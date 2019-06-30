@@ -355,7 +355,7 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  EnforceMaxPassengersConstraint
+// Method:			EnforceMaxPassengersConstraint
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Tells whether passenger count constraints are enforced by this buy menu.
 // Arguments:       None.
@@ -365,7 +365,7 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  SetEnforceMaxPassengersConstraint
+// Method:			SetEnforceMaxPassengersConstraint
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets whether passenger count constraints are enforced by this buy menu.
 // Arguments:       True to enforce passenger constraints by this menu, false otherwise
@@ -375,7 +375,7 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  EnforceMaxMassConstraint
+// Method:			EnforceMaxMassConstraint
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets whether mass constraints are enforced by this buy menu.
 // Arguments:       True if mass constraints are enforced by this menu, false otherwise
@@ -385,7 +385,7 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  SetEnforceMaxMassConstraint
+// Method:			SetEnforceMaxMassConstraint
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets whether mass constraints are enforced by this buy menu.
 // Arguments:       True to enforce mass constraints by this menu, false otherwise
@@ -393,6 +393,210 @@ public:
 
 	void SetEnforceMaxMassConstraint(bool enforce) { m_EnforceMaxMassConstraint = enforce; };
 
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			AddAllowedItem
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Adds an item to the list of allowed items. 
+//					If the list is not empty then everything not in the list is removed from the buy menu
+//					Items will be removed from the buy menu when it's called, category changed or after a ForceRefresh().
+// Arguments:       Full preset name to add.
+// Return value:    None.
+
+	void AddAllowedItem(string presetName) { m_AllowedItems[presetName] = true; };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			RemoveAllowedItem
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Removes an item from the list of allowed items. 
+// Arguments:       Full preset name to remove.
+// Return value:    None.
+
+	void RemoveAllowedItem(string presetName) { m_AllowedItems.erase(presetName); };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			ClearAllowedItems
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Clears the list of allowed items
+// Arguments:       None.
+// Return value:    None.
+
+	void ClearAllowedItems() { m_AllowedItems.clear(); };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			IsAllowedItem
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns true if the item is in allowed list
+// Arguments:       Full preset name.
+// Return value:    None.
+
+	bool IsAllowedItem(string presetName) { return m_AllowedItems.find(presetName) != m_AllowedItems.end(); }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			AddAlwaysAllowedItem
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Adds an item to the list of always allowed items. This list overrides all previous constraints.
+// Arguments:       Full preset name to add.
+// Return value:    None.
+
+	void AddAlwaysAllowedItem(string presetName) { m_AlwaysAllowedItems[presetName] = true; };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			RemoveAlwaysAllowedItem
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Removes an item from the list of always allowed items. 
+// Arguments:       Full preset name to remove.
+// Return value:    None.
+
+	void RemoveAlwaysAllowedItem(string presetName) { m_AlwaysAllowedItems.erase(presetName); };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			ClearAlwaysAllowedItems
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Clears the list of allowed items
+// Arguments:       None.
+// Return value:    None.
+
+	void ClearAlwaysAllowedItems() { m_AlwaysAllowedItems.clear(); };
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			IsAlwaysAllowedItem
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns true if the item is in always allowed list
+// Arguments:       Full preset name.
+// Return value:    None.
+
+	bool IsAlwaysAllowedItem(string presetName) { return m_AlwaysAllowedItems.find(presetName) != m_AlwaysAllowedItems.end(); }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			AddProhibitedItem
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Adds an item prohibited to buy from the buy menu. 
+//					The item will be removed from the buy menu when it's called, category changed or after a ForceRefresh().
+// Arguments:       Full preset name to add.
+// Return value:    None.
+
+	void AddProhibitedItem(string presetName) { m_ProhibitedItems[presetName] = true; };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			RemoveProhibitedItem
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Removes item from the list of prohibited items
+// Arguments:       Full preset name to remove.
+// Return value:    None.
+
+	void RemoveProhibitedItem(string presetName) { m_ProhibitedItems.erase(presetName); };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			ClearProhibitedItems
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Clears the list of prohibited items
+// Arguments:       None.
+// Return value:    None.
+
+	void ClearProhibitedItems() { m_ProhibitedItems.clear(); };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			IsProhibitedItem
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns true if the item is in prohibited list
+// Arguments:       Full preset name.
+// Return value:    None.
+
+	bool IsProhibitedItem(string presetName) { return m_ProhibitedItems.find(presetName) != m_ProhibitedItems.end(); }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			ForceRefresh
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Forces a refresh update of the list of buy menu items
+// Arguments:       None.
+// Return value:    None.
+
+	void ForceRefresh() { CategoryChange(); }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			ClearCartList
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Clear the cart out of items selected for purchase
+// Arguments:       None.
+// Return value:    None.
+
+	void ClearCartList(); 
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			LoadDefaultLoadoutToCart
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Loads the default loadout to the cart
+// Arguments:       None.
+// Return value:    None.
+
+	void LoadDefaultLoadoutToCart() { DeployLoadout(0); }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			SetOnlyShowOwnedItems
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     If set to true only owned items will be shown in buy menu. Overriden by AlwaysAllowed list.
+// Arguments:       Value.
+// Return value:    None.
+
+	void SetOnlyShowOwnedItems(bool value) { m_OnlyShowOwnedItems = value; }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			GetOnlyShowOwnedItems
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns whether only owned items will be shown in buy menu. Overriden by AlwaysAllowed list.
+// Arguments:       None.
+// Return value:    Whether only owned items will be shown in buy menu.
+
+	bool GetOnlyShowOwnedItems() const { return m_OnlyShowOwnedItems; }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			SetOwnedItemsAmount
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the amount of specified items to be owned in this buy menu
+// Arguments:       Full preset name of item to own. Amount of owned items.
+// Return value:    None.
+
+	void SetOwnedItemsAmount(std::string presetName, int amount) { m_OwnedItems[presetName] = amount; };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			GetOwnedItemsAmount
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns the amount of specified items owned in this buy menu
+// Arguments:       Full preset name of item. 
+// Return value:    Amount of owned items.
+
+	int GetOwnedItemsAmount(std::string presetName) { if (m_OwnedItems.find(presetName) != m_OwnedItems.end()) return m_OwnedItems[presetName]; else return 0; };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			CommitPurchase
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Deducts 1 piece of owned item and return true if purchase can be made or false if the item is out of stock.
+// Arguments:       Full preset name of item. 
+// Return value:    Whether the purchase can be conducted or the item is out of stock.
+
+	bool CommitPurchase(string presetName);
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			SetHeaderImage
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Changes the header image to the one specified in path
+// Arguments:       Path to image to set as header.
+// Return value:    None.
+
+	void SetHeaderImage(string path);
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			SetLogoImage
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Changes the logo image to the one specified in path
+// Arguments:       Path to image to set as logo.
+// Return value:    None.
+
+	void SetLogoImage(string path);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -653,7 +857,16 @@ protected:
 	// If true UI won't afford to order a craft with more mass than allowed by craft
 	bool m_EnforceMaxMassConstraint;
 
-
+	// Only show items that owned
+	bool m_OnlyShowOwnedItems;
+	// If not empty then only shows items present in this list
+	std::map<std::string, bool> m_AllowedItems;
+	// If not empty then items from this list are always shown int he buy menu no matter what other constraints there are
+	std::map<std::string, bool> m_AlwaysAllowedItems;
+	// If not empty then removes items from ths list the buy menu
+	std::map<std::string, bool> m_ProhibitedItems;
+	// A map of owned items, for which the gold will not be deducted when bought
+	std::map<std::string, int> m_OwnedItems;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -437,7 +437,7 @@ void MOSParticle::Draw(BITMAP *pTargetBitmap,
     if (m_pScreenEffect && mode == g_DrawColor && !onlyPhysical && m_AgeTimer.IsPastSimMS(m_EffectStartTime) && (m_EffectStopTime == 0 || !m_AgeTimer.IsPastSimMS(m_EffectStopTime)) &&  (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY())))
     {
 //        int strength = m_EffectStartStrength + (m_AgeTimer.GetElapsedSimTimeMS() - m_EffectStartTime) * ((m_EffectStartStrength) / ())   m_EffectStartStrength * (1.0f - (float)(m_AgeTimer.GetElapsedSimTimeMS() - m_EffectStartTime) / (float)DMin(m_EffectStopTime, m_Lifetime));
-        g_SceneMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, LERP(m_EffectStartTime, m_EffectStopTime, m_EffectStartStrength, m_EffectStopStrength, m_AgeTimer.GetElapsedSimTimeMS()));
+        g_SceneMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, LERP(m_EffectStartTime, m_EffectStopTime, m_EffectStartStrength, m_EffectStopStrength, m_AgeTimer.GetElapsedSimTimeMS()), m_EffectRotAngle);
     }
 
 /*

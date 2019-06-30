@@ -1623,7 +1623,7 @@ public:
 //                  0 - 255.
 // Return value:    None.
 
-    void RegisterPostEffect(const Vector &effectPos, BITMAP *pEffect, size_t hash, int strength = 255);
+    void RegisterPostEffect(const Vector &effectPos, BITMAP *pEffect, size_t hash, int strength = 255, float angle = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

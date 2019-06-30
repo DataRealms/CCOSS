@@ -37,7 +37,10 @@ using namespace RTE;
 const string PieMenuGUI::Slice::m_sClassName = "Slice";
 BITMAP *PieMenuGUI::s_pCursor;
 //BITMAP *PieMenuGUI::s_pCursorGlow;
+
+std::map<string, PieMenuGUI::Slice> PieMenuGUI::m_AllAvailableSlices;
 const int PieMenuGUI::s_EnablingDelay = 50;
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -257,6 +260,7 @@ void PieMenuGUI::Clear()
     m_UpLeftSlices.clear();
     m_DownLeftSlices.clear();
     m_DownRightSlices.clear();
+
     m_AllSlices.clear();
     m_SliceGroupCount = 0;
 
@@ -403,14 +407,119 @@ void PieMenuGUI::ResetSlices()
 }
 
 
+
+bool PieMenuGUI::AddSliceLua(string description, string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
+{
+	// Look for existing available slice item to use a reference
+	int foundSliceIndex = -1;
+	int sliceIndex = 0;
+
+	if (m_AllAvailableSlices.find(description + "::" + functionName) != m_AllAvailableSlices.end())
+	{
+		Slice s = m_AllAvailableSlices[description + "::" + functionName];
+		s.m_Direction = direction;
+		s.m_Enabled = isEnabled;
+		AddSlice(s);
+	}
+
+	// Remove the copy of slice since after Add we now have two duplicates of the same slice
+	if (foundSliceIndex > -1)
+	{
+		//m_AllAddedSlices.erase(m_AllAddedSlices.begin() + foundSliceIndex);
+		return true;
+	}
+
+	return false;
+}
+
+void PieMenuGUI::AlterSliceLua(string description, string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
+{
+	Slice foundSlice;
+
+	// Look for matching slice to alter
+	vector<Slice *>::iterator sSliceItr;
+	for (sSliceItr = m_AllSlices.begin(); sSliceItr != m_AllSlices.end(); ++sSliceItr)
+	{
+		if ((*sSliceItr)->m_Description == description && (*sSliceItr)->m_FunctionName == functionName)
+		{
+			foundSlice = *(*sSliceItr);
+		}
+	}
+
+	if (m_UpSlice.m_Description == description && m_UpSlice.m_FunctionName == functionName)
+		foundSlice = m_UpSlice;
+	if (m_DownSlice.m_Description == description && m_DownSlice.m_FunctionName == functionName)
+		foundSlice = m_DownSlice;
+	if (m_LeftSlice.m_Description == description && m_LeftSlice.m_FunctionName == functionName)
+		foundSlice = m_LeftSlice;
+	if (m_RightSlice.m_Description == description && m_RightSlice.m_FunctionName == functionName)
+		foundSlice = m_RightSlice;
+
+	if (foundSlice.m_SliceType != PieSliceIndex::PSI_NONE)
+	{
+		foundSlice.m_Direction = direction;
+		foundSlice.m_Enabled = isEnabled;
+
+		RemoveSliceLua(description, functionName);
+		AddSlice(foundSlice);
+	}
+
+	// Reallign to update 
+	RealignSlices();
+}
+
+
+PieMenuGUI::Slice PieMenuGUI::RemoveSliceLua(string description, string functionName)
+{
+	Slice retValue;
+
+	// Look for slices across all the collection to remove
+	std::vector< std::list<Slice> * > sliceCollections;
+	sliceCollections.push_back(&m_UpRightSlices);
+	sliceCollections.push_back(&m_UpLeftSlices);
+	sliceCollections.push_back(&m_DownLeftSlices);
+	sliceCollections.push_back(&m_DownRightSlices);
+
+	std::vector< std::list<Slice> * >::iterator sItr;
+	for (sItr = sliceCollections.begin(); sItr != sliceCollections.end(); ++sItr)
+	{
+		list<Slice>::iterator sSliceItr;
+		for (sSliceItr = (*sItr)->begin(); sSliceItr != (*sItr)->end(); ++sSliceItr)
+		{
+			if ((*sSliceItr).m_Description == description && (*sSliceItr).m_FunctionName == functionName)
+			{
+				retValue = (*sSliceItr);
+
+				(*sItr)->erase(sSliceItr);
+				break;
+			}
+		}
+	}
+
+	if (m_UpSlice.m_Description == description && m_UpSlice.m_FunctionName == functionName)
+		m_UpSlice.Reset();
+	if (m_DownSlice.m_Description == description && m_DownSlice.m_FunctionName == functionName)
+		m_DownSlice.Reset();
+	if (m_LeftSlice.m_Description == description && m_LeftSlice.m_FunctionName == functionName)
+		m_LeftSlice.Reset();
+	if (m_RightSlice.m_Description == description && m_RightSlice.m_FunctionName == functionName)
+		m_RightSlice.Reset();
+
+	// Reallign to update 
+	RealignSlices();
+
+	return retValue;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddSlice
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds a Slice to the menu. It will be placed according to what's already
 //                  in there, and what placement apriority parameters it has.
-
 bool PieMenuGUI::AddSlice(Slice &newSlice, bool takeAnyFreeCardinal)
 {
+	//m_AllAddedSlices.push_back(newSlice);
+
     // Make sure the slice is created and has a corresponding Icon assigned
     if (newSlice.m_Icon.GetFrameCount() <= 0)
         newSlice.Create();

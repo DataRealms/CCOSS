@@ -33,6 +33,7 @@ void GlobalScript::Clear()
     m_ScriptPath.clear();
     m_LuaClassName.clear();
     m_pOrbitedCraft = 0;
+	m_pPieMenuActor = 0;
 	m_IsActive = false;
 	m_LateUpdate = false;
 }
@@ -49,6 +50,7 @@ int GlobalScript::Create(const GlobalScript &reference)
     m_ScriptPath = reference.m_ScriptPath;
     m_LuaClassName = reference.m_LuaClassName;
 	m_pOrbitedCraft = reference.m_pOrbitedCraft;
+	m_pPieMenuActor = reference.m_pPieMenuActor;
 	m_IsActive = reference.m_IsActive;
 	m_LateUpdate = reference.m_LateUpdate;
 
@@ -71,6 +73,12 @@ int GlobalScript::ReadProperty(std::string propName, Reader &reader)
         reader >> m_LuaClassName;
 	else if (propName == "LateUpdate")
 		reader >> m_LateUpdate;
+	else if (propName == "AddPieSlice")
+	{
+		PieMenuGUI::Slice newSlice;
+		reader >> newSlice;
+		PieMenuGUI::AddAvailableSlice(newSlice);
+	}
 	else
         return Entity::ReadProperty(propName, reader);
 
@@ -143,6 +151,20 @@ void GlobalScript::EnteredOrbit(Actor *pActor)
     m_pOrbitedCraft = 0;
 }
 
+void GlobalScript::OnPieMenu(Actor *pActor)
+{
+	// Save the actor temporarily to member so the lua function can access it
+	m_pPieMenuActor = pActor;
+
+	if (m_pPieMenuActor && g_MovableMan.IsActor(m_pPieMenuActor))
+	{
+		// Call the defined function, but only after first checking if it exists
+		g_LuaMan.RunScriptString("if " + m_LuaClassName + ".OnPieMenu then " + m_LuaClassName + ":OnPieMenu(); end");
+	}
+
+	// Let go because it's about to be deleted later this frame
+	m_pPieMenuActor = 0;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Start

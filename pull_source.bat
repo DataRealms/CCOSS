@@ -2,8 +2,8 @@
 xcopy "..\..\Cortex Command Source Multiplayer\Trunk\Managers\*.*" Managers\ /E /Q /Y
 
 @rem Remove Steam stuff
-del Managers/SteamUGCMan.h
-del Managers/SteamUGCMan.cpp
+del Managers\SteamUGCMan.h /Q
+del Managers\SteamUGCMan.cpp /Q
 
 @rem Copy GUI subsystem
 xcopy "..\..\Cortex Command Source Multiplayer\Trunk\GUI\*.*" GUI\ /E /Q /Y

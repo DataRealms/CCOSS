@@ -44,12 +44,14 @@ void DataModule::Clear()
     m_IconFile.Reset();
     m_pIcon = 0;
     m_PresetList.clear();
+	m_EntityList.clear();
     m_TypeMap.clear();
     for (int i = 0; i < NUM_PALETTE_ENTRIES; ++i)
         m_MaterialMappings[i] = 0;
 	m_ScanFolderContents = false;
 	m_IgnoreMissingItems = false;
 	m_CrabToHumanSpawnRatio = 0;
+	m_ScriptPath.clear();
 }
 
 /*
@@ -211,6 +213,7 @@ int DataModule::Create(const DataModule &reference)
 	m_ScanFolderContents = reference.m_ScanFolderContents;
 	m_IgnoreMissingItems = reference.m_IgnoreMissingItems;
 	m_CrabToHumanSpawnRatio = reference.m_CrabToHumanSpawnRatio;
+	m_ScriptPath = reference.m_ScriptPath;
 
 /* Redundant, won't ever clone ada datamodule
     for (map<string, map<string, Entity *> >::iterator it0a = reference.m_TypeMap.begin(); it0a != reference.m_TypeMap.end(); ++it0a)
@@ -227,6 +230,20 @@ int DataModule::Create(const DataModule &reference)
     return 0;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  LoadScripts
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Loads the preset scripts of this object, from a specified path.
+
+int DataModule::LoadScripts()
+{
+	if (m_ScriptPath != "")
+	{
+		return g_LuaMan.RunScriptFile(m_ScriptPath);
+	}
+
+	return 0;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ReadProperty
@@ -252,6 +269,11 @@ int DataModule::ReadProperty(std::string propName, Reader &reader)
         reader >> m_IgnoreMissingItems;
     else if (propName == "CrabToHumanSpawnRatio")
         reader >> m_CrabToHumanSpawnRatio;
+	else if (propName == "ScriptPath")
+	{
+		reader >> m_ScriptPath;
+		LoadScripts();
+	}
     else if (propName == "LoadFirst")
         // Do nothing; this is a special param looked for by Main.cpp
         reader.ReadPropValue();
@@ -346,6 +368,8 @@ void DataModule::ReloadAllScripts()
 {
     for (list<PresetEntry>::iterator itr = m_PresetList.begin(); itr != m_PresetList.end(); ++itr)
         (*itr).m_pEntityPreset->ReloadScripts();
+
+	LoadScripts();
 }
 
 
@@ -430,11 +454,17 @@ bool DataModule::AddEntityPreset(Entity *pEntToAdd, bool overwriteSame, string r
 
         // Insert clone into the list of entries where it will now be owned
         // New file location specified
-        if (readFromFile != "Same")
-            m_PresetList.push_back(PresetEntry(pEntClone, readFromFile));
+		if (readFromFile != "Same")
+		{
+			m_PresetList.push_back(PresetEntry(pEntClone, readFromFile));
+			m_EntityList.push_back(pEntClone);
+		}
         // If same file specified for new instance, use the one in the last entry
-        else if (!m_PresetList.empty())
-            m_PresetList.push_back(PresetEntry(pEntClone, m_PresetList.back().m_FileReadFrom));
+		else if (!m_PresetList.empty())
+		{
+			m_PresetList.push_back(PresetEntry(pEntClone, m_PresetList.back().m_FileReadFrom));
+			m_EntityList.push_back(pEntClone);
+		}
         else
             DDTAbort("Tried to add first entity isntance to data module " + m_FileName + " without specifying a data file!");
 

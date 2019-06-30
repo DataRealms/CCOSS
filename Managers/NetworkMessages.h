@@ -209,6 +209,7 @@ namespace RTE
 		short int Y;
 		size_t BitmapHash;
 		short int Strength;
+		float Angle;
 	};
 
 	struct MsgPostEffects

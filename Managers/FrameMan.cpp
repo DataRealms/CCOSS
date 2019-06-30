@@ -644,7 +644,13 @@ int FrameMan::Create()
         glowFile.SetDataPath("Base.rte/Effects/Glows/BlueTiny.bmp");
         m_pBlueGlow = glowFile.GetAsBitmap();
         m_BlueGlowHash = glowFile.GetHash();
-    }
+
+		m_pTempEffectBitmap_16 = create_bitmap_ex(32, 16, 16);
+		m_pTempEffectBitmap_32 = create_bitmap_ex(32, 32, 32);
+		m_pTempEffectBitmap_64 = create_bitmap_ex(32, 64, 64);
+		m_pTempEffectBitmap_128 = create_bitmap_ex(32, 128, 128);
+		m_pTempEffectBitmap_256 = create_bitmap_ex(32, 256, 256);
+	}
 
     m_PlayerScreenWidth = m_pBackBuffer8->w;
     m_PlayerScreenHeight = m_pBackBuffer8->h;
@@ -1207,6 +1213,8 @@ int FrameMan::SaveWorldToBMP(const char *namebase)
 		int effectPosX = 0;
 		int effectPosY = 0;
 		int strength = 0;
+		float angle = 0;
+
 		for (list<PostEffect>::iterator eItr = postEffects.begin(); eItr != postEffects.end(); ++eItr)
 		{
 			pBitmap = (*eItr).m_pBitmap;
@@ -1214,7 +1222,35 @@ int FrameMan::SaveWorldToBMP(const char *namebase)
 			set_screen_blender(strength, strength, strength, strength);
 	        effectPosX  = (*eItr).m_Pos.GetFloorIntX() - (pBitmap->w / 2);
 			effectPosY  = (*eItr).m_Pos.GetFloorIntY() - (pBitmap->h / 2);
-			draw_trans_sprite(pWorldBitmap, pBitmap, effectPosX, effectPosY);
+			angle = (*eItr).m_Angle;
+
+			if (angle == 0)
+			{
+				draw_trans_sprite(pWorldBitmap, pBitmap, effectPosX, effectPosY);
+			}
+			else 
+			{
+				BITMAP * pTargetBitmap;
+
+				if (pBitmap->w < 16 && pBitmap->h < 16)
+					pTargetBitmap = m_pTempEffectBitmap_16;
+				else if (pBitmap->w < 32 && pBitmap->h < 32)
+					pTargetBitmap = m_pTempEffectBitmap_32;
+				else if (pBitmap->w < 64 && pBitmap->h < 64)
+					pTargetBitmap = m_pTempEffectBitmap_64;
+				else if (pBitmap->w < 128 && pBitmap->h < 128)
+					pTargetBitmap = m_pTempEffectBitmap_128;
+				else 
+					pTargetBitmap = m_pTempEffectBitmap_256;
+
+				clear_to_color(pTargetBitmap, 0);
+				
+				fixed fAngle;
+				fAngle = fixmul(angle, radtofix_r);
+
+				rotate_sprite(pTargetBitmap, pBitmap, 0, 0, fAngle);
+				draw_trans_sprite(pWorldBitmap, pTargetBitmap, effectPosX, effectPosY);
+			}
 		}
 
 		PALETTE palette;
@@ -1559,6 +1595,8 @@ void FrameMan::PostProcess()
     int effectPosX = 0;
     int effectPosY = 0;
     int strength = 0;
+	float angle = 0;
+
     for (list<PostEffect>::iterator eItr = m_PostScreenEffects.begin(); eItr != m_PostScreenEffects.end(); ++eItr)
     {
 		if ((*eItr).m_pBitmap)
@@ -1568,7 +1606,39 @@ void FrameMan::PostProcess()
 			set_screen_blender(strength, strength, strength, strength);
 			effectPosX = (*eItr).m_Pos.GetFloorIntX() - (pBitmap->w / 2);
 			effectPosY = (*eItr).m_Pos.GetFloorIntY() - (pBitmap->h / 2);
-			draw_trans_sprite(m_pBackBuffer32, pBitmap, effectPosX, effectPosY);
+			angle = (*eItr).m_Angle;
+			//draw_trans_sprite(m_pBackBuffer32, pBitmap, effectPosX, effectPosY);
+
+			if (angle == 0)
+			{
+				draw_trans_sprite(m_pBackBuffer32, pBitmap, effectPosX, effectPosY);
+			}
+			else
+			{
+				BITMAP * pTargetBitmap;
+
+				if (pBitmap->w < 16 && pBitmap->h < 16)
+					pTargetBitmap = m_pTempEffectBitmap_16;
+				else if (pBitmap->w < 32 && pBitmap->h < 32)
+					pTargetBitmap = m_pTempEffectBitmap_32;
+				else if (pBitmap->w < 64 && pBitmap->h < 64)
+					pTargetBitmap = m_pTempEffectBitmap_64;
+				else if (pBitmap->w < 128 && pBitmap->h < 128)
+					pTargetBitmap = m_pTempEffectBitmap_128;
+				else
+					pTargetBitmap = m_pTempEffectBitmap_256;
+
+				clear_to_color(pTargetBitmap, 0);
+
+				//fixed fAngle;
+				//fAngle = fixmul(angle, radtofix_r);
+
+				Matrix m;
+				m.SetRadAngle(angle);
+
+				rotate_sprite(pTargetBitmap, pBitmap, 0, 0, ftofix(m.GetAllegroAngle()));
+				draw_trans_sprite(m_pBackBuffer32, pTargetBitmap, effectPosX, effectPosY);
+			}
 		}
     }
 
@@ -2341,7 +2411,7 @@ void FrameMan::Draw()
             {
                 // Make sure we won't be adding any effects to a part of the screen that is occluded by menus and such
                 if ((*eItr).m_Pos.m_X > occX && (*eItr).m_Pos.m_Y > occY && (*eItr).m_Pos.m_X < pDrawScreen->w + occX && (*eItr).m_Pos.m_Y < pDrawScreen->h + occY)
-                    m_PostScreenEffects.push_back(PostEffect((*eItr).m_Pos + screenOffset, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength));
+                    m_PostScreenEffects.push_back( PostEffect((*eItr).m_Pos + screenOffset, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle) );
             }
 
             // Adjust glow areas for the player screen's position on the final buffer
@@ -2514,7 +2584,7 @@ void FrameMan::GetPostEffectsList(int whichScreen, list<PostEffect> & outputList
 	ScreenRelativeEffectsMutex[whichScreen].lock();
 	outputList.clear();
 	for (list<PostEffect>::iterator eItr = m_ScreenRelativeEffects[whichScreen].begin(); eItr != m_ScreenRelativeEffects[whichScreen].end(); ++eItr)
-		outputList.push_back(PostEffect((*eItr).m_Pos, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength));
+		outputList.push_back(PostEffect((*eItr).m_Pos, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle));
 
 	ScreenRelativeEffectsMutex[whichScreen].unlock();
 }
@@ -2524,7 +2594,7 @@ void FrameMan::SetPostEffectsList(int whichScreen, list<PostEffect> & inputList)
 	ScreenRelativeEffectsMutex[whichScreen].lock();
 	m_ScreenRelativeEffects[whichScreen].clear();
 	for (list<PostEffect>::iterator eItr = inputList.begin(); eItr != inputList.end(); ++eItr)
-		m_ScreenRelativeEffects[whichScreen].push_back(PostEffect((*eItr).m_Pos, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength));
+		m_ScreenRelativeEffects[whichScreen].push_back(PostEffect((*eItr).m_Pos, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle));
 
 	ScreenRelativeEffectsMutex[whichScreen].unlock();
 }

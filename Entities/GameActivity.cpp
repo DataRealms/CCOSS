@@ -125,6 +125,7 @@ void GameActivity::Clear()
     m_GameOverPeriod = 5000;
     m_WinnerTeam = -1;
     m_pOrbitedCraft = 0;
+	m_pPieMenuActor = 0;
     m_DemoTimer.Reset();
     m_PausedDemoTime = 0;
 }
@@ -710,7 +711,23 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
             nativeCostMult = pMetaPlayer->GetNativeCostMultiplier();
         }
         // Start with counting the craft
-        float totalCost = pDeliveryCraft->GetGoldValue(nativeModule, foreignCostMult, nativeCostMult);
+		float totalCost = 0;
+
+		if (m_pBuyGUI[player]->GetOnlyShowOwnedItems())
+		{
+			if (!m_pBuyGUI[player]->CommitPurchase(pDeliveryCraft->GetModuleAndPresetName()))
+			{
+				if (m_pBuyGUI[player]->IsAlwaysAllowedItem(pDeliveryCraft->GetModuleAndPresetName()))
+					totalCost = pDeliveryCraft->GetGoldValue(nativeModule, foreignCostMult, nativeCostMult);
+				else
+					return false;
+			}
+		}
+		else
+		{
+			if (!m_pBuyGUI[player]->CommitPurchase(pDeliveryCraft->GetModuleAndPresetName()))
+				totalCost = pDeliveryCraft->GetGoldValue(nativeModule, foreignCostMult, nativeCostMult);
+		}
 
         // Go through the list of things ordered, and give any actors all the items that is present after them,
         // until the next actor. Also, the first actor gets all stuff in the list above him.
@@ -734,53 +751,73 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
                 crabCount = -1;
             }
 
+			bool purchaseItem = true;
+
             // Add to the total cost tally
-            totalCost += (*itr)->GetGoldValue(nativeModule, foreignCostMult, nativeCostMult);
-            // Make copy of the preset instance in the list
-            pInventoryObject = dynamic_cast<MovableObject *>((*itr)->Clone());
-            // See if it's actually a passenger, as opposed to a regular item
-            pPassenger = dynamic_cast<Actor *>(pInventoryObject);
-            // If it's an actor, then set its team and add it to the Craft's inventory!
-            if (pPassenger)
-            {
-                // If this is the first passenger, then give him all the shit found in the list before him
-                if (!pLastPassenger)
-                {
-                    for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
-                        pPassenger->AddInventoryItem(*iItr);
-                }
-                // This isn't the first passenger, so give the previous guy all the stuff that was found since processing him
-                else
-                {
-                    for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
-                        pLastPassenger->AddInventoryItem(*iItr);
-                }
-                // Clear out the temporary cargo list since we've assign all the stuff in it to a passenger
-                cargoItems.clear();
+			if (m_pBuyGUI[player]->GetOnlyShowOwnedItems())
+			{
+				if (!m_pBuyGUI[player]->CommitPurchase((*itr)->GetModuleAndPresetName()))
+				{
+					if (m_pBuyGUI[player]->IsAlwaysAllowedItem((*itr)->GetModuleAndPresetName()))
+						totalCost += (*itr)->GetGoldValue(nativeModule, foreignCostMult, nativeCostMult);
+					else
+						purchaseItem = false;
+				}
+			}
+			else
+			{
+				if (!m_pBuyGUI[player]->CommitPurchase((*itr)->GetModuleAndPresetName()))
+					totalCost += (*itr)->GetGoldValue(nativeModule, foreignCostMult, nativeCostMult);
+			}
 
-                // Now set the current passenger as the 'last passenger' so he'll eventually get everything found after him.
-                pLastPassenger = pPassenger;
-                // Set the team etc for the current passenger and stuff him into the craft
-                pPassenger->SetTeam(team);
-                pPassenger->SetControllerMode(Controller::CIM_AI);
-                pPassenger->SetAIMode((Actor::AIMode)mode);
+			if (purchaseItem)
+			{
+				// Make copy of the preset instance in the list
+				pInventoryObject = dynamic_cast<MovableObject *>((*itr)->Clone());
+				// See if it's actually a passenger, as opposed to a regular item
+				pPassenger = dynamic_cast<Actor *>(pInventoryObject);
+				// If it's an actor, then set its team and add it to the Craft's inventory!
+				if (pPassenger)
+				{
+					// If this is the first passenger, then give him all the shit found in the list before him
+					if (!pLastPassenger)
+					{
+						for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+							pPassenger->AddInventoryItem(*iItr);
+					}
+					// This isn't the first passenger, so give the previous guy all the stuff that was found since processing him
+					else
+					{
+						for (list<MovableObject *>::iterator iItr = cargoItems.begin(); iItr != cargoItems.end(); ++iItr)
+							pLastPassenger->AddInventoryItem(*iItr);
+					}
+					// Clear out the temporary cargo list since we've assign all the stuff in it to a passenger
+					cargoItems.clear();
 
-                if (pTargetMO != NULL)
-                {
-                    Actor * pTarget = dynamic_cast<Actor *>(pTargetMO);
-                    if (pTarget)
-                        pPassenger->AddAIMOWaypoint(pTarget);
-                }
-                else if (waypoint.m_X > 0 && waypoint.m_Y > 0)
-                {
-                    pPassenger->AddAISceneWaypoint(waypoint);
-                }
+					// Now set the current passenger as the 'last passenger' so he'll eventually get everything found after him.
+					pLastPassenger = pPassenger;
+					// Set the team etc for the current passenger and stuff him into the craft
+					pPassenger->SetTeam(team);
+					pPassenger->SetControllerMode(Controller::CIM_AI);
+					pPassenger->SetAIMode((Actor::AIMode)mode);
 
-                pDeliveryCraft->AddInventoryItem(pPassenger);
-            }
-            // If not, then add it to the temp list of items which will be added to the last passenger's inventory
-            else
-                cargoItems.push_back(pInventoryObject);
+					if (pTargetMO != NULL)
+					{
+						Actor * pTarget = dynamic_cast<Actor *>(pTargetMO);
+						if (pTarget)
+							pPassenger->AddAIMOWaypoint(pTarget);
+					}
+					else if (waypoint.m_X > 0 && waypoint.m_Y > 0)
+					{
+						pPassenger->AddAISceneWaypoint(waypoint);
+					}
+
+					pDeliveryCraft->AddInventoryItem(pPassenger);
+				}
+				// If not, then add it to the temp list of items which will be added to the last passenger's inventory
+				else
+					cargoItems.push_back(pInventoryObject);
+			}
         }
 
         if (crabCount == 500)
@@ -1936,7 +1973,15 @@ void GameActivity::Update()
 						//PieMenuGUI::Slice ceaseFireSlice("Propose Cease Fire", PieMenuGUI::PSI_CEASEFIRE, PieMenuGUI::Slice::RIGHT, false);
 						//m_pPieMenu[player]->AddSlice(ceaseFireSlice, true);
                     }
-                    // Init the new slice positions and sizes
+
+					// Init the new slice positions and sizes, build the list of slices in menu
+					m_pPieMenu[player]->RealignSlices();
+					m_CurrentPieMenuPlayer = player;
+					m_CurrentPieMenuSlices = GetCurrentPieMenuSlices(player);
+
+					OnPieMenu(m_pControlledActor[player]);
+
+                    // Realigns slices after possible external pie-menu changes
                     m_pPieMenu[player]->RealignSlices();
                     // Enable the pie menu
                     m_pPieMenu[player]->SetEnabled(true);

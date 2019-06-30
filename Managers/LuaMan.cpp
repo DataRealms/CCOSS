@@ -561,6 +561,7 @@ int LuaMan::Create()
             .def("GetModuleAndPresetName", &Entity::GetModuleAndPresetName)
             .property("IsOriginalPreset", &Entity::IsOriginalPreset)
             .property("ModuleID", &Entity::GetModuleID)
+			.property("RandomWeight", &Entity::GetRandomWeight)
             .def("AddToGroup", &Entity::AddToGroup)
             .def("IsInGroup", (bool (Entity::*)(const string &))&Entity::IsInGroup),
 
@@ -596,6 +597,7 @@ int LuaMan::Create()
             .property("Radius", &MovableObject::GetRadius)
             .property("Diameter", &MovableObject::GetDiameter)
             .property("Scale", &MovableObject::GetScale, &MovableObject::SetScale)
+            .property("EffectRotAngle", &MovableObject::GetEffectRotAngle, &MovableObject::SetEffectRotAngle)
             .property("GlobalAccScalar", &MovableObject::GetGlobalAccScalar, &MovableObject::SetGlobalAccScalar)
             .property("AirResistance", &MovableObject::GetAirResistance, &MovableObject::SetAirResistance)
             .property("AirThreshold", &MovableObject::GetAirThreshold, &MovableObject::SetAirThreshold)
@@ -656,6 +658,8 @@ int LuaMan::Create()
 			.property("WoundDamageMultiplier", &MovableObject::WoundDamageMultiplier, &MovableObject::SetWoundDamageMultiplier)
 			.property("HitWhatMOID", &MovableObject::HitWhatMOID)
 			.property("HitWhatTerrMaterial", &MovableObject::HitWhatTerrMaterial)
+			.property("ProvidesPieMenuContext", &MovableObject::ProvidesPieMenuContext, &MovableObject::SetProvidesPieMenuContext)
+			.def_readwrite("PieMenuActor", &MovableObject::m_pPieMenuActor)
 			.property("HitWhatParticleUniqueID", &MovableObject::HitWhatParticleUniqueID),
 
 		class_<Material, Entity>("Material")
@@ -1284,7 +1288,8 @@ int LuaMan::Create()
             .def("GetAIPenetration", &HDFirearm::GetAIPenetration)
             .def("CompareTrajectories", &HDFirearm::CompareTrajectories)
             .def("SetNextMagazineName", &HDFirearm::SetNextMagazineName)
-			.property("IsAnimatedManually", &HDFirearm::IsAnimatedManually, &HDFirearm::SetAnimatedManually),
+			.property("IsAnimatedManually", &HDFirearm::IsAnimatedManually, &HDFirearm::SetAnimatedManually)
+			.property("RecoilTransmission", &HDFirearm::GetRecoilTransmission, &HDFirearm::SetRecoilTransmission),
 
         CONCRETELUABINDING(ThrownDevice, HeldDevice)
             .property("MinThrowVel", &ThrownDevice::GetMinThrowVel, &ThrownDevice::SetMinThrowVel)
@@ -1460,7 +1465,8 @@ int LuaMan::Create()
             .def("GetTotalModuleCount", &PresetMan::GetTotalModuleCount)
             .def("GetOfficialModuleCount", &PresetMan::GetOfficialModuleCount)
             .def("AddPreset", &PresetMan::AddEntityPreset)
-            // Disambiguate overloaded member funcs
+			.def_readwrite("Modules", &PresetMan::m_pDataModules, return_stl_iterator)
+			// Disambiguate overloaded member funcs
             .def("GetPreset", (const Entity *(PresetMan::*)(string, string, int))&PresetMan::GetEntityPreset)
             .def("GetPreset", (const Entity *(PresetMan::*)(string, string, string))&PresetMan::GetEntityPreset)
             .def("GetLoadout", (Actor * (PresetMan::*)(std::string, std::string, bool))&PresetMan::GetLoadout, adopt(result))
@@ -1487,8 +1493,9 @@ int LuaMan::Create()
             //.def("StopSound", &AudioMan::StopSound)
             //.def("FadeOutSound", &AudioMan::FadeOutSound)
             .def("StopMusic", &AudioMan::StopMusic)
-            .def("SetMusicPosition", &AudioMan::StopMusic)
-            .def("StopAll", &AudioMan::StopMusic),
+            .def("SetMusicPosition", &AudioMan::SetMusicPosition)
+			.def("GetMusicPosition", &AudioMan::GetMusicPosition)
+			.def("StopAll", &AudioMan::StopMusic),
 
         class_<UInputMan>("UInputManager")
             .enum_("Players")
@@ -1740,12 +1747,34 @@ int LuaMan::Create()
 			.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans)
             .def("ClearPostEffects", &SceneMan::ClearPostEffects),
 
+		class_<DataModule>("DataModule")
+			.def_readwrite("Presets", &DataModule::m_EntityList, return_stl_iterator)
+			.property("FileName", &DataModule::GetFileName)
+			.property("FriendlyName", &DataModule::GetFriendlyName),
+
         class_<BuyMenuGUI>("BuyMenuGUI")
             .def("SetMetaPlayer", &BuyMenuGUI::SetMetaPlayer)
             .def("SetNativeTechModule", &BuyMenuGUI::SetNativeTechModule)
             .def("SetForeignCostMultiplier", &BuyMenuGUI::SetForeignCostMultiplier)
             .def("SetModuleExpanded", &BuyMenuGUI::SetModuleExpanded)
             .def("LoadAllLoadoutsFromFile", &BuyMenuGUI::LoadAllLoadoutsFromFile)
+            .def("AddAllowedItem", &BuyMenuGUI::AddAllowedItem)
+			.def("RemoveAllowedItem", &BuyMenuGUI::RemoveAllowedItem)
+			.def("ClearAllowedItems", &BuyMenuGUI::ClearAllowedItems)
+			.def("AddAlwaysAllowedItem", &BuyMenuGUI::AddAlwaysAllowedItem)
+			.def("RemoveAlwaysAllowedItem", &BuyMenuGUI::RemoveAlwaysAllowedItem)
+			.def("ClearAlwaysAllowedItems", &BuyMenuGUI::ClearAlwaysAllowedItems)
+			.def("AddProhibitedItem", &BuyMenuGUI::AddProhibitedItem)
+			.def("RemoveProhibitedItem", &BuyMenuGUI::RemoveProhibitedItem)
+			.def("ClearProhibitedItems", &BuyMenuGUI::ClearProhibitedItems)
+			.def("ForceRefresh", &BuyMenuGUI::ForceRefresh)
+			.def("SetOwnedItemsAmount", &BuyMenuGUI::SetOwnedItemsAmount)
+			.def("GetOwnedItemsAmount", &BuyMenuGUI::GetOwnedItemsAmount)
+			.def("SetHeaderImage", &BuyMenuGUI::SetHeaderImage)
+			.def("SetLogoImage", &BuyMenuGUI::SetLogoImage)
+			.def("ClearCartList", &BuyMenuGUI::ClearCartList)
+			.def("LoadDefaultLoadoutToCart", &BuyMenuGUI::LoadDefaultLoadoutToCart)
+			.property("ShowOnlyOwnedItems", &BuyMenuGUI::GetOnlyShowOwnedItems, &BuyMenuGUI::SetOnlyShowOwnedItems)
 			.property("EnforceMaxPassengersConstraint", &BuyMenuGUI::EnforceMaxPassengersConstraint, &BuyMenuGUI::SetEnforceMaxPassengersConstraint)
 			.property("EnforceMaxMassConstraint", &BuyMenuGUI::EnforceMaxMassConstraint, &BuyMenuGUI::SetEnforceMaxMassConstraint),
 
@@ -1946,7 +1975,8 @@ int LuaMan::Create()
             .def_readwrite("GameOverTimer", &GameActivity::m_GameOverTimer)
             .def_readwrite("GameOverPeriod", &GameActivity::m_GameOverPeriod)
             .def_readwrite("OrbitedCraft", &GameActivity::m_pOrbitedCraft)
-            .def("OtherTeam", &GameActivity::OtherTeam)
+			.def_readwrite("PieMenuActor", &GameActivity::m_pPieMenuActor)
+			.def("OtherTeam", &GameActivity::OtherTeam)
             .def("OneOrNoneTeamsLeft", &GameActivity::OneOrNoneTeamsLeft)
             .def("WhichTeamLeft", &GameActivity::WhichTeamLeft)
             .def("NoTeamLeft", &GameActivity::NoTeamLeft)
@@ -1982,11 +2012,73 @@ int LuaMan::Create()
             .def("GetFogOfWarEnabled", &GameActivity::GetFogOfWarEnabled)
             .def("UpdateEditing", &GameActivity::UpdateEditing)
             .def("DisableAIs", &GameActivity::DisableAIs)
-            .def("InitAIs", &GameActivity::InitAIs),
+            .def("InitAIs", &GameActivity::InitAIs)
+            .def("AddPieMenuSlice", &GameActivity::AddPieMenuSlice)
+            .def("AlterPieMenuSlice", &GameActivity::AlterPieMenuSlice)
+            .def("RemovePieMenuSlice", &GameActivity::RemovePieMenuSlice)
+			.def_readwrite("PieMenuSlices", &GameActivity::m_CurrentPieMenuSlices, return_stl_iterator),
+		
+		class_<PieMenuGUI::Slice>("Slice")
+			.enum_("Direction")
+			[
+				value("NONE", 0),
+				value("UP", 1),
+				value("RIGHT", 2),
+				value("DOWN", 3),
+				value("LEFT", 4)
+			]
+
+			.enum_("Type")
+				[
+					value("PSI_NONE", 0),
+					value("PSI_PICKUP", 1),
+					value("PSI_DROP", 2),
+					value("PSI_NEXTITEM", 3),
+					value("PSI_PREVITEM", 4),
+					value("PSI_RELOAD", 5),
+					value("PSI_BUYMENU", 6),
+					value("PSI_STATS", 7),
+					value("PSI_MINIMAP", 8),
+					value("PSI_FORMSQUAD", 9),
+					value("PSI_CEASEFIRE", 10),
+					value("PSI_SENTRY", 11),
+					value("PSI_PATROL", 12),
+					value("PSI_BRAINHUNT", 13),
+					value("PSI_GOLDDIG", 14),
+					value("PSI_GOTO", 15),
+					value("PSI_RETURN", 16),
+					value("PSI_STAY", 17),
+					value("PSI_DELIVER", 18),
+					value("PSI_SCUTTLE", 19),
+					value("PSI_DONE", 20),
+					value("PSI_LOAD", 21),
+					value("PSI_SAVE", 22),
+					value("PSI_NEW", 23),
+					value("PSI_PICK", 24),
+					value("PSI_MOVE", 25),
+					value("PSI_REMOVE", 26),
+					value("PSI_INFRONT", 27),
+					value("PSI_BEHIND", 28),
+					value("PSI_ZOOMIN", 29),
+					value("PSI_ZOOMOUT", 30),
+					value("PSI_TEAM1", 31),
+					value("PSI_TEAM2", 32),
+					value("PSI_TEAM3", 33),
+					value("PSI_TEAM4", 34),
+					value("PSI_SCRIPTED", 35),
+					value("PSI_COUNT", 36)
+				]
+
+			.def(constructor<>())
+			.property("FunctionName", &PieMenuGUI::Slice::GetFunctionName)
+			.property("Description", &PieMenuGUI::Slice::GetDescription)
+			.property("Type", &PieMenuGUI::Slice::GetType)
+			.property("Direction", &PieMenuGUI::Slice::GetDirection),
 
         ABSTRACTLUABINDING(GlobalScript, Entity)
             .def_readwrite("OrbitedCraft", &GlobalScript::m_pOrbitedCraft)
-            .def("Deactivate", &GlobalScript::Deactivate),
+			.def_readwrite("PieMenuActor", &GlobalScript::m_pPieMenuActor)
+			.def("Deactivate", &GlobalScript::Deactivate),
 
         class_<ActivityMan>("ActivityManager")
             .property("DefaultActivityType", &ActivityMan::GetDefaultActivityType, &ActivityMan::SetDefaultActivityType)

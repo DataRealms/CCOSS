@@ -120,6 +120,11 @@ void BuyMenuGUI::Clear()
 
 	m_EnforceMaxPassengersConstraint = true;
 	m_EnforceMaxMassConstraint = true;
+
+	m_OnlyShowOwnedItems = false;
+	m_AllowedItems.clear();
+	m_AlwaysAllowedItems.clear();
+	m_OwnedItems.clear();
 }
 
 
@@ -318,6 +323,41 @@ void BuyMenuGUI::Destroy()
     Clear();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			SetHeaderImage
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Changes the header image to the one specified in path
+
+void BuyMenuGUI::SetHeaderImage(string path)
+{
+	GUICollectionBox *pHeader = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogHeader"));
+	ContentFile headerFile(path.c_str());
+	pHeader->SetDrawImage(new AllegroBitmap(headerFile.GetAsBitmap()));
+	pHeader->SetDrawType(GUICollectionBox::Image);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			SetLogoImage
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Changes the logo image to the one specified in path
+
+void BuyMenuGUI::SetLogoImage(string path)
+{
+	m_pLogo = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogLogo"));
+	ContentFile logoFile(path.c_str());
+	m_pLogo->SetDrawImage(new AllegroBitmap(logoFile.GetAsBitmap()));
+	m_pLogo->SetDrawType(GUICollectionBox::Image);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:			ClearCartList
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Clear the cart out of items selected for purchase
+
+void BuyMenuGUI::ClearCartList()
+{
+	m_pCartList->ClearList();
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  LoadAllLoadoutsFromFile
@@ -645,6 +685,20 @@ bool BuyMenuGUI::GetOrderList(list<const SceneObject *> &listToFill)
     return true;
 }
 
+bool BuyMenuGUI::CommitPurchase(string presetName)
+{
+	if (m_OwnedItems.size() > 0)
+	{
+		if (m_OwnedItems.find(presetName) != m_OwnedItems.end() && m_OwnedItems[presetName] > 0)
+		{
+			m_OwnedItems[presetName] -= 1;
+			return true;
+		}
+		else
+			return false;
+	}
+	return false;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalOrderCost
@@ -653,13 +707,61 @@ bool BuyMenuGUI::GetOrderList(list<const SceneObject *> &listToFill)
 
 float BuyMenuGUI::GetTotalOrderCost()
 {
-    float totalCost = 0;
-    for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
-        totalCost += dynamic_cast<const MOSprite *>((*itr)->m_pEntity)->GetGoldValue(m_NativeTechModule, m_ForeignCostMult);
+	float totalCost = 0;
 
-    // Add the delivery craft's cost
-    if (m_pSelectedCraft)
-        totalCost += dynamic_cast<const MOSprite *>(m_pSelectedCraft)->GetGoldValue(m_NativeTechModule, m_ForeignCostMult);
+	if (m_OwnedItems.size() > 0)
+	{
+		map<string, int> orderedItems;
+
+		for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
+		{
+			bool needsToBePaid = true;
+			string presetName = (*itr)->m_pEntity->GetModuleAndPresetName();
+
+			if (orderedItems.find(presetName) != orderedItems.end())
+				orderedItems[presetName] = 1;
+			else
+				orderedItems[presetName] += 1;
+
+			if (m_OwnedItems.find(presetName) != m_OwnedItems.end() && m_OwnedItems[presetName] >= orderedItems[presetName])
+				needsToBePaid = false;
+
+			if (needsToBePaid)
+			{
+				totalCost += dynamic_cast<const MOSprite *>((*itr)->m_pEntity)->GetGoldValue(m_NativeTechModule, m_ForeignCostMult);
+			}
+		}
+
+		if (m_pSelectedCraft)
+		{
+			bool needsToBePaid = true;
+			string presetName = m_pSelectedCraft->GetModuleAndPresetName();
+
+			if (orderedItems.find(presetName) != orderedItems.end())
+				orderedItems[presetName] = 1;
+			else
+				orderedItems[presetName] += 1;
+
+			if (m_OwnedItems.find(presetName) != m_OwnedItems.end() && m_OwnedItems[presetName] >= orderedItems[presetName])
+				needsToBePaid = false;
+
+			if (needsToBePaid)
+			{
+				totalCost += dynamic_cast<const MOSprite *>(m_pSelectedCraft)->GetGoldValue(m_NativeTechModule, m_ForeignCostMult);
+			}
+		}
+	}
+	else 
+	{
+		for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
+			totalCost += dynamic_cast<const MOSprite *>((*itr)->m_pEntity)->GetGoldValue(m_NativeTechModule, m_ForeignCostMult);
+
+		// Add the delivery craft's cost
+		if (m_pSelectedCraft)
+		{
+			totalCost += dynamic_cast<const MOSprite *>(m_pSelectedCraft)->GetGoldValue(m_NativeTechModule, m_ForeignCostMult);
+		}
+	}
 
     return totalCost;
 }
@@ -763,8 +865,11 @@ void BuyMenuGUI::Update()
         m_pParentBox->SetPositionAbs(position.m_X, position.m_Y);
         g_SceneMan.SetScreenOcclusion(occlusion, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
 
-        if (m_pParentBox->GetXPos() >= 0)
-            m_MenuEnabled = ENABLED;
+		if (m_pParentBox->GetXPos() >= 0)
+		{
+			m_MenuEnabled = ENABLED;
+			CategoryChange();
+		}
     }
     // Animate the menu out of view
     else if (m_MenuEnabled == DISABLING)
@@ -788,6 +893,7 @@ void BuyMenuGUI::Update()
     {
         m_pParentBox->SetEnabled(true);
         m_pParentBox->SetVisible(true);
+
     }
     else if (m_MenuEnabled == DISABLED)
     {
@@ -1486,7 +1592,30 @@ void BuyMenuGUI::Update()
                         {
                             // Gotto make a copy of the bitmap to pass it to the next list
                             GUIBitmap *pItemBitmap = new AllegroBitmap(dynamic_cast<AllegroBitmap *>(pItem->m_pBitmap)->GetBitmap());
-                            m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
+
+							if (m_OwnedItems.size() > 0 || m_OnlyShowOwnedItems)
+							{
+								if (GetOwnedItemsAmount(pItem->m_pEntity->GetModuleAndPresetName()) > 0)
+								{
+									m_pCartList->AddItem(pItem->m_Name, "1 pc", pItemBitmap, pItem->m_pEntity);
+								}
+								else
+								{
+									if (m_OnlyShowOwnedItems)
+									{
+										if (IsAlwaysAllowedItem(pItem->m_Name))
+											m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
+									}
+									else 
+									{
+										m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
+									}
+								}
+							}
+							else
+							{
+								m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
+							}
                         }
                         m_ItemChangeSound.Play(0, m_pController->GetPlayer());
                     }
@@ -1778,7 +1907,29 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
                         // Get a good icon and wrap it, while not passing ownership into the AllegroBitmap
                         pItemBitmap = new AllegroBitmap((*tItr)->GetGraphicalIcon());
                         // Passing in ownership of the bitmap, but not of the pSpriteObj
-                        m_pShopList->AddItem((*tItr)->GetPresetName(), (*tItr)->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult), pItemBitmap, *tItr);
+						if (m_OwnedItems.size() > 0 || m_OnlyShowOwnedItems)
+						{ 
+							if (GetOwnedItemsAmount((*tItr)->GetModuleAndPresetName()) > 0)
+							{
+								string amount = std::to_string(GetOwnedItemsAmount((*tItr)->GetModuleAndPresetName())) + " pcs";
+
+								m_pShopList->AddItem((*tItr)->GetPresetName(), amount , pItemBitmap, *tItr);
+							} 
+							else 
+							{ 
+								if (!m_OnlyShowOwnedItems)
+									m_pShopList->AddItem((*tItr)->GetPresetName(), (*tItr)->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult), pItemBitmap, *tItr);
+								else
+								{
+									if (m_AlwaysAllowedItems.find((*tItr)->GetModuleAndPresetName()) != m_AlwaysAllowedItems.end())
+										m_pShopList->AddItem((*tItr)->GetPresetName(), (*tItr)->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult), pItemBitmap, *tItr);
+								}
+							}
+						}
+						else
+						{
+							m_pShopList->AddItem((*tItr)->GetPresetName(), (*tItr)->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult), pItemBitmap, *tItr);
+						}
                     }
                 }
             }
@@ -1853,6 +2004,35 @@ bool BuyMenuGUI::DeployLoadout(int index)
 
     // Clear the cart, we're going to refill it with the selected loadout
     m_pCartList->ClearList();
+
+	// Check if the craft is available
+	const ACraft * pCraft = m_Loadouts[index].GetDeliveryCraft();
+
+	if (pCraft)
+	{
+		bool craftAvailable = true;
+
+		if (IsAllowedItem(pCraft->GetModuleAndPresetName()))
+			craftAvailable = true;
+
+		if (IsProhibitedItem(pCraft->GetModuleAndPresetName()))
+			craftAvailable = false;
+
+		if (m_OnlyShowOwnedItems && craftAvailable)
+		{
+			if (GetOwnedItemsAmount(pCraft->GetModuleAndPresetName()) > 0)
+				craftAvailable = true;
+			else
+				craftAvailable = false;
+		}
+
+		if (IsAlwaysAllowedItem(pCraft->GetModuleAndPresetName()))
+			craftAvailable = true;
+
+		if (!craftAvailable)
+			return false;
+	}
+
     // Get and add all the stuff in the selected loadout
     list<const SceneObject *> *pCargo = m_Loadouts[index].GetCargoList();
     AllegroBitmap *pItemBitmap = 0;
@@ -1861,7 +2041,31 @@ bool BuyMenuGUI::DeployLoadout(int index)
         // Get a good icon and wrap it, while not passing ownership into the AllegroBitmap
         pItemBitmap = new AllegroBitmap(const_cast<SceneObject *>(*cItr)->GetGraphicalIcon());
         // Take into account whether these are native or not, and multiply the cost accordingly
-        m_pCartList->AddItem((*cItr)->GetPresetName(), (*cItr)->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult), pItemBitmap, *cItr);
+		bool canAdd = true;
+
+		if (IsAllowedItem((*cItr)->GetModuleAndPresetName()))
+			canAdd = true;
+
+		if (IsProhibitedItem((*cItr)->GetModuleAndPresetName()))
+			canAdd = false;
+
+		if (m_OnlyShowOwnedItems && canAdd)
+		{
+			if (GetOwnedItemsAmount((*cItr)->GetModuleAndPresetName()) > 0)
+			{
+				canAdd = false;
+				// Add manually with pcs counter
+				m_pCartList->AddItem((*cItr)->GetPresetName(), "1 pc", pItemBitmap, *cItr);
+			}
+			else
+				canAdd = false;
+		}
+
+		if (IsAlwaysAllowedItem((*cItr)->GetModuleAndPresetName()))
+			canAdd = true;
+
+		if (canAdd)
+			m_pCartList->AddItem((*cItr)->GetPresetName(), (*cItr)->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult), pItemBitmap, *cItr);
     }
     // Now set the craft to what the loadout specifies, if anything
     if (m_Loadouts[index].GetDeliveryCraft())
@@ -1870,7 +2074,6 @@ bool BuyMenuGUI::DeployLoadout(int index)
         // Take into account whether these are native or not, and multiply the cost accordingly
         m_pCraftBox->SetText(m_pSelectedCraft->GetPresetName());
         m_pCraftBox->SetRightText(m_pSelectedCraft->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult));
-
 
 		m_pCraftNameLabel->SetText(m_pSelectedCraft->GetPresetName());
 		m_pCraftPriceLabel->SetText(m_pSelectedCraft->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult));
@@ -1924,6 +2127,90 @@ void BuyMenuGUI::AddObjectsToItemList(vector<list<Entity *> > &moduleList, strin
 				else
 					g_PresetMan.GetAllOfGroup(moduleList[moduleID], group, type, moduleID);
 			}
+		}
+	}
+
+	// Remove itwms which are not allowed to buy
+	if (m_AllowedItems.size() > 0)
+	{
+		for (int moduleID = 0; moduleID < moduleList.size(); ++moduleID)
+		{
+			list<Entity *> toRemove;
+
+			for (list<Entity *>::iterator itr = moduleList[moduleID].begin(); itr != moduleList[moduleID].end(); ++itr)
+			{
+				bool allowed = false;
+
+				if (m_AllowedItems.find((*itr)->GetModuleAndPresetName()) != m_AllowedItems.end())
+					allowed = true;
+
+				if (m_AlwaysAllowedItems.find((*itr)->GetModuleAndPresetName()) != m_AlwaysAllowedItems.end())
+					allowed = true;
+
+				if (!allowed)
+					toRemove.push_back((*itr));
+			}
+
+			// Remove items from the list
+			for (list<Entity *>::iterator itr = toRemove.begin(); itr != toRemove.end(); ++itr)
+				moduleList[moduleID].remove((*itr));
+		}
+	}
+
+	// Remove items which are prohibited
+	if (m_ProhibitedItems.size() > 0)
+	{
+		for (int moduleID = 0; moduleID < moduleList.size(); ++moduleID)
+		{
+			list<Entity *> toRemove;
+
+			for (list<Entity *>::iterator itr = moduleList[moduleID].begin(); itr != moduleList[moduleID].end(); ++itr)
+			{
+				bool allowed = true;
+
+				if (m_ProhibitedItems.find((*itr)->GetModuleAndPresetName()) != m_ProhibitedItems.end())
+					allowed = false;
+
+				if (m_AlwaysAllowedItems.find((*itr)->GetModuleAndPresetName()) != m_AlwaysAllowedItems.end())
+					allowed = true;
+
+				if (!allowed)
+					toRemove.push_back((*itr));
+			}
+
+			// Remove items from the list
+			for (list<Entity *>::iterator itr = toRemove.begin(); itr != toRemove.end(); ++itr)
+				moduleList[moduleID].remove((*itr));
+		}
+	}
+
+	// Remove items which are not in stock
+	if (m_OnlyShowOwnedItems && m_OwnedItems.size() > 0)
+	{
+		for (int moduleID = 0; moduleID < moduleList.size(); ++moduleID)
+		{
+			list<Entity *> toRemove;
+
+			for (list<Entity *>::iterator itr = moduleList[moduleID].begin(); itr != moduleList[moduleID].end(); ++itr)
+			{
+				bool allowed = false;
+
+				for (map<string, int>::iterator itrA = m_OwnedItems.begin(); itrA != m_OwnedItems.end(); ++itrA)
+				{
+					if ((*itr)->GetModuleAndPresetName() == (*itrA).first && (*itrA).second > 0)
+						allowed = true;
+				}
+
+				if (m_AlwaysAllowedItems.find((*itr)->GetModuleAndPresetName()) != m_AlwaysAllowedItems.end())
+					allowed = true;
+
+				if (!allowed)
+					toRemove.push_back((*itr));
+			}
+
+			// Remove items from the list
+			for (list<Entity *>::iterator itr = toRemove.begin(); itr != toRemove.end(); ++itr)
+				moduleList[moduleID].remove((*itr));
 		}
 	}
 }

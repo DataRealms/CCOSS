@@ -42,6 +42,7 @@ class Entity;
 class DataModule:
     public Serializable
 {
+	friend class LuaMan;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Struct:          PresetEntry
@@ -439,6 +440,16 @@ public:
 // Return value:    Crab-to-human spawn ration value.
 	const float GetCrabToHumanSpawnRatio() const { return m_CrabToHumanSpawnRatio; }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  LoadScripts
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Loads the preset scripts of this object, from a specified path.
+// Arguments:       None.
+// Return value:    An error return value signaling sucess or any particular failure.
+//                  Anything below 0 is an error signal.
+
+	int LoadScripts();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -459,6 +470,7 @@ protected:
     Entity * GetEntityIfExactType(const std::string &exactType, const std::string &instanceName);
 
 	Entity * GetEntityIfExactType(const std::string &exactType, size_t instanceHash);
+
 
 
 
@@ -499,6 +511,10 @@ protected:
     // This is used to be able to write back all of them in proper order into their respective files in the DataModule when writing this
     // The Entity instances ARE owned by this list.
     std::list<PresetEntry> m_PresetList;
+
+	// A list of loaded entities solely for the purpose of enumaretion presets from Lua
+	std::list<const Entity *> m_EntityList;
+
     // map of <class names and <map of instance template names and actual Entity instances> > that were read for this DataModule
     // An Entity instance of a derived typ will be placed in EACH of EVERY of its parent class' maps here.
     // There can be multiple entries of the same instance name in any of the type submaps, but only ONE whose exact class is that of the typelist!
@@ -516,6 +532,8 @@ protected:
 	bool m_IgnoreMissingItems;
 	// Crab-to-human Spawn ratio to replace value from Constants.lua
 	float m_CrabToHumanSpawnRatio;
+	// Path to script to execute when this module is loaded
+	std::string m_ScriptPath;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

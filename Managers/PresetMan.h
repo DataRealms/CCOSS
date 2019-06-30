@@ -54,7 +54,7 @@ class PresetMan:
     public Singleton<PresetMan>//,
 //    public Serializable
 {
-
+	friend class LuaMan;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations

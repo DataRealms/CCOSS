@@ -245,6 +245,9 @@ ENTITYALLOCATION(GlobalScript)
     virtual void EnteredOrbit(Actor *pActor);
 
 
+	virtual void OnPieMenu(Actor *pActor);
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ShouldLateUpdate
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -275,6 +278,10 @@ protected:
 	bool m_IsActive;
 	// Orbited craft
 	Actor * m_pOrbitedCraft;
+	// Actor who opened pie menu
+	Actor * m_pPieMenuActor;
+
+
 	// Whether the script should Update before MovableMan or after
 	bool m_LateUpdate;
 

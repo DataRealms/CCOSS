@@ -741,6 +741,26 @@ ENTITYALLOCATION(HDFirearm)
 	void SetAnimatedManually(bool newValue)  { m_IsAnimatedManually = newValue; }
 
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  SetRecoilTransmission
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the calar of how much of the fire recoil force is transmitted to 
+//					who/whatever is holding this weapon
+// Arguments:       New transmission value.
+// Return value:    None.
+
+	void SetRecoilTransmission(float recoilTransmission) { m_RecoilTransmission = recoilTransmission; }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  GetRecoilTransmission
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns the calar of how much of the fire recoil force is transmitted to 
+//					who/whatever is holding this weapon
+// Arguments:       None.
+// Return value:    Transmission value.
+
+	float GetRecoilTransmission() const { return m_RecoilTransmission; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

@@ -1137,7 +1137,7 @@ void HDFirearm::Draw(BITMAP *pTargetBitmap,
     muzzlePos = m_Pos + RotateOffset(muzzlePos);
     // Set the screen flash effect to draw at the final post processing stage
     if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical && !g_SceneMan.ObscuredPoint(muzzlePos))
-        g_SceneMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55 + 200 * PosRand());
+        g_SceneMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55 + 200 * PosRand(), m_pFlash->GetEffectRotAngle());
 }
 
 

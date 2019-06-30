@@ -267,6 +267,13 @@ public:
         std::string GetFunctionName() const { return m_FunctionName; }
 
 
+		std::string GetDescription() const { return m_Description; }
+
+		PieSliceIndex GetType() const { return m_SliceType; }
+
+		SliceDirection GetDirection() const { return (SliceDirection)m_Direction; }
+
+
         // Member variables
         static const std::string m_sClassName;
         // Description of what this slice option does
@@ -502,6 +509,18 @@ public:
     bool AddSlice(Slice &newSlice, bool takeAnyFreeCardinal = false);
 
 
+	bool AddSliceLua(string description, string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled);
+
+	Slice RemoveSliceLua(string description, string functionName);
+
+	void AlterSliceLua(string description, string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled);
+
+	static void AddAvailableSlice(Slice newSlice) { m_AllAvailableSlices[newSlice.m_Description + "::" + newSlice.m_FunctionName] = newSlice; }
+
+	//std::vector<Slice> GetAvailableSlices() const { return m_AllAvailableSlices; };
+
+	std::vector<Slice *> GetCurrentSlices() const { return m_AllSlices; };
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddSliceToGroup
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -581,6 +600,8 @@ public:
 // Return value:    None.
 
     virtual void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) const;
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -664,6 +685,9 @@ protected:
     std::list<Slice> m_UpLeftSlices;
     std::list<Slice> m_DownLeftSlices;
     std::list<Slice> m_DownRightSlices;
+
+	// All slices ever added to this pie-menu, serves as directory of slices available to add
+	static std::map<string, Slice> m_AllAvailableSlices;
 
     // All the slices, in order and aligned, not owned here, just pointing to the ones above
     std::vector<Slice *> m_AllSlices;

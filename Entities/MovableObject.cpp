@@ -80,6 +80,10 @@ void MovableObject::Clear()
     m_ScriptObjectName.clear();
     m_ScreenEffectFile.Reset();
     m_pScreenEffect = 0;
+	m_EffectRotAngle = 0;
+	m_InheritEffectRotAngle = false;
+	m_RandomizeEffectRotAngle = false;
+	m_RandomizeEffectRotAngleEveryFrame = false;
 	m_ScreenEffectHash = 0;
     m_EffectStartTime = 0;
     m_EffectStopTime = 0;
@@ -97,6 +101,9 @@ void MovableObject::Clear()
 	m_MOIDHit = g_NoMOID;
 	m_TerrainMatHit = g_MaterialAir;
 	m_ParticleUniqueIDHit = 0;
+
+	m_ProvidesPieMenuContext = false;
+	m_pPieMenuActor = 0;
 }
 
 
@@ -212,6 +219,14 @@ int MovableObject::Create(const MovableObject &reference)
         m_pScreenEffect = reference.m_pScreenEffect;
 
     }
+	m_EffectRotAngle = reference.m_EffectRotAngle;
+	m_InheritEffectRotAngle = reference.m_InheritEffectRotAngle;
+	m_RandomizeEffectRotAngle = reference.m_RandomizeEffectRotAngle;
+	m_RandomizeEffectRotAngleEveryFrame = reference.m_RandomizeEffectRotAngleEveryFrame;
+
+	if (m_RandomizeEffectRotAngle)
+		m_EffectRotAngle = PI * 2 * NormalRand();
+
 	m_ScreenEffectHash = reference.m_ScreenEffectHash;
     m_EffectStartTime = reference.m_EffectStartTime;
     m_EffectStopTime = reference.m_EffectStopTime;
@@ -233,6 +248,9 @@ int MovableObject::Create(const MovableObject &reference)
 	m_UniqueID = MovableObject::GetNextUniqueID();
 	g_MovableMan.RegisterObject(this);
 
+	m_ProvidesPieMenuContext = reference.m_ProvidesPieMenuContext;
+	m_pPieMenuActor = reference.m_pPieMenuActor;
+
     return 0;
 }
 
@@ -247,65 +265,73 @@ int MovableObject::Create(const MovableObject &reference)
 
 int MovableObject::ReadProperty(std::string propName, Reader &reader)
 {
-    if (propName == "Mass")
-    {
-        reader >> m_Mass;
-        if (m_Mass == 0)
-            m_Mass = 0.0001;
-    }
-    else if (propName == "Velocity")
-        reader >> m_Vel;
-    else if (propName == "Scale")
-        reader >> m_Scale;
-    else if (propName == "GlobalAccScalar")
-        reader >> m_GlobalAccScalar;
-    else if (propName == "AirResistance")
-    {
-        reader >> m_AirResistance;
-        // Backwards compatibility after we made this value scaled over time
-        m_AirResistance /= 0.01666;
-    }
-    else if (propName == "AirThreshold")
-        reader >> m_AirThreshold;
-    else if (propName == "PinStrength")
-        reader >> m_PinStrength;
-    else if (propName == "RestThreshold")
-        reader >> m_RestThreshold;
-    else if (propName == "LifeTime")
-        reader >> m_Lifetime;
-    else if (propName == "Sharpness")
-        reader >> m_Sharpness;
-    else if (propName == "HitsMOs")
-        reader >> m_HitsMOs;
-    else if (propName == "GetsHitByMOs")
-        reader >> m_GetsHitByMOs;
-    else if (propName == "IgnoresTeamHits")
-        reader >> m_IgnoresTeamHits;
-    else if (propName == "IgnoresAtomGroupHits")
-        reader >> m_IgnoresAtomGroupHits;
-    else if (propName == "IgnoresAGHitsWhenSlowerThan")
-        reader >> m_IgnoresAGHitsWhenSlowerThan;
-    else if (propName == "RemoveOrphanTerrainRadius")
+	if (propName == "Mass")
 	{
-        reader >> m_RemoveOrphanTerrainRadius;
+		reader >> m_Mass;
+		if (m_Mass == 0)
+			m_Mass = 0.0001;
+	}
+	else if (propName == "Velocity")
+		reader >> m_Vel;
+	else if (propName == "Scale")
+		reader >> m_Scale;
+	else if (propName == "GlobalAccScalar")
+		reader >> m_GlobalAccScalar;
+	else if (propName == "AirResistance")
+	{
+		reader >> m_AirResistance;
+		// Backwards compatibility after we made this value scaled over time
+		m_AirResistance /= 0.01666;
+	}
+	else if (propName == "AirThreshold")
+		reader >> m_AirThreshold;
+	else if (propName == "PinStrength")
+		reader >> m_PinStrength;
+	else if (propName == "RestThreshold")
+		reader >> m_RestThreshold;
+	else if (propName == "LifeTime")
+		reader >> m_Lifetime;
+	else if (propName == "Sharpness")
+		reader >> m_Sharpness;
+	else if (propName == "HitsMOs")
+		reader >> m_HitsMOs;
+	else if (propName == "GetsHitByMOs")
+		reader >> m_GetsHitByMOs;
+	else if (propName == "IgnoresTeamHits")
+		reader >> m_IgnoresTeamHits;
+	else if (propName == "IgnoresAtomGroupHits")
+		reader >> m_IgnoresAtomGroupHits;
+	else if (propName == "IgnoresAGHitsWhenSlowerThan")
+		reader >> m_IgnoresAGHitsWhenSlowerThan;
+	else if (propName == "RemoveOrphanTerrainRadius")
+	{
+		reader >> m_RemoveOrphanTerrainRadius;
 		if (m_RemoveOrphanTerrainRadius > MAXORPHANRADIUS)
 			m_RemoveOrphanTerrainRadius = MAXORPHANRADIUS;
 	}
-    else if (propName == "RemoveOrphanTerrainMaxArea")
+	else if (propName == "RemoveOrphanTerrainMaxArea")
 	{
-        reader >> m_RemoveOrphanTerrainMaxArea;
+		reader >> m_RemoveOrphanTerrainMaxArea;
 		if (m_RemoveOrphanTerrainMaxArea > MAXORPHANRADIUS * MAXORPHANRADIUS)
 			m_RemoveOrphanTerrainMaxArea = MAXORPHANRADIUS * MAXORPHANRADIUS;
 	}
-    else if (propName == "RemoveOrphanTerrainRate")
-        reader >> m_RemoveOrphanTerrainRate;
-    else if (propName == "MissionCritical")
-        reader >> m_MissionCritical;
-    else if (propName == "CanBeSquished")
-        reader >> m_CanBeSquished;
-    else if (propName == "HUDVisible")
-        reader >> m_HUDVisible;
-    else if (propName == "ScriptPath")
+	else if (propName == "RemoveOrphanTerrainRate")
+		reader >> m_RemoveOrphanTerrainRate;
+	else if (propName == "MissionCritical")
+		reader >> m_MissionCritical;
+	else if (propName == "CanBeSquished")
+		reader >> m_CanBeSquished;
+	else if (propName == "HUDVisible")
+		reader >> m_HUDVisible;
+	else if (propName == "ProvidesPieMenuContext")
+		reader >> m_ProvidesPieMenuContext;
+	else if (propName == "AddPieSlice")
+	{
+		PieMenuGUI::Slice newSlice;
+		reader >> newSlice;
+		PieMenuGUI::AddAvailableSlice(newSlice);
+	}
+	else if (propName == "ScriptPath")
     {
         reader >> m_ScriptPath;
         // Read in the Lua script function definitions for this preset
@@ -323,7 +349,15 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
     }
     else if (propName == "EffectStartTime")
         reader >> m_EffectStartTime;
-    else if (propName == "EffectStopTime")
+	else if (propName == "EffectRotAngle")
+		reader >> m_EffectRotAngle;
+	else if (propName == "InheritEffectRotAngle")
+		reader >> m_InheritEffectRotAngle;
+	else if (propName == "RandomizeEffectRotAngle")
+		reader >> m_RandomizeEffectRotAngle;
+	else if (propName == "RandomizeEffectRotAngleEveryFrame")
+		reader >> m_RandomizeEffectRotAngleEveryFrame;
+	else if (propName == "EffectStopTime")
         reader >> m_EffectStopTime;
     else if (propName == "EffectStartStrength")
     {
@@ -493,6 +527,8 @@ int MovableObject::LoadScripts(string scriptPath)
         return error;
     if ((error = g_LuaMan.RunScriptString("if Update then " + m_ScriptPresetName + ".Update = Update; end;")) < 0)
         return error;
+	if ((error = g_LuaMan.RunScriptString("if OnPieMenu then " + m_ScriptPresetName + ".OnPieMenu = OnPieMenu; end;")) < 0)
+		return error;
 
     return error;
 }
@@ -827,6 +863,38 @@ int MovableObject::UpdateScript()
     return error;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  OnPieMenu
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Executes the Lua-defined OnPieMenu event handler.
+
+int MovableObject::OnPieMenu(Actor * pActor)
+{
+	if (!pActor)
+		return -1;
+
+	// This preset doesn't seem to have any script file defined, so then just return
+	if (m_ScriptPath.empty() || m_ScriptPresetName.empty())
+		return -1;
+
+	if (m_ScriptObjectName.empty())
+		return -1;
+
+	m_pPieMenuActor = pActor;
+
+	int error = 0;
+
+	if ((error = g_LuaMan.RunScriptString("if " + m_ScriptPresetName + ".OnPieMenu and " + m_ScriptObjectName + " then " + m_ScriptPresetName + ".OnPieMenu(" + m_ScriptObjectName + "); end")) < 0)
+		return error;
+
+	return error;
+}
+
+void MovableObject::Update()
+{
+	if (m_RandomizeEffectRotAngleEveryFrame)
+		m_EffectRotAngle = PI * 2 * NormalRand();
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateMOID

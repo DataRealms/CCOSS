@@ -214,6 +214,8 @@ void Entity::Clear()
     m_Groups.clear();
     m_LastGroupSearch.clear();
     m_LastGroupResult = false;
+
+	m_RandomWeight = 1;
 }
 
 
@@ -245,6 +247,8 @@ int Entity::Create(const Entity &reference)
 
     for (list<string>::const_iterator itr = reference.m_Groups.begin(); itr != reference.m_Groups.end(); ++itr)
         m_Groups.push_back(*itr);
+
+	m_RandomWeight = reference.m_RandomWeight;
 
     return 0;
 }
@@ -318,6 +322,14 @@ int Entity::ReadProperty(std::string propName, Reader &reader)
     }
     else if (propName == "Description")
         reader >> m_PresetDescription;
+	else if (propName == "RandomWeight")
+	{
+		reader >> m_RandomWeight;
+		if (m_RandomWeight < 0)
+			m_RandomWeight = 0;
+		if (m_RandomWeight > 100)
+			m_RandomWeight = 100;
+	}
     else if (propName == "AddToGroup")
     {
         string newGroup;

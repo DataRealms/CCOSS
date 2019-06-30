@@ -3165,6 +3165,21 @@ void AHuman::UpdateAI()
     }
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  OnPieMenu
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Executes the Lua-defined OnPieMenu event handler.
+
+int AHuman::OnPieMenu(Actor * pActor)
+{
+	int error = Actor::OnPieMenu(pActor);
+
+	// Call OnPieMenu handlers for a currently held device if any
+	if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsDevice())
+		return m_pFGArm->GetHeldDevice()->OnPieMenu(pActor);
+
+	return 0;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update

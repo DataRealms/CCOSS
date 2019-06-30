@@ -653,7 +653,7 @@ namespace RTE
 			}
 
 			if (bmp)
-				m_PostEffects[msg->FrameNumber].push_back(PostEffect(Vector(effDataPtr->X, effDataPtr->Y), bmp, 0, effDataPtr->Strength));
+				m_PostEffects[msg->FrameNumber].push_back(PostEffect(Vector(effDataPtr->X, effDataPtr->Y), bmp, 0, effDataPtr->Strength, effDataPtr->Angle));
 			else
 			{
 				//char buf[128];

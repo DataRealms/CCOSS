@@ -3401,12 +3401,12 @@ int SceneMan::WrapBox(const Box &wrapBox, list<Box> &outputList)
 // Description:     Registers a post effect to be added at the very last stage of 32bpp
 //                  rendering by the FrameMan.
 
-void SceneMan::RegisterPostEffect(const Vector &effectPos, BITMAP *pEffect, size_t hash, int strength)
+void SceneMan::RegisterPostEffect(const Vector &effectPos, BITMAP *pEffect, size_t hash, int strength, float angle)
 {
     // These effects get applied when there's a drawn frame that followed one or more sim updates
     // They are not only registered on drawn sim updates; flashes and stuff could be missed otherwise if they occur on undrawn sim updates
     if (pEffect && /*g_TimerMan.DrawnSimUpdate()) && */g_TimerMan.SimUpdatesSinceDrawn() >= 0)
-        m_PostSceneEffects.push_back(PostEffect(effectPos, pEffect, hash, strength));
+        m_PostSceneEffects.push_back(PostEffect(effectPos, pEffect, hash, strength, angle));
 }
 
 
@@ -3531,7 +3531,7 @@ bool SceneMan::GetPostScreenEffects(Vector boxPos, int boxWidth, int boxHeight, 
         {
             found = true;
             // Make the position returned relative to the box
-            effectsList.push_back(PostEffect((*itr).m_Pos - boxPos, (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength));
+            effectsList.push_back(PostEffect((*itr).m_Pos - boxPos, (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
         }
     }
 
@@ -3560,7 +3560,7 @@ bool SceneMan::GetPostScreenEffects(int left, int top, int right, int bottom, li
         {
             found = true;
             // Make the position returned relative to the box
-            effectsList.push_back(PostEffect(Vector((*itr).m_Pos.m_X - left, (*itr).m_Pos.m_Y - top), (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength));
+            effectsList.push_back(PostEffect(Vector((*itr).m_Pos.m_X - left, (*itr).m_Pos.m_Y - top), (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
         }
     }
 

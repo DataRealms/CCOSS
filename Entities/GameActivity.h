@@ -930,6 +930,48 @@ ENTITYALLOCATION(GameActivity)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:          OnPieMenu
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Calls this to be processed by derived classes to enable pie-menu dynamic change
+// Arguments:       None.
+// Return value:    None.
+
+	virtual void OnPieMenu(Actor *pActor) { m_pPieMenuActor = pActor; };
+
+	virtual void AddPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
+	{ 
+		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
+			m_pPieMenu[m_CurrentPieMenuPlayer]->AddSliceLua(description, functionName, direction, isEnabled);
+	};
+
+	virtual void AlterPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
+	{
+		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
+			m_pPieMenu[m_CurrentPieMenuPlayer]->AlterSliceLua(description, functionName, direction, isEnabled);
+	};
+
+	virtual PieMenuGUI::Slice RemovePieMenuSlice(std::string description, std::string functionName)
+	{
+		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
+			return m_pPieMenu[m_CurrentPieMenuPlayer]->RemoveSliceLua(description, functionName);
+		return PieMenuGUI::Slice("", PieMenuGUI::PieSliceIndex::PSI_NONE, 0, false);
+	};
+
+	virtual std::vector<PieMenuGUI::Slice *> GetCurrentPieMenuSlices(int player) const 
+	{ 
+		//if (player >= 0 && player < Activity::MAXPLAYERCOUNT)
+			return m_pPieMenu[player]->GetCurrentSlices();
+		//return 0;
+	}
+
+	/*virtual std::vector<PieMenuGUI::Slice> * GetAvailablePieMenuSlices(int player) const 
+	{ 
+		if (player >= 0 && player < Activity::MAXPLAYERCOUNT)
+			return &m_pPieMenu[player]->GetAvailableSlices();
+		return 0;
+	}*/
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
@@ -1159,6 +1201,12 @@ protected:
     int m_WinnerTeam;
     // Temporary member for whatever craft goes into orbit, so Lua can access it. Not owned by this
     Actor *m_pOrbitedCraft;
+	// Temporary member for whatever actor has enabled the pie menu. Not owned by this
+	Actor *m_pPieMenuActor;
+
+	std::vector<PieMenuGUI::Slice *> m_CurrentPieMenuSlices;
+
+	int m_CurrentPieMenuPlayer;
 
 	std::string m_NetworkPlayerNames[MAXPLAYERCOUNT];
 
@@ -1166,9 +1214,6 @@ protected:
     Timer m_DemoTimer;
     // Keeps track of the current demo time if paused
     double m_PausedDemoTime;
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

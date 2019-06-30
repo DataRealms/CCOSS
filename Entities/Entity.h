@@ -670,6 +670,17 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Friend operator: GetRandomWeight
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns random weight used in PresetMan::GetRandomBuyableOfGroupFromTech
+// Arguments:       None.
+// Return value:    This item's random weight from 0 to 100
+
+	int GetRandomWeight() const { return m_RandomWeight; }
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
@@ -695,6 +706,9 @@ protected:
     std::string m_LastGroupSearch;
     // Last group search result, for more efficient response on multiple tries for the same group name
     bool m_LastGroupResult;
+	// Random weight used when picking item using PresetMan::GetRandomBuyableOfGroupFromTech. 
+	// From 0 to 100. 0 means item won't be ever picked.
+	int m_RandomWeight;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

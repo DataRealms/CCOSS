@@ -90,10 +90,12 @@ struct PostEffect
     int m_Strength;
 	// Hash used to transimt glow events over the network
 	size_t m_BitmapHash;
+	// Post effect angle
+	float m_Angle;
 
     
-	PostEffect() { m_Pos.Reset(); m_pBitmap = 0; m_BitmapHash = 0;  m_Strength = 128; }
-	PostEffect(const Vector &pos, BITMAP *pBitmap, size_t bitmapHash, int strength) { m_Pos = pos; m_pBitmap = pBitmap; m_BitmapHash = bitmapHash; m_Strength = strength; }
+	PostEffect() { m_Pos.Reset(); m_pBitmap = 0; m_BitmapHash = 0;  m_Strength = 128; m_Angle = 0; }
+	PostEffect(const Vector &pos, BITMAP *pBitmap, size_t bitmapHash, int strength, float angle) { m_Pos = pos; m_pBitmap = pBitmap; m_BitmapHash = bitmapHash; m_Strength = strength; m_Angle = angle; }
 };
 
 
@@ -1773,6 +1775,12 @@ protected:
     std::list<PostEffect> m_PostScreenEffects;
     // List of screen-relative areas that will be processed with glow
     std::list<Box> m_PostScreenGlowBoxes;
+	// Temp bitmap to rotate post effects in it
+	BITMAP * m_pTempEffectBitmap_16;
+	BITMAP * m_pTempEffectBitmap_32;
+	BITMAP * m_pTempEffectBitmap_64;
+	BITMAP * m_pTempEffectBitmap_128;
+	BITMAP * m_pTempEffectBitmap_256;
 
     // Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.
     bool m_HSplit;

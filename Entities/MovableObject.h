@@ -43,6 +43,7 @@ class MovableObject:
     public SceneObject
 {
 
+friend class LuaMan;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
@@ -667,6 +668,23 @@ ENTITYALLOCATION(MovableObject)
 
     virtual void SetRotAngle(float newAngle) { ; }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  SetEffectRotAngle
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the current absolute angle of rotation of this MovableObject's effect.
+// Arguments:       The new absolute angle in radians.
+// Return value:    None.
+
+	virtual void SetEffectRotAngle(float newAngle) { m_EffectRotAngle = newAngle; }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  GetEffectRotAngle
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns the current absolute angle of rotation of this MovableObject's effect.
+// Arguments:       None.
+// Return value:    The absolute angle in radians.
+
+	virtual float GetEffectRotAngle() const { return m_EffectRotAngle; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetAngularVel
@@ -1437,7 +1455,7 @@ ENTITYALLOCATION(MovableObject)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update() { return; } // [CHRISK] Was this meant to be pure?
+	virtual void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1450,6 +1468,17 @@ ENTITYALLOCATION(MovableObject)
 //                  Anything below 0 is an error signal.
 
     virtual int UpdateScript();
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  OnPieMenu
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Executes the Lua-defined OnPieMenu event handler.
+// Arguments:       Actor which triggered the pie menu event
+// Return value:    An error return value signaling sucess or any particular failure.
+//                  Anything below 0 is an error signal.
+
+	virtual int OnPieMenu(Actor *pActor);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1668,6 +1697,11 @@ ENTITYALLOCATION(MovableObject)
 	virtual void SetHitWhatTerrMaterial(unsigned char matID) { m_TerrainMatHit = matID; m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber(); }
 
 
+	virtual bool ProvidesPieMenuContext() const { return m_ProvidesPieMenuContext; }
+
+	virtual void SetProvidesPieMenuContext(bool value) { m_ProvidesPieMenuContext = value; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -1824,6 +1858,15 @@ protected:
     int m_EffectStopStrength;
     // The effect can't be obscured
     bool m_EffectAlwaysShows;
+	// The effect's rotation angle
+	float m_EffectRotAngle;
+	// Whether effect's rot angle should be inherited from parent
+	bool m_InheritEffectRotAngle;
+	// Whether effect's rot angle should be randomized on creation
+	bool m_RandomizeEffectRotAngle;
+	// Whether effects rot angle should be randomized every frame
+	bool m_RandomizeEffectRotAngleEveryFrame;
+
 	// This object's unique persistent ID
 	long int m_UniqueID;
 	// In which radis should we look to remove orphaned terrain on terrain penetration, 
@@ -1849,6 +1892,10 @@ protected:
 	long int m_ParticleUniqueIDHit;
 	// Number of sim update frame when last collision was detcted
 	unsigned int m_LastCollisionSimFrameNumber;
+	// If true, the object will receive OnPieMenu event whenever someone activated a pie menu
+	bool m_ProvidesPieMenuContext;
+	// Temp variable to process OnPieMenu events
+	Actor * m_pPieMenuActor;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

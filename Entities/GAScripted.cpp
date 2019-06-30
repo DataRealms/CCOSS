@@ -126,7 +126,13 @@ int GAScripted::ReadProperty(std::string propName, Reader &reader)
         reader >> m_ScriptPath;
     else if (propName == "LuaClassName")
         reader >> m_LuaClassName;
-    else
+	else if (propName == "AddPieSlice")
+	{
+		PieMenuGUI::Slice newSlice;
+		reader >> newSlice;
+		PieMenuGUI::AddAvailableSlice(newSlice);
+	}
+	else
         // See if the base class(es) can find a match instead
         return GameActivity::ReadProperty(propName, reader);
 
@@ -295,6 +301,25 @@ void GAScripted::EnteredOrbit(Actor *pActor)
     m_pOrbitedCraft = 0;
 }
 
+void GAScripted::OnPieMenu(Actor *pActor)
+{
+	m_pPieMenuActor = pActor;
+	if (pActor && g_MovableMan.IsActor(pActor))
+	{
+		m_pPieMenuActor->OnPieMenu(pActor);
+
+		g_MovableMan.OnPieMenu(pActor);
+
+		// Call the defined function, but only after first checking if it exists
+		g_LuaMan.RunScriptString("if " + m_LuaClassName + ".OnPieMenu then " + m_LuaClassName + ":OnPieMenu(); end");
+
+		// Trigger pie menu for all global scripts
+		for (std::vector<GlobalScript *>::iterator sItr = m_GlobalScriptsList.begin(); sItr < m_GlobalScriptsList.end(); ++sItr)
+			if ((*sItr)->IsActive())
+				(*sItr)->OnPieMenu(m_pPieMenuActor);
+	}
+
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Start

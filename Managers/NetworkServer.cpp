@@ -1164,6 +1164,8 @@ namespace RTE
 			effDataPtr->Y = (*eItr).m_Pos.GetY();
 			effDataPtr->BitmapHash = (*eItr).m_BitmapHash;
 			effDataPtr->Strength = (*eItr).m_Strength;
+			effDataPtr->Angle = (*eItr).m_Angle;
+
 			msg->PostEffectsCount++;
 			effDataPtr++;
 

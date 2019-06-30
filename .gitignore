@@ -1,0 +1,65 @@
+*.user
+*.suo
+*.sdf
+*.ncb
+*.log
+*.pdb
+*.obj
+ScreenDump*.bmp
+/.vs
+/WorkshopMods
+/_Bin
+/_SDL
+/_Pindrop
+/Backup
+/Debug
+/Packaging/Win32-Beta/files
+/Packaging/Win32/files
+/WorkshopMods
+/System/Slick Profiler/Final2017
+/System/Slick Profiler/Steam Final
+/System/Slick Profiler/Steam Release
+/System/Slick Profiler/Steam Debug
+/System/Slick Profiler/Debug
+/System/Slick Profiler/Final
+/System/Slick Profiler/Final Open Source
+/System/Slick Profiler/Debug Open Source
+/GUI/Editor/Debug
+/GUI/Editor/Release
+/System/Slick Profiler/Remote profile
+/Steam Release
+/Steam Debug
+/Steam Final
+/_Bin/Final Open Source
+/_Bin/Debug Open Source
+/Final Open Source
+/Debug Open Source
+/Steam Final
+/Final2017
+/Remote Profile
+/Remote Release
+/Release
+/Final
+/Debug
+/DebugFast
+LogConsole.txt
+LogLoading.txt
+LogPublish.txt
+MemCleanupInfo.txt
+/Packaging/Win32-Beta/client1
+/Packaging/Win32-Beta/client2
+/Packaging/Win32-Beta/client3
+/Packaging/Win32-Beta/ClientFinal
+/Packaging/Win32-Beta/ServerFinal
+/Packaging/Win32-Beta/ServerFinalGameplay
+/NATPunchServer/Server/NATCompleteServer/Debug
+/NATPunchServer/Server/NATCompleteServer/Release
+/NATPunchServer/Server/NATCompleteServer/.vs
+/_LuaBind/Debug
+/_LuaBind/Release
+/_LuaBind/.vs
+/_boost_1_69_0/bin.v2
+/_boost_1_69_0/stage
+/_Allegro-4.2.3.1-Custom/Allegro/build/msvc8/.vs
+/_Allegro-4.2.3.1-Custom/Allegro/lib
+/_Allegro-4.2.3.1-Custom/Allegro/obj

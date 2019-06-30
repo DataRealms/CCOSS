@@ -637,3 +637,7 @@
 			Prop FileName, r/o // Module file name, like Base.rte
 			Prop FriendlyName, r/o // Module friendly name, like Dummy Tech
 			
+30.06.2019
+	Lua:
+		MovableMan:
+			Func ChangeActorTeam(actor, team) // Change actor team and update team rosters properly. Remember to switch actor manually if it's player controlled

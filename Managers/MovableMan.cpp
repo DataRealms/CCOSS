@@ -869,16 +869,8 @@ void MovableMan::AddActor(Actor *pActorToAdd)
             pActorToAdd->SetAge(0);
         }
         m_AddedActors.push_back(pActorToAdd);
-        // Add to the team roster and then sort it too
-        int team = pActorToAdd->GetTeam();
-        // Also re-set the TEam so that the Team Icons get set up properly
-        pActorToAdd->SetTeam(team);
-        // Only add to a roster if it's on a team AND is controllable (eg doors are not)
-        if (team >= Activity::TEAM_1 && team < Activity::MAXTEAMCOUNT && pActorToAdd->IsControllable())
-        {
-            m_ActorRoster[pActorToAdd->GetTeam()].push_back(pActorToAdd);
-            m_ActorRoster[pActorToAdd->GetTeam()].sort(MOXPosComparison());
-        }
+
+		AddActorToTeamRoster(pActorToAdd);
     }
 }
 
@@ -991,9 +983,7 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
                 }
             }
         }
-        // Remove from roster as well
-        if (pActorToRem->GetTeam() >= 0)
-            m_ActorRoster[pActorToRem->GetTeam()].remove(dynamic_cast<Actor *>(pActorToRem));
+		RemoveActorFromTeamRoster(dynamic_cast<Actor *>(pActorToRem));
     }
     return removed;
 }
@@ -1036,6 +1026,68 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
         }
     }
     return removed;
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          AddActorToTeamRoster
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Adds actor to internal team roster
+// Arguments:       Pointer to actor
+// Return value:    None.
+
+void MovableMan::AddActorToTeamRoster(Actor * pActorToAdd)
+{
+	if (!pActorToAdd)
+		return;
+
+	// Add to the team roster and then sort it too
+	int team = pActorToAdd->GetTeam();
+	// Also re-set the TEam so that the Team Icons get set up properly
+	pActorToAdd->SetTeam(team);
+	// Only add to a roster if it's on a team AND is controllable (eg doors are not)
+	if (team >= Activity::TEAM_1 && team < Activity::MAXTEAMCOUNT && pActorToAdd->IsControllable())
+	{
+		m_ActorRoster[pActorToAdd->GetTeam()].push_back(pActorToAdd);
+		m_ActorRoster[pActorToAdd->GetTeam()].sort(MOXPosComparison());
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          RemoveActorToTeamRoster
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Removes actor from internal team roster
+// Arguments:       Pointer to actor
+// Return value:    None.
+
+void MovableMan::RemoveActorFromTeamRoster(Actor * pActorToRem)
+{
+	if (!pActorToRem)
+		return;
+
+	int team = pActorToRem->GetTeam();
+
+	// Remove from roster as well
+	if (team >= Activity::TEAM_1 && team < Activity::MAXTEAMCOUNT)
+		m_ActorRoster[team].remove(pActorToRem);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          ChangeActorTeam
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Changes actor team and updates team rosters.
+
+void MovableMan::ChangeActorTeam(Actor * pActor, int team)
+{
+	if (!pActor)
+		return;
+
+	RemoveActorFromTeamRoster(pActor);
+	pActor->SetTeam(team);
+	AddActorToTeamRoster(pActor);
 }
 
 
@@ -1813,8 +1865,9 @@ void MovableMan::Update()
             else
 			{
 				// Also remove actor from the roster
-	            if ((*aIt)->GetTeam() >= 0)
-	                m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
+				if ((*aIt)->GetTeam() >= 0)
+					//m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
+					RemoveActorFromTeamRoster(*aIt);
                 delete (*aIt);
 			}
         }
@@ -1870,7 +1923,8 @@ void MovableMan::Update()
                 // Remove from the team roster
 
                 if ((*aIt)->GetTeam() >= 0)
-                    m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
+                    //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
+					RemoveActorFromTeamRoster(*aIt);
                 aIt++;
             }
             // Try to set the existing iterator to a safer value, erase can crash in debug mode otherwise?
@@ -1917,7 +1971,9 @@ void MovableMan::Update()
 
             // Remove from team rosters
 			if ((*aIt)->GetTeam() >= Activity::TEAM_1 && (*aIt)->GetTeam() < Activity::MAXTEAMCOUNT)
-                m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
+                //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
+				RemoveActorFromTeamRoster(*aIt);
+
             // Delete
             delete *aIt;
             aIt++;

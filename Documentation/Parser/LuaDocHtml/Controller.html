@@ -1,0 +1,49 @@
+<h2>Generic Class:</h2><h1>Controller</h1><h3>
+A class controlling MovableObject:s through either player input, networking, scripting, AI, etc.</h3><p>Has no parent class.</p><br/><h3>Property:</h3><h2>InputMode</h2><p>
+The current mode of input for this Controller.
+The InputMode that this controller is currently using.
+</p><br/><h3>Function:</h3><h2>IsPlayerControlled</h2><p>
+Shortcut to indicate if in player input mode.</p><p><strong>Arguments:</strong><br />
+If you want to check if it's controlled by a player, AND that player is someone else than a specific one, pass in that player number here.</p><p><strong>Return value:</strong><br />
+Whether input mode is set to player input.<br />
+</p><br/><h3>Property:</h3><h2>ControlledActor</h2><p>
+Gets which Actor is being controlled by this. 0 if none.
+A pointer to the Actor which is being controlled by this. Ownership is NOT transferred!</p><br/><h3>Property:</h3><h2>Team</h2><p>
+The Team number using this controller.
+An int representing the team which this Controller belongs to. 0 is the first team. 0 if no team is using it.
+</p><br/><h3>Property:</h3><h2>AnalogMove</h2><p>
+The analog movement input data.
+A vector with the analog movement data, both axes ranging form -1.0 to 1.0.
+</p><br/><h3>Property:</h3><h2>AnalogAim</h2><p>
+The analog aiming input data.
+A vector with the analog aiming data, both axes ranging form -1.0 to 1.0.
+</p><br/><h3>Read-Only Property:</h3><h2>AnalogCursor</h2><p>
+The analog menu input data.
+A vector with the analog menu data, both axes ranging form -1.0 to 1.0.
+</p><br/><h3>Function:</h3><h2>RelativeCursorMovement</h2><p>
+Adds relative movement to a passed-in vector. Uses the appropriate input method currently of this.</p><p><strong>Arguments:</strong><br />
+The vector to alter.<br />
+The scale of the input. 1.0 is 'normal'.</p><p><strong>Return value:</strong><br />
+Whether the vector was altered or not.<br />
+</p><br/><h3>Property:</h3><h2>Player</h2><p>
+Gets which player's input this is listening to, if in player input mode.
+The player number, or -1 if not in player input mode.
+</p><br/><h3>Function:</h3><h2>IsMouseControlled</h2><p>
+Indicated whether this is listening to mouse input at all.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether this is using mouse input at all.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>MouseMovement</h2><p>
+The relative movement of the mouse since last update. Only returns true if this' player is actually set up to be using the mouse.
+The relative mouse movements, in both axes.
+</p><br/><h3>Property:</h3><h2>Disabled</h2><p>
+Shows whether this is disabled.
+Whether disabled.
+</p><br/><h3>Function:</h3><h2>SetState</h2><p>
+Sets one of this controller's states.</p><p><strong>Arguments:</strong><br />
+Which state to set and which value to set it to.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsState</h2><p>
+Shows whether the current controller is in a specific state.</p><p><strong>Arguments:</strong><br />
+Which state to check.</p><p><strong>Return value:</strong><br />
+Whether the controller is in the specified state.<br />
+</p>

@@ -1,0 +1,24 @@
+<h1>MetaManager</h1><h3>
+The singleton manager of the Metagame of Cortex Command, ie the games played out in the campaign screen.</h3><p>Has no parent class.</p><br/><h3>Property:</h3><h2>GameName</h2><p>
+The name of the currently played Metagame. It's what's used when saving to disk.
+The name of the current metagame.
+</p><br/><h3>Read-Only Property:</h3><h2>PlayerTurn</h2><p>
+Shows which player's turn is now or coming up.
+The player who is currently doing his turn, or coming up next in an intermediate phase.
+</p><br/><h3>Read-Only Property:</h3><h2>PlayerCount</h2><p>
+Gets current number of MetaPlayers
+The number of meta players in the current game.
+</p><br/><h3>Function:</h3><h2>GetTeamOfPlayer</h2><p>
+Gets the designated team of a specific player</p><p><strong>Arguments:</strong><br />
+Which player.</p><p><strong>Return value:</strong><br />
+The team of that player.<br />
+</p><br/><h3>Function:</h3><h2>GetPlayer</h2><p>
+Gets the specified <a href="MetaPlayer.html">MetaPlayer</a></p><p><strong>Arguments:</strong><br />
+Which player.</p><p><strong>Return value:</strong><br />
+The requested MetaPlayer<br />
+</p><br/><h3>Function:</h3><h2>GetMetaPlayerOfInGamePlayer</h2><p>
+Gets the MetaPlayer playing a specific in-game player, if any.</p><p><strong>Arguments:</strong><br />
+Which in-game player to translate into a metaplayer.</p><p><strong>Return value:</strong><br />
+The requested MetaPlayer, if any is playing that in-game player. If not<br />
+0 is returned.<br />
+</p>

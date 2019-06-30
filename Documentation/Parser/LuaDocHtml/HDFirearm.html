@@ -1,0 +1,79 @@
+<h2>Concrete Class:</h2><h1>HDFirearm</h1><h3>
+A firearm device that fires projectile MO's and discharges shell MO's.</h3><h3>Parent:  <a href="HeldDevice.html">HeldDevice</a></h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Property:</h3><h2>RateOfFire</h2><p>
+The rate of fire of this. This applies even if semi-auto. it limits how quickly a new round can be fired after the last.
+The rate of fire, in rounds per min.
+</p><br/><h3>Property:</h3><h2>FullAuto</h2><p>
+Tells whether the device is fully automatic or not.
+Whether the player can hold down fire and this will fire repeatedly.
+</p><br/><h3>Read-Only Property:</h3><h2>RoundInMagCount</h2><p>
+The number of rounds still in the loaded magazine. Negative value means infinite ammo.
+An int with the number of rounds in the magazine currently in this
+HDFirearm. Negative means infinite ammo.
+</p><br/><h3>Read-Only Property:</h3><h2>Magazine</h2><p>
+The currently attached Magazine, if any.
+The Magazine, if any is attached.
+</p><br/><h3>Property:</h3><h2>ActivationDelay</h2><p>
+The delay before firing.
+An int with the activation delay in ms.
+</p><br/><h3>Property:</h3><h2>DeactivationDelay</h2><p>
+The delay between release of activation and another can be started.
+An int with the delay in ms.
+</p><br/><h3>Property:</h3><h2>ReloadTime</h2><p>
+The reload time in ms.
+An int in ms.
+</p><br/><h3>Property:</h3><h2>ShakeRange</h2><p>
+The range of normal shaking of entire weapon.
+A float with the range in degrees.
+</p><br/><h3>Property:</h3><h2>SharpShakeRange</h2><p>
+The range of shaking of entire weapon during sharp aiming.
+A float with the range in degrees.
+</p><br/><h3>Property:</h3><h2>NoSupportFactor</h2><p>
+The factor for how much more weapon shakes if it isn't supported by a second hand.
+A float with the factor.
+</p><br/><h3>Property:</h3><h2>ParticleSpreadRange</h2><p>
+The range of spread angle of fired particles, in one direction.
+A float with the range in degrees.
+</p><br/><h3>Read-Only Property:</h3><h2>FiredOnce</h2><p>
+Whether at least one round has already been	fired during the current activation.
+Returns true if at least one round has already been fired during the current activation.
+</p><br/><h3>Read-Only Property:</h3><h2>FiredFrame</h2><p>
+Whether at least one round has already been fired during the current frame.
+Returns true at least one round has already been fired during the current frame.
+</p><br/><h3>Read-Only Property:</h3><h2>RoundsFired</h2><p>
+How many rounds were fired during this frame.
+Returns the number of rounds fired during this frame.
+</p><br/><h3>Function:</h3><h2>GetAIFireVel</h2><p>
+Gets the velocity the AI use when aiming this weapon.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A float with the velocity in m/s.<br />
+</p><br/><h3>Function:</h3><h2>GetAIBulletLifeTime</h2><p>
+Gets the bullet life time the AI use when aiming this weapon.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A float with the life time in ms.<br />
+</p><br/><h3>Function:</h3><h2>GetBulletAccScalar</h2><p>
+Gets the bullet acceleration scalar the AI use when aiming this weapon.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A float with the scalar.<br />
+</p><br/><h3>Function:</h3><h2>GetAIBlastRadius</h2><p>
+Gets the blast radius the AI use when aiming this weapon.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A float with the blast radius in pixels.<br />
+</p><br/><h3>Function:</h3><h2>GetAIPenetration</h2><p>
+Gets how much material the projectiles from this weapon can destory.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A float with the material strength.<br />
+</p><br/><h3>Function:</h3><h2>CompareTrajectories</h2><p>
+Estimates how close the projectiles from two weapons will land.</p><p><strong>Arguments:</strong><br />
+A HDFirearm pointer to compare with.</p><p><strong>Return value:</strong><br />
+A float with the distance in pixels.<br />
+</p><br/><h3>Function:</h3><h2>SetNextMagazineName</h2><p>
+Sets the Preset name of the next Magazine that will be loaded into this gun. This changes all future mags that will be reloaded.</p><p><strong>Arguments:</strong><br />
+The preset name of the new Magazine to load into this from now on.</p><p><strong>Return value:</strong><br />
+Whether the specified magazine was found and successfully prepared.<br />
+</p><br/><h3>Property:</h3><h2>IsAnimatedManually</h2><p>
+If true then the m_Frame property is not changed bye the Update function
+Whether this HDFirearm is animated manually.
+</p>

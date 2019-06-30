@@ -1,0 +1,58 @@
+<h2>Concrete Class:</h2><h1>Attachable</h1><h3>
+An articulated, detachable part of an Actor's body.</h3><h3>Parent:  <a href="MOSRotating.html">MOSRotating</a></h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Property:</h3><h2>ParentOffset</h2><p>
+The stored offset between this Attachable's parent's Pos and the joint position. This should be maintained by the parent.
+A const reference Vector describing the offset from the parent's pos to the joint point.
+</p><br/><h3>Read-Only Property:</h3><h2>JointOffset</h2><p>
+The offset to the joint (the point around which this Attachable and its parent hinge) from this Attachable's center of mass/origin.
+A const reference Vector describing the offset of the joint relative to the this Attachable's origin/center of mass position.
+</p><br/><h3>Property:</h3><h2>JointStiffness</h2><p>
+Sets the normalized stiffness scalar of the join of this Attachable.
+A float between 0 and 1.0. 1.0 means 100% of all forces imposed on this attachable will be transferred through the joint to the parent. 0.5 means 50%, and so on.
+</p><br/><h3>Property:</h3><h2>JointStrength</h2><p>
+The amount of impulse force the joint of this Attachable can handle before breaking.
+A float with the max tolerated impulse force in kg * m/s.
+</p><br/><h3>Property:</h3><h2>RotTarget</h2><p>
+The target rotation that this Attachable should be striving to match its real rotation with, if it is attached. The joint stiffness will determine how strong the scalar spring is between the current rotation and the target set here.
+A float for the current target angle in radians.
+</p><br/><h3>Property:</h3><h2>AtomSubgroupID</h2><p>
+The subgroup ID of this' Atoms.
+The the subgroup ID of this' Atoms.
+</p><br/><h3>Property:</h3><h2>OnlyLinearForces</h2><p>
+Indicates whether this AEmitter only cares about linear forces that it creates through emissions, ie no torquing due to the parent offset.
+Whether only using linear forces or not.
+</p><br/><h3>Function:</h3><h2>IsAttached</h2><p>
+Indicates whether this Attachable is attached to an MOSprite or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether it's attached or not.<br />
+</p><br/><h3>Function:</h3><h2>IsAttachedTo</h2><p>
+Indicates whether this Attachable is attached to a specific actor or not.</p><p><strong>Arguments:</strong><br />
+A pointer to which MOSprite you want to check if this is attached to.</p><p><strong>Return value:</strong><br />
+Whether it's attached or not.<br />
+</p><br/><h3>Function:</h3><h2>IsDrawnAfterParent</h2><p>
+Indicates whether this Attachable is to be drawn after (in front of) or before (behind) the parent.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether it's to be drawn after parent or not.<br />
+</p><br/><h3>Function:</h3><h2>Detach</h2><p>
+Detaches this Attachable from its host <a href="MOSprite.html">MOSprite</a></p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>TransferJointForces</h2><p>
+Bundles up all the accumulated forces of this Attachable and calcs how they transfer to the joint, and therefore to the parent.</p><p><strong>Arguments:</strong><br />
+A vector that will have with the forces affecting the joint ADDED to it.</p><p><strong>Return value:</strong><br />
+If the accumulated forces exceed the strength of the joint, the attachable will only fill out the forces up to the strength threshold and then detach itself and return false, and the parent should react accordingly in that case (null out pointers to the Attachable).<br />
+</p><br/><h3>Function:</h3><h2>TransferJointImpulses</h2><p>
+Bundles up all the accumulated impulses of this Attachable and calcs how they transfer to the joint, and therefore to the parent.</p><p><strong>Arguments:</strong><br />
+A vector that will have with the imps affecting the joint ADDED to it.</p><p><strong>Return value:</strong><br />
+If the accumulated impulses exceed the strength of the joint, the attachable will only fill out the impulses up to the strength threshold and then detach itself and return false, and the parent should react accordingly in that case (null out pointers to the Attachable).<br />
+</p><br/><h3>Function:</h3><h2>CollectDamage</h2><p>
+Gets the amount of damage points this Attachable has sustained and should cause its parent. Calling this will reset the damage count.
+This should normally be called AFTER Update() to get the correct damage for a given frame.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A float with the damage points accumulated since the last time this method was called.<br />
+</p><br/><h3>Property:</h3><h2>InheritsRotAngle</h2><p>
+If true (default old behavior) the parent MOSRotating resets attachables or emitters RotAngle every frame. False to avoid that.
+Whether parent MOSRotating should change this RotAngle to match it's own during MOSRotating::Update
+</p>

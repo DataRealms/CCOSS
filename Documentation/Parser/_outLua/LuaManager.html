@@ -1,0 +1,25 @@
+<h1>LuaManager</h1><h3>
+The singleton manager of the master lua script state.</h3><p>Has no parent class.</p><br/><h3>Property:</h3><h2>TempEntity</h2><p>
+A temporary Entity that can be accessed in the Lua state.
+The temporary entity. Ownership is NOT transferred.
+</p><br/><h3>Function:</h3><h2>FileOpen</h2><p>
+Opens file. You can open files only inside .rte folders of game directory. no more that MAX_OPEN_FILES file simultaneously.</p><p><strong>Arguments:</strong><br />
+Path to file. All paths are made absoulte by adding current working directory path. File mode.</p><p><strong>Return value:</strong><br />
+File number.<br />
+</p><br/><h3>Function:</h3><h2>FileClose</h2><p>
+Closes a previously opened file.</p><p><strong>Arguments:</strong><br />
+File number.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>FileReadLine</h2><p>
+Reads a line from file.</p><p><strong>Arguments:</strong><br />
+File number.</p><p><strong>Return value:</strong><br />
+Line from file, or empty string on error.<br />
+</p><br/><h3>Function:</h3><h2>FileWriteLine</h2><p>
+Writes a text line to file.</p><p><strong>Arguments:</strong><br />
+File number.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>FileEOF</h2><p>
+Returns true if end of file was reached</p><p><strong>Arguments:</strong><br />
+File number.</p><p><strong>Return value:</strong><br />
+Whether or not EOF was reached.<br />
+</p>

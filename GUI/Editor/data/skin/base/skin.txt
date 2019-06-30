@@ -1,0 +1,317 @@
+#
+# Skin template file
+#
+
+# Mouse pointer
+[Mouse_Pointer]
+Filename = pointer.bmp
+ColorKeyIndex = 1
+
+# Text mouse pointer
+[Mouse_Text]
+Filename = text.bmp
+ColorKeyIndex = 1
+
+# Horizontal resize
+[Mouse_HSize]
+Filename = hsize.bmp
+ColorKeyIndex = 1
+
+# Standard button control
+# Up State
+[Button_Up]
+Filename = button.bmp
+Font = font.bmp
+FontColor = 0
+TopLeft = 0,0, 2,2
+Top = 3,0, 3,1
+TopRight = 7,0, 2,2
+Left = 0,3, 1,3
+BottomLeft = 0,7, 2,2
+Bottom = 3,8, 3,1
+BottomRight = 7,7, 2,2
+Right = 8,3, 1,3
+Filler = 10,0, 8,8
+
+
+# Standard button control
+# Over State
+# Same font is used from [Button_Up]
+[Button_Over]
+Filename = button.bmp
+TopLeft = 0,11, 2,2
+Top = 3,11, 3,1
+TopRight = 7,11, 2,2
+Left = 0,14, 1,3
+BottomLeft = 0,18, 2,2
+Bottom = 3,19, 3,1
+BottomRight = 7,18, 2,2
+Right = 8,14, 1,3
+Filler = 10,11, 8,8
+
+# Standard button control
+# Down State
+# Same font is used from [Button_Up]
+[Button_Down]
+Filename = button.bmp
+TopLeft = 0,22, 2,2
+Top = 3,22, 3,1
+TopRight = 7,22, 2,2
+Left = 0,25, 1,3
+BottomLeft = 0,29, 2,2
+Bottom = 3,30, 3,1
+BottomRight = 7,29, 2,2
+Right = 8,25, 1,3
+Filler = 10,22, 8,8
+
+# List box control
+[Listbox]
+Filename = listpanel.bmp
+Font = font.bmp
+FontColor = 0
+FontSelectColor = 15
+SelectedColorIndex = 247
+TopLeft = 0,0, 2,2
+Top = 3,0, 3,1
+TopRight = 7,0, 2,2
+Left = 0,3, 1,3
+BottomLeft = 0,7, 2,2
+Bottom = 3,8, 3,1
+BottomRight = 7,7, 2,2
+Right = 8,3, 1,3
+Filler = 10,0, 8,8
+
+# Scrollbar Control
+# Button-UpState
+[ScrollButton_Up]
+Filename = scrollbar.bmp
+TopLeft = 0,0, 2,2
+Top = 3,0, 3,1
+TopRight = 7,0, 2,2
+Left = 0,3, 1,3
+BottomLeft = 0,7, 2,2
+Bottom = 3,8, 3,1
+BottomRight = 7,7, 2,2
+Right = 8,3, 1,3
+Filler = 10,0, 8,8
+
+# Scrollbar Control
+# Button-DownState
+[ScrollButton_Down]
+Filename = scrollbar.bmp
+TopLeft = 0,11, 2,2
+Top = 3,11, 3,1
+TopRight = 7,11, 2,2
+Left = 0,14, 1,3
+BottomLeft = 0,18, 2,2
+Bottom = 3,19, 3,1
+BottomRight = 7,18, 2,2
+Right = 8,14, 1,3
+Filler = 10,11, 8,8
+
+# Scrollbar Control
+# Knob-UpState
+[ScrollKnob_Up]
+Filename = scrollbar.bmp
+TopLeft = 0,0, 2,2
+Top = 3,0, 3,1
+TopRight = 7,0, 2,2
+Left = 0,3, 1,3
+BottomLeft = 0,7, 2,2
+Bottom = 3,8, 3,1
+BottomRight = 7,7, 2,2
+Right = 8,3, 1,3
+Filler = 10,0, 8,8
+
+# Scrollbar Control
+# Knob-DownState
+[ScrollKnob_Down]
+Filename = scrollbar.bmp
+TopLeft = 0,0, 2,2
+Top = 3,0, 3,1
+TopRight = 7,0, 2,2
+Left = 0,3, 1,3
+BottomLeft = 0,7, 2,2
+Bottom = 3,8, 3,1
+BottomRight = 7,7, 2,2
+Right = 8,3, 1,3
+Filler = 10,0, 8,8
+
+# Scrollbar Control
+# TopArrow
+[ScrollTopArrow]
+Filename = scrollbar.bmp
+ColorKeyIndex = 13
+Rect = 20,0, 7,5
+
+# Scrollbar Control
+# BottomArrow
+[ScrollBottomArrow]
+Filename = scrollbar.bmp
+ColorKeyIndex = 13
+Rect = 20,6, 7,5
+
+# Scrollbar Control
+# LeftArrow
+[ScrollLeftArrow]
+Filename = scrollbar.bmp
+ColorKeyIndex = 13
+Rect = 20,12, 5,7
+
+# Scrollbar Control
+# RightArrow
+[ScrollRightArrow]
+Filename = scrollbar.bmp
+ColorKeyIndex = 13
+Rect = 20,20, 5,7
+
+# Scrollbar Control
+# Background
+[ScrollBackground]
+Filename = scrollbar.bmp
+Filler = 10,21, 8,8
+
+# Checkbox Control
+[Checkbox]
+Filename = checkbox.bmp
+ColorKeyIndex = 13
+Font = font.bmp
+FontColor = 0
+Base = 0,0, 8,8
+MouseOver = 9,0, 8,8
+Check = 0,9, 8,8
+GreyCheck = 9,9, 8,8
+
+# RadioButton Control
+[RadioButton]
+Filename = radiobox.bmp
+ColorKeyIndex = 13
+Font = font.bmp
+FontColor = 0
+Base = 0,0, 8,8
+MouseOver = 9,0, 8,8
+Check = 0,9, 8,8
+GreyCheck = 9,9, 8,8
+
+# ProgressBar Control
+# Base
+[ProgressBar_Base]
+Filename = progress.bmp
+TopLeft = 0,0, 2,2
+Top = 3,0, 3,1
+TopRight = 7,0, 2,2
+Left = 0,3, 1,3
+BottomLeft = 0,7, 2,2
+Bottom = 3,8, 3,1
+BottomRight = 7,7, 2,2
+Right = 8,3, 1,3
+Filler = 10,0, 8,8
+
+# ProgressBar Control
+# Indicators
+[ProgressBar_Indicator]
+Filename = progress.bmp
+Top = 20,0, 10,1
+Centre = 20,2, 10,4
+Bottom = 20, 7, 10,1
+Spacing = 3
+
+# Slider Control
+# Horizontal section
+[Slider_Horz]
+Filename = slider.bmp
+ColorKeyIndex = 13
+Start = 0,0, 2,2
+Middle = 3,0, 3,2
+End = 7,0, 2,2
+TopLeftSlider = 13,15, 8,14
+BottomRightSlider = 13,0, 8,14
+TickColorIndex = 0
+
+# Slider Control
+# Vertical section
+[Slider_Vert]
+Filename = slider.bmp
+ColorKeyIndex = 13
+Start = 0,3, 2,2
+Middle = 0,6, 2,3
+End = 0,10, 2,2
+TopLeftSlider = 23,9, 14,8
+BottomRightSlider = 23,0, 14,8
+TickColorIndex = 0
+
+# Text Box
+[TextBox]
+Font = font.bmp
+CursorColorIndex = 0
+SelectedColorIndex = 247
+FontColor = 0
+FontSelectColor = 15
+Filename = textbox.bmp
+TopLeft = 0,0, 2,2
+Top = 3,0, 3,1
+TopRight = 7,0, 2,2
+Left = 0,3, 1,3
+BottomLeft = 0,7, 2,2
+Bottom = 3,8, 3,1
+BottomRight = 7,7, 2,2
+Right = 8,3, 1,3
+Filler = 10,0, 8,8
+
+# Label Control
+[Label]
+Font = font.bmp
+FontColor = 0
+
+# Combo box
+# Arrow
+[ComboBox_Arrow]
+Filename = combobox.bmp
+ColorKeyIndex = 13
+Rect = 20,0, 7,5
+
+# Combo box
+# Button_Up State
+[ComboBox_ButtonUp]
+Filename = combobox.bmp
+TopLeft = 0,0, 2,2
+Top = 3,0, 3,1
+TopRight = 7,0, 2,2
+Left = 0,3, 1,3
+BottomLeft = 0,7, 2,2
+Bottom = 3,8, 3,1
+BottomRight = 7,7, 2,2
+Right = 8,3, 1,3
+Filler = 10,0, 8,8
+
+
+# Combo box
+# Button_Down State
+[ComboBox_ButtonDown]
+Filename = combobox.bmp
+TopLeft = 0,10, 2,2
+Top = 3,10, 3,1
+TopRight = 7,10, 2,2
+Left = 0,13, 1,3
+BottomLeft = 0,17, 2,2
+Bottom = 3,18, 3,1
+BottomRight = 7,17, 2,2
+Right = 8,13, 1,3
+Filler = 10,10, 8,8
+
+
+# Property Page
+[PropertyPage]
+Font = font.bmp
+FontColor = 0
+LineColor = 21
+Filename = proppage.bmp
+TopLeft = 0,0, 2,2
+Top = 3,0, 3,1
+TopRight = 7,0, 2,2
+Left = 0,3, 1,3
+BottomLeft = 0,7, 2,2
+Bottom = 3,8, 3,1
+BottomRight = 7,7, 2,2
+Right = 8,3, 1,3
+Filler = 10,0, 8,8

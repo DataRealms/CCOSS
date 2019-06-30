@@ -1,0 +1,134 @@
+<h1>FrameManager</h1><h3>
+The singleton manager over the composition and display of frames.</h3><p>Has no parent class.</p><br/><h3>Function:</h3><h2>ResetSplitScreens</h2><p>
+Sets new values for the split screen configuration.</p><p><strong>Arguments:</strong><br />
+Whether the new setting should be horizontally split (over and under).<br />
+Whether the new setting should be vertically split (side by side)</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Property:</h3><h2>PPM</h2><p>
+The ratio between on-screen pixels and the physics engine's meters.
+A float describing the current PPM ratio.
+</p><br/><h3>Read-Only Property:</h3><h2>MPP</h2><p>
+The ratio between the physics engine's meters and on-screen pixels.
+A float describing the current MPP ratio.
+</p><br/><h3>Read-Only Property:</h3><h2>PPL</h2><p>
+The ratio between the on-screen pixels and the physics engine's
+Litres.
+A float describing the current PPL ratio.
+</p><br/><h3>Read-Only Property:</h3><h2>LPP</h2><p>
+The ratio between the physics engine's Litres and on-screen pixels.
+A float describing the current LPP ratio.
+</p><br/><h3>Read-Only Property:</h3><h2>ResX</h2><p>
+The horizontal resolution of the screen.
+An int describing the horizontal resolution of the screen in pixels.
+</p><br/><h3>Read-Only Property:</h3><h2>ResY</h2><p>
+The vertical resolution of the screen.
+An int describing the vertical resolution of the screen in pixels.
+</p><br/><h3>Read-Only Property:</h3><h2>ResBPP</h2><p>
+The bits per pixel color depth
+An int describing the number of bits per pixel of the current color depth.
+</p><br/><h3>Property:</h3><h2>HSplit</h2><p>
+Gets whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.
+Whether or not screen has a horizontal split.
+</p><br/><h3>Property:</h3><h2>VSplit</h2><p>
+Gets whether the screen is split vertically across the screen, ie as two splitscreens side by side.
+Whether screen has a vertical split.
+</p><br/><h3>Read-Only Property:</h3><h2>PlayerScreenWidth</h2><p>
+The width of the individual player screens. This will only be less than the backbuffer resolution if there are split screens.
+The width of the player screens.
+</p><br/><h3>Read-Only Property:</h3><h2>PlayerScreenWidth</h2><p>
+The width of the individual player screens. This will only be less than the backbuffer resolution if there are split screens.
+Player to get screen width for, only used by multiplayer parts.
+The width of the player screens.
+</p><br/><h3>Read-Only Property:</h3><h2>PlayerScreenHeight</h2><p>
+The height of the individual player screens. This will only be less than the backbuffer resolution if there are split screens.
+The height of the player screens.
+</p><br/><h3>Read-Only Property:</h3><h2>PlayerScreenHeight</h2><p>
+The height of the individual player screens. This will only be less than the backbuffer resolution if there are split screens.
+Player to get screen width for, only used by multiplayer parts.
+The height of the player screens.
+</p><br/><h3>Function:</h3><h2>SetScreenText</h2><p>
+Sets the message to be displayed on top of each player's screen</p><p><strong>Arguments:</strong><br />
+An std::string that specifies what should be displayed.<br />
+Which screen you want to set text to.<br />
+The interval with which the screen will be blinking, in ms. 0 means no blinking.<br />
+The duration, in MS to force this message to display. No other message can be displayed before this expires. ClearScreenText overrides it though.<br />
+Vertically centered on the screen</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ClearScreenText</h2><p>
+Clears the message to be displayed on top of each player's screen</p><p><strong>Arguments:</strong><br />
+Which screen you want to set text to.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsFullscreen</h2><p>
+Indicates whether we're in fullscreen mode or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether we're in fullscreen mode.<br />
+</p><br/><h3>Property:</h3><h2>PostProcessing</h2><p>
+Indicates whether we're postprocessing or not
+Whether post processing is enabled or not.
+</p><br/><h3>Property:</h3><h2>PostPixelGlow</h2><p>
+Indicates whether we're postprocessing the pixel glow effect or not
+Whether post processing is enabled or not.
+</p><br/><h3>Function:</h3><h2>LoadPalette</h2><p>
+Loads a palette from a .dat file and sets it as the currently used screen palette.</p><p><strong>Arguments:</strong><br />
+String with the data path to the palette data object within a .dat.</p><p><strong>Return value:</strong><br />
+Whether palette laoded successfully or not.<br />
+</p><br/><h3>Function:</h3><h2>FadeInPalette</h2><p>
+Fades the palette in from black at a specified speed.</p><p><strong>Arguments:</strong><br />
+Speed specififed from (slowest) 1 - 64 (fastest)</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>FadeOutPalette</h2><p>
+Fades the palette out to black at a specified speed.</p><p><strong>Arguments:</strong><br />
+Speed specififed from (slowest) 1 - 64 (fastest)</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SaveScreenToBMP</h2><p>
+Dumps a bitmap of the screen back buffer to a 8bpp BMP file.</p><p><strong>Arguments:</strong><br />
+The filename of the file to save to, WITHOUT EXTENSION. eg, If "Test" is passed in, this func will save to Test000.bmp, if that file does not already exist. If it does exist, it will attempt 001, and so on.</p><p><strong>Return value:</strong><br />
+Success >=0, or failure < 0.<br />
+</p><br/><h3>Function:</h3><h2>SaveBitmapToBMP</h2><p>
+Dumps a bitmap to a 8bpp BMP file.</p><p><strong>Arguments:</strong><br />
+A pointer to a BITMAP to save.<br />
+The filename of the file to save to, WITHOUT EXTENSION. eg, If "Test" is passed in, this func will save to Test000.bmp, if that file does not already exist. If it does exist, it will attempt 001, and so on.</p><p><strong>Return value:</strong><br />
+Success >=0, or failure < 0.<br />
+</p><br/><h3>Function:</h3><h2>ResetFrameTimer</h2><p>
+Resets the frame timer to restart counting.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ResetRTE</h2><p>
+Orders to reset the entire Retro Terrain Engine system next iteration.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsResettingRTE</h2><p>
+Indicated whether the system is about to be reset before the next loop starts.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether the RTE is about to reset next iteration of the loop or not.<br />
+</p><br/><h3>Function:</h3><h2>ToggleFullscreen</h2><p>
+Toggles to and from fullscreen and windowed mode.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Error code, anything other than 0 is error..<br />
+</p><br/><h3>Function:</h3><h2>ClearBackBuffer8</h2><p>
+Clears the 8bpp backbuffer with black.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ClearBackBuffer32</h2><p>
+Clears the 32bpp backbuffer with black.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ShowPerformanceStats</h2><p>
+Sets whetehr to display the performance stats on-screen or not.</p><p><strong>Arguments:</strong><br />
+Whether to show the performance stats or not.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>FlashScreen</h2><p>
+Flashes any of the players' screen red for this frame.</p><p><strong>Arguments:</strong><br />
+Which screen to flash.<br />
+What color to flash it. -1 means no color or flash.<br />
+How long a period to fill the frame with color. If 0, a single-frame flash will happen.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>CalculateTextHeight</h2><p>
+Returns max text height</p><p><strong>Arguments:</strong><br />
+Text, max width, whether to use small or large font</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>CalculateTextWidth</h2><p>
+Returns max text width</p><p><strong>Arguments:</strong><br />
+Text, whether to use small or large font</p><p><strong>Return value:</strong><br />
+None.<br />
+</p>

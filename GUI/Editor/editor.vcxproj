@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{DB486FC0-C6F8-4AD3-8D32-8AA0314C6B33}</ProjectGuid>
+    <RootNamespace>editor</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>15.0.28127.55</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\;..\..\System\Allegro\include;../;Wrappers;..\..\external\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;ALLEGRO_STATICLINK;GUI_STANDALONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <ForcedIncludeFiles>TargetSxS.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>fmodvc.lib;dinput.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;alld_s_c.lib;dinput8.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\System\fmod\lib;..\..\System\DirectX\lib;..\..\System\Allegro\lib;..\..\external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\;..\..\external\include;..\;Wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;GUI_STANDALONE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level2</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ForcedIncludeFiles>TargetSxS.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>fmodvc.lib;dinput.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;alleg_s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)GUIEditor.exe</OutputFile>
+      <AdditionalLibraryDirectories>..\..\System\fmod\lib;..\..\System\DirectX\lib;..\..\external\lib\win\;..\..\external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\AllegroBitmap.cpp" />
+    <ClCompile Include="..\AllegroInput.cpp" />
+    <ClCompile Include="..\AllegroScreen.cpp" />
+    <ClCompile Include="..\GUI.cpp" />
+    <ClCompile Include="..\GUIButton.cpp" />
+    <ClCompile Include="..\GUICheckbox.cpp" />
+    <ClCompile Include="..\GUICollectionBox.cpp" />
+    <ClCompile Include="..\GUIComboBox.cpp" />
+    <ClCompile Include="..\GUIControl.cpp" />
+    <ClCompile Include="..\GUIControlFactory.cpp" />
+    <ClCompile Include="..\GUIControlManager.cpp" />
+    <ClCompile Include="..\GUIEvent.cpp" />
+    <ClCompile Include="..\GUIFont.cpp" />
+    <ClCompile Include="..\GUIInput.cpp" />
+    <ClCompile Include="..\GUILabel.cpp" />
+    <ClCompile Include="..\GUIListBox.cpp" />
+    <ClCompile Include="..\GUIListPanel.cpp" />
+    <ClCompile Include="..\GUIManager.cpp" />
+    <ClCompile Include="..\GUIPanel.cpp" />
+    <ClCompile Include="..\GUIProgressBar.cpp" />
+    <ClCompile Include="..\GUIProperties.cpp" />
+    <ClCompile Include="..\GUIPropertyPage.cpp" />
+    <ClCompile Include="..\GUIRadioButton.cpp" />
+    <ClCompile Include="..\GUIScrollbar.cpp" />
+    <ClCompile Include="..\GUIScrollPanel.cpp" />
+    <ClCompile Include="..\GUISkin.cpp" />
+    <ClCompile Include="..\GUISlider.cpp" />
+    <ClCompile Include="..\GUITab.cpp" />
+    <ClCompile Include="..\GUITextBox.cpp" />
+    <ClCompile Include="..\GUITextPanel.cpp" />
+    <ClCompile Include="..\GUIUtil.cpp" />
+    <ClCompile Include="..\WinUtil.cpp" />
+    <ClCompile Include="Editor.cpp" />
+    <ClCompile Include="GUIEditorApp.cpp" />
+    <ClCompile Include="GUIEditorLib.cpp" />
+    <ClCompile Include="wrappers\ContentFile.cpp" />
+    <ClCompile Include="wrappers\DDTError.cpp" />
+    <ClCompile Include="wrappers\Reader.cpp" />
+    <ClCompile Include="wrappers\Timer.cpp" />
+    <ClCompile Include="wrappers\TimerMan.cpp" />
+    <ClCompile Include="wrappers\Writer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\AllegroBitmap.h" />
+    <ClInclude Include="..\AllegroInput.h" />
+    <ClInclude Include="..\AllegroScreen.h" />
+    <ClInclude Include="..\GUI.H" />
+    <ClInclude Include="..\GUIBitmap.h" />
+    <ClInclude Include="..\GUIButton.h" />
+    <ClInclude Include="..\GUICheckbox.h" />
+    <ClInclude Include="..\GUICollectionBox.h" />
+    <ClInclude Include="..\GUIComboBox.h" />
+    <ClInclude Include="..\GUIControl.h" />
+    <ClInclude Include="..\GUIControlFactory.h" />
+    <ClInclude Include="..\GUIControlManager.h" />
+    <ClInclude Include="..\GUIEvent.h" />
+    <ClInclude Include="..\GUIFont.h" />
+    <ClInclude Include="..\GUIInput.h" />
+    <ClInclude Include="..\GUILabel.h" />
+    <ClInclude Include="..\GUIListBox.h" />
+    <ClInclude Include="..\GUIListPanel.h" />
+    <ClInclude Include="..\GUIManager.h" />
+    <ClInclude Include="..\GUIPanel.h" />
+    <ClInclude Include="..\GUIProgressBar.h" />
+    <ClInclude Include="..\GUIProperties.h" />
+    <ClInclude Include="..\GUIPropertyPage.h" />
+    <ClInclude Include="..\GUIRadioButton.h" />
+    <ClInclude Include="..\GUIScreen.h" />
+    <ClInclude Include="..\GUIScrollbar.h" />
+    <ClInclude Include="..\GUIScrollPanel.h" />
+    <ClInclude Include="..\GUISkin.h" />
+    <ClInclude Include="..\GUISlider.h" />
+    <ClInclude Include="..\GUITab.h" />
+    <ClInclude Include="..\GUITextBox.h" />
+    <ClInclude Include="..\GUITextPanel.h" />
+    <ClInclude Include="..\GUIUtil.h" />
+    <ClInclude Include="..\WinUtil.h" />
+    <ClInclude Include="GUIEditorApp.h" />
+    <ClInclude Include="GUIEditorLib.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="wrappers\ContentFile.h" />
+    <ClInclude Include="wrappers\DDTError.h" />
+    <ClInclude Include="wrappers\FrameMan.h" />
+    <ClInclude Include="wrappers\Reader.h" />
+    <ClInclude Include="wrappers\Timer.h" />
+    <ClInclude Include="wrappers\TimerMan.h" />
+    <ClInclude Include="wrappers\Writer.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

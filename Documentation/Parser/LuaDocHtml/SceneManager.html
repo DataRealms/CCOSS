@@ -1,0 +1,269 @@
+<h1>SceneManager</h1><h3>
+The singleton manager of all terrain and backgrounds in the RTE.</h3><p>Has no parent class.</p><br/><h3>Read-Only Property:</h3><h2>Scene</h2><p>
+The currently loaded scene, if any.
+The scene, ownership IS NOT TRANSFERRED!
+</p><br/><h3>Read-Only Property:</h3><h2>SceneDim</h2><p>
+The total dimensions (width and height) of the scene, in pixels.
+A Vector describing the scene dimensions.
+</p><br/><h3>Read-Only Property:</h3><h2>SceneWidth</h2><p>
+The total width of the scene, in pixels.
+An int describing the scene width.
+</p><br/><h3>Read-Only Property:</h3><h2>SceneHeight</h2><p>
+The total height of the scene, in pixels.
+An int describing the scene width.
+</p><br/><h3>Read-Only Property:</h3><h2>SceneWrapsX</h2><p>
+Indicates whether the scene wraps its scrolling around the X axis.
+Whether the scene wraps around the X axis or not.
+</p><br/><h3>Read-Only Property:</h3><h2>SceneWrapsY</h2><p>
+Indicates whether the scene wraps its scrolling around the Y axis.
+Whether the scene wraps around the Y axis or not.
+</p><br/><h3>Function:</h3><h2>GetOffset</h2><p>
+Gets the offset (scroll position) of the terrain.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A Vector describing the offset (scroll) of the terrain in pixels.<br />
+</p><br/><h3>Function:</h3><h2>SetOffsetX</h2><p>
+Sets the horizontal offset (scroll position) of the terrain.</p><p><strong>Arguments:</strong><br />
+A long that specifies the new horizontal offset value.<br />
+Which screen you want to set the offset of.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetOffsetY</h2><p>
+Sets the vertical offset (scroll position) of the terrain.</p><p><strong>Arguments:</strong><br />
+A long that specifies the new vertical offset value.<br />
+Which screen you want to set the offset of.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetScreenOcclusion</h2><p>
+Gets the amount that a specific screen is occluded by a GUI panel or something of the sort. This will affect how the scroll target translates into the offset of the screen, in order to keep the target centered on the screen.</p><p><strong>Arguments:</strong><br />
+Which screen you want to get the occlusion value of.</p><p><strong>Return value:</strong><br />
+A Vector that indicates the amount of occlusion of the screen.<br />
+</p><br/><h3>Function:</h3><h2>SetScreenOcclusion</h2><p>
+Sets the amount that a specific screen is occluded by a GUI panel or something of the sort. This will affect how the scroll target translates into the offset of the screen, in order to keep the target centered on the screen.</p><p><strong>Arguments:</strong><br />
+A Vector that specifies the amount of occlusion of the screen.<br />
+Which screen you want to set the occlusion of.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetTerrain</h2><p>
+Gets the SLTerrain, or 0 if no scene is loaded.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A pointer to the SLTerrain. Ownership is NOT transferred!<br />
+</p><br/><h3>Property:</h3><h2>LayerDrawMode</h2><p>
+The current drawing mode of the SceneMan.
+The current layer draw mode, see the LayerDrawMode enumeration for the different possible mode settings.
+</p><br/><h3>Function:</h3><h2>GetTerrMatter</h2><p>
+Gets a specific pixel from the total material representation of this Scene. LockScene() must be called before using this method.</p><p><strong>Arguments:</strong><br />
+The X and Y coordinates of screen material pixel to get.</p><p><strong>Return value:</strong><br />
+An unsigned char specifying the requested pixel's material index.<br />
+</p><br/><h3>Function:</h3><h2>GetMOIDPixel</h2><p>
+Gets a MOID from pixel coordinates in the Scene. LockScene() must be called before using this method.</p><p><strong>Arguments:</strong><br />
+The X and Y coordinates of screen Scene pixel to get the MO from.</p><p><strong>Return value:</strong><br />
+The MOID currently at the specified pixel location.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>GlobalAcc</h2><p>
+The global acceleration (in m/s^2) that is applied to all movable objects' velocities during every frame. Typically models gravity.
+A Vector describing the global acceleration.
+</p><br/><h3>Read-Only Property:</h3><h2>OzPerKg</h2><p>
+Gets how many Ounces there are in a metric Kilogram
+A float describing the Oz/Kg ratio.
+</p><br/><h3>Read-Only Property:</h3><h2>KgPerOz</h2><p>
+Gets how many metric Kilograms there are in an Ounce.
+A float describing the Kg/Oz ratio.
+</p><br/><h3>Function:</h3><h2>SetLayerDrawMode</h2><p>
+Sets the drawing mode of the SceneMan, to easily view what's going on in the different internal SceneLayer:s.</p><p><strong>Arguments:</strong><br />
+The layer mode to draw in, see the LayerDrawMode enumeration for the different possible settings.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetScroll</h2><p>
+Sets the offset (scroll position) of the terrain to center on specific world coordinates. If the coordinate to center on is close to the terrain border edges, the view will not scroll outside the borders.</p><p><strong>Arguments:</strong><br />
+A Vector that specifies the coordinates to center the terrain scroll on.<br />
+Which screen you want to set the offset of.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetScrollTarget</h2><p>
+Interpolates a smooth scroll of the view from wherever it is now, towards centering on a new scroll target over time.</p><p><strong>Arguments:</strong><br />
+The new target vector in *scene coordinates*.<br />
+The normalized speed at screen the view scrolls. 0 being no movement, and 1.0 being instant movement to the target in one frame.<br />
+Whether the target was wrapped around the scene this frame or not.<br />
+Which screen you want to set the offset of.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetScrollTarget</h2><p>
+Gets the currently set scroll target, screen is where the center of the specific screen is trying to line up with.</p><p><strong>Arguments:</strong><br />
+Which screen to get the target for.</p><p><strong>Return value:</strong><br />
+Current target vector in *scene coordinates*.<br />
+</p><br/><h3>Function:</h3><h2>TargetDistanceScalar</h2><p>
+Calculates a scalar of how distant a certain point in the world is from the currently closest scroll target of all active screens.</p><p><strong>Arguments:</strong><br />
+Which world coordinate point to check distance to/from.</p><p><strong>Return value:</strong><br />
+A normalized scalar representing the distance between the closest scroll target of all active screens, to the passed in point. 0 means it's the point is within half a screen's width of the target, and<br />
+1.0 means it's on the clear opposite side of the scene.<br />
+</p><br/><h3>Function:</h3><h2>CheckOffset</h2><p>
+Makes sure the current offset won't create a view of outside the scene.
+If that is found to be the case, the offset is corrected so that the view rectangle is as close to the old offset as possible, but still entirely within the scene world.</p><p><strong>Arguments:</strong><br />
+Which screen you want to set the offset of.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>LoadUnseenLayer</h2><p>
+Loads a bitmap from file and use it as the unseen layer for a team.</p><p><strong>Arguments:</strong><br />
+The path to the bitmap to use as the unseen layer.<br />
+Which team we're talking about.</p><p><strong>Return value:</strong><br />
+Whether the loading was successful or not.<br />
+</p><br/><h3>Function:</h3><h2>MakeAllUnseen</h2><p>
+Sets one team's view of the scene to be unseen, using a generated map of a specific resolution chunkiness.</p><p><strong>Arguments:</strong><br />
+The dimensions of the pixels that should make up the unseen layer.<br />
+The team we're talking about.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AnythingUnseen</h2><p>
+Tells whether a team has anything still unseen on the scene.</p><p><strong>Arguments:</strong><br />
+The team we're talking about.</p><p><strong>Return value:</strong><br />
+A bool indicating whether that team has anyhting yet unseen.<br />
+</p><br/><h3>Function:</h3><h2>GetUnseenResolution</h2><p>
+Shows what the resolution factor of the unseen map to the entire Scene is, in both axes.</p><p><strong>Arguments:</strong><br />
+The team we're talking about.</p><p><strong>Return value:</strong><br />
+A vector witht he factors in each element representing the factors.<br />
+</p><br/><h3>Function:</h3><h2>IsUnseen</h2><p>
+Checks whether a pixel is in an unseen area on of a specific team.</p><p><strong>Arguments:</strong><br />
+The X and Y coords of the scene pixel that is to be checked.<br />
+The team we're talking about.</p><p><strong>Return value:</strong><br />
+A bool indicating whether that point is yet unseen.<br />
+</p><br/><h3>Function:</h3><h2>RevealUnseen</h2><p>
+Reveals a pixel on the unseen map for a specific team, if there is any.</p><p><strong>Arguments:</strong><br />
+The X and Y coord of the scene pixel that is to be revealed.<br />
+The team to reveal for.</p><p><strong>Return value:</strong><br />
+A bool indicating whether there was an unseen pixel revealed there.<br />
+</p><br/><h3>Function:</h3><h2>RevealUnseenBox</h2><p>
+Reveals a box on the unseen map for a specific team, if there is any.</p><p><strong>Arguments:</strong><br />
+The X and Y coords of the upper left corner of the box to be revealed.<br />
+The width and height of the box to be revealed, in scene units (pixels)<br />
+The team to reveal for.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>RestoreUnseen</h2><p>
+Hides a pixel on the unseen map for a specific team, if there is any.</p><p><strong>Arguments:</strong><br />
+The X and Y coord of the scene pixel that is to be revealed.<br />
+The team to hide for.</p><p><strong>Return value:</strong><br />
+A bool indicating whether there was a seen pixel hidden there.<br />
+</p><br/><h3>Function:</h3><h2>RestoreUnseenBox</h2><p>
+Restores a box on the unseen map for a specific team, if there is any.</p><p><strong>Arguments:</strong><br />
+The X and Y coords of the upper left corner of the box to be revealed.<br />
+The width and height of the box to be restored, in scene units (pixels)<br />
+The team to restore for.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>CastSeeRay</h2><p>
+Traces along a vector and reveals pixels on the unseen layer of a team as long as the accumulated material strengths traced through the terrain don't exceed a specific value.</p><p><strong>Arguments:</strong><br />
+The team to see for.<br />
+The starting position.<br />
+The vector to trace along.<br />
+A Vector that will be set to the position of where the sight ray was terminated. If it reached the end, it will be set to the end of the ray.<br />
+The material strength limit where<br />
+For every pixel checked along the line, how many to skip between them for optimization reasons. 0 = every pixel is checked.</p><p><strong>Return value:</strong><br />
+Whether any unseen pixels were revealed as a result of this seeing.<br />
+</p><br/><h3>Function:</h3><h2>CastStrengthSumRay</h2><p>
+Traces along a vector and returns how the sum of all encountered pixels' material strength values. This will take wrapping into account.</p><p><strong>Arguments:</strong><br />
+The starting position.<br />
+The ending position.<br />
+For every pixel checked along the line, how many to skip between them for optimization reasons. 0 = every pixel is checked.<br />
+A material ID to ignore, IN ADDITION to Air.</p><p><strong>Return value:</strong><br />
+The sum of all encountered pixels' material strength vales. So if it was all Air, then 0 is returned (Air's strength value is 0).<br />
+</p><br/><h3>Function:</h3><h2>CastMaxStrengthRay</h2><p>
+Traces along a vector and returns the strongest of all encountered pixels' material strength values exept doors.
+This will take wrapping into account.</p><p><strong>Arguments:</strong><br />
+The starting position.<br />
+The ending position.<br />
+For every pixel checked along the line, how many to skip between them for optimization reasons. 0 = every pixel is checked.</p><p><strong>Return value:</strong><br />
+The max of all encountered pixels' material strength vales. So if it was all Air, then 0 is returned (Air's strength value is 0).<br />
+</p><br/><h3>Function:</h3><h2>CastStrengthRay</h2><p>
+Traces along a vector and shows where along that ray there is an encounter with a pixel of a material with strength more than or equal to a specific value.</p><p><strong>Arguments:</strong><br />
+The starting position.<br />
+The vector to trace along.<br />
+The strength value of screen any found to be equal or more than will terminate the ray.<br />
+A reference to the vector screen will be filled out with the absolute location of the found terrain pixel of less than or equal to above strength.<br />
+For every pixel checked along the line, how many to skip between them for optimization reasons. 0 = every pixel is checked.<br />
+A material ID to ignore, IN ADDITION to Air.<br />
+Whetehr the ray should wrap around the scene if it crosses a seam.</p><p><strong>Return value:</strong><br />
+Whether a material of equal or more strength was found along the ray.<br />
+If not, the fourth parameter have been set to last position of the ray.<br />
+</p><br/><h3>Function:</h3><h2>CastWeaknessRay</h2><p>
+Traces along a vector and shows where along that ray there is an encounter with a pixel of a material with strength less than or equal to a specific value.</p><p><strong>Arguments:</strong><br />
+The starting position.<br />
+The vector to trace along.<br />
+The strength value of screen any found to be equal or less than will terminate the ray.<br />
+A reference to the vector screen will be filled out with the absolute location of the found terrain pixel of less than or equal to above strength.<br />
+For every pixel checked along the line, how many to skip between them for optimization reasons. 0 = every pixel is checked.<br />
+Whetehr the ray should wrap around the scene if it crosses a seam.</p><p><strong>Return value:</strong><br />
+Whether a material of equal or less strength was found along the ray.<br />
+If not, the fourth parameter have been set to last position of the ray.<br />
+</p><br/><h3>Function:</h3><h2>CastMORay</h2><p>
+Traces along a vector and returns MOID of the first non-ignored non-NoMOID MO encountered. If a non-air terrain pixel is encountered first, g_NoMOID will be returned.</p><p><strong>Arguments:</strong><br />
+The starting position.<br />
+The vector to trace along.<br />
+An MOID to ignore. Any child MO's of this MOID will also be ignored.<br />
+To enable ignoring of all MOIDs associated with an object of a specific team which also has team ignoring enabled itself.<br />
+A specific material ID to ignore hits with.<br />
+Whether to ignore all terrain hits or not.<br />
+For every pixel checked along the line, how many to skip between them for optimization reasons. 0 = every pixel is checked.</p><p><strong>Return value:</strong><br />
+The MOID of the hit non-ignored MO, or g_NoMOID if terrain or no MO was hit.<br />
+</p><br/><h3>Function:</h3><h2>CastFindMORay</h2><p>
+Traces along a vector and shows where a specific MOID has been found.</p><p><strong>Arguments:</strong><br />
+The starting position.<br />
+The vector to trace along.<br />
+An MOID to find. Any child MO's of this MOID will also be found. ------------ ???<br />
+A reference to the vector screen will be filled out with the absolute location of the found MO pixel of the above MOID.<br />
+A specific material ID to ignore hits with.<br />
+Whether to ignore all terrain hits or not.<br />
+For every pixel checked along the line, how many to skip between them for optimization reasons. 0 = every pixel is checked.</p><p><strong>Return value:</strong><br />
+Whether the target MOID was found along the ray or not.<br />
+</p><br/><h3>Function:</h3><h2>CastObstacleRay</h2><p>
+Traces along a vector and returns the length of how far the trace went without hitting any non-ignored terrain material or MOID at all.</p><p><strong>Arguments:</strong><br />
+The starting position.<br />
+The vector to trace along.<br />
+A reference to the vector screen will be filled out with the absolute location of the first obstacle, or the end of the ray if none was hit.<br />
+A reference to the vector screen will be filled out with the absolute location of the last free position before hitting an obstacle, or the end of the ray if none was hit. This is only altered if thre are any free pixels encountered.<br />
+An MOID to ignore. Any child MO's of this MOID will also be ignored.<br />
+To enable ignoring of all MOIDs associated with an object of a specific team which also has team ignoring enabled itself.<br />
+A specific material ID to ignore hits with.<br />
+For every pixel checked along the line, how many to skip between them for optimization reasons. 0 = every pixel is checked.</p><p><strong>Return value:</strong><br />
+How far along, in pixel units, the ray the pixel of any obstacle was encountered. If no pixel of the right material was found, < 0 is returned.<br />
+If an obstacle on the starting position was encountered, 0 is returned.<br />
+</p><br/><h3>Function:</h3><h2>GetLastRayHitPos</h2><p>
+Gets the abosulte pos of where the last cast ray hit somehting.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A vector witht he absoltue pos of where the last ray cast hit somehting.<br />
+</p><br/><h3>Function:</h3><h2>FindAltitude</h2><p>
+Calculates the altitide of a certain point above the terrain, measured in pixels.</p><p><strong>Arguments:</strong><br />
+The max altitude you care to check for. 0 Means check the whole scene's height.<br />
+The accuracy within screen measurement is acceptable. Higher number here means less calculation.</p><p><strong>Return value:</strong><br />
+The altitude over the terrain, in pixels.<br />
+</p><br/><h3>Function:</h3><h2>MovePointToGround</h2><p>
+Takes an arbitrary point in the air and calculates it to be straight down at a certain maximum distance from the ground.</p><p><strong>Arguments:</strong><br />
+The point to start from. Should be in the air, or the same point will be returned (null operation)<br />
+The max altitude in px you want the point to be above the ground.<br />
+The accuracy within screen measurement is acceptable. Higher number here means less calculation.</p><p><strong>Return value:</strong><br />
+The new point screen is no higher than accuracy + max altitude over the terrain.<br />
+</p><br/><h3>Function:</h3><h2>IsWithinBounds</h2><p>
+Returns whether the integer coordinates passed in are within the bounds of the current Scene, considering its wrapping.</p><p><strong>Arguments:</strong><br />
+Int coordinates.<br />
+A margin</p><p><strong>Return value:</strong><br />
+Whether within bounds or not, considering wrapping.<br />
+</p><br/><h3>Function:</h3><h2>SnapPosition</h2><p>
+Returns a position snapped to the current scene grid.</p><p><strong>Arguments:</strong><br />
+The vector coordinates of the position to snap.<br />
+Whether to actually snap or not. This is useful for cleaner toggle code.</p><p><strong>Return value:</strong><br />
+The new snapped position.<br />
+</p><br/><h3>Function:</h3><h2>ShortestDistance</h2><p>
+Calculates the shortest distance between two points in scene coordinates, taking into account all wrapping and out of bounds of the two points.</p><p><strong>Arguments:</strong><br />
+The two Vector coordinates of the two positions to find the shortest distance between.<br />
+Whether to check if the passed in points are outside the scene, and to wrap them if they are.</p><p><strong>Return value:</strong><br />
+The resulting vector screen shows the shortest distance, spanning over wrapping borders etc. Basically the ideal pos2 - pos1.<br />
+</p><br/><h3>Function:</h3><h2>RegisterPostEffect</h2><p>
+Registers a post effect to be added at the very last stage of 32bpp rendering by the FrameMan.</p><p><strong>Arguments:</strong><br />
+The absolute scene coordinates of the center of the effect.<br />
+A 32bpp BITMAP screen should be drawn centered on the above scene location in the final framebuffer. Ownership is NOT transferred!<br />
+The intensity level this effect should have when blended in post.<br />
+0 - 255.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AddSceneObject</h2><p>
+Takes any scene object and adds it to the scene in the appropriate way.
+If it's a TerrainObject, then it gets applied to the terrain, if it's an MO, it gets added to the correct type group in MovableMan.</p><p><strong>Arguments:</strong><br />
+The SceneObject to add. Ownership IS transferred!</p><p><strong>Return value:</strong><br />
+Whether the SceneObject was successfully added or not. Either way, ownership was transferred. If no success, the object was deleted.<br />
+</p><br/><h3>Function:</h3><h2>AddTerrainObject</h2><p>
+Takes TerrainObject and applies it to the terrain
+TRANSFERED!</p><p><strong>Arguments:</strong><br />
+TerrainObject to add.</p><p><strong>Return value:</strong><br />
+True on success.<br />
+</p><br/><h3>Function:</h3><h2>ClearPostEffects</h2><p>
+Clears the list of registered post processing scene effects.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p>

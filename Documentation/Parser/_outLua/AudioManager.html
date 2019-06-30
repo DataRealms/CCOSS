@@ -1,0 +1,51 @@
+<h1>AudioManager</h1><h3>
+The singleton manager of the WAV sound effects and OGG music playback.</h3><p>Has no parent class.</p><br/><h3>Property:</h3><h2>SoundsVolume</h2><p>
+The volume of all sounds to a specific volume.
+Does not affect music.
+The desired volume scalar. 0.0-1.0.
+</p><br/><h3>Property:</h3><h2>MusicVolume</h2><p>
+The music to a specific volume.
+The desired volume scalar. 0.0-1.0.</p><br/><h3>Function:</h3><h2>PlayMusic</h2><p>
+Starts playing a certain WAVE, MOD, MIDI, OGG, MP3 file in the music channel.</p><p><strong>Arguments:</strong><br />
+The path to the music file to play.<br />
+The number of times to loop the song. 0 means play once. -1 means play infinitely until stopped.<br />
+The volume override for music for this song only. < 0 means no override.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>QueueMusicStream</h2><p>
+Queues up another path to a stream that will be played after the current one is done. Can be done several times to queue up many tracks. The last track in the list will be looped infinitely.</p><p><strong>Arguments:</strong><br />
+The path to the music file to play after the current one.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>QueueSilence</h2><p>
+Queues up a period of silence in teh music stream playlist.</p><p><strong>Arguments:</strong><br />
+The number of secs to wait before going to the next stream.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ClearMusicQueue</h2><p>
+Clears the music queue.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetSoundAttenuation</h2><p>
+Sets/updates the distance attenuation for a specific sound. Will only have an effect if the sound is currently being played.</p><p><strong>Arguments:</strong><br />
+A pointer to a Sound object. Ownership IS NOT transferred!<br />
+Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent.</p><p><strong>Return value:</strong><br />
+Whetehr a smaple of the Sound is currently being played by any of the channels, and the attenuation was successfully set.<br />
+</p><br/><h3>Function:</h3><h2>IsPlaying</h2><p>
+Reports whetehr a certain Sound's last played sample is being played currently.</p><p><strong>Arguments:</strong><br />
+A pointer to a Sound object. Ownership IS NOT transferred!</p><p><strong>Return value:</strong><br />
+Whether the LAST sample that was played of the Sound is currently being played by any of the channels.<br />
+</p><br/><h3>Function:</h3><h2>IsMusicPlaying</h2><p>
+Reports whetehr any music stream is currently playing.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether any music stream is currently playing.<br />
+</p><br/><h3>Function:</h3><h2>StopMusic</h2><p>
+Stops playing a the music channel.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetMusicPosition</h2><p>
+Stops playing a the music channel.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>StopAll</h2><p>
+Stops playing a the music channel.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p>

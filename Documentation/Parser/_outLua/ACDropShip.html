@@ -1,0 +1,38 @@
+<h2>Concrete Class:</h2><h1>ACDropShip</h1><h3>
+A hovering craft, with two engines on each attached on each end which tilt independently of the body to achieve steering.</h3><h3>Parent:  <a href="ACraft.html">ACraft</a></h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Read-Only Property:</h3><h2>RightEngine</h2><p>
+The right side engine.
+An AEmitter pointer.
+</p><br/><h3>Read-Only Property:</h3><h2>LeftEngine</h2><p>
+The left side engine.
+An AEmitter pointer.
+</p><br/><h3>Read-Only Property:</h3><h2>RightThruster</h2><p>
+The right side secondary thruster.
+An AEmitter pointer.
+</p><br/><h3>Read-Only Property:</h3><h2>LeftThruster</h2><p>
+The left side secondary thruster.
+An AEmitter pointer.
+</p><br/><h3>Read-Only Property:</h3><h2>LeftHatch</h2><p>
+The left side hatch.
+An Attachable pointer.
+</p><br/><h3>Read-Only Property:</h3><h2>RightHatch</h2><p>
+The right side hatch.
+An Attachable pointer.
+</p><br/><h3>Property:</h3><h2>MaxEngineAngle</h2><p>
+Get max engine rotation angle in degrees.
+Max engine angle in degrees.
+</p><br/><h3>Property:</h3><h2>LateralControlSpeed</h2><p>
+The abstract rate of LateralControl change. Default is 6
+Current lateral control speed value.
+</p><br/><h3>Function:</h3><h2>DetectObstacle</h2><p>
+Checks for obstacles in the travel direction.</p><p><strong>Arguments:</strong><br />
+How far ahead of travel direction to check for obstacles.</p><p><strong>Return value:</strong><br />
+Which MOID was detected as obstacle. g_NoMOID means nothing was detected.<br />
+</p><br/><h3>Function:</h3><h2>GetAltitude</h2><p>
+Gets the altitide of this' pos (or appropriate low point) over the terrain, in pixels.</p><p><strong>Arguments:</strong><br />
+The max altitude you care to check for. 0 Means check the whole scene's height.<br />
+The accuracy within which measurement is acceptable. Higher number here means less calculation.</p><p><strong>Return value:</strong><br />
+The rough altitude over the terrain, in pixels.<br />
+</p>

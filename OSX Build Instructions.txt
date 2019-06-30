@@ -1,0 +1,45 @@
+Hello Daniel,
+
+I've uploaded the libraries you need to build the Mac version of Cortex Command. You can find pkglib.tar.gz in the ftp area.
+
+There are a number of things in there.
+
+The Universal Allegro Framework - normally placed in /Library/Frameworks/
+
+The header files for boost-1_36 - I had then in /usr/local/include
+
+The fmod include files - in /usr/local/include/fmod
+
+The luabind include directories - /usr/local/include/luabind
+
+SDL includes /usr/local/include/SDL
+
+Lua include /usr/local/include
+
+Libraries (Compiled for Universal)
+
+The following placed in /usr/local/lib
+
+libfmod.a
+libluabind.a
+liblua.a
+libSDLmain.a
+libSDL.dynlib
+
+
+You will need cmake to generate the Xcode project files. You can get cmake from here. http://www.cmake.org/ I'm using version 2.6-1
+
+You need to place the *.cmake files in share/cmake into /usr/local/share/cmake/. This files extend cmake to search for some additional libraries it's not aware of out of the box. Specifically allegro and lua.
+
+You'll need to make some changes to the cmake build cache once it does the defaults (it's a bit buggy). To make a universal build you need to set
+
+CMAKE_OSX_ARCHITECTURE to ppc;i386
+
+and
+
+CMAKE_OSX_SYSROOT to /Developer/SDKs/MacOSX10.4u.sdk
+
+It's a bit fiddly but hopefully you'll only have to do this once for a long time. I'll be awaiting any questions you have setting up.
+
+Chris K.
+chris.kruger@gmail.com

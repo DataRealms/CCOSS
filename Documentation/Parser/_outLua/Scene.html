@@ -1,0 +1,118 @@
+<h2>Concrete Class:</h2><h1>Scene</h1><h3>
+Contains everything that defines a complete scene.</h3><h3>Parent: Entity</h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Property:</h3><h2>Location</h2><p>
+The specified location of this scene on the planet view
+A Vector showing the location of this scene on the planet view.
+</p><br/><h3>Read-Only Property:</h3><h2>Dimensions</h2><p>
+The total dimensions (width and height) of the scene, in pixels.
+A Vector describing the scene dimensions.
+</p><br/><h3>Read-Only Property:</h3><h2>Width</h2><p>
+The total width of the scene, in pixels.
+An int describing the scene width.
+</p><br/><h3>Read-Only Property:</h3><h2>Height</h2><p>
+The total height of the scene, in pixels.
+An int describing the scene width.
+</p><br/><h3>Read-Only Property:</h3><h2>WrapsX</h2><p>
+Indicates whether the scene wraps its scrolling around the X axis.
+Whether the scene wraps around the X axis or not.
+</p><br/><h3>Read-Only Property:</h3><h2>WrapsY</h2><p>
+Indicates whether the scene wraps its scrolling around the Y axis.
+Whether the scene wraps around the Y axis or not.
+</p><br/><h3>Property:</h3><h2>TeamOwnership</h2><p>
+Shows which team owns this Scene in a Metagame, if any
+The team that owns this site in a Metagame, if any
+</p><br/><h3>Function:</h3><h2>GetBuildBudget</h2><p>
+Shows how much gold this Scene is budgeted to be built for this round.</p><p><strong>Arguments:</strong><br />
+Which player's set budget to show.</p><p><strong>Return value:</strong><br />
+The budget in oz that this is allocated to have built for this round.<br />
+</p><br/><h3>Function:</h3><h2>SetBuildBudget</h2><p>
+Sets how much gold this Scene is budgeted to be built for this round.</p><p><strong>Arguments:</strong><br />
+The player whom is setting the budget.<br />
+The budget in oz that this is allocated to have built for this round.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsScanScheduled</h2><p>
+Tells whether a specific team has scheduled an orbital Scan of this.</p><p><strong>Arguments:</strong><br />
+The team to check for.</p><p><strong>Return value:</strong><br />
+Whether the scan has been scheduled and paid for.<br />
+</p><br/><h3>Function:</h3><h2>SetScheduledScan</h2><p>
+Sets this to be orbitally scanned by a specific team on next load.</p><p><strong>Arguments:</strong><br />
+The team to schedule the scan for.<br />
+Whether to actually schedule the scan or clear it.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ClearPlacedObjectSet</h2><p>
+Removes all entries in a specific set of placed Objects.</p><p><strong>Arguments:</strong><br />
+Which set of placed objects to clear. See the PlacedObjectSets enum.</p><p><strong>Return value:</strong><br />
+How many things were removed in teh process of clearing that set.<br />
+</p><br/><h3>Function:</h3><h2>PlaceResidentBrain</h2><p>
+Places the individual brain of a single player which may be stationed on this Scene, and registers them as such in an Activity.</p><p><strong>Arguments:</strong><br />
+The player's brain to place.<br />
+The Activity to register the placed brains with.. OINT!</p><p><strong>Return value:</strong><br />
+If the brain was successfully found as resident and placed.<br />
+</p><br/><h3>Function:</h3><h2>PlaceResidentBrains</h2><p>
+Places the individual brains of the various players which may be stationed on this Scene, and registers them as such in an Activity.</p><p><strong>Arguments:</strong><br />
+The Activity to register the placed brains with.. OINT!</p><p><strong>Return value:</strong><br />
+How many brains were finally placed.<br />
+</p><br/><h3>Function:</h3><h2>RetrieveResidentBrains</h2><p>
+Looks at the Activity and its players' registered brain Actors, and saves them as resident brains for this Scene. Done when a fight is over and the survivors remain!</p><p><strong>Arguments:</strong><br />
+The Activity to check for registered brains.. OINT!</p><p><strong>Return value:</strong><br />
+How many brains were found registered with the passed in Activity.<br />
+</p><br/><h3>Function:</h3><h2>GetResidentBrain</h2><p>
+Gets the resident brain Actor of a specific player from this scene, if there is any. OINT!</p><p><strong>Arguments:</strong><br />
+Which player to get the resident brain of.</p><p><strong>Return value:</strong><br />
+The SO containing the brain, or 0 if there aren't any of that player.<br />
+</p><br/><h3>Function:</h3><h2>SetResidentBrain</h2><p>
+Sets the resident brain Actor of a specific player from this scene, if there is any. Ownership IS transferred!</p><p><strong>Arguments:</strong><br />
+Which player to set the resident brain of.<br />
+The Actor to set as the resident brain of the specified player.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetArea</h2><p>
+Adds one or modifies an existing area of this Scene.</p><p><strong>Arguments:</strong><br />
+The area to add or modify of the same name in this Scene. Ownership is<br />
+NOT transferred!</p><p><strong>Return value:</strong><br />
+Whether the specified area was previously defined in this scene.<br />
+</p><br/><h3>Function:</h3><h2>HasArea</h2><p>
+Checks for the existence of a specific Area identified by a name.
+This won't throw any errors to the console if the Area isn't found.</p><p><strong>Arguments:</strong><br />
+The name of the Area to try to find in this Scene.</p><p><strong>Return value:</strong><br />
+Whether the specified area is defined in this Scene.<br />
+</p><br/><h3>Function:</h3><h2>GetArea</h2><p>
+Gets a specific Area identified by a name. Ownership is NOT transferred!</p><p><strong>Arguments:</strong><br />
+The name of the Area to try to get.</p><p><strong>Return value:</strong><br />
+A pointer to the Area asked for. 0 if no Area of that name was found.<br />
+</p><br/><h3>Function:</h3><h2>WithinArea</h2><p>
+Checks if a point is within a specific named Area of this Scene. If no Area of the name is found, this just returns false without error.</p><p><strong>Arguments:</strong><br />
+The name of the Area to try to check against.<br />
+The point to see if it's within the specified Area.</p><p><strong>Return value:</strong><br />
+Whether any Area of that name was found, AND the point falls within it.<br />
+</p><br/><h3>Property:</h3><h2>GlobalAcc</h2><p>
+The global acceleration (in m/s^2) that is applied to all movable objects' velocities during every frame. Typically models gravity.
+A Vector describing the global acceleration.
+</p><br/><h3>Property:</h3><h2>GlocalAcc</h2><p>
+The global acceleration (in m/s^2) that is applied to all movable objects' velocities during every frame. Typically models gravity.
+A Vector describing the global acceleration.
+</p><br/><h3>Function:</h3><h2>ResetPathFinding</h2><p>
+Recalculates all of the pathfinding data. This is very expensive, so do very rarely!</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>UpdatePathFinding</h2><p>
+Recalculates only the areas of the pathfinding data that have been marked as outdated.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>PathFindingUpdated</h2><p>
+Tells whether the pathfinding data has been updated in the last frame.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether the pathfinding data was recalculated fully or partially.<br />
+</p><br/><h3>Function:</h3><h2>CalculatePath</h2><p>
+Calculates the least difficult path between two points on the current scene. Takes both distance and materials into account.
+A list of waypoints can be retrived from Scene.ScenePath.
+For exposing CalculatePath to Lua.</p><p><strong>Arguments:</strong><br />
+Start and end positions on the scene to find the path between.<br />
+If the path should be moved to the ground or not.<br />
+The maximum material strength any actor traveling along the paht can dig through.</p><p><strong>Return value:</strong><br />
+The number of waypoints from start to goal, or -1 if no path.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>ScenePathSize</h2><p>
+Gets how many waypoints there are in the ScenePath currently
+The number of waypoints in the ScenePath.
+</p>

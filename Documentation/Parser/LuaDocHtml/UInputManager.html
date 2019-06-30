@@ -1,0 +1,155 @@
+<h1>UInputManager</h1><h3>
+The singleton manager over the user input.</h3><p>Has no parent class.</p><br/><h3>Function:</h3><h2>ElementPressed</h2><p>
+Shows whether a specific input element was depressed between the last update and the one previous to it.</p><p><strong>Arguments:</strong><br />
+Which player to check, and which element of that player.</p><p><strong>Return value:</strong><br />
+Pressed or not.<br />
+</p><br/><h3>Function:</h3><h2>ElementReleased</h2><p>
+Shows whether a specific input element was released between the last update and the one previous to it.</p><p><strong>Arguments:</strong><br />
+Which player to check, and which element of that player.</p><p><strong>Return value:</strong><br />
+Pressed or not.<br />
+</p><br/><h3>Function:</h3><h2>ElementHeld</h2><p>
+Shows whether a specific input element was held during the last update.</p><p><strong>Arguments:</strong><br />
+Which player to check, and which element of that player.</p><p><strong>Return value:</strong><br />
+Pressed or not.<br />
+</p><br/><h3>Function:</h3><h2>KeyPressed</h2><p>
+Shows whether a key was depressed between the last update and the one previous to it.</p><p><strong>Arguments:</strong><br />
+A const char with the Allegro-defined key enumeration to test.</p><p><strong>Return value:</strong><br />
+Pressed or not.<br />
+</p><br/><h3>Function:</h3><h2>KeyReleased</h2><p>
+Shows whether a key was released between the last update and the one previous to it.</p><p><strong>Arguments:</strong><br />
+A const char with the Allegro-defined key enumeration to test.</p><p><strong>Return value:</strong><br />
+Released or not.<br />
+</p><br/><h3>Function:</h3><h2>KeyHeld</h2><p>
+Shows whether a key is being held right now.</p><p><strong>Arguments:</strong><br />
+A const char with the Allegro-defined key enumeration to test.</p><p><strong>Return value:</strong><br />
+Held or not.<br />
+</p><br/><h3>Function:</h3><h2>WhichKeyHeld</h2><p>
+Shows the scancode of the keyboard key which is currently down.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The scancode (KEY_SPACE, etc) of the first keyboard key in the keyboard buffer. 0 means none.<br />
+</p><br/><h3>Function:</h3><h2>MouseWheelMoved</h2><p>
+Shows whether a the mouse wheel has been moved past the threshold limit in either direction this frame.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The direction the mouse wheel has been moved which is past tht threshold<br />
+0 means not past, negative means moved down, positive means moved up.<br />
+</p><br/><h3>Function:</h3><h2>JoyButtonPressed</h2><p>
+Shows whether a joy button was depressed between the last update and the one previous to it.</p><p><strong>Arguments:</strong><br />
+Which joystick to check, and which button on that joystick.</p><p><strong>Return value:</strong><br />
+Pressed or not.<br />
+</p><br/><h3>Function:</h3><h2>JoyButtonReleased</h2><p>
+Shows whether a joy button was released between the last update and the one previous to it.</p><p><strong>Arguments:</strong><br />
+Which joystick to check, and which button on that joystick.</p><p><strong>Return value:</strong><br />
+Released or not.<br />
+</p><br/><h3>Function:</h3><h2>JoyButtonHeld</h2><p>
+Shows whether a joystick button is being held down right now.</p><p><strong>Arguments:</strong><br />
+Which joystick to check, and which button on that joystick.</p><p><strong>Return value:</strong><br />
+Held or not.<br />
+</p><br/><h3>Function:</h3><h2>WhichJoyButtonPressed</h2><p>
+Shows the first joystick button which was pressed down since last frame.</p><p><strong>Arguments:</strong><br />
+Which joystick to check.</p><p><strong>Return value:</strong><br />
+The first button in the sequence of button enumerations (JOY_1, JOY_2,<br />
+JOY_3) that is pressed since the previous frame. JOY_NONE means none.<br />
+</p><br/><h3>Function:</h3><h2>JoyDirectionPressed</h2><p>
+Shows whether a joystick axis direction was depressed between the last update and the one previous to it.</p><p><strong>Arguments:</strong><br />
+Which joystick, stick, axis and direction to check.</p><p><strong>Return value:</strong><br />
+Pressed or not.<br />
+</p><br/><h3>Function:</h3><h2>JoyDirectionReleased</h2><p>
+Shows whether a joystick d-pad direction was released between the last update and the one previous to it.</p><p><strong>Arguments:</strong><br />
+Which joystick, stick, axis and direction to check.</p><p><strong>Return value:</strong><br />
+Released or not.<br />
+</p><br/><h3>Function:</h3><h2>JoyDirectionHeld</h2><p>
+Shows whether a joystick axis is being held down in a specific direction right now. Two adjacent directions can be held down to produce diagonals.</p><p><strong>Arguments:</strong><br />
+Which joystick, stick, axis and direction to check.</p><p><strong>Return value:</strong><br />
+Held or not.<br />
+</p><br/><h3>Function:</h3><h2>AnalogMoveValues</h2><p>
+Gets the analog moving values of a specific player's control scheme.</p><p><strong>Arguments:</strong><br />
+Which player to get em for.</p><p><strong>Return value:</strong><br />
+The analog axis values ranging between -1.0 to 1.0, in both axes.<br />
+</p><br/><h3>Function:</h3><h2>AnalogAimValues</h2><p>
+Gets the analog aiming values of a specific player's control scheme.</p><p><strong>Arguments:</strong><br />
+Which player to get em for.</p><p><strong>Return value:</strong><br />
+The analog axis values ranging between -1.0 to 1.0, in both axes.<br />
+</p><br/><h3>Function:</h3><h2>SetMouseValueMagnitude</h2><p>
+Set the mouse's analog emualtion output to be of a specific normalized magnitude.</p><p><strong>Arguments:</strong><br />
+The normalized magnitude, between 0 and 1.0.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AnalogAxisValue</h2><p>
+Gets the normalized value of a certain joystick's stick's axis.</p><p><strong>Arguments:</strong><br />
+Which joystick, stick and axis to check.</p><p><strong>Return value:</strong><br />
+The analog axis value ranging between -1.0 to 1.0, or 0.0 to 1.0 if it's a throttle type control.<br />
+</p><br/><h3>Function:</h3><h2>AnalogStickValues</h2><p>
+Gets the analog values of a certain joystick device stick.</p><p><strong>Arguments:</strong><br />
+Which joystick to check, and which stick on that joystick device.</p><p><strong>Return value:</strong><br />
+The analog axis values ranging between -1.0 to 1.0.<br />
+</p><br/><h3>Function:</h3><h2>MouseUsedByPlayer</h2><p>
+Reports if any, and which player is using the mouse for control at this time.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Which player is using the mouse. If noone is, then -1 is returned;<br />
+</p><br/><h3>Function:</h3><h2>AnyMouseButtonPress</h2><p>
+Return true if there is any mouse button presses at all</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether any mouse buttons have been pressed at all since last frame<br />
+</p><br/><h3>Function:</h3><h2>TrapMousePos</h2><p>
+Sets the mouse to be trapped in the middle of the screen, so it doesn't go out and click on other windows etc. This is usually used when the cursor is invisible and only relative mouse movements are used.</p><p><strong>Arguments:</strong><br />
+Whether to trap the mouse or not.<br />
+Which player is trying ot control the mouse. Only the player with actual control over the mouse will affect its trapping here. -1 means change mouse trapping regardless of player.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetMouseMovement</h2><p>
+Gets the relative movement of the mouse since last update. Only returns true if the selected player actuall is using the mouse.</p><p><strong>Arguments:</strong><br />
+Which player to get em for. If the player doesn't use the mouse, then this always returns a zero vector.</p><p><strong>Return value:</strong><br />
+The relative mouse movements, in both axes.<br />
+</p><br/><h3>Function:</h3><h2>DisableMouseMoving</h2><p>
+Will temporarily disable positioniong of the mouse. This is so that when focus is swtiched back to the game window, it avoids having the window fly away because the user clicked the title bar of the window.</p><p><strong>Arguments:</strong><br />
+Whether to disable or not.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetMousePos</h2><p>
+Sets the absolute screen position of the mouse cursor.</p><p><strong>Arguments:</strong><br />
+Where to place the mouse.<br />
+Which player is trying ot control the mouse. Only the player with actual control over the mouse will affect its trapping here. -1 means do it regardless of player.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ForceMouseWithinBox</h2><p>
+Forces the mouse within a box on the screen.</p><p><strong>Arguments:</strong><br />
+The top left corner of the screen box to keep the mouse within, in screen coodinates.<br />
+The dimensions of the box, width/height.<br />
+Which player is trying ot control the mouse. Only the player with actual control over the mouse will affect its trapping here. -1 means do it regardless of player.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ForceMouseWithinPlayerScreen</h2><p>
+Forces the mouse within a specific player's screen area.</p><p><strong>Arguments:</strong><br />
+Which player's screen's are to constrain the mouse to. Only the player with actual control over the mouse will affect its trapping here.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AnyJoyInput</h2><p>
+Return true if there is any joystick input at all, buttons or d-pad.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether any buttons of pads are pressed at all.<br />
+</p><br/><h3>Function:</h3><h2>AnyJoyPress</h2><p>
+Return true if there is any joystick presses at all, buttons or d-pad.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether any buttons or pads have been pressed at all since last frame.<br />
+</p><br/><h3>Function:</h3><h2>AnyJoyButtonPress</h2><p>
+Return true if there is any joystick button presses at all, but not d-pad input, for a specific joystick.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether any joy buttons have been pressed at all since last frame, of a specific joystick.<br />
+</p><br/><h3>Function:</h3><h2>AnyInput</h2><p>
+Return true if there is any input at all, keyboard or buttons or d-pad.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether any buttons of pads are pressed at all.<br />
+</p><br/><h3>Function:</h3><h2>AnyPress</h2><p>
+Return true if there is any key, button, or d-pad presses at all.
+MUST call Update before calling this for it to work properly!</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether any buttons of pads have been pressed at all since last frame.<br />
+</p><br/><h3>Function:</h3><h2>AnyStartPress</h2><p>
+Return true if there is any start key/button presses at all.
+MUST call Update before calling this for it to work properly!</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether any start buttons or keys have been pressed at all since last frame.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>FlagAltState</h2><p>
+Returns the state of the Alt key.
+Returns the state of the Alt key.
+</p><br/><h3>Read-Only Property:</h3><h2>FlagCtrlState</h2><p>
+Returns the state of the Ctrl key.
+Returns the state of the Ctrl key.
+</p><br/><h3>Read-Only Property:</h3><h2>FlagShiftState</h2><p>
+Returns the state of the Shift key.
+Returns the state of the Shift key.
+</p>

@@ -1,0 +1,123 @@
+//////////////////////////////////////////////////////////////////////////////////////////
+// File:            Timer.cpp
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Source file for the Timer class.
+// Project:         Retro Terrain Engine
+// Author(s):       Daniel Tabar
+//                  data@datarealms.com
+//                  http://www.datarealms.com
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Inclusions of header files
+
+#include "Timer.h"
+#include "DDTTools.h"
+
+using namespace std;
+
+namespace RTE
+{
+
+const string Timer::ClassName = "Timer";
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          Clear
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Resets the timer so that the elapsed time is 0 ms.
+
+void Timer::Clear()
+{
+    m_StartRealTime = g_TimerMan.GetRealTickCount();
+    m_StartSimTime = g_TimerMan.GetSimTickCount();
+    m_RealTimeLimit = -1;
+    m_SimTimeLimit = -1;
+}
+
+/*
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  Create
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Makes the Timer object ready for use.
+
+int Timer::Create()
+{
+
+// TODO: maybe read back time...?")
+
+    return 0;
+}
+*/
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Constructor:     Timer
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Constructor method used to instantiate a Timer object.
+
+Timer::Timer()
+{
+    Reset();
+    m_TicksPerMS = (double)g_TimerMan.GetTicksPerSecond() * 0.001;
+    m_RealTimeLimit = -1;
+    m_SimTimeLimit = -1;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Constructor:     Timer
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Constructor method used to instantiate a Timer object with a set
+//                  time elapsed.
+
+Timer::Timer(unsigned long elapsedTime)
+{
+    SetElapsedSimTimeMS(elapsedTime);
+    m_TicksPerMS = (double)g_TimerMan.GetTicksPerSecond() * 0.001;
+    m_RealTimeLimit = -1;
+    m_SimTimeLimit = -1;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Constructor:     Timer
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Copy constructor method used to instantiate a Timer object
+//                  identical to an already existing one.
+
+Timer::Timer(const Timer &reference)
+{
+    m_StartRealTime = reference.m_StartRealTime;
+    m_StartSimTime = reference.m_StartSimTime;
+    m_RealTimeLimit = reference.m_RealTimeLimit;
+    m_SimTimeLimit = reference.m_SimTimeLimit;
+    m_TicksPerMS = (double)g_TimerMan.GetTicksPerSecond() * 0.001;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Destructor:      ~Timer
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Destructor method used to clean up the Timer object before
+//                  termination.
+
+Timer::~Timer()
+{
+    
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  Save
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Saves the complete state of this Timer with a Writer for
+//                  later recreation with Create(Reader &reader);
+
+int Timer::Save(Writer &writer) const
+{
+// TODO: maybe save time...?")
+
+    return 0;
+}
+
+} // namespace RTE

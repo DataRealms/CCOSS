@@ -1,0 +1,65 @@
+<h2>Abstract Class:</h2><h1>MOSprite</h1><h3>
+A movable object with mass that is graphically represented by a
+BITMAP.</h3><h3>Parent:  <a href="MovableObject.html">MovableObject</a></h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Read-Only Property:</h3><h2>Diameter</h2><p>
+The largest diameter of this in pixels.
+The largest diameter across its graphical representation.
+</p><br/><h3>Read-Only Property:</h3><h2>BoundingBox</h2><p>
+The oriented bounding box which is guaranteed to contain this, taking rotation etc into account. It's not guaranteed to be fit perfectly though. TODO: MAKE FIT BETTER
+A Box which is guaranteed to contain this. Does nto take wrapping into account, and parts of this box may be out of bounds!
+</p><br/><h3>Read-Only Property:</h3><h2>FrameCount</h2><p>
+The number of frames in this MOSprite's animation.
+The frame count.
+</p><br/><h3>Property:</h3><h2>SpriteOffset</h2><p>
+The offset that the BITMAP has from the position of this
+MOSprite.
+A vector with the offset.
+</p><br/><h3>Property:</h3><h2>HFlipped</h2><p>
+Returns whether this MOSprite is being drawn flipped horizontally
+(along the vertical axis), or not.
+Whether flipped or not.
+</p><br/><h3>Property:</h3><h2>RotAngle</h2><p>
+The current rotational angle of of this, in radians.
+The rotational angle of this, in radians.
+</p><br/><h3>Property:</h3><h2>AngularVel</h2><p>
+The current angular velocity of this MovableObject. Positive is a counter-clockwise rotation.
+The angular velocity in radians per second.
+</p><br/><h3>Property:</h3><h2>Frame</h2><p>
+Tells which frame is currently set to show.
+An unsigned int describing the current frame.
+</p><br/><h3>Property:</h3><h2>SpriteAnimMode</h2><p>
+The animation mode.
+The animation mode currently in effect.
+</p><br/><h3>Function:</h3><h2>SetNextFrame</h2><p>
+Hard-sets the frame this sprite is supposed to show, to the consecutive one after the current one. If currently the last fame is this will set it to the be the first, looping the animation.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether the animation looped or not with this setting.<br />
+</p><br/><h3>Function:</h3><h2>IsTooFast</h2><p>
+Indicates whether this MO is moving or rotating stupidly fast in a way that will screw up the simulation.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether this is either moving or rotating too fast.<br />
+</p><br/><h3>Function:</h3><h2>IsOnScenePoint</h2><p>
+Indicates whether this' current graphical representation overlaps a point in absolute scene coordinates.</p><p><strong>Arguments:</strong><br />
+The point in absolute scene coordinates.</p><p><strong>Return value:</strong><br />
+Whether this' graphical rep overlaps the scene point.<br />
+</p><br/><h3>Function:</h3><h2>RotateOffset</h2><p>
+Takes a vector which is offset from the center of this when not rotated or flipped, and then rotates and/or flips it to transform it into this'
+'local space', if applicable.</p><p><strong>Arguments:</strong><br />
+A vector which is supposed to be offset from this' center when upright.</p><p><strong>Return value:</strong><br />
+The resulting vector whihch has been flipped and rotated as appropriate.<br />
+</p><br/><h3>Function:</h3><h2>UnRotateOffset</h2><p>
+Takes a vector which is offset from the center of this when not rotated or flipped, and then rotates and/or flips it to transform it into this'
+'local space', but in REVERSE.</p><p><strong>Arguments:</strong><br />
+A vector which is supposed to be offset from this' center when upright.</p><p><strong>Return value:</strong><br />
+The resulting vector whihch has been flipped and rotated as appropriate.<br />
+</p><br/><h3>Function:</h3><h2>GetSpriteWidth</h2><p>
+Gets the width of the bitmap of this <a href="MOSprite.html">MOSprite</a></p><p><strong>Arguments:</strong><br />
+0.</p><p><strong>Return value:</strong><br />
+Sprite width if loaded.<br />
+</p><br/><h3>Function:</h3><h2>GetSpriteHeight</h2><p>
+Gets the height of the bitmap of this <a href="MOSprite.html">MOSprite</a></p><p><strong>Arguments:</strong><br />
+0.</p><p><strong>Return value:</strong><br />
+Sprite height if loaded.<br />
+</p>

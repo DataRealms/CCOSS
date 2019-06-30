@@ -1,0 +1,84 @@
+<h2>Generic Class:</h2><h1>Timer</h1><h3>
+A precise timer for FPS synch etc.</h3><p>Has no parent class.</p><br/><h3>Property:</h3><h2>StartRealTimeMS</h2><p>
+The start real time value of this Timer.
+A __int64 value that represents the amount of real time in ms from when windows was started to when Reset() of this Timer was called.
+</p><br/><h3>Property:</h3><h2>ElapsedRealTimeS</h2><p>
+The elapsed real time in seconds since this Timer was Reset().
+A double value that represents the elapsed real time since Reset() in s.
+</p><br/><h3>Property:</h3><h2>ElapsedRealTimeMS</h2><p>
+The elapsed real time in ms since this Timer was Reset().
+A unsigned long value that represents the elapsed real time since Reset() in ms.
+</p><br/><h3>Function:</h3><h2>SetRealTimeLimitMS</h2><p>
+Sets the real time limit value of this Timer, RELATVE to the start time.
+This is when the timer is supposed to show that it has 'expired' or reached whatever time limit it is supposed to keep track of.</p><p><strong>Arguments:</strong><br />
+A positive double with the new real time limit relative to the start time.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetRealTimeLimitS</h2><p>
+Sets the real time limit value of this Timer, RELATVE to the start time.
+This is when the timer is supposed to show that it has 'expired' or reached whatever time limit it is supposed to keep track of.</p><p><strong>Arguments:</strong><br />
+A positive double with the new real time limit relative to the start time.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsPastRealTimeLimit</h2><p>
+Returns true if the elapsed real time is past a certain amount of time after the start previously set by SetRealTimeLimit.</p><p><strong>Arguments:</strong><br />
+An unsigned long specifying the threshold amount of real time in ms.</p><p><strong>Return value:</strong><br />
+A bool only yielding true if the elapsed real time is greater than the set limit value. If no limit has been set, this returns false.<br />
+</p><br/><h3>Function:</h3><h2>LeftTillRealTimeLimitMS</h2><p>
+Returns how much time in ms that there is left till this Timer reaches a certain time limit previously set by SetRealTimeLimitMS.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A unsigned long with the real time left till the passed in value, or negative if this Timer is already past that point in time.<br />
+</p><br/><h3>Function:</h3><h2>LeftTillRealTimeLimitS</h2><p>
+Returns how much time in ms that there is left till this Timer reaches a certain time limit previously set by SetRealTimeLimitS.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A unsigned long with the real time left till the passed in value, or negative if this Timer is already past that point in time.<br />
+</p><br/><h3>Function:</h3><h2>LeftTillRealMS</h2><p>
+Returns how much time in ms that there is left till this Timer reaches a certain time limit.</p><p><strong>Arguments:</strong><br />
+A unsigned long specifying till when there is time.</p><p><strong>Return value:</strong><br />
+A unsigned long with the time left till the passed in value, or negative if this Timer is already past that point in time.<br />
+</p><br/><h3>Function:</h3><h2>IsPastRealMS</h2><p>
+Returns true if the elapsed real time is past a certain amount of time relative to this' start.</p><p><strong>Arguments:</strong><br />
+A long specifying the threshold amount of real time in ms.</p><p><strong>Return value:</strong><br />
+A bool only yielding true if the elapsed real time is greater than the passed in value.<br />
+</p><br/><h3>Function:</h3><h2>AlternateReal</h2><p>
+Returns true or false, depending on whether the elapsed time falls in one of two repeating intervals which divide it. This is useful for blink animations etc.</p><p><strong>Arguments:</strong><br />
+An int with the alternating period in ms. The time specified here is how long it will take for the switch to alternate.</p><p><strong>Return value:</strong><br />
+Whether the elapsed time is in the first state or not.<br />
+</p><br/><h3>Property:</h3><h2>StartSimTimeMS</h2><p>
+The start time value of this Timer.
+A __int64 value that represents the amount of time in ticks from when windows was started to when Reset() of this Timer was called.
+</p><br/><h3>Property:</h3><h2>ElapsedSimTimeS</h2><p>
+The elapsed time in s since this Timer was Reset().
+A unsigned long value that represents the elapsed time since Reset() in s.
+</p><br/><h3>Property:</h3><h2>ElapsedSimTimeMS</h2><p>
+The elapsed time in ms since this Timer was Reset().
+A unsigned long value that represents the elapsed time since Reset() in ms.
+</p><br/><h3>Function:</h3><h2>SetSimTimeLimitMS</h2><p>
+Sets the sim time limit value of this Timer, RELATVE to the start time.
+This is when the timer is supposed to show that it has 'expired' or reached whatever time limit it is supposed to keep track of.</p><p><strong>Arguments:</strong><br />
+A positive double with the new sim time limit relative to the start time.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetSimTimeLimitS</h2><p>
+Sets the sim time limit value of this Timer, RELATVE to the start time.
+This is when the timer is supposed to show that it has 'expired' or reached whatever time limit it is supposed to keep track of.</p><p><strong>Arguments:</strong><br />
+A positive double with the new sim time limit relative to the start time.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>LeftTillSimTimeLimitMS</h2><p>
+Returns how much time in ms that there is left till this Timer reaches a certain time limit previously set by SetSimTimeLimitMS.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A unsigned long with the sim time left till the passed in value, or negative if this Timer is already past that point in time.<br />
+</p><br/><h3>Function:</h3><h2>LeftTillSimTimeLimitS</h2><p>
+Returns how much time in ms that there is left till this Timer reaches a certain time limit previously set by SetSimTimeLimitS.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A unsigned long with the sim time left till the passed in value, or negative if this Timer is already past that point in time.<br />
+</p><br/><h3>Function:</h3><h2>LeftTillSimMS</h2><p>
+Returns how much time in ms that there is left till this Timer reaches a certain time limit.</p><p><strong>Arguments:</strong><br />
+A unsigned long specifying till when there is time.</p><p><strong>Return value:</strong><br />
+A unsigned long with the time left till the passed in value, or negative if this Timer is already past that point in time.<br />
+</p><br/><h3>Function:</h3><h2>IsPastSimMS</h2><p>
+Returns true if the elapsed time is past a certain amount of time.</p><p><strong>Arguments:</strong><br />
+A unsigned long specifying the threshold amount of time in ms.</p><p><strong>Return value:</strong><br />
+A bool only yielding true if the elapsed time is greater than the passed in value.<br />
+</p><br/><h3>Function:</h3><h2>AlternateSim</h2><p>
+Returns true or false, depending on whether the elapsed time falls in one of two repeating intervals which divide it. This is useful for blink animations etc.</p><p><strong>Arguments:</strong><br />
+An int with the alternating period in ms. The time specified here is how long it will take for the switch to alternate.</p><p><strong>Return value:</strong><br />
+Whether the elapsed time is in the first state or not.<br />
+</p>

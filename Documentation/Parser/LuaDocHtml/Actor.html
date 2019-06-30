@@ -1,0 +1,219 @@
+<h2>Concrete Class:</h2><h1>Actor</h1><h3>
+A sprite movable object that is autonomous.</h3><h3>Parent:  <a href="MOSRotating.html">MOSRotating</a></h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Function:</h3><h2>GetController</h2><p>
+Gets this Actor's Controller. Ownership IS NOT transferred!</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A const pointer to this Actor's Controller.<br />
+</p><br/><h3>Function:</h3><h2>IsPlayerControlled</h2><p>
+Tells whether a player is currently controlling this.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether a player is controlling this.<br />
+</p><br/><h3>Function:</h3><h2>IsControllable</h2><p>
+Tells wheter the player can switch control to this at all</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether a player can control this at all.<br />
+</p><br/><h3>Function:</h3><h2>SetControllerMode</h2><p>
+Sets this Actor's new Controller input mode.</p><p><strong>Arguments:</strong><br />
+The new input mode.<br />
+The player which will control this if the input mode was set to player.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SwapControllerModes</h2><p>
+Sets this Actor's Controller mode and gives back what it used to be.</p><p><strong>Arguments:</strong><br />
+The new mode to set to.<br />
+The player which will control this if the input mode was set to player.</p><p><strong>Return value:</strong><br />
+The old mode that it had before.<br />
+</p><br/><h3>Property:</h3><h2>ImpulseDamageThreshold</h2><p>
+Returns Threshold for taking damage from travel impulses, in kg * m/s
+Threshold for taking damage from travel impulses, in kg * m/s
+</p><br/><h3>Property:</h3><h2>Status</h2><p>
+Returns the current Status of this.
+The status.
+</p><br/><h3>Property:</h3><h2>Health</h2><p>
+This Actor's health value.
+A const int describing this Actor's health.
+</p><br/><h3>Property:</h3><h2>MaxHealth</h2><p>
+This Actor's maximum health value.
+A const int describing this Actor's max health.
+</p><br/><h3>Property:</h3><h2>GoldCarried</h2><p>
+Gets how many ounces of gold this Actor is carrying.
+The current amount of carried gold, in Oz.
+</p><br/><h3>Read-Only Property:</h3><h2>AimRange</h2><p>
+The limit of this actors aiming angle, in each direction, in radians.
+The arc range of the aiming angle in radians.
+Eg if HalfPI, it means full 180 degree range
+</p><br/><h3>Function:</h3><h2>GetAimAngle</h2><p>
+Gets this Actor's aim angle.</p><p><strong>Arguments:</strong><br />
+Whether to adjust the angle for flipping or not.</p><p><strong>Return value:</strong><br />
+The angle, in radians.<br />
+</p><br/><h3>Function:</h3><h2>SetAimAngle</h2><p>
+Sets this Actor's aim angle.</p><p><strong>Arguments:</strong><br />
+A new angle, in radians.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>HasObject</h2><p>
+Shows whether this is or carries a specifically named object in its inventory. Also looks through the inventories of potential passengers, as applicable.</p><p><strong>Arguments:</strong><br />
+The Preset name of the object to look for.</p><p><strong>Return value:</strong><br />
+Whetehr the object was found carried by this.<br />
+</p><br/><h3>Function:</h3><h2>HasObjectInGroup</h2><p>
+Shows whether this is or carries a specifically grouped object in its inventory. Also looks through the inventories of potential passengers, as applicable.</p><p><strong>Arguments:</strong><br />
+The name of the group to look for.</p><p><strong>Return value:</strong><br />
+Whetehr the object in the group was found carried by this.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>CPUPos</h2><p>
+The absoltue position of this' brain, or equivalent.
+A Vector with the absolute position of this' brain.
+</p><br/><h3>Read-Only Property:</h3><h2>EyePos</h2><p>
+The absoltue position of this' eye, or equivalent, where look vector starts from.
+A Vector with the absolute position of this' eye or view point.
+</p><br/><h3>Property:</h3><h2>ViewPoint</h2><p>
+The point at which this actor is viewing, or that the scene frame should be centered on if tracking this Actor's view. In absolute scene coordinates.
+The point in absolute scene coordinates.
+</p><br/><h3>Read-Only Property:</h3><h2>Height</h2><p>
+The approximate height of this Actor, standing up.
+A float with the approximate height, in pixels.
+</p><br/><h3>Function:</h3><h2>IsWithinRange</h2><p>
+Tells whether a point on the scene is within range of the currently used device and aiming status, if applicable.</p><p><strong>Arguments:</strong><br />
+A Vector witht he aboslute coordinates of a point to check.</p><p><strong>Return value:</strong><br />
+Whether the point is within range of this.<br />
+</p><br/><h3>Function:</h3><h2>AddHealth</h2><p>
+Adds health points to this Actor's current health value.</p><p><strong>Arguments:</strong><br />
+An int specifying the value to add.</p><p><strong>Return value:</strong><br />
+The resulting total health of this Actor.<br />
+</p><br/><h3>Function:</h3><h2>IsStatus</h2><p>
+Checks if this Actor is in a specific status.</p><p><strong>Arguments:</strong><br />
+Which status to check for.</p><p><strong>Return value:</strong><br />
+A bool with the answer.<br />
+</p><br/><h3>Function:</h3><h2>IsDead</h2><p>
+Checks if this Actor is dead.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A const bool with the answer.<br />
+</p><br/><h3>Function:</h3><h2>FacingAngle</h2><p>
+Adjusts an absolute aiming angle based on wether this Actor is facing left or right.</p><p><strong>Arguments:</strong><br />
+The input angle in radians.</p><p><strong>Return value:</strong><br />
+The output angle in radians, which will be unaltered if this Actor is facing right.<br />
+</p><br/><h3>Property:</h3><h2>AIMode</h2><p>
+This' AI mode.
+The current AI mode.
+</p><br/><h3>Read-Only Property:</h3><h2>DeploymentID</h2><p>
+Returns deployment id of this actor.
+</p><br/><h3>Function:</h3><h2>AddAISceneWaypoint</h2><p>
+Adds an absolute scene point to the list of waypoints this is going to go to, in order</p><p><strong>Arguments:</strong><br />
+The new scene point this should try to get to after all other waypoints are reached.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AddAIMOWaypoint</h2><p>
+Adds an MO in the scene as the next waypoint for this to go to, in order</p><p><strong>Arguments:</strong><br />
+The new MO this should try to get to after all other waypoints are reached.<br />
+OWNERSHIP IS NOT TRANSFERRED!</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ClearAIWaypoints</h2><p>
+Removes all AI waypoints and clears the current path to the current waypoint. The AI Actor will stop in its tracks.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetLastAIWaypoint</h2><p>
+Gets the last or furthest set AI waypoint of this. If none, this' pos is returned.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The furthest set AI waypoint of this.<br />
+</p><br/><h3>Function:</h3><h2>GetWaypointListSize</h2><p>
+Gets how many waypoints this actor have.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+How many waypoints.<br />
+</p><br/><h3>Function:</h3><h2>ClearMovePath</h2><p>
+Clears the list of coordinates in this' current MovePath, ie the path to the next Waypoint.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AddToMovePathBeginning</h2><p>
+Adds a coordinate to the beginning of the MovePath, meaning the one closest to this Actor.</p><p><strong>Arguments:</strong><br />
+The new coordinate to add to the front of the MovePath.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AddToMovePathEnd</h2><p>
+Adds a coordinate to the end of the MovePath, meaning the one closest to this Actor's next waypoint.</p><p><strong>Arguments:</strong><br />
+The new coordinate to add to the end of the MovePath.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>RemoveMovePathBeginning</h2><p>
+Removes a coordinate from the beginning of the MovePath, meaning the one closest to this Actor.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether there was any coordinate to remove. If false, the MovePath is empty.<br />
+</p><br/><h3>Function:</h3><h2>RemoveMovePathEnd</h2><p>
+Removes a coordinate from the end of the MovePath, meaning the one farthest from this Actor.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether there was any coordinate to remove. If false, the MovePath is empty.<br />
+</p><br/><h3>Property:</h3><h2>Perceptiveness</h2><p>
+This' perceptiveness to alarming events going on around him.
+The current perceptiveness, 0.0 - 1.0
+</p><br/><h3>Function:</h3><h2>AddInventoryItem</h2><p>
+Adds an inventory item to this Actor.</p><p><strong>Arguments:</strong><br />
+An pointer to the new item to add. Ownership IS TRANSFERRED!</p><p><strong>Return value:</strong><br />
+None..<br />
+</p><br/><h3>Function:</h3><h2>RemoveInventoryItem</h2><p>
+Removes a specified item from the actor's inventory. Only one item is removed at a time.</p><p><strong>Arguments:</strong><br />
+Preset name of an item to remove.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SwapNextInventory</h2><p>
+Swaps the next MovableObject carried by this Actor and puts one not currently carried into the into the back of the inventory of this.</p><p><strong>Arguments:</strong><br />
+A pointer to the external MovableObject to trade in. Ownership IS xferred!<br />
+If 0 is passed in, nothing will be added to the inventory.<br />
+Whether to mute the sound on this event. Override for the loading screen hack.</p><p><strong>Return value:</strong><br />
+The next MovableObject in this Actor's inventory. Ownership IS xferred!<br />
+If there are no MovableObject:s in inventory, 0 will be returned.<br />
+</p><br/><h3>Function:</h3><h2>SwapPrevInventory</h2><p>
+Swaps the prev MovableObject carried by this Actor and puts one not currently carried into the into the back of the inventory of this.</p><p><strong>Arguments:</strong><br />
+A pointer to the external MovableObject to trade in. Ownership IS xferred!<br />
+If 0 is passed in, nothing will be added to the inventory.</p><p><strong>Return value:</strong><br />
+The prev MovableObject in this Actor's inventory. Ownership IS xferred!<br />
+If there are no MovableObject:s in inventory, 0 will be returned.<br />
+</p><br/><h3>Function:</h3><h2>DropAllInventory</h2><p>
+Ejects all inventory items that this is carrying. It may not happen instantaneously, so check for ejection being complete with
+IsInventoryEmpty().</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>InventorySize</h2><p>
+Tells how many things are in the invetory
+The number of things in the inventory
+</p><br/><h3>Function:</h3><h2>IsInventoryEmpty</h2><p>
+Tells whether inventory is completely empty</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether inventory is completely empty.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>MaxMass</h2><p>
+Tells how much total mass (in kg) this Actor is recommended to weigh at most INCLUDING his own weight AND all his inventory!
+The max recommend total mass for this Actor
+</p><br/><h3>Function:</h3><h2>FlashWhite</h2><p>
+Tells to make this and all children get drawn as completely white, but only for a specified amount of time.</p><p><strong>Arguments:</strong><br />
+For how long to flash the whiteness, in MS.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>DrawWaypoints</h2><p>
+Makes this draw its current waypoints and related data on the scene in its HUD drawing stage.</p><p><strong>Arguments:</strong><br />
+Whether to enable or disable the drawing of the waypoints.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetMovePathToUpdate</h2><p>
+Sets this' AI's move path to be updated. Will update the path to the current waypoint, if any.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>UpdateMovePath</h2><p>
+Updates this' move path RIGHT NOW. Will update the path to the current waypoint, if any. CAVEAT: this only actually updates if a queue index number passed in is sufficiently close to 0 to allow this to compute, based on an internal global assessment of how often this very expensive computation is allowed to run.</p><p><strong>Arguments:</strong><br />
+The queue number this was given the last time</p><p><strong>Return value:</strong><br />
+Whether the update was performed, or if it should be tried again next frame.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>MovePathSize</h2><p>
+Gets how many waypoints there are in the MovePath currently
+The number of waypoints in the MovePath.
+</p><br/><h3>Function:</h3><h2>SetAlarmPoint</h2><p>
+Makes this alarmed about a certian point on in the scene, overriding the current AI mode until a certain time has passed.</p><p><strong>Arguments:</strong><br />
+The new scene point this should look at and see if anything dangerous is there.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetAlarmPoint</h2><p>
+Gets any point on the scene this actor should be alarmed about this frame.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The new scene point this should look at and see if anything dangerous is there or (0,0) if nothing is alarming.<br />
+</p><br/><h3>Property:</h3><h2>AimDistance</h2><p>
+The distance between the actor and the view point when not sharp aiming.
+A const int describing how far this actor aims/looks by default.
+</p><br/><h3>Property:</h3><h2>SightDistance</h2><p>
+Actor's sight distance.
+</p><br/><h3>Read-Only Property:</h3><h2>TotalWoundCount</h2><p>
+Returns total number of wounds of this actor.
+</p><br/><h3>Read-Only Property:</h3><h2>TotalWoundLimit</h2><p>
+Returns total wound limit of this actor.
+</p><br/><h3>Function:</h3><h2>RemoveAnyRandomWounds</h2><p>
+Removes a specified amount of wounds from the actor and all standard attachables.</p><p><strong>Arguments:</strong><br />
+Amount of wounds to remove.</p><p><strong>Return value:</strong><br />
+Damage taken from removed wounds.<br />
+</p>

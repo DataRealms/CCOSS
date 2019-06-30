@@ -1,0 +1,214 @@
+<h2>Abstract Class:</h2><h1>MovableObject</h1><h3>
+A movable object with mass.</h3><h3>Parent:  <a href="SceneObject.html">SceneObject</a></h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Function:</h3><h2>ReloadScripts</h2><p>
+Reloads the preset scripts of this object, from the same script file path as was originally defined. This will also update the original preset in the PresetMan with the updated scripts so future objects spawned will use the new scripts.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+An error return value signaling sucess or any particular failure.<br />
+Anything below 0 is an error signal.<br />
+</p><br/><h3>Property:</h3><h2>Mass</h2><p>
+The mass value of this MovableObject.
+A float describing the mass value in Kilograms (kg).
+</p><br/><h3>Property:</h3><h2>Vel</h2><p>
+The velocity vector of this MovableObject.
+A Vector describing the current velocity vector.
+</p><br/><h3>Property:</h3><h2>AngularVel</h2><p>
+The current angular velocity of this MovableObject. Positive is a counter-clockwise rotation.
+The angular velocity in radians per second.
+</p><br/><h3>Read-Only Property:</h3><h2>Radius</h2><p>
+The largest radius of this in pixels.
+The radius from its center to the edge of its graphical representation.
+</p><br/><h3>Read-Only Property:</h3><h2>Diameter</h2><p>
+The largest diameter of this in pixels.
+The largest diameter across its graphical representation.
+</p><br/><h3>Property:</h3><h2>Scale</h2><p>
+The current scale of this MOSRotating. This is mostly for fun.
+The normalized scale.
+</p><br/><h3>Property:</h3><h2>GlobalAccScalar</h2><p>
+Gets How this is affected by global effects, from +1.0 to -1.0.
+Something with a negative value will 'float' upward.
+The global acceleration scalar.
+</p><br/><h3>Property:</h3><h2>AirResistance</h2><p>
+How much this is affected by air resistance when traveling over a second, 0 to 1.0, with 0 as default
+The air resistance coefficient.
+</p><br/><h3>Property:</h3><h2>AirThreshold</h2><p>
+At which threshold of velocity, in m/s, the effect of AirResistance kicks in.
+The air threshold speed.
+</p><br/><h3>Property:</h3><h2>Age</h2><p>
+Gets real time age of this MovableObject.
+A unsigned long describing the current age in ms.
+</p><br/><h3>Property:</h3><h2>Lifetime</h2><p>
+The amount of time this MovableObject will exist from creation.
+A unsigned long describing the current lifetime in ms. 0 means unlimited.
+</p><br/><h3>Read-Only Property:</h3><h2>ID</h2><p>
+The MOID of this MovableObject for this frame.
+An int specifying the MOID that this MovableObject is assigned for the current frame only.
+</p><br/><h3>Read-Only Property:</h3><h2>UniqueID</h2><p>
+Returns this MO's unique persistent ID
+Returns this MO's unique persistent ID
+</p><br/><h3>Read-Only Property:</h3><h2>RootID</h2><p>
+The MOID of the MovableObject which is the root MO of this MO for this frame. If same as what GetID returns, then this is owned by
+MovableMan.
+An int specifying the MOID of the MO that this MovableObject is owned by for the current frame only.
+</p><br/><h3>Read-Only Property:</h3><h2>MOIDFootprint</h2><p>
+Gets how many total (subsequent) MOID's this MO and all its children are taking up this frame. ie if this MO has no children, this will likely be 1. Note this is only valid for this frame!
+The number of MOID indices this MO and all its children are taking up.
+</p><br/><h3>Property:</h3><h2>Sharpness</h2><p>
+The sharpness factor of this MO.
+The sharpness factor of this MO. 1.0 means normal sharpness, no alter- ation to any of the impulses.
+</p><br/><h3>Function:</h3><h2>GetAltitude</h2><p>
+Gets the altitide of this' pos (or appropriate low point) over the terrain, in pixels.</p><p><strong>Arguments:</strong><br />
+The max altitude you care to check for. 0 Means check the whole scene's height.<br />
+The accuracy within which measurement is acceptable. Higher number here means less calculation.</p><p><strong>Return value:</strong><br />
+The rough altitude over the terrain, in pixels.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>AboveHUDPos</h2><p>
+The absoltue position of the top of this' HUD stack.
+A Vector with the absolute position of this' HUD stack top point.
+</p><br/><h3>Property:</h3><h2>HitsMOs</h2><p>
+Gets whether this MovableObject is set to collide with other
+MovableObject:s during its travel.
+Whether this hits other MO's during its travel, or not.
+</p><br/><h3>Property:</h3><h2>GetsHitByMOs</h2><p>
+Gets whether this MovableObject is set to be able to get hit by other
+MovableObject:s during their travel.
+Whether this can get hit by MO's, or not.
+</p><br/><h3>Property:</h3><h2>IgnoresTeamHits</h2><p>
+Tells whether this will collide with any other MO of the same team.
+Whether this can hit or get hit by other MOs of the same team.
+</p><br/><h3>Read-Only Property:</h3><h2>IgnoresWhichTeam</h2><p>
+Tells which team this would be ignoring hits with, if we're ignoring hits at all.
+Which team this ignores hits with, if any.
+</p><br/><h3>Property:</h3><h2>IgnoreTerrain</h2><p>
+Tells whether this will collide with any Terrain
+Whether this can hit terrain.
+</p><br/><h3>Function:</h3><h2>SetWhichMOToNotHit</h2><p>
+Sets this MO to not hit a specific other MO and all its children even though MO hitting is enabled on this <a href="MovableObject.html">MovableObject</a></p><p><strong>Arguments:</strong><br />
+A pointer to the MO to not be hitting. 0 means don't ignore anyhting.<br />
+Ownership is not transferred!<br />
+For how long, in S, to ignore the above. Negative number means forever.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Property:</h3><h2>ToSettle</h2><p>
+Indicates whether this MO is marked for settling at the end of the
+MovableMan update.
+Whether this MO is marked for settling ontot the terrain or not.
+</p><br/><h3>Property:</h3><h2>ToDelete</h2><p>
+Indicates whether this MO is marked for deletion at the end of the
+MovableMan update.
+Whether this MO is marked for deletion or not.
+</p><br/><h3>Function:</h3><h2>IsSetToDelete</h2><p>
+Tells if this MovableObject is marked for deletion at the end of the update.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether this is marked for deletion or not.<br />
+</p><br/><h3>Function:</h3><h2>IsMissionCritical</h2><p>
+Shows whether this is mission critical and should therefore NEVER be settled or otherwise destroyed during teh course of a mission.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whetehr this should be immune to settling and destruction.<br />
+</p><br/><h3>Property:</h3><h2>HUDVisible</h2><p>
+Tells whether this Actor's HUD is drawn or not.
+Whether this' HUD gets drawn or not.
+</p><br/><h3>Function:</h3><h2>IsGeneric</h2><p>
+Indicates whether this MO is an Generic or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether this MovableObject is of Type Generic or not.<br />
+</p><br/><h3>Function:</h3><h2>IsActor</h2><p>
+Indicates whether this MO is an Actor or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether this MovableObject is of Type Actor or not.<br />
+</p><br/><h3>Function:</h3><h2>IsDevice</h2><p>
+Indicates whether this MO is a Device or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether this MovableObject is of Type Device (Held or Thrown) or not.<br />
+</p><br/><h3>Function:</h3><h2>IsHeldDevice</h2><p>
+Indicates whether this MO is a HeldDevice or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether this MovableObject is of Type HeldDevice or not.<br />
+<br />
+</p><br/><h3>Function:</h3><h2>IsThrownDevice</h2><p>
+Indicates whether this MO is a ThrownDevice or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether this MovableObject is of Type ThrownDevice or not.<br />
+</p><br/><h3>Function:</h3><h2>IsGold</h2><p>
+Indicates whether this MO is made of Gold or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether this MovableObject is of Gold or not.<br />
+</p><br/><h3>Function:</h3><h2>IsThrownDevice</h2><p>
+Indicates whether this MO is a ThrownDevice or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether this MovableObject is of Type ThrownDevice or not.<br />
+</p><br/><h3>Function:</h3><h2>HasObject</h2><p>
+Shows whether this is or carries a specifically named object in its inventory. Also looks through the inventories of potential passengers, as applicable.</p><p><strong>Arguments:</strong><br />
+The Preset name of the object to look for.</p><p><strong>Return value:</strong><br />
+Whetehr the object was found carried by this.<br />
+</p><br/><h3>Function:</h3><h2>HasObjectInGroup</h2><p>
+Shows whether this is or carries a specifically grouped object in its inventory. Also looks through the inventories of potential passengers, as applicable.</p><p><strong>Arguments:</strong><br />
+The name of the group to look for.</p><p><strong>Return value:</strong><br />
+Whetehr the object in the group was found carried by this.<br />
+</p><br/><h3>Function:</h3><h2>AddForce</h2><p>
+Adds force to this MovableObject for the next time Update() is called.</p><p><strong>Arguments:</strong><br />
+An Vector with the external force vector that will be added to this<br />
+MovableObject and affect its path next Update(). In N or kg * m/s^2.<br />
+A Vector with the offset, in METERS, of where the force is being applied relative to the center of this MovableObject.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AddAbsForce</h2><p>
+Adds force to this MovableObject for the next time Update() is called.</p><p><strong>Arguments:</strong><br />
+An Vector with the external force vector that will be added to this<br />
+MovableObject and affect its path next Update(). In N or kg * m/s^2.<br />
+A Vector with the absolute world coordinates, in PIXELS, of where the force is being applied to the center of this MovableObject.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AddImpulseForce</h2><p>
+Adds impulse force (or instant momentum) to this MovableObject for the next time Update() is called.</p><p><strong>Arguments:</strong><br />
+An Vector with the impulse force vector that will directly be added to this MovableObject's momentum  next Update(). In kg * m/s.<br />
+A Vector with the offset, in METERS, of where the impulse is being applied relative to the center of this MovableObject.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AddAbsImpulseForce</h2><p>
+Adds impulse force (or instant momentum) to this MovableObject for the next time Update() is called.</p><p><strong>Arguments:</strong><br />
+An Vector with the impulse force vector that will directly be added to this MovableObject's momentum  next Update(). In kg * m/s.<br />
+A Vector with the absolute world coordinates, in PIXELS, of where the force is being applied to the center of this MovableObject.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ClearForces</h2><p>
+Clears out all the forces this MO has accumulated during this frame.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ClearImpulseForces</h2><p>
+Clears out all the impulses this MO has accumulated during this frame.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Property:</h3><h2>PinStrength</h2><p>
+The impulse force threshold which has to be exceeded to
+'shake loose' this from a 'pinned' state. Pinned MOs don't get moved by travel algos. If 0, this isn't pinned.
+The impulse threshold in kg * (m/s). 0 means no pinning
+</p><br/><h3>Function:</h3><h2>RestDetection</h2><p>
+Does the calculations necessary to detect whether this MO appears to have has settled in the world and is at rest or not. IsAtRest() retreves the answer.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>NotResting</h2><p>
+Makes this MO reset its tiemr that keeps track of how long it's been at rest, effectively delaying it.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsAtRest</h2><p>
+Indicates wheter the MovableObject has been at rest (no velocity) for more than one (1) second.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Wheter the MovableObject has been at rest for more than one full second.<br />
+</p><br/><h3>Function:</h3><h2>MoveOutOfTerrain</h2><p>
+Checks whether any of the Atom:s in this MovableObject are on top of terrain pixels, and if so, attempt to move this out so none of this'
+Atoms are on top of the terrain any more.</p><p><strong>Arguments:</strong><br />
+Only consider materials stronger than this in the terrain for intersections.</p><p><strong>Return value:</strong><br />
+Whether any intersection was successfully resolved. Will return true even if there wasn't any intersections to begin with.<br />
+</p><br/><h3>Function:</h3><h2>RotateOffset</h2><p>
+Rotates a vector offset from this MORotating's position according to the rotate angle and flipping.</p><p><strong>Arguments:</strong><br />
+A const reference the offset Vector to rotate.</p><p><strong>Return value:</strong><br />
+A new vector that is the result of the rotation.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>HitWhatMOID</h2><p>
+Returns the ID of the MO hit at the previously taken Travel
+This will only potentially return non-g_NoMOID if this object's Atom is set to hit MO's and the MO hit isn't marked to be ignored.
+The ID of the non-ignored MO, if any, that this object's Atom or AtomGroup is now intersecting because of the last Travel taken.
+</p><br/><h3>Read-Only Property:</h3><h2>HitWhatMOID</h2><p>
+Returns the unique ID of the particle hit at the previously taken Travel
+Unique ID of the particle hit at the previously taken Travel
+</p><br/><h3>Read-Only Property:</h3><h2>HitWhatMOID</h2><p>
+Returns the unique ID of the particle hit at the previously taken Travel
+Unique ID of the particle hit at the previously taken Travel.</p><br/><h3>Read-Only Property:</h3><h2>HitWhatTerrMaterial</h2><p>
+Returns the terrain material the previously taken Tarvel hit, if any.
+The ID of the material, if any, that this MO hit during the last Travel.
+</p>

@@ -1,0 +1,68 @@
+
+        (K) All Rites Reversed
+
+    I, Peter Hartley, wrote this program, InterGif. Under the laws of
+England and every other country I know of, this gives me the right to
+put my name to it, and withholds that right from everyone else unless
+I choose to bestow it. If someone else made a copy of InterGif,
+removed my name from all over it, replaced it with theirs, and
+distributed the program further as an example of how cool *they* were,
+they'd be doing a wrong thing -- and I think most people would agree
+with the law on that one.
+    But the laws of England and many other countries give me an
+additional, unrelated right. They would allow me to give you -- or
+even *sell* you -- a copy of the program, and yet prohibit you from
+giving further copies away to your friends! This "copy right" can, and
+does, lead to the absurd situation in which a simple copy command -- a
+command built into every sensible operating system -- can become a
+criminal act. Some even speak of this act as a "theft" from the
+program's authors, even though it has removed from them no physical
+property (the act can take place hundreds of miles from their homes,
+and without them even noticing) and no intellectual property either
+(the new copy still contains the original authors' names).
+    I believe it would be morally untenable to exercise this "copy
+right", in just the same way as I choose for moral reasons not to
+exercise another right English law gives me: that of killing foxes for
+fun.
+    This piece of software does not have the "©" or "(C)" symbol or
+any other invocation of copy right attached to it. It contains instead
+the (K) symbol and the words "All Rites Reversed", indicating that no
+unrealistic restrictions are placed on your use and your friends' use
+of it. Copy what you like; use it for what you like. Just give me due
+credit. (As I understand it, you're in fact *legally obliged* to give
+me due credit. But that shouldn't be *why* you're doing it!)
+    No information in this program is of a personally damaging (to me)
+or nationally damaging (to England) nature. These two cases (and the
+latter only dubiously) are the only ones I can think of where a
+restriction on copying would make sense -- but of course, I would only
+reveal personally damaging information to individuals I personally
+trusted anyway, whether in an electronic or oral form. If I didn't
+personally trust them, I'd make them sign a contract saying they
+wouldn't pass on the information, and I think they'd appreciate the
+reason for that.
+    If, on the other hand, I was making someone I didn't know sign
+such a contract regarding a certain piece of information for the sole
+reason that I could then make more money by signing similar contracts
+with other people I didn't know, then I'd hope that person would be a
+little disgusted. Perhaps not too disgusted to refuse to sign,
+exclaiming that the information wasn't worth that (some information,
+sadly, just isn't available in other ways) -- but, I hope, left with a
+nagging nasty taste anyway.
+    
+    Now, I have your signature on no contract; for some readers of
+these words, I haven't even ever met you. I'm having to trust you
+anyway not to thieve my intellectual property from me by passing off
+these words or programs as your own. It would be logistically
+extremely difficult to ensure, whether by legal or technical means,
+that intellectual property rights were not infringed.
+    But on the whole, I *do* trust you. You might turn out to be a
+rogue, but at least I've acquitted myself: by trusting you, I've not
+made myself a rogue. Trusting people is not necessarily the Correct
+Answer (some people, such as John Lennon, have had worse crimes than
+theft committed against them because of it) but it is at least the
+Right Answer.
+
+    Having read this document, you get no prizes for working out that
+I've read the GNU Manifesto. But I believe that exercising copyright
+means war, and in any war (to "copy" shamelessly the conclusion to the
+film War Games) the only winning move is not to play.

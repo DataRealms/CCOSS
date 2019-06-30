@@ -1,0 +1,282 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Editor Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>c;cpp;h;hpp</Extensions>
+    </Filter>
+    <Filter Include="UI Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>c;cpp;h;hpp</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Wrappers">
+      <UniqueIdentifier>{323d5ac6-d2a4-48b2-887b-9404379ef3fc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Editor.cpp">
+      <Filter>Editor Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIEditorApp.cpp">
+      <Filter>Editor Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIEditorLib.cpp">
+      <Filter>Editor Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AllegroBitmap.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AllegroInput.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AllegroScreen.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUI.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIButton.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUICheckbox.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUICollectionBox.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIComboBox.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIControl.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIControlFactory.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIControlManager.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIEvent.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIFont.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIInput.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUILabel.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIListBox.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIListPanel.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIManager.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIPanel.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIProgressBar.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIProperties.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIPropertyPage.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIRadioButton.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIScrollbar.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIScrollPanel.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUISkin.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUISlider.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUITab.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUITextBox.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUITextPanel.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GUIUtil.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\WinUtil.cpp">
+      <Filter>UI Files</Filter>
+    </ClCompile>
+    <ClCompile Include="wrappers\ContentFile.cpp">
+      <Filter>Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="wrappers\DDTError.cpp">
+      <Filter>Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="wrappers\Reader.cpp">
+      <Filter>Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="wrappers\Timer.cpp">
+      <Filter>Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="wrappers\TimerMan.cpp">
+      <Filter>Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="wrappers\Writer.cpp">
+      <Filter>Wrappers</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GUIEditorApp.h">
+      <Filter>Editor Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GUIEditorLib.h">
+      <Filter>Editor Files</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Editor Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Editor Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AllegroBitmap.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AllegroInput.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AllegroScreen.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUI.H">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIBitmap.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIButton.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUICheckbox.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUICollectionBox.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIComboBox.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIControl.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIControlFactory.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIControlManager.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIEvent.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIFont.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIInput.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUILabel.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIListBox.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIListPanel.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIManager.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIPanel.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIProgressBar.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIProperties.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIPropertyPage.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIRadioButton.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIScreen.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIScrollbar.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIScrollPanel.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUISkin.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUISlider.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUITab.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUITextBox.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUITextPanel.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GUIUtil.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\WinUtil.h">
+      <Filter>UI Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wrappers\ContentFile.h">
+      <Filter>Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="wrappers\DDTError.h">
+      <Filter>Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="wrappers\FrameMan.h">
+      <Filter>Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="wrappers\Reader.h">
+      <Filter>Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="wrappers\Timer.h">
+      <Filter>Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="wrappers\TimerMan.h">
+      <Filter>Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="wrappers\Writer.h">
+      <Filter>Wrappers</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -6,11 +6,13 @@ Tested to build only with Visual Studio 2017 for Win32 platform with Visual Stud
 
 Almost builds with modern toolchains in VS 2017 and VS 2019, but there's some incompatibility in Luabind which fails to compile. Other than that should be fine.
 
-Commercial fmod library was replaced with free SDL Mixer which lacks pitching functionality hence some sound effects will sound differently or incorrectly.
-
-All source and binary dependencies rewuired to buile the project are included.
+Included source code does not match the current B32 functionality. This is a work-in-progress snapshot of what's internally called "B33", so it won't start with data from B32.
 
 No game data and most of required runtime DLLs are included, you should get those from the Cortex Command beta branch on Steam.
+
+Commercial fmod library was replaced with free SDL Mixer which lacks pitching functionality hence some sound effects will sound differently or incorrectly.
+
+All source and binary dependencies required to build the project are included.
 
 This version uses a slightly modified version of Allegro. The only difference from the original is a custom window borderless mode implemented to fix fullscreen issues. If you're gonna rebuild Allegro you'l probably need to disable custom calls in FrameMan.
 
@@ -28,6 +30,5 @@ You need to copy SDL related dlls from external\lib\win\ next to .exe in order t
 
 
 # CONTACT #
-
 
 support@datarealms.com

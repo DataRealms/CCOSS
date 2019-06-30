@@ -1,0 +1,157 @@
+<h2>Generic Class:</h2><h1>GameActivity</h1><h3>
+Base class for all GameActivity:s, including game modes and editors.</h3><h3>Parent:  <a href="Activity.html">Activity</a></h3><br/><h3>Function:</h3><h2>SetObservationTarget</h2><p>
+Sets the observation sceneman scroll targets, for when the game is over or a player is in observation mode</p><p><strong>Arguments:</strong><br />
+The new absolute position to observe.<br />
+Which player to set it for.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetDeathViewTarget</h2><p>
+Sets the player death sceneman scroll targets, for when a player- controlled actor dies and the view should go to his last position</p><p><strong>Arguments:</strong><br />
+The new absolute position to set as death view.<br />
+Which player to set it for.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetLandingZone</h2><p>
+Sets the he last selected landing zone.</p><p><strong>Arguments:</strong><br />
+The new absolute position to set as the last selected landing zone.<br />
+Which player to set it for.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetLandingZone</h2><p>
+Gets the he last selected landing zone.</p><p><strong>Arguments:</strong><br />
+Which player to get it for.</p><p><strong>Return value:</strong><br />
+The new absolute position to set as the last selected landing zone.<br />
+</p><br/><h3>Function:</h3><h2>SetActorSelectCursor</h2><p>
+Sets the actor selection cursor position.</p><p><strong>Arguments:</strong><br />
+The new absolute position to put the cursor at.<br />
+Which player to set it for.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetBuyGUI</h2><p>
+Gets the an in-game GUI Object for a specific player.</p><p><strong>Arguments:</strong><br />
+Which player to get the GUI for.</p><p><strong>Return value:</strong><br />
+A pointer to a BuyMenuGUI. Ownership is NOT transferred!<br />
+</p><br/><h3>Function:</h3><h2>GetEditorGUI</h2><p>
+Gets the an in-game editor GUI Object for a specific player.</p><p><strong>Arguments:</strong><br />
+Which player to get the GUI for.</p><p><strong>Return value:</strong><br />
+A pointer to a SceneEditorGUI. Ownership is NOT transferred!<br />
+</p><br/><h3>Property:</h3><h2>WinnerTeam</h2><p>
+Indicates which team is the winner, when the game is over.
+The team number of the winning team. 0 is team #1. Negative number means the game isn't over yet.
+</p><br/><h3>Property:</h3><h2>CPUTeam</h2><p>
+The current CPU-assisted team, if any (NOTEAM) - LEGACY function
+The current setting. NOTEAM is no team is assisted.
+</p><br/><h3>Function:</h3><h2>OtherTeam</h2><p>
+Gets the next other team number from the one passed in, if any. If there are more than two teams in this game, then the next one in the series will be returned here.</p><p><strong>Arguments:</strong><br />
+The team not to get.</p><p><strong>Return value:</strong><br />
+The other team's number.<br />
+</p><br/><h3>Function:</h3><h2>OneOrNoneTeamsLeft</h2><p>
+Indicates whether there is less than two teams left in this game with a brain in its ranks.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether less than two teams have brains in them left.<br />
+</p><br/><h3>Function:</h3><h2>WhichTeamLeft</h2><p>
+Indicates which single team is left, if any.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Which team stands alone with any brains in its ranks, if any. NOTEAM is returned if there's either more than one team, OR there are no teams at all left with brains in em.<br />
+</p><br/><h3>Function:</h3><h2>NoTeamLeft</h2><p>
+Indicates whether there are NO teams left with any brains at all!</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether any team has a brain in it at all.<br />
+</p><br/><h3>Function:</h3><h2>OnlyOneTeamLeft</h2><p>
+Indicates whether there is less than two teams left in this game with a brain in its ranks.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether less than two teams have brains in them left.<br />
+</p><br/><h3>Function:</h3><h2>GetBanner</h2><p>
+Gets access to the huge banner of any player that can display messages which can not be missed or ignored.</p><p><strong>Arguments:</strong><br />
+Which color banner to get - see the GameActivity::BannerColor enum.<br />
+Which player's banner to get.</p><p><strong>Return value:</strong><br />
+A pointer to the GUIBanner object that we can<br />
+</p><br/><h3>Function:</h3><h2>SetLZArea</h2><p>
+Sets the Area within which a team can land things.</p><p><strong>Arguments:</strong><br />
+The number of the team we're setting for.<br />
+The Area we're setting to limit their landings within.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetLZArea</h2><p>
+Gets the Area within which a team can land things. OINT.</p><p><strong>Arguments:</strong><br />
+The number of the team we're setting for.</p><p><strong>Return value:</strong><br />
+The Area we're using to limit their landings within. OINT.<br />
+</p><br/><h3>Function:</h3><h2>SetBrainLZWidth</h2><p>
+Sets the width of the landing zone box that follows around a player's brain.</p><p><strong>Arguments:</strong><br />
+The number of the in-game player we're setting for.<br />
+The width of the box, in pixels. 0 means disabled.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetBrainLZWidth</h2><p>
+Gets the width of the landing zone box that follows around a player's brain.</p><p><strong>Arguments:</strong><br />
+The number of the player we're getting for.</p><p><strong>Return value:</strong><br />
+The width in pixels of the landing zone.<br />
+</p><br/><h3>Function:</h3><h2>GetActiveCPUTeamCount</h2><p>
+Returns active CPU team count.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Returns active CPU team count.<br />
+</p><br/><h3>Function:</h3><h2>GetActiveHumanTeamCount</h2><p>
+Returns active human team count.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Returns active human team count.<br />
+</p><br/><h3>Function:</h3><h2>AddObjectivePoint</h2><p>
+Created an objective point for one of the teams to show until cleared.</p><p><strong>Arguments:</strong><br />
+The team number of the team to give objective. 0 is team #1.<br />
+The very short description of what the objective is (three short words max)<br />
+The absolute scene coordiante position of the objective.<br />
+The desired direction of the arrow when the point is on screen.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>YSortObjectivePoints</h2><p>
+Sorts all objective points according to their positions on the Y axis.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ClearObjectivePoints</h2><p>
+Clears all objective points previously added, for both teams.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AddOverridePurchase</h2><p>
+Adds somehting to the purchase list that will override what is set in the buy guy next time CreateDelivery is called.</p><p><strong>Arguments:</strong><br />
+The SceneObject preset to add to the override purchase list. OINT!<br />
+Which player's list to add an override purchase item to.</p><p><strong>Return value:</strong><br />
+The new total value of what's in the override purchase list.<br />
+</p><br/><h3>Function:</h3><h2>ClearOverridePurchase</h2><p>
+Clears all items from a specific player's override purchase list.</p><p><strong>Arguments:</strong><br />
+Which player's override purchase list to clear.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetDeliveryCount</h2><p>
+Shows how many deliveries this team has pending.</p><p><strong>Arguments:</strong><br />
+Which team to check the delivery count for.</p><p><strong>Return value:</strong><br />
+The number of deliveries this team has coming.<br />
+</p><br/><h3>Property:</h3><h2>DeliveryDelay</h2><p>
+Returns current delivery delay
+Returns current delivery delay
+</p><br/><h3>Function:</h3><h2>GetTeamTech</h2><p>
+Returns the name of the tech module selected for this team during scenario setup</p><p><strong>Arguments:</strong><br />
+Team to return tech module for</p><p><strong>Return value:</strong><br />
+Tech module name, for example Dummy.rte, or empty string if there is no team<br />
+</p><br/><h3>Function:</h3><h2>SetTeamTech</h2><p>
+Sets tech module name for specified team. Module must set must be loaded.</p><p><strong>Arguments:</strong><br />
+Team to set module, module name, for example Dummy.rte</p><p><strong>Return value:</strong><br />
+None<br />
+</p><br/><h3>Function:</h3><h2>GetCrabToHumanSpawnRatio</h2><p>
+Returns CrabToHumanSpawnRatio for specified module</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Crab-To-Human spawn ratio value set for specified module, 0.25 is default.<br />
+</p><br/><h3>Property:</h3><h2>BuyMenuEnabled</h2><p>
+
+</p><br/><h3>Function:</h3><h2>TeamIsCPU</h2><p>
+Indicates whether a specific team is assigned a CPU player in the current game.</p><p><strong>Arguments:</strong><br />
+Which team index to check.</p><p><strong>Return value:</strong><br />
+Whether the team is assigned a CPU player in the current activity.<br />
+</p><br/><h3>Function:</h3><h2>GetStartingGold</h2><p>
+Returns how much starting gold was selected in scenario setup dialog. 20000 - infinite amount.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+How much starting gold must be given to human players.<br />
+</p><br/><h3>Function:</h3><h2>UpdateEditing</h2><p>
+This is a special update step for when any player is still editing the scene.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>DisableAIs</h2><p>
+Goes through all Actor:s currently in the MovableMan and disables or enables each one with a Controller set to AI input.</p><p><strong>Arguments:</strong><br />
+Whether to disable or enable them;<br />
+Which team to do this to. If all, then pass Activity::NOTEAM</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>InitAIs</h2><p>
+Goes through all Actor:s currently in the MovableMan and sets each one not controlled by a player to be AI controlled and AIMode setting based on team and CPU team.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p>

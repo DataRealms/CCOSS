@@ -24,9 +24,11 @@ ScreenDump*.bmp
 /System/Slick Profiler/Final
 /System/Slick Profiler/Final Open Source
 /System/Slick Profiler/Debug Open Source
+/System/Slick Profiler/Remote profile
+/Slick DebugTool/DebugTool/bin
+/Slick DebugTool/DebugTool/obj
 /GUI/Editor/Debug
 /GUI/Editor/Release
-/System/Slick Profiler/Remote profile
 /Steam Release
 /Steam Debug
 /Steam Final

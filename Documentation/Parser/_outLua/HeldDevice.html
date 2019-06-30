@@ -1,0 +1,85 @@
+<h2>Concrete Class:</h2><h1>HeldDevice</h1><h3>
+An articulated device that can be weilded by an Actor.</h3><h3>Parent:  <a href="Attachable.html">Attachable</a></h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Read-Only Property:</h3><h2>SupportPos</h2><p>
+The absolute position of the support handhold that this HeldDevice offers.
+A vector describing the absolute world coordinates for the support position of this HeldDevice.
+</p><br/><h3>Read-Only Property:</h3><h2>MagazinePos</h2><p>
+The absolute position of the magazine or other equivalent point of this.
+A vector describing the absolute world coordinates for the magazine attachment point of this
+</p><br/><h3>Read-Only Property:</h3><h2>MuzzlePos</h2><p>
+The absolute position of the muzzle or other equivalent point of this.
+A vector describing the absolute world coordinates for the muzzle point of this
+</p><br/><h3>Property:</h3><h2>MuzzleOffset</h2><p>
+The unrotated relative offset from the position to the muzzle or other equivalent point of this.
+A unrotated vector describing the relative for the muzzle point of this from this' position.
+</p><br/><h3>Property:</h3><h2>StanceOffset</h2><p>
+The current position offset of this HeldDevice's joint relative from the parent Actor's position, if attached.
+A const reference to the current stance parent offset.
+</p><br/><h3>Property:</h3><h2>SharpLength</h2><p>
+Gets how much farther an Actor which holds this device can see when aiming this HeldDevice sharply.
+The length in world pixel units.
+</p><br/><h3>Function:</h3><h2>IsWeapon</h2><p>
+Indicates whether this is an offensive weapon or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Offensive weapon or not.<br />
+</p><br/><h3>Function:</h3><h2>IsTool</h2><p>
+Indicates whether this is a tool or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Tool or not.<br />
+</p><br/><h3>Function:</h3><h2>IsShield</h2><p>
+Indicates whether this is a shield or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Shield or not.<br />
+</p><br/><h3>Function:</h3><h2>IsOneHanded</h2><p>
+Indicates whether this can be held and operated effectively with one hand or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+One handed device or not.<br />
+</p><br/><h3>Function:</h3><h2>SetOneHanded</h2><p>
+Sets whether this can be held and operated effectively with one hand or not.</p><p><strong>Arguments:</strong><br />
+New value.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>Activate</h2><p>
+Activates one of this HDFirearm's features. Analogous to 'pulling the trigger'.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>Deactivate</h2><p>
+Deactivates one of this HDFirearm's features. Analogous to 'releasing the trigger'.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>Reload</h2><p>
+Throws out the currently used Magazine, if any, and puts in a new one after the reload delay is up.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsActivated</h2><p>
+Tells whether the device is curtrently being activated.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether being activated.<br />
+</p><br/><h3>Function:</h3><h2>IsReloading</h2><p>
+Tells whether the device is curtrently being reloaded.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whetehr being reloaded.<br />
+</p><br/><h3>Function:</h3><h2>DoneReloading</h2><p>
+Tells whether the device just finished reloading this frame.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether just done reloading this frame.<br />
+</p><br/><h3>Function:</h3><h2>NeedsReloading</h2><p>
+Tells whether the device is curtrently in need of being reloaded.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whetehr in need of reloading (ie not full).<br />
+</p><br/><h3>Function:</h3><h2>IsFull</h2><p>
+Tells whether the device is curtrently full and reloading won't have any effect.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whetehr magazine is full or not.<br />
+</p><br/><h3>Property:</h3><h2>SharpLength</h2><p>
+Gets how much farther an Actor which holds this device can see when aiming this HeldDevice sharply.
+The length in world pixel units.
+</p><br/><h3>Property:</h3><h2>SupportOffset</h2><p>
+Returns support offset.
+Support offset value.
+</p><br/><h3>Function:</h3><h2>SetSupported</h2><p>
+Sets whether this HeldDevice is currently supported by a second hand or not.</p><p><strong>Arguments:</strong><br />
+If it should be supported or not.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p>

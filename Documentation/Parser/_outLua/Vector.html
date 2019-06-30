@@ -1,0 +1,145 @@
+<h2>Generic Class:</h2><h1>Vector</h1><h3>
+A useful 2D float vector.</h3><p>Has no parent class.</p><br/><h3>Read-Only Property:</h3><h2>ClassName</h2><p>
+The class name of this Vector.
+A string with the friendly-formatted type name of this Vector.
+</p><br/><h3>Read-Only Property:</h3><h2>RoundedX</h2><p>
+Returns the rounded integer X value of this Vector.
+A int value that represents the X value of this Vector.
+</p><br/><h3>Read-Only Property:</h3><h2>RoundedY</h2><p>
+Returns the rounded integer Y value of this Vector.
+A int value that represents the Y value of this Vector.
+</p><br/><h3>Read-Only Property:</h3><h2>Rounded</h2><p>
+A rounded copy of this Vector. Does not alter this
+Vector.
+A rounded copy of this Vector.
+</p><br/><h3>Read-Only Property:</h3><h2>FlooredX</h2><p>
+Returns the greatest integer that is not greater than the X value of this Vector.
+A int value that represents the X value of this Vector.
+</p><br/><h3>Read-Only Property:</h3><h2>FlooredY</h2><p>
+Returns the greatest integer that is not greater than the Y value of this Vector.
+A int value that represents the Y value of this Vector.
+</p><br/><h3>Read-Only Property:</h3><h2>Floored</h2><p>
+A floored copy of this Vector. Does not alter this
+Vector.
+A floored copy of this Vector.
+</p><br/><h3>Read-Only Property:</h3><h2>CeilingedX</h2><p>
+Returns the lowest integer that is not less than the X value of this
+Vector.
+A int value that represents the X value of this Vector.
+</p><br/><h3>Read-Only Property:</h3><h2>CeilingedY</h2><p>
+Returns the lowest integer that is not less than the Y value of this
+Vector.
+A int value that represents the Y value of this Vector.
+</p><br/><h3>Read-Only Property:</h3><h2>Ceilinged</h2><p>
+A ceiling:ed copy of this Vector. Does not alter this
+Vector.
+A ceiling:ed copy of this Vector.
+</p><br/><h3>Read-Only Property:</h3><h2>Magnitude</h2><p>
+The magnitude of this Vector.
+A float describing the magnitude.
+</p><br/><h3>Function:</h3><h2>SetMagnitude</h2><p>
+Sets the magnitude of this Vector and keeps its angle intact.</p><p><strong>Arguments:</strong><br />
+A float value that the magnitude will be set to.</p><p><strong>Return value:</strong><br />
+A reference to this after the change.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>Largest</h2><p>
+The absolute largest of the two elements. Will always be positive.
+A float describing the largest value of the two, but not the magnitude.
+</p><br/><h3>Read-Only Property:</h3><h2>Smallest</h2><p>
+The absolute smallest of the two elements. Will always be positive.
+A float describing the smallest value of the two, but not the magnitude.
+</p><br/><h3>Read-Only Property:</h3><h2>Normalized</h2><p>
+A Vector that has the same direction as this but with a magnitude of 1.0.</p><br/><h3>Read-Only Property:</h3><h2>Perpendicular</h2><p>
+A Vector that is perpendicular to this, rotated PI/2.</p><br/><h3>Function:</h3><h2>GetXFlipped</h2><p>
+Gets a Vector identical to this except that its X component is flipped.</p><p><strong>Arguments:</strong><br />
+Whether to flip the X axis of the return vector or not.</p><p><strong>Return value:</strong><br />
+A copy of this vector with flipped X axis.<br />
+</p><br/><h3>Function:</h3><h2>GetYFlipped</h2><p>
+Gets a Vector identical to this except that its Y component is flipped.</p><p><strong>Arguments:</strong><br />
+Whether to flip the Y axis of the return vector or not.</p><p><strong>Return value:</strong><br />
+A copy of this vector with flipped Y axis.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>AbsRadAngle</h2><p>
+Get this Vector's absolute angle in radians. e.g: when x = 1, y = 0, the value returned here will be 0. x = 0, y = 1 yields -pi/2 here.
+The absolute angle in radians.
+</p><br/><h3>Read-Only Property:</h3><h2>AbsDegAngle</h2><p>
+Get this Vector's absolute angle in degrees. e.g: when x = 1, y = 0, the value returned here will be 0. x = 0, y = 1 yields -90 here.
+The absolute angle in degrees.
+</p><br/><h3>Function:</h3><h2>CapMagnitude</h2><p>
+Caps the magnitude of this Vector to a max value and keeps its angle intact.</p><p><strong>Arguments:</strong><br />
+A float value that the magnitude will be capped by.</p><p><strong>Return value:</strong><br />
+A reference to this after the change.<br />
+</p><br/><h3>Function:</h3><h2>FlipX</h2><p>
+Flips the X element of this Vector.</p><p><strong>Arguments:</strong><br />
+Whether or not to flip the X element or not.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>FlipY</h2><p>
+Flips the Y element of this Vector.</p><p><strong>Arguments:</strong><br />
+Whether or not to flip the Y element or not.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsZero</h2><p>
+Indicates whether both x and y components of this Vector are 0;</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether both x and y components of this Vector are 0.<br />
+</p><br/><h3>Function:</h3><h2>IsOpposedTo</h2><p>
+Indicates whether the x and y components of this Vector each have opposite signs to their corresponding components of a passed in Vector.</p><p><strong>Arguments:</strong><br />
+The Vector to compare with.</p><p><strong>Return value:</strong><br />
+Whether both x and y components of this Vector are 0.<br />
+</p><br/><h3>Function:</h3><h2>Dot</h2><p>
+Returns the dot product of this Vector and the passed in Vector.</p><p><strong>Arguments:</strong><br />
+The Vector which will be the rhs operand of the dot product operation.</p><p><strong>Return value:</strong><br />
+The resulting dot product scalar float.<br />
+</p><br/><h3>Function:</h3><h2>Cross</h2><p>
+Returns the 2D cross product of this Vector and the passed in Vector.
+This is really the area of the parallellogram that the two vectors form.</p><p><strong>Arguments:</strong><br />
+The Vector which will be the rhs operand of the cross product operation.</p><p><strong>Return value:</strong><br />
+The resulting 2d cross product parallellogram area.<br />
+</p><br/><h3>Function:</h3><h2>Round</h2><p>
+Rounds the X and Y values of this Vector upwards. E.g. 0.49 -> 0.0 and 0.5 -> 1.0.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ToHalf</h2><p>
+Sets the X and Y of this Vector to the nearest half value.
+E.g. 1.0 -> 1.5 and 0.9 -> 0.5.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>Floor</h2><p>
+Sets the X and Y of this Vector.to the greatest integers that are not greater than their original values. E.g. -1.02 becomes -2.0.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>Ceiling</h2><p>
+Sets the X and Y of this Vector.to the lowest integers that are not less than their original values. E.g. -1.02 becomes -1.0.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>Normalize</h2><p>
+Scales this vector to have the same direction but a magnitude of 1.0.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Vector reference to this after the operation.<br />
+</p><br/><h3>Function:</h3><h2>Perpendicularize</h2><p>
+Makes this vector perpendicular to its previous state, rotated PI/2.
+Much faster than RadRotate by PI/2.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Vector reference to this after the operation.<br />
+</p><br/><h3>Function:</h3><h2>Reset</h2><p>
+Sets both the X and Y of this Vector.to zero.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>RadRotate</h2><p>
+Rotate this Vector relatively by an angle in radians.</p><p><strong>Arguments:</strong><br />
+The angle in radians to rotate by. Positive angles rotate counter- clockwise, and negative angles clockwise.</p><p><strong>Return value:</strong><br />
+This vector, rotated.<br />
+</p><br/><h3>Function:</h3><h2>DegRotate</h2><p>
+Rotate this Vector relatively by an angle in degrees.</p><p><strong>Arguments:</strong><br />
+The angle in degrees to rotate by. Positive angles rotate counter- clockwise, and negative angles clockwise.</p><p><strong>Return value:</strong><br />
+This vector, rotated.<br />
+</p><br/><h3>Function:</h3><h2>DegRotate</h2><p>
+Rotate this Vector around itself by a relative rotation in degrees.</p><p><strong>Arguments:</strong><br />
+The angle in degrees to rotate. Positive is counter clockwise, and negative is clockwise rotation.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AbsRotateTo</h2><p>
+Set this Vector to an absolute rotation based on the absolute rotation of another Vector.</p><p><strong>Arguments:</strong><br />
+The reference Vector whose absolute angle from positive X (0 degrees) this Vector will be rotated to.</p><p><strong>Return value:</strong><br />
+This vector, rotated.<br />
+</p><br/><h3>Function:</h3><h2>SetXY</h2><p>
+Sets both the X and Y values of this Vector.</p><p><strong>Arguments:</strong><br />
+Two float values that the X and Y value will be set to, respectively.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p>

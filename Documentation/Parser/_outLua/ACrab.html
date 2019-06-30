@@ -1,0 +1,81 @@
+<h2>Concrete Class:</h2><h1>ACrab</h1><h3>
+A crab-like actor with four legs.</h3><h3>Parent:  <a href="Actor.html">Actor</a></h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Read-Only Property:</h3><h2>LFGLeg</h2><p>
+The left FG Leg as an Attachable. This is for Lua binding mostly.
+A pointer to the Leg Attachable. Ownership is NOT transferred!
+</p><br/><h3>Read-Only Property:</h3><h2>LFGLeg</h2><p>
+The right BG Leg as an Attachable. This is for Lua binding mostly.
+A pointer to the Leg Attachable. Ownership is NOT transferred!
+</p><br/><h3>Read-Only Property:</h3><h2>LBGLeg</h2><p>
+The left BG Leg as an Attachable. This is for Lua binding mostly.
+A pointer to the Leg Attachable. Ownership is NOT transferred!
+</p><br/><h3>Read-Only Property:</h3><h2>RFGLeg</h2><p>
+The right FG Leg as an Attachable. This is for Lua binding mostly.
+A pointer to the Leg Attachable. Ownership is NOT transferred!
+</p><br/><h3>Read-Only Property:</h3><h2>Jetpack</h2><p>
+The jetpack as an emitter. This is for Lua binding mostly.
+A pointer to jetpack emitter. Ownership is NOT transferred!
+</p><br/><h3>Property:</h3><h2>JetTimeTotal</h2><p>
+The amount of time this' jetpack can fire when filled, in ms.
+The amount of time this' jetpack can fire when it's at max.
+</p><br/><h3>Read-Only Property:</h3><h2>JetTimeLeft</h2><p>
+The amount of time this' jetpack can still fire until out, in ms.
+The amount of time this' jetpack can still fire before running out.
+</p><br/><h3>Read-Only Property:</h3><h2>EquippedItem</h2><p>
+Any equipped turret.
+A pointer to an attachable.
+</p><br/><h3>Read-Only Property:</h3><h2>EquippedItem</h2><p>
+Returns whatever is equipped in the turret, if anything. OINT.
+The currently equipped item, if any.
+</p><br/><h3>Read-Only Property:</h3><h2>FirearmIsReady</h2><p>
+Indicates whether the currently held HDFirearm's is ready for use, and has ammo etc.
+Whether a currently HDFirearm (if any) is ready for use.
+</p><br/><h3>Read-Only Property:</h3><h2>FirearmIsEmpty</h2><p>
+Indicates whether the currently held HDFirearm's is out of ammo.
+Whether a currently HDFirearm (if any) is out of ammo.
+</p><br/><h3>Read-Only Property:</h3><h2>FirearmNeedsReload</h2><p>
+Indicates whether the currently held HDFirearm's is almost out of ammo.
+Whether a currently HDFirearm (if any) has less than half of ammo left.
+</p><br/><h3>Read-Only Property:</h3><h2>FirearmIsSemiAuto</h2><p>
+Indicates whether the currently held HDFirearm's is semi or full auto.
+Whether a currently HDFirearm (if any) is a semi auto device.
+</p><br/><h3>Read-Only Property:</h3><h2>FirearmActivationDelay</h2><p>
+Returns the currently held device's delay between pulling the trigger and activating.
+Delay in ms or zero if not a HDFirearm.
+</p><br/><h3>Function:</h3><h2>ReloadFirearm</h2><p>
+Reloads the currently held firearm, if any.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsWithinRange</h2><p>
+Tells whether a point on the scene is within close range of the currently used device and aiming status, if applicable.</p><p><strong>Arguments:</strong><br />
+A Vector witht he aboslute coordinates of a point to check.</p><p><strong>Return value:</strong><br />
+Whether the point is within close range of this.<br />
+</p><br/><h3>Function:</h3><h2>Look</h2><p>
+Casts an unseen-revealing ray in the direction of where this is facing.</p><p><strong>Arguments:</strong><br />
+The degree angle to deviate from the current view point in the ray casting. A random ray will be chosen out of this +-range.<br />
+The range, in pixels, beyond the actors sharp aim that the ray will have.</p><p><strong>Return value:</strong><br />
+Whether any unseen pixels were revealed by this look.<br />
+</p><br/><h3>Function:</h3><h2>LookForMOs</h2><p>
+Casts an MO detecting ray in the direction of where the head is looking at the time. Factors including head rotation, sharp aim mode, and other variables determine how this ray is cast.</p><p><strong>Arguments:</strong><br />
+The degree angle to deviate from the current view point in the ray casting. A random ray will be chosen out of this +-range.<br />
+A specific material ID to ignore (see through)<br />
+Whether to ignore all terrain or not (true means 'x-ray vision').</p><p><strong>Return value:</strong><br />
+A pointer to the MO seen while looking.<br />
+</p><br/><h3>Function:</h3><h2>IsOnScenePoint</h2><p>
+Indicates whether this' current graphical representation overlaps a point in absolute scene coordinates.</p><p><strong>Arguments:</strong><br />
+The point in absolute scene coordinates.</p><p><strong>Return value:</strong><br />
+Whether this' graphical rep overlaps the scene point.<br />
+</p><br/><h3>Property:</h3><h2>LimbPathPushForce</h2><p>
+The default force that a limb traveling walking LimbPath can push against stuff in the scene with.
+The default set force maximum, in kg * m/s^2.
+</p><br/><h3>Function:</h3><h2>GetLimbPathSpeed</h2><p>
+Get walking limb path speed for the specified preset.</p><p><strong>Arguments:</strong><br />
+Speed preset to set 0 = LimbPath::SLOW, 1 = Limbpath::NORMAL, 2 = LimbPath::FAST</p><p><strong>Return value:</strong><br />
+Limb path speed for the specified preset in m/s.<br />
+</p><br/><h3>Function:</h3><h2>SetLimbPathSpeed</h2><p>
+Set walking limb path speed for the specified preset.</p><p><strong>Arguments:</strong><br />
+Speed preset to set 0 = LimbPath::SLOW, 1 = Limbpath::NORMAL, 2 = LimbPath::FAST. New speed value in m/s.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p>

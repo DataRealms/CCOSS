@@ -1,0 +1,24 @@
+<h2>Concrete Class:</h2><h1>ADoor</h1><h3>
+A sliding or swinging door.</h3><h3>Parent:  <a href="Actor.html">Actor</a></h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Read-Only Property:</h3><h2>Door</h2><p>
+The moving door <a href="Attachable.html">Attachable</a>
+A pointer to the door Attachable of this. Ownership is NOT transferred!
+</p><br/><h3>Function:</h3><h2>GetDoorState</h2><p>
+Gets the current state of the door.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+An int encoding the hatch state. See the DoorState enum.<br />
+</p><br/><h3>Function:</h3><h2>OpenDoor</h2><p>
+Opens the door, if it's closed.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>CloseDoor</h2><p>
+Closes the door, if it's open.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetClosedByDefault</h2><p>
+Sets whether this ADoor closes after a while by default (or opens)</p><p><strong>Arguments:</strong><br />
+Whether the door by default goes to a closed position. If not, then it will open after a while.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p>

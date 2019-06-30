@@ -1,0 +1,29 @@
+<h2>Concrete Class:</h2><h1>Round</h1><h3>
+A round containing a number of projectile particles and a one shell.</h3><h3>Parent: Entity</h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Read-Only Property:</h3><h2>NextParticle</h2><p>
+The next particle contained in this Round, ownership is NOT transferred!
+A pointer to the next particle, or 0 if this Round is empty.
+</p><br/><h3>Read-Only Property:</h3><h2>Shell</h2><p>
+The shell casing preset of this Round. Ownership IS NOT transferred!
+A pointer to the shell casing preset, or 0 if this Round has no shell.
+</p><br/><h3>Read-Only Property:</h3><h2>FireVel</h2><p>
+The velocity at which this round is to be fired.
+A float with the velocity in m/s.
+</p><br/><h3>Read-Only Property:</h3><h2>ShellVel</h2><p>
+The velocity at which this round's shell is to be ejected.
+A float with the shell velocity in m/s.
+</p><br/><h3>Read-Only Property:</h3><h2>Separation</h2><p>
+The separation of particles in this round.
+A float with the separation range in pixels.
+</p><br/><h3>Read-Only Property:</h3><h2>ParticleCount</h2><p>
+Returns how many particles are contained within this Round, not counting the shell.
+The number of particles.
+</p><br/><h3>Read-Only Property:</h3><h2>AILifeTime</h2><p>
+Returns the lifetime of the projectile used by the AI when executing the shooting scripts.
+The life time in MS used by the AI
+</p><br/><h3>Read-Only Property:</h3><h2>IsEmpty</h2><p>
+Returns whether this Round is out of particles or not.
+Whether this Round is out of particles or not.
+</p>

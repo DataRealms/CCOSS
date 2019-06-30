@@ -1,0 +1,188 @@
+<h1>MovableManager</h1><h3>
+The singleton manager of all movable objects in the RTE.</h3><p>Has no parent class.</p><br/><h3>Function:</h3><h2>GetMOFromID</h2><p>
+Gets a MO from its MOID. Note that MOID's are only valid during the same frame as they were assigned to the MOs!</p><p><strong>Arguments:</strong><br />
+The MOID to get the matching MO from.</p><p><strong>Return value:</strong><br />
+A pointer to the requested MovableObject instance. 0 if no MO with that<br />
+MOID was found. 0 if 0 was passed in as MOID (no MOID). Ownership is<br />
+*NOT* transferred!!<br />
+</p><br/><h3>Function:</h3><h2>GetMOIDCount</h2><p>
+Gets the number of MOID's currently in use this frame.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The count of MOIDs in use this frame.<br />
+</p><br/><h3>Function:</h3><h2>GetTeamMOIDCount</h2><p>
+Returns MO count for specified team</p><p><strong>Arguments:</strong><br />
+Team to count MO's</p><p><strong>Return value:</strong><br />
+MO's count owned by this team<br />
+</p><br/><h3>Function:</h3><h2>PurgeAllMOs</h2><p>
+Clears out all MovableObject:s out of this. Effectively empties the world of anything moving, without resetting all of this' settings.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetNextActorInGroup</h2><p>
+Get a pointer to the first Actor in the internal Actor list that is of a specifc group, alternatively the first one AFTER a specific actor!</p><p><strong>Arguments:</strong><br />
+Which group to try to get an Actor for.<br />
+A pointer to an Actor to use as starting point in the forward search.<br />
+Ownership NOT xferred!</p><p><strong>Return value:</strong><br />
+An Actor pointer to the requested team's first Actor encountered in the list. 0 if there are no Actors of that team.<br />
+</p><br/><h3>Function:</h3><h2>GetPrevActorInGroup</h2><p>
+Get a pointer to the last Actor in the internal Actor list that is of a specifc group, alternatively the last one BEFORE a specific actor!</p><p><strong>Arguments:</strong><br />
+Which group to try to get an Actor for.<br />
+A pointer to an Actor to use as starting point in the backward search.<br />
+Ownership NOT xferred!</p><p><strong>Return value:</strong><br />
+An Actor pointer to the requested team's last Actor encountered in the list. 0 if there are no Actors of that team.<br />
+</p><br/><h3>Function:</h3><h2>GetNextTeamActor</h2><p>
+Get a pointer to the first Actor in the internal Actor list that is of a specifc team, alternatively the first one AFTER a specific actor!</p><p><strong>Arguments:</strong><br />
+Which team to try to get an Actor for. 0 means first team, 1 means 2nd.<br />
+A pointer to an Actor to use as starting point in the forward search.<br />
+Ownership NOT xferred!</p><p><strong>Return value:</strong><br />
+An Actor pointer to the requested team's first Actor encountered in the list. 0 if there are no Actors of that team.<br />
+</p><br/><h3>Function:</h3><h2>GetPrevTeamActor</h2><p>
+Get a pointer to the last Actor in the internal Actor list that is of a specifc team, alternatively the last one BEFORE a specific actor!</p><p><strong>Arguments:</strong><br />
+Which team to try to get an Actor for. 0 means first team, 1 means 2nd.<br />
+A pointer to an Actor to use as starting point in the backward search.<br />
+Ownership NOT xferred!</p><p><strong>Return value:</strong><br />
+An Actor pointer to the requested team's last Actor encountered in the list. 0 if there are no Actors of that team.<br />
+</p><br/><h3>Function:</h3><h2>GetClosestTeamActor</h2><p>
+Get a pointer to an Actor in the internal Actor list that is of a specifc team and closest to a specific scene point.</p><p><strong>Arguments:</strong><br />
+Which team to try to get an Actor for. 0 means first team, 1 means 2nd.<br />
+The player to get the Actor for. This affects which brain can be marked.<br />
+The Scene point to search for the closest to.<br />
+The maximum radius around that scene point to search.<br />
+A float to be filled out with the distance of the returned closest to the search point. Will be unaltered if no object was found within radius.<br />
+An Actor to exclude from the search. OINT.</p><p><strong>Return value:</strong><br />
+An Actor pointer to the requested team's Actor closest to the Scene point, but not outside the max radius. If no Actor other than the excluded one was found within the radius of the point, 0 is returned.<br />
+</p><br/><h3>Function:</h3><h2>GetClosestEnemyActor</h2><p>
+Get a pointer to an Actor in the internal Actor list that is is not of the specified team and closest to a specific scene point.</p><p><strong>Arguments:</strong><br />
+Which team to try to get an enemy Actor for. NOTEAM means all teams.<br />
+The Scene point to search for the closest to.<br />
+The maximum radius around that scene point to search.<br />
+A vector to be filled out with the distance of the returned closest to the search point. Will be unaltered if no object was found within radius.</p><p><strong>Return value:</strong><br />
+An Actor pointer to the enemy closest to the Scene point, but not outside the max radius. If no Actor was found within the radius of the point, 0 is returned.<br />
+</p><br/><h3>Function:</h3><h2>GetFirstTeamActor</h2><p>
+Get a pointer to first best Actor in the internal Actor list that is of a specifc team.</p><p><strong>Arguments:</strong><br />
+Which team to try to get an Actor for. 0 means first team, 1 means 2nd.<br />
+The player to get the Actor for. This affects which brain can be marked.</p><p><strong>Return value:</strong><br />
+An Actor pointer to the first one of the requested team. If no Actor is in that team, 0 is returned.<br />
+</p><br/><h3>Function:</h3><h2>GetClosestActor</h2><p>
+Get a pointer to an Actor in the internal Actor list that is closest to a specific scene point.</p><p><strong>Arguments:</strong><br />
+Which team to try to get an Actor for. 0 means first team, 1 means 2nd.<br />
+The Scene point to search for the closest to.<br />
+The maximum radius around that scene point to search.<br />
+A float to be filled out with the distance of the returned closest to the search point. Will be unaltered if no object was found within radius.<br />
+An Actor to exclude from the search. OINT.</p><p><strong>Return value:</strong><br />
+An Actor pointer to the requested Actor closest to the Scene point, but not outside the max radius. If no Actor other than the excluded one was found within the radius of the point, 0 is returned.<br />
+</p><br/><h3>Function:</h3><h2>GetClosestBrainActor</h2><p>
+Get a pointer to the brain actor of a specific team that is closest to a scene point. OINT.</p><p><strong>Arguments:</strong><br />
+Which team to try to get the brain for. 0 means first team, 1 means 2nd.<br />
+The point in the scene where to look for the closest opposite team brain.</p><p><strong>Return value:</strong><br />
+An Actor pointer to the requested team's brain closest to the point.<br />
+0 if there are no brains of that team. OINT.<br />
+</p><br/><h3>Function:</h3><h2>GetFirstBrainActor</h2><p>
+Get a pointer to the brain actor of a specific team that is closest to a scene point. OINT.</p><p><strong>Arguments:</strong><br />
+Which team to try to get the brain for. 0 means first team, 1 means 2nd.<br />
+The point in the scene where to look for the closest opposite team brain.</p><p><strong>Return value:</strong><br />
+An Actor pointer to the requested team's brain closest to the point.<br />
+0 if there are no brains of that team. OINT.<br />
+</p><br/><h3>Function:</h3><h2>GetClosestOtherBrainActor</h2><p>
+Get a pointer to the brain actor NOT of a specific team that is closest to a scene point. OINT.</p><p><strong>Arguments:</strong><br />
+Which team to NOT get the brain for. 0 means first team, 1 means 2nd.<br />
+The point where to look for the closest brain not of this team.</p><p><strong>Return value:</strong><br />
+An Actor pointer to the requested brain closest to the point.<br />
+0 if there are no brains not on that team. OINT.<br />
+</p><br/><h3>Function:</h3><h2>GetFirstOtherBrainActor</h2><p>
+Get a pointer to the brain actor NOT of a specific team. OINT.</p><p><strong>Arguments:</strong><br />
+Which team to NOT get the brain for. 0 means first team, 1 means 2nd.</p><p><strong>Return value:</strong><br />
+An Actor pointer to the requested brain of that team.<br />
+0 if there are no brains not on that team. OINT.<br />
+</p><br/><h3>Function:</h3><h2>GetUnassignedBrain</h2><p>
+Get a pointer to the first brain actor of a specific team which hasn't been assigned to a player yet.</p><p><strong>Arguments:</strong><br />
+Which team to try to get the brain for. 0 means first team, 1 means 2nd.</p><p><strong>Return value:</strong><br />
+An Actor pointer to the requested team's first brain encountered in the list that hasn't been assigned to a player. 0 if there are no unassigned brains of that team.<br />
+</p><br/><h3>Function:</h3><h2>GetParticleCount</h2><p>
+Gets the number of particles (MOPixel:s) currently held.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The number of particles.<br />
+</p><br/><h3>Function:</h3><h2>GetAGResolution</h2><p>
+Gets the global default AtomGroup resolution setting.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The global AtomGroup resolution setting, from 1 (highest res) upward.<br />
+</p><br/><h3>Function:</h3><h2>GetSplashRatio</h2><p>
+Gets the global setting for how much splash MOPixels should be created an MO penetrates the terrain deeply.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+A float with the global splash amount setting, form 1.0 to 0.0.<br />
+</p><br/><h3>Property:</h3><h2>MaxDroppedItems</h2><p>
+The max number of dropped items that will be reached before the first dropped with be copied to the terrain.
+An int spefifying the limit.
+</p><br/><h3>Property:</h3><h2>ScriptedEntity</h2><p>
+The entity temporarily to be tranferred to the Lua interface for its preset-defined scripts to be run on it.
+The entity pointer made accessible to the Lua state.
+</p><br/><h3>Function:</h3><h2>SortTeamRoster</h2><p>
+Sets this to draw HUD lines for a specific team's roster this frame.</p><p><strong>Arguments:</strong><br />
+Which team to have lines drawn of.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>RemoveActor</h2><p>
+Removes an Actor from the internal list of MO:s. After the Actor is removed, ownership is effectively released and transferred to whatever client called this method.</p><p><strong>Arguments:</strong><br />
+A pointer to the MovableObject to remove.</p><p><strong>Return value:</strong><br />
+Whether the object was found in the particle list, and consequently removed. If the particle entry wasn't found, false is returned.<br />
+</p><br/><h3>Function:</h3><h2>RemoveItem</h2><p>
+Removes a pickup-able MovableObject item from the internal list of
+MO:s. After the item is removed, ownership is effectively released and transferred to whatever client called this method.</p><p><strong>Arguments:</strong><br />
+A pointer to the MovableObject to remove.</p><p><strong>Return value:</strong><br />
+Whether the object was found in the particle list, and consequently removed. If the particle entry wasn't found, false is returned.<br />
+</p><br/><h3>Function:</h3><h2>RemoveParticle</h2><p>
+Removes a MovableObject from the internal list of MO:s. After the
+MO is removed, ownership is effectively released and transferred to whatever client called this method.</p><p><strong>Arguments:</strong><br />
+A pointer to the MovableObject to remove.</p><p><strong>Return value:</strong><br />
+Whether the object was found in the particle list, and consequently removed. If the particle entry wasn't found, false is returned.<br />
+</p><br/><h3>Function:</h3><h2>ValidMO</h2><p>
+Indicates whether the passed in MovableObject pointer points to an
+MO that's currently active in the simulation, and kept by this
+MovableMan. Internal optimization is made so that the same MO can efficiently be checked many times during the same frame.</p><p><strong>Arguments:</strong><br />
+A pointer to the MovableObject to check for being actively kept by this MovableMan.</p><p><strong>Return value:</strong><br />
+Whether the MO instance was found in the active list or not.<br />
+</p><br/><h3>Function:</h3><h2>IsActor</h2><p>
+Indicates whether the passed in MovableObject is an active Actor kept by this MovableMan or not.</p><p><strong>Arguments:</strong><br />
+A pointer to the MovableObject to check for Actorness.</p><p><strong>Return value:</strong><br />
+Whether the object was found in the Actor list or not.<br />
+</p><br/><h3>Function:</h3><h2>IsDevice</h2><p>
+Indicates whether the passed in MovableObject is an active Item kept by this MovableMan or not.</p><p><strong>Arguments:</strong><br />
+A pointer to the MovableObject to check for Itemness.</p><p><strong>Return value:</strong><br />
+Whether the object was found in the Item list or not.<br />
+</p><br/><h3>Function:</h3><h2>IsParticle</h2><p>
+Indicates whether the passed in MovableObject is an active Item kept by this MovableMan or not.</p><p><strong>Arguments:</strong><br />
+A pointer to the MovableObject to check for Itemness.</p><p><strong>Return value:</strong><br />
+Whether the object was found in the Particle list or not.<br />
+</p><br/><h3>Function:</h3><h2>IsOfActor</h2><p>
+Indicates whether the passed in MOID is that of an MO which either is or is parented to an active Actor by this MovableMan, or not.</p><p><strong>Arguments:</strong><br />
+An MOID to check for Actorness.</p><p><strong>Return value:</strong><br />
+Whether the object was found or owned by an MO in the Actor list or not.<br />
+</p><br/><h3>Function:</h3><h2>GetRootMOID</h2><p>
+Produces the root MOID of the MOID of a potential child MO to another MO.</p><p><strong>Arguments:</strong><br />
+An MOID to get the root MOID of.</p><p><strong>Return value:</strong><br />
+The MOID of the root MO of the MO the passed-in MOID represents. This will be the same as the MOID passed in if the MO is a root itself. It will be equal to g_NoMOID if the MOID isn't allocated to an MO.<br />
+</p><br/><h3>Function:</h3><h2>RemoveMO</h2><p>
+Removes a MovableObject from the any and all internal lists of MO:s.
+After the MO is removed, ownership is effectively released and transferred to whatever client called this method.</p><p><strong>Arguments:</strong><br />
+A pointer to the MovableObject to remove.</p><p><strong>Return value:</strong><br />
+Whether the object was found in MovableMan's custody, and consequently removed. If the MO entry wasn't found, false is returned.<br />
+</p><br/><h3>Function:</h3><h2>KillAllActors</h2><p>
+Kills and destroys all actors of a specific team.</p><p><strong>Arguments:</strong><br />
+The team to NOT annihilate, if NOTEAM, then ALL actors die.</p><p><strong>Return value:</strong><br />
+How many Actors were killed.<br />
+</p><br/><h3>Function:</h3><h2>OpenAllDoors</h2><p>
+Opens all doors and keeps them open until this is called again with false.</p><p><strong>Arguments:</strong><br />
+Whether to open all doors (true), or undo this action (false)<br />
+Which team to do this for. NOTEAM means all teams.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsParticleSettlingEnabled</h2><p>
+Shows whetehr particles are set to get copied to the terrain upon settling</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether enabled or not.<br />
+</p><br/><h3>Function:</h3><h2>EnableParticleSettling</h2><p>
+Sets whether particles will get copied into the terrain upon them settling down.</p><p><strong>Arguments:</strong><br />
+Whether to enable or not.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsMOSubtractionEnabled</h2><p>
+Shows whether MO's sihouettes can get subtracted from the terrain at all.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether enabled or not.<br />
+</p>

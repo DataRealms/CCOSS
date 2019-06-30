@@ -1,0 +1,63 @@
+<h1>PresetManager</h1><h3>
+The singleton manager of all presets of Entity:s in the RTE.
+The presets serve as a respository of Entity instances with specific and unique and initial runtime data.</h3><p>Has no parent class.</p><br/><h3>Function:</h3><h2>GetDataModule</h2><p>
+Gets a specific loaded DataModule</p><p><strong>Arguments:</strong><br />
+The ID of the module to get.</p><p><strong>Return value:</strong><br />
+The requested DataModule. Ownership is NOT transferred!<br />
+</p><br/><h3>Function:</h3><h2>GetModuleID</h2><p>
+Gets the ID of a loaded DataModule.</p><p><strong>Arguments:</strong><br />
+The name of the DataModule to get the ID from, including the ".rte"</p><p><strong>Return value:</strong><br />
+The requested ID. If no module of the name was found, -1 will be returned.<br />
+</p><br/><h3>Function:</h3><h2>GetModuleIDFromPath</h2><p>
+Gets the ID of a loaded DataModule, from a full data file path.</p><p><strong>Arguments:</strong><br />
+The full path to a data file inside the data module id you want to get.</p><p><strong>Return value:</strong><br />
+The requested ID. If no module of the name was found, -1 will be returned.<br />
+</p><br/><h3>Function:</h3><h2>GetTotalModuleCount</h2><p>
+Gets the total number of modules loaded so far, official or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The number of modules loaded so far, both official and non.<br />
+</p><br/><h3>Function:</h3><h2>GetOfficialModuleCount</h2><p>
+Gets the total number of OFFICIAL modules loaded so far.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The number of official modules loaded so far.<br />
+</p><br/><h3>Function:</h3><h2>AddPreset</h2><p>
+Adds an Entity instance's pointer and name associations to the internal list of already read in Entity:s. Ownership is NOT transferred!
+If there already is an instance defined, nothing happens. If there is not, a clone is made of the passed-in Entity and added to the library.</p><p><strong>Arguments:</strong><br />
+A pointer to the Entity derived instance to add. It should be created from a Reader. Ownership is NOT transferred!<br />
+Which module to add the entity to.<br />
+Whether to overwrite if an instance of the EXACT same TYPE and name was found. If one of the same name but not the exact type, false is returned regardless and nothing will have been added.<br />
+The file this instance was read from, or where it should be written.<br />
+If "Same" is passed as the file path read from, an overwritten instance will keep the old one's file location entry.</p><p><strong>Return value:</strong><br />
+Whether or not a copy of the passed-in instance was successfully inserted into the module. False will be returned if there already was an instance of that class and instance name inserted previously, unless overwritten.<br />
+</p><br/><h3>Function:</h3><h2>GetRandomOfGroup</h2><p>
+Returns a previously read in (defined) Entity which is randomly selected from a specific group.</p><p><strong>Arguments:</strong><br />
+The group to randomly select an Entity from. "All" will look in all.<br />
+The name of the least common denominator type of the Entitys you want.<br />
+"All" will look at all types.<br />
+Whether to only get those of one specific DataModule (0-n), or all (-1).</p><p><strong>Return value:</strong><br />
+The Entity preset that was randomly selected. Ownership is NOT transferred!<br />
+</p><br/><h3>Function:</h3><h2>GetRandomOfGroupInModuleSpace</h2><p>
+Returns a previously read in (defined) Entity which is associated with a specific group, randomly selected and only exist in a specific module space.</p><p><strong>Arguments:</strong><br />
+Ownership of the list or the Entitys placed in it are NOT transferred!<br />
+The group to randomly select from. "All" will look in all.<br />
+The name of the least common denominator type of the Entity:s you want.<br />
+"All" will look at all types.<br />
+Which module to get the instances for, in addition to all groups in official modules loaded earlier than the one specified here. -1 means get ALL groups ever reg'd.</p><p><strong>Return value:</strong><br />
+The randomly select preset, if any was found with thse search params.<br />
+Ownership is NOT transferred!<br />
+</p><br/><h3>Function:</h3><h2>GetEntityDataLocation</h2><p>
+Gets the data file path of a previously read in (defined) Entity.</p><p><strong>Arguments:</strong><br />
+The type name of the derived Entity. Ownership is NOT transferred!<br />
+The preset name of the derived Entity preset.<br />
+Which module to try to get the entity from. If it's not found there, the official modules will be searched also.</p><p><strong>Return value:</strong><br />
+The file path of the data file that the specified Entity was read from.<br />
+If no Entity of that description was found, "" is returned.<br />
+</p><br/><h3>Function:</h3><h2>ReadReflectedPreset</h2><p>
+Reads a preset of an Entity and tries to add it to the list of read-in instances. Regardless of whether there is a name collision, the read-in preset will be returned, ownership TRANSFERRED!</p><p><strong>Arguments:</strong><br />
+The Reader which is about to read in a preset.</p><p><strong>Return value:</strong><br />
+A pointer to the Entity preset read in. 0 if there was an error, or the instance name was 'None'. Ownership IS transferred!<br />
+</p><br/><h3>Function:</h3><h2>ReloadAllScripts</h2><p>
+Reloads all scripted Entity Presets witht he latest version of their respective script files.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p>

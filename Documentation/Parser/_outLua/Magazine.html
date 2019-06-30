@@ -1,0 +1,26 @@
+<h2>Concrete Class:</h2><h1>Magazine</h1><h3>
+An Attachable ammo magazine that can hold rounds that can be fired by HDFirearm:s.</h3><h3>Parent:  <a href="Attachable.html">Attachable</a></h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Read-Only Property:</h3><h2>NextRound</h2><p>
+The next Round preset of ammo in this Magazine, without removing it. Ownership IS NOT transferred!
+A pointer to the next Round preset of ammo, or 0 if this Magazine is empty.
+</p><br/><h3>Property:</h3><h2>RoundCount</h2><p>
+Returns how many rounds are left in this Magazine.
+The number of rounds left. Negative value means infinite ammo left!
+</p><br/><h3>Read-Only Property:</h3><h2>IsEmpty</h2><p>
+Returns whether this Magazine is out of rounds.
+Whether this Magazine is out of rounds or not.
+</p><br/><h3>Read-Only Property:</h3><h2>IsFull</h2><p>
+Returns whether this Magazine has not used up any rounds yet.
+Whether this Magazine has not used any rounds yet.
+</p><br/><h3>Read-Only Property:</h3><h2>IsOverHalfFull</h2><p>
+Returns whether this Magazine has not used up half of the rounds yet.
+Whether this Magazine has not used half of its rounds yet.
+</p><br/><h3>Read-Only Property:</h3><h2>Capacity</h2><p>
+Returns teh number of rounds this can hold when it's full.
+The number of rounds this can hold. Negative value means infinite ammo.
+</p><br/><h3>Read-Only Property:</h3><h2>Discardable</h2><p>
+Whether this Magazine should be released into the scene when discarded or just deleted.
+Whether this Magazine should be relesed into scene or deleted when released.
+</p>

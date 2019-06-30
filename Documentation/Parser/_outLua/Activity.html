@@ -1,0 +1,202 @@
+<h2>Generic Class:</h2><h1>Activity</h1><h3>
+Base class for all Activity:s, including game modes and editors.</h3><h3>Parent: Entity</h3><br/><h3>Read-Only Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Read-Only Property:</h3><h2>Description</h2><p>
+The user-friendly description of this.
+A string with the user-friendly description of this.
+</p><br/><h3>Property:</h3><h2>InCampaignStage</h2><p>
+Shows in which stage of the Campaign this appears.
+An int with the stage number. < 0 means it's not in the campaign
+</p><br/><h3>Property:</h3><h2>ActivityState</h2><p>
+The current activity state code. See the ActivityState enumeration for the legend.
+An int with the game state code.
+</p><br/><h3>Property:</h3><h2>SceneName</h2><p>
+The name of the current scene.
+A string with the instance name of the scene.
+</p><br/><h3>Property:</h3><h2>PlayerCount</h2><p>
+The total number of active players in the current game, AI or Human
+The total number of players in the current game.
+</p><br/><h3>Function:</h3><h2>DeactivatePlayer</h2><p>
+Turns off a player if they were active. Should only be done if brain etc are already taken care of and disposed of properly. Will also deactivate the team this player is on, if there's no other active players still on it.</p><p><strong>Arguments:</strong><br />
+Which player index to deactivate.</p><p><strong>Return value:</strong><br />
+Whether the player was active before trying to deactivate.<br />
+</p><br/><h3>Function:</h3><h2>PlayerActive</h2><p>
+Indicates whether a specific player is active in the current game.</p><p><strong>Arguments:</strong><br />
+Which player index to check.</p><p><strong>Return value:</strong><br />
+Whether the player is active in the current activity.<br />
+</p><br/><h3>Function:</h3><h2>PlayerHuman</h2><p>
+Indicates whether a specific player is human in the current game, ie not an AI player and has a screen etc.</p><p><strong>Arguments:</strong><br />
+Which player index to check.</p><p><strong>Return value:</strong><br />
+Whether the player is active as a Human in the current activity.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>HumanCount</h2><p>
+The total number of human players in the current game
+The total number of players in the current game.
+</p><br/><h3>Property:</h3><h2>TeamCount</h2><p>
+The total number of teams in the current game
+The total number of teams in the current game.
+</p><br/><h3>Function:</h3><h2>TeamActive</h2><p>
+Indicates whether a specific team is active in the current game.</p><p><strong>Arguments:</strong><br />
+Which team index to check.</p><p><strong>Return value:</strong><br />
+Whether the team is active in the current activity.<br />
+</p><br/><h3>Function:</h3><h2>GetTeamOfPlayer</h2><p>
+Gets the current team a specific player belongs to.</p><p><strong>Arguments:</strong><br />
+The player to get the team info on.</p><p><strong>Return value:</strong><br />
+An int with the team number.<br />
+</p><br/><h3>Function:</h3><h2>SetTeamOfPlayer</h2><p>
+Sets the current team a specific player belongs to.</p><p><strong>Arguments:</strong><br />
+The player to set the team info on, and the team.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>PlayersInTeamCount</h2><p>
+Gets the current number of players in a specific team.</p><p><strong>Arguments:</strong><br />
+Which team to get the player count for.</p><p><strong>Return value:</strong><br />
+An int with the player count.<br />
+</p><br/><h3>Function:</h3><h2>ScreenOfPlayer</h2><p>
+Converts a player index into a screen index, and only if that player is human.</p><p><strong>Arguments:</strong><br />
+Which player index to convert.</p><p><strong>Return value:</strong><br />
+An int with the screen index, or -1 if nonhuman player or no players.<br />
+</p><br/><h3>Function:</h3><h2>GetViewState</h2><p>
+Gets the current viewing state for a specific player. See the
+ViewState enumeration for the legend.</p><p><strong>Arguments:</strong><br />
+Which player to get the view state for.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetViewState</h2><p>
+Sets the current viewing state for a specific player. See the
+ViewState enumeration for the legend.</p><p><strong>Arguments:</strong><br />
+The state you want to set to.<br />
+Which player to get the view state for.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetPlayerBrain</h2><p>
+Gets the current Brain actor for a specific player.</p><p><strong>Arguments:</strong><br />
+Which player to get the brain actor for.</p><p><strong>Return value:</strong><br />
+A pointer to the Brain Actor. Ownership is NOT transferred!<br />
+</p><br/><h3>Function:</h3><h2>SetPlayerBrain</h2><p>
+Sets the current Brain actor for a specific player.</p><p><strong>Arguments:</strong><br />
+A pointer to the new brain Actor. Ownership is NOT transferred!<br />
+Which team to set the brain actor for.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>PlayerHadBrain</h2><p>
+Shows whether a specific player ever had a brain yet.</p><p><strong>Arguments:</strong><br />
+Which player to check whether they ever had a brain.</p><p><strong>Return value:</strong><br />
+Whether this player ever had a brain.<br />
+</p><br/><h3>Function:</h3><h2>SetBrainEvacuated</h2><p>
+Sets whether a player's brain was evacuated during the Activity.</p><p><strong>Arguments:</strong><br />
+Which player to check whether their brain was evac'd.<br />
+Whether it was evacuated yet.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>BrainWasEvacuated</h2><p>
+Shows whether a specific player's brain was evacuated into orbit so far.</p><p><strong>Arguments:</strong><br />
+Which player to check whether their brain was evac'd.</p><p><strong>Return value:</strong><br />
+Whether this player had a brain that was evacuated.<br />
+</p><br/><h3>Function:</h3><h2>IsAssignedBrain</h2><p>
+Shows whether the passed in actor is the brain of any player.</p><p><strong>Arguments:</strong><br />
+Which Actor to check for player brainedness.</p><p><strong>Return value:</strong><br />
+Whetehr any player's brain or not.<br />
+</p><br/><h3>Function:</h3><h2>IsBrainOfWhichPlayer</h2><p>
+Shows which player has a specific actor as a brain, if any.</p><p><strong>Arguments:</strong><br />
+Which Actor to check for player brainedness.</p><p><strong>Return value:</strong><br />
+Which player has this assigned as a brain, if any.<br />
+</p><br/><h3>Function:</h3><h2>IsOtherPlayerBrain</h2><p>
+Shows whether the passed in actor is the brain of any other player.</p><p><strong>Arguments:</strong><br />
+Which Actor to check for other player brainedness.<br />
+From which player's perspective to make the query.</p><p><strong>Return value:</strong><br />
+Whetehr other player's brain or not.<br />
+</p><br/><h3>Function:</h3><h2>HumanBrainCount</h2><p>
+Shows how many human-controlled brains are left in this Activity.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+How many brains are left as human-controlled in this Activity.<br />
+</p><br/><h3>Function:</h3><h2>AIBrainCount</h2><p>
+Shows how many A.I.-controlled brains are left in this Activity.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+How many brains are left on as A.I.-controlled in this Activity.<br />
+</p><br/><h3>Function:</h3><h2>GetControlledActor</h2><p>
+Gets the currently controlled actor of a specific player.</p><p><strong>Arguments:</strong><br />
+Which player to get the controlled actor of.</p><p><strong>Return value:</strong><br />
+A pointer to the controlled Actor. Ownership is NOT transferred! 0 If no actor is currently controlled by this player.<br />
+</p><br/><h3>Function:</h3><h2>SetTeamFunds</h2><p>
+Sets the amount of funds a specific team currently has in the game.</p><p><strong>Arguments:</strong><br />
+Which team to set the fund count for. 0 = first team.</p><p><strong>Return value:</strong><br />
+A float with the funds tally for the requested team.<br />
+</p><br/><h3>Function:</h3><h2>GetTeamFunds</h2><p>
+Gets the amount of funds a specific team currently has in the game.</p><p><strong>Arguments:</strong><br />
+Which team to get the fund count from. 0 = first team.</p><p><strong>Return value:</strong><br />
+A float with the funds tally for the requested team.<br />
+</p><br/><h3>Function:</h3><h2>SetTeamAISkill</h2><p>
+Sets AI skill level for specified team</p><p><strong>Return value:</strong><br />
+None<br />
+</p><br/><h3>Function:</h3><h2>GetTeamAISkill</h2><p><strong>Arguments:</strong><br />
+Team to get skill level for</p><p><strong>Return value:</strong><br />
+Team skill level<br />
+</p><br/><h3>Function:</h3><h2>ChangeTeamFunds</h2><p>
+Changes a team's funds level by a certain amount.</p><p><strong>Arguments:</strong><br />
+The amount with which to change the funds balance.<br />
+Which team to alter the funds of. 0 = first team.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>TeamFundsChanged</h2><p>
+Checks whetehr the team funds changed since last time this was called.
+This also resets the state, so calling this again on the same team will ield false unless it's been changed again.</p><p><strong>Arguments:</strong><br />
+Which team's funds to check.</p><p><strong>Return value:</strong><br />
+Whether funds amount changed for this team since last time this was called.<br />
+</p><br/><h3>Function:</h3><h2>ReportDeath</h2><p>
+Increments the tally of a death of an actor on a specific team.</p><p><strong>Arguments:</strong><br />
+Which team to increase the death count of. 0 = first team.</p><p><strong>Return value:</strong><br />
+The new death count.<br />
+</p><br/><h3>Function:</h3><h2>GetTeamDeathCount</h2><p>
+Gets the number of deaths on a specific team so far on the current game.</p><p><strong>Arguments:</strong><br />
+Which team to get the death tally of. 0 = first team.</p><p><strong>Return value:</strong><br />
+The current death count.<br />
+</p><br/><h3>Function:</h3><h2>GetDemoTimeLeft</h2><p>
+Shows how many seconds of demo time is left, if indeed in demo mode.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+An int wwith how many demo seconds are left, or < 0 if not applicable.<br />
+</p><br/><h3>Function:</h3><h2>Running</h2><p>
+Indicates whether the game is currently running or not (not editing, over or paused)</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether the game is running or not.<br />
+</p><br/><h3>Function:</h3><h2>Paused</h2><p>
+Indicates whether the game is currently paused or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether the game is paused or not.<br />
+</p><br/><h3>Function:</h3><h2>ActivityOver</h2><p>
+Indicates whether the game is over or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether the game is over or not.<br />
+</p><br/><h3>Function:</h3><h2>EnteredOrbit</h2><p>
+Indicates an Actor as having left the game scene and entered orbit.
+OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.</p><p><strong>Arguments:</strong><br />
+The actor instance. Ownership IS NOT TRANSFERRED!</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SwitchToActor</h2><p>
+Forces the ActivityMan to focus player control to a specific Actor for a specific team. OWNERSHIP IS NOT TRANSFERRED!</p><p><strong>Arguments:</strong><br />
+Which Actor to switch focus to. The team of this Actor will be set once it is passed in. Ownership IS NOT TRANSFERRED! The Actor should be added to MovableMan already.</p><p><strong>Return value:</strong><br />
+Whether the focus switch was successful or not.<br />
+</p><br/><h3>Function:</h3><h2>SwitchToNextActor</h2><p>
+Forces the ActivityMan to focus player control to the next Actor of a specific team, other than the current one focused on.</p><p><strong>Arguments:</strong><br />
+Which team to switch to next actor on.<br />
+An actor pointer to skip in the sequence.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SwitchToPrevActor</h2><p>
+Forces the ActivityMan to focus player control to the previous Actor of a specific team, other than the current one focused on.</p><p><strong>Arguments:</strong><br />
+Which team to switch to next actor on.<br />
+An actor pointer to skip in the sequence.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Property:</h3><h2>Difficulty</h2><p>
+The current difficulty setting
+The current setting.
+</p><br/><h3>Function:</h3><h2>IsPlayerTeam</h2><p>
+Indicates whether a team is player controlled or not.</p><p><strong>Arguments:</strong><br />
+The team nuber to check.</p><p><strong>Return value:</strong><br />
+Whether  team is player controlled or not.<br />
+</p><br/><h3>Function:</h3><h2>ResetMessageTimer</h2><p>
+Resets the message timer for one player</p><p><strong>Arguments:</strong><br />
+The player to rese tthe message timer for.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>Pause</h2><p>
+Pauses and unpauses the game.</p><p><strong>Arguments:</strong><br />
+Whether to pause the game or not.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>End</h2><p>
+Forces this activity's game end.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p>

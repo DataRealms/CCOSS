@@ -1,0 +1,36 @@
+<h2>Generic Class:</h2><h1>SceneEditorGUI</h1><h3>
+A full menu system that represents the scene editing GUI for Cortex Command</h3><p>Has no parent class.</p><br/><h3>Function:</h3><h2>SetCursorPos</h2><p>
+Sets the absolute scene coordinates of the cursor of this Editor.</p><p><strong>Arguments:</strong><br />
+The new cursor position in absolute scene units.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetCurrentObject</h2><p>
+Gets the currently held Object in the cursor of this Editor. Ownership
+IS NOT transferred!</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The currently held object, if any. OINT!<br />
+</p><br/><h3>Function:</h3><h2>SetCurrentObject</h2><p>
+Sets the new Object to be held at the cursor of this Editor. Ownership
+IS transferred!</p><p><strong>Arguments:</strong><br />
+The new Object to be held by the cursor. Ownership IS transferred!</p><p><strong>Return value:</strong><br />
+Whether the cursor holds a valid object after setting.<br />
+</p><br/><h3>Function:</h3><h2>SetModuleSpace</h2><p>
+Sets which DataModule space to be picking objects from. If -1, then let the player pick from all loaded modules.</p><p><strong>Arguments:</strong><br />
+The ID of the module to let the player pick objects from. All official modules' objects will alwayws be presented, in addition to the one passed in here.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetNativeTechModule</h2><p>
+Sets which DataModule ID should be treated as the native tech of the user of this menu.</p><p><strong>Arguments:</strong><br />
+The module ID to set as the native one. 0 means everything is native.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetForeignCostMultiplier</h2><p>
+Sets the multiplier of the cost of any foreign Tech items.</p><p><strong>Arguments:</strong><br />
+The scalar multiplier of the costs of foreign Tech items.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>TestBrainResidence</h2><p>
+Checks whether the resident brain is currently placed into a valid location in this scene, based on whether there is a clear path to the sky above it. This forces the editor into place brain mode with the current resident brain if the current placement is no bueno. It also removes the faulty brain from residence in the scene!</p><p><strong>Arguments:</strong><br />
+Whether it's OK if we dont' have a brain right now - ie don't force into isntallation mode if no brain was found.</p><p><strong>Return value:</strong><br />
+Whether a resident brain was found, AND found in a valid location!<br />
+</p><br/><h3>Function:</h3><h2>Update</h2><p>
+Updates the state of this Menu each frame</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p>

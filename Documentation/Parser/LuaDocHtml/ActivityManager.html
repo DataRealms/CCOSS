@@ -1,0 +1,44 @@
+<h1>ActivityManager</h1><h3>
+The singleton manager of the Activity:s and rules of Cortex Command</h3><p>Has no parent class.</p><br/><h3>Property:</h3><h2>DefaultActivityType</h2><p>
+The type name of the default activity to be loaded if nothing else is available.
+The default activity type name.
+</p><br/><h3>Property:</h3><h2>DefaultActivityName</h2><p>
+The name of the default activity to be loaded if nothing else is available.
+The default activity instance name.
+</p><br/><h3>Function:</h3><h2>SetStartActivity</h2><p>
+Sets a new activity to copy for next restart. You have to use
+RestartActivity to get it going. Ownership IS transferred!</p><p><strong>Arguments:</strong><br />
+The new activity to put into effect next time ResetActivity is called.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetStartActivity</h2><p>
+Gets the activity set to use a copy of for next restart. Ownership is
+NOT transferred!</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The activity to put into effect next time ResetActivity is called. OINT!<br />
+</p><br/><h3>Function:</h3><h2>GetActivity</h2><p>
+Gets the current activity in effect. Won't be what has been set by
+SetStartActivity unless RestartActivity has been called since.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The current Activity in effect. Will be 0 if no activity is going.<br />
+</p><br/><h3>Function:</h3><h2>RestartActivity</h2><p>
+Completely restarts whatever activity was last started.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+An error return value signaling sucess or any particular failure.<br />
+Anything below 0 is an error signal.<br />
+</p><br/><h3>Function:</h3><h2>PauseActivity</h2><p>
+Pauses and unpauses the game.</p><p><strong>Arguments:</strong><br />
+Whether to pause the game or not.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>EndActivity</h2><p>
+Forces the current game's end.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ActivityRunning</h2><p>
+Indicates whether the game is currently running or not (not editing, over or paused)</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether the game is running or not.<br />
+</p><br/><h3>Function:</h3><h2>ActivityPaused</h2><p>
+Indicates whether the game is currently paused or not.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether the game is paused or not.<br />
+</p>

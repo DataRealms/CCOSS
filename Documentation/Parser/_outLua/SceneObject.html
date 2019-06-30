@@ -1,0 +1,51 @@
+<h2>Abstract Class:</h2><h1>SceneObject</h1><h3>
+The base class shared by Both TerrainObject:s and MovableObject:s, ie anything that can be places in a scene.</h3><h3>Parent: Entity</h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this SceneObject.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Property:</h3><h2>Pos</h2><p>
+The absolute position of this SceneObject.
+A Vector describing the current absolute position in pixels.
+</p><br/><h3>Property:</h3><h2>HFlipped</h2><p>
+Returns whether this is being drawn flipped horizontally (around the vertical axis), or not.
+Whether flipped or not.
+</p><br/><h3>Property:</h3><h2>RotAngle</h2><p>
+The current rotational angle of of this, in radians.
+The rotational angle of this, in radians.
+</p><br/><h3>Property:</h3><h2>Team</h2><p>
+Gets which team this belongs to.
+The currently assigned team number.
+</p><br/><h3>Property:</h3><h2>PlacedByPlayer</h2><p>
+Gets which player placed this object in the scene, if any.
+The player responsible for placing this is in the scene, if any.
+</p><br/><h3>Function:</h3><h2>GetGoldValue</h2><p>
+DOES THE SAME THING AS GetGoldValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
+</p><br/><h3>Function:</h3><h2>GetGoldValue</h2><p>
+Gets the cost to purchase this item, in oz's of gold.</p><p><strong>Arguments:</strong><br />
+If this is supposed to be adjusted for a specific Tech's subjective value, then pass in the native DataModule ID of that tech. 0 means no Tech is specified and the base value is returned.<br />
+How much to multiply the value if this happens to be a foreign Tech.<br />
+How much to multiply the value if this happens to be a native Tech.</p><p><strong>Return value:</strong><br />
+The cost, in oz of gold.<br />
+</p><br/><h3>Function:</h3><h2>SetGoldValue</h2><p>
+Sets the cost to purchase this item, in oz's of gold.</p><p><strong>Arguments:</strong><br />
+The cost, in oz of gold.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetGoldValueString</h2><p>
+Gets a descriptive string describing the cost to purchase this item, in oz's of gold.</p><p><strong>Arguments:</strong><br />
+If this is supposed to be adjusted for a specific Tech's subjective value, then pass in the native DataModule ID of that tech. 0 means no Tech is specified and the base value is returned.<br />
+How much to multiply the value if this happens to be a foreign Tech.</p><p><strong>Return value:</strong><br />
+The cost, described in a friendly to read string: "100oz", or "Free"<br />
+</p><br/><h3>Function:</h3><h2>GetTotalValue</h2><p>
+DOES THE SAME THING AS GetTotalValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
+</p><br/><h3>Function:</h3><h2>GetTotalValue</h2><p>
+Gets the total liquidation value of this, including everything inside.</p><p><strong>Arguments:</strong><br />
+If this is supposed to be adjusted for a specific Tech's subjective value, then pass in the native DataModule ID of that tech. 0 means no Tech is specified and the base value is returned.<br />
+How much to multiply the value if this happens to be a foreign Tech.</p><p><strong>Return value:</strong><br />
+The current value of this and all contained assets.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>IsBuyable</h2><p>
+Shows whether this should appear in teh buy menus at all.
+Buyable or not.
+</p><br/><h3>Function:</h3><h2>IsOnScenePoint</h2><p>
+Indicates whether this' current graphical representation overlaps a point in absolute scene coordinates.</p><p><strong>Arguments:</strong><br />
+The point in absolute scene coordinates.</p><p><strong>Return value:</strong><br />
+Whether this' graphical rep overlaps the scene point.<br />
+</p>

@@ -1,0 +1,92 @@
+To parse _luabindings/LuaMan.cpp:
+
+
+Define a php class 
+
+
+Find and eat "module(m_pMasterState)\n    [";
+
+do for each line until the line containing only "];" is found:
+{
+	eat all whitespace;
+
+	if line is empty or comment or bracket ("\n" OR "\r" OR "//" OR "/*" OR "*/" OR "[\n" OR "]\n" is encountered)
+		continue/skip to next line;
+	else if line starts with "def("
+	{
+		read what's within quotes and make new global lua function definition with that name;
+		eat to "&" and read what follows, up to ")";
+		what was read above is the name of the C++ function that the lua function is bound to - make the cross reference in the php data structures;
+	}
+	else if line starts with "class_<"
+	{
+		read what follows up till "," OR ">". This is the name of the C++ class being bound to - find it in existing php data structures from previous parsing of c++ headers;
+		if "," was encountered above, read what follows it up to ">" - this is the C++ parent name of the C++ class, make note of it in the php data structure later;
+		read what's within quotes after that, that's the Lua-bound class name;
+		create new class binding definition in php, so we can make a separate html page for it later. Any subsequent readings of .def, .property, .enum etc will be part of this new class
+	}
+	else if line starts with "ABSTRACTLUABINDING("
+	{
+		read what follows up till "," OR ")". This is BOTH the name of the lua binding class name AND the C++ class being bound to - find the latter in existing php data structures from previous parsing of c++ headers and make the cross reference to the binding data structure you're building;
+		if "," was encountered above, read what follows it up to ")" - this is the lua/C++ parent name of the lua/C++ class, make note of it in the php data structure later;
+		create new class binding definition in php, so we can make a separate html page for it later. Any subsequent readings of .def, .property, .enum etc will be part of this new class
+		
+		add to the Lua binding some more lua definitions inherent to all ABSTRACTLUABINDING class bindings:
+			global lua function To[ClassName]();
+			property of this new class definition: ClassName;
+	}
+	else if line starts with "CONCRETELUABINDING("
+	{
+		read what follows up till "," OR ")". This is BOTH the name of the lua binding class name AND the C++ class being bound to - find the latter in existing php data structures from previous parsing of c++ headers and make the cross reference to the binding data structure you're building;
+		if "," was encountered above, read what follows it up to ")" - this is the lua/C++ parent name of the lua/C++ class, make note of it in the php data structure later;
+		create new class binding definition in php, so we can make a separate html page for it later. Any subsequent readings of .def, .property, .enum etc will be part of this new class
+		
+		add to the Lua binding some more lua definitions inherent to all CONCRETELUABINDING class bindings:
+			global lua function Create[ClassName](string);
+			global lua function Create[ClassName](string, string);
+			global lua function To[ClassName]();
+			function of this new class definition: [ClassName] Clone();
+			property of this new class definition: string ClassName;
+	}
+	else if line starts with ".def("
+	{
+		if no current class definition is currently open, then FAIL! ".def" should never appear outside of a class binding definition;
+
+		if line contains no quotes
+		{
+			
+		}
+		else
+		{
+			read what's within quotes thereafter - this is the name of the new lua member function binding of the currently open lua class definition.
+			eat to "&";
+			eat to "::" and read what follows, up to ")" - this is the c++ class member function name being bound to - find it in existing php data structures from previous parsing of c++ headers;
+			make the binding connection between the lua bound function name and the c++ member function name in the currently open class definition in the php data structures;
+		}
+	}
+	else if line starts with ".def_readwrite("
+	{
+		if no current class definition is currently open, then FAIL! ".def_readwrite" should never appear outside of a class binding definition;
+
+		read what's within quotes thereafter - this is the name of the new lua member function binding of the currently open lua class definition.
+		eat to "&";
+		eat to "::" and read what follows, up to ")" - this is the c++ class member function name being bound to - find it in existing php data structures from previous parsing of c++ headers;
+		make the binding connection between the lua bound function name and the c++ member function name in the currently open class definition in the php data structures;
+	}
+	else if line starts with ".property("
+	{
+		if no current class definition is currently open, then FAIL! ".property(" should never appear outside of a class binding definition;
+	}
+	else if line starts with ".enum_("
+	{
+		if no current class definition is currently open, then FAIL! ".enum_(" should never appear outside of a class binding definition;
+	}
+	else if line starts with "value("
+	{
+		if no current class definition is currently open, then FAIL! "value(" should never appear outside of a class binding definition;
+		if no current enum definition is currently open, then FAIL! "value(" should never appear outside of a enumeration binding definition;
+		
+		read what's within quotes thereafter - this is the name of one of the enum values of the currently open enumeration definition;
+		
+	}
+}

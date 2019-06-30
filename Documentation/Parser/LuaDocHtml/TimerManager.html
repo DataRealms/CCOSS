@@ -1,0 +1,41 @@
+<h1>TimerManager</h1><h3>
+The centralized singleton manager of all Timer:s and overall timekeeping in RTE.</h3><p>Has no parent class.</p><br/><h3>Read-Only Property:</h3><h2>TicksPerSecond</h2><p>
+The number of ticks per second, or the resolution.
+The number of ticks per second.
+</p><br/><h3>Property:</h3><h2>TimeScale</h2><p>
+A time scale factor which will be used to speed up or slow down the progress of the simulation time in relation to the real world time.
+A factor between the real world time, and the simulation time. A value of 2.0 means simulation runs twice as fast as normal.
+</p><br/><h3>Function:</h3><h2>EnableAveraging</h2><p>
+Enables or disables the averaging of time measurements done each Update().
+These help smooth out and prevent choppy animation.</p><p><strong>Arguments:</strong><br />
+Whether ot not to enable the averaging.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Property:</h3><h2>RealToSimCap</h2><p>
+The cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.
+A float describing the current cap in seconds.
+</p><br/><h3>Property:</h3><h2>DeltaTimeTicks</h2><p>
+Returns the current number of ticks that the of the simulation updates in.
+The current fixed delta time that the simulation should be updating with, in ticks.
+</p><br/><h3>Property:</h3><h2>DeltaTimeSecs</h2><p>
+Returns the current fixed delta time of the simulation updates, in seconds.
+The current fixed delta time that the simulation should be updating with, in seconds.
+</p><br/><h3>Read-Only Property:</h3><h2>DeltaTimeMS</h2><p>
+Returns the current fixed delta time of the simulation updates, in ms.
+The current fixed delta time that the simulation should be updating with, in ms.
+</p><br/><h3>Function:</h3><h2>PauseSim</h2><p>
+Sets the sim to be paused, ie no real time ticks will be transferred to the sim accumulator while this is set to true;</p><p><strong>Arguments:</strong><br />
+Whether the sim should be paused or not.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Property:</h3><h2>OneSimUpdatePerFrame</h2><p>
+Shows whether to force this to artifically make time for only one single sim update for the graphics frame. Useful for debugging or profiling.
+Whether the sim should be set to only update once per graphics frame or not.
+</p><br/><h3>Function:</h3><h2>TimeForSimUpdate</h2><p>
+Tells whether there is enough sim time accumulated to do at least one physics update.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whetehr there is enough sim time to do a physics update.<br />
+</p><br/><h3>Function:</h3><h2>DrawnSimUpdate</h2><p>
+Tells whether the current simulation update will be drawn in a frame.
+Use this to check if it is necessary to draw purely graphical things during the sim update.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether this is the last sim update before a frame with its results will appear.<br />
+</p>

@@ -1,0 +1,133 @@
+<h2>Concrete Class:</h2><h1>MOSRotating</h1><h3>
+A sprite movable object that can rotate.</h3><h3>Parent:  <a href="MOSprite.html">MOSprite</a></h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Read-Only Property:</h3><h2>RecoilForce</h2><p>
+The current recoil impulse force Vector of this MOSprite.
+A const reference to the current recoil impulse force in kg * m/s.
+</p><br/><h3>Read-Only Property:</h3><h2>RecoilOffset</h2><p>
+The current recoil offset Vector of this MOSprite.
+A const reference to the current recoil offset.
+</p><br/><h3>Read-Only Property:</h3><h2>IsGold</h2><p>
+Indicates whether this MO is made of Gold or not.
+Whether this MovableObject is of Gold or not.
+</p><br/><h3>Property:</h3><h2>GibWoundLimit</h2><p>
+Return wound limit for this object.
+Wound limit of the object.
+</p><br/><h3>Property:</h3><h2>GibImpulseLimit</h2><p>
+Return impulse limit for this object.
+Impulse limit of the object.
+</p><br/><h3>Property:</h3><h2>DamageMultiplier</h2><p>
+Returns damage multiplier of this attachable.
+Current multiplier value.
+</p><br/><h3>Read-Only Property:</h3><h2>WoundCount</h2><p>
+Returns the amount of wound attached to this.
+Key to retrieve value.
+Wound amount.
+</p><br/><h3>Function:</h3><h2>AddRecoil</h2><p>
+Adds graphical recoil offset to this MOSprite according to its angle.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetRecoil</h2><p>
+Adds recoil offset to this MOSprite.</p><p><strong>Arguments:</strong><br />
+A vector with the recoil impulse force in kg * m/s.<br />
+A vector with the recoil offset in pixels.<br />
+Whether recoil should be activated or not for the next Draw().</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsRecoiled</h2><p>
+Returns whether this MOSprite is currently under the effects of recoil.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>EnableDeepCheck</h2><p>
+Sets whether or not this MOSRotating should check for deep penetrations the terrain or not.</p><p><strong>Arguments:</strong><br />
+Whether to enable deep penetration checking or not.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ForceDeepCheck</h2><p>
+Sets to force a deep checking of this' silhouette against the terrain and create an outline hole in the terrain, generating particles of the intersecting pixels in the terrain.</p><p><strong>Arguments:</strong><br />
+Whether to force a deep penetration check for this sim frame or not..</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GibThis</h2><p>
+Gibs this, effectively destroying it and creating multiple gibs or pieces in its place.</p><p><strong>Arguments:</strong><br />
+The impulse (kg * m/s) of the impact causing the gibbing to happen. blast impulse which will push the gibs away from the center.<br />
+A pointer to an MO which the gibs shuold not be colliding with!</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>MoveOutOfTerrain</h2><p>
+Checks whether any of the Atom:s in this MovableObject are on top of terrain pixels, and if so, attempt to move this out so none of this'
+Atoms are on top of the terrain any more.</p><p><strong>Arguments:</strong><br />
+Only consider materials stronger than this in the terrain for intersections.</p><p><strong>Return value:</strong><br />
+Whether any intersection was successfully resolved. Will return true even if there wasn't any intersections to begin with.<br />
+</p><br/><h3>Function:</h3><h2>ApplyForces</h2><p>
+Gathers and applies the global and accumulated forces. Then it clears out the force list.Note that this does NOT apply the accumulated impulses (impulse forces)!</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>ApplyImpulses</h2><p>
+Gathers and applies the accumulated impulse forces. Then it clears out the impulse list.Note that this does NOT apply the accumulated regular forces (non-impulse forces)!</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>AttachEmitter</h2><p>
+Attaches an AEmitter to this MOSRotating.</p><p><strong>Arguments:</strong><br />
+The AEmitter to attach, ownership IS transferred!<br />
+The offset from the origin of this MOSRotating to where the AEmitter's joint is attached.<br />
+Whether to check if this added emitter triggers the GibWoundLimit.. sometimes that's a bad idea if potentially gibbing this would cause the m_Attachables list to be messed with while it's being iterated.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>RemoveWounds</h2><p>
+Removes a specified amount of wounds.</p><p><strong>Arguments:</strong><br />
+Amount of wounds to remove.</p><p><strong>Return value:</strong><br />
+Amount of damage, caused by these wounds.<br />
+</p><br/><h3>Function:</h3><h2>IsOnScenePoint</h2><p>
+Indicates whether this' current graphical representation overlaps a point in absolute scene coordinates.</p><p><strong>Arguments:</strong><br />
+The point in absolute scene coordinates.</p><p><strong>Return value:</strong><br />
+Whether this' graphical rep overlaps the scene point.<br />
+</p><br/><h3>Function:</h3><h2>EraseFromTerrain</h2><p>
+Cuts this' silhouette out from the terrain's material and color layers.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>GetStringValue</h2><p>
+Returns the string value associated with the specified key or "" if it does not exist.</p><p><strong>Arguments:</strong><br />
+Key to retrieve value.</p><p><strong>Return value:</strong><br />
+String value.<br />
+</p><br/><h3>Function:</h3><h2>GetNumberValue</h2><p>
+Returns the number value associated with the specified key or 0 if it does not exist.</p><p><strong>Arguments:</strong><br />
+Key to retrieve value.</p><p><strong>Return value:</strong><br />
+Number (double) value.<br />
+</p><br/><h3>Function:</h3><h2>GetObjectValue</h2><p>
+Returns the object value associated with the specified key or 0 if it does not exist.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Object (Entity *) value.<br />
+</p><br/><h3>Function:</h3><h2>SetStringValue</h2><p>
+Sets the string value associated with the specified key.</p><p><strong>Arguments:</strong><br />
+String key and value to set.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetNumberValue</h2><p>
+Sets the string value associated with the specified key.</p><p><strong>Arguments:</strong><br />
+String key and value to set.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>SetObjectValue</h2><p>
+Sets the string value associated with the specified key.</p><p><strong>Arguments:</strong><br />
+String key and value to set.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>RemoveStringValue</h2><p>
+Remove the string value associated with the specified key.</p><p><strong>Arguments:</strong><br />
+String key to remove.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>RemoveNumberValue</h2><p>
+Remove the number value associated with the specified key.</p><p><strong>Arguments:</strong><br />
+String key to remove.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>RemoveObjectValue</h2><p>
+Remove the object value associated with the specified key.</p><p><strong>Arguments:</strong><br />
+String key to remove.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>StringValueExists</h2><p>
+Checks whether the value associated with the specified key exists.</p><p><strong>Arguments:</strong><br />
+String key to check.</p><p><strong>Return value:</strong><br />
+True if value exists.<br />
+</p><br/><h3>Function:</h3><h2>NumberValueExists</h2><p>
+Checks whether the value associated with the specified key exists.</p><p><strong>Arguments:</strong><br />
+String key to check.</p><p><strong>Return value:</strong><br />
+True if value exists.<br />
+</p><br/><h3>Function:</h3><h2>ObjectValueExists</h2><p>
+Checks whether the value associated with the specified key exists.</p><p><strong>Arguments:</strong><br />
+String key to check.</p><p><strong>Return value:</strong><br />
+True if value exists.<br />
+</p>

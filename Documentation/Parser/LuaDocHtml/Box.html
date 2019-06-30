@@ -1,0 +1,52 @@
+<h2>Generic Class:</h2><h1>Box</h1><h3>
+A useful 2D axis-aligned rectangle class.</h3><p>Has no parent class.</p><br/><h3>Read-Only Property:</h3><h2>ClassName</h2><p>
+The class name of this Box.
+A string with the friendly-formatted type name of this Box.
+</p><br/><h3>Property:</h3><h2>Corner</h2><p>
+The primary corner of this box
+A Vector with the primary corner of this box.
+</p><br/><h3>Property:</h3><h2>Width</h2><p>
+The width of this box. Note that this can be negative if the box hasn't been righted with Unflip().
+A float value that represents the width value of this Box.
+</p><br/><h3>Property:</h3><h2>Height</h2><p>
+The height of this box. Note that this can be negative if the box hasn't been righted with Unflip().
+A float value that represents the height value of this Box.
+</p><br/><h3>Property:</h3><h2>Center</h2><p>
+The center point of this Box' area, in absolute Scene coordinates.
+The center point.
+</p><br/><h3>Read-Only Property:</h3><h2>Area</h2><p>
+The width times the height.
+The width times the height.
+</p><br/><h3>Function:</h3><h2>GetRandomPoint</h2><p>
+Gets a random point within this box.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+The random point within the box.<br />
+</p><br/><h3>Function:</h3><h2>Unflip</h2><p>
+Makes the corner of this box represent the upper left corner, and both width and height will end up positive.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>WithinBox</h2><p>
+Tells whether a point is within the Box or not.</p><p><strong>Arguments:</strong><br />
+The Vector describing the point to test for insideness.</p><p><strong>Return value:</strong><br />
+Inside the box or not.<br />
+</p><br/><h3>Function:</h3><h2>WithinBoxX</h2><p>
+Tells whether an x coordinate is within the Box's x-range or not.</p><p><strong>Arguments:</strong><br />
+The coordinate describing the x value to test for insideness.</p><p><strong>Return value:</strong><br />
+Inside the box or not in the x axis.<br />
+</p><br/><h3>Function:</h3><h2>WithinBoxY</h2><p>
+Tells whether an y coordinate is within the Box's y-range or not.</p><p><strong>Arguments:</strong><br />
+The coordinate describing the y value to test for insideness.</p><p><strong>Return value:</strong><br />
+Inside the box or not in the y axis.<br />
+</p><br/><h3>Function:</h3><h2>GetWithinBoxX</h2><p>
+Returns an X value constrained inside the Box and returns it.</p><p><strong>Arguments:</strong><br />
+The X value to constrain inside the Box.</p><p><strong>Return value:</strong><br />
+The constrained value.<br />
+</p><br/><h3>Function:</h3><h2>GetWithinBoxY</h2><p>
+Returns an X value constrained inside the Box and returns it.</p><p><strong>Arguments:</strong><br />
+The X value to constrain inside the Box.</p><p><strong>Return value:</strong><br />
+The constrained value.<br />
+</p><br/><h3>Function:</h3><h2>GetWithinBox</h2><p>
+Returns a copy of a point constrained inside this box.</p><p><strong>Arguments:</strong><br />
+The Vector describing the point to constrain inside the box.</p><p><strong>Return value:</strong><br />
+The resulting point isnide the box.<br />
+</p>

@@ -1,0 +1,131 @@
+<h2>Concrete Class:</h2><h1>AHuman</h1><h3>
+A humanoid actor.</h3><h3>Parent:  <a href="Actor.html">Actor</a></h3><br/><h3>Property:</h3><h2>ClassName</h2><p>
+The class name of this Entity.
+A string with the friendly-formatted type name of this object.
+</p><br/><h3>Read-Only Property:</h3><h2>Head</h2><p>
+The head <a href="Attachable.html">Attachable</a>
+A pointer to the head Attachable of this. Ownership is NOT transferred!
+</p><br/><h3>Read-Only Property:</h3><h2>FGArm</h2><p>
+The FG Arm as an Attachable. This is for Lua binding mostly.
+A pointer to the FG Arm Attachable of this. Ownership is NOT transferred!
+</p><br/><h3>Read-Only Property:</h3><h2>BGArm</h2><p>
+The BG Arm as an Attachable. This is for Lua binding mostly.
+A pointer to the BG Arm Attachable of this. Ownership is NOT transferred!
+</p><br/><h3>Read-Only Property:</h3><h2>FGLeg</h2><p>
+The FG Leg as an Attachable. This is for Lua binding mostly.
+A pointer to the FG Leg Attachable of this. Ownership is NOT transferred!
+</p><br/><h3>Read-Only Property:</h3><h2>BGLeg</h2><p>
+The BG Leg as an Attachable. This is for Lua binding mostly.
+A pointer to the BG Leg Attachable of this. Ownership is NOT transferred!
+</p><br/><h3>Read-Only Property:</h3><h2>Jetpack</h2><p>
+The jetpack as an emitter. This is for Lua binding mostly.
+A pointer to jetpack emitter. Ownership is NOT transferred!
+</p><br/><h3>Property:</h3><h2>JetTimeTotal</h2><p>
+The amount of time this' jetpack can fire when filled, in ms.
+The amount of time this' jetpack can fire when it's at max.
+</p><br/><h3>Property:</h3><h2>JetTimeLeft</h2><p>
+The amount of time this' jetpack can still fire until out, in ms.
+The amount of time this' jetpack can still fire before running out.
+</p><br/><h3>Function:</h3><h2>EquipFirearm</h2><p>
+Switches the currently held device (if any) to the first found firearm in the inventory. If the held device already is a firearm, or no firearm is in inventory, nothing happens.</p><p><strong>Arguments:</strong><br />
+Whether to actually equip any matching item found in the inventory, or just report that it's there or not.</p><p><strong>Return value:</strong><br />
+Whether a firearm was successfully switched to, or already held.<br />
+</p><br/><h3>Function:</h3><h2>EquipThrowable</h2><p>
+Switches the currently held device (if any) to the first found ThrownDevice in the inventory. If the held device already is a ThrownDevice, or no
+ThrownDevice  is in inventory, nothing happens.</p><p><strong>Arguments:</strong><br />
+Whether to actually equip any matching item found in the inventory, or just report that it's there or not.</p><p><strong>Return value:</strong><br />
+Whether a ThrownDevice was successfully switched to, or already held.<br />
+</p><br/><h3>Function:</h3><h2>EquipDiggingTool</h2><p>
+Switches the currently held device (if any) to the first found digging tool in the inventory. If the held device already is a digging tool, or no digging tool is in inventory, nothing happens.</p><p><strong>Arguments:</strong><br />
+Whether to actually equip any matching item found in the inventory, or just report that it's there or not.</p><p><strong>Return value:</strong><br />
+Whether a digging tool was successfully switched to.<br />
+</p><br/><h3>Function:</h3><h2>EquipShield</h2><p>
+Switches the currently held device (if any) to the first found shield in the inventory. If the held device already is a shield, or no shield is in inventory, nothing happens.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether a shield was successfully switched to, or already held.<br />
+</p><br/><h3>Function:</h3><h2>EquipShieldInBGArm</h2><p>
+Tries to equip the first shield in inventory to the background arm; this only works if nothing is held at all, or the FG arm holds a one-handed device, or we're in inventory mode.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether a shield was successfully equipped in the background arm.<br />
+</p><br/><h3>Function:</h3><h2>EquipDeviceInGroup</h2><p>
+Switches the currently held device (if any) to the first found device of the specified group in the inventory. If the held device already is of that group, or no device is in inventory, nothing happens.</p><p><strong>Arguments:</strong><br />
+The group the device must belong to.<br />
+Whether to actually equip any matching item found in the inventory, or just report that it's there or not.</p><p><strong>Return value:</strong><br />
+Whether a firearm was successfully switched to, or already held.<br />
+</p><br/><h3>Function:</h3><h2>EquipNamedDevice</h2><p>
+Switches the currently held device (if any) to the first found device of with the specified preset name in the inventory. If the held device already is of that preset name, or no device is in inventory, nothing happens.</p><p><strong>Arguments:</strong><br />
+The preset name the device must have.<br />
+Whether to actually equip any matching item found in the inventory, or just report that it's there or not.</p><p><strong>Return value:</strong><br />
+Whether a device was successfully switched to, or already held.<br />
+</p><br/><h3>Function:</h3><h2>EquipLoadedFirearmInGroup</h2><p>
+Switches the currently held device (if any) to the first loaded HDFirearm of the specified group in the inventory. If no such weapon is in the inventory, nothing happens.</p><p><strong>Arguments:</strong><br />
+The group the HDFirearm must belong to. "Any" for all groups.<br />
+The group the HDFirearm must *not* belong to. "None" for no group.<br />
+Whether to actually equip any matching item found in the inventory, or just report that it's there or not.</p><p><strong>Return value:</strong><br />
+Whether a firearm was successfully switched to, or already held.<br />
+</p><br/><h3>Function:</h3><h2>UnequipBGArm</h2><p>
+Unequips whatever is in the BG arm and puts it into the inventory.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+Whether there was anything to unequip.<br />
+</p><br/><h3>Read-Only Property:</h3><h2>EquippedItem</h2><p>
+Returns whatever is equipped in the FG Arm, if anything. OINT.
+The currently equipped item, if any.
+</p><br/><h3>Read-Only Property:</h3><h2>FirearmIsReady</h2><p>
+Indicates whether the currently held HDFirearm's is ready for use, and has ammo etc.
+Whether a currently HDFirearm (if any) is ready for use.
+</p><br/><h3>Read-Only Property:</h3><h2>ThrowableIsReady</h2><p>
+Indicates whether the currently held ThrownDevice's is ready to go.
+Whether a currently held ThrownDevice (if any) is ready for use.
+</p><br/><h3>Read-Only Property:</h3><h2>FirearmIsEmpty</h2><p>
+Indicates whether the currently held HDFirearm's is out of ammo.
+Whether a currently HDFirearm (if any) is out of ammo.
+</p><br/><h3>Read-Only Property:</h3><h2>FirearmNeedsReload</h2><p>
+Indicates whether the currently held HDFirearm's is almost out of ammo.
+Whether a currently HDFirearm (if any) has less than half of ammo left.
+</p><br/><h3>Read-Only Property:</h3><h2>FirearmIsSemiAuto</h2><p>
+Indicates whether the currently held HDFirearm's is semi or full auto.
+Whether a currently HDFirearm (if any) is a semi auto device.
+</p><br/><h3>Read-Only Property:</h3><h2>FirearmActivationDelay</h2><p>
+Returns the currently held device's delay between pulling the trigger and activating.
+Delay in ms or zero if not a HDFirearm.
+</p><br/><h3>Function:</h3><h2>ReloadFirearm</h2><p>
+Reloads the currently held firearm, if any.</p><p><strong>Arguments:</strong><br />
+None.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p><br/><h3>Function:</h3><h2>IsWithinRange</h2><p>
+Tells whether a point on the scene is within close range of the currently used device and aiming status, if applicable.</p><p><strong>Arguments:</strong><br />
+A Vector with the aboslute coordinates of a point to check.</p><p><strong>Return value:</strong><br />
+Whether the point is within close range of this.<br />
+</p><br/><h3>Function:</h3><h2>Look</h2><p>
+Casts an unseen-revealing ray in the direction of where this is facing.</p><p><strong>Arguments:</strong><br />
+The degree angle to deviate from the current view point in the ray casting. A random ray will be chosen out of this +-range.<br />
+The range, in pixels, beyond the actors sharp aim that the ray will have.</p><p><strong>Return value:</strong><br />
+Whether any unseen pixels were revealed by this look.<br />
+</p><br/><h3>Function:</h3><h2>LookForGold</h2><p>
+Casts a material detecting ray in the direction of where this is facing.</p><p><strong>Arguments:</strong><br />
+The degree angle to deviate from the current view point in the ray casting. A random ray will be chosen out of this +-range.<br />
+The range, in pixels, that the ray will have.<br />
+A Vector which will be filled with the absolute coordinates of any found gold. It will be unaltered if false is returned.</p><p><strong>Return value:</strong><br />
+Whether gold was spotted by this ray cast. If so, foundLocation has been filled out with the absolute location of the gold.<br />
+</p><br/><h3>Function:</h3><h2>LookForMOs</h2><p>
+Casts an MO detecting ray in the direction of where the head is looking at the time. Factors including head rotation, sharp aim mode, and other variables determine how this ray is cast.</p><p><strong>Arguments:</strong><br />
+The degree angle to deviate from the current view point in the ray casting. A random ray will be chosen out of this +-range.<br />
+A specific material ID to ignore (see through)<br />
+Whether to ignore all terrain or not (true means 'x-ray vision').</p><p><strong>Return value:</strong><br />
+A pointer to the MO seen while looking.<br />
+</p><br/><h3>Function:</h3><h2>IsOnScenePoint</h2><p>
+Indicates whether this' current graphical representation overlaps a point in absolute scene coordinates.</p><p><strong>Arguments:</strong><br />
+The point in absolute scene coordinates.</p><p><strong>Return value:</strong><br />
+Whether this' graphical rep overlaps the scene point.<br />
+</p><br/><h3>Property:</h3><h2>LimbPathPushForce</h2><p>
+The default force that a limb traveling walking LimbPath can push against stuff in the scene with.
+The default set force maximum, in kg * m/s^2.
+</p><br/><h3>Function:</h3><h2>GetLimbPathSpeed</h2><p>
+Get walking limb path speed for the specified preset.</p><p><strong>Arguments:</strong><br />
+Speed preset to set 0 = LimbPath::SLOW, 1 = Limbpath::NORMAL, 2 = LimbPath::FAST</p><p><strong>Return value:</strong><br />
+Limb path speed for the specified preset in m/s.<br />
+</p><br/><h3>Function:</h3><h2>SetLimbPathSpeed</h2><p>
+Set walking limb path speed for the specified preset.</p><p><strong>Arguments:</strong><br />
+Speed preset to set 0 = LimbPath::SLOW, 1 = Limbpath::NORMAL, 2 = LimbPath::FAST. New speed value in m/s.</p><p><strong>Return value:</strong><br />
+None.<br />
+</p>

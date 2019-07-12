@@ -28,6 +28,8 @@ Binaries go to _Bin, you can't run from there outside of the IDE, it won't find 
 
 You need to copy SDL related dlls from external\lib\win\ next to .exe in order to run it.
 
+The data can be found under the "ccoss" beta branch of Cortex Command on Steam, if you own a license for the game.
+
 
 # CONTACT #
 

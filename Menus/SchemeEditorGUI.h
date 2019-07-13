@@ -14,8 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "global_types.h"
-
 //#include "FrameMan.h"
 #include "Sound.h"
 #include "Timer.h"
@@ -329,7 +327,7 @@ protected:
     // Currently placed scene object to make blink when drawing it. NOT OWNED.
     const SceneObject *m_pObjectToBlink;
     // Path found between brain pos and the sky to make sure fair brain placement
-    RTEList<Vector> m_BrainSkyPath;
+    std::list<Vector> m_BrainSkyPath;
     // Sound for enabling and disabling menu
     Sound m_EnterMenuSound;
     Sound m_ExitMenuSound;

@@ -772,11 +772,11 @@ void SchemeEditor::UpdateLoadDialog()
     m_pLoadNameCombo->ClearList();
 
     // Get the list of all read in scenes
-    RTEList<Entity *> sceneList;
+    list<Entity *> sceneList;
     g_PresetMan.GetAllOfType(sceneList, "Scene");
 
     // Go through the list and add their names to the combo box
-    for (RTEList<Entity *>::iterator itr = sceneList.begin(); itr != sceneList.end(); ++itr)
+    for (list<Entity *>::iterator itr = sceneList.begin(); itr != sceneList.end(); ++itr)
     {
         // Don't add the special "Editor Scene", users shouldn't be messing with it
         if ((*itr)->GetPresetName() != "Editor Scene")

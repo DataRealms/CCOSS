@@ -373,7 +373,10 @@ namespace RTE
 						}
 
 						if (saveSettings)
-							g_SettingsMan.Save(Writer("Base.rte/Settings.ini"));
+						{
+							Writer w("Base.rte/Settings.ini");
+							g_SettingsMan.Save(w);
+						}
 
 						m_pGUIController->EnableMouse(false);
 						m_Mode = CONNECTION;
@@ -437,7 +440,10 @@ namespace RTE
 						}
 
 						if (saveSettings)
-							g_SettingsMan.Save(Writer("Base.rte/Settings.ini"));
+						{
+							Writer w("Base.rte/Settings.ini");
+							g_SettingsMan.Save(w);
+						}
 
 						m_pGUIController->EnableMouse(false);
 						m_Mode = CONNECTION;

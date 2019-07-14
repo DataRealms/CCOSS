@@ -288,7 +288,7 @@ GUI_INC="-IGUI"
 MENUS_INC="-IMenus"
 ALLEGRO_INC="`pkg-config --cflags allegro`"
 BOOST_INC=""
-LUABIND_INC=""
+LUABIND_INC="-Iexternal/include/luabind/2017/"
 SDL_INC="`pkg-config --cflags sdl2`"
 SDL_MIXER_INC=""
 LUA_INC="`pkg-config --cflags lua51`"
@@ -304,7 +304,7 @@ ALLEGRO_LIBS="`pkg-config --libs allegro`"
 BOOST_LIBS='-lboost_thread -lboost_chrono -lboost_system -lboost_date_time'
 SDL_LIBS="`pkg-config --libs sdl`"
 SDL_MIXER_LIBS="-lSDL_mixer"
-LUABIND_LIBS="-lluabind"
+LUABIND_LIBS=""
 LUA_LIBS="`pkg-config --libs lua51`"
 ZIPIO_LIBS=""
 CURL_LIBS="`pkg-config --libs libcurl`"
@@ -321,15 +321,13 @@ WARN="-Wno-write-strings -Wno-endif-labels -Wno-deprecated-declarations"
 CPPFLAGS="$INCLUDES $WARN -DALLEGRO_NO_FIX_ALIASES -fpermissive -g"
 LDFLAGS="$ALLEGRO_LIBS $OPENSSL_LIBS $BOOST_LIBS $SDL_LIBS $SDL_MIXER_LIBS $LUABIND_LIBS $LUA_LIBS $ZIPIO_LIBS $CURL_LIBS $OPENAL_LIBS $OGG_LIBS $VORBIS_LIBS $VORBISFILE_LIBS -ldl -lz"
 LDFLAGS+=" $MINIZIP_LIBS "
-SRCS="$SYSTEM_SRCS $ENTITIES_SRCS $MANAGERS_SRCS $GUI_SRCS $MENUS_SRCS $RAKNET_SRCS"
+
+SRCS="$SYSTEM_SRCS $ENTITIES_SRCS $MANAGERS_SRCS $GUI_SRCS $MENUS_SRCS $RAKNET_SRCS $LUABIND_SRCS"
 
 OBJ_DIR="objs"
 if [ ! -d "$OBJ_DIR" ]; then
     mkdir $OBJ_DIR
 fi
-
-# RAKNET
-#if [ ! -f "libraknet.a" ]; then
 
 OBJ_FILES=""
 TOTAL_FILES=0
@@ -344,8 +342,5 @@ for src in $SRCS; do
     OBJ_FILES+="$path "
     NUM_FILES=$((NUM_FILES + 1))
 done
-
-#ar rcs libraknet.a $RAKNET_OBJ_FILES
-#fi
 
 c++ $CPPFLAGS -o run Main.cpp $OBJ_FILES $LDFLAGS

@@ -1819,7 +1819,7 @@ namespace RTE
 				connected = true;
 
 				msg = "Server: Client connected as #";
-				itoa(index, buf, 10);
+				sprintf(buf, "%d", index);
 				msg += buf;
 				g_ConsoleMan.PrintString(msg);
 				break;
@@ -1837,10 +1837,10 @@ namespace RTE
 		char buf[32];
 
 		msg = "Server: CLIENT REGISTRATION: RES ";
-		itoa(m->ResolutionX, buf, 10);
+		sprintf(buf, "%d", m->ResolutionX);
 		msg += buf;
 		msg += " x ";
-		itoa(m->ResolutionY, buf, 10);
+		sprintf(buf, "%d", m->ResolutionY);
 		msg += buf;
 		g_ConsoleMan.PrintString(msg);
 

@@ -372,8 +372,10 @@ namespace RTE
 							saveSettings = true;
 						}
 
-						if (saveSettings)
-							g_SettingsMan.Save(Writer("Base.rte/Settings.ini"));
+						if (saveSettings) {
+                            RTE::Writer writer("Base.rte/Settings.ini");
+							g_SettingsMan.Save(writer);
+                        }
 
 						m_pGUIController->EnableMouse(false);
 						m_Mode = CONNECTION;
@@ -436,8 +438,10 @@ namespace RTE
 							saveSettings = true;
 						}
 
-						if (saveSettings)
-							g_SettingsMan.Save(Writer("Base.rte/Settings.ini"));
+                        if (saveSettings) {
+                            RTE::Writer writer("Base.rte/Settings.ini");
+							g_SettingsMan.Save(writer);
+                        }
 
 						m_pGUIController->EnableMouse(false);
 						m_Mode = CONNECTION;

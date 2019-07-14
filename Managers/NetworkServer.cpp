@@ -13,7 +13,7 @@
 // Inclusions of header files
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
-#include "GUI\GUIInput.h"
+#include "GUI/GUIInput.h"
 
 #include "NetworkClient.h"
 #include "NetworkServer.h"
@@ -41,10 +41,19 @@
 extern bool g_ResetActivity;
 extern bool g_InActivity;
 
+//TODO: Better solution
+    static void Sleep(int ms) {
+        struct timespec ts;
+        ts.tv_sec = (time_t)floor((double)ms / 1000.0);
+        ms -= ts.tv_sec * 1000;
+        ts.tv_nsec = ms * 10000000;
+        nanosleep(&ts, NULL);
+    }
+
 namespace RTE
 {
 	const std::string NetworkServer::m_ClassName = "NetworkServer";
-
+    
 	void BackgroundSendThreadFunction(NetworkServer * ns, int player)
 	{
 		while (ns->IsServerModeEnabled() && ns->IsPlayerConnected(player))
@@ -984,9 +993,11 @@ namespace RTE
 			result = LZ4_compress_HC_extStateHC(m_pLZ4CompressionState[player], (char *)m_aTerrainChangeBuffer[player] , (char *)(m_aPixelLineBuffer[player] + sizeof(RTE::MsgTerrainChange)), size, size, LZ4HC_CLEVEL_OPT_MIN);
 
 			// Compression failed or ineffective, send as is
-			if (result == 0 || result == size)
-				memcpy_s(m_aPixelLineBuffer[player] + sizeof(RTE::MsgTerrainChange), MAX_PIXEL_LINE_BUFFER_SIZE, m_aTerrainChangeBuffer[player], size);
-			else
+			if (result == 0 || result == size) {
+                int sz = size;
+                if (sz > MAX_PIXEL_LINE_BUFFER_SIZE) sz = MAX_PIXEL_LINE_BUFFER_SIZE;
+				memcpy(m_aPixelLineBuffer[player] + sizeof(RTE::MsgTerrainChange), m_aTerrainChangeBuffer[player], sz);
+            } else
 				msg->DataSize = result;
 
 			int payloadSize = sizeof(RTE::MsgTerrainChange) + msg->DataSize;
@@ -1076,9 +1087,11 @@ namespace RTE
 					result = LZ4_compress_HC_extStateHC(m_pLZ4CompressionState[player], (char *)bmp->line[liney] + linex, (char *)(m_aPixelLineBuffer[player] + sizeof(RTE::MsgSceneLine)), width, width, LZ4HC_CLEVEL_MAX);
 
 					// Compression failed or ineffective, send as is
-					if (result == 0 || result == width)
-						memcpy_s(m_aPixelLineBuffer[player] + sizeof(RTE::MsgSceneLine), MAX_PIXEL_LINE_BUFFER_SIZE, bmp->line[liney] + linex, width);
-					else
+					if (result == 0 || result == width) {
+                        int sz = width;
+                        if (sz > MAX_PIXEL_LINE_BUFFER_SIZE) sz = MAX_PIXEL_LINE_BUFFER_SIZE;
+						memcpy(m_aPixelLineBuffer[player] + sizeof(RTE::MsgSceneLine), bmp->line[liney] + linex, sz);
+                    } else
 						sceneData->DataSize = result;
 
 					int payloadSize = sceneData->DataSize + sizeof(RTE::MsgSceneLine);
@@ -1592,7 +1605,9 @@ namespace RTE
 							// Compression failed or ineffective, send as is
 							if (result == 0 || result == backBuffer->w)
 							{
-								memcpy_s(m_aPixelLineBuffer[player] + sizeof(RTE::MsgFrameBox), MAX_PIXEL_LINE_BUFFER_SIZE, m_aTerrainChangeBuffer[player], size);
+                                int sz = size;
+                                if (sz > MAX_PIXEL_LINE_BUFFER_SIZE) sz = MAX_PIXEL_LINE_BUFFER_SIZE;
+								memcpy(m_aPixelLineBuffer[player] + sizeof(RTE::MsgFrameBox), m_aTerrainChangeBuffer[player], size);
 							}
 							else
 							{
@@ -1711,7 +1726,9 @@ namespace RTE
 						// Compression failed or ineffective, send as is
 						if (result == 0 || result == m_pBackBuffer8[player]->w)
 						{
-							memcpy_s(m_aPixelLineBuffer[player] + sizeof(RTE::MsgFrameLine), MAX_PIXEL_LINE_BUFFER_SIZE, backBuffer->line[m_CurrentFrameLine], backBuffer->w);
+                            int sz = backBuffer->w;
+                            if (sz > MAX_PIXEL_LINE_BUFFER_SIZE) sz = MAX_PIXEL_LINE_BUFFER_SIZE;
+							memcpy(m_aPixelLineBuffer[player] + sizeof(RTE::MsgFrameLine), backBuffer->line[m_CurrentFrameLine], sz);
 						}
 						else
 						{
@@ -1819,7 +1836,7 @@ namespace RTE
 				connected = true;
 
 				msg = "Server: Client connected as #";
-				itoa(index, buf, 10);
+				sprintf(buf, "%d", index);
 				msg += buf;
 				g_ConsoleMan.PrintString(msg);
 				break;
@@ -1837,10 +1854,10 @@ namespace RTE
 		char buf[32];
 
 		msg = "Server: CLIENT REGISTRATION: RES ";
-		itoa(m->ResolutionX, buf, 10);
+        sprintf(buf, "%d", m->ResolutionX);
 		msg += buf;
 		msg += " x ";
-		itoa(m->ResolutionY, buf, 10);
+        sprintf(buf, "%d", m->ResolutionY);
 		msg += buf;
 		g_ConsoleMan.PrintString(msg);
 

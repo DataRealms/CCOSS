@@ -34,5 +34,5 @@ set(System_SRC ${RESULT} PARENT_SCOPE)
 source_group(System FILES ${RESULT})
 
 add_subdirectory("MD5")
-add_subdirectory("Slick Profiler")
+add_subdirectory("Slick_Profiler")
 add_subdirectory("MicroPather")

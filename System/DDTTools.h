@@ -12,7 +12,7 @@
 
 #include "DDTError.h"
 #include "time.h"
-#include <cmath>
+//#include <cmath>
 
 #include <DebugTool/DebugTool.h>
 #include <Profiler/Profiler.h>

@@ -41,6 +41,7 @@ enum DotGlowColor
 };
 }
 
+#include <allegro.h>
 #include "DDTTools.h"
 #include "Singleton.h"
 #define g_FrameMan FrameMan::Instance()

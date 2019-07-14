@@ -16,17 +16,17 @@ ScreenDump*.bmp
 /Packaging/Win32-Beta/files
 /Packaging/Win32/files
 /WorkshopMods
-/System/Slick Profiler/Final2017
-/System/Slick Profiler/Steam Final
-/System/Slick Profiler/Steam Release
-/System/Slick Profiler/Steam Debug
-/System/Slick Profiler/Debug
-/System/Slick Profiler/Final
-/System/Slick Profiler/Final Open Source
-/System/Slick Profiler/Debug Open Source
-/System/Slick Profiler/Remote profile
-/Slick DebugTool/DebugTool/bin
-/Slick DebugTool/DebugTool/obj
+/System/Slick_Profiler/Final2017
+/System/Slick_Profiler/Steam Final
+/System/Slick_Profiler/Steam Release
+/System/Slick_Profiler/Steam Debug
+/System/Slick_Profiler/Debug
+/System/Slick_Profiler/Final
+/System/Slick_Profiler/Final Open Source
+/System/Slick_Profiler/Debug Open Source
+/System/Slick_Profiler/Remote profile
+/Slick_DebugTool/DebugTool/bin
+/Slick_DebugTool/DebugTool/obj
 /GUI/Editor/Debug
 /GUI/Editor/Release
 /Steam Release

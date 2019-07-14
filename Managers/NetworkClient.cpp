@@ -17,7 +17,7 @@
 
 #include "ConsoleMan.h"
 #include "FrameMan.h"
-#include "Audioman.h"
+#include "AudioMan.h"
 #include "SettingsMan.h"
 
 #include "NetworkClient.h"
@@ -26,6 +26,15 @@
 //#include "lz4hc.h"
 
 #define PLAYERNAMECHARLIMIT 15
+
+//TODO: Better solution
+    static void Sleep(int ms) {
+        struct timespec ts;
+        ts.tv_sec = (time_t)floor((double)ms / 1000.0);
+        ms -= ts.tv_sec * 1000;
+        ts.tv_nsec = ms * 10000000;
+        nanosleep(&ts, NULL);
+    }
 
 namespace RTE
 {
@@ -379,7 +388,7 @@ namespace RTE
 			int size = frameData->UncompressedSize;
 
 			if (frameData->DataSize == frameData->UncompressedSize)
-				memcpy_s(m_aPixelLineBuffer, size, p->data + sizeof(MsgTerrainChange), size);
+				memcpy(m_aPixelLineBuffer, p->data + sizeof(MsgTerrainChange), size);
 			else
 				LZ4_decompress_safe((char *)(p->data + sizeof(MsgTerrainChange)), (char *)m_aPixelLineBuffer, frameData->DataSize, size);
 
@@ -430,9 +439,11 @@ namespace RTE
 			}
 			else
 			{
-				if (frameData->DataSize == frameData->UncompressedSize)
-					memcpy_s(bmp->line[liney] + linex, width, p->data + sizeof(MsgSceneLine), pixels);
-				else
+				if (frameData->DataSize == frameData->UncompressedSize) {
+                    int sz = pixels;
+                    if (sz > width) sz = width;
+					memcpy(bmp->line[liney] + linex, p->data + sizeof(MsgSceneLine), pixels);
+                } else
 					LZ4_decompress_safe((char *)(p->data + sizeof(MsgSceneLine)), (char *)(bmp->line[liney] + linex), frameData->DataSize, width);
 			}
 		}
@@ -932,7 +943,7 @@ namespace RTE
 			else
 			{
 				if (frameData->DataSize == frameData->UncompressedSize)
-					memcpy_s(m_aPixelLineBuffer, size, p->data + sizeof(MsgFrameBox), size);
+					memcpy(m_aPixelLineBuffer, p->data + sizeof(MsgFrameBox), size);
 				else
 					LZ4_decompress_safe((char *)(p->data + sizeof(MsgFrameBox)), (char *)(m_aPixelLineBuffer), size, frameData->UncompressedSize);
 
@@ -940,7 +951,7 @@ namespace RTE
 				unsigned char * lineAddr = m_aPixelLineBuffer;
 				for (int y = 0; y < maxHeight; y++)
 				{
-					memcpy_s(bmp->line[bpy + y] + bpx, maxWidth, lineAddr, maxWidth);
+					memcpy(bmp->line[bpy + y] + bpx, lineAddr, maxWidth);
 					lineAddr += maxWidth;
 				}
 
@@ -995,9 +1006,11 @@ namespace RTE
 			}
 			else 
 			{
-				if (frameData->DataSize == frameData->UncompressedSize)
-					memcpy_s(bmp->line[lineNumber], bmp->w, p->data + sizeof(MsgFrameLine), pixels);
-				else
+				if (frameData->DataSize == frameData->UncompressedSize) {
+                    int sz = pixels;
+                    if (sz > bmp->w) sz = bmp->w;
+					memcpy(bmp->line[lineNumber], p->data + sizeof(MsgFrameLine), pixels);
+                } else
 					LZ4_decompress_safe((char *)(p->data + sizeof(MsgFrameLine)), (char *)(bmp->line[lineNumber]), frameData->DataSize, bmp->w);
 			}
 		}

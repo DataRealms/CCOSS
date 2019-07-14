@@ -19,7 +19,7 @@
 #undef int64_t
 #undef uint64_t
 
-#include <WinSock2.h>
+//#include <WinSock2.h>
 #include "RakPeerInterface.h"
 #include "MessageIdentifiers.h"
 

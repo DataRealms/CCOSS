@@ -31,5 +31,5 @@ pushd $PWD/prepared
     cp $SDL_DIR/install/lib/libSDL2.a .
     cp -r $SDL_DIR/install/include .
     cp $SNDIO_DIR/libsndio.a .
-    cp -t ../../libs $ALLEGRO_DIR/install/lib/*
+    cp -t $PWD/../../../libs $ALLEGRO_DIR/install/lib/*
 popd

@@ -17,7 +17,7 @@
 
 #include "ConsoleMan.h"
 #include "FrameMan.h"
-#include "Audioman.h"
+#include "AudioMan.h"
 #include "SettingsMan.h"
 
 #include "NetworkClient.h"

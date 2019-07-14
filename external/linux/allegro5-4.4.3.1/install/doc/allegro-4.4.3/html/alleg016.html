@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Compiled sprites
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Compiled sprites">Compiled sprites</a></h1>
+
+<ul>
+<li><a href="#destroy_compiled_sprite">destroy_compiled_sprite</a> &mdash; Destroys a compiled sprite.
+<li><a href="#draw_compiled_sprite">draw_compiled_sprite</a> &mdash; Draws a compiled sprite.
+<li><a href="#get_compiled_sprite">get_compiled_sprite</a> &mdash; Creates a compiled sprite using a bitmap as source.
+</ul>
+
+<p>
+Compiled sprites are stored as actual machine code instructions that draw a 
+specific image onto a bitmap, using mov instructions with immediate data 
+values. This is the fastest way to draw a masked image: on slow machines,
+up to and including a 486, drawing compiled sprites can be about to five
+times as fast as using draw_sprite() with a regular bitmap. On newer
+machines the difference is usually negligible.
+
+<p>
+Compiled sprites are big, so if memory is tight you should use RLE sprites
+instead, and what you can do with them is even more restricted than with RLE
+sprites, because they don't support clipping. If you try to draw one off the
+edge of a bitmap, you will corrupt memory and probably crash the system. You
+can convert bitmaps into compiled sprites at runtime, or you can create
+compiled sprite structures in grabber datafiles by making a new object of
+type 'Compiled sprite' or 'Compiled x-sprite'.
+
+<p><br>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#COMPILED_SPRITE" title="Stores the contents of a compiled sprite.">COMPILED_SPRITE</a> *<a name="get_compiled_sprite">get_compiled_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bitmap, int planar);</b></div><br>
+   Creates a compiled sprite based on the specified bitmap (which must be a 
+   memory bitmap). Compiled sprites are device-dependent, so you have to 
+   specify whether to compile it into a linear or planar format. Pass FALSE
+   as the second parameter if you are going to be drawing it onto memory 
+   bitmaps or mode 13h and SVGA screen bitmaps, and pass TRUE if you are 
+   going to draw it onto mode-X or Xtended mode screen bitmaps. Example:
+<blockquote class="code"><pre>
+      <a href="alleg001.html#COMPILED_SPRITE" class="autotype" title="Stores the contents of a compiled sprite.">COMPILED_SPRITE</a> *cspr;
+      <a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *bmp;
+      ...
+      /* Create compiled sprite from an existent bitmap. */
+      cspr = <a href="#get_compiled_sprite" class="autotype" title="Creates a compiled sprite using a bitmap as source.">get_compiled_sprite</a>(bmp, 0);
+      if (!cspr)
+         abort_on_error("Couldn't create compiled sprite!");
+      
+      /* We don't need the bitmap any more.*/
+      <a href="alleg009.html#destroy_bitmap" class="autotype" title="Destroys any type of created bitmap.">destroy_bitmap</a>(bmp);
+      
+      /* Use the compiled sprite. */
+      ...
+      /* Destroy it when we don't need it any more. */
+      <a href="#destroy_compiled_sprite" class="autotype" title="Destroys a compiled sprite.">destroy_compiled_sprite</a>(cspr);
+</pre></blockquote>
+   Returns a pointer to the created compiled sprite, or NULL if the compiled
+   sprite could not be created. Remember to free this compiled sprite later
+   to avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#draw_compiled_sprite" title="Draws a compiled sprite.">draw_compiled_sprite</a>,
+<a class="xref" href="#destroy_compiled_sprite" title="Destroys a compiled sprite.">destroy_compiled_sprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="destroy_compiled_sprite">destroy_compiled_sprite</a>(<a class="autotype" href="alleg001.html#COMPILED_SPRITE" title="Stores the contents of a compiled sprite.">COMPILED_SPRITE</a> *sprite);</b></div><br>
+   Destroys a compiled sprite structure previously returned by 
+   get_compiled_sprite(). If you pass a NULL pointer this function won't do
+   anything. Use this once you are done with a compiled sprite to avoid
+   memory leaks in your program.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_compiled_sprite" title="Creates a compiled sprite using a bitmap as source.">get_compiled_sprite</a>.</blockquote>
+<div class="al-api"><b>void <a name="draw_compiled_sprite">draw_compiled_sprite</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bmp, const <a class="autotype" href="alleg001.html#COMPILED_SPRITE" title="Stores the contents of a compiled sprite.">COMPILED_SPRITE</a> *sprite,
+                          int x, int y);</b></div><br>
+   Draws a compiled sprite onto a bitmap at the specified position. The 
+   sprite must have been compiled for the correct type of bitmap (linear or 
+   planar). This function does not support clipping.
+
+<p>
+   Hint: if not being able to clip compiled sprites is a problem, a neat 
+   trick is to set up a work surface (memory bitmap, mode-X virtual screen, 
+   or whatever) a bit bigger than you really need, and use the middle of it 
+   as your screen. That way you can draw slightly off the edge without any 
+   trouble... 
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_compiled_sprite" title="Creates a compiled sprite using a bitmap as source.">get_compiled_sprite</a>,
+<a class="xref" href="alleg014.html#draw_sprite" title="Draws a copy of the sprite onto the destination bitmap.">draw_sprite</a>,
+<a class="xref" href="alleg015.html#draw_rle_sprite" title="Draws an RLE sprite.">draw_rle_sprite</a>,
+<a class="xref" href="alleg009.html#bitmap_mask_color" title="Returns the mask color of the specified bitmap.">bitmap_mask_color</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

@@ -1,0 +1,658 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Datafile routines
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Datafile routines">Datafile routines</a></h1>
+
+<ul>
+<li><a href="#create_datafile_index">create_datafile_index</a> &mdash; Creates an index for a datafile.
+<li><a href="#DAT_ID">DAT_ID</a> &mdash; Makes an ID value from four letters.
+<li><a href="#destroy_datafile_index">destroy_datafile_index</a> &mdash; Destroys a datafile index.
+<li><a href="#find_datafile_object">find_datafile_object</a> &mdash; Searches a datafile for an object with a name.
+<li><a href="#fixup_datafile">fixup_datafile</a> &mdash; Fixes truecolor images in compiled datafiles.
+<li><a href="#get_datafile_property">get_datafile_property</a> &mdash; Returns the property string for the object.
+<li><a href="#load_datafile">load_datafile</a> &mdash; Loads a datafile into memory.
+<li><a href="#load_datafile_callback">load_datafile_callback</a> &mdash; Loads a datafile into memory, calling a hook per object.
+<li><a href="#load_datafile_object">load_datafile_object</a> &mdash; Loads a specific object from a datafile.
+<li><a href="#load_datafile_object_indexed">load_datafile_object_indexed</a> &mdash; Loads a single object from a datafile index.
+<li><a href="#register_datafile_object">register_datafile_object</a> &mdash; Registers load/destroy functions for custom object types.
+<li><a href="#unload_datafile">unload_datafile</a> &mdash; Frees all the objects in a datafile.
+<li><a href="#unload_datafile_object">unload_datafile_object</a> &mdash; Frees an object previously loaded by load_datafile_object().
+</ul>
+
+<p>
+Datafiles are created by the grabber utility (see <a href="grabber.html">grabber.txt</a> for more
+information), and have a <tt>`.dat'</tt> extension. They can contain bitmaps, palettes,
+fonts, samples, MIDI music, FLI/FLC animations, and any other binary data that
+you import. You could distribute your bitmaps and samples in a myriad of
+separate files, but packing them in a few <tt>`.dat'</tt> binaries has a few
+advantages:
+<ul><li>
+   On some platforms loading a single big datafile at once is faster than
+   loading individual resources one by one.
+<li>
+   Instead of several loops for your resources, you can write a single line of
+   code with just a single point of failure to take care of.
+<li>
+   You can potentially reduce the size of your data by enabling compression
+   on your datafiles. Less download time for your end users, less wait during
+   loading screens!
+<li>
+   If you don't need to load the whole datafile at once, you can still enable
+   individual file compression. It is slightly worse than global compression,
+   but it is very fast with loading times because Allegro can easily seek
+   inside the datafile to find a specific object.
+<li>
+   Even without encryption, most end users of your application won't be able
+   to look at or modify the resources for your game. A missing sound file or
+   a modified bitmap could potentially crash the game if you haven't
+   considered this in your loading code!
+<li>
+   It looks much more professional and convenient to distribute levels! For
+   example, if you found a bug in a level of your game, just distribute your
+   new <tt>`level4.dat'</tt> and tell users to overwrite their old version.
+</ul>
+Allegro allows you to load datafiles once and forget about them. But if you
+have many levels it can be wise to load only the resources required for the
+current level. You can accomplish the later by separating levels in different
+datafiles, or using functions like load_datafile_object() to avoid loading
+everything at once. You can even read directly from a specific datafile object
+with the pack_fopen() function.
+
+<p>
+On some platforms you can attach datafiles to your binary, potentially
+reducing your game distribution down to a single executable file. Try the
+example exexedat on your platform to see if this is possible. However, this
+is not recommended for big programs: a single update to your code or binary
+data would force end users to download again a potentially big file, no matter
+how small your change is. The same warning goes for the tools dat2s or dat2c,
+which convert datafiles into assembler and C code respectively, prepared to be
+included directly in your binary.
+
+<p>
+Remember that with Allegro truecolor images can only be loaded after you have
+set a graphics mode. This is true for datafiles too. Load all your data after
+you have set the graphics mode, otherwise the pixel format (RGB or BGR) will
+not be known and the datafile may be converted wrongly. Oh, and read carefully
+the warning of fixup_datafile() if you plan on switching resolutions during
+runtime.
+
+<p>
+Note: even though Allegro datafiles provide encryption, you should consider
+it weak, so don't plan on hiding there the plans for a Death Star or
+something. Determinate knowledgeable users will be able to rip your resources
+no matter how hard you try to hide them! Use the encryption only as a slight
+deterrent towards unwanted tampering of your data. How to crack an encrypted
+datafile is left as an exercise to the reader, though.
+
+<p>
+Using datafiles once they are loaded is quite simple: you access the elements
+of the DATAFILE as a normal array. Read below the section "Using datafiles"
+below for several examples on how to access their data.
+
+<p><br>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#DATAFILE" title="Stores an Allegro datafile in memory.">DATAFILE</a> *<a name="load_datafile">load_datafile</a>(const char *filename);</b></div><br>
+   Loads a datafile into memory in one go. If the datafile has been encrypted,
+   you must first call packfile_password() to set the appropriate key. If the
+   datafile contains truecolor graphics, you must set the video mode or call
+   set_color_conversion() before loading it. Example:
+<blockquote class="code"><pre>
+      /* Load the resources for our game. */
+      <a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat = <a href="#load_datafile" class="autotype" title="Loads a datafile into memory.">load_datafile</a>("game.dat");
+      if (!dat)
+         abort_on_error("Couldn't load sound resources!");
+      /* Use resources. */
+      ...
+      /* Destroy them when we don't need them any more. */
+      <a href="#unload_datafile" class="autotype" title="Frees all the objects in a datafile.">unload_datafile</a>(dat);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a pointer to the DATAFILE, or NULL on error. Remember to free this
+   DATAFILE later to avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#load_datafile_callback" title="Loads a datafile into memory, calling a hook per object.">load_datafile_callback</a>,
+<a class="xref" href="#unload_datafile" title="Frees all the objects in a datafile.">unload_datafile</a>,
+<a class="xref" href="#load_datafile_object" title="Loads a specific object from a datafile.">load_datafile_object</a>,
+<a class="xref" href="alleg010.html#set_color_conversion" title="Tells Allegro how to convert images during loading time.">set_color_conversion</a>,
+<a class="xref" href="#fixup_datafile" title="Fixes truecolor images in compiled datafiles.">fixup_datafile</a>,
+<a class="xref" href="alleg030.html#packfile_password" title="Sets the global I/O encryption password.">packfile_password</a>,
+<a class="xref" href="#find_datafile_object" title="Searches a datafile for an object with a name.">find_datafile_object</a>,
+<a class="xref" href="#register_datafile_object" title="Registers load/destroy functions for custom object types.">register_datafile_object</a>,
+<a class="xref" href="#Using datafiles" title="">Using datafiles</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#excustom" title="Creating custom GUI objects.">excustom</a>,
+<a class="eref" href="alleg045.html#exdata" title="Accessing the contents of datafiles.">exdata</a>,
+<a class="eref" href="alleg045.html#exexedat" title="Appending datafiles onto your executable.">exexedat</a>,
+<a class="eref" href="alleg045.html#exgui" title="Using the GUI routines.">exgui</a>,
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>,
+<a class="eref" href="alleg045.html#exunicod" title="Using Unicode string functions.">exunicod</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#DATAFILE" title="Stores an Allegro datafile in memory.">DATAFILE</a> *<a name="load_datafile_callback">load_datafile_callback</a>(const char *filename,
+                                 void (*callback)(<a class="autotype" href="alleg001.html#DATAFILE" title="Stores an Allegro datafile in memory.">DATAFILE</a> *d));</b></div><br>
+   Loads a datafile into memory, calling the specified hook function once for
+   each object in the file, passing it a pointer to the object just read. You
+   can use this to implement very simple loading screens where every time the
+   hook is called, the screen is updated to let the user know your program is
+   still loading from disk:
+<blockquote class="code"><pre>
+      void load_callback(<a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat_obj)
+      {
+         static const char indicator[] = "-\\|/-.oOXOo.";
+         static int current = 0;
+          
+         /* Show a different character every time. */
+         <a href="alleg018.html#textprintf_ex" class="autotype" title="Formatted output of a string.">textprintf_ex</a>(<a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, <a href="alleg018.html#font" class="autotype" title="A simple 8x8 fixed size font.">font</a>, 0, 0, <a href="alleg012.html#makecol" class="autotype" title="Converts an RGB value into the current pixel format.">makecol</a>(0, 0, 0),
+                       <a href="alleg012.html#makecol" class="autotype" title="Converts an RGB value into the current pixel format.">makecol</a>(255, 255, 255), "%c Loading %c",
+                       indicator[current], indicator[current]);
+         /* Increase index and check if we need to reset it. */
+         current++;
+         if (!indicator[current])
+            current = 0;
+      }
+         ...
+         dat = <a href="#load_datafile_callback" class="autotype" title="Loads a datafile into memory, calling a hook per object.">load_datafile_callback</a>("data.dat", load_callback);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a pointer to the DATAFILE or NULL on error. Remember to free this
+   DATAFILE later to avoid memory leaks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#load_datafile" title="Loads a datafile into memory.">load_datafile</a>,
+<a class="xref" href="#unload_datafile" title="Frees all the objects in a datafile.">unload_datafile</a>,
+<a class="xref" href="#load_datafile_object" title="Loads a specific object from a datafile.">load_datafile_object</a>,
+<a class="xref" href="alleg010.html#set_color_conversion" title="Tells Allegro how to convert images during loading time.">set_color_conversion</a>,
+<a class="xref" href="#fixup_datafile" title="Fixes truecolor images in compiled datafiles.">fixup_datafile</a>,
+<a class="xref" href="alleg030.html#packfile_password" title="Sets the global I/O encryption password.">packfile_password</a>,
+<a class="xref" href="#find_datafile_object" title="Searches a datafile for an object with a name.">find_datafile_object</a>,
+<a class="xref" href="#register_datafile_object" title="Registers load/destroy functions for custom object types.">register_datafile_object</a>.</blockquote>
+<div class="al-api"><b>void <a name="unload_datafile">unload_datafile</a>(<a class="autotype" href="alleg001.html#DATAFILE" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat);</b></div><br>
+   Frees all the objects in a datafile. Use this to avoid memory leaks in
+   your program.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#load_datafile" title="Loads a datafile into memory.">load_datafile</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#excustom" title="Creating custom GUI objects.">excustom</a>,
+<a class="eref" href="alleg045.html#exdata" title="Accessing the contents of datafiles.">exdata</a>,
+<a class="eref" href="alleg045.html#exexedat" title="Appending datafiles onto your executable.">exexedat</a>,
+<a class="eref" href="alleg045.html#exgui" title="Using the GUI routines.">exgui</a>,
+<a class="eref" href="alleg045.html#exsprite" title="Datafiles access and sprite animation.">exsprite</a>,
+<a class="eref" href="alleg045.html#exunicod" title="Using Unicode string functions.">exunicod</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#DATAFILE" title="Stores an Allegro datafile in memory.">DATAFILE</a> *<a name="load_datafile_object">load_datafile_object</a>(const char *filename, 
+                               const char *objectname);</b></div><br>
+   Loads a specific object from a datafile. This won't work if you strip the 
+   object names from the file, and it will be very slow if you save the file 
+   with global compression. Example:
+<blockquote class="code"><pre>
+      /* Load only the music from the datafile. */
+      music_object = <a href="#load_datafile_object" class="autotype" title="Loads a specific object from a datafile.">load_datafile_object</a>("datafile.dat",
+                                          "MUSIC");
+      /* Play it and wait a moment for it. */
+      <a href="alleg027.html#play_midi" class="autotype" title="Starts playing the specified MIDI file.">play_midi</a>(music_object-&gt;dat);
+      ...
+      /* Destroy unneeded music. */
+      <a href="#unload_datafile_object" class="autotype" title="Frees an object previously loaded by load_datafile_object().">unload_datafile_object</a>(music_object);</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a pointer to a single DATAFILE element whose <tt>`dat'</tt> member points to
+   the object, or NULL if there was an error or there was no object with the
+   requested name. Remember to free this DATAFILE later to avoid memory leaks,
+   but use the correct unloading function!
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#unload_datafile_object" title="Frees an object previously loaded by load_datafile_object().">unload_datafile_object</a>,
+<a class="xref" href="#load_datafile" title="Loads a datafile into memory.">load_datafile</a>,
+<a class="xref" href="alleg010.html#set_color_conversion" title="Tells Allegro how to convert images during loading time.">set_color_conversion</a>,
+<a class="xref" href="#find_datafile_object" title="Searches a datafile for an object with a name.">find_datafile_object</a>,
+<a class="xref" href="#register_datafile_object" title="Registers load/destroy functions for custom object types.">register_datafile_object</a>,
+<a class="xref" href="#Using datafiles" title="">Using datafiles</a>.</blockquote>
+<div class="al-api"><b>void <a name="unload_datafile_object">unload_datafile_object</a>(<a class="autotype" href="alleg001.html#DATAFILE" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat);</b></div><br>
+   Frees an object previously loaded by load_datafile_object(). Use this to
+   avoid memory leaks in your program.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#load_datafile_object" title="Loads a specific object from a datafile.">load_datafile_object</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#DATAFILE" title="Stores an Allegro datafile in memory.">DATAFILE</a> *<a name="find_datafile_object">find_datafile_object</a>(const <a class="autotype" href="alleg001.html#DATAFILE" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat, const char *objectname);</b></div><br>
+   Searches an already loaded datafile for an object with the specified 
+   name. In the name you can use <tt>`/'</tt> and `#' separators for nested datafile
+   paths. Example:
+<blockquote class="code"><pre>
+      char level_name[10];
+      <a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat, *level;
+      ...
+      <a href="alleg002.html#uszprintf" class="autotype" title="Writes formatted data into a buffer, specifying size.">uszprintf</a>(level_name, sizeof(buffer),
+                "LEVEL_%02d", level_number);
+      level = <a href="#find_datafile_object" class="autotype" title="Searches a datafile for an object with a name.">find_datafile_object</a>(dat, level_name);
+      if (!level)
+         abort_on_error("That level doesn't exist!");</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a pointer to a single DATAFILE element whose <tt>`dat'</tt> member points to
+   the object, or NULL if the object could not be found.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#load_datafile" title="Loads a datafile into memory.">load_datafile</a>,
+<a class="xref" href="#load_datafile_object" title="Loads a specific object from a datafile.">load_datafile_object</a>.</blockquote>
+<div class="al-api"><b>DATAFILE_INDEX *<a name="create_datafile_index">create_datafile_index</a>(const char *filename);</b></div><br>
+   Creates an index for a datafile, to speed up loading single objects out of
+   it. This is mostly useful for big datafiles, which you don't want to load as
+   a whole. The index will store the offset of all objects inside the datafile,
+   and then you can load it quickly with "load_datafile_object_indexed" later.
+   Use destroy_datafile_index to free the memory used by it again.
+
+<p>
+   Note: If the datafile uses global compression, there is no performance gain
+   from using an index, because seeking to the offset still requires to
+   uncompress the whole datafile up to that offset.
+   Example:
+<blockquote class="code"><pre>
+   DATAFILE_INDEX *index = <a href="#create_datafile_index" class="autotype" title="Creates an index for a datafile.">create_datafile_index</a>("huge.dat");
+   <a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *object = <a href="#load_datafile_object_indexed" class="autotype" title="Loads a single object from a datafile index.">load_datafile_object_indexed</a>(index, 1234);
+   ...
+   <a href="#unload_datafile_object" class="autotype" title="Frees an object previously loaded by load_datafile_object().">unload_datafile_object</a>(object);
+   <a href="#destroy_datafile_index" class="autotype" title="Destroys a datafile index.">destroy_datafile_index</a>(index);</pre></blockquote>
+<p><b>Return value:</b>
+   A pointer value which you can pass to load_datafile_object_indexed.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#destroy_datafile_index" title="Destroys a datafile index.">destroy_datafile_index</a>,
+<a class="xref" href="#load_datafile_object_indexed" title="Loads a single object from a datafile index.">load_datafile_object_indexed</a>,
+<a class="xref" href="#Using datafiles" title="">Using datafiles</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#DATAFILE" title="Stores an Allegro datafile in memory.">DATAFILE</a> *<a name="load_datafile_object_indexed">load_datafile_object_indexed</a>(const DATAFILE_INDEX *index, int item)</b></div><br>
+   This loads a single object, using the index created previously with
+   create_datafile_index. See create_datafile_index for an example.
+<p><b>Return value:</b>
+   Returns a pointer to a single DATAFILE element whose "dat" member points to
+   the object, or NULL if the object could not be loaded.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_datafile_index" title="Creates an index for a datafile.">create_datafile_index</a>,
+<a class="xref" href="#load_datafile_object" title="Loads a specific object from a datafile.">load_datafile_object</a>,
+<a class="xref" href="#unload_datafile_object" title="Frees an object previously loaded by load_datafile_object().">unload_datafile_object</a>.</blockquote>
+<div class="al-api"><b>void <a name="destroy_datafile_index">destroy_datafile_index</a>(DATAFILE_INDEX *index)</b></div><br>
+   This function frees the memory used by a datafile index created with
+   create_datafile_index earlier.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#create_datafile_index" title="Creates an index for a datafile.">create_datafile_index</a>.</blockquote>
+<div class="al-api"><b>const char *<a name="get_datafile_property">get_datafile_property</a>(const <a class="autotype" href="alleg001.html#DATAFILE" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat, int type);</b></div><br>
+   Finds the property type of a DATAFILE object. The type parameter must be a
+   value created with the DAT_ID() macro. Example:
+<blockquote class="code"><pre>
+      const char *name;
+      ...
+      name = <a href="#get_datafile_property" class="autotype" title="Returns the property string for the object.">get_datafile_property</a>(game_data,
+                                   <a href="#DAT_ID" class="autotype" title="Makes an ID value from four letters.">DAT_ID</a>('N','A','M','E'));
+      if (name == <a href="alleg002.html#empty_string" class="autotype" title="Universal string NULL terminator.">empty_string</a>)
+         abort_on_error("Object doesn't have a name!");</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a pointer to the text string for the object, or a pointer to the
+   variable empty_string if the property isn't present.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#Using datafiles" title="">Using datafiles</a>,
+<a class="xref" href="#DAT_ID" title="Makes an ID value from four letters.">DAT_ID</a>,
+<a class="xref" href="alleg002.html#empty_string" title="Universal string NULL terminator.">empty_string</a>.</blockquote>
+<div class="al-api"><b>void <a name="register_datafile_object">register_datafile_object</a>(int id, void *(*load)(<a class="autotype" href="alleg001.html#PACKFILE" title="Packfile structure, similar to the libc FILE structure.">PACKFILE</a> *f, long size),
+                              void (*destroy)(void *data));</b></div><br>
+   Used to add custom object types, specifying functions to load and destroy 
+   objects of this type.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#load_datafile" title="Loads a datafile into memory.">load_datafile</a>,
+<a class="xref" href="#load_datafile_object" title="Loads a specific object from a datafile.">load_datafile_object</a>,
+<a class="xref" href="#DAT_ID" title="Makes an ID value from four letters.">DAT_ID</a>,
+<a class="xref" href="#Custom datafile objects" title="">Custom datafile objects</a>.</blockquote>
+<div class="al-api"><b>void <a name="fixup_datafile">fixup_datafile</a>(<a class="autotype" href="alleg001.html#DATAFILE" title="Stores an Allegro datafile in memory.">DATAFILE</a> *data);</b></div><br>
+   If you are using compiled datafiles (produced by the dat2s and dat2c
+   utilities) on a platform that doesn't support constructors (currently any
+   non GCC-based platform), or if the datafiles contain truecolor images, you
+   must call this function once after your set the video mode that you will
+   be using. This will ensure the datafiles are properly initialised in the
+   first case and convert the color values into the appropriate format in
+   the second case. It handles flipping between RGB and BGR formats, and
+   converting between different color depths whenever that can be done
+   without changing the size of the image (ie. changing 15&lt;-&gt;16-bit
+   hicolor for both bitmaps and RLE sprites, and 24&lt;-&gt;32-bit truecolor
+   for RLE sprites).
+
+<p>
+   Note that you can only call this once and expect it to work correctly,
+   because after the call the DATAFILE you fixed up is permanently converted
+   to whatever is the current component ordering for your screen mode. If you
+   call fixup_datafile again, the function assumes you have a freshly loaded
+   datafile. It cannot "undo" the previous conversion.
+
+<p>
+   If your program supports changing resolution and/or color depth during
+   runtime, you have two choices: either call fixup_datafile() just once and
+   hope that the component ordering and bit depth doesn't change when the
+   screen mode changes (unlikely). Or, you can reload your datafiles when the
+   screen mode changes.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg008.html#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="alleg010.html#set_color_conversion" title="Tells Allegro how to convert images during loading time.">set_color_conversion</a>,
+<a class="xref" href="alleg042.html#Differences between platforms" title="">Differences between platforms</a>.</blockquote>
+<div class="al-api"><b>Macro <a name="DAT_ID">DAT_ID</a>(a, b, c, d);</b></div><br>
+   Every object or property in a datafile is identified by a 4 letter ID,
+   which can be created with this macro. For example, to access the NAME
+   property of a datafile object, you could use:
+<blockquote class="code"><pre>
+      <a href="#get_datafile_property" class="autotype" title="Returns the property string for the object.">get_datafile_property</a>(datob, <a href="#DAT_ID" class="autotype" title="Makes an ID value from four letters.">DAT_ID</a>('N','A','M','E'));
+</pre></blockquote>
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#register_datafile_object" title="Registers load/destroy functions for custom object types.">register_datafile_object</a>,
+<a class="xref" href="#get_datafile_property" title="Returns the property string for the object.">get_datafile_property</a>,
+<a class="xref" href="#Custom datafile objects" title="">Custom datafile objects</a>,
+<a class="xref" href="#Using datafiles" title="">Using datafiles</a>.</blockquote>
+<br><center><h2><a name="Using datafiles">Using datafiles</a></h2></center><p>
+
+<p>
+In order to access the contents of a datafile, you will need to know where
+each object is located. The easiest way to do this is by integer index,
+using an automatically generated header file. With the grabber, type a name
+into the "Header:" field, and the object indexes will be written to this
+file whenever the datafile is saved. With the dat utility, use the '-h'
+option, eg. "dat filename.dat -h filename.h". The header will define C
+preprocessor symbols for each object in the datafile, for example:
+<blockquote class="code"><pre>
+   #define SOME_DATA                        0        /* DATA */
+   #define SOME_MORE_DATA                   1        /* DATA */
+</pre></blockquote>
+To prevent name conflicts, you can specify a prefix string for these
+definitions by typing it into the "Prefix:" field in the grabber or using 
+the '-p' option to dat.
+
+<p>
+To load a datafile into memory, call the function:
+<blockquote class="code"><pre>
+   <a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *<a href="#load_datafile" class="autotype" title="Loads a datafile into memory.">load_datafile</a>(char *filename);
+</pre></blockquote>
+This will load the entire file, returning a pointer to it, or NULL on error.
+When the data is no longer required, the entire thing can be destroyed by
+calling:
+<blockquote class="code"><pre>
+   void <a href="#unload_datafile" class="autotype" title="Frees all the objects in a datafile.">unload_datafile</a>(<a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat);
+</pre></blockquote>
+When you load a datafile, you will obtain a pointer to an array of DATAFILE
+structures:
+<blockquote class="code"><pre>
+   typedef struct <a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a>
+   {
+      void *dat;                    - pointer to the actual data
+      int type;                     - object type ID
+      long size;                    - size of the data, in bytes
+      DATAFILE_PROPERTY *prop;      - list of object properties
+   } <a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a>;</pre></blockquote>
+
+<p>
+The only really important piece of information here is the <tt>`dat'</tt> field, which
+points to the contents of the object. What type of data this is will depend 
+on the type of object: for bitmaps it will be an Allegro BITMAP structure, 
+for RLE sprites an RLE_SPRITE, for fonts a FONT structure, etc. If you are 
+programming in C you can pass this pointer directly to the relevant Allegro 
+library functions, but if you are using C++ you will need to cast it to the 
+appropriate type to prevent the compiler giving a warning.
+
+<p>
+For example, if you have a datafile called <tt>`myfile.dat'</tt>, which contains a
+bitmap called COOL_PICTURE, and you have used it to produce a header called 
+<tt>`myfile.h'</tt>, you could display the bitmap with the code:
+<blockquote class="code"><pre>
+   #include "myfile.h"
+
+   void show_the_bitmap()
+   {
+      <a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat;
+      <a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *bmp;
+
+      dat = <a href="#load_datafile" class="autotype" title="Loads a datafile into memory.">load_datafile</a>("myfile.dat");
+      if (!dat) {
+         /* report an error! */
+         return;
+      }
+
+      bmp = (<a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *)dat[COOL_PICTURE].dat;
+      <a href="alleg014.html#blit" class="autotype" title="Copies a rectangular area from one bitmap to another.">blit</a>(bmp, <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a>, 0, 0, 0, 0, bmp-&gt;w, bmp-&gt;h);
+      <a href="#unload_datafile" class="autotype" title="Frees all the objects in a datafile.">unload_datafile</a>(dat);
+   }</pre></blockquote>
+
+<p>
+If a datafile contains nested child datafiles, the header will prefix the 
+names of objects in the sub-files with the name of their parent datafile. It 
+will also define a count of the number of objects in the child file, which 
+may be useful if for example the child datafile contains several bitmaps 
+which form a 'run' animation, and you want your code to automatically 
+adjust to the number of frames in the datafile. 
+
+<p>
+For example, the following datafile:
+<blockquote class="text"><pre>
+   "FILE" - NESTED_FILE
+            |- "BMP" - A_BITMAP
+            |- "FONT" - A_FONT
+   "DATA" - SOME_DATA
+   "DATA" - SOME_MORE_DATA
+</pre></blockquote>
+Will produce the header:
+<blockquote class="code"><pre>
+   #define NESTED_FILE                      0        /* FILE */
+
+   #define NESTED_FILE_A_BITMAP             0        /* BMP  */
+   #define NESTED_FILE_A_FONT               1        /* <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> */
+   #define NESTED_FILE_COUNT                2
+
+   #define SOME_DATA                        1        /* DATA */
+   #define SOME_MORE_DATA                   2        /* DATA */
+</pre></blockquote>
+The main datafile contains three objects (NESTED_FILE, SOME_DATA, and 
+SOME_MORE_DATA) with consecutive indexes, while the child datafile contains 
+the two objects A_BITMAP and A_FONT. To access these objects you need to 
+reference both the parent and child datafiles, eg:
+<blockquote class="code"><pre>
+   <a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat = <a href="#load_datafile" class="autotype" title="Loads a datafile into memory.">load_datafile</a>("whatever.dat");
+   <a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *nested = (<a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *)dat[NESTED_FILE].dat;
+   <a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *thefont = (<a href="alleg001.html#FONT" class="autotype" title="Stores an Allegro font.">FONT</a> *)nested[NESTED_FILE_A_FONT].dat;
+</pre></blockquote>
+If you need to access object property strings from within your program, you
+can use the function:
+<blockquote class="code"><pre>
+   char *<a href="#get_datafile_property" class="autotype" title="Returns the property string for the object.">get_datafile_property</a>(<a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat, int type);
+</pre></blockquote>
+This will return a pointer to the property string if it can be found, and an
+empty string (not null!) if it does not exist. One possible use of this 
+function is to locate objects by name, rather than using the indexes from a 
+header file. The datafile array is ended by an object of type DAT_END, so to 
+search the datafile dat for the object "my_object" you could use the code:
+<blockquote class="code"><pre>
+   const int name_type = <a href="#DAT_ID" class="autotype" title="Makes an ID value from four letters.">DAT_ID</a>('N','A','M','E');
+   for (i=0; dat[i].type != DAT_END; i++) {
+      if (stricmp(<a href="#get_datafile_property" class="autotype" title="Returns the property string for the object.">get_datafile_property</a>(dat+i, name_type),
+                  "my_object") == 0) {
+         /* found the object at index i */
+      }
+   }
+   /* not found... */
+</pre></blockquote>
+If you prefer to access objects by name rather than index number, you can
+use the function:
+<blockquote class="code"><pre>
+   <a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *<a href="#find_datafile_object" class="autotype" title="Searches a datafile for an object with a name.">find_datafile_object</a>(<a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat, char *objectname);
+</pre></blockquote>
+This will search an already loaded datafile for an object with the specified
+name, returning a pointer to it, or NULL if the object cannot be found. It 
+understands '/' and '#' separators for nested datafile paths.
+
+<p>
+It is also possible to selectively load individual objects from a datafile, 
+with the function:
+<blockquote class="code"><pre>
+   <a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *<a href="#load_datafile_object" class="autotype" title="Loads a specific object from a datafile.">load_datafile_object</a>(char *filename, char *objectname);
+</pre></blockquote>
+This searches the datafile for an object with the specified name, so
+obviously it won't work if you strip the name properties out of the file. 
+Because this function needs to seek through the data, it will be extremely 
+slow if you have saved the file with global compression. If you are planning 
+to load objects individually, you should save the file uncompressed or with 
+individual compression per-object. Because the returned datafile points to a 
+single object rather than an array of objects, you should access it with the 
+syntax datafile->dat, rather than datafile[index].dat, and when you are done
+you should free the object with the function:
+<blockquote class="code"><pre>
+   void <a href="#unload_datafile_object" class="autotype" title="Frees an object previously loaded by load_datafile_object().">unload_datafile_object</a>(<a href="alleg001.html#DATAFILE" class="autotype" title="Stores an Allegro datafile in memory.">DATAFILE</a> *dat);
+</pre></blockquote>
+Example:
+<blockquote class="code"><pre>
+   music_object = <a href="#load_datafile_object" class="autotype" title="Loads a specific object from a datafile.">load_datafile_object</a>("datafile.dat", "MUSIC");
+   <a href="alleg027.html#play_midi" class="autotype" title="Starts playing the specified MIDI file.">play_midi</a>(music_object-&gt;dat);
+   ...
+   <a href="#unload_datafile_object" class="autotype" title="Frees an object previously loaded by load_datafile_object().">unload_datafile_object</a>(music_object);
+</pre></blockquote>
+Alternatively, the packfile functions can open and read directly from the
+contents of a datafile object. You do this by calling pack_fopen() with a 
+fake filename in the form "filename.dat#object_name". The contents of the 
+object can then be read in an identical way to a normal disk file, so any of 
+the file access functions in Allegro (eg. load_pcx() and set_config_file()) 
+can be used to read from datafile objects. Note that you can't write to 
+datafiles in this way: the fake file is read only. Also, you should save the 
+file uncompressed or with per-object compression if you are planning on 
+using this feature. Finally, be aware that the special Allegro object types 
+aren't the same format as the files you import the data from, so if for 
+example you want to use load_pcx to read an image from a datafile, you 
+should import it as a binary data chunk rather than as a BITMAP object.
+
+<p>
+If you have appended a datafile to the end of your executable with the 
+exedat utility, use load_datafile("#") to read the entire thing into memory, 
+load_datafile_object("#", "object_name") to load a specific object, and 
+pack_fopen("#object_name", F_READ) to read one of the objects directly with 
+your own code. Note that unless you use the previous functions to load the
+appended data, the OS will not load it into memory just because you are
+running the program, so you shouldn't have problems attaching datafiles to
+your binary larger than the available system memory.
+
+<p>
+By default, all graphic objects loaded from a datafile will be converted 
+into the current color depth. This conversion may be both lossy and very 
+slow, particularly when reducing from truecolor to 256 color formats, so you 
+may wish to disable it by calling set_color_conversion(COLORCONV_NONE) or 
+set_color_conversion(COLORCONV_PARTIAL) before your call to load_datafile().
+
+
+
+<p><br>
+<br><center><h2><a name="Custom datafile objects">Custom datafile objects</a></h2></center><p>
+
+<p>
+Some of the objects in a datafile, for example palettes and FLI animations, 
+are simply treated as blocks of binary data, but others are loaded into 
+special formats such as bitmap structures or compiled sprites. It is 
+possible to extend the datafile system to support your own custom object 
+types, eg. map objects for a tile based engine, or level data for a platform 
+game. Obviously the grabber has no way of understanding this data, but it 
+will allow you to import binary data from external files, so you can grab 
+information produced by your own utilities. If you are happy with the data 
+being loaded as a simple binary block, that is all you need to do, but if 
+you need to load it into a specific structure, read on...
+
+<p>
+Your custom objects must be given a unique type ID, which is formed from 
+four ASCII characters (by convention all uppercase A-Z). If you don't use 
+all four characters, the string should be padded with spaces (ASCII 32). You 
+should use this ID when creating the objects in the grabber (select 
+New/Other and type in the ID string), and in your code you should define an 
+identifier for the type, eg:
+<blockquote class="code"><pre>
+   #define DAT_MAPDATA  <a href="#DAT_ID" class="autotype" title="Makes an ID value from four letters.">DAT_ID</a>('M','A','P','D')
+</pre></blockquote>
+You then need to write functions for loading and destroying objects of this
+type, in the form:
+<blockquote class="code"><pre>
+   void *load_mapdata(<a href="alleg001.html#PACKFILE" class="autotype" title="Packfile structure, similar to the libc FILE structure.">PACKFILE</a> *f, long size)
+   {
+      /* Allegro will call this function whenever an object of your custom 
+       * type needs to be loaded from a datafile. It will be passed a 
+       * pointer to the file from which the data is to be read, and the size 
+       * of the object in bytes. It should return a pointer to the loaded 
+       * data, which will be stored in the dat field of the datafile object 
+       * structure, or NULL if an error occurs. The file will have been 
+       * opened as a sub-chunk of the main datafile, so it is safe to read 
+       * past the end of the object (if you attempt this, Allegro will 
+       * return EOF), and it is also safe to return before reading all the 
+       * data in the chunk (if you do this, Allegro will skip any unused 
+       * bytes before starting to read the next object). You should _not_ 
+       * close the file when you are done: this will be handled by the 
+       * calling function. To clarify how all this works, here's an example 
+       * implementation of a null-terminated string object:
+       */
+
+      #define MAX_LEN  256
+
+      char buf[MAX_LEN];
+      char *p;
+      int i, c;
+
+      for (i=0; i&lt;;MAX_LEN-1; i++) {
+         if ((c = <a href="alleg030.html#pack_getc" class="autotype" title="Returns the next character from a stream.">pack_getc</a>(f)) == EOF)
+            break;
+
+         buf[i] = c;
+      }
+
+      buf[i] = 0;
+
+      p = malloc(i+1);
+      strcpy(p, buf);
+
+      return p;
+   }
+
+   void destroy_mapdata(void *data)
+   {
+      /* Allegro will call this function whenever an object of your custom 
+       * type needs to be destroyed. It will be passed a pointer to the 
+       * object (as returned by the load function), and should free whatever 
+       * memory the object is using. For example, the simple string object 
+       * returned by the above loader could be destroyed with the code:
+       */
+
+      if (data)
+         free(data);
+   }
+</pre></blockquote>
+Finally, before you load your datafile you must tell Allegro about the
+custom format, by calling:
+<blockquote class="code"><pre>
+   <a href="#register_datafile_object" class="autotype" title="Registers load/destroy functions for custom object types.">register_datafile_object</a>(DAT_MAPDATA, load_mapdata, destroy_mapdata);
+</pre></blockquote>
+It is also possible to integrate support for custom object types directly
+into the grabber and dat utilities, by copying some special files into the 
+tools/plugins directory. This can be used to add whole new object types and 
+menu commands, or to provide additional import/export routines for the 
+existing formats. See <tt>`tools/plugins/plugins.txt'</tt> for an overview of how to
+write your own grabber plugins.
+
+
+
+<p><br>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

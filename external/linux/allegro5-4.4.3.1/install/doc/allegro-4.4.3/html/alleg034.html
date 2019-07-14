@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Quaternion math routines
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Quaternion math routines">Quaternion math routines</a></h1>
+
+<ul>
+<li><a href="#apply_quat">apply_quat</a> &mdash; Multiplies a point by a quaternion.
+<li><a href="#get_rotation_quat">get_rotation_quat</a> &mdash; Constructs a quaternion to rotate points around all three axes.
+<li><a href="#get_vector_rotation_quat">get_vector_rotation_quat</a> &mdash; Constructs a quaternion to rotate points around a vector.
+<li><a href="#get_x_rotate_quat">get_x_rotate_quat</a> &mdash; Construct axis rotation quaternions.
+<li><a href="#get_y_rotate_quat">get_y_rotate_quat</a> &mdash; Construct axis rotation quaternions.
+<li><a href="#get_z_rotate_quat">get_z_rotate_quat</a> &mdash; Construct axis rotation quaternions.
+<li><a href="#identity_quat">identity_quat</a> &mdash; Global variable containing the identity quaternion.
+<li><a href="#matrix_to_quat">matrix_to_quat</a> &mdash; Constructs a quaternion from a rotation matrix.
+<li><a href="#quat_interpolate">quat_interpolate</a> &mdash; Constructs a quaternion representing a rotation between from and to.
+<li><a href="#quat_mul">quat_mul</a> &mdash; Multiplies two quaternions.
+<li><a href="#quat_slerp">quat_slerp</a> &mdash; Version of quat_interpolate() allowing control over the rotation.
+<li><a href="#quat_to_matrix">quat_to_matrix</a> &mdash; Constructs a rotation matrix from a quaternion.
+</ul>
+
+<p>
+Quaternions are an alternate way to represent the rotation part of a
+transformation, and can be easier to manipulate than matrices. As with a 
+matrix, you can encode a geometric transformations in one, concatenate 
+several of them to merge multiple transformations, and apply them to a 
+vector, but they can only store pure rotations. The big advantage is that 
+you can accurately interpolate between two quaternions to get a part-way 
+rotation, avoiding the gimbal problems of the more conventional Euler angle 
+interpolation.
+
+<p>
+Quaternions only have floating point versions, without any _f suffix. Other 
+than that, most of the quaternion functions correspond with a matrix 
+function that performs a similar operation.
+
+<p>
+Quaternion means 'of four parts', and that's exactly what it is. Here is the 
+structure:
+<blockquote class="code"><pre>
+   typedef struct <a href="alleg001.html#QUAT" class="autotype" title="Stores quaternion information.">QUAT</a>
+   {
+      float w, x, y, z;
+   }
+</pre></blockquote>
+You will have lots of fun figuring out what these numbers actually mean, but 
+that is beyond the scope of this documentation. Quaternions do work -- trust 
+me.
+
+<p><br>
+<div class="al-api"><b>extern <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> <a name="identity_quat">identity_quat</a>;</b></div><br>
+   Global variable containing the 'do nothing' identity quaternion. 
+   Multiplying by the identity quaternion has no effect.
+
+<p><br>
+<div class="al-api"><b>void <a name="get_x_rotate_quat">get_x_rotate_quat</a>(<a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *q, float r);</b></div><br>
+<div class="al-api-cont"><b>void <a name="get_y_rotate_quat">get_y_rotate_quat</a>(<a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *q, float r);</b></div><br>
+<div class="al-api-cont"><b>void <a name="get_z_rotate_quat">get_z_rotate_quat</a>(<a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *q, float r);</b></div><br>
+   Construct axis rotation quaternions, storing them in q. When applied to a 
+   point, these quaternions will rotate it about the relevant axis by the 
+   specified angle (given in binary, 256 degrees to a circle format).
+
+<p><br>
+<div class="al-api"><b>void <a name="get_rotation_quat">get_rotation_quat</a>(<a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *q, float x, float y, float z);</b></div><br>
+   Constructs a quaternion that will rotate points around all three axes by 
+   the specified amounts (given in binary, 256 degrees to a circle format).
+
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exquat" title="A comparison between Euler angles and quaternions.">exquat</a>.</blockquote>
+<div class="al-api"><b>void <a name="get_vector_rotation_quat">get_vector_rotation_quat</a>(<a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *q, float x, y, z, float a);</b></div><br>
+   Constructs a quaternion that will rotate points around the specified 
+   x,y,z vector by the specified angle (given in binary, 256 degrees to a 
+   circle format).
+
+<p><br>
+<div class="al-api"><b>void <a name="quat_to_matrix">quat_to_matrix</a>(const <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *q, <a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m);</b></div><br>
+   Constructs a rotation matrix from a quaternion.
+
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exquat" title="A comparison between Euler angles and quaternions.">exquat</a>.</blockquote>
+<div class="al-api"><b>void <a name="matrix_to_quat">matrix_to_quat</a>(const <a class="autotype" href="alleg001.html#MATRIX_f" title="Floating point matrix structure.">MATRIX_f</a> *m, <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *q);</b></div><br>
+   Constructs a quaternion from a rotation matrix. Translation is discarded 
+   during the conversion. Use get_align_matrix_f() if the matrix is not 
+   orthonormalized, because strange things may happen otherwise.
+
+<p><br>
+<div class="al-api"><b>void <a name="quat_mul">quat_mul</a>(const <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *p, const <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *q, <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *out);</b></div><br>
+   Multiplies two quaternions, storing the result in out. The resulting 
+   quaternion will have the same effect as the combination of p and q, ie. 
+   when applied to a point, (point * out) = ((point * p) * q). Any number of 
+   rotations can be concatenated in this way. Note that quaternion 
+   multiplication is not commutative, ie. quat_mul(p, q) != quat_mul(q, p). 
+
+<p><br>
+<div class="al-api"><b>void <a name="apply_quat">apply_quat</a>(const <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *q, float x, y, z, *xout, *yout, *zout);</b></div><br>
+   Multiplies the point (x, y, z) by the quaternion q, storing the result in 
+   (*xout, *yout, *zout). This is quite a bit slower than apply_matrix_f(), 
+   so only use it to translate a few points. If you have many points, it is 
+   much more efficient to call quat_to_matrix() and then use 
+   apply_matrix_f().
+
+<p><br>
+<div class="al-api"><b>void <a name="quat_interpolate">quat_interpolate</a>(const <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *from, const <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *to, float t, <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *out);</b></div><br>
+   Constructs a quaternion that represents a rotation between from and to. 
+   The argument t can be anything between 0 and 1 and represents where 
+   between from and to the result will be. 0 returns from, 1 returns to, and 
+   0.5 will return a rotation exactly in between. The result is copied to 
+   out. This function will create the short rotation (less than 180 degrees) 
+   between from and to.
+
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exquat" title="A comparison between Euler angles and quaternions.">exquat</a>.</blockquote>
+<div class="al-api"><b>void <a name="quat_slerp">quat_slerp</a>(const <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *from, const <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *to, float t, <a class="autotype" href="alleg001.html#QUAT" title="Stores quaternion information.">QUAT</a> *out, int how);</b></div><br>
+   The same as quat_interpolate(), but allows more control over how the 
+   rotation is done. The how parameter can be any one of the values:
+<blockquote class="text"><pre>
+      QUAT_SHORT  - like quat_interpolate(), use shortest path
+      QUAT_LONG   - rotation will be greater than 180 degrees
+      QUAT_CW     - rotate clockwise when viewed from above
+      QUAT_CCW    - rotate counterclockwise when viewed from above
+      QUAT_USER   - the quaternions are interpolated exactly as
+                    given
+</pre></blockquote>
+
+
+<p><br>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

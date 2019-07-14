@@ -280,6 +280,7 @@ LUABIND_SRCS="
     $LUABIND_LOCATION/wrapper_base.cpp
 "
 
+ALLEGRO_INSTALL="external/linux/allegra-5.2.5.0/install/"
 PREPARED_DIR="external/linux/prepared"
 ENTITIES_INC="-IEntities/"
 RAKNET_INC="-I$RAKNET_LOCATION"
@@ -287,7 +288,8 @@ MANAGERS_INC="-IManagers/"
 SYSTEM_INC="-ISystem -ISystem/MicroPather -ISystem/InterGif -ISystem/MD5 -ISystem/Steam -ISystem/Slick_Profiler"
 GUI_INC="-IGUI"
 MENUS_INC="-IMenus"
-ALLEGRO_INC="`pkg-config --cflags allegro`"
+#ALLEGRO_INC="`pkg-config --cflags allegro`"
+ALLEGRO_INC="-I$ALLEGRO_INSTALL/include"
 BOOST_INC=""
 LUABIND_INC="-Iexternal/include/luabind/2017/"
 SDL_INC="-I$PREPARED_DIR/include/SDL2"
@@ -299,9 +301,10 @@ OGG_INC=""
 VORBIS_INC=""
 MINIZIP_INC="`pkg-config --cflags minizip`"
 VORBISFILE_INC="`pkg-config --cflags vorbisfile`"
-OPENSSL_INC="`pkg-config --cflags openssl`"
+OPENSSL_INC=""
 
-ALLEGRO_LIBS="`pkg-config --libs allegro`"
+#ALLEGRO_LIBS="`pkg-config --libs allegro`"
+ALLEGRO_LIBS="-lalleg"
 BOOST_LIBS='-lboost_thread -lboost_chrono -lboost_system -lboost_date_time'
 SDL_LIBS="$PREPARED_DIR/libSDL2.a"
 SDL_MIXER_LIBS="-lSDL2_mixer"
@@ -312,18 +315,30 @@ CURL_LIBS="`pkg-config --libs libcurl`"
 OPENAL_LIBS="`pkg-config --libs openal`"
 OGG_LIBS="$PREPARED_DIR/libogg.a"
 VORBIS_LIBS="$PREPARED_DIR/libvorbis.a"
-VORBISFILE_LIBS="`pkg-config --libs vorbisfile`"
+VORBISFILE_LIBS="$PREPARED_DIR/libvorbisfile.a"
 MINIZIP_LIBS="`pkg-config --libs minizip`"
-OPENSSL_LIBS="`pkg-config --libs openssl`"
+OPENSSL_LIBS=""
 
 INCLUDES="-I. -Iexternal/include -I$PREPARED_DIR/include $LUA_INC $ENTITIES_INC $RAKNET_INC $MANAGERS_INC $SYSTEM_INC $GUI_INC $MENUS_INC $ALLEGRO_INC $BOOST_INC $LUABIND_INC $SDL_INC $CURL_INC"
 INCLUDES+=" $OPENAL_INC $OGG_INC $VORBIS_INC $VORBISFILE_INC $MINIZIP_INC $OPENSSL_INC"
 WARN="-Wno-write-strings -Wno-endif-labels -Wno-deprecated-declarations"
 CPPFLAGS="$INCLUDES $WARN -DALLEGRO_NO_FIX_ALIASES -fpermissive -g"
-LDFLAGS="$ALLEGRO_LIBS $OPENSSL_LIBS $BOOST_LIBS $SDL_LIBS $SDL_MIXER_LIBS $LUABIND_LIBS $LUA_LIBS $ZIPIO_LIBS $CURL_LIBS $OPENAL_LIBS $OGG_LIBS $VORBIS_LIBS $VORBISFILE_LIBS -ldl -lz"
-LDFLAGS+=" $MINIZIP_LIBS -lpthread"
+LDFLAGS="-Llibs/ $ALLEGRO_LIBS $OPENSSL_LIBS $BOOST_LIBS $SDL_LIBS $SDL_MIXER_LIBS $LUABIND_LIBS $LUA_LIBS $ZIPIO_LIBS $CURL_LIBS $OPENAL_LIBS $OGG_LIBS $VORBIS_LIBS $VORBISFILE_LIBS -ldl -lz"
+LDFLAGS+=" $MINIZIP_LIBS -lpthread -Wl,-rpath ."
 
 SRCS="$SYSTEM_SRCS $ENTITIES_SRCS $MANAGERS_SRCS $GUI_SRCS $MENUS_SRCS $RAKNET_SRCS $LUABIND_SRCS"
+
+
+LIBS_DIR="libs"
+if [ ! -d "$LIBS_DIR" ]; then
+    mkdir $LIBS_DIR
+fi
+
+if [ ! -f libs/liballeg.so ]; then
+    pushd $PWD/external/linux
+        ./prepare.sh
+    popd
+fi
 
 OBJ_DIR="objs"
 if [ ! -d "$OBJ_DIR" ]; then
@@ -344,4 +359,4 @@ for src in $SRCS; do
     NUM_FILES=$((NUM_FILES + 1))
 done
 
-c++ $CPPFLAGS -o run Main.cpp $OBJ_FILES $LDFLAGS
+c++ $CPPFLAGS -o cortex Main.cpp $OBJ_FILES $LDFLAGS

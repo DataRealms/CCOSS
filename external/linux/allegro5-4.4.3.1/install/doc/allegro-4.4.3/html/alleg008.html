@@ -1,0 +1,945 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html><head><title>
+Allegro Manual: Graphics modes
+</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" title="Default" type="text/css" href="allegro.css"></head><body bgcolor=white text=black link="#0000ee" alink="#ff0000" vlink="#551a8b">
+<h1><a name="Graphics modes">Graphics modes</a></h1>
+
+<ul>
+<li><a href="#destroy_gfx_mode_list">destroy_gfx_mode_list</a> &mdash; Frees the list created by get_gfx_mode_list().
+<li><a href="#enable_triple_buffer">enable_triple_buffer</a> &mdash; Enables triple buffering.
+<li><a href="#get_color_depth">get_color_depth</a> &mdash; Returns the current pixel color depth.
+<li><a href="#get_display_switch_mode">get_display_switch_mode</a> &mdash; Returns the current display switching mode.
+<li><a href="#get_gfx_mode">get_gfx_mode</a> &mdash; Returns the id of the current graphics driver.
+<li><a href="#get_gfx_mode_list">get_gfx_mode_list</a> &mdash; Obtains a list of available video modes.
+<li><a href="#get_gfx_mode_type">get_gfx_mode_type</a> &mdash; Retrieves type information for a specific graphics card.
+<li><a href="#get_refresh_rate">get_refresh_rate</a> &mdash; Returns the current refresh rate.
+<li><a href="#gfx_capabilities">gfx_capabilities</a> &mdash; Bitfield describing video hardware capabilities.
+<li><a href="#is_windowed_mode">is_windowed_mode</a> &mdash; Tells if you are running in windowed mode.
+<li><a href="#poll_scroll">poll_scroll</a> &mdash; Checks the status of a scroll request with triple buffering.
+<li><a href="#remove_display_switch_callback">remove_display_switch_callback</a> &mdash; Removes a switching notification callback.
+<li><a href="#request_refresh_rate">request_refresh_rate</a> &mdash; Requests a specific refresh rate during graphic mode switch.
+<li><a href="#request_scroll">request_scroll</a> &mdash; Queues a hardware scroll request with triple buffering.
+<li><a href="#request_video_bitmap">request_video_bitmap</a> &mdash; Triple buffering page flip request.
+<li><a href="#scroll_screen">scroll_screen</a> &mdash; Requests a hardware scroll request.
+<li><a href="#set_color_depth">set_color_depth</a> &mdash; Sets the global pixel color depth.
+<li><a href="#set_display_switch_callback">set_display_switch_callback</a> &mdash; Installs a switching notification callback.
+<li><a href="#set_display_switch_mode">set_display_switch_mode</a> &mdash; Tells Allegro how the program handles background switching.
+<li><a href="#set_gfx_mode">set_gfx_mode</a> &mdash; Sets a graphic video mode.
+<li><a href="#show_video_bitmap">show_video_bitmap</a> &mdash; Flips the hardware screen to use the specified page.
+<li><a href="#vsync">vsync</a> &mdash; Waits for a vertical retrace to begin.
+</ul>
+
+<p>
+Graphics modes are the common denominator for most Allegro programs. While it
+is possible to write platform specific programs using Allegro which don't set
+a graphic mode through the routines provided in this chapter, these are not
+very common.
+
+<p>
+The first thing to note is that due to the wide range of supported platforms,
+a graphic mode is the only way to safely communicate with the user. When
+Allegro was a DOS only library (versions 3.x and previous), it was frequent
+for programmers to use functions from the C standard library to communicate
+with the user, like calling printf() before setting a graphic mode or maybe
+scanf() to read the user's input. However, what would happen for such a game
+running under Windows where there is no default console output or it may be
+hidden from the user? Even if the game compiled successfully, it would be
+unplayable, especially if there was vital information for the user in those
+text only messages.
+
+<p>
+Allegro provides the allegro_message() function to deal with this problem,
+but this is not a very user friendly method of communicating with the user
+and its main purpose is displaying small error like messages when no graphic
+mode is available. Therefore, the first thing your Allegro program should do
+is set a graphic mode, and from there on, use Allegro's text output routines
+to display messages to the user, just like <tt>`allegro/examples/exhello.c'</tt> does.
+
+<p>
+Setting a graphic mode involves deciding how to allocate the memory of the
+video card for your program. On some platforms this means creating a virtual
+screen bigger than the physical resolution to do hardware scrolling or page
+flipping. Virtual screens can cause a lot of confusion, but they are really
+quite simple. Warning: patronising explanation coming up, so you may wish to
+skip the rest of this paragraph. Think of video memory as a rectangular piece
+of paper which is being viewed through a small hole (your monitor) in a bit of
+cardboard. Since the paper is bigger than the hole you can only see part of it
+at any one time, but by sliding the cardboard around you can alter which
+portion of the image is visible. You could just leave the hole in one position
+and ignore the parts of video memory that aren't visible, but you can get all
+sorts of useful effects by sliding the screen window around, or by drawing
+images in a hidden part of video memory and then flipping across to display
+them.
+
+<p>
+For example, you could select a 640x480 mode in which the monitor acts as a
+window onto a 1024x1024 virtual screen, and then move the visible screen
+around in this larger area (hardware scrolling). Initially, with the visible
+screen positioned at the top left corner of video memory, this setup would
+look like:
+<blockquote class="text"><pre>
+      (0,0)------------(640,0)----(1024,0)
+        |                  |           |
+        |  visible screen  |           |
+        |                  |           |
+      (0,480)----------(640,480)       |
+        |                              |
+        |   the rest of video memory   |
+        |                              |
+      (0,1024)--------------------(1024,1024)
+</pre></blockquote>
+With a virtual screen bigger than the visible screen you can perform smooth
+CPU inexpensive scrolling: you draw your graphics once, and then only tell
+the video card to show a different portion of the screen. However, virtual
+screens are not supported on all platforms, and on some they might be
+emulated through software, losing any performance. On top of that, many video
+cards only allow horizontal scrolling in steps of 32 bytes. This is not a
+problem if your game runs in 24 or 32 bit, but it tends to mean jerky
+scrolling for other color depths.
+
+<p>
+The other reason you could use virtual screens for is page flipping. This
+means showing one portion of the virtual screen while your program draws to
+the hidden one. When you finish, you show the part you have been drawing to
+and repeat the process with the area now hidden. The result is a perfectly
+smooth screen update without flickering or other graphical artifacts.
+
+<p>
+Scrolling manually to one part of the video memory is one non portable way to
+accomplish this. The portable way is to use functions like
+create_system_bitmap(), create_video_bitmap(), show_video_bitmap(), etc. These
+functions divide the memory of the video card in areas and switch between
+them, a feature supported on all platforms and video cards (given that they
+have enough memory for the screen resolutions you asked for).
+
+<p>
+The last thing you need to know about setting a graphic mode are drivers.
+Each platform has a number of graphic drivers which support a different range
+of hardware or behave in different ways. To avoid cluttering your own code
+with #ifdefs and dealing with drivers added after you release your program,
+Allegro provides several so called magic drivers. These magic drivers don't
+really exists, they wrap around a specific kind of functionality.
+
+<p>
+The magic drivers you can use are:
+<ul><li>
+GFX_AUTODETECT:<br>
+   Allegro will try to set the specified resolution with the current color
+   depth in fullscreen mode. Failing that, it will try to repeat the same
+   operation in windowed mode. If the call to set_gfx_mode() succeeds, you
+   are guaranteed to have set the specified resolution in the current color
+   depth, but you don't know if the program is running fullscreen or
+   windowed.
+<li>
+GFX_AUTODETECT_FULLSCREEN:<br>
+   Allegro will try to set the specified resolution with the current color
+   depth in fullscreen mode. If that is not possible, set_gfx_mode() will
+   fail.
+<li>
+GFX_AUTODETECT_WINDOWED:<br>
+   Allegro will try to set the specified resolution with the current color
+   depth in a windowed mode. If that is not possible, set_gfx_mode() will
+   fail. When it comes to windowed modes, the `specified resolution' actually
+   means the graphic area your program can draw on, without including window
+   decorations (if any). Note that in windowed modes running with a color
+   depth other than the desktop may result in non optimal performance due to
+   internal color conversions in the graphic driver. Use
+   desktop_color_depth() to your advantage in these situations.
+<li>
+GFX_SAFE:<br>
+   Using this driver Allegro guarantees that a graphic mode will always be
+   set correctly. It will try to select the resolution that you request, and
+   if that fails, it will fall back upon whatever mode is known to be
+   reliable on the current platform (this is 320x200 VGA mode under DOS, a
+   640x480 resolution under Windows, the actual framebuffer's resolution
+   under Linux if it's supported, etc). If it absolutely cannot set any
+   graphics mode at all, it will return negative as usual, meaning that
+   there's no possible video output on the machine, and that you should abort
+   your program immediately, possibly after notifying this to the user with
+   allegro_message.
+
+   This fake driver is useful for situations where you just want to get into
+   some kind of workable display mode, and can't be bothered with trying
+   multiple different resolutions and doing all the error checking yourself.
+   Note however, that after a successful call to set_gfx_mode with this
+   driver, you cannot make any assumptions about the width, height or color
+   depth of the screen: your code will have to deal with this little detail.
+<li>
+   GFX_TEXT:<br>
+   Closes any previously opened graphics mode, making you unable to use the
+   global variable <tt>`screen'</tt>, and in those environments that have text modes,
+   sets one previously used or the closest match to that (usually 80x25).
+   With this driver the size parameters of set_gfx_mode don't mean anything,
+   so you can leave them all to zero or any other number you prefer.
+</ul>
+
+<p><br>
+<div class="al-api"><b>void <a name="set_color_depth">set_color_depth</a>(int depth);</b></div><br>
+   Sets the pixel format to be used by subsequent calls to set_gfx_mode() 
+   and create_bitmap(). Valid depths are 8 (the default), 15, 16, 24, and 32 
+   bits. Example:
+<blockquote class="code"><pre>
+      <a href="#set_color_depth" class="autotype" title="Sets the global pixel color depth.">set_color_depth</a>(32);
+      if (<a href="#set_gfx_mode" class="autotype" title="Sets a graphic video mode.">set_gfx_mode</a>(GFX_AUTODETECT, 640, 480, 0, 0) != 0) {
+         abort_on_error("Couldn't set a 32 bit color resolution");
+      }
+</pre></blockquote>
+   Note that the screen color depth won't change until the next successful
+   call to set_gfx_mode().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_color_depth" title="Returns the current pixel color depth.">get_color_depth</a>,
+<a class="xref" href="#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="alleg010.html#set_color_conversion" title="Tells Allegro how to convert images during loading time.">set_color_conversion</a>,
+<a class="xref" href="alleg012.html#makecol" title="Converts an RGB value into the current pixel format.">makecol</a>,
+<a class="xref" href="alleg012.html#getr" title="Extract a color component from the current pixel format.">getr</a>,
+<a class="xref" href="alleg000.html#desktop_color_depth" title="Finds out the desktop color depth.">desktop_color_depth</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_color_depth">get_color_depth</a>(void);</b></div><br>
+   Returns the current pixel format. This can be very useful to know in order
+   to write generic functions which select a different code path internally
+   depending on the color depth being used.
+
+<p>
+   Note that the function returns whatever value you may have set previously
+   with set_color_depth(), which can be different from the current color
+   depth of the screen global variable. If you really need to know the color
+   depth of the screen, use bitmap_color_depth().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_color_depth" title="Sets the global pixel color depth.">set_color_depth</a>,
+<a class="xref" href="alleg009.html#bitmap_color_depth" title="Returns the color depth of the specified bitmap.">bitmap_color_depth</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exrgbhsv" title="RGB <-> HSV color space conversions.">exrgbhsv</a>.</blockquote>
+<div class="al-api"><b>void <a name="request_refresh_rate">request_refresh_rate</a>(int rate);</b></div><br>
+   Requests that the next call to set_gfx_mode() try to use the specified 
+   refresh rate, if possible. Not all drivers are able to control this at 
+   all, and even when they can, not all rates will be possible on all 
+   hardware, so the actual settings may differ from what you requested. 
+   After you call set_gfx_mode(), you can use get_refresh_rate() to find out 
+   what was actually selected. At the moment only the DOS VESA 3.0, X DGA 2.0
+   and some Windows DirectX drivers support this function. The speed is
+   specified in Hz, eg. 60, 70. To return to the normal default selection,
+   pass a rate value of zero. Example:
+<blockquote class="code"><pre>
+      <a href="#request_refresh_rate" class="autotype" title="Requests a specific refresh rate during graphic mode switch.">request_refresh_rate</a>(60);
+      if (<a href="#set_gfx_mode" class="autotype" title="Sets a graphic video mode.">set_gfx_mode</a>(GFX_AUTODETECT, 640, 480, 0, 0) != 0)
+         abort_on_error("Couldn't set graphic mode!");
+      if (<a href="#get_refresh_rate" class="autotype" title="Returns the current refresh rate.">get_refresh_rate</a>() != 60)
+         abort_on_error("Couldn't set refresh rate to 60Hz!");</pre></blockquote>
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="#get_refresh_rate" title="Returns the current refresh rate.">get_refresh_rate</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_refresh_rate">get_refresh_rate</a>(void);</b></div><br>
+   Returns the current refresh rate, if known (not all drivers are able to 
+   report this information). Returns zero if the actual rate is unknown.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#request_refresh_rate" title="Requests a specific refresh rate during graphic mode switch.">request_refresh_rate</a>.</blockquote>
+<div class="al-api"><b><a class="autotype" href="alleg001.html#GFX_MODE_LIST" title="Stores an array of GFX_MODE structures.">GFX_MODE_LIST</a> *<a name="get_gfx_mode_list">get_gfx_mode_list</a>(int card);</b></div><br>
+   Attempts to create a list of all the supported video modes for a certain
+   graphics driver, made up from the GFX_MODE_LIST structure, which has the
+   following definition:
+<blockquote class="code"><pre>
+      typedef struct <a href="alleg001.html#GFX_MODE_LIST" class="autotype" title="Stores an array of GFX_MODE structures.">GFX_MODE_LIST</a>
+      {
+         int num_modes;
+         <a href="alleg001.html#GFX_MODE" class="autotype" title="Stores video mode information.">GFX_MODE</a> *mode;
+      } <a href="alleg001.html#GFX_MODE_LIST" class="autotype" title="Stores an array of GFX_MODE structures.">GFX_MODE_LIST</a>;
+</pre></blockquote>
+   The mode entry  points to the actual list of video modes.
+<blockquote class="code"><pre>
+      typedef struct <a href="alleg001.html#GFX_MODE" class="autotype" title="Stores video mode information.">GFX_MODE</a>
+      {
+         int width, height, bpp;
+      } <a href="alleg001.html#GFX_MODE" class="autotype" title="Stores video mode information.">GFX_MODE</a>;
+</pre></blockquote>
+   This list of video modes is terminated with an { 0, 0, 0 } entry.
+
+<p>
+   Note that the card parameter must refer to a _real_ driver. This function
+   fails if you pass GFX_SAFE, GFX_AUTODETECT, or any other "magic" driver.
+<p><b>Return value:</b>
+   Returns a pointer to a list structure of the type GFX_MODE_LIST or NULL
+   if the request could not be satisfied.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#destroy_gfx_mode_list" title="Frees the list created by get_gfx_mode_list().">destroy_gfx_mode_list</a>,
+<a class="xref" href="#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="#set_color_depth" title="Sets the global pixel color depth.">set_color_depth</a>.</blockquote>
+<div class="al-api"><b>void <a name="destroy_gfx_mode_list">destroy_gfx_mode_list</a>(<a class="autotype" href="alleg001.html#GFX_MODE_LIST" title="Stores an array of GFX_MODE structures.">GFX_MODE_LIST</a> *mode_list);</b></div><br>
+   Removes the mode list created by get_gfx_mode_list() from memory. Use this
+   once you are done with the generated mode list to avoid memory leaks in
+   your program.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#get_gfx_mode_list" title="Obtains a list of available video modes.">get_gfx_mode_list</a>,
+<a class="xref" href="#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="#set_color_depth" title="Sets the global pixel color depth.">set_color_depth</a>.</blockquote>
+<div class="al-api"><b>int <a name="set_gfx_mode">set_gfx_mode</a>(int card, int w, int h, int v_w, int v_h);</b></div><br>
+   Switches into graphics mode. The card parameter should usually be one of
+   the Allegro magic drivers (read introduction of chapter "Graphics modes")
+   or see the platform specific documentation for a list of the available
+   drivers. The w and h parameters specify what screen resolution you want.
+   The color depth of the graphic mode has to be specified before calling
+   this function with set_color_depth().
+
+<p>
+   The v_w and v_h parameters specify the minimum virtual screen size, in 
+   case you need a large virtual screen for hardware scrolling or page 
+   flipping. You should set them to zero if you don't care about the virtual 
+   screen size.
+   
+<p>
+   When you call set_gfx_mode(), the v_w and v_h parameters represent the 
+   minimum size of virtual screen that is acceptable for your program. The 
+   range of possible sizes is usually very restricted, and Allegro may 
+   end up creating a virtual screen much larger than the one you request.
+   Allowed sizes are driver dependent and some drivers do not allow virtual 
+   screens that are larger than the visible screen at all: don't assume
+   that whatever you pass will always work.
+   
+<p>
+   In mode-X the virtual width can be any multiple of eight greater than or 
+   equal to the physical screen width, and the virtual height will be set 
+   accordingly (the VGA has 256k of vram, so the virtual height will be 
+   256*1024/virtual_width).
+
+<p>
+   Currently, using a big virtual screen for page flipping is considered bad
+   practice.  There are platforms which don't support virtual screens bigger
+   than the physical screen but can create different video pages to flip back
+   and forth. This means that, if you want page flipping and aren't going to
+   use hardware scrolling, you should call set_gfx_mode() with (0,0) as the
+   virtual screen size and later create the different video pages with
+   create_video_bitmap(). Otherwise your program will be limited to the
+   platforms supporting hardware scrolling.
+
+<p>
+   After you select a graphics mode, the physical and virtual screen sizes 
+   can be checked with the macros SCREEN_W, SCREEN_H, VIRTUAL_W, and 
+   VIRTUAL_H.
+<p><b>Return value:</b>
+   Returns zero on success. On failure returns a negative number and stores a
+   description of the problem in allegro_error.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_color_depth" title="Sets the global pixel color depth.">set_color_depth</a>,
+<a class="xref" href="#request_refresh_rate" title="Requests a specific refresh rate during graphic mode switch.">request_refresh_rate</a>,
+<a class="xref" href="alleg009.html#screen" title="Global pointer to the screen hardware video memory.">screen</a>,
+<a class="xref" href="#gfx_capabilities" title="Bitfield describing video hardware capabilities.">gfx_capabilities</a>,
+<a class="xref" href="alleg000.html#allegro_error" title="Stores the last Allegro error message.">allegro_error</a>,
+<a class="xref" href="alleg003.html#Standard config variables" title="">Standard config variables</a>,
+<a class="xref" href="alleg036.html#GFX_*/DOS" title="Supported DOS graphic drivers.">GFX_*/DOS</a>,
+<a class="xref" href="alleg037.html#GFX_*/Windows" title="Supported Windows graphic drivers.">GFX_*/Windows</a>,
+<a class="xref" href="alleg038.html#GFX_*/X" title="Supported X graphic drivers.">GFX_*/X</a>,
+<a class="xref" href="alleg038.html#GFX_*/Linux" title="Supported Linux console graphic drivers.">GFX_*/Linux</a>,
+<a class="xref" href="alleg039.html#GFX_*/BeOS" title="Supported BeOS graphic drivers.">GFX_*/BeOS</a>,
+<a class="xref" href="alleg041.html#GFX_*/MacOSX" title="Supported MacOSX graphic drivers.">GFX_*/MacOSX</a>,
+<a class="xref" href="alleg009.html#create_video_bitmap" title="Creates a video memory bitmap.">create_video_bitmap</a>,
+<a class="xref" href="alleg000.html#get_desktop_resolution" title="Finds out the desktop resolution.">get_desktop_resolution</a>,
+<a class="xref" href="alleg009.html#SCREEN_W" title="Global define to obtain the size of the screen.">SCREEN_W</a>,
+<a class="xref" href="alleg009.html#SCREEN_H" title="Global define to obtain the size of the screen.">SCREEN_H</a>,
+<a class="xref" href="alleg009.html#VIRTUAL_W" title="Global define to obtain the virtual size of the screen.">VIRTUAL_W</a>,
+<a class="xref" href="alleg009.html#VIRTUAL_H" title="Global define to obtain the virtual size of the screen.">VIRTUAL_H</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<div class="al-api"><b>int <a name="set_display_switch_mode">set_display_switch_mode</a>(int mode);</b></div><br>
+   Sets how the program should handle being switched into the background, 
+   if the user tabs away from it. Not all of the possible modes will be
+   supported by every graphics driver on every platform. The available modes
+   are:
+<ul><li>
+   SWITCH_NONE<br>
+      Disables switching. This is the default in single-tasking systems like 
+      DOS. It may be supported on other platforms, but you should use it 
+      with caution, because your users won't be impressed if they want to 
+      switch away from your program, but you don't let them!
+<li>
+   SWITCH_PAUSE<br>
+      Pauses the program whenever it is in the background. Execution will be 
+      resumed as soon as the user switches back to it. This is the default 
+      in most fullscreen multitasking environments, for example the Linux 
+      console, but not under Windows.
+<li>
+   SWITCH_AMNESIA<br>
+      Like SWITCH_PAUSE, but this mode doesn't bother to remember the 
+      contents of video memory, so the screen, and any video bitmaps that 
+      you have created, will be erased after the user switches away and then 
+      back to your program. This is not a terribly useful mode to have, but 
+      it is the default for the fullscreen drivers under Windows because 
+      DirectDraw is too dumb to implement anything better.
+<li>
+   SWITCH_BACKGROUND<br>
+      The program will carry on running in the background, with the screen 
+      bitmap temporarily being pointed at a memory buffer for the fullscreen 
+      drivers. You must take special care when using this mode, because bad 
+      things will happen if the screen bitmap gets changed around when your 
+      program isn't expecting it (see below).
+<li>
+   SWITCH_BACKAMNESIA<br>
+      Like SWITCH_BACKGROUND, but this mode doesn't bother to remember the 
+      contents of video memory (see SWITCH_AMNESIA). It is again the only 
+      mode supported by the fullscreen drivers under Windows that lets the 
+      program keep running in the background.
+</ul>
+   Note that you should be very careful when you are using graphics routines 
+   in the switching context: you must always call acquire_screen() before the
+   start of any drawing code onto the screen and not release it until you are
+   completely finished, because the automatic locking mechanism may not be
+   good enough to work when the program runs in the background or has just
+   been raised in the foreground.
+<p><b>Return value:</b>
+   Returns zero on success, invalidating at the same time all callbacks
+   previously registered with set_display_switch_callback(). Returns -1 if
+   the requested mode is not currently possible.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_display_switch_callback" title="Installs a switching notification callback.">set_display_switch_callback</a>,
+<a class="xref" href="#get_display_switch_mode" title="Returns the current display switching mode.">get_display_switch_mode</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exmidi" title="Playing MIDI music.">exmidi</a>,
+<a class="eref" href="alleg045.html#exsample" title="Playing digital samples.">exsample</a>,
+<a class="eref" href="alleg045.html#exstream" title="Playing audio streams.">exstream</a>,
+<a class="eref" href="alleg045.html#exswitch" title="Controlling the console switch mode for background running.">exswitch</a>.</blockquote>
+<div class="al-api"><b>int <a name="set_display_switch_callback">set_display_switch_callback</a>(int dir, void (*cb)());</b></div><br>
+   Installs a notification callback for the switching mode that was 
+   previously selected by calling set_display_switch_mode(). The direction 
+   parameter can either be SWITCH_IN or SWITCH_OUT, depending whether you 
+   want to be notified about switches away from your program or back to your 
+   program. You can sometimes install callbacks for both directions at the 
+   same time, but not every platform supports this. You can install several
+   switch callbacks, but no more than eight on any platform.
+<p><b>Return value:</b>
+   Returns zero on success, decreasing the number of empty callback slots by
+   one. Returns -1 if the request is impossible for the current platform or
+   you have reached the maximum number of allowed callbacks.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#remove_display_switch_callback" title="Removes a switching notification callback.">remove_display_switch_callback</a>,
+<a class="xref" href="#set_display_switch_mode" title="Tells Allegro how the program handles background switching.">set_display_switch_mode</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exswitch" title="Controlling the console switch mode for background running.">exswitch</a>.</blockquote>
+<div class="al-api"><b>void <a name="remove_display_switch_callback">remove_display_switch_callback</a>(void (*cb)());</b></div><br>
+   Removes a notification callback that was previously installed by calling 
+   set_display_switch_callback(). All the callbacks will automatically be 
+   removed when you call set_display_switch_mode(). You can safely call this
+   function even if the callback you want to remove is not installed.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_display_switch_callback" title="Installs a switching notification callback.">set_display_switch_callback</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_display_switch_mode">get_display_switch_mode</a>();</b></div><br>
+   Returns the current display switching mode, in the same format passed to 
+   set_display_switch_mode().
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_display_switch_mode" title="Tells Allegro how the program handles background switching.">set_display_switch_mode</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exswitch" title="Controlling the console switch mode for background running.">exswitch</a>.</blockquote>
+<div class="al-api"><b>int <a name="is_windowed_mode">is_windowed_mode</a>(void);</b></div><br>
+   This function can be used to detect whether or not set_gfx_mode() selected
+   a windowed mode. Example:
+<blockquote class="code"><pre>
+      if (<a href="#set_gfx_mode" class="autotype" title="Sets a graphic video mode.">set_gfx_mode</a>(GFX_AUTODETECT, 640, 480, 0, 0) != 0)
+         abort_on_error("Couldn't set graphic mode!");
+      if (<a href="#is_windowed_mode" class="autotype" title="Tells if you are running in windowed mode.">is_windowed_mode</a>()) {
+         /* Windowed mode stuff. */
+      } else {
+         /* Fullscreen mode stuff. */
+      }</pre></blockquote>
+<p><b>Return value:</b>
+   Returns true if the current graphics mode is a windowed mode, or zero if
+   it is a fullscreen mode. You should not call this function if you are not
+   in graphics mode.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_gfx_mode_type">get_gfx_mode_type</a>(int graphics_card);</b></div><br>
+   This function lets you determine the types of operating modes that a
+   specific graphics card driver operates in. It will tell you whether it is
+   a windowed, fullscreen, definitely windowed or fullscreen, and/or a magic
+   driver.
+   
+<p>
+   The value returned is a bitfield consisting of these fields:<br>
+   <b>GFX_TYPE_UNKNOWN</b><br>
+   <b>GFX_TYPE_WINDOWED</b><br>
+   <b>GFX_TYPE_FULLSCREEN</b><br>
+   <b>GFX_TYPE_DEFINITE</b><br>
+   <b>GFX_TYPE_MAGIC</b><br>
+   <br>
+<p>
+   The return value will only be equivalent to GFX_TYPE_UNKNOWN when it is
+   a driver unrecognized on that platform, or it is a bogus value. Test for
+   the other types by using a bitwise AND. If the driver is windowed or
+   fullscreen, it will also have the definite flag set. 
+   For example,
+<blockquote class="code"><pre>
+   int gfx_type = <a href="#get_gfx_mode_type" class="autotype" title="Retrieves type information for a specific graphics card.">get_gfx_mode_type</a>(GFX_AUTODETECT_WINDOWED);
+</pre></blockquote>
+   gfx_type would have the GFX_TYPE_WINDOWED, GFX_TYPE_DEFINITE, and
+   GFX_TYPE_MAGIC flags set.
+   
+<p>
+   Allegro needs to be initialized first.
+   
+<p>
+   Example:
+<blockquote class="code"><pre>
+   /* Accept the use of only windowed drivers in our selection dialog */
+   int accept_windowed(int card , int w , int h , int color_depth)
+   {
+      if (<a href="#get_gfx_mode_type" class="autotype" title="Retrieves type information for a specific graphics card.">get_gfx_mode_type</a>(card) &amp; GFX_TYPE_WINDOWED)
+         return 0;
+      return 1;
+   }
+
+   /* In main: */
+   <a href="alleg035.html#gfx_mode_select_filter" class="autotype" title="Even more extended version of the graphics mode selection dialog.">gfx_mode_select_filter</a>(&amp;card, &amp;w, &amp;h, &amp;color_depth, accept_windowed);
+</pre></blockquote>
+<p><b>Return value:</b>
+   Returns a bitfield describing the graphics mode type.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg035.html#gfx_mode_select_filter" title="Even more extended version of the graphics mode selection dialog.">gfx_mode_select_filter</a>,
+<a class="xref" href="#get_gfx_mode" title="Returns the id of the current graphics driver.">get_gfx_mode</a>,
+<a class="xref" href="#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="#is_windowed_mode" title="Tells if you are running in windowed mode.">is_windowed_mode</a>.</blockquote>
+<div class="al-api"><b>int <a name="get_gfx_mode">get_gfx_mode</a>();</b></div><br>
+   This function will let you determine which graphics driver is currently
+   set by allegro. If no graphics driver is set, it will return GFX_NONE.
+   
+<p><b>Return value:</b>
+<p>
+   Returns the id of the current graphics driver if there is one, or GFX_NONE
+   if none is set.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="#is_windowed_mode" title="Tells if you are running in windowed mode.">is_windowed_mode</a>.</blockquote>
+<div class="al-api"><b>extern int <a name="gfx_capabilities">gfx_capabilities</a>;</b></div><br>
+   Bitfield describing the capabilities of the current graphics driver and 
+   video hardware. This may contain combination any of the flags:
+
+<p>
+   <b>GFX_CAN_SCROLL:</b><br>
+      Indicates that the scroll_screen() function may be used with this 
+      driver.
+
+<p>
+   <b>GFX_CAN_TRIPLE_BUFFER:</b><br>
+      Indicates that the request_scroll() and poll_scroll() functions may be 
+      used with this driver. If this flag is not set, it is possible that 
+      the enable_triple_buffer() function may be able to activate it.
+
+<p>
+   <b>GFX_HW_CURSOR:</b><br>
+      Indicates that a hardware mouse cursor is in use. When this flag is 
+      set, it is safe to draw onto the screen without hiding the mouse 
+      pointer first. Note that not every cursor graphic can be implemented 
+      in hardware: in particular VBE/AF only supports 2-color images up to 
+      32x32 in size, where the second color is an exact inverse of the 
+      first. This means that Allegro may need to switch between hardware and 
+      software cursors at any point during the execution of your program, so 
+      you should not assume that this flag will remain constant for long 
+      periods of time. It only tells you whether a hardware cursor is in use 
+      at the current time, and may change whenever you hide/redisplay the 
+      pointer.
+      
+<p>
+   <b>GFX_SYSTEM_CURSOR</b><br>
+      Indicates that the mouse cursor is the default system cursor, not 
+      Allegro's custom cursor.
+
+<p>
+   <b>GFX_HW_HLINE:</b><br>
+      Indicates that the normal opaque version of the hline() function is 
+      implemented using a hardware accelerator. This will improve the 
+      performance not only of hline() itself, but also of many other 
+      functions that use it as a workhorse, for example circlefill(), 
+      triangle(), and floodfill().
+
+<p>
+   <b>GFX_HW_HLINE_XOR:</b><br>
+      Indicates that the XOR version of the hline() function, and any other 
+      functions that use it as a workhorse, are implemented using a hardware 
+      accelerator.
+
+<p>
+   <b>GFX_HW_HLINE_SOLID_PATTERN:</b><br>
+      Indicates that the solid and masked pattern modes of the hline() 
+      function, and any other functions that use it as a workhorse, are 
+      implemented using a hardware accelerator (see note below).
+
+<p>
+   <b>GFX_HW_HLINE_COPY_PATTERN:</b><br>
+      Indicates that the copy pattern mode of the hline() function, and any 
+      other functions that use it as a workhorse, are implemented using a 
+      hardware accelerator (see note below).
+
+<p>
+   <b>GFX_HW_FILL:</b><br>
+      Indicates that the opaque version of the rectfill() function, the 
+      clear_bitmap() routine, and clear_to_color(), are implemented using a
+      hardware accelerator.
+
+<p>
+   <b>GFX_HW_FILL_XOR:</b><br>
+      Indicates that the XOR version of the rectfill() function is 
+      implemented using a hardware accelerator.
+
+<p>
+   <b>GFX_HW_FILL_SOLID_PATTERN:</b><br>
+      Indicates that the solid and masked pattern modes of the rectfill() 
+      function are implemented using a hardware accelerator (see note below).
+
+<p>
+   <b>GFX_HW_FILL_COPY_PATTERN:</b><br>
+      Indicates that the copy pattern mode of the rectfill() function is 
+      implemented using a hardware accelerator (see note below).
+
+<p>
+   <b>GFX_HW_LINE:</b><br>
+      Indicates that the opaque mode line() and vline() functions are 
+      implemented using a hardware accelerator.
+
+<p>
+   <b>GFX_HW_LINE_XOR:</b><br>
+      Indicates that the XOR version of the line() and vline() functions are 
+      implemented using a hardware accelerator.
+
+<p>
+   <b>GFX_HW_TRIANGLE:</b><br>
+      Indicates that the opaque mode triangle() function is implemented 
+      using a hardware accelerator.
+
+<p>
+   <b>GFX_HW_TRIANGLE_XOR:</b><br>
+      Indicates that the XOR version of the triangle() function is 
+      implemented using a hardware accelerator.
+
+<p>
+   <b>GFX_HW_GLYPH:</b><br>
+      Indicates that monochrome character expansion (for text drawing) is 
+      implemented using a hardware accelerator.
+
+<p>
+   <b>GFX_HW_VRAM_BLIT:</b><br>
+      Indicates that blitting from one part of the screen to another is 
+      implemented using a hardware accelerator. If this flag is set, 
+      blitting within the video memory will almost certainly be the fastest 
+      possible way to display an image, so it may be worth storing some of 
+      your more frequently used graphics in an offscreen portion of the 
+      video memory.
+
+<p>
+   <b>GFX_HW_VRAM_BLIT_MASKED:</b><br>
+      Indicates that the masked_blit() routine is capable of a hardware 
+      accelerated copy from one part of video memory to another, and that 
+      draw_sprite() will use a hardware copy when given a sub-bitmap of the 
+      screen or a video memory bitmap as the source image. If this flag is 
+      set, copying within the video memory will almost certainly be the 
+      fastest possible way to display an image, so it may be worth storing 
+      some of your more frequently used sprites in an offscreen portion of 
+      the video memory.
+
+<p>
+      Warning: if this flag is not set, masked_blit() and draw_sprite() will 
+      not work correctly when used with a video memory source image! You 
+      must only try to use these functions to copy within the video memory 
+      if they are supported in hardware.
+
+<p>
+   <b>GFX_HW_MEM_BLIT:</b><br>
+      Indicates that blitting from a memory bitmap onto the screen is being 
+      accelerated in hardware.
+
+<p>
+   <b>GFX_HW_MEM_BLIT_MASKED:</b><br>
+      Indicates that the masked_blit() and draw_sprite() functions are being 
+      accelerated in hardware when the source image is a memory bitmap and 
+      the destination is the physical screen.
+
+<p>
+   <b>GFX_HW_SYS_TO_VRAM_BLIT:</b><br>
+      Indicates that blitting from a system bitmap onto the screen is being 
+      accelerated in hardware. Note that some acceleration may be present 
+      even if this flag is not set, because system bitmaps can benefit from 
+      normal memory to screen blitting as well. This flag will only be set 
+      if system bitmaps have further acceleration above and beyond what is 
+      provided by GFX_HW_MEM_BLIT.
+
+<p>
+   <b>GFX_HW_SYS_TO_VRAM_BLIT_MASKED:</b><br>
+      Indicates that the masked_blit() and draw_sprite() functions are being 
+      accelerated in hardware when the source image is a system bitmap and 
+      the destination is the physical screen. Note that some acceleration 
+      may be present even if this flag is not set, because system bitmaps 
+      can benefit from normal memory to screen blitting as well. This flag 
+      will only be set if system bitmaps have further acceleration above and 
+      beyond what is provided by GFX_HW_MEM_BLIT_MASKED.
+
+<p>
+   <b>GFX_HW_VRAM_STRETCH_BLIT:</b><br>
+      Indicates that stretched blitting of video bitmaps onto the screen is
+      implemented using hardware acceleration. 
+
+<p>
+   <b>GFX_HW_SYS_STRETCH_BLIT:</b><br>
+      Indicates that stretched blitting of system bitmaps onto the screen is
+      implemented using hardware acceleration. 
+
+<p>
+   <b>GFX_HW_VRAM_STRETCH_BLIT_MASKED:</b><br>
+      Indicates that masked stretched blitting (including stretch_sprite) of 
+      video bitmaps onto the screen is implemented using hardware acceleration.
+      NOTE: some display drivers may show artifacts when this function is used.
+      If the image does not look correct try updating your video drivers.
+
+<p>
+   <b>GFX_HW_SYS_STRETCH_BLIT_MASKED:</b><br>
+      Indicates that masked stretched blitting (including stretch_sprite) of 
+      system bitmaps onto the screen is implemented using hardware acceleration.
+      NOTE: some display drivers may show artefact's when this function is used.
+      If the image does not look correct try updating your video drivers.
+
+<p>
+   Note: even if the capabilities information says that patterned drawing is 
+   supported by the hardware, it will not be possible for every size of 
+   pattern. VBE/AF only supports patterns up to 8x8 in size, so Allegro will 
+   fall back on the original non-accelerated drawing routines whenever you 
+   use a pattern larger than this.
+
+<p>
+   Note2: these hardware acceleration features will only take effect when 
+   you are drawing directly onto the screen bitmap, a video memory bitmap, 
+   or a sub-bitmap thereof. Accelerated hardware is most useful in a page 
+   flipping or triple buffering setup, and is unlikely to make any 
+   difference to the classic "draw onto a memory bitmap, then blit to the 
+   screen" system.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg009.html#screen" title="Global pointer to the screen hardware video memory.">screen</a>,
+<a class="xref" href="alleg009.html#create_video_bitmap" title="Creates a video memory bitmap.">create_video_bitmap</a>,
+<a class="xref" href="#scroll_screen" title="Requests a hardware scroll request.">scroll_screen</a>,
+<a class="xref" href="#request_scroll" title="Queues a hardware scroll request with triple buffering.">request_scroll</a>,
+<a class="xref" href="alleg004.html#show_mouse" title="Tells Allegro to display a mouse pointer on the screen.">show_mouse</a>,
+<a class="xref" href="#enable_triple_buffer" title="Enables triple buffering.">enable_triple_buffer</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3buf" title="Mode-X triple buffering and retrace interrupt simulation.">ex3buf</a>,
+<a class="eref" href="alleg045.html#exaccel" title="Using offscreen video memory to store source graphics for VBE/AF.">exaccel</a>,
+<a class="eref" href="alleg045.html#exsyscur" title="Hardware accelerated mouse cursors.">exsyscur</a>,
+<a class="eref" href="alleg045.html#exupdate" title="Supporting different screen update methods in a single program.">exupdate</a>.</blockquote>
+<div class="al-api"><b>int <a name="enable_triple_buffer">enable_triple_buffer</a>();</b></div><br>
+   If the GFX_CAN_TRIPLE_BUFFER bit of the gfx_capabilities field is not 
+   set, you can attempt to enable it by calling this function. In particular 
+   if you are running in mode-X in a clean DOS environment, this routine 
+   will enable the timer retrace simulator, which will activate the triple 
+   buffering functions.
+<p><b>Return value:</b>
+   Returns zero if triple buffering is enabled, -1 otherwise.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#gfx_capabilities" title="Bitfield describing video hardware capabilities.">gfx_capabilities</a>,
+<a class="xref" href="#request_scroll" title="Queues a hardware scroll request with triple buffering.">request_scroll</a>,
+<a class="xref" href="#request_video_bitmap" title="Triple buffering page flip request.">request_video_bitmap</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3buf" title="Mode-X triple buffering and retrace interrupt simulation.">ex3buf</a>,
+<a class="eref" href="alleg045.html#exupdate" title="Supporting different screen update methods in a single program.">exupdate</a>.</blockquote>
+<div class="al-api"><b>int <a name="scroll_screen">scroll_screen</a>(int x, int y);</b></div><br>
+   Attempts to scroll the hardware screen to display a different part of the 
+   virtual screen (initially it will be positioned at 0, 0, which is the top 
+   left corner). You can use this to move the screen display around in a
+   large virtual screen space, or to page flip back and forth between two
+   non-overlapping areas of the virtual screen. Note that to draw outside the
+   original position in the screen bitmap you will have to alter the clipping
+   rectangle with set_clip_rect().
+
+<p>
+   Mode-X scrolling is reliable and will work on any card, other drivers may
+   not work or not work reliably. See the platform-specific section of the docs
+   for more information.
+
+<p>
+   Allegro will handle any necessary vertical retrace synchronisation when 
+   scrolling the screen, so you don't need to call vsync() before it. This 
+   means that scroll_screen() has the same time delay effects as vsync().
+<p><b>Return value:</b>
+   Returns zero on success. Returns non-zero if the graphics driver can't
+   handle hardware scrolling or the virtual screen is not large enough.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#set_gfx_mode" title="Sets a graphic video mode.">set_gfx_mode</a>,
+<a class="xref" href="#show_video_bitmap" title="Flips the hardware screen to use the specified page.">show_video_bitmap</a>,
+<a class="xref" href="#request_scroll" title="Queues a hardware scroll request with triple buffering.">request_scroll</a>,
+<a class="xref" href="#request_video_bitmap" title="Triple buffering page flip request.">request_video_bitmap</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exscroll" title="Mode-X hardware scrolling and split screens.">exscroll</a>.</blockquote>
+<div class="al-api"><b>int <a name="request_scroll">request_scroll</a>(int x, int y);</b></div><br>
+   This function is used for triple buffering. It requests a hardware scroll 
+   to the specified position, but returns immediately rather than waiting 
+   for a retrace. The scroll will then take place during the next vertical 
+   retrace, but you can carry on running other code in the meantime and use 
+   the poll_scroll() routine to detect when the flip has actually taken 
+   place.
+
+<p>
+   Triple buffering is only possible with certain drivers: you can look at the 
+   GFX_CAN_TRIPLE_BUFFER bit in the gfx_capabilities flag to see if it will 
+   work with the current driver.
+<p><b>Return value:</b>
+   This function returns zero on success, non-zero otherwise.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#poll_scroll" title="Checks the status of a scroll request with triple buffering.">poll_scroll</a>,
+<a class="xref" href="#request_video_bitmap" title="Triple buffering page flip request.">request_video_bitmap</a>,
+<a class="xref" href="#gfx_capabilities" title="Bitfield describing video hardware capabilities.">gfx_capabilities</a>,
+<a class="xref" href="#scroll_screen" title="Requests a hardware scroll request.">scroll_screen</a>.</blockquote>
+<div class="al-api"><b>int <a name="poll_scroll">poll_scroll</a>();</b></div><br>
+   This function is used for triple buffering. It checks the status of a 
+   hardware scroll previously initiated by the request_scroll() routine.
+<p><b>Return value:</b>
+   Returns non-zero if it is still waiting to take place, and zero if the
+   requested scroll has already happened.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#request_scroll" title="Queues a hardware scroll request with triple buffering.">request_scroll</a>,
+<a class="xref" href="#request_video_bitmap" title="Triple buffering page flip request.">request_video_bitmap</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3buf" title="Mode-X triple buffering and retrace interrupt simulation.">ex3buf</a>,
+<a class="eref" href="alleg045.html#exupdate" title="Supporting different screen update methods in a single program.">exupdate</a>.</blockquote>
+<div class="al-api"><b>int <a name="show_video_bitmap">show_video_bitmap</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bitmap);</b></div><br>
+   Attempts to page flip the hardware screen to display the specified video 
+   bitmap object, which must be the same size as the physical screen, and 
+   should have been obtained by calling the create_video_bitmap() function. 
+   
+<p>
+   Allegro will handle any necessary vertical retrace synchronisation when 
+   page flipping, so you don't need to call vsync() before it. This means
+   that show_video_bitmap() has the same time delay effects as vsync() by
+   default. This can be adjusted with the "disable_vsync" config key in the
+   [graphics] section of allegro.cfg. Example:
+<blockquote class="code"><pre>
+      int current_page;
+      <a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *video_page[2];
+      ...
+      /* Create pages for page flipping */
+      video_page[0] = <a href="alleg009.html#create_video_bitmap" class="autotype" title="Creates a video memory bitmap.">create_video_bitmap</a>(<a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>);
+      video_page[1] = <a href="alleg009.html#create_video_bitmap" class="autotype" title="Creates a video memory bitmap.">create_video_bitmap</a>(<a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>);
+      current_page = 0;
+      ...
+      /* draw the <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a> and flip pages */
+      draw_screen(video_page[current_page]);
+      <a href="#show_video_bitmap" class="autotype" title="Flips the hardware screen to use the specified page.">show_video_bitmap</a>(video_page[current_page]);
+      current_page = (current_page+1)%2;
+      ...</pre></blockquote>
+<p><b>Return value:</b>
+   Returns zero on success and non-zero on failure.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#scroll_screen" title="Requests a hardware scroll request.">scroll_screen</a>,
+<a class="xref" href="alleg009.html#create_video_bitmap" title="Creates a video memory bitmap.">create_video_bitmap</a>,
+<a class="xref" href="alleg003.html#Standard config variables" title="">Standard config variables</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#exaccel" title="Using offscreen video memory to store source graphics for VBE/AF.">exaccel</a>,
+<a class="eref" href="alleg045.html#exflip" title="Comparison of double buffering and page flipping.">exflip</a>,
+<a class="eref" href="alleg045.html#exupdate" title="Supporting different screen update methods in a single program.">exupdate</a>.</blockquote>
+<div class="al-api"><b>int <a name="request_video_bitmap">request_video_bitmap</a>(<a class="autotype" href="alleg001.html#BITMAP" title="Stores the contents of a bitmap.">BITMAP</a> *bitmap);</b></div><br>
+   This function is used for triple buffering. It requests a page flip to 
+   display the specified video bitmap object, but returns immediately rather 
+   than waiting for a retrace. The flip will then take place during the next 
+   vertical retrace, but you can carry on running other code in the meantime 
+   and use the poll_scroll() routine to detect when the flip has actually 
+   taken place. Triple buffering is only possible on certain hardware: see 
+   the comments about request_scroll(). Example:
+<blockquote class="code"><pre>
+      int current_page;
+      <a href="alleg001.html#BITMAP" class="autotype" title="Stores the contents of a bitmap.">BITMAP</a> *video_page[3];
+      ...
+      /* Create pages for page flipping */
+      video_page[0] = <a href="alleg009.html#create_video_bitmap" class="autotype" title="Creates a video memory bitmap.">create_video_bitmap</a>(<a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>);
+      video_page[1] = <a href="alleg009.html#create_video_bitmap" class="autotype" title="Creates a video memory bitmap.">create_video_bitmap</a>(<a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>);
+      video_page[2] = <a href="alleg009.html#create_video_bitmap" class="autotype" title="Creates a video memory bitmap.">create_video_bitmap</a>(<a href="alleg009.html#SCREEN_W" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_W</a>, <a href="alleg009.html#SCREEN_H" class="autotype" title="Global define to obtain the size of the screen.">SCREEN_H</a>);
+      current_page = 0;
+      ...
+      /* draw the <a href="alleg009.html#screen" class="autotype" title="Global pointer to the screen hardware video memory.">screen</a> and flip pages */
+      draw_screen(video_page[current_page]);
+      do {
+      } while (<a href="#poll_scroll" class="autotype" title="Checks the status of a scroll request with triple buffering.">poll_scroll</a>());
+      <a href="#request_video_bitmap" class="autotype" title="Triple buffering page flip request.">request_video_bitmap</a>(video_page[current_page]);
+      current_page = (current_page+1)%3;
+      ...</pre></blockquote>
+<p><b>Return value:</b>
+   Returns zero on success and non-zero on failure.
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="#poll_scroll" title="Checks the status of a scroll request with triple buffering.">poll_scroll</a>,
+<a class="xref" href="#request_scroll" title="Queues a hardware scroll request with triple buffering.">request_scroll</a>,
+<a class="xref" href="#gfx_capabilities" title="Bitfield describing video hardware capabilities.">gfx_capabilities</a>,
+<a class="xref" href="alleg009.html#create_video_bitmap" title="Creates a video memory bitmap.">create_video_bitmap</a>,
+<a class="xref" href="#scroll_screen" title="Requests a hardware scroll request.">scroll_screen</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#ex3buf" title="Mode-X triple buffering and retrace interrupt simulation.">ex3buf</a>,
+<a class="eref" href="alleg045.html#exupdate" title="Supporting different screen update methods in a single program.">exupdate</a>.</blockquote>
+<div class="al-api"><b>void <a name="vsync">vsync</a>();</b></div><br>
+   Waits for a vertical retrace to begin. The retrace happens when the
+   electron beam in your monitor has reached the bottom of the screen and is
+   moving back to the top ready for another scan. During this short period
+   the graphics card isn't sending any data to the monitor, so you can do
+   things to it that aren't possible at other times, such as altering the
+   palette without causing flickering (snow). Allegro will automatically
+   wait for a retrace before altering the palette or doing any hardware
+   scrolling, though, so you don't normally need to bother with this
+   function.
+
+
+
+
+<blockquote class="xref"><em><b>See also:</b></em>
+<a class="xref" href="alleg011.html#set_palette" title="Sets the entire palette of 256 colors.">set_palette</a>,
+<a class="xref" href="#scroll_screen" title="Requests a hardware scroll request.">scroll_screen</a>.</blockquote>
+
+<blockquote class="eref"><em><b>Examples using this:</b></em>
+<a class="eref" href="alleg045.html#Available Allegro examples" title="">Available Allegro examples</a>.</blockquote>
+<hr><div class="al-back-to-contents"><a href="allegro.html">Back to contents</a></div>
+
+</body>
+</html>

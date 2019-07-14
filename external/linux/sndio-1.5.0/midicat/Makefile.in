@@ -1,0 +1,53 @@
+# extra includes paths (-I options)
+INCLUDE = -I../libsndio -I../bsd-compat
+
+# extra libraries paths (-L options)
+LIB = -L../libsndio
+
+# extra defines (-D options)
+DEFS = -DDEBUG @defs@
+
+# extra libraries (-l options)
+LDADD = -lsndio @ldadd@
+
+# variables defined on configure script command line (if any)
+@vars@
+
+#
+# binaries, documentation, man pages and examples will be installed in 
+# ${BIN_DIR}, ${MAN1_DIR}
+#
+BIN_DIR = @bindir@
+MAN1_DIR = @mandir@/man1
+
+#
+# programs to build
+#
+PROG = midicat
+MAN1 = midicat.1
+
+all:		${PROG} ${MAN1}
+
+install:
+		mkdir -p ${DESTDIR}${BIN_DIR} ${DESTDIR}${MAN1_DIR}
+		cp midicat ${DESTDIR}${BIN_DIR}
+		cp midicat.1 ${DESTDIR}${MAN1_DIR}
+
+uninstall:
+		cd ${DESTDIR}${BIN_DIR} && rm -f ${PROG}
+		cd ${DESTDIR}${MAN1_DIR} && rm -f ${MAN1}
+
+clean:
+		rm -f -- *.o midicat
+
+# ---------------------------------------------------------- dependencies ---
+
+OBJS = midicat.o
+
+midicat:	${OBJS}
+		${CC} ${LDFLAGS} ${LIB} -o midicat ${OBJS} ${LDADD} 
+
+.c.o:
+		${CC} ${CFLAGS} ${INCLUDE} ${DEFS} -c $<
+
+midicat.o:	midicat.c

@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC  -W -Wall -Wno-unused-parameter -Wdeclaration-after-statement -O2 -g -DNDEBUG  -shared  -o lib/alleg-alsadigi.so CMakeFiles/alleg-alsadigi.dir/src/unix/alsa9.c.o -lasound 

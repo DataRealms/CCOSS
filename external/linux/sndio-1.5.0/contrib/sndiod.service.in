@@ -1,0 +1,12 @@
+[Unit]
+Description=sndio audio and MIDI server
+After=network.target
+
+[Service]
+Type=forking
+Restart=on-abort
+EnvironmentFile=-/etc/default/sndiod
+ExecStart=@bindir@/sndiod $DAEMON_OPTS
+
+[Install]
+WantedBy=multi-user.target

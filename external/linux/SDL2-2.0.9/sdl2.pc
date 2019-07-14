@@ -1,0 +1,15 @@
+# sdl pkg-config source file
+
+prefix=/home/ian/source/CCOSS/external/linux/SDL2-2.0.9/install
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: sdl2
+Description: Simple DirectMedia Layer is a cross-platform multimedia library designed to provide low level access to audio, keyboard, mouse, joystick, 3D hardware via OpenGL, and 2D video framebuffer.
+Version: 2.0.9
+Requires:
+Conflicts:
+Libs: -L${libdir} -Wl,-rpath,${libdir} -Wl,--enable-new-dtags -lSDL2
+Libs.private: -lSDL2  -Wl,--no-undefined -lm -ldl -lsndio -lts -lpthread -lrt
+Cflags: -I${includedir}/SDL2   -D_REENTRANT

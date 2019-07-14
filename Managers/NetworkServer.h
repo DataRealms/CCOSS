@@ -20,7 +20,7 @@
 #include "NetworkClient.h"
 #include "NatPunchthroughClient.h"
 
-#include "boost\thread.hpp"
+#include "boost/thread.hpp"
 #include <mutex>
 
 #include "TimerMan.h"

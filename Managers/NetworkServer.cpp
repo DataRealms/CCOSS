@@ -13,7 +13,7 @@
 // Inclusions of header files
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
-#include "GUI\GUIInput.h"
+#include "GUI/GUIInput.h"
 
 #include "NetworkClient.h"
 #include "NetworkServer.h"

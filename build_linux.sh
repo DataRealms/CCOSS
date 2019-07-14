@@ -328,8 +328,10 @@ LDFLAGS+=" $MINIZIP_LIBS -lpthread -Wl,-rpath ."
 
 SRCS="$SYSTEM_SRCS $ENTITIES_SRCS $MANAGERS_SRCS $GUI_SRCS $MENUS_SRCS $RAKNET_SRCS $LUABIND_SRCS"
 
+echo "Lua, Boost, Openal, Curl, SDL2_mixer, Minizip and zlib are all required to be installed in the system. (For now)"
+echo " "
 
-LIBS_DIR="libs"
+LIBS_DIR="$PWD/libs"
 if [ ! -d "$LIBS_DIR" ]; then
     mkdir $LIBS_DIR
 fi

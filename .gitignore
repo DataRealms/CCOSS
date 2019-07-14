@@ -5,6 +5,15 @@
 *.log
 *.pdb
 *.obj
+*.o
+*.status
+*.lo
+*.la
+*.a
+*makefile*
+*Makefile*
+.libs
+.deps
 ScreenDump*.bmp
 /.vs
 /WorkshopMods

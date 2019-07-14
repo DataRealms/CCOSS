@@ -195,7 +195,7 @@ namespace RTE
 
 		void RegisterTerrainChange(SceneMan::TerrainChange tc);
 
-		void NetworkServer::ClearTerrainChangeQueue(int player);
+		void ClearTerrainChangeQueue(int player);
 
 		bool NeedToProcessTerrainChanges(int player);
 
@@ -217,7 +217,7 @@ namespace RTE
 
 		void DrawStatisticsData();
 
-		RakNet::SystemAddress NetworkServer::ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, int port);
+		RakNet::SystemAddress ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, int port);
 
 		void UpdateStats(int player);
 

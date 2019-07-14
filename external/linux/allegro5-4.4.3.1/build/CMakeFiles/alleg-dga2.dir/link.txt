@@ -1,1 +1,0 @@
-/usr/bin/cc -fPIC  -W -Wall -Wno-unused-parameter -Wdeclaration-after-statement -O2 -g -DNDEBUG  -shared  -o lib/alleg-dga2.so CMakeFiles/alleg-dga2.dir/src/x/xdga2.c.o -lXxf86dga -lSM -lICE -lX11 -lXext 

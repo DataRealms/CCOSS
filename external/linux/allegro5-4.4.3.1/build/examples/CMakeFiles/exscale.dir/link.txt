@@ -1,1 +1,0 @@
-/usr/bin/cc  -W -Wall -Wno-unused-parameter -Wdeclaration-after-statement -O2 -g -DNDEBUG  -rdynamic CMakeFiles/exscale.dir/exscale.c.o  -o exscale -Wl,-rpath,/home/ian/source/CCOSS/external/linux/allegro5-4.4.3.1/build/lib ../lib/liballeg.so.4.4.3 -lm -lpthread -lrt -lSM -lICE -lX11 -lXext -lXcursor -lXpm -lXxf86vm -ldl 

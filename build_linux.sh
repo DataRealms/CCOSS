@@ -305,14 +305,15 @@ OPENSSL_INC=""
 
 #ALLEGRO_LIBS="`pkg-config --libs allegro`"
 ALLEGRO_LIBS="-lalleg"
-BOOST_LIBS='-lboost_thread -lboost_chrono -lboost_system -lboost_date_time'
+BOOST_LIBS='-lboost_thread'
 SDL_LIBS="$PREPARED_DIR/libSDL2.a"
 SDL_MIXER_LIBS="$PREPARED_DIR/libSDL2_mixer.a"
 LUABIND_LIBS=""
 LUA_LIBS="$PREPARED_DIR/liblua.a"
 ZIPIO_LIBS=""
 CURL_LIBS="`pkg-config --libs libcurl`"
-OPENAL_LIBS="`pkg-config --libs openal`"
+OPENAL_LIBS=""
+#OGG_LIBS="$PREPARED_DIR/libogg.a"
 OGG_LIBS="$PREPARED_DIR/libogg.a"
 VORBIS_LIBS="$PREPARED_DIR/libvorbis.a"
 VORBISFILE_LIBS="$PREPARED_DIR/libvorbisfile.a"

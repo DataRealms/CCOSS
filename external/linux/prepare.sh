@@ -7,6 +7,7 @@
 ./SDL_mixer.sh
 ./sndio.sh
 ./allegro.sh
+./lua.sh
 
 ZLIB_DIR=$PWD/zlib-1.2.11
 PNG_DIR=$PWD/libpng-1.6.37
@@ -16,6 +17,7 @@ SDL_DIR=$PWD/SDL2-2.0.9
 SDL_MIXER_DIR=$PWD/SDL2_mixer-2.0.4
 SNDIO_DIR=$PWD/sndio-1.5.0/libsndio
 ALLEGRO_DIR=$PWD/allegro5-4.4.3.1
+LUA_DIR=$PWD/lua-5.1.5
 
 mkdir $PWD/prepared
 mkdir $PWD/prepared/include
@@ -34,6 +36,8 @@ pushd $PWD/prepared
     cp -r $SDL_DIR/install/include .
     cp $SDL_MIXER_DIR/install/lib/libSDL2_mixer.a .
     cp -r $SDL_MIXER_DIR/install/include .
+    cp $LUA_DIR/install/lib/liblua.a .
+    cp -r $LUA_DIR/install/include .
     cp $SNDIO_DIR/libsndio.a .
     cp -t $PWD/../../../libs $ALLEGRO_DIR/install/lib/*
 popd

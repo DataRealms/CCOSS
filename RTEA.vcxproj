@@ -61,7 +61,7 @@
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)System\Slick Profiler;$(ProjectDir)System\Slick Profiler\Profiler;$(ProjectDir)System\Slick Profiler\DebugTool;$(ProjectDir)System\EXECryptor;$(ProjectDir)external\include\steam;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind\2013;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;DEBUGMODE;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER;__USE_SOUND_FMOD_OFF;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;DEBUGMODE;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER_OFF;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -75,7 +75,7 @@
       <ForcedIncludeFiles>TargetSxS.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>lua5.1.x86.debug.lib;luabind.x86.debug.lib;ws2_32.lib;libcurl.lib;zlibwapi.lib;alld_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;SDL2.x86.debug.lib;SDL2_mixer.x86.debug.lib;libboost_thread-vc120-mt-gd-1_55.lib;libboost_date_time-vc120-mt-gd-1_55.lib;libboost_system-vc120-mt-gd-1_55.lib;libboost_chrono-vc120-mt-gd-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lua5.1.x86.debug.lib;luabind.x86.debug.lib;ws2_32.lib;libcurl.lib;zlibwapi.lib;alld_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;SDL2.x86.debug.lib;SDL2_mixer.x86.debug.lib;libboost_thread-vc120-mt-gd-1_55.lib;libboost_date_time-vc120-mt-gd-1_55.lib;libboost_system-vc120-mt-gd-1_55.lib;libboost_chrono-vc120-mt-gd-1_55.lib;gorillaD.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -95,7 +95,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)System\Slick Profiler;$(ProjectDir)System\Slick Profiler\Profiler;$(ProjectDir)System\Slick Profiler\DebugTool;$(ProjectDir)System\EXECryptor;$(ProjectDir)external\include\steam;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind\2013;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>FINALRELASE;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER;__USE_SOUND_FMOD_OFF;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FINALRELASE;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER_OFF;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -114,7 +114,7 @@
       <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>lua.x86.release.lib;luabind.x86.release.lib;ws2_32.lib;libcurl.lib;zlibwapi.lib;alleg_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;SDL2.x86.release.lib;SDL2_mixer.x86.release.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lua.x86.release.lib;luabind.x86.release.lib;ws2_32.lib;libcurl.lib;zlibwapi.lib;alleg_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;SDL2.x86.release.lib;SDL2_mixer.x86.release.lib;gorilla.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>

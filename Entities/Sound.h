@@ -23,6 +23,8 @@
 struct FSOUND_SAMPLE;
 #elif __USE_SOUND_SDLMIXER
 struct Mix_Chunk;
+#elif __USE_SOUND_SDLMIXER
+struct ga_Handle;
 #endif
 
 namespace RTE
@@ -221,6 +223,8 @@ ENTITYALLOCATION(Sound)
 	const std::vector<std::pair<ContentFile, FSOUND_SAMPLE *> > & GetSampleList() const { return m_Samples; }
 #elif __USE_SOUND_SDLMIXER
 	const std::vector<std::pair<ContentFile, Mix_Chunk *> > & GetSampleList() const { return m_Samples; }
+#elif __USE_SOUND_GORILLA
+	const std::vector<std::pair<ContentFile, ga_Sound *> > & GetSampleList() const { return m_Samples; }
 #endif // __USE_SOUND_FMOD
 
 
@@ -236,6 +240,8 @@ ENTITYALLOCATION(Sound)
 #ifdef __USE_SOUND_FMOD
 		return !m_Samples.empty(); 
 #elif __USE_SOUND_SDLMIXER
+		return !m_Samples.empty();
+#elif __USE_SOUND_GORILLA
 		return !m_Samples.empty();
 #else
 		return false;
@@ -254,6 +260,8 @@ ENTITYALLOCATION(Sound)
 #ifdef __USE_SOUND_FMOD
 		return m_Samples.size(); 
 #elif __USE_SOUND_SDLMIXER
+		return m_Samples.size();
+#elif __USE_SOUND_GORILLA
 		return m_Samples.size();
 #else
 		return 0;
@@ -317,6 +325,8 @@ ENTITYALLOCATION(Sound)
 	FSOUND_SAMPLE * GetCurrentSample();
 #elif __USE_SOUND_SDLMIXER
 	Mix_Chunk * GetCurrentSample();
+#elif __USE_SOUND_GORILLA
+	ga_Sound * GetCurrentSample();
 #endif // __USE_SOUND_FMOD
 
 
@@ -333,6 +343,8 @@ ENTITYALLOCATION(Sound)
 	FSOUND_SAMPLE * StartNextSample();
 #elif __USE_SOUND_SDLMIXER
 	Mix_Chunk * StartNextSample();
+#elif __USE_SOUND_GORILLA
+	ga_Sound * StartNextSample();
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -452,6 +464,8 @@ protected:
 	std::vector<std::pair<ContentFile, FSOUND_SAMPLE *> > m_Samples;
 #elif __USE_SOUND_SDLMIXER
 	std::vector<std::pair<ContentFile, Mix_Chunk *> > m_Samples;
+#elif __USE_SOUND_GORILLA
+	std::vector<std::pair<ContentFile, ga_Sound *> > m_Samples;
 #endif // __USE_SOUND_FMOD
     // Index of the current (or last, if nothing is being played) sample being played
     int m_CurrentSample;

@@ -15,7 +15,6 @@ ScreenDump*.bmp
 /Debug
 /Packaging/Win32-Beta/files
 /Packaging/Win32/files
-/WorkshopMods
 /System/Slick Profiler/Final2017
 /System/Slick Profiler/Steam Final
 /System/Slick Profiler/Steam Release
@@ -36,13 +35,11 @@ ScreenDump*.bmp
 /_Bin/Debug Open Source
 /Final Open Source
 /Debug Open Source
-/Steam Final
 /Final2017
 /Remote Profile
 /Remote Release
 /Release
 /Final
-/Debug
 /DebugFast
 LogConsole.txt
 LogLoading.txt
@@ -76,6 +73,8 @@ MemCleanupInfo.txt
 /Metagames.rte
 /Missions.rte
 /Scenes.rte
+/Tutorial.rte
 
 
 
+/abortscreen.bmp

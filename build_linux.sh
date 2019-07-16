@@ -313,6 +313,13 @@ LDFLAGS="-Llibs/ $ALLEGRO_LIBS $OPENSSL_LIBS $BOOST_LIBS $SDL_LIBS $SDL_MIXER_LI
 LDFLAGS+=" $MINIZIP_LIBS -lpthread"
 
 SRCS="$SYSTEM_SRCS $ENTITIES_SRCS $MANAGERS_SRCS $GUI_SRCS $MENUS_SRCS $RAKNET_SRCS $LUABIND_SRCS"
+CC="c++"
+if `hash ccache 2> /dev/null`; then
+    CC="ccache $CC"
+    echo "Building with ccache ENABLED"
+else
+    echo "Building with ccache DISABLED. Consider installing it."
+fi
 
 LIBS_DIR="$PWD/libs"
 if [ ! -d "$LIBS_DIR" ]; then
@@ -324,6 +331,7 @@ if [ ! -f libs/liballeg.so ]; then
         ./prepare.sh
     popd
 fi
+
 
 OBJ_DIR="objs"
 if [ ! -d "$OBJ_DIR" ]; then
@@ -339,7 +347,7 @@ NUM_FILES=0
 for src in $SRCS; do
     echo "($NUM_FILES/$TOTAL_FILES)"
     path=$OBJ_DIR/$(basename $src).o
-    ccache c++ $CPPFLAGS -c $src -o $path
+    $CC $CPPFLAGS -c $src -o $path
     OBJ_FILES+="$path "
     NUM_FILES=$((NUM_FILES + 1))
 done

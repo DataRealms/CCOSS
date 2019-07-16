@@ -20,8 +20,6 @@
 #include <string>
 #include <deque>
 
-//#include <boost/thread.hpp>
-
 #include "Singleton.h"
 #define g_ThreadMan ThreadMan::Instance()
 

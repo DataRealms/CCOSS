@@ -1,0 +1,291 @@
+#!/bin/sh
+
+#
+# display help screeen
+#
+help() {
+cat << END
+Usage: configure [options]
+--prefix=DIR			set install prefix to DIR [$prefix]
+--bindir=DIR			install executables in DIR [\$prefix/bin]
+--datadir=DIR			install read-only data in DIR [\$prefix/share]
+--includedir=DIR		install header files in DIR [\$prefix/include]
+--libdir=DIR			install libraries in DIR [\$prefix/lib]
+--mandir=DIR			install man pages in DIR [\$prefix/man]
+--precision=NUMBER		aucat/sndiod processing precision [$precision]
+--privsep-user=USER		non-privileged user for sndio daemon [$user]
+--enable-alsa			enable alsa audio & midi backends [$alsa]
+--disable-alsa			disable alsa audio & midi backends
+--enable-sun			enable sun audio backend [$sun]
+--disable-sun			disable sun audio backend
+--enable-rmidi			enable character device midi backend [$rmidi]
+--disable-rmidi			disable character device midi backend
+--enable-umidi			enable usb-midi backend [$umidi]
+--disable-umidi			disable usb-midi backend
+--with-libbsd			use the libbsd rather than bsd-compat/*
+--without-libbsd		don't use libbsd
+END
+}
+
+#
+# defaults
+#
+prefix=/usr/local			# where to install sndio
+so="libsndio.so.\${MAJ}.\${MIN}"	# shared libs to build
+alsa=no					# do we want alsa support ?
+sun=no					# do we want sun support ?
+oss=no					# do we want oss support ?
+rmidi=no				# do we want support for raw char dev ?
+umidi=no				# do we want support for umidi ?
+precision=16				# aucat/sndiod arithmetic precision
+user=_sndio				# non-privileged user for sndio daemon
+libbsd=no				# use libbsd?
+so_ldflags=				# extra linker flags for shared libs
+unset vars				# variables passed as arguments
+unset bindir				# path where to install binaries
+unset datadir				# path where to install doc
+unset mandir				# path where to install man pages
+unset includedir			# path where to install header file
+unset libdir				# path where to install library
+unset defs				# no extra #defines
+unset ldadd				# no extra libraries (-l options)
+
+#
+# guess OS-specific parameters
+#
+case `uname` in
+	Linux)
+		alsa=yes
+		ldadd="-lrt"
+		user=sndiod
+		so_ldflags="-Wl,-soname=libsndio.so.\${MAJ}.\${MIN}"
+		so_link="libsndio.so"
+		defs='-D_GNU_SOURCE -DHAVE_SOCK_CLOEXEC -DHAVE_CLOCK_GETTIME'
+		;;
+	NetBSD)
+		sun=no
+		rmidi=yes
+		user=_sndio
+		so_link="libsndio.so"
+		defs='-DHAVE_ARC4RANDOM -DHAVE_ISSETUGID \\\
+		-DHAVE_STRLCAT -DHAVE_STRLCPY \\\
+		-DHAVE_SOCK_CLOEXEC -DHAVE_CLOCK_GETTIME'
+		;;
+	OpenBSD)
+		sun=yes
+		rmidi=yes
+		user=_sndio
+		defs='-DHAVE_ARC4RANDOM -DHAVE_ISSETUGID \\\
+		-DHAVE_STRLCAT -DHAVE_STRLCPY -DHAVE_STRTONUM \\\
+		-DHAVE_SOCK_CLOEXEC -DHAVE_CLOCK_GETTIME'
+		;;
+	DragonFly|FreeBSD)
+		oss=yes
+		umidi=yes
+		user=_sndio
+		so_ldflags="-Wl,-soname=libsndio.so.\${MAJ}.\${MIN}"
+		so_link="libsndio.so"
+		defs='-DHAVE_ARC4RANDOM -DHAVE_ISSETUGID \\\
+		-DHAVE_STRLCAT -DHAVE_STRLCPY -DHAVE_STRTONUM \\\
+		-DHAVE_SOCK_CLOEXEC -DHAVE_CLOCK_GETTIME'
+		;;
+	Darwin)
+		rmidi=no
+		so="libsndio.\${MAJ}.\${MIN}.dylib"
+		so_link="libsndio.dylib"
+		defs='-DHAVE_ARC4RANDOM -DHAVE_ISSETUGID \\\
+		-DHAVE_STRLCAT -DHAVE_STRLCPY'
+esac
+
+# shell word separator (none)
+IFS=''
+
+# sed-quoted new-line
+nl='\
+'
+
+for i; do
+	case "$i" in
+	--prefix=*)
+		prefix="${i#--prefix=}"
+		shift;;
+	--bindir=*)
+		bindir="${i#--bindir=}"
+		shift;;
+	--datadir=*)
+		datadir="${i#--datadir=}"
+		shift;;
+	--includedir=*)
+		includedir="${i#--includedir=}"
+		shift;;
+	--libdir=*)
+		libdir="${i#--libdir=}"
+		shift;;
+	--mandir=*)
+		mandir="${i#--mandir=}"
+		shift;;
+	--enable-alsa)
+		alsa=yes
+		shift;;
+	--disable-alsa)
+		alsa=no
+		shift;;
+	--enable-oss)
+		oss=yes
+		shift;;
+	--disable-oss)
+		oss=no
+		shift;;
+	--enable-sun)
+		sun=yes
+		shift;;
+	--disable-sun)
+		sun=no
+		shift;;
+	--enable-rmidi)
+		rmidi=yes
+		shift;;
+	--disable-rmidi)
+		rmidi=no
+		shift;;
+	--enable-umidi)
+		umidi=yes
+		shift;;
+	--disable-umidi)
+		umidi=no
+		shift;;
+	--privsep-user=*)
+		user="${i#--privsep-user=}"
+		shift;;
+	--precision=*)
+		precision="${i#--precision=}"
+		if [ "$precision" != 16 -a "$precision" != 24 ]; then
+			echo "$i: only 16 and 24 are supported" >&2
+			exit 1
+		fi
+		shift;;
+	--with-libbsd)
+		libbsd=yes
+		shift;;
+	--without-libbsd)
+		libbsd=no
+		shift;;
+	CC=*|CFLAGS=*|LDFLAGS=*)
+		vars="$vars$i$nl"
+		shift;;
+	*)
+		help
+		exit 1
+		;;
+	esac
+done
+
+#
+# if $xxxdir is not specified, define it to $prefix/xxx
+#
+bindir="${bindir:-$prefix/bin}"
+datadir="${datadir:-$prefix/share}"
+includedir="${includedir:-$prefix/include}"
+libdir="${libdir:-$prefix/lib}"
+mandir="${mandir:-$prefix/share/man}"
+
+#
+# umidi implies rmidi
+#
+if [ $umidi = yes ]; then
+	rmidi=yes
+fi
+
+#
+# if using ALSA, add corresponding parameters
+#
+if [ $alsa = yes ]; then
+	defs="$defs -DUSE_ALSA"
+	ldadd="$ldadd -lasound"
+fi
+
+#
+# if using OSS, add corresponding parameters
+#
+if [ $oss = yes ]; then
+	defs="$defs -DUSE_OSS"
+fi
+
+#
+# if using Sun API, add corresponding parameters
+#
+if [ $sun = yes ]; then
+	defs="$defs -DUSE_SUN"
+fi
+
+#
+# if using raw character devices for midi, add corresponding parameters
+#
+if [ $rmidi = yes ]; then
+	defs="$defs -DUSE_RMIDI"
+fi
+
+#
+# if using usb-midi raw devices for midi, add corresponding parameters
+#
+if [ $umidi = yes ]; then
+	defs="$defs -DUSE_UMIDI"
+fi
+
+#
+# if using libbsd, add corresponding parameters
+#
+if [ $libbsd = yes ]; then
+	# no arc4random as libbsd has a questionable implementation
+	defs="$defs -DHAVE_STRLCPY -DHAVE_STRLCAT -DHAVE_STRTONUM"
+	ldadd="$ldadd -lbsd"
+fi
+
+for f in Makefile aucat/Makefile midicat/Makefile sndiod/Makefile \
+libsndio/Makefile \
+examples/Makefile \
+contrib/init.d.sndiod \
+contrib/sndiod.service
+do
+	sed \
+	-e "s:@bindir@:$bindir:" \
+	-e "s:@datadir@:$datadir:" \
+	-e "s:@includedir@:$includedir:" \
+	-e "s:@libdir@:$libdir:" \
+	-e "s:@mandir@:$mandir:" \
+	-e "s:@defs@:$defs:" \
+	-e "s:@ldadd@:$ldadd:" \
+	-e "s:@so@:$so:" \
+	-e "s:@so_link@:$so_link:" \
+	-e "s:@so_ldflags@:$so_ldflags:" \
+	-e "s:@vars@:${vars}:" \
+	-e "s:@precision@:$precision:" \
+	-e "s:@user@:$user:" \
+	< $f.in > $f
+done
+
+chmod +x contrib/init.d.sndiod
+
+cat <<EOF
+
+bindir................... $bindir
+datadir.................. $datadir
+includedir............... $includedir
+libdir................... $libdir
+mandir................... $mandir
+user..................... $user
+libbsd................... $libbsd
+precision................ $precision
+alsa..................... $alsa
+oss...................... $oss
+sun...................... $sun
+rmidi.................... $rmidi
+umidi.................... $umidi
+
+Do "make && make install" to compile and install sndio
+
+Installation requires the "$libdir" directory to be part of
+the system library search path. The "$user" user must exist and
+its primary group must have access to audio and MIDI hardware.
+
+EOF

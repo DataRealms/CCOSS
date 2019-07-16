@@ -1873,7 +1873,8 @@ namespace RTE
 
 				m_Server->SetTimeoutTime(5000, m_ClientConnections[index].ClientId);
 
-				m_ClientConnections[index].pSendThread = new boost::thread(BackgroundSendThreadFunction, this, index);
+				//m_ClientConnections[index].pSendThread = new boost::thread(BackgroundSendThreadFunction, this, index);
+				m_ClientConnections[index].pSendThread = new std::thread(BackgroundSendThreadFunction, this, index);
 				SendAcceptedMsg(index);
 
 				m_SendSceneSetupData[index] = true;

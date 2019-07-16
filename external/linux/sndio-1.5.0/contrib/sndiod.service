@@ -1,0 +1,12 @@
+[Unit]
+Description=sndio audio and MIDI server
+After=network.target
+
+[Service]
+Type=forking
+Restart=on-abort
+EnvironmentFile=-/etc/default/sndiod
+ExecStart=/home/ian/source/CCOSS/external/linux/sndio-1.5.0/install/bin/sndiod $DAEMON_OPTS
+
+[Install]
+WantedBy=multi-user.target

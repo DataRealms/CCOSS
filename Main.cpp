@@ -68,6 +68,9 @@
 #define FILEBUFFER_SIZE 8192
 #define MAX_UNZIPPED_FILE_SIZE 104857600
 
+
+extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
+
 using namespace RTE;
 
 //////////////////////////////////////////////////////////////////////////////////////////

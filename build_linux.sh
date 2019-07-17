@@ -281,7 +281,7 @@ LUABIND_SRCS="
 "
 
 # CHANGE THIS TO FIT YOUR SYSTEM LOCATION
-PREPARED_DIR="$HOME/source/CCOSS_dependencies/prepared"
+PREPARED_DIR="$PWD/external/linux/prepared"
 ENTITIES_INC="-IEntities/"
 RAKNET_INC="-I$RAKNET_LOCATION"
 MANAGERS_INC="-IManagers/"

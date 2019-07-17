@@ -690,6 +690,11 @@ ENTITYALLOCATION(ACrab)
 
 protected:
 
+	// Dynamic AimRange -- The maximum angle MountedMO can be aimed up, positive values only -- MaximDude
+	float m_AimRangeUpperLimit;
+	// Dynamic AimRange -- The maximum angle MountedMO can be aimed down, positive values only -- MaximDude
+	float m_AimRangeLowerLimit;
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateChildMOIDs
 //////////////////////////////////////////////////////////////////////////////////////////

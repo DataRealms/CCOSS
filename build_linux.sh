@@ -281,7 +281,11 @@ LUABIND_SRCS="
 "
 
 # CHANGE THIS TO FIT YOUR SYSTEM LOCATION
-PREPARED_DIR="$PWD/external/linux/prepared"
+PREPARED_DIR=""
+if [ -z "$PREPARED_DIR" ]; then
+    echo "The PREPARED_DIR variable has not been set. Find it in build_linux.sh and set it to your system's path to the dependencies."
+    exit
+fi
 ENTITIES_INC="-IEntities/"
 RAKNET_INC="-I$RAKNET_LOCATION"
 MANAGERS_INC="-IManagers/"

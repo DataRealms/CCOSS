@@ -284,6 +284,7 @@ LUABIND_SRCS="
 PREPARED_DIR=""
 if [ -z "$PREPARED_DIR" ]; then
     echo "The PREPARED_DIR variable has not been set. Find it in build_linux.sh and set it to your system's path to the dependencies."
+    echo "You can find the dependencies here: https://github.com/liberated-cortex/CCOSS_dependencies"
     exit
 fi
 ENTITIES_INC="-IEntities/"
@@ -321,18 +322,6 @@ if `hash ccache 2> /dev/null`; then
 else
     echo "Building with ccache DISABLED. Consider installing it."
 fi
-
-LIBS_DIR="$PWD/libs"
-if [ ! -d "$LIBS_DIR" ]; then
-    mkdir $LIBS_DIR
-fi
-
-if [ ! -f libs/liballeg.so ]; then
-    pushd $PWD/external/linux
-        ./prepare.sh
-    popd
-fi
-
 
 OBJ_DIR="objs"
 if [ ! -d "$OBJ_DIR" ]; then

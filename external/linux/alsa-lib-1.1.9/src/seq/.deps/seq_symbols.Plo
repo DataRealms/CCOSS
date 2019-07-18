@@ -1,3 +1,0 @@
-seq_symbols.lo: seq_symbols.c /usr/include/stdc-predef.h
-
-/usr/include/stdc-predef.h:

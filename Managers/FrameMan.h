@@ -1531,7 +1531,7 @@ public:
 // Arguments:       The string that the message box should display.
 // Return value:    None.
 
-    void ShowMessageBox(std::string message) const { allegro_message(message.c_str()); }
+    void ShowMessageBox(std::string message) const { allegro_message("%s", message.c_str()); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -281,7 +281,7 @@ LUABIND_SRCS="
 "
 
 # CHANGE THIS TO FIT YOUR SYSTEM LOCATION
-PREPARED_DIR="$HOME/source/CCOSS_dependencies/prepared"
+PREPARED_DIR=""
 if [ -z "$PREPARED_DIR" ]; then
     echo "The PREPARED_DIR variable has not been set. Find it in build_linux.sh and set it to your system's path to the dependencies."
     echo "You can find the dependencies here: https://github.com/liberated-cortex/CCOSS_dependencies"
@@ -294,7 +294,7 @@ SYSTEM_INC="-ISystem -ISystem/MicroPather -ISystem/InterGif -ISystem/MD5 -ISyste
 GUI_INC="-IGUI"
 MENUS_INC="-IMenus"
 
-ALLEGRO_LIBS="-lalleg"
+ALLEGRO_LIBS="$PREPARED_DIR/liballeg.a -lm -lpthread -lrt -lSM -lICE -lX11 -lXext -lXext -lXcursor -lXcursor -lXpm -lXxf86vm -lXxf86dga -lSM -lICE -lX11 -lXext -ldl"
 ZLIB_LIBS="$PREPARED_DIR/libz.a"
 LUA_LIBS="$PREPARED_DIR/liblua.a"
 OGG_LIBS="$PREPARED_DIR/libogg.a"

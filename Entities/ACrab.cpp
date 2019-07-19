@@ -2378,11 +2378,11 @@ void ACrab::Update()
     // Aiming
 
     // Get rotation angle of crab
-    float RotAngle = GetRotAngle();
+    float rotAngle = GetRotAngle();
 
     // Adjust AimRange limits to crab rotation
-    float m_AdjustedAimRangeUpperLimit = (m_HFlipped) ? m_AimRangeUpperLimit - RotAngle : m_AimRangeUpperLimit + RotAngle;
-    float m_AdjustedAimRangeLowerLimit = (m_HFlipped) ? -m_AimRangeLowerLimit - RotAngle : -m_AimRangeLowerLimit + RotAngle;
+    float adjustedAimRangeUpperLimit = (m_HFlipped) ? m_AimRangeUpperLimit - rotAngle : m_AimRangeUpperLimit + rotAngle;
+    float adjustedAimRangeLowerLimit = (m_HFlipped) ? -m_AimRangeLowerLimit - rotAngle : -m_AimRangeLowerLimit + rotAngle;
 
     if (m_Controller.IsState(AIM_UP))
     {
@@ -2435,7 +2435,7 @@ void ACrab::Update()
         m_AimState = AIMSTILL;
 
     // Clamp aim angle so it's within adjusted limit ranges, for all control types
-    Clamp(m_AimAngle, m_AdjustedAimRangeUpperLimit, m_AdjustedAimRangeLowerLimit);
+    Clamp(m_AimAngle, adjustedAimRangeUpperLimit, adjustedAimRangeLowerLimit);
 
     //////////////////////////////
     // Sharp aim calculation

@@ -311,7 +311,7 @@ CPPFLAGS="-D__OPEN_SOURCE_EDITION -std=c++11 -fdiagnostics-color $INCLUDES $WARN
 LDFLAGS="-Llibs/ $ALLEGRO_LIBS $OPENSSL_LIBS $BOOST_LIBS $LUABIND_LIBS $LUA_LIBS $ZIPIO_LIBS $OPENAL_LIBS $OGG_LIBS $VORBIS_LIBS $VORBISFILE_LIBS"
 LDFLAGS+=" $MINIZIP_LIBS $ZLIB_LIBS $BSD_LIBS $SHARED_LIBS"
 
-SRCS="$SYSTEM_SRCS $ENTITIES_SRCS $MANAGERS_SRCS $GUI_SRCS $MENUS_SRCS $RAKNET_SRCS $LUABIND_SRCS"
+SRCS="$SYSTEM_SRCS $ENTITIES_SRCS $MANAGERS_SRCS $GUI_SRCS $MENUS_SRCS"
 CC="c++"
 if `hash ccache 2> /dev/null`; then
     CC="ccache $CC"
@@ -323,7 +323,30 @@ fi
 OBJ_DIR="objs"
 if [ ! -d "$OBJ_DIR" ]; then
     mkdir $OBJ_DIR
+    mkdir $OBJ_DIR/RAKNET
+    mkdir $OBJ_DIR/LUABIND
 fi
+
+RAKNET_LIB=$OBJ_DIR/libraknet.a
+RAKNET_OBJ_DIR=$OBJ_DIR/RAKNET
+if [ ! -f $RAKNET_LIB ]; then
+    for src in $RAKNET_SRCS; do
+        path=$RAKNET_OBJ_DIR/$(basename $src).o
+        $CC $CPPFLAGS -c $src -o $path
+    done
+    ar rcs $RAKNET_LIB $RAKNET_OBJ_DIR/*
+fi
+
+LUABIND_LIB=$OBJ_DIR/libluabind.a
+LUABIND_OBJ_DIR=$OBJ_DIR/LUABIND
+if [ ! -f $LUABIND_LIB ]; then
+    for src in $LUABIND_SRCS; do
+        path=$LUABIND_OBJ_DIR/$(basename $src).o
+        $CC $CPPFLAGS -c $src -o $path
+    done
+    ar rcs $LUABIND_LIB $LUABIND_OBJ_DIR/*
+fi
+
 
 OBJ_FILES=""
 TOTAL_FILES=0
@@ -339,4 +362,4 @@ for src in $SRCS; do
     NUM_FILES=$((NUM_FILES + 1))
 done
 
-c++ $CPPFLAGS -o cortex Main.cpp $OBJ_FILES $LDFLAGS
+c++ $CPPFLAGS -o cortex Main.cpp $OBJ_FILES $OBJ_DIR/libraknet.a $OBJ_DIR/libluabind.a $LDFLAGS

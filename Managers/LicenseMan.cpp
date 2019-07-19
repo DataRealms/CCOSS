@@ -988,7 +988,6 @@ char LicenseMan::CheckKeyValidityOffline(const char * EMAIL, const char * KEY)
 
     return KEY[0];
 
-#if 0
 	memset (buffer,0,64);
 	memset (hex_output,0,64);
 	memset (sum_output,0,9);
@@ -1045,7 +1044,6 @@ char LicenseMan::CheckKeyValidityOffline(const char * EMAIL, const char * KEY)
 	else
 		return OFFLINEINVALID;
 
-#endif
 #ifndef __OPEN_SOURCE_EDITION
 	CRYPT_END
 #endif

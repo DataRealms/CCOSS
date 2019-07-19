@@ -94,6 +94,8 @@ void ACrab::Clear()
     m_SweepTimer.Reset();
     m_PatrolTimer.Reset();
     m_JumpTimer.Reset();
+    m_AimRangeUpperLimit = -1;
+    m_AimRangeLowerLimit = -1;
 }
 
 
@@ -123,6 +125,14 @@ int ACrab::Create()
 
     // All ACrabs by default avoid hitting each other ont he same team
     m_IgnoresTeamHits = true;
+
+    // Dynamic AimRange
+    // Check whether UpperLimit and LowerLimit are defined, if not, copy legacy AimRange value to preserve compatibility
+    if (m_AimRangeUpperLimit == -1 || m_AimRangeLowerLimit == -1)
+    {
+        m_AimRangeUpperLimit = m_AimRange;
+        m_AimRangeLowerLimit = m_AimRange;
+    }
 
     return 0;
 }
@@ -238,6 +248,8 @@ int ACrab::Create(const ACrab &reference)
     m_DigTunnelEndPos = reference.m_DigTunnelEndPos;
     m_SweepCenterAimAngle = reference.m_SweepCenterAimAngle;
     m_SweepRange = reference.m_SweepRange;
+    m_AimRangeUpperLimit = reference.m_AimRangeUpperLimit;
+    m_AimRangeLowerLimit = reference.m_AimRangeLowerLimit;
 
     return 0;
 }
@@ -344,6 +356,10 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         reader >> m_Paths[RIGHTSIDE][FGROUND][WALK];
     else if (propName == "RDislodgeLimbPath")
         reader >> m_Paths[RIGHTSIDE][FGROUND][DISLODGE];
+    else if (propName == "AimRangeUpperLimit")
+        reader >> m_AimRangeUpperLimit;
+    else if (propName == "AimRangeLowerLimit")
+        reader >> m_AimRangeLowerLimit;
     else
         // See if the base class(es) can find a match instead
         return Actor::ReadProperty(propName, reader);
@@ -400,6 +416,11 @@ int ACrab::Save(Writer &writer) const
     writer << m_Paths[RIGHTSIDE][FGROUND][WALK];
     writer.NewProperty("RDislodgeLimbPath");
     writer << m_Paths[RIGHTSIDE][FGROUND][DISLODGE];
+
+    writer.NewProperty("AimRangeUpperLimit");
+    writer << m_AimRangeUpperLimit;
+    writer.NewProperty("AimRangeLowerLimit");
+    writer << m_AimRangeLowerLimit;
 
     return 0;
 }
@@ -2355,26 +2376,23 @@ void ACrab::Update()
     }
 
     ////////////////////////////////////
-    // Aiming
+    // Aiming -- Dynamic AimRange
 
-	//float rotAngle = GetRotAngle();
+    // Get rotation angle of crab
+    float RotAngle = GetRotAngle();
 
-	//if (IsHFlipped())
-	//	rotAngle = -rotAngle;
+    // Adjust AimRange limits to crab rotation
+    float m_AdjustedAimRangeUpperLimit = (m_HFlipped) ? m_AimRangeUpperLimit - RotAngle : m_AimRangeUpperLimit + RotAngle;
+    float m_AdjustedAimRangeLowerLimit = (m_HFlipped) ? -m_AimRangeLowerLimit - RotAngle : -m_AimRangeLowerLimit + RotAngle;
 
     if (m_Controller.IsState(AIM_UP))
     {
-// TODO: Improve these!")
         // Set the timer to some base number so we don't
         // get a sluggish feeling at start of aim
         if (m_AimState != AIMUP)
             m_AimTmr.SetElapsedSimTimeMS(150);
-        m_AimState = AIMUP; 
-        m_AimAngle += m_Controller.IsState(AIM_SHARP) ?
-                      DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
-                      DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
-        if (m_AimAngle > m_AimRange)
-            m_AimAngle = m_AimRange;
+        m_AimState = AIMUP;
+        m_AimAngle += m_Controller.IsState(AIM_SHARP) ? DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
     }
     else if (m_Controller.IsState(AIM_DOWN))
     {
@@ -2383,11 +2401,7 @@ void ACrab::Update()
         if (m_AimState != AIMDOWN)
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMDOWN;
-        m_AimAngle -= m_Controller.IsState(AIM_SHARP) ?
-                      DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
-                      DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
-        if (m_AimAngle < -m_AimRange)
-            m_AimAngle = -m_AimRange;
+        m_AimAngle -= m_Controller.IsState(AIM_SHARP) ? DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
     }
     // Analog aim
     else if (m_Controller.GetAnalogAim().GetMagnitude() > 0.1)
@@ -2403,7 +2417,7 @@ void ACrab::Update()
         {
             m_HFlipped = !m_HFlipped;
 //                // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
-//                m_ForceDeepCheck = true;
+            //m_ForceDeepCheck = true;
             m_CheckTerrIntersection = true;
             MoveOutOfTerrain(g_MaterialGrass);
             for (int side = 0; side < SIDECOUNT; ++side)
@@ -2419,11 +2433,12 @@ void ACrab::Update()
         }
         // Correct angle based on flip
         m_AimAngle = FacingAngle(m_AimAngle);
-        // Clamp so it's within the range
-        Clamp(m_AimAngle, m_AimRange, -m_AimRange);
     }
     else
         m_AimState = AIMSTILL;
+
+    // Clamp aim angle so it's within adjusted limit ranges, for all control types
+    Clamp(m_AimAngle, m_AdjustedAimRangeUpperLimit, m_AdjustedAimRangeLowerLimit);
 
     //////////////////////////////
     // Sharp aim calculation

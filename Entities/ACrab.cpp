@@ -94,11 +94,8 @@ void ACrab::Clear()
     m_SweepTimer.Reset();
     m_PatrolTimer.Reset();
     m_JumpTimer.Reset();
-
-	// Dynamic AimRange -- MaximDude
-	m_AimRangeUpperLimit = -1;
-	m_AimRangeLowerLimit = -1;
-	//
+    m_AimRangeUpperLimit = -1;
+    m_AimRangeLowerLimit = -1;
 }
 
 
@@ -128,6 +125,13 @@ int ACrab::Create()
 
     // All ACrabs by default avoid hitting each other ont he same team
     m_IgnoresTeamHits = true;
+
+    // Check whether UpperLimit and LowerLimit are defined, if not, copy general AimRange value to preserve compatibility
+    if (m_AimRangeUpperLimit == -1 || m_AimRangeLowerLimit == -1)
+    {
+        m_AimRangeUpperLimit = m_AimRange;
+        m_AimRangeLowerLimit = m_AimRange;
+    }
 
     return 0;
 }
@@ -243,11 +247,8 @@ int ACrab::Create(const ACrab &reference)
     m_DigTunnelEndPos = reference.m_DigTunnelEndPos;
     m_SweepCenterAimAngle = reference.m_SweepCenterAimAngle;
     m_SweepRange = reference.m_SweepRange;
-
-	// Dynamic AimRange -- MaximDude
-	m_AimRangeUpperLimit = reference.m_AimRangeUpperLimit;
-	m_AimRangeLowerLimit = reference.m_AimRangeLowerLimit;
-	//
+    m_AimRangeUpperLimit = reference.m_AimRangeUpperLimit;
+    m_AimRangeLowerLimit = reference.m_AimRangeLowerLimit;
 
     return 0;
 }
@@ -354,14 +355,10 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         reader >> m_Paths[RIGHTSIDE][FGROUND][WALK];
     else if (propName == "RDislodgeLimbPath")
         reader >> m_Paths[RIGHTSIDE][FGROUND][DISLODGE];
-
-	// Dynamic AimRange -- MaximDude
-	else if (propName == "AimRangeUpperLimit")
-		reader >> m_AimRangeUpperLimit;
-	else if (propName == "AimRangeLowerLimit")
-		reader >> m_AimRangeLowerLimit;
-	//
-
+    else if (propName == "AimRangeUpperLimit")
+        reader >> m_AimRangeUpperLimit;
+    else if (propName == "AimRangeLowerLimit")
+        reader >> m_AimRangeLowerLimit;
     else
         // See if the base class(es) can find a match instead
         return Actor::ReadProperty(propName, reader);
@@ -419,12 +416,10 @@ int ACrab::Save(Writer &writer) const
     writer.NewProperty("RDislodgeLimbPath");
     writer << m_Paths[RIGHTSIDE][FGROUND][DISLODGE];
 
-	// Dynamic AimRange -- MaximDude
-	writer.NewProperty("AimRangeUpperLimit");
-	writer << m_AimRangeUpperLimit;
-	writer.NewProperty("AimRangeLowerLimit");
-	writer << m_AimRangeLowerLimit;
-	//
+    writer.NewProperty("AimRangeUpperLimit");
+    writer << m_AimRangeUpperLimit;
+    writer.NewProperty("AimRangeLowerLimit");
+    writer << m_AimRangeLowerLimit;
 
     return 0;
 }
@@ -2222,319 +2217,225 @@ void ACrab::UpdateAI()
 
 void ACrab::Update()
 {
-	SLICK_PROFILE(0xFF668431);
+    SLICK_PROFILE(0xFF668431);
 
-	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
-	float mass = GetMass();
+    float deltaTime = g_TimerMan.GetDeltaTimeSecs();
+    float mass = GetMass();
 
-	// Set Default direction of all the paths!
-	for (int side = 0; side < SIDECOUNT; ++side)
-	{
-		for (int layer = 0; layer < LAYERCOUNT; ++layer)
-		{
-			m_Paths[side][layer][WALK].SetHFlip(m_HFlipped);
-			m_Paths[side][layer][STAND].SetHFlip(m_HFlipped);
-		}
-	}
+    // Set Default direction of all the paths!
+    for (int side = 0; side < SIDECOUNT; ++side)
+    {
+        for (int layer = 0; layer < LAYERCOUNT; ++layer)
+        {
+            m_Paths[side][layer][WALK].SetHFlip(m_HFlipped);
+            m_Paths[side][layer][STAND].SetHFlip(m_HFlipped);
+        }
+    }
 
-	////////////////////////////////////
-	// Jetpack activation and blast direction
+    ////////////////////////////////////
+    // Jetpack activation and blast direction
 
-	if (m_pJetpack && m_pJetpack->IsAttached())
-	{
-		// Start Jetpack burn
-		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0)
-		{
-			m_pJetpack->TriggerBurst();
-			// This is to make sure se get loose from being stuck
-			m_ForceDeepCheck = true;
-			m_pJetpack->EnableEmission(true);
-			// Quadruple this for the burst
-			m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS() * 10;
-			if (m_JetTimeLeft < 0)
-				m_JetTimeLeft = 0;
-		}
-		// Jetpack is burning
-		else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0)
-		{
-			m_pJetpack->EnableEmission(true);
-			// Jetpacks are noisy!
-			m_pJetpack->AlarmOnEmit(m_Team);
-			// Deduct from the jetpack time
-			m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS();
-			m_MoveState = JUMP;
-		}
-		// Jetpack is off/turning off
-		else
-		{
-			m_pJetpack->EnableEmission(false);
-			if (m_MoveState == JUMP)
-				m_MoveState = STAND;
+    if (m_pJetpack && m_pJetpack->IsAttached())
+    {
+        // Start Jetpack burn
+        if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0)
+        {
+            m_pJetpack->TriggerBurst();
+            // This is to make sure se get loose from being stuck
+            m_ForceDeepCheck = true;
+            m_pJetpack->EnableEmission(true);
+            // Quadruple this for the burst
+            m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS() * 10;
+            if (m_JetTimeLeft < 0)
+                m_JetTimeLeft = 0;
+        }
+        // Jetpack is burning
+        else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0)
+        {
+            m_pJetpack->EnableEmission(true);
+            // Jetpacks are noisy!
+            m_pJetpack->AlarmOnEmit(m_Team);
+            // Deduct from the jetpack time
+            m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS();
+            m_MoveState = JUMP;
+        }
+        // Jetpack is off/turning off
+        else
+        {
+            m_pJetpack->EnableEmission(false);
+            if (m_MoveState == JUMP)
+                m_MoveState = STAND;
 
-			// Replenish the jetpack time, twice as fast
-			m_JetTimeLeft += g_TimerMan.GetDeltaTimeMS() * 2;
-			if (m_JetTimeLeft >= m_JetTimeTotal)
-				m_JetTimeLeft = m_JetTimeTotal;
-		}
+            // Replenish the jetpack time, twice as fast
+            m_JetTimeLeft += g_TimerMan.GetDeltaTimeMS() * 2;
+            if (m_JetTimeLeft >= m_JetTimeTotal)
+                m_JetTimeLeft = m_JetTimeTotal;
+        }
 
-		// Direct the jetpack nozzle according to movement stick if analog input is present
-		if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1)
-		{
-			float jetAngle = m_Controller.GetAnalogMove().GetAbsRadAngle() + PI;
-			// Clamp the angle to 45 degrees down cone with centr straight down on body
-			if (jetAngle > PI + HalfPI + QuartPI)// - SixteenthPI)
-				jetAngle = PI + HalfPI + QuartPI;// - SixteenthPI;
-			else if (jetAngle < PI + QuartPI)// + SixteenthPI)
-				jetAngle = PI + QuartPI;// + SixteenthPI;
+        // Direct the jetpack nozzle according to movement stick if analog input is present
+        if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1)
+        {
+            float jetAngle = m_Controller.GetAnalogMove().GetAbsRadAngle() + PI;
+            // Clamp the angle to 45 degrees down cone with centr straight down on body
+            if (jetAngle > PI + HalfPI + QuartPI)// - SixteenthPI)
+                jetAngle = PI + HalfPI + QuartPI;// - SixteenthPI;
+            else if (jetAngle < PI + QuartPI)// + SixteenthPI)
+                jetAngle = PI + QuartPI;// + SixteenthPI;
 
-			m_pJetpack->SetEmitAngle(FacingAngle(jetAngle));
-		}
-		// Or just use the aim angle if we're getting digital input
-		else
-		{
-			float jetAngle = m_AimAngle >= 0 ? (m_AimAngle * 0.25) : 0;
-			jetAngle = PI + QuartPI + EigthPI + jetAngle;
-			// Don't need to use FacingAngle on this becuase it's already applied to the AimAngle since last update.
-			m_pJetpack->SetEmitAngle(jetAngle);
-		}
-	}
+            m_pJetpack->SetEmitAngle(FacingAngle(jetAngle));
+        }
+        // Or just use the aim angle if we're getting digital input
+        else
+        {
+            float jetAngle = m_AimAngle >= 0 ? (m_AimAngle * 0.25) : 0;
+            jetAngle = PI + QuartPI + EigthPI + jetAngle;
+            // Don't need to use FacingAngle on this becuase it's already applied to the AimAngle since last update.
+            m_pJetpack->SetEmitAngle(jetAngle);
+        }
+    }
 
-	////////////////////////////////////
-	// Movement direction
+    ////////////////////////////////////
+    // Movement direction
 
-	if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP)
-	{
-		if (m_MoveState != JUMP)
-		{
-			// Restart the stride if we're just starting to walk or crawl
-			if (m_MoveState != WALK)
-			{
-				m_StrideStart[LEFTSIDE] = true;
-				m_StrideStart[RIGHTSIDE] = true;
-				MoveOutOfTerrain(g_MaterialGrass);
-			}
+    if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP)
+    {
+        if (m_MoveState != JUMP)
+        {
+            // Restart the stride if we're just starting to walk or crawl
+            if (m_MoveState != WALK)
+            {
+                m_StrideStart[LEFTSIDE] = true;
+                m_StrideStart[RIGHTSIDE] = true;
+                MoveOutOfTerrain(g_MaterialGrass);
+            }
 
-			m_MoveState = WALK;
+            m_MoveState = WALK;
 
-			for (int side = 0; side < SIDECOUNT; ++side)
-			{
-				m_Paths[side][FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
-				m_Paths[side][BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
-			}
-		}
+            for (int side = 0; side < SIDECOUNT; ++side)
+            {
+                m_Paths[side][FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
+                m_Paths[side][BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
+            }
+        }
 
-		// Walk backwards if the aiming is done in the opposite direction of travel
-		if (fabs(m_Controller.GetAnalogAim().m_X) > 0.1)
-		{
-			// Walk backwards if necessary
-			for (int side = 0; side < SIDECOUNT; ++side)
-			{
-				m_Paths[side][FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
-				m_Paths[side][BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
-			}
-		}
-		// Flip if we're moving in the opposite direction
-		else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped))
-		{
-			m_HFlipped = !m_HFlipped;
-			//                // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
-			//                m_ForceDeepCheck = true;
-			m_CheckTerrIntersection = true;
-			MoveOutOfTerrain(g_MaterialGrass);
-			for (int side = 0; side < SIDECOUNT; ++side)
-			{
-				for (int layer = 0; layer < LAYERCOUNT; ++layer)
-				{
-					m_Paths[side][layer][m_MoveState].SetHFlip(m_HFlipped);
-					m_Paths[side][layer][WALK].Terminate();
-					m_Paths[side][layer][STAND].Terminate();
-				}
-				m_StrideStart[side] = true;
-			}
-		}
-	}
-	else
-		m_MoveState = STAND;
+        // Walk backwards if the aiming is done in the opposite direction of travel
+        if (fabs(m_Controller.GetAnalogAim().m_X) > 0.1)
+        {
+            // Walk backwards if necessary
+            for (int side = 0; side < SIDECOUNT; ++side)
+            {
+                m_Paths[side][FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
+                m_Paths[side][BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
+            }
+        }
+        // Flip if we're moving in the opposite direction
+        else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped))
+        {
+            m_HFlipped = !m_HFlipped;
+//                // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
+//                m_ForceDeepCheck = true;
+            m_CheckTerrIntersection = true;
+            MoveOutOfTerrain(g_MaterialGrass);
+            for (int side = 0; side < SIDECOUNT; ++side)
+            {
+                for (int layer = 0; layer < LAYERCOUNT; ++layer)
+                {
+                    m_Paths[side][layer][m_MoveState].SetHFlip(m_HFlipped);
+                    m_Paths[side][layer][WALK].Terminate();
+                    m_Paths[side][layer][STAND].Terminate();
+                }
+                m_StrideStart[side] = true;
+            }
+        }
+    }
+    else
+        m_MoveState = STAND;
 
-	////////////////////////////////////
-	// Reload held MO, if applicable
+    ////////////////////////////////////
+    // Reload held MO, if applicable
 
-	if (m_pTurret && m_pTurret->IsAttached())
-	{
-		HeldDevice *pDevice = m_pTurret->GetMountedDevice();
+    if (m_pTurret && m_pTurret->IsAttached())
+    {
+        HeldDevice *pDevice = m_pTurret->GetMountedDevice();
 
-		// Holds device, check if we are commanded to reload, or do other related stuff
-		if (pDevice)
-		{
-			// Only reload if no other pickuppable item is in reach
-			if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD))
-			{
-				pDevice->Reload();
-				m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        // Holds device, check if we are commanded to reload, or do other related stuff
+        if (pDevice)
+        {
+            // Only reload if no other pickuppable item is in reach
+            if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD))
+            {
+                pDevice->Reload();
+                m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
 
-				// Interrupt sharp aiming
-				m_SharpAimTimer.Reset();
-				m_SharpAimProgress = 0;
-			}
-		}
-	}
+                // Interrupt sharp aiming
+                m_SharpAimTimer.Reset();
+                m_SharpAimProgress = 0;
+            }
+        }
+    }
 
-	////////////////////////////////////
-	// Aiming
+    ////////////////////////////////////
+    // Aiming
 
-	// Check whether upper/lower limit properties are defined to enable Dynamic AimRange, if not, use legacy to keep compatibility -- MaximDude
-	if (m_AimRangeUpperLimit == -1 || m_AimRangeLowerLimit == -1)
-	{
-	//////// Legacy AimRange
-		//g_ConsoleMan.PrintString("Using Legacy AimRange");
+    // Get rotation angle of crab
+    float RotAngle = GetRotAngle();
 
-		if (m_Controller.IsState(AIM_UP))
-		{
-			// TODO: Improve these!")
-				// Set the timer to some base number so we don't
-				// get a sluggish feeling at start of aim
-			if (m_AimState != AIMUP)
-			{
-				m_AimTmr.SetElapsedSimTimeMS(150);
-			}
-			m_AimState = AIMUP;
-			m_AimAngle += m_Controller.IsState(AIM_SHARP) ? DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);			
-			if (m_AimAngle > m_AimRange)
-			{
-				m_AimAngle = m_AimRange;
-			}
-		}
-		else if (m_Controller.IsState(AIM_DOWN))
-		{
-			// Set the timer to some base number so we don't
-			// get a sluggish feeling at start of aim
-			if (m_AimState != AIMDOWN)
-			{
-				m_AimTmr.SetElapsedSimTimeMS(150);
-			}
-			m_AimState = AIMDOWN;
-			m_AimAngle -= m_Controller.IsState(AIM_SHARP) ? DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
-			if (m_AimAngle < -m_AimRange)
-			{
-				m_AimAngle = -m_AimRange;
-			}
-		}
-		// Analog aim
-		else if (m_Controller.GetAnalogAim().GetMagnitude() > 0.1)
-		{
-			Vector aim = m_Controller.GetAnalogAim();
-			// Hack to avoid the GetAbsRadAngle to mangle an aim angle straight down
-			if (aim.m_X == 0)
-			{
-				aim.m_X += m_HFlipped ? -0.01 : 0.01;
-			}
-			m_AimAngle = aim.GetAbsRadAngle();
+    // Adjust AimRange limits to crab rotation
+    float m_AdjustedAimRangeUpperLimit = (m_HFlipped) ? m_AimRangeUpperLimit - RotAngle : m_AimRangeUpperLimit + RotAngle;
+    float m_AdjustedAimRangeLowerLimit = (m_HFlipped) ? -m_AimRangeLowerLimit - RotAngle : -m_AimRangeLowerLimit + RotAngle;
 
-			// Check for flip change
-			if ((aim.m_X > 0 && m_HFlipped) || (aim.m_X < 0 && !m_HFlipped))
-			{
-				m_HFlipped = !m_HFlipped;
-				// Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
-				//m_ForceDeepCheck = true;
-				m_CheckTerrIntersection = true;
-				MoveOutOfTerrain(g_MaterialGrass);
-				for (int side = 0; side < SIDECOUNT; ++side)
-				{
-					for (int layer = 0; layer < LAYERCOUNT; ++layer)
-					{
-						m_Paths[side][layer][m_MoveState].SetHFlip(m_HFlipped);
-						m_Paths[side][layer][WALK].Terminate();
-						m_Paths[side][layer][STAND].Terminate();
-					}
-					m_StrideStart[side] = true;
-				}
-			}
-			// Correct angle based on flip
-			m_AimAngle = FacingAngle(m_AimAngle);
-			// Clamp so it's within the range
-			Clamp(m_AimAngle, m_AimRange, -m_AimRange);
-		}
-		else
-		{
-			m_AimState = AIMSTILL;
-		}
-	}
-	else
-	{
-	//////// Dynamic AimRange -- MaximDude
-		//g_ConsoleMan.PrintString("Using Dynamic AimRange");
+    if (m_Controller.IsState(AIM_UP))
+    {
+        // Set the timer to some base number so we don't get a sluggish feeling at start of aim
+        if (m_AimState != AIMUP)
+            m_AimTmr.SetElapsedSimTimeMS(150);
+        m_AimState = AIMUP;
+        m_AimAngle += m_Controller.IsState(AIM_SHARP) ? DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
+    }
+    else if (m_Controller.IsState(AIM_DOWN))
+    {
+        // Set the timer to some base number so we don't get a sluggish feeling at start of aim
+        if (m_AimState != AIMDOWN)
+            m_AimTmr.SetElapsedSimTimeMS(150);
+        m_AimState = AIMDOWN;
+        m_AimAngle -= m_Controller.IsState(AIM_SHARP) ? DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
+    }
+    // Analog aim
+    else if (m_Controller.GetAnalogAim().GetMagnitude() > 0.1)
+    {
+        Vector aim = m_Controller.GetAnalogAim();
+        // Hack to avoid the GetAbsRadAngle to mangle an aim angle straight down
+        if (aim.m_X == 0)
+            aim.m_X += m_HFlipped ? -0.01 : 0.01;
+        m_AimAngle = aim.GetAbsRadAngle();
 
-		// Get rotation angle of crab
-		float m_CrabRotAngle = GetRotAngle();
+        // Check for flip change
+        if ((aim.m_X > 0 && m_HFlipped) || (aim.m_X < 0 && !m_HFlipped))
+        {
+            m_HFlipped = !m_HFlipped;
+            // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
+            //m_ForceDeepCheck = true;
+            m_CheckTerrIntersection = true;
+            MoveOutOfTerrain(g_MaterialGrass);
+            for (int side = 0; side < SIDECOUNT; ++side)
+            {
+                for (int layer = 0; layer < LAYERCOUNT; ++layer)
+                {
+                    m_Paths[side][layer][m_MoveState].SetHFlip(m_HFlipped);
+                    m_Paths[side][layer][WALK].Terminate();
+                    m_Paths[side][layer][STAND].Terminate();
+                }
+                m_StrideStart[side] = true;
+            }
+        }
+        // Correct angle based on flip
+        m_AimAngle = FacingAngle(m_AimAngle);
+    }
+    else
+        m_AimState = AIMSTILL;
 
-		// Adjust AimRange limits to crab rotation
-		float m_AdjustedAimRangeUpperLimit = (m_HFlipped) ? m_AimRangeUpperLimit - m_CrabRotAngle : m_AimRangeUpperLimit + m_CrabRotAngle;
-		float m_AdjustedAimRangeLowerLimit = (m_HFlipped) ? -m_AimRangeLowerLimit - m_CrabRotAngle : -m_AimRangeLowerLimit + m_CrabRotAngle;
-
-		if (m_Controller.IsState(AIM_UP))
-		{
-			// Set the timer to some base number so we don't
-			// get a sluggish feeling at start of aim
-			if (m_AimState != AIMUP)
-			{
-				m_AimTmr.SetElapsedSimTimeMS(150);
-			}
-			m_AimState = AIMUP;
-			m_AimAngle += m_Controller.IsState(AIM_SHARP) ? DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);			
-		}
-		else if (m_Controller.IsState(AIM_DOWN))
-		{
-			// Set the timer to some base number so we don't
-			// get a sluggish feeling at start of aim
-			if (m_AimState != AIMDOWN)
-			{
-				m_AimTmr.SetElapsedSimTimeMS(150);
-			}
-			m_AimState = AIMDOWN;
-			m_AimAngle -= m_Controller.IsState(AIM_SHARP) ? DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
-		}
-		// Analog aim
-		else if (m_Controller.GetAnalogAim().GetMagnitude() > 0.1)
-		{
-			Vector aim = m_Controller.GetAnalogAim();
-			// Hack to avoid the GetAbsRadAngle to mangle an aim angle straight down
-			if (aim.m_X == 0)
-			{
-				aim.m_X += m_HFlipped ? -0.01 : 0.01;
-			}
-			m_AimAngle = aim.GetAbsRadAngle();
-
-			// Check for flip change
-			if ((aim.m_X > 0 && m_HFlipped) || (aim.m_X < 0 && !m_HFlipped))
-			{
-				m_HFlipped = !m_HFlipped;
-				// Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
-				//m_ForceDeepCheck = true;
-				m_CheckTerrIntersection = true;
-				MoveOutOfTerrain(g_MaterialGrass);
-				for (int side = 0; side < SIDECOUNT; ++side)
-				{
-					for (int layer = 0; layer < LAYERCOUNT; ++layer)
-					{
-						m_Paths[side][layer][m_MoveState].SetHFlip(m_HFlipped);
-						m_Paths[side][layer][WALK].Terminate();
-						m_Paths[side][layer][STAND].Terminate();
-					}
-					m_StrideStart[side] = true;
-				}
-			}
-			// Correct angle based on flip
-			m_AimAngle = FacingAngle(m_AimAngle);
-			// Clamp aim angle so it's within adjusted limit ranges
-			Clamp(m_AimAngle, m_AdjustedAimRangeUpperLimit, m_AdjustedAimRangeLowerLimit);
-		}
-		else
-		{
-			m_AimState = AIMSTILL;
-		}
-		// Clamp aim angle so it's within adjusted limit ranges
-		Clamp(m_AimAngle, m_AdjustedAimRangeUpperLimit, m_AdjustedAimRangeLowerLimit);
-	}
+    // Clamp aim angle so it's within adjusted limit ranges, for all control types
+    Clamp(m_AimAngle, m_AdjustedAimRangeUpperLimit, m_AdjustedAimRangeLowerLimit);
 
     //////////////////////////////
     // Sharp aim calculation
@@ -3521,4 +3422,3 @@ void ACrab::SetLimbPathPushForce(float force)
 
 
 } // namespace RTE
-

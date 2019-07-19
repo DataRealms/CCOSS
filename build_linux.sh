@@ -181,9 +181,9 @@ MANAGERS_SRCS="
     Managers/ActivityMan.cpp
     Managers/AudioMan.cpp
     Managers/ConsoleMan.cpp
+    Managers/LicenseMan.cpp
     Managers/EntityMan.cpp
     Managers/FrameMan.cpp
-    Managers/LicenseMan.cpp
     Managers/LuaMan.cpp
     Managers/MetaMan.cpp
     Managers/MovableMan.cpp
@@ -281,7 +281,7 @@ LUABIND_SRCS="
 "
 
 # CHANGE THIS TO FIT YOUR SYSTEM LOCATION
-PREPARED_DIR=""
+PREPARED_DIR="$HOME/source/CCOSS_dependencies/prepared"
 if [ -z "$PREPARED_DIR" ]; then
     echo "The PREPARED_DIR variable has not been set. Find it in build_linux.sh and set it to your system's path to the dependencies."
     echo "You can find the dependencies here: https://github.com/liberated-cortex/CCOSS_dependencies"
@@ -295,24 +295,22 @@ GUI_INC="-IGUI"
 MENUS_INC="-IMenus"
 SDL_INC="-I$PREPARED_DIR/include/SDL2"
 OPENAL_INC="`pkg-config --cflags openal`"
-CURL_INC=""
 
 ALLEGRO_LIBS="-lalleg"
 SDL_LIBS="$PREPARED_DIR/libSDL2.a"
 SDL_MIXER_LIBS="$PREPARED_DIR/libSDL2_mixer.a"
 LUA_LIBS="$PREPARED_DIR/liblua.a"
-CURL_LIBS="$PREPARED_DIR/libcurl.a"
 OGG_LIBS="$PREPARED_DIR/libogg.a"
 VORBIS_LIBS="$PREPARED_DIR/libvorbis.a"
 VORBISFILE_LIBS="$PREPARED_DIR/libvorbisfile.a"
 MINIZIP_LIBS="$PREPARED_DIR/libminizip.a $PREPARED_DIR/libaes.a"
-SHARED_LIBS="-lbsd -lssl -lcrypto -lpthread -lz -ldl -lnghttp2 -lldap -llber -lpsl -lbrotlidec -lidn2 -lrtmp"
+SHARED_LIBS="-lbsd -lpthread -lz -ldl"
 
-INCLUDES="-I. -Iexternal/include -I$PREPARED_DIR/include $LUA_INC $ENTITIES_INC $RAKNET_INC $MANAGERS_INC $SYSTEM_INC $GUI_INC $MENUS_INC $ALLEGRO_INC $BOOST_INC $LUABIND_INC $SDL_INC $CURL_INC"
+INCLUDES="-I. -Iexternal/include -I$PREPARED_DIR/include $LUA_INC $ENTITIES_INC $RAKNET_INC $MANAGERS_INC $SYSTEM_INC $GUI_INC $MENUS_INC $ALLEGRO_INC $BOOST_INC $LUABIND_INC $SDL_INC"
 INCLUDES+=" $OPENAL_INC $OGG_INC $VORBIS_INC $VORBISFILE_INC $MINIZIP_INC $OPENSSL_INC"
 WARN="-Wno-write-strings -Wno-endif-labels -Wno-deprecated-declarations"
-CPPFLAGS="-std=c++11 -fdiagnostics-color $INCLUDES $WARN -DALLEGRO_NO_FIX_ALIASES -fpermissive -g"
-LDFLAGS="-Llibs/ $ALLEGRO_LIBS $OPENSSL_LIBS $BOOST_LIBS $SDL_LIBS $SDL_MIXER_LIBS $LUABIND_LIBS $LUA_LIBS $ZIPIO_LIBS $CURL_LIBS $OPENAL_LIBS $OGG_LIBS $VORBIS_LIBS $VORBISFILE_LIBS"
+CPPFLAGS="-D__OPEN_SOURCE_EDITION -std=c++11 -fdiagnostics-color $INCLUDES $WARN -DALLEGRO_NO_FIX_ALIASES -fpermissive -g"
+LDFLAGS="-Llibs/ $ALLEGRO_LIBS $OPENSSL_LIBS $BOOST_LIBS $SDL_LIBS $SDL_MIXER_LIBS $LUABIND_LIBS $LUA_LIBS $ZIPIO_LIBS $OPENAL_LIBS $OGG_LIBS $VORBIS_LIBS $VORBISFILE_LIBS"
 LDFLAGS+=" $MINIZIP_LIBS $SHARED_LIBS"
 
 SRCS="$SYSTEM_SRCS $ENTITIES_SRCS $MANAGERS_SRCS $GUI_SRCS $MENUS_SRCS $RAKNET_SRCS $LUABIND_SRCS"

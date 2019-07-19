@@ -14,7 +14,6 @@
 #include "LicenseMan.h"
 
 #include <string>
-#include <curl/curl.h>
 #include "System/MD5/md5.h"
 #include <cstring>
 
@@ -176,12 +175,14 @@ int LicenseMan::Create()
 {
 #ifndef NODRM
     // Init libcURL
+#if 0
     m_pLibCURL = curl_easy_init();
     if (!m_pLibCURL)
     {
         // This is OK for now, will try again later before contacting server
         return 0;
     }
+#endif
     // This is just to establish contact with anything before loading a bunch of data on the heap;
     // it seems that if the first libcurl connection is done after everything else loads, curl_easy_perform freezes for a long time.
     GetPPPXML(m_sPPPBaseURL);
@@ -237,7 +238,7 @@ void LicenseMan::Destroy()
 {
 #ifndef NODRM
     // Clean up libcURL
-    curl_easy_cleanup(m_pLibCURL);
+    //curl_easy_cleanup(m_pLibCURL);
 #endif // NODRM
     Clear();
 }
@@ -417,6 +418,7 @@ LicenseMan::ServerResult LicenseMan::Register(string licenseEmail, string licens
     // The server result that we will evaluate after all server activity has been attempted
     ServerResult serverResult = UNKNOWNERROR;
 
+#if 0
     // Re-init libCURL if it isn't running already
     if (!m_pLibCURL)
     {
@@ -425,6 +427,7 @@ LicenseMan::ServerResult LicenseMan::Register(string licenseEmail, string licens
         if (!m_pLibCURL)
             serverResult = FAILEDCONNECTION;
     }
+#endif
 
     // Assemble the URL
     string plimusURL = m_sPPPBaseURL + "?action=REGISTER" + "&productId=" + m_sProductID + "&email=" + licenseEmail + "&key=" + licenseKey;
@@ -573,6 +576,7 @@ LicenseMan::ServerResult LicenseMan::Unregister()
         return SUCCESS;
     }
 
+#if 0
     // Re-init libCURL if it isn't running already
     if (!m_pLibCURL)
     {
@@ -581,6 +585,7 @@ LicenseMan::ServerResult LicenseMan::Unregister()
         if (!m_pLibCURL)
             return FAILEDCONNECTION;
     }
+#endif
 
     // Assemble the URL
     string plimusURL = m_sPPPBaseURL + "?action=UNREGISTER" + "&productId=" + m_sProductID + "&email=" + m_LicenseEmail + "&key=" + m_LicenseKey;
@@ -699,6 +704,7 @@ LicenseMan::ServerResult LicenseMan::Validate()
     // The server result that we will evaluate after all server activity has been attempted
     ServerResult serverResult = UNKNOWNERROR;
 
+#if 0
     // Re-init libCURL if it isn't running already
     if (!m_pLibCURL)
     {
@@ -707,6 +713,7 @@ LicenseMan::ServerResult LicenseMan::Validate()
         if (!m_pLibCURL)
             serverResult = FAILEDCONNECTION;
     }
+#endif 
 
     // Assemble the URL
     string plimusURL = m_sPPPBaseURL + "?action=VALIDATE" + "&productId=" + m_sProductID + "&email=" + m_LicenseEmail + "&key=" + m_LicenseKey;
@@ -988,6 +995,7 @@ char LicenseMan::CheckKeyValidityOffline(const char * EMAIL, const char * KEY)
 
     return KEY[0];
 
+#if 0
 	memset (buffer,0,64);
 	memset (hex_output,0,64);
 	memset (sum_output,0,9);
@@ -1043,6 +1051,7 @@ char LicenseMan::CheckKeyValidityOffline(const char * EMAIL, const char * KEY)
 		return productID;
 	else
 		return OFFLINEINVALID;
+#endif
 
 #ifndef __OPEN_SOURCE_EDITION
 	CRYPT_END
@@ -1080,6 +1089,7 @@ string LicenseMan::GetPPPXML(string contactURL)
     if (contactURL.empty())
         return "";
 
+#if 0
     ////////////////////////////////
     // Set the libcURL options, see http://curl.haxx.se/libcurl/c/curl_easy_setopt.html for reference
 
@@ -1106,6 +1116,7 @@ string LicenseMan::GetPPPXML(string contactURL)
     g_XMLBuffer.erase();
     // Go HTTPS request, go!
     CURLcode result = curl_easy_perform(m_pLibCURL);
+#endif
 
 // TODO: some kind of error handling on the result?
 

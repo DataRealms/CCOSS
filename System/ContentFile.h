@@ -25,6 +25,8 @@ struct BITMAP;
 struct FSOUND_SAMPLE;
 #elif __USE_SOUND_SDLMIXER
 struct Mix_Chunk;
+#elif __USE_SOUND_GORILLA
+struct ga_Sound;
 #endif // __USE_SOUND_FMOD
 
 namespace RTE
@@ -402,8 +404,9 @@ public:
     virtual FSOUND_SAMPLE * GetAsSample();
 #elif __USE_SOUND_SDLMIXER
 	virtual Mix_Chunk * GetAsSample();
+#elif __USE_SOUND_GORILLA
+	virtual ga_Sound * GetAsSample();
 #endif // __USE_SOUND_FMOD
-
 
 	virtual size_t GetHash() const { return std::hash<std::string>()(m_DataPath); }
 
@@ -474,8 +477,9 @@ protected:
 	// Static map containing all the already loaded FSOUND_SAMPLE:s and their paths
     static std::map<std::string, FSOUND_SAMPLE *> m_sLoadedSamples;
 #elif __USE_SOUND_SDLMIXER
-	// Static map containing all the already loaded FSOUND_SAMPLE:s and their paths
 	static std::map<std::string, Mix_Chunk *> m_sLoadedSamples;
+#elif __USE_SOUND_GORILLA
+	static std::map<std::string, ga_Sound *> m_sLoadedSamples;
 #endif // __USE_SOUND_FMOD
 
     // Path to this ContentFile's Datafile Object's path. "datafile.dat#objectname"

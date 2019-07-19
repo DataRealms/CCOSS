@@ -16,6 +16,9 @@
 #elif __USE_SOUND_SDLMIXER
 #include "SDL.h"
 #include "SDL_mixer.h"
+#elif __USE_SOUND_GORILLA
+#include "gorilla/ga.h"
+#include "gorilla/gau.h"
 #endif
 
 #include "ContentFile.h"
@@ -36,6 +39,8 @@ map<size_t, std::string> ContentFile::m_PathHashes;
 map<string, FSOUND_SAMPLE *> ContentFile::m_sLoadedSamples;
 #elif __USE_SOUND_SDLMIXER
 map<string, Mix_Chunk *> ContentFile::m_sLoadedSamples;
+#elif __USE_SOUND_GORILLA
+map<string, ga_Sound *> ContentFile::m_sLoadedSamples;
 #endif // __USE_SOUND_FMOD
 
 
@@ -729,6 +734,102 @@ Mix_Chunk * ContentFile::GetAsSample()
 
 		// Now when loaded for the first time, enter into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
 		m_sLoadedSamples.insert(pair<string, Mix_Chunk *>(m_DataPath, pReturnSample));
+	}
+
+	return pReturnSample;
+}
+#elif __USE_SOUND_GORILLA
+ga_Sound * ContentFile::GetAsSample()
+{
+	if (m_DataPath.empty())
+		return 0;
+
+	ga_Sound *pReturnSample = 0;
+
+	// Check if this file has already been read and loaded from disk.
+	map<string, ga_Sound *>::iterator itr = m_sLoadedSamples.find(m_DataPath);
+	if (itr != m_sLoadedSamples.end())
+	{
+		// Yes, has been loaded previously, then use that data from memory.
+		pReturnSample = (*itr).second;
+	}
+	// Hasn't been loaded previously, so go ahead and do so now.
+	else
+	{
+		// Find where the '#' denoting the divider between the datafile and the datafile object's name is
+		int separatorPos = m_DataPath.rfind('#');
+
+		// Size of the entire file to be read
+		long fileSize;
+		// Holder of the raw data read from the pack file
+		char *pRawData = 0;
+
+		// If there is none, that means we're told to load an exposed file outside of a .dat datafile.
+		if (separatorPos == -1)
+		{
+			fileSize = file_size(m_DataPath.c_str());
+			PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
+
+			// Make sure we opened properly.
+			if (!pFile || fileSize <= 0)
+				DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+
+			// Allocte the raw data space in memory
+			pRawData = new char[fileSize];
+
+			// Read the raw data from the file
+			int bytesRead = pack_fread(pRawData, fileSize, pFile);
+			AAssert(bytesRead == fileSize, "Tried to read a file but couldn't read the same amount of data as the reported file size!");
+
+			// Load the sample from the memory we've read from the file.
+
+
+			ga_Memory * mem = ga_memory_create(pRawData, fileSize);
+			ga_DataSource * data = gau_data_source_create_memory(mem);
+			ga_SampleSource * samples = gau_sample_source_create_wav(data);
+			pReturnSample = ga_sound_create_sample_source(samples);
+
+			//pReturnSample = gau_load_sound_file(m_DataPath.c_str(), "wav");
+
+			if (pReturnSample == 0)
+				DDTAbort(("Unable to create ga_sound " + m_DataPath).c_str());
+
+			// Deallocate the intermediary data
+			delete[] pRawData;
+
+			// Close the file stream
+			pack_fclose(pFile);
+		}
+		// If we found a pound sign, make sure it's not on the very end. If not, then go ahead and load from packed stream.
+		else if (separatorPos != m_DataPath.length() - 1)
+		{
+			DDTAbort("Loading sound samples from allegro datafiles isn't supported yet!");
+			// TODO loading SDL_mixer chunks from allegro datafiles! this!
+			/*
+			// Get the Path only, without the object name, using the separator index as length limiter
+			string datafilePath = m_DataPath.substr(0, separatorPos);
+			// Adjusting to the true first character of the datafile object's name string.
+			string objectName = m_DataPath.substr(separatorPos + 1);
+
+			// Try loading the datafile from the specified path + object names.
+			m_pDataFile = load_datafile_object(datafilePath.c_str(), objectName.c_str());
+
+			// Make sure we loaded properly.
+			if (!m_pDataFile || !m_pDataFile->dat || m_pDataFile->type != DAT_SAMPLE)
+			DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+
+			// Get the loaded data
+			pReturnSample = (FSOUND_SAMPLE *)m_pDataFile->dat;
+			*/
+		}
+		else
+			DDTAbort("No object name following first #-sign in ContentFile's datafile object path!");
+
+		if (!pReturnSample)
+			DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+
+		// Now when loaded for the first time, enter into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
+		m_sLoadedSamples.insert(pair<string, ga_Sound *>(m_DataPath, pReturnSample));
 	}
 
 	return pReturnSample;

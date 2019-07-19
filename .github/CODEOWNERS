@@ -1,0 +1,11 @@
+#This file is used to determine who's in charge of different filetypes. It uses the git code owners system to determine who is in charge of pull requests for file types.
+#For more information, see the following link: https://help.github.com/en/articles/about-code-owners
+#Feel free to suggest changes or updates
+
+#Global default owners for pull requests
+* @administrators
+
+#C++ Owners
+*.cpp @core-game-coders
+*.h @core-game-coders
+*.c++ @core-game-coders

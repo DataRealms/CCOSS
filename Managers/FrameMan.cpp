@@ -2241,14 +2241,8 @@ void FrameMan::Draw()
                 if (g_TimerMan.IsOneSimUpdatePerFrame())
                     GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 104, "ONE Sim Update Per Frame!", GUIFont::Left);
 
-#ifdef __USE_SOUND_FMOD
-				int num2d, num3d, total;
-
-				FSOUND_GetNumHWChannels(&num2d, &num3d, &total);
-
-				sprintf(str, "Sound channels: %d / %d (HW %d + %d : %d)  CPU: %.1f", FSOUND_GetChannelsPlaying(), FSOUND_GetMaxChannels(), num2d, num3d, total, FSOUND_GetCPUUsage());
+				sprintf(str, "Sound channels: %d / %d ", g_AudioMan.GetPlayingChannelCount(), g_AudioMan.GetTotalChannelCount());
 				GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 114, str, GUIFont::Left);
-#endif // __USE_SOUND_FMOD
 
 				int xOffset = 17;
 				int yOffset = 134;

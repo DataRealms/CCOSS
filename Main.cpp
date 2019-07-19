@@ -68,6 +68,9 @@
 #define FILEBUFFER_SIZE 8192
 #define MAX_UNZIPPED_FILE_SIZE 104857600
 
+
+extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
+
 using namespace RTE;
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1087,6 +1090,11 @@ bool PlayIntroTitle()
         g_TimerMan.Update();
         g_TimerMan.UpdateSim();
         g_ConsoleMan.Update();
+
+#if __USE_SOUND_GORILLA
+		g_AudioMan.Update();
+#endif
+
         if (sectionSwitch)
             sectionTimer.Reset();
         elapsed = sectionTimer.GetElapsedRealTimeS();

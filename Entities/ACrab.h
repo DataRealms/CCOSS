@@ -748,9 +748,9 @@ protected:
     Timer m_StrideTimer[SIDECOUNT];
     // How much gold is carried in an MovableObject in inventory, separate from the actor gold tally.
     int m_GoldInInventoryChunk;
-    // Dynamic AimRange -- The maximum angle MountedMO can be aimed up, positive values only, in radians
+    // The maximum angle MountedMO can be aimed up, positive values only, in radians
     float m_AimRangeUpperLimit;
-    // Dynamic AimRange -- The maximum angle MountedMO can be aimed down, positive values only, in radians
+    // The maximum angle MountedMO can be aimed down, positive values only, in radians
     float m_AimRangeLowerLimit;
 
     ////////////////

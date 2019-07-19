@@ -126,8 +126,7 @@ int ACrab::Create()
     // All ACrabs by default avoid hitting each other ont he same team
     m_IgnoresTeamHits = true;
 
-    // Dynamic AimRange
-    // Check whether UpperLimit and LowerLimit are defined, if not, copy legacy AimRange value to preserve compatibility
+    // Check whether UpperLimit and LowerLimit are defined, if not, copy general AimRange value to preserve compatibility
     if (m_AimRangeUpperLimit == -1 || m_AimRangeLowerLimit == -1)
     {
         m_AimRangeUpperLimit = m_AimRange;
@@ -2376,7 +2375,7 @@ void ACrab::Update()
     }
 
     ////////////////////////////////////
-    // Aiming -- Dynamic AimRange
+    // Aiming
 
     // Get rotation angle of crab
     float RotAngle = GetRotAngle();
@@ -2387,8 +2386,7 @@ void ACrab::Update()
 
     if (m_Controller.IsState(AIM_UP))
     {
-        // Set the timer to some base number so we don't
-        // get a sluggish feeling at start of aim
+        // Set the timer to some base number so we don't get a sluggish feeling at start of aim
         if (m_AimState != AIMUP)
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMUP;
@@ -2396,8 +2394,7 @@ void ACrab::Update()
     }
     else if (m_Controller.IsState(AIM_DOWN))
     {
-        // Set the timer to some base number so we don't
-        // get a sluggish feeling at start of aim
+        // Set the timer to some base number so we don't get a sluggish feeling at start of aim
         if (m_AimState != AIMDOWN)
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMDOWN;
@@ -2416,7 +2413,7 @@ void ACrab::Update()
         if ((aim.m_X > 0 && m_HFlipped) || (aim.m_X < 0 && !m_HFlipped))
         {
             m_HFlipped = !m_HFlipped;
-//                // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
+            // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
             //m_ForceDeepCheck = true;
             m_CheckTerrIntersection = true;
             MoveOutOfTerrain(g_MaterialGrass);

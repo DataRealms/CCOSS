@@ -689,7 +689,9 @@ int FrameMan::Create()
     m_PerfCounterNames[PERF_PARTICLES_PASS2] = "Prt Update";
 	m_PerfCounterNames[PERF_ACTORS_AI] = "Act AI";
     m_PerfCounterNames[PERF_ACTIVITY] = "Activity";
-
+#if __USE_SOUND_GORILLA
+	m_PerfCounterNames[PERF_SOUND] = "Sound";
+#endif
     return 0;
 }
 

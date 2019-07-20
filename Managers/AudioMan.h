@@ -658,7 +658,7 @@ protected:
 	std::vector<ga_Handle *> m_SoundChannels;
 	std::vector<ga_Sound *> m_SoundInstances;
 
-	int m_MaxChannels;
+	//int m_MaxChannels;
 #endif
 
     int m_MusicChannel;

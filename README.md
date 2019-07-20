@@ -1,4 +1,11 @@
-Cortex Command - open source under GNU AGPL v3 (no game data included)
+Cortex Command Community Project - open source under GNU AGPL v3
+
+This is a community-driven effort to continue the development of Cortex Command
+
+# CONTACT #
+
+https://discord.gg/junGCWe
+
 
 # Known problems and limitations #
 
@@ -31,6 +38,3 @@ You need to copy SDL related dlls from external\lib\win\ next to .exe in order t
 The data can be found under the "ccoss" beta branch of Cortex Command on Steam, if you own a license for the game.
 
 
-# CONTACT #
-
-support@datarealms.com

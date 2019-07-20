@@ -1070,7 +1070,8 @@ bool AudioMan::SetSoundAttenuation(Sound *pSound, float distance)
 		//Mix_Volume(pSound->m_LastChannel, ((double)MIX_MAX_VOLUME * (1.0f - distance)));
 		Mix_SetDistance(pSound->m_LastChannel, (255 * distance));
 #elif __USE_SOUND_GORILLA
-		ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * (1.0f - distance));
+        if (pSound->m_LastChannel != -1)
+            ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * (1.0f - distance));
 #endif
     }
 

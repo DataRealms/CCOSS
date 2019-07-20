@@ -304,7 +304,7 @@ VORBISFILE_LIBS="`pkg-config --libs vorbisfile`"
 MINIZIP_LIBS="$PREPARED_DIR/libminizip.a $PREPARED_DIR/libaes.a"
 BSD_LIBS="$PREPARED_DIR/libbsd.a"
 OPENAL_LIBS="`pkg-config --libs openal`"
-GORILLA_AUDIO_LIBS="$PREPARED_DIR/libgorillaaudio.a"
+GORILLA_AUDIO_LIBS="$PREPARED_DIR/libgorilla.a"
 SHARED_LIBS="-lpthread -ldl"
 
 INCLUDES="-I. -Iexternal/include -I$PREPARED_DIR/include $LUA_INC $ENTITIES_INC $RAKNET_INC $MANAGERS_INC $SYSTEM_INC $GUI_INC $MENUS_INC $ALLEGRO_INC $BOOST_INC $LUABIND_INC"

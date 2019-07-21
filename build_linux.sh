@@ -358,8 +358,9 @@ for src in $SRCS; do
 done
 NUM_FILES=0
 for src in $SRCS; do
-    echo "($NUM_FILES/$TOTAL_FILES)"
-    path=$OBJ_DIR/$(basename $src).o
+    basename=$(basename $src)
+    echo "($NUM_FILES/$TOTAL_FILES) Compiling $basename"
+    path=$OBJ_DIR/$basename.o
     $CC $CPPFLAGS -c $src -o $path
     OBJ_FILES+="$path "
     NUM_FILES=$((NUM_FILES + 1))

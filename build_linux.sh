@@ -259,29 +259,29 @@ MENUS_SRCS="
     Menus/ScenarioGUI.cpp
     Menus/SceneEditorGUI.cpp
 "
-LUABIND_LOCATION="external/sources/luabind-0.9.1/src"
+LUABIND_LOCATION="external/sources/luabind-0.9.1"
 LUABIND_SRCS="
-    $LUABIND_LOCATION/class.cpp
-    $LUABIND_LOCATION/class_info.cpp
-    $LUABIND_LOCATION/class_registry.cpp
-    $LUABIND_LOCATION/class_rep.cpp
-    $LUABIND_LOCATION/create_class.cpp
-    $LUABIND_LOCATION/error.cpp
-    $LUABIND_LOCATION/exception_handler.cpp
-    $LUABIND_LOCATION/function.cpp
-    $LUABIND_LOCATION/inheritance.cpp
-    $LUABIND_LOCATION/link_compatibility.cpp
-    $LUABIND_LOCATION/object_rep.cpp
-    $LUABIND_LOCATION/open.cpp
-    $LUABIND_LOCATION/pcall.cpp
-    $LUABIND_LOCATION/scope.cpp
-    $LUABIND_LOCATION/stack_content_by_name.cpp
-    $LUABIND_LOCATION/weak_ref.cpp
-    $LUABIND_LOCATION/wrapper_base.cpp
+    $LUABIND_LOCATION/src/class.cpp
+    $LUABIND_LOCATION/src/class_info.cpp
+    $LUABIND_LOCATION/src/class_registry.cpp
+    $LUABIND_LOCATION/src/class_rep.cpp
+    $LUABIND_LOCATION/src/create_class.cpp
+    $LUABIND_LOCATION/src/error.cpp
+    $LUABIND_LOCATION/src/exception_handler.cpp
+    $LUABIND_LOCATION/src/function.cpp
+    $LUABIND_LOCATION/src/inheritance.cpp
+    $LUABIND_LOCATION/src/link_compatibility.cpp
+    $LUABIND_LOCATION/src/object_rep.cpp
+    $LUABIND_LOCATION/src/open.cpp
+    $LUABIND_LOCATION/src/pcall.cpp
+    $LUABIND_LOCATION/src/scope.cpp
+    $LUABIND_LOCATION/src/stack_content_by_name.cpp
+    $LUABIND_LOCATION/src/weak_ref.cpp
+    $LUABIND_LOCATION/src/wrapper_base.cpp
 "
 
 # CHANGE THIS TO FIT YOUR SYSTEM LOCATION
-PREPARED_DIR=""
+PREPARED_DIR="../CCOSS_dependencies/prepared/"
 if [ -z "$PREPARED_DIR" ]; then
     echo "The PREPARED_DIR variable has not been set. Find it in build_linux.sh and set it to your system's path to the dependencies."
     echo "You can find the dependencies here: https://github.com/liberated-cortex/CCOSS_dependencies"
@@ -289,6 +289,7 @@ if [ -z "$PREPARED_DIR" ]; then
 fi
 ENTITIES_INC="-IEntities/"
 RAKNET_INC="-I$RAKNET_LOCATION"
+LUA_INC="-I$LUABIND_LOCATION"
 MANAGERS_INC="-IManagers/"
 SYSTEM_INC="-ISystem -ISystem/MicroPather -ISystem/InterGif -ISystem/MD5 -ISystem/Steam -ISystem/Slick_Profiler -ISystem/LZ4"
 GUI_INC="-IGUI"

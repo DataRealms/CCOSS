@@ -281,7 +281,7 @@ LUABIND_SRCS="
 "
 
 # CHANGE THIS TO FIT YOUR SYSTEM LOCATION
-PREPARED_DIR="../CCOSS_dependencies/prepared/"
+PREPARED_DIR=""
 if [ -z "$PREPARED_DIR" ]; then
     echo "The PREPARED_DIR variable has not been set. Find it in build_linux.sh and set it to your system's path to the dependencies."
     echo "You can find the dependencies here: https://github.com/liberated-cortex/CCOSS_dependencies"

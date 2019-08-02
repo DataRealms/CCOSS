@@ -470,9 +470,6 @@
     <ClInclude Include="managers\FrameMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="Managers\LicenseMan.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
     <ClInclude Include="Managers\LuaMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
@@ -1429,9 +1426,6 @@
       <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="managers\FrameMan.cpp">
-      <Filter>Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="Managers\LicenseMan.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="Managers\LuaMan.cpp">

@@ -16,7 +16,6 @@
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
-#include "LicenseMan.h"
 #include "ConsoleMan.h"
 #include "AudioMan.h"
 #include "SceneMan.h"
@@ -2429,23 +2428,6 @@ void FrameMan::Draw()
 
 	if (!m_StoreNetworkBackBuffer)
 	{
-		// Draw demo timer countdown if not registered
-		if (g_ActivityMan.GetActivity() && !g_LicenseMan.HasValidatedLicense())
-		{
-			int demoSecsLeft = g_ActivityMan.GetActivity()->GetDemoTimeLeft();
-			// Blink if under 30s
-			if (demoSecsLeft >= 0 && (demoSecsLeft > 30 || m_TextBlinkTimer.AlternateReal(333)))
-			{
-				AllegroBitmap pScreenGUIBitmap(m_pBackBuffer8);
-				// Minutes or seconds
-				if (demoSecsLeft > 60)
-					sprintf(str, "Demo Time Left: %imin %is", demoSecsLeft / 60, (demoSecsLeft % 60));
-				else
-					sprintf(str, "Demo Time Left: %is", demoSecsLeft);
-				GetLargeFont()->DrawAligned(&pScreenGUIBitmap, GetResX() / 2, GetResY() - 25, str, GUIFont::Centre);
-			}
-		}
-
 		// Draw split screen lines
 		acquire_bitmap(m_pBackBuffer8);
 		if (m_HSplit)

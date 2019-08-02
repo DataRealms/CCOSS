@@ -67,7 +67,6 @@ public:
         EDITING,
         PREGAME,
         RUNNING,
-        DEMOEND,
         INERROR,
         OVER
     };
@@ -813,16 +812,6 @@ public:
 // Return value:    The current death count.
 
 	int GetTeamDeathCount(unsigned int which = 0) { if (which >= Activity::TEAM_1 && which < Activity::MAXTEAMCOUNT) return m_TeamDeaths[which]; else return 0; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetDemoTimeLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows how many seconds of demo time is left, if indeed in demo mode.
-// Arguments:       None.
-// Return value:    An int wwith how many demo seconds are left, or < 0 if not applicable.
-
-    virtual long GetDemoTimeLeft() { return -1; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

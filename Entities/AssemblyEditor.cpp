@@ -15,7 +15,6 @@
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
-#include "LicenseMan.h"
 #include "SettingsMan.h"
 #include "SLTerrain.h"
 #include "Controller.h"

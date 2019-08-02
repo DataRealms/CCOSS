@@ -161,31 +161,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ReadLicenseKey
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads the license key in from the secret/obfuscated data location in
-//                  the current installation, then gives it to the LicenseMan.
-// Arguments:       None.
-// Return value:    Whether the key sting was successfully loaded and it checks out in
-//                  formatting.
-
-    bool ReadLicenseKey() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WriteLicenseKey
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Writes the current license key of the LicenseMan to the secret/obfuscated
-//                  data location in the current installation. This will write an invalid
-//                  key string if there isn't a valid key, so it will be identified as such
-//                  (being invalid, that is) upon reading next time.
-// Arguments:       None.
-// Return value:    Whether there was success in writing it.
-
-    bool WriteLicenseKey() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  PlayIntro
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Is app set to play the game intro on startup?
@@ -727,8 +702,6 @@ protected:
 
 	bool m_DisableLoadingScreen;
 
-    // The coordinates of all the license pixels in the hidden license file (base.rte/oldpal.bmp)
-    std::list<Vector> m_LicensePixels;
     // List of the module names we were subscribed to last time the game was started
     std::list<std::string> m_SubscribedModList;
     // List of assemblies groups always shown in editors

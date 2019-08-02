@@ -395,12 +395,6 @@ void GABrainMatch::Update()
         if (team == NOTEAM)
             continue;
 
-        // If demo end, don't do anything
-        if (m_ActivityState == DEMOEND)
-        {
-            m_pBrain[player] = 0;
-            g_FrameMan.SetScreenText("Demo time for this skirmish is up! Register for unlimited battles!\nPress Ctrl + [R] to restart", ScreenOfPlayer(player));
-        }
         // Make sure the game is not already ending
         else if (m_ActivityState != OVER)
         {

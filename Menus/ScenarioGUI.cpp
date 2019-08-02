@@ -20,7 +20,6 @@
 #include "AudioMan.h"
 #include "UInputMan.h"
 #include "SettingsMan.h"
-#include "LicenseMan.h"
 #include "ConsoleMan.h"
 
 #include "GUI/GUI.h"
@@ -430,16 +429,6 @@ void ScenarioGUI::SetEnabled(bool enable)
     m_ScreenChange = true;
 }
 
-#ifndef __OPEN_SOURCE_EDITION
-
-/////////////////////////////
-// TURN OPTIMIZATIONS OFF
-// This is so the EXECryptor markers don't get mangled by the optimizer
-
-#pragma optimize("", off)
-
-#endif
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -447,10 +436,6 @@ void ScenarioGUI::SetEnabled(bool enable)
 
 void ScenarioGUI::Update()
 {
-#ifndef __OPEN_SOURCE_EDITION
-    CRYPT_START
-#endif
-
     // Update the input controller
     m_pController->Update();
 
@@ -663,10 +648,6 @@ void ScenarioGUI::Update()
     // Save mouse pos for next frame so we can do dragging
     if (m_EngageDrag)
         m_PrevMousePos = mousePos;
-
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_END
-#endif
 }
 
 
@@ -1087,21 +1068,7 @@ void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox *pBox, int margin)
 
 void ScenarioGUI::SetupSkirmishActivity()
 {
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_START
-
-    CRYPT_END
-#endif
 }
-
-#ifndef __OPEN_SOURCE_EDITION
-/////////////////////////////
-// TURN OPTIMIZATIONS ON
-// This is so the EXECryptor markers don't get mangled by the optimizer
-
-#pragma optimize("", on)
-#endif
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          UpdateActivityBox

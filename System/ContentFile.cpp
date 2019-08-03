@@ -768,7 +768,6 @@ ga_Sound * ContentFile::GetAsSample()
 		if (separatorPos == -1)
 		{
             std::string platform_path = GetPlatformPath();
-            printf("'%s', '%s'\n", m_DataPath.c_str(), platform_path.c_str());
 			fileSize = file_size(platform_path.c_str());
 			PACKFILE *pFile = pack_fopen(platform_path.c_str(), F_READ);
 

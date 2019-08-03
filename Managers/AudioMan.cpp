@@ -108,7 +108,7 @@ void AudioMan::Clear()
 
 	m_SoundChannels.clear();
 	m_SoundInstances.clear();
-	m_MaxChannels = 0;
+	//m_MaxChannels = 0;
 #endif
     m_MusicChannel = -1;
     m_MusicPath.clear();
@@ -230,7 +230,12 @@ int AudioMan::Create()
 		return -1;
 	}
 
+	int maxChannels = g_SettingsMan.GetAudioChannels();
+
+	maxChannels = 16;
+
 	m_pManager = gau_manager_create();
+	//m_pManager = gau_manager_create_custom(GA_DEVICE_TYPE_DEFAULT, GAU_THREAD_POLICY_SINGLE, maxChannels, 1024);
 	if (!m_pManager)
 	{
 		// Audio failed to init, so just disable it
@@ -242,9 +247,8 @@ int AudioMan::Create()
 	m_pStreamManager = gau_manager_streamManager(m_pManager);
 
 	// Init up the array of normal frequencies
-	m_MaxChannels = g_SettingsMan.GetAudioChannels();
 	m_MusicChannel = 0;
-	for (int channel = 0; channel < m_MaxChannels; ++channel)
+	for (int channel = 0; channel < maxChannels; ++channel)
 	{
 		m_SoundChannels.push_back(0);
 		m_SoundInstances.push_back(0);
@@ -325,7 +329,7 @@ void AudioMan::SetSoundsVolume(double volume)
 #elif __USE_SOUND_SDLMIXER
 	Mix_Volume(-1, (MAX_VOLUME * m_SoundsVolume));
 #elif __USE_SOUND_GORILLA
-	for (int i = 1; i < m_MaxChannels; i++)
+	for (int i = 1; i < m_SoundChannels.size(); i++)
 		if (m_SoundChannels[i])
 			ga_handle_setParamf(m_SoundChannels[i], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * m_SoundsVolume);
 #endif
@@ -353,7 +357,7 @@ void AudioMan::SetMusicVolume(double volume)
 	if (m_pMusic >= 0)
 		Mix_VolumeMusic(MAX_VOLUME * m_MusicVolume);
 #elif __USE_SOUND_GORILLA
-	if (m_MaxChannels > m_MusicChannel && m_SoundChannels[m_MusicChannel])
+	if (m_SoundChannels.size() > m_MusicChannel && m_SoundChannels[m_MusicChannel])
 		ga_handle_setParamf(m_SoundChannels[m_MusicChannel], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * m_MusicVolume);
 #endif __USE_SOUND_FMOD
 
@@ -380,7 +384,7 @@ void AudioMan::SetTempMusicVolume(double volume)
 	if (m_pMusic >= 0)
 		Mix_VolumeMusic(MAX_VOLUME * volume);
 #elif __USE_SOUND_GORILLA
-	for (int i = 1; i < m_MaxChannels; i++)
+	for (int i = 1; i < m_SoundChannels.size(); i++)
 		if (m_SoundChannels[i])
 			ga_handle_setParamf(m_SoundChannels[i], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * volume);
 #endif
@@ -426,7 +430,7 @@ void AudioMan::SetGlobalPitch(double pitch, bool excludeMusic)
 	m_GlobalPitch = pitch > 0.1 ? pitch : (pitch < 16.0 ? pitch : 16.0);
 
 	// Go through all active channels and set the pitch on each, except for the music one
-	for (int channel = 1; channel < m_MaxChannels; ++channel)
+	for (int channel = 1; channel < m_SoundChannels.size(); ++channel)
 	{
 		if (m_SoundChannels[channel] && !ga_handle_finished(m_SoundChannels[channel]))
 		{
@@ -993,13 +997,29 @@ bool AudioMan::PlaySound(Sound *pSound, int priority, float distance, double pit
 
 	int channel = -1;
 	// Find a free channel
-	for (int i = 1; i < m_MaxChannels; i++)
+	for (int i = 1; i < m_SoundChannels.size(); i++)
 	{
-		if (m_SoundChannels[i] == 0 || (m_SoundChannels[i] != 0 && ga_handle_finished(m_SoundChannels[i])))
+		if (m_SoundChannels[i] == 0 || (m_SoundChannels[i] != 0 && !ga_handle_playing(m_SoundChannels[i])))
 		{
 			channel = i;
 			break;
 		}
+	}
+
+	// Add new channels when there's no space
+	if (channel == -1)
+	{
+		m_SoundChannels.push_back(0);
+		m_SoundInstances.push_back(0);
+		m_PitchModifiers.push_back(1.0f);
+
+		channel = m_SoundChannels.size() - 1;
+	}
+
+	if (m_SoundChannels[channel] != 0)
+	{
+		ga_handle_destroy(m_SoundChannels[channel]);
+		m_SoundChannels[channel] = 0;
 	}
 
 	pSound->m_LastChannel = channel;
@@ -1028,17 +1048,10 @@ bool AudioMan::PlaySound(Sound *pSound, int priority, float distance, double pit
 	ga_handle_play(handle);
 
 	// Set the distance attenuation effect of the just started sound
-	if (distance >= 0)
-	{
-		if (distance > 1.0f)
-			distance = 1.0f;
-		// Multiply by 0.9 because we don't want to to go completely quiet if max distance
-		distance *= 0.9f;
-		ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * (1.0f - distance));
-	}
+	SetSoundAttenuation(pSound, distance);
 
 	// Store the individual pitch modifier
-	m_PitchModifiers[pSound->m_LastChannel] = pitch;
+	SetSoundPitch(pSound, pitch);
 #endif
 
     return true;
@@ -1063,15 +1076,15 @@ bool AudioMan::SetSoundAttenuation(Sound *pSound, float distance)
         if (distance > 1.0f)
             distance = 1.0f;
         // Multiply by 0.9 because we don't want to to go completely quiet if max distance
-        distance *= 0.9f;
+        distance *= 0.95f;
 #ifdef __USE_SOUND_FMOD
 		FSOUND_SetVolume(pSound->m_LastChannel, MAX_VOLUME * (1.0f - distance));
 #elif __USE_SOUND_SDLMIXER
 		//Mix_Volume(pSound->m_LastChannel, ((double)MIX_MAX_VOLUME * (1.0f - distance)));
 		Mix_SetDistance(pSound->m_LastChannel, (255 * distance));
 #elif __USE_SOUND_GORILLA
-        if (pSound->m_LastChannel != -1)
-            ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * (1.0f - distance));
+		if (pSound->m_LastChannel >= 0)
+			ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * (1.0f - distance));
 #endif
     }
 
@@ -1099,20 +1112,24 @@ bool AudioMan::SetSoundPitch(Sound *pSound, float pitch)
     if (pitch > 16.0f)
         pitch = 16.0f;
 
-    // The channel index is stored in the lower 12 bits of the channel handle
-    int channelIndex = pSound->m_LastChannel & 0x00000FFF;
-
-    // Update the individual pitch modifier
-    m_PitchModifiers[channelIndex] = pitch;
-
     // Only set the frequency of those whose normal frequency values are normal (not set to <= 0 because they shouldn't be pitched)
 #ifdef __USE_SOUND_FMOD
+	// The channel index is stored in the lower 12 bits of the channel handle
+	int channelIndex = pSound->m_LastChannel & 0x00000FFF;
+
+	// Update the individual pitch modifier
+	m_PitchModifiers[channelIndex] = pitch;
+
     if (m_NormalFrequencies[channelIndex] > 0)
         FSOUND_SetFrequency(pSound->m_LastChannel, m_NormalFrequencies[channelIndex] * m_PitchModifiers[channelIndex] * m_GlobalPitch);
 #elif __USE_SOUND_SDLMIXER
 	// SDL seems to not support pitch changes
 #elif __USE_SOUND_GORILLA
-	ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_PITCH, m_PitchModifiers[pSound->m_LastChannel] * m_GlobalPitch);
+	if (pSound->m_LastChannel >= 0)
+	{
+		m_PitchModifiers[pSound->m_LastChannel] = pitch;
+		ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_PITCH, m_PitchModifiers[pSound->m_LastChannel] * m_GlobalPitch);
+	}
 #endif
 
     return true;
@@ -1400,7 +1417,7 @@ void AudioMan::StopAll()
 		m_pMusic = 0;
 	}
 #elif __USE_SOUND_GORILLA
-	for (int i = 1; i < m_MaxChannels; i++)
+	for (int i = 1; i < m_SoundChannels.size(); i++)
 	{
 		if (m_SoundChannels[i] && ga_handle_playing(m_SoundChannels[i]))
 			ga_handle_stop(m_SoundChannels[i]);
@@ -1461,13 +1478,14 @@ int AudioMan::GetPlayingChannelCount()
 #elif __USE_SOUND_GORILLA
 	int count = 0;
 
-	for (int i = 0; i < m_MaxChannels; i++)
+	for (int i = 0; i < m_SoundChannels.size(); i++)
 	{
 		if (m_SoundChannels[i] && ga_handle_playing(m_SoundChannels[i]))
 			count++;
 	}
 	return count;
 #endif
+	return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1481,8 +1499,9 @@ int AudioMan::GetTotalChannelCount()
 	return FSOUND_GetMaxChannels();
 #elif __USE_SOUND_SDLMIXER
 #elif __USE_SOUND_GORILLA
-	return m_MaxChannels;
+	return m_SoundChannels.size();
 #endif
+	return 0;
 }
 
 } // namespace RTE

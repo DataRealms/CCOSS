@@ -68,8 +68,9 @@
 #define FILEBUFFER_SIZE 8192
 #define MAX_UNZIPPED_FILE_SIZE 104857600
 
-
+#if defined(WIN32)
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
+#endif
 
 using namespace RTE;
 
@@ -1092,7 +1093,9 @@ bool PlayIntroTitle()
         g_ConsoleMan.Update();
 
 #if __USE_SOUND_GORILLA
+		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_SOUND);
 		g_AudioMan.Update();
+		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_SOUND);
 #endif
 
         if (sectionSwitch)
@@ -2354,6 +2357,9 @@ bool RunGameLoop()
 
             // Update the real time measurement and increment
             g_TimerMan.Update();
+#if __USE_SOUND_GORILLA
+			g_AudioMan.Update();
+#endif
 
 			bool serverUpdated = false;
 

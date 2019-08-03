@@ -118,6 +118,7 @@
       <SDLCheck>
       </SDLCheck>
       <OmitFramePointers>true</OmitFramePointers>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>lua.x86.release.lib;luabind.x86.release.lib;ws2_32.lib;libcurl.lib;zlibwapi.lib;alleg_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;gorilla.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>

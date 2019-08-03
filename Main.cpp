@@ -276,7 +276,7 @@ void LoadingSplashProgressReport(std::string reportString, bool newItem = false)
 			unicoded.replace(startPos, 1, to);
 			startPos += to.length();
 		}
-		std::cout << unicoded;
+		std::cout << unicoded << std::flush;
 	}
 	if (g_pLoadingGUI)
 	{

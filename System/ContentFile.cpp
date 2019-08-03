@@ -594,7 +594,7 @@ FSOUND_SAMPLE * ContentFile::GetAsSample()
         if (separatorPos == -1)
         {
             fileSize = file_size(m_DataPath.c_str());
-            PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
+            PACKFILE *pFile = pack_fopen(GetPlatformPath().c_str(), F_READ);
 
             // Make sure we opened properly.
             if (!pFile || fileSize <= 0)
@@ -767,8 +767,9 @@ ga_Sound * ContentFile::GetAsSample()
 		// If there is none, that means we're told to load an exposed file outside of a .dat datafile.
 		if (separatorPos == -1)
 		{
-			fileSize = file_size(m_DataPath.c_str());
-			PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
+            std::string platform_path = GetPlatformPath();
+			fileSize = file_size(platform_path.c_str());
+			PACKFILE *pFile = pack_fopen(platform_path.c_str(), F_READ);
 
 			// Make sure we opened properly.
 			if (!pFile || fileSize <= 0)
@@ -858,7 +859,7 @@ BITMAP * ContentFile::LoadAndReleaseBitmap(int conversionMode)
     // If there is none, that means we're told to load an exposed file outside of a .dat datafile.
     if (separatorPos == -1)
     {
-        PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
+        PACKFILE *pFile = pack_fopen(GetPlatformPath().c_str(), F_READ);
         // Make sure we opened properly, or try to add 000 before the extension if it's part of an animation naming
         if (!pFile)
         {
@@ -1016,6 +1017,36 @@ BITMAP ** ContentFile::LoadAndReleaseAnimation(int frameCount, int conversionMod
 
     // Return the loaded BITMAP:s
     return aReturnBitmaps;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  GetPlatformPath
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns data path in a platform specific representation
+// Arguments:       
+// Return value:    Platform specific representation of path
+    
+std::string ContentFile::GetPlatformPath()
+{
+    std::string rv;
+#ifdef WIN32
+    for (auto it = 0; it < m_DataPath.length(); ++it) {
+        if (m_DataPath[it] == '/') {
+            rv.push_back('\\');
+        } else {
+            rv.push_back(m_DataPath[it]);
+        }
+    }
+#else
+    for (auto it = 0; it < m_DataPath.length(); ++it) {
+        if (m_DataPath[it] == '\\') {
+            rv.push_back('/');
+        } else {
+            rv.push_back(m_DataPath[it]);
+        }
+    }
+#endif
+    return rv;
 }
 
 /* This is foolish

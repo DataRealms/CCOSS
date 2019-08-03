@@ -49,6 +49,7 @@
 
 #include <thread>
 
+#include <getopt.h>
 
 #if defined(__APPLE__)
 #include "OsxUtil.h"
@@ -2583,9 +2584,25 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
 
 int main(int argc, char *argv[])
 {
+    int opt;
+    char* help = "Usage: %s [-h]\n";
     ///////////////////////////////////////////////////////////////////
 	// Change to working directory (necessary for some platforms)
 	g_System.ChangeWorkingDirectory();
+
+    while ((opt = getopt(argc, argv, "h")) != -1) {
+        switch (opt) {
+        case 'h':
+            printf(help,
+                    argv[0]);
+            exit(0);
+            break;
+        default: /* '?' */
+            fprintf(stderr, help,
+                    argv[0]);
+            exit(EXIT_FAILURE);
+        }
+    }
 
 #if defined(__APPLE__)
 	OsxUtil::Create();

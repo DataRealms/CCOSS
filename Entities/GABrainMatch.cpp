@@ -396,7 +396,7 @@ void GABrainMatch::Update()
             continue;
 
         // Make sure the game is not already ending
-        else if (m_ActivityState != OVER)
+        if (m_ActivityState != OVER)
         {
             // Check if any player's brain is dead
             if (!g_MovableMan.IsActor(m_pBrain[player]) || !m_pBrain[player]->HasObjectInGroup("Brains"))

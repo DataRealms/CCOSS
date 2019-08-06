@@ -456,9 +456,14 @@ void GAScripted::Update()
             continue;
     }
 
-    g_LuaMan.RunScriptString("if " + m_LuaClassName + ".UpdateActivity then " + m_LuaClassName + ":UpdateActivity(); end");
+    // If the game didn't end, keep updating activity
+    if (m_ActivityState != OVER)
+    {   
+        // Call the defined function, but only after first checking if it exists
+        g_LuaMan.RunScriptString("if " + m_LuaClassName + ".UpdateActivity then " + m_LuaClassName + ":UpdateActivity(); end");
 
-    UpdateGlobalScripts(false);
+        UpdateGlobalScripts(false);
+    }
 }
 
 

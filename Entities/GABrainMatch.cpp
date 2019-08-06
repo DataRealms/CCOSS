@@ -395,14 +395,8 @@ void GABrainMatch::Update()
         if (team == NOTEAM)
             continue;
 
-        // If demo end, don't do anything
-        if (m_ActivityState == DEMOEND)
-        {
-            m_pBrain[player] = 0;
-            g_FrameMan.SetScreenText("Demo time for this skirmish is up! Register for unlimited battles!\nPress Ctrl + [R] to restart", ScreenOfPlayer(player));
-        }
         // Make sure the game is not already ending
-        else if (m_ActivityState != OVER)
+        if (m_ActivityState != OVER)
         {
             // Check if any player's brain is dead
             if (!g_MovableMan.IsActor(m_pBrain[player]) || !m_pBrain[player]->HasObjectInGroup("Brains"))

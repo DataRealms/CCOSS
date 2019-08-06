@@ -19,7 +19,6 @@
 #include "AudioMan.h"
 #include "UInputMan.h"
 #include "SettingsMan.h"
-#include "LicenseMan.h"
 #include "ConsoleMan.h"
 #include "MetaMan.h"
 #include "AchievementMan.h"
@@ -1421,16 +1420,6 @@ bool MetagameGUI::SaveGameFromDialog()
     return SaveGame(saveName, savePath, true);
 }
 
-#ifndef __OPEN_SOURCE_EDITION
-
-/////////////////////////////
-// TURN OPTIMIZATIONS OFF
-// This is so the EXECryptor markers don't get mangled by the optimizer
-
-#pragma optimize("", off)
-
-#endif
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1438,10 +1427,6 @@ bool MetagameGUI::SaveGameFromDialog()
 
 void MetagameGUI::Update()
 {
-#ifndef __OPEN_SOURCE_EDITION
-    CRYPT_START
-#endif
-
     // Update the input controller
     m_pController->Update();
 
@@ -2030,10 +2015,6 @@ void MetagameGUI::Update()
     // Save mouse pos for next frame so we can do dragging
     if (m_EngageDrag)
         m_PrevMousePos = mousePos;
-
-#ifndef __OPEN_SOURCE_EDITION
-    CRYPT_END
-#endif
 }
 
 
@@ -2969,16 +2950,6 @@ void MetagameGUI::KeepBoxOnScreen(GUICollectionBox *pBox, int margin)
             pBox->SetPositionAbs(pBox->GetXPos(), m_apScreenBox[ROOTBOX]->GetHeight() - margin);
     }
 }
-
-#ifndef __OPEN_SOURCE_EDITION
-
-/////////////////////////////
-// TURN OPTIMIZATIONS ON
-// This is so the EXECryptor markers don't get mangled by the optimizer
-
-#pragma optimize("", on)
-
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          CompletedActivity

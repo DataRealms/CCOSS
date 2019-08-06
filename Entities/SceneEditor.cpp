@@ -15,7 +15,6 @@
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
-#include "LicenseMan.h"
 #include "SettingsMan.h"
 #include "SLTerrain.h"
 #include "Controller.h"
@@ -727,41 +726,38 @@ bool SceneEditor::SaveScene(string saveAsName, bool forceOverwrite)
 		string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + saveAsName + ".preview.bmp");
 		if (g_PresetMan.AddEntityPreset(g_SceneMan.GetScene(), m_ModuleSpaceID, forceOverwrite, sceneFilePath))
 		{
-			if (g_LicenseMan.HasValidatedLicense())
-			{
-				// Save preview
-				g_SceneMan.GetScene()->SavePreview(previewFilePath);
+            // Save preview
+            g_SceneMan.GetScene()->SavePreview(previewFilePath);
 
-				// Does ini already exist? If yes, then no need to add it to a scenes.ini etc
-				bool sceneFileExisted = exists(sceneFilePath.c_str());
-				// Create the writer
-				Writer sceneWriter(sceneFilePath.c_str(), false);
-				sceneWriter.NewProperty("AddScene");
-		// TODO: Check if the ini file already exists, and then ask if overwrite
-				// Write the scene out to the new ini
-				sceneWriter << g_SceneMan.GetScene();
+            // Does ini already exist? If yes, then no need to add it to a scenes.ini etc
+            bool sceneFileExisted = exists(sceneFilePath.c_str());
+            // Create the writer
+            Writer sceneWriter(sceneFilePath.c_str(), false);
+            sceneWriter.NewProperty("AddScene");
+            // TODO: Check if the ini file already exists, and then ask if overwrite
+                    // Write the scene out to the new ini
+            sceneWriter << g_SceneMan.GetScene();
 
-				if (!sceneFileExisted)
-				{
-					// First find/create a .rte/Scenes.ini file to include the new .ini into
-					string scenesFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes.ini");
-					bool scenesFileExisted = exists(scenesFilePath.c_str());
-					Writer scenesWriter(scenesFilePath.c_str(), true);
-					scenesWriter.NewProperty("\nIncludeFile");
-					scenesWriter << sceneFilePath;
+            if (!sceneFileExisted)
+            {
+                // First find/create a .rte/Scenes.ini file to include the new .ini into
+                string scenesFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes.ini");
+                bool scenesFileExisted = exists(scenesFilePath.c_str());
+                Writer scenesWriter(scenesFilePath.c_str(), true);
+                scenesWriter.NewProperty("\nIncludeFile");
+                scenesWriter << sceneFilePath;
 
-					// Also add a line to the end of the modules' Index.ini to include the newly created Scenes.ini next startup
-					// If it's already included, it doens't matter, the definitions will just bounce the second time
-					if (!scenesFileExisted)
-					{
-						string indexFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Index.ini"); 
-						Writer indexWriter(indexFilePath.c_str(), true);
-						// Add extra tab since the DataModule has everything indented
-						indexWriter.NewProperty("\tIncludeFile");
-						indexWriter << scenesFilePath;
-					}
-				}
-			}
+                // Also add a line to the end of the modules' Index.ini to include the newly created Scenes.ini next startup
+                // If it's already included, it doens't matter, the definitions will just bounce the second time
+                if (!scenesFileExisted)
+                {
+                    string indexFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Index.ini");
+                    Writer indexWriter(indexFilePath.c_str(), true);
+                    // Add extra tab since the DataModule has everything indented
+                    indexWriter.NewProperty("\tIncludeFile");
+                    indexWriter << scenesFilePath;
+                }
+            }
 			return m_HasEverBeenSaved = true;
 		}
 		else

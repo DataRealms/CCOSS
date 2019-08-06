@@ -429,7 +429,6 @@
     <ClInclude Include="Managers\AudioMan.h" />
     <ClInclude Include="Managers\ConsoleMan.h" />
     <ClInclude Include="managers\FrameMan.h" />
-    <ClInclude Include="Managers\LicenseMan.h" />
     <ClInclude Include="Managers\LuaMan.h" />
     <ClInclude Include="Managers\MetaMan.h" />
     <ClInclude Include="Managers\MovableMan.h" />
@@ -706,7 +705,6 @@
     <ClCompile Include="Managers\AudioMan.cpp" />
     <ClCompile Include="Managers\ConsoleMan.cpp" />
     <ClCompile Include="managers\FrameMan.cpp" />
-    <ClCompile Include="Managers\LicenseMan.cpp" />
     <ClCompile Include="Managers\LuaMan.cpp" />
     <ClCompile Include="Managers\MetaMan.cpp" />
     <ClCompile Include="Managers\MovableMan.cpp" />

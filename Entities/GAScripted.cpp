@@ -454,22 +454,15 @@ void GAScripted::Update()
         int team = m_Team[player];
         if (team == NOTEAM)
             continue;
-
-        // If demo end, don't do anything
-        if (m_ActivityState == DEMOEND)
-        {
-            m_pBrain[player] = 0;
-            g_FrameMan.SetScreenText("Demo time for this skirmish is up! Register for unlimited battles!\nPress Ctrl + [R] to restart", ScreenOfPlayer(player));
-        }
     }
 
-    // Don't if demo is up
-    if (m_ActivityState != DEMOEND)
-    {
+    // If the game didn't end, keep updating activity
+    if (m_ActivityState != OVER)
+    {   
         // Call the defined function, but only after first checking if it exists
         g_LuaMan.RunScriptString("if " + m_LuaClassName + ".UpdateActivity then " + m_LuaClassName + ":UpdateActivity(); end");
 
-		UpdateGlobalScripts(false);
+        UpdateGlobalScripts(false);
     }
 }
 

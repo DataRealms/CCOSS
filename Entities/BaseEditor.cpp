@@ -15,7 +15,6 @@
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
-#include "LicenseMan.h"
 #include "SceneMan.h"
 #include "MetaMan.h"
 //#include "AHuman.h"

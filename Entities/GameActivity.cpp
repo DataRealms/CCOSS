@@ -15,7 +15,6 @@
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
-#include "LicenseMan.h"
 #include "AudioMan.h"
 #include "MetaMan.h"
 #include "ConsoleMan.h"
@@ -42,8 +41,6 @@
 extern bool g_ResetActivity;
 extern bool g_InActivity;
 
-// TODO: CHANGE BACK TO 600?
-#define DEMOTIMESECS 360
 #define BRAINLZWIDTHDEFAULT 640
 
 using namespace std;
@@ -126,8 +123,6 @@ void GameActivity::Clear()
     m_WinnerTeam = -1;
     m_pOrbitedCraft = 0;
 	m_pPieMenuActor = 0;
-    m_DemoTimer.Reset();
-    m_PausedDemoTime = 0;
 }
 
 
@@ -238,7 +233,6 @@ int GameActivity::Create(const GameActivity &reference)
 //    m_GameOverTimer = reference.m_GameOverTimer;
     m_GameOverPeriod = reference.m_GameOverPeriod;
     m_WinnerTeam = reference.m_WinnerTeam;
-    m_PausedDemoTime = reference.m_PausedDemoTime;
 
     return 0;
 }
@@ -401,58 +395,6 @@ void GameActivity::SetCPUTeam(int team)
         m_IsHuman[m_Team[player]] = m_IsActive[player] && m_Team[player] != team;
 */
 }
-
-#ifndef __OPEN_SOURCE_EDITION
-
-/////////////////////////////
-// TURN OPTIMIZATIONS OFF
-// This is so the EXECryptor markers don't get mangled by the optimizer
-
-#pragma optimize("", off)
-
-#endif
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetDemoTimeLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows how many seconds of demo time is left, if indeed in demo mode.
-
-long GameActivity::GetDemoTimeLeft()
-{
-#ifndef __OPEN_SOURCE_EDITION
-    CRYPT_START
-#endif
-
-    // Not in demo mode
-    if (g_LicenseMan.HasValidatedLicense())
-        return -1;
-
-    if (m_ActivityState != RUNNING)
-        return m_ActivityState == DEMOEND ? 0 : DEMOTIMESECS;
-
-    // Ten minutes
-    long secsLeft = DEMOTIMESECS - m_DemoTimer.GetElapsedRealTimeS();
-
-    // Cap at 0
-    if (secsLeft < 0)
-        secsLeft = 0;
-
-    return secsLeft;
-
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_END
-#endif
-}
-
-#ifndef __OPEN_SOURCE_EDITION
-
-/////////////////////////////
-// TURN OPTIMIZATIONS ON
-// This is so the EXECryptor markers don't get mangled by the optimizer
-
-#pragma optimize("", on)
-
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SwitchToActor
@@ -1092,7 +1034,6 @@ int GameActivity::Start()
 
     // Start the game timer
     m_GameTimer.Reset();
-    m_DemoTimer.Reset();
 
     if (!(m_aLZCursor[0]))
     {
@@ -1129,14 +1070,8 @@ int GameActivity::Start()
 
 void GameActivity::Pause(bool pause)
 {
-    if (pause)
-        m_PausedDemoTime = m_DemoTimer.GetElapsedRealTimeMS();
-    else
-        m_DemoTimer.SetElapsedRealTimeMS(m_PausedDemoTime);
-
     Activity::Pause(pause);
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          End
@@ -1379,8 +1314,6 @@ void GameActivity::UpdateEditing()
         {
             // START the game!
             m_ActivityState = RUNNING;
-            // Start the demo time
-            m_DemoTimer.Reset();
             // Re-enable the AI's if we are done editing
             DisableAIs(false);
             InitAIs();
@@ -2108,7 +2041,7 @@ void GameActivity::Update()
         }
 
         // After a while of game over, change messages to the final one for everyone
-        if ((m_ActivityState == OVER || m_ActivityState == DEMOEND) && m_GameOverTimer.IsPastRealMS(m_GameOverPeriod))
+        if (m_ActivityState == OVER && m_GameOverTimer.IsPastRealMS(m_GameOverPeriod))
         {
             g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
             //g_FrameMan.SetScreenText("Press [Esc] to leave the battlefield", ScreenOfPlayer(player), 750);
@@ -2260,36 +2193,6 @@ void GameActivity::Update()
         g_SceneMan.SetScrollTarget(m_ObservationTarget[PLAYER_4], 0.1, g_SceneMan.ForceBounds(m_ObservationTarget[PLAYER_4]), ScreenOfPlayer(PLAYER_4));
     }
 */
-    // Check if the demo time has run out, if not registered!
-    if (m_ActivityState != DEMOEND && GetDemoTimeLeft() == 0)
-    {
-// TODO: Write out some good message telling that the demo is over
-// ALSO MAKE BRAINS ASSPLODE
-        for (int team = 0; team < MAXTEAMCOUNT; ++team)
-        {
-            if (!m_TeamActive[team])
-                continue;
-            // Kill all player teams members
-            if (team != m_CPUTeam)
-            {
-                list<Actor *> *pActorList = g_MovableMan.GetTeamRoster(team);
-                for (list<Actor *>::iterator itr = pActorList->begin(); itr != pActorList->end(); ++itr)
-                {
-                    // If brain, make it explode
-                    if ((*itr)->HasObjectInGroup("Brains"))
-                        (*itr)->GibThis();
-                    // Otherwise, just kill the body
-                    else
-                        (*itr)->SetStatus(Actor::DYING);
-                }
-            }
-        }
-
-        // End the demo!
-        End();
-        // Override to Demo End for special handling of the demo end
-        m_ActivityState = DEMOEND;
-    }
 }
 
 

@@ -15,7 +15,6 @@
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
-#include "LicenseMan.h"
 //#include "AHuman.h"
 //#include "MOPixel.h"
 #include "SLTerrain.h"
@@ -761,51 +760,47 @@ bool GibEditor::SaveObject(string saveAsName, bool forceOverwrite)
 // TEMP always overwrite for now until proper save system is in place
 //    if (g_PresetMan.AddEntityPreset(m_pEditedObject, m_ModuleSpaceID, true))
     {
-        // Only save to ini if license is valid
-        if (g_LicenseMan.HasValidatedLicense())
+        // Does ini already exist? If yes, then no need to add it to a objects.ini etc
+        bool objectFileExisted = exists(objectFilePath.c_str());
+        // If the ini file already exists, and then ask if overwrite first
+        if (objectFileExisted && !forceOverwrite)
         {
-            // Does ini already exist? If yes, then no need to add it to a objects.ini etc
-            bool objectFileExisted = exists(objectFilePath.c_str());
-            // If the ini file already exists, and then ask if overwrite first
-            if (objectFileExisted && !forceOverwrite)
-            {
-                // Gotto ask if we can overwrite the existing object/file
-                m_PreviousMode = EditorActivity::SAVEDIALOG;
-                m_EditorMode = EditorActivity::OVERWRITEDIALOG;
-                m_ModeChange = true;
-                return false;
-            }
-            // Create the writer
-            Writer objectWriter(objectFilePath.c_str(), false);
-            AAssert(objectWriter.WriterOK(), "Couldn't open file " + objectFilePath + "to write to! Check if directory exists..?");
-            objectWriter.NewProperty("AddObject");
-            // Write the object out to the new ini
-            m_pEditedObject->MOSRotating::Save(objectWriter);
-            objectWriter.ObjectEnd();
-    // TODO: Make system for saving into/over the existing definition read originally from the ini's, wherever it was
-    /*
-            if (!objectFileExisted)
-            {
-                // First find/create  a .rte/Scenes.ini file to include the new .ini into
-                string objectsFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes.ini");
-                bool objectsFileExisted = exists(objectsFilePath.c_str());
-                Writer objectsWriter(objectsFilePath.c_str(), true);
-                objectsWriter.NewProperty("\nIncludeFile");
-                objectsWriter << objectFilePath;
-
-                // Also add a line to the end of the modules' Index.ini to include the newly created Scenes.ini next startup
-                // If it's already included, it doens't matter, the definitions will just bounce the second time
-                if (!objectsFileExisted)
-                {
-                    string indexFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Index.ini"); 
-                    Writer indexWriter(indexFilePath.c_str(), true);
-                    // Add extra tab since the DataModule has everything indented
-                    indexWriter.NewProperty("\tIncludeFile");
-                    indexWriter << objectsFilePath;
-                }
-            }
-    */
+            // Gotto ask if we can overwrite the existing object/file
+            m_PreviousMode = EditorActivity::SAVEDIALOG;
+            m_EditorMode = EditorActivity::OVERWRITEDIALOG;
+            m_ModeChange = true;
+            return false;
         }
+        // Create the writer
+        Writer objectWriter(objectFilePath.c_str(), false);
+        AAssert(objectWriter.WriterOK(), "Couldn't open file " + objectFilePath + "to write to! Check if directory exists..?");
+        objectWriter.NewProperty("AddObject");
+        // Write the object out to the new ini
+        m_pEditedObject->MOSRotating::Save(objectWriter);
+        objectWriter.ObjectEnd();
+        // TODO: Make system for saving into/over the existing definition read originally from the ini's, wherever it was
+        /*
+                if (!objectFileExisted)
+                {
+                    // First find/create  a .rte/Scenes.ini file to include the new .ini into
+                    string objectsFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes.ini");
+                    bool objectsFileExisted = exists(objectsFilePath.c_str());
+                    Writer objectsWriter(objectsFilePath.c_str(), true);
+                    objectsWriter.NewProperty("\nIncludeFile");
+                    objectsWriter << objectFilePath;
+
+                    // Also add a line to the end of the modules' Index.ini to include the newly created Scenes.ini next startup
+                    // If it's already included, it doens't matter, the definitions will just bounce the second time
+                    if (!objectsFileExisted)
+                    {
+                        string indexFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Index.ini");
+                        Writer indexWriter(indexFilePath.c_str(), true);
+                        // Add extra tab since the DataModule has everything indented
+                        indexWriter.NewProperty("\tIncludeFile");
+                        indexWriter << objectsFilePath;
+                    }
+                }
+        */
         return m_HasEverBeenSaved = true;
     }
     else

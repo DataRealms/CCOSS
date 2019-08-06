@@ -356,21 +356,6 @@ bool LoadDataModules()
         pBox->SetPositionRel(g_FrameMan.GetResX() - pBox->GetWidth() - 12, (g_FrameMan.GetResY() / 2) - (pBox->GetHeight() / 2));
     pBox->ClearList();
 
-    // Show and position the registration notice label
-    GUILabel *pRegLabel = dynamic_cast<GUILabel *>(g_pLoadingGUI->GetControl("LabelRegisterNotice"));
-    if (!g_LicenseMan.HasValidatedLicense())
-    {
-        // Make room for the notice over the list
-        pBox->SetSize(pBox->GetWidth(), 258);
-        pBox->SetPositionRel(pBox->GetXPos(), pBox->GetYPos() + pRegLabel->GetHeight());
-        // Show the notice label
-        pRegLabel->SetPositionRel(pBox->GetXPos(), pBox->GetYPos() - pRegLabel->GetHeight() - 6);
-        pRegLabel->SetText("Unregistered Copy");
-        pRegLabel->SetVisible(true);
-    }
-    else
-        pRegLabel->SetVisible(false);
-
 	if (!g_SettingsMan.DisableLoadingScreen())
 	{
 		//New mechanism to speed up loading times as it turned out that a massive amount of time is spent
@@ -674,49 +659,45 @@ bool LoadDataModules()
 	loadFirst.clear();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Search for any additional data modules, if license is registered! - NAH let them load mods
+    // Search for any additional data modules
 
-//    if (g_LicenseMan.HasValidatedLicense())
-//    {
-        moduleID = 0;
-        for (int result = al_findfirst("*.rte", &moduleInfo, FA_DIREC | FA_RDONLY); result == 0; result = al_findnext(&moduleInfo))
+    moduleID = 0;
+    for (int result = al_findfirst("*.rte", &moduleInfo, FA_DIREC | FA_RDONLY); result == 0; result = al_findnext(&moduleInfo))
+    {
+        if (!g_SettingsMan.IsModDisabled(moduleInfo.name))
         {
-			if (!g_SettingsMan.IsModDisabled(moduleInfo.name))
-			{
-				moduleID = g_PresetMan.GetModuleID(moduleInfo.name);
-				// Make sure we don't add the official metagames module among these; they should be loaded in explicit order before and after these unofficial ones
-				if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= g_PresetMan.GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte")
-				{
-	/* Redundant with weegee's other ssytem that allows sideloading etc
-					// If workshop is enabled, then SKIP loading any unofficial mods that are neither subscribed-to nor published by this user
-					if (g_SteamUGCMan.IsCloudEnabled() && (!g_SteamUGCMan.IsModuleSubscribedTo(moduleInfo.name) && !g_SteamUGCMan.IsModulePublished(moduleInfo.name)))
-					{
-						LoadingSplashProgressReport("NOT Loading Data Module: " + string(moduleInfo.name) + " - it is not subscribed to in the Workshop!", true);
-						continue;
-					}
-	*/              
-					// Actually load the unofficial data module
-					if (!g_PresetMan.LoadDataModule(string(moduleInfo.name), false, &LoadingSplashProgressReport))
-					{
-						// Report error?
-					}
-				}
-				else
-				{
-		// TODO: Log this and continue gracefully instead
-	// LoadDataModule can return false (esp since it amy try to load already loaded modules, and that's ok) and shouldn't cause stop
-	//                char error[512];
-	//                sprintf(error, "Failed to load Data Module: %s\n\nMake sure it contains an Index.ini file that defines a \"DataModule\"!", moduleInfo.name);
-	//                DDTAbort(error);
-	//                return false;
+            moduleID = g_PresetMan.GetModuleID(moduleInfo.name);
+            // Make sure we don't add the official metagames module among these; they should be loaded in explicit order before and after these unofficial ones
+            if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= g_PresetMan.GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte")
+            {
+                /* Redundant with weegee's other ssytem that allows sideloading etc
+                                // If workshop is enabled, then SKIP loading any unofficial mods that are neither subscribed-to nor published by this user
+                                if (g_SteamUGCMan.IsCloudEnabled() && (!g_SteamUGCMan.IsModuleSubscribedTo(moduleInfo.name) && !g_SteamUGCMan.IsModulePublished(moduleInfo.name)))
+                                {
+                                    LoadingSplashProgressReport("NOT Loading Data Module: " + string(moduleInfo.name) + " - it is not subscribed to in the Workshop!", true);
+                                    continue;
+                                }
+                */
+                // Actually load the unofficial data module
+                if (!g_PresetMan.LoadDataModule(string(moduleInfo.name), false, &LoadingSplashProgressReport))
+                {
+                    // Report error?
+                }
+            }
+            else
+            {
+                // TODO: Log this and continue gracefully instead
+            // LoadDataModule can return false (esp since it amy try to load already loaded modules, and that's ok) and shouldn't cause stop
+            //                char error[512];
+            //                sprintf(error, "Failed to load Data Module: %s\n\nMake sure it contains an Index.ini file that defines a \"DataModule\"!", moduleInfo.name);
+            //                DDTAbort(error);
+            //                return false;
 
-				}
-			}
+            }
         }
-        // Close the file search to avoid memory leaks
-        al_findclose(&moduleInfo);
-//    }
-//*/
+    }
+    // Close the file search to avoid memory leaks
+    al_findclose(&moduleInfo);
 
     // Load scenes and metagames AFTER all other techs etc are loaded; might be referring to stuff in user mods
     if (!g_PresetMan.LoadDataModule("Scenes.rte", false, &LoadingSplashProgressReport))
@@ -2477,70 +2458,18 @@ bool RunGameLoop()
     return true;
 }
 
-
-#ifndef __OPEN_SOURCE_EDITION
-
-/////////////////////////////
-// TURN OPTIMIZATIONS OFF
-// This is so the EXECryptor markers don't get mangled by the optimizer
-
-#pragma optimize("", off)
-
-#endif
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Command-line argument handling, returns false if app should quit right after this
 // The appExitVar is what the program should exit with if this returns false
 
 bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
 {
-#ifndef __OPEN_SOURCE_EDITION
-    CRYPT_START
-#endif
-
     // If no additional args passed, just continue (first arg is the program path)
     if (argc == 1)
         return true;
 
     // Default program return var is fail
     appExitVar = 2;
-
-    // If one additional arg is passed
-    if (argc == 2)
-    {
-        // If -register was passed as param, try to register with last used key and quit immediately (regardless of success)
-        if (strcmp(argv[1], "-register") == 0)
-        {
-            // Try to register the last used key, if we're not currently registered and we do have a last used key
-            if (!g_LicenseMan.HasValidatedLicense())
-            {
-                int result = g_LicenseMan.Register(g_LicenseMan.GetLastLicenseEmail(), g_LicenseMan.GetLastLicenseKey());
-                if (result == LicenseMan::SUCCESS || result == LicenseMan::DEPRECATEDKEY)
-                    appExitVar = 0;
-                g_SettingsMan.WriteLicenseKey();
-            }
-            // If already registered, then report that
-            else
-                appExitVar = 1;
-            return false;
-        }
-        // If -unregister was passed as param, just try to unregister the license and quit immediately (regardless of success)
-        else if (strcmp(argv[1], "-unregister") == 0)
-        {
-            if (g_LicenseMan.HasValidatedLicense())
-            {
-                if (g_LicenseMan.Unregister() == LicenseMan::SUCCESS)
-                    appExitVar = 0;
-                g_SettingsMan.WriteLicenseKey();
-//                g_SettingsMan.Save(Writer("Base.rte/Settings.ini"));
-            }
-            // If already unregistered, then report that
-            else
-                appExitVar = 1;
-            return false;
-        }
-    }
 
 	if (argc > 2)
 	{
@@ -2575,22 +2504,7 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
 	}*/
 
     return true;
-
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_END
-#endif
 }
-
-
-#ifndef __OPEN_SOURCE_EDITION
-
-/////////////////////////////
-// TURN OPTIMIZATIONS ON
-// This is so the EXECryptor markers don't get mangled by the optimizer
-
-#pragma optimize("", on)
-
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Implementation of the main function.
@@ -2644,7 +2558,6 @@ int main(int argc, char *argv[])
 
     new ConsoleMan();
     new LuaMan();
-    new LicenseMan();
     new SettingsMan();
     new TimerMan();
     new PresetMan();
@@ -2671,9 +2584,6 @@ int main(int argc, char *argv[])
     // Create the essential managers
 
     g_LuaMan.Create();
-    g_LicenseMan.Create();
-    // It's ok if ReadLicenseKey fails, it just means we're not registered yet
-    g_SettingsMan.ReadLicenseKey();
 	
 	Reader settingsReader("Base.rte/Settings.ini", false, 0, true);
     g_SettingsMan.Create(settingsReader);
@@ -2789,7 +2699,6 @@ int main(int argc, char *argv[])
     g_FrameMan.Destroy();
     g_TimerMan.Destroy();
     g_SettingsMan.Destroy();
-    g_LicenseMan.Destroy();
     g_LuaMan.Destroy();
     ContentFile::FreeAllLoaded();
     g_ConsoleMan.Destroy();

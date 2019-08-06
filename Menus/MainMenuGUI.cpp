@@ -20,7 +20,6 @@
 #include "AudioMan.h"
 #include "UInputMan.h"
 #include "SettingsMan.h"
-#include "LicenseMan.h"
 #include "ConsoleMan.h"
 #include "MetaMan.h"
 #ifdef STEAM_BUILD
@@ -63,9 +62,6 @@ extern int g_IntroState;
 
 using namespace std;
 using namespace RTE;
-
-#define NAGSCREENCOUNT 7
-#define NAGDURATIONMS 14000
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -139,20 +135,6 @@ void MainMenuGUI::Clear()
     // Editor screen
     for (int button = 0; button < EDITORBUTTONCOUNT; ++button)
         m_aEditorButton[button] = 0;
-
-    m_pLicenseCaptionLabel = 0;
-    m_pLicenseInstructionLabel = 0;
-    m_pLicenseEmailLabel = 0;
-    m_pLicenseKeyLabel = 0;
-    m_pLicenseEmailBox = 0;
-    m_pLicenseKeyBox = 0;
-    m_pRegistrationButton = 0;
-
-    m_NagMode = QUITNAG;
-    m_pNagExitButton = 0;
-    m_pNagRegButton = 0;
-    m_apNagSlides = 0;
-    m_NagTimer.Reset();
 
     m_aDPadBitmaps = 0;
     m_aDualAnalogBitmaps = 0;
@@ -252,11 +234,9 @@ int MainMenuGUI::Create(Controller *pController)
     m_apScreenBox[DIFFICULTYSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("DifficultyScreen"));
     m_apScreenBox[OPTIONSSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("OptionsScreen"));
     m_apScreenBox[CONFIGSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ConfigScreen"));
-    m_apScreenBox[LICENSESCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("LicenseScreen"));
     m_apScreenBox[EDITORSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("EditorScreen"));
     m_apScreenBox[METASCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("MetaScreen"));
     m_apScreenBox[CREDITSSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CreditsScreen"));
-    m_apScreenBox[NAGSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("LicenseNagScreen"));
     m_apScreenBox[QUITSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("QuitConfirmBox"));
     m_apScreenBox[MODMANAGERSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ModManagerScreen"));
 
@@ -351,7 +331,6 @@ int MainMenuGUI::Create(Controller *pController)
     m_aMainMenuButton[CREDITS] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToCreds"));
     m_aMainMenuButton[QUIT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonQuit"));
     m_aMainMenuButton[RESUME] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonResume"));
-	m_aMainMenuButton[REGISTER] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonRegister"));
     m_aMainMenuButton[PLAYTUTORIAL] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonTutorial"));
     m_aMainMenuButton[METACONTINUE] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonContinue"));
     m_aMainMenuButton[BACKTOMAIN] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonBackToMain"));
@@ -541,16 +520,6 @@ int MainMenuGUI::Create(Controller *pController)
     m_aEditorButton[WORKSHOPPUBLISH] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonWorkshopPublish"));
 
     m_pMetaNoticeLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("MetaLabel"));
-    m_pLicenseCaptionLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelLicenseCaption"));
-    m_pLicenseInstructionLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelLicenseInstructions"));
-    m_pLicenseEmailLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelLicenseEmail"));
-    m_pLicenseKeyLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelLicenseKey"));
-    m_pLicenseEmailBox = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("LicenseEmailTextBox"));
-    m_pLicenseKeyBox = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("LicenseKeyTextBox"));
-    m_pRegistrationButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonLicenseRegistration"));
-
-    m_pNagExitButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonNagExit"));
-    m_pNagRegButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonNagRegister"));
 
     m_pDPadTypeBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("BoxConfigDPadType"));
     m_pDAnalogTypeBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("BoxConfigDAnalogType"));
@@ -724,13 +693,6 @@ void MainMenuGUI::Destroy()
     delete [] m_aDPadBitmaps;
     delete [] m_aDualAnalogBitmaps;
 
-    if (m_apNagSlides)
-    {
-        for (int screen = 0; screen < NAGSCREENCOUNT; ++screen)
-            destroy_bitmap(m_apNagSlides[screen]);
-    }
-    delete [] m_apNagSlides;
-
     Clear();
 }
 
@@ -815,16 +777,6 @@ void MainMenuGUI::PublishingProgressReport(std::string reportString, bool newIte
     }
 }
 
-#ifndef __OPEN_SOURCE_EDITION
-
-/////////////////////////////
-// TURN OPTIMIZATIONS OFF
-// This is so the EXECryptor markers don't get mangled by the optimizer
-
-#pragma optimize("", off)
-
-#endif
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -832,10 +784,6 @@ void MainMenuGUI::PublishingProgressReport(std::string reportString, bool newIte
 
 void MainMenuGUI::Update()
 {
-#ifndef __OPEN_SOURCE_EDITION
-    CRYPT_START
-#endif
-
     // Update the input controller
     m_pController->Update();
 
@@ -870,27 +818,17 @@ void MainMenuGUI::Update()
         if (m_ScreenChange)
         {
             m_apScreenBox[MAINSCREEN]->SetVisible(true);
-            // Replace the Register button with the Resume game button if there's a game to be resumed
+
             if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::RUNNING || g_ActivityMan.GetActivity()->GetActivityState() == Activity::EDITING))
             {
                 m_apScreenBox[MAINSCREEN]->Resize(128, 220);
                 m_aMainMenuButton[RESUME]->SetVisible(true);
-                m_aMainMenuButton[REGISTER]->SetVisible(false);
             }
             else
             {
-#ifdef NODRM
                 m_apScreenBox[MAINSCREEN]->Resize(128, 196);
-#else // NODRM
-                m_apScreenBox[MAINSCREEN]->Resize(128, 220);
-#endif // NODRM
                 m_aMainMenuButton[RESUME]->SetVisible(false);
-#ifndef NODRM
-                m_aMainMenuButton[REGISTER]->SetVisible(true);
-#endif // NODRM
             }
-            // Set appropriate label on the registration button
-            m_aMainMenuButton[REGISTER]->SetText(!g_LicenseMan.HasValidatedLicense() ? "Register" : "Un-Register");
             // Restore the label on the campaign button
             m_aMainMenuButton[CAMPAIGN]->SetText("Campaign");
 
@@ -907,14 +845,6 @@ void MainMenuGUI::Update()
         {
             if (m_BlinkTimer.AlternateReal(500))
                 m_aMainMenuButton[RESUME]->SetFocus();
-            else
-                m_pGUIController->GetManager()->SetFocus(0);
-        }
-        // Blink the register button if still unregistered
-        else if (m_aMainMenuButton[REGISTER]->GetVisible() && m_aMainMenuButton[REGISTER]->GetText() == "Register")
-        {
-            if (m_BlinkTimer.AlternateReal(500))
-                m_aMainMenuButton[REGISTER]->SetFocus();
             else
                 m_pGUIController->GetManager()->SetFocus(0);
         }
@@ -1035,28 +965,6 @@ void MainMenuGUI::Update()
         {
             m_apScreenBox[MODMANAGERSCREEN]->SetVisible(true);
         }
-    }
-
-
-    //////////////////////////////////////
-    // LICENSE REGISTRATION SCREEN
-
-    else if (m_MenuScreen == LICENSESCREEN)
-    {
-        if (m_ScreenChange)
-        {
-            // Clear the key box, it will be set again in UpdateLicenseScreen if registered
-            m_pLicenseEmailBox->SetText("");
-            m_pLicenseKeyBox->SetText("");
-            UpdateLicenseScreen();
-            m_apScreenBox[LICENSESCREEN]->SetVisible(true);
-            m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
-            m_aMainMenuButton[REGISTER]->SetVisible(false);
-            m_pBackToOptionsButton->SetVisible(false);
-            m_ScreenChange = false;
-        }
-
-
     }
 
     //////////////////////////////////////
@@ -1214,60 +1122,6 @@ void MainMenuGUI::Update()
     }
 
     //////////////////////////////////////
-    // NAG SCREEN
-
-    else if (m_MenuScreen == NAGSCREEN)
-    {
-        if (m_ScreenChange)
-        {
-            m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
-            m_pBackToOptionsButton->SetVisible(false);
-
-            // Set the background image of the screen
-            m_apScreenBox[NAGSCREEN]->SetVisible(true);
-            m_apScreenBox[NAGSCREEN]->SetDrawBackground(true);
-            m_apScreenBox[NAGSCREEN]->SetDrawType(GUICollectionBox::Image);
-
-            // Set the appropriate continue button text for the mode
-            if (m_NagMode == EDITORNAG)
-                m_pNagExitButton->SetText("Back to Main Menu");
-            else// if (m_NagMode == QUITNAG)
-                m_pNagExitButton->SetText("Quit");
-
-            // Hide that continue button, only to show it on the last slide!
-            m_pNagExitButton->SetVisible(false);
-
-            // Start the timer to time the showing of different slides
-            m_NagTimer.Reset();
-
-            // Nag slides haven't been read yet, so read em in lazy style
-            if (!m_apNagSlides)
-            {
-                ContentFile nagDisplay("Base.rte/GUIs/RegSplash/RegSplashQuit.bmp");
-                // This transferrs ownership to this of both array and bitmaps
-                m_apNagSlides = nagDisplay.LoadAndReleaseAnimation(NAGSCREENCOUNT, COLORCONV_8_TO_32);
-            }
-            m_ScreenChange = false;
-        }
-
-        // Determine which slide to be showing
-        int nagSlide = 0;
-        float nagTime = m_NagTimer.GetElapsedRealTimeMS();
-        if (nagTime < NAGDURATIONMS)
-            nagSlide = (nagTime / (float)NAGDURATIONMS) * NAGSCREENCOUNT;
-        else
-            nagSlide = NAGSCREENCOUNT - 1;
-
-        // Show the appropriate slide
-        // Ownership of the BITMAP doesn't transfer here, it stays with us
-        m_apScreenBox[NAGSCREEN]->SetDrawImage(new AllegroBitmap(m_apNagSlides[nagSlide]));
-
-        // Only show the continue button when on the last slide!
-        if (nagSlide == (NAGSCREENCOUNT - 1))
-            m_pNagExitButton->SetVisible(true);
-    }
-
-    //////////////////////////////////////
     // QUIT CONFIRM SCREEN
 
     else if (m_MenuScreen == QUITSCREEN)
@@ -1393,16 +1247,7 @@ void MainMenuGUI::Update()
 
                 // Hide all screens, the appropriate screen will reappear on next update
                 HideAllScreens();
-
-                // If registered, go to the editor screen as normal, if not, go to the nag screen!
-                // Nag here even if we have a last entered key - should deny access
-                if (g_LicenseMan.HasValidatedLicense())
-                    m_MenuScreen = EDITORSCREEN;
-                else
-                {
-                    m_MenuScreen = NAGSCREEN;
-                    m_NagMode = EDITORNAG;
-                }
+                m_MenuScreen = EDITORSCREEN;
                 m_ScreenChange = true;
 
                 m_ButtonPressSound.Play();
@@ -1444,17 +1289,6 @@ void MainMenuGUI::Update()
                 m_ActivityResumed = true;
 
                 m_ExitMenuSound.Play();
-            }
-
-			// Register button pressed
-			if (anEvent.GetControl() == m_aMainMenuButton[REGISTER])
-            {
-                // Hide all screens, the appropriate screen will reappear on next update
-                HideAllScreens();
-                m_MenuScreen = LICENSESCREEN;
-                m_ScreenChange = true;
-
-                m_ButtonPressSound.Play();
             }
 
 			// Fullscreen toggle button pressed
@@ -1499,9 +1333,6 @@ void MainMenuGUI::Update()
                 HideAllScreens();
                 m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
                 m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 280);
-#ifndef NODRM
-                m_aMainMenuButton[REGISTER]->SetVisible(true);
-#endif // NODRM
 
                 // If leaving the options screen, save the settings!
                 if (m_MenuScreen == OPTIONSSCREEN)
@@ -2022,145 +1853,6 @@ void MainMenuGUI::Update()
             }
 
             /////////////////////////////////////////////
-            // LICENSE REGISTRATION SCREEN BUTTONS
-
-			if (m_MenuScreen == LICENSESCREEN)
-            {
-                // Register/Unregister button pressed
-                if (anEvent.GetControl() == m_pRegistrationButton)
-                {
-                    // If no license yet, then try to register the one in the key field
-                    if (!g_LicenseMan.HasValidatedLicense())
-                    {
-                        // Attempt the registration
-                        LicenseMan::ServerResult result = g_LicenseMan.Register(m_pLicenseEmailBox->GetText(), m_pLicenseKeyBox->GetText());
-
-                        // Registration was success!
-                        if (result == LicenseMan::SUCCESS)
-                        {
-							Writer writer("Base.rte/Settings.ini");
-                            // Write the ew key to the hidden data file right away
-                            g_SettingsMan.WriteLicenseKey();
-                            // Also write out the settings, because the new license email needs to be stored there
-                            g_SettingsMan.Save(writer);
-                            // Update to show the registration status
-                            UpdateLicenseScreen();
-                            // Show success message
-                            m_pLicenseCaptionLabel->SetText("T H A N K   Y O U !");
-                            m_pLicenseInstructionLabel->SetText("You have registered this copy of Cortex Command!\nYour support enables future development of Data Realms' games.\n\nWrite down and save your key - it is what you paid for:\n" + g_LicenseMan.GetLicenseKey() + "\nAlso remember which email address you used!");
-
-// TODO: play some glorious sound to reward registration!
-                            m_ButtonPressSound.Play();
-                        }
-                        // Registration was success, but with old key!
-                        else if (result == LicenseMan::DEPRECATEDKEY)
-                        {
-							Writer writer("Base.rte/Settings.ini");
-                            // Write the ew key to the hidden data file right away
-                            g_SettingsMan.WriteLicenseKey();
-                            // Also write out the settings, because the new license email needs to be stored there
-                            g_SettingsMan.Save(writer);
-                            // Update to show the registration status
-                            UpdateLicenseScreen();
-                            // Show success message
-                            m_pLicenseCaptionLabel->SetText("T H A N K   Y O U   -   B U T   U P D A T E   Y O U R   K E Y !");
-                            m_pLicenseInstructionLabel->SetText("You have successfully registered, but with an outdated key!\nIf you want to be able to play offline, update your key for FREE at:\nHTTP://LICENSING.DATAREALMS.COM\n\nWrite down your current key - you will need it to update:\n" + g_LicenseMan.GetLicenseKey());
-
-// TODO: play some glorious sound to reward registration!
-                            m_ButtonPressSound.Play();
-                        }
-                        // Error handling when registration fails
-                        else
-                        {
-                            if (result == LicenseMan::INVALIDKEY)
-                            {
-                                m_pLicenseCaptionLabel->SetText("I N V A L I D   K E Y !");
-                                m_pLicenseInstructionLabel->SetText("You seem to have entered an invalid registration key.\nPlease double-check it and try again.\nIf still trouble, email SUPPORT@DATAREALMS.COM for help!");
-                            }
-                            else if (result == LicenseMan::INVALIDEMAIL)
-                            {
-                                m_pLicenseCaptionLabel->SetText("I N V A L I D   E M A I L !");
-                                m_pLicenseInstructionLabel->SetText("You have entered an invalid email address.\nPlease double-check it and try again.\nIf still trouble, email SUPPORT@DATAREALMS.COM for help!");
-                            }
-                            else if (result == LicenseMan::EMAILMISMATCH)
-                            {
-                                m_pLicenseCaptionLabel->SetText("E M A I L   M I S M A T C H !");
-                                m_pLicenseInstructionLabel->SetText("You have entered an email address that doesn't match your key.\nWe need the billing email address used when buying your key.\nIf still trouble, email SUPPORT@DATAREALMS.COM for help!");
-                            }
-                            else if (result == LicenseMan::INVALIDMACHINE || result == LicenseMan::MAXCOUNT)
-                            {
-                                // Hide the register and key text fields, no point in actually try again anyway, and need the space for the explanation text
-                                m_pLicenseEmailLabel->SetVisible(false);
-                                m_pLicenseKeyLabel->SetVisible(false);
-                                m_pLicenseEmailBox->SetVisible(false);
-                                m_pLicenseKeyBox->SetVisible(false);
-                                m_pRegistrationButton->SetVisible(false);
-                                m_pLicenseCaptionLabel->SetText("T O O   M A N Y   R E G I S T R A T I O N S !");
-                                m_pLicenseInstructionLabel->SetText("You can only have one copy registered at a time with each key.\nFirst un-register your old installation and then try again here,\nor buy another key to register both installations.\n\nIf you can't un-register or you haven't used this key before,\ngo to HTTP://LICENSING.DATAREALMS.COM for help!");
-                            }
-                            else if (result == LicenseMan::FAILEDCONNECTION || result == LicenseMan::INVALIDXML)
-                            {
-                                m_pLicenseCaptionLabel->SetText("F A I L E D   C O N N E C T I O N !");
-                                m_pLicenseInstructionLabel->SetText("Could not contact the license server to register.\nMake sure you are connected to the internet and try again!\nIf still trouble, email SUPPORT@DATAREALMS.COM for help.");
-                            }
-                            else
-                            {
-                                m_pLicenseCaptionLabel->SetText("U N K N O W N   E R R O R !");
-                                m_pLicenseInstructionLabel->SetText("An unknown error happened while registering.\nTry again later or contact SUPPORT@DATAREALMS.COM for help!");
-                            }
-
-                            m_UserErrorSound.Play();
-                        }
-                    }
-                    // Already registered, so try to UN-register
-                    else
-                    {
-                        // Attempt the un-registration
-                        LicenseMan::ServerResult result = g_LicenseMan.Unregister();
-
-                        // Unregistration succeeded
-                        if (result == LicenseMan::SUCCESS)
-                        {
-							Writer writer("Base.rte/Settings.ini");
-                            // Write the new null key to the hidden data file right away
-                            g_SettingsMan.WriteLicenseKey();
-                            // Also write out the settings, because the new license email needs to be stored there
-                            g_SettingsMan.Save(writer);
-                            // Update to show the registration status
-                            UpdateLicenseScreen();
-                            // Show success message
-                            m_pLicenseCaptionLabel->SetText("K E Y   U N - R E G I S T E R E D !");
-                            m_pLicenseInstructionLabel->SetText("You have released your license key from this game copy.\nThe key can now be used to register a copy on another computer.\nWrite it down and keep it safe!");
-
-// TODO: play some more approriate locking sound
-                            m_ButtonPressSound.Play();
-                        }
-                        // Error handle the failed un-registration attempt
-                        else
-                        {
-                            if (result == LicenseMan::INVALIDMACHINE)
-                            {
-                                m_pLicenseCaptionLabel->SetText("D I F F E R E N T   C O M P U T E R !");
-                                m_pLicenseInstructionLabel->SetText("You can only un-register your key on the same computer\nas it was originally registered.\nFirst un-register the older installation and try again here.\n\nIf you still have trouble, email SUPPORT@DATAREALMS.COM for help.");
-                            }
-                            else if (result == LicenseMan::FAILEDCONNECTION || result == LicenseMan::INVALIDXML)
-                            {
-                                m_pLicenseCaptionLabel->SetText("F A I L E D   C O N N E C T I O N !");
-                                m_pLicenseInstructionLabel->SetText("Could not contact the license server to un-register.\nMake sure you are connected to the internet and try again!\n\nIf still trouble, email SUPPORT@DATAREALMS.COM for help.");
-                            }
-                            else
-                            {
-                                m_pLicenseCaptionLabel->SetText("U N K N O W N   E R R O R !");
-                                m_pLicenseInstructionLabel->SetText("An unknown error happened while un-registering.\nTry again later or contact SUPPORT@DATAREALMS.COM for help!");
-                            }
-
-                            m_UserErrorSound.Play();
-                        }
-                    }
-                }
-            }
-
-            /////////////////////////////////////////////
             // META NOTICE SCREEN BUTTONS
 
 			if (m_MenuScreen == METASCREEN)
@@ -2197,39 +1889,7 @@ void MainMenuGUI::Update()
             }
 
             /////////////////////////////////////////////
-            // NAG SCREEN BUTTONS
-
-			if (m_MenuScreen == NAGSCREEN)
-            {
-                // Quit the nag screen button pressed
-                if (anEvent.GetControl() == m_pNagExitButton)
-                {
-                    // Quit the app if this is the quitting nag screen
-                    if (m_NagMode == QUITNAG)
-                        m_Quit = true;
-                    // Otherwise just go back to the main menu
-                    else
-                    {
-                        // Hide all screens, the appropriate screen will reappear on next update
-                        HideAllScreens();
-    // TODO: Change this to be an exit state
-                        m_MenuScreen = MAINSCREEN;
-                        m_ScreenChange = true;
-                    }
-                    m_ButtonPressSound.Play();
-                }
-                // Go to registration dialog button
-                else if (anEvent.GetControl() == m_pNagRegButton)
-                {
-                    // Hide all screens, the appropriate screen will reappear on next update
-                    HideAllScreens();
-// TODO: Change this to be an exit state
-                    m_MenuScreen = LICENSESCREEN;
-                    m_ScreenChange = true;
-
-                    m_ButtonPressSound.Play();
-                }
-            }
+            // MOD MANAGER SCREEN BUTTONS
 
 			if (m_MenuScreen == MODMANAGERSCREEN)
             {
@@ -2268,19 +1928,11 @@ void MainMenuGUI::Update()
                 // Confirm quitting of game
                 if (anEvent.GetControl() == m_aMainMenuButton[QUITCONFIRM])
                 {
-                    // If registered, quit immediately, if not, go to the nag screen!
-                    // Also, if we have a last entered key, don't nag anymore
-				    std::string lastLicenseKey = g_LicenseMan.GetLastLicenseKey();
-                    if (g_LicenseMan.HasValidatedLicense() || g_LicenseMan.CheckKeyFormatting(lastLicenseKey))
-                        m_Quit = true;
-                    else
-                    {
-                        // Hide all screens, the appropriate screen will reappear on next update
-                        HideAllScreens();
-                        m_NagMode = QUITNAG;
-                        m_MenuScreen = NAGSCREEN;
-                        m_ScreenChange = true;
-                    }
+                    m_Quit = true;
+
+                    // Hide all screens, the appropriate screen will reappear on next update
+                    HideAllScreens();
+                    m_ScreenChange = true;
 
                     m_ButtonPressSound.Play();
                 }
@@ -2494,10 +2146,6 @@ void MainMenuGUI::Update()
 */
         }
     }
-
-#ifndef __OPEN_SOURCE_EDITION
-    CRYPT_END
-#endif
 }
 
 
@@ -2581,7 +2229,7 @@ void MainMenuGUI::HideAllScreens()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          QuitLogic
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles quitting of the game, whether to show nag screen, etc.
+// Description:     Handles quitting of the game.
 
 void MainMenuGUI::QuitLogic()
 {
@@ -2595,19 +2243,11 @@ void MainMenuGUI::QuitLogic()
     // No activity, so just start quitting
     else
     {
-        // If registered, quit immediately, if not, go to the nag screen!
-        // Also, if we have a last entered key, don't nag anymore
-	    std::string lastLicenseKey = g_LicenseMan.GetLastLicenseKey();
-        if (g_LicenseMan.HasValidatedLicense() || g_LicenseMan.CheckKeyFormatting(lastLicenseKey))
-            m_Quit = true;
-        else
-        {
-            // Hide all screens, the appropriate screen will reappear on next update
-            HideAllScreens();
-            m_NagMode = QUITNAG;
-            m_MenuScreen = NAGSCREEN;
-            m_ScreenChange = true;
-        }
+        m_Quit = true;
+
+        // Hide all screens, the appropriate screen will reappear on next update
+        HideAllScreens();
+        m_ScreenChange = true;
     }
 }
 
@@ -2619,10 +2259,6 @@ void MainMenuGUI::QuitLogic()
 
 void MainMenuGUI::SetupSkirmishActivity()
 {
-#ifndef __OPEN_SOURCE_EDITION
-    CRYPT_START
-#endif
-
     // If activity restarted, stuff the ActivityMan with the selected data
     if (m_ActivityRestarted)
     {
@@ -2673,21 +2309,7 @@ void MainMenuGUI::SetupSkirmishActivity()
         }
 */
     }
-
-#ifndef __OPEN_SOURCE_EDITION
-    CRYPT_END
-#endif
 }
-
-#ifndef __OPEN_SOURCE_EDITION
-
-/////////////////////////////
-// TURN OPTIMIZATIONS ON
-// This is so the EXECryptor markers don't get mangled by the optimizer
-
-#pragma optimize("", on)
-
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          UpdateScenesBox
@@ -4195,68 +3817,6 @@ int MainMenuGUI::SetupAndSubmitPublishing()
 #else
     return 0;
 #endif
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateLicenseScreen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the contents of the license registration screen.
-
-void MainMenuGUI::UpdateLicenseScreen()
-{
-    m_pLicenseEmailBox->SetVisible(false);
-    m_pLicenseKeyBox->SetVisible(true);
-    m_pRegistrationButton->SetVisible(true);
-
-    if (!g_LicenseMan.HasValidatedLicense())
-    {
-        m_pLicenseCaptionLabel->SetText("R E G I S T E R");
-        m_pLicenseInstructionLabel->SetText("Cortex Command is currently in locked demo mode.\nGo to HTTP://WWW.DATAREALMS.COM and buy a license key.\nEnter the key info below to unlock all the features of this game!");
-
-		std::string lastLicenseEmail = g_LicenseMan.GetLastLicenseEmail();
-		std::string enteredEmail = m_pLicenseEmailBox->GetText();
-		std::string lastLicenseKey = g_LicenseMan.GetLastLicenseKey();
-		std::string enteredKey = m_pLicenseKeyBox->GetText();
-		
-        // Clear any invalid email in the field
-        // Pre-set the last valid email used, if available
-        if (!g_LicenseMan.CheckEmailFormatting(enteredEmail))
-		{
-            m_pLicenseEmailBox->SetText(lastLicenseEmail);
-		}
-		
-        // Clear any invalid key in the field
-        // Pre-set the last valid key used, if available
-        if (!g_LicenseMan.CheckKeyFormatting(enteredKey))
-		{
-            m_pLicenseKeyBox->SetText(lastLicenseKey);
-		}
-
-        m_pLicenseEmailLabel->SetVisible(true);
-        m_pLicenseKeyLabel->SetVisible(true);
-        m_pLicenseEmailBox->SetVisible(true);
-        m_pLicenseEmailBox->SetFocus();
-        m_pLicenseKeyBox->SetVisible(true);
-//        m_pLicenseKeyBox->SetFocus();
-
-        m_pRegistrationButton->SetText("Register Key");
-    }
-    else
-    {
-        m_pLicenseCaptionLabel->SetText("U N - R E G I S T E R");
-        m_pLicenseInstructionLabel->SetText("This copy is currently registered to the email address:\n" + g_LicenseMan.GetLicenseEmail() + "\nusing the key:\n" + g_LicenseMan.GetLicenseKey() + "\n\nPress below if you want to use your key on a different computer:");
-
-        // Hide the email/key box so user can't monkey with the valid registered key
-        m_pLicenseEmailLabel->SetVisible(false);
-        m_pLicenseKeyLabel->SetVisible(false);
-        m_pLicenseEmailBox->SetText(g_LicenseMan.GetLicenseEmail());
-        m_pLicenseEmailBox->SetVisible(false);
-        m_pLicenseKeyBox->SetText(g_LicenseMan.GetLicenseKey());
-        m_pLicenseKeyBox->SetVisible(false);
-
-        m_pRegistrationButton->SetText("Un-Register Key");
-    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

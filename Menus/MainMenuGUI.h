@@ -323,7 +323,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          QuitLogic
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles quitting of the game, whether to show nag screen, etc.
+// Description:     Handles quitting of the game.
 // Arguments:       None.
 // Return value:    None.
 
@@ -456,16 +456,6 @@ protected:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateLicenseScreen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the contents of the license registration screen.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void UpdateLicenseScreen();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ToggleMod
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Turns currently selected mod on and aff and changes UI elements accordingly.
@@ -512,13 +502,11 @@ protected:
         DIFFICULTYSCREEN,
         OPTIONSSCREEN,
         CONFIGSCREEN,
-        LICENSESCREEN,
         EDITORSCREEN,
         WORKSHOPMANAGER,
         PUBLISHSTEPS,
         CREDITSSCREEN,
         METASCREEN,
-        NAGSCREEN,
         QUITSCREEN,
 		MODMANAGERSCREEN,
         SCREENCOUNT
@@ -535,7 +523,6 @@ protected:
         CREDITS,
         QUIT,
         RESUME,
-        REGISTER,
         BACKTOMAIN,
         PLAYTUTORIAL,
         METACONTINUE,
@@ -771,26 +758,6 @@ protected:
     GUIButton *m_aEditorButton[EDITORBUTTONCOUNT];
     // Metagame notice label
     GUILabel *m_pMetaNoticeLabel;
-    // Licensing caption
-    GUILabel *m_pLicenseCaptionLabel;
-    // License Regsitration labels
-    GUILabel *m_pLicenseInstructionLabel;
-    GUILabel *m_pLicenseEmailLabel;
-    GUILabel *m_pLicenseKeyLabel;
-    // The license key text box and button
-    GUITextBox *m_pLicenseEmailBox;
-    GUITextBox *m_pLicenseKeyBox;
-    GUIButton *m_pRegistrationButton;
-
-    // Nag screen mode
-    NagMode m_NagMode;
-    // Nag screen buttons
-    GUIButton *m_pNagExitButton;
-    GUIButton *m_pNagRegButton;
-    // Nag screen slides, both the array and the bimtaps are OWNED here
-    BITMAP **m_apNagSlides;
-    // Nag slide timer for timing the different slides appearing
-    Timer m_NagTimer;
 
     // Controller diagram bitmaps
     BITMAP **m_aDPadBitmaps;

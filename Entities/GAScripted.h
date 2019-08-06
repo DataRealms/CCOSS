@@ -198,16 +198,6 @@ ENTITYALLOCATION(GAScripted)
 
     virtual const std::string & GetLuaClassName() const { return m_LuaClassName; }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetDemoTimeLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows how many seconds of demo time is left, if indeed in demo mode.
-// Arguments:       None.
-// Return value:    An int wwith how many demo seconds are left, or < 0 if not applicable.
-
-    virtual long GetDemoTimeLeft() { return -1; }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SceneIsCompatible

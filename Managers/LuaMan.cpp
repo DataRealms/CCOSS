@@ -1812,7 +1812,6 @@ int LuaMan::Create()
                 value("EDITING", 2),
                 value("PREGAME", 3),
                 value("RUNNING", 4),
-                value("DEMOEND", 5),
                 value("INERROR", 6),
                 value("OVER", 7)
             ]
@@ -1903,7 +1902,6 @@ int LuaMan::Create()
             .def("TeamFundsChanged", &Activity::TeamFundsChanged)
             .def("ReportDeath", &Activity::ReportDeath)
             .def("GetTeamDeathCount", &Activity::GetTeamDeathCount)
-            .def("GetDemoTimeLeft", &Activity::GetDemoTimeLeft)
             .def("Running", &Activity::Running)
             .def("Paused", &Activity::Paused)
             .def("ActivityOver", &Activity::ActivityOver)

@@ -49,8 +49,6 @@
 
 #include <thread>
 
-#include <getopt.h>
-
 #if defined(__APPLE__)
 #include "OsxUtil.h"
 #endif // defined(__APPLE__)
@@ -2521,57 +2519,60 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
     // Default program return var is fail
     appExitVar = 2;
 
-    // If one additional arg is passed
-    if (argc == 2)
+    if (argc >= 2)
     {
-        // If -register was passed as param, try to register with last used key and quit immediately (regardless of success)
-        if (strcmp(argv[1], "-register") == 0)
+        
+        for (int i = 1; i < argc; i++)
         {
-            // Try to register the last used key, if we're not currently registered and we do have a last used key
-            if (!g_LicenseMan.HasValidatedLicense())
+            // If -register was passed as param, try to register with last used key and quit immediately (regardless of success)
+            if (strcmp(argv[1], "-register") == 0)
             {
-                int result = g_LicenseMan.Register(g_LicenseMan.GetLastLicenseEmail(), g_LicenseMan.GetLastLicenseKey());
-                if (result == LicenseMan::SUCCESS || result == LicenseMan::DEPRECATEDKEY)
-                    appExitVar = 0;
-                g_SettingsMan.WriteLicenseKey();
+                // Try to register the last used key, if we're not currently registered and we do have a last used key
+                if (!g_LicenseMan.HasValidatedLicense())
+                {
+                    int result = g_LicenseMan.Register(g_LicenseMan.GetLastLicenseEmail(), g_LicenseMan.GetLastLicenseKey());
+                    if (result == LicenseMan::SUCCESS || result == LicenseMan::DEPRECATEDKEY)
+                        appExitVar = 0;
+                    g_SettingsMan.WriteLicenseKey();
+                }
+                // If already registered, then report that
+                else
+                    appExitVar = 1;
+                return false;
             }
-            // If already registered, then report that
-            else
-                appExitVar = 1;
-            return false;
-        }
-        // If -unregister was passed as param, just try to unregister the license and quit immediately (regardless of success)
-        else if (strcmp(argv[1], "-unregister") == 0)
-        {
-            if (g_LicenseMan.HasValidatedLicense())
+            // If -unregister was passed as param, just try to unregister the license and quit immediately (regardless of success)
+            else if (strcmp(argv[1], "-unregister") == 0)
             {
-                if (g_LicenseMan.Unregister() == LicenseMan::SUCCESS)
-                    appExitVar = 0;
-                g_SettingsMan.WriteLicenseKey();
-//                g_SettingsMan.Save(Writer("Base.rte/Settings.ini"));
+                if (g_LicenseMan.HasValidatedLicense())
+                {
+                    if (g_LicenseMan.Unregister() == LicenseMan::SUCCESS)
+                        appExitVar = 0;
+                    g_SettingsMan.WriteLicenseKey();
+    //                g_SettingsMan.Save(Writer("Base.rte/Settings.ini"));
+                }
+                // If already unregistered, then report that
+                else
+                    appExitVar = 1;
+                return false;
             }
-            // If already unregistered, then report that
-            else
-                appExitVar = 1;
-            return false;
-        }
-    }
-
-	if (argc > 2)
-	{
-		for (int i = 1; i < argc; i++)
-		{
-			if (strcmp(argv[i], "-server") == 0 && i + 1 < argc)
-			{
-				std::string port = argv[i + 1];
-				g_NetworkServer.EnableServerMode();
-				g_NetworkServer.SetServerPort(port);
-			}
-
-			if (strcmp(argv[i], "-module") == 0 && i + 1 < argc)
-			{
-				g_LoadSingleModule = argv[i + 1];
-			}
+            // Print loading screen console to cout
+            else if (strcmp(argv[1], "-cout") == 0)
+            {
+                g_LogToCli = true;
+            }
+            else if (i + 1 < argc)
+            {
+                if (strcmp(argv[i], "-server") == 0 && i + 1 < argc)
+                {
+                    std::string port = argv[++i];
+                    g_NetworkServer.EnableServerMode();
+                    g_NetworkServer.SetServerPort(port);
+                }
+                else if (strcmp(argv[i], "-module") == 0 && i + 1 < argc)
+                {
+                    g_LoadSingleModule = argv[++i];
+                }
+            }
 		}
 	}
 
@@ -2612,26 +2613,9 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
 
 int main(int argc, char *argv[])
 {
-    int opt;
-    char* help = "Usage: %s [-c] [-h]\n";
     ///////////////////////////////////////////////////////////////////
     // Change to working directory (necessary for some platforms)
     g_System.ChangeWorkingDirectory();
-
-    while ((opt = getopt(argc, argv, "ch")) != -1) {
-        switch (opt) {
-        case 'c':
-            g_LogToCli = true;
-            break;
-        case 'h':
-            printf(help, argv[0]);
-            exit(0);
-            break;
-        default: /* '?' */
-            fprintf(stderr, help, argv[0]);
-            exit(EXIT_FAILURE);
-        }
-    }
 
 #if defined(__APPLE__)
 	OsxUtil::Create();

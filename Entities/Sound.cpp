@@ -17,6 +17,9 @@
 #elif __USE_SOUND_SDLMIXER
 #include "SDL.h"
 #include "SDL_mixer.h"
+#elif __USE_SOUND_GORILLA
+#include "gorilla/ga.h"
+#include "gorilla/gau.h"
 #endif
 
 #include "Sound.h"
@@ -43,6 +46,8 @@ void Sound::Clear()
 #ifdef __USE_SOUND_FMOD    
 	m_Samples.clear();
 #elif __USE_SOUND_SDLMIXER
+	m_Samples.clear();
+#elif __USE_SOUND_GORILLA
 	m_Samples.clear();
 #endif
     m_CurrentSample = 0;
@@ -82,6 +87,9 @@ int Sound::Create(const Sound &reference)
         m_Samples.push_back(*itr);
 #elif __USE_SOUND_SDLMIXER
 	for (vector<pair<ContentFile, Mix_Chunk *> >::const_iterator itr = reference.m_Samples.begin(); itr != reference.m_Samples.end(); ++itr)
+		m_Samples.push_back(*itr);
+#elif __USE_SOUND_GORILLA
+	for (vector<pair<ContentFile, ga_Sound *> >::const_iterator itr = reference.m_Samples.begin(); itr != reference.m_Samples.end(); ++itr)
 		m_Samples.push_back(*itr);
 #endif // __USE_SOUND_FMOD
 
@@ -143,6 +151,16 @@ int Sound::ReadProperty(std::string propName, Reader &reader)
 				reader.ReportError(string("Failed to load the sample from the file, error: ") + Mix_GetError());
 			}
 			m_Samples.push_back(pair<ContentFile, Mix_Chunk *>(newFile, pNewSample));
+		}
+#elif __USE_SOUND_GORILLA
+		if (g_AudioMan.IsAudioEnabled())
+		{
+			ga_Sound *pNewSample = newFile.GetAsSample();
+			if (!pNewSample)
+			{
+				reader.ReportError(string("Failed to load the sample from the file, error: "));
+			}
+			m_Samples.push_back(pair<ContentFile, ga_Sound *>(newFile, pNewSample));
 		}
 #endif // __USE_SOUND_FMOD
 
@@ -259,6 +277,12 @@ Mix_Chunk * Sound::GetCurrentSample()
 	DAssert(m_CurrentSample >= 0 && m_CurrentSample < m_Samples.size(), "Sample index is out of bounds!");
 	return m_Samples[m_CurrentSample].second;
 }
+#elif __USE_SOUND_GORILLA
+ga_Sound * Sound::GetCurrentSample()
+{
+	DAssert(m_CurrentSample >= 0 && m_CurrentSample < m_Samples.size(), "Sample index is out of bounds!");
+	return m_Samples[m_CurrentSample].second;
+}
 #endif // __USE_SOUND_FMOD
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -308,6 +332,26 @@ Mix_Chunk * Sound::StartNextSample()
 	DAssert(m_CurrentSample >= 0 && m_CurrentSample < m_Samples.size(), "Sample index is out of bounds!");
 	return m_Samples[m_CurrentSample].second;
 }
+#elif __USE_SOUND_GORILLA
+	ga_Sound * Sound::StartNextSample()
+	{
+		// Only two samples; alternate
+		if (m_Samples.size() == 2)
+		{
+			m_CurrentSample = m_CurrentSample == 0 ? 1 : 0;
+		}
+		// More than two, select randomly
+		else if (m_Samples.size() > 2)
+		{
+			int lastSample = m_CurrentSample;
+			m_CurrentSample = floorf((float)m_Samples.size() * PosRand());
+			// Mix it up again if we got the same sound twice
+			if (m_CurrentSample == lastSample)
+				m_CurrentSample = floorf((float)m_Samples.size() * PosRand());
+		}
+		DAssert(m_CurrentSample >= 0 && m_CurrentSample < m_Samples.size(), "Sample index is out of bounds!");
+		return m_Samples[m_CurrentSample].second;
+	}
 #endif // __USE_SOUND_FMOD
 
 
@@ -343,6 +387,13 @@ bool Sound::Play(float distance, int player)
 	}
 	else
 		return false;
+#elif __USE_SOUND_GORILLA
+	if (!m_Samples.empty())
+	{
+		return g_AudioMan.PlaySound(player, this, m_Priority, distance);
+	}
+	else
+		return false;
 #else
 		return false;
 #endif
@@ -363,6 +414,12 @@ bool Sound::Stop(int player)
     }
     else return false;
 #elif __USE_SOUND_SDLMIXER
+	if (!m_Samples.empty())
+	{
+		return g_AudioMan.StopSound(player, this);
+	}
+	else return false;
+#elif __USE_SOUND_GORILLA
 	if (!m_Samples.empty())
 	{
 		return g_AudioMan.StopSound(player, this);
@@ -415,6 +472,13 @@ void Sound::AddSample(string samplePath)
 		Mix_Chunk *pNewSample = newFile.GetAsSample();
 		AAssert(pNewSample, "Failed to load the sample from the file");
 		m_Samples.push_back(pair<ContentFile, Mix_Chunk *>(newFile, pNewSample));
+	}
+#elif __USE_SOUND_GORILLA
+	if (g_AudioMan.IsAudioEnabled())
+	{
+		ga_Sound *pNewSample = newFile.GetAsSample();
+		AAssert(pNewSample, "Failed to load the sample from the file");
+		m_Samples.push_back(pair<ContentFile, ga_Sound *>(newFile, pNewSample));
 	}
 #endif // __USE_SOUND_FMOD
 }

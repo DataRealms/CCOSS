@@ -158,16 +158,6 @@ ENTITYALLOCATION(GATutorial)
 
     virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
 
-// Tutorial is not demo time limited
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetDemoTimeLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows how many seconds of demo time is left, if indeed in demo mode.
-// Arguments:       None.
-// Return value:    An int wwith how many demo seconds are left, or < 0 if not applicable.
-
-    virtual long GetDemoTimeLeft() { return -1; }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SceneIsCompatible

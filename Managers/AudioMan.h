@@ -34,6 +34,10 @@ struct FSOUND_STREAM;
 //#include "SDL_mixer.h"
 struct Mix_Chunk;
 typedef struct _Mix_Music Mix_Music;
+#elif __USE_SOUND_GORILLA
+struct ga_Handle;
+#include "gorilla/ga.h"
+#include "gorilla/gau.h"
 #endif
 
 namespace RTE
@@ -435,6 +439,8 @@ struct MusicNetworkData
 		return m_AudioEnabled && m_pMusic; 
 #elif __USE_SOUND_SDLMIXER
 		return m_AudioEnabled && m_pMusic;
+#elif __USE_SOUND_GORILLA
+		return m_AudioEnabled && m_pMusic;
 #else
 		return m_AudioEnabled;
 #endif
@@ -548,17 +554,85 @@ struct MusicNetworkData
     void Update();
 
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          IsInMultiplayerMode
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns true if manager is in multiplayer mode.
+// Arguments:       None.
+// Return value:    True if in multiplayer mode.
+
 	bool IsInMultiplayerMode() { return m_IsInMultiplayerMode; }
+
+	
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          SetMultiplayerMode
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the multiplayer mode flag
+// Arguments:       Whether this manager should operate in multiplayer mode
+// Return value:    None.
 
 	void SetMultiplayerMode(bool value) { m_IsInMultiplayerMode = value; }
 
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetSoundEvents
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Fills the list with sound events happened for the specified network player
+// Arguments:       Player to get events for. List with events for this player.
+// Return value:    None.
+
 	void GetSoundEvents(int player, std::list<SoundNetworkData> & list);
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          RegisterSoundEvent
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Adds the sound event to internal list of sound events for the specified player.
+// Arguments:       Player for which the event happened. Sound state. Sound file hash to transmit to client. 
+//					Sound distance. Channel where sound was played. Loops counter. Pitch value. Whether the sound is affected by pitch.
+// Return value:    None.
 
 	void RegisterSoundEvent(int player, unsigned char state, size_t hash, short int distance, short int channel, short int loops, float pitch, bool affectedByPitch);
 
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetMusicEvents
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Fills the list with music events happened for the specified network player
+// Arguments:       Player to get events for. List with events for this player.
+// Return value:    None.
+
 	void GetMusicEvents(int player, std::list<MusicNetworkData> & list);
 
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          RegisterMusicEvent
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Adds the sound event to internal list of sound events for the specified player.
+// Arguments:       Player for which the event happened. Music state. Music file path to transmit to client. 
+//					Loops counter. Music playback position. Pitch value.
+// Return value:    None.
+
 	void RegisterMusicEvent(int player, unsigned char state, const char *filepath, int loops, double position, float pitch);
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetPlayingChannelCount
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns the number of channels currently used.
+// Arguments:		None.
+// Return value:    None.
+
+	int GetPlayingChannelCount();
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetTotalChannelCount
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Returns the number of channels available.
+// Arguments:		None.
+// Return value:    None.
+
+	int GetTotalChannelCount();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -574,6 +648,17 @@ protected:
 	FSOUND_STREAM *m_pMusic;
 #elif __USE_SOUND_SDLMIXER
 	Mix_Music *m_pMusic;
+#elif __USE_SOUND_GORILLA
+	gau_Manager* m_pManager;
+	ga_Mixer* m_pMixer;
+	ga_StreamManager* m_pStreamManager;
+
+	ga_Handle * m_pMusic;
+
+	std::vector<ga_Handle *> m_SoundChannels;
+	std::vector<ga_Sound *> m_SoundInstances;
+
+	//int m_MaxChannels;
 #endif
 
     int m_MusicChannel;
@@ -591,13 +676,12 @@ protected:
     std::list<std::string> m_MusicPlayList;
     // Timer for measuring silences between songs
     Timer m_SilenceTimer;
-
+	// If true then the server is in multiplayer mode and will register sound and music events into internal lists
 	bool m_IsInMultiplayerMode;
-
+	// Lists of per player sound events 
 	std::list<SoundNetworkData> m_SoundEvents[MAX_CLIENTS];
-
+	// Lists of per player music events 
 	std::list<MusicNetworkData> m_MusicEvents[MAX_CLIENTS];
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

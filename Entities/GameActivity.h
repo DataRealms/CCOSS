@@ -297,16 +297,6 @@ ENTITYALLOCATION(GameActivity)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetDemoTimeLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows how many seconds of demo time is left, if indeed in demo mode.
-// Arguments:       None.
-// Return value:    An int with how many demo seconds are left, or < 0 if not applicable.
-
-    virtual long GetDemoTimeLeft();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SwitchToActor
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Forces the this to focus player control to a specific Actor for a
@@ -1209,11 +1199,6 @@ protected:
 	int m_CurrentPieMenuPlayer;
 
 	std::string m_NetworkPlayerNames[MAXPLAYERCOUNT];
-
-    // Demo limit timer
-    Timer m_DemoTimer;
-    // Keeps track of the current demo time if paused
-    double m_PausedDemoTime;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

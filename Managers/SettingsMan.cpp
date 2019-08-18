@@ -16,7 +16,6 @@
 #include "PresetMan.h"
 #include "UInputMan.h"
 #include "ActivityMan.h"
-#include "LicenseMan.h"
 #include "ConsoleMan.h"
 
 #include "GUI/GUI.h"
@@ -33,18 +32,6 @@ namespace RTE
 {
 
 const string SettingsMan::m_ClassName = "Settings";
-#define LICENSEFILEPATH "Base.rte/titlepalette.bmp"
-
-
-#ifndef __OPEN_SOURCE_EDITION
-
-/////////////////////////////
-// TURN OPTIMIZATIONS OFF
-// This is so the EXECryptor markers don't get mangled by the optimizer
-
-#pragma optimize("", off)
-
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -54,10 +41,6 @@ const string SettingsMan::m_ClassName = "Settings";
 
 void SettingsMan::Clear()
 {
-#ifndef __OPEN_SOURCE_EDITION
-    CRYPT_START
-#endif
-
     m_PlayIntro = true;
     m_ToolTips = true;
 	m_FlashOnBrainDamage = true;
@@ -99,31 +82,6 @@ void SettingsMan::Clear()
 	m_DisableLoadingScreen = false;
 
 	m_AudioChannels = 32;
-
-    // Hardcode all the license pixel coordiantes
-    m_LicensePixels.clear();
-    m_LicensePixels.push_back(Vector(1, 0));
-    m_LicensePixels.push_back(Vector(10, 0));
-    m_LicensePixels.push_back(Vector(5, 1));
-    // -
-    m_LicensePixels.push_back(Vector(8, 5));
-    m_LicensePixels.push_back(Vector(4, 6));
-    m_LicensePixels.push_back(Vector(6, 9));
-    m_LicensePixels.push_back(Vector(2, 11));
-    // -
-    m_LicensePixels.push_back(Vector(14, 9));
-    m_LicensePixels.push_back(Vector(0, 14));
-    m_LicensePixels.push_back(Vector(5, 15));
-    m_LicensePixels.push_back(Vector(1, 4));
-    // -
-    m_LicensePixels.push_back(Vector(1, 14));
-    m_LicensePixels.push_back(Vector(12, 14));
-    m_LicensePixels.push_back(Vector(15, 9));
-    m_LicensePixels.push_back(Vector(7, 12));
-
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_END
-#endif
 }
 
 
@@ -134,29 +92,10 @@ void SettingsMan::Clear()
 
 int SettingsMan::Create()
 {
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_START
-#endif
-
     if (Serializable::Create() < 0)
         return -1;
 
-// This is now done in main() before this is created
-    // Attempt to read in and load the license key from the secret place. This is OK if it fails, just means the copy isn't licensed yet
-//    if (ReadLicenseKey())
-//    {
-// This is done later when the email is also read from the setting ini
-        // If the key was read and entered successfully, try to validate it
-//        LicenseMan::ServerResult result = g_LicenseMan.Validate();
-        // If this fails to contact the server, that's OK too.. we need to allow registered players to play even when they are not connected to the internet
-//        if (result == LicenseMan::INVALIDKEY)
-//            ;
-//    }
     return 0;
-    
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_END
-#endif
 }
 
 
@@ -196,10 +135,6 @@ int SettingsMan::Create(Reader &reader, bool checkType, bool doCreate)
 
 int SettingsMan::ReadProperty(std::string propName, Reader &reader)
 {
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_START
-#endif
-
     if (propName == "ResolutionX")
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "ResolutionY")
@@ -360,24 +295,6 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
     }
     else if (propName == "P1Scheme" || propName == "P2Scheme" || propName == "P3Scheme" || propName == "P4Scheme" || propName == "MouseSensitivity")
         g_UInputMan.ReadProperty(propName, reader);
-    else if (propName == "LastEmail")
-    {
-        string email;
-        reader >> email;
-        g_LicenseMan.SetLicenseEmail(email);
-        // See if we already have a key, then try to validate
-		std::string licenseKey = g_LicenseMan.GetLicenseKey();
-        if (g_LicenseMan.CheckKeyFormatting(licenseKey))
-        {
-            LicenseMan::ServerResult result = g_LicenseMan.Validate();
-        }
-    }
-    else if (propName == "LastKey")
-    {
-        string key;
-        reader >> key;
-        g_LicenseMan.SetLastLicenseKey(key);
-    }
     else if (propName == "SteamWorkshopMod")
     {
         string mod;
@@ -409,10 +326,6 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
-
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_END
-#endif
 }
 
 
@@ -608,21 +521,8 @@ int SettingsMan::Save(Writer &writer) const
 		}
 	}
 
-	std::string lastLicenseKey = g_LicenseMan.GetLastLicenseKey();
-    if (g_LicenseMan.CheckKeyFormatting(lastLicenseKey))
-    {
-        writer.NewProperty("LastEmail");
-        writer << g_LicenseMan.GetLastLicenseEmail();
-        writer.NewProperty("LastKey");
-        writer << g_LicenseMan.GetLastLicenseKey();
-    }
-
     // Dump out all the input schemes
     writer << g_UInputMan;
-
-
-    // Write the license file - DON'T.. only write it just when we register successfully. Don't risk messing up the file afterward
-//    WriteLicenseKey();
 
     return 0;
 }
@@ -743,60 +643,6 @@ void SettingsMan::Destroy()
     Clear();
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ReadLicenseKey
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads the license key in from the secret/obfuscated data location in
-//                  the current installation.
-
-bool SettingsMan::ReadLicenseKey() const
-{
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_START
-#endif
-
-#ifdef _DEBUG
-    return true;
-#endif // _DEBUG
-
-    // Load the image with the data encoded
-    PALETTE licensePalette;
-    BITMAP *pLicBitmap = load_bitmap(LICENSEFILEPATH, licensePalette);
-    if (!pLicBitmap || pLicBitmap->w < 16 || pLicBitmap->h < 16)
-        return false;
-
-    // Extract the string from a bunch of predetermined pixels of the bitmap XXX-XXXX-XXXX-XXXX
-    string keyString;
-    // Go through all the hardcoded coordinates and extract from each pixel
-    for (list<Vector>::const_iterator itr = m_LicensePixels.begin(); itr != m_LicensePixels.end(); ++itr)
-    {
-        keyString += (char)(getpixel(pLicBitmap, (*itr).GetFloorIntX(), (*itr).GetFloorIntY()));
-    }
-
-    // Put the dashes back where they are supposed to be or decryption will screw up
-    keyString.insert(3, "-");
-    keyString.insert(8, "-");
-    keyString.insert(13, "-");
-
-    // Decrypt the key using the hostname. If the current machine's hostname is different, then we have been moved!
-//    keyString = XORStrings(keyString, g_LicenseMan.GetMachineHostname(), '-');
-
-    // Attempt to set the license key. If it's rejected, report that
-    bool success = g_LicenseMan.SetLicenseKey(keyString);
-
-    // Clean up the bitmap
-    destroy_bitmap(pLicBitmap);
-    pLicBitmap = 0;
-
-    return success;
-
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_END
-#endif
-}
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			ModsInstalledLastTime
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -828,86 +674,6 @@ void SettingsMan::AddWorkshopModToList(string modModule)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WriteLicenseKey
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Writes the current license key of the LicenseMan to the secret/obfuscated
-//                  data location in the current installation. This will write an invalid
-//                  key string if there isn't a valid key, so it will be identified as such
-//                  (being invalid, that is) upon reading next time.
-
-bool SettingsMan::WriteLicenseKey() const
-{
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_START
-#endif
-
-#ifdef _DEBUG
-    return true;
-#endif // _DEBUG
-
-    // Only write out if the current license is valid
-// NO! because if the key was released or doesn't exist, it should be written out as "" and not stay in data
-//    if (!g_LicenseMan.HasValidatedLicense())
-//        return false;
-
-    // Get the current license string from the licenseMan
-    string keyString = g_LicenseMan.GetLicenseKey();
-    // Check that it has a proper length
-// Again, no, we want to write out "" if that's what we've got
-//    if (!(keyString.size() == 15 || keyString.size() == 18))
-//        return false;
-
-    // Encrypt the license key with the hostname as encryption key
-//    keyString = XORStrings(keyString, g_LicenseMan.GetMachineHostname(), '-');
-
-    // Create an image to encode the key into
-    BITMAP *pLicBitmap = create_bitmap_ex(8, 16, 16);
-
-    // Write a bunch of noise into the bitmap so the key pixels won't stand out
-    for (int y = 0; y < 16; ++y)
-        for (int x = 0; x < 16; ++x)
-            putpixel(pLicBitmap, x, y, (int)RangeRand(0, 255));
-
-    // Encode the string from a bunch of predetermined pixels of the bitmap
-    // Go through all the hardcoded coordinates and encode into each pixel for each string letter
-    int stringIndex = 0;
-    for (list<Vector>::const_iterator itr = m_LicensePixels.begin(); itr != m_LicensePixels.end(); ++itr)
-    {
-        // If no key, write invalid characters so the key will be invalid upon reading and we will know that it isn't an actual key
-        if (keyString.empty())
-        {
-            // Write the first char as invalid for sure, and the rest as random to not make it obvious which pixels in teh bitmap are used
-            putpixel(pLicBitmap, (*itr).GetFloorIntX(), (*itr).GetFloorIntY(), stringIndex == 0 ? ' ' : RangeRand(0, 255));
-        }
-        // Write the actual key properly if there is one
-        else
-        {
-            // Skip the dash locations if the key seems to have the dashes
-            if (keyString.size() == 18 && (stringIndex == 3 || stringIndex == 8 || stringIndex == 13))
-                stringIndex++;
-
-            putpixel(pLicBitmap, (*itr).GetFloorIntX(), (*itr).GetFloorIntY(), (char)keyString[stringIndex]);
-        }
-
-        stringIndex++;
-    }
-
-    // Write the bitmap to the secret file, overwriting it
-    // Always use the black palette, more incognito!
-    bool success = save_bmp(LICENSEFILEPATH, pLicBitmap, black_palette) == 0;
-
-    // Clean up the bitmap
-    destroy_bitmap(pLicBitmap);
-    pLicBitmap = 0;
-
-    return success;
-
-#ifndef __OPEN_SOURCE_EDITION
-	CRYPT_END
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:			IsModEnabled
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns true if specified mod is not disabled in the settings.
@@ -931,15 +697,5 @@ bool SettingsMan::IsScriptEnabled(string scriptName)
 		return m_EnabledScripts[scriptName];
 	return false;
 }
-
-#ifndef __OPEN_SOURCE_EDITION
-
-/////////////////////////////
-// TURN OPTIMIZATIONS ON
-// This is so the EXECryptor markers don't get mangled by the optimizer
-
-#pragma optimize("", on)
-
-#endif
 
 } // namespace RTE

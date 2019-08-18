@@ -10,7 +10,6 @@
 //                  data@datarealms.com
 //                  http://www.datarealms.com
 
-#include "LicenseMan.h"
 #include "SettingsMan.h"
 #include "TimerMan.h"
 #include "FrameMan.h"

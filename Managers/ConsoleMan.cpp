@@ -68,8 +68,9 @@ void ConsoleMan::Clear()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the ConsoleMan object ready for use.
 
-int ConsoleMan::Create()
+int ConsoleMan::Create(bool logToCli)
 {
+    m_LogToCli = logToCli;
     if (!m_pGUIScreen)
         m_pGUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32());
     if (!m_pGUIInput)
@@ -253,6 +254,10 @@ void ConsoleMan::PrintString(string toPrint)
 {
     // Add the input line to the console
     m_pConsoleText->SetText(m_pConsoleText->GetText() + "\n" + toPrint);
+    if(m_LogToCli)
+    {
+        std::cout << toPrint << std::endl;
+    }
 }
 
 

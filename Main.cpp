@@ -2707,7 +2707,7 @@ int main(int argc, char *argv[])
     g_UInputMan.Create();
 	if (g_NetworkServer.IsServerModeEnabled())
 		g_UInputMan.SetMultiplayerMode(true);
-    g_ConsoleMan.Create();
+    g_ConsoleMan.Create(g_LogToCli);
     g_ActivityMan.Create();
     g_MovableMan.Create();
     g_MetaMan.Create();
@@ -2768,6 +2768,8 @@ int main(int argc, char *argv[])
 	}
 
     InitMainMenu();
+    if(g_LogToCli)
+        std::cout << std::endl;
     if (g_SettingsMan.PlayIntro() && !g_NetworkServer.IsServerModeEnabled())
         PlayIntroTitle();
 

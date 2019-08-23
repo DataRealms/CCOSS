@@ -2768,8 +2768,6 @@ int main(int argc, char *argv[])
 	}
 
     InitMainMenu();
-    if(g_LogToCli)
-        std::cout << std::endl;
     if (g_SettingsMan.PlayIntro() && !g_NetworkServer.IsServerModeEnabled())
         PlayIntroTitle();
 

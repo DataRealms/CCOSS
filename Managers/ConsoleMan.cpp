@@ -24,6 +24,7 @@
 #include "GUI/GUITextBox.h"
 #include "GUI/GUILabel.h"
 
+#include <regex>
 #include <string>
 #include <sstream>
 using namespace std;
@@ -256,7 +257,13 @@ void ConsoleMan::PrintString(string toPrint)
     m_pConsoleText->SetText(m_pConsoleText->GetText() + "\n" + toPrint);
     if(m_LogToCli)
     {
-        std::cout << toPrint << std::endl;
+        std::regex re_error("(ERROR|SYSTEM):");
+        toPrint = std::regex_replace(toPrint, re_error, "\033[1;31m$&\033[0;0m");//red
+        std::regex re_path("\\w*\\.rte\\/(\\w| |\\.|\\/)*(\\/|\\.bmp|\\.wav|\\.lua|\\.ini)");
+        toPrint = std::regex_replace(toPrint, re_path, "\033[1;32m$&\033[0;0m");//green
+        std::regex re_name("(\"[A-Z].*\"|\'[A-Z].*\')");
+        toPrint = std::regex_replace(toPrint, re_name, "\033[1;33m$&\033[0;0m");//yellow
+        std::cout << "\r" << toPrint << std::endl;
     }
 }
 

@@ -258,25 +258,29 @@ void LoadingSplashProgressReport(std::string reportString, bool newItem = false)
 		{
 			std::cout << std::endl;
 		}
-		// overwrite current line
+		// Overwrite current line
 		std::cout << "\r";
 		size_t startPos = 0;
-		// convert characters to unicode
-		// just make sure to really overwrite all old output
+		// Just make sure to really overwrite all old output
+		// " - done! ✓" is shorter than "reading line 700"
 		std::string unicoded = reportString + "          ";
-		// also uses terminal coloring
-		std::string to = "\033[1;32m✓\033[0;0m";
+		// Colorize output with ANSI escape code
+		std::string greenTick = "\033[1;32m✓\033[0;0m";
+		// Convert all ✓ characters to unicode
+		// It's the 42th from last character in CC's custom font
 		while ((startPos = unicoded.find(-42, startPos)) != std::string::npos)
 		{
-			unicoded.replace(startPos, 1, to);
-			startPos += to.length();
+			unicoded.replace(startPos, 1, greenTick);
+			// We don't have to check indices we just overwrote
+			startPos += greenTick.length();
 		}
 		startPos = 0;
-		to = "\033[1;33m•\033[0;0m";
+		std::string yellowDot = "\033[1;33m•\033[0;0m";
+		// Convert all • characters to unicode
 		while ((startPos = unicoded.find(-43, startPos)) != std::string::npos)
 		{
-			unicoded.replace(startPos, 1, to);
-			startPos += to.length();
+			unicoded.replace(startPos, 1, yellowDot);
+			startPos += yellowDot.length();
 		}
 		std::cout << unicoded << std::flush;
 	}
@@ -2503,7 +2507,7 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
         for (int i = 1; i < argc; i++)
         {
             // Print loading screen console to cout
-            if (strcmp(argv[1], "-cout") == 0)
+            if (strcmp(argv[i], "-cout") == 0)
             {
                 g_LogToCli = true;
             }

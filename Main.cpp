@@ -49,7 +49,6 @@
 
 #include <thread>
 
-
 #if defined(__APPLE__)
 #include "OsxUtil.h"
 #endif // defined(__APPLE__)
@@ -138,6 +137,7 @@ enum SLIDES
 };
 
 volatile bool g_Quit = false;
+bool g_LogToCli = false;
 bool g_InActivity = false;
 bool g_ResetActivity = false;
 bool g_ResumeActivity = false;
@@ -252,6 +252,38 @@ void _LoadingSplashProgressReport(std::string reportString, bool newItem = false
 
 void LoadingSplashProgressReport(std::string reportString, bool newItem = false)
 {
+	if(g_LogToCli)
+	{
+		if (newItem)
+		{
+			std::cout << std::endl;
+		}
+		// Overwrite current line
+		std::cout << "\r";
+		size_t startPos = 0;
+		// Just make sure to really overwrite all old output
+		// " - done! ✓" is shorter than "reading line 700"
+		std::string unicoded = reportString + "          ";
+		// Colorize output with ANSI escape code
+		std::string greenTick = "\033[1;32m✓\033[0;0m";
+		// Convert all ✓ characters to unicode
+		// It's the 42th from last character in CC's custom font
+		while ((startPos = unicoded.find(-42, startPos)) != std::string::npos)
+		{
+			unicoded.replace(startPos, 1, greenTick);
+			// We don't have to check indices we just overwrote
+			startPos += greenTick.length();
+		}
+		startPos = 0;
+		std::string yellowDot = "\033[1;33m•\033[0;0m";
+		// Convert all • characters to unicode
+		while ((startPos = unicoded.find(-43, startPos)) != std::string::npos)
+		{
+			unicoded.replace(startPos, 1, yellowDot);
+			startPos += yellowDot.length();
+		}
+		std::cout << unicoded << std::flush;
+	}
 	if (g_pLoadingGUI)
 	{
 		g_UInputMan.Update();
@@ -305,7 +337,6 @@ bool LoadDataModules()
 {
 // TODO: REMOVE
 //    return true;
-
     // Loading splash screen
     g_FrameMan.ClearBackBuffer32();
 //    g_FrameMan.LoadPalette("Base.rte/palette.bmp");
@@ -2471,23 +2502,30 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
     // Default program return var is fail
     appExitVar = 2;
 
-	if (argc > 2)
-	{
-		for (int i = 1; i < argc; i++)
-		{
-			if (strcmp(argv[i], "-server") == 0 && i + 1 < argc)
-			{
-				std::string port = argv[i + 1];
-				g_NetworkServer.EnableServerMode();
-				g_NetworkServer.SetServerPort(port);
-			}
-
-			if (strcmp(argv[i], "-module") == 0 && i + 1 < argc)
-			{
-				g_LoadSingleModule = argv[i + 1];
-			}
-		}
-	}
+    if (argc >= 2)
+    {
+        for (int i = 1; i < argc; i++)
+        {
+            // Print loading screen console to cout
+            if (strcmp(argv[i], "-cout") == 0)
+            {
+                g_LogToCli = true;
+            }
+            else if (i + 1 < argc)
+            {
+                if (strcmp(argv[i], "-server") == 0 && i + 1 < argc)
+                {
+                    std::string port = argv[++i];
+                    g_NetworkServer.EnableServerMode();
+                    g_NetworkServer.SetServerPort(port);
+                }
+                else if (strcmp(argv[i], "-module") == 0 && i + 1 < argc)
+                {
+                    g_LoadSingleModule = argv[++i];
+                }
+            }
+        }
+    }
 
 	/*
 	if (argc > 3)
@@ -2512,8 +2550,8 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
 int main(int argc, char *argv[])
 {
     ///////////////////////////////////////////////////////////////////
-	// Change to working directory (necessary for some platforms)
-	g_System.ChangeWorkingDirectory();
+    // Change to working directory (necessary for some platforms)
+    g_System.ChangeWorkingDirectory();
 
 #if defined(__APPLE__)
 	OsxUtil::Create();
@@ -2601,7 +2639,7 @@ int main(int argc, char *argv[])
     g_UInputMan.Create();
 	if (g_NetworkServer.IsServerModeEnabled())
 		g_UInputMan.SetMultiplayerMode(true);
-    g_ConsoleMan.Create();
+    g_ConsoleMan.Create(g_LogToCli);
     g_ActivityMan.Create();
     g_MovableMan.Create();
     g_MetaMan.Create();

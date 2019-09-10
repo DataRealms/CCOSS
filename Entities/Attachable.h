@@ -680,6 +680,9 @@ protected:
 	// If true inherits Parent's rot angle, which is set MOSRotating::Update. Default is true to maintain maybe awkward but default behavior
 	bool m_InheritsRotAngle;
 
+    // If true enables collision with terrain for attachable
+    bool m_CollidesWithTerrain;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

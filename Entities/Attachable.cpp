@@ -48,6 +48,7 @@ void Attachable::Clear()
     m_DamageCount = 0;
     m_OnlyLinForces = false;
 	m_InheritsRotAngle = true;
+    m_CollidesWithTerrain = false;
 }
 
 
@@ -87,6 +88,7 @@ int Attachable::Create(const Attachable &reference)
     m_DamageCount = reference.m_DamageCount;
     m_OnlyLinForces = reference.m_OnlyLinForces;
 	m_InheritsRotAngle = reference.m_InheritsRotAngle;
+    m_CollidesWithTerrain = reference.m_CollidesWithTerrain;
 
     return 0;
 }
@@ -112,10 +114,12 @@ int Attachable::ReadProperty(std::string propName, Reader &reader)
         m_pBreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
     else if (propName == "JointOffset")
         reader >> m_JointOffset;
-	else if (propName == "InheritsRotAngle")
-		reader >> m_InheritsRotAngle;
-	else if (propName == "DrawAfterParent")
+    else if (propName == "InheritsRotAngle")
+        reader >> m_InheritsRotAngle;
+    else if (propName == "DrawAfterParent")
         reader >> m_DrawAfterParent;
+    else if (propName == "CollidesWithTerrain")
+        reader >> m_CollidesWithTerrain;
     else
         // See if the base class(es) can find a match instead
         return MOSRotating::ReadProperty(propName, reader);
@@ -148,6 +152,8 @@ int Attachable::Save(Writer &writer) const
 	writer << m_InheritsRotAngle;
 	writer.NewProperty("DrawAfterParent");
     writer << m_DrawAfterParent;
+    writer.NewProperty("CollidesWithTerrain");
+    writer << m_CollidesWithTerrain;
 
     return 0;
 }
@@ -256,7 +262,13 @@ void Attachable::Attach(MOSRotating *pParent)
 
     // Adopt the team of parent
     if (pParent)
+    {
         m_Team = pParent->GetTeam();
+        if (m_CollidesWithTerrain)
+        {
+            pParent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset(), m_Rotation);
+        }
+    }
 
     // Reset the attachables timers so things that have been sitting in inventory don't make backed up emissions
     ResetAllTimers();

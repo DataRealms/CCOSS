@@ -15,7 +15,7 @@ Almost builds with modern toolchains in VS 2017 and VS 2019, but there's some in
 
 Included source code does not match the current B32 functionality. This is a work-in-progress snapshot of what's internally called "B33", so it won't start with data from B32.
 
-No game data and most of required runtime DLLs are included, you should get those from the Cortex Command beta branch on Steam.
+Game data isn't included, you should get it from the Cortex Command beta branch on Steam. (See BUILD PROCESS section below for details).
 
 Commercial fmod library was replaced with free SDL Mixer which lacks pitching functionality hence some sound effects will sound differently or incorrectly.
 
@@ -26,15 +26,15 @@ This version uses a slightly modified version of Allegro. The only difference fr
 
 # BUILD PROCESS #
 
+## Windows ##
 
-Use Debug Open Source configuration to debug (be prepared, it's very slow).
+Use "Debug Open Source" configuration to debug (be prepared, it's very slow).
 
-Use Final Open Source configuration to build release .exe.
+Use "Final Open Source" configuration to build release .exe.
 
-Binaries go to _Bin, you can't run from there outside of the IDE, it won't find required stuff.
+After the build has finished, in order to run it:
+* Copy required dlls from external\lib\win\ next to .exe
+* Copy latest game data (.rte modules) to the same place. The data can be found under the "ccoss" beta branch of Cortex Command on Steam, if you own a license for the game.
+* Patch game data by copying modules from https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data. This will overwrite some of the module files.
 
-You need to copy SDL related dlls from external\lib\win\ next to .exe in order to run it.
-
-The data can be found under the "ccoss" beta branch of Cortex Command on Steam, if you own a license for the game.
-
-
+Binaries go to _Bin. Note: you can't run the debug build from there outside of the IDE, it won't find required stuff.

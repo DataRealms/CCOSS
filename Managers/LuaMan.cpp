@@ -946,7 +946,8 @@ int LuaMan::Create()
 			.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance)
 			.property("TotalWoundCount", &Actor::GetTotalWoundCount)
 			.property("TotalWoundLimit", &Actor::GetTotalWoundLimit)
-            .def("RemoveAnyRandomWounds", &Actor::RemoveAnyRandomWounds),
+            .def("RemoveAnyRandomWounds", &Actor::RemoveAnyRandomWounds)
+            .property("DeathSound", &Actor::GetDeathSound, &Actor::SetDeathSound),
 
         CONCRETELUABINDING(ADoor, Actor)
 			.enum_("DooorState")

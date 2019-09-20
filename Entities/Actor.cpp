@@ -1643,7 +1643,7 @@ void Actor::Update()
 	// Prevent dead actors from rotating like mad
 	if (m_Status == DYING || m_Status == DEAD)
 	{
-		m_AngularVel = m_AngularVel * 0.9;
+		m_AngularVel = m_AngularVel * 0.98;
 	}
 
     if (m_Status == DYING && m_DeathTmr.GetElapsedSimTimeMS() > 1000)

@@ -641,8 +641,6 @@ bool LoadDataModules()
         return false;
     if (!g_PresetMan.LoadDataModule("Browncoats.rte", true, &LoadingSplashProgressReport))
         return false;
-    if (!g_PresetMan.LoadDataModule("Tutorial.rte", true, &LoadingSplashProgressReport))
-        return false;
     if (!g_PresetMan.LoadDataModule("Missions.rte", true, &LoadingSplashProgressReport))
         return false;
 

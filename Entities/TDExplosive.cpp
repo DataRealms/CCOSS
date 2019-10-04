@@ -35,6 +35,7 @@ void TDExplosive::Clear()
 {
     m_NumberToAdd = 10;
 	m_ActivatesWhenReleased = false;
+	m_IsAnimatedManually = false;
 }
 
 /*
@@ -63,6 +64,7 @@ int TDExplosive::Create(const TDExplosive &reference)
 
 //    m_DetonationSound = reference.m_DetonationSound;
     m_ActivatesWhenReleased = reference.m_ActivatesWhenReleased;
+	m_IsAnimatedManually = reference.m_IsAnimatedManually;
 
     // All Explosives should hit against other objects etc, like grenades flying and hitting actors etc
     // EXCEPT when they are laying on the ground etc
@@ -108,6 +110,8 @@ int TDExplosive::ReadProperty(std::string propName, Reader &reader)
         reader >> m_GibSound;
     else if (propName == "ActivatesWhenReleased")
         reader >> m_ActivatesWhenReleased;
+	else if (propName == "IsAnimatedManually")
+		reader >> m_IsAnimatedManually;
     else
         // See if the base class(es) can find a match instead
         return ThrownDevice::ReadProperty(propName, reader);
@@ -128,6 +132,8 @@ int TDExplosive::Save(Writer &writer) const
 
 //    writer.NewProperty("DetonationSound");
 //    writer << m_DetonationSound;
+//	writer.NewProperty("IsAnimatedManually");
+//	writer << m_IsAnimatedManually;
 
     return 0;
 }
@@ -235,28 +241,34 @@ void TDExplosive::GibThis(Vector impactImpulse, float internalBlast, MovableObje
 
 void TDExplosive::Update()
 {
-    ThrownDevice::Update();
+	ThrownDevice::Update();
 
-    if (m_Activated)
-    {
-        // Play 'fuse lit' animation
-        m_SpriteAnimMode = ALWAYSLOOP;
-        m_RestTimer.Reset();
-        m_ToSettle = false;
-    }
-    else
-    {
-        m_Frame = 0;
-        m_SpriteAnimMode = NOANIM;
-    }
+	if (m_Activated)
+	{
+		// If not animated manually, play 'fuse lit' animation
+		if (!m_IsAnimatedManually)
+		{
+			m_SpriteAnimMode = ALWAYSLOOP;
+		}
+		m_RestTimer.Reset();
+		m_ToSettle = false;
+	}
+	else
+	{
+		if (!m_IsAnimatedManually)
+		{
+			m_Frame = 0;
+			m_SpriteAnimMode = NOANIM;
+		}
+	}
 
-    // Blow up if the timer since being activated has reached the trigger delay limit
-    if (m_Activated && m_ActivationTmr.GetElapsedSimTimeMS() >= m_TriggerDelay)
-    {
-        m_Activated = false;
-        // Detonate!
-        GibThis();
-    }
+	// Blow up if the timer since being activated has reached the trigger delay limit
+	if (m_Activated && m_ActivationTmr.GetElapsedSimTimeMS() >= m_TriggerDelay)
+	{
+		m_Activated = false;
+		// Detonate!
+		GibThis();
+	}
 }
 
 

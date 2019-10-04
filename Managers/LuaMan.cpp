@@ -1296,7 +1296,8 @@ int LuaMan::Create()
             .property("MinThrowVel", &ThrownDevice::GetMinThrowVel, &ThrownDevice::SetMinThrowVel)
             .property("MaxThrowVel", &ThrownDevice::GetMaxThrowVel, &ThrownDevice::SetMaxThrowVel),
 
-        CONCRETELUABINDING(TDExplosive, ThrownDevice),
+        CONCRETELUABINDING(TDExplosive, ThrownDevice)
+            .property("IsAnimatedManually", &TDExplosive::IsAnimatedManually, &TDExplosive::SetAnimatedManually),
 
         class_<Controller>("Controller")
             .enum_("ControlState")

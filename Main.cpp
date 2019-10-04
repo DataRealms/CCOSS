@@ -628,21 +628,25 @@ bool LoadDataModules()
 		return true;
 	}
 
-///* TODO: REPLACE
-    if (!g_PresetMan.LoadDataModule("Coalition.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Techion.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Imperatus.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Ronin.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Dummy.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Browncoats.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Missions.rte", true, &LoadingSplashProgressReport))
-        return false;
+	///* TODO: REPLACE
+	if (!g_PresetMan.LoadDataModule("Coalition.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Imperatus.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Techion.rte", true, &LoadingSplashProgressReport))
+		return false;
+//	if (!g_PresetMan.LoadDataModule("Uzira.rte", true, &LoadingSplashProgressReport))
+//		return false;
+//	if (!g_PresetMan.LoadDataModule("MuIlaak.rte", true, &LoadingSplashProgressReport))
+//		return false;
+	if (!g_PresetMan.LoadDataModule("Dummy.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Ronin.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Browncoats.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Missions.rte", true, &LoadingSplashProgressReport))
+		return false;
 
 	//Read module properties to find out which modules should be loaded earlier than others
     al_ffblk moduleInfo;

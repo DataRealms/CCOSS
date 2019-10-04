@@ -616,13 +616,13 @@ ENTITYALLOCATION(MOSprite)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetHFlippedMultiplier
+// Virtual method:  GetFlipFactor
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns a positive or negative number value to multiply with for external calculations. 
 // Arguments:       None.
 // Return value:    1 for not flipped, -1 for flipped.
 
-	virtual int GetHFlippedMultiplier() { return m_HFlipped ? -1 : 1; }
+	virtual int GetFlipFactor() { return m_HFlipped ? -1 : 1; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -635,15 +635,15 @@ bool LoadDataModules()
 		return false;
 	if (!g_PresetMan.LoadDataModule("Techion.rte", true, &LoadingSplashProgressReport))
 		return false;
-//	if (!g_PresetMan.LoadDataModule("Uzira.rte", true, &LoadingSplashProgressReport))
-//		return false;
-//	if (!g_PresetMan.LoadDataModule("MuIlaak.rte", true, &LoadingSplashProgressReport))
-//		return false;
 	if (!g_PresetMan.LoadDataModule("Dummy.rte", true, &LoadingSplashProgressReport))
 		return false;
 	if (!g_PresetMan.LoadDataModule("Ronin.rte", true, &LoadingSplashProgressReport))
 		return false;
 	if (!g_PresetMan.LoadDataModule("Browncoats.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Uzira.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("MuIlaak.rte", true, &LoadingSplashProgressReport))
 		return false;
 	if (!g_PresetMan.LoadDataModule("Missions.rte", true, &LoadingSplashProgressReport))
 		return false;

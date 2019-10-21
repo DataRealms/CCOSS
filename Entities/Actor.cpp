@@ -286,7 +286,7 @@ int Actor::Create(const Actor &reference)
         m_apAIIcons[AIMODE_SQUAD] = iconFile.GetAsBitmap();
 
         ContentFile arrowFile("Base.rte/GUIs/Indicators/SelectArrow.bmp");
-        m_apSelectArrow = arrowFile.GetAsAnimation(2);
+        m_apSelectArrow = arrowFile.GetAsAnimation(4);
         ContentFile alarmFile("Base.rte/GUIs/Indicators/AlarmExclamation.bmp");
         m_apAlarmExclamation = alarmFile.GetAsAnimation(2);
 
@@ -1822,8 +1822,8 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     // Draw the selection arrow, if controlled and under the arrow's time limit
     if (m_Controller.IsPlayerControlled() && m_NewControlTmr.GetElapsedSimTimeMS() < ARROWTIME)
     {
-        // Choose the correct selection arrow color based on whether this is drawn on a friendly or enemy screen
-        draw_sprite(pTargetBitmap, m_apSelectArrow[g_SceneMan.GetScreenTeam(whichScreen) != m_Team], cpuPos.m_X - 3, EaseOut(drawPos.m_Y + m_HUDStack - 60, drawPos.m_Y + m_HUDStack - 20, m_NewControlTmr.GetElapsedSimTimeMS() / (float)ARROWTIME));
+		// Draw the appropriate selection arrow color based on player team
+        draw_sprite(pTargetBitmap, m_apSelectArrow[m_Team], cpuPos.m_X, EaseOut(drawPos.m_Y + m_HUDStack - 60, drawPos.m_Y + m_HUDStack - 20, m_NewControlTmr.GetElapsedSimTimeMS() / (float)ARROWTIME));
     }
 
     // Draw the alarm exclamation mark if we are alarmed!

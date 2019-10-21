@@ -1532,7 +1532,7 @@ bool PlayIntroTitle()
             {
                 // Play juicy logo signature jingle/sound
                 Sound logoSound;
-                logoSound.Create("Base.rte/GUIs/Sounds/MetaStart.wav", false);
+                logoSound.Create("Base.rte/Sounds/GUIs/MetaStart.wav", false);
                 logoSound.Play();
                 // Black fade
                 clear_to_color(pFadeScreen, 0);
@@ -2040,7 +2040,7 @@ bool PlayIntroTitle()
 
                 // Play the scenario music with juicy start sound
                 Sound metaSound;
-                metaSound.Create("Base.rte/GUIs/Sounds/MetaStart.wav", false);
+                metaSound.Create("Base.rte/Sounds/GUIs/MetaStart.wav", false);
                 metaSound.Play();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
             }
@@ -2139,7 +2139,7 @@ bool PlayIntroTitle()
 
                 // Play the campaign music with metasound start
                 Sound metaSound;
-                metaSound.Create("Base.rte/GUIs/Sounds/MetaStart.wav", false);
+                metaSound.Create("Base.rte/Sounds/GUIs/MetaStart.wav", false);
                 metaSound.Play();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
             }

@@ -169,20 +169,20 @@ int AssemblyEditorGUI::Create(Controller *pController, FeatureSets featureSet, i
         s_pInvalidPathDot = dotFile.GetAsBitmap();
     }
 
-    m_EnterMenuSound.Create("Base.rte/GUIs/Sounds/MenuEnter.wav", false);
-    m_ExitMenuSound.Create("Base.rte/GUIs/Sounds/MenuExit.wav", false);
-    m_FocusChangeSound.Create("Base.rte/GUIs/Sounds/Blip00.wav", false);
-    m_SelectionChangeSound.Create("Base.rte/GUIs/Sounds/Blip01.wav", false);
-    m_ItemChangeSound.Create("Base.rte/GUIs/Sounds/Click00.wav", false);
-//    m_ObjectPickedSound.Create("Base.rte/GUIs/Sounds/MenuEnter.wav, false");
-    m_UserErrorSound.Create("Base.rte/GUIs/Sounds/Error.wav", false);
-    m_PlacementBlip.Create("Base.rte/GUIs/Sounds/Blip02.wav", false);
-    m_PlacementThud.Create("Base.rte/GUIs/Sounds/Thud01.wav", false);
-    m_PlacementThud.AddSample("Base.rte/GUIs/Sounds/Thud02.wav");
-    m_PlacementGravel.Create("Base.rte/GUIs/Sounds/Gravel1.wav", false);
-    m_PlacementGravel.AddSample("Base.rte/GUIs/Sounds/Gravel2.wav");
-    m_PlacementGravel.AddSample("Base.rte/GUIs/Sounds/Gravel3.wav");
-    m_PlacementGravel.AddSample("Base.rte/GUIs/Sounds/Gravel4.wav");
+    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
+    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", false);
+    m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", false);
+    m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
+    m_ItemChangeSound.Create("Base.rte/Sounds/GUIs/ItemChange.wav", false);
+//    m_ObjectPickedSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav, false");
+    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
+    m_PlacementBlip.Create("Base.rte/Sounds/GUIs/PlacementBlip.wav", false);
+    m_PlacementThud.Create("Base.rte/Sounds/GUIs/PlacementThud1.wav", false);
+    m_PlacementThud.AddSample("Base.rte/Sounds/GUIs/PlacementThud2.wav");
+    m_PlacementGravel.Create("Base.rte/Sounds/GUIs/PlacementGravel1.wav", false);
+    m_PlacementGravel.AddSample("Base.rte/Sounds/GUIs/PlacementGravel2.wav");
+    m_PlacementGravel.AddSample("Base.rte/Sounds/GUIs/PlacementGravel3.wav");
+    m_PlacementGravel.AddSample("Base.rte/Sounds/GUIs/PlacementGravel4.wav");
 
     return 0;
 }

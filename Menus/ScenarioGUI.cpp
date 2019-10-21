@@ -170,7 +170,6 @@ void ScenarioGUI::Clear()
     // Sounds
     m_EnterMenuSound.Reset();
     m_ExitMenuSound.Reset();
-    m_ExitMenuAltSound.Reset();
     m_FocusChangeSound.Reset();
     m_SelectionChangeSound.Reset();
     m_ButtonPressSound.Reset();
@@ -356,17 +355,16 @@ int ScenarioGUI::Create(Controller *pController)
     // Hide all screens, the appropriate screen will reappear on next update
     HideAllScreens();
 
-    m_EnterMenuSound.Create("Base.rte/GUIs/Sounds/MenuEnter.wav", false);
-    m_ExitMenuSound.Create("Base.rte/GUIs/Sounds/MenuExit.wav", false);
-    m_ExitMenuSound.AddSample("Base.rte/GUIs/Sounds/MenuExitB.wav");
-    m_ExitMenuAltSound.Create("Base.rte/GUIs/Sounds/MenuExitB.wav", false);
-    m_FocusChangeSound.Create("Base.rte/GUIs/Sounds/Blip00.wav", false);
-    m_SelectionChangeSound.Create("Base.rte/GUIs/Sounds/Blip02.wav", false);
-    m_ButtonPressSound.Create("Base.rte/GUIs/Sounds/Splip01.wav", false);
-    m_BackButtonPressSound.Create("Base.rte/GUIs/Sounds/Splip02.wav", false);
-    m_ItemChangeSound.Create("Base.rte/GUIs/Sounds/Click00.wav", false);
-    m_TestSound.Create("Base.rte/GUIs/Sounds/Click01.wav", false);
-    m_UserErrorSound.Create("Base.rte/GUIs/Sounds/Error.wav", false);
+    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
+    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", false);
+    m_ExitMenuSound.AddSample("Base.rte/Sounds/GUIs/MenuExit2.wav");
+    m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", false);
+    m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
+    m_ButtonPressSound.Create("Base.rte/Sounds/GUIs/ButtonPress.wav", false);
+    m_BackButtonPressSound.Create("Base.rte/Sounds/GUIs/BackButtonPress.wav", false);
+    m_ItemChangeSound.Create("Base.rte/Sounds/GUIs/ItemChange.wav", false);
+    m_TestSound.Create("Base.rte/Sounds/GUIs/Test.wav", false);
+    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
 
     return 0;
 }

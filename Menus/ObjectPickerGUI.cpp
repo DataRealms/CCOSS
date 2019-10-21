@@ -121,7 +121,7 @@ int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, strin
 
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/Cursor.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.bmp");
         s_pCursor = cursorFile.GetAsBitmap();
     }
 

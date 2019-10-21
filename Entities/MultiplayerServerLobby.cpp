@@ -387,7 +387,7 @@ namespace RTE
 
 		if (!m_pCursor)
 		{
-			ContentFile cursorFile("Base.rte/GUIs/Cursor.bmp");
+			ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.bmp");
 			m_pCursor = cursorFile.GetAsBitmap();
 		}
 

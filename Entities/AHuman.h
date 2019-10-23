@@ -15,6 +15,7 @@
 // Inclusions of header files
 
 #include "Actor.h"
+#include "Leg.h"
 #include "LimbPath.h"
 #include <deque>
 
@@ -359,6 +360,16 @@ ENTITYALLOCATION(AHuman)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetFGFoot
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets the FG foot Attachable
+// Arguments:       None.
+// Return value:    A pointer to the FG foot Attachable of this. Ownership is NOT transferred!
+
+	Attachable * GetFGFoot() const { return (Attachable *)m_pFGLeg->GetFoot(); }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetBGLeg
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the BG Leg as an Attachable. This is for Lua binding mostly.
@@ -366,6 +377,16 @@ ENTITYALLOCATION(AHuman)
 // Return value:    A pointer to the BG Leg Attachable of this. Ownership is NOT transferred!
 
     Attachable * GetBGLeg() const { return (Attachable *)m_pBGLeg; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetBGFoot
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets the BG foot Attachable
+// Arguments:       None.
+// Return value:    A pointer to the BG foot Attachable of this. Ownership is NOT transferred!
+
+	Attachable * GetBGFoot() const { return (Attachable *)m_pBGLeg->GetFoot(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -583,7 +583,7 @@ void AudioMan::PlayMusic(const char *filepath, int loops, double volumeOverride)
 		return;
 
 	strcpy(format, &filepath[dotPos + 1]);
-	
+
 	// Open the stream
 	m_pMusic = gau_create_handle_buffered_file(m_pMixer, m_pStreamManager, filepath, format, PlayNextCallback, 0, 0);
 	if (!m_pMusic)
@@ -1087,10 +1087,8 @@ bool AudioMan::SetSoundAttenuation(Sound *pSound, float distance)
 		//Mix_Volume(pSound->m_LastChannel, ((double)MIX_MAX_VOLUME * (1.0f - distance)));
 		Mix_SetDistance(pSound->m_LastChannel, (255 * distance));
 #elif __USE_SOUND_GORILLA
-		if (m_SoundChannels.size() > pSound->m_LastChannel)
-		{
+		if (pSound->m_LastChannel >= 0)
 			ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, m_SoundsVolume * (1.0f - distance));
-		}
 
 #endif
     }
@@ -1132,7 +1130,7 @@ bool AudioMan::SetSoundPitch(Sound *pSound, float pitch)
 #elif __USE_SOUND_SDLMIXER
 	// SDL seems to not support pitch changes
 #elif __USE_SOUND_GORILLA
-	if (pSound->m_AffectedByPitch && m_SoundChannels.size() > pSound->m_LastChannel)
+	if (pSound->m_AffectedByPitch && pSound->m_LastChannel >= 0)
 	{
 		m_PitchModifiers[pSound->m_LastChannel] = pitch;
 		ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_PITCH, m_PitchModifiers[pSound->m_LastChannel] * m_GlobalPitch);

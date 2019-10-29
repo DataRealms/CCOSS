@@ -1032,20 +1032,24 @@ bool AudioMan::PlaySound(Sound *pSound, int priority, float distance, double pit
 
 	// Set sample's channel looping setting
 	ga_Handle * handle;
-	if (pSound->m_Loops > 0)
+	if (pSound->m_Loops == 0)
+	{
+		handle = gau_create_handle_sound(m_pMixer, pSound->GetCurrentSample(), 0, 0, 0);
+	}
+	else
 	{
 		gau_SampleSourceLoop* loopSrc; 
 		handle = gau_create_handle_sound(m_pMixer, pSound->GetCurrentSample(), 0, 0, &loopSrc);
 		gau_sample_source_loop_set(loopSrc, -1, 0);
 	}
-	else 
-	{
-		handle = gau_create_handle_sound(m_pMixer, pSound->GetCurrentSample(), 0, 0, 0);
-	}
+
 	m_SoundChannels[channel] = handle;
 	m_SoundInstances[channel] = pSound->GetCurrentSample();
 
 	ga_handle_play(handle);
+
+	// Due to Gorilla lacking the ability to set a master volume, we have to set it here.
+	ga_handle_setParamf(handle, GA_HANDLE_PARAM_GAIN, m_SoundsVolume);
 
 	// Set the distance attenuation effect of the just started sound
 	SetSoundAttenuation(pSound, distance);
@@ -1083,8 +1087,11 @@ bool AudioMan::SetSoundAttenuation(Sound *pSound, float distance)
 		//Mix_Volume(pSound->m_LastChannel, ((double)MIX_MAX_VOLUME * (1.0f - distance)));
 		Mix_SetDistance(pSound->m_LastChannel, (255 * distance));
 #elif __USE_SOUND_GORILLA
-		if (pSound->m_LastChannel >= 0)
-			ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * (1.0f - distance));
+		if (m_SoundChannels.size() > pSound->m_LastChannel)
+		{
+			ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, m_SoundsVolume * (1.0f - distance));
+		}
+
 #endif
     }
 
@@ -1125,7 +1132,7 @@ bool AudioMan::SetSoundPitch(Sound *pSound, float pitch)
 #elif __USE_SOUND_SDLMIXER
 	// SDL seems to not support pitch changes
 #elif __USE_SOUND_GORILLA
-	if (pSound->m_LastChannel >= 0)
+	if (pSound->m_AffectedByPitch && m_SoundChannels.size() > pSound->m_LastChannel)
 	{
 		m_PitchModifiers[pSound->m_LastChannel] = pitch;
 		ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_PITCH, m_PitchModifiers[pSound->m_LastChannel] * m_GlobalPitch);

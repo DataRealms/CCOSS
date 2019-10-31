@@ -329,6 +329,9 @@ void AudioMan::SetSoundsVolume(double volume)
 #elif __USE_SOUND_SDLMIXER
 	Mix_Volume(-1, (MAX_VOLUME * m_SoundsVolume));
 #elif __USE_SOUND_GORILLA
+//Due to the behavior of Gorilla and the associated backend, master volume has to be set
+//as part of PlaySound(). This function effectively does nothing in its current state.
+//Might be worth considering removing this function when Gorilla is being used.
 	for (int i = 1; i < m_SoundChannels.size(); i++)
 		if (m_SoundChannels[i])
 			ga_handle_setParamf(m_SoundChannels[i], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * m_SoundsVolume);
@@ -1043,13 +1046,13 @@ bool AudioMan::PlaySound(Sound *pSound, int priority, float distance, double pit
 		gau_sample_source_loop_set(loopSrc, -1, 0);
 	}
 
+	// Due to Gorilla lacking the ability to set a master volume, we have to set it here.
+	ga_handle_setParamf(handle, GA_HANDLE_PARAM_GAIN, MAX_VOLUME * m_SoundsVolume);
+
 	m_SoundChannels[channel] = handle;
 	m_SoundInstances[channel] = pSound->GetCurrentSample();
 
 	ga_handle_play(handle);
-
-	// Due to Gorilla lacking the ability to set a master volume, we have to set it here.
-	ga_handle_setParamf(handle, GA_HANDLE_PARAM_GAIN, m_SoundsVolume);
 
 	// Set the distance attenuation effect of the just started sound
 	SetSoundAttenuation(pSound, distance);
@@ -1088,7 +1091,7 @@ bool AudioMan::SetSoundAttenuation(Sound *pSound, float distance)
 		Mix_SetDistance(pSound->m_LastChannel, (255 * distance));
 #elif __USE_SOUND_GORILLA
 		if (pSound->m_LastChannel >= 0)
-			ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, m_SoundsVolume * (1.0f - distance));
+			ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * m_SoundsVolume * (1.0f - distance));
 
 #endif
     }

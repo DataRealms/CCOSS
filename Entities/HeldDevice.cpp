@@ -77,7 +77,7 @@ int HeldDevice::Create()
     else if (IsInGroup("Shields"))
         m_HeldDeviceType = SHIELD;
 
-    if (IsInGroup("Explosive Weapons"))
+    if (IsInGroup("Weapons - Explosive"))
         m_IsExplosiveWeapon = true;
     else
         m_IsExplosiveWeapon = false;

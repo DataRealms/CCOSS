@@ -70,7 +70,7 @@ int TDExplosive::Create(const TDExplosive &reference)
     // EXCEPT when they are laying on the ground etc
     m_IgnoresAGHitsWhenSlowerThan = 1.0;
 
-	if (IsInGroup("Payloads"))
+	if (IsInGroup("Bombs - Payloads"))
 		m_HUDVisible = false;
 
     return 0;

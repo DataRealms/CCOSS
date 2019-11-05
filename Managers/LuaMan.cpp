@@ -2192,7 +2192,7 @@ int LuaMan::Create()
             .def("FileWriteLine", &LuaMan::FileWriteLine)
             .def("FileEOF", &LuaMan::FileEOF),
 
-        class_<SettingsMan>("SettingsdManager")
+        class_<SettingsMan>("SettingsManager")
             .property("PrintDebugInfo", &SettingsMan::PrintDebugInfo, &SettingsMan::SetPrintDebugInfo)
 			.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount),
 

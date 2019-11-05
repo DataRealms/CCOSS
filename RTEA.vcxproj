@@ -14,7 +14,7 @@
     <ProjectGuid>{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}</ProjectGuid>
     <RootNamespace>RTEA</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'" Label="Configuration">

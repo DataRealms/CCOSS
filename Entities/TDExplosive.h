@@ -272,7 +272,7 @@ ENTITYALLOCATION(TDExplosive)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     If true then the m_Frame property is not changed by the Update function
 // Arguments:       None.
-// Return value:    Whether this HDFirearm is animated manually.
+// Return value:    Whether this TDExplosive is animated manually.
 
 	bool IsAnimatedManually() const { return m_IsAnimatedManually; }
 
@@ -280,7 +280,7 @@ ENTITYALLOCATION(TDExplosive)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  SetAnimatedManually
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets Whether this HDFirearm is animated manually.
+// Description:     Sets whether this TDExplosive is animated manually.
 // Arguments:       Manual animation flag value.
 // Return value:    None.
 

@@ -1203,7 +1203,7 @@ bool AHuman::EquipDiggingTool(bool doEquip)
     if (m_pFGArm->HoldsSomething())
     {
         pTool = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-        if (pTool && pTool->IsInGroup("Diggers"))
+        if (pTool && pTool->IsInGroup("Tools - Diggers"))
             return true;
     }
 
@@ -1212,7 +1212,7 @@ bool AHuman::EquipDiggingTool(bool doEquip)
     {
         pTool = dynamic_cast<HDFirearm *>(*itr);
         // Found proper device to equip, so make the switch!
-        if (pTool && pTool->IsInGroup("Diggers"))
+        if (pTool && pTool->IsInGroup("Tools - Diggers"))
         {
             if (doEquip)
             {
@@ -1265,7 +1265,7 @@ float AHuman::EstimateDigStrenght()
     if (m_pFGArm->HoldsSomething())
     {
         pTool = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-        if (pTool && pTool->IsInGroup("Diggers"))
+        if (pTool && pTool->IsInGroup("Tools - Diggers"))
             return pTool->EstimateDigStrenght();
     }
 
@@ -1274,7 +1274,7 @@ float AHuman::EstimateDigStrenght()
     {
         pTool = dynamic_cast<HDFirearm *>(*itr);
         // Found proper device to equip, so make the switch!
-        if (pTool && pTool->IsInGroup("Diggers"))
+        if (pTool && pTool->IsInGroup("Tools - Diggers"))
             maxPenetration = max(pTool->EstimateDigStrenght(), maxPenetration);
     }
     

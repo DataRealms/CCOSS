@@ -79,7 +79,7 @@
       <OutputFile>$(OutDir)Cortex Command.debug.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)RTEA.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>_Bin\$(Configuration)\RTEA.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <LinkTimeCodeGeneration>
       </LinkTimeCodeGeneration>

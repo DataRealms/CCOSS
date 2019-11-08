@@ -151,7 +151,7 @@ int BuyMenuGUI::Create(Controller *pController)
 
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/Cursor.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.bmp");
         s_pCursor = cursorFile.GetAsBitmap();
     }
 
@@ -177,8 +177,8 @@ int BuyMenuGUI::Create(Controller *pController)
         // Set the images for the logo and header decorations
         GUICollectionBox *pHeader = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogHeader"));
         m_pLogo = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogLogo"));
-        ContentFile headerFile("Base.rte/GUIs/BuyMenuHeader.bmp");
-        ContentFile logoFile("Base.rte/GUIs/BuyMenuLogo.bmp");
+        ContentFile headerFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuHeader.bmp");
+        ContentFile logoFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuLogo.bmp");
         pHeader->SetDrawImage(new AllegroBitmap(headerFile.GetAsBitmap()));
         m_pLogo->SetDrawImage(new AllegroBitmap(logoFile.GetAsBitmap()));
         pHeader->SetDrawType(GUICollectionBox::Image);
@@ -295,13 +295,13 @@ int BuyMenuGUI::Create(Controller *pController)
     m_RepeatTimer.Reset();
 
     // Interface sounds should not be pitched, to reinforce the appearance of time decoupling between simulation and UI
-    m_EnterMenuSound.Create("Base.rte/GUIs/Sounds/MenuEnter.wav", false);
-    m_ExitMenuSound.Create("Base.rte/GUIs/Sounds/MenuExit.wav", false);
-    m_FocusChangeSound.Create("Base.rte/GUIs/Sounds/Blip00.wav", false);
-    m_SelectionChangeSound.Create("Base.rte/GUIs/Sounds/Blip01.wav", false);
-    m_ItemChangeSound.Create("Base.rte/GUIs/Sounds/Click00.wav", false);
-//    m_PurchaseMadeSound.Create("Base.rte/GUIs/Sounds/MenuEnter.wav", false);
-    m_UserErrorSound.Create("Base.rte/GUIs/Sounds/Error.wav", false);
+    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
+    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", false);
+    m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", false);
+    m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
+    m_ItemChangeSound.Create("Base.rte/Sounds/GUIs/ItemChange.wav", false);
+//    m_PurchaseMadeSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
+    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
 
     return 0;
 }

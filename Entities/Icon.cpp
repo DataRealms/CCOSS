@@ -55,7 +55,7 @@ int Icon::Create()
     {
         // If no file specified, load the default icon bitmap
         if (m_BitmapFile.GetDataPath().empty())
-            m_BitmapFile.SetDataPath("Base.rte/GUIs/BlankIcon.bmp");
+            m_BitmapFile.SetDataPath("Base.rte/GUIs/PieIcons/Blank001.bmp");
         m_apBitmaps8 = m_BitmapFile.GetAsAnimation(m_FrameCount, COLORCONV_REDUCE_TO_256);
         m_apBitmaps32 = m_BitmapFile.GetAsAnimation(m_FrameCount, COLORCONV_8_TO_32);
     }

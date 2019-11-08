@@ -268,6 +268,26 @@ ENTITYALLOCATION(TDExplosive)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:  IsAnimatedManually
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     If true then the m_Frame property is not changed by the Update function
+// Arguments:       None.
+// Return value:    Whether this TDExplosive is animated manually.
+
+	bool IsAnimatedManually() const { return m_IsAnimatedManually; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  SetAnimatedManually
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets whether this TDExplosive is animated manually.
+// Arguments:       Manual animation flag value.
+// Return value:    None.
+
+	void SetAnimatedManually(bool newValue) { m_IsAnimatedManually = newValue; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
@@ -280,6 +300,8 @@ protected:
     int m_NumberToAdd;
     // Whether this starts activation timer once it is first thrown, like a hand grenade vs a dumb bomb
     bool m_ActivatesWhenReleased;
+	// If true m_Frame is not changed during an update hence the animation is done by external Lua code
+	bool m_IsAnimatedManually;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

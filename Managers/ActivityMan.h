@@ -31,8 +31,6 @@
 namespace RTE
 {
 
-#define FRIENDLYCURSOR 0
-#define ENEMYCURSOR 1
 #define LZCURSORFRAMECOUNT 4
 #define OBJARROWFRAMECOUNT 4
 

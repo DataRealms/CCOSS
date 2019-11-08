@@ -269,21 +269,20 @@ int BaseEditor::Start()
     if (m_FundsChangedSound.GetSampleCount() < 1)
     {
         // Interface sounds should not be pitched, to reinforce the impression of time decoupling between simulation and UI
-        m_FundsChangedSound.Create("Base.rte/GUIs/Sounds/Poing1.wav", false);
-        m_FundsChangedSound.AddSample("Base.rte/GUIs/Sounds/Poing2.wav");
-        m_FundsChangedSound.AddSample("Base.rte/GUIs/Sounds/Poing3.wav");
-        m_FundsChangedSound.AddSample("Base.rte/GUIs/Sounds/Poing4.wav");
-        m_FundsChangedSound.AddSample("Base.rte/GUIs/Sounds/Poing5.wav");
-        m_FundsChangedSound.AddSample("Base.rte/GUIs/Sounds/Poing6.wav");
-        m_ActorSwitchSound.Create("Base.rte/GUIs/Sounds/ActorSwitch3.wav", false);
-        m_BrainSwitchSound.Create("Base.rte/GUIs/Sounds/ActorSwitch4.wav", false);
-        m_CameraTravelSound.Create("Base.rte/GUIs/Sounds/Woosh1.wav", false);
-        m_CameraTravelSound.AddSample("Base.rte/GUIs/Sounds/Woosh2.wav");
-        m_CameraTravelSound.AddSample("Base.rte/GUIs/Sounds/Woosh3.wav");
-        m_ConfirmSound.Create("Base.rte/GUIs/Sounds/MenuExitB.wav", false);
-        m_SelectionChangeSound.Create("Base.rte/GUIs/Sounds/Splip01.wav", false);
-        m_SelectionChangeSound.AddSample("Base.rte/GUIs/Sounds/Splip02.wav");
-        m_UserErrorSound.Create("Base.rte/GUIs/Sounds/Error.wav", false);
+        m_FundsChangedSound.Create("Base.rte/Sounds/GUIs/FundsChanged1.wav", false);
+        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged2.wav");
+        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged3.wav");
+        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged4.wav");
+        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged5.wav");
+        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged6.wav");
+        m_ActorSwitchSound.Create("Base.rte/Sounds/GUIs/ActorSwitch.wav", false);
+        m_BrainSwitchSound.Create("Base.rte/Sounds/GUIs/BrainSwitch.wav", false);
+        m_CameraTravelSound.Create("Base.rte/Sounds/GUIs/CameraTravel1.wav", false);
+        m_CameraTravelSound.AddSample("Base.rte/Sounds/GUIs/CameraTravel2.wav");
+        m_CameraTravelSound.AddSample("Base.rte/Sounds/GUIs/CameraTravel3.wav");
+        m_ConfirmSound.Create("Base.rte/Sounds/GUIs/MenuExit2.wav", false);
+        m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
+        m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
     }
 
     // Move any brains resident in the Scene to the MovableMan

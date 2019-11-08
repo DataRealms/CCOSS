@@ -5,9 +5,8 @@
 *.log
 *.pdb
 *.obj
-ScreenDump*.bmp
+
 /.vs
-/WorkshopMods
 /_Bin
 /_SDL
 /_Pindrop
@@ -41,9 +40,6 @@ ScreenDump*.bmp
 /Release
 /Final
 /DebugFast
-LogConsole.txt
-LogLoading.txt
-LogPublish.txt
 MemCleanupInfo.txt
 /Packaging/Win32-Beta/client1
 /Packaging/Win32-Beta/client2
@@ -64,17 +60,23 @@ MemCleanupInfo.txt
 /_Allegro-4.2.3.1-Custom/Allegro/obj
 
 /Base.rte
+/Benchmark.rte
 /Browncoats.rte
 /Coalition.rte
 /Dummy.rte
 /Imperatus.rte
-/Ronin.rte
-/Techion.rte
 /Metagames.rte
 /Missions.rte
+/MuIlaak.rte
+/Ronin.rte
 /Scenes.rte
-/Tutorial.rte
-/Benchmark.rte
-
+/Techion.rte
+/Uzira.rte
 
 /abortscreen.bmp
+
+LogConsole.txt
+LogLoading.txt
+LogPublish.txt
+
+ScreenDump*.bmp

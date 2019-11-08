@@ -868,7 +868,6 @@ protected:
     // Sound for enabling and disabling menu
     Sound m_EnterMenuSound;
     Sound m_ExitMenuSound;
-    Sound m_ExitMenuAltSound;
     // Sound for changing focus
     Sound m_FocusChangeSound;
     // Sound for selecting items in list, etc.

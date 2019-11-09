@@ -1858,7 +1858,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
     }
     else if (m_MenuCategory == BOMBS)
     {
-        AddObjectsToItemList(catalogList, "TDExplosive", "Bombs");
+        AddObjectsToItemList(catalogList, "ThrownDevice", "Bombs");
     }
     else if (m_MenuCategory == SHIELDS)
     {

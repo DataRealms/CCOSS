@@ -43,12 +43,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">..\Cortex Command Community Project Data\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">..\Cortex-Command-Community-Project-Data\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">_Bin\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">true</GenerateManifest>
     <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">true</EmbedManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">..\Cortex Command Community Project Data\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">..\Cortex-Command-Community-Project-Data\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">_Bin\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">true</GenerateManifest>

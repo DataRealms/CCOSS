@@ -1172,10 +1172,10 @@ protected:
 	bool m_RequireClearPathToOrbitSwitchEnabled;
 	bool m_BuyMenuEnabled;
 
-    // The cursor animations for the LZ indicators: friendly and enemy
-    BITMAP **m_aLZCursor[2];
+    // The cursor animations for the LZ indicators
+    BITMAP **m_aLZCursor[4];
     // The cursor animations for the objective indications
-    BITMAP **m_aObjCursor[2];
+    BITMAP **m_aObjCursor[4];
 
     // Time it takes for a delivery to be made, in ms
     long m_DeliveryDelay;

@@ -705,6 +705,7 @@ int LuaMan::Create()
             .property("FrameCount", &MOSprite::GetFrameCount)
             .property("SpriteOffset", &MOSprite::GetSpriteOffset, &MOSprite::SetSpriteOffset)
             .property("HFlipped", &MOSprite::IsHFlipped, &MOSprite::SetHFlipped)
+            .property("FlipFactor", &MOSprite::GetFlipFactor)
             .property("RotAngle", &MOSprite::GetRotAngle, &MOSprite::SetRotAngle)
             .property("AngularVel", &MOSprite::GetAngularVel, &MOSprite::SetAngularVel)
             .property("Frame", &MOSprite::GetFrame, &MOSprite::SetFrame)
@@ -1295,7 +1296,8 @@ int LuaMan::Create()
             .property("MinThrowVel", &ThrownDevice::GetMinThrowVel, &ThrownDevice::SetMinThrowVel)
             .property("MaxThrowVel", &ThrownDevice::GetMaxThrowVel, &ThrownDevice::SetMaxThrowVel),
 
-        CONCRETELUABINDING(TDExplosive, ThrownDevice),
+        CONCRETELUABINDING(TDExplosive, ThrownDevice)
+            .property("IsAnimatedManually", &TDExplosive::IsAnimatedManually, &TDExplosive::SetAnimatedManually),
 
         class_<Controller>("Controller")
             .enum_("ControlState")
@@ -2190,7 +2192,7 @@ int LuaMan::Create()
             .def("FileWriteLine", &LuaMan::FileWriteLine)
             .def("FileEOF", &LuaMan::FileEOF),
 
-        class_<SettingsMan>("SettingsdManager")
+        class_<SettingsMan>("SettingsManager")
             .property("PrintDebugInfo", &SettingsMan::PrintDebugInfo, &SettingsMan::SetPrintDebugInfo)
 			.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount),
 

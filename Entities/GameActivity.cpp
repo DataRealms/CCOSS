@@ -106,12 +106,9 @@ void GameActivity::Clear()
     {
         m_Deliveries[team].clear();
         m_LandingZoneArea[team].Reset();
+		m_aLZCursor[team] = 0;
+		m_aObjCursor[team] = 0;
     }
-
-    m_aLZCursor[FRIENDLYCURSOR] = 0;
-    m_aLZCursor[ENEMYCURSOR] = 0;
-    m_aObjCursor[FRIENDLYCURSOR] = 0;
-    m_aObjCursor[ENEMYCURSOR] = 0;
 
     m_Objectives.clear();
 
@@ -1037,18 +1034,26 @@ int GameActivity::Start()
 
     if (!(m_aLZCursor[0]))
     {
-        ContentFile cursorFile("Base.rte/GUIs/LZArrowRedL.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Indicators/LZArrowRedL.bmp");
         m_aLZCursor[0] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
-        cursorFile.SetDataPath("Base.rte/GUIs/LZArrowGreenL.bmp");
+        cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowGreenL.bmp");
         m_aLZCursor[1] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowBlueL.bmp");
+		m_aLZCursor[2] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowYellowL.bmp");
+		m_aLZCursor[3] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
     }
 
     if (!(m_aObjCursor[0]))
     {
-        ContentFile cursorFile("Base.rte/GUIs/ObjArrowRed.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Indicators/ObjArrowRed.bmp");
         m_aObjCursor[0] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
-        cursorFile.SetDataPath("Base.rte/GUIs/ObjArrowGreen.bmp");
+        cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowGreen.bmp");
         m_aObjCursor[1] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowBlue.bmp");
+		m_aObjCursor[2] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowYellow.bmp");
+		m_aObjCursor[3] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
     }
 
     // Start the in-game music
@@ -2211,7 +2216,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     char str[512];
     int yTextPos = 0;
     int team = NOTEAM;
-    int cursor = FRIENDLYCURSOR;
+    int cursor = 0;
     int PoS = PlayerOfScreen(which);
     if (PoS < 0 || PoS >= Activity::MAXPLAYERCOUNT)
         return;
@@ -2234,7 +2239,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
             team = m_Team[player];
             if (team == NOTEAM)
                 continue;
-            cursor = g_SceneMan.GetScreenTeam(which) == team ? FRIENDLYCURSOR : ENEMYCURSOR;
+			cursor = team;
             landZone = m_LandingZone[player] - targetPos;
             // Cursor
             draw_sprite(pTargetBitmap, m_aLZCursor[cursor][frame], landZone.m_X - halfWidth, landZone.m_Y - 48);
@@ -2265,7 +2270,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
         if (!m_TeamActive[team])
             continue;
         char str[64];
-        cursor = g_SceneMan.GetScreenTeam(which) == team ? FRIENDLYCURSOR : ENEMYCURSOR;
+		cursor = team;
         for (deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
         {
             int halfWidth = 24;
@@ -2315,7 +2320,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     // THis is the max distance that is possible between a point inside the scene, but outside the screen box, and the screen box's outer edge closest to the point (taking wrapping into account)
     float maxOffScreenSceneWidth = g_SceneMan.SceneWrapsX() ? ((sceneWidth / 2) - halfScreenWidth) : (sceneWidth - pTargetBitmap->w);
     // These handle arranging the left and right stacks of arrows, so they don't pile up on top of each other
-    cursor = g_SceneMan.GetScreenTeam(which) == team ? FRIENDLYCURSOR : ENEMYCURSOR;
+    cursor = team;
     float leftStackY = halfScreenHeight - m_aObjCursor[cursor][frame]->h * 2;
     float rightStackY = leftStackY;
 
@@ -2617,7 +2622,7 @@ void GameActivity::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
     GUIFont *pSmallFont = g_FrameMan.GetSmallFont();
     AllegroBitmap pBitmapInt(pTargetBitmap);
     int frame = ((int)m_CursorTimer.GetElapsedSimTimeMS() % 1000) / 250;
-    int cursor = FRIENDLYCURSOR;//= g_SceneMan.GetScreenTeam(which) == team ? FRIENDLYCURSOR : ENEMYCURSOR;
+    int cursor = 0;
     Vector landZone;
 
     // Iterate through all players, drawing each currently used LZ cursor.

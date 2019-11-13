@@ -341,7 +341,7 @@ bool LoadDataModules()
     g_FrameMan.ClearBackBuffer32();
 //    g_FrameMan.LoadPalette("Base.rte/palette.bmp");
     SceneLayer *pLoadingSplash = new SceneLayer();
-    pLoadingSplash->Create(ContentFile("Base.rte/GUIs/LoadingSplash.bmp"), false, Vector(), true, false, Vector(1.0, 0));
+    pLoadingSplash->Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.bmp"), false, Vector(), true, false, Vector(1.0, 0));
     // hcoded offset to make room for the loading box
     pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 110, 0));
     // Draw onto wrapped strip centered vertically on the screen
@@ -628,23 +628,25 @@ bool LoadDataModules()
 		return true;
 	}
 
-///* TODO: REPLACE
-    if (!g_PresetMan.LoadDataModule("Coalition.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Techion.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Imperatus.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Ronin.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Dummy.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Browncoats.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Tutorial.rte", true, &LoadingSplashProgressReport))
-        return false;
-    if (!g_PresetMan.LoadDataModule("Missions.rte", true, &LoadingSplashProgressReport))
-        return false;
+	///* TODO: REPLACE
+	if (!g_PresetMan.LoadDataModule("Coalition.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Imperatus.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Techion.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Dummy.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Ronin.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Browncoats.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Uzira.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("MuIlaak.rte", true, &LoadingSplashProgressReport))
+		return false;
+	if (!g_PresetMan.LoadDataModule("Missions.rte", true, &LoadingSplashProgressReport))
+		return false;
 
 	//Read module properties to find out which modules should be loaded earlier than others
     al_ffblk moduleInfo;
@@ -946,21 +948,21 @@ bool PlayIntroTitle()
 
     // Load the Intro slides
     BITMAP **apIntroSlides = new BITMAP *[SLIDECOUNT];
-    ContentFile introSlideFile("Base.rte/Title/IntroSlideA.bmp");
+    ContentFile introSlideFile("Base.rte/GUIs/Title/Intro/IntroSlideA.bmp");
     apIntroSlides[SLIDEPAST] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/Title/IntroSlideB.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideB.bmp");
     apIntroSlides[SLIDENOW] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/Title/IntroSlideC.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideC.bmp");
     apIntroSlides[SLIDEVR] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/Title/IntroSlideD.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideD.bmp");
     apIntroSlides[SLIDETRAVEL] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/Title/IntroSlideE.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideE.bmp");
     apIntroSlides[SLIDEALIENS] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/Title/IntroSlideF.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideF.bmp");
     apIntroSlides[SLIDETRADE] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/Title/IntroSlideG.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideG.bmp");
     apIntroSlides[SLIDEPEACE] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/Title/IntroSlideH.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideH.bmp");
     apIntroSlides[SLIDEFRONTIER] = introSlideFile.LoadAndReleaseBitmap();
     int normalSlideWidth = 640;
     int slideFadeDistance = 42;
@@ -969,55 +971,55 @@ bool PlayIntroTitle()
     BITMAP *pAlpha = 0;
 
     MOSParticle *pDRLogo = new MOSParticle();
-    pDRLogo->Create(ContentFile("Base.rte/Title/DRLogo5x.bmp"));
+    pDRLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.bmp"));
     pDRLogo->SetWrapDoubleDrawing(false);
 
     SceneLayer *pBackdrop = new SceneLayer();
-    pBackdrop->Create(ContentFile("Base.rte/Title/Nebula.bmp"), false, Vector(), false, false, Vector(0, -1.0));//startYOffset + resY));
+    pBackdrop->Create(ContentFile("Base.rte/GUIs/Title/Nebula.bmp"), false, Vector(), false, false, Vector(0, -1.0));//startYOffset + resY));
     float backdropScrollRatio = 1.0f / 3.0f;
 
     MOSParticle *pTitle = new MOSParticle();
-    pTitle->Create(ContentFile("Base.rte/Title/Title.bmp"));
+    pTitle->Create(ContentFile("Base.rte/GUIs/Title/Title.bmp"));
     pTitle->SetWrapDoubleDrawing(false);
     // Logo glow effect
     MOSParticle *pTitleGlow = new MOSParticle();
-    pTitleGlow->Create(ContentFile("Base.rte/Title/TitleGlow.bmp"));
+    pTitleGlow->Create(ContentFile("Base.rte/GUIs/Title/TitleGlow.bmp"));
     pTitleGlow->SetWrapDoubleDrawing(false);
     // Add alpha
-    alphaFile.SetDataPath("Base.rte/Title/TitleAlpha.bmp");
+    alphaFile.SetDataPath("Base.rte/GUIs/Title/TitleAlpha.bmp");
     set_write_alpha_blender();
     draw_trans_sprite(pTitle->GetSpriteFrame(0), alphaFile.GetAsBitmap(), 0, 0);
 
     MOSParticle *pPlanet = new MOSParticle();
-    pPlanet->Create(ContentFile("Base.rte/Title/Planet.bmp"));
+    pPlanet->Create(ContentFile("Base.rte/GUIs/Title/Planet.bmp"));
     pPlanet->SetWrapDoubleDrawing(false);
     // Add alpha
-    alphaFile.SetDataPath("Base.rte/Title/PlanetAlpha.bmp");
+    alphaFile.SetDataPath("Base.rte/GUIs/Title/PlanetAlpha.bmp");
     set_write_alpha_blender();
     draw_trans_sprite(pPlanet->GetSpriteFrame(0), alphaFile.GetAsBitmap(), 0, 0);
 
     MOSParticle *pMoon = new MOSParticle();
-    pMoon->Create(ContentFile("Base.rte/Title/Moon.bmp"));
+    pMoon->Create(ContentFile("Base.rte/GUIs/Title/Moon.bmp"));
     pMoon->SetWrapDoubleDrawing(false);
     // Add alpha
-    alphaFile.SetDataPath("Base.rte/Title/MoonAlpha.bmp");
+    alphaFile.SetDataPath("Base.rte/GUIs/Title/MoonAlpha.bmp");
     set_write_alpha_blender();
     draw_trans_sprite(pMoon->GetSpriteFrame(0), alphaFile.GetAsBitmap(), 0, 0);
 
     MOSRotating *pStation = new MOSRotating();
-    pStation->Create(ContentFile("Base.rte/Title/Station.bmp"));
+    pStation->Create(ContentFile("Base.rte/GUIs/Title/Station.bmp"));
     pStation->SetWrapDoubleDrawing(false);
 
 	MOSRotating *pPioneerCapsule = new MOSRotating();
-	pPioneerCapsule->Create(ContentFile("Base.rte/Title/PioneerCapsule.bmp"));
+	pPioneerCapsule->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerCapsule.bmp"));
 	pPioneerCapsule->SetWrapDoubleDrawing(false);
 
 	MOSRotating *pPioneerScreaming = new MOSRotating();
-	pPioneerScreaming->Create(ContentFile("Base.rte/Title/PioneerScreaming.bmp"));
+	pPioneerScreaming->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerScreaming.bmp"));
 	pPioneerScreaming->SetWrapDoubleDrawing(false);
 
 	MOSRotating *pPioneerPromo = new MOSRotating();
-	pPioneerPromo->Create(ContentFile("Base.rte/Title/PioneerPromo.bmp"));
+	pPioneerPromo->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerPromo.bmp"));
 	pPioneerPromo->SetWrapDoubleDrawing(false);
 
 	MOSParticle * pFirePuffLarge = dynamic_cast<MOSParticle *>(g_PresetMan.GetEntityPreset("MOSParticle", "Fire Puff Large", "Base.rte")->Clone());
@@ -1037,9 +1039,9 @@ bool PlayIntroTitle()
     // Generate stars!
     int starArea = resX * pBackdrop->GetBitmap()->h;
     int starCount = starArea / 1000;
-    ContentFile starSmallFile("Base.rte/Title/Stars/StarSmall.bmp");
-    ContentFile starLargeFile("Base.rte/Title/Stars/StarLarge.bmp");
-    ContentFile starHugeFile("Base.rte/Title/Stars/StarHuge.bmp");
+    ContentFile starSmallFile("Base.rte/GUIs/Title/Stars/StarSmall.bmp");
+    ContentFile starLargeFile("Base.rte/GUIs/Title/Stars/StarLarge.bmp");
+    ContentFile starHugeFile("Base.rte/GUIs/Title/Stars/StarHuge.bmp");
     int starSmallBitmapCount = 4;
     int starLargeBitmapCount = 1;
     int starHugeBitmapCount = 2;
@@ -1530,7 +1532,7 @@ bool PlayIntroTitle()
             {
                 // Play juicy logo signature jingle/sound
                 Sound logoSound;
-                logoSound.Create("Base.rte/GUIs/Sounds/MetaStart.wav", false);
+                logoSound.Create("Base.rte/Sounds/GUIs/MetaStart.wav", false);
                 logoSound.Play();
                 // Black fade
                 clear_to_color(pFadeScreen, 0);
@@ -2038,7 +2040,7 @@ bool PlayIntroTitle()
 
                 // Play the scenario music with juicy start sound
                 Sound metaSound;
-                metaSound.Create("Base.rte/GUIs/Sounds/MetaStart.wav", false);
+                metaSound.Create("Base.rte/Sounds/GUIs/MetaStart.wav", false);
                 metaSound.Play();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
             }
@@ -2137,7 +2139,7 @@ bool PlayIntroTitle()
 
                 // Play the campaign music with metasound start
                 Sound metaSound;
-                metaSound.Create("Base.rte/GUIs/Sounds/MetaStart.wav", false);
+                metaSound.Create("Base.rte/Sounds/GUIs/MetaStart.wav", false);
                 metaSound.Play();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
             }

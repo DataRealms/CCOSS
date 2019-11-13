@@ -766,13 +766,11 @@ void AssemblyEditor::UpdateLoadDialog()
 			// If metascenes are visible then allow to save assemblies to Base.rte
 			if (g_SettingsMan.ShowMetascenes())
 			{
-				if ((module == 0 || module > 6) && g_PresetMan.GetDataModule(module)->GetFileName() != "Metagames.rte"
-												&& g_PresetMan.GetDataModule(module)->GetFileName() != "Tutorial.rte"
+				if ((module == 0 || module > 8) && g_PresetMan.GetDataModule(module)->GetFileName() != "Metagames.rte"
 												&& g_PresetMan.GetDataModule(module)->GetFileName() != "Missions.rte")
 					isValid = true;
 			} else {
-				if (module > 6 && g_PresetMan.GetDataModule(module)->GetFileName() != "Metagames.rte"
-							   && g_PresetMan.GetDataModule(module)->GetFileName() != "Tutorial.rte"
+				if (module > 8 && g_PresetMan.GetDataModule(module)->GetFileName() != "Metagames.rte"
 						       && g_PresetMan.GetDataModule(module)->GetFileName() != "Missions.rte")
 					isValid = true;
 			}

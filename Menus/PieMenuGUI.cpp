@@ -305,7 +305,7 @@ int PieMenuGUI::Create(Controller *pController, Actor *pFocusActor)
     // Load the static pie icons and cursor if havne't been done yet
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/PieCursor.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/PieCursor.bmp");
         s_pCursor = cursorFile.GetAsBitmap();
 //        cursorFile.SetDataPath("Base.rte/Effects/Glows/YellowSmall.bmp");
 //        s_pCursorGlow = cursorFile.GetAsBitmap();
@@ -319,12 +319,12 @@ int PieMenuGUI::Create(Controller *pController, Actor *pFocusActor)
     }
 
     // Interface sounds should not be pitched, to reinforce the appearance of time decoupling between simulation and UI
-    m_EnterMenuSound.Create("Base.rte/GUIs/Sounds/PieMenuEnter1.wav", false);
-    m_ExitMenuSound.Create("Base.rte/GUIs/Sounds/PieMenuExit1.wav", false);
-    m_HoverChangeSound.Create("Base.rte/GUIs/Sounds/Blip01.wav", false);
-    m_HoverDisabledSound.Create("Base.rte/GUIs/Sounds/Blip02.wav", false);
-    m_SlicePickedSound.Create("Base.rte/GUIs/Sounds/SlicePicked2.wav", false);
-    m_DisabledPickedSound.Create("Base.rte/GUIs/Sounds/PieMenuExit1.wav", false);
+    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/PieMenuEnter.wav", false);
+    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/PieMenuExit.wav", false);
+    m_HoverChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
+    m_HoverDisabledSound.Create("Base.rte/Sounds/GUIs/PlacementBlip.wav", false);
+    m_SlicePickedSound.Create("Base.rte/Sounds/GUIs/SlicePicked.wav", false);
+    m_DisabledPickedSound.Create("Base.rte/Sounds/GUIs/PieMenuExit.wav", false);
 
     return 0;
 }

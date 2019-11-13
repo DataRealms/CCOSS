@@ -121,7 +121,7 @@ int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, strin
 
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/Cursor.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.bmp");
         s_pCursor = cursorFile.GetAsBitmap();
     }
 
@@ -211,13 +211,13 @@ int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, strin
     ShowOnlyType(onlyOfType);
 
     // Interface sounds should not be pitched, to reinforce the appearance of time decoupling between simulation and UI
-    m_EnterMenuSound.Create("Base.rte/GUIs/Sounds/MenuEnter.wav", false);
-    m_ExitMenuSound.Create("Base.rte/GUIs/Sounds/MenuExit.wav", false);
-    m_FocusChangeSound.Create("Base.rte/GUIs/Sounds/Blip00.wav", false);
-    m_SelectionChangeSound.Create("Base.rte/GUIs/Sounds/Blip01.wav", false);
-    m_ItemChangeSound.Create("Base.rte/GUIs/Sounds/Click00.wav", false);
-//    m_ObjectPickedSound.Create("Base.rte/GUIs/Sounds/MenuEnter.wav", false);
-    m_UserErrorSound.Create("Base.rte/GUIs/Sounds/Error.wav", false);
+    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
+    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", false);
+    m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", false);
+    m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
+    m_ItemChangeSound.Create("Base.rte/Sounds/GUIs/ItemChange.wav", false);
+//    m_ObjectPickedSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
+    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
 
     return 0;
 }

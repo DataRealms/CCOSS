@@ -195,7 +195,6 @@ void MainMenuGUI::Clear()
     // Sounds
     m_EnterMenuSound.Reset();
     m_ExitMenuSound.Reset();
-    m_ExitMenuAltSound.Reset();
     m_FocusChangeSound.Reset();
     m_SelectionChangeSound.Reset();
     m_ButtonPressSound.Reset();
@@ -660,17 +659,16 @@ int MainMenuGUI::Create(Controller *pController)
     m_FocusChange = 1;
 //    CategoryChange();
 
-    m_EnterMenuSound.Create("Base.rte/GUIs/Sounds/MenuEnter.wav", false);
-    m_ExitMenuSound.Create("Base.rte/GUIs/Sounds/MenuExit.wav", false);
-    m_ExitMenuSound.AddSample("Base.rte/GUIs/Sounds/MenuExitB.wav");
-    m_ExitMenuAltSound.Create("Base.rte/GUIs/Sounds/MenuExitB.wav", false);
-    m_FocusChangeSound.Create("Base.rte/GUIs/Sounds/Blip00.wav", false);
-    m_SelectionChangeSound.Create("Base.rte/GUIs/Sounds/Blip02.wav", false);
-    m_ButtonPressSound.Create("Base.rte/GUIs/Sounds/Splip01.wav", false);
-    m_BackButtonPressSound.Create("Base.rte/GUIs/Sounds/Splip02.wav", false);
-    m_ItemChangeSound.Create("Base.rte/GUIs/Sounds/Click00.wav", false);
-    m_TestSound.Create("Base.rte/GUIs/Sounds/Click01.wav", false);
-    m_UserErrorSound.Create("Base.rte/GUIs/Sounds/Error.wav", false);
+    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
+    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", false);
+    m_ExitMenuSound.AddSample("Base.rte/Sounds/GUIs/MenuExit2.wav");
+    m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", false);
+    m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
+    m_ButtonPressSound.Create("Base.rte/Sounds/GUIs/ButtonPress.wav", false);
+    m_BackButtonPressSound.Create("Base.rte/Sounds/GUIs/BackButtonPress.wav", false);
+    m_ItemChangeSound.Create("Base.rte/Sounds/GUIs/ItemChange.wav", false);
+    m_TestSound.Create("Base.rte/Sounds/GUIs/Test.wav", false);
+    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
 
 	m_PioneerPromoVisible = false;
 
@@ -830,7 +828,7 @@ void MainMenuGUI::Update()
                 m_aMainMenuButton[RESUME]->SetVisible(false);
             }
             // Restore the label on the campaign button
-            m_aMainMenuButton[CAMPAIGN]->SetText("Campaign");
+            m_aMainMenuButton[CAMPAIGN]->SetText("Metagame (WIP)");
 
             m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
             m_aMainMenuButton[PLAYTUTORIAL]->SetVisible(false);
@@ -1111,7 +1109,7 @@ void MainMenuGUI::Update()
             m_apScreenBox[METASCREEN]->SetVisible(true);
             m_aMainMenuButton[PLAYTUTORIAL]->SetVisible(true);
             m_aMainMenuButton[METACONTINUE]->SetVisible(true);
-            m_pMetaNoticeLabel->SetText("- A T T E N T I O N -\n\nPlease note that the Campaign is currently in a COMPLETE, fully playable,\nyet still imperfect state! As such, it is lacking some polish, audio, and game balancing.\nThat said, you can absolutely enjoy fighting the A.I. and/or up to three friends in co-op, 2 vs 2, etc.\n\nAlso, if you have not yet played Cortex Command, we recommend you first try the tutorial:");
+            m_pMetaNoticeLabel->SetText("- A T T E N T I O N -\n\nPlease note that the Campaign is in an INCOMPLETE, fully playable, yet still imperfect state!\nAs such, it is lacking some polish, audio, and game balancing, and we will be upgrading it significantly in future.\nThat said, you can absolutely enjoy fighting the A.I. and/or up to three friends in co-op, 2 vs 2, etc.\n\nAlso, if you have not yet played Cortex Command, we recommend you first try the tutorial:");
             m_pMetaNoticeLabel->SetVisible(true);
             // Flag that this notice has now been shown once, so no need to keep showing it
             m_TutorialOffered = true;

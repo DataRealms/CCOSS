@@ -329,6 +329,9 @@ void AudioMan::SetSoundsVolume(double volume)
 #elif __USE_SOUND_SDLMIXER
 	Mix_Volume(-1, (MAX_VOLUME * m_SoundsVolume));
 #elif __USE_SOUND_GORILLA
+//Due to the behavior of Gorilla and the associated backend, master volume has to be set
+//as part of PlaySound(). This function effectively does nothing in its current state.
+//Might be worth considering removing this function when Gorilla is being used.
 	for (int i = 1; i < m_SoundChannels.size(); i++)
 		if (m_SoundChannels[i])
 			ga_handle_setParamf(m_SoundChannels[i], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * m_SoundsVolume);
@@ -583,9 +586,19 @@ void AudioMan::PlayMusic(const char *filepath, int loops, double volumeOverride)
 		return;
 
 	strcpy(format, &filepath[dotPos + 1]);
-	
+
 	// Open the stream
-	m_pMusic = gau_create_handle_buffered_file(m_pMixer, m_pStreamManager, filepath, format, PlayNextCallback, 0, 0);
+	if (loops != 0)
+	{
+		gau_SampleSourceLoop* loopSrc;
+		m_pMusic = gau_create_handle_buffered_file(m_pMixer, m_pStreamManager, filepath, format, PlayNextCallback, 0, &loopSrc);
+		gau_sample_source_loop_set(loopSrc, -1, 0);
+	}
+	else 
+	{
+		m_pMusic = gau_create_handle_buffered_file(m_pMixer, m_pStreamManager, filepath, format, PlayNextCallback, 0, 0);
+	}
+
 	if (!m_pMusic)
 	{
 		g_ConsoleMan.PrintString("ERROR: Could not open and play music file:" + string(filepath));
@@ -1032,16 +1045,20 @@ bool AudioMan::PlaySound(Sound *pSound, int priority, float distance, double pit
 
 	// Set sample's channel looping setting
 	ga_Handle * handle;
-	if (pSound->m_Loops > 0)
+	if (pSound->m_Loops == 0)
+	{
+		handle = gau_create_handle_sound(m_pMixer, pSound->GetCurrentSample(), 0, 0, 0);
+	}
+	else
 	{
 		gau_SampleSourceLoop* loopSrc; 
 		handle = gau_create_handle_sound(m_pMixer, pSound->GetCurrentSample(), 0, 0, &loopSrc);
 		gau_sample_source_loop_set(loopSrc, -1, 0);
 	}
-	else 
-	{
-		handle = gau_create_handle_sound(m_pMixer, pSound->GetCurrentSample(), 0, 0, 0);
-	}
+
+	// Due to Gorilla lacking the ability to set a master volume, we have to set it here.
+	ga_handle_setParamf(handle, GA_HANDLE_PARAM_GAIN, MAX_VOLUME * m_SoundsVolume);
+
 	m_SoundChannels[channel] = handle;
 	m_SoundInstances[channel] = pSound->GetCurrentSample();
 
@@ -1084,7 +1101,8 @@ bool AudioMan::SetSoundAttenuation(Sound *pSound, float distance)
 		Mix_SetDistance(pSound->m_LastChannel, (255 * distance));
 #elif __USE_SOUND_GORILLA
 		if (pSound->m_LastChannel >= 0)
-			ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * (1.0f - distance));
+			ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * m_SoundsVolume * (1.0f - distance));
+
 #endif
     }
 
@@ -1125,7 +1143,7 @@ bool AudioMan::SetSoundPitch(Sound *pSound, float pitch)
 #elif __USE_SOUND_SDLMIXER
 	// SDL seems to not support pitch changes
 #elif __USE_SOUND_GORILLA
-	if (pSound->m_LastChannel >= 0)
+	if (pSound->m_AffectedByPitch && pSound->m_LastChannel >= 0)
 	{
 		m_PitchModifiers[pSound->m_LastChannel] = pitch;
 		ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_PITCH, m_PitchModifiers[pSound->m_LastChannel] * m_GlobalPitch);

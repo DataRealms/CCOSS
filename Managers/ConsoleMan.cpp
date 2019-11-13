@@ -117,9 +117,9 @@ int ConsoleMan::Create(bool logToCli)
     m_InputLogPosition = m_InputLog.begin();
     m_LastLogMove = 0;
 
-    m_EnterMenuSound.Create("Base.rte/GUIs/Sounds/MenuEnter.wav");
-    m_ExitMenuSound.Create("Base.rte/GUIs/Sounds/MenuExit.wav");
-    m_UserErrorSound.Create("Base.rte/GUIs/Sounds/Error.wav");
+    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav");
+    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav");
+    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav");
 
     return 0;
 }

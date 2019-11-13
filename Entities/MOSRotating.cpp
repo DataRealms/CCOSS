@@ -208,6 +208,7 @@ void MOSRotating::Clear()
     m_LoudnessOnGib = 1;
 	m_DamageMultiplier = 1;
 	m_DamageMultiplierRedefined = false;
+	m_AtomSubgroupCount = 0;
 }
 
 

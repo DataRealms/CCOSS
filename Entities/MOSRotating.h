@@ -1084,6 +1084,26 @@ ENTITYALLOCATION(MOSRotating)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetAtomSubgroupCount
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets the count of atom subgroups this has.
+// Arguments:       None.
+// Return value:    The the atom subgroup count of this.
+
+	int GetAtomSubgroupCount() const { return m_AtomSubgroupCount; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          SetAtomSubgroupCount
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the count of atom subgroups this has.
+// Arguments:       New atom subgroup count.
+// Return value:    None.
+
+	void SetAtomSubgroupCount(int newCount) { m_AtomSubgroupCount = newCount; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
@@ -1199,6 +1219,9 @@ protected:
     static BITMAP *m_spTempBitmapS128;
     static BITMAP *m_spTempBitmapS256;
     static BITMAP *m_spTempBitmapS512;
+
+	// Counter for AtomGroup Atom Subgroup IDs
+	int m_AtomSubgroupCount;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

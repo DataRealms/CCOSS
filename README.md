@@ -1,10 +1,11 @@
-Cortex Command Community Project - Free/Libre and Open Source under GNU AGPL v3
+# Cortex Command Community Project Source #
+*The Cortex Command Community Project is Free/Libre and Open Source under GNU AGPL v3*
 
 This is a community-driven effort to continue the development of Cortex Command. Stay up to date in our [discord channel](https://discord.gg/SdNnKJN).
 
 ***
 
-# SETUP PROCESS #
+# Setup Process #
 
 First you need to download the necessary files:
 1. Clone this Source Repository and the [Data Repository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data) in neighbouring folders. **Do Not** change the folder names unless you want to make trouble for yourself.
@@ -19,6 +20,6 @@ Now you're ready to build and run the game. Simply open RTEA.sln with Visual Stu
 
 ***
 
-# MORE INFORMATION #
+# More Information #
 
 For more information and Recommendations, see [here](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Information,-Recommended-Plugins-and-Useful-Links).

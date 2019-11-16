@@ -631,6 +631,16 @@ ENTITYALLOCATION(Attachable)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:          SetCollidesWithTerrain
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets whether this attachables collides with terrain when attached to another entity.
+// Arguments:       Whether to enable terrain collisions or not.
+// Return value:    None.
+
+	void SetCollidesWithTerrain(bool collide) { m_CollidesWithTerrain = collide; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:

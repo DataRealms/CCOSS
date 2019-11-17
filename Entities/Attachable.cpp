@@ -264,9 +264,15 @@ void Attachable::Attach(MOSRotating *pParent)
     if (pParent)
     {
         m_Team = pParent->GetTeam();
+
         if (m_CollidesWithTerrain)
         {
-            pParent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset(), m_Rotation);
+			// Set the attachable's subgroup ID to the next ID in the parent's subgroup count (map starts at 0, valid ID starts at 1)
+			SetAtomSubgroupID(pParent->GetAtomSubgroupCount() + 1);
+			// Update the parent's subgroup count to prevent subgroup merging when assigning ID to the next attachable if defined.
+			pParent->SetAtomSubgroupCount(pParent->GetAtomSubgroupCount() + 1);
+			// Add attachable's atoms into the parent's AtomGroup.
+			pParent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset(), m_Rotation);
         }
     }
 

@@ -320,6 +320,170 @@ public:
 
     };
 
+    // Nested class:    PieSubMenu
+    // Description: A submenu for the pie menu with some contents, opened by an appropriate pie slice
+
+    class PieSubMenu:
+        public Serializable
+    {
+
+
+    public:
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Constructor:     PieSubMenu
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Description:     Constructor method used to instantiate a PieSubMenu object in system
+    //                  memory. Create() should be called before using the object.
+    // Arguments:       None.
+
+        PieSubMenu() { Clear(); }
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Virtual method:  Create
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Description:     Creates a PieSubMenu to be identical to another, by deep copy.
+    // Arguments:       A reference to the PieSubMenu to deep copy.
+    // Return value:    An error return value signaling sucess or any particular failure.
+    //                  Anything below 0 is an error signal.
+
+        virtual int Create(const PieSubMenu &reference);
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Virtual method:  Create
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Description:     Makes the PieSubMenu object ready for use.
+    // Arguments:       None.
+    // Return value:    An error return value signaling success or any particular failure.
+    //                  Anything below 0 is an error signal.
+
+        virtual int Create();
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Virtual method:  Create
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Description:     Makes the Serializable ready for use.
+    // Arguments:       A Reader that the Serializable will create itself from.
+    //                  Whether there is a class name in the stream to check against to make
+    //                  sure the correct type is being read from the stream.
+    // Return value:    An error return value signaling sucess or any particular failure.
+    //                  Anything below 0 is an error signal.
+
+        virtual int Create(Reader &reader, bool checkType = true, bool doCreate = true)
+        {
+            return Serializable::Create(reader, checkType, doCreate);
+        }
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Virtual method:  ReadProperty
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Description:     Reads a property value from a Reader stream. If the name isn't
+    //                  recognized by this class, then ReadProperty of the parent class
+    //                  is called. If the property isn't recognized by any of the base classes,
+    //                  false is returned, and the Reader's position is untouched.
+    // Arguments:       The name of the property to be read.
+    //                  A Reader lined up to the value of the property to be read.
+    // Return value:    An error return value signaling whether the property was successfully
+    //                  read or not. 0 means it was read successfully, and any nonzero indicates
+    //                  that a property of that name could not be found in this or base classes.
+
+        virtual int ReadProperty(std::string propName, Reader &reader);
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Virtual method:  Reset
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Description:     Resets the entire Serializable, including its inherited members, to their
+    //                  default settings or values.
+    // Arguments:       None.
+    // Return value:    None.
+
+        virtual void Reset() { Clear(); }
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Virtual method:  Save
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Description:     Saves the complete state of this PieSubMenu to an output stream for
+    //                  later recreation with Create(Reader &reader);
+    // Arguments:       A Writer that the Slice will save itself with.
+    // Return value:    An error return value signaling sucess or any particular failure.
+    //                  Anything below 0 is an error signal.
+
+        virtual int Save(Writer &writer) const;
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Virtual method:  GetClassName
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Description:     Gets the class name of this Entity.
+    // Arguments:       None.
+    // Return value:    A string with the friendly-formatted type name of this object.
+
+        virtual const std::string & GetClassName() const { return m_sClassName; }
+
+ 
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Virtual method:  GetMenuName
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Description:     Gets the identifying MenuName of this SubMenu.
+    // Arguments:       None.
+    // Return value:    A string with the friendly-formatted MenuName of this SubMenu.
+
+		std::string GetMenuName() const { return m_MenuName; }
+
+        
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Method:          SetModuleID
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Description:     Sets the module this Entity was supposed to be defined in.
+    // Arguments:       The ID of the module, or -1 if it hasn't been defined in any.
+    // Return value:    None.
+
+        void SetModuleID(int whichModule) { m_DefinedInModule = whichModule; }
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Method:          GetModuleID
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Description:     Shows the ID of the DataModule this Entity has been defined in.
+    // Arguments:       None.
+    // Return value:    The ID of the module, or -1 if it hasn't been defined in any.
+
+        int GetModuleID() const { return m_DefinedInModule; }
+
+
+        // Member variables
+        static const std::string m_sClassName;
+        // Name of menu, used to internally identify it
+        std::string m_MenuName;
+        // The DataModule ID that this was defined in, not added or handled like Entity so this should never be -1
+        int m_DefinedInModule;
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Private member variable and method declarations
+
+    private:
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Method:          Clear
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Description:     Clears all the member variables of this Slice, effectively
+    //                  resetting the members of this abstraction level only.
+    // Arguments:       None.
+    // Return value:    None.
+
+        void Clear();
+
+    };
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     PieMenuGUI
@@ -685,6 +849,8 @@ protected:
     std::list<Slice> m_UpLeftSlices;
     std::list<Slice> m_DownLeftSlices;
     std::list<Slice> m_DownRightSlices;
+    std::list<string> m_hithere;
+    std::vector<string> m_hothere;
 
 	// All slices ever added to this pie-menu, serves as directory of slices available to add
 	static std::map<string, Slice> m_AllAvailableSlices;

@@ -387,6 +387,11 @@ int MOSRotating::Create(const MOSRotating &reference)
         SLICK_PROFILENAME("Attachable Copies", 0xFF775544);
 
         pAttachable = dynamic_cast<Attachable *>((*aItr)->Clone());
+        if (pAttachable->IsHardcoded())
+        {
+            continue;
+        }
+
         pAttachable->Attach(this, pAttachable->GetParentOffset());
         m_Attachables.push_back(pAttachable);
         pAttachable = 0;

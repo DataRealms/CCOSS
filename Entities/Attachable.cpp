@@ -49,6 +49,7 @@ void Attachable::Clear()
     m_OnlyLinForces = false;
 	m_InheritsRotAngle = true;
     m_CollidesWithTerrain = false;
+    m_Hardcoded = m_Hardcoded == true ? true : false; //TODO Need to be sure this is necessary, can we just set it to false and things are safe cause it's copied over, or will this fuck up somewhere?
 }
 
 
@@ -89,6 +90,7 @@ int Attachable::Create(const Attachable &reference)
     m_OnlyLinForces = reference.m_OnlyLinForces;
 	m_InheritsRotAngle = reference.m_InheritsRotAngle;
     m_CollidesWithTerrain = reference.m_CollidesWithTerrain;
+    m_Hardcoded = reference.m_Hardcoded;
 
     return 0;
 }

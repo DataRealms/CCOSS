@@ -113,13 +113,6 @@ int AHuman::Create()
     if (Actor::Create() < 0)
         return -1;
 
-	// Create AtomGroup
-	if (!m_pAtomGroup)
-	{
-		m_pAtomGroup = new AtomGroup();
-		m_pAtomGroup->Create(this);
-	}
-
     // Make the limb paths for the background limbs
     for (int i = 0; i < MOVEMENTSTATECOUNT; ++i)
     {
@@ -272,11 +265,21 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pHead;
         m_pHead = new Attachable;
         reader >> m_pHead;
-		m_pHead->SetCollidesWithTerrain(true);
         m_pHead->Attach(this);
+        m_pHead->SetAtomSubgroupID(1);
 
 		if (!m_pHead->IsDamageMultiplierRedefined())
 			m_pHead->SetDamageMultiplier(5);
+
+        if (!m_pAtomGroup)
+        {
+            m_pAtomGroup = new AtomGroup();
+            m_pAtomGroup->Create(this);
+        }
+        m_pAtomGroup->AddAtoms(m_pHead->GetAtomGroup()->GetAtomList(),
+                               m_pHead->GetAtomSubgroupID(),
+                               m_pHead->GetParentOffset() - m_pHead->GetJointOffset(),
+                               m_Rotation);
     }
     else if (propName == "Jetpack")
     {

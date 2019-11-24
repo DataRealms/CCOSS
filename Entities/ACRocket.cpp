@@ -189,6 +189,7 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader)
         m_pRLeg = new Leg;
         reader >> m_pRLeg;
         m_pRLeg->Attach(this);
+        m_pRLeg->SetAtomSubgroupID(1);
     }
     else if (propName == "LLeg")
     {
@@ -196,6 +197,7 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader)
         m_pLLeg = new Leg;
         reader >> m_pLLeg;
         m_pLLeg->Attach(this);
+        m_pLLeg->SetAtomSubgroupID(2);
         m_pLLeg->SetHFlipped(true);
     }
     else if (propName == "RFootGroup")

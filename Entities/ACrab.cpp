@@ -269,8 +269,12 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         delete m_pTurret;
         m_pTurret = new Turret;
         reader >> m_pTurret;
-		m_pTurret->SetCollidesWithTerrain(true);
         m_pTurret->Attach(this);
+        m_pTurret->SetAtomSubgroupID(1);
+        m_pAtomGroup->AddAtoms(m_pTurret->GetAtomGroup()->GetAtomList(),
+                               m_pTurret->GetAtomSubgroupID(),
+                               m_pTurret->GetParentOffset() - m_pTurret->GetJointOffset(),
+                               m_Rotation);
 		if (!m_pTurret->IsDamageMultiplierRedefined())
 			m_pTurret->SetDamageMultiplier(5);
     }

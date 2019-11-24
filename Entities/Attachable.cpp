@@ -48,7 +48,7 @@ void Attachable::Clear()
     m_DamageCount = 0;
     m_OnlyLinForces = false;
 	m_InheritsRotAngle = true;
-    m_Hardcoded = m_Hardcoded == true ? true : false; //TODO Need to be sure this is necessary, can we just set it to false and things are safe cause it's copied over, or will this fuck up somewhere?
+    m_Hardcoded = m_Hardcoded == true ? true : false;
 }
 
 

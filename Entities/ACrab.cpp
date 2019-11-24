@@ -177,14 +177,18 @@ int ACrab::Create(const ACrab &reference)
 
     if (reference.m_pTurret)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pTurret != NULL) RemoveAttachableByUniqueID(reference.m_pTurret->GetUniqueID());
         m_pTurret = dynamic_cast<Turret *>(reference.m_pTurret->Clone());
-        m_pTurret->Attach(this);        
+        AddAttachable(m_pTurret, true);
     }
 
     if (reference.m_pJetpack)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pJetpack != NULL) RemoveAttachableByUniqueID(reference.m_pJetpack->GetUniqueID());
         m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        m_pJetpack->Attach(this);
+        AddAttachable(m_pJetpack, true);
     }
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
@@ -192,26 +196,34 @@ int ACrab::Create(const ACrab &reference)
 
     if (reference.m_pLFGLeg)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pLFGLeg != NULL) RemoveAttachableByUniqueID(reference.m_pLFGLeg->GetUniqueID());
         m_pLFGLeg = dynamic_cast<Leg *>(reference.m_pLFGLeg->Clone());
-        m_pLFGLeg->Attach(this);
+        AddAttachable(m_pLFGLeg, true);
     }
 
     if (reference.m_pLBGLeg)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pLBGLeg != NULL) RemoveAttachableByUniqueID(reference.m_pLBGLeg->GetUniqueID());
         m_pLBGLeg = dynamic_cast<Leg *>(reference.m_pLBGLeg->Clone());
-        m_pLBGLeg->Attach(this);
+        AddAttachable(m_pLBGLeg, true);
     }
 
     if (reference.m_pRFGLeg)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pRFGLeg != NULL) RemoveAttachableByUniqueID(reference.m_pRFGLeg->GetUniqueID());
         m_pRFGLeg = dynamic_cast<Leg *>(reference.m_pRFGLeg->Clone());
-        m_pRFGLeg->Attach(this);
+        AddAttachable(m_pRFGLeg, true);
     }
 
     if (reference.m_pRBGLeg)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pRBGLeg != NULL) RemoveAttachableByUniqueID(reference.m_pRBGLeg->GetUniqueID());
         m_pRBGLeg = dynamic_cast<Leg *>(reference.m_pRBGLeg->Clone());
-        m_pRBGLeg->Attach(this);
+        AddAttachable(m_pRBGLeg, true);
     }
 
     m_pLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLFGFootGroup->Clone());
@@ -473,14 +485,6 @@ int ACrab::Save(ostream &stream) const
 
 void ACrab::Destroy(bool notInherited)
 {
-//    g_MovableMan.RemoveEntityPreset(this);
-
-    delete m_pTurret;
-    delete m_pLFGLeg;
-    delete m_pLBGLeg;
-    delete m_pRFGLeg;
-    delete m_pRBGLeg;
-    delete m_pJetpack;
     delete m_pLFGFootGroup;
     delete m_pLBGFootGroup;
     delete m_pRFGFootGroup;

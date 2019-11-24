@@ -104,20 +104,19 @@ int ACRocket::Create()
 int ACRocket::Create(const ACRocket &reference)
 {
     ACraft::Create(reference);
-/*
-    if (reference.m_pCapsule) {
-        m_pCapsule = dynamic_cast<Attachable *>(reference.m_pCapsule->Clone());
-        m_pCapsule->Attach(this, m_pCapsule->GetParentOffset());
-    }
-*/
+
     if (reference.m_pRLeg) {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pRLeg != NULL) RemoveAttachableByUniqueID(reference.m_pRLeg->GetUniqueID());
         m_pRLeg = dynamic_cast<Leg *>(reference.m_pRLeg->Clone());
-        m_pRLeg->Attach(this, m_pRLeg->GetParentOffset());
+        AddAttachable(m_pRLeg, true);
     }
 
     if (reference.m_pLLeg) {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pLLeg != NULL) RemoveAttachableByUniqueID(reference.m_pLLeg->GetUniqueID());
         m_pLLeg = dynamic_cast<Leg *>(reference.m_pLLeg->Clone());
-        m_pLLeg->Attach(this, m_pLLeg->GetParentOffset());
+        AddAttachable(m_pLLeg, true);
     }
 
     m_pBodyAG = dynamic_cast<AtomGroup *>(reference.m_pBodyAG->Clone());
@@ -136,28 +135,38 @@ int ACRocket::Create(const ACRocket &reference)
 
     if (reference.m_pMThruster)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pMThruster != NULL) RemoveAttachableByUniqueID(reference.m_pMThruster->GetUniqueID());
         m_pMThruster = dynamic_cast<AEmitter *>(reference.m_pMThruster->Clone());
-        m_pMThruster->Attach(this, m_pMThruster->GetParentOffset());
+        AddAttachable(m_pMThruster, true);
     }
     if (reference.m_pRThruster)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pRThruster != NULL) RemoveAttachableByUniqueID(reference.m_pRThruster->GetUniqueID());
         m_pRThruster = dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone());
-        m_pRThruster->Attach(this, m_pRThruster->GetParentOffset());
+        AddAttachable(m_pRThruster, true);
     }
     if (reference.m_pLThruster)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pLThruster != NULL) RemoveAttachableByUniqueID(reference.m_pLThruster->GetUniqueID());
         m_pLThruster = dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone());
-        m_pLThruster->Attach(this, m_pLThruster->GetParentOffset());
+        AddAttachable(m_pLThruster, true);
     }
     if (reference.m_pURThruster)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pURThruster != NULL) RemoveAttachableByUniqueID(reference.m_pURThruster->GetUniqueID());
         m_pURThruster = dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone());
-        m_pURThruster->Attach(this, m_pURThruster->GetParentOffset());
+        AddAttachable(m_pURThruster, true);
     }
     if (reference.m_pULThruster)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pULThruster != NULL) RemoveAttachableByUniqueID(reference.m_pULThruster->GetUniqueID());
         m_pULThruster = dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone());
-        m_pULThruster->Attach(this, m_pULThruster->GetParentOffset());
+        AddAttachable(m_pULThruster, true);
     }
 
     m_GearState = reference.m_GearState;
@@ -317,21 +326,10 @@ int ACRocket::Save(Writer &writer) const
 
 void ACRocket::Destroy(bool notInherited)
 {
-//    g_MovableMan.RemoveEntityPreset(this);
-
-//    delete m_pCapsule;
-    delete m_pRLeg;
-    delete m_pLLeg;
     delete m_pBodyAG;
     delete m_pRFootGroup;
     delete m_pLFootGroup;
     
-    delete m_pMThruster;
-    delete m_pRThruster;
-    delete m_pLThruster;
-    delete m_pURThruster;
-    delete m_pULThruster;
-
 //    for (deque<LimbPath *>::iterator itr = m_WalkPaths.begin();
 //         itr != m_WalkPaths.end(); ++itr)
 //        delete *itr;

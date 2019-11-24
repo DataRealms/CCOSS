@@ -1123,6 +1123,13 @@ protected:
                                  MOID rootMOID = g_NoMOID,
                                  bool makeNewMOID = true);
 
+    /// <summary>
+    /// Iterates through the list of attachables and removes the first entry with this PresetName
+    /// </summary>
+    /// <param name="presetName"></param>
+    /// <returns>True if an element was removed, false if no element was removed</returns>
+    virtual bool RemoveAttachableByUniqueID(long uniqueID);
+
     // Member variables
     static Entity::ClassInfo m_sClass;
 //    float m_Torque; // In kg * r/s^2 (Newtons).

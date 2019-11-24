@@ -84,8 +84,10 @@ int Leg::Create(const Leg &reference)
     Attachable::Create(reference);
 
     if (reference.m_pFoot) {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pFoot != NULL) RemoveAttachableByUniqueID(reference.m_pFoot->GetUniqueID());
         m_pFoot = dynamic_cast<Attachable *>(reference.m_pFoot->Clone());
-        m_pFoot->Attach(this, m_pFoot->GetParentOffset());
+        AddAttachable(m_pFoot);
     }
     m_ContractedOffset = reference.m_ContractedOffset;
     m_ExtendedOffset = reference.m_ExtendedOffset;
@@ -116,7 +118,10 @@ int Leg::ReadProperty(std::string propName, Reader &reader)
     {
         const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
         if (pObj)
+        {
             m_pFoot = dynamic_cast<Attachable *>(pObj->Clone());
+            m_pFoot->SetHardcoded(true);
+        }
     }
     else if (propName == "ContractedOffset")
     {
@@ -187,10 +192,6 @@ int Leg::Save(Writer &writer) const
 
 void Leg::Destroy(bool notInherited)
 {
-//    g_MovableMan.RemoveEntityPreset(this);
-
-    delete m_pFoot;
-
     if (!notInherited)
         Attachable::Destroy();
     Clear();

@@ -95,33 +95,45 @@ int ACDropShip::Create(const ACDropShip &reference)
 
     if (reference.m_pRThruster)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pRThruster != NULL) RemoveAttachableByUniqueID(reference.m_pRThruster->GetUniqueID());
         m_pRThruster = dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone());
-        m_pRThruster->Attach(this, m_pRThruster->GetParentOffset());
+        AddAttachable(m_pRThruster, true);
     }
     if (reference.m_pLThruster)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pLThruster != NULL) RemoveAttachableByUniqueID(reference.m_pLThruster->GetUniqueID());
         m_pLThruster = dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone());
-        m_pLThruster->Attach(this, m_pLThruster->GetParentOffset());
+        AddAttachable(m_pLThruster, true);
     }
     if (reference.m_pURThruster)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pURThruster != NULL) RemoveAttachableByUniqueID(reference.m_pURThruster->GetUniqueID());
         m_pURThruster = dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone());
-        m_pURThruster->Attach(this, m_pURThruster->GetParentOffset());
+        AddAttachable(m_pURThruster, true);
     }
     if (reference.m_pULThruster)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pULThruster != NULL) RemoveAttachableByUniqueID(reference.m_pULThruster->GetUniqueID());
         m_pULThruster = dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone());
-        m_pULThruster->Attach(this, m_pULThruster->GetParentOffset());
+        AddAttachable(m_pULThruster, true);
     }
     if (reference.m_pRHatch)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pRHatch != NULL) RemoveAttachableByUniqueID(reference.m_pRHatch->GetUniqueID());
         m_pRHatch = dynamic_cast<Attachable *>(reference.m_pRHatch->Clone());
-        m_pRHatch->Attach(this, m_pRHatch->GetParentOffset());
+        AddAttachable(m_pRHatch, true);
     }
     if (reference.m_pLHatch)
     {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pLHatch != NULL) RemoveAttachableByUniqueID(reference.m_pLHatch->GetUniqueID());
         m_pLHatch = dynamic_cast<Attachable *>(reference.m_pLHatch->Clone());
-        m_pLHatch->Attach(this, m_pLHatch->GetParentOffset());
+        AddAttachable(m_pLHatch, true);
     }
     m_HatchSwingRange = reference.m_HatchSwingRange;
     m_HatchOpeness = reference.m_HatchOpeness;
@@ -267,15 +279,7 @@ int ACDropShip::Save(Writer &writer) const
 
 void ACDropShip::Destroy(bool notInherited)
 {
-//    g_MovableMan.RemoveEntityPreset(this);
-
     delete m_pBodyAG;
-    delete m_pRThruster;
-    delete m_pLThruster;
-    delete m_pURThruster;
-    delete m_pULThruster;
-    delete m_pRHatch;
-    delete m_pLHatch;
 
     if (!notInherited)
         ACraft::Destroy();

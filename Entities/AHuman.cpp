@@ -179,53 +179,49 @@ int AHuman::Create(const AHuman &reference)
 {
     Actor::Create(reference);
 
-    //TODO For ini copyOf, this is causing problems because first the copyof is made, then the properties read from ini are pushed onto it with another create call, meaning it doubles up on everything
-    //Need to check if the object already exists in m_attachables and, if so, replace it. Check if std::list or std::vector has a search method of some sort so we can search for the object directly,
-    //otherwise, need to iterate through it and find and remove what we want. Might be a performance impact, this happens every time an actor is created via lua or the buy/edit menus, not ideal.
-    //Could change datastructure to a hashset though, if there's one available.
     if (reference.m_pHead) {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pHead != NULL) RemoveAttachableByUniqueID(m_pHead->GetUniqueID());
         m_pHead = dynamic_cast<Attachable *>(reference.m_pHead->Clone());
-        m_pHead->Attach(this);
-        m_pHead->SetHardcoded(true);
-        m_Attachables.push_back(m_pHead);
+        AddAttachable(m_pHead, true);
     }
 
     if (reference.m_pJetpack) {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pJetpack != NULL) RemoveAttachableByUniqueID(m_pJetpack->GetUniqueID());
         m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        m_pJetpack->Attach(this);
-        //m_pJetpack->SetHardcoded(true);
-        //m_Attachables.push_back(m_pJetpack);
+        AddAttachable(m_pJetpack, true);
     }
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
 
     if (reference.m_pFGArm) {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pFGArm != NULL) RemoveAttachableByUniqueID(m_pFGArm->GetUniqueID());
         m_pFGArm = dynamic_cast<Arm *>(reference.m_pFGArm->Clone());
-        m_pFGArm->Attach(this);
-        //m_pFGArm->SetHardcoded(true);
-        //m_Attachables.push_back(m_pFGArm);
+        AddAttachable(m_pFGArm, true);
     }
 
     if (reference.m_pBGArm) {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pBGArm != NULL) RemoveAttachableByUniqueID(m_pBGArm->GetUniqueID());
         m_pBGArm = dynamic_cast<Arm *>(reference.m_pBGArm->Clone());
-        m_pBGArm->Attach(this);
-        //m_pBGArm->SetHardcoded(true);
-        //m_Attachables.push_back(m_pBGArm);
+        AddAttachable(m_pBGArm, true);
     }
 
     if (reference.m_pFGLeg) {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pFGLeg != NULL) RemoveAttachableByUniqueID(m_pFGLeg->GetUniqueID());
         m_pFGLeg = dynamic_cast<Leg *>(reference.m_pFGLeg->Clone());
-        m_pFGLeg->Attach(this);
-        m_pFGLeg->SetHardcoded(true);
-        m_Attachables.push_back(m_pFGLeg);
+        AddAttachable(m_pFGLeg, true);
     }
 
     if (reference.m_pBGLeg) {
+        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
+        if (m_pBGLeg != NULL) RemoveAttachableByUniqueID(m_pBGLeg->GetUniqueID());
         m_pBGLeg = dynamic_cast<Leg *>(reference.m_pBGLeg->Clone());
-        m_pBGLeg->Attach(this);
-        //m_pBGLeg->SetHardcoded(true);
-        //m_Attachables.push_back(m_pBGLeg);
+        AddAttachable(m_pBGLeg, true);
     }
 
     m_pFGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pFGHandGroup->Clone());
@@ -281,6 +277,7 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pHead;
         m_pHead = new Attachable;
         reader >> m_pHead;
+        m_pHead->SetHardcoded(true);
         m_pHead->Attach(this);
         m_pHead->SetAtomSubgroupID(1);
 
@@ -302,6 +299,7 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pJetpack;
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
+        m_pJetpack->SetHardcoded(true);
         m_pJetpack->Attach(this);
     }
     else if (propName == "JumpTime")
@@ -315,6 +313,7 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pFGArm;
         m_pFGArm = new Arm;
         reader >> m_pFGArm;
+        m_pFGArm->SetHardcoded(true);
         m_pFGArm->Attach(this);
     }
     else if (propName == "BGArm")
@@ -322,6 +321,7 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pBGArm;
         m_pBGArm = new Arm;
         reader >> m_pBGArm;
+        m_pBGArm->SetHardcoded(true);
         m_pBGArm->Attach(this);
     }
     else if (propName == "FGLeg")
@@ -329,6 +329,7 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pFGLeg;
         m_pFGLeg = new Leg;
         reader >> m_pFGLeg;
+        m_pFGLeg->SetHardcoded(true);
         m_pFGLeg->Attach(this);
     }
     else if (propName == "BGLeg")
@@ -336,6 +337,7 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pBGLeg;
         m_pBGLeg = new Leg;
         reader >> m_pBGLeg;
+        m_pBGLeg->SetHardcoded(true);
         m_pBGLeg->Attach(this);
     }
     else if (propName == "HandGroup")
@@ -496,12 +498,6 @@ int AHuman::Save(ostream &stream) const
 
 void AHuman::Destroy(bool notInherited)
 {
-    delete m_pBGLeg;
-    //delete m_pFGLeg;
-    delete m_pBGArm;
-    delete m_pFGArm;
-    delete m_pJetpack;
-    //delete m_pHead;
     delete m_pBGHandGroup;
     delete m_pFGFootGroup;
     delete m_pBGFootGroup;

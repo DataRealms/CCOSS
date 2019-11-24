@@ -1811,6 +1811,25 @@ void MOSRotating::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
     MOSprite::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
 }
 
+bool MOSRotating::RemoveAttachableByUniqueID(long uniqueID)
+{
+    {
+        if (m_Attachables.size() > 0)
+        {
+            for (Attachable * attachable : m_Attachables)
+            {
+                if (attachable->GetUniqueID() == uniqueID)
+                {
+                    m_Attachables.remove(attachable);
+                    attachable->Detach();
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetMOIDs

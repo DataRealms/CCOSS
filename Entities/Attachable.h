@@ -639,10 +639,6 @@ ENTITYALLOCATION(Attachable)
 
 	void SetCollidesWithTerrain(bool collide) { m_CollidesWithTerrain = collide; }
 
-    void SetHardcoded(bool hardcoded) { m_Hardcoded = hardcoded; }
-
-    bool IsHardcoded() { return m_Hardcoded; }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -697,8 +693,6 @@ protected:
     // If true enables collision with terrain for attachable
     bool m_CollidesWithTerrain;
 
-    //Whether or not this attachable was added by hardcoded means, as opposed to ini. If true, it's not cloned into new MOSRotatings' m_Attachables lists automatically, as whatever hardcoded method added it should handle that
-    bool m_Hardcoded;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

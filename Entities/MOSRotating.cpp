@@ -1830,6 +1830,24 @@ bool MOSRotating::RemoveAttachableByUniqueID(long uniqueID)
     return false;
 }
 
+void MOSRotating::AddAttachable(Attachable * pAttachable)
+{
+    if (pAttachable)
+    {
+        pAttachable->Attach(this);
+        m_Attachables.push_back(pAttachable);
+    }
+}
+
+void MOSRotating::AddAttachable(Attachable * pAttachable, const Vector& parentOffsetToSet)
+{
+    if (pAttachable)
+    {
+        pAttachable->Attach(this, parentOffsetToSet);
+        m_Attachables.push_back(pAttachable);
+    }
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetMOIDs

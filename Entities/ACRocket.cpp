@@ -106,17 +106,15 @@ int ACRocket::Create(const ACRocket &reference)
     ACraft::Create(reference);
 
     if (reference.m_pRLeg) {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pRLeg != NULL) RemoveAttachableByUniqueID(reference.m_pRLeg->GetUniqueID());
         m_pRLeg = dynamic_cast<Leg *>(reference.m_pRLeg->Clone());
-        AddAttachable(m_pRLeg, true);
+        m_pRLeg->Attach(this, m_pRLeg->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pRLeg);
     }
 
     if (reference.m_pLLeg) {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pLLeg != NULL) RemoveAttachableByUniqueID(reference.m_pLLeg->GetUniqueID());
         m_pLLeg = dynamic_cast<Leg *>(reference.m_pLLeg->Clone());
-        AddAttachable(m_pLLeg, true);
+        m_pLLeg->Attach(this, m_pLLeg->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pLLeg);
     }
 
     m_pBodyAG = dynamic_cast<AtomGroup *>(reference.m_pBodyAG->Clone());
@@ -135,38 +133,33 @@ int ACRocket::Create(const ACRocket &reference)
 
     if (reference.m_pMThruster)
     {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pMThruster != NULL) RemoveAttachableByUniqueID(reference.m_pMThruster->GetUniqueID());
         m_pMThruster = dynamic_cast<AEmitter *>(reference.m_pMThruster->Clone());
-        AddAttachable(m_pMThruster, true);
+        m_pMThruster->Attach(this, m_pMThruster->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pMThruster);
     }
     if (reference.m_pRThruster)
     {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pRThruster != NULL) RemoveAttachableByUniqueID(reference.m_pRThruster->GetUniqueID());
         m_pRThruster = dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone());
-        AddAttachable(m_pRThruster, true);
+        m_pRThruster->Attach(this, m_pRThruster->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pRThruster);
     }
     if (reference.m_pLThruster)
     {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pLThruster != NULL) RemoveAttachableByUniqueID(reference.m_pLThruster->GetUniqueID());
         m_pLThruster = dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone());
-        AddAttachable(m_pLThruster, true);
+        m_pLThruster->Attach(this, m_pLThruster->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pLThruster);
     }
     if (reference.m_pURThruster)
     {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pURThruster != NULL) RemoveAttachableByUniqueID(reference.m_pURThruster->GetUniqueID());
         m_pURThruster = dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone());
-        AddAttachable(m_pURThruster, true);
+        m_pURThruster->Attach(this, m_pURThruster->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pURThruster);
     }
     if (reference.m_pULThruster)
     {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pULThruster != NULL) RemoveAttachableByUniqueID(reference.m_pULThruster->GetUniqueID());
         m_pULThruster = dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone());
-        AddAttachable(m_pULThruster, true);
+        m_pULThruster->Attach(this, m_pULThruster->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pULThruster);
     }
 
     m_GearState = reference.m_GearState;

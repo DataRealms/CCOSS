@@ -767,8 +767,10 @@ int LuaMan::Create()
             .def("StringValueExists", &MOSRotating::StringValueExists)
             .def("NumberValueExists", &MOSRotating::NumberValueExists)
             .def("ObjectValueExists", &MOSRotating::ObjectValueExists)
-			.def_readwrite("Attachables", &MOSRotating::m_Attachables, return_stl_iterator)
-			.def_readwrite("Emitters", &MOSRotating::m_Emitters, return_stl_iterator),
+			.def_readonly("Attachables", &MOSRotating::m_Attachables, return_stl_iterator)
+            .def_readonly("HAttachables", &MOSRotating::m_HardcodedAttachables, return_stl_iterator)
+            .def("AAttachables", &MOSRotating::GetAllAttachables, return_stl_iterator)
+			.def_readonly("Emitters", &MOSRotating::m_Emitters, return_stl_iterator),
 
         CONCRETELUABINDING(Attachable, MOSRotating)
             .def("GetRootParent", (MovableObject * (Attachable::*)())&Attachable::GetRootParent)

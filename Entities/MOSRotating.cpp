@@ -196,6 +196,7 @@ void MOSRotating::Clear()
     m_RecoilOffset.Reset();
     m_Emitters.clear();
     m_Attachables.clear();
+    m_HardcodedAttachables.clear();
     m_Gibs.clear();
     m_GibImpulseLimit = 0;
     m_GibWoundLimit = 0;
@@ -586,6 +587,8 @@ void MOSRotating::Destroy(bool notInherited)
         delete (*itr);
     for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
         delete (*aItr);
+    for (list<Attachable *>::iterator haItr = m_HardcodedAttachables.begin(); haItr != m_HardcodedAttachables.end(); ++haItr)
+        delete (*haItr);
 
     destroy_bitmap(m_pFlipBitmap);
     destroy_bitmap(m_pFlipBitmapS);
@@ -1846,6 +1849,13 @@ void MOSRotating::AddAttachable(Attachable * pAttachable, const Vector& parentOf
         pAttachable->Attach(this, parentOffsetToSet);
         m_Attachables.push_back(pAttachable);
     }
+}
+
+std::list<Attachable*> MOSRotating::GetAllAttachables()
+{
+    std::list<Attachable *> allAttachables(m_HardcodedAttachables.begin(), m_HardcodedAttachables.end());
+    allAttachables.insert(allAttachables.end(), m_Attachables.begin(), m_Attachables.end());
+    return allAttachables;
 }
 
 

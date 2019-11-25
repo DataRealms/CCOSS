@@ -84,10 +84,9 @@ int Leg::Create(const Leg &reference)
     Attachable::Create(reference);
 
     if (reference.m_pFoot) {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pFoot != NULL) RemoveAttachableByUniqueID(reference.m_pFoot->GetUniqueID());
         m_pFoot = dynamic_cast<Attachable *>(reference.m_pFoot->Clone());
-        AddAttachable(m_pFoot);
+        m_pFoot->Attach(this, m_pFoot->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pFoot);
     }
     m_ContractedOffset = reference.m_ContractedOffset;
     m_ExtendedOffset = reference.m_ExtendedOffset;

@@ -177,18 +177,16 @@ int ACrab::Create(const ACrab &reference)
 
     if (reference.m_pTurret)
     {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pTurret != NULL) RemoveAttachableByUniqueID(reference.m_pTurret->GetUniqueID());
         m_pTurret = dynamic_cast<Turret *>(reference.m_pTurret->Clone());
-        AddAttachable(m_pTurret, true);
+        m_pTurret->Attach(this, m_pTurret->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pTurret);
     }
 
     if (reference.m_pJetpack)
     {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pJetpack != NULL) RemoveAttachableByUniqueID(reference.m_pJetpack->GetUniqueID());
         m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        AddAttachable(m_pJetpack, true);
+        m_pJetpack->Attach(this, m_pJetpack->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pJetpack);
     }
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
@@ -196,34 +194,30 @@ int ACrab::Create(const ACrab &reference)
 
     if (reference.m_pLFGLeg)
     {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pLFGLeg != NULL) RemoveAttachableByUniqueID(reference.m_pLFGLeg->GetUniqueID());
         m_pLFGLeg = dynamic_cast<Leg *>(reference.m_pLFGLeg->Clone());
-        AddAttachable(m_pLFGLeg, true);
+        m_pLFGLeg->Attach(this, m_pLFGLeg->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pLFGLeg);
     }
 
     if (reference.m_pLBGLeg)
     {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pLBGLeg != NULL) RemoveAttachableByUniqueID(reference.m_pLBGLeg->GetUniqueID());
         m_pLBGLeg = dynamic_cast<Leg *>(reference.m_pLBGLeg->Clone());
-        AddAttachable(m_pLBGLeg, true);
+        m_pLBGLeg->Attach(this, m_pLBGLeg->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pLBGLeg);
     }
 
     if (reference.m_pRFGLeg)
     {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pRFGLeg != NULL) RemoveAttachableByUniqueID(reference.m_pRFGLeg->GetUniqueID());
         m_pRFGLeg = dynamic_cast<Leg *>(reference.m_pRFGLeg->Clone());
-        AddAttachable(m_pRFGLeg, true);
+        m_pRFGLeg->Attach(this, m_pRFGLeg->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pRFGLeg);
     }
 
     if (reference.m_pRBGLeg)
     {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pRBGLeg != NULL) RemoveAttachableByUniqueID(reference.m_pRBGLeg->GetUniqueID());
         m_pRBGLeg = dynamic_cast<Leg *>(reference.m_pRBGLeg->Clone());
-        AddAttachable(m_pRBGLeg, true);
+        m_pRBGLeg->Attach(this, m_pRBGLeg->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pRBGLeg);
     }
 
     m_pLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLFGFootGroup->Clone());

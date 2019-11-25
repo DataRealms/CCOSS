@@ -738,6 +738,8 @@ ENTITYALLOCATION(MOSRotating)
     /// <param name="parentOffsetToSet"></param>
     virtual void AddAttachable(Attachable * pAttachable, const Vector& parentOffsetToSet);
 
+    std::list<Attachable *> GetAllAttachables();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
@@ -1173,6 +1175,8 @@ protected:
     std::list<AEmitter *> m_Emitters;
     // The list of general Attachables currently attached and Owned by this.
     std::list<Attachable *> m_Attachables;
+    // The list of hardcoded Attachables added specifically for the given MOSRotating child class
+    std::list<Attachable *> m_HardcodedAttachables;
     // The list of Gib:s this will create when gibbed
     std::list<Gib> m_Gibs;
     // The amount of impulse force required to gib this, in kg * (m/s). 0 means no limit

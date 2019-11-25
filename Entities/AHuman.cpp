@@ -180,48 +180,42 @@ int AHuman::Create(const AHuman &reference)
     Actor::Create(reference);
 
     if (reference.m_pHead) {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pHead != NULL) RemoveAttachableByUniqueID(m_pHead->GetUniqueID());
         m_pHead = dynamic_cast<Attachable *>(reference.m_pHead->Clone());
-        AddAttachable(m_pHead, true);
+        m_pHead->Attach(this, m_pHead->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pHead);
     }
 
     if (reference.m_pJetpack) {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pJetpack != NULL) RemoveAttachableByUniqueID(m_pJetpack->GetUniqueID());
         m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        AddAttachable(m_pJetpack, true);
+        m_pJetpack->Attach(this, m_pJetpack->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pJetpack);
     }
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
 
     if (reference.m_pFGArm) {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pFGArm != NULL) RemoveAttachableByUniqueID(m_pFGArm->GetUniqueID());
         m_pFGArm = dynamic_cast<Arm *>(reference.m_pFGArm->Clone());
-        AddAttachable(m_pFGArm, true);
+        m_pFGArm->Attach(this, m_pFGArm->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pFGArm);
     }
 
     if (reference.m_pBGArm) {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pBGArm != NULL) RemoveAttachableByUniqueID(m_pBGArm->GetUniqueID());
         m_pBGArm = dynamic_cast<Arm *>(reference.m_pBGArm->Clone());
-        AddAttachable(m_pBGArm, true);
+        m_pBGArm->Attach(this, m_pBGArm->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pBGArm);
     }
 
     if (reference.m_pFGLeg) {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pFGLeg != NULL) RemoveAttachableByUniqueID(m_pFGLeg->GetUniqueID());
         m_pFGLeg = dynamic_cast<Leg *>(reference.m_pFGLeg->Clone());
-        AddAttachable(m_pFGLeg, true);
+        m_pFGLeg->Attach(this, m_pFGLeg->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pFGLeg);
     }
 
     if (reference.m_pBGLeg) {
-        //Handle any duplicated made by CopyOf, then set the appropriate member variable and add it as an attachable. Safety check is to avoid nullptr when reading from ini
-        if (m_pBGLeg != NULL) RemoveAttachableByUniqueID(m_pBGLeg->GetUniqueID());
         m_pBGLeg = dynamic_cast<Leg *>(reference.m_pBGLeg->Clone());
-        AddAttachable(m_pBGLeg, true);
+        m_pBGLeg->Attach(this, m_pBGLeg->GetParentOffset());
+        m_HardcodedAttachables.push_back(m_pBGLeg);
     }
 
     m_pFGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pFGHandGroup->Clone());
@@ -3218,7 +3212,7 @@ void AHuman::Update()
                 if (pNewHat)
                 {
 			        m_pHead->DetachAll(true);
-			        m_pHead->AddAttachable(pNewHat);
+			        m_pHead->AddAttachable(pNewHat, pNewHat->GetParentOffset());
                 }
 			}
 		}

@@ -618,16 +618,12 @@ ENTITYALLOCATION(MOSRotating)
     virtual bool CollideAtPoint(HitData &hitData);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnBounce
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  bounces off of something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The HitData describing the collision in detail.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this bounce.
-
+    /// <summary>
+    /// Defines what should happen when this MovableObject hits and then bounces off of something.
+    /// This is called by the owned Atom/AtomGroup of this MovableObject during travel.
+    /// </summary>
+    /// <param name="hd">The HitData describing the collision in detail.</param>
+    /// <return>Whether the MovableObject should immediately halt any travel going on after this bounce.</return>
     virtual bool OnBounce(HitData &hd);
 
 

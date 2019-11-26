@@ -415,10 +415,7 @@ bool Arm::ConstrainHand()
 
 void Arm::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
-    Detach();
-
     DropEverything();
-
     Attachable::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }
 

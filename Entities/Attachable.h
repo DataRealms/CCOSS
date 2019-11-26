@@ -571,16 +571,6 @@ ENTITYALLOCATION(Attachable)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DetachAll
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Detaches everything from this Attachable.
-// Arguments:       None.
-// Return value:    None.
-
-    void DetachAll(bool destroy);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RemoveWounds
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes a specified amount of wounds.
@@ -619,9 +609,6 @@ ENTITYALLOCATION(Attachable)
 
 	virtual void SetInheritsRotAngle(bool inherit) { m_InheritsRotAngle = inherit; }
 
-    void SetHardcoded(bool hardcoded) { m_Hardcoded = hardcoded; }
-
-    bool IsHardcoded() { return m_Hardcoded; }
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -672,8 +659,6 @@ protected:
 	// If true inherits Parent's rot angle, which is set MOSRotating::Update. Default is true to maintain maybe awkward but default behavior
 	bool m_InheritsRotAngle;
 
-    //Whether or not this attachable was added by hardcoded means, as opposed to ini. If true, it's not cloned into new MOSRotatings' m_Attachables lists automatically, as whatever hardcoded method added it should handle that
-    bool m_Hardcoded;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

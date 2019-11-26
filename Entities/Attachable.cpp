@@ -48,7 +48,6 @@ void Attachable::Clear()
     m_DamageCount = 0;
     m_OnlyLinForces = false;
 	m_InheritsRotAngle = true;
-    m_Hardcoded = m_Hardcoded == true ? true : false;
 }
 
 
@@ -88,7 +87,6 @@ int Attachable::Create(const Attachable &reference)
     m_DamageCount = reference.m_DamageCount;
     m_OnlyLinForces = reference.m_OnlyLinForces;
 	m_InheritsRotAngle = reference.m_InheritsRotAngle;
-    m_Hardcoded = reference.m_Hardcoded;
 
     return 0;
 }
@@ -241,7 +239,14 @@ bool Attachable::ParticlePenetration(HitData &hd)
 
 void Attachable::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
-    Detach();
+    if (m_pParent)
+    {
+        (MOSRotating *)m_pParent->RemoveAttachable(this);
+    }
+    else
+    {
+        Detach();
+    }
 
     MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }
@@ -398,7 +403,14 @@ bool Attachable::TransferJointImpulses(Vector &jointImpulses)
             }
         }
 
-        Detach();
+        if (m_pParent)
+        {
+            m_pParent->RemoveAttachable(this);
+        }
+        else
+        {
+            Detach();
+        }
         g_MovableMan.AddParticle(this);
         return false;
     }
@@ -645,27 +657,5 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
 #endif // _DEBUG
 */
 }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DetachAll
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Detaches everything from this Attachable.
-// Arguments:       None.
-// Return value:    None.
-
-void Attachable::DetachAll(bool destroy)
-{
-	for (list<Attachable *>::const_iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
-	{
-		if (destroy)
-			delete (*aItr);
-		else
-			(*aItr)->Detach();
-	}
-
-	m_Attachables.clear();
-}
-
 
 } // namespace RTE

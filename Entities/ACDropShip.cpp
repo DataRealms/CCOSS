@@ -96,38 +96,32 @@ int ACDropShip::Create(const ACDropShip &reference)
     if (reference.m_pRThruster)
     {
         m_pRThruster = dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone());
-        m_pRThruster->Attach(this, m_pRThruster->GetParentOffset());
-        m_HardcodedAttachables.push_back(m_pRThruster);
+        AddAttachable(m_pRThruster, true);
     }
     if (reference.m_pLThruster)
     {
         m_pLThruster = dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone());
-        m_pLThruster->Attach(this, m_pLThruster->GetParentOffset());
-        m_HardcodedAttachables.push_back(m_pLThruster);
+        AddAttachable(m_pLThruster, true);
     }
     if (reference.m_pURThruster)
     {
         m_pURThruster = dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone());
-        m_pURThruster->Attach(this, m_pURThruster->GetParentOffset());
-        m_HardcodedAttachables.push_back(m_pURThruster);
+        AddAttachable(m_pURThruster, true);
     }
     if (reference.m_pULThruster)
     {
         m_pULThruster = dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone());
-        m_pULThruster->Attach(this, m_pULThruster->GetParentOffset());
-        m_HardcodedAttachables.push_back(m_pULThruster);
+        AddAttachable(m_pULThruster, true);
     }
     if (reference.m_pRHatch)
     {
         m_pRHatch = dynamic_cast<Attachable *>(reference.m_pRHatch->Clone());
-        m_pRHatch->Attach(this, m_pRHatch->GetParentOffset());
-        m_HardcodedAttachables.push_back(m_pRHatch);
+        AddAttachable(m_pRHatch, true);
     }
     if (reference.m_pLHatch)
     {
         m_pLHatch = dynamic_cast<Attachable *>(reference.m_pLHatch->Clone());
-        m_pLHatch->Attach(this, m_pLHatch->GetParentOffset());
-        m_HardcodedAttachables.push_back(m_pLHatch);
+        AddAttachable(m_pLHatch, true);
     }
     m_HatchSwingRange = reference.m_HatchSwingRange;
     m_HatchOpeness = reference.m_HatchOpeness;
@@ -450,7 +444,7 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
     if (m_pRThruster && m_pRThruster->IsAttached())
     {
 //        m_pRThruster->GibThis();
-        m_pRThruster->Detach();
+        RemoveAttachable(m_pRThruster);
         Vector newVel(m_pRThruster->GetPos() - m_Pos);
         newVel.SetMagnitude(internalBlast);
         newVel += m_Vel + impactImpulse;
@@ -463,7 +457,7 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
     if (m_pLThruster && m_pLThruster->IsAttached())
     {
 //        m_pLThruster->GibThis();
-        m_pLThruster->Detach();
+        RemoveAttachable(m_pLThruster);
         Vector newVel(m_pLThruster->GetPos() - m_Pos);
         newVel.SetMagnitude(internalBlast);
         newVel += m_Vel + impactImpulse;
@@ -476,7 +470,7 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
     if (m_pRHatch && m_pRHatch->IsAttached())
     {
 //        m_pRHatch->GibThis();
-        m_pRHatch->Detach();
+        RemoveAttachable(m_pRHatch);
         Vector newVel(m_pRHatch->GetPos() - m_Pos);
         newVel.SetMagnitude(internalBlast);
         newVel += m_Vel + impactImpulse;
@@ -489,7 +483,7 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
     if (m_pLHatch && m_pLHatch->IsAttached())
     {
 //        m_pLHatch->GibThis();
-        m_pLHatch->Detach();
+        RemoveAttachable(m_pLHatch);
         Vector newVel(m_pLHatch->GetPos() - m_Pos);
         newVel.SetMagnitude(internalBlast);
         newVel += m_Vel + impactImpulse;
@@ -498,6 +492,19 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
         m_pLHatch->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pLHatch);
         m_pLHatch = 0;
+    }
+    //NOTE: The non-main thrusters are considered nothing here so not removed visibly. This can be changed
+    if (m_pURThruster && m_pURThruster->IsAttached())
+    {
+        RemoveAttachable(m_pURThruster);
+        m_pURThruster->SetToDelete(true);
+        m_pURThruster = 0;
+    }
+    if (m_pULThruster && m_pULThruster->IsAttached())
+    {
+        RemoveAttachable(m_pULThruster);
+        m_pULThruster->SetToDelete(true);
+        m_pULThruster = 0;
     }
 
     Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);

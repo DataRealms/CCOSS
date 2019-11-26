@@ -196,7 +196,7 @@ void MOSRotating::Clear()
     m_RecoilOffset.Reset();
     m_Emitters.clear();
     m_Attachables.clear();
-    m_HardcodedAttachables.clear();
+    m_AllAttachables.clear();
     m_Gibs.clear();
     m_GibImpulseLimit = 0;
     m_GibWoundLimit = 0;
@@ -382,19 +382,14 @@ int MOSRotating::Create(const MOSRotating &reference)
         pEmitter = 0;
     }
 
+    m_AllAttachables.clear();
     Attachable *pAttachable = 0;
     for (list<Attachable *>::const_iterator aItr = reference.m_Attachables.begin(); aItr != reference.m_Attachables.end(); ++aItr)
     {
         SLICK_PROFILENAME("Attachable Copies", 0xFF775544);
 
         pAttachable = dynamic_cast<Attachable *>((*aItr)->Clone());
-        if (pAttachable->IsHardcoded())
-        {
-            continue;
-        }
-
-        pAttachable->Attach(this, pAttachable->GetParentOffset());
-        m_Attachables.push_back(pAttachable);
+        AddAttachable(pAttachable, pAttachable->GetParentOffset());
         pAttachable = 0;
     }
 
@@ -587,8 +582,6 @@ void MOSRotating::Destroy(bool notInherited)
         delete (*itr);
     for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
         delete (*aItr);
-    for (list<Attachable *>::iterator haItr = m_HardcodedAttachables.begin(); haItr != m_HardcodedAttachables.end(); ++haItr)
-        delete (*haItr);
 
     destroy_bitmap(m_pFlipBitmap);
     destroy_bitmap(m_pFlipBitmapS);
@@ -1814,50 +1807,80 @@ void MOSRotating::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
     MOSprite::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
 }
 
-bool MOSRotating::RemoveAttachableByUniqueID(long uniqueID)
-{
-    {
-        if (m_Attachables.size() > 0)
-        {
-            for (Attachable * attachable : m_Attachables)
-            {
-                if (attachable->GetUniqueID() == uniqueID)
-                {
-                    m_Attachables.remove(attachable);
-                    attachable->Detach();
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-void MOSRotating::AddAttachable(Attachable * pAttachable)
+void MOSRotating::AddAttachable(Attachable *pAttachable)
 {
     if (pAttachable)
     {
-        pAttachable->Attach(this);
-        m_Attachables.push_back(pAttachable);
+        AddAttachable(pAttachable, pAttachable->GetParentOffset());
     }
 }
 
-void MOSRotating::AddAttachable(Attachable * pAttachable, const Vector& parentOffsetToSet)
+void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet)
+{
+    AddAttachable(pAttachable, parentOffsetToSet, false);
+}
+
+void MOSRotating::AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable)
+{
+    if (pAttachable)
+    {
+        AddAttachable(pAttachable, pAttachable->GetParentOffset(), isHardcodedAttachable);
+    }
+}
+
+void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOffsetToSet, bool isHardcodedAttachable)
 {
     if (pAttachable)
     {
         pAttachable->Attach(this, parentOffsetToSet);
-        m_Attachables.push_back(pAttachable);
+        if (!isHardcodedAttachable)
+        {
+            m_Attachables.push_back(pAttachable);
+        }
+        m_AllAttachables.push_back(pAttachable);
     }
 }
 
-std::list<Attachable*> MOSRotating::GetAllAttachables()
+bool MOSRotating::RemoveAttachable(long attachableUniqueId)
 {
-    std::list<Attachable *> allAttachables(m_HardcodedAttachables.begin(), m_HardcodedAttachables.end());
-    allAttachables.insert(allAttachables.end(), m_Attachables.begin(), m_Attachables.end());
-    return allAttachables;
+    MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueId);
+    if (attachableAsMovableObject)
+    {
+        return RemoveAttachable((Attachable *)attachableAsMovableObject);
+    }
+    return false;
 }
 
+bool MOSRotating::RemoveAttachable(Attachable *pAttachable)
+{
+    if (pAttachable)
+    {
+        if (m_Attachables.size() > 0)
+        {
+            m_Attachables.remove(pAttachable);
+        }
+        if (m_AllAttachables.size() > 0)
+        {
+            m_AllAttachables.remove(pAttachable);
+        }
+        pAttachable->Detach();
+        return true;
+    }
+    return false;
+}
+
+void MOSRotating::DetachOrDestroyAll(bool destroy)
+{
+    for (list<Attachable *>::const_iterator aItr = m_AllAttachables.begin(); aItr != m_AllAttachables.end(); ++aItr)
+    {
+        if (destroy)
+            delete (*aItr);
+        else
+            (*aItr)->Detach();
+    }
+
+    m_AllAttachables.clear();
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetMOIDs

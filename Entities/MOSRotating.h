@@ -729,16 +729,19 @@ ENTITYALLOCATION(MOSRotating)
     /// Attaches the passed in attachable and adds it to the list of attachables
     /// </summary>
     /// <param name="pAttachable"></param>
-    virtual void AddAttachable(Attachable* pAttachable);
+    void AddAttachable(Attachable *pAttachable);
 
-    /// <summary>
-    /// Attaches the passed in attachable, setting its m_parentOffset to the passed in vector, and adds it to the list of attachables
-    /// </summary>
-    /// <param name="pAttachable"></param>
-    /// <param name="parentOffsetToSet"></param>
-    virtual void AddAttachable(Attachable * pAttachable, const Vector& parentOffsetToSet);
+    void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet);
 
-    std::list<Attachable *> GetAllAttachables();
+    void AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable);
+
+    void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet, bool isHardcodedAttachable);
+
+    bool RemoveAttachable(long attachableUniqueId);
+
+    bool RemoveAttachable(Attachable *pAttachable);
+
+    void DetachOrDestroyAll(bool destroy);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1138,13 +1141,6 @@ protected:
                                  MOID rootMOID = g_NoMOID,
                                  bool makeNewMOID = true);
 
-    /// <summary>
-    /// Iterates through the list of attachables and removes the first entry with this PresetName
-    /// </summary>
-    /// <param name="presetName"></param>
-    /// <returns>True if an element was removed, false if no element was removed</returns>
-    virtual bool RemoveAttachableByUniqueID(long uniqueID);
-
     // Member variables
     static Entity::ClassInfo m_sClass;
 //    float m_Torque; // In kg * r/s^2 (Newtons).
@@ -1175,8 +1171,8 @@ protected:
     std::list<AEmitter *> m_Emitters;
     // The list of general Attachables currently attached and Owned by this.
     std::list<Attachable *> m_Attachables;
-    // The list of hardcoded Attachables added specifically for the given MOSRotating child class
-    std::list<Attachable *> m_HardcodedAttachables;
+    // The list of all Attachables, including both hardcoded attachables and those added through ini or lua
+    std::list<Attachable *> m_AllAttachables;
     // The list of Gib:s this will create when gibbed
     std::list<Gib> m_Gibs;
     // The amount of impulse force required to gib this, in kg * (m/s). 0 means no limit

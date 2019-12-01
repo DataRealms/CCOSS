@@ -426,73 +426,61 @@ bool ACRocket::OnSink(const Vector &pos)
 
 void ACRocket::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
-// TODO: improve, make proper gibbing!
+    // TODO: maybe make hardcoded attachables gib if their gib list isn't empty
     // Detach all limbs and let loose
     if (m_pRLeg && m_pRLeg->IsAttached())
     {
-//        m_pRLeg->GibThis();
         RemoveAttachable(m_pRLeg);
-        Vector newVel(m_pRLeg->GetPos() - m_Pos);
-        newVel.SetMagnitude(internalBlast);
-        newVel += m_Vel + impactImpulse;
-        m_pRLeg->SetVel(newVel);
-        m_pRLeg->SetAngularVel(NormalRand());
+        SetAttachableVelocitiesForGibbing(m_pRLeg, impactImpulse, internalBlast);
         m_pRLeg->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pRLeg);
         m_pRLeg = 0;
     }
     if (m_pLLeg && m_pLLeg->IsAttached())
     {
-//        m_pLLeg->GibThis();
         RemoveAttachable(m_pLLeg);
-        Vector newVel(m_pLLeg->GetPos() - m_Pos);
-        newVel.SetMagnitude(internalBlast);
-        newVel += m_Vel + impactImpulse;
-        m_pLLeg->SetVel(newVel);
-        m_pLLeg->SetAngularVel(NormalRand());
+        SetAttachableVelocitiesForGibbing(m_pLLeg, impactImpulse, internalBlast);
         m_pLLeg->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pLLeg);
         m_pLLeg = 0;
     }
     if (m_pMThruster && m_pMThruster->IsAttached())
     {
-//        m_pMThruster->GibThis();
         RemoveAttachable(m_pMThruster);
-        Vector newVel(m_pMThruster->GetPos() - m_Pos);
-        newVel.SetMagnitude(internalBlast);
-        newVel += m_Vel + impactImpulse;
-        m_pMThruster->SetVel(newVel);
-        m_pMThruster->SetAngularVel(NormalRand());
+        SetAttachableVelocitiesForGibbing(m_pMThruster, impactImpulse, internalBlast);
         m_pMThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pMThruster);
         m_pMThruster = 0;
     }
-    //NOTE: The non-main thrusters are considered nothing here so not removed visibly. This can be changed
     if (m_pRThruster && m_pRThruster->IsAttached())
     {
         RemoveAttachable(m_pRThruster);
-        m_pRThruster->SetToDelete(true);
+        SetAttachableVelocitiesForGibbing(m_pRThruster, impactImpulse, internalBlast);
+        m_pRThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pRThruster);
         m_pRThruster = 0;
     }
     if (m_pLThruster && m_pLThruster->IsAttached())
     {
         RemoveAttachable(m_pLThruster);
-        m_pLThruster->SetToDelete(true);
+        SetAttachableVelocitiesForGibbing(m_pLThruster, impactImpulse, internalBlast);
+        m_pLThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pLThruster);
         m_pLThruster = 0;
     }
     if (m_pURThruster && m_pURThruster->IsAttached())
     {
         RemoveAttachable(m_pURThruster);
-        m_pURThruster->SetToDelete(true);
+        SetAttachableVelocitiesForGibbing(m_pURThruster, impactImpulse, internalBlast);
+        m_pURThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pURThruster);
         m_pURThruster = 0;
     }
     if (m_pULThruster && m_pULThruster->IsAttached())
     {
         RemoveAttachable(m_pULThruster);
-        m_pULThruster->SetToDelete(true);
+        SetAttachableVelocitiesForGibbing(m_pULThruster, impactImpulse, internalBlast);
+        m_pULThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pULThruster);
         m_pULThruster = 0;
     }

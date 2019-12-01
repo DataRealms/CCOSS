@@ -473,6 +473,12 @@ int ACrab::Save(ostream &stream) const
 
 void ACrab::Destroy(bool notInherited)
 {
+    delete m_pTurret;
+    delete m_pLFGLeg;
+    delete m_pLBGLeg;
+    delete m_pRFGLeg;
+    delete m_pRBGLeg;
+    delete m_pJetpack;
     delete m_pLFGFootGroup;
     delete m_pLBGFootGroup;
     delete m_pRFGFootGroup;

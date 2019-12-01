@@ -312,9 +312,17 @@ int ACRocket::Save(Writer &writer) const
 
 void ACRocket::Destroy(bool notInherited)
 {
+    delete m_pRLeg;
+    delete m_pLLeg;
     delete m_pBodyAG;
     delete m_pRFootGroup;
     delete m_pLFootGroup;
+
+    delete m_pMThruster;
+    delete m_pRThruster;
+    delete m_pLThruster;
+    delete m_pURThruster;
+    delete m_pULThruster;
     
 //    for (deque<LimbPath *>::iterator itr = m_WalkPaths.begin();
 //         itr != m_WalkPaths.end(); ++itr)
@@ -464,24 +472,28 @@ void ACRocket::GibThis(Vector impactImpulse, float internalBlast, MovableObject 
     {
         RemoveAttachable(m_pRThruster);
         m_pRThruster->SetToDelete(true);
+        g_MovableMan.AddParticle(m_pRThruster);
         m_pRThruster = 0;
     }
     if (m_pLThruster && m_pLThruster->IsAttached())
     {
         RemoveAttachable(m_pLThruster);
         m_pLThruster->SetToDelete(true);
+        g_MovableMan.AddParticle(m_pLThruster);
         m_pLThruster = 0;
     }
     if (m_pURThruster && m_pURThruster->IsAttached())
     {
         RemoveAttachable(m_pURThruster);
         m_pURThruster->SetToDelete(true);
+        g_MovableMan.AddParticle(m_pURThruster);
         m_pURThruster = 0;
     }
     if (m_pULThruster && m_pULThruster->IsAttached())
     {
         RemoveAttachable(m_pULThruster);
         m_pULThruster->SetToDelete(true);
+        g_MovableMan.AddParticle(m_pULThruster);
         m_pULThruster = 0;
     }
 

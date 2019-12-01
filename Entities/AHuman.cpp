@@ -480,6 +480,12 @@ int AHuman::Save(ostream &stream) const
 
 void AHuman::Destroy(bool notInherited)
 {
+    delete m_pBGLeg;
+    delete m_pFGLeg;
+    delete m_pBGArm;
+    delete m_pFGArm;
+    delete m_pJetpack;
+    delete m_pHead;
     delete m_pBGHandGroup;
     delete m_pFGFootGroup;
     delete m_pBGFootGroup;

@@ -498,12 +498,14 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
     {
         RemoveAttachable(m_pURThruster);
         m_pURThruster->SetToDelete(true);
+        g_MovableMan.AddParticle(m_pURThruster);
         m_pURThruster = 0;
     }
     if (m_pULThruster && m_pULThruster->IsAttached())
     {
         RemoveAttachable(m_pULThruster);
         m_pULThruster->SetToDelete(true);
+        g_MovableMan.AddParticle(m_pULThruster);
         m_pULThruster = 0;
     }
 

@@ -189,6 +189,7 @@ int Leg::Save(Writer &writer) const
 
 void Leg::Destroy(bool notInherited)
 {
+    delete m_pFoot;
     if (!notInherited)
         Attachable::Destroy();
     Clear();

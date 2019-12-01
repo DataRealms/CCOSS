@@ -1099,9 +1099,13 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
 
     // Throw out all the attachables
     Attachable *pAttachable = 0;
-    for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
+    for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ) //NOTE: No increment to handle RemoveAttachable removing the object
     {
         SLICK_PROFILENAME("Throwing out Attachables", 0xFF446542);
+
+        DAssert((*aItr), "Broken Attachable!");
+        if (!(*aItr))
+            continue;
 
         // Get handy handle to the object we're putting
         pAttachable = *aItr;
@@ -1110,10 +1114,6 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
         velMin = internalBlast / pAttachable->GetMass();
         velRange = 10.0f;
 
-        // Set up its position and velocity
-// Position and rot is already set
-//        pAttachable->SetPos(m_Pos + RotateOffset(pAttachable->GetParentOffset()));
-//        pAttachable->SetRotAngle(m_Rotation.GetRadAngle() + pAttachable->GetRotMatrix().GetRadAngle());
         // Rotational angle velocity
         pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.35) + (pAttachable->GetAngularVel() * 0.65 / pAttachable->GetMass()) * PosRand());
         // Make it rotate away in the appropriate direction depending on which side of the object it is on
@@ -1138,26 +1138,21 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
         else
             gibVel.SetMagnitude(velMin + velRange * PosRand());
         gibVel.RadRotate(impactImpulse.GetAbsRadAngle());
-// Don't! the offset was already rotated!
-//            gibVel = RotateOffset(gibVel);
-        // Distribute any impact implse out over all the gibs
-//            gibVel += (impactImpulse / m_Gibs.size()) / pAttachable->GetMass();
         pAttachable->SetVel(m_Vel + gibVel);
 
         // Set the gib to not hit a specific MO
         if (pIgnoreMO)
             pAttachable->SetWhichMOToNotHit(pIgnoreMO);
 
-        // Make em not hit MOs
-// TODO: Really?
-//        pAttachable->SetToGetHitByMOs(false);
-        // Detach from this and add to the scene, passing ownership from the attachables
-        pAttachable->Detach();
+        // Safely remove attachable and add it to the scene
+        ++aItr;
+        RemoveAttachable(pAttachable);
         g_MovableMan.AddParticle(pAttachable);
         pAttachable = 0;
     }
     // Clear the attachables list, all the attachables ownership have been handed to the movableman
     m_Attachables.clear();
+    m_AllAttachables.clear();
 
     // Play the gib sound
     m_GibSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
@@ -1713,38 +1708,26 @@ void MOSRotating::Update()
     }
 
     // Update all the attachables
-    list<Attachable *>::iterator eraseItr;
+    Attachable *pAttachable = 0;
     for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ) // NOTE NO INCCREMENT!
     {
         DAssert((*aItr), "Broken Attachable!");
         if (!(*aItr))
             continue;
 
-        (*aItr)->SetHFlipped(m_HFlipped);
-        (*aItr)->SetJointPos(m_Pos + RotateOffset((*aItr)->GetParentOffset()));
-		if ((*aItr)->InheritsRotAngle())
-			(*aItr)->SetRotAngle(m_Rotation.GetRadAngle());
-//            (*aItr)->SetEmitAngle(m_Rotation);
-        (*aItr)->Update();
-        if (!ApplyAttachableForces(*aItr))
-        {
-            // This hanky panky necessary to not invalidate the aItr iterator
-            eraseItr = aItr;
-            // DON'T DELETE, ApplyAttachableForces takes care of it!
-//            delete (*eraseItr);
-//            (*eraseItr) = 0;
-            ++aItr;
-            if (m_Attachables.size() == 1)
-                m_Attachables.clear();
-            else
-                m_Attachables.erase(eraseItr);
-        }
-        else
-            ++aItr;
-    }
+        pAttachable = *aItr;
 
-// Don't do this anymore, the recoil source will set it back to false
-//    m_Recoiled = false;
+        pAttachable->SetHFlipped(m_HFlipped);
+        pAttachable->SetJointPos(m_Pos + RotateOffset((pAttachable)->GetParentOffset()));
+        if (pAttachable->InheritsRotAngle())
+        {
+            pAttachable->SetRotAngle(m_Rotation.GetRadAngle());
+        }
+        pAttachable->Update();
+
+        ++aItr;
+        ApplyAttachableForces(pAttachable);
+    }
 
     // Create intermediate flipping bitmap if there isn't one yet
     if (m_HFlipped && !m_pFlipBitmap && m_aSprite[0])
@@ -2170,8 +2153,7 @@ bool MOSRotating::ApplyAttachableForces(Attachable *pAttachable, bool isCritical
         if (pAttachable->IsSetToDelete())
         {
             intact = false;
-            // Only detach, don't delete yet.. we need the wound info first. Delete below.
-            pAttachable->Detach();
+            RemoveAttachable(pAttachable);
             // If set to delete, then add to the movableman, and it'll delete it when it's safe to!
             g_MovableMan.AddParticle(pAttachable);
         }

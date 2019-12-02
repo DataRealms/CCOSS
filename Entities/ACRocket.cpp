@@ -104,20 +104,15 @@ int ACRocket::Create()
 int ACRocket::Create(const ACRocket &reference)
 {
     ACraft::Create(reference);
-/*
-    if (reference.m_pCapsule) {
-        m_pCapsule = dynamic_cast<Attachable *>(reference.m_pCapsule->Clone());
-        m_pCapsule->Attach(this, m_pCapsule->GetParentOffset());
-    }
-*/
+
     if (reference.m_pRLeg) {
         m_pRLeg = dynamic_cast<Leg *>(reference.m_pRLeg->Clone());
-        m_pRLeg->Attach(this, m_pRLeg->GetParentOffset());
+        AddAttachable(m_pRLeg, true);
     }
 
     if (reference.m_pLLeg) {
         m_pLLeg = dynamic_cast<Leg *>(reference.m_pLLeg->Clone());
-        m_pLLeg->Attach(this, m_pLLeg->GetParentOffset());
+        AddAttachable(m_pLLeg, true);
     }
 
     m_pBodyAG = dynamic_cast<AtomGroup *>(reference.m_pBodyAG->Clone());
@@ -137,27 +132,27 @@ int ACRocket::Create(const ACRocket &reference)
     if (reference.m_pMThruster)
     {
         m_pMThruster = dynamic_cast<AEmitter *>(reference.m_pMThruster->Clone());
-        m_pMThruster->Attach(this, m_pMThruster->GetParentOffset());
+        AddAttachable(m_pMThruster, true);
     }
     if (reference.m_pRThruster)
     {
         m_pRThruster = dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone());
-        m_pRThruster->Attach(this, m_pRThruster->GetParentOffset());
+        AddAttachable(m_pRThruster, true);
     }
     if (reference.m_pLThruster)
     {
         m_pLThruster = dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone());
-        m_pLThruster->Attach(this, m_pLThruster->GetParentOffset());
+        AddAttachable(m_pLThruster, true);
     }
     if (reference.m_pURThruster)
     {
         m_pURThruster = dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone());
-        m_pURThruster->Attach(this, m_pURThruster->GetParentOffset());
+        AddAttachable(m_pURThruster, true);
     }
     if (reference.m_pULThruster)
     {
         m_pULThruster = dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone());
-        m_pULThruster->Attach(this, m_pULThruster->GetParentOffset());
+        AddAttachable(m_pULThruster, true);
     }
 
     m_GearState = reference.m_GearState;
@@ -317,21 +312,18 @@ int ACRocket::Save(Writer &writer) const
 
 void ACRocket::Destroy(bool notInherited)
 {
-//    g_MovableMan.RemoveEntityPreset(this);
-
-//    delete m_pCapsule;
     delete m_pRLeg;
     delete m_pLLeg;
     delete m_pBodyAG;
     delete m_pRFootGroup;
     delete m_pLFootGroup;
-    
+
     delete m_pMThruster;
     delete m_pRThruster;
     delete m_pLThruster;
     delete m_pURThruster;
     delete m_pULThruster;
-
+    
 //    for (deque<LimbPath *>::iterator itr = m_WalkPaths.begin();
 //         itr != m_WalkPaths.end(); ++itr)
 //        delete *itr;
@@ -434,46 +426,63 @@ bool ACRocket::OnSink(const Vector &pos)
 
 void ACRocket::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
-// TODO: improve, make proper gibbing!
+    // TODO: maybe make hardcoded attachables gib if their gib list isn't empty
     // Detach all limbs and let loose
     if (m_pRLeg && m_pRLeg->IsAttached())
     {
-//        m_pRLeg->GibThis();
-        m_pRLeg->Detach();
-        Vector newVel(m_pRLeg->GetPos() - m_Pos);
-        newVel.SetMagnitude(internalBlast);
-        newVel += m_Vel + impactImpulse;
-        m_pRLeg->SetVel(newVel);
-        m_pRLeg->SetAngularVel(NormalRand());
+        RemoveAttachable(m_pRLeg);
+        SetAttachableVelocitiesForGibbing(m_pRLeg, impactImpulse, internalBlast);
         m_pRLeg->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pRLeg);
         m_pRLeg = 0;
     }
     if (m_pLLeg && m_pLLeg->IsAttached())
     {
-//        m_pLLeg->GibThis();
-        m_pLLeg->Detach();
-        Vector newVel(m_pLLeg->GetPos() - m_Pos);
-        newVel.SetMagnitude(internalBlast);
-        newVel += m_Vel + impactImpulse;
-        m_pLLeg->SetVel(newVel);
-        m_pLLeg->SetAngularVel(NormalRand());
+        RemoveAttachable(m_pLLeg);
+        SetAttachableVelocitiesForGibbing(m_pLLeg, impactImpulse, internalBlast);
         m_pLLeg->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pLLeg);
         m_pLLeg = 0;
     }
     if (m_pMThruster && m_pMThruster->IsAttached())
     {
-//        m_pMThruster->GibThis();
-        m_pMThruster->Detach();
-        Vector newVel(m_pMThruster->GetPos() - m_Pos);
-        newVel.SetMagnitude(internalBlast);
-        newVel += m_Vel + impactImpulse;
-        m_pMThruster->SetVel(newVel);
-        m_pMThruster->SetAngularVel(NormalRand());
+        RemoveAttachable(m_pMThruster);
+        SetAttachableVelocitiesForGibbing(m_pMThruster, impactImpulse, internalBlast);
         m_pMThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pMThruster);
         m_pMThruster = 0;
+    }
+    if (m_pRThruster && m_pRThruster->IsAttached())
+    {
+        RemoveAttachable(m_pRThruster);
+        SetAttachableVelocitiesForGibbing(m_pRThruster, impactImpulse, internalBlast);
+        m_pRThruster->SetToGetHitByMOs(false);
+        g_MovableMan.AddParticle(m_pRThruster);
+        m_pRThruster = 0;
+    }
+    if (m_pLThruster && m_pLThruster->IsAttached())
+    {
+        RemoveAttachable(m_pLThruster);
+        SetAttachableVelocitiesForGibbing(m_pLThruster, impactImpulse, internalBlast);
+        m_pLThruster->SetToGetHitByMOs(false);
+        g_MovableMan.AddParticle(m_pLThruster);
+        m_pLThruster = 0;
+    }
+    if (m_pURThruster && m_pURThruster->IsAttached())
+    {
+        RemoveAttachable(m_pURThruster);
+        SetAttachableVelocitiesForGibbing(m_pURThruster, impactImpulse, internalBlast);
+        m_pURThruster->SetToGetHitByMOs(false);
+        g_MovableMan.AddParticle(m_pURThruster);
+        m_pURThruster = 0;
+    }
+    if (m_pULThruster && m_pULThruster->IsAttached())
+    {
+        RemoveAttachable(m_pULThruster);
+        SetAttachableVelocitiesForGibbing(m_pULThruster, impactImpulse, internalBlast);
+        m_pULThruster->SetToGetHitByMOs(false);
+        g_MovableMan.AddParticle(m_pULThruster);
+        m_pULThruster = 0;
     }
 
     Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);

@@ -618,16 +618,12 @@ ENTITYALLOCATION(MOSRotating)
     virtual bool CollideAtPoint(HitData &hitData);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnBounce
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  bounces off of something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The HitData describing the collision in detail.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this bounce.
-
+    /// <summary>
+    /// Defines what should happen when this MovableObject hits and then bounces off of something.
+    /// This is called by the owned Atom/AtomGroup of this MovableObject during travel.
+    /// </summary>
+    /// <param name="hd">The HitData describing the collision in detail.</param>
+    /// <return>Whether the MovableObject should immediately halt any travel going on after this bounce.</return>
     virtual bool OnBounce(HitData &hd);
 
 
@@ -724,6 +720,20 @@ ENTITYALLOCATION(MOSRotating)
 // Return value:    None.
 
     virtual void AttachEmitter(AEmitter *pEmitter, Vector emitOffset, bool checkGibWoundLimit = true);
+
+    void AddAttachable(Attachable *pAttachable);
+
+    void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet);
+
+    void AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable);
+
+    void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet, bool isHardcodedAttachable);
+
+    bool RemoveAttachable(long attachableUniqueId);
+
+    bool RemoveAttachable(Attachable *pAttachable);
+
+    void DetachOrDestroyAll(bool destroy);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1173,6 +1183,8 @@ protected:
     std::list<AEmitter *> m_Emitters;
     // The list of general Attachables currently attached and Owned by this.
     std::list<Attachable *> m_Attachables;
+    // The list of all Attachables, including both hardcoded attachables and those added through ini or lua
+    std::list<Attachable *> m_AllAttachables;
     // The list of Gib:s this will create when gibbed
     std::list<Gib> m_Gibs;
     // The amount of impulse force required to gib this, in kg * (m/s). 0 means no limit

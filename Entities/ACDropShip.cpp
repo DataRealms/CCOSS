@@ -96,32 +96,32 @@ int ACDropShip::Create(const ACDropShip &reference)
     if (reference.m_pRThruster)
     {
         m_pRThruster = dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone());
-        m_pRThruster->Attach(this, m_pRThruster->GetParentOffset());
+        AddAttachable(m_pRThruster, true);
     }
     if (reference.m_pLThruster)
     {
         m_pLThruster = dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone());
-        m_pLThruster->Attach(this, m_pLThruster->GetParentOffset());
+        AddAttachable(m_pLThruster, true);
     }
     if (reference.m_pURThruster)
     {
         m_pURThruster = dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone());
-        m_pURThruster->Attach(this, m_pURThruster->GetParentOffset());
+        AddAttachable(m_pURThruster, true);
     }
     if (reference.m_pULThruster)
     {
         m_pULThruster = dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone());
-        m_pULThruster->Attach(this, m_pULThruster->GetParentOffset());
+        AddAttachable(m_pULThruster, true);
     }
     if (reference.m_pRHatch)
     {
         m_pRHatch = dynamic_cast<Attachable *>(reference.m_pRHatch->Clone());
-        m_pRHatch->Attach(this, m_pRHatch->GetParentOffset());
+        AddAttachable(m_pRHatch, true);
     }
     if (reference.m_pLHatch)
     {
         m_pLHatch = dynamic_cast<Attachable *>(reference.m_pLHatch->Clone());
-        m_pLHatch->Attach(this, m_pLHatch->GetParentOffset());
+        AddAttachable(m_pLHatch, true);
     }
     m_HatchSwingRange = reference.m_HatchSwingRange;
     m_HatchOpeness = reference.m_HatchOpeness;
@@ -267,8 +267,6 @@ int ACDropShip::Save(Writer &writer) const
 
 void ACDropShip::Destroy(bool notInherited)
 {
-//    g_MovableMan.RemoveEntityPreset(this);
-
     delete m_pBodyAG;
     delete m_pRThruster;
     delete m_pLThruster;
@@ -447,59 +445,55 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
 {
     SLICK_PROFILE(0xFF786542);
 
-// TODO: improve, make proper gibbing!
+    // TODO: maybe make hardcoded attachables gib if their gib list isn't empty
     // Detach all limbs and let loose
     if (m_pRThruster && m_pRThruster->IsAttached())
     {
-//        m_pRThruster->GibThis();
-        m_pRThruster->Detach();
-        Vector newVel(m_pRThruster->GetPos() - m_Pos);
-        newVel.SetMagnitude(internalBlast);
-        newVel += m_Vel + impactImpulse;
-        m_pRThruster->SetVel(newVel);
-        m_pRThruster->SetAngularVel(NormalRand());
+        RemoveAttachable(m_pRThruster);
+        SetAttachableVelocitiesForGibbing(m_pRThruster, impactImpulse, internalBlast);
         m_pRThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pRThruster);
         m_pRThruster = 0;
     }
     if (m_pLThruster && m_pLThruster->IsAttached())
     {
-//        m_pLThruster->GibThis();
-        m_pLThruster->Detach();
-        Vector newVel(m_pLThruster->GetPos() - m_Pos);
-        newVel.SetMagnitude(internalBlast);
-        newVel += m_Vel + impactImpulse;
-        m_pLThruster->SetVel(newVel);
-        m_pLThruster->SetAngularVel(NormalRand());
+        RemoveAttachable(m_pLThruster);
+        SetAttachableVelocitiesForGibbing(m_pLThruster, impactImpulse, internalBlast);
         m_pLThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pLThruster);
         m_pLThruster = 0;
     }
     if (m_pRHatch && m_pRHatch->IsAttached())
     {
-//        m_pRHatch->GibThis();
-        m_pRHatch->Detach();
-        Vector newVel(m_pRHatch->GetPos() - m_Pos);
-        newVel.SetMagnitude(internalBlast);
-        newVel += m_Vel + impactImpulse;
-        m_pRHatch->SetVel(newVel);
-        m_pRHatch->SetAngularVel(NormalRand());
+        RemoveAttachable(m_pRHatch);
+        SetAttachableVelocitiesForGibbing(m_pRHatch, impactImpulse, internalBlast);
         m_pRHatch->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pRHatch);
         m_pRHatch = 0;
     }
     if (m_pLHatch && m_pLHatch->IsAttached())
     {
-//        m_pLHatch->GibThis();
-        m_pLHatch->Detach();
-        Vector newVel(m_pLHatch->GetPos() - m_Pos);
-        newVel.SetMagnitude(internalBlast);
-        newVel += m_Vel + impactImpulse;
-        m_pLHatch->SetVel(newVel);
-        m_pLHatch->SetAngularVel(NormalRand());
+        RemoveAttachable(m_pLHatch);
+        SetAttachableVelocitiesForGibbing(m_pLHatch, impactImpulse, internalBlast);
         m_pLHatch->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pLHatch);
         m_pLHatch = 0;
+    }
+    if (m_pURThruster && m_pURThruster->IsAttached())
+    {
+        RemoveAttachable(m_pURThruster);
+        SetAttachableVelocitiesForGibbing(m_pURThruster, impactImpulse, internalBlast);
+        m_pURThruster->SetToGetHitByMOs(false);
+        g_MovableMan.AddParticle(m_pURThruster);
+        m_pURThruster = 0;
+    }
+    if (m_pULThruster && m_pULThruster->IsAttached())
+    {
+        RemoveAttachable(m_pULThruster);
+        SetAttachableVelocitiesForGibbing(m_pULThruster, impactImpulse, internalBlast);
+        m_pULThruster->SetToGetHitByMOs(false);
+        g_MovableMan.AddParticle(m_pULThruster);
+        m_pULThruster = 0;
     }
 
     Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);

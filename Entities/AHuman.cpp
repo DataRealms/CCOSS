@@ -181,12 +181,12 @@ int AHuman::Create(const AHuman &reference)
 
     if (reference.m_pHead) {
         m_pHead = dynamic_cast<Attachable *>(reference.m_pHead->Clone());
-        m_pHead->Attach(this);
+        AddAttachable(m_pHead, true);
     }
 
     if (reference.m_pJetpack) {
         m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        m_pJetpack->Attach(this);
+        AddAttachable(m_pJetpack, true);
     }
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
@@ -194,22 +194,22 @@ int AHuman::Create(const AHuman &reference)
 
     if (reference.m_pFGArm) {
         m_pFGArm = dynamic_cast<Arm *>(reference.m_pFGArm->Clone());
-        m_pFGArm->Attach(this);
+        AddAttachable(m_pFGArm, true);
     }
 
     if (reference.m_pBGArm) {
         m_pBGArm = dynamic_cast<Arm *>(reference.m_pBGArm->Clone());
-        m_pBGArm->Attach(this);
+        AddAttachable(m_pBGArm, true);
     }
 
     if (reference.m_pFGLeg) {
         m_pFGLeg = dynamic_cast<Leg *>(reference.m_pFGLeg->Clone());
-        m_pFGLeg->Attach(this);
+        AddAttachable(m_pFGLeg, true);
     }
 
     if (reference.m_pBGLeg) {
         m_pBGLeg = dynamic_cast<Leg *>(reference.m_pBGLeg->Clone());
-        m_pBGLeg->Attach(this);
+        AddAttachable(m_pBGLeg, true);
     }
 
     m_pFGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pFGHandGroup->Clone());
@@ -480,8 +480,6 @@ int AHuman::Save(ostream &stream) const
 
 void AHuman::Destroy(bool notInherited)
 {
-//    g_MovableMan.RemoveEntityPreset(this);
-
     delete m_pBGLeg;
     delete m_pFGLeg;
     delete m_pBGArm;
@@ -1749,7 +1747,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     // Detach all limbs and let loose
     if (m_pHead && m_pHead->IsAttached())
     {
-        m_pHead->Detach();
+        RemoveAttachable(m_pHead);
         m_pHead->SetVel(m_Vel + m_pHead->GetParentOffset() * PosRand());
         m_pHead->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pHead);
@@ -1757,15 +1755,15 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     }
     if (m_pJetpack && m_pJetpack->IsAttached())
     {
-// Jetpacks are really nothing, so just delete them safely
-        m_pJetpack->Detach();
+        // Jetpacks are really nothing, so just delete them safely
+        RemoveAttachable(m_pJetpack);
         m_pJetpack->SetToDelete(true);
         g_MovableMan.AddParticle(m_pJetpack);
         m_pJetpack = 0;
     }
     if (m_pFGArm && m_pFGArm->IsAttached())
     {
-        m_pFGArm->Detach();
+        RemoveAttachable(m_pFGArm);
         m_pFGArm->SetVel(m_Vel + m_pFGArm->GetParentOffset() * PosRand());
         m_pFGArm->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pFGArm);
@@ -1773,7 +1771,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     }
     if (m_pBGArm && m_pBGArm->IsAttached())
     {
-        m_pBGArm->Detach();
+        RemoveAttachable(m_pBGArm);
         m_pBGArm->SetVel(m_Vel + m_pBGArm->GetParentOffset() * PosRand());
         m_pBGArm->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pBGArm);
@@ -1781,7 +1779,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     }
     if (m_pFGLeg && m_pFGLeg->IsAttached())
     {
-        m_pFGLeg->Detach();
+        RemoveAttachable(m_pFGLeg);
         m_pFGLeg->SetVel(m_Vel + m_pFGLeg->GetParentOffset() * PosRand());
         m_pFGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pFGLeg);
@@ -1789,7 +1787,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     }
     if (m_pBGLeg && m_pBGLeg->IsAttached())
     {
-        m_pBGLeg->Detach();
+        RemoveAttachable(m_pBGLeg);
         m_pBGLeg->SetVel(m_Vel + m_pBGLeg->GetParentOffset() * PosRand());
         m_pBGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pBGLeg);
@@ -3207,8 +3205,8 @@ void AHuman::Update()
                 Attachable *pNewHat = dynamic_cast<Attachable *>(preset->Clone());
                 if (pNewHat)
                 {
-			        m_pHead->DetachAll(true);
-			        m_pHead->AddAttachable(pNewHat);
+			        m_pHead->DetachOrDestroyAll(true);
+			        m_pHead->AddAttachable(pNewHat, pNewHat->GetParentOffset());
                 }
 			}
 		}

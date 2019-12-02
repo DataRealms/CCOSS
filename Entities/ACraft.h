@@ -707,6 +707,7 @@ protected:
                                  MOID rootMOID = g_NoMOID,
                                  bool makeNewMOID = true) { Actor::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID); }
 
+    void SetAttachableVelocitiesForGibbing(Attachable* pAttachable, Vector impactImpulse, float internalBlast);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetMOIDs

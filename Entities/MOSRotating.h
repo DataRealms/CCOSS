@@ -721,10 +721,6 @@ ENTITYALLOCATION(MOSRotating)
 
     virtual void AttachEmitter(AEmitter *pEmitter, Vector emitOffset, bool checkGibWoundLimit = true);
 
-    /// <summary>
-    /// Attaches the passed in attachable and adds it to the list of attachables
-    /// </summary>
-    /// <param name="pAttachable"></param>
     void AddAttachable(Attachable *pAttachable);
 
     void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet);

@@ -1790,6 +1790,10 @@ void MOSRotating::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
     MOSprite::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
 }
 
+/// <summary>
+/// Attaches the passed in Attachable and adds it to the list of attachables, not changing its parent offset and not treating it as hardcoded
+/// </summary>
+/// <param name="pAttachable">The Attachable to ataddtach</param>
 void MOSRotating::AddAttachable(Attachable *pAttachable)
 {
     if (pAttachable)
@@ -1798,11 +1802,21 @@ void MOSRotating::AddAttachable(Attachable *pAttachable)
     }
 }
 
+/// <summary>
+/// Attaches the passed in Attachable and adds it to the list of attachables, changing its parent offset to the passed in Vector but not treating it as hardcoded
+/// </summary>
+/// <param name="pAttachable">The Attachable to add</param>
+/// <param name="parentOffsetToSet">The vector to set as the Attachable's parent offset</param>
 void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet)
 {
     AddAttachable(pAttachable, parentOffsetToSet, false);
 }
 
+/// <summary>
+/// Attaches the passed in Attachable and adds it to the list of attachables, not changing its parent offset but treating it as hardcoded depending on the passed in boolean
+/// </summary>
+/// <param name="pAttachable">The Attachable to add</param>
+/// <param name="isHardcodedAttachable">Whether or not the Attachable should be treated as hardcoded</param>
 void MOSRotating::AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable)
 {
     if (pAttachable)
@@ -1811,6 +1825,12 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, bool isHardcodedAttacha
     }
 }
 
+/// <summary>
+/// Attaches the passed in Attachable and adds it to the list of attachables, changing its parent offset to the passed in Vector and treating it as hardcoded depending on the passed in boolean
+/// </summary>
+/// <param name="pAttachable">The Attachable to add</param>
+/// <param name="parentOffsetToSet">The vector to set as the Attachable's parent offset</param>
+/// <param name="isHardcodedAttachable">Whether or not the Attachable should be treated as hardcoded</param>
 void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOffsetToSet, bool isHardcodedAttachable)
 {
     if (pAttachable)
@@ -1824,6 +1844,11 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOf
     }
 }
 
+/// <summary>
+/// Detaches the Attachable corresponding to the passed in UniqueId, and removes it from the appropriate attachable lists
+/// </summary>
+/// <param name="attachableUniqueId">The UniqueId of the the attachable to remove</param>
+/// <returns>False if the attachable is invalid, otherwise true</returns>
 bool MOSRotating::RemoveAttachable(long attachableUniqueId)
 {
     MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueId);
@@ -1834,6 +1859,11 @@ bool MOSRotating::RemoveAttachable(long attachableUniqueId)
     return false;
 }
 
+/// <summary>
+/// Detaches the passed in Attachable and removes it from the appropriate attachable lists
+/// </summary>
+/// <param name="pAttachable">The attachable to remove</param>
+/// <returns>False if the attachable is invalid, otherwise true</returns>
 bool MOSRotating::RemoveAttachable(Attachable *pAttachable)
 {
     if (pAttachable)
@@ -1852,6 +1882,10 @@ bool MOSRotating::RemoveAttachable(Attachable *pAttachable)
     return false;
 }
 
+/// <summary>
+/// Either detaches or deletes all of this MOSRotating's attachables
+/// </summary>
+/// <param name="destroy">Whether to detach or delete the attachables. Setting this to true deletes them, setting it to false detaches them</param>
 void MOSRotating::DetachOrDestroyAll(bool destroy)
 {
     for (list<Attachable *>::const_iterator aItr = m_AllAttachables.begin(); aItr != m_AllAttachables.end(); ++aItr)

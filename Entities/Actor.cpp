@@ -212,6 +212,7 @@ int Actor::Create(const Actor &reference)
     m_MOType = MovableObject::TypeActor;
 
     m_Controller = reference.m_Controller;
+    m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
 
     m_BodyHitSound = reference.m_BodyHitSound;

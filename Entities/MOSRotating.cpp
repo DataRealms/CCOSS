@@ -209,6 +209,9 @@ void MOSRotating::Clear()
     m_LoudnessOnGib = 1;
 	m_DamageMultiplier = 1;
 	m_DamageMultiplierRedefined = false;
+    m_StringValueMap.clear();
+    m_NumberValueMap.clear();
+    m_ObjectValueMap.clear();
 }
 
 
@@ -399,6 +402,10 @@ int MOSRotating::Create(const MOSRotating &reference)
 
         m_Gibs.push_back(*gItr);
     }
+
+    m_StringValueMap = reference.m_StringValueMap;
+    m_NumberValueMap = reference.m_NumberValueMap;
+    m_ObjectValueMap = reference.m_ObjectValueMap;
 
     m_GibImpulseLimit = reference.m_GibImpulseLimit;
     m_GibWoundLimit = reference.m_GibWoundLimit;

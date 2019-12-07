@@ -1837,11 +1837,23 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOf
     if (pAttachable)
     {
         pAttachable->Attach(this, parentOffsetToSet);
+
         if (!isHardcodedAttachable)
         {
             m_Attachables.push_back(pAttachable);
         }
         m_AllAttachables.push_back(pAttachable);
+
+		// Set the attachable's subgroup ID to the next ID in this' subgroup count (map starts at 0, valid ID starts at 1)
+		pAttachable->SetAtomSubgroupID(GetAtomSubgroupCount() + 1);
+		// Update the this' subgroup count to prevent subgroup merging when assigning ID to the next attachable if defined.
+		SetAtomSubgroupCount(GetAtomSubgroupCount() + 1);
+
+		if (pAttachable->CollidesWithTerrain())
+		{
+			// Add attachable's atoms into this' AtomGroup to enable terrain collisions.
+			GetAtomGroup()->AddAtoms(pAttachable->GetAtomGroup()->GetAtomList(), pAttachable->GetAtomSubgroupID(), pAttachable->GetParentOffset() - pAttachable->GetJointOffset(), m_Rotation);
+		}
     }
 }
 

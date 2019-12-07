@@ -609,14 +609,20 @@ ENTITYALLOCATION(Attachable)
 
 	virtual void SetInheritsRotAngle(bool inherit) { m_InheritsRotAngle = inherit; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetCollidesWithTerrain
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this attachables collides with terrain when attached to another entity.
-// Arguments:       Whether to enable terrain collisions or not.
-// Return value:    None.
 
-	void SetCollidesWithTerrain(bool collide) { m_CollidesWithTerrain = collide; }
+/// <summary>
+/// Whether this attachable collides with terrain or not.
+/// If true, then the attachable's AtomGroup will be added into the parent's AtomGroup to enable terrain collisions for this attachable.
+/// </summary>
+/// <return>Whether this attachable collides with terrain or not.</return>
+	virtual bool CollidesWithTerrain() const { return m_CollidesWithTerrain; }
+
+
+/// <summary>
+/// Sets whether this attachable collides with terrain when attached to a parent or not.
+/// </summary>
+/// <param name="collide">Whether to enable terrain collisions or not.</param>
+	virtual void SetCollidesWithTerrain(bool collide) { m_CollidesWithTerrain = collide; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

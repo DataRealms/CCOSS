@@ -911,6 +911,11 @@ void ACDropShip::Update()
         m_pRHatch->SetRotAngle(m_Rotation.GetRadAngle() + m_HatchSwingRange.GetRadAngle() * m_HatchOpeness);
         m_pRHatch->SetJointPos(m_Pos + m_pRHatch->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
         m_pRHatch->Update();
+
+		// Update the Atoms' offsets in the parent group
+		Matrix atomRot(FacingAngle(m_pRHatch->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
+		m_pAtomGroup->UpdateSubAtoms(m_pRHatch->GetAtomSubgroupID(), m_pRHatch->GetParentOffset() - (m_pRHatch->GetJointOffset() * atomRot), atomRot);
+
         m_Health -= m_pRHatch->CollectDamage();
     }
 
@@ -919,6 +924,11 @@ void ACDropShip::Update()
         m_pLHatch->SetRotAngle(m_Rotation.GetRadAngle() - m_HatchSwingRange.GetRadAngle() * m_HatchOpeness);
         m_pLHatch->SetJointPos(m_Pos + m_pLHatch->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
         m_pLHatch->Update();
+
+		// Update the Atoms' offsets in the parent group
+		Matrix atomRot(FacingAngle(m_pLHatch->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
+		m_pAtomGroup->UpdateSubAtoms(m_pLHatch->GetAtomSubgroupID(), m_pLHatch->GetParentOffset() - (m_pLHatch->GetJointOffset() * atomRot), atomRot);
+
         m_Health -= m_pLHatch->CollectDamage();
     }
 

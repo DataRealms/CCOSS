@@ -152,12 +152,14 @@ int ACDropShip::ReadProperty(std::string propName, Reader &reader)
         delete m_pRThruster;
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
+		m_pRThruster->SetCollidesWithTerrain(true);
     }
     else if (propName == "LThruster")
     {
         delete m_pLThruster;
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
+		m_pLThruster->SetCollidesWithTerrain(true);
     }
     else if (propName == "URThruster")
     {
@@ -176,12 +178,14 @@ int ACDropShip::ReadProperty(std::string propName, Reader &reader)
         delete m_pRHatch;
         m_pRHatch = new Attachable;
         reader >> m_pRHatch;
+		m_pRHatch->SetCollidesWithTerrain(true);
     }
     else if (propName == "LHatchDoor")
     {
         delete m_pLHatch;
         m_pLHatch = new Attachable;
         reader >> m_pLHatch;
+		m_pLHatch->SetCollidesWithTerrain(true);
     }
     else if (propName == "HatchDoorSwingRange")
         reader >> m_HatchSwingRange;

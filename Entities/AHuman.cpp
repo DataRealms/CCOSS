@@ -4186,10 +4186,6 @@ void AHuman::Update()
 
         m_Health -= m_pHead->CollectDamage();// * 5; // This is done in CollectDamage via m_DamageMultiplier now.
     }
-    else
-    {
-        m_pAtomGroup->RemoveAtoms(1);
-    }
 
     if (m_pJetpack && m_pJetpack->IsAttached())
     {

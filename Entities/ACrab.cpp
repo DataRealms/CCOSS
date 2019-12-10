@@ -2788,10 +2788,6 @@ void ACrab::Update()
 
         m_Health -= m_pTurret->CollectDamage();// * 5;
     }
-    else
-    {
-        m_pAtomGroup->RemoveAtoms(1);
-    }
 
     if (m_pJetpack && m_pJetpack->IsAttached())
     {

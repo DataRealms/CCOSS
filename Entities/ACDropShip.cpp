@@ -152,58 +152,36 @@ int ACDropShip::ReadProperty(std::string propName, Reader &reader)
         delete m_pRThruster;
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
-        m_pRThruster->Attach(this);
-        m_pRThruster->SetAtomSubgroupID(1);
-        m_pAtomGroup->AddAtoms(m_pRThruster->GetAtomGroup()->GetAtomList(),
-                               m_pRThruster->GetAtomSubgroupID(),
-                               m_pRThruster->GetParentOffset() - m_pRThruster->GetJointOffset());
     }
     else if (propName == "LThruster")
     {
         delete m_pLThruster;
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
-        m_pLThruster->Attach(this);
-        m_pLThruster->SetAtomSubgroupID(2);
-        m_pAtomGroup->AddAtoms(m_pLThruster->GetAtomGroup()->GetAtomList(),
-                               m_pLThruster->GetAtomSubgroupID(),
-                               m_pLThruster->GetParentOffset() - m_pLThruster->GetJointOffset());
     }
     else if (propName == "URThruster")
     {
         delete m_pURThruster;
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
-        m_pURThruster->Attach(this);
     }
     else if (propName == "ULThruster")
     {
         delete m_pULThruster;
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
-        m_pULThruster->Attach(this);
     }
     else if (propName == "RHatchDoor")
     {
         delete m_pRHatch;
         m_pRHatch = new Attachable;
         reader >> m_pRHatch;
-        m_pRHatch->Attach(this);
-        m_pRHatch->SetAtomSubgroupID(3);
-        m_pAtomGroup->AddAtoms(m_pRHatch->GetAtomGroup()->GetAtomList(),
-                               m_pRHatch->GetAtomSubgroupID(),
-                               m_pRHatch->GetParentOffset() - m_pRHatch->GetJointOffset());
     }
     else if (propName == "LHatchDoor")
     {
         delete m_pLHatch;
         m_pLHatch = new Attachable;
         reader >> m_pLHatch;
-        m_pLHatch->Attach(this);
-        m_pLHatch->SetAtomSubgroupID(4);
-        m_pAtomGroup->AddAtoms(m_pLHatch->GetAtomGroup()->GetAtomList(),
-                               m_pLHatch->GetAtomSubgroupID(),
-                               m_pLHatch->GetParentOffset() - m_pLHatch->GetJointOffset());
     }
     else if (propName == "HatchDoorSwingRange")
         reader >> m_HatchSwingRange;

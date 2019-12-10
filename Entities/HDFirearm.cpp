@@ -167,8 +167,6 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader)
 
             delete m_pMagazine;
             m_pMagazine = dynamic_cast<Magazine *>(m_pMagazineReference->Clone());
-            if (m_pMagazine)
-                m_pMagazine->Attach(this);
         }
     }
     else if (propName == "Flash")

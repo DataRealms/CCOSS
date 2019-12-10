@@ -269,12 +269,6 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         delete m_pTurret;
         m_pTurret = new Turret;
         reader >> m_pTurret;
-        m_pTurret->Attach(this);
-        m_pTurret->SetAtomSubgroupID(1);
-        m_pAtomGroup->AddAtoms(m_pTurret->GetAtomGroup()->GetAtomList(),
-                               m_pTurret->GetAtomSubgroupID(),
-                               m_pTurret->GetParentOffset() - m_pTurret->GetJointOffset(),
-                               m_Rotation);
 		if (!m_pTurret->IsDamageMultiplierRedefined())
 			m_pTurret->SetDamageMultiplier(5);
     }
@@ -283,7 +277,6 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         delete m_pJetpack;
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-        m_pJetpack->Attach(this);
     }
     else if (propName == "JumpTime")
     {
@@ -296,28 +289,24 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         delete m_pLFGLeg;
         m_pLFGLeg = new Leg;
         reader >> m_pLFGLeg;
-        m_pLFGLeg->Attach(this);
     }
     else if (propName == "LBGLeg")
     {
         delete m_pLBGLeg;
         m_pLBGLeg = new Leg;
         reader >> m_pLBGLeg;
-        m_pLBGLeg->Attach(this);
     }
     else if (propName == "RFGLeg")
     {
         delete m_pRFGLeg;
         m_pRFGLeg = new Leg;
         reader >> m_pRFGLeg;
-        m_pRFGLeg->Attach(this);
     }
     else if (propName == "RBGLeg")
     {
         delete m_pRBGLeg;
         m_pRBGLeg = new Leg;
         reader >> m_pRBGLeg;
-        m_pRBGLeg->Attach(this);
     }
     else if (propName == "LFootGroup")
     {

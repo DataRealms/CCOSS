@@ -1093,23 +1093,17 @@ ENTITYALLOCATION(MOSRotating)
 	virtual void SetTravelImpulse(Vector impulse) { m_TravelImpulse = impulse; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetAtomSubgroupCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the count of atom subgroups this has.
-// Arguments:       None.
-// Return value:    The the atom subgroup count of this.
-
+/// <summary>
+/// Gets the count of atom subgroups this has.
+/// </summary>
+/// <returns>The the atom subgroup count of this.</returns> 
 	int GetAtomSubgroupCount() const { return m_AtomSubgroupCount; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetAtomSubgroupCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the count of atom subgroups this has.
-// Arguments:       New atom subgroup count.
-// Return value:    None.
-
+/// <summary>
+/// Sets the count of atom subgroups this has.
+/// </summary>
+/// <param name="newCount">New atom subgroup count.</param>
 	void SetAtomSubgroupCount(int newCount) { m_AtomSubgroupCount = newCount; }
 
 

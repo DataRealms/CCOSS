@@ -8,7 +8,7 @@ This is a community-driven effort to continue the development of Cortex Command.
 # Setup Process #
 
 First you need to download the necessary files:
-1. Install the necessary tools. You'll probably want [Visual Studio Community Edition](https://visualstudio.microsoft.com/downloads/) (we mostly use 2017 but 2019 should be fine) and, if you're using that, you'll need [Visual C++ 2008 Express Edition With SP1 - ENU](https://www.dropbox.com/s/vhd0sd4bwczg1un/Visual_C_2008_Express_With_SP1.exe?dl=0) to use the debugger. You may also want to check out the [list of recommended Visual Studio plugins](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Information,-Recommended-Plugins-and-Useful-Links).
+1. Install the necessary tools. You'll probably want [Visual Studio Community Edition](https://visualstudio.microsoft.com/downloads/) (we mostly use 2017 but 2019 should be fine) and, if you're using that, you'll need [Visual C++ 2008 Express Edition With SP1 - ENU](https://www.dropbox.com/s/vhd0sd4bwczg1un/Visual_C_2008_Express_With_SP1.exe?dl=0) to use the debugger. You may also want to check out the list of recommended Visual Studio plugins [here](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Information,-Recommended-Plugins-and-Useful-Links).
 
 2. Clone this Source Repository and the [Data Repository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data) in neighbouring folders. **Do Not** change the folder names unless you want to make trouble for yourself.
 

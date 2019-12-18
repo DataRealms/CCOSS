@@ -352,7 +352,8 @@ int MOSRotating::Create(const MOSRotating &reference)
         SLICK_PROFILENAME("AtomGroup Copies", 0xFF775544);
 
         // THESE ATOMGROUP COPYING ARE A TIME SINK!
-        m_pAtomGroup = dynamic_cast<AtomGroup *>(reference.m_pAtomGroup->Clone());
+        m_pAtomGroup = new AtomGroup();
+        m_pAtomGroup->Create(*reference.m_pAtomGroup, true);
         if (m_pAtomGroup)
             m_pAtomGroup->SetOwner(this);
 
@@ -1845,7 +1846,7 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOf
         m_AllAttachables.push_back(pAttachable);
 
 		// Set the attachable's subgroup ID to the next ID in this' subgroup count (map starts at 0, valid ID starts at 1)
-		pAttachable->SetAtomSubgroupID(GetAtomSubgroupCount() + 1);
+        pAttachable->SetAtomSubgroupID(pAttachable->GetUniqueID());
 		// Update the this' subgroup count to prevent subgroup merging when assigning ID to the next attachable if defined.
 		SetAtomSubgroupCount(GetAtomSubgroupCount() + 1);
 

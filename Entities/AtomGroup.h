@@ -102,6 +102,14 @@ ENTITYALLOCATION(AtomGroup)
 
     virtual int Create(const AtomGroup &reference);
 
+    /// <summary>
+    /// Creates an AtomGroup to be identical to another, by deep copy, with the option to only copy atoms that belong to the reference AtomGroup's owner
+    /// </summary>
+    /// <param name="reference">A reference to the AtomGroup to deep copy</param>
+    /// <param name="onlyCopyOwnerAtoms">Whether or not to only copy atoms that belong to the reference AtomGroup's owner directly</param>
+    /// <returns>An error return value signalling success or any particular failure. Anything below 0 is an error signal.</returns>
+    virtual int Create(const AtomGroup & reference, boolean onlyCopyOwnerAtoms);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create

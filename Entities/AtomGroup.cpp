@@ -92,6 +92,11 @@ int AtomGroup::Create()
 
 int AtomGroup::Create(const AtomGroup &reference)
 {
+    return Create(reference, false);
+}
+
+int AtomGroup::Create(const AtomGroup &reference, boolean onlyCopyOwnerAtoms)
+{
     SLICK_PROFILE(0xFF662348);
 
     Entity::Create(reference);
@@ -105,23 +110,26 @@ int AtomGroup::Create(const AtomGroup &reference)
     m_SubGroups.clear();
     for (list<Atom *>::const_iterator itr = reference.m_Atoms.begin(); itr != reference.m_Atoms.end(); ++itr)
     {
-        Atom *pAtomCopy = new Atom(**itr);
-		pAtomCopy->SetIgnoreMOIDsByGroup(&m_IgnoreMOIDs);
-
-        m_Atoms.push_back(pAtomCopy);
-
-		// TODO: OPTIMIZE THE SHIT OUT OF THIS!!! TERRIBLE to have a find in every atom creation for a group!
-        // Add to the appropriate spot in the subgroup map
-        int subID = pAtomCopy->GetSubID();
-        if (subID != 0)
+        if (!onlyCopyOwnerAtoms || (*itr)->GetSubID() == 0)
         {
-            // Try to find the group
-            map<int, list<Atom *> >::iterator subItr = m_SubGroups.find(subID);
-            // No atom added to that group yet, so it doesn't exist, so make it
-            if (subItr == m_SubGroups.end())
-                subItr = (m_SubGroups.insert(pair<int, list<Atom *> >(subID, list<Atom *>()))).first;
-            // Add Atom to the list of that group
-            subItr->second.push_back(pAtomCopy);
+            Atom *pAtomCopy = new Atom(**itr);
+            pAtomCopy->SetIgnoreMOIDsByGroup(&m_IgnoreMOIDs);
+
+            m_Atoms.push_back(pAtomCopy);
+
+            // TODO: OPTIMIZE THE SHIT OUT OF THIS!!! TERRIBLE to have a find in every atom creation for a group!
+            // Add to the appropriate spot in the subgroup map
+            int subID = pAtomCopy->GetSubID();
+            if (subID != 0)
+            {
+                // Try to find the group
+                map<int, list<Atom *> >::iterator subItr = m_SubGroups.find(subID);
+                // No atom added to that group yet, so it doesn't exist, so make it
+                if (subItr == m_SubGroups.end())
+                    subItr = (m_SubGroups.insert(pair<int, list<Atom *> >(subID, list<Atom *>()))).first;
+                // Add Atom to the list of that group
+                subItr->second.push_back(pAtomCopy);
+            }
         }
     }
 

@@ -209,7 +209,6 @@ void MOSRotating::Clear()
     m_LoudnessOnGib = 1;
 	m_DamageMultiplier = 1;
 	m_DamageMultiplierRedefined = false;
-	m_AtomSubgroupCount = 0;
 }
 
 
@@ -1845,10 +1844,8 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOf
         }
         m_AllAttachables.push_back(pAttachable);
 
-		// Set the attachable's subgroup ID to the next ID in this' subgroup count (map starts at 0, valid ID starts at 1)
+		// Set the attachable's subgroup ID to it's Unique ID to avoid any possible conflicts when adding atoms to parent group.
         pAttachable->SetAtomSubgroupID(pAttachable->GetUniqueID());
-		// Update the this' subgroup count to prevent subgroup merging when assigning ID to the next attachable if defined.
-		SetAtomSubgroupCount(GetAtomSubgroupCount() + 1);
 
 		if (pAttachable->CollidesWithTerrain())
 		{

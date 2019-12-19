@@ -1093,20 +1093,6 @@ ENTITYALLOCATION(MOSRotating)
 	virtual void SetTravelImpulse(Vector impulse) { m_TravelImpulse = impulse; }
 
 
-/// <summary>
-/// Gets the count of atom subgroups this has.
-/// </summary>
-/// <returns>The the atom subgroup count of this.</returns> 
-	int GetAtomSubgroupCount() const { return m_AtomSubgroupCount; }
-
-
-/// <summary>
-/// Sets the count of atom subgroups this has.
-/// </summary>
-/// <param name="newCount">New atom subgroup count.</param>
-	void SetAtomSubgroupCount(int newCount) { m_AtomSubgroupCount = newCount; }
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -1225,9 +1211,6 @@ protected:
     static BITMAP *m_spTempBitmapS128;
     static BITMAP *m_spTempBitmapS256;
     static BITMAP *m_spTempBitmapS512;
-
-	// Counter for AtomGroup Atom Subgroup IDs
-	int m_AtomSubgroupCount;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

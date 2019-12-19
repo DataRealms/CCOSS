@@ -454,7 +454,7 @@ ENTITYALLOCATION(AtomGroup)
 //                  The rotation of the placed atoms around the above offset.
 // Return value:    None.
 
-    void AddAtoms(const std::list<Atom *> &atomList, int subID = 0, const Vector &offset = Vector(), const Matrix &offsetRotation = Matrix());
+    void AddAtoms(const std::list<Atom *> &atomList, long int subID = 0, const Vector &offset = Vector(), const Matrix &offsetRotation = Matrix());
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -468,7 +468,7 @@ ENTITYALLOCATION(AtomGroup)
 //                  The rotation of the updated atoms around the above offset.
 // Return value:    Whether any atoms of that group was found and updated.
 
-    bool UpdateSubAtoms(int subID = 0, const Vector &newOffset = Vector(), const Matrix& newOffsetRotation = Matrix());
+    bool UpdateSubAtoms(long int subID = 0, const Vector &newOffset = Vector(), const Matrix& newOffsetRotation = Matrix());
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -478,7 +478,7 @@ ENTITYALLOCATION(AtomGroup)
 // Arguments:       The ID of the subgroup of atoms to remove.
 // Return value:    Whether any Atoms of that subgroup ID were found and removed.
 
-    bool RemoveAtoms(int removeID);
+    bool RemoveAtoms(long int removeID);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -106,7 +106,7 @@ int AtomGroup::Create(const AtomGroup &reference, boolean onlyCopyOwnerAtoms)
     m_Resolution = reference.m_Resolution;
     m_Depth = reference.m_Depth;
 
-    int subID = 0;
+    long int subID = 0;
     m_SubGroups.clear();
     for (list<Atom *>::const_iterator itr = reference.m_Atoms.begin(); itr != reference.m_Atoms.end(); ++itr)
     {
@@ -119,7 +119,7 @@ int AtomGroup::Create(const AtomGroup &reference, boolean onlyCopyOwnerAtoms)
 
             // TODO: OPTIMIZE THE SHIT OUT OF THIS!!! TERRIBLE to have a find in every atom creation for a group!
             // Add to the appropriate spot in the subgroup map
-            int subID = pAtomCopy->GetSubID();
+            long int subID = pAtomCopy->GetSubID();
             if (subID != 0)
             {
                 // Try to find the group
@@ -775,7 +775,7 @@ void AtomGroup::SetOwner(MOSRotating *newOwner)
 // Description:     Adds a list of new Atom:s to the internal list that makes up this group.
 //                  Ownership of all Atom:s in the list IS NOT transferred!
 
-void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, int subID, const Vector &offset, const Matrix &offsetRotation)
+void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, long int subID, const Vector &offset, const Matrix &offsetRotation)
 {
     Atom *pAtom;
 
@@ -807,7 +807,7 @@ void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, int subID, const Vec
 //                  representing sub parts of the whole to more closely represent the
 //                  graphics better.
 
-bool AtomGroup::UpdateSubAtoms(int subID, const Vector &newOffset, const Matrix &newOffsetRotation)
+bool AtomGroup::UpdateSubAtoms(long int subID, const Vector &newOffset, const Matrix &newOffsetRotation)
 {
     // Try to find existing subgroup with that ID to update
     map<int, list<Atom *> >::iterator subItr = m_SubGroups.find(subID);
@@ -834,7 +834,7 @@ bool AtomGroup::UpdateSubAtoms(int subID, const Vector &newOffset, const Matrix 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes all atoms of a specific subgroup ID from this AtomGroup.
 
-bool AtomGroup::RemoveAtoms(int removeID)
+bool AtomGroup::RemoveAtoms(long int removeID)
 {
     bool removedAny = false;
     list<Atom *>::iterator eraseItr;

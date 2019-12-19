@@ -288,7 +288,7 @@ ENTITYALLOCATION(Attachable)
 // Arguments:       None.
 // Return value:    The the subgroup ID of this' Atoms.
 
-    int GetAtomSubgroupID() const { return m_AtomSubgroupID; }
+	long int GetAtomSubgroupID() const { return m_AtomSubgroupID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -369,7 +369,7 @@ ENTITYALLOCATION(Attachable)
 // Arguments:       The new subgroup id of this' Atoms
 // Return value:    None.
 
-    void SetAtomSubgroupID(int newID = 0) { m_AtomSubgroupID = newID; }
+    void SetAtomSubgroupID(long int newID = 0) { m_AtomSubgroupID = newID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -660,7 +660,7 @@ protected:
     Matrix m_RotTarget;
 
     // The Atom ID's this' atoms will have when attached and added to a parent's AtomGroup
-    int m_AtomSubgroupID;
+    long int m_AtomSubgroupID;
 
     // Whether to draw this Attachable after (in front of) or before (behind) the parent.
     bool m_DrawAfterParent;

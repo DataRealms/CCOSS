@@ -399,7 +399,7 @@ public:
 // Arguments:       None.
 // Return value:    The the group ID of this Atom.
 
-    int GetSubID() const { return m_SubgroupID; }
+    long int GetSubID() const { return m_SubgroupID; }
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -640,7 +640,7 @@ public:
 // Arguments:       The new subgroup id of this Atom
 // Return value:    None.
 
-    void SetSubID(int newID = 0) { m_SubgroupID = newID; }
+    void SetSubID(long int newID = 0) { m_SubgroupID = newID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

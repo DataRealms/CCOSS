@@ -489,7 +489,7 @@ ENTITYALLOCATION(AtomGroup)
 // Arguments:       The ID of the subgroup of atoms to not remove.
 // Return value:    Whether any Atoms of not that ID were found and removed.
 
-    bool RemoveAllButAtoms(int removeAllButID);
+//    bool RemoveAllButAtoms(int removeAllButID);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

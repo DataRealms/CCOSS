@@ -868,7 +868,7 @@ bool AtomGroup::RemoveAtoms(long int removeID)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes all atoms of a specific subgroup ID from this AtomGroup that
 //                  don't match a specific subgroup ID.
-
+/*
 bool AtomGroup::RemoveAllButAtoms(int removeAllButID)
 {
     bool removedAny = false;
@@ -905,7 +905,7 @@ bool AtomGroup::RemoveAllButAtoms(int removeAllButID)
 
     return removedAny;
 }
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddMOIDToIgnore

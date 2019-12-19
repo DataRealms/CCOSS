@@ -18,6 +18,7 @@
 #include "MOSRotating.h"
 #include <deque>
 #include <map>
+#include <unordered_map>
 #include <set>
 
 #include "ConsoleMan.h"
@@ -123,12 +124,13 @@ int AtomGroup::Create(const AtomGroup &reference, boolean onlyCopyOwnerAtoms)
             if (subID != 0)
             {
                 // Try to find the group
-                map<int, list<Atom *> >::iterator subItr = m_SubGroups.find(subID);
                 // No atom added to that group yet, so it doesn't exist, so make it
-                if (subItr == m_SubGroups.end())
-                    subItr = (m_SubGroups.insert(pair<int, list<Atom *> >(subID, list<Atom *>()))).first;
+                if (m_SubGroups.find(subID) == m_SubGroups.end())
+				{
+                    m_SubGroups.insert(pair<long int, list<Atom *> >(subID, list<Atom *>())).first;
+				}
                 // Add Atom to the list of that group
-                subItr->second.push_back(pAtomCopy);
+                m_SubGroups.find(subID)->second.push_back(pAtomCopy);
             }
         }
     }
@@ -780,11 +782,11 @@ void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, long int subID, cons
     Atom *pAtom;
 
     // Try to find existing subgroup with that ID to add to
-    map<int, list<Atom *> >::iterator subItr = m_SubGroups.find(subID);
     // Couldn't find any, so make a new one for the new ID so we can add to it
-    if (subItr == m_SubGroups.end())
-        subItr = (m_SubGroups.insert(pair<int, list<Atom *> >(subID, list<Atom *>()))).first;
-
+	if (m_SubGroups.find(subID) == m_SubGroups.end())
+	{
+		m_SubGroups.insert(pair<long int, list<Atom *> >(subID, list<Atom *>())).first;
+	}
     for (list<Atom *>::const_iterator itr = atomList.begin(); itr != atomList.end(); ++itr)
     {
         pAtom = new Atom(**itr);
@@ -795,7 +797,7 @@ void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, long int subID, cons
         m_Atoms.push_back(pAtom);
 
         // Add the atom to the subgroup in the SubGroups map, not transferring ownership
-        subItr->second.push_back(pAtom);
+        m_SubGroups.find(subID)->second.push_back(pAtom);
     }
 }
 
@@ -810,14 +812,14 @@ void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, long int subID, cons
 bool AtomGroup::UpdateSubAtoms(long int subID, const Vector &newOffset, const Matrix &newOffsetRotation)
 {
     // Try to find existing subgroup with that ID to update
-    map<int, list<Atom *> >::iterator subItr = m_SubGroups.find(subID);
     // Couldn't find any, so quit
-    if (subItr == m_SubGroups.end())
-        return false;
-
+	if (m_SubGroups.find(subID) == m_SubGroups.end())
+	{
+		return false;
+	}
     DAssert(!subItr->second.empty(), "Found empty atom subgroup list!?");
 
-    for (list<Atom *>::const_iterator aItr = subItr->second.begin(); aItr != subItr->second.end(); ++aItr)
+    for (list<Atom *>::const_iterator aItr = m_SubGroups.find(subID)->second.begin(); aItr != m_SubGroups.find(subID)->second.end(); ++aItr)
     {
         // Re-set ID just to make sure
         (*aItr)->SetSubID(subID);

@@ -741,7 +741,7 @@ private:
     // List of Atoms that constitute the group. Owned by this
     std::list<Atom *> m_Atoms;
     // Sub groupings of atoms, not owned in here. Point to atoms owned in m_Atoms.
-    std::map<int, std::list<Atom *> > m_SubGroups;
+	std::unordered_map<long int, std::list<Atom *> > m_SubGroups;
     // Moment of Inertia for this AtomGroup
     float m_MomInertia;
     // The owner of this AtomGroup. The owner is obviously not owned by this AtomGroup.

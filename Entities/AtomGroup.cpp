@@ -107,7 +107,6 @@ int AtomGroup::Create(const AtomGroup &reference, boolean onlyCopyOwnerAtoms)
     m_Resolution = reference.m_Resolution;
     m_Depth = reference.m_Depth;
 
-    long int subID = 0;
     m_SubGroups.clear();
     for (list<Atom *>::const_iterator itr = reference.m_Atoms.begin(); itr != reference.m_Atoms.end(); ++itr)
     {

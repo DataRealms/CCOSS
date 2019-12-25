@@ -792,7 +792,8 @@ int LuaMan::Create()
             .def("TransferJointForces", &Attachable::TransferJointForces)
             .def("TransferJointImpulses", &Attachable::TransferJointImpulses)
             .def("CollectDamage", &Attachable::CollectDamage)
-			.property("InheritsRotAngle", &Attachable::InheritsRotAngle, &Attachable::SetInheritsRotAngle),
+			.property("InheritsRotAngle", &Attachable::InheritsRotAngle, &Attachable::SetInheritsRotAngle)
+			.def("EnableTerrainCollisions", &Attachable::EnableTerrainCollisions),
 
 		ABSTRACTLUABINDING(Emission, Entity)
 			.property("ParticlesPerMinute", &Emission::GetRate, &Emission::SetRate)

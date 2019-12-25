@@ -612,17 +612,22 @@ ENTITYALLOCATION(Attachable)
 
 /// <summary>
 /// Whether this attachable collides with terrain or not.
-/// If true, then the attachable's AtomGroup will be added into the parent's AtomGroup to enable terrain collisions for this attachable.
 /// </summary>
 /// <return>Whether this attachable collides with terrain or not.</return>
 	virtual bool CollidesWithTerrain() const { return m_CollidesWithTerrain; }
 
 
 /// <summary>
-/// Sets whether this attachable collides with terrain when attached to a parent or not.
+/// Sets whether this attachable should collide with terrain when attached to a parent or not.
 /// </summary>
 /// <param name="collide">Whether to enable terrain collisions or not.</param>
 	virtual void SetCollidesWithTerrain(bool collide) { m_CollidesWithTerrain = collide; }
+
+
+/// <summary>
+/// Turns on/off this Attachable's collisions, by adding/removing its atoms to/from its parent's AtomGroup.
+/// </summary>
+	virtual void EnableTerrainCollisions(bool enable);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

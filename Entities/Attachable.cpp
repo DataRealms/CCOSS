@@ -305,6 +305,26 @@ void Attachable::Detach()
 }
 
 
+/// <summary>
+/// Turns on/off this Attachable's collisions, by adding/removing its atoms to/from its parent's AtomGroup.
+/// </summary>
+/// <param name="enable">Adds this Attachable's atoms to the parent's AtomGroup if true, removes them if false.</param>
+void Attachable::EnableTerrainCollisions(bool enable)
+{
+	if (m_pParent != nullptr)
+	{
+		if (enable)
+		{
+			m_pParent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset(), m_Rotation);
+		}
+		else if (!enable)
+		{
+			m_pParent->GetAtomGroup()->RemoveAtoms(GetAtomSubgroupID());
+		}
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          TransferJointForces
 //////////////////////////////////////////////////////////////////////////////////////////

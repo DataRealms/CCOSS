@@ -1849,8 +1849,7 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOf
 
 		if (pAttachable->CollidesWithTerrain())
 		{
-			// Add attachable's atoms into this' AtomGroup to enable terrain collisions.
-			GetAtomGroup()->AddAtoms(pAttachable->GetAtomGroup()->GetAtomList(), pAttachable->GetAtomSubgroupID(), pAttachable->GetParentOffset() - pAttachable->GetJointOffset(), m_Rotation);
+			pAttachable->EnableTerrainCollisions(true);
 		}
     }
 }

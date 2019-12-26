@@ -707,24 +707,26 @@ ENTITYALLOCATION(MOSRotating)
     virtual void ApplyImpulses();
 
 
+	void AddAttachable(Attachable *pAttachable);
 
+	void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet);
 
-    void AddAttachable(Attachable *pAttachable);
+	void AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable);
 
-    void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet);
+	void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet, bool isHardcodedAttachable);
 
-    void AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable);
+	bool RemoveAttachable(long attachableUniqueId);
 
-    void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet, bool isHardcodedAttachable);
+	bool RemoveAttachable(Attachable *pAttachable);
+
+	void DetachOrDestroyAll(bool destroy);
+
 	void AddEmitter(AEmitter *pEmitter);
 
-    bool RemoveAttachable(long attachableUniqueId);
 	void AddEmitter(AEmitter *pEmitter, const Vector& parentOffsetToSet);
 
-    bool RemoveAttachable(Attachable *pAttachable);
 	bool RemoveEmitter(long emitterUniqueId);
 
-    void DetachOrDestroyAll(bool destroy);
 	bool RemoveEmitter(AEmitter *pEmitter);
 
 

@@ -1763,17 +1763,19 @@ void MOSRotating::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
     MOSprite::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
 }
 
+
 /// <summary>
 /// Attaches the passed in Attachable and adds it to the list of attachables, not changing its parent offset and not treating it as hardcoded
 /// </summary>
-/// <param name="pAttachable">The Attachable to ataddtach</param>
+/// <param name="pAttachable">The Attachable to attach</param>
 void MOSRotating::AddAttachable(Attachable *pAttachable)
 {
-    if (pAttachable)
-    {
-        AddAttachable(pAttachable, pAttachable->GetParentOffset());
-    }
+	if (pAttachable)
+	{
+		AddAttachable(pAttachable, pAttachable->GetParentOffset());
+	}
 }
+
 
 /// <summary>
 /// Attaches the passed in Attachable and adds it to the list of attachables, changing its parent offset to the passed in Vector but not treating it as hardcoded
@@ -1782,8 +1784,9 @@ void MOSRotating::AddAttachable(Attachable *pAttachable)
 /// <param name="parentOffsetToSet">The vector to set as the Attachable's parent offset</param>
 void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet)
 {
-    AddAttachable(pAttachable, parentOffsetToSet, false);
+	AddAttachable(pAttachable, parentOffsetToSet, false);
 }
+
 
 /// <summary>
 /// Attaches the passed in Attachable and adds it to the list of attachables, not changing its parent offset but treating it as hardcoded depending on the passed in boolean
@@ -1792,39 +1795,41 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector& parentOff
 /// <param name="isHardcodedAttachable">Whether or not the Attachable should be treated as hardcoded</param>
 void MOSRotating::AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable)
 {
-    if (pAttachable)
-    {
-        AddAttachable(pAttachable, pAttachable->GetParentOffset(), isHardcodedAttachable);
-    }
+	if (pAttachable)
+	{
+		AddAttachable(pAttachable, pAttachable->GetParentOffset(), isHardcodedAttachable);
+	}
 }
 
+
 /// <summary>
-/// Attaches the passed in Attachable and adds it to the list of attachables, changing its parent offset to the passed in Vector and treating it as hardcoded depending on the passed in boolean
+/// Attaches the passed in Attachable and adds it to the list of attachables, changing its parent offset to the passed in Vector and treating it as hardcoded depending on the passed in boolean.
 /// </summary>
 /// <param name="pAttachable">The Attachable to add</param>
 /// <param name="parentOffsetToSet">The vector to set as the Attachable's parent offset</param>
 /// <param name="isHardcodedAttachable">Whether or not the Attachable should be treated as hardcoded</param>
 void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOffsetToSet, bool isHardcodedAttachable)
 {
-    if (pAttachable)
-    {
-        pAttachable->Attach(this, parentOffsetToSet);
-
-        if (!isHardcodedAttachable)
-        {
-            m_Attachables.push_back(pAttachable);
-        }
-        m_AllAttachables.push_back(pAttachable);
+	if (pAttachable)
+	{
+		pAttachable->Attach(this, parentOffsetToSet);
 
 		// Set the attachable's subgroup ID to it's Unique ID to avoid any possible conflicts when adding atoms to parent group.
-        pAttachable->SetAtomSubgroupID(pAttachable->GetUniqueID());
+		pAttachable->SetAtomSubgroupID(pAttachable->GetUniqueID());
 
 		if (pAttachable->CollidesWithTerrain())
 		{
 			pAttachable->EnableTerrainCollisions(true);
 		}
-    }
+
+		if (!isHardcodedAttachable)
+		{
+			m_Attachables.push_back(pAttachable);
+		}
+		m_AllAttachables.push_back(pAttachable);
+	}
 }
+
 
 /// <summary>
 /// Detaches the Attachable corresponding to the passed in UniqueId, and removes it from the appropriate attachable lists
@@ -1833,13 +1838,14 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOf
 /// <returns>False if the attachable is invalid, otherwise true</returns>
 bool MOSRotating::RemoveAttachable(long attachableUniqueId)
 {
-    MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueId);
-    if (attachableAsMovableObject)
-    {
-        return RemoveAttachable((Attachable *)attachableAsMovableObject);
-    }
-    return false;
+	MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueId);
+	if (attachableAsMovableObject)
+	{
+		return RemoveAttachable((Attachable *)attachableAsMovableObject);
+	}
+	return false;
 }
+
 
 /// <summary>
 /// Detaches the passed in Attachable and removes it from the appropriate attachable lists
@@ -1848,21 +1854,22 @@ bool MOSRotating::RemoveAttachable(long attachableUniqueId)
 /// <returns>False if the attachable is invalid, otherwise true</returns>
 bool MOSRotating::RemoveAttachable(Attachable *pAttachable)
 {
-    if (pAttachable)
-    {
-        if (m_Attachables.size() > 0)
-        {
-            m_Attachables.remove(pAttachable);
-        }
-        if (m_AllAttachables.size() > 0)
-        {
-            m_AllAttachables.remove(pAttachable);
-        }
-        pAttachable->Detach();
-        return true;
-    }
-    return false;
+	if (pAttachable)
+	{
+		if (m_Attachables.size() > 0)
+		{
+			m_Attachables.remove(pAttachable);
+		}
+		if (m_AllAttachables.size() > 0)
+		{
+			m_AllAttachables.remove(pAttachable);
+		}
+		pAttachable->Detach();
+		return true;
+	}
+	return false;
 }
+
 
 /// <summary>
 /// Either detaches or deletes all of this MOSRotating's attachables
@@ -1870,13 +1877,14 @@ bool MOSRotating::RemoveAttachable(Attachable *pAttachable)
 /// <param name="destroy">Whether to detach or delete the attachables. Setting this to true deletes them, setting it to false detaches them</param>
 void MOSRotating::DetachOrDestroyAll(bool destroy)
 {
-    for (list<Attachable *>::const_iterator aItr = m_AllAttachables.begin(); aItr != m_AllAttachables.end(); ++aItr)
-    {
-        if (destroy)
-            delete (*aItr);
-        else
-            (*aItr)->Detach();
-    }
+	for (list<Attachable *>::const_iterator aItr = m_AllAttachables.begin(); aItr != m_AllAttachables.end(); ++aItr)
+	{
+		if (destroy)
+			delete (*aItr);
+		else
+			(*aItr)->Detach();
+	}
+
 	m_AllAttachables.clear();
 }
 

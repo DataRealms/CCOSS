@@ -1892,7 +1892,7 @@ void MOSRotating::DetachOrDestroyAll(bool destroy)
 /// <summary>
 /// Attaches the passed in AEmitter and adds it to the list of emitters, not changing its parent offset.
 /// </summary>
-/// <param name="pAttachable">The AEmitter to attach</param>
+/// <param name="pEmitter">The AEmitter to attach</param>
 void MOSRotating::AddEmitter(AEmitter *pEmitter)
 {
 	if (pEmitter)
@@ -1905,7 +1905,7 @@ void MOSRotating::AddEmitter(AEmitter *pEmitter)
 /// <summary>
 /// Attaches the passed in AEmitter and adds it to the list of emitters, changing its parent offset to the passed in Vector.
 /// </summary>
-/// <param name="pAttachable">The AEmitter to add</param>
+/// <param name="pEmitter">The AEmitter to add</param>
 /// <param name="parentOffsetToSet">The vector to set as the AEmitter's parent offset</param>
 void MOSRotating::AddEmitter(AEmitter *pEmitter, const Vector & parentOffsetToSet)
 {
@@ -1929,7 +1929,7 @@ void MOSRotating::AddEmitter(AEmitter *pEmitter, const Vector & parentOffsetToSe
 /// <summary>
 /// Detaches the AEmitter corresponding to the passed in UniqueID, and removes it from the emitter list.
 /// </summary>
-/// <param name="attachableUniqueId">The UniqueID of the the AEmitter to remove</param>
+/// <param name="emitterUniqueId">The UniqueID of the the AEmitter to remove</param>
 /// <returns>False if the AEmitter is invalid, otherwise true</returns>
 bool MOSRotating::RemoveEmitter(long emitterUniqueId)
 {
@@ -1943,18 +1943,14 @@ bool MOSRotating::RemoveEmitter(long emitterUniqueId)
 
 
 /// <summary>
-/// Detaches the passed in Attachable and removes it from the appropriate attachable lists
+/// Detaches the passed in AEmitter and removes it from the appropriate emitters lists
 /// </summary>
-/// <param name="pAttachable">The attachable to remove</param>
-/// <returns>False if the attachable is invalid, otherwise true</returns>
+/// <param name="pEmitter">The AEmitter to remove</param>
+/// <returns>False if the AEmitter is invalid, otherwise true</returns>
 bool MOSRotating::RemoveEmitter(AEmitter *pEmitter)
 {
 	if (pEmitter)
 	{
-		if (m_Emitters.size() > 0)
-		{
-			m_Emitters.remove(pEmitter);
-		}
 		if (m_Emitters.size() > 0)
 		{
 			m_Emitters.remove(pEmitter);

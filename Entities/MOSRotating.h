@@ -707,19 +707,7 @@ ENTITYALLOCATION(MOSRotating)
     virtual void ApplyImpulses();
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AttachEmitter
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Attaches an AEmitter to this MOSRotating.
-// Arguments:       The AEmitter to attach, ownership IS transferred!
-//                  The offset from the origin of this MOSRotating to where the AEmitter's
-//                  joint is attached.
-//                  Whether to check if this added emitter triggers the GibWoundLimit..
-//                  sometimes that's a bad idea if potentially gibbing this would cause
-//                  the m_Attachables list to be messed with while it's being iterated.
-// Return value:    None.
 
-    virtual void AttachEmitter(AEmitter *pEmitter, Vector emitOffset, bool checkGibWoundLimit = true);
 
     void AddAttachable(Attachable *pAttachable);
 
@@ -728,12 +716,16 @@ ENTITYALLOCATION(MOSRotating)
     void AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable);
 
     void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet, bool isHardcodedAttachable);
+	void AddEmitter(AEmitter *pEmitter);
 
     bool RemoveAttachable(long attachableUniqueId);
+	void AddEmitter(AEmitter *pEmitter, const Vector& parentOffsetToSet);
 
     bool RemoveAttachable(Attachable *pAttachable);
+	bool RemoveEmitter(long emitterUniqueId);
 
     void DetachOrDestroyAll(bool destroy);
+	bool RemoveEmitter(AEmitter *pEmitter);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -1175,29 +1175,6 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AttachEmitter
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Attaches an AEmitter to this MOSRotating.
-
-void MOSRotating::AttachEmitter(AEmitter *pEmitter, Vector emitOffset, bool checkGibWoundLimit)
-{
-    // Gib if the limit is reached, and not already gibbed yet
-    if (checkGibWoundLimit && !m_ToDelete && m_GibWoundLimit && m_Emitters.size() + 1 > m_GibWoundLimit)
-    {
-        // Indicate blast in opposite direction of emission
-// TODO: don't hardcode here; get some data from the emitter
-        Vector blast(-5, 0);
-        blast.RadRotate(pEmitter->GetEmitAngle());
-        GibThis(blast);
-        return;
-    }
-
-    pEmitter->Attach(this, emitOffset);
-    m_Emitters.push_back(pEmitter);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  MoveOutOfTerrain
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether any of the Atom:s in this MovableObject are on top of
@@ -1905,9 +1882,86 @@ void MOSRotating::DetachOrDestroyAll(bool destroy)
         else
             (*aItr)->Detach();
     }
-
-    m_AllAttachables.clear();
+	m_AllAttachables.clear();
 }
+
+
+/// <summary>
+/// Attaches the passed in AEmitter and adds it to the list of emitters, not changing its parent offset.
+/// </summary>
+/// <param name="pAttachable">The AEmitter to attach</param>
+void MOSRotating::AddEmitter(AEmitter *pEmitter)
+{
+	if (pEmitter)
+	{
+		AddEmitter(pEmitter, pEmitter->GetParentOffset());
+	}
+}
+
+
+/// <summary>
+/// Attaches the passed in AEmitter and adds it to the list of emitters, changing its parent offset to the passed in Vector.
+/// </summary>
+/// <param name="pAttachable">The AEmitter to add</param>
+/// <param name="parentOffsetToSet">The vector to set as the AEmitter's parent offset</param>
+void MOSRotating::AddEmitter(AEmitter *pEmitter, const Vector & parentOffsetToSet)
+{
+	if (pEmitter)
+	{
+		pEmitter->Attach(this, parentOffsetToSet);
+
+		// Set the emitter's subgroup ID to it's Unique ID to avoid any possible conflicts when adding atoms to parent group.
+		pEmitter->SetAtomSubgroupID(pEmitter->GetUniqueID());
+
+		if (pEmitter->CollidesWithTerrain())
+		{
+			pEmitter->EnableTerrainCollisions(true);
+		}
+
+		m_Emitters.push_back(pEmitter);
+	}
+}
+
+
+/// <summary>
+/// Detaches the AEmitter corresponding to the passed in UniqueID, and removes it from the emitter list.
+/// </summary>
+/// <param name="attachableUniqueId">The UniqueID of the the AEmitter to remove</param>
+/// <returns>False if the AEmitter is invalid, otherwise true</returns>
+bool MOSRotating::RemoveEmitter(long emitterUniqueId)
+{
+	MovableObject *emitterAsMovableObject = g_MovableMan.FindObjectByUniqueID(emitterUniqueId);
+	if (emitterAsMovableObject)
+	{
+		return RemoveEmitter((AEmitter *)emitterAsMovableObject);
+	}
+	return false;
+}
+
+
+/// <summary>
+/// Detaches the passed in Attachable and removes it from the appropriate attachable lists
+/// </summary>
+/// <param name="pAttachable">The attachable to remove</param>
+/// <returns>False if the attachable is invalid, otherwise true</returns>
+bool MOSRotating::RemoveEmitter(AEmitter *pEmitter)
+{
+	if (pEmitter)
+	{
+		if (m_Emitters.size() > 0)
+		{
+			m_Emitters.remove(pEmitter);
+		}
+		if (m_Emitters.size() > 0)
+		{
+			m_Emitters.remove(pEmitter);
+		}
+		pEmitter->Detach();
+		return true;
+	}
+	return false;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetMOIDs

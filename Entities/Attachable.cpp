@@ -358,7 +358,7 @@ bool Attachable::TransferJointForces(Vector &jointForces)
 //                dynamic_cast<AEmitter *>(g_PresetMan.GetEntityPreset("AEmitter", "Wound Flesh Body")->Clone());
             if (pWound) {
                 pWound->SetEmitAngle(m_JointOffset.GetAbsRadAngle());
-                AttachEmitter(pWound, m_JointOffset);
+                AddEmitter(pWound, m_JointOffset);
                 pWound = 0;
             }
         }
@@ -422,11 +422,10 @@ bool Attachable::TransferJointImpulses(Vector &jointImpulses)
             // Add velocity and wound before detaching.
             // The forces should be applied to this' vel next round when detached
             AEmitter *pWound = dynamic_cast<AEmitter *>(m_pBreakWound->Clone());
-//                dynamic_cast<AEmitter *>(g_PresetMan.GetEntityPreset("AEmitter", "Wound Flesh Body")->Clone());
             if (pWound)
             {
                 pWound->SetEmitAngle(m_JointOffset.GetAbsRadAngle());
-                AttachEmitter(pWound, m_JointOffset, false);
+				AddEmitter(pWound, m_JointOffset);
                 pWound = 0;
             }
         }

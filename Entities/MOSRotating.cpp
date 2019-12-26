@@ -378,8 +378,7 @@ int MOSRotating::Create(const MOSRotating &reference)
         SLICK_PROFILENAME("AEmitter Copies", 0xFF775544);
 
         pEmitter = dynamic_cast<AEmitter *>((*itr)->Clone());
-        pEmitter->Attach(this, pEmitter->GetParentOffset());
-        m_Emitters.push_back(pEmitter);
+		AddEmitter(pEmitter, pEmitter->GetParentOffset());
         pEmitter = 0;
     }
 
@@ -939,13 +938,11 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
         {
             // Add entry wound AEmitter to actor where the particle penetrated.
             AEmitter *pEntryWound = dynamic_cast<AEmitter *>(m_pEntryWound->Clone());
-//              dynamic_cast<AEmitter *>(g_PresetMan.GetEntityPreset("AEmitter", "Wound Entry")->Clone());
-//              AAssert(pEntryWound, "Tried to get an emitter that hasn't been defined!");
             pEntryWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle() + PI);
 			pEntryWound->SetDamageMultiplier(hd.pBody[HITOR]->WoundDamageMultiplier());
             // Adjust position so that it looks like the hole is actually *on* the Hitee.
             entryPos[dom] += increment[dom] * (pEntryWound->GetSpriteFrame()->w / 2);
-            AttachEmitter(pEntryWound, entryPos + m_SpriteOffset);
+			AddEmitter(pEntryWound, entryPos + m_SpriteOffset);
             pEntryWound = 0;
         }
 
@@ -958,13 +955,11 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
             if (m_pExitWound)
             {
                 AEmitter *pExitWound = dynamic_cast<AEmitter *>(m_pExitWound->Clone());
-//                dynamic_cast<AEmitter *>(g_PresetMan.GetEntityPreset("AEmitter", "Wound Exit")->Clone());
-//                AAssert(pExitWound, "Tried to get an emitter that hasn't been defined!");
                 // Adjust position so that it looks like the hole is actually *on* the Hitee.
                 exitPos[dom] -= increment[dom] * (pExitWound->GetSpriteFrame()->w / 2);
                 pExitWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle());
 				pExitWound->SetDamageMultiplier(hd.pBody[HITOR]->WoundDamageMultiplier());
-                AttachEmitter(pExitWound, exitPos + m_SpriteOffset);
+				AddEmitter(pExitWound, exitPos + m_SpriteOffset);
                 pExitWound = 0;
             }
 
@@ -2289,7 +2284,7 @@ bool MOSRotating::ApplyAttachableForces(Attachable *pAttachable, bool isCritical
 						pWound->SetBurstDamage(35);
 					}
                     // IMPORTANT to pass false here so teh added wound doesn't potentially gib this and cause the Attachables list to get f'd up while we're iterating through it in MOSRotating::Update!
-                    AttachEmitter(pWound, pAttachable->GetParentOffset(), false);
+					AddEmitter(pWound, pAttachable->GetParentOffset());
                     pWound = 0;
                 }
             }

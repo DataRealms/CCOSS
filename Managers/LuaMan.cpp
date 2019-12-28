@@ -739,7 +739,7 @@ int LuaMan::Create()
 			.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
 			.property("DamageMultiplier", &MOSRotating::GetDamageMultiplier, &MOSRotating::SetDamageMultiplier)
 			.property("WoundCount", &MOSRotating::GetWoundCount)
-            .def_readwrite("Wounds", &MOSRotating::m_Emitters, return_stl_iterator)
+            .def_readwrite("Wounds", &MOSRotating::m_Wounds, return_stl_iterator)
             .def("AddRecoil", &MOSRotating::AddRecoil)
             .def("SetRecoil", &MOSRotating::SetRecoil)
             .def("IsRecoiled", &MOSRotating::IsRecoiled)
@@ -775,7 +775,7 @@ int LuaMan::Create()
 			.def("RemoveEmitter", (bool (MOSRotating::*)(AEmitter *emitterToRemove))&MOSRotating::RemoveEmitter)
 			.def("RemoveEmitter", (bool (MOSRotating::*)(long uniqueIDOfEmitterToRemove))&MOSRotating::RemoveEmitter)
 			.def_readonly("Attachables", &MOSRotating::m_AllAttachables, return_stl_iterator)
-			.def_readonly("Emitters", &MOSRotating::m_Emitters, return_stl_iterator),
+			.def_readonly("Emitters", &MOSRotating::m_Wounds, return_stl_iterator),
 
         CONCRETELUABINDING(Attachable, MOSRotating)
             .def("GetRootParent", (MovableObject * (Attachable::*)())&Attachable::GetRootParent)

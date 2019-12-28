@@ -918,7 +918,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       Key to retrieve value.
 // Return value:    Wound amount.
 
-	virtual int GetWoundCount() const { return m_Emitters.size(); }; 
+	virtual int GetWoundCount() const { return m_Wounds.size(); }; 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1153,8 +1153,8 @@ protected:
     Vector m_RecoilForce;
     // The vector that the recoil offsets the sprite when m_Recoiled is true.
     Vector m_RecoilOffset;
-    // The list of AEmitters currently attached to this MOSRotating, and owned here as well
-    std::list<AEmitter *> m_Emitters;
+    // The list of wound AEmitters currently attached to this MOSRotating, and owned here as well
+    std::list<AEmitter *> m_Wounds;
     // The list of general Attachables currently attached and Owned by this.
     std::list<Attachable *> m_Attachables;
     // The list of all Attachables, including both hardcoded attachables and those added through ini or lua
@@ -1163,7 +1163,7 @@ protected:
     std::list<Gib> m_Gibs;
     // The amount of impulse force required to gib this, in kg * (m/s). 0 means no limit
     float m_GibImpulseLimit;
-    // The number of emitters allowed before this gets gibbed. 0 means this can't get gibbed
+    // The number of wound emitters allowed before this gets gibbed. 0 means this can't get gibbed
     int m_GibWoundLimit;
     // Gib sound effect
     Sound m_GibSound;

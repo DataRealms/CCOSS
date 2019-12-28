@@ -194,7 +194,7 @@ void MOSRotating::Clear()
     m_Recoiled = false;
     m_RecoilForce.Reset();
     m_RecoilOffset.Reset();
-    m_Emitters.clear();
+    m_Wounds.clear();
     m_Attachables.clear();
     m_AllAttachables.clear();
     m_Gibs.clear();
@@ -373,7 +373,7 @@ int MOSRotating::Create(const MOSRotating &reference)
     m_RecoilOffset = reference.m_RecoilOffset;
 
     AEmitter *pEmitter = 0;
-    for (list<AEmitter *>::const_iterator itr = reference.m_Emitters.begin(); itr != reference.m_Emitters.end(); ++itr)
+    for (list<AEmitter *>::const_iterator itr = reference.m_Wounds.begin(); itr != reference.m_Wounds.end(); ++itr)
     {
         SLICK_PROFILENAME("AEmitter Copies", 0xFF775544);
 
@@ -454,7 +454,7 @@ int MOSRotating::ReadProperty(std::string propName, Reader &reader)
     {
         AEmitter *pEmitter = new AEmitter;
         reader >> pEmitter;
-        m_Emitters.push_back(pEmitter);
+        m_Wounds.push_back(pEmitter);
     }
     else if (propName == "AddAttachable")
     {
@@ -512,7 +512,7 @@ int MOSRotating::Save(Writer &writer) const
     writer.NewProperty("OrientToVel");
     writer << m_OrientToVel;
 
-    for (list<AEmitter *>::const_iterator itr = m_Emitters.begin(); itr != m_Emitters.end(); ++itr)
+    for (list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
     {
         writer.NewProperty("AddEmitter");
         writer << (*itr);
@@ -553,12 +553,12 @@ int MOSRotating::RemoveWounds(int amount)
 	int deleted = 0;
 	float damage = 0;
 
-    for (list<AEmitter *>::iterator itr = m_Emitters.begin(); itr != m_Emitters.end();)
+    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end();)
 	{
 		damage += (*itr)->GetBurstDamage();
         delete (*itr);
 		(*itr) = 0;
-		itr = m_Emitters.erase(itr);
+		itr = m_Wounds.erase(itr);
 		deleted++;
 
 		if (deleted >= amount)
@@ -578,7 +578,7 @@ void MOSRotating::Destroy(bool notInherited)
     delete m_pAtomGroup;
     delete m_pDeepGroup;
 
-    for (list<AEmitter *>::iterator itr = m_Emitters.begin(); itr != m_Emitters.end(); ++itr)
+    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
         delete (*itr);
     for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
         delete (*aItr);
@@ -1249,7 +1249,7 @@ void MOSRotating::ResetAllTimers()
 {
     MovableObject::ResetAllTimers();
 
-    for (list<AEmitter *>::iterator emitter = m_Emitters.begin(); emitter != m_Emitters.end(); ++emitter)
+    for (list<AEmitter *>::iterator emitter = m_Wounds.begin(); emitter != m_Wounds.end(); ++emitter)
         (*emitter)->ResetAllTimers();
 
     for (list<Attachable *>::iterator attachable = m_Attachables.begin(); attachable != m_Attachables.end(); ++attachable)
@@ -1664,9 +1664,9 @@ void MOSRotating::Update()
         m_Rotation += (radsToGo * m_OrientToVel * velInfluence);
     }
 
-    // Update all the attached emitters
-    for (list<AEmitter *>::iterator itr = m_Emitters.begin();
-        itr != m_Emitters.end(); ++itr)
+    // Update all the attached wound emitters
+    for (list<AEmitter *>::iterator itr = m_Wounds.begin();
+        itr != m_Wounds.end(); ++itr)
     {
         if ((*itr))
         {
@@ -1921,7 +1921,7 @@ void MOSRotating::AddEmitter(AEmitter *pEmitter, const Vector & parentOffsetToSe
 			pEmitter->EnableTerrainCollisions(true);
 		}
 
-		m_Emitters.push_back(pEmitter);
+		m_Wounds.push_back(pEmitter);
 	}
 }
 
@@ -1951,9 +1951,9 @@ bool MOSRotating::RemoveEmitter(AEmitter *pEmitter)
 {
 	if (pEmitter)
 	{
-		if (m_Emitters.size() > 0)
+		if (m_Wounds.size() > 0)
 		{
-			m_Emitters.remove(pEmitter);
+			m_Wounds.remove(pEmitter);
 		}
 		pEmitter->Detach();
 		return true;
@@ -2087,11 +2087,11 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
     }
 
 
-	// Draw all the attached emitters, and only if the mode is g_DrawColor and not onlyphysical
-	// Only draw attachables and emitters which are not drawn after parrent, so we draw them before
+	// Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
+	// Only draw attachables and emitters which are not drawn after parent, so we draw them before
 	if (mode == g_DrawColor || (!onlyPhysical && mode == g_DrawMaterial))
 	{
-		for (list<AEmitter *>::const_iterator itr = m_Emitters.begin(); itr != m_Emitters.end(); ++itr)
+		for (list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
 		{
 			if (!(*itr)->IsDrawnAfterParent())
 				(*itr)->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
@@ -2211,10 +2211,10 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
         }
     }
 
-    // Draw all the attached emitters, and only if the mode is g_DrawColor and not onlyphysical
+    // Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
     if (mode == g_DrawColor || (!onlyPhysical && mode == g_DrawMaterial))
     {
-		for (list<AEmitter *>::const_iterator itr = m_Emitters.begin(); itr != m_Emitters.end(); ++itr)
+		for (list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
 		{
 			if ((*itr)->IsDrawnAfterParent())
 				(*itr)->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);

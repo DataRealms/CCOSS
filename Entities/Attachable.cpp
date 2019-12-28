@@ -487,7 +487,7 @@ float Attachable::CollectDamage()
     float totalDamage = m_DamageCount;
     m_DamageCount = 0;
 
-    for (list<AEmitter *>::iterator itr = m_Emitters.begin(); itr != m_Emitters.end(); ++itr)
+    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
         totalDamage += (*itr)->CollectDamage();
 
     return totalDamage * m_DamageMultiplier;
@@ -670,7 +670,7 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
 // TODO: Clean up the drawing hierarchy!#@!")
     // Finally draw all the attached emitters, and only if the mode is g_DrawColor
     if (mode == g_DrawColor || mode == g_DrawMaterial) {
-        for (list<AEmitter *>::iterator itr = m_Emitters.begin(); itr != m_Emitters.end(); ++itr)
+        for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
             (*itr)->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
     }
 */

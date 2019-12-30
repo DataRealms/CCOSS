@@ -343,31 +343,6 @@ bool Attachable::TransferJointForces(Vector &jointForces)
          fItr != m_Forces.end(); ++fItr)
         forces += fItr->first;
 
-/* doesn't really apply to forces, only impulse forces
-    // Factor in the stiffness, or lack thereof
-    forces *= m_JointStiffness;
-    // Check if joint breaks and act accordingly
-    if (forces.GetMagnitude() > m_JointStrength) {
-        forces.SetMagnitude(m_JointStrength);
-        jointForces += forces;
-
-        if (m_pBreakWound) {
-            // Add velocity and wound before detaching.
-            // The forces should be applied to this' vel next round when detached
-            AEmitter *pWound = dynamic_cast<AEmitter *>(m_pBreakWound->Clone());
-//                dynamic_cast<AEmitter *>(g_PresetMan.GetEntityPreset("AEmitter", "Wound Flesh Body")->Clone());
-            if (pWound) {
-                pWound->SetEmitAngle(m_JointOffset.GetAbsRadAngle());
-                AddEmitter(pWound, m_JointOffset);
-                pWound = 0;
-            }
-        }
-
-        Detach();
-        g_MovableMan.AddParticle(this);
-        return false;
-    }
-*/
     // Joint held up, so act accordingly
 // TODO: Maybe not do this here, we might need the forces for other stuff?")
     // Clear out forces after we've bundled them up.
@@ -425,7 +400,7 @@ bool Attachable::TransferJointImpulses(Vector &jointImpulses)
             if (pWound)
             {
                 pWound->SetEmitAngle(m_JointOffset.GetAbsRadAngle());
-				AddEmitter(pWound, m_JointOffset);
+				AddWound(pWound, m_JointOffset);
                 pWound = 0;
             }
         }

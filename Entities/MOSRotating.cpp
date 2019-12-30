@@ -956,7 +956,7 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
 			pEntryWound->SetDamageMultiplier(hd.pBody[HITOR]->WoundDamageMultiplier());
             // Adjust position so that it looks like the hole is actually *on* the Hitee.
             entryPos[dom] += increment[dom] * (pEntryWound->GetSpriteFrame()->w / 2);
-			AddEmitter(pEntryWound, entryPos + m_SpriteOffset);
+			AddWound(pEntryWound, entryPos + m_SpriteOffset);
             pEntryWound = 0;
         }
 
@@ -973,7 +973,7 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
                 exitPos[dom] -= increment[dom] * (pExitWound->GetSpriteFrame()->w / 2);
                 pExitWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle());
 				pExitWound->SetDamageMultiplier(hd.pBody[HITOR]->WoundDamageMultiplier());
-				AddEmitter(pExitWound, exitPos + m_SpriteOffset);
+				AddWound(pExitWound, exitPos + m_SpriteOffset);
                 pExitWound = 0;
             }
 

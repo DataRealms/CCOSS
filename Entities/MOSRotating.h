@@ -900,14 +900,19 @@ ENTITYALLOCATION(MOSRotating)
 	virtual void SetGibWoundLimit(int newLimit) { m_GibWoundLimit = newLimit; }
 
 
+/// <summary>
+/// Attaches the passed in wound AEmitter and adds it to the list of wounds, changing its parent offset to the passed in Vector.
+/// </summary>
+/// <param name="pWound">The wound AEmitter to add</param>
+/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset</param>
+	virtual void AddWound(AEmitter *pWound, const Vector& parentOffsetToSet);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RemoveWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds.
-// Arguments:       Amount of wounds to remove.
-// Return value:    Amount of damage, caused by these wounds.
 
+/// <summary>
+/// Removes a specified amount of wounds and returns damage caused by these wounds. Head multiplier is not used.				
+/// </summary>
+/// <param name="amount">Amount of wounds to remove.</param>
+/// <returns>Amount of damage caused by these wounds.</returns>
 	virtual int RemoveWounds(int amount); 
 
 

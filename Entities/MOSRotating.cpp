@@ -542,12 +542,26 @@ int MOSRotating::Save(Writer &writer) const
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RemoveWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds and returns damage caoused by this wounds. 
-//					Head multiplier is not used.
+/// <summary>
+/// Attaches the passed in wound AEmitter and adds it to the list of wounds, changing its parent offset to the passed in Vector.
+/// </summary>
+/// <param name="pWound">The wound AEmitter to add</param>
+/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset</param>
+void MOSRotating::AddWound(AEmitter *pWound, const Vector & parentOffsetToSet)
+{
+	if (pWound)
+	{
+		pWound->Attach(this, parentOffsetToSet);
+		m_Wounds.push_back(pWound);
+	}
+}
 
+
+/// <summary>
+/// Removes a specified amount of wounds and returns damage caused by this wounds. Head multiplier is not used.				
+/// </summary>
+/// <param name="amount">Amount of wounds to remove.</param>
+/// <returns>Amount of damage caused by these wounds.</returns>
 int MOSRotating::RemoveWounds(int amount)
 {
 	int deleted = 0;

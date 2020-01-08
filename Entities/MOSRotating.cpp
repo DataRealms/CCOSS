@@ -454,7 +454,8 @@ int MOSRotating::ReadProperty(std::string propName, Reader &reader)
     {
         AEmitter *pEmitter = new AEmitter;
         reader >> pEmitter;
-        m_Wounds.push_back(pEmitter);
+		Attachable *pEmitterAsAttachable = dynamic_cast<Attachable *>(pEmitter);
+		m_Attachables.push_back(pEmitterAsAttachable);
     }
     else if (propName == "AddAttachable")
     {

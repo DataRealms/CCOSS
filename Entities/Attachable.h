@@ -611,6 +611,13 @@ ENTITYALLOCATION(Attachable)
 
 
 /// <summary>
+/// Whether this attachable is set to collide with terrain when attached to a parent or not.
+/// </summary>
+/// <return>Whether this attachable is set to collide with terrain or not.</return>
+	virtual bool IsSetToCollide() const { return m_IsSetToCollide; }
+
+
+/// <summary>
 /// Whether this attachable collides with terrain or not.
 /// </summary>
 /// <return>Whether this attachable collides with terrain or not.</return>
@@ -618,9 +625,9 @@ ENTITYALLOCATION(Attachable)
 
 
 /// <summary>
-/// Sets whether this attachable should collide with terrain when attached to a parent or not.
+/// Sets whether this attachable currently collides with terrain or not.
 /// </summary>
-/// <param name="collide">Whether to enable terrain collisions or not.</param>
+/// <param name="collide">Whether this is currently colliding or not.</param>
 	virtual void SetCollidesWithTerrain(bool collide) { m_CollidesWithTerrain = collide; }
 
 
@@ -680,7 +687,10 @@ protected:
 	// If true inherits Parent's rot angle, which is set MOSRotating::Update. Default is true to maintain maybe awkward but default behavior
 	bool m_InheritsRotAngle;
 
-    // If true enables collision with terrain for attachable
+	// Whether this is set to collide with terrain or not.
+	bool m_IsSetToCollide;
+
+    // Whether this currently collides with terrain or not.
     bool m_CollidesWithTerrain;
 
 

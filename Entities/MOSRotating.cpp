@@ -1832,7 +1832,7 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOf
 		// Set the attachable's subgroup ID to it's Unique ID to avoid any possible conflicts when adding atoms to parent group.
 		pAttachable->SetAtomSubgroupID(pAttachable->GetUniqueID());
 
-		if (pAttachable->CollidesWithTerrain())
+		if (pAttachable->IsSetToCollide())
 		{
 			pAttachable->EnableTerrainCollisions(true);
 		}
@@ -1931,7 +1931,7 @@ void MOSRotating::AddEmitter(AEmitter *pEmitter, const Vector & parentOffsetToSe
 		// Set the emitter's subgroup ID to it's Unique ID to avoid any possible conflicts when adding atoms to parent group.
 		pEmitter->SetAtomSubgroupID(pEmitter->GetUniqueID());
 
-		if (pEmitter->CollidesWithTerrain())
+		if (pEmitter->IsSetToCollide())
 		{
 			pEmitter->EnableTerrainCollisions(true);
 		}

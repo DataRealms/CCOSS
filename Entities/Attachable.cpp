@@ -48,7 +48,8 @@ void Attachable::Clear()
     m_DamageCount = 0;
     m_OnlyLinForces = false;
 	m_InheritsRotAngle = true;
-    m_CollidesWithTerrain = false;
+    m_IsSetToCollide = false;
+	m_CollidesWithTerrain = false;
 }
 
 
@@ -88,7 +89,7 @@ int Attachable::Create(const Attachable &reference)
     m_DamageCount = reference.m_DamageCount;
     m_OnlyLinForces = reference.m_OnlyLinForces;
 	m_InheritsRotAngle = reference.m_InheritsRotAngle;
-    m_CollidesWithTerrain = reference.m_CollidesWithTerrain;
+	m_IsSetToCollide = reference.m_IsSetToCollide;
 
     return 0;
 }
@@ -119,7 +120,7 @@ int Attachable::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "DrawAfterParent")
         reader >> m_DrawAfterParent;
     else if (propName == "CollidesWithTerrain")
-        reader >> m_CollidesWithTerrain;
+        reader >> m_IsSetToCollide;
     else
         // See if the base class(es) can find a match instead
         return MOSRotating::ReadProperty(propName, reader);
@@ -153,7 +154,7 @@ int Attachable::Save(Writer &writer) const
 	writer.NewProperty("DrawAfterParent");
     writer << m_DrawAfterParent;
     writer.NewProperty("CollidesWithTerrain");
-    writer << m_CollidesWithTerrain;
+    writer << m_IsSetToCollide;
 
     return 0;
 }
@@ -311,15 +312,17 @@ void Attachable::Detach()
 /// <param name="enable">Adds this Attachable's atoms to the parent's AtomGroup if true, removes them if false.</param>
 void Attachable::EnableTerrainCollisions(bool enable)
 {
-	if (m_pParent != nullptr)
+	if (IsAttached() && IsSetToCollide())
 	{
-		if (enable)
+		if (!CollidesWithTerrain() && enable)
 		{
 			m_pParent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset());
+			SetCollidesWithTerrain(true);
 		}
-		else if (!enable)
+		else if (CollidesWithTerrain() && !enable)
 		{
 			m_pParent->GetAtomGroup()->RemoveAtoms(GetAtomSubgroupID());
+			SetCollidesWithTerrain(false);
 		}
 	}
 }

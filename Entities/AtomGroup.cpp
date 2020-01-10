@@ -814,7 +814,7 @@ bool AtomGroup::UpdateSubAtoms(long int subID, const Vector &newOffset, const Ma
 	{
 		return false;
 	}
-    DAssert(!subItr->second.empty(), "Found empty atom subgroup list!?");
+    DAssert(m_SubGroups.find(subID)->second.empty(), "Found empty atom subgroup list!?");
 
     for (list<Atom *>::const_iterator aItr = m_SubGroups.find(subID)->second.begin(); aItr != m_SubGroups.find(subID)->second.end(); ++aItr)
     {

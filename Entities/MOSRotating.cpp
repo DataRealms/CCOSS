@@ -2303,7 +2303,7 @@ bool MOSRotating::ApplyAttachableForces(Attachable *pAttachable, bool isCritical
 						pWound->SetBurstDamage(35);
 					}
                     // IMPORTANT to pass false here so teh added wound doesn't potentially gib this and cause the Attachables list to get f'd up while we're iterating through it in MOSRotating::Update!
-					AddEmitter(pWound, pAttachable->GetParentOffset());
+					AddWound(pWound, pAttachable->GetParentOffset());
                     pWound = 0;
                 }
             }

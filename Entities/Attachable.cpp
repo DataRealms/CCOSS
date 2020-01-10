@@ -315,7 +315,7 @@ void Attachable::EnableTerrainCollisions(bool enable)
 	{
 		if (enable)
 		{
-			m_pParent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset(), m_Rotation);
+			m_pParent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset());
 		}
 		else if (!enable)
 		{

@@ -1704,6 +1704,7 @@ void MOSRotating::Update()
             continue;
 
         pAttachable = *aItr;
+        ++aItr;
 
         pAttachable->SetHFlipped(m_HFlipped);
         pAttachable->SetJointPos(m_Pos + RotateOffset((pAttachable)->GetParentOffset()));
@@ -1713,7 +1714,6 @@ void MOSRotating::Update()
         }
         pAttachable->Update();
 
-        ++aItr;
         ApplyAttachableForces(pAttachable);
     }
 

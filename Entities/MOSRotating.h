@@ -721,14 +721,6 @@ ENTITYALLOCATION(MOSRotating)
 
 	void DetachOrDestroyAll(bool destroy);
 
-	void AddEmitter(AEmitter *pEmitter);
-
-	void AddEmitter(AEmitter *pEmitter, const Vector& parentOffsetToSet);
-
-	bool RemoveEmitter(long emitterUniqueId);
-
-	bool RemoveEmitter(AEmitter *pEmitter);
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers

@@ -325,6 +325,13 @@ void Attachable::EnableTerrainCollisions(bool enable)
 			SetCollidesWithTerrain(false);
 		}
 	}
+	else if (IsAttached() && !IsSetToCollide())
+	{
+		if (enable || !enable)
+		{
+			g_ConsoleMan.PrintString("ERROR: Tried to toggle collisions for attachable that was not set to collide when initially created!");
+		}
+	}
 }
 
 

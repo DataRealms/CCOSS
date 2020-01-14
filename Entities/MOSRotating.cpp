@@ -375,10 +375,10 @@ int MOSRotating::Create(const MOSRotating &reference)
     AEmitter *pEmitter = 0;
     for (list<AEmitter *>::const_iterator itr = reference.m_Wounds.begin(); itr != reference.m_Wounds.end(); ++itr)
     {
-        SLICK_PROFILENAME("AEmitter Copies", 0xFF775544);
+        SLICK_PROFILENAME("Wound AEmitter Copies", 0xFF775544);
 
         pEmitter = dynamic_cast<AEmitter *>((*itr)->Clone());
-		AddEmitter(pEmitter, pEmitter->GetParentOffset());
+		AddWound(pEmitter, pEmitter->GetParentOffset());
         pEmitter = 0;
     }
 

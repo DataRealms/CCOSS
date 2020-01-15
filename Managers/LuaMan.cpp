@@ -776,7 +776,7 @@ int LuaMan::Create()
 			.def("RemoveEmitter", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
 			.def("RemoveEmitter", (bool (MOSRotating::*)(long uniqueIDOfAttachableToRemove))&MOSRotating::RemoveAttachable)
 			.def_readonly("Attachables", &MOSRotating::m_AllAttachables, return_stl_iterator)
-			.def_readonly("Emitters", &MOSRotating::m_Wounds, return_stl_iterator),
+			.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator),
 
         CONCRETELUABINDING(Attachable, MOSRotating)
             .def("GetRootParent", (MovableObject * (Attachable::*)())&Attachable::GetRootParent)
@@ -797,6 +797,7 @@ int LuaMan::Create()
             .def("TransferJointImpulses", &Attachable::TransferJointImpulses)
             .def("CollectDamage", &Attachable::CollectDamage)
 			.property("InheritsRotAngle", &Attachable::InheritsRotAngle, &Attachable::SetInheritsRotAngle)
+			.property("CollidesWithTerrain", &Attachable::CollidesWithTerrain)
 			.def("EnableTerrainCollisions", &Attachable::EnableTerrainCollisions),
 
 		ABSTRACTLUABINDING(Emission, Entity)

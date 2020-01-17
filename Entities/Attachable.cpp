@@ -48,7 +48,7 @@ void Attachable::Clear()
     m_DamageCount = 0;
     m_OnlyLinForces = false;
 	m_InheritsRotAngle = true;
-    m_IsSetToCollide = false;
+    m_CanCollideWithTerrain = false;
 	m_CollidesWithTerrain = false;
 }
 
@@ -89,7 +89,7 @@ int Attachable::Create(const Attachable &reference)
     m_DamageCount = reference.m_DamageCount;
     m_OnlyLinForces = reference.m_OnlyLinForces;
 	m_InheritsRotAngle = reference.m_InheritsRotAngle;
-	m_IsSetToCollide = reference.m_IsSetToCollide;
+	m_CanCollideWithTerrain = reference.m_CanCollideWithTerrain;
 
     return 0;
 }
@@ -120,7 +120,7 @@ int Attachable::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "DrawAfterParent")
         reader >> m_DrawAfterParent;
     else if (propName == "CollidesWithTerrain")
-        reader >> m_IsSetToCollide;
+        reader >> m_CanCollideWithTerrain;
     else
         // See if the base class(es) can find a match instead
         return MOSRotating::ReadProperty(propName, reader);
@@ -154,7 +154,7 @@ int Attachable::Save(Writer &writer) const
 	writer.NewProperty("DrawAfterParent");
     writer << m_DrawAfterParent;
     writer.NewProperty("CollidesWithTerrain");
-    writer << m_IsSetToCollide;
+    writer << m_CanCollideWithTerrain;
 
     return 0;
 }

@@ -614,7 +614,7 @@ ENTITYALLOCATION(Attachable)
 	/// Whether this attachable is capable of having terrain collisions when attached to a parent or not.
 	/// </summary>
 	/// <return>Whether this attachable is capable of colliding with terrain or not.</return>
-	virtual bool CanCollideWithTerrain() const { return m_IsSetToCollide; }
+	virtual bool CanCollideWithTerrain() const { return m_CanCollideWithTerrain; }
 
 
 	/// <summary>
@@ -688,7 +688,7 @@ protected:
 	bool m_InheritsRotAngle;
 
 	// Whether this is capable of colliding with terrain or not.
-	bool m_IsSetToCollide;
+	bool m_CanCollideWithTerrain;
 
 	// Whether this currently has terrain collisions enabled or not.
 	bool m_CollidesWithTerrain;

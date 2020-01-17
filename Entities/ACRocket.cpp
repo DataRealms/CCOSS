@@ -824,9 +824,6 @@ void ACRocket::Update()
     // RAISE the gears
     if (m_pMThruster && m_pMThruster->IsEmitting())// && m_pMThruster->IsSetToBurst())
     {
-// Obsolete way of adding and removing atoms to the body group
-//        m_pAtomGroup->RemoveAllButAtoms(0);
-
         m_Paths[RIGHT][RAISED].SetHFlip(m_HFlipped);
         m_Paths[LEFT][RAISED].SetHFlip(!m_HFlipped);
 
@@ -852,9 +849,7 @@ void ACRocket::Update()
     // LOWER the gears
     else if (m_pMThruster && !m_pMThruster->IsEmitting())// && m_GearState != LOWERED)
     {
-/* Obsolete way of adding and removing atoms to the body group
-        m_pAtomGroup->RemoveAllButAtoms(0);
-
+/*
         if (m_pRLeg && m_pRLeg->IsAttached())
             m_pAtomGroup->AddAtoms(m_pRFootGroup->GetAtomList(), m_pRLeg->GetAtomSubgroupID(), Vector(18, 40));
         if (m_pLLeg && m_pLLeg->IsAttached())

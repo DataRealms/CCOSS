@@ -861,50 +861,6 @@ bool AtomGroup::RemoveAtoms(long int removeID)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAllButAtoms
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes all atoms of a specific subgroup ID from this AtomGroup that
-//                  don't match a specific subgroup ID.
-/*
-bool AtomGroup::RemoveAllButAtoms(int removeAllButID)
-{
-    bool removedAny = false;
-    list<Atom *>::iterator eraseItr;
-
-    for (list<Atom *>::iterator aItr = m_Atoms.begin(); aItr != m_Atoms.end();)
-    {
-        if ((*aItr)->GetSubID() != removeAllButID)
-        {
-            // This hanky panky necessary to not invalidate the aItr iterator
-            delete (*aItr);
-            eraseItr = aItr;
-            aItr++;
-            m_Atoms.erase(eraseItr);
-            removedAny = true;
-        }
-        else
-            aItr++;
-    }
-
-    // Remove the entries int he SubGroup map
-    map<int, list<Atom *> >::iterator eraseMapItr;
-    for (map<int, list<Atom *> >::iterator mItr = m_SubGroups.begin(); mItr != m_SubGroups.end();)
-    {
-        if (mItr->first != removeAllButID)
-        {
-            eraseMapItr = mItr;
-            mItr++;
-            m_SubGroups.erase(eraseMapItr);
-        }
-        else
-            mItr++;
-    }
-
-    return removedAny;
-}
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddMOIDToIgnore
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds a MOID that this Atom should ignore collisions with during its

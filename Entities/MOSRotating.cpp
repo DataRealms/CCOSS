@@ -552,8 +552,15 @@ void MOSRotating::AddWound(AEmitter *pWound, const Vector & parentOffsetToSet)
 {
 	if (pWound)
 	{
-		pWound->Attach(this, parentOffsetToSet);
-		m_Wounds.push_back(pWound);
+		if (!ToDelete() && m_GibWoundLimit && m_Wounds.size() + 1 > m_GibWoundLimit)
+		{
+			GibThis();
+		}
+		else
+		{
+			pWound->Attach(this, parentOffsetToSet);
+			m_Wounds.push_back(pWound);
+		}
 	}
 }
 
@@ -1832,7 +1839,7 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOf
 		// Set the attachable's subgroup ID to it's Unique ID to avoid any possible conflicts when adding atoms to parent group.
 		pAttachable->SetAtomSubgroupID(pAttachable->GetUniqueID());
 
-		if (pAttachable->IsSetToCollide())
+		if (pAttachable->CanCollideWithTerrain())
 		{
 			pAttachable->EnableTerrainCollisions(true);
 		}

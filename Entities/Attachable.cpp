@@ -312,7 +312,7 @@ void Attachable::Detach()
 /// <param name="enable">Adds this Attachable's atoms to the parent's AtomGroup if true, removes them if false.</param>
 void Attachable::EnableTerrainCollisions(bool enable)
 {
-	if (IsAttached() && IsSetToCollide())
+	if (IsAttached() && CanCollideWithTerrain())
 	{
 		if (!CollidesWithTerrain() && enable)
 		{
@@ -325,7 +325,7 @@ void Attachable::EnableTerrainCollisions(bool enable)
 			SetCollidesWithTerrain(false);
 		}
 	}
-	else if (IsAttached() && !IsSetToCollide())
+	else if (IsAttached() && !CanCollideWithTerrain())
 	{
 		if (enable || !enable)
 		{

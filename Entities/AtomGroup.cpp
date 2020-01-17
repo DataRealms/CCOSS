@@ -105,32 +105,31 @@ int AtomGroup::Create(const AtomGroup &reference, boolean onlyCopyOwnerAtoms)
     m_Resolution = reference.m_Resolution;
     m_Depth = reference.m_Depth;
 
-    m_SubGroups.clear();
-    for (list<Atom *>::const_iterator itr = reference.m_Atoms.begin(); itr != reference.m_Atoms.end(); ++itr)
-    {
-        if (!onlyCopyOwnerAtoms || (*itr)->GetSubID() == 0)
-        {
-            Atom *pAtomCopy = new Atom(**itr);
-            pAtomCopy->SetIgnoreMOIDsByGroup(&m_IgnoreMOIDs);
+	m_SubGroups.clear();
+	for (list<Atom *>::const_iterator itr = reference.m_Atoms.begin(); itr != reference.m_Atoms.end(); ++itr)
+	{
+		if (!onlyCopyOwnerAtoms || (*itr)->GetSubID() == 0)
+		{
+			Atom *pAtomCopy = new Atom(**itr);
+			pAtomCopy->SetIgnoreMOIDsByGroup(&m_IgnoreMOIDs);
 
-            m_Atoms.push_back(pAtomCopy);
+			m_Atoms.push_back(pAtomCopy);
 
-            // TODO: OPTIMIZE THE SHIT OUT OF THIS!!! TERRIBLE to have a find in every atom creation for a group!
-            // Add to the appropriate spot in the subgroup map
-            long int subID = pAtomCopy->GetSubID();
-            if (subID != 0)
-            {
-                // Try to find the group
-                // No atom added to that group yet, so it doesn't exist, so make it
-                if (m_SubGroups.find(subID) == m_SubGroups.end())
+			// Add to the appropriate spot in the subgroup map
+			long int subID = pAtomCopy->GetSubID();
+			if (subID != 0)
+			{
+				// Try to find the group
+				// No atom added to that group yet, so it doesn't exist, so make it
+				if (m_SubGroups.find(subID) == m_SubGroups.end())
 				{
-                    m_SubGroups.insert(pair<long int, list<Atom *> >(subID, list<Atom *>())).first;
+					m_SubGroups.insert(pair<long int, list<Atom *> >(subID, list<Atom *>())).first;
 				}
-                // Add Atom to the list of that group
-                m_SubGroups.find(subID)->second.push_back(pAtomCopy);
-            }
-        }
-    }
+				// Add Atom to the list of that group
+				m_SubGroups.find(subID)->second.push_back(pAtomCopy);
+			}
+		}
+	}
 
 	// Copy ignored MOIDs list
 	for (list<MOID>::const_iterator itr = reference.m_IgnoreMOIDs.begin(); itr != reference.m_IgnoreMOIDs.end(); ++itr)
@@ -808,23 +807,22 @@ void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, long int subID, cons
 
 bool AtomGroup::UpdateSubAtoms(long int subID, const Vector &newOffset, const Matrix &newOffsetRotation)
 {
-    // Try to find existing subgroup with that ID to update
-    // Couldn't find any, so quit
+	// Try to find existing subgroup with that ID to update
 	if (m_SubGroups.find(subID) == m_SubGroups.end())
 	{
 		return false;
 	}
-    DAssert(m_SubGroups.find(subID)->second.empty(), "Found empty atom subgroup list!?");
+	DAssert(m_SubGroups.find(subID)->second.empty(), "Found empty atom subgroup list!?");
 
-    for (list<Atom *>::const_iterator aItr = m_SubGroups.find(subID)->second.begin(); aItr != m_SubGroups.find(subID)->second.end(); ++aItr)
-    {
-        // Re-set ID just to make sure
-        (*aItr)->SetSubID(subID);
-        (*aItr)->SetOffset(newOffset + ((*aItr)->GetOriginalOffset() * newOffsetRotation));
-//        pAtom->SetOwner(m_pOwnerMO);
-    }
+	for (list<Atom *>::const_iterator aItr = m_SubGroups.find(subID)->second.begin(); aItr != m_SubGroups.find(subID)->second.end(); ++aItr)
+	{
+		// Re-set ID just to make sure
+		(*aItr)->SetSubID(subID);
+		(*aItr)->SetOffset(newOffset + ((*aItr)->GetOriginalOffset() * newOffsetRotation));
+		//pAtom->SetOwner(m_pOwnerMO);
+	}
 
-    return true;
+	return true;
 }
 
 

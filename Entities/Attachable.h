@@ -610,30 +610,30 @@ ENTITYALLOCATION(Attachable)
 	virtual void SetInheritsRotAngle(bool inherit) { m_InheritsRotAngle = inherit; }
 
 
-/// <summary>
-/// Whether this attachable is set to collide with terrain when attached to a parent or not.
-/// </summary>
-/// <return>Whether this attachable is set to collide with terrain or not.</return>
-	virtual bool IsSetToCollide() const { return m_IsSetToCollide; }
+	/// <summary>
+	/// Whether this attachable is capable of having terrain collisions when attached to a parent or not.
+	/// </summary>
+	/// <return>Whether this attachable is capable of colliding with terrain or not.</return>
+	virtual bool CanCollideWithTerrain() const { return m_IsSetToCollide; }
 
 
-/// <summary>
-/// Whether this attachable collides with terrain or not.
-/// </summary>
-/// <return>Whether this attachable collides with terrain or not.</return>
+	/// <summary>
+	/// Whether this attachable collides with terrain or not.
+	/// </summary>
+	/// <return>Whether this attachable is currently colliding or not.</return>
 	virtual bool CollidesWithTerrain() const { return m_CollidesWithTerrain; }
 
 
-/// <summary>
-/// Sets whether this attachable currently collides with terrain or not.
-/// </summary>
-/// <param name="collide">Whether this is currently colliding or not.</param>
+	/// <summary>
+	/// Sets whether this attachable currently collides with terrain or not.
+	/// </summary>
+	/// <param name="collide">Whether this attachable is currently colliding or not.</param>
 	virtual void SetCollidesWithTerrain(bool collide) { m_CollidesWithTerrain = collide; }
 
 
-/// <summary>
-/// Turns on/off this Attachable's collisions, by adding/removing its atoms to/from its parent's AtomGroup.
-/// </summary>
+	/// <summary>
+	/// Turns on/off this Attachable's collisions, by adding/removing its atoms to/from its parent's AtomGroup.
+	/// </summary>
 	virtual void EnableTerrainCollisions(bool enable);
 
 
@@ -687,11 +687,11 @@ protected:
 	// If true inherits Parent's rot angle, which is set MOSRotating::Update. Default is true to maintain maybe awkward but default behavior
 	bool m_InheritsRotAngle;
 
-	// Whether this is set to collide with terrain or not.
+	// Whether this is capable of colliding with terrain or not.
 	bool m_IsSetToCollide;
 
-    // Whether this currently collides with terrain or not.
-    bool m_CollidesWithTerrain;
+	// Whether this currently has terrain collisions enabled or not.
+	bool m_CollidesWithTerrain;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

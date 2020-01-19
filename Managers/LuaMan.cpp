@@ -796,7 +796,7 @@ int LuaMan::Create()
             .def("TransferJointImpulses", &Attachable::TransferJointImpulses)
             .def("CollectDamage", &Attachable::CollectDamage)
 			.property("InheritsRotAngle", &Attachable::InheritsRotAngle, &Attachable::SetInheritsRotAngle)
-			.property("CollidesWithTerrain", &Attachable::CollidesWithTerrain)
+			.property("IsCollidingWithTerrainWhileAttached", &Attachable::IsCollidingWithTerrainWhileAttached)
 			.def("EnableTerrainCollisions", &Attachable::EnableTerrainCollisions),
 
 		ABSTRACTLUABINDING(Emission, Entity)

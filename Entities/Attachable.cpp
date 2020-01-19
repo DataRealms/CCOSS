@@ -48,8 +48,8 @@ void Attachable::Clear()
     m_DamageCount = 0;
     m_OnlyLinForces = false;
 	m_InheritsRotAngle = true;
-    m_CanCollideWithTerrain = false;
-	m_CollidesWithTerrain = false;
+	m_CanCollideWithTerrainWhenAttached = false;
+	m_IsCollidingWithTerrainWhileAttached = false;
 }
 
 
@@ -89,7 +89,7 @@ int Attachable::Create(const Attachable &reference)
     m_DamageCount = reference.m_DamageCount;
     m_OnlyLinForces = reference.m_OnlyLinForces;
 	m_InheritsRotAngle = reference.m_InheritsRotAngle;
-	m_CanCollideWithTerrain = reference.m_CanCollideWithTerrain;
+	m_CanCollideWithTerrainWhenAttached = reference.m_CanCollideWithTerrainWhenAttached;
 
     return 0;
 }
@@ -119,8 +119,8 @@ int Attachable::ReadProperty(std::string propName, Reader &reader)
         reader >> m_InheritsRotAngle;
     else if (propName == "DrawAfterParent")
         reader >> m_DrawAfterParent;
-    else if (propName == "CollidesWithTerrain")
-        reader >> m_CanCollideWithTerrain;
+    else if (propName == "CollidesWithTerrainWhenAttached")
+        reader >> m_CanCollideWithTerrainWhenAttached;
     else
         // See if the base class(es) can find a match instead
         return MOSRotating::ReadProperty(propName, reader);
@@ -153,8 +153,8 @@ int Attachable::Save(Writer &writer) const
 	writer << m_InheritsRotAngle;
 	writer.NewProperty("DrawAfterParent");
     writer << m_DrawAfterParent;
-    writer.NewProperty("CollidesWithTerrain");
-    writer << m_CanCollideWithTerrain;
+    writer.NewProperty("CollidesWithTerrainWhenAttached");
+    writer << m_CanCollideWithTerrainWhenAttached;
 
     return 0;
 }
@@ -312,20 +312,20 @@ void Attachable::Detach()
 /// <param name="enable">Adds this Attachable's atoms to the parent's AtomGroup if true, removes them if false.</param>
 void Attachable::EnableTerrainCollisions(bool enable)
 {
-	if (IsAttached() && CanCollideWithTerrain())
+	if (IsAttached() && CanCollideWithTerrainWhenAttached())
 	{
-		if (!CollidesWithTerrain() && enable)
+		if (!IsCollidingWithTerrainWhileAttached() && enable)
 		{
 			m_pParent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset());
-			SetCollidesWithTerrain(true);
+			SetIsCollidingWithTerrainWhileAttached(true);
 		}
-		else if (CollidesWithTerrain() && !enable)
+		else if (IsCollidingWithTerrainWhileAttached() && !enable)
 		{
 			m_pParent->GetAtomGroup()->RemoveAtoms(GetAtomSubgroupID());
-			SetCollidesWithTerrain(false);
+			SetIsCollidingWithTerrainWhileAttached(false);
 		}
 	}
-	else if (IsAttached() && !CanCollideWithTerrain())
+	else if (IsAttached() && !CanCollideWithTerrainWhenAttached())
 	{
 		if (enable || !enable)
 		{

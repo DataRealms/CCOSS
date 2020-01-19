@@ -611,28 +611,35 @@ ENTITYALLOCATION(Attachable)
 
 
 	/// <summary>
-	/// Whether this attachable is capable of having terrain collisions when attached to a parent or not.
+	/// Whether this attachable is capable of having terrain collisions enabled/disabled when attached to a parent.
 	/// </summary>
-	/// <return>Whether this attachable is capable of colliding with terrain or not.</return>
-	virtual bool CanCollideWithTerrain() const { return m_CanCollideWithTerrain; }
+	/// <return>If true, can have terrain collisions enabled/disabled when attached.</return>
+	virtual bool CanCollideWithTerrainWhenAttached() const { return m_CanCollideWithTerrainWhenAttached; }
 
 
 	/// <summary>
-	/// Whether this attachable collides with terrain or not.
+	/// Sets whether this attachable is capable of having terrain collisions enabled/disabled when attached to a parent.
 	/// </summary>
-	/// <return>Whether this attachable is currently colliding or not.</return>
-	virtual bool CollidesWithTerrain() const { return m_CollidesWithTerrain; }
+	/// <param name="canCollide">Whether this attachable can have terrain collisions enabled/disabled when attached.</param>
+	virtual void SetCanCollideWithTerrainWhenAttached(bool canCollide) { m_CanCollideWithTerrainWhenAttached = canCollide; }
 
 
 	/// <summary>
-	/// Sets whether this attachable currently collides with terrain or not.
+	/// Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
 	/// </summary>
-	/// <param name="collide">Whether this attachable is currently colliding or not.</param>
-	virtual void SetCollidesWithTerrain(bool collide) { m_CollidesWithTerrain = collide; }
+	/// <return>If true, terrain collisions while attached are enabled and atoms are present in parent AtomGroup.</return>
+	virtual bool IsCollidingWithTerrainWhileAttached() const { return m_IsCollidingWithTerrainWhileAttached; }
 
 
 	/// <summary>
-	/// Turns on/off this Attachable's collisions, by adding/removing its atoms to/from its parent's AtomGroup.
+	/// Sets whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
+	/// </summary>
+	/// <param name="collide">Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.</param>
+	virtual void SetIsCollidingWithTerrainWhileAttached(bool isColliding) { m_IsCollidingWithTerrainWhileAttached = isColliding; }
+
+
+	/// <summary>
+	/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its atoms to/from its parent AtomGroup.
 	/// </summary>
 	virtual void EnableTerrainCollisions(bool enable);
 
@@ -687,11 +694,11 @@ protected:
 	// If true inherits Parent's rot angle, which is set MOSRotating::Update. Default is true to maintain maybe awkward but default behavior
 	bool m_InheritsRotAngle;
 
-	// Whether this is capable of colliding with terrain or not.
-	bool m_CanCollideWithTerrain;
+	// Whether this attachable is capable of having terrain collisions enabled/disabled when attached to a parent.
+	bool m_CanCollideWithTerrainWhenAttached;
 
-	// Whether this currently has terrain collisions enabled or not.
-	bool m_CollidesWithTerrain;
+	// Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
+	bool m_IsCollidingWithTerrainWhileAttached;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

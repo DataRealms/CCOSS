@@ -1843,7 +1843,7 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOf
 		// Set the attachable's subgroup ID to it's Unique ID to avoid any possible conflicts when adding atoms to parent group.
 		pAttachable->SetAtomSubgroupID(pAttachable->GetUniqueID());
 
-		if (pAttachable->CanCollideWithTerrain())
+		if (pAttachable->CanCollideWithTerrainWhenAttached())
 		{
 			pAttachable->EnableTerrainCollisions(true);
 		}

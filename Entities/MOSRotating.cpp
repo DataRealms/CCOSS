@@ -372,14 +372,14 @@ int MOSRotating::Create(const MOSRotating &reference)
     m_RecoilForce = reference.m_RecoilForce;
     m_RecoilOffset = reference.m_RecoilOffset;
 
-    AEmitter *pEmitter = 0;
+    AEmitter *pWound = 0;
     for (list<AEmitter *>::const_iterator itr = reference.m_Wounds.begin(); itr != reference.m_Wounds.end(); ++itr)
     {
         SLICK_PROFILENAME("Wound AEmitter Copies", 0xFF775544);
 
-        pEmitter = dynamic_cast<AEmitter *>((*itr)->Clone());
-		AddWound(pEmitter, pEmitter->GetParentOffset());
-        pEmitter = 0;
+		pWound = dynamic_cast<AEmitter *>((*itr)->Clone());
+		AddWound(pWound, pWound->GetParentOffset());
+		pWound = 0;
     }
 
     m_AllAttachables.clear();
@@ -548,13 +548,18 @@ int MOSRotating::Save(Writer &writer) const
 /// </summary>
 /// <param name="pWound">The wound AEmitter to add</param>
 /// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset</param>
-void MOSRotating::AddWound(AEmitter *pWound, const Vector & parentOffsetToSet)
+void MOSRotating::AddWound(AEmitter *pWound, const Vector & parentOffsetToSet, bool checkGibWoundLimit)
 {
 	if (pWound)
 	{
-		if (!ToDelete() && m_GibWoundLimit && m_Wounds.size() + 1 > m_GibWoundLimit)
+		if (checkGibWoundLimit && !ToDelete() && m_GibWoundLimit && m_Wounds.size() + 1 > m_GibWoundLimit)
 		{
-			GibThis();
+			// Indicate blast in opposite direction of emission
+			// TODO: don't hardcode here, get some data from the emitter
+			Vector blast(-5, 0);
+			blast.RadRotate(pWound->GetEmitAngle());
+			GibThis(blast);
+			return;
 		}
 		else
 		{
@@ -2236,9 +2241,9 @@ bool MOSRotating::ApplyAttachableForces(Attachable *pAttachable, bool isCritical
 						pWound->SetEmitDamage(0.5);
 						pWound->SetBurstDamage(35);
 					}
-                    // IMPORTANT to pass false here so teh added wound doesn't potentially gib this and cause the Attachables list to get f'd up while we're iterating through it in MOSRotating::Update!
-					AddWound(pWound, pAttachable->GetParentOffset());
-                    pWound = 0;
+					// IMPORTANT to pass false here so the added wound doesn't potentially gib this and cause the Attachables list to get f'd up while we're iterating through it in MOSRotating::Update!
+					AddWound(pWound, pAttachable->GetParentOffset(), false);
+					pWound = 0;
                 }
             }
         }

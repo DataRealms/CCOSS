@@ -410,7 +410,7 @@ bool Attachable::TransferJointImpulses(Vector &jointImpulses)
             if (pWound)
             {
                 pWound->SetEmitAngle(m_JointOffset.GetAbsRadAngle());
-				AddWound(pWound, m_JointOffset);
+				AddWound(pWound, m_JointOffset, false);
                 pWound = 0;
             }
         }

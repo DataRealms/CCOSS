@@ -897,7 +897,7 @@ ENTITYALLOCATION(MOSRotating)
 	/// </summary>
 	/// <param name="pWound">The wound AEmitter to add</param>
 	/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset</param>
-	virtual void AddWound(AEmitter *pWound, const Vector& parentOffsetToSet);
+	virtual void AddWound(AEmitter *pWound, const Vector& parentOffsetToSet, bool checkGibWoundLimit = true);
 
 
 	/// <summary>

@@ -90,6 +90,7 @@ int Attachable::Create(const Attachable &reference)
     m_OnlyLinForces = reference.m_OnlyLinForces;
 	m_InheritsRotAngle = reference.m_InheritsRotAngle;
 	m_CanCollideWithTerrain = reference.m_CanCollideWithTerrain;
+    m_CollidesWithTerrain = reference.m_CollidesWithTerrain;
 
     return 0;
 }

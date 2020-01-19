@@ -100,7 +100,7 @@ int AtomGroup::Create(const AtomGroup &reference, boolean onlyCopyOwnerAtoms)
 
     Entity::Create(reference);
 
-    m_AutoGenerate = false; //reference.m_AutoGenerate; Don't because we'll copy the atoms below
+    m_AutoGenerate = false; //Don't autogenerate because we'll copy the atoms below
     m_pMaterial = reference.m_pMaterial;
     m_Resolution = reference.m_Resolution;
     m_Depth = reference.m_Depth;
@@ -119,11 +119,10 @@ int AtomGroup::Create(const AtomGroup &reference, boolean onlyCopyOwnerAtoms)
 			long int subID = pAtomCopy->GetSubID();
 			if (subID != 0)
 			{
-				// Try to find the group
-				// No atom added to that group yet, so it doesn't exist, so make it
+                // Make a new list for the subgroup ID if there isn't one already
 				if (m_SubGroups.find(subID) == m_SubGroups.end())
 				{
-					m_SubGroups.insert(pair<long int, list<Atom *> >(subID, list<Atom *>())).first;
+					m_SubGroups.insert(pair<long int, list<Atom *>>(subID, list<Atom *>()));
 				}
 				// Add Atom to the list of that group
 				m_SubGroups.find(subID)->second.push_back(pAtomCopy);
@@ -777,11 +776,10 @@ void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, long int subID, cons
 {
     Atom *pAtom;
 
-    // Try to find existing subgroup with that ID to add to
-    // Couldn't find any, so make a new one for the new ID so we can add to it
+    // Make a new list for the subgroup ID if there isn't one already
 	if (m_SubGroups.find(subID) == m_SubGroups.end())
 	{
-		m_SubGroups.insert(pair<long int, list<Atom *> >(subID, list<Atom *>())).first;
+		m_SubGroups.insert(pair<long int, list<Atom *> >(subID, list<Atom *>()));
 	}
     for (list<Atom *>::const_iterator itr = atomList.begin(); itr != atomList.end(); ++itr)
     {
@@ -816,10 +814,8 @@ bool AtomGroup::UpdateSubAtoms(long int subID, const Vector &newOffset, const Ma
 
 	for (list<Atom *>::const_iterator aItr = m_SubGroups.find(subID)->second.begin(); aItr != m_SubGroups.find(subID)->second.end(); ++aItr)
 	{
-		// Re-set ID just to make sure
-		(*aItr)->SetSubID(subID);
+		(*aItr)->SetSubID(subID); // Re-set ID just to make sure - TODO I don't think we need this?!
 		(*aItr)->SetOffset(newOffset + ((*aItr)->GetOriginalOffset() * newOffsetRotation));
-		//pAtom->SetOwner(m_pOwnerMO);
 	}
 
 	return true;

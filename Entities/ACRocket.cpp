@@ -849,15 +849,6 @@ void ACRocket::Update()
     // LOWER the gears
     else if (m_pMThruster && !m_pMThruster->IsEmitting())// && m_GearState != LOWERED)
     {
-/*
-        if (m_pRLeg && m_pRLeg->IsAttached())
-            m_pAtomGroup->AddAtoms(m_pRFootGroup->GetAtomList(), m_pRLeg->GetAtomSubgroupID(), Vector(18, 40));
-        if (m_pLLeg && m_pLLeg->IsAttached())
-            m_pAtomGroup->AddAtoms(m_pLFootGroup->GetAtomList(), m_pLLeg->GetAtomSubgroupID(), Vector(-18, 40));
-*/
-//        m_pAtomGroup->AddAtoms(m_pRFootGroup->GetAtomList(), m_Paths[RIGHT][LOWERED].GetStartOffset());
-//        m_pAtomGroup->AddAtoms(m_pLFootGroup->GetAtomList(), m_Paths[LEFT][LOWERED].GetStartOffset());
-
         m_Paths[RIGHT][LOWERED].SetHFlip(m_HFlipped);
         m_Paths[LEFT][LOWERED].SetHFlip(!m_HFlipped);
 

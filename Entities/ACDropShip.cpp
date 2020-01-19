@@ -96,11 +96,13 @@ int ACDropShip::Create(const ACDropShip &reference)
     if (reference.m_pRThruster)
     {
         m_pRThruster = dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone());
+		m_pRThruster->SetCanCollideWithTerrainWhenAttached(true);
         AddAttachable(m_pRThruster, true);
     }
     if (reference.m_pLThruster)
     {
         m_pLThruster = dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone());
+		m_pLThruster->SetCanCollideWithTerrainWhenAttached(true);
         AddAttachable(m_pLThruster, true);
     }
     if (reference.m_pURThruster)
@@ -116,11 +118,13 @@ int ACDropShip::Create(const ACDropShip &reference)
     if (reference.m_pRHatch)
     {
         m_pRHatch = dynamic_cast<Attachable *>(reference.m_pRHatch->Clone());
+		m_pRHatch->SetCanCollideWithTerrainWhenAttached(true);
         AddAttachable(m_pRHatch, true);
     }
     if (reference.m_pLHatch)
     {
         m_pLHatch = dynamic_cast<Attachable *>(reference.m_pLHatch->Clone());
+		m_pLHatch->SetCanCollideWithTerrainWhenAttached(true);
         AddAttachable(m_pLHatch, true);
     }
     m_HatchSwingRange = reference.m_HatchSwingRange;
@@ -152,14 +156,12 @@ int ACDropShip::ReadProperty(std::string propName, Reader &reader)
         delete m_pRThruster;
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
-		m_pRThruster->SetCollidesWithTerrain(true);
     }
     else if (propName == "LThruster")
     {
         delete m_pLThruster;
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
-		m_pLThruster->SetCollidesWithTerrain(true);
     }
     else if (propName == "URThruster")
     {
@@ -178,14 +180,12 @@ int ACDropShip::ReadProperty(std::string propName, Reader &reader)
         delete m_pRHatch;
         m_pRHatch = new Attachable;
         reader >> m_pRHatch;
-		m_pRHatch->SetCollidesWithTerrain(true);
     }
     else if (propName == "LHatchDoor")
     {
         delete m_pLHatch;
         m_pLHatch = new Attachable;
         reader >> m_pLHatch;
-		m_pLHatch->SetCollidesWithTerrain(true);
     }
     else if (propName == "HatchDoorSwingRange")
         reader >> m_HatchSwingRange;

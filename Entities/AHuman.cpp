@@ -181,6 +181,7 @@ int AHuman::Create(const AHuman &reference)
 
     if (reference.m_pHead) {
         m_pHead = dynamic_cast<Attachable *>(reference.m_pHead->Clone());
+		m_pHead->SetCanCollideWithTerrainWhenAttached(true);
         AddAttachable(m_pHead, true);
     }
 
@@ -265,7 +266,6 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pHead;
         m_pHead = new Attachable;
         reader >> m_pHead;
-		m_pHead->SetCollidesWithTerrain(true);
 		if (!m_pHead->IsDamageMultiplierRedefined())
 			m_pHead->SetDamageMultiplier(5);
     }

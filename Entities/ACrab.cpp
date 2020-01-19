@@ -178,6 +178,7 @@ int ACrab::Create(const ACrab &reference)
     if (reference.m_pTurret)
     {
         m_pTurret = dynamic_cast<Turret *>(reference.m_pTurret->Clone());
+		m_pTurret->SetCanCollideWithTerrainWhenAttached(true);
         AddAttachable(m_pTurret, true);
     }
 
@@ -269,7 +270,6 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         delete m_pTurret;
         m_pTurret = new Turret;
         reader >> m_pTurret;
-		m_pTurret->SetCollidesWithTerrain(true);
 		if (!m_pTurret->IsDamageMultiplierRedefined())
 			m_pTurret->SetDamageMultiplier(5);
     }

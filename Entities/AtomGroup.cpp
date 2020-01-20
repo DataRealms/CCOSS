@@ -119,7 +119,7 @@ int AtomGroup::Create(const AtomGroup &reference, boolean onlyCopyOwnerAtoms)
 			long int subID = pAtomCopy->GetSubID();
 			if (subID != 0)
 			{
-                // Make a new list for the subgroup ID if there isn't one already
+				// Make a new list for the subgroup ID if there isn't one already
 				if (m_SubGroups.find(subID) == m_SubGroups.end())
 				{
 					m_SubGroups.insert(pair<long int, list<Atom *>>(subID, list<Atom *>()));

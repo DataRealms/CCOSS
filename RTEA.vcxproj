@@ -62,7 +62,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\steam;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;DEBUGMODE;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER_OFF;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>
@@ -73,6 +73,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <DisableSpecificWarnings>4312;4311;4786;4503;4800;4244;4204;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ForcedIncludeFiles>TargetSxS.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>lua5.1.x86.debug.lib;luabind.x86.debug.lib;ws2_32.lib;libcurl.lib;zlibwapi.lib;alld_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;libboost_thread-vc141-mt-gd-x32-1_69.lib;libboost_date_time-vc141-mt-gd-x32-1_69.lib;libboost_system-vc141-mt-gd-x32-1_69.lib;libboost_chrono-vc141-mt-gd-x32-1_69.lib;gorillaD.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>

@@ -707,33 +707,19 @@ ENTITYALLOCATION(MOSRotating)
     virtual void ApplyImpulses();
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AttachEmitter
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Attaches an AEmitter to this MOSRotating.
-// Arguments:       The AEmitter to attach, ownership IS transferred!
-//                  The offset from the origin of this MOSRotating to where the AEmitter's
-//                  joint is attached.
-//                  Whether to check if this added emitter triggers the GibWoundLimit..
-//                  sometimes that's a bad idea if potentially gibbing this would cause
-//                  the m_Attachables list to be messed with while it's being iterated.
-// Return value:    None.
+	void AddAttachable(Attachable *pAttachable);
 
-    virtual void AttachEmitter(AEmitter *pEmitter, Vector emitOffset, bool checkGibWoundLimit = true);
+	void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet);
 
-    void AddAttachable(Attachable *pAttachable);
+	void AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable);
 
-    void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet);
+	void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet, bool isHardcodedAttachable);
 
-    void AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable);
+	bool RemoveAttachable(long attachableUniqueId);
 
-    void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet, bool isHardcodedAttachable);
+	bool RemoveAttachable(Attachable *pAttachable);
 
-    bool RemoveAttachable(long attachableUniqueId);
-
-    bool RemoveAttachable(Attachable *pAttachable);
-
-    void DetachOrDestroyAll(bool destroy);
+	void DetachOrDestroyAll(bool destroy);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -906,15 +892,20 @@ ENTITYALLOCATION(MOSRotating)
 	virtual void SetGibWoundLimit(int newLimit) { m_GibWoundLimit = newLimit; }
 
 
+	/// <summary>
+	/// Attaches the passed in wound AEmitter and adds it to the list of wounds, changing its parent offset to the passed in Vector.
+	/// </summary>
+	/// <param name="pWound">The wound AEmitter to add</param>
+	/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset</param>
+	virtual void AddWound(AEmitter *pWound, const Vector& parentOffsetToSet, bool checkGibWoundLimit = true);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RemoveWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds.
-// Arguments:       Amount of wounds to remove.
-// Return value:    Amount of damage, caused by these wounds.
 
-	virtual int RemoveWounds(int amount); 
+	/// <summary>
+	/// Removes a specified amount of wounds and returns damage caused by these wounds. Head multiplier is not used.				
+	/// </summary>
+	/// <param name="amount">Amount of wounds to remove.</param>
+	/// <returns>Amount of damage caused by these wounds.</returns>
+	virtual int RemoveWounds(int amount);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -924,7 +915,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       Key to retrieve value.
 // Return value:    Wound amount.
 
-	virtual int GetWoundCount() const { return m_Emitters.size(); }; 
+	virtual int GetWoundCount() const { return m_Wounds.size(); }; 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1159,8 +1150,8 @@ protected:
     Vector m_RecoilForce;
     // The vector that the recoil offsets the sprite when m_Recoiled is true.
     Vector m_RecoilOffset;
-    // The list of AEmitters currently attached to this MOSRotating, and owned here as well
-    std::list<AEmitter *> m_Emitters;
+    // The list of wound AEmitters currently attached to this MOSRotating, and owned here as well
+    std::list<AEmitter *> m_Wounds;
     // The list of general Attachables currently attached and Owned by this.
     std::list<Attachable *> m_Attachables;
     // The list of all Attachables, including both hardcoded attachables and those added through ini or lua
@@ -1169,7 +1160,7 @@ protected:
     std::list<Gib> m_Gibs;
     // The amount of impulse force required to gib this, in kg * (m/s). 0 means no limit
     float m_GibImpulseLimit;
-    // The number of emitters allowed before this gets gibbed. 0 means this can't get gibbed
+    // The number of wound emitters allowed before this gets gibbed. 0 means this can't get gibbed
     int m_GibWoundLimit;
     // Gib sound effect
     Sound m_GibSound;

@@ -96,11 +96,13 @@ int ACDropShip::Create(const ACDropShip &reference)
     if (reference.m_pRThruster)
     {
         m_pRThruster = dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone());
+		m_pRThruster->SetCanCollideWithTerrainWhenAttached(true);
         AddAttachable(m_pRThruster, true);
     }
     if (reference.m_pLThruster)
     {
         m_pLThruster = dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone());
+		m_pLThruster->SetCanCollideWithTerrainWhenAttached(true);
         AddAttachable(m_pLThruster, true);
     }
     if (reference.m_pURThruster)
@@ -116,11 +118,13 @@ int ACDropShip::Create(const ACDropShip &reference)
     if (reference.m_pRHatch)
     {
         m_pRHatch = dynamic_cast<Attachable *>(reference.m_pRHatch->Clone());
+		m_pRHatch->SetCanCollideWithTerrainWhenAttached(true);
         AddAttachable(m_pRHatch, true);
     }
     if (reference.m_pLHatch)
     {
         m_pLHatch = dynamic_cast<Attachable *>(reference.m_pLHatch->Clone());
+		m_pLHatch->SetCanCollideWithTerrainWhenAttached(true);
         AddAttachable(m_pLHatch, true);
     }
     m_HatchSwingRange = reference.m_HatchSwingRange;
@@ -152,58 +156,36 @@ int ACDropShip::ReadProperty(std::string propName, Reader &reader)
         delete m_pRThruster;
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
-        m_pRThruster->Attach(this);
-        m_pRThruster->SetAtomSubgroupID(1);
-        m_pAtomGroup->AddAtoms(m_pRThruster->GetAtomGroup()->GetAtomList(),
-                               m_pRThruster->GetAtomSubgroupID(),
-                               m_pRThruster->GetParentOffset() - m_pRThruster->GetJointOffset());
     }
     else if (propName == "LThruster")
     {
         delete m_pLThruster;
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
-        m_pLThruster->Attach(this);
-        m_pLThruster->SetAtomSubgroupID(2);
-        m_pAtomGroup->AddAtoms(m_pLThruster->GetAtomGroup()->GetAtomList(),
-                               m_pLThruster->GetAtomSubgroupID(),
-                               m_pLThruster->GetParentOffset() - m_pLThruster->GetJointOffset());
     }
     else if (propName == "URThruster")
     {
         delete m_pURThruster;
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
-        m_pURThruster->Attach(this);
     }
     else if (propName == "ULThruster")
     {
         delete m_pULThruster;
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
-        m_pULThruster->Attach(this);
     }
     else if (propName == "RHatchDoor")
     {
         delete m_pRHatch;
         m_pRHatch = new Attachable;
         reader >> m_pRHatch;
-        m_pRHatch->Attach(this);
-        m_pRHatch->SetAtomSubgroupID(3);
-        m_pAtomGroup->AddAtoms(m_pRHatch->GetAtomGroup()->GetAtomList(),
-                               m_pRHatch->GetAtomSubgroupID(),
-                               m_pRHatch->GetParentOffset() - m_pRHatch->GetJointOffset());
     }
     else if (propName == "LHatchDoor")
     {
         delete m_pLHatch;
         m_pLHatch = new Attachable;
         reader >> m_pLHatch;
-        m_pLHatch->Attach(this);
-        m_pLHatch->SetAtomSubgroupID(4);
-        m_pAtomGroup->AddAtoms(m_pLHatch->GetAtomGroup()->GetAtomList(),
-                               m_pLHatch->GetAtomSubgroupID(),
-                               m_pLHatch->GetParentOffset() - m_pLHatch->GetJointOffset());
     }
     else if (propName == "HatchDoorSwingRange")
         reader >> m_HatchSwingRange;
@@ -911,6 +893,11 @@ void ACDropShip::Update()
         m_pRHatch->SetRotAngle(m_Rotation.GetRadAngle() + m_HatchSwingRange.GetRadAngle() * m_HatchOpeness);
         m_pRHatch->SetJointPos(m_Pos + m_pRHatch->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
         m_pRHatch->Update();
+
+		// Update the Atoms' offsets in the parent group
+		Matrix atomRot(FacingAngle(m_pRHatch->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
+		m_pAtomGroup->UpdateSubAtoms(m_pRHatch->GetAtomSubgroupID(), m_pRHatch->GetParentOffset() - (m_pRHatch->GetJointOffset() * atomRot), atomRot);
+
         m_Health -= m_pRHatch->CollectDamage();
     }
 
@@ -919,6 +906,11 @@ void ACDropShip::Update()
         m_pLHatch->SetRotAngle(m_Rotation.GetRadAngle() - m_HatchSwingRange.GetRadAngle() * m_HatchOpeness);
         m_pLHatch->SetJointPos(m_Pos + m_pLHatch->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
         m_pLHatch->Update();
+
+		// Update the Atoms' offsets in the parent group
+		Matrix atomRot(FacingAngle(m_pLHatch->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
+		m_pAtomGroup->UpdateSubAtoms(m_pLHatch->GetAtomSubgroupID(), m_pLHatch->GetParentOffset() - (m_pLHatch->GetJointOffset() * atomRot), atomRot);
+
         m_Health -= m_pLHatch->CollectDamage();
     }
 

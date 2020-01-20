@@ -181,6 +181,7 @@ int AHuman::Create(const AHuman &reference)
 
     if (reference.m_pHead) {
         m_pHead = dynamic_cast<Attachable *>(reference.m_pHead->Clone());
+		m_pHead->SetCanCollideWithTerrainWhenAttached(true);
         AddAttachable(m_pHead, true);
     }
 
@@ -265,28 +266,14 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pHead;
         m_pHead = new Attachable;
         reader >> m_pHead;
-        m_pHead->Attach(this);
-        m_pHead->SetAtomSubgroupID(1);
-
 		if (!m_pHead->IsDamageMultiplierRedefined())
 			m_pHead->SetDamageMultiplier(5);
-
-        if (!m_pAtomGroup)
-        {
-            m_pAtomGroup = new AtomGroup();
-            m_pAtomGroup->Create(this);
-        }
-        m_pAtomGroup->AddAtoms(m_pHead->GetAtomGroup()->GetAtomList(),
-                               m_pHead->GetAtomSubgroupID(),
-                               m_pHead->GetParentOffset() - m_pHead->GetJointOffset(),
-                               m_Rotation);
     }
     else if (propName == "Jetpack")
     {
         delete m_pJetpack;
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-        m_pJetpack->Attach(this);
     }
     else if (propName == "JumpTime")
     {
@@ -299,28 +286,24 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pFGArm;
         m_pFGArm = new Arm;
         reader >> m_pFGArm;
-        m_pFGArm->Attach(this);
     }
     else if (propName == "BGArm")
     {
         delete m_pBGArm;
         m_pBGArm = new Arm;
         reader >> m_pBGArm;
-        m_pBGArm->Attach(this);
     }
     else if (propName == "FGLeg")
     {
         delete m_pFGLeg;
         m_pFGLeg = new Leg;
         reader >> m_pFGLeg;
-        m_pFGLeg->Attach(this);
     }
     else if (propName == "BGLeg")
     {
         delete m_pBGLeg;
         m_pBGLeg = new Leg;
         reader >> m_pBGLeg;
-        m_pBGLeg->Attach(this);
     }
     else if (propName == "HandGroup")
     {
@@ -4203,10 +4186,6 @@ void AHuman::Update()
         m_pAtomGroup->UpdateSubAtoms(m_pHead->GetAtomSubgroupID(), m_pHead->GetParentOffset() - (m_pHead->GetJointOffset() * headAtomRot), headAtomRot);
 
         m_Health -= m_pHead->CollectDamage();// * 5; // This is done in CollectDamage via m_DamageMultiplier now.
-    }
-    else
-    {
-        m_pAtomGroup->RemoveAtoms(1);
     }
 
     if (m_pJetpack && m_pJetpack->IsAttached())

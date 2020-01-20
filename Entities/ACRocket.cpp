@@ -183,16 +183,12 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader)
         delete m_pRLeg;
         m_pRLeg = new Leg;
         reader >> m_pRLeg;
-        m_pRLeg->Attach(this);
-        m_pRLeg->SetAtomSubgroupID(1);
     }
     else if (propName == "LLeg")
     {
         delete m_pLLeg;
         m_pLLeg = new Leg;
         reader >> m_pLLeg;
-        m_pLLeg->Attach(this);
-        m_pLLeg->SetAtomSubgroupID(2);
         m_pLLeg->SetHFlipped(true);
     }
     else if (propName == "RFootGroup")
@@ -214,35 +210,30 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader)
         delete m_pMThruster;
         m_pMThruster = new AEmitter;
         reader >> m_pMThruster;
-        m_pMThruster->Attach(this);
     }
     else if (propName == "RThruster")
     {
         delete m_pRThruster;
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
-        m_pRThruster->Attach(this);
     }
     else if (propName == "LThruster")
     {
         delete m_pLThruster;
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
-        m_pLThruster->Attach(this);
     }
     else if (propName == "URThruster")
     {
         delete m_pURThruster;
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
-        m_pURThruster->Attach(this);
     }
     else if (propName == "ULThruster")
     {
         delete m_pULThruster;
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
-        m_pULThruster->Attach(this);
     }
     else if (propName == "RaisedGearLimbPath")
         reader >> m_Paths[RIGHT][RAISED];
@@ -833,9 +824,6 @@ void ACRocket::Update()
     // RAISE the gears
     if (m_pMThruster && m_pMThruster->IsEmitting())// && m_pMThruster->IsSetToBurst())
     {
-// Obsolete way of adding and removing atoms to the body group
-//        m_pAtomGroup->RemoveAllButAtoms(0);
-
         m_Paths[RIGHT][RAISED].SetHFlip(m_HFlipped);
         m_Paths[LEFT][RAISED].SetHFlip(!m_HFlipped);
 
@@ -861,17 +849,6 @@ void ACRocket::Update()
     // LOWER the gears
     else if (m_pMThruster && !m_pMThruster->IsEmitting())// && m_GearState != LOWERED)
     {
-/* Obsolete way of adding and removing atoms to the body group
-        m_pAtomGroup->RemoveAllButAtoms(0);
-
-        if (m_pRLeg && m_pRLeg->IsAttached())
-            m_pAtomGroup->AddAtoms(m_pRFootGroup->GetAtomList(), m_pRLeg->GetAtomSubgroupID(), Vector(18, 40));
-        if (m_pLLeg && m_pLLeg->IsAttached())
-            m_pAtomGroup->AddAtoms(m_pLFootGroup->GetAtomList(), m_pLLeg->GetAtomSubgroupID(), Vector(-18, 40));
-*/
-//        m_pAtomGroup->AddAtoms(m_pRFootGroup->GetAtomList(), m_Paths[RIGHT][LOWERED].GetStartOffset());
-//        m_pAtomGroup->AddAtoms(m_pLFootGroup->GetAtomList(), m_Paths[LEFT][LOWERED].GetStartOffset());
-
         m_Paths[RIGHT][LOWERED].SetHFlip(m_HFlipped);
         m_Paths[LEFT][LOWERED].SetHFlip(!m_HFlipped);
 

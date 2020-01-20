@@ -1877,8 +1877,6 @@ bool AHuman::UpdateMovePath()
 
 void AHuman::UpdateAI()
 {
-    SLICK_PROFILE(0xFF121456);
-
     Actor::UpdateAI();
 
     Vector cpuPos = GetCPUPos();
@@ -3169,8 +3167,6 @@ int AHuman::OnPieMenu(Actor * pActor)
 
 void AHuman::Update()
 {
-    SLICK_PROFILE(0xFF668431);
-
 	if (g_SettingsMan.EnableHats() && !m_GotHat && m_pHead)
 	{
 		m_GotHat = true;

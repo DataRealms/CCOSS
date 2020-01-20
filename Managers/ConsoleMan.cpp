@@ -347,8 +347,6 @@ void ConsoleMan::ForceVisibility(bool visible)
 
 void ConsoleMan::Update()
 {
-    SLICK_PROFILE(0xFF856541);
-
 	bool inputConsumed = false;
 
 	if ((g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_TILDE)) || (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_SLASH)))

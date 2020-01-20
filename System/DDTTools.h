@@ -14,9 +14,6 @@
 #include "time.h"
 #include <cmath>
 
-#include <DebugTool/DebugTool.h>
-#include <Profiler/Profiler.h>
-
 struct TexMapTable;
 
 #define DMax(a, b) (((a) > (b)) ? (a) : (b))

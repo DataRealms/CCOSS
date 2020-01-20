@@ -771,8 +771,6 @@ void MovableObject::Travel()
 
 void MovableObject::PostTravel()
 {
-    SLICK_PROFILE(0xFF654871);
-
     // Toggle whether this gets hit by other AtomGroup MOs depending on whether it's going slower than a set threshold
     if (m_IgnoresAGHitsWhenSlowerThan > 0)
         m_IgnoresAtomGroupHits = m_Vel.GetLargest() < m_IgnoresAGHitsWhenSlowerThan;

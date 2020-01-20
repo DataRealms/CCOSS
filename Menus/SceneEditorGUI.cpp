@@ -328,8 +328,6 @@ void SceneEditorGUI::SetForeignCostMultiplier(float newMultiplier)
 
 bool SceneEditorGUI::TestBrainResidence(bool noBrainIsOK)
 {
-    SLICK_PROFILE(0xFF343526);
-
     // Do we have a resident at all?
     SceneObject *pBrain = g_SceneMan.GetScene()->GetResidentBrain(m_pController->GetPlayer());
 

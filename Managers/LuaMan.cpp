@@ -2422,8 +2422,6 @@ bool LuaMan::ExpressionIsTrue(string expression, bool consoleErrors)
 
 int LuaMan::RunScriptString(string scriptString, bool consoleErrors)
 {
-    SLICK_PROFILE(0xFF124325);
-
     if (scriptString.empty())
         return -1;
 

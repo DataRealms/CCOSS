@@ -60,7 +60,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)System\Slick Profiler;$(ProjectDir)System\Slick Profiler\Profiler;$(ProjectDir)System\Slick Profiler\DebugTool;$(ProjectDir)System\EXECryptor;$(ProjectDir)external\include\steam;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\steam;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;DEBUGMODE;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER_OFF;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -95,7 +95,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)System\Slick Profiler;$(ProjectDir)System\Slick Profiler\Profiler;$(ProjectDir)System\Slick Profiler\DebugTool;$(ProjectDir)System\EXECryptor;$(ProjectDir)external\include\steam;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\steam;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>FINALRELASE;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER_OFF;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -811,12 +811,6 @@
     <ClCompile Include="Menus\ScenarioGUI.cpp" />
     <ClCompile Include="Menus\SceneEditorGUI.cpp" />
     <ClCompile Include="Main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="System\Slick Profiler\SlickProfiler.vcxproj">
-      <Project>{b682a5df-d9d2-4443-ab0e-62f5c80c79ee}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Text Include="external\sources\RakNet\CMakeLists.txt" />

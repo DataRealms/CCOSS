@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Removed
 - All licensing-related code has been removed since it's no longer needed
 - Wounds can no longer be added via ini, as used to be doable buggily through ini `AddEmitter`
+- All usage of the outdated Slick Profiler has been removed
 
 ### Fixed
 - SFX slider now works properly

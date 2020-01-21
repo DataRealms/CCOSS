@@ -192,6 +192,7 @@
     <None Include="Base.rte\Scenes\Tutorial Mission.ini" />
     <None Include="Base.rte\Scenes\Tutorial.ini" />
     <None Include="Base.rte\Scenes\Scripts\TestScript.lua" />
+    <None Include="cpp.hint" />
     <None Include="external\sources\RakNet\RakNet.vcproj" />
     <None Include="external\sources\RakNet\RakNet_vc8.vcproj" />
     <None Include="external\sources\RakNet\RakNet_vc9.vcproj" />

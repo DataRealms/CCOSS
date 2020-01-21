@@ -261,6 +261,7 @@
     <None Include="external\sources\RakNet\RakNet_vc9.vcproj">
       <Filter>System\RakNet</Filter>
     </None>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">

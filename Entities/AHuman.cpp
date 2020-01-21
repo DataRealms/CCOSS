@@ -3579,8 +3579,9 @@ void AHuman::Update()
                     if (m_ArmsState != THROWING_PREP/* || m_ThrowTmr.GetElapsedSimTimeMS() > m_ThrowPrepTime*/)
                     {
                         m_ThrowTmr.Reset();
-                        // Activate the device, light the fuse etc!
-                        pThrown->Activate();
+						if (!pThrown->ActivatesWhenReleased()) {
+							pThrown->Activate();
+						}
                     }
                     m_ArmsState = THROWING_PREP;
                     m_pFGArm->ReachToward(m_Pos + pThrown->GetStartThrowOffset().GetXFlipped(m_HFlipped));
@@ -3592,6 +3593,10 @@ void AHuman::Update()
                     m_pFGArm->SetHandPos(m_Pos + pThrown->GetEndThrowOffset().GetXFlipped(m_HFlipped));
 
                     MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
+
+					if (pThrown->ActivatesWhenReleased()) {
+						pThrown->Activate();
+					}
                     if (pMO)
                     {
                         pMO->SetPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) + Vector(m_HFlipped ? -15 : 15, -8));

@@ -2979,8 +2979,6 @@ int Scene::SetOwnerOfAllDoors(int team, int player)
 
 void Scene::ResetPathFinding()
 {
-    SLICK_PROFILE(0xFF343486);
-
     if (m_pPathFinder)
         m_pPathFinder->RecalculateAllCosts();
 }
@@ -2994,8 +2992,6 @@ void Scene::ResetPathFinding()
 
 void Scene::UpdatePathFinding()
 {
-    SLICK_PROFILE(0xFF343726);
-
     m_pPathFinder->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
     m_pTerrain->ClearUpdatedAreas();
     m_PartialPathUpdateTimer.Reset();
@@ -3011,8 +3007,6 @@ void Scene::UpdatePathFinding()
 
 float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrenght)
 {
-    SLICK_PROFILE(0xFF343626);
-
     float totalCostResult = -1;
     if (m_pPathFinder)
     {
@@ -3036,8 +3030,6 @@ float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vec
 
 int Scene::CalculateScenePath(const Vector start, const Vector end, bool movePathToGround, float digStrength)
 {
-    SLICK_PROFILE(0xFF343626);
-    
     int pathSize = -1;
     if (m_pPathFinder)
     {
@@ -3109,8 +3101,6 @@ void Scene::Unlock()
 
 void Scene::Update()
 {
-    SLICK_PROFILE(0xFF123549);
-
     m_PathfindingUpdated = false;
 
 	if (g_SettingsMan.BlipOnRevealUnseen())

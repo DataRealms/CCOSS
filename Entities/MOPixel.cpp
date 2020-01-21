@@ -340,8 +340,6 @@ void MOPixel::RestDetection()
 
 void MOPixel::Travel()
 {
-    SLICK_PROFILE(0xFF227932);
-
     MovableObject::Travel();
 
     if (m_PinStrength)

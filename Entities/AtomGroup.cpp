@@ -96,8 +96,6 @@ int AtomGroup::Create(const AtomGroup &reference)
 
 int AtomGroup::Create(const AtomGroup &reference, boolean onlyCopyOwnerAtoms)
 {
-    SLICK_PROFILE(0xFF662348);
-
     Entity::Create(reference);
 
     m_AutoGenerate = false; //Don't autogenerate because we'll copy the atoms below
@@ -2401,8 +2399,6 @@ float AtomGroup::RatioInTerrain()
 
 bool AtomGroup::ResolveTerrainIntersection(Vector &position, Matrix &rotation, unsigned char strongerThan)
 {
-    SLICK_PROFILE(0xFF335546);
-
     Vector atomOffset, atomPos, atomNormal, clearPos, exitDirection, atomExitVector, totalExitVector;
     list<Atom *>::iterator aItr;
     list<Atom *> intersectingAtoms;

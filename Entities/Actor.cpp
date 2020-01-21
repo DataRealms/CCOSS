@@ -993,8 +993,6 @@ void Actor::DropAllInventory()
 
 void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
-    SLICK_PROFILE(0xFF686432);
-
     // Play death sound
 // TODO: Don't attenuate since death is pretty important.. maybe only make this happen for teh brains
     m_DeathSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));

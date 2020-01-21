@@ -4,8 +4,6 @@ VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RTEA", "RTEA.vcxproj", "{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SlickProfiler", "System\Slick Profiler\SlickProfiler.vcxproj", "{B682A5DF-D9D2-4443-AB0E-62F5C80C79EE}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{02433C09-01D9-4910-BB03-FF648DB02229}"
 EndProject
 Global
@@ -18,10 +16,6 @@ Global
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Open Source|Win32.Build.0 = Debug Open Source|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final Open Source|Win32.ActiveCfg = Final Open Source|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final Open Source|Win32.Build.0 = Final Open Source|Win32
-		{B682A5DF-D9D2-4443-AB0E-62F5C80C79EE}.Debug Open Source|Win32.ActiveCfg = Debug Open Source|Win32
-		{B682A5DF-D9D2-4443-AB0E-62F5C80C79EE}.Debug Open Source|Win32.Build.0 = Debug Open Source|Win32
-		{B682A5DF-D9D2-4443-AB0E-62F5C80C79EE}.Final Open Source|Win32.ActiveCfg = Final Open Source|Win32
-		{B682A5DF-D9D2-4443-AB0E-62F5C80C79EE}.Final Open Source|Win32.Build.0 = Final Open Source|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

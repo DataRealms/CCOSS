@@ -425,8 +425,6 @@ bool ACDropShip::OnSink(const Vector &pos)
 
 void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
-    SLICK_PROFILE(0xFF786542);
-
     // TODO: maybe make hardcoded attachables gib if their gib list isn't empty
     // Detach all limbs and let loose
     if (m_pRThruster && m_pRThruster->IsAttached())

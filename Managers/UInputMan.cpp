@@ -2423,8 +2423,6 @@ void UInputMan::WaitForSpace()
 
 int UInputMan::Update()
 {
-    SLICK_PROFILE(0xFF879355);
-
 	m_LastDeviceWhichControlledGUICursor = 0;
 
     // Only update inputs on drawn frames

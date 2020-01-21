@@ -13,17 +13,6 @@
 /Debug
 /Packaging/Win32-Beta/files
 /Packaging/Win32/files
-/System/Slick Profiler/Final2017
-/System/Slick Profiler/Steam Final
-/System/Slick Profiler/Steam Release
-/System/Slick Profiler/Steam Debug
-/System/Slick Profiler/Debug
-/System/Slick Profiler/Final
-/System/Slick Profiler/Final Open Source
-/System/Slick Profiler/Debug Open Source
-/System/Slick Profiler/Remote profile
-/Slick DebugTool/DebugTool/bin
-/Slick DebugTool/DebugTool/obj
 /GUI/Editor/Debug
 /GUI/Editor/Release
 /Steam Release
@@ -57,5 +46,4 @@ MemCleanupInfo.txt
 /_Allegro-4.2.3.1-Custom/Allegro/build/msvc8/.vs
 /_Allegro-4.2.3.1-Custom/Allegro/lib
 /_Allegro-4.2.3.1-Custom/Allegro/obj
-SlickProfiler.vcxproj.user
 Doxygen/Output/

@@ -343,16 +343,12 @@ int MOSRotating::Create(ContentFile spriteFile,
 
 int MOSRotating::Create(const MOSRotating &reference)
 {
-    SLICK_PROFILE(0xFF778962);
-
     MOSprite::Create(reference);
 
     if (!reference.m_pAtomGroup)
         return -1;
 
     {
-        SLICK_PROFILENAME("AtomGroup Copies", 0xFF775544);
-
         // THESE ATOMGROUP COPYING ARE A TIME SINK!
         m_pAtomGroup = new AtomGroup();
         m_pAtomGroup->Create(*reference.m_pAtomGroup, true);
@@ -375,31 +371,28 @@ int MOSRotating::Create(const MOSRotating &reference)
     m_RecoilForce = reference.m_RecoilForce;
     m_RecoilOffset = reference.m_RecoilOffset;
 
+	// Wound emitter copies
     AEmitter *pWound = 0;
     for (list<AEmitter *>::const_iterator itr = reference.m_Wounds.begin(); itr != reference.m_Wounds.end(); ++itr)
     {
-        SLICK_PROFILENAME("Wound AEmitter Copies", 0xFF775544);
-
 		pWound = dynamic_cast<AEmitter *>((*itr)->Clone());
 		AddWound(pWound, pWound->GetParentOffset());
 		pWound = 0;
     }
 
+	// Attachable copies
     m_AllAttachables.clear();
     Attachable *pAttachable = 0;
     for (list<Attachable *>::const_iterator aItr = reference.m_Attachables.begin(); aItr != reference.m_Attachables.end(); ++aItr)
     {
-        SLICK_PROFILENAME("Attachable Copies", 0xFF775544);
-
         pAttachable = dynamic_cast<Attachable *>((*aItr)->Clone());
         AddAttachable(pAttachable, pAttachable->GetParentOffset());
         pAttachable = 0;
     }
 
+	// Gib copies
     for (list<MOSRotating::Gib>::const_iterator gItr = reference.m_Gibs.begin(); gItr != reference.m_Gibs.end(); ++gItr)
     {
-        SLICK_PROFILENAME("Gib Copies", 0xFF775544);
-
         m_Gibs.push_back(*gItr);
     }
 
@@ -1035,8 +1028,6 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
 
 void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
-    SLICK_PROFILE(0xFF446542);
-
     // Can't, or is already gibbed, so don't do anything
     if (m_MissionCritical || m_ToDelete)
         return;
@@ -1046,14 +1037,13 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
     Vector gibROffset, gibVel;
     for (list<MOSRotating::Gib>::iterator gItr = m_Gibs.begin(); gItr != m_Gibs.end(); ++gItr)
     {
-        SLICK_PROFILENAME("Throwing out Gibs", 0xFF446542);
-
+		// Throwing out gibs
         for (int i = 0; i < (*gItr).GetCount(); ++i)
         {
             // Make a copy after the preset particle
             // THIS IS A TIME SINK, takes up the vast bulk of time of GibThis
 			{
-				SLICK_PROFILENAME("Create Gibs", 0xFF446542);
+				// Create gibs
 				pGib = dynamic_cast<MovableObject *>((*gItr).GetParticlePreset()->Clone());
 			}
 
@@ -1097,7 +1087,6 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
 // TODO: Optimize making the random angles!")
             {
 				// Pretty much always zero
-                //SLICK_PROFILENAME("Making random angles", 0xFF446542);
                 gibVel = gibROffset;
                 if (gibVel.IsZero())
                     gibVel.SetXY(velMin + velRange * PosRand(), 0);
@@ -1130,8 +1119,6 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
     Attachable *pAttachable = 0;
     for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ) //NOTE: No increment to handle RemoveAttachable removing the object
     {
-        SLICK_PROFILENAME("Throwing out Attachables", 0xFF446542);
-
         DAssert((*aItr), "Broken Attachable!");
         if (!(*aItr))
             continue;
@@ -1447,8 +1434,6 @@ void MOSRotating::EraseFromTerrain()
 
 bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
 {
-    SLICK_PROFILE(0xFF656654);
-
     // Check for deep penetration of the terrain and
     // generate splash of MOPixels accordingly.
     if (m_pDeepGroup && (m_pDeepGroup->InTerrain() || m_ForceDeepCheck))
@@ -1458,7 +1443,6 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
 /*
         // Just make the outline of this disappear from the terrain
         {
-            SLICK_PROFILENAME("Draw the empty outline", 0xFF552465);
 // TODO: These don't work at all because they're drawing shapes of color 0 to an intermediate field of 0!
             Draw(g_SceneMan.GetTerrain()->GetFGColorBitmap(), Vector(), g_DrawKey, true);
             Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawAir, true);
@@ -1488,8 +1472,7 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
         }
 
         {
-            SLICK_PROFILENAME("Particle generation", 0xFF552465);
-
+            // Particle generation
             // Erase the silhouette and get all the pixels that were created as a result
             deque<MOPixel *> pixels = g_SceneMan.GetTerrain()->EraseSilhouette(m_HFlipped ? m_pFlipBitmap : m_aSprite[m_Frame], m_Pos, pivot, m_Rotation, m_Scale, makeMOPs, skipMOP, maxMOPs);
 
@@ -1533,8 +1516,6 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
 
 void MOSRotating::PreTravel()
 {
-    SLICK_PROFILE(0xFF776853);
-
     MOSprite::PreTravel();
 
     // If this is going slow enough, check for and redraw the MOID representations of
@@ -1551,8 +1532,6 @@ void MOSRotating::PreTravel()
 
 void MOSRotating::Travel()
 {
-    SLICK_PROFILE(0xFF663384);
-
     MOSprite::Travel();
 
     // Pinned objects don't travel!
@@ -1603,8 +1582,6 @@ void MOSRotating::Travel()
 
 void MOSRotating::PostTravel()
 {
-    SLICK_PROFILE(0xFF442132);
-
     // Check for stupid velocities to gib instead of outright deletion that MOSprite::PostTravel() will do
     if (IsTooFast())
         GibThis();

@@ -1119,8 +1119,6 @@ bool ACrab::UpdateMovePath()
 
 void ACrab::UpdateAI()
 {
-    SLICK_PROFILE(0xFF121456);
-
     Actor::UpdateAI();
 
     Vector cpuPos = GetCPUPos();
@@ -2205,8 +2203,6 @@ void ACrab::UpdateAI()
 
 void ACrab::Update()
 {
-    SLICK_PROFILE(0xFF668431);
-
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
     float mass = GetMass();
 

@@ -240,7 +240,7 @@ ENTITYALLOCATION(HeldDevice)
 // Arguments:       None.
 // Return value:    A const reference to the current stance parent offset.
 
-    Vector GetStanceOffset() const;
+    virtual Vector GetStanceOffset() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -12,6 +12,7 @@ namespace RTE {
 	public:
 		ENTITYALLOCATION(ThrownDevice);
 
+#pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a ThrownDevice object in system memory. Create should be called before using the object.
 		/// </summary>
@@ -29,7 +30,9 @@ namespace RTE {
 		/// <param name="reference">A reference to the ThrownDevice to deep copy.</param>
 		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const ThrownDevice &reference);
+#pragma endregion
 
+#pragma region INI Handling
 		/// <summary>
 		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
 		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
@@ -48,7 +51,9 @@ namespace RTE {
 		/// <param name="writer">A Writer that the ThrownDevice will save itself with.</param>
 		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int Save(Writer &writer) const;
+#pragma endregion
 
+#pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a ThrownDevice object before deletion from system memory.
 		/// </summary>
@@ -59,7 +64,9 @@ namespace RTE {
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
 		virtual void Destroy(bool notInherited = false);
+#pragma endregion
 
+#pragma region Virtual Override Methods
 		/// <summary>
 		/// Resets the entire ThrownDevice, including its inherited members, to their default settings or values.
 		/// </summary>
@@ -91,13 +98,17 @@ namespace RTE {
 		/// Does the calculations necessary to detect whether this MO appears to have has settled in the world and is at rest or not. IsAtRest() retrieves the answer.
 		/// </summary>
 		virtual void RestDetection();
+#pragma endregion
 
+#pragma region ConcreteOverrideMethods
 		/// <summary>
 		/// Gets the current position offset of this ThrownDevice's joint relative from the parent Actor's position, if attached.
 		/// </summary>
 		/// <returns>A const reference to the current stance parent offset.</returns>
 		Vector GetStanceOffset() const override;
+#pragma endregion
 
+#pragma region GettersAndSetters
 		/// <summary>
 		/// Gets the Start throw offset of this ThrownDevice's joint relative from the parent Actor's position, if attached.
 		/// </summary>
@@ -139,29 +150,21 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether this ThrownDevice is supposed to only activate when it's released</returns>
 		bool ActivatesWhenReleased() const { return m_ActivatesWhenReleased; }
+#pragma endregion
 
 	protected:
-		// ClassInfo for this class
-		static Entity::ClassInfo m_sClass;
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class
 
-		// Timer for timing how long ago this ThrownDevice was thrown.
-		Timer m_ThrownTmr;
+		Timer m_ThrownTmr; //!< Timer for timing how long ago this ThrownDevice was thrown
 
-		// Activation sound
-		Sound m_ActivationSound;
+		Sound m_ActivationSound; //!< Activation sound
 
-		// The position offset at which a throw of this Device begins
-		Vector m_StartThrowOffset;
-		// The position offset at which a throw of this Device ends
-		Vector m_EndThrowOffset;
-		// The minimum throw velocity this gets when thrown
-		float m_MinThrowVel;
-		// The maximum throw velocity this gets when thrown
-		float m_MaxThrowVel;
-		// Time in millisecs from the time of being thrown to triggering whatever it is that this ThrownDevice does
-		long m_TriggerDelay;
-		// Whether this activates when its throw is started, or waits until it is released from the arm that is throwing it
-		bool m_ActivatesWhenReleased;
+		Vector m_StartThrowOffset; //!< The position offset at which a throw of this Device begins
+		Vector m_EndThrowOffset; //!< The position offset at which a throw of this Device ends
+		float m_MinThrowVel; //!< The minimum throw velocity this gets when thrown
+		float m_MaxThrowVel; //!< The maximum throw velocity this gets when thrown
+		long m_TriggerDelay; //!< Time in millisecs from the time of being thrown to triggering whatever it is that this ThrownDevice does
+		bool m_ActivatesWhenReleased; //!< Whether this activates when its throw is started, or waits until it is released from the arm that is throwing it
 
 	private:
 		/// <summary>

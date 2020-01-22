@@ -4,6 +4,8 @@ using namespace std;
 
 namespace RTE {
 	CONCRETECLASSINFO(ThrownDevice, Attachable, 0);
+	
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ThrownDevice::Clear() {
 		m_ThrownTmr.Reset();
@@ -16,7 +18,8 @@ namespace RTE {
 		m_ActivatesWhenReleased = false;
 	}
 
-#pragma region Creation
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int ThrownDevice::Create() {
 		if (HeldDevice::Create() < 0) {
 			return -1;
@@ -26,6 +29,8 @@ namespace RTE {
 
 		return 0;
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ThrownDevice::Create(const ThrownDevice &reference) {
 		HeldDevice::Create(reference);
@@ -45,9 +50,9 @@ namespace RTE {
 
 		return 0;
 	}
-#pragma endregion
 
-#pragma region INI Handling
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int ThrownDevice::ReadProperty(std::string propName, Reader &reader) {
 		if (propName == "ActivationSound")
 			reader >> m_ActivationSound;
@@ -69,6 +74,8 @@ namespace RTE {
 		return 0;
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int ThrownDevice::Save(Writer &writer) const {
 		HeldDevice::Save(writer);
 
@@ -89,9 +96,9 @@ namespace RTE {
 
 		return 0;
 	}
-#pragma endregion
 
-#pragma region Destruction
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void ThrownDevice::Destroy(bool notInherited) {
 		if (!notInherited) {
 			HeldDevice::Destroy();
@@ -99,9 +106,9 @@ namespace RTE {
 
 		Clear();
 	}
-#pragma endregion
 
-#pragma region Virtual Override Methods
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void ThrownDevice::Activate() {
 		if (!m_Activated) {
 			m_ActivationTmr.Reset();
@@ -110,6 +117,8 @@ namespace RTE {
 		}
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void ThrownDevice::RestDetection() {
 		HeldDevice::RestDetection();
 
@@ -117,11 +126,10 @@ namespace RTE {
 			m_RestTimer.Reset();
 		}
 	}
-#pragma endregion
 
-#pragma region ConcreteOverrideMethods
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	Vector ThrownDevice::GetStanceOffset() const {
 		return m_StanceOffset.GetXFlipped(m_HFlipped);
 	}
-#pragma endregion
 }

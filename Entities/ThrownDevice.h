@@ -73,6 +73,11 @@ namespace RTE {
 		virtual void Reset() { Clear(); Attachable::Reset(); }
 
 		/// <summary>
+		/// Resest all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.
+		/// </summary>
+		virtual void ResetAllTimers() { HeldDevice::ResetAllTimers(); m_ThrownTmr.Reset(); }
+
+		/// <summary>
 		/// Gets the ClassInfo instance of this Entity.
 		/// </summary>
 		/// <returns>A reference to the ClassInfo of this' class.</returns>
@@ -83,11 +88,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
 		virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
-		/// <summary>
-		/// Resest all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.
-		/// </summary>
-		virtual void ResetAllTimers() { HeldDevice::ResetAllTimers(); m_ThrownTmr.Reset(); }
 
 		/// <summary>
 		/// Activates this Device as long as it's not set to activate when released or it has no parent
@@ -153,18 +153,18 @@ namespace RTE {
 #pragma endregion
 
 	protected:
-		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class
+		static Entity::ClassInfo m_sClass; //! ClassInfo for this class
 
-		Timer m_ThrownTmr; //!< Timer for timing how long ago this ThrownDevice was thrown
+		Timer m_ThrownTmr; //! Timer for timing how long ago this ThrownDevice was thrown
 
-		Sound m_ActivationSound; //!< Activation sound
+		Sound m_ActivationSound; //! Activation sound
 
-		Vector m_StartThrowOffset; //!< The position offset at which a throw of this Device begins
-		Vector m_EndThrowOffset; //!< The position offset at which a throw of this Device ends
-		float m_MinThrowVel; //!< The minimum throw velocity this gets when thrown
-		float m_MaxThrowVel; //!< The maximum throw velocity this gets when thrown
-		long m_TriggerDelay; //!< Time in millisecs from the time of being thrown to triggering whatever it is that this ThrownDevice does
-		bool m_ActivatesWhenReleased; //!< Whether this activates when its throw is started, or waits until it is released from the arm that is throwing it
+		Vector m_StartThrowOffset; //! The position offset at which a throw of this Device begins
+		Vector m_EndThrowOffset; //! The position offset at which a throw of this Device ends
+		float m_MinThrowVel; //! The minimum throw velocity this gets when thrown
+		float m_MaxThrowVel; //! The maximum throw velocity this gets when thrown
+		long m_TriggerDelay; //! Time in millisecs from the time of being thrown to triggering whatever it is that this ThrownDevice does
+		bool m_ActivatesWhenReleased; //! Whether this activates when its throw is started, or waits until it is released from the arm that is throwing it
 
 	private:
 		/// <summary>
@@ -177,5 +177,4 @@ namespace RTE {
 		ThrownDevice & operator=(const ThrownDevice &rhs);
 	};
 }
-
 #endif

@@ -1,7 +1,5 @@
 #include "ThrownDevice.h"
 
-using namespace std;
-
 namespace RTE {
 	CONCRETECLASSINFO(ThrownDevice, Attachable, 0);
 	

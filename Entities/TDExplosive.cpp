@@ -1,7 +1,5 @@
 #include "TDExplosive.h"
 
-using namespace std;
-
 namespace RTE {
 	CONCRETECLASSINFO(TDExplosive, ThrownDevice, 0);
 

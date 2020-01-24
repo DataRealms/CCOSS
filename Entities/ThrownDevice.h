@@ -5,7 +5,7 @@
 
 namespace RTE {
 	/// <summary>
-	/// [Abstract Class] - A device that is carried and thrown by Actors
+	/// [Abstract Class] - A device that is carried and thrown by Actors.
 	/// </summary>
 	class ThrownDevice : public HeldDevice {
 
@@ -46,7 +46,7 @@ namespace RTE {
 		virtual int ReadProperty(std::string propName, Reader &reader);
 
 		/// <summary>
-		/// Saves the complete state of this ThrownDevice to an output stream for later recreation with Create(Reader &reader);
+		/// Saves the complete state of this ThrownDevice to an output stream for later recreation with Create(Reader &reader).
 		/// </summary>
 		/// <param name="writer">A Writer that the ThrownDevice will save itself with.</param>
 		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
@@ -90,7 +90,7 @@ namespace RTE {
 		virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
 
 		/// <summary>
-		/// Activates this Device as long as it's not set to activate when released or it has no parent
+		/// Activates this Device as long as it's not set to activate when released or it has no parent.
 		/// </summary>
 		virtual void Activate();
 
@@ -146,9 +146,9 @@ namespace RTE {
 		void SetMaxThrowVel(float maxThrowVel) { m_MaxThrowVel = maxThrowVel; }
 
 		/// <summary>
-		/// If true then the explosive will not activate until it's released
+		/// If true then the explosive will not activate until it's released.
 		/// </summary>
-		/// <returns>Whether this ThrownDevice is supposed to only activate when it's released</returns>
+		/// <returns>Whether this ThrownDevice is supposed to only activate when it's released.</returns>
 		bool ActivatesWhenReleased() const { return m_ActivatesWhenReleased; }
 #pragma endregion
 

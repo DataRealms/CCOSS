@@ -5,7 +5,7 @@
 
 namespace RTE {
 	/// <summary>
-	/// [Concrete Class] -  A thrown device that explodes after its trigger delay is completed after its activation
+	/// [Concrete Class] -  A thrown device that explodes after its trigger delay is completed after its activation.
 	/// </summary>
 	class TDExplosive : public ThrownDevice {
 
@@ -40,7 +40,7 @@ namespace RTE {
 		virtual int ReadProperty(std::string propName, Reader &reader);
 
 		/// <summary>
-		/// Saves the complete state of this TDExplosive to an output stream for later recreation with Create(Reader &reader);
+		/// Saves the complete state of this TDExplosive to an output stream for later recreation with Create(Reader &reader).
 		/// </summary>
 		/// <param name="writer">A Writer that the TDExplosive will save itself with.</param>
 		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>

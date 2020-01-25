@@ -69,15 +69,13 @@ namespace RTE {
 			// If not animated manually, play 'fuse lit' animation
 			if (!m_IsAnimatedManually) {
 				m_SpriteAnimMode = ALWAYSLOOP;
-			}
-			m_RestTimer.Reset();
-			m_ToSettle = false;
-		} else {
-			// If not animated manually, stay on starting frame
-			if (!m_IsAnimatedManually) {
+			} else {
+				// If animated manually, stay on starting frame
 				m_Frame = 0;
 				m_SpriteAnimMode = NOANIM;
 			}
+			m_RestTimer.Reset();
+			m_ToSettle = false;
 		}
 
 		// Blow up if the activation timer has reached the trigger delay limit

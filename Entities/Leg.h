@@ -293,14 +293,11 @@ ENTITYALLOCATION(Leg)
 	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetFoot
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the foot Attachable
-// Arguments:       None.
-// Return value:    A pointer to the foot Attachable of this. Ownership is NOT transferred!
-
-	Attachable * GetFoot() const { return (Attachable *)m_pFoot; }
+	/// <summary>
+	/// Gets the foot Attachable of this.
+	/// </summary>
+	/// <returns>A pointer to the foot Attachable of this. Ownership is NOT transferred!</returns>
+	Attachable * GetFoot() const { return m_pFoot; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

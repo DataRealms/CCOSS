@@ -1302,34 +1302,30 @@ ENTITYALLOCATION(Actor)
 
 	void SetTravelImpulseDamage(float value) { m_TravelImpulseDamage = value; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDeathSound
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the defined sound to be played on death.
-// Arguments:       None.
-// Return value:    A sound with the death sample of this actor.
 
-    Sound GetDeathSound() const { return m_DeathSound; }
+	/// <summary>
+	/// Returns the defined sound to be played on death.
+	/// </summary>
+	/// <returns>A sound with the death sample of this actor.</returns>
+	Sound GetDeathSound() const { return m_DeathSound; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetDeathSound
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets new death sound sample from specified path or sets null.
-// Arguments:       Filepath to new sample or None/nil for no sound.
-// Return value:    Updated DeathSound.
 
-    Sound SetDeathSound(const char *samplePath)
-    {
-        Sound snd;
-        if (strcmp(samplePath, "None") || strcmp(samplePath, "nil"))
-            m_DeathSound.Reset();
-        else
-        { 
-            snd.Create(samplePath, false);
-            m_DeathSound = snd;
-        }
-        return m_DeathSound;
-    }
+	/// <summary>
+	/// Sets new death sound sample from specified path or sets null.
+	/// </summary>
+	/// <param name="samplePath">Filepath to new sample or None/nil for no sound.</param>
+	/// <returns>Updated DeathSound.</returns>
+	Sound SetDeathSound(char *samplePath) {
+		Sound snd;
+		if (std::strcmp(samplePath, "None") || std::strcmp(samplePath, "nil")) {
+			m_DeathSound.Reset();
+		} else {
+			snd.Create(samplePath, false);
+			m_DeathSound = snd;
+		}
+		return m_DeathSound;
+	}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

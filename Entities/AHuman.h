@@ -359,14 +359,11 @@ ENTITYALLOCATION(AHuman)
     Attachable * GetFGLeg() const { return (Attachable *)m_pFGLeg; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetFGFoot
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the FG foot Attachable
-// Arguments:       None.
-// Return value:    A pointer to the FG foot Attachable of this. Ownership is NOT transferred!
-
-	Attachable * GetFGFoot() const { return (Attachable *)m_pFGLeg->GetFoot(); }
+	/// <summary>
+	/// Gets the FG foot attachable of this.
+	/// </summary>
+	/// <returns>A pointer to the FG foot attachable of this. Ownership is NOT transferred!</returns>
+	Attachable * GetFGFoot() const { return m_pFGLeg->GetFoot(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -379,14 +376,11 @@ ENTITYALLOCATION(AHuman)
     Attachable * GetBGLeg() const { return (Attachable *)m_pBGLeg; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetBGFoot
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the BG foot Attachable
-// Arguments:       None.
-// Return value:    A pointer to the BG foot Attachable of this. Ownership is NOT transferred!
-
-	Attachable * GetBGFoot() const { return (Attachable *)m_pBGLeg->GetFoot(); }
+	/// <summary>
+	/// Gets the BG foot attachable of this.
+	/// </summary>
+	/// <returns>A pointer to the BG foot attachable of this. Ownership is NOT transferred!</returns>
+	Attachable * GetBGFoot() const { return m_pBGLeg->GetFoot(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

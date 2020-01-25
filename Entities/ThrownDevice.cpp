@@ -1,7 +1,7 @@
 #include "ThrownDevice.h"
 
 namespace RTE {
-	CONCRETECLASSINFO(ThrownDevice, Attachable, 0);
+	CONCRETECLASSINFO(ThrownDevice, HeldDevice, 0);
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

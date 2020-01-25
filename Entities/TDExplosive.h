@@ -11,6 +11,7 @@ namespace RTE {
 
 	public:
 		ENTITYALLOCATION(TDExplosive);
+		CLASSINFOGETTERS();
 
 #pragma region Creation
 		/// <summary>
@@ -70,18 +71,6 @@ namespace RTE {
 		/// Updates this MovableObject. Supposed to be done every frame.
 		/// </summary>
 		virtual void Update();
-
-		/// <summary>
-		/// Gets the ClassInfo instance of this Entity.
-		/// </summary>
-		/// <returns>A reference to the ClassInfo of this' class.</returns>
-		virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-		/// <summary>
-		/// Gets the class name of this Entity.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
 
 		/// <summary>
 		/// Draws this' current graphical HUD overlay representation to a BITMAP of choice.

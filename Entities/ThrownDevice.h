@@ -11,6 +11,7 @@ namespace RTE {
 
 	public:
 		ENTITYALLOCATION(ThrownDevice);
+		CLASSINFOGETTERS();
 
 #pragma region Creation
 		/// <summary>
@@ -76,18 +77,6 @@ namespace RTE {
 		/// Resest all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.
 		/// </summary>
 		virtual void ResetAllTimers() { HeldDevice::ResetAllTimers(); m_ThrownTmr.Reset(); }
-
-		/// <summary>
-		/// Gets the ClassInfo instance of this Entity.
-		/// </summary>
-		/// <returns>A reference to the ClassInfo of this' class.</returns>
-		virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-		/// <summary>
-		/// Gets the class name of this Entity.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
 
 		/// <summary>
 		/// Activates this Device as long as it's not set to activate when released or it has no parent.

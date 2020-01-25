@@ -1315,15 +1315,14 @@ ENTITYALLOCATION(Actor)
 	/// </summary>
 	/// <param name="samplePath">Filepath to new sample or None/nil for no sound.</param>
 	/// <returns>Updated DeathSound.</returns>
-	Sound SetDeathSound(char *samplePath) {
-		Sound snd;
-		if (std::strcmp(samplePath, "None") || std::strcmp(samplePath, "nil")) {
+	void SetDeathSound(const char *samplePath) {
+		if (samplePath == nullptr) {
 			m_DeathSound.Reset();
 		} else {
-			snd.Create(samplePath, false);
-			m_DeathSound = snd;
+			Sound newDeathSound;
+			newDeathSound.Create(samplePath, false);
+			m_DeathSound = newDeathSound;
 		}
-		return m_DeathSound;
 	}
 
 

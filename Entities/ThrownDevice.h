@@ -22,14 +22,14 @@ namespace RTE {
 		/// <summary>
 		/// Makes the ThrownDevice object ready for use.
 		/// </summary>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int Create();
 
 		/// <summary>
 		/// Creates a ThrownDevice to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the ThrownDevice to deep copy.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const ThrownDevice &reference);
 #pragma endregion
 
@@ -50,7 +50,7 @@ namespace RTE {
 		/// Saves the complete state of this ThrownDevice to an output stream for later recreation with Create(Reader &reader).
 		/// </summary>
 		/// <param name="writer">A Writer that the ThrownDevice will save itself with.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int Save(Writer &writer) const;
 #pragma endregion
 
@@ -74,7 +74,7 @@ namespace RTE {
 		virtual void Reset() { Clear(); Attachable::Reset(); }
 
 		/// <summary>
-		/// Resest all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.
+		/// Resets all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.
 		/// </summary>
 		virtual void ResetAllTimers() { HeldDevice::ResetAllTimers(); m_ThrownTmr.Reset(); }
 

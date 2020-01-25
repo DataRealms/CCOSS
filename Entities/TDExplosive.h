@@ -23,7 +23,7 @@ namespace RTE {
 		/// Creates a TDExplosive to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the TDExplosive to deep copy.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const TDExplosive &reference);
 #pragma endregion
 
@@ -44,7 +44,7 @@ namespace RTE {
 		/// Saves the complete state of this TDExplosive to an output stream for later recreation with Create(Reader &reader).
 		/// </summary>
 		/// <param name="writer">A Writer that the TDExplosive will save itself with.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int Save(Writer &writer) const;
 #pragma endregion
 

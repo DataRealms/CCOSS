@@ -1,4 +1,16 @@
-//////////////////////////////////////////////////////////////////////////////////////////
+/*          ______   ______   ______  ______  ______  __  __       ______   ______   __    __   __    __   ______   __   __   _____
+           /\  ___\ /\  __ \ /\  == \/\__  _\/\  ___\/\_\_\_\     /\  ___\ /\  __ \ /\ "-./  \ /\ "-./  \ /\  __ \ /\ "-.\ \ /\  __-.
+           \ \ \____\ \ \/\ \\ \  __<\/_/\ \/\ \  __\\/_/\_\/_    \ \ \____\ \ \/\ \\ \ \-./\ \\ \ \-./\ \\ \  __ \\ \ \-.  \\ \ \/\ \
+            \ \_____\\ \_____\\ \_\ \_\ \ \_\ \ \_____\/\_\/\_\    \ \_____\\ \_____\\ \_\ \ \_\\ \_\ \ \_\\ \_\ \_\\ \_\\"\_\\ \____-
+  	         \/_____/ \/_____/ \/_/ /_/  \/_/  \/_____/\/_/\/_/     \/_____/ \/_____/ \/_/  \/_/ \/_/  \/_/ \/_/\/_/ \/_/ \/_/ \/____/
+   ______   ______   __    __   __    __   __  __   __   __   __   ______  __  __       ______  ______   ______      __   ______   ______   ______
+  /\  ___\ /\  __ \ /\ "-./  \ /\ "-./  \ /\ \/\ \ /\ "-.\ \ /\ \ /\__  _\/\ \_\ \     /\  == \/\  == \ /\  __ \    /\ \ /\  ___\ /\  ___\ /\__  _\
+  \ \ \____\ \ \/\ \\ \ \-./\ \\ \ \-./\ \\ \ \_\ \\ \ \-.  \\ \ \\/_/\ \/\ \____ \    \ \  _-/\ \  __< \ \ \/\ \  _\_\ \\ \  __\ \ \ \____\/_/\ \/
+   \ \_____\\ \_____\\ \_\ \ \_\\ \_\ \ \_\\ \_____\\ \_\\"\_\\ \_\  \ \_\ \/\_____\    \ \_\   \ \_\ \_\\ \_____\/\_____\\ \_____\\ \_____\  \ \_\
+    \/_____/ \/_____/ \/_/  \/_/ \/_/  \/_/ \/_____/ \/_/ \/_/ \/_/   \/_/  \/_____/     \/_/    \/_/ /_/ \/_____/\/_____/ \/_____/ \/_____/   \/_/
+
+/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\*/
+
 ///\file    Main.cpp
 ///         Main driver implementation of the Retro Terrain Engine.
 ///\author  Copyright 2001 - 2006 Data Realms, LLC - http://www.datarealms.com
@@ -31,9 +43,6 @@
 #include "MultiplayerServerLobby.h"
 
 #include "Network.h"
-
-#include <DebugTool/DebugTool.h>
-#include <Profiler/Profiler.h>
 
 #include <algorithm>
 #include <string>
@@ -2357,20 +2366,13 @@ bool RunGameLoop()
 
     while (!g_Quit)
     {
-        SLICK_PROFILENAME("Game Loop", 0xFFFF0000);
-
         {
             // Need to clear this out; sometimes background layers don't cover the whole back
             g_FrameMan.ClearBackBuffer8();
 
-#ifdef SLICK_PROFILER
-            // Force to only one sim update for this graphics frame if the profiling tool is connected
-// Can switch this on and off in the console now
-//            g_TimerMan.SetOneSimUpdatePerFrame(Debug::DebugTool::Instance()->IsDebugToolConnected());
-#endif // SLICK_PROFILER
-
             // Update the real time measurement and increment
             g_TimerMan.Update();
+
 #if __USE_SOUND_GORILLA
 			g_AudioMan.Update();
 #endif
@@ -2381,7 +2383,6 @@ bool RunGameLoop()
             while (g_TimerMan.TimeForSimUpdate())
             {
 				serverUpdated = false;
-                SLICK_PROFILENAME("Simulation Update", 0xFFFFFF00);
 				g_FrameMan.NewPerformanceSample();
 
                 // Advance the simulation time by the fixed amount
@@ -2476,16 +2477,9 @@ bool RunGameLoop()
         // Frame draw update
         if (!g_Quit)
         {
-            SLICK_PROFILENAME("Rendering Frame", 0xFFFF00FF);
             g_FrameMan.Draw();
             g_FrameMan.FlipFrameBuffers();
         }
-
-// Slick Profiler updates - the debug tool needs to update BEFORE the profile system because control messages may have been sent.
-#ifdef SLICK_PROFILER
-        Debug::DebugTool::Instance()->Update();
-	    ProfileSystem::Instance()->Update();
-#endif
     }
 
     return true;
@@ -2584,14 +2578,6 @@ int main(int argc, char *argv[])
     SeedRand();
 // REMOVE!
 //    srand(100);
-
-    ///////////////////////////////////////////////////////////////////
-    // Init the Slick Profiler
-
-#ifdef SLICK_PROFILER
-    Debug::DebugTool::Initialize();
-	ProfileSystem::Initialize();
-#endif
 
     ///////////////////////////////////////////////////////////////////
     // Instantiate all the managers
@@ -2753,11 +2739,6 @@ int main(int argc, char *argv[])
     // Dump out the info about how well memory cleanup went
     Entity::ClassInfo::DumpPoolMemoryInfo(Writer("MemCleanupInfo.txt"));
 #endif // _DEBUG
-
-#ifdef SLICK_PROFILER
-	ProfileSystem::Finalize();
-	Debug::DebugTool::Finalize();
-#endif // SLICK_PROFILER
 
 #if defined(__APPLE__)
 	OsxUtil::Destroy();

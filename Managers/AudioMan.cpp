@@ -588,7 +588,17 @@ void AudioMan::PlayMusic(const char *filepath, int loops, double volumeOverride)
 	strcpy(format, &filepath[dotPos + 1]);
 
 	// Open the stream
-	m_pMusic = gau_create_handle_buffered_file(m_pMixer, m_pStreamManager, filepath, format, PlayNextCallback, 0, 0);
+	if (loops != 0)
+	{
+		gau_SampleSourceLoop* loopSrc;
+		m_pMusic = gau_create_handle_buffered_file(m_pMixer, m_pStreamManager, filepath, format, PlayNextCallback, 0, &loopSrc);
+		gau_sample_source_loop_set(loopSrc, -1, 0);
+	}
+	else 
+	{
+		m_pMusic = gau_create_handle_buffered_file(m_pMixer, m_pStreamManager, filepath, format, PlayNextCallback, 0, 0);
+	}
+
 	if (!m_pMusic)
 	{
 		g_ConsoleMan.PrintString("ERROR: Could not open and play music file:" + string(filepath));

@@ -212,6 +212,7 @@ int Actor::Create(const Actor &reference)
     m_MOType = MovableObject::TypeActor;
 
     m_Controller = reference.m_Controller;
+    m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
 
     m_BodyHitSound = reference.m_BodyHitSound;
@@ -992,8 +993,6 @@ void Actor::DropAllInventory()
 
 void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
-    SLICK_PROFILE(0xFF686432);
-
     // Play death sound
 // TODO: Don't attenuate since death is pretty important.. maybe only make this happen for teh brains
     m_DeathSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
@@ -1550,7 +1549,7 @@ void Actor::Update()
     /////////////////////////////////////
     // Detract damage caused by wounds from health
 
-    for (list<AEmitter *>::iterator itr = m_Emitters.begin(); itr != m_Emitters.end(); ++itr)
+    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
         m_Health -= (*itr)->CollectDamage() * m_DamageMultiplier; //Actors must apply DamageMultiplier effects to their main MO by themselves
 
     /////////////////////////////////////////////

@@ -178,13 +178,14 @@ int ACrab::Create(const ACrab &reference)
     if (reference.m_pTurret)
     {
         m_pTurret = dynamic_cast<Turret *>(reference.m_pTurret->Clone());
-        m_pTurret->Attach(this);        
+		m_pTurret->SetCanCollideWithTerrainWhenAttached(true);
+        AddAttachable(m_pTurret, true);
     }
 
     if (reference.m_pJetpack)
     {
         m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        m_pJetpack->Attach(this);
+        AddAttachable(m_pJetpack, true);
     }
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
@@ -193,25 +194,25 @@ int ACrab::Create(const ACrab &reference)
     if (reference.m_pLFGLeg)
     {
         m_pLFGLeg = dynamic_cast<Leg *>(reference.m_pLFGLeg->Clone());
-        m_pLFGLeg->Attach(this);
+        AddAttachable(m_pLFGLeg, true);
     }
 
     if (reference.m_pLBGLeg)
     {
         m_pLBGLeg = dynamic_cast<Leg *>(reference.m_pLBGLeg->Clone());
-        m_pLBGLeg->Attach(this);
+        AddAttachable(m_pLBGLeg, true);
     }
 
     if (reference.m_pRFGLeg)
     {
         m_pRFGLeg = dynamic_cast<Leg *>(reference.m_pRFGLeg->Clone());
-        m_pRFGLeg->Attach(this);
+        AddAttachable(m_pRFGLeg, true);
     }
 
     if (reference.m_pRBGLeg)
     {
         m_pRBGLeg = dynamic_cast<Leg *>(reference.m_pRBGLeg->Clone());
-        m_pRBGLeg->Attach(this);
+        AddAttachable(m_pRBGLeg, true);
     }
 
     m_pLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLFGFootGroup->Clone());
@@ -269,12 +270,6 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         delete m_pTurret;
         m_pTurret = new Turret;
         reader >> m_pTurret;
-        m_pTurret->Attach(this);
-        m_pTurret->SetAtomSubgroupID(1);
-        m_pAtomGroup->AddAtoms(m_pTurret->GetAtomGroup()->GetAtomList(),
-                               m_pTurret->GetAtomSubgroupID(),
-                               m_pTurret->GetParentOffset() - m_pTurret->GetJointOffset(),
-                               m_Rotation);
 		if (!m_pTurret->IsDamageMultiplierRedefined())
 			m_pTurret->SetDamageMultiplier(5);
     }
@@ -283,7 +278,6 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         delete m_pJetpack;
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-        m_pJetpack->Attach(this);
     }
     else if (propName == "JumpTime")
     {
@@ -296,28 +290,24 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         delete m_pLFGLeg;
         m_pLFGLeg = new Leg;
         reader >> m_pLFGLeg;
-        m_pLFGLeg->Attach(this);
     }
     else if (propName == "LBGLeg")
     {
         delete m_pLBGLeg;
         m_pLBGLeg = new Leg;
         reader >> m_pLBGLeg;
-        m_pLBGLeg->Attach(this);
     }
     else if (propName == "RFGLeg")
     {
         delete m_pRFGLeg;
         m_pRFGLeg = new Leg;
         reader >> m_pRFGLeg;
-        m_pRFGLeg->Attach(this);
     }
     else if (propName == "RBGLeg")
     {
         delete m_pRBGLeg;
         m_pRBGLeg = new Leg;
         reader >> m_pRBGLeg;
-        m_pRBGLeg->Attach(this);
     }
     else if (propName == "LFootGroup")
     {
@@ -473,8 +463,6 @@ int ACrab::Save(ostream &stream) const
 
 void ACrab::Destroy(bool notInherited)
 {
-//    g_MovableMan.RemoveEntityPreset(this);
-
     delete m_pTurret;
     delete m_pLFGLeg;
     delete m_pLBGLeg;
@@ -1005,7 +993,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     // Detach all limbs and let loose
     if (m_pTurret && m_pTurret->IsAttached())
     {
-        m_pTurret->Detach();
+        RemoveAttachable(m_pTurret);
         m_pTurret->SetVel(m_Vel + m_pTurret->GetParentOffset() * PosRand());
         m_pTurret->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pTurret);
@@ -1013,15 +1001,15 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     }
     if (m_pJetpack && m_pJetpack->IsAttached())
     {
-// Jetpacks are really nothing, so just delete them safely
-        m_pJetpack->Detach();
+        // Jetpacks are really nothing, so just delete them safely
+        RemoveAttachable(m_pJetpack);
         m_pJetpack->SetToDelete(true);
         g_MovableMan.AddParticle(m_pJetpack);
         m_pJetpack = 0;
     }
     if (m_pLFGLeg && m_pLFGLeg->IsAttached())
     {
-        m_pLFGLeg->Detach();
+        RemoveAttachable(m_pLFGLeg);
         m_pLFGLeg->SetVel(m_Vel + m_pLFGLeg->GetParentOffset() * PosRand());
         m_pLFGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pLFGLeg);
@@ -1029,7 +1017,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     }
     if (m_pLBGLeg && m_pLBGLeg->IsAttached())
     {
-        m_pLBGLeg->Detach();
+        RemoveAttachable(m_pLBGLeg);
         m_pLBGLeg->SetVel(m_Vel + m_pLBGLeg->GetParentOffset() * PosRand());
         m_pLBGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pLBGLeg);
@@ -1037,7 +1025,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     }
     if (m_pRFGLeg && m_pRFGLeg->IsAttached())
     {
-        m_pRFGLeg->Detach();
+        RemoveAttachable(m_pRFGLeg);
         m_pRFGLeg->SetVel(m_Vel + m_pRFGLeg->GetParentOffset() * PosRand());
         m_pRFGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pRFGLeg);
@@ -1045,7 +1033,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     }
     if (m_pRBGLeg && m_pRBGLeg->IsAttached())
     {
-        m_pRBGLeg->Detach();
+        RemoveAttachable(m_pRBGLeg);
         m_pRBGLeg->SetVel(m_Vel + m_pRBGLeg->GetParentOffset() * PosRand());
         m_pRBGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pRBGLeg);
@@ -1131,8 +1119,6 @@ bool ACrab::UpdateMovePath()
 
 void ACrab::UpdateAI()
 {
-    SLICK_PROFILE(0xFF121456);
-
     Actor::UpdateAI();
 
     Vector cpuPos = GetCPUPos();
@@ -2217,8 +2203,6 @@ void ACrab::UpdateAI()
 
 void ACrab::Update()
 {
-    SLICK_PROFILE(0xFF668431);
-
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
     float mass = GetMass();
 
@@ -2800,10 +2784,6 @@ void ACrab::Update()
 //        m_pAtomGroup->UpdateSubAtoms(m_pTurret->GetAtomSubgroupID(), m_pTurret->GetParentOffset() - (m_pTurret->GetJointOffset() * atomRot), atomRot);
 
         m_Health -= m_pTurret->CollectDamage();// * 5;
-    }
-    else
-    {
-        m_pAtomGroup->RemoveAtoms(1);
     }
 
     if (m_pJetpack && m_pJetpack->IsAttached())

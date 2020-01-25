@@ -918,8 +918,6 @@ void SceneMan::RegisterMOIDDrawing(const Vector &center, float radius)
 
 void SceneMan::ClearAllMOIDDrawings()
 {
-    SLICK_PROFILE(0xFF648483);
-
     for (list<IntRect>::iterator itr = m_MOIDDrawings.begin(); itr != m_MOIDDrawings.end(); ++itr)
         ClearMOIDRect(itr->m_Left, itr->m_Top, itr->m_Right, itr->m_Bottom);
 
@@ -3631,8 +3629,6 @@ bool SceneMan::AddSceneObject(SceneObject *pObject)
 
 void SceneMan::Update(int screen)
 {
-//    SLICK_PROFILE(0xFF834456);
-
 	DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
     // Record screen was the last updated screen
@@ -3774,8 +3770,6 @@ void SceneMan::Update(int screen)
 
 void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vector &targetPos, bool skipSkybox, bool skipTerrain)
 {
-//    SLICK_PROFILE(0xFF578846);
-
     DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
     // Handy
     SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
@@ -3868,8 +3862,6 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 
 void SceneMan::ClearMOColorLayer()
 {
-    SLICK_PROFILE(0xFF454621);
-
     clear_to_color(m_pMOColorLayer->GetBitmap(), g_KeyColor);
 
 #ifdef _DEBUG

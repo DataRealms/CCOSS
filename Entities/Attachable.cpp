@@ -48,6 +48,8 @@ void Attachable::Clear()
     m_DamageCount = 0;
     m_OnlyLinForces = false;
 	m_InheritsRotAngle = true;
+	m_CanCollideWithTerrainWhenAttached = false;
+	m_IsCollidingWithTerrainWhileAttached = false;
 }
 
 
@@ -87,6 +89,7 @@ int Attachable::Create(const Attachable &reference)
     m_DamageCount = reference.m_DamageCount;
     m_OnlyLinForces = reference.m_OnlyLinForces;
 	m_InheritsRotAngle = reference.m_InheritsRotAngle;
+	m_CanCollideWithTerrainWhenAttached = reference.m_CanCollideWithTerrainWhenAttached;
 
     return 0;
 }
@@ -112,10 +115,12 @@ int Attachable::ReadProperty(std::string propName, Reader &reader)
         m_pBreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
     else if (propName == "JointOffset")
         reader >> m_JointOffset;
-	else if (propName == "InheritsRotAngle")
-		reader >> m_InheritsRotAngle;
-	else if (propName == "DrawAfterParent")
+    else if (propName == "InheritsRotAngle")
+        reader >> m_InheritsRotAngle;
+    else if (propName == "DrawAfterParent")
         reader >> m_DrawAfterParent;
+    else if (propName == "CollidesWithTerrainWhenAttached")
+        reader >> m_CanCollideWithTerrainWhenAttached;
     else
         // See if the base class(es) can find a match instead
         return MOSRotating::ReadProperty(propName, reader);
@@ -148,6 +153,8 @@ int Attachable::Save(Writer &writer) const
 	writer << m_InheritsRotAngle;
 	writer.NewProperty("DrawAfterParent");
     writer << m_DrawAfterParent;
+    writer.NewProperty("CollidesWithTerrainWhenAttached");
+    writer << m_CanCollideWithTerrainWhenAttached;
 
     return 0;
 }
@@ -239,7 +246,14 @@ bool Attachable::ParticlePenetration(HitData &hd)
 
 void Attachable::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
-    Detach();
+    if (m_pParent)
+    {
+        (MOSRotating *)m_pParent->RemoveAttachable(this);
+    }
+    else
+    {
+        Detach();
+    }
 
     MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }
@@ -256,7 +270,9 @@ void Attachable::Attach(MOSRotating *pParent)
 
     // Adopt the team of parent
     if (pParent)
+    {
         m_Team = pParent->GetTeam();
+    }
 
     // Reset the attachables timers so things that have been sitting in inventory don't make backed up emissions
     ResetAllTimers();
@@ -290,6 +306,35 @@ void Attachable::Detach()
 }
 
 
+/// <summary>
+/// Turns on/off this Attachable's collisions, by adding/removing its atoms to/from its parent's AtomGroup.
+/// </summary>
+/// <param name="enable">Adds this Attachable's atoms to the parent's AtomGroup if true, removes them if false.</param>
+void Attachable::EnableTerrainCollisions(bool enable)
+{
+	if (IsAttached() && CanCollideWithTerrainWhenAttached())
+	{
+		if (!IsCollidingWithTerrainWhileAttached() && enable)
+		{
+			m_pParent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset());
+			SetIsCollidingWithTerrainWhileAttached(true);
+		}
+		else if (IsCollidingWithTerrainWhileAttached() && !enable)
+		{
+			m_pParent->GetAtomGroup()->RemoveAtoms(GetAtomSubgroupID());
+			SetIsCollidingWithTerrainWhileAttached(false);
+		}
+	}
+	else if (IsAttached() && !CanCollideWithTerrainWhenAttached())
+	{
+		if (enable || !enable)
+		{
+			g_ConsoleMan.PrintString("ERROR: Tried to toggle collisions for attachable that was not set to collide when initially created!");
+		}
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          TransferJointForces
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -308,31 +353,6 @@ bool Attachable::TransferJointForces(Vector &jointForces)
          fItr != m_Forces.end(); ++fItr)
         forces += fItr->first;
 
-/* doesn't really apply to forces, only impulse forces
-    // Factor in the stiffness, or lack thereof
-    forces *= m_JointStiffness;
-    // Check if joint breaks and act accordingly
-    if (forces.GetMagnitude() > m_JointStrength) {
-        forces.SetMagnitude(m_JointStrength);
-        jointForces += forces;
-
-        if (m_pBreakWound) {
-            // Add velocity and wound before detaching.
-            // The forces should be applied to this' vel next round when detached
-            AEmitter *pWound = dynamic_cast<AEmitter *>(m_pBreakWound->Clone());
-//                dynamic_cast<AEmitter *>(g_PresetMan.GetEntityPreset("AEmitter", "Wound Flesh Body")->Clone());
-            if (pWound) {
-                pWound->SetEmitAngle(m_JointOffset.GetAbsRadAngle());
-                AttachEmitter(pWound, m_JointOffset);
-                pWound = 0;
-            }
-        }
-
-        Detach();
-        g_MovableMan.AddParticle(this);
-        return false;
-    }
-*/
     // Joint held up, so act accordingly
 // TODO: Maybe not do this here, we might need the forces for other stuff?")
     // Clear out forces after we've bundled them up.
@@ -387,16 +407,22 @@ bool Attachable::TransferJointImpulses(Vector &jointImpulses)
             // Add velocity and wound before detaching.
             // The forces should be applied to this' vel next round when detached
             AEmitter *pWound = dynamic_cast<AEmitter *>(m_pBreakWound->Clone());
-//                dynamic_cast<AEmitter *>(g_PresetMan.GetEntityPreset("AEmitter", "Wound Flesh Body")->Clone());
             if (pWound)
             {
                 pWound->SetEmitAngle(m_JointOffset.GetAbsRadAngle());
-                AttachEmitter(pWound, m_JointOffset, false);
+				AddWound(pWound, m_JointOffset, false);
                 pWound = 0;
             }
         }
 
-        Detach();
+        if (m_pParent)
+        {
+            m_pParent->RemoveAttachable(this);
+        }
+        else
+        {
+            Detach();
+        }
         g_MovableMan.AddParticle(this);
         return false;
     }
@@ -446,7 +472,7 @@ float Attachable::CollectDamage()
     float totalDamage = m_DamageCount;
     m_DamageCount = 0;
 
-    for (list<AEmitter *>::iterator itr = m_Emitters.begin(); itr != m_Emitters.end(); ++itr)
+    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
         totalDamage += (*itr)->CollectDamage();
 
     return totalDamage * m_DamageMultiplier;
@@ -629,7 +655,7 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
 // TODO: Clean up the drawing hierarchy!#@!")
     // Finally draw all the attached emitters, and only if the mode is g_DrawColor
     if (mode == g_DrawColor || mode == g_DrawMaterial) {
-        for (list<AEmitter *>::iterator itr = m_Emitters.begin(); itr != m_Emitters.end(); ++itr)
+        for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
             (*itr)->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
     }
 */
@@ -643,44 +669,5 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
 #endif // _DEBUG
 */
 }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddAttachable
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds an attachable to this Attachable.
-// Arguments:       The Attachable to add.
-// Return value:    None.
-
-void Attachable::AddAttachable(Attachable *pAttachable)
-{
-    if (pAttachable)
-    {
-	    pAttachable->Attach(this, pAttachable->GetParentOffset());
-	    m_Attachables.push_back(pAttachable);
-    }
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DetachAll
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Detaches everything from this Attachable.
-// Arguments:       None.
-// Return value:    None.
-
-void Attachable::DetachAll(bool destroy)
-{
-	for (list<Attachable *>::const_iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
-	{
-		if (destroy)
-			delete (*aItr);
-		else
-			(*aItr)->Detach();
-	}
-
-	m_Attachables.clear();
-}
-
 
 } // namespace RTE

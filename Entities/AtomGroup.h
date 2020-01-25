@@ -19,6 +19,7 @@
 #include "LimbPath.h"
 #include "Timer.h"
 #include <deque>
+#include <unordered_map>
 
 namespace RTE
 {
@@ -101,6 +102,14 @@ ENTITYALLOCATION(AtomGroup)
 //                  Anything below 0 is an error signal.
 
     virtual int Create(const AtomGroup &reference);
+
+    /// <summary>
+    /// Creates an AtomGroup to be identical to another, by deep copy, with the option to only copy atoms that belong to the reference AtomGroup's owner
+    /// </summary>
+    /// <param name="reference">A reference to the AtomGroup to deep copy</param>
+    /// <param name="onlyCopyOwnerAtoms">Whether or not to only copy atoms that belong to the reference AtomGroup's owner directly</param>
+    /// <returns>An error return value signalling success or any particular failure. Anything below 0 is an error signal.</returns>
+    virtual int Create(const AtomGroup & reference, boolean onlyCopyOwnerAtoms);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -446,7 +455,7 @@ ENTITYALLOCATION(AtomGroup)
 //                  The rotation of the placed atoms around the above offset.
 // Return value:    None.
 
-    void AddAtoms(const std::list<Atom *> &atomList, int subID = 0, const Vector &offset = Vector(), const Matrix &offsetRotation = Matrix());
+    void AddAtoms(const std::list<Atom *> &atomList, long int subID = 0, const Vector &offset = Vector(), const Matrix &offsetRotation = Matrix());
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -460,7 +469,7 @@ ENTITYALLOCATION(AtomGroup)
 //                  The rotation of the updated atoms around the above offset.
 // Return value:    Whether any atoms of that group was found and updated.
 
-    bool UpdateSubAtoms(int subID = 0, const Vector &newOffset = Vector(), const Matrix& newOffsetRotation = Matrix());
+    bool UpdateSubAtoms(long int subID = 0, const Vector &newOffset = Vector(), const Matrix& newOffsetRotation = Matrix());
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -470,18 +479,7 @@ ENTITYALLOCATION(AtomGroup)
 // Arguments:       The ID of the subgroup of atoms to remove.
 // Return value:    Whether any Atoms of that subgroup ID were found and removed.
 
-    bool RemoveAtoms(int removeID);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAllButAtoms
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes all atoms of a specific subgroup ID from this AtomGroup that
-//                  don't match a specific subgroup ID.
-// Arguments:       The ID of the subgroup of atoms to not remove.
-// Return value:    Whether any Atoms of not that ID were found and removed.
-
-    bool RemoveAllButAtoms(int removeAllButID);
+    bool RemoveAtoms(long int removeID);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -733,7 +731,7 @@ private:
     // List of Atoms that constitute the group. Owned by this
     std::list<Atom *> m_Atoms;
     // Sub groupings of atoms, not owned in here. Point to atoms owned in m_Atoms.
-    std::map<int, std::list<Atom *> > m_SubGroups;
+	std::unordered_map<long int, std::list<Atom *> > m_SubGroups;
     // Moment of Inertia for this AtomGroup
     float m_MomInertia;
     // The owner of this AtomGroup. The owner is obviously not owned by this AtomGroup.

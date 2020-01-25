@@ -591,8 +591,6 @@ struct SLDrawBox
 
 void SceneLayer::Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride) const
 {
-    SLICK_PROFILE(0xFF687233);
-
     DAssert(m_pMainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
 
     int sourceX = 0;
@@ -749,8 +747,6 @@ void SceneLayer::Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrol
 
 void SceneLayer::DrawScaled(BITMAP *pTargetBitmap, Box &targetBox, const Vector &scrollOverride) const
 {
-    SLICK_PROFILE(0xFF687233);
-
     // If no scaling, use the regular scaling routine
     if (m_ScaleFactor.m_X == 1.0 && m_ScaleFactor.m_Y == 1.0)
         return Draw(pTargetBitmap, targetBox, scrollOverride);

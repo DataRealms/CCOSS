@@ -283,11 +283,6 @@ MovableObject * Turret::SwapMountedMO(MovableObject *newMO)
 
 void Turret::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
-    Detach();
-
-// Weird to drop a fixed mount
-//    DropEverything();
-
     Attachable::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }
 

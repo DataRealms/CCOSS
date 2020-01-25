@@ -328,8 +328,6 @@ void AssemblyEditorGUI::SetForeignCostMultiplier(float newMultiplier)
 
 bool AssemblyEditorGUI::TestBrainResidence(bool noBrainIsOK)
 {
-    SLICK_PROFILE(0xFF343526);
-
 	// Brain is fine, leave it be
     return false;
 }

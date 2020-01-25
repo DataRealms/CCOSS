@@ -1458,8 +1458,6 @@ void Activity::End()
 
 void Activity::Update()
 {
-    SLICK_PROFILE(0xFF343526);
-
     ///////////////////////////////////////////
     // Iterate through all human players
 
@@ -1875,8 +1873,6 @@ void ActivityMan::EndActivity()
 
 void ActivityMan::Update()
 {
-    SLICK_PROFILE(0xFF879355);
-
     if (m_pActivity)
         m_pActivity->Update();
 }

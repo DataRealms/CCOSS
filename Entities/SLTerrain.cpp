@@ -938,8 +938,6 @@ deque<MOPixel *> SLTerrain::EraseSilhouette(BITMAP *pSprite,
                                             int skipMOP,
                                             int maxMOPs)
 {
-    SLICK_PROFILE(0xFF654842);
-
 // TODO: OPTIMIZE THIS, IT'S A TIME HOG. MAYBE JSUT STAMP THE OUTLINE AND SAMPLE SOME RANDOM PARTICLES?
 
     AAssert(pSprite, "Null BITMAP passed to SLTerrain::EraseSilhouette");
@@ -1585,8 +1583,6 @@ void SLTerrain::CleanAirBox(Box box, bool wrapsX, bool wrapsY)
 
 void SLTerrain::CleanAir()
 {
-    SLICK_PROFILE(0xFF225486);
-
     acquire_bitmap(m_pMainBitmap);
     acquire_bitmap(m_pFGColor->GetBitmap());
 
@@ -1631,8 +1627,6 @@ void SLTerrain::ClearAllMaterial()
 
 void SLTerrain::Update()
 {
-//    SLICK_PROFILE(0xFF336545);
-
     SceneLayer::Update();
 
     m_pFGColor->SetOffset(m_Offset);
@@ -1658,8 +1652,6 @@ void SLTerrain::DrawBackground(BITMAP *pTargetBitmap, Box &targetBox, const Vect
 
 void SLTerrain::Draw(BITMAP *pTargetBitmap, Box &targetBox, const Vector &scrollOverride) const
 {
-//    SLICK_PROFILE(0xFF212443);
-
     if (m_DrawMaterial)
     {
         SceneLayer::Draw(pTargetBitmap, targetBox, scrollOverride);

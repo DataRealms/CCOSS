@@ -363,7 +363,7 @@ ENTITYALLOCATION(AHuman)
 	/// Gets the FG foot attachable of this.
 	/// </summary>
 	/// <returns>A pointer to the FG foot attachable of this. Ownership is NOT transferred!</returns>
-	Attachable * GetFGFoot() const { return m_pFGLeg->GetFoot(); }
+	Attachable * GetFGFoot() const { if (m_pFGLeg) { return m_pFGLeg->GetFoot(); } else { return nullptr; } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -380,7 +380,7 @@ ENTITYALLOCATION(AHuman)
 	/// Gets the BG foot attachable of this.
 	/// </summary>
 	/// <returns>A pointer to the BG foot attachable of this. Ownership is NOT transferred!</returns>
-	Attachable * GetBGFoot() const { return m_pBGLeg->GetFoot(); }
+	Attachable * GetBGFoot() const { if (m_pBGLeg) { return m_pBGLeg->GetFoot(); } else { return nullptr; } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

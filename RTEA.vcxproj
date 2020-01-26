@@ -57,7 +57,7 @@
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">..\Cortex-Command-Community-Project-Data\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">..\CCCP Data\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">..\Cortex-Command-Community-Project-Data\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">_Bin\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">_Bin\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">true</LinkIncremental>

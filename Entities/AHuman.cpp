@@ -4726,7 +4726,7 @@ void AHuman::Draw(BITMAP *pTargetBitmap,
             m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
     }
     
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
     if (mode == g_DrawDebug)
     {
         // Limbpath debug drawing
@@ -4753,7 +4753,7 @@ void AHuman::Draw(BITMAP *pTargetBitmap,
         m_pFGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
-#endif // _DEBUG
+#endif
 }
 
 
@@ -4782,7 +4782,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
     // Limbpath debug drawing
     m_Paths[FGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
     m_Paths[FGROUND][CRAWL].Draw(pTargetBitmap, targetPos, 122);
@@ -4813,7 +4813,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     // Raidus
 //    waypoint = m_Pos - targetPos;
 //    circle(pTargetBitmap, waypoint.m_X, waypoint.m_Y, m_MoveProximityLimit, g_RedColor);  
-#endif // _DEBUG
+#endif
 
     // Player AI drawing
 
@@ -5036,7 +5036,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     }
 
     // AI mode state debugging
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
 
     AllegroBitmap allegroBitmap(pTargetBitmap);
     Vector drawPos = m_Pos - targetPos;
@@ -5098,7 +5098,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
-#endif // _DEBUG
+#endif
 
 }
 

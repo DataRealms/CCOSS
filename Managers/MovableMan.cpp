@@ -1140,14 +1140,14 @@ bool MovableMan::RemoveParticle(MovableObject *pMOToRem)
 
 bool MovableMan::ValidateMOIDs()
 {
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
     float test;
     for (vector<MovableObject *>::iterator itr = m_MOIDIndex.begin(); itr != m_MOIDIndex.end(); ++itr)
     {
         if (*itr)
             test = (*itr)->GetGoldValue();
     }
-#endif _DEBUG
+#endif
     return true;
 }
 
@@ -1776,11 +1776,6 @@ void MovableMan::Update()
             }
         }
 		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
-
-    // TOD0: TEMP REMOVE!
-#ifdef _DEBUG
-//        ValidateMOIDs();
-#endif _DEBUG
 
         // Items
         {

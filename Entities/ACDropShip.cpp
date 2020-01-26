@@ -1184,7 +1184,7 @@ void ACDropShip::Draw(BITMAP *pTargetBitmap,
 
     if (mode == g_DrawColor)
     {
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
         acquire_bitmap(pTargetBitmap);
         putpixel(pTargetBitmap, floorf(m_Pos.m_X),
                               floorf(m_Pos.m_Y),
@@ -1196,7 +1196,7 @@ void ACDropShip::Draw(BITMAP *pTargetBitmap,
 
         m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
 //        m_pDeepGroup->Draw(pTargetBitmap, targetPos, false, 13);
-#endif // _DEBUG
+#endif
     }
 }
 

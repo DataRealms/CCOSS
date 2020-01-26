@@ -167,10 +167,8 @@ int ConsoleMan::Save(Writer &writer) const
 
 void ConsoleMan::Destroy()
 {
-//#ifdef _DEBUG
     // Dump out the text in the console
     SaveAllText("LogConsole.txt");
-//#endif // _DEBUG
 
     delete m_pGUIController;
     delete m_pGUIInput;

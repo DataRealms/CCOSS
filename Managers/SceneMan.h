@@ -517,7 +517,7 @@ public:
 // Method:          GetDebugBitmap
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the bitmap of the SceneLayer that debug graphics is drawn onto.
-//                  Will only return valid BITMAP if building with _DEBUG.
+//                  Will only return valid BITMAP if building with DEBUG_BUILD.
 // Arguments:       None.
 // Return value:    A BITMAP pointer to the debug bitmap. Ownership is NOT transferred!
 

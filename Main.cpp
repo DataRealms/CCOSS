@@ -2735,10 +2735,10 @@ int main(int argc, char *argv[])
 	SteamAPI_Shutdown();
 #endif
 
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
     // Dump out the info about how well memory cleanup went
     Entity::ClassInfo::DumpPoolMemoryInfo(Writer("MemCleanupInfo.txt"));
-#endif // _DEBUG
+#endif
 
 #if defined(__APPLE__)
 	OsxUtil::Destroy();

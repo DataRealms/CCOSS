@@ -2135,7 +2135,7 @@ void FrameMan::Draw()
         set_clip_state(pDrawScreen, 1);
 
 		//Always draw seam in debug mode
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
 		//DrawLinePrimitive(Vector(0,0),Vector(0,g_SceneMan.GetSceneHeight()), 5);
 #endif
 

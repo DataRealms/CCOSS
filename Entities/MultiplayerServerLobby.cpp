@@ -1116,13 +1116,13 @@ namespace RTE
 				m_pActivitySelect->AddItem(pActivity->GetPresetName(), "", 0, pActivity);
 
 				// Save the tutorial mission so we can select it by default
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
 				if (pActivity->GetPresetName() == "Network Test Activity")
 					skirmishIndex = index;
 #else
 				if (pActivity->GetPresetName() == "Skirmish Defense")
 					skirmishIndex = index;
-#endif // DEBUG
+#endif
 				index++;
 			}
 		}

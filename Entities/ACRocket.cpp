@@ -1252,7 +1252,7 @@ void ACRocket::Draw(BITMAP *pTargetBitmap,
         m_pCapsule->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 */
     if (mode == g_DrawColor) {
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
         acquire_bitmap(pTargetBitmap);
         putpixel(pTargetBitmap, floorf(m_Pos.m_X),
                               floorf(m_Pos.m_Y),
@@ -1266,7 +1266,7 @@ void ACRocket::Draw(BITMAP *pTargetBitmap,
         m_pLFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
 //        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
 //        m_pDeepGroup->Draw(pTargetBitmap, targetPos, false, 13);
-#endif // _DEBUG
+#endif
 //        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false);
 //        m_pFGFootGroup->Draw(pTargetBitmap, targetPos, true);
 //        m_pBGFootGroup->Draw(pTargetBitmap, targetPos, true);

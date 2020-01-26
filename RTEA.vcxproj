@@ -9,6 +9,10 @@
       <Configuration>Final Open Source</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Minimal Debug Open Source|Win32">
+      <Configuration>Minimal Debug Open Source</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}</ProjectGuid>
@@ -29,6 +33,11 @@
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -40,14 +49,23 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">..\Cortex-Command-Community-Project-Data\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">..\CCCP Data\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">_Bin\$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">_Bin\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">true</GenerateManifest>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">true</GenerateManifest>
     <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">false</EmbedManifest>
+    <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">false</EmbedManifest>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">..\Cortex-Command-Community-Project-Data\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">_Bin\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">false</LinkIncremental>
@@ -55,6 +73,7 @@
     <EmbedManifest Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">false</EmbedManifest>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">Cortex Command</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">Cortex Command.debug</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">Cortex Command.debug.minimal</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Open Source|Win32'">
     <ClCompile>
@@ -78,6 +97,39 @@
     <Link>
       <AdditionalDependencies>lua5.1.x86.debug.lib;luabind.x86.debug.lib;ws2_32.lib;libcurl.lib;zlibwapi.lib;alld_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;libboost_thread-vc141-mt-gd-x32-1_69.lib;libboost_date_time-vc141-mt-gd-x32-1_69.lib;libboost_system-vc141-mt-gd-x32-1_69.lib;libboost_chrono-vc141-mt-gd-x32-1_69.lib;gorillaD.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.debug.exe</OutputFile>
+      <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>_Bin\$(Configuration)\RTEA.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <LinkTimeCodeGeneration>
+      </LinkTimeCodeGeneration>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <ShowProgress>LinkVerbose</ShowProgress>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\steam;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;MIN_DEBUG_BUILD;_WINDOWS;DEBUGMODE;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER_OFF;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level1</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4312;4311;4786;4503;4800;4244;4204;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ForcedIncludeFiles>%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>lua5.1.x86.debug.lib;luabind.x86.debug.lib;ws2_32.lib;libcurl.lib;zlibwapi.lib;alld_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;libboost_thread-vc141-mt-gd-x32-1_69.lib;libboost_date_time-vc141-mt-gd-x32-1_69.lib;libboost_system-vc141-mt-gd-x32-1_69.lib;libboost_chrono-vc141-mt-gd-x32-1_69.lib;gorillaD.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)Cortex Command.debug.minimal.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>_Bin\$(Configuration)\RTEA.pdb</ProgramDatabaseFile>

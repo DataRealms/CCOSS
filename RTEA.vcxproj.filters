@@ -25,9 +25,6 @@
     <Filter Include="Entities">
       <UniqueIdentifier>{937bb94c-5106-4040-acad-0614d72cd11b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Entities\Activities">
-      <UniqueIdentifier>{4d361173-4982-4e1b-8967-8ab53105dc7f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Menus">
       <UniqueIdentifier>{51f0c24a-295f-46b9-bf3a-c589a2c258b5}</UniqueIdentifier>
     </Filter>
@@ -36,6 +33,9 @@
     </Filter>
     <Filter Include="System\LZ4">
       <UniqueIdentifier>{fc693771-7e01-473d-aa69-fce744a0bdc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Activities">
+      <UniqueIdentifier>{4d361173-4982-4e1b-8967-8ab53105dc7f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -420,41 +420,41 @@
     <ClInclude Include="Entities\Turret.h">
       <Filter>Entities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\ActorEditor.h">
-      <Filter>Entities\Activities</Filter>
+    <ClInclude Include="Activities\ActorEditor.h">
+      <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\AreaEditor.h">
-      <Filter>Entities\Activities</Filter>
+    <ClInclude Include="Activities\AreaEditor.h">
+      <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\AssemblyEditor.h">
-      <Filter>Entities\Activities</Filter>
+    <ClInclude Include="Activities\AssemblyEditor.h">
+      <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\BaseEditor.h">
-      <Filter>Entities\Activities</Filter>
+    <ClInclude Include="Activities\BaseEditor.h">
+      <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\EditorActivity.h">
-      <Filter>Entities\Activities</Filter>
+    <ClInclude Include="Activities\EditorActivity.h">
+      <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\GABaseDefense.h">
-      <Filter>Entities\Activities</Filter>
+    <ClInclude Include="Activities\GABaseDefense.h">
+      <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\GABrainMatch.h">
-      <Filter>Entities\Activities</Filter>
+    <ClInclude Include="Activities\GABrainMatch.h">
+      <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\GameActivity.h">
-      <Filter>Entities\Activities</Filter>
+    <ClInclude Include="Activities\GameActivity.h">
+      <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\GAScripted.h">
-      <Filter>Entities\Activities</Filter>
+    <ClInclude Include="Activities\GAScripted.h">
+      <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\GATutorial.h">
-      <Filter>Entities\Activities</Filter>
+    <ClInclude Include="Activities\GATutorial.h">
+      <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\GibEditor.h">
-      <Filter>Entities\Activities</Filter>
+    <ClInclude Include="Activities\GibEditor.h">
+      <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\SceneEditor.h">
-      <Filter>Entities\Activities</Filter>
+    <ClInclude Include="Activities\SceneEditor.h">
+      <Filter>Activities</Filter>
     </ClInclude>
     <ClInclude Include="Menus\AreaEditorGUI.h">
       <Filter>Menus</Filter>
@@ -966,20 +966,20 @@
     <ClInclude Include="Managers\Network.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\MultiplayerGame.h">
-      <Filter>Entities\Activities</Filter>
-    </ClInclude>
     <ClInclude Include="System\LZ4\lz4.h">
       <Filter>System\LZ4</Filter>
     </ClInclude>
     <ClInclude Include="System\LZ4\lz4hc.h">
       <Filter>System\LZ4</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\MultiplayerServerLobby.h">
-      <Filter>Entities\Activities</Filter>
-    </ClInclude>
     <ClInclude Include="Managers\NetworkMessages.h">
       <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Activities\MultiplayerGame.h">
+      <Filter>Activities</Filter>
+    </ClInclude>
+    <ClInclude Include="Activities\MultiplayerServerLobby.h">
+      <Filter>Activities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1366,41 +1366,41 @@
     <ClCompile Include="Entities\Turret.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\ActorEditor.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\ActorEditor.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\AreaEditor.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\AreaEditor.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\AssemblyEditor.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\AssemblyEditor.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\BaseEditor.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\BaseEditor.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\EditorActivity.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\EditorActivity.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\GABaseDefense.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\GABaseDefense.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\GABrainMatch.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\GABrainMatch.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\GameActivity.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\GameActivity.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\GAScripted.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\GAScripted.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\GATutorial.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\GATutorial.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\GibEditor.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\GibEditor.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\SceneEditor.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\SceneEditor.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
     <ClCompile Include="Menus\AreaEditorGUI.cpp">
       <Filter>Menus</Filter>
@@ -1778,17 +1778,17 @@
     <ClCompile Include="Managers\NetworkServer.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\MultiplayerGame.cpp">
-      <Filter>Entities\Activities</Filter>
-    </ClCompile>
     <ClCompile Include="System\LZ4\lz4.c">
       <Filter>System\LZ4</Filter>
     </ClCompile>
     <ClCompile Include="System\LZ4\lz4hc.c">
       <Filter>System\LZ4</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\MultiplayerServerLobby.cpp">
-      <Filter>Entities\Activities</Filter>
+    <ClCompile Include="Activities\MultiplayerGame.cpp">
+      <Filter>Activities</Filter>
+    </ClCompile>
+    <ClCompile Include="Activities\MultiplayerServerLobby.cpp">
+      <Filter>Activities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

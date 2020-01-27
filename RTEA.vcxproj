@@ -79,7 +79,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;DEBUG_BUILD;_WINDOWS;DEBUGMODE;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER_OFF;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -121,7 +121,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;MIN_DEBUG_BUILD;_WINDOWS;DEBUGMODE;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER_OFF;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -166,7 +166,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>FINALRELASE;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER_OFF;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -219,8 +219,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entities\Emission.h" />
-    <ClInclude Include="Entities\MultiplayerGame.h" />
-    <ClInclude Include="Entities\MultiplayerServerLobby.h" />
     <ClInclude Include="Entities\PEmitter.h" />
     <ClInclude Include="external\sources\RakNet\AutopatcherPatchContext.h" />
     <ClInclude Include="external\sources\RakNet\AutopatcherRepositoryInterface.h" />
@@ -504,18 +502,20 @@
     <ClInclude Include="Entities\TerrainObject.h" />
     <ClInclude Include="Entities\ThrownDevice.h" />
     <ClInclude Include="Entities\Turret.h" />
-    <ClInclude Include="Entities\ActorEditor.h" />
-    <ClInclude Include="Entities\AreaEditor.h" />
-    <ClInclude Include="Entities\AssemblyEditor.h" />
-    <ClInclude Include="Entities\BaseEditor.h" />
-    <ClInclude Include="Entities\EditorActivity.h" />
-    <ClInclude Include="Entities\GABaseDefense.h" />
-    <ClInclude Include="Entities\GABrainMatch.h" />
-    <ClInclude Include="Entities\GameActivity.h" />
-    <ClInclude Include="Entities\GAScripted.h" />
-    <ClInclude Include="Entities\GATutorial.h" />
-    <ClInclude Include="Entities\GibEditor.h" />
-    <ClInclude Include="Entities\SceneEditor.h" />
+    <ClInclude Include="Activities\ActorEditor.h" />
+    <ClInclude Include="Activities\AreaEditor.h" />
+    <ClInclude Include="Activities\AssemblyEditor.h" />
+    <ClInclude Include="Activities\BaseEditor.h" />
+    <ClInclude Include="Activities\EditorActivity.h" />
+    <ClInclude Include="Activities\GABaseDefense.h" />
+    <ClInclude Include="Activities\GABrainMatch.h" />
+    <ClInclude Include="Activities\GameActivity.h" />
+    <ClInclude Include="Activities\GAScripted.h" />
+    <ClInclude Include="Activities\GATutorial.h" />
+    <ClInclude Include="Activities\GibEditor.h" />
+    <ClInclude Include="Activities\MultiplayerGame.h" />
+    <ClInclude Include="Activities\MultiplayerServerLobby.h" />
+    <ClInclude Include="Activities\SceneEditor.h" />
     <ClInclude Include="Menus\AreaEditorGUI.h" />
     <ClInclude Include="Menus\AreaPickerGUI.h" />
     <ClInclude Include="Menus\AssemblyEditorGUI.h" />
@@ -533,8 +533,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Entities\Emission.cpp" />
-    <ClCompile Include="Entities\MultiplayerGame.cpp" />
-    <ClCompile Include="Entities\MultiplayerServerLobby.cpp" />
     <ClCompile Include="Entities\PEmitter.cpp" />
     <ClCompile Include="external\sources\RakNet\Base64Encoder.cpp" />
     <ClCompile Include="external\sources\RakNet\BitStream.cpp" />
@@ -776,18 +774,20 @@
     <ClCompile Include="Entities\TerrainObject.cpp" />
     <ClCompile Include="Entities\ThrownDevice.cpp" />
     <ClCompile Include="Entities\Turret.cpp" />
-    <ClCompile Include="Entities\ActorEditor.cpp" />
-    <ClCompile Include="Entities\AreaEditor.cpp" />
-    <ClCompile Include="Entities\AssemblyEditor.cpp" />
-    <ClCompile Include="Entities\BaseEditor.cpp" />
-    <ClCompile Include="Entities\EditorActivity.cpp" />
-    <ClCompile Include="Entities\GABaseDefense.cpp" />
-    <ClCompile Include="Entities\GABrainMatch.cpp" />
-    <ClCompile Include="Entities\GameActivity.cpp" />
-    <ClCompile Include="Entities\GAScripted.cpp" />
-    <ClCompile Include="Entities\GATutorial.cpp" />
-    <ClCompile Include="Entities\GibEditor.cpp" />
-    <ClCompile Include="Entities\SceneEditor.cpp" />
+    <ClCompile Include="Activities\ActorEditor.cpp" />
+    <ClCompile Include="Activities\AreaEditor.cpp" />
+    <ClCompile Include="Activities\AssemblyEditor.cpp" />
+    <ClCompile Include="Activities\BaseEditor.cpp" />
+    <ClCompile Include="Activities\EditorActivity.cpp" />
+    <ClCompile Include="Activities\GABaseDefense.cpp" />
+    <ClCompile Include="Activities\GABrainMatch.cpp" />
+    <ClCompile Include="Activities\GameActivity.cpp" />
+    <ClCompile Include="Activities\GAScripted.cpp" />
+    <ClCompile Include="Activities\GATutorial.cpp" />
+    <ClCompile Include="Activities\GibEditor.cpp" />
+    <ClCompile Include="Activities\MultiplayerGame.cpp" />
+    <ClCompile Include="Activities\MultiplayerServerLobby.cpp" />
+    <ClCompile Include="Activities\SceneEditor.cpp" />
     <ClCompile Include="Menus\AreaEditorGUI.cpp" />
     <ClCompile Include="Menus\AreaPickerGUI.cpp" />
     <ClCompile Include="Menus\AssemblyEditorGUI.cpp" />

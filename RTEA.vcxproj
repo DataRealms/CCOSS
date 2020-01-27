@@ -79,7 +79,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\steam;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;DEBUG_BUILD;_WINDOWS;DEBUGMODE;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER_OFF;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -107,12 +107,21 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <ShowProgress>LinkVerbose</ShowProgress>
     </Link>
+    <Manifest>
+      <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
+    </Manifest>
+    <Xdcmake>
+      <OutputFile>$(IntDir)$(TargetName).xml</OutputFile>
+    </Xdcmake>
+    <Bscmake>
+      <OutputFile>$(IntDir)$(TargetName).bsc</OutputFile>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\steam;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;MIN_DEBUG_BUILD;_WINDOWS;DEBUGMODE;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER_OFF;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -140,6 +149,15 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <ShowProgress>LinkVerbose</ShowProgress>
     </Link>
+    <Manifest>
+      <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
+    </Manifest>
+    <Xdcmake>
+      <OutputFile>$(IntDir)$(TargetName).xml</OutputFile>
+    </Xdcmake>
+    <Bscmake>
+      <OutputFile>$(IntDir)$(TargetName).bsc</OutputFile>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">
     <ClCompile>
@@ -148,7 +166,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\steam;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\luabind\2017;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\sources\RakNet;$(ProjectDir)System\LZ4;$(ProjectDir)external\include\SDL;$(ProjectDir)external\include\SDL_mixer</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>FINALRELASE;WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ZLIB_WINAPI;__USE_SOUND_SDLMIXER_OFF;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -182,68 +200,18 @@
       <FixedBaseAddress>false</FixedBaseAddress>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
+    <Manifest>
+      <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
+    </Manifest>
+    <Xdcmake>
+      <OutputFile>$(IntDir)$(TargetName).xml</OutputFile>
+    </Xdcmake>
+    <Bscmake>
+      <OutputFile>$(IntDir)$(TargetName).bsc</OutputFile>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="ccicon.ico" />
-    <None Include="Base.rte\Activities.ini" />
-    <None Include="Base.rte\AllegroConfig.txt" />
-    <None Include="Base.rte\Index.ini" />
-    <None Include="Base.rte\Materials.ini" />
-    <None Include="Base.rte\Scenes.ini" />
-    <None Include="Base.rte\Settings.ini" />
-    <None Include="Base.rte\Sounds.ini" />
-    <None Include="Base.rte\Terrains.ini" />
-    <None Include="Base.rte\GUIs\AreaEditorGUI.ini" />
-    <None Include="Base.rte\GUIs\AreaPickerGUI.ini" />
-    <None Include="Base.rte\GUIs\BuyMenuGUI.ini" />
-    <None Include="Base.rte\GUIs\ConsoleGUI.ini" />
-    <None Include="Base.rte\GUIs\GibEditorGUI.ini" />
-    <None Include="Base.rte\GUIs\LoadingGUI.ini" />
-    <None Include="Base.rte\GUIs\MainMenuGUI.ini" />
-    <None Include="Base.rte\GUIs\MetagameGUI.ini" />
-    <None Include="Base.rte\GUIs\ObjectPickerGUI.ini" />
-    <None Include="Base.rte\GUIs\SceneEditorGUI.ini" />
-    <None Include="Base.rte\Effects.ini" />
-    <None Include="Base.rte\Effects\Gibs\Gibs.ini" />
-    <None Include="Base.rte\Effects\Pyro\Pyro.ini" />
-    <None Include="Base.rte\Effects\Shards\Shards.ini" />
-    <None Include="Base.rte\Effects\Wounds\Wounds.ini" />
-    <None Include="Base.rte\Actors.ini" />
-    <None Include="Base.rte\Actors\Brains\Brains.ini" />
-    <None Include="Base.rte\Actors\Doors\Doors.ini" />
-    <None Include="Base.rte\Actors\DropShips\DropShips.ini" />
-    <None Include="Base.rte\Icons.ini" />
-    <None Include="Base.rte\Actors\Robots\Robots.ini" />
-    <None Include="Base.rte\Actors\Rockets\Rockets.ini" />
-    <None Include="Base.rte\Actors\Rockets\RocketsNew.ini" />
-    <None Include="Base.rte\Actors\Skeletons\Skeletons.ini" />
-    <None Include="Base.rte\Actors\Coalition\Soldier.ini" />
-    <None Include="Base.rte\Actors\Wildlife\Wildlife.ini" />
-    <None Include="Base.rte\Actors\Zombies\Zombies.ini" />
-    <None Include="Base.rte\Actors\Dummies\Dreadnought.ini" />
-    <None Include="Base.rte\Actors\Dummies\Dropship.ini" />
-    <None Include="Base.rte\Actors\Dummies\Dummies.ini" />
-    <None Include="Base.rte\Actors\Dummies\Dummy\Dummy.ini" />
-    <None Include="Base.rte\Ammo.ini" />
-    <None Include="Base.rte\Devices\Artifacts\Artifacts.ini" />
-    <None Include="Base.rte\Devices\Cannons\Cannons.ini" />
-    <None Include="Base.rte\Devices.ini" />
-    <None Include="Base.rte\Devices\Diggers\Diggers.ini" />
-    <None Include="Base.rte\Devices\Explosives\Explosives.ini" />
-    <None Include="Base.rte\Devices\Pistols\Pistols.ini" />
-    <None Include="Base.rte\Devices\Rifles\Rifles.ini" />
-    <None Include="Base.rte\Devices\Shields\Shields.ini" />
-    <None Include="Base.rte\Devices\Shotguns\Shotguns.ini" />
-    <None Include="Base.rte\Devices\SMGs\SMGs.ini" />
-    <None Include="Base.rte\Devices\Sprayers\Sprayers.ini" />
-    <None Include="Base.rte\Scenes\Objects\BunkerModules\BunkerModules.ini" />
-    <None Include="Base.rte\Scenes\Editor.ini" />
-    <None Include="Base.rte\Scenes\Grasslands.ini" />
-    <None Include="Base.rte\Scenes\HorizLand.ini" />
-    <None Include="Base.rte\Scenes\Physics Test.ini" />
-    <None Include="Base.rte\Scenes\Tutorial Mission.ini" />
-    <None Include="Base.rte\Scenes\Tutorial.ini" />
-    <None Include="Base.rte\Scenes\Scripts\TestScript.lua" />
     <None Include="cpp.hint" />
     <None Include="external\sources\RakNet\RakNet.vcproj" />
     <None Include="external\sources\RakNet\RakNet_vc8.vcproj" />
@@ -414,7 +382,6 @@
     <ClInclude Include="Managers\NetworkServer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="System\Box.h" />
-    <ClInclude Include="System\cctypes.h" />
     <ClInclude Include="System\Color.h" />
     <ClInclude Include="System\ContentFile.h" />
     <ClInclude Include="Entities\Controller.h" />
@@ -428,7 +395,6 @@
     <ClInclude Include="System\Reader.h" />
     <ClInclude Include="System\Serializable.h" />
     <ClInclude Include="System\Singleton.h" />
-    <ClInclude Include="System\snprintf.h" />
     <ClInclude Include="System\StdString.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="System\Timer.h" />
@@ -447,37 +413,6 @@
     <ClInclude Include="System\InterGif\utils.h" />
     <ClInclude Include="System\InterGif\workspace.h" />
     <ClInclude Include="System\MD5\md5.h" />
-    <ClInclude Include="System\Steam\include\isteamapps.h" />
-    <ClInclude Include="System\Steam\include\isteamappticket.h" />
-    <ClInclude Include="System\Steam\include\isteamclient.h" />
-    <ClInclude Include="System\Steam\include\isteamcontroller.h" />
-    <ClInclude Include="System\Steam\include\isteamfriends.h" />
-    <ClInclude Include="System\Steam\include\isteamgamecoordinator.h" />
-    <ClInclude Include="System\Steam\include\isteamgameserver.h" />
-    <ClInclude Include="System\Steam\include\isteamgameserverstats.h" />
-    <ClInclude Include="System\Steam\include\isteamhttp.h" />
-    <ClInclude Include="System\Steam\include\isteammasterserverupdater.h" />
-    <ClInclude Include="System\Steam\include\isteammatchmaking.h" />
-    <ClInclude Include="System\Steam\include\isteamnetworking.h" />
-    <ClInclude Include="System\Steam\include\isteamps3overlayrenderer.h" />
-    <ClInclude Include="System\Steam\include\isteamremotestorage.h" />
-    <ClInclude Include="System\Steam\include\isteamscreenshots.h" />
-    <ClInclude Include="System\Steam\include\isteamugc.h" />
-    <ClInclude Include="System\Steam\include\isteamunifiedmessages.h" />
-    <ClInclude Include="System\Steam\include\isteamuser.h" />
-    <ClInclude Include="System\Steam\include\isteamuserstats.h" />
-    <ClInclude Include="System\Steam\include\isteamutils.h" />
-    <ClInclude Include="System\Steam\include\matchmakingtypes.h" />
-    <ClInclude Include="System\Steam\include\steam_api.h" />
-    <ClInclude Include="System\Steam\include\steam_gameserver.h" />
-    <ClInclude Include="System\Steam\include\steamclientpublic.h" />
-    <ClInclude Include="System\Steam\include\steamcontrollerpublic.h" />
-    <ClInclude Include="System\Steam\include\steamencryptedappticket.h" />
-    <ClInclude Include="System\Steam\include\steamhttpenums.h" />
-    <ClInclude Include="System\Steam\include\steamps3params.h" />
-    <ClInclude Include="System\Steam\include\steamtypes.h" />
-    <ClInclude Include="System\Steam\include\steamuniverse.h" />
-    <ClInclude Include="System\Steam\include\steamvr.h" />
     <ClInclude Include="Managers\AchievementMan.h" />
     <ClInclude Include="Managers\ActivityMan.h" />
     <ClInclude Include="Managers\AudioMan.h" />

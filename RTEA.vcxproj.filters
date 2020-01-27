@@ -16,44 +16,11 @@
     <Filter Include="System\MD5">
       <UniqueIdentifier>{2895a2d1-cae8-4fa4-9ad8-40f708b86d00}</UniqueIdentifier>
     </Filter>
-    <Filter Include="System\zlib">
-      <UniqueIdentifier>{f4d64d57-80ba-41e4-ae0e-3ef46091d1ca}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="System\Steam">
-      <UniqueIdentifier>{a0c444e9-e647-4f2d-9b37-af7428658622}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Managers">
       <UniqueIdentifier>{777a2010-7ae7-41e7-8d10-1a3d2e6b3001}</UniqueIdentifier>
     </Filter>
     <Filter Include="GUI">
       <UniqueIdentifier>{2f4c4852-44a1-459f-8666-e8c263c47196}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Data">
-      <UniqueIdentifier>{e87fda88-9211-40d4-a442-b58129d8edfc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Data\Base.rte">
-      <UniqueIdentifier>{4b85e997-3fa5-4090-afbb-aa211dd436b3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Data\Base.rte\GUIs">
-      <UniqueIdentifier>{12826bbe-87f2-4a3e-9225-d88231c3663b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Data\Base.rte\Effects">
-      <UniqueIdentifier>{54c4b009-41db-4082-9af7-b9d0b41811ad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Data\Base.rte\Actors">
-      <UniqueIdentifier>{bc7b9060-e96f-44ae-87a1-89f0c562caf3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Data\Base.rte\Actors\Dummies">
-      <UniqueIdentifier>{53e1c2b4-9f1c-4ac2-af8a-f3e10a5d525b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Data\Base.rte\Devices">
-      <UniqueIdentifier>{d941543b-a28e-464c-a138-63278650b1ce}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Data\Base.rte\Scenes">
-      <UniqueIdentifier>{aba35ff6-2f4d-406e-8124-19bb7822fdfa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Data\Base.rte\Scenes\Scripts">
-      <UniqueIdentifier>{249de980-15eb-4532-bd35-68eff5a18f39}</UniqueIdentifier>
     </Filter>
     <Filter Include="Entities">
       <UniqueIdentifier>{937bb94c-5106-4040-acad-0614d72cd11b}</UniqueIdentifier>
@@ -75,183 +42,6 @@
     <None Include="ccicon.ico">
       <Filter>Resources</Filter>
     </None>
-    <None Include="Base.rte\Activities.ini">
-      <Filter>Data\Base.rte</Filter>
-    </None>
-    <None Include="Base.rte\AllegroConfig.txt">
-      <Filter>Data\Base.rte</Filter>
-    </None>
-    <None Include="Base.rte\Index.ini">
-      <Filter>Data\Base.rte</Filter>
-    </None>
-    <None Include="Base.rte\Materials.ini">
-      <Filter>Data\Base.rte</Filter>
-    </None>
-    <None Include="Base.rte\Scenes.ini">
-      <Filter>Data\Base.rte</Filter>
-    </None>
-    <None Include="Base.rte\Settings.ini">
-      <Filter>Data\Base.rte</Filter>
-    </None>
-    <None Include="Base.rte\Sounds.ini">
-      <Filter>Data\Base.rte</Filter>
-    </None>
-    <None Include="Base.rte\Terrains.ini">
-      <Filter>Data\Base.rte</Filter>
-    </None>
-    <None Include="Base.rte\GUIs\AreaEditorGUI.ini">
-      <Filter>Data\Base.rte\GUIs</Filter>
-    </None>
-    <None Include="Base.rte\GUIs\AreaPickerGUI.ini">
-      <Filter>Data\Base.rte\GUIs</Filter>
-    </None>
-    <None Include="Base.rte\GUIs\BuyMenuGUI.ini">
-      <Filter>Data\Base.rte\GUIs</Filter>
-    </None>
-    <None Include="Base.rte\GUIs\ConsoleGUI.ini">
-      <Filter>Data\Base.rte\GUIs</Filter>
-    </None>
-    <None Include="Base.rte\GUIs\GibEditorGUI.ini">
-      <Filter>Data\Base.rte\GUIs</Filter>
-    </None>
-    <None Include="Base.rte\GUIs\LoadingGUI.ini">
-      <Filter>Data\Base.rte\GUIs</Filter>
-    </None>
-    <None Include="Base.rte\GUIs\MainMenuGUI.ini">
-      <Filter>Data\Base.rte\GUIs</Filter>
-    </None>
-    <None Include="Base.rte\GUIs\MetagameGUI.ini">
-      <Filter>Data\Base.rte\GUIs</Filter>
-    </None>
-    <None Include="Base.rte\GUIs\ObjectPickerGUI.ini">
-      <Filter>Data\Base.rte\GUIs</Filter>
-    </None>
-    <None Include="Base.rte\GUIs\SceneEditorGUI.ini">
-      <Filter>Data\Base.rte\GUIs</Filter>
-    </None>
-    <None Include="Base.rte\Effects.ini">
-      <Filter>Data\Base.rte\Effects</Filter>
-    </None>
-    <None Include="Base.rte\Effects\Gibs\Gibs.ini">
-      <Filter>Data\Base.rte\Effects</Filter>
-    </None>
-    <None Include="Base.rte\Effects\Pyro\Pyro.ini">
-      <Filter>Data\Base.rte\Effects</Filter>
-    </None>
-    <None Include="Base.rte\Effects\Shards\Shards.ini">
-      <Filter>Data\Base.rte\Effects</Filter>
-    </None>
-    <None Include="Base.rte\Effects\Wounds\Wounds.ini">
-      <Filter>Data\Base.rte\Effects</Filter>
-    </None>
-    <None Include="Base.rte\Actors.ini">
-      <Filter>Data\Base.rte\Actors</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Brains\Brains.ini">
-      <Filter>Data\Base.rte\Actors</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Doors\Doors.ini">
-      <Filter>Data\Base.rte\Actors</Filter>
-    </None>
-    <None Include="Base.rte\Actors\DropShips\DropShips.ini">
-      <Filter>Data\Base.rte\Actors</Filter>
-    </None>
-    <None Include="Base.rte\Icons.ini">
-      <Filter>Data\Base.rte\Actors</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Robots\Robots.ini">
-      <Filter>Data\Base.rte\Actors</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Rockets\Rockets.ini">
-      <Filter>Data\Base.rte\Actors</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Rockets\RocketsNew.ini">
-      <Filter>Data\Base.rte\Actors</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Skeletons\Skeletons.ini">
-      <Filter>Data\Base.rte\Actors</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Coalition\Soldier.ini">
-      <Filter>Data\Base.rte\Actors</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Wildlife\Wildlife.ini">
-      <Filter>Data\Base.rte\Actors</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Zombies\Zombies.ini">
-      <Filter>Data\Base.rte\Actors</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Dummies\Dreadnought.ini">
-      <Filter>Data\Base.rte\Actors\Dummies</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Dummies\Dropship.ini">
-      <Filter>Data\Base.rte\Actors\Dummies</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Dummies\Dummies.ini">
-      <Filter>Data\Base.rte\Actors\Dummies</Filter>
-    </None>
-    <None Include="Base.rte\Actors\Dummies\Dummy\Dummy.ini">
-      <Filter>Data\Base.rte\Actors\Dummies</Filter>
-    </None>
-    <None Include="Base.rte\Ammo.ini">
-      <Filter>Data\Base.rte\Devices</Filter>
-    </None>
-    <None Include="Base.rte\Devices\Artifacts\Artifacts.ini">
-      <Filter>Data\Base.rte\Devices</Filter>
-    </None>
-    <None Include="Base.rte\Devices\Cannons\Cannons.ini">
-      <Filter>Data\Base.rte\Devices</Filter>
-    </None>
-    <None Include="Base.rte\Devices.ini">
-      <Filter>Data\Base.rte\Devices</Filter>
-    </None>
-    <None Include="Base.rte\Devices\Diggers\Diggers.ini">
-      <Filter>Data\Base.rte\Devices</Filter>
-    </None>
-    <None Include="Base.rte\Devices\Explosives\Explosives.ini">
-      <Filter>Data\Base.rte\Devices</Filter>
-    </None>
-    <None Include="Base.rte\Devices\Pistols\Pistols.ini">
-      <Filter>Data\Base.rte\Devices</Filter>
-    </None>
-    <None Include="Base.rte\Devices\Rifles\Rifles.ini">
-      <Filter>Data\Base.rte\Devices</Filter>
-    </None>
-    <None Include="Base.rte\Devices\Shields\Shields.ini">
-      <Filter>Data\Base.rte\Devices</Filter>
-    </None>
-    <None Include="Base.rte\Devices\Shotguns\Shotguns.ini">
-      <Filter>Data\Base.rte\Devices</Filter>
-    </None>
-    <None Include="Base.rte\Devices\SMGs\SMGs.ini">
-      <Filter>Data\Base.rte\Devices</Filter>
-    </None>
-    <None Include="Base.rte\Devices\Sprayers\Sprayers.ini">
-      <Filter>Data\Base.rte\Devices</Filter>
-    </None>
-    <None Include="Base.rte\Scenes\Objects\BunkerModules\BunkerModules.ini">
-      <Filter>Data\Base.rte\Scenes</Filter>
-    </None>
-    <None Include="Base.rte\Scenes\Editor.ini">
-      <Filter>Data\Base.rte\Scenes</Filter>
-    </None>
-    <None Include="Base.rte\Scenes\Grasslands.ini">
-      <Filter>Data\Base.rte\Scenes</Filter>
-    </None>
-    <None Include="Base.rte\Scenes\HorizLand.ini">
-      <Filter>Data\Base.rte\Scenes</Filter>
-    </None>
-    <None Include="Base.rte\Scenes\Physics Test.ini">
-      <Filter>Data\Base.rte\Scenes</Filter>
-    </None>
-    <None Include="Base.rte\Scenes\Tutorial Mission.ini">
-      <Filter>Data\Base.rte\Scenes</Filter>
-    </None>
-    <None Include="Base.rte\Scenes\Tutorial.ini">
-      <Filter>Data\Base.rte\Scenes</Filter>
-    </None>
-    <None Include="Base.rte\Scenes\Scripts\TestScript.lua">
-      <Filter>Data\Base.rte\Scenes\Scripts</Filter>
-    </None>
     <None Include="external\sources\RakNet\RakNet.vcproj">
       <Filter>System\RakNet</Filter>
     </None>
@@ -268,9 +58,6 @@
       <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="System\Box.h">
-      <Filter>System</Filter>
-    </ClInclude>
-    <ClInclude Include="System\cctypes.h">
       <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="System\Color.h">
@@ -304,9 +91,6 @@
       <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="System\Singleton.h">
-      <Filter>System</Filter>
-    </ClInclude>
-    <ClInclude Include="System\snprintf.h">
       <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="System\StdString.h">
@@ -362,99 +146,6 @@
     </ClInclude>
     <ClInclude Include="System\MD5\md5.h">
       <Filter>System\MD5</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamapps.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamappticket.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamclient.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamcontroller.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamfriends.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamgamecoordinator.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamgameserver.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamgameserverstats.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamhttp.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteammasterserverupdater.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteammatchmaking.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamnetworking.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamps3overlayrenderer.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamremotestorage.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamscreenshots.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamugc.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamunifiedmessages.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamuser.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamuserstats.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\isteamutils.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\matchmakingtypes.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\steam_api.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\steam_gameserver.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\steamclientpublic.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\steamcontrollerpublic.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\steamencryptedappticket.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\steamhttpenums.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\steamps3params.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\steamtypes.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\steamuniverse.h">
-      <Filter>System\Steam</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Steam\include\steamvr.h">
-      <Filter>System\Steam</Filter>
     </ClInclude>
     <ClInclude Include="Managers\AchievementMan.h">
       <Filter>Managers</Filter>

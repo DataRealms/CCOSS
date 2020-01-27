@@ -1,8 +1,6 @@
 #include "AchievementMan.h"
 #include "ConsoleMan.h"
 
-#include "snprintf.h" 
-
 using namespace std;
 
 namespace RTE

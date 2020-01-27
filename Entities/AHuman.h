@@ -15,6 +15,7 @@
 // Inclusions of header files
 
 #include "Actor.h"
+#include "Leg.h"
 #include "LimbPath.h"
 #include <deque>
 
@@ -358,6 +359,13 @@ ENTITYALLOCATION(AHuman)
     Attachable * GetFGLeg() const { return (Attachable *)m_pFGLeg; }
 
 
+	/// <summary>
+	/// Gets the FG foot attachable of this.
+	/// </summary>
+	/// <returns>A pointer to the FG foot attachable of this. Ownership is NOT transferred!</returns>
+	Attachable * GetFGFoot() const { if (m_pFGLeg) { return m_pFGLeg->GetFoot(); } else { return nullptr; } }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetBGLeg
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -366,6 +374,13 @@ ENTITYALLOCATION(AHuman)
 // Return value:    A pointer to the BG Leg Attachable of this. Ownership is NOT transferred!
 
     Attachable * GetBGLeg() const { return (Attachable *)m_pBGLeg; }
+
+
+	/// <summary>
+	/// Gets the BG foot attachable of this.
+	/// </summary>
+	/// <returns>A pointer to the BG foot attachable of this. Ownership is NOT transferred!</returns>
+	Attachable * GetBGFoot() const { if (m_pBGLeg) { return m_pBGLeg->GetFoot(); } else { return nullptr; } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-## [0.0.1] - 2020-01-19
+## [0.0.1] - 2020-01-27
 ### Added
 - You can now run the game with command line parameters, including `-h` to see help and `-c` to send ingame console input to cout
 - `MOSprite` now has the `FlipFactor` property that returns -1 if the sprite is flipped and 1 if it's not
@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Attachables can now collide with terrain when attached.  
   Check value: `attachable.IsCollidingWithTerrainWhileAttached`  
   Manipulate value: `attachable:EnableTerrainCollisions(trueOrFalse)`
+- Actor DeathSound is now accessible to lua using `Actor.DeathSound = "string pathToNewFile"`
+- AHuman Feet are now accessible to lua using `AHuman.FGFoot` and `AHuman.BGFoot`. Interaction with them may be wonky.
+- Streamlined debug process and requirements so old Visual C++ Express edition is no longer needed for debugging.
+- Added minimal debug configuration for quicker debug builds without visualization.
 
 ### Changed
 - `AimRange` is now split into `UpperLimit` and `LowerLimit`, allowing asymmetric ranges, and allowing crabs' aiming to work with their rotation.
@@ -27,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   Addition: `parent:AddAttachable(attachableToAdd)` or `parent:AddAttachable(attachableToAdd, parentOffsetVector)`  
   Removal: `parent:RemoveAttachable(attachableToRemove)` or `parent:RemoveAttachable(uniqueIdOfAttachableToRemove)`
 - Wounds have been separated internally from emitter attachables. They can now be added with `parent:AddWound(woundEmitterToAdd)`. Removing wounds remains the same as before.
+- Built-in Actor angular velocity reduction on death has been lessened.
 
 ### Removed
 - All licensing-related code has been removed since it's no longer needed
@@ -38,6 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - BGM now loops properly
 - Sound pitching now respects sounds that are not supposed to be affected by pitch
 - Using `actor:Clone()` now works properly, there are no longer issues with controlling/selecting cloned actors
+- TDExplosive ActivatesWhenReleased now works properly
 - Various bug fixed related to all the Attachable and Emitter changes, so they can now me affected reliably and safely with lua
 - Various minor other things that have gotten lost in the shuffle
 

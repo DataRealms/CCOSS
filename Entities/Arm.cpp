@@ -651,13 +651,13 @@ void Arm::Draw(BITMAP *pTargetBitmap,
     if (m_pHeldMO && ((!m_pHeldMO->IsHeldDevice() && !m_pHeldMO->IsThrownDevice()) || m_pHeldMO->IsDrawnAfterParent()))
         m_pHeldMO->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 /*
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
     if (m_PresetName == "Player BG Arm") {
         char str[64];
         sprintf(str, "m_Pos in draw: %f, %f", m_Pos.m_X, m_Pos.m_Y);
         g_FrameMan.DrawText(pTargetBitmap, str, m_Pos + Vector(4, -80), false);
     }
-#endif // _DEBUG
+#endif
 */
 }
 
@@ -684,13 +684,13 @@ void Arm::DrawHand(BITMAP *pTargetBitmap,
     else
         draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.m_X, handPos.m_Y);
 /*
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
     if (m_PresetName == "Player BG Arm") {
         char str[64];
         sprintf(str, "HandPos in hand draw: %f, %f", handPos.m_X, handPos.m_Y);
         g_FrameMan.DrawText(pTargetBitmap, str, handPos + Vector(4, -40), false);
     }
-#endif // _DEBUG
+#endif
 */
 }
 

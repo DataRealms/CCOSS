@@ -70,10 +70,10 @@ namespace RTE
 		}
 		ns->SetThreadExitReason(player, NetworkServer::THREAD_FINISH);
 
-//#ifdef _DEBUG
+//#ifdef DEBUG_BUILD
 		// Not thread safe at all to do this, just for debugging purposes
 		//g_ConsoleMan.PrintString("Thread exited " + player);
-//#endif // _DEBUG
+//#endif
 
 	}
 

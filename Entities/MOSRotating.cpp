@@ -1611,7 +1611,7 @@ void MOSRotating::PostTravel()
 void MOSRotating::Update()
 {
 
-#ifdef _DEBUG
+#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
 	DAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
 #endif
 

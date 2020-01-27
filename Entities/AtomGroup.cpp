@@ -1122,10 +1122,10 @@ float AtomGroup::Travel(Vector &position,
 //                        hitData.resImpulse[HITOR] = -hitData.hitVel[HITOR];
                 }
             }
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
             // Draw the positions of the atoms at the start of each segment, for visual debugging.
             putpixel(g_SceneMan.GetMOColorBitmap(), (*aItr)->GetCurrentPos().m_X, (*aItr)->GetCurrentPos().m_Y, 122);
-#endif //_DEBUG
+#endif
         }
 
         // Compute and scale the actual on-screen travel trajectory of the origin of thid AtomGroup
@@ -1252,13 +1252,13 @@ float AtomGroup::Travel(Vector &position,
 //                  else
 //                      DDTAbort("Atom reported hit to AtomGroup, but then reported neither MO or Terr hit!");
 
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
                     Vector tPos = (*aItr)->GetCurrentPos();
                     Vector tNorm = m_pOwnerMO->RotateOffset((*aItr)->GetNormal()) * 7;
                     line(g_SceneMan.GetMOColorBitmap(), tPos.m_X, tPos.m_Y, tPos.m_X + tNorm.m_X, tPos.m_Y + tNorm.m_Y, 244);
                     // Draw the positions of the hitpoints on screen for easy debugging.
 //                    putpixel(g_SceneMan.GetMOColorBitmap(), tPos.m_X, tPos.m_Y, 5);
-#endif //_DEBUG
+#endif
                 }
             }
 
@@ -1862,10 +1862,10 @@ before adding them to the MovableMan.
                                                                            intPos[Y] + rotatedOffset.m_Y))
                     hitTerrAtoms.push_back(pair<Atom *, Vector>(*aItr, rotatedOffset));
 /*
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
                 // Draw the positions of the hitpoints on screen for easy debugging.
                 putpixel(g_SceneMan.GetMOColorBitmap(), floorf(position.m_X + rotatedOffset.m_X), floorf(position.m_Y + rotatedOffset.m_Y), 122);
-#endif //_DEBUG
+#endif
 */
             }
 
@@ -2352,10 +2352,10 @@ bool AtomGroup::InTerrain()
         if (g_SceneMan.GetTerrMatter(aPos.m_X, aPos.m_Y) != g_MaterialAir)
             penetrates = true;
 /*
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
         // Draw a dot for each atom for visual reference.
         putpixel(g_SceneMan.GetDebugBitmap(), aPos.m_X, aPos.m_Y, 112);
-#endif //_DEBUG
+#endif
 */
     }
 

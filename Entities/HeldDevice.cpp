@@ -463,13 +463,13 @@ void HeldDevice::Draw(BITMAP *pTargetBitmap,
     }
 */
 /*
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
     if (mode == g_DrawColor && !onlyPhysical)
     {
         m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
         m_pDeepGroup->Draw(pTargetBitmap, targetPos, false, 13);
     }
-#endif // _DEBUG
+#endif
 */
 }
 

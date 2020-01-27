@@ -297,7 +297,7 @@ void Attachable::Detach()
 	// Since it's no longer atteched it should belong to itself
 	m_RootMOID = m_MOID;
 
-#ifdef _DEBUG
+#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
 	DAssert(m_RootMOID == g_NoMOID || (m_RootMOID >= 0 && m_RootMOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
 	DAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
 #endif
@@ -660,13 +660,13 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
     }
 */
 /*
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
         pTargetBitmap->Lock();
         pTargetBitmap->PutPixel(m_Pos.GetFloorIntX() - targetPos.m_X,
                               m_Pos.GetFloorIntY() - targetPos.m_Y,
                               64);
         pTargetBitmap->UnLock();
-#endif // _DEBUG
+#endif
 */
 }
 

@@ -3126,7 +3126,7 @@ void ACrab::Draw(BITMAP *pTargetBitmap,
     if (m_pLFGLeg)
         m_pLFGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
 
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
 //    if (mode == g_DrawDebug)
     if (mode == g_DrawColor && !onlyPhysical)
     {
@@ -3145,7 +3145,7 @@ void ACrab::Draw(BITMAP *pTargetBitmap,
         m_pRFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pRBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
-#endif // _DEBUG
+#endif
 }
 
 

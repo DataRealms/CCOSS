@@ -10,12 +10,15 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug Open Source|Win32 = Debug Open Source|Win32
 		Final Open Source|Win32 = Final Open Source|Win32
+		Minimal Debug Open Source|Win32 = Minimal Debug Open Source|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Open Source|Win32.ActiveCfg = Debug Open Source|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Open Source|Win32.Build.0 = Debug Open Source|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final Open Source|Win32.ActiveCfg = Final Open Source|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final Open Source|Win32.Build.0 = Final Open Source|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Minimal Debug Open Source|Win32.ActiveCfg = Minimal Debug Open Source|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Minimal Debug Open Source|Win32.Build.0 = Minimal Debug Open Source|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

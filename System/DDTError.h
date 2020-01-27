@@ -118,7 +118,7 @@ extern bool DDTAssert(bool expression,
 #endif // WIN32
 
 // Debug-only version of Assert
-#ifdef _DEBUG
+#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
 
     #ifdef WIN32
 

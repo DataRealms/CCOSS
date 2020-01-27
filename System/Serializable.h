@@ -137,9 +137,7 @@ public:
     virtual int ReadProperty(std::string propName, Reader &reader)
     {
         reader.ReadPropValue();
-//#ifdef _DEBUG
         reader.ReportError("Could not match property");
-//#endif //_DEBUG
         return -1;
     }
 

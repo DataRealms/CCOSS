@@ -46,6 +46,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - TDExplosive ActivatesWhenReleased now works properly
 - Various bug fixed related to all the Attachable and Emitter changes, so they can now me affected reliably and safely with lua
 - Various minor other things that have gotten lost in the shuffle
+***
+Note: For a log of changes made prior to the commencement of the open source community project, look [here.](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Previous-Closed-Source-Changelog)
 
 
 [unreleased]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/compare/master...cortex-command-community:development

@@ -75,8 +75,6 @@ enum
 #define MAXSCREENCOUNT 4
 #define SCENEGRIDSIZE 24
 #define SCENESNAPSIZE 12
-#define NUM_PALETTE_ENTRIES 256
-#define MOID_BITMAP_LAYER_DEPTH 16
 #define MAXORPHANRADIUS 11
 
 //////////////////////////////////////////////////////////////////////////////////////////

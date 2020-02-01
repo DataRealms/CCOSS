@@ -981,6 +981,7 @@
     <ClInclude Include="Activities\MultiplayerServerLobby.h">
       <Filter>Activities</Filter>
     </ClInclude>
+    <ClInclude Include="Constants.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RTEA.rc">

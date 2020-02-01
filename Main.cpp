@@ -72,10 +72,6 @@
 #include "NetworkServer.h"
 #include "NetworkClient.h"
 
-#define MAX_FILENAME 512
-#define FILEBUFFER_SIZE 8192
-#define MAX_UNZIPPED_FILE_SIZE 104857600
-
 #if defined(WIN32)
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #endif

@@ -53,27 +53,6 @@ extern bool g_InActivity;
 
 using namespace std;
 
-//#define WHITEGUICOLOR makecol(255, 255, 255)
-//#define YELLOWGUICOLOR makecol(255, 255, 128)
-//#define REDGUICOLOR makecol(255, 100, 100)
-//#define GREENGUICOLOR makecol(128, 255, 128)
-//#define LIGHTBLUEGUICOLOR makecol(109, 117, 170)
-//#define BLUEGUICOLOR makecol(59, 65, 83)
-//#define DARKBLUEGUICOLOR makecol(12, 20, 39)
-
-// Need to redefine to match the palette color also blue colors dont match transformed activity colors
-//#define BLUEGUICOLOR makecol(44, 65, 110) 
-//#define DEFAULTSLOTCOLOR makecol(59, 65, 83)
-#define DEFAULTSLOTCOLOR makecol(161, 109, 20) 
-
-//#define LIGHTBLUEGUICOLOR makecol(101, 166, 231)
-//#define HOVEREDSLOTCOLOR makecol(109, 117, 170)
-#define HOVEREDSLOTCOLOR makecol(203, 130, 56) 
-
-//#define DARKBLUEGUICOLOR makecol(24, 19, 47)
-//#define DISABLEDSLOTCOLOR makecol(12, 20, 39)
-#define DISABLEDSLOTCOLOR makecol(104, 67, 15)
-
 namespace RTE
 {
 	CONCRETECLASSINFO(MultiplayerServerLobby, Activity, 0)

@@ -61,13 +61,6 @@ extern int g_StationOffsetY;
 using namespace std;
 using namespace RTE;
 
-#define WHITEGUICOLOR makecol(255, 255, 255)
-#define YELLOWGUICOLOR makecol(255, 255, 128)
-#define REDGUICOLOR makecol(255, 100, 100)
-#define GREENGUICOLOR makecol(128, 255, 128)
-#define LIGHTBLUEGUICOLOR makecol(109, 117, 170)
-#define BLUEGUICOLOR makecol(59, 65, 83)
-#define DARKBLUEGUICOLOR makecol(12, 20, 39)
 #define CHAMFERSIZE 40
 
 

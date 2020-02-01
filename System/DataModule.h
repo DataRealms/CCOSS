@@ -23,8 +23,6 @@
 struct DATAFILE;
 struct BITMAP;
 
-#define NUM_PALETTE_ENTRIES 256
-
 namespace RTE
 {
 

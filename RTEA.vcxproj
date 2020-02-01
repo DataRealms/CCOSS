@@ -218,6 +218,7 @@
     <None Include="external\sources\RakNet\RakNet_vc9.vcproj" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Constants.h" />
     <ClInclude Include="Entities\Emission.h" />
     <ClInclude Include="Entities\PEmitter.h" />
     <ClInclude Include="external\sources\RakNet\AutopatcherPatchContext.h" />

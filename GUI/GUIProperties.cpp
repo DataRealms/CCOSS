@@ -248,7 +248,7 @@ int GUIProperties::GetValue(const string Variable, string *Array, int MaxArraySi
         return 0;
 
     // Tokenize the string
-    strcpy(str, Value.c_str());
+    strcpy_s(str, c_PrintBufferSize, Value.c_str());
     char *tok = strtok(str, ",");
     int count = 0;
     
@@ -288,7 +288,7 @@ int GUIProperties::GetValue(const string Variable, int *Array, int MaxArraySize)
         return 0;
 
     // Tokenize the string
-    strcpy(str, Value.c_str());
+    strcpy_s(str, c_PrintBufferSize, Value.c_str());
     char *tok = strtok(str, ",");
     int count = 0;
     

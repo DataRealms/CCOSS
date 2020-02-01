@@ -569,7 +569,7 @@ void AudioMan::PlayMusic(const char *filepath, int loops, double volumeOverride)
 
 	// Look for file extension
 	char format[16];
-	strcpy(format, "");
+	strcpy_s(format, c_PrintBufferSize, "");
 
 	int dotPos = -1;
 
@@ -585,7 +585,7 @@ void AudioMan::PlayMusic(const char *filepath, int loops, double volumeOverride)
 	if (dotPos == -1)
 		return;
 
-	strcpy(format, &filepath[dotPos + 1]);
+	strcpy_s(format, c_PrintBufferSize, &filepath[dotPos + 1]);
 
 	// Open the stream
 	if (loops != 0)

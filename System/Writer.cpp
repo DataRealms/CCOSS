@@ -73,7 +73,7 @@ int Writer::Create(const char *filename, bool append)
         for (int i = 0; i < strlen(filename) && filename[i] != '/'; ++i)
             packageName[i] = filename[i];
         packageName[i] = '\0';
-//        strcpy(&packageName[i], g_WritePackageExtension);
+//        strcpy_s(&packageName[i], c_PrintBufferSize, g_WritePackageExtension);
 
         m_Package = new ozipfile(packageName);
         if (!m_Package->isOk())

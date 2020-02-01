@@ -2371,7 +2371,7 @@ void BuyMenuGUI::UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel)
 		if (pCraft->GetMaxMass() > 0)
 			sprintf_s(buf, c_PrintBufferSize, "%d / %d", (int)GetTotalOrderMass() - (int)GetCraftMass(), (int)pCraft->GetMaxMass() - (int)GetCraftMass());
 		else
-			strcpy(buf, "NO CARGO SPACE");
+			strcpy_s(buf, c_PrintBufferSize, "NO CARGO SPACE");
 	}
 	else
 		sprintf_s(buf, c_PrintBufferSize, "%d", (int)GetTotalOrderMass());
@@ -2400,7 +2400,7 @@ void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft * pCraft, GUILabel * pL
 			sprintf_s(buf, c_PrintBufferSize, "%d", GetTotalOrderPassengers());
 	}
 	else
-		strcpy(buf, "NO ROOM");
+		strcpy_s(buf, c_PrintBufferSize, "NO ROOM");
 
 	pLabel->SetText(buf);
 }

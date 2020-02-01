@@ -109,7 +109,7 @@ int Reader::Create(const char *filename, bool overwrites, void (*fpProgressCallb
         for (int i = 0; i < strlen(filename) && filename[i] != '/'; ++i)
             packageName[i] = filename[i];
         packageName[i] = '\0';
-//        strcpy(&packageName[i], g_ReadPackageExtension);
+//        strcpy_s(&packageName[i], c_PrintBufferSize, g_ReadPackageExtension);
 
         m_Package = new izipfile(packageName);
         if (!m_Package->isOk())

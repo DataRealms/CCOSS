@@ -466,7 +466,7 @@ bool LoadDataModules()
                 char outputDirName[c_MaxFileName];
                 char parentDirName[c_MaxFileName];
                 // Copy the file path to a separate dir path
-                strcpy(outputDirName, outputFileName);
+                strcpy_s(outputDirName, c_PrintBufferSize, outputFileName);
                 // Find the last slash in the dir path, so we can cut off everything after that (ie the actual filename), and only have the directory path left
                 char *pSlashPos = strrchr(outputDirName, '/');
                 // Try to find the other kind of slash if we found none
@@ -480,7 +480,7 @@ bool LoadDataModules()
                 for (int nested = 0; !file_exists(outputDirName, FA_DIREC, 0) && pSlashPos; ++nested)
                 {
                     // Keep making new working copies of the path that we can dice up
-                    strcpy(parentDirName, outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
+                    strcpy_s(parentDirName, c_PrintBufferSize, outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
                     // Start off at the beginning
                     pSlashPos = parentDirName;
                     for (int j = 0; j <= nested && pSlashPos; ++j)

@@ -441,7 +441,7 @@ void MOSParticle::Draw(BITMAP *pTargetBitmap,
 /*
     if (!onlyPhysical) {
         char str[64];
-        sprintf(str, "aVel:%.2f", m_AngularVel);
+        sprintf_s(str, "aVel:%.2f", m_AngularVel);
         g_FrameMan.DrawText(pTargetBitmap, str, m_Pos + Vector(-45, -75), false);
     }
 */

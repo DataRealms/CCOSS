@@ -963,7 +963,7 @@ string GUIPanel::WriteValue(const string Name, int Value)
     string OutString = Name;
     OutString += " = ";
 
-    sprintf(buf, "%i", Value);
+    sprintf_s(buf, c_PrintBufferSize, "%i", Value);
     OutString += buf;
     OutString += "\n";
 

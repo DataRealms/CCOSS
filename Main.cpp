@@ -819,12 +819,12 @@ bool ResetActivity()
 //    g_AudioMan.Create();
 
     char report[512];
-    sprintf(report, "Building Scene: \"%s\"...", g_ActivityMan.GetActivity()->GetSceneName().c_str());
+    sprintf_s(report, c_PrintBufferSize, "Building Scene: \"%s\"...", g_ActivityMan.GetActivity()->GetSceneName().c_str());
     LoadingSplashProgressReport(report, true);
 
     g_SceneMan.LoadScene(g_ActivityMan.GetActivity()->GetSceneName());
 
-    sprintf(report, "\tDone! %c", -42);
+    sprintf_s(report, c_PrintBufferSize, "\tDone! %c", -42);
     LoadingSplashProgressReport(report, true);
     LoadingSplashProgressReport(" ", true);
 
@@ -833,7 +833,7 @@ bool ResetActivity()
     Timer blinkTimer;
     do
     {
-        sprintf(report, "PRESS ANY KEY TO START! %c", blinkTimer.AlternateSim(300) ? -65 : ' ');
+        sprintf_s(report, c_PrintBufferSize, "PRESS ANY KEY TO START! %c", blinkTimer.AlternateSim(300) ? -65 : ' ');
         LoadingSplashProgressReport(report, false);
 
         // Reset the key press states
@@ -1208,7 +1208,7 @@ bool PlayIntroTitle()
             // Draw the copyright notice
             yTextPos = g_FrameMan.GetResY() - pFont->GetFontHeight();
             char copyRight[512];
-            sprintf(copyRight, "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
+            sprintf_s(copyRight, c_PrintBufferSize, "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, copyRight, GUIFont::Centre);
         }
 

@@ -263,7 +263,7 @@ int BunkerAssembly::ReadProperty(std::string propName, Reader &reader)
 		} else {
 			// Do not allow to define assemblies prior to corresponding assembly scheme
 			char s[256];
-			sprintf(s, "Required BunkerAssemblyScheme '%s%' not found when trying to load BunkerAssembly '%s'! BunkerAssemblySchemes MUST be defined before dependent BunkerAssmeblies.", parentScheme.c_str(), m_PresetName.c_str());
+			sprintf_s(s, c_PrintBufferSize, "Required BunkerAssemblyScheme '%s%' not found when trying to load BunkerAssembly '%s'! BunkerAssemblySchemes MUST be defined before dependent BunkerAssmeblies.", parentScheme.c_str(), m_PresetName.c_str());
 			DDTAbort(s);
 		}
 	} else

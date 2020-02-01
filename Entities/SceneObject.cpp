@@ -354,9 +354,9 @@ string SceneObject::GetGoldValueString(int nativeModule, float foreignMult, floa
     char returnString[64];
     if (subjValue != 0)
     {
-//        sprintf(returnString, "%.0foz", subjValue);
+//        sprintf_s(returnString, "%.0foz", subjValue);
         // The 'oz' takes up too much space
-        sprintf(returnString, "%.0f", subjValue);
+        sprintf_s(returnString, c_PrintBufferSize, "%.0f", subjValue);
     }
     else
         return "FREE";

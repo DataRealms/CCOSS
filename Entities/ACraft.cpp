@@ -1062,22 +1062,22 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             
             if (m_AIMode == AIMODE_RETURN)
             {
-                sprintf(str, "%s", "Return");
+                sprintf_s(str, "%s", "Return");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X, iconPos.m_Y - 18, str, GUIFont::Centre);
             }
             else if (m_AIMode == AIMODE_DELIVER)
             {
-                sprintf(str, "%s", "Deliver");
+                sprintf_s(str, "%s", "Deliver");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X - 9, iconPos.m_Y - 5, str, GUIFont::Right);
             }
             else if (m_AIMode == AIMODE_SCUTTLE)
             {
-                sprintf(str, "%s", "Scuttle");
+                sprintf_s(str, "%s", "Scuttle");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X + 9, iconPos.m_Y - 5, str, GUIFont::Left);
             }
             else if (m_AIMode == AIMODE_STAY)
             {
-                sprintf(str, "%s", "Stay");
+                sprintf_s(str, "%s", "Stay");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X, iconPos.m_Y + 8, str, GUIFont::Centre);
             }
 

@@ -3256,7 +3256,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             char gaugeColor = jetTimeRatio > 0.6 ? 149 : (jetTimeRatio > 0.3 ? 77 : 13);
             rectfill(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 6, drawPos.m_X + (16 * jetTimeRatio), drawPos.m_Y + m_HUDStack + 7, gaugeColor);
 //                    rect(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack - 2, drawPos.m_X + 24, drawPos.m_Y + m_HUDStack - 4, 238);
-//                    sprintf(str, "%.0f Kg", mass);
+//                    sprintf_s(str, "%.0f Kg", mass);
 //                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
 
             m_HUDStack += -10;
@@ -3272,11 +3272,11 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 str[0] = -56; str[1] = 0;
                 pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
                 if (pHeldFirearm->IsReloading())
-                    sprintf(str, "%s", "Reloading...");
+                    sprintf_s(str, c_PrintBufferSize, "%s", "Reloading...");
                 else if (pHeldFirearm->GetRoundInMagCount() >= 0)
-                    sprintf(str, "%i", pHeldFirearm->GetRoundInMagCount());
+                    sprintf_s(str, c_PrintBufferSize, "%i", pHeldFirearm->GetRoundInMagCount());
                 else
-                    sprintf(str, "%s", "INF");
+                    sprintf_s(str, c_PrintBufferSize, "%s", "INF");
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
 
                 m_HUDStack += -10;
@@ -3284,7 +3284,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         }
         else
         {
-            sprintf(str, "NO TURRET!");
+            sprintf_s(str, c_PrintBufferSize, "NO TURRET!");
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
             m_HUDStack += -9;
         }
@@ -3292,7 +3292,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
 		// Print aim angle and rot angle stoff
 		/*{
-			sprintf(str, "Aim %.2f Rot %.2f Lim %.2f", m_AimAngle, GetRotAngle(), m_AimRange + GetRotAngle());
+			sprintf_s(str, "Aim %.2f Rot %.2f Lim %.2f", m_AimAngle, GetRotAngle(), m_AimRange + GetRotAngle());
 			pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
 
 			m_HUDStack += -10;
@@ -3308,22 +3308,22 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             
             if (m_AIMode == AIMODE_SENTRY)
             {
-                sprintf(str, "%s", "Sentry");
+                sprintf_s(str, "%s", "Sentry");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y - 18, str, GUIFont::Centre);
             }
             else if (m_AIMode == AIMODE_PATROL)
             {
-                sprintf(str, "%s", "Patrol");
+                sprintf_s(str, "%s", "Patrol");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X - 9, iconPos.m_Y - 5, str, GUIFont::Right);
             }
             else if (m_AIMode == AIMODE_BRAINHUNT)
             {
-                sprintf(str, "%s", "Brainhunt");
+                sprintf_s(str, "%s", "Brainhunt");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X + 9, iconPos.m_Y - 5, str, GUIFont::Left);
             }
             else if (m_AIMode == AIMODE_GOLDDIG)
             {
-                sprintf(str, "%s", "Gold Dig");
+                sprintf_s(str, "%s", "Gold Dig");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y + 8, str, GUIFont::Centre);
             }
 

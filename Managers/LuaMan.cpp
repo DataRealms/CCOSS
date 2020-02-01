@@ -2541,7 +2541,7 @@ string LuaMan::GetNewPresetID()
 {
     // Generate the new ID
     char newID[64];
-    sprintf(newID, "Pre%05i", m_NextPresetID);
+    sprintf_s(newID, c_PrintBufferSize, "Pre%05i", m_NextPresetID);
     // Increment the ID so it will be diff for the next one (improve this primitive approach??)
     m_NextPresetID++;
 
@@ -2560,7 +2560,7 @@ string LuaMan::GetNewObjectID()
 {
     // Generate the new ID
     char newID[64];
-    sprintf(newID, "Obj%05i", m_NextObjectID);
+    sprintf_s(newID, c_PrintBufferSize, "Obj%05i", m_NextObjectID);
     // Increment the ID so it will be diff for the next one (improve this primitive approach??)
     m_NextObjectID++;
 

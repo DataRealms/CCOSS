@@ -503,7 +503,7 @@ namespace RTE
 			{
 				char buf[128];
 
-				sprintf(buf, "Voting to end activity %d of %d", votes, votesNeeded);
+				sprintf_s(buf, c_PrintBufferSize, "Voting to end activity %d of %d", votes, votesNeeded);
 				for (int i = 0; i < MAX_CLIENTS; i++)
 				{
 					g_FrameMan.SetScreenText(buf, i, 0, -1, false);
@@ -584,7 +584,7 @@ namespace RTE
 
 		if (m_NatServerConnected)
 		{
-			sprintf(buf, "NAT SERVICE CONNECTED\nName: %s  Pass: %s", g_SettingsMan.GetNATServerName().c_str(), g_SettingsMan.GetNATServerPassword().c_str());
+			sprintf_s(buf, c_PrintBufferSize, "NAT SERVICE CONNECTED\nName: %s  Pass: %s", g_SettingsMan.GetNATServerName().c_str(), g_SettingsMan.GetNATServerPassword().c_str());
 			g_FrameMan.GetLargeFont()->DrawAligned(&pGUIBitmap, midX, 20, buf, GUIFont::Centre);
 		}
 		else
@@ -597,7 +597,7 @@ namespace RTE
 			GameActivity * pGameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
 			if (pGameActivity)
 			{
-				sprintf(buf, "Activity: %s   Players: %d", pGameActivity->GetPresetName().c_str(), pGameActivity->GetPlayerCount());
+				sprintf_s(buf, c_PrintBufferSize, "Activity: %s   Players: %d", pGameActivity->GetPresetName().c_str(), pGameActivity->GetPlayerCount());
 				g_FrameMan.GetLargeFont()->DrawAligned(&pGUIBitmap, midX, 50, buf, GUIFont::Centre);
 			}
 		}
@@ -666,7 +666,7 @@ namespace RTE
 			if (m_MsecPerFrame[i] > 0)
 				fps = 1000 / m_MsecPerFrame[i];
 
-			sprintf(buf, "%s\nPing %u\nCmp Mbit: %.1f\nUnc Mbit: %.1f\nR: %.2f\nFrame Kbit: %lu\nGlow Kbit: %lu\nSound Kbit: %lu\nScene Kbit: %lu\nFrames sent: %uK\nFrame skipped: %uK\nBlocks full: %uK\nBlocks empty: %uK\nBlk Ratio: %.2f\nFPS: %d\nSend Ms %d\nTotal Data %lu MB",
+			sprintf_s(buf, c_PrintBufferSize, "%s\nPing %u\nCmp Mbit: %.1f\nUnc Mbit: %.1f\nR: %.2f\nFrame Kbit: %lu\nGlow Kbit: %lu\nSound Kbit: %lu\nScene Kbit: %lu\nFrames sent: %uK\nFrame skipped: %uK\nBlocks full: %uK\nBlocks empty: %uK\nBlk Ratio: %.2f\nFPS: %d\nSend Ms %d\nTotal Data %lu MB",
 				i == STATS_SUM ? "- TOTALS - " : IsPlayerConnected(i) ? GetPlayerName(i).c_str() : "- NO PLAYER -",
 				i < MAX_CLIENTS ? m_Ping[i] : 0,
 				(double)m_DataSentCurrent[i][STAT_SHOWN] / (125000),
@@ -691,7 +691,7 @@ namespace RTE
 				if (i < MAX_CLIENTS)
 				{
 					int lines = 2;
-					sprintf(buf, "Thread: %d\nBuffer: %d / %d",
+					sprintf_s(buf, c_PrintBufferSize, "Thread: %d\nBuffer: %d / %d",
 						m_ThreadExitReason[i], m_SendBufferMessages[i], m_SendBufferBytes[i] / 1024);
 					g_FrameMan.GetLargeFont()->DrawAligned(&pGUIBitmap, 10 + i * g_FrameMan.GetResX() / 5, g_FrameMan.GetResY() - lines * 15, buf, GUIFont::Left);
 				}
@@ -1172,7 +1172,7 @@ namespace RTE
 			if (msg->PostEffectsCount >= 75)
 			{
 				//char buf[128];
-				//sprintf(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
+				//sprintf_s(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 				//g_ConsoleMan.PrintString(buf);
 
 				int payloadSize = sizeof(RTE::MsgPostEffects) + sizeof(PostEffectNetworkData) * msg->PostEffectsCount;
@@ -1191,7 +1191,7 @@ namespace RTE
 		if (msg->PostEffectsCount > 0)
 		{
 			//char buf[128];
-			//sprintf(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
+			//sprintf_s(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 			//g_ConsoleMan.PrintString(buf);
 
 			int header = sizeof(RTE::MsgPostEffects);
@@ -1241,7 +1241,7 @@ namespace RTE
 			if (msg->SoundEventsCount >= 50)
 			{
 				//char buf[128];
-				//sprintf(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
+				//sprintf_s(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 				//g_ConsoleMan.PrintString(buf);
 
 				int payloadSize = sizeof(RTE::MsgSoundEvents) + sizeof(AudioMan::SoundNetworkData) * msg->SoundEventsCount;
@@ -1260,7 +1260,7 @@ namespace RTE
 		if (msg->SoundEventsCount > 0)
 		{
 			//char buf[128];
-			//sprintf(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
+			//sprintf_s(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 			//g_ConsoleMan.PrintString(buf);
 
 			int header = sizeof(RTE::MsgSoundEvents);
@@ -1307,7 +1307,7 @@ namespace RTE
 			if (msg->MusicEventsCount >= 4)
 			{
 				//char buf[128];
-				//sprintf(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
+				//sprintf_s(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 				//g_ConsoleMan.PrintString(buf);
 
 				int payloadSize = sizeof(RTE::MsgMusicEvents) + sizeof(AudioMan::MusicNetworkData) * msg->MusicEventsCount;
@@ -1326,7 +1326,7 @@ namespace RTE
 		if (msg->MusicEventsCount > 0)
 		{
 			//char buf[128];
-			//sprintf(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
+			//sprintf_s(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 			//g_ConsoleMan.PrintString(buf);
 
 			int header = sizeof(RTE::MsgMusicEvents);

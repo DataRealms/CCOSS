@@ -536,7 +536,7 @@ BITMAP ** ContentFile::GetAsAnimation(int frameCount, int conversionMode)
     for (int i = 0; i < frameCount; i++)
     {
         // Create the temporary frame datapath
-        sprintf(framePath, "%s%03i%s", originalDataPath.c_str(), i, extension.c_str());
+        sprintf_s(framePath, c_PrintBufferSize, "%s%03i%s", originalDataPath.c_str(), i, extension.c_str());
         // Temporarily assign it to the datapath member var so that GetAsBitmap uses it
         m_DataPath = framePath;
         // Get the frame bitmap
@@ -999,7 +999,7 @@ BITMAP ** ContentFile::LoadAndReleaseAnimation(int frameCount, int conversionMod
     for (int i = 0; i < frameCount; i++)
     {
         // Create the temporary frame datapath
-        sprintf(framePath, "%s%03i%s", originalDataPath.c_str(), i, extension.c_str());
+        sprintf_s(framePath, c_PrintBufferSize, "%s%03i%s", originalDataPath.c_str(), i, extension.c_str());
         // Temporarily assign it to the datapath member var so that GetAsBitmap uses it
         m_DataPath = framePath;
         // Get the frame bitmap

@@ -749,7 +749,7 @@ void SceneEditorGUI::Update()
 // TODO: TEMP REMOVE
 /*
         char str[256];
-        sprintf(str, "Cost: %f", m_BrainSkyPathCost);
+        sprintf_s(str, "Cost: %f", m_BrainSkyPathCost);
         g_FrameMan.SetScreenText(str, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
 */
 /*

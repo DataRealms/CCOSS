@@ -664,7 +664,7 @@ void AudioMan::QueueSilence(int seconds)
     {
         // Encode the silence as number of secs preceded by '@'
         char str[256];
-        sprintf(str, "@%i", seconds);
+        sprintf_s(str, c_PrintBufferSize, "@%i", seconds);
         m_MusicPlayList.push_back(string(str));
     }
 }

@@ -546,9 +546,9 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
                 m_BlinkTimer.Reset();
 
             pSymbolFont->DrawAligned(&pBitmapInt, drawPos.m_X - 1, drawPos.m_Y - 20, str, GUIFont::Centre);
-    //        sprintf(str, "%.0f", m_PresetName);
-            sprintf(str, "%s", m_PresetName.c_str());
-//            sprintf(str, "%s", m_sClass.GetName().c_str());
+    //        sprintf_s(str, "%.0f", m_PresetName);
+            sprintf_s(str, c_PrintBufferSize, "%s", m_PresetName.c_str());
+//            sprintf_s(str, "%s", m_sClass.GetName().c_str());
             pTextFont->DrawAligned(&pBitmapInt, drawPos.m_X + 0, drawPos.m_Y - 29, str, GUIFont::Centre);
         }
     }

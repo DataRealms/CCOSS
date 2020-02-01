@@ -1032,7 +1032,7 @@ int Scene::SaveData(string pathBase)
     {
         if (m_apUnseenLayer[team])
         {
-            sprintf(str, "T%d", team);
+            sprintf_s(str, c_PrintBufferSize, "T%d", team);
             // Save unseen layer data to disk
             if (m_apUnseenLayer[team]->SaveData(pathBase + " US" + str + ".bmp") < 0)
             {
@@ -1449,7 +1449,7 @@ int Scene::Save(Writer &writer) const
     {
         if (m_ResidentBrains[player])
         {
-            sprintf(str, "P%dResidentBrain", player + 1);
+            sprintf_s(str, c_PrintBufferSize, "P%dResidentBrain", player + 1);
             writer.NewProperty(str);
             writer.ObjectStart(m_ResidentBrains[player]->GetClassName());
             writer.NewProperty("CopyOf");

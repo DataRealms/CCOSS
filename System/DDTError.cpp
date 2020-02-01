@@ -94,7 +94,7 @@ bool DDTAssert(bool expression,
 /*
         int response;
         char string[512];
-        sprintf(string, "What: %s\nWhere: %s - Line %i", description, file, line);
+        sprintf_s(string, "What: %s\nWhere: %s - Line %i", description, file, line);
         response = MessageBox(0,
                               string,
                               "Assertion Failure!",
@@ -111,7 +111,7 @@ bool DDTAssert(bool expression,
 // TODO: Make this display a box in the game asking whether to ignore or abort")
         // For now, always abort.
         char error[512];
-        sprintf(error, "Assertion failed: %s", description);
+        sprintf_s(error, c_PrintBufferSize, "Assertion failed: %s", description);
         DDTAbortFunc(error, __FILE__, __LINE__);
 
         // True so that the asm_ { int 3 } code is run and the debugger goes there.

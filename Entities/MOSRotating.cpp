@@ -56,7 +56,7 @@ void MOSRotating::Gib::Clear()
     m_pGibParticle = 0;
     m_Offset.Reset();
     m_Count = 1;
-    m_Spread = PI;
+    m_Spread = c_PI;
     m_MinVelocity = 0;
     m_MaxVelocity = 0;
     m_LifeVariation = 0.1;
@@ -270,17 +270,17 @@ int MOSRotating::Create()
 
     // Can't create these earlier in the static declaration because allegro_init needs to be called before create_bitmap
     if (!m_spTempBitmapS16)
-        m_spTempBitmapS16 = create_bitmap_ex(MOID_BITMAP_LAYER_DEPTH, 16, 16);
+        m_spTempBitmapS16 = create_bitmap_ex(c_MOIDLayerBitDepth, 16, 16);
     if (!m_spTempBitmapS32)
-        m_spTempBitmapS32 = create_bitmap_ex(MOID_BITMAP_LAYER_DEPTH, 32, 32);
+        m_spTempBitmapS32 = create_bitmap_ex(c_MOIDLayerBitDepth, 32, 32);
     if (!m_spTempBitmapS64)
-        m_spTempBitmapS64 = create_bitmap_ex(MOID_BITMAP_LAYER_DEPTH, 64, 64);
+        m_spTempBitmapS64 = create_bitmap_ex(c_MOIDLayerBitDepth, 64, 64);
     if (!m_spTempBitmapS128)
-        m_spTempBitmapS128 = create_bitmap_ex(MOID_BITMAP_LAYER_DEPTH, 128, 128);
+        m_spTempBitmapS128 = create_bitmap_ex(c_MOIDLayerBitDepth, 128, 128);
     if (!m_spTempBitmapS256)
-        m_spTempBitmapS256 = create_bitmap_ex(MOID_BITMAP_LAYER_DEPTH, 256, 256);
+        m_spTempBitmapS256 = create_bitmap_ex(c_MOIDLayerBitDepth, 256, 256);
     if (!m_spTempBitmapS512)
-        m_spTempBitmapS512 = create_bitmap_ex(MOID_BITMAP_LAYER_DEPTH, 512, 512);
+        m_spTempBitmapS512 = create_bitmap_ex(c_MOIDLayerBitDepth, 512, 512);
 
     // Choose an appropriate size for this' diameter
     if (m_MaxDiameter >= 256)
@@ -713,7 +713,7 @@ void MOSRotating::SetToHitMOs(bool hitMOs)
 void MOSRotating::AddRecoil()
 {
     m_RecoilOffset.SetXY(1, 0);
-    m_RecoilOffset.RadRotate(m_Rotation.GetRadAngle() + PI);
+    m_RecoilOffset.RadRotate(m_Rotation.GetRadAngle() + c_PI);
     m_Recoiled = true;
 }
 
@@ -964,7 +964,7 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
         {
             // Add entry wound AEmitter to actor where the particle penetrated.
             AEmitter *pEntryWound = dynamic_cast<AEmitter *>(m_pEntryWound->Clone());
-            pEntryWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle() + PI);
+            pEntryWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle() + c_PI);
 			pEntryWound->SetDamageMultiplier(hd.pBody[HITOR]->WoundDamageMultiplier());
             // Adjust position so that it looks like the hole is actually *on* the Hitee.
             entryPos[dom] += increment[dom] * (pEntryWound->GetSpriteFrame()->w / 2);
@@ -1717,7 +1717,7 @@ void MOSRotating::Update()
         m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
 
 	if (m_HFlipped && !m_pFlipBitmapS && m_aSprite[0])
-        m_pFlipBitmapS = create_bitmap_ex(MOID_BITMAP_LAYER_DEPTH, m_aSprite[0]->w, m_aSprite[0]->h);
+        m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h);
 }
 
 

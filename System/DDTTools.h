@@ -12,6 +12,7 @@
 
 #include "DDTError.h"
 #include "time.h"
+#include "Constants.h"
 #include <cmath>
 
 struct TexMapTable;

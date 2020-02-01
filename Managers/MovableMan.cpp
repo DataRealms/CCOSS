@@ -1989,9 +1989,9 @@ void MovableMan::Update()
             if ((*parIt)->GetDrawPriority() >= terrMat->priority)
             {
                 // Gold particle special case to avoid compacting of gold
-                if ((*parIt)->GetMaterial()->id == GOLDMATID)
+                if ((*parIt)->GetMaterial()->id == c_GoldMaterialID)
                 {
-                    for (int s = 0; terrMat->id == GOLDMATID; ++s)
+                    for (int s = 0; terrMat->id == c_GoldMaterialID; ++s)
                     {
                         if (s % 2 == 0)
                             parPos.m_Y -= 1.0;

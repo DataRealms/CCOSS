@@ -96,7 +96,7 @@ void SceneMan::Clear()
     m_LayerDrawMode = g_LayerNormal;
 
     m_MatNameMap.clear();
-    for (int i = 0; i < NUM_PALETTE_ENTRIES; ++i)
+    for (int i = 0; i < c_PaletteEntriesNumber; ++i)
         m_apMatPalette[i] = 0;
     m_MaterialCount = 0;
 
@@ -240,7 +240,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
 
     // Re-create the MoveableObject:s ID SceneLayer
     delete m_pMOIDLayer;
-    pBitmap = create_bitmap_ex(MOID_BITMAP_LAYER_DEPTH, GetSceneWidth(), GetSceneHeight());
+    pBitmap = create_bitmap_ex(c_MOIDLayerBitDepth, GetSceneWidth(), GetSceneHeight());
     clear_to_color(pBitmap, g_NoMOID);
     m_pMOIDLayer = new SceneLayer();
     m_pMOIDLayer->Create(pBitmap, false, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
@@ -361,7 +361,7 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
 
         // If the initially requested material slot is available, then put it there
         // But if it's not available, then check if any subsequent one is, looping around the palette if necessary
-        for (int tryId = pNewMat->id; tryId < NUM_PALETTE_ENTRIES; ++tryId)
+        for (int tryId = pNewMat->id; tryId < c_PaletteEntriesNumber; ++tryId)
         {
             // We found an empty slot in the Material palette!
             if (m_apMatPalette[tryId] == 0)
@@ -381,7 +381,7 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
                 break;
             }
             // We reached the end of the Material palette without finding any empty slots.. loop around to the start
-            else if (tryId >= NUM_PALETTE_ENTRIES - 1)
+            else if (tryId >= c_PaletteEntriesNumber - 1)
                 tryId = 0;
             // If we've looped around without finding anything, break and throw error
             else if (tryId == pNewMat->id - 1)
@@ -442,7 +442,7 @@ int SceneMan::Save(Writer &writer) const
 
 void SceneMan::Destroy()
 {
-    for (int i = 0; i < NUM_PALETTE_ENTRIES; ++i)
+    for (int i = 0; i < c_PaletteEntriesNumber; ++i)
         delete m_apMatPalette[i];
 
     delete m_pCurrentScene;
@@ -1086,7 +1086,7 @@ int SceneMan::RemoveOrphans(int posX, int posY,
                                            new Atom(Vector(), spawnMat->id, 0, spawnColor, 2),
                                            0);
 
-            pixelMO->SetToHitMOs(spawnMat->id == GOLDMATID);
+            pixelMO->SetToHitMOs(spawnMat->id == c_GoldMaterialID);
             pixelMO->SetToGetHitByMOs(false);
             g_MovableMan.AddParticle(pixelMO);
             pixelMO = 0;
@@ -1290,7 +1290,7 @@ bool SceneMan::TryPenetrate(const int posX,
                                                0);
 
 // TODO: Make material IDs more robust!")
-                pixelMO->SetToHitMOs(spawnMat->id == GOLDMATID);
+                pixelMO->SetToHitMOs(spawnMat->id == c_GoldMaterialID);
                 pixelMO->SetToGetHitByMOs(false);
                 g_MovableMan.AddParticle(pixelMO);
                 pixelMO = 0;
@@ -1358,7 +1358,7 @@ bool SceneMan::TryPenetrate(const int posX,
 								pixelMO = new MOPixel(spawnColor, spawnMat->pixelDensity, Vector(posX, testY), sprayVel, new Atom(Vector(), spawnMat->id, 0, spawnColor, 2), 0);
 
                                 // Let it loose into the world
-                                pixelMO->SetToHitMOs(spawnMat->id == GOLDMATID);
+                                pixelMO->SetToHitMOs(spawnMat->id == c_GoldMaterialID);
                                 pixelMO->SetToGetHitByMOs(false);
                                 g_MovableMan.AddParticle(pixelMO);
                                 pixelMO = 0;

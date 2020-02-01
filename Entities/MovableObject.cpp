@@ -225,7 +225,7 @@ int MovableObject::Create(const MovableObject &reference)
 	m_RandomizeEffectRotAngleEveryFrame = reference.m_RandomizeEffectRotAngleEveryFrame;
 
 	if (m_RandomizeEffectRotAngle)
-		m_EffectRotAngle = PI * 2 * NormalRand();
+		m_EffectRotAngle = c_PI * 2 * NormalRand();
 
 	m_ScreenEffectHash = reference.m_ScreenEffectHash;
     m_EffectStartTime = reference.m_EffectStartTime;
@@ -344,7 +344,7 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
 		m_ScreenEffectHash = m_ScreenEffectFile.GetHash();
 
 		//char buf[128];
-		//sprintf(buf, "%s %lu", m_ScreenEffectFile.GetDataPath().c_str(), m_ScreenEffectHash);
+		//sprintf_s(buf, "%s %lu", m_ScreenEffectFile.GetDataPath().c_str(), m_ScreenEffectHash);
 		//g_ConsoleMan.PrintString(buf);
     }
     else if (propName == "EffectStartTime")
@@ -891,7 +891,7 @@ int MovableObject::OnPieMenu(Actor * pActor)
 void MovableObject::Update()
 {
 	if (m_RandomizeEffectRotAngleEveryFrame)
-		m_EffectRotAngle = PI * 2 * NormalRand();
+		m_EffectRotAngle = c_PI * 2 * NormalRand();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

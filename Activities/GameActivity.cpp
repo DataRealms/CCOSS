@@ -2547,7 +2547,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 			g_SceneMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
 
 			//Glowing dotted circle version
-			int dots = 2 * PI * radius / 25;//5 + (int)(radius / 10);
+			int dots = 2 * c_PI * radius / 25;//5 + (int)(radius / 10);
 			float radsperdot = 2 * 3.14159265359 / dots;
 
 			for (int i = 0; i < dots; i++)

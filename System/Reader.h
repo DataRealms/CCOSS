@@ -19,6 +19,7 @@
 #include <string>
 #include <list>
 #include "Writer.h"
+#include "Constants.h"
 
 namespace RTE
 {

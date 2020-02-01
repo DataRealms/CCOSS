@@ -442,7 +442,7 @@ void Arm::Update()
         }
         // Update hand
         m_HandOffset.SetXY(m_MaxLength * 0.65, 0);
-        m_HandOffset.RadRotate((m_HFlipped ? PI : 0) + m_Rotation.GetRadAngle());
+        m_HandOffset.RadRotate((m_HFlipped ? c_PI : 0) + m_Rotation.GetRadAngle());
     }
     else {
         // Attached, so act like it
@@ -492,7 +492,7 @@ void Arm::Update()
             else
                 m_Recoiled = false;
 
-            m_Rotation = (m_HFlipped ? PI : 0) + handAngle;
+            m_Rotation = (m_HFlipped ? c_PI : 0) + handAngle;
 
             // Redo the positioning of the arm now since the rotation has changed and RotateOffset will return different results
             if (!m_JointPos.IsZero())
@@ -549,7 +549,7 @@ void Arm::Update()
             }
             // Cap hand distance to what the Arm allows
             ConstrainHand();
-            m_Rotation = (m_HFlipped ? PI : 0) + m_HandOffset.GetAbsRadAngle();
+            m_Rotation = (m_HFlipped ? c_PI : 0) + m_HandOffset.GetAbsRadAngle();
 
             // Redo the positioning of the arm now since the rotation has changed and RotateOffset will return different results
             if (!m_JointPos.IsZero())

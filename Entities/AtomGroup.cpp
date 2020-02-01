@@ -1054,7 +1054,7 @@ float AtomGroup::Travel(Vector &position,
     HitData hitData;
 
 // TODO: Make this dependent on agroup radius!, not hcoded")
-    float segRotLimit = PI / 6;
+    float segRotLimit = c_PI / 6;
 
     didWrap = false;
     newDir = true;
@@ -1168,7 +1168,7 @@ float AtomGroup::Travel(Vector &position,
 //            startOff = (position + (*aItr)->GetOffset().GetXFlipped(hFlipped)) - position.GetFloored();
 // TODO: Get flipping working inside the matrix instead!")
             startOff = (*aItr)->GetOffset().GetXFlipped(hFlipped);
-//            startOff.RadRotate(/*hFlipped ? (PI + rotation) :*/ rotation);
+//            startOff.RadRotate(/*hFlipped ? (c_PI + rotation) :*/ rotation);
             startOff *= rotation;
 
             // Get the atom's travel direction due to body rotation.
@@ -1400,7 +1400,7 @@ float AtomGroup::Travel(Vector &position,
                 (*aItr)->SetHitRadius((*aItr)->GetOffset().RadRotate(rotation));
                 // Figure out the pre-collision velocity of the
                 // hitting atom due to body translation and rotation.
-                (*aItr)->SetHitVel(velocity + (*aItr)->GetOffset().RadRotate(rotation + HalfPI) *
+                (*aItr)->SetHitVel(velocity + (*aItr)->GetOffset().RadRotate(rotation + c_HalfPI) *
                                             g_FrameMan.GetMPP() * angVel);
 */
                 hitFactor = 1.0 / (float)penetratingAtoms.size();

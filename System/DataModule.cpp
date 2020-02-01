@@ -46,7 +46,7 @@ void DataModule::Clear()
     m_PresetList.clear();
 	m_EntityList.clear();
     m_TypeMap.clear();
-    for (int i = 0; i < NUM_PALETTE_ENTRIES; ++i)
+    for (int i = 0; i < c_PaletteEntriesNumber; ++i)
         m_MaterialMappings[i] = 0;
 	m_ScanFolderContents = false;
 	m_IgnoreMissingItems = false;
@@ -684,7 +684,7 @@ bool DataModule::GetGroupsWithType(list<string> &groupList, string withType)
 
 bool DataModule::AddMaterialMapping(int fromID, int toID)
 {
-    AAssert(fromID > 0 && fromID < NUM_PALETTE_ENTRIES && toID > 0 && toID < NUM_PALETTE_ENTRIES, "Tried to make an out-of-bounds Material mapping");
+    AAssert(fromID > 0 && fromID < c_PaletteEntriesNumber && toID > 0 && toID < c_PaletteEntriesNumber, "Tried to make an out-of-bounds Material mapping");
 
     bool clear = m_MaterialMappings[fromID] == 0;
     m_MaterialMappings[fromID] = toID;

@@ -1139,7 +1139,7 @@ int Atom::Travel(float travelTime,
 
                 // Gold special collection case!
 // TODO: Make material IDs more robust!")
-                if (m_pMaterial->id == GOLDMATID && g_MovableMan.IsOfActor(m_MOIDHit)) {
+                if (m_pMaterial->id == c_GoldMaterialID && g_MovableMan.IsOfActor(m_MOIDHit)) {
                     Actor *pActor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(m_LastHit.pBody[HITEE]->GetRootID()));
                     if (pActor)
                     {

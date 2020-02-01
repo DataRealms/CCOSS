@@ -347,8 +347,8 @@ void MOSParticle::Travel()
     // Animate based on rotation.. temporary.
     if (m_Framerate) {
         double newFrame = m_Rotation.GetRadAngle();
-        newFrame -= floorf(m_Rotation.GetRadAngle() / (2 * PI)) * (2 * PI);
-        newFrame /= (2 * PI);
+        newFrame -= floorf(m_Rotation.GetRadAngle() / (2 * c_PI)) * (2 * c_PI);
+        newFrame /= (2 * c_PI);
         newFrame *= m_FrameCount;
         m_Frame = floorf(newFrame);
         m_Rotation += (long double)m_AngularVel * (long double)deltaTime;

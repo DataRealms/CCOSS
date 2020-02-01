@@ -91,7 +91,7 @@ void MetagameGUI::SiteTarget::Draw(BITMAP *drawBitmap) const
     {
         float radius = LERP(0.0, 1.0, 200, 10, m_AnimProgress);
         float lineLen = LERP(0.0, 1.0, 60, 10, m_AnimProgress);
-        float rotation = 0;//LERP(0.0, 1.0, -EigthPI, 0.0, m_AnimProgress);
+        float rotation = 0;//LERP(0.0, 1.0, -c_EighthPI, 0.0, m_AnimProgress);
         Vector inner;
         Vector outer;
 
@@ -100,8 +100,8 @@ void MetagameGUI::SiteTarget::Draw(BITMAP *drawBitmap) const
         {
             inner.SetXY(radius, 0);
             outer.SetXY(radius + lineLen, 0);
-            inner.RadRotate(rotation + (HalfPI * i));
-            outer.RadRotate(rotation + (HalfPI * i));
+            inner.RadRotate(rotation + (c_HalfPI * i));
+            outer.RadRotate(rotation + (c_HalfPI * i));
             DrawGlowLine(drawBitmap, m_CenterPos + inner, m_CenterPos + outer, m_Color);
         }
     }
@@ -109,7 +109,7 @@ void MetagameGUI::SiteTarget::Draw(BITMAP *drawBitmap) const
     {
         float radius = LERP(0.0, 1.0, 10, 200, m_AnimProgress);
         float lineLen = LERP(0.0, 1.0, 10, 60, m_AnimProgress);
-        float rotation = 0;//LERP(0.0, 1.0, -EigthPI, 0.0, m_AnimProgress);
+        float rotation = 0;//LERP(0.0, 1.0, -c_EighthPI, 0.0, m_AnimProgress);
         Vector inner;
         Vector outer;
 
@@ -118,8 +118,8 @@ void MetagameGUI::SiteTarget::Draw(BITMAP *drawBitmap) const
         {
             inner.SetXY(radius, 0);
             outer.SetXY(radius + lineLen, 0);
-            inner.RadRotate(rotation + (HalfPI * i));
-            outer.RadRotate(rotation + (HalfPI * i));
+            inner.RadRotate(rotation + (c_HalfPI * i));
+            outer.RadRotate(rotation + (c_HalfPI * i));
             DrawGlowLine(drawBitmap, m_CenterPos + inner, m_CenterPos + outer, m_Color);
         }
     }
@@ -2054,11 +2054,11 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
                 // Make it flicker more if it's currently being fought over
                 blendAmount = 95 + (battleSite ? 25 : 15) * NormalRand();
                 set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-                circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 4, YELLOWGUICOLOR);
-                circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 2, YELLOWGUICOLOR);
+                circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 4, c_GUIColorYellow);
+                circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 2, c_GUIColorYellow);
                 blendAmount = 210 + 45 * NormalRand();
                 set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-                circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 1, YELLOWGUICOLOR);
+                circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 1, c_GUIColorYellow);
             }
         }
 
@@ -2066,7 +2066,7 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
         if (m_pSelectedScene && m_pSceneInfoPopup->GetVisible() && !m_PreTurn)
         {
             Vector sceneInfoBoxPos(m_pSceneInfoPopup->GetXPos() + (m_pSceneInfoPopup->GetWidth() / 2), m_pSceneInfoPopup->GetYPos() + (m_pSceneInfoPopup->GetHeight() / 2));
-            DrawScreenLineToSitePoint(drawBitmap, sceneInfoBoxPos, m_pSelectedScene->GetLocation() + m_pSelectedScene->GetLocationOffset(), WHITEGUICOLOR, -1, -1, (m_pSceneInfoPopup->GetHeight() / 2) + CHAMFERSIZE + 6, 1.0, g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()));
+            DrawScreenLineToSitePoint(drawBitmap, sceneInfoBoxPos, m_pSelectedScene->GetLocation() + m_pSelectedScene->GetLocationOffset(), c_GUIColorWhite, -1, -1, (m_pSceneInfoPopup->GetHeight() / 2) + CHAMFERSIZE + 6, 1.0, g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()));
         }
 
         // Draw all the player income site lines we are supposed to
@@ -3388,8 +3388,8 @@ void MetagameGUI::UpdateSiteRevealing()
         g_MetaMan.m_Scenes[m_AnimCountCurrent]->SetRevealed(true);
         // Create and set up its crosshairs
 // TODO: TEMP change this back
-        m_NewSiteIndicators.push_back(SiteTarget(m_PlanetCenter + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocation() + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocationOffset(), 0, SiteTarget::CROSSHAIRSSHRINK, YELLOWGUICOLOR, m_AnimTimer2.GetElapsedRealTimeMS()));
-        m_SiteSwitchIndicators.push_back(SiteTarget(m_PlanetCenter + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocation() + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocationOffset(), 0, SiteTarget::CIRCLEGROW, YELLOWGUICOLOR, m_AnimTimer2.GetElapsedRealTimeMS()));
+        m_NewSiteIndicators.push_back(SiteTarget(m_PlanetCenter + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocation() + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocationOffset(), 0, SiteTarget::CROSSHAIRSSHRINK, c_GUIColorYellow, m_AnimTimer2.GetElapsedRealTimeMS()));
+        m_SiteSwitchIndicators.push_back(SiteTarget(m_PlanetCenter + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocation() + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocationOffset(), 0, SiteTarget::CIRCLEGROW, c_GUIColorYellow, m_AnimTimer2.GetElapsedRealTimeMS()));
         // Increment the current scene index
         m_AnimCountCurrent++;
         // Reset the timer so we will get the next reveal in the set time
@@ -3408,7 +3408,7 @@ void MetagameGUI::UpdateSiteRevealing()
             m_NewSiteIndicators[i].m_AnimProgress = EaseOut(0.0, 1.0, shrinkTime / shrinkInterval);
         // If it's after, then just keep pulsating the target
         else
-            m_NewSiteIndicators[i].m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)shrinkTime % (int)shrinkInterval) / shrinkInterval);
+            m_NewSiteIndicators[i].m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)shrinkTime % (int)shrinkInterval) / shrinkInterval);
     }
 
     // Set the phase label grammatically correct
@@ -3452,7 +3452,7 @@ void MetagameGUI::UpdateSiteChangeAnim()
             (*itr).m_AnimProgress = EaseOut(0.0, 1.0, animTime / animInterval);
 //        // If it's after, then just keep pulsating the target
 //        else
-//            (*itr).m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)animTime % (int)animInterval) / animInterval);
+//            (*itr).m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)animTime % (int)animInterval) / animInterval);
     }
 
     // Remove the markers that are done animating
@@ -3518,7 +3518,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
 
             // TRADESTAR BANK ACCOUNT AND RENT
             // Add line to show existing funds stored in space station, and deduct rent from
-            m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 0, 1.0, Vector(g_StationOffsetX, g_StationOffsetY), "TradeStar Midas", 0, YELLOWGUICOLOR, -1, 0, channelHeight, 2.0f));
+            m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 0, 1.0, Vector(g_StationOffsetX, g_StationOffsetY), "TradeStar Midas", 0, c_GUIColorYellow, -1, 0, channelHeight, 2.0f));
             m_IncomeSiteLines.back().m_FundsAmount = g_MetaMan.m_Players[m_AnimMetaPlayer].m_PhaseStartFunds;
             m_IncomeSiteLines.back().m_FundsTarget = m_IncomeSiteLines.back().m_FundsAmount - totalRent;
             // Save the index so we can update the line later
@@ -3528,7 +3528,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
             // Loop through the scenes owned by that player, setting up the site line for each
             while (m_pAnimScene = g_MetaMan.GetNextSceneOfPlayer(m_AnimMetaPlayer, m_pAnimScene))
             {
-                m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 1.0, 0, m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), m_pAnimScene->GetPresetName(), m_pAnimScene, YELLOWGUICOLOR, -1, 0, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(m_pAnimScene->GetTeamOwnership())));
+                m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 1.0, 0, m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), m_pAnimScene->GetPresetName(), m_pAnimScene, c_GUIColorYellow, -1, 0, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(m_pAnimScene->GetTeamOwnership())));
                 // Star them at 0, make them go to the round income for this base
                 m_IncomeSiteLines.back().m_FundsAmount = 0;
                 m_IncomeSiteLines.back().m_FundsTarget = m_pAnimScene->GetRoundIncome();
@@ -3538,7 +3538,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
             // BRAIN LIQUIDATION if funds will end up under 0
             if (totalEndFunds <= 0 || g_MetaMan.GetTotalBrainCountOfPlayer(m_AnimMetaPlayer) <= 0)
             {
-                m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 1.0, 0, Vector(m_apBrainPoolLabel[m_AnimMetaPlayer]->GetXPos() + (m_apBrainPoolLabel[m_AnimMetaPlayer]->GetHAlignment() == GUIFont::Left ? 5 : 16), m_apBrainPoolLabel[m_AnimMetaPlayer]->GetYPos() + 9) - m_PlanetCenter, "Brain Liquidation", 0, YELLOWGUICOLOR, -1, 0, channelHeight, 2.0f, false));
+                m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 1.0, 0, Vector(m_apBrainPoolLabel[m_AnimMetaPlayer]->GetXPos() + (m_apBrainPoolLabel[m_AnimMetaPlayer]->GetHAlignment() == GUIFont::Left ? 5 : 16), m_apBrainPoolLabel[m_AnimMetaPlayer]->GetYPos() + 9) - m_PlanetCenter, "Brain Liquidation", 0, c_GUIColorYellow, -1, 0, channelHeight, 2.0f, false));
                 // Start at 0 and grow to how much the brain is worth
                 m_IncomeSiteLines.back().m_FundsAmount = 0;
                 m_IncomeSiteLines.back().m_FundsTarget = BRAINGOLDVALUE;
@@ -4072,7 +4072,7 @@ void MetagameGUI::UpdateBaseBuilding()
 //            ChangeAnimMode(PAUSEANIM);
 
         // Find the next green defense line of this player
-        while (m_AnimActionLine < m_ActionSiteLines[m_AnimMetaPlayer].size() && m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_Color != GREENGUICOLOR)
+        while (m_AnimActionLine < m_ActionSiteLines[m_AnimMetaPlayer].size() && m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_Color != c_GUIColorGreen)
             m_AnimActionLine++;
 
         // Regular site line, start with bar bracket and line appearing toward the site
@@ -4258,7 +4258,7 @@ void MetagameGUI::UpdateBaseBuilding()
             for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[metaPlayer].begin(); slItr != m_ActionSiteLines[metaPlayer].end(); ++slItr)
             {
                 // APPLY all the defense budget allocations to actually building, but not before subtracting their values from the pre funds
-                if ((*slItr).m_Color == GREENGUICOLOR)
+                if ((*slItr).m_Color == c_GUIColorGreen)
                 {
                     if ((*slItr).m_pScene)
                     {
@@ -4521,7 +4521,7 @@ void MetagameGUI::UpdateOffensives()
 //                        if (remainingFunds <= 0)
 //                            PlayerTextIndication(mp, "No unallocated funds!", Vector(m_apPlayerBox[mp]->GetXPos(), m_apPlayerBox[mp]->GetYPos()), 1500);
 
-                        m_ActionSiteLines[mp].push_back(SiteLine(mp, meterStart, remainingFunds / g_MetaMan.m_Players[mp].m_Funds, m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), m_pAnimScene->GetPresetName(), m_pAnimScene, YELLOWGUICOLOR, -1, -1, 60, 1.0f, g_MetaMan.IsActiveTeam(m_pAnimScene->GetTeamOwnership())));
+                        m_ActionSiteLines[mp].push_back(SiteLine(mp, meterStart, remainingFunds / g_MetaMan.m_Players[mp].m_Funds, m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), m_pAnimScene->GetPresetName(), m_pAnimScene, c_GUIColorYellow, -1, -1, 60, 1.0f, g_MetaMan.IsActiveTeam(m_pAnimScene->GetTeamOwnership())));
                         // This will actually affect the line meter
                         m_ActionSiteLines[mp].back().m_FundsAmount = remainingFunds;
                         // Add to the battle funds display too
@@ -4579,7 +4579,7 @@ void MetagameGUI::UpdateOffensives()
         {
             m_SiteAttackTarget.m_CenterPos = m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset();
             m_SiteAttackTarget.m_AnimProgress = 0;
-            m_SiteAttackTarget.m_Color = REDGUICOLOR;
+            m_SiteAttackTarget.m_Color = c_GUIColorRed;
             m_AnimModeDuration = 600;
             m_AnimTimer1.Reset();
             m_AnimTimer2.Reset();
@@ -4616,7 +4616,7 @@ void MetagameGUI::UpdateOffensives()
                     for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                     {
                         // Offensive lines are red; set them up to have their meters visible
-                        if ((*slItr).m_Color == REDGUICOLOR)
+                        if ((*slItr).m_Color == c_GUIColorRed)
                         {
                            (*slItr).m_OnlyFirstSegments = 1;
                            (*slItr).m_OnlyLastSegments = -1;
@@ -4649,7 +4649,7 @@ void MetagameGUI::UpdateOffensives()
                         for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                         {
                             // Offensive lines are red; grow all of em
-                            if ((*slItr).m_Color == REDGUICOLOR)
+                            if ((*slItr).m_Color == c_GUIColorRed)
                                 (*slItr).m_OnlyFirstSegments++;
                         }
                     }
@@ -4661,7 +4661,7 @@ void MetagameGUI::UpdateOffensives()
         }
 
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // Animate the brain label travel animations
         UpdatePreBattleAttackers(EaseInOut(0, 1.0, DMin(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
@@ -4699,7 +4699,7 @@ void MetagameGUI::UpdateOffensives()
         UpdateSiteNameLabel(true, m_pAnimScene->GetPresetName(), m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 1.8);
 
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // Keep the brain label travel animations in one spot and their labels updated
         UpdatePreBattleAttackers(1.0);
@@ -4735,7 +4735,7 @@ void MetagameGUI::UpdateOffensives()
                     for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                     {
                         // Offensive lines are green; unallocated funds are white - attach all of them
-                        if ((*slItr).m_Color != REDGUICOLOR)
+                        if ((*slItr).m_Color != c_GUIColorRed)
                         {
                             (*slItr).m_OnlyFirstSegments = -1;
                             (*slItr).m_OnlyLastSegments = 0;
@@ -4767,7 +4767,7 @@ void MetagameGUI::UpdateOffensives()
                         for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                         {
                             // Offensive lines are red; grow the defensive ones relevant to this scene
-                            if ((*slItr).m_Color != REDGUICOLOR && m_pAnimScene->GetPresetName() == (*slItr).m_SiteName &&
+                            if ((*slItr).m_Color != c_GUIColorRed && m_pAnimScene->GetPresetName() == (*slItr).m_SiteName &&
                                 (m_pAnimScene->GetTeamOwnership() == g_MetaMan.m_Players[mp].GetTeam() && m_pAnimScene->GetResidentBrain(g_MetaMan.m_Players[mp].GetInGamePlayer())))
                                 (*slItr).m_OnlyLastSegments++;
                         }
@@ -4779,7 +4779,7 @@ void MetagameGUI::UpdateOffensives()
         }
 
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // Keep the brain label travel animations in one spot and their labels updated
         UpdatePreBattleAttackers(1.0);
@@ -4812,7 +4812,7 @@ void MetagameGUI::UpdateOffensives()
         // Keep the name on the attack site, keeping the name high so the contestants' info can fit in the quadrants around the site
         UpdateSiteNameLabel(true, m_pAnimScene->GetPresetName(), m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 1.8);
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         UpdatePostBattleRetreaters(0);
         UpdatePostBattleResidents(0);
@@ -4879,7 +4879,7 @@ void MetagameGUI::UpdateOffensives()
                     if (!m_aAnimDestroyed[mp] && m_AnimTimer2.GetElapsedRealTimeMS() > (m_AnimModeDuration * 0.5) && PosRand() < 0.05)
                     {
                         // Add circle explosion effect to where the brain icon used to be
-                        m_SiteSwitchIndicators.push_back(SiteTarget(m_aBrainIconPos[mp], 0, SiteTarget::CIRCLEGROW, REDGUICOLOR));
+                        m_SiteSwitchIndicators.push_back(SiteTarget(m_aBrainIconPos[mp], 0, SiteTarget::CIRCLEGROW, c_GUIColorRed));
                         // Switch the brain icon drawing off
                         m_aAnimDestroyed[mp] = true;
                     }
@@ -4919,7 +4919,7 @@ void MetagameGUI::UpdateOffensives()
         // Keep the name on the attack site, keeping the name high so the contestants' info can fit in the quadrants around the site
         UpdateSiteNameLabel(true, m_pAnimScene->GetPresetName(), m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 1.8);
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // Animate the brain label travel animations
         UpdatePostBattleRetreaters(0);
@@ -4947,7 +4947,7 @@ void MetagameGUI::UpdateOffensives()
                         if (!m_aAnimDestroyed[mp])
                         {
                             // Add circle explosion effect to where the brain icon used to be
-                            m_SiteSwitchIndicators.push_back(SiteTarget(m_aBrainIconPos[mp], 0, SiteTarget::CIRCLEGROW, REDGUICOLOR));
+                            m_SiteSwitchIndicators.push_back(SiteTarget(m_aBrainIconPos[mp], 0, SiteTarget::CIRCLEGROW, c_GUIColorRed));
                             // Switch the brain icon drawing off
                             m_aAnimDestroyed[mp] = true;
                         }
@@ -4979,7 +4979,7 @@ void MetagameGUI::UpdateOffensives()
         // Keep the name on the attack site, keeping the name high so the contestants' info can fit in the quadrants around the site
         UpdateSiteNameLabel(true, m_pAnimScene->GetPresetName(), m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 1.8);
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // The retreating brain label travel animations get updated to go back to their pools
         if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyEvacuees())
@@ -5033,7 +5033,7 @@ void MetagameGUI::UpdateOffensives()
         // Keep the name on the attack site, keeping the name high so the contestants' info can fit in the quadrants around the site
         UpdateSiteNameLabel(true, m_pAnimScene->GetPresetName(), m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 1.8);
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // The brains going back into their lair are animated
         UpdatePostBattleRetreaters(1.0);
@@ -5088,7 +5088,7 @@ void MetagameGUI::UpdateOffensives()
                     if ((*slItr).m_SiteName == m_pAnimScene->GetPresetName())
                     {
                         // Find their offensive funds site lines and set the offensive budget back to where it is supposed to end up
-                        if ((*slItr).m_Color == REDGUICOLOR)
+                        if ((*slItr).m_Color == c_GUIColorRed)
                             (*slItr).m_OnlyFirstSegments = 15;
                         // Defensive site
                         else if (m_pAnimScene->GetTeamOwnership() == g_MetaMan.m_Players[mp].GetTeam() && m_pAnimScene->GetResidentBrain(g_MetaMan.m_Players[mp].GetInGamePlayer()))
@@ -5209,7 +5209,7 @@ bool MetagameGUI::FinalizeOffensive()
 
     // If the battle caused ownership change, then show it with a cool indication
     if (m_BattleCausedOwnershipChange)
-        m_SiteSwitchIndicators.push_back(SiteTarget(m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 0, m_pAnimScene->GetTeamOwnership() != Activity::NOTEAM ? SiteTarget::SQUAREGROW : SiteTarget::CIRCLEGROW, REDGUICOLOR, m_AnimTimer2.GetElapsedRealTimeMS()));
+        m_SiteSwitchIndicators.push_back(SiteTarget(m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 0, m_pAnimScene->GetTeamOwnership() != Activity::NOTEAM ? SiteTarget::SQUAREGROW : SiteTarget::CIRCLEGROW, c_GUIColorRed, m_AnimTimer2.GetElapsedRealTimeMS()));
 
     // Clear the battle info of the last one
     ResetBattleInfo();
@@ -6021,7 +6021,7 @@ float MetagameGUI::UpdatePlayerActionLines(int metaPlayer)//, bool addUnallocate
         // Add line for scenes which are owned and whose build budgets have been set to something
         if (pScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer) && floorf(pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer())) > 0)
         {
-            m_ActionSiteLines[metaPlayer].push_back(SiteLine(metaPlayer, meterStart, pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / totalFunds, pScene->GetLocation() + pScene->GetLocationOffset(), pScene->GetPresetName(), pScene, GREENGUICOLOR, -1, -1, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(pScene->GetTeamOwnership())));
+            m_ActionSiteLines[metaPlayer].push_back(SiteLine(metaPlayer, meterStart, pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / totalFunds, pScene->GetLocation() + pScene->GetLocationOffset(), pScene->GetPresetName(), pScene, c_GUIColorGreen, -1, -1, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(pScene->GetTeamOwnership())));
             m_ActionSiteLines[metaPlayer].back().m_FundsAmount = pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer());
             meterStart += m_ActionSiteLines[metaPlayer].back().m_MeterAmount;
             channelHeight += 10;
@@ -6037,7 +6037,7 @@ float MetagameGUI::UpdatePlayerActionLines(int metaPlayer)//, bool addUnallocate
         {
             if ((*sItr)->IsRevealed() && (*sItr)->GetPresetName() == targetName)
             {
-                m_ActionSiteLines[metaPlayer].push_back(SiteLine(metaPlayer, meterStart, offensiveBudget / totalFunds, (*sItr)->GetLocation() + (*sItr)->GetLocationOffset(), (*sItr)->GetPresetName(), (*sItr), REDGUICOLOR, -1, -1, channelHeight, 1.0f, g_MetaMan.IsActiveTeam((*sItr)->GetTeamOwnership())));
+                m_ActionSiteLines[metaPlayer].push_back(SiteLine(metaPlayer, meterStart, offensiveBudget / totalFunds, (*sItr)->GetLocation() + (*sItr)->GetLocationOffset(), (*sItr)->GetPresetName(), (*sItr), c_GUIColorRed, -1, -1, channelHeight, 1.0f, g_MetaMan.IsActiveTeam((*sItr)->GetTeamOwnership())));
                 m_ActionSiteLines[metaPlayer].back().m_FundsAmount = offensiveBudget;
                 meterStart += m_ActionSiteLines[metaPlayer].back().m_MeterAmount;
             }

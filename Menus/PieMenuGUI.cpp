@@ -61,7 +61,7 @@ void PieMenuGUI::Slice::Clear()
     m_Direction = UP;
     m_GroupID = -1;
     m_AreaStart = 0;
-    m_AreaArc = QuartPI;
+    m_AreaArc = c_QuarterPI;
     m_MidAngle = m_AreaStart + (m_AreaArc / 2);
     m_ScriptPath.clear();
     m_FunctionName.clear();
@@ -674,20 +674,20 @@ void PieMenuGUI::RealignSlices()
         int which = 0;
         for (srItr = m_UpRightSlices.rbegin(); srItr != m_UpRightSlices.rend(); ++srItr)
         {
-            (*srItr).m_AreaArc = QuartPI / m_UpRightSlices.size();
-            (*srItr).m_AreaStart = EigthPI + which * (*srItr).m_AreaArc;
+            (*srItr).m_AreaArc = c_QuarterPI / m_UpRightSlices.size();
+            (*srItr).m_AreaStart = c_EighthPI + which * (*srItr).m_AreaArc;
             // Add the corner slice to the ordered list of all
             m_AllSlices.push_back(&(*srItr));
             ++which;
         }
-        m_UpSlice.m_AreaStart = QuartPI + EigthPI;
+        m_UpSlice.m_AreaStart = c_QuarterPI + c_EighthPI;
         // Assume next quadrant won't have any corner slices
-        m_UpSlice.m_AreaArc = QuartPI + EigthPI;
+        m_UpSlice.m_AreaArc = c_QuarterPI + c_EighthPI;
     }
     else
     {
-        m_UpSlice.m_AreaStart = QuartPI;
-        m_UpSlice.m_AreaArc = HalfPI;
+        m_UpSlice.m_AreaStart = c_QuarterPI;
+        m_UpSlice.m_AreaArc = c_HalfPI;
     }
 
     // Add the next cardinal slice to the ordered list of all
@@ -699,22 +699,22 @@ void PieMenuGUI::RealignSlices()
         int which = 0;
         for (sItr = m_UpLeftSlices.begin(); sItr != m_UpLeftSlices.end(); ++sItr)
         {
-            (*sItr).m_AreaArc = QuartPI / m_UpLeftSlices.size();
-            (*sItr).m_AreaStart = HalfPI + EigthPI + which * (*sItr).m_AreaArc;
+            (*sItr).m_AreaArc = c_QuarterPI / m_UpLeftSlices.size();
+            (*sItr).m_AreaStart = c_HalfPI + c_EighthPI + which * (*sItr).m_AreaArc;
             // Add the corner slice to the ordered list of all
             m_AllSlices.push_back(&(*sItr));
             ++which;
         }
-        m_LeftSlice.m_AreaStart = HalfPI + QuartPI + EigthPI;
+        m_LeftSlice.m_AreaStart = c_HalfPI + c_QuarterPI + c_EighthPI;
         // Assume next quadrant won't have any corner slices
-        m_LeftSlice.m_AreaArc =  QuartPI + EigthPI;
+        m_LeftSlice.m_AreaArc =  c_QuarterPI + c_EighthPI;
         // Adjust previous cardinal slice since this quadrant is encroaching on it
-        m_UpSlice.m_AreaArc -= EigthPI;
+        m_UpSlice.m_AreaArc -= c_EighthPI;
     }
     else
     {
-        m_LeftSlice.m_AreaStart = HalfPI + QuartPI;
-        m_LeftSlice.m_AreaArc = HalfPI;
+        m_LeftSlice.m_AreaStart = c_HalfPI + c_QuarterPI;
+        m_LeftSlice.m_AreaArc = c_HalfPI;
     }
 
     // Add the next cardinal slice to the ordered list of all
@@ -726,22 +726,22 @@ void PieMenuGUI::RealignSlices()
         int which = 0;
         for (sItr = m_DownLeftSlices.begin(); sItr != m_DownLeftSlices.end(); ++sItr)
         {
-            (*sItr).m_AreaArc = QuartPI / m_DownLeftSlices.size();
-            (*sItr).m_AreaStart = PI + EigthPI + which * (*sItr).m_AreaArc;
+            (*sItr).m_AreaArc = c_QuarterPI / m_DownLeftSlices.size();
+            (*sItr).m_AreaStart = c_PI + c_EighthPI + which * (*sItr).m_AreaArc;
             // Add the corner slice to the ordered list of all
             m_AllSlices.push_back(&(*sItr));
             ++which;
         }
-        m_DownSlice.m_AreaStart = PI + QuartPI + EigthPI;
+        m_DownSlice.m_AreaStart = c_PI + c_QuarterPI + c_EighthPI;
         // Assume next quadrant won't have any corner slices
-        m_DownSlice.m_AreaArc = QuartPI + EigthPI;
+        m_DownSlice.m_AreaArc = c_QuarterPI + c_EighthPI;
         // Adjust previous cardinal slice since this quadrant is encroaching on it
-        m_LeftSlice.m_AreaArc -= EigthPI;
+        m_LeftSlice.m_AreaArc -= c_EighthPI;
     }
     else
     {
-        m_DownSlice.m_AreaStart = PI + QuartPI;
-        m_DownSlice.m_AreaArc = HalfPI;
+        m_DownSlice.m_AreaStart = c_PI + c_QuarterPI;
+        m_DownSlice.m_AreaArc = c_HalfPI;
     }
 
     // Add the next cardinal slice to the ordered list of all
@@ -753,22 +753,22 @@ void PieMenuGUI::RealignSlices()
         int which = 0;
         for (srItr = m_DownRightSlices.rbegin(); srItr != m_DownRightSlices.rend(); ++srItr)
         {
-            (*srItr).m_AreaArc = QuartPI / m_DownRightSlices.size();
-            (*srItr).m_AreaStart = PI + HalfPI + EigthPI + which * (*srItr).m_AreaArc;
+            (*srItr).m_AreaArc = c_QuarterPI / m_DownRightSlices.size();
+            (*srItr).m_AreaStart = c_PI + c_HalfPI + c_EighthPI + which * (*srItr).m_AreaArc;
             // Add the corner slice to the ordered list of all
             m_AllSlices.push_back(&(*srItr));
             ++which;
         }
-        m_RightSlice.m_AreaStart = PI + HalfPI + QuartPI + EigthPI;
+        m_RightSlice.m_AreaStart = c_PI + c_HalfPI + c_QuarterPI + c_EighthPI;
         // Check if next quadrant has any corner slices and set size accordingly
-        m_RightSlice.m_AreaArc = QuartPI + (m_UpRightSlices.empty() ? EigthPI : 0);
+        m_RightSlice.m_AreaArc = c_QuarterPI + (m_UpRightSlices.empty() ? c_EighthPI : 0);
         // Adjust previous cardinal slice since this quadrant is encroaching on it
-        m_DownSlice.m_AreaArc -= EigthPI;
+        m_DownSlice.m_AreaArc -= c_EighthPI;
     }
     else
     {
-        m_RightSlice.m_AreaStart = PI + HalfPI + QuartPI;
-        m_RightSlice.m_AreaArc = HalfPI - (m_UpRightSlices.empty() ? 0 : EigthPI);
+        m_RightSlice.m_AreaStart = c_PI + c_HalfPI + c_QuarterPI;
+        m_RightSlice.m_AreaArc = c_HalfPI - (m_UpRightSlices.empty() ? 0 : c_EighthPI);
     }
 
     // Add the next cardinal slice to the ordered list of all
@@ -799,7 +799,7 @@ const PieMenuGUI::Slice * PieMenuGUI::GetSliceOnAngle(float angle)
             return *sItr;
 
         // Check for if the target slice overlaps the 0 point on the arc
-        if (areaEnd > PI * 2 && angle >= 0 && angle < (areaEnd - PI * 2))
+        if (areaEnd > c_PI * 2 && angle >= 0 && angle < (areaEnd - c_PI * 2))
             return *sItr;
     }
 
@@ -929,7 +929,7 @@ void PieMenuGUI::Update()
 
         // Always make cursor pos positive
         while (m_CursorAng < 0)
-            m_CursorAng += PI * 2;
+            m_CursorAng += c_PI * 2;
 
         // If enough input to give an angle, and a slice is present there, highlight it
         const Slice *pNewSlice = GetSliceOnAngle(m_CursorAng);
@@ -1017,7 +1017,7 @@ void PieMenuGUI::Update()
                     if (m_CursorAng < m_DownSlice.m_MidAngle && m_CursorAng > m_UpSlice.m_MidAngle)
                         SelectSlice(&m_RightSlice, true);
                     else if (m_pHoveredSlice != &m_RightSlice)
-                        step = m_CursorAng > m_RightSlice.m_MidAngle || m_CursorAng < (m_RightSlice.m_MidAngle - PI) ? -1 : 1;
+                        step = m_CursorAng > m_RightSlice.m_MidAngle || m_CursorAng < (m_RightSlice.m_MidAngle - c_PI) ? -1 : 1;
                     m_DInputHoldTimer.Reset();
                 }
 
@@ -1381,7 +1381,7 @@ void PieMenuGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
         {
             Vector cursorPos(m_InnerRadius/* - s_pCursor->w*/, 0);
             cursorPos.RadRotate(m_CursorAng);
-            pivot_sprite(pTargetBitmap, s_pCursor, drawPos.m_X + cursorPos.m_X, drawPos.m_Y + cursorPos.m_Y, s_pCursor->w / 2, s_pCursor->h / 2,  ftofix((m_CursorAng / PI) * -128));
+            pivot_sprite(pTargetBitmap, s_pCursor, drawPos.m_X + cursorPos.m_X, drawPos.m_Y + cursorPos.m_Y, s_pCursor->w / 2, s_pCursor->h / 2,  ftofix((m_CursorAng / c_PI) * -128));
     //        g_SceneMan.RegisterPostEffect(cursorPos, s_pCursorGlow, 
         }
 
@@ -1399,7 +1399,7 @@ void PieMenuGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
             if (m_pHoveredSlice == &m_UpSlice || m_pHoveredSlice == &m_DownSlice)
                 pFont->DrawAligned(&allegroBitmap, drawPos.m_X + textPos.m_X, drawPos.m_Y + textPos.m_Y, m_pHoveredSlice->m_Description.c_str(), GUIFont::Centre);
             // Right side, so align text left
-            else if (m_CursorAng < HalfPI || m_CursorAng > PI + HalfPI)
+            else if (m_CursorAng < c_HalfPI || m_CursorAng > c_PI + c_HalfPI)
                 pFont->DrawAligned(&allegroBitmap, drawPos.m_X + textPos.m_X, drawPos.m_Y + textPos.m_Y, m_pHoveredSlice->m_Description.c_str(), GUIFont::Left);
             // Left side, so align text right
             else

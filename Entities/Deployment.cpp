@@ -761,7 +761,7 @@ void Deployment::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode m
 			{
 				masked_blit(pBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), pBitmap->w, pBitmap->h);
 				// Draw the spawn radius circle too
-				circle(pTargetBitmap, aDrawPos[i].GetFloorIntX() + (pBitmap->w / 2), aDrawPos[i].GetFloorIntY() + (pBitmap->h / 2), m_SpawnRadius, makecol(232, 232, 248));
+				circle(pTargetBitmap, aDrawPos[i].GetFloorIntX() + (pBitmap->w / 2), aDrawPos[i].GetFloorIntY() + (pBitmap->h / 2), m_SpawnRadius, c_GUIColorGray);
 			}
 			else if (mode == g_DrawLess)
 			{
@@ -771,7 +771,7 @@ void Deployment::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode m
 			{
 				draw_trans_sprite(pTargetBitmap, pBitmap, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY());
 				// Draw the spawn radius circle too
-				circle(pTargetBitmap, aDrawPos[i].GetFloorIntX() + (pBitmap->w / 2), aDrawPos[i].GetFloorIntY() + (pBitmap->h / 2), m_SpawnRadius, makecol(232, 232, 248));
+				circle(pTargetBitmap, aDrawPos[i].GetFloorIntX() + (pBitmap->w / 2), aDrawPos[i].GetFloorIntY() + (pBitmap->h / 2), m_SpawnRadius, c_GUIColorGray);
 			}
 		}
 	}

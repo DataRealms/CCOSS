@@ -41,6 +41,7 @@ struct RECT
 #include "GUIEvent.h"
 #include "GUIControlFactory.h"
 #include "GUIControlManager.h"
+#include "Constants.h"
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

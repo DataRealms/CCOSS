@@ -329,7 +329,7 @@ namespace RTE
 					velMin = min(eItr->GetMinVelocity(), eItr->GetMaxVelocity());
 					velMax = max(eItr->GetMinVelocity(), eItr->GetMaxVelocity());
 					velRange = (velMax - velMin) * 0.5;
-					spread = max(static_cast<float>(PI)-eItr->GetSpread(), .0f) / PI;     // A large spread will cause the forces to cancel eachother out
+					spread = max(static_cast<float>(c_PI)-eItr->GetSpread(), .0f) / c_PI;     // A large spread will cause the forces to cancel eachother out
 
 					// Add to accumulative recoil impulse generated, F = m * a.
 					impulse += (velMin + velRange) * spread * eItr->m_pEmission->GetMass() * emissions;

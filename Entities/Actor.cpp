@@ -87,7 +87,7 @@ void Actor::Clear()
     m_GoldPicked = false;
     m_AimState = AIMSTILL;
     m_AimAngle = 0;
-    m_AimRange = HalfPI;
+    m_AimRange = c_HalfPI;
     m_AimDistance = 0;
     m_AimTmr.Reset();
     m_SharpAimTimer.Reset();
@@ -768,7 +768,7 @@ void Actor::RestDetection()
 
 float Actor::FacingAngle(float angle) const
 {
-    return (m_HFlipped ? PI : 0) + (angle * (m_HFlipped ? -1 : 1));
+    return (m_HFlipped ? c_PI : 0) + (angle * (m_HFlipped ? -1 : 1));
 //    return (angle * m_HFlipped ? -1 : 1);
 }
 
@@ -965,7 +965,7 @@ void Actor::DropAllInventory()
 			// Detect whether we're dealing with a passenger and add it as Actor instead
 			if (pPassenger = dynamic_cast<Actor *>(pObject))
 			{
-				pPassenger->SetRotAngle(HalfPI * NormalRand());
+				pPassenger->SetRotAngle(c_HalfPI * NormalRand());
 				pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5);
 				pPassenger->SetHFlipped(PosRand() > 0.5);
 				pPassenger->SetStatus(UNSTABLE);
@@ -1076,7 +1076,7 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
         // Detect whether we're dealing with a passenger and add it as Actor instead
         if (pPassenger = dynamic_cast<Actor *>(pObject))
         {
-            pPassenger->SetRotAngle(HalfPI * NormalRand());
+            pPassenger->SetRotAngle(c_HalfPI * NormalRand());
             pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5);
             pPassenger->SetHFlipped(PosRand() > 0.5);
             pPassenger->SetStatus(UNSTABLE);

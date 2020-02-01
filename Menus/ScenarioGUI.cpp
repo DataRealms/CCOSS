@@ -666,9 +666,9 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
 
 			// Mark user-created scenes to let players easily distinguish them from built-in
 			if ((*sItr)->GetModuleID() == g_PresetMan.GetModuleID("Scenes.rte"))
-				color = makecol(128, 255, 128);
+				color = c_GUIColorGreen;
 			else
-				color = makecol(255, 255, 128);
+				color = c_GUIColorYellow;
 
             screenLocation = m_PlanetCenter + (*sItr)->GetLocation() + (*sItr)->GetLocationOffset();
             blendAmount = 85 + 25 * NormalRand();
@@ -684,7 +684,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
         if (m_pSelectedScene && m_pSceneInfoBox->GetVisible())
         {
             Vector sceneInfoBoxPos(m_pSceneInfoBox->GetXPos() + (m_pSceneInfoBox->GetWidth() / 2), m_pSceneInfoBox->GetYPos() + (m_pSceneInfoBox->GetHeight() / 2));
-            DrawScreenLineToSitePoint(drawBitmap, sceneInfoBoxPos, m_pSelectedScene->GetLocation() +  m_pSelectedScene->GetLocationOffset(), WHITEGUICOLOR, -1, -1, (m_pSceneInfoBox->GetHeight() / 2) + CHAMFERSIZE + 6, 1.0);
+            DrawScreenLineToSitePoint(drawBitmap, sceneInfoBoxPos, m_pSelectedScene->GetLocation() +  m_pSelectedScene->GetLocationOffset(), c_GUIColorWhite, -1, -1, (m_pSceneInfoBox->GetHeight() / 2) + CHAMFERSIZE + 6, 1.0);
 	    }
     }
 
@@ -731,12 +731,12 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
                 // Screen blend the dots and lines, with some flicekring in its intensity
                 int blendAmount = 230;
                 set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-                rectfill(drawBitmap, m_pPlayerSetupBox->GetXPos() + 110, m_pPlayerSetupBox->GetYPos() + lineY, m_pPlayerSetupBox->GetXPos() + m_pPlayerSetupBox->GetWidth() - 12, m_pPlayerSetupBox->GetYPos() + lineY + 25, DARKBLUEGUICOLOR);
+                rectfill(drawBitmap, m_pPlayerSetupBox->GetXPos() + 110, m_pPlayerSetupBox->GetYPos() + lineY, m_pPlayerSetupBox->GetXPos() + m_pPlayerSetupBox->GetWidth() - 12, m_pPlayerSetupBox->GetYPos() + lineY + 25, c_GUIColorDarkBlue);
             }
             // Back to solid drawing
             drawing_mode(DRAW_MODE_SOLID, 0, 0, 0);
             // Cell border separator lines
-            line(drawBitmap, m_pPlayerSetupBox->GetXPos() + 110, m_pPlayerSetupBox->GetYPos() + lineY, m_pPlayerSetupBox->GetXPos() + m_pPlayerSetupBox->GetWidth() - 12, m_pPlayerSetupBox->GetYPos() + lineY, LIGHTBLUEGUICOLOR);
+            line(drawBitmap, m_pPlayerSetupBox->GetXPos() + 110, m_pPlayerSetupBox->GetYPos() + lineY, m_pPlayerSetupBox->GetXPos() + m_pPlayerSetupBox->GetWidth() - 12, m_pPlayerSetupBox->GetYPos() + lineY, c_GUIColorLightBlue);
             lineY += 25;
         }
 
@@ -1287,7 +1287,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                     else
                     {
                         m_aapPlayerBoxes[player][team]->SetDrawType(GUICollectionBox::Color);
-                        m_aapPlayerBoxes[player][team]->SetDrawColor(BLUEGUICOLOR);
+                        m_aapPlayerBoxes[player][team]->SetDrawColor(c_GUIColorBlue);
                     }
 
                     // The CPU gets placed on its locked team
@@ -1303,7 +1303,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                         else
                         {
                             m_aapPlayerBoxes[player][team]->SetDrawType(GUICollectionBox::Color);
-                            m_aapPlayerBoxes[player][team]->SetDrawColor(BLUEGUICOLOR);
+                            m_aapPlayerBoxes[player][team]->SetDrawColor(c_GUIColorBlue);
                         }
                     }
                 }
@@ -1342,7 +1342,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
 									if (m_aapPlayerBoxes[player][t2]->GetDrawType() == GUICollectionBox::Image)
 									{
 										m_aapPlayerBoxes[player][t2]->SetDrawType(GUICollectionBox::Color);
-										m_aapPlayerBoxes[player][t2]->SetDrawColor(BLUEGUICOLOR);
+										m_aapPlayerBoxes[player][t2]->SetDrawColor(c_GUIColorBlue);
 									} else {
 										pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 										if (pIcon)
@@ -1359,7 +1359,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
 								if (player != PLAYER_CPU)
 								{
 									m_aapPlayerBoxes[player][t2]->SetDrawType(GUICollectionBox::Color);
-									m_aapPlayerBoxes[player][t2]->SetDrawColor(BLUEGUICOLOR);
+									m_aapPlayerBoxes[player][t2]->SetDrawColor(c_GUIColorBlue);
 								}
                             }
                         }
@@ -1372,7 +1372,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                                 if (m_aapPlayerBoxes[p2][team]->GetDrawType() == GUICollectionBox::Image)
                                 {
                                     m_aapPlayerBoxes[p2][team]->SetDrawType(GUICollectionBox::Color);
-                                    m_aapPlayerBoxes[p2][team]->SetDrawColor(BLUEGUICOLOR);
+                                    m_aapPlayerBoxes[p2][team]->SetDrawColor(c_GUIColorBlue);
                                     // Move him to disabled
                                     m_aapPlayerBoxes[p2][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
                                     pIcon = g_UInputMan.GetSchemeIcon(p2);
@@ -1389,7 +1389,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
 								if (m_aapPlayerBoxes[PLAYER_CPU][t2]->GetDrawType() == GUICollectionBox::Image)
 								{
 									m_aapPlayerBoxes[PLAYER_CPU][t2]->SetDrawType(GUICollectionBox::Color);
-									m_aapPlayerBoxes[PLAYER_CPU][t2]->SetDrawColor(BLUEGUICOLOR);
+									m_aapPlayerBoxes[PLAYER_CPU][t2]->SetDrawColor(c_GUIColorBlue);
 								}
 							}
 						}
@@ -1400,7 +1400,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                             if (m_aapPlayerBoxes[PLAYER_CPU][team]->GetDrawType() == GUICollectionBox::Image)
                             {
                                 m_aapPlayerBoxes[PLAYER_CPU][team]->SetDrawType(GUICollectionBox::Color);
-                                m_aapPlayerBoxes[PLAYER_CPU][team]->SetDrawColor(BLUEGUICOLOR);
+                                m_aapPlayerBoxes[PLAYER_CPU][team]->SetDrawColor(c_GUIColorBlue);
                                 // Move him to disabled
                                 //m_aapPlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
                                 //pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
@@ -1428,20 +1428,20 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
 							}
 						} else {
 							m_aapPlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Color);
-							m_aapPlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawColor(BLUEGUICOLOR);
+							m_aapPlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawColor(c_GUIColorBlue);
 						}
 
                     }
                     // Just highlight the cell
-                    else if (m_aapPlayerBoxes[player][team]->GetDrawColor() != LIGHTBLUEGUICOLOR)
+                    else if (m_aapPlayerBoxes[player][team]->GetDrawColor() != c_GUIColorLightBlue)
                     {
-                        m_aapPlayerBoxes[player][team]->SetDrawColor(LIGHTBLUEGUICOLOR);
+                        m_aapPlayerBoxes[player][team]->SetDrawColor(c_GUIColorLightBlue);
                         m_SelectionChangeSound.Play();
                     }
                 }
                 // Un-highlight all other cells
                 else if (pHoveredCell && m_aapPlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Color)
-                    m_aapPlayerBoxes[player][team]->SetDrawColor(BLUEGUICOLOR);
+                    m_aapPlayerBoxes[player][team]->SetDrawColor(c_GUIColorBlue);
             }
         }
 

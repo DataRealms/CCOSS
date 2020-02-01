@@ -585,7 +585,7 @@ void ACRocket::UpdateAI()
     if (m_ObstacleState == BACKSTEPPING)
         m_ObstacleState = BACKSTEPPING;
     // Don't when very close to the ground, unless taking off, or if really rotated
-    else if (m_DeliveryState != LAUNCH && altitude < thrustLimit || m_AltitudeControl >= 1.0/* || fabs(angle) > SixteenthPI */)
+    else if (m_DeliveryState != LAUNCH && altitude < thrustLimit || m_AltitudeControl >= 1.0/* || fabs(angle) > c_SixteenthPI */)
         m_ObstacleState = PROCEEDING;
     // Always fire if alt control is maxed out
     else if (m_AltitudeControl <= -1.0)
@@ -612,11 +612,11 @@ void ACRocket::UpdateAI()
         m_LateralMoveState = LAT_STILL;
     else
     {
-        if (angle > SixteenthPI / 2)
+        if (angle > c_SixteenthPI / 2)
         {
             m_LateralMoveState = LAT_LEFT;
         }
-        else if (angle < -SixteenthPI / 2)
+        else if (angle < -c_SixteenthPI / 2)
         {
             m_LateralMoveState = LAT_RIGHT;
         }
@@ -662,7 +662,7 @@ void ACRocket::Update()
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 
     // Look/aim update, make the scanner point aftward if the rocket is falling
-    m_AimAngle = m_Vel.m_Y < 0 ? HalfPI : -HalfPI;
+    m_AimAngle = m_Vel.m_Y < 0 ? c_HalfPI : -c_HalfPI;
 
     /////////////////////////////////
     // Controller update and handling
@@ -929,15 +929,15 @@ void ACRocket::Update()
     if (m_pMThruster) {
         m_pMThruster->SetJointPos(m_Pos + RotateOffset(m_pMThruster->GetParentOffset()));
 //        m_pMThruster->SetVel(m_Vel);
-        m_pMThruster->SetRotAngle(m_Rotation.GetRadAngle() - HalfPI);
-//        m_pMThruster->SetEmitAngle(m_Rotation - HalfPI);
+        m_pMThruster->SetRotAngle(m_Rotation.GetRadAngle() - c_HalfPI);
+//        m_pMThruster->SetEmitAngle(m_Rotation - c_HalfPI);
         m_pMThruster->Update();
     }
 
     if (m_pRThruster) {
         m_pRThruster->SetJointPos(m_Pos + RotateOffset(m_pRThruster->GetParentOffset()));
         m_pRThruster->SetVel(m_Vel);
-        m_pRThruster->SetRotAngle(m_Rotation.GetRadAngle() + EigthPI);
+        m_pRThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_EighthPI);
 //        m_pRThruster->SetEmitAngle(m_Rotation);
         m_pRThruster->Update();
     }
@@ -945,24 +945,24 @@ void ACRocket::Update()
     if (m_pLThruster) {
         m_pLThruster->SetJointPos(m_Pos + RotateOffset(m_pLThruster->GetParentOffset()));
         m_pLThruster->SetVel(m_Vel);
-        m_pLThruster->SetRotAngle(m_Rotation.GetRadAngle() + PI - EigthPI);
-//        m_pLThruster->SetEmitAngle(m_Rotation + PI);
+        m_pLThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_PI - c_EighthPI);
+//        m_pLThruster->SetEmitAngle(m_Rotation + c_PI);
         m_pLThruster->Update();
     }
 
     if (m_pURThruster) {
         m_pURThruster->SetJointPos(m_Pos + RotateOffset(m_pURThruster->GetParentOffset()));
         m_pURThruster->SetVel(m_Vel);
-        m_pURThruster->SetRotAngle(m_Rotation.GetRadAngle() + HalfPI - QuartPI / 2);
-//        m_pURThruster->SetEmitAngle(-QuartPI / 2);
+        m_pURThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_HalfPI - c_QuarterPI / 2);
+//        m_pURThruster->SetEmitAngle(-c_QuarterPI / 2);
         m_pURThruster->Update();
     }
 
     if (m_pULThruster) {
         m_pULThruster->SetJointPos(m_Pos + RotateOffset(m_pULThruster->GetParentOffset()));
         m_pULThruster->SetVel(m_Vel);
-        m_pULThruster->SetRotAngle(m_Rotation.GetRadAngle() + HalfPI + QuartPI / 2);
-//        m_pULThruster->SetEmitAngle(QuartPI / 2);
+        m_pULThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_HalfPI + c_QuarterPI / 2);
+//        m_pULThruster->SetEmitAngle(c_QuarterPI / 2);
         m_pULThruster->Update();
     }
 
@@ -979,15 +979,15 @@ void ACRocket::Update()
     float rot = m_Rotation.GetRadAngle();
 
     // Eliminate full rotations
-    while (fabs(rot) > TwoPI)
-        rot -= rot > 0 ? TwoPI : -TwoPI;
+    while (fabs(rot) > c_TwoPI)
+        rot -= rot > 0 ? c_TwoPI : -c_TwoPI;
 
     // Eliminate rotations over half a turn
-    if (fabs(rot) > PI)
-        rot = (rot > 0 ? -PI : PI) + (rot - (rot > 0 ? PI : -PI));
+    if (fabs(rot) > c_PI)
+        rot = (rot > 0 ? -c_PI : c_PI) + (rot - (rot > 0 ? c_PI : -c_PI));
 
     // If tipped too far for too long, die
-    if (rot < HalfPI && rot > -HalfPI)
+    if (rot < c_HalfPI && rot > -c_HalfPI)
 	{
         m_FlippedTimer.Reset();
 	}
@@ -1005,7 +1005,7 @@ void ACRocket::Update()
             FlashWhite(10);
     }
 /*
-//        rot = fabs(rot) < QuartPI ? rot : (rot > 0 ? QuartPI : -QuartPI);
+//        rot = fabs(rot) < c_QuarterPI ? rot : (rot > 0 ? c_QuarterPI : -c_QuarterPI);
 
     // Rotational balancing spring calc
     if (m_Status == STABLE) {
@@ -1017,8 +1017,8 @@ void ACRocket::Update()
     }
     // Unstable, or without balance
     else if (m_Status == DYING) {
-//        float rotTarget = rot > 0 ? HalfPI : -HalfPI;
-        float rotTarget = HalfPI;
+//        float rotTarget = rot > 0 ? c_HalfPI : -c_HalfPI;
+        float rotTarget = c_HalfPI;
         float rotDiff = rotTarget - rot;
         if (fabs(rotDiff) > 0.1)
             m_AngularVel += rotDiff * rotDiff;

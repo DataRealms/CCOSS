@@ -13,6 +13,7 @@
 
 #include "DDTError.h"
 #include "allegro.h"
+#include "Constants.h"
 
 
 namespace RTE

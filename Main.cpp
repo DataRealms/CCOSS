@@ -450,7 +450,7 @@ bool LoadDataModules()
                 LoadingSplashProgressReport("Could not read global file info of: " + string(zippedModuleInfo.name), true);
 
             // Buffer to hold data read from the zip file.
-            char fileBuffer[FILEBUFFER_SIZE];
+			char fileBuffer[c_FileBufferSize];
 
             // Loop to extract all files
             bool abortExtract = false;
@@ -458,13 +458,13 @@ bool LoadDataModules()
             {
                 // Get info about current file.
                 unz_file_info fileInfo;
-                char outputFileName[MAX_FILENAME];
-                if (unzGetCurrentFileInfo(zipFile, &fileInfo, outputFileName, MAX_FILENAME, NULL, 0, NULL, 0) != UNZ_OK)
+                char outputFileName[c_MaxFileName];
+                if (unzGetCurrentFileInfo(zipFile, &fileInfo, outputFileName, c_MaxFileName, NULL, 0, NULL, 0) != UNZ_OK)
                     LoadingSplashProgressReport("Could not read file info of: " + string(outputFileName), true);
 
                 // Check if the directory we are trying to extract into exists, and if not, create it
-                char outputDirName[MAX_FILENAME];
-                char parentDirName[MAX_FILENAME];
+                char outputDirName[c_MaxFileName];
+                char parentDirName[c_MaxFileName];
                 // Copy the file path to a separate dir path
                 strcpy(outputDirName, outputFileName);
                 // Find the last slash in the dir path, so we can cut off everything after that (ie the actual filename), and only have the directory path left
@@ -557,12 +557,12 @@ bool LoadDataModules()
                     do
                     {
                         // Read a chunk
-                        bytesRead = unzReadCurrentFile(zipFile, fileBuffer, FILEBUFFER_SIZE);
+                        bytesRead = unzReadCurrentFile(zipFile, fileBuffer, c_FileBufferSize);
                         // Add to total tally
                         totalBytesRead += bytesRead;
 
                         // Sanity check how damn big this file we're writing is becoming.. could prevent zip bomb exploits: http://en.wikipedia.org/wiki/Zip_bomb
-                        if (totalBytesRead >= MAX_UNZIPPED_FILE_SIZE)
+                        if (totalBytesRead >= c_MaxUnzippedFileSize)
                         {
                             LoadingSplashProgressReport("File inside zip " + string(zippedModuleInfo.name) +  " is turning out WAY TOO LARGE - Aborting extraction!", true);
                             abortExtract = true;
@@ -1088,7 +1088,7 @@ bool PlayIntroTitle()
     bool keyPressed = false, sectionSwitch = true;
     float planetRadius = 240;
     float orbitRadius = 274;
-    float orbitRotation = HalfPI - EigthPI;
+    float orbitRotation = c_HalfPI - c_EighthPI;
     // Set the start so that the nebula is fully scolled up
     int startYOffset = pBackdrop->GetBitmap()->h / backdropScrollRatio - (resY / backdropScrollRatio);
     int titleAppearYOffset = 900;
@@ -1255,13 +1255,13 @@ bool PlayIntroTitle()
 
 
 			// Draw pioneer promo capsule
-			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -PI * 1.27 && orbitRotation > -PI * 1.85)
+			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.27 && orbitRotation > -c_PI * 1.85)
 			{
 				// Start drawig pioneer apsule
 				// Slowly decrease radius to show that the capsule is falling
-				float radiusperc = 1 - ((fabs(orbitRotation) - (1.27 * PI)) / (0.35 * PI) / 4);
+				float radiusperc = 1 - ((fabs(orbitRotation) - (1.27 * c_PI)) / (0.35 * c_PI) / 4);
 				// Slowly decrease size to make the capsule disappear after a while
-				float sizeperc = 1 - ((fabs(orbitRotation) - (1.27 * PI)) / (0.35 * PI) / 1.5);
+				float sizeperc = 1 - ((fabs(orbitRotation) - (1.27 * c_PI)) / (0.35 * c_PI) / 1.5);
 
 				// Rotate, place and draw capsule
 				capsuleOffset.SetXY(orbitRadius * radiusperc, 0);
@@ -1273,10 +1273,10 @@ bool PlayIntroTitle()
 			}
 
 			// Enable promo clickables only if we're in main menu and the station is at the required location (under the menu)
-			if (g_IntroState == MENUACTIVE && g_pMainMenuGUI->AllowPioneerPromo() &&  orbitRotation < -PI * 1.25 && orbitRotation > -PI * 1.95)
+			if (g_IntroState == MENUACTIVE && g_pMainMenuGUI->AllowPioneerPromo() &&  orbitRotation < -c_PI * 1.25 && orbitRotation > -c_PI * 1.95)
 			{
 				// After capsule flew some time, start showing angry pioneer
-				if (orbitRotation < -PI * 1.32 && orbitRotation > -PI * 1.65)
+				if (orbitRotation < -c_PI * 1.32 && orbitRotation > -c_PI * 1.65)
 				{
 					Vector pioneerScreamPos = planetPos - Vector(320 - 130, 320 + 44);
 
@@ -1297,7 +1297,7 @@ bool PlayIntroTitle()
 					g_pMainMenuGUI->SetPioneerPromoBox(promoBox);
 				} 
 
-				if (orbitRotation < -PI * 1.65 && orbitRotation > -PI * 1.95)
+				if (orbitRotation < -c_PI * 1.65 && orbitRotation > -c_PI * 1.95)
 				{
 					Vector promoPos = planetPos - Vector(320 - 128, 320 + 29);
 
@@ -1317,12 +1317,12 @@ bool PlayIntroTitle()
 			stationOffset.SetXY(orbitRadius, 0);
 			stationOffset.RadRotate(orbitRotation);
 			pStation->SetPos(planetPos + stationOffset);
-			pStation->SetRotAngle(-HalfPI + orbitRotation);
+			pStation->SetRotAngle(-c_HalfPI + orbitRotation);
 			pStation->Draw(g_FrameMan.GetBackBuffer32());
 
 			// Start explosion effects to show that there's something wrong with the station
 			// but only if we're not in campaign
-			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -PI * 1.25 && orbitRotation > -TwoPI)
+			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.25 && orbitRotation > -c_TwoPI)
 			{
 				// Add explosions delay and count them
 				if (g_TimerMan.GetAbsoulteTime() > lastPuff + 1000000)
@@ -1381,8 +1381,8 @@ bool PlayIntroTitle()
 			orbitRotation -= 0.0020; //0.0015
 
             // Keep the rotation angle from getting too large
-            if (orbitRotation < -TwoPI)
-                orbitRotation += TwoPI;
+            if (orbitRotation < -c_TwoPI)
+                orbitRotation += c_TwoPI;
             g_StationOffsetX = stationOffset.m_X;
             g_StationOffsetY = stationOffset.m_Y;
         }
@@ -2302,9 +2302,9 @@ bool PlayIntroTitle()
             sectionSwitch = true;
 
             scrollOffset.m_Y = preMenuYOffset;
-            orbitRotation = HalfPI - EigthPI;
+            orbitRotation = c_HalfPI - c_EighthPI;
 
-			orbitRotation = -PI * 1.20;
+			orbitRotation = -c_PI * 1.20;
 /*
             // Start/Jump the song to the theme spot
             g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0);

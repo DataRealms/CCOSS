@@ -263,7 +263,7 @@ Vector HeldDevice::GetSupportPos() const
 {
 /*
     Vector rotOff(m_SupportOffset.GetYFlipped(m_HFlipped));
-    rotOff.RadRotate(m_HFlipped ? (PI + m_Rotation) : m_Rotation);
+    rotOff.RadRotate(m_HFlipped ? (c_PI + m_Rotation) : m_Rotation);
     return m_Pos + rotOff;
 */
     return m_Pos + RotateOffset(m_SupportOffset);

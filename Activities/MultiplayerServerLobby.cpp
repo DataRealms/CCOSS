@@ -583,7 +583,7 @@ namespace RTE
 						else
 						{
 							m_aapPlayerBoxes[player][team]->SetDrawType(GUICollectionBox::Color);
-							m_aapPlayerBoxes[player][team]->SetDrawColor(DEFAULTSLOTCOLOR);
+							m_aapPlayerBoxes[player][team]->SetDrawColor(c_PlayerSlotColorDefault);
 						}
 
 						// The CPU gets placed on its locked team
@@ -599,7 +599,7 @@ namespace RTE
 							else
 							{
 								m_aapPlayerBoxes[player][team]->SetDrawType(GUICollectionBox::Color);
-								m_aapPlayerBoxes[player][team]->SetDrawColor(DEFAULTSLOTCOLOR);
+								m_aapPlayerBoxes[player][team]->SetDrawColor(c_PlayerSlotColorDefault);
 							}
 						}
 					}
@@ -639,7 +639,7 @@ namespace RTE
 										if (m_aapPlayerBoxes[player][t2]->GetDrawType() == GUICollectionBox::Image)
 										{
 											m_aapPlayerBoxes[player][t2]->SetDrawType(GUICollectionBox::Color);
-											m_aapPlayerBoxes[player][t2]->SetDrawColor(DEFAULTSLOTCOLOR);
+											m_aapPlayerBoxes[player][t2]->SetDrawColor(c_PlayerSlotColorDefault);
 										}
 										else {
 											pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
@@ -657,7 +657,7 @@ namespace RTE
 									if (player != PLAYER_CPU)
 									{
 										m_aapPlayerBoxes[player][t2]->SetDrawType(GUICollectionBox::Color);
-										m_aapPlayerBoxes[player][t2]->SetDrawColor(DEFAULTSLOTCOLOR);
+										m_aapPlayerBoxes[player][t2]->SetDrawColor(c_PlayerSlotColorDefault);
 									}
 								}
 							}
@@ -670,7 +670,7 @@ namespace RTE
 									if (m_aapPlayerBoxes[p2][team]->GetDrawType() == GUICollectionBox::Image)
 									{
 										m_aapPlayerBoxes[p2][team]->SetDrawType(GUICollectionBox::Color);
-										m_aapPlayerBoxes[p2][team]->SetDrawColor(DEFAULTSLOTCOLOR);
+										m_aapPlayerBoxes[p2][team]->SetDrawColor(c_PlayerSlotColorDefault);
 										// Move him to disabled
 										m_aapPlayerBoxes[p2][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
 										pIcon = g_UInputMan.GetSchemeIcon(p2);
@@ -687,7 +687,7 @@ namespace RTE
 									if (m_aapPlayerBoxes[PLAYER_CPU][t2]->GetDrawType() == GUICollectionBox::Image)
 									{
 										m_aapPlayerBoxes[PLAYER_CPU][t2]->SetDrawType(GUICollectionBox::Color);
-										m_aapPlayerBoxes[PLAYER_CPU][t2]->SetDrawColor(DEFAULTSLOTCOLOR);
+										m_aapPlayerBoxes[PLAYER_CPU][t2]->SetDrawColor(c_PlayerSlotColorDefault);
 									}
 								}
 							}
@@ -698,7 +698,7 @@ namespace RTE
 								if (m_aapPlayerBoxes[PLAYER_CPU][team]->GetDrawType() == GUICollectionBox::Image)
 								{
 									m_aapPlayerBoxes[PLAYER_CPU][team]->SetDrawType(GUICollectionBox::Color);
-									m_aapPlayerBoxes[PLAYER_CPU][team]->SetDrawColor(DEFAULTSLOTCOLOR);
+									m_aapPlayerBoxes[PLAYER_CPU][team]->SetDrawColor(c_PlayerSlotColorDefault);
 									// Move him to disabled
 									//m_aapPlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
 									//pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
@@ -727,20 +727,20 @@ namespace RTE
 							}
 							else {
 								m_aapPlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Color);
-								m_aapPlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawColor(DEFAULTSLOTCOLOR);
+								m_aapPlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawColor(c_PlayerSlotColorDefault);
 							}
 
 						}
 						// Just highlight the cell
-						else if (m_aapPlayerBoxes[player][team]->GetDrawColor() != HOVEREDSLOTCOLOR)
+						else if (m_aapPlayerBoxes[player][team]->GetDrawColor() != c_PlayerSlotColorHovered)
 						{
-							m_aapPlayerBoxes[player][team]->SetDrawColor(HOVEREDSLOTCOLOR);
+							m_aapPlayerBoxes[player][team]->SetDrawColor(c_PlayerSlotColorHovered);
 							//m_SelectionChangeSound.Play();
 						}
 					}
 					// Un-highlight all other cells
 					else if (pHoveredCell && m_aapPlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Color)
-						m_aapPlayerBoxes[player][team]->SetDrawColor(DEFAULTSLOTCOLOR);
+						m_aapPlayerBoxes[player][team]->SetDrawColor(c_PlayerSlotColorDefault);
 				}
 			}
 
@@ -1376,12 +1376,12 @@ namespace RTE
 					// Screen blend the dots and lines, with some flicekring in its intensity
 					//int blendAmount = 230;
 					//set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-					rectfill(drawBitmap, m_pPlayerSetupBox->GetXPos() + 110, m_pPlayerSetupBox->GetYPos() + lineY + 56, m_pPlayerSetupBox->GetXPos() + m_pPlayerSetupBox->GetWidth() - 12, m_pPlayerSetupBox->GetYPos() + lineY + 25 + 56, DISABLEDSLOTCOLOR);
+					rectfill(drawBitmap, m_pPlayerSetupBox->GetXPos() + 110, m_pPlayerSetupBox->GetYPos() + lineY + 56, m_pPlayerSetupBox->GetXPos() + m_pPlayerSetupBox->GetWidth() - 12, m_pPlayerSetupBox->GetYPos() + lineY + 25 + 56, c_PlayerSlotColorDisabled);
 				}
 				// Back to solid drawing
 				//drawing_mode(DRAW_MODE_SOLID, 0, 0, 0);
 				// Cell border separator lines
-				line(drawBitmap, m_pPlayerSetupBox->GetXPos() + 110, m_pPlayerSetupBox->GetYPos() + lineY + 56, m_pPlayerSetupBox->GetXPos() + m_pPlayerSetupBox->GetWidth() - 12, m_pPlayerSetupBox->GetYPos() + lineY + 56, HOVEREDSLOTCOLOR);
+				line(drawBitmap, m_pPlayerSetupBox->GetXPos() + 110, m_pPlayerSetupBox->GetYPos() + lineY + 56, m_pPlayerSetupBox->GetXPos() + m_pPlayerSetupBox->GetWidth() - 12, m_pPlayerSetupBox->GetYPos() + lineY + 56, c_PlayerSlotColorHovered);
 				lineY += 25;
 			}
 

@@ -718,7 +718,7 @@ void ACraft::DropAllInventory()
             if (pPassenger && m_ExitTimer.IsPastSimMS(m_ExitInterval))
             {
                 pPassenger->SetVel(m_Vel + exitVel * antiGravBoost);
-//                pPassenger->SetRotAngle(m_Rotation + exitVel.GetAbsRadAngle() (ejectDir > 0 ? -HalfPI : HalfPI));
+//                pPassenger->SetRotAngle(m_Rotation + exitVel.GetAbsRadAngle() (ejectDir > 0 ? -c_HalfPI : c_HalfPI));
 //                pPassenger->SetHFlipped(ejectDir <= 0);
                 // Avoid having immediate collisions with this
                 pPassenger->SetWhichMOToNotHit(this, 0.5f);
@@ -765,7 +765,7 @@ void ACraft::DropAllInventory()
             m_HasDelivered = true;
 
             // Kill craft if it is lying down.
-            if (fabs(m_Rotation.GetRadAngle()) > QuartPI && m_Status != DYING)
+            if (fabs(m_Rotation.GetRadAngle()) > c_QuarterPI && m_Status != DYING)
             {
                 m_Status = DYING;
                 m_DeathTmr.Reset();

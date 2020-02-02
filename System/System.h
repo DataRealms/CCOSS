@@ -14,6 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files, forward declarations, namespace stuff
 
+#include "StandardIncludes.h"
 
 namespace RTE
 {

@@ -26,6 +26,9 @@ struct RECT
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
+#include "StandardIncludes.h"
+#include "Constants.h"
+
 #include "GUIProperties.h"
 #include "GUIInput.h"
 #include "GUIBitmap.h"
@@ -39,8 +42,6 @@ struct RECT
 #include "GUIEvent.h"
 #include "GUIControlFactory.h"
 #include "GUIControlManager.h"
-#include "Constants.h"
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // GUI Library macros

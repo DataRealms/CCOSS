@@ -10,6 +10,7 @@
 //                  jackal@shplorb.com
 //                  www.shplorb.com/~jackal
 
+#include "StandardIncludes.h"
 
 namespace RTE
 {

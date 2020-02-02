@@ -982,6 +982,7 @@
       <Filter>Activities</Filter>
     </ClInclude>
     <ClInclude Include="Constants.h" />
+    <ClInclude Include="StandardIncludes.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RTEA.rc">

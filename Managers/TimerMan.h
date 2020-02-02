@@ -14,6 +14,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
+#include "StandardIncludes.h"
+
 #if defined(_MSC_VER)
 #define RECT WINDOWS_RECT // grr typedef repeat fix
 #include <allegro.h>

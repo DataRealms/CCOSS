@@ -14,10 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <vector>
-#include <map>
-#include <string>
-
 #include "DDTTools.h"
 #include "Singleton.h"
 #define g_PresetMan PresetMan::Instance()

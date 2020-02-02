@@ -11,8 +11,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <algorithm>
-
 #include "PresetMan.h"
 #include "DataModule.h"
 #include "SceneObject.h"

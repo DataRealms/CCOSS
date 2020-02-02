@@ -19,9 +19,6 @@
 #include "Timer.h"
 #include "Box.h"
 
-#include <string>
-#include <list>
-
 struct BITMAP;
 
 

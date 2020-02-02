@@ -18,8 +18,6 @@
 #include "ContentFile.h"
 #include "Vector.h"
 #include "Material.h"
-#include <vector>
-#include <map>
 
 //struct BITMAP;
 

@@ -42,8 +42,6 @@
 #include "AHuman.h"
 #include "ACraft.h"
 
-#include <functional>
-
 using namespace std;
 using namespace RTE;
 

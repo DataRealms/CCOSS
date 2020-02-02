@@ -14,13 +14,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <string>
-
 #include "DDTTools.h"
 #include "Singleton.h"
 #define g_MetaMan MetaMan::Instance()
-
-#include <deque>
 
 //#include "Serializable.h"
 #include "SceneObject.h"

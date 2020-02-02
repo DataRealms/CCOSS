@@ -11,8 +11,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <mutex>
-
 #ifdef __USE_SOUND_FMOD
 #include "fmod.h"
 #elif __USE_SOUND_SDLMIXER
@@ -28,10 +26,6 @@
 #include "SettingsMan.h"
 #include "Sound.h"
 #include "DDTError.h"
-
-#include <vector>
-#include <string>
-
 
 // Allegro defines those via define in astdlib.h and Boost with stdlib go crazy about those so we need to undefine them manually.
 #undef int8_t

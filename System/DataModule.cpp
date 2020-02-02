@@ -14,7 +14,6 @@
 #include "DataModule.h"
 #include "RTEManagers.h"
 #include "Entity.h"
-#include <map>
 
 #include "allegro.h"
 

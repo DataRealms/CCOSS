@@ -14,10 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <istream>
-#include <fstream>
-#include <string>
-#include <list>
 #include "Writer.h"
 #include "Constants.h"
 

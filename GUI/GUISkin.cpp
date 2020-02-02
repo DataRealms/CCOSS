@@ -13,8 +13,6 @@
 
 #include "GUI.h"
 #include "Reader.h"
-#include <cstring>
-
 
 using namespace std;
 using namespace RTE;

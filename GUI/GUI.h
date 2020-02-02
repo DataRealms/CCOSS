@@ -26,8 +26,6 @@ struct RECT
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <assert.h>
-#include <math.h>
 #include "GUIProperties.h"
 #include "GUIInput.h"
 #include "GUIBitmap.h"

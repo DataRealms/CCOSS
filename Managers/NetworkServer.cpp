@@ -26,8 +26,6 @@
 #include "lz4.h"
 #include "lz4hc.h"
 
-#include <thread>
-
 #include "Scene.h"
 #include "SLTerrain.h"
 #include "TimerMan.h"

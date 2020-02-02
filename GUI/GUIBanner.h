@@ -13,8 +13,6 @@
 
 #include "Vector.h"
 #include "Timer.h"
-#include <map>
-#include <list>
 
 struct BITMAP;
 

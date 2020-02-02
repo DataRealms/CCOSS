@@ -14,10 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-
-#include <list>
-#include <map>
-#include <algorithm>
 #include "DDTTools.h"
 #include "Singleton.h"
 #define g_SettingsMan SettingsMan::Instance()

@@ -44,19 +44,11 @@
 
 #include "Network.h"
 
-#include <algorithm>
-#include <string>
-#include <list>
-
 #include "Reader.h"
 #include "Writer.h"
 #include "System.h"
 
-#include "math.h"
-
 #include "unzip.h"
-
-#include <thread>
 
 #if defined(__APPLE__)
 #include "OsxUtil.h"

@@ -18,9 +18,6 @@
 #include "Sound.h"
 #include "Timer.h"
 
-#include <string>
-#include <list>
-
 struct BITMAP;
 
 

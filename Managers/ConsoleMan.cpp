@@ -24,9 +24,6 @@
 #include "GUI/GUITextBox.h"
 #include "GUI/GUILabel.h"
 
-#include <regex>
-#include <string>
-#include <sstream>
 using namespace std;
 
 namespace RTE

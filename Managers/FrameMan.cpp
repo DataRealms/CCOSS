@@ -11,8 +11,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <mutex>
-
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -27,7 +25,6 @@
 #include "MOSprite.h"
 #include "Scene.h"
 
-
 #include "UInputMan.h"
 
 #include "GUI/GUI.h"
@@ -40,10 +37,6 @@
 
 // I know this is a crime, but if I include it in FrameMan.h the whole thing will collapse due to int redefinitions in Allegro
 std::mutex ScreenRelativeEffectsMutex[MAXSCREENCOUNT];
-
-using std::list;
-using std::pair;
-using std::deque;
 
 #define MSPFAVERAGESAMPLESIZE 10
 

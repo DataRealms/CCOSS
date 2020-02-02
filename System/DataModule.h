@@ -16,9 +16,6 @@
 
 #include "Serializable.h"
 #include "ContentFile.h"
-#include <string>
-#include <map>
-#include <list>
 
 struct DATAFILE;
 struct BITMAP;

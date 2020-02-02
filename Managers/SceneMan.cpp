@@ -31,12 +31,6 @@
 // Temp
 #include "Controller.h"
 
-
-using std::string;
-using std::list;
-using std::pair;
-using std::map;
-
 #ifdef _WIN32
 #define fmax max
 #define fmin min

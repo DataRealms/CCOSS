@@ -12,8 +12,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <string>
-
 #include "DDTTools.h"
 #include "ActivityMan.h"
 #include "GameActivity.h"

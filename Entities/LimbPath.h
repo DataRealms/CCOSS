@@ -14,13 +14,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <string>
 #include "Entity.h"
 #include "Vector.h"
 #include "FrameMan.h"
 #include "ActivityMan.h"
 #include "Atom.h"
-#include <deque>
 
 namespace RTE
 {

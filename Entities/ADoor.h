@@ -15,7 +15,6 @@
 // Inclusions of header files
 
 #include "Actor.h"
-#include <deque>
 
 struct BITMAP;
 

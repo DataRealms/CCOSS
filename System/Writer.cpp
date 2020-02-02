@@ -12,7 +12,6 @@
 // Inclusions of header files
 
 #include "Writer.h"
-#include <fstream>
 
 using namespace std;
 //using namespace zip;

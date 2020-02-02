@@ -14,10 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <ostream>
-#include <fstream>
-//#include <zipstream.h>
-#include <string>
 
 namespace RTE
 {

@@ -11,8 +11,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <functional>
-
 #include "MovableMan.h"
 #include "PresetMan.h"
 #include "AHuman.h"

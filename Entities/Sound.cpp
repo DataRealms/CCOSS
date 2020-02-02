@@ -25,7 +25,6 @@
 #include "Sound.h"
 #include "DDTTools.h"
 #include "AudioMan.h"
-#include <cmath>
 
 using namespace std;
 

@@ -16,7 +16,6 @@
 
 #include "MOSRotating.h"
 #include "PieMenuGUI.h"
-#include <deque>
 
 namespace RTE
 {

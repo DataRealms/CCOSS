@@ -14,16 +14,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files, forward declarations, namespace stuff
 
-#include <string>
-#include <list>
-#include <vector>
-#include <iostream>
 #include "Serializable.h"
 #include "Reader.h"
 #include "Writer.h"
 #include "DDTTools.h"
 #include "Vector.h"
-#include <cstdlib>
 
 namespace RTE
 {

@@ -12,8 +12,6 @@
 // Inclusions of header files
 
 #include "Reader.h"
-#include <cctype>
-#include <fstream>
 #include "DDTTools.h"
 #include "MOSRotating.h"
 #include "Attachable.h"

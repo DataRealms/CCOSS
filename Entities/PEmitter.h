@@ -15,7 +15,6 @@
 // Inclusions of header files
 
 #include "MOSParticle.h"
-#include <list>
 #include "Emission.h"
 
 namespace RTE

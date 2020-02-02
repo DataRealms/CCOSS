@@ -15,7 +15,6 @@
 // Inclusions of header files
  
 #include "Attachable.h"
-#include <list>
 #include "Emission.h"
 
 namespace RTE

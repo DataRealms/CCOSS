@@ -16,8 +16,6 @@
 #include "SLTerrain.h"
 #include "MovableObject.h"
 #include "MOSRotating.h"
-#include <deque>
-#include <set>
 
 #include "ConsoleMan.h"
 

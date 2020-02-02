@@ -14,8 +14,6 @@
 #include "TerrainDebris.h"
 #include "DDTTools.h"
 #include "SLTerrain.h"
-#include <cmath>
-#include <list>
 
 using namespace std;
 

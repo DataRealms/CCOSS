@@ -12,9 +12,6 @@
 // Inclusions of header files
 
 #include "GUI.h"
-#include <cstring>
-#include <cstdlib>
-
 
 using namespace std;
 using namespace RTE;

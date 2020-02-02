@@ -14,13 +14,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <string>
-
 #include "DDTTools.h"
 #include "Singleton.h"
 #define g_ActivityMan ActivityMan::Instance()
-
-#include <deque>
 
 #include "Sound.h"
 

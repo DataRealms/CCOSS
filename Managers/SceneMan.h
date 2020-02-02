@@ -14,13 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <list>
-#include <queue>
-
-
 // *** TEMP
 //#include "resource.h"
 

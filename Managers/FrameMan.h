@@ -48,8 +48,6 @@ enum DotGlowColor
 #include "Vector.h"
 #include "Box.h"
 #include "Material.h"
-#include <map>
-#include <list>
 #include "SceneMan.h"
 
 #include "MovableMan.h"

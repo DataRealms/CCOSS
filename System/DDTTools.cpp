@@ -13,8 +13,6 @@
 
 #include "DDTTools.h"
 
-#include <math.h>
-#include <fstream>
 #include "FrameMan.h"
 #include "SceneMan.h"
 #include "Vector.h"

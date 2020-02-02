@@ -14,8 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <string>
-#include <vector>
 #include "Entity.h"
 #include "ContentFile.h"
 #include "Icon.h"

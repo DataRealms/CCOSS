@@ -192,7 +192,7 @@ bool Controller::RelativeCursorMovement(Vector &cursorPos, float moveScale)
     else if (GetAnalogCursor().GetLargest() > 0.1 && !IsMouseControlled())
     {
         // See how much to accelerate the joystick input based on how long the stick has been pushed around
-        float acceleration = 0.5 + DMin(m_JoyAccelTimer.GetElapsedRealTimeS(), 0.5) * 6;
+        float acceleration = 0.5 + MIN(m_JoyAccelTimer.GetElapsedRealTimeS(), 0.5) * 6;
         cursorPos += GetAnalogCursor() * 10 * moveScale * acceleration;
         altered = true;
     }
@@ -200,7 +200,7 @@ bool Controller::RelativeCursorMovement(Vector &cursorPos, float moveScale)
     else
     {
         // See how much to accelerate the keyboard input based on how long any key has been pressed
-        float acceleration = 0.25 + DMin(m_KeyAccelTimer.GetElapsedRealTimeS(), 0.75) * 6;
+        float acceleration = 0.25 + MIN(m_KeyAccelTimer.GetElapsedRealTimeS(), 0.75) * 6;
 
         if (IsState(HOLD_LEFT))
         {

@@ -227,7 +227,7 @@ void GUIListPanel::AddItem(string Name, string rightText, GUIBitmap *pBitmap, co
     // Calculate the largest width
     if (m_Font) {
         int FWidth = m_Font->CalculateWidth(Name);
-        m_LargestWidth = GUI_MAX(m_LargestWidth, FWidth);
+        m_LargestWidth = MAX(m_LargestWidth, FWidth);
     }
 
     // Adjust the scrollbars
@@ -878,7 +878,7 @@ void GUIListPanel::AdjustScrollbars(void)
         // Subtract the frame size
         int Page = Height - 4;
         int Max = itemStackHeight/* - Page*/;
-        Max = GUI_MAX(Max, 0);
+        Max = MAX(Max, 0);
 
         // Setup the vertical scrollbar
         m_VertScroll->SetPageSize(Page);
@@ -983,8 +983,8 @@ void GUIListPanel::OnKeyPress(int KeyCode, int Modifier)
     m_SelectedList.clear();
 
     // Clamp the value
-    m_LastSelected = GUI_MAX(m_LastSelected, 0);
-    m_LastSelected = GUI_MIN(m_LastSelected, m_Items.size()-1);
+    m_LastSelected = MAX(m_LastSelected, 0);
+    m_LastSelected = MIN(m_LastSelected, m_Items.size()-1);
 
 
     // Select the new item

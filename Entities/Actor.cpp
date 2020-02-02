@@ -1872,7 +1872,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 {
                     // Make team icon blink faster as the health goes down
                     int f = m_HeartBeat.AlternateReal(200 + 800 * (m_Health / 100)) ? 0 : 1;
-                    f = DMin(f, m_pTeamIcon ? m_pTeamIcon->GetFrameCount() - 1 : 1);
+                    f = MIN(f, m_pTeamIcon ? m_pTeamIcon->GetFrameCount() - 1 : 1);
                     masked_blit(apIconBitmaps[f], pTargetBitmap, 0, 0, drawPos.m_X - apIconBitmaps[f]->w - 2, drawPos.m_Y + m_HUDStack - (apIconBitmaps[f]->h / 2) + 8, apIconBitmaps[f]->w, apIconBitmaps[f]->h);
                 }
             }

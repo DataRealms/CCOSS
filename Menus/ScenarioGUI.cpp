@@ -1998,12 +1998,12 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     else if (twoBends)
     {
         // Cap the chamfer size on the second bend appropriately
-        chamferSize = DMin((firstBend - secondBend).GetMagnitude() - 15, chamferSize);
-        chamferSize = DMin((secondBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
+        chamferSize = MIN((firstBend - secondBend).GetMagnitude() - 15, chamferSize);
+        chamferSize = MIN((secondBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
         // Snap the chamfer to not exist below a minimum size
         chamferSize = (chamferSize < 15) ? 0 : chamferSize;
         // No inverted chamfer
-        chamferSize = DMax(0, chamferSize);
+        chamferSize = MAX(0, chamferSize);
         chamferPoint1.SetXY(secondBend.m_X + chamferSize * -xDirMult, secondBend.m_Y);
         chamferPoint2.SetXY(secondBend.m_X, secondBend.m_Y + chamferSize * -yDirMult);
         // How many of the last segments to draw: to first bend + to second bend chamfer + chamfer + to site + circle
@@ -2024,12 +2024,12 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     else
     {
         // Cap the chamfer size on the first bend appropriately
-        chamferSize = DMin((screenPoint - firstBend).GetMagnitude() - 15, chamferSize);
-        chamferSize = DMin((firstBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
+        chamferSize = MIN((screenPoint - firstBend).GetMagnitude() - 15, chamferSize);
+        chamferSize = MIN((firstBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
         // Snap the chamfer to not exist below a minimum size
         chamferSize = (chamferSize < 15) ? 0 : chamferSize;
         // No inverted chamfer
-        chamferSize = DMax(0, chamferSize);
+        chamferSize = MAX(0, chamferSize);
         chamferPoint1.SetXY(screenPoint.m_X, firstBend.m_Y + chamferSize * -yDirMult);
         chamferPoint2.SetXY(firstBend.m_X + chamferSize * xDirMult, sitePos.m_Y);
         // How many of the last segments to draw: to first bend chamfer + chamfer + to site + circle

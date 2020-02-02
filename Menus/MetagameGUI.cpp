@@ -1195,7 +1195,7 @@ bool MetagameGUI::StartNewGame()
             // Start with the baseline setting
             newPlayer.m_BrainPool = ceilf(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
             // Baseline can never be 0
-            newPlayer.m_BrainPool = DMax(newPlayer.m_BrainPool, 1);
+            newPlayer.m_BrainPool = MAX(newPlayer.m_BrainPool, 1);
             // Apply the handicap!
             if (m_apPlayerHandicap[player]->GetSelectedIndex() == 0)
                 newPlayer.m_BrainPool += 5;
@@ -1210,7 +1210,7 @@ bool MetagameGUI::StartNewGame()
             else if (m_apPlayerHandicap[player]->GetSelectedIndex() == 6)
                 newPlayer.m_BrainPool -= 5;
             // Give at least ONE brain!
-            newPlayer.m_BrainPool = DMax(newPlayer.m_BrainPool, 1);
+            newPlayer.m_BrainPool = MAX(newPlayer.m_BrainPool, 1);
 
             // Starting gold amount; common to all
             newPlayer.m_Funds = startGold;
@@ -3333,7 +3333,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             {
                 // Just mess with the funds; the metaplayers' funds will be affected afterward, according to their shares
                 // Never let team funds dip below 0
-                pOffensive->SetTeamFunds(DMax(0, pOffensive->GetTeamFunds(team) * PosRand()), team);
+                pOffensive->SetTeamFunds(MAX(0, pOffensive->GetTeamFunds(team) * PosRand()), team);
             }
         }
     }
@@ -4664,7 +4664,7 @@ void MetagameGUI::UpdateOffensives()
         m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // Animate the brain label travel animations
-        UpdatePreBattleAttackers(EaseInOut(0, 1.0, DMin(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
+        UpdatePreBattleAttackers(EaseInOut(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
         UpdatePreBattleDefenders(0);
 
         // Just wait until the players hit the continue button..
@@ -4703,7 +4703,7 @@ void MetagameGUI::UpdateOffensives()
 
         // Keep the brain label travel animations in one spot and their labels updated
         UpdatePreBattleAttackers(1.0);
-        UpdatePreBattleDefenders(EaseOut(0, 1.0, DMin(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
+        UpdatePreBattleDefenders(EaseOut(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
 
         // Just wait until the players hit the continue button..
         if (m_BattleToResume)
@@ -4983,7 +4983,7 @@ void MetagameGUI::UpdateOffensives()
 
         // The retreating brain label travel animations get updated to go back to their pools
         if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyEvacuees())
-            UpdatePostBattleRetreaters(EaseInOut(0, 1.0, DMin(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
+            UpdatePostBattleRetreaters(EaseInOut(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
         else
             UpdatePostBattleRetreaters(1.0);
         UpdatePostBattleResidents(0);
@@ -5039,9 +5039,9 @@ void MetagameGUI::UpdateOffensives()
         UpdatePostBattleRetreaters(1.0);
         // Tweak the animaiton slightly based on whether the site switched hands or not
         if (m_BattleCausedOwnershipChange)
-            UpdatePostBattleResidents(EaseIn(0, 1.0, DMin(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
+            UpdatePostBattleResidents(EaseIn(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
         else
-            UpdatePostBattleResidents(EaseOut(0, 1.0, DMin(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
+            UpdatePostBattleResidents(EaseOut(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
 
         // Find the players who are involved in this battle
         for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
@@ -6305,7 +6305,7 @@ void MetagameGUI::UpdateGameSizeLabels()
     // Set the length label also according to the game length slider
 // TODO: don't hardcode the range of this
     int brainCount = ceilf(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
-    brainCount = DMax(brainCount, 1);
+    brainCount = MAX(brainCount, 1);
     sprintf_s(str, c_PrintBufferSize, "Game Length: %c%c%d starting brains", -48, -36, brainCount);
     m_pLengthLabel->SetText(str);
 
@@ -6810,12 +6810,12 @@ bool MetagameGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     else if (twoBends)
     {
         // Cap the chamfer size on the second bend appropriately
-        chamferSize = DMin((firstBend - secondBend).GetMagnitude() - 15, chamferSize);
-        chamferSize = DMin((secondBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
+        chamferSize = MIN((firstBend - secondBend).GetMagnitude() - 15, chamferSize);
+        chamferSize = MIN((secondBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
         // Snap the chamfer to not exist below a minimum size
         chamferSize = (chamferSize < 15) ? 0 : chamferSize;
         // No inverted chamfer
-        chamferSize = DMax(0, chamferSize);
+        chamferSize = MAX(0, chamferSize);
         chamferPoint1.SetXY(secondBend.m_X + chamferSize * -xDirMult, secondBend.m_Y);
         chamferPoint2.SetXY(secondBend.m_X, secondBend.m_Y + chamferSize * -yDirMult);
         // How many of the last segments to draw: to first bend + to second bend chamfer + chamfer + to site + circle
@@ -6836,12 +6836,12 @@ bool MetagameGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     else
     {
         // Cap the chamfer size on the first bend appropriately
-        chamferSize = DMin((screenPoint - firstBend).GetMagnitude() - 15, chamferSize);
-        chamferSize = DMin((firstBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
+        chamferSize = MIN((screenPoint - firstBend).GetMagnitude() - 15, chamferSize);
+        chamferSize = MIN((firstBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
         // Snap the chamfer to not exist below a minimum size
         chamferSize = (chamferSize < 15) ? 0 : chamferSize;
         // No inverted chamfer
-        chamferSize = DMax(0, chamferSize);
+        chamferSize = MAX(0, chamferSize);
         chamferPoint1.SetXY(screenPoint.m_X, firstBend.m_Y + chamferSize * -yDirMult);
         chamferPoint2.SetXY(firstBend.m_X + chamferSize * xDirMult, sitePos.m_Y);
         // How many of the last segments to draw: to first bend chamfer + chamfer + to site + circle
@@ -6908,8 +6908,8 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     // No part of the line is visible with these params, so just quit
     if ((onlyFirstSegments == 0 || onlyLastSegments == 0) && !drawMeterOverride)
         return false;
-    startMeterAt = DMax(0, startMeterAt);
-    startMeterAt = DMin(1.0, startMeterAt);
+    startMeterAt = MAX(0, startMeterAt);
+    startMeterAt = MIN(1.0, startMeterAt);
     if ((startMeterAt + meterAmount) > 1.0)
         meterAmount = 1.0 - startMeterAt;
     // Detect disabling of the segment controls
@@ -6932,8 +6932,8 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     float yDirMult = siteIsAbove ? -1.0 : 1.0;
     bool twoBends = fabs(sitePos.m_Y - boxMidY) < (channelHeight - circleRadius);
     Vector startMeter(m_apPlayerBox[metaPlayer]->GetXPos() + (m_apPlayerBox[metaPlayer]->GetWidth() - 1) * startMeterAt + 1, m_apPlayerBox[metaPlayer]->GetYPos() + (siteIsAbove ? 0 : m_apPlayerBox[metaPlayer]->GetHeight()));
-    Vector endMeter(startMeter.m_X + DMax(0, (m_apPlayerBox[metaPlayer]->GetWidth() - 1) * meterAmount - 2), startMeter.m_Y);
-    Vector midMeter(startMeter.m_X + DMax(0, (m_apPlayerBox[metaPlayer]->GetWidth() - 1) * meterAmount * 0.5 - 1), startMeter.m_Y + meterHeight * yDirMult);
+    Vector endMeter(startMeter.m_X + MAX(0, (m_apPlayerBox[metaPlayer]->GetWidth() - 1) * meterAmount - 2), startMeter.m_Y);
+    Vector midMeter(startMeter.m_X + MAX(0, (m_apPlayerBox[metaPlayer]->GetWidth() - 1) * meterAmount * 0.5 - 1), startMeter.m_Y + meterHeight * yDirMult);
     bool noBends = (fabs(sitePos.m_X - midMeter.m_X) < circleRadius) && ((m_apPlayerBox[metaPlayer]->GetWidth() * meterAmount * 0.5) >= fabs(sitePos.m_X - midMeter.m_X));
     Vector firstBend(midMeter.m_X, twoBends ? (boxMidY + channelHeight * yDirMult) : sitePos.m_Y);
     Vector secondBend(sitePos.m_X, firstBend.m_Y);
@@ -6960,12 +6960,12 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     else if (twoBends)
     {
         // Cap the chamfer size on the second bend appropriately
-        chamferSize = DMin((firstBend - secondBend).GetMagnitude() - meterHeight * 3, chamferSize);
-        chamferSize = DMin((secondBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
+        chamferSize = MIN((firstBend - secondBend).GetMagnitude() - meterHeight * 3, chamferSize);
+        chamferSize = MIN((secondBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
         // Snap the chamfer to not exist below a minimum size
         chamferSize = (chamferSize < (meterHeight * 3)) ? 0 : chamferSize;
         // No inverted chamfer
-        chamferSize = DMax(0, chamferSize);
+        chamferSize = MAX(0, chamferSize);
         chamferPoint1.SetXY(secondBend.m_X + chamferSize * -xDirMult, secondBend.m_Y);
         chamferPoint2.SetXY(secondBend.m_X, secondBend.m_Y + chamferSize * -yDirMult);
         // How many of the last segments to draw: meter + to first bend + to second bend chamfer + chamfer + to site + circle
@@ -6993,12 +6993,12 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     else
     {
         // Cap the chamfer size on the first bend appropriately
-        chamferSize = DMin((midMeter - firstBend).GetMagnitude() - meterHeight * 3, chamferSize);
-        chamferSize = DMin((firstBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
+        chamferSize = MIN((midMeter - firstBend).GetMagnitude() - meterHeight * 3, chamferSize);
+        chamferSize = MIN((firstBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
         // Snap the chamfer to not exist below a minimum size
         chamferSize = (chamferSize < (meterHeight * 3)) ? 0 : chamferSize;
         // No inverted chamfer
-        chamferSize = DMax(0, chamferSize);
+        chamferSize = MAX(0, chamferSize);
         chamferPoint1.SetXY(midMeter.m_X, firstBend.m_Y + chamferSize * -yDirMult);
         chamferPoint2.SetXY(firstBend.m_X + chamferSize * xDirMult, sitePos.m_Y);
         // How many of the last segments to draw: meter + to first bend chamfer + chamfer + to site + circle

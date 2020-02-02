@@ -3450,8 +3450,8 @@ void AHuman::Update()
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMUP; 
         m_AimAngle += m_Controller.IsState(AIM_SHARP) ?
-                      DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
-                      DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
+                      MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
+                      MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
         if (m_AimAngle > m_AimRange)
             m_AimAngle = m_AimRange;
     }
@@ -3463,8 +3463,8 @@ void AHuman::Update()
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMDOWN;
         m_AimAngle -= m_Controller.IsState(AIM_SHARP) ?
-                      DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
-                      DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
+                      MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
+                      MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
         if (m_AimAngle < -m_AimRange)
             m_AimAngle = -m_AimRange;
     }
@@ -3600,7 +3600,7 @@ void AHuman::Update()
                     if (pMO)
                     {
                         pMO->SetPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) + Vector(m_HFlipped ? -15 : 15, -8));
-                        float throwScalar = (float)DMin(m_ThrowTmr.GetElapsedSimTimeMS(), m_ThrowPrepTime) / (float)m_ThrowPrepTime;
+                        float throwScalar = (float)MIN(m_ThrowTmr.GetElapsedSimTimeMS(), m_ThrowPrepTime) / (float)m_ThrowPrepTime;
                         Vector tossVec(pThrown->GetMinThrowVel() + ((pThrown->GetMaxThrowVel() - pThrown->GetMinThrowVel()) * throwScalar), 0.5 * NormalRand());
                         tossVec.RadRotate(m_AimAngle);
                         pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
@@ -3747,8 +3747,8 @@ void AHuman::Update()
             m_Paths[FGROUND][STAND].Terminate();
             m_Paths[BGROUND][STAND].Terminate();
 
-//            float FGLegProg = DMax(m_Paths[FGROUND][WALK].GetRegularProgress(), m_Paths[FGROUND][WALK].GetTotalTimeProgress());
-//            float BGLegProg = DMax(m_Paths[BGROUND][WALK].GetRegularProgress(), m_Paths[BGROUND][WALK].GetTotalTimeProgress());
+//            float FGLegProg = MAX(m_Paths[FGROUND][WALK].GetRegularProgress(), m_Paths[FGROUND][WALK].GetTotalTimeProgress());
+//            float BGLegProg = MAX(m_Paths[BGROUND][WALK].GetRegularProgress(), m_Paths[BGROUND][WALK].GetTotalTimeProgress());
             float FGLegProg = m_Paths[FGROUND][WALK].GetRegularProgress();
             float BGLegProg = m_Paths[BGROUND][WALK].GetRegularProgress();
 
@@ -3803,8 +3803,8 @@ void AHuman::Update()
             ////////////////////////////////////////
             // Arm Climbing if the leg paths failed to find clear spot to restart
 
-//            float FGArmProg = DMax(m_Paths[FGROUND][CLIMB].GetRegularProgress(), m_Paths[FGROUND][CLIMB].GetTotalTimeProgress());
-//            float BGArmProg = DMax(m_Paths[BGROUND][CLIMB].GetRegularProgress(), m_Paths[BGROUND][CLIMB].GetTotalTimeProgress());
+//            float FGArmProg = MAX(m_Paths[FGROUND][CLIMB].GetRegularProgress(), m_Paths[FGROUND][CLIMB].GetTotalTimeProgress());
+//            float BGArmProg = MAX(m_Paths[BGROUND][CLIMB].GetRegularProgress(), m_Paths[BGROUND][CLIMB].GetTotalTimeProgress());
             float FGArmProg = m_Paths[FGROUND][CLIMB].GetRegularProgress();
             float BGArmProg = m_Paths[BGROUND][CLIMB].GetRegularProgress();
 
@@ -4827,7 +4827,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     if (m_ArmsState == THROWING_PREP)
         DrawThrowingReticule(pTargetBitmap,
                              targetPos,
-                             DMin((float)m_ThrowTmr.GetElapsedSimTimeMS() / (float)m_ThrowPrepTime, 1.0));
+                             MIN((float)m_ThrowTmr.GetElapsedSimTimeMS() / (float)m_ThrowPrepTime, 1.0));
 
     //////////////////////////////////////
     // Draw stat info HUD

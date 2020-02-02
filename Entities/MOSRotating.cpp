@@ -1450,7 +1450,7 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
 */
 // TODO: This stuff is just way too slow, EraseSilhouette is a hog
         // Make particles fly at least somewhat
-        float velMag = DMax(10.0f, m_Vel.GetMagnitude());
+        float velMag = MAX(10.0f, m_Vel.GetMagnitude());
         float splashDir = m_Vel.m_X >= 0 ? 1 : -1;
         float splashRatio = g_MovableMan.GetSplashRatio();
         float tally = 0.0;

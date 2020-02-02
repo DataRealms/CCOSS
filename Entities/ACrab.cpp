@@ -2374,7 +2374,7 @@ void ACrab::Update()
         if (m_AimState != AIMUP)
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMUP;
-        m_AimAngle += m_Controller.IsState(AIM_SHARP) ? DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
+        m_AimAngle += m_Controller.IsState(AIM_SHARP) ? MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
     }
     else if (m_Controller.IsState(AIM_DOWN))
     {
@@ -2382,7 +2382,7 @@ void ACrab::Update()
         if (m_AimState != AIMDOWN)
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMDOWN;
-        m_AimAngle -= m_Controller.IsState(AIM_SHARP) ? DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
+        m_AimAngle -= m_Controller.IsState(AIM_SHARP) ? MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
     }
     // Analog aim
     else if (m_Controller.GetAnalogAim().GetMagnitude() > 0.1)

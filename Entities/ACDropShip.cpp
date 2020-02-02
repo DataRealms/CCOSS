@@ -317,7 +317,7 @@ float ACDropShip::GetAltitude(int max, int accuracy)
     float lAlt = g_SceneMan.FindAltitude(lPos, max, accuracy);
 
     // Return the lowest of the three
-    return DMin(cAlt, DMin(rAlt, lAlt));
+    return MIN(cAlt, MIN(rAlt, lAlt));
 }
 
 

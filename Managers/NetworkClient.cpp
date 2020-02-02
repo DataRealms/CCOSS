@@ -571,8 +571,8 @@ namespace RTE
 					int tiledOffsetX = 0;
 					int tiledOffsetY = 0;
 					// Use the dimensions of the target box, if it has any area at all
-					int targetWidth = DMin(pTargetBitmap->w, targetBox.GetWidth());
-					int targetHeight = DMin(pTargetBitmap->h, targetBox.GetHeight());
+					int targetWidth = MIN(pTargetBitmap->w, targetBox.GetWidth());
+					int targetHeight = MIN(pTargetBitmap->h, targetBox.GetHeight());
 					int toCoverX = offsetX + targetBox.GetCorner().m_X + targetWidth;
 					int toCoverY = offsetY + targetBox.GetCorner().m_Y + targetHeight;
 

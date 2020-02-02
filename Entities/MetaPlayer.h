@@ -421,7 +421,7 @@ ENTITYALLOCATION(MetaPlayer)
 //                  positive value to decrease the funds amount.
 // Return value:    The amount of funds that were spent.
 
-    float SpendFunds(float howMuch) { howMuch = DMin(m_Funds, howMuch); m_Funds -= howMuch; return howMuch; }
+    float SpendFunds(float howMuch) { howMuch = MIN(m_Funds, howMuch); m_Funds -= howMuch; return howMuch; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -161,7 +161,7 @@ bool GUIBanner::Create(const std::string fontFilePath, const std::string fontBlu
                     {
                         int Pixel = getpixel(m_pFontImage[mode], i, j);
                         if (Pixel != dotColor && Pixel != keyColor)
-                            Height = DMax(Height, j - y);
+                            Height = MAX(Height, j - y);
                     }
                 }
                 

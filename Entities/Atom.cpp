@@ -1360,7 +1360,7 @@ int Atom::Travel(float travelTime,
     // Draw the trail
     if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
         int length = m_TrailLength/* + 3 * PosRand()*/;
-        for (int i = trailPoints.size() - DMin(length, trailPoints.size()); i < trailPoints.size(); ++i)
+        for (int i = trailPoints.size() - MIN(length, trailPoints.size()); i < trailPoints.size(); ++i)
         {
 //            DAssert(is_inside_bitmap(pTrailBitmap, trailPoints[i].first, trailPoints[i].second, 0), "Trying to draw out of bounds trail!");
 //            _putpixel(pTrailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());

@@ -17,9 +17,6 @@
 
 struct TexMapTable;
 
-#define DMax(a, b) (((a) > (b)) ? (a) : (b))
-#define DMin(a, b) (((a) < (b)) ? (a) : (b))
-
 namespace RTE {
 
 class Vector;

@@ -47,13 +47,6 @@ struct RECT
 //////////////////////////////////////////////////////////////////////////////////////////
 // GUI Library macros
 
-// Use the maximum of two values
-#define    GUI_MAX(a, b) ((a) > (b) ? (a) : (b))
-
-// Use the minimum of two values
-#define    GUI_MIN(a, b) ((a) < (b) ? (a) : (b))
-
-
 void SetRect(RECT *pRect,
              int left,
              int top,

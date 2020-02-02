@@ -2396,14 +2396,14 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     // Team Icon up in the top left corner
     const Icon *pIcon = GetTeamIcon(m_Team[PoS]);
     if (pIcon)
-        draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], DMax(2, g_SceneMan.GetScreenOcclusion(which).m_X + 2), 2);
+        draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], MAX(2, g_SceneMan.GetScreenOcclusion(which).m_X + 2), 2);
     // Gold
     sprintf_s(str, c_PrintBufferSize, "%c Funds: %.0f oz", TeamFundsChanged(which) ? -57 : -58, GetTeamFunds(m_Team[PoS]));
-    g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, DMax(16, g_SceneMan.GetScreenOcclusion(which).m_X + 16), yTextPos, str, GUIFont::Left);
+    g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MAX(16, g_SceneMan.GetScreenOcclusion(which).m_X + 16), yTextPos, str, GUIFont::Left);
 /* Not applicable anymore to the 4-team games
     // Body losses
     sprintf_s(str, "%c Losses: %c%i %c%i", -39, -62, GetTeamDeathCount(Activity::TEAM_1), -59, GetTeamDeathCount(Activity::TEAM_2));
-    g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, DMin(pTargetBitmap->w - 4, pTargetBitmap->w - 4 + g_SceneMan.GetScreenOcclusion(which).m_X), yTextPos, str, GUIFont::Right);
+    g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MIN(pTargetBitmap->w - 4, pTargetBitmap->w - 4 + g_SceneMan.GetScreenOcclusion(which).m_X), yTextPos, str, GUIFont::Right);
 */
     // Show the player's controller scheme icon in the upper right corner of his screen, but only for a minute
     if (m_GameTimer.GetElapsedRealTimeS() < 30)
@@ -2415,7 +2415,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
             pIcon = g_UInputMan.GetSchemeIcon(PoS);
             if (pIcon)
             {
-                draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], DMin(pTargetBitmap->w - pIcon->GetBitmaps8()[0]->w - 2, pTargetBitmap->w - pIcon->GetBitmaps8()[0]->w - 2 + g_SceneMan.GetScreenOcclusion(which).m_X), yTextPos);
+                draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], MIN(pTargetBitmap->w - pIcon->GetBitmaps8()[0]->w - 2, pTargetBitmap->w - pIcon->GetBitmaps8()[0]->w - 2 + g_SceneMan.GetScreenOcclusion(which).m_X), yTextPos);
 // TODO: make a black Activity intro screen, saying "Player X, press any key/button to show that you are ready!, and display their controller icon, then fade into the scene"
 //                stretch_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], 10, 10, pIcon->GetBitmaps8()[0]->w * 4, pIcon->GetBitmaps8()[0]->h * 4);
             }

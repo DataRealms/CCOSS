@@ -33,7 +33,6 @@ class Leg:
     public Attachable
 {
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
 
@@ -293,6 +292,12 @@ ENTITYALLOCATION(Leg)
 
 	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
 
+
+	/// <summary>
+	/// Gets the foot Attachable of this.
+	/// </summary>
+	/// <returns>A pointer to the foot Attachable of this. Ownership is NOT transferred!</returns>
+	Attachable * GetFoot() const { return m_pFoot; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

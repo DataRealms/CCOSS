@@ -1345,8 +1345,6 @@ void GameActivity::UpdateEditing()
 
 void GameActivity::Update()
 {
-    SLICK_PROFILE(0xFF446688);
-
     Activity::Update();
 
     // Avoid game logic when we're editing
@@ -2208,8 +2206,6 @@ void GameActivity::Update()
 
 void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int which)
 {
-//    SLICK_PROFILE(0xFF789654);
-
     if (which < 0 || which >= MAXSCREENCOUNT)
         return;
 
@@ -2616,8 +2612,6 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 
 void GameActivity::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 {
-    SLICK_PROFILE(0xFF665432);
-
     GUIFont *pLargeFont = g_FrameMan.GetLargeFont();
     GUIFont *pSmallFont = g_FrameMan.GetSmallFont();
     AllegroBitmap pBitmapInt(pTargetBitmap);

@@ -212,6 +212,7 @@ int Actor::Create(const Actor &reference)
     m_MOType = MovableObject::TypeActor;
 
     m_Controller = reference.m_Controller;
+    m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
 
     m_BodyHitSound = reference.m_BodyHitSound;
@@ -992,8 +993,6 @@ void Actor::DropAllInventory()
 
 void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
-    SLICK_PROFILE(0xFF686432);
-
     // Play death sound
 // TODO: Don't attenuate since death is pretty important.. maybe only make this happen for teh brains
     m_DeathSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
@@ -1550,7 +1549,7 @@ void Actor::Update()
     /////////////////////////////////////
     // Detract damage caused by wounds from health
 
-    for (list<AEmitter *>::iterator itr = m_Emitters.begin(); itr != m_Emitters.end(); ++itr)
+    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
         m_Health -= (*itr)->CollectDamage() * m_DamageMultiplier; //Actors must apply DamageMultiplier effects to their main MO by themselves
 
     /////////////////////////////////////////////
@@ -1643,7 +1642,7 @@ void Actor::Update()
 	// Prevent dead actors from rotating like mad
 	if (m_Status == DYING || m_Status == DEAD)
 	{
-		m_AngularVel = m_AngularVel * 0.9;
+		m_AngularVel = m_AngularVel * 0.98;
 	}
 
     if (m_Status == DYING && m_DeathTmr.GetElapsedSimTimeMS() > 1000)
@@ -1940,7 +1939,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     }
 
     // AI mode state debugging
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
     AllegroBitmap bitmapInt(pTargetBitmap);
 
     // Obstacle state
@@ -1969,7 +1968,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
-#endif // _DEBUG
+#endif
 
     // Don't proceed to draw all the secret stuff below if this screen is for a player on the other team!
     if (g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->GetTeamOfPlayer(whichScreen) != m_Team)

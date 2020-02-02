@@ -82,8 +82,6 @@ namespace RTE
 
 	int PEmitter::Create(const PEmitter &reference)
 	{
-		SLICK_PROFILE(0xFF665521);
-
 		MOSParticle::Create(reference);
 
 		for (list<Emission>::const_iterator itr = reference.m_EmissionList.begin(); itr != reference.m_EmissionList.end(); ++itr)

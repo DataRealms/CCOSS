@@ -274,7 +274,7 @@ void TimerMan::Update()
         m_SimUpdatesSinceDrawn = -1;
     }
 /*
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
     // Override the accumulator and just put one delta time in there so sim updates only once per frame
     m_SimAccumulator = m_DeltaTime;
 #endif // _DEBUG

@@ -240,7 +240,7 @@ ENTITYALLOCATION(HeldDevice)
 // Arguments:       None.
 // Return value:    A const reference to the current stance parent offset.
 
-    Vector GetStanceOffset() const;
+    virtual Vector GetStanceOffset() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -583,6 +583,11 @@ ENTITYALLOCATION(HeldDevice)
 // Return value:    None.
 
     virtual void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
+
+	/// <summary>
+	/// Resest all the timers used by this. Can be emitters, etc. This is to prevent backed up emissions to come out all at once while this has been held dormant in an inventory.
+	/// </summary>
+	virtual void ResetAllTimers() { Attachable::ResetAllTimers(); m_ActivationTmr.Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

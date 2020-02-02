@@ -1212,7 +1212,7 @@ int Atom::Travel(float travelTime,
                 hitPos[Y] = intPos[Y];
                 ++hitCount;
 
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
                 if (m_TrailLength)
                     putpixel(pTrailBitmap, intPos[X], intPos[Y], 199);
 #endif

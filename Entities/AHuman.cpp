@@ -181,12 +181,13 @@ int AHuman::Create(const AHuman &reference)
 
     if (reference.m_pHead) {
         m_pHead = dynamic_cast<Attachable *>(reference.m_pHead->Clone());
-        m_pHead->Attach(this);
+		m_pHead->SetCanCollideWithTerrainWhenAttached(true);
+        AddAttachable(m_pHead, true);
     }
 
     if (reference.m_pJetpack) {
         m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        m_pJetpack->Attach(this);
+        AddAttachable(m_pJetpack, true);
     }
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
@@ -194,22 +195,22 @@ int AHuman::Create(const AHuman &reference)
 
     if (reference.m_pFGArm) {
         m_pFGArm = dynamic_cast<Arm *>(reference.m_pFGArm->Clone());
-        m_pFGArm->Attach(this);
+        AddAttachable(m_pFGArm, true);
     }
 
     if (reference.m_pBGArm) {
         m_pBGArm = dynamic_cast<Arm *>(reference.m_pBGArm->Clone());
-        m_pBGArm->Attach(this);
+        AddAttachable(m_pBGArm, true);
     }
 
     if (reference.m_pFGLeg) {
         m_pFGLeg = dynamic_cast<Leg *>(reference.m_pFGLeg->Clone());
-        m_pFGLeg->Attach(this);
+        AddAttachable(m_pFGLeg, true);
     }
 
     if (reference.m_pBGLeg) {
         m_pBGLeg = dynamic_cast<Leg *>(reference.m_pBGLeg->Clone());
-        m_pBGLeg->Attach(this);
+        AddAttachable(m_pBGLeg, true);
     }
 
     m_pFGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pFGHandGroup->Clone());
@@ -265,28 +266,14 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pHead;
         m_pHead = new Attachable;
         reader >> m_pHead;
-        m_pHead->Attach(this);
-        m_pHead->SetAtomSubgroupID(1);
-
 		if (!m_pHead->IsDamageMultiplierRedefined())
 			m_pHead->SetDamageMultiplier(5);
-
-        if (!m_pAtomGroup)
-        {
-            m_pAtomGroup = new AtomGroup();
-            m_pAtomGroup->Create(this);
-        }
-        m_pAtomGroup->AddAtoms(m_pHead->GetAtomGroup()->GetAtomList(),
-                               m_pHead->GetAtomSubgroupID(),
-                               m_pHead->GetParentOffset() - m_pHead->GetJointOffset(),
-                               m_Rotation);
     }
     else if (propName == "Jetpack")
     {
         delete m_pJetpack;
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-        m_pJetpack->Attach(this);
     }
     else if (propName == "JumpTime")
     {
@@ -299,28 +286,24 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pFGArm;
         m_pFGArm = new Arm;
         reader >> m_pFGArm;
-        m_pFGArm->Attach(this);
     }
     else if (propName == "BGArm")
     {
         delete m_pBGArm;
         m_pBGArm = new Arm;
         reader >> m_pBGArm;
-        m_pBGArm->Attach(this);
     }
     else if (propName == "FGLeg")
     {
         delete m_pFGLeg;
         m_pFGLeg = new Leg;
         reader >> m_pFGLeg;
-        m_pFGLeg->Attach(this);
     }
     else if (propName == "BGLeg")
     {
         delete m_pBGLeg;
         m_pBGLeg = new Leg;
         reader >> m_pBGLeg;
-        m_pBGLeg->Attach(this);
     }
     else if (propName == "HandGroup")
     {
@@ -480,8 +463,6 @@ int AHuman::Save(ostream &stream) const
 
 void AHuman::Destroy(bool notInherited)
 {
-//    g_MovableMan.RemoveEntityPreset(this);
-
     delete m_pBGLeg;
     delete m_pFGLeg;
     delete m_pBGArm;
@@ -1749,7 +1730,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     // Detach all limbs and let loose
     if (m_pHead && m_pHead->IsAttached())
     {
-        m_pHead->Detach();
+        RemoveAttachable(m_pHead);
         m_pHead->SetVel(m_Vel + m_pHead->GetParentOffset() * PosRand());
         m_pHead->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pHead);
@@ -1757,15 +1738,15 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     }
     if (m_pJetpack && m_pJetpack->IsAttached())
     {
-// Jetpacks are really nothing, so just delete them safely
-        m_pJetpack->Detach();
+        // Jetpacks are really nothing, so just delete them safely
+        RemoveAttachable(m_pJetpack);
         m_pJetpack->SetToDelete(true);
         g_MovableMan.AddParticle(m_pJetpack);
         m_pJetpack = 0;
     }
     if (m_pFGArm && m_pFGArm->IsAttached())
     {
-        m_pFGArm->Detach();
+        RemoveAttachable(m_pFGArm);
         m_pFGArm->SetVel(m_Vel + m_pFGArm->GetParentOffset() * PosRand());
         m_pFGArm->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pFGArm);
@@ -1773,7 +1754,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     }
     if (m_pBGArm && m_pBGArm->IsAttached())
     {
-        m_pBGArm->Detach();
+        RemoveAttachable(m_pBGArm);
         m_pBGArm->SetVel(m_Vel + m_pBGArm->GetParentOffset() * PosRand());
         m_pBGArm->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pBGArm);
@@ -1781,7 +1762,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     }
     if (m_pFGLeg && m_pFGLeg->IsAttached())
     {
-        m_pFGLeg->Detach();
+        RemoveAttachable(m_pFGLeg);
         m_pFGLeg->SetVel(m_Vel + m_pFGLeg->GetParentOffset() * PosRand());
         m_pFGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pFGLeg);
@@ -1789,7 +1770,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     }
     if (m_pBGLeg && m_pBGLeg->IsAttached())
     {
-        m_pBGLeg->Detach();
+        RemoveAttachable(m_pBGLeg);
         m_pBGLeg->SetVel(m_Vel + m_pBGLeg->GetParentOffset() * PosRand());
         m_pBGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pBGLeg);
@@ -1896,8 +1877,6 @@ bool AHuman::UpdateMovePath()
 
 void AHuman::UpdateAI()
 {
-    SLICK_PROFILE(0xFF121456);
-
     Actor::UpdateAI();
 
     Vector cpuPos = GetCPUPos();
@@ -3188,8 +3167,6 @@ int AHuman::OnPieMenu(Actor * pActor)
 
 void AHuman::Update()
 {
-    SLICK_PROFILE(0xFF668431);
-
 	if (g_SettingsMan.EnableHats() && !m_GotHat && m_pHead)
 	{
 		m_GotHat = true;
@@ -3207,8 +3184,8 @@ void AHuman::Update()
                 Attachable *pNewHat = dynamic_cast<Attachable *>(preset->Clone());
                 if (pNewHat)
                 {
-			        m_pHead->DetachAll(true);
-			        m_pHead->AddAttachable(pNewHat);
+			        m_pHead->DetachOrDestroyAll(true);
+			        m_pHead->AddAttachable(pNewHat, pNewHat->GetParentOffset());
                 }
 			}
 		}
@@ -3602,8 +3579,9 @@ void AHuman::Update()
                     if (m_ArmsState != THROWING_PREP/* || m_ThrowTmr.GetElapsedSimTimeMS() > m_ThrowPrepTime*/)
                     {
                         m_ThrowTmr.Reset();
-                        // Activate the device, light the fuse etc!
-                        pThrown->Activate();
+						if (!pThrown->ActivatesWhenReleased()) {
+							pThrown->Activate();
+						}
                     }
                     m_ArmsState = THROWING_PREP;
                     m_pFGArm->ReachToward(m_Pos + pThrown->GetStartThrowOffset().GetXFlipped(m_HFlipped));
@@ -3615,6 +3593,10 @@ void AHuman::Update()
                     m_pFGArm->SetHandPos(m_Pos + pThrown->GetEndThrowOffset().GetXFlipped(m_HFlipped));
 
                     MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
+
+					if (pThrown->ActivatesWhenReleased()) {
+						pThrown->Activate();
+					}
                     if (pMO)
                     {
                         pMO->SetPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) + Vector(m_HFlipped ? -15 : 15, -8));
@@ -4206,10 +4188,6 @@ void AHuman::Update()
 
         m_Health -= m_pHead->CollectDamage();// * 5; // This is done in CollectDamage via m_DamageMultiplier now.
     }
-    else
-    {
-        m_pAtomGroup->RemoveAtoms(1);
-    }
 
     if (m_pJetpack && m_pJetpack->IsAttached())
     {
@@ -4748,7 +4726,7 @@ void AHuman::Draw(BITMAP *pTargetBitmap,
             m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
     }
     
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
     if (mode == g_DrawDebug)
     {
         // Limbpath debug drawing
@@ -4775,7 +4753,7 @@ void AHuman::Draw(BITMAP *pTargetBitmap,
         m_pFGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
-#endif // _DEBUG
+#endif
 }
 
 
@@ -4804,7 +4782,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
     // Limbpath debug drawing
     m_Paths[FGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
     m_Paths[FGROUND][CRAWL].Draw(pTargetBitmap, targetPos, 122);
@@ -4835,7 +4813,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     // Raidus
 //    waypoint = m_Pos - targetPos;
 //    circle(pTargetBitmap, waypoint.m_X, waypoint.m_Y, m_MoveProximityLimit, g_RedColor);  
-#endif // _DEBUG
+#endif
 
     // Player AI drawing
 
@@ -5058,7 +5036,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     }
 
     // AI mode state debugging
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
 
     AllegroBitmap allegroBitmap(pTargetBitmap);
     Vector drawPos = m_Pos - targetPos;
@@ -5120,7 +5098,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
-#endif // _DEBUG
+#endif
 
 }
 

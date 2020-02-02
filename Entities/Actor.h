@@ -1303,6 +1303,29 @@ ENTITYALLOCATION(Actor)
 	void SetTravelImpulseDamage(float value) { m_TravelImpulseDamage = value; }
 
 
+	/// <summary>
+	/// Returns the defined sound to be played on death.
+	/// </summary>
+	/// <returns>A sound with the death sample of this actor.</returns>
+	Sound GetDeathSound() const { return m_DeathSound; }
+
+
+	/// <summary>
+	/// Sets new death sound sample from specified path or sets null.
+	/// </summary>
+	/// <param name="samplePath">Filepath to new sample or None/nil for no sound.</param>
+	/// <returns>Updated DeathSound.</returns>
+	void SetDeathSound(const char *samplePath) {
+		if (samplePath == nullptr) {
+			m_DeathSound.Reset();
+		} else {
+			Sound newDeathSound;
+			newDeathSound.Create(samplePath, false);
+			m_DeathSound = newDeathSound;
+		}
+	}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 

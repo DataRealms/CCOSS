@@ -1398,10 +1398,10 @@ namespace RTE
 
 		// Input is sent at whetever settings are set in inputs per second
 		float ips = m_ClientInputFps;
-		#ifdef _DEBUG
+#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
 		// Reduce input rate for debugging because it may overflow the input queue
 		ips = 10; 
-		#endif
+#endif
 
 		int64_t currentTicks = g_TimerMan.GetRealTickCount();
 

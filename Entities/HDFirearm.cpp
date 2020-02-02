@@ -110,7 +110,7 @@ int HDFirearm::Create(const HDFirearm &reference)
     if (reference.m_pMagazine)
     {
         m_pMagazine = dynamic_cast<Magazine *>(reference.m_pMagazine->Clone());
-        m_pMagazine->Attach(this, m_pMagazine->GetParentOffset());
+        AddAttachable(m_pMagazine, m_pMagazine->GetParentOffset(), true);
     }
     if (reference.m_pFlash)
     {
@@ -167,8 +167,6 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader)
 
             delete m_pMagazine;
             m_pMagazine = dynamic_cast<Magazine *>(m_pMagazineReference->Clone());
-            if (m_pMagazine)
-                m_pMagazine->Attach(this);
         }
     }
     else if (propName == "Flash")

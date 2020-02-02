@@ -85,7 +85,7 @@ int Leg::Create(const Leg &reference)
 
     if (reference.m_pFoot) {
         m_pFoot = dynamic_cast<Attachable *>(reference.m_pFoot->Clone());
-        m_pFoot->Attach(this, m_pFoot->GetParentOffset());
+        AddAttachable(m_pFoot, true);
     }
     m_ContractedOffset = reference.m_ContractedOffset;
     m_ExtendedOffset = reference.m_ExtendedOffset;
@@ -116,7 +116,9 @@ int Leg::ReadProperty(std::string propName, Reader &reader)
     {
         const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
         if (pObj)
+        {
             m_pFoot = dynamic_cast<Attachable *>(pObj->Clone());
+        }
     }
     else if (propName == "ContractedOffset")
     {
@@ -187,10 +189,7 @@ int Leg::Save(Writer &writer) const
 
 void Leg::Destroy(bool notInherited)
 {
-//    g_MovableMan.RemoveEntityPreset(this);
-
     delete m_pFoot;
-
     if (!notInherited)
         Attachable::Destroy();
     Clear();
@@ -274,12 +273,10 @@ void Leg::BendLeg()
 
 void Leg::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
-    Detach();
-
     // Detach foot and let loose
     if (m_pFoot)
     {
-        m_pFoot->Detach();
+        RemoveAttachable(m_pFoot);
         g_MovableMan.AddParticle(m_pFoot);
         m_pFoot = 0;
     }

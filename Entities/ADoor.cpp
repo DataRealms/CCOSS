@@ -214,7 +214,7 @@ int ADoor::Create(const ADoor &reference)
     if (reference.m_pDoor)
     {
         m_pDoor = dynamic_cast<Attachable *>(reference.m_pDoor->Clone());
-        m_pDoor->Attach(this);
+        AddAttachable(m_pDoor, m_ClosedOffset, true);
     }
     m_OpenOffset = reference.m_OpenOffset;
     m_ClosedOffset = reference.m_ClosedOffset;
@@ -262,7 +262,6 @@ int ADoor::ReadProperty(std::string propName, Reader &reader)
         delete m_pDoor;
         m_pDoor = new Attachable;
         reader >> m_pDoor;
-        m_pDoor->Attach(this, m_ClosedOffset);
         m_DoorMaterialID = m_pDoor->GetMaterial()->id;
     }
     else if (propName == "OpenOffset")

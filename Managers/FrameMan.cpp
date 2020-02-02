@@ -1514,8 +1514,6 @@ int FrameMan::SwitchWindowMultiplier(int multiplier)
 
 void FrameMan::PostProcess()
 {
-    SLICK_PROFILE(0xFF354556);
-
     if (!m_PostProcessing)
         return;
 
@@ -1661,8 +1659,6 @@ void FrameMan::PostProcess()
 
 void FrameMan::FlipFrameBuffers()
 {
-    SLICK_PROFILE(0xFF886532);
-
     if (get_color_depth() == 32 && m_BPP == 32 && m_pBackBuffer32)
     {
         if (g_InActivity)
@@ -2051,8 +2047,6 @@ void FrameMan::DrawPrimitives(int player, BITMAP *pTargetBitmap, const Vector &t
 
 void FrameMan::Draw()
 {
-    SLICK_PROFILE(0xFF684822);
-
     // Count how many split screens we'll need
     int screenCount = (m_HSplit ? 2 : 1) * (m_VSplit ? 2 : 1);
 
@@ -2071,7 +2065,7 @@ void FrameMan::Draw()
 
     for (int whichScreen = 0; whichScreen < screenCount; ++whichScreen)
     {
-        SLICK_PROFILENAME("Screen Update", 0xFF321546);
+        // Screen Update
         screenRelativeEffects.clear();
         screenRelativeGlowBoxes.clear();
 
@@ -2141,7 +2135,7 @@ void FrameMan::Draw()
         set_clip_state(pDrawScreen, 1);
 
 		//Always draw seam in debug mode
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
 		//DrawLinePrimitive(Vector(0,0),Vector(0,g_SceneMan.GetSceneHeight()), 5);
 #endif
 

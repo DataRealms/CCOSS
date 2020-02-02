@@ -1140,14 +1140,14 @@ bool MovableMan::RemoveParticle(MovableObject *pMOToRem)
 
 bool MovableMan::ValidateMOIDs()
 {
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
     float test;
     for (vector<MovableObject *>::iterator itr = m_MOIDIndex.begin(); itr != m_MOIDIndex.end(); ++itr)
     {
         if (*itr)
             test = (*itr)->GetGoldValue();
     }
-#endif _DEBUG
+#endif
     return true;
 }
 
@@ -1649,8 +1649,6 @@ void MovableMan::OnPieMenu(Actor * pActor)
 
 void MovableMan::Update()
 {
-    SLICK_PROFILE(0xFF507569);
-
     // Don't update if paused
     if (g_ActivityMan.GetActivity() && g_ActivityMan.ActivityPaused())
         return;
@@ -1697,13 +1695,9 @@ void MovableMan::Update()
     // First Pass
 
     {
-        SLICK_PROFILENAME("First Pass", 0xFF354556);
-
-        // Travel Actor:s
+        // Travel Actors
 		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS1);
         {
-            SLICK_PROFILENAME("Travel Actors", 0xFF648434);
-
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
                 if (!((*aIt)->IsUpdated()))
@@ -1728,8 +1722,6 @@ void MovableMan::Update()
 
         // Travel items
         {
-            SLICK_PROFILENAME("Travel Items", 0xFF224535);
-
             for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt)
             {
                 if (!((*iIt)->IsUpdated()))
@@ -1746,8 +1738,6 @@ void MovableMan::Update()
         // Travel particles
 		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_PARTICLES_PASS1);
         {
-            SLICK_PROFILENAME("Travel Particles", 0xFF778962);
-
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
                 if (!((*parIt)->IsUpdated()))
@@ -1769,14 +1759,11 @@ void MovableMan::Update()
     // Second Pass
 
     {
-        SLICK_PROFILENAME("Second Pass", 0xFF552465);
-
         g_SceneMan.LockScene();
 
-        // Actor:s
+        // Actors
 		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
         {
-            SLICK_PROFILENAME("Second Pass -  Actors", 0xFF558673);
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
 				//g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
@@ -1790,14 +1777,8 @@ void MovableMan::Update()
         }
 		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
 
-    // TOD0: TEMP REMOVE!
-#ifdef _DEBUG
-//        ValidateMOIDs();
-#endif _DEBUG
-
         // Items
         {
-            SLICK_PROFILENAME("Second Pass - Items", 0xFF556876);
             int count = 0;
             int itemLimit = m_Items.size() - m_MaxDroppedItems;
             for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count)
@@ -1815,7 +1796,6 @@ void MovableMan::Update()
         // Particles
 		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_PARTICLES_PASS2);
         {
-            SLICK_PROFILENAME("Second Pass - Particles", 0xFF557766);
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
                 (*parIt)->Update();
@@ -1854,8 +1834,6 @@ void MovableMan::Update()
     // All Actors, Items, and Particles added this frame now are officially added
 
     {
-        SLICK_PROFILENAME("Transfer added MOs", 0xFF878765);
-
         // Actors
         for (aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
         {
@@ -1900,8 +1878,6 @@ void MovableMan::Update()
     // Copy (Settle) Pass
 
     {
-        SLICK_PROFILENAME("Copy and Settle Pass", 0xFF879684);
-
         g_SceneMan.UnlockScene();
         acquire_bitmap(g_SceneMan.GetTerrain()->GetMaterialBitmap());
 
@@ -2003,8 +1979,6 @@ void MovableMan::Update()
     // Only settle after all updates and deletions are done
     if (m_SettlingEnabled)
     {
-        SLICK_PROFILENAME("Settle particles", 0xFF879646);
-
         parIt = partition(m_Particles.begin(), m_Particles.end(), not1(mem_fun(&MovableObject::ToSettle)));
         midIt = parIt;
 
@@ -2074,7 +2048,6 @@ void MovableMan::Update()
 
     // Sort team rosters if necessary
     {
-        SLICK_PROFILENAME("Sort Team Rosters", 0xFF879646);
         if (m_SortTeamRoster[Activity::TEAM_1])
             m_ActorRoster[Activity::TEAM_1].sort(MOXPosComparison());
         if (m_SortTeamRoster[Activity::TEAM_2])
@@ -2146,8 +2119,6 @@ void MovableMan::VerifyMOIDIndex()
 
 void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
 {
-    SLICK_PROFILE(0xFF225464);
-
     int aCount = m_Actors.size();
     int iCount = m_Items.size();
     int parCount = m_Particles.size();
@@ -2206,8 +2177,6 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
 
 void MovableMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 {
-    SLICK_PROFILE(0xFF564462);
-
     // Draw objects to accumulation bitmap, in reverse order so actors appear on top.
     for (deque<MovableObject *>::iterator parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
         (*parIt)->Draw(pTargetBitmap, targetPos);
@@ -2228,8 +2197,6 @@ void MovableMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 
 void MovableMan::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int which, bool playerControlled)
 {
-//    SLICK_PROFILE(0xFF986512);
-
     // Draw HUD elements
 	for (deque<MovableObject *>::reverse_iterator itmIt = m_Items.rbegin(); itmIt != m_Items.rend(); ++itmIt)
         (*itmIt)->DrawHUD(pTargetBitmap, targetPos, which);

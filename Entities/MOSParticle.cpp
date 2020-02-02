@@ -285,8 +285,6 @@ void MOSParticle::RestDetection()
 
 void MOSParticle::Travel()
 {
-    SLICK_PROFILE(0xFF323324);
-
     MOSprite::Travel();
 
     // Pinned objects don't travel!

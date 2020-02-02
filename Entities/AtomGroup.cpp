@@ -17,7 +17,6 @@
 #include "MovableObject.h"
 #include "MOSRotating.h"
 #include <deque>
-#include <map>
 #include <set>
 
 #include "ConsoleMan.h"
@@ -92,38 +91,42 @@ int AtomGroup::Create()
 
 int AtomGroup::Create(const AtomGroup &reference)
 {
-    SLICK_PROFILE(0xFF662348);
+    return Create(reference, false);
+}
 
+int AtomGroup::Create(const AtomGroup &reference, boolean onlyCopyOwnerAtoms)
+{
     Entity::Create(reference);
 
-    m_AutoGenerate = false; //reference.m_AutoGenerate; Don't because we'll copy the atoms below
+    m_AutoGenerate = false; //Don't autogenerate because we'll copy the atoms below
     m_pMaterial = reference.m_pMaterial;
     m_Resolution = reference.m_Resolution;
     m_Depth = reference.m_Depth;
 
-    int subID = 0;
-    m_SubGroups.clear();
-    for (list<Atom *>::const_iterator itr = reference.m_Atoms.begin(); itr != reference.m_Atoms.end(); ++itr)
-    {
-        Atom *pAtomCopy = new Atom(**itr);
-		pAtomCopy->SetIgnoreMOIDsByGroup(&m_IgnoreMOIDs);
+	m_SubGroups.clear();
+	for (list<Atom *>::const_iterator itr = reference.m_Atoms.begin(); itr != reference.m_Atoms.end(); ++itr)
+	{
+		if (!onlyCopyOwnerAtoms || (*itr)->GetSubID() == 0)
+		{
+			Atom *pAtomCopy = new Atom(**itr);
+			pAtomCopy->SetIgnoreMOIDsByGroup(&m_IgnoreMOIDs);
 
-        m_Atoms.push_back(pAtomCopy);
+			m_Atoms.push_back(pAtomCopy);
 
-		// TODO: OPTIMIZE THE SHIT OUT OF THIS!!! TERRIBLE to have a find in every atom creation for a group!
-        // Add to the appropriate spot in the subgroup map
-        int subID = pAtomCopy->GetSubID();
-        if (subID != 0)
-        {
-            // Try to find the group
-            map<int, list<Atom *> >::iterator subItr = m_SubGroups.find(subID);
-            // No atom added to that group yet, so it doesn't exist, so make it
-            if (subItr == m_SubGroups.end())
-                subItr = (m_SubGroups.insert(pair<int, list<Atom *> >(subID, list<Atom *>()))).first;
-            // Add Atom to the list of that group
-            subItr->second.push_back(pAtomCopy);
-        }
-    }
+			// Add to the appropriate spot in the subgroup map
+			long int subID = pAtomCopy->GetSubID();
+			if (subID != 0)
+			{
+				// Make a new list for the subgroup ID if there isn't one already
+				if (m_SubGroups.find(subID) == m_SubGroups.end())
+				{
+					m_SubGroups.insert(pair<long int, list<Atom *>>(subID, list<Atom *>()));
+				}
+				// Add Atom to the list of that group
+				m_SubGroups.find(subID)->second.push_back(pAtomCopy);
+			}
+		}
+	}
 
 	// Copy ignored MOIDs list
 	for (list<MOID>::const_iterator itr = reference.m_IgnoreMOIDs.begin(); itr != reference.m_IgnoreMOIDs.end(); ++itr)
@@ -767,16 +770,15 @@ void AtomGroup::SetOwner(MOSRotating *newOwner)
 // Description:     Adds a list of new Atom:s to the internal list that makes up this group.
 //                  Ownership of all Atom:s in the list IS NOT transferred!
 
-void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, int subID, const Vector &offset, const Matrix &offsetRotation)
+void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, long int subID, const Vector &offset, const Matrix &offsetRotation)
 {
     Atom *pAtom;
 
-    // Try to find existing subgroup with that ID to add to
-    map<int, list<Atom *> >::iterator subItr = m_SubGroups.find(subID);
-    // Couldn't find any, so make a new one for the new ID so we can add to it
-    if (subItr == m_SubGroups.end())
-        subItr = (m_SubGroups.insert(pair<int, list<Atom *> >(subID, list<Atom *>()))).first;
-
+    // Make a new list for the subgroup ID if there isn't one already
+	if (m_SubGroups.find(subID) == m_SubGroups.end())
+	{
+		m_SubGroups.insert(pair<long int, list<Atom *> >(subID, list<Atom *>()));
+	}
     for (list<Atom *>::const_iterator itr = atomList.begin(); itr != atomList.end(); ++itr)
     {
         pAtom = new Atom(**itr);
@@ -787,7 +789,7 @@ void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, int subID, const Vec
         m_Atoms.push_back(pAtom);
 
         // Add the atom to the subgroup in the SubGroups map, not transferring ownership
-        subItr->second.push_back(pAtom);
+        m_SubGroups.find(subID)->second.push_back(pAtom);
     }
 }
 
@@ -799,25 +801,22 @@ void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, int subID, const Vec
 //                  representing sub parts of the whole to more closely represent the
 //                  graphics better.
 
-bool AtomGroup::UpdateSubAtoms(int subID, const Vector &newOffset, const Matrix &newOffsetRotation)
+bool AtomGroup::UpdateSubAtoms(long int subID, const Vector &newOffset, const Matrix &newOffsetRotation)
 {
-    // Try to find existing subgroup with that ID to update
-    map<int, list<Atom *> >::iterator subItr = m_SubGroups.find(subID);
-    // Couldn't find any, so quit
-    if (subItr == m_SubGroups.end())
-        return false;
+	// Try to find existing subgroup with that ID to update
+	if (m_SubGroups.find(subID) == m_SubGroups.end())
+	{
+		return false;
+	}
+	DAssert(!m_SubGroups.find(subID)->second.empty(), "Found empty atom subgroup list!?");
 
-    DAssert(!subItr->second.empty(), "Found empty atom subgroup list!?");
+	for (list<Atom *>::const_iterator aItr = m_SubGroups.find(subID)->second.begin(); aItr != m_SubGroups.find(subID)->second.end(); ++aItr)
+	{
+		(*aItr)->SetSubID(subID); // Re-set ID just to make sure - TODO I don't think we need this?!
+		(*aItr)->SetOffset(newOffset + ((*aItr)->GetOriginalOffset() * newOffsetRotation));
+	}
 
-    for (list<Atom *>::const_iterator aItr = subItr->second.begin(); aItr != subItr->second.end(); ++aItr)
-    {
-        // Re-set ID just to make sure
-        (*aItr)->SetSubID(subID);
-        (*aItr)->SetOffset(newOffset + ((*aItr)->GetOriginalOffset() * newOffsetRotation));
-//        pAtom->SetOwner(m_pOwnerMO);
-    }
-
-    return true;
+	return true;
 }
 
 
@@ -826,7 +825,7 @@ bool AtomGroup::UpdateSubAtoms(int subID, const Vector &newOffset, const Matrix 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes all atoms of a specific subgroup ID from this AtomGroup.
 
-bool AtomGroup::RemoveAtoms(int removeID)
+bool AtomGroup::RemoveAtoms(long int removeID)
 {
     bool removedAny = false;
     list<Atom *>::iterator eraseItr;
@@ -848,50 +847,6 @@ bool AtomGroup::RemoveAtoms(int removeID)
 
     // Try to erase the group from the subgroup map
     m_SubGroups.erase(removeID);
-
-    return removedAny;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAllButAtoms
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes all atoms of a specific subgroup ID from this AtomGroup that
-//                  don't match a specific subgroup ID.
-
-bool AtomGroup::RemoveAllButAtoms(int removeAllButID)
-{
-    bool removedAny = false;
-    list<Atom *>::iterator eraseItr;
-
-    for (list<Atom *>::iterator aItr = m_Atoms.begin(); aItr != m_Atoms.end();)
-    {
-        if ((*aItr)->GetSubID() != removeAllButID)
-        {
-            // This hanky panky necessary to not invalidate the aItr iterator
-            delete (*aItr);
-            eraseItr = aItr;
-            aItr++;
-            m_Atoms.erase(eraseItr);
-            removedAny = true;
-        }
-        else
-            aItr++;
-    }
-
-    // Remove the entries int he SubGroup map
-    map<int, list<Atom *> >::iterator eraseMapItr;
-    for (map<int, list<Atom *> >::iterator mItr = m_SubGroups.begin(); mItr != m_SubGroups.end();)
-    {
-        if (mItr->first != removeAllButID)
-        {
-            eraseMapItr = mItr;
-            mItr++;
-            m_SubGroups.erase(eraseMapItr);
-        }
-        else
-            mItr++;
-    }
 
     return removedAny;
 }
@@ -1167,10 +1122,10 @@ float AtomGroup::Travel(Vector &position,
 //                        hitData.resImpulse[HITOR] = -hitData.hitVel[HITOR];
                 }
             }
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
             // Draw the positions of the atoms at the start of each segment, for visual debugging.
             putpixel(g_SceneMan.GetMOColorBitmap(), (*aItr)->GetCurrentPos().m_X, (*aItr)->GetCurrentPos().m_Y, 122);
-#endif //_DEBUG
+#endif
         }
 
         // Compute and scale the actual on-screen travel trajectory of the origin of thid AtomGroup
@@ -1297,13 +1252,13 @@ float AtomGroup::Travel(Vector &position,
 //                  else
 //                      DDTAbort("Atom reported hit to AtomGroup, but then reported neither MO or Terr hit!");
 
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
                     Vector tPos = (*aItr)->GetCurrentPos();
                     Vector tNorm = m_pOwnerMO->RotateOffset((*aItr)->GetNormal()) * 7;
                     line(g_SceneMan.GetMOColorBitmap(), tPos.m_X, tPos.m_Y, tPos.m_X + tNorm.m_X, tPos.m_Y + tNorm.m_Y, 244);
                     // Draw the positions of the hitpoints on screen for easy debugging.
 //                    putpixel(g_SceneMan.GetMOColorBitmap(), tPos.m_X, tPos.m_Y, 5);
-#endif //_DEBUG
+#endif
                 }
             }
 
@@ -1907,10 +1862,10 @@ before adding them to the MovableMan.
                                                                            intPos[Y] + rotatedOffset.m_Y))
                     hitTerrAtoms.push_back(pair<Atom *, Vector>(*aItr, rotatedOffset));
 /*
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
                 // Draw the positions of the hitpoints on screen for easy debugging.
                 putpixel(g_SceneMan.GetMOColorBitmap(), floorf(position.m_X + rotatedOffset.m_X), floorf(position.m_Y + rotatedOffset.m_Y), 122);
-#endif //_DEBUG
+#endif
 */
             }
 
@@ -2397,10 +2352,10 @@ bool AtomGroup::InTerrain()
         if (g_SceneMan.GetTerrMatter(aPos.m_X, aPos.m_Y) != g_MaterialAir)
             penetrates = true;
 /*
-#ifdef _DEBUG
+#ifdef DEBUG_BUILD
         // Draw a dot for each atom for visual reference.
         putpixel(g_SceneMan.GetDebugBitmap(), aPos.m_X, aPos.m_Y, 112);
-#endif //_DEBUG
+#endif
 */
     }
 
@@ -2444,8 +2399,6 @@ float AtomGroup::RatioInTerrain()
 
 bool AtomGroup::ResolveTerrainIntersection(Vector &position, Matrix &rotation, unsigned char strongerThan)
 {
-    SLICK_PROFILE(0xFF335546);
-
     Vector atomOffset, atomPos, atomNormal, clearPos, exitDirection, atomExitVector, totalExitVector;
     list<Atom *>::iterator aItr;
     list<Atom *> intersectingAtoms;

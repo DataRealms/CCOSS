@@ -208,8 +208,6 @@ void PathFinder::RecalculateAllCosts()
 
 void PathFinder::RecalculateAreaCosts(const list<Box> &boxList)
 {
-    SLICK_PROFILE(0xFF343526);
-
     // Go through all the boxes and see if any of the node centers are inside each
     Box box;
     for (list<Box>::const_iterator bItr = boxList.begin(); bItr != boxList.end(); bItr++)

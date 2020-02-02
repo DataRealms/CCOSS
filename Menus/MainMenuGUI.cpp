@@ -1833,9 +1833,9 @@ void MainMenuGUI::Update()
                 else if (anEvent.GetControl() == m_pLegalAgreementLink)
                 {
                     // Open the license agreement page
-#ifndef _DEBUG
+#ifndef DEBUG_BUILD
                     OpenBrowserToURL("http://steamcommunity.com/sharedfiles/workshoplegalagreement");
-#endif // _DEBUG
+#endif
                     // Show the publish button now
                     m_pPublishNextButton->SetVisible(true);
                 }
@@ -2170,7 +2170,7 @@ void MainMenuGUI::Draw(BITMAP *drawBitmap) const
 		if (pIcon)
 			draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], mouseX + 16, mouseY - 4);
 
-/*#ifdef _DEBUG
+/*#ifdef DEBUG_BUILD
 		if (g_UInputMan.JoystickActive(0))
 		{
 			Vector aim = g_UInputMan.AnalogAimValues(0);

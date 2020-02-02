@@ -288,7 +288,7 @@ ENTITYALLOCATION(Attachable)
 // Arguments:       None.
 // Return value:    The the subgroup ID of this' Atoms.
 
-    int GetAtomSubgroupID() const { return m_AtomSubgroupID; }
+	long int GetAtomSubgroupID() const { return m_AtomSubgroupID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -369,7 +369,7 @@ ENTITYALLOCATION(Attachable)
 // Arguments:       The new subgroup id of this' Atoms
 // Return value:    None.
 
-    void SetAtomSubgroupID(int newID = 0) { m_AtomSubgroupID = newID; }
+    void SetAtomSubgroupID(long int newID = 0) { m_AtomSubgroupID = newID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -571,26 +571,6 @@ ENTITYALLOCATION(Attachable)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddAttachable
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds an attachable to this Attachable.
-// Arguments:       The Attachable to add.
-// Return value:    None.
-
-    void AddAttachable(Attachable *pAttachable);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DetachAll
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Detaches everything from this Attachable.
-// Arguments:       None.
-// Return value:    None.
-
-    void DetachAll(bool destroy);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RemoveWounds
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes a specified amount of wounds.
@@ -630,6 +610,40 @@ ENTITYALLOCATION(Attachable)
 	virtual void SetInheritsRotAngle(bool inherit) { m_InheritsRotAngle = inherit; }
 
 
+	/// <summary>
+	/// Whether this attachable is capable of having terrain collisions enabled/disabled when attached to a parent.
+	/// </summary>
+	/// <return>If true, can have terrain collisions enabled/disabled when attached.</return>
+	virtual bool CanCollideWithTerrainWhenAttached() const { return m_CanCollideWithTerrainWhenAttached; }
+
+
+	/// <summary>
+	/// Sets whether this attachable is capable of having terrain collisions enabled/disabled when attached to a parent.
+	/// </summary>
+	/// <param name="canCollide">Whether this attachable can have terrain collisions enabled/disabled when attached.</param>
+	virtual void SetCanCollideWithTerrainWhenAttached(bool canCollide) { m_CanCollideWithTerrainWhenAttached = canCollide; }
+
+
+	/// <summary>
+	/// Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
+	/// </summary>
+	/// <return>If true, terrain collisions while attached are enabled and atoms are present in parent AtomGroup.</return>
+	virtual bool IsCollidingWithTerrainWhileAttached() const { return m_IsCollidingWithTerrainWhileAttached; }
+
+
+	/// <summary>
+	/// Sets whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
+	/// </summary>
+	/// <param name="collide">Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.</param>
+	virtual void SetIsCollidingWithTerrainWhileAttached(bool isColliding) { m_IsCollidingWithTerrainWhileAttached = isColliding; }
+
+
+	/// <summary>
+	/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its atoms to/from its parent AtomGroup.
+	/// </summary>
+	virtual void EnableTerrainCollisions(bool enable);
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -665,7 +679,7 @@ protected:
     Matrix m_RotTarget;
 
     // The Atom ID's this' atoms will have when attached and added to a parent's AtomGroup
-    int m_AtomSubgroupID;
+    long int m_AtomSubgroupID;
 
     // Whether to draw this Attachable after (in front of) or before (behind) the parent.
     bool m_DrawAfterParent;
@@ -679,6 +693,12 @@ protected:
 
 	// If true inherits Parent's rot angle, which is set MOSRotating::Update. Default is true to maintain maybe awkward but default behavior
 	bool m_InheritsRotAngle;
+
+	// Whether this attachable is capable of having terrain collisions enabled/disabled when attached to a parent.
+	bool m_CanCollideWithTerrainWhenAttached;
+
+	// Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
+	bool m_IsCollidingWithTerrainWhileAttached;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

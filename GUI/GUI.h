@@ -55,4 +55,4 @@ void SetRect(RECT *pRect,
 
 int DDTstricmp(const char *s1, const char *s2);
 
-#endif  //  _GUI_
+#endif

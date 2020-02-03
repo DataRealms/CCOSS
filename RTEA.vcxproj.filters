@@ -189,106 +189,106 @@
     <ClInclude Include="Managers\UInputMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\AllegroBitmap.h">
+    <ClInclude Include="GUI\AllegroBitmap.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\AllegroInput.h">
+    <ClInclude Include="GUI\AllegroInput.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\AllegroScreen.h">
+    <ClInclude Include="GUI\AllegroScreen.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\Gui.h">
+    <ClInclude Include="GUI\GUI.h">
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\GUIBanner.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIBitmap.h">
+    <ClInclude Include="GUI\GUIBitmap.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIButton.h">
+    <ClInclude Include="GUI\GUIButton.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUICheckbox.h">
+    <ClInclude Include="GUI\GUICheckbox.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUICollectionBox.h">
+    <ClInclude Include="GUI\GUICollectionBox.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIComboBox.h">
+    <ClInclude Include="GUI\GUIComboBox.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIControl.h">
+    <ClInclude Include="GUI\GUIControl.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIControlFactory.h">
+    <ClInclude Include="GUI\GUIControlFactory.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIControlManager.h">
+    <ClInclude Include="GUI\GUIControlManager.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIEvent.h">
+    <ClInclude Include="GUI\GUIEvent.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIFont.h">
+    <ClInclude Include="GUI\GUIFont.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIInput.h">
+    <ClInclude Include="GUI\GUIInput.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUILabel.h">
+    <ClInclude Include="GUI\GUILabel.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIListBox.h">
+    <ClInclude Include="GUI\GUIListBox.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIListPanel.h">
+    <ClInclude Include="GUI\GUIListPanel.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIManager.h">
+    <ClInclude Include="GUI\GUIManager.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIPanel.h">
+    <ClInclude Include="GUI\GUIPanel.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIProgressBar.h">
+    <ClInclude Include="GUI\GUIProgressBar.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIProperties.h">
+    <ClInclude Include="GUI\GUIProperties.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIPropertyPage.h">
+    <ClInclude Include="GUI\GUIPropertyPage.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIRadioButton.h">
+    <ClInclude Include="GUI\GUIRadioButton.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIScreen.h">
+    <ClInclude Include="GUI\GUIScreen.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIScrollbar.h">
+    <ClInclude Include="GUI\GUIScrollbar.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIScrollPanel.h">
+    <ClInclude Include="GUI\GUIScrollPanel.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUISkin.h">
+    <ClInclude Include="GUI\GUISkin.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUISlider.h">
+    <ClInclude Include="GUI\GUISlider.h">
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\GUITab.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUITextBox.h">
+    <ClInclude Include="GUI\GUITextBox.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUITextPanel.h">
+    <ClInclude Include="GUI\GUITextPanel.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Gui\GUIUtil.h">
+    <ClInclude Include="GUI\GUIUtil.h">
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\WinUtil.h">
@@ -1146,100 +1146,100 @@
     <ClCompile Include="Managers\UInputMan.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\AllegroBitmap.cpp">
+    <ClCompile Include="GUI\AllegroBitmap.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\AllegroInput.cpp">
+    <ClCompile Include="GUI\AllegroInput.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\AllegroScreen.cpp">
+    <ClCompile Include="GUI\AllegroScreen.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUI.cpp">
+    <ClCompile Include="GUI\GUI.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\GUIBanner.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIButton.cpp">
+    <ClCompile Include="GUI\GUIButton.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUICheckbox.cpp">
+    <ClCompile Include="GUI\GUICheckbox.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUICollectionBox.cpp">
+    <ClCompile Include="GUI\GUICollectionBox.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIComboBox.cpp">
+    <ClCompile Include="GUI\GUIComboBox.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIControl.cpp">
+    <ClCompile Include="GUI\GUIControl.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIControlFactory.cpp">
+    <ClCompile Include="GUI\GUIControlFactory.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIControlManager.cpp">
+    <ClCompile Include="GUI\GUIControlManager.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIEvent.cpp">
+    <ClCompile Include="GUI\GUIEvent.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIFont.cpp">
+    <ClCompile Include="GUI\GUIFont.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIInput.cpp">
+    <ClCompile Include="GUI\GUIInput.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUILabel.cpp">
+    <ClCompile Include="GUI\GUILabel.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIListBox.cpp">
+    <ClCompile Include="GUI\GUIListBox.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIListPanel.cpp">
+    <ClCompile Include="GUI\GUIListPanel.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIManager.cpp">
+    <ClCompile Include="GUI\GUIManager.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIPanel.cpp">
+    <ClCompile Include="GUI\GUIPanel.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIProgressBar.cpp">
+    <ClCompile Include="GUI\GUIProgressBar.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIProperties.cpp">
+    <ClCompile Include="GUI\GUIProperties.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIPropertyPage.cpp">
+    <ClCompile Include="GUI\GUIPropertyPage.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIRadioButton.cpp">
+    <ClCompile Include="GUI\GUIRadioButton.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIScrollbar.cpp">
+    <ClCompile Include="GUI\GUIScrollbar.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIScrollPanel.cpp">
+    <ClCompile Include="GUI\GUIScrollPanel.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUISkin.cpp">
+    <ClCompile Include="GUI\GUISkin.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUISlider.cpp">
+    <ClCompile Include="GUI\GUISlider.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\GUITab.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUITextBox.cpp">
+    <ClCompile Include="GUI\GUITextBox.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUITextPanel.cpp">
+    <ClCompile Include="GUI\GUITextPanel.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="Gui\GUIUtil.cpp">
+    <ClCompile Include="GUI\GUIUtil.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\WinUtil.cpp">

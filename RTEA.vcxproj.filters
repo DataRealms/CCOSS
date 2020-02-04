@@ -10,9 +10,6 @@
     <Filter Include="System\MicroPather">
       <UniqueIdentifier>{d7921341-db26-4b59-b590-1cd922940032}</UniqueIdentifier>
     </Filter>
-    <Filter Include="System\InterGif">
-      <UniqueIdentifier>{1fc1f8dd-e10f-4386-80a0-27b5c1f19170}</UniqueIdentifier>
-    </Filter>
     <Filter Include="System\MD5">
       <UniqueIdentifier>{2895a2d1-cae8-4fa4-9ad8-40f708b86d00}</UniqueIdentifier>
     </Filter>
@@ -110,39 +107,6 @@
     </ClInclude>
     <ClInclude Include="System\MicroPather\micropather.h">
       <Filter>System\MicroPather</Filter>
-    </ClInclude>
-    <ClInclude Include="System\InterGif\animlib.h">
-      <Filter>System\InterGif</Filter>
-    </ClInclude>
-    <ClInclude Include="System\InterGif\count.h">
-      <Filter>System\InterGif</Filter>
-    </ClInclude>
-    <ClInclude Include="System\InterGif\frame.h">
-      <Filter>System\InterGif</Filter>
-    </ClInclude>
-    <ClInclude Include="System\InterGif\gifdecode.h">
-      <Filter>System\InterGif</Filter>
-    </ClInclude>
-    <ClInclude Include="System\InterGif\gifencode.h">
-      <Filter>System\InterGif</Filter>
-    </ClInclude>
-    <ClInclude Include="System\InterGif\intergif.h">
-      <Filter>System\InterGif</Filter>
-    </ClInclude>
-    <ClInclude Include="System\InterGif\riemann.h">
-      <Filter>System\InterGif</Filter>
-    </ClInclude>
-    <ClInclude Include="System\InterGif\split.h">
-      <Filter>System\InterGif</Filter>
-    </ClInclude>
-    <ClInclude Include="System\InterGif\sprite.h">
-      <Filter>System\InterGif</Filter>
-    </ClInclude>
-    <ClInclude Include="System\InterGif\utils.h">
-      <Filter>System\InterGif</Filter>
-    </ClInclude>
-    <ClInclude Include="System\InterGif\workspace.h">
-      <Filter>System\InterGif</Filter>
     </ClInclude>
     <ClInclude Include="System\MD5\md5.h">
       <Filter>System\MD5</Filter>
@@ -1034,75 +998,6 @@
     </ClCompile>
     <ClCompile Include="System\MicroPather\micropather.cpp">
       <Filter>System\MicroPather</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\animlib.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\colmatch.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\commonpal.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\count.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\frame.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\from.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\fromfile.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\gifdecode.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\gifencode.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\histogram.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\intergif.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\join.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\loadgif.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\loadsprite.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\loadtca.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\mediancut.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\palettemap.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\riemann.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\savegif.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\savesprite.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\split.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\win32.c">
-      <Filter>System\InterGif</Filter>
-    </ClCompile>
-    <ClCompile Include="System\InterGif\workspace.c">
-      <Filter>System\InterGif</Filter>
     </ClCompile>
     <ClCompile Include="System\MD5\md5.c">
       <Filter>System\MD5</Filter>

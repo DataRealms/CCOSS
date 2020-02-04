@@ -395,7 +395,6 @@
     <ClInclude Include="System\Reader.h" />
     <ClInclude Include="System\Serializable.h" />
     <ClInclude Include="System\Singleton.h" />
-    <ClInclude Include="System\StdString.h" />
     <ClInclude Include="System\System.h" />
     <ClInclude Include="System\Timer.h" />
     <ClInclude Include="System\Vector.h" />

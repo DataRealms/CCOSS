@@ -90,9 +90,6 @@
     <ClInclude Include="System\Singleton.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="System\StdString.h">
-      <Filter>System</Filter>
-    </ClInclude>
     <ClInclude Include="System\System.h">
       <Filter>System</Filter>
     </ClInclude>

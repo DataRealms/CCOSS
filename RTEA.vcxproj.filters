@@ -28,9 +28,6 @@
     <Filter Include="System\RakNet">
       <UniqueIdentifier>{2f4fa343-694e-4e9f-bdaf-0ff0f46869d8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="System\LZ4">
-      <UniqueIdentifier>{fc693771-7e01-473d-aa69-fce744a0bdc3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Activities">
       <UniqueIdentifier>{4d361173-4982-4e1b-8967-8ab53105dc7f}</UniqueIdentifier>
     </Filter>
@@ -927,12 +924,6 @@
     <ClInclude Include="Managers\Network.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="System\LZ4\lz4.h">
-      <Filter>System\LZ4</Filter>
-    </ClInclude>
-    <ClInclude Include="System\LZ4\lz4hc.h">
-      <Filter>System\LZ4</Filter>
-    </ClInclude>
     <ClInclude Include="Managers\NetworkMessages.h">
       <Filter>Managers</Filter>
     </ClInclude>
@@ -1671,12 +1662,6 @@
     </ClCompile>
     <ClCompile Include="Managers\NetworkServer.cpp">
       <Filter>Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="System\LZ4\lz4.c">
-      <Filter>System\LZ4</Filter>
-    </ClCompile>
-    <ClCompile Include="System\LZ4\lz4hc.c">
-      <Filter>System\LZ4</Filter>
     </ClCompile>
     <ClCompile Include="Activities\MultiplayerGame.cpp">
       <Filter>Activities</Filter>

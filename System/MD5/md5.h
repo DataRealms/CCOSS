@@ -1,91 +1,93 @@
-/*
-  Copyright (C) 1999, 2002 Aladdin Enterprises.  All rights reserved.
-
-  This software is provided 'as-is', without any express or implied
-  warranty.  In no event will the authors be held liable for any damages
-  arising from the use of this software.
-
-  Permission is granted to anyone to use this software for any purpose,
-  including commercial applications, and to alter it and redistribute it
-  freely, subject to the following restrictions:
-
-  1. The origin of this software must not be misrepresented; you must not
-     claim that you wrote the original software. If you use this software
-     in a product, an acknowledgment in the product documentation would be
-     appreciated but is not required.
-  2. Altered source versions must be plainly marked as such, and must not be
-     misrepresented as being the original software.
-  3. This notice may not be removed or altered from any source distribution.
-
-  L. Peter Deutsch
-  ghost@aladdin.com
-
- */
-/* $Id: md5.h,v 1.4 2002/04/13 19:20:28 lpd Exp $ */
-/*
-  Independent implementation of MD5 (RFC 1321).
-
-  This code implements the MD5 Algorithm defined in RFC 1321, whose
-  text is available at
-	http://www.ietf.org/rfc/rfc1321.txt
-  The code is derived from the text of the RFC, including the test suite
-  (section A.5) but excluding the rest of Appendix A.  It does not include
-  any code or documentation that is identified in the RFC as being
-  copyrighted.
-
-  The original and principal author of md5.h is L. Peter Deutsch
-  <ghost@aladdin.com>.  Other authors are noted in the change history
-  that follows (in reverse chronological order):
-
-  2002-04-13 lpd Removed support for non-ANSI compilers; removed
-	references to Ghostscript; clarified derivation from RFC 1321;
-	now handles byte order either statically or dynamically.
-  1999-11-04 lpd Edited comments slightly for automatic TOC extraction.
-  1999-10-18 lpd Fixed typo in header comment (ansi2knr rather than md5);
-	added conditionalization for C++ compilation from Martin
-	Purschke <purschke@bnl.gov>.
-  1999-05-03 lpd Original version.
- */
-
-#ifndef md5_INCLUDED
-#  define md5_INCLUDED
-
-/*
- * This package supports both compile-time and run-time determination of CPU
- * byte order.  If ARCH_IS_BIG_ENDIAN is defined as 0, the code will be
- * compiled to run only on little-endian CPUs; if ARCH_IS_BIG_ENDIAN is
- * defined as non-zero, the code will be compiled to run only on big-endian
- * CPUs; if ARCH_IS_BIG_ENDIAN is not defined, the code will be compiled to
- * run on either big- or little-endian CPUs, but will run slightly less
- * efficiently on either one than if ARCH_IS_BIG_ENDIAN is defined.
- */
-
-typedef unsigned char md5_byte_t; /* 8-bit byte */
-typedef unsigned int md5_word_t; /* 32-bit word */
-
-/* Define the state of the MD5 Algorithm. */
-typedef struct md5_state_s {
-    md5_word_t count[2];	/* message length in bits, lsw first */
-    md5_word_t abcd[4];		/* digest buffer */
-    md5_byte_t buf[64];		/* accumulate block */
-} md5_state_t;
-
-#ifdef __cplusplus
-extern "C" 
+/* MD5
+ converted to C++ class by Frank Thilo (thilo@unix-ag.org)
+ for bzflag (http://www.bzflag.org)
+ 
+   based on:
+ 
+   md5.h and md5.c
+   reference implementation of RFC 1321
+ 
+   Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
+rights reserved.
+ 
+License to copy and use this software is granted provided that it
+is identified as the "RSA Data Security, Inc. MD5 Message-Digest
+Algorithm" in all material mentioning or referencing this software
+or this function.
+ 
+License is also granted to make and use derivative works provided
+that such works are identified as "derived from the RSA Data
+Security, Inc. MD5 Message-Digest Algorithm" in all material
+mentioning or referencing the derived work.
+ 
+RSA Data Security, Inc. makes no representations concerning either
+the merchantability of this software or the suitability of this
+software for any particular purpose. It is provided "as is"
+without express or implied warranty of any kind.
+ 
+These notices must be retained in any copies of any part of this
+documentation and/or software.
+ 
+*/
+ 
+#ifndef BZF_MD5_H
+#define BZF_MD5_H
+ 
+#include <cstring>
+#include <iostream>
+ 
+ 
+// a small class for calculating MD5 hashes of strings or byte arrays
+// it is not meant to be fast or secure
+//
+// usage: 1) feed it blocks of uchars with update()
+//      2) finalize()
+//      3) get hexdigest() string
+//      or
+//      MD5(std::string).hexdigest()
+//
+// assumes that char is 8 bit and int is 32 bit
+class MD5
 {
+public:
+  typedef unsigned int size_type; // must be 32bit
+ 
+  MD5();
+  MD5(const std::string& text);
+  void update(const unsigned char *buf, size_type length);
+  void update(const char *buf, size_type length);
+  MD5& finalize();
+  std::string hexdigest() const;
+  friend std::ostream& operator<<(std::ostream&, MD5 md5);
+ 
+private:
+  void init();
+  typedef unsigned char uint1; //  8bit
+  typedef unsigned int uint4;  // 32bit
+  enum {blocksize = 64}; // VC6 won't eat a const static int here
+ 
+  void transform(const uint1 block[blocksize]);
+  static void decode(uint4 output[], const uint1 input[], size_type len);
+  static void encode(uint1 output[], const uint4 input[], size_type len);
+ 
+  bool finalized;
+  uint1 buffer[blocksize]; // bytes that didn't fit in last 64 byte chunk
+  uint4 count[2];   // 64bit counter for number of bits (lo, hi)
+  uint4 state[4];   // digest so far
+  uint1 digest[16]; // the result
+ 
+  // low level logic operations
+  static inline uint4 F(uint4 x, uint4 y, uint4 z);
+  static inline uint4 G(uint4 x, uint4 y, uint4 z);
+  static inline uint4 H(uint4 x, uint4 y, uint4 z);
+  static inline uint4 I(uint4 x, uint4 y, uint4 z);
+  static inline uint4 rotate_left(uint4 x, int n);
+  static inline void FF(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac);
+  static inline void GG(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac);
+  static inline void HH(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac);
+  static inline void II(uint4 &a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uint4 ac);
+};
+ 
+std::string md5(const std::string str);
+ 
 #endif
-
-/* Initialize the algorithm. */
-void md5_init(md5_state_t *pms);
-
-/* Append a string to the message. */
-void md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes);
-
-/* Finish the message and return the digest. */
-void md5_finish(md5_state_t *pms, md5_byte_t digest[16]);
-
-#ifdef __cplusplus
-}  /* end extern "C" */
-#endif
-
-#endif /* md5_INCLUDED */

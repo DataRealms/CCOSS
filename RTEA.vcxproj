@@ -735,7 +735,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">StandardIncludes.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="System\MicroPather\micropather.cpp" />
-    <ClCompile Include="System\MD5\md5.c" />
     <ClCompile Include="System\PathFinder.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Final Open Source|Win32'">StandardIncludes.h</PrecompiledHeaderFile>
@@ -1688,6 +1687,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">StandardIncludes.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="System\MD5\md5.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="external\sources\RakNet\CMakeLists.txt" />

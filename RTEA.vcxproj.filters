@@ -989,7 +989,7 @@
     <ClCompile Include="System\MicroPather\micropather.cpp">
       <Filter>System\MicroPather</Filter>
     </ClCompile>
-    <ClCompile Include="System\MD5\md5.c">
+    <ClCompile Include="System\MD5\md5.cpp">
       <Filter>System\MD5</Filter>
     </ClCompile>
     <ClCompile Include="Managers\AchievementMan.cpp">

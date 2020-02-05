@@ -17,13 +17,12 @@
 
 #include "ConsoleMan.h"
 #include "FrameMan.h"
-#include "Audioman.h"
+#include "AudioMan.h"
 #include "SettingsMan.h"
 
 #include "NetworkClient.h"
 
-#include "lz4.h"
-//#include "lz4hc.h"
+#include "LZ4/lz4.h"
 
 #define PLAYERNAMECHARLIMIT 15
 

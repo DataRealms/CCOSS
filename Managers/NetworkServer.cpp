@@ -23,8 +23,8 @@
 #include "GetTime.h"
 #include "BitStream.h"
 
-#include "lz4.h"
-#include "lz4hc.h"
+#include "LZ4/lz4.h"
+#include "LZ4/lz4hc.h"
 
 #include "Scene.h"
 #include "SLTerrain.h"

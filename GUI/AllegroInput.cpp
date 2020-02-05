@@ -16,9 +16,6 @@
 #include "UInputMan.h"
 #endif // GUI_STANDALONE
 
-#include "allegro.h"
-
-
 using namespace RTE;
 
 

@@ -13,6 +13,7 @@
 
 #include "Vector.h"
 #include "Timer.h"
+#include "allegro.h"
 
 struct BITMAP;
 

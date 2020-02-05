@@ -30,15 +30,4 @@
 #include <cassert>
 #include <limits>
 
-// Allegro utility header
-#include <allegro/base.h>
-
-// TODO: Get rid of these once alias qualifiers are added.
-using std::string;
-using std::list;
-using std::pair;
-using std::deque;
-using std::map;
-using std::set;
-
 #endif

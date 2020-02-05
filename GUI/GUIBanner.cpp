@@ -13,7 +13,6 @@
 
 #include "GUIBanner.h"
 #include "ContentFile.h"
-#include "allegro.h"
 
 using namespace std;
 

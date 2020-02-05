@@ -26,9 +26,8 @@ struct RECT
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "StandardIncludes.h"
+#include "allegro.h"
 #include "Constants.h"
-
 #include "GUIProperties.h"
 #include "GUIInput.h"
 #include "GUIBitmap.h"

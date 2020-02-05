@@ -934,7 +934,9 @@
       <Filter>Activities</Filter>
     </ClInclude>
     <ClInclude Include="Constants.h" />
-    <ClInclude Include="StandardIncludes.h" />
+    <ClInclude Include="System\StandardIncludes.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RTEA.rc">
@@ -1668,6 +1670,9 @@
     </ClCompile>
     <ClCompile Include="Activities\MultiplayerServerLobby.cpp">
       <Filter>Activities</Filter>
+    </ClCompile>
+    <ClCompile Include="System\StandardIncludes.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -10,12 +10,6 @@
 //                  c/- Daniel Tabar (data@datarealms.com)
 //                  http://www.datarealms.com
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files, forward declarations, namespace stuff
-
-#include "StandardIncludes.h"
-
 namespace RTE
 {
 

@@ -10,12 +10,6 @@
 //                  data@datarealms.com
 //                  http://www.datarealms.com
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
-#include "StandardIncludes.h"
-
 namespace RTE
 {
 

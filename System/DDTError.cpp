@@ -12,7 +12,6 @@
 // Inclusions of header files
 
 #include "DDTError.h"
-#include "allegro.h"
 #include "Constants.h"
 
 

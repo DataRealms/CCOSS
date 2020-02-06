@@ -19,7 +19,6 @@
 #include "MetaMan.h"
 #include "ConsoleMan.h"
 #include "PresetMan.h"
-#include "AchievementMan.h"
 #include "DataModule.h"
 #include "Controller.h"
 #include "Scene.h"
@@ -675,21 +674,8 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
         Actor *pLastPassenger = 0;
         list<MovableObject *> cargoItems;
 
-        int crabCount = 0;
-
         for (list<const SceneObject *>::iterator itr = purchaseList.begin(); itr != purchaseList.end(); ++itr)
         {
-            // Achievement: check if it's a crab
-            if ((*itr)->GetPresetName() == "Crab" && (*itr)->GetGoldValue() == 0 && crabCount != -1)
-            {
-                crabCount++;
-            }
-            else
-            {
-                // Not a crab! Give up on the achievement.
-                crabCount = -1;
-            }
-
 			bool purchaseItem = true;
 
             // Add to the total cost tally
@@ -758,9 +744,6 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
 					cargoItems.push_back(pInventoryObject);
 			}
         }
-
-        if (crabCount == 500)
-            g_AchievementMan.UnlockAchievement("CC_MORECRABS");
 
         pPassenger = 0;
 
@@ -1115,49 +1098,7 @@ void GameActivity::End()
         m_Deliveries[team].clear();
     }
 
-    if (GetWinnerTeam() >= 0)
-    {
-        g_AchievementMan.ProgressAchievement("CC_WARTORN", 1, 999);
 
-        if (IsPlayerTeam(GetWinnerTeam()))
-        {
-            int playerLosses = GetTeamDeathCount(GetWinnerTeam());
-            int highestCount = 0;
-
-            for (int i = Activity::TEAM_1; i < GetTeamCount(); i++)
-            {
-                if (i != GetWinnerTeam() && GetTeamDeathCount(i) > highestCount)
-                {
-                    highestCount = GetTeamDeathCount(i);
-                }
-            }
-
-            if (playerLosses > highestCount)
-            {
-                g_AchievementMan.UnlockAchievement("CC_PYRRHICVICTORY");
-            }
-        }
-        else
-        {
-            int playerTeam = 0;
-            for (int i = Activity::TEAM_1; i < GetTeamCount(); i++)
-            {
-                if (IsPlayerTeam(i))
-                {
-                    playerTeam = i;
-                    break;
-                }
-            }
-
-            int winnerLosses = GetTeamDeathCount(GetWinnerTeam());
-            int playerLosses = GetTeamDeathCount(playerTeam);
-
-            if (winnerLosses > playerLosses)
-            {
-                g_AchievementMan.UnlockAchievement("CC_TECHNICALWIN"); // the best kind of win
-            }
-        }
-    }
 /* Now controlled by the scripted activities
     // Play the approriate tune on player win/lose
     if (playerWon)

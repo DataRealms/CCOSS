@@ -59,7 +59,7 @@
 #include "SteamUGCMan.h"
 #endif // defined (STEAM_BUILD)
 // Has its own checks for steam build so we don't have to surround every achievement call
-#include "AchievementMan.h"
+//#include "AchievementMan.h"
 
 #include "NetworkServer.h"
 #include "NetworkClient.h"
@@ -1518,10 +1518,6 @@ bool PlayIntroTitle()
         {
             g_IntroState = LOGOFADEIN;
             sectionSwitch = true;
-			if (g_SettingsMan.ModsInstalledLastTime().size() >= 5)
-			{
-				g_AchievementMan.UnlockAchievement("CC_5WORKSHOP");
-			}
         }
         else if (g_IntroState == LOGOFADEIN)
         {
@@ -1913,7 +1909,6 @@ bool PlayIntroTitle()
 
             if (elapsed >= duration)
             {
-				g_AchievementMan.UnlockAchievement( "CC_WATCHINTRO" );
                 g_IntroState = PLANETSCROLL;
                 sectionSwitch = true;
             }
@@ -2592,7 +2587,6 @@ int main(int argc, char *argv[])
 #endif
     // Outside because it has its own internal preproc conditions and will be called many times
     // which would be annoying to have to add conditions for each call
-	new AchievementMan();
 
     ///////////////////////////////////////////////////////////////////
     // Create the essential managers
@@ -2630,17 +2624,8 @@ int main(int argc, char *argv[])
     g_ConsoleMan.SaveAllText("LogConsole.txt");
 #endif 
 
-// TODO: REMOVE
-/*
-    if (g_LuaMan.RunScriptFile("Base.rte/Scripts/Test.lua"))
-        g_FrameMan.ShowMessageBox(string("Script error: ") + g_LuaMan.GetLastError());
+	//new AchievementMan();
 
-    if (g_LuaMan.RunScriptFile("Base.rte/Scripts/Test2.lua"))
-        g_FrameMan.ShowMessageBox(string("Script error: ") + g_LuaMan.GetLastError());
-
-    if (g_LuaMan.RunScriptFile("Base.rte/Scripts/Test3.lua"))
-        g_FrameMan.ShowMessageBox(string("Script error: ") + g_LuaMan.GetLastError());
-*/
     ///////////////////////////////////////////////////////////////////
     // Main game driver
 
@@ -2719,9 +2704,9 @@ int main(int argc, char *argv[])
 
 #if defined(STEAM_BUILD)
 	g_SteamUGCMan.Destroy();
-	g_AchievementMan.Destroy();
 	SteamAPI_Shutdown();
 #endif
+	//g_AchievementMan.Destroy();
 
 #ifdef DEBUG_BUILD
     // Dump out the info about how well memory cleanup went

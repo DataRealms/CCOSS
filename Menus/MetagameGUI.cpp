@@ -21,7 +21,6 @@
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
 #include "MetaMan.h"
-#include "AchievementMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -1824,29 +1823,6 @@ void MetagameGUI::Update()
                         // There's now more than one name in there
                         if (!winnerNames.empty())
                             plural = true;
-
-                        // Achievement logic
-                        if ((*pItr).IsHuman())
-                        {
-                            g_AchievementMan.UnlockAchievement("CC_WINMETAGAME");
-
-                            string tech = g_PresetMan.GetDataModule((*pItr).GetNativeTechModule())->GetFriendlyName();
-
-                            int techPos = tech.find(" Tech");
-                            tech.replace(techPos, 5, "");
-
-                            int bit = -1;
-                            
-                            if (tech == "Coalition") bit = 1;
-                            if (tech == "Techion")   bit = 2;
-                            if (tech == "Imperatus") bit = 3;
-                            if (tech == "Ronin")     bit = 4;
-                            if (tech == "Dummy")     bit = 5;
-                            if (tech == "Browncoat") bit = 6;
-
-                            if (bit != -1)
-                                g_AchievementMan.SetAchievementBit("CC_METAGAMEALLTECHS", bit, 6);
-						}
 
                         winnerNames = winnerNames + (winnerNames.empty() ? "" : " and ") + (*pItr).GetName();
                     }

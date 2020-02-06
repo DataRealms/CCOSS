@@ -18,7 +18,6 @@
 #include "ActivityMan.h"
 #include "UInputMan.h"
 #include "MetaMan.h"
-#include "AchievementMan.h"
 #include "SettingsMan.h"
 
 #include "GUI/GUI.h"
@@ -1954,24 +1953,6 @@ void BuyMenuGUI::SaveCurrentLoadout()
     // Abort if there's no cargo to save into the preset
     if (!GetOrderList(*(newSet.GetCargoList())))
         return;
-
-    int crabCount = 0;
-
-    for (list<const SceneObject *>::iterator cItr = newSet.GetCargoList()->begin(); cItr != newSet.GetCargoList()->end(); ++cItr)
-    {
-        if ((*cItr)->GetPresetName() == "Crab" && (*cItr)->GetGoldValue() == 0)
-        {
-            crabCount++;
-        }
-        else
-        {
-            crabCount = -1;
-            break;
-        }
-    }
-
-    if (crabCount == 10)
-        g_AchievementMan.UnlockAchievement("CC_10CRABS");
 
     // Add the ship
     newSet.SetDeliveryCraft(dynamic_cast<const ACraft *>(GetDeliveryCraftPreset()));

@@ -95,7 +95,7 @@
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>lua5.1.x86.debug.lib;luabind.x86.debug.lib;ws2_32.lib;libcurl.lib;zlibwapi.lib;alld_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;libboost_thread-vc141-mt-gd-x32-1_69.lib;libboost_date_time-vc141-mt-gd-x32-1_69.lib;libboost_system-vc141-mt-gd-x32-1_69.lib;libboost_chrono-vc141-mt-gd-x32-1_69.lib;gorillaD.lib;legacy_stdio_definitions.lib;liblz4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lua5.1.x86.debug.lib;luabind.x86.debug.lib;ws2_32.lib;zlibwapi.lib;alld_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;libboost_thread-vc141-mt-gd-x32-1_69.lib;libboost_date_time-vc141-mt-gd-x32-1_69.lib;libboost_system-vc141-mt-gd-x32-1_69.lib;libboost_chrono-vc141-mt-gd-x32-1_69.lib;gorillaD.lib;legacy_stdio_definitions.lib;liblz4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.debug.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -137,7 +137,7 @@
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>lua5.1.x86.debug.lib;luabind.x86.debug.lib;ws2_32.lib;libcurl.lib;zlibwapi.lib;alld_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;libboost_thread-vc141-mt-gd-x32-1_69.lib;libboost_date_time-vc141-mt-gd-x32-1_69.lib;libboost_system-vc141-mt-gd-x32-1_69.lib;libboost_chrono-vc141-mt-gd-x32-1_69.lib;gorillaD.lib;legacy_stdio_definitions.lib;liblz4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lua5.1.x86.debug.lib;luabind.x86.debug.lib;ws2_32.lib;zlibwapi.lib;alld_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;libboost_thread-vc141-mt-gd-x32-1_69.lib;libboost_date_time-vc141-mt-gd-x32-1_69.lib;libboost_system-vc141-mt-gd-x32-1_69.lib;libboost_chrono-vc141-mt-gd-x32-1_69.lib;gorillaD.lib;legacy_stdio_definitions.lib;liblz4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.debug.minimal.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -187,7 +187,7 @@
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>lua.x86.release.lib;luabind.x86.release.lib;ws2_32.lib;libcurl.lib;zlibwapi.lib;alleg_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;gorilla.lib;legacy_stdio_definitions.lib;liblz4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lua.x86.release.lib;luabind.x86.release.lib;ws2_32.lib;zlibwapi.lib;alleg_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;gorilla.lib;legacy_stdio_definitions.lib;liblz4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>

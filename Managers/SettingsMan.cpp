@@ -48,7 +48,6 @@ void SettingsMan::Clear()
 	m_BlipOnRevealUnseen = true;
 	m_ShowMetascenes = false;
 	m_ShowForeignItems = true;
-	m_SteamDisabled = false;
 	m_EndlessMode = false;
 	m_PrintDebugInfo = false;
 	m_PreciseCollisions = true;
@@ -233,8 +232,6 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         g_MovableMan.ReadProperty(propName, reader);
     else if (propName == "EnableMOSubtraction")
         g_MovableMan.ReadProperty(propName, reader);
-    else if (propName == "DisableSteam")
-        reader >> m_SteamDisabled;
     else if (propName == "EndlessMode")
         reader >> m_EndlessMode;
     else if (propName == "PrintDebugInfo")
@@ -295,12 +292,6 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
     }
     else if (propName == "P1Scheme" || propName == "P2Scheme" || propName == "P3Scheme" || propName == "P4Scheme" || propName == "MouseSensitivity")
         g_UInputMan.ReadProperty(propName, reader);
-    else if (propName == "SteamWorkshopMod")
-    {
-        string mod;
-        reader >> mod;
-        AddWorkshopModToList(mod);
-    }
     else if (propName == "DisableMod")
     {
         string mod;
@@ -403,8 +394,6 @@ int SettingsMan::Save(Writer &writer) const
     writer << g_MovableMan.IsParticleSettlingEnabled();
     writer.NewProperty("EnableMOSubtraction");
     writer << g_MovableMan.IsMOSubtractionEnabled();
-	writer.NewProperty("DisableSteam");
-    writer << m_SteamDisabled;
     writer.NewProperty("ForceSoftwareGfxDriver");
     writer << m_ForceSoftwareGfxDriver;
     writer.NewProperty("ForceSafeGfxDriver");
@@ -486,13 +475,6 @@ int SettingsMan::Save(Writer &writer) const
     writer << g_AudioMan.GetSoundsVolume() * 100;
     writer.NewProperty("MusicVolume");
     writer << g_AudioMan.GetMusicVolume() * 100;
-
-    // Write workshop installed mod list
-	for (list<string>::const_iterator itr = m_SubscribedModList.begin(); itr != m_SubscribedModList.end(); itr++)
-	{
-        writer.NewProperty("SteamWorkshopMod");
-        writer << (*itr);
-	}
 
     // Write visible assembly groups
 	for (list<string>::const_iterator itr = m_VisibleAssemblyGroupsList.begin(); itr != m_VisibleAssemblyGroupsList.end(); itr++)
@@ -641,36 +623,6 @@ void SettingsMan::Destroy()
 
 
     Clear();
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			ModsInstalledLastTime
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns list of mods which were installed last time.
-
-std::list<string> SettingsMan::ModsInstalledLastTime() const
-{
-	return m_SubscribedModList;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			ClearModList
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears internal list of installed workshop mods
-
-void SettingsMan::ClearWorkshopModList()
-{
-	m_SubscribedModList.clear();
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			AddModToList
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds specified mod to internal list of installed workshop mods.
-
-void SettingsMan::AddWorkshopModToList(string modModule)
-{
-	m_SubscribedModList.push_back(modModule);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

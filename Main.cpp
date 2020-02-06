@@ -54,11 +54,6 @@
 #include "OsxUtil.h"
 #endif // defined(__APPLE__)
 
-#if defined(STEAM_BUILD)
-#include "steam_api.h"
-#include "SteamUGCMan.h"
-#endif // defined (STEAM_BUILD)
-// Has its own checks for steam build so we don't have to surround every achievement call
 //#include "AchievementMan.h"
 
 #include "NetworkServer.h"
@@ -229,13 +224,6 @@ void _LoadingSplashProgressReport(std::string reportString, bool newItem = false
         g_pLoadingGUI->Update();
         g_pLoadingGUI->Draw();
         g_FrameMan.FlipFrameBuffers();
-	
-#if defined(STEAM_BUILD)
-		// pump steam while loading game too
-		// g_SteamUGCMan.Update();
-		// Two managers use the Steam API. Probably better to just use it here directly.
-		SteamAPI_RunCallbacks();
-#endif // 
 
         // Quit if we're commanded to during loading
         if (g_Quit)
@@ -310,14 +298,6 @@ void LoadingSplashProgressReport(std::string reportString, bool newItem = false)
 
 			g_FrameMan.FlipFrameBuffers();
 		}
-
-
-#if defined(STEAM_BUILD)
-		// pump steam while loading game too
-		// g_SteamUGCMan.Update();
-		// Two managers use the Steam API. Probably better to just use it here directly.
-		SteamAPI_RunCallbacks();
-#endif // 
 
 		// Quit if we're commanded to during loading
 		if (g_Quit)
@@ -407,12 +387,6 @@ bool LoadDataModules()
     // Clear out the PresetMan and all its DataModules
     g_PresetMan.Destroy();
     g_PresetMan.Create();
-
-#if defined(STEAM_BUILD)
-    // Download all subscribed-to data module files from Steam and copy them all into the game install dir
-    // so they can be unzipped next and loaded
-    g_SteamUGCMan.DownloadAllWorkshopDataModules(&LoadingSplashProgressReport);
-#endif // STEAM_BUILD
 
     // Unzip all *.rte.zip files found in the install dir, overwriting all files already existing
     // This will cause extracted and available data modules to be updated to whatever is within their corresponding zip files
@@ -700,14 +674,6 @@ bool LoadDataModules()
             // Make sure we don't add the official metagames module among these; they should be loaded in explicit order before and after these unofficial ones
             if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= g_PresetMan.GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte")
             {
-                /* Redundant with weegee's other ssytem that allows sideloading etc
-                                // If workshop is enabled, then SKIP loading any unofficial mods that are neither subscribed-to nor published by this user
-                                if (g_SteamUGCMan.IsCloudEnabled() && (!g_SteamUGCMan.IsModuleSubscribedTo(moduleInfo.name) && !g_SteamUGCMan.IsModulePublished(moduleInfo.name)))
-                                {
-                                    LoadingSplashProgressReport("NOT Loading Data Module: " + string(moduleInfo.name) + " - it is not subscribed to in the Workshop!", true);
-                                    continue;
-                                }
-                */
                 // Actually load the unofficial data module
                 if (!g_PresetMan.LoadDataModule(string(moduleInfo.name), false, &LoadingSplashProgressReport))
                 {
@@ -2450,11 +2416,6 @@ bool RunGameLoop()
 					}
 				}
 			}
-
-
-#if defined(STEAM_BUILD)
-		g_SteamUGCMan.Update();
-#endif // 
         }
 
         // Frame draw update
@@ -2581,13 +2542,6 @@ int main(int argc, char *argv[])
 	new NetworkServer();
 	new NetworkClient();
 
-#if defined(STEAM_BUILD)
-	SteamAPI_Init();
-	new SteamUGCMan();
-#endif
-    // Outside because it has its own internal preproc conditions and will be called many times
-    // which would be annoying to have to add conditions for each call
-
     ///////////////////////////////////////////////////////////////////
     // Create the essential managers
 
@@ -2613,16 +2567,6 @@ int main(int argc, char *argv[])
     g_ActivityMan.Create();
     g_MovableMan.Create();
     g_MetaMan.Create();
-
-	// [CHRISK] STEAM SUPPORT
-#if defined(STEAM_BUILD)
-	g_SteamUGCMan.Create();
-
-    // Update once and push out the console contents after manager init so we can check it before having to load everything
-    g_SteamUGCMan.Update();
-    g_ConsoleMan.Update();
-    g_ConsoleMan.SaveAllText("LogConsole.txt");
-#endif 
 
 	//new AchievementMan();
 
@@ -2702,10 +2646,6 @@ int main(int argc, char *argv[])
     ContentFile::FreeAllLoaded();
     g_ConsoleMan.Destroy();
 
-#if defined(STEAM_BUILD)
-	g_SteamUGCMan.Destroy();
-	SteamAPI_Shutdown();
-#endif
 	//g_AchievementMan.Destroy();
 
 #ifdef DEBUG_BUILD

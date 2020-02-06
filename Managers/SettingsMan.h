@@ -296,17 +296,6 @@ public:
 
 	void SetPreciseCollisions(bool newValue) { m_PreciseCollisions = newValue; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			ModsInstalledLastTime
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns list of mods which were installed last time.
-// Arguments:       Module name to check.
-// Return value:    Returns list of mods which were installed last time.
-
-	std::list<string> ModsInstalledLastTime() const;
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			GetVisibleAssemblyGroupsList
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -315,25 +304,6 @@ public:
 // Return value:    List of visible assembly groups.
 
 	std::list<string> GetVisibleAssemblyGroupsList() const { return m_VisibleAssemblyGroupsList; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			ClearModList
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears internal list of installed workshop mods
-// Arguments:       None.
-// Return value:    None.
-
-    void ClearWorkshopModList();
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			AddModToList
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds specified mod to internal list of installed workshop mods.
-// Arguments:       Mod to add.
-// Return value:    None.
-
-	void AddWorkshopModToList(string modModule);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			GetDisabledModsList
@@ -397,16 +367,6 @@ public:
 // Return value:    Whether the script is enabled via settings.
 
 	bool IsScriptEnabled(string scriptName);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			SteamDisabled
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns true if steam is manually disabled in settings
-// Arguments:       None.
-// Return value:    Whether Steam is disabled via settings.
-
-	bool SteamDisabled() const { return m_SteamDisabled; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -634,8 +594,6 @@ protected:
 	bool m_ShowMetascenes;
 	// Do not show foreign items in buy menu
 	bool m_ShowForeignItems;
-	// Disable steam
-	bool m_SteamDisabled;
 	// Endless metagame mode
 	bool m_EndlessMode;
 	// Print some debug info in console
@@ -698,8 +656,6 @@ protected:
 
 	bool m_DisableLoadingScreen;
 
-    // List of the module names we were subscribed to last time the game was started
-    std::list<std::string> m_SubscribedModList;
     // List of assemblies groups always shown in editors
     std::list<std::string> m_VisibleAssemblyGroupsList;
     // List of the module names we disabled

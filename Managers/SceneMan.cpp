@@ -31,11 +31,6 @@
 // Temp
 #include "Controller.h"
 
-#ifdef _WIN32
-#define fmax max
-#define fmin min
-#endif
-
 namespace RTE
 {
 
@@ -2216,7 +2211,7 @@ float SceneMan::CastMaxStrengthRay(const Vector &start, const Vector &end, int s
             // Sum all strengths
             materialID = GetTerrMatter(intPos[X], intPos[Y]);
             if (materialID != g_MaterialDoor)
-                maxStrength = fmax(maxStrength, GetMaterialFromID(materialID)->strength);
+                maxStrength = MAX(maxStrength, GetMaterialFromID(materialID)->strength);
 
             skipped = 0;
         }

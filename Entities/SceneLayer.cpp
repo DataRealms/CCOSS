@@ -14,10 +14,7 @@
 #include "SceneLayer.h"
 #include "ContentFile.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(SceneLayer, Entity, 0)
 

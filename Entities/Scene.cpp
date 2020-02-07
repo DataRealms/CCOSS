@@ -33,10 +33,7 @@
 #include "Arm.h"
 #include "HeldDevice.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Scene, Entity, 0)
 const string Scene::Area::m_sClassName = "Area";

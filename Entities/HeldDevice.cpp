@@ -22,10 +22,7 @@
 #include "AtomGroup.h"
 #include "GUI/AllegroBitmap.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(HeldDevice, Attachable, 0)
 

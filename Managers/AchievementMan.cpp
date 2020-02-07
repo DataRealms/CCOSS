@@ -6,10 +6,7 @@
 #include "AchievementMan.h"
 #include "ConsoleMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 #ifdef STEAM_BUILD
 AchievementMan::AchievementMan():

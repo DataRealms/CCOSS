@@ -15,10 +15,7 @@
 #include "PresetMan.h"
 #include "ContentFile.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(TerrainObject, SceneObject, 0)
 

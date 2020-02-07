@@ -16,10 +16,7 @@
 #include "DDTTools.h"
 #include "AEmitter.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 ABSTRACTCLASSINFO(MOSprite, MovableObject)
 

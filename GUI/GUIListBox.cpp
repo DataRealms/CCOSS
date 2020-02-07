@@ -14,10 +14,7 @@
 #include "GUI.h"
 #include "GUIListBox.h"
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUIListBox

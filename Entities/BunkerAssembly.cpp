@@ -21,10 +21,7 @@
 #include "BunkerAssemblyScheme.h"
 #include "Deployment.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(BunkerAssembly, SceneObject, 0)
 

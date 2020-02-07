@@ -19,10 +19,7 @@
 
 #include "ConsoleMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(AtomGroup, Entity, 200)
 

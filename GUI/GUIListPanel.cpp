@@ -14,8 +14,6 @@
 #include "GUI.h"
 #include "GUIListPanel.h"
 
-
-using namespace std;
 using namespace RTE;
 
 #define RIGHTTEXTWIDTH 36
@@ -380,7 +378,7 @@ void GUIListPanel::BuildDrawBitmap(void)
             }
 
             int textHeight = m_Font->CalculateHeight(I->m_Name, mainTextWidth);
-            int itemHeight = max(bitmapHeight + 4, textHeight + 2);
+            int itemHeight = MAX(bitmapHeight + 4, textHeight + 2);
             int textX = thirdWidth + 6 - x;
             int textY = y + (itemHeight / 2) + 1;
             int bitmapY = y + (itemHeight / 2) - (bitmapHeight / 2) + 1;
@@ -1271,7 +1269,7 @@ int GUIListPanel::GetItemHeight(Item *pItem)
             }
 
             int textHeight = m_Font->CalculateHeight(pItem->m_Name, mainTextWidth);
-            height = pItem->m_Height = max(bitmapHeight + 4, textHeight + 2);
+            height = pItem->m_Height = MAX(bitmapHeight + 4, textHeight + 2);
         }
         // Non-fancy drawing mode all have same height.
         else

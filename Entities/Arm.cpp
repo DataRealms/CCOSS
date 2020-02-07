@@ -18,10 +18,7 @@
 #include "ContentFile.h"
 #include "PresetMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Arm, Attachable, 0)
 

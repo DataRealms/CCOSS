@@ -41,11 +41,9 @@
 #include "AHuman.h"
 #include "ACraft.h"
 
-using namespace std;
 using namespace RTE;
 
 BITMAP *RTE::BuyMenuGUI::s_pCursor = 0;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -1891,7 +1889,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
                     pItemBitmap = pModule->GetIcon() ? new AllegroBitmap(pModule->GetIcon()) : 0;
                     // Passing in ownership of the bitmap, making uppercase the name
                     string name = pModule->GetFriendlyName();
-                    transform(name.begin(), name.end(), name.begin(), pointer_to_unary_function<int, int>(toupper));
+                    transform(name.begin(), name.end(), name.begin(), std::pointer_to_unary_function<int, int>(toupper));
                     m_pShopList->AddItem(name, m_aExpandedModules[moduleID] ? "-" : "+", pItemBitmap, 0, moduleID);
                 }
 

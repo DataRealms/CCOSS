@@ -17,11 +17,7 @@
 #include "Attachable.h"
 #include "PresetMan.h"
 
-using namespace std;
-//using namespace zip;
-
-namespace RTE
-{
+namespace RTE {
 
 const string Reader::ClassName = "Reader";
 
@@ -80,7 +76,7 @@ int Reader::Create(const char *filename, bool overwrites, void (*fpProgressCallb
 // This is OK, may be able to do it later when needed
 //    AAssert(m_DataModuleID > 0, "Couldn't establish which DataModule we're reading from when creating Reader!");
 
-    m_pStream = new ifstream(filename);
+    m_pStream = new std::ifstream(filename);
     if (!failOK)
         AAssert(m_pStream->good(), "Failed to open data file \'" + string(filename) + "\'!");
 
@@ -575,7 +571,7 @@ bool Reader::StartIncludeFile()
 
     // Get the file path from the stream
     m_FilePath = ReadPropValue();
-    m_pStream = new ifstream(m_FilePath.c_str());
+    m_pStream = new std::ifstream(m_FilePath.c_str());
     if (m_pStream->fail())
     {
 #ifndef WIN32

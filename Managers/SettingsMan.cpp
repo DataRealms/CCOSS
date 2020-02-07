@@ -23,15 +23,12 @@
 
 #include "RTEManagers.h"
 
-using namespace std;
-
 extern bool g_ResetActivity;
 extern bool g_ResetActivity;
 
-namespace RTE
-{
+namespace RTE {
 
-const string SettingsMan::m_ClassName = "Settings";
+const std::string SettingsMan::m_ClassName = "Settings";
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

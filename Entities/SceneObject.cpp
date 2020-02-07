@@ -17,10 +17,7 @@
 #include "ActivityMan.h"
 #include "SceneMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 ABSTRACTCLASSINFO(SceneObject, Entity)
 const string SceneObject::SOPlacer::m_sClassName = "SOPlacer";

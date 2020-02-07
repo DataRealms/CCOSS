@@ -14,10 +14,7 @@
 #include "GUI.h"
 #include "GUISlider.h"
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUISlider

@@ -18,11 +18,7 @@
 #include "LuaMan.h"
 #include "Atom.h"
 
-
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 ABSTRACTCLASSINFO(MovableObject, SceneObject)
 

@@ -17,10 +17,7 @@
 #include "ContentFile.h"
 #include "PresetMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Turret, Attachable, 0)
 

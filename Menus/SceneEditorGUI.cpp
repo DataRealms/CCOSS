@@ -37,7 +37,6 @@
 #include "Deployment.h"
 #include "BunkerAssemblyScheme.h"
 
-using namespace std;
 using namespace RTE;
 
 #define MAXBRAINPATHCOST 10000
@@ -46,7 +45,6 @@ using namespace RTE;
 
 BITMAP *SceneEditorGUI::s_pValidPathDot = 0;
 BITMAP *SceneEditorGUI::s_pInvalidPathDot = 0;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

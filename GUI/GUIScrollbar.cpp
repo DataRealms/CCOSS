@@ -14,10 +14,7 @@
 #include "GUI.h"
 #include "GUIScrollbar.h"
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUIScrollbar

@@ -34,12 +34,9 @@
 extern bool g_ResetActivity;
 extern bool g_InActivity;
 
-using namespace std;
-
 #define MAPNAME(element) g_UInputMan.GetMappingName(m_TutorialPlayer, UInputMan::element)
 
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(GATutorial, GameActivity, 0)
 

@@ -14,10 +14,7 @@
 #include "DDTTools.h"
 #include "PresetMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 
 //const string Emission::m_sClassName = "Emission";

@@ -29,10 +29,7 @@ extern bool g_ResetActivity;
 extern bool g_ResumeActivity;
 extern bool g_InActivity;
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string MetaMan::m_ClassName = "MetaMan";
 CONCRETECLASSINFO(MetaSave, Entity, 0)

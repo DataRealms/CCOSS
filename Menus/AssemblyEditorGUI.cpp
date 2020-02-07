@@ -35,7 +35,6 @@
 #include "Scene.h"
 #include "SettingsMan.h"
 
-using namespace std;
 using namespace RTE;
 
 #define MAXBRAINPATHCOST 10000
@@ -44,7 +43,6 @@ using namespace RTE;
 
 BITMAP *AssemblyEditorGUI::s_pValidPathDot = 0;
 BITMAP *AssemblyEditorGUI::s_pInvalidPathDot = 0;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -350,7 +348,7 @@ void AssemblyEditorGUI::Update()
 		std::list<Entity *> assemblies;
 		g_PresetMan.GetAllOfGroup(assemblies, m_pCurrentScheme->GetPresetName(), "BunkerAssembly");
 
-        stringstream assemblyName;
+		std::stringstream assemblyName;
         assemblyName << m_pCurrentScheme->GetPresetName() << " [ " << assemblies.size() << " ]";
 		selectedAssembly += assemblyName.str();
 	}

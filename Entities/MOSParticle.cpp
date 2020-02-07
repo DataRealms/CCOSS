@@ -16,10 +16,7 @@
 #include "RTEManagers.h"
 #include "DDTTools.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(MOSParticle, MovableObject, 200)
 

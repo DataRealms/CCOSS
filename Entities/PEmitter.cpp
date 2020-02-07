@@ -17,10 +17,7 @@
 #include "PresetMan.h"
 #include "Emission.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 	CONCRETECLASSINFO(PEmitter, MOSParticle, 50)
 

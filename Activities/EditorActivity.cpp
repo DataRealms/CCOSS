@@ -42,10 +42,7 @@
 
 extern bool g_ResetActivity;
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 ABSTRACTCLASSINFO(EditorActivity, Activity)
 

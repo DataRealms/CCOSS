@@ -35,10 +35,7 @@
 #include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(AHuman, Actor, 0)
 
@@ -3175,7 +3172,7 @@ void AHuman::Update()
 		{
 			int hat = SelectRand(1, 20);
 
-            stringstream hatName;
+            std::stringstream hatName;
             hatName << "Random Hat " << hat;
 			const Entity *preset = g_PresetMan.GetEntityPreset("Attachable", hatName.str());
 

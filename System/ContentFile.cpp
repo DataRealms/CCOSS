@@ -26,10 +26,7 @@
 
 #include "allegro.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string ContentFile::m_ClassName = "ContentFile";
 map<string, BITMAP *> ContentFile::m_sLoadedBitmaps[BitDepthCount];

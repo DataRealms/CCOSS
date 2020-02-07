@@ -13,10 +13,7 @@
 #include "GUI.h"
 #include "GUICheckbox.h"
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUICheckbox

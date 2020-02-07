@@ -19,10 +19,7 @@
 #include "AEmitter.h"
 #include "Actor.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Attachable, MOSRotating, 0)
 

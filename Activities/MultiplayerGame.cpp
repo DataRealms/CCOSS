@@ -51,10 +51,8 @@
 extern bool g_ResetActivity;
 extern bool g_InActivity;
 
-using namespace std;
+namespace RTE {
 
-namespace RTE
-{
 	CONCRETECLASSINFO(MultiplayerGame, Activity, 0)
 
 	//////////////////////////////////////////////////////////////////////////////////////////

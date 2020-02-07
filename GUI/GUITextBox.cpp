@@ -14,10 +14,7 @@
 #include "GUI.h"
 #include "GUITextBox.h"
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUITextBox

@@ -15,10 +15,7 @@
 #include "Atom.h"
 #include "RTEManagers.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(MOPixel, MovableObject, 500)
 

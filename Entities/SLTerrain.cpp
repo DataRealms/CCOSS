@@ -22,8 +22,6 @@
 #include "MOSprite.h"
 #include "Atom.h"
 
-using namespace std;
-
 struct RECT
 {
     long    left;
@@ -32,8 +30,7 @@ struct RECT
     long    bottom;
 };
 
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(SLTerrain, SceneLayer, 0)
 

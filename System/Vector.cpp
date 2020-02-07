@@ -18,10 +18,7 @@
 #endif
 #include "DDTTools.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string Vector::ClassName = "Vector";
 

@@ -42,10 +42,7 @@ extern bool g_InActivity;
 
 #define BRAINLZWIDTHDEFAULT 640
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 ABSTRACTCLASSINFO(GameActivity, Activity)
 

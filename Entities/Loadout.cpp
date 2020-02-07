@@ -23,10 +23,7 @@
 #include "AHuman.h"
 #include "ACraft.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Loadout, Entity, 0)
 

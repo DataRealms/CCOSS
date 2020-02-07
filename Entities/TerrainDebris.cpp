@@ -15,10 +15,7 @@
 #include "DDTTools.h"
 #include "SLTerrain.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(TerrainDebris, Entity, 0)
 

@@ -23,17 +23,14 @@
 #include "ADoor.h"
 #include "Atom.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string MovableMan::m_ClassName = "MovableMan";
 
 
 // Comparison functor for sorting movable objects by their X position using STL's sort
 struct MOXPosComparison:
-    public binary_function<MovableObject *, MovableObject *, bool>
+    public std::binary_function<MovableObject *, MovableObject *, bool>
 {
     bool operator()(MovableObject *pRhs, MovableObject *pLhs) { return pRhs->GetPos().m_X < pLhs->GetPos().m_X; }
 };
@@ -1881,7 +1878,7 @@ void MovableMan::Update()
 
         // DEATH //////////////////////////////////////////////////////////
         // Transfer dead actors from Actor list to particle list
-        aIt = partition(m_Actors.begin(), m_Actors.end(), not1(mem_fun(&Actor::IsDead)));
+        aIt = partition(m_Actors.begin(), m_Actors.end(), std::not1(std::mem_fun(&Actor::IsDead)));
         amidIt = aIt;
 
         // Move dead Actor to particles list
@@ -1908,7 +1905,7 @@ void MovableMan::Update()
 
         // ITEM SETTLE //////////////////////////////////////////////////////////
         // Transfer excess items to particle list - use stable partition, item orde is important
-        iIt = stable_partition(m_Items.begin(), m_Items.end(), not1(mem_fun(&MovableObject::ToSettle)));
+        iIt = stable_partition(m_Items.begin(), m_Items.end(), std::not1(std::mem_fun(&MovableObject::ToSettle)));
         imidIt = iIt;
 
         // Move force-settled items to particles list
@@ -1928,7 +1925,7 @@ void MovableMan::Update()
         // DELETE //////////////////////////////////////////////////////////
         // Only delete after all travels & updates are done
         // Actors
-        aIt = partition(m_Actors.begin(), m_Actors.end(), not1(mem_fun(&MovableObject::ToDelete)));
+        aIt = partition(m_Actors.begin(), m_Actors.end(), std::not1(std::mem_fun(&MovableObject::ToDelete)));
         amidIt = aIt;
 
         while (aIt != m_Actors.end())
@@ -1957,7 +1954,7 @@ void MovableMan::Update()
         m_Actors.erase(amidIt, m_Actors.end());
 
         // Items
-        iIt = stable_partition(m_Items.begin(), m_Items.end(), not1(mem_fun(&MovableObject::ToDelete)));
+        iIt = stable_partition(m_Items.begin(), m_Items.end(), std::not1(std::mem_fun(&MovableObject::ToDelete)));
         imidIt = iIt;
 
         while (iIt != m_Items.end())
@@ -1965,7 +1962,7 @@ void MovableMan::Update()
         m_Items.erase(imidIt, m_Items.end());
 
         // Particles
-        parIt = partition(m_Particles.begin(), m_Particles.end(), not1(mem_fun(&MovableObject::ToDelete)));
+        parIt = partition(m_Particles.begin(), m_Particles.end(), std::not1(std::mem_fun(&MovableObject::ToDelete)));
         midIt = parIt;
 
         while (parIt != m_Particles.end())
@@ -1977,7 +1974,7 @@ void MovableMan::Update()
     // Only settle after all updates and deletions are done
     if (m_SettlingEnabled)
     {
-        parIt = partition(m_Particles.begin(), m_Particles.end(), not1(mem_fun(&MovableObject::ToSettle)));
+        parIt = partition(m_Particles.begin(), m_Particles.end(), std::not1(std::mem_fun(&MovableObject::ToSettle)));
         midIt = parIt;
 
         while (parIt != m_Particles.end())

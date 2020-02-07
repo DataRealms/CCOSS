@@ -61,7 +61,6 @@ extern "C"
 //#include "boost/detail/shared_ptr_nmt.hpp"
 //#include "boost/shared_ptr.hpp"
 
-using namespace std;
 using namespace luabind;
 
 // From LuaBind documentation:

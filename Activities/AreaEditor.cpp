@@ -45,10 +45,7 @@
 
 extern bool g_ResetActivity;
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(AreaEditor, EditorActivity, 0)
 

@@ -14,10 +14,7 @@
 #include "GUI.h"
 #include "GUIScrollPanel.h"
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUIScrollPanel

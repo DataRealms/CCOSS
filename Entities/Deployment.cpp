@@ -22,10 +22,7 @@
 #include "ActivityMan.h"
 #include "DataModule.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Deployment, SceneObject, 0)
 

@@ -17,10 +17,7 @@
 #include "HeldDevice.h"
 #include "ContentFile.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Leg, Attachable, 0)
 

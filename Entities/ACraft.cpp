@@ -33,10 +33,7 @@
 #include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 ABSTRACTCLASSINFO(ACraft, Actor)
 const string ACraft::Exit::m_sClassName = "Exit";

@@ -14,10 +14,7 @@
 #include "GUI.h"
 #include "GUIProgressBar.h"
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUIProgressBar

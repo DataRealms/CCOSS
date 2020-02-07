@@ -13,10 +13,7 @@
 #include "GUI.h"
 #include "GUILabel.h"
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUILabel

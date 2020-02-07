@@ -20,11 +20,7 @@
 #include "MOPixel.h"
 #include "Actor.h"
 
-
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(HDFirearm, HeldDevice, 0)
 

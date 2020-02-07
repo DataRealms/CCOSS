@@ -17,10 +17,7 @@
 #include "PresetMan.h"
 #include "Emission.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(AEmitter, Attachable, 0)
 

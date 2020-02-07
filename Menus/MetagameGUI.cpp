@@ -57,7 +57,6 @@ extern volatile bool g_Quit;
 extern int g_StationOffsetX;
 extern int g_StationOffsetY;
 
-using namespace std;
 using namespace RTE;
 
 #define CHAMFERSIZE 40

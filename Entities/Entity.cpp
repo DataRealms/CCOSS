@@ -16,10 +16,7 @@
 #include "ConsoleMan.h"
 #include "DataModule.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 Entity::ClassInfo * Entity::ClassInfo::m_sClassHead = 0;
 

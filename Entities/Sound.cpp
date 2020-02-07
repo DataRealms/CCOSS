@@ -26,10 +26,7 @@
 #include "DDTTools.h"
 #include "AudioMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Sound, Entity, 0);
 

@@ -15,10 +15,7 @@
 #include "DDTTools.h"
 #include "FrameMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Icon, Entity, 0)
 

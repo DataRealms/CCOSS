@@ -31,7 +31,6 @@
 #include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
-using namespace std;
 using namespace RTE;
 
 const string PieMenuGUI::Slice::m_sClassName = "Slice";
@@ -40,8 +39,6 @@ BITMAP *PieMenuGUI::s_pCursor;
 
 std::map<string, PieMenuGUI::Slice> PieMenuGUI::m_AllAvailableSlices;
 const int PieMenuGUI::s_EnablingDelay = 50;
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

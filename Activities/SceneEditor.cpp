@@ -46,10 +46,7 @@
 extern bool g_ResetActivity;
 extern bool g_InActivity;
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(SceneEditor, EditorActivity, 0)
 

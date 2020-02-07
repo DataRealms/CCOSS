@@ -24,10 +24,7 @@
 
 #include "ConsoleMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string PresetMan::m_ClassName = "PresetMan";
 

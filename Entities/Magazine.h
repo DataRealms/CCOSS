@@ -16,10 +16,7 @@
 
 #include "Attachable.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 class MOSParticle;
 

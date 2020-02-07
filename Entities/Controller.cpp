@@ -17,10 +17,7 @@
 #include "DDTTools.h"
 #include "Actor.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const int Controller::m_ReleaseDelay = 250;
 

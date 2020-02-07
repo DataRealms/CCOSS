@@ -24,10 +24,7 @@
 #include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(ADoor, Actor, 0)
 const string ADoor::Sensor::m_sClassName = "Sensor";

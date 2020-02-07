@@ -22,10 +22,7 @@
 
 #include "DDTError.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(MOSRotating, MOSprite, 100)
 

@@ -15,10 +15,7 @@
 #pragma intrinsic (sin, cos)
 #include "DDTTools.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string Matrix::ClassName = "Matrix";
 

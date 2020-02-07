@@ -13,10 +13,7 @@
 #include "GUI.h"
 #include "GUITab.h"
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUITab

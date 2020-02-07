@@ -14,10 +14,7 @@
 #include "GUIBanner.h"
 #include "ContentFile.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 map<string, GUIBanner::FontChar *> GUIBanner::m_sFontCache;
 map<string, int> GUIBanner::m_sCharCapCache;

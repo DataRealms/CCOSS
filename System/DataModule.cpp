@@ -17,11 +17,7 @@
 
 #include "allegro.h"
 
-using namespace std;
-//using namespace zip;
-
-namespace RTE
-{
+namespace RTE {
 
 const string DataModule::m_ClassName = "DataModule";
 

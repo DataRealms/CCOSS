@@ -19,10 +19,7 @@
 #include "DDTTools.h"
 #include "Actor.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string Atom::ClassName = "Atom";
 std::vector<void *> Atom::m_AllocatedPool;

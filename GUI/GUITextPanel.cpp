@@ -22,9 +22,7 @@
 #include "WinUtil.h"
 #endif // defined(__APPLE__)
 
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUITextPanel

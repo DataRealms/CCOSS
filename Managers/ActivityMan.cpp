@@ -37,10 +37,7 @@ extern bool g_ResetActivity;
 extern bool g_ResumeActivity;
 extern bool g_InActivity;
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
     
 ABSTRACTCLASSINFO(Activity, Entity)
 const string ActivityMan::m_ClassName = "ActivityMan";

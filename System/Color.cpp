@@ -16,10 +16,7 @@
 #include "DDTTools.h"
 #include "FrameMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string Color::ClassName = "Color";
 

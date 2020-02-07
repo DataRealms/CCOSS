@@ -3,14 +3,6 @@
 
 namespace RTE {
 
-	// TODO: Get rid of these once alias qualifiers are added.
-	using std::string;
-	using std::list;
-	using std::pair;
-	using std::deque;
-	using std::map;
-	using std::set;
-
 #pragma region Buffer Constants
 	constexpr static unsigned int c_MaxFileName = 256; ///! Maximum length of output file directory+name string.
 	constexpr static unsigned int c_FileBufferSize = 8192; ///! Buffer to hold data read from the zip file.

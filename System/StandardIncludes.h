@@ -30,4 +30,15 @@
 #include <cassert>
 #include <limits>
 
+// TODO: Get rid of these once alias qualifiers are added.
+using std::string;
+using std::list;
+using std::pair;
+using std::deque;
+using std::map;
+using std::set;
+using std::vector;
+using std::ios_base;
+using std::make_pair;
+
 #endif

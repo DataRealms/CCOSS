@@ -501,7 +501,7 @@ namespace RTE
 			{
 				char buf[128];
 
-				sprintf_s(buf, c_PrintBufferSize, "Voting to end activity %d of %d", votes, votesNeeded);
+				sprintf_s(buf, sizeof(buf), "Voting to end activity %d of %d", votes, votesNeeded);
 				for (int i = 0; i < MAX_CLIENTS; i++)
 				{
 					g_FrameMan.SetScreenText(buf, i, 0, -1, false);
@@ -582,7 +582,7 @@ namespace RTE
 
 		if (m_NatServerConnected)
 		{
-			sprintf_s(buf, c_PrintBufferSize, "NAT SERVICE CONNECTED\nName: %s  Pass: %s", g_SettingsMan.GetNATServerName().c_str(), g_SettingsMan.GetNATServerPassword().c_str());
+			sprintf_s(buf, sizeof(buf), "NAT SERVICE CONNECTED\nName: %s  Pass: %s", g_SettingsMan.GetNATServerName().c_str(), g_SettingsMan.GetNATServerPassword().c_str());
 			g_FrameMan.GetLargeFont()->DrawAligned(&pGUIBitmap, midX, 20, buf, GUIFont::Centre);
 		}
 		else
@@ -595,7 +595,7 @@ namespace RTE
 			GameActivity * pGameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
 			if (pGameActivity)
 			{
-				sprintf_s(buf, c_PrintBufferSize, "Activity: %s   Players: %d", pGameActivity->GetPresetName().c_str(), pGameActivity->GetPlayerCount());
+				sprintf_s(buf, sizeof(buf), "Activity: %s   Players: %d", pGameActivity->GetPresetName().c_str(), pGameActivity->GetPlayerCount());
 				g_FrameMan.GetLargeFont()->DrawAligned(&pGUIBitmap, midX, 50, buf, GUIFont::Centre);
 			}
 		}
@@ -664,7 +664,7 @@ namespace RTE
 			if (m_MsecPerFrame[i] > 0)
 				fps = 1000 / m_MsecPerFrame[i];
 
-			sprintf_s(buf, c_PrintBufferSize, "%s\nPing %u\nCmp Mbit: %.1f\nUnc Mbit: %.1f\nR: %.2f\nFrame Kbit: %lu\nGlow Kbit: %lu\nSound Kbit: %lu\nScene Kbit: %lu\nFrames sent: %uK\nFrame skipped: %uK\nBlocks full: %uK\nBlocks empty: %uK\nBlk Ratio: %.2f\nFPS: %d\nSend Ms %d\nTotal Data %lu MB",
+			sprintf_s(buf, sizeof(buf), "%s\nPing %u\nCmp Mbit: %.1f\nUnc Mbit: %.1f\nR: %.2f\nFrame Kbit: %lu\nGlow Kbit: %lu\nSound Kbit: %lu\nScene Kbit: %lu\nFrames sent: %uK\nFrame skipped: %uK\nBlocks full: %uK\nBlocks empty: %uK\nBlk Ratio: %.2f\nFPS: %d\nSend Ms %d\nTotal Data %lu MB",
 				i == STATS_SUM ? "- TOTALS - " : IsPlayerConnected(i) ? GetPlayerName(i).c_str() : "- NO PLAYER -",
 				i < MAX_CLIENTS ? m_Ping[i] : 0,
 				(double)m_DataSentCurrent[i][STAT_SHOWN] / (125000),
@@ -689,7 +689,7 @@ namespace RTE
 				if (i < MAX_CLIENTS)
 				{
 					int lines = 2;
-					sprintf_s(buf, c_PrintBufferSize, "Thread: %d\nBuffer: %d / %d",
+					sprintf_s(buf, sizeof(buf), "Thread: %d\nBuffer: %d / %d",
 						m_ThreadExitReason[i], m_SendBufferMessages[i], m_SendBufferBytes[i] / 1024);
 					g_FrameMan.GetLargeFont()->DrawAligned(&pGUIBitmap, 10 + i * g_FrameMan.GetResX() / 5, g_FrameMan.GetResY() - lines * 15, buf, GUIFont::Left);
 				}

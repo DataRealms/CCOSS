@@ -371,7 +371,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     if (m_MetaPlayer != Activity::NOPLAYER)
     {
         // Start loading any additional stuff from the custom user file
-        sprintf_s(loadoutPath, c_PrintBufferSize, "Metagames.rte/%s - LoadoutsMP%d.ini", g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
+        sprintf_s(loadoutPath, sizeof(loadoutPath), "Metagames.rte/%s - LoadoutsMP%d.ini", g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
 
         if (!exists(loadoutPath))
         {
@@ -382,7 +382,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     // Not a metagame player, just a regular scenario player
     else
 	{
-        sprintf_s(loadoutPath, c_PrintBufferSize, "Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
+        sprintf_s(loadoutPath, sizeof(loadoutPath), "Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
 
 	}
 
@@ -484,12 +484,12 @@ bool BuyMenuGUI::SaveAllLoadoutsToFile()
         // Since the players of a new game are likely to have different techs and therefore different default loadouts
         // So we should start fresh with new loadouts loaded from tech defaults for each player
         if (g_MetaMan.GetGameName() == DEFAULTGAMENAME)
-            sprintf_s(loadoutPath, c_PrintBufferSize, "Metagames.rte/%s - LoadoutsMP%d.ini", AUTOSAVENAME, m_MetaPlayer + 1);
+            sprintf_s(loadoutPath, sizeof(loadoutPath), "Metagames.rte/%s - LoadoutsMP%d.ini", AUTOSAVENAME, m_MetaPlayer + 1);
         else
-            sprintf_s(loadoutPath, c_PrintBufferSize, "Metagames.rte/%s - LoadoutsMP%d.ini", g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
+            sprintf_s(loadoutPath, sizeof(loadoutPath), "Metagames.rte/%s - LoadoutsMP%d.ini", g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
     }
     else
-        sprintf_s(loadoutPath, c_PrintBufferSize, "Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
+        sprintf_s(loadoutPath, sizeof(loadoutPath), "Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
 
     // Open the file
     Writer loadoutFile(loadoutPath, false);
@@ -2241,7 +2241,7 @@ void BuyMenuGUI::AddPresetsToItemList()
         }
 
         // Make the cost label
-        sprintf_s(costString, c_PrintBufferSize, "%.0f", loadoutCost);
+        sprintf_s(costString, sizeof(costString), "%.0f", loadoutCost);
         // Get a good icon and wrap it, while not passing ownership into the AllegroBitmap
         // We're trying to pick the icon of the first passenger, or the first item if there's no passengers in the loadout
         pItemBitmap = new AllegroBitmap(pPassenger ? const_cast<Actor *>(pPassenger)->GetGraphicalIcon() : const_cast<SceneObject *>((*lItr).GetCargoList()->front())->GetGraphicalIcon());
@@ -2260,7 +2260,7 @@ void BuyMenuGUI::AddPresetsToItemList()
 void BuyMenuGUI::UpdateTotalCostLabel(int whichTeam)
 {
     char newText[512];
-    sprintf_s(newText, c_PrintBufferSize, "Cost: %.0f/%.0f", GetTotalOrderCost(), g_ActivityMan.GetActivity()->GetTeamFunds(whichTeam));
+    sprintf_s(newText, sizeof(newText), "Cost: %.0f/%.0f", GetTotalOrderCost(), g_ActivityMan.GetActivity()->GetTeamFunds(whichTeam));
     m_pCostLabel->SetText(newText);
 }
 
@@ -2346,12 +2346,12 @@ void BuyMenuGUI::UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel)
 	if (pCraft && pCraft->GetMaxMass() != 0)
 	{
 		if (pCraft->GetMaxMass() > 0)
-			sprintf_s(buf, c_PrintBufferSize, "%d / %d", (int)GetTotalOrderMass() - (int)GetCraftMass(), (int)pCraft->GetMaxMass() - (int)GetCraftMass());
+			sprintf_s(buf, sizeof(buf), "%d / %d", (int)GetTotalOrderMass() - (int)GetCraftMass(), (int)pCraft->GetMaxMass() - (int)GetCraftMass());
 		else
-			strcpy_s(buf, c_PrintBufferSize, "NO CARGO SPACE");
+			strcpy_s(buf, sizeof(buf), "NO CARGO SPACE");
 	}
 	else
-		sprintf_s(buf, c_PrintBufferSize, "%d", (int)GetTotalOrderMass());
+		sprintf_s(buf, sizeof(buf), "%d", (int)GetTotalOrderMass());
 
 	pLabel->SetText(buf);
 }
@@ -2372,12 +2372,12 @@ void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft * pCraft, GUILabel * pL
 	if (pCraft && pCraft->GetMaxPassengers() != 0)
 	{
 		if (pCraft->GetMaxPassengers() > 0)
-			sprintf_s(buf, c_PrintBufferSize, "%d / %d", GetTotalOrderPassengers(), pCraft->GetMaxPassengers());
+			sprintf_s(buf, sizeof(buf), "%d / %d", GetTotalOrderPassengers(), pCraft->GetMaxPassengers());
 		else 
-			sprintf_s(buf, c_PrintBufferSize, "%d", GetTotalOrderPassengers());
+			sprintf_s(buf, sizeof(buf), "%d", GetTotalOrderPassengers());
 	}
 	else
-		strcpy_s(buf, c_PrintBufferSize, "NO ROOM");
+		strcpy_s(buf, sizeof(buf), "NO ROOM");
 
 	pLabel->SetText(buf);
 }

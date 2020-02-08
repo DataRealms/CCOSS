@@ -110,7 +110,7 @@ bool DDTAssert(bool expression,
 // TODO: Make this display a box in the game asking whether to ignore or abort")
         // For now, always abort.
         char error[512];
-        sprintf_s(error, c_PrintBufferSize, "Assertion failed: %s", description);
+        sprintf_s(error, sizeof(error), "Assertion failed: %s", description);
         DDTAbortFunc(error, __FILE__, __LINE__);
 
         // True so that the asm_ { int 3 } code is run and the debugger goes there.

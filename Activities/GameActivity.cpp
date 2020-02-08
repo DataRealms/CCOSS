@@ -866,7 +866,7 @@ int GameActivity::Start()
 /* This is taken care of by the individual Activity logic
         // See if there are specified landing zone areas defined in the scene
         char str[64];
-        sprintf_s(str, c_PrintBufferSize, "LZ Team %d", team + 1);
+        sprintf_s(str, sizeof(str), "LZ Team %d", team + 1);
         Scene::Area *pArea = g_SceneMan.GetScene()->GetArea(str);
         pArea = pArea ? pArea : g_SceneMan.GetScene()->GetArea("Landing Zone");
         // If area is defined, save a copy so we can lock the LZ selection to within its boxes
@@ -2071,7 +2071,7 @@ void GameActivity::Update()
             if (m_MsgTimer[player].IsPastSimMS(1000))
             {
                 char message[512];
-                sprintf_s(message, c_PrintBufferSize, "Next delivery in %i secs", ((int)m_Deliveries[team].front().delay - (int)m_Deliveries[team].front().timer.GetElapsedSimTimeMS()) / 1000);
+                sprintf_s(message, sizeof(message), "Next delivery in %i secs", ((int)m_Deliveries[team].front().delay - (int)m_Deliveries[team].front().timer.GetElapsedSimTimeMS()) / 1000);
                 g_FrameMan.SetScreenText(message, ScreenOfPlayer(player));
                 m_MsgTimer[player].Reset();
             }
@@ -2214,9 +2214,9 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
             // Text
             pSmallFont->DrawAligned(&pBitmapInt, landZone.m_X, landZone.m_Y - 38, "ETA:", GUIFont::Centre);
             if (m_ActivityState == Activity::PREGAME)
-                sprintf_s(str, c_PrintBufferSize, "???s");
+                sprintf_s(str, sizeof(str), "???s");
             else
-                sprintf_s(str, c_PrintBufferSize, "%is", ((int)itr->delay - (int)itr->timer.GetElapsedSimTimeMS()) / 1000);
+                sprintf_s(str, sizeof(str), "%is", ((int)itr->delay - (int)itr->timer.GetElapsedSimTimeMS()) / 1000);
             pLargeFont->DrawAligned(&pBitmapInt, landZone.m_X, landZone.m_Y - 32, str, GUIFont::Centre);
             // Draw wrap around the world if necessary, and only if this is being drawn directly to a scenewide target bitmap
             if (targetPos.IsZero() && (landZone.m_X < halfWidth || landZone.m_X > g_SceneMan.GetSceneWidth() - halfWidth))
@@ -2336,7 +2336,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     if (pIcon)
         draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], MAX(2, g_SceneMan.GetScreenOcclusion(which).m_X + 2), 2);
     // Gold
-    sprintf_s(str, c_PrintBufferSize, "%c Funds: %.0f oz", TeamFundsChanged(which) ? -57 : -58, GetTeamFunds(m_Team[PoS]));
+    sprintf_s(str, sizeof(str), "%c Funds: %.0f oz", TeamFundsChanged(which) ? -57 : -58, GetTeamFunds(m_Team[PoS]));
     g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MAX(16, g_SceneMan.GetScreenOcclusion(which).m_X + 16), yTextPos, str, GUIFont::Left);
 /* Not applicable anymore to the 4-team games
     // Body losses
@@ -2608,9 +2608,9 @@ void GameActivity::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
             // Text
             pSmallFont->DrawAligned(&pBitmapInt, landZone.m_X, landZone.m_Y - 38, "ETA:", GUIFont::Centre);
             if (m_ActivityState == Activity::PREGAME)
-                sprintf_s(str, c_PrintBufferSize, "???s");
+                sprintf_s(str, sizeof(str), "???s");
             else
-                sprintf_s(str, c_PrintBufferSize, "%is", ((int)itr->delay - (int)itr->timer.GetElapsedSimTimeMS()) / 1000);
+                sprintf_s(str, sizeof(str), "%is", ((int)itr->delay - (int)itr->timer.GetElapsedSimTimeMS()) / 1000);
             pLargeFont->DrawAligned(&pBitmapInt, landZone.m_X, landZone.m_Y - 32, str, GUIFont::Centre);
             // Draw wrap around the world if necessary, and only if this is being drawn directly to a scenewide target bitmap
             if (targetPos.IsZero() && (landZone.m_X < halfWidth || landZone.m_X > g_SceneMan.GetSceneWidth() - halfWidth))

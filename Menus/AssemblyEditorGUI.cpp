@@ -750,11 +750,11 @@ void AssemblyEditorGUI::Update()
 					number = i;
 					char currentName[256];
 
-					sprintf_s(currentName, c_PrintBufferSize, "%s - %d", m_CurrentAssemblyName.c_str(), 1);
+					sprintf_s(currentName, sizeof(currentName), "%s - %d", m_CurrentAssemblyName.c_str(), 1);
 
 					for (list<Entity *>::iterator itr = assemblies.begin(); itr != assemblies.end(); itr++)
 					{
-						sprintf_s(currentName, c_PrintBufferSize, "%s - %d", m_CurrentAssemblyName.c_str(), number);
+						sprintf_s(currentName, sizeof(currentName), "%s - %d", m_CurrentAssemblyName.c_str(), number);
 						if ((*itr)->GetPresetName() == currentName)
 						{
 							number = 0;

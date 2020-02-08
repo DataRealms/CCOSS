@@ -286,13 +286,13 @@ int MainMenuGUI::Create(Controller *pController)
 	// Set value labels
 	char s[256];
 
-	sprintf_s(s, c_PrintBufferSize, "%d", m_aDeadZoneSlider[P1DEADZONESLIDER]->GetValue());
+	sprintf_s(s, sizeof(s), "%d", m_aDeadZoneSlider[P1DEADZONESLIDER]->GetValue());
 	m_aDeadZoneLabel[P1DEADZONESLIDER]->SetText(s);
-	sprintf_s(s, c_PrintBufferSize, "%d", m_aDeadZoneSlider[P2DEADZONESLIDER]->GetValue());
+	sprintf_s(s, sizeof(s), "%d", m_aDeadZoneSlider[P2DEADZONESLIDER]->GetValue());
 	m_aDeadZoneLabel[P2DEADZONESLIDER]->SetText(s);
-	sprintf_s(s, c_PrintBufferSize, "%d", m_aDeadZoneSlider[P3DEADZONESLIDER]->GetValue());
+	sprintf_s(s, sizeof(s), "%d", m_aDeadZoneSlider[P3DEADZONESLIDER]->GetValue());
 	m_aDeadZoneLabel[P3DEADZONESLIDER]->SetText(s);
-	sprintf_s(s, c_PrintBufferSize, "%d", m_aDeadZoneSlider[P4DEADZONESLIDER]->GetValue());
+	sprintf_s(s, sizeof(s), "%d", m_aDeadZoneSlider[P4DEADZONESLIDER]->GetValue());
 	m_aDeadZoneLabel[P4DEADZONESLIDER]->SetText(s);
 
 	// Set deadzone checkboxes
@@ -1696,7 +1696,7 @@ void MainMenuGUI::Update()
 				{
 					// Display value
 					char s[256];
-					sprintf_s(s, c_PrintBufferSize, "%d", m_aDeadZoneSlider[which]->GetValue());
+					sprintf_s(s, sizeof(s), "%d", m_aDeadZoneSlider[which]->GetValue());
 					m_aDeadZoneLabel[which]->SetText(s);
 
 					// Update control scheme
@@ -2034,12 +2034,12 @@ void MainMenuGUI::UpdateTeamBoxes()
         if (m_aTeamAssignments[player] == Activity::TEAM_1)
         {
             m_aSkirmishBox[player]->SetDrawColor(makecol(70, 27, 12));
-            sprintf_s(str, c_PrintBufferSize, "Player %i: %c", player + 1, -62);
+            sprintf_s(str, sizeof(str), "Player %i: %c", player + 1, -62);
         }
         else
         {
             m_aSkirmishBox[player]->SetDrawColor(makecol(47, 55, 40));
-            sprintf_s(str, c_PrintBufferSize, "Player %i: %c", player + 1, -59);
+            sprintf_s(str, sizeof(str), "Player %i: %c", player + 1, -59);
         }
         m_aSkirmishButton[player]->SetText(str);
     }
@@ -2061,12 +2061,12 @@ void MainMenuGUI::UpdateTeamBoxes()
     // See if either team is empty of human players - that becomes the CPU team
     if (team0Count == 0 || team1Count == 0)
     {
-        sprintf_s(str, c_PrintBufferSize, "CPU Team: %c", team0Count == 0 ? -62 : -59);
+        sprintf_s(str, sizeof(str), "CPU Team: %c", team0Count == 0 ? -62 : -59);
         m_CPUTeam = team0Count == 0 ? 0 : 1;
     }
     else
     {
-        sprintf_s(str, c_PrintBufferSize, "No CPU Team (both have players)");
+        sprintf_s(str, sizeof(str), "No CPU Team (both have players)");
         m_CPUTeam = -1;
     }
 
@@ -2132,7 +2132,7 @@ void MainMenuGUI::UpdateResolutionCombo()
 					}
 
 					// Construct and add the resolution string to the combobox
-					sprintf_s(resString, c_PrintBufferSize, "%ix%i", width, height);
+					sprintf_s(resString, sizeof(resString), "%ix%i", width, height);
 
 					// Add useful notation to the standardized resolutions
 					if (width == 320 && height == 200)
@@ -2194,7 +2194,7 @@ void MainMenuGUI::UpdateResolutionCombo()
         // If none of the listed matched our resolution set for next start, add a 'custom' one to display as the current res
         if (currentResIndex < 0)
         {
-            sprintf_s(resString, c_PrintBufferSize, "%ix%i Custom", g_FrameMan.GetNewResX() * g_FrameMan.GetNewNxFullscreen(), g_FrameMan.GetNewResY() * g_FrameMan.GetNewNxFullscreen());
+            sprintf_s(resString, sizeof(resString), "%ix%i Custom", g_FrameMan.GetNewResX() * g_FrameMan.GetNewNxFullscreen(), g_FrameMan.GetNewResY() * g_FrameMan.GetNewNxFullscreen());
             m_pResolutionCombo->AddItem(resString);
             currentResIndex = m_pResolutionCombo->GetCount() - 1;
         }
@@ -2215,12 +2215,12 @@ void MainMenuGUI::UpdateVolumeSliders()
 {
     char labelText[512];
     int volume = (int)(g_AudioMan.GetSoundsVolume() * 100);
-    sprintf_s(labelText, c_PrintBufferSize, "Sound Volume: %i", volume);
+    sprintf_s(labelText, sizeof(labelText), "Sound Volume: %i", volume);
     m_pSoundLabel->SetText(labelText);
     m_pSoundSlider->SetValue(volume);
 
     volume = (int)(g_AudioMan.GetMusicVolume() * 100);
-    sprintf_s(labelText, c_PrintBufferSize, "Music Volume: %i", volume);
+    sprintf_s(labelText, sizeof(labelText), "Music Volume: %i", volume);
     m_pMusicLabel->SetText(labelText);
     m_pMusicSlider->SetValue(volume);
 }
@@ -2298,7 +2298,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINSTRUCTION]->SetVisible(true);
             m_pConfigLabel[CONFIGINPUT]->SetVisible(true);
-            sprintf_s(str, c_PrintBufferSize, "Keyboard Configuration - Player %i", m_ConfiguringPlayer + 1);
+            sprintf_s(str, sizeof(str), "Keyboard Configuration - Player %i", m_ConfiguringPlayer + 1);
             m_pConfigLabel[CONFIGTITLE]->SetText(str);
             m_pConfigLabel[CONFIGINSTRUCTION]->SetText("Press the key for");
             m_pConfigLabel[CONFIGSTEPS]->SetVisible(true);
@@ -2310,7 +2310,7 @@ void MainMenuGUI::UpdateConfigScreen()
         }
 		
         // Step label update
-        sprintf_s(str, c_PrintBufferSize, "Step %i / %i", m_ConfigureStep + 1, KEYBOARDSTEPS);
+        sprintf_s(str, sizeof(str), "Step %i / %i", m_ConfigureStep + 1, KEYBOARDSTEPS);
         m_pConfigLabel[CONFIGSTEPS]->SetText(str);
 
         // Move/Aim up
@@ -2545,7 +2545,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINSTRUCTION]->SetVisible(true);
             m_pConfigLabel[CONFIGINPUT]->SetVisible(true);
-            sprintf_s(str, c_PrintBufferSize, "Mouse + Keyboard Configuration - Player %i", m_ConfiguringPlayer + 1);
+            sprintf_s(str, sizeof(str), "Mouse + Keyboard Configuration - Player %i", m_ConfiguringPlayer + 1);
             m_pConfigLabel[CONFIGTITLE]->SetText(str);
             m_pConfigLabel[CONFIGINSTRUCTION]->SetText("Press the key for");
             m_pConfigLabel[CONFIGSTEPS]->SetVisible(true);
@@ -2557,7 +2557,7 @@ void MainMenuGUI::UpdateConfigScreen()
         }
 
         // Step label update
-        sprintf_s(str, c_PrintBufferSize, "Step %i / %i", m_ConfigureStep + 1, MOUSESTEPS);
+        sprintf_s(str, sizeof(str), "Step %i / %i", m_ConfigureStep + 1, MOUSESTEPS);
         m_pConfigLabel[CONFIGSTEPS]->SetText(str);
 
         // Move up
@@ -2704,7 +2704,7 @@ void MainMenuGUI::UpdateConfigScreen()
         if (m_ConfigureStep == 0)
         {
             // Set title
-            sprintf_s(str, c_PrintBufferSize, "Choose Gamepad Type for Player %i:", m_ConfiguringPlayer + 1);
+            sprintf_s(str, sizeof(str), "Choose Gamepad Type for Player %i:", m_ConfiguringPlayer + 1);
             m_pConfigLabel[CONFIGTITLE]->SetText(str);
 
             // Hide the back button on this first step
@@ -2752,7 +2752,7 @@ void MainMenuGUI::UpdateConfigScreen()
             {
                 if (m_ScreenChange)
                 {
-                    sprintf_s(str, c_PrintBufferSize, "D-Pad Gamepad Configuration - Player %i", m_ConfiguringPlayer + 1);
+                    sprintf_s(str, sizeof(str), "D-Pad Gamepad Configuration - Player %i", m_ConfiguringPlayer + 1);
                     m_pConfigLabel[CONFIGTITLE]->SetText(str);
                     m_pConfigLabel[CONFIGRECOMMENDATION]->SetVisible(false);
                     m_pConfigLabel[CONFIGINSTRUCTION]->SetText("Press the button or move the stick for");
@@ -2764,7 +2764,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 }
 
                 // Step label update
-                sprintf_s(str, c_PrintBufferSize, "Step %i / %i", m_ConfigureStep + 1, DPADSTEPS);
+                sprintf_s(str, sizeof(str), "Step %i / %i", m_ConfigureStep + 1, DPADSTEPS);
                 m_pConfigLabel[CONFIGSTEPS]->SetText(str);
 
                 // Diagram update
@@ -2918,7 +2918,7 @@ void MainMenuGUI::UpdateConfigScreen()
             {
                 if (m_ScreenChange)
                 {
-                    sprintf_s(str, c_PrintBufferSize, "Dual Analog Gamepad Configuration - Player %i", m_ConfiguringPlayer + 1);
+                    sprintf_s(str, sizeof(str), "Dual Analog Gamepad Configuration - Player %i", m_ConfiguringPlayer + 1);
                     m_pConfigLabel[CONFIGTITLE]->SetText(str);
                     m_pConfigLabel[CONFIGRECOMMENDATION]->SetVisible(false);
                     m_pConfigLabel[CONFIGINSTRUCTION]->SetText("Press the button or move the stick for");
@@ -2930,7 +2930,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 }
 
                 // Step label update
-                sprintf_s(str, c_PrintBufferSize, "Step %i / %i", m_ConfigureStep + 1, DANALOGSTEPS);
+                sprintf_s(str, sizeof(str), "Step %i / %i", m_ConfigureStep + 1, DANALOGSTEPS);
                 m_pConfigLabel[CONFIGSTEPS]->SetText(str);
 
                 // Diagram update

@@ -232,7 +232,7 @@ int ScenarioGUI::Create(Controller *pController)
         for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
         {
             // +1 because the controls are indexed starting at 1, not 0
-            sprintf_s(str, c_PrintBufferSize, "P%dT%dBox", player + 1, team + 1);
+            sprintf_s(str, sizeof(str), "P%dT%dBox", player + 1, team + 1);
             m_aapPlayerBoxes[player][team] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl(str));
         }
     }
@@ -1472,7 +1472,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                     if (!pIcon)
                     {
                         char str[128];
-                        sprintf_s(str, c_PrintBufferSize, "Team %d Default", team + 1);
+                        sprintf_s(str, sizeof(str), "Team %d Default", team + 1);
                         pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", str));
                     }
                     m_apTeamNameLabels[team]->SetText(pActivity->GetTeamName(team) + ":");
@@ -1535,7 +1535,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
             m_aScenarioButton[STARTGAME]->SetVisible(false);
             m_pStartErrorLabel->SetVisible(true);
             char str[256];
-            sprintf_s(str, c_PrintBufferSize, "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
+            sprintf_s(str, sizeof(str), "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
             m_pStartErrorLabel->SetText(str);
         }
         // If we are under the required number of teams with players assigned, disable the start button and show why
@@ -1544,7 +1544,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
             m_aScenarioButton[STARTGAME]->SetVisible(false);
             m_pStartErrorLabel->SetVisible(true);
             char str[256];
-            sprintf_s(str, c_PrintBufferSize, "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
+            sprintf_s(str, sizeof(str), "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
             m_pStartErrorLabel->SetText(str);
         }
 		// Assign at least one human player
@@ -1567,9 +1567,9 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
 		int startGold = m_pGoldSlider->GetValue();
 		startGold = startGold - startGold % 500;
 		if (m_pGoldSlider->GetValue() == m_pGoldSlider->GetMaximum())
-			sprintf_s(str, c_PrintBufferSize, "Starting Gold: %c Infinite", -58);
+			sprintf_s(str, sizeof(str), "Starting Gold: %c Infinite", -58);
 		else
-			sprintf_s(str, c_PrintBufferSize, "Starting Gold: %c %d oz", -58, startGold);
+			sprintf_s(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
 		m_pGoldLabel->SetText(str);
 
 

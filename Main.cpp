@@ -432,7 +432,7 @@ bool LoadDataModules()
                 char outputDirName[c_MaxFileName];
                 char parentDirName[c_MaxFileName];
                 // Copy the file path to a separate dir path
-                strcpy_s(outputDirName, c_PrintBufferSize, outputFileName);
+                strcpy_s(outputDirName, sizeof(outputDirName), outputFileName);
                 // Find the last slash in the dir path, so we can cut off everything after that (ie the actual filename), and only have the directory path left
                 char *pSlashPos = strrchr(outputDirName, '/');
                 // Try to find the other kind of slash if we found none
@@ -446,7 +446,7 @@ bool LoadDataModules()
                 for (int nested = 0; !file_exists(outputDirName, FA_DIREC, 0) && pSlashPos; ++nested)
                 {
                     // Keep making new working copies of the path that we can dice up
-                    strcpy_s(parentDirName, c_PrintBufferSize, outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
+                    strcpy_s(parentDirName, sizeof(parentDirName), outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
                     // Start off at the beginning
                     pSlashPos = parentDirName;
                     for (int j = 0; j <= nested && pSlashPos; ++j)
@@ -777,12 +777,12 @@ bool ResetActivity()
 //    g_AudioMan.Create();
 
     char report[512];
-    sprintf_s(report, c_PrintBufferSize, "Building Scene: \"%s\"...", g_ActivityMan.GetActivity()->GetSceneName().c_str());
+    sprintf_s(report, sizeof(report), "Building Scene: \"%s\"...", g_ActivityMan.GetActivity()->GetSceneName().c_str());
     LoadingSplashProgressReport(report, true);
 
     g_SceneMan.LoadScene(g_ActivityMan.GetActivity()->GetSceneName());
 
-    sprintf_s(report, c_PrintBufferSize, "\tDone! %c", -42);
+    sprintf_s(report, sizeof(report), "\tDone! %c", -42);
     LoadingSplashProgressReport(report, true);
     LoadingSplashProgressReport(" ", true);
 
@@ -791,7 +791,7 @@ bool ResetActivity()
     Timer blinkTimer;
     do
     {
-        sprintf_s(report, c_PrintBufferSize, "PRESS ANY KEY TO START! %c", blinkTimer.AlternateSim(300) ? -65 : ' ');
+        sprintf_s(report, sizeof(report), "PRESS ANY KEY TO START! %c", blinkTimer.AlternateSim(300) ? -65 : ' ');
         LoadingSplashProgressReport(report, false);
 
         // Reset the key press states
@@ -1166,7 +1166,7 @@ bool PlayIntroTitle()
             // Draw the copyright notice
             yTextPos = g_FrameMan.GetResY() - pFont->GetFontHeight();
             char copyRight[512];
-            sprintf_s(copyRight, c_PrintBufferSize, "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
+            sprintf_s(copyRight, sizeof(copyRight), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, copyRight, GUIFont::Centre);
         }
 

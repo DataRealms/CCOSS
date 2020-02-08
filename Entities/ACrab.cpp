@@ -3269,11 +3269,11 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 str[0] = -56; str[1] = 0;
                 pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
                 if (pHeldFirearm->IsReloading())
-                    sprintf_s(str, c_PrintBufferSize, "%s", "Reloading...");
+                    sprintf_s(str, sizeof(str), "%s", "Reloading...");
                 else if (pHeldFirearm->GetRoundInMagCount() >= 0)
-                    sprintf_s(str, c_PrintBufferSize, "%i", pHeldFirearm->GetRoundInMagCount());
+                    sprintf_s(str, sizeof(str), "%i", pHeldFirearm->GetRoundInMagCount());
                 else
-                    sprintf_s(str, c_PrintBufferSize, "%s", "INF");
+                    sprintf_s(str, sizeof(str), "%s", "INF");
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
 
                 m_HUDStack += -10;
@@ -3281,7 +3281,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         }
         else
         {
-            sprintf_s(str, c_PrintBufferSize, "NO TURRET!");
+            sprintf_s(str, sizeof(str), "NO TURRET!");
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
             m_HUDStack += -9;
         }

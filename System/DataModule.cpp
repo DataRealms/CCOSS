@@ -86,7 +86,7 @@ int DataModule::Create(string moduleName, void (*fpProgressCallback)(std::string
     if (fpProgressCallback)
     {
         char report[512];
-        sprintf_s(report, c_PrintBufferSize, "%s %c loading:", m_FileName.c_str(), -43);
+        sprintf_s(report, sizeof(report), "%s %c loading:", m_FileName.c_str(), -43);
         fpProgressCallback(string(report), true);
     }
 
@@ -167,7 +167,7 @@ int DataModule::ReadModuleProperties(string moduleName, void (*fpProgressCallbac
     if (fpProgressCallback)
     {
         char report[512];
-        sprintf_s(report, c_PrintBufferSize, "%s %c reading properties:", m_FileName.c_str(), -43);
+        sprintf_s(report, sizeof(report), "%s %c reading properties:", m_FileName.c_str(), -43);
         fpProgressCallback(string(report), true);
     }
 

@@ -4908,13 +4908,13 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                 str[0] = -56; str[1] = 0;
                 pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
                 if (pHeldFirearm->IsReloading())
-                    sprintf_s(str, c_PrintBufferSize, "%s", "Reloading...");
+                    sprintf_s(str, sizeof(str), "%s", "Reloading...");
                 else
                 {
                     if (pHeldFirearm->GetRoundInMagCount() < 0)
-                        sprintf_s(str, c_PrintBufferSize, "%s", "Infinite");
+                        sprintf_s(str, sizeof(str), "%s", "Infinite");
                     else
-                        sprintf_s(str, c_PrintBufferSize, "%i", pHeldFirearm->GetRoundInMagCount());
+                        sprintf_s(str, sizeof(str), "%i", pHeldFirearm->GetRoundInMagCount());
                 }
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
 
@@ -4965,7 +4965,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         }
         else
         {
-            sprintf_s(str, c_PrintBufferSize, "NO ARM!");
+            sprintf_s(str, sizeof(str), "NO ARM!");
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
             m_HUDStack += -9;
         }
@@ -4976,7 +4976,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             if (m_pItemInReach && g_MovableMan.IsDevice(m_pItemInReach) && m_pFGArm && m_pFGArm->IsAttached())
             {
     //            sprintf_s(str, " œ Pick up %s", m_pItemInReach->GetPresetName().c_str());
-                sprintf_s(str, c_PrintBufferSize, " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
+                sprintf_s(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
             }
             else

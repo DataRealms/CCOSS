@@ -563,7 +563,7 @@ void AudioMan::PlayMusic(const char *filepath, int loops, double volumeOverride)
 
 	// Look for file extension
 	char format[16];
-	strcpy_s(format, c_PrintBufferSize, "");
+	strcpy_s(format, sizeof(format), "");
 
 	int dotPos = -1;
 
@@ -579,7 +579,7 @@ void AudioMan::PlayMusic(const char *filepath, int loops, double volumeOverride)
 	if (dotPos == -1)
 		return;
 
-	strcpy_s(format, c_PrintBufferSize, &filepath[dotPos + 1]);
+	strcpy_s(format, sizeof(format), &filepath[dotPos + 1]);
 
 	// Open the stream
 	if (loops != 0)
@@ -658,7 +658,7 @@ void AudioMan::QueueSilence(int seconds)
     {
         // Encode the silence as number of secs preceded by '@'
         char str[256];
-        sprintf_s(str, c_PrintBufferSize, "@%i", seconds);
+        sprintf_s(str, sizeof(str), "@%i", seconds);
         m_MusicPlayList.push_back(string(str));
     }
 }

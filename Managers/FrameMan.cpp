@@ -1130,7 +1130,7 @@ int FrameMan::SaveScreenToBMP(const char *namebase)
 
     do {
         // Check for the file namebase001.bmp; if it exists, try 002, etc.
-        sprintf_s(fullfilename, c_PrintBufferSize, "%s%03i.bmp", namebase, filenumber++);
+        sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", namebase, filenumber++);
         if (!exists(fullfilename)) {
             break;
         }
@@ -1172,7 +1172,7 @@ int FrameMan::SaveWorldToBMP(const char *namebase)
 
     do {
         // Check for the file namebase001.bmp; if it exists, try 002, etc.
-        sprintf_s(fullfilename, c_PrintBufferSize, "%s%03i.bmp", namebase, filenumber++);
+        sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", namebase, filenumber++);
         if (!exists(fullfilename)) {
             break;
         }
@@ -1278,7 +1278,7 @@ int FrameMan::SaveBitmapToBMP(BITMAP *pBitmap, const char *namebase)
 
     do {
         // Check for the file namebase001.bmp; if it exists, try 002, etc.
-        sprintf_s(fullfilename, c_PrintBufferSize, "%s%03i.bmp", namebase, filenumber++);
+        sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", namebase, filenumber++);
         if (!exists(fullfilename)) {
             break;
         }
@@ -2197,39 +2197,39 @@ void FrameMan::Draw()
 
                 // Calcualte teh fps from the average
                 float fps = 1.0f / ((float)m_MSPFAverage / 1000.0f);
-                sprintf_s(str, c_PrintBufferSize, "FPS: %.0f", fps);
+                sprintf_s(str, sizeof(str), "FPS: %.0f", fps);
                 GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 14, str, GUIFont::Left);
 
                 // Display the average
-                sprintf_s(str, c_PrintBufferSize, "MSPF: %i", m_MSPFAverage);
+                sprintf_s(str, sizeof(str), "MSPF: %i", m_MSPFAverage);
                 GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 24, str, GUIFont::Left);
 
-                sprintf_s(str, c_PrintBufferSize, "Time Scale: x%.2f ([1]-, [2]+)", g_TimerMan.IsOneSimUpdatePerFrame() ? m_SimSpeed : g_TimerMan.GetTimeScale());
+                sprintf_s(str, sizeof(str), "Time Scale: x%.2f ([1]-, [2]+)", g_TimerMan.IsOneSimUpdatePerFrame() ? m_SimSpeed : g_TimerMan.GetTimeScale());
                 GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 34, str, GUIFont::Left);
 
-                sprintf_s(str, c_PrintBufferSize, "Real to Sim Cap: %.2f ms ([3]-, [4]+)", g_TimerMan.GetRealToSimCap() * 1000.0f);
+                sprintf_s(str, sizeof(str), "Real to Sim Cap: %.2f ms ([3]-, [4]+)", g_TimerMan.GetRealToSimCap() * 1000.0f);
                 GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 44, str, GUIFont::Left);
 
                 float dt = g_TimerMan.GetDeltaTimeMS();
-                sprintf_s(str, c_PrintBufferSize, "DeltaTime: %.2f ms ([5]-, [6]+)", dt);
+                sprintf_s(str, sizeof(str), "DeltaTime: %.2f ms ([5]-, [6]+)", dt);
                 GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 54, str, GUIFont::Left);
 
-                sprintf_s(str, c_PrintBufferSize, "Particles: %i", g_MovableMan.GetParticleCount());
+                sprintf_s(str, sizeof(str), "Particles: %i", g_MovableMan.GetParticleCount());
                 GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 64, str, GUIFont::Left);
 
-				sprintf_s(str, c_PrintBufferSize, "Objects: %i", g_MovableMan.GetKnownObjectsCount());
+				sprintf_s(str, sizeof(str), "Objects: %i", g_MovableMan.GetKnownObjectsCount());
 				GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 74, str, GUIFont::Left);
 
-                sprintf_s(str, c_PrintBufferSize, "MOIDs: %i", g_MovableMan.GetMOIDCount());
+                sprintf_s(str, sizeof(str), "MOIDs: %i", g_MovableMan.GetMOIDCount());
                 GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 84, str, GUIFont::Left);
 
-                sprintf_s(str, c_PrintBufferSize, "Sim Updates Since Last Drawn: %i", g_TimerMan.SimUpdatesSinceDrawn());
+                sprintf_s(str, sizeof(str), "Sim Updates Since Last Drawn: %i", g_TimerMan.SimUpdatesSinceDrawn());
                 GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 94, str, GUIFont::Left);
 
                 if (g_TimerMan.IsOneSimUpdatePerFrame())
                     GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 104, "ONE Sim Update Per Frame!", GUIFont::Left);
 
-				sprintf_s(str, c_PrintBufferSize, "Sound channels: %d / %d ", g_AudioMan.GetPlayingChannelCount(), g_AudioMan.GetTotalChannelCount());
+				sprintf_s(str, sizeof(str), "Sound channels: %d / %d ", g_AudioMan.GetPlayingChannelCount(), g_AudioMan.GetTotalChannelCount());
 				GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 114, str, GUIFont::Left);
 
 				int xOffset = 17;
@@ -2250,11 +2250,11 @@ void FrameMan::Draw()
 
 					// Print percentage from PerformanceCounters::PERF_SIM_TOTAL
 					int perc = (int)((float)GetPerormanceCounterAverage(static_cast<PerformanceCounters>(pc)) / (float)GetPerormanceCounterAverage(PERF_SIM_TOTAL) * 100);
-					sprintf_s(str, c_PrintBufferSize, "%%: %i", perc);
+					sprintf_s(str, sizeof(str), "%%: %i", perc);
 		            GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, xOffset + 60, blockStart, str, GUIFont::Left);
 					
 					// Print average processing time in ms
-					sprintf_s(str, c_PrintBufferSize, "T: %lli", GetPerormanceCounterAverage(static_cast<PerformanceCounters>(pc)) / 1000);
+					sprintf_s(str, sizeof(str), "T: %lli", GetPerormanceCounterAverage(static_cast<PerformanceCounters>(pc)) / 1000);
 		            GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, xOffset + 96, blockStart, str, GUIFont::Left);
 					
 					int graphStart = blockStart + graphOffset;
@@ -2305,7 +2305,7 @@ void FrameMan::Draw()
 					}
 
 					// Print peak values
-					sprintf_s(str, c_PrintBufferSize, "Peak: %i", peak / 1000);
+					sprintf_s(str, sizeof(str), "Peak: %i", peak / 1000);
 		            GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, xOffset + 130, blockStart, str, GUIFont::Left);
 				}
             }
@@ -2445,7 +2445,7 @@ void FrameMan::Draw()
 			{
 				AllegroBitmap allegroBitmap(m_pBackBuffer8);
 				char buf[32];
-				sprintf_s(buf, c_PrintBufferSize, "PING: %u", m_CurrentPing);
+				sprintf_s(buf, sizeof(buf), "PING: %u", m_CurrentPing);
 				GetLargeFont()->DrawAligned(&allegroBitmap, m_pBackBuffer8->w - 25, m_pBackBuffer8->h - 14, buf, GUIFont::Right);
 			}
 

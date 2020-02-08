@@ -3833,7 +3833,7 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 //            g_ActivityMan.GetActivity()->Draw(pTargetBitmap, targetPos, m_LastUpdatedScreen);
             g_ActivityMan.GetActivity()->DrawGUI(pTargetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
-//            sprintf_s(str, c_PrintBufferSize, "Normal Layer Draw Mode\nHit M to cycle modes");
+//            sprintf_s(str, sizeof(str), "Normal Layer Draw Mode\nHit M to cycle modes");
 //            g_FrameMan.DrawText(pTargetBitmap, str, Vector(475, 4), false);
 
 #ifdef DEBUG_BUILD

@@ -769,7 +769,7 @@ namespace RTE
 				strncpy(path, sndDataPtr->Path, 255);
 
 				char buf[128];
-				sprintf_s(buf, c_PrintBufferSize, "MUSIC %s %d", path, sndDataPtr->Loops);
+				sprintf_s(buf, sizeof(buf), "MUSIC %s %d", path, sndDataPtr->Loops);
 				g_ConsoleMan.PrintString(buf);
 
 				g_AudioMan.PlayMusic(path, sndDataPtr->Loops);

@@ -1899,7 +1899,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 */
-            sprintf_s(str, c_PrintBufferSize, "%.0f", m_Health);
+            sprintf_s(str, sizeof(str), "%.0f", m_Health);
 //            pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y - 35, str, GUIFont::Left);
             pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
 
@@ -1909,7 +1909,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             if (GetGoldCarried() > 0) {
                 str[0] = m_GoldPicked ? -57 : -58; str[1] = 0;
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                sprintf_s(str, c_PrintBufferSize, "%.0f oz", GetGoldCarried());
+                sprintf_s(str, sizeof(str), "%.0f oz", GetGoldCarried());
                 pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, str, GUIFont::Left);
 
                 m_HUDStack += -11;

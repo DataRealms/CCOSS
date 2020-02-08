@@ -7,7 +7,6 @@ namespace RTE {
 	constexpr static unsigned int c_MaxFileName = 256; ///! Maximum length of output file directory+name string.
 	constexpr static unsigned int c_FileBufferSize = 8192; ///! Buffer to hold data read from the zip file.
 	constexpr static unsigned int c_MaxUnzippedFileSize = 104857600; ///! Maximum size of single file being extracted from zip archive.
-	constexpr static unsigned int c_PrintBufferSize = 512; ///! Maximum number of bytes to be used in the print buffer.
 #pragma endregion
 
 #pragma region Graphics Constants

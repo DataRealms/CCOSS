@@ -353,7 +353,7 @@ string SceneObject::GetGoldValueString(int nativeModule, float foreignMult, floa
     {
 //        sprintf_s(returnString, "%.0foz", subjValue);
         // The 'oz' takes up too much space
-        sprintf_s(returnString, c_PrintBufferSize, "%.0f", subjValue);
+        sprintf_s(returnString, sizeof(returnString), "%.0f", subjValue);
     }
     else
         return "FREE";

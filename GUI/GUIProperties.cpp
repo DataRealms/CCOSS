@@ -118,7 +118,7 @@ void GUIProperties::AddVariable(const string Variable, char *Value)
 void GUIProperties::AddVariable(const string Variable, int Value)
 {
     char buf[32];
-    sprintf_s(buf, c_PrintBufferSize, "%i", Value);
+    sprintf_s(buf, sizeof(buf), "%i", Value);
     string Val(buf);
     AddVariable(Variable, Val);
 }
@@ -169,7 +169,7 @@ bool GUIProperties::SetValue(const string Variable, const string Value)
 bool GUIProperties::SetValue(const string Variable, int Value)
 {
     char buf[64];
-    sprintf_s(buf, c_PrintBufferSize, "%i", Value);
+    sprintf_s(buf, sizeof(buf), "%i", Value);
 
     return SetValue(Variable, buf);
 }
@@ -243,7 +243,7 @@ int GUIProperties::GetValue(const string Variable, string *Array, int MaxArraySi
         return 0;
 
     // Tokenize the string
-    strcpy_s(str, c_PrintBufferSize, Value.c_str());
+    strcpy(str, Value.c_str());
     char *tok = strtok(str, ",");
     int count = 0;
     
@@ -283,7 +283,7 @@ int GUIProperties::GetValue(const string Variable, int *Array, int MaxArraySize)
         return 0;
 
     // Tokenize the string
-    strcpy_s(str, c_PrintBufferSize, Value.c_str());
+    strcpy(str, Value.c_str());
     char *tok = strtok(str, ",");
     int count = 0;
     

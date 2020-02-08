@@ -32,7 +32,7 @@
 #include "GUI/AllegroScreen.h"
 
 #ifdef __USE_SOUND_FMOD
-#include "fmod.h"
+#include "fmod/fmod.h"
 #endif
 
 // I know this is a crime, but if I include it in FrameMan.h the whole thing will collapse due to int redefinitions in Allegro

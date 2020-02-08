@@ -12,8 +12,8 @@
 // Inclusions of header files
 
 #ifdef __USE_SOUND_FMOD
-#include "fmod.h"
-#include "fmod_errors.h"
+#include "fmod/fmod.h"
+#include "fmod/fmod_errors.h"
 #elif __USE_SOUND_SDLMIXER
 #include "SDL.h"
 #include "SDL_mixer.h"

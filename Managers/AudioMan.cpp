@@ -13,9 +13,7 @@
 
 #ifdef __USE_SOUND_FMOD
 #include "fmod/fmod.h"
-#elif __USE_SOUND_SDLMIXER
-#include "SDL.h"
-#include "SDL_mixer.h"
+
 #elif __USE_SOUND_GORILLA
 #include "gorilla/ga.h"
 #include "gorilla/gau.h"
@@ -43,8 +41,7 @@
 
 #ifdef __USE_SOUND_FMOD
 #define MAX_VOLUME 255
-#elif __USE_SOUND_SDLMIXER
-#define MAX_VOLUME MIX_MAX_VOLUME
+
 #elif __USE_SOUND_GORILLA
 #define MAX_VOLUME 1.0f
 #endif
@@ -61,19 +58,14 @@ signed char F_CALLBACKAPI PlayNextCallback(FSOUND_STREAM *stream, void *buff, in
     g_AudioMan.PlayNextStream();
     return 0;
 }
-#elif __USE_SOUND_SDLMIXER
-// Callback for catching music streams that end
-void PlayNextCallback()
-{
-	g_AudioMan.PlayNextStream();
-}
+
 #elif __USE_SOUND_GORILLA
 // Callback for catching music streams that end
 void PlayNextCallback(ga_Handle *in_finishedHandle, void *in_context)
 {
 	g_AudioMan.PlayNextStream();
 }
-#endif // __USE_SOUND_FMOD
+#endif
 
 
 // I know this is a crime, but if I include it in FrameMan.h the whole thing will collapse due to int redefinitions in Allegro
@@ -91,8 +83,7 @@ void AudioMan::Clear()
 	m_AudioEnabled = false;
 #ifdef __USE_SOUND_FMOD
     m_pMusic = 0;
-#elif __USE_SOUND_SDLMIXER
-	m_pMusic = 0;
+
 #elif __USE_SOUND_GORILLA
 	m_pManager = 0;
 	m_pMixer = 0;
@@ -104,6 +95,7 @@ void AudioMan::Clear()
 	m_SoundInstances.clear();
 	//m_MaxChannels = 0;
 #endif
+
     m_MusicChannel = -1;
     m_MusicPath.clear();
     m_SoundsVolume = 1.0;
@@ -174,48 +166,7 @@ int AudioMan::Create()
 
     // Init the global pitch
     SetGlobalPitch(m_GlobalPitch);
-#elif __USE_SOUND_SDLMIXER
-	if (SDL_Init(SDL_INIT_AUDIO) < 0)
-	{
-		// Audio failed to init, so just disable it
-		m_AudioEnabled = false;
-		return -1;
-	}
 
-	int audioBitrate = 44100;
-	Uint16 audioFormat = AUDIO_F32;
-	int maxChannels = 32;
-	int maxAudioChannels = 2;
-
-	// Open the audio device
-	if (Mix_OpenAudio(audioBitrate, audioFormat, maxAudioChannels, 4096) < 0) {
-		// Audio failed to init, so just disable it
-		m_AudioEnabled = false;
-		return -1;
-	} else {
-		Mix_QuerySpec(&audioBitrate, &audioFormat, &maxAudioChannels);
-	}
-
-	Mix_HookMusicFinished(PlayNextCallback);
-	Mix_AllocateChannels(maxChannels);
-
-	m_AudioEnabled = true;
-
-	// Set the global sound channels' volume
-	SetSoundsVolume(m_SoundsVolume);
-	// And Music volume
-	SetMusicVolume(m_MusicVolume);
-
-	// Init up the array of normal frequencies
-	int channelCount = maxChannels;
-	for (int channel = 0; channel < channelCount; ++channel)
-	{
-		//m_NormalFrequencies.push_back(FSOUND_GetFrequency(channel));
-		m_PitchModifiers.push_back(1.0);
-	}
-
-	// Init the global pitch
-	SetGlobalPitch(m_GlobalPitch);
 #elif __USE_SOUND_GORILLA
 	if (gc_initialize(0) != GC_SUCCESS)
 	{
@@ -257,7 +208,6 @@ int AudioMan::Create()
 	SetMusicVolume(m_MusicVolume);
 	// Init the global pitch
 	SetGlobalPitch(m_GlobalPitch);
-
 #endif
 
     return 0;
@@ -294,9 +244,7 @@ void AudioMan::Destroy()
     // Close FMOD
 #ifdef __USE_SOUND_FMOD
     FSOUND_Close();
-#elif __USE_SOUND_SDLMIXER
-	Mix_CloseAudio();
-	SDL_Quit();
+
 #elif __USE_SOUND_GORILLA
 	gau_manager_destroy(m_pManager);
 	gc_shutdown();
@@ -320,8 +268,7 @@ void AudioMan::SetSoundsVolume(double volume)
 
 #ifdef __USE_SOUND_FMOD
 	FSOUND_SetSFXMasterVolume(MAX_VOLUME * m_SoundsVolume);
-#elif __USE_SOUND_SDLMIXER
-	Mix_Volume(-1, (MAX_VOLUME * m_SoundsVolume));
+
 #elif __USE_SOUND_GORILLA
 //Due to the behavior of Gorilla and the associated backend, master volume has to be set
 //as part of PlaySound(). This function effectively does nothing in its current state.
@@ -350,13 +297,11 @@ void AudioMan::SetMusicVolume(double volume)
 #ifdef __USE_SOUND_FMOD
 	if (m_pMusic >= 0)
         FSOUND_SetVolumeAbsolute(m_MusicChannel, MAX_VOLUME * m_MusicVolume);
-#elif __USE_SOUND_SDLMIXER
-	if (m_pMusic >= 0)
-		Mix_VolumeMusic(MAX_VOLUME * m_MusicVolume);
+
 #elif __USE_SOUND_GORILLA
 	if (m_SoundChannels.size() > m_MusicChannel && m_SoundChannels[m_MusicChannel])
 		ga_handle_setParamf(m_SoundChannels[m_MusicChannel], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * m_MusicVolume);
-#endif __USE_SOUND_FMOD
+#endif
 
 }
 
@@ -377,9 +322,7 @@ void AudioMan::SetTempMusicVolume(double volume)
 #ifdef __USE_SOUND_FMOD
 	if (m_pMusic >= 0)
         FSOUND_SetVolumeAbsolute(m_MusicChannel, MAX_VOLUME * volume);
-#elif __USE_SOUND_SDLMIXER
-	if (m_pMusic >= 0)
-		Mix_VolumeMusic(MAX_VOLUME * volume);
+
 #elif __USE_SOUND_GORILLA
 	for (int i = 1; i < m_SoundChannels.size(); i++)
 		if (m_SoundChannels[i])
@@ -420,8 +363,7 @@ void AudioMan::SetGlobalPitch(double pitch, bool excludeMusic)
                 FSOUND_SetFrequency(channel, m_NormalFrequencies[channel] * m_PitchModifiers[channel] * m_GlobalPitch);
         }
     }
-#elif __USE_SOUND_SDLMIXER
-	// Looks like it does not support pitching
+
 #elif __USE_SOUND_GORILLA
 	// Keep the pitch value sane
 	m_GlobalPitch = pitch > 0.1 ? pitch : (pitch < 16.0 ? pitch : 16.0);
@@ -496,62 +438,7 @@ void AudioMan::PlayMusic(const char *filepath, int loops, double volumeOverride)
     if (channelIndex < m_NormalFrequencies.size())
         m_NormalFrequencies[channelIndex] = FSOUND_GetFrequency(m_MusicChannel);
     m_PitchModifiers[channelIndex] = 1.0;
-#elif __USE_SOUND_SDLMIXER
-	// If music is already playing, first stop it
-	if (m_pMusic)
-	{
-		Mix_HaltMusic();
-		Mix_FreeMusic(m_pMusic);
-		m_pMusic = 0;
-	}
 
-	// Open the stream
-	m_pMusic = Mix_LoadMUS(filepath);
-	if (!m_pMusic)
-	{
-		g_ConsoleMan.PrintString("ERROR: Could not open and play music file:" + string(filepath));
-		g_ConsoleMan.PrintString("MIX: " + string(Mix_GetError()));
-		g_ConsoleMan.PrintString("Available codecs");
-
-		int i, max = Mix_GetNumMusicDecoders();
-		for (i = 0; i < max; ++i)
-			g_ConsoleMan.PrintString(Mix_GetMusicDecoder(i));
-		return;
-	}
-	// Start playing the stream
-	if (Mix_PlayMusic(m_pMusic, -1))
-	if (m_MusicChannel < 0)
-	{
-		g_ConsoleMan.PrintString("ERROR: Could not open and play music file:" + string(filepath));
-		g_ConsoleMan.PrintString("MIX: " + string(Mix_GetError()));
-		return;
-	}
-	// Save the path of the last played music stream
-	m_MusicPath = filepath;
-
-
-
-
-	// Set the callback so that it will switch to next song when current one is done.
-	//FSOUND_Stream_SetEndCallback(m_pMusic, PlayNextCallback, 0);
-	// Set loop mode
-	//if (loops != 0)
-	//	FSOUND_Stream_SetMode(m_pMusic, FSOUND_LOOP_NORMAL);
-	// Set loop count
-	//FSOUND_Stream_SetLoopCount(m_pMusic, loops);
-	// Set the volume of the music stream's channel, and override if asked to, but not if the normal music volume is muted
-	//if (volumeOverride >= 0 && m_MusicVolume > 0)
-	//	FSOUND_SetVolumeAbsolute(m_MusicChannel, MAX_VOLUME * volumeOverride);
-	//else
-	//	FSOUND_SetVolumeAbsolute(m_MusicChannel, MAX_VOLUME * m_MusicVolume);
-
-	// The channel index is stored in the lower 12 bits of the channel handle
-	int channelIndex = m_MusicChannel & 0x00000FFF;
-
-	// Save the 'normal' frequency so we can pitch it later
-	//if (channelIndex < m_NormalFrequencies.size())
-	//	m_NormalFrequencies[channelIndex] = FSOUND_GetFrequency(m_MusicChannel);
-	m_PitchModifiers[channelIndex] = 1.0;
 #elif __USE_SOUND_GORILLA
 	// If music is already playing, first stop it
 	if (m_pMusic)
@@ -633,11 +520,7 @@ void AudioMan::QueueMusicStream(const char *filepath)
         // Set the callback so that it will switch to next song when current one is done.
         FSOUND_Stream_SetEndCallback(m_pMusic, PlayNextCallback, 0);
     }
-#elif __USE_SOUND_SDLMIXER
-	if (!m_pMusic)
-		PlayMusic(filepath);
-	else
-		m_MusicPlayList.push_back(string(filepath));
+
 #elif __USE_SOUND_GORILLA
 	if (!m_pMusic)
 		PlayMusic(filepath);
@@ -697,16 +580,7 @@ void AudioMan::PlayNextStream()
                 FSOUND_Stream_Close(m_pMusic);
                 m_pMusic = 0;
             }
-#elif __USE_SOUND_SDLMIXER
-			// Stop music playback
-			if (m_pMusic)
-			{
-				RegisterMusicEvent(-1, MUSIC_SILENCE, 0, seconds, 0.0, 1.0);
 
-				Mix_HaltMusic();
-				Mix_FreeMusic(m_pMusic);
-				m_pMusic = 0;
-			}
 #elif __USE_SOUND_GORILLA
 			if (m_pMusic)
 			{
@@ -949,55 +823,7 @@ bool AudioMan::PlaySound(Sound *pSound, int priority, float distance, double pit
 
     // Store the individual pitch modifier
     m_PitchModifiers[channelIndex] = pitch;
-#elif __USE_SOUND_SDLMIXER
-	if (!m_AudioEnabled || !pSound)
-		return false;
 
-	pSound->m_LastChannel = Mix_PlayChannel(-1, pSound->StartNextSample(), pSound->m_Loops);
-
-	if (pSound->m_LastChannel == -1)
-	{
-		g_ConsoleMan.PrintString("ERROR: Could not play a sound sample!");
-		return false;
-	}
-
-	// Set sample's channel priority setting
-	// Sound is high enough to be 'reserved', can't be overridden at all
-	// Don't, have to un-reserve every time it ends
-	//    if (pSound->m_Priority > 255)
-	//        FSOUND_SetReserved(pSound->m_LastChannel, true);
-	//    else if (pSound->m_Priority > 0)
-	//if (pSound->m_Priority > 0)
-	//	FSOUND_SetPriority(pSound->m_LastChannel, pSound->m_Priority);
-
-	// TODO: Use the fmod 3D attenuation method for this isntead
-	// Set the distance attenuation effect of the just started sound
-	if (distance >= 0)
-	{
-		if (distance > 1.0f)
-			distance = 1.0f;
-		// Multiply by 0.9 because we don't want to to go completely quiet if max distance
-		distance *= 0.9f;
-		//Mix_Volume(pSound->m_LastChannel, (MAX_VOLUME * (1.0f - distance)));
-		Mix_SetDistance(pSound->m_LastChannel, (255 * distance));
-	}
-
-	// The channel index is stored in the lower 12 bits of the channel handle
-	//int channelIndex = pSound->m_LastChannel & 0x00000FFF;
-
-	// Save the 'normal' frequency so we can pitch it later
-	//DAssert(channelIndex < m_NormalFrequencies.size(), "Channel index higher than normal freq array?");
-	//if (channelIndex < m_NormalFrequencies.size())
-	//{
-		// If this sound isn't supposed to be pitched, then set a <= 0 normal frequency to indicate it
-	//	if (!pSound->m_AffectedByPitch)
-	//		m_NormalFrequencies[channelIndex] = 0;
-	//	else
-	//		m_NormalFrequencies[channelIndex] = FSOUND_GetFrequency(pSound->m_LastChannel);
-	//}
-
-	// Store the individual pitch modifier
-	//m_PitchModifiers[channelIndex] = pitch;
 #elif __USE_SOUND_GORILLA
 	if (!m_AudioEnabled || !pSound)
 	return false;
@@ -1090,13 +916,10 @@ bool AudioMan::SetSoundAttenuation(Sound *pSound, float distance)
         distance *= 0.95f;
 #ifdef __USE_SOUND_FMOD
 		FSOUND_SetVolume(pSound->m_LastChannel, MAX_VOLUME * (1.0f - distance));
-#elif __USE_SOUND_SDLMIXER
-		//Mix_Volume(pSound->m_LastChannel, ((double)MIX_MAX_VOLUME * (1.0f - distance)));
-		Mix_SetDistance(pSound->m_LastChannel, (255 * distance));
+
 #elif __USE_SOUND_GORILLA
 		if (pSound->m_LastChannel >= 0)
 			ga_handle_setParamf(m_SoundChannels[pSound->m_LastChannel], GA_HANDLE_PARAM_GAIN, MAX_VOLUME * m_SoundsVolume * (1.0f - distance));
-
 #endif
     }
 
@@ -1134,8 +957,7 @@ bool AudioMan::SetSoundPitch(Sound *pSound, float pitch)
 
     if (m_NormalFrequencies[channelIndex] > 0)
         FSOUND_SetFrequency(pSound->m_LastChannel, m_NormalFrequencies[channelIndex] * m_PitchModifiers[channelIndex] * m_GlobalPitch);
-#elif __USE_SOUND_SDLMIXER
-	// SDL seems to not support pitch changes
+
 #elif __USE_SOUND_GORILLA
 	if (pSound->m_AffectedByPitch && pSound->m_LastChannel >= 0)
 	{
@@ -1161,9 +983,7 @@ bool AudioMan::SetMusicPitch(float pitch)
 #ifdef __USE_SOUND_FMOD
 	if (!m_AudioEnabled || !m_pMusic)
         return false;
-#elif __USE_SOUND_SDLMIXER
-	if (!m_AudioEnabled || !m_pMusic)
-		return false;
+
 #elif __USE_SOUND_GORILLA
 	if (!m_AudioEnabled || !m_pMusic)
 		return false;
@@ -1187,7 +1007,6 @@ bool AudioMan::SetMusicPitch(float pitch)
 #ifdef __USE_SOUND_FMOD
 	if (m_NormalFrequencies[channelIndex] > 0)
         FSOUND_SetFrequency(m_MusicChannel, m_NormalFrequencies[channelIndex] * m_PitchModifiers[channelIndex] * m_GlobalPitch);
-#elif __USE_SOUND_SDLMIXER
 
 #elif __USE_SOUND_GORILLA
 	ga_handle_setParamf(m_SoundChannels[m_MusicChannel], GA_HANDLE_PARAM_PITCH, m_PitchModifiers[m_MusicChannel] * m_GlobalPitch);
@@ -1217,12 +1036,7 @@ bool AudioMan::IsPlaying(Sound *pSound)
         return false;
 
 	return FSOUND_IsPlaying(pSound->m_LastChannel);
-#elif __USE_SOUND_SDLMIXER
-	if (Mix_GetChunk(pSound->m_LastChannel) != pSound->GetCurrentSample())
-			return false;
 
-	int playing = Mix_Playing(pSound->m_LastChannel);
-	return playing;
 #elif __USE_SOUND_GORILLA
 	if (m_SoundInstances[pSound->m_LastChannel] != pSound->GetCurrentSample())
 		return false;
@@ -1272,8 +1086,7 @@ bool AudioMan::StopSound(Sound *pSound)
     {
 #ifdef __USE_SOUND_FMOD
 		FSOUND_StopSound(pSound->m_LastChannel);
-#elif __USE_SOUND_SDLMIXER
-		Mix_HaltChannel(pSound->m_LastChannel);
+
 #elif __USE_SOUND_GORILLA
 		ga_handle_stop(m_SoundChannels[pSound->m_LastChannel]);
 #endif
@@ -1321,13 +1134,7 @@ void AudioMan::StopMusic()
 	FSOUND_Stream_Stop(m_pMusic);
     FSOUND_Stream_Close(m_pMusic);
     m_pMusic = 0;
-#elif __USE_SOUND_SDLMIXER
-	if (!m_AudioEnabled || !m_pMusic)
-		return;
 
-	Mix_HaltMusic();
-	Mix_FreeMusic(m_pMusic);
-	m_pMusic = 0;
 #elif __USE_SOUND_GORILLA
 	if (!m_AudioEnabled || !m_pMusic)
 		return;
@@ -1354,12 +1161,7 @@ void AudioMan::SetMusicPosition(double position)
 		return;
 
 	FSOUND_Stream_SetTime(m_pMusic, position * 1000);
-#elif __USE_SOUND_SDLMIXER
-	if (!m_AudioEnabled || !m_pMusic)
-		return;
 
-	Mix_RewindMusic();
-	Mix_SetMusicPosition(position);
 #elif __USE_SOUND_GORILLA
 	if (!m_AudioEnabled || !m_pMusic)
 		return;
@@ -1381,11 +1183,7 @@ double AudioMan::GetMusicPosition()
 		return 0;
 
 	return ((double)FSOUND_Stream_GetTime(m_pMusic)) / 1000.0;
-#elif __USE_SOUND_SDLMIXER
-	if (!m_AudioEnabled || !m_pMusic)
-		return 0;
 
-	return 0;
 #elif __USE_SOUND_GORILLA
 	if (!m_AudioEnabled || !m_pMusic)
 		return 0;
@@ -1418,16 +1216,7 @@ void AudioMan::StopAll()
         FSOUND_Stream_Close(m_pMusic);
         m_pMusic = 0;
     }
-#elif __USE_SOUND_SDLMIXER
-	Mix_HaltChannel(-1);
 
-	// If music is playing, stop it
-	if (m_pMusic)
-	{
-		Mix_HaltMusic();
-		Mix_FreeMusic(m_pMusic);
-		m_pMusic = 0;
-	}
 #elif __USE_SOUND_GORILLA
 	for (int i = 1; i < m_SoundChannels.size(); i++)
 	{
@@ -1464,10 +1253,7 @@ void AudioMan::Update()
     // Done waiting for silence
     if (!m_pMusic && m_SilenceTimer.IsPastRealTimeLimit())
         PlayNextStream();
-#elif __USE_SOUND_SDLMIXER
-	// Done waiting for silence
-	if (!m_pMusic && m_SilenceTimer.IsPastRealTimeLimit())
-		PlayNextStream();
+
 #elif __USE_SOUND_GORILLA
 	// Done waiting for silence
 	if (!m_pMusic && m_SilenceTimer.IsPastRealTimeLimit())
@@ -1486,7 +1272,7 @@ int AudioMan::GetPlayingChannelCount()
 {
 #ifdef __USE_SOUND_FMOD
 	return FSOUND_GetChannelsPlaying();
-#elif __USE_SOUND_SDLMIXER
+
 #elif __USE_SOUND_GORILLA
 	int count = 0;
 
@@ -1509,7 +1295,7 @@ int AudioMan::GetTotalChannelCount()
 {
 #ifdef __USE_SOUND_FMOD
 	return FSOUND_GetMaxChannels();
-#elif __USE_SOUND_SDLMIXER
+
 #elif __USE_SOUND_GORILLA
 	return m_SoundChannels.size();
 #endif

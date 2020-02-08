@@ -26,11 +26,7 @@
 #ifdef __USE_SOUND_FMOD
 struct FSOUND_SAMPLE;
 struct FSOUND_STREAM;
-#elif __USE_SOUND_SDLMIXER
-//#include "SDL.h"
-//#include "SDL_mixer.h"
-struct Mix_Chunk;
-typedef struct _Mix_Music Mix_Music;
+
 #elif __USE_SOUND_GORILLA
 struct ga_Handle;
 #include "gorilla/ga.h"
@@ -432,10 +428,10 @@ struct MusicNetworkData
 // Return value:    Whether any music stream is currently playing.
 
     bool IsMusicPlaying() { 
+
 #ifdef __USE_SOUND_FMOD
 		return m_AudioEnabled && m_pMusic; 
-#elif __USE_SOUND_SDLMIXER
-		return m_AudioEnabled && m_pMusic;
+
 #elif __USE_SOUND_GORILLA
 		return m_AudioEnabled && m_pMusic;
 #else
@@ -643,8 +639,7 @@ protected:
 
 #ifdef __USE_SOUND_FMOD
 	FSOUND_STREAM *m_pMusic;
-#elif __USE_SOUND_SDLMIXER
-	Mix_Music *m_pMusic;
+
 #elif __USE_SOUND_GORILLA
 	gau_Manager* m_pManager;
 	ga_Mixer* m_pMixer;

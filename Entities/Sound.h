@@ -19,14 +19,12 @@
 
 #ifdef __USE_SOUND_FMOD
 struct FSOUND_SAMPLE;
-#elif __USE_SOUND_SDLMIXER
-struct Mix_Chunk;
-#elif __USE_SOUND_SDLMIXER
+
+#elif __USE_SOUND_GORILLA
 struct ga_Handle;
 #endif
 
-namespace RTE
-{   
+namespace RTE {   
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Class:           Sound
@@ -219,11 +217,10 @@ ENTITYALLOCATION(Sound)
 
 #ifdef __USE_SOUND_FMOD
 	const std::vector<std::pair<ContentFile, FSOUND_SAMPLE *> > & GetSampleList() const { return m_Samples; }
-#elif __USE_SOUND_SDLMIXER
-	const std::vector<std::pair<ContentFile, Mix_Chunk *> > & GetSampleList() const { return m_Samples; }
+
 #elif __USE_SOUND_GORILLA
 	const std::vector<std::pair<ContentFile, ga_Sound *> > & GetSampleList() const { return m_Samples; }
-#endif // __USE_SOUND_FMOD
+#endif
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -234,11 +231,11 @@ ENTITYALLOCATION(Sound)
 // Arguments:       None.
 // Return value:    Whether this Sound has any samples.
 
-    bool HasAnySamples() const { 
+    bool HasAnySamples() const {
+
 #ifdef __USE_SOUND_FMOD
 		return !m_Samples.empty(); 
-#elif __USE_SOUND_SDLMIXER
-		return !m_Samples.empty();
+
 #elif __USE_SOUND_GORILLA
 		return !m_Samples.empty();
 #else
@@ -255,10 +252,10 @@ ENTITYALLOCATION(Sound)
 // Return value:    An int with the count.
 
     int GetSampleCount() const {
+
 #ifdef __USE_SOUND_FMOD
-		return m_Samples.size(); 
-#elif __USE_SOUND_SDLMIXER
 		return m_Samples.size();
+
 #elif __USE_SOUND_GORILLA
 		return m_Samples.size();
 #else
@@ -321,11 +318,10 @@ ENTITYALLOCATION(Sound)
 
 #ifdef __USE_SOUND_FMOD
 	FSOUND_SAMPLE * GetCurrentSample();
-#elif __USE_SOUND_SDLMIXER
-	Mix_Chunk * GetCurrentSample();
+
 #elif __USE_SOUND_GORILLA
 	ga_Sound * GetCurrentSample();
-#endif // __USE_SOUND_FMOD
+#endif
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -339,8 +335,7 @@ ENTITYALLOCATION(Sound)
 
 #ifdef __USE_SOUND_FMOD
 	FSOUND_SAMPLE * StartNextSample();
-#elif __USE_SOUND_SDLMIXER
-	Mix_Chunk * StartNextSample();
+
 #elif __USE_SOUND_GORILLA
 	ga_Sound * StartNextSample();
 #endif
@@ -460,11 +455,11 @@ protected:
 	// All the SDL samples of this Sound, they are NOT owned by this, but owned by the Contentfile static maps
 #ifdef __USE_SOUND_FMOD    
 	std::vector<std::pair<ContentFile, FSOUND_SAMPLE *> > m_Samples;
-#elif __USE_SOUND_SDLMIXER
-	std::vector<std::pair<ContentFile, Mix_Chunk *> > m_Samples;
+
 #elif __USE_SOUND_GORILLA
 	std::vector<std::pair<ContentFile, ga_Sound *> > m_Samples;
-#endif // __USE_SOUND_FMOD
+#endif
+
     // Index of the current (or last, if nothing is being played) sample being played
     int m_CurrentSample;
     // Current channel the current Sample of this Sound is being played on.

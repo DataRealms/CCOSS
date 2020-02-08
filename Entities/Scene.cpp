@@ -33,10 +33,7 @@
 #include "Arm.h"
 #include "HeldDevice.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Scene, Entity, 0)
 const string Scene::Area::m_sClassName = "Area";
@@ -1032,7 +1029,7 @@ int Scene::SaveData(string pathBase)
     {
         if (m_apUnseenLayer[team])
         {
-            sprintf(str, "T%d", team);
+            sprintf_s(str, sizeof(str), "T%d", team);
             // Save unseen layer data to disk
             if (m_apUnseenLayer[team]->SaveData(pathBase + " US" + str + ".bmp") < 0)
             {
@@ -1449,7 +1446,7 @@ int Scene::Save(Writer &writer) const
     {
         if (m_ResidentBrains[player])
         {
-            sprintf(str, "P%dResidentBrain", player + 1);
+            sprintf_s(str, sizeof(str), "P%dResidentBrain", player + 1);
             writer.NewProperty(str);
             writer.ObjectStart(m_ResidentBrains[player]->GetClassName());
             writer.NewProperty("CopyOf");

@@ -20,9 +20,6 @@
 #include "Controller.h"
 #include "Scene.h"
 
-#include <string>
-#include <list>
-
 struct BITMAP;
 
 namespace RTE

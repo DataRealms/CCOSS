@@ -22,9 +22,6 @@
 #include "Box.h"
 #include "Controller.h"
 
-#include <string>
-#include <list>
-
 struct BITMAP;
 
 

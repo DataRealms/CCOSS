@@ -20,9 +20,6 @@
 #include "Controller.h"
 #include "Icon.h"
 
-#include <string>
-#include <list>
-
 struct BITMAP;
 
 

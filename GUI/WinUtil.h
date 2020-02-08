@@ -10,10 +10,6 @@
 //                  jackal@shplorb.com
 //                  www.shplorb.com/~jackal
 
-
-#include <string>
-
-
 namespace RTE
 {
 

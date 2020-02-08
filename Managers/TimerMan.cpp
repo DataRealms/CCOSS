@@ -23,8 +23,6 @@
 #include <time.h>
 #endif // defined(__unix__)
 
-using namespace std;
-
 /* Obsolete Allegro timer
 // Needs to be declared volatile so that the optimizer doens't mess with it
 volatile unsigned long g_MSSinceStart = 0;
@@ -37,12 +35,11 @@ void TimerMSTick()
 END_OF_FUNCTION(TimerMSTick);
 */
 
-namespace RTE
-{
+namespace RTE {
 
 #define DELTABUFFERSIZE 30
 
-const string TimerMan::m_ClassName = "TimerMan";
+const std::string TimerMan::m_ClassName = "TimerMan";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

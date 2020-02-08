@@ -17,10 +17,7 @@
 #include "ActivityMan.h"
 #include "SceneMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 ABSTRACTCLASSINFO(SceneObject, Entity)
 const string SceneObject::SOPlacer::m_sClassName = "SOPlacer";
@@ -354,9 +351,8 @@ string SceneObject::GetGoldValueString(int nativeModule, float foreignMult, floa
     char returnString[64];
     if (subjValue != 0)
     {
-//        sprintf(returnString, "%.0foz", subjValue);
-        // The 'oz' takes up too much space
-        sprintf(returnString, "%.0f", subjValue);
+        // Just show number since adding oz at the end takes up too much space
+        sprintf_s(returnString, sizeof(returnString), "%.0f", subjValue);
     }
     else
         return "FREE";

@@ -12,7 +12,6 @@
 // and we can't move "Network.h" here because for whatever reasons everything will collapse
 #define WIN32_LEAN_AND_MEAN
 
-#include <string.h>
 #include "Singleton.h"
 #include "UInputMan.h"
 
@@ -20,8 +19,7 @@
 #include "NetworkClient.h"
 #include "NatPunchthroughClient.h"
 
-#include "boost\thread.hpp"
-#include <mutex>
+#include "boost/thread.hpp"
 
 #include "TimerMan.h"
 

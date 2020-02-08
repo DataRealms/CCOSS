@@ -17,10 +17,7 @@
 #include "HeldDevice.h"
 #include "ContentFile.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Leg, Attachable, 0)
 
@@ -300,10 +297,10 @@ void Leg::Update()
         if (m_pFoot)
         {
             m_AnkleOffset.SetXY(m_MaxExtension * 0.60, 0);
-            m_AnkleOffset.RadRotate((m_HFlipped ? PI : 0) + m_Rotation.GetRadAngle());
+            m_AnkleOffset.RadRotate((m_HFlipped ? c_PI : 0) + m_Rotation.GetRadAngle());
             BendLeg();
             m_pFoot->SetJointPos(m_JointPos.GetFloored() + m_AnkleOffset);
-            m_pFoot->SetRotAngle(m_Rotation.GetRadAngle() + PI / 2);
+            m_pFoot->SetRotAngle(m_Rotation.GetRadAngle() + c_PI / 2);
             m_pFoot->Update();
         }
     }
@@ -336,7 +333,7 @@ void Leg::Update()
         ConstrainFoot();
 
         // Set the basic rotation
-        m_Rotation = (m_HFlipped ? PI : 0) + m_AnkleOffset.GetAbsRadAngle();
+        m_Rotation = (m_HFlipped ? c_PI : 0) + m_AnkleOffset.GetAbsRadAngle();
 
         // Apply the extra rotation needed to line up the sprite with the leg extension line
 
@@ -380,7 +377,7 @@ void Leg::Update()
                      m_HFlipped && target.m_X < -6) {
                 m_pFoot->SetFrame(1);
                 m_pFoot->SetRotAngle(0);
-//                m_pFoot->SetRotAngle(m_Rotation + (m_HFlipped ? -HalfPI : HalfPI));
+//                m_pFoot->SetRotAngle(m_Rotation + (m_HFlipped ? -c_HalfPI : c_HalfPI));
             }
             else {
                 m_pFoot->SetFrame(0);

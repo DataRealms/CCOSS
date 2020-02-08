@@ -29,10 +29,7 @@
 #include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(ACDropShip, ACraft, 0)
 
@@ -317,7 +314,7 @@ float ACDropShip::GetAltitude(int max, int accuracy)
     float lAlt = g_SceneMan.FindAltitude(lPos, max, accuracy);
 
     // Return the lowest of the three
-    return DMin(cAlt, DMin(rAlt, lAlt));
+    return MIN(cAlt, MIN(rAlt, lAlt));
 }
 
 
@@ -688,9 +685,9 @@ void ACDropShip::Update()
 			// Throttle override control for correcting heavy tilt, only applies if both engines are present
 			if (m_pLThruster && m_pLThruster->IsAttached())
 			{
-				if (m_Rotation.GetRadAngle() > SixteenthPI)
+				if (m_Rotation.GetRadAngle() > c_SixteenthPI)
 					rightThrottle = -0.8f;
-				else if (m_Rotation.GetRadAngle() < -SixteenthPI)
+				else if (m_Rotation.GetRadAngle() < -c_SixteenthPI)
 					rightThrottle = 0.8f;
 			}
 
@@ -710,9 +707,9 @@ void ACDropShip::Update()
 			// Throttle override control for correcting heavy tilt, only applies if both engines are present
 			if (m_pRThruster && m_pRThruster->IsAttached())
 			{
-				if (m_Rotation.GetRadAngle() > SixteenthPI)
+				if (m_Rotation.GetRadAngle() > c_SixteenthPI)
 					leftThrottle = 0.8f;
-				else if (m_Rotation.GetRadAngle() < -SixteenthPI)
+				else if (m_Rotation.GetRadAngle() < -c_SixteenthPI)
 					leftThrottle = -0.8f;
 			}
 
@@ -944,15 +941,15 @@ void ACDropShip::Update()
     float rot = m_Rotation.GetRadAngle();
 /* If the dropship starts rolling, it's over man
     // Eliminate full rotations
-    while (fabs(rot) > TwoPI)
-        rot -= rot > 0 ? TwoPI : -TwoPI;
+    while (fabs(rot) > c_TwoPI)
+        rot -= rot > 0 ? c_TwoPI : -c_TwoPI;
 
     // Eliminate rotations over half a turn
-    if (fabs(rot) > PI)
-        rot = (rot > 0 ? -PI : PI) + (rot - (rot > 0 ? PI : -PI));
+    if (fabs(rot) > c_PI)
+        rot = (rot > 0 ? -c_PI : c_PI) + (rot - (rot > 0 ? c_PI : -c_PI));
 */
     // If tipped too far for too long, die
-    if (rot < HalfPI && rot > -HalfPI)
+    if (rot < c_HalfPI && rot > -c_HalfPI)
     {
         m_FlippedTimer.Reset();
     }
@@ -971,7 +968,7 @@ void ACDropShip::Update()
     }
 
 /*
-//        rot = fabs(rot) < QuartPI ? rot : (rot > 0 ? QuartPI : -QuartPI);
+//        rot = fabs(rot) < c_QuarterPI ? rot : (rot > 0 ? c_QuarterPI : -c_QuarterPI);
 
     // Rotational balancing spring calc
     if (m_Status == STABLE) {
@@ -983,8 +980,8 @@ void ACDropShip::Update()
     }
     // Unstable, or without balance
     else if (m_Status == DYING) {
-//        float rotTarget = rot > 0 ? HalfPI : -HalfPI;
-        float rotTarget = HalfPI;
+//        float rotTarget = rot > 0 ? c_HalfPI : -c_HalfPI;
+        float rotTarget = c_HalfPI;
         float rotDiff = rotTarget - rot;
         if (fabs(rotDiff) > 0.1)
             m_AngularVel += rotDiff * rotDiff;

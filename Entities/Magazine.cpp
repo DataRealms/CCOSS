@@ -20,10 +20,7 @@
 #include "AEmitter.h"
 #include "float.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Magazine, Attachable, 0)
 CONCRETECLASSINFO(Round, Entity, 0)

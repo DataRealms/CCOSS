@@ -33,9 +33,7 @@
 #include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
-using namespace std;
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Actor, MOSRotating, 0);
 
@@ -87,7 +85,7 @@ void Actor::Clear()
     m_GoldPicked = false;
     m_AimState = AIMSTILL;
     m_AimAngle = 0;
-    m_AimRange = HalfPI;
+    m_AimRange = c_HalfPI;
     m_AimDistance = 0;
     m_AimTmr.Reset();
     m_SharpAimTimer.Reset();
@@ -768,7 +766,7 @@ void Actor::RestDetection()
 
 float Actor::FacingAngle(float angle) const
 {
-    return (m_HFlipped ? PI : 0) + (angle * (m_HFlipped ? -1 : 1));
+    return (m_HFlipped ? c_PI : 0) + (angle * (m_HFlipped ? -1 : 1));
 //    return (angle * m_HFlipped ? -1 : 1);
 }
 
@@ -965,7 +963,7 @@ void Actor::DropAllInventory()
 			// Detect whether we're dealing with a passenger and add it as Actor instead
 			if (pPassenger = dynamic_cast<Actor *>(pObject))
 			{
-				pPassenger->SetRotAngle(HalfPI * NormalRand());
+				pPassenger->SetRotAngle(c_HalfPI * NormalRand());
 				pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5);
 				pPassenger->SetHFlipped(PosRand() > 0.5);
 				pPassenger->SetStatus(UNSTABLE);
@@ -1076,7 +1074,7 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
         // Detect whether we're dealing with a passenger and add it as Actor instead
         if (pPassenger = dynamic_cast<Actor *>(pObject))
         {
-            pPassenger->SetRotAngle(HalfPI * NormalRand());
+            pPassenger->SetRotAngle(c_HalfPI * NormalRand());
             pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5);
             pPassenger->SetHFlipped(PosRand() > 0.5);
             pPassenger->SetStatus(UNSTABLE);
@@ -1872,7 +1870,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 {
                     // Make team icon blink faster as the health goes down
                     int f = m_HeartBeat.AlternateReal(200 + 800 * (m_Health / 100)) ? 0 : 1;
-                    f = DMin(f, m_pTeamIcon ? m_pTeamIcon->GetFrameCount() - 1 : 1);
+                    f = MIN(f, m_pTeamIcon ? m_pTeamIcon->GetFrameCount() - 1 : 1);
                     masked_blit(apIconBitmaps[f], pTargetBitmap, 0, 0, drawPos.m_X - apIconBitmaps[f]->w - 2, drawPos.m_Y + m_HUDStack - (apIconBitmaps[f]->h / 2) + 8, apIconBitmaps[f]->w, apIconBitmaps[f]->h);
                 }
             }
@@ -1901,7 +1899,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 */
-            sprintf(str, "%.0f", m_Health);
+            sprintf_s(str, sizeof(str), "%.0f", m_Health);
 //            pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y - 35, str, GUIFont::Left);
             pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
 
@@ -1911,7 +1909,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             if (GetGoldCarried() > 0) {
                 str[0] = m_GoldPicked ? -57 : -58; str[1] = 0;
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                sprintf(str, "%.0f oz", GetGoldCarried());
+                sprintf_s(str, sizeof(str), "%.0f oz", GetGoldCarried());
                 pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, str, GUIFont::Left);
 
                 m_HUDStack += -11;
@@ -1931,7 +1929,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             // Draw the contol pointer, if controlled and under the icon's time limit
             if (m_Controller.IsPlayetControlled() && m_NewControlTmr.GetElapsedSimTimeMS() < 1500)
             {
-                sprintf(str, "%c", -38);
+                sprintf_s(str, sizeof(str), "%c", -38);
                 pSymbolFont->DrawAligned(&bitmapInt, cpuPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 */
@@ -1944,27 +1942,27 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     // Obstacle state
     if (m_ObstacleState == PROCEEDING)
-        sprintf(str, "PROCEEDING");
+        sprintf_s(str, sizeof(str), "PROCEEDING");
     else if (m_ObstacleState == BACKSTEPPING)
-        sprintf(str, "BACKSTEPPING");
+        sprintf_s(str, sizeof(str), "BACKSTEPPING");
     else if (m_ObstacleState == JUMPING)
-        sprintf(str, "JUMPING");
+        sprintf_s(str, sizeof(str), "JUMPING");
     else if (m_ObstacleState == SOFTLANDING)
-        sprintf(str, "SOFTLANDING");
+        sprintf_s(str, sizeof(str), "SOFTLANDING");
     else
-        sprintf(str, "DIGPAUSING");
+        sprintf_s(str, sizeof(str), "DIGPAUSING");
     pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
     // Team Block State
     if (m_TeamBlockState == BLOCKED)
-        sprintf(str, "BLOCKED");
+        sprintf_s(str, sizeof(str), "BLOCKED");
     else if (m_TeamBlockState == IGNORINGBLOCK)
-        sprintf(str, "IGNORINGBLOCK");
+        sprintf_s(str, sizeof(str), "IGNORINGBLOCK");
     else if (m_TeamBlockState == FOLLOWWAIT)
-        sprintf(str, "FOLLOWWAIT");
+        sprintf_s(str, sizeof(str), "FOLLOWWAIT");
     else
-        sprintf(str, "NOTBLOCKED");
+        sprintf_s(str, sizeof(str), "NOTBLOCKED");
     pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 

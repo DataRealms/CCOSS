@@ -2031,10 +2031,10 @@ void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whi
     if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == -1 || m_aControlScheme[whichPlayer].GetDevice() == DEVICE_MOUSE_KEYB))
     {
         float windowResMultiplier = g_FrameMan.IsFullscreen() ? g_FrameMan.NxFullscreen() : g_FrameMan.NxWindowed();
-        int mouseX = DMax(x, mouse_x);
-        int mouseY = DMax(y, mouse_y);
-        mouseX = DMin(mouseX, x + width * windowResMultiplier);
-        mouseY = DMin(mouseY, y + height * windowResMultiplier);
+        int mouseX = MAX(x, mouse_x);
+        int mouseY = MAX(y, mouse_y);
+        mouseX = MIN(mouseX, x + width * windowResMultiplier);
+        mouseY = MIN(mouseY, y + height * windowResMultiplier);
 		
 #if !defined(__APPLE__)
 		// [CHRISK] OSX really doesn't like this

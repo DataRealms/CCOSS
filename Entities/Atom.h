@@ -14,9 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <string>
-#include <list>
-
 #include "Serializable.h"
 #include "Vector.h"
 #include "Matrix.h"

@@ -19,9 +19,6 @@
 #include "Timer.h"
 #include "GUIBanner.h"
 
-#include <string>
-#include <list>
-
 struct BITMAP;
 
 

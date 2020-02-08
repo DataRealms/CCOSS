@@ -14,8 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <string>
-#include <vector>
 #include "Vector.h"
 #include "Box.h"
 #include "SceneMan.h"

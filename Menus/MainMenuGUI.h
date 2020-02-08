@@ -19,9 +19,6 @@
 #include "Timer.h"
 #include "Box.h"
 
-#include <string>
-#include <list>
-
 struct BITMAP;
 
 
@@ -225,28 +222,6 @@ public:
 
     void SetStartFunds(int startFunds) { m_StartFunds = startFunds; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Static method:   PublishingProgressReport
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the workshop publishing status screen with a line of text that
-//                  the user sees as reported progress.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void PublishingProgressReport(std::string reportString, bool newItem = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Static method:   PublishingSuccessReport
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells the amin menu GUI that the publishing was completed successfully!
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void PublishingSuccessReport(std::string appIDString) { m_PublishingComplete = true; m_PublishedAppIDString = appIDString; }
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Static method:   AllowPioneerPromo
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -424,38 +399,6 @@ protected:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PopulatePublishingWithPrevious
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Populates the fields of the publishing steps with whatever might ahve
-//                  been filled out before for the same-named mod.
-// Arguments:       None.
-// Return value:    Whether that module was found to have been published previously.
-
-    virtual bool PopulatePublishingWithPrevious(std::string moduleName);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdatePublishingStepsDialog
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the contents of the Workshop publishing steps dialog.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void UpdatePublishingStepsDialog();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetupAndSubmitPublishing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Collects all the user-entered module metadata from all publishing
-//                  forms and submits it all for publishing to the Steam Workshop.
-// Arguments:       None.
-// Return value:    The error code, 0 being normal and no errors.
-
-    virtual int SetupAndSubmitPublishing();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ToggleMod
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Turns currently selected mod on and aff and changes UI elements accordingly.
@@ -503,8 +446,6 @@ protected:
         OPTIONSSCREEN,
         CONFIGSCREEN,
         EDITORSCREEN,
-        WORKSHOPMANAGER,
-        PUBLISHSTEPS,
         CREDITSSCREEN,
         METASCREEN,
         QUITSCREEN,
@@ -621,39 +562,7 @@ protected:
         ASSEMBLYEDITOR,
         GIBEDITOR,
         ACTOREDITOR,
-        WORKSHOPPUBLISH,
         EDITORBUTTONCOUNT
-    };
-
-    enum PublishSteps
-    {
-        PUBLISHSTEPFIRST = 0,
-        PUBLISHSTEPDESCRIPTION,
-        PUBLISHSTEPTAGS,
-        PUBLISHSTEPAGREEMENT,
-        PUBLISHSTEPLAST,
-        PUBLISHSTEPCOUNT
-    };
-
-    enum PublishTags
-    {
-        PUBLISHTAGACTORS = 0,
-        PUBLISHTAGWEAPONS,
-        PUBLISHTAGTOOLS,
-        PUBLISHTAGCRAFT,
-        PUBLISHTAGBUNKER,
-        PUBLISHTAGSCENES,
-        PUBLISHTACTIVITIES,
-        PUBLISHTAGTECH,
-        PUBLISHTAGVANILLA,
-        PUBLISHTAGFRIENDS,
-        PUBLISHTAGCOUNT
-    };
-
-    enum NagMode
-    {
-        QUITNAG = 0,
-        EDITORNAG
     };
 
     enum BlinkMode
@@ -780,44 +689,6 @@ protected:
     GUIButton *m_pDPadTypeButton;
     GUIButton *m_pDAnalogTypeButton;
     GUIButton *m_pXBox360TypeButton;
-
-    // WORKSHOP PUBLISHING CONTROLS
-    // Published module manager screen
-    GUILabel *m_pPublishedListHeader;
-    GUIButton *m_pMainMenuButton;
-    GUIButton *m_pPublishNewButton;
-    GUIComboBox *m_pPublishedList;
-    GUIButton *m_pEditUpdateButton;
-
-    // Publish steps dialog
-    GUILabel *m_pPublishStepsHeader;
-    // Current step of publishing we are on
-    int m_PublishStep;
-    // Whether we are updating an already-published mod
-    bool m_UpdatingAlreadyPublished;
-    // Whether the publishing process has been reported as fully completed
-    bool m_PublishingComplete;
-    // The ID string of the last published app so we can send people to the URL of its workshop web page
-    string m_PublishedAppIDString;
-    // The nested publishing step collections of controls; one for each step
-    GUICollectionBox *m_apPublishStepsControls[PUBLISHSTEPCOUNT];
-    GUIComboBox *m_pUnpublishedList;
-    GUILabel *m_pPreviewNoticeLabel;
-    GUIButton *m_pPublishBackButton;
-    GUIButton *m_pPublishNextButton;
-    GUIButton *m_pPublishCancelButton;
-    GUILabel *m_pLegalAgreementLabel;
-    GUIButton *m_pLegalAgreementLink;
-    GUITextBox *m_pPublishTitleText;
-    GUITextBox *m_pPublishDescText;
-    GUICheckbox *m_apPublishTags[PUBLISHTAGCOUNT];
-    GUIListBox *m_pPublishStatus;
-    GUIButton *m_pAppLinkButton;
-    Writer m_PublishLogWriter;
-
-    // The confirm and tooltop boxes in the Workshop GUI layout
-    GUICollectionBox *m_pPublishConfirmBox;
-    GUICollectionBox *m_pPublishToolTipBox;
 
     // Panel behind editor menu to be resized depending on which editors are available
     GUICollectionBox *m_pEditorPanel;

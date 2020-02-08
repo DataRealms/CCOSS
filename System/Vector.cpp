@@ -18,10 +18,7 @@
 #endif
 #include "DDTTools.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string Vector::ClassName = "Vector";
 
@@ -520,14 +517,14 @@ Vector & Vector::operator/=(const float &rhs)
 float Vector::GetAbsRadAngle()
 {
     if (m_X == 0)
-        return m_Y > 0 ? HalfPI : (m_Y < 0 ? -HalfPI : 0);
+        return m_Y > 0 ? c_HalfPI : (m_Y < 0 ? -c_HalfPI : 0);
     if (m_Y == 0)
-        return m_X > 0 ? 0 : (m_X < 0 ? PI : 0);
+        return m_X > 0 ? 0 : (m_X < 0 ? c_PI : 0);
 
 // TODO: Confirm that this is correct!")
     float rawAngle = atan(m_Y / m_X);
     if (m_X < 0 && m_Y > 0 || m_X < 0 && m_Y < 0)
-        rawAngle += PI;
+        rawAngle += c_PI;
     return rawAngle;
 }
 
@@ -546,7 +543,7 @@ float Vector::GetAbsDegAngle()
         return m_X > 0 ? 0 : (m_X < 0 ? 180 : 0);
 
 // TODO: Confirm that this is correct!")
-    float rawAngle = (atan(m_Y / m_X) / PI) * 180;
+    float rawAngle = (atan(m_Y / m_X) / c_PI) * 180;
     if (m_X < 0 && m_Y > 0 || m_X < 0 && m_Y < 0)
         rawAngle += 180;
     return rawAngle;
@@ -562,14 +559,14 @@ float Vector::GetAbsDegAngle()
 float Vector::GetAbsRadAngle() const
 {
     if (m_X == 0)
-        return m_Y > 0 ? -HalfPI : (m_Y < 0 ? HalfPI : 0);
+        return m_Y > 0 ? -c_HalfPI : (m_Y < 0 ? c_HalfPI : 0);
     if (m_Y == 0)
-        return m_X > 0 ? 0 : (m_X < 0 ? PI : 0);
+        return m_X > 0 ? 0 : (m_X < 0 ? c_PI : 0);
 
 // TODO: Confirm that this is correct!")
     float rawAngle = -atan(m_Y / m_X);
     if (m_X < 0)
-        rawAngle += PI;
+        rawAngle += c_PI;
     return rawAngle;
 }
 
@@ -587,7 +584,7 @@ float Vector::GetAbsDegAngle() const
     if (m_Y == 0)
         return m_X > 0 ? 0 : (m_X < 0 ? 180 : 0);
 
-    float rawAngle = -(atan(m_Y / m_X) / PI) * 180;
+    float rawAngle = -(atan(m_Y / m_X) / c_PI) * 180;
     if (m_X < 0)
         rawAngle += 180;
     return rawAngle;
@@ -648,7 +645,7 @@ void Vector::DegRotate(float angle)
 {
     // Convert to radians.
     angle /= 180;
-    angle *= PI;
+    angle *= c_PI;
 
     float tempX = m_X * cos(angle) - m_Y * sin(angle);
     float tempY = m_X * sin(angle) + m_Y * cos(angle);
@@ -685,7 +682,7 @@ Vector & Vector::DegRotate(float angle)
 
     // Convert to radians.
     angle /= 180;
-    angle *= PI;
+    angle *= c_PI;
 
     float tempX = m_X * cos(angle) - m_Y * sin(angle);
     float tempY = m_X * sin(angle) + m_Y * cos(angle);
@@ -706,13 +703,13 @@ void Vector::AbsRotateTo(const Vector &refVector)
 {
     float rawAngle;
     if (refVector.m_X == 0)
-        rawAngle = refVector.m_Y > 0 ? HalfPI : (refVector.m_Y < 0 ? -HalfPI : 0);
+        rawAngle = refVector.m_Y > 0 ? c_HalfPI : (refVector.m_Y < 0 ? -c_HalfPI : 0);
     else if (refVector.m_Y == 0)
-        rawAngle = refVector.m_X > 0 ? 0 : (refVector.m_X < 0 ? PI : 0);
+        rawAngle = refVector.m_X > 0 ? 0 : (refVector.m_X < 0 ? c_PI : 0);
     else {
         rawAngle = atan(refVector.m_Y / refVector.m_X);
         if (refVector.m_X < 0 && refVector.m_Y > 0 || refVector.m_X < 0 && refVector.m_Y <= 0)
-            rawAngle += PI;
+            rawAngle += c_PI;
     }
 
     float tempX = m_X * cos(rawAngle) - m_Y * sin(rawAngle);
@@ -732,13 +729,13 @@ Vector & Vector::AbsRotateTo(const Vector &refVector)
 {
     float rawAngle;
     if (refVector.m_X == 0)
-        rawAngle = refVector.m_Y > 0 ? -HalfPI : (refVector.m_Y < 0 ? HalfPI : 0);
+        rawAngle = refVector.m_Y > 0 ? -c_HalfPI : (refVector.m_Y < 0 ? c_HalfPI : 0);
     else if (refVector.m_Y == 0)
-        rawAngle = refVector.m_X > 0 ? 0 : (refVector.m_X < 0 ? PI : 0);
+        rawAngle = refVector.m_X > 0 ? 0 : (refVector.m_X < 0 ? c_PI : 0);
     else {
         rawAngle = -atan(refVector.m_Y / refVector.m_X);
         if (refVector.m_X < 0)
-            rawAngle += PI;
+            rawAngle += c_PI;
     }
     rawAngle = -rawAngle;
 

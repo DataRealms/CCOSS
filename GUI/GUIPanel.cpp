@@ -12,10 +12,7 @@
 
 #include "GUI.h"
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUIPanel
@@ -127,8 +124,8 @@ void GUIPanel::AddChild(GUIPanel *child, bool convertToAbsolutePos)
             child->m_Height -= (child->m_Y + child->m_Height) - (m_Y + m_Height);
 */
         // Make sure the rectangle is valid
-        child->m_Width = GUI_MAX(child->m_Width, 0);
-        child->m_Height = GUI_MAX(child->m_Height, 0);
+        child->m_Width = MAX(child->m_Width, 0);
+        child->m_Height = MAX(child->m_Height, 0);
 
         int Z = 0;
         // Get the last child in the list
@@ -963,7 +960,7 @@ string GUIPanel::WriteValue(const string Name, int Value)
     string OutString = Name;
     OutString += " = ";
 
-    sprintf(buf, "%i", Value);
+    sprintf_s(buf, sizeof(buf), "%i", Value);
     OutString += buf;
     OutString += "\n";
 

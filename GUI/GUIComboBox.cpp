@@ -14,10 +14,7 @@
 #include "GUI.h"
 #include "GUIComboBox.h"
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUIComboBox
@@ -77,8 +74,8 @@ void GUIComboBox::Create(const std::string Name, int X, int Y, int Width, int He
         m_Height = Height;
 
     // Make sure the textbox isn't too small
-    m_Width = GUI_MAX(m_Width, m_MinWidth);
-    m_Height = GUI_MAX(m_Height, m_MinHeight);
+    m_Width = MAX(m_Width, m_MinWidth);
+    m_Height = MAX(m_Height, m_MinHeight);
     
     m_TextPanel->Create(0, 0, m_Width-12, m_Height);    
     m_TextPanel->_SetVisible(true);
@@ -120,8 +117,8 @@ void GUIComboBox::Create(GUIProperties *Props)
     GUIPanel::LoadProperties(Props);
 
     // Make sure the textbox isn't too small
-    m_Width = GUI_MAX(m_Width, m_MinWidth);
-    m_Height = GUI_MAX(m_Height, m_MinHeight);
+    m_Width = MAX(m_Width, m_MinWidth);
+    m_Height = MAX(m_Height, m_MinHeight);
     
     m_TextPanel->Create(0, 0, m_Width-12, m_Height);    
     m_TextPanel->_SetVisible(true);
@@ -143,7 +140,7 @@ void GUIComboBox::Create(GUIProperties *Props)
 
     // Load the info
     Props->GetValue("Dropheight", &m_DropHeight);
-    m_DropHeight = GUI_MAX(m_DropHeight, 20);
+    m_DropHeight = MAX(m_DropHeight, 20);
 
     string Val;
     Props->GetValue("DropDownStyle", &Val);
@@ -461,9 +458,9 @@ void GUIComboBox::Move(int X, int Y)
 void GUIComboBox::Resize(int Width, int Height)
 {
     // Make sure the textbox isn't too small
-    Width = GUI_MAX(Width, m_MinWidth);
-    Height = GUI_MAX(Height, m_MinHeight);
-    Height = GUI_MIN(Height, 20);
+    Width = MAX(Width, m_MinWidth);
+    Height = MAX(Height, m_MinHeight);
+    Height = MIN(Height, 20);
 
     GUIPanel::SetSize(Width, Height);
 
@@ -596,7 +593,7 @@ GUIListPanel::Item *GUIComboBox::GetItem(int Index)
 void GUIComboBox::SetDropHeight(int Drop)
 {
     m_DropHeight = Drop;
-    m_DropHeight = GUI_MAX(m_DropHeight, 20);
+    m_DropHeight = MAX(m_DropHeight, 20);
 
     // Change the list panel
     m_ListPanel->SetSize(m_Width, m_DropHeight);
@@ -730,7 +727,7 @@ void GUIComboBox::ApplyProperties(GUIProperties *Props)
     GUIControl::ApplyProperties(Props);
 
     m_Properties.GetValue("Dropheight", &m_DropHeight);
-    m_DropHeight = GUI_MAX(m_DropHeight, 20);
+    m_DropHeight = MAX(m_DropHeight, 20);
 
     string Val;
     m_Properties.GetValue("DropDownStyle", &Val);

@@ -12,18 +12,12 @@
 // Inclusions of header files
 
 #include "Reader.h"
-#include <cctype>
-#include <fstream>
 #include "DDTTools.h"
 #include "MOSRotating.h"
 #include "Attachable.h"
 #include "PresetMan.h"
 
-using namespace std;
-//using namespace zip;
-
-namespace RTE
-{
+namespace RTE {
 
 const string Reader::ClassName = "Reader";
 
@@ -82,7 +76,7 @@ int Reader::Create(const char *filename, bool overwrites, void (*fpProgressCallb
 // This is OK, may be able to do it later when needed
 //    AAssert(m_DataModuleID > 0, "Couldn't establish which DataModule we're reading from when creating Reader!");
 
-    m_pStream = new ifstream(filename);
+    m_pStream = new std::ifstream(filename);
     if (!failOK)
         AAssert(m_pStream->good(), "Failed to open data file \'" + string(filename) + "\'!");
 
@@ -93,7 +87,7 @@ int Reader::Create(const char *filename, bool overwrites, void (*fpProgressCallb
     if (m_fpReportProgress && m_pStream->good())
     {
         char report[512];
-        sprintf(report, "\t%s on line %i", m_FileName.c_str(), m_CurrentLine);
+        sprintf_s(report, sizeof(report), "\t%s on line %i", m_FileName.c_str(), m_CurrentLine);
         m_fpReportProgress(string(report), true);
     }
 
@@ -109,7 +103,7 @@ int Reader::Create(const char *filename, bool overwrites, void (*fpProgressCallb
         for (int i = 0; i < strlen(filename) && filename[i] != '/'; ++i)
             packageName[i] = filename[i];
         packageName[i] = '\0';
-//        strcpy(&packageName[i], g_ReadPackageExtension);
+//        strcpy_s(&packageName[i], sizeof(&packageName[i]), g_ReadPackageExtension);
 
         m_Package = new izipfile(packageName);
         if (!m_Package->isOk())
@@ -214,7 +208,7 @@ bool Reader::Eat()
                 if (m_fpReportProgress && (m_CurrentLine % 100 == 0))
                 {
                     //char report[512];
-                    sprintf(report, "%s%s reading line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
+                    sprintf_s(report, sizeof(report), "%s%s reading line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
                     m_fpReportProgress(string(report), false);
                 }
             }
@@ -550,7 +544,7 @@ string Reader::TrimString(string &stringToTrim)
 void Reader::ReportError(std::string errorDesc)
 {
     char error[1024];
-    sprintf(error, "%s Error happened in %s at line %i!", errorDesc.c_str(), m_FilePath.c_str(), m_CurrentLine);
+    sprintf_s(error, sizeof(error), "%s Error happened in %s at line %i!", errorDesc.c_str(), m_FilePath.c_str(), m_CurrentLine);
     DDTAbort(error);
 }
 
@@ -568,7 +562,7 @@ bool Reader::StartIncludeFile()
     if (m_fpReportProgress)
     {
         char report[512];
-        sprintf(report, "%s%s on line %i includes:", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
+        sprintf_s(report, sizeof(report), "%s%s on line %i includes:", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
         m_fpReportProgress(string(report), false);
     }
 
@@ -577,7 +571,7 @@ bool Reader::StartIncludeFile()
 
     // Get the file path from the stream
     m_FilePath = ReadPropValue();
-    m_pStream = new ifstream(m_FilePath.c_str());
+    m_pStream = new std::ifstream(m_FilePath.c_str());
     if (m_pStream->fail())
     {
 #ifndef WIN32
@@ -629,7 +623,7 @@ bool Reader::StartIncludeFile()
             m_ReportTabs.append("\t");
 
         char report[512];
-        sprintf(report, "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
+        sprintf_s(report, sizeof(report), "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
         m_fpReportProgress(string(report), true);
     }
 
@@ -654,7 +648,7 @@ bool Reader::EndIncludeFile()
     if (m_fpReportProgress)
     {
         char report[512];
-        sprintf(report, "%s%s - done! %c", m_ReportTabs.c_str(), m_FileName.c_str(), -42);
+        sprintf_s(report, sizeof(report), "%s%s - done! %c", m_ReportTabs.c_str(), m_FileName.c_str(), -42);
         m_fpReportProgress(string(report), false);
     }
 
@@ -687,7 +681,7 @@ bool Reader::EndIncludeFile()
             m_ReportTabs.append("\t");
 
         char report[512];
-        sprintf(report, "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
+        sprintf_s(report, sizeof(report), "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
         m_fpReportProgress(string(report), true);
     }
 

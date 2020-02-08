@@ -16,10 +16,8 @@
 #include "LuaMan.h"
 #include "MovableMan.h"
 
-using namespace std;
+namespace RTE {
 
-namespace RTE
-{
 CONCRETECLASSINFO(GlobalScript, Entity, 0);
 
 //////////////////////////////////////////////////////////////////////////////////////////

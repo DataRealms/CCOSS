@@ -12,15 +12,11 @@
 // Inclusions of header files
 
 #include "Writer.h"
-#include <fstream>
-
-using namespace std;
-//using namespace zip;
 
 namespace RTE
 {
 
-const string Writer::ClassName = "Writer";
+const std::string Writer::ClassName = "Writer";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -46,7 +42,7 @@ void Writer::Clear()
 
 int Writer::Create(const char *filename, bool append)
 {
-    m_pStream = new ofstream(filename, append ? (ios_base::out | ios_base::app | ios_base::ate) : (ios_base::out | ios_base::trunc));
+    m_pStream = new std::ofstream(filename, append ? (std::ios_base::out | std::ios_base::app | std::ios_base::ate) : (std::ios_base::out | std::ios_base::trunc));
 
     if (!m_pStream->good())
         return -1;
@@ -56,7 +52,7 @@ int Writer::Create(const char *filename, bool append)
 
     // Extract just the filename and the path by first finding the last slash int he total path
     int slashPos = m_FilePath.find_last_of('/');
-    if (slashPos == string::npos)
+    if (slashPos == std::string::npos)
         slashPos = m_FilePath.find_last_of('\\');
 
     // Extract filename
@@ -73,7 +69,7 @@ int Writer::Create(const char *filename, bool append)
         for (int i = 0; i < strlen(filename) && filename[i] != '/'; ++i)
             packageName[i] = filename[i];
         packageName[i] = '\0';
-//        strcpy(&packageName[i], g_WritePackageExtension);
+//        strcpy_s(&packageName[i], sizeof(&packageName[i]), g_WritePackageExtension);
 
         m_Package = new ozipfile(packageName);
         if (!m_Package->isOk())

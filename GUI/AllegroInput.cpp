@@ -16,9 +16,6 @@
 #include "UInputMan.h"
 #endif // GUI_STANDALONE
 
-#include "allegro.h"
-
-
 using namespace RTE;
 
 
@@ -308,17 +305,17 @@ void AllegroInput::Update(void)
         if (joyKeyDirectional.GetMagnitude() < 0.95)
             m_pCursorAccelTimer->Reset();
 
-        float acceleration = 0.25 + DMin(m_pCursorAccelTimer->GetElapsedRealTimeS(), 0.5) * 20;
+        float acceleration = 0.25 + MIN(m_pCursorAccelTimer->GetElapsedRealTimeS(), 0.5) * 20;
 
         // Manipulate the mouse position with the joysticks or keys
         mouse_x += joyKeyDirectional.m_X * mouseDenominator * elapsedS * 15.0f * acceleration;
         mouse_y += joyKeyDirectional.m_Y * mouseDenominator * elapsedS * 15.0f * acceleration;
         // Prevent mouse from flying out of the screen
-        mouse_x = DMax(0, mouse_x);
-        mouse_y = DMax(0, mouse_y);
+        mouse_x = MAX(0, mouse_x);
+        mouse_y = MAX(0, mouse_y);
         // Pull in a bit so cursor doesn't completely disappear
-        mouse_x = DMin((g_FrameMan.GetResX() * mouseDenominator) - 3, mouse_x);
-        mouse_y = DMin((g_FrameMan.GetResY() * mouseDenominator) - 3, mouse_y);
+        mouse_x = MIN((g_FrameMan.GetResX() * mouseDenominator) - 3, mouse_x);
+        mouse_y = MIN((g_FrameMan.GetResY() * mouseDenominator) - 3, mouse_y);
 
         // Button states/presses, Primary - ACTUALLY make either button work, we don't have use for secondary in menus
         if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER))
@@ -380,7 +377,7 @@ void AllegroInput::ConvertKeyEvent(int allegroKey, int guilibKey, float elapsedS
         else
         {
             m_KeyboardBuffer[guilibKey] = Repeat;
-            m_KeyboardTimes[guilibKey] = 0;//DMax(m_KeyboardTimes[guilibKey] - m_KeyDelay, 0);
+            m_KeyboardTimes[guilibKey] = 0;//MAX(m_KeyboardTimes[guilibKey] - m_KeyDelay, 0);
         }
         m_KeyboardTimes[guilibKey] += elapsedS;
     }

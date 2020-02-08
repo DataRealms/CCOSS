@@ -14,13 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <list>
-#include <queue>
-
-
 // *** TEMP
 //#include "resource.h"
 
@@ -75,8 +68,6 @@ enum
 #define MAXSCREENCOUNT 4
 #define SCENEGRIDSIZE 24
 #define SCENESNAPSIZE 12
-#define NUM_PALETTE_ENTRIES 256
-#define MOID_BITMAP_LAYER_DEPTH 16
 #define MAXORPHANRADIUS 11
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -413,7 +404,7 @@ public:
 // Arguments:       The unsigned char index specifying screen material to get (0-255).
 // Return value:    A reference to the requested material. OINT!
 
-    Material const * GetMaterialFromID(unsigned char screen) { return screen >= 0 && screen < NUM_PALETTE_ENTRIES && m_apMatPalette[screen] ?  m_apMatPalette[screen] : m_apMatPalette[g_MaterialAir]; }
+    Material const * GetMaterialFromID(unsigned char screen) { return screen >= 0 && screen < c_PaletteEntriesNumber && m_apMatPalette[screen] ?  m_apMatPalette[screen] : m_apMatPalette[g_MaterialAir]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1892,7 +1883,7 @@ protected:
     // Material palette stuff
     std::map<std::string, unsigned char> m_MatNameMap;
     // This gets filled with holes, not contigous from 0 onward, but whatever the ini specifies. The Material objects are owned here
-    Material *m_apMatPalette[NUM_PALETTE_ENTRIES];
+    Material *m_apMatPalette[c_PaletteEntriesNumber];
     // The total number of added materials so far
     int m_MaterialCount;
 

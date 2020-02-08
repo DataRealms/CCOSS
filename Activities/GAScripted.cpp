@@ -35,10 +35,7 @@
 
 extern bool g_ResetActivity;
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(GAScripted, GameActivity, 0)
 
@@ -513,7 +510,7 @@ void GAScripted::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 void GAScripted::CollectRequiredAreas()
 {
     // Open the script file so we can check it out
-    ifstream *pScriptFile = new ifstream(m_ScriptPath.c_str());
+    std::ifstream *pScriptFile = new std::ifstream(m_ScriptPath.c_str());
     if (!pScriptFile->good())
         return;
 

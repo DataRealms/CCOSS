@@ -14,13 +14,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files, forward declarations, namespace stuff
 
-#include <string>
-#include <iostream>
 #include "Reader.h"
 #include "Writer.h"
 #include "DDTTools.h"
-
-using std::string;
 
 namespace RTE
 {

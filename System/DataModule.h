@@ -16,14 +16,9 @@
 
 #include "Serializable.h"
 #include "ContentFile.h"
-#include <string>
-#include <map>
-#include <list>
 
 struct DATAFILE;
 struct BITMAP;
-
-#define NUM_PALETTE_ENTRIES 256
 
 namespace RTE
 {
@@ -524,7 +519,7 @@ protected:
     // List of all Entity groups ever registered in this, all uniques
     std::list<std::string> m_GroupRegister;
     // Material mappings local to this DataModule
-    unsigned char m_MaterialMappings[NUM_PALETTE_ENTRIES];
+    unsigned char m_MaterialMappings[c_PaletteEntriesNumber];
 	// Indicates whether module loader should scan for any .ini's inside module folder
 	// instead of using IncludeFile
 	bool m_ScanFolderContents;

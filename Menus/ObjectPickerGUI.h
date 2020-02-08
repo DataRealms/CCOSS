@@ -19,11 +19,7 @@
 #include "Timer.h"
 #include "Controller.h"
 
-#include <string>
-#include <list>
-
 struct BITMAP;
-
 
 namespace RTE
 {

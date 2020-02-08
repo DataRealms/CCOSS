@@ -10,20 +10,17 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <assert.h>
 #include <windows.h>
 #include "WinUtil.h"
 
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetClipboardText
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the text from the clipboard.
 
-bool WinUtil::GetClipboardText(string *Text)
+bool WinUtil::GetClipboardText(std::string *Text)
 {
     HANDLE  CBDataHandle; // handle to the clipboard data
     LPSTR   CBDataPtr;    // pointer to data to send
@@ -65,7 +62,7 @@ bool WinUtil::GetClipboardText(string *Text)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the text in the clipboard.
 
-bool WinUtil::SetClipboardText(string Text)
+bool WinUtil::SetClipboardText(std::string Text)
 {
     // Open the clipboard
     if (OpenClipboard(0))

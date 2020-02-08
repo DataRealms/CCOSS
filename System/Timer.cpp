@@ -14,10 +14,7 @@
 #include "Timer.h"
 #include "DDTTools.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string Timer::ClassName = "Timer";
 

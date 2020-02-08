@@ -14,11 +14,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <istream>
-#include <fstream>
-#include <string>
-#include <list>
 #include "Writer.h"
+#include "Constants.h"
 
 namespace RTE
 {
@@ -232,7 +229,7 @@ public:
 // Arguments:       None.
 // Return value:    The line number that will be read from next.
 
-    std::string GetCurrentFileLineString() const { char str[128]; sprintf(str, "%d", m_CurrentLine); return str; }
+    std::string GetCurrentFileLineString() const { char str[128]; sprintf_s(str, sizeof(str), "%d", m_CurrentLine); return str; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -18,10 +18,7 @@
 #include "ContentFile.h"
 #include "PresetMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Arm, Attachable, 0)
 
@@ -442,7 +439,7 @@ void Arm::Update()
         }
         // Update hand
         m_HandOffset.SetXY(m_MaxLength * 0.65, 0);
-        m_HandOffset.RadRotate((m_HFlipped ? PI : 0) + m_Rotation.GetRadAngle());
+        m_HandOffset.RadRotate((m_HFlipped ? c_PI : 0) + m_Rotation.GetRadAngle());
     }
     else {
         // Attached, so act like it
@@ -492,7 +489,7 @@ void Arm::Update()
             else
                 m_Recoiled = false;
 
-            m_Rotation = (m_HFlipped ? PI : 0) + handAngle;
+            m_Rotation = (m_HFlipped ? c_PI : 0) + handAngle;
 
             // Redo the positioning of the arm now since the rotation has changed and RotateOffset will return different results
             if (!m_JointPos.IsZero())
@@ -524,11 +521,11 @@ void Arm::Update()
     /*
                 if (m_PresetName == "Player BG Arm") {
                     char str[64];
-                    sprintf(str, "TargetOffset: %f, %f", m_TargetPoint.m_X, m_TargetPoint.m_Y);
+                    sprintf_s(str, sizeof(str), "TargetOffset: %f, %f", m_TargetPoint.m_X, m_TargetPoint.m_Y);
                     g_FrameMan.DrawText(g_SceneMan.GetMOBitmap(), str, m_Pos + Vector(4, -140), false);
-                    sprintf(str, "m_Pos: %f, %f", m_Pos.m_X, m_Pos.m_Y);
+                    sprintf_s(str, sizeof(str), "m_Pos: %f, %f", m_Pos.m_X, m_Pos.m_Y);
                     g_FrameMan.DrawText(g_SceneMan.GetMOBitmap(), str, m_Pos + Vector(4, -120), false);
-                    sprintf(str, "handTarget: %f, %f", handTarget.m_X, handTarget.m_Y);
+                    sprintf_s(str, sizeof(str), "handTarget: %f, %f", handTarget.m_X, handTarget.m_Y);
                     g_FrameMan.DrawText(g_SceneMan.GetMOBitmap(), str, m_Pos + Vector(4, -100), false);
                 }
     */
@@ -549,7 +546,7 @@ void Arm::Update()
             }
             // Cap hand distance to what the Arm allows
             ConstrainHand();
-            m_Rotation = (m_HFlipped ? PI : 0) + m_HandOffset.GetAbsRadAngle();
+            m_Rotation = (m_HFlipped ? c_PI : 0) + m_HandOffset.GetAbsRadAngle();
 
             // Redo the positioning of the arm now since the rotation has changed and RotateOffset will return different results
             if (!m_JointPos.IsZero())
@@ -654,7 +651,7 @@ void Arm::Draw(BITMAP *pTargetBitmap,
 #ifdef DEBUG_BUILD
     if (m_PresetName == "Player BG Arm") {
         char str[64];
-        sprintf(str, "m_Pos in draw: %f, %f", m_Pos.m_X, m_Pos.m_Y);
+        sprintf_s(str, sizeof(str), "m_Pos in draw: %f, %f", m_Pos.m_X, m_Pos.m_Y);
         g_FrameMan.DrawText(pTargetBitmap, str, m_Pos + Vector(4, -80), false);
     }
 #endif
@@ -687,7 +684,7 @@ void Arm::DrawHand(BITMAP *pTargetBitmap,
 #ifdef DEBUG_BUILD
     if (m_PresetName == "Player BG Arm") {
         char str[64];
-        sprintf(str, "HandPos in hand draw: %f, %f", handPos.m_X, handPos.m_Y);
+        sprintf_s(str, sizeof(str), "HandPos in hand draw: %f, %f", handPos.m_X, handPos.m_Y);
         g_FrameMan.DrawText(pTargetBitmap, str, handPos + Vector(4, -40), false);
     }
 #endif

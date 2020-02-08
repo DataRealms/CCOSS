@@ -21,8 +21,6 @@
 #include "Serializable.h"
 #include "Sound.h"
 
-#include <deque>
-
 namespace RTE
 {
 

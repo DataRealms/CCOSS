@@ -11,11 +11,8 @@
 //                  www.shplorb.com/~jackal
 
 #include "GUIBitmap.h"
-#include <string>
 #include "ContentFile.h"
 #include "allegro.h"
-
-using std::string;
 
 namespace RTE
 {

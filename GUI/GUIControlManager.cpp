@@ -12,11 +12,8 @@
 // Inclusions of header files
 
 #include "GUI.h"
-#include <cstring>
 
 using namespace RTE;
-using namespace std;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUIControlmanager

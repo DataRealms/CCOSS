@@ -14,11 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <iostream>
-#include <sstream>
-#include <string>
-using std::string;
-
 #include "DDTTools.h"
 #include "Entity.h"
 #include "Vector.h"

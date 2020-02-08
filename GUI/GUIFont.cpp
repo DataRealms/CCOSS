@@ -12,12 +12,8 @@
 // Inclusions of header files
 
 #include "GUI.h"
-#include <cstring>
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUIFont
@@ -115,7 +111,7 @@ bool GUIFont::Load(GUIScreen *Screen, const std::string Filename)
             {
                 Uint32 Pixel = m_Font->GetPixel(i, j);
                 if (Pixel != Red && Pixel != BackG)
-                    Height = GUI_MAX(Height, j - y);
+                    Height = MAX(Height, j - y);
             }
         }
         

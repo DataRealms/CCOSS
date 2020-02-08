@@ -29,10 +29,7 @@ extern bool g_ResetActivity;
 extern bool g_ResumeActivity;
 extern bool g_InActivity;
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string MetaMan::m_ClassName = "MetaMan";
 CONCRETECLASSINFO(MetaSave, Entity, 0)
@@ -1049,13 +1046,13 @@ int MetaMan::SelectScenePresets(float gameSize, int playerCount, list<Scene *> *
     // How many scenes the game should end up with, according to the specified game size.
     // Note that it will never be all or none of all the available scenes!
 // TODO: Hook these constants up to settings!!
-    int minCount = DMax(3, DMin(floorf(playerCount * 1.5), scenePresets.size()));
-    int maxCount = DMax(floorf(scenePresets.size() * 0.7), minCount);
+    int minCount = MAX(3, MIN(floorf(playerCount * 1.5), scenePresets.size()));
+    int maxCount = MAX(floorf(scenePresets.size() * 0.7), minCount);
     // Determine the actual game size
     int gameSceneCount = minCount + floorf((maxCount - minCount) * gameSize);
     // Clamp
-    gameSceneCount = DMin(gameSceneCount, maxCount);
-    gameSceneCount = DMax(gameSceneCount, minCount);
+    gameSceneCount = MIN(gameSceneCount, maxCount);
+    gameSceneCount = MAX(gameSceneCount, minCount);
 
     // If we need to actually fill the list, do so
     if (pSelected)

@@ -27,7 +27,6 @@
 #include "ObjectPickerGUI.h"
 #include "PieMenuGUI.h"
 
-using namespace std;
 using namespace RTE;
 
 #define MAXZOOMFACTOR 5

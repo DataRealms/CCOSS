@@ -15,10 +15,7 @@
 #include "Atom.h"
 #include "RTEManagers.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(MOPixel, MovableObject, 500)
 
@@ -425,7 +422,7 @@ void MOPixel::Draw(BITMAP *pTargetBitmap,
     acquire_bitmap(pTargetBitmap);
 
 /*
-    if (m_pAtom->GetMaterial().id == GOLDMATID) {
+    if (m_pAtom->GetMaterial().id == c_GoldMaterialID) {
         if (mode == g_DrawKey) {
             
         }

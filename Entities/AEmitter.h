@@ -15,7 +15,6 @@
 // Inclusions of header files
  
 #include "Attachable.h"
-#include <list>
 #include "Emission.h"
 
 namespace RTE
@@ -250,7 +249,7 @@ ENTITYALLOCATION(AEmitter)
 // Arguments:       None.
 // Return value:    A unit vector.
 
-    Vector GetEmitVector() const { return Vector(1, 0).RadRotate(m_HFlipped ? PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle()); }
+    Vector GetEmitVector() const { return Vector(1, 0).RadRotate(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle()); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -261,7 +260,7 @@ ENTITYALLOCATION(AEmitter)
 // Arguments:       None.
 // Return value:    A unit vector.
 
-    Vector GetRecoilVector() const { return Vector(-1, 0).RadRotate(m_HFlipped ? PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle()); }
+    Vector GetRecoilVector() const { return Vector(-1, 0).RadRotate(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle()); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

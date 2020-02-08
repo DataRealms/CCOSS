@@ -16,7 +16,6 @@
 
 #include "ACraft.h"
 #include "LimbPath.h"
-#include <deque>
 
 namespace RTE
 {

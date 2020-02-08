@@ -11,23 +11,11 @@
 //                  http://www.datarealms.com
 
 #include "DDTError.h"
-#include "time.h"
-#include <cmath>
+#include "Constants.h"
 
 struct TexMapTable;
 
-#define DMax(a, b) (((a) > (b)) ? (a) : (b))
-#define DMin(a, b) (((a) < (b)) ? (a) : (b))
-
-namespace RTE
-{
-
-const double TwoPI = 6.28318530718;
-const double PI = 3.141592654;
-const double HalfPI = 1.570796327;
-const double QuartPI = 0.7853981635;
-const double EigthPI = 0.3926990817;
-const double SixteenthPI = 0.1963495408;
+namespace RTE {
 
 class Vector;
 

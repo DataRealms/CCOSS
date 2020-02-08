@@ -18,7 +18,6 @@
 #include "UInputMan.h"
 #include "ConsoleMan.h"
 #include "AudioMan.h"
-#include "AchievementMan.h"
 #include "AHuman.h"
 #include "ACrab.h"
 #include "SLTerrain.h"
@@ -35,12 +34,9 @@
 extern bool g_ResetActivity;
 extern bool g_InActivity;
 
-using namespace std;
-
 #define MAPNAME(element) g_UInputMan.GetMappingName(m_TutorialPlayer, UInputMan::element)
 
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(GATutorial, GameActivity, 0)
 
@@ -312,7 +308,7 @@ int GATutorial::Start()
         {
             // See if there are specified landing zone areas defined in the scene
             char str[64];
-            sprintf(str, "LZ Team %d", team + 1);
+            sprintf_s(str, sizeof(str), "LZ Team %d", team + 1);
             Scene::Area *pArea = g_SceneMan.GetScene()->GetArea(str);
     //        pArea = pArea ? pArea : g_SceneMan.GetScene()->GetArea("Landing Zone");
             // If area is defined, save a copy so we can lock the LZ selection to within its boxes
@@ -514,16 +510,11 @@ void GATutorial::End()
     // Play the approriate tune on player win/lose
     if (playerWon)
     {
-// Didn't work well, has gap between intro and loop tracks
-//        g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/uwinintro.ogg", 0);
-//        g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/uwinloop.ogg");
         g_AudioMan.ClearMusicQueue();
         // Loop it twice, nice tune!
         g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/uwinfinal.ogg", 2);
         g_AudioMan.QueueSilence(10);
         g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/ccambient4.ogg");
-
-        g_AchievementMan.UnlockAchievement("CC_WINTUTORIAL");
     }
     else
     {

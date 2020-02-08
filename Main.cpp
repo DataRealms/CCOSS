@@ -44,37 +44,18 @@
 
 #include "Network.h"
 
-#include <algorithm>
-#include <string>
-#include <list>
-
 #include "Reader.h"
 #include "Writer.h"
 #include "System.h"
 
-#include "math.h"
-
 #include "unzip.h"
-
-#include <thread>
 
 #if defined(__APPLE__)
 #include "OsxUtil.h"
 #endif // defined(__APPLE__)
 
-#if defined(STEAM_BUILD)
-#include "steam_api.h"
-#include "SteamUGCMan.h"
-#endif // defined (STEAM_BUILD)
-// Has its own checks for steam build so we don't have to surround every achievement call
-#include "AchievementMan.h"
-
 #include "NetworkServer.h"
 #include "NetworkClient.h"
-
-#define MAX_FILENAME 512
-#define FILEBUFFER_SIZE 8192
-#define MAX_UNZIPPED_FILE_SIZE 104857600
 
 #if defined(WIN32)
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
@@ -241,13 +222,6 @@ void _LoadingSplashProgressReport(std::string reportString, bool newItem = false
         g_pLoadingGUI->Update();
         g_pLoadingGUI->Draw();
         g_FrameMan.FlipFrameBuffers();
-	
-#if defined(STEAM_BUILD)
-		// pump steam while loading game too
-		// g_SteamUGCMan.Update();
-		// Two managers use the Steam API. Probably better to just use it here directly.
-		SteamAPI_RunCallbacks();
-#endif // 
 
         // Quit if we're commanded to during loading
         if (g_Quit)
@@ -322,14 +296,6 @@ void LoadingSplashProgressReport(std::string reportString, bool newItem = false)
 
 			g_FrameMan.FlipFrameBuffers();
 		}
-
-
-#if defined(STEAM_BUILD)
-		// pump steam while loading game too
-		// g_SteamUGCMan.Update();
-		// Two managers use the Steam API. Probably better to just use it here directly.
-		SteamAPI_RunCallbacks();
-#endif // 
 
 		// Quit if we're commanded to during loading
 		if (g_Quit)
@@ -420,12 +386,6 @@ bool LoadDataModules()
     g_PresetMan.Destroy();
     g_PresetMan.Create();
 
-#if defined(STEAM_BUILD)
-    // Download all subscribed-to data module files from Steam and copy them all into the game install dir
-    // so they can be unzipped next and loaded
-    g_SteamUGCMan.DownloadAllWorkshopDataModules(&LoadingSplashProgressReport);
-#endif // STEAM_BUILD
-
     // Unzip all *.rte.zip files found in the install dir, overwriting all files already existing
     // This will cause extracted and available data modules to be updated to whatever is within their corresponding zip files
     // The point of this is that it facilitates downloaded mods being loaded without having to be manually unzipped first by the user
@@ -454,7 +414,7 @@ bool LoadDataModules()
                 LoadingSplashProgressReport("Could not read global file info of: " + string(zippedModuleInfo.name), true);
 
             // Buffer to hold data read from the zip file.
-            char fileBuffer[FILEBUFFER_SIZE];
+			char fileBuffer[c_FileBufferSize];
 
             // Loop to extract all files
             bool abortExtract = false;
@@ -462,15 +422,15 @@ bool LoadDataModules()
             {
                 // Get info about current file.
                 unz_file_info fileInfo;
-                char outputFileName[MAX_FILENAME];
-                if (unzGetCurrentFileInfo(zipFile, &fileInfo, outputFileName, MAX_FILENAME, NULL, 0, NULL, 0) != UNZ_OK)
+                char outputFileName[c_MaxFileName];
+                if (unzGetCurrentFileInfo(zipFile, &fileInfo, outputFileName, c_MaxFileName, NULL, 0, NULL, 0) != UNZ_OK)
                     LoadingSplashProgressReport("Could not read file info of: " + string(outputFileName), true);
 
                 // Check if the directory we are trying to extract into exists, and if not, create it
-                char outputDirName[MAX_FILENAME];
-                char parentDirName[MAX_FILENAME];
+                char outputDirName[c_MaxFileName];
+                char parentDirName[c_MaxFileName];
                 // Copy the file path to a separate dir path
-                strcpy(outputDirName, outputFileName);
+                strcpy_s(outputDirName, sizeof(outputDirName), outputFileName);
                 // Find the last slash in the dir path, so we can cut off everything after that (ie the actual filename), and only have the directory path left
                 char *pSlashPos = strrchr(outputDirName, '/');
                 // Try to find the other kind of slash if we found none
@@ -484,7 +444,7 @@ bool LoadDataModules()
                 for (int nested = 0; !file_exists(outputDirName, FA_DIREC, 0) && pSlashPos; ++nested)
                 {
                     // Keep making new working copies of the path that we can dice up
-                    strcpy(parentDirName, outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
+                    strcpy_s(parentDirName, sizeof(parentDirName), outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
                     // Start off at the beginning
                     pSlashPos = parentDirName;
                     for (int j = 0; j <= nested && pSlashPos; ++j)
@@ -561,12 +521,12 @@ bool LoadDataModules()
                     do
                     {
                         // Read a chunk
-                        bytesRead = unzReadCurrentFile(zipFile, fileBuffer, FILEBUFFER_SIZE);
+                        bytesRead = unzReadCurrentFile(zipFile, fileBuffer, c_FileBufferSize);
                         // Add to total tally
                         totalBytesRead += bytesRead;
 
                         // Sanity check how damn big this file we're writing is becoming.. could prevent zip bomb exploits: http://en.wikipedia.org/wiki/Zip_bomb
-                        if (totalBytesRead >= MAX_UNZIPPED_FILE_SIZE)
+                        if (totalBytesRead >= c_MaxUnzippedFileSize)
                         {
                             LoadingSplashProgressReport("File inside zip " + string(zippedModuleInfo.name) +  " is turning out WAY TOO LARGE - Aborting extraction!", true);
                             abortExtract = true;
@@ -712,14 +672,6 @@ bool LoadDataModules()
             // Make sure we don't add the official metagames module among these; they should be loaded in explicit order before and after these unofficial ones
             if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= g_PresetMan.GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte")
             {
-                /* Redundant with weegee's other ssytem that allows sideloading etc
-                                // If workshop is enabled, then SKIP loading any unofficial mods that are neither subscribed-to nor published by this user
-                                if (g_SteamUGCMan.IsCloudEnabled() && (!g_SteamUGCMan.IsModuleSubscribedTo(moduleInfo.name) && !g_SteamUGCMan.IsModulePublished(moduleInfo.name)))
-                                {
-                                    LoadingSplashProgressReport("NOT Loading Data Module: " + string(moduleInfo.name) + " - it is not subscribed to in the Workshop!", true);
-                                    continue;
-                                }
-                */
                 // Actually load the unofficial data module
                 if (!g_PresetMan.LoadDataModule(string(moduleInfo.name), false, &LoadingSplashProgressReport))
                 {
@@ -731,7 +683,7 @@ bool LoadDataModules()
                 // TODO: Log this and continue gracefully instead
             // LoadDataModule can return false (esp since it amy try to load already loaded modules, and that's ok) and shouldn't cause stop
             //                char error[512];
-            //                sprintf(error, "Failed to load Data Module: %s\n\nMake sure it contains an Index.ini file that defines a \"DataModule\"!", moduleInfo.name);
+            //                sprintf(error, sizeof(error), "Failed to load Data Module: %s\n\nMake sure it contains an Index.ini file that defines a \"DataModule\"!", moduleInfo.name);
             //                DDTAbort(error);
             //                return false;
 
@@ -823,12 +775,12 @@ bool ResetActivity()
 //    g_AudioMan.Create();
 
     char report[512];
-    sprintf(report, "Building Scene: \"%s\"...", g_ActivityMan.GetActivity()->GetSceneName().c_str());
+    sprintf_s(report, sizeof(report), "Building Scene: \"%s\"...", g_ActivityMan.GetActivity()->GetSceneName().c_str());
     LoadingSplashProgressReport(report, true);
 
     g_SceneMan.LoadScene(g_ActivityMan.GetActivity()->GetSceneName());
 
-    sprintf(report, "\tDone! %c", -42);
+    sprintf_s(report, sizeof(report), "\tDone! %c", -42);
     LoadingSplashProgressReport(report, true);
     LoadingSplashProgressReport(" ", true);
 
@@ -837,7 +789,7 @@ bool ResetActivity()
     Timer blinkTimer;
     do
     {
-        sprintf(report, "PRESS ANY KEY TO START! %c", blinkTimer.AlternateSim(300) ? -65 : ' ');
+        sprintf_s(report, sizeof(report), "PRESS ANY KEY TO START! %c", blinkTimer.AlternateSim(300) ? -65 : ' ');
         LoadingSplashProgressReport(report, false);
 
         // Reset the key press states
@@ -1092,7 +1044,7 @@ bool PlayIntroTitle()
     bool keyPressed = false, sectionSwitch = true;
     float planetRadius = 240;
     float orbitRadius = 274;
-    float orbitRotation = HalfPI - EigthPI;
+    float orbitRotation = c_HalfPI - c_EighthPI;
     // Set the start so that the nebula is fully scolled up
     int startYOffset = pBackdrop->GetBitmap()->h / backdropScrollRatio - (resY / backdropScrollRatio);
     int titleAppearYOffset = 900;
@@ -1212,7 +1164,7 @@ bool PlayIntroTitle()
             // Draw the copyright notice
             yTextPos = g_FrameMan.GetResY() - pFont->GetFontHeight();
             char copyRight[512];
-            sprintf(copyRight, "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
+            sprintf_s(copyRight, sizeof(copyRight), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, copyRight, GUIFont::Centre);
         }
 
@@ -1259,13 +1211,13 @@ bool PlayIntroTitle()
 
 
 			// Draw pioneer promo capsule
-			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -PI * 1.27 && orbitRotation > -PI * 1.85)
+			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.27 && orbitRotation > -c_PI * 1.85)
 			{
 				// Start drawig pioneer apsule
 				// Slowly decrease radius to show that the capsule is falling
-				float radiusperc = 1 - ((fabs(orbitRotation) - (1.27 * PI)) / (0.35 * PI) / 4);
+				float radiusperc = 1 - ((fabs(orbitRotation) - (1.27 * c_PI)) / (0.35 * c_PI) / 4);
 				// Slowly decrease size to make the capsule disappear after a while
-				float sizeperc = 1 - ((fabs(orbitRotation) - (1.27 * PI)) / (0.35 * PI) / 1.5);
+				float sizeperc = 1 - ((fabs(orbitRotation) - (1.27 * c_PI)) / (0.35 * c_PI) / 1.5);
 
 				// Rotate, place and draw capsule
 				capsuleOffset.SetXY(orbitRadius * radiusperc, 0);
@@ -1277,10 +1229,10 @@ bool PlayIntroTitle()
 			}
 
 			// Enable promo clickables only if we're in main menu and the station is at the required location (under the menu)
-			if (g_IntroState == MENUACTIVE && g_pMainMenuGUI->AllowPioneerPromo() &&  orbitRotation < -PI * 1.25 && orbitRotation > -PI * 1.95)
+			if (g_IntroState == MENUACTIVE && g_pMainMenuGUI->AllowPioneerPromo() &&  orbitRotation < -c_PI * 1.25 && orbitRotation > -c_PI * 1.95)
 			{
 				// After capsule flew some time, start showing angry pioneer
-				if (orbitRotation < -PI * 1.32 && orbitRotation > -PI * 1.65)
+				if (orbitRotation < -c_PI * 1.32 && orbitRotation > -c_PI * 1.65)
 				{
 					Vector pioneerScreamPos = planetPos - Vector(320 - 130, 320 + 44);
 
@@ -1301,7 +1253,7 @@ bool PlayIntroTitle()
 					g_pMainMenuGUI->SetPioneerPromoBox(promoBox);
 				} 
 
-				if (orbitRotation < -PI * 1.65 && orbitRotation > -PI * 1.95)
+				if (orbitRotation < -c_PI * 1.65 && orbitRotation > -c_PI * 1.95)
 				{
 					Vector promoPos = planetPos - Vector(320 - 128, 320 + 29);
 
@@ -1321,12 +1273,12 @@ bool PlayIntroTitle()
 			stationOffset.SetXY(orbitRadius, 0);
 			stationOffset.RadRotate(orbitRotation);
 			pStation->SetPos(planetPos + stationOffset);
-			pStation->SetRotAngle(-HalfPI + orbitRotation);
+			pStation->SetRotAngle(-c_HalfPI + orbitRotation);
 			pStation->Draw(g_FrameMan.GetBackBuffer32());
 
 			// Start explosion effects to show that there's something wrong with the station
 			// but only if we're not in campaign
-			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -PI * 1.25 && orbitRotation > -TwoPI)
+			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.25 && orbitRotation > -c_TwoPI)
 			{
 				// Add explosions delay and count them
 				if (g_TimerMan.GetAbsoulteTime() > lastPuff + 1000000)
@@ -1385,8 +1337,8 @@ bool PlayIntroTitle()
 			orbitRotation -= 0.0020; //0.0015
 
             // Keep the rotation angle from getting too large
-            if (orbitRotation < -TwoPI)
-                orbitRotation += TwoPI;
+            if (orbitRotation < -c_TwoPI)
+                orbitRotation += c_TwoPI;
             g_StationOffsetX = stationOffset.m_X;
             g_StationOffsetY = stationOffset.m_Y;
         }
@@ -1530,10 +1482,6 @@ bool PlayIntroTitle()
         {
             g_IntroState = LOGOFADEIN;
             sectionSwitch = true;
-			if (g_SettingsMan.ModsInstalledLastTime().size() >= 5)
-			{
-				g_AchievementMan.UnlockAchievement("CC_5WORKSHOP");
-			}
         }
         else if (g_IntroState == LOGOFADEIN)
         {
@@ -1925,7 +1873,6 @@ bool PlayIntroTitle()
 
             if (elapsed >= duration)
             {
-				g_AchievementMan.UnlockAchievement( "CC_WATCHINTRO" );
                 g_IntroState = PLANETSCROLL;
                 sectionSwitch = true;
             }
@@ -2306,9 +2253,9 @@ bool PlayIntroTitle()
             sectionSwitch = true;
 
             scrollOffset.m_Y = preMenuYOffset;
-            orbitRotation = HalfPI - EigthPI;
+            orbitRotation = c_HalfPI - c_EighthPI;
 
-			orbitRotation = -PI * 1.20;
+			orbitRotation = -c_PI * 1.20;
 /*
             // Start/Jump the song to the theme spot
             g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0);
@@ -2467,11 +2414,6 @@ bool RunGameLoop()
 					}
 				}
 			}
-
-
-#if defined(STEAM_BUILD)
-		g_SteamUGCMan.Update();
-#endif // 
         }
 
         // Frame draw update
@@ -2598,14 +2540,6 @@ int main(int argc, char *argv[])
 	new NetworkServer();
 	new NetworkClient();
 
-#if defined(STEAM_BUILD)
-	SteamAPI_Init();
-	new SteamUGCMan();
-#endif
-    // Outside because it has its own internal preproc conditions and will be called many times
-    // which would be annoying to have to add conditions for each call
-	new AchievementMan();
-
     ///////////////////////////////////////////////////////////////////
     // Create the essential managers
 
@@ -2632,27 +2566,8 @@ int main(int argc, char *argv[])
     g_MovableMan.Create();
     g_MetaMan.Create();
 
-	// [CHRISK] STEAM SUPPORT
-#if defined(STEAM_BUILD)
-	g_SteamUGCMan.Create();
+	//new AchievementMan();
 
-    // Update once and push out the console contents after manager init so we can check it before having to load everything
-    g_SteamUGCMan.Update();
-    g_ConsoleMan.Update();
-    g_ConsoleMan.SaveAllText("LogConsole.txt");
-#endif 
-
-// TODO: REMOVE
-/*
-    if (g_LuaMan.RunScriptFile("Base.rte/Scripts/Test.lua"))
-        g_FrameMan.ShowMessageBox(string("Script error: ") + g_LuaMan.GetLastError());
-
-    if (g_LuaMan.RunScriptFile("Base.rte/Scripts/Test2.lua"))
-        g_FrameMan.ShowMessageBox(string("Script error: ") + g_LuaMan.GetLastError());
-
-    if (g_LuaMan.RunScriptFile("Base.rte/Scripts/Test3.lua"))
-        g_FrameMan.ShowMessageBox(string("Script error: ") + g_LuaMan.GetLastError());
-*/
     ///////////////////////////////////////////////////////////////////
     // Main game driver
 
@@ -2729,11 +2644,7 @@ int main(int argc, char *argv[])
     ContentFile::FreeAllLoaded();
     g_ConsoleMan.Destroy();
 
-#if defined(STEAM_BUILD)
-	g_SteamUGCMan.Destroy();
-	g_AchievementMan.Destroy();
-	SteamAPI_Shutdown();
-#endif
+	//g_AchievementMan.Destroy();
 
 #ifdef DEBUG_BUILD
     // Dump out the info about how well memory cleanup went

@@ -10,15 +10,6 @@
 //                  data@datarealms.com
 //                  http://www.datarealms.com
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
-#include <ostream>
-#include <fstream>
-//#include <zipstream.h>
-#include <string>
-
 namespace RTE
 {
 

@@ -12,12 +12,9 @@
 // and we can't move "Network.h" here because for whatever reasons everything will collapse
 #define WIN32_LEAN_AND_MEAN
 
-#include <string.h>
 #include "Singleton.h"
 #include "UInputMan.h"
 #include "Sound.h"
-
-#include <map>
 
 #include "Network.h"
 #include "NatPunchthroughClient.h"

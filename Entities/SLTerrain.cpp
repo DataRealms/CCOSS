@@ -22,8 +22,6 @@
 #include "MOSprite.h"
 #include "Atom.h"
 
-using namespace std;
-
 struct RECT
 {
     long    left;
@@ -32,8 +30,7 @@ struct RECT
     long    bottom;
 };
 
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(SLTerrain, SceneLayer, 0)
 
@@ -372,7 +369,7 @@ int SLTerrain::LoadData()
             }
 
             // Validate the material, or default to default material
-            if (matIndex >= 0 && matIndex < NUM_PALETTE_ENTRIES && apMaterials[matIndex])
+            if (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && apMaterials[matIndex])
                 pMaterial = apMaterials[matIndex];
             else
                 pMaterial = apMaterials[g_MaterialDefault];

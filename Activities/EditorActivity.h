@@ -14,9 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <string>
-#include <deque>
-
 #include "DDTTools.h"
 #include "ActivityMan.h"
 

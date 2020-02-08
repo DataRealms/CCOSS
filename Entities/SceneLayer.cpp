@@ -14,10 +14,7 @@
 #include "SceneLayer.h"
 #include "ContentFile.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(SceneLayer, Entity, 0)
 
@@ -676,8 +673,8 @@ void SceneLayer::Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrol
         int tiledOffsetX = 0;
         int tiledOffsetY = 0;
         // Use the dimensions of the target box, if it has any area at all
-        int targetWidth = DMin(pTargetBitmap->w, targetBox.GetWidth());
-        int targetHeight = DMin(pTargetBitmap->h, targetBox.GetHeight());
+        int targetWidth = MIN(pTargetBitmap->w, targetBox.GetWidth());
+        int targetHeight = MIN(pTargetBitmap->h, targetBox.GetHeight());
         int toCoverX = offsetX + targetBox.GetCorner().m_X + targetWidth;
         int toCoverY = offsetY + targetBox.GetCorner().m_Y + targetHeight;
 
@@ -769,7 +766,7 @@ void SceneLayer::DrawScaled(BITMAP *pTargetBitmap, Box &targetBox, const Vector 
 
 // TODO: Remove
 //                char balle[245];
-//                sprintf(balle, "y: %f becomes %f through %f and %f, needs to match: %f, which is: %i", targetPos.m_Y, subOffset.m_Y, resMult.m_Y, resDenom.m_Y, targetPos.m_Y * resMult.m_Y + 0.0001f, (int)(targetPos.m_Y * resMult.m_Y + 0.0001f));
+//                sprintf_s(balle, sizeof(balle), "y: %f becomes %f through %f and %f, needs to match: %f, which is: %i", targetPos.m_Y, subOffset.m_Y, resMult.m_Y, resDenom.m_Y, targetPos.m_Y * resMult.m_Y + 0.0001f, (int)(targetPos.m_Y * resMult.m_Y + 0.0001f));
 //                g_FrameMan.SetScreenText(string(balle));
 
 
@@ -878,8 +875,8 @@ void SceneLayer::DrawScaled(BITMAP *pTargetBitmap, Box &targetBox, const Vector 
         int tiledOffsetX = 0;
         int tiledOffsetY = 0;
         // Use the dimensions of the target box, if it has any area at all
-        int targetWidth = DMin(pTargetBitmap->w, targetBox.GetWidth());
-        int targetHeight = DMin(pTargetBitmap->h, targetBox.GetHeight());
+        int targetWidth = MIN(pTargetBitmap->w, targetBox.GetWidth());
+        int targetHeight = MIN(pTargetBitmap->h, targetBox.GetHeight());
         int toCoverX = offsetX + targetBox.GetCorner().m_X + targetWidth;
         int toCoverY = offsetY + targetBox.GetCorner().m_Y + targetHeight;
 

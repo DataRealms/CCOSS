@@ -1,10 +1,12 @@
+/*
+//TODO: Remake this into a nice offline achievement system eventually™.
+// NO STUPID 999 GAMES THING!
+// Possibly unlock special junk to use ingame.
+
 #include "AchievementMan.h"
 #include "ConsoleMan.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 #ifdef STEAM_BUILD
 AchievementMan::AchievementMan():
@@ -150,3 +152,4 @@ void AchievementMan::Sync()
 }
 
 } // namespace RTE
+*/

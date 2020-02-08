@@ -35,10 +35,7 @@
 #include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(AHuman, Actor, 0)
 
@@ -91,7 +88,7 @@ void AHuman::Clear()
     m_Crawling = false;
     m_DigTunnelEndPos.Reset();
     m_SweepCenterAimAngle = 0;
-    m_SweepRange = EigthPI;
+    m_SweepRange = c_EighthPI;
     m_DigTarget.Reset();
     m_FireTimer.Reset();
     m_SweepTimer.Reset();
@@ -1949,7 +1946,7 @@ void AHuman::UpdateAI()
     else if (m_AIMode == AIMODE_PATROL)
     {
         m_SweepCenterAimAngle = 0;
-        m_SweepRange = EigthPI;
+        m_SweepRange = c_EighthPI;
 
         if (m_LateralMoveState == LAT_STILL)
         {
@@ -2041,7 +2038,7 @@ void AHuman::UpdateAI()
         {
             Vector targetVector(fabs(m_MoveVector.m_X), m_MoveVector.m_Y);
             m_SweepCenterAimAngle = targetVector.GetAbsRadAngle();
-            m_SweepRange = SixteenthPI;
+            m_SweepRange = c_SixteenthPI;
         }
     }
     // Brain hunting
@@ -2067,7 +2064,7 @@ void AHuman::UpdateAI()
     // Gold digging
     else if (m_AIMode == AIMODE_GOLDDIG)
     {
-        m_SweepRange = EigthPI;
+        m_SweepRange = c_EighthPI;
 
         // Only dig if we have a tool for it
         if (EquipDiggingTool())
@@ -2120,7 +2117,7 @@ void AHuman::UpdateAI()
             EquipFirearm();
             m_LateralMoveState = LAT_STILL;
             m_SweepCenterAimAngle = 0;
-            m_SweepRange = EigthPI;
+            m_SweepRange = c_EighthPI;
         }
     }
     // Sentry
@@ -2128,7 +2125,7 @@ void AHuman::UpdateAI()
     {
         m_LateralMoveState = LAT_STILL;
         m_SweepCenterAimAngle = 0;
-        m_SweepRange = EigthPI;
+        m_SweepRange = c_EighthPI;
     }
 
     ///////////////////////////////
@@ -2144,11 +2141,11 @@ void AHuman::UpdateAI()
         m_SweepCenterAimAngle = FacingAngle(g_SceneMan.ShortestDistance(cpuPos, m_MoveTarget).GetAbsRadAngle());
         // Aim to point there
         float aimAngle = GetAimAngle(false);
-        if (aimAngle < m_SweepCenterAimAngle && aimAngle < HalfPI)
+        if (aimAngle < m_SweepCenterAimAngle && aimAngle < c_HalfPI)
         {
             m_Controller.SetState(AIM_UP, true);
         }
-        else if (aimAngle > m_SweepCenterAimAngle && aimAngle > -HalfPI)
+        else if (aimAngle > m_SweepCenterAimAngle && aimAngle > -c_HalfPI)
         {
             m_Controller.SetState(AIM_DOWN, true);
         }
@@ -2171,11 +2168,11 @@ void AHuman::UpdateAI()
         m_SweepCenterAimAngle = FacingAngle(g_SceneMan.ShortestDistance(cpuPos, m_PointingTarget).GetAbsRadAngle());
         // Aim to point there
         float aimAngle = GetAimAngle(false);
-        if (aimAngle < m_SweepCenterAimAngle && aimAngle < HalfPI)
+        if (aimAngle < m_SweepCenterAimAngle && aimAngle < c_HalfPI)
         {
             m_Controller.SetState(AIM_UP, true);
         }
-        else if (aimAngle > m_SweepCenterAimAngle && aimAngle > -HalfPI)
+        else if (aimAngle > m_SweepCenterAimAngle && aimAngle > -c_HalfPI)
         {
             m_Controller.SetState(AIM_DOWN, true);
         }
@@ -2252,7 +2249,7 @@ void AHuman::UpdateAI()
                 if (m_SweepState == SWEEPINGUP && m_TeamBlockState != BLOCKED)
                 {
                     float aimAngle = GetAimAngle(false);
-                    if (aimAngle < m_SweepCenterAimAngle + m_SweepRange && aimAngle < HalfPI)
+                    if (aimAngle < m_SweepCenterAimAngle + m_SweepRange && aimAngle < c_HalfPI)
                     {
                         m_Controller.SetState(AIM_UP, true);
                     }
@@ -2269,7 +2266,7 @@ void AHuman::UpdateAI()
                 else if (m_SweepState == SWEEPINGDOWN && m_TeamBlockState != BLOCKED)
                 {
                     float aimAngle = GetAimAngle(false);
-                    if (aimAngle > m_SweepCenterAimAngle - m_SweepRange && aimAngle > -HalfPI)
+                    if (aimAngle > m_SweepCenterAimAngle - m_SweepRange && aimAngle > -c_HalfPI)
                     {
                         m_Controller.SetState(AIM_DOWN, true);
                     }
@@ -2381,7 +2378,7 @@ void AHuman::UpdateAI()
         if (m_SweepState == SWEEPINGUP)
         {
             float aimAngle = GetAimAngle(false);
-            if (aimAngle < m_SweepCenterAimAngle + m_SweepRange && aimAngle < HalfPI)
+            if (aimAngle < m_SweepCenterAimAngle + m_SweepRange && aimAngle < c_HalfPI)
             {
                 m_Controller.SetState(AIM_UP, true);
             }
@@ -2398,7 +2395,7 @@ void AHuman::UpdateAI()
         else if (m_SweepState == SWEEPINGDOWN)
         {
             float aimAngle = GetAimAngle(false);
-            if (aimAngle > m_SweepCenterAimAngle - m_SweepRange && aimAngle > -HalfPI)
+            if (aimAngle > m_SweepCenterAimAngle - m_SweepRange && aimAngle > -c_HalfPI)
             {
                 m_Controller.SetState(AIM_DOWN, true);
             }
@@ -2907,7 +2904,7 @@ void AHuman::UpdateAI()
             Vector lookRay(m_CharHeight * 0.75, 0);
             Vector lookRayDown(m_CharHeight * 0.75, 0);
             lookRay.RadRotate(GetAimAngle(true));
-            lookRayDown.RadRotate(GetAimAngle(true) + (m_HFlipped ? QuartPI : -QuartPI));
+            lookRayDown.RadRotate(GetAimAngle(true) + (m_HFlipped ? c_QuarterPI : -c_QuarterPI));
             MOID obstructionMOID = g_SceneMan.CastMORay(GetCPUPos(), lookRay, m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 6);
             obstructionMOID = obstructionMOID == g_NoMOID ? g_SceneMan.CastMORay(cpuPos, lookRayDown, m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 6) : obstructionMOID;
             if (obstructionMOID != g_NoMOID)
@@ -2967,7 +2964,7 @@ void AHuman::UpdateAI()
                 {
                     m_DeviceState = DIGGING;
                     m_DigState = STARTDIG;
-                    m_SweepRange = QuartPI - SixteenthPI;
+                    m_SweepRange = c_QuarterPI - c_SixteenthPI;
                     m_ObstacleState = DIGPAUSING;
                 }
                 // If in invalid state of starting to dig but not actually digging, reset
@@ -3175,7 +3172,7 @@ void AHuman::Update()
 		{
 			int hat = SelectRand(1, 20);
 
-            stringstream hatName;
+            std::stringstream hatName;
             hatName << "Random Hat " << hat;
 			const Entity *preset = g_PresetMan.GetEntityPreset("Attachable", hatName.str());
 
@@ -3257,12 +3254,12 @@ void AHuman::Update()
         // Direct the jetpack nozzle according to movement stick if analog input is present
         else if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1)
         {
-            float jetAngle = m_Controller.GetAnalogMove().GetAbsRadAngle() + PI;
+            float jetAngle = m_Controller.GetAnalogMove().GetAbsRadAngle() + c_PI;
             // Clamp the angle to 45 degrees down cone with centr straight down on body
-            if (jetAngle > PI + HalfPI + QuartPI)// - SixteenthPI)
-                jetAngle = PI + HalfPI + QuartPI;// - SixteenthPI;
-            else if (jetAngle < PI + QuartPI)// + SixteenthPI)
-                jetAngle = PI + QuartPI;// + SixteenthPI;
+            if (jetAngle > c_PI + c_HalfPI + c_QuarterPI)// - c_SixteenthPI)
+                jetAngle = c_PI + c_HalfPI + c_QuarterPI;// - c_SixteenthPI;
+            else if (jetAngle < c_PI + c_QuarterPI)// + c_SixteenthPI)
+                jetAngle = c_PI + c_QuarterPI;// + c_SixteenthPI;
 
             m_pJetpack->SetEmitAngle(FacingAngle(jetAngle));
         }
@@ -3270,7 +3267,7 @@ void AHuman::Update()
         else
         {
             float jetAngle = m_AimAngle >= 0 ? (m_AimAngle * 0.25) : 0;
-            jetAngle = PI + QuartPI + EigthPI + jetAngle;
+            jetAngle = c_PI + c_QuarterPI + c_EighthPI + jetAngle;
             // Don't need to use FacingAngle on this becuase it's already applied to the AimAngle since last update.
             m_pJetpack->SetEmitAngle(jetAngle);
         }
@@ -3450,8 +3447,8 @@ void AHuman::Update()
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMUP; 
         m_AimAngle += m_Controller.IsState(AIM_SHARP) ?
-                      DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
-                      DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
+                      MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
+                      MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
         if (m_AimAngle > m_AimRange)
             m_AimAngle = m_AimRange;
     }
@@ -3463,8 +3460,8 @@ void AHuman::Update()
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMDOWN;
         m_AimAngle -= m_Controller.IsState(AIM_SHARP) ?
-                      DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
-                      DMin(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
+                      MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
+                      MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
         if (m_AimAngle < -m_AimRange)
             m_AimAngle = -m_AimRange;
     }
@@ -3600,7 +3597,7 @@ void AHuman::Update()
                     if (pMO)
                     {
                         pMO->SetPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) + Vector(m_HFlipped ? -15 : 15, -8));
-                        float throwScalar = (float)DMin(m_ThrowTmr.GetElapsedSimTimeMS(), m_ThrowPrepTime) / (float)m_ThrowPrepTime;
+                        float throwScalar = (float)MIN(m_ThrowTmr.GetElapsedSimTimeMS(), m_ThrowPrepTime) / (float)m_ThrowPrepTime;
                         Vector tossVec(pThrown->GetMinThrowVel() + ((pThrown->GetMaxThrowVel() - pThrown->GetMinThrowVel()) * throwScalar), 0.5 * NormalRand());
                         tossVec.RadRotate(m_AimAngle);
                         pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
@@ -3747,8 +3744,8 @@ void AHuman::Update()
             m_Paths[FGROUND][STAND].Terminate();
             m_Paths[BGROUND][STAND].Terminate();
 
-//            float FGLegProg = DMax(m_Paths[FGROUND][WALK].GetRegularProgress(), m_Paths[FGROUND][WALK].GetTotalTimeProgress());
-//            float BGLegProg = DMax(m_Paths[BGROUND][WALK].GetRegularProgress(), m_Paths[BGROUND][WALK].GetTotalTimeProgress());
+//            float FGLegProg = MAX(m_Paths[FGROUND][WALK].GetRegularProgress(), m_Paths[FGROUND][WALK].GetTotalTimeProgress());
+//            float BGLegProg = MAX(m_Paths[BGROUND][WALK].GetRegularProgress(), m_Paths[BGROUND][WALK].GetTotalTimeProgress());
             float FGLegProg = m_Paths[FGROUND][WALK].GetRegularProgress();
             float BGLegProg = m_Paths[BGROUND][WALK].GetRegularProgress();
 
@@ -3803,8 +3800,8 @@ void AHuman::Update()
             ////////////////////////////////////////
             // Arm Climbing if the leg paths failed to find clear spot to restart
 
-//            float FGArmProg = DMax(m_Paths[FGROUND][CLIMB].GetRegularProgress(), m_Paths[FGROUND][CLIMB].GetTotalTimeProgress());
-//            float BGArmProg = DMax(m_Paths[BGROUND][CLIMB].GetRegularProgress(), m_Paths[BGROUND][CLIMB].GetTotalTimeProgress());
+//            float FGArmProg = MAX(m_Paths[FGROUND][CLIMB].GetRegularProgress(), m_Paths[FGROUND][CLIMB].GetTotalTimeProgress());
+//            float BGArmProg = MAX(m_Paths[BGROUND][CLIMB].GetRegularProgress(), m_Paths[BGROUND][CLIMB].GetTotalTimeProgress());
             float FGArmProg = m_Paths[FGROUND][CLIMB].GetRegularProgress();
             float BGArmProg = m_Paths[BGROUND][CLIMB].GetRegularProgress();
 
@@ -4160,16 +4157,16 @@ void AHuman::Update()
         m_pHead->SetJointPos(m_Pos + m_pHead->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
         float toRotate = 0;
         // Only rotate the head to match the aim angle if body is stable and upright
-        if (m_Status == STABLE && fabs(m_Rotation.GetRadAngle()) < (HalfPI + QuartPI))
+        if (m_Status == STABLE && fabs(m_Rotation.GetRadAngle()) < (c_HalfPI + c_QuarterPI))
         {
             toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_HFlipped ? -m_AimAngle : m_AimAngle) * 0.7 + m_Rotation.GetRadAngle() * 0.2);
             toRotate *= 0.15;
         }
         // If dying upright, make head slump forward or back depending on body lean
 // TODO: Doesn't work too well, but probably could
-//        else if ((m_Status == DEAD || m_Status == DYING) && fabs(m_Rotation.GetRadAngle()) < QuartPI)
+//        else if ((m_Status == DEAD || m_Status == DYING) && fabs(m_Rotation.GetRadAngle()) < c_QuarterPI)
 //        {
-//            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle() + ((m_HFlipped && m_Rotation.GetRadAngle() > 0) || (!m_HFlipped && m_Rotation.GetRadAngle() > 0) ? PI : -PI) * 0.6);
+//            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle() + ((m_HFlipped && m_Rotation.GetRadAngle() > 0) || (!m_HFlipped && m_Rotation.GetRadAngle() > 0) ? c_PI : -c_PI) * 0.6);
 //            toRotate *= 0.10;
 //        }
         // Make head just keep rotating loosely with the body if unstable or upside down
@@ -4361,15 +4358,15 @@ void AHuman::Update()
 
     // Get the rotation in radians.
     float rot = m_Rotation.GetRadAngle();
-//        rot = fabs(rot) < QuartPI ? rot : (rot > 0 ? QuartPI : -QuartPI);
+//        rot = fabs(rot) < c_QuarterPI ? rot : (rot > 0 ? c_QuarterPI : -c_QuarterPI);
     // Eliminate full rotations
-    while (fabs(rot) > TwoPI) {
-        rot -= rot > 0 ? TwoPI : -TwoPI;
+    while (fabs(rot) > c_TwoPI) {
+        rot -= rot > 0 ? c_TwoPI : -c_TwoPI;
     }
     // Eliminate rotations over half a turn
-    if (fabs(rot) > PI)
+    if (fabs(rot) > c_PI)
     {
-        rot = (rot > 0 ? -PI : PI) + (rot - (rot > 0 ? PI : -PI));
+        rot = (rot > 0 ? -c_PI : c_PI) + (rot - (rot > 0 ? c_PI : -c_PI));
         // If we're upside down, we're unstable damnit
 		if (m_Status != DYING && m_Status != DEAD)
 			m_Status = UNSTABLE;
@@ -4382,14 +4379,14 @@ void AHuman::Update()
         // If we're supposed to be laying down on the ground, make the spring pull the body that way until we reach that angle
         if (m_ProneState != NOTPRONE)
         {
-            float rotTarget = m_HFlipped ? HalfPI : -HalfPI;
+            float rotTarget = m_HFlipped ? c_HalfPI : -c_HalfPI;
             float rotDiff = rotTarget - rot;
 
             if (m_ProneState == GOPRONE)
             {
                 if (!m_ProneTimer.IsPastSimMS(333))
                 {
-                    if (fabs(rotDiff) > 0.1 && fabs(rotDiff) < PI)
+                    if (fabs(rotDiff) > 0.1 && fabs(rotDiff) < c_PI)
                     {
                         m_AngularVel += rotDiff * 0.45;// * fabs(rotDiff);
                         m_Vel.m_X += (m_HFlipped ? -fabs(rotDiff) : fabs(rotDiff)) * 0.25;
@@ -4403,7 +4400,7 @@ void AHuman::Update()
                 }
 /*
                 // Break the spring if close to target angle.
-                if (-HalfPI + fabs(rot) > 0.1)
+                if (-c_HalfPI + fabs(rot) > 0.1)
                     m_AngularVel -= rot * fabs(rot);
                 else if (fabs(m_AngularVel) > 0.1)
                     m_AngularVel *= 0.5;
@@ -4412,7 +4409,7 @@ void AHuman::Update()
             // If down, try to keep flat against the ground
             else if (m_ProneState == PRONE)
             {
-                if (fabs(rotDiff) > SixteenthPI && fabs(rotDiff) < HalfPI)
+                if (fabs(rotDiff) > c_SixteenthPI && fabs(rotDiff) < c_HalfPI)
                     m_AngularVel += rotDiff * 0.65;// * fabs(rotDiff);
                 else if (fabs(m_AngularVel) > 0.3)
                     m_AngularVel *= 0.85;
@@ -4434,13 +4431,13 @@ void AHuman::Update()
         float rotTarget = 0;
         // If traveling at speed, then always start falling forward
         if (fabs(m_Vel.m_X) > 1.0)
-            rotTarget = m_HFlipped ? HalfPI : -HalfPI;
+            rotTarget = m_HFlipped ? c_HalfPI : -c_HalfPI;
         // Go whichever way we're already rotated
         else
-            rotTarget = rot > 0 ? HalfPI : -HalfPI;
+            rotTarget = rot > 0 ? c_HalfPI : -c_HalfPI;
 
         float rotDiff = rotTarget - rot;
-        if (fabs(rotDiff) > 0.1 && fabs(rotDiff) < PI)
+        if (fabs(rotDiff) > 0.1 && fabs(rotDiff) < c_PI)
         {
             m_AngularVel += rotDiff * 0.05;
 //            m_Vel.m_X += (rotTarget > 0 ? -fabs(rotDiff) : fabs(rotDiff)) * 0.35;
@@ -4449,10 +4446,10 @@ void AHuman::Update()
     // While dying, pull body quickly toward down toward horizontal
     else if (m_Status == DYING)
     {
-        float rotTarget = rot > 0 ? HalfPI : -HalfPI;
-//        float rotTarget = m_HFlipped ? HalfPI : -HalfPI;
+        float rotTarget = rot > 0 ? c_HalfPI : -c_HalfPI;
+//        float rotTarget = m_HFlipped ? c_HalfPI : -c_HalfPI;
         float rotDiff = rotTarget - rot;
-        if (!m_DeathTmr.IsPastSimMS(125) && fabs(rotDiff) > 0.1 && fabs(rotDiff) < PI)
+        if (!m_DeathTmr.IsPastSimMS(125) && fabs(rotDiff) > 0.1 && fabs(rotDiff) < c_PI)
         {
             m_AngularVel += rotDiff * 0.5;//fabs(rotDiff);
 //            m_Vel.m_X += (m_HFlipped ? -fabs(rotDiff) : fabs(rotDiff)) * 0.35;
@@ -4827,7 +4824,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     if (m_ArmsState == THROWING_PREP)
         DrawThrowingReticule(pTargetBitmap,
                              targetPos,
-                             DMin((float)m_ThrowTmr.GetElapsedSimTimeMS() / (float)m_ThrowPrepTime, 1.0));
+                             MIN((float)m_ThrowTmr.GetElapsedSimTimeMS() / (float)m_ThrowPrepTime, 1.0));
 
     //////////////////////////////////////
     // Draw stat info HUD
@@ -4895,7 +4892,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             char gaugeColor = jetTimeRatio > 0.6 ? 149 : (jetTimeRatio > 0.3 ? 77 : 13);
             rectfill(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 6, drawPos.m_X + (16 * jetTimeRatio), drawPos.m_Y + m_HUDStack + 7, gaugeColor);
 //                    rect(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack - 2, drawPos.m_X + 24, drawPos.m_Y + m_HUDStack - 4, 238);
-//                    sprintf(str, "%.0f Kg", mass);
+//                    sprintf_s(str, sizeof(str), "%.0f Kg", mass);
 //                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
 
             m_HUDStack += -10;
@@ -4911,13 +4908,13 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                 str[0] = -56; str[1] = 0;
                 pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
                 if (pHeldFirearm->IsReloading())
-                    sprintf(str, "%s", "Reloading...");
+                    sprintf_s(str, sizeof(str), "%s", "Reloading...");
                 else
                 {
                     if (pHeldFirearm->GetRoundInMagCount() < 0)
-                        sprintf(str, "%s", "Infinite");
+                        sprintf_s(str, sizeof(str), "%s", "Infinite");
                     else
-                        sprintf(str, "%i", pHeldFirearm->GetRoundInMagCount());
+                        sprintf_s(str, sizeof(str), "%i", pHeldFirearm->GetRoundInMagCount());
                 }
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
 
@@ -4933,7 +4930,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                 {
                     str[0] = m_GoldPicked ? -57 : -58; str[1] = 0;
                     pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                    sprintf(str, "%.0f oz", GetGoldCarried());
+                    sprintf_s(str, sizeof(str), "%.0f oz", GetGoldCarried());
                     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, str, GUIFont::Left);
 
                     m_HUDStack += -11;
@@ -4942,17 +4939,17 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                 if (m_pFGArm->HoldsSomething())
                 {
 /*
-                    sprintf(str, " Œ Drop");
+                    sprintf_s(str, sizeof(str), " Œ Drop");
                     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
                     m_HUDStack += -9;
 */
-//                    sprintf(str, "   %s", m_pFGArm->GetHeldMO()->GetPresetName().c_str());
+//                    sprintf_s(str, sizeof(str), "   %s", m_pFGArm->GetHeldMO()->GetPresetName().c_str());
                     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 3, m_pFGArm->GetHeldMO()->GetPresetName().c_str(), GUIFont::Centre);
                     m_HUDStack += -9;
                 }
                 else
                 {
-//                    sprintf(str, "æ  EMPTY  ø");
+//                    sprintf_s(str, sizeof(str), "æ  EMPTY  ø");
                     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 3, "EMPTY", GUIFont::Centre);
                     m_HUDStack += -9;
                 }
@@ -4960,7 +4957,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                 // Reload GUI, only show when there's nothing to pick up
                 if (!m_pItemInReach && m_pFGArm->HoldsSomething() && pHeldFirearm && !pHeldFirearm->IsFull())
                 {
-                    sprintf(str, " œ Reload", pHeldFirearm);
+                    sprintf_s(str, sizeof(str), " œ Reload", pHeldFirearm);
                     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
                 }
 */
@@ -4968,7 +4965,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         }
         else
         {
-            sprintf(str, "NO ARM!");
+            sprintf_s(str, sizeof(str), "NO ARM!");
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
             m_HUDStack += -9;
         }
@@ -4978,8 +4975,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         {
             if (m_pItemInReach && g_MovableMan.IsDevice(m_pItemInReach) && m_pFGArm && m_pFGArm->IsAttached())
             {
-    //            sprintf(str, " œ Pick up %s", m_pItemInReach->GetPresetName().c_str());
-                sprintf(str, " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
+                sprintf_s(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
             }
             else
@@ -4995,22 +4991,22 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             
             if (m_AIMode == AIMODE_SENTRY)
             {
-                sprintf(str, "%s", "Sentry");
+                sprintf_s(str, sizeof(str), "%s", "Sentry");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y - 18, str, GUIFont::Centre);
             }
             else if (m_AIMode == AIMODE_PATROL)
             {
-                sprintf(str, "%s", "Patrol");
+                sprintf_s(str, sizeof(str), "%s", "Patrol");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X - 9, iconPos.m_Y - 5, str, GUIFont::Right);
             }
             else if (m_AIMode == AIMODE_BRAINHUNT)
             {
-                sprintf(str, "%s", "Brainhunt");
+                sprintf_s(str, sizeof(str), "%s", "Brainhunt");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X + 9, iconPos.m_Y - 5, str, GUIFont::Left);
             }
             else if (m_AIMode == AIMODE_GOLDDIG)
             {
-                sprintf(str, "%s", "Gold Dig");
+                sprintf_s(str, sizeof(str), "%s", "Gold Dig");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y + 8, str, GUIFont::Centre);
             }
 
@@ -5043,58 +5039,58 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
     // Dig state
     if (m_DigState == PREDIG)
-        sprintf(str, "PREDIG");
+        sprintf_s(str, sizeof(str), "PREDIG");
     else if (m_DigState == STARTDIG)
-        sprintf(str, "STARTDIG");
+        sprintf_s(str, sizeof(str), "STARTDIG");
     else if (m_DigState == TUNNELING)
-        sprintf(str, "TUNNELING");
+        sprintf_s(str, sizeof(str), "TUNNELING");
     else if (m_DigState == FINISHINGDIG)
-        sprintf(str, "FINISHINGDIG");
+        sprintf_s(str, sizeof(str), "FINISHINGDIG");
     else if (m_DigState == PAUSEDIGGER)
-        sprintf(str, "PAUSEDIGGER");
+        sprintf_s(str, sizeof(str), "PAUSEDIGGER");
     else
-        sprintf(str, "NOTDIGGING");
+        sprintf_s(str, sizeof(str), "NOTDIGGING");
     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
     // Device State
     if (m_DeviceState == POINTING)
-        sprintf(str, "POINTING");
+        sprintf_s(str, sizeof(str), "POINTING");
     else if (m_DeviceState == SCANNING)
-        sprintf(str, "SCANNING");
+        sprintf_s(str, sizeof(str), "SCANNING");
     else if (m_DeviceState == AIMING)
-        sprintf(str, "AIMING");
+        sprintf_s(str, sizeof(str), "AIMING");
     else if (m_DeviceState == FIRING)
-        sprintf(str, "FIRING");
+        sprintf_s(str, sizeof(str), "FIRING");
     else if (m_DeviceState == THROWING)
-        sprintf(str, "THROWING");
+        sprintf_s(str, sizeof(str), "THROWING");
     else if (m_DeviceState == DIGGING)
-        sprintf(str, "DIGGING");
+        sprintf_s(str, sizeof(str), "DIGGING");
     else
-        sprintf(str, "STILL");
+        sprintf_s(str, sizeof(str), "STILL");
     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
     // Jump State
     if (m_JumpState == FORWARDJUMP)
-        sprintf(str, "FORWARDJUMP");
+        sprintf_s(str, sizeof(str), "FORWARDJUMP");
     else if (m_JumpState == PREUPJUMP)
-        sprintf(str, "PREUPJUMP");
+        sprintf_s(str, sizeof(str), "PREUPJUMP");
     else if (m_JumpState == UPJUMP)
-        sprintf(str, "UPJUMP");
+        sprintf_s(str, sizeof(str), "UPJUMP");
     else if (m_JumpState == APEXJUMP)
-        sprintf(str, "APEXJUMP");
+        sprintf_s(str, sizeof(str), "APEXJUMP");
     else if (m_JumpState == LANDJUMP)
-        sprintf(str, "LANDJUMP");
+        sprintf_s(str, sizeof(str), "LANDJUMP");
     else
-        sprintf(str, "NOTJUMPING");
+        sprintf_s(str, sizeof(str), "NOTJUMPING");
     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
     if (m_Status == STABLE)
-        sprintf(str, "STABLE");
+        sprintf_s(str, sizeof(str), "STABLE");
     else if (m_Status == UNSTABLE)
-        sprintf(str, "UNSTABLE");
+        sprintf_s(str, sizeof(str), "UNSTABLE");
     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 

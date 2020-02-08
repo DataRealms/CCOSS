@@ -20,11 +20,7 @@
 #include "MOPixel.h"
 #include "Actor.h"
 
-
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(HDFirearm, HeldDevice, 0)
 
@@ -728,7 +724,7 @@ void HDFirearm::Update()
                 {
                     roundsFired = 1;
                     // Wind back the last fire timer appropriately for the first round, but not farther back than 0
-                    m_LastFireTmr.SetElapsedSimTimeMS(DMax(m_LastFireTmr.GetElapsedSimTimeMS() - mspr, 0));
+                    m_LastFireTmr.SetElapsedSimTimeMS(MAX(m_LastFireTmr.GetElapsedSimTimeMS() - mspr, 0));
                 }
                 // How many rounds are going to fly since holding down activation. Make sure gun can't be fired faster by tapping activation fast
                 if (m_LastFireTmr.GetElapsedSimTimeMS() > (m_ActivationTmr.GetElapsedSimTimeMS() - m_ActivationDelay))

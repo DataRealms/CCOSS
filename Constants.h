@@ -3,6 +3,19 @@
 
 namespace RTE {
 
+	// Allegro defines these via define in astdint.h and Boost with stdlib go crazy so we need to undefine them manually.
+	#undef int8_t
+	#undef uint8_t
+	#undef int16_t
+	#undef uint16_t
+	#undef int32_t
+	#undef uint32_t
+	#undef intptr_t
+	#undef uintptr_t
+	#undef LONG_LONG
+	#undef int64_t
+	#undef uint64_t
+
 #pragma region Buffer Constants
 	constexpr static unsigned int c_MaxFileName = 256; ///! Maximum length of output file directory+name string.
 	constexpr static unsigned int c_FileBufferSize = 8192; ///! Buffer to hold data read from the zip file.

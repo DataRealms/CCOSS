@@ -521,11 +521,11 @@ void Arm::Update()
     /*
                 if (m_PresetName == "Player BG Arm") {
                     char str[64];
-                    sprintf_s(str, "TargetOffset: %f, %f", m_TargetPoint.m_X, m_TargetPoint.m_Y);
+                    sprintf_s(str, sizeof(str), "TargetOffset: %f, %f", m_TargetPoint.m_X, m_TargetPoint.m_Y);
                     g_FrameMan.DrawText(g_SceneMan.GetMOBitmap(), str, m_Pos + Vector(4, -140), false);
-                    sprintf_s(str, "m_Pos: %f, %f", m_Pos.m_X, m_Pos.m_Y);
+                    sprintf_s(str, sizeof(str), "m_Pos: %f, %f", m_Pos.m_X, m_Pos.m_Y);
                     g_FrameMan.DrawText(g_SceneMan.GetMOBitmap(), str, m_Pos + Vector(4, -120), false);
-                    sprintf_s(str, "handTarget: %f, %f", handTarget.m_X, handTarget.m_Y);
+                    sprintf_s(str, sizeof(str), "handTarget: %f, %f", handTarget.m_X, handTarget.m_Y);
                     g_FrameMan.DrawText(g_SceneMan.GetMOBitmap(), str, m_Pos + Vector(4, -100), false);
                 }
     */
@@ -651,7 +651,7 @@ void Arm::Draw(BITMAP *pTargetBitmap,
 #ifdef DEBUG_BUILD
     if (m_PresetName == "Player BG Arm") {
         char str[64];
-        sprintf_s(str, "m_Pos in draw: %f, %f", m_Pos.m_X, m_Pos.m_Y);
+        sprintf_s(str, sizeof(str), "m_Pos in draw: %f, %f", m_Pos.m_X, m_Pos.m_Y);
         g_FrameMan.DrawText(pTargetBitmap, str, m_Pos + Vector(4, -80), false);
     }
 #endif
@@ -684,7 +684,7 @@ void Arm::DrawHand(BITMAP *pTargetBitmap,
 #ifdef DEBUG_BUILD
     if (m_PresetName == "Player BG Arm") {
         char str[64];
-        sprintf_s(str, "HandPos in hand draw: %f, %f", handPos.m_X, handPos.m_Y);
+        sprintf_s(str, sizeof(str), "HandPos in hand draw: %f, %f", handPos.m_X, handPos.m_Y);
         g_FrameMan.DrawText(pTargetBitmap, str, handPos + Vector(4, -40), false);
     }
 #endif

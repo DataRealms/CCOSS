@@ -338,10 +338,6 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
         reader >> m_ScreenEffectFile;
         m_pScreenEffect = m_ScreenEffectFile.GetAsBitmap();
 		m_ScreenEffectHash = m_ScreenEffectFile.GetHash();
-
-		//char buf[128];
-		//sprintf_s(buf, "%s %lu", m_ScreenEffectFile.GetDataPath().c_str(), m_ScreenEffectHash);
-		//g_ConsoleMan.PrintString(buf);
     }
     else if (propName == "EffectStartTime")
         reader >> m_EffectStartTime;

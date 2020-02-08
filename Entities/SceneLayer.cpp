@@ -766,7 +766,7 @@ void SceneLayer::DrawScaled(BITMAP *pTargetBitmap, Box &targetBox, const Vector 
 
 // TODO: Remove
 //                char balle[245];
-//                sprintf_s(balle, "y: %f becomes %f through %f and %f, needs to match: %f, which is: %i", targetPos.m_Y, subOffset.m_Y, resMult.m_Y, resDenom.m_Y, targetPos.m_Y * resMult.m_Y + 0.0001f, (int)(targetPos.m_Y * resMult.m_Y + 0.0001f));
+//                sprintf_s(balle, sizeof(balle), "y: %f becomes %f through %f and %f, needs to match: %f, which is: %i", targetPos.m_Y, subOffset.m_Y, resMult.m_Y, resDenom.m_Y, targetPos.m_Y * resMult.m_Y + 0.0001f, (int)(targetPos.m_Y * resMult.m_Y + 0.0001f));
 //                g_FrameMan.SetScreenText(string(balle));
 
 

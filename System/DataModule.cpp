@@ -108,7 +108,7 @@ int DataModule::Create(string moduleName, void (*fpProgressCallback)(std::string
 // TODO, more info here?
 /*
             char report[512];
-            sprintf_s(report, "%s loading:", m_FileName.c_str());
+            sprintf_s(report, sizeof(report), "%s loading:", m_FileName.c_str());
             fpProgressCallback(string(report), true);
 */
             fpProgressCallback(string(" "), true);

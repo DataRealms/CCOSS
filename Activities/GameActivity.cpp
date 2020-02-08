@@ -2340,7 +2340,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MAX(16, g_SceneMan.GetScreenOcclusion(which).m_X + 16), yTextPos, str, GUIFont::Left);
 /* Not applicable anymore to the 4-team games
     // Body losses
-    sprintf_s(str, "%c Losses: %c%i %c%i", -39, -62, GetTeamDeathCount(Activity::TEAM_1), -59, GetTeamDeathCount(Activity::TEAM_2));
+    sprintf_s(str, sizeof(str), "%c Losses: %c%i %c%i", -39, -62, GetTeamDeathCount(Activity::TEAM_1), -59, GetTeamDeathCount(Activity::TEAM_2));
     g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MIN(pTargetBitmap->w - 4, pTargetBitmap->w - 4 + g_SceneMan.GetScreenOcclusion(which).m_X), yTextPos, str, GUIFont::Right);
 */
     // Show the player's controller scheme icon in the upper right corner of his screen, but only for a minute

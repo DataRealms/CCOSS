@@ -1929,7 +1929,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             // Draw the contol pointer, if controlled and under the icon's time limit
             if (m_Controller.IsPlayetControlled() && m_NewControlTmr.GetElapsedSimTimeMS() < 1500)
             {
-                sprintf_s(str, "%c", -38);
+                sprintf_s(str, sizeof(str), "%c", -38);
                 pSymbolFont->DrawAligned(&bitmapInt, cpuPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 */
@@ -1942,27 +1942,27 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     // Obstacle state
     if (m_ObstacleState == PROCEEDING)
-        sprintf_s(str, "PROCEEDING");
+        sprintf_s(str, sizeof(str), "PROCEEDING");
     else if (m_ObstacleState == BACKSTEPPING)
-        sprintf_s(str, "BACKSTEPPING");
+        sprintf_s(str, sizeof(str), "BACKSTEPPING");
     else if (m_ObstacleState == JUMPING)
-        sprintf_s(str, "JUMPING");
+        sprintf_s(str, sizeof(str), "JUMPING");
     else if (m_ObstacleState == SOFTLANDING)
-        sprintf_s(str, "SOFTLANDING");
+        sprintf_s(str, sizeof(str), "SOFTLANDING");
     else
-        sprintf_s(str, "DIGPAUSING");
+        sprintf_s(str, sizeof(str), "DIGPAUSING");
     pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
     // Team Block State
     if (m_TeamBlockState == BLOCKED)
-        sprintf_s(str, "BLOCKED");
+        sprintf_s(str, sizeof(str), "BLOCKED");
     else if (m_TeamBlockState == IGNORINGBLOCK)
-        sprintf_s(str, "IGNORINGBLOCK");
+        sprintf_s(str, sizeof(str), "IGNORINGBLOCK");
     else if (m_TeamBlockState == FOLLOWWAIT)
-        sprintf_s(str, "FOLLOWWAIT");
+        sprintf_s(str, sizeof(str), "FOLLOWWAIT");
     else
-        sprintf_s(str, "NOTBLOCKED");
+        sprintf_s(str, sizeof(str), "NOTBLOCKED");
     pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 

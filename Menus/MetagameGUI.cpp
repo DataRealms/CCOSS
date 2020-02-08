@@ -1829,7 +1829,7 @@ void MetagameGUI::Update()
                 m_pBannerRedTop->ShowText(winnerNames, GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
                 m_pBannerYellowBottom->ShowText(plural ? "WIN!" : "WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);
 //                char winStr[256];
-//                sprintf_s(winStr, "Team %d", winner + 1);
+//                sprintf_s(winStr, sizeof(winStr), "Team %d", winner + 1);
 //                m_pBannerRedTop->ShowText(winStr, GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
 //                m_pBannerYellowBottom->ShowText("WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);
             }
@@ -5810,7 +5810,7 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
                                 sprintf_s(str, sizeof(str), "%c %.0f oz     ", -58, m_aBattleFunds[mp]);
                             else
                                 sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -26);
-//                            sprintf_s(str, "%c %.0f oz %c", -58, m_aBattleFunds[mp], m_AnimTimer2.AlternateReal(200) ? -39 : -26);
+//                            sprintf_s(str, sizeof(str), "%c %.0f oz %c", -58, m_aBattleFunds[mp], m_AnimTimer2.AlternateReal(200) ? -39 : -26);
                         }
                         else
                         {
@@ -5818,7 +5818,7 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
                                 sprintf_s(str, sizeof(str), "     %c %.0f oz", -58, m_aBattleFunds[mp]);
                             else
                                 sprintf_s(str, sizeof(str), "%c%c %c %.0f oz",  m_aAnimDestroyed[mp] ? ' ' : -26, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
-//                            sprintf_s(str, "%c %c %.0f oz", m_AnimTimer2.AlternateReal(200) ? -39 : -26, -58, m_aBattleFunds[mp]);
+//                            sprintf_s(str, sizeof(str), "%c %c %.0f oz", m_AnimTimer2.AlternateReal(200) ? -39 : -26, -58, m_aBattleFunds[mp]);
                         }
                     }
                     m_apPlayerBrainTravelLabel[mp]->SetText(str);
@@ -5891,10 +5891,10 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
                 {
                     if (quadIndex <= 1)
                         sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
-//                        sprintf_s(str, "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], -47, -48);
+//                        sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], -47, -48);
                     else
                         sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
-//                        sprintf_s(str, "%c%c %c %.0f oz", -48, -47, -58, m_aBattleFunds[mp]);
+//                        sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, -47, -58, m_aBattleFunds[mp]);
                 }
                 m_apPlayerBrainTravelLabel[mp]->SetText(str);
                 m_apPlayerBrainTravelLabel[mp]->SetToolTip("The new resident brain that has won this site and is settling in here now.");
@@ -6416,7 +6416,7 @@ void MetagameGUI::UpdatePlayerBars()
                 metaPlayer == m_ActivePlayerIncomeLines || g_MetaMan.m_GameState == MetaMan::COUNTINCOME || g_MetaMan.m_GameState == MetaMan::BUILDBASES || g_MetaMan.m_GameState == MetaMan::RUNACTIVITIES || g_MetaMan.m_GameState == MetaMan::ENDROUND)
             {
                 sprintf_s(str, sizeof(str), "%c %.0f oz", -58, (*mpItr).m_Funds);
-//                sprintf_s(str, "%cx%d %c %.0f oz", -48, (*mpItr).GetBrainPoolCount(), -58, (*mpItr).m_Funds);
+//                sprintf_s(str, sizeof(str), "%cx%d %c %.0f oz", -48, (*mpItr).GetBrainPoolCount(), -58, (*mpItr).m_Funds);
                 m_apPlayerBarLabel[metaPlayer]->SetText(str);
                 m_apPlayerBarLabel[metaPlayer]->SetHAlignment(GUIFont::Right);
                 m_apPlayerBarLabel[metaPlayer]->SetToolTip("This player's total funds");

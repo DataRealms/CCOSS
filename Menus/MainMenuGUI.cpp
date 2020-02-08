@@ -1803,7 +1803,7 @@ void MainMenuGUI::Draw(BITMAP *drawBitmap) const
 			float axis10 = g_UInputMan.AnalogAxisValue(0, 1, 0);
 			float axis11 = g_UInputMan.AnalogAxisValue(0, 1, 1);
 			char s[256];
-			sprintf_s(s, "Aim %.1f %.1f - Stick 0 %.1f %.1f - Stick 1 %.1f %.1f", aim.GetX(), aim.GetY(), axis00, axis01, axis10, axis11);
+			sprintf_s(s, sizeof(s), "Aim %.1f %.1f - Stick 0 %.1f %.1f - Stick 1 %.1f %.1f", aim.GetX(), aim.GetY(), axis00, axis01, axis10, axis11);
 
 			GUILabel * debugLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelDebug"));
 			if (debugLabel)

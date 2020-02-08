@@ -351,8 +351,7 @@ string SceneObject::GetGoldValueString(int nativeModule, float foreignMult, floa
     char returnString[64];
     if (subjValue != 0)
     {
-//        sprintf_s(returnString, "%.0foz", subjValue);
-        // The 'oz' takes up too much space
+        // Just show number since adding oz at the end takes up too much space
         sprintf_s(returnString, sizeof(returnString), "%.0f", subjValue);
     }
     else

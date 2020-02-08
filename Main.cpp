@@ -683,7 +683,7 @@ bool LoadDataModules()
                 // TODO: Log this and continue gracefully instead
             // LoadDataModule can return false (esp since it amy try to load already loaded modules, and that's ok) and shouldn't cause stop
             //                char error[512];
-            //                sprintf(error, "Failed to load Data Module: %s\n\nMake sure it contains an Index.ini file that defines a \"DataModule\"!", moduleInfo.name);
+            //                sprintf(error, sizeof(error), "Failed to load Data Module: %s\n\nMake sure it contains an Index.ini file that defines a \"DataModule\"!", moduleInfo.name);
             //                DDTAbort(error);
             //                return false;
 

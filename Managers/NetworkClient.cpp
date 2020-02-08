@@ -347,7 +347,7 @@ namespace RTE
 		/*if (msg.InputElementHeld > 0 || msg.InputElementPressed > 0 || msg.InputElementReleased > 0)
 		{
 			g_ConsoleMan.PrintString(buf);
-			sprintf_s(buf, "%08x %08x %08x", msg.InputElementHeld, msg.InputElementPressed, msg.InputElementReleased);
+			sprintf_s(buf, sizeof(buf), "%08x %08x %08x", msg.InputElementHeld, msg.InputElementPressed, msg.InputElementReleased);
 			g_ConsoleMan.PrintString(buf);
 		}*/
 	}
@@ -359,7 +359,7 @@ namespace RTE
 			return;
 
 		//char buf[256];
-		//sprintf_s(buf, "+ %d %d %d %d", frameData->X, frameData->Y, frameData->W, frameData->H);
+		//sprintf_s(buf, sizeof(buf), "+ %d %d %d %d", frameData->X, frameData->Y, frameData->W, frameData->H);
 		//g_ConsoleMan.PrintString(buf);
 
 		if (frameData->W == 1 && frameData->H == 1)
@@ -656,14 +656,14 @@ namespace RTE
 			else
 			{
 				//char buf[128];
-				//sprintf_s(buf, "%lu", effDataPtr->BitmapHash);
+				//sprintf_s(buf, sizeof(buf), "%lu", effDataPtr->BitmapHash);
 				//g_ConsoleMan.PrintString(buf);
 			}
 			effDataPtr++;
 		}
 
 		//char buf[128];
-		//sprintf_s(buf, "%d %d %d", msg->FrameNumber, m_PostEffects[msg->FrameNumber].size(), msg->PostEffectsCount);
+		//sprintf_s(buf, sizeof(buf), "%d %d %d", msg->FrameNumber, m_PostEffects[msg->FrameNumber].size(), msg->PostEffectsCount);
 		//g_ConsoleMan.PrintString(buf);
 	}
 
@@ -696,13 +696,13 @@ namespace RTE
 					m_Sounds[sndDataPtr->Channel] = pSound;
 
 					//char buf[128];
-					//sprintf_s(buf, "PLAY %d %d %f %s", sndDataPtr->Loops, pSound->GetCurrentChannel(), sndDataPtr->Pitch, path.c_str());
+					//sprintf_s(buf, sizeof(buf), "PLAY %d %d %f %s", sndDataPtr->Loops, pSound->GetCurrentChannel(), sndDataPtr->Pitch, path.c_str());
 					//g_ConsoleMan.PrintString(buf);
 				}
 				else 
 				{
 					//char buf[128];
-					//sprintf_s(buf, "NO SOUND %d", sndDataPtr->SoundHash);
+					//sprintf_s(buf, sizeof(buf), "NO SOUND %d", sndDataPtr->SoundHash);
 					//g_ConsoleMan.PrintString(buf);
 				}
 			}
@@ -712,7 +712,7 @@ namespace RTE
 				{
 					g_AudioMan.SetGlobalPitch(sndDataPtr->Pitch, sndDataPtr->AffectedByPitch > 0 ? true : false);
 					//char buf[128];
-					//sprintf_s(buf, "GLOBAL PITCH %f %d", sndDataPtr->Pitch, sndDataPtr->AffectedByPitch);
+					//sprintf_s(buf, sizeof(buf), "GLOBAL PITCH %f %d", sndDataPtr->Pitch, sndDataPtr->AffectedByPitch);
 					//g_ConsoleMan.PrintString(buf);
 				}
 				else
@@ -720,7 +720,7 @@ namespace RTE
 					if (m_Sounds.count(sndDataPtr->Channel) > 0)
 					{
 						//char buf[128];
-						//sprintf_s(buf, "PITCH %d %f", m_Sounds[sndDataPtr->Channel]->GetCurrentChannel(), sndDataPtr->Pitch);
+						//sprintf_s(buf, sizeof(buf), "PITCH %d %f", m_Sounds[sndDataPtr->Channel]->GetCurrentChannel(), sndDataPtr->Pitch);
 						//g_ConsoleMan.PrintString(buf);
 
 						g_AudioMan.SetSoundPitch(m_Sounds[sndDataPtr->Channel], sndDataPtr->Pitch);
@@ -728,7 +728,7 @@ namespace RTE
 					else
 					{
 						//char buf[128];
-						//sprintf_s(buf, "Not found %d", sndDataPtr->Channel);
+						//sprintf_s(buf, sizeof(buf), "Not found %d", sndDataPtr->Channel);
 						//g_ConsoleMan.PrintString(buf);
 					}
 				}
@@ -738,7 +738,7 @@ namespace RTE
 				if (m_Sounds.count(sndDataPtr->Channel) > 0)
 				{
 					//char buf[128];
-					//sprintf_s(buf, "STOP %d", m_Sounds[sndDataPtr->Channel]->GetCurrentChannel());
+					//sprintf_s(buf, sizeof(buf), "STOP %d", m_Sounds[sndDataPtr->Channel]->GetCurrentChannel());
 					//g_ConsoleMan.PrintString(buf);
 
 					m_Sounds[sndDataPtr->Channel]->Stop();
@@ -749,7 +749,7 @@ namespace RTE
 		}
 
 		//char buf[128];
-		//sprintf_s(buf, "%d %d %d", msg->FrameNumber, m_PostEffects[msg->FrameNumber].size(), msg->PostEffectsCount);
+		//sprintf_s(buf, sizeof(buf), "%d %d %d", msg->FrameNumber, m_PostEffects[msg->FrameNumber].size(), msg->PostEffectsCount);
 		//g_ConsoleMan.PrintString(buf);
 	}
 
@@ -784,7 +784,7 @@ namespace RTE
 			else if (sndDataPtr->State == AudioMan::MUSIC_SET_PITCH)
 			{
 				//char buf[128];
-				//sprintf_s(buf, "MUSIC PITCH %f", sndDataPtr->Pitch);
+				//sprintf_s(buf, sizeof(buf), "MUSIC PITCH %f", sndDataPtr->Pitch);
 				//g_ConsoleMan.PrintString(buf);
 
 				//g_AudioMan.SetMusicPitch(sndDataPtr->Pitch);

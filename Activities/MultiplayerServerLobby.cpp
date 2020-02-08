@@ -1176,7 +1176,7 @@ namespace RTE {
 			m_pGUIInput->GetMousePosition(&x, &y);
 
 			char buf[256];
-			sprintf_s(buf, "MB-%d%d%d MS-%d%d%d   %d - %d", states[0], states[1], states[2], events[0], events[1], events[2], x, y);
+			sprintf_s(buf, sizeof(buf), "MB-%d%d%d MS-%d%d%d   %d - %d", states[0], states[1], states[2], events[0], events[1], events[2], x, y);
 
 			result = result + buf;
 			g_FrameMan.SetScreenText(result, 0, 0, -1, false);

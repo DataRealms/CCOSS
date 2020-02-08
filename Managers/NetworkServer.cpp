@@ -1170,7 +1170,7 @@ namespace RTE
 			if (msg->PostEffectsCount >= 75)
 			{
 				//char buf[128];
-				//sprintf_s(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
+				//sprintf_s(buf, sizeof(buf), "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 				//g_ConsoleMan.PrintString(buf);
 
 				int payloadSize = sizeof(RTE::MsgPostEffects) + sizeof(PostEffectNetworkData) * msg->PostEffectsCount;
@@ -1189,7 +1189,7 @@ namespace RTE
 		if (msg->PostEffectsCount > 0)
 		{
 			//char buf[128];
-			//sprintf_s(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
+			//sprintf_s(buf, sizeof(buf), "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 			//g_ConsoleMan.PrintString(buf);
 
 			int header = sizeof(RTE::MsgPostEffects);
@@ -1239,7 +1239,7 @@ namespace RTE
 			if (msg->SoundEventsCount >= 50)
 			{
 				//char buf[128];
-				//sprintf_s(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
+				//sprintf_s(buf, sizeof(buf), "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 				//g_ConsoleMan.PrintString(buf);
 
 				int payloadSize = sizeof(RTE::MsgSoundEvents) + sizeof(AudioMan::SoundNetworkData) * msg->SoundEventsCount;
@@ -1258,7 +1258,7 @@ namespace RTE
 		if (msg->SoundEventsCount > 0)
 		{
 			//char buf[128];
-			//sprintf_s(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
+			//sprintf_s(buf, sizeof(buf), "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 			//g_ConsoleMan.PrintString(buf);
 
 			int header = sizeof(RTE::MsgSoundEvents);
@@ -1305,7 +1305,7 @@ namespace RTE
 			if (msg->MusicEventsCount >= 4)
 			{
 				//char buf[128];
-				//sprintf_s(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
+				//sprintf_s(buf, sizeof(buf), "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 				//g_ConsoleMan.PrintString(buf);
 
 				int payloadSize = sizeof(RTE::MsgMusicEvents) + sizeof(AudioMan::MusicNetworkData) * msg->MusicEventsCount;
@@ -1324,7 +1324,7 @@ namespace RTE
 		if (msg->MusicEventsCount > 0)
 		{
 			//char buf[128];
-			//sprintf_s(buf, "%d %d", msg->FrameNumber, msg->PostEffectsCount);
+			//sprintf_s(buf, sizeof(buf), "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 			//g_ConsoleMan.PrintString(buf);
 
 			int header = sizeof(RTE::MsgMusicEvents);

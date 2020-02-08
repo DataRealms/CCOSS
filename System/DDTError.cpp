@@ -93,7 +93,7 @@ bool DDTAssert(bool expression,
 /*
         int response;
         char string[512];
-        sprintf_s(string, "What: %s\nWhere: %s - Line %i", description, file, line);
+        sprintf_s(string, sizeof(string), "What: %s\nWhere: %s - Line %i", description, file, line);
         response = MessageBox(0,
                               string,
                               "Assertion Failure!",

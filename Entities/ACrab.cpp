@@ -3253,7 +3253,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             char gaugeColor = jetTimeRatio > 0.6 ? 149 : (jetTimeRatio > 0.3 ? 77 : 13);
             rectfill(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 6, drawPos.m_X + (16 * jetTimeRatio), drawPos.m_Y + m_HUDStack + 7, gaugeColor);
 //                    rect(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack - 2, drawPos.m_X + 24, drawPos.m_Y + m_HUDStack - 4, 238);
-//                    sprintf_s(str, "%.0f Kg", mass);
+//                    sprintf_s(str, sizeof(str), "%.0f Kg", mass);
 //                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
 
             m_HUDStack += -10;
@@ -3289,7 +3289,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
 		// Print aim angle and rot angle stoff
 		/*{
-			sprintf_s(str, "Aim %.2f Rot %.2f Lim %.2f", m_AimAngle, GetRotAngle(), m_AimRange + GetRotAngle());
+			sprintf_s(str, sizeof(str), "Aim %.2f Rot %.2f Lim %.2f", m_AimAngle, GetRotAngle(), m_AimRange + GetRotAngle());
 			pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
 
 			m_HUDStack += -10;
@@ -3305,22 +3305,22 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             
             if (m_AIMode == AIMODE_SENTRY)
             {
-                sprintf_s(str, "%s", "Sentry");
+                sprintf_s(str, sizeof(str), "%s", "Sentry");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y - 18, str, GUIFont::Centre);
             }
             else if (m_AIMode == AIMODE_PATROL)
             {
-                sprintf_s(str, "%s", "Patrol");
+                sprintf_s(str, sizeof(str), "%s", "Patrol");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X - 9, iconPos.m_Y - 5, str, GUIFont::Right);
             }
             else if (m_AIMode == AIMODE_BRAINHUNT)
             {
-                sprintf_s(str, "%s", "Brainhunt");
+                sprintf_s(str, sizeof(str), "%s", "Brainhunt");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X + 9, iconPos.m_Y - 5, str, GUIFont::Left);
             }
             else if (m_AIMode == AIMODE_GOLDDIG)
             {
-                sprintf_s(str, "%s", "Gold Dig");
+                sprintf_s(str, sizeof(str), "%s", "Gold Dig");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y + 8, str, GUIFont::Centre);
             }
 

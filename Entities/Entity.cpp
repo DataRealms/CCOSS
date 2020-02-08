@@ -283,7 +283,7 @@ int Entity::ReadProperty(std::string propName, Reader &reader)
         {
 /* Just read as an original preset instead of failing
             char error[256];
-            sprintf_s(error, "Referring to an instance ('%s') to copy from that hasn't been defined!", refName.c_str());
+            sprintf_s(error, sizeof(error), "Referring to an instance ('%s') to copy from that hasn't been defined!", refName.c_str());
             reader.ReportError(error);
             return -1;
 */

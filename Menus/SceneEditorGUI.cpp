@@ -744,12 +744,6 @@ void SceneEditorGUI::Update()
 
         // Check brain position validity with pathfinding and show a path to the sky
         m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(m_CursorPos, Vector(m_CursorPos.m_X, 0), m_BrainSkyPath);
-// TODO: TEMP REMOVE
-/*
-        char str[256];
-        sprintf_s(str, "Cost: %f", m_BrainSkyPathCost);
-        g_FrameMan.SetScreenText(str, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
-*/
 /*
         // Process the new path we now have, if any
         if (!m_BrainSkyPath.empty())

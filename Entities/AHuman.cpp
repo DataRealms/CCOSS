@@ -4892,7 +4892,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             char gaugeColor = jetTimeRatio > 0.6 ? 149 : (jetTimeRatio > 0.3 ? 77 : 13);
             rectfill(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 6, drawPos.m_X + (16 * jetTimeRatio), drawPos.m_Y + m_HUDStack + 7, gaugeColor);
 //                    rect(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack - 2, drawPos.m_X + 24, drawPos.m_Y + m_HUDStack - 4, 238);
-//                    sprintf_s(str, "%.0f Kg", mass);
+//                    sprintf_s(str, sizeof(str), "%.0f Kg", mass);
 //                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
 
             m_HUDStack += -10;
@@ -4930,7 +4930,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                 {
                     str[0] = m_GoldPicked ? -57 : -58; str[1] = 0;
                     pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                    sprintf_s(str, "%.0f oz", GetGoldCarried());
+                    sprintf_s(str, sizeof(str), "%.0f oz", GetGoldCarried());
                     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, str, GUIFont::Left);
 
                     m_HUDStack += -11;
@@ -4939,17 +4939,17 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                 if (m_pFGArm->HoldsSomething())
                 {
 /*
-                    sprintf_s(str, " Œ Drop");
+                    sprintf_s(str, sizeof(str), " Œ Drop");
                     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
                     m_HUDStack += -9;
 */
-//                    sprintf_s(str, "   %s", m_pFGArm->GetHeldMO()->GetPresetName().c_str());
+//                    sprintf_s(str, sizeof(str), "   %s", m_pFGArm->GetHeldMO()->GetPresetName().c_str());
                     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 3, m_pFGArm->GetHeldMO()->GetPresetName().c_str(), GUIFont::Centre);
                     m_HUDStack += -9;
                 }
                 else
                 {
-//                    sprintf_s(str, "æ  EMPTY  ø");
+//                    sprintf_s(str, sizeof(str), "æ  EMPTY  ø");
                     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 3, "EMPTY", GUIFont::Centre);
                     m_HUDStack += -9;
                 }
@@ -4957,7 +4957,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                 // Reload GUI, only show when there's nothing to pick up
                 if (!m_pItemInReach && m_pFGArm->HoldsSomething() && pHeldFirearm && !pHeldFirearm->IsFull())
                 {
-                    sprintf_s(str, " œ Reload", pHeldFirearm);
+                    sprintf_s(str, sizeof(str), " œ Reload", pHeldFirearm);
                     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
                 }
 */
@@ -4975,7 +4975,6 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         {
             if (m_pItemInReach && g_MovableMan.IsDevice(m_pItemInReach) && m_pFGArm && m_pFGArm->IsAttached())
             {
-    //            sprintf_s(str, " œ Pick up %s", m_pItemInReach->GetPresetName().c_str());
                 sprintf_s(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
             }
@@ -4992,22 +4991,22 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             
             if (m_AIMode == AIMODE_SENTRY)
             {
-                sprintf_s(str, "%s", "Sentry");
+                sprintf_s(str, sizeof(str), "%s", "Sentry");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y - 18, str, GUIFont::Centre);
             }
             else if (m_AIMode == AIMODE_PATROL)
             {
-                sprintf_s(str, "%s", "Patrol");
+                sprintf_s(str, sizeof(str), "%s", "Patrol");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X - 9, iconPos.m_Y - 5, str, GUIFont::Right);
             }
             else if (m_AIMode == AIMODE_BRAINHUNT)
             {
-                sprintf_s(str, "%s", "Brainhunt");
+                sprintf_s(str, sizeof(str), "%s", "Brainhunt");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X + 9, iconPos.m_Y - 5, str, GUIFont::Left);
             }
             else if (m_AIMode == AIMODE_GOLDDIG)
             {
-                sprintf_s(str, "%s", "Gold Dig");
+                sprintf_s(str, sizeof(str), "%s", "Gold Dig");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y + 8, str, GUIFont::Centre);
             }
 
@@ -5040,58 +5039,58 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
     // Dig state
     if (m_DigState == PREDIG)
-        sprintf_s(str, "PREDIG");
+        sprintf_s(str, sizeof(str), "PREDIG");
     else if (m_DigState == STARTDIG)
-        sprintf_s(str, "STARTDIG");
+        sprintf_s(str, sizeof(str), "STARTDIG");
     else if (m_DigState == TUNNELING)
-        sprintf_s(str, "TUNNELING");
+        sprintf_s(str, sizeof(str), "TUNNELING");
     else if (m_DigState == FINISHINGDIG)
-        sprintf_s(str, "FINISHINGDIG");
+        sprintf_s(str, sizeof(str), "FINISHINGDIG");
     else if (m_DigState == PAUSEDIGGER)
-        sprintf_s(str, "PAUSEDIGGER");
+        sprintf_s(str, sizeof(str), "PAUSEDIGGER");
     else
-        sprintf_s(str, "NOTDIGGING");
+        sprintf_s(str, sizeof(str), "NOTDIGGING");
     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
     // Device State
     if (m_DeviceState == POINTING)
-        sprintf_s(str, "POINTING");
+        sprintf_s(str, sizeof(str), "POINTING");
     else if (m_DeviceState == SCANNING)
-        sprintf_s(str, "SCANNING");
+        sprintf_s(str, sizeof(str), "SCANNING");
     else if (m_DeviceState == AIMING)
-        sprintf_s(str, "AIMING");
+        sprintf_s(str, sizeof(str), "AIMING");
     else if (m_DeviceState == FIRING)
-        sprintf_s(str, "FIRING");
+        sprintf_s(str, sizeof(str), "FIRING");
     else if (m_DeviceState == THROWING)
-        sprintf_s(str, "THROWING");
+        sprintf_s(str, sizeof(str), "THROWING");
     else if (m_DeviceState == DIGGING)
-        sprintf_s(str, "DIGGING");
+        sprintf_s(str, sizeof(str), "DIGGING");
     else
-        sprintf_s(str, "STILL");
+        sprintf_s(str, sizeof(str), "STILL");
     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
     // Jump State
     if (m_JumpState == FORWARDJUMP)
-        sprintf_s(str, "FORWARDJUMP");
+        sprintf_s(str, sizeof(str), "FORWARDJUMP");
     else if (m_JumpState == PREUPJUMP)
-        sprintf_s(str, "PREUPJUMP");
+        sprintf_s(str, sizeof(str), "PREUPJUMP");
     else if (m_JumpState == UPJUMP)
-        sprintf_s(str, "UPJUMP");
+        sprintf_s(str, sizeof(str), "UPJUMP");
     else if (m_JumpState == APEXJUMP)
-        sprintf_s(str, "APEXJUMP");
+        sprintf_s(str, sizeof(str), "APEXJUMP");
     else if (m_JumpState == LANDJUMP)
-        sprintf_s(str, "LANDJUMP");
+        sprintf_s(str, sizeof(str), "LANDJUMP");
     else
-        sprintf_s(str, "NOTJUMPING");
+        sprintf_s(str, sizeof(str), "NOTJUMPING");
     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
     if (m_Status == STABLE)
-        sprintf_s(str, "STABLE");
+        sprintf_s(str, sizeof(str), "STABLE");
     else if (m_Status == UNSTABLE)
-        sprintf_s(str, "UNSTABLE");
+        sprintf_s(str, sizeof(str), "UNSTABLE");
     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 

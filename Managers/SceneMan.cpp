@@ -3787,13 +3787,13 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
             pTerrain->Draw(pTargetBitmap, targetBox);
 //            m_pMOColorLayer->Draw(pTargetBitmap, targetBox);
 
-//            sprintf_s(str, "Terrain Matter\nHit M to cycle modes");
+//            sprintf_s(str, sizeof(str), "Terrain Matter\nHit M to cycle modes");
 //            g_FrameMan.DrawText(pTargetBitmap, str, Vector(475, 4), false);
             break;
 
         case g_LayerMOID:
             m_pMOIDLayer->Draw(pTargetBitmap, targetBox);
-//            sprintf_s(str, "MovableObject ID\nHit M to cycle modes");
+//            sprintf_s(str, sizeof(str), "MovableObject ID\nHit M to cycle modes");
 //            g_FrameMan.DrawText(pTargetBitmap, str, Vector(475, 4), false);
             break;
 

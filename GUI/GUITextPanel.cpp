@@ -389,7 +389,7 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier)
     if (KeyCode >= 32 && KeyCode < 128) {
         RemoveSelectionText();
 
-        char buf[2] = {KeyCode, '\0'};        
+        char buf[2] = {static_cast<char>(KeyCode), '\0'};
 
         // Insert the text
         m_Text.insert(m_CursorIndex, buf);

@@ -398,7 +398,6 @@
     <ClInclude Include="System\Vector.h" />
     <ClInclude Include="System\Writer.h" />
     <ClInclude Include="System\MicroPather\micropather.h" />
-    <ClInclude Include="System\MD5\md5.h" />
     <ClInclude Include="Managers\AchievementMan.h" />
     <ClInclude Include="Managers\ActivityMan.h" />
     <ClInclude Include="Managers\AudioMan.h" />
@@ -651,7 +650,6 @@
     <ClCompile Include="System\DDTTools.cpp" />
     <ClCompile Include="System\Matrix.cpp" />
     <ClCompile Include="System\MicroPather\micropather.cpp" />
-    <ClCompile Include="System\MD5\md5.cpp" />
     <ClCompile Include="System\PathFinder.cpp" />
     <ClCompile Include="System\Reader.cpp" />
     <ClCompile Include="System\System.cpp" />

@@ -10,9 +10,6 @@
     <Filter Include="System\MicroPather">
       <UniqueIdentifier>{d7921341-db26-4b59-b590-1cd922940032}</UniqueIdentifier>
     </Filter>
-    <Filter Include="System\MD5">
-      <UniqueIdentifier>{2895a2d1-cae8-4fa4-9ad8-40f708b86d00}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Managers">
       <UniqueIdentifier>{777a2010-7ae7-41e7-8d10-1a3d2e6b3001}</UniqueIdentifier>
     </Filter>
@@ -101,9 +98,6 @@
     </ClInclude>
     <ClInclude Include="System\MicroPather\micropather.h">
       <Filter>System\MicroPather</Filter>
-    </ClInclude>
-    <ClInclude Include="System\MD5\md5.h">
-      <Filter>System\MD5</Filter>
     </ClInclude>
     <ClInclude Include="Managers\AchievementMan.h">
       <Filter>Managers</Filter>
@@ -988,9 +982,6 @@
     </ClCompile>
     <ClCompile Include="System\MicroPather\micropather.cpp">
       <Filter>System\MicroPather</Filter>
-    </ClCompile>
-    <ClCompile Include="System\MD5\md5.cpp">
-      <Filter>System\MD5</Filter>
     </ClCompile>
     <ClCompile Include="Managers\AchievementMan.cpp">
       <Filter>Managers</Filter>

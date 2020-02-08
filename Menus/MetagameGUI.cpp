@@ -21,7 +21,6 @@
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
 #include "MetaMan.h"
-#include "AchievementMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -58,13 +57,8 @@ extern volatile bool g_Quit;
 extern int g_StationOffsetX;
 extern int g_StationOffsetY;
 
-using namespace std;
 using namespace RTE;
 
-#define WHITEGUICOLOR makecol(255, 255, 255)
-#define YELLOWGUICOLOR makecol(255, 255, 128)
-#define REDGUICOLOR makecol(255, 100, 100)
-#define GREENGUICOLOR makecol(128, 255, 128)
 #define CHAMFERSIZE 40
 
 #define SCANCOST 250
@@ -95,7 +89,7 @@ void MetagameGUI::SiteTarget::Draw(BITMAP *drawBitmap) const
     {
         float radius = LERP(0.0, 1.0, 200, 10, m_AnimProgress);
         float lineLen = LERP(0.0, 1.0, 60, 10, m_AnimProgress);
-        float rotation = 0;//LERP(0.0, 1.0, -EigthPI, 0.0, m_AnimProgress);
+        float rotation = 0;//LERP(0.0, 1.0, -c_EighthPI, 0.0, m_AnimProgress);
         Vector inner;
         Vector outer;
 
@@ -104,8 +98,8 @@ void MetagameGUI::SiteTarget::Draw(BITMAP *drawBitmap) const
         {
             inner.SetXY(radius, 0);
             outer.SetXY(radius + lineLen, 0);
-            inner.RadRotate(rotation + (HalfPI * i));
-            outer.RadRotate(rotation + (HalfPI * i));
+            inner.RadRotate(rotation + (c_HalfPI * i));
+            outer.RadRotate(rotation + (c_HalfPI * i));
             DrawGlowLine(drawBitmap, m_CenterPos + inner, m_CenterPos + outer, m_Color);
         }
     }
@@ -113,7 +107,7 @@ void MetagameGUI::SiteTarget::Draw(BITMAP *drawBitmap) const
     {
         float radius = LERP(0.0, 1.0, 10, 200, m_AnimProgress);
         float lineLen = LERP(0.0, 1.0, 10, 60, m_AnimProgress);
-        float rotation = 0;//LERP(0.0, 1.0, -EigthPI, 0.0, m_AnimProgress);
+        float rotation = 0;//LERP(0.0, 1.0, -c_EighthPI, 0.0, m_AnimProgress);
         Vector inner;
         Vector outer;
 
@@ -122,8 +116,8 @@ void MetagameGUI::SiteTarget::Draw(BITMAP *drawBitmap) const
         {
             inner.SetXY(radius, 0);
             outer.SetXY(radius + lineLen, 0);
-            inner.RadRotate(rotation + (HalfPI * i));
-            outer.RadRotate(rotation + (HalfPI * i));
+            inner.RadRotate(rotation + (c_HalfPI * i));
+            outer.RadRotate(rotation + (c_HalfPI * i));
             DrawGlowLine(drawBitmap, m_CenterPos + inner, m_CenterPos + outer, m_Color);
         }
     }
@@ -524,7 +518,7 @@ int MetagameGUI::Create(Controller *pController)
     // Just get the menu button temporarily so we can set the custom menu icon
     if (GUIButton *pMenuButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("OpenMenuButton")))
     {
-        sprintf(str, "%c", -22);
+        sprintf_s(str, sizeof(str), "%c", -22);
         pMenuButton->SetText(string(str));
     }
 
@@ -636,7 +630,7 @@ int MetagameGUI::Create(Controller *pController)
 
     // Add the handicap options to the dropdowns
     // Prepare the brain icon
-    sprintf(str, "%c", -48);
+    sprintf_s(str, sizeof(str), "%c", -48);
     for (int metaPlayer = 0; metaPlayer < Activity::MAXPLAYERCOUNT; ++metaPlayer)
     {
         m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(string(str) + " +5", "", 0, 0, -1);
@@ -1047,7 +1041,7 @@ string MetagameGUI::GetRoundName(int roundNumber)
             return "TWELVE";
     }
     char numStr[8];
-    sprintf(numStr, "%d", roundNumber + 1);
+    sprintf_s(numStr, sizeof(numStr), "%d", roundNumber + 1);
     return string(numStr);
 }
 
@@ -1101,7 +1095,7 @@ bool MetagameGUI::StartNewGame()
             // Disallow empty player name strings
             if (m_apPlayerNameBox[player]->GetText() == "")
             {
-                sprintf(str, "Player %d", player);
+                sprintf_s(str, sizeof(str), "Player %d", player);
                 m_apPlayerNameBox[player]->SetText(str);
             }
 
@@ -1199,7 +1193,7 @@ bool MetagameGUI::StartNewGame()
             // Start with the baseline setting
             newPlayer.m_BrainPool = ceilf(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
             // Baseline can never be 0
-            newPlayer.m_BrainPool = DMax(newPlayer.m_BrainPool, 1);
+            newPlayer.m_BrainPool = MAX(newPlayer.m_BrainPool, 1);
             // Apply the handicap!
             if (m_apPlayerHandicap[player]->GetSelectedIndex() == 0)
                 newPlayer.m_BrainPool += 5;
@@ -1214,7 +1208,7 @@ bool MetagameGUI::StartNewGame()
             else if (m_apPlayerHandicap[player]->GetSelectedIndex() == 6)
                 newPlayer.m_BrainPool -= 5;
             // Give at least ONE brain!
-            newPlayer.m_BrainPool = DMax(newPlayer.m_BrainPool, 1);
+            newPlayer.m_BrainPool = MAX(newPlayer.m_BrainPool, 1);
 
             // Starting gold amount; common to all
             newPlayer.m_Funds = startGold;
@@ -1539,7 +1533,7 @@ void MetagameGUI::Update()
 				else
 					difficultyString = "Difficulty: Nuts!";
 
-				sprintf(info, "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pAutoSave->GetSiteCount(), pAutoSave->GetPlayerCount(), pAutoSave->GetRoundCount() + 1, difficultyString.c_str());
+				sprintf_s(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pAutoSave->GetSiteCount(), pAutoSave->GetPlayerCount(), pAutoSave->GetRoundCount() + 1, difficultyString.c_str());
                 m_pLoadInfoLabel->SetText(info);
                 // Show the Load button since we have one locked in
                 m_apMetaButton[LOADNOW]->SetVisible(true);
@@ -1829,36 +1823,13 @@ void MetagameGUI::Update()
                         if (!winnerNames.empty())
                             plural = true;
 
-                        // Achievement logic
-                        if ((*pItr).IsHuman())
-                        {
-                            g_AchievementMan.UnlockAchievement("CC_WINMETAGAME");
-
-                            string tech = g_PresetMan.GetDataModule((*pItr).GetNativeTechModule())->GetFriendlyName();
-
-                            int techPos = tech.find(" Tech");
-                            tech.replace(techPos, 5, "");
-
-                            int bit = -1;
-                            
-                            if (tech == "Coalition") bit = 1;
-                            if (tech == "Techion")   bit = 2;
-                            if (tech == "Imperatus") bit = 3;
-                            if (tech == "Ronin")     bit = 4;
-                            if (tech == "Dummy")     bit = 5;
-                            if (tech == "Browncoat") bit = 6;
-
-                            if (bit != -1)
-                                g_AchievementMan.SetAchievementBit("CC_METAGAMEALLTECHS", bit, 6);
-						}
-
                         winnerNames = winnerNames + (winnerNames.empty() ? "" : " and ") + (*pItr).GetName();
                     }
                 }
                 m_pBannerRedTop->ShowText(winnerNames, GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
                 m_pBannerYellowBottom->ShowText(plural ? "WIN!" : "WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);
 //                char winStr[256];
-//                sprintf(winStr, "Team %d", winner + 1);
+//                sprintf_s(winStr, sizeof(winStr), "Team %d", winner + 1);
 //                m_pBannerRedTop->ShowText(winStr, GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
 //                m_pBannerYellowBottom->ShowText("WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);
             }
@@ -2058,11 +2029,11 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
                 // Make it flicker more if it's currently being fought over
                 blendAmount = 95 + (battleSite ? 25 : 15) * NormalRand();
                 set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-                circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 4, YELLOWGUICOLOR);
-                circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 2, YELLOWGUICOLOR);
+                circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 4, c_GUIColorYellow);
+                circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 2, c_GUIColorYellow);
                 blendAmount = 210 + 45 * NormalRand();
                 set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-                circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 1, YELLOWGUICOLOR);
+                circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 1, c_GUIColorYellow);
             }
         }
 
@@ -2070,7 +2041,7 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
         if (m_pSelectedScene && m_pSceneInfoPopup->GetVisible() && !m_PreTurn)
         {
             Vector sceneInfoBoxPos(m_pSceneInfoPopup->GetXPos() + (m_pSceneInfoPopup->GetWidth() / 2), m_pSceneInfoPopup->GetYPos() + (m_pSceneInfoPopup->GetHeight() / 2));
-            DrawScreenLineToSitePoint(drawBitmap, sceneInfoBoxPos, m_pSelectedScene->GetLocation() + m_pSelectedScene->GetLocationOffset(), WHITEGUICOLOR, -1, -1, (m_pSceneInfoPopup->GetHeight() / 2) + CHAMFERSIZE + 6, 1.0, g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()));
+            DrawScreenLineToSitePoint(drawBitmap, sceneInfoBoxPos, m_pSelectedScene->GetLocation() + m_pSelectedScene->GetLocationOffset(), c_GUIColorWhite, -1, -1, (m_pSceneInfoPopup->GetHeight() / 2) + CHAMFERSIZE + 6, 1.0, g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()));
         }
 
         // Draw all the player income site lines we are supposed to
@@ -2558,7 +2529,7 @@ void MetagameGUI::UpdateInput()
                     BaseEditor *pNewEditor = new BaseEditor;
                     pNewEditor->Create();
                     char str[64];
-                    sprintf(str, "R%dEdit", g_MetaMan.m_CurrentRound + 1);
+                    sprintf_s(str, sizeof(str), "R%dEdit", g_MetaMan.m_CurrentRound + 1);
                     pNewEditor->SetPresetName(g_MetaMan.GetGameName() + str);
 
                     // Gotto deact all players since by default there is one in slot 1
@@ -2589,7 +2560,7 @@ void MetagameGUI::UpdateInput()
                 GAScripted *pScanActivity = new GAScripted;
                 pScanActivity->Create("Base.rte/Activities/SiteScan.lua", "SiteScan");
                 char str[64];
-                sprintf(str, "R%dScan", g_MetaMan.m_CurrentRound + 1);
+                sprintf_s(str, sizeof(str), "R%dScan", g_MetaMan.m_CurrentRound + 1);
                 pScanActivity->SetPresetName(g_MetaMan.GetGameName() + str);
 
                 // Gotto deact all players since by default there is one in slot 1
@@ -2796,7 +2767,7 @@ void MetagameGUI::UpdateInput()
 					else
 						difficultyString = "Difficulty: Nuts!";
 
-                    sprintf(info, "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pGame->GetSiteCount(), pGame->GetPlayerCount(), pGame->GetRoundCount() + 1, difficultyString.c_str());
+                    sprintf_s(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pGame->GetSiteCount(), pGame->GetPlayerCount(), pGame->GetRoundCount() + 1, difficultyString.c_str());
                     m_pLoadInfoLabel->SetText(info);
                     // Show the Load button since we have one locked in
                     m_apMetaButton[LOADNOW]->SetVisible(true);
@@ -2835,7 +2806,7 @@ void MetagameGUI::UpdateInput()
 					else
 						difficultyString = "Difficulty: Nuts!";
 
-                    sprintf(info, "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pGame->GetSiteCount(), pGame->GetPlayerCount(), pGame->GetRoundCount() + 1, difficultyString.c_str());
+                    sprintf_s(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pGame->GetSiteCount(), pGame->GetPlayerCount(), pGame->GetRoundCount() + 1, difficultyString.c_str());
                     m_pSaveInfoLabel->SetText(info);
                     m_pSaveInfoLabel->SetVisible(true);
                     // Show the Save button since we have one to overwrite locked in
@@ -3337,7 +3308,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             {
                 // Just mess with the funds; the metaplayers' funds will be affected afterward, according to their shares
                 // Never let team funds dip below 0
-                pOffensive->SetTeamFunds(DMax(0, pOffensive->GetTeamFunds(team) * PosRand()), team);
+                pOffensive->SetTeamFunds(MAX(0, pOffensive->GetTeamFunds(team) * PosRand()), team);
             }
         }
     }
@@ -3392,8 +3363,8 @@ void MetagameGUI::UpdateSiteRevealing()
         g_MetaMan.m_Scenes[m_AnimCountCurrent]->SetRevealed(true);
         // Create and set up its crosshairs
 // TODO: TEMP change this back
-        m_NewSiteIndicators.push_back(SiteTarget(m_PlanetCenter + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocation() + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocationOffset(), 0, SiteTarget::CROSSHAIRSSHRINK, YELLOWGUICOLOR, m_AnimTimer2.GetElapsedRealTimeMS()));
-        m_SiteSwitchIndicators.push_back(SiteTarget(m_PlanetCenter + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocation() + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocationOffset(), 0, SiteTarget::CIRCLEGROW, YELLOWGUICOLOR, m_AnimTimer2.GetElapsedRealTimeMS()));
+        m_NewSiteIndicators.push_back(SiteTarget(m_PlanetCenter + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocation() + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocationOffset(), 0, SiteTarget::CROSSHAIRSSHRINK, c_GUIColorYellow, m_AnimTimer2.GetElapsedRealTimeMS()));
+        m_SiteSwitchIndicators.push_back(SiteTarget(m_PlanetCenter + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocation() + g_MetaMan.m_Scenes[m_AnimCountCurrent]->GetLocationOffset(), 0, SiteTarget::CIRCLEGROW, c_GUIColorYellow, m_AnimTimer2.GetElapsedRealTimeMS()));
         // Increment the current scene index
         m_AnimCountCurrent++;
         // Reset the timer so we will get the next reveal in the set time
@@ -3412,7 +3383,7 @@ void MetagameGUI::UpdateSiteRevealing()
             m_NewSiteIndicators[i].m_AnimProgress = EaseOut(0.0, 1.0, shrinkTime / shrinkInterval);
         // If it's after, then just keep pulsating the target
         else
-            m_NewSiteIndicators[i].m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)shrinkTime % (int)shrinkInterval) / shrinkInterval);
+            m_NewSiteIndicators[i].m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)shrinkTime % (int)shrinkInterval) / shrinkInterval);
     }
 
     // Set the phase label grammatically correct
@@ -3456,7 +3427,7 @@ void MetagameGUI::UpdateSiteChangeAnim()
             (*itr).m_AnimProgress = EaseOut(0.0, 1.0, animTime / animInterval);
 //        // If it's after, then just keep pulsating the target
 //        else
-//            (*itr).m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)animTime % (int)animInterval) / animInterval);
+//            (*itr).m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)animTime % (int)animInterval) / animInterval);
     }
 
     // Remove the markers that are done animating
@@ -3522,7 +3493,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
 
             // TRADESTAR BANK ACCOUNT AND RENT
             // Add line to show existing funds stored in space station, and deduct rent from
-            m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 0, 1.0, Vector(g_StationOffsetX, g_StationOffsetY), "TradeStar Midas", 0, YELLOWGUICOLOR, -1, 0, channelHeight, 2.0f));
+            m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 0, 1.0, Vector(g_StationOffsetX, g_StationOffsetY), "TradeStar Midas", 0, c_GUIColorYellow, -1, 0, channelHeight, 2.0f));
             m_IncomeSiteLines.back().m_FundsAmount = g_MetaMan.m_Players[m_AnimMetaPlayer].m_PhaseStartFunds;
             m_IncomeSiteLines.back().m_FundsTarget = m_IncomeSiteLines.back().m_FundsAmount - totalRent;
             // Save the index so we can update the line later
@@ -3532,7 +3503,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
             // Loop through the scenes owned by that player, setting up the site line for each
             while (m_pAnimScene = g_MetaMan.GetNextSceneOfPlayer(m_AnimMetaPlayer, m_pAnimScene))
             {
-                m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 1.0, 0, m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), m_pAnimScene->GetPresetName(), m_pAnimScene, YELLOWGUICOLOR, -1, 0, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(m_pAnimScene->GetTeamOwnership())));
+                m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 1.0, 0, m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), m_pAnimScene->GetPresetName(), m_pAnimScene, c_GUIColorYellow, -1, 0, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(m_pAnimScene->GetTeamOwnership())));
                 // Star them at 0, make them go to the round income for this base
                 m_IncomeSiteLines.back().m_FundsAmount = 0;
                 m_IncomeSiteLines.back().m_FundsTarget = m_pAnimScene->GetRoundIncome();
@@ -3542,7 +3513,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
             // BRAIN LIQUIDATION if funds will end up under 0
             if (totalEndFunds <= 0 || g_MetaMan.GetTotalBrainCountOfPlayer(m_AnimMetaPlayer) <= 0)
             {
-                m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 1.0, 0, Vector(m_apBrainPoolLabel[m_AnimMetaPlayer]->GetXPos() + (m_apBrainPoolLabel[m_AnimMetaPlayer]->GetHAlignment() == GUIFont::Left ? 5 : 16), m_apBrainPoolLabel[m_AnimMetaPlayer]->GetYPos() + 9) - m_PlanetCenter, "Brain Liquidation", 0, YELLOWGUICOLOR, -1, 0, channelHeight, 2.0f, false));
+                m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 1.0, 0, Vector(m_apBrainPoolLabel[m_AnimMetaPlayer]->GetXPos() + (m_apBrainPoolLabel[m_AnimMetaPlayer]->GetHAlignment() == GUIFont::Left ? 5 : 16), m_apBrainPoolLabel[m_AnimMetaPlayer]->GetYPos() + 9) - m_PlanetCenter, "Brain Liquidation", 0, c_GUIColorYellow, -1, 0, channelHeight, 2.0f, false));
                 // Start at 0 and grow to how much the brain is worth
                 m_IncomeSiteLines.back().m_FundsAmount = 0;
                 m_IncomeSiteLines.back().m_FundsTarget = BRAINGOLDVALUE;
@@ -4076,7 +4047,7 @@ void MetagameGUI::UpdateBaseBuilding()
 //            ChangeAnimMode(PAUSEANIM);
 
         // Find the next green defense line of this player
-        while (m_AnimActionLine < m_ActionSiteLines[m_AnimMetaPlayer].size() && m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_Color != GREENGUICOLOR)
+        while (m_AnimActionLine < m_ActionSiteLines[m_AnimMetaPlayer].size() && m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_Color != c_GUIColorGreen)
             m_AnimActionLine++;
 
         // Regular site line, start with bar bracket and line appearing toward the site
@@ -4204,7 +4175,7 @@ void MetagameGUI::UpdateBaseBuilding()
                 else
                 {
                     char str[64];
-                    sprintf(str, m_AnimBuildCount == 1 ? "Built %d item" : "Built %d items", m_AnimBuildCount);
+                    sprintf_s(str, sizeof(str), m_AnimBuildCount == 1 ? "Built %d item" : "Built %d items", m_AnimBuildCount);
                     PlayerTextIndication(m_AnimMetaPlayer, str, m_PlanetCenter + m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_PlanetPoint, 2500);
                 }
                 m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_OnlyFirstSegments = -1;
@@ -4262,7 +4233,7 @@ void MetagameGUI::UpdateBaseBuilding()
             for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[metaPlayer].begin(); slItr != m_ActionSiteLines[metaPlayer].end(); ++slItr)
             {
                 // APPLY all the defense budget allocations to actually building, but not before subtracting their values from the pre funds
-                if ((*slItr).m_Color == GREENGUICOLOR)
+                if ((*slItr).m_Color == c_GUIColorGreen)
                 {
                     if ((*slItr).m_pScene)
                     {
@@ -4347,7 +4318,7 @@ void MetagameGUI::SetupOffensives()
                         GAScripted *pOffensive = new GAScripted;
                         pOffensive->Create("Base.rte/Activities/MetaFight.lua", "MetaFight");
                         char str[64];
-                        sprintf(str, "R%dA%d", g_MetaMan.m_CurrentRound + 1, offensiveCount);
+                        sprintf_s(str, sizeof(str), "R%dA%d", g_MetaMan.m_CurrentRound + 1, offensiveCount);
                         pOffensive->SetPresetName(g_MetaMan.GetGameName() + str);
                         // Associate the name of the scene with where this thing is supposed to take place
                         pOffensive->SetSceneName(targetName);
@@ -4462,7 +4433,7 @@ void MetagameGUI::UpdateOffensives()
     if (m_AnimActivityChange)
     {   
         // Show which mission we're on of all the offensive activities in queue
-        sprintf(str, "Battle %d of %d", (g_MetaMan.m_CurrentOffensive + 1), (int)(g_MetaMan.m_RoundOffensives.size()));
+        sprintf_s(str, sizeof(str), "Battle %d of %d", (g_MetaMan.m_CurrentOffensive + 1), (int)(g_MetaMan.m_RoundOffensives.size()));
         m_pPhaseLabel->SetText(str);
 
         // Find the scene being attacked in this offensive Activity
@@ -4525,7 +4496,7 @@ void MetagameGUI::UpdateOffensives()
 //                        if (remainingFunds <= 0)
 //                            PlayerTextIndication(mp, "No unallocated funds!", Vector(m_apPlayerBox[mp]->GetXPos(), m_apPlayerBox[mp]->GetYPos()), 1500);
 
-                        m_ActionSiteLines[mp].push_back(SiteLine(mp, meterStart, remainingFunds / g_MetaMan.m_Players[mp].m_Funds, m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), m_pAnimScene->GetPresetName(), m_pAnimScene, YELLOWGUICOLOR, -1, -1, 60, 1.0f, g_MetaMan.IsActiveTeam(m_pAnimScene->GetTeamOwnership())));
+                        m_ActionSiteLines[mp].push_back(SiteLine(mp, meterStart, remainingFunds / g_MetaMan.m_Players[mp].m_Funds, m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), m_pAnimScene->GetPresetName(), m_pAnimScene, c_GUIColorYellow, -1, -1, 60, 1.0f, g_MetaMan.IsActiveTeam(m_pAnimScene->GetTeamOwnership())));
                         // This will actually affect the line meter
                         m_ActionSiteLines[mp].back().m_FundsAmount = remainingFunds;
                         // Add to the battle funds display too
@@ -4583,7 +4554,7 @@ void MetagameGUI::UpdateOffensives()
         {
             m_SiteAttackTarget.m_CenterPos = m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset();
             m_SiteAttackTarget.m_AnimProgress = 0;
-            m_SiteAttackTarget.m_Color = REDGUICOLOR;
+            m_SiteAttackTarget.m_Color = c_GUIColorRed;
             m_AnimModeDuration = 600;
             m_AnimTimer1.Reset();
             m_AnimTimer2.Reset();
@@ -4620,7 +4591,7 @@ void MetagameGUI::UpdateOffensives()
                     for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                     {
                         // Offensive lines are red; set them up to have their meters visible
-                        if ((*slItr).m_Color == REDGUICOLOR)
+                        if ((*slItr).m_Color == c_GUIColorRed)
                         {
                            (*slItr).m_OnlyFirstSegments = 1;
                            (*slItr).m_OnlyLastSegments = -1;
@@ -4653,7 +4624,7 @@ void MetagameGUI::UpdateOffensives()
                         for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                         {
                             // Offensive lines are red; grow all of em
-                            if ((*slItr).m_Color == REDGUICOLOR)
+                            if ((*slItr).m_Color == c_GUIColorRed)
                                 (*slItr).m_OnlyFirstSegments++;
                         }
                     }
@@ -4665,10 +4636,10 @@ void MetagameGUI::UpdateOffensives()
         }
 
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // Animate the brain label travel animations
-        UpdatePreBattleAttackers(EaseInOut(0, 1.0, DMin(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
+        UpdatePreBattleAttackers(EaseInOut(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
         UpdatePreBattleDefenders(0);
 
         // Just wait until the players hit the continue button..
@@ -4703,11 +4674,11 @@ void MetagameGUI::UpdateOffensives()
         UpdateSiteNameLabel(true, m_pAnimScene->GetPresetName(), m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 1.8);
 
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // Keep the brain label travel animations in one spot and their labels updated
         UpdatePreBattleAttackers(1.0);
-        UpdatePreBattleDefenders(EaseOut(0, 1.0, DMin(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
+        UpdatePreBattleDefenders(EaseOut(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
 
         // Just wait until the players hit the continue button..
         if (m_BattleToResume)
@@ -4739,7 +4710,7 @@ void MetagameGUI::UpdateOffensives()
                     for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                     {
                         // Offensive lines are green; unallocated funds are white - attach all of them
-                        if ((*slItr).m_Color != REDGUICOLOR)
+                        if ((*slItr).m_Color != c_GUIColorRed)
                         {
                             (*slItr).m_OnlyFirstSegments = -1;
                             (*slItr).m_OnlyLastSegments = 0;
@@ -4771,7 +4742,7 @@ void MetagameGUI::UpdateOffensives()
                         for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[mp].begin(); slItr != m_ActionSiteLines[mp].end(); ++slItr)
                         {
                             // Offensive lines are red; grow the defensive ones relevant to this scene
-                            if ((*slItr).m_Color != REDGUICOLOR && m_pAnimScene->GetPresetName() == (*slItr).m_SiteName &&
+                            if ((*slItr).m_Color != c_GUIColorRed && m_pAnimScene->GetPresetName() == (*slItr).m_SiteName &&
                                 (m_pAnimScene->GetTeamOwnership() == g_MetaMan.m_Players[mp].GetTeam() && m_pAnimScene->GetResidentBrain(g_MetaMan.m_Players[mp].GetInGamePlayer())))
                                 (*slItr).m_OnlyLastSegments++;
                         }
@@ -4783,7 +4754,7 @@ void MetagameGUI::UpdateOffensives()
         }
 
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // Keep the brain label travel animations in one spot and their labels updated
         UpdatePreBattleAttackers(1.0);
@@ -4816,7 +4787,7 @@ void MetagameGUI::UpdateOffensives()
         // Keep the name on the attack site, keeping the name high so the contestants' info can fit in the quadrants around the site
         UpdateSiteNameLabel(true, m_pAnimScene->GetPresetName(), m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 1.8);
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         UpdatePostBattleRetreaters(0);
         UpdatePostBattleResidents(0);
@@ -4883,7 +4854,7 @@ void MetagameGUI::UpdateOffensives()
                     if (!m_aAnimDestroyed[mp] && m_AnimTimer2.GetElapsedRealTimeMS() > (m_AnimModeDuration * 0.5) && PosRand() < 0.05)
                     {
                         // Add circle explosion effect to where the brain icon used to be
-                        m_SiteSwitchIndicators.push_back(SiteTarget(m_aBrainIconPos[mp], 0, SiteTarget::CIRCLEGROW, REDGUICOLOR));
+                        m_SiteSwitchIndicators.push_back(SiteTarget(m_aBrainIconPos[mp], 0, SiteTarget::CIRCLEGROW, c_GUIColorRed));
                         // Switch the brain icon drawing off
                         m_aAnimDestroyed[mp] = true;
                     }
@@ -4923,7 +4894,7 @@ void MetagameGUI::UpdateOffensives()
         // Keep the name on the attack site, keeping the name high so the contestants' info can fit in the quadrants around the site
         UpdateSiteNameLabel(true, m_pAnimScene->GetPresetName(), m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 1.8);
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // Animate the brain label travel animations
         UpdatePostBattleRetreaters(0);
@@ -4951,7 +4922,7 @@ void MetagameGUI::UpdateOffensives()
                         if (!m_aAnimDestroyed[mp])
                         {
                             // Add circle explosion effect to where the brain icon used to be
-                            m_SiteSwitchIndicators.push_back(SiteTarget(m_aBrainIconPos[mp], 0, SiteTarget::CIRCLEGROW, REDGUICOLOR));
+                            m_SiteSwitchIndicators.push_back(SiteTarget(m_aBrainIconPos[mp], 0, SiteTarget::CIRCLEGROW, c_GUIColorRed));
                             // Switch the brain icon drawing off
                             m_aAnimDestroyed[mp] = true;
                         }
@@ -4983,11 +4954,11 @@ void MetagameGUI::UpdateOffensives()
         // Keep the name on the attack site, keeping the name high so the contestants' info can fit in the quadrants around the site
         UpdateSiteNameLabel(true, m_pAnimScene->GetPresetName(), m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 1.8);
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // The retreating brain label travel animations get updated to go back to their pools
         if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyEvacuees())
-            UpdatePostBattleRetreaters(EaseInOut(0, 1.0, DMin(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
+            UpdatePostBattleRetreaters(EaseInOut(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
         else
             UpdatePostBattleRetreaters(1.0);
         UpdatePostBattleResidents(0);
@@ -5037,15 +5008,15 @@ void MetagameGUI::UpdateOffensives()
         // Keep the name on the attack site, keeping the name high so the contestants' info can fit in the quadrants around the site
         UpdateSiteNameLabel(true, m_pAnimScene->GetPresetName(), m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 1.8);
         // Animate the crosshairs subtly
-        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
+        m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // The brains going back into their lair are animated
         UpdatePostBattleRetreaters(1.0);
         // Tweak the animaiton slightly based on whether the site switched hands or not
         if (m_BattleCausedOwnershipChange)
-            UpdatePostBattleResidents(EaseIn(0, 1.0, DMin(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
+            UpdatePostBattleResidents(EaseIn(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
         else
-            UpdatePostBattleResidents(EaseOut(0, 1.0, DMin(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
+            UpdatePostBattleResidents(EaseOut(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
 
         // Find the players who are involved in this battle
         for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
@@ -5092,7 +5063,7 @@ void MetagameGUI::UpdateOffensives()
                     if ((*slItr).m_SiteName == m_pAnimScene->GetPresetName())
                     {
                         // Find their offensive funds site lines and set the offensive budget back to where it is supposed to end up
-                        if ((*slItr).m_Color == REDGUICOLOR)
+                        if ((*slItr).m_Color == c_GUIColorRed)
                             (*slItr).m_OnlyFirstSegments = 15;
                         // Defensive site
                         else if (m_pAnimScene->GetTeamOwnership() == g_MetaMan.m_Players[mp].GetTeam() && m_pAnimScene->GetResidentBrain(g_MetaMan.m_Players[mp].GetInGamePlayer()))
@@ -5213,7 +5184,7 @@ bool MetagameGUI::FinalizeOffensive()
 
     // If the battle caused ownership change, then show it with a cool indication
     if (m_BattleCausedOwnershipChange)
-        m_SiteSwitchIndicators.push_back(SiteTarget(m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 0, m_pAnimScene->GetTeamOwnership() != Activity::NOTEAM ? SiteTarget::SQUAREGROW : SiteTarget::CIRCLEGROW, REDGUICOLOR, m_AnimTimer2.GetElapsedRealTimeMS()));
+        m_SiteSwitchIndicators.push_back(SiteTarget(m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 0, m_pAnimScene->GetTeamOwnership() != Activity::NOTEAM ? SiteTarget::SQUAREGROW : SiteTarget::CIRCLEGROW, c_GUIColorRed, m_AnimTimer2.GetElapsedRealTimeMS()));
 
     // Clear the battle info of the last one
     ResetBattleInfo();
@@ -5375,14 +5346,14 @@ void MetagameGUI::UpdatePreBattleAttackers(float progress)
 
             // Write the brain label, with info if applicable for the current progress of animation
             if (progress < 1.0)
-                sprintf(str, "%c", -48);
+                sprintf_s(str, sizeof(str), "%c", -48);
             // When at site destination, take into account the side the brain icon needs to be on
             else
             {
                 if (quadIndex <= 1)
-                    sprintf(str, "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
+                    sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
                 else
-                    sprintf(str, "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+                    sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
             }
             m_apPlayerBrainTravelLabel[mp]->SetText(str);
             m_apPlayerBrainTravelLabel[mp]->SetToolTip("The specific brain that is being sent in to attack this place, and the funds he has been budgeted to do so with.");
@@ -5529,14 +5500,14 @@ void MetagameGUI::UpdatePreBattleDefenders(float progress)
 
             // Write the brain label, with info if applicable for the current progress of animation
             if (progress < 1.0)
-                sprintf(str, "%c", -48);
+                sprintf_s(str, sizeof(str), "%c", -48);
             // When at site destination, take into account the side the brain icon needs to be on
             else
             {
                 if (quadIndex <= 1)
-                    sprintf(str, "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
+                    sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
                 else
-                    sprintf(str, "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+                    sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
             }
             m_apPlayerBrainTravelLabel[mp]->SetText(str);
             m_apPlayerBrainTravelLabel[mp]->SetToolTip("The resident brain that is defending this site from attack, and the unallocated funds of its player that he gets to use (beyond the defense investments already made here).");
@@ -5669,14 +5640,14 @@ void MetagameGUI::UpdatePostBattleRetreaters(float progress)
 
             // Write the brain label, with info if applicable for the current progress of animation
             if (progress > 0)
-                sprintf(str, "%c", -48);
+                sprintf_s(str, sizeof(str), "%c", -48);
             // When at site destination, take into account the side the brain icon needs to be on
             else
             {
                 if (quadIndex <= 1)
-                    sprintf(str, "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
+                    sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
                 else
-                    sprintf(str, "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+                    sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
             }
             m_apPlayerBrainTravelLabel[mp]->SetText(str);
             m_apPlayerBrainTravelLabel[mp]->SetToolTip("The specific brain that is being sent in to attack this place, and the funds he has been budgeted to do so with.");
@@ -5829,25 +5800,25 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
                 {
                     // Death mask
                     if (progress > 0)
-                        sprintf(str, "%c", -26);
+                        sprintf_s(str, sizeof(str), "%c", -26);
                     // Brain with line blinking over it and the funds still showing
                     else
                     {
                         if (quadIndex <= 1)
                         {
                             if (m_aAnimDestroyed[mp])
-                                sprintf(str, "%c %.0f oz     ", -58, m_aBattleFunds[mp]);
+                                sprintf_s(str, sizeof(str), "%c %.0f oz     ", -58, m_aBattleFunds[mp]);
                             else
-                                sprintf(str, "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -26);
-//                            sprintf(str, "%c %.0f oz %c", -58, m_aBattleFunds[mp], m_AnimTimer2.AlternateReal(200) ? -39 : -26);
+                                sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -26);
+//                            sprintf_s(str, sizeof(str), "%c %.0f oz %c", -58, m_aBattleFunds[mp], m_AnimTimer2.AlternateReal(200) ? -39 : -26);
                         }
                         else
                         {
                             if (m_aAnimDestroyed[mp])
-                                sprintf(str, "     %c %.0f oz", -58, m_aBattleFunds[mp]);
+                                sprintf_s(str, sizeof(str), "     %c %.0f oz", -58, m_aBattleFunds[mp]);
                             else
-                                sprintf(str, "%c%c %c %.0f oz",  m_aAnimDestroyed[mp] ? ' ' : -26, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
-//                            sprintf(str, "%c %c %.0f oz", m_AnimTimer2.AlternateReal(200) ? -39 : -26, -58, m_aBattleFunds[mp]);
+                                sprintf_s(str, sizeof(str), "%c%c %c %.0f oz",  m_aAnimDestroyed[mp] ? ' ' : -26, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+//                            sprintf_s(str, sizeof(str), "%c %c %.0f oz", m_AnimTimer2.AlternateReal(200) ? -39 : -26, -58, m_aBattleFunds[mp]);
                         }
                     }
                     m_apPlayerBrainTravelLabel[mp]->SetText(str);
@@ -5914,16 +5885,16 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
 
                 // Write the brain label, with info if applicable for the current progress of animation
                 if (progress > 0)
-                    sprintf(str, "%c", -48);
+                    sprintf_s(str, sizeof(str), "%c", -48);
                 // When at site start position, take into account the side the brain icon needs to be on
                 else
                 {
                     if (quadIndex <= 1)
-                        sprintf(str, "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
-//                        sprintf(str, "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], -47, -48);
+                        sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
+//                        sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], -47, -48);
                     else
-                        sprintf(str, "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
-//                        sprintf(str, "%c%c %c %.0f oz", -48, -47, -58, m_aBattleFunds[mp]);
+                        sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+//                        sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, -47, -58, m_aBattleFunds[mp]);
                 }
                 m_apPlayerBrainTravelLabel[mp]->SetText(str);
                 m_apPlayerBrainTravelLabel[mp]->SetToolTip("The new resident brain that has won this site and is settling in here now.");
@@ -6025,7 +5996,7 @@ float MetagameGUI::UpdatePlayerActionLines(int metaPlayer)//, bool addUnallocate
         // Add line for scenes which are owned and whose build budgets have been set to something
         if (pScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer) && floorf(pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer())) > 0)
         {
-            m_ActionSiteLines[metaPlayer].push_back(SiteLine(metaPlayer, meterStart, pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / totalFunds, pScene->GetLocation() + pScene->GetLocationOffset(), pScene->GetPresetName(), pScene, GREENGUICOLOR, -1, -1, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(pScene->GetTeamOwnership())));
+            m_ActionSiteLines[metaPlayer].push_back(SiteLine(metaPlayer, meterStart, pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / totalFunds, pScene->GetLocation() + pScene->GetLocationOffset(), pScene->GetPresetName(), pScene, c_GUIColorGreen, -1, -1, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(pScene->GetTeamOwnership())));
             m_ActionSiteLines[metaPlayer].back().m_FundsAmount = pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer());
             meterStart += m_ActionSiteLines[metaPlayer].back().m_MeterAmount;
             channelHeight += 10;
@@ -6041,7 +6012,7 @@ float MetagameGUI::UpdatePlayerActionLines(int metaPlayer)//, bool addUnallocate
         {
             if ((*sItr)->IsRevealed() && (*sItr)->GetPresetName() == targetName)
             {
-                m_ActionSiteLines[metaPlayer].push_back(SiteLine(metaPlayer, meterStart, offensiveBudget / totalFunds, (*sItr)->GetLocation() + (*sItr)->GetLocationOffset(), (*sItr)->GetPresetName(), (*sItr), REDGUICOLOR, -1, -1, channelHeight, 1.0f, g_MetaMan.IsActiveTeam((*sItr)->GetTeamOwnership())));
+                m_ActionSiteLines[metaPlayer].push_back(SiteLine(metaPlayer, meterStart, offensiveBudget / totalFunds, (*sItr)->GetLocation() + (*sItr)->GetLocationOffset(), (*sItr)->GetPresetName(), (*sItr), c_GUIColorRed, -1, -1, channelHeight, 1.0f, g_MetaMan.IsActiveTeam((*sItr)->GetTeamOwnership())));
                 m_ActionSiteLines[metaPlayer].back().m_FundsAmount = offensiveBudget;
                 meterStart += m_ActionSiteLines[metaPlayer].back().m_MeterAmount;
             }
@@ -6064,7 +6035,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
     {
         char str[256];
         // Set the close button to have that fancy X
-        sprintf(str, "%c", -36);
+        sprintf_s(str, sizeof(str), "%c", -36);
         m_pSceneCloseButton->SetText(string(str));
 
         // Set the currently selected scene's texts
@@ -6079,7 +6050,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
             m_pSceneOwnerTeam->SetDrawType(GUICollectionBox::Image);
             m_pSceneOwnerTeam->SetDrawImage(new AllegroBitmap(g_MetaMan.m_TeamIcons[m_pSelectedScene->GetTeamOwnership()].GetBitmaps32()[0]));
             // Show how many resident brains there are hanging out here
-            sprintf(str, "%c", -26);
+            sprintf_s(str, sizeof(str), "%c", -26);
             string brainString = "";
             int brainCount = m_pSelectedScene->GetResidentBrainCount();
             for (int i = 0; i < brainCount; ++i)
@@ -6096,7 +6067,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
         }
 
         // Write the description, and add the total defense investment in this place so far as a lil stat
-        sprintf(str, "Total base investments here: %doz", (int)floorf(m_pSelectedScene->GetTotalInvestment()));
+        sprintf_s(str, sizeof(str), "Total base investments here: %doz", (int)floorf(m_pSelectedScene->GetTotalInvestment()));
         m_pSceneInfoLabel->SetText(m_pSelectedScene->GetDescription() + "\n" + string(str));
         // Adjust the height of the text box and container so it fits the text to display
         int newHeight = m_pSceneInfoLabel->ResizeHeightToFit();
@@ -6140,7 +6111,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
             {
                 // Set the budget label as per the slider
                 int budget = floorf(((float)m_pSceneBudgetSlider->GetValue() / 100.0f) * g_MetaMan.m_Players[metaPlayer].GetFunds());
-                sprintf(str, "Build Budget: %d oz", budget);
+                sprintf_s(str, sizeof(str), "Build Budget: %d oz", budget);
                 m_pSceneBudgetLabel->SetText(str);
                 m_apMetaButton[SCANNOW]->SetVisible(false);
                 m_apMetaButton[SCANLATER]->SetVisible(false);
@@ -6164,13 +6135,13 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                     // Set the appropriate action message, depending on whether this is enemy owned, or merely unexplored
                     if (g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()))
                     {
-                        sprintf(str, "Attack Budget: %d oz", budget);
+                        sprintf_s(str, sizeof(str), "Attack Budget: %d oz", budget);
                         m_pSceneBudgetLabel->SetToolTip("Sets how much of your total funds will be budgeted toward exploring this site. Any gold that isn't used in the attack will return to your account afterward, but will also be tied up and can't be used for defense if someone else attacks any of your bases during the same turn. You can only attack one site per turn!");
                         m_pSceneBudgetSlider->SetToolTip("Sets how much of your total funds will be budgeted toward exploring this site. Any gold that isn't used in the attack will return to your account afterward, but will also be tied up and can't be used for defense if someone else attacks any of your bases during the same turn. You can only attack one site per turn!");
                     }
                     else
                     {
-                        sprintf(str, "Expedition Budget: %d oz", budget);
+                        sprintf_s(str, sizeof(str), "Expedition Budget: %d oz", budget);
                         m_pSceneBudgetLabel->SetToolTip("Sets how much of your total funds will be budgeted toward attacking this site. Any gold that isn't used in the attack will return to your account afterward, but will also be tied up and can't be used for defense if someone else attacks any of your bases during the same turn. You can only explore one site per turn!");
                         m_pSceneBudgetSlider->SetToolTip("Sets how much of your total funds will be budgeted toward attacking this site. Any gold that isn't used in the attack will return to your account afterward, but will also be tied up and can't be used for defense if someone else attacks any of your bases during the same turn. You can only explore one site per turn!");
                     }
@@ -6196,7 +6167,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                         m_apMetaButton[SCANNOW]->SetVisible(false);
                         m_apMetaButton[SCANLATER]->SetVisible(false);
                         m_pScanInfoLabel->SetVisible(true);
-                        sprintf(str, "%d", SCANCOST);
+                        sprintf_s(str, sizeof(str), "%d", SCANCOST);
                         m_pScanInfoLabel->SetText("Need " + string(str) + " oz left to Scan!");
                     }
                     // Site can be scheduled to be scanned
@@ -6208,7 +6179,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                         m_pScanInfoLabel->SetVisible(false);
                         m_apMetaButton[DESIGNBASE]->SetVisible(false);
                         m_apMetaButton[SCENEACTION]->SetVisible(true);
-                        sprintf(str, "%d", SCANCOST);
+                        sprintf_s(str, sizeof(str), "%d", SCANCOST);
                         m_apMetaButton[SCENEACTION]->SetText("Scan Site (" + string(str) + " oz)");
                         m_apMetaButton[SCENEACTION]->SetToolTip("Performs an orbital scan of this site, which will show everything that is on the surface, but will not be able to penetrate far into the ground.");
                     }
@@ -6298,19 +6269,19 @@ void MetagameGUI::UpdateGameSizeLabels()
     // How many scenes are there total
     int totalCount = g_MetaMan.TotalScenePresets();
     char str[256];
-    sprintf(str, "Game Size: %d/%d sites", selectedCount, totalCount);
+    sprintf_s(str, sizeof(str), "Game Size: %d/%d sites", selectedCount, totalCount);
     m_pSizeLabel->SetText(str);
 
     // How much starting gold does the slider yield
     int startGold = STARTGOLDMIN + ((STARTGOLDMAX - STARTGOLDMIN) * (float)m_pGoldSlider->GetValue() / 100.0);
-    sprintf(str, "Starting Gold: %c %d oz", -58, startGold);
+    sprintf_s(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
     m_pGoldLabel->SetText(str);
 
     // Set the length label also according to the game length slider
 // TODO: don't hardcode the range of this
     int brainCount = ceilf(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
-    brainCount = DMax(brainCount, 1);
-    sprintf(str, "Game Length: %c%c%d starting brains", -48, -36, brainCount);
+    brainCount = MAX(brainCount, 1);
+    sprintf_s(str, sizeof(str), "Game Length: %c%c%d starting brains", -48, -36, brainCount);
     m_pLengthLabel->SetText(str);
 
     if (m_pDifficultySlider->GetValue() < GameActivity::CAKEDIFFICULTY)
@@ -6444,8 +6415,8 @@ void MetagameGUI::UpdatePlayerBars()
             if ((!m_PreTurn && metaPlayer == (g_MetaMan.m_GameState - MetaMan::PLAYER1TURN) && m_pSelectedScene) ||
                 metaPlayer == m_ActivePlayerIncomeLines || g_MetaMan.m_GameState == MetaMan::COUNTINCOME || g_MetaMan.m_GameState == MetaMan::BUILDBASES || g_MetaMan.m_GameState == MetaMan::RUNACTIVITIES || g_MetaMan.m_GameState == MetaMan::ENDROUND)
             {
-                sprintf(str, "%c %.0f oz", -58, (*mpItr).m_Funds);
-//                sprintf(str, "%cx%d %c %.0f oz", -48, (*mpItr).GetBrainPoolCount(), -58, (*mpItr).m_Funds);
+                sprintf_s(str, sizeof(str), "%c %.0f oz", -58, (*mpItr).m_Funds);
+//                sprintf_s(str, sizeof(str), "%cx%d %c %.0f oz", -48, (*mpItr).GetBrainPoolCount(), -58, (*mpItr).m_Funds);
                 m_apPlayerBarLabel[metaPlayer]->SetText(str);
                 m_apPlayerBarLabel[metaPlayer]->SetHAlignment(GUIFont::Right);
                 m_apPlayerBarLabel[metaPlayer]->SetToolTip("This player's total funds");
@@ -6455,7 +6426,7 @@ void MetagameGUI::UpdatePlayerBars()
             {
                 // If the player is out of the game, show a skull before the name
                 if (g_MetaMan.GetTotalBrainCountOfPlayer(metaPlayer) <= 0)
-                    sprintf(str, "%c ", -39);
+                    sprintf_s(str, sizeof(str), "%c ", -39);
                 else
                     str[0] = 0;
 
@@ -6480,7 +6451,7 @@ void MetagameGUI::UpdatePlayerBars()
             // [Brain Icon] [X] Number
             // The number to display is adjusted with whether any brains are out and about in the gui animations
             int brainDisplayCount = (*mpItr).GetBrainPoolCount() - (*mpItr).GetBrainsInTransit();
-            sprintf(str, "%c%c%d", brainDisplayCount > 0 ? -48 : -25, -36, brainDisplayCount);
+            sprintf_s(str, sizeof(str), "%c%c%d", brainDisplayCount > 0 ? -48 : -25, -36, brainDisplayCount);
             m_apBrainPoolLabel[metaPlayer]->SetText(str);
 
             // Animate any funds change indicator labels, make them float upward
@@ -6613,7 +6584,7 @@ void MetagameGUI::PlayerTextIndication(int metaPlayer, string text, const Vector
 void MetagameGUI::FundsChangeIndication(int metaPlayer, float change, const Vector &screenPos, double animLengthMS)
 {
     char str[256];
-    sprintf(str, change >= 1.0 ? "%c +%.0f oz" : (change <= -1.0 ? "%c %.0f oz" : "%c %.0f oz"), -58, change);
+    sprintf_s(str, sizeof(str), change >= 1.0 ? "%c +%.0f oz" : (change <= -1.0 ? "%c %.0f oz" : "%c %.0f oz"), -58, change);
     m_apFundsChangeLabel[metaPlayer]->SetText(str);
     m_apFundsChangeLabel[metaPlayer]->SetHAlignment(GUIFont::Right);
     m_apFundsChangeLabel[metaPlayer]->SetVAlignment(GUIFont::Top);
@@ -6638,7 +6609,7 @@ void MetagameGUI::BrainsChangeIndication(int metaPlayer, int change, const Vecto
     char str[256];
     // [Brain Icon] [X] Number
     // The number to display is adjusted with whether any brains are out and about in the gui animations
-    sprintf(str, change >= 0 ? "%c+%d" : "%c%d", -48, change);
+    sprintf_s(str, sizeof(str), change >= 0 ? "%c+%d" : "%c%d", -48, change);
     m_apBrainChangeLabel[metaPlayer]->SetText(str);
 
     m_apBrainChangeLabel[metaPlayer]->SetHAlignment(fontAlignment);
@@ -6814,12 +6785,12 @@ bool MetagameGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     else if (twoBends)
     {
         // Cap the chamfer size on the second bend appropriately
-        chamferSize = DMin((firstBend - secondBend).GetMagnitude() - 15, chamferSize);
-        chamferSize = DMin((secondBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
+        chamferSize = MIN((firstBend - secondBend).GetMagnitude() - 15, chamferSize);
+        chamferSize = MIN((secondBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
         // Snap the chamfer to not exist below a minimum size
         chamferSize = (chamferSize < 15) ? 0 : chamferSize;
         // No inverted chamfer
-        chamferSize = DMax(0, chamferSize);
+        chamferSize = MAX(0, chamferSize);
         chamferPoint1.SetXY(secondBend.m_X + chamferSize * -xDirMult, secondBend.m_Y);
         chamferPoint2.SetXY(secondBend.m_X, secondBend.m_Y + chamferSize * -yDirMult);
         // How many of the last segments to draw: to first bend + to second bend chamfer + chamfer + to site + circle
@@ -6840,12 +6811,12 @@ bool MetagameGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     else
     {
         // Cap the chamfer size on the first bend appropriately
-        chamferSize = DMin((screenPoint - firstBend).GetMagnitude() - 15, chamferSize);
-        chamferSize = DMin((firstBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
+        chamferSize = MIN((screenPoint - firstBend).GetMagnitude() - 15, chamferSize);
+        chamferSize = MIN((firstBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
         // Snap the chamfer to not exist below a minimum size
         chamferSize = (chamferSize < 15) ? 0 : chamferSize;
         // No inverted chamfer
-        chamferSize = DMax(0, chamferSize);
+        chamferSize = MAX(0, chamferSize);
         chamferPoint1.SetXY(screenPoint.m_X, firstBend.m_Y + chamferSize * -yDirMult);
         chamferPoint2.SetXY(firstBend.m_X + chamferSize * xDirMult, sitePos.m_Y);
         // How many of the last segments to draw: to first bend chamfer + chamfer + to site + circle
@@ -6912,8 +6883,8 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     // No part of the line is visible with these params, so just quit
     if ((onlyFirstSegments == 0 || onlyLastSegments == 0) && !drawMeterOverride)
         return false;
-    startMeterAt = DMax(0, startMeterAt);
-    startMeterAt = DMin(1.0, startMeterAt);
+    startMeterAt = MAX(0, startMeterAt);
+    startMeterAt = MIN(1.0, startMeterAt);
     if ((startMeterAt + meterAmount) > 1.0)
         meterAmount = 1.0 - startMeterAt;
     // Detect disabling of the segment controls
@@ -6936,8 +6907,8 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     float yDirMult = siteIsAbove ? -1.0 : 1.0;
     bool twoBends = fabs(sitePos.m_Y - boxMidY) < (channelHeight - circleRadius);
     Vector startMeter(m_apPlayerBox[metaPlayer]->GetXPos() + (m_apPlayerBox[metaPlayer]->GetWidth() - 1) * startMeterAt + 1, m_apPlayerBox[metaPlayer]->GetYPos() + (siteIsAbove ? 0 : m_apPlayerBox[metaPlayer]->GetHeight()));
-    Vector endMeter(startMeter.m_X + DMax(0, (m_apPlayerBox[metaPlayer]->GetWidth() - 1) * meterAmount - 2), startMeter.m_Y);
-    Vector midMeter(startMeter.m_X + DMax(0, (m_apPlayerBox[metaPlayer]->GetWidth() - 1) * meterAmount * 0.5 - 1), startMeter.m_Y + meterHeight * yDirMult);
+    Vector endMeter(startMeter.m_X + MAX(0, (m_apPlayerBox[metaPlayer]->GetWidth() - 1) * meterAmount - 2), startMeter.m_Y);
+    Vector midMeter(startMeter.m_X + MAX(0, (m_apPlayerBox[metaPlayer]->GetWidth() - 1) * meterAmount * 0.5 - 1), startMeter.m_Y + meterHeight * yDirMult);
     bool noBends = (fabs(sitePos.m_X - midMeter.m_X) < circleRadius) && ((m_apPlayerBox[metaPlayer]->GetWidth() * meterAmount * 0.5) >= fabs(sitePos.m_X - midMeter.m_X));
     Vector firstBend(midMeter.m_X, twoBends ? (boxMidY + channelHeight * yDirMult) : sitePos.m_Y);
     Vector secondBend(sitePos.m_X, firstBend.m_Y);
@@ -6964,12 +6935,12 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     else if (twoBends)
     {
         // Cap the chamfer size on the second bend appropriately
-        chamferSize = DMin((firstBend - secondBend).GetMagnitude() - meterHeight * 3, chamferSize);
-        chamferSize = DMin((secondBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
+        chamferSize = MIN((firstBend - secondBend).GetMagnitude() - meterHeight * 3, chamferSize);
+        chamferSize = MIN((secondBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
         // Snap the chamfer to not exist below a minimum size
         chamferSize = (chamferSize < (meterHeight * 3)) ? 0 : chamferSize;
         // No inverted chamfer
-        chamferSize = DMax(0, chamferSize);
+        chamferSize = MAX(0, chamferSize);
         chamferPoint1.SetXY(secondBend.m_X + chamferSize * -xDirMult, secondBend.m_Y);
         chamferPoint2.SetXY(secondBend.m_X, secondBend.m_Y + chamferSize * -yDirMult);
         // How many of the last segments to draw: meter + to first bend + to second bend chamfer + chamfer + to site + circle
@@ -6997,12 +6968,12 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     else
     {
         // Cap the chamfer size on the first bend appropriately
-        chamferSize = DMin((midMeter - firstBend).GetMagnitude() - meterHeight * 3, chamferSize);
-        chamferSize = DMin((firstBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
+        chamferSize = MIN((midMeter - firstBend).GetMagnitude() - meterHeight * 3, chamferSize);
+        chamferSize = MIN((firstBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
         // Snap the chamfer to not exist below a minimum size
         chamferSize = (chamferSize < (meterHeight * 3)) ? 0 : chamferSize;
         // No inverted chamfer
-        chamferSize = DMax(0, chamferSize);
+        chamferSize = MAX(0, chamferSize);
         chamferPoint1.SetXY(midMeter.m_X, firstBend.m_Y + chamferSize * -yDirMult);
         chamferPoint2.SetXY(firstBend.m_X + chamferSize * xDirMult, sitePos.m_Y);
         // How many of the last segments to draw: meter + to first bend chamfer + chamfer + to site + circle

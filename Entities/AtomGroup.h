@@ -18,8 +18,6 @@
 #include "Atom.h"
 #include "LimbPath.h"
 #include "Timer.h"
-#include <deque>
-#include <unordered_map>
 
 namespace RTE
 {

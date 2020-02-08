@@ -1,3 +1,8 @@
+/*
+//TODO: Remake this into a nice offline achievement system eventually™.
+// NO STUPID 999 GAMES THING!
+// Possibly unlock special junk to use ingame.
+
 #ifndef _ACHIEVEMENTMAN_
 #define _ACHIEVEMENTMAN_
 
@@ -114,3 +119,4 @@ private:
 } // namespace RTE
 
 #endif // _ACHIEVEMENTMAN_
+*/

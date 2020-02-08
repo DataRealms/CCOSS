@@ -11,12 +11,8 @@
 // Inclusions of header files
 
 #include "GUI.h"
-#include <cstring>
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          TrimString

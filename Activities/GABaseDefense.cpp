@@ -31,10 +31,7 @@
 
 extern bool g_ResetActivity;
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(GABaseDefense, GameActivity, 0)
 

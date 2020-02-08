@@ -13,17 +13,11 @@
 
 #include "DDTTools.h"
 
-#include <math.h>
-#include <fstream>
 #include "FrameMan.h"
 #include "SceneMan.h"
 #include "Vector.h"
 
-namespace RTE
-{
-
-#define X 0
-#define Y 1 
+namespace RTE { 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Global function: SeedRand
@@ -110,7 +104,7 @@ float EaseIn(float x1, float x2, float y)
         return x2;
 
     float t = 1 - y;
-    return (x2 - x1) * (sinf(-t * HalfPI) + 1) + x1;
+    return (x2 - x1) * (sinf(-t * c_HalfPI) + 1) + x1;
 }
 
 
@@ -127,7 +121,7 @@ float EaseOut(float x1, float x2, float y)
     else if (y >= 1.0)
         return x2;
 
-    return (x2 - x1) * -sinf(-y * HalfPI) + x1;
+    return (x2 - x1) * -sinf(-y * c_HalfPI) + x1;
 }
 
 

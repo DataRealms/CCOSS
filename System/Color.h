@@ -14,10 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <iostream>
-#include <cmath>
-#include <string>
-#include <deque>
 #include "Serializable.h"
 
 namespace RTE

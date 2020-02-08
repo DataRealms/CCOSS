@@ -32,11 +32,9 @@
 
 #include "Controller.h"
 
-using namespace std;
 using namespace RTE;
 
 BITMAP *RTE::AreaPickerGUI::s_pCursor = 0;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

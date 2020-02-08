@@ -24,13 +24,7 @@
 #include "GUI/GUITextBox.h"
 #include "GUI/GUILabel.h"
 
-#include <regex>
-#include <string>
-#include <sstream>
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 #define MENUSPEED 0.5
 
@@ -462,7 +456,7 @@ void ConsoleMan::Update()
     if (m_pInputTextBox->GetText().find_last_of('\n') != string::npos)
     {
         char strLine[1024];
-        stringstream inputSStream(m_pInputTextBox->GetText());
+		std::stringstream inputSStream(m_pInputTextBox->GetText());
         do
         {
             inputSStream.getline(strLine, 1024, '\n');

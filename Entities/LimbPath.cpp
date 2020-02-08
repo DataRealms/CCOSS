@@ -16,10 +16,7 @@
 #include "PresetMan.h"
 #include "SLTerrain.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(LimbPath, Entity, 0)
 

@@ -16,10 +16,7 @@
 #include "PresetMan.h"
 #include "DataModule.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(MetaPlayer, Entity, 0)
 

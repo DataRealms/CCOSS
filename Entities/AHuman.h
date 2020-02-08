@@ -17,7 +17,6 @@
 #include "Actor.h"
 #include "Leg.h"
 #include "LimbPath.h"
-#include <deque>
 
 struct BITMAP;
 

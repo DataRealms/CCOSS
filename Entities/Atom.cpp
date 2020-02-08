@@ -19,10 +19,7 @@
 #include "DDTTools.h"
 #include "Actor.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string Atom::ClassName = "Atom";
 std::vector<void *> Atom::m_AllocatedPool;
@@ -1139,7 +1136,7 @@ int Atom::Travel(float travelTime,
 
                 // Gold special collection case!
 // TODO: Make material IDs more robust!")
-                if (m_pMaterial->id == GOLDMATID && g_MovableMan.IsOfActor(m_MOIDHit)) {
+                if (m_pMaterial->id == c_GoldMaterialID && g_MovableMan.IsOfActor(m_MOIDHit)) {
                     Actor *pActor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(m_LastHit.pBody[HITEE]->GetRootID()));
                     if (pActor)
                     {
@@ -1360,7 +1357,7 @@ int Atom::Travel(float travelTime,
     // Draw the trail
     if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
         int length = m_TrailLength/* + 3 * PosRand()*/;
-        for (int i = trailPoints.size() - DMin(length, trailPoints.size()); i < trailPoints.size(); ++i)
+        for (int i = trailPoints.size() - MIN(length, trailPoints.size()); i < trailPoints.size(); ++i)
         {
 //            DAssert(is_inside_bitmap(pTrailBitmap, trailPoints[i].first, trailPoints[i].second, 0), "Trying to draw out of bounds trail!");
 //            _putpixel(pTrailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());

@@ -48,10 +48,7 @@
 
 extern bool g_ResetActivity;
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(GibEditor, EditorActivity, 0)
 

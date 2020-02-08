@@ -14,7 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <string>
 #include "Serializable.h"
 #include "TimerMan.h"
 
@@ -330,7 +329,7 @@ public:
 // Arguments:       None.
 // Return value:    A normalzied scalar between 0.0 - 1.0 showing the progress toward the limit.
 
-    double RealTimeLimitProgress() const { return m_RealTimeLimit == 0 ? 1.0 : (DMin(1.0, GetElapsedRealTimeMS() / (m_RealTimeLimit / m_TicksPerMS)));  }
+    double RealTimeLimitProgress() const { return m_RealTimeLimit == 0 ? 1.0 : (MIN(1.0, GetElapsedRealTimeMS() / (m_RealTimeLimit / m_TicksPerMS)));  }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -535,7 +534,7 @@ public:
 // Arguments:       None.
 // Return value:    A normalzied scalar between 0.0 - 1.0 showing the progress toward the limit.
 
-    double SimTimeLimitProgress() const { return m_SimTimeLimit == 0 ? 1.0 : (DMin(1.0, GetElapsedSimTimeMS() / (m_SimTimeLimit / m_TicksPerMS)));  }
+    double SimTimeLimitProgress() const { return m_SimTimeLimit == 0 ? 1.0 : (MIN(1.0, GetElapsedSimTimeMS() / (m_SimTimeLimit / m_TicksPerMS)));  }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

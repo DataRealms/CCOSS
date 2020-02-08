@@ -14,9 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files, forward declarations, namespace stuff
 
-#include <string>
-#include <set>
-#include <deque>
 #include "SceneObject.h"
 #include "Vector.h"
 #include "Matrix.h"

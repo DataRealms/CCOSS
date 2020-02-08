@@ -46,10 +46,7 @@
 extern bool g_ResetActivity;
 extern bool g_InActivity;
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(SceneEditor, EditorActivity, 0)
 
@@ -469,7 +466,7 @@ void SceneEditor::Update()
                     }
 
 					// Make random planet coord's for this scene
-					float angle = RangeRand(0, 2 * PI);
+					float angle = RangeRand(0, 2 * c_PI);
                     Vector pos = Vector((int)(150 * cos(angle)), (int)(150 * sin(angle)));
 					pNewScene->SetLocation(pos);
 

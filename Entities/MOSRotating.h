@@ -198,7 +198,7 @@ friend class LuaMan;
     // Arguments:       None.
     // Return value:    The min emission velocity in m/s.
 
-        virtual float GetMinVelocity() const { return DMin(m_MinVelocity, m_MaxVelocity); }
+        virtual float GetMinVelocity() const { return MIN(m_MinVelocity, m_MaxVelocity); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -208,7 +208,7 @@ friend class LuaMan;
     // Arguments:       None.
     // Return value:    The max emission velocity in m/s.
 
-        virtual float GetMaxVelocity() const { return DMax(m_MinVelocity, m_MaxVelocity); }
+        virtual float GetMaxVelocity() const { return MAX(m_MinVelocity, m_MaxVelocity); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -540,7 +540,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    Whether this MovableObject is of Gold or not.
 
-    virtual bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->id == GOLDMATID; }
+    virtual bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->id == c_GoldMaterialID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

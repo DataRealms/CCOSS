@@ -16,8 +16,6 @@
 
 #include "Entity.h"
 #include "ContentFile.h"
-#include <vector>
-#include <map>
 
 #ifdef __USE_SOUND_FMOD
 struct FSOUND_SAMPLE;

@@ -15,8 +15,6 @@
 // Inclusions of header files
 
 #include "Serializable.h"
-#include <string>
-#include <map>
 
 struct DATAFILE;
 struct BITMAP;

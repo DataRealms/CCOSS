@@ -14,15 +14,10 @@
 #include "DataModule.h"
 #include "RTEManagers.h"
 #include "Entity.h"
-#include <map>
 
 #include "allegro.h"
 
-using namespace std;
-//using namespace zip;
-
-namespace RTE
-{
+namespace RTE {
 
 const string DataModule::m_ClassName = "DataModule";
 
@@ -46,7 +41,7 @@ void DataModule::Clear()
     m_PresetList.clear();
 	m_EntityList.clear();
     m_TypeMap.clear();
-    for (int i = 0; i < NUM_PALETTE_ENTRIES; ++i)
+    for (int i = 0; i < c_PaletteEntriesNumber; ++i)
         m_MaterialMappings[i] = 0;
 	m_ScanFolderContents = false;
 	m_IgnoreMissingItems = false;
@@ -91,7 +86,7 @@ int DataModule::Create(string moduleName, void (*fpProgressCallback)(std::string
     if (fpProgressCallback)
     {
         char report[512];
-        sprintf(report, "%s %c loading:", m_FileName.c_str(), -43);
+        sprintf_s(report, sizeof(report), "%s %c loading:", m_FileName.c_str(), -43);
         fpProgressCallback(string(report), true);
     }
 
@@ -113,7 +108,7 @@ int DataModule::Create(string moduleName, void (*fpProgressCallback)(std::string
 // TODO, more info here?
 /*
             char report[512];
-            sprintf(report, "%s loading:", m_FileName.c_str());
+            sprintf_s(report, sizeof(report), "%s loading:", m_FileName.c_str());
             fpProgressCallback(string(report), true);
 */
             fpProgressCallback(string(" "), true);
@@ -172,7 +167,7 @@ int DataModule::ReadModuleProperties(string moduleName, void (*fpProgressCallbac
     if (fpProgressCallback)
     {
         char report[512];
-        sprintf(report, "%s %c reading properties:", m_FileName.c_str(), -43);
+        sprintf_s(report, sizeof(report), "%s %c reading properties:", m_FileName.c_str(), -43);
         fpProgressCallback(string(report), true);
     }
 
@@ -684,7 +679,7 @@ bool DataModule::GetGroupsWithType(list<string> &groupList, string withType)
 
 bool DataModule::AddMaterialMapping(int fromID, int toID)
 {
-    AAssert(fromID > 0 && fromID < NUM_PALETTE_ENTRIES && toID > 0 && toID < NUM_PALETTE_ENTRIES, "Tried to make an out-of-bounds Material mapping");
+    AAssert(fromID > 0 && fromID < c_PaletteEntriesNumber && toID > 0 && toID < c_PaletteEntriesNumber, "Tried to make an out-of-bounds Material mapping");
 
     bool clear = m_MaterialMappings[fromID] == 0;
     m_MaterialMappings[fromID] = toID;

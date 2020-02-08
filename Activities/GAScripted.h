@@ -14,9 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <string>
-#include <vector>
-#include <set>
 #include "GameActivity.h"
 #include "GlobalScript.h"
 #include "Box.h"

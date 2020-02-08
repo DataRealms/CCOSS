@@ -15,11 +15,8 @@
 // Inclusions of header files
 
 #include "Attachable.h"
-#include <list>
-using namespace std;
 
-namespace RTE
-{
+namespace RTE {
 
 class MOSParticle;
 

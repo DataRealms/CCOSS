@@ -22,10 +22,7 @@
 #include "AtomGroup.h"
 #include "GUI/AllegroBitmap.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(HeldDevice, Attachable, 0)
 
@@ -263,7 +260,7 @@ Vector HeldDevice::GetSupportPos() const
 {
 /*
     Vector rotOff(m_SupportOffset.GetYFlipped(m_HFlipped));
-    rotOff.RadRotate(m_HFlipped ? (PI + m_Rotation) : m_Rotation);
+    rotOff.RadRotate(m_HFlipped ? (c_PI + m_Rotation) : m_Rotation);
     return m_Pos + rotOff;
 */
     return m_Pos + RotateOffset(m_SupportOffset);
@@ -546,9 +543,7 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
                 m_BlinkTimer.Reset();
 
             pSymbolFont->DrawAligned(&pBitmapInt, drawPos.m_X - 1, drawPos.m_Y - 20, str, GUIFont::Centre);
-    //        sprintf(str, "%.0f", m_PresetName);
-            sprintf(str, "%s", m_PresetName.c_str());
-//            sprintf(str, "%s", m_sClass.GetName().c_str());
+            sprintf_s(str, sizeof(str), "%s", m_PresetName.c_str());
             pTextFont->DrawAligned(&pBitmapInt, drawPos.m_X + 0, drawPos.m_Y - 29, str, GUIFont::Centre);
         }
     }

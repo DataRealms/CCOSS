@@ -14,8 +14,6 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 #include "DDTError.h"
-#include "allegro.h"
-
 
 using namespace RTE;
 

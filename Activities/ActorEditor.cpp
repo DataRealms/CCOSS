@@ -47,10 +47,7 @@
 
 extern bool g_ResetActivity;
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(ActorEditor, EditorActivity, 0)
 

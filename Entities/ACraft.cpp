@@ -33,10 +33,7 @@
 #include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 ABSTRACTCLASSINFO(ACraft, Actor)
 const string ACraft::Exit::m_sClassName = "Exit";
@@ -718,7 +715,7 @@ void ACraft::DropAllInventory()
             if (pPassenger && m_ExitTimer.IsPastSimMS(m_ExitInterval))
             {
                 pPassenger->SetVel(m_Vel + exitVel * antiGravBoost);
-//                pPassenger->SetRotAngle(m_Rotation + exitVel.GetAbsRadAngle() (ejectDir > 0 ? -HalfPI : HalfPI));
+//                pPassenger->SetRotAngle(m_Rotation + exitVel.GetAbsRadAngle() (ejectDir > 0 ? -c_HalfPI : c_HalfPI));
 //                pPassenger->SetHFlipped(ejectDir <= 0);
                 // Avoid having immediate collisions with this
                 pPassenger->SetWhichMOToNotHit(this, 0.5f);
@@ -765,7 +762,7 @@ void ACraft::DropAllInventory()
             m_HasDelivered = true;
 
             // Kill craft if it is lying down.
-            if (fabs(m_Rotation.GetRadAngle()) > QuartPI && m_Status != DYING)
+            if (fabs(m_Rotation.GetRadAngle()) > c_QuarterPI && m_Status != DYING)
             {
                 m_Status = DYING;
                 m_DeathTmr.Reset();
@@ -1062,22 +1059,22 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             
             if (m_AIMode == AIMODE_RETURN)
             {
-                sprintf(str, "%s", "Return");
+                sprintf_s(str, sizeof(str), "%s", "Return");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X, iconPos.m_Y - 18, str, GUIFont::Centre);
             }
             else if (m_AIMode == AIMODE_DELIVER)
             {
-                sprintf(str, "%s", "Deliver");
+                sprintf_s(str, sizeof(str), "%s", "Deliver");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X - 9, iconPos.m_Y - 5, str, GUIFont::Right);
             }
             else if (m_AIMode == AIMODE_SCUTTLE)
             {
-                sprintf(str, "%s", "Scuttle");
+                sprintf_s(str, sizeof(str), "%s", "Scuttle");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X + 9, iconPos.m_Y - 5, str, GUIFont::Left);
             }
             else if (m_AIMode == AIMODE_STAY)
             {
-                sprintf(str, "%s", "Stay");
+                sprintf_s(str, sizeof(str), "%s", "Stay");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X, iconPos.m_Y + 8, str, GUIFont::Centre);
             }
 

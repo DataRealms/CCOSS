@@ -31,17 +31,6 @@
 // Temp
 #include "Controller.h"
 
-
-using std::string;
-using std::list;
-using std::pair;
-using std::map;
-
-#ifdef _WIN32
-#define fmax max
-#define fmin min
-#endif
-
 namespace RTE
 {
 
@@ -62,10 +51,10 @@ bool IntRect::IntersectionCut(const IntRect &rhs)
 {
     if (Intersects(rhs))
     {
-        m_Left = DMax(m_Left, rhs.m_Left);
-        m_Right = DMin(m_Right, rhs.m_Right);
-        m_Top = DMax(m_Top, rhs.m_Top);
-        m_Bottom = DMin(m_Bottom, rhs.m_Bottom);
+        m_Left = MAX(m_Left, rhs.m_Left);
+        m_Right = MIN(m_Right, rhs.m_Right);
+        m_Top = MAX(m_Top, rhs.m_Top);
+        m_Bottom = MIN(m_Bottom, rhs.m_Bottom);
         return true;
     }
 
@@ -96,7 +85,7 @@ void SceneMan::Clear()
     m_LayerDrawMode = g_LayerNormal;
 
     m_MatNameMap.clear();
-    for (int i = 0; i < NUM_PALETTE_ENTRIES; ++i)
+    for (int i = 0; i < c_PaletteEntriesNumber; ++i)
         m_apMatPalette[i] = 0;
     m_MaterialCount = 0;
 
@@ -240,7 +229,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
 
     // Re-create the MoveableObject:s ID SceneLayer
     delete m_pMOIDLayer;
-    pBitmap = create_bitmap_ex(MOID_BITMAP_LAYER_DEPTH, GetSceneWidth(), GetSceneHeight());
+    pBitmap = create_bitmap_ex(c_MOIDLayerBitDepth, GetSceneWidth(), GetSceneHeight());
     clear_to_color(pBitmap, g_NoMOID);
     m_pMOIDLayer = new SceneLayer();
     m_pMOIDLayer->Create(pBitmap, false, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
@@ -361,7 +350,7 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
 
         // If the initially requested material slot is available, then put it there
         // But if it's not available, then check if any subsequent one is, looping around the palette if necessary
-        for (int tryId = pNewMat->id; tryId < NUM_PALETTE_ENTRIES; ++tryId)
+        for (int tryId = pNewMat->id; tryId < c_PaletteEntriesNumber; ++tryId)
         {
             // We found an empty slot in the Material palette!
             if (m_apMatPalette[tryId] == 0)
@@ -381,7 +370,7 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
                 break;
             }
             // We reached the end of the Material palette without finding any empty slots.. loop around to the start
-            else if (tryId >= NUM_PALETTE_ENTRIES - 1)
+            else if (tryId >= c_PaletteEntriesNumber - 1)
                 tryId = 0;
             // If we've looped around without finding anything, break and throw error
             else if (tryId == pNewMat->id - 1)
@@ -442,7 +431,7 @@ int SceneMan::Save(Writer &writer) const
 
 void SceneMan::Destroy()
 {
-    for (int i = 0; i < NUM_PALETTE_ENTRIES; ++i)
+    for (int i = 0; i < c_PaletteEntriesNumber; ++i)
         delete m_apMatPalette[i];
 
     delete m_pCurrentScene;
@@ -764,8 +753,8 @@ float SceneMan::TargetDistanceScalar(Vector point)
         return 0;
 
     int screenCount = g_FrameMan.GetScreenCount();
-    int screenRadius = DMax(g_FrameMan.GetPlayerScreenWidth(), g_FrameMan.GetPlayerScreenHeight()) / 2;
-    int sceneRadius = DMax(m_pCurrentScene->GetWidth(), m_pCurrentScene->GetHeight()) / 2;
+    int screenRadius = MAX(g_FrameMan.GetPlayerScreenWidth(), g_FrameMan.GetPlayerScreenHeight()) / 2;
+    int sceneRadius = MAX(m_pCurrentScene->GetWidth(), m_pCurrentScene->GetHeight()) / 2;
     // Avoid divide by zero problems if scene and screen radius are the same
     if (screenRadius == sceneRadius)
         sceneRadius += 100;
@@ -1086,7 +1075,7 @@ int SceneMan::RemoveOrphans(int posX, int posY,
                                            new Atom(Vector(), spawnMat->id, 0, spawnColor, 2),
                                            0);
 
-            pixelMO->SetToHitMOs(spawnMat->id == GOLDMATID);
+            pixelMO->SetToHitMOs(spawnMat->id == c_GoldMaterialID);
             pixelMO->SetToGetHitByMOs(false);
             g_MovableMan.AddParticle(pixelMO);
             pixelMO = 0;
@@ -1290,7 +1279,7 @@ bool SceneMan::TryPenetrate(const int posX,
                                                0);
 
 // TODO: Make material IDs more robust!")
-                pixelMO->SetToHitMOs(spawnMat->id == GOLDMATID);
+                pixelMO->SetToHitMOs(spawnMat->id == c_GoldMaterialID);
                 pixelMO->SetToGetHitByMOs(false);
                 g_MovableMan.AddParticle(pixelMO);
                 pixelMO = 0;
@@ -1358,7 +1347,7 @@ bool SceneMan::TryPenetrate(const int posX,
 								pixelMO = new MOPixel(spawnColor, spawnMat->pixelDensity, Vector(posX, testY), sprayVel, new Atom(Vector(), spawnMat->id, 0, spawnColor, 2), 0);
 
                                 // Let it loose into the world
-                                pixelMO->SetToHitMOs(spawnMat->id == GOLDMATID);
+                                pixelMO->SetToHitMOs(spawnMat->id == c_GoldMaterialID);
                                 pixelMO->SetToGetHitByMOs(false);
                                 g_MovableMan.AddParticle(pixelMO);
                                 pixelMO = 0;
@@ -2222,7 +2211,7 @@ float SceneMan::CastMaxStrengthRay(const Vector &start, const Vector &end, int s
             // Sum all strengths
             materialID = GetTerrMatter(intPos[X], intPos[Y]);
             if (materialID != g_MaterialDoor)
-                maxStrength = fmax(maxStrength, GetMaterialFromID(materialID)->strength);
+                maxStrength = MAX(maxStrength, GetMaterialFromID(materialID)->strength);
 
             skipped = 0;
         }
@@ -3798,13 +3787,13 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
             pTerrain->Draw(pTargetBitmap, targetBox);
 //            m_pMOColorLayer->Draw(pTargetBitmap, targetBox);
 
-//            sprintf(str, "Terrain Matter\nHit M to cycle modes");
+//            sprintf_s(str, sizeof(str), "Terrain Matter\nHit M to cycle modes");
 //            g_FrameMan.DrawText(pTargetBitmap, str, Vector(475, 4), false);
             break;
 
         case g_LayerMOID:
             m_pMOIDLayer->Draw(pTargetBitmap, targetBox);
-//            sprintf(str, "MovableObject ID\nHit M to cycle modes");
+//            sprintf_s(str, sizeof(str), "MovableObject ID\nHit M to cycle modes");
 //            g_FrameMan.DrawText(pTargetBitmap, str, Vector(475, 4), false);
             break;
 
@@ -3844,7 +3833,7 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 //            g_ActivityMan.GetActivity()->Draw(pTargetBitmap, targetPos, m_LastUpdatedScreen);
             g_ActivityMan.GetActivity()->DrawGUI(pTargetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
-//            sprintf(str, "Normal Layer Draw Mode\nHit M to cycle modes");
+//            sprintf_s(str, sizeof(str), "Normal Layer Draw Mode\nHit M to cycle modes");
 //            g_FrameMan.DrawText(pTargetBitmap, str, Vector(475, 4), false);
 
 #ifdef DEBUG_BUILD

@@ -15,10 +15,7 @@
 #pragma intrinsic (sin, cos)
 #include "DDTTools.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 const string Matrix::ClassName = "Matrix";
 
@@ -439,10 +436,10 @@ float Matrix::GetRadAngleTo(float otherAngle) const
     float difference = otherAngle - GetRadAngle();
 
     // "Normalize" difference to range [-PI,PI)
-    while(difference < -PI)
-        difference += TwoPI;
-    while(difference >= PI)
-        difference -= TwoPI;
+    while(difference < -c_PI)
+        difference += c_TwoPI;
+    while(difference >= c_PI)
+        difference -= c_TwoPI;
 
     // difference has the signed answer
     return difference;
@@ -481,7 +478,7 @@ float Matrix::GetDegAngleTo(float otherAngle) const
 void Matrix::SetXFlipped(bool flipX)
 {
 //    if (flipX != m_Flipped[X])
-//        m_Rotation = PI - m_Rotation;
+//        m_Rotation = c_PI - m_Rotation;
 
     m_Flipped[X] = flipX;
 

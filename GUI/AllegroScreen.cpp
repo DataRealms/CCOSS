@@ -15,8 +15,6 @@
 #include "AllegroScreen.h"
 #include "AllegroBitmap.h"
 
-#include "allegro.h"
-
 using namespace RTE;
 
 

@@ -18,11 +18,7 @@
 #include "LuaMan.h"
 #include "Atom.h"
 
-
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 ABSTRACTCLASSINFO(MovableObject, SceneObject)
 
@@ -225,7 +221,7 @@ int MovableObject::Create(const MovableObject &reference)
 	m_RandomizeEffectRotAngleEveryFrame = reference.m_RandomizeEffectRotAngleEveryFrame;
 
 	if (m_RandomizeEffectRotAngle)
-		m_EffectRotAngle = PI * 2 * NormalRand();
+		m_EffectRotAngle = c_PI * 2 * NormalRand();
 
 	m_ScreenEffectHash = reference.m_ScreenEffectHash;
     m_EffectStartTime = reference.m_EffectStartTime;
@@ -342,10 +338,6 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
         reader >> m_ScreenEffectFile;
         m_pScreenEffect = m_ScreenEffectFile.GetAsBitmap();
 		m_ScreenEffectHash = m_ScreenEffectFile.GetHash();
-
-		//char buf[128];
-		//sprintf(buf, "%s %lu", m_ScreenEffectFile.GetDataPath().c_str(), m_ScreenEffectHash);
-		//g_ConsoleMan.PrintString(buf);
     }
     else if (propName == "EffectStartTime")
         reader >> m_EffectStartTime;
@@ -891,7 +883,7 @@ int MovableObject::OnPieMenu(Actor * pActor)
 void MovableObject::Update()
 {
 	if (m_RandomizeEffectRotAngleEveryFrame)
-		m_EffectRotAngle = PI * 2 * NormalRand();
+		m_EffectRotAngle = c_PI * 2 * NormalRand();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

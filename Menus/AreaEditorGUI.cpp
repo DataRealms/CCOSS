@@ -28,9 +28,7 @@
 #include "PieMenuGUI.h"
 #include "Scene.h"
 
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

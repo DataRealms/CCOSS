@@ -17,9 +17,6 @@
 //#include "FrameMan.h"
 #include "Entity.h"
 
-#include <string>
-#include <list>
-
 namespace RTE
 {
 

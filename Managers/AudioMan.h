@@ -14,9 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <list>
-#include <string>
-
 #include "DDTTools.h"
 #include "Singleton.h"
 #define g_AudioMan AudioMan::Instance()

@@ -11,8 +11,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <mutex>
-
 #ifdef __USE_SOUND_FMOD
 #include "fmod.h"
 #elif __USE_SOUND_SDLMIXER
@@ -28,10 +26,6 @@
 #include "SettingsMan.h"
 #include "Sound.h"
 #include "DDTError.h"
-
-#include <vector>
-#include <string>
-
 
 // Allegro defines those via define in astdlib.h and Boost with stdlib go crazy about those so we need to undefine them manually.
 #undef int8_t
@@ -569,7 +563,7 @@ void AudioMan::PlayMusic(const char *filepath, int loops, double volumeOverride)
 
 	// Look for file extension
 	char format[16];
-	strcpy(format, "");
+	strcpy_s(format, sizeof(format), "");
 
 	int dotPos = -1;
 
@@ -585,7 +579,7 @@ void AudioMan::PlayMusic(const char *filepath, int loops, double volumeOverride)
 	if (dotPos == -1)
 		return;
 
-	strcpy(format, &filepath[dotPos + 1]);
+	strcpy_s(format, sizeof(format), &filepath[dotPos + 1]);
 
 	// Open the stream
 	if (loops != 0)
@@ -664,7 +658,7 @@ void AudioMan::QueueSilence(int seconds)
     {
         // Encode the silence as number of secs preceded by '@'
         char str[256];
-        sprintf(str, "@%i", seconds);
+        sprintf_s(str, sizeof(str), "@%i", seconds);
         m_MusicPlayList.push_back(string(str));
     }
 }

@@ -37,10 +37,7 @@ extern bool g_ResetActivity;
 extern bool g_ResumeActivity;
 extern bool g_InActivity;
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
     
 ABSTRACTCLASSINFO(Activity, Entity)
 const string ActivityMan::m_ClassName = "ActivityMan";
@@ -917,7 +914,7 @@ void Activity::EnteredOrbit(Actor *pActor)
 // TODO ARGH WHAT IF TWO PLAYERS ON SAME TEAM ARE OF DIFFERENT TECHSS??!?!?!?$?!?!$?!$?
 // A: Just let the base cost be the liquidation value.. they could cheat otherwise, one buying, one selling
     char str[64];
-    sprintf(str, "Returned Craft + Cargo added %.0f oz to Funds!", totalValue);
+    sprintf_s(str, sizeof(str), "Returned Craft + Cargo added %.0f oz to Funds!", totalValue);
     for (int player = 0; player < MAXPLAYERCOUNT; ++player)
     {
         if (m_IsActive[player])
@@ -926,7 +923,7 @@ void Activity::EnteredOrbit(Actor *pActor)
             if (brainOnBoard && pActor == GetPlayerBrain(player))
             {
                 m_BrainEvacuated[player] = true;
-                sprintf(str, "YOUR BRAIN HAS BEEN EVACUATED BACK INTO ORBIT!");
+                sprintf_s(str, sizeof(str), "YOUR BRAIN HAS BEEN EVACUATED BACK INTO ORBIT!");
             }
 
             if (m_Team[player] == team)

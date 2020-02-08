@@ -26,8 +26,8 @@ struct RECT
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <assert.h>
-#include <math.h>
+#include "allegro.h"
+#include "Constants.h"
 #include "GUIProperties.h"
 #include "GUIInput.h"
 #include "GUIBitmap.h"
@@ -42,16 +42,8 @@ struct RECT
 #include "GUIControlFactory.h"
 #include "GUIControlManager.h"
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // GUI Library macros
-
-// Use the maximum of two values
-#define    GUI_MAX(a, b) ((a) > (b) ? (a) : (b))
-
-// Use the minimum of two values
-#define    GUI_MIN(a, b) ((a) < (b) ? (a) : (b))
-
 
 void SetRect(RECT *pRect,
              int left,
@@ -62,4 +54,4 @@ void SetRect(RECT *pRect,
 
 int DDTstricmp(const char *s1, const char *s2);
 
-#endif  //  _GUI_
+#endif

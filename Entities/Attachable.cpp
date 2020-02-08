@@ -19,10 +19,7 @@
 #include "AEmitter.h"
 #include "Actor.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(Attachable, MOSRotating, 0)
 
@@ -522,12 +519,12 @@ void Attachable::Update()
         // Get the rotation in radians.
         float springDelta = m_Rotation.GetRadAngle() - m_RotTarget.GetRadAngle();
         // Eliminate full rotations
-        while (fabs(springDelta) > TwoPI) {
-            springDelta -= springDelta > 0 ? TwoPI : -TwoPI;
+        while (fabs(springDelta) > c_TwoPI) {
+            springDelta -= springDelta > 0 ? c_TwoPI : -c_TwoPI;
         }
         // Eliminate rotations over half a turn
-//        if (fabs(springDelta) > PI)
-//            springDelta = (springDelta > 0 ? -PI : PI) + (springDelta - (springDelta > 0 ? PI : -PI));
+//        if (fabs(springDelta) > c_PI)
+//            springDelta = (springDelta > 0 ? -c_PI : c_PI) + (springDelta - (springDelta > 0 ? c_PI : -c_PI));
         // Break the spring if close to target angle.
         if (fabs(springDelta) > 0.1)
             m_AngularVel -= springDelta * fabs(springDelta);// * m_JointStiffness;

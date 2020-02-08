@@ -17,10 +17,7 @@
 #include "PresetMan.h"
 #include "Emission.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 CONCRETECLASSINFO(AEmitter, Attachable, 0)
 
@@ -370,7 +367,7 @@ float AEmitter::EstimateImpulse(bool burst)
                 velMin = min((*eItr)->GetMinVelocity(), (*eItr)->GetMaxVelocity());
                 velMax = max((*eItr)->GetMinVelocity(), (*eItr)->GetMaxVelocity());
                 velRange = (velMax - velMin) * 0.5;
-                spread = max(static_cast<float>(PI) - (*eItr)->GetSpread(), .0f) / PI;     // A large spread will cause the forces to cancel eachother out
+                spread = max(static_cast<float>(c_PI) - (*eItr)->GetSpread(), .0f) / c_PI;     // A large spread will cause the forces to cancel eachother out
 
                 // Add to accumulative recoil impulse generated, F = m * a.
                 impulse += (velMin + velRange) * spread * (*eItr)->m_pEmission->GetMass() * emissions;
@@ -581,7 +578,7 @@ void AEmitter::Update()
                 m_pFlash->SetJointPos(m_Pos/* + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation)*/);
             // Don't set the flipping for the flash because that is wasting resources when drawing,
             // just handle the flipping of the rotation here.
-            m_pFlash->SetRotAngle(m_HFlipped ? PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
+            m_pFlash->SetRotAngle(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
 //            m_pFlash->SetFrame(floorf((m_pFlash->GetFrameCount()/* - 1*/) * PosRand() - 0.001));
             m_pFlash->SetScale(m_FlashScale);
             m_pFlash->SetNextFrame();
@@ -655,7 +652,7 @@ void AEmitter::Draw(BITMAP *pTargetBitmap,
     {
         // Fudge the emission pos forward a little bit so the glow aligns nicely
         Vector emitPos(m_pFlash->GetScreenEffect()->w / 4, 0);
-        emitPos.RadRotate(m_HFlipped ? PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
+        emitPos.RadRotate(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
         emitPos = m_Pos + RotateOffset(m_EmissionOffset) + emitPos;
         if(!g_SceneMan.ObscuredPoint(emitPos))
             g_SceneMan.RegisterPostEffect(emitPos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55 + 200 * PosRand(), m_pFlash->GetEffectRotAngle());

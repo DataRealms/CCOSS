@@ -13,10 +13,7 @@
 #include "GUI.h"
 #include "GUILabel.h"
 
-
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUILabel
@@ -67,8 +64,8 @@ void GUILabel::Create(const std::string Name, int X, int Y, int Width, int Heigh
         m_Height = Height;
 
     // Make sure the label isn't too small
-    m_Width = GUI_MAX(m_Width, m_MinWidth);
-    m_Height = GUI_MAX(m_Height, m_MinHeight);
+    m_Width = MAX(m_Width, m_MinWidth);
+    m_Height = MAX(m_Height, m_MinHeight);
 }
 
 
@@ -93,8 +90,8 @@ void GUILabel::Create(GUIProperties *Props)
     GUIPanel::LoadProperties(Props);
 
     // Make sure the label isn't too small
-    m_Width = GUI_MAX(m_Width, m_MinWidth);
-    m_Height = GUI_MAX(m_Height, m_MinHeight);
+    m_Width = MAX(m_Width, m_MinWidth);
+    m_Height = MAX(m_Height, m_MinHeight);
 
     // Get the values
     Props->GetValue("Text", &m_Text);
@@ -245,8 +242,8 @@ void GUILabel::Move(int X, int Y)
 void GUILabel::Resize(int Width, int Height)
 {
     // Make sure the control isn't too small
-    Width = GUI_MAX(Width, m_MinWidth);
-    Height = GUI_MAX(Height, m_MinHeight);
+    Width = MAX(Width, m_MinWidth);
+    Height = MAX(Height, m_MinHeight);
 
     GUIPanel::SetSize(Width, Height);
 }

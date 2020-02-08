@@ -14,12 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <list>
-#include <map>
-#include <vector>
-#include <string>
-#include <algorithm>
-
 #include "DDTTools.h"
 #include "Singleton.h"
 #define g_MovableMan MovableMan::Instance()

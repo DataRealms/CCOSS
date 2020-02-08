@@ -13,12 +13,8 @@
 
 #include "GUIBanner.h"
 #include "ContentFile.h"
-#include "allegro.h"
 
-using namespace std;
-
-namespace RTE
-{
+namespace RTE {
 
 map<string, GUIBanner::FontChar *> GUIBanner::m_sFontCache;
 map<string, int> GUIBanner::m_sCharCapCache;
@@ -161,7 +157,7 @@ bool GUIBanner::Create(const std::string fontFilePath, const std::string fontBlu
                     {
                         int Pixel = getpixel(m_pFontImage[mode], i, j);
                         if (Pixel != dotColor && Pixel != keyColor)
-                            Height = DMax(Height, j - y);
+                            Height = MAX(Height, j - y);
                     }
                 }
                 

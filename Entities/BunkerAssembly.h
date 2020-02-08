@@ -14,10 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <iostream>
-#include <sstream>
-#include <string>
-
 #include "DDTTools.h"
 #include "TerrainObject.h"
 #include "Vector.h"

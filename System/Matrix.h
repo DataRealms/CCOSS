@@ -14,10 +14,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <iostream>
-#include <cmath>
-#include <string>
-#include <deque>
 #include "Vector.h"
 #include "Serializable.h"
 
@@ -450,7 +446,7 @@ public:
 // Arguments:       None.
 // Return value:    A float with the represented angle in degrees.
 
-    float GetDegAngle() const { return (m_Rotation / PI) * 180; }
+    float GetDegAngle() const { return (m_Rotation / c_PI) * 180; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -484,7 +480,7 @@ public:
 // Arguments:       None.
 // Return value:    A float with the represented angle as full rotations being 256.
 
-    float GetAllegroAngle() const { return (m_Rotation / PI) * -128; }
+    float GetAllegroAngle() const { return (m_Rotation / c_PI) * -128; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -526,8 +522,7 @@ public:
 // Arguments:       A float with the new angle, in degrees.
 // Return value:    None.
 
-    void SetDegAngle(float newAngle) { m_Rotation = (newAngle / 180) * PI;
-                                       m_ElementsUpdated = false; }
+    void SetDegAngle(float newAngle) { m_Rotation = (newAngle / 180) * c_PI; m_ElementsUpdated = false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -22,9 +22,7 @@
 #include "WinUtil.h"
 #endif // defined(__APPLE__)
 
-using namespace std;
 using namespace RTE;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUITextPanel
@@ -149,7 +147,7 @@ void GUITextPanel::Draw(GUIScreen *Screen)
     int hSpacer = m_HeightMargin;
 
     // Clamp the cursor
-    m_CursorX = GUI_MAX(m_CursorX, 0);
+    m_CursorX = MAX(m_CursorX, 0);
     
     // Setup the clipping
     Screen->GetBitmap()->SetClipRect(GetRect());
@@ -170,8 +168,8 @@ void GUITextPanel::Draw(GUIScreen *Screen)
         Screen->GetBitmap()->DrawRectangle(m_X+wSpacer + m_SelectionX, m_Y + hSpacer + 2, m_SelectionWidth, FontHeight - 3, m_SelectedColorIndex, true);
         // Draw text with selection regions in different colour
         m_Font->SetColor(m_FontSelectColor);
-        int Start = GUI_MIN(m_StartSelection, m_EndSelection);
-        int End = GUI_MAX(m_StartSelection, m_EndSelection);
+        int Start = MIN(m_StartSelection, m_EndSelection);
+        int End = MAX(m_StartSelection, m_EndSelection);
         
         // Selection
         if (m_StartIndex > Start)
@@ -391,7 +389,7 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier)
     if (KeyCode >= 32 && KeyCode < 128) {
         RemoveSelectionText();
 
-        char buf[2] = {KeyCode, '\0'};        
+        char buf[2] = {static_cast<char>(KeyCode), '\0'};
 
         // Insert the text
         m_Text.insert(m_CursorIndex, buf);
@@ -524,7 +522,7 @@ void GUITextPanel::UpdateText(bool Typing, bool DoIncrement)
         m_StartIndex = m_CursorIndex-Increment;
 
     // Clamp it
-    m_StartIndex = GUI_MAX(m_StartIndex, 0);
+    m_StartIndex = MAX(m_StartIndex, 0);
     
     // If the cursor is greater than the length of text panel, adjust the start index
     string Sub = m_Text.substr(m_StartIndex,m_CursorIndex-m_StartIndex);
@@ -534,7 +532,7 @@ void GUITextPanel::UpdateText(bool Typing, bool DoIncrement)
     }
 
     // Clamp it
-    m_StartIndex = GUI_MIN(m_StartIndex, m_Text.size()-1);
+    m_StartIndex = MIN(m_StartIndex, m_Text.size()-1);
 
     // Adjust the cursor position
     m_CursorX = m_Font->CalculateWidth(m_Text.substr(m_StartIndex, m_CursorIndex-m_StartIndex));
@@ -570,11 +568,11 @@ void GUITextPanel::DoSelection(int Start, int End)
     }
 
     // Update the selection coords
-    int StartSel = GUI_MIN(m_StartSelection, m_EndSelection);
-    int EndSel = GUI_MAX(m_StartSelection, m_EndSelection);
+    int StartSel = MIN(m_StartSelection, m_EndSelection);
+    int EndSel = MAX(m_StartSelection, m_EndSelection);
 
     m_SelectionX = StartSel - m_StartIndex;
-    m_SelectionX = GUI_MAX(m_SelectionX, 0);
+    m_SelectionX = MAX(m_SelectionX, 0);
     int temp = m_SelectionX;
 
     m_SelectionWidth = (EndSel - m_StartIndex) - m_SelectionX;
@@ -582,8 +580,8 @@ void GUITextPanel::DoSelection(int Start, int End)
     m_SelectionX = m_Font->CalculateWidth(m_Text.substr(m_StartIndex, m_SelectionX));
     m_SelectionWidth = m_Font->CalculateWidth(m_Text.substr(m_StartIndex+temp, m_SelectionWidth));
 
-    m_SelectionX = GUI_MAX(m_SelectionX, 0);
-    m_SelectionWidth = GUI_MIN(m_SelectionWidth, m_Width);
+    m_SelectionX = MAX(m_SelectionX, 0);
+    m_SelectionWidth = MIN(m_SelectionWidth, m_Width);
 }
 
 
@@ -597,8 +595,8 @@ void GUITextPanel::RemoveSelectionText(void)
     if (!m_GotSelection)
         return;
 
-    int Start = GUI_MIN(m_StartSelection, m_EndSelection);
-    int End = GUI_MAX(m_StartSelection, m_EndSelection);
+    int Start = MIN(m_StartSelection, m_EndSelection);
+    int End = MAX(m_StartSelection, m_EndSelection);
 
     if (Start == End)
         return;
@@ -643,8 +641,8 @@ string GUITextPanel::GetSelectionText(void)
     if (!m_GotSelection)
         return "";
 
-    int Start = GUI_MIN(m_StartSelection, m_EndSelection);
-    int End = GUI_MAX(m_StartSelection, m_EndSelection);
+    int Start = MIN(m_StartSelection, m_EndSelection);
+    int End = MAX(m_StartSelection, m_EndSelection);
 
     if (Start == End)
         return "";

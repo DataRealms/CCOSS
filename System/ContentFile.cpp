@@ -11,14 +11,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#ifdef __USE_SOUND_FMOD
-#include "fmod/fmod.h"
-
-#elif __USE_SOUND_GORILLA
-#include "gorilla/ga.h"
-#include "gorilla/gau.h"
-#endif
-
 #include "ContentFile.h"
 #include "PresetMan.h"
 
@@ -30,12 +22,7 @@ const string ContentFile::m_ClassName = "ContentFile";
 map<string, BITMAP *> ContentFile::m_sLoadedBitmaps[BitDepthCount];
 map<size_t, std::string> ContentFile::m_PathHashes;
 
-#ifdef __USE_SOUND_FMOD
-map<string, FSOUND_SAMPLE *> ContentFile::m_sLoadedSamples;
-
-#elif __USE_SOUND_GORILLA
-map<string, ga_Sound *> ContentFile::m_sLoadedSamples;
-#endif
+map<string, AUDIO_STRUCT *> ContentFile::m_sLoadedSamples;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

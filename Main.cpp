@@ -1067,7 +1067,9 @@ bool PlayIntroTitle()
         g_TimerMan.UpdateSim();
         g_ConsoleMan.Update();
 
-#if __USE_SOUND_GORILLA
+#if __USE_SOUND_FMOD
+		g_AudioMan.Update();
+#elif __USE_SOUND_GORILLA
 		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_SOUND);
 		g_AudioMan.Update();
 		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_SOUND);
@@ -2319,10 +2321,6 @@ bool RunGameLoop()
 
             // Update the real time measurement and increment
             g_TimerMan.Update();
-
-#if __USE_SOUND_GORILLA
-			g_AudioMan.Update();
-#endif
 
 			bool serverUpdated = false;
 

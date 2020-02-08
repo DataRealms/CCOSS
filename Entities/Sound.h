@@ -18,11 +18,19 @@
 #include "ContentFile.h"
 
 #ifdef __USE_SOUND_FMOD
-struct FSOUND_SAMPLE;
+#include "fmod/fmod.h"
+#include "fmod/fmod_errors.h"
+#define AUDIO_STRUCT FSOUND_SAMPLE
+struct FSOUND_STREAM;
 
 #elif __USE_SOUND_GORILLA
+#include "gorilla/ga.h"
+#include "gorilla/gau.h"
+#define AUDIO_STRUCT ga_Sound
 struct ga_Handle;
 #endif
+
+struct AUDIO_STRUCT;
 
 namespace RTE {   
 
@@ -215,13 +223,7 @@ ENTITYALLOCATION(Sound)
 // Arguments:       None.
 // Return value:    A reference to the list.
 
-#ifdef __USE_SOUND_FMOD
-	const std::vector<std::pair<ContentFile, FSOUND_SAMPLE *> > & GetSampleList() const { return m_Samples; }
-
-#elif __USE_SOUND_GORILLA
-	const std::vector<std::pair<ContentFile, ga_Sound *> > & GetSampleList() const { return m_Samples; }
-#endif
-
+	const std::vector<std::pair<ContentFile, AUDIO_STRUCT *> > & GetSampleList() const { return m_Samples; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          HasAnySamples
@@ -233,16 +235,12 @@ ENTITYALLOCATION(Sound)
 
     bool HasAnySamples() const {
 
-#ifdef __USE_SOUND_FMOD
+#if defined __USE_SOUND_FMOD || defined __USE_SOUND_GORILLA
 		return !m_Samples.empty(); 
-
-#elif __USE_SOUND_GORILLA
-		return !m_Samples.empty();
 #else
 		return false;
 #endif
 	}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetSampleCount
@@ -253,16 +251,12 @@ ENTITYALLOCATION(Sound)
 
     int GetSampleCount() const {
 
-#ifdef __USE_SOUND_FMOD
-		return m_Samples.size();
-
-#elif __USE_SOUND_GORILLA
+#if defined __USE_SOUND_FMOD || defined __USE_SOUND_GORILLA
 		return m_Samples.size();
 #else
 		return 0;
 #endif
 	}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetLoopSetting
@@ -316,13 +310,7 @@ ENTITYALLOCATION(Sound)
 // Return value:    A pointer to the currently played sample, or 0 if no sample of this
 //                  Sound is currently being played. Ownership is NOT transferred.
 
-#ifdef __USE_SOUND_FMOD
-	FSOUND_SAMPLE * GetCurrentSample();
-
-#elif __USE_SOUND_GORILLA
-	ga_Sound * GetCurrentSample();
-#endif
-
+	AUDIO_STRUCT * GetCurrentSample();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          StartNextSample
@@ -333,12 +321,7 @@ ENTITYALLOCATION(Sound)
 // Arguments:       None.
 // Return value:    A pointer to the sample to be played. Ownership is NOT transferred.
 
-#ifdef __USE_SOUND_FMOD
-	FSOUND_SAMPLE * StartNextSample();
-
-#elif __USE_SOUND_GORILLA
-	ga_Sound * StartNextSample();
-#endif
+	AUDIO_STRUCT * StartNextSample();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetChannel
@@ -452,13 +435,8 @@ protected:
 
     static Entity::ClassInfo m_sClass;
 
-	// All the SDL samples of this Sound, they are NOT owned by this, but owned by the Contentfile static maps
-#ifdef __USE_SOUND_FMOD    
-	std::vector<std::pair<ContentFile, FSOUND_SAMPLE *> > m_Samples;
-
-#elif __USE_SOUND_GORILLA
-	std::vector<std::pair<ContentFile, ga_Sound *> > m_Samples;
-#endif
+	// All the samples of this Sound, they are NOT owned by this, but owned by the Contentfile static maps 
+	std::vector<std::pair<ContentFile, AUDIO_STRUCT *> > m_Samples;
 
     // Index of the current (or last, if nothing is being played) sample being played
     int m_CurrentSample;

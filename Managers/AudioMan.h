@@ -15,26 +15,30 @@
 // Inclusions of header files
 
 #include "DDTTools.h"
-#include "Singleton.h"
-#define g_AudioMan AudioMan::Instance()
-
 #include "Entity.h"
 #include "Timer.h"
+#include "Singleton.h"
 
-#define MAX_CLIENTS 4
+#define g_AudioMan AudioMan::Instance()
 
 #ifdef __USE_SOUND_FMOD
-struct FSOUND_SAMPLE;
+#include "fmod/fmod.h"
+#include "fmod/fmod_errors.h"
+#define AUDIO_STRUCT FSOUND_SAMPLE
 struct FSOUND_STREAM;
 
 #elif __USE_SOUND_GORILLA
-struct ga_Handle;
 #include "gorilla/ga.h"
 #include "gorilla/gau.h"
+#define AUDIO_STRUCT ga_Sound
+struct ga_Handle;
 #endif
 
-namespace RTE
-{
+struct AUDIO_STRUCT;
+
+#define MAX_CLIENTS 4
+
+namespace RTE {
 
 class Sound;
 

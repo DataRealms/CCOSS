@@ -11,14 +11,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#ifdef __USE_SOUND_FMOD
-#include "fmod/fmod.h"
-
-#elif __USE_SOUND_GORILLA
-#include "gorilla/ga.h"
-#include "gorilla/gau.h"
-#endif
-
 #include "AudioMan.h"
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
@@ -81,15 +73,12 @@ std::mutex g_SoundEventsListMutex[MAX_CLIENTS];
 void AudioMan::Clear()
 {
 	m_AudioEnabled = false;
-#ifdef __USE_SOUND_FMOD
     m_pMusic = 0;
 
-#elif __USE_SOUND_GORILLA
+#if __USE_SOUND_GORILLA
 	m_pManager = 0;
 	m_pMixer = 0;
 	m_pStreamManager = 0;
-
-	m_pMusic = 0;
 
 	m_SoundChannels.clear();
 	m_SoundInstances.clear();
@@ -123,7 +112,6 @@ void AudioMan::Clear()
 int AudioMan::Create()
 {
 #ifdef __USE_SOUND_FMOD
-    printf( "GRAN GRAN THE AUDIO MAN\n" );
     // Basic params for the audio
     int audioBitrate = 44100;
     int maxChannels = g_SettingsMan.GetAudioChannels();
@@ -344,9 +332,10 @@ void AudioMan::SetGlobalPitch(double pitch, bool excludeMusic)
 	if (m_IsInMultiplayerMode)
 		RegisterSoundEvent(-1, SOUND_SET_PITCH, 0, 0, 0, 0, pitch, excludeMusic);
 
-#ifdef __USE_SOUND_FMOD
 	// Keep the pitch value sane
-    m_GlobalPitch = pitch > 0.1 ? pitch : (pitch < 16.0 ? pitch : 16.0);
+	m_GlobalPitch = pitch > 0.1 ? pitch : (pitch < 16.0 ? pitch : 16.0);
+
+#ifdef __USE_SOUND_FMOD
     // The channel index is stored in the lower 12 bits of the channel handle
     int musicChannelIndex = excludeMusic ? m_MusicChannel & 0x00000FFF : -1;
 
@@ -365,9 +354,6 @@ void AudioMan::SetGlobalPitch(double pitch, bool excludeMusic)
     }
 
 #elif __USE_SOUND_GORILLA
-	// Keep the pitch value sane
-	m_GlobalPitch = pitch > 0.1 ? pitch : (pitch < 16.0 ? pitch : 16.0);
-
 	// Go through all active channels and set the pitch on each, except for the music one
 	for (int channel = 1; channel < m_SoundChannels.size(); ++channel)
 	{
@@ -511,22 +497,19 @@ void AudioMan::PlayMusic(const char *filepath, int loops, double volumeOverride)
 
 void AudioMan::QueueMusicStream(const char *filepath)
 {
-#ifdef __USE_SOUND_FMOD
     if (!m_pMusic)
         PlayMusic(filepath);
     else
     {
+#ifdef __USE_SOUND_FMOD
         m_MusicPlayList.push_back(string(filepath));
         // Set the callback so that it will switch to next song when current one is done.
         FSOUND_Stream_SetEndCallback(m_pMusic, PlayNextCallback, 0);
-    }
 
 #elif __USE_SOUND_GORILLA
-	if (!m_pMusic)
-		PlayMusic(filepath);
-	else
 		m_MusicPlayList.push_back(string(filepath));
 #endif
+    }
 }
 
 
@@ -570,27 +553,22 @@ void AudioMan::PlayNextStream()
             m_SilenceTimer.SetRealTimeLimitS(seconds > 0 ? seconds : 0);
             m_SilenceTimer.Reset();
 
-#ifdef __USE_SOUND_FMOD
+
             // Stop music playback
             if (m_pMusic)
             {
 				RegisterMusicEvent(-1, MUSIC_SILENCE, 0, seconds, 0.0, 1.0);
 
+#ifdef __USE_SOUND_FMOD
                 FSOUND_Stream_Stop(m_pMusic);
                 FSOUND_Stream_Close(m_pMusic);
-                m_pMusic = 0;
-            }
 
 #elif __USE_SOUND_GORILLA
-			if (m_pMusic)
-			{
-				RegisterMusicEvent(-1, MUSIC_SILENCE, 0, seconds, 0.0, 1.0);
-
 				ga_handle_stop(m_pMusic);
 				ga_handle_destroy(m_pMusic);
-				m_pMusic = 0;
-			}
 #endif
+				m_pMusic = 0;
+            }
         }
         else
         {
@@ -914,6 +892,7 @@ bool AudioMan::SetSoundAttenuation(Sound *pSound, float distance)
             distance = 1.0f;
         // Multiply by 0.9 because we don't want to to go completely quiet if max distance
         distance *= 0.95f;
+
 #ifdef __USE_SOUND_FMOD
 		FSOUND_SetVolume(pSound->m_LastChannel, MAX_VOLUME * (1.0f - distance));
 
@@ -980,16 +959,8 @@ bool AudioMan::SetMusicPitch(float pitch)
 	if (m_IsInMultiplayerMode)
 		RegisterMusicEvent(-1, MUSIC_SET_PITCH, 0, 0, 0.0, pitch);
 
-#ifdef __USE_SOUND_FMOD
 	if (!m_AudioEnabled || !m_pMusic)
         return false;
-
-#elif __USE_SOUND_GORILLA
-	if (!m_AudioEnabled || !m_pMusic)
-		return false;
-#else
-	return false;
-#endif
 
     // Keep teh pitch value sane
     if (pitch < 0.1f)
@@ -1127,22 +1098,20 @@ void AudioMan::StopMusic()
 	if (m_IsInMultiplayerMode)
 		RegisterMusicEvent(-1, MUSIC_STOP, 0, 0, 0.0, 0.0);
 
-#ifdef __USE_SOUND_FMOD
+
 	if (!m_AudioEnabled || !m_pMusic)
 		return;
 
+#ifdef __USE_SOUND_FMOD
 	FSOUND_Stream_Stop(m_pMusic);
     FSOUND_Stream_Close(m_pMusic);
-    m_pMusic = 0;
 
 #elif __USE_SOUND_GORILLA
-	if (!m_AudioEnabled || !m_pMusic)
-		return;
-
 	ga_handle_stop(m_pMusic);
 	ga_handle_destroy(m_pMusic);
-	m_pMusic = 0;
 #endif 
+
+    m_pMusic = 0;
 
     // Clear out playlist, it doesn't apply anymore
     m_MusicPlayList.clear();
@@ -1156,16 +1125,14 @@ void AudioMan::StopMusic()
 
 void AudioMan::SetMusicPosition(double position)
 {
-#ifdef __USE_SOUND_FMOD
+
 	if (!m_AudioEnabled || !m_pMusic)
 		return;
 
+#ifdef __USE_SOUND_FMOD
 	FSOUND_Stream_SetTime(m_pMusic, position * 1000);
 
 #elif __USE_SOUND_GORILLA
-	if (!m_AudioEnabled || !m_pMusic)
-		return;
-
 	ga_handle_seek(m_pMusic, position);
 #endif
 }
@@ -1178,16 +1145,14 @@ void AudioMan::SetMusicPosition(double position)
 
 double AudioMan::GetMusicPosition()
 {
-#ifdef __USE_SOUND_FMOD
+
 	if (!m_AudioEnabled || !m_pMusic)
 		return 0;
 
+#ifdef __USE_SOUND_FMOD
 	return ((double)FSOUND_Stream_GetTime(m_pMusic)) / 1000.0;
 
 #elif __USE_SOUND_GORILLA
-	if (!m_AudioEnabled || !m_pMusic)
-		return 0;
-
 	return ga_handle_tell(m_pMusic, GA_TELL_PARAM_CURRENT);
 #else
 	return 0;
@@ -1214,7 +1179,6 @@ void AudioMan::StopAll()
     {
         FSOUND_Stream_Stop(m_pMusic);
         FSOUND_Stream_Close(m_pMusic);
-        m_pMusic = 0;
     }
 
 #elif __USE_SOUND_GORILLA
@@ -1229,9 +1193,10 @@ void AudioMan::StopAll()
 	{
 		ga_handle_stop(m_pMusic);
 		ga_handle_destroy(m_pMusic);
-		m_pMusic = 0;
+		
 	}
 #endif
+	m_pMusic = 0;
 
     // Clear out playlist, it doesn't apply anymore
     m_MusicPlayList.clear();
@@ -1249,15 +1214,10 @@ void AudioMan::Update()
 	if (!m_AudioEnabled)
 		return;
 
-#ifdef __USE_SOUND_FMOD
     // Done waiting for silence
     if (!m_pMusic && m_SilenceTimer.IsPastRealTimeLimit())
         PlayNextStream();
-
-#elif __USE_SOUND_GORILLA
-	// Done waiting for silence
-	if (!m_pMusic && m_SilenceTimer.IsPastRealTimeLimit())
-		PlayNextStream();
+#if __USE_SOUND_GORILLA
 	gau_manager_update(m_pManager);
 #endif
 }

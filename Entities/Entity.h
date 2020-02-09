@@ -82,7 +82,7 @@ namespace RTE
 #define CONCRETESUBCLASSINFO(TYPE, SUPER, PARENT, BLOCKCOUNT) \
     Entity::ClassInfo SUPER::TYPE::m_sClass(#TYPE, &PARENT::m_sClass, SUPER::TYPE::Allocate, SUPER::TYPE::Deallocate, SUPER::TYPE::NewInstance, BLOCKCOUNT);
 
-#define CLASSINFOGETTERS() \
+#define CLASSINFOGETTERS \
 	const Entity::ClassInfo & GetClass() const { return m_sClass; } \
 	const std::string & GetClassName() const { return m_sClass.GetName(); }
 

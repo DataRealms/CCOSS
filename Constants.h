@@ -17,16 +17,16 @@ namespace RTE {
 	#undef uint64_t
 
 #pragma region Buffer Constants
-	constexpr static unsigned int c_MaxFileName = 256; ///! Maximum length of output file directory+name string.
-	constexpr static unsigned int c_FileBufferSize = 8192; ///! Buffer to hold data read from the zip file.
-	constexpr static unsigned int c_MaxUnzippedFileSize = 104857600; ///! Maximum size of single file being extracted from zip archive.
+	static constexpr unsigned int c_MaxFileName = 256; ///! Maximum length of output file directory+name string.
+	static constexpr unsigned int c_FileBufferSize = 8192; ///! Buffer to hold data read from the zip file.
+	static constexpr unsigned int c_MaxUnzippedFileSize = 104857600; ///! Maximum size of single file being extracted from zip archive.
 #pragma endregion
 
 #pragma region Graphics Constants
-	constexpr static unsigned int c_PaletteEntriesNumber = 256; ///! Number of indexes in the graphics palette.
-	constexpr static unsigned int c_MOIDLayerBitDepth = 16; ///! Bit depth of MOID layer bitmap.
+	static constexpr unsigned int c_PaletteEntriesNumber = 256; ///! Number of indexes in the graphics palette.
+	static constexpr unsigned int c_MOIDLayerBitDepth = 16; ///! Bit depth of MOID layer bitmap.
 
-	constexpr static unsigned int c_GoldMaterialID = 2; ///! Index of gold material in the material palette.
+	static constexpr unsigned int c_GoldMaterialID = 2; ///! Index of gold material in the material palette.
 
 	// GUI colors
 	#define c_GUIColorWhite makecol(255, 255, 255)
@@ -44,12 +44,16 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Math Constants
-	constexpr static float c_TwoPI = 6.2831853;
-	constexpr static float c_PI = 3.1415926;
-	constexpr static float c_HalfPI = 1.5707963;
-	constexpr static float c_QuarterPI = 0.7853982;
-	constexpr static float c_EighthPI = 0.3926991;
-	constexpr static float c_SixteenthPI = 0.1963495;
+	static constexpr float c_TwoPI = 6.2831853;
+	static constexpr float c_PI = 3.1415926;
+	static constexpr float c_HalfPI = 1.5707963;
+	static constexpr float c_QuarterPI = 0.7853982;
+	static constexpr float c_EighthPI = 0.3926991;
+	static constexpr float c_SixteenthPI = 0.1963495;
+#pragma endregion
+
+#pragma region Network Constants
+	static constexpr unsigned short int c_MaxClients = 4;
 #pragma endregion
 }
 #endif

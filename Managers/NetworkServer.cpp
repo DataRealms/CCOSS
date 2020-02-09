@@ -77,7 +77,7 @@ namespace RTE
 
 	void NetworkServer::LockScene(bool isLocked)
 	{
-		for (int i = 0; i < MAX_CLIENTS; i++)
+		for (int i = 0; i < c_MaxClients; i++)
 		{
 			if (isLocked)
 				m_SceneLock[i].lock();
@@ -95,7 +95,7 @@ namespace RTE
 	void NetworkServer::Clear()
 	{
 
-		for (int i = 0; i < MAX_CLIENTS; i++)
+		for (int i = 0; i < c_MaxClients; i++)
 		{
 			m_pBackBuffer8[i] = 0;
 			m_pBackBufferGUI8[i] = 0;
@@ -196,7 +196,7 @@ namespace RTE
 		m_ServerPort = "";
 		m_Server = RakNet::RakPeerInterface::GetInstance();
 
-		for (int i = 0; i < MAX_CLIENTS; i++)
+		for (int i = 0; i < c_MaxClients; i++)
 		{
 			m_ClientConnections[i].InternalId = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
 			m_ClientConnections[i].ClientId = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
@@ -268,7 +268,7 @@ namespace RTE
 		// We're done with the network
 		RakNet::RakPeerInterface::DestroyInstance(m_Server);
 
-		for (int i = 0; i < MAX_CLIENTS; i++)
+		for (int i = 0; i < c_MaxClients; i++)
 		{
 			DestroyBackBuffer(i);
 
@@ -449,11 +449,11 @@ namespace RTE
 				g_ConsoleMan.PrintString("PONG");
 				int player = -1;
 
-				for (int index = 0; index < MAX_CLIENTS; index++)
+				for (int index = 0; index < c_MaxClients; index++)
 					if (m_ClientConnections[index].ClientId == p->systemAddress)
 						player = index;
 
-				if (player > -1 && player < MAX_CLIENTS)
+				if (player > -1 && player < c_MaxClients)
 				{
 					unsigned int dataLength;
 					RakNet::TimeMS time;
@@ -475,7 +475,7 @@ namespace RTE
 		if (processInput)
 		{
 			// Process input messages
-			for (int p = 0; p < MAX_CLIENTS; p++)
+			for (int p = 0; p < c_MaxClients; p++)
 			{
 				if (!m_InputMessages[p].empty())
 				{
@@ -488,7 +488,7 @@ namespace RTE
 			// Process reset votes
 			int votesNeeded = 0;
 			int votes = 0;
-			for (int p = 0; p < MAX_CLIENTS; p++)
+			for (int p = 0; p < c_MaxClients; p++)
 			{
 				if (IsPlayerConnected(p))
 				{
@@ -502,7 +502,7 @@ namespace RTE
 				char buf[128];
 
 				sprintf_s(buf, sizeof(buf), "Voting to end activity %d of %d", votes, votesNeeded);
-				for (int i = 0; i < MAX_CLIENTS; i++)
+				for (int i = 0; i < c_MaxClients; i++)
 				{
 					g_FrameMan.SetScreenText(buf, i, 0, -1, false);
 				}
@@ -510,7 +510,7 @@ namespace RTE
 			}
 			if (votes == votesNeeded && votesNeeded > 0)
 			{
-				for (int p = 0; p < MAX_CLIENTS; p++)
+				for (int p = 0; p < c_MaxClients; p++)
 				{
 					m_ResetActivityVotes[p] = false;
 				}
@@ -531,10 +531,10 @@ namespace RTE
 
 		// Clear sound events for unconnected players because AudioMan does not know about their state and stores broadcast sounds to their event lists
 		{
-			std::list<AudioMan::SoundNetworkData> ls;
-			std::list<AudioMan::MusicNetworkData> lm;
+			std::list<AudioMan::NetworkSoundData> ls;
+			std::list<AudioMan::NetworkMusicData> lm;
 
-			for (int i = 0; i < MAX_CLIENTS; i++)
+			for (int i = 0; i < c_MaxClients; i++)
 			{
 				if (!IsPlayerConnected(i))
 				{
@@ -548,7 +548,7 @@ namespace RTE
 		if (g_SettingsMan.GetServerSleepWhenIdle() && m_LastPackedReceived.IsPastRealMS(10000))
 		{
 			int playersConnected = 0;
-			for (int player = 0; player < MAX_CLIENTS; player++)
+			for (int player = 0; player < c_MaxClients; player++)
 				if (IsPlayerConnected(player))
 				{
 					playersConnected++;
@@ -666,7 +666,7 @@ namespace RTE
 
 			sprintf_s(buf, sizeof(buf), "%s\nPing %u\nCmp Mbit: %.1f\nUnc Mbit: %.1f\nR: %.2f\nFrame Kbit: %lu\nGlow Kbit: %lu\nSound Kbit: %lu\nScene Kbit: %lu\nFrames sent: %uK\nFrame skipped: %uK\nBlocks full: %uK\nBlocks empty: %uK\nBlk Ratio: %.2f\nFPS: %d\nSend Ms %d\nTotal Data %lu MB",
 				i == STATS_SUM ? "- TOTALS - " : IsPlayerConnected(i) ? GetPlayerName(i).c_str() : "- NO PLAYER -",
-				i < MAX_CLIENTS ? m_Ping[i] : 0,
+				i < c_MaxClients ? m_Ping[i] : 0,
 				(double)m_DataSentCurrent[i][STAT_SHOWN] / (125000),
 				(double)m_DataUncompressedCurrent[i][STAT_SHOWN] / (125000),
 				compressionRatio,
@@ -679,14 +679,14 @@ namespace RTE
 				m_FullBlocks[i] / 1000,
 				m_EmptyBlocks[i] / 1000,
 				emptyRatio,
-				i < MAX_CLIENTS ? fps : 0,
-				i < MAX_CLIENTS ? m_MsecPerSendCall[i] : 0,
+				i < c_MaxClients ? fps : 0,
+				i < c_MaxClients ? m_MsecPerSendCall[i] : 0,
 				m_DataSentTotal[i] / (1024 * 1024));
 
 				g_FrameMan.GetLargeFont()->DrawAligned(&pGUIBitmap, 10 + i * g_FrameMan.GetResX() / 5, 75, buf, GUIFont::Left);
 
 
-				if (i < MAX_CLIENTS)
+				if (i < c_MaxClients)
 				{
 					int lines = 2;
 					sprintf_s(buf, sizeof(buf), "Thread: %d\nBuffer: %d / %d",
@@ -701,7 +701,7 @@ namespace RTE
 		int playersReady = 0;
 		int playersTotal = 0;
 
-		for (int i = 0; i < MAX_CLIENTS; i++)
+		for (int i = 0; i < c_MaxClients; i++)
 		{
 			if (IsPlayerConnected(i))
 				playersTotal++;
@@ -808,7 +808,7 @@ namespace RTE
 	void NetworkServer::ResetScene()
 	{
 		m_SceneId++;
-		for (int i = 0; i < MAX_CLIENTS; i++)
+		for (int i = 0; i < c_MaxClients; i++)
 		{
 			m_SendSceneSetupData[i] = true;
 			m_SceneAvailable[i] = true;
@@ -821,7 +821,7 @@ namespace RTE
 	{
 		int player = -1;
 
-		for (int index = 0; index < MAX_CLIENTS; index++)
+		for (int index = 0; index < c_MaxClients; index++)
 			if (m_ClientConnections[index].ClientId == p->systemAddress)
 				player = index;
 
@@ -837,7 +837,7 @@ namespace RTE
 	{
 		if (m_IsInServerMode)
 		{
-			for (int p = 0; p < MAX_CLIENTS; p++)
+			for (int p = 0; p < c_MaxClients; p++)
 			{
 				if (IsPlayerConnected(p))
 				{
@@ -1136,7 +1136,7 @@ namespace RTE
 
 	void NetworkServer::ReceiveSceneAcceptedMsg(RakNet::Packet * p)
 	{
-		for (int player = 0; player < MAX_CLIENTS; player++)
+		for (int player = 0; player < c_MaxClients; player++)
 			if (m_ClientConnections[player].ClientId == p->systemAddress)
 				m_SendFrameData[player] = true;
 	}
@@ -1210,20 +1210,20 @@ namespace RTE
 
 	void NetworkServer::SendSoundData(int player)
 	{
-		std::list<AudioMan::SoundNetworkData> events;
+		std::list<AudioMan::NetworkSoundData> events;
 		g_AudioMan.GetSoundEvents(player, events);
 
 		if (events.empty())
 			return;
 
 		MsgSoundEvents * msg = (MsgSoundEvents *)m_aPixelLineBuffer[player];
-		AudioMan::SoundNetworkData * sndDataPtr = (AudioMan::SoundNetworkData *)((char *)msg + sizeof(MsgSoundEvents));
+		AudioMan::NetworkSoundData * sndDataPtr = (AudioMan::NetworkSoundData *)((char *)msg + sizeof(MsgSoundEvents));
 
 		msg->Id = ID_SRV_SOUND_EVENTS;
 		msg->FrameNumber = m_FrameNumbers[player];
 		msg->SoundEventsCount = 0;
 
-		for (std::list<AudioMan::SoundNetworkData>::iterator eItr = events.begin(); eItr != events.end(); ++eItr)
+		for (std::list<AudioMan::NetworkSoundData>::iterator eItr = events.begin(); eItr != events.end(); ++eItr)
 		{
 			sndDataPtr->State = (*eItr).State;
 			sndDataPtr->Channel = (*eItr).Channel;
@@ -1242,10 +1242,10 @@ namespace RTE
 				//sprintf_s(buf, sizeof(buf), "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 				//g_ConsoleMan.PrintString(buf);
 
-				int payloadSize = sizeof(RTE::MsgSoundEvents) + sizeof(AudioMan::SoundNetworkData) * msg->SoundEventsCount;
+				int payloadSize = sizeof(RTE::MsgSoundEvents) + sizeof(AudioMan::NetworkSoundData) * msg->SoundEventsCount;
 				m_Server->Send((const char *)msg, payloadSize, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, m_ClientConnections[player].ClientId, false);
 				msg->SoundEventsCount = 0;
-				sndDataPtr = (AudioMan::SoundNetworkData *)((char *)msg + sizeof(MsgSoundEvents));
+				sndDataPtr = (AudioMan::NetworkSoundData *)((char *)msg + sizeof(MsgSoundEvents));
 
 				m_SoundDataSentCurrent[player][STAT_CURRENT] += payloadSize;
 				m_SoundDataSentTotal[player] += payloadSize;
@@ -1262,11 +1262,11 @@ namespace RTE
 			//g_ConsoleMan.PrintString(buf);
 
 			int header = sizeof(RTE::MsgSoundEvents);
-			int data = sizeof(AudioMan::SoundNetworkData);
+			int data = sizeof(AudioMan::NetworkSoundData);
 			int toal = header + data * msg->SoundEventsCount;
 			int sz = sizeof(size_t);
 
-			int payloadSize = sizeof(RTE::MsgSoundEvents) + sizeof(AudioMan::SoundNetworkData) * msg->SoundEventsCount;
+			int payloadSize = sizeof(RTE::MsgSoundEvents) + sizeof(AudioMan::NetworkSoundData) * msg->SoundEventsCount;
 			m_Server->Send((const char *)msg, payloadSize, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, m_ClientConnections[player].ClientId, false);
 
 			m_SoundDataSentCurrent[player][STAT_CURRENT] += payloadSize;
@@ -1278,20 +1278,20 @@ namespace RTE
 
 	void NetworkServer::SendMusicData(int player)
 	{
-		std::list<AudioMan::MusicNetworkData> events;
+		std::list<AudioMan::NetworkMusicData> events;
 		g_AudioMan.GetMusicEvents(player, events);
 
 		if (events.empty())
 			return;
 
 		MsgMusicEvents * msg = (MsgMusicEvents *)m_aPixelLineBuffer[player];
-		AudioMan::MusicNetworkData * sndDataPtr = (AudioMan::MusicNetworkData *)((char *)msg + sizeof(MsgMusicEvents));
+		AudioMan::NetworkMusicData * sndDataPtr = (AudioMan::NetworkMusicData *)((char *)msg + sizeof(MsgMusicEvents));
 
 		msg->Id = ID_SRV_MUSIC_EVENTS;
 		msg->FrameNumber = m_FrameNumbers[player];
 		msg->MusicEventsCount = 0;
 
-		for (std::list<AudioMan::MusicNetworkData>::iterator eItr = events.begin(); eItr != events.end(); ++eItr)
+		for (std::list<AudioMan::NetworkMusicData>::iterator eItr = events.begin(); eItr != events.end(); ++eItr)
 		{
 			sndDataPtr->State = (*eItr).State;
 			sndDataPtr->Loops = (*eItr).Loops;
@@ -1308,10 +1308,10 @@ namespace RTE
 				//sprintf_s(buf, sizeof(buf), "%d %d", msg->FrameNumber, msg->PostEffectsCount);
 				//g_ConsoleMan.PrintString(buf);
 
-				int payloadSize = sizeof(RTE::MsgMusicEvents) + sizeof(AudioMan::MusicNetworkData) * msg->MusicEventsCount;
+				int payloadSize = sizeof(RTE::MsgMusicEvents) + sizeof(AudioMan::NetworkMusicData) * msg->MusicEventsCount;
 				m_Server->Send((const char *)msg, payloadSize, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, m_ClientConnections[player].ClientId, false);
 				msg->MusicEventsCount = 0;
-				sndDataPtr = (AudioMan::MusicNetworkData *)((char *)msg + sizeof(MsgMusicEvents));
+				sndDataPtr = (AudioMan::NetworkMusicData *)((char *)msg + sizeof(MsgMusicEvents));
 
 				m_SoundDataSentCurrent[player][STAT_CURRENT] += payloadSize;
 				m_SoundDataSentTotal[player] += payloadSize;
@@ -1328,11 +1328,11 @@ namespace RTE
 			//g_ConsoleMan.PrintString(buf);
 
 			int header = sizeof(RTE::MsgMusicEvents);
-			int data = sizeof(AudioMan::MusicNetworkData);
+			int data = sizeof(AudioMan::NetworkMusicData);
 			int toal = header + data * msg->MusicEventsCount;
 			int sz = sizeof(size_t);
 
-			int payloadSize = sizeof(RTE::MsgMusicEvents) + sizeof(AudioMan::MusicNetworkData) * msg->MusicEventsCount;
+			int payloadSize = sizeof(RTE::MsgMusicEvents) + sizeof(AudioMan::NetworkMusicData) * msg->MusicEventsCount;
 			m_Server->Send((const char *)msg, payloadSize, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, m_ClientConnections[player].ClientId, false);
 
 			m_SoundDataSentCurrent[player][STAT_CURRENT] += payloadSize;
@@ -1758,7 +1758,7 @@ namespace RTE
 		msg += p->systemAddress.ToString(true);
 		g_ConsoleMan.PrintString(msg);
 
-		for (int index = 0; index < MAX_CLIENTS; index++)
+		for (int index = 0; index < c_MaxClients; index++)
 		{
 			if (m_ClientConnections[index].ClientId == p->systemAddress)
 			{
@@ -1805,7 +1805,7 @@ namespace RTE
 		bool connected = false;
 
 		// Store client connection data
-		for (int index = 0; index < MAX_CLIENTS; index++)
+		for (int index = 0; index < c_MaxClients; index++)
 		{
 			g_ConsoleMan.PrintString(m_ClientConnections[index].ClientId.ToString());
 
@@ -1842,7 +1842,7 @@ namespace RTE
 		msg += buf;
 		g_ConsoleMan.PrintString(msg);
 
-		for (int index = 0; index < MAX_CLIENTS; index++)
+		for (int index = 0; index < c_MaxClients; index++)
 		{
 			if (m_ClientConnections[index].ClientId == p->systemAddress)
 			{
@@ -1880,7 +1880,7 @@ namespace RTE
 
 	void NetworkServer::ClearInputMessages(int player)
 	{
-		if (player >= 0 && player < MAX_CLIENTS)
+		if (player >= 0 && player < c_MaxClients)
 		{
 			while (!m_InputMessages[player].empty())
 				m_InputMessages[player].pop();
@@ -1889,7 +1889,7 @@ namespace RTE
 
 	void NetworkServer::ProcessInputMessage(int player, NetworkClient::MsgInput msg)
 	{
-		if (player >= 0 && player < MAX_CLIENTS)
+		if (player >= 0 && player < c_MaxClients)
 		{
 			Vector input;
 			input.m_X = msg.MouseX;
@@ -1951,11 +1951,11 @@ namespace RTE
 
 		int player = -1;
 
-		for (int index = 0; index < MAX_CLIENTS; index++)
+		for (int index = 0; index < c_MaxClients; index++)
 			if (m_ClientConnections[index].ClientId == p->systemAddress)
 				player = index;
 
-		if (player >= 0 && player < MAX_CLIENTS)
+		if (player >= 0 && player < c_MaxClients)
 		{
 			// Copy message data
 			NetworkClient::MsgInput msg;

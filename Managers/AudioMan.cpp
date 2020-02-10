@@ -12,7 +12,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		// Callback for catching music streams that end
+	// Callback for catching music streams that end
 #ifdef __USE_SOUND_FMOD
 	signed char F_CALLBACKAPI PlayNextCallback(FSOUND_STREAM *stream, void *buff, int len, void *userdata) { g_AudioMan.PlayNextStream(); return 0; }
 

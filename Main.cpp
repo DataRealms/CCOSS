@@ -313,28 +313,23 @@ void LoadingSplashProgressReport(std::string reportString, bool newItem = false)
 
 bool LoadDataModules()
 {
-// TODO: REMOVE
-//    return true;
     // Loading splash screen
     g_FrameMan.ClearBackBuffer32();
-//    g_FrameMan.LoadPalette("Base.rte/palette.bmp");
     SceneLayer *pLoadingSplash = new SceneLayer();
     pLoadingSplash->Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.bmp"), false, Vector(), true, false, Vector(1.0, 0));
-    // hcoded offset to make room for the loading box
-    pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 110, 0));
+
+    // hardcoded offset to make room for the loading box only if DisableLoadingScreen is false.
+	if (!g_SettingsMan.DisableLoadingScreen()) {
+		pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 110, 0));
+	} else {
+		pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 14, 0));
+	}
+
     // Draw onto wrapped strip centered vertically on the screen
 	Box splashBox(Vector(0, (g_FrameMan.GetResY() - pLoadingSplash->GetBitmap()->h) / 2), g_FrameMan.GetResX(), pLoadingSplash->GetBitmap()->h);
     pLoadingSplash->Draw(g_FrameMan.GetBackBuffer32(), splashBox);
     delete pLoadingSplash;
     pLoadingSplash = 0;
-
-	/*int x = g_FrameMan.GetResX() / 2;
-	int y = g_FrameMan.GetResY() - 50;
-
-	AllegroBitmap bmp(g_FrameMan.GetBackBuffer32());
-
-	g_FrameMan.GetLargeFont()->DrawAligned(&bmp, x, y, "PLANETOID PIONEERS FACT #1", 1);
-	g_FrameMan.GetLargeFont()->DrawAligned(&bmp, x, y + 12, "Mods are loaded orders of magnitude faster!", 1);*/
 
     g_FrameMan.FlipFrameBuffers();
 

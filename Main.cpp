@@ -73,6 +73,9 @@ enum TITLESEQUENCE
     LOGOFADEIN,
     LOGODISPLAY,
     LOGOFADEOUT,
+	FMODLOGOFADEIN,
+	FMODLOGODISPLAY,
+	FMODLOGOFADEOUT,
     // Game notice
     NOTICEFADEIN,
     NOTICEDISPLAY,
@@ -935,6 +938,10 @@ bool PlayIntroTitle()
     pDRLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.bmp"));
     pDRLogo->SetWrapDoubleDrawing(false);
 
+	MOSParticle *pFMODLogo = new MOSParticle();
+	pFMODLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.bmp"));
+	pFMODLogo->SetWrapDoubleDrawing(false);
+
     SceneLayer *pBackdrop = new SceneLayer();
     pBackdrop->Create(ContentFile("Base.rte/GUIs/Title/Nebula.bmp"), false, Vector(), false, false, Vector(0, -1.0));//startYOffset + resY));
     float backdropScrollRatio = 1.0f / 3.0f;
@@ -1144,6 +1151,15 @@ bool PlayIntroTitle()
             pDRLogo->SetPos(Vector(g_FrameMan.GetResX() / 2, (g_FrameMan.GetResY() / 2) - 35));
             pDRLogo->Draw(g_FrameMan.GetBackBuffer32());
         }
+
+		///////////////////////////////////////////////////////
+		// FMOD Logo drawing
+
+		if (g_IntroState >= FMODLOGOFADEIN && g_IntroState <= FMODLOGOFADEOUT) {
+			g_FrameMan.ClearBackBuffer32();
+			pFMODLogo->SetPos(Vector(g_FrameMan.GetResX() / 2, (g_FrameMan.GetResY() / 2) - 35));
+			pFMODLogo->Draw(g_FrameMan.GetBackBuffer32());
+		}
 
         ///////////////////////////////////////////////////////
         // Notice drawing
@@ -1533,7 +1549,7 @@ bool PlayIntroTitle()
             {
                 // Black fade
                 clear_to_color(pFadeScreen, 0);
-                duration = 0.5;
+                duration = 0.25;
                 sectionSwitch = false;
             }
 
@@ -1543,10 +1559,54 @@ bool PlayIntroTitle()
 
             if (elapsed >= duration || keyPressed)
             {
-                g_IntroState = NOTICEFADEIN;
+                g_IntroState = FMODLOGOFADEIN;
                 sectionSwitch = true;
             }
         }
+		else if (g_IntroState == FMODLOGOFADEIN) {
+			if (sectionSwitch) {
+				// Black fade
+				clear_to_color(pFadeScreen, 0);
+				duration = 0.25;
+				sectionSwitch = false;
+			}
+
+			fadePos = 255 - (255 * sectionProgress);
+			set_trans_blender(fadePos, fadePos, fadePos, fadePos);
+			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pFadeScreen, 0, 0);
+
+			if (elapsed >= duration) {
+				g_IntroState = FMODLOGODISPLAY;
+				sectionSwitch = true;
+			} else if (keyPressed) {
+				g_IntroState = FMODLOGOFADEOUT;
+				sectionSwitch = true;
+			}
+		} else if (g_IntroState == FMODLOGODISPLAY) {
+			if (sectionSwitch) {
+				duration = 2.0;
+				sectionSwitch = false;
+			}
+			if (elapsed > duration || keyPressed) {
+				g_IntroState = FMODLOGOFADEOUT;
+				sectionSwitch = true;
+			}
+		} else if (g_IntroState == FMODLOGOFADEOUT) {
+			if (sectionSwitch) {
+				// Black fade
+				clear_to_color(pFadeScreen, 0);
+				duration = 0.25;
+				sectionSwitch = false;
+			}
+			fadePos = 255 * sectionProgress;
+			set_trans_blender(fadePos, fadePos, fadePos, fadePos);
+			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pFadeScreen, 0, 0);
+
+			if (elapsed >= duration || keyPressed) {
+				g_IntroState = NOTICEFADEIN;
+				sectionSwitch = true;
+			}
+		}
         else if (g_IntroState == NOTICEFADEIN)
         {
             if (sectionSwitch)

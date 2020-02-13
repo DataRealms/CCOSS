@@ -2584,6 +2584,7 @@ int main(int argc, char *argv[])
     new PresetMan();
     new FrameMan();
     new AudioMan();
+	new GUISound();
     new UInputMan();
     new ActivityMan();
     new MovableMan();
@@ -2611,6 +2612,7 @@ int main(int argc, char *argv[])
     g_PresetMan.Create();
     g_FrameMan.Create();
     g_AudioMan.Create();
+	g_GUISound.Create();
     g_UInputMan.Create();
 	if (g_NetworkServer.IsServerModeEnabled())
 		g_UInputMan.SetMultiplayerMode(true);
@@ -2687,6 +2689,7 @@ int main(int argc, char *argv[])
     g_MovableMan.Destroy();
     g_SceneMan.Destroy();
     g_ActivityMan.Destroy();
+	g_GUISound.Destroy();
     g_AudioMan.Destroy();
     g_PresetMan.Destroy();
     g_UInputMan.Destroy();

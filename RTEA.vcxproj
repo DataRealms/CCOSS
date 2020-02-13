@@ -375,6 +375,7 @@
     <ClInclude Include="external\sources\RakNet\WSAStartupSingleton.h" />
     <ClInclude Include="external\sources\RakNet\XBox360Includes.h" />
     <ClInclude Include="external\sources\RakNet\_FindFirst.h" />
+    <ClInclude Include="GUI\GUISound.h" />
     <ClInclude Include="Managers\Network.h" />
     <ClInclude Include="Managers\NetworkClient.h" />
     <ClInclude Include="Managers\NetworkMessages.h" />
@@ -631,6 +632,7 @@
     <ClCompile Include="external\sources\RakNet\_FindFirst.cpp" />
     <ClCompile Include="Entities\Emission.cpp" />
     <ClCompile Include="Entities\PEmitter.cpp" />
+    <ClCompile Include="GUI\GUISound.cpp" />
     <ClCompile Include="Managers\NetworkClient.cpp" />
     <ClCompile Include="Managers\NetworkServer.cpp" />
     <ClCompile Include="System\StandardIncludes.cpp">

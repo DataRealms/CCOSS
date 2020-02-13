@@ -704,7 +704,7 @@ namespace RTE {
 									//    m_aapPlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps8()[0]));
 								}
 							}
-							//m_FocusChangeSound.Play();
+							//g_GUISound.FocusChangeSound().Play();
 
 							//Check if we need to clear or set CPU disabled team icon
 							bool noCPUs = true;
@@ -733,7 +733,7 @@ namespace RTE {
 						else if (m_aapPlayerBoxes[player][team]->GetDrawColor() != c_PlayerSlotColorHovered)
 						{
 							m_aapPlayerBoxes[player][team]->SetDrawColor(c_PlayerSlotColorHovered);
-							//m_SelectionChangeSound.Play();
+							//g_GUISound.SelectionChangeSound().Play();
 						}
 					}
 					// Un-highlight all other cells
@@ -1240,10 +1240,10 @@ namespace RTE {
 						//HideAllScreens();
 						//                    m_MenuScreen = SCENESELECT;
 						//                    m_ScreenChange = true;
-						//m_ButtonPressSound.Play();
+						//g_GUISound.ButtonPressSound().Play();
 					}
 					else
-						m_UserErrorSound.Play();
+						g_GUISound.UserErrorSound().Play();
 				}
 			}
 
@@ -1282,7 +1282,7 @@ namespace RTE {
 
 						// Update the scene info box
 						//UpdateScenesBox();
-						//m_ItemChangeSound.Play();
+						//g_GUISound.ItemChangeSound().Play();
 					}
 				}
 

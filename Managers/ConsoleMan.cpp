@@ -218,7 +218,7 @@ void ConsoleMan::SetEnabled(bool enable)
         Vector mousePos(-mouseOffX + (g_FrameMan.GetPlayerScreenWidth() / 2), -mouseOffY + (g_FrameMan.GetPlayerScreenHeight() / 2));
         g_UInputMan.SetMousePos(mousePos, m_pController->GetPlayer());
 */
-        m_EnterMenuSound.Play();
+        g_GUISound.EnterMenuSound().Play();
     }
     else if (!enable && m_EnabledState != DISABLED && m_EnabledState != DISABLING)
     {
@@ -226,7 +226,7 @@ void ConsoleMan::SetEnabled(bool enable)
         // Trap the mouse cursor again
 //        g_UInputMan.TrapMousePos(true, m_pController->GetPlayer());
         // Only play switching away sound
-        m_ExitMenuSound.Play();
+        g_GUISound.ExitMenuSound().Play();
     }
 }
 
@@ -413,7 +413,7 @@ void ConsoleMan::Update()
             m_LastInputString = m_pInputTextBox->GetText();
 
             m_EnabledState = DISABLING;
-            m_ExitMenuSound.Play();
+            g_GUISound.ExitMenuSound().Play();
         }
         else
         {
@@ -425,7 +425,7 @@ void ConsoleMan::Update()
             m_pInputTextBox->SetCursorPos(m_pInputTextBox->GetText().length());
 
             m_EnabledState = ENABLING;
-            m_EnterMenuSound.Play();
+            g_GUISound.EnterMenuSound().Play();
         }
     }
 

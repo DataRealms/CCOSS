@@ -1501,7 +1501,7 @@ bool PlayIntroTitle()
             if (sectionSwitch)
             {
                 // Play juicy logo signature jingle/sound
-                logoSound.Play();
+				g_GUISound.SplashSound().Play();
                 // Black fade
                 clear_to_color(pFadeScreen, 0);
                 duration = 0.25;
@@ -2050,7 +2050,7 @@ bool PlayIntroTitle()
                 g_pScenarioGUI->SetEnabled(true);
 
                 // Play the scenario music with juicy start sound
-                metaSound.Play();
+                g_GUISound.SplashSound().Play();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
             }
 
@@ -2147,7 +2147,7 @@ bool PlayIntroTitle()
                 sectionSwitch = false;
 
                 // Play the campaign music with metasound start
-                metaSound.Play();
+				g_GUISound.SplashSound().Play();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
             }
 

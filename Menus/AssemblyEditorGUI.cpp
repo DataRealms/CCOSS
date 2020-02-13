@@ -535,7 +535,7 @@ void AssemblyEditorGUI::Update()
             m_PreviousMode = ADDINGOBJECT;
             m_ModeChanged = true;
             UpdatePieMenu();
-            m_PlacementBlip.Play();
+            g_GUISound.PlacementBlip().Play();
         }
 
         // Apply the team to the current actor, if applicable
@@ -681,7 +681,7 @@ void AssemblyEditorGUI::Update()
 							g_SceneMan.GetScene()->AddPlacedObject(editedSet, pNewObject, objectListPosition);
 
 							m_EditMade = true;
-							m_PlacementThud.Play();
+							g_GUISound.PlacementThud().Play();
 							toPlace = false;
 						}
 					}
@@ -699,7 +699,7 @@ void AssemblyEditorGUI::Update()
 									pBrainAHuman->AddInventoryItem(dynamic_cast<MovableObject *>(m_pCurrentObject->Clone()));
 									pBrainAHuman->FlashWhite(150);
 									m_EditMade = true;
-									m_PlacementThud.Play();
+									g_GUISound.PlacementThud().Play();
 									toPlace = false;
 								}
 							}
@@ -744,7 +744,7 @@ void AssemblyEditorGUI::Update()
 					}
 				}
 
-				m_PlacementThud.Play();
+				g_GUISound.PlacementThud().Play();
 				m_EditMade = true;
 				toPlace = false;
 			}
@@ -800,7 +800,7 @@ void AssemblyEditorGUI::Update()
 						m_ObjectListOrder++;
 				}
 				m_CurrentAssemblyName = pBA->GetPresetName();
-				m_PlacementThud.Play();
+				g_GUISound.PlacementThud().Play();
 				m_EditMade = true;
 				toPlace = false;
 			}
@@ -812,7 +812,7 @@ void AssemblyEditorGUI::Update()
 				// Increment the list order so we place over last placed item
 				if (m_ObjectListOrder >= 0)
 					m_ObjectListOrder++;
-				m_PlacementThud.Play();
+				g_GUISound.PlacementThud().Play();
 				m_EditMade = true;
             }
 // TEMP REMOVE WEHN YOU CLEAN UP THE ABOVE HARDCODED BRAIN PLACEMENT
@@ -893,11 +893,11 @@ void AssemblyEditorGUI::Update()
                     m_ModeChanged = true;
                     UpdatePieMenu();
                     m_BlinkTimer.Reset();
-                    m_PlacementBlip.Play();
-                    m_PlacementGravel.Play();
+                    g_GUISound.PlacementBlip().Play();
+                    g_GUISound.PlacementGravel().Play();
                 }
                 else
-                    m_UserErrorSound.Play();
+                    g_GUISound.UserErrorSound().Play();
             }
         }
 
@@ -928,7 +928,7 @@ void AssemblyEditorGUI::Update()
 // TODO: Add awesome destruction sound here
                 }
                 else
-                    m_UserErrorSound.Play();
+                    g_GUISound.UserErrorSound().Play();
             }
         }
     }

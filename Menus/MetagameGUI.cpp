@@ -881,12 +881,12 @@ void MetagameGUI::SetEnabled(bool enable)
     if (enable && m_MenuEnabled != ENABLED && m_MenuEnabled != ENABLING)
     {
         m_MenuEnabled = ENABLING;
-        m_EnterMenuSound.Play();
+        g_GUISound.EnterMenuSound().Play();
     }
     else if (!enable && m_MenuEnabled != DISABLED && m_MenuEnabled != DISABLING)
     {
         m_MenuEnabled = DISABLING;
-        m_ExitMenuSound.Play();
+        g_GUISound.ExitMenuSound().Play();
     }
 
     m_ScreenChange = true;
@@ -1897,7 +1897,7 @@ void MetagameGUI::Update()
             {
                 m_pHoveredScene = (*newCandidateItr);
                 foundNewHover = true;
-                m_SelectionChangeSound.Play();
+                g_GUISound.SelectionChangeSound().Play();
             }
 
             // If we didn't find anything to hover over, then remove the hover status
@@ -1916,14 +1916,14 @@ void MetagameGUI::Update()
                 if (m_pHoveredScene)
                 {
                     SelectScene(m_pHoveredScene);
-                    m_ItemChangeSound.Play();
+                    g_GUISound.ItemChangeSound().Play();
                 }
 /* Can't do this, doesn't take into account clicks on floating UI boxes
                 // Not hovering over anything on click, so deselect whatever was selected
                 else if (m_pSelectedScene)
                 {
                     m_pSelectedScene = 0;
-                    m_FocusChangeSound.Play();
+                    g_GUISound.FocusChangeSound().Play();
                 }
 */
             }
@@ -2268,7 +2268,7 @@ void MetagameGUI::UpdateInput()
             {
                 g_MetaMan.SetSuspend(true);
                 SwitchToScreen(MENUDIALOG);
-                m_BackButtonPressSound.Play();
+                g_GUISound.BackButtonPressSound().Play();
             }
 
 			// Return to main menu button pressed
@@ -2280,7 +2280,7 @@ void MetagameGUI::UpdateInput()
                 HideAllScreens();
                 // Signal that we want to go back to main menu
                 m_BackToMain = true;
-                m_BackButtonPressSound.Play();
+                g_GUISound.BackButtonPressSound().Play();
 				
             }
 
@@ -2289,7 +2289,7 @@ void MetagameGUI::UpdateInput()
             {
                 g_MetaMan.SetSuspend(true);
                 SwitchToScreen(SAVEDIALOG);
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// Open load menu button pressed
@@ -2298,7 +2298,7 @@ void MetagameGUI::UpdateInput()
             {
                 g_MetaMan.SetSuspend(true);
                 SwitchToScreen(LOADDIALOG);
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// New Game menu button pressed
@@ -2307,7 +2307,7 @@ void MetagameGUI::UpdateInput()
                 g_MetaMan.SetSuspend(true);
                 SwitchToScreen(NEWDIALOG);
                 UpdatePlayerSetup();
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// Quit Program button pressed
@@ -2318,7 +2318,7 @@ void MetagameGUI::UpdateInput()
                 m_pConfirmationLabel->SetText("Sure you want to quit to OS?\nAny unsaved progress\nwill be lost!");
                 m_pConfirmationButton->SetText("Quit");
                 m_pConfirmationBox->SetVisible(true);
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// Resume Game menu button pressed
@@ -2333,7 +2333,7 @@ void MetagameGUI::UpdateInput()
                 }
                 else
                     SwitchToScreen(ROOTBOX);
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// Confirm button pressed
@@ -2368,7 +2368,7 @@ void MetagameGUI::UpdateInput()
                 g_MetaMan.SetSuspend(false);
                 SwitchToScreen(ROOTBOX);
 
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
             // NEW GAME SETUP DIALOG
@@ -2387,7 +2387,7 @@ void MetagameGUI::UpdateInput()
                     // Show changes in affected player' gizmos
                     UpdatePlayerSetup();
                     
-                    m_ButtonPressSound.Play();
+                    g_GUISound.ButtonPressSound().Play();
                 } 
             }
 
@@ -2405,7 +2405,7 @@ void MetagameGUI::UpdateInput()
                 else
                     StartNewGame();
 
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// Save game button pressed
@@ -2433,12 +2433,12 @@ void MetagameGUI::UpdateInput()
                             SwitchToScreen(MENUDIALOG);
 //                        }
                     }
-                    m_ButtonPressSound.Play();
+                    g_GUISound.ButtonPressSound().Play();
                 }
                 else
                 {
                     m_apMetaButton[SAVENOW]->SetText("CONFIRM?");
-                    m_ItemChangeSound.Play();
+                    g_GUISound.ItemChangeSound().Play();
                 }
             }
 
@@ -2464,7 +2464,7 @@ void MetagameGUI::UpdateInput()
                     SwitchToScreen(ROOTBOX);
                 }
 
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// Graphical 'Continue Phase' button pressed; set the signal flag and handle at the end of UpdateInput
@@ -2481,7 +2481,7 @@ void MetagameGUI::UpdateInput()
                 if (g_MetaMan.GetRemainingFundsOfPlayer(metaPlayer, 0, false, false) < SCANCOST)
                 {
                     m_apMetaButton[SCENEACTION]->SetText("NOT ENOUGH FUNDS!");
-                    m_UserErrorSound.Play();
+                    g_GUISound.UserErrorSound().Play();
                 }
                 // Ask whether the player wants to scan now or later, with two new buttons
                 else
@@ -2493,7 +2493,7 @@ void MetagameGUI::UpdateInput()
                     m_pScanInfoLabel->SetVisible(true);
                     m_pScanInfoLabel->SetText("or");
 
-                    m_ButtonPressSound.Play();
+                    g_GUISound.ButtonPressSound().Play();
                 }
             }
 
@@ -2525,7 +2525,7 @@ void MetagameGUI::UpdateInput()
                     g_ActivityMan.SetStartActivity(pNewEditor);
                     m_ActivityRestarted = true;
 
-                    m_ButtonPressSound.Play();
+                    g_GUISound.ButtonPressSound().Play();
                 }
             }
 
@@ -2563,7 +2563,7 @@ void MetagameGUI::UpdateInput()
                 g_ActivityMan.SetStartActivity(pScanActivity);
                 m_ActivityRestarted = true;
 
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// Scan Later button pressed; mark the Scene for scanning by this metaplayer's team
@@ -2573,7 +2573,7 @@ void MetagameGUI::UpdateInput()
                 int team = g_MetaMan.m_Players[metaPlayer].GetTeam();
                 // Double-check to make sure we do have the funds to do this AND that the scan hasn't already been paid for
                 if (g_MetaMan.m_Players[metaPlayer].m_Funds < SCANCOST && !m_pSelectedScene->IsScanScheduled(team))
-                    m_UserErrorSound.Play();
+                    g_GUISound.UserErrorSound().Play();
                 else
                 {
                     // Show the cost change the funds meter
@@ -2592,7 +2592,7 @@ void MetagameGUI::UpdateInput()
                         m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
 
                     // Play an appropriate sound to indicate that the scan is bought and scheduled
-                    m_ItemChangeSound.Play();
+                    g_GUISound.ItemChangeSound().Play();
                 }
             }
 
@@ -2600,7 +2600,7 @@ void MetagameGUI::UpdateInput()
 			if (anEvent.GetControl() == m_pSceneCloseButton)
             {
                 m_pSelectedScene = 0;
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
         }
 
@@ -2611,7 +2611,7 @@ void MetagameGUI::UpdateInput()
             if (dynamic_cast<GUIButton *>(anEvent.GetControl()))
             {
                 if (anEvent.GetMsg() == GUIButton::Focused)
-                    m_SelectionChangeSound.Play();
+                    g_GUISound.SelectionChangeSound().Play();
                 // Also stop dragging any panels if we're over any button
                 m_pDraggedBox = 0;
                 m_EngageDrag = true;
@@ -2714,7 +2714,7 @@ void MetagameGUI::UpdateInput()
 					UpdateAISkillSliders(player);
 
                     UpdatePlayerSetup();
-//                    m_ButtonPressSound.Play();
+//                    g_GUISound.ButtonPressSound().Play();
                 }
             }
 
@@ -2754,7 +2754,7 @@ void MetagameGUI::UpdateInput()
                 else
                     m_apMetaButton[LOADNOW]->SetVisible(false);
                 // Play a ding
-                m_ItemChangeSound.Play();
+                g_GUISound.ItemChangeSound().Play();
             }
 
             // Save overwrite combo box selection changed
@@ -2799,7 +2799,7 @@ void MetagameGUI::UpdateInput()
                 }
 
                 // Play a ding
-                m_ItemChangeSound.Play();
+                g_GUISound.ItemChangeSound().Play();
             }
         }
     }
@@ -2817,7 +2817,7 @@ void MetagameGUI::UpdateInput()
             SwitchToScreen(MENUDIALOG);
         else
             m_ContinuePhase = true;
-        m_ButtonPressSound.Play();
+        g_GUISound.ButtonPressSound().Play();
     }
 }
 
@@ -5062,7 +5062,7 @@ void MetagameGUI::UpdateOffensives()
         {
             m_BattleToResume = false;
             m_ActivityResumed = true;
-            m_ExitMenuSound.Play();
+            g_GUISound.ExitMenuSound().Play();
         }
         // Starting the next battle
         else

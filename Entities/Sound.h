@@ -11,7 +11,8 @@ namespace RTE {
 	/// </summary>
 	class Sound : public Entity {
 		friend class AudioMan;
-
+		friend class GUISound;
+		
 	public:
 		ENTITYALLOCATION(Sound)
 		CLASSINFOGETTERS

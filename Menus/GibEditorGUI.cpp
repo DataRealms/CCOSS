@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "GibEditorGUI.h"
+#include "GUISound.h"
 
 #include "FrameMan.h"
 #include "PresetMan.h"

@@ -96,14 +96,6 @@ void Activity::Clear()
     m_TeamNames[TEAM_3] = "Team 3";
     m_TeamNames[TEAM_4] = "Team 4";
 
-    m_FundsChangedSound.Reset();
-    m_ActorSwitchSound.Reset();
-    m_BrainSwitchSound.Reset();
-    m_CameraTravelSound.Reset();
-    m_ConfirmSound.Reset();
-    m_SelectionChangeSound.Reset();
-    m_UserErrorSound.Reset();
-
 	m_CraftsOrbitAtTheEdge = false;
 }
 
@@ -197,14 +189,6 @@ int Activity::Create(const Activity &reference)
         m_TeamDeaths[team] = reference.m_TeamDeaths[team];
 		m_TeamAISkillLevels[team] = reference.m_TeamAISkillLevels[team];
     }
-
-    m_FundsChangedSound = reference.m_FundsChangedSound;
-    m_ActorSwitchSound = reference.m_ActorSwitchSound;
-    m_BrainSwitchSound = reference.m_BrainSwitchSound;
-    m_CameraTravelSound = reference.m_CameraTravelSound;
-    m_ConfirmSound = reference.m_ConfirmSound;
-    m_SelectionChangeSound = reference.m_SelectionChangeSound;
-    m_UserErrorSound = reference.m_UserErrorSound;
 
 	m_CraftsOrbitAtTheEdge = reference.m_CraftsOrbitAtTheEdge;
 
@@ -1381,26 +1365,6 @@ int Activity::Start()
         m_PlayerController[player].SetTeam(m_Team[player]);
 
         m_MsgTimer[player].Reset();
-    }
-
-    // Init sounds
-    if (m_FundsChangedSound.GetSampleCount() < 1)
-    {
-        // Interface sounds should not be pitched, to reinforce the impression of time decoupling between simulation and UI
-        m_FundsChangedSound.Create("Base.rte/Sounds/GUIs/FundsChanged1.wav", false);
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged2.wav");
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged3.wav");
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged4.wav");
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged5.wav");
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged6.wav");
-        m_ActorSwitchSound.Create("Base.rte/Sounds/GUIs/ActorSwitch.wav", false);
-        m_BrainSwitchSound.Create("Base.rte/Sounds/GUIs/BrainSwitch.wav", false);
-        m_CameraTravelSound.Create("Base.rte/Sounds/GUIs/CameraTravel1.wav", false);
-        m_CameraTravelSound.AddSample("Base.rte/Sounds/GUIs/CameraTravel2.wav");
-        m_CameraTravelSound.AddSample("Base.rte/Sounds/GUIs/CameraTravel3.wav");
-        m_ConfirmSound.Create("Base.rte/Sounds/GUIs/MenuExit2.wav", false);
-        m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
-        m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
     }
 
     // Precache the player to screen mappings

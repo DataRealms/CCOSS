@@ -82,17 +82,6 @@ namespace RTE {
 
 		m_LastMusic = "";
 		m_LastMusicPos = 0;
-
-		// Sounds
-		m_EnterMenuSound.Reset();
-		m_ExitMenuSound.Reset();
-		m_FocusChangeSound.Reset();
-		m_SelectionChangeSound.Reset();
-		m_ButtonPressSound.Reset();
-		m_BackButtonPressSound.Reset();
-		m_ItemChangeSound.Reset();
-		m_TestSound.Reset();
-		m_UserErrorSound.Reset();
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -104,17 +93,6 @@ namespace RTE {
 	{
 		if (Activity::Create() < 0)
 			return -1;
-
-		// Load pie menu sounds so they could be played when their network events arrive
-		// We don't care about the sound object, only the underlying FileContent objects it loads during creation
-		Sound s;
-		s.Create("Base.rte/Sounds/GUIs/PieMenuEnter.wav", false);
-		s.Create("Base.rte/Sounds/GUIs/PieMenuExit.wav", false);
-		s.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
-		s.Create("Base.rte/Sounds/GUIs/PlacementBlip.wav", false);
-		s.Create("Base.rte/Sounds/GUIs/SlicePicked.wav", false);
-		s.Create("Base.rte/Sounds/GUIs/PieMenuExit.wav", false);
-
 		return 0;
 	}
 
@@ -236,18 +214,6 @@ namespace RTE {
 		m_pNATServiceServerNameTextBox->SetText(g_SettingsMan.GetNATServiceAddress());
 		m_pNATServerNameTextBox->SetText(g_SettingsMan.GetNATServerName());
 		m_pNATServerPasswordTextBox->SetText(g_SettingsMan.GetNATServerPassword());
-
-
-		m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
-		m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", false);
-		m_ExitMenuSound.AddSample("Base.rte/Sounds/GUIs/MenuExit2.wav");
-		m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", false);
-		m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
-		m_ButtonPressSound.Create("Base.rte/Sounds/GUIs/ButtonPress.wav", false);
-		m_BackButtonPressSound.Create("Base.rte/Sounds/GUIs/BackButtonPress.wav", false);
-		m_ItemChangeSound.Create("Base.rte/Sounds/GUIs/ItemChange.wav", false);
-		m_TestSound.Create("Base.rte/Sounds/GUIs/Test.wav", false);
-		m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
 
 		return error;
 	}

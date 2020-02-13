@@ -316,12 +316,6 @@ protected:
     // The lat direction the log marker was moved. Needed so that changing directions dont need doouble tapping etc
     int m_LastLogMove;
 
-    // Sound for enabling and disabling menu
-    Sound m_EnterMenuSound;
-    Sound m_ExitMenuSound;
-    // Sound for erroneus input
-    Sound m_UserErrorSound;
-
 	// If true the console is drawn no matter what
 	bool m_ForceVisible;
 

@@ -51,9 +51,6 @@ void ConsoleMan::Clear()
     m_InputLog.clear();
     m_InputLogPosition = m_InputLog.begin();
     m_LastLogMove = 0;
-    m_EnterMenuSound.Reset();
-    m_ExitMenuSound.Reset();
-    m_UserErrorSound.Reset();
 	m_ForceVisible = true;
 }
 
@@ -110,10 +107,6 @@ int ConsoleMan::Create(bool logToCli)
     // Reset the input log
     m_InputLogPosition = m_InputLog.begin();
     m_LastLogMove = 0;
-
-    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav");
-    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav");
-    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav");
 
     return 0;
 }

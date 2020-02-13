@@ -272,15 +272,7 @@ void PieMenuGUI::Clear()
     m_CursorAng = 0;
     m_EnoughInput = false;
     m_DInputHoldTimer.Reset();
-
-    m_EnterMenuSound.Reset();
-    m_ExitMenuSound.Reset();
-    m_HoverChangeSound.Reset();
-    m_HoverDisabledSound.Reset();
-    m_SlicePickedSound.Reset();
-    m_DisabledPickedSound.Reset();
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -314,14 +306,6 @@ int PieMenuGUI::Create(Controller *pController, Actor *pFocusActor)
         m_pBGBitmap = create_bitmap_ex(8, diameter, diameter);
         clear_to_color(m_pBGBitmap, g_KeyColor);
     }
-
-    // Interface sounds should not be pitched, to reinforce the appearance of time decoupling between simulation and UI
-    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/PieMenuEnter.wav", false);
-    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/PieMenuExit.wav", false);
-    m_HoverChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
-    m_HoverDisabledSound.Create("Base.rte/Sounds/GUIs/PlacementBlip.wav", false);
-    m_SlicePickedSound.Create("Base.rte/Sounds/GUIs/SlicePicked.wav", false);
-    m_DisabledPickedSound.Create("Base.rte/Sounds/GUIs/PieMenuExit.wav", false);
 
     return 0;
 }

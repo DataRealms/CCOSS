@@ -105,13 +105,6 @@ void BuyMenuGUI::Clear()
     m_Loadouts.clear();
     m_PurchaseMade = false;
     m_CursorPos.Reset();
-    m_EnterMenuSound.Reset();
-    m_ExitMenuSound.Reset();
-    m_FocusChangeSound.Reset();
-    m_SelectionChangeSound.Reset();
-    m_ItemChangeSound.Reset();
-    m_PurchaseMadeSound.Reset();
-    m_UserErrorSound.Reset();
 
 	m_EnforceMaxPassengersConstraint = true;
 	m_EnforceMaxMassConstraint = true;
@@ -288,15 +281,6 @@ int BuyMenuGUI::Create(Controller *pController)
     // Reset repeat timers
     m_RepeatStartTimer.Reset();
     m_RepeatTimer.Reset();
-
-    // Interface sounds should not be pitched, to reinforce the appearance of time decoupling between simulation and UI
-    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
-    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", false);
-    m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", false);
-    m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
-    m_ItemChangeSound.Create("Base.rte/Sounds/GUIs/ItemChange.wav", false);
-//    m_PurchaseMadeSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
-    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
 
     return 0;
 }

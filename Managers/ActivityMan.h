@@ -1173,21 +1173,6 @@ protected:
 	// If true then on non-wrapped maps crafts beyound the edge of the map are considered orbited
 	bool m_CraftsOrbitAtTheEdge;
 
-    // Sound for when the funds of a team changes. Some kind of subtle gold/money sound
-    Sound m_FundsChangedSound;
-    // Sound for switching between regular (non-brain) actors
-    Sound m_ActorSwitchSound;
-    // Sound for switching to the brain shortcut
-    Sound m_BrainSwitchSound;
-    // Air woosh sound for traveling between actors
-    Sound m_CameraTravelSound;
-    // Sound for confirming a choice
-    Sound m_ConfirmSound;
-    // Sound for selecting items in list, etc.
-    Sound m_SelectionChangeSound;
-    // Sound for erroneus input
-    Sound m_UserErrorSound;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

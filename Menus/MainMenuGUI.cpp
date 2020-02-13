@@ -152,17 +152,6 @@ void MainMenuGUI::Clear()
 
 	m_MaxResX = 0;
 	m_MaxResY = 0;
-
-    // Sounds
-    m_EnterMenuSound.Reset();
-    m_ExitMenuSound.Reset();
-    m_FocusChangeSound.Reset();
-    m_SelectionChangeSound.Reset();
-    m_ButtonPressSound.Reset();
-    m_BackButtonPressSound.Reset();
-    m_ItemChangeSound.Reset();
-    m_TestSound.Reset();
-    m_UserErrorSound.Reset();
 }
 
 
@@ -550,17 +539,6 @@ int MainMenuGUI::Create(Controller *pController)
     m_ScreenChange = true;
     m_FocusChange = 1;
 //    CategoryChange();
-
-    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
-    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", false);
-    m_ExitMenuSound.AddSample("Base.rte/Sounds/GUIs/MenuExit2.wav");
-    m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", false);
-    m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
-    m_ButtonPressSound.Create("Base.rte/Sounds/GUIs/ButtonPress.wav", false);
-    m_BackButtonPressSound.Create("Base.rte/Sounds/GUIs/BackButtonPress.wav", false);
-    m_ItemChangeSound.Create("Base.rte/Sounds/GUIs/ItemChange.wav", false);
-    m_TestSound.Create("Base.rte/Sounds/GUIs/Test.wav", false);
-    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
 
 	m_PioneerPromoVisible = false;
 

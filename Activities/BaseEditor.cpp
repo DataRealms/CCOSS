@@ -262,26 +262,6 @@ int BaseEditor::Start()
         m_TeamDeaths[team] = 0;
     }
 
-    // Init sounds
-    if (m_FundsChangedSound.GetSampleCount() < 1)
-    {
-        // Interface sounds should not be pitched, to reinforce the impression of time decoupling between simulation and UI
-        m_FundsChangedSound.Create("Base.rte/Sounds/GUIs/FundsChanged1.wav", false);
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged2.wav");
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged3.wav");
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged4.wav");
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged5.wav");
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged6.wav");
-        m_ActorSwitchSound.Create("Base.rte/Sounds/GUIs/ActorSwitch.wav", false);
-        m_BrainSwitchSound.Create("Base.rte/Sounds/GUIs/BrainSwitch.wav", false);
-        m_CameraTravelSound.Create("Base.rte/Sounds/GUIs/CameraTravel1.wav", false);
-        m_CameraTravelSound.AddSample("Base.rte/Sounds/GUIs/CameraTravel2.wav");
-        m_CameraTravelSound.AddSample("Base.rte/Sounds/GUIs/CameraTravel3.wav");
-        m_ConfirmSound.Create("Base.rte/Sounds/GUIs/MenuExit2.wav", false);
-        m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
-        m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
-    }
-
     // Move any brains resident in the Scene to the MovableMan
 // Nope - these are manipulated by the SceneEditorGUI directly where they are in the resident lists
 //    g_SceneMan.GetScene()->PlaceResidentBrains(*this);

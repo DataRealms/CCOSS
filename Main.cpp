@@ -73,9 +73,11 @@ enum TITLESEQUENCE
     LOGOFADEIN,
     LOGODISPLAY,
     LOGOFADEOUT,
+#ifdef __USE_SOUND_FMOD
 	FMODLOGOFADEIN,
 	FMODLOGODISPLAY,
 	FMODLOGOFADEOUT,
+#endif
     // Game notice
     NOTICEFADEIN,
     NOTICEDISPLAY,
@@ -1150,11 +1152,13 @@ bool PlayIntroTitle()
 		///////////////////////////////////////////////////////
 		// FMOD Logo drawing
 
+#ifdef __USE_SOUND_FMOD
 		if (g_IntroState >= FMODLOGOFADEIN && g_IntroState <= FMODLOGOFADEOUT) {
 			g_FrameMan.ClearBackBuffer32();
 			pFMODLogo->SetPos(Vector(g_FrameMan.GetResX() / 2, (g_FrameMan.GetResY() / 2) - 35));
 			pFMODLogo->Draw(g_FrameMan.GetBackBuffer32());
 		}
+#endif
 
         ///////////////////////////////////////////////////////
         // Notice drawing
@@ -1552,10 +1556,15 @@ bool PlayIntroTitle()
 
             if (elapsed >= duration || keyPressed)
             {
+#ifdef __USE_SOUND_FMOD
                 g_IntroState = FMODLOGOFADEIN;
+#elif __USE_SOUND_GORILLA
+				g_IntroState = NOTICEFADEIN;
+#endif
                 sectionSwitch = true;
             }
         }
+#ifdef __USE_SOUND_FMOD
 		else if (g_IntroState == FMODLOGOFADEIN) {
 			if (sectionSwitch) {
 				// Black fade
@@ -1600,6 +1609,7 @@ bool PlayIntroTitle()
 				sectionSwitch = true;
 			}
 		}
+#endif
         else if (g_IntroState == NOTICEFADEIN)
         {
             if (sectionSwitch)

@@ -935,9 +935,11 @@ bool PlayIntroTitle()
     pDRLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.bmp"));
     pDRLogo->SetWrapDoubleDrawing(false);
 
+#ifdef __USE_SOUND_FMOD
 	MOSParticle *pFMODLogo = new MOSParticle();
 	pFMODLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.bmp"));
 	pFMODLogo->SetWrapDoubleDrawing(false);
+#endif
 
     SceneLayer *pBackdrop = new SceneLayer();
     pBackdrop->Create(ContentFile("Base.rte/GUIs/Title/Nebula.bmp"), false, Vector(), false, false, Vector(0, -1.0));//startYOffset + resY));

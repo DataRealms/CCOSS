@@ -93,7 +93,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="writer">A Writer that the AudioMan will save itself with.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
+		virtual int Save(Writer &writer) const { return 0; }
 #pragma endregion
 
 #pragma region Destruction

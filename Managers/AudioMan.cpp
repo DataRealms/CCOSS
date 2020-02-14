@@ -716,7 +716,7 @@ namespace RTE {
 		if (channel == -1) {
 			m_SoundChannels.push_back(0);
 			m_SoundInstances.push_back(0);
-			m_PitchModifiers.push_back(1.0f);
+			m_PitchModifiers.push_back(1.0F);
 
 			channel = m_SoundChannels.size() - 1;
 		}
@@ -727,6 +727,7 @@ namespace RTE {
 		}
 
 		pSound->m_LastChannel = channel;
+		pSound->StartNextSample();
 
 		if (pSound->m_LastChannel == -1) {
 			g_ConsoleMan.PrintString("ERROR: Could not play a sound sample!");

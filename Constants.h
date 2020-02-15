@@ -17,16 +17,16 @@ namespace RTE {
 	#undef uint64_t
 
 #pragma region Buffer Constants
-	static constexpr unsigned int c_MaxFileName = 256; ///! Maximum length of output file directory+name string.
-	static constexpr unsigned int c_FileBufferSize = 8192; ///! Buffer to hold data read from the zip file.
-	static constexpr unsigned int c_MaxUnzippedFileSize = 104857600; ///! Maximum size of single file being extracted from zip archive.
+	static constexpr unsigned int c_MaxFileName = 256; //! Maximum length of output file directory+name string.
+	static constexpr unsigned int c_FileBufferSize = 8192; //! Buffer to hold data read from the zip file.
+	static constexpr unsigned int c_MaxUnzippedFileSize = 104857600; //! Maximum size of single file being extracted from zip archive.
 #pragma endregion
 
 #pragma region Graphics Constants
-	static constexpr unsigned int c_PaletteEntriesNumber = 256; ///! Number of indexes in the graphics palette.
-	static constexpr unsigned int c_MOIDLayerBitDepth = 16; ///! Bit depth of MOID layer bitmap.
+	static constexpr unsigned int c_PaletteEntriesNumber = 256; //! Number of indexes in the graphics palette.
+	static constexpr unsigned int c_MOIDLayerBitDepth = 16; //! Bit depth of MOID layer bitmap.
 
-	static constexpr unsigned int c_GoldMaterialID = 2; ///! Index of gold material in the material palette.
+	static constexpr unsigned int c_GoldMaterialID = 2; //! Index of gold material in the material palette.
 
 	// GUI colors
 	#define c_GUIColorWhite makecol(255, 255, 255)

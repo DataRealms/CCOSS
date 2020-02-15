@@ -210,17 +210,16 @@ namespace RTE {
 
 	protected:
 
-		static Entity::ClassInfo m_sClass; ///! ClassInfo for this class.
+		static Entity::ClassInfo m_sClass; //! ClassInfo for this class.
 
-		// All the samples of this Sound, they are NOT owned by this, but owned by the ContentFile static maps 
-		std::vector<std::pair<ContentFile, AUDIO_STRUCT *> > m_Samples;
+		std::vector<std::pair<ContentFile, AUDIO_STRUCT *> > m_Samples; //! All the samples of this Sound, they are NOT owned by this, but owned by the ContentFile static maps 
 
-		int m_CurrentSample; ///! Index of the current (or last, if nothing is being played) sample being played
-		int m_LastChannel; ///! Current channel the current Sample of this Sound is being played on.
-		int m_Loops; ///! Number of loops (repeats) the sound should play when played. 0 means it plays once, -1 means it plays until stopped 
-		int m_Priority; ///! The mixing priority of this, the higher the more likely it's to be mixed and heard
-		bool m_AffectedByPitch; ///! Whether this should be altered by pitch
-		size_t m_Hash; ///! Sound file hash for network transmission.
+		int m_CurrentSample; //! Index of the current (or last, if nothing is being played) sample being played
+		int m_LastChannel; //! Current channel the current Sample of this Sound is being played on.
+		int m_Loops; //! Number of loops (repeats) the sound should play when played. 0 means it plays once, -1 means it plays until stopped 
+		int m_Priority; //! The mixing priority of this, the higher the more likely it's to be mixed and heard
+		bool m_AffectedByPitch; //! Whether this should be altered by pitch
+		size_t m_Hash; //! Sound file hash for network transmission.
 
 		/// <summary>
 		/// Clears all the member variables of this Sound, effectively resetting the members of this abstraction level only.

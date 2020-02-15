@@ -217,44 +217,44 @@ namespace RTE {
 
 	protected:
 
-		Sound m_SplashSound; ///! Juicy logo signature jingle sound.
+		Sound m_SplashSound; //! Juicy logo signature jingle sound.
 
-		Sound m_EnterMenuSound; ///! Sound for enabling menu.
-		Sound m_ExitMenuSound; ///! Sound for disabling menu.
+		Sound m_EnterMenuSound; //! Sound for enabling menu.
+		Sound m_ExitMenuSound; //! Sound for disabling menu.
 
-		Sound m_FocusChangeSound; ///! Sound for changing focus.
+		Sound m_FocusChangeSound; //! Sound for changing focus.
 
-		Sound m_SelectionChangeSound; ///! Sound for selecting items in list, etc.
-		Sound m_ItemChangeSound; ///! Sound for adding or deleting items in list.
+		Sound m_SelectionChangeSound; //! Sound for selecting items in list, etc.
+		Sound m_ItemChangeSound; //! Sound for adding or deleting items in list.
 
-		Sound m_ButtonPressSound; ///! Sound for button press.
-		Sound m_BackButtonPressSound; ///! Sound for button press of going back button.
-		Sound m_ConfirmSound; ///! Sound for confirming a selection.
-		Sound m_UserErrorSound; ///! Sound for erroneous input.
-		Sound m_TestSound; ///! Sound for testing volume when adjusting volume sliders.
+		Sound m_ButtonPressSound; //! Sound for button press.
+		Sound m_BackButtonPressSound; //! Sound for button press of going back button.
+		Sound m_ConfirmSound; //! Sound for confirming a selection.
+		Sound m_UserErrorSound; //! Sound for erroneous input.
+		Sound m_TestSound; //! Sound for testing volume when adjusting volume sliders.
 
-		Sound m_PieMenuEnterSound; ///! Sound for opening pie menu.
-		Sound m_PieMenuExitSound; ///! Sound for closing pie menu.
+		Sound m_PieMenuEnterSound; //! Sound for opening pie menu.
+		Sound m_PieMenuExitSound; //! Sound for closing pie menu.
 
-		Sound m_HoverChangeSound; ///! Sound for when PieMenu hover arrow appears or changes slice.
-		Sound m_HoverDisabledSound; ///! Sound for when PieMenu hover arrow appears or changes to a disabled slice.
-		Sound m_SlicePickedSound; ///! Sound for picking a valid PieMenu slice.
-		Sound m_DisabledPickedSound; ///! Sound for erroneous input in PieMenu.
+		Sound m_HoverChangeSound; //! Sound for when PieMenu hover arrow appears or changes slice.
+		Sound m_HoverDisabledSound; //! Sound for when PieMenu hover arrow appears or changes to a disabled slice.
+		Sound m_SlicePickedSound; //! Sound for picking a valid PieMenu slice.
+		Sound m_DisabledPickedSound; //! Sound for erroneous input in PieMenu.
 
-		Sound m_FundsChangedSound; ///! Sound for when the funds of a team changes.
+		Sound m_FundsChangedSound; //! Sound for when the funds of a team changes.
 
-		Sound m_ActorSwitchSound; ///! Sound for switching between regular (non-brain) actors.
-		Sound m_BrainSwitchSound; ///! Sound for switching to the brain shortcut.
+		Sound m_ActorSwitchSound; //! Sound for switching between regular (non-brain) actors.
+		Sound m_BrainSwitchSound; //! Sound for switching to the brain shortcut.
 
-		Sound m_CameraTravelSound; ///! Sound when camera is traveling between actors.
+		Sound m_CameraTravelSound; //! Sound when camera is traveling between actors.
 
-		Sound m_AreaPickedSound; ///! Sound for making an area focus.
-		Sound m_ObjectPickedSound; ///! Sound for making an object focus.
-		Sound m_PurchaseMadeSound; ///! Sound for making a purchase.
+		Sound m_AreaPickedSound; //! Sound for making an area focus.
+		Sound m_ObjectPickedSound; //! Sound for making an object focus.
+		Sound m_PurchaseMadeSound; //! Sound for making a purchase.
 
-		Sound m_PlacementBlip; ///! Sound for placement of object to scene.
-		Sound m_PlacementThud; ///! Sound for placement of object to scene.
-		Sound m_PlacementGravel; ///! Sound for gravely placement of object to scene.
+		Sound m_PlacementBlip; //! Sound for placement of object to scene.
+		Sound m_PlacementThud; //! Sound for placement of object to scene.
+		Sound m_PlacementGravel; //! Sound for gravely placement of object to scene.
 
 		/// <summary>
 		/// Clears all the member variables of this GUISound, effectively resetting the members of this abstraction level only.

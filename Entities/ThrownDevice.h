@@ -144,8 +144,6 @@ namespace RTE {
 	protected:
 		static Entity::ClassInfo m_sClass; //! ClassInfo for this class
 
-		Timer m_ThrownTmr; //! Timer for timing how long ago this ThrownDevice was thrown
-
 		Sound m_ActivationSound; //! Activation sound
 
 		Vector m_StartThrowOffset; //! The position offset at which a throw of this Device begins

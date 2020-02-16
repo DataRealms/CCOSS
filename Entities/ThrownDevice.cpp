@@ -6,7 +6,6 @@ namespace RTE {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ThrownDevice::Clear() {
-		m_ThrownTmr.Reset();
 		m_ActivationSound.Reset();
 		m_StartThrowOffset.Reset();
 		m_EndThrowOffset.Reset();
@@ -34,8 +33,6 @@ namespace RTE {
 		HeldDevice::Create(reference);
 
 		m_MOType = MovableObject::TypeThrownDevice;
-
-		m_ThrownTmr = reference.m_ThrownTmr;
 
 		m_ActivationSound = reference.m_ActivationSound;
 

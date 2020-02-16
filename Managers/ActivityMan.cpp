@@ -96,14 +96,6 @@ void Activity::Clear()
     m_TeamNames[TEAM_3] = "Team 3";
     m_TeamNames[TEAM_4] = "Team 4";
 
-    m_FundsChangedSound.Reset();
-    m_ActorSwitchSound.Reset();
-    m_BrainSwitchSound.Reset();
-    m_CameraTravelSound.Reset();
-    m_ConfirmSound.Reset();
-    m_SelectionChangeSound.Reset();
-    m_UserErrorSound.Reset();
-
 	m_CraftsOrbitAtTheEdge = false;
 }
 
@@ -197,14 +189,6 @@ int Activity::Create(const Activity &reference)
         m_TeamDeaths[team] = reference.m_TeamDeaths[team];
 		m_TeamAISkillLevels[team] = reference.m_TeamAISkillLevels[team];
     }
-
-    m_FundsChangedSound = reference.m_FundsChangedSound;
-    m_ActorSwitchSound = reference.m_ActorSwitchSound;
-    m_BrainSwitchSound = reference.m_BrainSwitchSound;
-    m_CameraTravelSound = reference.m_CameraTravelSound;
-    m_ConfirmSound = reference.m_ConfirmSound;
-    m_SelectionChangeSound = reference.m_SelectionChangeSound;
-    m_UserErrorSound = reference.m_UserErrorSound;
 
 	m_CraftsOrbitAtTheEdge = reference.m_CraftsOrbitAtTheEdge;
 
@@ -843,7 +827,7 @@ void Activity::ChangeTeamFunds(float howMuch, unsigned int which)
 		m_TeamFunds[which] += howMuch;
 		m_FundsChanged[which] = true;
 		if (IsPlayerTeam(which))
-			m_FundsChangedSound.Play();
+			g_GUISound.FundsChangedSound().Play();
 	}
 }
 
@@ -1029,7 +1013,7 @@ bool Activity::SwitchToActor(Actor *pActor, int player, int team)
     // OR if it's actually a brain of another player, we can't switch to it
     if (pActor != m_pBrain[player] && pActor->IsPlayerControlled() || IsOtherPlayerBrain(m_pControlledActor[player], player))
     {
-        m_UserErrorSound.Play();
+        g_GUISound.UserErrorSound().Play();
         return false;
     }
 
@@ -1058,12 +1042,12 @@ bool Activity::SwitchToActor(Actor *pActor, int player, int team)
         // Play actor switching sound effects
         // Brain has its own special sound effects
         if (m_pControlledActor[player] == m_pBrain[player])
-            m_BrainSwitchSound.Play();
+            g_GUISound.BrainSwitchSound().Play();
         else
-            m_ActorSwitchSound.Play();
+            g_GUISound.ActorSwitchSound().Play();
         // Only play air swoosh if actors are out of sight of each other
         if (pPrevActor && Vector(pPrevActor->GetPos() - m_pControlledActor[player]->GetPos()).GetMagnitude() > g_FrameMan.GetResX() / 2)
-            m_CameraTravelSound.Play();
+            g_GUISound.CameraTravelSound().Play();
 
         ReassignSquadLeader(player, team);
     }
@@ -1116,7 +1100,7 @@ void Activity::SwitchToNextActor(int player, int team, Actor *pSkip)
         // Looped around the whole actor chain, and couldn't find an available actor, so switch back to the original
         if (m_pControlledActor[player] == pPrevActor)
         {
-            m_UserErrorSound.Play();
+            g_GUISound.UserErrorSound().Play();
             m_pControlledActor[player] = pPrevActor;
             break;
         }
@@ -1142,12 +1126,12 @@ void Activity::SwitchToNextActor(int player, int team, Actor *pSkip)
         // Play actor switching sound effects
         // Brain has its own special sound effects
         if (m_pControlledActor[player] == m_pBrain[player])
-            m_BrainSwitchSound.Play();
+            g_GUISound.BrainSwitchSound().Play();
         else
-            m_ActorSwitchSound.Play();
+            g_GUISound.ActorSwitchSound().Play();
         // Only play air swoosh if actors are out of sight of each other
         if (pPrevActor && Vector(pPrevActor->GetPos() - m_pControlledActor[player]->GetPos()).GetMagnitude() > g_FrameMan.GetResX() / 2)
-            m_CameraTravelSound.Play();
+            g_GUISound.CameraTravelSound().Play();
 
         // Follow the new guy normally
         m_ViewState[player] = NORMAL;
@@ -1199,7 +1183,7 @@ void Activity::SwitchToPrevActor(int player, int team, Actor *pSkip)
         // Looped around the whole actor chain, and couldn't find an available actor, so switch back to the original
         if (m_pControlledActor[player] == pPrevActor)
         {
-            m_UserErrorSound.Play();
+            g_GUISound.UserErrorSound().Play();
             m_pControlledActor[player] = pPrevActor;
             break;
         }
@@ -1225,12 +1209,12 @@ void Activity::SwitchToPrevActor(int player, int team, Actor *pSkip)
         // Play actor switching sound effects
         // Brain has its own special sound effects
         if (m_pControlledActor[player] == m_pBrain[player])
-            m_BrainSwitchSound.Play();
+            g_GUISound.BrainSwitchSound().Play();
         else
-            m_ActorSwitchSound.Play();
+            g_GUISound.ActorSwitchSound().Play();
         // Only play air swoosh if actors are out of sight of each other
         if (pPrevActor && Vector(pPrevActor->GetPos() - m_pControlledActor[player]->GetPos()).GetMagnitude() > g_FrameMan.GetResX() / 2)
-            m_CameraTravelSound.Play();
+            g_GUISound.CameraTravelSound().Play();
 
         ReassignSquadLeader(player, team);
     }
@@ -1381,26 +1365,6 @@ int Activity::Start()
         m_PlayerController[player].SetTeam(m_Team[player]);
 
         m_MsgTimer[player].Reset();
-    }
-
-    // Init sounds
-    if (m_FundsChangedSound.GetSampleCount() < 1)
-    {
-        // Interface sounds should not be pitched, to reinforce the impression of time decoupling between simulation and UI
-        m_FundsChangedSound.Create("Base.rte/Sounds/GUIs/FundsChanged1.wav", false);
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged2.wav");
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged3.wav");
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged4.wav");
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged5.wav");
-        m_FundsChangedSound.AddSample("Base.rte/Sounds/GUIs/FundsChanged6.wav");
-        m_ActorSwitchSound.Create("Base.rte/Sounds/GUIs/ActorSwitch.wav", false);
-        m_BrainSwitchSound.Create("Base.rte/Sounds/GUIs/BrainSwitch.wav", false);
-        m_CameraTravelSound.Create("Base.rte/Sounds/GUIs/CameraTravel1.wav", false);
-        m_CameraTravelSound.AddSample("Base.rte/Sounds/GUIs/CameraTravel2.wav");
-        m_CameraTravelSound.AddSample("Base.rte/Sounds/GUIs/CameraTravel3.wav");
-        m_ConfirmSound.Create("Base.rte/Sounds/GUIs/MenuExit2.wav", false);
-        m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
-        m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
     }
 
     // Precache the player to screen mappings

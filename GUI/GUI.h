@@ -31,6 +31,7 @@ struct RECT
 #include "GUIProperties.h"
 #include "GUIInput.h"
 #include "GUIBitmap.h"
+#include "GUISound.h"
 #include "GUIScreen.h"
 #include "GUIFont.h"
 #include "GUISkin.h"

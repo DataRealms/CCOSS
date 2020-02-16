@@ -7,9 +7,6 @@ namespace RTE
 #define MAX_BACKGROUND_LAYERS_TRANSMITTED 10
 #define FRAMES_TO_REMEMBER 3
 
-#define MAX_CLIENTS 4
-
-
 	enum CustomMessageIDTypes
 	{
 		ID_CUSTOM_START = ID_USER_PACKET_ENUM,

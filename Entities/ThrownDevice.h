@@ -11,7 +11,7 @@ namespace RTE {
 
 	public:
 		ENTITYALLOCATION(ThrownDevice);
-		CLASSINFOGETTERS();
+		CLASSINFOGETTERS
 
 #pragma region Creation
 		/// <summary>

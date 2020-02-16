@@ -1285,23 +1285,6 @@ protected:
     bool m_BackToMain;
     // Player selected to quit the program
     bool m_Quit;
-    // Sound for enabling and disabling menu
-    Sound m_EnterMenuSound;
-    Sound m_ExitMenuSound;
-    // Sound for changing focus
-    Sound m_FocusChangeSound;
-    // Sound for selecting items in list, etc.
-    Sound m_SelectionChangeSound;
-    // Sound for button press
-    Sound m_ButtonPressSound;
-    // Sound for button press of going back button
-    Sound m_BackButtonPressSound;
-    // Sound for adding or deleting items in list.
-    Sound m_ItemChangeSound;
-    // Sound for testing sound volume
-    Sound m_TestSound;
-    // Sound for erroneous input
-    Sound m_UserErrorSound;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

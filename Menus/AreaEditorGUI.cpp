@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "AreaEditorGUI.h"
+#include "GUISound.h"
 
 #include "FrameMan.h"
 #include "PresetMan.h"
@@ -56,16 +57,6 @@ void AreaEditorGUI::Clear()
     m_pCurrentArea = 0;
     m_EditedBox.Reset();
     m_pBoxToBlink = 0;
-    m_EnterMenuSound.Reset();
-    m_ExitMenuSound.Reset();
-    m_FocusChangeSound.Reset();
-    m_SelectionChangeSound.Reset();
-    m_ItemChangeSound.Reset();
-    m_AreaPickedSound.Reset();
-    m_UserErrorSound.Reset();
-    m_PlacementBlip.Reset();
-    m_PlacementThud.Reset();
-    m_PlacementGravel.Reset();
 }
 
 
@@ -108,22 +99,6 @@ int AreaEditorGUI::Create(Controller *pController, bool fullFeatured, int whichM
     // Reset repeat timers
     m_RepeatStartTimer.Reset();
     m_RepeatTimer.Reset();
-
-    // Interface sounds should not be pitched, to reinforce the appearance of time decoupling between simulation and UI
-    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
-    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", false);
-    m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", false);
-    m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
-    m_ItemChangeSound.Create("Base.rte/Sounds/GUIs/ItemChange.wav", false);
-//    m_AreaPickedSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
-    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
-    m_PlacementBlip.Create("Base.rte/Sounds/GUIs/PlacementBlip.wav", false);
-    m_PlacementThud.Create("Base.rte/Sounds/GUIs/PlacementThud1.wav", false);
-    m_PlacementThud.AddSample("Base.rte/Sounds/GUIs/PlacementThud2.wav");
-    m_PlacementGravel.Create("Base.rte/Sounds/GUIs/PlacementGravel1.wav", false);
-    m_PlacementGravel.AddSample("Base.rte/Sounds/GUIs/PlacementGravel2.wav");
-    m_PlacementGravel.AddSample("Base.rte/Sounds/GUIs/PlacementGravel3.wav");
-    m_PlacementGravel.AddSample("Base.rte/Sounds/GUIs/PlacementGravel4.wav");
 
     return 0;
 }
@@ -470,7 +445,7 @@ void AreaEditorGUI::Update()
             }
 
             UpdatePieMenu();
-            m_PlacementBlip.Play();
+            g_GUISound.PlacementBlip().Play();
         }
         // Just hovering over things, show what would be moved if we started dragging
         else
@@ -535,7 +510,7 @@ void AreaEditorGUI::Update()
                 m_EditMade = true;
                 m_EditorGUIMode = PREADDMOVEBOX;
                 m_PreviousMode = MOVINGBOX;
-                m_PlacementThud.Play();
+                g_GUISound.PlacementThud().Play();
             }
         }
 
@@ -563,7 +538,7 @@ void AreaEditorGUI::Update()
                 m_EditMade = true;
                 m_EditorGUIMode = PREADDMOVEBOX;
                 m_PreviousMode = ADDINGBOX;
-                m_PlacementThud.Play();
+                g_GUISound.PlacementThud().Play();
             }
         }
 
@@ -589,7 +564,7 @@ void AreaEditorGUI::Update()
                 Box removed = m_pCurrentArea->RemoveBoxInside(m_CursorPos);
                 // If we didnt' remove any box, play error sound
                 if (removed.IsEmpty())
-                    m_UserErrorSound.Play();
+                    g_GUISound.UserErrorSound().Play();
                 else
                     m_EditMade = true;
             }

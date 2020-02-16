@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "GibEditorGUI.h"
+#include "GUISound.h"
 
 #include "FrameMan.h"
 #include "PresetMan.h"
@@ -63,16 +64,6 @@ void GibEditorGUI::Clear()
     m_GibListOrder = -1;
     m_DrawCurrentGib = true;
     m_pObjectToBlink = 0;
-    m_EnterMenuSound.Reset();
-    m_ExitMenuSound.Reset();
-    m_FocusChangeSound.Reset();
-    m_SelectionChangeSound.Reset();
-    m_ItemChangeSound.Reset();
-    m_ObjectPickedSound.Reset();
-    m_UserErrorSound.Reset();
-    m_PlacementBlip.Reset();
-    m_PlacementThud.Reset();
-    m_PlacementGravel.Reset();
 }
 
 
@@ -117,22 +108,6 @@ int GibEditorGUI::Create(Controller *pController, int whichModuleSpace)
     // Reset repeat timers
     m_RepeatStartTimer.Reset();
     m_RepeatTimer.Reset();
-
-    // Interface sounds should not be pitched, to reinforce the appearance of time decoupling between simulation and UI
-    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
-    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", false);
-    m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", false);
-    m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
-    m_ItemChangeSound.Create("Base.rte/Sounds/GUIs/ItemChange.wav", false);
-//    m_ObjectPickedSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
-    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
-    m_PlacementBlip.Create("Base.rte/Sounds/GUIs/PlacementBlip.wav", false);
-    m_PlacementThud.Create("Base.rte/Sounds/GUIs/PlacementThud1.wav", false);
-    m_PlacementThud.AddSample("Base.rte/Sounds/GUIs/PlacementThud2.wav");
-    m_PlacementGravel.Create("Base.rte/Sounds/GUIs/PlacementGravel1.wav", false);
-    m_PlacementGravel.AddSample("Base.rte/Sounds/GUIs/PlacementGravel2.wav");
-    m_PlacementGravel.AddSample("Base.rte/Sounds/GUIs/PlacementGravel3.wav");
-    m_PlacementGravel.AddSample("Base.rte/Sounds/GUIs/PlacementGravel4.wav");
 
     return 0;
 }
@@ -487,7 +462,7 @@ void GibEditorGUI::Update()
             m_EditorGUIMode = PLACINGGIB;
             m_PreviousMode = ADDINGGIB;
             UpdatePieMenu();
-            m_PlacementBlip.Play();
+            g_GUISound.PlacementBlip().Play();
         }
     }
 
@@ -572,8 +547,8 @@ void GibEditorGUI::Update()
             // Increment the list order so we place over last placed item
             if (m_GibListOrder >= 0)
                 m_GibListOrder++;
-            m_PlacementThud.Play();
-//                m_PlacementGravel.Play();
+            g_GUISound.PlacementThud().Play();
+//                g_GUISound.PlacementGravel().Play();
             m_EditMade = true;
 
 // TEMP REMOVE WEHN YOU CLEAN UP THE ABOVE HARDCODED BRAIN PLACEMENT
@@ -642,11 +617,11 @@ void GibEditorGUI::Update()
                     m_PreviousMode = MOVINGGIB;
                     UpdatePieMenu();
                     m_BlinkTimer.Reset();
-                    m_PlacementBlip.Play();
-                    m_PlacementGravel.Play();
+                    g_GUISound.PlacementBlip().Play();
+                    g_GUISound.PlacementGravel().Play();
                 }
                 else
-                    m_UserErrorSound.Play();
+                    g_GUISound.UserErrorSound().Play();
             }
         }
 
@@ -672,7 +647,7 @@ void GibEditorGUI::Update()
 // TODO: Add awesome destruction sound here
                 }
                 else
-                    m_UserErrorSound.Play();
+                    g_GUISound.UserErrorSound().Play();
             }
         }
 
@@ -704,7 +679,7 @@ void GibEditorGUI::Update()
                     UpdatePieMenu();
                 }
                 else
-                    m_UserErrorSound.Play();
+                    g_GUISound.UserErrorSound().Play();
             }
         }
     }

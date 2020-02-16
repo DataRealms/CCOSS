@@ -931,6 +931,9 @@
     <ClInclude Include="System\StandardIncludes.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="GUI\GUISound.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RTEA.rc">
@@ -1664,6 +1667,9 @@
     </ClCompile>
     <ClCompile Include="System\StandardIncludes.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\GUISound.cpp">
+      <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -82,16 +82,6 @@ void SceneEditorGUI::Clear()
     m_pObjectToBlink = 0;
     m_BrainSkyPath.clear();
     m_BrainSkyPathCost = 0;
-    m_EnterMenuSound.Reset();
-    m_ExitMenuSound.Reset();
-    m_FocusChangeSound.Reset();
-    m_SelectionChangeSound.Reset();
-    m_ItemChangeSound.Reset();
-    m_ObjectPickedSound.Reset();
-    m_UserErrorSound.Reset();
-    m_PlacementBlip.Reset();
-    m_PlacementThud.Reset();
-    m_PlacementGravel.Reset();
 	m_RequireClearPathToOrbit = true;
 }
 
@@ -166,21 +156,6 @@ int SceneEditorGUI::Create(Controller *pController, FeatureSets featureSet, int 
         dotFile.SetDataPath("Base.rte/GUIs/Indicators/PathDotInvalid.bmp");
         s_pInvalidPathDot = dotFile.GetAsBitmap();
     }
-
-    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
-    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", false);
-    m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", false);
-    m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
-    m_ItemChangeSound.Create("Base.rte/Sounds/GUIs/ItemChange.wav", false);
-//    m_ObjectPickedSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav, false");
-    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
-    m_PlacementBlip.Create("Base.rte/Sounds/GUIs/PlacementBlip.wav", false);
-    m_PlacementThud.Create("Base.rte/Sounds/GUIs/PlacementThud1.wav", false);
-    m_PlacementThud.AddSample("Base.rte/Sounds/GUIs/PlacementThud2.wav");
-    m_PlacementGravel.Create("Base.rte/Sounds/GUIs/PlacementGravel1.wav", false);
-    m_PlacementGravel.AddSample("Base.rte/Sounds/GUIs/PlacementGravel2.wav");
-    m_PlacementGravel.AddSample("Base.rte/Sounds/GUIs/PlacementGravel3.wav");
-    m_PlacementGravel.AddSample("Base.rte/Sounds/GUIs/PlacementGravel4.wav");
 
     return 0;
 }
@@ -357,7 +332,7 @@ bool SceneEditorGUI::TestBrainResidence(bool noBrainIsOK)
             m_ModeChanged = true;
             UpdateBrainPath();
             UpdatePieMenu();
-            m_UserErrorSound.Play(0.0, m_pController->GetPlayer());
+            g_GUISound.UserErrorSound().Play(0.0, m_pController->GetPlayer());
         }
         return false;
     }
@@ -376,7 +351,7 @@ bool SceneEditorGUI::TestBrainResidence(bool noBrainIsOK)
         m_ModeChanged = true;
         UpdateBrainPath();
         UpdatePieMenu();
-        m_UserErrorSound.Play(0.0, m_pController->GetPlayer());
+        g_GUISound.UserErrorSound().Play(0.0, m_pController->GetPlayer());
         return false;
     }
 
@@ -648,7 +623,7 @@ void SceneEditorGUI::Update()
             m_PreviousMode = ADDINGOBJECT;
             m_ModeChanged = true;
             UpdatePieMenu();
-            m_PlacementBlip.Play(0.0, m_pController->GetPlayer());
+            g_GUISound.PlacementBlip().Play(0.0, m_pController->GetPlayer());
         }
 
         // Apply the team to the current actor, if applicable
@@ -786,7 +761,7 @@ void SceneEditorGUI::Update()
             m_PreviousMode = INSTALLINGBRAIN;
             m_ModeChanged = true;
             UpdatePieMenu();
-            m_PlacementBlip.Play(0.0, m_pController->GetPlayer());
+            g_GUISound.PlacementBlip().Play(0.0, m_pController->GetPlayer());
         }
 
         // Apply the team to the current actor, if applicable
@@ -939,7 +914,7 @@ void SceneEditorGUI::Update()
 						m_CursorPos.m_Y += 10;
 						UpdateBrainPath();
 						UpdatePieMenu();
-						m_PlacementThud.Play(0.0, m_pController->GetPlayer());
+						g_GUISound.PlacementThud().Play(0.0, m_pController->GetPlayer());
 					}
                 }
                 // If no clear path to the sky, just reject the placment and keep the brain in hand
@@ -947,7 +922,7 @@ void SceneEditorGUI::Update()
                 {
                     g_FrameMan.ClearScreenText(g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
                     g_FrameMan.SetScreenText("Your brain can only be placed with a clear access path to orbit!", g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()), 333, 3500);
-                    m_UserErrorSound.Play(0.0, m_pController->GetPlayer());
+                    g_GUISound.UserErrorSound().Play(0.0, m_pController->GetPlayer());
                 }
             }
             // Non-brain thing is being placed
@@ -1003,7 +978,7 @@ void SceneEditorGUI::Update()
 									g_SceneMan.GetScene()->AddPlacedObject(editedSet, pNewObject, objectListPosition);
 
 									m_EditMade = true;
-									m_PlacementThud.Play(0.0, m_pController->GetPlayer());
+									g_GUISound.PlacementThud().Play(0.0, m_pController->GetPlayer());
 									toPlace = false;
 								}
 							}
@@ -1021,7 +996,7 @@ void SceneEditorGUI::Update()
 											pBrainAHuman->AddInventoryItem(dynamic_cast<MovableObject *>(m_pCurrentObject->Clone()));
 											pBrainAHuman->FlashWhite(150);
 											m_EditMade = true;
-											m_PlacementThud.Play(0.0, m_pController->GetPlayer());
+											g_GUISound.PlacementThud().Play(0.0, m_pController->GetPlayer());
 											toPlace = false;
 										}
 									}
@@ -1035,7 +1010,7 @@ void SceneEditorGUI::Update()
 						// Increment the list order so we place over last placed item
 						if (m_ObjectListOrder >= 0)
 							m_ObjectListOrder++;
-						m_PlacementThud.Play(0.0, m_pController->GetPlayer());
+						g_GUISound.PlacementThud().Play(0.0, m_pController->GetPlayer());
 						m_EditMade = true;
 					}
                 }
@@ -1047,7 +1022,7 @@ void SceneEditorGUI::Update()
                     {
                         g_FrameMan.ClearScreenText(g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
                         g_FrameMan.SetScreenText("You can't afford to place that!", g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()), 333, 1500);
-                        m_UserErrorSound.Play(0.0, m_pController->GetPlayer());
+                        g_GUISound.UserErrorSound().Play(0.0, m_pController->GetPlayer());
                     }
                     else
                     {
@@ -1077,8 +1052,8 @@ void SceneEditorGUI::Update()
 
                             delete pPlacedClone;
                             pPlacedClone = 0;
-                            m_PlacementThud.Play(0.0, m_pController->GetPlayer());
-                            m_PlacementGravel.Play(0.0, m_pController->GetPlayer());
+                            g_GUISound.PlacementThud().Play(0.0, m_pController->GetPlayer());
+                            g_GUISound.PlacementGravel().Play(0.0, m_pController->GetPlayer());
                             m_EditMade = true;
                         }
                         // Only place if the cursor is clear of terrain obstructions
@@ -1115,8 +1090,8 @@ void SceneEditorGUI::Update()
 								}
 								delete pPlacedClone;
 								pPlacedClone = 0;
-								m_PlacementThud.Play(0.0, m_pController->GetPlayer());
-								m_PlacementGravel.Play(0.0, m_pController->GetPlayer());
+								g_GUISound.PlacementThud().Play(0.0, m_pController->GetPlayer());
+								g_GUISound.PlacementGravel().Play(0.0, m_pController->GetPlayer());
 								m_EditMade = true;
 							}
 
@@ -1189,7 +1164,7 @@ void SceneEditorGUI::Update()
                         else
                         {
                             delete pPlacedClone;
-                            m_UserErrorSound.Play(0.0, m_pController->GetPlayer());
+                            g_GUISound.UserErrorSound().Play(0.0, m_pController->GetPlayer());
                         }
                     }
                 }
@@ -1272,11 +1247,11 @@ void SceneEditorGUI::Update()
                     m_ModeChanged = true;
                     UpdatePieMenu();
                     m_BlinkTimer.Reset();
-                    m_PlacementBlip.Play(0.0, m_pController->GetPlayer());
-                    m_PlacementGravel.Play(0.0, m_pController->GetPlayer());
+                    g_GUISound.PlacementBlip().Play(0.0, m_pController->GetPlayer());
+                    g_GUISound.PlacementGravel().Play(0.0, m_pController->GetPlayer());
                 }
                 else
-                    m_UserErrorSound.Play(0.0, m_pController->GetPlayer());
+                    g_GUISound.UserErrorSound().Play(0.0, m_pController->GetPlayer());
             }
         }
 
@@ -1307,7 +1282,7 @@ void SceneEditorGUI::Update()
 // TODO: Add awesome destruction sound here
                 }
                 else
-                    m_UserErrorSound.Play(0.0, m_pController->GetPlayer());
+                    g_GUISound.UserErrorSound().Play(0.0, m_pController->GetPlayer());
             }
         }
 
@@ -1345,7 +1320,7 @@ void SceneEditorGUI::Update()
                     UpdatePieMenu();
                 }
                 else
-                    m_UserErrorSound.Play(0.0, m_pController->GetPlayer());
+                    g_GUISound.UserErrorSound().Play(0.0, m_pController->GetPlayer());
             }   
         }
     }

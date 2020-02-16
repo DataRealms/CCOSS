@@ -76,7 +76,7 @@ namespace RTE {
 		/// <summary>
 		/// Resets all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.
 		/// </summary>
-		virtual void ResetAllTimers() { HeldDevice::ResetAllTimers(); m_ThrownTmr.Reset(); }
+		virtual void ResetAllTimers();
 
 		/// <summary>
 		/// Activates this Device as long as it's not set to activate when released or it has no parent.

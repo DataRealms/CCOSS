@@ -104,6 +104,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void ThrownDevice::ResetAllTimers() {
+		double elapsedTime;
+		if (m_Activated) {
+			elapsedTime = m_ActivationTmr.GetElapsedSimTimeMS();
+		}
+		HeldDevice::ResetAllTimers();
+		if (m_Activated) {
+			m_ActivationTmr.SetElapsedSimTimeMS(elapsedTime);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void ThrownDevice::Activate() {
 		if (!m_Activated) {
 			m_ActivationTmr.Reset();

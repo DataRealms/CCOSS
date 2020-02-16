@@ -99,11 +99,11 @@ namespace RTE {
 		void Destroy();
 #pragma endregion
 
-#pragma region Virtual Override Methods
+#pragma region Standard Methods
 		/// <summary>
 		/// Resets the entire AudioMan including it's inherited members to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() { Clear(); }
 
 		/// <summary>
 		/// Updates the state of this AudioMan. Supposed to be done every frame before drawing.

@@ -30,11 +30,6 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Resets the entire GUISound, including its inherited members, to their default settings or values.
-		/// </summary>
-		void Reset() { Clear(); Reset(); }
-
-		/// <summary>
 		/// Destroys and resets (through Clear()) the GUISound object.
 		/// </summary>
 		void Destroy() { Clear(); }

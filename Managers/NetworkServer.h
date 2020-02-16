@@ -26,8 +26,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#define STATS_SUM MAX_CLIENTS
-#define MAX_STAT_RECORDS MAX_CLIENTS + 1
+#define STATS_SUM c_MaxClients
+#define MAX_STAT_RECORDS c_MaxClients + 1
 
 #define STAT_CURRENT 0
 #define STAT_SHOWN 1
@@ -246,7 +246,7 @@ namespace RTE
 			std::string PlayerName;
 		};
 
-		ClientConnection m_ClientConnections[MAX_CLIENTS];
+		ClientConnection m_ClientConnections[c_MaxClients];
 
 		// Member variables
 		static const std::string m_ClassName;
@@ -263,13 +263,13 @@ namespace RTE
 
 		bool m_IsInServerMode = false;
 
-		unsigned char m_aPixelLineBuffer[MAX_CLIENTS][MAX_PIXEL_LINE_BUFFER_SIZE];
+		unsigned char m_aPixelLineBuffer[c_MaxClients][MAX_PIXEL_LINE_BUFFER_SIZE];
 
-		unsigned char m_aTerrainChangeBuffer[MAX_CLIENTS][MAX_PIXEL_LINE_BUFFER_SIZE];
+		unsigned char m_aTerrainChangeBuffer[c_MaxClients][MAX_PIXEL_LINE_BUFFER_SIZE];
 
-		int64_t m_LastFrameSentTime[MAX_CLIENTS];
+		int64_t m_LastFrameSentTime[c_MaxClients];
 
-		int64_t m_LastStatResetTime[MAX_CLIENTS];
+		int64_t m_LastStatResetTime[c_MaxClients];
 
 		unsigned int m_FramesSent[MAX_STAT_RECORDS];
 
@@ -305,29 +305,29 @@ namespace RTE
 
 		int m_SendBufferMessages[MAX_STAT_RECORDS];
 
-		int m_DelayedFrames[MAX_CLIENTS];
+		int m_DelayedFrames[c_MaxClients];
 
-		int m_MsecPerFrame[MAX_CLIENTS];
+		int m_MsecPerFrame[c_MaxClients];
 
-		int m_MsecPerSendCall[MAX_CLIENTS];
+		int m_MsecPerSendCall[c_MaxClients];
 
-		BITMAP * m_pBackBuffer8[MAX_CLIENTS];
+		BITMAP * m_pBackBuffer8[c_MaxClients];
 
-		BITMAP * m_pBackBufferGUI8[MAX_CLIENTS];
+		BITMAP * m_pBackBufferGUI8[c_MaxClients];
 
-		void * m_pLZ4CompressionState[MAX_CLIENTS];
+		void * m_pLZ4CompressionState[c_MaxClients];
 
-		void * m_pLZ4FastCompressionState[MAX_CLIENTS];
+		void * m_pLZ4FastCompressionState[c_MaxClients];
 
 		const int m_MicroSecs = 1000000;
 
-		int m_MouseState1[MAX_CLIENTS];
-		int m_MouseState2[MAX_CLIENTS];
-		int m_MouseState3[MAX_CLIENTS];
+		int m_MouseState1[c_MaxClients];
+		int m_MouseState2[c_MaxClients];
+		int m_MouseState3[c_MaxClients];
 
-		int m_MouseEvent1[MAX_CLIENTS];
-		int m_MouseEvent2[MAX_CLIENTS];
-		int m_MouseEvent3[MAX_CLIENTS];
+		int m_MouseEvent1[c_MaxClients];
+		int m_MouseEvent2[c_MaxClients];
+		int m_MouseEvent3[c_MaxClients];
 
 
 		bool m_UseHighCompression;
@@ -342,44 +342,44 @@ namespace RTE
 
 		int m_EncodingFps;
 
-		bool m_SendEven[MAX_CLIENTS];
+		bool m_SendEven[c_MaxClients];
 
 		bool m_ShowStats;
 
 		bool m_ShowInput;
 
-		int m_ThreadExitReason[MAX_CLIENTS];
+		int m_ThreadExitReason[c_MaxClients];
 
-		long m_MSecsSinceLastUpdate[MAX_CLIENTS];
-		long m_MSecsToSleep[MAX_CLIENTS];
+		long m_MSecsSinceLastUpdate[c_MaxClients];
+		long m_MSecsToSleep[c_MaxClients];
 
-		bool m_SendSceneSetupData[MAX_CLIENTS];
-		bool m_SendSceneData[MAX_CLIENTS];
-		bool m_SceneAvailable[MAX_CLIENTS];
-		bool m_SendFrameData[MAX_CLIENTS];
-		std::mutex m_SceneLock[MAX_CLIENTS];
+		bool m_SendSceneSetupData[c_MaxClients];
+		bool m_SendSceneData[c_MaxClients];
+		bool m_SceneAvailable[c_MaxClients];
+		bool m_SendFrameData[c_MaxClients];
+		std::mutex m_SceneLock[c_MaxClients];
 
-		std::queue<SceneMan::TerrainChange> m_PendingTerrainChanges[MAX_CLIENTS];
+		std::queue<SceneMan::TerrainChange> m_PendingTerrainChanges[c_MaxClients];
 
-		std::queue<SceneMan::TerrainChange> m_CurrentTerrainChanges[MAX_CLIENTS];
+		std::queue<SceneMan::TerrainChange> m_CurrentTerrainChanges[c_MaxClients];
 
-		std::mutex m_Mutex[MAX_CLIENTS];
+		std::mutex m_Mutex[c_MaxClients];
 
-		//std::mutex m_InputQueueMutex[MAX_CLIENTS];
-		std::queue<NetworkClient::MsgInput>m_InputMessages[MAX_CLIENTS];
+		//std::mutex m_InputQueueMutex[c_MaxClients];
+		std::queue<NetworkClient::MsgInput>m_InputMessages[c_MaxClients];
 
-		float OffsetX[MAX_CLIENTS][MAX_BACKGROUND_LAYERS_TRANSMITTED];
-		float OffsetY[MAX_CLIENTS][MAX_BACKGROUND_LAYERS_TRANSMITTED];
+		float OffsetX[c_MaxClients][MAX_BACKGROUND_LAYERS_TRANSMITTED];
+		float OffsetY[c_MaxClients][MAX_BACKGROUND_LAYERS_TRANSMITTED];
 
 		unsigned char m_SceneId;
 
-		bool m_ResetActivityVotes[MAX_CLIENTS];
+		bool m_ResetActivityVotes[c_MaxClients];
 
-		int m_FrameNumbers[MAX_CLIENTS];
+		int m_FrameNumbers[c_MaxClients];
 
-		unsigned int m_Ping[MAX_CLIENTS];
+		unsigned int m_Ping[c_MaxClients];
 
-		Timer m_PingTimer[MAX_CLIENTS];
+		Timer m_PingTimer[c_MaxClients];
 
 		Timer m_LastPackedReceived;
 

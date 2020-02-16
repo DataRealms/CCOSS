@@ -881,22 +881,6 @@ protected:
     bool m_EnoughInput;
     // Times how long after digital input the enoughinput signal is given
     Timer m_DInputHoldTimer;
-    
-    // Sound for enabling and disabling menu
-    Sound m_EnterMenuSound;
-    // For when no slice was picked
-    Sound m_ExitMenuSound;
-    // Sound for when hover arrow appears or changes slice
-    Sound m_HoverChangeSound;
-    // Sound for when hover arrow appears or changes to a disabled slice
-    Sound m_HoverDisabledSound;
-    // Sound for when hover arrow disappears forn not enough input
-    Sound m_HoverGoneSound;
-    // Sound for making picking a valid slice
-    Sound m_SlicePickedSound;
-    // Sound for erroneus input
-    Sound m_DisabledPickedSound;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

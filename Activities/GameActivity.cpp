@@ -786,7 +786,7 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
 
         // Go 'ding!', but only if player is human, or it may be confusing
 		if (PlayerHuman(player))
-			m_ConfirmSound.Play(0, player);
+			g_GUISound.ConfirmSound().Play(0, player);
 
         // Clear out the override purchase list, whether anything was in there or not, it should not override twice.
         m_PurchaseOverride[player].clear();
@@ -1472,7 +1472,7 @@ void GameActivity::Update()
                 // Switch back to normal view
                 m_ViewState[player] = NORMAL;
                 // Play err sound to indicate cancellation
-                m_UserErrorSound.Play(0, player);
+                g_GUISound.UserErrorSound().Play(0, player);
                 // Flash the same actor, jsut to show the control went back to him
                 m_pPieMenu[player]->DisableAnim();
             }
@@ -1488,7 +1488,7 @@ void GameActivity::Update()
                     SwitchToActor(pMarkedActor, player, team);
                 // If not, boop
                 else
-                    m_UserErrorSound.Play(0, player);
+                    g_GUISound.UserErrorSound().Play(0, player);
 
                 // Switch back to normal view
                 m_ViewState[player] = NORMAL;
@@ -1734,18 +1734,18 @@ void GameActivity::Update()
             if (m_PlayerController[player].IsState(PRESS_DOWN))// || m_PlayerController[player].IsState(PRESS_SECONDARY))
             {
                 if (m_AIReturnCraft[player])
-                    m_SelectionChangeSound.Play(0, player);
+                    g_GUISound.SelectionChangeSound().Play(0, player);
                 else
-                    m_UserErrorSound.Play(0, player);
+                    g_GUISound.UserErrorSound().Play(0, player);
 
                 m_AIReturnCraft[player] = false;
             }
             else if (m_PlayerController[player].IsState(PRESS_UP))// || m_PlayerController[player].IsState(PRESS_SECONDARY))
             {
                 if (!m_AIReturnCraft[player])
-                    m_SelectionChangeSound.Play(0, player);
+                    g_GUISound.SelectionChangeSound().Play(0, player);
                 else
-                    m_UserErrorSound.Play(0, player);
+                    g_GUISound.UserErrorSound().Play(0, player);
 
                 m_AIReturnCraft[player] = true;
             }
@@ -1756,9 +1756,9 @@ void GameActivity::Update()
                 // Switch back to normal view
                 m_ViewState[player] = NORMAL;
                 // Play err sound to indicate cancellation
-                g_FrameMan.SetScreenText("Order cancelled!", ScreenOfPlayer(player), 333);
+                g_FrameMan.SetScreenText("Order canceled!", ScreenOfPlayer(player), 333);
                 m_MsgTimer[player].Reset();
-                m_UserErrorSound.Play(0, player);
+                g_GUISound.UserErrorSound().Play(0, player);
                 // Flash the same actor, jsut to show the control went back to him
                 m_pPieMenu[player]->DisableAnim();
             }

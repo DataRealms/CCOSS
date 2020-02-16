@@ -418,25 +418,6 @@ protected:
     static BITMAP *s_pValidPathDot;
     // Invalid brain path line dots
     static BITMAP *s_pInvalidPathDot;
-    // Sound for enabling and disabling menu
-    Sound m_EnterMenuSound;
-    Sound m_ExitMenuSound;
-    // Sound for changing focus
-    Sound m_FocusChangeSound;
-    // Sound for selecting items in list, etc.
-    Sound m_SelectionChangeSound;
-    // Sound for adding or deleting items in list.
-    Sound m_ItemChangeSound;
-    // Sound for making a purchase focus
-    Sound m_ObjectPickedSound;
-    // Sound for erroneus input
-    Sound m_UserErrorSound;
-    // Sound for placement of object
-    Sound m_PlacementBlip;
-    // Sound for placement of object
-    Sound m_PlacementThud;
-    // Sound for gravely placement of object sound
-    Sound m_PlacementGravel;
 
 	//Edited scheme type
 	BunkerAssemblyScheme *m_pCurrentScheme;

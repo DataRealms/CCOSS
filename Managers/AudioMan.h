@@ -1,707 +1,435 @@
 #ifndef _RTEAUDIOMAN_
 #define _RTEAUDIOMAN_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            AudioMan.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the AudioMan class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "DDTTools.h"
-#include "Singleton.h"
-#define g_AudioMan AudioMan::Instance()
-
 #include "Entity.h"
 #include "Timer.h"
-
-#define MAX_CLIENTS 4
+#include "Singleton.h"
 
 #ifdef __USE_SOUND_FMOD
-struct FSOUND_SAMPLE;
+#include "fmod/fmod.h"
+#include "fmod/fmod_errors.h"
+#define AUDIO_STRUCT FSOUND_SAMPLE
 struct FSOUND_STREAM;
-#elif __USE_SOUND_SDLMIXER
-//#include "SDL.h"
-//#include "SDL_mixer.h"
-struct Mix_Chunk;
-typedef struct _Mix_Music Mix_Music;
+
 #elif __USE_SOUND_GORILLA
-struct ga_Handle;
 #include "gorilla/ga.h"
 #include "gorilla/gau.h"
+#define AUDIO_STRUCT ga_Sound
+struct ga_Handle;
 #endif
 
-namespace RTE
-{
-
-class Sound;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           AudioMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     The singleton manager of the WAV sound effects and OGG music playback.
-// Parent(s):       Singleton, Serializable.
-// Class history:   10/09/2004 AudioMan created.
-//                  8/18/2006 AudioMan changed to use SDL and SDL_mixer.
-
-class AudioMan:
-    public Singleton<AudioMan>
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
-
-public:
-
-// Playback priorities
-enum PlaybackPriority
-{
-    PRIORITY_LOW = 0,
-    PRIORITY_HIGH = 100,
-    PRIORITY_NOATTENUATION,
-    PRIORITY_COUNT
-};
-
-
-enum NetworkSoundState
-{
-	SOUND_PLAY = 0,
-	SOUND_STOP,
-	SOUND_SET_PITCH,
-	SOUND_SET_ATTENUATION
-};
-
-enum NetworkMusicState
-{
-	MUSIC_PLAY = 0,
-	MUSIC_STOP,
-	MUSIC_SILENCE,
-	MUSIC_SET_PITCH
-};
-
-struct SoundNetworkData
-{
-	unsigned char State;
-	unsigned char AffectedByPitch;
-	size_t SoundHash;
-	short int Distance;
-	short int Channel;
-	short int Loops;
-	float Pitch;
-};
-
-struct MusicNetworkData
-{
-	unsigned char State;
-	char Path[256];
-	int Loops;
-	double Position;
-	float Pitch;
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     AudioMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a AudioMan object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
-
-    AudioMan() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~AudioMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a AudioMan object before deletion
-//                  from system memory.
-// Arguments:       None.
-
-    ~AudioMan() { Destroy(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the AudioMan object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this AudioMan to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the AudioMan will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the entire AudioMan, including its inherited members, to
-//                  their default settings or values.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Reset() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the AudioMan object.
-// Arguments:       None.
-// Return value:    None.
-
-    void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_ClassName; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetSoundsVolume
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the volume of all sounds to a specific volume.
-//                  Does not affect music.
-// Arguments:       The desired volume scalar. 0.0-1.0.
-// Return value:    None.
-
-    void SetSoundsVolume(double volume = 1.0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetMusicVolume
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the music to a specific volume.
-// Arguments:       The desired volume scalar. 0.0-1.0.
-// Return value:    None.
-
-    void SetMusicVolume(double volume = 1.0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetTempMusicVolume
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the music to a specific volume, but it will onyl last until a new
-//                  song is palyed. Useful for fading etc.
-// Arguments:       The desired volume scalar. 0.0-1.0.
-// Return value:    None.
-
-    void SetTempMusicVolume(double volume = 1.0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSoundsVolume
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the volume of all sounds to a specific volume.
-//                  Does not affect music.
-// Arguments:       None.
-// Return value:    The desired volume scalar. 0.0-1.0.
-
-    double GetSoundsVolume() const { return m_SoundsVolume; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetGlobalPitch
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the global pitch multiplier for all sounds, optionally the music
-//                  too.
-// Arguments:       The desired pitch multiplier. Keep it > 0
-//                  Whether to exclude the music from pitch modification
-// Return value:    None.
-
-    void SetGlobalPitch(double pitch = 1.0, bool excludeMusic = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGlobalPitch
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the volume of all sounds to a specific volume. Does not affect
-//                  music.
-// Arguments:       None.
-// Return value:    The current pitch scalar. Will be > 0
-
-    double GetGlobalPitch() const { return m_GlobalPitch; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMusicVolume
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the music to a specific volume.
-// Arguments:       The desired volume scalar. 0.0-1.0.
-// Return value:    None.
-
-    double GetMusicVolume() const { return m_MusicVolume; }
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PlayModule
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Starts playing a certain music module
-// Arguments:       The path to the IT/MOD//S3M/XM file to play
-// Return value:    None.
-
-    void PlayModule(const char *modfilepath);
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PlayMusic
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Starts playing a certain WAVE, MOD, MIDI, OGG, MP3 file in the music
-//                  channel.
-// Arguments:       The path to the music file to play.
-//                  The number of times to loop the song. 0 means play once. -1 means
-//                  play infinitely until stopped.
-//                  The volume override for music for this song only. < 0 means no override.
-// Return value:    None.
-
-    void PlayMusic(const char *filepath, int loops = -1, double volumeOverride = -1.0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          QueueMusicStream
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Queues up another path to a stream that will be played after the current
-//                  one is done. Can be done several times to queue up many tracks. The
-//                  last track in the list will be looped infinitely.
-// Arguments:       The path to the music file to play after the current one.
-// Return value:    None.
-
-    void QueueMusicStream(const char *filepath);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          QueueSilence
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Queues up a period of silence in teh music stream playlist.
-// Arguments:       The number of secs to wait before going to the next stream.
-// Return value:    None.
-
-    void QueueSilence(int seconds);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMusicQueue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears the music queue.
-// Arguments:       None.
-// Return value:    None.
-
-    void ClearMusicQueue() { m_MusicPlayList.clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PlayNextStream
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Plays the next music stream in the queue, if any is queued.
-// Arguments:       None.
-// Return value:    None.
-
-    void PlayNextStream();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PlaySound
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Starts playing a certain sound sample
-// Arguments:       The path to the .wav file to play
-// Return value:    None.
-
-    void PlaySound(const char *wavefile);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PlaySound
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Starts playing the next sample of a certain Sound.
-// Arguments:       Pointer to the Sound to start playing. Ownership is NOT transferred!
-//                  The priority of this sound; higher gives it a higher likelyhood of
-//                  getting mixed compared to lower-priority samples.
-//                  Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent.
-//                  The pitch modifier for this sound. 1.0 yields unmodified frequency.
-// Return value:    Whether or not playback of the Sound was successful.
-
-    bool PlaySound(Sound *pSound, int priority = PRIORITY_LOW, float distance = 0.0, double pitch = 1.0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PlaySound
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Starts playing the next sample of a certain Sound.
-// Arguments:       Pointer to the Sound to start playing. Ownership is NOT transferred!
-//                  The priority of this sound; higher gives it a higher likelyhood of
-//                  getting mixed compared to lower-priority samples.
-//                  Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent.
-//                  The pitch modifier for this sound. 1.0 yields unmodified frequency.
-// Return value:    Whether or not playback of the Sound was successful.
-
-	bool PlaySound(int player, Sound *pSound, int priority = PRIORITY_LOW, float distance = 0.0, double pitch = 1.0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PlaySound
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Starts playing a certain WAVE sound file.
-// Arguments:       The path to the music file to play.
-//                  Normalized distance from 0 to 1 to play the sound with.
-//                  Wheher the sound should be affected by pitch.
-//					For which network player to play the sound for, -1 for all.
-// Return value:    Returns the new sound object being played. OWNERSHIP IS TRANSFERRED!!!
-
-	Sound * PlaySound(const char *filepath, float distance, bool loop, bool affectedByPitch, int player);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetSoundAttenuation
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets/updates the distance attenuation for a specific sound. Will only
-//                  have an effect if the sound is currently being played.
-// Arguments:       A pointer to a Sound object. Ownership IS NOT transferred!
-//                  Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent.
-// Return value:    Whetehr a smaple of the Sound is currently being played by any of the
-//                  channels, and the attenuation was successfully set.
-
-    bool SetSoundAttenuation(Sound *pSound, float distance = 0.0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetSoundPitch
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets/updates the frequency/pitch for a specific sound. Will only
-//                  have an effect if the sound is currently being played.
-// Arguments:       A pointer to a Sound object. Ownership IS NOT transferred!
-//                  New pitch, a multiplier of the original normal frequency. Keep it > 0
-// Return value:    Whether a sample of the Sound is currently being played by any of the
-//                  channels, and the pitch was successfully set.
-
-    bool SetSoundPitch(Sound *pSound, float pitch);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetMusicPitch
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets/updates the frequency/pitch for the music channel.
-// Arguments:       New pitch, a multiplier of the original normal frequency. Keep it > 0
-// Return value:    Whether a sample of the Sound is currently being played by any of the
-//                  channels, and the pitch was successfully set.
-
-    bool SetMusicPitch(float pitch);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsPlaying
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reports whetehr a certain Sound's last played sample is being played
-//                  currently.
-// Arguments:       A pointer to a Sound object. Ownership IS NOT transferred!
-// Return value:    Whether the LAST sample that was played of the Sound is currently being
-//                  played by any of the channels.
-
-    bool IsPlaying(Sound *pSound);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsMusicPlaying
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reports whetehr any music stream is currently playing.
-// Arguments:       None.
-// Return value:    Whether any music stream is currently playing.
-
-    bool IsMusicPlaying() { 
-#ifdef __USE_SOUND_FMOD
-		return m_AudioEnabled && m_pMusic; 
-#elif __USE_SOUND_SDLMIXER
-		return m_AudioEnabled && m_pMusic;
-#elif __USE_SOUND_GORILLA
-		return m_AudioEnabled && m_pMusic;
-#else
-		return m_AudioEnabled;
-#endif
-	}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsAudioEnabled
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reports whether audio is enabled.
-// Arguments:       None.
-// Return value:    Whether audio is enabled.
-
-	bool IsAudioEnabled() {
-		return m_AudioEnabled;
-	}
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          StopSound
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Stops playing a certain sound sample
-// Arguments:       The path to the .wav file to stop playing
-// Return value:    None.
-
-    void StopSound(const char *wavefile);
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          StopSound
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Stops playing a certain Sound's samples.
-// Arguments:       Pointer to the Sound to stop playing. Ownership is NOT transferred!
-// Return value:    Whether playback of the sound was successfully stopped, or even found.
-
-    bool StopSound(Sound *pSound);
-
-
-	bool StopSound(int player, Sound *pSound);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FadeOutSound
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Fades out playback of a specific sound
-// Arguments:       Pointer to the Sound to fade out playing. Ownership is NOT transferred!
-//                  The amount of time, in ms, to fade out over.
-// Return value:    None.
-
-    void FadeOutSound(Sound *pSound, int fadeOutTime = 1000);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          StopMusic
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Stops playing a the music channel.
-// Arguments:       None.
-// Return value:    None.
-
-    void StopMusic();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetMusicPosition
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the music to a specific position in the song.
-// Arguments:       The desired position from the start, in seconds.
-// Return value:    None.
-
-    void SetMusicPosition(double position);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMusicPosition
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the position of palyback of the current music stream, in seconds. 
-// Arguments:       None.
-// Return value:    THe current position of the curtrent stream playing, in seconds.
-
-    double GetMusicPosition();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMusicPath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the path of the last played music stream.
-// Arguments:       None.
-// Return value:    The file path of the last played music stream.
-
-    std::string GetMusicPath() const { return m_MusicPath; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          StopAll
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Stops all playback.
-// Arguments:       None.
-// Return value:    None.
-
-    void StopAll();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the state of this AudioMan. Supposed to be done every frame
-//                  before drawing.
-// Arguments:       None.
-// Return value:    None.
-
-    void Update();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsInMultiplayerMode
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns true if manager is in multiplayer mode.
-// Arguments:       None.
-// Return value:    True if in multiplayer mode.
-
-	bool IsInMultiplayerMode() { return m_IsInMultiplayerMode; }
-
-	
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetMultiplayerMode
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the multiplayer mode flag
-// Arguments:       Whether this manager should operate in multiplayer mode
-// Return value:    None.
-
-	void SetMultiplayerMode(bool value) { m_IsInMultiplayerMode = value; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSoundEvents
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Fills the list with sound events happened for the specified network player
-// Arguments:       Player to get events for. List with events for this player.
-// Return value:    None.
-
-	void GetSoundEvents(int player, std::list<SoundNetworkData> & list);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterSoundEvent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds the sound event to internal list of sound events for the specified player.
-// Arguments:       Player for which the event happened. Sound state. Sound file hash to transmit to client. 
-//					Sound distance. Channel where sound was played. Loops counter. Pitch value. Whether the sound is affected by pitch.
-// Return value:    None.
-
-	void RegisterSoundEvent(int player, unsigned char state, size_t hash, short int distance, short int channel, short int loops, float pitch, bool affectedByPitch);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMusicEvents
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Fills the list with music events happened for the specified network player
-// Arguments:       Player to get events for. List with events for this player.
-// Return value:    None.
-
-	void GetMusicEvents(int player, std::list<MusicNetworkData> & list);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterMusicEvent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds the sound event to internal list of sound events for the specified player.
-// Arguments:       Player for which the event happened. Music state. Music file path to transmit to client. 
-//					Loops counter. Music playback position. Pitch value.
-// Return value:    None.
-
-	void RegisterMusicEvent(int player, unsigned char state, const char *filepath, int loops, double position, float pitch);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPlayingChannelCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the number of channels currently used.
-// Arguments:		None.
-// Return value:    None.
-
-	int GetPlayingChannelCount();
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTotalChannelCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the number of channels available.
-// Arguments:		None.
-// Return value:    None.
-
-	int GetTotalChannelCount();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
-
-protected:
-
-    // Member variables
-    static const std::string m_ClassName;
-
-	bool m_AudioEnabled;
+struct AUDIO_STRUCT;
+
+#define g_AudioMan AudioMan::Instance()
+
+namespace RTE {
+	class Sound;
+
+	/// <summary>
+	/// The singleton manager of the WAV sound effects and OGG music playback.
+	/// </summary>
+	class AudioMan : public Singleton<AudioMan> {
+
+	public:
+		CLASSINFOGETTERS
+
+		enum PlaybackPriority {
+			PRIORITY_LOW = 0,
+			PRIORITY_HIGH = 100,
+			PRIORITY_NOATTENUATION,
+			PRIORITY_COUNT
+		};
+
+		enum NetworkSoundState {
+			SOUND_PLAY = 0,
+			SOUND_STOP,
+			SOUND_SET_PITCH,
+			SOUND_SET_ATTENUATION
+		};
+
+		struct NetworkSoundData {
+			unsigned char State;
+			size_t SoundHash;
+			unsigned char AffectedByPitch;
+			short int Distance;
+			short int Channel;
+			short int Loops;
+			float Pitch;
+		};
+
+		enum NetworkMusicState {
+			MUSIC_PLAY = 0,
+			MUSIC_STOP,
+			MUSIC_SILENCE,
+			MUSIC_SET_PITCH
+		};
+
+		struct NetworkMusicData {
+			unsigned char State;
+			char Path[256];
+			int Loops;
+			double Position;
+			float Pitch;
+		};
+
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate a AudioMan object in system memory.
+		/// Create() should be called before using the object.
+		/// </summary>
+		AudioMan() { Clear(); }
+
+		/// <summary>
+		/// Makes the AudioMan object ready for use.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		virtual int Create();
+#pragma endregion
+
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a AudioMan object before deletion from system memory.
+		/// </summary>
+		~AudioMan() { Destroy(); }
+
+		/// <summary>
+		/// Destroys and resets (through Clear()) the AudioMan object.
+		/// </summary>
+		void Destroy();
+#pragma endregion
+
+#pragma region Standard Methods
+		/// <summary>
+		/// Resets the entire AudioMan including it's inherited members to their default settings or values.
+		/// </summary>
+		void Reset() { Clear(); }
+
+		/// <summary>
+		/// Updates the state of this AudioMan. Supposed to be done every frame before drawing.
+		/// </summary>
+		void Update();
+#pragma endregion
+
+#pragma region Getters and Setters
+		/// <summary>
+		/// Reports whether audio is enabled.
+		/// </summary>
+		/// <returns>Whether audio is enabled.</returns>
+		bool IsAudioEnabled() { return m_AudioEnabled; }
+
+		/// <summary>
+		/// Reports whether a certain Sound's last played sample is being played currently.
+		/// </summary>
+		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
+		/// <returns>Whether the LAST sample that was played of the Sound is currently being played by any of the channels.</returns>
+		bool IsPlaying(Sound *pSound);
+
+		/// <summary>
+		/// Reports whether any music stream is currently playing.
+		/// </summary>
+		/// <returns>Whether any music stream is currently playing.</returns>
+		bool IsMusicPlaying() { return m_AudioEnabled && m_pMusic; }
+
+		/// <summary>
+		/// Gets the volume of all sounds. Does not get volume of music.
+		/// </summary>
+		/// <returns>Current volume scalar value. 0.0-1.0.</returns>
+		double GetSoundsVolume() const { return m_SoundsVolume; }
+
+		/// <summary>
+		/// Sets the volume of all sounds to a specific volume. Does not affect music.
+		/// </summary>
+		/// <param name="volume">The desired volume scalar. 0.0-1.0.</param>
+		void SetSoundsVolume(double volume = 1.0);
+
+		/// <summary>
+		/// Gets the volume of music. Does not get volume of sounds.
+		/// </summary>
+		/// <returns>Current volume scalar value. 0.0-1.0.</returns>
+		double GetMusicVolume() const { return m_MusicVolume; }
+
+		/// <summary>
+		/// Sets the music to a specific volume. Does not affect sounds.
+		/// </summary>
+		/// <param name="volume">The desired volume scalar. 0.0-1.0.</param>
+		void SetMusicVolume(double volume = 1.0);
+
+		/// <summary>
+		/// Sets the music to a specific volume, but it will only last until a new song is played. Useful for fading etc.
+		/// </summary>
+		/// <param name="volume">The desired volume scalar. 0.0-1.0.</param>
+		void SetTempMusicVolume(double volume = 1.0);
+
+		/// <summary>
+		/// Gets the global pitch scalar value for all sounds and music.
+		/// </summary>
+		/// <returns>The current pitch scalar. Will be > 0.</returns>
+		double GetGlobalPitch() const { return m_GlobalPitch; }
+
+		/// <summary>
+		/// Sets the global pitch multiplier for all sounds, optionally the music too.
+		/// </summary>
+		/// <param name="pitch">The desired pitch multiplier. Keep it > 0.</param>
+		/// <param name="excludeMusic">Whether to exclude the music from pitch modification</param>
+		void SetGlobalPitch(double pitch = 1.0, bool excludeMusic = false);
+
+		/// <summary>
+		/// Sets/updates the distance attenuation for a specific sound. Will only have an effect if the sound is currently being played.
+		/// </summary>
+		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
+		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not completely inaudible.</param>
+		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the attenuation was successfully set.</returns>
+		bool SetSoundAttenuation(Sound *pSound, float distance = 0.0);
+
+		/// <summary>
+		/// Sets/updates the frequency/pitch for a specific sound. Will only have an effect if the sound is currently being played.
+		/// </summary>
+		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
+		/// <param name="pitch">New pitch, a multiplier of the original normal frequency. Keep it > 0.</param>
+		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the pitch was successfully set.</returns>
+		bool SetSoundPitch(Sound *pSound, float pitch);
+
+		/// <summary>
+		/// Sets/updates the frequency/pitch for the music channel.
+		/// </summary>
+		/// <param name="pitch">New pitch, a multiplier of the original normal frequency. Keep it > 0.</param>
+		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the pitch was successfully set.</returns>
+		bool SetMusicPitch(float pitch);
+
+		/// <summary>
+		/// Gets the path of the last played music stream.
+		/// </summary>
+		/// <returns>The file path of the last played music stream.</returns>
+		std::string GetMusicPath() const { return m_MusicPath; }
+
+		/// <summary>
+		/// Gets the position of playback of the current music stream, in seconds.
+		/// </summary>
+		/// <returns>The current position of the current stream playing, in seconds.</returns>
+		double GetMusicPosition();
+
+		/// <summary>
+		/// Sets the music to a specific position in the song.
+		/// </summary>
+		/// <param name="position">The desired position from the start, in seconds.</param>
+		void SetMusicPosition(double position);
+
+		/// <summary>
+		/// Returns the number of audio channels currently used.
+		/// </summary>
+		/// <returns>The number of audio channels currently used.</returns>
+		int GetPlayingChannelCount();
+
+		/// <summary>
+		/// Returns the number of audio channels available in total.
+		/// </summary>
+		/// <returns>The number of audio channels available in total.</returns>
+		int GetTotalChannelCount();
+#pragma endregion
+
+#pragma region Playback Handling
+		/// <summary>
+		/// Starts playing a certain sound sample.
+		/// </summary>
+		/// <param name="wavefile">The path to the .wav file to play.</param>
+		void PlaySound(const char *wavefile);
+
+		/// <summary>
+		/// Starts playing the next sample of a certain Sound.
+		/// </summary>
+		/// <param name="pSound">Pointer to the Sound to start playing. Ownership is NOT transferred!</param>
+		/// <param name="priority">The priority of this sound. Higher gives it a higher likelihood of getting mixed compared to lower-priority samples.</param>
+		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not completely inaudible.</param>
+		/// <param name="pitch">The pitch modifier for this sound. 1.0 yields unmodified frequency.</param>
+		/// <returns>Whether or not playback of the Sound was successful.</returns>
+		bool PlaySound(Sound *pSound, int priority = PRIORITY_LOW, float distance = 0.0, double pitch = 1.0);
+
+		/// <summary>
+		/// Starts playing the next sample of a certain Sound for a certain player.
+		/// </summary>
+		/// <param name="player">Which player to play the Sound sample for.</param>
+		/// <param name="pSound">Pointer to the Sound to start playing. Ownership is NOT transferred!</param>
+		/// <param name="priority">The priority of this sound. Higher gives it a higher likelihood of getting mixed compared to lower-priority samples.</param>
+		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent.</param>
+		/// <param name="pitch">The pitch modifier for this sound. 1.0 yields unmodified frequency.</param>
+		/// <returns>Whether or not playback of the Sound was successful.</returns>
+		bool PlaySound(int player, Sound *pSound, int priority = PRIORITY_LOW, float distance = 0.0, double pitch = 1.0);
+
+		/// <summary>
+		/// Starts playing a certain WAVE sound file.
+		/// </summary>
+		/// <param name="filepath">The path to the music file to play.</param>
+		/// <param name="distance">Normalized distance from 0 to 1 to play the sound with.</param>
+		/// <param name="loops">The number of times to loop the sound. 0 means play once. -1 means play infinitely until stopped.</param>
+		/// <param name="affectedByPitch">Whether the sound should be affected by pitch.</param>
+		/// <param name="player">For which player to play the sound for, -1 for all.</param>
+		/// <returns>Returns the new sound object being played. OWNERSHIP IS TRANSFERRED!</returns>
+		Sound * PlaySound(const char *filepath, float distance, bool loops, bool affectedByPitch, int player);
+
+		/// <summary>
+		/// Starts playing a certain WAVE, MOD, MIDI, OGG, MP3 file in the music channel.
+		/// </summary>
+		/// <param name="filepath">The path to the music file to play.</param>
+		/// <param name="loops">The number of times to loop the song. 0 means play once. -1 means play infinitely until stopped.</param>
+		/// <param name="volumeOverride">The volume override for music for this song only. < 0 means no override.</param>
+		void PlayMusic(const char *filepath, int loops = -1, double volumeOverride = -1.0);
+
+		/// <summary>
+		/// Queues up another path to a stream that will be played after the current one is done. 
+		/// Can be done several times to queue up many tracks.
+		/// The last track in the list will be looped infinitely.
+		/// </summary>
+		/// <param name="filepath">The path to the music file to play after the current one.</param>
+		void QueueMusicStream(const char *filepath);
+
+		/// <summary>
+		/// Plays the next music stream in the queue, if any is queued.
+		/// </summary>
+		void PlayNextStream();
+
+		/// <summary>
+		/// Queues up a period of silence in the music stream playlist.
+		/// </summary>
+		/// <param name="seconds">The number of secs to wait before going to the next stream.</param>
+		void QueueSilence(int seconds);
+
+		/// <summary>
+		/// Clears the music queue.
+		/// </summary>
+		void ClearMusicQueue() { m_MusicPlayList.clear(); }
+
+		/// <summary>
+		/// Stops all playback.
+		/// </summary>
+		void StopAll();
+
+		/// <summary>
+		/// Stops playing a the music channel.
+		/// </summary>
+		void StopMusic();
+
+		/// <summary>
+		/// Stops playing a certain Sound sample.
+		/// </summary>
+		/// <param name="pSound">Pointer to the Sound to stop playing. Ownership is NOT transferred!</param>
+		/// <returns>Whether playback of the sound was successfully stopped, or even found.</returns>
+		bool StopSound(Sound *pSound);
+
+		/// <summary>
+		/// Stops playing a certain Sound sample for a certain player.
+		/// </summary>
+		/// <param name="player">Which player to stop the Sound sample for.</param>
+		/// <param name="pSound">Pointer to the Sound to stop playing. Ownership is NOT transferred!</param>
+		/// <returns></returns>
+		bool StopSound(int player, Sound *pSound);
+
+		/// <summary>
+		/// Fades out playback of a specific sound.
+		/// </summary>
+		/// <param name="pSound">Pointer to the Sound to fade out playing. Ownership is NOT transferred!</param>
+		/// <param name="fadeOutTime"> The amount of time, in ms, to fade out over.</param>
+		void FadeOutSound(Sound *pSound, int fadeOutTime = 1000);
+#pragma endregion
+
+#pragma region Network Audio Handling
+		/// <summary>
+		/// Returns true if manager is in multiplayer mode.
+		/// </summary>
+		/// <returns>True if in multiplayer mode.</returns>
+		bool IsInMultiplayerMode() { return m_IsInMultiplayerMode; }
+
+		/// <summary>
+		/// Sets the multiplayer mode flag.
+		/// </summary>
+		/// <param name="value">Whether this manager should operate in multiplayer mode.</param>
+		void SetMultiplayerMode(bool value) { m_IsInMultiplayerMode = value; }
+
+		/// <summary>
+		/// Fills the list with sound events happened for the specified network player.
+		/// </summary>
+		/// <param name="player">Player to get events for.</param>
+		/// <param name="list">List with events for this player.</param>
+		void GetSoundEvents(int player, std::list<NetworkSoundData> & list);
+
+		/// <summary>
+		/// Adds the sound event to internal list of sound events for the specified player.
+		/// </summary>
+		/// <param name="player">Player for which the event happened.</param>
+		/// <param name="state">Sound state.</param>
+		/// <param name="hash">Sound file hash to transmit to client.</param>
+		/// <param name="distance">Sound distance.</param>
+		/// <param name="channel">Channel where sound was played.</param>
+		/// <param name="loops">Loops counter.</param>
+		/// <param name="pitch">Pitch value.</param>
+		/// <param name="affectedByPitch">Whether the sound is affected by pitch.</param>
+		void RegisterSoundEvent(int player, unsigned char state, size_t hash, short int distance, short int channel, short int loops, float pitch, bool affectedByPitch);
+
+		/// <summary>
+		/// Fills the list with music events happened for the specified network player.
+		/// </summary>
+		/// <param name="player">Player to get events for.</param>
+		/// <param name="list">List with events for this player.</param>
+		void GetMusicEvents(int player, std::list<NetworkMusicData> & list);
+
+		/// <summary>
+		/// Adds the music event to internal list of music events for the specified player.
+		/// </summary>
+		/// <param name="player">Player for which the event happened.</param>
+		/// <param name="state">Music state.</param>
+		/// <param name="filepath">Music file path to transmit to client.</param>
+		/// <param name="loops">Loops counter.</param>
+		/// <param name="position">Music playback position.</param>
+		/// <param name="pitch">Pitch value.</param>
+		void RegisterMusicEvent(int player, unsigned char state, const char *filepath, int loops, double position, float pitch);
+#pragma endregion
+
+	protected:
+		static Entity::ClassInfo m_sClass; //! ClassInfo for this class.
+		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this object.
+
+		bool m_AudioEnabled; //! Bool to tell whether audio is enabled or not.
+		int m_MusicChannel; //! Channel number for Music streams. Typically 0. 
 
 #ifdef __USE_SOUND_FMOD
-	FSOUND_STREAM *m_pMusic;
-#elif __USE_SOUND_SDLMIXER
-	Mix_Music *m_pMusic;
+		static constexpr unsigned short int s_MaxVolume = 255; //! Maximum value to use for volume control.
+		FSOUND_STREAM *m_pMusic; //! Pointer to Fmod sound stream data structure.
+
 #elif __USE_SOUND_GORILLA
-	gau_Manager* m_pManager;
-	ga_Mixer* m_pMixer;
-	ga_StreamManager* m_pStreamManager;
-
-	ga_Handle * m_pMusic;
-
-	std::vector<ga_Handle *> m_SoundChannels;
-	std::vector<ga_Sound *> m_SoundInstances;
-
-	//int m_MaxChannels;
+		static constexpr float s_MaxVolume = 1.0;  //! Maximum value to use for volume control.
+		gau_Manager* m_pManager; //! Pointer to Gorilla Audio manager and associated functions.
+		ga_Mixer* m_pMixer; //! Pointer to Gorilla Audio mixer data structure.
+		ga_StreamManager* m_pStreamManager; //! Pointer to Gorilla Audio stream manager data structure.
+		ga_Handle * m_pMusic; //! Pointer to Gorilla Audio playback control handle data structure.
+		std::vector<ga_Handle *> m_SoundChannels; //! Vector containing active sound channels.
+		std::vector<ga_Sound *> m_SoundInstances; //! Vector containing Sound instances.
 #endif
+		double m_SoundsVolume; //! Global sounds effects volume.
+		double m_MusicVolume; //! Global music volume.
 
-    int m_MusicChannel;
-    // The path to the last played music stream
-    std::string m_MusicPath;
-    double m_SoundsVolume;
-    double m_MusicVolume;
-    // Global pitch multipler
-    double m_GlobalPitch;
-    // The 'normal' unpitched frequency of each channel handle we have
-    std::vector<int> m_NormalFrequencies;
-    // How each channel's pitch is modified individually
-    std::vector<double> m_PitchModifiers;
-    // Playlist of paths to music to play after the current nonlooping one is done
-    std::list<std::string> m_MusicPlayList;
-    // Timer for measuring silences between songs
-    Timer m_SilenceTimer;
-	// If true then the server is in multiplayer mode and will register sound and music events into internal lists
-	bool m_IsInMultiplayerMode;
-	// Lists of per player sound events 
-	std::list<SoundNetworkData> m_SoundEvents[MAX_CLIENTS];
-	// Lists of per player music events 
-	std::list<MusicNetworkData> m_MusicEvents[MAX_CLIENTS];
+		double m_GlobalPitch; //! Global pitch multiplier.
+		std::vector<int> m_NormalFrequencies; //! The 'normal' unpitched frequency of each channel handle we have.
+		std::vector<double> m_PitchModifiers; //! How each channel's pitch is modified individually.
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
+		std::string m_MusicPath; //! The path to the last played music stream.
+		std::list<std::string> m_MusicPlayList; //! Playlist of paths to music to play after the current non looping one is done.
 
-private:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this AudioMan, effectively
-//                  resetting the members of this abstraction level only.
-// Arguments:       None.
-// Return value:    None.
-
-    void Clear();
+		Timer m_SilenceTimer; //! Timer for measuring silences between songs.
 
 
-    // Disallow the use of some implicit methods.
-    AudioMan(const AudioMan &reference);
-    AudioMan & operator=(const AudioMan &rhs);
+		bool m_IsInMultiplayerMode; //! If true then the server is in multiplayer mode and will register sound and music events into internal lists.
+		std::list<NetworkSoundData> m_SoundEvents[c_MaxClients]; //! Lists of per player sound events.
+		std::list<NetworkMusicData> m_MusicEvents[c_MaxClients]; //! Lists of per player music events.
 
-};
+	private:
+		/// <summary>
+		/// Clears all the member variables of this AudioMan, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
 
-} // namespace RTE
-
-#endif // File
+		// Disallow the use of some implicit methods.
+		AudioMan(const AudioMan &reference);
+		AudioMan & operator=(const AudioMan &rhs);
+	};
+}
+#endif

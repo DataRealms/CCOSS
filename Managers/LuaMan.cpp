@@ -36,20 +36,6 @@ extern "C"
   #include "lauxlib.h"
 }
 
-// Allegro defines those via define in astdlib.h and Boost with stdlib go crazy about those so we need to undefine them manually.
-#undef int8_t
-#undef uint8_t
-#undef int16_t
-#undef uint16_t
-#undef int32_t
-#undef uint32_t
-#undef intptr_t
-#undef uintptr_t
-
-#undef LONG_LONG
-#undef int64_t
-#undef uint64_t
-
 // LuaBind
 #include "luabind/luabind.hpp"
 #include "luabind/operator.hpp"

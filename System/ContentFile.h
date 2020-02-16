@@ -16,20 +16,25 @@
 
 #include "Serializable.h"
 
+#ifdef __USE_SOUND_FMOD
+#include "fmod/fmod.h"
+#include "fmod/fmod_errors.h"
+#define AUDIO_STRUCT FSOUND_SAMPLE
+struct FSOUND_STREAM;
+
+#elif __USE_SOUND_GORILLA
+#include "gorilla/ga.h"
+#include "gorilla/gau.h"
+#define AUDIO_STRUCT ga_Sound
+struct ga_Handle;
+#endif
+
 struct DATAFILE;
 struct BITMAP;
 
-#ifdef __USE_SOUND_FMOD
-struct FSOUND_SAMPLE;
-#elif __USE_SOUND_SDLMIXER
-struct Mix_Chunk;
-#elif __USE_SOUND_GORILLA
-struct ga_Sound;
-#endif // __USE_SOUND_FMOD
+struct AUDIO_STRUCT;
 
-namespace RTE
-{
-
+namespace RTE {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Class:           ContentFile
@@ -398,13 +403,7 @@ public:
 // Return value:    The pointer to the beginning of the data object loaded from the file.
 //                  Owenship is NOT transferred! If 0, the file could not be found/loaded.
 
-#ifdef __USE_SOUND_FMOD
-    virtual FSOUND_SAMPLE * GetAsSample();
-#elif __USE_SOUND_SDLMIXER
-	virtual Mix_Chunk * GetAsSample();
-#elif __USE_SOUND_GORILLA
-	virtual ga_Sound * GetAsSample();
-#endif // __USE_SOUND_FMOD
+    virtual AUDIO_STRUCT * GetAsSample();
 
 	virtual size_t GetHash() const { return std::hash<std::string>()(m_DataPath); }
 
@@ -470,15 +469,8 @@ protected:
 
 	static std::map<size_t, std::string> m_PathHashes;
 
-
-#ifdef __USE_SOUND_FMOD
 	// Static map containing all the already loaded FSOUND_SAMPLE:s and their paths
-    static std::map<std::string, FSOUND_SAMPLE *> m_sLoadedSamples;
-#elif __USE_SOUND_SDLMIXER
-	static std::map<std::string, Mix_Chunk *> m_sLoadedSamples;
-#elif __USE_SOUND_GORILLA
-	static std::map<std::string, ga_Sound *> m_sLoadedSamples;
-#endif // __USE_SOUND_FMOD
+    static std::map<std::string, AUDIO_STRUCT *> m_sLoadedSamples;
 
     // Path to this ContentFile's Datafile Object's path. "datafile.dat#objectname"
     // In the case of an animation, this filename/name will be appended with 000, 001, 002 etc

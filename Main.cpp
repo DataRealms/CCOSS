@@ -73,6 +73,11 @@ enum TITLESEQUENCE
     LOGOFADEIN,
     LOGODISPLAY,
     LOGOFADEOUT,
+#ifdef __USE_SOUND_FMOD
+	FMODLOGOFADEIN,
+	FMODLOGODISPLAY,
+	FMODLOGOFADEOUT,
+#endif
     // Game notice
     NOTICEFADEIN,
     NOTICEDISPLAY,
@@ -310,28 +315,23 @@ void LoadingSplashProgressReport(std::string reportString, bool newItem = false)
 
 bool LoadDataModules()
 {
-// TODO: REMOVE
-//    return true;
     // Loading splash screen
     g_FrameMan.ClearBackBuffer32();
-//    g_FrameMan.LoadPalette("Base.rte/palette.bmp");
     SceneLayer *pLoadingSplash = new SceneLayer();
     pLoadingSplash->Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.bmp"), false, Vector(), true, false, Vector(1.0, 0));
-    // hcoded offset to make room for the loading box
-    pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 110, 0));
+
+    // hardcoded offset to make room for the loading box only if DisableLoadingScreen is false.
+	if (!g_SettingsMan.DisableLoadingScreen()) {
+		pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 110, 0));
+	} else {
+		pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 14, 0));
+	}
+
     // Draw onto wrapped strip centered vertically on the screen
 	Box splashBox(Vector(0, (g_FrameMan.GetResY() - pLoadingSplash->GetBitmap()->h) / 2), g_FrameMan.GetResX(), pLoadingSplash->GetBitmap()->h);
     pLoadingSplash->Draw(g_FrameMan.GetBackBuffer32(), splashBox);
     delete pLoadingSplash;
     pLoadingSplash = 0;
-
-	/*int x = g_FrameMan.GetResX() / 2;
-	int y = g_FrameMan.GetResY() - 50;
-
-	AllegroBitmap bmp(g_FrameMan.GetBackBuffer32());
-
-	g_FrameMan.GetLargeFont()->DrawAligned(&bmp, x, y, "PLANETOID PIONEERS FACT #1", 1);
-	g_FrameMan.GetLargeFont()->DrawAligned(&bmp, x, y + 12, "Mods are loaded orders of magnitude faster!", 1);*/
 
     g_FrameMan.FlipFrameBuffers();
 
@@ -935,6 +935,12 @@ bool PlayIntroTitle()
     pDRLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.bmp"));
     pDRLogo->SetWrapDoubleDrawing(false);
 
+#ifdef __USE_SOUND_FMOD
+	MOSParticle *pFMODLogo = new MOSParticle();
+	pFMODLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.bmp"));
+	pFMODLogo->SetWrapDoubleDrawing(false);
+#endif
+
     SceneLayer *pBackdrop = new SceneLayer();
     pBackdrop->Create(ContentFile("Base.rte/GUIs/Title/Nebula.bmp"), false, Vector(), false, false, Vector(0, -1.0));//startYOffset + resY));
     float backdropScrollRatio = 1.0f / 3.0f;
@@ -1067,7 +1073,9 @@ bool PlayIntroTitle()
         g_TimerMan.UpdateSim();
         g_ConsoleMan.Update();
 
-#if __USE_SOUND_GORILLA
+#if __USE_SOUND_FMOD
+		g_AudioMan.Update();
+#elif __USE_SOUND_GORILLA
 		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_SOUND);
 		g_AudioMan.Update();
 		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_SOUND);
@@ -1142,6 +1150,17 @@ bool PlayIntroTitle()
             pDRLogo->SetPos(Vector(g_FrameMan.GetResX() / 2, (g_FrameMan.GetResY() / 2) - 35));
             pDRLogo->Draw(g_FrameMan.GetBackBuffer32());
         }
+
+		///////////////////////////////////////////////////////
+		// FMOD Logo drawing
+
+#ifdef __USE_SOUND_FMOD
+		if (g_IntroState >= FMODLOGOFADEIN && g_IntroState <= FMODLOGOFADEOUT) {
+			g_FrameMan.ClearBackBuffer32();
+			pFMODLogo->SetPos(Vector(g_FrameMan.GetResX() / 2, (g_FrameMan.GetResY() / 2) - 35));
+			pFMODLogo->Draw(g_FrameMan.GetBackBuffer32());
+		}
+#endif
 
         ///////////////////////////////////////////////////////
         // Notice drawing
@@ -1488,9 +1507,7 @@ bool PlayIntroTitle()
             if (sectionSwitch)
             {
                 // Play juicy logo signature jingle/sound
-                Sound logoSound;
-                logoSound.Create("Base.rte/Sounds/GUIs/MetaStart.wav", false);
-                logoSound.Play();
+				g_GUISound.SplashSound().Play();
                 // Black fade
                 clear_to_color(pFadeScreen, 0);
                 duration = 0.25;
@@ -1531,7 +1548,7 @@ bool PlayIntroTitle()
             {
                 // Black fade
                 clear_to_color(pFadeScreen, 0);
-                duration = 0.5;
+                duration = 0.25;
                 sectionSwitch = false;
             }
 
@@ -1541,10 +1558,60 @@ bool PlayIntroTitle()
 
             if (elapsed >= duration || keyPressed)
             {
-                g_IntroState = NOTICEFADEIN;
+#ifdef __USE_SOUND_FMOD
+                g_IntroState = FMODLOGOFADEIN;
+#elif __USE_SOUND_GORILLA
+				g_IntroState = NOTICEFADEIN;
+#endif
                 sectionSwitch = true;
             }
         }
+#ifdef __USE_SOUND_FMOD
+		else if (g_IntroState == FMODLOGOFADEIN) {
+			if (sectionSwitch) {
+				// Black fade
+				clear_to_color(pFadeScreen, 0);
+				duration = 0.25;
+				sectionSwitch = false;
+			}
+
+			fadePos = 255 - (255 * sectionProgress);
+			set_trans_blender(fadePos, fadePos, fadePos, fadePos);
+			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pFadeScreen, 0, 0);
+
+			if (elapsed >= duration) {
+				g_IntroState = FMODLOGODISPLAY;
+				sectionSwitch = true;
+			} else if (keyPressed) {
+				g_IntroState = FMODLOGOFADEOUT;
+				sectionSwitch = true;
+			}
+		} else if (g_IntroState == FMODLOGODISPLAY) {
+			if (sectionSwitch) {
+				duration = 2.0;
+				sectionSwitch = false;
+			}
+			if (elapsed > duration || keyPressed) {
+				g_IntroState = FMODLOGOFADEOUT;
+				sectionSwitch = true;
+			}
+		} else if (g_IntroState == FMODLOGOFADEOUT) {
+			if (sectionSwitch) {
+				// Black fade
+				clear_to_color(pFadeScreen, 0);
+				duration = 0.25;
+				sectionSwitch = false;
+			}
+			fadePos = 255 * sectionProgress;
+			set_trans_blender(fadePos, fadePos, fadePos, fadePos);
+			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pFadeScreen, 0, 0);
+
+			if (elapsed >= duration || keyPressed) {
+				g_IntroState = NOTICEFADEIN;
+				sectionSwitch = true;
+			}
+		}
+#endif
         else if (g_IntroState == NOTICEFADEIN)
         {
             if (sectionSwitch)
@@ -1995,9 +2062,7 @@ bool PlayIntroTitle()
                 g_pScenarioGUI->SetEnabled(true);
 
                 // Play the scenario music with juicy start sound
-                Sound metaSound;
-                metaSound.Create("Base.rte/Sounds/GUIs/MetaStart.wav", false);
-                metaSound.Play();
+                g_GUISound.SplashSound().Play();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
             }
 
@@ -2094,9 +2159,7 @@ bool PlayIntroTitle()
                 sectionSwitch = false;
 
                 // Play the campaign music with metasound start
-                Sound metaSound;
-                metaSound.Create("Base.rte/Sounds/GUIs/MetaStart.wav", false);
-                metaSound.Play();
+				g_GUISound.SplashSound().Play();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
             }
 
@@ -2320,10 +2383,6 @@ bool RunGameLoop()
             // Update the real time measurement and increment
             g_TimerMan.Update();
 
-#if __USE_SOUND_GORILLA
-			g_AudioMan.Update();
-#endif
-
 			bool serverUpdated = false;
 
             // Simulation update, as many times as the fixed update step allows in the span since last frame draw
@@ -2531,6 +2590,7 @@ int main(int argc, char *argv[])
     new PresetMan();
     new FrameMan();
     new AudioMan();
+	new GUISound();
     new UInputMan();
     new ActivityMan();
     new MovableMan();
@@ -2558,6 +2618,7 @@ int main(int argc, char *argv[])
     g_PresetMan.Create();
     g_FrameMan.Create();
     g_AudioMan.Create();
+	g_GUISound.Create();
     g_UInputMan.Create();
 	if (g_NetworkServer.IsServerModeEnabled())
 		g_UInputMan.SetMultiplayerMode(true);
@@ -2634,6 +2695,7 @@ int main(int argc, char *argv[])
     g_MovableMan.Destroy();
     g_SceneMan.Destroy();
     g_ActivityMan.Destroy();
+	g_GUISound.Destroy();
     g_AudioMan.Destroy();
     g_PresetMan.Destroy();
     g_UInputMan.Destroy();

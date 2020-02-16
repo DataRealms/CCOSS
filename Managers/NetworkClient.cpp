@@ -670,7 +670,7 @@ namespace RTE
 	void NetworkClient::ReceiveSoundEventsMsg(RakNet::Packet * p)
 	{
 		MsgSoundEvents * msg = (MsgSoundEvents *)p->data;
-		AudioMan::SoundNetworkData * sndDataPtr = (AudioMan::SoundNetworkData *)((char *)msg + sizeof(MsgSoundEvents));
+		AudioMan::NetworkSoundData * sndDataPtr = (AudioMan::NetworkSoundData *)((char *)msg + sizeof(MsgSoundEvents));
 
 		for (int i = 0; i < msg->SoundEventsCount; i++)
 		{
@@ -757,7 +757,7 @@ namespace RTE
 	void NetworkClient::ReceiveMusicEventsMsg(RakNet::Packet * p)
 	{
 		MsgMusicEvents * msg = (MsgMusicEvents *)p->data;
-		AudioMan::MusicNetworkData * sndDataPtr = (AudioMan::MusicNetworkData *)((char *)msg + sizeof(MsgMusicEvents));
+		AudioMan::NetworkMusicData * sndDataPtr = (AudioMan::NetworkMusicData *)((char *)msg + sizeof(MsgMusicEvents));
 
 		for (int i = 0; i < msg->MusicEventsCount; i++)
 		{

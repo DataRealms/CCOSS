@@ -152,17 +152,6 @@ void MainMenuGUI::Clear()
 
 	m_MaxResX = 0;
 	m_MaxResY = 0;
-
-    // Sounds
-    m_EnterMenuSound.Reset();
-    m_ExitMenuSound.Reset();
-    m_FocusChangeSound.Reset();
-    m_SelectionChangeSound.Reset();
-    m_ButtonPressSound.Reset();
-    m_BackButtonPressSound.Reset();
-    m_ItemChangeSound.Reset();
-    m_TestSound.Reset();
-    m_UserErrorSound.Reset();
 }
 
 
@@ -551,17 +540,6 @@ int MainMenuGUI::Create(Controller *pController)
     m_FocusChange = 1;
 //    CategoryChange();
 
-    m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", false);
-    m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", false);
-    m_ExitMenuSound.AddSample("Base.rte/Sounds/GUIs/MenuExit2.wav");
-    m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", false);
-    m_SelectionChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.wav", false);
-    m_ButtonPressSound.Create("Base.rte/Sounds/GUIs/ButtonPress.wav", false);
-    m_BackButtonPressSound.Create("Base.rte/Sounds/GUIs/BackButtonPress.wav", false);
-    m_ItemChangeSound.Create("Base.rte/Sounds/GUIs/ItemChange.wav", false);
-    m_TestSound.Create("Base.rte/Sounds/GUIs/Test.wav", false);
-    m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", false);
-
 	m_PioneerPromoVisible = false;
 
     return 0;
@@ -608,12 +586,12 @@ void MainMenuGUI::SetEnabled(bool enable)
     if (enable && m_MenuEnabled != ENABLED && m_MenuEnabled != ENABLING)
     {
         m_MenuEnabled = ENABLING;
-        m_EnterMenuSound.Play();
+        g_GUISound.EnterMenuSound().Play();
     }
     else if (!enable && m_MenuEnabled != DISABLED && m_MenuEnabled != DISABLING)
     {
         m_MenuEnabled = DISABLING;
-        m_ExitMenuSound.Play();
+        g_GUISound.ExitMenuSound().Play();
     }
 
     m_ScreenChange = true;
@@ -912,12 +890,12 @@ void MainMenuGUI::Update()
                 if (m_aMainMenuButton[CAMPAIGN]->GetText() == "Campaign")
                 {
                     m_aMainMenuButton[CAMPAIGN]->SetText("COMING SOON!");
-                    m_ExitMenuSound.Play();
+                    g_GUISound.ExitMenuSound().Play();
                 }
                 else
                 {
                     m_aMainMenuButton[CAMPAIGN]->SetText("Campaign");
-                    m_ButtonPressSound.Play();
+                    g_GUISound.ButtonPressSound().Play();
                 }
 */
                 // Show the metagame notice screen if it hasn't already been shown yet
@@ -932,7 +910,7 @@ void MainMenuGUI::Update()
 
                 HideAllScreens();
                 m_ScreenChange = true;
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// Skirmish button pressed
@@ -949,8 +927,8 @@ void MainMenuGUI::Update()
 //                m_MenuScreen = PLAYERSSCREEN;
                 m_MenuScreen = MAINSCREEN;
                 m_ScreenChange = true;
-                m_ButtonPressSound.Play();
-//                m_ExitMenuSound.Play();
+                g_GUISound.ButtonPressSound().Play();
+//                g_GUISound.ExitMenuSound().Play();
             }
 
 			if (anEvent.GetControl() == m_aMainMenuButton[MULTIPLAYER])
@@ -966,14 +944,14 @@ void MainMenuGUI::Update()
 				//                m_MenuScreen = PLAYERSSCREEN;
 				//m_MenuScreen = MAINSCREEN;
 				//m_ScreenChange = true;
-				m_ButtonPressSound.Play();
-				//                m_ExitMenuSound.Play();
+				g_GUISound.ButtonPressSound().Play();
+				//                g_GUISound.ExitMenuSound().Play();
 
 				HideAllScreens();
 				m_MenuScreen = MAINSCREEN;
 				m_ScreenChange = true;
 				m_ActivityRestarted = true;
-				m_ExitMenuSound.Play();
+				g_GUISound.ExitMenuSound().Play();
 
 				g_SceneMan.SetSceneToLoad("Editor Scene");
 				MultiplayerGame *pMultiplayerGame = new MultiplayerGame;
@@ -989,7 +967,7 @@ void MainMenuGUI::Update()
                 m_MenuScreen = OPTIONSSCREEN;
                 m_ScreenChange = true;
 
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// Editor button pressed
@@ -1005,8 +983,8 @@ void MainMenuGUI::Update()
                 m_MenuScreen = EDITORSCREEN;
                 m_ScreenChange = true;
 
-                m_ButtonPressSound.Play();
-//                m_UserErrorSound.Play();
+                g_GUISound.ButtonPressSound().Play();
+//                g_GUISound.UserErrorSound().Play();
             }
 
 			// Editor button pressed
@@ -1017,7 +995,7 @@ void MainMenuGUI::Update()
                 m_MenuScreen = MODMANAGERSCREEN;
                 m_ScreenChange = true;
 
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// Credits button pressed
@@ -1028,14 +1006,14 @@ void MainMenuGUI::Update()
                 m_MenuScreen = CREDITSSCREEN;
                 m_ScreenChange = true;
 
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// Quit button pressed
 			if (anEvent.GetControl() == m_aMainMenuButton[QUIT])
             {
                 QuitLogic();
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
 			// Resume button pressed
@@ -1043,13 +1021,13 @@ void MainMenuGUI::Update()
             {
                 m_ActivityResumed = true;
 
-                m_ExitMenuSound.Play();
+                g_GUISound.ExitMenuSound().Play();
             }
 
 			// Fullscreen toggle button pressed
 			if (anEvent.GetControl() == m_aOptionButton[FULLSCREEN])
             {
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
 
                 // Was fullscreen, switch to 1x window
                 if (g_FrameMan.IsFullscreen())
@@ -1105,7 +1083,7 @@ void MainMenuGUI::Update()
                 m_MenuScreen = MAINSCREEN;
                 m_ScreenChange = true;
 
-                m_BackButtonPressSound.Play();
+                g_GUISound.BackButtonPressSound().Play();
             }
 
 			// Return to options menu button pressed
@@ -1117,7 +1095,7 @@ void MainMenuGUI::Update()
                 m_MenuScreen = OPTIONSSCREEN;
                 m_ScreenChange = true;
 
-                m_BackButtonPressSound.Play();
+                g_GUISound.BackButtonPressSound().Play();
             }
 
             /////////////////////////////////////////////
@@ -1147,7 +1125,7 @@ void MainMenuGUI::Update()
                 else
                     m_StartPlayers = 0;
 
-                m_ButtonPressSound.Play();
+                g_GUISound.ButtonPressSound().Play();
             }
 
             /////////////////////////////////////////////
@@ -1168,7 +1146,7 @@ void MainMenuGUI::Update()
 
                         UpdateTeamBoxes();
 
-                        m_ButtonPressSound.Play();
+                        g_GUISound.ButtonPressSound().Play();
                     }
                 }
 
@@ -1185,7 +1163,7 @@ void MainMenuGUI::Update()
                         m_ScreenChange = true;
                         m_ActivityRestarted = true;
                         SetupSkirmishActivity();
-                        m_ExitMenuSound.Play();
+                        g_GUISound.ExitMenuSound().Play();
                     }
                     // CPU team present, so ask for the difficulty level of it before starting
                     else
@@ -1194,7 +1172,7 @@ void MainMenuGUI::Update()
                         m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 280);
                         m_MenuScreen = DIFFICULTYSCREEN;
                         m_ScreenChange = true;
-                        m_ButtonPressSound.Play();
+                        g_GUISound.ButtonPressSound().Play();
                     }
                 }
             }
@@ -1229,8 +1207,8 @@ void MainMenuGUI::Update()
 
                 SetupSkirmishActivity();
 
-//                m_BackButtonPressSound.Play();
-                m_ExitMenuSound.Play();
+//                g_GUISound.BackButtonPressSound().Play();
+                g_GUISound.ExitMenuSound().Play();
             }
 
             /////////////////////////////////////////////
@@ -1272,7 +1250,7 @@ void MainMenuGUI::Update()
                         g_UInputMan.GetControlScheme(player)->SetDevice(currentDevice);
                         UpdateDeviceLabels();
 
-                        m_ButtonPressSound.Play();
+                        g_GUISound.ButtonPressSound().Play();
                     }
                 }
 
@@ -1297,7 +1275,7 @@ void MainMenuGUI::Update()
 						g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->SetJoystickDeadzone(deadzone);
                         g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->SetDevice(m_ConfiguringDevice);
 
-                        m_ButtonPressSound.Play();
+                        g_GUISound.ButtonPressSound().Play();
                     }
                 }
 
@@ -1316,7 +1294,7 @@ void MainMenuGUI::Update()
                             for (int otherButton = P1CLEAR; otherButton <= P4CLEAR; ++otherButton)
                                 if (otherButton != which)
                                     m_aOptionButton[otherButton]->SetText("Reset");
-                            m_ButtonPressSound.Play();
+                            g_GUISound.ButtonPressSound().Play();
                         }
                         else
                         {
@@ -1333,7 +1311,7 @@ void MainMenuGUI::Update()
 
 //                            m_aOptionsLabel[P1DEVICE + (which - P1CLEAR)]->SetText("NEEDS CONFIG!");
 //                            m_aOptionButton[P1CONFIG + (which - P1CLEAR)]->SetText("-> CONFIGURE <-");
-                            m_ExitMenuSound.Play();
+                            g_GUISound.ExitMenuSound().Play();
                         }
                     }
                 }
@@ -1351,7 +1329,7 @@ void MainMenuGUI::Update()
                     m_ConfigureStep++;
                     m_ScreenChange = true;
 
-                    m_ButtonPressSound.Play();
+                    g_GUISound.ButtonPressSound().Play();
                 }
 
 			    // DPad Gamepad type selected
@@ -1361,7 +1339,7 @@ void MainMenuGUI::Update()
                     m_ConfigureStep++;
                     m_ScreenChange = true;
 
-                    m_ButtonPressSound.Play();
+                    g_GUISound.ButtonPressSound().Play();
                 }
 
 			    // XBox Gamepad type selected
@@ -1380,7 +1358,7 @@ void MainMenuGUI::Update()
                     m_MenuScreen = OPTIONSSCREEN;
                     m_ScreenChange = true;
 
-                    m_ExitMenuSound.Play();
+                    g_GUISound.ExitMenuSound().Play();
                 }
 
 			    // Skip ahead one config step button pressed
@@ -1390,7 +1368,7 @@ void MainMenuGUI::Update()
                     m_ConfigureStep++;
                     m_ScreenChange = true;
 
-                    m_ButtonPressSound.Play();
+                    g_GUISound.ButtonPressSound().Play();
                 }
 
 			    // Go back one config step button pressed
@@ -1400,10 +1378,10 @@ void MainMenuGUI::Update()
                     {
                         m_ConfigureStep--;
                         m_ScreenChange = true;
-                        m_BackButtonPressSound.Play();
+                        g_GUISound.BackButtonPressSound().Play();
                     }
                     else
-                        m_UserErrorSound.Play();
+                        g_GUISound.UserErrorSound().Play();
                 }
             }
 
@@ -1469,8 +1447,8 @@ void MainMenuGUI::Update()
                     g_ActivityMan.SetStartActivity(pNewEditor);
                 }
 
-//                m_BackButtonPressSound.Play();
-                m_ExitMenuSound.Play();
+//                g_GUISound.BackButtonPressSound().Play();
+                g_GUISound.ExitMenuSound().Play();
             }
 
             /////////////////////////////////////////////
@@ -1494,7 +1472,7 @@ void MainMenuGUI::Update()
                     g_SceneMan.SetSceneToLoad("Tutorial Bunker");
                     m_ActivityRestarted = true;
 
-                    m_ButtonPressSound.Play();
+                    g_GUISound.ButtonPressSound().Play();
                 }
                 // Go to registration dialog button
                 else if (anEvent.GetControl() == m_aMainMenuButton[METACONTINUE])
@@ -1505,7 +1483,7 @@ void MainMenuGUI::Update()
                     HideAllScreens();
                     m_MenuScreen = MAINSCREEN;
                     m_ScreenChange = true;
-                    m_ButtonPressSound.Play();
+                    g_GUISound.ButtonPressSound().Play();
                 }
             }
 
@@ -1525,7 +1503,7 @@ void MainMenuGUI::Update()
 					HideAllScreens();
 					m_MenuScreen = MAINSCREEN;
 					m_ScreenChange = true;
-					m_BackButtonPressSound.Play();
+					g_GUISound.BackButtonPressSound().Play();
 				}
 
 				// Disable/Enable mod pressed
@@ -1555,7 +1533,7 @@ void MainMenuGUI::Update()
                     HideAllScreens();
                     m_ScreenChange = true;
 
-                    m_ButtonPressSound.Play();
+                    g_GUISound.ButtonPressSound().Play();
                 }
                 // Cancel quitting
                 else if (anEvent.GetControl() == m_aMainMenuButton[QUITCANCEL])
@@ -1565,7 +1543,7 @@ void MainMenuGUI::Update()
                     m_MenuScreen = MAINSCREEN;
                     m_ScreenChange = true;
 
-                    m_ButtonPressSound.Play();
+                    g_GUISound.ButtonPressSound().Play();
                 }
             }
         }
@@ -1577,7 +1555,7 @@ void MainMenuGUI::Update()
             if (dynamic_cast<GUIButton *>(anEvent.GetControl()))
             {
                 if (anEvent.GetMsg() == GUIButton::Focused)
-                    m_SelectionChangeSound.Play();
+                    g_GUISound.SelectionChangeSound().Play();
             }
 
 			// Mod list pressed
@@ -1670,7 +1648,7 @@ void MainMenuGUI::Update()
             {
                 // See if we should play test sound after the volume has been set
                 bool playTest = false;
-                if (((double)m_pSoundSlider->GetValue() / 100) != g_AudioMan.GetSoundsVolume() && !g_AudioMan.IsPlaying(&m_TestSound))
+                if (((double)m_pSoundSlider->GetValue() / 100) != g_AudioMan.GetSoundsVolume() && !g_AudioMan.IsPlaying(&g_GUISound.TestSound()))
                     playTest = true;
 
                 g_AudioMan.SetSoundsVolume((double)m_pSoundSlider->GetValue() / 100);
@@ -1678,7 +1656,7 @@ void MainMenuGUI::Update()
 
                 // Play test sound after new volume is set
                 if (playTest)
-                    m_TestSound.Play();
+                    g_GUISound.TestSound().Play();
 			}
 
 			// Music Volume slider changed
@@ -3148,7 +3126,7 @@ void MainMenuGUI::UpdateConfigScreen()
 	g_UInputMan.SetInputClass(NULL);
 	
     if (m_ScreenChange)
-        m_ExitMenuSound.Play();
+        g_GUISound.ExitMenuSound().Play();
 }
 
 

@@ -11,7 +11,7 @@ namespace RTE {
 
 	public:
 		ENTITYALLOCATION(TDExplosive);
-		CLASSINFOGETTERS();
+		CLASSINFOGETTERS
 
 #pragma region Creation
 		/// <summary>

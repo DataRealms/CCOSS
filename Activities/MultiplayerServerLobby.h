@@ -317,9 +317,9 @@ namespace RTE
 		GUICheckbox *m_pRequireClearPathToOrbitCheckbox;
 		GUICheckbox *m_pDeployUnitsCheckbox;
 
-		const Icon *m_apPlayerIcons[MAX_CLIENTS];
+		const Icon *m_apPlayerIcons[c_MaxClients];
 
-		GUILabel * m_apPlayerNameLabel[MAX_CLIENTS];
+		GUILabel * m_apPlayerNameLabel[c_MaxClients];
 
 		BITMAP* m_pUIDrawBitmap;
 

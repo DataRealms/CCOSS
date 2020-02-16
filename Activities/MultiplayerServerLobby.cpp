@@ -704,7 +704,7 @@ namespace RTE {
 									//    m_aapPlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps8()[0]));
 								}
 							}
-							//m_FocusChangeSound.Play();
+							//g_GUISound.FocusChangeSound().Play();
 
 							//Check if we need to clear or set CPU disabled team icon
 							bool noCPUs = true;
@@ -733,7 +733,7 @@ namespace RTE {
 						else if (m_aapPlayerBoxes[player][team]->GetDrawColor() != c_PlayerSlotColorHovered)
 						{
 							m_aapPlayerBoxes[player][team]->SetDrawColor(c_PlayerSlotColorHovered);
-							//m_SelectionChangeSound.Play();
+							//g_GUISound.SelectionChangeSound().Play();
 						}
 					}
 					// Un-highlight all other cells
@@ -938,7 +938,7 @@ namespace RTE {
 			pGameActivity->SetFogOfWarEnabled(m_pFogOfWarCheckbox->GetCheck());
 			pGameActivity->SetRequireClearPathToOrbit(m_pRequireClearPathToOrbitCheckbox->GetCheck());
 
-			for (int i = 0; i < MAX_CLIENTS; i++)
+			for (int i = 0; i < c_MaxClients; i++)
 				pGameActivity->SetNetworkPlayerName(i, g_NetworkServer.GetPlayerName(i));
 
 			// If gold slider is at it max value then the amount is 'infinite' and we must set some rediculously high value
@@ -1150,7 +1150,7 @@ namespace RTE {
 	{
 		Activity::Update();
 
-		for (int i = 0; i < MAX_CLIENTS; i++)
+		for (int i = 0; i < c_MaxClients; i++)
 		{
 			if (g_NetworkServer.IsPlayerConnected(i))
 			{
@@ -1240,10 +1240,10 @@ namespace RTE {
 						//HideAllScreens();
 						//                    m_MenuScreen = SCENESELECT;
 						//                    m_ScreenChange = true;
-						//m_ButtonPressSound.Play();
+						//g_GUISound.ButtonPressSound().Play();
 					}
 					else
-						m_UserErrorSound.Play();
+						g_GUISound.UserErrorSound().Play();
 				}
 			}
 
@@ -1282,7 +1282,7 @@ namespace RTE {
 
 						// Update the scene info box
 						//UpdateScenesBox();
-						//m_ItemChangeSound.Play();
+						//g_GUISound.ItemChangeSound().Play();
 					}
 				}
 
@@ -1328,7 +1328,7 @@ namespace RTE {
 		// We need to manually draw UI's to intermediate buffer first, then to the player's backbuffer to make it centered on each player's screen.
 		for (int i = 0; i < 4; i++)
 		{
-			if (i < MAX_CLIENTS)
+			if (i < c_MaxClients)
 				finalDestBitmap = g_FrameMan.GetNetworkBackBufferIntermediate8Current(i);
 			else
 				finalDestBitmap = pTargetBitmap;
@@ -1338,7 +1338,7 @@ namespace RTE {
 			//m_pGUIController->DrawMouse();
 
 			//Draw player icons
-			for (int j = 0; j < MAX_CLIENTS; j++)
+			for (int j = 0; j < c_MaxClients; j++)
 				draw_sprite(drawBitmap, m_apPlayerIcons[j]->GetBitmaps8()[0], m_apPlayerNameLabel[j]->GetXPos() - 32, m_apPlayerNameLabel[j]->GetYPos() - 5);
 
 			// Draw scene preview after GUI

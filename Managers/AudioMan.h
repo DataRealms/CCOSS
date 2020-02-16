@@ -87,15 +87,6 @@ namespace RTE {
 		virtual int Create();
 #pragma endregion
 
-#pragma region INI Handling
-		/// <summary>
-		/// Saves the complete state of this AudioMan to an output stream for later recreation with Create(Reader &reader);
-		/// </summary>
-		/// <param name="writer">A Writer that the AudioMan will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const { return 0; }
-#pragma endregion
-
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a AudioMan object before deletion from system memory.

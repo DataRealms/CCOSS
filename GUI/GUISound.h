@@ -11,7 +11,7 @@ namespace RTE {
 	/// <summary>
 	/// The singleton loader for all GUI sound effects.
 	/// </summary>
-	class GUISound : public Singleton<GUISound>, public Entity {
+	class GUISound : public Singleton<GUISound> {
 		
 	public:
 
@@ -28,27 +28,21 @@ namespace RTE {
 		virtual int Create();
 #pragma endregion
 
-#pragma region INI Handling
-		/// <summary>
-		/// Saves the complete state of this GUISound to an output stream for later recreation with Create(Reader &reader);
-		/// </summary>
-		/// <param name="writer">A Writer that the GUISound will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const { return 0; }
-#pragma endregion
-
 #pragma region Destruction
-		/// <summary>
-		/// Destructor method used to clean up a GUISound object before deletion from system memory.
-		/// </summary>
-		virtual ~GUISound() { Destroy(true); }
-#pragma endregion
-
-#pragma region Virtual Override Methods
 		/// <summary>
 		/// Resets the entire GUISound, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); Entity::Reset(); }
+		void Reset() { Clear(); Reset(); }
+
+		/// <summary>
+		/// Destroys and resets (through Clear()) the GUISound object.
+		/// </summary>
+		void Destroy() { Clear(); }
+
+		/// <summary>
+		/// Destructor method used to clean up a GUISound object before deletion from system memory.
+		/// </summary>
+		virtual ~GUISound() { Destroy(); }
 #pragma endregion
 
 #pragma region Getters

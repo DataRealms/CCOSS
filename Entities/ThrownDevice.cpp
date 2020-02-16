@@ -6,7 +6,6 @@ namespace RTE {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ThrownDevice::Clear() {
-		m_ThrownTmr.Reset();
 		m_ActivationSound.Reset();
 		m_StartThrowOffset.Reset();
 		m_EndThrowOffset.Reset();
@@ -34,8 +33,6 @@ namespace RTE {
 		HeldDevice::Create(reference);
 
 		m_MOType = MovableObject::TypeThrownDevice;
-
-		m_ThrownTmr = reference.m_ThrownTmr;
 
 		m_ActivationSound = reference.m_ActivationSound;
 
@@ -103,6 +100,19 @@ namespace RTE {
 		}
 
 		Clear();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ThrownDevice::ResetAllTimers() {
+		double elapsedTime;
+		if (m_Activated) {
+			elapsedTime = m_ActivationTmr.GetElapsedSimTimeMS();
+		}
+		HeldDevice::ResetAllTimers();
+		if (m_Activated) {
+			m_ActivationTmr.SetElapsedSimTimeMS(elapsedTime);
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

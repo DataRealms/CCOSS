@@ -37,6 +37,7 @@ void MOSprite::Clear()
     m_SpriteAnimMode = NOANIM;
     m_SpriteAnimDuration = 500;
     m_SpriteAnimTimer.Reset();
+    m_SpriteAnimIsReversingFrames = false;
     m_HFlipped = false;
     m_MaxRadius = 1;
     m_MaxDiameter = 2;
@@ -451,7 +452,7 @@ Vector MOSprite::UnRotateOffset(const Vector &offset) const
     return rotOff;
 }
 
-/*
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Pure v. method:  Update
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -460,8 +461,59 @@ Vector MOSprite::UnRotateOffset(const Vector &offset) const
 void MOSprite::Update()
 {
     MovableObject::Update();
+
+    ////////////////////////////////////////
+    // Animate the sprite, if applicable
+
+    if (m_FrameCount > 1)
+    {
+        if (m_SpriteAnimMode == ALWAYSLOOP)
+        {
+            float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;
+            m_Frame = floorf((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);
+        }
+        else if (m_SpriteAnimMode == ALWAYSRANDOM)
+        {
+            if (m_SpriteAnimTimer.GetElapsedSimTimeMS() > (m_SpriteAnimDuration / m_FrameCount))
+            {
+                //  Quick switch to other frame if only two
+                if (m_FrameCount == 2)
+                    m_Frame = m_Frame == 0 ? 1 : 0;
+                else
+                {
+                    int prevFrame = m_Frame;
+                    // Keep trying ot find a new frame
+                    do
+                    {
+                        m_Frame = floorf((float)m_FrameCount * PosRand());
+                    } while (m_Frame == prevFrame);
+                }
+
+                m_SpriteAnimTimer.Reset();
+            }
+        }
+        else if (m_SpriteAnimMode == ALWAYSPINGPONG)
+        {
+            int realFrameCount = m_FrameCount - 1;
+            float perFrameTime = ((m_SpriteAnimDuration / m_FrameCount) / 2);
+            if (m_SpriteAnimTimer.IsPastSimMS(perFrameTime))
+            {
+                m_SpriteAnimTimer.Reset();
+                (m_SpriteAnimIsReversingFrames) ? (m_Frame--) : (m_Frame++);
+            }
+            
+            if (m_Frame == realFrameCount) 
+            {
+                m_SpriteAnimIsReversingFrames = true;
+            }
+            else if (m_Frame == 0)
+            {
+                m_SpriteAnimIsReversingFrames = false;
+            }
+        }
+    }
 }
-*/
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw

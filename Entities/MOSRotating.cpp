@@ -1614,43 +1614,6 @@ void MOSRotating::Update()
 
     MOSprite::Update();
 
-    ////////////////////////////////////////
-    // Animate the sprite, if applicable
-
-    if (m_FrameCount > 1)
-    {
-        if (m_SpriteAnimMode == ALWAYSLOOP)
-        {
-            float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;
-            m_Frame = floorf((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);
-        }
-        else if (m_SpriteAnimMode == ALWAYSRANDOM)
-        {
-            if (m_SpriteAnimTimer.GetElapsedSimTimeMS() > (m_SpriteAnimDuration / m_FrameCount))
-            {
-                //  Quick switch to other frame if only two
-                if (m_FrameCount == 2)
-                    m_Frame = m_Frame == 0 ? 1 : 0;
-                else
-                {
-                    int prevFrame = m_Frame;
-                    // Keep trying ot find a new frame
-                    do
-                    {
-                        m_Frame = floorf((float)m_FrameCount * PosRand());
-                    }
-                    while (m_Frame == prevFrame);
-                }
-
-                m_SpriteAnimTimer.Reset();
-            }
-        }
-        else if (m_SpriteAnimMode == ALWAYSPINGPONG)
-        {
-
-        }
-    }
-
 	if (m_InheritEffectRotAngle)
 		m_EffectRotAngle = m_Rotation.GetRadAngle();
 

@@ -477,9 +477,7 @@ void MOSprite::Update()
             if (m_SpriteAnimTimer.GetElapsedSimTimeMS() > (m_SpriteAnimDuration / m_FrameCount))
             {
                 //  Quick switch to other frame if only two
-                if (m_FrameCount == 2)
-                    m_Frame = m_Frame == 0 ? 1 : 0;
-                else
+                if (m_FrameCount == 2) { m_SpriteAnimMode = ALWAYSLOOP; }
                 {
                     int prevFrame = m_Frame;
                     // Keep trying ot find a new frame
@@ -494,6 +492,7 @@ void MOSprite::Update()
         }
         else if (m_SpriteAnimMode == ALWAYSPINGPONG)
         {
+            if (m_FrameCount == 2) { m_SpriteAnimMode = ALWAYSLOOP; }
             int realFrameCount = m_FrameCount - 1;
             float perFrameTime = ((m_SpriteAnimDuration / m_FrameCount) / 2);
             if (m_SpriteAnimTimer.IsPastSimMS(perFrameTime))

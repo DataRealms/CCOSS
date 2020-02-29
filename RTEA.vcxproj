@@ -79,8 +79,8 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_69_0;$(ProjectDir)external\sources\RakNet;${ProjectDir)external\include\LZ4;${ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;DEBUG_BUILD;_WINDOWS;DEBUGMODE;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ALLEGRO_NO_STD_HEADERS;ZLIB_WINAPI;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\sources\RakNet;${ProjectDir)external\include\LZ4;${ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;DEBUG_BUILD;_WINDOWS;DEBUGMODE;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=1;_ITERATOR_DEBUG_LEVEL=2;ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ALLEGRO_NO_STD_HEADERS;ZLIB_WINAPI;__USE_SOUND_FMOD_OFF;__USE_SOUND_GORILLA;__OPEN_SOURCE_EDITION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -187,7 +187,7 @@
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>lua515.x86.release.lib;luabind.x86.release.lib;ws2_32.lib;zlibwapi.lib;alleg_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;gorilla.lib;legacy_stdio_definitions.lib;liblz4.lib;libboost_thread-vc141-mt-x32-1_55.lib;libboost_date_time-vc141-mt-x32-1_55.lib;libboost_system-vc141-mt-x32-1_55.lib;libboost_chrono-vc141-mt-x32-1_55.lib;fmodvc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lua515.x86.release.lib;luabind.x86.release.lib;ws2_32.lib;zlibwapi.lib;alleg_s_c.lib;kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;gorilla.lib;legacy_stdio_definitions.lib;liblz4.lib;libboost_thread-vc141-mt-x32-1_55.lib;libboost_date_time-vc141-mt-x32-1_55.lib;libboost_system-vc141-mt-x32-1_55.lib;libboost_chrono-vc141-mt-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>

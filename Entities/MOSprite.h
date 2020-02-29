@@ -622,7 +622,7 @@ ENTITYALLOCATION(MOSprite)
 // Arguments:       None.
 // Return value:    1 for not flipped, -1 for flipped.
 
-	virtual int GetFlipFactor() { return m_HFlipped ? -1 : 1; }
+	int GetFlipFactor() const { return m_HFlipped ? -1 : 1; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

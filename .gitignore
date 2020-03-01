@@ -47,7 +47,3 @@ MemCleanupInfo.txt
 /_Allegro-4.2.3.1-Custom/Allegro/lib
 /_Allegro-4.2.3.1-Custom/Allegro/obj
 Doxygen/Output/
-
-/external/include/fmod
-/external/lib/win/fmodvc.lib
-/external/lib/win/fmod.dll

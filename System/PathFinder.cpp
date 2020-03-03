@@ -40,7 +40,7 @@ void PathFinder::Clear()
 
 int PathFinder::Create(Scene *pScene, int nodeDimension, unsigned int allocate)
 {
-    DAssert(pScene, "Scene doesn't exist or isn't loaded when creating PathFinder!");
+    RTEAssert(pScene, "Scene doesn't exist or isn't loaded when creating PathFinder!");
 
     m_NodeDimension = nodeDimension;
     int sceneWidth = g_SceneMan.GetSceneWidth();
@@ -177,7 +177,7 @@ void PathFinder::Destroy()
 
 void PathFinder::RecalculateAllCosts()
 {
-    DAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
+    RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
 
     PathNode *pNode = 0;
     for (int x = 0; x < m_NodeGrid.size(); ++x)
@@ -267,7 +267,7 @@ void PathFinder::RecalculateAreaCosts(const list<Box> &boxList)
 
 int PathFinder::CalculatePath(Vector start, Vector end, list<Vector> &pathResult, float &totalCostResult, float digStrength)
 {
-    DAssert(m_pPather, "No pather exists, can't calculate the path!");
+    RTEAssert(m_pPather, "No pather exists, can't calculate the path!");
 
     // Make sure start and end are within scene bounds
     g_SceneMan.ForceBounds(start);

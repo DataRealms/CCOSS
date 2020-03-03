@@ -281,7 +281,7 @@ void PieMenuGUI::Clear()
 
 int PieMenuGUI::Create(Controller *pController, Actor *pFocusActor)
 {
-    AAssert(pController, "No controller sent to PieMenuGUI on creation!");
+    RTEAssert(pController, "No controller sent to PieMenuGUI on creation!");
     m_pController = pController;
 
     m_pActor = pFocusActor;

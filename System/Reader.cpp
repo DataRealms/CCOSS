@@ -74,11 +74,11 @@ int Reader::Create(const char *filename, bool overwrites, void (*fpProgressCallb
     m_DataModuleName = m_FilePath.substr(0, firstSlashPos);
     m_DataModuleID = g_PresetMan.GetModuleID(m_DataModuleName);
 // This is OK, may be able to do it later when needed
-//    AAssert(m_DataModuleID > 0, "Couldn't establish which DataModule we're reading from when creating Reader!");
+//    RTEAssert(m_DataModuleID > 0, "Couldn't establish which DataModule we're reading from when creating Reader!");
 
     m_pStream = new std::ifstream(filename);
     if (!failOK)
-        AAssert(m_pStream->good(), "Failed to open data file \'" + string(filename) + "\'!");
+        RTEAssert(m_pStream->good(), "Failed to open data file \'" + string(filename) + "\'!");
 
     m_OverwriteExisting = overwrites;
 
@@ -545,7 +545,7 @@ void Reader::ReportError(std::string errorDesc)
 {
     char error[1024];
     sprintf_s(error, sizeof(error), "%s Error happened in %s at line %i!", errorDesc.c_str(), m_FilePath.c_str(), m_CurrentLine);
-    DDTAbort(error);
+    RTEAbort(error);
 }
 
 

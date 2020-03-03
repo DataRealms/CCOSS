@@ -415,8 +415,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    TerrainObject(const TerrainObject &reference) { DDTAbort("Tried to use forbidden method"); }
-    void operator=(const TerrainObject &rhs) { DDTAbort("Tried to use forbidden method"); }
+    TerrainObject(const TerrainObject &reference) { RTEAbort("Tried to use forbidden method"); }
+    void operator=(const TerrainObject &rhs) { RTEAbort("Tried to use forbidden method"); }
 
 };
 

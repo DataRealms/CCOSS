@@ -235,7 +235,7 @@ namespace RTE {
 		if (!m_pGUIController)
 			m_pGUIController = new GUIControlManager();
 		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-			DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
 
 		m_pGUIController->Load("Base.rte/GUIs/MultiplayerServerLobbyGUI.ini");
 		m_pGUIController->EnableMouse(true);

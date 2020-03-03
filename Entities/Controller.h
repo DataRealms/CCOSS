@@ -439,7 +439,7 @@ enum InputMode
 // Arguments:       Which state to set and which value to set it to.
 // Return value:    None.
 
-    void SetState(ControlState which, bool setting = true) { DAssert(which >= 0 && which < CONTROLSTATECOUNT, "Control state out of whack"); m_ControlStates[which] = setting; };
+    void SetState(ControlState which, bool setting = true) { RTEAssert(which >= 0 && which < CONTROLSTATECOUNT, "Control state out of whack"); m_ControlStates[which] = setting; };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

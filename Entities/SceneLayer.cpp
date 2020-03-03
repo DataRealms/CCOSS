@@ -76,7 +76,7 @@ int SceneLayer::Create(ContentFile bitmapFile,
     m_BitmapFile = bitmapFile;
 
     m_pMainBitmap = m_BitmapFile.GetAsBitmap();
-    AAssert(m_pMainBitmap, "Failed to load BITMAP in SceneLayer::Create");
+    RTEAssert(m_pMainBitmap, "Failed to load BITMAP in SceneLayer::Create");
 
     Create(m_pMainBitmap, drawTrans, offset, wrapX, wrapY, scrollInfo);
 
@@ -102,7 +102,7 @@ int SceneLayer::Create(BITMAP *pBitmap,
                        Vector scrollInfo)
 {
     m_pMainBitmap = pBitmap;
-    AAssert(m_pMainBitmap, "Null bitmap passed in when creating SceneLayer");
+    RTEAssert(m_pMainBitmap, "Null bitmap passed in when creating SceneLayer");
     m_MainBitmapOwned = true;
 
     m_DrawTrans = drawTrans;
@@ -167,11 +167,11 @@ int SceneLayer::Create(const SceneLayer &reference)
     {
         // Copy the bitmap from the ContentFile, because we're going to be changing it!
         BITMAP *pCopyFrom = reference.m_pMainBitmap;
-        AAssert(pCopyFrom, "Couldn't load the bitmap file specified for SceneLayer!");
+        RTEAssert(pCopyFrom, "Couldn't load the bitmap file specified for SceneLayer!");
 
         // Destination
         m_pMainBitmap = create_bitmap_ex(8, pCopyFrom->w, pCopyFrom->h);
-        AAssert(m_pMainBitmap, "Failed to allocate BITMAP in SceneLayer::Create");
+        RTEAssert(m_pMainBitmap, "Failed to allocate BITMAP in SceneLayer::Create");
 
         // Copy!
         blit(pCopyFrom, m_pMainBitmap, 0, 0, 0, 0, pCopyFrom->w, pCopyFrom->h);
@@ -214,11 +214,11 @@ int SceneLayer::LoadData()
 /* No need to do this copying, we are re-loading fresh from disk each time
     // Copy the bitmap from the ContentFile, because we're going to be changing it!
     BITMAP *pCopyFrom = m_BitmapFile.GetAsBitmap();
-    AAssert(pCopyFrom, "Couldn't load the bitmap file specified for SceneLayer!");
+    RTEAssert(pCopyFrom, "Couldn't load the bitmap file specified for SceneLayer!");
 
     // Destination
     m_pMainBitmap = create_bitmap_ex(8, pCopyFrom->w, pCopyFrom->h);
-    AAssert(m_pMainBitmap, "Failed to allocate BITMAP in SceneLayer::Create");
+    RTEAssert(m_pMainBitmap, "Failed to allocate BITMAP in SceneLayer::Create");
 
     // Copy!
     blit(pCopyFrom, m_pMainBitmap, 0, 0, 0, 0, pCopyFrom->w, pCopyFrom->h);
@@ -390,8 +390,8 @@ unsigned char SceneLayer::GetPixel(const int pixelX, const int pixelY)
     // Make sure it's within the boundaries of the bitmap.
     if (pixelX < 0 || pixelX >= m_pMainBitmap->w || pixelY < 0 || pixelY >= m_pMainBitmap->h)
         return 0;
-//    AAssert(m_pTerrain->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
-//    DAssert(is_inside_bitmap(m_pMainBitmap, pixelX, pixelY, 0), "Trying to access pixel outside of SceneLayer's bitmap's boundaries!");
+//    RTEAssert(m_pTerrain->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(is_inside_bitmap(m_pMainBitmap, pixelX, pixelY, 0), "Trying to access pixel outside of SceneLayer's bitmap's boundaries!");
     return  _getpixel(m_pMainBitmap, pixelX, pixelY);
 }
 
@@ -405,7 +405,7 @@ unsigned char SceneLayer::GetPixel(const int pixelX, const int pixelY)
 
 void SceneLayer::SetPixel(const int pixelX, const int pixelY, const unsigned char value)
 {
-    AAssert(m_MainBitmapOwned, "Trying to set a pixel of a SceneLayer's bitmap which isn't owned!");
+    RTEAssert(m_MainBitmapOwned, "Trying to set a pixel of a SceneLayer's bitmap which isn't owned!");
 
     // Make sure it's within the boundaries of the bitmap.
     if (pixelX < 0 ||
@@ -413,8 +413,8 @@ void SceneLayer::SetPixel(const int pixelX, const int pixelY, const unsigned cha
        pixelY < 0 ||
        pixelY >= m_pMainBitmap->h)
        return;
-//    AAssert(m_pTerrain->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
-//    DAssert(is_inside_bitmap(m_pMainBitmap, pixelX, pixelY, 0), "Trying to access pixel outside of SceneLayer's bitmap's boundaries!");
+//    RTEAssert(m_pTerrain->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(is_inside_bitmap(m_pMainBitmap, pixelX, pixelY, 0), "Trying to access pixel outside of SceneLayer's bitmap's boundaries!");
 //    _putpixel(m_pMainBitmap, pixelX, pixelY, value);
     putpixel(m_pMainBitmap, pixelX, pixelY, value);
 }
@@ -588,7 +588,7 @@ struct SLDrawBox
 
 void SceneLayer::Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride) const
 {
-    DAssert(m_pMainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
+    RTEAssert(m_pMainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
 
     int sourceX = 0;
     int sourceY = 0;
@@ -748,7 +748,7 @@ void SceneLayer::DrawScaled(BITMAP *pTargetBitmap, Box &targetBox, const Vector 
     if (m_ScaleFactor.m_X == 1.0 && m_ScaleFactor.m_Y == 1.0)
         return Draw(pTargetBitmap, targetBox, scrollOverride);
 
-    DAssert(m_pMainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
+    RTEAssert(m_pMainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
 
 
 /*

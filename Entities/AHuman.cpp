@@ -425,7 +425,7 @@ int AHuman::Create(istream &stream, bool checkType)
         stream >> name;
         if (name != m_sClass.GetName())
         {
-           DDTAbort("Wrong type in stream when passed to Create");
+           RTEAbort("Wrong type in stream when passed to Create");
            return -1;
         }
     }

@@ -482,8 +482,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Deployment(const Deployment &reference) { DDTAbort("Tried to use forbidden method"); }
-    void operator=(const Deployment &rhs) { DDTAbort("Tried to use forbidden method"); }
+    Deployment(const Deployment &reference) { RTEAbort("Tried to use forbidden method"); }
+    void operator=(const Deployment &rhs) { RTEAbort("Tried to use forbidden method"); }
 
 };
 

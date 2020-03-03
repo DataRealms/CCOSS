@@ -118,7 +118,7 @@ void Entity::ClassInfo::FillPool(int fillAmount)
 
 void * Entity::ClassInfo::GetPoolMemory()
 {
-    DAssert(IsConcrete(), "Trying to get pool memory of an abstract Entity class!");
+    RTEAssert(IsConcrete(), "Trying to get pool memory of an abstract Entity class!");
 
     // If the pool is empty, then fill it up again with as many instances as we are set to
     if (m_AllocatedPool.empty())
@@ -128,7 +128,7 @@ void * Entity::ClassInfo::GetPoolMemory()
     void *pFoundMemory = m_AllocatedPool.back();
     m_AllocatedPool.pop_back();
 
-    DAssert(pFoundMemory, "Could not find an available instance in the pool, even after increasing its size!");
+    RTEAssert(pFoundMemory, "Could not find an available instance in the pool, even after increasing its size!");
 
     // Keep track of the number of instaces passed out
     m_InstancesInUse++;
@@ -189,7 +189,7 @@ Entity * ReadInstance(Reader &reader)
     if (pClass && pClass->IsConcrete())
         pEntity = pClass->NewInstance();
     else {
-        DDTAbort("Reader stream suggests allocating an unallocatable type");
+        RTEAbort("Reader stream suggests allocating an unallocatable type");
     }
 
     return pObject;
@@ -389,7 +389,7 @@ int Entity::SavePresetCopy(Writer &writer) const
     // Can only save out copies with this
     if (m_IsOriginalPreset)
     {
-        DDTAbort("Tried to save out a pure Preset Copy Reference from an original Preset!");
+        RTEAbort("Tried to save out a pure Preset Copy Reference from an original Preset!");
         return -1;
     }
 

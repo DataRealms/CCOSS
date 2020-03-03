@@ -71,7 +71,7 @@ int ConsoleMan::Create(bool logToCli)
         m_pGUIController = new GUIControlManager();
     // Use the MainMenu skin because it uses 32bpp images and will work since we only draw to 32bpp bitmaps
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/MainMenu", "ConsoleSkin.ini"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu/ConsoleSkin.ini");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu/ConsoleSkin.ini");
     m_pGUIController->Load("Base.rte/GUIs/ConsoleGUI.ini");
     m_pGUIController->EnableMouse(false);
 

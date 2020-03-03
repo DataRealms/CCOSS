@@ -99,7 +99,7 @@ int Emission::ReadProperty(std::string propName, Reader &reader)
 	if (propName == "EmittedParticle")
 	{
 		m_pEmission = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
-		AAssert(m_pEmission, "Stream suggests allocating an unallocatable type in AEmitter::Emission::Create!");
+		RTEAssert(m_pEmission, "Stream suggests allocating an unallocatable type in AEmitter::Emission::Create!");
 	}
 	else if (propName == "ParticlesPerMinute")
 		reader >> m_PPM;

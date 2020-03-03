@@ -376,7 +376,7 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "AddInventoryDevice" || propName == "AddInventory")
     {
         MovableObject *pInvMO = dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader));
-        AAssert(pInvMO, "Reader has been fed bad Inventory MovableObject in Actor::Create");
+        RTEAssert(pInvMO, "Reader has been fed bad Inventory MovableObject in Actor::Create");
         m_Inventory.push_back(pInvMO);
     }
     else if (propName == "MaxMass")
@@ -1457,7 +1457,7 @@ void Actor::VerifyMOIDs()
 
 	for (std::vector<MOID>::iterator it = MOIDs.begin(); it != MOIDs.end(); it++)
 	{
-		DAssert(*it == g_NoMOID || *it < g_MovableMan.GetMOIDCount(), "Invalid MOID in actor");
+		RTEAssert(*it == g_NoMOID || *it < g_MovableMan.GetMOIDCount(), "Invalid MOID in actor");
 	}
 }
 
@@ -2062,9 +2062,9 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         {
             // Find this in the list, both ways
             list<Actor *>::reverse_iterator selfRItr = find(pRoster->rbegin(), pRoster->rend(), this);
-            DAssert(selfRItr != pRoster->rend(), "Actor couldn't find self in Team roster!");
+            RTEAssert(selfRItr != pRoster->rend(), "Actor couldn't find self in Team roster!");
             list<Actor *>::iterator selfItr = find(pRoster->begin(), pRoster->end(), this);
-            DAssert(selfItr != pRoster->end(), "Actor couldn't find self in Team roster!");
+            RTEAssert(selfItr != pRoster->end(), "Actor couldn't find self in Team roster!");
             
             // Find the adjacent actors
             if (selfItr != pRoster->end())

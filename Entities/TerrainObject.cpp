@@ -85,7 +85,7 @@ int TerrainObject::Create(ContentFile *pBitmapFile,
     m_pBitmapFile = pBitmapFile;
 
     m_pBitmap = new BITMAP();
-    AAssert(m_pBitmap, "Failed to allocate BITMAP in TerrainObject::Create");
+    RTEAssert(m_pBitmap, "Failed to allocate BITMAP in TerrainObject::Create");
 
     if (FAILED(m_pBitmap->Create(g_FrameMan.GetScreen(), m_pBitmapFile->GetDataSize(), m_pBitmapFile->GetContent()))) {
         CDXError(g_FrameMan.GetScreen(), "Could not create TerrainObject bitmap");
@@ -375,7 +375,7 @@ void TerrainObject::SetTeam(int team)
 void TerrainObject::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const
 {
     if (!m_pFGColor)
-        DDTAbort("TerrainObject's bitmaps are null when drawing!");
+        RTEAbort("TerrainObject's bitmaps are null when drawing!");
 
     // Take care of wrapping situations
     Vector aDrawPos[4];

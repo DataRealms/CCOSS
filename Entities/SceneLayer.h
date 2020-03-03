@@ -655,8 +655,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    SceneLayer(const SceneLayer &reference) { DDTAbort("Tried to use forbidden method"); }
-    void operator=(const SceneLayer &rhs) { DDTAbort("Tried to use forbidden method"); }
+    SceneLayer(const SceneLayer &reference) { RTEAbort("Tried to use forbidden method"); }
+    void operator=(const SceneLayer &rhs) { RTEAbort("Tried to use forbidden method"); }
 
 };
 

@@ -338,7 +338,7 @@ bool LoadDataModules()
 // when it's 8bpp internally, since it does not use any masked_blit calls to draw listboxes.
 // Note also how the GUIScreen passed in here has been created with an 8bpp bitmap, since that is what determines what the gui manager uses internally
         if(!g_pLoadingGUI->Create(g_pGUIScreen, g_pGUIInput, "Base.rte/GUIs/Skins/MainMenu", "LoadingSkin.ini"))
-            DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu/LoadingSkin.ini");
+            RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu/LoadingSkin.ini");
         g_pLoadingGUI->Load("Base.rte/GUIs/LoadingGUI.ini");
     }
     // Place and clear the sectionProgress box
@@ -678,7 +678,7 @@ bool LoadDataModules()
             // LoadDataModule can return false (esp since it amy try to load already loaded modules, and that's ok) and shouldn't cause stop
             //                char error[512];
             //                sprintf(error, sizeof(error), "Failed to load Data Module: %s\n\nMake sure it contains an Index.ini file that defines a \"DataModule\"!", moduleInfo.name);
-            //                DDTAbort(error);
+            //                RTEAbort(error);
             //                return false;
 
             }

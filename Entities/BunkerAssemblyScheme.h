@@ -409,8 +409,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    BunkerAssemblyScheme(const BunkerAssemblyScheme &reference) { DDTAbort("Tried to use forbidden method"); }
-    void operator=(const BunkerAssemblyScheme &rhs) { DDTAbort("Tried to use forbidden method"); }
+    BunkerAssemblyScheme(const BunkerAssemblyScheme &reference) { RTEAbort("Tried to use forbidden method"); }
+    void operator=(const BunkerAssemblyScheme &rhs) { RTEAbort("Tried to use forbidden method"); }
 
 };
 

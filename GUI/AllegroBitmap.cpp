@@ -79,7 +79,7 @@ bool AllegroBitmap::Create(const std::string Filename)
     m_BitmapFile.Create(Filename.c_str());
 
     m_pBitmap = m_BitmapFile.GetAsBitmap();//COLORCONV_8_TO_32 | COLORCONV_24_TO_32);
-    AAssert(m_pBitmap, "Could not load bitmap from file into AllegroBitmap!");
+    RTEAssert(m_pBitmap, "Could not load bitmap from file into AllegroBitmap!");
 
     return true;
 }
@@ -109,7 +109,7 @@ void AllegroBitmap::Draw(GUIBitmap *pDestBitmap, int X, int Y, RECT *pRect)
     if (!m_pBitmap)
         return;
 
-    DAssert(pDestBitmap && ((AllegroBitmap *)pDestBitmap)->GetBitmap(), "Null destination bitmap passed when trying to draw AllegroBitmap");
+    RTEAssert(pDestBitmap && ((AllegroBitmap *)pDestBitmap)->GetBitmap(), "Null destination bitmap passed when trying to draw AllegroBitmap");
 
     if (pRect)
         blit(m_pBitmap, ((AllegroBitmap *)pDestBitmap)->GetBitmap(), pRect->left, pRect->top, X, Y, pRect->right - pRect->left, pRect->bottom - pRect->top);
@@ -129,7 +129,7 @@ void AllegroBitmap::DrawTrans(GUIBitmap *pDestBitmap, int X, int Y, RECT *pRect)
     if (!m_pBitmap)
         return;
 
-    DAssert(pDestBitmap && ((AllegroBitmap *)pDestBitmap)->GetBitmap(), "Null destination bitmap passed when trying to draw AllegroBitmap");
+    RTEAssert(pDestBitmap && ((AllegroBitmap *)pDestBitmap)->GetBitmap(), "Null destination bitmap passed when trying to draw AllegroBitmap");
 
     if (pRect)
         masked_blit(m_pBitmap, ((AllegroBitmap *)pDestBitmap)->GetBitmap(), pRect->left, pRect->top, X, Y, pRect->right - pRect->left, pRect->bottom - pRect->top);
@@ -148,7 +148,7 @@ void AllegroBitmap::DrawTransScaled(GUIBitmap *pDestBitmap, int X, int Y, int wi
     if (!m_pBitmap)
         return;
 
-    DAssert(pDestBitmap && ((AllegroBitmap *)pDestBitmap)->GetBitmap(), "Null destination bitmap passed when trying to draw AllegroBitmap");
+    RTEAssert(pDestBitmap && ((AllegroBitmap *)pDestBitmap)->GetBitmap(), "Null destination bitmap passed when trying to draw AllegroBitmap");
 
     stretch_sprite(((AllegroBitmap *)pDestBitmap)->GetBitmap(), m_pBitmap, X, Y, width, height);
 }
@@ -196,7 +196,7 @@ Uint32 AllegroBitmap::GetPixel(int X, int Y)
     if (!m_pBitmap)
         return 0;
 
-    AAssert(m_pBitmap, "GUI Bitmap is null; can't get pixel");
+    RTEAssert(m_pBitmap, "GUI Bitmap is null; can't get pixel");
 
 //    m_pBitmap->Lock();
 
@@ -218,7 +218,7 @@ void AllegroBitmap::SetPixel(int X, int Y, Uint32 Color)
     if (!m_pBitmap)
         return;
 
-    AAssert(m_pBitmap, "Trying to set a pixel on a null bitmap!");
+    RTEAssert(m_pBitmap, "Trying to set a pixel on a null bitmap!");
 
 //    m_pBitmap->Lock();
     putpixel(m_pBitmap, X, Y, Color);

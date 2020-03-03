@@ -295,8 +295,8 @@ void Attachable::Detach()
 	m_RootMOID = m_MOID;
 
 #if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
-	DAssert(m_RootMOID == g_NoMOID || (m_RootMOID >= 0 && m_RootMOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
-	DAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
+	RTEAssert(m_RootMOID == g_NoMOID || (m_RootMOID >= 0 && m_RootMOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
+	RTEAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
 #endif
 
     m_RestTimer.Reset();
@@ -606,7 +606,7 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
             else if (mode == g_DrawMOID)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, m_MOID);
             else
-                DDTAbort("Unknown draw mode selected in Attachable:Draw()!");
+                RTEAbort("Unknown draw mode selected in Attachable:Draw()!");
 
             m_pTempBitmapA->DrawTransHFlip(m_pTempBitmapB, 0, 0);
         }

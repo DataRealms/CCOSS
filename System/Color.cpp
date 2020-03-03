@@ -353,7 +353,7 @@ void Color::SetRGBWithIndex(unsigned char index)
 //    LPDIRECTDRAWPALETTE palette = g_FrameMan.GetScreen()->GetPalette();
     LPDIRECTDRAWPALETTE palette;
     g_FrameMan.GetScreen()->GetFront()->GetDDS()->GetPalette(&palette);
-    AAssert(palette, "Couldn't get palette!");
+    RTEAssert(palette, "Couldn't get palette!");
     palette->GetEntries(0, 0, 256, (tagPALETTEENTRY *)&(bytePalette[0]));
     palette->Release();
 

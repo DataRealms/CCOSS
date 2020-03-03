@@ -53,7 +53,7 @@ int TerrainDebris::Create()
 
     // Get the bitmaps
     m_aBitmaps = m_DebrisFile.GetAsAnimation(m_BitmapCount);
-    AAssert(m_aBitmaps && m_aBitmaps[0], "Failed to load debris bitmaps!")
+    RTEAssert(m_aBitmaps && m_aBitmaps[0], "Failed to load debris bitmaps!")
 
     return 0;
 }
@@ -207,7 +207,7 @@ TerrainDebris * operator+(const TerrainDebris *lhs, const TerrainDebris *rhs)
 
 void TerrainDebris::ApplyDebris(SLTerrain *pTerrain)
 {
-    AAssert(m_aBitmaps && m_BitmapCount > 0, "No bitmaps loaded for terrain debris!");
+    RTEAssert(m_aBitmaps && m_BitmapCount > 0, "No bitmaps loaded for terrain debris!");
 
     BITMAP *pTerrBitmap = pTerrain->GetFGColorBitmap();
     BITMAP *pMatBitmap = pTerrain->GetMaterialBitmap();
@@ -229,7 +229,7 @@ void TerrainDebris::ApplyDebris(SLTerrain *pTerrain)
     {
         place = false;
         currentBitmap = floorf((float)m_BitmapCount * PosRand());
-        DAssert(currentBitmap >= 0 && currentBitmap < m_BitmapCount, "Bitmap index is out of bounds!");
+        RTEAssert(currentBitmap >= 0 && currentBitmap < m_BitmapCount, "Bitmap index is out of bounds!");
 
         pieceBox.SetWidth(m_aBitmaps[currentBitmap]->w);
         pieceBox.SetHeight(m_aBitmaps[currentBitmap]->h);

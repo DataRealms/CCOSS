@@ -1497,8 +1497,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Scene(const Scene &reference) { DDTAbort("Tried to use forbidden method"); }
-    void operator=(const Scene &rhs) { DDTAbort("Tried to use forbidden method"); }
+    Scene(const Scene &reference) { RTEAbort("Tried to use forbidden method"); }
+    void operator=(const Scene &rhs) { RTEAbort("Tried to use forbidden method"); }
 
 };
 

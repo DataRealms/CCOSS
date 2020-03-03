@@ -159,7 +159,7 @@ int Vector::Create(istream &stream, bool checkType)
         stream >> name;
         if (name != ClassName)
         {
-           DDTAbort("Wrong type in stream when passed to Create");
+           RTEAbort("Wrong type in stream when passed to Create");
            return -1;
         }
     }

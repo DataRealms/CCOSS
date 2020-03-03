@@ -278,20 +278,20 @@ int SLTerrain::LoadData()
     if (SceneLayer::LoadData())
         return -1;
 
-    DAssert(m_pFGColor, "Terrain's foreground layer not instantiated before trying to load its data!");
-    DAssert(m_pBGColor, "Terrain's background layer not instantiated before trying to load its data!");
+    RTEAssert(m_pFGColor, "Terrain's foreground layer not instantiated before trying to load its data!");
+    RTEAssert(m_pBGColor, "Terrain's background layer not instantiated before trying to load its data!");
 
     // Check if our color layers' BITMAP data is also to be loaded from disk, and not be generated from the material bitmap!
     if (m_pFGColor->IsFileData() && m_pBGColor->IsFileData())
     {
         if (m_pFGColor->LoadData() < 0)
         {
-            DDTAbort("Could not load the Foreground Color SceneLayer data from file, when a path was specified for it!");
+            RTEAbort("Could not load the Foreground Color SceneLayer data from file, when a path was specified for it!");
             return -1;
         }
         if (m_pBGColor->LoadData() < 0)
         {
-            DDTAbort("Could not load the Background Color SceneLayer data from file, when a path was specified for it!");
+            RTEAbort("Could not load the Background Color SceneLayer data from file, when a path was specified for it!");
             return -1;
         }
         // Ok, we have now loaded the layers in from files, don't need to generate them from the material layer
@@ -304,7 +304,7 @@ int SLTerrain::LoadData()
     BITMAP *pFGBitmap = create_bitmap_ex(8, m_pMainBitmap->w, m_pMainBitmap->h);
     if (!pFGBitmap || m_pFGColor->Create(pFGBitmap, true, m_Offset, m_WrapX, m_WrapY, m_ScrollRatio))
     {
-        DDTAbort("Failed to create terrain's foreground layer's bitmap!");
+        RTEAbort("Failed to create terrain's foreground layer's bitmap!");
         return -1;
     }
 
@@ -313,14 +313,14 @@ int SLTerrain::LoadData()
     BITMAP *pBGBitmap = create_bitmap_ex(8, m_pMainBitmap->w, m_pMainBitmap->h);
     if (!pBGBitmap || m_pBGColor->Create(pBGBitmap, true, m_Offset, m_WrapX, m_WrapY, m_ScrollRatio))
     {
-        DDTAbort("Failed to create terrain's background layer's bitmap!");
+        RTEAbort("Failed to create terrain's background layer's bitmap!");
         return -1;
     }
 
     // Structural integrity calc buffer bitmap
     destroy_bitmap(m_pStructural);
     m_pStructural = create_bitmap_ex(8, m_pMainBitmap->w, m_pMainBitmap->h);
-    AAssert(m_pStructural, "Failed to allocate BITMAP in Terrain::Create");
+    RTEAssert(m_pStructural, "Failed to allocate BITMAP in Terrain::Create");
     clear_bitmap(m_pStructural);
 
     ///////////////////////////////////////////////
@@ -527,19 +527,19 @@ int SLTerrain::SaveData(string pathBase)
     // Save the bitmap of the material bitmap
     if (SceneLayer::SaveData(pathBase + " Mat.bmp") < 0)
     {
-        DDTAbort("Failed to write the material bitmap data saving an SLTerrain!");
+        RTEAbort("Failed to write the material bitmap data saving an SLTerrain!");
         return -1;
     }
     // Then the foreground color layer
     if (m_pFGColor->SaveData(pathBase + " FG.bmp") < 0)
     {
-        DDTAbort("Failed to write the FG color bitmap data saving an SLTerrain!");
+        RTEAbort("Failed to write the FG color bitmap data saving an SLTerrain!");
         return -1;
     }
     // Then the background color layer
     if (m_pBGColor->SaveData(pathBase + " BG.bmp") < 0)
     {
-        DDTAbort("Failed to write the BG color bitmap data saving an SLTerrain!");
+        RTEAbort("Failed to write the BG color bitmap data saving an SLTerrain!");
         return -1;
     }
 
@@ -557,19 +557,19 @@ int SLTerrain::ClearData()
     // Clear the material layer
     if (SceneLayer::ClearData() < 0)
     {
-        DDTAbort("Failed to clear material bitmap data of an SLTerrain!");
+        RTEAbort("Failed to clear material bitmap data of an SLTerrain!");
         return -1;
     }
     // Clear the foreground color layer
     if (m_pFGColor && m_pFGColor->ClearData() < 0)
     {
-        DDTAbort("Failed to clear the foreground color bitmap data of an SLTerrain!");
+        RTEAbort("Failed to clear the foreground color bitmap data of an SLTerrain!");
         return -1;
     }
     // Clear the background color layer
     if (m_pBGColor && m_pBGColor->ClearData() < 0)
     {
-        DDTAbort("Failed to clear the background color bitmap data of an SLTerrain!");
+        RTEAbort("Failed to clear the background color bitmap data of an SLTerrain!");
         return -1;
     }
 
@@ -751,7 +751,7 @@ unsigned char SLTerrain::GetFGColorPixel(const int pixelX, const int pixelY) con
     if (posY < 0)
         return g_KeyColor;
 
-//    AAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     return _getpixel(m_pFGColor->GetBitmap(), posX, posY);
 }
 
@@ -778,7 +778,7 @@ unsigned char SLTerrain::GetBGColorPixel(const int pixelX, const int pixelY) con
     if (posY < 0)
         return g_KeyColor;
 
-//    AAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     return _getpixel(m_pBGColor->GetBitmap(), posX, posY);
 }
 
@@ -806,7 +806,7 @@ unsigned char SLTerrain::GetMaterialPixel(const int pixelX, const int pixelY) co
     if (posY < 0)
         return g_MaterialAir;
 
-//    AAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     return _getpixel(m_pMainBitmap, posX, posY);
 }
 
@@ -834,7 +834,7 @@ bool SLTerrain::IsAirPixel(const int pixelX, const int pixelY) const
         return true;
 
 	int checkPixel = _getpixel(m_pMainBitmap, posX, posY);
-//    AAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     return checkPixel == g_MaterialAir || checkPixel == g_MaterialCavity;
 }
 
@@ -861,7 +861,7 @@ void SLTerrain::SetFGColorPixel(const int pixelX, const int pixelY, const int co
        posY >= m_pMainBitmap->h)
        return;
 
-//    AAssert(m_pFGColor->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pFGColor->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     _putpixel(m_pFGColor->GetBitmap(), posX, posY, color);
 }
 
@@ -888,7 +888,7 @@ void SLTerrain::SetBGColorPixel(const int pixelX, const int pixelY, const int co
        posY >= m_pMainBitmap->h)
        return;
 
-//    AAssert(m_pBGColor->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pBGColor->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     _putpixel(m_pBGColor->GetBitmap(), posX, posY, color);
 }
 
@@ -914,7 +914,7 @@ void SLTerrain::SetMaterialPixel(const int pixelX, const int pixelY, const unsig
        posY < 0 ||
        posY >= m_pMainBitmap->h)
        return;
-//    AAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     _putpixel(m_pMainBitmap, posX, posY, material);
 }
 
@@ -937,7 +937,7 @@ deque<MOPixel *> SLTerrain::EraseSilhouette(BITMAP *pSprite,
 {
 // TODO: OPTIMIZE THIS, IT'S A TIME HOG. MAYBE JSUT STAMP THE OUTLINE AND SAMPLE SOME RANDOM PARTICLES?
 
-    AAssert(pSprite, "Null BITMAP passed to SLTerrain::EraseSilhouette");
+    RTEAssert(pSprite, "Null BITMAP passed to SLTerrain::EraseSilhouette");
 
     deque<MOPixel *> MOPDeque;
 

@@ -274,11 +274,11 @@ int * ContentFile::GetAsContour()
 
         // Make sure we opened properly.
         if (!pFile)
-            DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+            RTEAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
 
         // Read the length header
         if (pack_fread(&length, sizeof(int), pFile) < sizeof(int))
-            DDTAbort(("Failed to read contour size header of contour file:\n\n" + m_DataPath).c_str());
+            RTEAbort(("Failed to read contour size header of contour file:\n\n" + m_DataPath).c_str());
 
         // Make the memory buffer, including room for the length header
         pReturnContour = new int[length + 1];
@@ -288,7 +288,7 @@ int * ContentFile::GetAsContour()
 
         // Now read the rest of the contour into the memory, after the header
         if (pack_fread(&(pReturnContour[1]), length * sizeof(int), pFile) < length)
-            DDTAbort(("Failed to read entire contour:\n\n" + m_DataPath).c_str());
+            RTEAbort(("Failed to read entire contour:\n\n" + m_DataPath).c_str());
 
         // Close the file stream
         pack_fclose(pFile);
@@ -306,16 +306,16 @@ int * ContentFile::GetAsContour()
 
         // Make sure we loaded properly.
         if (!m_pDataFile || !m_pDataFile->dat/* || m_pDataFile->type != DAT_BITMAP*/)
-            DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+            RTEAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
 
         // Get the loaded data
         pReturnContour = (int *)m_pDataFile->dat;
     }
     else
-        DDTAbort("No object name following first #-sign in ContentFile's datafile object path!");
+        RTEAbort("No object name following first #-sign in ContentFile's datafile object path!");
 
     if (!pReturnContour)
-        DDTAbort(("Failed to load Content File with following path and name:\n\n" + m_DataPath).c_str());
+        RTEAbort(("Failed to load Content File with following path and name:\n\n" + m_DataPath).c_str());
 
     return pReturnContour;
 }
@@ -351,7 +351,7 @@ BITMAP * ContentFile::GetAsBitmap(int conversionMode)
         pReturnBitmap = LoadAndReleaseBitmap(conversionMode);
 
         if (!pReturnBitmap)
-            DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+            RTEAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
 
         // Now when loaded for the first time, enter into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
         m_sLoadedBitmaps[bitDepth].insert(pair<string, BITMAP *>(m_DataPath, pReturnBitmap));
@@ -400,7 +400,7 @@ BITMAP ** ContentFile::GetAsAnimation(int frameCount, int conversionMode)
     {
         // Find the filename extension
         extensionPos = m_DataPath.rfind('.');
-        AAssert(extensionPos > 0, "Could not find file extension when trying to load an animation from external bitmaps!");
+        RTEAssert(extensionPos > 0, "Could not find file extension when trying to load an animation from external bitmaps!");
 
         // Save our extension from the datapath
         extension.assign(m_DataPath, extensionPos, m_DataPath.length() - extensionPos);
@@ -418,7 +418,7 @@ BITMAP ** ContentFile::GetAsAnimation(int frameCount, int conversionMode)
         m_DataPath = framePath;
         // Get the frame bitmap
         aReturnBitmaps[i] = GetAsBitmap(conversionMode);
-        AAssert(aReturnBitmaps[i], "Could not get a frame of animation");
+        RTEAssert(aReturnBitmaps[i], "Could not get a frame of animation");
     }
 
     // Set the data path back to its original state (without any numbers after it)
@@ -470,7 +470,7 @@ AUDIO_STRUCT * ContentFile::GetAsSample() {
 
 			// Make sure we opened properly.
 			if (!pFile || fileSize <= 0) {
-				DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+				RTEAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
 			}
 
 			// Allocate the raw data space in memory
@@ -478,7 +478,7 @@ AUDIO_STRUCT * ContentFile::GetAsSample() {
 
 			// Read the raw data from the file
 			int bytesRead = pack_fread(pRawData, fileSize, pFile);
-			AAssert(bytesRead == fileSize, "Tried to read a file but couldn't read the same amount of data as the reported file size!");
+			RTEAssert(bytesRead == fileSize, "Tried to read a file but couldn't read the same amount of data as the reported file size!");
 
 			// Load the sample from the memory we've read from the file.
 #ifdef __USE_SOUND_FMOD
@@ -492,7 +492,7 @@ AUDIO_STRUCT * ContentFile::GetAsSample() {
 			pReturnSample = ga_sound_create_sample_source(samples);
 #endif
 			if (pReturnSample == 0) {
-				DDTAbort(("Unable to create sound " + m_DataPath).c_str());
+				RTEAbort(("Unable to create sound " + m_DataPath).c_str());
 			}
 
 			// Deallocate the intermediary data
@@ -503,7 +503,7 @@ AUDIO_STRUCT * ContentFile::GetAsSample() {
 
 		// If we found a pound sign, make sure it's not on the very end. If not, then go ahead and load from packed stream.
 		} else if (separatorPos != m_DataPath.length() - 1) {
-			DDTAbort("Loading sound samples from allegro datafiles isn't supported yet!");
+			RTEAbort("Loading sound samples from allegro datafiles isn't supported yet!");
 			// TODO loading SDL_mixer chunks from allegro datafiles! this!
 			/*
 			// Get the Path only, without the object name, using the separator index as length limiter
@@ -516,17 +516,17 @@ AUDIO_STRUCT * ContentFile::GetAsSample() {
 
 			// Make sure we loaded properly.
 			if (!m_pDataFile || !m_pDataFile->dat || m_pDataFile->type != DAT_SAMPLE)
-				DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+				RTEAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
 
 			// Get the loaded data
 			pReturnSample = (FSOUND_SAMPLE *)m_pDataFile->dat;
 			*/
 		} else {
-			DDTAbort("No object name following first #-sign in ContentFile's datafile object path!");
+			RTEAbort("No object name following first #-sign in ContentFile's datafile object path!");
 		}
 
 		if (!pReturnSample) {
-			DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+			RTEAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
 		}
 
 		// Now when loaded for the first time, enter into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
@@ -569,7 +569,7 @@ BITMAP * ContentFile::LoadAndReleaseBitmap(int conversionMode)
             pFile = pack_fopen((m_DataPath + "000.bmp").c_str(), F_READ);
 
             if (!pFile)
-                DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+                RTEAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
             // Add the extension back in so it can get saved properly later
             m_DataPath = m_DataPath + ".bmp";
         }
@@ -597,7 +597,7 @@ BITMAP * ContentFile::LoadAndReleaseBitmap(int conversionMode)
 
         // Make sure we loaded properly.
         if (!m_pDataFile || !m_pDataFile->dat || m_pDataFile->type != DAT_BITMAP)
-            DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+            RTEAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
 
 /* Don't do this because there is no easy way to copy SAMPLE:s. Just save the datafile and unload it upon destruction.
         // Create temporary poitner to laoded bitmap; it will be destroyed along with the datafile soon
@@ -605,7 +605,7 @@ BITMAP * ContentFile::LoadAndReleaseBitmap(int conversionMode)
 
         // Copy the loaded bitmap
         if (!(pReturnBitmap = create_bitmap_ex(bitmap_color_depth(pTempBitmap), pTempBitmap->w, pTempBitmap->h)))
-            DDTAbort("Failed to create copy of the loaded datafile's data!");
+            RTEAbort("Failed to create copy of the loaded datafile's data!");
         blit(pTempBitmap, pReturnBitmap, 0, 0, 0, 0, pTempBitmap->w, pTempBitmap->h);
 
         // Now unload the datafile, also destroying the loaded bitmap;
@@ -616,10 +616,10 @@ BITMAP * ContentFile::LoadAndReleaseBitmap(int conversionMode)
         pReturnBitmap = (BITMAP *)m_pDataFile->dat;
     }
     else
-        DDTAbort("No object name following first #-sign in ContentFile's datafile object path!");
+        RTEAbort("No object name following first #-sign in ContentFile's datafile object path!");
 
     if (!pReturnBitmap)
-        DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+        RTEAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
 
     return pReturnBitmap;
 }
@@ -674,7 +674,7 @@ BITMAP ** ContentFile::LoadAndReleaseAnimation(int frameCount, int conversionMod
     {
         // Find the filename extension
         extensionPos = m_DataPath.rfind('.');
-        AAssert(extensionPos > 0, "Could not find file extension when trying to load an animation from external bitmaps!");
+        RTEAssert(extensionPos > 0, "Could not find file extension when trying to load an animation from external bitmaps!");
 
         // Save our extension from the datapath
         extension.assign(m_DataPath, extensionPos, m_DataPath.length() - extensionPos);
@@ -692,7 +692,7 @@ BITMAP ** ContentFile::LoadAndReleaseAnimation(int frameCount, int conversionMod
         m_DataPath = framePath;
         // Get the frame bitmap
         aReturnBitmaps[i] = LoadAndReleaseBitmap(conversionMode);
-        AAssert(aReturnBitmaps[i], "Could not get a frame of animation");
+        RTEAssert(aReturnBitmaps[i], "Could not get a frame of animation");
     }
 
     // Set the data path back to its original state (without any numbers after it)

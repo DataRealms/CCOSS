@@ -64,7 +64,7 @@ namespace RTE
     static Entity * NewInstance() { return new TYPE; } \
 \
     virtual Entity * Clone(Entity *pCloneTo = 0) const { TYPE *pEnt = pCloneTo ? dynamic_cast<TYPE *>(pCloneTo) : new TYPE(); \
-                                                         AAssert(pEnt, "Tried to clone to an incompatible instance!"); \
+                                                         RTEAssert(pEnt, "Tried to clone to an incompatible instance!"); \
                                                          if (pCloneTo) { pEnt->Destroy(); } \
                                                          pEnt->Create(*this); \
                                                          return pEnt; }
@@ -451,7 +451,7 @@ public:
 // Return value:    An Entity pointer to the newly cloned-to instance.
 //                  Ownership IS transferred!
 
-    virtual Entity * Clone(Entity *pCloneTo = 0) const { DDTAbort("Attempt to clone an abstract or unclonable type!"); return 0; }
+    virtual Entity * Clone(Entity *pCloneTo = 0) const { RTEAbort("Attempt to clone an abstract or unclonable type!"); return 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

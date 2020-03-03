@@ -336,7 +336,7 @@ void GUIManager::Draw(GUIScreen *Screen)
 
 void GUIManager::CaptureMouse(GUIPanel *Panel)
 {
-    AAssert(Panel, "No panel!");
+    RTEAssert(Panel, "No panel!");
 
     // Release any old capture
     ReleaseMouse();
@@ -486,7 +486,7 @@ bool GUIManager::MouseInRect(RECT *Rect, int X, int Y)
 
 void GUIManager::TrackMouseHover(GUIPanel *Pan, bool Enabled, int Delay)
 {
-    AAssert(Pan, "No Panel!");
+    RTEAssert(Pan, "No Panel!");
     m_HoverTrack = Enabled;
     m_HoverPanel = Pan;
     if (m_HoverTrack)

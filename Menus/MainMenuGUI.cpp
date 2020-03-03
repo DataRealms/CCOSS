@@ -162,7 +162,7 @@ void MainMenuGUI::Clear()
 
 int MainMenuGUI::Create(Controller *pController)
 {
-    AAssert(pController, "No controller sent to MainMenuGUI on creation!");
+    RTEAssert(pController, "No controller sent to MainMenuGUI on creation!");
     m_pController = pController;
 
     if (!m_pGUIScreen)
@@ -172,7 +172,7 @@ int MainMenuGUI::Create(Controller *pController)
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/MainMenu"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
     m_pGUIController->Load("Base.rte/GUIs/MainMenuGUI.ini");
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
@@ -1885,7 +1885,7 @@ void MainMenuGUI::SetupSkirmishActivity()
             g_SceneMan.SetSceneToLoad(m_pSceneSelector->GetItem(m_pSceneSelector->GetSelectedIndex())->m_Name);
 // TODO: Let player choose the GABaseDefense activity instance!
             GABaseDefense *pNewGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Skirmish Defense")->Clone());
-            AAssert(pNewGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
+            RTEAssert(pNewGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
             pNewGame->SetPlayerCount(m_StartPlayers);
             pNewGame->SetTeamCount(m_StartTeams);
 

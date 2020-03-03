@@ -369,7 +369,7 @@ void AssemblyEditor::Update()
                     {
                         //m_ModuleSpaceID = g_SceneMan.GetScene()->GetModuleID();
 						m_ModuleSpaceID = g_PresetMan.GetModuleID(m_pModuleCombo->GetSelectedItem()->m_Name);
-                        AAssert(m_ModuleSpaceID >= 0, "Loaded Scene's DataModule ID is negative? Should always be a specific one..");
+                        RTEAssert(m_ModuleSpaceID >= 0, "Loaded Scene's DataModule ID is negative? Should always be a specific one..");
                         m_pEditorGUI->Destroy();
 						if (m_ModuleSpaceID == g_PresetMan.GetModuleID("Scenes.rte"))
 							m_pEditorGUI->Create(&(m_PlayerController[0]), AssemblyEditorGUI::ONLOADEDIT, -1);

@@ -123,7 +123,7 @@ void BuyMenuGUI::Clear()
 
 int BuyMenuGUI::Create(Controller *pController)
 {
-    AAssert(pController, "No controller sent to BuyMenyGUI on creation!");
+    RTEAssert(pController, "No controller sent to BuyMenyGUI on creation!");
     m_pController = pController;
 
     if (!m_pGUIScreen)
@@ -133,7 +133,7 @@ int BuyMenuGUI::Create(Controller *pController)
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
     m_pGUIController->Load("Base.rte/GUIs/BuyMenuGUI.ini");
     m_pGUIController->EnableMouse(pController->IsMouseControlled());
 

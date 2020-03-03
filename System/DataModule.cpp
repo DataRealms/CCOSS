@@ -193,7 +193,7 @@ int DataModule::ReadModuleProperties(string moduleName, void (*fpProgressCallbac
 
 int DataModule::Create(const DataModule &reference)
 {
-    DDTAbort("Can't clone Data Modules!");
+    RTEAbort("Can't clone Data Modules!");
 
 //    Serializable::Create(reference);
 
@@ -417,7 +417,7 @@ bool DataModule::AddEntityPreset(Entity *pEntToAdd, bool overwriteSame, string r
                         break;
                     }
                 }
-                AAssert(itr != m_PresetList.end(), "Tried to alter allegedly existing Entity Preset Entry: " + pEntToAdd->GetPresetName() + ", but couldn't find it in the list!");
+                RTEAssert(itr != m_PresetList.end(), "Tried to alter allegedly existing Entity Preset Entry: " + pEntToAdd->GetPresetName() + ", but couldn't find it in the list!");
             }
             // Report success
             return true;
@@ -461,11 +461,11 @@ bool DataModule::AddEntityPreset(Entity *pEntToAdd, bool overwriteSame, string r
 			m_EntityList.push_back(pEntClone);
 		}
         else
-            DDTAbort("Tried to add first entity isntance to data module " + m_FileName + " without specifying a data file!");
+            RTEAbort("Tried to add first entity isntance to data module " + m_FileName + " without specifying a data file!");
 
         // Add it to the type map and quit
         added = AddToTypeMap(pEntClone);
-        AAssert(added, "Unexpected problem while adding Entity instance \"" + pEntToAdd->GetPresetName() + "\" to the type map of data module: " + m_FileName);
+        RTEAssert(added, "Unexpected problem while adding Entity instance \"" + pEntToAdd->GetPresetName() + "\" to the type map of data module: " + m_FileName);
     }
 
     return added;
@@ -534,7 +534,7 @@ string DataModule::GetEntityDataLocation(std::string exactType, std::string inst
             return (*itr).m_FileReadFrom;
     }
 
-    DDTAbort("Tried to find allegedly existing Entity Preset Entry: " + pFoundEnt->GetPresetName() + ", but couldn't!");
+    RTEAbort("Tried to find allegedly existing Entity Preset Entry: " + pFoundEnt->GetPresetName() + ", but couldn't!");
     return "";
 }
 
@@ -554,7 +554,7 @@ bool DataModule::GetAllOfType(list<Entity *> &entityList, string type)
     if (clsItr == m_TypeMap.end())
         return false;
 
-    AAssert(!clsItr->second.empty(), "DataModule has class entry without instances in its map!?");
+    RTEAssert(!clsItr->second.empty(), "DataModule has class entry without instances in its map!?");
 
     // Found something, so let's add it to the list!
     for (list<pair<string, Entity *> >::iterator instItr = clsItr->second.begin(); instItr != clsItr->second.end(); ++instItr)
@@ -606,7 +606,7 @@ bool DataModule::GetAllOfGroup(list<Entity *> &entityList, string group, string 
         if (clsItr == m_TypeMap.end())
             return 0;
 
-        AAssert(!clsItr->second.empty(), "DataModule has class entry without instances in its map!?");
+        RTEAssert(!clsItr->second.empty(), "DataModule has class entry without instances in its map!?");
 
         for (list<pair<string, Entity *> >::iterator instItr = clsItr->second.begin(); instItr != clsItr->second.end(); ++instItr)
         {
@@ -679,7 +679,7 @@ bool DataModule::GetGroupsWithType(list<string> &groupList, string withType)
 
 bool DataModule::AddMaterialMapping(int fromID, int toID)
 {
-    AAssert(fromID > 0 && fromID < c_PaletteEntriesNumber && toID > 0 && toID < c_PaletteEntriesNumber, "Tried to make an out-of-bounds Material mapping");
+    RTEAssert(fromID > 0 && fromID < c_PaletteEntriesNumber && toID > 0 && toID < c_PaletteEntriesNumber, "Tried to make an out-of-bounds Material mapping");
 
     bool clear = m_MaterialMappings[fromID] == 0;
     m_MaterialMappings[fromID] = toID;

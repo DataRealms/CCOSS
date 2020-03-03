@@ -19,7 +19,7 @@
 #include "ACraft.h"
 #include "AtomGroup.h"
 #include "Controller.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "SceneMan.h"
 #include "HeldDevice.h"
 #include "PresetMan.h"

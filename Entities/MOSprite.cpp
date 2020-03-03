@@ -13,7 +13,7 @@
 
 #include "MOSprite.h"
 #include "RTEManagers.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "AEmitter.h"
 
 namespace RTE {

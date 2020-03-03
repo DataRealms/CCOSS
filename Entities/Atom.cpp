@@ -16,7 +16,7 @@
 #include "MovableObject.h"
 #include "MOSRotating.h"
 #include "PresetMan.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Actor.h"
 
 namespace RTE {

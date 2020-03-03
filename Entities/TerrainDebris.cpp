@@ -12,7 +12,7 @@
 // Inclusions of header files
 
 #include "TerrainDebris.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "SLTerrain.h"
 
 namespace RTE {

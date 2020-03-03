@@ -14,7 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "SceneObject.h"
 #include "Vector.h"
 #include "FrameMan.h"

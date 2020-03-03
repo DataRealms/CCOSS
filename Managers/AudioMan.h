@@ -1,7 +1,7 @@
 #ifndef _RTEAUDIOMAN_
 #define _RTEAUDIOMAN_
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Entity.h"
 #include "Timer.h"
 #include "Singleton.h"

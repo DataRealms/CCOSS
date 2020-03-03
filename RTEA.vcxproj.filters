@@ -63,12 +63,6 @@
     <ClInclude Include="System\DataModule.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="System\DDTError.h">
-      <Filter>System</Filter>
-    </ClInclude>
-    <ClInclude Include="System\DDTTools.h">
-      <Filter>System</Filter>
-    </ClInclude>
     <ClInclude Include="System\Matrix.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -934,6 +928,12 @@
     <ClInclude Include="GUI\GUISound.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="System\RTETools.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\RTEError.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RTEA.rc">
@@ -954,12 +954,6 @@
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="System\DataModule.cpp">
-      <Filter>System</Filter>
-    </ClCompile>
-    <ClCompile Include="System\DDTError.cpp">
-      <Filter>System</Filter>
-    </ClCompile>
-    <ClCompile Include="System\DDTTools.cpp">
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="System\Matrix.cpp">
@@ -1670,6 +1664,12 @@
     </ClCompile>
     <ClCompile Include="GUI\GUISound.cpp">
       <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="System\RTETools.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\RTEError.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

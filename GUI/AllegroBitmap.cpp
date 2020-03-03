@@ -13,7 +13,7 @@
 
 #include "GUI.h"
 #include "AllegroBitmap.h"
-#include "DDTError.h"
+#include "RTEError.h"
 
 using namespace RTE;
 

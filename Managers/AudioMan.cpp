@@ -2,7 +2,7 @@
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
 #include "Sound.h"
-#include "DDTError.h"
+#include "RTEError.h"
 
 namespace RTE {
 	const std::string AudioMan::m_ClassName = "AudioMan";

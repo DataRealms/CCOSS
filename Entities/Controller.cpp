@@ -14,7 +14,7 @@
 #include "Controller.h"
 #include "UInputMan.h"
 #include "ConsoleMan.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Actor.h"
 
 namespace RTE {

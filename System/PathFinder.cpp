@@ -12,7 +12,7 @@
 // Inclusions of header files
 
 #include "PathFinder.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "SceneMan.h"
 #include "Scene.h"
 

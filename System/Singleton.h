@@ -15,7 +15,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTError.h"
+#include "RTEError.h"
 #if defined(__unix__) || defined(__APPLE__)
 #include <stdint.h>
 #endif 

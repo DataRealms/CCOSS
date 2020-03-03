@@ -10,7 +10,7 @@
 //                  data@datarealms.com
 //                  http://www.datarealms.com
 
-#include "DDTError.h"
+#include "RTEError.h"
 #include "Constants.h"
 
 struct TexMapTable;

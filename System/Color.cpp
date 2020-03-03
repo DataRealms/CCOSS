@@ -13,7 +13,7 @@
 
 #include "Color.h"
 #pragma intrinsic (sin, cos)
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "FrameMan.h"
 
 namespace RTE {

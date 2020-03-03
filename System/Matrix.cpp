@@ -13,7 +13,7 @@
 
 #include "Matrix.h"
 #pragma intrinsic (sin, cos)
-#include "DDTTools.h"
+#include "RTETools.h"
 
 namespace RTE {
 

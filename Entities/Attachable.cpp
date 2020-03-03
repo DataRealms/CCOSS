@@ -15,7 +15,7 @@
 #include "Atom.h"
 #include "AtomGroup.h"
 #include "RTEManagers.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "AEmitter.h"
 #include "Actor.h"
 

@@ -12,7 +12,7 @@
 // Inclusions of header files
 
 #include "Arm.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "HDFirearm.h"
 #include "ThrownDevice.h"
 #include "ContentFile.h"

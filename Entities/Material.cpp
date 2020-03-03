@@ -12,7 +12,7 @@
 // Inclusions of header files
 
 #include "Material.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "FrameMan.h"
 
 namespace RTE {

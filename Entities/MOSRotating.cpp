@@ -20,7 +20,7 @@
 #include "AEmitter.h"
 #include "Attachable.h"
 
-#include "DDTError.h"
+#include "RTEError.h"
 
 namespace RTE {
 

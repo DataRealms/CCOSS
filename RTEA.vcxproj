@@ -387,8 +387,8 @@
     <ClInclude Include="System\ContentFile.h" />
     <ClInclude Include="Entities\Controller.h" />
     <ClInclude Include="System\DataModule.h" />
-    <ClInclude Include="System\DDTError.h" />
-    <ClInclude Include="System\DDTTools.h" />
+    <ClInclude Include="System\RTEError.h" />
+    <ClInclude Include="System\RTETools.h" />
     <ClInclude Include="System\Matrix.h" />
     <ClInclude Include="System\PathFinder.h" />
     <ClInclude Include="System\Reader.h" />
@@ -648,8 +648,8 @@
     <ClCompile Include="System\ContentFile.cpp" />
     <ClCompile Include="Entities\Controller.cpp" />
     <ClCompile Include="System\DataModule.cpp" />
-    <ClCompile Include="System\DDTError.cpp" />
-    <ClCompile Include="System\DDTTools.cpp" />
+    <ClCompile Include="System\RTEError.cpp" />
+    <ClCompile Include="System\RTETools.cpp" />
     <ClCompile Include="System\Matrix.cpp" />
     <ClCompile Include="System\MicroPather\micropather.cpp" />
     <ClCompile Include="System\PathFinder.cpp" />

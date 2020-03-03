@@ -14,15 +14,6 @@
 
 #include "TimerMan.h"
 
-#if defined(__APPLE__)
-#include <mach/mach.h>
-#include <mach/mach_time.h>
-#endif // defined(__APPLE__)
-
-#if defined(__unix__)
-#include <time.h>
-#endif // defined(__unix__)
-
 /* Obsolete Allegro timer
 // Needs to be declared volatile so that the optimizer doens't mess with it
 volatile unsigned long g_MSSinceStart = 0;
@@ -89,25 +80,10 @@ int TimerMan::Create()
     install_int(TimerMSTick, 1);
 */
 
-#if defined(WIN32)
     // Get the frequency of ticks/s for this machine
     LARGE_INTEGER tempLInt;
     QueryPerformanceFrequency(&tempLInt);
     m_TicksPerSecond = tempLInt.QuadPart;
-#elif defined(__APPLE__)
-	mach_timebase_info_data_t tbInfo;
-	mach_timebase_info(&tbInfo);
-	
-	double secondsPerTick = 1e-9 * (double)tbInfo.numer / (double)tbInfo.denom /* 1000.0f */;
-	m_TicksPerSecond = 1.0 / secondsPerTick;
-#elif defined(__unix__)
-	timespec my_TimeSpec;
-    clock_getres(CLOCK_MONOTONIC, &my_TimeSpec);
-    // Clamp the resolution to microsecond levels as that is what we're only caring about...
-    //
-    // FCE (08-26-10)
-	m_TicksPerSecond = ((1e9 / my_TimeSpec.tv_nsec) / 1000);
-#endif // defined(__unix__)
 
     // Reset the real time setting so that we can measure how much real time
     // has passed till the next Update.
@@ -147,21 +123,9 @@ void TimerMan::Destroy()
 void TimerMan::ResetTime()
 {
     // Set the new starting point
-#if defined(WIN32)
     LARGE_INTEGER tempLInt;
     QueryPerformanceCounter(&tempLInt);
     m_StartTime = tempLInt.QuadPart;
-#elif defined(__APPLE__)
-	m_StartTime = mach_absolute_time();
-#elif defined (__unix__)
-    timespec my_TimeSpec;
-    clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
-    // Get the nanoseconds value for right now and convert it to microseconds, since we don't
-    // honestly need anything more than that.
-    //
-    // FCE (08-26-10)
-    m_StartTime = (int64_t)((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
-#endif // defined(__unix__)
 
     // Reset the counters
     m_RealTimeTicks = 0;
@@ -193,15 +157,11 @@ int64_t TimerMan::GetSimTimeMS() const
 int64_t TimerMan::GetAbsoulteTime()
 {
 	int64_t ticks;
-#if defined(WIN32)
 	LARGE_INTEGER tickReading;
 
 	QueryPerformanceCounter(&tickReading);
 
 	ticks = tickReading.QuadPart;
-#elif defined(__APPLE__)
-	ticks = mach_absolute_time();
-#endif // defined(__APPLE__)
 	
 	ticks *= 1000000;
 	ticks /= m_TicksPerSecond;
@@ -222,22 +182,12 @@ void TimerMan::Update()
 {
     int64_t prevTime = m_RealTimeTicks;
 
-#if defined(WIN32)
     LARGE_INTEGER tickReading;
 
     // Increase the real time ticks with the amount of actual time passed since the last Update
     QueryPerformanceCounter(&tickReading);
 
     m_RealTimeTicks = tickReading.QuadPart - m_StartTime;
-#elif defined(__APPLE__)
-    m_RealTimeTicks = mach_absolute_time() - m_StartTime;
-#elif defined(__unix__)
-    uint64_t curTime;
-    timespec my_TimeSpec;
-    clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
-    curTime = (int64_t)((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
-    m_RealTimeTicks =  curTime - m_StartTime;
-#endif // defined(__unix__)
 
     // Figure the increase in real time 
     uint64_t timeIncrease = m_RealTimeTicks - prevTime;

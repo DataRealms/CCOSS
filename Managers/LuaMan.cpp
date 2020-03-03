@@ -2476,14 +2476,7 @@ int LuaMan::RunScriptFile(string filePath, bool consoleErrors)
 //        // Point out the special error handling function on the stack, which is one under the file's position on the stack (-2)
 //        if (luaL_loadfile(m_pMasterState, filePath.c_str()) || lua_pcall(m_pMasterState, 0, LUA_MULTRET, -2))
 	const char *path = filePath.c_str();
-#ifndef WIN32
-	extern char *fcase( const char *path );
-	char *fixed = fcase( filePath.c_str() );
-	if ( fixed )
-	{
-		path = fixed;
-	}
-#endif
+
         if (luaL_dofile(m_pMasterState, path))
         {
             // Retrieve and pop the error message off the stack

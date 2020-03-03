@@ -809,7 +809,6 @@ int UInputMan::Create()
     //win_grab_input();
 
     // Get the Joysticks going
-#ifdef WIN32
 	if (install_joystick(JOY_TYPE_WIN32) != 0)
 	{
 		//DDTAbort("Error initialising joysticks!");
@@ -831,10 +830,6 @@ int UInputMan::Create()
 			}
 		}
 	}
-#else
-    if (install_joystick(JOY_TYPE_AUTODETECT) != 0)
-        DDTAbort("Error initialising joysticks!");
-#endif
 
     poll_joystick();
 /* Can't do this now, the data modules aren't loaded yet.. this is done lazily as the first one is gotten
@@ -2036,10 +2031,7 @@ void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whi
         mouseX = MIN(mouseX, x + width * windowResMultiplier);
         mouseY = MIN(mouseY, y + height * windowResMultiplier);
 		
-#if !defined(__APPLE__)
-		// [CHRISK] OSX really doesn't like this
         position_mouse(mouseX, mouseY);
-#endif // !defined(__APPLE__)
     }
 }
 

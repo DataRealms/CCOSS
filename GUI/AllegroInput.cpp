@@ -107,16 +107,6 @@ void AllegroInput::Update(void)
 
 		m_ScanCodeState[scancode] = Pushed;
 
-#if defined(__APPLE__)
-
-		// [CHRISK] HACK: Apple ignore map - need to look into
-		// this more. Backspace and arrow keys generate extraneous keypresses
-		// 127 == Delete
-		// 63 == ?
-		if (ascii == 63 || ascii == 127)
-			continue;
-#endif // defined(__APPLE__)
-
 		m_KeyboardBuffer[ascii] = Pushed;
 	}
 

@@ -265,17 +265,7 @@ int Entity::ReadProperty(std::string propName, Reader &reader)
     {
         string refName = reader.ReadPropValue();
         const Entity *pPreset = g_PresetMan.GetEntityPreset(GetClassName(), refName, reader.GetReadModuleID());
-#ifndef WIN32
-	if ( !pPreset )
-	{
-		extern char *fcase( const char *path );
-		char *fixed = fcase( refName.c_str() );
-		if ( fixed )
-		{
-			pPreset = g_PresetMan.GetEntityPreset(GetClassName(), fixed, reader.GetReadModuleID());
-		}
-	}
-#endif
+
         if (pPreset)
             pPreset->Clone(this);
         // Couldn't find the preset to copy from? Then just read it in as an original

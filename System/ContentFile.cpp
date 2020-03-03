@@ -57,81 +57,6 @@ int ContentFile::Create()
 }
 */
 
-#ifndef WIN32
-#include <dirent.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-char *fcase( const char *path )
-{
-	DIR *folder = opendir( "." );
-	if ( !folder ) return 0;
-
-	char *fixed = ( char * ) calloc( strlen( path ) + 1, sizeof( char ) );
-	char *copy = strdup( path );
-	char *current = strtok( copy, "/\\" );
-
-	while ( current )
-	{
-		fixed[ strlen( fixed ) ] = '/';
-		dirent *entry;
-		bool found = false;
-
-		char *next = strtok( 0, "/" );
-
-		while ( entry = readdir( folder ) )
-		{
-			if ( !strcasecmp( entry->d_name, current ) )
-			{
-				memcpy( fixed + ( current - copy ), entry->d_name, strlen( entry->d_name ) );
-
-				if ( next )
-				{
-					// We're still looking for a directory; make sure this is one
-					// (in case there's a file named the same as a dir)
-					DIR *test = opendir( fixed );
-					if ( test != 0 )
-					{
-						closedir( test );
-						found = true;
-						break;
-					}
-				}
-				else
-				{
-					found = true;
-					break;
-				}
-			}
-		}
-
-		if ( !found )
-		{
-			free( copy );
-			closedir( folder );
-			return 0;
-		}
-
-		current = next;
-		if ( current )
-		{
-			closedir( folder );
-			folder = opendir( fixed );
-			if ( !folder )
-			{
-				free( copy );
-				return 0;
-			}
-		}
-	}
-
-	free( copy );
-	fixed[ strlen( path ) ] = 0;
-	closedir( folder );
-	return fixed;
-}
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -143,14 +68,6 @@ int ContentFile::Create(const char *filePath)
     m_DataPath = filePath;
 	m_PathHashes[GetHash()] = m_DataPath;
 
-#ifndef WIN32
-    char *fixed = fcase( m_DataPath.c_str() );
-    if ( fixed )
-    {
-        m_DataPath.assign( fixed );
-        free( fixed );
-    }
-#endif
     m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
 
     return 0;
@@ -167,14 +84,7 @@ int ContentFile::Create(const ContentFile &reference)
 //    Entity::Create(reference);
 
     m_DataPath = reference.m_DataPath;
-#ifndef WIN32
-    char *fixed = fcase( m_DataPath.c_str() );
-    if ( fixed )
-    {
-        m_DataPath.assign( fixed );
-        free( fixed );
-    }
-#endif
+
     m_DataModuleID = reference.m_DataModuleID;
     m_DataModified = reference.m_DataModified;
 //    m_pLoadedData = reference.m_pLoadedData;
@@ -198,14 +108,7 @@ int ContentFile::ReadProperty(std::string propName, Reader &reader)
     if (propName == "Path" || propName == "FilePath")
     {
         m_DataPath = reader.ReadPropValue();
-#ifndef WIN32
-        char *fixed = fcase( m_DataPath.c_str() );
-        if ( fixed )
-        {
-            m_DataPath.assign( fixed );
-            free( fixed );
-        }
-#endif
+
         m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
 		m_PathHashes[GetHash()] = m_DataPath;
     }
@@ -289,14 +192,7 @@ void ContentFile::SetDataPath(std::string newDataPath)
 {
     m_DataPath = newDataPath;
 	m_PathHashes[GetHash()] = m_DataPath;
-#ifndef WIN32
-    char *fixed = fcase( m_DataPath.c_str() );
-    if ( fixed )
-    {
-        m_DataPath.assign( fixed );
-        free( fixed );
-    }
-#endif
+
     // Reset the loaded convenience pointer
     m_pLoadedData = 0;
     m_LoadedDataSize = 0;
@@ -669,21 +565,9 @@ BITMAP * ContentFile::LoadAndReleaseBitmap(int conversionMode)
             // Truncate away the extension
             int extensionPos = m_DataPath.rfind('.');
             m_DataPath.resize(extensionPos);
-#ifdef WIN32
+
             pFile = pack_fopen((m_DataPath + "000.bmp").c_str(), F_READ);
-#else
-            std::string newpath = m_DataPath + "000.bmp";
-            const char *fixed = fcase( newpath.c_str() );
-            if ( !fixed ) fixed = newpath.c_str();
-            pFile = pack_fopen( fixed, F_READ );
-            if ( !pFile )
-            {
-                newpath = m_DataPath + ".bmp";
-                fixed = fcase( newpath.c_str() );
-                if ( !fixed ) fixed = newpath.c_str();
-                pFile = pack_fopen( fixed, F_READ );
-            }
-#endif
+
             if (!pFile)
                 DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
             // Add the extension back in so it can get saved properly later

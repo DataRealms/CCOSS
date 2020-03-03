@@ -514,13 +514,6 @@ int FrameMan::Create()
 	int fullscreenGfxDriver = GFX_AUTODETECT_FULLSCREEN;
 	int windowedGfxDriver = GFX_AUTODETECT_WINDOWED;
 
-#if defined(__APPLE__)
-	//fullscreenGfxDriver = GFX_QUARTZ_FULLSCREEN;
-	//windowedGfxDriver = GFX_QUARTZ_WINDOW
-#elif defined(__unix__)
-	//fullscreenGfxDriver = GFX_XWINDOWS_FULLSCREEN;
-	//windowedGfxDriver = GFX_XWINDOWS;
-#else
     fullscreenGfxDriver = GFX_DIRECTX_ACCEL;
 
 	if (g_SettingsMan.ForceSoftwareGfxDriver()) 
@@ -533,7 +526,6 @@ int FrameMan::Create()
 		windowedGfxDriver = GFX_DIRECTX_WIN;
 	if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) 
 		windowedGfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
-#endif // defined(__APPLE__)
 
 
     if (set_gfx_mode(m_Fullscreen ? fullscreenGfxDriver : windowedGfxDriver, m_Fullscreen ? m_ResX * m_NxFullscreen : m_ResX * m_NxWindowed, m_Fullscreen ? m_ResY * m_NxFullscreen : m_ResY * m_NxWindowed, 0, 0) != 0)
@@ -1327,15 +1319,7 @@ int FrameMan::ToggleFullscreen()
 	int fullscreenGfxDriver = GFX_AUTODETECT_FULLSCREEN;
 	int windowedGfxDriver = GFX_AUTODETECT_WINDOWED;
 
-#if defined(__APPLE__)
-	//fullscreenGfxDriver = GFX_QUARTZ_FULLSCREEN;
-	//windowedGfxDriver = GFX_QUARTZ_WINDOW
-#elif defined(__unix__)
-	//fullscreenGfxDriver = GFX_XWINDOWS_FULLSCREEN;
-	//windowedGfxDriver = GFX_XWINDOWS;
-#else
     fullscreenGfxDriver = GFX_DIRECTX_ACCEL;
-	//windowedGfxDriver = GFX_DIRECTX_WIN;
 
 	if (g_SettingsMan.ForceSoftwareGfxDriver()) 
 		fullscreenGfxDriver = GFX_DIRECTX_SOFT;
@@ -1347,7 +1331,6 @@ int FrameMan::ToggleFullscreen()
 		windowedGfxDriver = GFX_DIRECTX_WIN;
 	if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) 
 		windowedGfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
-#endif // defined(__APPLE__)
 
 
     // Switch to windowed mode

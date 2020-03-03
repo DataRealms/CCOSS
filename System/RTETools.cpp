@@ -263,11 +263,7 @@ string XORStrings(string toEncrypt, string keyString, char exception)
 
 void OpenBrowserToURL(string goToURL)
 {
-#ifdef WIN32
     ShellExecute(NULL, "open", goToURL.c_str(), NULL, NULL, SW_SHOWNORMAL);
-#else // WIN32
-    system(("open" + goToURL).c_str());
-#endif // WIN32
 }
 
 

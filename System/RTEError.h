@@ -37,7 +37,6 @@ extern bool DDTAbortFunc(const std::string description,
                          const char *file,
                          int line);
 
-#ifdef WIN32
 
     #define DDTAbort(description)                              \
     {                                                       \
@@ -46,17 +45,6 @@ extern bool DDTAbortFunc(const std::string description,
             _asm { int 3 }                                  \
         }                                                   \
     }
-
-#else // WIN32
-
-    #define DDTAbort(description)                              \
-    {                                                       \
-        if (DDTAbortFunc(description, __FILE__, __LINE__))      \
-        {                                                   \
-        }                                                   \
-    }
-
-#endif // WIN32
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -86,7 +74,6 @@ extern bool DDTAssert(bool expression,
                       bool &alwaysIgnore);
 
 // Always-exists version of Assert
-#ifdef WIN32
 
     #define AAssert(expression, description)                                                     \
     {                                                                                           \
@@ -100,25 +87,9 @@ extern bool DDTAssert(bool expression,
         }                                                                                       \
     }
 
-#else // WIN32
-
-    #define AAssert(expression, description)                                                     \
-    {                                                                                           \
-        static bool alwaysIgnore = false;                                                       \
-        if (!alwaysIgnore)                                                                      \
-        {                                                                                       \
-            if (DDTAssert((intptr_t)(expression), description, __FILE__, __LINE__, alwaysIgnore))    \
-            {                                                                                   \
-            }                                                                                   \
-        }                                                                                       \
-    }
-
-#endif // WIN32
 
 // Debug-only version of Assert
 #if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
-
-    #ifdef WIN32
 
         #define DAssert(expression, description)                                                    \
         {                                                                                           \
@@ -132,20 +103,6 @@ extern bool DDTAssert(bool expression,
             }                                                                                       \
         }
 
-    #else // WIN32
-
-        #define DAssert(expression, description)                                                    \
-        {                                                                                           \
-            static bool alwaysIgnore = false;                                                       \
-            if (!alwaysIgnore)                                                                      \
-            {                                                                                       \
-                if (DDTAssert((int)(expression), description, __FILE__, __LINE__, alwaysIgnore))    \
-                {                                                                                   \
-                }                                                                                   \
-            }                                                                                       \
-        }
-
-    #endif // WIN32
 
 #else // _DEBUG
 

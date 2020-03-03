@@ -50,16 +50,10 @@
 
 #include "unzip.h"
 
-#if defined(__APPLE__)
-#include "OsxUtil.h"
-#endif // defined(__APPLE__)
-
 #include "NetworkServer.h"
 #include "NetworkClient.h"
 
-#if defined(WIN32)
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
-#endif
 
 using namespace RTE;
 
@@ -2549,10 +2543,6 @@ int main(int argc, char *argv[])
     ///////////////////////////////////////////////////////////////////
     // Change to working directory (necessary for some platforms)
     g_System.ChangeWorkingDirectory();
-
-#if defined(__APPLE__)
-	OsxUtil::Create();
-#endif // defined(__APPLE__)
 	
     ///////////////////////////////////////////////////////////////////
     // Init Allegro
@@ -2712,10 +2702,6 @@ int main(int argc, char *argv[])
     // Dump out the info about how well memory cleanup went
     Entity::ClassInfo::DumpPoolMemoryInfo(Writer("MemCleanupInfo.txt"));
 #endif
-
-#if defined(__APPLE__)
-	OsxUtil::Destroy();
-#endif // defined(__APPLE__)
 	
     return 0;
 }

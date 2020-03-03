@@ -574,18 +574,6 @@ bool Reader::StartIncludeFile()
     m_pStream = new std::ifstream(m_FilePath.c_str());
     if (m_pStream->fail())
     {
-#ifndef WIN32
-	extern char *fcase( const char *path );
-	char *fixed = fcase( m_FilePath.c_str() );
-	bool fail = true;
-	if ( fixed )
-	{
-		m_pStream = new ifstream( fixed );
-		fail = m_pStream->fail();
-	}
-	if ( fail )
-	{
-#endif
         // Backpedal and set up to read the next property in the old stream
         delete m_pStream;
         m_pStream = m_StreamStack.back().m_pStream;
@@ -600,9 +588,6 @@ bool Reader::StartIncludeFile()
         Eat();
         return false;
     }
-#ifndef WIN32
-    }
-#endif
 
     // Line counting starts with 1, not 0
     m_CurrentLine = 1;

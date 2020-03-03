@@ -2067,13 +2067,7 @@ void MainMenuGUI::UpdateResolutionCombo()
     // Only refill possible resolutions if empty
     if (m_pResolutionCombo->GetCount() <= 0)
     {
-#if defined(__APPLE__)
-		GFX_MODE_LIST* pList = get_gfx_mode_list(g_FrameMan.IsFullscreen() ? GFX_QUARTZ_FULLSCREEN : GFX_QUARTZ_WINDOW);
-#elif defined(__unix__)
-		GFX_MODE_LIST* pList = get_gfx_mode_list(g_FrameMan.IsFullscreen() ? GFX_XWINDOWS_FULLSCREEN : GFX_XWINDOWS);
-#else
         GFX_MODE_LIST *pList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
-#endif // defined(__APPLE__)
 
         int width = 0;
         int height = 0;

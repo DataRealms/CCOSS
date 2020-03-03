@@ -16,9 +16,6 @@
 // Inclusions of header files
 
 #include "RTEError.h"
-#if defined(__unix__) || defined(__APPLE__)
-#include <stdint.h>
-#endif 
 
 namespace RTE
 {

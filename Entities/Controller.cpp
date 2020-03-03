@@ -514,11 +514,7 @@ void Controller::Update()
             else if (g_UInputMan.MouseWheelMovedByPlayer(m_Player) > 0)
                 m_ControlStates[WEAPON_CHANGE_PREV] = m_ControlStates[SCROLL_UP] = true;
 
-//#if defined(WIN32)
 			UInputMan::MouseButtons activeSecondary = UInputMan::MOUSE_RIGHT;
-//#elif defined(__APPLE__)
-//			UInputMan::MouseButtons activeSecondary = UInputMan::MOUSE_CTRL;
-//#endif // defined(WIN32)
 			
             if (g_UInputMan.MouseButtonHeld(UInputMan::MOUSE_LEFT, m_Player))
                 m_ControlStates[PRIMARY_ACTION] = true;

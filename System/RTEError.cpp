@@ -55,11 +55,7 @@ extern bool DDTAbortFunc(const char *description,
     // Show messagebox with explanation
 //    allegro_message("Abortion in file %s, line %i, because:\n\n%s\n\nThe last frame has been dumped to 'abortscreen.bmp'", file, line, description);
     // Shortened and less confusing one.. users have no use of knowing which source file and where
-#ifdef WIN32
     allegro_message("%s\n\nThe last frame has been dumped to 'abortscreen.bmp'\n\nYou can copy this message with Ctrl+C", description);
-#else // WIN32
-    allegro_message("%s\n\nThe last frame has been dumped to 'abortscreen.bmp'", description);
-#endif // WIN32
     // True so that the asm_ { int 3 } code is run and the debugger goes there.
 //    exit(-1);
     return true;

@@ -126,6 +126,7 @@ enum SLIDES
 };
 
 volatile bool g_Quit = false;
+bool g_ResetRTE = false; //! Signals to reset the entire RTE next iteration.
 bool g_LogToCli = false;
 bool g_InActivity = false;
 bool g_ResetActivity = false;
@@ -2705,4 +2706,16 @@ int main(int argc, char *argv[])
 	
     return 0;
 }
+
+/// <summary>
+/// Orders to reset the entire Retro Terrain Engine system next iteration.
+/// </summary>
+void ResetRTE() { g_ResetRTE = true; }
+
+/// <summary>
+/// Indicated whether the system is about to be reset before the next loop starts.
+/// </summary>
+/// <returns>Whether the RTE is about to reset next iteration of the loop or not.</returns>
+bool IsResettingRTE() { return g_ResetRTE; }
+
 END_OF_MAIN();

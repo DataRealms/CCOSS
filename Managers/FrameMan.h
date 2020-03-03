@@ -1413,27 +1413,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ResetRTE
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Orders to reset the entire Retro Terrain Engine system next iteration.
-// Arguments:       None.
-// Return value:    None.
-
-    void ResetRTE() { m_ResetRTE = true; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsResettingRTE
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicated whether the system is about to be reset before the next loop
-//                  starts.
-// Arguments:       None.
-// Return value:    Whether the RTE is about to reset next iteration of the loop or not.
-
-    bool IsResettingRTE() { return m_ResetRTE; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ToggleFullscreen
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Toggles to and from fullscreen and windowed mode.
@@ -1815,9 +1794,6 @@ protected:
     int m_MSPFAverage;
     // The sim speed over real time
     float m_SimSpeed;
-
-    // Signals to reset the entire RTE next iteration.
-    bool m_ResetRTE;
 
     // The GUI control managers for all teams
 //    std::vector<GUIControlManager *> m_BuyGUIs;

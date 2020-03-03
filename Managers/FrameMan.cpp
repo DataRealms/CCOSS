@@ -426,7 +426,6 @@ void FrameMan::Clear()
     m_MSPFs.clear();
     m_MSPFAverage = 0;
     m_SimSpeed = 1.0;
-    m_ResetRTE = false;
     m_pGUIScreen = 0;
     m_pLargeFont = 0;
     m_pSmallFont = 0;

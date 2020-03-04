@@ -143,11 +143,13 @@ namespace RTE {
 		virtual Writer & operator<<(const std::string &var) { *m_pStream << var; return *this; }
 #pragma endregion
 
+#pragma region Writer Status
 		/// <summary>
 		/// Shows whether the writer is ok to start accepting data streamed to it.
 		/// </summary>
 		/// <returns></returns>
 		virtual bool WriterOK();
+#pragma endregion
 
 	protected:
 

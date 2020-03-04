@@ -57,33 +57,6 @@ namespace RTE {
 		virtual void Reset() { Clear(); /*Serializable::Reset();*/ }
 #pragma endregion
 
-#pragma region Operator Overloads
-		/// <summary>
-		/// Stream extraction operator overloads for all the elemental types.
-		/// </summary>
-		/// <param name="var">A reference to the variable that will be filled by the extracted data.</param>
-		/// <returns>A Reader reference for further use in an expression.</returns>
-		virtual Reader & operator>>(bool &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(char &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(unsigned char &var) { Eat(); int temp; *m_pStream >> temp; var = temp; return *this; }
-		virtual Reader & operator>>(short &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(unsigned short &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(int &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(unsigned int &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(long &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(unsigned long &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(float &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(double &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(char * var) { Eat(); *m_pStream >> var; return *this; }
-
-		/// <summary>
-		/// Stream extraction operator overloads for std::string.
-		/// </summary>
-		/// <param name="var">A reference to the variable that will be filled by the extracted data.</param>
-		/// <returns>A Reader reference for further use in an expression.</returns>
-		virtual Reader & operator>>(std::string &var);
-#pragma endregion
-
 #pragma region Getters and Setters
 		/// <summary>
 		/// Gets the class name of this Reader.
@@ -220,6 +193,33 @@ namespace RTE {
 		/// </summary>
 		/// <param name="errorDesc">The message describing what's wrong.</param>
 		void ReportError(std::string errorDesc);
+#pragma endregion
+
+#pragma region Operator Overloads
+		/// <summary>
+		/// Stream extraction operator overloads for all the elemental types.
+		/// </summary>
+		/// <param name="var">A reference to the variable that will be filled by the extracted data.</param>
+		/// <returns>A Reader reference for further use in an expression.</returns>
+		virtual Reader & operator>>(bool &var) { Eat(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(char &var) { Eat(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(unsigned char &var) { Eat(); int temp; *m_pStream >> temp; var = temp; return *this; }
+		virtual Reader & operator>>(short &var) { Eat(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(unsigned short &var) { Eat(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(int &var) { Eat(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(unsigned int &var) { Eat(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(long &var) { Eat(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(unsigned long &var) { Eat(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(float &var) { Eat(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(double &var) { Eat(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(char * var) { Eat(); *m_pStream >> var; return *this; }
+
+		/// <summary>
+		/// Stream extraction operator overloads for std::string.
+		/// </summary>
+		/// <param name="var">A reference to the variable that will be filled by the extracted data.</param>
+		/// <returns>A Reader reference for further use in an expression.</returns>
+		virtual Reader & operator>>(std::string &var);
 #pragma endregion
 
 	protected:

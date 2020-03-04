@@ -122,6 +122,14 @@ namespace RTE {
 		}
 #pragma endregion
 
+#pragma region Writer Status
+		/// <summary>
+		/// Shows whether the writer is ok to start accepting data streamed to it.
+		/// </summary>
+		/// <returns></returns>
+		virtual bool WriterOK();
+#pragma endregion
+
 #pragma region Operator Overloads
 		/// <summary>
 		/// Elemental types stream insertions. Stream insertion operator overloads for all the elemental types.
@@ -141,14 +149,6 @@ namespace RTE {
 		virtual Writer & operator<<(const double &var) { *m_pStream << var; return *this; }
 		virtual Writer & operator<<(const char *var) { *m_pStream << var; return *this; }
 		virtual Writer & operator<<(const std::string &var) { *m_pStream << var; return *this; }
-#pragma endregion
-
-#pragma region Writer Status
-		/// <summary>
-		/// Shows whether the writer is ok to start accepting data streamed to it.
-		/// </summary>
-		/// <returns></returns>
-		virtual bool WriterOK();
 #pragma endregion
 
 	protected:

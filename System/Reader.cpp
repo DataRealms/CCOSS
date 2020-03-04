@@ -73,13 +73,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Reader & Reader::operator>>(std::string &var) {
-		var.assign(ReadLine());
-		return *this;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	int Reader::GetReadModuleID() const {
 		// If we have an invalid ID, try to get a valid one based on the name we do have
 		return m_DataModuleID < 0 ? g_PresetMan.GetModuleID(m_DataModuleName) : m_DataModuleID;
@@ -444,5 +437,12 @@ namespace RTE {
 		// Set up the resumed file for reading again
 		Eat();
 		return true;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Reader & Reader::operator>>(std::string &var) {
+		var.assign(ReadLine());
+		return *this;
 	}
 }

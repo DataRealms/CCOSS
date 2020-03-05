@@ -19,6 +19,7 @@
 #include "Timer.h"
 #include "Vector.h"
 #include "Controller.h"
+#include "MOSRotating.h"
 
 struct BITMAP;
 

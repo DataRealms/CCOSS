@@ -96,7 +96,7 @@ namespace RTE {
 		virtual ~Box() { ; }
 
 		/// <summary>
-		/// Resets the entire Serializable, including its inherited members, to their default settings or values.
+		/// Resets the entire Box object to the default settings or values.
 		/// </summary>
 		virtual void Reset() { Clear(); }
 #pragma endregion

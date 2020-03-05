@@ -283,13 +283,13 @@ int GUIControl::GetAnchor(void)
     int Count = m_Properties.GetValue("Anchor", Value, 4);
 
     for(int i=0; i<Count; i++) {
-        if (std::strcmp(Value[i].c_str(), "left") == 0)
+        if (stricmp(Value[i].c_str(), "left") == 0)
             Anchor |= Anchor_Left;
-        if (std::strcmp(Value[i].c_str(), "top") == 0)
+        if (stricmp(Value[i].c_str(), "top") == 0)
             Anchor |= Anchor_Top;
-        if (std::strcmp(Value[i].c_str(), "right") == 0)
+        if (stricmp(Value[i].c_str(), "right") == 0)
             Anchor |= Anchor_Right;
-        if (std::strcmp(Value[i].c_str(), "bottom") == 0)
+        if (stricmp(Value[i].c_str(), "bottom") == 0)
             Anchor |= Anchor_Bottom;
     }
 

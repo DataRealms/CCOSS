@@ -144,9 +144,9 @@ void GUIComboBox::Create(GUIProperties *Props)
 
     string Val;
     Props->GetValue("DropDownStyle", &Val);
-    if (std::strcmp(Val.c_str(), "DropDownList") == 0)
+    if (stricmp(Val.c_str(), "DropDownList") == 0)
         m_DropDownStyle = DropDownList;
-    else if (std::strcmp(Val.c_str(), "DropDown") == 0)
+    else if (stricmp(Val.c_str(), "DropDown") == 0)
         m_DropDownStyle = DropDown;
 
     m_TextPanel->SetLocked((m_DropDownStyle == DropDownList));
@@ -731,9 +731,9 @@ void GUIComboBox::ApplyProperties(GUIProperties *Props)
 
     string Val;
     m_Properties.GetValue("DropDownStyle", &Val);
-    if (std::strcmp(Val.c_str(), "DropDownList") == 0)
+    if (stricmp(Val.c_str(), "DropDownList") == 0)
         m_DropDownStyle = DropDownList;
-    else if (std::strcmp(Val.c_str(), "DropDown") == 0)
+    else if (stricmp(Val.c_str(), "DropDown") == 0)
         m_DropDownStyle = DropDown;
 
     m_TextPanel->SetLocked((m_DropDownStyle == DropDownList));

@@ -102,16 +102,16 @@ void GUISlider::Create(GUIProperties *Props)
     // Get the values
     string ori;
     Props->GetValue("Orientation", &ori);
-    if (std::strcmp(ori.c_str(), "horizontal") == 0)
+    if (stricmp(ori.c_str(), "horizontal") == 0)
         m_Orientation = Horizontal;
-    else if (std::strcmp(ori.c_str(), "vertical") == 0)
+    else if (stricmp(ori.c_str(), "vertical") == 0)
         m_Orientation = Vertical;
 
     string tick;
     Props->GetValue("TickDirection", &tick);
-    if (std::strcmp(tick.c_str(), "TopLeft") == 0)
+    if (stricmp(tick.c_str(), "TopLeft") == 0)
         m_TickDirection = TopLeft;
-    else if (std::strcmp(tick.c_str(), "BottomRight") == 0)
+    else if (stricmp(tick.c_str(), "BottomRight") == 0)
         m_TickDirection = BottomRight;
         
     Props->GetValue("Minimum", &m_Minimum);
@@ -744,16 +744,16 @@ void GUISlider::ApplyProperties(GUIProperties *Props)
     // Get the values
     string ori;
     m_Properties.GetValue("Orientation", &ori);
-    if (std::strcmp(ori.c_str(), "horizontal") == 0)
+    if (stricmp(ori.c_str(), "horizontal") == 0)
         m_Orientation = Horizontal;
-    else if (std::strcmp(ori.c_str(), "vertical") == 0)
+    else if (stricmp(ori.c_str(), "vertical") == 0)
         m_Orientation = Vertical;
 
     string tick;
     m_Properties.GetValue("TickDirection", &tick);
-    if (std::strcmp(tick.c_str(), "TopLeft") == 0)
+    if (stricmp(tick.c_str(), "TopLeft") == 0)
         m_TickDirection = TopLeft;
-    else if (std::strcmp(tick.c_str(), "BottomRight") == 0)
+    else if (stricmp(tick.c_str(), "BottomRight") == 0)
         m_TickDirection = BottomRight;
         
     m_Properties.GetValue("Minimum", &m_Minimum);

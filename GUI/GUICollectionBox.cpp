@@ -100,11 +100,11 @@ void GUICollectionBox::Create(GUIProperties *Props)
     Props->GetValue("DrawBackground", &m_DrawBackground);
     string v;
     Props->GetValue("DrawType", &v);
-    if (std::strcmp(v.c_str(), "Color") == 0)
+    if (stricmp(v.c_str(), "Color") == 0)
         m_DrawType = Color;
-    else if (std::strcmp(v.c_str(), "Image") == 0)
+    else if (stricmp(v.c_str(), "Image") == 0)
         m_DrawType = Image;
-    else if (std::strcmp(v.c_str(), "Panel") == 0)
+    else if (stricmp(v.c_str(), "Panel") == 0)
         m_DrawType = Panel;
 
     Props->GetValue("DrawColor", &m_DrawColor);
@@ -401,9 +401,9 @@ void GUICollectionBox::ApplyProperties(GUIProperties *Props)
     m_Properties.GetValue("DrawBackground", &m_DrawBackground);
     string v;
     m_Properties.GetValue("DrawType", &v);
-    if (std::strcmp(v.c_str(), "Color") == 0)
+    if (stricmp(v.c_str(), "Color") == 0)
         m_DrawType = Color;
-    else if (std::strcmp(v.c_str(), "Image") == 0)
+    else if (stricmp(v.c_str(), "Image") == 0)
         m_DrawType = Image;
 
     m_Properties.GetValue("DrawColor", &m_DrawColor);

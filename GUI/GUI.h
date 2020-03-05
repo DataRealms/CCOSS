@@ -52,7 +52,4 @@ void SetRect(RECT *pRect,
              int right,
              int bottom);
 
-
-int DDTstricmp(const char *s1, const char *s2);
-
 #endif

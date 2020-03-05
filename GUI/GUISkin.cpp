@@ -161,7 +161,7 @@ bool GUISkin::GetValue(const std::string Section, const std::string Variable, st
     for(it = m_PropList.begin(); it != m_PropList.end(); it++) {
         GUIProperties *p = *it;        
 
-        if (DDTstricmp(p->GetName().c_str(), Section.c_str()) == 0) {
+        if (std::strcmp(p->GetName().c_str(), Section.c_str()) == 0) {
             
             if (p->GetValue(Variable, Value))
                 return true;
@@ -186,7 +186,7 @@ int GUISkin::GetValue(const std::string Section, const std::string Variable, int
     for(it = m_PropList.begin(); it != m_PropList.end(); it++) {
         GUIProperties *p = *it;        
 
-        if (DDTstricmp(p->GetName().c_str(), Section.c_str()) == 0) {
+        if (std::strcmp(p->GetName().c_str(), Section.c_str()) == 0) {
             
             if (p->GetValue(Variable, Array, MaxArraySize))
                 return true;
@@ -211,7 +211,7 @@ bool GUISkin::GetValue(const std::string Section, const std::string Variable, in
     for(it = m_PropList.begin(); it != m_PropList.end(); it++) {
         GUIProperties *p = *it;        
 
-        if (DDTstricmp(p->GetName().c_str(), Section.c_str()) == 0) {
+        if (std::strcmp(p->GetName().c_str(), Section.c_str()) == 0) {
             
             if (p->GetValue(Variable, Value))
                 return true;
@@ -236,7 +236,7 @@ bool GUISkin::GetValue(const std::string Section, const std::string Variable, Ui
     for(it = m_PropList.begin(); it != m_PropList.end(); it++) {
         GUIProperties *p = *it;        
 
-        if (DDTstricmp(p->GetName().c_str(), Section.c_str()) == 0) {
+        if (std::strcmp(p->GetName().c_str(), Section.c_str()) == 0) {
             
             if (p->GetValue(Variable, Value))
                 return true;
@@ -322,7 +322,7 @@ GUIBitmap *GUISkin::CreateBitmap(const string Filename)
     for(it = m_ImageCache.begin(); it != m_ImageCache.end(); it++) {
         GUIBitmap *Surf = *it;
 
-        if (DDTstricmp(File.c_str(), Surf->GetDataPath().c_str()) == 0)
+        if (std::strcmp(File.c_str(), Surf->GetDataPath().c_str()) == 0)
             return Surf;
     }
 
@@ -350,7 +350,7 @@ GUIFont *GUISkin::GetFont(const string Name)
 
     for(it = m_FontCache.begin(); it != m_FontCache.end(); it++) {
         GUIFont *F = *it;
-        if (DDTstricmp(F->GetName().c_str(), Name.c_str()) == 0)
+        if (std::strcmp(F->GetName().c_str(), Name.c_str()) == 0)
             return F;
     }
 

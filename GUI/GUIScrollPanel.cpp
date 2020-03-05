@@ -114,7 +114,7 @@ void GUIScrollPanel::LoadProps(GUIProperties *Props)
     Props->GetValue("Orientation", &Ori);
 
     m_Orientation = Horizontal;
-    if (DDTstricmp(Ori.c_str(), "Vertical") == 0)
+    if (std::strcmp(Ori.c_str(), "Vertical") == 0)
         m_Orientation = Vertical;
 
     Props->GetValue("Minimum", &m_Minimum);

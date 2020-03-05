@@ -96,9 +96,9 @@ void GUICheckbox::Create(GUIProperties *Props)
     m_Check = Unchecked;
     string value;
     Props->GetValue("Checked", &value);
-    if (DDTstricmp(value.c_str(), "Checked") == 0)
+    if (std::strcmp(value.c_str(), "Checked") == 0)
         m_Check = Checked;
-    else if (DDTstricmp(value.c_str(), "Greycheck") == 0)
+    else if (std::strcmp(value.c_str(), "Greycheck") == 0)
         m_Check = Greycheck;
 
     Props->GetValue("Text", &m_Text);
@@ -426,9 +426,9 @@ void GUICheckbox::ApplyProperties(GUIProperties *Props)
     m_Check = Unchecked;
     string value;
     m_Properties.GetValue("Checked", &value);
-    if (DDTstricmp(value.c_str(), "Checked") == 0)
+    if (std::strcmp(value.c_str(), "Checked") == 0)
         m_Check = Checked;
-    else if (DDTstricmp(value.c_str(), "Greycheck") == 0)
+    else if (std::strcmp(value.c_str(), "Greycheck") == 0)
         m_Check = Greycheck;
 
     m_Properties.GetValue("Text", &m_Text);

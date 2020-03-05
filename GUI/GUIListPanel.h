@@ -15,7 +15,7 @@
 // Inclusions of header files
 
 #include "GUIScrollPanel.h"
-#include "GUIBitmap.h"
+#include "GUI/Interface.h"
 
 
 namespace RTE

@@ -10,7 +10,7 @@
 //                  jackal@shplorb.com
 //                  www.shplorb.com/~jackal
 
-#include "GUIBitmap.h"
+#include "GUI/Interface.h"
 #include "ContentFile.h"
 #include "allegro.h"
 

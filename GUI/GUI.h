@@ -27,11 +27,10 @@ struct RECT
 
 #include "allegro.h"
 #include "Constants.h"
+#include "GUI/Interface.h"
 #include "GUIProperties.h"
 #include "GUIInput.h"
-#include "GUIBitmap.h"
 #include "GUISound.h"
-#include "GUIScreen.h"
 #include "GUIFont.h"
 #include "GUISkin.h"
 #include "GUIPanel.h"

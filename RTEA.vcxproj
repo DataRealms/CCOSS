@@ -218,6 +218,7 @@
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Entities\Emission.h" />
     <ClInclude Include="Entities\PEmitter.h" />
+    <ClInclude Include="GUI\Interface.h" />
     <ClInclude Include="GUI\GUISound.h" />
     <ClInclude Include="Managers\Network.h" />
     <ClInclude Include="Managers\NetworkClient.h" />
@@ -261,7 +262,6 @@
     <ClInclude Include="GUI\AllegroScreen.h" />
     <ClInclude Include="GUI\GUI.h" />
     <ClInclude Include="GUI\GUIBanner.h" />
-    <ClInclude Include="GUI\GUIBitmap.h" />
     <ClInclude Include="GUI\GUIButton.h" />
     <ClInclude Include="GUI\GUICheckbox.h" />
     <ClInclude Include="GUI\GUICollectionBox.h" />
@@ -281,7 +281,6 @@
     <ClInclude Include="GUI\GUIProperties.h" />
     <ClInclude Include="GUI\GUIPropertyPage.h" />
     <ClInclude Include="GUI\GUIRadioButton.h" />
-    <ClInclude Include="GUI\GUIScreen.h" />
     <ClInclude Include="GUI\GUIScrollbar.h" />
     <ClInclude Include="GUI\GUIScrollPanel.h" />
     <ClInclude Include="GUI\GUISkin.h" />

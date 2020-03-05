@@ -138,9 +138,6 @@
     <ClInclude Include="GUI\GUIBanner.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="GUI\GUIBitmap.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
     <ClInclude Include="GUI\GUIButton.h">
       <Filter>GUI</Filter>
     </ClInclude>
@@ -196,9 +193,6 @@
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\GUIRadioButton.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI\GUIScreen.h">
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="GUI\GUIScrollbar.h">
@@ -459,6 +453,9 @@
     </ClInclude>
     <ClInclude Include="System\RTEError.h">
       <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Interface.h">
+      <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

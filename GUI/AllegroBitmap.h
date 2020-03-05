@@ -127,7 +127,7 @@ public:
 // Description:     Draws a line.
 // Arguments:       Start Position, End Position, Color.
 
-    virtual void DrawLine(int x1, int y1, int x2, int y2, Uint32 Color);
+    virtual void DrawLine(int x1, int y1, int x2, int y2, unsigned long Color);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ public:
 // Description:     Draws a rectangle.
 // Arguments:       Position, Size, Color, Filled.
 
-    void DrawRectangle(int X, int Y, int Width, int Height, Uint32 Color, bool Filled);
+    void DrawRectangle(int X, int Y, int Width, int Height, unsigned long Color, bool Filled);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ public:
 // Description:     Gets the colour of a pixel at a specific point.
 // Arguments:       Point.
 
-    Uint32 GetPixel(int X, int Y);
+    unsigned long GetPixel(int X, int Y);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -154,7 +154,7 @@ public:
 // Description:     Sets the color of a pixel at a specific point.
 // Arguments:       Point, Color.
 
-    void SetPixel(int X, int Y, Uint32 Color);
+    void SetPixel(int X, int Y, unsigned long Color);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -181,7 +181,7 @@ public:
 // Description:     Sets the color key of the bitmap.
 // Arguments:       ColorKey.
 
-    void SetColorKey(Uint32 Key);
+    void SetColorKey(unsigned long Key);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

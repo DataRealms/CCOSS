@@ -215,7 +215,7 @@ void GUISlider::BuildBitmap(void)
     m_KnobImage = m_Skin->CreateBitmap(Values[2], Values[3]);
     SrcImage->Draw(m_KnobImage, 0,0, &Rect);
 
-    Uint32 ColorKey;
+    unsigned long ColorKey;
     m_Skin->GetValue(Section, "ColorKeyIndex", &ColorKey);
     ColorKey = m_Skin->ConvertColor(ColorKey, m_KnobImage->GetColorDepth());
     m_KnobImage->SetColorKey(ColorKey);

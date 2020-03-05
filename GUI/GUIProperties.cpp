@@ -327,7 +327,7 @@ bool GUIProperties::GetValue(const string Variable, int *Value)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets a single unsigned interger
 
-bool GUIProperties::GetValue(const string Variable, Uint32 *Value)
+bool GUIProperties::GetValue(const string Variable, unsigned long *Value)
 {
     assert(Value);
 

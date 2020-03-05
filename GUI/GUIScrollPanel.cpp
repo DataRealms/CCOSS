@@ -265,7 +265,7 @@ void GUIScrollPanel::BuildButton(const string ArrowName, int Y, int Width, int H
         return;
 
     // Get the transparent colour key
-    Uint32 ColorKey = 0;
+    unsigned long ColorKey = 0;
     m_Skin->GetValue(ArrowName, "ColorKeyIndex", &ColorKey);
     ColorKey = m_Skin->ConvertColor(ColorKey, Arrow->GetColorDepth());
     Arrow->SetColorKey(ColorKey);

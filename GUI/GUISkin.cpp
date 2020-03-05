@@ -228,7 +228,7 @@ bool GUISkin::GetValue(const std::string Section, const std::string Variable, in
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets a single unsigned integer value.
 
-bool GUISkin::GetValue(const std::string Section, const std::string Variable, Uint32 *Value)
+bool GUISkin::GetValue(const std::string Section, const std::string Variable, unsigned long *Value)
 {
     vector <GUIProperties *>::iterator it;
 
@@ -511,7 +511,7 @@ void GUISkin::BuildStandardRect(GUIBitmap *Dest, const std::string Section, int 
 // Description:     Converts an 8bit palette index to a valid pixel format.
 //                  Primarily used for development in windowed mode.
     
-Uint32 GUISkin::ConvertColor(Uint32 color, int targetDepth)
+unsigned long GUISkin::ConvertColor(unsigned long color, int targetDepth)
 {
     return m_Screen->ConvertColor(color, targetDepth);
 }

@@ -786,7 +786,7 @@ void GUIComboBoxButton::ChangeSkin(GUISkin *Skin)
     if (!Arrow)
         return;
 
-    Uint32 ColorKey;
+    unsigned long ColorKey;
     Skin->GetValue("ComboBox_Arrow", "ColorKeyIndex", &ColorKey);
     ColorKey = Skin->ConvertColor(ColorKey, m_DrawBitmap->GetColorDepth());
     Arrow->SetColorKey(ColorKey);

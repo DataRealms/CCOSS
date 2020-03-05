@@ -369,7 +369,7 @@ void GUICollectionBox::SetDrawType(int Type)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the drawing color.
 
-void GUICollectionBox::SetDrawColor(Uint32 Color)
+void GUICollectionBox::SetDrawColor(unsigned long Color)
 {
     m_DrawColor = Color;
 }

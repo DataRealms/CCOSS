@@ -146,7 +146,7 @@ GUIBitmap * AllegroScreen::GetBitmap(void)
 // Description:     Converts an 8bit palette index to a valid pixel format.
 //                  Primarily used for development in windowed mode.
    
-Uint32 AllegroScreen::ConvertColor(Uint32 color, int targetDepth)
+unsigned long AllegroScreen::ConvertColor(unsigned long color, int targetDepth)
 {
     // If no target to shoot for, use the current video mode depth
     if (targetDepth == 0)

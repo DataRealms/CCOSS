@@ -120,7 +120,7 @@ public:
 //                  should be converted to. If this is 0, then the current video color depth
 //                  will be used as target.
 
-    Uint32 ConvertColor(Uint32 color, int targetDepth = 0);
+    unsigned long ConvertColor(unsigned long color, int targetDepth = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

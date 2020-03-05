@@ -64,11 +64,11 @@ bool GUIFont::Load(GUIScreen *Screen, const std::string Filename)
     m_CurrentColor = m_MainColor;
 
     // Set the color key to be the same color as the Top-Right hand corner pixel
-    Uint32 BackG = m_Font->GetPixel(m_Font->GetWidth()-1, 0);
+    unsigned long BackG = m_Font->GetPixel(m_Font->GetWidth()-1, 0);
     m_Font->SetColorKey(BackG);
 
     // The red seperator MUST be on the Top-Left hand corner
-    Uint32 Red = m_Font->GetPixel(0, 0);
+    unsigned long Red = m_Font->GetPixel(0, 0);
 
     // Find the separating gap of the font lines
     int y;
@@ -109,7 +109,7 @@ bool GUIFont::Load(GUIScreen *Screen, const std::string Filename)
         {
             for (int i = x; i < x + w; i++)
             {
-                Uint32 Pixel = m_Font->GetPixel(i, j);
+                unsigned long Pixel = m_Font->GetPixel(i, j);
                 if (Pixel != Red && Pixel != BackG)
                     Height = MAX(Height, j - y);
             }
@@ -142,7 +142,7 @@ bool GUIFont::Load(GUIScreen *Screen, const std::string Filename)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws text to a bitmap.
 
-void GUIFont::Draw(GUIBitmap *Bitmap, int X, int Y, const std::string Text, Uint32 Shadow)
+void GUIFont::Draw(GUIBitmap *Bitmap, int X, int Y, const std::string Text, unsigned long Shadow)
 {
     unsigned char c;
     int i;
@@ -200,7 +200,7 @@ void GUIFont::Draw(GUIBitmap *Bitmap, int X, int Y, const std::string Text, Uint
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws text to a bitmap aligned.
 
-void GUIFont::DrawAligned(GUIBitmap *Bitmap, int X, int Y, const std::string Text, int HAlign, int VAlign, int MaxWidth, Uint32 Shadow)
+void GUIFont::DrawAligned(GUIBitmap *Bitmap, int X, int Y, const std::string Text, int HAlign, int VAlign, int MaxWidth, unsigned long Shadow)
 {
     string TextLine = Text;
     int lineStartPos = 0;
@@ -290,7 +290,7 @@ void GUIFont::DrawAligned(GUIBitmap *Bitmap, int X, int Y, const std::string Tex
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the current color.
 
-void GUIFont::SetColor(Uint32 Color)
+void GUIFont::SetColor(unsigned long Color)
 {
     // Only check the change if the color is different
     if (Color != m_CurrentColor) {
@@ -427,7 +427,7 @@ int GUIFont::CalculateHeight(const std::string Text, int MaxWidth)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pre-Calculates the font using a specific color.
 
-void GUIFont::CacheColor(Uint32 Color)
+void GUIFont::CacheColor(unsigned long Color)
 {
     // Make sure we havn't already cached this color and it isn't a 0 color
     if (GetFontColor(Color) != 0 || !Color)
@@ -446,7 +446,7 @@ void GUIFont::CacheColor(Uint32 Color)
     m_Font->Draw(FC.m_Bitmap, 0, 0, 0);
 
     // Set the color key to be the same color as the Top-Right hand corner pixel
-    Uint32 BackG = FC.m_Bitmap->GetPixel(FC.m_Bitmap->GetWidth()-1, 0);
+    unsigned long BackG = FC.m_Bitmap->GetPixel(FC.m_Bitmap->GetWidth()-1, 0);
     FC.m_Bitmap->SetColorKey(BackG);
     
     // Go through the bitmap and change the pixels
@@ -467,7 +467,7 @@ void GUIFont::CacheColor(Uint32 Color)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Finds a font color structure from the cache.
 
-GUIFont::FontColor *GUIFont::GetFontColor(Uint32 Color)
+GUIFont::FontColor *GUIFont::GetFontColor(unsigned long Color)
 {
     vector<FontColor>::iterator it;
     FontColor *F = 0;

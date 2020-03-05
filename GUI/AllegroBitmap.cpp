@@ -159,7 +159,7 @@ void AllegroBitmap::DrawTransScaled(GUIBitmap *pDestBitmap, int X, int Y, int wi
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws a line.
 
-void AllegroBitmap::DrawLine(int x1, int y1, int x2, int y2, Uint32 Color)
+void AllegroBitmap::DrawLine(int x1, int y1, int x2, int y2, unsigned long Color)
 {
     if (!m_pBitmap)
         return;
@@ -173,7 +173,7 @@ void AllegroBitmap::DrawLine(int x1, int y1, int x2, int y2, Uint32 Color)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws a rectangle.
 
-void AllegroBitmap::DrawRectangle(int X, int Y, int Width, int Height, Uint32 Color, bool Filled)
+void AllegroBitmap::DrawRectangle(int X, int Y, int Width, int Height, unsigned long Color, bool Filled)
 {
     if (!m_pBitmap)
         return;
@@ -191,7 +191,7 @@ void AllegroBitmap::DrawRectangle(int X, int Y, int Width, int Height, Uint32 Co
 // Description:     Gets the colour of a pixel at a specific point.
 // Arguments:       Point.
 
-Uint32 AllegroBitmap::GetPixel(int X, int Y)
+unsigned long AllegroBitmap::GetPixel(int X, int Y)
 {
     if (!m_pBitmap)
         return 0;
@@ -200,7 +200,7 @@ Uint32 AllegroBitmap::GetPixel(int X, int Y)
 
 //    m_pBitmap->Lock();
 
-    Uint32 col = getpixel(m_pBitmap, X, Y);
+    unsigned long col = getpixel(m_pBitmap, X, Y);
 
 //    m_pBitmap->UnLock();
 
@@ -213,7 +213,7 @@ Uint32 AllegroBitmap::GetPixel(int X, int Y)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the color of a pixel at a specific point.
 
-void AllegroBitmap::SetPixel(int X, int Y, Uint32 Color)
+void AllegroBitmap::SetPixel(int X, int Y, unsigned long Color)
 {
     if (!m_pBitmap)
         return;
@@ -259,7 +259,7 @@ int AllegroBitmap::GetHeight(void)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the color key of the bitmap.
 
-void AllegroBitmap::SetColorKey(Uint32 Key)
+void AllegroBitmap::SetColorKey(unsigned long Key)
 {
     if (m_pBitmap)
         m_pBitmap->SetColorKey(Key);

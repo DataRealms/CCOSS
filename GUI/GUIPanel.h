@@ -677,8 +677,8 @@ protected:
 protected:
 
     GUIFont                    *m_Font;
-    Uint32                    m_FontColor;
-    Uint32                    m_FontShadow;
+    unsigned long                    m_FontColor;
+    unsigned long                    m_FontShadow;
     int                     m_FontKerning;
 
 

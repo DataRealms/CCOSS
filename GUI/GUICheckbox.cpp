@@ -137,7 +137,7 @@ void GUICheckbox::ChangeSkin(GUISkin *Skin)
 void GUICheckbox::BuildBitmap(void)
 {
     string Filename;
-    Uint32 ColorIndex = 0;
+    unsigned long ColorIndex = 0;
     int Values[4];
 
     // Load the image

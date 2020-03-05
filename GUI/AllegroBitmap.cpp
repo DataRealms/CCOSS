@@ -104,7 +104,7 @@ void AllegroBitmap::Destroy(void)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draw a section of this bitmap onto another bitmap
 
-void AllegroBitmap::Draw(GUIBitmap *pDestBitmap, int X, int Y, RECT *pRect)
+void AllegroBitmap::Draw(GUIBitmap *pDestBitmap, int X, int Y, GUIRect *pRect)
 {
     if (!m_pBitmap)
         return;
@@ -124,7 +124,7 @@ void AllegroBitmap::Draw(GUIBitmap *pDestBitmap, int X, int Y, RECT *pRect)
 // Description:     Draw a section of this bitmap onto another bitmap ignoring 
 //                  color-keyed pixels
 
-void AllegroBitmap::DrawTrans(GUIBitmap *pDestBitmap, int X, int Y, RECT *pRect)
+void AllegroBitmap::DrawTrans(GUIBitmap *pDestBitmap, int X, int Y, GUIRect *pRect)
 {
     if (!m_pBitmap)
         return;
@@ -296,7 +296,7 @@ int AllegroBitmap::GetColorDepth()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the clipping rectangle of the bitmap.
 
-void AllegroBitmap::GetClipRect(RECT *pRect)
+void AllegroBitmap::GetClipRect(GUIRect *pRect)
 {
     if (m_pBitmap && pRect)
     {
@@ -315,7 +315,7 @@ void AllegroBitmap::GetClipRect(RECT *pRect)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the clipping rectangle of the bitmap.
 
-void AllegroBitmap::SetClipRect(RECT *pRect)
+void AllegroBitmap::SetClipRect(GUIRect *pRect)
 {
     if (m_pBitmap)
     {
@@ -340,7 +340,7 @@ void AllegroBitmap::SetClipRect(RECT *pRect)
 //                  intersection of its current clipping rectangle and the rectangle
 //                  described by the passed-in rect. 
 
-void AllegroBitmap::AddClipRect(RECT *pRect)
+void AllegroBitmap::AddClipRect(GUIRect *pRect)
 {
     if (m_pBitmap)
     {

@@ -175,7 +175,7 @@ void GUIProgressBar::BuildBitmap(void)
         return;
 
     int Values[4];
-    RECT Rect;
+    GUIRect Rect;
     m_Skin->GetValue("ProgressBar_Indicator", "Top", Values, 4);
     SetRect(&Rect, Values[0], Values[1], Values[0]+Values[2], Values[1]+Values[3]);
 
@@ -229,7 +229,7 @@ void GUIProgressBar::Draw(GUIScreen *Screen)
         Count = Count / (float)(m_IndicatorImage->GetWidth()+m_Spacing);
 
     // Setup the clipping
-    RECT Rect = *GetRect();
+    GUIRect Rect = *GetRect();
     Rect.left++;
     Rect.right-=2;
     Screen->GetBitmap()->SetClipRect(&Rect);

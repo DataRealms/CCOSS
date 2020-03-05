@@ -99,7 +99,7 @@ public:
 // Description:     Draw a section of this bitmap onto another bitmap
 // Arguments:       Destination Bitmap, Position, Size
 
-    void Draw(GUIBitmap *pDestBitmap, int X, int Y, RECT *pRect);
+    void Draw(GUIBitmap *pDestBitmap, int X, int Y, GUIRect *pRect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +109,7 @@ public:
 //                  color-keyed pixels
 // Arguments:       Destination Bitmap, Position, Size
 
-    void DrawTrans(GUIBitmap *pDestBitmap, int X, int Y, RECT *pRect);
+    void DrawTrans(GUIBitmap *pDestBitmap, int X, int Y, GUIRect *pRect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -207,9 +207,9 @@ public:
 // Virtual Method:  GetClipRect
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the clipping rectangle of the bitmap.
-// Arguments:       Pointer to RECT struct to fill out.
+// Arguments:       Pointer to GUIRect struct to fill out.
 
-    virtual void GetClipRect(RECT *Rect);
+    virtual void GetClipRect(GUIRect *Rect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -218,7 +218,7 @@ public:
 // Description:     Sets the clipping rectangle of the bitmap.
 // Arguments:       Rectangle pointer. 0 for no clipping.
 
-    virtual void SetClipRect(RECT *pRect);
+    virtual void SetClipRect(GUIRect *pRect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -229,7 +229,7 @@ public:
 //                  described by the passed-in rect. 
 // Arguments:       Rectangle pointer.
 
-    virtual void AddClipRect(RECT *Rect);
+    virtual void AddClipRect(GUIRect *Rect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

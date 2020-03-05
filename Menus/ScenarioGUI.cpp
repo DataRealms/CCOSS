@@ -490,7 +490,7 @@ void ScenarioGUI::Update()
 		bool mouseIsInBox = false;
 
 		// Detect if mouse is inside UI boxes
-		RECT * r;
+		GUIRect * r;
 		r = m_pActivityBox->GetRect();
 		if (mouseX > r->left && mouseX < r->right &&
 			mouseY > r->top && mouseY < r->bottom)

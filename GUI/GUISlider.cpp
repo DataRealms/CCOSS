@@ -207,7 +207,7 @@ void GUISlider::BuildBitmap(void)
         Side = "BottomRightSlider";
 
     int Values[4];
-    RECT Rect;
+    GUIRect Rect;
     m_Skin->GetValue(Section, Side, Values, 4);
     SetRect(&Rect, Values[0], Values[1], Values[0]+Values[2], Values[1]+Values[3]);
 
@@ -234,7 +234,7 @@ void GUISlider::BuildBitmap(void)
 void GUISlider::BuildLine(const string Section, GUIBitmap *SrcImage)
 {
     int Values[4];
-    RECT Rect;
+    GUIRect Rect;
 
     // Get the size of the middle bit for determining part of the bitmap size
     m_Skin->GetValue(Section, "Middle", Values, 4);

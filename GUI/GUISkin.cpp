@@ -424,7 +424,7 @@ void GUISkin::BuildStandardRect(GUIBitmap *Dest, const std::string Section, int 
     int VLeft[4]; int VFiller[4]; int VRight[4];
     int VBottomLeft[4]; int VBottom[4]; int VBottomRight[4];
     int i, j;
-    RECT Rect;
+    GUIRect Rect;
 
     // Load the filename
     string Filename;

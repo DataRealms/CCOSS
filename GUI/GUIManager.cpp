@@ -466,7 +466,7 @@ float GUIManager::m_pTimer->GetElapsedSimTimeMS(void)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks if the mouse point is inside a rectangle.
 
-bool GUIManager::MouseInRect(RECT *Rect, int X, int Y)
+bool GUIManager::MouseInRect(GUIRect *Rect, int X, int Y)
 {
     if (!Rect)
         return false;

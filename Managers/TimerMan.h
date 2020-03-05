@@ -14,14 +14,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#if defined(_MSC_VER)
-#define RECT WINDOWS_RECT // grr typedef repeat fix
 #include <allegro.h>
-#include <winalleg.h>
-#undef RECT			
+#include <winalleg.h>	
+
 #undef GetClassName // grr MACRO NAMESPACE clash
 #undef PlaySound	// and again == windows is a parasite
-#endif // defined(WIN32)
 
 
 //#include "Entity.h"

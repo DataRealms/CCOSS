@@ -227,7 +227,7 @@ void GUIPanel::Draw(GUIScreen *Screen)
     // was already set by the parent, and the dimensions of this panel.
     Screen->GetBitmap()->AddClipRect(GetRect());
     // Now save this interseciton clipping rect so we can re-set it before each new child is drawn
-    RECT thisClip;
+    GUIRect thisClip;
     Screen->GetBitmap()->GetClipRect(&thisClip);
 
     // Draw children
@@ -655,7 +655,7 @@ int GUIPanel::GetHeight(void)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the rectangle of the panel.
 
-RECT *GUIPanel::GetRect(void)
+GUIRect *GUIPanel::GetRect(void)
 {
     SetRect(&m_Rect, m_X, m_Y, m_X+m_Width, m_Y+m_Height);
     

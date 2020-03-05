@@ -89,7 +89,7 @@ public:
 // Description:     Draws a bitmap onto the back buffer
 // Arguments:       Bitmap, destination position, source rectangle
 
-    void DrawBitmap(GUIBitmap *pGUIBitmap, int X, int Y, RECT *pRect);
+    void DrawBitmap(GUIBitmap *pGUIBitmap, int X, int Y, GUIRect *pRect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,7 @@ public:
 // Description:     Draws a bitmap onto the back buffer using the colorkey.
 // Arguments:       Bitmap, destination position, source rectangle
 
-    void DrawBitmapTrans(GUIBitmap *pGUIBitmap, int X, int Y, RECT *pRect);
+    void DrawBitmapTrans(GUIBitmap *pGUIBitmap, int X, int Y, GUIRect *pRect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

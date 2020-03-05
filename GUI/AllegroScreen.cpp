@@ -90,7 +90,7 @@ GUIBitmap * AllegroScreen::CreateBitmap(int Width, int Height)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws a bitmap onto the back buffer
 
-void AllegroScreen::DrawBitmap(GUIBitmap *pGUIBitmap, int destX, int destY, RECT *pRect)
+void AllegroScreen::DrawBitmap(GUIBitmap *pGUIBitmap, int destX, int destY, GUIRect *pRect)
 {
     if (!pGUIBitmap)
         return;
@@ -112,7 +112,7 @@ void AllegroScreen::DrawBitmap(GUIBitmap *pGUIBitmap, int destX, int destY, RECT
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws a bitmap onto the back buffer using the colorkey.
 
-void AllegroScreen::DrawBitmapTrans(GUIBitmap *pGUIBitmap, int destX, int destY, RECT *pRect)
+void AllegroScreen::DrawBitmapTrans(GUIBitmap *pGUIBitmap, int destX, int destY, GUIRect *pRect)
 {
     if (!pGUIBitmap)
         return;

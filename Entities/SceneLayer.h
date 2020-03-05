@@ -24,15 +24,6 @@
 
 namespace RTE
 {
-/*
-struct RECT
-{
-    long    left;
-    long    top;
-    long    right;
-    long    bottom;
-};
-*/
 
 class ContentFile;
 

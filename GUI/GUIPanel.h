@@ -458,7 +458,7 @@ public:
 // Description:     Gets the rectangle of the panel.
 // Arguments:       None.
 
-    RECT *GetRect(void);
+    GUIRect *GetRect(void);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -688,7 +688,7 @@ protected:
 private:
     
     std::vector<GUIPanel *>    m_Children;
-    RECT                    m_Rect;
+    GUIRect                    m_Rect;
     
     int                        m_ID;
     bool                    m_ValidRegion;

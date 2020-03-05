@@ -182,7 +182,7 @@ void GUICollectionBox::Draw(GUIScreen *Screen)
         // Panel
         else if (m_DrawType == Panel && m_DrawBackground) {
             if (m_DrawBitmap) {
-                RECT Rect;
+                GUIRect Rect;
                 SetRect(&Rect, 0, 0, m_Width, m_Height);
                 Screen->DrawBitmapTrans(m_DrawBitmap, m_X, m_Y, &Rect);
             }

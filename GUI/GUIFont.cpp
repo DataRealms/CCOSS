@@ -146,7 +146,7 @@ void GUIFont::Draw(GUIBitmap *Bitmap, int X, int Y, const std::string Text, unsi
 {
     unsigned char c;
     int i;
-    RECT Rect;
+    GUIRect Rect;
     GUIBitmap *Surf = m_CurrentBitmap;
     int initX = X;
     

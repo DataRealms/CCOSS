@@ -85,7 +85,7 @@ public:
 //                  A function pointer to a function that will be called and sent a string
 //                  with information about the progress of this DataModule's creation.
 
-    DataModule(std::string moduleName, void (*fpProgressCallback)(std::string, bool) = 0) { Clear(); Create(moduleName, fpProgressCallback); }
+    DataModule(std::string moduleName, ProgressCallback fpProgressCallback = 0) { Clear(); Create(moduleName, fpProgressCallback); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +121,7 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(std::string moduleName, void (*fpProgressCallback)(std::string, bool) = 0);
+    virtual int Create(std::string moduleName, ProgressCallback fpProgressCallback = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +135,7 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int ReadModuleProperties(std::string moduleName, void (*fpProgressCallback)(std::string, bool) = 0);
+    virtual int ReadModuleProperties(std::string moduleName, ProgressCallback fpProgressCallback = 0);
 
 
 

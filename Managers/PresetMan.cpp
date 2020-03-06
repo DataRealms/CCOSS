@@ -111,7 +111,7 @@ void PresetMan::Destroy()
 // Description:     Reads an entire data module and adds it to this. NOTE that official
 //                  modules can't be loaded after any non-official ones!
 
-bool PresetMan::LoadDataModule(string moduleName, bool official, void (*fpProgressCallback)(string, bool))
+bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallback fpProgressCallback)
 {
     if (moduleName.empty())
         return false;

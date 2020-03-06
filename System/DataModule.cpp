@@ -76,7 +76,7 @@ int DataModule::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the DataModule entity ready for use.
 
-int DataModule::Create(string moduleName, void (*fpProgressCallback)(std::string, bool))
+int DataModule::Create(string moduleName, ProgressCallback fpProgressCallback)
 {
     m_FileName = moduleName;
     m_ModuleID = g_PresetMan.GetModuleID(moduleName);
@@ -157,7 +157,7 @@ int DataModule::Create(string moduleName, void (*fpProgressCallback)(std::string
 // Description:     Read module specific properties from index.ini without processing 
 //					IncludeFiles and loading the whole module
 
-int DataModule::ReadModuleProperties(string moduleName, void (*fpProgressCallback)(std::string, bool))
+int DataModule::ReadModuleProperties(string moduleName, ProgressCallback fpProgressCallback)
 {
     m_FileName = moduleName;
     m_ModuleID = g_PresetMan.GetModuleID(moduleName);

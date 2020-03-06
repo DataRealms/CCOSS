@@ -3,6 +3,8 @@
 
 namespace RTE {
 
+	typedef std::function<void(std::string, bool)> ProgressCallback; //! Convenient name definition for the progress report callback function.
+
 	/// <summary>
 	/// Reads RTE objects from std::istreams.
 	/// </summary>
@@ -23,7 +25,7 @@ namespace RTE {
 		/// <param name="overwrites">Whether object definitions read here overwrite existing ones with the same names.</param>
 		/// <param name="fpProgressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this Reader's reading.</param>
 		/// <param name="failOK">Whether it's ok for the file to not be there, ie we're only trying to open, and if it's not there, then fail silently.</param>
-		Reader(const char *filename, bool overwrites = false, void(*fpProgressCallback)(std::string, bool) = 0, bool failOK = false) { Clear(); Create(filename, overwrites, fpProgressCallback, failOK); }
+		Reader(const char *filename, bool overwrites = false, ProgressCallback fpProgressCallback = 0, bool failOK = false) { Clear(); Create(filename, overwrites, fpProgressCallback, failOK); }
 
 		/// <summary>
 		/// Makes the Reader object ready for use.
@@ -36,7 +38,7 @@ namespace RTE {
 		/// <param name="fpProgressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this Reader's reading.</param>
 		/// <param name="failOK">Whether it's ok for the file to not be there, ie we're only trying to open, and if it's not there, then fail silently.</param>
 		/// <returns>An error return value signaling success or any particular failure.  Anything below 0 is an error signal.</returns>
-		virtual int Create(const char *filename, bool overwrites = false, void(*fpProgressCallback)(std::string, bool) = 0, bool failOK = false);
+		virtual int Create(const char *filename, bool overwrites = false, ProgressCallback fpProgressCallback = 0, bool failOK = false);
 #pragma endregion
 
 #pragma region Destruction
@@ -244,7 +246,7 @@ namespace RTE {
 		std::list<StreamInfo> m_StreamStack; //! Stack of stream and filepath pairs, each one representing a file opened to read from within another.
 		bool m_EndOfStreams; //! All streams have been depleted.
 
-		void(*m_fpReportProgress)(std::string, bool); //! Function pointer to report our reading progress to, by calling it and passing a descriptive string to it.
+		ProgressCallback m_fpReportProgress; //! Function pointer to report our reading progress to, by calling it and passing a descriptive string to it.
 
 		std::string m_FilePath; //! Currently used stream's filepath.
 		std::string m_FileName; //! Only the name of the currently read file, excluding the path.

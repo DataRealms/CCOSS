@@ -28,19 +28,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Reader::Create(const char *filename, bool overwrites, void(*fpProgressCallback)(std::string, bool), bool failOK) {
+	int Reader::Create(const char *filename, bool overwrites, ProgressCallback fpProgressCallback, bool failOK) {
 		m_FilePath = filename;
 
 		if (m_FilePath.empty()) { return -1; }
 
 		// Extract just the filename
 		int lastSlashPos = m_FilePath.find_last_of('/');
-		if (lastSlashPos == string::npos) { lastSlashPos = m_FilePath.find_last_of('\\'); }
+		if (lastSlashPos == std::string::npos) { lastSlashPos = m_FilePath.find_last_of('\\'); }
 		m_FileName = m_FilePath.substr(lastSlashPos + 1);
 
 		// Find the first slash so we can get the module name
 		int firstSlashPos = m_FilePath.find_first_of('/');
-		if (firstSlashPos == string::npos) { firstSlashPos = m_FilePath.find_first_of('\\'); }
+		if (firstSlashPos == std::string::npos) { firstSlashPos = m_FilePath.find_first_of('\\'); }
 
 		m_DataModuleName = m_FilePath.substr(0, firstSlashPos);
 		m_DataModuleID = g_PresetMan.GetModuleID(m_DataModuleName);
@@ -48,7 +48,7 @@ namespace RTE {
 		//RTEAssert(m_DataModuleID > 0, "Couldn't establish which DataModule we're reading from when creating Reader!");
 
 		m_pStream = new std::ifstream(filename);
-		if (!failOK) { RTEAssert(m_pStream->good(), "Failed to open data file \'" + string(filename) + "\'!"); }
+		if (!failOK) { RTEAssert(m_pStream->good(), "Failed to open data file \'" + std::string(filename) + "\'!"); }
 
 		m_OverwriteExisting = overwrites;
 
@@ -57,7 +57,7 @@ namespace RTE {
 		if (m_fpReportProgress && m_pStream->good()) {
 			char report[512];
 			sprintf_s(report, sizeof(report), "\t%s on line %i", m_FileName.c_str(), m_CurrentLine);
-			m_fpReportProgress(string(report), true);
+			m_fpReportProgress(std::string(report), true);
 		}
 		return m_pStream->good() ? 0 : -1;
 	}
@@ -228,7 +228,7 @@ namespace RTE {
 	std::string Reader::ReadPropValue() {
 		std::string fullLine = ReadLine();
 		int begin = fullLine.find_first_of('=');
-		std::string subStr = (begin == string::npos ? fullLine : fullLine.substr(begin + 1));
+		std::string subStr = (begin == std::string::npos ? fullLine : fullLine.substr(begin + 1));
 		return TrimString(subStr);
 	}
 
@@ -268,7 +268,7 @@ namespace RTE {
 					if (m_fpReportProgress && (m_CurrentLine % 100 == 0)) {
 						//char report[512];
 						sprintf_s(report, sizeof(report), "%s%s reading line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
-						m_fpReportProgress(string(report), false);
+						m_fpReportProgress(std::string(report), false);
 					}
 				}
 				indent = 0;
@@ -348,7 +348,7 @@ namespace RTE {
 		if (m_fpReportProgress) {
 			char report[512];
 			sprintf_s(report, sizeof(report), "%s%s on line %i includes:", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
-			m_fpReportProgress(string(report), false);
+			m_fpReportProgress(std::string(report), false);
 		}
 		// Push the current stream onto the StreamStack for future retrieval when the new include file has run out of data.
 		m_StreamStack.push_back(StreamInfo(m_pStream, m_FilePath, m_CurrentLine, m_PreviousIndent));
@@ -379,7 +379,7 @@ namespace RTE {
 
 		// Extract just the filename
 		int firstSlashPos = m_FilePath.find_first_of('/');
-		if (firstSlashPos == string::npos) { firstSlashPos = m_FilePath.find_first_of('\\'); }
+		if (firstSlashPos == std::string::npos) { firstSlashPos = m_FilePath.find_first_of('\\'); }
 		m_FileName = m_FilePath.substr(firstSlashPos + 1);
 
 		// Report that we're starting a new file
@@ -389,7 +389,7 @@ namespace RTE {
 
 			char report[512];
 			sprintf_s(report, sizeof(report), "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
-			m_fpReportProgress(string(report), true);
+			m_fpReportProgress(std::string(report), true);
 		}
 		// Eat away any fluff in the beginning of the new file
 		Eat();
@@ -404,7 +404,7 @@ namespace RTE {
 		if (m_fpReportProgress) {
 			char report[512];
 			sprintf_s(report, sizeof(report), "%s%s - done! %c", m_ReportTabs.c_str(), m_FileName.c_str(), -42);
-			m_fpReportProgress(string(report), false);
+			m_fpReportProgress(std::string(report), false);
 		}
 		if (m_StreamStack.empty()) {
 			m_EndOfStreams = true;
@@ -421,7 +421,7 @@ namespace RTE {
 
 		// Extract just the filename
 		int firstSlashPos = m_FilePath.find_first_of('/');
-		if (firstSlashPos == string::npos) { firstSlashPos = m_FilePath.find_first_of('\\'); }
+		if (firstSlashPos == std::string::npos) { firstSlashPos = m_FilePath.find_first_of('\\'); }
 
 		m_FileName = m_FilePath.substr(firstSlashPos + 1);
 
@@ -432,7 +432,7 @@ namespace RTE {
 
 			char report[512];
 			sprintf_s(report, sizeof(report), "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
-			m_fpReportProgress(string(report), true);
+			m_fpReportProgress(std::string(report), true);
 		}
 		// Set up the resumed file for reading again
 		Eat();

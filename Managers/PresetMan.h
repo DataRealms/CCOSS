@@ -144,7 +144,7 @@ public:
 //                  with information about the progress of this DataModule's creation.
 // Return value:    Whether the DataModule was read and added correctly.
 
-    bool LoadDataModule(std::string moduleName, bool official, void (*fpProgressCallback)(std::string, bool) = 0);
+    bool LoadDataModule(std::string moduleName, bool official, ProgressCallback fpProgressCallback = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

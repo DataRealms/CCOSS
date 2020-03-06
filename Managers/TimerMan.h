@@ -17,9 +17,9 @@
 #include <allegro.h>
 #include <winalleg.h>	
 
-#undef GetClassName // grr MACRO NAMESPACE clash
-#undef PlaySound	// and again == windows is a parasite
-
+// Windows.h defines these and they conflict with our methods so we need to undefine them manually.
+#undef GetClassName
+#undef PlaySound
 
 //#include "Entity.h"
 #include "Singleton.h"

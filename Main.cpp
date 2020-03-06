@@ -16,8 +16,7 @@
 ///\author  Copyright 2001 - 2006 Data Realms, LLC - http://www.datarealms.com
 ///\author  Daniel Tabar
 
-// Without this nested includes somewhere deep inside Allegro will summon winsock.h and it will conflict with winsock2.h from RakNet
-// and we can't move "Network.h" here because for whatever reasons everything will collapse
+// Without this nested includes somewhere deep inside Allegro will summon winsock.h and it will conflict with winsock2.h from RakNet.
 #define WIN32_LEAN_AND_MEAN
 
 #include "RTEManagers.h"
@@ -180,54 +179,14 @@ struct Star
     { m_pBitmap = pBitmap; m_Pos = pos; m_ScrollRatio = scrollRatio; m_Intensity = intensity; }
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// This handles when the quit or exit button is pressed on the window
-
-void QuitHandler(void)
-{
-    g_Quit = true;
-}
+/// <summary>
+/// This handles when the quit or exit button is pressed on the window.
+/// </summary>
+void QuitHandler(void){ g_Quit = true; }
 END_OF_FUNCTION(QuitHandler)
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// This updates the loading list [DEPRECATED DUE TO HIGH OVERHEAD, BUT KEPT HERE JUST IN CASE]
-
-void _LoadingSplashProgressReport(std::string reportString, bool newItem = false)
-{
-    if (g_pLoadingGUI)
-    {
-//        GUIProgressBar *pProgressBar = dynamic_cast<GUIProgressBar *>(g_pLoadingGUI->GetControl("ProgressBar"));
-        GUIListBox *pProgressBox = dynamic_cast<GUIListBox *>(g_pLoadingGUI->GetControl("ProgressBox"));
-
-        if (newItem || pProgressBox->GetItemList()->empty())
-        {
-            // Write out the last line to the log file before starting a new one
-            if (g_pLoadingLogWriter->WriterOK() && !pProgressBox->GetItemList()->empty())
-                *g_pLoadingLogWriter << pProgressBox->GetItemList()->back()->m_Name << "\n";
-
-            // Add the new report line
-            pProgressBox->AddItem(reportString);
-        }
-        else
-        {
-            int lastItemIndex = pProgressBox->GetItemList()->size() - 1;
-            GUIListPanel::Item *pItem = pProgressBox->GetItem(lastItemIndex);
-            pItem->m_Name = reportString;
-            pProgressBox->SetItemValues(lastItemIndex, *pItem);
-        }
-
-        g_UInputMan.Update();
-        g_pLoadingGUI->Update();
-        g_pLoadingGUI->Draw();
-        g_FrameMan.FlipFrameBuffers();
-
-        // Quit if we're commanded to during loading
-        if (g_Quit)
-            exit(0);
-    }
-}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -2536,40 +2495,34 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
     return true;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Implementation of the main function.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int main(int argc, char *argv[])
-{
-    ///////////////////////////////////////////////////////////////////
-    // Change to working directory (necessary for some platforms)
-    g_System.ChangeWorkingDirectory();
-	
+/// <summary>
+/// Implementation of the main function.
+/// </summary>
+int main(int argc, char *argv[]) {
+
     ///////////////////////////////////////////////////////////////////
     // Init Allegro
 
-/* This is obsolete; only applied when we were loading from a compressed Base.rte
+/* This is obsolete; only applied when we were loading from a compressed Base.rte // might come in handy sometime later actually
     // Load the Allegro config data from the base datafile
     DATAFILE *pConfigFile = load_datafile_object("Base.rte/Base.dat", "AConfig");
-    if (pConfigFile)
-    {
+    if (pConfigFile) {
         set_config_data((char *)pConfigFile->dat, pConfigFile->size);
         // The above copies the data, so this is safe to do
         unload_datafile_object(pConfigFile);
-    }
-*/
+    } */
+
     set_config_file("Base.rte/AllegroConfig.txt");
     allegro_init();
+
     // Enable the exit button on the window
     LOCK_FUNCTION(QuitHandler);
     set_close_button_callback(QuitHandler);
-    //set_window_title("Cortex Command");
 
     // Seed the random number generator
-// PUT BACK
     SeedRand();
-// REMOVE!
-//    srand(100);
 
     ///////////////////////////////////////////////////////////////////
     // Instantiate all the managers
@@ -2603,22 +2556,19 @@ int main(int argc, char *argv[])
 	g_NetworkClient.Create();
 
     int exitVar = 0;
-    if (!HandleMainArgs(argc, argv, exitVar))
-        return exitVar;
+    if (!HandleMainArgs(argc, argv, exitVar)) { return exitVar; }
+
     g_TimerMan.Create();
     g_PresetMan.Create();
     g_FrameMan.Create();
     g_AudioMan.Create();
 	g_GUISound.Create();
     g_UInputMan.Create();
-	if (g_NetworkServer.IsServerModeEnabled())
-		g_UInputMan.SetMultiplayerMode(true);
+	if (g_NetworkServer.IsServerModeEnabled()) { g_UInputMan.SetMultiplayerMode(true); }
     g_ConsoleMan.Create(g_LogToCli);
     g_ActivityMan.Create();
     g_MovableMan.Create();
     g_MetaMan.Create();
-
-	//new AchievementMan();
 
     ///////////////////////////////////////////////////////////////////
     // Main game driver
@@ -2626,26 +2576,16 @@ int main(int argc, char *argv[])
 	string fullscreenDriver = "";
 	string windowedDriver = "";
 
-	if (g_SettingsMan.ForceSoftwareGfxDriver())
-		fullscreenDriver = "MSG: Using software DirectX fullscreen driver!";
-	if (g_SettingsMan.ForceSafeGfxDriver())
-		fullscreenDriver = "MSG: Using safe DirectX fullscrteen driver!";
-
-	if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) 
-		windowedDriver = "MSG: Using overlay DirectX windowed driver!";
-	if (g_SettingsMan.ForceNonOverlayedWindowGfxDriver()) 
-		windowedDriver = "MSG: Using non-overlay DirectX windowed driver!";
-	if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) 
-		windowedDriver = "MSG: Using DirectX fullscreen-windowed driver!";
-
-	if (fullscreenDriver != "")
-		g_ConsoleMan.PrintString(fullscreenDriver);
-
-	if (windowedDriver != "")
-		g_ConsoleMan.PrintString(windowedDriver);
-
-	if (g_NetworkServer.IsServerModeEnabled())
-	{
+	if (g_SettingsMan.ForceSoftwareGfxDriver()) { fullscreenDriver = "MSG: Using software DirectX fullscreen driver!"; }	
+	if (g_SettingsMan.ForceSafeGfxDriver()) { fullscreenDriver = "MSG: Using safe DirectX fullscreen driver!"; }
+	if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) { windowedDriver = "MSG: Using overlay DirectX windowed driver!"; }
+	if (g_SettingsMan.ForceNonOverlayedWindowGfxDriver()) { windowedDriver = "MSG: Using non-overlay DirectX windowed driver!"; }
+	if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) { windowedDriver = "MSG: Using DirectX fullscreen-windowed driver!"; }
+		
+	if (fullscreenDriver != "") { g_ConsoleMan.PrintString(fullscreenDriver); }
+	if (windowedDriver != "") { g_ConsoleMan.PrintString(windowedDriver); }
+		
+	if (g_NetworkServer.IsServerModeEnabled()) {
 		g_NetworkServer.Start();
 		g_FrameMan.SetStoreNetworkBackBuffer(true);
 
@@ -2655,29 +2595,19 @@ int main(int argc, char *argv[])
 	}
 
     InitMainMenu();
-    if (g_SettingsMan.PlayIntro() && !g_NetworkServer.IsServerModeEnabled())
-        PlayIntroTitle();
+
+    if (g_SettingsMan.PlayIntro() && !g_NetworkServer.IsServerModeEnabled()) { PlayIntroTitle(); }
 
 	// NETWORK Create multiplayer lobby activity to start as default if server is running
-	if (g_NetworkServer.IsServerModeEnabled())
-	{
-		EnterMultiplayerLobby();
-	}
+	if (g_NetworkServer.IsServerModeEnabled()) { EnterMultiplayerLobby(); }
 
     // If we fail to start/reset the activity, then revert to the intro/menu
-    if (!ResetActivity())
-        PlayIntroTitle();
+    if (!ResetActivity()) { PlayIntroTitle(); }
 	
     RunGameLoop();
 
     ///////////////////////////////////////////////////////////////////
     // Clean up
-
-    // Save settings
-	// We don't need to save settings every time the game ends, sometimes it corrupts settings
-	// and the game fails to start
-	//Writer writer("Base.rte/Settings.ini");
-    //g_SettingsMan.Save(writer);
 
 	g_NetworkClient.Destroy();
 	g_NetworkServer.Destroy();
@@ -2696,8 +2626,6 @@ int main(int argc, char *argv[])
     g_LuaMan.Destroy();
     ContentFile::FreeAllLoaded();
     g_ConsoleMan.Destroy();
-
-	//g_AchievementMan.Destroy();
 
 #ifdef DEBUG_BUILD
     // Dump out the info about how well memory cleanup went
@@ -2718,4 +2646,4 @@ void ResetRTE() { g_ResetRTE = true; }
 /// <returns>Whether the RTE is about to reset next iteration of the loop or not.</returns>
 bool IsResettingRTE() { return g_ResetRTE; }
 
-END_OF_MAIN();
+END_OF_MAIN()

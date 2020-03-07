@@ -24,6 +24,7 @@
 
 #include "ConsoleMan.h"
 
+#include "LoadingGUI.h"
 #include "SettingsMan.h"
 
 namespace RTE {

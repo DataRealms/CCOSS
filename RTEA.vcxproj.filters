@@ -457,6 +457,9 @@
     <ClInclude Include="GUI\Interface.h">
       <Filter>GUI</Filter>
     </ClInclude>
+    <ClInclude Include="Menus\LoadingGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RTEA.rc">
@@ -863,6 +866,9 @@
     </ClCompile>
     <ClCompile Include="System\RTEError.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\LoadingGUI.cpp">
+      <Filter>Menus</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

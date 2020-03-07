@@ -19,20 +19,19 @@
 // Without this nested includes somewhere deep inside Allegro will summon winsock.h and it will conflict with winsock2.h from RakNet.
 #define WIN32_LEAN_AND_MEAN
 
+#include "System.h"
+
 #include "RTEManagers.h"
 #include "MetaMan.h"
 #include "ConsoleMan.h"
-#include "GUI.h"
-#include "GUICollectionBox.h"
-#include "GUIProgressBar.h"
-#include "GUIListBox.h"
-#include "GUILabel.h"
-#include "AllegroInput.h"
-#include "AllegroScreen.h"
-#include "AllegroBitmap.h"
+
+#include "GUI/GUI.h"
+#include "GUI/AllegroBitmap.h"
+#include "LoadingGUI.h"
 #include "MainMenuGUI.h"
 #include "ScenarioGUI.h"
 #include "MetagameGUI.h"
+
 #include "DataModule.h"
 #include "SceneLayer.h"
 #include "MOSParticle.h"
@@ -40,17 +39,9 @@
 #include "Controller.h"
 
 #include "MultiplayerServerLobby.h"
-
-#include "Network.h"
-
-#include "Reader.h"
-#include "Writer.h"
-#include "System.h"
-
-#include "unzip.h"
-
 #include "NetworkServer.h"
 #include "NetworkClient.h"
+#include "Network.h"
 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
@@ -139,15 +130,6 @@ int g_StationOffsetX, g_StationOffsetY;
 
 MainMenuGUI *g_pMainMenuGUI = 0;
 ScenarioGUI *g_pScenarioGUI = 0;
-GUIControlManager *g_pLoadingGUI = 0;
-
-BITMAP * g_pLoadingGUIBitmap = 0;
-int g_LoadingGUIPosX = 0;
-int g_LoadingGUIPosY = 0;
-
-Writer *g_pLoadingLogWriter = 0;
-AllegroInput *g_pGUIInput = 0;
-AllegroScreen *g_pGUIScreen = 0;
 Controller *g_pMainMenuController = 0;
 
 enum StarSize
@@ -185,328 +167,6 @@ struct Star
 void QuitHandler(void){ g_Quit = true; }
 END_OF_FUNCTION(QuitHandler)
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// This updates the loading list. An optimizied version compared to previous one
-
-void LoadingSplashProgressReport(std::string reportString, bool newItem = false)
-{
-	if (g_pLoadingGUI)
-	{
-		g_UInputMan.Update();
-		if (newItem)
-		{
-			// Write out the last line to the log file before starting a new one
-			if (g_pLoadingLogWriter->WriterOK())
-				*g_pLoadingLogWriter << reportString << "\n";
-
-			// Scroll bitmap upwards
-			if (g_pLoadingGUIBitmap)
-				blit(g_pLoadingGUIBitmap, g_pLoadingGUIBitmap, 2, 12, 2, 2, g_pLoadingGUIBitmap->w - 3, g_pLoadingGUIBitmap->h - 12);
-		}
-		if (g_pLoadingGUIBitmap)
-		{
-			AllegroBitmap bmp(g_pLoadingGUIBitmap);
-			// Clear current line
-			rectfill(g_pLoadingGUIBitmap, 2, g_pLoadingGUIBitmap->h - 12, g_pLoadingGUIBitmap->w - 3, g_pLoadingGUIBitmap->h - 3, 54);
-			// Print new line
-			g_FrameMan.GetSmallFont()->DrawAligned(&bmp, 5, g_pLoadingGUIBitmap->h - 12, reportString.c_str(), GUIFont::Left);
-			// DrawAligned - MaxWidth is useless here, so we're just drawing lines manually
-			vline(g_pLoadingGUIBitmap, g_pLoadingGUIBitmap->w - 2, g_pLoadingGUIBitmap->h - 12, g_pLoadingGUIBitmap->h - 2, 33);
-			vline(g_pLoadingGUIBitmap, g_pLoadingGUIBitmap->w - 1, g_pLoadingGUIBitmap->h - 12, g_pLoadingGUIBitmap->h - 2, 33);
-
-			// Draw onto current frame buffer
-			blit(g_pLoadingGUIBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, g_LoadingGUIPosX, g_LoadingGUIPosY, g_pLoadingGUIBitmap->w, g_pLoadingGUIBitmap->h);
-
-			g_FrameMan.FlipFrameBuffers();
-		}
-
-		// Quit if we're commanded to during loading
-		if (g_Quit)
-			exit(0);
-	}
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Finding and loading all DataModule:s
-
-bool LoadDataModules()
-{
-    // Loading splash screen
-    g_FrameMan.ClearBackBuffer32();
-    SceneLayer *pLoadingSplash = new SceneLayer();
-    pLoadingSplash->Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.bmp"), false, Vector(), true, false, Vector(1.0, 0));
-
-    // hardcoded offset to make room for the loading box only if DisableLoadingScreen is false.
-	if (!g_SettingsMan.DisableLoadingScreen()) {
-		pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 110, 0));
-	} else {
-		pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 14, 0));
-	}
-
-    // Draw onto wrapped strip centered vertically on the screen
-	Box splashBox(Vector(0, (g_FrameMan.GetResY() - pLoadingSplash->GetBitmap()->h) / 2), g_FrameMan.GetResX(), pLoadingSplash->GetBitmap()->h);
-    pLoadingSplash->Draw(g_FrameMan.GetBackBuffer32(), splashBox);
-    delete pLoadingSplash;
-    pLoadingSplash = 0;
-
-    g_FrameMan.FlipFrameBuffers();
-
-    // Set up the loading GUI
-    if (!g_pLoadingGUI)
-    {
-        g_pLoadingGUI = new GUIControlManager();
-// TODO: This should be using the 32bpp main menu skin, but isn't becuase it needs the config of the base for its listbox
-// Can get away with this hack for now because the list box that the laoding menu uses displays ok when drawn on a 32bpp buffer,
-// when it's 8bpp internally, since it does not use any masked_blit calls to draw listboxes.
-// Note also how the GUIScreen passed in here has been created with an 8bpp bitmap, since that is what determines what the gui manager uses internally
-        if(!g_pLoadingGUI->Create(g_pGUIScreen, g_pGUIInput, "Base.rte/GUIs/Skins/MainMenu", "LoadingSkin.ini"))
-            RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu/LoadingSkin.ini");
-        g_pLoadingGUI->Load("Base.rte/GUIs/LoadingGUI.ini");
-    }
-    // Place and clear the sectionProgress box
-    dynamic_cast<GUICollectionBox *>(g_pLoadingGUI->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
-    GUIListBox *pBox = dynamic_cast<GUIListBox *>(g_pLoadingGUI->GetControl("ProgressBox"));
-    // Make the box a bit bigger if there's room in higher, HD resolutions
-    if (g_FrameMan.GetResX() >= 960)
-    {
-        // Make the loading progress box fill the right third of the screen
-        pBox->Resize((g_FrameMan.GetResX() / 3) - 12, pBox->GetHeight());
-        pBox->SetPositionRel(g_FrameMan.GetResX() - pBox->GetWidth() - 12, (g_FrameMan.GetResY() / 2) - (pBox->GetHeight() / 2));
-    }
-    // Legacy positioning and sizing when running low resolutions
-    else
-        pBox->SetPositionRel(g_FrameMan.GetResX() - pBox->GetWidth() - 12, (g_FrameMan.GetResY() / 2) - (pBox->GetHeight() / 2));
-    pBox->ClearList();
-
-	if (!g_SettingsMan.DisableLoadingScreen())
-	{
-		//New mechanism to speed up loading times as it turned out that a massive amount of time is spent
-		// to update UI control.
-		if (!g_pLoadingGUIBitmap)
-		{
-			pBox->SetVisible(false);
-			g_pLoadingGUIBitmap = create_bitmap_ex(8, pBox->GetWidth(), pBox->GetHeight());
-			clear_to_color(g_pLoadingGUIBitmap, 54);
-			rect(g_pLoadingGUIBitmap, 0, 0, pBox->GetWidth() - 1, pBox->GetHeight() - 1, 33);
-			rect(g_pLoadingGUIBitmap, 1, 1, pBox->GetWidth() - 2, pBox->GetHeight() - 2, 33);
-			g_LoadingGUIPosX = pBox->GetXPos();
-			g_LoadingGUIPosY = pBox->GetYPos();
-		}
-	}
-
-    // Create the loading log writer
-    if (!g_pLoadingLogWriter)
-        g_pLoadingLogWriter = new Writer("LogLoading.txt");
-
-    // Clear out the PresetMan and all its DataModules
-    g_PresetMan.Destroy();
-    g_PresetMan.Create();
-
-    // Unzip all *.rte.zip files found in the install dir, overwriting all files already existing
-    // This will cause extracted and available data modules to be updated to whatever is within their corresponding zip files
-    // The point of this is that it facilitates downloaded mods being loaded without having to be manually unzipped first by the user
-    al_ffblk zippedModuleInfo;
-    unzFile zipFile;
-    for (int result = al_findfirst("*.rte.zip", &zippedModuleInfo, FA_ALL); result == 0; result = al_findnext(&zippedModuleInfo))
-    {
-        // Report that we are attempting to unzip this thing
-        LoadingSplashProgressReport("Unzipping " + string(zippedModuleInfo.name), true);
-// THIS IS WRONG - rely on the working directory instead; this hard method will fail when the exe is not in the install dir like when running in visual studio
-/*
-        // Get the absolute path to the zip, which lies next to the game exe in the same dir
-        get_executable_name(zipFilePath, sizeof(zipFilePath));
-        // Replace the exe filename with the zip one we found while enumerating all rte.zip files
-        replace_filename(zipFilePath, zipFilePath, zippedModuleInfo.name, sizeof(zipFilePath));
-*/
-
-        // Try to open the zipped and unzip it into place as an exposed data module
-        if (strlen(zippedModuleInfo.name) > 0 && (zipFile = unzOpen(zippedModuleInfo.name)))
-        {
-            // Go through and extract every file inside this zip, overwriting every colliding file that already exists in the install dir 
-
-            // Get info about the zip file
-            unz_global_info zipFileInfo;
-            if (unzGetGlobalInfo(zipFile, &zipFileInfo) != UNZ_OK)
-                LoadingSplashProgressReport("Could not read global file info of: " + string(zippedModuleInfo.name), true);
-
-            // Buffer to hold data read from the zip file.
-			char fileBuffer[c_FileBufferSize];
-
-            // Loop to extract all files
-            bool abortExtract = false;
-            for (uLong i = 0; i < zipFileInfo.number_entry && !abortExtract; ++i)
-            {
-                // Get info about current file.
-                unz_file_info fileInfo;
-                char outputFileName[c_MaxFileName];
-                if (unzGetCurrentFileInfo(zipFile, &fileInfo, outputFileName, c_MaxFileName, NULL, 0, NULL, 0) != UNZ_OK)
-                    LoadingSplashProgressReport("Could not read file info of: " + string(outputFileName), true);
-
-                // Check if the directory we are trying to extract into exists, and if not, create it
-                char outputDirName[c_MaxFileName];
-                char parentDirName[c_MaxFileName];
-                // Copy the file path to a separate dir path
-                strcpy_s(outputDirName, sizeof(outputDirName), outputFileName);
-                // Find the last slash in the dir path, so we can cut off everything after that (ie the actual filename), and only have the directory path left
-                char *pSlashPos = strrchr(outputDirName, '/');
-                // Try to find the other kind of slash if we found none
-                if (!pSlashPos)
-                    pSlashPos = strrchr(outputDirName, '\\');
-                // Now that we have the slash position, terminate the directory path string right after there
-                if (pSlashPos)
-                    *(++pSlashPos) = 0;
-
-                // If that file's directory doesn't exist yet, then create it, and all its parent directories above if need be
-                for (int nested = 0; !file_exists(outputDirName, FA_DIREC, 0) && pSlashPos; ++nested)
-                {
-                    // Keep making new working copies of the path that we can dice up
-                    strcpy_s(parentDirName, sizeof(parentDirName), outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
-                    // Start off at the beginning
-                    pSlashPos = parentDirName;
-                    for (int j = 0; j <= nested && pSlashPos; ++j)
-                    {
-                        // Find the first slash so we can isolate the folders in the hierarchy, in descending seniority
-                        pSlashPos = strchr(pSlashPos, '/');
-                        // If we can't find any more slashes, then quit
-                        if (!pSlashPos)
-                            break;
-                        // If we did find a slash, go to one past it slash and try to find the next one
-                        pSlashPos++;
-                    }
-                    // No more nested folders to make
-                    if (!pSlashPos)
-                        break;
-                    // Terminate there so we are making the most senior folder
-                    *(pSlashPos) = 0;
-                    g_System.MakeDirectory(parentDirName);
-                }
-
-                // Check if this entry is a directory or file
-                if (outputFileName[strlen(outputFileName) - 1] == '/' || outputFileName[strlen(outputFileName) - 1] == '\\')
-                {
-                    // Entry is a directory, so create it.
-                    LoadingSplashProgressReport("Creating Dir: " + string(outputFileName), true);
-                    g_System.MakeDirectory(outputFileName);
-                }
-                else
-                // So it's a file
-                {
-                    // Validate so only certain filetypes are extracted:  .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3
-                    // Get the file extension
-                    string extension(get_extension(outputFileName));
-                    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-                    const char *ext = extension.c_str();
-                    // Validate only certain filetypes to be included! .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3
-                    if (!(strcmp(ext, "ini") == 0 || strcmp(ext, "txt") == 0 || strcmp(ext, "lua") == 0 || strcmp(ext, "cfg") == 0 ||
-                          strcmp(ext, "bmp") == 0 || strcmp(ext, "png") == 0 || strcmp(ext, "jpg") == 0 || strcmp(ext, "jpeg") == 0 || 
-                          strcmp(ext, "wav") == 0 || strcmp(ext, "ogg") == 0 || strcmp(ext, "mp3") == 0 ||
-                          strcmp(ext, "xlsx") == 0 || strcmp(ext, "rtf") == 0 || strcmp(ext, "dat") == 0)) 
-                    {
-                        LoadingSplashProgressReport("Skipping: " + string(outputFileName) + " - bad extension!", true);
-
-                        // Keep going though!!
-                        // Close the read file within the zip archive
-                        unzCloseCurrentFile(zipFile);
-                        // Go the the next entry listed in the zip file.
-                        if ((i + 1) < zipFileInfo.number_entry)
-                        {
-                            if (unzGoToNextFile(zipFile) != UNZ_OK)
-                            {
-                                LoadingSplashProgressReport("Could not read next file inside zip " + string(zippedModuleInfo.name) +  " - Aborting extraction!", true);
-                                abortExtract = true;
-                                break;
-                            }
-                        }
-                        // Onto the next file
-                        continue;
-                    }
-
-                    // Entry is a file, so extract it.
-                    LoadingSplashProgressReport("Extracting: " + string(outputFileName), true);
-                    if (unzOpenCurrentFile(zipFile) != UNZ_OK)
-                        LoadingSplashProgressReport("Could not open file within " + string(zippedModuleInfo.name), true);
-
-                    // Open a file to write out the data.
-                    FILE *outputFile = fopen(outputFileName, "wb");
-                    if (outputFile == NULL)
-                        LoadingSplashProgressReport("Could not open/create destination file while unzipping " + string(zippedModuleInfo.name), true);
-
-                    // Write the entire file out, reading in buffer size chunks and spitting them out to the output stream
-                    int bytesRead = 0;
-                    int64_t totalBytesRead = 0;
-                    do
-                    {
-                        // Read a chunk
-                        bytesRead = unzReadCurrentFile(zipFile, fileBuffer, c_FileBufferSize);
-                        // Add to total tally
-                        totalBytesRead += bytesRead;
-
-                        // Sanity check how damn big this file we're writing is becoming.. could prevent zip bomb exploits: http://en.wikipedia.org/wiki/Zip_bomb
-                        if (totalBytesRead >= c_MaxUnzippedFileSize)
-                        {
-                            LoadingSplashProgressReport("File inside zip " + string(zippedModuleInfo.name) +  " is turning out WAY TOO LARGE - Aborting extraction!", true);
-                            abortExtract = true;
-                            break;
-                        }
-
-                        // Write data to the output file
-                        if (bytesRead > 0)
-                            fwrite(fileBuffer, bytesRead, 1, outputFile);
-                        else if (bytesRead < 0)
-                        {
-                            LoadingSplashProgressReport("Error while reading zip " + string(zippedModuleInfo.name), true);
-                            abortExtract = true;
-                            break;
-                        }
-                    }
-                    // Keep going while bytes are still being read (0 means end of file)
-                    while (bytesRead > 0 && outputFile);
-
-                    // Close the output file
-                    fclose(outputFile);
-                    // Close the read file within the zip archive
-                    unzCloseCurrentFile(zipFile);
-                }
-
-                // Go the the next entry listed in the zip file.
-                if ((i + 1) < zipFileInfo.number_entry)
-                {
-                    if (unzGoToNextFile(zipFile) != UNZ_OK)
-                    {
-                        LoadingSplashProgressReport("Could not read next file inside zip " + string(zippedModuleInfo.name) +  " - Aborting extraction!", true);
-                        break;
-                    }
-                }
-            }
-
-            // Close the zip file we've opened
-            unzClose(zipFile);
-
-            // DELETE the zip in the install dir after decompression
-            // (whether successful or not - any rte.zip in the install dir is throwaway and shouldn't keep failing each load in case they do fail)
-            LoadingSplashProgressReport("Deleting extracted Data Module zip: " + string(zippedModuleInfo.name), true);
-            delete_file(zippedModuleInfo.name);
-        }
-        // Indicate that the unzip went awry
-        else
-        {
-            // DELETE the zip in the install dir after decompression
-            // (whether successful or not - any rte.zip in the install dir is throwaway and shouldn't keep failing each load in case they do fail)
-            LoadingSplashProgressReport("FAILED to unzip " + string(zippedModuleInfo.name) + " - deleting it now!", true);
-            delete_file(zippedModuleInfo.name);
-        }
-    }
-    // Close the file search to avoid memory leaks
-    al_findclose(&zippedModuleInfo);
-
-    return true;
-}
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Load and init the Main menu
 
@@ -514,13 +174,6 @@ bool InitMainMenu()
 {
     // Load the palette
     g_FrameMan.LoadPalette("Base.rte/palette.bmp");
-
-    // Create the Main Menu GUI
-    g_pGUIInput = new AllegroInput(-1);
-    g_pGUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32());
-
-    // Have to load the data modules in here becuase it needs the GUIScreen and input for the loading GUI
-    LoadDataModules();
 
     // Create the main menu interface
 	g_pMainMenuGUI = new MainMenuGUI();
@@ -2432,6 +2085,7 @@ int main(int argc, char *argv[]) {
 		g_AudioMan.SetMusicVolume(0);
 	}
 
+	g_LoadingGUI.InitLoadingScreen();
     InitMainMenu();
 
     if (g_SettingsMan.PlayIntro() && !g_NetworkServer.IsServerModeEnabled()) { PlayIntroTitle(); }

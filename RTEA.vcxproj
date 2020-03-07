@@ -224,6 +224,7 @@
     <ClInclude Include="Managers\NetworkClient.h" />
     <ClInclude Include="Managers\NetworkMessages.h" />
     <ClInclude Include="Managers\NetworkServer.h" />
+    <ClInclude Include="Menus\LoadingGUI.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
@@ -367,6 +368,7 @@
     <ClCompile Include="GUI\GUISound.cpp" />
     <ClCompile Include="Managers\NetworkClient.cpp" />
     <ClCompile Include="Managers\NetworkServer.cpp" />
+    <ClCompile Include="Menus\LoadingGUI.cpp" />
     <ClCompile Include="System\StandardIncludes.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">StandardIncludes.h</PrecompiledHeaderFile>

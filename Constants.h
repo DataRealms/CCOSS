@@ -3,12 +3,6 @@
 
 namespace RTE {
 
-#pragma region Buffer Constants
-	static constexpr unsigned int c_MaxFileName = 256; //! Maximum length of output file directory+name string.
-	static constexpr unsigned int c_FileBufferSize = 8192; //! Buffer to hold data read from the zip file.
-	static constexpr unsigned int c_MaxUnzippedFileSize = 104857600; //! Maximum size of single file being extracted from zip archive.
-#pragma endregion
-
 #pragma region Graphics Constants
 	static constexpr unsigned int c_PaletteEntriesNumber = 256; //! Number of indexes in the graphics palette.
 	static constexpr unsigned int c_MOIDLayerBitDepth = 16; //! Bit depth of MOID layer bitmap.

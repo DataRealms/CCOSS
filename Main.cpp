@@ -11,10 +11,12 @@
 
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\*/
 
-///\file    Main.cpp
-///         Main driver implementation of the Retro Terrain Engine.
-///\author  Copyright 2001 - 2006 Data Realms, LLC - http://www.datarealms.com
-///\author  Daniel Tabar
+/// <summary>
+/// Main driver implementation of the Retro Terrain Engine.
+/// Data Realms, LLC - http://www.datarealms.com
+/// Cortex Command Center - https://discord.gg/SdNnKJN
+/// Cortex Command Community Project - https://github.com/cortex-command-community
+/// </summary>
 
 // Without this nested includes somewhere deep inside Allegro will summon winsock.h and it will conflict with winsock2.h from RakNet.
 #define WIN32_LEAN_AND_MEAN
@@ -47,11 +49,13 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
 using namespace RTE;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Globals
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum TITLESEQUENCE
-{
+/// <summary>
+/// Global variables.
+/// </summary>
+
+enum TITLESEQUENCE {
     START = 0,
     // DRL Logo
     LOGOFADEIN,
@@ -102,8 +106,7 @@ enum TITLESEQUENCE
 };
 
 // Intro slides
-enum SLIDES
-{
+enum SLIDES {
     SLIDEPAST = 0,
     SLIDENOW,
     SLIDEVR,
@@ -126,24 +129,23 @@ int g_IntroState = START;
 int g_TeamCount = 2;
 int g_PlayerCount = 3;
 int g_DifficultySetting = 4;
-int g_StationOffsetX, g_StationOffsetY;
+int g_StationOffsetX;
+int g_StationOffsetY;
 
 MainMenuGUI *g_pMainMenuGUI = 0;
 ScenarioGUI *g_pScenarioGUI = 0;
 Controller *g_pMainMenuController = 0;
 
-enum StarSize
-{
+enum StarSize {
     StarSmall = 0,
     StarLarge,
     StarHuge,
 };
 
-struct Star
-{
+struct Star {
     // Bitmap representation
     BITMAP *m_pBitmap;
-    // Center locaiton on screen
+    // Center location on screen
     Vector m_Pos;
     // Bitmap offset
 //    int m_Offset;
@@ -155,8 +157,7 @@ struct Star
     StarSize m_Size;
 
     Star() { m_pBitmap = 0; m_Pos.Reset(); m_ScrollRatio = 1.0; m_Intensity = 1.0; m_Size = StarSmall; }
-    Star(BITMAP *pBitmap, Vector &pos, float scrollRatio, float intensity)
-    { m_pBitmap = pBitmap; m_Pos = pos; m_ScrollRatio = scrollRatio; m_Intensity = intensity; }
+    Star(BITMAP *pBitmap, Vector &pos, float scrollRatio, float intensity) { m_pBitmap = pBitmap; m_Pos = pos; m_ScrollRatio = scrollRatio; m_Intensity = intensity; }
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,14 +165,16 @@ struct Star
 /// <summary>
 /// This handles when the quit or exit button is pressed on the window.
 /// </summary>
-void QuitHandler(void){ g_Quit = true; }
+void QuitHandler(void) { g_Quit = true; }
 END_OF_FUNCTION(QuitHandler)
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Load and init the Main menu
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool InitMainMenu()
-{
+/// <summary>
+/// Load and initialize the Main Menu.
+/// </summary>
+/// <returns></returns>
+bool InitMainMenu() {
     // Load the palette
     g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 
@@ -189,10 +192,12 @@ bool InitMainMenu()
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Load all Managers
-
+/// <summary>
+/// Reset the current activity.
+/// </summary>
+/// <returns></returns>
 bool ResetActivity()
 {
     g_ResetActivity = false;
@@ -203,112 +208,70 @@ bool ResetActivity()
     g_AudioMan.StopAll();
 
     // Quit if we should
-    if (g_Quit)
-        return false;
+	if (g_Quit) { return false; }
 
-// TODO: Deal with GUI resetting here!$@#")
-
+	// TODO: Deal with GUI resetting here!$@#")
     // Clear out all MO's
     g_MovableMan.PurgeAllMOs();
     // Have to reset TimerMan before creating anything else because all timers are reset against it
     g_TimerMan.ResetTime();
-/*
-    // Load all the modules anew
-    LoadDataModules();
 
-//    g_PresetMan.Create();
-//    g_AudioMan.Create();
-
-    char report[512];
-    sprintf_s(report, sizeof(report), "Building Scene: \"%s\"...", g_ActivityMan.GetActivity()->GetSceneName().c_str());
-    LoadingSplashProgressReport(report, true);
-
-    g_SceneMan.LoadScene(g_ActivityMan.GetActivity()->GetSceneName());
-
-    sprintf_s(report, sizeof(report), "\tDone! %c", -42);
-    LoadingSplashProgressReport(report, true);
-    LoadingSplashProgressReport(" ", true);
-
-    // Ask user to press key before start
-    LoadingSplashProgressReport("PRESS ANY KEY TO START!", true);
-    Timer blinkTimer;
-    do
-    {
-        sprintf_s(report, sizeof(report), "PRESS ANY KEY TO START! %c", blinkTimer.AlternateSim(300) ? -65 : ' ');
-        LoadingSplashProgressReport(report, false);
-
-        // Reset the key press states
-        g_UInputMan.Update();
-        g_TimerMan.Update();
-        rest(30);
-    }
-    while (!g_UInputMan.AnyPress() && !g_Quit);
-
-*/
     g_FrameMan.LoadPalette("Base.rte/palette.bmp");
     g_FrameMan.FlipFrameBuffers();
 
-    // Reset timerman again after loading so there's no residual delay
+    // Reset TimerMan again after loading so there's no residual delay
     g_TimerMan.ResetTime();
-    // Enable time averaging since it helps with animation jerkyness
+    // Enable time averaging since it helps with animation jerkiness
     g_TimerMan.EnableAveraging(true);
     // Unpause
     g_TimerMan.PauseSim(false);
 
-// TODO: Remove
-//    g_ActivityMan.GetActivity()->SetActivityState(Activity::TESTING);
-    // Start the game with previous settings
     int error = g_ActivityMan.RestartActivity();
-
-    if (error >= 0)
-        g_InActivity = true;
-    // Somehting went wrong when restarting, so drop out to scenario menu and open the console to show the error messages
-    else
-    {
-        g_InActivity = false;
-        g_ActivityMan.PauseActivity();
-        g_ConsoleMan.SetEnabled(true);
-        g_IntroState = MAINTOSCENARIO;
-        return false;
-    }
-
+	if (error >= 0) {
+		g_InActivity = true;
+		// Something went wrong when restarting, so drop out to scenario menu and open the console to show the error messages
+	} else {
+		g_InActivity = false;
+		g_ActivityMan.PauseActivity();
+		g_ConsoleMan.SetEnabled(true);
+		g_IntroState = MAINTOSCENARIO;
+		return false;
+	}
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Start the simulation back up after being paused
+/// <summary>
+/// Start the simulation back up after being paused.
+/// </summary>
+void ResumeActivity() {
+	if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NOTSTARTED) {
+		g_Quit = false;
+		g_InActivity = true;
+		g_ResumeActivity = false;
 
-void ResumeActivity()
-{
-    if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NOTSTARTED)
-    {
-        g_Quit = false;
-        g_InActivity = true;
-        g_ResumeActivity = false;
+		g_FrameMan.ClearBackBuffer8();
+		g_FrameMan.FlipFrameBuffers();
+		// Load in-game palette
+		g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 
-        g_FrameMan.ClearBackBuffer8();
-        g_FrameMan.FlipFrameBuffers();
-        // Load in-game palette
-        g_FrameMan.LoadPalette("Base.rte/palette.bmp");
-
-        // Unpause the game
-        g_FrameMan.ResetFrameTimer();
-        // Enable time averaging since it helps with animation jerkyness
-        g_TimerMan.EnableAveraging(true);
-        // Unpause the sim
-        g_TimerMan.PauseSim(false);
-        g_ActivityMan.PauseActivity(false);
-    }
+		// Unpause the game
+		g_FrameMan.ResetFrameTimer();
+		// Enable time averaging since it helps with animation jerkiness
+		g_TimerMan.EnableAveraging(true);
+		// Unpause the sim
+		g_TimerMan.PauseSim(false);
+		g_ActivityMan.PauseActivity(false);
+	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Launch multiplayer lobby activity
-
-void EnterMultiplayerLobby()
-{
-	//g_ActivityMan.EndActivity();
+/// <summary>
+/// Launch multiplayer lobby activity.
+/// </summary>
+void EnterMultiplayerLobby() {
 
 	// Start multiplayer lobby
 	g_SceneMan.SetSceneToLoad("Multiplayer Scene");
@@ -326,12 +289,13 @@ void EnterMultiplayerLobby()
 	g_ResetActivity = true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Load and display the into, title and menu sequence
-
-bool PlayIntroTitle()
-{
+/// <summary>
+/// Load and display the into, title and menu sequence.
+/// </summary>
+/// <returns></returns>
+bool PlayIntroTitle() {
     // Disable time averaging since it can make the music timing creep off target.
     g_TimerMan.EnableAveraging(false);
     
@@ -347,7 +311,7 @@ bool PlayIntroTitle()
     int resX = g_FrameMan.GetResX();
     int resY = g_FrameMan.GetResY();
 
-    // The fadein/out screens
+    // The fade-in/out screens
     BITMAP *pFadeScreen = create_bitmap_ex(32, resX, resY);
     clear_to_color(pFadeScreen, 0);
     int fadePos = 0;
@@ -370,8 +334,6 @@ bool PlayIntroTitle()
     apIntroSlides[SLIDEPEACE] = introSlideFile.LoadAndReleaseBitmap();
     introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideH.bmp");
     apIntroSlides[SLIDEFRONTIER] = introSlideFile.LoadAndReleaseBitmap();
-    int normalSlideWidth = 640;
-    int slideFadeDistance = 42;
 
     ContentFile alphaFile;
     BITMAP *pAlpha = 0;
@@ -388,7 +350,7 @@ bool PlayIntroTitle()
 
     SceneLayer *pBackdrop = new SceneLayer();
     pBackdrop->Create(ContentFile("Base.rte/GUIs/Title/Nebula.bmp"), false, Vector(), false, false, Vector(0, -1.0));//startYOffset + resY));
-    float backdropScrollRatio = 1.0f / 3.0f;
+    float backdropScrollRatio = 1.0F / 3.0F;
 
     MOSParticle *pTitle = new MOSParticle();
     pTitle->Create(ContentFile("Base.rte/GUIs/Title/Title.bmp"));
@@ -446,8 +408,6 @@ bool PlayIntroTitle()
 
 	Vector shakeOffset(0, 0);
 
-	bool pioneerPhase = false;
-
     // Generate stars!
     int starArea = resX * pBackdrop->GetBitmap()->h;
     int starCount = starArea / 1000;
@@ -463,8 +423,7 @@ bool PlayIntroTitle()
     Star *aStars = new Star[starCount];
     StarSize size;
 
-    for (int star = 0; star < starCount; ++star)
-    {
+    for (int star = 0; star < starCount; ++star) {
         aStars[star].m_Size = size = PosRand() < 0.95 ? StarSmall : (PosRand() < 0.85 ? StarLarge : StarHuge);
         aStars[star].m_pBitmap = size  == StarSmall ? apStarSmallBitmaps[SelectRand(0, starSmallBitmapCount - 1)] :
                                 (size  == StarLarge ? apStarLargeBitmaps[SelectRand(0, starLargeBitmapCount - 1)] : apStarHugeBitmaps[SelectRand(0, starLargeBitmapCount - 1)]);
@@ -488,15 +447,16 @@ bool PlayIntroTitle()
     double duration = 0, scrollDuration = 0, scrollStart = 0, slideFadeInDuration = 0.5, slideFadeOutDuration = 0.5;
     // Progress made on a section, from 0.0 to 1.0
     double sectionProgress = 0, scrollProgress = 0;
-    // When a section is supposed to end, relative to the songtimer
+    // When a section is supposed to end, relative to the song timer
     long sectionSongEnd = 0;
 
     // Scrolling data
-    bool keyPressed = false, sectionSwitch = true;
+	bool keyPressed = false;
+	bool sectionSwitch = true;
     float planetRadius = 240;
     float orbitRadius = 274;
     float orbitRotation = c_HalfPI - c_EighthPI;
-    // Set the start so that the nebula is fully scolled up
+    // Set the start so that the nebula is fully scrolled up
     int startYOffset = pBackdrop->GetBitmap()->h / backdropScrollRatio - (resY / backdropScrollRatio);
     int titleAppearYOffset = 900;
     int preMenuYOffset = 100;
@@ -508,8 +468,7 @@ bool PlayIntroTitle()
 
     totalTimer.Reset();
     sectionTimer.Reset();
-    while (!g_Quit && g_IntroState != END && !g_ResumeActivity)
-    {
+    while (!g_Quit && g_IntroState != END && !g_ResumeActivity) {
         keyPressed = g_UInputMan.AnyStartPress();
 //        g_Quit = key[KEY_ESC];
         // Reset the key press states
@@ -526,21 +485,15 @@ bool PlayIntroTitle()
 		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_SOUND);
 #endif
 
-        if (sectionSwitch)
-            sectionTimer.Reset();
+		if (sectionSwitch) { sectionTimer.Reset(); }
         elapsed = sectionTimer.GetElapsedRealTimeS();
         // Calculate the normalized sectionProgress scalar
-        if (duration > 0)
-            sectionProgress = elapsed / duration;
-        else
-            sectionProgress = 0;
+		if (duration > 0) { sectionProgress = elapsed / duration; } else { sectionProgress = 0; }
         // Clamp the sectionProgress scalar
-        if (sectionProgress > 0.9999)
-            sectionProgress = 0.9999;
+		if (sectionProgress > 0.9999) { sectionProgress = 0.9999; }
 
-		if (g_NetworkServer.IsServerModeEnabled())
-			g_NetworkServer.Update();
-
+		if (g_NetworkServer.IsServerModeEnabled()) { g_NetworkServer.Update(); }
+			
         ////////////////////////////////
         // Scrolling logic
 
@@ -556,7 +509,7 @@ bool PlayIntroTitle()
             scrollProgress = (double)(songTimer.GetElapsedRealTimeS() - scrollStart) / (double)scrollDuration;
             scrollOffset.m_Y = LERP(0, 1.0, startYOffset, titleAppearYOffset,  scrollProgress);
         }
-        // Scroll after the slideshow
+        // Scroll after the slide-show
         else if (g_IntroState >= TITLEAPPEAR && g_IntroState <= PLANETSCROLL)
         {
             if (g_IntroState == TITLEAPPEAR && sectionSwitch)
@@ -640,12 +593,9 @@ bool PlayIntroTitle()
             g_FrameMan.ClearBackBuffer32();
 
 			Box backdropBox;
-// Use the override of the SL drawing isntead
-//            pBackdrop->SetOffset(scrollOffset * backdropScrollRatio);
             pBackdrop->Draw(g_FrameMan.GetBackBuffer32(), backdropBox, scrollOffset * backdropScrollRatio);
 
             Vector starDrawPos;
-            StarSize size;
             for (int star = 0; star < starCount; ++star)
             {
                 size = aStars[star].m_Size;
@@ -677,7 +627,7 @@ bool PlayIntroTitle()
 			// Draw pioneer promo capsule
 			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.27 && orbitRotation > -c_PI * 1.85)
 			{
-				// Start drawig pioneer apsule
+				// Start drawing pioneer capsule
 				// Slowly decrease radius to show that the capsule is falling
 				float radiusperc = 1 - ((fabs(orbitRotation) - (1.27 * c_PI)) / (0.35 * c_PI) / 4);
 				// Slowly decrease size to make the capsule disappear after a while
@@ -840,7 +790,7 @@ bool PlayIntroTitle()
         {
             if (g_IntroState == MENUAPPEAR)
             {
-// TODO: some fancy transpernecy effect here
+				// TODO: some fancy transparency effect here
 /*
                 g_pMainMenuGUI->Update();
                 clear_to_color(pFadeScreen, 0xFFFF00FF);
@@ -881,7 +831,7 @@ bool PlayIntroTitle()
             int slide = g_IntroState - SHOWSLIDE1;
             Vector slideCenteredPos((resX / 2) - (apIntroSlides[slide]->w / 2), (resY / 2) - (apIntroSlides[slide]->h / 2));
 
-            // Screenwide slide
+            // Screen wide slide
             if (apIntroSlides[slide]->w <= resX)
                 slidePos.m_X = (resX / 2) - (apIntroSlides[slide]->w / 2);
             // The slides wider than the screen, pan sideways
@@ -921,24 +871,6 @@ bool PlayIntroTitle()
             }
         }
 
-        //////////////////////////////
-        // Letterbox drawing
-/*
-        if (g_IntroState >= FADEIN && g_IntroState < MENUACTIVE)
-        {
-            int thick = 60;
-            if (g_IntroState == MENUAPPEAR)
-            {
-                rectfill(g_FrameMan.GetBackBuffer32(), 0, 0, resX, EaseOut(thick, 0, sectionProgress), 0);
-                rectfill(g_FrameMan.GetBackBuffer32(), 0, EaseOut(resY - thick, resY, sectionProgress), resX, resY, 0);
-            }
-            else
-            {
-                rectfill(g_FrameMan.GetBackBuffer32(), 0, 0, resX, thick, 0);
-                rectfill(g_FrameMan.GetBackBuffer32(), 0, resY - thick, resX, resY, 0);
-            }
-        }
-*/
         //////////////////////////////////////////////////////////
         // Intro sequence logic
 
@@ -1156,9 +1088,6 @@ bool PlayIntroTitle()
                 sectionSwitch = false;
             }
 
-//            yTextPos = (g_FrameMan.GetResY() / 2) + (apIntroSlides[g_IntroState - SHOWSLIDE1]->h / 2) + 12;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "In a not too distant future...", GUIFont::Centre);
-
             if (elapsed >= duration)
             {
                 g_IntroState = SHOWSLIDE1;
@@ -1179,8 +1108,6 @@ bool PlayIntroTitle()
             yTextPos = (g_FrameMan.GetResY() / 2) + (apIntroSlides[g_IntroState - SHOWSLIDE1]->h / 2) + 12;
             if (elapsed > 1.25)
                 pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "At the end of humanity's darkest century...", GUIFont::Centre);
-//            yTextPos += 20;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "but also the restrictions of their physical bodies...", GUIFont::Centre);
 
             if (elapsed >= duration)
             {
@@ -1202,9 +1129,6 @@ bool PlayIntroTitle()
             yTextPos = (g_FrameMan.GetResY() / 2) + (apIntroSlides[g_IntroState - SHOWSLIDE1]->h / 2) + 12;
             if (elapsed < duration - 1.75)
                 pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "...a curious symbiosis between man and machine emerged.", GUIFont::Centre);
-//            yTextPos += 20;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "their natural habitats and societies,", GUIFont::Centre);
-
 
             if (elapsed >= duration)
             {
@@ -1228,8 +1152,6 @@ bool PlayIntroTitle()
                 pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "This eventually enabled humans to leave their natural bodies...", GUIFont::Centre);
             else if (sectionProgress > 0.51)
                 pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "...and to free their minds from obsolete constraints.", GUIFont::Centre);
-//            yTextPos += 20;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "their disembodied brains maintained by artifical means.", GUIFont::Centre);
 
             if (elapsed >= duration)
             {
@@ -1250,8 +1172,6 @@ bool PlayIntroTitle()
 
             yTextPos = (g_FrameMan.GetResY() / 2) + (apIntroSlides[g_IntroState - SHOWSLIDE1]->h / 2) + 12;
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "With their brains sustained by artificial means, space travel also became feasible.", GUIFont::Centre);
-//            yTextPos += 20;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "they still require physical materials to sustain themselves.", GUIFont::Centre);
 
             if (elapsed >= duration)
             {
@@ -1312,8 +1232,6 @@ bool PlayIntroTitle()
 
             yTextPos = (g_FrameMan.GetResY() / 2) + (apIntroSlides[g_IntroState - SHOWSLIDE1]->h / 2) + 12;
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "Now, the growing civilizations create a huge demand for resources...", GUIFont::Centre);
-//            yTextPos += 20;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "said resources are to harvest profitably.", GUIFont::Centre);
 
             if (elapsed >= duration)
             {
@@ -1451,13 +1369,6 @@ bool PlayIntroTitle()
                 sectionSwitch = false;
             }
 
-//            yTextPos = (g_FrameMan.GetResY() / 3) - 15;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "Press Any Key to Start", GUIFont::Centre);
-//            yTextPos += pFont->GetFontHeight();
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "Press Any Key to Start", GUIFont::Centre);
-
-//            g_pMainMenuGUI->Draw();
-
             // Detect quitting of the program from the menu button
             g_Quit = g_Quit || g_pMainMenuGUI->QuitProgram();
 
@@ -1528,15 +1439,6 @@ bool PlayIntroTitle()
 
                 duration = 1.0;
                 sectionSwitch = false;
-/* Restart campaign scenario setup screen music
-                // Play intro music at max volume regardless of setting
-                g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0, 1.0);
-                g_AudioMan.SetMusicPosition(0.05);
-                // Override music volume setting for the intro
-                g_AudioMan.SetTempMusicVolume(1.0);
-//                songTimer.Reset();
-                songTimer.SetElapsedRealTimeS(0.05);
-*/
             }
 
             fadePos = 255 - (255 * sectionProgress);
@@ -1554,15 +1456,8 @@ bool PlayIntroTitle()
             if (sectionSwitch)
             {
                 scrollOffset.m_Y = planetViewYOffset;
-//                // Fire up the CampaignMan
-//                g_pMainMenuGUI->SetEnabled(true);
-//                // Indicate that we're now in the main menu
-//                g_InActivity = false;
-
                 sectionSwitch = false;
             }
-
-//            g_CampaignMan->Draw();
 
             // Detect quitting of the program from the menu button
             g_Quit = g_Quit || g_pScenarioGUI->QuitProgram();
@@ -1603,7 +1498,7 @@ bool PlayIntroTitle()
                 duration = 2.0;
                 sectionSwitch = false;
 
-                // Play the campaign music with metasound start
+                // Play the campaign music with Meta sound start
 				g_GUISound.SplashSound().Play();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
             }
@@ -1625,15 +1520,6 @@ bool PlayIntroTitle()
 
                 duration = 1.0;
                 sectionSwitch = false;
-/* Restart campaign metagame screen music
-                // Play intro music at max volume regardless of setting
-                g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0, 1.0);
-                g_AudioMan.SetMusicPosition(0.05);
-                // Override music volume setting for the intro
-                g_AudioMan.SetTempMusicVolume(1.0);
-//                songTimer.Reset();
-                songTimer.SetElapsedRealTimeS(0.05);
-*/
             }
 
             fadePos = 255 - (255 * sectionProgress);
@@ -1651,15 +1537,8 @@ bool PlayIntroTitle()
             if (sectionSwitch)
             {
                 scrollOffset.m_Y = planetViewYOffset;
-//                // Fire up the CampaignMan
-//                g_pMainMenuGUI->SetEnabled(true);
-//                // Indicate that we're now in the main menu
-//                g_InActivity = false;
-
                 sectionSwitch = false;
             }
-
-//            g_CampaignMan->Draw();
 
             // Detect quitting of the program from the menu button
             g_Quit = g_Quit || g_MetaMan.GetGUI()->QuitProgram();
@@ -1764,18 +1643,12 @@ bool PlayIntroTitle()
             orbitRotation = c_HalfPI - c_EighthPI;
 
 			orbitRotation = -c_PI * 1.20;
-/*
-            // Start/Jump the song to the theme spot
-            g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0);
-            g_AudioMan.SetMusicPosition(66.7);
-            songTimer.SetElapsedRealTimeS(66.7);
-*/
         }
 
         // Draw the console in the menu
         g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
 
-        // Wait for vertical synch before flipping frames
+        // Wait for vertical sync before flipping frames
         vsync();
         g_FrameMan.FlipFrameBuffers();
     }
@@ -1802,10 +1675,26 @@ bool PlayIntroTitle()
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Game simulation loop pump
+/// <summary>
+/// Orders to reset the entire Retro Terrain Engine system next iteration.
+/// </summary>
+void ResetRTE() { g_ResetRTE = true; }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// <summary>
+/// Indicated whether the system is about to be reset before the next loop starts.
+/// </summary>
+/// <returns>Whether the RTE is about to reset next iteration of the loop or not.</returns>
+bool IsResettingRTE() { return g_ResetRTE; }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// <summary>
+/// Game simulation loop.
+/// </summary>
 bool RunGameLoop()
 {
     if (g_Quit)
@@ -1841,7 +1730,7 @@ bool RunGameLoop()
 
 				g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_SIM_TOTAL);
 				g_UInputMan.Update();
-				// It is vital that server is updated after input manager but before activity because unput manager will clear 
+				// It is vital that server is updated after input manager but before activity because input manager will clear 
 				// received pressed and released events on next update.
 				if (g_NetworkServer.IsServerModeEnabled())
 				{
@@ -1894,7 +1783,7 @@ bool RunGameLoop()
 			if (g_NetworkServer.IsServerModeEnabled())
 			{
 				// Pause sim while we're waiting for scene transmission or scene will
-				// start changing before cleints receive them and those changes will be lost
+				// start changing before clients receive them and those changes will be lost
 				if (!g_NetworkServer.ReadyForSimulation())
 					g_TimerMan.PauseSim(true);
 				else 
@@ -1931,58 +1820,50 @@ bool RunGameLoop()
     return true;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Command-line argument handling, returns false if app should quit right after this
-// The appExitVar is what the program should exit with if this returns false
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
-{
-    // If no additional args passed, just continue (first arg is the program path)
-    if (argc == 1)
-        return true;
+/// <summary>
+/// Command-line argument handling.
+/// </summary>
+/// <param name="argc">Argument name.</param>
+/// <param name="argv">Argument value.</param>
+/// <param name="appExitVar">The appExitVar is what the program should exit with if this returns false.</param>
+/// <returns>False if app should quit right after this.</returns>
+bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
 
-    // Default program return var is fail
+    // If no additional arguments passed, just continue (first argument is the program path)
+    if (argc == 1) { return true; }
+
+    // Default program return var if fail
     appExitVar = 2;
 
-    if (argc >= 2)
-    {
-        for (int i = 1; i < argc; i++)
-        {
+    if (argc >= 2) {
+        for (int i = 1; i < argc; i++) {
             // Print loading screen console to cout
-            if (strcmp(argv[i], "-cout") == 0)
-            {
-                g_LogToCLI = true;
-            }
-            else if (i + 1 < argc)
-            {
-                if (strcmp(argv[i], "-server") == 0 && i + 1 < argc)
-                {
+			if (std::strcmp(argv[i], "-cout") == 0) {
+				g_LoadingGUI.SetLogToCLI(true);
+			} else if (i + 1 < argc) {
+                if (std::strcmp(argv[i], "-server") == 0 && i + 1 < argc) {
                     std::string port = argv[++i];
                     g_NetworkServer.EnableServerMode();
                     g_NetworkServer.SetServerPort(port);
-                }
-                else if (strcmp(argv[i], "-module") == 0 && i + 1 < argc)
-                {
-                    g_PresetMan.SetSingleModuleToLoad(argv[++i]);
-                }
+                } else if (std::strcmp(argv[i], "-module") == 0 && i + 1 < argc) {
+					g_PresetMan.SetSingleModuleToLoad(argv[++i]); 
+				}
             }
         }
     }
-
 	/*
-	if (argc > 3)
-	{
-		for (int i = 1; i < argc; i++)
-		{
-			if (strcmp(argv[i], "-activity") == 0 && i + 2 < argc)
-			{
+	if (argc > 3) {
+		for (int i = 1; i < argc; i++) {
+			if (strcmp(argv[i], "-activity") == 0 && i + 2 < argc) {
 				g_SettingsMan.SetPlayIntro(false);
 				g_ActivityMan.SetDefaultActivityType(argv[i + 1]);
 				g_ActivityMan.SetDefaultActivityName(argv[i + 2]);
 			}
 		}
-	}*/
-
+	}
+	*/
     return true;
 }
 
@@ -1993,8 +1874,8 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
 /// </summary>
 int main(int argc, char *argv[]) {
 
-    ///////////////////////////////////////////////////////////////////
-    // Init Allegro
+	///////////////////////////////////////////////////////////////////
+    // Initialize Allegro
 
 /* This is obsolete; only applied when we were loading from a compressed Base.rte // might come in handy sometime later actually
     // Load the Allegro config data from the base datafile
@@ -2126,16 +2007,4 @@ int main(int argc, char *argv[]) {
 	
     return 0;
 }
-
-/// <summary>
-/// Orders to reset the entire Retro Terrain Engine system next iteration.
-/// </summary>
-void ResetRTE() { g_ResetRTE = true; }
-
-/// <summary>
-/// Indicated whether the system is about to be reset before the next loop starts.
-/// </summary>
-/// <returns>Whether the RTE is about to reset next iteration of the loop or not.</returns>
-bool IsResettingRTE() { return g_ResetRTE; }
-
 END_OF_MAIN()

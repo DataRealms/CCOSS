@@ -137,8 +137,6 @@ int g_PlayerCount = 3;
 int g_DifficultySetting = 4;
 int g_StationOffsetX, g_StationOffsetY;
 
-std::string g_LoadSingleModule = "";
-
 MainMenuGUI *g_pMainMenuGUI = 0;
 ScenarioGUI *g_pScenarioGUI = 0;
 GUIControlManager *g_pLoadingGUI = 0;
@@ -505,134 +503,6 @@ bool LoadDataModules()
     // Close the file search to avoid memory leaks
     al_findclose(&zippedModuleInfo);
 
-    ///////////////////////////////////////////////////////////////
-    // Load all the official modules first!
-
-    if (!g_PresetMan.LoadDataModule("Base.rte", true, &LoadingSplashProgressReport))
-        return false;
-
-	if (g_LoadSingleModule != "")
-	{
-		if (g_LoadSingleModule != "Base.rte")
-			if (!g_PresetMan.LoadDataModule(g_LoadSingleModule, false, &LoadingSplashProgressReport))
-				return false;
-		return true;
-	}
-
-	///* TODO: REPLACE
-	if (!g_PresetMan.LoadDataModule("Coalition.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Imperatus.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Techion.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Dummy.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Ronin.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Browncoats.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Uzira.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("MuIlaak.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Missions.rte", true, &LoadingSplashProgressReport))
-		return false;
-
-	//Read module properties to find out which modules should be loaded earlier than others
-    al_ffblk moduleInfo;
-	int moduleID = 0;
-
-	std::list<std::string> loadFirst;
-
-    for (int result = al_findfirst("*.rte", &moduleInfo, FA_DIREC | FA_RDONLY); result == 0; result = al_findnext(&moduleInfo))
-    {
-        moduleID = g_PresetMan.GetModuleID(moduleInfo.name);
-        // Make sure we don't load properties of already loaded official modules
-        if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= g_PresetMan.GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte")
-        {
-            // See if we can find that phantom property in this data module's index.ini that would indicate it should have prioritized loading
-			if (ASCIIFileContainsString(string(moduleInfo.name) + "/Index.ini", "LoadFirst = 1"))
-				loadFirst.push_back(moduleInfo.name);
-        }
-        else
-        {
-        }
-    }
-    // Close the file search to avoid memory leaks
-    al_findclose(&moduleInfo);
-
-	//Load preceding modules first
-	for (std::list<std::string>::iterator itr = loadFirst.begin(); itr != loadFirst.end(); ++itr)
-	{
-		if (!g_SettingsMan.IsModDisabled(*itr))
-		{
-			moduleID = g_PresetMan.GetModuleID(*itr);
-			// Make sure we don't add the official metagames module among these; they should be loaded in explicit order before and after these unofficial ones
-			if ((*itr).length() > 0 && (moduleID < 0 || moduleID >= g_PresetMan.GetOfficialModuleCount()) && *itr != "Metagames.rte" && *itr != "Scenes.rte")
-			{
-				// Actually load the unofficial data module
-				if (!g_PresetMan.LoadDataModule(*itr, false, &LoadingSplashProgressReport))
-				{
-					// Report error?
-				}
-			}
-		}
-	}
-
-	loadFirst.clear();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Search for any additional data modules
-
-    moduleID = 0;
-    for (int result = al_findfirst("*.rte", &moduleInfo, FA_DIREC | FA_RDONLY); result == 0; result = al_findnext(&moduleInfo))
-    {
-        if (!g_SettingsMan.IsModDisabled(moduleInfo.name))
-        {
-            moduleID = g_PresetMan.GetModuleID(moduleInfo.name);
-            // Make sure we don't add the official metagames module among these; they should be loaded in explicit order before and after these unofficial ones
-            if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= g_PresetMan.GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte")
-            {
-                // Actually load the unofficial data module
-                if (!g_PresetMan.LoadDataModule(string(moduleInfo.name), false, &LoadingSplashProgressReport))
-                {
-                    // Report error?
-                }
-            }
-            else
-            {
-                // TODO: Log this and continue gracefully instead
-            // LoadDataModule can return false (esp since it amy try to load already loaded modules, and that's ok) and shouldn't cause stop
-            //                char error[512];
-            //                sprintf(error, sizeof(error), "Failed to load Data Module: %s\n\nMake sure it contains an Index.ini file that defines a \"DataModule\"!", moduleInfo.name);
-            //                RTEAbort(error);
-            //                return false;
-
-            }
-        }
-    }
-    // Close the file search to avoid memory leaks
-    al_findclose(&moduleInfo);
-
-    // Load scenes and metagames AFTER all other techs etc are loaded; might be referring to stuff in user mods
-    if (!g_PresetMan.LoadDataModule("Scenes.rte", false, &LoadingSplashProgressReport))
-        return false;
-
-    if (!g_PresetMan.LoadDataModule("Metagames.rte", false, &LoadingSplashProgressReport))
-        return false;
-
-
-/* We are now doing this as line by line reports come in to LoadingSplashProgressReport
-    // Write out entire loading log to a file
-    Writer writer("LogLoading.txt");
-    if (writer.WriterOK())
-    {
-        GUIListBox *pProgressBox = dynamic_cast<GUIListBox *>(g_pLoadingGUI->GetControl("ProgressBox"));
-        for (std::vector<GUIListBox::Item *>::iterator itr = pProgressBox->GetItemList()->begin(); itr != pProgressBox->GetItemList()->end(); itr++)
-            writer << (*itr)->m_Name << "\n";
-    }
-*/
     return true;
 }
 
@@ -2440,7 +2310,7 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
                 }
                 else if (strcmp(argv[i], "-module") == 0 && i + 1 < argc)
                 {
-                    g_LoadSingleModule = argv[++i];
+                    g_PresetMan.SetSingleModuleToLoad(argv[++i]);
                 }
             }
         }

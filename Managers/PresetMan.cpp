@@ -24,6 +24,8 @@
 
 #include "ConsoleMan.h"
 
+#include "SettingsMan.h"
+
 namespace RTE {
 
 const string PresetMan::m_ClassName = "PresetMan";
@@ -174,6 +176,62 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallbac
     pModule = 0;
 
     return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::LoadAllDataModules() {
+
+	// Load all the official modules first!
+	if (!LoadDataModule("Base.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+
+	// TODO: REPLACE - or don't, this is ok because there really shouldn't be any more official modules besides these.
+	if (!LoadDataModule("Coalition.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Imperatus.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Techion.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Dummy.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Ronin.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Browncoats.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Uzira.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("MuIlaak.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Missions.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+
+	// If a single module is specified, skip loading all other unofficial modules and load specified module only.
+	if (m_SingleModuleToLoad != "Base.rte" && m_SingleModuleToLoad != "") {
+		if (!LoadDataModule(m_SingleModuleToLoad, false, &LoadingGUI::LoadingSplashProgressReport)) { return false; } else { return true; }
+	} else {
+		// Read module properties to find out which modules should be loaded earlier than others
+		al_ffblk moduleInfo;
+		int moduleID = 0;
+
+		for (int result = al_findfirst("*.rte", &moduleInfo, FA_DIREC | FA_RDONLY); result == 0; result = al_findnext(&moduleInfo)) {
+			if (!g_SettingsMan.IsModDisabled(moduleInfo.name)) {
+				moduleID = GetModuleID(moduleInfo.name);
+				// Make sure we don't load properties of already loaded official modules
+				if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte") {
+					// Actually load the unofficial data module
+					if (!LoadDataModule(string(moduleInfo.name), false, &LoadingGUI::LoadingSplashProgressReport)) {
+						// TODO: Report error and skip loading module.
+					}
+				} else {
+					// LoadDataModule can return false (esp since it may try to load already loaded modules, and that's ok) and shouldn't cause stop
+					// TODO: Log this and continue gracefully instead
+					// char error[512];
+					// sprintf_s(error, sizeof(error), "Failed to load Data Module: %s\n\nMake sure it contains an Index.ini file that defines a \"DataModule\"!", moduleInfo.name);
+					// RTEAbort(error);
+					// return false;
+				}
+			}
+		}
+		// Close the file search to avoid memory leaks
+		al_findclose(&moduleInfo);
+	}
+
+	// Load scenes and MetaGames AFTER all other techs etc are loaded; might be referring to stuff in user mods
+	if (!g_PresetMan.LoadDataModule("Scenes.rte", false, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!g_PresetMan.LoadDataModule("Metagames.rte", false, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+
+	return true;
 }
 
 

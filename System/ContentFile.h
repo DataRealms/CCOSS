@@ -16,19 +16,10 @@
 
 #include "Serializable.h"
 
-#ifdef __USE_SOUND_FMOD
 #include "fmod/fmod.h"
 #include "fmod/fmod_errors.h"
 #define AUDIO_STRUCT FSOUND_SAMPLE
 struct FSOUND_STREAM;
-
-#elif __USE_SOUND_GORILLA
-#include "gorilla/ga.h"
-#include "gorilla/gau.h"
-#define AUDIO_STRUCT ga_Sound
-struct ga_Handle;
-#endif
-
 struct DATAFILE;
 struct BITMAP;
 

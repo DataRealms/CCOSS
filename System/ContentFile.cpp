@@ -272,10 +272,8 @@ void ContentFile::FreeAllLoaded()
             destroy_bitmap((*lbItr).second);
     }
 
-#ifdef __USE_SOUND_FMOD
 	for (map<string, FSOUND_SAMPLE *>::iterator lcItr = m_sLoadedSamples.begin(); lcItr != m_sLoadedSamples.end(); ++lcItr)
         FSOUND_Sample_Free((*lcItr).second);
-#endif
 }
 
 
@@ -585,16 +583,8 @@ AUDIO_STRUCT * ContentFile::GetAsSample() {
 			AAssert(bytesRead == fileSize, "Tried to read a file but couldn't read the same amount of data as the reported file size!");
 
 			// Load the sample from the memory we've read from the file.
-#ifdef __USE_SOUND_FMOD
 			// FSOUND_UNMANAGED because we want to manage the freeing of the sample ourselves.
 			pReturnSample = FSOUND_Sample_Load(FSOUND_UNMANAGED, pRawData, FSOUND_LOADMEMORY, 0, fileSize);
-
-#elif __USE_SOUND_GORILLA
-			ga_Memory * mem = ga_memory_create(pRawData, fileSize);
-			ga_DataSource * data = gau_data_source_create_memory(mem);
-			ga_SampleSource * samples = gau_sample_source_create_wav(data);
-			pReturnSample = ga_sound_create_sample_source(samples);
-#endif
 			if (pReturnSample == 0) {
 				DDTAbort(("Unable to create sound " + m_DataPath).c_str());
 			}

@@ -56,12 +56,7 @@ namespace RTE {
 
 			AUDIO_STRUCT *pNewSample = newFile.GetAsSample();
 			if (!pNewSample) {
-
-#ifdef __USE_SOUND_FMOD
 				reader.ReportError(std::string("Failed to load the sample from the file, error: ") + FMOD_ErrorString(FSOUND_GetError()));
-#elif __USE_SOUND_GORILLA
-				reader.ReportError(std::string("Failed to load the sample from the file, error: "));
-#endif
 			}
 			m_Samples.push_back(std::pair<ContentFile, AUDIO_STRUCT *>(newFile, pNewSample));
 		} else if (propName == "LoopSetting")

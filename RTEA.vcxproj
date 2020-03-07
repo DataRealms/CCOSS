@@ -95,7 +95,7 @@
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;liblz4.lib;fmodvc.lib;alld_s_c.lib;gorillaD.lib;lua515.x86.debug.lib;luabind.x86.debug.lib;libboost_thread-vc141-mt-gd-x32-1_55.lib;libboost_date_time-vc141-mt-gd-x32-1_55.lib;libboost_system-vc141-mt-gd-x32-1_55.lib;libboost_chrono-vc141-mt-gd-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;liblz4.lib;fmodvc.lib;alld_s_c.lib;lua515.x86.debug.lib;luabind.x86.debug.lib;libboost_thread-vc141-mt-gd-x32-1_55.lib;libboost_date_time-vc141-mt-gd-x32-1_55.lib;libboost_system-vc141-mt-gd-x32-1_55.lib;libboost_chrono-vc141-mt-gd-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.debug.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -137,7 +137,7 @@
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;liblz4.lib;fmodvc.lib;alld_s_c.lib;gorillaD.lib;lua515.x86.debug.lib;luabind.x86.debug.lib;libboost_thread-vc141-mt-gd-x32-1_55.lib;libboost_date_time-vc141-mt-gd-x32-1_55.lib;libboost_system-vc141-mt-gd-x32-1_55.lib;libboost_chrono-vc141-mt-gd-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;liblz4.lib;fmodvc.lib;alld_s_c.lib;lua515.x86.debug.lib;luabind.x86.debug.lib;libboost_thread-vc141-mt-gd-x32-1_55.lib;libboost_date_time-vc141-mt-gd-x32-1_55.lib;libboost_system-vc141-mt-gd-x32-1_55.lib;libboost_chrono-vc141-mt-gd-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.debug.minimal.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -187,7 +187,7 @@
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;liblz4.lib;fmodvc.lib;alleg_s_c.lib;gorilla.lib;lua515.x86.release.lib;luabind.x86.release.lib;libboost_thread-vc141-mt-x32-1_55.lib;libboost_date_time-vc141-mt-x32-1_55.lib;libboost_system-vc141-mt-x32-1_55.lib;libboost_chrono-vc141-mt-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;liblz4.lib;fmodvc.lib;alleg_s_c.lib;lua515.x86.release.lib;luabind.x86.release.lib;libboost_thread-vc141-mt-x32-1_55.lib;libboost_date_time-vc141-mt-x32-1_55.lib;libboost_system-vc141-mt-x32-1_55.lib;libboost_chrono-vc141-mt-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>

@@ -27,15 +27,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ccicon.ico">
-      <Filter>Resources</Filter>
-    </None>
     <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h">
-      <Filter>Resources</Filter>
-    </ClInclude>
     <ClInclude Include="System\Box.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -462,11 +456,9 @@
     <ClInclude Include="System\Constants.h">
       <Filter>System</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="RTEA.rc">
+    <ClInclude Include="Resources\resource.h">
       <Filter>Resources</Filter>
-    </ResourceCompile>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -872,5 +864,15 @@
     <ClCompile Include="Menus\LoadingGUI.cpp">
       <Filter>Menus</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resources\ccicon.ico">
+      <Filter>Resources</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources\RTEA.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

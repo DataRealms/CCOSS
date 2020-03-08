@@ -214,7 +214,6 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="ccicon.ico" />
     <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
@@ -227,7 +226,7 @@
     <ClInclude Include="Managers\NetworkMessages.h" />
     <ClInclude Include="Managers\NetworkServer.h" />
     <ClInclude Include="Menus\LoadingGUI.h" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="Resources\resource.h" />
     <ClInclude Include="System\Constants.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
@@ -361,9 +360,6 @@
     <ClInclude Include="Menus\PieMenuGUI.h" />
     <ClInclude Include="Menus\ScenarioGUI.h" />
     <ClInclude Include="Menus\SceneEditorGUI.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="RTEA.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Entities\Emission.cpp" />
@@ -508,6 +504,12 @@
     <ClCompile Include="Menus\ScenarioGUI.cpp" />
     <ClCompile Include="Menus\SceneEditorGUI.cpp" />
     <ClCompile Include="Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resources\ccicon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources\RTEA.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

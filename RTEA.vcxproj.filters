@@ -441,7 +441,6 @@
     <ClInclude Include="Activities\MultiplayerServerLobby.h">
       <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Constants.h" />
     <ClInclude Include="System\StandardIncludes.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -459,6 +458,9 @@
     </ClInclude>
     <ClInclude Include="Menus\LoadingGUI.h">
       <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Constants.h">
+      <Filter>System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -218,7 +218,6 @@
     <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Constants.h" />
     <ClInclude Include="Entities\Emission.h" />
     <ClInclude Include="Entities\PEmitter.h" />
     <ClInclude Include="GUI\Interface.h" />
@@ -229,6 +228,7 @@
     <ClInclude Include="Managers\NetworkServer.h" />
     <ClInclude Include="Menus\LoadingGUI.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="System\Constants.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
     <ClInclude Include="System\Color.h" />

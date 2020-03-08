@@ -63,14 +63,6 @@ namespace RTE {
 		void Reset() { m_StartRealTime = g_TimerMan.GetRealTickCount(); m_StartSimTime = g_TimerMan.GetSimTickCount(); }
 #pragma endregion
 
-#pragma region Getters
-		/// <summary>
-		/// Gets the class name of this Timer.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Serializable.</returns>
-		const std::string & GetClassName() const { return ClassName; }
-#pragma endregion
-
 #pragma region Real Time
 		/// <summary>
 		/// Gets the start real time value of this Timer.
@@ -297,9 +289,17 @@ namespace RTE {
 		bool AlternateSim(int period) const { if (period == 0) return true; else return ((int)GetElapsedSimTimeMS() % (period * 2)) > period; }
 #pragma endregion
 
+#pragma region Class Info
+		/// <summary>
+		/// Gets the class name of this Timer.
+		/// </summary>
+		/// <returns>A string with the friendly-formatted type name of this Serializable.</returns>
+		const std::string & GetClassName() const { return m_ClassName; }
+#pragma endregion
+
 	protected:
 
-		static const std::string ClassName; //! A string with the friendly-formatted type name of this.
+		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this.
 		double m_TicksPerMS; //! Ticks per MS.
 
 		int64_t m_StartRealTime; //! Absolute tick count when this was started in real time.

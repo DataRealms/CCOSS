@@ -15,8 +15,6 @@
 #include "GUI/AllegroInput.h"
 
 #include "unzip.h"
-#include <corecrt_io.h>
-#include <experimental/filesystem>
 
 extern std::string g_LoadSingleModule;
 extern volatile bool g_Quit;

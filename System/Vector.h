@@ -81,12 +81,6 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the class name of this Vector.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Vector.</returns>
-		virtual const std::string & GetClassName() const { return ClassName; }
-
-		/// <summary>
 		/// Gets the X value of this Vector.
 		/// </summary>
 		/// <returns>A float value that represents the X value of this Vector.</returns>
@@ -560,9 +554,17 @@ namespace RTE {
 		float & operator[](const int &rhs) { return rhs == 0 ? m_X : m_Y; }
 #pragma endregion
 
+#pragma region Class Info
+		/// <summary>
+		/// Gets the class name of this Vector.
+		/// </summary>
+		/// <returns>A string with the friendly-formatted type name of this Vector.</returns>
+		virtual const std::string & GetClassName() const { return m_ClassName; }
+#pragma endregion
+
 	protected:
 
-		static const std::string ClassName; //! A string with the friendly-formatted type name of this.
+		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this.
 
 	private:
 

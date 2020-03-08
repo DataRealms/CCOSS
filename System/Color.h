@@ -102,12 +102,6 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the class name of this Color.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Color.</returns>
-		virtual const std::string & GetClassName() const { return ClassName; }
-
-		/// <summary>
 		/// Gets the entry in the current color palette that most closely matches this Color's RGB values.
 		/// </summary>
 		/// <returns>The color entry index number.</returns>
@@ -172,9 +166,17 @@ namespace RTE {
 		unsigned char RecalculateIndex();
 #pragma endregion
 
+#pragma region Class Info
+		/// <summary>
+		/// Gets the class name of this Color.
+		/// </summary>
+		/// <returns>A string with the friendly-formatted type name of this Color.</returns>
+		virtual const std::string & GetClassName() const { return m_ClassName; }
+#pragma endregion
+
 	protected:
 
-		static const std::string ClassName; //! A string with the friendly-formatted type name of this.
+		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this.
 
 	private:
 

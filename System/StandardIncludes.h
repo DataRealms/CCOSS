@@ -29,6 +29,7 @@
 #include <cerrno>
 #include <cassert>
 #include <limits>
+#include <experimental/filesystem>
 
 // TODO: Get rid of these once alias qualifiers are added.
 using std::string;

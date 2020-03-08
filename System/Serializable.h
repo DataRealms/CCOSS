@@ -55,6 +55,13 @@ namespace RTE {
 		}
 #pragma endregion
 
+#pragma region Destruction
+		/// <summary>
+		/// Resets the entire Serializable, including its inherited members, to their default settings or values.
+		/// </summary>
+		virtual void Reset() { Clear(); }
+#pragma endregion
+
 #pragma region INI Handling
 		/// <summary>
 		/// Reads a property value from a Reader stream.
@@ -131,16 +138,13 @@ namespace RTE {
 		}
 #pragma endregion
 
-		/// <summary>
-		/// Resets the entire Serializable, including its inherited members, to their default settings or values.
-		/// </summary>
-		virtual void Reset() { Clear(); }
-
+#pragma region Class Info
 		/// <summary>
 		/// Gets the class name of this Serializable.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this Serializable.</returns>
 		virtual const std::string & GetClassName() const = 0;
+#pragma endregion
 
 	private:
 

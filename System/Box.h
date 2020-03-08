@@ -131,12 +131,6 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the class name of this Box.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Box.</returns>
-		virtual const std::string & GetClassName() const { return ClassName; }
-
-		/// <summary>
 		/// Shows if this box has 0 width OR 0 height, ie can't contain anything.
 		/// </summary>
 		/// <returns>Whether either width OR height are 0.</returns>
@@ -279,9 +273,17 @@ namespace RTE {
 		friend bool operator!=(const Box &lhs, const Box &rhs) { if (lhs.m_Corner != rhs.m_Corner || lhs.m_Width != rhs.m_Width || lhs.m_Height != rhs.m_Height) { return true; } else { return false; } }
 #pragma endregion
 
+#pragma region Class Info
+		/// <summary>
+		/// Gets the class name of this Box.
+		/// </summary>
+		/// <returns>A string with the friendly-formatted type name of this Box.</returns>
+		virtual const std::string & GetClassName() const { return m_ClassName; }
+#pragma endregion
+
 	protected:
 
-		static const std::string ClassName; //! A string with the friendly-formatted type name of this.
+		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this.
 
 	private:
 

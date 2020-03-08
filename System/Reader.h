@@ -61,12 +61,6 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the class name of this Reader.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Reader.</returns>
-		virtual const std::string & GetClassName() const { return ClassName; }
-
-		/// <summary>
 		/// Gets the name of Data Module this reader is reading from.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this Reader.</returns>
@@ -224,6 +218,14 @@ namespace RTE {
 		virtual Reader & operator>>(std::string &var);
 #pragma endregion
 
+#pragma region Class Info
+		/// <summary>
+		/// Gets the class name of this Reader.
+		/// </summary>
+		/// <returns>A string with the friendly-formatted type name of this Reader.</returns>
+		virtual const std::string & GetClassName() const { return m_ClassName; }
+#pragma endregion
+
 	protected:
 
 		/// <summary>
@@ -240,7 +242,7 @@ namespace RTE {
 			int m_PreviousIndent; //! Count of tabs encountered on the last line Eat() ate.
 		};
 
-		static const std::string ClassName; //! A string with the friendly-formatted type name of this.
+		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this.
 
 		std::ifstream *m_pStream; //! Currently used stream, is not on the StreamStack until a new stream is opened.
 		std::list<StreamInfo> m_StreamStack; //! Stack of stream and filepath pairs, each one representing a file opened to read from within another.

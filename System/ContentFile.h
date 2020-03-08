@@ -109,12 +109,6 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the class name of this Entity.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return m_ClassName; }
-
-		/// <summary>
 		/// Gets the ID of the Data Module this file is inside.
 		/// </summary>
 		/// <returns>The ID of the Data Module containing this' file.</returns>
@@ -237,6 +231,14 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The pointer to the beginning of the raw data loaded from the Allegro .dat datafile. file. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
 		//virtual char * GetAsRawBinary();
+#pragma endregion
+
+#pragma region Class Info
+		/// <summary>
+		/// Gets the class name of this Entity.
+		/// </summary>
+		/// <returns>A string with the friendly-formatted type name of this object.</returns>
+		virtual const std::string & GetClassName() const { return m_ClassName; }
 #pragma endregion
 
 	protected:

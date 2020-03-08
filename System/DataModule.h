@@ -105,14 +105,6 @@ namespace RTE {
 		const bool GetIgnoreMissingItems() const { return m_IgnoreMissingItems; }
 #pragma endregion
 
-#pragma region Getters
-		/// <summary>
-		/// Gets the class name of this Entity.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return m_ClassName; }
-#pragma endregion
-
 #pragma region Module Information Getters
 		/// <summary>
 		/// Gets the file name of this Data Module, e.g. "MyMod.rte".
@@ -267,6 +259,14 @@ namespace RTE {
 		/// Reloads all scripted Entity Presets with the latest version of their respective script files.
 		/// </summary>
 		void ReloadAllScripts();
+#pragma endregion
+
+#pragma region Class Info
+		/// <summary>
+		/// Gets the class name of this Entity.
+		/// </summary>
+		/// <returns>A string with the friendly-formatted type name of this object.</returns>
+		virtual const std::string & GetClassName() const { return m_ClassName; }
 #pragma endregion
 
 	protected:

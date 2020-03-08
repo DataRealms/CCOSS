@@ -92,12 +92,6 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the class name of this Matrix.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Matrix.</returns>
-		virtual const std::string & GetClassName() const { return ClassName; }
-
-		/// <summary>
 		/// Gets whether or not this Matrix also mirrors the X component of any Vector it is multiplied with.
 		/// </summary>
 		/// <returns>A bool with the setting whether flipping the X components or not.</returns>
@@ -349,9 +343,17 @@ namespace RTE {
 		friend Vector & operator/=(Vector &lhs, Matrix &rhs) { return lhs = rhs / lhs; }
 #pragma endregion
 
+#pragma region Class Info
+		/// <summary>
+		/// Gets the class name of this Matrix.
+		/// </summary>
+		/// <returns>A string with the friendly-formatted type name of this Matrix.</returns>
+		virtual const std::string & GetClassName() const { return m_ClassName; }
+#pragma endregion
+
 	protected:
 
-		static const std::string ClassName; //! A string with the friendly-formatted type name of this.
+		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this.
 
 	private:
 

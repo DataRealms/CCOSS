@@ -14,6 +14,7 @@
 #include "ConsoleMan.h"
 #include "RTEManagers.h"
 #include "Writer.h"
+#include "System.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -60,9 +61,8 @@ void ConsoleMan::Clear()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the ConsoleMan object ready for use.
 
-int ConsoleMan::Create(bool logToCli)
+int ConsoleMan::Create()
 {
-    m_LogToCli = logToCli;
     if (!m_pGUIScreen)
         m_pGUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32());
     if (!m_pGUIInput)
@@ -236,27 +236,12 @@ void ConsoleMan::SetEnabled(bool enable)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Prints a string into the console.
 
-void ConsoleMan::PrintString(string toPrint)
+void ConsoleMan::PrintString(std::string toPrint)
 {
     // Add the input line to the console
     m_pConsoleText->SetText(m_pConsoleText->GetText() + "\n" + toPrint);
-    if(m_LogToCli)
-    {
-        // Color the words ERROR: and SYSTEM: red
-        std::regex regexError("(ERROR|SYSTEM):");
-        toPrint = std::regex_replace(toPrint, regexError, "\033[1;31m$&\033[0;0m");
-
-        // Color .rte-paths green
-        std::regex regexPath("\\w*\\.rte\\/(\\w| |\\.|\\/)*(\\/|\\.bmp|\\.wav|\\.lua|\\.ini)");
-        toPrint = std::regex_replace(toPrint, regexPath, "\033[1;32m$&\033[0;0m");
-
-        // Color names in quotes yellow
-        // They have to start with an upper case letter to sort out apostrophes
-        std::regex regexName("(\"[A-Z].*\"|\'[A-Z].*\')");
-        toPrint = std::regex_replace(toPrint, regexName, "\033[1;33m$&\033[0;0m");
-
-        std::cout << "\r" << toPrint << std::endl;
-    }
+	// Print the input line to the command-line
+	if (g_System.GetLogToCLI()) { g_System.PrintConsoleToCLI(toPrint); }
 }
 
 

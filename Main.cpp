@@ -120,7 +120,6 @@ enum SLIDES {
 
 volatile bool g_Quit = false;
 bool g_ResetRTE = false; //! Signals to reset the entire RTE next iteration.
-bool g_LogToCLI = false;
 bool g_InActivity = false;
 bool g_ResetActivity = false;
 bool g_ResumeActivity = false;
@@ -1841,7 +1840,7 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
         for (int i = 1; i < argc; i++) {
             // Print loading screen console to cout
 			if (std::strcmp(argv[i], "-cout") == 0) {
-				g_LoadingGUI.SetLogToCLI(true);
+				g_System.SetLogToCLI(true);
 			} else if (i + 1 < argc) {
                 if (std::strcmp(argv[i], "-server") == 0 && i + 1 < argc) {
                     std::string port = argv[++i];
@@ -1937,7 +1936,7 @@ int main(int argc, char *argv[]) {
 	g_GUISound.Create();
     g_UInputMan.Create();
 	if (g_NetworkServer.IsServerModeEnabled()) { g_UInputMan.SetMultiplayerMode(true); }
-    g_ConsoleMan.Create(g_LogToCLI);
+    g_ConsoleMan.Create();
     g_ActivityMan.Create();
     g_MovableMan.Create();
     g_MetaMan.Create();

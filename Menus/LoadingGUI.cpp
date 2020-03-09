@@ -18,7 +18,6 @@
 
 extern std::string g_LoadSingleModule;
 extern volatile bool g_Quit;
-extern bool g_LogToCLI;
 
 namespace RTE {
 
@@ -35,7 +34,6 @@ namespace RTE {
 	AllegroInput *m_GUIInput = 0;
 	Writer *m_LoadingLogWriter = 0;
 
-	bool LoadingGUI::m_LogToCLI = false;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -116,7 +114,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingGUI::LoadingSplashProgressReport(std::string reportString, bool newItem) {
-		if (m_LogToCLI) { g_System.LogToCLI(reportString, newItem); }
+		if (g_System.GetLogToCLI()) { g_System.PrintLoadingToCLI(reportString, newItem); }
 
 		if (m_LoadingGUI) {
 			g_UInputMan.Update();

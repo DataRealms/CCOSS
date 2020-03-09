@@ -31,18 +31,11 @@ namespace RTE {
 		/// </summary>
 		void ExtractArchivedModules();
 
-		/// <summary>
-		/// Sets whether to print the progress report log to command-line.
-		/// </summary>
-		/// <param name="enable">True to print progress report log to command-line.</param>
-		void SetLogToCLI(bool enable) { m_LogToCLI = true; }
-
 	protected:
 
 		static int m_LoadingGUIPosX; //! Position of the progress report box on X axis.
 		static int m_LoadingGUIPosY; //! Position of the progress report box on Y axis.
 
-		static bool m_LogToCLI; //! Bool to tell whether to print progress report to CLI or not.
 
 		static const unsigned int s_MaxFileName = 256; //! Maximum length of output file directory + name string.
 		static const unsigned int s_FileBufferSize = 8192; //! Buffer to hold data read from the zip file.

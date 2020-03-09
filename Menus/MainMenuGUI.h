@@ -278,6 +278,32 @@ public:
 
     virtual void Draw(BITMAP *drawBitmap) const;
 
+#pragma region Editor Activity Handling
+	/// <summary>
+	/// Loads "Editor Scene" and starts Actor Editor activity.
+	/// </summary>
+	void StartActorEditor();
+
+	/// <summary>
+	/// Loads "Editor Scene" and starts Gib Editor activity.
+	/// </summary>
+	void StartGibEditor();
+
+	/// <summary>
+	/// Loads "Editor Scene" and starts Scene Editor activity.
+	/// </summary>
+	void StartSceneEditor();
+
+	/// <summary>
+	/// Loads "Editor Scene" and starts Area Editor activity.
+	/// </summary>
+	void StartAreaEditor();
+
+	/// <summary>
+	/// Loads "Editor Scene" and starts Assembly Editor activity.
+	/// </summary>
+	void StartAssemblyEditor();
+#pragma endregion
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

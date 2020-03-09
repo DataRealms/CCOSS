@@ -25,6 +25,7 @@ extern volatile bool g_Quit;
 extern bool g_ResetActivity;
 extern bool g_InActivity;
 extern int g_IntroState;
+extern bool g_LaunchIntoEditor;
 //extern int g_TempXOff;
 //extern int g_TempYOff;
 
@@ -2740,6 +2741,11 @@ int UInputMan::Update()
     // If Escape is pressed, go to the mainmenu or close the app
     if (KeyPressed(KEY_ESC))
     {
+		// If we launched into editor directly, skip the logic and quit quickly.
+		if (g_LaunchIntoEditor) {
+			g_Quit = true;
+		}
+
 // TODO: Make this more robust and purty!")
         // If in the game pause and exit to menu on esc
         if (g_InActivity)

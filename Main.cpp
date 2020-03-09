@@ -120,6 +120,8 @@ enum SLIDES {
 
 volatile bool g_Quit = false;
 bool g_ResetRTE = false; //! Signals to reset the entire RTE next iteration.
+bool g_LaunchIntoEditor = false;
+const char *g_EditorToLaunch = "";
 bool g_InActivity = false;
 bool g_ResetActivity = false;
 bool g_ResumeActivity = false;
@@ -286,6 +288,27 @@ void EnterMultiplayerLobby() {
 	//g_FrameMan.ResetSplitScreens(true, true);
 	g_ActivityMan.SetStartActivity(pMultiplayerServerLobby);
 	g_ResetActivity = true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// <summary>
+/// Launch editor activity specified in command-line argument.
+/// </summary>
+void EnterEditorActivity(const char *editorToEnter) {
+	if (std::strcmp(editorToEnter, "ActorEditor") == 0) { 
+		g_pMainMenuGUI->StartActorEditor(); 
+	} else if (std::strcmp(editorToEnter, "GibEditor") == 0) {
+		g_pMainMenuGUI->StartGibEditor();
+	} else if (std::strcmp(editorToEnter, "SceneEditor") == 0) {
+		g_pMainMenuGUI->StartSceneEditor();
+	} else if (std::strcmp(editorToEnter, "AreaEditor") == 0) {
+		g_pMainMenuGUI->StartAreaEditor();
+	} else if (std::strcmp(editorToEnter, "AssemblyEditor") == 0) {
+		g_pMainMenuGUI->StartAssemblyEditor();
+	} else {
+		g_LaunchIntoEditor = false;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1848,6 +1871,12 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
                     g_NetworkServer.SetServerPort(port);
                 } else if (std::strcmp(argv[i], "-module") == 0 && i + 1 < argc) {
 					g_PresetMan.SetSingleModuleToLoad(argv[++i]); 
+				} else if (std::strcmp(argv[i], "-editor") == 0 && i + 1 < argc) {
+					const char *editorName = argv[++i];
+					if (std::strcmp(editorName, "") == 1) {
+						g_EditorToLaunch = editorName;
+						g_LaunchIntoEditor = true;
+					}
 				}
             }
         }
@@ -1966,7 +1995,17 @@ int main(int argc, char *argv[]) {
 	}
 
 	g_LoadingGUI.InitLoadingScreen();
-    InitMainMenu();
+	InitMainMenu();
+
+	if (g_LaunchIntoEditor) { 
+		// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
+		g_UInputMan.GetControlScheme(0)->SetDevice(1);
+		g_UInputMan.GetControlScheme(0)->SetPreset(1);
+		// Disable intro sequence.
+		g_SettingsMan.SetPlayIntro(false);
+		// Start the specified editor activity.
+		EnterEditorActivity(g_EditorToLaunch);
+	}
 
     if (g_SettingsMan.PlayIntro() && !g_NetworkServer.IsServerModeEnabled()) { PlayIntroTitle(); }
 

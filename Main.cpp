@@ -594,8 +594,6 @@ bool PlayIntroTitle() {
             yTextPos += pFont->GetFontHeight() * 2;
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, string("This game plays great with up to FOUR people on a BIG-SCREEN TV!"), GUIFont::Centre);
             yTextPos += pFont->GetFontHeight() * 2;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, string("but it also plays great with up to four people on a BIG SCREEN TV!"), GUIFont::Centre);
-//            yTextPos += pFont->GetFontHeight() * 1;
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, string("So invite some friends/enemies over, plug in those USB controllers, and have a blast -"), GUIFont::Centre);
             yTextPos += pFont->GetFontHeight() * 4;
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, string("Press ALT+ENTER to toggle FULLSCREEN mode"), GUIFont::Centre);
@@ -1707,7 +1705,7 @@ void ResetRTE() { g_ResetRTE = true; }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
-/// Indicated whether the system is about to be reset before the next loop starts.
+/// Indicates whether the system is about to be reset before the next loop starts.
 /// </summary>
 /// <returns>Whether the RTE is about to reset next iteration of the loop or not.</returns>
 bool IsResettingRTE() { return g_ResetRTE; }
@@ -1717,129 +1715,108 @@ bool IsResettingRTE() { return g_ResetRTE; }
 /// <summary>
 /// Game simulation loop.
 /// </summary>
-bool RunGameLoop()
-{
-    if (g_Quit)
-        return true;
+bool RunGameLoop() {
+	if (g_Quit) { return true; }
 
-    g_FrameMan.ResetFrameTimer();
-    g_TimerMan.EnableAveraging(true);
-    g_TimerMan.PauseSim(false);
-// Done in ResetActivity
-//    g_ActivityMan.GetActivity()->StartActivity();
-    if (g_ResetActivity)
-        ResetActivity();
+	g_FrameMan.ResetFrameTimer();
+	g_TimerMan.EnableAveraging(true);
+	g_TimerMan.PauseSim(false);
 
-    while (!g_Quit)
-    {
-        {
-            // Need to clear this out; sometimes background layers don't cover the whole back
-            g_FrameMan.ClearBackBuffer8();
+	if (g_ResetActivity) { ResetActivity(); }
 
-            // Update the real time measurement and increment
-            g_TimerMan.Update();
+	while (!g_Quit) {
+		// Need to clear this out; sometimes background layers don't cover the whole back
+		g_FrameMan.ClearBackBuffer8();
 
-			bool serverUpdated = false;
+		// Update the real time measurement and increment
+		g_TimerMan.Update();
 
-            // Simulation update, as many times as the fixed update step allows in the span since last frame draw
-            while (g_TimerMan.TimeForSimUpdate())
-            {
-				serverUpdated = false;
-				g_FrameMan.NewPerformanceSample();
+		bool serverUpdated = false;
 
-                // Advance the simulation time by the fixed amount
-                g_TimerMan.UpdateSim();
+		// Simulation update, as many times as the fixed update step allows in the span since last frame draw
+		while (g_TimerMan.TimeForSimUpdate()) {
+			serverUpdated = false;
+			g_FrameMan.NewPerformanceSample();
 
-				g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_SIM_TOTAL);
-				g_UInputMan.Update();
-				// It is vital that server is updated after input manager but before activity because input manager will clear 
-				// received pressed and released events on next update.
-				if (g_NetworkServer.IsServerModeEnabled())
-				{
-					g_NetworkServer.Update(true);
-					serverUpdated = true;
-				}
-				g_FrameMan.Update();
-				g_AudioMan.Update();
-				g_LuaMan.Update();
-				g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTIVITY);
-				g_ActivityMan.Update();
-				g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTIVITY);
-				g_MovableMan.Update();
+			// Advance the simulation time by the fixed amount
+			g_TimerMan.UpdateSim();
 
-				g_ActivityMan.LateUpdateGlobalScripts();
+			g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_SIM_TOTAL);
 
-				g_ConsoleMan.Update();
-				g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_SIM_TOTAL);
+			g_UInputMan.Update();
 
-                if (!g_InActivity)
-                {
-					g_TimerMan.PauseSim(true);
-					// If we're not in a metagame, then show main menu
-					if (g_MetaMan.GameInProgress())
-						g_IntroState = CAMPAIGNFADEIN;
-					else
-					{
-						Activity * pActivity = g_ActivityMan.GetActivity();
-						// If we edited something then return to main menu instead of scenario menu
-						// player will probably switch to area/scene editor
-						if (pActivity && pActivity->GetPresetName() == "None")
-							g_IntroState = MENUAPPEAR;
-						else
-							g_IntroState = MAINTOSCENARIO;
+			// It is vital that server is updated after input manager but before activity because input manager will clear 
+			// received pressed and released events on next update.
+			if (g_NetworkServer.IsServerModeEnabled()) {
+				g_NetworkServer.Update(true);
+				serverUpdated = true;
+			}
+			g_FrameMan.Update();
+			g_AudioMan.Update();
+			g_LuaMan.Update();
+			g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTIVITY);
+			g_ActivityMan.Update();
+			g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTIVITY);
+			g_MovableMan.Update();
+
+			g_ActivityMan.LateUpdateGlobalScripts();
+
+			g_ConsoleMan.Update();
+			g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_SIM_TOTAL);
+
+			if (!g_InActivity) {
+				g_TimerMan.PauseSim(true);
+				// If we're not in a metagame, then show main menu
+				if (g_MetaMan.GameInProgress()) {
+					g_IntroState = CAMPAIGNFADEIN;
+				} else {
+					Activity * pActivity = g_ActivityMan.GetActivity();
+					// If we edited something then return to main menu instead of scenario menu
+					// player will probably switch to area/scene editor
+					if (pActivity && pActivity->GetPresetName() == "None") {
+						g_IntroState = MENUAPPEAR;
+					} else {
+						g_IntroState = MAINTOSCENARIO;
 					}
-					PlayIntroTitle();
-                }
-                // Resetting the simulation
-                if (g_ResetActivity)
-                {
-                    // Reset and quit if user quit during reset loading
-                    if (!ResetActivity())
-                        break;
-                }
-                // Resuming the simulation
-                if (g_ResumeActivity)
-                    ResumeActivity();
-            }
-
-			if (g_NetworkServer.IsServerModeEnabled())
-			{
-				// Pause sim while we're waiting for scene transmission or scene will
-				// start changing before clients receive them and those changes will be lost
-				if (!g_NetworkServer.ReadyForSimulation())
-					g_TimerMan.PauseSim(true);
-				else 
-					if (g_InActivity)
-						g_TimerMan.PauseSim(false);
-
-				if (!serverUpdated)
-				{
-					g_NetworkServer.Update();
-					serverUpdated = true;
 				}
+				PlayIntroTitle();
+			}
+			// Resetting the simulation
+			if (g_ResetActivity) {
+				// Reset and quit if user quit during reset loading
+				if (!ResetActivity()) { break; }
+			}
+			// Resuming the simulation
+			if (g_ResumeActivity) { ResumeActivity(); }
+		}
 
-				if (g_SettingsMan.GetServerSimSleepWhenIdle())
-				{
-					signed long long ticksToSleep = g_TimerMan.GetTimeToSleep();
-					if (ticksToSleep > 0)
-					{
-						double secsToSleep = (double)ticksToSleep / (double)g_TimerMan.GetTicksPerSecond();
-						long long milisToSleep = (long long)secsToSleep * (1000);
-						std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
-					}
+		if (g_NetworkServer.IsServerModeEnabled()) {
+			// Pause sim while we're waiting for scene transmission or scene will
+			// start changing before clients receive them and those changes will be lost
+			if (!g_NetworkServer.ReadyForSimulation()) {
+				g_TimerMan.PauseSim(true);
+			} else {
+				if (g_InActivity) { g_TimerMan.PauseSim(false); }
+			}
+
+			if (!serverUpdated) {
+				g_NetworkServer.Update();
+				serverUpdated = true;
+			}
+
+			if (g_SettingsMan.GetServerSimSleepWhenIdle()) {
+				signed long long ticksToSleep = g_TimerMan.GetTimeToSleep();
+				if (ticksToSleep > 0) {
+					double secsToSleep = (double)ticksToSleep / (double)g_TimerMan.GetTicksPerSecond();
+					long long milisToSleep = (long long)secsToSleep * (1000);
+					std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
 				}
 			}
-        }
-
-        // Frame draw update
-        if (!g_Quit)
-        {
-            g_FrameMan.Draw();
-            g_FrameMan.FlipFrameBuffers();
-        }
-    }
-
-    return true;
+		}
+		g_FrameMan.Draw();
+		g_FrameMan.FlipFrameBuffers();
+	}
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

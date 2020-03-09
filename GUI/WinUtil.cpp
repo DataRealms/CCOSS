@@ -10,7 +10,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include <windows.h>
+#include <Windows.h>
 #include "WinUtil.h"
 
 using namespace RTE;

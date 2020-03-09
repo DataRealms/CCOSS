@@ -5,6 +5,7 @@
 *.pdb
 *.obj
 *.vs
+*.APS
 
 /_Bin
 /NATPunchServer/Server/NATCompleteServer/Debug

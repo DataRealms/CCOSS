@@ -245,6 +245,8 @@ namespace RTE {
 		Sound m_PlacementThud; //!< Sound for placement of object to scene.
 		Sound m_PlacementGravel; //!< Sound for gravely placement of object to scene.
 
+	private:
+
 		/// <summary>
 		/// Clears all the member variables of this GUISound, effectively resetting the members of this abstraction level only.
 		/// </summary>

@@ -3,7 +3,7 @@
 
 namespace RTE {
 
-	const char g_WritePackageExtension[8] = ".rte";
+	static constexpr char g_WritePackageExtension[8] = ".rte";
 
 	/// <summary>
 	/// Writes RTE objects to std::ostreams.

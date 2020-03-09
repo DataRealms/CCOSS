@@ -299,14 +299,14 @@ namespace RTE {
 
 	protected:
 
-		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this.
-		double m_TicksPerMS; //! Ticks per MS.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this.
+		double m_TicksPerMS; //!< Ticks per MS.
 
-		int64_t m_StartRealTime; //! Absolute tick count when this was started in real time.
-		int64_t m_RealTimeLimit; //! Tick count, relative to the start time, when this should indicate end or expired in real time.
+		int64_t m_StartRealTime; //!< Absolute tick count when this was started in real time.
+		int64_t m_RealTimeLimit; //!< Tick count, relative to the start time, when this should indicate end or expired in real time.
 
-		int64_t m_StartSimTime; //! Absolute tick count when this was started in simulation time.
-		int64_t m_SimTimeLimit; //! Tick count, relative to the start time, when this should indicate end or expired in simulation time.
+		int64_t m_StartSimTime; //!< Absolute tick count when this was started in simulation time.
+		int64_t m_SimTimeLimit; //!< Tick count, relative to the start time, when this should indicate end or expired in simulation time.
 
 	private:
 

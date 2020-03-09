@@ -243,24 +243,24 @@ namespace RTE {
 
 	protected:
 
-		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this object.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
 
-		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount }; //! Enumeration for loading BITMAPs by bit depth.
+		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount }; //!< Enumeration for loading BITMAPs by bit depth.
 
-		std::string m_DataPath; //! Path to this ContentFile's Datafile Object's path. "datafile.dat#objectname". In the case of an animation, this filename/name will be appended with 000, 001, 002 etc.
-		static std::map<size_t, std::string> m_PathHashes; //! Hash value of the path to this ContentFile's Datafile Object.
+		std::string m_DataPath; //!< Path to this ContentFile's Datafile Object's path. "datafile.dat#objectname". In the case of an animation, this filename/name will be appended with 000, 001, 002 etc.
+		static std::map<size_t, std::string> m_PathHashes; //!< Hash value of the path to this ContentFile's Datafile Object.
 
-		static std::map<std::string, BITMAP *> m_sLoadedBitmaps[BitDepthCount]; //! Static map containing all the already loaded BITMAPs and their paths, and there's two maps, for each bit depth.
-		static std::map<std::string, AUDIO_STRUCT *> m_sLoadedSamples; //! Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
-		//static std::map<std::string, std::pair<char *, long> > m_sLoadedBinary; //! Static map containing all the already loaded binary data. First in pair is the data, second is size in bytes.
+		static std::map<std::string, BITMAP *> m_sLoadedBitmaps[BitDepthCount]; //!< Static map containing all the already loaded BITMAPs and their paths, and there's two maps, for each bit depth.
+		static std::map<std::string, AUDIO_STRUCT *> m_sLoadedSamples; //!< Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
+		//static std::map<std::string, std::pair<char *, long> > m_sLoadedBinary; //!< Static map containing all the already loaded binary data. First in pair is the data, second is size in bytes.
 
-		int m_DataModuleID; //! Data Module ID of where this was loaded from.
+		int m_DataModuleID; //!< Data Module ID of where this was loaded from.
 
-		void *m_pLoadedData; //! Non-ownership pointer to the loaded data for convenience. Do not release/delete this.   
-		//long m_LoadedDataSize; //! Size of loaded data.
-		//bool m_DataModified; //! Whether the data itself has been modified since load, and should be saved out again to the path on write.
+		void *m_pLoadedData; //!< Non-ownership pointer to the loaded data for convenience. Do not release/delete this.   
+		//long m_LoadedDataSize; //!< Size of loaded data.
+		//bool m_DataModified; //!< Whether the data itself has been modified since load, and should be saved out again to the path on write.
 
-		DATAFILE *m_pDataFile; //! This is only if the data is loaded from a datafile; needs to be saved so that it can be unloaded as some point.
+		DATAFILE *m_pDataFile; //!< This is only if the data is loaded from a datafile; needs to be saved so that it can be unloaded as some point.
 
 	private:
 

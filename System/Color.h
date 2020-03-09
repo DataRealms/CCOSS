@@ -14,10 +14,10 @@ namespace RTE {
 
 	public:
 
-		unsigned char m_R; //! Red value of this color.
-		unsigned char m_G; //! Green value of this color.
-		unsigned char m_B; //! Blue value of this color.
-		unsigned char m_Index; //! The closest matching index in the current color palette. If 0, this needs to be recalculated and updated.
+		unsigned char m_R; //!< Red value of this color.
+		unsigned char m_G; //!< Green value of this color.
+		unsigned char m_B; //!< Blue value of this color.
+		unsigned char m_Index; //!< The closest matching index in the current color palette. If 0, this needs to be recalculated and updated.
 
 #pragma region Creation
 		/// <summary>
@@ -176,7 +176,7 @@ namespace RTE {
 
 	protected:
 
-		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this.
 
 	private:
 

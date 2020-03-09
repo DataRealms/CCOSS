@@ -532,7 +532,7 @@ protected:
     // All official modules are in the beginning of the m_TypeMap, so this count shows how many into that vector they represent
     int m_OfficialModuleCount;
 
-	std::string m_SingleModuleToLoad; //! Name of the single module to load after the official modules.
+	std::string m_SingleModuleToLoad; //!< Name of the single module to load after the official modules.
 
     // List of all Entity groups ever registered, all uniques
     // This is just a handy total of all the groups registered in all the individual DataModule:s

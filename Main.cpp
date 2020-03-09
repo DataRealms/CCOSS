@@ -119,9 +119,9 @@ enum SLIDES {
 };
 
 volatile bool g_Quit = false;
-bool g_ResetRTE = false; //! Signals to reset the entire RTE next iteration.
-bool g_LaunchIntoEditor = false;
-const char *g_EditorToLaunch = "";
+bool g_ResetRTE = false; //!< Signals to reset the entire RTE next iteration.
+bool g_LaunchIntoEditor = false; //!< Flag for launching directly into editor activity.
+const char *g_EditorToLaunch = ""; //!< String with editor activity name to launch.
 bool g_InActivity = false;
 bool g_ResetActivity = false;
 bool g_ResumeActivity = false;

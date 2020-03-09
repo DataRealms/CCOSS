@@ -4,10 +4,10 @@
 namespace RTE {
 
 #pragma region Graphics Constants
-	static constexpr unsigned int c_PaletteEntriesNumber = 256; //! Number of indexes in the graphics palette.
-	static constexpr unsigned int c_MOIDLayerBitDepth = 16; //! Bit depth of MOID layer bitmap.
+	static constexpr unsigned int c_PaletteEntriesNumber = 256; //!< Number of indexes in the graphics palette.
+	static constexpr unsigned int c_MOIDLayerBitDepth = 16; //!< Bit depth of MOID layer bitmap.
 
-	static constexpr unsigned int c_GoldMaterialID = 2; //! Index of gold material in the material palette.
+	static constexpr unsigned int c_GoldMaterialID = 2; //!< Index of gold material in the material palette.
 
 	// GUI colors
 	#define c_GUIColorWhite makecol(255, 255, 255)

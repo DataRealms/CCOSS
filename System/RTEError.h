@@ -5,7 +5,7 @@
 
 namespace RTE {
 
-	static BITMAP *g_pScreendumpBuffer = 0; //! Buffer for saving abort screendumps.
+	static BITMAP *g_pScreendumpBuffer = 0; //!< Buffer for saving abort screendumps.
 
 	/// <summary>
 	/// Abort on Error function. Will try to dump a screenshot, show an abort message, and then quit the program immediately.

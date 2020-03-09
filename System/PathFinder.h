@@ -14,8 +14,8 @@ namespace RTE {
 	/// </summary>
 	struct PathNode {
 
-		Vector m_Pos; //! Absolute position of the center of this node in the scene.    
-		bool m_IsChanged; //! Whether this has been updated since last call to Reset the pather.
+		Vector m_Pos; //!< Absolute position of the center of this node in the scene.    
+		bool m_IsChanged; //!< Whether this has been updated since last call to Reset the pather.
 
 		/// <summary>
 		/// Pointers to all adjacent nodes. These are not owned, and may be 0 if adjacent to non-wrapping scene border.
@@ -147,11 +147,11 @@ namespace RTE {
 
 	protected:
 
-		MicroPather *m_pPather; //! The actual pathing object that does the pathfinding work. Owned.
-		std::vector<std::vector<PathNode *> > m_NodeGrid;  //! The array of PathNodes representing the grid on the scene. The nodes are owned by this.
-		int m_NodeDimension; //! The width and height of each node, in pixels on the scene.
+		MicroPather *m_pPather; //!< The actual pathing object that does the pathfinding work. Owned.
+		std::vector<std::vector<PathNode *> > m_NodeGrid;  //!< The array of PathNodes representing the grid on the scene. The nodes are owned by this.
+		int m_NodeDimension; //!< The width and height of each node, in pixels on the scene.
 
-		float m_DigStrenght; //! What material strength the search is capable of digging through.
+		float m_DigStrenght; //!< What material strength the search is capable of digging through.
 
 #pragma region Path Cost Updates
 		/// <summary>

@@ -13,9 +13,9 @@ namespace RTE {
 
 	public:
 
-		Vector m_Corner; //! Vector position of the upper left corner of this box.
-		float m_Width; //! Width of this box.
-		float m_Height; //! Height of this box.
+		Vector m_Corner; //!< Vector position of the upper left corner of this box.
+		float m_Width; //!< Width of this box.
+		float m_Height; //!< Height of this box.
 
 #pragma region Creation
 		/// <summary>
@@ -283,7 +283,7 @@ namespace RTE {
 
 	protected:
 
-		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this.
 
 	private:
 

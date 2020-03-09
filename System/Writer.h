@@ -161,12 +161,12 @@ namespace RTE {
 
 	protected:
 
-		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this object.
-		std::ofstream *m_pStream; //! Stream used for writing to files.
-		std::string m_FolderPath; //! Only the path to the folder that we are writing a file in, excluding the filename
-		std::string m_FilePath; //! Currently used stream's filepath
-		std::string m_FileName; //! Only the name of the currently read file, excluding the path
-		int m_Indent; //! Indent counter.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
+		std::ofstream *m_pStream; //!< Stream used for writing to files.
+		std::string m_FolderPath; //!< Only the path to the folder that we are writing a file in, excluding the filename
+		std::string m_FilePath; //!< Currently used stream's filepath
+		std::string m_FileName; //!< Only the name of the currently read file, excluding the path
+		int m_Indent; //!< Indent counter.
 
 	private:
 

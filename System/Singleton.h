@@ -50,7 +50,7 @@ namespace RTE {
 
 	private:
 
-		static Type *ms_Instance; //! Pointer to instance of this singleton.
+		static Type *ms_Instance; //!< Pointer to instance of this singleton.
 	};
 
 	template <typename Type> Type * Singleton<Type>::ms_Instance = 0;

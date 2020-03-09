@@ -21,8 +21,8 @@ namespace RTE {
 		/// Holds and owns the actual object instance pointer, and the location of the data file it was read from, as well as where in that file.
 		/// </summary>
 		struct PresetEntry {
-			Entity *m_pEntityPreset; //! Owned by this.
-			std::string m_FileReadFrom; //! Where the instance was read from.
+			Entity *m_pEntityPreset; //!< Owned by this.
+			std::string m_FileReadFrom; //!< Where the instance was read from.
 			PresetEntry(Entity *pPreset, std::string file) { m_pEntityPreset = pPreset; m_FileReadFrom = file; }
 		};
 
@@ -271,27 +271,27 @@ namespace RTE {
 
 	protected:
 
-		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this object.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
 
-		bool m_ScanFolderContents; //! Indicates whether module loader should scan for any .ini's inside module folder instead of loading files defined in IncludeFile only.
-		bool m_IgnoreMissingItems; //! Indicates whether module loader should ignore missing items in this module.
+		bool m_ScanFolderContents; //!< Indicates whether module loader should scan for any .ini's inside module folder instead of loading files defined in IncludeFile only.
+		bool m_IgnoreMissingItems; //!< Indicates whether module loader should ignore missing items in this module.
 
-		std::string m_FileName; //! File/folder name of the data module, eg "MyMod.rte".   
-		std::string m_FriendlyName; //! Friendly name of the data module, eg "My Weapons Mod". 
-		std::string m_Author; //! Name of the author of this module.
-		std::string m_Description; //! Brief description of what this module is and contains.
-		std::string m_ScriptPath; //! Path to script to execute when this module is loaded.
-		int m_Version; //! Version number, starting with 1.
-		int m_ModuleID; //! ID number assigned to this upon loading, for internal use only, don't reflect in ini's.
+		std::string m_FileName; //!< File/folder name of the data module, eg "MyMod.rte".   
+		std::string m_FriendlyName; //!< Friendly name of the data module, eg "My Weapons Mod". 
+		std::string m_Author; //!< Name of the author of this module.
+		std::string m_Description; //!< Brief description of what this module is and contains.
+		std::string m_ScriptPath; //!< Path to script to execute when this module is loaded.
+		int m_Version; //!< Version number, starting with 1.
+		int m_ModuleID; //!< ID number assigned to this upon loading, for internal use only, don't reflect in ini's.
 
-		ContentFile m_IconFile; //! File to the icon/symbol bitmap.
-		BITMAP *m_pIcon; //! Bitmap with the icon loaded form above file.
+		ContentFile m_IconFile; //!< File to the icon/symbol bitmap.
+		BITMAP *m_pIcon; //!< Bitmap with the icon loaded form above file.
 
-		float m_CrabToHumanSpawnRatio; //! Crab-to-human Spawn ratio to replace value from Constants.lua.
+		float m_CrabToHumanSpawnRatio; //!< Crab-to-human Spawn ratio to replace value from Constants.lua.
 
-		std::list<const Entity *> m_EntityList; //! A list of loaded entities solely for the purpose of enumeration presets from Lua.
-		std::list<std::string> m_GroupRegister; //! List of all Entity groups ever registered in this, all uniques.
-		unsigned char m_MaterialMappings[c_PaletteEntriesNumber]; //! Material mappings local to this DataModule.
+		std::list<const Entity *> m_EntityList; //!< A list of loaded entities solely for the purpose of enumeration presets from Lua.
+		std::list<std::string> m_GroupRegister; //!< List of all Entity groups ever registered in this, all uniques.
+		unsigned char m_MaterialMappings[c_PaletteEntriesNumber]; //!< Material mappings local to this DataModule.
 
 		/// <summary>
 		/// Ordered list of all owned Entity instances, ordered by the sequence of their reading - really now with overwriting?.

@@ -385,41 +385,41 @@ namespace RTE {
 #pragma endregion
 
 	protected:
-		static Entity::ClassInfo m_sClass; //! ClassInfo for this class.
-		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this object.
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
 
-		bool m_AudioEnabled; //! Bool to tell whether audio is enabled or not.
-		int m_MusicChannel; //! Channel number for Music streams. Typically 0. 
+		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
+		int m_MusicChannel; //!< Channel number for Music streams. Typically 0. 
 
 #ifdef __USE_SOUND_FMOD
-		static constexpr unsigned short int s_MaxVolume = 255; //! Maximum value to use for volume control.
-		FSOUND_STREAM *m_pMusic; //! Pointer to Fmod sound stream data structure.
+		static constexpr unsigned short int s_MaxVolume = 255; //!< Maximum value to use for volume control.
+		FSOUND_STREAM *m_pMusic; //!< Pointer to Fmod sound stream data structure.
 
 #elif __USE_SOUND_GORILLA
-		static constexpr float s_MaxVolume = 1.0;  //! Maximum value to use for volume control.
-		gau_Manager* m_pManager; //! Pointer to Gorilla Audio manager and associated functions.
-		ga_Mixer* m_pMixer; //! Pointer to Gorilla Audio mixer data structure.
-		ga_StreamManager* m_pStreamManager; //! Pointer to Gorilla Audio stream manager data structure.
-		ga_Handle * m_pMusic; //! Pointer to Gorilla Audio playback control handle data structure.
-		std::vector<ga_Handle *> m_SoundChannels; //! Vector containing active sound channels.
-		std::vector<ga_Sound *> m_SoundInstances; //! Vector containing Sound instances.
+		static constexpr float s_MaxVolume = 1.0;  //!< Maximum value to use for volume control.
+		gau_Manager* m_pManager; //!< Pointer to Gorilla Audio manager and associated functions.
+		ga_Mixer* m_pMixer; //!< Pointer to Gorilla Audio mixer data structure.
+		ga_StreamManager* m_pStreamManager; //!< Pointer to Gorilla Audio stream manager data structure.
+		ga_Handle * m_pMusic; //!< Pointer to Gorilla Audio playback control handle data structure.
+		std::vector<ga_Handle *> m_SoundChannels; //!< Vector containing active sound channels.
+		std::vector<ga_Sound *> m_SoundInstances; //!< Vector containing Sound instances.
 #endif
-		double m_SoundsVolume; //! Global sounds effects volume.
-		double m_MusicVolume; //! Global music volume.
+		double m_SoundsVolume; //!< Global sounds effects volume.
+		double m_MusicVolume; //!< Global music volume.
 
-		double m_GlobalPitch; //! Global pitch multiplier.
-		std::vector<int> m_NormalFrequencies; //! The 'normal' unpitched frequency of each channel handle we have.
-		std::vector<double> m_PitchModifiers; //! How each channel's pitch is modified individually.
+		double m_GlobalPitch; //!< Global pitch multiplier.
+		std::vector<int> m_NormalFrequencies; //!< The 'normal' unpitched frequency of each channel handle we have.
+		std::vector<double> m_PitchModifiers; //!< How each channel's pitch is modified individually.
 
-		std::string m_MusicPath; //! The path to the last played music stream.
-		std::list<std::string> m_MusicPlayList; //! Playlist of paths to music to play after the current non looping one is done.
+		std::string m_MusicPath; //!< The path to the last played music stream.
+		std::list<std::string> m_MusicPlayList; //!< Playlist of paths to music to play after the current non looping one is done.
 
-		Timer m_SilenceTimer; //! Timer for measuring silences between songs.
+		Timer m_SilenceTimer; //!< Timer for measuring silences between songs.
 
 
-		bool m_IsInMultiplayerMode; //! If true then the server is in multiplayer mode and will register sound and music events into internal lists.
-		std::list<NetworkSoundData> m_SoundEvents[c_MaxClients]; //! Lists of per player sound events.
-		std::list<NetworkMusicData> m_MusicEvents[c_MaxClients]; //! Lists of per player music events.
+		bool m_IsInMultiplayerMode; //!< If true then the server is in multiplayer mode and will register sound and music events into internal lists.
+		std::list<NetworkSoundData> m_SoundEvents[c_MaxClients]; //!< Lists of per player sound events.
+		std::list<NetworkMusicData> m_MusicEvents[c_MaxClients]; //!< Lists of per player music events.
 
 	private:
 		/// <summary>

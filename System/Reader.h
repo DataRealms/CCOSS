@@ -3,7 +3,7 @@
 
 namespace RTE {
 
-	typedef std::function<void(std::string, bool)> ProgressCallback; //! Convenient name definition for the progress report callback function.
+	typedef std::function<void(std::string, bool)> ProgressCallback; //!< Convenient name definition for the progress report callback function.
 
 	/// <summary>
 	/// Reads RTE objects from std::istreams.
@@ -236,33 +236,33 @@ namespace RTE {
 				m_pStream(pStream), m_FilePath(filePath), m_CurrentLine(currentLine), m_PreviousIndent(prevIndent) { ; }
 
 			// Owned by the reader, so not deleted by this
-			std::ifstream *m_pStream; //! Currently used stream, is not on the StreamStack until a new stream is opened.
-			std::string m_FilePath; //! Currently used stream's filepath.
-			int m_CurrentLine; //! The line number the stream is on.
-			int m_PreviousIndent; //! Count of tabs encountered on the last line Eat() ate.
+			std::ifstream *m_pStream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
+			std::string m_FilePath; //!< Currently used stream's filepath.
+			int m_CurrentLine; //!< The line number the stream is on.
+			int m_PreviousIndent; //!< Count of tabs encountered on the last line Eat() ate.
 		};
 
-		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this.
 
-		std::ifstream *m_pStream; //! Currently used stream, is not on the StreamStack until a new stream is opened.
-		std::list<StreamInfo> m_StreamStack; //! Stack of stream and filepath pairs, each one representing a file opened to read from within another.
-		bool m_EndOfStreams; //! All streams have been depleted.
+		std::ifstream *m_pStream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
+		std::list<StreamInfo> m_StreamStack; //!< Stack of stream and filepath pairs, each one representing a file opened to read from within another.
+		bool m_EndOfStreams; //!< All streams have been depleted.
 
-		ProgressCallback m_fpReportProgress; //! Function pointer to report our reading progress to, by calling it and passing a descriptive string to it.
+		ProgressCallback m_fpReportProgress; //!< Function pointer to report our reading progress to, by calling it and passing a descriptive string to it.
 
-		std::string m_FilePath; //! Currently used stream's filepath.
-		std::string m_FileName; //! Only the name of the currently read file, excluding the path.
+		std::string m_FilePath; //!< Currently used stream's filepath.
+		std::string m_FileName; //!< Only the name of the currently read file, excluding the path.
 
-		std::string m_DataModuleName; //! The current name of the data module being read from, including the .rte extension.
-		int m_DataModuleID; //! The current ID of the data module being read from.
+		std::string m_DataModuleName; //!< The current name of the data module being read from, including the .rte extension.
+		int m_DataModuleID; //!< The current ID of the data module being read from.
 
-		int m_PreviousIndent; //! Count of tabs encountered on the last line Eat() ate.
-		int m_IndentDifference; //! Difference in indentation from the last line to the current line.
-		std::string m_ReportTabs; //! String containing the proper amount of tabs for the report.
+		int m_PreviousIndent; //!< Count of tabs encountered on the last line Eat() ate.
+		int m_IndentDifference; //!< Difference in indentation from the last line to the current line.
+		std::string m_ReportTabs; //!< String containing the proper amount of tabs for the report.
 
-		int m_CurrentLine; //! The line number the stream is on.
-		bool m_OverwriteExisting; //! Whether object instances read from this should overwrite any already existing ones with the same names.
-		bool m_SkipIncludes; //! Indicates whether reader should skip included files
+		int m_CurrentLine; //!< The line number the stream is on.
+		bool m_OverwriteExisting; //!< Whether object instances read from this should overwrite any already existing ones with the same names.
+		bool m_SkipIncludes; //!< Indicates whether reader should skip included files
 
 		/// <summary>
 		/// When NextProperty() has returned false, indicating that there were no more properties to read on that object,

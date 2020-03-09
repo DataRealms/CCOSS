@@ -142,16 +142,16 @@ namespace RTE {
 #pragma endregion
 
 	protected:
-		static Entity::ClassInfo m_sClass; //! ClassInfo for this class
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class
 
-		Sound m_ActivationSound; //! Activation sound
+		Sound m_ActivationSound; //!< Activation sound
 
-		Vector m_StartThrowOffset; //! The position offset at which a throw of this Device begins
-		Vector m_EndThrowOffset; //! The position offset at which a throw of this Device ends
-		float m_MinThrowVel; //! The minimum throw velocity this gets when thrown
-		float m_MaxThrowVel; //! The maximum throw velocity this gets when thrown
-		long m_TriggerDelay; //! Time in millisecs from the time of being thrown to triggering whatever it is that this ThrownDevice does
-		bool m_ActivatesWhenReleased; //! Whether this activates when its throw is started, or waits until it is released from the arm that is throwing it
+		Vector m_StartThrowOffset; //!< The position offset at which a throw of this Device begins
+		Vector m_EndThrowOffset; //!< The position offset at which a throw of this Device ends
+		float m_MinThrowVel; //!< The minimum throw velocity this gets when thrown
+		float m_MaxThrowVel; //!< The maximum throw velocity this gets when thrown
+		long m_TriggerDelay; //!< Time in millisecs from the time of being thrown to triggering whatever it is that this ThrownDevice does
+		bool m_ActivatesWhenReleased; //!< Whether this activates when its throw is started, or waits until it is released from the arm that is throwing it
 
 	private:
 		/// <summary>

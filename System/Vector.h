@@ -15,8 +15,8 @@ namespace RTE {
 
 	public:
 
-		float m_X; //! X value of this vector.
-		float m_Y; //! Y value of this vector.
+		float m_X; //!< X value of this vector.
+		float m_Y; //!< Y value of this vector.
 
 #pragma region Creation
 		/// <summary>
@@ -564,7 +564,7 @@ namespace RTE {
 
 	protected:
 
-		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this.
 
 	private:
 

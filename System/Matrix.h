@@ -13,10 +13,10 @@ namespace RTE {
 
 	public:
 
-		float m_Rotation; //! The angle represented, in radians.
-		bool m_Flipped[2]; //! Whether or not this Matrix also mirrors the X axis of its invoked Vectors.
-		float m_Elements[2][2]; //! The elements of the matrix, which represent the angle.
-		bool m_ElementsUpdated; //! Whether the elements are currently updated to the set angle.
+		float m_Rotation; //!< The angle represented, in radians.
+		bool m_Flipped[2]; //!< Whether or not this Matrix also mirrors the X axis of its invoked Vectors.
+		float m_Elements[2][2]; //!< The elements of the matrix, which represent the angle.
+		bool m_ElementsUpdated; //!< Whether the elements are currently updated to the set angle.
 
 #pragma region Creation
 		/// <summary>
@@ -353,7 +353,7 @@ namespace RTE {
 
 	protected:
 
-		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this.
 
 	private:
 

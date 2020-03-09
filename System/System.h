@@ -52,7 +52,7 @@ namespace RTE {
 
 	protected:
 
-		static bool m_LogToCLI; //! Bool to tell whether to print to command-line or not.
+		static bool m_LogToCLI; //!< Bool to tell whether to print to command-line or not.
 	};
 
 	extern System g_System;

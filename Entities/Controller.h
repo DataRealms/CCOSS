@@ -9,7 +9,7 @@ namespace RTE {
 
 	class Actor;
 
-	//! Enumerate control states.
+	//!< Enumerate control states.
 	enum ControlState {
 		PRIMARY_ACTION = 0,
 		SECONDARY_ACTION,
@@ -66,9 +66,9 @@ namespace RTE {
 
 	public:
 
-		Vector m_AnalogMove; //! Analog values for movement.
-		Vector m_AnalogAim; //! Analog values for aiming.
-		Vector m_AnalogCursor; //! Analog values for Pie Menu operation.
+		Vector m_AnalogMove; //!< Analog values for movement.
+		Vector m_AnalogAim; //!< Analog values for aiming.
+		Vector m_AnalogCursor; //!< Analog values for Pie Menu operation.
 
 		// Enumerate different input modes.
 		enum InputMode {
@@ -302,12 +302,12 @@ namespace RTE {
 
 	protected:
 
-		bool m_ControlStates[CONTROLSTATECOUNT]; //! Control states.
-		bool m_Disabled; //! Quick and easy disable to prevent updates from being made.
+		bool m_ControlStates[CONTROLSTATECOUNT]; //!< Control states.
+		bool m_Disabled; //!< Quick and easy disable to prevent updates from being made.
 
-		InputMode m_InputMode; //! The current controller input mode, like AI, player etc.
+		InputMode m_InputMode; //!< The current controller input mode, like AI, player etc.
 
-		Actor *m_pControlled; //! The actor controlled by this.
+		Actor *m_pControlled; //!< The actor controlled by this.
 
 		/// <summary>
 		/// The last player this controlled. This is necessary so we still have some control after controlled's death.
@@ -315,7 +315,7 @@ namespace RTE {
 		/// </summary>
 		int m_Player;
 
-		int m_Team; //! The last team this controlled. This is necessary so we still have some control after controlled's death.
+		int m_Team; //!< The last team this controlled. This is necessary so we still have some control after controlled's death.
 
 		/// <summary>
 		/// These are hacks to make the switch to brain shortcut work without immediately switching away by 
@@ -324,19 +324,19 @@ namespace RTE {
 		bool m_NextIgnore;
 		bool m_PrevIgnore;
 
-		//! These are used to track just a single press on  shortcut button.
+		//!< These are used to track just a single press on  shortcut button.
 		bool m_WeaponChangeNextIgnore;
 		bool m_WeaponChangePrevIgnore;
 		bool m_WeaponPickupIgnore;
 		bool m_WeaponDropIgnore;
 		bool m_WeaponReloadIgnore;
 
-		static const int m_ReleaseDelay; //! The delay between releasing a menu button and activating the regular controls, to avoid accidental input.
-		Timer m_ReleaseTimer; //! Timer for measuring release delays.  
-		Timer m_JoyAccelTimer; //! Timer for measuring analog joystick-controlled cursor acceleration.   
-		Timer m_KeyAccelTimer; //! Timer for measuring keyboard-controlled cursor acceleration.
+		static const int m_ReleaseDelay; //!< The delay between releasing a menu button and activating the regular controls, to avoid accidental input.
+		Timer m_ReleaseTimer; //!< Timer for measuring release delays.  
+		Timer m_JoyAccelTimer; //!< Timer for measuring analog joystick-controlled cursor acceleration.   
+		Timer m_KeyAccelTimer; //!< Timer for measuring keyboard-controlled cursor acceleration.
 
-		Vector m_MouseMovement; //! Relative mouse movement, if this player uses the mouse.
+		Vector m_MouseMovement; //!< Relative mouse movement, if this player uses the mouse.
 
 	private:
 

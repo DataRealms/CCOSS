@@ -16,24 +16,21 @@
 
 #include "unzip.h"
 
-extern std::string g_LoadSingleModule;
 extern volatile bool g_Quit;
 
 namespace RTE {
 
 	LoadingGUI g_LoadingGUI;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	AllegroScreen *m_GUIScreen = 0;
-	GUIControlManager *m_LoadingGUI = 0;
-	BITMAP *m_LoadingGUIBitmap = 0;
+	GUIControlManager *LoadingGUI::m_LoadingGUI = 0;
+
+	AllegroInput *LoadingGUI::m_GUIInput = 0;
+	AllegroScreen *LoadingGUI::m_GUIScreen = 0;
+	BITMAP *LoadingGUI::m_LoadingGUIBitmap = 0;
 	int LoadingGUI::m_LoadingGUIPosX = 0;
 	int LoadingGUI::m_LoadingGUIPosY = 0;
 
-	AllegroInput *m_GUIInput = 0;
-	Writer *m_LoadingLogWriter = 0;
-
+	Writer *LoadingGUI::m_LoadingLogWriter = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

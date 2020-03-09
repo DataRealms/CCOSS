@@ -1,7 +1,14 @@
 #ifndef _LOADINGUI_
 #define _LOADINGGUI_
 
+struct BITMAP;
+
 namespace RTE {
+
+	class AllegroScreen;
+	class AllegroInput;
+	class GUIControlManager;
+	class Writer;
 
 	class LoadingGUI {
 
@@ -33,9 +40,15 @@ namespace RTE {
 
 	protected:
 
+		static GUIControlManager *m_LoadingGUI; //! Manager of the whole LoadingGUI.
+
+		static AllegroInput *m_GUIInput; //! Input interface of this.
+		static AllegroScreen *m_GUIScreen; //! Screen interface of this.
+		static BITMAP *m_LoadingGUIBitmap; //! BITMAP that the progress report will be drawn into.
 		static int m_LoadingGUIPosX; //! Position of the progress report box on X axis.
 		static int m_LoadingGUIPosY; //! Position of the progress report box on Y axis.
 
+		static Writer *m_LoadingLogWriter; //! The Writer that generates the loading log.
 
 		static const unsigned int s_MaxFileName = 256; //! Maximum length of output file directory + name string.
 		static const unsigned int s_FileBufferSize = 8192; //! Buffer to hold data read from the zip file.

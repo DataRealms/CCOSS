@@ -39,9 +39,6 @@
     <ClInclude Include="System\ContentFile.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\Controller.h">
-      <Filter>System</Filter>
-    </ClInclude>
     <ClInclude Include="System\DataModule.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -459,6 +456,9 @@
     <ClInclude Include="Resources\resource.h">
       <Filter>Resources</Filter>
     </ClInclude>
+    <ClInclude Include="System\Controller.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -468,9 +468,6 @@
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="System\ContentFile.cpp">
-      <Filter>System</Filter>
-    </ClCompile>
-    <ClCompile Include="Entities\Controller.cpp">
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="System\DataModule.cpp">
@@ -863,6 +860,9 @@
     </ClCompile>
     <ClCompile Include="Menus\LoadingGUI.cpp">
       <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Controller.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

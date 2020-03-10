@@ -1,7 +1,6 @@
 #ifndef _RTECONTROLLER_
 #define _RTECONTROLLER_
 
-#include "Entity.h"
 #include "Timer.h"
 #include "Vector.h"
 

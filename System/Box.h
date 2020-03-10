@@ -262,7 +262,7 @@ namespace RTE {
 		/// <param name="lhs">A Box reference as the left hand side operand.</param>
 		/// <param name="rhs">A Box reference as the right hand side operand.</param>
 		/// <returns>A boolean indicating whether the two operands are equal or not.</returns>
-		friend bool operator==(const Box &lhs, const Box &rhs) { if (lhs.m_Corner == rhs.m_Corner && lhs.m_Width == rhs.m_Width && lhs.m_Height == rhs.m_Height) { return true; } else { return false; } }
+		friend bool operator==(const Box &lhs, const Box &rhs) { return lhs.m_Corner == rhs.m_Corner && lhs.m_Width == rhs.m_Width && lhs.m_Height == rhs.m_Height; }
 
 		/// <summary>
 		/// An inequality operator for testing if any two Boxes are unequal.
@@ -270,7 +270,7 @@ namespace RTE {
 		/// <param name="lhs">A Box reference as the left hand side operand.</param>
 		/// <param name="rhs">A Box reference as the right hand side operand.</param>
 		/// <returns>A boolean indicating whether the two operands are unequal or not.</returns>
-		friend bool operator!=(const Box &lhs, const Box &rhs) { if (lhs.m_Corner != rhs.m_Corner || lhs.m_Width != rhs.m_Width || lhs.m_Height != rhs.m_Height) { return true; } else { return false; } }
+		friend bool operator!=(const Box &lhs, const Box &rhs) { return lhs.m_Corner != rhs.m_Corner || lhs.m_Width != rhs.m_Width || lhs.m_Height != rhs.m_Height; }
 #pragma endregion
 
 #pragma region Class Info

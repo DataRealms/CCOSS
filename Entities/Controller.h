@@ -233,10 +233,10 @@ namespace RTE {
 		/// <param name="cursorPos"> The vector to alter.</param>
 		/// <param name="moveScale">The scale of the input. 1.0 is 'normal'.</param>
 		/// <returns>Whether the vector was altered or not.</returns>
-		bool RelativeCursorMovement(Vector &cursorPos, float moveScale = 1.0f);
+		bool RelativeCursorMovement(Vector &cursorPos, float moveScale = 1.0F);
 
 		/// <summary>
-		/// Indicated whether this is listening to mouse input at all.
+		/// Indicates whether this is listening to mouse input at all.
 		/// </summary>
 		/// <returns>Whether this is using mouse input at all.</returns>
 		bool IsMouseControlled() const;

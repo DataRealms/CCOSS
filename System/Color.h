@@ -2,6 +2,7 @@
 #define _RTECOLOR_
 
 #include "Serializable.h"
+#include "RTETools.h"
 
 namespace RTE {
 
@@ -58,13 +59,7 @@ namespace RTE {
 		/// <param name="G">Initial Green value of this color.</param>
 		/// <param name="B">Initial Blue value of this color.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(unsigned char inputR, unsigned char inputG, unsigned char inputB) {
-			m_R = inputR;
-			m_G = inputG;
-			m_B = inputB;
-			RecalculateIndex();
-			return 0;
-		}
+		virtual int Create(unsigned char inputR, unsigned char inputG, unsigned char inputB);
 #pragma endregion
 
 #pragma region Destruction
@@ -163,7 +158,7 @@ namespace RTE {
 		/// Causes recalculation of the nearest index even though there might be one cached or not.
 		/// </summary>
 		/// <returns>The new color entry index number.</returns>
-		unsigned char RecalculateIndex();
+		unsigned char RecalculateIndex() { return m_Index = makecol8(m_R, m_G, m_B); }
 #pragma endregion
 
 #pragma region Class Info

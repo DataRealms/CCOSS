@@ -127,7 +127,7 @@ namespace RTE {
 		/// Shows whether the writer is ok to start accepting data streamed to it.
 		/// </summary>
 		/// <returns></returns>
-		virtual bool WriterOK();
+		virtual bool WriterOK() { return m_pStream && !m_pStream->fail() && m_pStream->is_open(); }
 #pragma endregion
 
 #pragma region Operator Overloads

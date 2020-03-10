@@ -36,14 +36,12 @@ namespace RTE {
 
 		/// <summary>
 		/// Constructor method used to instantiate a ContentFile object in system memory, and also do a Create() in the same line.
-		/// Create() should therefore not be called after using this constructor.
 		/// </summary>
 		/// <param name="filePath">A string defining the path to where the content file itself is located, either within the package file, or directly on the disk.</param>
 		ContentFile(const char *filePath) { Clear(); Create(filePath); }
 
 		/// <summary>
 		/// Constructor method used to instantiate a ContentFile object in system memory from a hash value of the file path, and also do a Create() in the same line.
-		/// Create() should therefore not be called after using this constructor.
 		/// </summary>
 		/// <param name="hash">A hash value containing the path to where the content file itself is located.</param>
 		ContentFile(size_t hash) { Clear(); if (m_PathHashes.count(hash) == 1) { Create(m_PathHashes[hash].c_str()); } else { Create(""); } }
@@ -166,18 +164,18 @@ namespace RTE {
 
 #pragma region Data Handling
 		/// <summary>
-		/// Loads and gets the data represented by this ConentFile object as an Allegro BITMAP. Note that ownership of the BITMAP IS NOT TRANSFERRED!
+		/// Loads and gets the data represented by this ContentFile object as an Allegro BITMAP. Note that ownership of the BITMAP IS NOT TRANSFERRED!
 		/// Also, this should only be done once upon startup, since getting the BITMAP again is slow.
 		/// </summary>
 		/// <param name="conversionMode">
 		/// The Allegro color conversion mode to use when loading this bitmap.
 		/// Note it will only apply the first time you get a bitmap since it is only loaded from disk the first time. See allegro docs for the modes.
 		/// </param>
-		/// <returns>The pointer to the beginning of the data object loaded from the allegro .dat datafile. file. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
+		/// <returns>The pointer to the beginning of the data object loaded from the allegro .dat datafile. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
 		virtual BITMAP * GetAsBitmap(int conversionMode = 0);
 
 		/// <summary>
-		/// Loads and gets the data represented by this ConentFile object as an of array Allegro BITMAPs, each representing a frame in an animation.
+		/// Loads and gets the data represented by this ContentFile object as an of array Allegro BITMAPs, each representing a frame in an animation.
 		/// Note that ownership of the BITMAPS ARE NOT TRANSFERRED, BUT THE ARRAY ITSELF, IS!
 		/// Also, this should only be done once upon startup, since getting the BITMAPs again is slow.
 		/// </summary>
@@ -190,20 +188,20 @@ namespace RTE {
 		/// Note it will only apply the first time you get a bitmap since it is only loaded from disk the first time. See allegro docs for the modes.
 		/// </param>
 		/// <returns>
-		/// The pointer to the beginning of the array of BITMAP pointers loaded from the allegro .dat datafile. file, the length of which is specified with the frameCount argument.
+		/// The pointer to the beginning of the array of BITMAP pointers loaded from the allegro .dat datafile, the length of which is specified with the frameCount argument.
 		/// Ownership of the array IS transferred! Ownership of the BITMAPS is NOT transferred! If 0, the file could not be found/loaded.
 		/// </returns>
 		virtual BITMAP ** GetAsAnimation(int frameCount = 1, int conversionMode = 0);
 
 		/// <summary>
-		/// Loads and gets the data represented by this ConentFile object as an FMOD FSOUND_SAMPLE. Note that ownership of the SAMPLE IS NOT TRANSFERRED!
+		/// Loads and gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE. Note that ownership of the SAMPLE IS NOT TRANSFERRED!
 		/// Also, this should only be done once upon startup, since getting the Sample again is slow.
 		/// </summary>
 		/// <returns>The pointer to the beginning of the data object loaded from the file. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
 		virtual AUDIO_STRUCT * GetAsSample();
 
 		/// <summary>
-		/// Loads and transfers the data represented by this ConentFile object as an Allegro BITMAP. Note that ownership of the BITMAP IS TRANSFERRED!
+		/// Loads and transfers the data represented by this ContentFile object as an Allegro BITMAP. Note that ownership of the BITMAP IS TRANSFERRED!
 		/// Also, this is relatively slow since it reads the data from disk each time.
 		/// </summary>
 		/// <param name="conversionMode">
@@ -214,7 +212,7 @@ namespace RTE {
 		virtual BITMAP * LoadAndReleaseBitmap(int conversionMode = 0);
 
 		/// <summary>
-		/// Loads and transfers the data represented by this ConentFile object as a series of Allegro BITMAPs. Note that ownership of both the ARRAY and the BITMAPS ARE TRANSFERRED!
+		/// Loads and transfers the data represented by this ContentFile object as a series of Allegro BITMAPs. Note that ownership of both the ARRAY and the BITMAPS ARE TRANSFERRED!
 		/// Also, this is relatively slow since it reads the data from disk each time.
 		/// </summary>
 		/// <param name="frameCount"> 
@@ -226,10 +224,10 @@ namespace RTE {
 		virtual BITMAP ** LoadAndReleaseAnimation(int frameCount = 1, int conversionMode = 0);
 
 		/// <summary>
-		/// Loads and gets the data represented by this ConentFile object as a binary chunk of data. Note that ownership of the DATA IS NOT TRANSFERRED!
+		/// Loads and gets the data represented by this ContentFile object as a binary chunk of data. Note that ownership of the DATA IS NOT TRANSFERRED!
 		/// Also, this should only be done once upon startup, since getting the data again is slow.
 		/// </summary>
-		/// <returns>The pointer to the beginning of the raw data loaded from the Allegro .dat datafile. file. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
+		/// <returns>The pointer to the beginning of the raw data loaded from the Allegro .dat datafile. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
 		//virtual char * GetAsRawBinary();
 #pragma endregion
 
@@ -252,7 +250,7 @@ namespace RTE {
 
 		static std::map<std::string, BITMAP *> m_sLoadedBitmaps[BitDepthCount]; //!< Static map containing all the already loaded BITMAPs and their paths, and there's two maps, for each bit depth.
 		static std::map<std::string, AUDIO_STRUCT *> m_sLoadedSamples; //!< Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
-		//static std::map<std::string, std::pair<char *, long> > m_sLoadedBinary; //!< Static map containing all the already loaded binary data. First in pair is the data, second is size in bytes.
+		//static std::map<std::string, std::pair<char *, long>> m_sLoadedBinary; //!< Static map containing all the already loaded binary data. First in pair is the data, second is size in bytes.
 
 		int m_DataModuleID; //!< Data Module ID of where this was loaded from.
 

@@ -148,10 +148,10 @@ namespace RTE {
 	protected:
 
 		MicroPather *m_pPather; //!< The actual pathing object that does the pathfinding work. Owned.
-		std::vector<std::vector<PathNode *> > m_NodeGrid;  //!< The array of PathNodes representing the grid on the scene. The nodes are owned by this.
+		std::vector<std::vector<PathNode *>> m_NodeGrid;  //!< The array of PathNodes representing the grid on the scene. The nodes are owned by this.
 		int m_NodeDimension; //!< The width and height of each node, in pixels on the scene.
 
-		float m_DigStrenght; //!< What material strength the search is capable of digging through.
+		float m_DigStrength; //!< What material strength the search is capable of digging through.
 
 #pragma region Path Cost Updates
 		/// <summary>

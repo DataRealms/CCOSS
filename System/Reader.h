@@ -21,24 +21,24 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a Reader object in system memory. Create() should be called before using the object.
 		/// </summary>
-		/// <param name="filename">Path to the file to open for reading.</param>
+		/// <param name="fileName">Path to the file to open for reading.</param>
 		/// <param name="overwrites">Whether object definitions read here overwrite existing ones with the same names.</param>
 		/// <param name="fpProgressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this Reader's reading.</param>
 		/// <param name="failOK">Whether it's ok for the file to not be there, ie we're only trying to open, and if it's not there, then fail silently.</param>
-		Reader(const char *filename, bool overwrites = false, ProgressCallback fpProgressCallback = 0, bool failOK = false) { Clear(); Create(filename, overwrites, fpProgressCallback, failOK); }
+		Reader(const char *fileName, bool overwrites = false, ProgressCallback fpProgressCallback = 0, bool failOK = false) { Clear(); Create(fileName, overwrites, fpProgressCallback, failOK); }
 
 		/// <summary>
 		/// Makes the Reader object ready for use.
 		/// </summary>
-		/// <param name="filename">
-		/// The filename of the file to open and read from. If the file isn't found directly on disk, the first directory in the path will be used to try open a package of that name.
+		/// <param name="fileName">
+		/// The fileName of the file to open and read from. If the file isn't found directly on disk, the first directory in the path will be used to try open a package of that name.
 		/// If that doesn't work, and error code will be returned.
 		/// </param>
 		/// <param name="overwrites"> Whether object definitions read here overwrite existing ones with the same names.</param>
 		/// <param name="fpProgressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this Reader's reading.</param>
 		/// <param name="failOK">Whether it's ok for the file to not be there, ie we're only trying to open, and if it's not there, then fail silently.</param>
 		/// <returns>An error return value signaling success or any particular failure.  Anything below 0 is an error signal.</returns>
-		virtual int Create(const char *filename, bool overwrites = false, ProgressCallback fpProgressCallback = 0, bool failOK = false);
+		virtual int Create(const char *fileName, bool overwrites = false, ProgressCallback fpProgressCallback = 0, bool failOK = false);
 #pragma endregion
 
 #pragma region Destruction
@@ -56,7 +56,7 @@ namespace RTE {
 		/// <summary>
 		/// Resets the entire Reader, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); /*Serializable::Reset();*/ }
+		virtual void Reset() { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -209,13 +209,7 @@ namespace RTE {
 		virtual Reader & operator>>(float &var) { Eat(); *m_pStream >> var; return *this; }
 		virtual Reader & operator>>(double &var) { Eat(); *m_pStream >> var; return *this; }
 		virtual Reader & operator>>(char * var) { Eat(); *m_pStream >> var; return *this; }
-
-		/// <summary>
-		/// Stream extraction operator overloads for std::string.
-		/// </summary>
-		/// <param name="var">A reference to the variable that will be filled by the extracted data.</param>
-		/// <returns>A Reader reference for further use in an expression.</returns>
-		virtual Reader & operator>>(std::string &var);
+		virtual Reader & operator>>(std::string &var) { var.assign(ReadLine()); return *this; }
 #pragma endregion
 
 #pragma region Class Info
@@ -232,10 +226,11 @@ namespace RTE {
 		/// A struct containing information from the currently used stream.
 		/// </summary>
 		struct StreamInfo {
+			// TODO: Figure out what the hell is this and what/how it does.
 			StreamInfo(std::ifstream *pStream, std::string filePath, int currentLine, int prevIndent) :
 				m_pStream(pStream), m_FilePath(filePath), m_CurrentLine(currentLine), m_PreviousIndent(prevIndent) { ; }
 
-			// Owned by the reader, so not deleted by this
+			// NOTE: These members are owned by the reader that owns this struct, so are not deleted when this is destroyed.
 			std::ifstream *m_pStream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
 			std::string m_FilePath; //!< Currently used stream's filepath.
 			int m_CurrentLine; //!< The line number the stream is on.

@@ -213,12 +213,12 @@ namespace RTE {
 	std::string DataModule::GetEntityDataLocation(std::string exactType, std::string instance) {
 		if (instance == "None" || instance.empty()) { return ""; }
 
-		map<std::string, std::list<std::pair<std::string, Entity *> > >::iterator clsItr = m_TypeMap.find(exactType);
+		map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator clsItr = m_TypeMap.find(exactType);
 		if (clsItr == m_TypeMap.end()) { return ""; }
 
 		Entity *pFoundEnt = 0;
 		// Find an instance of that EXACT type and name
-		for (std::list<std::pair<std::string, Entity *> >::iterator instItr = (*clsItr).second.begin(); instItr != (*clsItr).second.end(); ++instItr) {
+		for (std::list<std::pair<std::string, Entity *>>::iterator instItr = (*clsItr).second.begin(); instItr != (*clsItr).second.end(); ++instItr) {
 			// Check that the type is really the exact same as asked for; there may be others which are actually more derived types
 			if ((*instItr).first == instance && (*instItr).second->GetClassName() == exactType) { pFoundEnt = (*instItr).second; }
 		}
@@ -238,11 +238,11 @@ namespace RTE {
 	const Entity * DataModule::GetEntityPreset(std::string exactType, std::string instance) {
 		if (instance == "None" || instance.empty()) { return 0; }
 
-		map<std::string, std::list<std::pair<std::string, Entity *> > >::iterator clsItr = m_TypeMap.find(exactType);
+		map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator clsItr = m_TypeMap.find(exactType);
 		if (clsItr == m_TypeMap.end()) { return 0; }
 
 		// Find an instance of that EXACT type and name
-		for (std::list<std::pair<std::string, Entity *> >::iterator instItr = (*clsItr).second.begin(); instItr != (*clsItr).second.end(); ++instItr) {
+		for (std::list<std::pair<std::string, Entity *>>::iterator instItr = (*clsItr).second.begin(); instItr != (*clsItr).second.end(); ++instItr) {
 			// Check that the type is really the exact same as asked for; there may be others which are actually more derived types
 			if ((*instItr).first == instance && (*instItr).second->GetClassName() == exactType) { return (*instItr).second; }
 		}
@@ -344,12 +344,12 @@ namespace RTE {
 		} else {
 			// Go through all entities, adding the groups the ones of the right type belong to
 			// Find the type entry in the type map
-			map<std::string, std::list<std::pair<std::string, Entity *> > >::iterator clsItr = m_TypeMap.find(withType);
+			map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator clsItr = m_TypeMap.find(withType);
 			if (clsItr == m_TypeMap.end()) { return false; }
 
 			const std::list<std::string> *pGroupList = 0;
 			// Go through all the entities of that type, adding the groups they belong to
-			for (std::list<std::pair<std::string, Entity *> >::iterator instItr = clsItr->second.begin(); instItr != clsItr->second.end(); ++instItr) {
+			for (std::list<std::pair<std::string, Entity *>>::iterator instItr = clsItr->second.begin(); instItr != clsItr->second.end(); ++instItr) {
 				pGroupList = instItr->second->GetGroupList();
 				// Get the grouped entities, without transferring ownership
 				for (std::list<std::string>::const_iterator gItr = pGroupList->begin(); gItr != pGroupList->end(); ++gItr) {
@@ -373,11 +373,11 @@ namespace RTE {
 
 		// Look in all classes, so only look in the Entity level, which includes all!
 		if (type.empty() || type == "All") {
-			map<std::string, std::list<std::pair<std::string, Entity *> > >::iterator clsItr = m_TypeMap.find("Entity");
+			map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator clsItr = m_TypeMap.find("Entity");
 			if (clsItr == m_TypeMap.end()) { return false; }
 
 			// Go through only the Entity typelist since it should contain all entities in this DataModule
-			for (std::list<std::pair<std::string, Entity *> >::iterator instItr = clsItr->second.begin(); instItr != clsItr->second.end(); ++instItr) {
+			for (std::list<std::pair<std::string, Entity *>>::iterator instItr = clsItr->second.begin(); instItr != clsItr->second.end(); ++instItr) {
 				// Get the grouped entities, without transferring ownership
 				if (instItr->second->IsInGroup(group)) {
 					entityList.push_back(instItr->second);
@@ -387,12 +387,12 @@ namespace RTE {
 		} else {
 			// Look only in one specific class (which will get all derived classes' entities too!)
 			// Look for the class entry
-			map<std::string, std::list<std::pair<std::string, Entity *> > >::iterator clsItr = m_TypeMap.find(type);
+			map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator clsItr = m_TypeMap.find(type);
 			if (clsItr == m_TypeMap.end()) { return 0; }
 
 			RTEAssert(!clsItr->second.empty(), "DataModule has class entry without instances in its map!?");
 
-			for (std::list<std::pair<std::string, Entity *> >::iterator instItr = clsItr->second.begin(); instItr != clsItr->second.end(); ++instItr) {
+			for (std::list<std::pair<std::string, Entity *>>::iterator instItr = clsItr->second.begin(); instItr != clsItr->second.end(); ++instItr) {
 				// Get the grouped entities, without transferring ownership
 				if (instItr->second->IsInGroup(group)) {
 					entityList.push_back(instItr->second);
@@ -409,13 +409,13 @@ namespace RTE {
 		if (type.empty()) { return false; }
 
 		// Look for the class entry
-		map<std::string, std::list<std::pair<std::string, Entity *> > >::iterator clsItr = m_TypeMap.find(type);
+		map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator clsItr = m_TypeMap.find(type);
 		if (clsItr == m_TypeMap.end()) { return false; }
 
 		RTEAssert(!clsItr->second.empty(), "DataModule has class entry without instances in its map!?");
 
 		// Found something, so let's add it to the list!
-		for (std::list<std::pair<std::string, Entity *> >::iterator instItr = clsItr->second.begin(); instItr != clsItr->second.end(); ++instItr) {
+		for (std::list<std::pair<std::string, Entity *>>::iterator instItr = clsItr->second.begin(); instItr != clsItr->second.end(); ++instItr) {
 			// Get the entities, without transferring ownership
 			entityList.push_back(instItr->second);
 		}
@@ -453,7 +453,7 @@ namespace RTE {
 		// Check if null name
 		if (exactType.empty() || instanceName == "None" || instanceName.empty()) { return 0; }
 
-		map<std::string, std::list<std::pair<std::string, Entity *> > >::iterator clsItr = m_TypeMap.find(exactType);
+		map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator clsItr = m_TypeMap.find(exactType);
 		// We didn't find any instances of this class, so report false
 		if (clsItr == m_TypeMap.end()) {
 			return 0;
@@ -461,7 +461,7 @@ namespace RTE {
 			// We found that instances of the same type exist
 			// See if there already is an instance of that class and name
 			// Find an instance of that EXACT type and name
-			for (std::list<std::pair<std::string, Entity *> >::iterator instItr = (*clsItr).second.begin(); instItr != (*clsItr).second.end(); ++instItr) {
+			for (std::list<std::pair<std::string, Entity *>>::iterator instItr = (*clsItr).second.begin(); instItr != (*clsItr).second.end(); ++instItr) {
 				// Check that the type is really the exact same as asked for; there may be others which are actually more derived types
 				if ((*instItr).first == instanceName && (*instItr).second->GetClassName() == exactType) { return (*instItr).second; }
 			}
@@ -478,11 +478,11 @@ namespace RTE {
 		// Walk up the class hierarchy till we reach the top, adding an entry of the passed in entity into each typelist as we go along
 		for (const Entity::ClassInfo *pClass = &(pEntToAdd->GetClass()); pClass != 0; pClass = pClass->GetParent()) {
 			// Look for the current class level in the map
-			std::map<std::string, std::list<std::pair<std::string, Entity *> > >::iterator clsItr = m_TypeMap.find(pClass->GetName());
+			std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator clsItr = m_TypeMap.find(pClass->GetName());
 
 			// We didn't find any instances of this class already added, so add a new class category and add our new entry
 			if (clsItr == m_TypeMap.end()) {
-				clsItr = (m_TypeMap.insert(std::pair<std::string, std::list<std::pair<std::string, Entity *> > >(pClass->GetName(), std::list<std::pair<std::string, Entity *> >()))).first;
+				clsItr = (m_TypeMap.insert(std::pair<std::string, std::list<std::pair<std::string, Entity *>>>(pClass->GetName(), std::list<std::pair<std::string, Entity *>>()))).first;
 				// Add into the new typelist, but isn't owned there
 				(*clsItr).second.push_back(std::pair<std::string, Entity *>(pEntToAdd->GetPresetName(), pEntToAdd));
 			} else {

@@ -7,7 +7,7 @@ namespace RTE {
 	void PathFinder::Clear() {
 		m_NodeGrid.clear();
 		m_NodeDimension = 20;
-		m_DigStrenght = 1;
+		m_DigStrength = 1;
 		m_pPather = 0;
 	}
 
@@ -128,8 +128,8 @@ namespace RTE {
 		// Clear out the results if it happens to contain anything
 		pathResult.clear();
 
-		// Actors capable of digging can use m_DigStrenght to modify the node adjacency cost
-		m_DigStrenght = digStrength;
+		// Actors capable of digging can use m_DigStrength to modify the node adjacency cost
+		m_DigStrength = digStrength;
 
 		// Do the actual pathfinding, fetch out the list of states that comprise the best path
 		vector<void *> statePath;
@@ -244,25 +244,25 @@ namespace RTE {
 		// Add cost for digging upwards
 		if (pNode->m_pUp) {
 			strength = pNode->m_UpCost;
-			adjCost.cost = 1 + (strength > m_DigStrenght ? strength * 2000 : strength * 4); // Four times more expensive when digging
+			adjCost.cost = 1 + (strength > m_DigStrength ? strength * 2000 : strength * 4); // Four times more expensive when digging
 			adjCost.state = (void *)pNode->m_pUp;
 			pAdjacentList->push_back(adjCost);
 		}
 		if (pNode->m_pRight) {
 			strength = pNode->m_RightCost;
-			adjCost.cost = 1 + (strength > m_DigStrenght ? strength * 1000 : strength);
+			adjCost.cost = 1 + (strength > m_DigStrength ? strength * 1000 : strength);
 			adjCost.state = (void *)pNode->m_pRight;
 			pAdjacentList->push_back(adjCost);
 		}
 		if (pNode->m_pDown) {
 			strength = pNode->m_DownCost;
-			adjCost.cost = 1 + (strength > m_DigStrenght ? strength * 1000 : strength);
+			adjCost.cost = 1 + (strength > m_DigStrength ? strength * 1000 : strength);
 			adjCost.state = (void *)pNode->m_pDown;
 			pAdjacentList->push_back(adjCost);
 		}
 		if (pNode->m_pLeft) {
 			strength = pNode->m_LeftCost;
-			adjCost.cost = 1 + (strength > m_DigStrenght ? strength * 1000 : strength);
+			adjCost.cost = 1 + (strength > m_DigStrength ? strength * 1000 : strength);
 			adjCost.state = (void *)pNode->m_pLeft;
 			pAdjacentList->push_back(adjCost);
 		}
@@ -270,25 +270,25 @@ namespace RTE {
 		// Add cost for digging at 45 degrees and for digging upwards
 		if (pNode->m_pUpRight) {
 			strength = pNode->m_UpRightCost;
-			adjCost.cost = 1.4 + (strength > m_DigStrenght ? strength * 2828 : strength * 4.2);  // Three times more expensive when digging
+			adjCost.cost = 1.4 + (strength > m_DigStrength ? strength * 2828 : strength * 4.2);  // Three times more expensive when digging
 			adjCost.state = (void *)pNode->m_pUpRight;
 			pAdjacentList->push_back(adjCost);
 		}
 		if (pNode->m_pRightDown) {
 			strength = pNode->m_RightDownCost;
-			adjCost.cost = 1.4 + (strength > m_DigStrenght ? strength * 1414 : strength * 1.4);
+			adjCost.cost = 1.4 + (strength > m_DigStrength ? strength * 1414 : strength * 1.4);
 			adjCost.state = (void *)pNode->m_pRightDown;
 			pAdjacentList->push_back(adjCost);
 		}
 		if (pNode->m_pDownLeft) {
 			strength = pNode->m_DownLeftCost;
-			adjCost.cost = 1.4 + (strength > m_DigStrenght ? strength * 1414 : strength * 1.4);
+			adjCost.cost = 1.4 + (strength > m_DigStrength ? strength * 1414 : strength * 1.4);
 			adjCost.state = (void *)pNode->m_pDownLeft;
 			pAdjacentList->push_back(adjCost);
 		}
 		if (pNode->m_pLeftUp) {
 			strength = pNode->m_LeftUpCost;
-			adjCost.cost = 1.4 + (strength > m_DigStrenght ? strength * 2828 : strength * 4.2);  // Three times more expensive when digging
+			adjCost.cost = 1.4 + (strength > m_DigStrength ? strength * 2828 : strength * 4.2);  // Three times more expensive when digging
 			adjCost.state = (void *)pNode->m_pLeftUp;
 			pAdjacentList->push_back(adjCost);
 		}
@@ -320,10 +320,10 @@ namespace RTE {
 		box.Unflip();
 
 		// Get the extents of the box' potential influence on nodes and their connecting edges
-		int firstX = floorf((box.m_Corner.m_X / (float)m_NodeDimension) + 0.5f) - 1;
-		int lastX = floorf(((box.m_Corner.m_X + box.m_Width) / (float)m_NodeDimension) + 0.5f) + 1;
-		int firstY = floorf((box.m_Corner.m_Y / (float)m_NodeDimension) + 0.5f) - 1;
-		int lastY = floorf(((box.m_Corner.m_Y + box.m_Height) / (float)m_NodeDimension) + 0.5f) + 1;
+		int firstX = floorf((box.m_Corner.m_X / (float)m_NodeDimension) + 0.5F) - 1;
+		int lastX = floorf(((box.m_Corner.m_X + box.m_Width) / (float)m_NodeDimension) + 0.5F) + 1;
+		int firstY = floorf((box.m_Corner.m_Y / (float)m_NodeDimension) + 0.5F) - 1;
+		int lastY = floorf(((box.m_Corner.m_Y + box.m_Height) / (float)m_NodeDimension) + 0.5F) + 1;
 
 		// Truncate the influence
 		if (firstX < 0) { firstX = 0; }

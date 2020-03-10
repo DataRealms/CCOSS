@@ -23,7 +23,6 @@
 //#include "Atom.h"
 
 #include "ConsoleMan.h"
-
 #include "LoadingGUI.h"
 #include "SettingsMan.h"
 
@@ -182,11 +181,9 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallbac
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool PresetMan::LoadAllDataModules() {
-
 	// Load all the official modules first!
 	if (!LoadDataModule("Base.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
 
-	// TODO: REPLACE - or don't, this is ok because there really shouldn't be any more official modules besides these.
 	if (!LoadDataModule("Coalition.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
 	if (!LoadDataModule("Imperatus.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
 	if (!LoadDataModule("Techion.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
@@ -201,7 +198,6 @@ bool PresetMan::LoadAllDataModules() {
 	if (m_SingleModuleToLoad != "Base.rte" && m_SingleModuleToLoad != "") {
 		if (!LoadDataModule(m_SingleModuleToLoad, false, &LoadingGUI::LoadingSplashProgressReport)) { return false; } else { return true; }
 	} else {
-		// Read module properties to find out which modules should be loaded earlier than others
 		al_ffblk moduleInfo;
 		int moduleID = 0;
 

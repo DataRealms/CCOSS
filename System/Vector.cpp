@@ -54,9 +54,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float Vector::GetAbsRadAngle() const {
-		if (m_X == 0) { return m_Y > 0 ? -c_HalfPI : (m_Y < 0 ? c_HalfPI : 0); }
-		if (m_Y == 0) { return m_X > 0 ? 0 : (m_X < 0 ? c_PI : 0); }
-
+		if (m_X == 0) {
+			return m_Y > 0 ? -c_HalfPI : (m_Y < 0 ? c_HalfPI : 0);
+		}
+		if (m_Y == 0) {
+			return m_X > 0 ? 0 : (m_X < 0 ? c_PI : 0);
+		}
 		// TODO: Confirm that this is correct!")
 		float rawAngle = -atan(m_Y / m_X);
 		if (m_X < 0) { rawAngle += c_PI; }
@@ -67,8 +70,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float Vector::GetAbsDegAngle() const {
-		if (m_X == 0) { return m_Y > 0 ? -90 : (m_Y < 0 ? 90 : 0); }
-		if (m_Y == 0) { return m_X > 0 ? 0 : (m_X < 0 ? 180 : 0); }
+		if (m_X == 0) {
+			return m_Y > 0 ? -90 : (m_Y < 0 ? 90 : 0);
+		}
+		if (m_Y == 0) {
+			return m_X > 0 ? 0 : (m_X < 0 ? 180 : 0);
+		}
 
 		float rawAngle = -(atan(m_Y / m_X) / c_PI) * 180;
 		if (m_X < 0) { rawAngle += 180; }
@@ -133,7 +140,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector & Vector::operator=(const Vector &rhs) {
-		if (*this == rhs) { return *this; }
+		if (*this == rhs) {
+			return *this;
+		}
 		m_X = rhs.m_X;
 		m_Y = rhs.m_Y;
 		return *this;
@@ -144,7 +153,9 @@ namespace RTE {
 	Vector & Vector::operator=(const deque<Vector> &rhs) {
 		Clear();
 		if (rhs.empty()) { return *this; }
-		for (deque<Vector>::const_iterator itr = rhs.begin(); itr != rhs.end(); ++itr) { *this += *itr; }
+		for (deque<Vector>::const_iterator itr = rhs.begin(); itr != rhs.end(); ++itr) {
+			*this += *itr;
+		}
 		*this /= rhs.size();
 		return *this;
 	}

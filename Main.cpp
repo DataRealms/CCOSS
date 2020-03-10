@@ -1716,7 +1716,9 @@ bool IsResettingRTE() { return g_ResetRTE; }
 /// Game simulation loop.
 /// </summary>
 bool RunGameLoop() {
-	if (g_Quit) { return true; }
+	if (g_Quit) {
+		return true;
+	}
 
 	g_FrameMan.ResetFrameTimer();
 	g_TimerMan.EnableAveraging(true);
@@ -1771,8 +1773,7 @@ bool RunGameLoop() {
 					g_IntroState = CAMPAIGNFADEIN;
 				} else {
 					Activity * pActivity = g_ActivityMan.GetActivity();
-					// If we edited something then return to main menu instead of scenario menu
-					// player will probably switch to area/scene editor
+					// If we edited something then return to main menu instead of scenario menu player will probably switch to area/scene editor.
 					if (pActivity && pActivity->GetPresetName() == "None") {
 						g_IntroState = MENUAPPEAR;
 					} else {
@@ -1791,8 +1792,7 @@ bool RunGameLoop() {
 		}
 
 		if (g_NetworkServer.IsServerModeEnabled()) {
-			// Pause sim while we're waiting for scene transmission or scene will
-			// start changing before clients receive them and those changes will be lost
+			// Pause sim while we're waiting for scene transmission or scene will start changing before clients receive them and those changes will be lost.
 			if (!g_NetworkServer.ReadyForSimulation()) {
 				g_TimerMan.PauseSim(true);
 			} else {

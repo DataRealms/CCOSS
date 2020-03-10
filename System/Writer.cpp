@@ -34,10 +34,4 @@ namespace RTE {
 
 		return 0;
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool Writer::WriterOK() {
-		if (m_pStream && !m_pStream->fail() && m_pStream->is_open()) { return true; } else { return false; }
-	}
 }

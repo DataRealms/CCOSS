@@ -23,7 +23,9 @@ namespace RTE {
 
 	int Matrix::Create() {
 		// Read all the properties
-		if (Serializable::Create() < 0) { return -1; }
+		if (Serializable::Create() < 0) {
+			return -1;
+		}
 		m_ElementsUpdated = false;
 
 		return 0;
@@ -115,8 +117,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Matrix & Matrix::operator=(const Matrix &rhs) {
-		if (*this == rhs) { return *this; }
-
+		if (*this == rhs) {
+			return *this;
+		}
 		m_Rotation = rhs.m_Rotation;
 		m_Flipped[X] = rhs.m_Flipped[X];
 		m_Flipped[Y] = rhs.m_Flipped[Y];

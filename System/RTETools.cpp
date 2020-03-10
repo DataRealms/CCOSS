@@ -66,7 +66,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Clamp(float &value, float upperLimit, float lowerLimit) {
-
 		// Straighten out the limits
 		if (upperLimit < lowerLimit) {
 			float temp = upperLimit;
@@ -124,7 +123,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool ASCIIFileContainsString(std::string filePath, std::string findString) {
-
 		// Open the script file so we can check it out
 		std::ifstream *pFile = new std::ifstream(filePath.c_str());
 		if (!pFile->good()) { return false; }

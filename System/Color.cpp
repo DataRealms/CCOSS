@@ -1,5 +1,4 @@
 #include "Color.h"
-#include "RTETools.h"
 
 namespace RTE {
 
@@ -9,7 +8,19 @@ namespace RTE {
 
 	int Color::Create() {
 		// Read all the properties
-		if (Serializable::Create() < 0) { return -1; }
+		if (Serializable::Create() < 0) { 
+			return -1; 
+		}
+		RecalculateIndex();
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int Color::Create(unsigned char inputR, unsigned char inputG, unsigned char inputB) {
+		m_R = inputR;
+		m_G = inputG;
+		m_B = inputB;
 		RecalculateIndex();
 		return 0;
 	}
@@ -57,8 +68,4 @@ namespace RTE {
 		m_G = color.g * 4;
 		m_B = color.b * 4;
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	unsigned char Color::RecalculateIndex() { return m_Index = makecol8(m_R, m_G, m_B); }
 }

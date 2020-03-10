@@ -28,8 +28,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Reader::Create(const char *filename, bool overwrites, ProgressCallback fpProgressCallback, bool failOK) {
-		m_FilePath = filename;
+	int Reader::Create(const char *fileName, bool overwrites, ProgressCallback fpProgressCallback, bool failOK) {
+		m_FilePath = fileName;
 
 		if (m_FilePath.empty()) { return -1; }
 
@@ -44,11 +44,9 @@ namespace RTE {
 
 		m_DataModuleName = m_FilePath.substr(0, firstSlashPos);
 		m_DataModuleID = g_PresetMan.GetModuleID(m_DataModuleName);
-		// This is OK, may be able to do it later when needed
-		//RTEAssert(m_DataModuleID > 0, "Couldn't establish which DataModule we're reading from when creating Reader!");
 
-		m_pStream = new std::ifstream(filename);
-		if (!failOK) { RTEAssert(m_pStream->good(), "Failed to open data file \'" + std::string(filename) + "\'!"); }
+		m_pStream = new std::ifstream(fileName);
+		if (!failOK) { RTEAssert(m_pStream->good(), "Failed to open data file \'" + std::string(fileName) + "\'!"); }
 
 		m_OverwriteExisting = overwrites;
 
@@ -67,7 +65,9 @@ namespace RTE {
 	void Reader::Destroy(bool notInherited) {
 		delete m_pStream;
 		// Delete all the streams in the stream stack
-		for (list<StreamInfo>::iterator itr = m_StreamStack.begin(); itr != m_StreamStack.end(); ++itr) { delete (*itr).m_pStream; }
+		for (list<StreamInfo>::iterator itr = m_StreamStack.begin(); itr != m_StreamStack.end(); ++itr) {
+			delete (*itr).m_pStream;
+		}
 		Clear();
 	}
 
@@ -182,7 +182,7 @@ namespace RTE {
 		char temp;
 		char peek;
 
-		while (1) {
+		while (true) {
 			peek = m_pStream->peek();
 			if (peek == '=') {
 				m_pStream->ignore(1);
@@ -203,10 +203,8 @@ namespace RTE {
 		}
 		// Trim the string of whitespace
 		retString = TrimString(retString);
-
-		// If the property name turns out to be the special IncludeFile,
-		// and we're not skipping include files
-		// then open that file and read the first property from it instead.
+		
+		// If the property name turns out to be the special IncludeFile,and we're not skipping include files then open that file and read the first property from it instead.
 		if (retString == "IncludeFile") {
 			if (m_SkipIncludes) {
 				//Eat IncludeFile value
@@ -215,8 +213,8 @@ namespace RTE {
 				retString = ReadPropName();
 			} else {
 				StartIncludeFile();
-				// Return the first property name in the new file, this is to make the file inclusion seamless
-				// Alternatively, if StartIncludeFile failed, this will just grab the next prop name and ignore the failed IncludeFile property
+				// Return the first property name in the new file, this is to make the file inclusion seamless.
+				// Alternatively, if StartIncludeFile failed, this will just grab the next prop name and ignore the failed IncludeFile property.
 				retString = ReadPropName();
 			}
 		}
@@ -240,7 +238,7 @@ namespace RTE {
 		bool ateLine = false;
 		char report[512];
 
-		while (1) {
+		while (true) {
 			peek = m_pStream->peek();
 
 			// If we have hit the end and don't have any files to resume, then quit and indicate that
@@ -252,15 +250,12 @@ namespace RTE {
 			// Eat spaces
 			if (peek == ' ') {
 				m_pStream->ignore(1);
-
 			// Eat tabs, and count them
 			} else if (peek == '\t') {
 				indent++;
 				m_pStream->ignore(1);
-
 			// Eat newlines and reset the tab count for the new line, also count the lines
 			} else if (peek == '\n' || peek == '\r') {
-
 				// So we don't count lines twice when there are both newline and carriage return at the end of lines
 				if (peek == '\n') {
 					m_CurrentLine++;
@@ -283,10 +278,8 @@ namespace RTE {
 				// Confirm that it's a comment line, if so eat it and continue
 				if (m_pStream->peek() == '/') {
 					while (m_pStream->peek() != '\n' && m_pStream->peek() != '\r' && !m_pStream->eof()) { m_pStream->ignore(1); }
-
 				// Block comment
 				} else if (m_pStream->peek() == '*') {
-
 					// Find the matching "*/"
 					while (!((temp2 = m_pStream->get()) == '*' && m_pStream->peek() == '/') && !m_pStream->eof()) {
 						// Count the lines within the comment though
@@ -305,11 +298,9 @@ namespace RTE {
 			}
 		}
 
-		// Only do this if we actually ate an end line
 		// This precaution enables us to use Eat repeatedly without messing up the indentation tracking logic
 		if (ateLine) {
-			// Get indentation difference from the last line of the last call to Eat(),
-			// and the last line of this call to Eat().
+			// Get indentation difference from the last line of the last call to Eat(), and the last line of this call to Eat().
 			m_IndentDifference = indent - m_PreviousIndent;
 			// Save the last tab count
 			m_PreviousIndent = indent;
@@ -320,8 +311,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string Reader::TrimString(std::string &stringToTrim) {
-		if (stringToTrim.empty()) { return ""; }
-
+		if (stringToTrim.empty()) {
+			return "";
+		}
 		int start = stringToTrim.find_first_not_of(' ');
 		int end = stringToTrim.find_last_not_of(' ');
 
@@ -385,8 +377,9 @@ namespace RTE {
 		// Report that we're starting a new file
 		if (m_fpReportProgress) {
 			m_ReportTabs = "\t";
-			for (int i = 0; i < m_StreamStack.size(); ++i) { m_ReportTabs.append("\t"); }
-
+			for (int i = 0; i < m_StreamStack.size(); ++i) {
+				m_ReportTabs.append("\t");
+			}
 			char report[512];
 			sprintf_s(report, sizeof(report), "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
 			m_fpReportProgress(std::string(report), true);
@@ -437,12 +430,5 @@ namespace RTE {
 		// Set up the resumed file for reading again
 		Eat();
 		return true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Reader & Reader::operator>>(std::string &var) {
-		var.assign(ReadLine());
-		return *this;
 	}
 }

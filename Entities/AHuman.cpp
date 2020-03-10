@@ -1823,7 +1823,7 @@ void AHuman::ResetAllTimers()
 bool AHuman::UpdateMovePath()
 {
     // Estimate how much material this actor can dig through
-    m_DigStrenght = EstimateDigStrenght();
+    m_DigStrength = EstimateDigStrenght();
     
     // Do the real path calc; abort and pass along the message if it didn't happen due to throttling
     if (!Actor::UpdateMovePath())

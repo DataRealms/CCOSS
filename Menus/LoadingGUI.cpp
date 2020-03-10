@@ -35,8 +35,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingGUI::InitLoadingScreen() {
-
-		// Load the palette
 		g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 
 		// Create the main GUI
@@ -49,11 +47,9 @@ namespace RTE {
 		pLoadingSplash->Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.bmp"), false, Vector(), true, false, Vector(1.0, 0));
 
 		// Hardcoded offset to make room for the loading box only if DisableLoadingScreen is false.
-		if (!g_SettingsMan.DisableLoadingScreen()) {
-			pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 120, 0));
-		} else {
-			pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 14, 0));
-		}
+		int loadingSplashOffset = g_SettingsMan.DisableLoadingScreen() ? 14 : 120;
+		pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + loadingSplashOffset, 0));
+
 		// Draw onto wrapped strip centered vertically on the screen
 		Box splashBox(Vector(0, (g_FrameMan.GetResY() - pLoadingSplash->GetBitmap()->h) / 2), g_FrameMan.GetResX(), pLoadingSplash->GetBitmap()->h);
 		pLoadingSplash->Draw(g_FrameMan.GetBackBuffer32(), splashBox);
@@ -99,7 +95,6 @@ namespace RTE {
 			rect(m_LoadingGUIBitmap, 1, 1, pBox->GetWidth() - 2, pBox->GetHeight() - 2, 33);
 			m_LoadingGUIPosX = pBox->GetXPos();
 			m_LoadingGUIPosY = pBox->GetYPos();
-
 		}
 		// Create the loading log writer
 		if (!m_LoadingLogWriter) { m_LoadingLogWriter = new Writer("LogLoading.txt"); }
@@ -144,7 +139,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LoadingGUI::LoadDataModules() {
-
 		// Clear out the PresetMan and all its DataModules
 		g_PresetMan.Destroy();
 		g_PresetMan.Create();
@@ -160,7 +154,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingGUI::ExtractArchivedModules() {
-
 		al_ffblk zippedModuleInfo;
 		unzFile zipFile;
 		for (int result = al_findfirst("*.rte.zip", &zippedModuleInfo, FA_ALL); result == 0; result = al_findnext(&zippedModuleInfo)) {

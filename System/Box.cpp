@@ -186,8 +186,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Box & Box::operator=(const Box &rhs) {
-		if (*this == rhs) { return *this; }
-		Create(rhs);
+		if (*this != rhs) { Create(rhs); }
 		return *this;
 	}
 }

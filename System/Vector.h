@@ -382,9 +382,7 @@ namespace RTE {
 		/// <param name="lhs">A Vector reference as the left hand side operand.</param>
 		/// <param name="rhs">A Vector reference as the right hand side operand.</param>
 		/// <returns>A boolean indicating whether the two operands are equal or not.</returns>
-		friend bool operator==(const Vector &lhs, const Vector &rhs) {
-			if (lhs.m_X == rhs.m_X && lhs.m_Y == rhs.m_Y) { return true; } else { return false; }
-		}
+		friend bool operator==(const Vector &lhs, const Vector &rhs) { return lhs.m_X == rhs.m_X && lhs.m_Y == rhs.m_Y; }
 
 		/// <summary>
 		/// An inequality operator for testing if any two Vectors are unequal.
@@ -392,9 +390,7 @@ namespace RTE {
 		/// <param name="lhs">A Vector reference as the left hand side operand.</param>
 		/// <param name="rhs">A Vector reference as the right hand side operand.</param>
 		/// <returns>A boolean indicating whether the two operands are unequal or not.</returns>
-		friend bool operator!=(const Vector &lhs, const Vector &rhs) {
-			if (lhs.m_X != rhs.m_X || lhs.m_Y != rhs.m_Y) { return true; } else { return false; }
-		}
+		friend bool operator!=(const Vector &lhs, const Vector &rhs) { return lhs.m_X != rhs.m_X || lhs.m_Y != rhs.m_Y; }
 
 		/// <summary>
 		/// A stream insertion operator for sending a Vector to an output stream.
@@ -522,10 +518,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="rhs">A float reference as the right hand side operand.</param>
 		/// <returns>A reference to the resulting Vector.</returns>
-		Vector & operator/=(const float &rhs) {
-			if (rhs) { m_X /= rhs; m_Y /= rhs; }
-			return *this;
-		}
+		Vector & operator/=(const float &rhs) { if (rhs) { m_X /= rhs; m_Y /= rhs; } return *this; }
 
 		/// <summary>
 		/// Self-division operator overload for Vectors.

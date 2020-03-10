@@ -122,8 +122,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Controller::GetTeam() const {
-		if (m_pControlled) { return m_pControlled->GetTeam(); } else { return m_Team; }
-		return 0;
+		return (m_pControlled) ? m_pControlled->GetTeam() : m_Team;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,19 +148,19 @@ namespace RTE {
 
 		// Player Input Mode
 		if (m_InputMode == CIM_PLAYER) {
-			// If the console is open, then disable regular player input and stop updating here
-			if (g_ConsoleMan.IsEnabled()) { return; }
-
-			// Disabled won't get updates
-			if (m_Disabled || m_Player < 0) { return; }
-
+			// Disable player input if the console is open, or the controller is disabled or has no player
+			if (g_ConsoleMan.IsEnabled() || m_Disabled || m_Player < 0) {
+				return;
+			}
 			// Update all the player input
 			UpdatePlayerInput();
 
 		// AI Input Mode
 		} else if (m_InputMode == CIM_AI) {
 			// Disabled won't get updates, or when the activity isn't going
-			if (m_Disabled || !g_ActivityMan.ActivityRunning()) { return; }
+			if (m_Disabled || !g_ActivityMan.ActivityRunning()) {
+				return;
+			}
 
 			// Update the AI state of the Actor we're controlling and to use any scripted AI defined for this Actor.
 			if (m_pControlled && !m_pControlled->UpdateAIScripted()) {
@@ -174,7 +173,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Controller & Controller::operator=(const Controller &rhs) {
-		if (this == &rhs) { return *this; }
+		if (this == &rhs) {
+			return *this;
+		}
 		Destroy();
 		Create(rhs);
 		return *this;
@@ -234,8 +235,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Controller::UpdatePlayerPieMenuInput() {
-		// Set the control states according to digital key/d-pad states.
-
 		// PIE MENU ACTIVE
 		if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_PIEMENU)) {
 			m_ControlStates[PIE_MENU_ACTIVE] = true;
@@ -256,9 +255,6 @@ namespace RTE {
 
 				// SHARP AIM
 				if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM)) { m_ControlStates[AIM_SHARP] = true; }
-
-				// RELOADING
-				//if (g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_PIEMENU)) { m_ControlStates[WEAPON_RELOAD] = true; }
 
 				// JUMP START
 				if (g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_JUMP)) { m_ControlStates[BODY_JUMPSTART] = true; }
@@ -340,7 +336,9 @@ namespace RTE {
 		// If the joystick-controlled analog cursor is less than at the edge of input range, don't accelerate
 		if (GetAnalogCursor().GetMagnitude() < 0.85) { m_JoyAccelTimer.Reset(); }
 		// If the keyboard inputs for cursor movements is initially pressed, reset the acceleration timer
-		if (IsState(ACTOR_NEXT) || IsState(ACTOR_PREV) || (IsState(PRESS_LEFT) || IsState(PRESS_RIGHT) || IsState(PRESS_UP) || IsState(PRESS_DOWN))) { m_KeyAccelTimer.Reset(); }
+		if (IsState(ACTOR_NEXT) || IsState(ACTOR_PREV) || (IsState(PRESS_LEFT) || IsState(PRESS_RIGHT) || IsState(PRESS_UP) || IsState(PRESS_DOWN))) {
+			m_KeyAccelTimer.Reset();
+		}
 
 		// Translate the analog inputs to the discrete control states
 

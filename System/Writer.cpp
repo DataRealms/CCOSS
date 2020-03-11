@@ -18,8 +18,9 @@ namespace RTE {
 	int Writer::Create(const char *filename, bool append) {
 		m_pStream = new std::ofstream(filename, append ? (std::ios_base::out | std::ios_base::app | std::ios_base::ate) : (std::ios_base::out | std::ios_base::trunc));
 
-		if (!m_pStream->good()) { return -1; }
-
+		if (!m_pStream->good()) {
+			return -1;
+		}
 		// Save the file path
 		m_FilePath = filename;
 

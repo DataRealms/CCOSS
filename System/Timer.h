@@ -60,6 +60,7 @@ namespace RTE {
 		/// <summary>
 		/// Resets the timer so that the elapsed time is 0 ms.
 		/// </summary>
+		// TODO: Figure out why calling Clear() here breaks time.
 		void Reset() { m_StartRealTime = g_TimerMan.GetRealTickCount(); m_StartSimTime = g_TimerMan.GetSimTickCount(); }
 #pragma endregion
 

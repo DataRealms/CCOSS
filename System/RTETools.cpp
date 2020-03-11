@@ -125,8 +125,9 @@ namespace RTE {
 	bool ASCIIFileContainsString(std::string filePath, std::string findString) {
 		// Open the script file so we can check it out
 		std::ifstream *pFile = new std::ifstream(filePath.c_str());
-		if (!pFile->good()) { return false; }
-
+		if (!pFile->good()) {
+			return false;
+		}
 		char rawLine[1024];
 		std::string line;
 		std::string::size_type pos = 0;

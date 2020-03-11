@@ -31,8 +31,9 @@ namespace RTE {
 	int Reader::Create(const char *fileName, bool overwrites, ProgressCallback fpProgressCallback, bool failOK) {
 		m_FilePath = fileName;
 
-		if (m_FilePath.empty()) { return -1; }
-
+		if (m_FilePath.empty()) {
+			return -1;
+		}
 		// Extract just the filename
 		int lastSlashPos = m_FilePath.find_last_of('/');
 		if (lastSlashPos == std::string::npos) { lastSlashPos = m_FilePath.find_last_of('\\'); }
@@ -81,7 +82,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Reader::ReadLine(char *locString, int size) {
-		// Make sure we're about to get real data.
 		Eat();
 
 		char temp;
@@ -110,7 +110,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string Reader::ReadLine() {
-		// Make sure we're about to get real data.
 		Eat();
 
 		std::string retString;
@@ -159,9 +158,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Reader::NextProperty() {
-		if (!Eat()) { return false; }
-		if (m_EndOfStreams) { return false; }
-
+		if (!Eat()) {
+			return false;
+		}
+		if (m_EndOfStreams) {
+			return false;
+		}
 		// If there are fewer tabs on the last line eaten this time,
 		// that means there are no more properties to read on this object
 		if (m_ObjectEndings < -m_IndentDifference) {
@@ -175,7 +177,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string Reader::ReadPropName() {
-		// Make sure we're about to get real data.
 		Eat();
 
 		std::string retString;
@@ -242,8 +243,9 @@ namespace RTE {
 			peek = m_pStream->peek();
 
 			// If we have hit the end and don't have any files to resume, then quit and indicate that
-			if (m_pStream->eof()) { return EndIncludeFile(); }
-
+			if (m_pStream->eof()) {
+				return EndIncludeFile();
+			}
 			// Not end-of-file but still got junk back... something went to shit
 			if (peek == -1) { ReportError("Something went wrong reading the line; make sure it is providing the expected type"); }
 

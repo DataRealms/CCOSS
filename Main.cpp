@@ -176,7 +176,6 @@ END_OF_FUNCTION(QuitHandler)
 /// </summary>
 /// <returns></returns>
 bool InitMainMenu() {
-    // Load the palette
     g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 
     // Create the main menu interface
@@ -209,7 +208,9 @@ bool ResetActivity()
     g_AudioMan.StopAll();
 
     // Quit if we should
-	if (g_Quit) { return false; }
+	if (g_Quit) {
+		return false;
+	}
 
 	// TODO: Deal with GUI resetting here!$@#")
     // Clear out all MO's
@@ -1719,7 +1720,6 @@ bool RunGameLoop() {
 	if (g_Quit) {
 		return true;
 	}
-
 	g_FrameMan.ResetFrameTimer();
 	g_TimerMan.EnableAveraging(true);
 	g_TimerMan.PauseSim(false);
@@ -1798,12 +1798,10 @@ bool RunGameLoop() {
 			} else {
 				if (g_InActivity) { g_TimerMan.PauseSim(false); }
 			}
-
 			if (!serverUpdated) {
 				g_NetworkServer.Update();
 				serverUpdated = true;
 			}
-
 			if (g_SettingsMan.GetServerSimSleepWhenIdle()) {
 				signed long long ticksToSleep = g_TimerMan.GetTimeToSleep();
 				if (ticksToSleep > 0) {
@@ -1831,8 +1829,9 @@ bool RunGameLoop() {
 bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
 
     // If no additional arguments passed, just continue (first argument is the program path)
-    if (argc == 1) { return true; }
-
+    if (argc == 1) {
+		return true;
+	}
     // Default program return var if fail
     appExitVar = 2;
 
@@ -1842,12 +1841,15 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
 			if (std::strcmp(argv[i], "-cout") == 0) {
 				g_System.SetLogToCLI(true);
 			} else if (i + 1 < argc) {
+				// Launch game in server mode
                 if (std::strcmp(argv[i], "-server") == 0 && i + 1 < argc) {
                     std::string port = argv[++i];
                     g_NetworkServer.EnableServerMode();
                     g_NetworkServer.SetServerPort(port);
+				// Load a single module right after the official modules
                 } else if (std::strcmp(argv[i], "-module") == 0 && i + 1 < argc) {
-					g_PresetMan.SetSingleModuleToLoad(argv[++i]); 
+					g_PresetMan.SetSingleModuleToLoad(argv[++i]);
+				// Launch game directly into editor activity
 				} else if (std::strcmp(argv[i], "-editor") == 0 && i + 1 < argc) {
 					const char *editorName = argv[++i];
 					if (std::strcmp(editorName, "") == 1) {
@@ -1933,8 +1935,9 @@ int main(int argc, char *argv[]) {
 	g_NetworkClient.Create();
 
     int exitVar = 0;
-    if (!HandleMainArgs(argc, argv, exitVar)) { return exitVar; }
-
+    if (!HandleMainArgs(argc, argv, exitVar)) {
+		return exitVar;
+	}
     g_TimerMan.Create();
     g_PresetMan.Create();
     g_FrameMan.Create();

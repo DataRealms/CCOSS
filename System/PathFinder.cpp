@@ -297,8 +297,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PathFinder::UpdateNodeCosts(PathNode *pNode) {
-		if (!pNode) { return; }
-
+		if (!pNode) {
+			return;
+		}
 		// Look at each existing adjacent node and calculate the cost for each, offset start and end to cover more terrain
 		if (pNode->m_pUp) { pNode->m_UpCost = max(pNode->m_pUp->m_DownCost, CostAlongLine(pNode->m_Pos + Vector(3, 0), pNode->m_pUp->m_Pos + Vector(3, 0))); }
 		if (pNode->m_pRight) { pNode->m_RightCost = CostAlongLine(pNode->m_Pos + Vector(0, 3), pNode->m_pRight->m_Pos + Vector(0, 3)); }

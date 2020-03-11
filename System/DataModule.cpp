@@ -91,28 +91,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int DataModule::Create(const DataModule &reference) {
-		RTEAbort("Can't clone Data Modules!");
-
-		m_FileName = reference.m_FileName;
-		m_FriendlyName = reference.m_FriendlyName;
-		m_Author = reference.m_Author;
-		m_Description = reference.m_Description;
-		m_Version = reference.m_Version;
-		m_ModuleID = reference.m_ModuleID;
-		m_IconFile = reference.m_IconFile;
-		m_pIcon = reference.m_pIcon;
-		m_ScanFolderContents = reference.m_ScanFolderContents;
-		m_IgnoreMissingItems = reference.m_IgnoreMissingItems;
-		m_CrabToHumanSpawnRatio = reference.m_CrabToHumanSpawnRatio;
-		m_ScriptPath = reference.m_ScriptPath;
-
+		RTEAbort("Can't clone Data Modules!"); 
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void DataModule::Destroy(bool notInherited) {
-		for (std::list<PresetEntry>::iterator itr = m_PresetList.begin(); itr != m_PresetList.end(); ++itr) { delete (*itr).m_pEntityPreset; }
+		for (std::list<PresetEntry>::iterator itr = m_PresetList.begin(); itr != m_PresetList.end(); ++itr) {
+			delete (*itr).m_pEntityPreset;
+		}
 		Clear();
 	}
 
@@ -160,9 +148,6 @@ namespace RTE {
 		} else if (propName == "ScriptPath") {
 			reader >> m_ScriptPath;
 			LoadScripts();
-		//} else if (propName == "LoadFirst") {
-			// Do nothing; this is a special parameter looked for by Main.cpp
-			//reader.ReadPropValue();
 		} else if (propName == "Require") {
 			// Check for required dependencies if we're not load properties
 			std::string requiredModule;
@@ -172,7 +157,6 @@ namespace RTE {
 				reader.ReportError("\"" + m_FileName + "\" requires \"" + requiredModule + "\" in order to load!\n");
 			}
 		} else if (propName == "IconFile") {
-			// Load the bitmap as well
 			reader >> m_IconFile;
 			m_pIcon = m_IconFile.GetAsBitmap();
 		} else if (propName == "AddMaterial") {
@@ -180,7 +164,6 @@ namespace RTE {
 		} else {
 			// Try to read in the preset and add it to the PresetMan in one go, and report if fail
 			if (!g_PresetMan.GetEntityPreset(reader)) { reader.ReportError("Could not understand Preset type!"); }
-
 		}
 		return 0;
 	}

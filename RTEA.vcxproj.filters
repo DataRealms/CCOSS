@@ -261,9 +261,6 @@
     <ClInclude Include="Entities\Deployment.h">
       <Filter>Entities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\Entity.h">
-      <Filter>Entities</Filter>
-    </ClInclude>
     <ClInclude Include="Entities\GlobalScript.h">
       <Filter>Entities</Filter>
     </ClInclude>
@@ -457,6 +454,9 @@
       <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="System\Controller.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Entity.h">
       <Filter>System</Filter>
     </ClInclude>
   </ItemGroup>
@@ -680,9 +680,6 @@
     <ClCompile Include="Entities\Deployment.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\Entity.cpp">
-      <Filter>Entities</Filter>
-    </ClCompile>
     <ClCompile Include="Entities\GlobalScript.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
@@ -862,6 +859,9 @@
       <Filter>Menus</Filter>
     </ClCompile>
     <ClCompile Include="System\Controller.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Entity.cpp">
       <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>

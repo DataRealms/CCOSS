@@ -229,6 +229,7 @@
     <ClInclude Include="Resources\resource.h" />
     <ClInclude Include="System\Constants.h" />
     <ClInclude Include="System\Controller.h" />
+    <ClInclude Include="System\Entity.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
     <ClInclude Include="System\Color.h" />
@@ -309,7 +310,6 @@
     <ClInclude Include="Entities\BunkerAssembly.h" />
     <ClInclude Include="Entities\BunkerAssemblyScheme.h" />
     <ClInclude Include="Entities\Deployment.h" />
-    <ClInclude Include="Entities\Entity.h" />
     <ClInclude Include="Entities\GlobalScript.h" />
     <ClInclude Include="Entities\HDFirearm.h" />
     <ClInclude Include="Entities\HeldDevice.h" />
@@ -369,6 +369,7 @@
     <ClCompile Include="Managers\NetworkServer.cpp" />
     <ClCompile Include="Menus\LoadingGUI.cpp" />
     <ClCompile Include="System\Controller.cpp" />
+    <ClCompile Include="System\Entity.cpp" />
     <ClCompile Include="System\StandardIncludes.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">StandardIncludes.h</PrecompiledHeaderFile>
@@ -452,7 +453,6 @@
     <ClCompile Include="Entities\BunkerAssembly.cpp" />
     <ClCompile Include="Entities\BunkerAssemblyScheme.cpp" />
     <ClCompile Include="Entities\Deployment.cpp" />
-    <ClCompile Include="Entities\Entity.cpp" />
     <ClCompile Include="Entities\GlobalScript.cpp" />
     <ClCompile Include="Entities\HDFirearm.cpp" />
     <ClCompile Include="Entities\HeldDevice.cpp" />

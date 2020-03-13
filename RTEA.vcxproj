@@ -484,7 +484,7 @@
     <ClInclude Include="Entities\SceneLayer.h" />
     <ClInclude Include="Entities\SceneObject.h" />
     <ClInclude Include="Entities\SLTerrain.h" />
-    <ClInclude Include="Entities\Sound.h" />
+    <ClInclude Include="Entities\SoundContainer.h" />
     <ClInclude Include="Entities\TDExplosive.h" />
     <ClInclude Include="Entities\TerrainDebris.h" />
     <ClInclude Include="Entities\TerrainObject.h" />
@@ -739,7 +739,7 @@
     <ClCompile Include="Entities\SceneLayer.cpp" />
     <ClCompile Include="Entities\SceneObject.cpp" />
     <ClCompile Include="Entities\SLTerrain.cpp" />
-    <ClCompile Include="Entities\Sound.cpp" />
+    <ClCompile Include="Entities\SoundContainer.cpp" />
     <ClCompile Include="Entities\TDExplosive.cpp" />
     <ClCompile Include="Entities\TerrainDebris.cpp" />
     <ClCompile Include="Entities\TerrainObject.cpp" />

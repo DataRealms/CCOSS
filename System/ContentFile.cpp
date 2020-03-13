@@ -13,6 +13,7 @@
 
 #include "ContentFile.h"
 #include "PresetMan.h"
+#include "AudioMan.h"
 
 #include "allegro.h"
 
@@ -22,7 +23,7 @@ const string ContentFile::m_ClassName = "ContentFile";
 map<string, BITMAP *> ContentFile::m_sLoadedBitmaps[BitDepthCount];
 map<size_t, std::string> ContentFile::m_PathHashes;
 
-map<string, AUDIO_STRUCT *> ContentFile::m_sLoadedSamples;
+map<string, FMOD::Sound *> ContentFile::m_sLoadedSamples;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -543,15 +544,15 @@ BITMAP ** ContentFile::GetAsAnimation(int frameCount, int conversionMode)
 //                  Also, this should only be done once upon startup, since getting the
 //                  Sample again is slow.
 
-AUDIO_STRUCT * ContentFile::GetAsSample() {
+FMOD::Sound * ContentFile::GetAsSample() {
 
 	if (m_DataPath.empty()) {
 		return 0;
 	}
-	AUDIO_STRUCT *pReturnSample = 0;
+	FMOD::Sound *pReturnSample = 0;
 
 	// Check if this file has already been read and loaded from disk.
-	map<string, AUDIO_STRUCT *>::iterator itr = m_sLoadedSamples.find(m_DataPath);
+	map<string, FMOD::Sound *>::iterator itr = m_sLoadedSamples.find(m_DataPath);
 	if (itr != m_sLoadedSamples.end()) {
 		// Yes, has been loaded previously, then use that data from memory.
 		pReturnSample = (*itr).second;
@@ -566,26 +567,30 @@ AUDIO_STRUCT * ContentFile::GetAsSample() {
 		char *pRawData = 0;
 
 		// If there is none, that means we're told to load an exposed file outside of a .dat datafile.
-		if (separatorPos == -1) {
-			fileSize = file_size(m_DataPath.c_str());
-			PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
+        if (separatorPos == -1) {
+            fileSize = file_size(m_DataPath.c_str());
+            PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
 
-			// Make sure we opened properly.
-			if (!pFile || fileSize <= 0) {
-				DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
-			}
+            // Make sure we opened properly.
+            if (!pFile || fileSize <= 0) {
+                DDTAbort(("Failed to load datafile object with following path and name:\n\n" + m_DataPath).c_str());
+            }
 
-			// Allocate the raw data space in memory
-			pRawData = new char[fileSize];
+            // Allocate the raw data space in memory
+            pRawData = new char[fileSize];
 
-			// Read the raw data from the file
-			int bytesRead = pack_fread(pRawData, fileSize, pFile);
-			AAssert(bytesRead == fileSize, "Tried to read a file but couldn't read the same amount of data as the reported file size!");
+            // Read the raw data from the file
+            int bytesRead = pack_fread(pRawData, fileSize, pFile);
+            AAssert(bytesRead == fileSize, "Tried to read a file but couldn't read the same amount of data as the reported file size!");
 
-			// Load the sample from the memory we've read from the file.
-			// FSOUND_UNMANAGED because we want to manage the freeing of the sample ourselves.
-			pReturnSample = FSOUND_Sample_Load(FSOUND_UNMANAGED, pRawData, FSOUND_LOADMEMORY, 0, fileSize);
-			if (pReturnSample == 0) {
+            // Load the sample from the memory we've read from the file.
+            // FSOUND_UNMANAGED because we want to manage the freeing of the sample ourselves.
+
+            FMOD_CREATESOUNDEXINFO *soundInfo;
+            soundInfo->cbsize = fileSize;
+            //TODO Consider doing FMOD_CREATESAMPLE for dumping audio files into memory and FMOD_NONBLOCKING to async create sounds
+            FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(pRawData, FMOD_OPENMEMORY_POINT, soundInfo, &pReturnSample);
+			if (result != FMOD_OK) {
 				DDTAbort(("Unable to create sound " + m_DataPath).c_str());
 			}
 
@@ -624,7 +629,7 @@ AUDIO_STRUCT * ContentFile::GetAsSample() {
 		}
 
 		// Now when loaded for the first time, enter into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
-		m_sLoadedSamples.insert(pair<string, AUDIO_STRUCT *>(m_DataPath, pReturnSample));
+		m_sLoadedSamples.insert(pair<string, FMOD::Sound *>(m_DataPath, pReturnSample));
 	}
 
 	return pReturnSample;

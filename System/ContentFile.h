@@ -16,14 +16,11 @@
 
 #include "Serializable.h"
 
-#include "fmod/fmod.h"
+#include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
-#define AUDIO_STRUCT FSOUND_SAMPLE
-struct FSOUND_STREAM;
 struct DATAFILE;
 struct BITMAP;
 
-struct AUDIO_STRUCT;
 
 namespace RTE {
 
@@ -394,7 +391,7 @@ public:
 // Return value:    The pointer to the beginning of the data object loaded from the file.
 //                  Owenship is NOT transferred! If 0, the file could not be found/loaded.
 
-    virtual AUDIO_STRUCT * GetAsSample();
+    virtual FMOD::Sound * GetAsSample();
 
 	virtual size_t GetHash() const { return std::hash<std::string>()(m_DataPath); }
 
@@ -461,7 +458,7 @@ protected:
 	static std::map<size_t, std::string> m_PathHashes;
 
 	// Static map containing all the already loaded FSOUND_SAMPLE:s and their paths
-    static std::map<std::string, AUDIO_STRUCT *> m_sLoadedSamples;
+    static std::map<std::string, FMOD::Sound *> m_sLoadedSamples;
 
     // Path to this ContentFile's Datafile Object's path. "datafile.dat#objectname"
     // In the case of an animation, this filename/name will be appended with 000, 001, 002 etc

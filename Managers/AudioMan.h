@@ -6,16 +6,15 @@
 #include "Timer.h"
 #include "Singleton.h"
 
-#include "fmod/fmod.h"
+#include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
-#define AUDIO_STRUCT FSOUND_SAMPLE
-struct FSOUND_STREAM;
+#define AUDIO_STRUCT FMOD_SOUND
 struct AUDIO_STRUCT;
 
 #define g_AudioMan AudioMan::Instance()
 
 namespace RTE {
-	class Sound;
+	class SoundContainer;
 
 	/// <summary>
 	/// The singleton manager of the WAV sound effects and OGG music playback.
@@ -44,7 +43,7 @@ namespace RTE {
 			size_t SoundHash;
 			unsigned char AffectedByPitch;
 			short int Distance;
-			short int Channel;
+			std::unordered_set<short int> Channels;
 			short int Loops;
 			float Pitch;
 		};
@@ -104,23 +103,29 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
+		/// Gets the sound management system object used for playing every sound
+		/// </summary>
+		/// <returns>The sound management system object used by AudioMan for playing audio</returns>
+		FMOD::System *GetAudioSystem() { return m_AudioSystem; }
+
+		/// <summary>
 		/// Reports whether audio is enabled.
 		/// </summary>
 		/// <returns>Whether audio is enabled.</returns>
 		bool IsAudioEnabled() { return m_AudioEnabled; }
 
 		/// <summary>
-		/// Reports whether a certain Sound's last played sample is being played currently.
+		/// Reports whether a certain SoundContainer's last played sample is being played currently.
 		/// </summary>
 		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
 		/// <returns>Whether the LAST sample that was played of the Sound is currently being played by any of the channels.</returns>
-		bool IsPlaying(Sound *pSound);
+		bool IsPlaying(SoundContainer *pSound);
 
 		/// <summary>
 		/// Reports whether any music stream is currently playing.
 		/// </summary>
 		/// <returns>Whether any music stream is currently playing.</returns>
-		bool IsMusicPlaying() { return m_AudioEnabled && m_pMusic; }
+		bool IsMusicPlaying() { bool isPlayingMusic; return m_AudioEnabled && m_MusicChannelGroup->isPlaying(&isPlayingMusic) == FMOD_OK ? isPlayingMusic : false; }
 
 		/// <summary>
 		/// Gets the volume of all sounds. Does not get volume of music.
@@ -166,12 +171,12 @@ namespace RTE {
 		void SetGlobalPitch(double pitch = 1.0, bool excludeMusic = false);
 
 		/// <summary>
-		/// Sets/updates the distance attenuation for a specific sound. Will only have an effect if the sound is currently being played.
+		/// Sets/updates the distance attenuation for a specific SoundContainer. Will only have an effect if the sound is currently being played.
 		/// </summary>
 		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
 		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not completely inaudible.</param>
 		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the attenuation was successfully set.</returns>
-		bool SetSoundAttenuation(Sound *pSound, float distance = 0.0);
+		bool SetSoundAttenuation(SoundContainer *pSound, float distance = 0.0);
 
 		/// <summary>
 		/// Sets/updates the frequency/pitch for a specific sound. Will only have an effect if the sound is currently being played.
@@ -179,7 +184,7 @@ namespace RTE {
 		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
 		/// <param name="pitch">New pitch, a multiplier of the original normal frequency. Keep it > 0.</param>
 		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the pitch was successfully set.</returns>
-		bool SetSoundPitch(Sound *pSound, float pitch);
+		bool SetSoundPitch(SoundContainer *pSound, float pitch);
 
 		/// <summary>
 		/// Sets/updates the frequency/pitch for the music channel.
@@ -210,69 +215,69 @@ namespace RTE {
 		/// Returns the number of audio channels currently used.
 		/// </summary>
 		/// <returns>The number of audio channels currently used.</returns>
-		int GetPlayingChannelCount();
+		int GetPlayingChannelCount() { int channelCount; return m_AudioSystem->getChannelsPlaying(&channelCount) == FMOD_OK ? channelCount : 0; }
 
 		/// <summary>
 		/// Returns the number of audio channels available in total.
 		/// </summary>
 		/// <returns>The number of audio channels available in total.</returns>
-		int GetTotalChannelCount();
+		int GetTotalChannelCount() { int channelCount; return m_AudioSystem->getSoftwareChannels(&channelCount) == FMOD_OK ? channelCount : 0; }
 #pragma endregion
 
 #pragma region Playback Handling
 		/// <summary>
 		/// Starts playing a certain sound sample.
 		/// </summary>
-		/// <param name="wavefile">The path to the .wav file to play.</param>
-		void PlaySound(const char *wavefile);
+		/// <param name="filePath">The path to the sound file to play.</param>
+		void PlaySound(const char *filePath);
 
 		/// <summary>
-		/// Starts playing the next sample of a certain Sound.
+		/// Starts playing the next sample of a certain SoundContainer.
 		/// </summary>
-		/// <param name="pSound">Pointer to the Sound to start playing. Ownership is NOT transferred!</param>
+		/// <param name="pSound">Pointer to the SoundContainer to start playing. Ownership is NOT transferred!</param>
 		/// <param name="priority">The priority of this sound. Higher gives it a higher likelihood of getting mixed compared to lower-priority samples.</param>
 		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not completely inaudible.</param>
 		/// <param name="pitch">The pitch modifier for this sound. 1.0 yields unmodified frequency.</param>
 		/// <returns>Whether or not playback of the Sound was successful.</returns>
-		bool PlaySound(Sound *pSound, int priority = PRIORITY_LOW, float distance = 0.0, double pitch = 1.0);
+		bool PlaySound(SoundContainer *pSound, int priority = PRIORITY_LOW, float distance = 0.0, double pitch = 1.0);
 
 		/// <summary>
-		/// Starts playing the next sample of a certain Sound for a certain player.
+		/// Starts playing the next sample of a certain SoundContainer for a certain player.
 		/// </summary>
-		/// <param name="player">Which player to play the Sound sample for.</param>
+		/// <param name="player">Which player to play the SoundContainer sample for.</param>
 		/// <param name="pSound">Pointer to the Sound to start playing. Ownership is NOT transferred!</param>
 		/// <param name="priority">The priority of this sound. Higher gives it a higher likelihood of getting mixed compared to lower-priority samples.</param>
 		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent.</param>
 		/// <param name="pitch">The pitch modifier for this sound. 1.0 yields unmodified frequency.</param>
 		/// <returns>Whether or not playback of the Sound was successful.</returns>
-		bool PlaySound(int player, Sound *pSound, int priority = PRIORITY_LOW, float distance = 0.0, double pitch = 1.0);
+		bool PlaySound(int player, SoundContainer *pSound, int priority = PRIORITY_LOW, float distance = 0.0, double pitch = 1.0);
 
 		/// <summary>
 		/// Starts playing a certain WAVE sound file.
 		/// </summary>
-		/// <param name="filepath">The path to the music file to play.</param>
+		/// <param name="filePath">The path to the sound file to play.</param>
 		/// <param name="distance">Normalized distance from 0 to 1 to play the sound with.</param>
 		/// <param name="loops">The number of times to loop the sound. 0 means play once. -1 means play infinitely until stopped.</param>
 		/// <param name="affectedByPitch">Whether the sound should be affected by pitch.</param>
 		/// <param name="player">For which player to play the sound for, -1 for all.</param>
 		/// <returns>Returns the new sound object being played. OWNERSHIP IS TRANSFERRED!</returns>
-		Sound * PlaySound(const char *filepath, float distance, bool loops, bool affectedByPitch, int player);
+		SoundContainer * PlaySound(const char *filePath, float distance, bool loops, bool affectedByPitch, int player);
 
 		/// <summary>
 		/// Starts playing a certain WAVE, MOD, MIDI, OGG, MP3 file in the music channel.
 		/// </summary>
-		/// <param name="filepath">The path to the music file to play.</param>
+		/// <param name="filePath">The path to the music file to play.</param>
 		/// <param name="loops">The number of times to loop the song. 0 means play once. -1 means play infinitely until stopped.</param>
-		/// <param name="volumeOverride">The volume override for music for this song only. < 0 means no override.</param>
-		void PlayMusic(const char *filepath, int loops = -1, double volumeOverride = -1.0);
+		/// <param name="volumeOverrideIfNotMuted">The volume override for music for this song only, if volume is not muted. < 0 means no override.</param>
+		void PlayMusic(const char *filePath, int loops = -1, double volumeOverrideIfNotMuted = -1.0);
 
 		/// <summary>
 		/// Queues up another path to a stream that will be played after the current one is done. 
 		/// Can be done several times to queue up many tracks.
 		/// The last track in the list will be looped infinitely.
 		/// </summary>
-		/// <param name="filepath">The path to the music file to play after the current one.</param>
-		void QueueMusicStream(const char *filepath);
+		/// <param name="filePath">The path to the music file to play after the current one.</param>
+		void QueueMusicStream(const char *filePath);
 
 		/// <summary>
 		/// Plays the next music stream in the queue, if any is queued.
@@ -301,26 +306,26 @@ namespace RTE {
 		void StopMusic();
 
 		/// <summary>
-		/// Stops playing a certain Sound sample.
+		/// Stops playing all sounds in a given SoundContainer.
 		/// </summary>
-		/// <param name="pSound">Pointer to the Sound to stop playing. Ownership is NOT transferred!</param>
+		/// <param name="pSound">Pointer to the SoundContainer to stop playing. Ownership is NOT transferred!</param>
 		/// <returns>Whether playback of the sound was successfully stopped, or even found.</returns>
-		bool StopSound(Sound *pSound);
+		bool StopSound(SoundContainer *pSound);
 
 		/// <summary>
-		/// Stops playing a certain Sound sample for a certain player.
+		/// Stops playing all sounds in a given SoundContainer for a certain player.
 		/// </summary>
-		/// <param name="player">Which player to stop the Sound sample for.</param>
-		/// <param name="pSound">Pointer to the Sound to stop playing. Ownership is NOT transferred!</param>
+		/// <param name="player">Which player to stop the SoundContainer  for.</param>
+		/// <param name="pSound">Pointer to the SoundContainer to stop playing. Ownership is NOT transferred!</param>
 		/// <returns></returns>
-		bool StopSound(int player, Sound *pSound);
+		bool StopSound(int player, SoundContainer *pSound);
 
 		/// <summary>
-		/// Fades out playback of a specific sound.
+		/// Fades out playback of all sounds in a specific SoundContainer.
 		/// </summary>
 		/// <param name="pSound">Pointer to the Sound to fade out playing. Ownership is NOT transferred!</param>
-		/// <param name="fadeOutTime"> The amount of time, in ms, to fade out over.</param>
-		void FadeOutSound(Sound *pSound, int fadeOutTime = 1000);
+		/// <param name="fadeOutTime">The amount of time, in ms, to fade out over.</param>
+		void FadeOutSound(SoundContainer *pSound, int fadeOutTime = 1000);
 #pragma endregion
 
 #pragma region Network Audio Handling
@@ -350,11 +355,11 @@ namespace RTE {
 		/// <param name="state">Sound state.</param>
 		/// <param name="hash">Sound file hash to transmit to client.</param>
 		/// <param name="distance">Sound distance.</param>
-		/// <param name="channel">Channel where sound was played.</param>
+		/// <param name="channels">Channels where sound was played.</param>
 		/// <param name="loops">Loops counter.</param>
 		/// <param name="pitch">Pitch value.</param>
 		/// <param name="affectedByPitch">Whether the sound is affected by pitch.</param>
-		void RegisterSoundEvent(int player, unsigned char state, size_t hash, short int distance, short int channel, short int loops, float pitch, bool affectedByPitch);
+		void RegisterSoundEvent(int player, unsigned char state, size_t hash, short int distance, std::unordered_set<short int> channels, short int loops, float pitch, bool affectedByPitch);
 
 		/// <summary>
 		/// Fills the list with music events happened for the specified network player.
@@ -379,28 +384,33 @@ namespace RTE {
 		static Entity::ClassInfo m_sClass; //! ClassInfo for this class.
 		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this object.
 
+		FMOD::System *m_AudioSystem; //! The FMOD Sound management object
+		FMOD::ChannelGroup *m_MusicChannelGroup; //! The FMOD ChannelGroup for music
+		FMOD::ChannelGroup *m_SoundChannelGroup; //! The FMOD ChannelGroup for sounds
+
 		bool m_AudioEnabled; //! Bool to tell whether audio is enabled or not.
-		int m_MusicChannel; //! Channel number for Music streams. Typically 0.
-		static constexpr unsigned short int s_MaxVolume = 255; //! Maximum value to use for volume control.
-		FSOUND_STREAM *m_pMusic; //! Pointer to Fmod sound stream data structure.
+
 		double m_SoundsVolume; //! Global sounds effects volume.
 		double m_MusicVolume; //! Global music volume.
-
 		double m_GlobalPitch; //! Global pitch multiplier.
+
 		std::vector<int> m_NormalFrequencies; //! The 'normal' unpitched frequency of each channel handle we have.
 		std::vector<double> m_PitchModifiers; //! How each channel's pitch is modified individually.
 
 		std::string m_MusicPath; //! The path to the last played music stream.
 		std::list<std::string> m_MusicPlayList; //! Playlist of paths to music to play after the current non looping one is done.
-
 		Timer m_SilenceTimer; //! Timer for measuring silences between songs.
-
 
 		bool m_IsInMultiplayerMode; //! If true then the server is in multiplayer mode and will register sound and music events into internal lists.
 		std::list<NetworkSoundData> m_SoundEvents[c_MaxClients]; //! Lists of per player sound events.
 		std::list<NetworkMusicData> m_MusicEvents[c_MaxClients]; //! Lists of per player music events.
 
 	private:
+		static FMOD_RESULT F_CALLBACK MusicChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
+		static FMOD_RESULT F_CALLBACK SoundChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
+
+		std::unordered_map<int, SoundContainer *> m_ChannelsToSoundContainers; //! A map of channel numbers to SoundContainers. Is lazily updated so channels should be checked against the SoundChannelGroup before being considered accurate
+
 		/// <summary>
 		/// Clears all the member variables of this AudioMan, effectively resetting the members of this abstraction level only.
 		/// </summary>

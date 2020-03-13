@@ -267,14 +267,14 @@ void ContentFile::Destroy(bool notInherited)
 
 void ContentFile::FreeAllLoaded()
 {
-    for (int depth = Eight; depth < BitDepthCount; ++depth)
-    {
+    for (int depth = Eight; depth < BitDepthCount; ++depth) {
         for (map<string, BITMAP *>::iterator lbItr = m_sLoadedBitmaps[depth].begin(); lbItr != m_sLoadedBitmaps[depth].end(); ++lbItr)
             destroy_bitmap((*lbItr).second);
     }
 
-	for (map<string, FSOUND_SAMPLE *>::iterator lcItr = m_sLoadedSamples.begin(); lcItr != m_sLoadedSamples.end(); ++lcItr)
-        FSOUND_Sample_Free((*lcItr).second);
+    for (map<string, FMOD::Sound *>::iterator lcItr = m_sLoadedSamples.begin(); lcItr != m_sLoadedSamples.end(); ++lcItr) {
+        (*lcItr).second->release();
+    }
 }
 
 

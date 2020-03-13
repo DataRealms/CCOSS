@@ -77,7 +77,7 @@ void SettingsMan::Clear()
 	m_UseNATService = false;
 	m_DisableLoadingScreen = false;
 
-	m_AudioChannels = 32;
+	m_AudioChannels = 64;
 }
 
 

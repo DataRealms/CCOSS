@@ -84,7 +84,7 @@ namespace RTE
 		}
 
 		// Stop all sounds received from server
-		for (std::map<short int, Sound *>::iterator it = m_Sounds.begin(); it != m_Sounds.end(); ++it)
+		for (std::map<short int, SoundContainer *>::iterator it = m_Sounds.begin(); it != m_Sounds.end(); ++it)
 		{
 			it->second->Stop();
 			delete it->second;
@@ -676,24 +676,24 @@ namespace RTE
 		{
 			if (sndDataPtr->State == AudioMan::SOUND_PLAY)
 			{
-				BITMAP * bmp = 0;
 				std::string path = ContentFile::GetPathFromHash(sndDataPtr->SoundHash);
 				if (path != "")
 				{
-					Sound *pSound = new Sound();
+					SoundContainer *pSound = new SoundContainer();
 					pSound->Create(path, sndDataPtr->AffectedByPitch > 0 ? true : false, sndDataPtr->Loops);
 					g_AudioMan.SetSoundPitch(pSound, sndDataPtr->Pitch);
 
 					pSound->Play(sndDataPtr->Distance);
 
-					// Stop sound at this channel just in case
-					if (m_Sounds.count(sndDataPtr->Channel) > 0)
-					{
-						m_Sounds[sndDataPtr->Channel]->Stop();
-						delete m_Sounds[sndDataPtr->Channel];
-					}
+					// Stop sound at these channels just in case
+					for (std::unordered_set<short int>::iterator channelIterator = sndDataPtr->Channels.begin(); channelIterator != sndDataPtr->Channels.end(); ++channelIterator) {
+						if (m_Sounds.count(*channelIterator) > 0) {
+							m_Sounds[(*channelIterator)]->Stop();
+							delete m_Sounds[(*channelIterator)];
+						}
 
-					m_Sounds[sndDataPtr->Channel] = pSound;
+						m_Sounds[(*channelIterator)] = pSound;
+					}
 
 					//char buf[128];
 					//sprintf_s(buf, sizeof(buf), "PLAY %d %d %f %s", sndDataPtr->Loops, pSound->GetCurrentChannel(), sndDataPtr->Pitch, path.c_str());
@@ -717,31 +717,31 @@ namespace RTE
 				}
 				else
 				{
-					if (m_Sounds.count(sndDataPtr->Channel) > 0)
-					{
-						//char buf[128];
-						//sprintf_s(buf, sizeof(buf), "PITCH %d %f", m_Sounds[sndDataPtr->Channel]->GetCurrentChannel(), sndDataPtr->Pitch);
-						//g_ConsoleMan.PrintString(buf);
+					for (std::unordered_set<short int>::iterator channelIterator = sndDataPtr->Channels.begin(); channelIterator != sndDataPtr->Channels.end(); ++channelIterator) {
+						if (m_Sounds.count(*channelIterator) > 0) {
+							//char buf[128];
+							//sprintf_s(buf, sizeof(buf), "PITCH %d %f", m_Sounds[sndDataPtr->Channel]->GetCurrentChannel(), sndDataPtr->Pitch);
+							//g_ConsoleMan.PrintString(buf);
 
-						g_AudioMan.SetSoundPitch(m_Sounds[sndDataPtr->Channel], sndDataPtr->Pitch);
-					}
-					else
-					{
-						//char buf[128];
-						//sprintf_s(buf, sizeof(buf), "Not found %d", sndDataPtr->Channel);
-						//g_ConsoleMan.PrintString(buf);
+							g_AudioMan.SetSoundPitch(m_Sounds[(*channelIterator)], sndDataPtr->Pitch);
+						} else {
+							//char buf[128];
+							//sprintf_s(buf, sizeof(buf), "Not found %d", sndDataPtr->Channel);
+							//g_ConsoleMan.PrintString(buf);
+						}
 					}
 				}
 			}
 			else if (sndDataPtr->State == AudioMan::SOUND_STOP)
 			{
-				if (m_Sounds.count(sndDataPtr->Channel) > 0)
-				{
-					//char buf[128];
-					//sprintf_s(buf, sizeof(buf), "STOP %d", m_Sounds[sndDataPtr->Channel]->GetCurrentChannel());
-					//g_ConsoleMan.PrintString(buf);
+				for (std::unordered_set<short int>::iterator channelIterator = sndDataPtr->Channels.begin(); channelIterator != sndDataPtr->Channels.end(); ++channelIterator) {
+					if (m_Sounds.count(*channelIterator) > 0) {
+						//char buf[128];
+						//sprintf_s(buf, sizeof(buf), "STOP %d", m_Sounds[sndDataPtr->Channel]->GetCurrentChannel());
+						//g_ConsoleMan.PrintString(buf);
 
-					m_Sounds[sndDataPtr->Channel]->Stop();
+						m_Sounds[(*channelIterator)]->Stop();
+					}
 				}
 			}
 

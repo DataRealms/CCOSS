@@ -14,7 +14,7 @@
 
 #include "Singleton.h"
 #include "UInputMan.h"
-#include "Sound.h"
+#include "SoundContainer.h"
 
 #include "Network.h"
 #include "NatPunchthroughClient.h"
@@ -250,7 +250,7 @@ namespace RTE
 		std::list<PostEffect> m_PostEffects[FRAMES_TO_REMEMBER];
 
 		// List of sounds received from server. OWNED!!!
-		std::map<short int, Sound *> m_Sounds;
+		std::map<short int, SoundContainer *> m_Sounds;
 
 		BITMAP * m_pSceneBackgroundBitmap;
 		BITMAP * m_pSceneForegroundBitmap;

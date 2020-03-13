@@ -1226,7 +1226,7 @@ namespace RTE
 		for (std::list<AudioMan::NetworkSoundData>::iterator eItr = events.begin(); eItr != events.end(); ++eItr)
 		{
 			sndDataPtr->State = (*eItr).State;
-			sndDataPtr->Channel = (*eItr).Channel;
+			sndDataPtr->Channels = (*eItr).Channels;
 			sndDataPtr->Distance = (*eItr).Distance;
 			sndDataPtr->SoundHash = (*eItr).SoundHash;
 			sndDataPtr->Loops = (*eItr).Loops;

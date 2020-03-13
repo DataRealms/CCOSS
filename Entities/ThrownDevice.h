@@ -144,7 +144,7 @@ namespace RTE {
 	protected:
 		static Entity::ClassInfo m_sClass; //! ClassInfo for this class
 
-		Sound m_ActivationSound; //! Activation sound
+		SoundContainer m_ActivationSound; //! Activation sound
 
 		Vector m_StartThrowOffset; //! The position offset at which a throw of this Device begins
 		Vector m_EndThrowOffset; //! The position offset at which a throw of this Device ends

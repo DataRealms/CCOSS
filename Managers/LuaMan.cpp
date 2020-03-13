@@ -549,12 +549,12 @@ int LuaMan::Create()
             .def("AddToGroup", &Entity::AddToGroup)
             .def("IsInGroup", (bool (Entity::*)(const string &))&Entity::IsInGroup),
 
-		class_<Sound>("Sound")
+		class_<SoundContainer>("Sound")
 			.def(constructor<>())
-			.def("IsPlaying", &Sound::IsBeingPlayed)
-			.def("Stop", &Sound::Stop)
-			.def("UpdateDistance", &Sound::UpdateAttenuation),
-			//.property("Loops", &Sound::GetLoopSetting, &Sound::SetLoopSetting),
+			.def("IsPlaying", &SoundContainer::IsBeingPlayed)
+			.def("Stop", &SoundContainer::Stop)
+			.def("UpdateDistance", &SoundContainer::UpdateAttenuation)
+			.property("Loops", &SoundContainer::GetLoopSetting, &SoundContainer::SetLoopSetting),
 
         ABSTRACTLUABINDING(SceneObject, Entity)
             .property("Pos", &SceneObject::GetPos, &SceneObject::SetPos)
@@ -1480,7 +1480,7 @@ int LuaMan::Create()
             .def("QueueMusicStream", &AudioMan::QueueMusicStream)
             .def("QueueSilence", &AudioMan::QueueSilence)
             .def("ClearMusicQueue", &AudioMan::ClearMusicQueue)
-            .def("PlaySound", (Sound * (AudioMan::*)(const char *, float, bool, bool, int))&AudioMan::PlaySound)
+            .def("PlaySound", (SoundContainer * (AudioMan::*)(const char *, float, bool, bool, int))&AudioMan::PlaySound)
             .def("PlaySound", (void (AudioMan::*)(const char *))&AudioMan::PlaySound)
             .def("SetSoundAttenuation", &AudioMan::SetSoundAttenuation)
             .def("IsPlaying", &AudioMan::IsPlaying)

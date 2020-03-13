@@ -19,7 +19,7 @@
 #define g_ConsoleMan ConsoleMan::Instance()
 
 #include "Serializable.h"
-#include "Sound.h"
+#include "SoundContainer.h"
 
 namespace RTE
 {

@@ -1076,7 +1076,7 @@ protected:
     AtomGroup *m_pFGFootGroup;
     AtomGroup *m_pBGFootGroup;
     // The sound of the actor taking a step (think robot servo)
-    Sound m_StrideSound;
+    SoundContainer m_StrideSound;
     // Jetpack booster.
     AEmitter *m_pJetpack;
     // The max total time, in ms, that the jetpack can be used without pause

@@ -15,7 +15,6 @@
 // Inclusions of header files
 
 //#include "FrameMan.h"
-#include "Sound.h"
 #include "Timer.h"
 #include "Controller.h"
 #include "Loadout.h"

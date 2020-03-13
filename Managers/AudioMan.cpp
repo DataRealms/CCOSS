@@ -1,7 +1,7 @@
 #include "AudioMan.h"
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
-#include "Sound.h"
+#include "SoundContainer.h"
 #include "DDTError.h"
 
 namespace RTE {

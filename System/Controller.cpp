@@ -213,21 +213,21 @@ namespace RTE {
 			m_WeaponReloadIgnore = false;
 		}
 
-		if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_L_RIGHT) || g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_RIGHT)) { m_ControlStates[HOLD_RIGHT] = true; }
-		if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_L_LEFT) || g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_LEFT)) { m_ControlStates[HOLD_LEFT] = true; }
-		if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_L_UP) || g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_UP)) { m_ControlStates[HOLD_UP] = true; }
-		if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_L_DOWN) || g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_DOWN)) { m_ControlStates[HOLD_DOWN] = true; }
-		if (g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_L_RIGHT) || g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_AIM_RIGHT)) { m_ControlStates[PRESS_RIGHT] = true; }
-		if (g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_L_LEFT) || g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_AIM_LEFT)) { m_ControlStates[PRESS_LEFT] = true; }
-		if (g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_L_UP) || g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_AIM_UP)) { m_ControlStates[PRESS_UP] = true; }
-		if (g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_L_DOWN) || g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_AIM_DOWN)) { m_ControlStates[PRESS_DOWN] = true; }
+		m_ControlStates[HOLD_RIGHT] = g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_L_RIGHT) || g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_RIGHT);
+		m_ControlStates[HOLD_LEFT] = g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_L_LEFT) || g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_LEFT);
+		m_ControlStates[HOLD_UP] = g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_L_UP) || g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_UP);
+		m_ControlStates[HOLD_DOWN] = g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_L_DOWN) || g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_DOWN);
+		m_ControlStates[PRESS_RIGHT] = g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_L_RIGHT) || g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_AIM_RIGHT);
+		m_ControlStates[PRESS_LEFT] = g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_L_LEFT) || g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_AIM_LEFT);
+		m_ControlStates[PRESS_UP] = g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_L_UP) || g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_AIM_UP);
+		m_ControlStates[PRESS_DOWN] = g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_L_DOWN) || g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_AIM_DOWN);
 
-		if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_FIRE)) { m_ControlStates[PRIMARY_ACTION] = true; }
-		if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_PIEMENU)) { m_ControlStates[SECONDARY_ACTION] = true; }
-		if (g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_FIRE)) { m_ControlStates[PRESS_PRIMARY] = true; }
-		if (g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_PIEMENU)) { m_ControlStates[PRESS_SECONDARY] = true; }
-		if (g_UInputMan.ElementReleased(m_Player, UInputMan::INPUT_FIRE)) { m_ControlStates[RELEASE_PRIMARY] = true; }
-		if (g_UInputMan.ElementReleased(m_Player, UInputMan::INPUT_PIEMENU)) { m_ControlStates[RELEASE_SECONDARY] = true; }
+		m_ControlStates[PRIMARY_ACTION] = g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_FIRE);
+		m_ControlStates[SECONDARY_ACTION] = g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_PIEMENU);
+		m_ControlStates[PRESS_PRIMARY] = g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_FIRE);
+		m_ControlStates[PRESS_SECONDARY] = g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_PIEMENU);
+		m_ControlStates[RELEASE_PRIMARY] = g_UInputMan.ElementReleased(m_Player, UInputMan::INPUT_FIRE);
+		m_ControlStates[RELEASE_SECONDARY] = g_UInputMan.ElementReleased(m_Player, UInputMan::INPUT_PIEMENU);
 
 		UpdatePlayerAnalogInput();
 	}
@@ -248,22 +248,13 @@ namespace RTE {
 			} else if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_PREV)) {
 				m_ControlStates[ACTOR_PREV_PREP] = true;
 				m_ReleaseTimer.Reset();
-				// No actions can be performed while switching actors or pie menu, and short time thereafter
+			// No actions can be performed while switching actors or pie menu, and short time thereafter
 			} else if (m_ReleaseTimer.IsPastRealMS(m_ReleaseDelay)) {
-				// WEAPON ACTIVATION
-				if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_FIRE)) { m_ControlStates[WEAPON_FIRE] = true; }
-
-				// SHARP AIM
-				if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM)) { m_ControlStates[AIM_SHARP] = true; }
-
-				// JUMP START
-				if (g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_JUMP)) { m_ControlStates[BODY_JUMPSTART] = true; }
-
-				// JUMP EXECUTION
-				if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_JUMP)) { m_ControlStates[BODY_JUMP] = true; }
-
-				// CROUCH/PRONE
-				if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_CROUCH)) { m_ControlStates[BODY_CROUCH] = true; }
+				m_ControlStates[WEAPON_FIRE] = g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_FIRE);
+				m_ControlStates[AIM_SHARP] = g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM);
+				m_ControlStates[BODY_JUMPSTART] = g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_JUMP);
+				m_ControlStates[BODY_JUMP] = g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_JUMP);
+				m_ControlStates[BODY_CROUCH] = g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_CROUCH);
 
 				// MOVEMENT LEFT/RIGHT
 				if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_L_RIGHT)) {
@@ -273,26 +264,29 @@ namespace RTE {
 				} else {
 					m_ControlStates[MOVE_IDLE] = true;
 				}
+
+				// AIM LEFT AND RIGHT DIGITALLY - not really used as aiming, so convert into movement input
+				if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_LEFT)) {
+					m_ControlStates[MOVE_LEFT] = true;
+				} else if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_RIGHT)) {
+					m_ControlStates[MOVE_RIGHT] = true;
+				}
+
 				// AIM AND MOVE UP AND DOWN
 				if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_L_UP) || g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_UP)) {
 					m_ControlStates[MOVE_UP] = true;
 				} else if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_L_DOWN) || g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_DOWN)) {
 					m_ControlStates[MOVE_DOWN] = true;
 				}
+
 				// AIM UP AND DOWN DIGITALLY
 				if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_UP)) {
 					m_ControlStates[AIM_UP] = true;
 				} else if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_DOWN)) {
 					m_ControlStates[AIM_DOWN] = true;
 				}
-				// AIM LEFT AND RIGHT DIGITALLY  not really used as aiming, so convert into movement input
-				if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_LEFT)) {
-					m_ControlStates[MOVE_LEFT] = true;
-				} else if (g_UInputMan.ElementHeld(m_Player, UInputMan::INPUT_AIM_RIGHT)) {
-					m_ControlStates[MOVE_RIGHT] = true;
-				}
-				if (g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_FIRE) || g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_AIM)/* || g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_PIEMENU) || g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_JUMP)*/)
-					m_ControlStates[PRESS_FACEBUTTON] = true;
+
+				m_ControlStates[PRESS_FACEBUTTON] = g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_FIRE) || g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_AIM);
 
 				if (!m_WeaponChangeNextIgnore && g_UInputMan.ElementPressed(m_Player, UInputMan::INPUT_WEAPON_CHANGE_NEXT)) {
 					m_ControlStates[WEAPON_CHANGE_NEXT] = true;
@@ -340,15 +334,10 @@ namespace RTE {
 			m_KeyAccelTimer.Reset();
 		}
 
-		// Translate the analog inputs to the discrete control states
-
-		// Sharp Aim
+		// Translate analog aim input into sharp aim constrol state
 		if (m_AnalogAim.GetMagnitude() > 0.1 && !m_ControlStates[PIE_MENU_ACTIVE]) { m_ControlStates[AIM_SHARP] = true; }
 
-		// Overrides
-
-		// Sharp aim can't happen when moving around
-		// This also helps with keyboard vs mouse fighting when moving and aiming in opposite directions
+		// Disable sharp aim while moving - this also helps with keyboard vs mouse fighting when moving and aiming in opposite directions
 		if (m_ControlStates[PRESS_RIGHT] || m_ControlStates[PRESS_LEFT] || m_ControlStates[BODY_JUMPSTART] || (m_ControlStates[PIE_MENU_ACTIVE] && !m_ControlStates[SECONDARY_ACTION])) {
 			if (IsMouseControlled()) { g_UInputMan.SetMouseValueMagnitude(0.05); }
 			m_ControlStates[AIM_SHARP] = false;
@@ -365,12 +354,12 @@ namespace RTE {
 			}
 			UInputMan::MouseButtons activeSecondary = UInputMan::MOUSE_RIGHT;
 
-			if (g_UInputMan.MouseButtonHeld(UInputMan::MOUSE_LEFT, m_Player)) { m_ControlStates[PRIMARY_ACTION] = true; }
-			if (g_UInputMan.MouseButtonHeld(activeSecondary, m_Player)) { m_ControlStates[SECONDARY_ACTION] = true; }
-			if (g_UInputMan.MouseButtonPressed(UInputMan::MOUSE_LEFT, m_Player)) { m_ControlStates[PRESS_PRIMARY] = true; }
-			if (g_UInputMan.MouseButtonPressed(activeSecondary, m_Player)) { m_ControlStates[PRESS_SECONDARY] = true; }
-			if (g_UInputMan.MouseButtonReleased(UInputMan::MOUSE_LEFT, m_Player)) { m_ControlStates[RELEASE_PRIMARY] = true; }
-			if (g_UInputMan.MouseButtonReleased(activeSecondary, m_Player)) { m_ControlStates[RELEASE_SECONDARY] = true; }
+			m_ControlStates[PRIMARY_ACTION] = g_UInputMan.MouseButtonHeld(UInputMan::MOUSE_LEFT, m_Player);
+			m_ControlStates[SECONDARY_ACTION] = g_UInputMan.MouseButtonHeld(activeSecondary, m_Player);
+			m_ControlStates[PRESS_PRIMARY] = g_UInputMan.MouseButtonPressed(UInputMan::MOUSE_LEFT, m_Player);
+			m_ControlStates[PRESS_SECONDARY] = g_UInputMan.MouseButtonPressed(activeSecondary, m_Player);
+			m_ControlStates[RELEASE_PRIMARY] = g_UInputMan.MouseButtonReleased(UInputMan::MOUSE_LEFT, m_Player);
+			m_ControlStates[RELEASE_SECONDARY] = g_UInputMan.MouseButtonReleased(activeSecondary, m_Player);
 		}
 	}
 }

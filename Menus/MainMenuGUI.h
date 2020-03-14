@@ -38,6 +38,7 @@ class GUIButton;
 class GUILabel;
 class GUISlider;
 class Entity;
+class EditorActivity;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -777,6 +778,12 @@ private:
 // Return value:    None.
 
     void Clear();
+
+    /// <summary>
+    /// Loads "Editor Scene" and starts the given editor activity
+    /// </summary>
+    /// <param name="editorActivity"></param>
+    void StartEditorActivity(EditorActivity *editorActivity);
 
 
     // Disallow the use of some implicit methods.

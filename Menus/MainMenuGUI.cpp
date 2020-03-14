@@ -53,6 +53,7 @@
 #include "GibEditor.h"
 #include "ActorEditor.h"
 #include "AssemblyEditor.h"
+#include "EditorActivity.h"
 #include "MultiplayerGame.h"
 
 extern int g_IntroState;
@@ -3198,52 +3199,29 @@ void MainMenuGUI::ToggleScript()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MainMenuGUI::StartActorEditor() {
-	g_SceneMan.SetSceneToLoad("Editor Scene");
-	ActorEditor *pNewEditor = new ActorEditor;
-	pNewEditor->Create();
-	pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-	g_ActivityMan.SetStartActivity(pNewEditor);
-}
+void MainMenuGUI::StartActorEditor() { StartEditorActivity(new ActorEditor); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MainMenuGUI::StartGibEditor() {
-	g_SceneMan.SetSceneToLoad("Editor Scene");
-	GibEditor *pNewEditor = new GibEditor;
-	pNewEditor->Create();
-	pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-	g_ActivityMan.SetStartActivity(pNewEditor);
-}
+void MainMenuGUI::StartGibEditor() { StartEditorActivity(new GibEditor); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MainMenuGUI::StartSceneEditor() {
-	g_SceneMan.SetSceneToLoad("Editor Scene");
-	SceneEditor *pNewEditor = new SceneEditor;
-	pNewEditor->Create();
-	pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-	g_ActivityMan.SetStartActivity(pNewEditor);
-}
+void MainMenuGUI::StartSceneEditor() { StartEditorActivity(new SceneEditor); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MainMenuGUI::StartAreaEditor() {
-	g_SceneMan.SetSceneToLoad("Editor Scene");
-	AreaEditor *pNewEditor = new AreaEditor;
-	pNewEditor->Create();
-	pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-	g_ActivityMan.SetStartActivity(pNewEditor);
-}
+void MainMenuGUI::StartAreaEditor() { StartEditorActivity(new AreaEditor); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MainMenuGUI::StartAssemblyEditor() {
-	g_SceneMan.SetSceneToLoad("Editor Scene");
-	AssemblyEditor *pNewEditor = new AssemblyEditor;
-	pNewEditor->Create();
-	pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-	g_ActivityMan.SetStartActivity(pNewEditor);
+void MainMenuGUI::StartAssemblyEditor() { StartEditorActivity(new AssemblyEditor); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartEditorActivity(EditorActivity *editorActivityToStart) {
+    g_SceneMan.SetSceneToLoad("Editor Scene");
+    editorActivityToStart->Create();
+    editorActivityToStart->SetEditorMode(EditorActivity::LOADDIALOG);
+    g_ActivityMan.SetStartActivity(editorActivityToStart);
 }
-
-

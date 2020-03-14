@@ -91,11 +91,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Box::WithinBox(const Vector &point) const {
-		// Can't be within a non-box
-		if (m_Width == 0 || m_Height == 0) { return false; }
-
-		// Take potential flipping into account
-		return (((m_Width > 0 && point.m_X >= m_Corner.m_X && point.m_X < (m_Corner.m_X + m_Width)) ||
+		return !IsEmpty() && (((m_Width > 0 && point.m_X >= m_Corner.m_X && point.m_X < (m_Corner.m_X + m_Width)) ||
 			(m_Width < 0 && point.m_X < m_Corner.m_X && point.m_X >= (m_Corner.m_X + m_Width))) &&
 			(m_Height > 0 && point.m_Y >= m_Corner.m_Y && point.m_Y < (m_Corner.m_Y + m_Height)) ||
 			(m_Height < 0 && point.m_Y < m_Corner.m_Y && point.m_Y <= (m_Corner.m_Y + m_Height)));
@@ -104,22 +100,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Box::WithinBoxX(float pointX) const {
-		// Can't be within a non-box
-		if (m_Width == 0) { return false; }
-
-		// Take potential flipping into account
-		return ((m_Width > 0 && pointX >= m_Corner.m_X && pointX < (m_Corner.m_X + m_Width)) ||
+		return !IsEmpty() && ((m_Width > 0 && pointX >= m_Corner.m_X && pointX < (m_Corner.m_X + m_Width)) ||
 			(m_Width < 0 && pointX < m_Corner.m_X && pointX >= (m_Corner.m_X + m_Width)));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Box::WithinBoxY(float pointY) const {
-		// Can't be within a non-box
-		if (m_Height == 0) { return false; }
-
-		// Take potential flipping into account
-		return ((m_Height > 0 && pointY >= m_Corner.m_Y && pointY < (m_Corner.m_Y + m_Height)) ||
+		return !IsEmpty() && ((m_Height > 0 && pointY >= m_Corner.m_Y && pointY < (m_Corner.m_Y + m_Height)) ||
 			(m_Height < 0 && pointY < m_Corner.m_Y && pointY <= (m_Corner.m_Y + m_Height)));
 	}
 
@@ -127,21 +115,9 @@ namespace RTE {
 
 	float Box::GetWithinBoxX(float pointX) const {
 		if (m_Width > 0) {
-			if (pointX < m_Corner.m_X) {
-				return m_Corner.m_X;
-			} else if (pointX >= m_Corner.m_X + m_Width) {
-				return m_Corner.m_X + m_Width - 1.0;
-			} else {
-				return pointX;
-			}
+			return Limit(pointX, m_Corner.m_X + m_Width - 1, m_Corner.m_X);
 		} else if (m_Width < 0) {
-			if (pointX >= m_Corner.m_X) {
-				return m_Corner.m_X - 1;
-			} else if (pointX < m_Corner.m_X + m_Width) {
-				return m_Corner.m_X + m_Width;
-			} else {
-				return pointX;
-			}
+			return Limit(pointX, m_Corner.m_X - 1, m_Corner.m_X + m_Width);
 		}
 		return m_Corner.m_X;
 	}
@@ -150,21 +126,9 @@ namespace RTE {
 
 	float Box::GetWithinBoxY(float pointY) const {
 		if (m_Height > 0) {
-			if (pointY < m_Corner.m_Y) {
-				return m_Corner.m_Y;
-			} else if (pointY >= m_Corner.m_Y + m_Height) {
-				return m_Corner.m_Y + m_Height - 1.0;
-			} else {
-				return pointY;
-			}
+			return Limit(pointY, m_Corner.m_Y + m_Height - 1, m_Corner.m_Y);
 		} else if (m_Height < 0) {
-			if (pointY >= m_Corner.m_Y) {
-				return m_Corner.m_Y - 1;
-			} else if (pointY < m_Corner.m_Y + m_Height) {
-				return m_Corner.m_Y + m_Height;
-			} else {
-				return pointY;
-			}
+			return Limit(pointY, m_Corner.m_Y - 1, m_Corner.m_Y + m_Height);
 		}
 		return m_Corner.m_Y;
 	}
@@ -172,8 +136,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Box::IntersectsBox(const Box &rhs) {
-		// Can't intersect a non-box
-		if (m_Width == 0 || m_Height == 0 || rhs.m_Width == 0 || rhs.m_Height == 0) { return false; }
+		if (IsEmpty() || rhs.IsEmpty()) {
+			return false;
+		}
 
 		Box box1 = *this;
 		Box box2 = rhs;

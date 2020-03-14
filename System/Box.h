@@ -206,11 +206,25 @@ namespace RTE {
 		bool IntersectsBox(const Box &rhs);
 
 		/// <summary>
-		/// Tells whether a point is within the Box or not.
+		/// Tells whether a point is within the Box or not, taking potential flipping into account.
 		/// </summary>
 		/// <param name="point">The Vector describing the point to test for within box bounds.</param>
-		/// <returns>Inside the box or not.</returns>
+		/// <returns>Inside the box or not. False if the box IsEmpty()</returns>
 		bool WithinBox(const Vector &point) const;
+
+		/// <summary>
+		/// Tells whether an X coordinate is within the Box's X-range or not, taking potential flipping into account.
+		/// </summary>
+		/// <param name="pointX">The coordinate describing the X value to test for within box bounds.</param>
+		/// <returns>Inside the box or not in the X axis. False if the box IsEmpty()</returns>
+		bool WithinBoxX(float pointX) const;
+
+		/// <summary>
+		/// Tells whether an Y coordinate is within the Box's Y-range or not, taking potential flipping into account.
+		/// </summary>
+		/// <param name="pointY">The coordinate describing the Y value to test for within box bounds.</param>
+		/// <returns>Inside the box or not in the Y axis. False if the box IsEmpty()</returns>
+		bool WithinBoxY(float pointY) const;
 
 		/// <summary>
 		/// Returns a copy of a point constrained inside this box.
@@ -220,25 +234,11 @@ namespace RTE {
 		Vector GetWithinBox(const Vector &point) const { return Vector(GetWithinBoxX(point.m_X), GetWithinBoxY(point.m_Y)); }
 
 		/// <summary>
-		/// Tells whether an X coordinate is within the Box's X-range or not.
-		/// </summary>
-		/// <param name="pointX">The coordinate describing the X value to test for within box bounds.</param>
-		/// <returns>Inside the box or not in the X axis.</returns>
-		bool WithinBoxX(float pointX) const;
-
-		/// <summary>
 		/// Returns an X value constrained inside the Box and returns it.
 		/// </summary>
 		/// <param name="pointX">The X value to constrain inside the Box.</param>
 		/// <returns>The constrained value.</returns>
 		float GetWithinBoxX(float pointX) const;
-
-		/// <summary>
-		/// Tells whether an Y coordinate is within the Box's Y-range or not.
-		/// </summary>
-		/// <param name="pointY">The coordinate describing the Y value to test for within box bounds.</param>
-		/// <returns>Inside the box or not in the Y axis.</returns>
-		bool WithinBoxY(float pointY) const;
 
 		/// <summary>
 		/// Returns an Y value constrained inside the Box and returns it.

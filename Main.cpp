@@ -231,8 +231,8 @@ bool ResetActivity()
     int error = g_ActivityMan.RestartActivity();
 	if (error >= 0) {
 		g_InActivity = true;
-		// Something went wrong when restarting, so drop out to scenario menu and open the console to show the error messages
 	} else {
+        // Something went wrong when restarting, so drop out to scenario menu and open the console to show the error messages
 		g_InActivity = false;
 		g_ActivityMan.PauseActivity();
 		g_ConsoleMan.SetEnabled(true);
@@ -255,14 +255,11 @@ void ResumeActivity() {
 
 		g_FrameMan.ClearBackBuffer8();
 		g_FrameMan.FlipFrameBuffers();
-		// Load in-game palette
 		g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 
-		// Unpause the game
 		g_FrameMan.ResetFrameTimer();
-		// Enable time averaging since it helps with animation jerkiness
+        // Enable time averaging since it helps with animation jerkiness
 		g_TimerMan.EnableAveraging(true);
-		// Unpause the sim
 		g_TimerMan.PauseSim(false);
 		g_ActivityMan.PauseActivity(false);
 	}
@@ -274,8 +271,6 @@ void ResumeActivity() {
 /// Launch multiplayer lobby activity.
 /// </summary>
 void EnterMultiplayerLobby() {
-
-	// Start multiplayer lobby
 	g_SceneMan.SetSceneToLoad("Multiplayer Scene");
 	MultiplayerServerLobby *pMultiplayerServerLobby = new MultiplayerServerLobby;
 	pMultiplayerServerLobby->Create();
@@ -511,9 +506,9 @@ bool PlayIntroTitle() {
 		if (sectionSwitch) { sectionTimer.Reset(); }
         elapsed = sectionTimer.GetElapsedRealTimeS();
         // Calculate the normalized sectionProgress scalar
-		if (duration > 0) { sectionProgress = elapsed / duration; } else { sectionProgress = 0; }
+        sectionProgress = duration <= 0 ? 0 : (elapsed / duration);
         // Clamp the sectionProgress scalar
-		if (sectionProgress > 0.9999) { sectionProgress = 0.9999; }
+        sectionProgress = min(sectionProgress, 0.9999);
 
 		if (g_NetworkServer.IsServerModeEnabled()) { g_NetworkServer.Update(); }
 			
@@ -1747,8 +1742,7 @@ bool RunGameLoop() {
 
 			g_UInputMan.Update();
 
-			// It is vital that server is updated after input manager but before activity because input manager will clear 
-			// received pressed and released events on next update.
+			// It is vital that server is updated after input manager but before activity because input manager will clear received pressed and released events on next update.
 			if (g_NetworkServer.IsServerModeEnabled()) {
 				g_NetworkServer.Update(true);
 				serverUpdated = true;
@@ -1860,17 +1854,6 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
             }
         }
     }
-	/*
-	if (argc > 3) {
-		for (int i = 1; i < argc; i++) {
-			if (strcmp(argv[i], "-activity") == 0 && i + 2 < argc) {
-				g_SettingsMan.SetPlayIntro(false);
-				g_ActivityMan.SetDefaultActivityType(argv[i + 1]);
-				g_ActivityMan.SetDefaultActivityName(argv[i + 2]);
-			}
-		}
-	}
-	*/
     return true;
 }
 

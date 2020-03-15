@@ -10,6 +10,13 @@ namespace RTE {
 
 	public:
 
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate a System object in system memory. Should never be called directly, since g_System is an extern linked global that should be used by everything trying to use System.
+		/// </summary>
+		System() { m_LogToCLI = true; }
+#pragma endregion
+
 #pragma region Directories
 		/// <summary>
 		/// Returns current working directory.
@@ -52,7 +59,7 @@ namespace RTE {
 
 	protected:
 
-		static bool m_LogToCLI; //!< Bool to tell whether to print to command-line or not.
+		bool m_LogToCLI; //!< Bool to tell whether to print to command-line or not.
 	};
 
 	extern System g_System;

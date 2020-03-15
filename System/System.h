@@ -14,7 +14,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a System object in system memory. Should never be called directly, since g_System is an extern linked global that should be used by everything trying to use System.
 		/// </summary>
-		System() { m_LogToCLI = true; }
+		System() { m_LogToCLI = false; }
 #pragma endregion
 
 #pragma region Directories

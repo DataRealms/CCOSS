@@ -8,7 +8,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SoundContainer::Clear() {
-		m_SoundGroup->release();
+		if (m_SoundGroup != NULL) {
+			m_SoundGroup->release();
+			m_SoundGroup = 0;
+		}
 		m_CurrentSound = 0;
 		m_PlayingChannels.clear();
 		m_Loops = 0;

@@ -89,7 +89,7 @@ int AtomGroup::Create(const AtomGroup &reference)
     return Create(reference, false);
 }
 
-int AtomGroup::Create(const AtomGroup &reference, boolean onlyCopyOwnerAtoms)
+int AtomGroup::Create(const AtomGroup &reference, bool onlyCopyOwnerAtoms)
 {
     Entity::Create(reference);
 

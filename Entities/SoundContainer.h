@@ -232,7 +232,7 @@ namespace RTE {
 	protected:
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		FMOD::SoundGroup *m_SoundGroup; //!< A sound group for all the FMOD Sound objects of this SoundContainer. The sound objects within are owned by the ContentFile static maps
+		FMOD::SoundGroup *m_SoundGroup = 0; //!< A sound group for all the FMOD Sound objects of this SoundContainer. The sound objects within are owned by the ContentFile static maps
 
 		//TODO change this to be a list/vector of sounds
 		int m_CurrentSound; //!< Sound group index of the current (or last played if nothing is being played) sound being played

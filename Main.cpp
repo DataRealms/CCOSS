@@ -1880,7 +1880,8 @@ int main(int argc, char *argv[]) {
     new PresetMan();
     new FrameMan();
     new AudioMan();
-	new GUISound();
+    g_AudioMan.Create();
+    new GUISound(); //NOTE: Due to being unable to check if the fmod sound system actually exists and is up and running, AudioMan create should happen before anything that uses audio comes into existence 
     new UInputMan();
     new ActivityMan();
     new MovableMan();
@@ -1992,4 +1993,5 @@ int main(int argc, char *argv[]) {
 	
     return 0;
 }
-END_OF_MAIN()
+
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) { return main(__argc, __argv); }

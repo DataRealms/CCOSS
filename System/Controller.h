@@ -241,7 +241,7 @@ namespace RTE {
 		bool IsMouseControlled() const;
 
 		/// <summary>
-		/// Gets the relative movement of the mouse since last update. Only returns true if this' player is actually set up to be using the mouse.
+		/// Gets the relative movement of the mouse since last update.
 		/// </summary>
 		/// <returns>The relative mouse movements, in both axes.</returns>
 		const Vector & GetMouseMovement() const { return m_MouseMovement; }

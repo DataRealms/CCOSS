@@ -77,14 +77,14 @@ namespace RTE {
 			cursorPos += GetMouseMovement() * moveScale;
 			altered = true;
 
-			// See if there's other analog input, only if the mouse isn't active (or the cursor will float if mouse is used!)
+		// See if there's other analog input, only if the mouse isn't active (or the cursor will float if mouse is used!)
 		} else if (GetAnalogCursor().GetLargest() > 0.1 && !IsMouseControlled()) {
 			// See how much to accelerate the joystick input based on how long the stick has been pushed around
 			float acceleration = 0.5 + MIN(m_JoyAccelTimer.GetElapsedRealTimeS(), 0.5) * 6;
 			cursorPos += GetAnalogCursor() * 10 * moveScale * acceleration;
 			altered = true;
 
-			// Digital movement
+		// Digital movement
 		} else {
 			// See how much to accelerate the keyboard input based on how long any key has been pressed
 			float acceleration = 0.25 + MIN(m_KeyAccelTimer.GetElapsedRealTimeS(), 0.75) * 6;
@@ -335,7 +335,7 @@ namespace RTE {
 		}
 
 		// Translate analog aim input into sharp aim constrol state
-		if (m_AnalogAim.GetMagnitude() > 0.1 && !m_ControlStates[PIE_MENU_ACTIVE]) { m_ControlStates[AIM_SHARP] = true; }
+		m_ControlStates[AIM_SHARP] = m_AnalogAim.GetMagnitude() > 0.1 && !m_ControlStates[PIE_MENU_ACTIVE];
 
 		// Disable sharp aim while moving - this also helps with keyboard vs mouse fighting when moving and aiming in opposite directions
 		if (m_ControlStates[PRESS_RIGHT] || m_ControlStates[PRESS_LEFT] || m_ControlStates[BODY_JUMPSTART] || (m_ControlStates[PIE_MENU_ACTIVE] && !m_ControlStates[SECONDARY_ACTION])) {

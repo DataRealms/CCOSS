@@ -44,7 +44,7 @@ namespace RTE {
 		/// Constructor method used to instantiate a ContentFile object in system memory from a hash value of the file path, and also do a Create() in the same line.
 		/// </summary>
 		/// <param name="hash">A hash value containing the path to where the content file itself is located.</param>
-		ContentFile(size_t hash) { Clear(); if (m_PathHashes.count(hash) == 1) { Create(m_PathHashes[hash].c_str()); } else { Create(""); } }
+		ContentFile(size_t hash) { Clear(); Create(GetPathFromHash(hash).c_str()); }
 
 		/// <summary>
 		/// Makes the ContentFile object ready for use.
@@ -112,17 +112,18 @@ namespace RTE {
 		/// <returns>The ID of the Data Module containing this' file.</returns>
 		int GetDataModuleID();
 
+		//TODO Potentially use these DataSize and DataType methods (as well as their corresponding setters below) to assist with packing base files as Allegro .dat files
 		/// <summary>
 		/// Gets the file size of the content file represented by this ContentFile object, in bytes. This should be called AFTER using any of the GetAs methods.
 		/// </summary>
 		/// <returns>A long describing the file size of the content file.</returns>
-		//virtual unsigned long GetDataSize();
+		//virtual unsigned long GetDataSize() { if (!m_pLoadedData) { GetContent(); } return m_LoadedDataSize; }
 
 		/// <summary>
 		/// Gets the Allegro DATAFILE type of the DATAFILE represented by this ContentFile.
 		/// </summary>
 		/// <returns>A DATAFILE type as described in the Allegro docs.</returns>
-		//virtual int GetDataType();
+		//virtual int GetDataType() { if (!m_pDataFile) { GetContent(); } return m_pDataFile->type; }
 
 		/// <summary>
 		/// Gets the file path of the content file represented by this ContentFile object.
@@ -159,13 +160,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="hash">Hash value to get file path from.</param>
 		/// <returns>Path to ContentFile.</returns>
-		static std::string GetPathFromHash(size_t hash);
+		static std::string GetPathFromHash(size_t hash) { return m_PathHashes.find(hash) == m_PathHashes.end() ? "" : m_PathHashes[hash]; }
 #pragma endregion
 
 #pragma region Data Handling
 		/// <summary>
-		/// Loads and gets the data represented by this ContentFile object as an Allegro BITMAP. Note that ownership of the BITMAP IS NOT TRANSFERRED!
-		/// Also, this should only be done once upon startup, since getting the BITMAP again is slow.
+		/// Gets the data represented by this ContentFile object as an Allegro BITMAP, loading it into the static maps if it's not already loaded. Note that ownership of the BITMAP IS NOT TRANSFERRED!
 		/// </summary>
 		/// <param name="conversionMode">
 		/// The Allegro color conversion mode to use when loading this bitmap.
@@ -175,14 +175,18 @@ namespace RTE {
 		virtual BITMAP * GetAsBitmap(int conversionMode = 0);
 
 		/// <summary>
-		/// Loads and gets the data represented by this ContentFile object as an of array Allegro BITMAPs, each representing a frame in an animation.
-		/// Note that ownership of the BITMAPS ARE NOT TRANSFERRED, BUT THE ARRAY ITSELF, IS!
-		/// Also, this should only be done once upon startup, since getting the BITMAPs again is slow.
+		/// Loads and transfers the data represented by this ContentFile object as an Allegro BITMAP. Note that ownership of the BITMAP IS TRANSFERRED!
+		/// Note that this is relatively slow since it reads the data from disk each time.
 		/// </summary>
-		/// <param name="frameCount">
-		/// The number of frames to attempt to load.
-		/// The name of the file/object specified by the data path will be appended with 000, 001. 002 etc up to the frameCount number - 1.
-		/// </param>
+		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap. See allegro docs for the modes.</param>
+		/// <returns>The pointer to the BITMAP loaded from disk Ownership IS transferred! If 0, the file could not be found/loaded.</returns>
+		virtual BITMAP *LoadAndReleaseBitmap(int conversionMode = 0);
+
+		/// <summary>
+		/// Gets the data represented by this ContentFile object as an array of Allegro BITMAPs, each represting a frame in the animation. It loads the BITMAPs into the static maps if they're not already loaded.
+		/// Note that ownership of the BITMAPS ARE NOT TRANSFERRED, BUT THE ARRAY ITSELF, IS!
+		/// </summary>
+		/// <param name="frameCount">The number of frames to attempt to load, more than 1 frmae will mean 00# is appended to datapath to handle naming conventions.</param>
 		/// <param name="conversionMode">
 		/// The Allegro color conversion mode to use when loading this bitmap.
 		/// Note it will only apply the first time you get a bitmap since it is only loaded from disk the first time. See allegro docs for the modes.
@@ -195,37 +199,12 @@ namespace RTE {
 
 		/// <summary>
 		/// Loads and gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE. Note that ownership of the SAMPLE IS NOT TRANSFERRED!
-		/// Also, this should only be done once upon startup, since getting the Sample again is slow.
 		/// </summary>
 		/// <returns>The pointer to the beginning of the data object loaded from the file. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
 		virtual AUDIO_STRUCT * GetAsSample();
 
 		/// <summary>
-		/// Loads and transfers the data represented by this ContentFile object as an Allegro BITMAP. Note that ownership of the BITMAP IS TRANSFERRED!
-		/// Also, this is relatively slow since it reads the data from disk each time.
-		/// </summary>
-		/// <param name="conversionMode">
-		/// The Allegro color conversion mode to use when loading this bitmap.
-		/// Note it will only apply the first time you get a bitmap since it is only loaded from disk the first time. See allegro docs for the modes.
-		/// </param>
-		/// <returns>The pointer to the BITMAP loaded from disk Ownership IS transferred! If 0, the file could not be found/loaded.</returns>
-		virtual BITMAP * LoadAndReleaseBitmap(int conversionMode = 0);
-
-		/// <summary>
-		/// Loads and transfers the data represented by this ContentFile object as a series of Allegro BITMAPs. Note that ownership of both the ARRAY and the BITMAPS ARE TRANSFERRED!
-		/// Also, this is relatively slow since it reads the data from disk each time.
-		/// </summary>
-		/// <param name="frameCount"> 
-		/// The number of frames to attempt to load. 
-		/// The name of the file/object specified by the data path will be appended with 000, 001. 002 etc up to the frameCount number - 1.
-		/// </param>
-		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap.</param>
-		/// <returns>The pointer to the BITMAP loaded from disk Ownership IS transferred! If 0, the file could not be found/loaded.</returns>
-		virtual BITMAP ** LoadAndReleaseAnimation(int frameCount = 1, int conversionMode = 0);
-
-		/// <summary>
 		/// Loads and gets the data represented by this ContentFile object as a binary chunk of data. Note that ownership of the DATA IS NOT TRANSFERRED!
-		/// Also, this should only be done once upon startup, since getting the data again is slow.
 		/// </summary>
 		/// <returns>The pointer to the beginning of the raw data loaded from the Allegro .dat datafile. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
 		//virtual char * GetAsRawBinary();
@@ -240,17 +219,18 @@ namespace RTE {
 #pragma endregion
 
 	protected:
+		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount }; //!< Enumeration for loading BITMAPs by bit depth. NOTE: This can't be lower down because m_sLoadedBitmaps relies on its definition
 
-		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.01, 002 etc.
 
-		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount }; //!< Enumeration for loading BITMAPs by bit depth.
-
-		std::string m_DataPath; //!< Path to this ContentFile's Datafile Object's path. "datafile.dat#objectname". In the case of an animation, this filename/name will be appended with 000, 001, 002 etc.
+		//TODO all of these could probably be replaced with unordered_maps and decrease lookup time.
 		static std::map<size_t, std::string> m_PathHashes; //!< Hash value of the path to this ContentFile's Datafile Object.
-
 		static std::map<std::string, BITMAP *> m_sLoadedBitmaps[BitDepthCount]; //!< Static map containing all the already loaded BITMAPs and their paths, and there's two maps, for each bit depth.
 		static std::map<std::string, AUDIO_STRUCT *> m_sLoadedSamples; //!< Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
+		//TODO Potentially use this to handle storing base files packed as Allegro .dat files
 		//static std::map<std::string, std::pair<char *, long>> m_sLoadedBinary; //!< Static map containing all the already loaded binary data. First in pair is the data, second is size in bytes.
+
+		std::string m_DataPath; //!< Path to this ContentFile's Datafile Object's path. "datafile.dat#objectname". In the case of an animation, this filename/name will be appended with 000, 001, 002 etc.
 
 		int m_DataModuleID; //!< Data Module ID of where this was loaded from.
 

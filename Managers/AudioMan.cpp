@@ -304,16 +304,17 @@ namespace RTE {
 
 		FMOD_RESULT result;
 		FMOD::Channel *soundChannel;
-		bool anySoundsPlaying;
+		bool anySoundsPlaying = pSoundContainer->IsBeingPlayed();
 
-		std::unordered_set<short int> channels = pSoundContainer->GetPlayingChannels();
-		for (std::unordered_set<short int>::iterator channelIterator = channels.begin(); channelIterator != channels.end(); ++channelIterator) {
-			result = m_SoundChannelGroup->getChannel((*channelIterator), &soundChannel);
-			if (result == FMOD_OK) {
-				if (!anySoundsPlaying) {
-					soundChannel->isPlaying(&anySoundsPlaying);
+		if (anySoundsPlaying) {
+			std::unordered_set<short int> channels = pSoundContainer->GetPlayingChannels();
+			for (std::unordered_set<short int>::iterator channelIterator = channels.begin(); channelIterator != channels.end(); ++channelIterator) {
+				result = m_SoundChannelGroup->getChannel((*channelIterator), &soundChannel);
+				result = result == FMOD_OK ? soundChannel->stop() : result;
+				if (result != FMOD_OK) {
+					g_ConsoleMan.PrintString("Error: Failed to stop playing channel in SoundContainer "+pSoundContainer->GetPresetName());
 				}
-				soundChannel->stop();
+
 			}
 		}
 		return anySoundsPlaying;

@@ -7,8 +7,6 @@
 
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
-#define AUDIO_STRUCT FMOD_SOUND
-struct AUDIO_STRUCT;
 
 #define g_AudioMan AudioMan::Instance()
 
@@ -308,7 +306,7 @@ namespace RTE {
 		/// Stops playing all sounds in a given SoundContainer.
 		/// </summary>
 		/// <param name="pSound">Pointer to the SoundContainer to stop playing. Ownership is NOT transferred!</param>
-		/// <returns>Whether playback of the sound was successfully stopped, or even found.</returns>
+		/// <returns>True if sounds were playing and were stopped, false otherwise.</returns>
 		bool StopSound(SoundContainer *pSound);
 
 		/// <summary>

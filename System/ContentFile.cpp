@@ -242,7 +242,7 @@ namespace RTE {
 				RTEAssert(bytesRead == fileSize, "Tried to read a file but couldn't read the same amount of data as the reported file size!");
 
 				// Setup fmod info, and make sure to use mode OPENMEMORY_POINT since we're doing the loading ContentFile instead of fmod
-				FMOD_CREATESOUNDEXINFO *soundInfo;
+				FMOD_CREATESOUNDEXINFO *soundInfo = {};
 				soundInfo->cbsize = fileSize;
 				//TODO Consider doing FMOD_CREATESAMPLE for dumping audio files into memory and FMOD_NONBLOCKING to async create sounds
 				FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(pRawData, FMOD_OPENMEMORY_POINT, soundInfo, &pReturnSample);

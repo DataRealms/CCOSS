@@ -116,7 +116,7 @@ namespace RTE {
 		/// Indicates whether any sound in this SoundContainer is currently being played.
 		/// </summary>
 		/// <returns>Whether any sounds are playing.</returns>
-		bool IsBeingPlayed() { GetPlayingSoundCount() > 0; }
+		bool IsBeingPlayed() { return GetPlayingSoundCount() > 0; }
 
 		/// <summary>
 		/// Gets the number of currently playing sounds in this SoundContainer.

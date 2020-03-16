@@ -11,29 +11,29 @@
 
 /////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\/////\\\\\*/
 
-///\file    Main.cpp
-///         Main driver implementation of the Retro Terrain Engine.
-///\author  Copyright 2001 - 2006 Data Realms, LLC - http://www.datarealms.com
-///\author  Daniel Tabar
+/// <summary>
+/// Main driver implementation of the Retro Terrain Engine.
+/// Data Realms, LLC - http://www.datarealms.com
+/// Cortex Command Center - https://discord.gg/SdNnKJN
+/// Cortex Command Community Project - https://github.com/cortex-command-community
+/// </summary>
 
-// Without this nested includes somewhere deep inside Allegro will summon winsock.h and it will conflict with winsock2.h from RakNet
-// and we can't move "Network.h" here because for whatever reasons everything will collapse
+// Without this nested includes somewhere deep inside Allegro will summon winsock.h and it will conflict with winsock2.h from RakNet.
 #define WIN32_LEAN_AND_MEAN
+
+#include "System.h"
 
 #include "RTEManagers.h"
 #include "MetaMan.h"
 #include "ConsoleMan.h"
-#include "GUI.h"
-#include "GUICollectionBox.h"
-#include "GUIProgressBar.h"
-#include "GUIListBox.h"
-#include "GUILabel.h"
-#include "AllegroInput.h"
-#include "AllegroScreen.h"
-#include "AllegroBitmap.h"
+
+#include "GUI/GUI.h"
+#include "GUI/AllegroBitmap.h"
+#include "LoadingGUI.h"
 #include "MainMenuGUI.h"
 #include "ScenarioGUI.h"
 #include "MetagameGUI.h"
+
 #include "DataModule.h"
 #include "SceneLayer.h"
 #include "MOSParticle.h"
@@ -41,33 +41,21 @@
 #include "Controller.h"
 
 #include "MultiplayerServerLobby.h"
-
-#include "Network.h"
-
-#include "Reader.h"
-#include "Writer.h"
-#include "System.h"
-
-#include "unzip.h"
-
-#if defined(__APPLE__)
-#include "OsxUtil.h"
-#endif // defined(__APPLE__)
-
 #include "NetworkServer.h"
 #include "NetworkClient.h"
+#include "Network.h"
 
-#if defined(WIN32)
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
-#endif
 
 using namespace RTE;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Globals
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum TITLESEQUENCE
-{
+/// <summary>
+/// Global variables.
+/// </summary>
+
+enum TITLESEQUENCE {
     START = 0,
     // DRL Logo
     LOGOFADEIN,
@@ -116,8 +104,7 @@ enum TITLESEQUENCE
 };
 
 // Intro slides
-enum SLIDES
-{
+enum SLIDES {
     SLIDEPAST = 0,
     SLIDENOW,
     SLIDEVR,
@@ -130,7 +117,9 @@ enum SLIDES
 };
 
 volatile bool g_Quit = false;
-bool g_LogToCli = false;
+bool g_ResetRTE = false; //!< Signals to reset the entire RTE next iteration.
+bool g_LaunchIntoEditor = false; //!< Flag for launching directly into editor activity.
+const char *g_EditorToLaunch = ""; //!< String with editor activity name to launch.
 bool g_InActivity = false;
 bool g_ResetActivity = false;
 bool g_ResumeActivity = false;
@@ -139,35 +128,23 @@ int g_IntroState = START;
 int g_TeamCount = 2;
 int g_PlayerCount = 3;
 int g_DifficultySetting = 4;
-int g_StationOffsetX, g_StationOffsetY;
-
-std::string g_LoadSingleModule = "";
+int g_StationOffsetX;
+int g_StationOffsetY;
 
 MainMenuGUI *g_pMainMenuGUI = 0;
 ScenarioGUI *g_pScenarioGUI = 0;
-GUIControlManager *g_pLoadingGUI = 0;
-
-BITMAP * g_pLoadingGUIBitmap = 0;
-int g_LoadingGUIPosX = 0;
-int g_LoadingGUIPosY = 0;
-
-Writer *g_pLoadingLogWriter = 0;
-AllegroInput *g_pGUIInput = 0;
-AllegroScreen *g_pGUIScreen = 0;
 Controller *g_pMainMenuController = 0;
 
-enum StarSize
-{
+enum StarSize {
     StarSmall = 0,
     StarLarge,
     StarHuge,
 };
 
-struct Star
-{
+struct Star {
     // Bitmap representation
     BITMAP *m_pBitmap;
-    // Center locaiton on screen
+    // Center location on screen
     Vector m_Pos;
     // Bitmap offset
 //    int m_Offset;
@@ -179,554 +156,25 @@ struct Star
     StarSize m_Size;
 
     Star() { m_pBitmap = 0; m_Pos.Reset(); m_ScrollRatio = 1.0; m_Intensity = 1.0; m_Size = StarSmall; }
-    Star(BITMAP *pBitmap, Vector &pos, float scrollRatio, float intensity)
-    { m_pBitmap = pBitmap; m_Pos = pos; m_ScrollRatio = scrollRatio; m_Intensity = intensity; }
+    Star(BITMAP *pBitmap, Vector &pos, float scrollRatio, float intensity) { m_pBitmap = pBitmap; m_Pos = pos; m_ScrollRatio = scrollRatio; m_Intensity = intensity; }
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// This handles when the quit or exit button is pressed on the window
-
-void QuitHandler(void)
-{
-    g_Quit = true;
-}
+/// <summary>
+/// This handles when the quit or exit button is pressed on the window.
+/// </summary>
+void QuitHandler(void) { g_Quit = true; }
 END_OF_FUNCTION(QuitHandler)
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// This updates the loading list [DEPRECATED DUE TO HIGH OVERHEAD, BUT KEPT HERE JUST IN CASE]
-
-void _LoadingSplashProgressReport(std::string reportString, bool newItem = false)
-{
-    if (g_pLoadingGUI)
-    {
-//        GUIProgressBar *pProgressBar = dynamic_cast<GUIProgressBar *>(g_pLoadingGUI->GetControl("ProgressBar"));
-        GUIListBox *pProgressBox = dynamic_cast<GUIListBox *>(g_pLoadingGUI->GetControl("ProgressBox"));
-
-        if (newItem || pProgressBox->GetItemList()->empty())
-        {
-            // Write out the last line to the log file before starting a new one
-            if (g_pLoadingLogWriter->WriterOK() && !pProgressBox->GetItemList()->empty())
-                *g_pLoadingLogWriter << pProgressBox->GetItemList()->back()->m_Name << "\n";
-
-            // Add the new report line
-            pProgressBox->AddItem(reportString);
-        }
-        else
-        {
-            int lastItemIndex = pProgressBox->GetItemList()->size() - 1;
-            GUIListPanel::Item *pItem = pProgressBox->GetItem(lastItemIndex);
-            pItem->m_Name = reportString;
-            pProgressBox->SetItemValues(lastItemIndex, *pItem);
-        }
-
-        g_UInputMan.Update();
-        g_pLoadingGUI->Update();
-        g_pLoadingGUI->Draw();
-        g_FrameMan.FlipFrameBuffers();
-
-        // Quit if we're commanded to during loading
-        if (g_Quit)
-            exit(0);
-    }
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// This updates the loading list. An optimizied version compared to previous one
-
-void LoadingSplashProgressReport(std::string reportString, bool newItem = false)
-{
-	if(g_LogToCli)
-	{
-		if (newItem)
-		{
-			std::cout << std::endl;
-		}
-		// Overwrite current line
-		std::cout << "\r";
-		size_t startPos = 0;
-		// Just make sure to really overwrite all old output
-		// " - done! ✓" is shorter than "reading line 700"
-		std::string unicoded = reportString + "          ";
-		// Colorize output with ANSI escape code
-		std::string greenTick = "\033[1;32m✓\033[0;0m";
-		// Convert all ✓ characters to unicode
-		// It's the 42th from last character in CC's custom font
-		while ((startPos = unicoded.find(-42, startPos)) != std::string::npos)
-		{
-			unicoded.replace(startPos, 1, greenTick);
-			// We don't have to check indices we just overwrote
-			startPos += greenTick.length();
-		}
-		startPos = 0;
-		std::string yellowDot = "\033[1;33m•\033[0;0m";
-		// Convert all • characters to unicode
-		while ((startPos = unicoded.find(-43, startPos)) != std::string::npos)
-		{
-			unicoded.replace(startPos, 1, yellowDot);
-			startPos += yellowDot.length();
-		}
-		std::cout << unicoded << std::flush;
-	}
-	if (g_pLoadingGUI)
-	{
-		g_UInputMan.Update();
-		if (newItem)
-		{
-			// Write out the last line to the log file before starting a new one
-			if (g_pLoadingLogWriter->WriterOK())
-				*g_pLoadingLogWriter << reportString << "\n";
-
-			// Scroll bitmap upwards
-			if (g_pLoadingGUIBitmap)
-				blit(g_pLoadingGUIBitmap, g_pLoadingGUIBitmap, 2, 12, 2, 2, g_pLoadingGUIBitmap->w - 3, g_pLoadingGUIBitmap->h - 12);
-		}
-		if (g_pLoadingGUIBitmap)
-		{
-			AllegroBitmap bmp(g_pLoadingGUIBitmap);
-			// Clear current line
-			rectfill(g_pLoadingGUIBitmap, 2, g_pLoadingGUIBitmap->h - 12, g_pLoadingGUIBitmap->w - 3, g_pLoadingGUIBitmap->h - 3, 54);
-			// Print new line
-			g_FrameMan.GetSmallFont()->DrawAligned(&bmp, 5, g_pLoadingGUIBitmap->h - 12, reportString.c_str(), GUIFont::Left);
-			// DrawAligned - MaxWidth is useless here, so we're just drawing lines manually
-			vline(g_pLoadingGUIBitmap, g_pLoadingGUIBitmap->w - 2, g_pLoadingGUIBitmap->h - 12, g_pLoadingGUIBitmap->h - 2, 33);
-			vline(g_pLoadingGUIBitmap, g_pLoadingGUIBitmap->w - 1, g_pLoadingGUIBitmap->h - 12, g_pLoadingGUIBitmap->h - 2, 33);
-
-			// Draw onto current frame buffer
-			blit(g_pLoadingGUIBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, g_LoadingGUIPosX, g_LoadingGUIPosY, g_pLoadingGUIBitmap->w, g_pLoadingGUIBitmap->h);
-
-			g_FrameMan.FlipFrameBuffers();
-		}
-
-		// Quit if we're commanded to during loading
-		if (g_Quit)
-			exit(0);
-	}
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Finding and loading all DataModule:s
-
-bool LoadDataModules()
-{
-    // Loading splash screen
-    g_FrameMan.ClearBackBuffer32();
-    SceneLayer *pLoadingSplash = new SceneLayer();
-    pLoadingSplash->Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.bmp"), false, Vector(), true, false, Vector(1.0, 0));
-
-    // hardcoded offset to make room for the loading box only if DisableLoadingScreen is false.
-	if (!g_SettingsMan.DisableLoadingScreen()) {
-		pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 110, 0));
-	} else {
-		pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + 14, 0));
-	}
-
-    // Draw onto wrapped strip centered vertically on the screen
-	Box splashBox(Vector(0, (g_FrameMan.GetResY() - pLoadingSplash->GetBitmap()->h) / 2), g_FrameMan.GetResX(), pLoadingSplash->GetBitmap()->h);
-    pLoadingSplash->Draw(g_FrameMan.GetBackBuffer32(), splashBox);
-    delete pLoadingSplash;
-    pLoadingSplash = 0;
-
-    g_FrameMan.FlipFrameBuffers();
-
-    // Set up the loading GUI
-    if (!g_pLoadingGUI)
-    {
-        g_pLoadingGUI = new GUIControlManager();
-// TODO: This should be using the 32bpp main menu skin, but isn't becuase it needs the config of the base for its listbox
-// Can get away with this hack for now because the list box that the laoding menu uses displays ok when drawn on a 32bpp buffer,
-// when it's 8bpp internally, since it does not use any masked_blit calls to draw listboxes.
-// Note also how the GUIScreen passed in here has been created with an 8bpp bitmap, since that is what determines what the gui manager uses internally
-        if(!g_pLoadingGUI->Create(g_pGUIScreen, g_pGUIInput, "Base.rte/GUIs/Skins/MainMenu", "LoadingSkin.ini"))
-            DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu/LoadingSkin.ini");
-        g_pLoadingGUI->Load("Base.rte/GUIs/LoadingGUI.ini");
-    }
-    // Place and clear the sectionProgress box
-    dynamic_cast<GUICollectionBox *>(g_pLoadingGUI->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
-    GUIListBox *pBox = dynamic_cast<GUIListBox *>(g_pLoadingGUI->GetControl("ProgressBox"));
-    // Make the box a bit bigger if there's room in higher, HD resolutions
-    if (g_FrameMan.GetResX() >= 960)
-    {
-        // Make the loading progress box fill the right third of the screen
-        pBox->Resize((g_FrameMan.GetResX() / 3) - 12, pBox->GetHeight());
-        pBox->SetPositionRel(g_FrameMan.GetResX() - pBox->GetWidth() - 12, (g_FrameMan.GetResY() / 2) - (pBox->GetHeight() / 2));
-    }
-    // Legacy positioning and sizing when running low resolutions
-    else
-        pBox->SetPositionRel(g_FrameMan.GetResX() - pBox->GetWidth() - 12, (g_FrameMan.GetResY() / 2) - (pBox->GetHeight() / 2));
-    pBox->ClearList();
-
-	if (!g_SettingsMan.DisableLoadingScreen())
-	{
-		//New mechanism to speed up loading times as it turned out that a massive amount of time is spent
-		// to update UI control.
-		if (!g_pLoadingGUIBitmap)
-		{
-			pBox->SetVisible(false);
-			g_pLoadingGUIBitmap = create_bitmap_ex(8, pBox->GetWidth(), pBox->GetHeight());
-			clear_to_color(g_pLoadingGUIBitmap, 54);
-			rect(g_pLoadingGUIBitmap, 0, 0, pBox->GetWidth() - 1, pBox->GetHeight() - 1, 33);
-			rect(g_pLoadingGUIBitmap, 1, 1, pBox->GetWidth() - 2, pBox->GetHeight() - 2, 33);
-			g_LoadingGUIPosX = pBox->GetXPos();
-			g_LoadingGUIPosY = pBox->GetYPos();
-		}
-	}
-
-    // Create the loading log writer
-    if (!g_pLoadingLogWriter)
-        g_pLoadingLogWriter = new Writer("LogLoading.txt");
-
-    // Clear out the PresetMan and all its DataModules
-    g_PresetMan.Destroy();
-    g_PresetMan.Create();
-
-    // Unzip all *.rte.zip files found in the install dir, overwriting all files already existing
-    // This will cause extracted and available data modules to be updated to whatever is within their corresponding zip files
-    // The point of this is that it facilitates downloaded mods being loaded without having to be manually unzipped first by the user
-    al_ffblk zippedModuleInfo;
-    unzFile zipFile;
-    for (int result = al_findfirst("*.rte.zip", &zippedModuleInfo, FA_ALL); result == 0; result = al_findnext(&zippedModuleInfo))
-    {
-        // Report that we are attempting to unzip this thing
-        LoadingSplashProgressReport("Unzipping " + string(zippedModuleInfo.name), true);
-// THIS IS WRONG - rely on the working directory instead; this hard method will fail when the exe is not in the install dir like when running in visual studio
-/*
-        // Get the absolute path to the zip, which lies next to the game exe in the same dir
-        get_executable_name(zipFilePath, sizeof(zipFilePath));
-        // Replace the exe filename with the zip one we found while enumerating all rte.zip files
-        replace_filename(zipFilePath, zipFilePath, zippedModuleInfo.name, sizeof(zipFilePath));
-*/
-
-        // Try to open the zipped and unzip it into place as an exposed data module
-        if (strlen(zippedModuleInfo.name) > 0 && (zipFile = unzOpen(zippedModuleInfo.name)))
-        {
-            // Go through and extract every file inside this zip, overwriting every colliding file that already exists in the install dir 
-
-            // Get info about the zip file
-            unz_global_info zipFileInfo;
-            if (unzGetGlobalInfo(zipFile, &zipFileInfo) != UNZ_OK)
-                LoadingSplashProgressReport("Could not read global file info of: " + string(zippedModuleInfo.name), true);
-
-            // Buffer to hold data read from the zip file.
-			char fileBuffer[c_FileBufferSize];
-
-            // Loop to extract all files
-            bool abortExtract = false;
-            for (uLong i = 0; i < zipFileInfo.number_entry && !abortExtract; ++i)
-            {
-                // Get info about current file.
-                unz_file_info fileInfo;
-                char outputFileName[c_MaxFileName];
-                if (unzGetCurrentFileInfo(zipFile, &fileInfo, outputFileName, c_MaxFileName, NULL, 0, NULL, 0) != UNZ_OK)
-                    LoadingSplashProgressReport("Could not read file info of: " + string(outputFileName), true);
-
-                // Check if the directory we are trying to extract into exists, and if not, create it
-                char outputDirName[c_MaxFileName];
-                char parentDirName[c_MaxFileName];
-                // Copy the file path to a separate dir path
-                strcpy_s(outputDirName, sizeof(outputDirName), outputFileName);
-                // Find the last slash in the dir path, so we can cut off everything after that (ie the actual filename), and only have the directory path left
-                char *pSlashPos = strrchr(outputDirName, '/');
-                // Try to find the other kind of slash if we found none
-                if (!pSlashPos)
-                    pSlashPos = strrchr(outputDirName, '\\');
-                // Now that we have the slash position, terminate the directory path string right after there
-                if (pSlashPos)
-                    *(++pSlashPos) = 0;
-
-                // If that file's directory doesn't exist yet, then create it, and all its parent directories above if need be
-                for (int nested = 0; !file_exists(outputDirName, FA_DIREC, 0) && pSlashPos; ++nested)
-                {
-                    // Keep making new working copies of the path that we can dice up
-                    strcpy_s(parentDirName, sizeof(parentDirName), outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
-                    // Start off at the beginning
-                    pSlashPos = parentDirName;
-                    for (int j = 0; j <= nested && pSlashPos; ++j)
-                    {
-                        // Find the first slash so we can isolate the folders in the hierarchy, in descending seniority
-                        pSlashPos = strchr(pSlashPos, '/');
-                        // If we can't find any more slashes, then quit
-                        if (!pSlashPos)
-                            break;
-                        // If we did find a slash, go to one past it slash and try to find the next one
-                        pSlashPos++;
-                    }
-                    // No more nested folders to make
-                    if (!pSlashPos)
-                        break;
-                    // Terminate there so we are making the most senior folder
-                    *(pSlashPos) = 0;
-                    g_System.MakeDirectory(parentDirName);
-                }
-
-                // Check if this entry is a directory or file
-                if (outputFileName[strlen(outputFileName) - 1] == '/' || outputFileName[strlen(outputFileName) - 1] == '\\')
-                {
-                    // Entry is a directory, so create it.
-                    LoadingSplashProgressReport("Creating Dir: " + string(outputFileName), true);
-                    g_System.MakeDirectory(outputFileName);
-                }
-                else
-                // So it's a file
-                {
-                    // Validate so only certain filetypes are extracted:  .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3
-                    // Get the file extension
-                    string extension(get_extension(outputFileName));
-                    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-                    const char *ext = extension.c_str();
-                    // Validate only certain filetypes to be included! .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3
-                    if (!(strcmp(ext, "ini") == 0 || strcmp(ext, "txt") == 0 || strcmp(ext, "lua") == 0 || strcmp(ext, "cfg") == 0 ||
-                          strcmp(ext, "bmp") == 0 || strcmp(ext, "png") == 0 || strcmp(ext, "jpg") == 0 || strcmp(ext, "jpeg") == 0 || 
-                          strcmp(ext, "wav") == 0 || strcmp(ext, "ogg") == 0 || strcmp(ext, "mp3") == 0 ||
-                          strcmp(ext, "xlsx") == 0 || strcmp(ext, "rtf") == 0 || strcmp(ext, "dat") == 0)) 
-                    {
-                        LoadingSplashProgressReport("Skipping: " + string(outputFileName) + " - bad extension!", true);
-
-                        // Keep going though!!
-                        // Close the read file within the zip archive
-                        unzCloseCurrentFile(zipFile);
-                        // Go the the next entry listed in the zip file.
-                        if ((i + 1) < zipFileInfo.number_entry)
-                        {
-                            if (unzGoToNextFile(zipFile) != UNZ_OK)
-                            {
-                                LoadingSplashProgressReport("Could not read next file inside zip " + string(zippedModuleInfo.name) +  " - Aborting extraction!", true);
-                                abortExtract = true;
-                                break;
-                            }
-                        }
-                        // Onto the next file
-                        continue;
-                    }
-
-                    // Entry is a file, so extract it.
-                    LoadingSplashProgressReport("Extracting: " + string(outputFileName), true);
-                    if (unzOpenCurrentFile(zipFile) != UNZ_OK)
-                        LoadingSplashProgressReport("Could not open file within " + string(zippedModuleInfo.name), true);
-
-                    // Open a file to write out the data.
-                    FILE *outputFile = fopen(outputFileName, "wb");
-                    if (outputFile == NULL)
-                        LoadingSplashProgressReport("Could not open/create destination file while unzipping " + string(zippedModuleInfo.name), true);
-
-                    // Write the entire file out, reading in buffer size chunks and spitting them out to the output stream
-                    int bytesRead = 0;
-                    int64_t totalBytesRead = 0;
-                    do
-                    {
-                        // Read a chunk
-                        bytesRead = unzReadCurrentFile(zipFile, fileBuffer, c_FileBufferSize);
-                        // Add to total tally
-                        totalBytesRead += bytesRead;
-
-                        // Sanity check how damn big this file we're writing is becoming.. could prevent zip bomb exploits: http://en.wikipedia.org/wiki/Zip_bomb
-                        if (totalBytesRead >= c_MaxUnzippedFileSize)
-                        {
-                            LoadingSplashProgressReport("File inside zip " + string(zippedModuleInfo.name) +  " is turning out WAY TOO LARGE - Aborting extraction!", true);
-                            abortExtract = true;
-                            break;
-                        }
-
-                        // Write data to the output file
-                        if (bytesRead > 0)
-                            fwrite(fileBuffer, bytesRead, 1, outputFile);
-                        else if (bytesRead < 0)
-                        {
-                            LoadingSplashProgressReport("Error while reading zip " + string(zippedModuleInfo.name), true);
-                            abortExtract = true;
-                            break;
-                        }
-                    }
-                    // Keep going while bytes are still being read (0 means end of file)
-                    while (bytesRead > 0 && outputFile);
-
-                    // Close the output file
-                    fclose(outputFile);
-                    // Close the read file within the zip archive
-                    unzCloseCurrentFile(zipFile);
-                }
-
-                // Go the the next entry listed in the zip file.
-                if ((i + 1) < zipFileInfo.number_entry)
-                {
-                    if (unzGoToNextFile(zipFile) != UNZ_OK)
-                    {
-                        LoadingSplashProgressReport("Could not read next file inside zip " + string(zippedModuleInfo.name) +  " - Aborting extraction!", true);
-                        break;
-                    }
-                }
-            }
-
-            // Close the zip file we've opened
-            unzClose(zipFile);
-
-            // DELETE the zip in the install dir after decompression
-            // (whether successful or not - any rte.zip in the install dir is throwaway and shouldn't keep failing each load in case they do fail)
-            LoadingSplashProgressReport("Deleting extracted Data Module zip: " + string(zippedModuleInfo.name), true);
-            delete_file(zippedModuleInfo.name);
-        }
-        // Indicate that the unzip went awry
-        else
-        {
-            // DELETE the zip in the install dir after decompression
-            // (whether successful or not - any rte.zip in the install dir is throwaway and shouldn't keep failing each load in case they do fail)
-            LoadingSplashProgressReport("FAILED to unzip " + string(zippedModuleInfo.name) + " - deleting it now!", true);
-            delete_file(zippedModuleInfo.name);
-        }
-    }
-    // Close the file search to avoid memory leaks
-    al_findclose(&zippedModuleInfo);
-
-    ///////////////////////////////////////////////////////////////
-    // Load all the official modules first!
-
-    if (!g_PresetMan.LoadDataModule("Base.rte", true, &LoadingSplashProgressReport))
-        return false;
-
-	if (g_LoadSingleModule != "")
-	{
-		if (g_LoadSingleModule != "Base.rte")
-			if (!g_PresetMan.LoadDataModule(g_LoadSingleModule, false, &LoadingSplashProgressReport))
-				return false;
-		return true;
-	}
-
-	///* TODO: REPLACE
-	if (!g_PresetMan.LoadDataModule("Coalition.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Imperatus.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Techion.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Dummy.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Ronin.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Browncoats.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Uzira.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("MuIlaak.rte", true, &LoadingSplashProgressReport))
-		return false;
-	if (!g_PresetMan.LoadDataModule("Missions.rte", true, &LoadingSplashProgressReport))
-		return false;
-
-	//Read module properties to find out which modules should be loaded earlier than others
-    al_ffblk moduleInfo;
-	int moduleID = 0;
-
-	std::list<std::string> loadFirst;
-
-    for (int result = al_findfirst("*.rte", &moduleInfo, FA_DIREC | FA_RDONLY); result == 0; result = al_findnext(&moduleInfo))
-    {
-        moduleID = g_PresetMan.GetModuleID(moduleInfo.name);
-        // Make sure we don't load properties of already loaded official modules
-        if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= g_PresetMan.GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte")
-        {
-            // See if we can find that phantom property in this data module's index.ini that would indicate it should have prioritized loading
-			if (ASCIIFileContainsString(string(moduleInfo.name) + "/Index.ini", "LoadFirst = 1"))
-				loadFirst.push_back(moduleInfo.name);
-        }
-        else
-        {
-        }
-    }
-    // Close the file search to avoid memory leaks
-    al_findclose(&moduleInfo);
-
-	//Load preceding modules first
-	for (std::list<std::string>::iterator itr = loadFirst.begin(); itr != loadFirst.end(); ++itr)
-	{
-		if (!g_SettingsMan.IsModDisabled(*itr))
-		{
-			moduleID = g_PresetMan.GetModuleID(*itr);
-			// Make sure we don't add the official metagames module among these; they should be loaded in explicit order before and after these unofficial ones
-			if ((*itr).length() > 0 && (moduleID < 0 || moduleID >= g_PresetMan.GetOfficialModuleCount()) && *itr != "Metagames.rte" && *itr != "Scenes.rte")
-			{
-				// Actually load the unofficial data module
-				if (!g_PresetMan.LoadDataModule(*itr, false, &LoadingSplashProgressReport))
-				{
-					// Report error?
-				}
-			}
-		}
-	}
-
-	loadFirst.clear();
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Search for any additional data modules
-
-    moduleID = 0;
-    for (int result = al_findfirst("*.rte", &moduleInfo, FA_DIREC | FA_RDONLY); result == 0; result = al_findnext(&moduleInfo))
-    {
-        if (!g_SettingsMan.IsModDisabled(moduleInfo.name))
-        {
-            moduleID = g_PresetMan.GetModuleID(moduleInfo.name);
-            // Make sure we don't add the official metagames module among these; they should be loaded in explicit order before and after these unofficial ones
-            if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= g_PresetMan.GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte")
-            {
-                // Actually load the unofficial data module
-                if (!g_PresetMan.LoadDataModule(string(moduleInfo.name), false, &LoadingSplashProgressReport))
-                {
-                    // Report error?
-                }
-            }
-            else
-            {
-                // TODO: Log this and continue gracefully instead
-            // LoadDataModule can return false (esp since it amy try to load already loaded modules, and that's ok) and shouldn't cause stop
-            //                char error[512];
-            //                sprintf(error, sizeof(error), "Failed to load Data Module: %s\n\nMake sure it contains an Index.ini file that defines a \"DataModule\"!", moduleInfo.name);
-            //                DDTAbort(error);
-            //                return false;
-
-            }
-        }
-    }
-    // Close the file search to avoid memory leaks
-    al_findclose(&moduleInfo);
-
-    // Load scenes and metagames AFTER all other techs etc are loaded; might be referring to stuff in user mods
-    if (!g_PresetMan.LoadDataModule("Scenes.rte", false, &LoadingSplashProgressReport))
-        return false;
-
-    if (!g_PresetMan.LoadDataModule("Metagames.rte", false, &LoadingSplashProgressReport))
-        return false;
-
-
-/* We are now doing this as line by line reports come in to LoadingSplashProgressReport
-    // Write out entire loading log to a file
-    Writer writer("LogLoading.txt");
-    if (writer.WriterOK())
-    {
-        GUIListBox *pProgressBox = dynamic_cast<GUIListBox *>(g_pLoadingGUI->GetControl("ProgressBox"));
-        for (std::vector<GUIListBox::Item *>::iterator itr = pProgressBox->GetItemList()->begin(); itr != pProgressBox->GetItemList()->end(); itr++)
-            writer << (*itr)->m_Name << "\n";
-    }
-*/
-    return true;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Load and init the Main menu
-
-bool InitMainMenu()
-{
-    // Load the palette
+/// <summary>
+/// Load and initialize the Main Menu.
+/// </summary>
+/// <returns></returns>
+bool InitMainMenu() {
     g_FrameMan.LoadPalette("Base.rte/palette.bmp");
-
-    // Create the Main Menu GUI
-    g_pGUIInput = new AllegroInput(-1);
-    g_pGUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32());
-
-    // Have to load the data modules in here becuase it needs the GUIScreen and input for the loading GUI
-    LoadDataModules();
 
     // Create the main menu interface
 	g_pMainMenuGUI = new MainMenuGUI();
@@ -742,10 +190,12 @@ bool InitMainMenu()
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Load all Managers
-
+/// <summary>
+/// Reset the current activity.
+/// </summary>
+/// <returns></returns>
 bool ResetActivity()
 {
     g_ResetActivity = false;
@@ -756,114 +206,69 @@ bool ResetActivity()
     g_AudioMan.StopAll();
 
     // Quit if we should
-    if (g_Quit)
-        return false;
+	if (g_Quit) {
+		return false;
+	}
 
-// TODO: Deal with GUI resetting here!$@#")
-
+	// TODO: Deal with GUI resetting here!$@#")
     // Clear out all MO's
     g_MovableMan.PurgeAllMOs();
     // Have to reset TimerMan before creating anything else because all timers are reset against it
     g_TimerMan.ResetTime();
-/*
-    // Load all the modules anew
-    LoadDataModules();
 
-//    g_PresetMan.Create();
-//    g_AudioMan.Create();
-
-    char report[512];
-    sprintf_s(report, sizeof(report), "Building Scene: \"%s\"...", g_ActivityMan.GetActivity()->GetSceneName().c_str());
-    LoadingSplashProgressReport(report, true);
-
-    g_SceneMan.LoadScene(g_ActivityMan.GetActivity()->GetSceneName());
-
-    sprintf_s(report, sizeof(report), "\tDone! %c", -42);
-    LoadingSplashProgressReport(report, true);
-    LoadingSplashProgressReport(" ", true);
-
-    // Ask user to press key before start
-    LoadingSplashProgressReport("PRESS ANY KEY TO START!", true);
-    Timer blinkTimer;
-    do
-    {
-        sprintf_s(report, sizeof(report), "PRESS ANY KEY TO START! %c", blinkTimer.AlternateSim(300) ? -65 : ' ');
-        LoadingSplashProgressReport(report, false);
-
-        // Reset the key press states
-        g_UInputMan.Update();
-        g_TimerMan.Update();
-        rest(30);
-    }
-    while (!g_UInputMan.AnyPress() && !g_Quit);
-
-*/
     g_FrameMan.LoadPalette("Base.rte/palette.bmp");
     g_FrameMan.FlipFrameBuffers();
 
-    // Reset timerman again after loading so there's no residual delay
+    // Reset TimerMan again after loading so there's no residual delay
     g_TimerMan.ResetTime();
-    // Enable time averaging since it helps with animation jerkyness
+    // Enable time averaging since it helps with animation jerkiness
     g_TimerMan.EnableAveraging(true);
     // Unpause
     g_TimerMan.PauseSim(false);
 
-// TODO: Remove
-//    g_ActivityMan.GetActivity()->SetActivityState(Activity::TESTING);
-    // Start the game with previous settings
     int error = g_ActivityMan.RestartActivity();
-
-    if (error >= 0)
-        g_InActivity = true;
-    // Somehting went wrong when restarting, so drop out to scenario menu and open the console to show the error messages
-    else
-    {
-        g_InActivity = false;
-        g_ActivityMan.PauseActivity();
-        g_ConsoleMan.SetEnabled(true);
-        g_IntroState = MAINTOSCENARIO;
-        return false;
-    }
-
+	if (error >= 0) {
+		g_InActivity = true;
+	} else {
+        // Something went wrong when restarting, so drop out to scenario menu and open the console to show the error messages
+		g_InActivity = false;
+		g_ActivityMan.PauseActivity();
+		g_ConsoleMan.SetEnabled(true);
+		g_IntroState = MAINTOSCENARIO;
+		return false;
+	}
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Start the simulation back up after being paused
+/// <summary>
+/// Start the simulation back up after being paused.
+/// </summary>
+void ResumeActivity() {
+	if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NOTSTARTED) {
+		g_Quit = false;
+		g_InActivity = true;
+		g_ResumeActivity = false;
 
-void ResumeActivity()
-{
-    if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NOTSTARTED)
-    {
-        g_Quit = false;
-        g_InActivity = true;
-        g_ResumeActivity = false;
+		g_FrameMan.ClearBackBuffer8();
+		g_FrameMan.FlipFrameBuffers();
+		g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 
-        g_FrameMan.ClearBackBuffer8();
-        g_FrameMan.FlipFrameBuffers();
-        // Load in-game palette
-        g_FrameMan.LoadPalette("Base.rte/palette.bmp");
-
-        // Unpause the game
-        g_FrameMan.ResetFrameTimer();
-        // Enable time averaging since it helps with animation jerkyness
-        g_TimerMan.EnableAveraging(true);
-        // Unpause the sim
-        g_TimerMan.PauseSim(false);
-        g_ActivityMan.PauseActivity(false);
-    }
+		g_FrameMan.ResetFrameTimer();
+        // Enable time averaging since it helps with animation jerkiness
+		g_TimerMan.EnableAveraging(true);
+		g_TimerMan.PauseSim(false);
+		g_ActivityMan.PauseActivity(false);
+	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Launch multiplayer lobby activity
-
-void EnterMultiplayerLobby()
-{
-	//g_ActivityMan.EndActivity();
-
-	// Start multiplayer lobby
+/// <summary>
+/// Launch multiplayer lobby activity.
+/// </summary>
+void EnterMultiplayerLobby() {
 	g_SceneMan.SetSceneToLoad("Multiplayer Scene");
 	MultiplayerServerLobby *pMultiplayerServerLobby = new MultiplayerServerLobby;
 	pMultiplayerServerLobby->Create();
@@ -879,12 +284,34 @@ void EnterMultiplayerLobby()
 	g_ResetActivity = true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Load and display the into, title and menu sequence
+/// <summary>
+/// Launch editor activity specified in command-line argument.
+/// </summary>
+void EnterEditorActivity(const char *editorToEnter) {
+	if (std::strcmp(editorToEnter, "ActorEditor") == 0) { 
+		g_pMainMenuGUI->StartActorEditor(); 
+	} else if (std::strcmp(editorToEnter, "GibEditor") == 0) {
+		g_pMainMenuGUI->StartGibEditor();
+	} else if (std::strcmp(editorToEnter, "SceneEditor") == 0) {
+		g_pMainMenuGUI->StartSceneEditor();
+	} else if (std::strcmp(editorToEnter, "AreaEditor") == 0) {
+		g_pMainMenuGUI->StartAreaEditor();
+	} else if (std::strcmp(editorToEnter, "AssemblyEditor") == 0) {
+		g_pMainMenuGUI->StartAssemblyEditor();
+	} else {
+		g_LaunchIntoEditor = false;
+	}
+}
 
-bool PlayIntroTitle()
-{
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// <summary>
+/// Load and display the into, title and menu sequence.
+/// </summary>
+/// <returns></returns>
+bool PlayIntroTitle() {
     // Disable time averaging since it can make the music timing creep off target.
     g_TimerMan.EnableAveraging(false);
     
@@ -900,7 +327,7 @@ bool PlayIntroTitle()
     int resX = g_FrameMan.GetResX();
     int resY = g_FrameMan.GetResY();
 
-    // The fadein/out screens
+    // The fade-in/out screens
     BITMAP *pFadeScreen = create_bitmap_ex(32, resX, resY);
     clear_to_color(pFadeScreen, 0);
     int fadePos = 0;
@@ -923,8 +350,6 @@ bool PlayIntroTitle()
     apIntroSlides[SLIDEPEACE] = introSlideFile.LoadAndReleaseBitmap();
     introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideH.bmp");
     apIntroSlides[SLIDEFRONTIER] = introSlideFile.LoadAndReleaseBitmap();
-    int normalSlideWidth = 640;
-    int slideFadeDistance = 42;
 
     ContentFile alphaFile;
     BITMAP *pAlpha = 0;
@@ -939,7 +364,7 @@ bool PlayIntroTitle()
 
     SceneLayer *pBackdrop = new SceneLayer();
     pBackdrop->Create(ContentFile("Base.rte/GUIs/Title/Nebula.bmp"), false, Vector(), false, false, Vector(0, -1.0));//startYOffset + resY));
-    float backdropScrollRatio = 1.0f / 3.0f;
+    float backdropScrollRatio = 1.0F / 3.0F;
 
     MOSParticle *pTitle = new MOSParticle();
     pTitle->Create(ContentFile("Base.rte/GUIs/Title/Title.bmp"));
@@ -997,8 +422,6 @@ bool PlayIntroTitle()
 
 	Vector shakeOffset(0, 0);
 
-	bool pioneerPhase = false;
-
     // Generate stars!
     int starArea = resX * pBackdrop->GetBitmap()->h;
     int starCount = starArea / 1000;
@@ -1014,8 +437,7 @@ bool PlayIntroTitle()
     Star *aStars = new Star[starCount];
     StarSize size;
 
-    for (int star = 0; star < starCount; ++star)
-    {
+    for (int star = 0; star < starCount; ++star) {
         aStars[star].m_Size = size = PosRand() < 0.95 ? StarSmall : (PosRand() < 0.85 ? StarLarge : StarHuge);
         aStars[star].m_pBitmap = size  == StarSmall ? apStarSmallBitmaps[SelectRand(0, starSmallBitmapCount - 1)] :
                                 (size  == StarLarge ? apStarLargeBitmaps[SelectRand(0, starLargeBitmapCount - 1)] : apStarHugeBitmaps[SelectRand(0, starLargeBitmapCount - 1)]);
@@ -1039,15 +461,16 @@ bool PlayIntroTitle()
     double duration = 0, scrollDuration = 0, scrollStart = 0, slideFadeInDuration = 0.5, slideFadeOutDuration = 0.5;
     // Progress made on a section, from 0.0 to 1.0
     double sectionProgress = 0, scrollProgress = 0;
-    // When a section is supposed to end, relative to the songtimer
+    // When a section is supposed to end, relative to the song timer
     long sectionSongEnd = 0;
 
     // Scrolling data
-    bool keyPressed = false, sectionSwitch = true;
+	bool keyPressed = false;
+	bool sectionSwitch = true;
     float planetRadius = 240;
     float orbitRadius = 274;
     float orbitRotation = c_HalfPI - c_EighthPI;
-    // Set the start so that the nebula is fully scolled up
+    // Set the start so that the nebula is fully scrolled up
     int startYOffset = pBackdrop->GetBitmap()->h / backdropScrollRatio - (resY / backdropScrollRatio);
     int titleAppearYOffset = 900;
     int preMenuYOffset = 100;
@@ -1059,8 +482,7 @@ bool PlayIntroTitle()
 
     totalTimer.Reset();
     sectionTimer.Reset();
-    while (!g_Quit && g_IntroState != END && !g_ResumeActivity)
-    {
+    while (!g_Quit && g_IntroState != END && !g_ResumeActivity) {
         keyPressed = g_UInputMan.AnyStartPress();
 //        g_Quit = key[KEY_ESC];
         // Reset the key press states
@@ -1073,21 +495,15 @@ bool PlayIntroTitle()
 		g_AudioMan.Update();
         g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_SOUND);
 
-        if (sectionSwitch)
-            sectionTimer.Reset();
+		if (sectionSwitch) { sectionTimer.Reset(); }
         elapsed = sectionTimer.GetElapsedRealTimeS();
         // Calculate the normalized sectionProgress scalar
-        if (duration > 0)
-            sectionProgress = elapsed / duration;
-        else
-            sectionProgress = 0;
+        sectionProgress = duration <= 0 ? 0 : (elapsed / duration);
         // Clamp the sectionProgress scalar
-        if (sectionProgress > 0.9999)
-            sectionProgress = 0.9999;
+        sectionProgress = min(sectionProgress, 0.9999);
 
-		if (g_NetworkServer.IsServerModeEnabled())
-			g_NetworkServer.Update();
-
+		if (g_NetworkServer.IsServerModeEnabled()) { g_NetworkServer.Update(); }
+			
         ////////////////////////////////
         // Scrolling logic
 
@@ -1103,7 +519,7 @@ bool PlayIntroTitle()
             scrollProgress = (double)(songTimer.GetElapsedRealTimeS() - scrollStart) / (double)scrollDuration;
             scrollOffset.m_Y = LERP(0, 1.0, startYOffset, titleAppearYOffset,  scrollProgress);
         }
-        // Scroll after the slideshow
+        // Scroll after the slide-show
         else if (g_IntroState >= TITLEAPPEAR && g_IntroState <= PLANETSCROLL)
         {
             if (g_IntroState == TITLEAPPEAR && sectionSwitch)
@@ -1164,8 +580,6 @@ bool PlayIntroTitle()
             yTextPos += pFont->GetFontHeight() * 2;
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, string("This game plays great with up to FOUR people on a BIG-SCREEN TV!"), GUIFont::Centre);
             yTextPos += pFont->GetFontHeight() * 2;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, string("but it also plays great with up to four people on a BIG SCREEN TV!"), GUIFont::Centre);
-//            yTextPos += pFont->GetFontHeight() * 1;
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, string("So invite some friends/enemies over, plug in those USB controllers, and have a blast -"), GUIFont::Centre);
             yTextPos += pFont->GetFontHeight() * 4;
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, string("Press ALT+ENTER to toggle FULLSCREEN mode"), GUIFont::Centre);
@@ -1185,12 +599,9 @@ bool PlayIntroTitle()
             g_FrameMan.ClearBackBuffer32();
 
 			Box backdropBox;
-// Use the override of the SL drawing isntead
-//            pBackdrop->SetOffset(scrollOffset * backdropScrollRatio);
             pBackdrop->Draw(g_FrameMan.GetBackBuffer32(), backdropBox, scrollOffset * backdropScrollRatio);
 
             Vector starDrawPos;
-            StarSize size;
             for (int star = 0; star < starCount; ++star)
             {
                 size = aStars[star].m_Size;
@@ -1222,7 +633,7 @@ bool PlayIntroTitle()
 			// Draw pioneer promo capsule
 			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.27 && orbitRotation > -c_PI * 1.85)
 			{
-				// Start drawig pioneer apsule
+				// Start drawing pioneer capsule
 				// Slowly decrease radius to show that the capsule is falling
 				float radiusperc = 1 - ((fabs(orbitRotation) - (1.27 * c_PI)) / (0.35 * c_PI) / 4);
 				// Slowly decrease size to make the capsule disappear after a while
@@ -1385,7 +796,7 @@ bool PlayIntroTitle()
         {
             if (g_IntroState == MENUAPPEAR)
             {
-// TODO: some fancy transpernecy effect here
+				// TODO: some fancy transparency effect here
 /*
                 g_pMainMenuGUI->Update();
                 clear_to_color(pFadeScreen, 0xFFFF00FF);
@@ -1426,7 +837,7 @@ bool PlayIntroTitle()
             int slide = g_IntroState - SHOWSLIDE1;
             Vector slideCenteredPos((resX / 2) - (apIntroSlides[slide]->w / 2), (resY / 2) - (apIntroSlides[slide]->h / 2));
 
-            // Screenwide slide
+            // Screen wide slide
             if (apIntroSlides[slide]->w <= resX)
                 slidePos.m_X = (resX / 2) - (apIntroSlides[slide]->w / 2);
             // The slides wider than the screen, pan sideways
@@ -1466,24 +877,6 @@ bool PlayIntroTitle()
             }
         }
 
-        //////////////////////////////
-        // Letterbox drawing
-/*
-        if (g_IntroState >= FADEIN && g_IntroState < MENUACTIVE)
-        {
-            int thick = 60;
-            if (g_IntroState == MENUAPPEAR)
-            {
-                rectfill(g_FrameMan.GetBackBuffer32(), 0, 0, resX, EaseOut(thick, 0, sectionProgress), 0);
-                rectfill(g_FrameMan.GetBackBuffer32(), 0, EaseOut(resY - thick, resY, sectionProgress), resX, resY, 0);
-            }
-            else
-            {
-                rectfill(g_FrameMan.GetBackBuffer32(), 0, 0, resX, thick, 0);
-                rectfill(g_FrameMan.GetBackBuffer32(), 0, resY - thick, resX, resY, 0);
-            }
-        }
-*/
         //////////////////////////////////////////////////////////
         // Intro sequence logic
 
@@ -1695,9 +1088,6 @@ bool PlayIntroTitle()
                 sectionSwitch = false;
             }
 
-//            yTextPos = (g_FrameMan.GetResY() / 2) + (apIntroSlides[g_IntroState - SHOWSLIDE1]->h / 2) + 12;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "In a not too distant future...", GUIFont::Centre);
-
             if (elapsed >= duration)
             {
                 g_IntroState = SHOWSLIDE1;
@@ -1718,8 +1108,6 @@ bool PlayIntroTitle()
             yTextPos = (g_FrameMan.GetResY() / 2) + (apIntroSlides[g_IntroState - SHOWSLIDE1]->h / 2) + 12;
             if (elapsed > 1.25)
                 pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "At the end of humanity's darkest century...", GUIFont::Centre);
-//            yTextPos += 20;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "but also the restrictions of their physical bodies...", GUIFont::Centre);
 
             if (elapsed >= duration)
             {
@@ -1741,9 +1129,6 @@ bool PlayIntroTitle()
             yTextPos = (g_FrameMan.GetResY() / 2) + (apIntroSlides[g_IntroState - SHOWSLIDE1]->h / 2) + 12;
             if (elapsed < duration - 1.75)
                 pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "...a curious symbiosis between man and machine emerged.", GUIFont::Centre);
-//            yTextPos += 20;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "their natural habitats and societies,", GUIFont::Centre);
-
 
             if (elapsed >= duration)
             {
@@ -1767,8 +1152,6 @@ bool PlayIntroTitle()
                 pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "This eventually enabled humans to leave their natural bodies...", GUIFont::Centre);
             else if (sectionProgress > 0.51)
                 pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "...and to free their minds from obsolete constraints.", GUIFont::Centre);
-//            yTextPos += 20;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "their disembodied brains maintained by artifical means.", GUIFont::Centre);
 
             if (elapsed >= duration)
             {
@@ -1789,8 +1172,6 @@ bool PlayIntroTitle()
 
             yTextPos = (g_FrameMan.GetResY() / 2) + (apIntroSlides[g_IntroState - SHOWSLIDE1]->h / 2) + 12;
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "With their brains sustained by artificial means, space travel also became feasible.", GUIFont::Centre);
-//            yTextPos += 20;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "they still require physical materials to sustain themselves.", GUIFont::Centre);
 
             if (elapsed >= duration)
             {
@@ -1851,8 +1232,6 @@ bool PlayIntroTitle()
 
             yTextPos = (g_FrameMan.GetResY() / 2) + (apIntroSlides[g_IntroState - SHOWSLIDE1]->h / 2) + 12;
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "Now, the growing civilizations create a huge demand for resources...", GUIFont::Centre);
-//            yTextPos += 20;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "said resources are to harvest profitably.", GUIFont::Centre);
 
             if (elapsed >= duration)
             {
@@ -1990,13 +1369,6 @@ bool PlayIntroTitle()
                 sectionSwitch = false;
             }
 
-//            yTextPos = (g_FrameMan.GetResY() / 3) - 15;
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "Press Any Key to Start", GUIFont::Centre);
-//            yTextPos += pFont->GetFontHeight();
-//            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, "Press Any Key to Start", GUIFont::Centre);
-
-//            g_pMainMenuGUI->Draw();
-
             // Detect quitting of the program from the menu button
             g_Quit = g_Quit || g_pMainMenuGUI->QuitProgram();
 
@@ -2067,15 +1439,6 @@ bool PlayIntroTitle()
 
                 duration = 1.0;
                 sectionSwitch = false;
-/* Restart campaign scenario setup screen music
-                // Play intro music at max volume regardless of setting
-                g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0, 1.0);
-                g_AudioMan.SetMusicPosition(0.05);
-                // Override music volume setting for the intro
-                g_AudioMan.SetTempMusicVolume(1.0);
-//                songTimer.Reset();
-                songTimer.SetElapsedRealTimeS(0.05);
-*/
             }
 
             fadePos = 255 - (255 * sectionProgress);
@@ -2093,15 +1456,8 @@ bool PlayIntroTitle()
             if (sectionSwitch)
             {
                 scrollOffset.m_Y = planetViewYOffset;
-//                // Fire up the CampaignMan
-//                g_pMainMenuGUI->SetEnabled(true);
-//                // Indicate that we're now in the main menu
-//                g_InActivity = false;
-
                 sectionSwitch = false;
             }
-
-//            g_CampaignMan->Draw();
 
             // Detect quitting of the program from the menu button
             g_Quit = g_Quit || g_pScenarioGUI->QuitProgram();
@@ -2142,7 +1498,7 @@ bool PlayIntroTitle()
                 duration = 2.0;
                 sectionSwitch = false;
 
-                // Play the campaign music with metasound start
+                // Play the campaign music with Meta sound start
 				g_GUISound.SplashSound().Play();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
             }
@@ -2164,15 +1520,6 @@ bool PlayIntroTitle()
 
                 duration = 1.0;
                 sectionSwitch = false;
-/* Restart campaign metagame screen music
-                // Play intro music at max volume regardless of setting
-                g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0, 1.0);
-                g_AudioMan.SetMusicPosition(0.05);
-                // Override music volume setting for the intro
-                g_AudioMan.SetTempMusicVolume(1.0);
-//                songTimer.Reset();
-                songTimer.SetElapsedRealTimeS(0.05);
-*/
             }
 
             fadePos = 255 - (255 * sectionProgress);
@@ -2190,15 +1537,8 @@ bool PlayIntroTitle()
             if (sectionSwitch)
             {
                 scrollOffset.m_Y = planetViewYOffset;
-//                // Fire up the CampaignMan
-//                g_pMainMenuGUI->SetEnabled(true);
-//                // Indicate that we're now in the main menu
-//                g_InActivity = false;
-
                 sectionSwitch = false;
             }
-
-//            g_CampaignMan->Draw();
 
             // Detect quitting of the program from the menu button
             g_Quit = g_Quit || g_MetaMan.GetGUI()->QuitProgram();
@@ -2303,18 +1643,12 @@ bool PlayIntroTitle()
             orbitRotation = c_HalfPI - c_EighthPI;
 
 			orbitRotation = -c_PI * 1.20;
-/*
-            // Start/Jump the song to the theme spot
-            g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0);
-            g_AudioMan.SetMusicPosition(66.7);
-            songTimer.SetElapsedRealTimeS(66.7);
-*/
         }
 
         // Draw the console in the menu
         g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
 
-        // Wait for vertical synch before flipping frames
+        // Wait for vertical sync before flipping frames
         vsync();
         g_FrameMan.FlipFrameBuffers();
     }
@@ -2341,228 +1675,200 @@ bool PlayIntroTitle()
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Game simulation loop pump
+/// <summary>
+/// Orders to reset the entire Retro Terrain Engine system next iteration.
+/// </summary>
+void ResetRTE() { g_ResetRTE = true; }
 
-bool RunGameLoop()
-{
-    if (g_Quit)
-        return true;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    g_FrameMan.ResetFrameTimer();
-    g_TimerMan.EnableAveraging(true);
-    g_TimerMan.PauseSim(false);
-// Done in ResetActivity
-//    g_ActivityMan.GetActivity()->StartActivity();
-    if (g_ResetActivity)
-        ResetActivity();
+/// <summary>
+/// Indicates whether the system is about to be reset before the next loop starts.
+/// </summary>
+/// <returns>Whether the RTE is about to reset next iteration of the loop or not.</returns>
+bool IsResettingRTE() { return g_ResetRTE; }
 
-    while (!g_Quit)
-    {
-        {
-            // Need to clear this out; sometimes background layers don't cover the whole back
-            g_FrameMan.ClearBackBuffer8();
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            // Update the real time measurement and increment
-            g_TimerMan.Update();
+/// <summary>
+/// Game simulation loop.
+/// </summary>
+bool RunGameLoop() {
+	if (g_Quit) {
+		return true;
+	}
+	g_FrameMan.ResetFrameTimer();
+	g_TimerMan.EnableAveraging(true);
+	g_TimerMan.PauseSim(false);
 
-			bool serverUpdated = false;
+	if (g_ResetActivity) { ResetActivity(); }
 
-            // Simulation update, as many times as the fixed update step allows in the span since last frame draw
-            while (g_TimerMan.TimeForSimUpdate())
-            {
-				serverUpdated = false;
-				g_FrameMan.NewPerformanceSample();
+	while (!g_Quit) {
+		// Need to clear this out; sometimes background layers don't cover the whole back
+		g_FrameMan.ClearBackBuffer8();
 
-                // Advance the simulation time by the fixed amount
-                g_TimerMan.UpdateSim();
+		// Update the real time measurement and increment
+		g_TimerMan.Update();
 
-				g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_SIM_TOTAL);
-				g_UInputMan.Update();
-				// It is vital that server is updated after input manager but before activity because unput manager will clear 
-				// received pressed and released events on next update.
-				if (g_NetworkServer.IsServerModeEnabled())
-				{
-					g_NetworkServer.Update(true);
-					serverUpdated = true;
-				}
-				g_FrameMan.Update();
-				g_AudioMan.Update();
-				g_LuaMan.Update();
-				g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTIVITY);
-				g_ActivityMan.Update();
-				g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTIVITY);
-				g_MovableMan.Update();
+		bool serverUpdated = false;
 
-				g_ActivityMan.LateUpdateGlobalScripts();
+		// Simulation update, as many times as the fixed update step allows in the span since last frame draw
+		while (g_TimerMan.TimeForSimUpdate()) {
+			serverUpdated = false;
+			g_FrameMan.NewPerformanceSample();
 
-				g_ConsoleMan.Update();
-				g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_SIM_TOTAL);
+			// Advance the simulation time by the fixed amount
+			g_TimerMan.UpdateSim();
 
-                if (!g_InActivity)
-                {
-					g_TimerMan.PauseSim(true);
-					// If we're not in a metagame, then show main menu
-					if (g_MetaMan.GameInProgress())
-						g_IntroState = CAMPAIGNFADEIN;
-					else
-					{
-						Activity * pActivity = g_ActivityMan.GetActivity();
-						// If we edited something then return to main menu instead of scenario menu
-						// player will probably switch to area/scene editor
-						if (pActivity && pActivity->GetPresetName() == "None")
-							g_IntroState = MENUAPPEAR;
-						else
-							g_IntroState = MAINTOSCENARIO;
+			g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_SIM_TOTAL);
+
+			g_UInputMan.Update();
+
+			// It is vital that server is updated after input manager but before activity because input manager will clear received pressed and released events on next update.
+			if (g_NetworkServer.IsServerModeEnabled()) {
+				g_NetworkServer.Update(true);
+				serverUpdated = true;
+			}
+			g_FrameMan.Update();
+			g_AudioMan.Update();
+			g_LuaMan.Update();
+			g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTIVITY);
+			g_ActivityMan.Update();
+			g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTIVITY);
+			g_MovableMan.Update();
+
+			g_ActivityMan.LateUpdateGlobalScripts();
+
+			g_ConsoleMan.Update();
+			g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_SIM_TOTAL);
+
+			if (!g_InActivity) {
+				g_TimerMan.PauseSim(true);
+				// If we're not in a metagame, then show main menu
+				if (g_MetaMan.GameInProgress()) {
+					g_IntroState = CAMPAIGNFADEIN;
+				} else {
+					Activity * pActivity = g_ActivityMan.GetActivity();
+					// If we edited something then return to main menu instead of scenario menu player will probably switch to area/scene editor.
+					if (pActivity && pActivity->GetPresetName() == "None") {
+						g_IntroState = MENUAPPEAR;
+					} else {
+						g_IntroState = MAINTOSCENARIO;
 					}
-					PlayIntroTitle();
-                }
-                // Resetting the simulation
-                if (g_ResetActivity)
-                {
-                    // Reset and quit if user quit during reset loading
-                    if (!ResetActivity())
-                        break;
-                }
-                // Resuming the simulation
-                if (g_ResumeActivity)
-                    ResumeActivity();
-            }
-
-			if (g_NetworkServer.IsServerModeEnabled())
-			{
-				// Pause sim while we're waiting for scene transmission or scene will
-				// start changing before cleints receive them and those changes will be lost
-				if (!g_NetworkServer.ReadyForSimulation())
-					g_TimerMan.PauseSim(true);
-				else 
-					if (g_InActivity)
-						g_TimerMan.PauseSim(false);
-
-				if (!serverUpdated)
-				{
-					g_NetworkServer.Update();
-					serverUpdated = true;
 				}
+				PlayIntroTitle();
+			}
+			// Resetting the simulation
+			if (g_ResetActivity) {
+				// Reset and quit if user quit during reset loading
+				if (!ResetActivity()) { break; }
+			}
+			// Resuming the simulation
+			if (g_ResumeActivity) { ResumeActivity(); }
+		}
 
-				if (g_SettingsMan.GetServerSimSleepWhenIdle())
-				{
-					signed long long ticksToSleep = g_TimerMan.GetTimeToSleep();
-					if (ticksToSleep > 0)
-					{
-						double secsToSleep = (double)ticksToSleep / (double)g_TimerMan.GetTicksPerSecond();
-						long long milisToSleep = (long long)secsToSleep * (1000);
-						std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
-					}
+		if (g_NetworkServer.IsServerModeEnabled()) {
+			// Pause sim while we're waiting for scene transmission or scene will start changing before clients receive them and those changes will be lost.
+			if (!g_NetworkServer.ReadyForSimulation()) {
+				g_TimerMan.PauseSim(true);
+			} else {
+				if (g_InActivity) { g_TimerMan.PauseSim(false); }
+			}
+			if (!serverUpdated) {
+				g_NetworkServer.Update();
+				serverUpdated = true;
+			}
+			if (g_SettingsMan.GetServerSimSleepWhenIdle()) {
+				signed long long ticksToSleep = g_TimerMan.GetTimeToSleep();
+				if (ticksToSleep > 0) {
+					double secsToSleep = (double)ticksToSleep / (double)g_TimerMan.GetTicksPerSecond();
+					long long milisToSleep = (long long)secsToSleep * (1000);
+					std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
 				}
 			}
-        }
-
-        // Frame draw update
-        if (!g_Quit)
-        {
-            g_FrameMan.Draw();
-            g_FrameMan.FlipFrameBuffers();
-        }
-    }
-
-    return true;
+		}
+		g_FrameMan.Draw();
+		g_FrameMan.FlipFrameBuffers();
+	}
+	return true;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Command-line argument handling, returns false if app should quit right after this
-// The appExitVar is what the program should exit with if this returns false
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool HandleMainArgs(int argc, char *argv[], int &appExitVar)
-{
-    // If no additional args passed, just continue (first arg is the program path)
-    if (argc == 1)
-        return true;
+/// <summary>
+/// Command-line argument handling.
+/// </summary>
+/// <param name="argc">Argument name.</param>
+/// <param name="argv">Argument value.</param>
+/// <param name="appExitVar">The appExitVar is what the program should exit with if this returns false.</param>
+/// <returns>False if app should quit right after this.</returns>
+bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
 
-    // Default program return var is fail
+    // If no additional arguments passed, just continue (first argument is the program path)
+    if (argc == 1) {
+		return true;
+	}
+    // Default program return var if fail
     appExitVar = 2;
 
-    if (argc >= 2)
-    {
-        for (int i = 1; i < argc; i++)
-        {
+    if (argc >= 2) {
+        for (int i = 1; i < argc; i++) {
             // Print loading screen console to cout
-            if (strcmp(argv[i], "-cout") == 0)
-            {
-                g_LogToCli = true;
-            }
-            else if (i + 1 < argc)
-            {
-                if (strcmp(argv[i], "-server") == 0 && i + 1 < argc)
-                {
+			if (std::strcmp(argv[i], "-cout") == 0) {
+				g_System.SetLogToCLI(true);
+			} else if (i + 1 < argc) {
+				// Launch game in server mode
+                if (std::strcmp(argv[i], "-server") == 0 && i + 1 < argc) {
                     std::string port = argv[++i];
                     g_NetworkServer.EnableServerMode();
                     g_NetworkServer.SetServerPort(port);
-                }
-                else if (strcmp(argv[i], "-module") == 0 && i + 1 < argc)
-                {
-                    g_LoadSingleModule = argv[++i];
-                }
+				// Load a single module right after the official modules
+                } else if (std::strcmp(argv[i], "-module") == 0 && i + 1 < argc) {
+					g_PresetMan.SetSingleModuleToLoad(argv[++i]);
+				// Launch game directly into editor activity
+				} else if (std::strcmp(argv[i], "-editor") == 0 && i + 1 < argc) {
+					const char *editorName = argv[++i];
+					if (std::strcmp(editorName, "") == 1) {
+						g_EditorToLaunch = editorName;
+						g_LaunchIntoEditor = true;
+					}
+				}
             }
         }
     }
-
-	/*
-	if (argc > 3)
-	{
-		for (int i = 1; i < argc; i++)
-		{
-			if (strcmp(argv[i], "-activity") == 0 && i + 2 < argc)
-			{
-				g_SettingsMan.SetPlayIntro(false);
-				g_ActivityMan.SetDefaultActivityType(argv[i + 1]);
-				g_ActivityMan.SetDefaultActivityName(argv[i + 2]);
-			}
-		}
-	}*/
-
     return true;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Implementation of the main function.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int main(int argc, char *argv[])
-{
-    ///////////////////////////////////////////////////////////////////
-    // Change to working directory (necessary for some platforms)
-    g_System.ChangeWorkingDirectory();
+/// <summary>
+/// Implementation of the main function.
+/// </summary>
+int main(int argc, char *argv[]) {
 
-#if defined(__APPLE__)
-	OsxUtil::Create();
-#endif // defined(__APPLE__)
-	
-    ///////////////////////////////////////////////////////////////////
-    // Init Allegro
+	///////////////////////////////////////////////////////////////////
+    // Initialize Allegro
 
-/* This is obsolete; only applied when we were loading from a compressed Base.rte
+/* This is obsolete; only applied when we were loading from a compressed Base.rte // might come in handy sometime later actually
     // Load the Allegro config data from the base datafile
     DATAFILE *pConfigFile = load_datafile_object("Base.rte/Base.dat", "AConfig");
-    if (pConfigFile)
-    {
+    if (pConfigFile) {
         set_config_data((char *)pConfigFile->dat, pConfigFile->size);
         // The above copies the data, so this is safe to do
         unload_datafile_object(pConfigFile);
-    }
-*/
+    } */
+
     set_config_file("Base.rte/AllegroConfig.txt");
     allegro_init();
+
     // Enable the exit button on the window
     LOCK_FUNCTION(QuitHandler);
     set_close_button_callback(QuitHandler);
-    //set_window_title("Cortex Command");
 
     // Seed the random number generator
-// PUT BACK
     SeedRand();
-// REMOVE!
-//    srand(100);
 
     ///////////////////////////////////////////////////////////////////
     // Instantiate all the managers
@@ -2596,22 +1902,20 @@ int main(int argc, char *argv[])
 	g_NetworkClient.Create();
 
     int exitVar = 0;
-    if (!HandleMainArgs(argc, argv, exitVar))
-        return exitVar;
+    if (!HandleMainArgs(argc, argv, exitVar)) {
+		return exitVar;
+	}
     g_TimerMan.Create();
     g_PresetMan.Create();
     g_FrameMan.Create();
     g_AudioMan.Create();
 	g_GUISound.Create();
     g_UInputMan.Create();
-	if (g_NetworkServer.IsServerModeEnabled())
-		g_UInputMan.SetMultiplayerMode(true);
-    g_ConsoleMan.Create(g_LogToCli);
+	if (g_NetworkServer.IsServerModeEnabled()) { g_UInputMan.SetMultiplayerMode(true); }
+    g_ConsoleMan.Create();
     g_ActivityMan.Create();
     g_MovableMan.Create();
     g_MetaMan.Create();
-
-	//new AchievementMan();
 
     ///////////////////////////////////////////////////////////////////
     // Main game driver
@@ -2619,26 +1923,16 @@ int main(int argc, char *argv[])
 	string fullscreenDriver = "";
 	string windowedDriver = "";
 
-	if (g_SettingsMan.ForceSoftwareGfxDriver())
-		fullscreenDriver = "MSG: Using software DirectX fullscreen driver!";
-	if (g_SettingsMan.ForceSafeGfxDriver())
-		fullscreenDriver = "MSG: Using safe DirectX fullscrteen driver!";
-
-	if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) 
-		windowedDriver = "MSG: Using overlay DirectX windowed driver!";
-	if (g_SettingsMan.ForceNonOverlayedWindowGfxDriver()) 
-		windowedDriver = "MSG: Using non-overlay DirectX windowed driver!";
-	if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) 
-		windowedDriver = "MSG: Using DirectX fullscreen-windowed driver!";
-
-	if (fullscreenDriver != "")
-		g_ConsoleMan.PrintString(fullscreenDriver);
-
-	if (windowedDriver != "")
-		g_ConsoleMan.PrintString(windowedDriver);
-
-	if (g_NetworkServer.IsServerModeEnabled())
-	{
+	if (g_SettingsMan.ForceSoftwareGfxDriver()) { fullscreenDriver = "MSG: Using software DirectX fullscreen driver!"; }	
+	if (g_SettingsMan.ForceSafeGfxDriver()) { fullscreenDriver = "MSG: Using safe DirectX fullscreen driver!"; }
+	if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) { windowedDriver = "MSG: Using overlay DirectX windowed driver!"; }
+	if (g_SettingsMan.ForceNonOverlayedWindowGfxDriver()) { windowedDriver = "MSG: Using non-overlay DirectX windowed driver!"; }
+	if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) { windowedDriver = "MSG: Using DirectX fullscreen-windowed driver!"; }
+		
+	if (fullscreenDriver != "") { g_ConsoleMan.PrintString(fullscreenDriver); }
+	if (windowedDriver != "") { g_ConsoleMan.PrintString(windowedDriver); }
+		
+	if (g_NetworkServer.IsServerModeEnabled()) {
 		g_NetworkServer.Start();
 		g_FrameMan.SetStoreNetworkBackBuffer(true);
 
@@ -2647,30 +1941,31 @@ int main(int argc, char *argv[])
 		g_AudioMan.SetMusicVolume(0);
 	}
 
-    InitMainMenu();
-    if (g_SettingsMan.PlayIntro() && !g_NetworkServer.IsServerModeEnabled())
-        PlayIntroTitle();
+	g_LoadingGUI.InitLoadingScreen();
+	InitMainMenu();
 
-	// NETWORK Create multiplayer lobby activity to start as default if server is running
-	if (g_NetworkServer.IsServerModeEnabled())
-	{
-		EnterMultiplayerLobby();
+	if (g_LaunchIntoEditor) { 
+		// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
+		g_UInputMan.GetControlScheme(0)->SetDevice(1);
+		g_UInputMan.GetControlScheme(0)->SetPreset(1);
+		// Disable intro sequence.
+		g_SettingsMan.SetPlayIntro(false);
+		// Start the specified editor activity.
+		EnterEditorActivity(g_EditorToLaunch);
 	}
 
+    if (g_SettingsMan.PlayIntro() && !g_NetworkServer.IsServerModeEnabled()) { PlayIntroTitle(); }
+
+	// NETWORK Create multiplayer lobby activity to start as default if server is running
+	if (g_NetworkServer.IsServerModeEnabled()) { EnterMultiplayerLobby(); }
+
     // If we fail to start/reset the activity, then revert to the intro/menu
-    if (!ResetActivity())
-        PlayIntroTitle();
+    if (!ResetActivity()) { PlayIntroTitle(); }
 	
     RunGameLoop();
 
     ///////////////////////////////////////////////////////////////////
     // Clean up
-
-    // Save settings
-	// We don't need to save settings every time the game ends, sometimes it corrupts settings
-	// and the game fails to start
-	//Writer writer("Base.rte/Settings.ini");
-    //g_SettingsMan.Save(writer);
 
 	g_NetworkClient.Destroy();
 	g_NetworkServer.Destroy();
@@ -2690,17 +1985,11 @@ int main(int argc, char *argv[])
     ContentFile::FreeAllLoaded();
     g_ConsoleMan.Destroy();
 
-	//g_AchievementMan.Destroy();
-
 #ifdef DEBUG_BUILD
     // Dump out the info about how well memory cleanup went
     Entity::ClassInfo::DumpPoolMemoryInfo(Writer("MemCleanupInfo.txt"));
 #endif
-
-#if defined(__APPLE__)
-	OsxUtil::Destroy();
-#endif // defined(__APPLE__)
 	
     return 0;
 }
-END_OF_MAIN();
+END_OF_MAIN()

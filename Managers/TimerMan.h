@@ -14,15 +14,12 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#if defined(_MSC_VER)
-#define RECT WINDOWS_RECT // grr typedef repeat fix
 #include <allegro.h>
-#include <winalleg.h>
-#undef RECT			
-#undef GetClassName // grr MACRO NAMESPACE clash
-#undef PlaySound	// and again == windows is a parasite
-#endif // defined(WIN32)
+#include <winalleg.h>	
 
+// Windows.h defines these and they conflict with our methods so we need to undefine them manually.
+#undef GetClassName
+#undef PlaySound
 
 //#include "Entity.h"
 #include "Singleton.h"

@@ -98,19 +98,19 @@ void GUILabel::Create(GUIProperties *Props)
 
     string alignString;
     Props->GetValue("HAlignment", &alignString);
-    if (DDTstricmp(alignString.c_str(), "left") == 0)
+    if (stricmp(alignString.c_str(), "left") == 0)
         m_HAlignment = GUIFont::Left;
-    if (DDTstricmp(alignString.c_str(), "centre") == 0 || DDTstricmp(alignString.c_str(), "center") == 0)
+    if (stricmp(alignString.c_str(), "centre") == 0 || stricmp(alignString.c_str(), "center") == 0)
         m_HAlignment = GUIFont::Centre;
-    if (DDTstricmp(alignString.c_str(), "right") == 0)
+    if (stricmp(alignString.c_str(), "right") == 0)
         m_HAlignment = GUIFont::Right;
 
     Props->GetValue("VAlignment", &alignString);
-    if (DDTstricmp(alignString.c_str(), "top") == 0)
+    if (stricmp(alignString.c_str(), "top") == 0)
         m_VAlignment = GUIFont::Top;
-    if (DDTstricmp(alignString.c_str(), "middle") == 0)
+    if (stricmp(alignString.c_str(), "middle") == 0)
         m_VAlignment = GUIFont::Middle;
-    if (DDTstricmp(alignString.c_str(), "bottom") == 0)
+    if (stricmp(alignString.c_str(), "bottom") == 0)
         m_VAlignment = GUIFont::Bottom;
 }
 
@@ -346,18 +346,18 @@ void GUILabel::ApplyProperties(GUIProperties *Props)
 
     string alignString;
     m_Properties.GetValue("HAlignment", &alignString);
-    if (DDTstricmp(alignString.c_str(), "left") == 0)
+    if (stricmp(alignString.c_str(), "left") == 0)
         m_HAlignment = GUIFont::Left;
-    if (DDTstricmp(alignString.c_str(), "centre") == 0)
+    if (stricmp(alignString.c_str(), "centre") == 0)
         m_HAlignment = GUIFont::Centre;
-    if (DDTstricmp(alignString.c_str(), "right") == 0)
+    if (stricmp(alignString.c_str(), "right") == 0)
         m_HAlignment = GUIFont::Right;
 
     m_Properties.GetValue("VAlignment", &alignString);
-    if (DDTstricmp(alignString.c_str(), "top") == 0)
+    if (stricmp(alignString.c_str(), "top") == 0)
         m_VAlignment = GUIFont::Top;
-    if (DDTstricmp(alignString.c_str(), "middle") == 0)
+    if (stricmp(alignString.c_str(), "middle") == 0)
         m_VAlignment = GUIFont::Middle;
-    if (DDTstricmp(alignString.c_str(), "bottom") == 0)
+    if (stricmp(alignString.c_str(), "bottom") == 0)
         m_VAlignment = GUIFont::Bottom;
 }

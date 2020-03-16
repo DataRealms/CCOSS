@@ -102,16 +102,16 @@ void GUISlider::Create(GUIProperties *Props)
     // Get the values
     string ori;
     Props->GetValue("Orientation", &ori);
-    if (DDTstricmp(ori.c_str(), "horizontal") == 0)
+    if (stricmp(ori.c_str(), "horizontal") == 0)
         m_Orientation = Horizontal;
-    else if (DDTstricmp(ori.c_str(), "vertical") == 0)
+    else if (stricmp(ori.c_str(), "vertical") == 0)
         m_Orientation = Vertical;
 
     string tick;
     Props->GetValue("TickDirection", &tick);
-    if (DDTstricmp(tick.c_str(), "TopLeft") == 0)
+    if (stricmp(tick.c_str(), "TopLeft") == 0)
         m_TickDirection = TopLeft;
-    else if (DDTstricmp(tick.c_str(), "BottomRight") == 0)
+    else if (stricmp(tick.c_str(), "BottomRight") == 0)
         m_TickDirection = BottomRight;
         
     Props->GetValue("Minimum", &m_Minimum);
@@ -207,7 +207,7 @@ void GUISlider::BuildBitmap(void)
         Side = "BottomRightSlider";
 
     int Values[4];
-    RECT Rect;
+    GUIRect Rect;
     m_Skin->GetValue(Section, Side, Values, 4);
     SetRect(&Rect, Values[0], Values[1], Values[0]+Values[2], Values[1]+Values[3]);
 
@@ -215,7 +215,7 @@ void GUISlider::BuildBitmap(void)
     m_KnobImage = m_Skin->CreateBitmap(Values[2], Values[3]);
     SrcImage->Draw(m_KnobImage, 0,0, &Rect);
 
-    Uint32 ColorKey;
+    unsigned long ColorKey;
     m_Skin->GetValue(Section, "ColorKeyIndex", &ColorKey);
     ColorKey = m_Skin->ConvertColor(ColorKey, m_KnobImage->GetColorDepth());
     m_KnobImage->SetColorKey(ColorKey);
@@ -234,7 +234,7 @@ void GUISlider::BuildBitmap(void)
 void GUISlider::BuildLine(const string Section, GUIBitmap *SrcImage)
 {
     int Values[4];
-    RECT Rect;
+    GUIRect Rect;
 
     // Get the size of the middle bit for determining part of the bitmap size
     m_Skin->GetValue(Section, "Middle", Values, 4);
@@ -744,16 +744,16 @@ void GUISlider::ApplyProperties(GUIProperties *Props)
     // Get the values
     string ori;
     m_Properties.GetValue("Orientation", &ori);
-    if (DDTstricmp(ori.c_str(), "horizontal") == 0)
+    if (stricmp(ori.c_str(), "horizontal") == 0)
         m_Orientation = Horizontal;
-    else if (DDTstricmp(ori.c_str(), "vertical") == 0)
+    else if (stricmp(ori.c_str(), "vertical") == 0)
         m_Orientation = Vertical;
 
     string tick;
     m_Properties.GetValue("TickDirection", &tick);
-    if (DDTstricmp(tick.c_str(), "TopLeft") == 0)
+    if (stricmp(tick.c_str(), "TopLeft") == 0)
         m_TickDirection = TopLeft;
-    else if (DDTstricmp(tick.c_str(), "BottomRight") == 0)
+    else if (stricmp(tick.c_str(), "BottomRight") == 0)
         m_TickDirection = BottomRight;
         
     m_Properties.GetValue("Minimum", &m_Minimum);

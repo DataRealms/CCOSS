@@ -15,7 +15,7 @@
 #include "Atom.h"
 #include "AtomGroup.h"
 #include "Attachable.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Matrix.h"
 #include "SLTerrain.h"
 #include "PresetMan.h"

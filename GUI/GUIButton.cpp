@@ -184,7 +184,7 @@ void GUIButton::BuildBitmap(void)
 
 void GUIButton::Draw(GUIScreen *Screen)
 {
-    RECT Rect;
+    GUIRect Rect;
     int y = 0;
     if (m_Pushed)
         y = m_Height*2;

@@ -161,7 +161,7 @@ bool GUISkin::GetValue(const std::string Section, const std::string Variable, st
     for(it = m_PropList.begin(); it != m_PropList.end(); it++) {
         GUIProperties *p = *it;        
 
-        if (DDTstricmp(p->GetName().c_str(), Section.c_str()) == 0) {
+        if (stricmp(p->GetName().c_str(), Section.c_str()) == 0) {
             
             if (p->GetValue(Variable, Value))
                 return true;
@@ -186,7 +186,7 @@ int GUISkin::GetValue(const std::string Section, const std::string Variable, int
     for(it = m_PropList.begin(); it != m_PropList.end(); it++) {
         GUIProperties *p = *it;        
 
-        if (DDTstricmp(p->GetName().c_str(), Section.c_str()) == 0) {
+        if (stricmp(p->GetName().c_str(), Section.c_str()) == 0) {
             
             if (p->GetValue(Variable, Array, MaxArraySize))
                 return true;
@@ -211,7 +211,7 @@ bool GUISkin::GetValue(const std::string Section, const std::string Variable, in
     for(it = m_PropList.begin(); it != m_PropList.end(); it++) {
         GUIProperties *p = *it;        
 
-        if (DDTstricmp(p->GetName().c_str(), Section.c_str()) == 0) {
+        if (stricmp(p->GetName().c_str(), Section.c_str()) == 0) {
             
             if (p->GetValue(Variable, Value))
                 return true;
@@ -228,7 +228,7 @@ bool GUISkin::GetValue(const std::string Section, const std::string Variable, in
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets a single unsigned integer value.
 
-bool GUISkin::GetValue(const std::string Section, const std::string Variable, Uint32 *Value)
+bool GUISkin::GetValue(const std::string Section, const std::string Variable, unsigned long *Value)
 {
     vector <GUIProperties *>::iterator it;
 
@@ -236,7 +236,7 @@ bool GUISkin::GetValue(const std::string Section, const std::string Variable, Ui
     for(it = m_PropList.begin(); it != m_PropList.end(); it++) {
         GUIProperties *p = *it;        
 
-        if (DDTstricmp(p->GetName().c_str(), Section.c_str()) == 0) {
+        if (stricmp(p->GetName().c_str(), Section.c_str()) == 0) {
             
             if (p->GetValue(Variable, Value))
                 return true;
@@ -322,7 +322,7 @@ GUIBitmap *GUISkin::CreateBitmap(const string Filename)
     for(it = m_ImageCache.begin(); it != m_ImageCache.end(); it++) {
         GUIBitmap *Surf = *it;
 
-        if (DDTstricmp(File.c_str(), Surf->GetDataPath().c_str()) == 0)
+        if (stricmp(File.c_str(), Surf->GetDataPath().c_str()) == 0)
             return Surf;
     }
 
@@ -350,7 +350,7 @@ GUIFont *GUISkin::GetFont(const string Name)
 
     for(it = m_FontCache.begin(); it != m_FontCache.end(); it++) {
         GUIFont *F = *it;
-        if (DDTstricmp(F->GetName().c_str(), Name.c_str()) == 0)
+        if (stricmp(F->GetName().c_str(), Name.c_str()) == 0)
             return F;
     }
 
@@ -424,7 +424,7 @@ void GUISkin::BuildStandardRect(GUIBitmap *Dest, const std::string Section, int 
     int VLeft[4]; int VFiller[4]; int VRight[4];
     int VBottomLeft[4]; int VBottom[4]; int VBottomRight[4];
     int i, j;
-    RECT Rect;
+    GUIRect Rect;
 
     // Load the filename
     string Filename;
@@ -511,7 +511,7 @@ void GUISkin::BuildStandardRect(GUIBitmap *Dest, const std::string Section, int 
 // Description:     Converts an 8bit palette index to a valid pixel format.
 //                  Primarily used for development in windowed mode.
     
-Uint32 GUISkin::ConvertColor(Uint32 color, int targetDepth)
+unsigned long GUISkin::ConvertColor(unsigned long color, int targetDepth)
 {
     return m_Screen->ConvertColor(color, targetDepth);
 }

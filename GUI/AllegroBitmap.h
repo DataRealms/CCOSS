@@ -10,7 +10,7 @@
 //                  jackal@shplorb.com
 //                  www.shplorb.com/~jackal
 
-#include "GUIBitmap.h"
+#include "GUI/Interface.h"
 #include "ContentFile.h"
 #include "allegro.h"
 
@@ -99,7 +99,7 @@ public:
 // Description:     Draw a section of this bitmap onto another bitmap
 // Arguments:       Destination Bitmap, Position, Size
 
-    void Draw(GUIBitmap *pDestBitmap, int X, int Y, RECT *pRect);
+    void Draw(GUIBitmap *pDestBitmap, int X, int Y, GUIRect *pRect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +109,7 @@ public:
 //                  color-keyed pixels
 // Arguments:       Destination Bitmap, Position, Size
 
-    void DrawTrans(GUIBitmap *pDestBitmap, int X, int Y, RECT *pRect);
+    void DrawTrans(GUIBitmap *pDestBitmap, int X, int Y, GUIRect *pRect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +127,7 @@ public:
 // Description:     Draws a line.
 // Arguments:       Start Position, End Position, Color.
 
-    virtual void DrawLine(int x1, int y1, int x2, int y2, Uint32 Color);
+    virtual void DrawLine(int x1, int y1, int x2, int y2, unsigned long Color);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ public:
 // Description:     Draws a rectangle.
 // Arguments:       Position, Size, Color, Filled.
 
-    void DrawRectangle(int X, int Y, int Width, int Height, Uint32 Color, bool Filled);
+    void DrawRectangle(int X, int Y, int Width, int Height, unsigned long Color, bool Filled);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ public:
 // Description:     Gets the colour of a pixel at a specific point.
 // Arguments:       Point.
 
-    Uint32 GetPixel(int X, int Y);
+    unsigned long GetPixel(int X, int Y);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -154,7 +154,7 @@ public:
 // Description:     Sets the color of a pixel at a specific point.
 // Arguments:       Point, Color.
 
-    void SetPixel(int X, int Y, Uint32 Color);
+    void SetPixel(int X, int Y, unsigned long Color);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -181,7 +181,7 @@ public:
 // Description:     Sets the color key of the bitmap.
 // Arguments:       ColorKey.
 
-    void SetColorKey(Uint32 Key);
+    void SetColorKey(unsigned long Key);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -207,9 +207,9 @@ public:
 // Virtual Method:  GetClipRect
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the clipping rectangle of the bitmap.
-// Arguments:       Pointer to RECT struct to fill out.
+// Arguments:       Pointer to GUIRect struct to fill out.
 
-    virtual void GetClipRect(RECT *Rect);
+    virtual void GetClipRect(GUIRect *Rect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -218,7 +218,7 @@ public:
 // Description:     Sets the clipping rectangle of the bitmap.
 // Arguments:       Rectangle pointer. 0 for no clipping.
 
-    virtual void SetClipRect(RECT *pRect);
+    virtual void SetClipRect(GUIRect *pRect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -229,7 +229,7 @@ public:
 //                  described by the passed-in rect. 
 // Arguments:       Rectangle pointer.
 
-    virtual void AddClipRect(RECT *Rect);
+    virtual void AddClipRect(GUIRect *Rect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

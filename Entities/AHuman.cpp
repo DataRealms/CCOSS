@@ -20,7 +20,7 @@
 #include "Arm.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
@@ -425,7 +425,7 @@ int AHuman::Create(istream &stream, bool checkType)
         stream >> name;
         if (name != m_sClass.GetName())
         {
-           DDTAbort("Wrong type in stream when passed to Create");
+           RTEAbort("Wrong type in stream when passed to Create");
            return -1;
         }
     }
@@ -1823,7 +1823,7 @@ void AHuman::ResetAllTimers()
 bool AHuman::UpdateMovePath()
 {
     // Estimate how much material this actor can dig through
-    m_DigStrenght = EstimateDigStrenght();
+    m_DigStrength = EstimateDigStrenght();
     
     // Do the real path calc; abort and pass along the message if it didn't happen due to throttling
     if (!Actor::UpdateMovePath())

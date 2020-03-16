@@ -71,7 +71,7 @@ bool GUIBanner::Create(const std::string fontFilePath, const std::string fontBlu
         // Load the font images
         fontFile.SetDataPath(filePaths[mode].c_str());
         m_pFontImage[mode] = fontFile.GetAsBitmap(bitDepth == 8 ? COLORCONV_REDUCE_TO_256 : COLORCONV_8_TO_32);
-        AAssert(m_pFontImage[mode], "Couldn't load font bitmap for banner font from this file:\n" + fontFilePath);
+        RTEAssert(m_pFontImage[mode], "Couldn't load font bitmap for banner font from this file:\n" + fontFilePath);
 
         // Check the color key to be the same color as the Bottom-Right hand corner pixel
         int keyColor = getpixel(m_pFontImage[mode], m_pFontImage[mode]->w - 1, m_pFontImage[mode]->h - 1);

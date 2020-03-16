@@ -4,46 +4,11 @@
 *.log
 *.pdb
 *.obj
+*.vs
+*.APS
 
-/.vs
 /_Bin
-/_SDL
-/_Pindrop
-/Backup
-/Debug
-/Packaging/Win32-Beta/files
-/Packaging/Win32/files
-/GUI/Editor/Debug
-/GUI/Editor/Release
-/Steam Release
-/Steam Debug
-/Steam Final
-/_Bin/Final Open Source
-/_Bin/Debug Open Source
-/Final Open Source
-/Debug Open Source
-/Final2017
-/Remote Profile
-/Remote Release
-/Release
-/Final
-/DebugFast
-MemCleanupInfo.txt
-/Packaging/Win32-Beta/client1
-/Packaging/Win32-Beta/client2
-/Packaging/Win32-Beta/client3
-/Packaging/Win32-Beta/ClientFinal
-/Packaging/Win32-Beta/ServerFinal
-/Packaging/Win32-Beta/ServerFinalGameplay
 /NATPunchServer/Server/NATCompleteServer/Debug
 /NATPunchServer/Server/NATCompleteServer/Release
-/NATPunchServer/Server/NATCompleteServer/.vs
-/_LuaBind/Debug
-/_LuaBind/Release
-/_LuaBind/.vs
-/_boost_1_69_0/bin.v2
-/_boost_1_69_0/stage
-/_Allegro-4.2.3.1-Custom/Allegro/build/msvc8/.vs
-/_Allegro-4.2.3.1-Custom/Allegro/lib
-/_Allegro-4.2.3.1-Custom/Allegro/obj
-Doxygen/Output/
+/Documentation/Doxygen/Output
+MemCleanupInfo.txt

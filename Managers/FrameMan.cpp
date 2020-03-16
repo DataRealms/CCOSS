@@ -426,7 +426,6 @@ void FrameMan::Clear()
     m_MSPFs.clear();
     m_MSPFAverage = 0;
     m_SimSpeed = 1.0;
-    m_ResetRTE = false;
     m_pGUIScreen = 0;
     m_pLargeFont = 0;
     m_pSmallFont = 0;
@@ -514,13 +513,6 @@ int FrameMan::Create()
 	int fullscreenGfxDriver = GFX_AUTODETECT_FULLSCREEN;
 	int windowedGfxDriver = GFX_AUTODETECT_WINDOWED;
 
-#if defined(__APPLE__)
-	//fullscreenGfxDriver = GFX_QUARTZ_FULLSCREEN;
-	//windowedGfxDriver = GFX_QUARTZ_WINDOW
-#elif defined(__unix__)
-	//fullscreenGfxDriver = GFX_XWINDOWS_FULLSCREEN;
-	//windowedGfxDriver = GFX_XWINDOWS;
-#else
     fullscreenGfxDriver = GFX_DIRECTX_ACCEL;
 
 	if (g_SettingsMan.ForceSoftwareGfxDriver()) 
@@ -533,7 +525,6 @@ int FrameMan::Create()
 		windowedGfxDriver = GFX_DIRECTX_WIN;
 	if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) 
 		windowedGfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
-#endif // defined(__APPLE__)
 
 
     if (set_gfx_mode(m_Fullscreen ? fullscreenGfxDriver : windowedGfxDriver, m_Fullscreen ? m_ResX * m_NxFullscreen : m_ResX * m_NxWindowed, m_Fullscreen ? m_ResY * m_NxFullscreen : m_ResY * m_NxWindowed, 0, 0) != 0)
@@ -1012,7 +1003,7 @@ bool FrameMan::LoadPalette(std::string palettePath)
         BITMAP *tempBitmap;
         PALETTE newPalette;
         if (!(tempBitmap = load_bitmap(palettePath.c_str(), newPalette)))
-            DDTAbort(("Failed to load palette from bitmap with following path:\n\n" + palettePath).c_str());
+            RTEAbort(("Failed to load palette from bitmap with following path:\n\n" + palettePath).c_str());
 
         // Set the current palette
         set_palette(newPalette);
@@ -1037,7 +1028,7 @@ bool FrameMan::LoadPalette(std::string palettePath)
 
         // Make sure we loaded properly.
         if (!pTempFile || !pTempFile->dat || pTempFile->type != DAT_PALETTE)
-            DDTAbort(("Failed to load palette datafile object with following path and name:\n\n" + palettePath).c_str());
+            RTEAbort(("Failed to load palette datafile object with following path and name:\n\n" + palettePath).c_str());
 
         // Now when we know it's valid, go ahead and replace the old palette with it
         if (m_pPaletteDataFile)
@@ -1324,15 +1315,7 @@ int FrameMan::ToggleFullscreen()
 	int fullscreenGfxDriver = GFX_AUTODETECT_FULLSCREEN;
 	int windowedGfxDriver = GFX_AUTODETECT_WINDOWED;
 
-#if defined(__APPLE__)
-	//fullscreenGfxDriver = GFX_QUARTZ_FULLSCREEN;
-	//windowedGfxDriver = GFX_QUARTZ_WINDOW
-#elif defined(__unix__)
-	//fullscreenGfxDriver = GFX_XWINDOWS_FULLSCREEN;
-	//windowedGfxDriver = GFX_XWINDOWS;
-#else
     fullscreenGfxDriver = GFX_DIRECTX_ACCEL;
-	//windowedGfxDriver = GFX_DIRECTX_WIN;
 
 	if (g_SettingsMan.ForceSoftwareGfxDriver()) 
 		fullscreenGfxDriver = GFX_DIRECTX_SOFT;
@@ -1344,7 +1327,6 @@ int FrameMan::ToggleFullscreen()
 		windowedGfxDriver = GFX_DIRECTX_WIN;
 	if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) 
 		windowedGfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
-#endif // defined(__APPLE__)
 
 
     // Switch to windowed mode
@@ -1705,7 +1687,7 @@ void FrameMan::DrawText(BITMAP *pTargetBitmap,
                         const Vector &pos,
                         bool black)
 {
-    DDTAbort("Old fonts are not ported yet!");
+    RTEAbort("Old fonts are not ported yet!");
 /*
     BITMAP *pFont = black ? m_pBlackFont : m_pWhiteFont;
     const char *drawChar = str.c_str();
@@ -1736,7 +1718,7 @@ void FrameMan::DrawText(BITMAP *pTargetBitmap,
 
 int FrameMan::DrawLine(BITMAP *pBitmap, const Vector &start, const Vector &end, int color, int altColor, int skip, int skipStart, bool shortestWrap)
 {
-    AAssert(pBitmap, "Trying to draw line to null Bitmap");
+    RTEAssert(pBitmap, "Trying to draw line to null Bitmap");
 
 //    acquire_bitmap(pBitmap);
 
@@ -1855,8 +1837,8 @@ int FrameMan::DrawLine(BITMAP *pBitmap, const Vector &start, const Vector &end, 
 
 int FrameMan::DrawDotLine(BITMAP *pBitmap, const Vector &start, const Vector &end, BITMAP *pDot, int skip, int skipStart, bool shortestWrap)
 {
-    AAssert(pBitmap, "Trying to draw line to null Bitmap");
-    AAssert(pDot, "Trying to draw line of dots without specifying a dot Bitmap");
+    RTEAssert(pBitmap, "Trying to draw line to null Bitmap");
+    RTEAssert(pDot, "Trying to draw line of dots without specifying a dot Bitmap");
 
 //    acquire_bitmap(pBitmap);
 
@@ -2038,7 +2020,7 @@ void FrameMan::Draw()
     // Count how many split screens we'll need
     int screenCount = (m_HSplit ? 2 : 1) * (m_VSplit ? 2 : 1);
 
-    AAssert(screenCount <= 1 || m_pPlayerScreen, "Splitscreen surface not ready when needed!");
+    RTEAssert(screenCount <= 1 || m_pPlayerScreen, "Splitscreen surface not ready when needed!");
     // Choose which buffer to draw to. If there are no splitscreens and 8bit modes, draw directly to the back buffer, else use a intermediary splitscreen buffer
     char str[512];
 

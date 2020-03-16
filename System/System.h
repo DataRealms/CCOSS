@@ -1,67 +1,67 @@
-#ifndef _RTE_SYSTEM_H_
-#define _RTE_SYSTEM_H_
+#ifndef _RTESYSTEM_
+#define _RTESYSTEM_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            System.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the cross platform system functionality.
-// Project:         Retro Terrain Engine
-// Author(s):       Chris Kruger
-//                  c/- Daniel Tabar (data@datarealms.com)
-//                  http://www.datarealms.com
+namespace RTE {
 
-namespace RTE
-{
+	/// <summary>
+	/// Class for the system functionality.
+	/// </summary>
+	class System {
 
-class System
-{
+	public:
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate a System object in system memory. Should never be called directly, since g_System is an extern linked global that should be used by everything trying to use System.
+		/// </summary>
+		System() { m_LogToCLI = false; }
+#pragma endregion
 
-public:
+#pragma region Directories
+		/// <summary>
+		/// Returns current working directory.
+		/// </summary>
+		/// <returns>Absolute path to current working directory.</returns>
+		std::string GetWorkingDirectory();
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  ChangeWorkingDirectory
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Some platforms have by design their data seperated from the executable. 
-//					As many serializable classes have fixed data paths we need to change the 
-//					working directory so that the data can be found. Currently a call to this
-//					method will do the correct thing for the platform in question. It needs to be 
-//					called on application startup before any file io takes place.
-// Arguments:       None.
-// Return value:    None.
+		/// <summary>
+		/// Create a directory.
+		/// </summary>
+		/// <param name="path">Path to create.</param>
+		/// <returns>Returns 0 if successful.</returns>
+		int MakeDirectory(const std::string& path);
+#pragma endregion
 
-	void ChangeWorkingDirectory();
+#pragma region Command-Line Interface
+		/// <summary>
+		/// Tells whether printing loading progress report and console to command-line is enabled or not.
+		/// </summary>
+		/// <returns>Whether printing to command-line is enabled or not.</returns>
+		bool GetLogToCLI() const { return m_LogToCLI; }
 
+		/// <summary>
+		/// Sets whether to print the loading progress report and console to command-line or not.
+		/// </summary>
+		/// <param name="enable">True to enable printing to command-line.</param>
+		void SetLogToCLI(bool enable) { m_LogToCLI = enable; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetWorkingDirectory
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns current working directory.
-// Arguments:       None.
-// Return value:    Absolute path to current working directory.
-	std::string GetWorkingDirectory();
-	
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  MakeDirectory
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Create a directory. Returns 0 if successful, POSIX compliant errorcode if error.
-// Arguments:       path to create.
-// Return value:    Returns 0 if successful, POSIX compliant errorcode if error.	
-	int MakeDirectory(const std::string& path);
+		/// <summary>
+		/// Prints the loading progress report to command-line.
+		/// </summary>
+		void PrintLoadingToCLI(std::string reportString, bool newItem = false);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
+		/// <summary>
+		/// Prints console output to command-line.
+		/// </summary>
+		/// <param name="consoleString"></param>
+		void PrintConsoleToCLI(std::string consoleString);
+#pragma endregion
 
-	
-	
-private:
+	protected:
 
-};
+		bool m_LogToCLI; //!< Bool to tell whether to print to command-line or not.
+	};
 
-extern System g_System;
-
+	extern System g_System;
 }
-
-#endif // _RTE_SYSTEM_H_
+#endif

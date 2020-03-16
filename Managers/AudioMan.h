@@ -1,7 +1,6 @@
 #ifndef _RTEAUDIOMAN_
 #define _RTEAUDIOMAN_
 
-#include "DDTTools.h"
 #include "Entity.h"
 #include "Timer.h"
 #include "Singleton.h"
@@ -381,35 +380,42 @@ namespace RTE {
 #pragma endregion
 
 	protected:
-		static Entity::ClassInfo m_sClass; //! ClassInfo for this class.
-		static const std::string m_ClassName; //! A string with the friendly-formatted type name of this object.
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
 
-		FMOD::System *m_AudioSystem; //! The FMOD Sound management object
-		FMOD::ChannelGroup *m_MusicChannelGroup; //! The FMOD ChannelGroup for music
-		FMOD::ChannelGroup *m_SoundChannelGroup; //! The FMOD ChannelGroup for sounds
+		FMOD::System *m_AudioSystem; //!< The FMOD Sound management object
+		FMOD::ChannelGroup *m_MusicChannelGroup; //!< The FMOD ChannelGroup for music
+		FMOD::ChannelGroup *m_SoundChannelGroup; //!< The FMOD ChannelGroup for sounds
 
-		bool m_AudioEnabled; //! Bool to tell whether audio is enabled or not.
+		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
 
-		double m_SoundsVolume; //! Global sounds effects volume.
-		double m_MusicVolume; //! Global music volume.
-		double m_GlobalPitch; //! Global pitch multiplier.
+		double m_SoundsVolume; //!< Global sounds effects volume.
+		double m_MusicVolume; //!< Global music volume.
+		double m_GlobalPitch; //!< Global pitch multiplier.
 
-		std::vector<int> m_NormalFrequencies; //! The 'normal' unpitched frequency of each channel handle we have.
-		std::vector<double> m_PitchModifiers; //! How each channel's pitch is modified individually.
+		std::vector<int> m_NormalFrequencies; //!< The 'normal' unpitched frequency of each channel handle we have.
+		std::vector<double> m_PitchModifiers; //!< How each channel's pitch is modified individually.
 
-		std::string m_MusicPath; //! The path to the last played music stream.
-		std::list<std::string> m_MusicPlayList; //! Playlist of paths to music to play after the current non looping one is done.
-		Timer m_SilenceTimer; //! Timer for measuring silences between songs.
+		std::string m_MusicPath; //!< The path to the last played music stream.
+		std::list<std::string> m_MusicPlayList; //!< Playlist of paths to music to play after the current non looping one is done.
+		Timer m_SilenceTimer; //!< Timer for measuring silences between songs.
 
-		bool m_IsInMultiplayerMode; //! If true then the server is in multiplayer mode and will register sound and music events into internal lists.
-		std::list<NetworkSoundData> m_SoundEvents[c_MaxClients]; //! Lists of per player sound events.
-		std::list<NetworkMusicData> m_MusicEvents[c_MaxClients]; //! Lists of per player music events.
+		bool m_IsInMultiplayerMode; //!< If true then the server is in multiplayer mode and will register sound and music events into internal lists.
+		std::list<NetworkSoundData> m_SoundEvents[c_MaxClients]; //!< Lists of per player sound events.
+		std::list<NetworkMusicData> m_MusicEvents[c_MaxClients]; //!< Lists of per player music events.
 
 	private:
+		/// <summary>
+		/// A static callback function for FMOD to invoke when the music channel finishes playing. See fmod docs - FMOD_SYSTEM_CALLBACK for details
+		/// </summary>
 		static FMOD_RESULT F_CALLBACK MusicChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
+
+		/// <summary>
+		/// A static callback function for FMOD to invoke when a sound channel finished playing. See fmod docs - FMOD_SYSTEM_CALLBACK for details
+		/// </summary>
 		static FMOD_RESULT F_CALLBACK SoundChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
 
-		std::unordered_map<int, SoundContainer *> m_ChannelsToSoundContainers; //! A map of channel numbers to SoundContainers. Is lazily updated so channels should be checked against the SoundChannelGroup before being considered accurate
+		std::unordered_map<int, SoundContainer *> m_ChannelsToSoundContainers; //!< A map of channel numbers to SoundContainers. Is lazily updated so channels should be checked against the SoundChannelGroup before being considered accurate
 
 		/// <summary>
 		/// Clears all the member variables of this AudioMan, effectively resetting the members of this abstraction level only.

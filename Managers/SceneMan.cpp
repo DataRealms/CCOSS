@@ -376,7 +376,7 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
             else if (tryId == pNewMat->id - 1)
             {
 // TODO: find the closest matching mateiral and map to it?
-                DDTAbort("Tried to load material \"" + pNewMat->GetPresetName() + "\" but the material palette (256 max) is full! Try consolidating or removing some redundant materials, or removing some entire data modules.");
+                RTEAbort("Tried to load material \"" + pNewMat->GetPresetName() + "\" but the material palette (256 max) is full! Try consolidating or removing some redundant materials, or removing some entire data modules.");
                 break;
             }
         }
@@ -454,7 +454,7 @@ void SceneMan::Destroy()
 
 Vector SceneMan::GetSceneDim() const
 {
-    DAssert(m_pCurrentScene && m_pCurrentScene->GetTerrain() && m_pCurrentScene->GetTerrain()->GetBitmap(), "Trying to get terrain info before there is a scene or terrain!");
+    RTEAssert(m_pCurrentScene && m_pCurrentScene->GetTerrain() && m_pCurrentScene->GetTerrain()->GetBitmap(), "Trying to get terrain info before there is a scene or terrain!");
     if (m_pCurrentScene)
         return m_pCurrentScene->GetDimensions();
     return Vector();
@@ -468,7 +468,7 @@ Vector SceneMan::GetSceneDim() const
 
 int SceneMan::GetSceneWidth() const
 {
-//    DAssert(m_pCurrentScene, "Trying to get terrain info before there is a scene or terrain!");
+//    RTEAssert(m_pCurrentScene, "Trying to get terrain info before there is a scene or terrain!");
     if (m_pCurrentScene)
         return m_pCurrentScene->GetWidth();
     return 0;
@@ -482,7 +482,7 @@ int SceneMan::GetSceneWidth() const
 
 int SceneMan::GetSceneHeight() const
 {
-//    DAssert(m_pCurrentScene, "Trying to get terrain info before there is a scene or terrain!");
+//    RTEAssert(m_pCurrentScene, "Trying to get terrain info before there is a scene or terrain!");
     if (m_pCurrentScene)
         return m_pCurrentScene->GetHeight();
     return 0;
@@ -522,7 +522,7 @@ bool SceneMan::SceneWrapsY() const
 
 SLTerrain * SceneMan::GetTerrain()
 {
-//    DAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
+//    RTEAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
     if (m_pCurrentScene)
         return m_pCurrentScene->GetTerrain();
 
@@ -578,7 +578,7 @@ bool SceneMan::MOIDClearCheck()
             {
                 g_FrameMan.SaveBitmapToBMP(pMOIDMap, "MOIDCheck");
                 g_FrameMan.SaveBitmapToBMP(m_pMOColorLayer->GetBitmap(), "MOIDCheck");
-                DDTAbort("Bad MOID of MO detected: " + g_MovableMan.GetMOFromID(badMOID)->GetPresetName());
+                RTEAbort("Bad MOID of MO detected: " + g_MovableMan.GetMOFromID(badMOID)->GetPresetName());
                 return false;
             }
         }
@@ -595,7 +595,7 @@ bool SceneMan::MOIDClearCheck()
 
 unsigned char SceneMan::GetTerrMatter(int pixelX, int pixelY)
 {
-    DAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
+    RTEAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
 
     WrapPosition(pixelX, pixelY);
 
@@ -660,7 +660,7 @@ Material const * SceneMan::GetMaterial(const std::string &matName)
 
 Vector SceneMan::GetGlobalAcc() const
 {
-    DAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
+    RTEAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
     return m_pCurrentScene->GetGlobalAcc();
 }
 
@@ -796,11 +796,11 @@ float SceneMan::TargetDistanceScalar(Vector point)
 
 void SceneMan::CheckOffset(int screen)
 {
-    DAssert(m_pCurrentScene, "Trying to check offset before there is a scene or terrain!");
+    RTEAssert(m_pCurrentScene, "Trying to check offset before there is a scene or terrain!");
 
     // Handy
     SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
-    DAssert(pTerrain, "Trying to get terrain matter before there is a scene or terrain!");
+    RTEAssert(pTerrain, "Trying to get terrain matter before there is a scene or terrain!");
 
     if (!pTerrain->WrapsX() && m_Offset[screen].m_X < 0)
         m_Offset[screen].m_X = 0;
@@ -844,7 +844,7 @@ void SceneMan::CheckOffset(int screen)
 
 void SceneMan::LockScene()
 {
-//    AAssert(!m_pCurrentScene->IsLocked(), "Hey, locking already locked scene!");
+//    RTEAssert(!m_pCurrentScene->IsLocked(), "Hey, locking already locked scene!");
     if (!m_pCurrentScene->IsLocked())
     {
         m_pCurrentScene->Lock();
@@ -864,7 +864,7 @@ void SceneMan::LockScene()
 
 void SceneMan::UnlockScene()
 {
-//    AAssert(m_pCurrentScene->IsLocked(), "Hey, unlocking already unlocked scene!");
+//    RTEAssert(m_pCurrentScene->IsLocked(), "Hey, unlocking already unlocked scene!");
     if (m_pCurrentScene->IsLocked())
     {
         m_pCurrentScene->Unlock();
@@ -881,7 +881,7 @@ void SceneMan::UnlockScene()
 
 bool SceneMan::SceneIsLocked() const
 {
-    DAssert(m_pCurrentScene, "Trying to check offset before there is a scene or terrain!");
+    RTEAssert(m_pCurrentScene, "Trying to check offset before there is a scene or terrain!");
     return m_pCurrentScene->IsLocked();
 }
 
@@ -974,7 +974,7 @@ bool SceneMan::WillPenetrate(const int posX,
                              const int posY,
                              const Vector &impulse)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
     if (!m_pCurrentScene->GetTerrain()->IsWithinBounds(posX, posY))
         return false;
@@ -1224,7 +1224,7 @@ bool SceneMan::TryPenetrate(const int posX,
 					        const int removeOrphansMaxArea,
 					        const float removeOrphansRate)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
     if (!m_pCurrentScene->GetTerrain()->IsWithinBounds(posX, posY))
         return false;
@@ -1232,7 +1232,7 @@ bool SceneMan::TryPenetrate(const int posX,
     unsigned char materialID = _getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
     if (materialID == g_MaterialAir)
     {
-//        DDTAbort("Why are we penetrating air??");
+//        RTEAbort("Why are we penetrating air??");
         return true;
     }
     Material const * sceneMat = GetMaterialFromID(materialID);
@@ -1392,7 +1392,7 @@ bool SceneMan::TryPenetrate(const int posX,
 
 void SceneMan::MakeAllUnseen(Vector pixelSize, const int team)
 {
-    AAssert(m_pCurrentScene, "Messing with scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Messing with scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return;
 
@@ -1438,7 +1438,7 @@ bool SceneMan::LoadUnseenLayer(std::string bitmapPath, int team)
 
 bool SceneMan::AnythingUnseen(const int team)
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 
     return m_pCurrentScene->GetUnseenLayer(team) != 0;
 // TODO: Actually check all pixels on the map too?
@@ -1453,7 +1453,7 @@ bool SceneMan::AnythingUnseen(const int team)
 
 Vector SceneMan::GetUnseenResolution(const int team) const
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return Vector(1, 1);
 
@@ -1472,7 +1472,7 @@ Vector SceneMan::GetUnseenResolution(const int team) const
 
 bool SceneMan::IsUnseen(const int posX, const int posY, const int team)
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return false;
 
@@ -1497,7 +1497,7 @@ bool SceneMan::IsUnseen(const int posX, const int posY, const int team)
 
 bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return false;
 
@@ -1536,7 +1536,7 @@ bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
 
 bool SceneMan::RestoreUnseen(const int posX, const int posY, const int team)
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return false;
 
@@ -1575,7 +1575,7 @@ bool SceneMan::RestoreUnseen(const int posX, const int posY, const int team)
 
 void SceneMan::RevealUnseenBox(const int posX, const int posY, const int width, const int height, const int team)
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return;
 
@@ -1602,7 +1602,7 @@ void SceneMan::RevealUnseenBox(const int posX, const int posY, const int width, 
 
 void SceneMan::RestoreUnseenBox(const int posX, const int posY, const int width, const int height, const int team)
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return;
 
@@ -3010,7 +3010,7 @@ bool SceneMan::IsWithinBounds(const int pixelX, const int pixelY, const int marg
 
 bool SceneMan::ForceBounds(int &posX, int &posY)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
     return m_pCurrentScene->GetTerrain()->ForceBounds(posX, posY);
 }
 
@@ -3023,7 +3023,7 @@ bool SceneMan::ForceBounds(int &posX, int &posY)
 
 bool SceneMan::ForceBounds(Vector &pos)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
     int posX = floorf(pos.m_X);
     int posY = floorf(pos.m_Y);
@@ -3045,7 +3045,7 @@ bool SceneMan::ForceBounds(Vector &pos)
 
 bool SceneMan::WrapPosition(int &posX, int &posY)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
     return m_pCurrentScene->GetTerrain()->WrapPosition(posX, posY);
 }
 
@@ -3058,7 +3058,7 @@ bool SceneMan::WrapPosition(int &posX, int &posY)
 
 bool SceneMan::WrapPosition(Vector &pos)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
     int posX = floorf(pos.m_X);
     int posY = floorf(pos.m_Y);
@@ -3618,7 +3618,7 @@ bool SceneMan::AddSceneObject(SceneObject *pObject)
 
 void SceneMan::Update(int screen)
 {
-	DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+	RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
     // Record screen was the last updated screen
     m_LastUpdatedScreen = screen;
@@ -3758,7 +3758,7 @@ void SceneMan::Update(int screen)
 
 void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vector &targetPos, bool skipSkybox, bool skipTerrain)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
     // Handy
     SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
 

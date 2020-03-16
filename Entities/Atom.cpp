@@ -16,7 +16,7 @@
 #include "MovableObject.h"
 #include "MOSRotating.h"
 #include "PresetMan.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Actor.h"
 
 namespace RTE {
@@ -134,7 +134,7 @@ void * Atom::GetPoolMemory()
     void *pFoundMemory = m_AllocatedPool.back();
     m_AllocatedPool.pop_back();
 
-    DAssert(pFoundMemory, "Could not find an available instance in the pool, even after increasing its size!");
+    RTEAssert(pFoundMemory, "Could not find an available instance in the pool, even after increasing its size!");
 
     // Keep track of the number of instaces passed out
     m_InstancesInUse++;
@@ -290,7 +290,7 @@ int Atom::ReadProperty(std::string propName, Reader &reader)
 		m_pMaterial = g_SceneMan.AddMaterialCopy(&mat);
 		if (!m_pMaterial)
 		{
-			DDTAbort("Failed to store material \"" + mat.GetPresetName() + "\" Aborting!");
+			RTEAbort("Failed to store material \"" + mat.GetPresetName() + "\" Aborting!");
 		}
 
 		/*if (mat.id)
@@ -305,7 +305,7 @@ int Atom::ReadProperty(std::string propName, Reader &reader)
 			// Crash if could not fall back to g_MaterialAir. Will crash due to null-pointer somewhere anyway
 			if (!m_pMaterial)
 			{
-				DDTAbort("Failed to find a matching material \"" + mat.GetPresetName() + "\" or even fall back to g_MaterialAir. Aborting!");
+				RTEAbort("Failed to find a matching material \"" + mat.GetPresetName() + "\" or even fall back to g_MaterialAir. Aborting!");
 			}
 		}*/
 	}
@@ -402,8 +402,8 @@ Atom & Atom::operator=(const Atom &rhs)
 
 bool Atom::CalculateNormal(BITMAP *pSprite, Vector spriteCenter)
 {
-    AAssert(pSprite, "Trying to set up Atom normal without passing in bitmap");
-//    DAssert(m_pOwnerMO, "Trying to set up Atom normal without a parent MO!");
+    RTEAssert(pSprite, "Trying to set up Atom normal without passing in bitmap");
+//    RTEAssert(m_pOwnerMO, "Trying to set up Atom normal without a parent MO!");
     
     // Can't set up a normal on an atom that doesn't have an offset from its parent's center
     if (m_Offset.IsZero())
@@ -508,7 +508,7 @@ bool Atom::IsIgnoringMOID(MOID which)
 
 bool Atom::SetupPos(Vector startPos)
 {
-    DAssert(m_pOwnerMO, "Stepping an Atom without a parent MO!");
+    RTEAssert(m_pOwnerMO, "Stepping an Atom without a parent MO!");
 
     // Only save the previous positions if they are in the scene
     if (m_IntPos[X] > 0 && m_IntPos[Y] > 0)
@@ -558,7 +558,7 @@ bool Atom::SetupPos(Vector startPos)
 
 int Atom::SetupSeg(Vector startPos, Vector trajectory, float stepRatio)
 {
-    DAssert(m_pOwnerMO, "Stepping an Atom without a parent MO!");
+    RTEAssert(m_pOwnerMO, "Stepping an Atom without a parent MO!");
     bool inNewMO = false;
     m_TerrainMatHit = g_MaterialAir;
     m_MOIDHit = g_NoMOID;
@@ -623,7 +623,7 @@ int Atom::SetupSeg(Vector startPos, Vector trajectory, float stepRatio)
 
 bool Atom::StepForward(int numSteps)
 {
-    DAssert(m_pOwnerMO, "Stepping an Atom without a parent MO!");
+    RTEAssert(m_pOwnerMO, "Stepping an Atom without a parent MO!");
 
     // Only take the step if the step ratio permits it
     float prevProgress = m_SegProgress;
@@ -665,7 +665,7 @@ bool Atom::StepForward(int numSteps)
 
                     m_HitPos[X] = m_IntPos[X];
                     m_HitPos[Y] = m_IntPos[Y];
-                    DAssert(m_TerrainMatHit != 0, "Atom returning step with positive hit but without ID stored!");
+                    RTEAssert(m_TerrainMatHit != 0, "Atom returning step with positive hit but without ID stored!");
                     hitStep = true;
                 }
             }
@@ -687,7 +687,7 @@ bool Atom::StepForward(int numSteps)
                     {
                         m_HitPos[X] = m_IntPos[X];
                         m_HitPos[Y] = m_IntPos[Y];
-                        DAssert(m_MOIDHit != g_NoMOID, "Atom returning step with positive hit but without ID stored!");
+                        RTEAssert(m_MOIDHit != g_NoMOID, "Atom returning step with positive hit but without ID stored!");
                         hitStep = true;
 
 						m_pOwnerMO->SetHitWhatMOID(m_MOIDHit);
@@ -699,7 +699,7 @@ bool Atom::StepForward(int numSteps)
 
             return hitStep;
         }
-        DAssert(0, "Atom shouldn't be taking steps beyond the trajectory!");
+        RTEAssert(0, "Atom shouldn't be taking steps beyond the trajectory!");
         m_pOwnerMO->SetToDelete();
     }
     m_StepWasTaken = false;
@@ -716,7 +716,7 @@ bool Atom::StepForward(int numSteps)
 
 void Atom::StepBack()
 {
-    DAssert(m_pOwnerMO, "Stepping an Atom without a parent MO!");
+    RTEAssert(m_pOwnerMO, "Stepping an Atom without a parent MO!");
 
     // Not complete undo because we lost what these were during last step.
 //    m_MOIDHit = g_NoMOID;
@@ -749,7 +749,7 @@ void Atom::StepBack()
 
 bool Atom::MOHitResponse()
 {
-    DAssert(m_pOwnerMO, "Stepping an Atom without a parent MO!");
+    RTEAssert(m_pOwnerMO, "Stepping an Atom without a parent MO!");
 
     if (m_pOwnerMO->m_HitsMOs && m_MOIDHit != g_NoMOID/* && IsIgnoringMOID(m_MOIDHit)*/) {
         m_LastHit.hitPoint.Reset();
@@ -802,8 +802,8 @@ bool Atom::MOHitResponse()
 
         m_LastHit.pBody[HITOR] = m_pOwnerMO;
         m_LastHit.pBody[HITEE] = g_MovableMan.GetMOFromID(m_MOIDHit);
-        DAssert(m_LastHit.pBody[HITEE], "Hitee MO is 0 in Atom::MOHitResponse!");
-        DAssert(m_MOIDHit == m_LastHit.pBody[HITEE]->GetID(), "g_MovableMan.GetMOFromID messed up in in Atom::MOHitResponse!");
+        RTEAssert(m_LastHit.pBody[HITEE], "Hitee MO is 0 in Atom::MOHitResponse!");
+        RTEAssert(m_MOIDHit == m_LastHit.pBody[HITEE]->GetID(), "g_MovableMan.GetMOFromID messed up in in Atom::MOHitResponse!");
         // Get the roots for both bodies
         if (m_LastHit.pBody[HITOR])
             m_LastHit.pRootBody[HITOR] = m_LastHit.pBody[HITOR]->GetRootParent();
@@ -814,7 +814,7 @@ bool Atom::MOHitResponse()
 
         return validHit;
     }
-    DDTAbort("Atom not supposed to do MO hit response if it didnt hit anything!");
+    RTEAbort("Atom not supposed to do MO hit response if it didnt hit anything!");
     return false;
 }
 
@@ -830,7 +830,7 @@ bool Atom::MOHitResponse()
 
 HitData & Atom::TerrHitResponse()
 {
-    DAssert(m_pOwnerMO, "Stepping an Atom without a parent MO!");
+    RTEAssert(m_pOwnerMO, "Stepping an Atom without a parent MO!");
 
     if (m_TerrainMatHit) {
         MID hitMaterialID = g_SceneMan.GetTerrMatter(m_HitPos[X], m_HitPos[Y]);
@@ -913,7 +913,7 @@ HitData & Atom::TerrHitResponse()
         // Return the hit info.
         return m_LastHit;
     }
-    DDTAbort("Atom not supposed to do Terrain hit response if it didnt hit anything!");
+    RTEAbort("Atom not supposed to do Terrain hit response if it didnt hit anything!");
     return m_LastHit;
 }
 
@@ -930,7 +930,7 @@ int Atom::Travel(float travelTime,
                  bool scenePreLocked)
 {
     if (!m_pOwnerMO) {
-        DDTAbort("Travelling an Atom without a parent MO!");
+        RTEAbort("Travelling an Atom without a parent MO!");
         return travelTime;
     }
     Vector &position = m_pOwnerMO->m_Pos;
@@ -1126,8 +1126,8 @@ int Atom::Travel(float travelTime,
 
                 m_LastHit.pBody[HITOR] = m_pOwnerMO;
 				m_LastHit.pBody[HITEE] = pMO;
-                DAssert(m_LastHit.pBody[HITEE], "Hitee MO is 0 in Atom::Travel!");
-                DAssert(m_MOIDHit == m_LastHit.pBody[HITEE]->GetID(), "g_MovableMan.GetMOFromID messed up in in Atom::MOHitResponse!");
+                RTEAssert(m_LastHit.pBody[HITEE], "Hitee MO is 0 in Atom::Travel!");
+                RTEAssert(m_MOIDHit == m_LastHit.pBody[HITEE]->GetID(), "g_MovableMan.GetMOFromID messed up in in Atom::MOHitResponse!");
 
                 // Don't do this normal approximation based on object centers, it causes particles to 'slide into' sprite objects when they
                 // should be resting on them. Orthogonal normals only, as the pixel boundaries themselves! See further down for the setting og this.
@@ -1352,14 +1352,14 @@ int Atom::Travel(float travelTime,
              hitCount < 100 &&
              !m_LastHit.terminate[HITOR]);
 
-//    DAssert(hitCount < 100, "Atom travel resulted in more than 100 segs!!");
+//    RTEAssert(hitCount < 100, "Atom travel resulted in more than 100 segs!!");
 
     // Draw the trail
     if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
         int length = m_TrailLength/* + 3 * PosRand()*/;
         for (int i = trailPoints.size() - MIN(length, trailPoints.size()); i < trailPoints.size(); ++i)
         {
-//            DAssert(is_inside_bitmap(pTrailBitmap, trailPoints[i].first, trailPoints[i].second, 0), "Trying to draw out of bounds trail!");
+//            RTEAssert(is_inside_bitmap(pTrailBitmap, trailPoints[i].first, trailPoints[i].second, 0), "Trying to draw out of bounds trail!");
 //            _putpixel(pTrailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
             putpixel(pTrailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
         }

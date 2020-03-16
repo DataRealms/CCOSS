@@ -169,7 +169,7 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 {
     if (!pOwnerMOSRotating || resolution < 0)
     {
-        DDTAbort("Trying to generate an AtomGroup without sprite and//or 0 resolution setting!");
+        RTEAbort("Trying to generate an AtomGroup without sprite and//or 0 resolution setting!");
         return -1;
     }
 
@@ -528,7 +528,7 @@ int AtomGroup::ReadProperty(std::string propName, Reader &reader)
 			// Crash if could not fall back to g_MaterialAir. Will crash due to null-pointer somewhere anyway
 			if (!m_pMaterial)
 			{
-				DDTAbort("Failed to find a matching material \"" + mat.GetPresetName() + "\" or even fall back to g_MaterialAir. Aborting!");
+				RTEAbort("Failed to find a matching material \"" + mat.GetPresetName() + "\" or even fall back to g_MaterialAir. Aborting!");
 			}
 		}
 	}
@@ -599,7 +599,7 @@ int AtomGroup::Create(istream &stream, bool checkType)
         stream >> name;
         if (name != m_sClass.GetName())
         {
-           DDTAbort("Wrong type in stream when passed to Create");
+           RTEAbort("Wrong type in stream when passed to Create");
            return -1;
         }
     }
@@ -726,7 +726,7 @@ float AtomGroup::GetMomentOfInertia()
     {
         if (!m_pOwnerMO)
         {
-            DDTAbort("Getting AtomGroup stuff without a parent MO!");
+            RTEAbort("Getting AtomGroup stuff without a parent MO!");
             return 0;
         }
         float distMass = m_pOwnerMO->GetMass() / m_Atoms.size();
@@ -803,7 +803,7 @@ bool AtomGroup::UpdateSubAtoms(long int subID, const Vector &newOffset, const Ma
 	{
 		return false;
 	}
-	DAssert(!m_SubGroups.find(subID)->second.empty(), "Found empty atom subgroup list!?");
+	RTEAssert(!m_SubGroups.find(subID)->second.empty(), "Found empty atom subgroup list!?");
 
 	for (list<Atom *>::const_iterator aItr = m_SubGroups.find(subID)->second.begin(); aItr != m_SubGroups.find(subID)->second.end(); ++aItr)
 	{
@@ -906,7 +906,7 @@ float AtomGroup::Travel(const float travelTime,
 {
     if (!m_pOwnerMO)
     {
-        DDTAbort("Travelling an AtomGroup without a parent MO!");
+        RTEAbort("Travelling an AtomGroup without a parent MO!");
         return travelTime;
     }
 
@@ -1024,7 +1024,7 @@ float AtomGroup::Travel(Vector &position,
 
     if (!m_pOwnerMO)
     {
-        DDTAbort("Travelling an AtomGroup without a parent MO!");
+        RTEAbort("Travelling an AtomGroup without a parent MO!");
         return travelTime;
     }
     m_MomInertia = GetMomentOfInertia();
@@ -1245,7 +1245,7 @@ float AtomGroup::Travel(Vector &position,
                         atomsHitMOsCount++;
                     }
 //                  else
-//                      DDTAbort("Atom reported hit to AtomGroup, but then reported neither MO or Terr hit!");
+//                      RTEAbort("Atom reported hit to AtomGroup, but then reported neither MO or Terr hit!");
 
 #ifdef DEBUG_BUILD
                     Vector tPos = (*aItr)->GetCurrentPos();
@@ -1548,7 +1548,7 @@ float AtomGroup::Travel(Vector &position,
 
         if (hitCount > 10)
         {
-//            DDTAbort("AtomGroup travel resulted in more than 1000 segs!!");
+//            RTEAbort("AtomGroup travel resulted in more than 1000 segs!!");
             break;
         }
     }
@@ -1615,7 +1615,7 @@ Vector AtomGroup::PushTravel(Vector &position,
 {
     if (!m_pOwnerMO)
     {
-        DDTAbort("Travelling an AtomGroup without a parent MO!");
+        RTEAbort("Travelling an AtomGroup without a parent MO!");
         return Vector();
     }
 
@@ -1980,7 +1980,7 @@ before adding them to the MovableMan.
                         {
                             hitData.pBody[HITOR] = m_pOwnerMO;
                             hitData.pBody[HITEE] = g_MovableMan.GetMOFromID(hitMOID);
-                            DAssert(hitData.pBody[HITEE], "Hitee MO is 0 in AtomGroup::PushTravel!");
+                            RTEAssert(hitData.pBody[HITEE], "Hitee MO is 0 in AtomGroup::PushTravel!");
 
                             hitData.pBody[HITEE]->CollideAtPoint(hitData);
 
@@ -2220,7 +2220,7 @@ bool AtomGroup::PushAsLimb(const Vector &jointPos,
 {
     if (!m_pOwnerMO)
     {
-        DDTAbort("Travelling an AtomGroup without a parent MO!");
+        RTEAbort("Travelling an AtomGroup without a parent MO!");
         return false;
     }
 
@@ -2292,7 +2292,7 @@ void AtomGroup::FlailAsLimb(const Vector ownerPos,
 {
     if (!m_pOwnerMO)
     {
-        DDTAbort("Travelling an AtomGroup without a parent MO!");
+        RTEAbort("Travelling an AtomGroup without a parent MO!");
         return;
     }
 
@@ -2333,7 +2333,7 @@ void AtomGroup::FlailAsLimb(const Vector ownerPos,
 
 bool AtomGroup::InTerrain()
 {
-    AAssert(m_pOwnerMO, "Using an AtomGroup without a parent MO!");
+    RTEAssert(m_pOwnerMO, "Using an AtomGroup without a parent MO!");
 
     if (!g_SceneMan.SceneIsLocked())
         g_SceneMan.LockScene();
@@ -2369,7 +2369,7 @@ bool AtomGroup::InTerrain()
 
 float AtomGroup::RatioInTerrain()
 {
-    AAssert(m_pOwnerMO, "Using an AtomGroup without a parent MO!");
+    RTEAssert(m_pOwnerMO, "Using an AtomGroup without a parent MO!");
 
     int inTerrain = 0;
     Vector aPos;
@@ -2532,7 +2532,7 @@ bool AtomGroup::ResolveMOSIntersection(Vector &position, Matrix &rotation)
 
                 // Get the MO we seem to be intersecting
                 pIntersectedMO = g_MovableMan.GetMOFromID(hitMOID);
-                AAssert(pIntersectedMO, "Intersected MOID couldn't be translated to a real MO!");
+                RTEAssert(pIntersectedMO, "Intersected MOID couldn't be translated to a real MO!");
                 pIntersectedMO = pIntersectedMO->GetRootParent();
 
                 if (pIntersectedMO->GetsHitByMOs())
@@ -2573,7 +2573,7 @@ bool AtomGroup::ResolveMOSIntersection(Vector &position, Matrix &rotation)
     // No intersections - we're clear?!
 //        if (intersectingAtoms.empty())
 //            return true;
-//        AAssert(!intersectingAtoms.empty(), "Couldn't find any intersections after finding one?!");
+//        RTEAssert(!intersectingAtoms.empty(), "Couldn't find any intersections after finding one?!");
 
     // If all atoms are intersecting, we're screwed?!
 //        if (intersectingAtoms.size() >= m_Atoms.size())

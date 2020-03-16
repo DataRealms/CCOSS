@@ -255,7 +255,7 @@ private:
 // Members
     
     GUIBitmap        *m_Image;
-    RECT            m_ImageRects[4];
+    GUIRect            m_ImageRects[4];
 
     int                m_Check;
     std::string        m_Text;

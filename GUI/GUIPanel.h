@@ -458,7 +458,7 @@ public:
 // Description:     Gets the rectangle of the panel.
 // Arguments:       None.
 
-    RECT *GetRect(void);
+    GUIRect *GetRect(void);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -677,8 +677,8 @@ protected:
 protected:
 
     GUIFont                    *m_Font;
-    Uint32                    m_FontColor;
-    Uint32                    m_FontShadow;
+    unsigned long                    m_FontColor;
+    unsigned long                    m_FontShadow;
     int                     m_FontKerning;
 
 
@@ -688,7 +688,7 @@ protected:
 private:
     
     std::vector<GUIPanel *>    m_Children;
-    RECT                    m_Rect;
+    GUIRect                    m_Rect;
     
     int                        m_ID;
     bool                    m_ValidRegion;

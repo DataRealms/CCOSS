@@ -1454,7 +1454,7 @@ protected:
     // Extra pie menu options that this should add to any Pie Menu that focuses on this
     std::list<PieMenuGUI::Slice> m_PieSlices;
     // What material strength this actor is capable of digging trough.
-    float m_DigStrenght;
+    float m_DigStrength;
 	// ID of deployment which spawned this actor
 	unsigned int m_DeploymentID;
 

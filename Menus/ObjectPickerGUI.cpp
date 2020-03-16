@@ -94,7 +94,7 @@ void ObjectPickerGUI::Clear()
 
 int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, string onlyOfType)
 {
-    AAssert(pController, "No controller sent to ObjectPickerGUI on creation!");
+    RTEAssert(pController, "No controller sent to ObjectPickerGUI on creation!");
     m_pController = pController;
 
     if (!m_pGUIScreen)
@@ -104,7 +104,7 @@ int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, strin
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
     m_pGUIController->Load("Base.rte/GUIs/ObjectPickerGUI.ini");
     m_pGUIController->EnableMouse(pController->IsMouseControlled());
 

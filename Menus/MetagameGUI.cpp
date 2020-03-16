@@ -363,7 +363,7 @@ int MetagameGUI::Create()
 
 int MetagameGUI::Create(Controller *pController)
 {
-    AAssert(pController, "No controller sent to MetagameGUI on creation!");
+    RTEAssert(pController, "No controller sent to MetagameGUI on creation!");
     m_pController = pController;
 
     char str[256];
@@ -375,7 +375,7 @@ int MetagameGUI::Create(Controller *pController)
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/MainMenu"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
     m_pGUIController->Load("Base.rte/GUIs/MetagameGUI.ini");
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
@@ -968,7 +968,7 @@ bool MetagameGUI::SelectScene(std::string sceneName)
 
 void MetagameGUI::SwitchToScreen(int newScreen)
 {
-    AAssert(newScreen >= ROOTBOX && newScreen < SCREENCOUNT, "Tried to switch to an out of bounds screen!");
+    RTEAssert(newScreen >= ROOTBOX && newScreen < SCREENCOUNT, "Tried to switch to an out of bounds screen!");
 
     // Hide all previously shown screens
     HideAllScreens();
@@ -1588,7 +1588,7 @@ void MetagameGUI::Update()
     {
         m_pPhaseBox->SetVisible(true);
         // Never let a game go if we have 0 players
-//        AAssert(g_MetaMan.m_Players.size() > 0, "Game in progress without any players!");
+//        RTEAssert(g_MetaMan.m_Players.size() > 0, "Game in progress without any players!");
     }
 
     // Deselect scenes and player bars on state change
@@ -3064,7 +3064,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             pScene = (*sItr);
     }
 */
-    AAssert(pScene, "Couldn't find the Site that has been selected as auto resolution of an attack!");
+    RTEAssert(pScene, "Couldn't find the Site that has been selected as auto resolution of an attack!");
 
     // Check all players for active brains, and deactivate them if they don't have them
     if (brainCheck)
@@ -3324,7 +3324,7 @@ void MetagameGUI::UpdateSiteRevealing()
         }
         // Where we need to go with the animation
         m_AnimCountEnd = m_AnimCountStart + delta;
-        AAssert(m_AnimCountEnd <= g_MetaMan.m_Scenes.size(), "Trying to reveal more scenes than there are!");
+        RTEAssert(m_AnimCountEnd <= g_MetaMan.m_Scenes.size(), "Trying to reveal more scenes than there are!");
 
         // Clear and add target crosshairs pointing out all the new scenes
         m_NewSiteIndicators.clear();
@@ -4112,7 +4112,7 @@ void MetagameGUI::UpdateBaseBuilding()
                 m_AnimTotalFunds = g_MetaMan.m_Players[m_AnimMetaPlayer].m_Funds;
                 // Get a handy pointer to the scene we're talking about
                 m_pAnimScene = m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_pScene;
-                AAssert(m_pAnimScene, "Couldn't find the scene that we're building the base on!");
+                RTEAssert(m_pAnimScene, "Couldn't find the scene that we're building the base on!");
                 // Using the line target as the going-from point
                 m_AnimFundsMax = m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_FundsAmount;
                 // The calculated budget use is the target value we're shrinking to
@@ -4420,7 +4420,7 @@ void MetagameGUI::UpdateOffensives()
             if ((*sItr)->IsRevealed() && (*sItr)->GetPresetName() == g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->GetSceneName())
                 m_pAnimScene = (*sItr);
         }
-        AAssert(m_pAnimScene, "Couldn't find the Site that has been selected as attacked!");
+        RTEAssert(m_pAnimScene, "Couldn't find the Site that has been selected as attacked!");
 
         // It's owned by a team, so set up and show its defenders
         if (m_pAnimScene->GetTeamOwnership() != Activity::NOTEAM)
@@ -6857,7 +6857,7 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
                                           bool squareSite,
                                           bool drawMeterOverride) const
 {
-    AAssert(metaPlayer >= Activity::PLAYER_1 && metaPlayer < Activity::MAXPLAYERCOUNT, "Player out of bounds");
+    RTEAssert(metaPlayer >= Activity::PLAYER_1 && metaPlayer < Activity::MAXPLAYERCOUNT, "Player out of bounds");
     // No part of the line is visible with these params, so just quit
     if ((onlyFirstSegments == 0 || onlyLastSegments == 0) && !drawMeterOverride)
         return false;

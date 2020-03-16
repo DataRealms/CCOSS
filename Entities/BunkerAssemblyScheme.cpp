@@ -351,7 +351,7 @@ void BunkerAssemblyScheme::SetTeam(int team)
 void BunkerAssemblyScheme::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const
 {
     if (!m_pPresentationBitmap)
-        DDTAbort("BunkerAssemblyScheme's bitmaps are null when drawing!");
+        RTEAbort("BunkerAssemblyScheme's bitmaps are null when drawing!");
 
     // Take care of wrapping situations
     Vector aDrawPos[4];

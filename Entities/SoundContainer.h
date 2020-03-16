@@ -230,19 +230,19 @@ namespace RTE {
 #pragma endregion
 
 	protected:
-		static Entity::ClassInfo m_sClass; //! ClassInfo for this class.
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		FMOD::SoundGroup *m_SoundGroup; //! A sound group for all the FMOD Sound objects of this SoundContainer. The sound objects within are owned by the ContentFile static maps
+		FMOD::SoundGroup *m_SoundGroup; //!< A sound group for all the FMOD Sound objects of this SoundContainer. The sound objects within are owned by the ContentFile static maps
 
 		//TODO change this to be a list/vector of sounds
-		int m_CurrentSound; //! Sound group index of the current (or last played if nothing is being played) sound being played
-		std::unordered_set<short int> m_PlayingChannels; //! The channels this SoundContainer is currently using
+		int m_CurrentSound; //!< Sound group index of the current (or last played if nothing is being played) sound being played
+		std::unordered_set<short int> m_PlayingChannels; //!< The channels this SoundContainer is currently using
 
-		int m_Loops; //! Number of loops (repeats) the SoundContainer's sounds should play when played. 0 means it plays once, -1 means it plays until stopped 
-		int m_Priority; //! The mixing priority of this SoundContainer's sounds. Higher values are more likely to be heard
-		bool m_AffectedByPitch; //! Whether this SoundContainer's sounds should be able to be altered by pitch changes
+		int m_Loops; //!< Number of loops (repeats) the SoundContainer's sounds should play when played. 0 means it plays once, -1 means it plays until stopped 
+		int m_Priority; //!< The mixing priority of this SoundContainer's sounds. Higher values are more likely to be heard
+		bool m_AffectedByPitch; //!< Whether this SoundContainer's sounds should be able to be altered by pitch changes
 
-		size_t m_Hash; //! Sound file hash for network transmission.
+		size_t m_Hash; //!< Sound file hash for network transmission.
 
 	private:
 		/// <summary>

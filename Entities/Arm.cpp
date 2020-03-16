@@ -12,7 +12,7 @@
 // Inclusions of header files
 
 #include "Arm.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "HDFirearm.h"
 #include "ThrownDevice.h"
 #include "ContentFile.h"
@@ -77,7 +77,7 @@ int Arm::Create(const Arm &reference)
 
     m_HandFile = reference.m_HandFile;
     m_pHand = m_HandFile.GetAsBitmap();
-    AAssert(m_pHand, "Failed to load hand bitmap in Arm::Create")
+    RTEAssert(m_pHand, "Failed to load hand bitmap in Arm::Create")
 
     m_MaxLength = reference.m_MaxLength;
     m_HandOffset = reference.m_HandOffset;

@@ -1526,7 +1526,7 @@ void MetaMan::Update()
     // Whoops, state is f'd up, restart the last round
     else
     {
-        DDTAbort("Metagame State is out of bounds!?");
+        RTEAbort("Metagame State is out of bounds!?");
         m_GameState = REVEALSCENES;
     }
 }

@@ -1644,7 +1644,7 @@ void ActivityMan::Destroy(bool notInherited)
 
 void ActivityMan::SetStartActivity(Activity *pNewActivity)
 { 
-    DAssert(pNewActivity, "Trying to replace an activity with a null one!");
+    RTEAssert(pNewActivity, "Trying to replace an activity with a null one!");
 
     delete m_pStartActivity;
     m_pStartActivity = pNewActivity;
@@ -1658,7 +1658,7 @@ void ActivityMan::SetStartActivity(Activity *pNewActivity)
 
 int ActivityMan::StartActivity(Activity *pActivity)
 {
-    DAssert(pActivity, "Trying to start a null activity!");
+    RTEAssert(pActivity, "Trying to start a null activity!");
 
     int error = 0;
 

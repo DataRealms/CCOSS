@@ -97,9 +97,9 @@ namespace RTE {
 #pragma endregion
 
 	protected:
-		static Entity::ClassInfo m_sClass; //! ClassInfo for this class
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class
 
-		bool m_IsAnimatedManually; //! If true m_Frame is not changed during an update hence the animation is done by external Lua code
+		bool m_IsAnimatedManually; //!< If true m_Frame is not changed during an update hence the animation is done by external Lua code
 
 	private:
 		/// <summary>

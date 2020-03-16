@@ -167,7 +167,7 @@ void ScenarioGUI::Clear()
 
 int ScenarioGUI::Create(Controller *pController)
 {
-    AAssert(pController, "No controller sent to ScenarioGUI on creation!");
+    RTEAssert(pController, "No controller sent to ScenarioGUI on creation!");
     m_pController = pController;
 
     if (!m_pGUIScreen)
@@ -177,7 +177,7 @@ int ScenarioGUI::Create(Controller *pController)
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/MainMenu"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
     m_pGUIController->Load("Base.rte/GUIs/ScenarioGUI.ini");
 
     // Make sure we have convenient points to the containing GUI collection boxes that we will manipulate the positions of
@@ -490,7 +490,7 @@ void ScenarioGUI::Update()
 		bool mouseIsInBox = false;
 
 		// Detect if mouse is inside UI boxes
-		RECT * r;
+		GUIRect * r;
 		r = m_pActivityBox->GetRect();
 		if (mouseX > r->left && mouseX < r->right &&
 			mouseY > r->top && mouseY < r->bottom)

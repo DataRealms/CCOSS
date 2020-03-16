@@ -14,7 +14,7 @@
 #include "HeldDevice.h"
 #include "Atom.h"
 #include "RTEManagers.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "GUI/GUI.h"
 #include "GUI/GUIFont.h"
 #include "Actor.h"

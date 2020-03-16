@@ -26,6 +26,7 @@ namespace RTE
 {
 
 class MovableObject;
+class MOSRotating;
 class ObjectPickerGUI;
 class PieMenuGUI;
 

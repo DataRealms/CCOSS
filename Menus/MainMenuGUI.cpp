@@ -53,6 +53,7 @@
 #include "GibEditor.h"
 #include "ActorEditor.h"
 #include "AssemblyEditor.h"
+#include "EditorActivity.h"
 #include "MultiplayerGame.h"
 
 extern int g_IntroState;
@@ -162,7 +163,7 @@ void MainMenuGUI::Clear()
 
 int MainMenuGUI::Create(Controller *pController)
 {
-    AAssert(pController, "No controller sent to MainMenuGUI on creation!");
+    RTEAssert(pController, "No controller sent to MainMenuGUI on creation!");
     m_pController = pController;
 
     if (!m_pGUIScreen)
@@ -172,7 +173,7 @@ int MainMenuGUI::Create(Controller *pController)
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/MainMenu"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
     m_pGUIController->Load("Base.rte/GUIs/MainMenuGUI.ini");
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
@@ -1406,46 +1407,17 @@ void MainMenuGUI::Update()
 //                set_palette(;
 
                 // Create and start the appropriate editor Activity
-                if (anEvent.GetControl() == m_aEditorButton[SCENEEDITOR])
-                {
-                    g_SceneMan.SetSceneToLoad("Editor Scene");
-                    SceneEditor *pNewEditor = new SceneEditor;
-                    pNewEditor->Create();
-                    pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-                    g_ActivityMan.SetStartActivity(pNewEditor);
-                }
-                else if (anEvent.GetControl() == m_aEditorButton[AREAEDITOR])
-                {
-                    g_SceneMan.SetSceneToLoad("Editor Scene");
-                    AreaEditor *pNewEditor = new AreaEditor;
-                    pNewEditor->Create();
-                    pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-                    g_ActivityMan.SetStartActivity(pNewEditor);
-                }
-                else if (anEvent.GetControl() == m_aEditorButton[ASSEMBLYEDITOR])
-                {
-                    g_SceneMan.SetSceneToLoad("Editor Scene");
-                    AssemblyEditor *pNewEditor = new AssemblyEditor;
-                    pNewEditor->Create();
-                    pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-                    g_ActivityMan.SetStartActivity(pNewEditor);
-                }
-                else if (anEvent.GetControl() == m_aEditorButton[GIBEDITOR])
-                {
-                    g_SceneMan.SetSceneToLoad("Editor Scene");
-                    GibEditor *pNewEditor = new GibEditor;
-                    pNewEditor->Create();
-                    pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-                    g_ActivityMan.SetStartActivity(pNewEditor);
-                }
-                else if (anEvent.GetControl() == m_aEditorButton[ACTOREDITOR])
-                {
-                    g_SceneMan.SetSceneToLoad("Editor Scene");
-                    ActorEditor *pNewEditor = new ActorEditor;
-                    pNewEditor->Create();
-                    pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-                    g_ActivityMan.SetStartActivity(pNewEditor);
-                }
+				if (anEvent.GetControl() == m_aEditorButton[SCENEEDITOR]) {
+					StartSceneEditor();
+				} else if (anEvent.GetControl() == m_aEditorButton[AREAEDITOR]) {
+					StartAreaEditor();
+				} else if (anEvent.GetControl() == m_aEditorButton[ASSEMBLYEDITOR]) {
+					StartAssemblyEditor();
+				} else if (anEvent.GetControl() == m_aEditorButton[GIBEDITOR]) {
+					StartGibEditor();
+				} else if (anEvent.GetControl() == m_aEditorButton[ACTOREDITOR]) {
+					StartActorEditor();
+				}
 
 //                g_GUISound.BackButtonPressSound().Play();
                 g_GUISound.ExitMenuSound().Play();
@@ -1885,7 +1857,7 @@ void MainMenuGUI::SetupSkirmishActivity()
             g_SceneMan.SetSceneToLoad(m_pSceneSelector->GetItem(m_pSceneSelector->GetSelectedIndex())->m_Name);
 // TODO: Let player choose the GABaseDefense activity instance!
             GABaseDefense *pNewGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Skirmish Defense")->Clone());
-            AAssert(pNewGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
+            RTEAssert(pNewGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
             pNewGame->SetPlayerCount(m_StartPlayers);
             pNewGame->SetTeamCount(m_StartTeams);
 
@@ -2067,13 +2039,7 @@ void MainMenuGUI::UpdateResolutionCombo()
     // Only refill possible resolutions if empty
     if (m_pResolutionCombo->GetCount() <= 0)
     {
-#if defined(__APPLE__)
-		GFX_MODE_LIST* pList = get_gfx_mode_list(g_FrameMan.IsFullscreen() ? GFX_QUARTZ_FULLSCREEN : GFX_QUARTZ_WINDOW);
-#elif defined(__unix__)
-		GFX_MODE_LIST* pList = get_gfx_mode_list(g_FrameMan.IsFullscreen() ? GFX_XWINDOWS_FULLSCREEN : GFX_XWINDOWS);
-#else
         GFX_MODE_LIST *pList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
-#endif // defined(__APPLE__)
 
         int width = 0;
         int height = 0;
@@ -3231,3 +3197,31 @@ void MainMenuGUI::ToggleScript()
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartActorEditor() { StartEditorActivity(new ActorEditor); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartGibEditor() { StartEditorActivity(new GibEditor); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartSceneEditor() { StartEditorActivity(new SceneEditor); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartAreaEditor() { StartEditorActivity(new AreaEditor); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartAssemblyEditor() { StartEditorActivity(new AssemblyEditor); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartEditorActivity(EditorActivity *editorActivityToStart) {
+    g_SceneMan.SetSceneToLoad("Editor Scene");
+    editorActivityToStart->Create();
+    editorActivityToStart->SetEditorMode(EditorActivity::LOADDIALOG);
+    g_ActivityMan.SetStartActivity(editorActivityToStart);
+}

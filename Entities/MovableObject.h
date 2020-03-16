@@ -1034,7 +1034,7 @@ ENTITYALLOCATION(MovableObject)
 // Return value:    None.
 
     void AddImpulseForce(const Vector &impulse, const Vector &offset = Vector())
-        { DAssert(impulse.GetLargest() < 10000, "HUEG IMPULSE FORCE"); DAssert(offset.GetLargest() < 1000, "HUEG IMPULSE FORCE OFFSET"); m_ImpulseForces.push_back(std::make_pair(impulse, offset)); }
+        { RTEAssert(impulse.GetLargest() < 100000, "HUEG IMPULSE FORCE"); RTEAssert(offset.GetLargest() < 1000, "HUEG IMPULSE FORCE OFFSET"); m_ImpulseForces.push_back(std::make_pair(impulse, offset)); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1049,7 +1049,7 @@ ENTITYALLOCATION(MovableObject)
 // Return value:    None.
 
     void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos)
-        { DAssert(impulse.GetLargest() < 10000, "HUEG IMPULSE FORCE");
+        { RTEAssert(impulse.GetLargest() < 100000, "HUEG IMPULSE FORCE");
           m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * g_FrameMan.GetMPP())); }
 
 

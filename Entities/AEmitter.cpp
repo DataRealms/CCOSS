@@ -13,7 +13,7 @@
 
 #include "AEmitter.h"
 #include "Atom.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "PresetMan.h"
 #include "Emission.h"
 
@@ -498,7 +498,7 @@ void AEmitter::Update()
                     // Deduct the about to be emitted emissions from the accumulator
                     (*eItr)->m_Accumulator -= emissions * SPE;
 
-                    DAssert((*eItr)->m_Accumulator >= 0, "Emission accumulator negative!");
+                    RTEAssert((*eItr)->m_Accumulator >= 0, "Emission accumulator negative!");
                 }
 
                 // Add extra emissions if bursting.

@@ -13,7 +13,7 @@
 
 #include "MOSprite.h"
 #include "RTEManagers.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "AEmitter.h"
 
 namespace RTE {
@@ -475,7 +475,7 @@ void MOSprite::Draw(BITMAP *pTargetBitmap,
                     bool onlyPhysical) const
 {
     if (!m_aSprite[m_Frame])
-        DDTAbort("Sprite frame pointer is null when drawing MOSprite!");
+        RTEAbort("Sprite frame pointer is null when drawing MOSprite!");
 
     // Apply offsets and positions.
     Vector spriteOffset;
@@ -531,7 +531,7 @@ void MOSprite::Draw(BITMAP *pTargetBitmap,
     for (int i = 0; i < passes; ++i)
     {
         if (mode == g_DrawMaterial) {
-            DDTAbort("Ordered to draw an MOSprite in its material, which is not possible!");
+            RTEAbort("Ordered to draw an MOSprite in its material, which is not possible!");
         }
         else if (mode == g_DrawAir)
             draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_MaterialAir, -1);

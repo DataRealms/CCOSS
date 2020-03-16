@@ -67,7 +67,7 @@ void AreaEditorGUI::Clear()
 
 int AreaEditorGUI::Create(Controller *pController, bool fullFeatured, int whichModuleSpace)
 {
-    AAssert(pController, "No controller sent to AreaEditorGUI on creation!");
+    RTEAssert(pController, "No controller sent to AreaEditorGUI on creation!");
     m_pController = pController;
 
     m_FullFeatured = fullFeatured;

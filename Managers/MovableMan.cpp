@@ -188,7 +188,7 @@ void MovableMan::Destroy()
 
 MovableObject * MovableMan::GetMOFromID(MOID whichID)
 {
-    DAssert(whichID == g_NoMOID || (whichID >= 0 && whichID < m_MOIDIndex.size()), "MOID out of bounds!");
+    RTEAssert(whichID == g_NoMOID || (whichID >= 0 && whichID < m_MOIDIndex.size()), "MOID out of bounds!");
 
     if (whichID != g_NoMOID && whichID != 0 && whichID < m_MOIDIndex.size())
     {
@@ -313,7 +313,7 @@ Actor * MovableMan::GetNextActorInGroup(std::string group, Actor *pAfterThis)
             ;
 
         // Still nothing?? Should at least get the specified actor and return it! - EDIT No becuase it just may not be there!
-//        DAssert(aIt != m_Actors.end(), "Search for something after specified actor, and didn't even find the specified actor!?");
+//        RTEAssert(aIt != m_Actors.end(), "Search for something after specified actor, and didn't even find the specified actor!?");
     }
 
     // Still nothing, so return nothing
@@ -369,7 +369,7 @@ Actor * MovableMan::GetPrevActorInGroup(std::string group, Actor *pBeforeThis)
             ;
 
         // Still nothing?? Should at least get the specified actor and return it! - EDIT No becuase it just may not be there!
-//        DAssert(aIt != m_Actors.rend(), "Search for something after specified actor, and didn't even find the specified actor!?");
+//        RTEAssert(aIt != m_Actors.rend(), "Search for something after specified actor, and didn't even find the specified actor!?");
     }
 
     // Still nothing, so return nothing
@@ -425,7 +425,7 @@ Actor * MovableMan::GetNextTeamActor(int team, Actor *pAfterThis)
             ;
 
         // Still nothing?? Should at least get the specified actor and return it! - EDIT No becuase it just may not be there!
-//        DAssert(aIt != m_Actors.end(), "Search for something after specified actor, and didn't even find the specified actor!?");
+//        RTEAssert(aIt != m_Actors.end(), "Search for something after specified actor, and didn't even find the specified actor!?");
     }
 
     // Still nothing, so return nothing
@@ -463,7 +463,7 @@ Actor * MovableMan::GetNextTeamActor(int team, Actor *pAfterThis)
         }
     }
 
-    DAssert((*aIt)->GetTeam() == team, "Actor of wrong team found in the wrong roster!");
+    RTEAssert((*aIt)->GetTeam() == team, "Actor of wrong team found in the wrong roster!");
     return *aIt;
 }
 
@@ -510,7 +510,7 @@ Actor * MovableMan::GetPrevTeamActor(int team, Actor *pBeforeThis)
             ;
 
         // Still nothing?? Should at least get the specified actor and return it! - EDIT No becuase it just may not be there!
-//        DAssert(aIt != m_Actors.rend(), "Search for something after specified actor, and didn't even find the specified actor!?");
+//        RTEAssert(aIt != m_Actors.rend(), "Search for something after specified actor, and didn't even find the specified actor!?");
     }
 
     // Still nothing, so return nothing
@@ -548,7 +548,7 @@ Actor * MovableMan::GetPrevTeamActor(int team, Actor *pBeforeThis)
         }
     }
 
-    DAssert((*aIt)->GetTeam() == team, "Actor of wrong team found in the wrong roster!");
+    RTEAssert((*aIt)->GetTeam() == team, "Actor of wrong team found in the wrong roster!");
     return *aIt;
 }
 
@@ -2085,8 +2085,8 @@ void MovableMan::VerifyMOIDIndex()
 	{
 		if (*aIt)
 		{
-			DAssert((*aIt)->GetID() == g_NoMOID || (*aIt)->GetID() == count, "MOIDIndex broken!");
-			DAssert((*aIt)->GetRootID() == g_NoMOID || ((*aIt)->GetRootID() >= 0 && (*aIt)->GetRootID() < g_MovableMan.GetMOIDCount()), "MOIDIndex broken!");
+			RTEAssert((*aIt)->GetID() == g_NoMOID || (*aIt)->GetID() == count, "MOIDIndex broken!");
+			RTEAssert((*aIt)->GetRootID() == g_NoMOID || ((*aIt)->GetRootID() >= 0 && (*aIt)->GetRootID() < g_MovableMan.GetMOIDCount()), "MOIDIndex broken!");
 		}
 		count++;
 		if (count == g_NoMOID) count++;
@@ -2095,14 +2095,14 @@ void MovableMan::VerifyMOIDIndex()
 
 	for (deque<MovableObject *>::iterator itr = m_Items.begin(); itr != m_Items.end(); ++itr)
 	{
-		DAssert((*itr)->GetID() == g_NoMOID || (*itr)->GetID() < GetMOIDCount(), "MOIDIndex broken!");
-		DAssert((*itr)->GetRootID() == g_NoMOID || ((*itr)->GetRootID() >= 0 && (*itr)->GetRootID() < g_MovableMan.GetMOIDCount()), "MOIDIndex broken!");
+		RTEAssert((*itr)->GetID() == g_NoMOID || (*itr)->GetID() < GetMOIDCount(), "MOIDIndex broken!");
+		RTEAssert((*itr)->GetRootID() == g_NoMOID || ((*itr)->GetRootID() >= 0 && (*itr)->GetRootID() < g_MovableMan.GetMOIDCount()), "MOIDIndex broken!");
 	}
 	// Try the items just added this frame
 	for (deque<MovableObject *>::iterator itr = m_AddedItems.begin(); itr != m_AddedItems.end(); ++itr)
 	{
-		DAssert((*itr)->GetID() == g_NoMOID || (*itr)->GetID() < GetMOIDCount(), "MOIDIndex broken!");
-		DAssert((*itr)->GetRootID() == g_NoMOID || ((*itr)->GetRootID() >= 0 && (*itr)->GetRootID() < g_MovableMan.GetMOIDCount()), "MOIDIndex broken!");
+		RTEAssert((*itr)->GetID() == g_NoMOID || (*itr)->GetID() < GetMOIDCount(), "MOIDIndex broken!");
+		RTEAssert((*itr)->GetRootID() == g_NoMOID || ((*itr)->GetRootID() >= 0 && (*itr)->GetRootID() < g_MovableMan.GetMOIDCount()), "MOIDIndex broken!");
 	}
 }
 

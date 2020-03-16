@@ -272,7 +272,7 @@ private:
 
     GUIBitmap        *m_DrawBitmap;
     
-    Uint32            m_LineColor;
+    unsigned long            m_LineColor;
 
     GUIProperties    m_PageValues;
     std::vector<GUITextPanel *>        m_TextPanelList;

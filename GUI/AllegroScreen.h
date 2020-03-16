@@ -89,7 +89,7 @@ public:
 // Description:     Draws a bitmap onto the back buffer
 // Arguments:       Bitmap, destination position, source rectangle
 
-    void DrawBitmap(GUIBitmap *pGUIBitmap, int X, int Y, RECT *pRect);
+    void DrawBitmap(GUIBitmap *pGUIBitmap, int X, int Y, GUIRect *pRect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,7 @@ public:
 // Description:     Draws a bitmap onto the back buffer using the colorkey.
 // Arguments:       Bitmap, destination position, source rectangle
 
-    void DrawBitmapTrans(GUIBitmap *pGUIBitmap, int X, int Y, RECT *pRect);
+    void DrawBitmapTrans(GUIBitmap *pGUIBitmap, int X, int Y, GUIRect *pRect);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@ public:
 //                  should be converted to. If this is 0, then the current video color depth
 //                  will be used as target.
 
-    Uint32 ConvertColor(Uint32 color, int targetDepth = 0);
+    unsigned long ConvertColor(unsigned long color, int targetDepth = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

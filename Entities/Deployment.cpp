@@ -701,10 +701,10 @@ bool Deployment::IsOnScenePoint(Vector &scenePoint) const
 void Deployment::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const
 {
     if (!m_Icon.GetBitmaps8() || !(m_Icon.GetBitmaps8()[0]))
-        DDTAbort("Deployment's Icon bitmaps are null when drawing!");
+        RTEAbort("Deployment's Icon bitmaps are null when drawing!");
 
 	if (!m_apArrowLeftBitmap || !m_apArrowRightBitmap)
-		DDTAbort("Deployment's Arrow bitmaps are null when drawing!");
+		RTEAbort("Deployment's Arrow bitmaps are null when drawing!");
 
 	{
 		BITMAP *pBitmap = m_Icon.GetBitmaps8()[0];

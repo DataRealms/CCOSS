@@ -14,7 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Singleton.h"
 #define g_ActivityMan ActivityMan::Instance()
 

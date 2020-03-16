@@ -93,7 +93,7 @@ void SceneEditorGUI::Clear()
 
 int SceneEditorGUI::Create(Controller *pController, FeatureSets featureSet, int whichModuleSpace, int nativeTechModule, float foreignCostMult)
 {
-    AAssert(pController, "No controller sent to SceneEditorGUI on creation!");
+    RTEAssert(pController, "No controller sent to SceneEditorGUI on creation!");
     m_pController = pController;
 
     m_FeatureSet = featureSet;

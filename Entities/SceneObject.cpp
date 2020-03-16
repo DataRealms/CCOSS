@@ -83,7 +83,7 @@ int SceneObject::SOPlacer::ReadProperty(std::string propName, Reader &reader)
     if (propName == "PlacedObject")
     {
         m_pObjectReference = dynamic_cast<const SceneObject *>(g_PresetMan.GetEntityPreset(reader));
-        AAssert(m_pObjectReference, "Stream suggests allocating an unallocatable type in SOPlacer::Create!");
+        RTEAssert(m_pObjectReference, "Stream suggests allocating an unallocatable type in SOPlacer::Create!");
     }
     else if (propName == "Offset")
         reader >> m_Offset;
@@ -150,7 +150,7 @@ int SceneObject::SOPlacer::Save(Writer &writer) const
 
 SceneObject * SceneObject::SOPlacer::GetPlacedCopy(const SceneObject *pParent) const
 {
-    AAssert(m_pObjectReference, "No Object reference to make copy from!");
+    RTEAssert(m_pObjectReference, "No Object reference to make copy from!");
 
     SceneObject *pCopy = dynamic_cast<SceneObject *>(m_pObjectReference->Clone());
     if (pCopy)

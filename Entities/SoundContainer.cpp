@@ -1,5 +1,5 @@
 #include "SoundContainer.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 
 namespace RTE {
 
@@ -20,7 +20,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SoundContainer::Create(const SoundContainer &reference) {
-		DDTAbort("Cannot clone SoundGroups like this. Attempt was made to clone " + reference.GetModuleAndPresetName());
+		RTEAbort("Cannot clone SoundGroups like this. Attempt was made to clone " + reference.GetModuleAndPresetName());
 		return -1;
 	}
 
@@ -85,7 +85,7 @@ namespace RTE {
 		m_Hash = newFile.GetHash();
 
 		FMOD::Sound *pNewSample = newFile.GetAsSample();
-		AAssert(pNewSample, "Failed to load the sample from the file");
+		RTEAssert(pNewSample, "Failed to load the sample from the file");
 		pNewSample->setSoundGroup(m_SoundGroup);
 	}
 
@@ -114,7 +114,7 @@ namespace RTE {
 				m_CurrentSound = floorf((float)soundCount * PosRand());
 			}
 		}
-		DAssert(m_CurrentSound >= 0 && m_CurrentSound < soundCount, "Sample index is out of bounds!");
+		RTEAssert(m_CurrentSound >= 0 && m_CurrentSound < soundCount, "Sample index is out of bounds!");
 		
 		FMOD::Sound *soundToStart;
 		m_SoundGroup->getSound(m_CurrentSound, &soundToStart);

@@ -150,7 +150,7 @@ bool GUIProperties::SetValue(const string Variable, const string Value)
         PropVariable *p = *it;
 
         // Matching name?
-        if (DDTstricmp(p->m_Name.c_str(), Variable.c_str()) == 0) {
+        if (stricmp(p->m_Name.c_str(), Variable.c_str()) == 0) {
             p->m_Value = Value;
             return true;
         }
@@ -211,7 +211,7 @@ bool GUIProperties::GetValue(const string Variable, string *Value)
         PropVariable *p = *it;
 
         // Matching name?
-        if (DDTstricmp(p->m_Name.c_str(), Variable.c_str()) == 0) {
+        if (stricmp(p->m_Name.c_str(), Variable.c_str()) == 0) {
             *Value = p->m_Value;
             return true;
         }
@@ -327,7 +327,7 @@ bool GUIProperties::GetValue(const string Variable, int *Value)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets a single unsigned interger
 
-bool GUIProperties::GetValue(const string Variable, Uint32 *Value)
+bool GUIProperties::GetValue(const string Variable, unsigned long *Value)
 {
     assert(Value);
 
@@ -363,7 +363,7 @@ bool GUIProperties::GetValue(const string Variable, bool *Value)
     *Value = false;
 
     // Convert the string into a boolean
-    if (DDTstricmp(val.c_str(), "true") == 0)
+    if (stricmp(val.c_str(), "true") == 0)
         *Value = true;
 
     // Found the value

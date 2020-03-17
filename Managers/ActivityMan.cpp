@@ -827,7 +827,7 @@ void Activity::ChangeTeamFunds(float howMuch, unsigned int which)
 		m_TeamFunds[which] += howMuch;
 		m_FundsChanged[which] = true;
 		if (IsPlayerTeam(which))
-			g_GUISound.FundsChangedSound().Play();
+			g_GUISound.FundsChangedSound()->Play();
 	}
 }
 
@@ -1013,7 +1013,7 @@ bool Activity::SwitchToActor(Actor *pActor, int player, int team)
     // OR if it's actually a brain of another player, we can't switch to it
     if (pActor != m_pBrain[player] && pActor->IsPlayerControlled() || IsOtherPlayerBrain(m_pControlledActor[player], player))
     {
-        g_GUISound.UserErrorSound().Play();
+        g_GUISound.UserErrorSound()->Play();
         return false;
     }
 
@@ -1042,12 +1042,12 @@ bool Activity::SwitchToActor(Actor *pActor, int player, int team)
         // Play actor switching sound effects
         // Brain has its own special sound effects
         if (m_pControlledActor[player] == m_pBrain[player])
-            g_GUISound.BrainSwitchSound().Play();
+            g_GUISound.BrainSwitchSound()->Play();
         else
-            g_GUISound.ActorSwitchSound().Play();
+            g_GUISound.ActorSwitchSound()->Play();
         // Only play air swoosh if actors are out of sight of each other
         if (pPrevActor && Vector(pPrevActor->GetPos() - m_pControlledActor[player]->GetPos()).GetMagnitude() > g_FrameMan.GetResX() / 2)
-            g_GUISound.CameraTravelSound().Play();
+            g_GUISound.CameraTravelSound()->Play();
 
         ReassignSquadLeader(player, team);
     }
@@ -1100,7 +1100,7 @@ void Activity::SwitchToNextActor(int player, int team, Actor *pSkip)
         // Looped around the whole actor chain, and couldn't find an available actor, so switch back to the original
         if (m_pControlledActor[player] == pPrevActor)
         {
-            g_GUISound.UserErrorSound().Play();
+            g_GUISound.UserErrorSound()->Play();
             m_pControlledActor[player] = pPrevActor;
             break;
         }
@@ -1126,12 +1126,12 @@ void Activity::SwitchToNextActor(int player, int team, Actor *pSkip)
         // Play actor switching sound effects
         // Brain has its own special sound effects
         if (m_pControlledActor[player] == m_pBrain[player])
-            g_GUISound.BrainSwitchSound().Play();
+            g_GUISound.BrainSwitchSound()->Play();
         else
-            g_GUISound.ActorSwitchSound().Play();
+            g_GUISound.ActorSwitchSound()->Play();
         // Only play air swoosh if actors are out of sight of each other
         if (pPrevActor && Vector(pPrevActor->GetPos() - m_pControlledActor[player]->GetPos()).GetMagnitude() > g_FrameMan.GetResX() / 2)
-            g_GUISound.CameraTravelSound().Play();
+            g_GUISound.CameraTravelSound()->Play();
 
         // Follow the new guy normally
         m_ViewState[player] = NORMAL;
@@ -1183,7 +1183,7 @@ void Activity::SwitchToPrevActor(int player, int team, Actor *pSkip)
         // Looped around the whole actor chain, and couldn't find an available actor, so switch back to the original
         if (m_pControlledActor[player] == pPrevActor)
         {
-            g_GUISound.UserErrorSound().Play();
+            g_GUISound.UserErrorSound()->Play();
             m_pControlledActor[player] = pPrevActor;
             break;
         }
@@ -1209,12 +1209,12 @@ void Activity::SwitchToPrevActor(int player, int team, Actor *pSkip)
         // Play actor switching sound effects
         // Brain has its own special sound effects
         if (m_pControlledActor[player] == m_pBrain[player])
-            g_GUISound.BrainSwitchSound().Play();
+            g_GUISound.BrainSwitchSound()->Play();
         else
-            g_GUISound.ActorSwitchSound().Play();
+            g_GUISound.ActorSwitchSound()->Play();
         // Only play air swoosh if actors are out of sight of each other
         if (pPrevActor && Vector(pPrevActor->GetPos() - m_pControlledActor[player]->GetPos()).GetMagnitude() > g_FrameMan.GetResX() / 2)
-            g_GUISound.CameraTravelSound().Play();
+            g_GUISound.CameraTravelSound()->Play();
 
         ReassignSquadLeader(player, team);
     }

@@ -339,7 +339,7 @@ namespace RTE {
 						m_pGUIController->EnableMouse(false);
 						m_Mode = CONNECTION;
 						m_ConnectionWaitTimer.Reset();
-						g_GUISound.ButtonPressSound().Play();
+						g_GUISound.ButtonPressSound()->Play();
 					}
 
 
@@ -403,7 +403,7 @@ namespace RTE {
 						m_pGUIController->EnableMouse(false);
 						m_Mode = CONNECTION;
 						m_ConnectionWaitTimer.Reset();
-						g_GUISound.ButtonPressSound().Play();
+						g_GUISound.ButtonPressSound()->Play();
 					}
 				}
 				// Notifications

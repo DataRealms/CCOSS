@@ -178,7 +178,7 @@ void AreaPickerGUI::SetEnabled(bool enable)
         m_pGUIInput->GetMouseOffset(mouseOffX, mouseOffY);
         Vector mousePos(-mouseOffX + (g_FrameMan.GetPlayerScreenWidth() / 2), -mouseOffY + (g_FrameMan.GetPlayerScreenHeight() / 2));
         g_UInputMan.SetMousePos(mousePos, m_pController->GetPlayer());
-        g_GUISound.EnterMenuSound().Play();
+        g_GUISound.EnterMenuSound()->Play();
 
         // Repopulate with the current Scene's list of Area:s
         UpdateAreasList();
@@ -190,7 +190,7 @@ void AreaPickerGUI::SetEnabled(bool enable)
         g_UInputMan.TrapMousePos(true, m_pController->GetPlayer());
         // Only play switching away sound
 //        if (!m_pPickedArea)
-            g_GUISound.ExitMenuSound().Play();
+            g_GUISound.ExitMenuSound()->Play();
     }
 }
 
@@ -225,7 +225,7 @@ Scene::Area * AreaPickerGUI::GetNextArea()
     GUIListPanel::Item *pItem = m_pAreasList->GetSelected();
     if (pItem)
     {
-        g_GUISound.SelectionChangeSound().Play();
+        g_GUISound.SelectionChangeSound()->Play();
         return g_SceneMan.GetScene()->GetArea(pItem->m_Name);
     }
     return 0;
@@ -249,7 +249,7 @@ Scene::Area * AreaPickerGUI::GetPrevArea()
     GUIListPanel::Item *pItem = m_pAreasList->GetSelected();
     if (pItem)
     {
-        g_GUISound.SelectionChangeSound().Play();
+        g_GUISound.SelectionChangeSound()->Play();
         return g_SceneMan.GetScene()->GetArea(pItem->m_Name);
     }
     return 0;
@@ -421,7 +421,7 @@ void AreaPickerGUI::Update()
         GUIListPanel::Item *pItem = m_pAreasList->GetSelected();
         if (pItem)
             m_pPickedArea = g_SceneMan.GetScene()->GetArea(pItem->m_Name);
-        g_GUISound.SelectionChangeSound().Play();
+        g_GUISound.SelectionChangeSound()->Play();
     }
     else if (pressUp)
     {
@@ -436,7 +436,7 @@ void AreaPickerGUI::Update()
         if (pItem)
             m_pPickedArea = g_SceneMan.GetScene()->GetArea(pItem->m_Name);
 
-        g_GUISound.SelectionChangeSound().Play();
+        g_GUISound.SelectionChangeSound()->Play();
     }
 
     // Fire button picks the area and deactivates the picker GUI
@@ -448,7 +448,7 @@ void AreaPickerGUI::Update()
             // User has made final selection, so close the Picker
             if (m_pPickedArea = g_SceneMan.GetScene()->GetArea(pItem->m_Name))
             {
-                g_GUISound.AreaPickedSound().Play();
+                g_GUISound.AreaPickedSound()->Play();
                 SetEnabled(false);
             }
         }
@@ -463,7 +463,7 @@ void AreaPickerGUI::Update()
             // User has made final selection, so close the Picker
             if (m_pPickedArea = g_SceneMan.GetScene()->GetArea(pItem->m_Name))
             {
-                g_GUISound.AreaPickedSound().Play();
+                g_GUISound.AreaPickedSound()->Play();
                 SetEnabled(false);
             }
         }
@@ -502,10 +502,10 @@ void AreaPickerGUI::Update()
                     g_SceneMan.GetScene()->RemoveArea(pItem->m_Name);
                     // Update the list so it shows the one removed
                     UpdateAreasList(m_pPickedArea->GetName());
-                    g_GUISound.AreaPickedSound().Play();
+                    g_GUISound.AreaPickedSound()->Play();
                 }
                 else
-                    g_GUISound.UserErrorSound().Play();
+                    g_GUISound.UserErrorSound()->Play();
 			}
         }
         else if (anEvent.GetType() == GUIEvent::Notification)
@@ -526,7 +526,7 @@ void AreaPickerGUI::Update()
                         // User has made final selection, so close the Picker
                         if (m_pPickedArea = g_SceneMan.GetScene()->GetArea(pItem->m_Name))
                         {
-                            g_GUISound.AreaPickedSound().Play();
+                            g_GUISound.AreaPickedSound()->Play();
                             SetEnabled(false);
                         }
                     }
@@ -546,7 +546,7 @@ void AreaPickerGUI::Update()
                 // User has made final selection, so close the Picker
                 if (m_pPickedArea = g_SceneMan.GetScene()->GetArea(pItem->m_Name))
                 {
-                    g_GUISound.AreaPickedSound().Play();
+                    g_GUISound.AreaPickedSound()->Play();
                     SetEnabled(false);
                 }
             }

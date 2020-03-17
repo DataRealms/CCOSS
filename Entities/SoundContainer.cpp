@@ -8,10 +8,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SoundContainer::Clear() {
-		if (m_SoundGroup != NULL) {
-			m_SoundGroup->release();
-			m_SoundGroup = 0;
-		}
+		m_Sounds.clear();
 		m_CurrentSound = 0;
 		m_PlayingChannels.clear();
 		m_Loops = 0;
@@ -23,8 +20,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SoundContainer::Create(const SoundContainer &reference) {
-		RTEAbort("Cannot clone SoundGroups like this. Attempt was made to clone " + reference.GetModuleAndPresetName());
-		return -1;
+		Entity::Create(reference);
+
+		for (std::vector<std::pair<ContentFile, FMOD::Sound *>>::const_iterator itr = reference.m_Sounds.begin(); itr != reference.m_Sounds.end(); ++itr) {
+			m_Sounds.push_back(*itr);
+		}
+
+		m_CurrentSound = reference.m_CurrentSound;
+		m_PlayingChannels.clear();
+		m_Loops = reference.m_Loops;
+		m_Priority = reference.m_Priority;
+		m_AffectedByPitch = reference.m_AffectedByPitch;
+		m_Hash = reference.m_Hash;
+
+		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,8 +42,6 @@ namespace RTE {
 		AddSound(samplePath);
 		m_AffectedByPitch = affectedByPitch;
 		m_Loops = loops;
-
-		g_AudioMan.GetAudioSystem()->createSoundGroup(GetPresetName().c_str(), &m_SoundGroup);
 
 		return 0;
 	}
@@ -51,7 +58,7 @@ namespace RTE {
 			if (!pNewSample) {
 				reader.ReportError(std::string("Failed to load the sample from the file"));
 			}
-			pNewSample->setSoundGroup(m_SoundGroup);
+			m_Sounds.push_back(std::pair<ContentFile, FMOD::Sound *>(newFile, pNewSample));
 		} else if (propName == "LoopSetting")
 			reader >> m_Loops;
 		else if (propName == "Priority")
@@ -89,17 +96,15 @@ namespace RTE {
 
 		FMOD::Sound *pNewSample = newFile.GetAsSample();
 		RTEAssert(pNewSample, "Failed to load the sample from the file");
-		pNewSample->setSoundGroup(m_SoundGroup);
+		m_Sounds.push_back(std::pair<ContentFile, FMOD::Sound *>(newFile, pNewSample));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SoundContainer::SetLoopSetting(int loops) {
-		for (int i = 0; i < GetSoundCount(); i++) {
-			FMOD::Sound *sound;
-			m_SoundGroup->getSound(i, &sound);
-			sound->setMode((loops == 0 || loops == 1) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL);
-			sound->setLoopCount(loops);
+		for (std::vector<std::pair<ContentFile, FMOD::Sound * >>::const_iterator itr = m_Sounds.begin(); itr != m_Sounds.end(); ++itr) {
+			FMOD_RESULT result = itr->second->setMode((loops == 0 || loops == 1) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL);
+			result = itr->second->setLoopCount(loops);
 		}
 	}
 
@@ -120,8 +125,7 @@ namespace RTE {
 		RTEAssert(m_CurrentSound >= 0 && m_CurrentSound < soundCount, "Sample index is out of bounds!");
 		
 		FMOD::Sound *soundToStart;
-		m_SoundGroup->getSound(m_CurrentSound, &soundToStart);
-		return soundToStart;
+		return m_Sounds[m_CurrentSound].second;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -98,7 +98,7 @@ namespace RTE {
 		/// Gets the current list of sounds in the SoundContainer.
 		/// </summary>
 		/// <returns>A reference to the list.</returns>
-		FMOD::SoundGroup *GetSounds() const { return m_SoundGroup; }
+		std::vector<std::pair<ContentFile, FMOD::Sound *>> GetSounds() const { return m_Sounds; }
 
 		/// <summary>
 		/// Shows whether this SoundContainer has been initialized at all yet and loaded with any samples.
@@ -110,7 +110,7 @@ namespace RTE {
 		/// Gets the current number of sounds in this SoundContainer.
 		/// </summary>
 		/// <returns>An int with the count.</returns>
-		int GetSoundCount() const { int numSounds; return m_SoundGroup->getNumSounds(&numSounds) == FMOD_OK ? numSounds : 0; }
+		int GetSoundCount() const { return m_Sounds.size(); }
 
 		/// <summary>
 		/// Indicates whether any sound in this SoundContainer is currently being played.
@@ -122,7 +122,7 @@ namespace RTE {
 		/// Gets the number of currently playing sounds in this SoundContainer.
 		/// </summary>
 		/// <returns>Number of playing sounds in this SoundContainer.</returns>
-		int GetPlayingSoundCount() { int numPlaying; return m_SoundGroup->getNumPlaying(&numPlaying) == FMOD_OK ? numPlaying : 0; }
+		int GetPlayingSoundCount() { return m_PlayingChannels.size(); }
 
 		/// <summary>
 		/// Gets the index in the internal sound group of the currently playing sound in this SoundContainer.
@@ -232,7 +232,7 @@ namespace RTE {
 	protected:
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		FMOD::SoundGroup *m_SoundGroup = 0; //!< A sound group for all the FMOD Sound objects of this SoundContainer. The sound objects within are owned by the ContentFile static maps
+		std::vector<std::pair<ContentFile, FMOD::Sound *>> m_Sounds; // All the FMOD Sound objects in this SoundContainer, paired with their appropriate ContentFile. The sound objects within are owned by the ContentFile static maps
 
 		//TODO change this to be a list/vector of sounds
 		int m_CurrentSound; //!< Sound group index of the current (or last played if nothing is being played) sound being played

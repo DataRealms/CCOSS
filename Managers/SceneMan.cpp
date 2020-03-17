@@ -215,7 +215,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
 
     // Get the unseen reveal sound
     if (!m_pUnseenRevealSound)
-        m_pUnseenRevealSound = dynamic_cast<SoundContainer *>(g_PresetMan.GetEntityPreset("Sound", "Unseen Reveal Blip")->Clone());
+        m_pUnseenRevealSound = dynamic_cast<SoundContainer *>(g_PresetMan.GetEntityPreset("SoundContainer", "Unseen Reveal Blip")->Clone());
 
 //    m_pCurrentScene->GetTerrain()->CleanAir();
 

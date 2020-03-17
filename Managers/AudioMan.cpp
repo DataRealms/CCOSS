@@ -186,9 +186,11 @@ namespace RTE {
 				result = result == FMOD_OK ? soundChannel->isPlaying(&isPlaying) : result;
 
 				if (result == FMOD_OK && isPlaying) {
-					SoundContainer *soundContainer = m_ChannelsToSoundContainers.at(i);
+					void *userData;
+					result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
+					SoundContainer *channelSoundContainer = (SoundContainer *)userData;
 
-					if (soundContainer->IsAffectedByPitch()) {
+					if (channelSoundContainer->IsAffectedByPitch()) {
 						soundChannel->setPitch(pitch);
 					}
 				}

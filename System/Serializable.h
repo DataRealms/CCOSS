@@ -75,7 +75,7 @@ namespace RTE {
 		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
 		/// </returns>
 		virtual int ReadProperty(std::string propName, Reader &reader) {
-			// Eat the value of the property which failed to read
+			// Discard the value of the property which failed to read
 			reader.ReadPropValue();
 			reader.ReportError("Could not match property");
 			return -1;

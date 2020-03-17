@@ -48,11 +48,6 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a Vector object before deletion.
-		/// </summary>
-		virtual ~Vector() { ; }
-
-		/// <summary>
 		/// Sets both the X and Y of this Vector to zero.
 		/// </summary>
 		void Reset() { m_X = m_Y = 0.0F; }

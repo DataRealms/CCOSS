@@ -53,11 +53,6 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a Timer object before deletion.
-		/// </summary>
-		~Timer() { ; }
-
-		/// <summary>
 		/// Resets the timer so that the elapsed time is 0 ms.
 		/// </summary>
 		// TODO: Figure out why calling Clear() here breaks time.

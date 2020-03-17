@@ -12,7 +12,8 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a System object in system memory. Should never be called directly, since g_System is an extern linked global that should be used by everything trying to use System.
+		/// Constructor method used to instantiate a System object in system memory. 
+		/// Should never be called directly, since g_System is an extern linked global that should be used by everything trying to use System.
 		/// </summary>
 		System() { m_LogToCLI = false; }
 #pragma endregion
@@ -53,13 +54,13 @@ namespace RTE {
 		/// <summary>
 		/// Prints console output to command-line.
 		/// </summary>
-		/// <param name="consoleString"></param>
-		void PrintConsoleToCLI(std::string consoleString);
+		/// <param name="inputString"></param>
+		void PrintToCLI(std::string inputString);
 #pragma endregion
 
 	protected:
 
-		bool m_LogToCLI; //!< Bool to tell whether to print to command-line or not.
+		bool m_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
 	};
 
 	extern System g_System;

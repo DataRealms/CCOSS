@@ -91,11 +91,6 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a Box object before deletion.
-		/// </summary>
-		virtual ~Box() { ; }
-
-		/// <summary>
 		/// Resets the entire Box object to the default settings or values.
 		/// </summary>
 		virtual void Reset() { Clear(); }

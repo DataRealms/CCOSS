@@ -241,7 +241,7 @@ void ConsoleMan::PrintString(std::string toPrint)
     // Add the input line to the console
     m_pConsoleText->SetText(m_pConsoleText->GetText() + "\n" + toPrint);
 	// Print the input line to the command-line
-	if (g_System.GetLogToCLI()) { g_System.PrintConsoleToCLI(toPrint); }
+	if (g_System.GetLogToCLI()) { g_System.PrintToCLI(toPrint); }
 }
 
 

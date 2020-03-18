@@ -50,9 +50,6 @@ namespace RTE {
 				destroy_bitmap((*lbItr).second);
 			}
 		}
-		for (std::map<std::string, FMOD::Sound *>::iterator lcItr = m_sLoadedSamples.begin(); lcItr != m_sLoadedSamples.end(); ++lcItr) {
-			(*lcItr).second->release();
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,7 +243,7 @@ namespace RTE {
 				soundInfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
 				soundInfo.length = fileSize;
 				//TODO Consider doing FMOD_CREATESAMPLE for dumping audio files into memory and FMOD_NONBLOCKING to async create sounds
-				FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(pRawData, FMOD_OPENMEMORY_POINT, &soundInfo, &pReturnSample);
+				FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(pRawData, FMOD_OPENMEMORY, &soundInfo, &pReturnSample);
 
 				RTEAssert(result == FMOD_OK, "Unable to create sound " + m_DataPath);
 

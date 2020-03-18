@@ -294,13 +294,36 @@ namespace RTE {
 
 		/// <summary>
 		/// Stops all playback.
+		/// Starts playing a certain sound file with optional configurations.
 		/// </summary>
 		void StopAll();
+		/// <param name="filePath">The path to the sound file to play.</param>
+		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent. Defaults to 0.</param>
+		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players. Defaults to -1.</param>
+		/// <param name="loops">The number of times to loop the SoundContainer's sounds. 0 or 1 means play once. -1 means play infinitely until stopped. Defaults to 0.</param>
+		/// <param name="priority">The priority of this sound - higher priority sounds are more likely to be heard. Defaults to PRIORITY_LOW.</param>
+		/// <param name="pitchOrAffectedByGlobalPitch">
+		/// The pitch to play this SoundContainer's at where 1 is unmodified frequency and each multiple of 2 is an octave up or down.
+		/// -1 means the SoundContainer will use global pitch instead of setting it manually. Defaults to -1.
+		/// </param>
+		/// <returns>Returns the new sound object being played. OWNERSHIP IS TRANSFERRED!</returns>
+		SoundContainer *PlaySound(const char *filePath, float distance = 0.0, int player = -1, int loops = 0, int priority = PRIORITY_LOW, double pitchOrAffectedByGlobalPitch = -1);
 
 		/// <summary>
 		/// Stops playing a the music channel.
+		/// Starts playing the next sample of a certain SoundContainer for a certain player.
 		/// </summary>
 		void StopMusic();
+		/// <param name="pSound">Pointer to the SoundContainer to start playing. Ownership is NOT transferred!</param>
+		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent. Defaults to 0.</param>
+		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players. Defaults to -1.</param>
+		/// <param name="priority">The priority of this sound - higher priority sounds are more likely to be heard. -1 means it'll use the SoundContainer's value. Defaults to -1.</param>
+		/// <param name="pitch">
+		/// The pitch to play this SoundContainer's at where 1 is unmodified frequency and each multiple of 2 is an octave up or down.
+		/// -1 means use the SoundContainer's pitch. Defaults to -1
+		/// </param>
+		/// <returns>Whether or not playback of the Sound was successful.</returns>
+		bool PlaySound(SoundContainer *pSoundContainer, float distance = 0.0, int player = -1, int priority = -1, double pitch = -1);
 
 		/// <summary>
 		/// Stops playing all sounds in a given SoundContainer.
@@ -382,6 +405,7 @@ namespace RTE {
 		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		FMOD::System *m_AudioSystem; //!< The FMOD Sound management object
+		FMOD::ChannelGroup *m_MasterChannelGroup; //!< The top-level FMOD ChannelGroup that holds everything
 		FMOD::ChannelGroup *m_MusicChannelGroup; //!< The FMOD ChannelGroup for music
 		FMOD::ChannelGroup *m_SoundChannelGroup; //!< The FMOD ChannelGroup for sounds
 
@@ -390,9 +414,6 @@ namespace RTE {
 		double m_SoundsVolume; //!< Global sounds effects volume.
 		double m_MusicVolume; //!< Global music volume.
 		double m_GlobalPitch; //!< Global pitch multiplier.
-
-		std::vector<int> m_NormalFrequencies; //!< The 'normal' unpitched frequency of each channel handle we have.
-		std::vector<double> m_PitchModifiers; //!< How each channel's pitch is modified individually.
 
 		std::string m_MusicPath; //!< The path to the last played music stream.
 		std::list<std::string> m_MusicPlayList; //!< Playlist of paths to music to play after the current non looping one is done.
@@ -412,8 +433,6 @@ namespace RTE {
 		/// A static callback function for FMOD to invoke when a sound channel finished playing. See fmod docs - FMOD_SYSTEM_CALLBACK for details
 		/// </summary>
 		static FMOD_RESULT F_CALLBACK SoundChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
-
-		std::unordered_map<int, SoundContainer *> m_ChannelsToSoundContainers; //!< A map of channel numbers to SoundContainers. Is lazily updated so channels should be checked against the SoundChannelGroup before being considered accurate
 
 		/// <summary>
 		/// Clears all the member variables of this AudioMan, effectively resetting the members of this abstraction level only.

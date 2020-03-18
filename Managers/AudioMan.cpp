@@ -11,15 +11,7 @@ namespace RTE {
 
 	FMOD_RESULT F_CALLBACK AudioMan::MusicChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *unusedCommandData1, void *unusedCommandData2) {
 		if (channelControlType == FMOD_CHANNELCONTROL_CHANNEL && callbackType == FMOD_CHANNELCONTROL_CALLBACK_END) {
-			FMOD::Channel *channel = (FMOD::Channel *) channelControl;
-
-			FMOD_RESULT result = channel->setVolume(g_AudioMan.m_MusicVolume);
 			g_AudioMan.PlayNextStream();
-
-			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: An error occured in the End Music callback.");
-				return result;
-			}
 		}
 		return FMOD_OK;
 	}
@@ -38,13 +30,13 @@ namespace RTE {
 				channelSoundContainer->RemovePlayingChannel(channelIndex);
 			}
 
-			//TODO this stuff below might be unnecessary
-			result = result == FMOD_OK ? channel->setPitch(1.0) : result;
-			result = result == FMOD_OK ? channel->removeFadePoints(0, 18446744073709551615) : result; //Remove all possible fade points
-			result = result == FMOD_OK ? channel->setVolume(Instance().m_SoundsVolume) : result;
+			//TODO this stuff below might be unnecessary, setPitch fails from an invalid channel anyway. Need to be sure everything resets to defaults, probably by fiddling with a specific channel then playing on it then playing another thing on it when it's done to see what happens
+			//result = result == FMOD_OK ? channel->setPitch(1.0) : result;
+			//result = result == FMOD_OK ? channel->removeFadePoints(0, 18446744073709551615) : result; //Remove all possible fade points
+			//result = result == FMOD_OK ? channel->setVolume(Instance().m_SoundsVolume) : result;
 
 			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: An error occured in the End Sound callback for a sound in SoundContainer " + channelSoundContainer->GetPresetName() + ". This is probably bad!");
+				g_ConsoleMan.PrintString("ERROR: An error occured when Ending a sound in SoundContainer " + channelSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
 				return result;
 			}
 		}
@@ -60,9 +52,6 @@ namespace RTE {
 		m_SoundsVolume = 1.0;
 		m_MusicVolume = 1.0;
 		m_GlobalPitch = 1.0;
-
-		m_NormalFrequencies.clear();
-		m_PitchModifiers.clear();
 
 		m_MusicPlayList.clear();
 		m_SilenceTimer.Reset();
@@ -80,22 +69,23 @@ namespace RTE {
 	int AudioMan::Create() {
 		FMOD_RESULT soundSystemSetupResult = FMOD::System_Create(&m_AudioSystem);
 
-		m_AudioSystem->setSoftwareChannels(g_SettingsMan.GetAudioChannels());
 		//TODO 44.1 kHz came from data, fmod defaults to 48 kHz, see if we can just use this instead??
 		m_AudioSystem->setSoftwareFormat(44100, FMOD_SPEAKERMODE_DEFAULT, 0);
 
-		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->init(512, FMOD_INIT_NORMAL, 0) : soundSystemSetupResult;
+		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->init(g_SettingsMan.GetAudioChannels(), FMOD_INIT_NORMAL, 0) : soundSystemSetupResult;
+		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->getMasterChannelGroup(&m_MasterChannelGroup) : soundSystemSetupResult;
 		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->createChannelGroup("Music", &m_MusicChannelGroup) : soundSystemSetupResult;
 		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->createChannelGroup("Sounds", &m_SoundChannelGroup) : soundSystemSetupResult;
+		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_MasterChannelGroup->addGroup(m_MusicChannelGroup) : soundSystemSetupResult;
+		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_MasterChannelGroup->addGroup(m_SoundChannelGroup) : soundSystemSetupResult;
 		
 		m_AudioEnabled = true;
 		if (soundSystemSetupResult != FMOD_OK) {
 			m_AudioEnabled = false;
 			return -1;
 		}
-
-		//TODO figure out if we want this/if it can be done more automatically with fmod?
-		SetGlobalPitch(m_GlobalPitch);
+		
+		SetGlobalPitch(m_GlobalPitch); //TODO figure out if we want pitching and if it can be done more automatically with fmod?
 		SetSoundsVolume(m_SoundsVolume);
 		SetMusicVolume(m_MusicVolume);
 
@@ -311,10 +301,10 @@ namespace RTE {
 		if (anySoundsPlaying) {
 			std::unordered_set<short int> channels = pSoundContainer->GetPlayingChannels();
 			for (std::unordered_set<short int>::iterator channelIterator = channels.begin(); channelIterator != channels.end(); ++channelIterator) {
-				result = m_SoundChannelGroup->getChannel((*channelIterator), &soundChannel);
+				result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
 				result = result == FMOD_OK ? soundChannel->stop() : result;
 				if (result != FMOD_OK) {
-					g_ConsoleMan.PrintString("Error: Failed to stop playing channel in SoundContainer "+pSoundContainer->GetPresetName());
+					g_ConsoleMan.PrintString("Error: Failed to stop playing channel in SoundContainer "+pSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
 				}
 
 			}
@@ -339,7 +329,10 @@ namespace RTE {
 				RegisterMusicEvent(-1, MUSIC_STOP, 0, 0, 0.0, 0.0);
 			}
 
-			m_MusicChannelGroup->stop();
+			FMOD_RESULT result = m_MusicChannelGroup->stop();
+			if (result != FMOD_OK) {
+				g_ConsoleMan.PrintString("ERROR: Could not stop music: " + std::string(FMOD_ErrorString(result)));
+			}
 			m_MusicPlayList.clear();
 		}
 	}
@@ -389,12 +382,13 @@ namespace RTE {
 
 		std::unordered_set<short int> channels = pSoundContainer->GetPlayingChannels();
 		for (std::unordered_set<short int>::iterator channelIterator = channels.begin(); channelIterator != channels.end(); ++channelIterator) {
-			result = m_SoundChannelGroup->getChannel((*channelIterator), &soundChannel);
-			if (result == FMOD_OK) {
-				result = soundChannel->getDSPClock(nullptr, &parentClock);
-				result = result == FMOD_OK ? soundChannel->getVolume(&currentVolume) : result;
-				result = result == FMOD_OK ? soundChannel->addFadePoint(parentClock, currentVolume) : result;
-				result = result == FMOD_OK ? soundChannel->addFadePoint(parentClock + fadeOutTimeAsSamples, 0) : result;
+			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
+			result = result == FMOD_OK ? soundChannel->getDSPClock(nullptr, &parentClock) : result;
+			result = result == FMOD_OK ? soundChannel->getVolume(&currentVolume) : result;
+			result = result == FMOD_OK ? soundChannel->addFadePoint(parentClock, currentVolume) : result;
+			result = result == FMOD_OK ? soundChannel->addFadePoint(parentClock + fadeOutTimeAsSamples, 0) : result;
+			if (result != FMOD_OK) {
+				g_ConsoleMan.PrintString("ERROR: Could not fade out sounds in SoundContainer " + pSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
 			}
 		}
 	}
@@ -417,7 +411,9 @@ namespace RTE {
 			bool isPlaying;
 			FMOD_RESULT result = m_MusicChannelGroup->isPlaying(&isPlaying);
 
-			if (result == FMOD_OK && !isPlaying) {
+			if (result != FMOD_OK) {
+				g_ConsoleMan.PrintString("ERROR: Could not queue music stream: " + std::string(FMOD_ErrorString(result)));
+			} else if (!isPlaying) {
 				PlayMusic(filepath);
 			} else {
 				m_MusicPlayList.push_back(std::string(filepath));
@@ -444,7 +440,10 @@ namespace RTE {
 				FMOD_RESULT result = m_MusicChannelGroup->isPlaying(&isPlaying);
 				if (result == FMOD_OK && isPlaying) {
 					RegisterMusicEvent(-1, MUSIC_SILENCE, 0, seconds, 0.0, 1.0);
-					m_MusicChannelGroup->stop();
+					result = m_MusicChannelGroup->stop();
+				}
+				if (result != FMOD_OK) {
+					g_ConsoleMan.PrintString("ERROR: Could not set play silence as specified in music queue, when trying to play next stream: " + std::string(FMOD_ErrorString(result)));
 				}
 			} else {
 				PlayMusic(nextString.c_str(), m_MusicPlayList.empty() ? -1 : 0); //Loop music if it's the last track in the playlist, otherwise just go to the next one
@@ -454,45 +453,29 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::PlaySound(const char *filePath) {
-		FMOD::Sound *sound;
-		m_AudioSystem->createSound(filePath, FMOD_DEFAULT, nullptr, &sound);
-		m_AudioSystem->playSound(sound, m_SoundChannelGroup, false, nullptr);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	SoundContainer * AudioMan::PlaySound(const char *filePath, float distance, bool loops, bool affectedByPitch, int player) {
+	SoundContainer * AudioMan::PlaySound(const char *filePath, float distance, int player, int loops, int priority, double pitchOrAffectedByGlobalPitch) {
 		if (!filePath) {
 			g_ConsoleMan.PrintString("Error: Null filepath passed to AudioMan::PlaySound!");
 			return 0;
 		}
 
+		bool affectedByGlobalPitch = pitchOrAffectedByGlobalPitch == -1;
+		bool pitch = affectedByGlobalPitch ? m_GlobalPitch : pitchOrAffectedByGlobalPitch;
+
 		SoundContainer *newSoundContainer = new SoundContainer();
-		newSoundContainer->Create(filePath, affectedByPitch, loops ? 1 : 0);
-		PlaySound(player, newSoundContainer, PRIORITY_LOW, distance, affectedByPitch ? m_GlobalPitch : 1.0);
+		newSoundContainer->Create(filePath, affectedByGlobalPitch, loops);
+		PlaySound(newSoundContainer, distance, player, priority, pitch);
 
 		return newSoundContainer;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AudioMan::PlaySound(int player, SoundContainer *pSoundContainer, int priority, float distance, double pitch) {
-		// We need to play sound before registering an event because it will assign a channel or channels to the sound being played. Clients then use this number to identify the sound being played
-		bool success = PlaySound(pSoundContainer, priority, distance, pitch);
-
-		if (m_IsInMultiplayerMode && pSoundContainer) {
-			RegisterSoundEvent(player, SOUND_PLAY, pSoundContainer->GetHash(), distance, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), pitch, pSoundContainer->IsAffectedByPitch());
-		}
-		return success;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool AudioMan::PlaySound(SoundContainer *pSoundContainer, int priority, float distance, double pitch) {
+	bool AudioMan::PlaySound(SoundContainer *pSoundContainer, float distance, int player, int priority, double pitch) {
 		if (!m_AudioEnabled || !pSoundContainer) {
 			return false;
 		}
+		priority < 0 ? pSoundContainer->GetPriority() : priority;
 
 		FMOD::Channel *channel;
 		int channelIndex;
@@ -501,15 +484,20 @@ namespace RTE {
 		result = result == FMOD_OK ? channel->setUserData(pSoundContainer) : result;
 		result = result == FMOD_OK ? channel->setCallback(SoundChannelEndedCallback) : result;
 		result = result == FMOD_OK ? channel->setLoopCount(pSoundContainer->GetLoopSetting()) : result;
-		result = result == FMOD_OK ? channel->setPriority(pSoundContainer->GetPriority()) : result;
+		result = result == FMOD_OK ? channel->setPriority(priority) : result;
 
 		if (result != FMOD_OK) {
-			g_ConsoleMan.PrintString("ERROR: Could not play sounds from SoundContainer "+pSoundContainer->GetPresetName());
+			g_ConsoleMan.PrintString("ERROR: Could not play sounds from SoundContainer " + pSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
 			return false;
 		}
 
 		pSoundContainer->AddPlayingChannel(channelIndex);
 		SetSoundAttenuation(pSoundContainer, distance);
+
+		// Now that the sound is playing we can register an event with the SoundContainer's channels, which can be used by clients to identify the sound being played.
+		if (m_IsInMultiplayerMode) {
+			RegisterSoundEvent(player, SOUND_PLAY, pSoundContainer->GetHash(), distance, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), pitch, pSoundContainer->IsAffectedByPitch());
+		}
 
 		return true;
 	}
@@ -524,7 +512,7 @@ namespace RTE {
 
 			FMOD_RESULT result = m_MusicChannelGroup->stop();
 			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: Could not stop existing music to play new music.");
+				g_ConsoleMan.PrintString("ERROR: Could not stop existing music to play new music: " + std::string(FMOD_ErrorString(result)));
 				return;
 			}
 
@@ -532,13 +520,13 @@ namespace RTE {
 
 			result = m_AudioSystem->createStream(filePath, (loops == 0 || loops == 1) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL, nullptr, &musicStream);
 			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: Could not open music file: " + std::string(filePath));
+				g_ConsoleMan.PrintString("ERROR: Could not open music file " + std::string(filePath) + ": " + std::string(FMOD_ErrorString(result)));
 				return;
 			}
 
 			result = musicStream->setLoopCount(loops);
 			if (result != FMOD_OK && (loops != 0 && loops != 1)) {
-				g_ConsoleMan.PrintString("ERROR: Failed to set looping for music file: " + std::string(filePath) + ". This means it will only play 1 time, instead of " + (loops == 0 ? "looping endlessly." : loops + " times."));
+				g_ConsoleMan.PrintString("ERROR: Failed to set looping for music file: " + std::string(filePath) + ". This means it will only play 1 time, instead of " + (loops == 0 ? "looping endlessly." : loops + " times.") + std::string(FMOD_ErrorString(result)));
 			}
 
 			FMOD::Channel *musicChannel;
@@ -551,7 +539,7 @@ namespace RTE {
 			if (volumeOverrideIfNotMuted >= 0 && m_MusicVolume > 0) {
 				result = musicChannel->setVolume(volumeOverrideIfNotMuted);
 				if (result != FMOD_OK && (loops != 0 && loops != 1)) {
-					g_ConsoleMan.PrintString("ERROR: Failed to set vollume override for music file: " + std::string(filePath) + ". This means it will at the current music volume.");
+					g_ConsoleMan.PrintString("ERROR: Failed to set vollume override for music file: " + std::string(filePath) + ". This means it will stay at " + std::to_string(m_MusicVolume) + ": " + std::string(FMOD_ErrorString(result)));
 				}
 			}
 
@@ -559,7 +547,7 @@ namespace RTE {
 
 			result = musicChannel->setCallback(MusicChannelEndedCallback);
 			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: Failed to set callback for music ending. This means no more music in the music playlist will play after this one is finished.");
+				g_ConsoleMan.PrintString("ERROR: Failed to set callback for music ending. This means no more music in the music playlist will play after this one is finished: " + std::string(FMOD_ErrorString(result)));
 				return;
 			}
 		}

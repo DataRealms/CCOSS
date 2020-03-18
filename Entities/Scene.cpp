@@ -185,7 +185,7 @@ bool Scene::Area::IsInside(const Vector &point) const
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
-            if (wItr->WithinBox(point))
+            if (wItr->IsWithinBox(point))
                 return true;
         }
     }
@@ -211,7 +211,7 @@ bool Scene::Area::IsInsideX(float pointX) const
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
-            if (wItr->WithinBoxX(pointX))
+            if (wItr->IsWithinBoxX(pointX))
                 return true;
         }
     }
@@ -237,7 +237,7 @@ bool Scene::Area::IsInsideY(float pointY) const
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
-            if (wItr->WithinBoxY(pointY))
+            if (wItr->IsWithinBoxY(pointY))
                 return true;
         }
     }
@@ -324,7 +324,7 @@ Box * Scene::Area::GetBoxInside(const Vector &point)
         for (list<Box>::const_iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
             // Return the BoxList box, not the inconsequential wrapped copy
-            if (wItr->WithinBox(point))
+            if (wItr->IsWithinBox(point))
                 return &(*aItr);
         }
     }
@@ -351,7 +351,7 @@ Box Scene::Area::RemoveBoxInside(const Vector &point)
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
-            if (wItr->WithinBox(point))
+            if (wItr->IsWithinBox(point))
             {
                 // Remove the BoxList box, not the inconsequential wrapped copy
                 returnBox = (*aItr);

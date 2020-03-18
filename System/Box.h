@@ -205,21 +205,21 @@ namespace RTE {
 		/// </summary>
 		/// <param name="point">The Vector describing the point to test for within box bounds.</param>
 		/// <returns>Inside the box or not. False if the box IsEmpty()</returns>
-		bool WithinBox(const Vector &point) const;
+		bool IsWithinBox(const Vector &point) const;
 
 		/// <summary>
 		/// Tells whether an X coordinate is within the Box's X-range or not, taking potential flipping into account.
 		/// </summary>
 		/// <param name="pointX">The coordinate describing the X value to test for within box bounds.</param>
 		/// <returns>Inside the box or not in the X axis. False if the box IsEmpty()</returns>
-		bool WithinBoxX(float pointX) const;
+		bool IsWithinBoxX(float pointX) const;
 
 		/// <summary>
 		/// Tells whether an Y coordinate is within the Box's Y-range or not, taking potential flipping into account.
 		/// </summary>
 		/// <param name="pointY">The coordinate describing the Y value to test for within box bounds.</param>
 		/// <returns>Inside the box or not in the Y axis. False if the box IsEmpty()</returns>
-		bool WithinBoxY(float pointY) const;
+		bool IsWithinBoxY(float pointY) const;
 
 		/// <summary>
 		/// Returns a copy of a point constrained inside this box.

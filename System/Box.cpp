@@ -90,7 +90,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool Box::WithinBox(const Vector &point) const {
+	bool Box::IsWithinBox(const Vector &point) const {
 		return !IsEmpty() && (((m_Width > 0 && point.m_X >= m_Corner.m_X && point.m_X < (m_Corner.m_X + m_Width)) ||
 			(m_Width < 0 && point.m_X < m_Corner.m_X && point.m_X >= (m_Corner.m_X + m_Width))) &&
 			(m_Height > 0 && point.m_Y >= m_Corner.m_Y && point.m_Y < (m_Corner.m_Y + m_Height)) ||
@@ -99,14 +99,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool Box::WithinBoxX(float pointX) const {
+	bool Box::IsWithinBoxX(float pointX) const {
 		return !IsEmpty() && ((m_Width > 0 && pointX >= m_Corner.m_X && pointX < (m_Corner.m_X + m_Width)) ||
 			(m_Width < 0 && pointX < m_Corner.m_X && pointX >= (m_Corner.m_X + m_Width)));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool Box::WithinBoxY(float pointY) const {
+	bool Box::IsWithinBoxY(float pointY) const {
 		return !IsEmpty() && ((m_Height > 0 && pointY >= m_Corner.m_Y && pointY < (m_Corner.m_Y + m_Height)) ||
 			(m_Height < 0 && pointY < m_Corner.m_Y && pointY <= (m_Corner.m_Y + m_Height)));
 	}

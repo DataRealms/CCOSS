@@ -2271,7 +2271,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
             for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
             {
                 // See if we found the point to be within the screen or not
-                if (wItr->WithinBox((*itr).m_ScenePos))
+                if (wItr->IsWithinBox((*itr).m_ScenePos))
                 {
                     nearestBoxItr = wItr;
                     withinAny = true;

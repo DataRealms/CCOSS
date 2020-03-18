@@ -66,7 +66,7 @@ namespace RTE {
 	void Reader::Destroy(bool notInherited) {
 		delete m_pStream;
 		// Delete all the streams in the stream stack
-		for (list<StreamInfo>::iterator itr = m_StreamStack.begin(); itr != m_StreamStack.end(); ++itr) {
+		for (std::list<StreamInfo>::iterator itr = m_StreamStack.begin(); itr != m_StreamStack.end(); ++itr) {
 			delete (*itr).m_pStream;
 		}
 		Clear();

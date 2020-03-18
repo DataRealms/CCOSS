@@ -115,7 +115,7 @@ namespace RTE {
 			RTEAssert(pReturnBitmap, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
 
 			// Insert the bitmap into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
-			m_sLoadedBitmaps[bitDepth].insert(pair<std::string, BITMAP *>(m_DataPath, pReturnBitmap));
+			m_sLoadedBitmaps[bitDepth].insert(std::pair<std::string, BITMAP *>(m_DataPath, pReturnBitmap));
 		}
 
 		return pReturnBitmap;
@@ -268,7 +268,7 @@ namespace RTE {
 			RTEAssert(pReturnSample, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
 
 			// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
-			m_sLoadedSamples.insert(pair<std::string, AUDIO_STRUCT *>(m_DataPath, pReturnSample));
+			m_sLoadedSamples.insert(std::pair<std::string, AUDIO_STRUCT *>(m_DataPath, pReturnSample));
 		}
 		return pReturnSample;
 	}

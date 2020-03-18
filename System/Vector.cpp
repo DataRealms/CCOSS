@@ -150,10 +150,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::operator=(const deque<Vector> &rhs) {
+	Vector & Vector::operator=(const std::deque<Vector> &rhs) {
 		Clear();
 		if (rhs.empty()) { return *this; }
-		for (deque<Vector>::const_iterator itr = rhs.begin(); itr != rhs.end(); ++itr) {
+		for (std::deque<Vector>::const_iterator itr = rhs.begin(); itr != rhs.end(); ++itr) {
 			*this += *itr;
 		}
 		*this /= rhs.size();

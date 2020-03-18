@@ -318,7 +318,7 @@ namespace RTE {
 		bool foundAny = false;
 
 		// Find either the Entity typelist that contains all entities in this DataModule, or the specific class' typelist (which will get all derived classes too)
-		map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find((type.empty() || type == "All") ? "Entity" : type);
+		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find((type.empty() || type == "All") ? "Entity" : type);
 		
 		if (classItr != m_TypeMap.end()) {
 			//RTEAssert(!(type.empty() || type == "All") && !classItr->second.empty(), "DataModule has class entry without instances in its map!?");
@@ -340,7 +340,7 @@ namespace RTE {
 			return false;
 		}
 
-		map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(type);
+		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(type);
 		if (classItr != m_TypeMap.end()) {
 			RTEAssert(!classItr->second.empty(), "DataModule has class entry without instances in its map!?");
 

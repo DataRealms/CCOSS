@@ -116,7 +116,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void OpenBrowserToURL(string goToURL) {
+	void OpenBrowserToURL(std::string goToURL) {
 		system(std::string("start ").append(goToURL).c_str());
 	}
 
@@ -132,7 +132,7 @@ namespace RTE {
 		std::string line;
 		std::string::size_type pos = 0;
 		std::string::size_type endPos = 0;
-		std::string::size_type commentPos = string::npos;
+		std::string::size_type commentPos = std::string::npos;
 		bool blockCommented = false;
 
 		while (!pFile->eof()) {

@@ -33,7 +33,7 @@ namespace RTE {
 			// Start the column height over at middle of the top node each new column
 			nodePos.m_Y = static_cast<float>(nodeDimension) / 2.0F;
 			// Create the new column and fill it out
-			vector<PathNode *> newColumn;
+			std::vector<PathNode *> newColumn;
 			for (int y = 0; y < nodeYCount; ++y) {
 				// Make sure no cell centers are off the scene (since they can overlap the far edge of the scene)
 				if (nodePos.m_Y >= sceneHeight) { nodePos.m_Y = sceneHeight - 1; }
@@ -112,7 +112,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int PathFinder::CalculatePath(Vector start, Vector end, list<Vector> &pathResult, float &totalCostResult, float digStrength) {
+	int PathFinder::CalculatePath(Vector start, Vector end, std::list<Vector> &pathResult, float &totalCostResult, float digStrength) {
 		RTEAssert(m_pPather, "No pather exists, can't calculate the path!");
 
 		// Make sure start and end are within scene bounds
@@ -132,14 +132,14 @@ namespace RTE {
 		m_DigStrength = digStrength;
 
 		// Do the actual pathfinding, fetch out the list of states that comprise the best path
-		vector<void *> statePath;
+		std::vector<void *> statePath;
 		int result = m_pPather->Solve((void *)(m_NodeGrid[startNodeX][startNodeY]), (void *)(m_NodeGrid[endNodeX][endNodeY]), &statePath, &totalCostResult);
 
 		// We got something back
 		if (!statePath.empty()) {
 			// Replace the approximate first point from the pathfound path with the exact starting point
 			pathResult.push_back(start);
-			vector<void *>::iterator itr = statePath.begin();
+			std::vector<void *>::iterator itr = statePath.begin();
 			itr++;
 
 			// Convert from a list of state void pointers to a list of scene position vectors
@@ -180,10 +180,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PathFinder::RecalculateAreaCosts(const list<Box> &boxList) {
+	void PathFinder::RecalculateAreaCosts(const std::list<Box> &boxList) {
 		// Go through all the boxes and see if any of the node centers are inside each
 		Box box;
-		for (list<Box>::const_iterator bItr = boxList.begin(); bItr != boxList.end(); bItr++) {
+		for (std::list<Box>::const_iterator bItr = boxList.begin(); bItr != boxList.end(); bItr++) {
 			// Get the current area box and make sure it's unflipped
 			box = (*bItr);
 			box.Unflip();

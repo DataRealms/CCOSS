@@ -39,10 +39,10 @@ namespace RTE {
 		/// Creates a SoundContainer and gives it a path to its first sample.
 		/// </summary>
 		/// <param name="soundPath">A path to the sound for this sound to have.</param>
-		/// <param name="affectedByPitch">Whether this SoundContainer's sounds' frequency will be affected by global pitch</param>
 		/// <param name="loops">The number of times this SoundContainer's sounds will loop. 0 means play once. -1 means play infinitely until stopped.</param>
+		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(std::string soundPath, bool affectedByPitch = true, int loops = 0);
+		int Create(std::string soundPath, int loops = 0, bool affectedByGlobalPitch = true);
 
 		/// <summary>
 		/// Adds a new Sound to this SoundContainer, loaded from a file.
@@ -151,10 +151,9 @@ namespace RTE {
 		/// <summary>
 		/// Updates the distance attenuation of the SoundContainer's sounds while they're playing.
 		/// </summary>
-		/// <param name="distance">
-		/// How much distance attenuation to apply to the sound. 0 = full volume 1.0 = max distant, but still won't be completely inaudible.</param>
+		/// <param name="attenuation">How much distance attenuation to apply to the sound. 0 = full volume 1.0 = max distant, but still won't be completely inaudible.</param>
 		/// <returns>Whether this SoundContainer's attenuation setting was successful.</returns>
-		bool UpdateAttenuation(float distance = 0) { return g_AudioMan.SetSoundAttenuation(this, distance); }
+		bool UpdateAttenuation(float attenuation) { return g_AudioMan.SetSoundAttenuation(this, attenuation); }
 
 		/// <summary>
 		/// Gets the looping setting of this SoundContainer.
@@ -185,13 +184,13 @@ namespace RTE {
 		/// Gets whether the sounds in this SoundContainer are affected by global pitch changes or not.
 		/// </summary>
 		/// <returns>Whether or not the Sounds in this SoundContainer affected by global pitch changes.</returns>
-		bool IsAffectedByPitch() const { return m_AffectedByPitch; }
+		bool IsAffectedByGlobalPitch() const { return m_AffectedByGlobalPitch; }
 
 		/// <summary>
 		/// Sets whether the sounds in this SoundContainer are affected by global pitch changes or not.
 		/// </summary>
 		/// <param name="pitched">Whether the sounds in this SoundContainer should be affected by global pitch or not.</param>
-		void SetAffectedByPitch(bool pitched = true) { m_AffectedByPitch = pitched; }
+		void SetAffectedByGlobalPitch(bool affectedByGlobalPitch) { m_AffectedByGlobalPitch = affectedByGlobalPitch; }
 
 		/// <summary>
 		/// Gets the hash for this SoundContainer, used for multiplayer data
@@ -202,19 +201,38 @@ namespace RTE {
 
 #pragma region Playback Controls
 		/// <summary>
-		/// Plays the next sound of this SoundContainer for a specific player.
+		/// Plays the next sound of this SoundContainer with default attenuation for all players.
 		/// </summary>
-		/// <param name="distance">How much distance attenuation to apply to the SoundContainer.</param>
+		/// <returns>Whether this SoundContainer successfully started playing on any channels.</returns>
+		bool Play() { return Play(0, -1); }
+
+		/// <summary>
+		/// Plays the next sound of this SoundContainer with the given attenuation for all players.
+		/// </summary>
+		/// <param name="attenuation">How much distance attenuation to apply to the SoundContainer.</param>
+		/// <returns>Whether this SoundContainer successfully started playing on any channels.</returns>
+		bool Play(float attenuation) { return Play(attenuation, -1); }
+
+		/// <summary>
+		/// Plays the next sound of this SoundContainer with the given attenuation for a specific player.
+		/// </summary>
+		/// <param name="attenuation">How much distance attenuation to apply to the SoundContainer.</param>
 		/// <param name="player">Player to start playback of this SoundContainer for.</param>
-		/// <returns>Whether this SoundContainer successfully started playing on a channel.</returns>
-		bool Play(float distance = 0, int player = -1) { return HasAnySounds() ? g_AudioMan.PlaySound(this, distance, player) : false; }
+		/// <returns>Whether this SoundContainer successfully started playing on any channels.</returns>
+		bool Play(float attenuation, int player) { return HasAnySounds() ? g_AudioMan.PlaySound(this, player, attenuation) : false; }
+
+		/// <summary>
+		/// Stops playback of this SoundContainer for all players.
+		/// </summary>
+		/// <returns>Whether this SoundContainer successfully stopped playing.</returns>
+		bool Stop() { return Stop(-1); }
 
 		/// <summary>
 		/// Stops playback of this SoundContainer for a specific player.
 		/// </summary>
 		/// <param name="player">Player to stop playback of this SoundContainer for.</param>
 		/// <returns>Whether this SoundContainer successfully stopped playing.</returns>
-		bool Stop(int player = -1) { return HasAnySounds() ? g_AudioMan.StopSound(player, this) : false; }
+		bool Stop(int player) { return HasAnySounds() ? g_AudioMan.StopSound(player, this) : false; }
 
 		/// <summary>
 		/// Selects, saves and returns the next sound of this SoundContainer to be played.
@@ -240,7 +258,7 @@ namespace RTE {
 
 		int m_Loops; //!< Number of loops (repeats) the SoundContainer's sounds should play when played. 0 means it plays once, -1 means it plays until stopped 
 		int m_Priority; //!< The mixing priority of this SoundContainer's sounds. Higher values are more likely to be heard
-		bool m_AffectedByPitch; //!< Whether this SoundContainer's sounds should be able to be altered by pitch changes
+		bool m_AffectedByGlobalPitch; //!< Whether this SoundContainer's sounds should be able to be altered by global pitch changes
 
 		size_t m_Hash; //!< Sound file hash for network transmission.
 

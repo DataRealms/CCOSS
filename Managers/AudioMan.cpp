@@ -32,11 +32,6 @@ namespace RTE {
 				channelSoundContainer->RemovePlayingChannel(channelIndex);
 			}
 
-			//TODO this stuff below might be unnecessary, setPitch fails from an invalid channel anyway. Need to be sure everything resets to defaults, probably by fiddling with a specific channel then playing on it then playing another thing on it when it's done to see what happens
-			//result = result == FMOD_OK ? channel->setPitch(1.0) : result;
-			//result = result == FMOD_OK ? channel->removeFadePoints(0, 18446744073709551615) : result; //Remove all possible fade points
-			//result = result == FMOD_OK ? channel->setVolume(Instance().m_SoundsVolume) : result;
-
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: An error occured when Ending a sound in SoundContainer " + channelSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
 				return result;
@@ -87,7 +82,7 @@ namespace RTE {
 			return -1;
 		}
 		
-		SetGlobalPitch(m_GlobalPitch); //TODO figure out if we want pitching and if it can be done more automatically with fmod?
+		SetGlobalPitch(m_GlobalPitch);
 		SetSoundsVolume(m_SoundsVolume);
 		SetMusicVolume(m_MusicVolume);
 
@@ -148,7 +143,7 @@ namespace RTE {
 					result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
 					SoundContainer *channelSoundContainer = (SoundContainer *)userData;
 
-					if (channelSoundContainer->IsAffectedByPitch()) {
+					if (channelSoundContainer->IsAffectedByGlobalPitch()) {
 						soundChannel->setPitch(pitch);
 					}
 				}
@@ -159,10 +154,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AudioMan::SetMusicVolume(double volume) {
-		m_MusicVolume = volume;
+		m_MusicVolume = Limit(volume, 1, 0);
 
 		if (m_AudioEnabled) {
-			m_MusicChannelGroup->setVolume(volume);
+			m_MusicChannelGroup->setVolume(m_MusicVolume);
 		}
 	}
 
@@ -172,7 +167,7 @@ namespace RTE {
 		if (m_AudioEnabled && IsMusicPlaying()) {
 			FMOD::Channel *musicChannel;
 			FMOD_RESULT result = m_MusicChannelGroup->getChannel(0, &musicChannel);
-			result = result == FMOD_OK ? musicChannel->setVolume(volume) : result;
+			result = result == FMOD_OK ? musicChannel->setVolume(Limit(volume, 1, 0)) : result;
 
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not set temporary volume for current music track: " + std::string(FMOD_ErrorString(result)));
@@ -223,11 +218,17 @@ namespace RTE {
 
 	void AudioMan::SetMusicPosition(double position) {
 		if (m_AudioEnabled || IsMusicPlaying()) {
-			FMOD_RESULT result;
 			FMOD::Channel *musicChannel;
+			FMOD_RESULT result = m_MusicChannelGroup->getChannel(0, &musicChannel);
 
-			result = m_MusicChannelGroup->getChannel(0, &musicChannel);
-			result = result == FMOD_OK ? musicChannel->setPosition((unsigned int)(position * 1000), FMOD_TIMEUNIT_MS) : result;
+			FMOD::Sound *musicSound;
+			result = result == FMOD_OK ? musicChannel->getCurrentSound(&musicSound) : result;
+
+			unsigned int musicLength;
+			result = result == FMOD_OK ? musicSound->getLength(&musicLength, FMOD_TIMEUNIT_MS) : result;
+
+			position = static_cast<unsigned int>(Limit(position, musicLength, 0));
+			result = result == FMOD_OK ? musicChannel->setPosition(position, FMOD_TIMEUNIT_MS) : result;
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not set music position: " + std::string(FMOD_ErrorString(result)));
 			}
@@ -253,7 +254,7 @@ namespace RTE {
 
 		distance = Limit(distance, 0.95, 0); //Limit distance so it can't be closer than 0 (no attenuation) or farther than 0.95 (quiet but not quite silent)
 
-		FMOD_RESULT result;
+		FMOD_RESULT result = FMOD_OK;
 		FMOD::Channel *soundChannel;
 
 		std::unordered_set<short int> channels = pSoundContainer->GetPlayingChannels();
@@ -261,7 +262,7 @@ namespace RTE {
 			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
 			result = result == FMOD_OK ? soundChannel->setVolume(1 - distance) : result;
 			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: Could not set sound attenuation for SoundContainer " + pSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
+				g_ConsoleMan.PrintString("ERROR: Could not set sound attenuation for the sound being played on channel " + std::to_string(*channelIterator) + " for SoundContainer " + pSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
 			}
 		}
 
@@ -271,11 +272,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool AudioMan::SetSoundPitch(SoundContainer *pSoundContainer, float pitch) {
-		if (!m_AudioEnabled || !pSoundContainer || !pSoundContainer->IsAffectedByPitch() || pSoundContainer->IsBeingPlayed()) {
+		if (!m_AudioEnabled || !pSoundContainer || !pSoundContainer->IsBeingPlayed()) {
 			return false;
 		}
 		if (IsInMultiplayerMode() && pSoundContainer) {
-			RegisterSoundEvent(-1, SOUND_SET_PITCH, pSoundContainer->GetHash(), 0, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), pitch, pSoundContainer->IsAffectedByPitch());
+			RegisterSoundEvent(-1, SOUND_SET_PITCH, pSoundContainer->GetHash(), 0, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), pitch, pSoundContainer->IsAffectedByGlobalPitch());
 		}
 
 		pitch = Limit(pitch, 8, 0.125); //Limit pitch change to 8 octaves up or down
@@ -321,7 +322,7 @@ namespace RTE {
 			}
 
 			FMOD::Channel *musicChannel;
-			result = m_AudioSystem->playSound(musicStream, m_MusicChannelGroup, false, &musicChannel);
+			result = m_AudioSystem->playSound(musicStream, m_MusicChannelGroup, true, &musicChannel);
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not play music file: " + std::string(filePath));
 				return;
@@ -339,6 +340,12 @@ namespace RTE {
 			result = musicChannel->setCallback(MusicChannelEndedCallback);
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Failed to set callback for music ending. This means no more music in the music playlist will play after this one is finished: " + std::string(FMOD_ErrorString(result)));
+				return;
+			}
+
+			result = musicChannel->setPaused(false);
+			if (result != FMOD_OK) {
+				g_ConsoleMan.PrintString("ERROR: Failed to start playing music after setting it up: " + std::string(FMOD_ErrorString(result)));
 				return;
 			}
 		}
@@ -427,10 +434,10 @@ namespace RTE {
 		}
 
 		bool affectedByGlobalPitch = pitchOrAffectedByGlobalPitch == -1;
-		bool pitch = affectedByGlobalPitch ? m_GlobalPitch : pitchOrAffectedByGlobalPitch;
+		double pitch = affectedByGlobalPitch ? m_GlobalPitch : pitchOrAffectedByGlobalPitch;
 
 		SoundContainer *newSoundContainer = new SoundContainer();
-		newSoundContainer->Create(filePath, affectedByGlobalPitch, loops);
+		newSoundContainer->Create(filePath, loops, affectedByGlobalPitch);
 		PlaySound(newSoundContainer, attenuation, player, priority, pitch);
 
 		return newSoundContainer;
@@ -443,10 +450,11 @@ namespace RTE {
 			return false;
 		}
 		priority = priority < 0 ? pSoundContainer->GetPriority() : priority;
+		pitch = pSoundContainer->IsAffectedByGlobalPitch() ? m_GlobalPitch : pitch;
 
 		FMOD::Channel *channel;
 		int channelIndex;
-		FMOD_RESULT result = m_AudioSystem->playSound(pSoundContainer->SelectNextSound(), m_SoundChannelGroup, false, &channel);
+		FMOD_RESULT result = m_AudioSystem->playSound(pSoundContainer->SelectNextSound(), m_SoundChannelGroup, true, &channel);
 		result = result == FMOD_OK ? channel->getIndex(&channelIndex) : result;
 		result = result == FMOD_OK ? channel->setUserData(pSoundContainer) : result;
 		result = result == FMOD_OK ? channel->setCallback(SoundChannelEndedCallback) : result;
@@ -460,10 +468,16 @@ namespace RTE {
 
 		pSoundContainer->AddPlayingChannel(channelIndex);
 		SetSoundAttenuation(pSoundContainer, attenuation);
+		if (pitch != 1) { SetSoundPitch(pSoundContainer, pitch); }
+
+		result = channel->setPaused(false);
+		if (result != FMOD_OK) {
+			g_ConsoleMan.PrintString("ERROR: Failed to start playing sounds from SoundContainer " + pSoundContainer->GetPresetName() + " after setting it up: " + std::string(FMOD_ErrorString(result)));
+		}
 
 		// Now that the sound is playing we can register an event with the SoundContainer's channels, which can be used by clients to identify the sound being played.
 		if (m_IsInMultiplayerMode) {
-			RegisterSoundEvent(player, SOUND_PLAY, pSoundContainer->GetHash(), attenuation, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), pitch, pSoundContainer->IsAffectedByPitch());
+			RegisterSoundEvent(player, SOUND_PLAY, pSoundContainer->GetHash(), attenuation, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), pitch, pSoundContainer->IsAffectedByGlobalPitch());
 		}
 
 		return true;
@@ -498,7 +512,7 @@ namespace RTE {
 
 	bool AudioMan::StopSound(int player, SoundContainer *pSoundContainer) {
 		if (m_IsInMultiplayerMode && pSoundContainer) {
-			RegisterSoundEvent(player, SOUND_STOP, pSoundContainer->GetHash(), 0, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), 1.0, pSoundContainer->IsAffectedByPitch());
+			RegisterSoundEvent(player, SOUND_STOP, pSoundContainer->GetHash(), 0, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), 1.0, pSoundContainer->IsAffectedByGlobalPitch());
 		}
 		return StopSound(pSoundContainer);
 	}

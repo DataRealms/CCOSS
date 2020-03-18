@@ -22,9 +22,9 @@ namespace RTE {
 		CLASSINFOGETTERS
 
 		enum PlaybackPriority {
-			PRIORITY_LOW = 0,
-			PRIORITY_HIGH = 100,
-			PRIORITY_NOATTENUATION,
+			PRIORITY_HIGH = 0,
+			PRIORITY_NORMAL = 128,
+			PRIORITY_LOW = 256,
 			PRIORITY_COUNT
 		};
 
@@ -221,7 +221,7 @@ namespace RTE {
 		/// <summary>
 		/// Stops all playback and clears the music playlist.
 		/// </summary>
-		void StopAll() { if (m_AudioEnabled) { m_MusicChannelGroup->stop(); m_SoundChannelGroup->stop(); } m_MusicPlayList.clear(); }
+		void StopAll() { if (m_AudioEnabled) { m_MasterChannelGroup->stop(); } m_MusicPlayList.clear(); }
 
 #pragma region Music Playback and Handling
 		/// <summary>
@@ -264,19 +264,35 @@ namespace RTE {
 
 #pragma region Sound Playback and Handling
 		/// <summary>
-		/// Starts playing a certain sound file with optional configurations.
+		/// Starts playing a certain sound file.
 		/// </summary>
 		/// <param name="filePath">The path to the sound file to play.</param>
-		/// <param name="attenuation">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent. Defaults to 0.</param>
-		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players. Defaults to -1.</param>
-		/// <param name="loops">The number of times to loop the SoundContainer's sounds. 0 or 1 means play once. -1 means play infinitely until stopped. Defaults to 0.</param>
-		/// <param name="priority">The priority of this sound - higher priority sounds are more likely to be heard. Defaults to PRIORITY_LOW.</param>
+		/// <returns>Returns the new sound object being played. OWNERSHIP IS TRANSFERRED!</returns>
+		SoundContainer *PlaySound(const char *filePath) { return PlaySound(filePath, -1, 0); }
+
+		/// <summary>
+		/// Starts playing a certain sound file with a certain attenuation for a certain player.
+		/// </summary>
+		/// <param name="filePath">The path to the sound file to play.</param>
+		/// <param name="attenuation">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent.</param>
+		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players.</param>
+		/// <returns></returns>
+		SoundContainer *PlaySound(const char *filePath, float attenuation, int player) { return PlaySound(filePath, player, attenuation, 0, PRIORITY_NORMAL, -1); }
+
+		/// <summary>
+		/// Starts playing a certain sound file with various configuration settings.
+		/// </summary>
+		/// <param name="filePath">The path to the sound file to play.</param>
+		/// <param name="attenuation">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent.</param>
+		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players.</param>
+		/// <param name="loops">The number of times to loop the SoundContainer's sounds. 0 means play once. -1 means play infinitely until stopped.</param>
+		/// <param name="priority">The priority of this sound from 256 (lowest) to 0 (highest). Higher priority sounds are more likely to be heard.</param>
 		/// <param name="pitchOrAffectedByGlobalPitch">
 		/// The pitch to play this SoundContainer's at where 1 is unmodified frequency and each multiple of 2 is an octave up or down.
-		/// -1 means the SoundContainer will use global pitch instead of setting it manually. Defaults to -1.
+		/// -1 means the SoundContainer will be affected by global pitch instead of setting handling its pitch manually. Defaults to -1.
 		/// </param>
 		/// <returns>Returns the new sound object being played. OWNERSHIP IS TRANSFERRED!</returns>
-		SoundContainer *PlaySound(const char *filePath, float attenuation = 0.0, int player = -1, int loops = 0, int priority = PRIORITY_LOW, double pitchOrAffectedByGlobalPitch = -1);
+		SoundContainer *PlaySound(const char *filePath, float attenuation, int player, int loops, int priority, double pitchOrAffectedByGlobalPitch);
 
 		/// <summary>
 		/// Starts playing the next sample of a certain SoundContainer for a certain player.
@@ -285,12 +301,9 @@ namespace RTE {
 		/// <param name="attenuation">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent. Defaults to 0.</param>
 		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players. Defaults to -1.</param>
 		/// <param name="priority">The priority of this sound - higher priority sounds are more likely to be heard. -1 means it'll use the SoundContainer's value. Defaults to -1.</param>
-		/// <param name="pitch">
-		/// The pitch to play this SoundContainer's at where 1 is unmodified frequency and each multiple of 2 is an octave up or down.
-		/// -1 means use the SoundContainer's pitch. Defaults to -1
-		/// </param>
+		/// <param name="pitch">/// The pitch to play this SoundContainer's at where 1 is unmodified frequency and each multiple of 2 is an octave up or down. Defaults to 1.</param>
 		/// <returns>Whether or not playback of the Sound was successful.</returns>
-		bool PlaySound(SoundContainer *pSoundContainer, float attenuation = 0.0, int player = -1, int priority = -1, double pitch = -1);
+		bool PlaySound(SoundContainer *pSoundContainer, float attenuation = 0.0, int player = -1, int priority = -1, double pitch = 1);
 
 		/// <summary>
 		/// Stops playing all sounds in a given SoundContainer.

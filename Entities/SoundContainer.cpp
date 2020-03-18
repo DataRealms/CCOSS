@@ -13,7 +13,7 @@ namespace RTE {
 		m_PlayingChannels.clear();
 		m_Loops = 0;
 		m_Priority = AudioMan::PRIORITY_LOW;
-		m_AffectedByPitch = true;
+		m_AffectedByGlobalPitch = true;
 		m_Hash = 0;
 	}
 
@@ -30,7 +30,7 @@ namespace RTE {
 		m_PlayingChannels.clear();
 		m_Loops = reference.m_Loops;
 		m_Priority = reference.m_Priority;
-		m_AffectedByPitch = reference.m_AffectedByPitch;
+		m_AffectedByGlobalPitch = reference.m_AffectedByGlobalPitch;
 		m_Hash = reference.m_Hash;
 
 		return 0;
@@ -38,10 +38,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SoundContainer::Create(std::string samplePath, bool affectedByPitch, int loops) {
-		AddSound(samplePath);
-		m_AffectedByPitch = affectedByPitch;
+	int SoundContainer::Create(std::string samplePath, int loops, bool affectedByGlobalPitch) {
+		m_AffectedByGlobalPitch = affectedByGlobalPitch;
 		m_Loops = loops;
+		AddSound(samplePath);
 
 		return 0;
 	}
@@ -63,8 +63,8 @@ namespace RTE {
 			reader >> m_Loops;
 		else if (propName == "Priority")
 			reader >> m_Priority;
-		else if (propName == "AffectedByPitch")
-			reader >> m_AffectedByPitch;
+		else if (propName == "AffectedByGlobalPitch")
+			reader >> m_AffectedByGlobalPitch;
 		else
 			// See if the base class(es) can find a match instead
 			return Entity::ReadProperty(propName, reader);
@@ -95,6 +95,9 @@ namespace RTE {
 		m_Hash = newFile.GetHash();
 
 		FMOD::Sound *pNewSample = newFile.GetAsSample();
+		FMOD_RESULT result = pNewSample->setMode(m_Loops == 0 ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL);
+		result = result == FMOD_OK ? pNewSample->setLoopCount(m_Loops) : result;
+
 		RTEAssert(pNewSample, "Failed to load the sample from the file");
 		m_Sounds.push_back(std::pair<ContentFile, FMOD::Sound *>(newFile, pNewSample));
 	}
@@ -102,9 +105,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SoundContainer::SetLoopSetting(int loops) {
+		m_Loops = loops;
 		for (std::vector<std::pair<ContentFile, FMOD::Sound * >>::const_iterator itr = m_Sounds.begin(); itr != m_Sounds.end(); ++itr) {
-			FMOD_RESULT result = itr->second->setMode((loops == 0 || loops == 1) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL);
-			result = itr->second->setLoopCount(loops);
+			FMOD_RESULT result = itr->second->setMode(m_Loops == 0 ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL);
+			result = itr->second->setLoopCount(m_Loops);
 		}
 	}
 

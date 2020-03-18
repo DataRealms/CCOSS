@@ -76,7 +76,6 @@ namespace RTE {
 		if (m_Y == 0) {
 			return m_X > 0 ? 0 : (m_X < 0 ? 180 : 0);
 		}
-
 		float rawAngle = -(atan(m_Y / m_X) / c_PI) * 180;
 		if (m_X < 0) { rawAngle += 180; }
 

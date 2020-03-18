@@ -51,7 +51,7 @@ namespace RTE {
 			}
 
 			// Now do all the additional initializing needed.
-			return (doCreate) ? Create() : 0;
+			return doCreate ? Create() : 0;
 		}
 #pragma endregion
 

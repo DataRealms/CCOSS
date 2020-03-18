@@ -5,13 +5,12 @@
 
 namespace RTE {
 
-	const int Controller::m_ReleaseDelay = 250;
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Controller::Clear() {
-		for (int i = 0; i < CONTROLSTATECOUNT; ++i) { m_ControlStates[i] = false; }
-
+		for (int i = 0; i < CONTROLSTATECOUNT; ++i) {
+			m_ControlStates[i] = false;
+		}
 		m_AnalogMove.Reset();
 		m_AnalogAim.Reset();
 		m_AnalogCursor.Reset();
@@ -47,8 +46,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Controller::Create(const Controller &reference) {
-		for (int i = 0; i < CONTROLSTATECOUNT; ++i) { m_ControlStates[i] = reference.m_ControlStates[i]; }
-
+		for (int i = 0; i < CONTROLSTATECOUNT; ++i) {
+			m_ControlStates[i] = reference.m_ControlStates[i];
+		}
 		m_AnalogMove = reference.m_AnalogMove;
 		m_AnalogAim = reference.m_AnalogAim;
 		m_AnalogCursor = reference.m_AnalogCursor;
@@ -122,7 +122,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Controller::GetTeam() const {
-		return (m_pControlled) ? m_pControlled->GetTeam() : m_Team;
+		return m_pControlled ? m_pControlled->GetTeam() : m_Team;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,8 +136,9 @@ namespace RTE {
 
 	void Controller::Update() {
 		// Reset all command states.
-		for (int i = 0; i < CONTROLSTATECOUNT; ++i) { m_ControlStates[i] = false; }
-
+		for (int i = 0; i < CONTROLSTATECOUNT; ++i) {
+			m_ControlStates[i] = false;
+		}
 		m_AnalogMove.Reset();
 		m_AnalogAim.Reset();
 		m_AnalogCursor.Reset();
@@ -334,7 +335,7 @@ namespace RTE {
 			m_KeyAccelTimer.Reset();
 		}
 
-		// Translate analog aim input into sharp aim constrol state
+		// Translate analog aim input into sharp aim control state
 		m_ControlStates[AIM_SHARP] = m_AnalogAim.GetMagnitude() > 0.1 && !m_ControlStates[PIE_MENU_ACTIVE];
 
 		// Disable sharp aim while moving - this also helps with keyboard vs mouse fighting when moving and aiming in opposite directions

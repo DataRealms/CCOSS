@@ -174,7 +174,9 @@ namespace RTE {
 		/// </summary>
 		/// <param name="opp">The Vector to compare with.</param>
 		/// <returns>Whether both x and y components of this Vector are 0.</returns>
-		bool IsOpposedTo(const Vector &opp) { return (!m_X && !opp.m_X) || (m_X < 0 && opp.m_X > 0) || (m_X > 0 && opp.m_X < 0) && (!m_Y && !opp.m_Y) || (m_Y < 0 && opp.m_Y > 0) || (m_Y > 0 && opp.m_Y < 0); }
+		bool IsOpposedTo(const Vector &opp) { 
+			return (!m_X && !opp.m_X) || (m_X < 0 && opp.m_X > 0) || (m_X > 0 && opp.m_X < 0) && (!m_Y && !opp.m_Y) || (m_Y < 0 && opp.m_Y > 0) || (m_Y > 0 && opp.m_Y < 0); 
+		}
 #pragma endregion
 
 #pragma region Magnitude
@@ -445,11 +447,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="rhs">A float reference as the right hand side operand.</param>
 		/// <returns>The resulting Vector.</returns>
-		Vector operator/(const float &rhs) const {
-			Vector returnVector(0, 0);
-			if (rhs) { returnVector.SetXY(m_X / rhs, m_Y / rhs); }
-			return returnVector;
-		}
+		Vector operator/(const float &rhs) const { Vector returnVector(0, 0); if (rhs) { returnVector.SetXY(m_X / rhs, m_Y / rhs); } return returnVector; }
 
 		/// <summary>
 		/// Division operator overload for Vectors.

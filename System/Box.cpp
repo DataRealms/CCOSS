@@ -139,19 +139,11 @@ namespace RTE {
 		if (IsEmpty() || rhs.IsEmpty()) {
 			return false;
 		}
-
 		Box box1 = *this;
 		Box box2 = rhs;
 		box1.Unflip();
 		box2.Unflip();
 		return (box1.m_Corner.m_X < box2.m_Corner.m_X + box2.m_Width) && (box1.m_Corner.m_X + box1.m_Width > box2.m_Corner.m_X) &&
 			(box1.m_Corner.m_Y < box2.m_Corner.m_Y + box2.m_Height) && (box1.m_Corner.m_Y + box1.m_Height > box2.m_Corner.m_Y);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Box & Box::operator=(const Box &rhs) {
-		if (*this != rhs) { Create(rhs); }
-		return *this;
 	}
 }

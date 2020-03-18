@@ -69,7 +69,7 @@ namespace RTE {
 		Vector m_AnalogAim; //!< Analog values for aiming.
 		Vector m_AnalogCursor; //!< Analog values for Pie Menu operation.
 
-		// Enumerate different input modes.
+		//!< Enumerate different input modes.
 		enum InputMode {
 			CIM_DISABLED = 0,
 			CIM_PLAYER,
@@ -301,6 +301,8 @@ namespace RTE {
 
 	protected:
 
+		static constexpr int m_ReleaseDelay = 250; //!< The delay between releasing a menu button and activating the regular controls, to avoid accidental input.
+
 		bool m_ControlStates[CONTROLSTATECOUNT]; //!< Control states.
 		bool m_Disabled; //!< Quick and easy disable to prevent updates from being made.
 
@@ -330,7 +332,6 @@ namespace RTE {
 		bool m_WeaponDropIgnore;
 		bool m_WeaponReloadIgnore;
 
-		static const int m_ReleaseDelay; //!< The delay between releasing a menu button and activating the regular controls, to avoid accidental input.
 		Timer m_ReleaseTimer; //!< Timer for measuring release delays.  
 		Timer m_JoyAccelTimer; //!< Timer for measuring analog joystick-controlled cursor acceleration.   
 		Timer m_KeyAccelTimer; //!< Timer for measuring keyboard-controlled cursor acceleration.

@@ -154,14 +154,14 @@ namespace RTE {
 		/// Returns true if the elapsed real time is past a certain amount of time after the start previously set by SetRealTimeLimit.
 		/// </summary>
 		/// <returns>A bool only yielding true if the elapsed real time is greater than the set limit value. If no limit has been set, this returns false.</returns>
-		bool IsPastRealTimeLimit() { return m_RealTimeLimit == 0 ? true : (m_RealTimeLimit > 0 && (g_TimerMan.GetRealTickCount() - m_StartRealTime) > m_RealTimeLimit); }
+		bool IsPastRealTimeLimit() { return (m_RealTimeLimit == 0) ? true : (m_RealTimeLimit > 0 && (g_TimerMan.GetRealTickCount() - m_StartRealTime) > m_RealTimeLimit); }
 
 		/// <summary>
 		/// Returns how much progress has been made toward the set time limit previously set by SetRealTimeLimitMS.
 		/// 0 means no progress, 1.0 means the timer has reached, or is beyond the limit.
 		/// </summary>
 		/// <returns>A normalized scalar between 0.0 - 1.0 showing the progress toward the limit.</returns>
-		double RealTimeLimitProgress() const { return m_RealTimeLimit == 0 ? 1.0 : (MIN(1.0, GetElapsedRealTimeMS() / (m_RealTimeLimit / m_TicksPerMS))); }
+		double RealTimeLimitProgress() const { return (m_RealTimeLimit == 0) ? 1.0 : (MIN(1.0, GetElapsedRealTimeMS() / (m_RealTimeLimit / m_TicksPerMS))); }
 
 		/// <summary>
 		/// Returns true or false, depending on whether the elapsed time falls in one of two repeating intervals which divide it.
@@ -267,14 +267,14 @@ namespace RTE {
 		/// Returns true if the elapsed sim time is past a certain amount of time after the start previously set by SetSimTimeLimit.
 		/// </summary>
 		/// <returns>A bool only yielding true if the elapsed real time is greater than the set limit value. If no limit has been set, this returns false.</returns>
-		bool IsPastSimTimeLimit() const { return m_SimTimeLimit == 0 ? true : (m_SimTimeLimit > 0 && (g_TimerMan.GetSimTickCount() - m_StartSimTime) > m_SimTimeLimit); }
+		bool IsPastSimTimeLimit() const { return (m_SimTimeLimit == 0) ? true : (m_SimTimeLimit > 0 && (g_TimerMan.GetSimTickCount() - m_StartSimTime) > m_SimTimeLimit); }
 
 		/// <summary>
 		/// Returns how much progress has been made toward the set time limit previously set by SetSimTimeLimitMS.
 		/// 0 means no progress, 1.0 means the timer has reached, or is beyond the limit.
 		/// </summary>
 		/// <returns>A normalized scalar between 0.0 - 1.0 showing the progress toward the limit.</returns>
-		double SimTimeLimitProgress() const { return m_SimTimeLimit == 0 ? 1.0 : (MIN(1.0, GetElapsedSimTimeMS() / (m_SimTimeLimit / m_TicksPerMS))); }
+		double SimTimeLimitProgress() const { return (m_SimTimeLimit == 0) ? 1.0 : (MIN(1.0, GetElapsedSimTimeMS() / (m_SimTimeLimit / m_TicksPerMS))); }
 
 		/// <summary>
 		/// Returns true or false, depending on whether the elapsed time falls in one of two repeating intervals which divide it.
@@ -296,6 +296,7 @@ namespace RTE {
 	protected:
 
 		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this.
+
 		double m_TicksPerMS; //!< Ticks per MS.
 
 		int64_t m_StartRealTime; //!< Absolute tick count when this was started in real time.

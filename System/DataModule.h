@@ -4,7 +4,7 @@
 #include "ContentFile.h"
 #include "Constants.h"
 
-struct DATAFILE;
+//struct DATAFILE; // DataFile loading not implemented.
 struct BITMAP;
 
 namespace RTE {
@@ -12,7 +12,7 @@ namespace RTE {
 	class Entity;
 
 	/// <summary>
-	/// A representation of a Data Module containing zero or many Material, Effect, Ammo, Device, Actor, or Scene definitions.
+	/// A representation of a DataModule containing zero or many Material, Effect, Ammo, Device, Actor, or Scene definitions.
 	/// </summary>
 	class DataModule : public Serializable {
 		friend class LuaMan;
@@ -46,7 +46,7 @@ namespace RTE {
 		/// Makes the DataModule object ready for use. This needs to be called after PresetMan is created.
 		/// This looks for an "index.ini" within the specified .rte directory and loads all the defined objects in that index file. 
 		/// </summary>
-		/// <param name="moduleName">A string defining the name of this Data Module, e.g. "MyModule.rte".</param>
+		/// <param name="moduleName">A string defining the name of this DataModule, e.g. "MyModule.rte".</param>
 		/// <param name="fpProgressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this DataModule's creation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int Create(std::string moduleName, ProgressCallback fpProgressCallback = 0);
@@ -74,7 +74,7 @@ namespace RTE {
 		/// <summary>
 		/// Read module specific properties from index.ini without processing IncludeFiles and loading the whole module.
 		/// </summary>
-		/// <param name="moduleName">A string defining the name of this Data Module, e.g. "MyModule.rte".</param>
+		/// <param name="moduleName">A string defining the name of this DataModule, e.g. "MyModule.rte".</param>
 		/// <param name="fpProgressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this DataModule's creation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int ReadModuleProperties(std::string moduleName, ProgressCallback fpProgressCallback = 0);
@@ -107,37 +107,37 @@ namespace RTE {
 
 #pragma region Module Information Getters
 		/// <summary>
-		/// Gets the file name of this Data Module, e.g. "MyMod.rte".
+		/// Gets the file name of this DataModule, e.g. "MyMod.rte".
 		/// </summary>
 		/// <returns>A string with the data module file name.</returns>
 		virtual const std::string & GetFileName() const { return m_FileName; }
 
 		/// <summary>
-		/// Gets the friendly name of this Data Module, e.g. "My Great Mod".
+		/// Gets the friendly name of this DataModule, e.g. "My Great Mod".
 		/// </summary>
 		/// <returns>A string with the data module's friendly name.</returns>
 		virtual const std::string & GetFriendlyName() const { return m_FriendlyName; }
 
 		/// <summary>
-		/// Gets the author name of this Data Module, e.g. "Data Realms, LLC".
+		/// Gets the author name of this DataModule, e.g. "Data Realms, LLC".
 		/// </summary>
 		/// <returns>A string with the author's name.</returns>
 		virtual const std::string & GetAuthor() const { return m_Author; }
 
 		/// <summary>
-		/// Gets the description of this Data Module's contents.
+		/// Gets the description of this DataModule's contents.
 		/// </summary>
 		/// <returns>A string with the description.</returns>
 		virtual const std::string & GetDescription() const { return m_Description; }
 
 		/// <summary>
-		/// Gets the version number of this Data Module.
+		/// Gets the version number of this DataModule.
 		/// </summary>
 		/// <returns>An int with the version number, starting at 1.</returns>
 		virtual int GetVersionNumber() const { return m_Version; }
 
 		/// <summary>
-		/// Gets the BITMAP that visually represents this Data Module, for use in menus.
+		/// Gets the BITMAP that visually represents this DataModule, for use in menus.
 		/// </summary>
 		/// <returns>BITMAP pointer that might have the icon. 0 is very possible.</returns>
 		BITMAP * GetIcon() const { return m_pIcon; }

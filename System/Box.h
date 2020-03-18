@@ -249,7 +249,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="rhs">A Box reference.</param>
 		/// <returns>A reference to the changed Box.</returns>
-		Box & operator=(const Box &rhs);
+		Box & operator=(const Box &rhs) { if (*this != rhs) { Create(rhs); } return *this; }
 
 		/// <summary>
 		/// An equality operator for testing if any two Boxes are equal.

@@ -2,6 +2,7 @@
 #include "PresetMan.h"
 
 namespace RTE {
+
 	const std::string ContentFile::m_ClassName = "ContentFile";
 
 	std::map<std::string, BITMAP *> ContentFile::m_sLoadedBitmaps[BitDepthCount];
@@ -16,7 +17,7 @@ namespace RTE {
 		//m_DataModified = false;
 		//m_pLoadedData = 0;
 		//m_LoadedDataSize = 0;
-		m_pDataFile = 0;
+		//m_pDataFile = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,10 +46,14 @@ namespace RTE {
 
 	void ContentFile::FreeAllLoaded() {
 		for (int depth = Eight; depth < BitDepthCount; ++depth) {
-			for (std::map<std::string, BITMAP *>::iterator lbItr = m_sLoadedBitmaps[depth].begin(); lbItr != m_sLoadedBitmaps[depth].end(); ++lbItr) { destroy_bitmap((*lbItr).second); }
+			for (std::map<std::string, BITMAP *>::iterator lbItr = m_sLoadedBitmaps[depth].begin(); lbItr != m_sLoadedBitmaps[depth].end(); ++lbItr) {
+				destroy_bitmap((*lbItr).second);
+			}
 		}
 #ifdef __USE_SOUND_FMOD
-		for (std::map<std::string, FSOUND_SAMPLE *>::iterator lcItr = m_sLoadedSamples.begin(); lcItr != m_sLoadedSamples.end(); ++lcItr) { FSOUND_Sample_Free((*lcItr).second); }
+		for (std::map<std::string, FSOUND_SAMPLE *>::iterator lcItr = m_sLoadedSamples.begin(); lcItr != m_sLoadedSamples.end(); ++lcItr) {
+			FSOUND_Sample_Free((*lcItr).second);
+		}
 #endif
 	}
 
@@ -75,7 +80,6 @@ namespace RTE {
 			writer.NewProperty("FilePath");
 			writer << m_DataPath;
 		}
-
 		return 0;
 	}
 
@@ -100,7 +104,6 @@ namespace RTE {
 		if (m_DataPath.empty()) {
 			return 0;
 		}
-
 		BITMAP *pReturnBitmap = 0;
 
 		// Determine the bit depth this bitmap will be loaded as
@@ -117,7 +120,6 @@ namespace RTE {
 			// Insert the bitmap into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
 			m_sLoadedBitmaps[bitDepth].insert(std::pair<std::string, BITMAP *>(m_DataPath, pReturnBitmap));
 		}
-
 		return pReturnBitmap;
 	}
 
@@ -128,10 +130,10 @@ namespace RTE {
 			return 0;
 		}
 		BITMAP *pReturnBitmap = 0;
-
 		set_color_conversion(conversionMode == 0 ? COLORCONV_MOST : conversionMode);
 
-		int separatorPos = m_DataPath.find('#'); // Used for handling separators between the datafile name and the object name in .dat datafiles. NOTE: Not currently used
+		// Used for handling separators between the datafile name and the object name in .dat datafiles. NOTE: Not currently used
+		int separatorPos = m_DataPath.find('#');
 
 		if (separatorPos == m_DataPath.length()) {
 			RTEAbort("There was no object name following first pound sign in the ContentFile's datafile path, which means there was no actual object defined. The path was:\n\n" + m_DataPath);
@@ -147,22 +149,24 @@ namespace RTE {
 				pFile = pack_fopen((pathWithoutExtension + "000.bmp").c_str(), F_READ);
 				RTEAssert(pFile, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
 			}
-
-			// Load the bitmap then close the filestream to clean up
+			// Load the bitmap then close the file stream to clean up
 			PALETTE currentPalette;
 			get_palette(currentPalette);
 
 			pReturnBitmap = load_bmp_pf(pFile, (RGB *)currentPalette);
 			pack_fclose(pFile);
 		} else if (separatorPos != m_DataPath.length() - 1) {
+			RTEAbort("Loading bitmaps from allegro datafiles isn't supported yet!");
+			// Used for loading from DataFiles, disabled because we don't have this properly implemented right now. 
+			/*
 			// Split the datapath into the path and the object name and load the datafile from them
 			m_pDataFile = load_datafile_object(m_DataPath.substr(0, separatorPos).c_str(), m_DataPath.substr(separatorPos + 1).c_str());
 			RTEAssert(m_pDataFile && m_pDataFile->dat && m_pDataFile->type == DAT_BITMAP, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
 
 			pReturnBitmap = (BITMAP *)m_pDataFile->dat;
+			*/
 		}
 		RTEAssert(pReturnBitmap, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
-
 		return pReturnBitmap;
 	}
 
@@ -172,7 +176,6 @@ namespace RTE {
 		if (m_DataPath.empty()) {
 			return 0;
 		}
-
 		// Create the array of as many BITMAP pointers as requested frames
 		BITMAP **aReturnBitmaps = new BITMAP *[frameCount];
 
@@ -181,9 +184,9 @@ namespace RTE {
 			aReturnBitmaps[0] = GetAsBitmap(conversionMode);
 			return aReturnBitmaps;
 		}
-
 		std::string extension = "";
-		int separatorPos = m_DataPath.find('#'); // Used for handling separators between the datafile name and the object name in .dat datafiles. NOTE: Not currently used
+		// Used for handling separators between the datafile name and the object name in .dat datafiles. NOTE: Not currently used
+		int separatorPos = m_DataPath.find('#');
 		int extensionPos = 0;
 
 		// No separator, need to separate file extension from datapath
@@ -193,7 +196,6 @@ namespace RTE {
 			extension.assign(m_DataPath, extensionPos, m_DataPath.length() - extensionPos);
 			m_DataPath.resize(extensionPos);
 		}
-
 		std::string originalDataPath = m_DataPath;
 		char framePath[1024];
 		// For each frame in the animation, temporarily assign it to the datapath member var so that GetAsBitmap and then load it with GetBitmap
@@ -205,7 +207,6 @@ namespace RTE {
 			RTEAssert(aReturnBitmaps[i], "Could not get a frame of animation with path and name:\n\n" + m_DataPath);
 		}
 		m_DataPath = originalDataPath + (extensionPos > 0 ? extension : "");
-
 		return aReturnBitmaps;
 	}
 
@@ -264,7 +265,6 @@ namespace RTE {
 				pReturnSample = (FSOUND_SAMPLE *)m_pDataFile->dat;
 				*/
 			}
-
 			RTEAssert(pReturnSample, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
 
 			// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE

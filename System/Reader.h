@@ -290,7 +290,7 @@ namespace RTE {
 
 		// Disallow the use of some implicit methods.
 		Reader(const Reader &reference);
-		Reader & operator=(const Reader &rhs);
+		Reader & operator=(const Reader &rhs) {}
 	};
 }
 #endif

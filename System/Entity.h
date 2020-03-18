@@ -6,6 +6,8 @@
 
 namespace RTE {
 
+	typedef std::function<void*()> MemoryAllocate; //!< Convenient name definition for the memory allocation callback function.
+	typedef std::function<void(void*)> MemoryDeallocate; //!< Convenient name definition for the memory deallocation callback function.
 
 #pragma region Global Macro Definitions
 	#define ABSTRACTCLASSINFO(TYPE, PARENT)	\
@@ -92,7 +94,7 @@ namespace RTE {
 			/// <param name="fpDeallocFunc">Function pointer to the raw deallocation function of memory. If the represented Entity subclass isn't concrete, pass in 0.</param>
 			/// <param name="fpNewFunc">Function pointer to the new instance factory. If the represented Entity subclass isn't concrete, pass in 0.</param>
 			/// <param name="allocBlockCount">The number of new instances to fill the pre-allocated pool with when it runs out.</param>
-			ClassInfo(const std::string &name, ClassInfo *pParentInfo = 0, void * (*fpAllocFunc)() = 0, void(*fpDeallocFunc)(void *) = 0, Entity * (*fpNewFunc)() = 0, int allocBlockCount = 10);
+			ClassInfo(const std::string &name, ClassInfo *pParentInfo = 0, MemoryAllocate fpAllocFunc = 0, MemoryDeallocate fpDeallocFunc = 0, Entity * (*fpNewFunc)() = 0, int allocBlockCount = 10);
 #pragma endregion
 
 #pragma region Getters
@@ -182,9 +184,10 @@ namespace RTE {
 			int m_PoolAllocBlockCount; //!< The number of instances to fill up the pool of this type with each time it runs dry.
 			int m_InstancesInUse; //!< The number of allocated instances passed out from the pool.
 
-			void *(*m_fpAllocate)(); //!< Raw memory allocation for the size of the type this ClassInfo describes.
-			void(*m_fpDeallocate)(void *); //!< Raw memory deallocation for the size of the type this ClassInfo describes.
+			MemoryAllocate m_fpAllocate; //!< Raw memory allocation for the size of the type this ClassInfo describes.
+			MemoryDeallocate m_fpDeallocate; //!< Raw memory deallocation for the size of the type this ClassInfo describes.
 
+			// TODO: figure out why this doesn't want to work when defined as std::function.
 			Entity *(*m_fpNewInstance)(); //!< Returns an actual new instance of the type that this describes.
 
 			// Forbidding copying

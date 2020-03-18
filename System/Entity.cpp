@@ -231,7 +231,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Entity::ClassInfo::ClassInfo(const std::string &name, ClassInfo *pParentInfo, void * (*fpAllocFunc)(), void(*fpDeallocFunc)(void *), Entity * (*fpNewFunc)(), int allocBlockCount) :
+	Entity::ClassInfo::ClassInfo(const std::string &name, ClassInfo *pParentInfo, MemoryAllocate fpAllocFunc, MemoryDeallocate fpDeallocFunc, Entity * (*fpNewFunc)(), int allocBlockCount) :
 		m_Name(name),
 		m_pParentInfo(pParentInfo),
 		m_fpAllocate(fpAllocFunc),

@@ -91,20 +91,20 @@ namespace RTE {
 		/// This is when the timer is supposed to show that it has 'expired' or reached whatever time limit it is supposed to keep track of.
 		/// </summary>
 		/// <returns>A positive double with the real time limit relative to the start time.</returns>
-		double GetRealTimeLimitS() const { return m_RealTimeLimit / (double)g_TimerMan.GetTicksPerSecond(); }
+		double GetRealTimeLimitS() const { return m_RealTimeLimit / static_cast<double>(g_TimerMan.GetTicksPerSecond()); }
 
 		/// <summary>
 		/// Sets the real time limit value of this Timer, RELATVE to the start time.
 		/// This is when the timer is supposed to show that it has 'expired' or reached whatever time limit it is supposed to keep track of.
 		/// </summary>
 		/// <param name="newTimeLimit">A positive double with the new real time limit relative to the start time.</param>
-		void SetRealTimeLimitS(double newTimeLimit) { m_RealTimeLimit = newTimeLimit * (double)g_TimerMan.GetTicksPerSecond(); }
+		void SetRealTimeLimitS(double newTimeLimit) { m_RealTimeLimit = newTimeLimit * static_cast<double>(g_TimerMan.GetTicksPerSecond()); }
 
 		/// <summary>
 		/// Gets the elapsed real time in ms since this Timer was Reset().
 		/// </summary>
 		/// <returns>A unsigned long value that represents the elapsed real time since Reset() in ms.</returns>
-		double GetElapsedRealTimeMS() const { return (double)(g_TimerMan.GetRealTickCount() - m_StartRealTime) / m_TicksPerMS; }
+		double GetElapsedRealTimeMS() const { return static_cast<double>(g_TimerMan.GetRealTickCount() - m_StartRealTime) / m_TicksPerMS; }
 
 		/// <summary>
 		/// Sets the start real time value of this Timer, in seconds.
@@ -116,13 +116,13 @@ namespace RTE {
 		/// Gets the elapsed real time in seconds since this Timer was Reset().
 		/// </summary>
 		/// <returns>A double value that represents the elapsed real time since Reset() in s.</returns>
-		double GetElapsedRealTimeS() const { return (double)(g_TimerMan.GetRealTickCount() - m_StartRealTime) / (double)g_TimerMan.GetTicksPerSecond(); }
+		double GetElapsedRealTimeS() const { return static_cast<double>(g_TimerMan.GetRealTickCount() - m_StartRealTime) / static_cast<double>(g_TimerMan.GetTicksPerSecond()); }
 
 		/// <summary>
 		/// Sets the start real time value of this Timer.
 		/// </summary>
 		/// <param name="newElapsedRealTime">An int64 with the new elapsed time value in seconds.</param>
-		void SetElapsedRealTimeS(const double newElapsedRealTime) { m_StartRealTime = g_TimerMan.GetRealTickCount() - (newElapsedRealTime * (double)g_TimerMan.GetTicksPerSecond()); }
+		void SetElapsedRealTimeS(const double newElapsedRealTime) { m_StartRealTime = g_TimerMan.GetRealTickCount() - (newElapsedRealTime * static_cast<double>(g_TimerMan.GetTicksPerSecond())); }
 
 		/// <summary>
 		/// Returns how much time in ms that there is left till this Timer reaches a certain time limit.
@@ -148,7 +148,7 @@ namespace RTE {
 		/// Returns how much time in ms that there is left till this Timer reaches a certain time limit previously set by SetRealTimeLimitS.
 		/// </summary>
 		/// <returns>A unsigned long with the real time left till the passed in value, or negative if this Timer is already past that point in time.</returns>
-		double LeftTillRealTimeLimitS() { return (m_RealTimeLimit * (double)g_TimerMan.GetTicksPerSecond()) - GetElapsedRealTimeS(); }
+		double LeftTillRealTimeLimitS() { return (m_RealTimeLimit * static_cast<double>(g_TimerMan.GetTicksPerSecond())) - GetElapsedRealTimeS(); }
 
 		/// <summary>
 		/// Returns true if the elapsed real time is past a certain amount of time after the start previously set by SetRealTimeLimit.
@@ -169,7 +169,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="period">An int with the alternating period in ms. The time specified here is how long it will take for the switch to alternate.</param>
 		/// <returns>Whether the elapsed time is in the first state or not.</returns>
-		bool AlternateReal(int period) const { return ((int)GetElapsedRealTimeMS() % (period * 2)) > period; }
+		bool AlternateReal(int period) const { return (static_cast<int>(GetElapsedRealTimeMS()) % (period * 2)) > period; }
 #pragma endregion
 
 #pragma region Simulation Time
@@ -204,20 +204,20 @@ namespace RTE {
 		/// This is when the timer is supposed to show that it has 'expired' or reached whatever time limit it is supposed to keep track of.
 		/// </summary>
 		/// <returns>A positive double with the sim time limit relative to the start time.</returns>
-		double GetSimTimeLimitS() const { return m_SimTimeLimit / (double)g_TimerMan.GetTicksPerSecond(); }
+		double GetSimTimeLimitS() const { return m_SimTimeLimit / static_cast<double>(g_TimerMan.GetTicksPerSecond()); }
 
 		/// <summary>
 		/// Sets the sim time limit value of this Timer, RELATVE to the start time.
 		/// This is when the timer is supposed to show that it has 'expired' or reached whatever time limit it is supposed to keep track of.
 		/// </summary>
 		/// <param name="newTimeLimit">A positive double with the new sim time limit relative to the start time.</param>
-		void SetSimTimeLimitS(double newTimeLimit) { m_SimTimeLimit = newTimeLimit * (double)g_TimerMan.GetTicksPerSecond(); }
+		void SetSimTimeLimitS(double newTimeLimit) { m_SimTimeLimit = newTimeLimit * static_cast<double>(g_TimerMan.GetTicksPerSecond()); }
 
 		/// <summary>
 		/// Gets the elapsed time in ms since this Timer was Reset().
 		/// </summary>
 		/// <returns>A unsigned long value that represents the elapsed time since Reset() in ms.</returns>
-		double GetElapsedSimTimeMS() const { return (double)(g_TimerMan.GetSimTickCount() - m_StartSimTime) / m_TicksPerMS; }
+		double GetElapsedSimTimeMS() const { return static_cast<double>(g_TimerMan.GetSimTickCount() - m_StartSimTime) / m_TicksPerMS; }
 
 		/// <summary>
 		/// Sets the start time value of this Timer, in ms.
@@ -229,13 +229,13 @@ namespace RTE {
 		/// Gets the elapsed time in s since this Timer was Reset().
 		/// </summary>
 		/// <returns>A unsigned long value that represents the elapsed time since Reset() in s.</returns>
-		double GetElapsedSimTimeS() const { return (double)(g_TimerMan.GetSimTickCount() - m_StartSimTime) / (double)g_TimerMan.GetTicksPerSecond(); }
+		double GetElapsedSimTimeS() const { return static_cast<double>(g_TimerMan.GetSimTickCount() - m_StartSimTime) / static_cast<double>(g_TimerMan.GetTicksPerSecond()); }
 
 		/// <summary>
 		/// Sets the start time value of this Timer, in seconds.
 		/// </summary>
 		/// <param name="newElapsedSimTime">An int64 with the new elapsed time value in seconds.</param>
-		void SetElapsedSimTimeS(const double newElapsedSimTime) { m_StartSimTime = g_TimerMan.GetSimTickCount() - (newElapsedSimTime * (double)g_TimerMan.GetTicksPerSecond()); }
+		void SetElapsedSimTimeS(const double newElapsedSimTime) { m_StartSimTime = g_TimerMan.GetSimTickCount() - (newElapsedSimTime * static_cast<double>(g_TimerMan.GetTicksPerSecond())); }
 
 		/// <summary>
 		/// Returns how much time in ms that there is left till this Timer reaches a certain time limit.a certain time limit.
@@ -261,7 +261,7 @@ namespace RTE {
 		/// Returns how much time in ms that there is left till this Timer reaches a certain time limit previously set by SetSimTimeLimitS.
 		/// </summary>
 		/// <returns>A unsigned long with the sim time left till the passed in value, or negative if this Timer is already past that point in time.</returns>
-		double LeftTillSimTimeLimitS() const { return (m_SimTimeLimit * (double)g_TimerMan.GetTicksPerSecond()) - GetElapsedSimTimeS(); }
+		double LeftTillSimTimeLimitS() const { return (m_SimTimeLimit * static_cast<double>(g_TimerMan.GetTicksPerSecond())) - GetElapsedSimTimeS(); }
 
 		/// <summary>
 		/// Returns true if the elapsed sim time is past a certain amount of time after the start previously set by SetSimTimeLimit.
@@ -282,7 +282,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="period">An int with the alternating period in ms. The time specified here is how long it will take for the switch to alternate.</param>
 		/// <returns>Whether the elapsed time is in the first state or not.</returns>
-		bool AlternateSim(int period) const { if (period == 0) return true; else return ((int)GetElapsedSimTimeMS() % (period * 2)) > period; }
+		bool AlternateSim(int period) const { return (period == 0) ? true : (static_cast<int>(GetElapsedSimTimeMS()) % (period * 2)) > period; }
 #pragma endregion
 
 #pragma region Class Info

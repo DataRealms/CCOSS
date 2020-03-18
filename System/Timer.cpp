@@ -16,7 +16,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Timer::Create() {
-		m_TicksPerMS = (double)g_TimerMan.GetTicksPerSecond() * 0.001;
+		m_TicksPerMS = static_cast<double>(g_TimerMan.GetTicksPerSecond()) * 0.001;
 		return 0;
 	}
 
@@ -24,7 +24,7 @@ namespace RTE {
 
 	int Timer::Create(unsigned long elapsedSimTime) {
 		SetElapsedSimTimeMS(elapsedSimTime);
-		m_TicksPerMS = (double)g_TimerMan.GetTicksPerSecond() * 0.001;
+		m_TicksPerMS = static_cast<double>(g_TimerMan.GetTicksPerSecond()) * 0.001;
 		return 0;
 	}
 
@@ -35,7 +35,7 @@ namespace RTE {
 		m_StartSimTime = reference.m_StartSimTime;
 		m_RealTimeLimit = reference.m_RealTimeLimit;
 		m_SimTimeLimit = reference.m_SimTimeLimit;
-		m_TicksPerMS = (double)g_TimerMan.GetTicksPerSecond() * 0.001;
+		m_TicksPerMS = static_cast<double>(g_TimerMan.GetTicksPerSecond()) * 0.001;
 		return 0;
 	}
 }

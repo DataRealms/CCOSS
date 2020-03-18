@@ -21,17 +21,17 @@ namespace RTE {
 		int sceneHeight = g_SceneMan.GetSceneHeight();
 
 		// Make overlapping nodes at seams if necessary, to make sure all scene pixels are covered
-		int nodeXCount = ceilf((float)sceneWidth / (float)m_NodeDimension);
-		int nodeYCount = ceilf((float)sceneHeight / (float)m_NodeDimension);
+		int nodeXCount = ceilf(static_cast<float>(sceneWidth) / static_cast<float>(m_NodeDimension));
+		int nodeYCount = ceilf(static_cast<float>(sceneHeight) / static_cast<float>(m_NodeDimension));
 
 		// Create and assign scene coordinate positions for all nodes
 		PathNode *pNode = 0;
-		Vector nodePos = Vector((float)nodeDimension / 2.0F, (float)nodeDimension / 2.0F);
+		Vector nodePos = Vector(static_cast<float>(nodeDimension) / 2.0F, static_cast<float>(nodeDimension) / 2.0F);
 		for (int x = 0; x < nodeXCount; ++x) {
 			// Make sure no cell centers are off the scene (since they can overlap the far edge of the scene)
 			if (nodePos.m_X >= sceneWidth) { nodePos.m_X = sceneWidth - 1; }
 			// Start the column height over at middle of the top node each new column
-			nodePos.m_Y = (float)nodeDimension / 2.0F;
+			nodePos.m_Y = static_cast<float>(nodeDimension) / 2.0F;
 			// Create the new column and fill it out
 			vector<PathNode *> newColumn;
 			for (int y = 0; y < nodeYCount; ++y) {
@@ -120,10 +120,10 @@ namespace RTE {
 		g_SceneMan.ForceBounds(end);
 
 		// Convert from absolute scene pixel coordinates to path node indices
-		int startNodeX = floorf(start.m_X / (float)m_NodeDimension);
-		int startNodeY = floorf(start.m_Y / (float)m_NodeDimension);
-		int endNodeX = floorf(end.m_X / (float)m_NodeDimension);
-		int endNodeY = floorf(end.m_Y / (float)m_NodeDimension);
+		int startNodeX = floorf(start.m_X / static_cast<float>(m_NodeDimension));
+		int startNodeY = floorf(start.m_Y / static_cast<float>(m_NodeDimension));
+		int endNodeX = floorf(end.m_X / static_cast<float>(m_NodeDimension));
+		int endNodeY = floorf(end.m_Y / static_cast<float>(m_NodeDimension));
 
 		// Clear out the results if it happens to contain anything
 		pathResult.clear();
@@ -321,10 +321,10 @@ namespace RTE {
 		box.Unflip();
 
 		// Get the extents of the box' potential influence on nodes and their connecting edges
-		int firstX = floorf((box.m_Corner.m_X / (float)m_NodeDimension) + 0.5F) - 1;
-		int lastX = floorf(((box.m_Corner.m_X + box.m_Width) / (float)m_NodeDimension) + 0.5F) + 1;
-		int firstY = floorf((box.m_Corner.m_Y / (float)m_NodeDimension) + 0.5F) - 1;
-		int lastY = floorf(((box.m_Corner.m_Y + box.m_Height) / (float)m_NodeDimension) + 0.5F) + 1;
+		int firstX = floorf((box.m_Corner.m_X / static_cast<float>(m_NodeDimension)) + 0.5F) - 1;
+		int lastX = floorf(((box.m_Corner.m_X + box.m_Width) / static_cast<float>(m_NodeDimension)) + 0.5F) + 1;
+		int firstY = floorf((box.m_Corner.m_Y / static_cast<float>(m_NodeDimension)) + 0.5F) - 1;
+		int lastY = floorf(((box.m_Corner.m_Y + box.m_Height) / static_cast<float>(m_NodeDimension)) + 0.5F) + 1;
 
 		// Truncate the influence
 		if (firstX < 0) { firstX = 0; }

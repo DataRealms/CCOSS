@@ -38,10 +38,10 @@ namespace RTE {
 	#define RTEAssert(expression, description) {													\
 		static bool alwaysIgnore = false;															\
 		if (!alwaysIgnore) {																		\
-			if (RTEAssertFunc((int)(expression), description, __FILE__, __LINE__, alwaysIgnore)) {	\
 				__debugbreak();																		\
 			}																						\
 		}																							\
+			if (RTEAssertFunc(expression, description, __FILE__, __LINE__, alwaysIgnore)) {		\
 	}
 }
 #endif

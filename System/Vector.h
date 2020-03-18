@@ -91,7 +91,7 @@ namespace RTE {
 		/// Sets the X value of this Vector.
 		/// </summary>
 		/// <param name="newX">An int value that the X value will be set to.</param>
-		void SetIntX(const int newX) { m_X = (float)newX; }
+		void SetIntX(const int newX) { m_X = static_cast<float>(newX); }
 
 		/// <summary>
 		/// Gets the Y value of this Vector.
@@ -109,7 +109,7 @@ namespace RTE {
 		/// Sets the Y value of this Vector.
 		/// </summary>
 		/// <param name="newY">An int value that the Y value will be set to.</param>
-		void SetIntY(const int newY) { m_Y = (float)newY; }
+		void SetIntY(const int newY) { m_Y = static_cast<float>(newY); }
 
 		/// <summary>
 		/// Sets both the X and Y values of this Vector.
@@ -123,7 +123,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newX">An int value that the X value will be set to.</param>
 		/// <param name="newY">An int value that the Y value will be set to.</param>
-		void SetIntXY(const int newX, const int newY) { m_X = (float)newX; m_Y = (float)newY; }
+		void SetIntXY(const int newX, const int newY) { m_X = static_cast<float>(newX); m_Y = static_cast<float>(newY); }
 
 		/// <summary>
 		/// Gets the absolute largest of the two elements. Will always be positive.

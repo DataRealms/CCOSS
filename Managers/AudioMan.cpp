@@ -246,6 +246,30 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool AudioMan::SetSoundAttenuation(SoundContainer *pSoundContainer, float distance) {
+		if (!m_AudioEnabled || !pSoundContainer) {
+			return false;
+		}
+
+		distance = Limit(distance, 0.95, 0); //Limit distance so it can't be closer than 0 (no attenuation) or farther than 0.95 (quiet but not quite silent)
+
+		FMOD_RESULT result;
+		FMOD::Channel *soundChannel;
+
+		std::unordered_set<short int> channels = pSoundContainer->GetPlayingChannels();
+		for (std::unordered_set<short int>::iterator channelIterator = channels.begin(); channelIterator != channels.end(); ++channelIterator) {
+			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
+			result = result == FMOD_OK ? soundChannel->setVolume(1 - distance) : result;
+			if (result != FMOD_OK) {
+				g_ConsoleMan.PrintString("ERROR: Could not set sound attenuation for SoundContainer " + pSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
+			}
+		}
+
+		return result == FMOD_OK;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool AudioMan::SetSoundPitch(SoundContainer *pSoundContainer, float pitch) {
 		if (!m_AudioEnabled || !pSoundContainer || !pSoundContainer->IsAffectedByPitch() || pSoundContainer->IsBeingPlayed()) {
 			return false;
@@ -267,30 +291,6 @@ namespace RTE {
 			}
 		}
 		return true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool AudioMan::SetSoundAttenuation(SoundContainer *pSoundContainer, float distance) {
-		if (!m_AudioEnabled || !pSoundContainer) {
-			return false;
-		}
-
-		distance = Limit(distance, 0.95, 0); //Limit distance so it can't be closer than 0 (no attenuation) or farther than 0.95 (quiet but not quite silent)
-
-		FMOD_RESULT result;
-		FMOD::Channel *soundChannel;
-
-		std::unordered_set<short int> channels = pSoundContainer->GetPlayingChannels();
-		for (std::unordered_set<short int>::iterator channelIterator = channels.begin(); channelIterator != channels.end(); ++channelIterator) {
-			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
-			result = result == FMOD_OK ? soundChannel->setVolume(1 - distance) : result;
-			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: Could not set sound attenuation for SoundContainer " + pSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
-			}
-		}
-
-		return result == FMOD_OK;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -442,7 +442,7 @@ namespace RTE {
 		if (!m_AudioEnabled || !pSoundContainer) {
 			return false;
 		}
-		priority < 0 ? pSoundContainer->GetPriority() : priority;
+		priority = priority < 0 ? pSoundContainer->GetPriority() : priority;
 
 		FMOD::Channel *channel;
 		int channelIndex;

@@ -202,20 +202,20 @@ namespace RTE {
 		void SetSoundsVolume(double volume = 1.0);
 
 		/// <summary>
-		/// Sets/updates the frequency/pitch for a specific sound. Will only have an effect if the sound is currently being played.
-		/// </summary>
-		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
-		/// <param name="pitch">New pitch, a multiplier of the original normal frequency. Keep it > 0.</param>
-		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the pitch was successfully set.</returns>
-		bool SetSoundPitch(SoundContainer *pSound, float pitch);
-
-		/// <summary>
 		/// Sets/updates the distance attenuation for a specific SoundContainer. Will only have an effect if the sound is currently being played.
 		/// </summary>
 		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
 		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not completely inaudible.</param>
 		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the attenuation was successfully set.</returns>
 		bool SetSoundAttenuation(SoundContainer *pSound, float distance = 0.0);
+
+		/// <summary>
+		/// Sets/updates the frequency/pitch for a specific sound. Will only have an effect if the sound is currently being played.
+		/// </summary>
+		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
+		/// <param name="pitch">New pitch, a multiplier of the original normal frequency. Keep it > 0.</param>
+		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the pitch was successfully set.</returns>
+		bool SetSoundPitch(SoundContainer *pSound, float pitch);
 #pragma endregion
 
 		/// <summary>

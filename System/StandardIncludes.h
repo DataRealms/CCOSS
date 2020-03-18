@@ -42,5 +42,7 @@ using std::set;
 using std::vector;
 using std::ios_base;
 using std::make_pair;
+using std::min;
+using std::max;
 
 #endif

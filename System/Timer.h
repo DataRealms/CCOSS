@@ -161,7 +161,7 @@ namespace RTE {
 		/// 0 means no progress, 1.0 means the timer has reached, or is beyond the limit.
 		/// </summary>
 		/// <returns>A normalized scalar between 0.0 - 1.0 showing the progress toward the limit.</returns>
-		double RealTimeLimitProgress() const { return (m_RealTimeLimit == 0) ? 1.0 : (MIN(1.0, GetElapsedRealTimeMS() / (m_RealTimeLimit / m_TicksPerMS))); }
+		double RealTimeLimitProgress() const { return (m_RealTimeLimit == 0) ? 1.0 : (std::min(1.0, GetElapsedRealTimeMS() / (m_RealTimeLimit / m_TicksPerMS))); }
 
 		/// <summary>
 		/// Returns true or false, depending on whether the elapsed time falls in one of two repeating intervals which divide it.
@@ -274,7 +274,7 @@ namespace RTE {
 		/// 0 means no progress, 1.0 means the timer has reached, or is beyond the limit.
 		/// </summary>
 		/// <returns>A normalized scalar between 0.0 - 1.0 showing the progress toward the limit.</returns>
-		double SimTimeLimitProgress() const { return (m_SimTimeLimit == 0) ? 1.0 : (MIN(1.0, GetElapsedSimTimeMS() / (m_SimTimeLimit / m_TicksPerMS))); }
+		double SimTimeLimitProgress() const { return (m_SimTimeLimit == 0) ? 1.0 : (std::min(1.0, GetElapsedSimTimeMS() / (m_SimTimeLimit / m_TicksPerMS))); }
 
 		/// <summary>
 		/// Returns true or false, depending on whether the elapsed time falls in one of two repeating intervals which divide it.

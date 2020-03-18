@@ -80,14 +80,14 @@ namespace RTE {
 		// See if there's other analog input, only if the mouse isn't active (or the cursor will float if mouse is used!)
 		} else if (GetAnalogCursor().GetLargest() > 0.1 && !IsMouseControlled()) {
 			// See how much to accelerate the joystick input based on how long the stick has been pushed around
-			float acceleration = 0.5 + MIN(m_JoyAccelTimer.GetElapsedRealTimeS(), 0.5) * 6;
+			float acceleration = 0.5 + std::min(m_JoyAccelTimer.GetElapsedRealTimeS(), 0.5) * 6;
 			cursorPos += GetAnalogCursor() * 10 * moveScale * acceleration;
 			altered = true;
 
 		// Digital movement
 		} else {
 			// See how much to accelerate the keyboard input based on how long any key has been pressed
-			float acceleration = 0.25 + MIN(m_KeyAccelTimer.GetElapsedRealTimeS(), 0.75) * 6;
+			float acceleration = 0.25 + std::min(m_KeyAccelTimer.GetElapsedRealTimeS(), 0.75) * 6;
 
 			if (IsState(HOLD_LEFT)) {
 				cursorPos.m_X -= 10 * moveScale * acceleration;

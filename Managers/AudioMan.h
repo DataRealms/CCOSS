@@ -190,13 +190,6 @@ namespace RTE {
 
 #pragma region Sound Getters and Setters
 		/// <summary>
-		/// Reports whether a certain SoundContainer's last played sample is being played currently.
-		/// </summary>
-		/// <param name="pSoundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
-		/// <returns>Whether the any of the SoundContainer's sounds are currently being played.</returns>
-		bool IsPlaying(SoundContainer *pSoundContainer) { return pSoundContainer->IsBeingPlayed(); }
-
-		/// <summary>
 		/// Gets the volume of all sounds. Does not get volume of music.
 		/// </summary>
 		/// <returns>Current volume scalar value. 0.0-1.0.</returns>
@@ -274,7 +267,7 @@ namespace RTE {
 		/// Starts playing a certain sound file with optional configurations.
 		/// </summary>
 		/// <param name="filePath">The path to the sound file to play.</param>
-		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent. Defaults to 0.</param>
+		/// <param name="attenuation">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent. Defaults to 0.</param>
 		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players. Defaults to -1.</param>
 		/// <param name="loops">The number of times to loop the SoundContainer's sounds. 0 or 1 means play once. -1 means play infinitely until stopped. Defaults to 0.</param>
 		/// <param name="priority">The priority of this sound - higher priority sounds are more likely to be heard. Defaults to PRIORITY_LOW.</param>
@@ -283,13 +276,13 @@ namespace RTE {
 		/// -1 means the SoundContainer will use global pitch instead of setting it manually. Defaults to -1.
 		/// </param>
 		/// <returns>Returns the new sound object being played. OWNERSHIP IS TRANSFERRED!</returns>
-		SoundContainer *PlaySound(const char *filePath, float distance = 0.0, int player = -1, int loops = 0, int priority = PRIORITY_LOW, double pitchOrAffectedByGlobalPitch = -1);
+		SoundContainer *PlaySound(const char *filePath, float attenuation = 0.0, int player = -1, int loops = 0, int priority = PRIORITY_LOW, double pitchOrAffectedByGlobalPitch = -1);
 
 		/// <summary>
 		/// Starts playing the next sample of a certain SoundContainer for a certain player.
 		/// </summary>
 		/// <param name="pSound">Pointer to the SoundContainer to start playing. Ownership is NOT transferred!</param>
-		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent. Defaults to 0.</param>
+		/// <param name="attenuation">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent. Defaults to 0.</param>
 		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players. Defaults to -1.</param>
 		/// <param name="priority">The priority of this sound - higher priority sounds are more likely to be heard. -1 means it'll use the SoundContainer's value. Defaults to -1.</param>
 		/// <param name="pitch">
@@ -297,7 +290,7 @@ namespace RTE {
 		/// -1 means use the SoundContainer's pitch. Defaults to -1
 		/// </param>
 		/// <returns>Whether or not playback of the Sound was successful.</returns>
-		bool PlaySound(SoundContainer *pSoundContainer, float distance = 0.0, int player = -1, int priority = -1, double pitch = -1);
+		bool PlaySound(SoundContainer *pSoundContainer, float attenuation = 0.0, int player = -1, int priority = -1, double pitch = -1);
 
 		/// <summary>
 		/// Stops playing all sounds in a given SoundContainer.

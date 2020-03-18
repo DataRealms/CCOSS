@@ -247,7 +247,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool AudioMan::SetSoundPitch(SoundContainer *pSoundContainer, float pitch) {
-		if (!m_AudioEnabled || !pSoundContainer || !pSoundContainer->IsAffectedByPitch() || !IsPlaying(pSoundContainer)) {
+		if (!m_AudioEnabled || !pSoundContainer || !pSoundContainer->IsAffectedByPitch() || pSoundContainer->IsBeingPlayed()) {
 			return false;
 		}
 		if (IsInMultiplayerMode() && pSoundContainer) {
@@ -420,7 +420,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	SoundContainer *AudioMan::PlaySound(const char *filePath, float distance, int player, int loops, int priority, double pitchOrAffectedByGlobalPitch) {
+	SoundContainer *AudioMan::PlaySound(const char *filePath, float attenuation, int player, int loops, int priority, double pitchOrAffectedByGlobalPitch) {
 		if (!filePath) {
 			g_ConsoleMan.PrintString("Error: Null filepath passed to AudioMan::PlaySound!");
 			return 0;
@@ -431,14 +431,14 @@ namespace RTE {
 
 		SoundContainer *newSoundContainer = new SoundContainer();
 		newSoundContainer->Create(filePath, affectedByGlobalPitch, loops);
-		PlaySound(newSoundContainer, distance, player, priority, pitch);
+		PlaySound(newSoundContainer, attenuation, player, priority, pitch);
 
 		return newSoundContainer;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AudioMan::PlaySound(SoundContainer *pSoundContainer, float distance, int player, int priority, double pitch) {
+	bool AudioMan::PlaySound(SoundContainer *pSoundContainer, float attenuation, int player, int priority, double pitch) {
 		if (!m_AudioEnabled || !pSoundContainer) {
 			return false;
 		}
@@ -459,11 +459,11 @@ namespace RTE {
 		}
 
 		pSoundContainer->AddPlayingChannel(channelIndex);
-		SetSoundAttenuation(pSoundContainer, distance);
+		SetSoundAttenuation(pSoundContainer, attenuation);
 
 		// Now that the sound is playing we can register an event with the SoundContainer's channels, which can be used by clients to identify the sound being played.
 		if (m_IsInMultiplayerMode) {
-			RegisterSoundEvent(player, SOUND_PLAY, pSoundContainer->GetHash(), distance, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), pitch, pSoundContainer->IsAffectedByPitch());
+			RegisterSoundEvent(player, SOUND_PLAY, pSoundContainer->GetHash(), attenuation, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), pitch, pSoundContainer->IsAffectedByPitch());
 		}
 
 		return true;
@@ -595,16 +595,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::RegisterSoundEvent(int player, unsigned char state, size_t hash, short int distance, std::unordered_set<short int> const &channels, short int loops, float pitch, bool affectedByPitch) {
+	void AudioMan::RegisterSoundEvent(int player, unsigned char state, size_t hash, short int attenuation, std::unordered_set<short int> const &channels, short int loops, float pitch, bool affectedByPitch) {
 		if (player == -1) {
 			for (int i = 0; i < c_MaxClients; i++) {
-				RegisterSoundEvent(i, state, hash, distance, channels, loops, pitch, affectedByPitch);
+				RegisterSoundEvent(i, state, hash, attenuation, channels, loops, pitch, affectedByPitch);
 			}
 		} else {
 			if (player >= 0 && player < c_MaxClients) {
 				NetworkSoundData soundData;
 				soundData.State = state;
-				soundData.Distance = distance;
+				soundData.Distance = attenuation;
 				soundData.SoundHash = hash;
 				soundData.Channels = channels;
 				soundData.Loops = loops;

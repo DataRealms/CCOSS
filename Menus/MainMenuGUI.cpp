@@ -1620,7 +1620,7 @@ void MainMenuGUI::Update()
             {
                 // See if we should play test sound after the volume has been set
                 bool playTest = false;
-                if (((double)m_pSoundSlider->GetValue() / 100) != g_AudioMan.GetSoundsVolume() && !g_AudioMan.IsPlaying(g_GUISound.TestSound()))
+                if (((double)m_pSoundSlider->GetValue() / 100) != g_AudioMan.GetSoundsVolume() && !g_GUISound.TestSound()->IsBeingPlayed())
                     playTest = true;
 
                 g_AudioMan.SetSoundsVolume((double)m_pSoundSlider->GetValue() / 100);

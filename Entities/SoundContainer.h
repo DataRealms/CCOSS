@@ -149,6 +149,14 @@ namespace RTE {
 		void RemovePlayingChannel(int channel) { m_PlayingChannels.erase(channel); }
 
 		/// <summary>
+		/// Updates the distance attenuation of the SoundContainer's sounds while they're playing.
+		/// </summary>
+		/// <param name="distance">
+		/// How much distance attenuation to apply to the sound. 0 = full volume 1.0 = max distant, but still won't be completely inaudible.</param>
+		/// <returns>Whether this SoundContainer's attenuation setting was successful.</returns>
+		bool UpdateAttenuation(float distance = 0) { return g_AudioMan.SetSoundAttenuation(this, distance); }
+
+		/// <summary>
 		/// Gets the looping setting of this SoundContainer.
 		/// </summary>
 		/// <returns>An int with the loop count.</returns>
@@ -184,14 +192,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="pitched">Whether the sounds in this SoundContainer should be affected by global pitch or not.</param>
 		void SetAffectedByPitch(bool pitched = true) { m_AffectedByPitch = pitched; }
-
-		/// <summary>
-		/// Updates the distance attenuation of the SoundContainer's sounds while they're playing.
-		/// </summary>
-		/// <param name="distance">
-		/// How much distance attenuation to apply to the sound. 0 = full volume 1.0 = max distant, but still won't be completely inaudible.</param>
-		/// <returns>Whether this SoundContainer's attenuation setting was successful.</returns>
-		bool UpdateAttenuation(float distance = 0) { return g_AudioMan.SetSoundAttenuation(this, distance); }
 
 		/// <summary>
 		/// Gets the hash for this SoundContainer, used for multiplayer data

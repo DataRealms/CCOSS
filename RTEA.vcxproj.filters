@@ -456,7 +456,9 @@
     <ClInclude Include="System\Entity.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\SoundContainer.h" />
+    <ClInclude Include="Entities\SoundContainer.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -859,7 +861,9 @@
     <ClCompile Include="System\Entity.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\SoundContainer.cpp" />
+    <ClCompile Include="Entities\SoundContainer.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\ccicon.ico">

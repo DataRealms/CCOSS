@@ -207,7 +207,7 @@ namespace RTE {
 		/// <param name="distance">How much distance attenuation to apply to the SoundContainer.</param>
 		/// <param name="player">Player to start playback of this SoundContainer for.</param>
 		/// <returns>Whether this SoundContainer successfully started playing on a channel.</returns>
-		bool Play(float distance = 0, int player = -1) { return HasAnySounds() ? g_AudioMan.PlaySound(player, this, m_Priority, distance) : false; }
+		bool Play(float distance = 0, int player = -1) { return HasAnySounds() ? g_AudioMan.PlaySound(this, distance, player) : false; }
 
 		/// <summary>
 		/// Stops playback of this SoundContainer for a specific player.

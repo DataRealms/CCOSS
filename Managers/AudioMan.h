@@ -98,7 +98,7 @@ namespace RTE {
 		void Update();
 #pragma endregion
 
-#pragma region Getters and Setters
+#pragma region General Getters and Setters
 		/// <summary>
 		/// Gets the sound management system object used for playing every sound
 		/// </summary>
@@ -112,29 +112,37 @@ namespace RTE {
 		bool IsAudioEnabled() { return m_AudioEnabled; }
 
 		/// <summary>
-		/// Reports whether a certain SoundContainer's last played sample is being played currently.
+		/// Returns the number of audio channels currently used.
 		/// </summary>
-		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
-		/// <returns>Whether the LAST sample that was played of the Sound is currently being played by any of the channels.</returns>
-		bool IsPlaying(SoundContainer *pSound);
+		/// <returns>The number of audio channels currently used.</returns>
+		int GetPlayingChannelCount() { int channelCount; return m_AudioSystem->getChannelsPlaying(&channelCount) == FMOD_OK ? channelCount : 0; }
 
+		/// <summary>
+		/// Returns the number of audio channels available in total.
+		/// </summary>
+		/// <returns>The number of audio channels available in total.</returns>
+		int GetTotalChannelCount() { int channelCount; return m_AudioSystem->getSoftwareChannels(&channelCount) == FMOD_OK ? channelCount : 0; }
+
+		/// <summary>
+		/// Gets the global pitch scalar value for all sounds and music.
+		/// </summary>
+		/// <returns>The current pitch scalar. Will be > 0.</returns>
+		double GetGlobalPitch() const { return m_GlobalPitch; }
+
+		/// <summary>
+		/// Sets the global pitch multiplier for all sounds, optionally the music too.
+		/// </summary>
+		/// <param name="pitch">The desired pitch multiplier. Keep it > 0.</param>
+		/// <param name="excludeMusic">Whether to exclude the music from pitch modification</param>
+		void SetGlobalPitch(double pitch = 1.0, bool excludeMusic = false);
+#pragma endregion
+
+#pragma region Music Getters and Setters
 		/// <summary>
 		/// Reports whether any music stream is currently playing.
 		/// </summary>
 		/// <returns>Whether any music stream is currently playing.</returns>
 		bool IsMusicPlaying() { bool isPlayingMusic; return m_AudioEnabled && m_MusicChannelGroup->isPlaying(&isPlayingMusic) == FMOD_OK ? isPlayingMusic : false; }
-
-		/// <summary>
-		/// Gets the volume of all sounds. Does not get volume of music.
-		/// </summary>
-		/// <returns>Current volume scalar value. 0.0-1.0.</returns>
-		double GetSoundsVolume() const { return m_SoundsVolume; }
-
-		/// <summary>
-		/// Sets the volume of all sounds to a specific volume. Does not affect music.
-		/// </summary>
-		/// <param name="volume">The desired volume scalar. 0.0-1.0.</param>
-		void SetSoundsVolume(double volume = 1.0);
 
 		/// <summary>
 		/// Gets the volume of music. Does not get volume of sounds.
@@ -155,33 +163,10 @@ namespace RTE {
 		void SetTempMusicVolume(double volume = 1.0);
 
 		/// <summary>
-		/// Gets the global pitch scalar value for all sounds and music.
+		/// Gets the path of the last played music stream.
 		/// </summary>
-		/// <returns>The current pitch scalar. Will be > 0.</returns>
-		double GetGlobalPitch() const { return m_GlobalPitch; }
-
-		/// <summary>
-		/// Sets the global pitch multiplier for all sounds, optionally the music too.
-		/// </summary>
-		/// <param name="pitch">The desired pitch multiplier. Keep it > 0.</param>
-		/// <param name="excludeMusic">Whether to exclude the music from pitch modification</param>
-		void SetGlobalPitch(double pitch = 1.0, bool excludeMusic = false);
-
-		/// <summary>
-		/// Sets/updates the distance attenuation for a specific SoundContainer. Will only have an effect if the sound is currently being played.
-		/// </summary>
-		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
-		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not completely inaudible.</param>
-		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the attenuation was successfully set.</returns>
-		bool SetSoundAttenuation(SoundContainer *pSound, float distance = 0.0);
-
-		/// <summary>
-		/// Sets/updates the frequency/pitch for a specific sound. Will only have an effect if the sound is currently being played.
-		/// </summary>
-		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
-		/// <param name="pitch">New pitch, a multiplier of the original normal frequency. Keep it > 0.</param>
-		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the pitch was successfully set.</returns>
-		bool SetSoundPitch(SoundContainer *pSound, float pitch);
+		/// <returns>The file path of the last played music stream.</returns>
+		std::string GetMusicPath() const { return m_MusicPath; }
 
 		/// <summary>
 		/// Sets/updates the frequency/pitch for the music channel.
@@ -189,12 +174,6 @@ namespace RTE {
 		/// <param name="pitch">New pitch, a multiplier of the original normal frequency. Keep it > 0.</param>
 		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the pitch was successfully set.</returns>
 		bool SetMusicPitch(float pitch);
-
-		/// <summary>
-		/// Gets the path of the last played music stream.
-		/// </summary>
-		/// <returns>The file path of the last played music stream.</returns>
-		std::string GetMusicPath() const { return m_MusicPath; }
 
 		/// <summary>
 		/// Gets the position of playback of the current music stream, in seconds.
@@ -207,59 +186,51 @@ namespace RTE {
 		/// </summary>
 		/// <param name="position">The desired position from the start, in seconds.</param>
 		void SetMusicPosition(double position);
-
-		/// <summary>
-		/// Returns the number of audio channels currently used.
-		/// </summary>
-		/// <returns>The number of audio channels currently used.</returns>
-		int GetPlayingChannelCount() { int channelCount; return m_AudioSystem->getChannelsPlaying(&channelCount) == FMOD_OK ? channelCount : 0; }
-
-		/// <summary>
-		/// Returns the number of audio channels available in total.
-		/// </summary>
-		/// <returns>The number of audio channels available in total.</returns>
-		int GetTotalChannelCount() { int channelCount; return m_AudioSystem->getSoftwareChannels(&channelCount) == FMOD_OK ? channelCount : 0; }
 #pragma endregion
 
-#pragma region Playback Handling
+#pragma region Sound Getters and Setters
 		/// <summary>
-		/// Starts playing a certain sound sample.
+		/// Reports whether a certain SoundContainer's last played sample is being played currently.
 		/// </summary>
-		/// <param name="filePath">The path to the sound file to play.</param>
-		void PlaySound(const char *filePath);
+		/// <param name="pSoundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
+		/// <returns>Whether the any of the SoundContainer's sounds are currently being played.</returns>
+		bool IsPlaying(SoundContainer *pSoundContainer) { return pSoundContainer->IsBeingPlayed(); }
 
 		/// <summary>
-		/// Starts playing the next sample of a certain SoundContainer.
+		/// Gets the volume of all sounds. Does not get volume of music.
 		/// </summary>
-		/// <param name="pSound">Pointer to the SoundContainer to start playing. Ownership is NOT transferred!</param>
-		/// <param name="priority">The priority of this sound. Higher gives it a higher likelihood of getting mixed compared to lower-priority samples.</param>
+		/// <returns>Current volume scalar value. 0.0-1.0.</returns>
+		double GetSoundsVolume() const { return m_SoundsVolume; }
+
+		/// <summary>
+		/// Sets the volume of all sounds to a specific volume. Does not affect music.
+		/// </summary>
+		/// <param name="volume">The desired volume scalar. 0.0-1.0.</param>
+		void SetSoundsVolume(double volume = 1.0);
+
+		/// <summary>
+		/// Sets/updates the frequency/pitch for a specific sound. Will only have an effect if the sound is currently being played.
+		/// </summary>
+		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
+		/// <param name="pitch">New pitch, a multiplier of the original normal frequency. Keep it > 0.</param>
+		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the pitch was successfully set.</returns>
+		bool SetSoundPitch(SoundContainer *pSound, float pitch);
+
+		/// <summary>
+		/// Sets/updates the distance attenuation for a specific SoundContainer. Will only have an effect if the sound is currently being played.
+		/// </summary>
+		/// <param name="pSound">A pointer to a Sound object. Ownership IS NOT transferred!</param>
 		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not completely inaudible.</param>
-		/// <param name="pitch">The pitch modifier for this sound. 1.0 yields unmodified frequency.</param>
-		/// <returns>Whether or not playback of the Sound was successful.</returns>
-		bool PlaySound(SoundContainer *pSound, int priority = PRIORITY_LOW, float distance = 0.0, double pitch = 1.0);
+		/// <returns>Whether a sample of the Sound is currently being played by any of the channels, and the attenuation was successfully set.</returns>
+		bool SetSoundAttenuation(SoundContainer *pSound, float distance = 0.0);
+#pragma endregion
 
 		/// <summary>
-		/// Starts playing the next sample of a certain SoundContainer for a certain player.
+		/// Stops all playback and clears the music playlist.
 		/// </summary>
-		/// <param name="player">Which player to play the SoundContainer sample for.</param>
-		/// <param name="pSound">Pointer to the Sound to start playing. Ownership is NOT transferred!</param>
-		/// <param name="priority">The priority of this sound. Higher gives it a higher likelihood of getting mixed compared to lower-priority samples.</param>
-		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent.</param>
-		/// <param name="pitch">The pitch modifier for this sound. 1.0 yields unmodified frequency.</param>
-		/// <returns>Whether or not playback of the Sound was successful.</returns>
-		bool PlaySound(int player, SoundContainer *pSound, int priority = PRIORITY_LOW, float distance = 0.0, double pitch = 1.0);
+		void StopAll() { if (m_AudioEnabled) { m_MusicChannelGroup->stop(); m_SoundChannelGroup->stop(); } m_MusicPlayList.clear(); }
 
-		/// <summary>
-		/// Starts playing a certain WAVE sound file.
-		/// </summary>
-		/// <param name="filePath">The path to the sound file to play.</param>
-		/// <param name="distance">Normalized distance from 0 to 1 to play the sound with.</param>
-		/// <param name="loops">The number of times to loop the sound. 0 means play once. -1 means play infinitely until stopped.</param>
-		/// <param name="affectedByPitch">Whether the sound should be affected by pitch.</param>
-		/// <param name="player">For which player to play the sound for, -1 for all.</param>
-		/// <returns>Returns the new sound object being played. OWNERSHIP IS TRANSFERRED!</returns>
-		SoundContainer * PlaySound(const char *filePath, float distance, bool loops, bool affectedByPitch, int player);
-
+#pragma region Music Playback and Handling
 		/// <summary>
 		/// Starts playing a certain WAVE, MOD, MIDI, OGG, MP3 file in the music channel.
 		/// </summary>
@@ -269,17 +240,22 @@ namespace RTE {
 		void PlayMusic(const char *filePath, int loops = -1, double volumeOverrideIfNotMuted = -1.0);
 
 		/// <summary>
+		/// Plays the next music stream in the queue, if any is queued.
+		/// </summary>
+		void PlayNextStream();
+
+		/// <summary>
+		/// Stops playing a the music channel.
+		/// </summary>
+		void StopMusic();
+
+		/// <summary>
 		/// Queues up another path to a stream that will be played after the current one is done. 
 		/// Can be done several times to queue up many tracks.
 		/// The last track in the list will be looped infinitely.
 		/// </summary>
 		/// <param name="filePath">The path to the music file to play after the current one.</param>
 		void QueueMusicStream(const char *filePath);
-
-		/// <summary>
-		/// Plays the next music stream in the queue, if any is queued.
-		/// </summary>
-		void PlayNextStream();
 
 		/// <summary>
 		/// Queues up a period of silence in the music stream playlist.
@@ -291,12 +267,12 @@ namespace RTE {
 		/// Clears the music queue.
 		/// </summary>
 		void ClearMusicQueue() { m_MusicPlayList.clear(); }
+#pragma endregion
 
+#pragma region Sound Playback and Handling
 		/// <summary>
-		/// Stops all playback.
 		/// Starts playing a certain sound file with optional configurations.
 		/// </summary>
-		void StopAll();
 		/// <param name="filePath">The path to the sound file to play.</param>
 		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent. Defaults to 0.</param>
 		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players. Defaults to -1.</param>
@@ -310,10 +286,8 @@ namespace RTE {
 		SoundContainer *PlaySound(const char *filePath, float distance = 0.0, int player = -1, int loops = 0, int priority = PRIORITY_LOW, double pitchOrAffectedByGlobalPitch = -1);
 
 		/// <summary>
-		/// Stops playing a the music channel.
 		/// Starts playing the next sample of a certain SoundContainer for a certain player.
 		/// </summary>
-		void StopMusic();
 		/// <param name="pSound">Pointer to the SoundContainer to start playing. Ownership is NOT transferred!</param>
 		/// <param name="distance">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent. Defaults to 0.</param>
 		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players. Defaults to -1.</param>
@@ -362,6 +336,24 @@ namespace RTE {
 		void SetMultiplayerMode(bool value) { m_IsInMultiplayerMode = value; }
 
 		/// <summary>
+		/// Fills the list with music events happened for the specified network player.
+		/// </summary>
+		/// <param name="player">Player to get events for.</param>
+		/// <param name="list">List with events for this player.</param>
+		void GetMusicEvents(int player, std::list<NetworkMusicData> &list);
+
+		/// <summary>
+		/// Adds the music event to internal list of music events for the specified player.
+		/// </summary>
+		/// <param name="player">Player for which the event happened.</param>
+		/// <param name="state">Music state.</param>
+		/// <param name="filepath">Music file path to transmit to client.</param>
+		/// <param name="loops">Loops counter.</param>
+		/// <param name="position">Music playback position.</param>
+		/// <param name="pitch">Pitch value.</param>
+		void RegisterMusicEvent(int player, unsigned char state, const char *filepath, int loops, double position, float pitch);
+
+		/// <summary>
 		/// Fills the list with sound events happened for the specified network player.
 		/// </summary>
 		/// <param name="player">Player to get events for.</param>
@@ -379,25 +371,7 @@ namespace RTE {
 		/// <param name="loops">Loops counter.</param>
 		/// <param name="pitch">Pitch value.</param>
 		/// <param name="affectedByPitch">Whether the sound is affected by pitch.</param>
-		void RegisterSoundEvent(int player, unsigned char state, size_t hash, short int distance, std::unordered_set<short int> channels, short int loops, float pitch, bool affectedByPitch);
-
-		/// <summary>
-		/// Fills the list with music events happened for the specified network player.
-		/// </summary>
-		/// <param name="player">Player to get events for.</param>
-		/// <param name="list">List with events for this player.</param>
-		void GetMusicEvents(int player, std::list<NetworkMusicData> & list);
-
-		/// <summary>
-		/// Adds the music event to internal list of music events for the specified player.
-		/// </summary>
-		/// <param name="player">Player for which the event happened.</param>
-		/// <param name="state">Music state.</param>
-		/// <param name="filepath">Music file path to transmit to client.</param>
-		/// <param name="loops">Loops counter.</param>
-		/// <param name="position">Music playback position.</param>
-		/// <param name="pitch">Pitch value.</param>
-		void RegisterMusicEvent(int player, unsigned char state, const char *filepath, int loops, double position, float pitch);
+		void RegisterSoundEvent(int player, unsigned char state, size_t hash, short int distance, std::unordered_set<short int> const &channels, short int loops, float pitch, bool affectedByPitch);
 #pragma endregion
 
 	protected:

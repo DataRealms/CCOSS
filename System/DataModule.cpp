@@ -321,7 +321,6 @@ namespace RTE {
 		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find((type.empty() || type == "All") ? "Entity" : type);
 		
 		if (classItr != m_TypeMap.end()) {
-			//RTEAssert(!(type.empty() || type == "All") && !classItr->second.empty(), "DataModule has class entry without instances in its map!?");
 			RTEAssert(!classItr->second.empty(), "DataModule has class entry without instances in its map!?");
 			for (std::list<std::pair<std::string, Entity *>>::iterator instItr = classItr->second.begin(); instItr != classItr->second.end(); ++instItr) {
 				if (instItr->second->IsInGroup(group)) {
@@ -382,6 +381,7 @@ namespace RTE {
 
 	// TODO: This method is almost identical to GetEntityPreset, except it doesn't return a const Entity *. 
 	// Investigate if the latter needs to return const (based on what's using it) and if not, get rid of this and replace its uses. At the very least, consider renaming this
+	// See https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/87
 	Entity * DataModule::GetEntityIfExactType(const std::string &exactType, const std::string &instanceName) {
 		if (exactType.empty() || instanceName == "None" || instanceName.empty()) {
 			return 0;

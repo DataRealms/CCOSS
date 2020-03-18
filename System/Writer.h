@@ -24,7 +24,6 @@ namespace RTE {
 		/// <param name="filename">Path to the file to open for writing.</param>
 		/// <param name="append">Whether to append to the file if it exists, or to overwrite it.</param>
 		Writer(const char *filename, bool append = false) { Clear(); Create(filename, append); }
-		Writer(std::string filename, bool append = false) { Clear(); Create(filename.c_str(), append); }
 
 		/// <summary>
 		/// Makes the Writer object ready for use.

@@ -11,41 +11,41 @@ namespace RTE {
 
 #pragma region Global Macro Definitions
 	#define ABSTRACTCLASSINFO(TYPE, PARENT)	\
-    Entity::ClassInfo TYPE::m_sClass(#TYPE, &PARENT::m_sClass);
+		Entity::ClassInfo TYPE::m_sClass(#TYPE, &PARENT::m_sClass);
 
 	#define CONCRETECLASSINFO(TYPE, PARENT, BLOCKCOUNT) \
-    Entity::ClassInfo TYPE::m_sClass(#TYPE, &PARENT::m_sClass, TYPE::Allocate, TYPE::Deallocate, TYPE::NewInstance, BLOCKCOUNT);
+		Entity::ClassInfo TYPE::m_sClass(#TYPE, &PARENT::m_sClass, TYPE::Allocate, TYPE::Deallocate, TYPE::NewInstance, BLOCKCOUNT);
 
 	#define CONCRETESUBCLASSINFO(TYPE, SUPER, PARENT, BLOCKCOUNT) \
-    Entity::ClassInfo SUPER::TYPE::m_sClass(#TYPE, &PARENT::m_sClass, SUPER::TYPE::Allocate, SUPER::TYPE::Deallocate, SUPER::TYPE::NewInstance, BLOCKCOUNT);
+		Entity::ClassInfo SUPER::TYPE::m_sClass(#TYPE, &PARENT::m_sClass, SUPER::TYPE::Allocate, SUPER::TYPE::Deallocate, SUPER::TYPE::NewInstance, BLOCKCOUNT);
 
 	/// <summary>
 	/// Convenience macro to cut down on duplicate ClassInfo methods in classes that extend Entity.
 	/// </summary>
 	#define CLASSINFOGETTERS \
-	const Entity::ClassInfo & GetClass() const { return m_sClass; } \
-	const std::string & GetClassName() const { return m_sClass.GetName(); }
+		const Entity::ClassInfo & GetClass() const { return m_sClass; } \
+		const std::string & GetClassName() const { return m_sClass.GetName(); }
 
 	/// <summary>
 	/// Static method used in conjunction with ClassInfo to allocate an Entity. 
 	/// This function is passed into the constructor of this Entity's static ClassInfo's constructor, so that it can instantiate MovableObjects.
 	/// </summary>
 	/// <returns>A pointer to the newly dynamically allocated Entity. Ownership is transferred as well.</returns>
-	#define ENTITYALLOCATION(TYPE)																	\
-	static void * operator new (size_t size) { return TYPE::m_sClass.GetPoolMemory(); }				\
-	static void operator delete (void *pInstance) { TYPE::m_sClass.ReturnPoolMemory(pInstance); }	\
-	static void * operator new (size_t size, void *p) throw() { return p; }							\
-	static void operator delete (void *, void *) throw() {  }										\
-	static void * Allocate() { return malloc(sizeof(TYPE)); }										\
-	static void Deallocate(void *pInstance) { free(pInstance); }									\
-	static Entity * NewInstance() { return new TYPE; }												\
-	virtual Entity * Clone(Entity *pCloneTo = 0) const {											\
-		TYPE *pEnt = pCloneTo ? dynamic_cast<TYPE *>(pCloneTo) : new TYPE();						\
-		RTEAssert(pEnt, "Tried to clone to an incompatible instance!");								\
-		if (pCloneTo) { pEnt->Destroy(); }															\
-		pEnt->Create(*this);																		\
-		return pEnt;																				\
-	}
+	#define ENTITYALLOCATION(TYPE)																		\
+		static void * operator new (size_t size) { return TYPE::m_sClass.GetPoolMemory(); }				\
+		static void operator delete (void *pInstance) { TYPE::m_sClass.ReturnPoolMemory(pInstance); }	\
+		static void * operator new (size_t size, void *p) throw() { return p; }							\
+		static void operator delete (void *, void *) throw() {  }										\
+		static void * Allocate() { return malloc(sizeof(TYPE)); }										\
+		static void Deallocate(void *pInstance) { free(pInstance); }									\
+		static Entity * NewInstance() { return new TYPE; }												\
+		virtual Entity * Clone(Entity *pCloneTo = 0) const {											\
+			TYPE *pEnt = pCloneTo ? dynamic_cast<TYPE *>(pCloneTo) : new TYPE();						\
+			RTEAssert(pEnt, "Tried to clone to an incompatible instance!");								\
+			if (pCloneTo) { pEnt->Destroy(); }															\
+			pEnt->Create(*this);																		\
+			return pEnt;																				\
+		}
 #pragma endregion
 
 	/// <summary>
@@ -178,17 +178,17 @@ namespace RTE {
 			const std::string m_Name; //!< A string with the friendly - formatted name of this ClassInfo.
 			const ClassInfo *m_pParentInfo; //!< A pointer to the parent ClassInfo.
 
+			MemoryAllocate m_fpAllocate; //!< Raw memory allocation for the size of the type this ClassInfo describes.
+			MemoryDeallocate m_fpDeallocate; //!< Raw memory deallocation for the size of the type this ClassInfo describes.
+			// TODO: figure out why this doesn't want to work when defined as std::function.
+			Entity *(*m_fpNewInstance)(); //!< Returns an actual new instance of the type that this describes.
+
 			ClassInfo *m_NextClass; //!< Next ClassInfo after this one on aforementioned unordered linked list.
 
 			std::vector<void *> m_AllocatedPool; //!< Pool of pre-allocated objects of the type described by this ClassInfo.
 			int m_PoolAllocBlockCount; //!< The number of instances to fill up the pool of this type with each time it runs dry.
 			int m_InstancesInUse; //!< The number of allocated instances passed out from the pool.
 
-			MemoryAllocate m_fpAllocate; //!< Raw memory allocation for the size of the type this ClassInfo describes.
-			MemoryDeallocate m_fpDeallocate; //!< Raw memory deallocation for the size of the type this ClassInfo describes.
-
-			// TODO: figure out why this doesn't want to work when defined as std::function.
-			Entity *(*m_fpNewInstance)(); //!< Returns an actual new instance of the type that this describes.
 
 			// Forbidding copying
 			ClassInfo(const ClassInfo &reference) {}
@@ -220,7 +220,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="reader">A Reader that the Serializable will create itself from.</param>
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
-		/// <param name="doCreate"></param>
+		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader. This is done by calling Create().</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int Create(Reader &reader, bool checkType = true, bool doCreate = true) { return Serializable::Create(reader, checkType, doCreate); }
 
@@ -312,7 +312,7 @@ namespace RTE {
 		const std::string & GetDescription() const { return m_PresetDescription; }
 
 		/// <summary>
-		/// Sets the plain text description of this Entity's data Preset. Should only be a couple of sentences.
+		/// Sets the plain text description of this Entity's data Preset. Shouldn't be more than a couple of sentences.
 		/// </summary>
 		/// <param name="newDesc">A string reference with the preset description.</param>
 		void SetDescription(const std::string &newDesc) { m_PresetDescription = newDesc; }
@@ -324,7 +324,7 @@ namespace RTE {
 		std::string GetModuleAndPresetName() const;
 
 		/// <summary>
-		/// Indicated whether this Entity was explicitly given a new instance name upon creation, or if it was just copied/inherited implicitly.
+		/// Indicates whether this Entity was explicitly given a new instance name upon creation, or if it was just copied/inherited implicitly.
 		/// </summary>
 		/// <returns>Whether this Entity was given a new Preset Name upon creation.</returns>
 		bool IsOriginalPreset() const { return m_IsOriginalPreset; }
@@ -430,6 +430,7 @@ namespace RTE {
 		bool m_IsOriginalPreset; //!< Whether this is to be added to the PresetMan as an original preset instance.  
 		int m_DefinedInModule; //!< The DataModule ID that this was successfully added to at some point. -1 if not added to anything yet.
 
+		//TODO Consider replacing this with an unordered_set. See https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/88
 		std::list<std::string> m_Groups; //!< List of all tags associated with this. The groups are used to categorize and organize Entities.  
 		std::string m_LastGroupSearch; //!< Last group search string, for more efficient response on multiple tries for the same group name.  
 		bool m_LastGroupResult; //!< Last group search result, for more efficient response on multiple tries for the same group name.

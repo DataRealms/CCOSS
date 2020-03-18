@@ -319,7 +319,7 @@ void ConsoleMan::Update()
 {
 	bool inputConsumed = false;
 
-	if ((g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_TILDE)) || (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_SLASH)))
+	if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_TILDE))
 	{
 		inputConsumed = true;
 		if (IsForceVisible())
@@ -388,7 +388,7 @@ void ConsoleMan::Update()
     }
 
     // Toggle enabling with traditional tilde key
-    if (!inputConsumed && (g_UInputMan.KeyPressed(KEY_TILDE) || g_UInputMan.KeyPressed(KEY_SLASH)))
+    if (!inputConsumed && g_UInputMan.KeyPressed(KEY_TILDE))
     {
         if (IsEnabled())
         {
@@ -422,8 +422,7 @@ void ConsoleMan::Update()
     m_pGUIController->Update();
 
     // Remove any junk input that will have been entered by the opening/closing of the console
-    if (g_UInputMan.KeyPressed(KEY_TILDE) || g_UInputMan.KeyPressed(KEY_SLASH) ||
-        g_UInputMan.KeyHeld(KEY_TILDE) || g_UInputMan.KeyHeld(KEY_SLASH))
+    if (g_UInputMan.KeyPressed(KEY_TILDE) ||g_UInputMan.KeyHeld(KEY_TILDE))
     {
         // Restore any text being worked on in the input, as the box keeps getting junk added to it
         m_pInputTextBox->SetText(m_LastInputString);

@@ -24,8 +24,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Entity::Create() {
-		// Special "All" group that includes.. all
-		m_Groups.push_back("All");
+		m_Groups.push_back("All"); // Special "All" group that includes.. all
 		return 0;
 	}
 
@@ -53,15 +52,8 @@ namespace RTE {
 
 			if (pPreset) {
 				pPreset->Clone(this);
-				// Couldn't find the preset to copy from? Then just read it in as an original
 			} else {
-				/*	Just read as an original preset instead of failing
-					char error[256];
-					sprintf_s(error, sizeof(error), "Referring to an instance ('%s') to copy from that hasn't been defined!", refName.c_str());
-					reader.ReportError(error);
-					return -1;
-				*/
-				// Do report this error to the console though!
+				// If we couldn't find the preset to copy from, read it as an original but report the problem in the console
 				g_ConsoleMan.PrintString("ERROR: Couldn't find the preset '" + refName + "' accessed in " + reader.GetCurrentFilePath() + " at line " + reader.GetCurrentFileLineString());
 
 				// Preset name might have "[ModuleName]/" preceding it, detect it here and select proper module!
@@ -86,8 +78,7 @@ namespace RTE {
 			reader >> m_PresetDescription;
 		} else if (propName == "RandomWeight") {
 			reader >> m_RandomWeight;
-			if (m_RandomWeight < 0) { m_RandomWeight = 0; }
-			if (m_RandomWeight > 100) { m_RandomWeight = 100; }
+			m_RandomWeight = Limit(m_RandomWeight, 100, 0);
 		} else if (propName == "AddToGroup") {
 			std::string newGroup;
 			reader >> newGroup;
@@ -167,8 +158,7 @@ namespace RTE {
 		if (m_DefinedInModule == whichModule) {
 			return false;
 		}
-		// This now a unique snowflake
-		m_IsOriginalPreset = true;
+		m_IsOriginalPreset = true; // This now a unique snowflake
 		m_DefinedInModule = whichModule;
 		return true;
 	}
@@ -205,9 +195,8 @@ namespace RTE {
 	Reader & operator>>(Reader &reader, Entity &operand) {
 		// Get this before reading Entity, since if it's the last one in its datafile, the stream will show the parent file instead
 		std::string objectFilePath = reader.GetCurrentFilePath();
-		// Read the Entity from the file
+		// Read the Entity from the file and try to add it to PresetMan
 		operand.Create(reader);
-		// Try to add it to the PresetMan
 		g_PresetMan.AddEntityPreset(&operand, reader.GetReadModuleID(), reader.GetPresetOverwriting(), objectFilePath);
 
 		return reader;
@@ -219,9 +208,8 @@ namespace RTE {
 		if (operand) {
 			// Get this before reading Entity, since if it's the last one in its datafile, the stream will show the parent file instead
 			std::string objectFilePath = reader.GetCurrentFilePath();
-			// Read the Entity from the file
+			// Read the Entity from the file and try to add it to PresetMan
 			operand->Create(reader);
-			// Try to add it to the PresetMan
 			g_PresetMan.AddEntityPreset(operand, reader.GetReadModuleID(), reader.GetPresetOverwriting(), objectFilePath);
 		} else {
 			reader.ReportError("Tried to read an .ini file into a null Entity pointer!");
@@ -238,11 +226,11 @@ namespace RTE {
 		m_fpDeallocate(fpDeallocFunc),
 		m_fpNewInstance(fpNewFunc),
 		m_NextClass(m_sClassHead) {
-		m_sClassHead = this;
+			m_sClassHead = this;
 
-		m_AllocatedPool.clear();
-		m_PoolAllocBlockCount = allocBlockCount > 0 ? allocBlockCount : 10;
-	}
+			m_AllocatedPool.clear();
+			m_PoolAllocBlockCount = allocBlockCount > 0 ? allocBlockCount : 10;
+		}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -284,8 +272,9 @@ namespace RTE {
 
 		// If concrete class, fill up the pool with pre-allocated memory blocks the size of the type
 		if (m_fpAllocate && fillAmount > 0) {
-			// As many as we're asked to make
-			for (int i = 0; i < fillAmount; ++i) { m_AllocatedPool.push_back(m_fpAllocate()); }
+			for (int i = 0; i < fillAmount; ++i) {
+				m_AllocatedPool.push_back(m_fpAllocate());
+			}
 		}
 	}
 
@@ -313,7 +302,7 @@ namespace RTE {
 
 	int Entity::ClassInfo::ReturnPoolMemory(void *pReturnedMemory) {
 		if (!pReturnedMemory) {
-			return false;
+			return 0;
 		}
 		m_AllocatedPool.push_back(pReturnedMemory);
 

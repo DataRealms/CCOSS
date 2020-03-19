@@ -1,6 +1,7 @@
 #ifndef _RTEAUDIOMAN_
 #define _RTEAUDIOMAN_
 
+#include "Constants.h"
 #include "Entity.h"
 #include "Timer.h"
 #include "Singleton.h"

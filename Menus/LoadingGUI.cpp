@@ -20,13 +20,17 @@ extern volatile bool g_Quit;
 
 namespace RTE {
 
-	GUIControlManager *LoadingGUI::s_LoadingGUI = 0;
-	AllegroInput *LoadingGUI::s_GUIInput = 0;
-	AllegroScreen *LoadingGUI::s_GUIScreen = 0;
-	Writer *LoadingGUI::s_LoadingLogWriter = 0;
-	BITMAP *LoadingGUI::s_LoadingGUIBitmap = 0;
-	int LoadingGUI::s_LoadingGUIPosX = 0;
-	int LoadingGUI::s_LoadingGUIPosY = 0;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LoadingGUI::Clear() {
+		m_ControlManager = 0;
+		m_GUIInput = 0;
+		m_GUIScreen = 0;
+		m_LoadingLogWriter = 0;
+		m_LoadingGUIBitmap = 0;
+		m_PosX = 0;
+		m_PosY = 0;
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -34,8 +38,8 @@ namespace RTE {
 		g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 
 		// Create the main GUI
-		s_GUIInput = new AllegroInput(-1);
-		s_GUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32());
+		m_GUIInput = new AllegroInput(-1);
+		m_GUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32());
 
 		// Loading splash screen
 		g_FrameMan.ClearBackBuffer32();
@@ -55,22 +59,22 @@ namespace RTE {
 		g_FrameMan.FlipFrameBuffers();
 
 		// Set up the loading GUI
-		if (!s_LoadingGUI) {
-			s_LoadingGUI = new GUIControlManager();
+		if (!m_ControlManager) {
+			m_ControlManager = new GUIControlManager();
 
 			// TODO: This should be using the 32bpp main menu skin, but isn't because it needs the config of the base for its listbox
 			// Can get away with this hack for now because the list box that the loading menu uses displays ok when drawn on a 32bpp buffer,
 			// when it's 8bpp internally, since it does not use any masked_blit calls to draw list boxes.
 			// Note also how the GUIScreen passed in here has been created with an 8bpp bitmap, since that is what determines what the GUI manager uses internally
-			if (!s_LoadingGUI->Create(s_GUIScreen, s_GUIInput, "Base.rte/GUIs/Skins/MainMenu", "LoadingSkin.ini")) {
+			if (!m_ControlManager->Create(m_GUIScreen, m_GUIInput, "Base.rte/GUIs/Skins/MainMenu", "LoadingSkin.ini")) {
 				RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu/LoadingSkin.ini");
 			}
-			s_LoadingGUI->Load("Base.rte/GUIs/LoadingGUI.ini");
+			m_ControlManager->Load("Base.rte/GUIs/LoadingGUI.ini");
 		}
 
 		// Place and clear the sectionProgress box
-		dynamic_cast<GUICollectionBox *>(s_LoadingGUI->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
-		GUIListBox *pBox = dynamic_cast<GUIListBox *>(s_LoadingGUI->GetControl("ProgressBox"));
+		dynamic_cast<GUICollectionBox *>(m_ControlManager->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		GUIListBox *pBox = dynamic_cast<GUIListBox *>(m_ControlManager->GetControl("ProgressBox"));
 		// Make the box a bit bigger if there's room in higher, HD resolutions
 		if (g_FrameMan.GetResX() >= 960) {
 			// Make the loading progress box fill the right third of the screen
@@ -83,17 +87,17 @@ namespace RTE {
 		pBox->ClearList();
 
 		// New mechanism to speed up loading times as it turned out that a massive amount of time is spent to update GUI control.
-		if (!g_SettingsMan.DisableLoadingScreen() && !s_LoadingGUIBitmap) {
+		if (!g_SettingsMan.DisableLoadingScreen() && !m_LoadingGUIBitmap) {
 			pBox->SetVisible(false);
-			s_LoadingGUIBitmap = create_bitmap_ex(8, pBox->GetWidth(), pBox->GetHeight());
-			clear_to_color(s_LoadingGUIBitmap, 54);
-			rect(s_LoadingGUIBitmap, 0, 0, pBox->GetWidth() - 1, pBox->GetHeight() - 1, 33);
-			rect(s_LoadingGUIBitmap, 1, 1, pBox->GetWidth() - 2, pBox->GetHeight() - 2, 33);
-			s_LoadingGUIPosX = pBox->GetXPos();
-			s_LoadingGUIPosY = pBox->GetYPos();
+			m_LoadingGUIBitmap = create_bitmap_ex(8, pBox->GetWidth(), pBox->GetHeight());
+			clear_to_color(m_LoadingGUIBitmap, 54);
+			rect(m_LoadingGUIBitmap, 0, 0, pBox->GetWidth() - 1, pBox->GetHeight() - 1, 33);
+			rect(m_LoadingGUIBitmap, 1, 1, pBox->GetWidth() - 2, pBox->GetHeight() - 2, 33);
+			m_PosX = pBox->GetXPos();
+			m_PosY = pBox->GetYPos();
 		}
 		// Create the loading log writer
-		if (!s_LoadingLogWriter) { s_LoadingLogWriter = new Writer("LogLoading.txt"); }
+		if (!m_LoadingLogWriter) { m_LoadingLogWriter = new Writer("LogLoading.txt"); }
 
 		// Load all the data modules
 		LoadDataModules();
@@ -104,26 +108,26 @@ namespace RTE {
 	void LoadingGUI::LoadingSplashProgressReport(std::string reportString, bool newItem) {
 		if (g_System.GetLogToCLI()) { g_System.PrintLoadingToCLI(reportString, newItem); }
 
-		if (s_LoadingGUI) {
+		if (g_LoadingGUI.m_ControlManager) {
 			g_UInputMan.Update();
 			if (newItem) {
 				// Write out the last line to the log file before starting a new one
-				if (s_LoadingLogWriter->WriterOK()) { *s_LoadingLogWriter << reportString << "\n"; }
+				if (g_LoadingGUI.m_LoadingLogWriter->WriterOK()) { *g_LoadingGUI.m_LoadingLogWriter << reportString << "\n"; }
 				// Scroll bitmap upwards
-				if (s_LoadingGUIBitmap) { blit(s_LoadingGUIBitmap, s_LoadingGUIBitmap, 2, 12, 2, 2, s_LoadingGUIBitmap->w - 3, s_LoadingGUIBitmap->h - 12); }
+				if (g_LoadingGUI.m_LoadingGUIBitmap) { blit(g_LoadingGUI.m_LoadingGUIBitmap, g_LoadingGUI.m_LoadingGUIBitmap, 2, 12, 2, 2, g_LoadingGUI.m_LoadingGUIBitmap->w - 3, g_LoadingGUI.m_LoadingGUIBitmap->h - 12); }
 			}
-			if (s_LoadingGUIBitmap) {
-				AllegroBitmap bmp(s_LoadingGUIBitmap);
+			if (g_LoadingGUI.m_LoadingGUIBitmap) {
+				AllegroBitmap bmp(g_LoadingGUI.m_LoadingGUIBitmap);
 				// Clear current line
-				rectfill(s_LoadingGUIBitmap, 2, s_LoadingGUIBitmap->h - 12, s_LoadingGUIBitmap->w - 3, s_LoadingGUIBitmap->h - 3, 54);
+				rectfill(g_LoadingGUI.m_LoadingGUIBitmap, 2, g_LoadingGUI.m_LoadingGUIBitmap->h - 12, g_LoadingGUI.m_LoadingGUIBitmap->w - 3, g_LoadingGUI.m_LoadingGUIBitmap->h - 3, 54);
 				// Print new line
-				g_FrameMan.GetSmallFont()->DrawAligned(&bmp, 5, s_LoadingGUIBitmap->h - 12, reportString.c_str(), GUIFont::Left);
+				g_FrameMan.GetSmallFont()->DrawAligned(&bmp, 5, g_LoadingGUI.m_LoadingGUIBitmap->h - 12, reportString.c_str(), GUIFont::Left);
 				// DrawAligned - MaxWidth is useless here, so we're just drawing lines manually
-				vline(s_LoadingGUIBitmap, s_LoadingGUIBitmap->w - 2, s_LoadingGUIBitmap->h - 12, s_LoadingGUIBitmap->h - 2, 33);
-				vline(s_LoadingGUIBitmap, s_LoadingGUIBitmap->w - 1, s_LoadingGUIBitmap->h - 12, s_LoadingGUIBitmap->h - 2, 33);
+				vline(g_LoadingGUI.m_LoadingGUIBitmap, g_LoadingGUI.m_LoadingGUIBitmap->w - 2, g_LoadingGUI.m_LoadingGUIBitmap->h - 12, g_LoadingGUI.m_LoadingGUIBitmap->h - 2, 33);
+				vline(g_LoadingGUI.m_LoadingGUIBitmap, g_LoadingGUI.m_LoadingGUIBitmap->w - 1, g_LoadingGUI.m_LoadingGUIBitmap->h - 12, g_LoadingGUI.m_LoadingGUIBitmap->h - 2, 33);
 
 				// Draw onto current frame buffer
-				blit(s_LoadingGUIBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, s_LoadingGUIPosX, s_LoadingGUIPosY, s_LoadingGUIBitmap->w, s_LoadingGUIBitmap->h);
+				blit(g_LoadingGUI.m_LoadingGUIBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, g_LoadingGUI.m_PosX, g_LoadingGUI.m_PosY, g_LoadingGUI.m_LoadingGUIBitmap->w, g_LoadingGUI.m_LoadingGUIBitmap->h);
 
 				g_FrameMan.FlipFrameBuffers();
 			}

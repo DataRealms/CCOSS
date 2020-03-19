@@ -133,7 +133,6 @@ int g_DifficultySetting = 4;
 int g_StationOffsetX;
 int g_StationOffsetY;
 
-LoadingGUI *g_LoadingGUI;
 MainMenuGUI *g_pMainMenuGUI = 0;
 ScenarioGUI *g_pScenarioGUI = 0;
 Controller *g_pMainMenuController = 0;
@@ -1958,7 +1957,8 @@ int main(int argc, char *argv[]) {
 		g_AudioMan.SetMusicVolume(0);
 	}
 
-	g_LoadingGUI->InitLoadingScreen();
+    new LoadingGUI();
+	g_LoadingGUI.InitLoadingScreen();
 	InitMainMenu();
 
 	if (g_LaunchIntoEditor) { 

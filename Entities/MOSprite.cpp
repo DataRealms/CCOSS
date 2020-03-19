@@ -473,7 +473,7 @@ void MOSprite::Update() {
 
 	// Animate the sprite, if applicable
 	unsigned int frameTime = m_SpriteAnimDuration / m_FrameCount;
-	unsigned int prevFrame;
+	unsigned int prevFrame = m_Frame;
 
 	if (m_SpriteAnimTimer.GetElapsedSimTimeMS() > frameTime) {
 		switch (m_SpriteAnimMode) {

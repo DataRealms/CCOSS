@@ -458,59 +458,43 @@ Vector MOSprite::UnRotateOffset(const Vector &offset) const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this MOSprite. Supposed to be done every frame.
 
-void MOSprite::Update()
-{
-    MovableObject::Update();
+void MOSprite::Update() {
+	MovableObject::Update();
 
-    ////////////////////////////////////////
-    // Animate the sprite, if applicable
+	// First, check that the sprite has enough frames to even have an animation and override the setting if not
+	if (m_FrameCount > 1) {
+		// If animation mode is set to something other than ALWAYSLOOP but only has 2 frames, override it because it's pointless
+		if ((m_SpriteAnimMode == ALWAYSRANDOM || m_SpriteAnimMode == ALWAYSPINGPONG) && m_FrameCount == 2) {
+			m_SpriteAnimMode = ALWAYSLOOP;
+		}
+	} else {
+		m_SpriteAnimMode = NOANIM;
+	}
 
-    if (m_FrameCount > 1)
-    {
-        if (m_SpriteAnimMode == ALWAYSLOOP)
-        {
-            float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;
-            m_Frame = floorf((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);
-        }
-        else if (m_SpriteAnimMode == ALWAYSRANDOM)
-        {
-            if (m_SpriteAnimTimer.GetElapsedSimTimeMS() > (m_SpriteAnimDuration / m_FrameCount))
-            {
-                //  Quick switch to other frame if only two
-                if (m_FrameCount == 2) { m_SpriteAnimMode = ALWAYSLOOP; }
-                {
-                    int prevFrame = m_Frame;
-                    // Keep trying ot find a new frame
-                    do
-                    {
-                        m_Frame = floorf((float)m_FrameCount * PosRand());
-                    } while (m_Frame == prevFrame);
-                }
+	// Animate the sprite, if applicable
+	int frameTime = m_SpriteAnimDuration / m_FrameCount;
 
-                m_SpriteAnimTimer.Reset();
-            }
-        }
-        else if (m_SpriteAnimMode == ALWAYSPINGPONG)
-        {
-            if (m_FrameCount == 2) { m_SpriteAnimMode = ALWAYSLOOP; }
-            int realFrameCount = m_FrameCount - 1;
-            float perFrameTime = ((m_SpriteAnimDuration / m_FrameCount) / 2);
-            if (m_SpriteAnimTimer.IsPastSimMS(perFrameTime))
-            {
-                m_SpriteAnimTimer.Reset();
-                (m_SpriteAnimIsReversingFrames) ? (m_Frame--) : (m_Frame++);
-            }
-            
-            if (m_Frame == realFrameCount) 
-            {
-                m_SpriteAnimIsReversingFrames = true;
-            }
-            else if (m_Frame == 0)
-            {
-                m_SpriteAnimIsReversingFrames = false;
-            }
-        }
-    }
+	if (m_SpriteAnimMode == ALWAYSLOOP) {
+		float cycleTime = (static_cast<long>(m_SpriteAnimTimer.GetElapsedSimTimeMS())) % m_SpriteAnimDuration;
+		m_Frame = floorf((cycleTime / static_cast<float>(m_SpriteAnimDuration)) * static_cast<float>(m_FrameCount));
+
+	} else if (m_SpriteAnimMode == ALWAYSRANDOM && m_SpriteAnimTimer.GetElapsedSimTimeMS() > frameTime) {
+		int prevFrame = m_Frame;
+		// Keep trying to find a new frame
+		do {
+			m_Frame = floorf(static_cast<float>(m_FrameCount) * PosRand());
+		} while (m_Frame == prevFrame);
+		m_SpriteAnimTimer.Reset();
+
+	} else if (m_SpriteAnimMode == ALWAYSPINGPONG && m_SpriteAnimTimer.GetElapsedSimTimeMS() > frameTime) {
+		if (m_Frame == m_FrameCount - 1) {
+			m_SpriteAnimIsReversingFrames = true;
+		} else if (m_Frame == 0) {
+			m_SpriteAnimIsReversingFrames = false;
+		}
+		m_SpriteAnimIsReversingFrames ? m_Frame-- : m_Frame++;
+		m_SpriteAnimTimer.Reset();
+	}
 }
 
 

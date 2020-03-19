@@ -651,7 +651,7 @@ protected:
     int m_SpriteAnimDuration;
     // The timer to keep track of the body animation
     Timer m_SpriteAnimTimer;
-    // Keep track of animation direction (mainly for ALWAYSPINGPONG), true is increasing frame, false is decreasing frame
+    // Keep track of animation direction (mainly for ALWAYSPINGPONG), true is decreasing frame, false is increasing frame
     bool m_SpriteAnimIsReversingFrames;
     // Whether flipped horizontally or not.
     bool m_HFlipped;

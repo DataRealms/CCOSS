@@ -1500,7 +1500,7 @@ int LuaMan::Create()
             .def("PlaySound", (SoundContainer *(AudioMan:: *)(const char *filePath, float attenuation, int player)) &AudioMan::PlaySound)
             .def("PlaySound", (SoundContainer * (AudioMan:: *)(const char *filePath, float attenuation, int player, int loops, int priority, double pitchOrAffectedByGlobalPitch)) &AudioMan::PlaySound)
             .def("StopSound", (bool (AudioMan:: *)(SoundContainer *soundContainer)) &AudioMan::StopSound)
-            .def("StopSound", (bool (AudioMan:: *)(int player, SoundContainer *soundContainer)) &AudioMan::StopSound)
+            .def("StopSound", (bool (AudioMan:: *)(SoundContainer *soundContainer, int player)) &AudioMan::StopSound)
             .def("FadeOutSound", &AudioMan::FadeOutSound),
 
         class_<UInputMan>("UInputManager")

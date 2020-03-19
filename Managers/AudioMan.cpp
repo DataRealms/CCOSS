@@ -481,7 +481,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AudioMan::StopSound(int player, SoundContainer *pSoundContainer) {
+	bool AudioMan::StopSound(SoundContainer *pSoundContainer, int player) {
 		if (m_IsInMultiplayerMode && pSoundContainer) {
 			RegisterSoundEvent(player, SOUND_STOP, pSoundContainer->GetHash(), 0, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), 1.0, pSoundContainer->IsAffectedByGlobalPitch());
 		}

@@ -230,7 +230,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Player to stop playback of this SoundContainer for.</param>
 		/// <returns>Whether this SoundContainer successfully stopped playing.</returns>
-		bool Stop(int player) { return HasAnySounds() ? g_AudioMan.StopSound(player, this) : false; }
+		bool Stop(int player) { return HasAnySounds() ? g_AudioMan.StopSound(this, player) : false; }
 
 		/// <summary>
 		/// Selects, saves and returns the next sound of this SoundContainer to be played.

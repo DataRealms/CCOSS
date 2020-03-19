@@ -2,6 +2,7 @@
 #define _RTEAUDIOMAN_
 
 #include "Constants.h"
+#include "RTETools.h"
 #include "Entity.h"
 #include "Timer.h"
 #include "Singleton.h"
@@ -219,10 +220,12 @@ namespace RTE {
 		bool SetSoundPitch(SoundContainer *pSound, float pitch);
 #pragma endregion
 
+#pragma region Global Playback and Handling
 		/// <summary>
 		/// Stops all playback and clears the music playlist.
 		/// </summary>
 		void StopAll() { if (m_AudioEnabled) { m_MasterChannelGroup->stop(); } m_MusicPlayList.clear(); }
+#pragma endregion
 
 #pragma region Music Playback and Handling
 		/// <summary>
@@ -319,7 +322,7 @@ namespace RTE {
 		/// <param name="player">Which player to stop the SoundContainer  for.</param>
 		/// <param name="pSound">Pointer to the SoundContainer to stop playing. Ownership is NOT transferred!</param>
 		/// <returns></returns>
-		bool StopSound(int player, SoundContainer *pSound);
+		bool StopSound(SoundContainer *pSound, int player);
 
 		/// <summary>
 		/// Fades out playback of all sounds in a specific SoundContainer.
@@ -403,6 +406,8 @@ namespace RTE {
 		bool m_IsInMultiplayerMode; //!< If true then the server is in multiplayer mode and will register sound and music events into internal lists.
 		std::list<NetworkSoundData> m_SoundEvents[c_MaxClients]; //!< Lists of per player sound events.
 		std::list<NetworkMusicData> m_MusicEvents[c_MaxClients]; //!< Lists of per player music events.
+
+		std::mutex g_SoundEventsListMutex[c_MaxClients]; //!< A list for locking sound events for multiplayer to avoid race conditions and other such problems.
 
 	private:
 		/// <summary>

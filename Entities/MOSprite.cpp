@@ -481,7 +481,6 @@ void MOSprite::Update() {
 			m_Frame = ((m_Frame + 1) % m_FrameCount);
 			break;
 		case ALWAYSRANDOM:
-			prevFrame = m_Frame;
 			while (m_Frame == prevFrame) {
 				m_Frame = floorf(static_cast<float>(m_FrameCount) * PosRand());
 			}

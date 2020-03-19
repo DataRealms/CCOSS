@@ -34,6 +34,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	//TODO Consider splitting this into a Create method and Init method to standardize LoadingGUI. Need to research if it can viably be done.
 	void LoadingGUI::InitLoadingScreen() {
 		g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 

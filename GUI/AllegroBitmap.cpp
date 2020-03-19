@@ -13,7 +13,7 @@
 
 #include "GUI.h"
 #include "AllegroBitmap.h"
-#include "DDTError.h"
+#include "RTEError.h"
 
 using namespace RTE;
 
@@ -79,7 +79,7 @@ bool AllegroBitmap::Create(const std::string Filename)
     m_BitmapFile.Create(Filename.c_str());
 
     m_pBitmap = m_BitmapFile.GetAsBitmap();//COLORCONV_8_TO_32 | COLORCONV_24_TO_32);
-    AAssert(m_pBitmap, "Could not load bitmap from file into AllegroBitmap!");
+    RTEAssert(m_pBitmap, "Could not load bitmap from file into AllegroBitmap!");
 
     return true;
 }
@@ -104,12 +104,12 @@ void AllegroBitmap::Destroy(void)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draw a section of this bitmap onto another bitmap
 
-void AllegroBitmap::Draw(GUIBitmap *pDestBitmap, int X, int Y, RECT *pRect)
+void AllegroBitmap::Draw(GUIBitmap *pDestBitmap, int X, int Y, GUIRect *pRect)
 {
     if (!m_pBitmap)
         return;
 
-    DAssert(pDestBitmap && ((AllegroBitmap *)pDestBitmap)->GetBitmap(), "Null destination bitmap passed when trying to draw AllegroBitmap");
+    RTEAssert(pDestBitmap && ((AllegroBitmap *)pDestBitmap)->GetBitmap(), "Null destination bitmap passed when trying to draw AllegroBitmap");
 
     if (pRect)
         blit(m_pBitmap, ((AllegroBitmap *)pDestBitmap)->GetBitmap(), pRect->left, pRect->top, X, Y, pRect->right - pRect->left, pRect->bottom - pRect->top);
@@ -124,12 +124,12 @@ void AllegroBitmap::Draw(GUIBitmap *pDestBitmap, int X, int Y, RECT *pRect)
 // Description:     Draw a section of this bitmap onto another bitmap ignoring 
 //                  color-keyed pixels
 
-void AllegroBitmap::DrawTrans(GUIBitmap *pDestBitmap, int X, int Y, RECT *pRect)
+void AllegroBitmap::DrawTrans(GUIBitmap *pDestBitmap, int X, int Y, GUIRect *pRect)
 {
     if (!m_pBitmap)
         return;
 
-    DAssert(pDestBitmap && ((AllegroBitmap *)pDestBitmap)->GetBitmap(), "Null destination bitmap passed when trying to draw AllegroBitmap");
+    RTEAssert(pDestBitmap && ((AllegroBitmap *)pDestBitmap)->GetBitmap(), "Null destination bitmap passed when trying to draw AllegroBitmap");
 
     if (pRect)
         masked_blit(m_pBitmap, ((AllegroBitmap *)pDestBitmap)->GetBitmap(), pRect->left, pRect->top, X, Y, pRect->right - pRect->left, pRect->bottom - pRect->top);
@@ -148,7 +148,7 @@ void AllegroBitmap::DrawTransScaled(GUIBitmap *pDestBitmap, int X, int Y, int wi
     if (!m_pBitmap)
         return;
 
-    DAssert(pDestBitmap && ((AllegroBitmap *)pDestBitmap)->GetBitmap(), "Null destination bitmap passed when trying to draw AllegroBitmap");
+    RTEAssert(pDestBitmap && ((AllegroBitmap *)pDestBitmap)->GetBitmap(), "Null destination bitmap passed when trying to draw AllegroBitmap");
 
     stretch_sprite(((AllegroBitmap *)pDestBitmap)->GetBitmap(), m_pBitmap, X, Y, width, height);
 }
@@ -159,7 +159,7 @@ void AllegroBitmap::DrawTransScaled(GUIBitmap *pDestBitmap, int X, int Y, int wi
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws a line.
 
-void AllegroBitmap::DrawLine(int x1, int y1, int x2, int y2, Uint32 Color)
+void AllegroBitmap::DrawLine(int x1, int y1, int x2, int y2, unsigned long Color)
 {
     if (!m_pBitmap)
         return;
@@ -173,7 +173,7 @@ void AllegroBitmap::DrawLine(int x1, int y1, int x2, int y2, Uint32 Color)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws a rectangle.
 
-void AllegroBitmap::DrawRectangle(int X, int Y, int Width, int Height, Uint32 Color, bool Filled)
+void AllegroBitmap::DrawRectangle(int X, int Y, int Width, int Height, unsigned long Color, bool Filled)
 {
     if (!m_pBitmap)
         return;
@@ -191,16 +191,16 @@ void AllegroBitmap::DrawRectangle(int X, int Y, int Width, int Height, Uint32 Co
 // Description:     Gets the colour of a pixel at a specific point.
 // Arguments:       Point.
 
-Uint32 AllegroBitmap::GetPixel(int X, int Y)
+unsigned long AllegroBitmap::GetPixel(int X, int Y)
 {
     if (!m_pBitmap)
         return 0;
 
-    AAssert(m_pBitmap, "GUI Bitmap is null; can't get pixel");
+    RTEAssert(m_pBitmap, "GUI Bitmap is null; can't get pixel");
 
 //    m_pBitmap->Lock();
 
-    Uint32 col = getpixel(m_pBitmap, X, Y);
+    unsigned long col = getpixel(m_pBitmap, X, Y);
 
 //    m_pBitmap->UnLock();
 
@@ -213,12 +213,12 @@ Uint32 AllegroBitmap::GetPixel(int X, int Y)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the color of a pixel at a specific point.
 
-void AllegroBitmap::SetPixel(int X, int Y, Uint32 Color)
+void AllegroBitmap::SetPixel(int X, int Y, unsigned long Color)
 {
     if (!m_pBitmap)
         return;
 
-    AAssert(m_pBitmap, "Trying to set a pixel on a null bitmap!");
+    RTEAssert(m_pBitmap, "Trying to set a pixel on a null bitmap!");
 
 //    m_pBitmap->Lock();
     putpixel(m_pBitmap, X, Y, Color);
@@ -259,7 +259,7 @@ int AllegroBitmap::GetHeight(void)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the color key of the bitmap.
 
-void AllegroBitmap::SetColorKey(Uint32 Key)
+void AllegroBitmap::SetColorKey(unsigned long Key)
 {
     if (m_pBitmap)
         m_pBitmap->SetColorKey(Key);
@@ -296,7 +296,7 @@ int AllegroBitmap::GetColorDepth()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the clipping rectangle of the bitmap.
 
-void AllegroBitmap::GetClipRect(RECT *pRect)
+void AllegroBitmap::GetClipRect(GUIRect *pRect)
 {
     if (m_pBitmap && pRect)
     {
@@ -315,7 +315,7 @@ void AllegroBitmap::GetClipRect(RECT *pRect)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the clipping rectangle of the bitmap.
 
-void AllegroBitmap::SetClipRect(RECT *pRect)
+void AllegroBitmap::SetClipRect(GUIRect *pRect)
 {
     if (m_pBitmap)
     {
@@ -340,7 +340,7 @@ void AllegroBitmap::SetClipRect(RECT *pRect)
 //                  intersection of its current clipping rectangle and the rectangle
 //                  described by the passed-in rect. 
 
-void AllegroBitmap::AddClipRect(RECT *pRect)
+void AllegroBitmap::AddClipRect(GUIRect *pRect)
 {
     if (m_pBitmap)
     {

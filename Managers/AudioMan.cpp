@@ -2,7 +2,7 @@
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
 #include "Sound.h"
-#include "DDTError.h"
+#include "RTEError.h"
 
 namespace RTE {
 	const std::string AudioMan::m_ClassName = "AudioMan";
@@ -689,7 +689,7 @@ namespace RTE {
 		int channelIndex = pSound->m_LastChannel & 0x00000FFF;
 
 		// Save the 'normal' frequency so we can pitch it later
-		DAssert(channelIndex < m_NormalFrequencies.size(), "Channel index higher than normal freq array?");
+		RTEAssert(channelIndex < m_NormalFrequencies.size(), "Channel index higher than normal freq array?");
 		if (channelIndex < m_NormalFrequencies.size()) {
 			// If this sound isn't supposed to be pitched, then set a <= 0 normal frequency to indicate it
 			if (!pSound->m_AffectedByPitch) {

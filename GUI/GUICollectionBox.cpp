@@ -100,11 +100,11 @@ void GUICollectionBox::Create(GUIProperties *Props)
     Props->GetValue("DrawBackground", &m_DrawBackground);
     string v;
     Props->GetValue("DrawType", &v);
-    if (DDTstricmp(v.c_str(), "Color") == 0)
+    if (stricmp(v.c_str(), "Color") == 0)
         m_DrawType = Color;
-    else if (DDTstricmp(v.c_str(), "Image") == 0)
+    else if (stricmp(v.c_str(), "Image") == 0)
         m_DrawType = Image;
-    else if (DDTstricmp(v.c_str(), "Panel") == 0)
+    else if (stricmp(v.c_str(), "Panel") == 0)
         m_DrawType = Panel;
 
     Props->GetValue("DrawColor", &m_DrawColor);
@@ -182,7 +182,7 @@ void GUICollectionBox::Draw(GUIScreen *Screen)
         // Panel
         else if (m_DrawType == Panel && m_DrawBackground) {
             if (m_DrawBitmap) {
-                RECT Rect;
+                GUIRect Rect;
                 SetRect(&Rect, 0, 0, m_Width, m_Height);
                 Screen->DrawBitmapTrans(m_DrawBitmap, m_X, m_Y, &Rect);
             }
@@ -369,7 +369,7 @@ void GUICollectionBox::SetDrawType(int Type)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the drawing color.
 
-void GUICollectionBox::SetDrawColor(Uint32 Color)
+void GUICollectionBox::SetDrawColor(unsigned long Color)
 {
     m_DrawColor = Color;
 }
@@ -401,9 +401,9 @@ void GUICollectionBox::ApplyProperties(GUIProperties *Props)
     m_Properties.GetValue("DrawBackground", &m_DrawBackground);
     string v;
     m_Properties.GetValue("DrawType", &v);
-    if (DDTstricmp(v.c_str(), "Color") == 0)
+    if (stricmp(v.c_str(), "Color") == 0)
         m_DrawType = Color;
-    else if (DDTstricmp(v.c_str(), "Image") == 0)
+    else if (stricmp(v.c_str(), "Image") == 0)
         m_DrawType = Image;
 
     m_Properties.GetValue("DrawColor", &m_DrawColor);

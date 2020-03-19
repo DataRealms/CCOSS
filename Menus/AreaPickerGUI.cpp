@@ -70,7 +70,7 @@ void AreaPickerGUI::Clear()
 
 int AreaPickerGUI::Create(Controller *pController, string onlyOfType)
 {
-    AAssert(pController, "No controller sent to AreaPickerGUI on creation!");
+    RTEAssert(pController, "No controller sent to AreaPickerGUI on creation!");
     m_pController = pController;
 
     if (!m_pGUIScreen)
@@ -80,7 +80,7 @@ int AreaPickerGUI::Create(Controller *pController, string onlyOfType)
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
     m_pGUIController->Load("Base.rte/GUIs/AreaPickerGUI.ini");
     m_pGUIController->EnableMouse(pController->IsMouseControlled());
 

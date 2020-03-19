@@ -185,7 +185,7 @@ bool Scene::Area::IsInside(const Vector &point) const
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
-            if (wItr->WithinBox(point))
+            if (wItr->IsWithinBox(point))
                 return true;
         }
     }
@@ -211,7 +211,7 @@ bool Scene::Area::IsInsideX(float pointX) const
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
-            if (wItr->WithinBoxX(pointX))
+            if (wItr->IsWithinBoxX(pointX))
                 return true;
         }
     }
@@ -237,7 +237,7 @@ bool Scene::Area::IsInsideY(float pointY) const
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
-            if (wItr->WithinBoxY(pointY))
+            if (wItr->IsWithinBoxY(pointY))
                 return true;
         }
     }
@@ -324,7 +324,7 @@ Box * Scene::Area::GetBoxInside(const Vector &point)
         for (list<Box>::const_iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
             // Return the BoxList box, not the inconsequential wrapped copy
-            if (wItr->WithinBox(point))
+            if (wItr->IsWithinBox(point))
                 return &(*aItr);
         }
     }
@@ -351,7 +351,7 @@ Box Scene::Area::RemoveBoxInside(const Vector &point)
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
-            if (wItr->WithinBox(point))
+            if (wItr->IsWithinBox(point))
             {
                 // Remove the BoxList box, not the inconsequential wrapped copy
                 returnBox = (*aItr);
@@ -549,7 +549,7 @@ int Scene::Create(const Scene &reference)
         BITMAP *pCopyFrom = reference.m_pPreviewBitmap;
 		// Destination
 		m_pPreviewBitmap = create_bitmap_ex(8, pCopyFrom->w, pCopyFrom->h);
-		AAssert(m_pPreviewBitmap, "Failed to allocate BITMAP in Scene::Create");
+		RTEAssert(m_pPreviewBitmap, "Failed to allocate BITMAP in Scene::Create");
 
 		// Copy!
 		blit(pCopyFrom, m_pPreviewBitmap, 0, 0, 0, 0, pCopyFrom->w, pCopyFrom->h);
@@ -569,13 +569,13 @@ int Scene::Create(const Scene &reference)
 
 int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 {
-    DAssert(m_pTerrain, "Terrain not instantiated before trying to load its data!");
+    RTEAssert(m_pTerrain, "Terrain not instantiated before trying to load its data!");
 
     ///////////////////////////////////
     // Load Terrain's data
     if (m_pTerrain->LoadData() < 0)
     {
-        DDTAbort("Loading Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
+        RTEAbort("Loading Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
         return -1;
     }
     
@@ -907,7 +907,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
         // Load Background layers' data
         for (list<SceneLayer *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
         {
-            DAssert((*slItr), "Background layer not instantiated before trying to load its data!");
+            RTEAssert((*slItr), "Background layer not instantiated before trying to load its data!");
             if ((*slItr)->LoadData() < 0)
             {
                 g_ConsoleMan.PrintString("ERROR: Loading background layer " + (*slItr)->GetPresetName() + "\'s data failed!");
@@ -1017,7 +1017,7 @@ int Scene::SaveData(string pathBase)
     // Save Terrain's data
     if (m_pTerrain->SaveData(pathBase) < 0)
     {
-        DDTAbort("Saving Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
+        RTEAbort("Saving Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
         return -1;
     }
 
@@ -1221,14 +1221,14 @@ int Scene::ClearData()
     // Clear Terrain's data
     if (m_pTerrain->ClearData() < 0)
     {
-        DDTAbort("Clearing Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
+        RTEAbort("Clearing Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
         return -1;
     }
 
     // Clear Background layers' data
     for (list<SceneLayer *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
     {
-        DAssert((*slItr), "Background layer not instantiated before trying to clear its data!");
+        RTEAssert((*slItr), "Background layer not instantiated before trying to clear its data!");
         if ((*slItr)->ClearData() < 0)
         {
             g_ConsoleMan.PrintString("ERROR: Clearing background layer " + (*slItr)->GetPresetName() + "\'s data failed!");
@@ -1339,7 +1339,7 @@ int Scene::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "AddBackgroundLayer")
     {
         SceneLayer *pLayer = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
-        AAssert(pLayer, "Something went wrong with reading SceneLayer");
+        RTEAssert(pLayer, "Something went wrong with reading SceneLayer");
         if (pLayer)
             m_BackLayerList.push_back(pLayer);
     }
@@ -2006,7 +2006,7 @@ bool Scene::PlaceResidentBrain(int player, Activity &newActivity)
 {
     if (m_ResidentBrains[player])
     {
-        DAssert(m_ResidentBrains[player]->GetTeam() == newActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team!!");
+        RTEAssert(m_ResidentBrains[player]->GetTeam() == newActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team!!");
 
         Actor *pBrainActor = dynamic_cast<Actor *>(m_ResidentBrains[player]);
         if (pBrainActor)// && pBrainActor->IsActor())
@@ -2061,7 +2061,7 @@ int Scene::RetrieveResidentBrains(Activity &oldActivity)
 
     for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
     {
-//        DAssert(oldActivity.GetPlayerBrain(player) && oldActivity.GetPlayerBrain(player)->GetTeam() == oldActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team BEFORE being retrieved!!");
+//        RTEAssert(oldActivity.GetPlayerBrain(player) && oldActivity.GetPlayerBrain(player)->GetTeam() == oldActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team BEFORE being retrieved!!");
 
         // Replace existing brain residencies
         delete m_ResidentBrains[player];
@@ -2076,7 +2076,7 @@ int Scene::RetrieveResidentBrains(Activity &oldActivity)
         else
             m_ResidentBrains[player] = 0;
 
-//        DAssert(m_ResidentBrains[player] && m_ResidentBrains[player]->GetTeam() == oldActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team AFTER being retrieved!!");
+//        RTEAssert(m_ResidentBrains[player] && m_ResidentBrains[player]->GetTeam() == oldActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team AFTER being retrieved!!");
     }
 
     return found;
@@ -3062,7 +3062,7 @@ int Scene::CalculateScenePath(const Vector start, const Vector end, bool movePat
 
 void Scene::Lock()
 {
-//    AAssert(!m_Locked, "Hey, locking already locked scene!");
+//    RTEAssert(!m_Locked, "Hey, locking already locked scene!");
     if (!m_Locked)
     {
         m_pTerrain->LockBitmaps();
@@ -3081,7 +3081,7 @@ void Scene::Lock()
 
 void Scene::Unlock()
 {
-//    AAssert(m_Locked, "Hey, unlocking already unlocked scene!");
+//    RTEAssert(m_Locked, "Hey, unlocking already unlocked scene!");
     if (m_Locked)
     {
         m_pTerrain->UnlockBitmaps();

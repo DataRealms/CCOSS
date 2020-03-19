@@ -12,7 +12,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "ActivityMan.h"
 #include "GameActivity.h"
 

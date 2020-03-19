@@ -14,13 +14,7 @@
 #include "GUI.h"
 #include "GUITextPanel.h"
 
-#if defined(__APPLE__)
-#include "OsxUtil.h"
-#elif defined(__unix__)
-// FIXME -- Need to add the Linux version of these "utils"...
-#else
 #include "WinUtil.h"
-#endif // defined(__APPLE__)
 
 using namespace RTE;
 
@@ -198,16 +192,9 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier)
 {
     bool Shift = ((Modifier & MODI_SHIFT) != 0);        // Condition here to stop the compiler
                                                         // bitching about performance
-	
-	// ModKey is Control key on WIN32 and Apple key on OSX
-#if defined(__APPLE__) || defined(__unix__)
-	bool ModKey = ((Modifier & MODI_COMMAND) != 0);	
-	int asciiChar = KeyCode;	// [CHRISK] no conversion needed on APPLE
-#elif defined(WIN32)
     bool ModKey = ((Modifier & MODI_CTRL) != 0);        // Ditto
 	// To convert to allegro's crazy scheme with their keyboard function returning the order of the letter when ctrl is pressed
     int asciiChar = ModKey ? KeyCode + 96 : KeyCode;
-#endif // defined(__APPLE__)
 
     if (m_Locked)
         return;
@@ -322,13 +309,7 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier)
     if (asciiChar == 'x' && ModKey) {
         if (m_GotSelection) {
             // Set the clipboard text
-#if defined(__APPLE__)
-			OsxUtil::SetClipboardText(GetSelectionText());
-#elif defined(__unix__)
-			// FIXME -- Need to fix clippoarding code for LINUX
-#else
             WinUtil::SetClipboardText(GetSelectionText());
-#endif // defined(__APPLE__)
 			RemoveSelectionText();
 
             SendSignal(Changed, 0);
@@ -339,16 +320,9 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier)
 
     // ModKey-C (Copy)
     if (asciiChar == 'c' && ModKey) {
-        if (m_GotSelection) {
-			
-#if defined(__APPLE__)
-			OsxUtil::SetClipboardText(GetSelectionText());
-#elif defined(__unix__)
-			// FIXME -- Need to fix clippoarding code for LINUX
-#else
+        if (m_GotSelection) {		
             // Set the clipboard text
             WinUtil::SetClipboardText(GetSelectionText());
-#endif // defined(__APPLE__)
         }
 
         return;
@@ -359,13 +333,7 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier)
         RemoveSelectionText();
 
         string Text = "";
-#if defined(__APPLE__)
-		OsxUtil::GetClipboardText(&Text);
-#elif defined(__unix__)
-			// FIXME -- Need to fix clippoarding code for LINUX
-#else
         WinUtil::GetClipboardText(&Text);
-#endif // defined(__APPLE__)
 		
         // Insert the text
         m_Text.insert(m_CursorIndex, Text);

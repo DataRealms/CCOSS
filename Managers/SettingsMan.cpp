@@ -107,7 +107,7 @@ int SettingsMan::Create(Reader &reader, bool checkType, bool doCreate)
 
     // Couldn't find the settings file, so create a new one with all the good defaults!
     Writer writer("Base.rte/Settings.ini");
-    AAssert(writer.WriterOK(), "After failing to open the Base.rte/Settings.ini, could not then even create a new one to save settings to! Are you trying to run the game from a read-only disk? You need to install the game to a writable area before running it!");
+    RTEAssert(writer.WriterOK(), "After failing to open the Base.rte/Settings.ini, could not then even create a new one to save settings to! Are you trying to run the game from a read-only disk? You need to install the game to a writable area before running it!");
 
     // Save out the defaults
     SaveDefaults(writer);

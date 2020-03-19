@@ -1,5 +1,5 @@
 #include "Sound.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "AudioMan.h"
 
 namespace RTE {
@@ -112,7 +112,7 @@ namespace RTE {
 		m_Hash = newFile.GetHash();
 
 		AUDIO_STRUCT *pNewSample = newFile.GetAsSample();
-		AAssert(pNewSample, "Failed to load the sample from the file");
+		RTEAssert(pNewSample, "Failed to load the sample from the file");
 		m_Samples.push_back(std::pair<ContentFile, AUDIO_STRUCT *>(newFile, pNewSample));
 	}
 
@@ -123,7 +123,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	AUDIO_STRUCT * Sound::GetCurrentSample() {
-		DAssert(m_CurrentSample >= 0 && m_CurrentSample < m_Samples.size(), "Sample index is out of bounds!");
+		RTEAssert(m_CurrentSample >= 0 && m_CurrentSample < m_Samples.size(), "Sample index is out of bounds!");
 		return m_Samples[m_CurrentSample].second;
 	}
 
@@ -164,7 +164,7 @@ namespace RTE {
 				m_CurrentSample = floorf((float)m_Samples.size() * PosRand());
 			}
 		}
-		DAssert(m_CurrentSample >= 0 && m_CurrentSample < m_Samples.size(), "Sample index is out of bounds!");
+		RTEAssert(m_CurrentSample >= 0 && m_CurrentSample < m_Samples.size(), "Sample index is out of bounds!");
 		return m_Samples[m_CurrentSample].second;
 	}
 

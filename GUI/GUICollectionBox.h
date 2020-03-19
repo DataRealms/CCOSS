@@ -244,7 +244,7 @@ public:
 // Description:     Sets the drawing color.
 // Arguments:       Color.
 
-    void SetDrawColor(Uint32 Color);
+    void SetDrawColor(unsigned long Color);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -253,7 +253,7 @@ public:
 // Description:     Gets the drawing color.
 // Returns:         Color.
 
-    Uint32 GetDrawColor() const { return m_DrawColor; }
+    unsigned long GetDrawColor() const { return m_DrawColor; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -286,7 +286,7 @@ private:
 
     bool            m_DrawBackground;
     int                m_DrawType;
-    Uint32            m_DrawColor;
+    unsigned long            m_DrawColor;
     GUIBitmap        *m_DrawBitmap;
 
 

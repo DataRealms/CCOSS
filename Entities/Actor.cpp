@@ -19,7 +19,7 @@
 #include "ACraft.h"
 #include "AtomGroup.h"
 #include "Controller.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "SceneMan.h"
 #include "HeldDevice.h"
 #include "PresetMan.h"
@@ -133,7 +133,7 @@ void Actor::Clear()
     m_ProgressTimer.Reset();
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
-    m_DigStrenght = 1;
+    m_DigStrength = 1;
 }
 
 
@@ -376,7 +376,7 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "AddInventoryDevice" || propName == "AddInventory")
     {
         MovableObject *pInvMO = dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader));
-        AAssert(pInvMO, "Reader has been fed bad Inventory MovableObject in Actor::Create");
+        RTEAssert(pInvMO, "Reader has been fed bad Inventory MovableObject in Actor::Create");
         m_Inventory.push_back(pInvMO);
     }
     else if (propName == "MaxMass")
@@ -1235,7 +1235,7 @@ bool Actor::UpdateMovePath()
 
     // If we're following someone/thing, then never advance waypoints until that thing disappears
     if (g_MovableMan.ValidMO(m_pMOMoveTarget))
-        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, m_DigStrenght);
+        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, m_DigStrength);
     else
     {
         // Do we currently have a path to a static target we would like to still pursue?
@@ -1245,7 +1245,7 @@ bool Actor::UpdateMovePath()
             if (!m_Waypoints.empty())
             {
                 // Make sure the path starts from the ground and not somewhere up in the air if/when dropped out of ship
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, m_DigStrenght);
+                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, m_DigStrength);
                 // If the waypoint was tied to an MO to pursue, then load it into the current MO target
                 if (g_MovableMan.ValidMO(m_Waypoints.front().second))
                     m_pMOMoveTarget = m_Waypoints.front().second;
@@ -1256,11 +1256,11 @@ bool Actor::UpdateMovePath()
             }
             // Just try to get to the last Move Target
             else
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, m_DigStrenght);
+                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, m_DigStrength);
         }
         // We had a path before trying to update, so use its last point as the final destination
         else
-            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, m_DigStrenght);
+            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, m_DigStrength);
     }
 
     // Place back the material representation of all doors of this guy's team so they are as we found them
@@ -1457,7 +1457,7 @@ void Actor::VerifyMOIDs()
 
 	for (std::vector<MOID>::iterator it = MOIDs.begin(); it != MOIDs.end(); it++)
 	{
-		DAssert(*it == g_NoMOID || *it < g_MovableMan.GetMOIDCount(), "Invalid MOID in actor");
+		RTEAssert(*it == g_NoMOID || *it < g_MovableMan.GetMOIDCount(), "Invalid MOID in actor");
 	}
 }
 
@@ -2062,9 +2062,9 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         {
             // Find this in the list, both ways
             list<Actor *>::reverse_iterator selfRItr = find(pRoster->rbegin(), pRoster->rend(), this);
-            DAssert(selfRItr != pRoster->rend(), "Actor couldn't find self in Team roster!");
+            RTEAssert(selfRItr != pRoster->rend(), "Actor couldn't find self in Team roster!");
             list<Actor *>::iterator selfItr = find(pRoster->begin(), pRoster->end(), this);
-            DAssert(selfItr != pRoster->end(), "Actor couldn't find self in Team roster!");
+            RTEAssert(selfItr != pRoster->end(), "Actor couldn't find self in Team roster!");
             
             // Find the adjacent actors
             if (selfItr != pRoster->end())

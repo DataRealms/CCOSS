@@ -17,7 +17,7 @@
 // *** TEMP
 //#include "resource.h"
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Singleton.h"
 #define g_SceneMan SceneMan::Instance()
 #include "Serializable.h"

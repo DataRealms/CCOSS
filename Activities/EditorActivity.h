@@ -15,7 +15,7 @@
 // Inclusions of header files
 
 #include "GUISound.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "ActivityMan.h"
 
 namespace RTE

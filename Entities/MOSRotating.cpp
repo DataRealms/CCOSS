@@ -20,7 +20,7 @@
 #include "AEmitter.h"
 #include "Attachable.h"
 
-#include "DDTError.h"
+#include "RTEError.h"
 
 namespace RTE {
 
@@ -108,7 +108,7 @@ int MOSRotating::Gib::ReadProperty(std::string propName, Reader &reader)
     if (propName == "GibParticle")
     {
         m_pGibParticle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
-        AAssert(m_pGibParticle, "Stream suggests allocating an unallocatable type in Gib::Create!");
+        RTEAssert(m_pGibParticle, "Stream suggests allocating an unallocatable type in Gib::Create!");
     }
     else if (propName == "Offset")
         reader >> m_Offset;
@@ -922,7 +922,7 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
                 break;
             }
 
-            DAssert(is_inside_bitmap(m_aSprite[m_Frame], intPos[X], intPos[Y], 0), "Particle penetration test is outside of sprite!");
+            RTEAssert(is_inside_bitmap(m_aSprite[m_Frame], intPos[X], intPos[Y], 0), "Particle penetration test is outside of sprite!");
 
             // Check if we are inside the sprite.
             if (_getpixel(m_aSprite[m_Frame], intPos[X], intPos[Y]) != g_KeyColor)
@@ -1116,7 +1116,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
     Attachable *pAttachable = 0;
     for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ) //NOTE: No increment to handle RemoveAttachable removing the object
     {
-        DAssert((*aItr), "Broken Attachable!");
+        RTEAssert((*aItr), "Broken Attachable!");
         if (!(*aItr))
             continue;
 
@@ -1363,7 +1363,7 @@ bool MOSRotating::IsOnScenePoint(Vector &scenePoint) const
     // Check all the passes needed
     for (int i = 0; i < passes; ++i)
     {
-        if (WithinBox(aScenePoint[i], m_Pos + m_BitmapOffset, m_pFGColor->w, m_pFGColor->h))
+        if (IsWithinBox(aScenePoint[i], m_Pos + m_BitmapOffset, m_pFGColor->w, m_pFGColor->h))
         {
             if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor ||
                (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor) ||
@@ -1609,7 +1609,7 @@ void MOSRotating::Update()
 {
 
 #if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
-	DAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
+	RTEAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
 #endif
 
     MOSprite::Update();
@@ -1684,14 +1684,14 @@ void MOSRotating::Update()
             (*itr)->Update();
         }
         else
-            DDTAbort("Broken emitter!!");
+            RTEAbort("Broken emitter!!");
     }
 
     // Update all the attachables
     Attachable *pAttachable = 0;
     for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ) // NOTE NO INCCREMENT!
     {
-        DAssert((*aItr), "Broken Attachable!");
+        RTEAssert((*aItr), "Broken Attachable!");
         if (!(*aItr))
             continue;
 
@@ -1925,8 +1925,8 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
                        DrawMode mode,
                        bool onlyPhysical) const
 {
-    DAssert(m_aSprite, "No sprite bitmaps loaded to draw!");
-    DAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds!");
+    RTEAssert(m_aSprite, "No sprite bitmaps loaded to draw!");
+    RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds!");
     
     // Only draw MOID if this gets hit by MO's and it has a valid MOID assigned to it
     if (mode == g_DrawMOID && (!m_GetsHitByMOs || m_MOID == g_NoMOID))
@@ -1973,7 +1973,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
         else
         {
 //            return;
-//            DDTAbort("Unknown draw mode selected in MOSRotating::Draw()!");
+//            RTEAbort("Unknown draw mode selected in MOSRotating::Draw()!");
         }
     }
 

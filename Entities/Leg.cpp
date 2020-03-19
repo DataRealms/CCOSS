@@ -13,7 +13,7 @@
 
 #include "Leg.h"
 #include "RTEManagers.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "HeldDevice.h"
 #include "ContentFile.h"
 
@@ -258,7 +258,7 @@ void Leg::BendLeg()
     if (m_Frame >= m_FrameCount)
         m_Frame = m_FrameCount - 1;
 
-    DAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds!");
+    RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds!");
 }
 
 

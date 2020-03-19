@@ -182,7 +182,7 @@ public:
 // Description:     Gets a single unsigned interger
 // Arguments:       Variable, Unsigned Integer pointer
 
-    bool GetValue(const std::string Variable, Uint32 *Value);
+    bool GetValue(const std::string Variable, unsigned long *Value);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

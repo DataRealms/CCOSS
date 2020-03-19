@@ -22,14 +22,6 @@
 #include "MOSprite.h"
 #include "Atom.h"
 
-struct RECT
-{
-    long    left;
-    long    top;
-    long    right;
-    long    bottom;
-};
-
 namespace RTE {
 
 CONCRETECLASSINFO(SLTerrain, SceneLayer, 0)
@@ -278,20 +270,20 @@ int SLTerrain::LoadData()
     if (SceneLayer::LoadData())
         return -1;
 
-    DAssert(m_pFGColor, "Terrain's foreground layer not instantiated before trying to load its data!");
-    DAssert(m_pBGColor, "Terrain's background layer not instantiated before trying to load its data!");
+    RTEAssert(m_pFGColor, "Terrain's foreground layer not instantiated before trying to load its data!");
+    RTEAssert(m_pBGColor, "Terrain's background layer not instantiated before trying to load its data!");
 
     // Check if our color layers' BITMAP data is also to be loaded from disk, and not be generated from the material bitmap!
     if (m_pFGColor->IsFileData() && m_pBGColor->IsFileData())
     {
         if (m_pFGColor->LoadData() < 0)
         {
-            DDTAbort("Could not load the Foreground Color SceneLayer data from file, when a path was specified for it!");
+            RTEAbort("Could not load the Foreground Color SceneLayer data from file, when a path was specified for it!");
             return -1;
         }
         if (m_pBGColor->LoadData() < 0)
         {
-            DDTAbort("Could not load the Background Color SceneLayer data from file, when a path was specified for it!");
+            RTEAbort("Could not load the Background Color SceneLayer data from file, when a path was specified for it!");
             return -1;
         }
         // Ok, we have now loaded the layers in from files, don't need to generate them from the material layer
@@ -304,7 +296,7 @@ int SLTerrain::LoadData()
     BITMAP *pFGBitmap = create_bitmap_ex(8, m_pMainBitmap->w, m_pMainBitmap->h);
     if (!pFGBitmap || m_pFGColor->Create(pFGBitmap, true, m_Offset, m_WrapX, m_WrapY, m_ScrollRatio))
     {
-        DDTAbort("Failed to create terrain's foreground layer's bitmap!");
+        RTEAbort("Failed to create terrain's foreground layer's bitmap!");
         return -1;
     }
 
@@ -313,14 +305,14 @@ int SLTerrain::LoadData()
     BITMAP *pBGBitmap = create_bitmap_ex(8, m_pMainBitmap->w, m_pMainBitmap->h);
     if (!pBGBitmap || m_pBGColor->Create(pBGBitmap, true, m_Offset, m_WrapX, m_WrapY, m_ScrollRatio))
     {
-        DDTAbort("Failed to create terrain's background layer's bitmap!");
+        RTEAbort("Failed to create terrain's background layer's bitmap!");
         return -1;
     }
 
     // Structural integrity calc buffer bitmap
     destroy_bitmap(m_pStructural);
     m_pStructural = create_bitmap_ex(8, m_pMainBitmap->w, m_pMainBitmap->h);
-    AAssert(m_pStructural, "Failed to allocate BITMAP in Terrain::Create");
+    RTEAssert(m_pStructural, "Failed to allocate BITMAP in Terrain::Create");
     clear_bitmap(m_pStructural);
 
     ///////////////////////////////////////////////
@@ -527,19 +519,19 @@ int SLTerrain::SaveData(string pathBase)
     // Save the bitmap of the material bitmap
     if (SceneLayer::SaveData(pathBase + " Mat.bmp") < 0)
     {
-        DDTAbort("Failed to write the material bitmap data saving an SLTerrain!");
+        RTEAbort("Failed to write the material bitmap data saving an SLTerrain!");
         return -1;
     }
     // Then the foreground color layer
     if (m_pFGColor->SaveData(pathBase + " FG.bmp") < 0)
     {
-        DDTAbort("Failed to write the FG color bitmap data saving an SLTerrain!");
+        RTEAbort("Failed to write the FG color bitmap data saving an SLTerrain!");
         return -1;
     }
     // Then the background color layer
     if (m_pBGColor->SaveData(pathBase + " BG.bmp") < 0)
     {
-        DDTAbort("Failed to write the BG color bitmap data saving an SLTerrain!");
+        RTEAbort("Failed to write the BG color bitmap data saving an SLTerrain!");
         return -1;
     }
 
@@ -557,19 +549,19 @@ int SLTerrain::ClearData()
     // Clear the material layer
     if (SceneLayer::ClearData() < 0)
     {
-        DDTAbort("Failed to clear material bitmap data of an SLTerrain!");
+        RTEAbort("Failed to clear material bitmap data of an SLTerrain!");
         return -1;
     }
     // Clear the foreground color layer
     if (m_pFGColor && m_pFGColor->ClearData() < 0)
     {
-        DDTAbort("Failed to clear the foreground color bitmap data of an SLTerrain!");
+        RTEAbort("Failed to clear the foreground color bitmap data of an SLTerrain!");
         return -1;
     }
     // Clear the background color layer
     if (m_pBGColor && m_pBGColor->ClearData() < 0)
     {
-        DDTAbort("Failed to clear the background color bitmap data of an SLTerrain!");
+        RTEAbort("Failed to clear the background color bitmap data of an SLTerrain!");
         return -1;
     }
 
@@ -751,7 +743,7 @@ unsigned char SLTerrain::GetFGColorPixel(const int pixelX, const int pixelY) con
     if (posY < 0)
         return g_KeyColor;
 
-//    AAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     return _getpixel(m_pFGColor->GetBitmap(), posX, posY);
 }
 
@@ -778,7 +770,7 @@ unsigned char SLTerrain::GetBGColorPixel(const int pixelX, const int pixelY) con
     if (posY < 0)
         return g_KeyColor;
 
-//    AAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     return _getpixel(m_pBGColor->GetBitmap(), posX, posY);
 }
 
@@ -806,7 +798,7 @@ unsigned char SLTerrain::GetMaterialPixel(const int pixelX, const int pixelY) co
     if (posY < 0)
         return g_MaterialAir;
 
-//    AAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     return _getpixel(m_pMainBitmap, posX, posY);
 }
 
@@ -834,7 +826,7 @@ bool SLTerrain::IsAirPixel(const int pixelX, const int pixelY) const
         return true;
 
 	int checkPixel = _getpixel(m_pMainBitmap, posX, posY);
-//    AAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     return checkPixel == g_MaterialAir || checkPixel == g_MaterialCavity;
 }
 
@@ -861,7 +853,7 @@ void SLTerrain::SetFGColorPixel(const int pixelX, const int pixelY, const int co
        posY >= m_pMainBitmap->h)
        return;
 
-//    AAssert(m_pFGColor->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pFGColor->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     _putpixel(m_pFGColor->GetBitmap(), posX, posY, color);
 }
 
@@ -888,7 +880,7 @@ void SLTerrain::SetBGColorPixel(const int pixelX, const int pixelY, const int co
        posY >= m_pMainBitmap->h)
        return;
 
-//    AAssert(m_pBGColor->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pBGColor->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     _putpixel(m_pBGColor->GetBitmap(), posX, posY, color);
 }
 
@@ -914,7 +906,7 @@ void SLTerrain::SetMaterialPixel(const int pixelX, const int pixelY, const unsig
        posY < 0 ||
        posY >= m_pMainBitmap->h)
        return;
-//    AAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     _putpixel(m_pMainBitmap, posX, posY, material);
 }
 
@@ -937,7 +929,7 @@ deque<MOPixel *> SLTerrain::EraseSilhouette(BITMAP *pSprite,
 {
 // TODO: OPTIMIZE THIS, IT'S A TIME HOG. MAYBE JSUT STAMP THE OUTLINE AND SAMPLE SOME RANDOM PARTICLES?
 
-    AAssert(pSprite, "Null BITMAP passed to SLTerrain::EraseSilhouette");
+    RTEAssert(pSprite, "Null BITMAP passed to SLTerrain::EraseSilhouette");
 
     deque<MOPixel *> MOPDeque;
 
@@ -1060,220 +1052,6 @@ deque<MOPixel *> SLTerrain::EraseSilhouette(BITMAP *pSprite,
     m_UpdatedMateralAreas.push_back(Box(pos - pivot, maxWidth, maxHeight));
 
     return MOPDeque;
-
-/*
-//  HRESULT BITMAP::Draw(BITMAP* pTargetBitmap, unsigned long ScrnWorldX, unsigned long ScrnWorldY, WORD BltType)
-
-    RECT SpriteDestRect;    // Sprite RECT is defined in world space
-    RECT SpriteSrcRect;        // RECT defining the source area for the BLT
-    int blockWidth, blockHeight;
-//    HRESULT rval;
-
-    deque<MOPixel *> MOPDeque;
-    MOPixel *pPixel = 0;
-    Material sceneMat, spawnMat;
-
-    // Get block width and height
-    blockWidth  = pSprite->w;
-    blockHeight = pSprite->h;
-
-    // RECT defining the sprite in world space.
-    SpriteDestRect.top    = posY;
-    SpriteDestRect.left   = posX;
-    SpriteDestRect.bottom = posY + blockHeight;
-    SpriteDestRect.right  = posX + blockWidth;
-
-    // Get the number of tiles in the sprite tile bitmap width
-    TilesInWidth = pSprite->GetTile()->w / blockWidth;
-    
-    // Define the source RECT for the BLT.
-    SpriteSrcRect.top    = 0;
-    SpriteSrcRect.left   = 0;
-    SpriteSrcRect.bottom = blockHeight;
-    SpriteSrcRect.right  = blockWidth;
-
-//  TransRotoZoom(pTargetBitmap, SpriteSrcRect, SpriteDestRect);
-//  HRESULT BITMAP::TransRotoZoom(BITMAP* pTargetBitmap, RECT SpriteSrcRect, RECT SpriteDestRect)
-
-    unsigned long width = SpriteSrcRect.right - SpriteSrcRect.left;
-    unsigned long height = SpriteSrcRect.bottom - SpriteSrcRect.top;
-
-    BOOL bTrans = TRUE;
-
-    // Clip the source rect to the extents of the bitmap.
-    pSprite->GetTile()->ClipRect(&SpriteSrcRect);
-
-    int HalfWidth  = int(double((SpriteSrcRect.right  - SpriteSrcRect.left) * pSprite->GetScale() / 2));
-    int HalfHeight = int(double((SpriteSrcRect.bottom - SpriteSrcRect.top)  * pSprite->GetScale() / 2));
-
-    double SinA = sin(-pSprite->GetAngle());
-    double CosA = cos(-pSprite->GetAngle());
-
-    int x1 = (int)(CosA * -HalfWidth - SinA * -HalfHeight);
-    int y1 = (int)(SinA * -HalfWidth + CosA * -HalfHeight);
-    int x2 = (int)(CosA * HalfWidth - SinA * -HalfHeight);
-    int y2 = (int)(SinA * HalfWidth + CosA * -HalfHeight);
-    int x3 = (int)(CosA * HalfWidth - SinA * HalfHeight);
-    int y3 = (int)(SinA * HalfWidth + CosA * HalfHeight);
-    int x4 = (int)(CosA * -HalfWidth - SinA * HalfHeight);
-    int y4 = (int)(SinA * -HalfWidth + CosA * HalfHeight);
-
-    x1 += SpriteDestRect.left + width/2;
-    y1 += SpriteDestRect.top + height/2;
-    x2 += SpriteDestRect.left + width/2;
-    y2 += SpriteDestRect.top + height/2;
-    x3 += SpriteDestRect.left + width/2;
-    y3 += SpriteDestRect.top + height/2;
-    x4 += SpriteDestRect.left + width/2;
-    y4 += SpriteDestRect.top + height/2;
-
-//  TextureMap(pTargetBitmap, x1+midX, y1+midY, x2+midX, y2+midY, x3+midX, y3+midY, x4+midX, y4+midY, area, bTrans);
-//  void BITMAP::TextureMap(BITMAP *pTargetBitmap, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, RECT* area, BOOL bTrans)
-
-    BYTE* lpSrc;
-    BYTE* lpColor;
-    BYTE* lpMaterial;
-    unsigned long sPitch, cPitch, mPitch;
-    unsigned long colorKey;
-    RECT* dClipRect;
-
-    // Get the ClipRect for the destination bitmap.
-    dClipRect = m_pFGColor->GetBitmap()->GetClipRect();
-
-    TexMapTable* leftTable = 0;
-    TexMapTable* rightTable = 0;
-
-    //Screen->TexMapTableHeight = m_ClipRect.bottom;
-    leftTable  = new TexMapTable[dClipRect->bottom];
-    rightTable = new TexMapTable[dClipRect->bottom];
-
-    int TexWidth  = SpriteSrcRect.right  - SpriteSrcRect.left;
-    int TexHeight = SpriteSrcRect.bottom - SpriteSrcRect.top;
-
-    int miny = y1;
-    int maxy = y1;
-    if (y2<miny) miny = y2;
-    if (y2>maxy) maxy = y2;
-    if (y3<miny) miny = y3;
-    if (y3>maxy) maxy = y3;
-    if (y4<miny) miny = y4;
-    if (y4>maxy) maxy = y4;
-
-    if (miny >= maxy) return MOPDeque;
-    if (maxy < dClipRect->top) return MOPDeque;
-    if (miny >= dClipRect->bottom) return MOPDeque;
-    if (miny < dClipRect->top) miny = dClipRect->top;
-    if (maxy > dClipRect->bottom) maxy = dClipRect->bottom;
-    if (maxy - miny<1) return MOPDeque;
-
-    if (y2 < y1) {Scanleftside(x2,x1,y2,y1-y2,1,TexWidth,TexHeight, dClipRect, leftTable);}
-    else        {Scanrightside(x1,x2,y1,y2-y1,1,TexWidth,TexHeight, dClipRect, rightTable);}
-
-    if (y3 < y2) {Scanleftside (x3,x2,y3,y2-y3,2,TexWidth,TexHeight, dClipRect, leftTable);}
-    else        {Scanrightside (x2,x3,y2,y3-y2,2,TexWidth,TexHeight, dClipRect, rightTable);}
-
-    if (y4 < y3) {Scanleftside (x4,x3,y4,y3-y4,3,TexWidth,TexHeight, dClipRect, leftTable);}
-    else        {Scanrightside (x3,x4,y3,y4-y3,3,TexWidth,TexHeight, dClipRect, rightTable);}
-
-    if (y1 < y4) {Scanleftside (x1,x4,y1,y4-y1,4,TexWidth,TexHeight, dClipRect, leftTable);}
-    else        {Scanrightside (x4,x1,y4,y1-y4,4,TexWidth,TexHeight, dClipRect, rightTable);}
-
-    int polyx1,polyx2,y,linewidth,pxadd,pyadd;
-    int texX,texY;
-
-    // Lock down both bitmaps for read and write
-    pSprite->GetTile()->Lock();
-    m_pFGColor->GetBitmap()->Lock();
-    m_pMainBitmap->Lock();
-
-    LPDDsurfaceDESC2 ddsd = new _DDbitmapDESC2;
-    pSprite->GetTile()->GetBitmapDescriptor(ddsd);
-    LPDDsurfaceDESC2 ddsdCol = new _DDbitmapDESC2;
-    m_pFGColor->GetBitmap()->GetBitmapDescriptor(ddsdCol);
-    LPDDsurfaceDESC2 ddsdMat = new _DDbitmapDESC2;
-    m_pMainBitmap->GetBitmapDescriptor(ddsdMat);
-
-    // Set the pitch for both bitmaps
-    sPitch = ddsd->lPitch;
-    cPitch = ddsdCol->lPitch;
-    mPitch = ddsdMat->lPitch;
-
-    // Initialize the pointers to the upper left hand corner of the bitmap
-    lpSrc  = (BYTE*)ddsd->lpBitmap;
-    lpColor = (BYTE*)ddsdCol->lpBitmap;
-    lpMaterial = (BYTE*)ddsdMat->lpBitmap;
-
-    delete ddsd;
-    ddsd = 0;
-    delete ddsdCol;
-    ddsdCol = 0;
-    delete ddsdMat;
-    ddsdMat = 0;
-
-    // Get the color key for sprite bitmap
-    colorKey = (unsigned long)pSprite->GetTile()->GetColorKey();
-
-    for(y=miny; y<=maxy; y++) {
-        polyx1 = leftTable[y].x >> 16;
-        polyx2 = rightTable[y].x >> 16;
-        linewidth = polyx2 - polyx1;
-        if (linewidth < 1) linewidth = 1;
-        pxadd = ((rightTable[y].px)-(leftTable[y].px)) / linewidth;
-        pyadd = ((rightTable[y].py)-(leftTable[y].py)) / linewidth;
-
-        texX = leftTable[y].px;
-        texY = leftTable[y].py;
-
-        if (polyx1 < dClipRect->left) {
-            texX  += pxadd * (dClipRect->left - polyx1);
-            texY  += pyadd * (dClipRect->left - polyx1);
-            polyx1 = dClipRect->left;
-        }
-        if (polyx2 > dClipRect->right - 0) {polyx2 = dClipRect->right - 0;}
-
-        texX += SpriteSrcRect.left << 16;
-        texY += SpriteSrcRect.top << 16;
-        unsigned char *col = (lpColor + (y * cPitch) + polyx1);
-        unsigned char *mat = (lpMaterial + (y * mPitch) + polyx1);
-
-        for(int x = polyx1 + 1; x < polyx2; x++) {
-            texX += pxadd;
-            texY += pyadd;
-            unsigned char c = *(lpSrc + ((texY >> 16) * sPitch) + (texX >> 16));
-
-            if (c != colorKey && *mat != g_MaterialAir) {
-                sceneMat = g_SceneMan.GetMaterialFromID(*mat);
-                spawnMat = sceneMat.spawnMaterial ? g_SceneMan.GetMaterialFromID(sceneMat.spawnMaterial) :
-                                                    sceneMat;
-                // Create the MOPixel based off the Terrain data.
-                pPixel = new MOPixel(*col,
-                                     spawnMat.density,
-                                     Vector(polyx1, y),
-                                     Vector(),
-                                     new Atom(Vector(), spawnMat, 0, *col, 2),
-                                     0);
-                pPixel->SetToHitMOs(false);
-                MOPDeque.push_back(pPixel);
-                pPixel = 0;
-
-                // Clear the terrain pixels
-                *col = g_KeyColor;
-                *mat = g_MaterialAir;
-            }
-            col++;
-            mat++;
-        }
-    }
-
-    delete leftTable; leftTable = 0;
-    delete rightTable; rightTable = 0;
-
-    pSprite->GetTile()->UnLock();
-    m_pFGColor->GetBitmap()->UnLock();
-    m_pMainBitmap->UnLock();
-
-    return MOPDeque;
-*/
 }
 
 

@@ -336,7 +336,7 @@ void GUIManager::Draw(GUIScreen *Screen)
 
 void GUIManager::CaptureMouse(GUIPanel *Panel)
 {
-    AAssert(Panel, "No panel!");
+    RTEAssert(Panel, "No panel!");
 
     // Release any old capture
     ReleaseMouse();
@@ -466,7 +466,7 @@ float GUIManager::m_pTimer->GetElapsedSimTimeMS(void)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks if the mouse point is inside a rectangle.
 
-bool GUIManager::MouseInRect(RECT *Rect, int X, int Y)
+bool GUIManager::MouseInRect(GUIRect *Rect, int X, int Y)
 {
     if (!Rect)
         return false;
@@ -486,7 +486,7 @@ bool GUIManager::MouseInRect(RECT *Rect, int X, int Y)
 
 void GUIManager::TrackMouseHover(GUIPanel *Pan, bool Enabled, int Delay)
 {
-    AAssert(Pan, "No Panel!");
+    RTEAssert(Pan, "No Panel!");
     m_HoverTrack = Enabled;
     m_HoverPanel = Pan;
     if (m_HoverTrack)

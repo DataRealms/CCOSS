@@ -114,7 +114,7 @@ void GUIScrollPanel::LoadProps(GUIProperties *Props)
     Props->GetValue("Orientation", &Ori);
 
     m_Orientation = Horizontal;
-    if (DDTstricmp(Ori.c_str(), "Vertical") == 0)
+    if (stricmp(Ori.c_str(), "Vertical") == 0)
         m_Orientation = Vertical;
 
     Props->GetValue("Minimum", &m_Minimum);
@@ -255,7 +255,7 @@ void GUIScrollPanel::BuildButton(const string ArrowName, int Y, int Width, int H
     
     // Draw the arrows
     int Values[4];
-    RECT Rect;
+    GUIRect Rect;
     
     // Load the image file
     string Filename;
@@ -265,7 +265,7 @@ void GUIScrollPanel::BuildButton(const string ArrowName, int Y, int Width, int H
         return;
 
     // Get the transparent colour key
-    Uint32 ColorKey = 0;
+    unsigned long ColorKey = 0;
     m_Skin->GetValue(ArrowName, "ColorKeyIndex", &ColorKey);
     ColorKey = m_Skin->ConvertColor(ColorKey, Arrow->GetColorDepth());
     Arrow->SetColorKey(ColorKey);
@@ -301,7 +301,7 @@ void GUIScrollPanel::BuildBackground(void)
         return;
 
     int Values[4];
-    RECT Rect;
+    GUIRect Rect;
     m_Skin->GetValue("ScrollBackground", "Filler", Values, 4);
     SetRect(&Rect, Values[0], Values[1], Values[0]+Values[2], Values[1]+Values[3]);
 
@@ -443,7 +443,7 @@ void GUIScrollPanel::SetSmallChange(int SmallChange)
 
 void GUIScrollPanel::Draw(GUIScreen *Screen)
 {
-    RECT Rect;
+    GUIRect Rect;
 
     // Do we need to rebuild?
     if (m_RebuildKnob || m_RebuildSize)

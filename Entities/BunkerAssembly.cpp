@@ -261,7 +261,7 @@ int BunkerAssembly::ReadProperty(std::string propName, Reader &reader)
 			// Do not allow to define assemblies prior to corresponding assembly scheme
 			char s[256];
 			sprintf_s(s, sizeof(s), "Required BunkerAssemblyScheme '%s%' not found when trying to load BunkerAssembly '%s'! BunkerAssemblySchemes MUST be defined before dependent BunkerAssmeblies.", parentScheme.c_str(), m_PresetName.c_str());
-			DDTAbort(s);
+			RTEAbort(s);
 		}
 	} else
         // See if the base class(es) can find a match instead
@@ -480,7 +480,7 @@ void BunkerAssembly::SetTeam(int team)
 void BunkerAssembly::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const
 {
     if (!m_pFGColor)
-        DDTAbort("TerrainObject's bitmaps are null when drawing!");
+        RTEAbort("TerrainObject's bitmaps are null when drawing!");
 
     // Take care of wrapping situations
     Vector aDrawPos[4];

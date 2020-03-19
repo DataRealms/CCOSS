@@ -93,7 +93,7 @@ void AssemblyEditorGUI::Clear()
 
 int AssemblyEditorGUI::Create(Controller *pController, FeatureSets featureSet, int whichModuleSpace, int nativeTechModule, float foreignCostMult)
 {
-    AAssert(pController, "No controller sent to AssemblyEditorGUI on creation!");
+    RTEAssert(pController, "No controller sent to AssemblyEditorGUI on creation!");
     m_pController = pController;
 
     m_FeatureSet = featureSet;

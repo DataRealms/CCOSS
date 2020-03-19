@@ -514,9 +514,9 @@ int LuaMan::Create()
             .property("Area", &Box::GetArea)
             .def("GetRandomPoint", &Box::GetRandomPoint)
             .def("Unflip", &Box::Unflip)
-            .def("WithinBox", &Box::WithinBox)
-            .def("WithinBoxX", &Box::WithinBoxX)
-            .def("WithinBoxY", &Box::WithinBoxY)
+            .def("IsWithinBox", &Box::IsWithinBox)
+            .def("IsWithinBoxX", &Box::IsWithinBoxX)
+            .def("IsWithinBoxY", &Box::IsWithinBoxY)
             .def("GetWithinBoxX", &Box::GetWithinBoxX)
             .def("GetWithinBoxY", &Box::GetWithinBoxY)
             .def("GetWithinBox", &Box::GetWithinBox),
@@ -1428,8 +1428,6 @@ int LuaMan::Create()
             .def("SaveScreenToBMP", &FrameMan::SaveScreenToBMP)
             .def("SaveBitmapToBMP", &FrameMan::SaveBitmapToBMP)
             .def("ResetFrameTimer", &FrameMan::ResetFrameTimer)
-            .def("ResetRTE", &FrameMan::ResetRTE)
-            .def("IsResettingRTE", &FrameMan::IsResettingRTE)
             .def("ToggleFullscreen", &FrameMan::ToggleFullscreen)
             .def("ClearBackBuffer8", &FrameMan::ClearBackBuffer8)
             .def("ClearBackBuffer32", &FrameMan::ClearBackBuffer32)
@@ -2476,14 +2474,7 @@ int LuaMan::RunScriptFile(string filePath, bool consoleErrors)
 //        // Point out the special error handling function on the stack, which is one under the file's position on the stack (-2)
 //        if (luaL_loadfile(m_pMasterState, filePath.c_str()) || lua_pcall(m_pMasterState, 0, LUA_MULTRET, -2))
 	const char *path = filePath.c_str();
-#ifndef WIN32
-	extern char *fcase( const char *path );
-	char *fixed = fcase( filePath.c_str() );
-	if ( fixed )
-	{
-		path = fixed;
-	}
-#endif
+
         if (luaL_dofile(m_pMasterState, path))
         {
             // Retrieve and pop the error message off the stack

@@ -200,7 +200,7 @@ private:
 // Description:     Checks if the mouse point is inside a rectangle.
 // Arguments:       Rectangle, Mouse position.
 
-    bool MouseInRect(RECT *Rect, int X, int Y);
+    bool MouseInRect(GUIRect *Rect, int X, int Y);
 
 
 // Members
@@ -220,7 +220,7 @@ private:
     int                     m_DoubleClickSize;
     int                     m_DoubleClickButtons;
     float                   m_LastMouseDown[3];
-    RECT                    m_DoubleClickRect;
+    GUIRect                    m_DoubleClickRect;
 
     // Hover tracking
     bool                    m_HoverTrack;

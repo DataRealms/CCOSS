@@ -74,7 +74,7 @@ void GibEditorGUI::Clear()
 
 int GibEditorGUI::Create(Controller *pController, int whichModuleSpace)
 {
-    AAssert(pController, "No controller sent to GibEditorGUI on creation!");
+    RTEAssert(pController, "No controller sent to GibEditorGUI on creation!");
     m_pController = pController;
 
     // Allocate and (re)create the Editor GUIs

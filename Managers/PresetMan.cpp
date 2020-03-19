@@ -23,6 +23,8 @@
 //#include "Atom.h"
 
 #include "ConsoleMan.h"
+#include "LoadingGUI.h"
+#include "SettingsMan.h"
 
 namespace RTE {
 
@@ -111,7 +113,7 @@ void PresetMan::Destroy()
 // Description:     Reads an entire data module and adds it to this. NOTE that official
 //                  modules can't be loaded after any non-official ones!
 
-bool PresetMan::LoadDataModule(string moduleName, bool official, void (*fpProgressCallback)(string, bool))
+bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallback fpProgressCallback)
 {
     if (moduleName.empty())
         return false;
@@ -136,7 +138,7 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, void (*fpProgre
     {
         // Halt if an official module is being loaded after any non-official ones!
 // We need to disable this because Metagames.rte gets loaded after non-official modules
-//        AAssert(m_pDataModules.size() == m_OfficialModuleCount, "Trying to load an official module after a non-official one has been loaded!");
+//        RTEAssert(m_pDataModules.size() == m_OfficialModuleCount, "Trying to load an official module after a non-official one has been loaded!");
 
         // Find where the offical modules end in the vector
         itr = m_pDataModules.begin();
@@ -167,13 +169,57 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, void (*fpProgre
     // Now actually create it
     if (pModule->Create(moduleName, fpProgressCallback) < 0)
     {
-        DDTAbort("Failed to find the " + moduleName + " Data Module!");
+        RTEAbort("Failed to find the " + moduleName + " Data Module!");
         return false;
     }
 
     pModule = 0;
 
     return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool PresetMan::LoadAllDataModules() {
+	// Load all the official modules first!
+	if (!LoadDataModule("Base.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+
+	if (!LoadDataModule("Coalition.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Imperatus.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Techion.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Dummy.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Ronin.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Browncoats.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Uzira.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("MuIlaak.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!LoadDataModule("Missions.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+
+	// If a single module is specified, skip loading all other unofficial modules and load specified module only.
+	if (m_SingleModuleToLoad != "Base.rte" && m_SingleModuleToLoad != "") {
+		if (!LoadDataModule(m_SingleModuleToLoad, false, &LoadingGUI::LoadingSplashProgressReport)) { return false; } else { return true; }
+	} else {
+		al_ffblk moduleInfo;
+		int moduleID = 0;
+
+		for (int result = al_findfirst("*.rte", &moduleInfo, FA_DIREC | FA_RDONLY); result == 0; result = al_findnext(&moduleInfo)) {
+			if (!g_SettingsMan.IsModDisabled(moduleInfo.name)) {
+				moduleID = GetModuleID(moduleInfo.name);
+				// Make sure we don't load properties of already loaded official modules
+				if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte") {
+					// NOTE: LoadDataModule can return false (especially since it may try to load already loaded modules, which is okay) and shouldn't cause stop, so we can ignore its return value here.
+                    LoadDataModule(string(moduleInfo.name), false, &LoadingGUI::LoadingSplashProgressReport);
+				}
+			}
+		}
+		// Close the file search to avoid memory leaks
+		al_findclose(&moduleInfo);
+	}
+
+	// Load scenes and MetaGames AFTER all other techs etc are loaded; might be referring to stuff in user mods
+	if (!g_PresetMan.LoadDataModule("Scenes.rte", false, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	if (!g_PresetMan.LoadDataModule("Metagames.rte", false, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+
+	return true;
 }
 
 
@@ -184,7 +230,7 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, void (*fpProgre
 
 const DataModule * PresetMan::GetDataModule(int whichModule)
 {
-    AAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
     return m_pDataModules[whichModule];
 }
 
@@ -195,7 +241,7 @@ const DataModule * PresetMan::GetDataModule(int whichModule)
 
 const std::string PresetMan::GetDataModuleName(int whichModule)
 {
-    AAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
     return m_pDataModules[whichModule]->GetFileName();
 }
 
@@ -285,7 +331,7 @@ int PresetMan::GetModuleIDFromPath(std::string dataPath)
 
 bool PresetMan::AddEntityPreset(Entity *pEntToAdd, int whichModule, bool overwriteSame, string readFromFile)
 {
-    AAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
     return m_pDataModules[whichModule]->AddEntityPreset(pEntToAdd, overwriteSame, readFromFile);
 }
@@ -297,7 +343,7 @@ bool PresetMan::AddEntityPreset(Entity *pEntToAdd, int whichModule, bool overwri
 
 const Entity * PresetMan::GetEntityPreset(string type, string preset, int whichModule)
 {
-    AAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
     const Entity *pRetEntity = 0;
 
@@ -326,7 +372,7 @@ const Entity * PresetMan::GetEntityPreset(string type, string preset, int whichM
         // If couldn't find it in there, then try all the official modules!
         if (!pRetEntity)
         {
-            AAssert(m_OfficialModuleCount <= m_pDataModules.size(), "More official modules than modules loaded?!");
+            RTEAssert(m_OfficialModuleCount <= m_pDataModules.size(), "More official modules than modules loaded?!");
             for (int i = 0; i < m_OfficialModuleCount && !pRetEntity; ++i)
             {
                 pRetEntity = m_pDataModules[i]->GetEntityPreset(type, preset);
@@ -352,7 +398,7 @@ const Entity * PresetMan::GetEntityPreset(Reader &reader)
 {
     // The reader is aware of which DataModule it is reading within
     int whichModule = reader.GetReadModuleID();
-    AAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Reader has an out of bounds module number!");
+    RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Reader has an out of bounds module number!");
 
     string ClassName;
     const Entity::ClassInfo *pClass = 0;
@@ -375,7 +421,7 @@ const Entity * PresetMan::GetEntityPreset(Reader &reader)
 		{
 			// Abort loading if we can't create entity and it's not in Scenes.rte
 			if (!g_PresetMan.GetDataModule(whichModule)->GetIgnoreMissingItems())
-				DDTAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLineString());
+				RTEAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLineString());
 		}
 		else if (pNewInstance)
 		{
@@ -387,7 +433,7 @@ const Entity * PresetMan::GetEntityPreset(Reader &reader)
 			// If the instance wasn't found in the specific DataModule, try to find it in all the official ones instead
 			if (!pReturnPreset)
 			{
-				AAssert(m_OfficialModuleCount <= m_pDataModules.size(), "More official modules than modules loaded?!");
+				RTEAssert(m_OfficialModuleCount <= m_pDataModules.size(), "More official modules than modules loaded?!");
 				for (int i = 0; i < m_OfficialModuleCount && !pReturnPreset; ++i)
 					pReturnPreset = m_pDataModules[i]->GetEntityPreset(pNewInstance->GetClassName(), pNewInstance->GetPresetName());
 			}
@@ -413,7 +459,7 @@ Entity * PresetMan::ReadReflectedPreset(Reader &reader)
 {
     // The reader is aware of which DataModule it's reading within
     int whichModule = reader.GetReadModuleID();
-    AAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Reader has an out of bounds module number!");
+    RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Reader has an out of bounds module number!");
 
     string ClassName;
     const Entity::ClassInfo *pClass = 0;
@@ -434,7 +480,7 @@ Entity * PresetMan::ReadReflectedPreset(Reader &reader)
         if (pNewInstance && pNewInstance->Create(reader, false) < 0)
 		{
 			if (!g_PresetMan.GetDataModule(whichModule)->GetIgnoreMissingItems())
-	            DDTAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLineString());
+	            RTEAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLineString());
 		}
 		else
 		{
@@ -471,7 +517,7 @@ bool PresetMan::GetAllOfType(list<Entity *> &entityList, string type, int whichM
     // Specific module
     else
     {
-        AAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
+        RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
         foundAny = m_pDataModules[whichModule]->GetAllOfType(entityList, type);
     }
 
@@ -518,7 +564,7 @@ bool PresetMan::GetAllOfTypeInModuleSpace(std::list<Entity *> &entityList, std::
 
 bool PresetMan::GetAllOfGroup(list<Entity *> &entityList, string group, string type, int whichModule)
 {
-    AAssert(!group.empty(), "Looking for empty group!");
+    RTEAssert(!group.empty(), "Looking for empty group!");
 
     bool foundAny = false;
 
@@ -533,7 +579,7 @@ bool PresetMan::GetAllOfGroup(list<Entity *> &entityList, string group, string t
     // Specific one
     else
     {
-        AAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
+        RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
         foundAny = m_pDataModules[whichModule]->GetAllOfGroup(entityList, group, type);
     }
 
@@ -549,7 +595,7 @@ bool PresetMan::GetAllOfGroup(list<Entity *> &entityList, string group, string t
 
 Entity * PresetMan::GetRandomOfGroup(string group, string type, int whichModule)
 {
-    AAssert(!group.empty(), "Looking for empty group!");
+    RTEAssert(!group.empty(), "Looking for empty group!");
 
     bool foundAny = false;
     // The total list we'll select a random one from
@@ -566,7 +612,7 @@ Entity * PresetMan::GetRandomOfGroup(string group, string type, int whichModule)
     // Specific one
     else
     {
-        AAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
+        RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
         foundAny = m_pDataModules[whichModule]->GetAllOfGroup(entityList, group, type);
     }
 
@@ -584,7 +630,7 @@ Entity * PresetMan::GetRandomOfGroup(string group, string type, int whichModule)
         current++;
     }
 
-    AAssert(0, "Tried selecting randomly but didn't?");
+    RTEAssert(0, "Tried selecting randomly but didn't?");
     return 0;
 }
 
@@ -597,7 +643,7 @@ Entity * PresetMan::GetRandomOfGroup(string group, string type, int whichModule)
 
 Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, int whichModule)
 {
-    AAssert(!group.empty(), "Looking for empty group!");
+    RTEAssert(!group.empty(), "Looking for empty group!");
 
     bool foundAny = false;
     // The total list we'll select a random one from
@@ -625,7 +671,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
     // Specific one
     else
     {
-        AAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
+        RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
         foundAny = m_pDataModules[whichModule]->GetAllOfGroup(tempList, group, type);
     }
 
@@ -713,7 +759,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 		}
 	}
 
-    AAssert(0, "Tried selecting randomly but didn't?");
+    RTEAssert(0, "Tried selecting randomly but didn't?");
     return 0;
 }
 
@@ -726,7 +772,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 
 bool PresetMan::GetAllOfGroupInModuleSpace(list<Entity *> &entityList, string group, string type, int whichModuleSpace)
 {
-    AAssert(!group.empty(), "Looking for empty group!");
+    RTEAssert(!group.empty(), "Looking for empty group!");
 
     bool foundAny = false;
 
@@ -757,7 +803,7 @@ bool PresetMan::GetAllOfGroupInModuleSpace(list<Entity *> &entityList, string gr
 
 Entity * PresetMan::GetRandomOfGroupInModuleSpace(string group, string type, int whichModuleSpace)
 {
-    AAssert(!group.empty(), "Looking for empty group!");
+    RTEAssert(!group.empty(), "Looking for empty group!");
 
     bool foundAny = false;
     // The total list we'll select a random one from
@@ -791,7 +837,7 @@ Entity * PresetMan::GetRandomOfGroupInModuleSpace(string group, string type, int
         current++;
     }
 
-    AAssert(0, "Tried selecting randomly but didn't?");
+    RTEAssert(0, "Tried selecting randomly but didn't?");
     return 0;
 }
 
@@ -803,7 +849,7 @@ Entity * PresetMan::GetRandomOfGroupInModuleSpace(string group, string type, int
 
 string PresetMan::GetEntityDataLocation(string type, string preset, int whichModule)
 {
-    AAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
     string pRetPath = "";
 
@@ -823,7 +869,7 @@ string PresetMan::GetEntityDataLocation(string type, string preset, int whichMod
         // If couldn't find it in there, then try all the official modules!
         if (pRetPath.empty())
         {
-            AAssert(m_OfficialModuleCount <= m_pDataModules.size(), "More official modules than modules loaded?!");
+            RTEAssert(m_OfficialModuleCount <= m_pDataModules.size(), "More official modules than modules loaded?!");
             for (int i = 0; i < m_OfficialModuleCount && pRetPath.empty(); ++i)
             {
                 pRetPath = m_pDataModules[i]->GetEntityDataLocation(type, preset);
@@ -861,7 +907,7 @@ void PresetMan::ReloadAllScripts()
 
 bool PresetMan::AddMaterialMapping(int fromID, int toID, int whichModule)
 {
-    AAssert(whichModule >= m_OfficialModuleCount && whichModule < m_pDataModules.size(), "Tried to make a material mapping in an offical or out-of-bounds DataModule!");
+    RTEAssert(whichModule >= m_OfficialModuleCount && whichModule < m_pDataModules.size(), "Tried to make a material mapping in an offical or out-of-bounds DataModule!");
 
     return m_pDataModules[whichModule]->AddMaterialMapping(fromID, toID);
 }
@@ -874,7 +920,7 @@ bool PresetMan::AddMaterialMapping(int fromID, int toID, int whichModule)
 
 void PresetMan::RegisterGroup(std::string newGroup, int whichModule)
 {
-    AAssert(whichModule >= 0 && whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule >= 0 && whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
     // Register in the handy total list
     m_TotalGroupRegister.push_back(newGroup);
@@ -893,7 +939,7 @@ void PresetMan::RegisterGroup(std::string newGroup, int whichModule)
 
 bool PresetMan::GetGroups(list<string> &groupList, int whichModule, string withType) const
 {
-    AAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
     bool foundAny = false;
 
@@ -944,7 +990,7 @@ bool PresetMan::GetGroups(list<string> &groupList, int whichModule, string withT
 
 bool PresetMan::GetModuleSpaceGroups(list<string> &groupList, int whichModule, string withType) const
 {
-    AAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
     bool foundAny = false;
 

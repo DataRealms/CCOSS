@@ -669,7 +669,7 @@ bool Deployment::IsOnScenePoint(Vector &scenePoint) const
     for (int i = 0; i < passes; ++i)
     {
 
-        if (WithinBox(aScenePoint[i], m_Pos + m_BitmapOffset, m_pFGColor->w, m_pFGColor->h))
+        if (IsWithinBox(aScenePoint[i], m_Pos + m_BitmapOffset, m_pFGColor->w, m_pFGColor->h))
         {
             if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor ||
                (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor) ||
@@ -701,10 +701,10 @@ bool Deployment::IsOnScenePoint(Vector &scenePoint) const
 void Deployment::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const
 {
     if (!m_Icon.GetBitmaps8() || !(m_Icon.GetBitmaps8()[0]))
-        DDTAbort("Deployment's Icon bitmaps are null when drawing!");
+        RTEAbort("Deployment's Icon bitmaps are null when drawing!");
 
 	if (!m_apArrowLeftBitmap || !m_apArrowRightBitmap)
-		DDTAbort("Deployment's Arrow bitmaps are null when drawing!");
+		RTEAbort("Deployment's Arrow bitmaps are null when drawing!");
 
 	{
 		BITMAP *pBitmap = m_Icon.GetBitmaps8()[0];

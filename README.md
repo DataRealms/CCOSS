@@ -17,7 +17,10 @@ You may also want to check out the list of recommended Visual Studio plugins [he
 2. Clone this Source Repository and the [Data Repository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data) in neighboring folders.  
 **Do Not** change the folder names unless you want to make trouble for yourself.
 
-3. Copy `Cortex-Command-Community-Project-Source\external\sources\zlib\DLLs\dll32\zlibwapi.dll` and `Cortex-Command-Community-Project-Source\external\lib\win\lua51.dll` into the Data Repository
+3. Copy the following libraries from `Cortex-Command-Community-Project-Source\external\lib\` into the Data Repository:
+* `fmod.dll`
+* `liblz4.dll`
+* `zlibwapi.dll`
 
 4. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into the Data Repository.
 

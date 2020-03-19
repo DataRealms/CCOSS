@@ -40,7 +40,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="soundPath">A path to the sound for this sound to have.</param>
 		/// <param name="loops">The number of times this SoundContainer's sounds will loop. 0 means play once. -1 means play infinitely until stopped.</param>
-		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch</param>
+		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(std::string soundPath, int loops = 0, bool affectedByGlobalPitch = true);
 
@@ -49,6 +49,24 @@ namespace RTE {
 		/// </summary>
 		/// <param name="soundPath">A path to the new sound to add. This will be handled through PresetMan.</param>
 		void AddSound(std::string soundPath);
+#pragma endregion
+
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a SoundContainer object before deletion from system memory.
+		/// </summary>
+		virtual ~SoundContainer() { Destroy(true); }
+
+		/// <summary>
+		/// Destroys and resets (through Clear()) the SoundContainer object. It doesn't delete the Sound files, since they're owned by ContentFile static maps.
+		/// </summary>
+		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
+		virtual void Destroy(bool notInherited = false) { if (!notInherited) { Entity::Destroy(); } Clear(); }
+
+		/// <summary>
+		/// Resets the entire SoundContainer, including its inherited members, to their default settings or values.
+		/// </summary>
+		virtual void Reset() { Clear(); Entity::Reset(); }
 #pragma endregion
 
 #pragma region INI Handling
@@ -70,27 +88,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="writer">A Writer that the SoundContainer will save itself with.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
-#pragma endregion
-
-#pragma region Destruction
-		/// <summary>
-		/// Destructor method used to clean up a SoundContainer object before deletion from system memory.
-		/// </summary>
-		virtual ~SoundContainer() { Destroy(true); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the SoundContainer object.
-		/// </summary>
-		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false);
-#pragma endregion
-
-#pragma region Virtual Override Methods
-		/// <summary>
-		/// Resets the entire SoundContainer, including its inherited members, to their default settings or values.
-		/// </summary>
-		virtual void Reset() { Clear(); Entity::Reset(); }
+		virtual int Save(Writer &writer) const { return 0; }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -219,7 +217,7 @@ namespace RTE {
 		/// <param name="attenuation">How much distance attenuation to apply to the SoundContainer.</param>
 		/// <param name="player">Player to start playback of this SoundContainer for.</param>
 		/// <returns>Whether this SoundContainer successfully started playing on any channels.</returns>
-		bool Play(float attenuation, int player) { return HasAnySounds() ? g_AudioMan.PlaySound(this, player, attenuation) : false; }
+		bool Play(float attenuation, int player) { return HasAnySounds() ? g_AudioMan.PlaySound(this, attenuation, player) : false; }
 
 		/// <summary>
 		/// Stops playback of this SoundContainer for all players.
@@ -244,7 +242,7 @@ namespace RTE {
 		/// Fades out playback of the SoundContainer to 0 volume.
 		/// </summary>
 		/// <param name="fadeOutTime">How long the fadeout should take.</param>
-		void FadeOut(int fadeOutTime = 1000);
+		void FadeOut(int fadeOutTime = 1000) { if (HasAnySounds()) { return g_AudioMan.FadeOutSound(this, fadeOutTime); } }
 #pragma endregion
 
 	protected:

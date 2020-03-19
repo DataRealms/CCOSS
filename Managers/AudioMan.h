@@ -155,7 +155,7 @@ namespace RTE {
 		/// Sets the music to a specific volume. Does not affect sounds.
 		/// </summary>
 		/// <param name="volume">The desired volume scalar. 0.0-1.0.</param>
-		void SetMusicVolume(double volume = 1.0);
+		void SetMusicVolume(double volume = 1.0) { m_MusicVolume = Limit(volume, 1, 0); if (m_AudioEnabled) { m_MusicChannelGroup->setVolume(m_MusicVolume); } }
 
 		/// <summary>
 		/// Sets the music to a specific volume, but it will only last until a new song is played. Useful for fading etc.
@@ -200,7 +200,7 @@ namespace RTE {
 		/// Sets the volume of all sounds to a specific volume. Does not affect music.
 		/// </summary>
 		/// <param name="volume">The desired volume scalar. 0.0-1.0.</param>
-		void SetSoundsVolume(double volume = 1.0);
+		void SetSoundsVolume(double volume = 1.0) { m_SoundsVolume = volume; if (m_AudioEnabled) { m_SoundChannelGroup->setVolume(volume); } }
 
 		/// <summary>
 		/// Sets/updates the distance attenuation for a specific SoundContainer. Will only have an effect if the sound is currently being played.
@@ -269,7 +269,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="filePath">The path to the sound file to play.</param>
 		/// <returns>Returns the new sound object being played. OWNERSHIP IS TRANSFERRED!</returns>
-		SoundContainer *PlaySound(const char *filePath) { return PlaySound(filePath, -1, 0); }
+		SoundContainer *PlaySound(const char *filePath) { return PlaySound(filePath, 0, -1); }
 
 		/// <summary>
 		/// Starts playing a certain sound file with a certain attenuation for a certain player.
@@ -278,7 +278,7 @@ namespace RTE {
 		/// <param name="attenuation">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent.</param>
 		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players.</param>
 		/// <returns></returns>
-		SoundContainer *PlaySound(const char *filePath, float attenuation, int player) { return PlaySound(filePath, player, attenuation, 0, PRIORITY_NORMAL, -1); }
+		SoundContainer *PlaySound(const char *filePath, float attenuation, int player) { return PlaySound(filePath, attenuation, player, 0, PRIORITY_NORMAL, -1); }
 
 		/// <summary>
 		/// Starts playing a certain sound file with various configuration settings.
@@ -304,7 +304,7 @@ namespace RTE {
 		/// <param name="priority">The priority of this sound - higher priority sounds are more likely to be heard. -1 means it'll use the SoundContainer's value. Defaults to -1.</param>
 		/// <param name="pitch">/// The pitch to play this SoundContainer's at where 1 is unmodified frequency and each multiple of 2 is an octave up or down. Defaults to 1.</param>
 		/// <returns>Whether or not playback of the Sound was successful.</returns>
-		bool PlaySound(SoundContainer *pSoundContainer, float attenuation = 0.0, int player = -1, int priority = -1, double pitch = 1);
+		bool PlaySound(SoundContainer *pSoundContainer, float attenuation = 0, int player = -1, int priority = -1, double pitch = 1);
 
 		/// <summary>
 		/// Stops playing all sounds in a given SoundContainer.
@@ -424,5 +424,7 @@ namespace RTE {
 		AudioMan(const AudioMan &reference);
 		AudioMan & operator=(const AudioMan &rhs);
 	};
+
+	std::mutex g_SoundEventsListMutex[c_MaxClients];
 }
 #endif

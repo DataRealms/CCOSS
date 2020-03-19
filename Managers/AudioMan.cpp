@@ -2,12 +2,12 @@
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
 #include "SoundContainer.h"
+#include "GUISound.h"
 
 namespace RTE {
 	const std::string AudioMan::m_ClassName = "AudioMan";
 
-	// I know this is a crime, but if I include it in FrameMan.h the whole thing will collapse due to int redefinitions in Allegro
-	std::mutex g_SoundEventsListMutex[c_MaxClients];
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	FMOD_RESULT F_CALLBACK AudioMan::MusicChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *unusedCommandData1, void *unusedCommandData2) {
 		if (channelControlType == FMOD_CHANNELCONTROL_CHANNEL && callbackType == FMOD_CHANNELCONTROL_CALLBACK_END) {
@@ -33,7 +33,7 @@ namespace RTE {
 			}
 
 			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: An error occured when Ending a sound in SoundContainer " + channelSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
+				g_ConsoleMan.PrintString("ERROR: An error occurred when Ending a sound in SoundContainer " + channelSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
 				return result;
 			}
 		}
@@ -86,6 +86,8 @@ namespace RTE {
 		SetSoundsVolume(m_SoundsVolume);
 		SetMusicVolume(m_MusicVolume);
 
+		new GUISound(); //NOTE: Anything that instantiates SoundContainers needs to wait until the Audio System is up and running before they start doing that. It'll fail safely even if Audio is not enabled.
+
 		return 0;
 	}
 
@@ -106,9 +108,7 @@ namespace RTE {
 			m_AudioSystem->update();
 
 			// Done waiting for silence
-			if (!IsMusicPlaying() && m_SilenceTimer.IsPastRealTimeLimit()) {
-				PlayNextStream();
-			}
+			if (!IsMusicPlaying() && m_SilenceTimer.IsPastRealTimeLimit()) { PlayNextStream(); }
 		}
 	}
 
@@ -119,15 +119,11 @@ namespace RTE {
 			return;
 		}
 
-		if (m_IsInMultiplayerMode) {
-			RegisterSoundEvent(-1, SOUND_SET_PITCH, 0, 0, std::unordered_set<short int>(), 0, pitch, excludeMusic);
-		}
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_PITCH, 0, 0, std::unordered_set<short int>(), 0, pitch, excludeMusic); }
 
 		m_GlobalPitch = Limit(pitch, 8, 0.125); //Limit pitch change to 8 octaves up or down
 
-		if (!excludeMusic) {
-			m_MusicChannelGroup->setPitch(m_GlobalPitch);
-		}
+		if (!excludeMusic) { m_MusicChannelGroup->setPitch(m_GlobalPitch); }
 
 		int numChannels;
 		FMOD_RESULT result = m_SoundChannelGroup->getNumChannels(&numChannels);
@@ -143,21 +139,9 @@ namespace RTE {
 					result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
 					SoundContainer *channelSoundContainer = (SoundContainer *)userData;
 
-					if (channelSoundContainer->IsAffectedByGlobalPitch()) {
-						soundChannel->setPitch(pitch);
-					}
+					if (channelSoundContainer->IsAffectedByGlobalPitch()) { soundChannel->setPitch(pitch); }
 				}
 			}
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void AudioMan::SetMusicVolume(double volume) {
-		m_MusicVolume = Limit(volume, 1, 0);
-
-		if (m_AudioEnabled) {
-			m_MusicChannelGroup->setVolume(m_MusicVolume);
 		}
 	}
 
@@ -179,12 +163,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool AudioMan::SetMusicPitch(float pitch) {
-		if (m_IsInMultiplayerMode) {
-			RegisterMusicEvent(-1, MUSIC_SET_PITCH, 0, 0, 0.0, pitch);
-		}
 		if (!m_AudioEnabled) {
 			return false;
 		}
+
+		if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_SET_PITCH, 0, 0, 0.0, pitch); }
 
 		pitch = Limit(pitch, 8, 0.125); //Limit pitch change to 8 octaves up or down
 		FMOD_RESULT result = m_MusicChannelGroup->setPitch(pitch);
@@ -209,7 +192,7 @@ namespace RTE {
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not get music position: " + std::string(FMOD_ErrorString(result)));
 			}
-			return result == FMOD_OK ? ((double)position) / 1000 : 0;
+			return result == FMOD_OK ? (static_cast<double>(position)) / 1000 : 0;
 		}
 		return 0;
 	}
@@ -232,16 +215,6 @@ namespace RTE {
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not set music position: " + std::string(FMOD_ErrorString(result)));
 			}
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void AudioMan::SetSoundsVolume(double volume) {
-		m_SoundsVolume = volume;
-
-		if (m_AudioEnabled) {
-			m_SoundChannelGroup->setVolume(volume);
 		}
 	}
 
@@ -275,6 +248,7 @@ namespace RTE {
 		if (!m_AudioEnabled || !pSoundContainer || !pSoundContainer->IsBeingPlayed()) {
 			return false;
 		}
+
 		if (IsInMultiplayerMode() && pSoundContainer) {
 			RegisterSoundEvent(-1, SOUND_SET_PITCH, pSoundContainer->GetHash(), 0, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), pitch, pSoundContainer->IsAffectedByGlobalPitch());
 		}
@@ -298,9 +272,7 @@ namespace RTE {
 
 	void AudioMan::PlayMusic(const char *filePath, int loops, double volumeOverrideIfNotMuted) {
 		if (m_AudioEnabled) {
-			if (m_IsInMultiplayerMode) {
-				RegisterMusicEvent(-1, MUSIC_PLAY, filePath, loops, 0.0, 1.0);
-			}
+			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_PLAY, filePath, loops, 0.0, 1.0); }
 
 			FMOD_RESULT result = m_MusicChannelGroup->stop();
 			if (result != FMOD_OK) {
@@ -331,7 +303,7 @@ namespace RTE {
 			if (volumeOverrideIfNotMuted >= 0 && m_MusicVolume > 0) {
 				result = musicChannel->setVolume(volumeOverrideIfNotMuted);
 				if (result != FMOD_OK && (loops != 0 && loops != 1)) {
-					g_ConsoleMan.PrintString("ERROR: Failed to set vollume override for music file: " + std::string(filePath) + ". This means it will stay at " + std::to_string(m_MusicVolume) + ": " + std::string(FMOD_ErrorString(result)));
+					g_ConsoleMan.PrintString("ERROR: Failed to set volume override for music file: " + std::string(filePath) + ". This means it will stay at " + std::to_string(m_MusicVolume) + ": " + std::string(FMOD_ErrorString(result)));
 				}
 			}
 
@@ -385,9 +357,7 @@ namespace RTE {
 
 	void AudioMan::StopMusic() {
 		if (m_AudioEnabled) {
-			if (m_IsInMultiplayerMode) {
-				RegisterMusicEvent(-1, MUSIC_STOP, 0, 0, 0.0, 0.0);
-			}
+			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_STOP, 0, 0, 0.0, 0.0); }
 
 			FMOD_RESULT result = m_MusicChannelGroup->stop();
 			if (result != FMOD_OK) {
@@ -449,6 +419,7 @@ namespace RTE {
 		if (!m_AudioEnabled || !pSoundContainer) {
 			return false;
 		}
+
 		priority = priority < 0 ? pSoundContainer->GetPriority() : priority;
 		pitch = pSoundContainer->IsAffectedByGlobalPitch() ? m_GlobalPitch : pitch;
 

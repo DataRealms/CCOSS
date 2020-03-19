@@ -59,33 +59,18 @@ namespace RTE {
 				reader.ReportError(std::string("Failed to load the sample from the file"));
 			}
 			m_Sounds.push_back(std::pair<ContentFile, FMOD::Sound *>(newFile, pNewSample));
-		} else if (propName == "LoopSetting")
+		} else if (propName == "LoopSetting") {
 			reader >> m_Loops;
-		else if (propName == "Priority")
+		} else if (propName == "Priority") {
 			reader >> m_Priority;
-		else if (propName == "AffectedByGlobalPitch")
+		} else if (propName == "AffectedByGlobalPitch") {
 			reader >> m_AffectedByGlobalPitch;
-		else
+		} else {
 			// See if the base class(es) can find a match instead
 			return Entity::ReadProperty(propName, reader);
-
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int SoundContainer::Save(Writer &writer) const {
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SoundContainer::Destroy(bool notInherited) {
-		// Don't delete Sounds since they are owned in the ContentFile static maps
-		if (!notInherited) {
-			Entity::Destroy();
 		}
-		Clear();
+
+		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,13 +115,5 @@ namespace RTE {
 		
 		FMOD::Sound *soundToStart;
 		return m_Sounds[m_CurrentSound].second;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SoundContainer::FadeOut(int fadeOutTime) {
-		if (HasAnySounds()) {
-			return g_AudioMan.FadeOutSound(this, fadeOutTime);
-		}
 	}
 }

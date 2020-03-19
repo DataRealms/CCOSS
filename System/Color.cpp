@@ -62,7 +62,7 @@ namespace RTE {
 		m_Index = index;
 
 		RGB color;
-		get_color((int)m_Index, &color);
+		get_color(static_cast<int>(m_Index), &color);
 
 		m_R = color.r * 4;
 		m_G = color.g * 4;

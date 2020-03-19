@@ -59,11 +59,6 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a Matrix object before deletion.
-		/// </summary>
-		virtual ~Matrix() { ; }
-
-		/// <summary>
 		/// Resets this Matrix to an identity Matrix, representing a 0 angle.
 		/// </summary>
 		void Reset() { Clear(); }
@@ -175,11 +170,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="rhs">A float in radians to set this rotational Matrix to.</param>
 		/// <returns>A reference to the changed Matrix.</returns>
-		Matrix & operator=(const float &rhs) {
-			m_Rotation = rhs;
-			m_ElementsUpdated = false;
-			return *this;
-		}
+		Matrix & operator=(const float &rhs) { m_Rotation = rhs; m_ElementsUpdated = false; return *this; }
 
 		/// <summary>
 		/// Unary negation overload for single Matrices.
@@ -208,11 +199,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="rhs">A float reference as the right hand side operand.</param>
 		/// <returns>A reference to the resulting Matrix.</returns>
-		Matrix & operator+=(const float &rhs) {
-			m_Rotation += rhs;
-			m_ElementsUpdated = false;
-			return *this;
-		}
+		Matrix & operator+=(const float &rhs) { m_Rotation += rhs; m_ElementsUpdated = false; return *this; }
 
 		/// <summary>
 		/// Self-addition operator overload for Matrices.
@@ -220,22 +207,14 @@ namespace RTE {
 		/// <param name="lhs">A Matrix reference as the left hand side operand.</param>
 		/// <param name="rhs">A Matrix reference as the right hand side operand.</param>
 		/// <returns>A reference to the resulting Matrix (the left one).</returns>
-		friend Matrix & operator+=(Matrix &lhs, const Matrix &rhs) {
-			lhs.m_Rotation += rhs.m_Rotation;
-			lhs.m_ElementsUpdated = false;
-			return lhs;
-		}
+		friend Matrix & operator+=(Matrix &lhs, const Matrix &rhs) { lhs.m_Rotation += rhs.m_Rotation; lhs.m_ElementsUpdated = false; return lhs; }
 
 		/// <summary>
 		/// Self-subtraction operator overload for a Matrix and a float.
 		/// </summary>
 		/// <param name="rhs">A float reference as the right hand side operand.</param>
 		/// <returns>A reference to the resulting Matrix.</returns>
-		Matrix & operator-=(const float &rhs) {
-			m_Rotation -= rhs;
-			m_ElementsUpdated = false;
-			return *this;
-		}
+		Matrix & operator-=(const float &rhs) { m_Rotation -= rhs; m_ElementsUpdated = false; return *this; }
 
 		/// <summary>
 		/// Self-subtraction operator overload for Matrices.
@@ -243,22 +222,14 @@ namespace RTE {
 		/// <param name="lhs">A Matrix reference as the left hand side operand.</param>
 		/// <param name="rhs">A Matrix reference as the right hand side operand.</param>
 		/// <returns>A reference to the resulting Matrix (the left one).</returns>
-		friend Matrix & operator-=(Matrix &lhs, const Matrix &rhs) {
-			lhs.m_Rotation -= rhs.m_Rotation;
-			lhs.m_ElementsUpdated = false;
-			return lhs;
-		}
+		friend Matrix & operator-=(Matrix &lhs, const Matrix &rhs) { lhs.m_Rotation -= rhs.m_Rotation; lhs.m_ElementsUpdated = false; return lhs; }
 
 		/// <summary>
 		/// Self-multiplication operator overload for a Matrix and a float.
 		/// </summary>
 		/// <param name="rhs">A float reference as the right hand side operand.</param>
 		/// <returns>A reference to the resulting Matrix.</returns>
-		Matrix & operator*=(const float &rhs) {
-			m_Rotation *= rhs;
-			m_ElementsUpdated = false;
-			return *this;
-		}
+		Matrix & operator*=(const float &rhs) { m_Rotation *= rhs; m_ElementsUpdated = false;	return *this; }
 
 		/// <summary>
 		/// Self-multiplication operator overload for Matrices.
@@ -266,11 +237,7 @@ namespace RTE {
 		/// <param name="lhs">A Matrix reference as the left hand side operand.</param>
 		/// <param name="rhs">A Matrix reference as the right hand side operand.</param>
 		/// <returns>A reference to the resulting Matrix (the left one).</returns>
-		friend Matrix & operator*=(Matrix &lhs, const Matrix &rhs) {
-			lhs.m_Rotation *= rhs.m_Rotation;
-			lhs.m_ElementsUpdated = false;
-			return lhs;
-		}
+		friend Matrix & operator*=(Matrix &lhs, const Matrix &rhs) { lhs.m_Rotation *= rhs.m_Rotation; lhs.m_ElementsUpdated = false; return lhs; }
 
 		/// <summary>
 		/// self-division operator overload for a Matrix and a float.

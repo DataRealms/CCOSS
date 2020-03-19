@@ -66,7 +66,7 @@ namespace RTE {
 	void Reader::Destroy(bool notInherited) {
 		delete m_pStream;
 		// Delete all the streams in the stream stack
-		for (list<StreamInfo>::iterator itr = m_StreamStack.begin(); itr != m_StreamStack.end(); ++itr) {
+		for (std::list<StreamInfo>::iterator itr = m_StreamStack.begin(); itr != m_StreamStack.end(); ++itr) {
 			delete (*itr).m_pStream;
 		}
 		Clear();
@@ -82,7 +82,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Reader::ReadLine(char *locString, int size) {
-		Eat();
+		DiscardEmptySpace();
 
 		char temp;
 		char peek = m_pStream->peek();
@@ -110,7 +110,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string Reader::ReadLine() {
-		Eat();
+		DiscardEmptySpace();
 
 		std::string retString;
 		char temp;
@@ -136,7 +136,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::string Reader::ReadTo(char terminator, bool eatTerminator) {
+	std::string Reader::ReadTo(char terminator, bool discardTerminator) {
 		std::string retString;
 		char temp;
 		char peek = m_pStream->peek();
@@ -150,18 +150,15 @@ namespace RTE {
 			retString.append(1, temp);
 			peek = m_pStream->peek();
 		}
-		// Eat the terminator if instructed to
-		if (eatTerminator && peek == terminator) { m_pStream->get(); }
+		// Discard the terminator if instructed to
+		if (discardTerminator && peek == terminator) { m_pStream->get(); }
 		return retString;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Reader::NextProperty() {
-		if (!Eat()) {
-			return false;
-		}
-		if (m_EndOfStreams) {
+		if (!DiscardEmptySpace() || m_EndOfStreams) {
 			return false;
 		}
 		// If there are fewer tabs on the last line eaten this time,
@@ -177,7 +174,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string Reader::ReadPropName() {
-		Eat();
+		DiscardEmptySpace();
 
 		std::string retString;
 		char temp;
@@ -190,9 +187,7 @@ namespace RTE {
 				break;
 			}
 			if (peek == '\n' || peek == '\r' || peek == '\t') {
-				// TODO: add file name and line number here!
 				ReportError("Property name wasn't followed by a value");
-				// TODO: handle this gracefully by ignoring the property and reading the next somehow instead
 			}
 			temp = m_pStream->get();
 			if (m_pStream->eof()) {
@@ -208,9 +203,9 @@ namespace RTE {
 		// If the property name turns out to be the special IncludeFile,and we're not skipping include files then open that file and read the first property from it instead.
 		if (retString == "IncludeFile") {
 			if (m_SkipIncludes) {
-				//Eat IncludeFile value
+				// Discard IncludeFile value
 				std::string val = ReadPropValue();
-				Eat();
+				DiscardEmptySpace();
 				retString = ReadPropName();
 			} else {
 				StartIncludeFile();
@@ -233,7 +228,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool Reader::Eat() {
+	bool Reader::DiscardEmptySpace() {
 		char peek;
 		int indent = 0;
 		bool ateLine = false;
@@ -249,14 +244,14 @@ namespace RTE {
 			// Not end-of-file but still got junk back... something went to shit
 			if (peek == -1) { ReportError("Something went wrong reading the line; make sure it is providing the expected type"); }
 
-			// Eat spaces
+			// Discard spaces
 			if (peek == ' ') {
 				m_pStream->ignore(1);
-			// Eat tabs, and count them
+			// Discard tabs, and count them
 			} else if (peek == '\t') {
 				indent++;
 				m_pStream->ignore(1);
-			// Eat newlines and reset the tab count for the new line, also count the lines
+			// Discard newlines and reset the tab count for the new line, also count the lines
 			} else if (peek == '\n' || peek == '\r') {
 				// So we don't count lines twice when there are both newline and carriage return at the end of lines
 				if (peek == '\n') {
@@ -277,7 +272,7 @@ namespace RTE {
 				char temp = m_pStream->get();
 				char temp2;
 
-				// Confirm that it's a comment line, if so eat it and continue
+				// Confirm that it's a comment line, if so discard it and continue
 				if (m_pStream->peek() == '/') {
 					while (m_pStream->peek() != '\n' && m_pStream->peek() != '\r' && !m_pStream->eof()) { m_pStream->ignore(1); }
 				// Block comment
@@ -287,7 +282,7 @@ namespace RTE {
 						// Count the lines within the comment though
 						if (temp2 == '\n') { ++m_CurrentLine; }
 					}
-					// Eat that final '/'
+					// Discard that final '/'
 					if (!m_pStream->eof()) { m_pStream->ignore(1); }
 
 				// Not a comment, so it's data, so quit.
@@ -300,9 +295,9 @@ namespace RTE {
 			}
 		}
 
-		// This precaution enables us to use Eat repeatedly without messing up the indentation tracking logic
+		// This precaution enables us to use DiscardEmptySpace repeatedly without messing up the indentation tracking logic
 		if (ateLine) {
-			// Get indentation difference from the last line of the last call to Eat(), and the last line of this call to Eat().
+			// Get indentation difference from the last line of the last call to DiscardEmptySpace(), and the last line of this call to DiscardEmptySpace().
 			m_IndentDifference = indent - m_PreviousIndent;
 			// Save the last tab count
 			m_PreviousIndent = indent;
@@ -359,10 +354,9 @@ namespace RTE {
 			m_PreviousIndent = m_StreamStack.back().m_PreviousIndent;
 			m_StreamStack.pop_back();
 
-			// TODO: make this graceful log error instead.
 			ReportError("Failed to open included data file");
 
-			Eat();
+			DiscardEmptySpace();
 			return false;
 		}
 
@@ -386,8 +380,8 @@ namespace RTE {
 			sprintf_s(report, sizeof(report), "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
 			m_fpReportProgress(std::string(report), true);
 		}
-		// Eat away any fluff in the beginning of the new file
-		Eat();
+		// Discard any fluff in the beginning of the new file
+		DiscardEmptySpace();
 		// indicate success
 		return true;
 	}
@@ -423,14 +417,15 @@ namespace RTE {
 		// Report that we're going back a file
 		if (m_fpReportProgress) {
 			m_ReportTabs = "\t";
-			for (int i = 0; i < m_StreamStack.size(); ++i) { m_ReportTabs.append("\t"); }
-
+			for (int i = 0; i < m_StreamStack.size(); ++i) {
+				m_ReportTabs.append("\t");
+			}
 			char report[512];
 			sprintf_s(report, sizeof(report), "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
 			m_fpReportProgress(std::string(report), true);
 		}
 		// Set up the resumed file for reading again
-		Eat();
+		DiscardEmptySpace();
 		return true;
 	}
 }

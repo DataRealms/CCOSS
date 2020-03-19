@@ -27,7 +27,7 @@ namespace RTE {
 		Color() { Clear(); }
 
 		/// <summary>
-		/// Constructor method used to instantiate a Color object from RGB values
+		/// Constructor method used to instantiate a Color object from RGB values.
 		/// </summary>
 		/// <param name="R">Initial Red value of this color.</param>
 		/// <param name="G">Initial Green value of this color.</param>
@@ -63,11 +63,6 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Destruction
-		/// <summary>
-		/// Destructor method used to clean up a Color object before deletion.
-		/// </summary>
-		virtual ~Color() { ; }
-
 		/// <summary>
 		/// Sets RGB of this Color to zero.
 		/// </summary>

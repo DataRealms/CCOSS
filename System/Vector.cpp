@@ -76,7 +76,6 @@ namespace RTE {
 		if (m_Y == 0) {
 			return m_X > 0 ? 0 : (m_X < 0 ? 180 : 0);
 		}
-
 		float rawAngle = -(atan(m_Y / m_X) / c_PI) * 180;
 		if (m_X < 0) { rawAngle += 180; }
 
@@ -150,10 +149,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::operator=(const deque<Vector> &rhs) {
+	Vector & Vector::operator=(const std::deque<Vector> &rhs) {
 		Clear();
 		if (rhs.empty()) { return *this; }
-		for (deque<Vector>::const_iterator itr = rhs.begin(); itr != rhs.end(); ++itr) {
+		for (std::deque<Vector>::const_iterator itr = rhs.begin(); itr != rhs.end(); ++itr) {
 			*this += *itr;
 		}
 		*this /= rhs.size();

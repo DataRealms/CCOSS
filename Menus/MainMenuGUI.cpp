@@ -681,7 +681,7 @@ void MainMenuGUI::Update()
 				m_pGUIInput->GetMousePosition(&mouseX, &mouseY);
 				Vector mouse(mouseX, mouseY);
 
-				if (m_PioneerPromoBox.WithinBox(mouse))
+				if (m_PioneerPromoBox.IsWithinBox(mouse))
 				{
 					OpenBrowserToURL("http://store.steampowered.com/app/300260/");
 				}

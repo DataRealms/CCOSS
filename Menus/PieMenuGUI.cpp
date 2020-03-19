@@ -1159,7 +1159,7 @@ void PieMenuGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
             // See if we found the point to be within the screen or not
-            if (wItr->WithinBox(m_CenterPos))
+            if (wItr->IsWithinBox(m_CenterPos))
             {
                 nearestBoxItr = wItr;
                 withinAny = true;

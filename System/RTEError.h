@@ -35,13 +35,13 @@ namespace RTE {
 	extern bool RTEAssertFunc(bool expression, const char *description, const char *file, int line, bool &alwaysIgnore);
 	extern bool RTEAssertFunc(bool expression, const std::string description, const char *file, int line, bool &alwaysIgnore);
 
-	#define RTEAssert(expression, description) {													\
-		static bool alwaysIgnore = false;															\
-		if (!alwaysIgnore) {																		\
-			if (RTEAssertFunc((int)(expression), description, __FILE__, __LINE__, alwaysIgnore)) {	\
-				__debugbreak();																		\
-			}																						\
-		}																							\
+	#define RTEAssert(expression, description) {												\
+		static bool alwaysIgnore = false;														\
+		if (!alwaysIgnore) {																	\
+			if (RTEAssertFunc(expression, description, __FILE__, __LINE__, alwaysIgnore)) {		\
+				__debugbreak();																	\
+			}																					\
+		}																						\
 	}
 }
 #endif

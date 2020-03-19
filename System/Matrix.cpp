@@ -38,8 +38,8 @@ namespace RTE {
 		m_ElementsUpdated = true;
 
 		// Inverse angle to make CCW positive direction.
-		float const CosAngle = (float)cos(-angle);
-		float const SinAngle = (float)sin(-angle);
+		float const CosAngle = static_cast<float>(cos(-angle));
+		float const SinAngle = static_cast<float>(sin(-angle));
 		m_Elements[0][0] = CosAngle;
 		m_Elements[0][1] = -SinAngle;
 		m_Elements[1][0] = SinAngle;
@@ -176,8 +176,8 @@ namespace RTE {
 
 	void Matrix::UpdateElements() {
 		// Inverse angle to make CCW positive direction.
-		float const CosAngle = (float)cos(-m_Rotation);
-		float const SinAngle = (float)sin(-m_Rotation);
+		float const CosAngle = static_cast<float>(cos(-m_Rotation));
+		float const SinAngle = static_cast<float>(sin(-m_Rotation));
 		m_Elements[0][0] = CosAngle;
 		m_Elements[0][1] = -SinAngle;
 		m_Elements[1][0] = SinAngle;

@@ -206,17 +206,8 @@ bool PresetMan::LoadAllDataModules() {
 				moduleID = GetModuleID(moduleInfo.name);
 				// Make sure we don't load properties of already loaded official modules
 				if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte") {
-					// Actually load the unofficial data module
-					if (!LoadDataModule(string(moduleInfo.name), false, &LoadingGUI::LoadingSplashProgressReport)) {
-						// TODO: Report error and skip loading module.
-					}
-				} else {
-					// LoadDataModule can return false (esp since it may try to load already loaded modules, and that's ok) and shouldn't cause stop
-					// TODO: Log this and continue gracefully instead
-					// char error[512];
-					// sprintf_s(error, sizeof(error), "Failed to load Data Module: %s\n\nMake sure it contains an Index.ini file that defines a \"DataModule\"!", moduleInfo.name);
-					// RTEAbort(error);
-					// return false;
+					// NOTE: LoadDataModule can return false (especially since it may try to load already loaded modules, which is okay) and shouldn't cause stop, so we can ignore its return value here.
+                    LoadDataModule(string(moduleInfo.name), false, &LoadingGUI::LoadingSplashProgressReport);
 				}
 			}
 		}

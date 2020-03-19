@@ -136,18 +136,18 @@ namespace RTE {
 		std::string ReadLine();
 
 		/// <summary>
-		/// Eats all whitespace and newlines and comment lines (which start with '//') so that the next thing to be read will be actual data.
+		/// Discards all whitespace and newlines and comment lines (which start with '//') so that the next thing to be read will be actual data.
 		/// </summary>
 		/// <returns>Whether there is more data to read from the file streams after this eat.</returns>
-		bool Eat();
+		bool DiscardEmptySpace();
 
 		/// <summary>
 		/// Reads from the current position up to a specific character or end-of-file.
 		/// </summary>
 		/// <param name="terminator">Which character to stop reading at.</param>
-		/// <param name="eatTerminator">Whether to also eat the terminator when it is encountered, or to leave it in the stream.</param>
+		/// <param name="eatTerminator">Whether to also discard the terminator when it is encountered, or to leave it in the stream.</param>
 		/// <returns>The std::string that will hold what has been read up till, but not including the terminator char.</returns>
-		std::string ReadTo(char terminator, bool eatTerminator = false);
+		std::string ReadTo(char terminator, bool discardTerminator = false);
 
 		/// <summary>
 		/// Reads the next property name from the context object Reader's stream after eating all whitespace including newlines up till the first newline char.
@@ -197,18 +197,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="var">A reference to the variable that will be filled by the extracted data.</param>
 		/// <returns>A Reader reference for further use in an expression.</returns>
-		virtual Reader & operator>>(bool &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(char &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(unsigned char &var) { Eat(); int temp; *m_pStream >> temp; var = temp; return *this; }
-		virtual Reader & operator>>(short &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(unsigned short &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(int &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(unsigned int &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(long &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(unsigned long &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(float &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(double &var) { Eat(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(char * var) { Eat(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(bool &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(char &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(unsigned char &var) { DiscardEmptySpace(); int temp; *m_pStream >> temp; var = temp; return *this; }
+		virtual Reader & operator>>(short &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(unsigned short &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(int &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(unsigned int &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(long &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(unsigned long &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(float &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(double &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(char * var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
 		virtual Reader & operator>>(std::string &var) { var.assign(ReadLine()); return *this; }
 #pragma endregion
 
@@ -234,7 +234,7 @@ namespace RTE {
 			std::ifstream *m_pStream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
 			std::string m_FilePath; //!< Currently used stream's filepath.
 			int m_CurrentLine; //!< The line number the stream is on.
-			int m_PreviousIndent; //!< Count of tabs encountered on the last line Eat() ate.
+			int m_PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
 		};
 
 		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this.
@@ -251,7 +251,7 @@ namespace RTE {
 		std::string m_DataModuleName; //!< The current name of the data module being read from, including the .rte extension.
 		int m_DataModuleID; //!< The current ID of the data module being read from.
 
-		int m_PreviousIndent; //!< Count of tabs encountered on the last line Eat() ate.
+		int m_PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
 		int m_IndentDifference; //!< Difference in indentation from the last line to the current line.
 		std::string m_ReportTabs; //!< String containing the proper amount of tabs for the report.
 
@@ -290,7 +290,7 @@ namespace RTE {
 
 		// Disallow the use of some implicit methods.
 		Reader(const Reader &reference);
-		Reader & operator=(const Reader &rhs);
+		Reader & operator=(const Reader &rhs) {}
 	};
 }
 #endif

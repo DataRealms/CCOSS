@@ -6,7 +6,7 @@
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
 
-struct DATAFILE;
+//struct DATAFILE; // DataFile loading not implemented.
 struct BITMAP;
 
 namespace RTE {
@@ -173,10 +173,10 @@ namespace RTE {
 		virtual BITMAP *LoadAndReleaseBitmap(int conversionMode = 0);
 
 		/// <summary>
-		/// Gets the data represented by this ContentFile object as an array of Allegro BITMAPs, each represting a frame in the animation. It loads the BITMAPs into the static maps if they're not already loaded.
+		/// Gets the data represented by this ContentFile object as an array of Allegro BITMAPs, each representing a frame in the animation. It loads the BITMAPs into the static maps if they're not already loaded.
 		/// Note that ownership of the BITMAPS ARE NOT TRANSFERRED, BUT THE ARRAY ITSELF, IS!
 		/// </summary>
-		/// <param name="frameCount">The number of frames to attempt to load, more than 1 frmae will mean 00# is appended to datapath to handle naming conventions.</param>
+		/// <param name="frameCount">The number of frames to attempt to load, more than 1 frame will mean 00# is appended to datapath to handle naming conventions.</param>
 		/// <param name="conversionMode">
 		/// The Allegro color conversion mode to use when loading this bitmap.
 		/// Note it will only apply the first time you get a bitmap since it is only loaded from disk the first time. See allegro docs for the modes.
@@ -209,9 +209,10 @@ namespace RTE {
 #pragma endregion
 
 	protected:
-		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount }; //!< Enumeration for loading BITMAPs by bit depth. NOTE: This can't be lower down because m_sLoadedBitmaps relies on its definition
 
 		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.01, 002 etc.
+
+		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount }; //!< Enumeration for loading BITMAPs by bit depth. NOTE: This can't be lower down because m_sLoadedBitmaps relies on its definition.
 
 		//TODO all of these could probably be replaced with unordered_maps and decrease lookup time.
 		static std::map<size_t, std::string> m_PathHashes; //!< Hash value of the path to this ContentFile's Datafile Object.
@@ -228,7 +229,7 @@ namespace RTE {
 		//long m_LoadedDataSize; //!< Size of loaded data.
 		//bool m_DataModified; //!< Whether the data itself has been modified since load, and should be saved out again to the path on write.
 
-		DATAFILE *m_pDataFile; //!< This is only if the data is loaded from a datafile; needs to be saved so that it can be unloaded as some point.
+		//DATAFILE *m_pDataFile; //!< This is only if the data is loaded from a datafile; needs to be saved so that it can be unloaded as some point.
 
 	private:
 

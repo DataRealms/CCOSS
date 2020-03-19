@@ -5,13 +5,12 @@
 
 namespace RTE {
 
-	const int Controller::m_ReleaseDelay = 250;
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Controller::Clear() {
-		for (int i = 0; i < CONTROLSTATECOUNT; ++i) { m_ControlStates[i] = false; }
-
+		for (int i = 0; i < CONTROLSTATECOUNT; ++i) {
+			m_ControlStates[i] = false;
+		}
 		m_AnalogMove.Reset();
 		m_AnalogAim.Reset();
 		m_AnalogCursor.Reset();
@@ -47,8 +46,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Controller::Create(const Controller &reference) {
-		for (int i = 0; i < CONTROLSTATECOUNT; ++i) { m_ControlStates[i] = reference.m_ControlStates[i]; }
-
+		for (int i = 0; i < CONTROLSTATECOUNT; ++i) {
+			m_ControlStates[i] = reference.m_ControlStates[i];
+		}
 		m_AnalogMove = reference.m_AnalogMove;
 		m_AnalogAim = reference.m_AnalogAim;
 		m_AnalogCursor = reference.m_AnalogCursor;
@@ -80,14 +80,14 @@ namespace RTE {
 		// See if there's other analog input, only if the mouse isn't active (or the cursor will float if mouse is used!)
 		} else if (GetAnalogCursor().GetLargest() > 0.1 && !IsMouseControlled()) {
 			// See how much to accelerate the joystick input based on how long the stick has been pushed around
-			float acceleration = 0.5 + MIN(m_JoyAccelTimer.GetElapsedRealTimeS(), 0.5) * 6;
+			float acceleration = 0.5 + std::min(m_JoyAccelTimer.GetElapsedRealTimeS(), 0.5) * 6;
 			cursorPos += GetAnalogCursor() * 10 * moveScale * acceleration;
 			altered = true;
 
 		// Digital movement
 		} else {
 			// See how much to accelerate the keyboard input based on how long any key has been pressed
-			float acceleration = 0.25 + MIN(m_KeyAccelTimer.GetElapsedRealTimeS(), 0.75) * 6;
+			float acceleration = 0.25 + std::min(m_KeyAccelTimer.GetElapsedRealTimeS(), 0.75) * 6;
 
 			if (IsState(HOLD_LEFT)) {
 				cursorPos.m_X -= 10 * moveScale * acceleration;
@@ -122,7 +122,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Controller::GetTeam() const {
-		return (m_pControlled) ? m_pControlled->GetTeam() : m_Team;
+		return m_pControlled ? m_pControlled->GetTeam() : m_Team;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,8 +136,9 @@ namespace RTE {
 
 	void Controller::Update() {
 		// Reset all command states.
-		for (int i = 0; i < CONTROLSTATECOUNT; ++i) { m_ControlStates[i] = false; }
-
+		for (int i = 0; i < CONTROLSTATECOUNT; ++i) {
+			m_ControlStates[i] = false;
+		}
 		m_AnalogMove.Reset();
 		m_AnalogAim.Reset();
 		m_AnalogCursor.Reset();
@@ -334,7 +335,7 @@ namespace RTE {
 			m_KeyAccelTimer.Reset();
 		}
 
-		// Translate analog aim input into sharp aim constrol state
+		// Translate analog aim input into sharp aim control state
 		m_ControlStates[AIM_SHARP] = m_AnalogAim.GetMagnitude() > 0.1 && !m_ControlStates[PIE_MENU_ACTIVE];
 
 		// Disable sharp aim while moving - this also helps with keyboard vs mouse fighting when moving and aiming in opposite directions

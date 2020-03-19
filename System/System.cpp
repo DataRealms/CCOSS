@@ -53,20 +53,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void System::PrintConsoleToCLI(std::string consoleString) {
+	void System::PrintToCLI(std::string inputString) {
 		// Color the words ERROR: and SYSTEM: red
 		std::regex regexError("(ERROR|SYSTEM):");
-		consoleString = std::regex_replace(consoleString, regexError, "\033[1;31m$&\033[0;0m");
+		inputString = std::regex_replace(inputString, regexError, "\033[1;31m$&\033[0;0m");
 
 		// Color .rte-paths green
 		std::regex regexPath("\\w*\\.rte\\/(\\w| |\\.|\\/)*(\\/|\\.bmp|\\.wav|\\.lua|\\.ini)");
-		consoleString = std::regex_replace(consoleString, regexPath, "\033[1;32m$&\033[0;0m");
+		inputString = std::regex_replace(inputString, regexPath, "\033[1;32m$&\033[0;0m");
 
 		// Color names in quotes yellow
 		// They have to start with an upper case letter to sort out apostrophes
 		std::regex regexName("(\"[A-Z].*\"|\'[A-Z].*\')");
-		consoleString = std::regex_replace(consoleString, regexName, "\033[1;33m$&\033[0;0m");
+		inputString = std::regex_replace(inputString, regexName, "\033[1;33m$&\033[0;0m");
 
-		std::cout << "\r" << consoleString << std::endl;
+		std::cout << "\r" << inputString << std::endl;
 	}
 }

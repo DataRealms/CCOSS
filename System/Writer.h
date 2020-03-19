@@ -24,7 +24,6 @@ namespace RTE {
 		/// <param name="filename">Path to the file to open for writing.</param>
 		/// <param name="append">Whether to append to the file if it exists, or to overwrite it.</param>
 		Writer(const char *filename, bool append = false) { Clear(); Create(filename, append); }
-		Writer(std::string filename, bool append = false) { Clear(); Create(filename.c_str(), append); }
 
 		/// <summary>
 		/// Makes the Writer object ready for use.
@@ -81,10 +80,7 @@ namespace RTE {
 		/// Used to specify the start of an object to be written.
 		/// </summary>
 		/// <param name="className">The class name of the object about to be written.</param>
-		virtual void ObjectStart(const std::string &className) {
-			*m_pStream << className;
-			++m_Indent;
-		}
+		virtual void ObjectStart(const std::string &className) { *m_pStream << className; ++m_Indent; }
 
 		/// <summary>
 		/// Used to specify the end of an object that has just been written.
@@ -100,7 +96,9 @@ namespace RTE {
 		/// </summary>
 		virtual void NewLine() {
 			*m_pStream << "\n";
-			for (int i = 0; i < m_Indent; ++i) { *m_pStream << "\t"; }
+			for (int i = 0; i < m_Indent; ++i) {
+				*m_pStream << "\t";
+			}
 		}
 
 		/// <summary>
@@ -116,10 +114,7 @@ namespace RTE {
 		/// <summary>
 		/// Marks that there is a null reference to an object here.
 		/// </summary>
-		virtual void NoObject() {
-			//NewLine();
-			*m_pStream << "None";
-		}
+		virtual void NoObject() { *m_pStream << "None"; }
 #pragma endregion
 
 #pragma region Writer Status
@@ -162,6 +157,7 @@ namespace RTE {
 	protected:
 
 		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
+
 		std::ofstream *m_pStream; //!< Stream used for writing to files.
 		std::string m_FolderPath; //!< Only the path to the folder that we are writing a file in, excluding the filename
 		std::string m_FilePath; //!< Currently used stream's filepath
@@ -177,7 +173,7 @@ namespace RTE {
 
 		// Disallow the use of some implicit methods.
 		Writer(const Writer &reference);
-		Writer & operator=(const Writer &rhs);
+		Writer & operator=(const Writer &rhs) {}
 	};
 }
 #endif

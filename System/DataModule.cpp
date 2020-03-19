@@ -19,8 +19,9 @@ namespace RTE {
 		m_PresetList.clear();
 		m_EntityList.clear();
 		m_TypeMap.clear();
-		for (int i = 0; i < c_PaletteEntriesNumber; ++i) { m_MaterialMappings[i] = 0; }
-
+		for (int i = 0; i < c_PaletteEntriesNumber; ++i) { 
+			m_MaterialMappings[i] = 0; 
+		}
 		m_ScanFolderContents = false;
 		m_IgnoreMissingItems = false;
 		m_CrabToHumanSpawnRatio = 0;
@@ -51,14 +52,8 @@ namespace RTE {
 		if (std::experimental::filesystem::exists(indexPath.c_str()) && reader.Create(indexPath.c_str(), true, fpProgressCallback) >= 0) {
 			int result = Serializable::Create(reader);
 
-			// Report loading result
+			// Print an empty line to separate the end of a module from the beginning of the next one in the loading progress log.
 			if (fpProgressCallback) {
-				// TODO: more info here?
-				/*
-				char report[512];
-				sprintf_s(report, sizeof(report), "%s loading:", m_FileName.c_str());
-				fpProgressCallback(std::string(report), true);
-				*/
 				fpProgressCallback(std::string(" "), true);
 			}
 
@@ -152,7 +147,6 @@ namespace RTE {
 			// Check for required dependencies if we're not load properties
 			std::string requiredModule;
 			reader >> requiredModule;
-
 			if (!reader.GetSkipIncludes() && g_PresetMan.GetModuleID(requiredModule) == -1) {
 				reader.ReportError("\"" + m_FileName + "\" requires \"" + requiredModule + "\" in order to load!\n");
 			}
@@ -216,7 +210,7 @@ namespace RTE {
 			return 0;
 		}
 
-		map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(exactType);
+		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(exactType);
 		if (classItr != m_TypeMap.end()) {
 			// Find an instance of that EXACT type and name; derived types are not matched
 			for (std::list<std::pair<std::string, Entity *>>::iterator instItr = (*classItr).second.begin(); instItr != (*classItr).second.end(); ++instItr) {
@@ -289,14 +283,15 @@ namespace RTE {
 		if (withType == "All" || withType.empty()) {
 			for (std::list<std::string>::const_iterator gItr = m_GroupRegister.begin(); gItr != m_GroupRegister.end(); ++gItr) {
 				groupList.push_back(*gItr);
-				//TODO it seems weird that foundAny isn't set to true here, given that the list gets filled. But I suppose no actual finding is done. Investigate this and see where it's called, maybe this should be changed
+				// TODO: it seems weird that foundAny isn't set to true here, given that the list gets filled. 
+				// But I suppose no actual finding is done. Investigate this and see where it's called, maybe this should be changed
 			}
 		} else {
-			map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator clsItr = m_TypeMap.find(withType);
-			if (clsItr != m_TypeMap.end()) {
+			std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(withType);
+			if (classItr != m_TypeMap.end()) {
 				const std::list<std::string> *pGroupList = 0;
 				// Go through all the entities of that type, adding the groups they belong to
-				for (std::list<std::pair<std::string, Entity *>>::iterator instItr = clsItr->second.begin(); instItr != clsItr->second.end(); ++instItr) {
+				for (std::list<std::pair<std::string, Entity *>>::iterator instItr = classItr->second.begin(); instItr != classItr->second.end(); ++instItr) {
 					pGroupList = instItr->second->GetGroupList();
 					
 					for (std::list<std::string>::const_iterator gItr = pGroupList->begin(); gItr != pGroupList->end(); ++gItr) {
@@ -323,10 +318,9 @@ namespace RTE {
 		bool foundAny = false;
 
 		// Find either the Entity typelist that contains all entities in this DataModule, or the specific class' typelist (which will get all derived classes too)
-		map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find((type.empty() || type == "All") ? "Entity" : type);
+		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find((type.empty() || type == "All") ? "Entity" : type);
 		
 		if (classItr != m_TypeMap.end()) {
-			//RTEAssert(!(type.empty() || type == "All") && !classItr->second.empty(), "DataModule has class entry without instances in its map!?");
 			RTEAssert(!classItr->second.empty(), "DataModule has class entry without instances in its map!?");
 			for (std::list<std::pair<std::string, Entity *>>::iterator instItr = classItr->second.begin(); instItr != classItr->second.end(); ++instItr) {
 				if (instItr->second->IsInGroup(group)) {
@@ -345,7 +339,7 @@ namespace RTE {
 			return false;
 		}
 
-		map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(type);
+		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(type);
 		if (classItr != m_TypeMap.end()) {
 			RTEAssert(!classItr->second.empty(), "DataModule has class entry without instances in its map!?");
 
@@ -385,13 +379,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//TODO This method is almost identical to GetEntityPreset, except it doesn't return a const Entity *. Investigate if the latter needs to return const (based on what's using it) and if not, get rid of this and replace its uses. At the very least, consider renaming this
+	// TODO: This method is almost identical to GetEntityPreset, except it doesn't return a const Entity *. 
+	// Investigate if the latter needs to return const (based on what's using it) and if not, get rid of this and replace its uses. At the very least, consider renaming this
+	// See https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/87
 	Entity * DataModule::GetEntityIfExactType(const std::string &exactType, const std::string &instanceName) {
 		if (exactType.empty() || instanceName == "None" || instanceName.empty()) {
 			return 0;
 		}
 
-		map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(exactType);
+		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(exactType);
 		if (classItr != m_TypeMap.end()) {
 			// Find an instance of that EXACT type and name; derived types are not matched
 			for (std::list<std::pair<std::string, Entity *>>::iterator instItr = (*classItr).second.begin(); instItr != (*classItr).second.end(); ++instItr) {
@@ -412,15 +408,15 @@ namespace RTE {
 
 		// Walk up the class hierarchy till we reach the top, adding an entry of the passed in entity into each typelist as we go along
 		for (const Entity::ClassInfo *pClass = &(pEntToAdd->GetClass()); pClass != 0; pClass = pClass->GetParent()) {
-			map<string, list<pair<string, Entity *> > >::iterator clsItr = m_TypeMap.find(pClass->GetName());
+			std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find(pClass->GetName());
 
 			// No instances of this entity have been added yet so add a class category for it
-			if (clsItr == m_TypeMap.end()) {
-				clsItr = (m_TypeMap.insert(pair<string, list<pair<string, Entity *> > >(pClass->GetName(), list<pair<string, Entity *> >()))).first;
+			if (classItr == m_TypeMap.end()) {
+				classItr = (m_TypeMap.insert(std::pair<std::string, std::list<std::pair<std::string, Entity *>>>(pClass->GetName(), std::list<std::pair<std::string, Entity *>>()))).first;
 			}
 
-			// NOTE We're adding the entity to the class category list but not transfering ownership. Also, we're not checking for collisions as they're assumed to have been checked for already
-			(*clsItr).second.push_back(pair<string, Entity *>(pEntToAdd->GetPresetName(), pEntToAdd));
+			// NOTE We're adding the entity to the class category list but not transferring ownership. Also, we're not checking for collisions as they're assumed to have been checked for already
+			(*classItr).second.push_back(std::pair<std::string, Entity *>(pEntToAdd->GetPresetName(), pEntToAdd));
 		}
 		return true;
 	}

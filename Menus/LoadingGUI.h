@@ -1,7 +1,11 @@
 #ifndef _LOADINGUI_
 #define _LOADINGGUI_
 
+#include "Singleton.h"
+
 struct BITMAP;
+
+#define g_LoadingGUI LoadingGUI::Instance()
 
 namespace RTE {
 
@@ -10,9 +14,17 @@ namespace RTE {
 	class GUIControlManager;
 	class Writer;
 
-	class LoadingGUI {
+	/// <summary>
+	/// Represents the loading screen GUI when starting the game.
+	/// </summary>
+	class LoadingGUI : public Singleton<LoadingGUI> {
 
 	public:
+
+		/// <summary>
+		/// Constructor method used to instantiate a LoadingGUI object in system memory.
+		/// </summary>
+		LoadingGUI() { Clear(); }
 
 		/// <summary>
 		/// Creates the loading screen and the log writer, then calls loading all the modules.
@@ -40,20 +52,29 @@ namespace RTE {
 
 	protected:
 
-		static GUIControlManager *m_LoadingGUI; //!< Manager of the whole LoadingGUI.
-
-		static AllegroInput *m_GUIInput; //!< Input interface of this.
-		static AllegroScreen *m_GUIScreen; //!< Screen interface of this.
-		static BITMAP *m_LoadingGUIBitmap; //!< BITMAP that the progress report will be drawn into.
-		static int m_LoadingGUIPosX; //!< Position of the progress report box on X axis.
-		static int m_LoadingGUIPosY; //!< Position of the progress report box on Y axis.
-
-		static Writer *m_LoadingLogWriter; //!< The Writer that generates the loading log.
-
 		static const unsigned int s_MaxFileName = 256; //!< Maximum length of output file directory + name string.
 		static const unsigned int s_FileBufferSize = 8192; //!< Buffer to hold data read from the zip file.
 		static const unsigned int s_MaxUnzippedFileSize = 104857600; //!< Maximum size of single file being extracted from zip archive (100MiB).
+
+		GUIControlManager *m_ControlManager; //!< Manager of the whole LoadingGUI.
+		AllegroInput *m_GUIInput; //!< Input interface of this.
+		AllegroScreen *m_GUIScreen; //!< Screen interface of this.
+		Writer *m_LoadingLogWriter; //!< The Writer that generates the loading log.
+		BITMAP *m_LoadingGUIBitmap; //!< BITMAP that the progress report will be drawn into.
+
+		int m_PosX; //!< Position of the progress report box on X axis.
+		int m_PosY; //!< Position of the progress report box on Y axis.
+
+	private:
+
+		/// <summary>
+		/// Clears all the member variables of this LoadingGUI, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+
+		// Disallow the use of some implicit methods.
+		LoadingGUI(const LoadingGUI &reference) {}
+		LoadingGUI &operator=(const LoadingGUI &rhs) {}
 	};
-	extern LoadingGUI g_LoadingGUI;
 }
 #endif

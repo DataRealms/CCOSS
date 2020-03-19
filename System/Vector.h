@@ -48,11 +48,6 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a Vector object before deletion.
-		/// </summary>
-		virtual ~Vector() { ; }
-
-		/// <summary>
 		/// Sets both the X and Y of this Vector to zero.
 		/// </summary>
 		void Reset() { m_X = m_Y = 0.0F; }
@@ -96,7 +91,7 @@ namespace RTE {
 		/// Sets the X value of this Vector.
 		/// </summary>
 		/// <param name="newX">An int value that the X value will be set to.</param>
-		void SetIntX(const int newX) { m_X = (float)newX; }
+		void SetIntX(const int newX) { m_X = static_cast<float>(newX); }
 
 		/// <summary>
 		/// Gets the Y value of this Vector.
@@ -114,7 +109,7 @@ namespace RTE {
 		/// Sets the Y value of this Vector.
 		/// </summary>
 		/// <param name="newY">An int value that the Y value will be set to.</param>
-		void SetIntY(const int newY) { m_Y = (float)newY; }
+		void SetIntY(const int newY) { m_Y = static_cast<float>(newY); }
 
 		/// <summary>
 		/// Sets both the X and Y values of this Vector.
@@ -128,7 +123,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newX">An int value that the X value will be set to.</param>
 		/// <param name="newY">An int value that the Y value will be set to.</param>
-		void SetIntXY(const int newX, const int newY) { m_X = (float)newX; m_Y = (float)newY; }
+		void SetIntXY(const int newX, const int newY) { m_X = static_cast<float>(newX); m_Y = static_cast<float>(newY); }
 
 		/// <summary>
 		/// Gets the absolute largest of the two elements. Will always be positive.
@@ -179,7 +174,9 @@ namespace RTE {
 		/// </summary>
 		/// <param name="opp">The Vector to compare with.</param>
 		/// <returns>Whether both x and y components of this Vector are 0.</returns>
-		bool IsOpposedTo(const Vector &opp) { return (!m_X && !opp.m_X) || (m_X < 0 && opp.m_X > 0) || (m_X > 0 && opp.m_X < 0) && (!m_Y && !opp.m_Y) || (m_Y < 0 && opp.m_Y > 0) || (m_Y > 0 && opp.m_Y < 0); }
+		bool IsOpposedTo(const Vector &opp) { 
+			return (!m_X && !opp.m_X) || (m_X < 0 && opp.m_X > 0) || (m_X > 0 && opp.m_X < 0) && (!m_Y && !opp.m_Y) || (m_Y < 0 && opp.m_Y > 0) || (m_Y > 0 && opp.m_Y < 0); 
+		}
 #pragma endregion
 
 #pragma region Magnitude
@@ -450,11 +447,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="rhs">A float reference as the right hand side operand.</param>
 		/// <returns>The resulting Vector.</returns>
-		Vector operator/(const float &rhs) const {
-			Vector returnVector(0, 0);
-			if (rhs) { returnVector.SetXY(m_X / rhs, m_Y / rhs); }
-			return returnVector;
-		}
+		Vector operator/(const float &rhs) const { Vector returnVector(0, 0); if (rhs) { returnVector.SetXY(m_X / rhs, m_Y / rhs); } return returnVector; }
 
 		/// <summary>
 		/// Division operator overload for Vectors.

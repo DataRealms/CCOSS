@@ -37,6 +37,7 @@ void MOSprite::Clear()
     m_SpriteAnimMode = NOANIM;
     m_SpriteAnimDuration = 500;
     m_SpriteAnimTimer.Reset();
+    m_SpriteAnimIsReversingFrames = false;
     m_HFlipped = false;
     m_MaxRadius = 1;
     m_MaxDiameter = 2;
@@ -451,17 +452,54 @@ Vector MOSprite::UnRotateOffset(const Vector &offset) const
     return rotOff;
 }
 
-/*
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Pure v. method:  Update
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this MOSprite. Supposed to be done every frame.
 
-void MOSprite::Update()
-{
-    MovableObject::Update();
+void MOSprite::Update() {
+	MovableObject::Update();
+
+	// First, check that the sprite has enough frames to even have an animation and override the setting if not
+	if (m_FrameCount > 1) {
+		// If animation mode is set to something other than ALWAYSLOOP but only has 2 frames, override it because it's pointless
+		if ((m_SpriteAnimMode == ALWAYSRANDOM || m_SpriteAnimMode == ALWAYSPINGPONG) && m_FrameCount == 2) {
+			m_SpriteAnimMode = ALWAYSLOOP;
+		}
+	} else {
+		m_SpriteAnimMode = NOANIM;
+	}
+
+	// Animate the sprite, if applicable
+	unsigned int frameTime = m_SpriteAnimDuration / m_FrameCount;
+	unsigned int prevFrame = m_Frame;
+
+	if (m_SpriteAnimTimer.GetElapsedSimTimeMS() > frameTime) {
+		switch (m_SpriteAnimMode) {
+		case ALWAYSLOOP:
+			m_Frame = ((m_Frame + 1) % m_FrameCount);
+			break;
+		case ALWAYSRANDOM:
+			while (m_Frame == prevFrame) {
+				m_Frame = floorf(static_cast<float>(m_FrameCount) * PosRand());
+			}
+			break;
+		case ALWAYSPINGPONG:
+			if (m_Frame == m_FrameCount - 1) {
+				m_SpriteAnimIsReversingFrames = true;
+			} else if (m_Frame == 0) {
+				m_SpriteAnimIsReversingFrames = false;
+			}
+			m_SpriteAnimIsReversingFrames ? m_Frame-- : m_Frame++;
+			break;
+		default:
+			break;
+		}
+		m_SpriteAnimTimer.Reset();
+	}
 }
-*/
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw

@@ -22,6 +22,7 @@
 #include "Color.h"
 
 #include "ConsoleMan.h"
+#include "SceneMan.h"
 
 namespace RTE
 {

@@ -1,4 +1,5 @@
 #include "PerformanceMan.h"
+#include "MovableMan.h"
 #include "FrameMan.h"
 #include "AudioMan.h"
 #include "Timer.h"

@@ -14,20 +14,13 @@
 #include "FrameMan.h"
 #include "PrimitiveMan.h"
 #include "PerformanceMan.h"
-#include "PresetMan.h"
 #include "ActivityMan.h"
 #include "ConsoleMan.h"
-#include "AudioMan.h"
-#include "SceneMan.h"
 #include "SettingsMan.h"
-#include "BuyMenuGUI.h"
-#include "SceneEditorGUI.h"
-#include "MovableMan.h"
-#include "SLTerrain.h"
-#include "MOSprite.h"
-#include "Scene.h"
-
 #include "UInputMan.h"
+
+#include "SLTerrain.h"
+#include "Scene.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"

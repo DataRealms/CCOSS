@@ -45,11 +45,10 @@ enum DotGlowColor
 #include "Singleton.h"
 #define g_FrameMan FrameMan::Instance()
 #include "Serializable.h"
-#include "Box.h"
-#include "Material.h"
+#include "ContentFile.h"
 #include "Timer.h"
+#include "Box.h"
 
-#include "MovableMan.h"
 
 namespace RTE
 {

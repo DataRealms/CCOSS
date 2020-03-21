@@ -171,60 +171,61 @@ namespace RTE {
 			if (g_TimerMan.IsOneSimUpdatePerFrame()) { g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, 17, 104, "ONE Sim Update Per Frame!", GUIFont::Left); }
 
 			sprintf_s(str, sizeof(str), "Sound channels: %d / %d ", g_AudioMan.GetPlayingChannelCount(), g_AudioMan.GetTotalChannelCount());
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, 17, 114, str, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 100, str, GUIFont::Left);
 
-			unsigned short xOffset = 17;
-			unsigned short yOffset = 134;
-			unsigned short blockHeight = 34;
-			unsigned short graphHeight = 20;
-			unsigned short graphOffset = 14;
+		}
+	}
 
-			// Update current sample percentage
-			CalculateSamplePercentages();
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			//Draw advanced performance counters
-			for (unsigned short pc = 0; pc < PERF_COUNT; ++pc) {
-				unsigned short blockStart = yOffset + pc * blockHeight;
+	void PerformanceMan::DrawPeformanceGraphs(AllegroBitmap bitmapToDrawTo) {
+		// Update current sample percentage
+		CalculateSamplePercentages();
 
-				g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, xOffset, blockStart, m_PerfCounterNames[pc], GUIFont::Left);
+		char str[512];
 
-				// Print percentage from PerformanceCounters::PERF_SIM_TOTAL
-				unsigned short perc = static_cast<unsigned short>((static_cast<float>(GetPerormanceCounterAverage(static_cast<PerformanceCounters>(pc))) / static_cast<float>(GetPerormanceCounterAverage(PERF_SIM_TOTAL)) * 100));
-				sprintf_s(str, sizeof(str), "%%: %u", perc);
-				g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, xOffset + 60, blockStart, str, GUIFont::Left);
+		//Draw advanced performance counters
+		for (unsigned short pc = 0; pc < PERF_COUNT; ++pc) {
+			unsigned short blockStart = c_GraphsStartOffsetY + pc * c_GraphBlockHeight;
 
-				// Print average processing time in ms
-				sprintf_s(str, sizeof(str), "T: %lli", GetPerormanceCounterAverage(static_cast<PerformanceCounters>(pc)) / 1000);
-				g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, xOffset + 96, blockStart, str, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, blockStart, m_PerfCounterNames[pc], GUIFont::Left);
 
-				unsigned short graphStart = blockStart + graphOffset;
+			// Print percentage from PerformanceCounters::PERF_SIM_TOTAL
+			unsigned short perc = static_cast<unsigned short>((static_cast<float>(GetPerormanceCounterAverage(static_cast<PerformanceCounters>(pc))) / static_cast<float>(GetPerormanceCounterAverage(PERF_SIM_TOTAL)) * 100));
+			sprintf_s(str, sizeof(str), "%%: %u", perc);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 60, blockStart, str, GUIFont::Left);
 
-				//Draw graph backgrounds
-				bitmapToDrawTo.DrawRectangle(xOffset, graphStart, c_MaxSamples, graphHeight, 240, true);
-				bitmapToDrawTo.DrawLine(xOffset, graphStart + graphHeight / 2, xOffset + c_MaxSamples, graphStart + graphHeight / 2, 96);
-		
-				//Reset peak value
-				unsigned short peak = 0;
+			// Print average processing time in ms
+			sprintf_s(str, sizeof(str), "T: %lli", GetPerormanceCounterAverage(static_cast<PerformanceCounters>(pc)) / 1000);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 96, blockStart, str, GUIFont::Left);
 
-				//Draw sample dots
-				unsigned int smpl = m_Sample;
-				for (unsigned short i = 0; i < c_MaxSamples; i++) {
-					if (smpl == 0) { smpl = c_MaxSamples; }
-						
-					// Show microseconds in graphs, assume that 33333 microseconds (one frame of 30 fps) is the highest value on the graph
-					unsigned short value = static_cast<unsigned short>(static_cast<float>(m_PerfData[pc][smpl]) / (1000000 / 30) * 100);
-					value = Limit(value, 100, 0);
-					// Calculate dot height on the graph
-					unsigned short dotHeight = static_cast<unsigned short>(static_cast<float>(graphHeight) / 100.0 * static_cast<float>(value));
-					bitmapToDrawTo.SetPixel(xOffset + c_MaxSamples - i, graphStart + graphHeight - dotHeight, 13);
-					peak = Limit(peak, m_PerfData[pc][smpl], 0);
-					//Move to previous sample
-					smpl--;
-				}
-				// Print peak values
-				sprintf_s(str, sizeof(str), "Peak: %i", peak / 1000);
-				g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, xOffset + 130, blockStart, str, GUIFont::Left);
+			unsigned short graphStart = blockStart + c_GraphsOffsetX;
+
+			//Draw graph backgrounds
+			bitmapToDrawTo.DrawRectangle(c_StatsOffsetX, graphStart, c_MaxSamples, c_GraphHeight, 240, true);
+			bitmapToDrawTo.DrawLine(c_StatsOffsetX, graphStart + c_GraphHeight / 2, c_StatsOffsetX + c_MaxSamples, graphStart + c_GraphHeight / 2, 96);
+
+			//Reset peak value
+			unsigned short peak = 0;
+
+			//Draw sample dots
+			unsigned short smpl = m_Sample;
+			for (unsigned short i = 0; i < c_MaxSamples; i++) {
+				if (smpl == 0) { smpl = c_MaxSamples; }
+
+				// Show microseconds in graphs, assume that 33333 microseconds (one frame of 30 fps) is the highest value on the graph
+				unsigned short value = static_cast<unsigned short>(static_cast<float>(m_PerfData[pc][smpl]) / (1000000 / 30) * 100);
+				value = Limit(value, 100, 0);
+				// Calculate dot height on the graph
+				unsigned short dotHeight = static_cast<unsigned short>(static_cast<float>(c_GraphHeight) / 100.0 * static_cast<float>(value));
+				bitmapToDrawTo.SetPixel(c_StatsOffsetX + c_MaxSamples - i, graphStart + c_GraphHeight - dotHeight, 13);
+				peak = Limit(peak, m_PerfData[pc][smpl], 0);
+				//Move to previous sample
+				smpl--;
 			}
+			// Print peak values
+			sprintf_s(str, sizeof(str), "Peak: %i", peak / 1000);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 130, blockStart, str, GUIFont::Left);
 		}
 	}
 

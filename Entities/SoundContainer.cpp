@@ -9,12 +9,11 @@ namespace RTE {
 
 	void SoundContainer::Clear() {
 		m_Sounds.clear();
-		m_CurrentSound = 0;
+		m_SelectedSounds.clear();
 		m_PlayingChannels.clear();
 		m_Loops = 0;
 		m_Priority = AudioMan::PRIORITY_LOW;
 		m_AffectedByGlobalPitch = true;
-		m_Hash = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,13 +25,11 @@ namespace RTE {
 			m_Sounds.push_back(*itr);
 		}
 
-		m_CurrentSound = reference.m_CurrentSound;
+		m_SelectedSounds = reference.m_SelectedSounds;
 		m_PlayingChannels.clear();
 		m_Loops = reference.m_Loops;
 		m_Priority = reference.m_Priority;
 		m_AffectedByGlobalPitch = reference.m_AffectedByGlobalPitch;
-		m_Hash = reference.m_Hash;
-
 
 		return 0;
 	}
@@ -43,7 +40,6 @@ namespace RTE {
 		if (propName == "AddSample" || propName == "AddSound") {
 			ContentFile newFile;
 			reader >> newFile;
-			m_Hash = newFile.GetHash();
 
 			FMOD::Sound *pNewSample = newFile.GetAsSample();
 			if (!pNewSample) {
@@ -77,6 +73,24 @@ namespace RTE {
 		}
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	std::vector<std::size_t> SoundContainer::GetSelectedSoundHashes() {
+		std::vector<std::size_t> soundHashes;
+		for (std::size_t selectedSoundIndex : m_SelectedSounds) {
+			soundHashes.push_back(m_Sounds[selectedSoundIndex].first.GetHash());
+		}
+		return soundHashes;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::vector<FMOD::Sound *> SoundContainer::GetSelectedSoundObjects() {
+ 		std::vector<FMOD::Sound *> soundObjects;
+		for (std::size_t selectedSoundIndex : m_SelectedSounds) {
+			soundObjects.push_back(m_Sounds[selectedSoundIndex].second);
+		}
+		return soundObjects;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

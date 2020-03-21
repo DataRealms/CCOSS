@@ -258,8 +258,8 @@ namespace RTE {
 		FMOD_RESULT result;
 		FMOD::Channel *soundChannel;
 
-		std::unordered_set<short int> channels = pSoundContainer->GetPlayingChannels();
-		for (std::unordered_set<short int>::iterator channelIterator = channels.begin(); channelIterator != channels.end(); ++channelIterator) {
+		std::unordered_set<unsigned short int> const *channels = pSoundContainer->GetPlayingChannels();
+		for (std::unordered_set<unsigned short int>::iterator channelIterator = channels->begin(); channelIterator != channels->end(); ++channelIterator) {
 			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
 			if (result == FMOD_OK) {
 				soundChannel->setPitch(pitch);
@@ -471,8 +471,8 @@ namespace RTE {
 		bool anySoundsPlaying = pSoundContainer->IsBeingPlayed();
 
 		if (anySoundsPlaying) {
-			std::unordered_set<short int> channels = pSoundContainer->GetPlayingChannels();
-			for (std::unordered_set<short int>::iterator channelIterator = channels.begin(); channelIterator != channels.end(); ++channelIterator) {
+			std::unordered_set<unsigned short int> const *channels = pSoundContainer->GetPlayingChannels();
+			for (std::unordered_set<unsigned short int>::iterator channelIterator = channels->begin(); channelIterator != channels->end();) {
 				result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
 				result = result == FMOD_OK ? soundChannel->stop() : result;
 				if (result != FMOD_OK) {
@@ -509,8 +509,8 @@ namespace RTE {
 		unsigned long long parentClock;
 		float currentVolume;
 
-		std::unordered_set<short int> channels = pSoundContainer->GetPlayingChannels();
-		for (std::unordered_set<short int>::iterator channelIterator = channels.begin(); channelIterator != channels.end(); ++channelIterator) {
+		std::unordered_set<unsigned short int> const *channels = pSoundContainer->GetPlayingChannels();
+		for (std::unordered_set<unsigned short int>::iterator channelIterator = channels->begin(); channelIterator != channels->end(); ++channelIterator) {
 			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
 			result = result == FMOD_OK ? soundChannel->getDSPClock(nullptr, &parentClock) : result;
 			result = result == FMOD_OK ? soundChannel->getVolume(&currentVolume) : result;

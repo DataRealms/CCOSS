@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "FrameMan.h"
+#include "PrimitiveMan.h"
 #include "PerformanceMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
@@ -68,316 +69,6 @@ void DisplaySwitchIn(void)
 //    g_UInputMan.ReInitKeyboard();
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			Translate coordinates
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Translates coordinats from scene to this bitmap
-//                  
-// Arguments:       bitmap offset, scene coordinates
-// Return value:    Vector with translated coordinates
-Vector FrameMan::GraphicalPrimitive::TranslateCoordinates(Vector targetPos, Vector scenePos)
-{
-	return scenePos - targetPos;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			TranslateCoordinates
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Translates coordinats from scene to this bitmap offset producing two coordinates 
-//					for 'left' scene bitmap with negative values as if scene seam is 0,0 and
-//					for 'right' dcini bitmap with positive values.
-//                  
-// Arguments:       Bitmap to draw on, bitmap offset, scene coordinates, translated coordinates
-// Return value:    Vector with translated coordinates
-void FrameMan::GraphicalPrimitive::TranslateCoordinates(Vector targetPos, Vector scenePos, Vector & drawLeftPos, Vector & drawRightPos)
-{
-	// Unfortunately it's hard to explain how this works. It tries to represent scene bitmap as two parts
-	// with center in 0,0. Right part is just plain visible part with coordinates from [0, scenewidth]
-	// and left part is imaginary bitmap as if we traversed it across the seam right-to-left with coordinates [0, -scenewidth].
-	// So in order to be drawn each screen coordinates calculated twice for left and right 'bitmaps' and then one of them
-	// either flies away offscreen or gets drawn on the screen.
-	// When we cross the seam either left or right part is actually drawn in the bitmap, and negative coords of right
-	// part are compensated by view point offset coordinates when we cross the seam right to left. I really don't know
-	// how to make it simpler, becuase it has so many special cases and simply wrapping all out-of-the scene coordinates
-	// don't work because this way nithing will be ever draw across the seam. You're welcom to rewrite this nightmare if you can
-	// I wasted a whole week on this (I can admit that I'm just too dumb for this) )))
-	drawLeftPos = scenePos;
-	drawRightPos = scenePos;
-
-	if (g_SceneMan.SceneWrapsX()) 
-	{
-		int sceneWidth = g_SceneMan.GetSceneWidth(); 
-
-		if (targetPos.m_X <= sceneWidth && targetPos.m_X > sceneWidth  / 2)
-			targetPos.m_X = targetPos.m_X - sceneWidth;
-		 
-		if (drawLeftPos.m_X > 0) 
-			drawLeftPos.m_X -= sceneWidth;
-		else
-			drawLeftPos.m_X -= sceneWidth + targetPos.m_X;
-	}
-
-	drawLeftPos.m_X -= targetPos.m_X; 
-	drawRightPos.m_X -= targetPos.m_X; 
-
-	if (g_SceneMan.SceneWrapsY()) 
-	{
-		int sceneHeight = g_SceneMan.GetSceneHeight(); 
-
-		if (targetPos.m_Y <= sceneHeight && targetPos.m_Y > sceneHeight  / 2)
-			targetPos.m_Y = targetPos.m_Y - sceneHeight;
-		 
-		if (drawLeftPos.m_Y > 0) 
-			drawLeftPos.m_Y -= sceneHeight;
-		else
-			drawLeftPos.m_Y -= sceneHeight + targetPos.m_Y;
-	}
-
-	drawLeftPos.m_Y -= targetPos.m_Y; 
-	drawRightPos.m_Y -= targetPos.m_Y; 
-} 
-
-
-
-void FrameMan::LinePrimitive::Draw(BITMAP *pDrawScreen, Vector targetPos) 
-{
-	if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) 
-	{ 
-		Vector drawStart = m_Start - targetPos; 
-		Vector drawEnd = m_End - targetPos; 
-		 
-		line(pDrawScreen, drawStart.m_X, drawStart.m_Y, drawEnd.m_X, drawEnd.m_Y, m_Color);
-	} else {
-		Vector drawStartLeft;
-		Vector drawEndLeft;
-
-		Vector drawStartRight;
-		Vector drawEndRight;
-
-		TranslateCoordinates(targetPos, m_Start, drawStartLeft, drawStartRight);
-		TranslateCoordinates(targetPos, m_End, drawEndLeft, drawEndRight);
-
-		line(pDrawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, drawEndLeft.m_X, drawEndLeft.m_Y, m_Color);
-		line(pDrawScreen, drawStartRight.m_X, drawStartRight.m_Y, drawEndRight.m_X, drawEndRight.m_Y, m_Color);
-	}
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this primitive on provided bitmap
-//                  
-// Arguments:       Bitmap to draw on, bitmap offset
-// Return value:    None
-void FrameMan::BoxPrimitive::Draw(BITMAP *pDrawScreen, Vector targetPos) 
-{
-	if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) 
-	{ 
-		Vector drawStart = m_Start - targetPos; 
-		Vector drawEnd = m_End - targetPos; 
-		 
-		rect(pDrawScreen, drawStart.m_X, drawStart.m_Y, drawEnd.m_X, drawEnd.m_Y, m_Color);
-	} else {
-		Vector drawStartLeft;
-		Vector drawEndLeft;
-
-		Vector drawStartRight;
-		Vector drawEndRight;
-
-		TranslateCoordinates(targetPos, m_Start, drawStartLeft, drawStartRight);
-		TranslateCoordinates(targetPos, m_End, drawEndLeft, drawEndRight);
-
-		rect(pDrawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, drawEndLeft.m_X, drawEndLeft.m_Y, m_Color);
-		rect(pDrawScreen, drawStartRight.m_X, drawStartRight.m_Y, drawEndRight.m_X, drawEndRight.m_Y, m_Color);
-	}
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this primitive on provided bitmap
-//                  
-// Arguments:       Bitmap to draw on, bitmap offset
-// Return value:    None
-void FrameMan::BoxFillPrimitive::Draw(BITMAP *pDrawScreen, Vector targetPos) 
-{
-	if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) 
-	{ 
-		Vector drawStart = m_Start - targetPos; 
-		Vector drawEnd = m_End - targetPos; 
-		 
-		rectfill(pDrawScreen, drawStart.m_X, drawStart.m_Y, drawEnd.m_X, drawEnd.m_Y, m_Color);
-	} else {
-		Vector drawStartLeft;
-		Vector drawEndLeft;
-
-		Vector drawStartRight;
-		Vector drawEndRight;
-
-		TranslateCoordinates(targetPos, m_Start, drawStartLeft, drawStartRight);
-		TranslateCoordinates(targetPos, m_End, drawEndLeft, drawEndRight);
-
-		rectfill(pDrawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, drawEndLeft.m_X, drawEndLeft.m_Y, m_Color);
-		rectfill(pDrawScreen, drawStartRight.m_X, drawStartRight.m_Y, drawEndRight.m_X, drawEndRight.m_Y, m_Color);
-	}
-}
-
-
-void FrameMan::CirclePrimitive::Draw(BITMAP *pDrawScreen, Vector targetPos) 
-{
-	if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) 
-	{ 
-		Vector drawStart = m_Start - targetPos; 
-		 
-		circle(pDrawScreen, drawStart.m_X, drawStart.m_Y, m_Radius, m_Color);
-	} else {
-		Vector drawStartLeft;
-		Vector drawStartRight;
-
-		TranslateCoordinates(targetPos, m_Start, drawStartLeft, drawStartRight);
-
-		circle(pDrawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, m_Radius, m_Color);
-		circle(pDrawScreen, drawStartRight.m_X, drawStartRight.m_Y, m_Radius, m_Color);
-	}
-}
-
-
-void FrameMan::CircleFillPrimitive::Draw(BITMAP *pDrawScreen, Vector targetPos) 
-{
-	if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) 
-	{ 
-		Vector drawStart = m_Start - targetPos; 
-		 
-		circlefill(pDrawScreen, drawStart.m_X, drawStart.m_Y, m_Radius, m_Color);
-	} else {
-		Vector drawStartLeft;
-		Vector drawStartRight;
-
-		TranslateCoordinates(targetPos, m_Start, drawStartLeft, drawStartRight);
-
-		circlefill(pDrawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, m_Radius, m_Color);
-		circlefill(pDrawScreen, drawStartRight.m_X, drawStartRight.m_Y, m_Radius, m_Color);
-	}
-}
-
-void FrameMan::TextPrimitive::Draw(BITMAP *pDrawScreen, Vector targetPos) 
-{
-	if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) 
-	{ 
-		Vector drawStart = m_Start - targetPos; 
-		AllegroBitmap pPlayerGUIBitmap(pDrawScreen);
-
-		if (m_IsSmall)
-			g_FrameMan.GetSmallFont()->DrawAligned(&pPlayerGUIBitmap, drawStart.m_X, drawStart.m_Y, m_Text, m_Alignment);
-		else
-			g_FrameMan.GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, drawStart.m_X, drawStart.m_Y, m_Text, m_Alignment);
-	} else {
-		Vector drawStartLeft;
-		Vector drawStartRight;
-
-		TranslateCoordinates(targetPos, m_Start, drawStartLeft, drawStartRight);
-
-		AllegroBitmap pPlayerGUIBitmap(pDrawScreen);
-		if (m_IsSmall)
-		{
-			g_FrameMan.GetSmallFont()->DrawAligned(&pPlayerGUIBitmap, drawStartLeft.m_X, drawStartLeft.m_Y, m_Text, m_Alignment);
-			g_FrameMan.GetSmallFont()->DrawAligned(&pPlayerGUIBitmap, drawStartRight.m_X, drawStartRight.m_Y, m_Text, m_Alignment);
-		}
-		else
-		{
-			g_FrameMan.GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, drawStartLeft.m_X, drawStartLeft.m_Y, m_Text, m_Alignment);
-			g_FrameMan.GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, drawStartRight.m_X, drawStartRight.m_Y, m_Text, m_Alignment);
-		}
-	}
-}
-
-
-void FrameMan::BitmapPrimitive::Draw(BITMAP *pDrawScreen, Vector targetPos) 
-{
-	if (!m_pBitmap)
-		return;
-
-	Vector pos[2];
-	int passes = 0;
-
-	if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) 
-	{ 
-		Vector drawStart = m_Start - targetPos;
-
-		pos[0] = drawStart;
-		passes = 1;
-
-	} else {
-		Vector drawStartLeft;
-		Vector drawStartRight;
-
-		TranslateCoordinates(targetPos, m_Start, drawStartLeft, drawStartRight);
-
-		pos[0] = drawStartLeft;
-		pos[1] = drawStartRight;
-		passes = 2;
-	}
-
-	Matrix rotation = Matrix(m_RotAngle);
-
-	for (int i = 0 ; i < 2 ; i++)
-	{
-		// Take into account the h-flipped pivot point
-		pivot_scaled_sprite(pDrawScreen,
-							m_pBitmap,
-							pos[i].GetFloorIntX(),
-							pos[i].GetFloorIntY(),
-							m_pBitmap->w / 2,
-							m_pBitmap->h / 2,
-							ftofix(rotation.GetAllegroAngle()),
-							ftofix(1.0));
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawBitmapPrimitive
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Schedule to draw a bitmap primitive.
-// Arguments:       Position of primitive in scene coordintaes, an entity to sraw sprite from, 
-//					rotation angle in radians, frame to draw
-// Return value:    None.
-
-	void FrameMan::DrawBitmapPrimitive(Vector start, Entity * pEntity, float rotAngle, int frame)
-	{
-		MOSprite * pMOS = dynamic_cast<MOSprite *>(pEntity);
-		if (pMOS)
-		{
-			BITMAP * pBitmap = pMOS->GetSpriteFrame(frame);
-			if (pBitmap)
-				m_Primitives.push_back(new BitmapPrimitive(start, pBitmap, rotAngle));
-		}
-	}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawBitmapPrimitive
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Schedule to draw a bitmap primitive.
-// Arguments:       Player screen to draw primitive on. Position of primitive in scene coordintaes, an entity to sraw sprite from, 
-//					rotation angle in radians, frame to draw
-// Return value:    None.
-
-	void FrameMan::DrawBitmapPrimitive(int player, Vector start, Entity * pEntity, float rotAngle, int frame)
-	{
-		MOSprite * pMOS = dynamic_cast<MOSprite *>(pEntity);
-		if (pMOS)
-		{
-			BITMAP * pBitmap = pMOS->GetSpriteFrame(frame);
-			if (pBitmap)
-				m_Primitives.push_back(new BitmapPrimitive(player, start, pBitmap, rotAngle));
-		}
-	}
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -427,9 +118,6 @@ void FrameMan::Clear()
 
 	m_NetworkFrameCurrent = 0;
 	m_NetworkFrameReady = 1;
-
-	// Delete all allocated primitives and clear the list
-	ClearPrimitivesList();
 
     for (int i = 0; i < MAXSCREENCOUNT; ++i)
     {
@@ -1919,29 +1607,8 @@ void FrameMan::Update()
 
 //    g_UInputMan.DisableMouseMoving(false);
 
-	//Remove all scheduled primitives, those will be readded by updates from other entities
-	ClearPrimitivesList();
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawPrimitives
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws all stored primitives on the screen
-// Arguments:       Bitmap to draw on, poistion to draw.
-// Return value:    None.
-
-void FrameMan::DrawPrimitives(int player, BITMAP *pTargetBitmap, const Vector &targetPos)
-{
-    // Count how many split screens we'll need
-    //int screenCount = (m_HSplit ? 2 : 1) * (m_VSplit ? 2 : 1);
-    //BITMAP *pDrawScreen = /*get_color_depth() == 8 && */screenCount == 1 ? m_pBackBuffer8 : m_pPlayerScreen;
-
-	//Draw primitives
-	for (std::list<GraphicalPrimitive *>::const_iterator it = m_Primitives.begin(); it != m_Primitives.end(); ++it)
-	{
-		if (player == (*it)->m_Player || (*it)->m_Player == -1)
-			(*it)->Draw(pTargetBitmap, targetPos);
-	}
+	//Remove all scheduled primitives, those will be re-added by updates from other entities.
+	g_PrimitiveMan.ClearPrimitivesList();
 }
 
 
@@ -2041,7 +1708,7 @@ void FrameMan::Draw()
 
 		//Always draw seam in debug mode
 #ifdef DEBUG_BUILD
-		//DrawLinePrimitive(Vector(0,0),Vector(0,g_SceneMan.GetSceneHeight()), 5);
+		g_PrimitiveMan.DrawLinePrimitive(Vector(0,0),Vector(0,g_SceneMan.GetSceneHeight()), 5);
 #endif
 
         ///////////////////////////////////////

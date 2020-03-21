@@ -229,6 +229,7 @@
     <ClInclude Include="Managers\NetworkMessages.h" />
     <ClInclude Include="Managers\NetworkServer.h" />
     <ClInclude Include="Managers\PerformanceMan.h" />
+    <ClInclude Include="Managers\PrimitiveMan.h" />
     <ClInclude Include="Menus\LoadingGUI.h" />
     <ClInclude Include="Resources\resource.h" />
     <ClInclude Include="System\Constants.h" />
@@ -372,6 +373,7 @@
     <ClCompile Include="Managers\NetworkClient.cpp" />
     <ClCompile Include="Managers\NetworkServer.cpp" />
     <ClCompile Include="Managers\PerformanceMan.cpp" />
+    <ClCompile Include="Managers\PrimitiveMan.cpp" />
     <ClCompile Include="Menus\LoadingGUI.cpp" />
     <ClCompile Include="System\Controller.cpp" />
     <ClCompile Include="System\Entity.cpp" />

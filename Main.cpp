@@ -1890,6 +1890,7 @@ int main(int argc, char *argv[]) {
 	new PerformanceMan();
     new PresetMan();
     new FrameMan();
+	new PrimitiveMan();
     new AudioMan();
 	new GUISound();
     new UInputMan();

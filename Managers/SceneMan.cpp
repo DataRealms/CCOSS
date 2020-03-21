@@ -17,6 +17,7 @@
 #include "ActivityMan.h"
 #include "UInputMan.h"
 #include "ConsoleMan.h"
+#include "PrimitiveMan.h"
 #include "SettingsMan.h"
 #include "Scene.h"
 #include "SLTerrain.h"
@@ -3829,7 +3830,7 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 
             // Actor and gameplay HUDs and GUIs
             g_MovableMan.DrawHUD(pTargetGUIBitmap, targetPos, m_LastUpdatedScreen);
-			g_FrameMan.DrawPrimitives(m_LastUpdatedScreen, pTargetGUIBitmap, targetPos);
+			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, pTargetGUIBitmap, targetPos);
 //            g_ActivityMan.GetActivity()->Draw(pTargetBitmap, targetPos, m_LastUpdatedScreen);
             g_ActivityMan.GetActivity()->DrawGUI(pTargetGUIBitmap, targetPos, m_LastUpdatedScreen);
 

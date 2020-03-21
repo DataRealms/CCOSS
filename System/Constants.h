@@ -34,7 +34,7 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Audio Constants
-	static constexpr unsigned short int c_NumberOfAudioChannels = 512;
+	static constexpr unsigned short int c_MaxAudioChannels = 512;
 	static constexpr unsigned short int c_MaxPlayingSoundsPerContainer = 64;
 #pragma endregion
 

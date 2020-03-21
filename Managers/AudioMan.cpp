@@ -70,7 +70,7 @@ namespace RTE {
 		//TODO 44.1 kHz came from data, fmod defaults to 48 kHz, see if we can just use this instead??
 		m_AudioSystem->setSoftwareFormat(44100, FMOD_SPEAKERMODE_DEFAULT, 0);
 
-		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->init(c_NumberOfAudioChannels, FMOD_INIT_NORMAL, 0) : soundSystemSetupResult;
+		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->init(c_MaxAudioChannels, FMOD_INIT_NORMAL, 0) : soundSystemSetupResult;
 		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->getMasterChannelGroup(&m_MasterChannelGroup) : soundSystemSetupResult;
 		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->createChannelGroup("Music", &m_MusicChannelGroup) : soundSystemSetupResult;
 		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->createChannelGroup("Sounds", &m_SoundChannelGroup) : soundSystemSetupResult;

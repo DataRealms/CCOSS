@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "FrameMan.h"
+#include "PerformanceMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
 #include "ConsoleMan.h"
@@ -34,8 +35,6 @@
 
 // I know this is a crime, but if I include it in FrameMan.h the whole thing will collapse due to int redefinitions in Allegro
 std::mutex ScreenRelativeEffectsMutex[MAXSCREENCOUNT];
-
-#define MSPFAVERAGESAMPLESIZE 10
 
 extern bool g_ResetActivity;
 extern bool g_InActivity;
@@ -422,15 +421,9 @@ void FrameMan::Clear()
     m_PlayerScreenWidth = 0;
     m_PlayerScreenHeight = 0;
     m_PPM = 0;
-    m_pFrameTimer = 0;
-    m_MSPFs.clear();
-    m_MSPFAverage = 0;
-    m_SimSpeed = 1.0;
     m_pGUIScreen = 0;
     m_pLargeFont = 0;
     m_pSmallFont = 0;
-    m_ShowPerfStats = false;
-	m_CurrentPing = 0;
 
 	m_NetworkFrameCurrent = 0;
 	m_NetworkFrameReady = 1;
@@ -486,8 +479,6 @@ int FrameMan::Create()
 
 int FrameMan::Create()
 {
-    m_pFrameTimer = new Timer();
-
     // Init allegro's graphics
     set_color_depth(m_BPP);
 
@@ -647,32 +638,6 @@ int FrameMan::Create()
         m_PlayerScreenWidth = m_pPlayerScreen->w;
         m_PlayerScreenHeight = m_pPlayerScreen->h;
     }
-
-	m_Sample = 0;
-
-	for (int c = 0; c < PERF_COUNT; ++c)
-	{
-		for (int i = 0; i < MAXSAMPLES; ++i)
-		{
-			m_PerfData[c][i] = 0;
-			m_PerfPercentages[c][i] = 0;
-		}
-		m_PerfMeasureStart[c] = 0;
-		m_PerfMeasureStop[c] = 0;
-	}
-
-	//Set up performance counter's names
-	m_PerfCounterNames[PERF_SIM_TOTAL] = "Total";
-	m_PerfCounterNames[PERF_ACTORS_PASS1] = "Act Travel";
-    m_PerfCounterNames[PERF_PARTICLES_PASS1] = "Prt Travel";
-	m_PerfCounterNames[PERF_ACTORS_PASS2] = "Act Update";
-    m_PerfCounterNames[PERF_PARTICLES_PASS2] = "Prt Update";
-	m_PerfCounterNames[PERF_ACTORS_AI] = "Act AI";
-    m_PerfCounterNames[PERF_ACTIVITY] = "Activity";
-
-#if __USE_SOUND_GORILLA
-	m_PerfCounterNames[PERF_SOUND] = "Sound";
-#endif
     return 0;
 }
 
@@ -876,7 +841,6 @@ void FrameMan::Destroy()
     delete m_pGUIScreen;
     delete m_pLargeFont;
     delete m_pSmallFont;
-    delete m_pFrameTimer;
 
     g_TimerMan.Destroy();
 
@@ -1948,39 +1912,7 @@ int FrameMan::DrawDotLine(BITMAP *pBitmap, const Vector &start, const Vector &en
 
 void FrameMan::Update()
 {
-    // Time and add the millisecs per frame reading to the buffer
-    m_MSPFs.push_back(m_pFrameTimer->GetElapsedRealTimeMS());
-    // Keep the buffer trimmed
-    while (m_MSPFs.size() > MSPFAVERAGESAMPLESIZE)
-        m_MSPFs.pop_front();
-
-    // Calculate the average millsecs per frame over the last sampleSize frames
-    m_MSPFAverage = 0;
-    for (deque<int>::iterator fItr = m_MSPFs.begin(); fItr != m_MSPFs.end(); ++fItr)
-        m_MSPFAverage += *fItr;
-    m_MSPFAverage /= m_MSPFs.size();
-
-    // If one sim update per frame mode, adjust the pitch of most sound effects to match the sim time over real time ratio as it fluctuates!
-    if (g_TimerMan.IsOneSimUpdatePerFrame())
-    {
-        // Calculate the sim speed over the actual real time
-        m_SimSpeed = g_TimerMan.GetDeltaTimeMS() / (float)m_MSPFAverage;
-//        float simSpeed = g_TimerMan.GetDeltaTimeSecs() / m_pFrameTimer->GetElapsedRealTimeS();
-        // If limited, only allow pitch to go slower, not faster
-        if (g_TimerMan.IsSimSpeedLimited() && m_SimSpeed > 1.0)
-            m_SimSpeed = 1.0;
-        // Soften the ratio of the pitch adjustment so it's not such an extreme effect on the audio
-// TODO: Don't hardcode this coefficient - although it's a good defualt
-        float pitch = m_SimSpeed + (1.0f - m_SimSpeed) * 0.35;
-        // Set the pitch for all other applicable sounds other than music
-        g_AudioMan.SetGlobalPitch(pitch, true);
-// MUSIC PITCHING IS SUCK.. ruins the songs
-        // Only affect the music if it's really slow, so it doesn't sound funny and fluctuating
-// TODO: Don't hardcode this threshold - although it's a good defualt
-//        g_AudioMan.SetMusicPitch(pitch >= 0.50 ? 1.0 : pitch);
-    }
-    else
-        m_SimSpeed = 1.0;
+	g_PerformanceMan.Update();
 
     // Clear the back buffers
 //    m_pScreen->GetBack()->Fill(0); // don't do this to avoid the black lines...look into that later.
@@ -2159,137 +2091,7 @@ void FrameMan::Draw()
 
 			////////////////////////////////////////////////////////////////
             // Performance stats
-            if (m_ShowPerfStats && whichScreen == 0)
-            {
-                int sampleSize = 10;
-                // Time and add the millisecs per frame reading to the buffer
-                m_MSPFs.push_back(m_pFrameTimer->GetElapsedRealTimeMS());
-                m_pFrameTimer->Reset();
-                // Keep the buffer trimmed
-                while (m_MSPFs.size() > sampleSize)
-                    m_MSPFs.pop_front();
-
-                // Calculate the average millsecs per frame over the last sampleSize frames
-                int m_MSPFAverage = 0;
-                for (deque<int>::iterator fItr = m_MSPFs.begin(); fItr != m_MSPFs.end(); ++fItr)
-                    m_MSPFAverage += *fItr;
-                m_MSPFAverage /= m_MSPFs.size();
-
-                // Calcualte teh fps from the average
-                float fps = 1.0f / ((float)m_MSPFAverage / 1000.0f);
-                sprintf_s(str, sizeof(str), "FPS: %.0f", fps);
-                GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 14, str, GUIFont::Left);
-
-                // Display the average
-                sprintf_s(str, sizeof(str), "MSPF: %i", m_MSPFAverage);
-                GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 24, str, GUIFont::Left);
-
-                sprintf_s(str, sizeof(str), "Time Scale: x%.2f ([1]-, [2]+)", g_TimerMan.IsOneSimUpdatePerFrame() ? m_SimSpeed : g_TimerMan.GetTimeScale());
-                GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 34, str, GUIFont::Left);
-
-                sprintf_s(str, sizeof(str), "Real to Sim Cap: %.2f ms ([3]-, [4]+)", g_TimerMan.GetRealToSimCap() * 1000.0f);
-                GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 44, str, GUIFont::Left);
-
-                float dt = g_TimerMan.GetDeltaTimeMS();
-                sprintf_s(str, sizeof(str), "DeltaTime: %.2f ms ([5]-, [6]+)", dt);
-                GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 54, str, GUIFont::Left);
-
-                sprintf_s(str, sizeof(str), "Particles: %i", g_MovableMan.GetParticleCount());
-                GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 64, str, GUIFont::Left);
-
-				sprintf_s(str, sizeof(str), "Objects: %i", g_MovableMan.GetKnownObjectsCount());
-				GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 74, str, GUIFont::Left);
-
-                sprintf_s(str, sizeof(str), "MOIDs: %i", g_MovableMan.GetMOIDCount());
-                GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 84, str, GUIFont::Left);
-
-                sprintf_s(str, sizeof(str), "Sim Updates Since Last Drawn: %i", g_TimerMan.SimUpdatesSinceDrawn());
-                GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 94, str, GUIFont::Left);
-
-                if (g_TimerMan.IsOneSimUpdatePerFrame())
-                    GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 104, "ONE Sim Update Per Frame!", GUIFont::Left);
-
-				sprintf_s(str, sizeof(str), "Sound channels: %d / %d ", g_AudioMan.GetPlayingChannelCount(), g_AudioMan.GetTotalChannelCount());
-				GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, 17, 114, str, GUIFont::Left);
-
-				int xOffset = 17;
-				int yOffset = 134;
-				int blockHeight = 34;
-				int graphHeight = 20;
-				int graphOffset = 14;
-
-				//Update current sample percentage
-				g_FrameMan.CalculateSamplePercentages();
-
-				//Draw advanced performance counters
-				for(int pc = 0 ; pc < FrameMan::PERF_COUNT; ++pc)
-				{
-					int blockStart = yOffset + pc * blockHeight;
-
-					GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, xOffset, blockStart , m_PerfCounterNames[pc], GUIFont::Left);
-
-					// Print percentage from PerformanceCounters::PERF_SIM_TOTAL
-					int perc = (int)((float)GetPerormanceCounterAverage(static_cast<PerformanceCounters>(pc)) / (float)GetPerormanceCounterAverage(PERF_SIM_TOTAL) * 100);
-					sprintf_s(str, sizeof(str), "%%: %i", perc);
-		            GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, xOffset + 60, blockStart, str, GUIFont::Left);
-					
-					// Print average processing time in ms
-					sprintf_s(str, sizeof(str), "T: %lli", GetPerormanceCounterAverage(static_cast<PerformanceCounters>(pc)) / 1000);
-		            GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, xOffset + 96, blockStart, str, GUIFont::Left);
-					
-					int graphStart = blockStart + graphOffset;
-
-					//Draw graph
-					//Draw graph backgrounds
-					pPlayerGUIBitmap.DrawRectangle(xOffset, graphStart , MAXSAMPLES, graphHeight , 240, true);
-					//pPlayerGUIBitmap.DrawLine(xOffset, graphStart, xOffset + MAXSAMPLES, graphStart, 48);
-					pPlayerGUIBitmap.DrawLine(xOffset, graphStart + graphHeight / 2, xOffset + MAXSAMPLES, graphStart + graphHeight / 2, 96);
-					//pPlayerGUIBitmap.DrawLine(xOffset, graphStart + graphHeight, xOffset + MAXSAMPLES, graphStart + graphHeight , 48);
-
-					int smpl = m_Sample;
-
-					//Custom graph for Total counter which shows update time
-					// Not used because graphs now show data in ms, but can be enabled if you need percentages
-					/*if (pc == PerformanceCounters::SIM_TOTAL)
-					{
-						m_PerfPercentages[pc][smpl] = (int)((float)m_PerfData[pc][smpl] / (1000000 / 30) * 100);
-						if (m_PerfPercentages[pc][smpl] > 100)
-							m_PerfPercentages[pc][smpl] = 100;
-					}*/
-
-					//Reset peak value
-					int peak = 0;
-
-					//Draw sample dots
-					for (int i = 0; i < MAXSAMPLES; i++)
-					{
-						if (smpl < 0)
-							smpl = MAXSAMPLES - 1;
-						
-						// Show percentages in graphs
-						//int dotHeight = (int)((float)graphHeight / 100.0 * (float)m_PerfPercentages[pc][smpl]);
-
-						// Show microseconds in graphs, assume that 33333 microseconds (one frame of 30 fps) is the highest value on the graph
-						int value = (int)((float)m_PerfData[pc][smpl] / (1000000 / 30) * 100);
-						if (value > 100)
-							value = 100;
-						// Calculate dot height on the graph
-						int dotHeight = (int)((float)graphHeight / 100.0 * (float)value);
-						pPlayerGUIBitmap.SetPixel(xOffset + MAXSAMPLES - i, graphStart + graphHeight - dotHeight, 13);
-
-						if (peak < m_PerfData[pc][smpl])
-							peak = m_PerfData[pc][smpl];
-
-						//Move to previous sample
-						smpl--;
-					}
-
-					// Print peak values
-					sprintf_s(str, sizeof(str), "Peak: %i", peak / 1000);
-		            GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, xOffset + 130, blockStart, str, GUIFont::Left);
-				}
-            }
-
+			g_PerformanceMan.Draw(pPlayerGUIBitmap);
         }
         // If superflous screen (as in a three-player match), make the fourth the Observer one
         else
@@ -2421,13 +2223,7 @@ void FrameMan::Draw()
 			blit(m_pNetworkBackBufferFinal8[m_NetworkFrameReady][0], m_pBackBuffer8, 0, 0, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
 			masked_blit(m_pNetworkBackBufferFinalGUI8[m_NetworkFrameReady][0], m_pBackBuffer8, 0, 0, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
 
-			if (g_UInputMan.FlagAltState() || g_UInputMan.FlagCtrlState() || g_UInputMan.FlagShiftState())
-			{
-				AllegroBitmap allegroBitmap(m_pBackBuffer8);
-				char buf[32];
-				sprintf_s(buf, sizeof(buf), "PING: %u", m_CurrentPing);
-				GetLargeFont()->DrawAligned(&allegroBitmap, m_pBackBuffer8->w - 25, m_pBackBuffer8->h - 14, buf, GUIFont::Right);
-			}
+			if (g_UInputMan.FlagAltState() || g_UInputMan.FlagCtrlState() || g_UInputMan.FlagShiftState()) { g_PerformanceMan.DrawCurrentPing(); }
 
 			m_NetworkBitmapIsLocked[0] = false;
 		}
@@ -2521,7 +2317,7 @@ void FrameMan::Draw()
     release_bitmap(m_pBackBuffer8);
 
     // Reset the frame timer so we can measure how much it takes until next frame being drawn
-    m_pFrameTimer->Reset();
+	g_PerformanceMan.ResetFrameTimer();
 }
 
 void FrameMan::GetPostEffectsList(int whichScreen, list<PostEffect> & outputList)

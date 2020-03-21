@@ -1402,6 +1402,10 @@ int LuaMan::Create()
             .def("TimeForSimUpdate", &TimerMan::TimeForSimUpdate)
             .def("DrawnSimUpdate", &TimerMan::DrawnSimUpdate),
 
+		class_<PerformanceMan>("PerformanceManager")
+			.def("ResetFrameTimer", &PerformanceMan::ResetFrameTimer)
+			.def("ShowPerformanceStats", &PerformanceMan::ShowPerformanceStats),
+
         class_<FrameMan>("FrameManager")
             .def("ResetSplitScreens", &FrameMan::ResetSplitScreens)
             .property("PPM", &FrameMan::GetPPM, &FrameMan::SetPPM)
@@ -1427,11 +1431,9 @@ int LuaMan::Create()
             .def("FadeOutPalette", &FrameMan::FadeOutPalette)
             .def("SaveScreenToBMP", &FrameMan::SaveScreenToBMP)
             .def("SaveBitmapToBMP", &FrameMan::SaveBitmapToBMP)
-            .def("ResetFrameTimer", &FrameMan::ResetFrameTimer)
             .def("ToggleFullscreen", &FrameMan::ToggleFullscreen)
             .def("ClearBackBuffer8", &FrameMan::ClearBackBuffer8)
             .def("ClearBackBuffer32", &FrameMan::ClearBackBuffer32)
-            .def("ShowPerformanceStats", &FrameMan::ShowPerformanceStats)
             .def("FlashScreen", &FrameMan::FlashScreen)
             .def("DrawCirclePrimitive", (void (FrameMan::*)(Vector pos, int radius, int color))&FrameMan::DrawCirclePrimitive)
             .def("DrawCircleFillPrimitive", (void (FrameMan::*)(Vector pos, int radius, int color))&FrameMan::DrawCircleFillPrimitive)

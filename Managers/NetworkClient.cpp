@@ -19,6 +19,7 @@
 #include "FrameMan.h"
 #include "AudioMan.h"
 #include "SettingsMan.h"
+#include "PerformanceMan.h"
 
 #include "NetworkClient.h"
 
@@ -872,7 +873,7 @@ namespace RTE
 
 		DrawPostEffects(m_CurrentFrame);
 
-		g_FrameMan.SetCurrentPing(GetPing());
+		g_PerformanceMan.SetCurrentPing(GetPing());
 
 		//clear_to_color(src_bmp, g_KeyColor);
 		//clear_to_color(src_gui_bmp, g_KeyColor);

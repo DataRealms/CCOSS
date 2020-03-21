@@ -257,7 +257,7 @@ void ResumeActivity() {
 		g_FrameMan.FlipFrameBuffers();
 		g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 
-		g_FrameMan.ResetFrameTimer();
+		g_PerformanceMan.ResetFrameTimer();
         // Enable time averaging since it helps with animation jerkiness
 		g_TimerMan.EnableAveraging(true);
 		g_TimerMan.PauseSim(false);
@@ -1715,7 +1715,7 @@ bool RunGameLoop() {
 	if (g_Quit) {
 		return true;
 	}
-	g_FrameMan.ResetFrameTimer();
+	g_PerformanceMan.ResetFrameTimer();
 	g_TimerMan.EnableAveraging(true);
 	g_TimerMan.PauseSim(false);
 
@@ -1733,12 +1733,12 @@ bool RunGameLoop() {
 		// Simulation update, as many times as the fixed update step allows in the span since last frame draw
 		while (g_TimerMan.TimeForSimUpdate()) {
 			serverUpdated = false;
-			g_FrameMan.NewPerformanceSample();
+			g_PerformanceMan.NewPerformanceSample();
 
 			// Advance the simulation time by the fixed amount
 			g_TimerMan.UpdateSim();
 
-			g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_SIM_TOTAL);
+			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_SIM_TOTAL);
 
 			g_UInputMan.Update();
 
@@ -1750,15 +1750,15 @@ bool RunGameLoop() {
 			g_FrameMan.Update();
 			g_AudioMan.Update();
 			g_LuaMan.Update();
-			g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTIVITY);
+			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTIVITY);
 			g_ActivityMan.Update();
-			g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTIVITY);
+			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTIVITY);
 			g_MovableMan.Update();
 
 			g_ActivityMan.LateUpdateGlobalScripts();
 
 			g_ConsoleMan.Update();
-			g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_SIM_TOTAL);
+			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_SIM_TOTAL);
 
 			if (!g_InActivity) {
 				g_TimerMan.PauseSim(true);
@@ -1893,6 +1893,7 @@ int main(int argc, char *argv[]) {
     new LuaMan();
     new SettingsMan();
     new TimerMan();
+	new PerformanceMan();
     new PresetMan();
     new FrameMan();
     new AudioMan();
@@ -1922,6 +1923,7 @@ int main(int argc, char *argv[]) {
 		return exitVar;
 	}
     g_TimerMan.Create();
+	g_PerformanceMan.Create();
     g_PresetMan.Create();
     g_FrameMan.Create();
     g_AudioMan.Create();
@@ -1995,6 +1997,7 @@ int main(int argc, char *argv[]) {
     g_AudioMan.Destroy();
     g_PresetMan.Destroy();
     g_UInputMan.Destroy();
+	g_PerformanceMan.Destroy();
     g_FrameMan.Destroy();
     g_TimerMan.Destroy();
     g_SettingsMan.Destroy();

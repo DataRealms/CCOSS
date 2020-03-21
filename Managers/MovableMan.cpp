@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "MovableMan.h"
+#include "PerformanceMan.h"
 #include "PresetMan.h"
 #include "AHuman.h"
 #include "MOPixel.h"
@@ -1691,7 +1692,7 @@ void MovableMan::Update()
 
     {
         // Travel Actors
-		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS1);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS1);
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
@@ -1713,7 +1714,7 @@ void MovableMan::Update()
                 (*aIt)->NewFrame();
             }
         }
-		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS1);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS1);
 
         // Travel items
         {
@@ -1731,7 +1732,7 @@ void MovableMan::Update()
         }
 
         // Travel particles
-		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_PARTICLES_PASS1);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS1);
         {
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
@@ -1745,7 +1746,7 @@ void MovableMan::Update()
                 (*parIt)->NewFrame();
             }
         }
-		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_PARTICLES_PASS1);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS1);
 
         g_SceneMan.UnlockScene();
     }
@@ -1757,7 +1758,7 @@ void MovableMan::Update()
         g_SceneMan.LockScene();
 
         // Actors
-		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS2);
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
@@ -1770,7 +1771,7 @@ void MovableMan::Update()
                 (*aIt)->ApplyImpulses();
             }
         }
-		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS2);
 
         // Items
         {
@@ -1789,7 +1790,7 @@ void MovableMan::Update()
         }
 
         // Particles
-		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_PARTICLES_PASS2);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS2);
         {
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
@@ -1805,7 +1806,7 @@ void MovableMan::Update()
                 }
             }
         }
-		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_PARTICLES_PASS2);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS2);
     }
 
     ///////////////////////////////////////////////////

@@ -13,6 +13,7 @@
 #include "SettingsMan.h"
 #include "TimerMan.h"
 #include "FrameMan.h"
+#include "PerformanceMan.h"
 #include "PresetMan.h"
 #include "AudioMan.h"
 #include "UInputMan.h"

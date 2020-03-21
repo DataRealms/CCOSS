@@ -459,6 +459,9 @@
     <ClInclude Include="System\Entity.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="Managers\PerformanceMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -863,6 +866,9 @@
     </ClCompile>
     <ClCompile Include="System\Entity.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Managers\PerformanceMan.cpp">
+      <Filter>Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

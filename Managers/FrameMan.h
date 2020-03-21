@@ -115,25 +115,6 @@ class FrameMan:
 
 public:
 
-
-	// Enumeration of all available perofrmance counters
-	enum PerformanceCounters
-	{
-		PERF_SIM_TOTAL = 0,
-		PERF_ACTORS_AI,
-		PERF_ACTORS_PASS2,
-		PERF_ACTORS_PASS1,
-		PERF_PARTICLES_PASS2,
-		PERF_PARTICLES_PASS1,
-		PERF_ACTIVITY,
-
-#if __USE_SOUND_GORILLA
-		PERF_SOUND,
-#endif
-		PERF_COUNT
-	};
-
-
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Nested class:           GraphicalPrimitive
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -1403,16 +1384,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ResetFrameTimer
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the frame timer to restart counting.
-// Arguments:       None.
-// Return value:    None.
-
-    void ResetFrameTimer() { m_pFrameTimer->Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ToggleFullscreen
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Toggles to and from fullscreen and windowed mode.
@@ -1482,26 +1453,6 @@ public:
 // Return value:    Whether the 32bpp is used or not (8bpp one is).
 
     bool FlippingWith32BPP() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ShowPerformanceStats
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whetehr to display the performance stats on-screen or not.
-// Arguments:       Whether to show the performance stats or not.
-// Return value:    None.
-
-    void ShowPerformanceStats(bool showStats = true) { m_ShowPerfStats = showStats; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsShowingPerformanceStats
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells whetehr to display the performance stats on-screen or not.
-// Arguments:       None.
-// Return value:    Whether to show the performance stats or not.
-
-    bool IsShowingPerformanceStats() const { return m_ShowPerfStats; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1614,46 +1565,6 @@ public:
 
     void DrawPrimitives(int player, BITMAP *pTargetBitmap, const Vector &targetPos);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          NewPerformanceSample
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Moves sample counter to next sample and clears it's values.
-// Arguments:       None.
-// Return value:    None.
-	void NewPerformanceSample()
-	{
-		m_Sample++;
-		if (m_Sample >= MAXSAMPLES)
-			m_Sample = 0;
-
-		for (int pc = 0; pc < PERF_COUNT; ++pc)
-		{
-			m_PerfData[pc][m_Sample] = 0;
-			m_PerfPercentages[pc][m_Sample] = 0;
-		}
-	}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          StartPerformanceMeasurement
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves current absolute time in microseconds as a start of performance measurerement.
-// Arguments:       Counter to start measurement for.
-// Return value:    None.
-	void StartPerformanceMeasurement(PerformanceCounters counter) { m_PerfMeasureStart[counter] = g_TimerMan.GetAbsoulteTime(); }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          StopPerformanceMeasurement
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves current absolute time in microseconds as an end of performance measurerement. 
-//					The difference is added to the value of current perofrmance sample.
-// Arguments:       Counter to stop and updated measurement for.
-// Return value:    None.
-	void StopPerformanceMeasurement(PerformanceCounters counter) 
-	{ 
-		m_PerfMeasureStop[counter] = g_TimerMan.GetAbsoulteTime(); 
-		AddPerformanceSample(counter, m_PerfMeasureStop[counter] - m_PerfMeasureStart[counter]);
-	}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsValidResolution	
@@ -1668,8 +1579,6 @@ public:
 	Vector SLOffset[MAXSCREENCOUNT][MAX_LAYERS_STORED_FOR_NETWORK];
 
 	bool IsInMultiplayerMode() { return m_StoreNetworkBackBuffer; }
-
-	void SetCurrentPing(unsigned int ping) { m_CurrentPing = ping; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1786,15 +1695,6 @@ protected:
     // Litres Per Pixel contstant
     float m_LPP;
 
-    // Timer for measuring millisecs per frame for performance stats readings
-    Timer *m_pFrameTimer;
-    // History log of readings, for averaging the results
-    std::deque<int> m_MSPFs;
-    // The average of the MSPF reading buffer above, computer each frame
-    int m_MSPFAverage;
-    // The sim speed over real time
-    float m_SimSpeed;
-
     // The GUI control managers for all teams
 //    std::vector<GUIControlManager *> m_BuyGUIs;
 
@@ -1803,8 +1703,6 @@ protected:
     // Standard fonts for quick access.
     GUIFont *m_pLargeFont;
     GUIFont *m_pSmallFont;
-    // Whether to show performance stats on screen or not
-    bool m_ShowPerfStats;
     // The text to be displayed on each player's screen
     std::string m_ScreenText[MAXSCREENCOUNT];
     // The minimum duration the current message is supposed to show vefore it can be overwritten
@@ -1832,79 +1730,9 @@ protected:
 
 	std::list<PostEffect> m_ScreenRelativeEffects[MAXSCREENCOUNT];
 
-
-	//Performance data
-	//How many performance samples to store, directly affects graph size
-	const static int MAXSAMPLES = 120;
-	// How many samples to use to calculate average value displayed on screen
-	const static int AVERAGE = 10;
-
-	// Array to store perormance measurements in microseconds
-	int64_t m_PerfData[PERF_COUNT][MAXSAMPLES];
-	// Current measurement start time in microseconds
-	int64_t m_PerfMeasureStart[PERF_COUNT];
-	// Current measurement stop time in microseconds
-	int64_t m_PerfMeasureStop[PERF_COUNT];
-	// Array to store percentages from PERF_SIM_TOTAL
-	int m_PerfPercentages[PERF_COUNT][MAXSAMPLES];
-	// Perormance counter's names displayed on screen
-	string m_PerfCounterNames[PERF_COUNT];
-	// Sample counter
-	int m_Sample;
-	// Current ping value to display on screen
-	int m_CurrentPing;
-
 	// If true then the network bitmap is being updated
 	bool m_NetworkBitmapIsLocked[MAXSCREENCOUNT];
 	//std::mutex m_NetworkBitmapIsLocked[MAXSCREENCOUNT];
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddPerformanceSample
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds provided value to current sample of specified performance counter
-// Arguments:       Counter to update, value to add to this counter
-// Return value:    None.
-	void AddPerformanceSample(PerformanceCounters counter, int64_t value) { m_PerfData[counter][m_Sample] += value; }
-	
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CalculateSamplePercentages
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Calculates current sample's percentages from SIM_TOTAL for all performance counters 
-//					and stores them to m_PerfPercenrages.
-// Arguments:       None.
-// Return value:    None.
-	void CalculateSamplePercentages()
-	{
-		for(int pc = 0 ; pc < FrameMan::PERF_COUNT; ++pc)
-		{
-			int perc = (int)((float)m_PerfData[pc][m_Sample] / (float)m_PerfData[pc][FrameMan::PERF_SIM_TOTAL] * 100);
-			m_PerfPercentages[pc][m_Sample] = perc;
-		}
-	}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPerormanceCounterAverage
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns an average value of AVERAGE last samples for specified performance counter
-// Arguments:       None.
-// Return value:    An average value for specified counter.
-	int64_t GetPerormanceCounterAverage(PerformanceCounters counter)
-	{
-		int64_t accum = 0;
-		int smpl = m_Sample;
-
-		for (int i = 0 ; i < AVERAGE; ++i)
-		{
-			accum += m_PerfData[counter][smpl];
-
-			smpl--;
-			if (smpl < 0)
-				smpl = MAXSAMPLES - 1;
-		}
-
-		return accum / AVERAGE;
-	}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

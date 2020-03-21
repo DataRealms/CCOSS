@@ -28,6 +28,7 @@
 #include "MOPixel.h"
 #include "Scene.h"
 #include "SettingsMan.h"
+#include "PerformanceMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUIFont.h"
@@ -1338,9 +1339,9 @@ bool Actor::UpdateAIScripted()
 
     // Call the defined function, but only after first checking if it and this instance's Lua representation exists
 
-	g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
+	g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
 	error = g_LuaMan.RunScriptString("if " + m_ScriptPresetName + ".UpdateAI and " + m_ScriptObjectName + " then " + m_ScriptPresetName + ".UpdateAI(" + m_ScriptObjectName + "); end");
-	g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
+	g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
 
     if (error < 0)
         return false;

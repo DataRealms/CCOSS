@@ -20,6 +20,7 @@
 #include "SLTerrain.h"
 #include "GUIInput.h"
 #include "Icon.h"
+#include "PerformanceMan.h"
 
 extern volatile bool g_Quit;
 extern bool g_ResetActivity;
@@ -2800,7 +2801,7 @@ int UInputMan::Update()
     }
 
     // Only allow performance tweaking if showing the stats
-    if (g_FrameMan.IsShowingPerformanceStats())
+    if (g_PerformanceMan.IsShowingPerformanceStats())
     {
         // Manipulate timescaling
         if (KeyHeld(KEY_2))
@@ -2842,7 +2843,7 @@ int UInputMan::Update()
 
     // Perf stats display toggle
     if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_P))
-        g_FrameMan.ShowPerformanceStats(!g_FrameMan.IsShowingPerformanceStats());
+		g_PerformanceMan.ShowPerformanceStats(!g_PerformanceMan.IsShowingPerformanceStats());
 
     // Force one sim update per graphics frame
     if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_O))

@@ -8,7 +8,7 @@
 
 namespace RTE {
 
-	const std::string PerformanceMan::m_ClassName = "PerformanceMan";
+	const std::string PerformanceMan::c_ClassName = "PerformanceMan";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -140,35 +140,35 @@ namespace RTE {
 			// Calculate the fps from the average
 			float fps = 1.0F / (static_cast<float>(m_MSPFAverage) / 1000.0F);
 			sprintf_s(str, sizeof(str), "FPS: %.0f", fps);
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, 17, 14, str, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight, str, GUIFont::Left);
 
 			// Display the average
 			sprintf_s(str, sizeof(str), "MSPF: %i", m_MSPFAverage);
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, 17, 24, str, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 10, str, GUIFont::Left);
 
 			sprintf_s(str, sizeof(str), "Time Scale: x%.2f ([1]-, [2]+)", g_TimerMan.IsOneSimUpdatePerFrame() ? m_SimSpeed : g_TimerMan.GetTimeScale());
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, 17, 34, str, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 20, str, GUIFont::Left);
 
 			sprintf_s(str, sizeof(str), "Real to Sim Cap: %.2f ms ([3]-, [4]+)", g_TimerMan.GetRealToSimCap() * 1000.0F);
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, 17, 44, str, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 30, str, GUIFont::Left);
 
 			float deltaTime = g_TimerMan.GetDeltaTimeMS();
 			sprintf_s(str, sizeof(str), "DeltaTime: %.2f ms ([5]-, [6]+)", deltaTime);
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, 17, 54, str, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 40, str, GUIFont::Left);
 
 			sprintf_s(str, sizeof(str), "Particles: %i", g_MovableMan.GetParticleCount());
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, 17, 64, str, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 50, str, GUIFont::Left);
 
 			sprintf_s(str, sizeof(str), "Objects: %i", g_MovableMan.GetKnownObjectsCount());
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, 17, 74, str, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 60, str, GUIFont::Left);
 
 			sprintf_s(str, sizeof(str), "MOIDs: %i", g_MovableMan.GetMOIDCount());
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, 17, 84, str, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 70, str, GUIFont::Left);
 
 			sprintf_s(str, sizeof(str), "Sim Updates Since Last Drawn: %i", g_TimerMan.SimUpdatesSinceDrawn());
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, 17, 94, str, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 80, str, GUIFont::Left);
 
-			if (g_TimerMan.IsOneSimUpdatePerFrame()) { g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, 17, 104, "ONE Sim Update Per Frame!", GUIFont::Left); }
+			if (g_TimerMan.IsOneSimUpdatePerFrame()) { g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 90, "ONE Sim Update Per Frame!", GUIFont::Left); }
 
 			sprintf_s(str, sizeof(str), "Sound channels: %d / %d ", g_AudioMan.GetPlayingChannelCount(), g_AudioMan.GetTotalChannelCount());
 			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 100, str, GUIFont::Left);
@@ -252,11 +252,11 @@ namespace RTE {
 
 	uint64_t PerformanceMan::GetPerormanceCounterAverage(PerformanceCounters counter) {
 		uint64_t accum = 0;
-		unsigned int smpl = m_Sample;
+		unsigned short smpl = m_Sample;
 		for (unsigned short i = 0; i < c_Average; ++i) {
 			accum += m_PerfData[counter][smpl];
-			smpl--;
 			if (smpl == 0) { smpl = c_MaxSamples; }
+			smpl--;
 		}
 		return accum / c_Average;
 	}

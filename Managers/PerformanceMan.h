@@ -137,22 +137,29 @@ namespace RTE {
 		/// Gets the class name of this Entity.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return m_ClassName; }
+		virtual const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:
 
-		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 		static constexpr unsigned short c_MSPFAverageSampleSize = 10;
 		static constexpr unsigned short c_MaxSamples = 120; //!< How many performance samples to store, directly affects graph size.
 		static constexpr unsigned short c_Average = 10; //!< How many samples to use to calculate average value displayed on screen.
+
+		const unsigned short c_StatsOffsetX = 17; //!< Offset of the stat text from the left edge of the screen.
+		const unsigned short c_StatsHeight = 14; //!< Height of each stat text line.
+		const unsigned short c_GraphsOffsetX = 14; //!< Offset of the graph from the left edge of the screen.
+		const unsigned short c_GraphsStartOffsetY = 134; //!< Position the first graph block will be drawn from the top edge of the screen.
+		const unsigned short c_GraphHeight = 20; //!< Height of the performance graph.
+		const unsigned short c_GraphBlockHeight = 34; //!< Height of the whole graph block (text height and graph height combined).
 
 		bool m_ShowPerfStats; //!< Whether to show performance stats on screen or not.
 		bool m_AdvancedPerfStats; //!< Whether to show performance graphs on screen or not.
 
 		Timer *m_FrameTimer; //!< Timer for measuring millisecs per frame for performance stats readings.
 		float m_SimSpeed; //!< The simulation speed over real time.
-		unsigned int m_Sample; //!< Sample counter.
+		unsigned short m_Sample; //!< Sample counter.
 
 		std::deque<unsigned int> m_MSPFs; //!< History log of readings, for averaging the results.
 		unsigned short m_MSPFAverage; //!< The average of the MSPF reading buffer above, computer each frame.

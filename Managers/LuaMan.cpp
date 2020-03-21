@@ -2206,7 +2206,9 @@ int LuaMan::Create()
 
     // Assign the manager instances to globals in the lua master state
     globals(m_pMasterState)["TimerMan"] = &g_TimerMan;
+	globals(m_pMasterState)["PerformanceMan"] = &g_PerformanceMan;
     globals(m_pMasterState)["FrameMan"] = &g_FrameMan;
+	globals(m_pMasterState)["PrimitiveMan"] = &g_PrimitiveMan;
     globals(m_pMasterState)["PresetMan"] = &g_PresetMan;
     globals(m_pMasterState)["AudioMan"] = &g_AudioMan;
     globals(m_pMasterState)["UInputMan"] = &g_UInputMan;

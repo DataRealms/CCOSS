@@ -14,6 +14,7 @@ namespace RTE {
 
 	void PerformanceMan::Clear() {
 		m_ShowPerfStats = false;
+		m_AdvancedPerfStats = true;
 		m_CurrentPing = 0;
 		m_FrameTimer = 0;
 		m_MSPFs.clear();
@@ -173,6 +174,7 @@ namespace RTE {
 			sprintf_s(str, sizeof(str), "Sound channels: %d / %d ", g_AudioMan.GetPlayingChannelCount(), g_AudioMan.GetTotalChannelCount());
 			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 100, str, GUIFont::Left);
 
+			if (m_AdvancedPerfStats) { DrawPeformanceGraphs(bitmapToDrawTo); }
 		}
 	}
 

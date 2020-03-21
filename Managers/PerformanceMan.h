@@ -89,6 +89,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="showStats">Whether to show the performance stats or not.</param>
 		void ShowPerformanceStats(bool showStats = true) { m_ShowPerfStats = showStats; }
+
+		/// <summary>
+		/// Tells whether to display the performance graphs on-screen or not.
+		/// </summary>
+		/// <returns>Whether to show the performance graphs or not.</returns>
+		bool AdvancedPerformanceStatsEnabled() const { return m_AdvancedPerfStats; }
+
+		/// <summary>
+		/// Sets whether to display the performance graphs on-screen or not.
+		/// </summary>
+		/// <param name="showGraphs">Whether to show the performance graphs or not.</param>
+		void ShowAdvancedPerformanceStats(bool showGraphs = true) { m_AdvancedPerfStats = showGraphs; }
 #pragma endregion
 
 #pragma region Performance Counter Handling
@@ -137,6 +149,7 @@ namespace RTE {
 		static constexpr unsigned short c_Average = 10; //!< How many samples to use to calculate average value displayed on screen.
 
 		bool m_ShowPerfStats; //!< Whether to show performance stats on screen or not.
+		bool m_AdvancedPerfStats; //!< Whether to show performance graphs on screen or not.
 
 		Timer *m_FrameTimer; //!< Timer for measuring millisecs per frame for performance stats readings.
 		float m_SimSpeed; //!< The simulation speed over real time.

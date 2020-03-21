@@ -17,6 +17,7 @@
 #include "UInputMan.h"
 #include "ActivityMan.h"
 #include "ConsoleMan.h"
+#include "PerformanceMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUIControlManager.h"
@@ -155,7 +156,11 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         reader >> m_PlayIntro;
     else if (propName == "ToolTips")
         reader >> m_ToolTips;
-    else if (propName == "FlashOnBrainDamage")
+	else if (propName == "AdvancedPerformanceStats") {
+		bool enableAdvanced;
+		reader >> enableAdvanced;
+		g_PerformanceMan.ShowAdvancedPerformanceStats(enableAdvanced);	
+	} else if (propName == "FlashOnBrainDamage")
         reader >> m_FlashOnBrainDamage;
     else if (propName == "EnableHats")
         reader >> m_EnableHats;
@@ -351,6 +356,8 @@ int SettingsMan::Save(Writer &writer) const
     writer << m_PlayIntro;
     writer.NewProperty("ToolTips");
     writer << m_ToolTips;
+	writer.NewProperty("AdvancedPerformanceStats");
+	writer << g_PerformanceMan.AdvancedPerformanceStatsEnabled();
     writer.NewProperty("FlashOnBrainDamage");
     writer << m_FlashOnBrainDamage;
     writer.NewProperty("EnableHats");
@@ -546,6 +553,8 @@ int SettingsMan::SaveDefaults(Writer &writer) const
     writer << 1;
     writer.NewProperty("ToolTips");
     writer << 1;
+	writer.NewProperty("AdvancedPerformanceStats");
+	writer << 1;
     writer.NewProperty("FlashOnBrainDamage");
     writer << 1;
     writer.NewProperty("ShowForeignItems");

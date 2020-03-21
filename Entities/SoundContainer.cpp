@@ -33,15 +33,6 @@ namespace RTE {
 		m_AffectedByGlobalPitch = reference.m_AffectedByGlobalPitch;
 		m_Hash = reference.m_Hash;
 
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int SoundContainer::Create(std::string samplePath, int loops, bool affectedByGlobalPitch) {
-		m_AffectedByGlobalPitch = affectedByGlobalPitch;
-		m_Loops = loops;
-		AddSound(samplePath);
 
 		return 0;
 	}
@@ -75,16 +66,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SoundContainer::AddSound(std::string soundPath) {
+	void SoundContainer::AddSound(std::string const soundPath, bool abortGameForInvalidSound) {
 		ContentFile newFile(soundPath.c_str());
-		m_Hash = newFile.GetHash();
 
-		FMOD::Sound *pNewSample = newFile.GetAsSample();
-		FMOD_RESULT result = pNewSample->setMode(m_Loops == 0 ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL);
-		result = result == FMOD_OK ? pNewSample->setLoopCount(m_Loops) : result;
+		FMOD::Sound *newSample = newFile.GetAsSample(abortGameForInvalidSound);
+		if (newSample) {
+			FMOD_RESULT result = newSample->setMode(m_Loops == 0 ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL);
+			result = result == FMOD_OK ? newSample->setLoopCount(m_Loops) : result;
+			m_Sounds.push_back(std::pair<ContentFile, FMOD::Sound *>(newFile, newSample));
+		}
+	}
 
-		RTEAssert(pNewSample, "Failed to load the sample from the file");
-		m_Sounds.push_back(std::pair<ContentFile, FMOD::Sound *>(newFile, pNewSample));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

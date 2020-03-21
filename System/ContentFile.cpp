@@ -1,5 +1,6 @@
 #include "ContentFile.h"
 #include "PresetMan.h"
+#include "ConsoleMan.h"
 
 namespace RTE {
 
@@ -207,11 +208,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	FMOD::Sound * ContentFile::GetAsSample() {
+	FMOD::Sound * ContentFile::GetAsSample(bool abortGameForInvalidSound) {
 		if (m_DataPath.empty()) {
 			return 0;
 		}
 		FMOD::Sound *pReturnSample = 0;
+		std::string errorMessage;
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data. Otherwise, load it
 		std::map<std::string, FMOD::Sound *>::iterator itr = m_sLoadedSamples.find(m_DataPath);
@@ -223,31 +225,45 @@ namespace RTE {
 			char *pRawData = 0;
 
 			if (separatorPos == m_DataPath.length()) {
-				RTEAbort("There was no object name following first pound sign in the ContentFile's datafile path, which means there was no actual object defined. The path was:\n\n" + m_DataPath);
+				errorMessage = "There was no object name following first pound sign in the sound ContentFile's datafile path, which means there was no actual object defined. The path was: ";
+				if (abortGameForInvalidSound) { RTEAbort(errorMessage + "\n\n" + m_DataPath); }
+				g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
+				return pReturnSample;
 			} else if (separatorPos == -1) {
 				// Open the file, allocate space for it, read it and load it in as a Sound object
 				fileSize = file_size(m_DataPath.c_str());
 				PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
-				RTEAssert(pFile && fileSize > 0, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
+
+				if (!pFile || fileSize <= 0) {
+					errorMessage = "Failed to load sound file with following path and name: ";
+					if (abortGameForInvalidSound) { RTEAbort(errorMessage + "\n\n" + m_DataPath); }
+					g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
+					return pReturnSample;
+				}
 
 				pRawData = new char[fileSize];
 				int bytesRead = pack_fread(pRawData, fileSize, pFile);
-				RTEAssert(bytesRead == fileSize, "Tried to read a file but couldn't read the same amount of data as the reported file size!");
+				RTEAssert(bytesRead == fileSize, "Tried to read a sound file but couldn't read the same amount of data as the reported file size! The path and name were: \n\n" +m_DataPath);
 
-				// Setup fmod info, and make sure to use mode OPENMEMORY_POINT since we're doing the loading ContentFile instead of fmod
+				// Setup fmod info, and make sure to use mode OPENMEMORY since we're doing the loading with ContentFile instead of fmod, and we're deleting the raw data after loading it
 				FMOD_CREATESOUNDEXINFO soundInfo = {};
 				soundInfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
 				soundInfo.length = fileSize;
 				//TODO Consider doing FMOD_CREATESAMPLE for dumping audio files into memory and FMOD_NONBLOCKING to async create sounds
 				FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(pRawData, FMOD_OPENMEMORY, &soundInfo, &pReturnSample);
 
-				RTEAssert(result == FMOD_OK, "Unable to create sound " + m_DataPath);
+				if (result != FMOD_OK) {
+					errorMessage = "Unable to create sound because of FMOD error " + std::string(FMOD_ErrorString(result)) + ". Path and name was: ";
+					if (abortGameForInvalidSound) { RTEAbort(errorMessage + "\n\n" + m_DataPath); }
+					g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
+					return pReturnSample;
+				}
 
 				// Deallocate the intermediary data and close the file stream
 				delete[] pRawData;
 				pack_fclose(pFile);
 			} else if (separatorPos != m_DataPath.length() - 1) {
-				RTEAbort("Loading sound samples from allegro datafiles isn't supported yet!");
+				RTEAbort("Loading sounds from allegro datafiles isn't supported yet!");
 				/*
 				// Split the datapath into the path and the object name and load the datafile from them
 				m_pDataFile = load_datafile_object(m_DataPath.substr(0, separatorPos).c_str(), m_DataPath.substr(separatorPos + 1).c_str());
@@ -256,7 +272,12 @@ namespace RTE {
 				pReturnSample = (FMOD::Sound *)m_pDataFile->dat;
 				*/
 			}
-			RTEAssert(pReturnSample, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
+			if (!pReturnSample) {
+				errorMessage = "Failed to load sound file with following path and name:";
+				if (abortGameForInvalidSound) { RTEAbort(errorMessage + "\n\n" + m_DataPath); }
+				g_ConsoleMan.PrintString("Error: " + errorMessage + m_DataPath);
+				return pReturnSample;
+			}
 
 			// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
 			m_sLoadedSamples.insert(std::pair<std::string, FMOD::Sound *>(m_DataPath, pReturnSample));

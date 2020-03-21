@@ -36,19 +36,28 @@ namespace RTE {
 		int Create(const SoundContainer &reference);
 
 		/// <summary>
-		/// Creates a SoundContainer and gives it a path to its first sample.
+		/// Creates an empty SoundContainer with no sounds.
+		/// </summary>
+		/// <param name="loops">The number of times this SoundContainer's sounds will loop. 0 means play once. -1 means play infinitely until stopped.</param>
+		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create(int loops = 0, bool affectedByGlobalPitch = true) { m_Loops = loops; m_AffectedByGlobalPitch = affectedByGlobalPitch; return 0; }
+
+		/// <summary>
+		/// Creates a SoundContainer and gives it a path to its first sound.
 		/// </summary>
 		/// <param name="soundPath">A path to the sound for this sound to have.</param>
 		/// <param name="loops">The number of times this SoundContainer's sounds will loop. 0 means play once. -1 means play infinitely until stopped.</param>
 		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(std::string soundPath, int loops = 0, bool affectedByGlobalPitch = true);
+		int Create(std::string const soundPath, int loops = 0, bool affectedByGlobalPitch = true) { int result = Create(loops, affectedByGlobalPitch); AddSound(soundPath); return result; }
 
 		/// <summary>
 		/// Adds a new Sound to this SoundContainer, loaded from a file.
 		/// </summary>
 		/// <param name="soundPath">A path to the new sound to add. This will be handled through PresetMan.</param>
-		void AddSound(std::string soundPath);
+		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
+		void AddSound(std::string const soundPath, bool abortGameForInvalidSound = true);
 #pragma endregion
 
 #pragma region Destruction

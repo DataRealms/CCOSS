@@ -407,8 +407,13 @@ namespace RTE {
 		double pitch = affectedByGlobalPitch ? m_GlobalPitch : pitchOrAffectedByGlobalPitch;
 
 		SoundContainer *newSoundContainer = new SoundContainer();
-		newSoundContainer->Create(filePath, loops, affectedByGlobalPitch);
-		PlaySound(newSoundContainer, attenuation, player, priority, pitch);
+		newSoundContainer->Create(loops, affectedByGlobalPitch);
+		newSoundContainer->AddSound(filePath, false);
+		if (newSoundContainer->HasAnySounds()) {
+			PlaySound(newSoundContainer, attenuation, player, priority, pitch);
+		} else {
+			delete newSoundContainer;
+		}
 
 		return newSoundContainer;
 	}

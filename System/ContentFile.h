@@ -190,8 +190,9 @@ namespace RTE {
 		/// <summary>
 		/// Loads and gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE. Note that ownership of the SAMPLE IS NOT TRANSFERRED!
 		/// </summary>
+		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
 		/// <returns>The pointer to the beginning of the data object loaded from the file. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
-		virtual FMOD::Sound * GetAsSample();
+		virtual FMOD::Sound * GetAsSample(bool abortGameForInvalidSound = true);
 
 		/// <summary>
 		/// Loads and gets the data represented by this ContentFile object as a binary chunk of data. Note that ownership of the DATA IS NOT TRANSFERRED!

@@ -1226,12 +1226,13 @@ namespace RTE
 		for (std::list<AudioMan::NetworkSoundData>::iterator eItr = events.begin(); eItr != events.end(); ++eItr)
 		{
 			sndDataPtr->State = (*eItr).State;
-			sndDataPtr->Channels = (*eItr).Channels;
+			std::copy(std::begin(eItr->Channels), std::end(eItr->Channels), sndDataPtr->Channels);
+			std::copy(std::begin(eItr->SoundFileHashes), std::end(eItr->SoundFileHashes), sndDataPtr->SoundFileHashes);
 			sndDataPtr->Distance = (*eItr).Distance;
-			sndDataPtr->SoundHash = (*eItr).SoundHash;
 			sndDataPtr->Loops = (*eItr).Loops;
 			sndDataPtr->Pitch = (*eItr).Pitch;
-			sndDataPtr->AffectedByPitch = (*eItr).AffectedByPitch;
+			sndDataPtr->AffectedByGlobalPitch = (*eItr).AffectedByGlobalPitch;
+			sndDataPtr->FadeOutTime = (*eItr).FadeOutTime;
 
 			msg->SoundEventsCount++;
 			sndDataPtr++;

@@ -30,23 +30,6 @@ namespace RTE {
 			PRIORITY_COUNT
 		};
 
-		enum NetworkSoundState {
-			SOUND_PLAY = 0,
-			SOUND_STOP,
-			SOUND_SET_PITCH,
-			SOUND_SET_ATTENUATION
-		};
-
-		struct NetworkSoundData {
-			unsigned char State;
-			size_t SoundHash;
-			unsigned char AffectedByPitch;
-			short int Distance;
-			std::unordered_set<short int> Channels;
-			short int Loops;
-			float Pitch;
-		};
-
 		enum NetworkMusicState {
 			MUSIC_PLAY = 0,
 			MUSIC_STOP,
@@ -60,6 +43,26 @@ namespace RTE {
 			int Loops;
 			double Position;
 			float Pitch;
+		};
+
+		enum NetworkSoundState {
+			SOUND_PLAY = 0,
+			SOUND_STOP,
+			SOUND_SET_ATTENUATION,
+			SOUND_SET_PITCH,
+			SOUND_SET_GLOBAL_PITCH,
+			SOUND_FADE_OUT
+		};
+
+		struct NetworkSoundData {
+			unsigned char State;
+			unsigned short int Channels[c_MaxPlayingSoundsPerContainer]{c_NumberOfAudioChannels + 1};
+			size_t SoundFileHashes[c_NumberOfAudioChannels]{0};
+			short int Distance;
+			short int Loops;
+			float Pitch;
+			bool AffectedByGlobalPitch;
+			short int FadeOutTime;
 		};
 
 #pragma region Creation
@@ -355,13 +358,13 @@ namespace RTE {
 		/// <summary>
 		/// Adds the music event to internal list of music events for the specified player.
 		/// </summary>
-		/// <param name="player">Player for which the event happened.</param>
-		/// <param name="state">Music state.</param>
+		/// <param name="player">Player(s) for which the event happened.</param>
+		/// <param name="state">NetworkMusicState for the event.</param>
 		/// <param name="filepath">Music file path to transmit to client.</param>
 		/// <param name="loops">Loops counter.</param>
 		/// <param name="position">Music playback position.</param>
 		/// <param name="pitch">Pitch value.</param>
-		void RegisterMusicEvent(int player, unsigned char state, const char *filepath, int loops, double position, float pitch);
+		void RegisterMusicEvent(int player, NetworkMusicState state, const char *filepath, int loops = 0, double position = 0, float pitch = 1);
 
 		/// <summary>
 		/// Fills the list with sound events happened for the specified network player.
@@ -373,15 +376,16 @@ namespace RTE {
 		/// <summary>
 		/// Adds the sound event to internal list of sound events for the specified player.
 		/// </summary>
-		/// <param name="player">Player for which the event happened.</param>
-		/// <param name="state">Sound state.</param>
-		/// <param name="hash">Sound file hash to transmit to client.</param>
-		/// <param name="distance">Sound distance.</param>
-		/// <param name="channels">Channels where sound was played.</param>
+		/// <param name="player">Player(s) for which the event happened.</param>
+		/// <param name="state">NetworkSoundState for the event .</param>
+		/// <param name="channels">Pointer to an unordered_set of channels this sound event applies to on the server.</param>
+		/// <param name="soundFileHashes">Pointer to a vector of hashes describing sound file locations to transmit to client.</param>
+		/// <param name="attenuation">Sound attenuation.</param>
 		/// <param name="loops">Loops counter.</param>
 		/// <param name="pitch">Pitch value.</param>
-		/// <param name="affectedByPitch">Whether the sound is affected by pitch.</param>
-		void RegisterSoundEvent(int player, unsigned char state, size_t hash, short int distance, std::unordered_set<short int> const &channels, short int loops, float pitch, bool affectedByPitch);
+		/// <param name="affectedByGlobalPitch">Whether the sound is affected by pitch.</param>
+		/// <param name="fadeOutTime">The amount of time, in ms, to fade out over.</param>
+		void RegisterSoundEvent(int player, NetworkSoundState state, std::unordered_set<unsigned short int> const *channels = NULL, std::vector<size_t> const *soundFileHashes = NULL, short int attenuation = 0, short int loops = 0, float pitch = 1, bool affectedByGlobalPitch = false, short int fadeOutTime = 0);
 #pragma endregion
 
 	protected:

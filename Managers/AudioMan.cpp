@@ -120,7 +120,7 @@ namespace RTE {
 			return;
 		}
 
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_PITCH, 0, 0, std::unordered_set<short int>(), 0, pitch, excludeMusic); }
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_GLOBAL_PITCH, NULL, NULL, 0, 0, pitch, excludeMusic); }
 
 		m_GlobalPitch = Limit(pitch, 8, 0.125); //Limit pitch change to 8 octaves up or down
 
@@ -226,6 +226,7 @@ namespace RTE {
 			return false;
 		}
 
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_ATTENUATION, pSoundContainer->GetPlayingChannels(), &pSoundContainer->GetSelectedSoundHashes(), attenuation); }
 
 		attenuation = Limit(attenuation, 0.95, 0); //Limit attenuation so it can't be closer than 0 (full volume) or farther than 0.95 (quiet but not quite silent)
 
@@ -251,9 +252,7 @@ namespace RTE {
 			return false;
 		}
 
-		if (IsInMultiplayerMode() && pSoundContainer) {
-			RegisterSoundEvent(-1, SOUND_SET_PITCH, pSoundContainer->GetHash(), 0, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), pitch, pSoundContainer->IsAffectedByGlobalPitch());
-		}
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_PITCH, pSoundContainer->GetPlayingChannels(), &pSoundContainer->GetSelectedSoundHashes(), 0, 0, pitch); }
 
 		pitch = Limit(pitch, 8, 0.125); //Limit pitch change to 8 octaves up or down
 
@@ -274,7 +273,7 @@ namespace RTE {
 
 	void AudioMan::PlayMusic(const char *filePath, int loops, double volumeOverrideIfNotMuted) {
 		if (m_AudioEnabled) {
-			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_PLAY, filePath, loops, 0.0, 1.0); }
+			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_PLAY, filePath, loops); }
 
 			FMOD_RESULT result = m_MusicChannelGroup->stop();
 			if (result != FMOD_OK) {
@@ -343,7 +342,7 @@ namespace RTE {
 				bool isPlaying;
 				FMOD_RESULT result = m_MusicChannelGroup->isPlaying(&isPlaying);
 				if (result == FMOD_OK && isPlaying) {
-					RegisterMusicEvent(-1, MUSIC_SILENCE, 0, seconds, 0.0, 1.0);
+					if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_SILENCE, NULL, seconds); }
 					result = m_MusicChannelGroup->stop();
 				}
 				if (result != FMOD_OK) {
@@ -462,7 +461,7 @@ namespace RTE {
 
 		// Now that the sound is playing we can register an event with the SoundContainer's channels, which can be used by clients to identify the sound being played.
 		if (m_IsInMultiplayerMode) {
-			RegisterSoundEvent(player, SOUND_PLAY, pSoundContainer->GetHash(), attenuation, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), pitch, pSoundContainer->IsAffectedByGlobalPitch());
+			RegisterSoundEvent(player, SOUND_PLAY, pSoundContainer->GetPlayingChannels(), &pSoundContainer->GetSelectedSoundHashes(), attenuation, pSoundContainer->GetLoopSetting(), pitch, pSoundContainer->IsAffectedByGlobalPitch());
 		}
 
 		return true;
@@ -474,6 +473,8 @@ namespace RTE {
 		if (!m_AudioEnabled || !pSoundContainer) {
 			return false;
 		}
+
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(player, SOUND_STOP, pSoundContainer->GetPlayingChannels()); }
 
 		FMOD_RESULT result;
 		FMOD::Channel *soundChannel;
@@ -501,6 +502,8 @@ namespace RTE {
 		if (!m_AudioEnabled || !pSoundContainer || !pSoundContainer->IsBeingPlayed()) {
 			return;
 		}
+
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_FADE_OUT, pSoundContainer->GetPlayingChannels(), &pSoundContainer->GetSelectedSoundHashes(), 0, 0, 0, false, fadeOutTime); }
 
 		int sampleRate;
 		m_AudioSystem->getSoftwareFormat(&sampleRate, nullptr, nullptr);
@@ -544,7 +547,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::RegisterMusicEvent(int player, unsigned char state, const char *filepath, int loops, double position, float pitch) {
+	void AudioMan::RegisterMusicEvent(int player, NetworkMusicState state, const char *filepath, int loops, double position, float pitch) {
 		if (player == -1) {
 			for (int i = 0; i < c_MaxClients; i++) {
 				RegisterMusicEvent(i, state, filepath, loops, position, pitch);
@@ -587,21 +590,26 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::RegisterSoundEvent(int player, unsigned char state, size_t hash, short int attenuation, std::unordered_set<short int> const &channels, short int loops, float pitch, bool affectedByPitch) {
+	void AudioMan::RegisterSoundEvent(int player, NetworkSoundState state, std::unordered_set<unsigned short int> const *channels, std::vector<size_t> const *soundFileHashes, short int attenuation, short int loops, float pitch, bool affectedByGlobalPitch, short int fadeOutTime) {
 		if (player == -1) {
 			for (int i = 0; i < c_MaxClients; i++) {
-				RegisterSoundEvent(i, state, hash, attenuation, channels, loops, pitch, affectedByPitch);
+				RegisterSoundEvent(i, state, channels, soundFileHashes, attenuation, loops, pitch, affectedByGlobalPitch, fadeOutTime);
 			}
 		} else {
 			if (player >= 0 && player < c_MaxClients) {
 				NetworkSoundData soundData;
 				soundData.State = state;
+				if (channels) {
+					std::copy(channels->begin(), channels->end(), soundData.Channels);
+				}
+				if (soundFileHashes) {
+					std::copy(soundFileHashes->begin(), soundFileHashes->end(), soundData.SoundFileHashes);
+				}
 				soundData.Distance = attenuation;
-				soundData.SoundHash = hash;
-				soundData.Channels = channels;
 				soundData.Loops = loops;
 				soundData.Pitch = pitch;
-				soundData.AffectedByPitch = affectedByPitch ? 1 : 0;
+				soundData.AffectedByGlobalPitch = affectedByGlobalPitch;
+				soundData.FadeOutTime = fadeOutTime;
 
 				g_SoundEventsListMutex[player].lock();
 				m_SoundEvents[player].push_back(soundData);

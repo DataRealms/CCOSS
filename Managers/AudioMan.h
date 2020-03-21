@@ -314,7 +314,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="pSound">Pointer to the SoundContainer to stop playing. Ownership is NOT transferred!</param>
 		/// <returns>True if sounds were playing and were stopped, false otherwise.</returns>
-		bool StopSound(SoundContainer *pSound);
+		bool StopSound(SoundContainer *pSound) { return StopSound(pSound, -1); }
 
 		/// <summary>
 		/// Stops playing all sounds in a given SoundContainer for a certain player.
@@ -410,6 +410,7 @@ namespace RTE {
 		std::mutex g_SoundEventsListMutex[c_MaxClients]; //!< A list for locking sound events for multiplayer to avoid race conditions and other such problems.
 
 	private:
+
 		/// <summary>
 		/// A static callback function for FMOD to invoke when the music channel finishes playing. See fmod docs - FMOD_SYSTEM_CALLBACK for details
 		/// </summary>
@@ -429,7 +430,5 @@ namespace RTE {
 		AudioMan(const AudioMan &reference);
 		AudioMan & operator=(const AudioMan &rhs);
 	};
-
-	std::mutex g_SoundEventsListMutex[c_MaxClients];
 }
 #endif

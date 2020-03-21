@@ -567,8 +567,6 @@ public:
 
 	bool GetServerSimSleepWhenIdle() { return m_ServerSimSleepWhenIdle; }
 	
-	int GetAudioChannels() { return m_AudioChannels; }
-
 	bool DisableLoadingScreen() { return m_DisableLoadingScreen; }
 
 
@@ -651,8 +649,6 @@ protected:
 	bool m_ServerSleepWhenIdle;
 
 	bool m_ServerSimSleepWhenIdle;
-
-	int m_AudioChannels;
 
 	bool m_DisableLoadingScreen;
 

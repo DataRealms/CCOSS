@@ -76,8 +76,6 @@ void SettingsMan::Clear()
 
 	m_UseNATService = false;
 	m_DisableLoadingScreen = false;
-
-	m_AudioChannels = 512;
 }
 
 
@@ -271,8 +269,6 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
 		reader >> m_ServerSleepWhenIdle;
 	else if (propName == "ServerSimSleepWhenIdle")
 		reader >> m_ServerSimSleepWhenIdle;
-	else if (propName == "AudioChannels")
-		reader >> m_AudioChannels;
 	else if (propName == "DisableLoadingScreen")
 		reader >> m_DisableLoadingScreen;
 	else if (propName == "SoundVolume")
@@ -466,8 +462,6 @@ int SettingsMan::Save(Writer &writer) const
 	writer.NewProperty("DisableLoadingScreen");
 	writer << m_DisableLoadingScreen;
 
-	writer.NewProperty("AudioChannels");
-	writer << m_AudioChannels;
 	writer.NewProperty("SoundVolume");
     writer << g_AudioMan.GetSoundsVolume() * 100;
     writer.NewProperty("MusicVolume");

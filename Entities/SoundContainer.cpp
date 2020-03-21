@@ -12,7 +12,7 @@ namespace RTE {
 		m_SelectedSounds.clear();
 		m_PlayingChannels.clear();
 		m_Loops = 0;
-		m_Priority = AudioMan::PRIORITY_LOW;
+		m_Priority = AudioMan::PRIORITY_NORMAL;
 		m_AffectedByGlobalPitch = true;
 	}
 
@@ -105,21 +105,32 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	FMOD::Sound *SoundContainer::SelectNextSound() {
+	bool SoundContainer::SelectNextSounds() {
 		int soundCount = GetSoundCount();
-		if (soundCount == 2) {
-			m_CurrentSound = m_CurrentSound == 0 ? 1 : 0; // Alternate between 2 sounds
-		} else if (soundCount > 2) {
-			int lastSound = m_CurrentSound;
-			m_CurrentSound = floorf((float)soundCount * PosRand());
-			// Mix it up again if we got the same sound twice
-			while (m_CurrentSound == lastSound) {
-				m_CurrentSound = floorf((float)soundCount * PosRand());
+		if (soundCount == 0) {
+			return false;
+		}
+
+		std::size_t previouslySelectedSound = m_SelectedSounds.size() > 0 ? m_SelectedSounds[0] : 0;
+
+		if (m_SelectedSounds.empty() || soundCount == 1) {
+			m_SelectedSounds.clear();
+			m_SelectedSounds.push_back(previouslySelectedSound);
+		} else {
+			m_SelectedSounds.clear();
+			if (soundCount == 2) {
+				m_SelectedSounds.push_back((previouslySelectedSound + 1) % soundCount);
+			} else if (soundCount > 2) {
+				size_t soundToSelect = floorf((float)soundCount * PosRand());
+				// Mix it up again if we got the same sound twice
+				while (soundToSelect == previouslySelectedSound) {
+					soundToSelect = floorf((float)soundCount * PosRand());
+				}
+				m_SelectedSounds.push_back(soundToSelect);
 			}
 		}
-		RTEAssert(m_CurrentSound >= 0 && m_CurrentSound < soundCount, "Sample index is out of bounds!");
+		RTEAssert(m_SelectedSounds.size() > 0 && m_SelectedSounds[0] >= 0 && m_SelectedSounds[0] < soundCount, "Failed to select next sound, either none was selected or the selected sound was invalid.");
 		
-		FMOD::Sound *soundToStart;
-		return m_Sounds[m_CurrentSound].second;
+		return true;
 	}
 }

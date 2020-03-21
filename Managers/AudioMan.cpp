@@ -24,13 +24,14 @@ namespace RTE {
 			int channelIndex;
 			FMOD_RESULT result = channel->getIndex(&channelIndex);
 
+			// Remove this playing sound index from the SoundContainer if it has any playing sounds, i.e. it hasn't been reset before this callback happened.
 			void *userData;
-			result == FMOD_OK ? channel->getUserData(&userData) : result;
+			result = result == FMOD_OK ? channel->getUserData(&userData) : result;
 			SoundContainer *channelSoundContainer = (SoundContainer *)userData;
-			//Account for PlaySound that doesn't create a SoundContainer
-			if (channelSoundContainer != NULL) {
+			if (channelSoundContainer->GetPlayingSoundCount() > 0) {
 				channelSoundContainer->RemovePlayingChannel(channelIndex);
 			}
+			result = result == FMOD_OK ? channel->setUserData(NULL) : result;
 
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: An error occurred when Ending a sound in SoundContainer " + channelSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
@@ -69,7 +70,7 @@ namespace RTE {
 		//TODO 44.1 kHz came from data, fmod defaults to 48 kHz, see if we can just use this instead??
 		m_AudioSystem->setSoftwareFormat(44100, FMOD_SPEAKERMODE_DEFAULT, 0);
 
-		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->init(g_SettingsMan.GetAudioChannels(), FMOD_INIT_NORMAL, 0) : soundSystemSetupResult;
+		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->init(c_NumberOfAudioChannels, FMOD_INIT_NORMAL, 0) : soundSystemSetupResult;
 		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->getMasterChannelGroup(&m_MasterChannelGroup) : soundSystemSetupResult;
 		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->createChannelGroup("Music", &m_MusicChannelGroup) : soundSystemSetupResult;
 		soundSystemSetupResult = soundSystemSetupResult == FMOD_OK ? m_AudioSystem->createChannelGroup("Sounds", &m_SoundChannelGroup) : soundSystemSetupResult;
@@ -220,20 +221,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AudioMan::SetSoundAttenuation(SoundContainer *pSoundContainer, float distance) {
+	bool AudioMan::SetSoundAttenuation(SoundContainer *pSoundContainer, float attenuation) {
 		if (!m_AudioEnabled || !pSoundContainer) {
 			return false;
 		}
 
-		distance = Limit(distance, 0.95, 0); //Limit distance so it can't be closer than 0 (no attenuation) or farther than 0.95 (quiet but not quite silent)
+
+		attenuation = Limit(attenuation, 0.95, 0); //Limit attenuation so it can't be closer than 0 (full volume) or farther than 0.95 (quiet but not quite silent)
 
 		FMOD_RESULT result = FMOD_OK;
 		FMOD::Channel *soundChannel;
 
-		std::unordered_set<short int> channels = pSoundContainer->GetPlayingChannels();
-		for (std::unordered_set<short int>::iterator channelIterator = channels.begin(); channelIterator != channels.end(); ++channelIterator) {
+		std::unordered_set<unsigned short int> const *channels = pSoundContainer->GetPlayingChannels();
+		for (std::unordered_set<unsigned short int>::iterator channelIterator = channels->begin(); channelIterator != channels->end(); ++channelIterator) {
 			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
-			result = result == FMOD_OK ? soundChannel->setVolume(1 - distance) : result;
+			result = result == FMOD_OK ? soundChannel->setVolume(1 - attenuation) : result;
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not set sound attenuation for the sound being played on channel " + std::to_string(*channelIterator) + " for SoundContainer " + pSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
 			}
@@ -429,13 +431,20 @@ namespace RTE {
 		pitch = pSoundContainer->IsAffectedByGlobalPitch() ? m_GlobalPitch : pitch;
 
 		FMOD::Channel *channel;
+		FMOD_RESULT result = FMOD_OK;
 		int channelIndex;
-		FMOD_RESULT result = m_AudioSystem->playSound(pSoundContainer->SelectNextSound(), m_SoundChannelGroup, true, &channel);
-		result = result == FMOD_OK ? channel->getIndex(&channelIndex) : result;
-		result = result == FMOD_OK ? channel->setUserData(pSoundContainer) : result;
-		result = result == FMOD_OK ? channel->setCallback(SoundChannelEndedCallback) : result;
-		result = result == FMOD_OK ? channel->setLoopCount(pSoundContainer->GetLoopSetting()) : result;
-		result = result == FMOD_OK ? channel->setPriority(priority) : result;
+		if (!pSoundContainer->SelectNextSounds()) {
+			g_ConsoleMan.PrintString("Unable to select new sounds to play for SoundContainer " + pSoundContainer->GetPresetName() + ". No sounds will be played.");
+		}
+
+		for (FMOD::Sound *sound : pSoundContainer->GetSelectedSoundObjects()) {
+			result = result == FMOD_OK ? m_AudioSystem->playSound(sound, m_SoundChannelGroup, true, &channel) : result;
+			result = result == FMOD_OK ? channel->getIndex(&channelIndex) : result;
+			result = result == FMOD_OK ? channel->setUserData(pSoundContainer) : result;
+			result = result == FMOD_OK ? channel->setCallback(SoundChannelEndedCallback) : result;
+			result = result == FMOD_OK ? channel->setLoopCount(pSoundContainer->GetLoopSetting()) : result;
+			result = result == FMOD_OK ? channel->setPriority(priority) : result;
+		}
 
 		if (result != FMOD_OK) {
 			g_ConsoleMan.PrintString("ERROR: Could not play sounds from SoundContainer " + pSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
@@ -461,7 +470,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AudioMan::StopSound(SoundContainer *pSoundContainer) {
+	bool AudioMan::StopSound(SoundContainer *pSoundContainer, int player) {
 		if (!m_AudioEnabled || !pSoundContainer) {
 			return false;
 		}
@@ -474,23 +483,16 @@ namespace RTE {
 			std::unordered_set<unsigned short int> const *channels = pSoundContainer->GetPlayingChannels();
 			for (std::unordered_set<unsigned short int>::iterator channelIterator = channels->begin(); channelIterator != channels->end();) {
 				result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
+				++channelIterator; // NOTE - stopping the sound will remove the channel, screwing things up if we don't move to the next iterator preemptively
 				result = result == FMOD_OK ? soundChannel->stop() : result;
 				if (result != FMOD_OK) {
-					g_ConsoleMan.PrintString("Error: Failed to stop playing channel in SoundContainer "+pSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
+					g_ConsoleMan.PrintString("Error: Failed to stop playing channel in SoundContainer " + pSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
 				}
 
 			}
 		}
+
 		return anySoundsPlaying;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool AudioMan::StopSound(SoundContainer *pSoundContainer, int player) {
-		if (m_IsInMultiplayerMode && pSoundContainer) {
-			RegisterSoundEvent(player, SOUND_STOP, pSoundContainer->GetHash(), 0, pSoundContainer->GetPlayingChannels(), pSoundContainer->GetLoopSetting(), 1.0, pSoundContainer->IsAffectedByGlobalPitch());
-		}
-		return StopSound(pSoundContainer);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

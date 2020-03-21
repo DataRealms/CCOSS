@@ -34,7 +34,7 @@ namespace RTE {
 		PerformanceMan() { Clear(); }
 
 		/// <summary>
-		/// Makes the PerformanceMan object ready for use, which is to be used with SettingsMan first.
+		/// Makes the PerformanceMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int Create();
@@ -52,7 +52,7 @@ namespace RTE {
 		void Destroy();
 
 		/// <summary>
-		/// Resets the entire PerformanceMan, including its inherited members, to their default settings or values.
+		/// Resets the entire PerformanceMan to the default settings or values.
 		/// </summary>
 		void Reset() { Clear(); }
 #pragma endregion

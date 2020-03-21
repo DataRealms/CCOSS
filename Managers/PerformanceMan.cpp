@@ -97,16 +97,16 @@ namespace RTE {
 			m_MSPFAverage += *fItr;
 		}
 		m_MSPFAverage /= m_MSPFs.size();
-		
+
+		// TODO: This probably belongs in TimerMan so figure out where exactly to shove it in it.
 		// If one sim update per frame mode, adjust the pitch of most sound effects to match the sim time over real time ratio as it fluctuates!
 		if (g_TimerMan.IsOneSimUpdatePerFrame()) {
 			// Calculate the sim speed over the actual real time
 			m_SimSpeed = g_TimerMan.GetDeltaTimeMS() / static_cast<float>(m_MSPFAverage);
-			//        float simSpeed = g_TimerMan.GetDeltaTimeSecs() / m_FrameTimer->GetElapsedRealTimeS();
-					// If limited, only allow pitch to go slower, not faster
-			if (g_TimerMan.IsSimSpeedLimited() && m_SimSpeed > 1.0) {
-				m_SimSpeed = 1.0;
-			}
+
+			// If limited, only allow pitch to go slower, not faster
+			if (g_TimerMan.IsSimSpeedLimited() && m_SimSpeed > 1.0) { m_SimSpeed = 1.0; }
+
 			// Soften the ratio of the pitch adjustment so it's not such an extreme effect on the audio
 			// TODO: Don't hardcode this coefficient - although it's a good default
 			float pitch = m_SimSpeed + (1.0F - m_SimSpeed) * 0.35;
@@ -119,7 +119,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::Draw(AllegroBitmap bitmapToDrawTo ) {
+	void PerformanceMan::Draw(AllegroBitmap bitmapToDrawTo) {
 		if (m_ShowPerfStats) {
 			// Time and add the millisecs per frame reading to the buffer
 			m_MSPFs.push_back(m_FrameTimer->GetElapsedRealTimeMS());
@@ -127,7 +127,7 @@ namespace RTE {
 			// Keep the buffer trimmed
 			while (m_MSPFs.size() > c_MSPFAverageSampleSize) {
 				m_MSPFs.pop_front();
-			}		
+			}
 			// Calculate the average milliseconds per frame over the last sampleSize frames
 			//unsigned short m_MSPFAverage = 0;
 			for (deque<unsigned int>::iterator fItr = m_MSPFs.begin(); fItr != m_MSPFs.end(); ++fItr) {
@@ -136,7 +136,7 @@ namespace RTE {
 			m_MSPFAverage /= m_MSPFs.size();
 
 			char str[512];
-			
+
 			// Calculate the fps from the average
 			float fps = 1.0F / (static_cast<float>(m_MSPFAverage) / 1000.0F);
 			sprintf_s(str, sizeof(str), "FPS: %.0f", fps);
@@ -230,7 +230,7 @@ namespace RTE {
 		}
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PerformanceMan::DrawCurrentPing() {
 		AllegroBitmap allegroBitmap(g_FrameMan.GetBackBuffer8());

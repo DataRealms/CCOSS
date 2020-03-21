@@ -249,8 +249,8 @@ namespace RTE
 		Vector m_TargetPos[FRAMES_TO_REMEMBER];
 		std::list<PostEffect> m_PostEffects[FRAMES_TO_REMEMBER];
 
-		// List of sounds received from server. OWNED!!!
-		std::map<short int, SoundContainer *> m_Sounds;
+		// Unordered map of SoundContainers received from server. OWNED!!!
+		std::unordered_map<unsigned short int, SoundContainer *> m_ServerSounds;
 
 		BITMAP * m_pSceneBackgroundBitmap;
 		BITMAP * m_pSceneForegroundBitmap;

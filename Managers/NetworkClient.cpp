@@ -84,13 +84,13 @@ namespace RTE
 		}
 
 		// Stop all sounds received from server
-		for (std::map<short int, SoundContainer *>::iterator it = m_Sounds.begin(); it != m_Sounds.end(); ++it)
+		for (std::unordered_map<unsigned short int, SoundContainer *>::iterator it = m_ServerSounds.begin(); it != m_ServerSounds.end(); ++it)
 		{
 			it->second->Stop();
 			delete it->second;
 		}
 
-		m_Sounds.clear();
+		m_ServerSounds.clear();
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -667,90 +667,62 @@ namespace RTE
 		//g_ConsoleMan.PrintString(buf);
 	}
 
-	void NetworkClient::ReceiveSoundEventsMsg(RakNet::Packet * p)
-	{
+	void NetworkClient::ReceiveSoundEventsMsg(RakNet::Packet * p) {
 		MsgSoundEvents * msg = (MsgSoundEvents *)p->data;
 		AudioMan::NetworkSoundData * sndDataPtr = (AudioMan::NetworkSoundData *)((char *)msg + sizeof(MsgSoundEvents));
 
-		for (int i = 0; i < msg->SoundEventsCount; i++)
-		{
-			if (sndDataPtr->State == AudioMan::SOUND_PLAY)
-			{
-				std::string path = ContentFile::GetPathFromHash(sndDataPtr->SoundHash);
-				if (path != "")
-				{
-					SoundContainer *pSound = new SoundContainer();
-					pSound->Create(path, sndDataPtr->AffectedByPitch > 0 ? true : false, sndDataPtr->Loops);
-					g_AudioMan.SetSoundPitch(pSound, sndDataPtr->Pitch);
+		for (int msgIndex = 0; msgIndex < msg->SoundEventsCount; msgIndex++) {
+			if (sndDataPtr->State == AudioMan::SOUND_SET_GLOBAL_PITCH) {
+				g_AudioMan.SetGlobalPitch(sndDataPtr->Pitch, sndDataPtr->AffectedByGlobalPitch); //Note AffectedByGlobalPitch is hackily used to determine whether this affects music
+			} else {
+				SoundContainer *newlyMadeSoundContainer;
+				if (sndDataPtr->State == AudioMan::SOUND_PLAY) {
+					newlyMadeSoundContainer = new SoundContainer();
+					newlyMadeSoundContainer->Create(sndDataPtr->Loops, sndDataPtr->AffectedByGlobalPitch);
+					for (size_t soundFileHash : sndDataPtr->SoundFileHashes) {
+						if (soundFileHash != 0) { newlyMadeSoundContainer->AddSound(ContentFile::GetPathFromHash(soundFileHash)); }
+					}
+					g_AudioMan.PlaySound(newlyMadeSoundContainer, sndDataPtr->Distance, -1, -1, sndDataPtr->Pitch);
+				}
 
-					pSound->Play(sndDataPtr->Distance);
+				// The set of channels that have already been handled for this event, used to potentially avoid repeating actions while still keeping being sure to potentially iterate over every provided channel index
+				std::unordered_set<SoundContainer *> alreadyHandledSoundContainers;
 
-					// Stop sound at these channels just in case
-					for (std::unordered_set<short int>::iterator channelIterator = sndDataPtr->Channels.begin(); channelIterator != sndDataPtr->Channels.end(); ++channelIterator) {
-						if (m_Sounds.count(*channelIterator) > 0) {
-							m_Sounds[(*channelIterator)]->Stop();
-							delete m_Sounds[(*channelIterator)];
+				for (unsigned short serverSoundChannelIndex : sndDataPtr->Channels) {
+					if (serverSoundChannelIndex < c_NumberOfAudioChannels && m_ServerSounds.find(serverSoundChannelIndex) != m_ServerSounds.end()) {
+						SoundContainer *soundContainerToHandle = m_ServerSounds[serverSoundChannelIndex];
+						if (alreadyHandledSoundContainers.find(soundContainerToHandle) == alreadyHandledSoundContainers.end()) {
+							switch (sndDataPtr->State) {
+								case AudioMan::SOUND_PLAY:
+									soundContainerToHandle->Stop();
+									delete soundContainerToHandle;
+									break;
+								case AudioMan::SOUND_STOP:
+									soundContainerToHandle->Stop();
+									break;
+								case AudioMan::SOUND_SET_ATTENUATION:
+									soundContainerToHandle->UpdateAttenuation(sndDataPtr->Distance);
+									break;
+								case AudioMan::SOUND_SET_PITCH:
+									g_AudioMan.SetSoundPitch(soundContainerToHandle, sndDataPtr->Pitch);
+									break;
+								case AudioMan::SOUND_FADE_OUT:
+									g_AudioMan.FadeOutSound(soundContainerToHandle, sndDataPtr->FadeOutTime);
+									break;
+								default:
+									RTEAbort("Multiplayer client tried to receive unhandled Sound Event, of state " + sndDataPtr->State);
+							}
+							alreadyHandledSoundContainers.insert(soundContainerToHandle);
 						}
 
-						m_Sounds[(*channelIterator)] = pSound;
-					}
-
-					//char buf[128];
-					//sprintf_s(buf, sizeof(buf), "PLAY %d %d %f %s", sndDataPtr->Loops, pSound->GetCurrentChannel(), sndDataPtr->Pitch, path.c_str());
-					//g_ConsoleMan.PrintString(buf);
-				}
-				else 
-				{
-					//char buf[128];
-					//sprintf_s(buf, sizeof(buf), "NO SOUND %d", sndDataPtr->SoundHash);
-					//g_ConsoleMan.PrintString(buf);
-				}
-			}
-			else if (sndDataPtr->State == AudioMan::SOUND_SET_PITCH)
-			{
-				if (sndDataPtr->SoundHash == 0)
-				{
-					g_AudioMan.SetGlobalPitch(sndDataPtr->Pitch, sndDataPtr->AffectedByPitch > 0 ? true : false);
-					//char buf[128];
-					//sprintf_s(buf, sizeof(buf), "GLOBAL PITCH %f %d", sndDataPtr->Pitch, sndDataPtr->AffectedByPitch);
-					//g_ConsoleMan.PrintString(buf);
-				}
-				else
-				{
-					for (std::unordered_set<short int>::iterator channelIterator = sndDataPtr->Channels.begin(); channelIterator != sndDataPtr->Channels.end(); ++channelIterator) {
-						if (m_Sounds.count(*channelIterator) > 0) {
-							//char buf[128];
-							//sprintf_s(buf, sizeof(buf), "PITCH %d %f", m_Sounds[sndDataPtr->Channel]->GetCurrentChannel(), sndDataPtr->Pitch);
-							//g_ConsoleMan.PrintString(buf);
-
-							g_AudioMan.SetSoundPitch(m_Sounds[(*channelIterator)], sndDataPtr->Pitch);
-						} else {
-							//char buf[128];
-							//sprintf_s(buf, sizeof(buf), "Not found %d", sndDataPtr->Channel);
-							//g_ConsoleMan.PrintString(buf);
-						}
-					}
-				}
-			}
-			else if (sndDataPtr->State == AudioMan::SOUND_STOP)
-			{
-				for (std::unordered_set<short int>::iterator channelIterator = sndDataPtr->Channels.begin(); channelIterator != sndDataPtr->Channels.end(); ++channelIterator) {
-					if (m_Sounds.count(*channelIterator) > 0) {
-						//char buf[128];
-						//sprintf_s(buf, sizeof(buf), "STOP %d", m_Sounds[sndDataPtr->Channel]->GetCurrentChannel());
-						//g_ConsoleMan.PrintString(buf);
-
-						m_Sounds[(*channelIterator)]->Stop();
+						// We always have to add the newly made sound container to the map of server sounds, regardless of whether we were able to delete existing sounds above
+						if (sndDataPtr->State == AudioMan::SOUND_PLAY) { m_ServerSounds[serverSoundChannelIndex] = newlyMadeSoundContainer; }
 					}
 				}
 			}
 
 			sndDataPtr++;
 		}
-
-		//char buf[128];
-		//sprintf_s(buf, sizeof(buf), "%d %d %d", msg->FrameNumber, m_PostEffects[msg->FrameNumber].size(), msg->PostEffectsCount);
-		//g_ConsoleMan.PrintString(buf);
 	}
 
 

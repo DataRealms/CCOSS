@@ -495,11 +495,7 @@ bool PlayIntroTitle() {
         g_TimerMan.UpdateSim();
         g_ConsoleMan.Update();
 
-#if __USE_SOUND_FMOD
 		g_AudioMan.Update();
-#elif __USE_SOUND_GORILLA
-		g_AudioMan.Update();
-#endif
 
 		if (sectionSwitch) { sectionTimer.Reset(); }
         elapsed = sectionTimer.GetElapsedRealTimeS();

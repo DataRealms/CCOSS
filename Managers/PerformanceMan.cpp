@@ -44,7 +44,6 @@ namespace RTE {
 		m_PerfCounterNames[PERF_PARTICLES_PASS2] = "Prt Update";
 		m_PerfCounterNames[PERF_ACTORS_AI] = "Act AI";
 		m_PerfCounterNames[PERF_ACTIVITY] = "Activity";
-		m_PerfCounterNames[PERF_SOUND] = "Sound";
 
 		return 0;
 	}

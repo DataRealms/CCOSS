@@ -1,16 +1,3 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            FrameMan.cpp
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Source file for the FrameMan class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "FrameMan.h"
 #include "PostProcessMan.h"
 #include "PrimitiveMan.h"
@@ -30,34 +17,24 @@
 extern bool g_ResetActivity;
 extern bool g_InActivity;
 
-namespace RTE
-{
+namespace RTE {
 
-const string FrameMan::m_ClassName = "FrameMan";
+const std::string FrameMan::c_ClassName = "FrameMan";
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Callback function for the allegro set_display_switch_callback. It will be called when
-// focus is swtiched away to the game window. 
+// focus is switched away to the game window. 
 
-void DisplaySwitchOut(void)
-{
-    g_UInputMan.DisableMouseMoving(true);
-//    g_ActivityMan.PauseActivity();
-//    g_InActivity = false;
-}
+void DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Callback function for the allegro set_display_switch_callback. It will be called when
-// focus is swtiched back to the game window. It will temporarily disable positioniong of
-// the mouse. This is so that when focus is swtiched back to the game window, it avoids
+// focus is switched back to the game window. It will temporarily disable positioning of
+// the mouse. This is so that when focus is switched back to the game window, it avoids
 // having the window fly away because the user clicked the title bar of the window.
 
-void DisplaySwitchIn(void)
-{
-    g_UInputMan.DisableMouseMoving(false);
-//    g_UInputMan.ReInitKeyboard();
-}
+void DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -123,20 +100,6 @@ void FrameMan::Clear()
     m_TextBlinkTimer.Reset();
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the FrameMan object ready for use.
-
-int FrameMan::Create()
-{
-    if (Serializable::Create() < 0)
-        return -1;
-
-    return Create();
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Create
@@ -295,23 +258,17 @@ int FrameMan::Create()
 // Method:          IsValidResolution	
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns true if this resolution is supported
-bool FrameMan::IsValidResolution(int width, int height) const
-{
+
+bool FrameMan::IsValidResolution(int width, int height) const {
 	int actualWidth = width;
 	int actualHeight = height;
 
-	// If width is greater than 1280, the game will switch itself in 2X mode
-	// lowering actual resolution twice
-	if (width >= 1280)
-	{
+	// If width is greater than 1280, the game will switch itself in 2X mode lowering actual resolution twice.
+	if (width >= 1280) {
 		actualWidth = width / 2;
 		actualHeight = height / 2;
 	}
-
-	if (actualWidth < 360 || actualHeight < 360)
-		return false;
-	else
-		return true;
+	return (actualWidth < 360 || actualHeight < 360) ? false : true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -530,33 +487,17 @@ GUIFont * FrameMan::GetSmallFont()
     return m_pSmallFont;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CalculateTextHeight
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns max text height
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int FrameMan::CalculateTextHeight(std::string text, int maxWidth, bool isSmall)
-{
-	if (isSmall)
-		return GetSmallFont()->CalculateHeight(text, maxWidth);
-	else
-		return GetLargeFont()->CalculateHeight(text, maxWidth);
+int FrameMan::CalculateTextHeight(std::string text, int maxWidth, bool isSmall) {
+	return (isSmall) ? GetSmallFont()->CalculateHeight(text, maxWidth) : GetLargeFont()->CalculateHeight(text, maxWidth);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CalculateTextWidth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns max text height
-
-int FrameMan::CalculateTextWidth(std::string text, bool isSmall)
-{
-	if (isSmall)
-		return GetSmallFont()->CalculateWidth(text);
-	else
-		return GetLargeFont()->CalculateWidth(text);
+int FrameMan::CalculateTextWidth(std::string text, bool isSmall) {
+	return (isSmall) ? GetSmallFont()->CalculateWidth(text) : GetLargeFont()->CalculateWidth(text);
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetScreenText
@@ -579,19 +520,6 @@ void FrameMan::SetScreenText(const std::string &msg, int which, int blinkInterva
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetScreenText
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the message to be displayed on top of each player's screen
-
-std::string FrameMan::GetScreenText(int which) const
-{
-    if (which >= 0 && which < MAXSCREENCOUNT)
-		return m_ScreenText[which];
-	else
-		return "";
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          LoadPalette
@@ -662,16 +590,11 @@ bool FrameMan::LoadPalette(std::string palettePath)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Fades the palette in from black at a specified speed.
 
-void FrameMan::FadeInPalette(int fadeSpeed)
-{
-    if (fadeSpeed < 1)
-        fadeSpeed = 1;
-    if (fadeSpeed > 64)
-        fadeSpeed = 64;
-
-    PALETTE pal;
-    get_palette(pal);
-    fade_in(pal, fadeSpeed);
+void FrameMan::FadeInPalette(int fadeSpeed) {
+	PALETTE pal;
+	get_palette(pal);
+	fadeSpeed = Limit(fadeSpeed, 64, 1);
+	fade_in(pal, fadeSpeed);
 }
 
 
@@ -680,14 +603,9 @@ void FrameMan::FadeInPalette(int fadeSpeed)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Fades the palette out to black at a specified speed.
 
-void FrameMan::FadeOutPalette(int fadeSpeed)
-{
-    if (fadeSpeed < 1)
-        fadeSpeed = 1;
-    if (fadeSpeed > 64)
-        fadeSpeed = 64;
-
-    fade_out(fadeSpeed);
+void FrameMan::FadeOutPalette(int fadeSpeed) {
+	fadeSpeed = Limit(fadeSpeed, 64, 1);
+	fade_out(fadeSpeed);
 }
 
 
@@ -1128,18 +1046,9 @@ void FrameMan::FlipFrameBuffers()
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FlippingWith32BPP
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether the 32bpp framebuffer is currnetly being used or not
-//                  when flipping the frame buffers.
-
-bool FrameMan::FlippingWith32BPP() const
-{
-    return get_color_depth() == 32 && m_BPP == 32 && m_pBackBuffer32 && g_InActivity && m_PostProcessing;
-}
-
+bool FrameMan::FlippingWith32BPP() const { return get_color_depth() == 32 && m_BPP == 32 && m_pBackBuffer32 && g_InActivity && g_PostProcessMan.IsPostProcessing(); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          DrawText
@@ -1408,14 +1317,9 @@ int FrameMan::DrawDotLine(BITMAP *pBitmap, const Vector &start, const Vector &en
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the state of this FrameMan. Supposed to be done every frame.
 
-void FrameMan::Update()
-{
+void FrameMan::Update() {
+	// Update all the performance counters.
 	g_PerformanceMan.Update();
-
-    // Clear the back buffers
-//    m_pScreen->GetBack()->Fill(0); // don't do this to avoid the black lines...look into that later.
-
-//    g_UInputMan.DisableMouseMoving(false);
 
 	//Remove all scheduled primitives, those will be re-added by updates from other entities.
 	g_PrimitiveMan.ClearPrimitivesList();
@@ -1706,26 +1610,19 @@ void FrameMan::Draw()
 	}
 
 	//m_StoreNetworkBackBuffer = false;
-	if (m_StoreNetworkBackBuffer)
-	{
+	if (m_StoreNetworkBackBuffer) {
 		// Blit all four internal player screens onto the backbuffer
-		for (int i = 0; i < MAXSCREENCOUNT; i++)
-		{
+		for (int i = 0; i < c_MaxScreenCount; i++) {
 			int dx = 0;
 			int dy = 0;
 			int dw = m_pBackBuffer8->w / 2;
 			int dh = m_pBackBuffer8->h / 2;
 
-			if (i == 1)
-			{
+			if (i == 1) {
 				dx = dw;
-			} 
-			else if (i == 2)
-			{
+			} else if (i == 2) {
 				dy = dh;
-			}
-			else if (i == 3)
-			{
+			} else if (i == 3) {
 				dx = dw;
 				dy = dh;
 			}
@@ -1738,27 +1635,21 @@ void FrameMan::Draw()
 			m_NetworkBitmapIsLocked[i] = false;
 
 			// Draw all player's screen into one
-			if (g_UInputMan.KeyHeld(KEY_5))
+			if (g_UInputMan.KeyHeld(KEY_5)) {
 				stretch_blit(m_pNetworkBackBufferFinal8[m_NetworkFrameCurrent][i], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->h, dx, dy, dw, dh);
+			}
 		}
 
-		if (g_UInputMan.KeyHeld(KEY_1))
-		{
+		if (g_UInputMan.KeyHeld(KEY_1)) {
 			stretch_blit(m_pNetworkBackBufferFinal8[0][0], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][0]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][0]->h, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
 		}
-
-		if (g_UInputMan.KeyHeld(KEY_2))
-		{
+		if (g_UInputMan.KeyHeld(KEY_2)) {
 			stretch_blit(m_pNetworkBackBufferFinal8[1][0], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][1]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][1]->h, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
 		}
-
-		if (g_UInputMan.KeyHeld(KEY_3))
-		{
+		if (g_UInputMan.KeyHeld(KEY_3)) {
 			stretch_blit(m_pNetworkBackBufferFinal8[m_NetworkFrameReady][2], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][2]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][2]->h, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
 		}
-
-		if (g_UInputMan.KeyHeld(KEY_4))
-		{
+		if (g_UInputMan.KeyHeld(KEY_4)) {
 			stretch_blit(m_pNetworkBackBufferFinal8[m_NetworkFrameReady][3], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][3]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][3]->h, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
 		}
 
@@ -1786,8 +1677,7 @@ void FrameMan::Draw()
     if (g_PostProcessMan.IsPostProcessing() && g_InActivity && m_BPP == 32) { g_PostProcessMan.PostProcess(); }
 
     // Draw the console on top of everything
-    if (FlippingWith32BPP())
-        g_ConsoleMan.Draw(m_pBackBuffer32);
+    if (FlippingWith32BPP()) { g_ConsoleMan.Draw(m_pBackBuffer32); }
 
     release_bitmap(m_pBackBuffer8);
 
@@ -1795,6 +1685,7 @@ void FrameMan::Draw()
 	g_PerformanceMan.ResetFrameTimer();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FrameMan::CreateNewPlayerBackBuffer(int player, int w, int h)
 {
@@ -1815,27 +1706,7 @@ void FrameMan::CreateNewPlayerBackBuffer(int player, int w, int h)
 	m_PlayerScreenHeight = h;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPlayerScreenWidth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the width of the individual player screens. This will only be less
-//                  than the backbuffer resolution if there are split screens.
-// Arguments:       None.
-// Return value:    The width of the player screens.
-
-int FrameMan::GetPlayerScreenWidth() const
-{
-	return GetPlayerFrameBufferWidth(-1);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPlayerScreenWidth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the width of the individual player screens. This will only be less
-//                  than the backbuffer resolution if there are split screens.
-// Arguments:       Player to get screen width for, only used by multiplayer parts.
-// Return value:    The width of the player screens.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int FrameMan::GetPlayerFrameBufferWidth(int whichPlayer) const
 { 
@@ -1858,27 +1729,7 @@ int FrameMan::GetPlayerFrameBufferWidth(int whichPlayer) const
 	return m_PlayerScreenWidth; 
 };
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPlayerScreenHeight
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the height of the individual player screens. This will only be less
-//                  than the backbuffer resolution if there are split screens.
-// Arguments:       None.
-// Return value:    The height of the player screens.
-
-int FrameMan::GetPlayerScreenHeight() const
-{
-	return GetPlayerFrameBufferHeight(-1);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPlayerScreenHeight
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the height of the individual player screens. This will only be less
-//                  than the backbuffer resolution if there are split screens.
-// Arguments:       Player to get screen width for, only used by multiplayer parts.
-// Return value:    The height of the player screens.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int FrameMan::GetPlayerFrameBufferHeight(int whichPlayer) const 
 { 
@@ -1900,6 +1751,4 @@ int FrameMan::GetPlayerFrameBufferHeight(int whichPlayer) const
 	}
 	return m_PlayerScreenHeight; 
 }
-
-
-} // namespace RTE
+}

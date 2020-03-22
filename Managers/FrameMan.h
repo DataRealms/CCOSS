@@ -1,66 +1,80 @@
 #ifndef _RTEFRAMEMAN_
 #define _RTEFRAMEMAN_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            FrameMan.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the FrameMan class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
-
-namespace RTE
-{
 #include "RTETools.h"
 #include "Singleton.h"
-#define g_FrameMan FrameMan::Instance()
 #include "Serializable.h"
 #include "ContentFile.h"
 #include "Timer.h"
 #include "Box.h"
 
+#define g_FrameMan FrameMan::Instance()
 
-namespace RTE
-{
+namespace RTE {
 
-class AllegroScreen;
-class GUIFont;
+	class AllegroScreen;
+	class GUIFont;
 
+enum TransperencyPreset { LessTrans = 0, HalfTrans, MoreTrans };
 
-enum TransperencyPreset
-{
-    LessTrans = 0,
-    HalfTrans,
-    MoreTrans
-};
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           FrameMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     The singleton manager over the composition and display of frames.
-// Parent(s):       Singleton, Serializable.
-// Class history:   12/26/2001 FrameMan created.
-
-class FrameMan:
-    public Singleton<FrameMan>,
-    public Serializable
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// The singleton manager over the composition and display of frames.
+/// </summary>
+class FrameMan : public Singleton<FrameMan>, public Serializable {
 
 public:
+
+#pragma region Creation
+	/// <summary>
+	/// Constructor method used to instantiate a FrameMan object in system memory. Create() should be called before using the object.
+	/// </summary>
+	FrameMan() { Clear(); }
+
+	/// <summary>
+	/// Makes the FrameMan object ready for use, which is to be used with SettingsMan first.
+	/// </summary>
+	/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+	virtual int Create();
+#pragma endregion
+
+#pragma region Destruction
+	/// <summary>
+	/// Destructor method used to clean up a FrameMan object before deletion from system memory.
+	/// </summary>
+	virtual ~FrameMan() { Destroy(); }
+
+	/// <summary>
+	/// Destroys and resets (through Clear()) the FrameMan object.
+	/// </summary>
+	void Destroy();
+
+	/// <summary>
+	/// Resets the entire FrameMan, including its inherited members, to their default settings or values.
+	/// </summary>
+	virtual void Reset() { Clear(); }
+#pragma endregion
+
+#pragma region INI Handling
+	/// <summary>
+	/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
+	/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
+	/// </summary>
+	/// <param name="propName">The name of the property to be read.</param>
+	/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
+	/// <returns>
+	/// An error return value signaling whether the property was successfully read or not.
+	/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
+	/// </returns>
+	virtual int ReadProperty(std::string propName, Reader &reader);
+
+	/// <summary>
+	/// Saves the complete state of this FrameMan to an output stream for later recreation with Create(Reader &reader).
+	/// </summary>
+	/// <param name="writer">A Writer that the FrameMan will save itself with.</param>
+	/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+	virtual int Save(Writer &writer) const;
+#pragma endregion
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          CalculateTextHeight
@@ -81,64 +95,6 @@ public:
 
 	int CalculateTextWidth(std::string text, bool isSmall);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     FrameMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a FrameMan object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
-
-    FrameMan() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~FrameMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a FrameMan object before deletion
-//                  from system memory.
-// Arguments:       None.
-
-    virtual ~FrameMan() { Destroy(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the FrameMan object ready for use, which is to be used with
-//                  SettingsMan first.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the entire FrameMan, including its inherited members, to
-//                  their default settings or values.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Reset() { Clear(); }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ResetSplitScreens
@@ -149,38 +105,6 @@ public:
 // Return value:    None.
 
     void ResetSplitScreens(bool hSplit = false, bool vSplit = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this FrameMan to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the FrameMan will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the FrameMan object.
-// Arguments:       None.
-// Return value:    None.
-
-    void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -423,7 +347,7 @@ public:
 // Arguments:       None.
 // Return value:    The width of the player screens.
 
-	int GetPlayerScreenWidth() const;
+	int GetPlayerScreenWidth() const { return GetPlayerFrameBufferWidth(-1); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -446,7 +370,7 @@ public:
 // Arguments:       None.
 // Return value:    The height of the player screens.
 
-	int GetPlayerScreenHeight() const;
+	int GetPlayerScreenHeight() const { return GetPlayerFrameBufferHeight(-1); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -554,7 +478,7 @@ public:
 // Arguments:       None.
 // Return value:    Current message shown to player.
 
-	std::string GetScreenText(int which = 0) const;
+	std::string GetScreenText(int which = 0) const { return (which >= 0 && which < c_MaxScreenCount) ? m_ScreenText[which] : ""; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -564,7 +488,7 @@ public:
 // Arguments:       Which screen you want to set text to.
 // Return value:    None.
 
-    void ClearScreenText(int which = 0) { if (which >= 0 && which < MAXSCREENCOUNT) { m_ScreenText[which].clear(); m_TextDuration[which] = -1; m_TextDurationTimer[which].Reset(); m_TextBlinking[which] = 0; } }
+    void ClearScreenText(int which = 0) { if (which >= 0 && which < c_MaxScreenCount) { m_ScreenText[which].clear(); m_TextDuration[which] = -1; m_TextDurationTimer[which].Reset(); m_TextBlinking[which] = 0; } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -760,17 +684,7 @@ public:
 // Arguments:       None.
 // Return value:    Whether the 32bpp is used or not (8bpp one is).
 
-    bool FlippingWith32BPP() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ShowMessageBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Pops up a message box dialog in the OS. For debug purposes mostly.
-// Arguments:       The string that the message box should display.
-// Return value:    None.
-
-    void ShowMessageBox(std::string message) const { allegro_message(message.c_str()); }
+	bool FlippingWith32BPP() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -874,17 +788,23 @@ public:
 
 	Vector GetTargetPos(int screen) { return m_TargetPos[m_NetworkFrameReady][screen]; }
 
-	Vector SLOffset[MAXSCREENCOUNT][MAX_LAYERS_STORED_FOR_NETWORK];
+	Vector SLOffset[c_MaxScreenCount][c_MaxLayersStoredForNetwork];
 
 	bool IsInMultiplayerMode() { return m_StoreNetworkBackBuffer; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
+
+#pragma region Class Info
+	/// <summary>
+	/// Gets the class name of this Entity.
+	/// </summary>
+	/// <returns>A string with the friendly-formatted type name of this object.</returns>
+	virtual const std::string & GetClassName() const { return c_ClassName; }
+#pragma endregion
 
 protected:
 
     // Member variables
-    static const std::string m_ClassName;
+    static const std::string c_ClassName; //!< The friendly-formatted type name of this object.
 
     // Resolution
     int m_ResX;
@@ -902,17 +822,17 @@ protected:
     BITMAP *m_pBackBuffer32;
 
 	// Per-player allocated frame buffer to draw upon during frameman draw
-	BITMAP *m_pNetworkBackBufferIntermediate8[2][MAXSCREENCOUNT];
+	BITMAP *m_pNetworkBackBufferIntermediate8[2][c_MaxScreenCount];
 
 	// Per-player allocated frame buffer to draw upon during frameman draw used to draw UI only
-	BITMAP *m_pNetworkBackBufferIntermediateGUI8[2][MAXSCREENCOUNT];
+	BITMAP *m_pNetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount];
 
 
 	// Per-player allocated frame buffer to copy Intermediate before sending
-	BITMAP *m_pNetworkBackBufferFinal8[2][MAXSCREENCOUNT];
+	BITMAP *m_pNetworkBackBufferFinal8[2][c_MaxScreenCount];
 
 	// Per-player allocated frame buffer to copy Intermediate before sending used to draw UI only
-	BITMAP *m_pNetworkBackBufferFinalGUI8[2][MAXSCREENCOUNT];
+	BITMAP *m_pNetworkBackBufferFinalGUI8[2][c_MaxScreenCount];
 
 
 	// If true, draws the contents of the m_pNetworkBackBuffer8 on top of m_pBackBuffer8 every frame in FrameMan.Draw
@@ -979,56 +899,44 @@ protected:
     GUIFont *m_pLargeFont;
     GUIFont *m_pSmallFont;
     // The text to be displayed on each player's screen
-    std::string m_ScreenText[MAXSCREENCOUNT];
+    std::string m_ScreenText[c_MaxScreenCount];
     // The minimum duration the current message is supposed to show vefore it can be overwritten
-    int m_TextDuration[MAXSCREENCOUNT];
+    int m_TextDuration[c_MaxScreenCount];
     // Screen text display duration time
-    Timer m_TextDurationTimer[MAXSCREENCOUNT];
+    Timer m_TextDurationTimer[c_MaxScreenCount];
     // Screen text messages blinking interval in ms. 0 is no blink at all, just show message.
-    int m_TextBlinking[MAXSCREENCOUNT];
+    int m_TextBlinking[c_MaxScreenCount];
     // Whether screen text is centered vertically
-    bool m_TextCentered[MAXSCREENCOUNT];
+    bool m_TextCentered[c_MaxScreenCount];
     // Screen text blink timer
     Timer m_TextBlinkTimer;
     // Whether to flash a player's screen a specific color this frame. -1 means no flash
-    int m_FlashScreenColor[MAXSCREENCOUNT];
+    int m_FlashScreenColor[c_MaxScreenCount];
     // Whether we flashed last frame or not
-    bool m_FlashedLastFrame[MAXSCREENCOUNT];
+    bool m_FlashedLastFrame[c_MaxScreenCount];
     // Flash screen timer
-    Timer m_FlashTimer[MAXSCREENCOUNT];
+    Timer m_FlashTimer[c_MaxScreenCount];
 	// Frame target pos for network players
-	Vector m_TargetPos[2][MAXSCREENCOUNT];
+	Vector m_TargetPos[2][c_MaxScreenCount];
 	// Which frame index is being rendered, 0 or 1
 	int m_NetworkFrameCurrent;
 	// Which frame is rendered and ready for transmission, 0 or 1
 	int m_NetworkFrameReady;
 
 	// If true then the network bitmap is being updated
-	bool m_NetworkBitmapIsLocked[MAXSCREENCOUNT];
-	//std::mutex m_NetworkBitmapIsLocked[MAXSCREENCOUNT];
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
+	bool m_NetworkBitmapIsLocked[c_MaxScreenCount];
+	//std::mutex m_NetworkBitmapIsLocked[c_MaxScreenCount];
 
 private:
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this FrameMan, effectively
-//                  resetting the members of this abstraction level only.
-// Arguments:       None.
-// Return value:    None.
-
+	/// <summary>
+	/// Clears all the member variables of this FrameMan, effectively resetting the members of this abstraction level only.
+	/// </summary>
     void Clear();
 
-
     // Disallow the use of some implicit methods.
-    FrameMan(const FrameMan &reference);
-    FrameMan & operator=(const FrameMan &rhs);
-
+	FrameMan(const FrameMan &reference) {}
+	FrameMan & operator=(const FrameMan &rhs) {}
 };
-
-} // namespace RTE
-
-#endif // File
+}
+#endif

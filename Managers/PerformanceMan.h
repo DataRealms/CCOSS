@@ -11,6 +11,9 @@ namespace RTE {
 	class AllegroBitmap;
 	class Timer;
 
+	/// <summary>
+	/// Singleton manager responsible for all performance stats counting and drawing.
+	/// </summary>
 	class PerformanceMan : public Singleton<PerformanceMan> {
 
 	public:

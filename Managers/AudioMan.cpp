@@ -573,7 +573,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::GetSoundEvents(int player, std::list<NetworkSoundData> & list) {
+	void AudioMan::GetSoundEvents(int player, std::list<NetworkSoundData> &list) {
 		if (player < 0 || player >= c_MaxClients) {
 			return;
 		}
@@ -600,9 +600,11 @@ namespace RTE {
 			if (player >= 0 && player < c_MaxClients) {
 				NetworkSoundData soundData;
 				soundData.State = state;
+				std::fill_n(soundData.Channels, c_MaxPlayingSoundsPerContainer, c_MaxAudioChannels + 1);
 				if (channels) {
 					std::copy(channels->begin(), channels->end(), soundData.Channels);
 				}
+				std::fill_n(soundData.SoundFileHashes, c_MaxAudioChannels, 0);
 				if (soundFileHashes) {
 					std::copy(soundFileHashes->begin(), soundFileHashes->end(), soundData.SoundFileHashes);
 				}

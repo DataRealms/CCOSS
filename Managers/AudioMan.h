@@ -56,8 +56,8 @@ namespace RTE {
 
 		struct NetworkSoundData {
 			unsigned char State;
-			unsigned short int Channels[c_MaxPlayingSoundsPerContainer]{c_MaxAudioChannels + 1};
-			size_t SoundFileHashes[c_MaxAudioChannels]{0};
+			unsigned short int Channels[c_MaxPlayingSoundsPerContainer];
+			size_t SoundFileHashes[c_MaxAudioChannels];
 			short int Distance;
 			short int Loops;
 			float Pitch;

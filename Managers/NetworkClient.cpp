@@ -675,27 +675,26 @@ namespace RTE
 			if (sndDataPtr->State == AudioMan::SOUND_SET_GLOBAL_PITCH) {
 				g_AudioMan.SetGlobalPitch(sndDataPtr->Pitch, sndDataPtr->AffectedByGlobalPitch); //Note AffectedByGlobalPitch is hackily used to determine whether this affects music
 			} else {
-				SoundContainer *newlyMadeSoundContainer;
-				if (sndDataPtr->State == AudioMan::SOUND_PLAY) {
-					newlyMadeSoundContainer = new SoundContainer();
-					newlyMadeSoundContainer->Create(sndDataPtr->Loops, sndDataPtr->AffectedByGlobalPitch);
-					for (size_t soundFileHash : sndDataPtr->SoundFileHashes) {
-						if (soundFileHash != 0) { newlyMadeSoundContainer->AddSound(ContentFile::GetPathFromHash(soundFileHash)); }
-					}
-					g_AudioMan.PlaySound(newlyMadeSoundContainer, sndDataPtr->Distance, -1, -1, sndDataPtr->Pitch);
-				}
-
-				// The set of channels that have already been handled for this event, used to potentially avoid repeating actions while still keeping being sure to potentially iterate over every provided channel index
+				// The set of SoundContainers that have already been handled for this event, used to hopefully avoid repeating actions when iterating over provided sound channel indices
 				std::unordered_set<SoundContainer *> alreadyHandledSoundContainers;
 
 				for (unsigned short serverSoundChannelIndex : sndDataPtr->Channels) {
-					if (serverSoundChannelIndex < c_MaxAudioChannels && m_ServerSounds.find(serverSoundChannelIndex) != m_ServerSounds.end()) {
-						SoundContainer *soundContainerToHandle = m_ServerSounds[serverSoundChannelIndex];
+					if (serverSoundChannelIndex < c_MaxAudioChannels && (sndDataPtr->State == AudioMan::SOUND_PLAY || m_ServerSounds.find(serverSoundChannelIndex) != m_ServerSounds.end())) {
+						SoundContainer *soundContainerToHandle = m_ServerSounds.find(serverSoundChannelIndex) == m_ServerSounds.end() ? NULL : m_ServerSounds.at(serverSoundChannelIndex);
 						if (alreadyHandledSoundContainers.find(soundContainerToHandle) == alreadyHandledSoundContainers.end()) {
 							switch (sndDataPtr->State) {
 								case AudioMan::SOUND_PLAY:
-									soundContainerToHandle->Stop();
-									delete soundContainerToHandle;
+									if (soundContainerToHandle == NULL) {
+										soundContainerToHandle = new SoundContainer();
+									} else {
+										soundContainerToHandle->Stop();
+										soundContainerToHandle->Reset();
+									}
+									soundContainerToHandle->Create(sndDataPtr->Loops, sndDataPtr->AffectedByGlobalPitch);
+									for (size_t soundFileHash : sndDataPtr->SoundFileHashes) {
+										if (soundFileHash != 0) { soundContainerToHandle->AddSound(ContentFile::GetPathFromHash(soundFileHash)); }
+									}
+									g_AudioMan.PlaySound(soundContainerToHandle, sndDataPtr->Distance, -1, -1, sndDataPtr->Pitch);
 									break;
 								case AudioMan::SOUND_STOP:
 									soundContainerToHandle->Stop();

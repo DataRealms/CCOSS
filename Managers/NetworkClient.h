@@ -15,6 +15,7 @@
 #include "Singleton.h"
 #include "UInputMan.h"
 #include "Sound.h"
+#include "PostProcessMan.h"
 
 #include "Network.h"
 #include "NatPunchthroughClient.h"

@@ -1174,7 +1174,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
     if (m_pScreenEffect && m_EffectOnGib && (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY())))
     {
         // Set the screen effect to draw at the final post processing stage
-        g_SceneMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, 255, m_EffectRotAngle);
+		g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, 255, m_EffectRotAngle);
     }
 
     // Things breaking apart makes alarming noises!

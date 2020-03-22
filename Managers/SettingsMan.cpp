@@ -18,6 +18,7 @@
 #include "ActivityMan.h"
 #include "ConsoleMan.h"
 #include "PerformanceMan.h"
+#include "PostProcessMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUIControlManager.h"
@@ -147,9 +148,9 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "NxFullscreen")
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "PostProcessing")
-        g_FrameMan.ReadProperty(propName, reader);
+        g_PostProcessMan.ReadProperty(propName, reader);
     else if (propName == "PostPixelGlow")
-        g_FrameMan.ReadProperty(propName, reader);
+		g_PostProcessMan.ReadProperty(propName, reader);
     else if (propName == "PixelsPerMeter")
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "PlayIntro")
@@ -347,9 +348,9 @@ int SettingsMan::Save(Writer &writer) const
     writer.NewProperty("NxFullscreen");
     writer << g_FrameMan.GetNewNxFullscreen();
     writer.NewProperty("PostProcessing");
-    writer << g_FrameMan.IsPostProcessing();
+    writer << g_PostProcessMan.IsPostProcessing();
     writer.NewProperty("PostPixelGlow");
-    writer << g_FrameMan.IsPixelGlowEnabled();
+    writer << g_PostProcessMan.IsPixelGlowEnabled();
     writer.NewProperty("PixelsPerMeter");
     writer << g_FrameMan.GetPPM();
     writer.NewProperty("PlayIntro");

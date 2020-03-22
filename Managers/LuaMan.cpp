@@ -1424,8 +1424,6 @@ int LuaMan::Create()
             .def("SetScreenText", &FrameMan::SetScreenText)
             .def("ClearScreenText", &FrameMan::ClearScreenText)
             .def("IsFullscreen", &FrameMan::IsFullscreen)
-            .property("PostProcessing", &FrameMan::IsPostProcessing, &FrameMan::EnablePostProcessing)
-            .property("PostPixelGlow", &FrameMan::IsPixelGlowEnabled, &FrameMan::EnablePixelGlow)
             .def("LoadPalette", &FrameMan::LoadPalette)
             .def("FadeInPalette", &FrameMan::FadeInPalette)
             .def("FadeOutPalette", &FrameMan::FadeOutPalette)
@@ -1437,6 +1435,12 @@ int LuaMan::Create()
             .def("FlashScreen", &FrameMan::FlashScreen)
 			.def("CalculateTextHeight", &FrameMan::CalculateTextHeight)
 			.def("CalculateTextWidth", &FrameMan::CalculateTextWidth),
+
+		class_<PostProcessMan>("PostProcessManager")
+			.property("PostProcessing", &PostProcessMan::IsPostProcessing, &PostProcessMan::EnablePostProcessing)
+			.property("PostPixelGlow", &PostProcessMan::IsPixelGlowEnabled, &PostProcessMan::EnablePixelGlow)
+			.def("RegisterPostEffect", &PostProcessMan::RegisterPostEffect)
+			.def("ClearPostEffects", &PostProcessMan::ClearPostEffects),
 
 		class_<PrimitiveMan>("PrimitiveManager")
 			.def("DrawLinePrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, unsigned short color))&PrimitiveMan::DrawLinePrimitive)
@@ -1738,11 +1742,9 @@ int LuaMan::Create()
             .def("ShortestDistance", &SceneMan::ShortestDistance)
             .def("ObscuredPoint", (bool (SceneMan::*)(Vector &, int))&SceneMan::ObscuredPoint)//, out_value(_2))
             .def("ObscuredPoint", (bool (SceneMan::*)(int, int, int))&SceneMan::ObscuredPoint)
-            .def("RegisterPostEffect", &SceneMan::RegisterPostEffect)
             .def("AddSceneObject", &SceneMan::AddSceneObject)
             .def("AddTerrainObject", &SceneMan::AddTerrainObject)
-			.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans)
-            .def("ClearPostEffects", &SceneMan::ClearPostEffects),
+			.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans),
 
 		class_<DataModule>("DataModule")
 			.def_readwrite("Presets", &DataModule::m_EntityList, return_stl_iterator)
@@ -2208,6 +2210,7 @@ int LuaMan::Create()
     globals(m_pMasterState)["TimerMan"] = &g_TimerMan;
 	globals(m_pMasterState)["PerformanceMan"] = &g_PerformanceMan;
     globals(m_pMasterState)["FrameMan"] = &g_FrameMan;
+	globals(m_pMasterState)["PostProcessMan"] = &g_PostProcessMan;
 	globals(m_pMasterState)["PrimitiveMan"] = &g_PrimitiveMan;
     globals(m_pMasterState)["PresetMan"] = &g_PresetMan;
     globals(m_pMasterState)["AudioMan"] = &g_AudioMan;

@@ -465,6 +465,9 @@
     <ClInclude Include="Managers\PrimitiveMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
+    <ClInclude Include="Managers\PostProcessMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -874,6 +877,9 @@
       <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="Managers\PrimitiveMan.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Managers\PostProcessMan.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
   </ItemGroup>

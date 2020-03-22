@@ -1144,7 +1144,7 @@ namespace RTE
 	void NetworkServer::SendPostEffectData(int player)
 	{
 		std::list<PostEffect> effects;
-		g_FrameMan.GetPostEffectsList(player, effects);
+		g_PostProcessMan.GetNetworkPostEffectsList(player, effects);
 
 		if (effects.empty())
 			return;

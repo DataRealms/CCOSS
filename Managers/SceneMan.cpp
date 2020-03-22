@@ -79,7 +79,6 @@ void SceneMan::Clear()
     m_pMOColorLayer = 0;
     m_pMOIDLayer = 0;
     m_MOIDDrawings.clear();
-    m_PostSceneEffects.clear();
     m_pDebugLayer = 0;
     m_LastRayHitPos.Reset();
 
@@ -185,7 +184,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
     // Clear out all the MO's in the scene
     g_MovableMan.PurgeAllMOs();
     // Clear the post effects
-    ClearPostEffects();
+    g_PostProcessMan.ClearPostEffects();
 
 	g_NetworkServer.LockScene(true);
 
@@ -3380,179 +3379,6 @@ int SceneMan::WrapBox(const Box &wrapBox, list<Box> &outputList)
     }
 
     return addedTimes;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterPostEffect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers a post effect to be added at the very last stage of 32bpp
-//                  rendering by the FrameMan.
-
-void SceneMan::RegisterPostEffect(const Vector &effectPos, BITMAP *pEffect, size_t hash, int strength, float angle)
-{
-    // These effects get applied when there's a drawn frame that followed one or more sim updates
-    // They are not only registered on drawn sim updates; flashes and stuff could be missed otherwise if they occur on undrawn sim updates
-    if (pEffect && /*g_TimerMan.DrawnSimUpdate()) && */g_TimerMan.SimUpdatesSinceDrawn() >= 0)
-        m_PostSceneEffects.push_back(PostEffect(effectPos, pEffect, hash, strength, angle));
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterGlowDotEffect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers a specific post yellow glow effect to be added at the very
-//                  last stage of 32bpp rendering by the FrameMan.
-
-void SceneMan::RegisterGlowDotEffect(const Vector &effectPos, DotGlowColor color, int strength)
-{
-    // These effects only apply only once per drawn sim update, and only on the first frame drawn after one or more sim updates
-    if (color != NoDot && g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0)
-        RegisterPostEffect(effectPos, g_FrameMan.GetDotGlowEffect(color), g_FrameMan.GetDotGlowEffectHash(color) , strength);
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPostScreenEffectsWrapped
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets all screen effects that are located within a box in the scene.
-//                  Their coordinates will be returned relative to the upper left corner
-//                  of the box passed in here.
-
-bool SceneMan::GetPostScreenEffectsWrapped(const Vector &boxPos, int boxWidth, int boxHeight, list<PostEffect> &effectsList, int team)
-{
-    bool found = false;
-
-    // Do the first unwrapped rect
-    found = GetPostScreenEffects(boxPos, boxWidth, boxHeight, effectsList, team);
-
-    int left = boxPos.m_X;
-    int top = boxPos.m_Y;
-    int right = left + boxWidth;
-    int bottom = top + boxHeight;
-
-    // Check wrapped rectangles
-    if (g_SceneMan.SceneWrapsX())
-    {
-        int sceneWidth = m_pCurrentScene->GetWidth();
-
-        if (left < 0)
-            found = GetPostScreenEffects(left + sceneWidth, top, right + sceneWidth, bottom, effectsList, team) || found;
-        if (right >= sceneWidth)
-            found = GetPostScreenEffects(left - sceneWidth, top, right - sceneWidth, bottom, effectsList, team) || found;
-    }
-    if (g_SceneMan.SceneWrapsY())
-    {
-        int sceneHeight = m_pCurrentScene->GetHeight();
-
-        if (top < 0)
-            found = GetPostScreenEffects(left, top + sceneHeight, right, bottom + sceneHeight, effectsList, team) || found;
-        if (bottom >= sceneHeight)
-            found = GetPostScreenEffects(left, top - sceneHeight, right, bottom - sceneHeight, effectsList, team) || found;
-    }
-
-    return found;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGlowAreasWrapped
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets all glow areas that affect anyhting within a box in the scene.
-//                  Their coordinates will be returned relative to the upper left corner
-//                  of the box passed in here. Wrapping of the box will be taken care of.
-
-bool SceneMan::GetGlowAreasWrapped(const Vector &boxPos, int boxWidth, int boxHeight, list<Box> &areaList)
-{
-    bool foundAny = false;
-
-    // The Box passed in here is the test box we're going to look if any glow areas intersect with.
-    IntRect testRect(boxPos.m_X, boxPos.m_Y, boxPos.m_X + boxWidth, boxPos.m_Y + boxHeight);
-    // Need to check for test box wrappings, so we'll end up with a list of at least one test box to check all glow areas against
-    list<IntRect> testRects;
-    WrapRect(testRect, testRects);
-
-    // Get all the wrapped instances of the existing registered glow areas.
-    list<IntRect> wrappedGlowRects;
-    for (list<IntRect>::iterator grItr = m_GlowAreas.begin(); grItr != m_GlowAreas.end(); ++grItr)
-        WrapRect((*grItr), wrappedGlowRects);
-
-    // Now check each wrapped test rect against all the wrapped glow rects, and add the intersecting ones to the output list
-    for (list<IntRect>::iterator trItr = testRects.begin(); trItr != testRects.end(); ++trItr)
-    {
-        for (list<IntRect>::iterator wgrItr = wrappedGlowRects.begin(); wgrItr != wrappedGlowRects.end(); ++wgrItr)
-        {
-            if ((*trItr).Intersects(*wgrItr))
-            {
-                // Cut down any intersecting boxes so they are only inside the box
-                IntRect cutRect(*wgrItr);
-                cutRect.IntersectionCut(*trItr);
-                // Create boxPos-relative Box out of the IntRect that is found to be intersecting with the test box!
-                areaList.push_back(Box(Vector(cutRect.m_Left - boxPos.m_X, cutRect.m_Top - boxPos.m_Y), cutRect.m_Right - cutRect.m_Left, cutRect.m_Bottom - cutRect.m_Top));
-                foundAny = true;
-            }
-        }
-    }
-
-    return foundAny;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPostScreenEffects
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets all screen effects that are located within a box in the scene.
-//                  Their coordinates will be returned relative to the upper left corner
-//                  of the box passed in here.
-
-bool SceneMan::GetPostScreenEffects(Vector boxPos, int boxWidth, int boxHeight, list<PostEffect> &effectsList, int team)
-{
-    bool found = false;
-    bool unseen = false;
-    for (list<PostEffect>::iterator itr = m_PostSceneEffects.begin(); itr != m_PostSceneEffects.end(); ++itr)
-    {
-        if (team != Activity::NOTEAM)
-            unseen = IsUnseen((*itr).m_Pos.m_X, (*itr).m_Pos.m_Y, team);
-
-        if (WithinBox((*itr).m_Pos, boxPos, boxWidth, boxHeight) && !unseen)
-        {
-            found = true;
-            // Make the position returned relative to the box
-            effectsList.push_back(PostEffect((*itr).m_Pos - boxPos, (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
-        }
-    }
-
-    return found;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPostScreenEffects
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets all screen effects that are located within a box in the scene.
-//                  Their coordinates will be returned relative to the upper left corner
-//                  of the box passed in here.
-
-bool SceneMan::GetPostScreenEffects(int left, int top, int right, int bottom, list<PostEffect> &effectsList, int team)
-{
-    bool found = false;
-    bool unseen = false;
-    Vector posInBox;
-    for (list<PostEffect>::iterator itr = m_PostSceneEffects.begin(); itr != m_PostSceneEffects.end(); ++itr)
-    {
-        if (team != Activity::NOTEAM)
-            unseen = IsUnseen((*itr).m_Pos.m_X, (*itr).m_Pos.m_Y, team);
-
-        if (WithinBox((*itr).m_Pos, left, top, right, bottom) && !unseen)
-        {
-            found = true;
-            // Make the position returned relative to the box
-            effectsList.push_back(PostEffect(Vector((*itr).m_Pos.m_X - left, (*itr).m_Pos.m_Y - top), (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
-        }
-    }
-
-    return found;
 }
 
 

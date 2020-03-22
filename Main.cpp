@@ -1890,6 +1890,7 @@ int main(int argc, char *argv[]) {
 	new PerformanceMan();
     new PresetMan();
     new FrameMan();
+	new PostProcessMan();
 	new PrimitiveMan();
     new AudioMan();
 	new GUISound();
@@ -1921,6 +1922,7 @@ int main(int argc, char *argv[]) {
 	g_PerformanceMan.Create();
     g_PresetMan.Create();
     g_FrameMan.Create();
+	g_PostProcessMan.Create();
     g_AudioMan.Create();
 	g_GUISound.Create();
     g_UInputMan.Create();

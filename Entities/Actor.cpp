@@ -2003,7 +2003,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 waypoint = (*vItr).first - targetPos;
                 circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 2, g_YellowGlowColor);
                 // Add pixel glow area around it, in scene coordinates
-                g_SceneMan.RegisterGlowArea((*vItr).first, 5);
+				g_PostProcessMan.RegisterGlowArea((*vItr).first, 5);
             }
 
             // Draw line from the last movetarget on the current path to the first waypoint in queue after that
@@ -2031,7 +2031,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             waypoint = m_MovePath.back() - targetPos;
             circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 2, g_YellowGlowColor);
             // Add pixel glow area around it, in scene coordinates
-            g_SceneMan.RegisterGlowArea(m_MovePath.back(), 5);
+			g_PostProcessMan.RegisterGlowArea(m_MovePath.back(), 5);
         }
         // If no points left on movepath, then draw straight line to the movetarget
         else
@@ -2042,7 +2042,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             waypoint = m_MoveTarget - targetPos;
             circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 2, g_YellowGlowColor);
             // Add pixel glow area around it, in scene coordinates
-            g_SceneMan.RegisterGlowArea(m_MoveTarget, 5);
+			g_PostProcessMan.RegisterGlowArea(m_MoveTarget, 5);
         }
     }
 

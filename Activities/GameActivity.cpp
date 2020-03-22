@@ -20,6 +20,7 @@
 #include "ConsoleMan.h"
 #include "PresetMan.h"
 #include "DataModule.h"
+#include "PostProcessMan.h"
 #include "Controller.h"
 #include "Scene.h"
 #include "Actor.h"
@@ -2376,7 +2377,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
         Vector center = m_ActorCursor[PoS] - targetPos;
         circle(pTargetBitmap, center.m_X, center.m_Y, m_CursorTimer.AlternateReal(150) ? 6 : 8, g_YellowGlowColor);
         // Add pixel glow area around it, in scene coordinates
-        g_SceneMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
+		g_PostProcessMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
 /* Crosshairs
         putpixel(pTargetBitmap, center.m_X, center.m_Y, g_YellowGlowColor);
         hline(pTargetBitmap, center.m_X - 5, center.m_Y, center.m_X - 2, g_YellowGlowColor);
@@ -2393,7 +2394,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
         circlefill(pTargetBitmap, center.m_X, center.m_Y, 2, g_YellowGlowColor);
 //            putpixel(pTargetBitmap, center.m_X, center.m_Y, g_YellowGlowColor);
         // Add pixel glow area around it, in scene coordinates
-        g_SceneMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
+		g_PostProcessMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
 
         // Draw a line from the last set waypoint to the cursor
         if (m_pControlledActor[PoS] && g_MovableMan.IsActor(m_pControlledActor[PoS]))
@@ -2475,13 +2476,13 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 						unwrappedPos = m_ActorCursor[PoS] + Vector(sceneWidth , 0);
 					else
 						unwrappedPos = m_ActorCursor[PoS] - Vector(sceneWidth , 0);
-					g_SceneMan.RegisterGlowArea(unwrappedPos, 10);
+					g_PostProcessMan.RegisterGlowArea(unwrappedPos, 10);
 				}
 			}
 			else
 				unwrappedPos = m_ActorCursor[PoS];
 
-			g_SceneMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
+			g_PostProcessMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
 
 			//Glowing dotted circle version
 			int dots = 2 * c_PI * radius / 25;//5 + (int)(radius / 10);
@@ -2521,7 +2522,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 					}
 
 					circlefill(pTargetBitmap, dotDrawPos.m_X, dotDrawPos.m_Y, 1, g_YellowGlowColor);
-					g_SceneMan.RegisterGlowArea(dotPos, 3);
+					g_PostProcessMan.RegisterGlowArea(dotPos, 3);
 				}
 			}
 		}

@@ -17,6 +17,7 @@
 #include "GUISound.h"
 #include "RTETools.h"
 #include "ActivityMan.h"
+#include "PostProcessMan.h"
 
 namespace RTE
 {

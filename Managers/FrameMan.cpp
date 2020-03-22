@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "FrameMan.h"
+#include "PostProcessMan.h"
 #include "PrimitiveMan.h"
 #include "PerformanceMan.h"
 #include "ActivityMan.h"
@@ -25,10 +26,6 @@
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
 #include "GUI/AllegroScreen.h"
-
-
-// I know this is a crime, but if I include it in FrameMan.h the whole thing will collapse due to int redefinitions in Allegro
-std::mutex ScreenRelativeEffectsMutex[MAXSCREENCOUNT];
 
 extern bool g_ResetActivity;
 extern bool g_InActivity;
@@ -88,15 +85,6 @@ void FrameMan::Clear()
     m_NxWindowed = 1;
     m_NxFullscreen = 1;
     m_NewNxFullscreen = 1;
-    m_PostProcessing = false;
-    m_PostPixelGlow = false;
-    m_pYellowGlow = 0;
-    m_YellowGlowHash = 0;
-    m_pRedGlow = 0;
-    m_RedGlowHash = 0;
-    m_pBlueGlow = 0;
-    m_BlueGlowHash = 0;
-    m_PostScreenEffects.clear();
     m_HSplit = false;
     m_VSplit = false;
     m_HSplitOverride = false;
@@ -131,8 +119,6 @@ void FrameMan::Clear()
 			m_pNetworkBackBufferFinalGUI8[f][i] = 0;
 		}
 		m_NetworkBitmapIsLocked[i] = false;
-
-		m_ScreenRelativeEffects->clear();
     }
     m_TextBlinkTimer.Reset();
 }
@@ -285,23 +271,6 @@ int FrameMan::Create()
         // 32bpp so we can make ze cool effects. Everyhting up to this is 8bpp, including the back buffer
         m_pBackBuffer32 = create_bitmap_ex(32, m_ResX, m_ResY);
 //        clear_to_color(m_pBackBuffer32, m_BlackColor);
-
-// TODO: Make more robust and load more glows!
-        ContentFile glowFile("Base.rte/Effects/Glows/YellowTiny.bmp");
-        m_pYellowGlow = glowFile.GetAsBitmap();
-		m_YellowGlowHash = glowFile.GetHash();
-        glowFile.SetDataPath("Base.rte/Effects/Glows/RedTiny.bmp");
-        m_pRedGlow = glowFile.GetAsBitmap();
-        m_RedGlowHash = glowFile.GetHash();
-        glowFile.SetDataPath("Base.rte/Effects/Glows/BlueTiny.bmp");
-        m_pBlueGlow = glowFile.GetAsBitmap();
-        m_BlueGlowHash = glowFile.GetHash();
-
-		m_pTempEffectBitmap_16 = create_bitmap_ex(32, 16, 16);
-		m_pTempEffectBitmap_32 = create_bitmap_ex(32, 32, 32);
-		m_pTempEffectBitmap_64 = create_bitmap_ex(32, 64, 64);
-		m_pTempEffectBitmap_128 = create_bitmap_ex(32, 128, 128);
-		m_pTempEffectBitmap_256 = create_bitmap_ex(32, 256, 256);
 	}
 
     m_PlayerScreenWidth = m_pBackBuffer8->w;
@@ -387,10 +356,6 @@ int FrameMan::ReadProperty(std::string propName, Reader &reader)
         reader >> m_NxFullscreen;
         m_NewNxFullscreen = m_NxFullscreen;
     }
-    else if (propName == "PostProcessing")
-        reader >> m_PostProcessing;
-    else if (propName == "PostPixelGlow")
-        reader >> m_PostPixelGlow;
     else if (propName == "PixelsPerMeter")
     {
         reader >> m_PPM;
@@ -482,10 +447,6 @@ int FrameMan::Save(Writer &writer) const
     writer << m_PaletteFile;
     writer.NewProperty("Fullscreen");
     writer << m_Fullscreen;
-    writer.NewProperty("PostProcessing");
-    writer << m_PostProcessing;
-    writer.NewProperty("PostPixelGlow");
-    writer << m_PostPixelGlow;
     writer.NewProperty("PixelsPerMeter");
     writer << m_PPM;
     writer.NewProperty("HSplitScreen");
@@ -834,7 +795,7 @@ int FrameMan::SaveWorldToBMP(const char *namebase)
 		//Draw objects
 		draw_sprite(pWorldBitmap, g_SceneMan.GetMOColorBitmap(), 0, 0);
 
-		g_SceneMan.GetPostScreenEffectsWrapped(targetPos, pWorldBitmap->w, pWorldBitmap->h, postEffects,-1);
+		g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, pWorldBitmap->w, pWorldBitmap->h, postEffects,-1);
 
 		//Draw post-effects
 		BITMAP *pBitmap = 0;
@@ -860,17 +821,19 @@ int FrameMan::SaveWorldToBMP(const char *namebase)
 			{
 				BITMAP * pTargetBitmap;
 
-				if (pBitmap->w < 16 && pBitmap->h < 16)
-					pTargetBitmap = m_pTempEffectBitmap_16;
-				else if (pBitmap->w < 32 && pBitmap->h < 32)
-					pTargetBitmap = m_pTempEffectBitmap_32;
-				else if (pBitmap->w < 64 && pBitmap->h < 64)
-					pTargetBitmap = m_pTempEffectBitmap_64;
-				else if (pBitmap->w < 128 && pBitmap->h < 128)
-					pTargetBitmap = m_pTempEffectBitmap_128;
-				else 
-					pTargetBitmap = m_pTempEffectBitmap_256;
-
+				if (pBitmap->w < 16 && pBitmap->h < 16) {
+					pTargetBitmap = g_PostProcessMan.GetTempEffectBitmap(16);
+				} else if (pBitmap->w < 32 && pBitmap->h < 32) {
+					pTargetBitmap = g_PostProcessMan.GetTempEffectBitmap(32);
+				} else if (pBitmap->w < 64 && pBitmap->h < 64) {
+					pTargetBitmap = g_PostProcessMan.GetTempEffectBitmap(64);
+				} else if (pBitmap->w < 128 && pBitmap->h < 128) {
+					pTargetBitmap = g_PostProcessMan.GetTempEffectBitmap(128);
+				} else if (pBitmap->w < 256 && pBitmap->h < 256) {
+					pTargetBitmap = g_PostProcessMan.GetTempEffectBitmap(256);
+				} else {
+					pTargetBitmap = g_PostProcessMan.GetTempEffectBitmap(512);
+				}
 				clear_to_color(pTargetBitmap, 0);
 				
 				fixed fAngle;
@@ -1125,152 +1088,6 @@ int FrameMan::SwitchWindowMultiplier(int multiplier)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PostProcess
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Takes the current state of the back buffer, copies it, and adds post
-//                  processing effects on top like glows etc. Only works in 32bpp mode.
-
-void FrameMan::PostProcess()
-{
-    if (!m_PostProcessing)
-        return;
-
-    // First copy the current 8bpp backbuffer to the 32bpp buffer; we'll add effects to it
-    blit(m_pBackBuffer8, m_pBackBuffer32, 0, 0, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
-
-	// Set the screen blender mode for glows
-//    set_alpha_blender();
-    set_screen_blender(128, 128, 128, 128);
-
-//    acquire_bitmap(m_pBackBuffer8);
-//    acquire_bitmap(m_pBackBuffer32);
-
-    // Randomly sample the entire backbuffer, looking for pixels to put a glow on
-    // NOTE THIS IS SLOW, especially on higher resolutions!
-    if (m_PostPixelGlow)
-    {
-        int x = 0, y = 0, startX = 0, startY = 0, endX = 0, endY = 0, testpixel = 0;
-
-        for (list<Box>::iterator bItr = m_PostScreenGlowBoxes.begin(); bItr != m_PostScreenGlowBoxes.end(); ++bItr)
-        {
-            startX = (*bItr).m_Corner.m_X;
-            startY = (*bItr).m_Corner.m_Y;
-            endX = startX + (*bItr).m_Width;
-            endY = startY + (*bItr).m_Height;
-            testpixel = 0;
-
-            // Sanity check a little at least
-            if (startX < 0 || startX >= m_pBackBuffer8->w || startY < 0 || startY >= m_pBackBuffer8->h ||
-                endX < 0 || endX >= m_pBackBuffer8->w || endY < 0 || endY >= m_pBackBuffer8->h)
-                continue;
-
-// TODO: REMOVE TEMP DEBUG
-//            rect(m_pBackBuffer32, startX, startY, endX, endY, g_RedColor);
-
-            for (y = startY; y < endY; ++y)
-            {
-                for (x = startX; x < endX; ++x)
-                {
-                    testpixel = _getpixel(m_pBackBuffer8, x, y);
-
-                    // YELLOW
-                    if ((testpixel == g_YellowGlowColor && PosRand() < 0.9) || testpixel == 98 || (testpixel == 120 && PosRand() < 0.7))// || testpixel == 39 || testpixel == 86 || testpixel == 47 || testpixel == 48 || testpixel == 116)
-                        draw_trans_sprite(m_pBackBuffer32, m_pYellowGlow, x - 2, y - 2);
-                    // RED
-        //            if (testpixel == 13)
-        //                draw_trans_sprite(m_pBackBuffer32, m_pRedGlow, x - 2, y - 2);
-                    // BLUE
-                    if (testpixel == 166)
-                        draw_trans_sprite(m_pBackBuffer32, m_pBlueGlow, x - 2, y - 2);
-                }
-            }            
-        }
-    }
-/* This one is even slower than above method
-    // How many samples to make
-    int samples = 640 * 480 * 0.7;
-
-    for (int i = 0; i < samples; ++i)
-    {
-        x = m_pBackBuffer8->w * PosRand();
-//        y = m_pBackBuffer8->h * PosRand();
-        testpixel = _getpixel(m_pBackBuffer8, x, y);
-        // YELLOW
-        if (testpixel == g_YellowGlowColor || testpixel == 98 || testpixel == 120)// || testpixel == 39 || testpixel == 86 || testpixel == 47 || testpixel == 48 || testpixel == 116)
-            draw_trans_sprite(m_pBackBuffer32, m_pYellowGlow, x - 2, y - 2);
-        // RED
-//            if (testpixel == 13)
-//                draw_trans_sprite(m_pBackBuffer32, m_pRedGlow, x - 2, y - 2);
-        // BLUE
-        if (testpixel == 166)
-            draw_trans_sprite(m_pBackBuffer32, m_pBlueGlow, x - 2, y - 2);
-    }
-*/
-
-    // Draw all the scene screen effects accumulated this frame
-    BITMAP *pBitmap = 0;
-    int effectPosX = 0;
-    int effectPosY = 0;
-    int strength = 0;
-	float angle = 0;
-
-    for (list<PostEffect>::iterator eItr = m_PostScreenEffects.begin(); eItr != m_PostScreenEffects.end(); ++eItr)
-    {
-		if ((*eItr).m_pBitmap)
-		{
-			pBitmap = (*eItr).m_pBitmap;
-			strength = (*eItr).m_Strength;
-			set_screen_blender(strength, strength, strength, strength);
-			effectPosX = (*eItr).m_Pos.GetFloorIntX() - (pBitmap->w / 2);
-			effectPosY = (*eItr).m_Pos.GetFloorIntY() - (pBitmap->h / 2);
-			angle = (*eItr).m_Angle;
-			//draw_trans_sprite(m_pBackBuffer32, pBitmap, effectPosX, effectPosY);
-
-			if (angle == 0)
-			{
-				draw_trans_sprite(m_pBackBuffer32, pBitmap, effectPosX, effectPosY);
-			}
-			else
-			{
-				BITMAP * pTargetBitmap;
-
-				if (pBitmap->w < 16 && pBitmap->h < 16)
-					pTargetBitmap = m_pTempEffectBitmap_16;
-				else if (pBitmap->w < 32 && pBitmap->h < 32)
-					pTargetBitmap = m_pTempEffectBitmap_32;
-				else if (pBitmap->w < 64 && pBitmap->h < 64)
-					pTargetBitmap = m_pTempEffectBitmap_64;
-				else if (pBitmap->w < 128 && pBitmap->h < 128)
-					pTargetBitmap = m_pTempEffectBitmap_128;
-				else
-					pTargetBitmap = m_pTempEffectBitmap_256;
-
-				clear_to_color(pTargetBitmap, 0);
-
-				//fixed fAngle;
-				//fAngle = fixmul(angle, radtofix_r);
-
-				Matrix m;
-				m.SetRadAngle(angle);
-
-				rotate_sprite(pTargetBitmap, pBitmap, 0, 0, ftofix(m.GetAllegroAngle()));
-				draw_trans_sprite(m_pBackBuffer32, pTargetBitmap, effectPosX, effectPosY);
-			}
-		}
-    }
-
-//    release_bitmap(m_pBackBuffer32);
-//    release_bitmap(m_pBackBuffer8);
-
-    // Set blender mode back??
-//    set_trans_blender(128, 128, 128, 128);
-
-    // Clear the effects list for this frame
-    m_PostScreenEffects.clear();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          FlipFrameBuffers
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Flips the framebuffer.
@@ -1282,11 +1099,11 @@ void FrameMan::FlipFrameBuffers()
         if (g_InActivity)
         {
             if (!m_Fullscreen && m_NxWindowed != 1)
-                stretch_blit(m_PostProcessing ? m_pBackBuffer32 : m_pBackBuffer8, screen, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
+                stretch_blit(g_PostProcessMan.IsPostProcessing() ? m_pBackBuffer32 : m_pBackBuffer8, screen, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
             else if (m_Fullscreen && m_NxFullscreen != 1)
-                stretch_blit(m_PostProcessing ? m_pBackBuffer32 : m_pBackBuffer8, screen, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
+                stretch_blit(g_PostProcessMan.IsPostProcessing() ? m_pBackBuffer32 : m_pBackBuffer8, screen, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
             else
-                blit(m_PostProcessing ? m_pBackBuffer32 : m_pBackBuffer8, screen, 0, 0, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h);            
+                blit(g_PostProcessMan.IsPostProcessing() ? m_pBackBuffer32 : m_pBackBuffer8, screen, 0, 0, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h);
         }
         // Menu is always 32bpp
         else
@@ -1620,8 +1437,7 @@ void FrameMan::Draw()
     char str[512];
 
     // Clear out the post processing screen effects list
-    m_PostScreenEffects.clear();
-    m_PostScreenGlowBoxes.clear();
+	g_PostProcessMan.Reset();
     // These accumulate the effects for each player's screen area, and are then transferred to the above lists with the player screen offset applied
 	list<PostEffect> screenRelativeEffects;
     list<Box> screenRelativeGlowBoxes;
@@ -1686,13 +1502,13 @@ void FrameMan::Draw()
 			g_SceneMan.Draw(pDrawScreen, pDrawScreenGUI, targetPos, true, true);
 		}
         // Get only the scene-relative post effects that affect this player's screen
-        if (m_PostProcessing && pActivity)
+        if (g_PostProcessMan.IsPostProcessing() && pActivity)
         {
-            g_SceneMan.GetPostScreenEffectsWrapped(targetPos, pDrawScreen->w, pDrawScreen->h, screenRelativeEffects, pActivity->GetTeamOfPlayer(pActivity->PlayerOfScreen(whichScreen)));
-            g_SceneMan.GetGlowAreasWrapped(targetPos, pDrawScreen->w, pDrawScreen->h, screenRelativeGlowBoxes);
+			g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, pDrawScreen->w, pDrawScreen->h, screenRelativeEffects, pActivity->GetTeamOfPlayer(pActivity->PlayerOfScreen(whichScreen)));
+			g_PostProcessMan.GetGlowAreasWrapped(targetPos, pDrawScreen->w, pDrawScreen->h, screenRelativeGlowBoxes);
 
 			if (IsInMultiplayerMode())
-				SetPostEffectsList(whichScreen, screenRelativeEffects);
+				g_PostProcessMan.SetNetworkPostEffectsList(whichScreen, screenRelativeEffects);
         }
 
 // TODO: Find out what keeps disabling the clipping on the draw bitmap
@@ -1819,7 +1635,7 @@ void FrameMan::Draw()
 	        blit(pDrawScreen, m_pBackBuffer8, 0, 0, screenOffset.GetFloorIntX(), screenOffset.GetFloorIntY(), pDrawScreen->w, pDrawScreen->h);
 
         // Add the player screen's effects to the total screen effects list so they can be drawn in post processing
-        if (m_PostProcessing && !IsInMultiplayerMode())
+        if (g_PostProcessMan.IsPostProcessing() && !IsInMultiplayerMode())
         {
             int occX = g_SceneMan.GetScreenOcclusion(whichScreen).GetFloorIntX();
             int occY = g_SceneMan.GetScreenOcclusion(whichScreen).GetFloorIntY();
@@ -1827,7 +1643,7 @@ void FrameMan::Draw()
 			// Copy post effects received by client if in network mode
 			if (m_DrawNetworkBackBuffer)
 			{
-				GetPostEffectsList(0, screenRelativeEffects);
+				g_PostProcessMan.GetNetworkPostEffectsList(0, screenRelativeEffects);
 			}
 
             // Adjust for the player screen's position on the final buffer
@@ -1835,15 +1651,15 @@ void FrameMan::Draw()
             {
                 // Make sure we won't be adding any effects to a part of the screen that is occluded by menus and such
                 if ((*eItr).m_Pos.m_X > occX && (*eItr).m_Pos.m_Y > occY && (*eItr).m_Pos.m_X < pDrawScreen->w + occX && (*eItr).m_Pos.m_Y < pDrawScreen->h + occY)
-                    m_PostScreenEffects.push_back( PostEffect((*eItr).m_Pos + screenOffset, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle) );
+					g_PostProcessMan.GetPostScreenEffectsList()->push_back( PostEffect((*eItr).m_Pos + screenOffset, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle) );
             }
 
             // Adjust glow areas for the player screen's position on the final buffer
             for (list<Box>::iterator bItr = screenRelativeGlowBoxes.begin(); bItr != screenRelativeGlowBoxes.end(); ++bItr)
             {
-                m_PostScreenGlowBoxes.push_back(*bItr);
+				g_PostProcessMan.GetPostScreenGlowBoxesList()->push_back(*bItr);
                 // Adjust each added glow area for the player screen's position on the final buffer
-                m_PostScreenGlowBoxes.back().m_Corner += screenOffset;
+				g_PostProcessMan.GetPostScreenGlowBoxesList()->back().m_Corner += screenOffset;
             }
         }
     }
@@ -1966,9 +1782,8 @@ void FrameMan::Draw()
 		}*/
 	}
 
-    // Do postprocessing effects, if applicable and enabled
-    if (m_PostProcessing && g_InActivity && m_BPP == 32)
-        PostProcess();
+    // Do post-processing effects, if applicable and enabled
+    if (g_PostProcessMan.IsPostProcessing() && g_InActivity && m_BPP == 32) { g_PostProcessMan.PostProcess(); }
 
     // Draw the console on top of everything
     if (FlippingWith32BPP())
@@ -1978,26 +1793,6 @@ void FrameMan::Draw()
 
     // Reset the frame timer so we can measure how much it takes until next frame being drawn
 	g_PerformanceMan.ResetFrameTimer();
-}
-
-void FrameMan::GetPostEffectsList(int whichScreen, list<PostEffect> & outputList)
-{
-	ScreenRelativeEffectsMutex[whichScreen].lock();
-	outputList.clear();
-	for (list<PostEffect>::iterator eItr = m_ScreenRelativeEffects[whichScreen].begin(); eItr != m_ScreenRelativeEffects[whichScreen].end(); ++eItr)
-		outputList.push_back(PostEffect((*eItr).m_Pos, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle));
-
-	ScreenRelativeEffectsMutex[whichScreen].unlock();
-}
-
-void FrameMan::SetPostEffectsList(int whichScreen, list<PostEffect> & inputList)
-{
-	ScreenRelativeEffectsMutex[whichScreen].lock();
-	m_ScreenRelativeEffects[whichScreen].clear();
-	for (list<PostEffect>::iterator eItr = inputList.begin(); eItr != inputList.end(); ++eItr)
-		m_ScreenRelativeEffects[whichScreen].push_back(PostEffect((*eItr).m_Pos, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle));
-
-	ScreenRelativeEffectsMutex[whichScreen].unlock();
 }
 
 

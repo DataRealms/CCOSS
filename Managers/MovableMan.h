@@ -24,6 +24,7 @@
 #include "SceneMan.h"
 #include "LuaMan.h"
 #include "ActivityMan.h"
+#include "PostProcessMan.h"
 #include "Vector.h"
 //#include "MOPixel.h"
 //#include "AHuman.h"

@@ -804,7 +804,7 @@ namespace RTE
 
 	void NetworkClient::DrawPostEffects(int frame)
 	{
-		g_FrameMan.SetPostEffectsList(0, m_PostEffects[frame]);
+		g_PostProcessMan.SetNetworkPostEffectsList(0, m_PostEffects[frame]);
 		//m_PostEffects[frame].clear();
 	}
 

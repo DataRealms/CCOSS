@@ -68,31 +68,6 @@ enum TransperencyPreset
 
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Struct:          PostEffect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     For storing a Post screen effect to be applied at the last stage of
-//                  32bpp rendering
-// Parent(s):       None.
-// Class history:   8/18/2007 PostEffect created.
-
-struct PostEffect
-{
-    // Where, can be relative to the scene, or to the screen, depending on context
-    Vector m_Pos;
-    // The bitmap to blend, not owned
-    BITMAP *m_pBitmap;
-    // Scalar float for how hard to blend it in, 0 - 255
-    int m_Strength;
-	// Hash used to transimt glow events over the network
-	size_t m_BitmapHash;
-	// Post effect angle
-	float m_Angle;
-
-    
-	PostEffect() { m_Pos.Reset(); m_pBitmap = 0; m_BitmapHash = 0;  m_Strength = 128; m_Angle = 0; }
-	PostEffect(const Vector &pos, BITMAP *pBitmap, size_t bitmapHash, int strength, float angle) { m_Pos = pos; m_pBitmap = pBitmap; m_BitmapHash = bitmapHash; m_Strength = strength; m_Angle = angle; }
-};
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -675,82 +650,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EnablePostProcessing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether we're postprocessing at all.
-// Arguments:       Whether post processing should be enabled or not.
-// Return value:    None.
-
-    void EnablePostProcessing(bool enable = true) { m_PostProcessing = enable; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsPostProcessing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether we're postprocessing or not
-// Arguments:       None.
-// Return value:    Whether post processing is enabled or not.
-
-    bool IsPostProcessing() const { return m_PostProcessing && m_BPP == 32; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EnablePixelGlow
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether we're postprocessing the pixel glow effect or not
-// Arguments:       Whether post processing should be enabled or not.
-// Return value:    None.
-
-    void EnablePixelGlow(bool enable = true) { if (enable) { EnablePostProcessing(enable); } m_PostPixelGlow = enable; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsPixelGlowEnabled
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether we're postprocessing the pixel glow effect or not
-// Arguments:       None.
-// Return value:    Whether post processing is enabled or not.
-
-    bool IsPixelGlowEnabled() const { return IsPostProcessing() && m_PostPixelGlow; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDotGlowEffect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a specific standard dot glow effect for making pixels glow
-// Arguments:       Which of the dot glow colors to get, see the DotGlowColor enum.
-// Return value:    The requested glow dot BITMAP.
-
-    BITMAP * GetDotGlowEffect(DotGlowColor which) const
-    {
-        if (which == NoDot)
-            return 0;
-        else if (which == YellowDot)
-            return m_pYellowGlow;
-        else if (which == RedDot)
-            return m_pRedGlow;
-        else
-            return m_pBlueGlow;
-    }
-
-	size_t GetDotGlowEffectHash(DotGlowColor which) const
-	{
-		if (which == NoDot)
-			return 0;
-		else if (which == YellowDot)
-			return m_YellowGlowHash;
-		else if (which == RedDot)
-			return m_RedGlowHash;
-		else
-			return m_BlueGlowHash;
-	}
-
-	void GetPostEffectsList(int whichScreen, std::list<PostEffect> & outputList);
-
-	void SetPostEffectsList(int whichScreen, std::list<PostEffect> & inputList);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          LoadPalette
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Loads a palette from a .dat file and sets it as the currently used
@@ -847,17 +746,6 @@ public:
 // Return value:    Error code, anything other than 0 is error..
 
     int SwitchWindowMultiplier(int multiplier = 1);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PostProcess
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Takes the current state of the 8bpp back buffer, copies it, and adds
-//                  post processing effects on top like glows etc. Only works in 32bpp mode.
-// Arguments:       None.
-// Return value:    None.
-
-    void PostProcess();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1085,29 +973,6 @@ protected:
     // This is the new fullscreen multiple that will take effect next time the FrameMan is started
     int m_NewNxFullscreen;
 
-    // Whether postprocessing is enabled or not
-    bool m_PostProcessing;
-    // Whether postprocessing pixel glow is enabled or not
-    bool m_PostPixelGlow;
-    BITMAP *m_pYellowGlow;
-	size_t m_YellowGlowHash;
-    BITMAP *m_pRedGlow;
-	size_t m_RedGlowHash;
-	BITMAP *m_pBlueGlow;
-	size_t m_BlueGlowHash;
-
-    // List of effects to apply at the end of each frame, Vector is in total absolute screen coordinates, and the BITMAP is not owned.
-    // This list gets cleared out and re-filled each frame.
-    std::list<PostEffect> m_PostScreenEffects;
-    // List of screen-relative areas that will be processed with glow
-    std::list<Box> m_PostScreenGlowBoxes;
-	// Temp bitmap to rotate post effects in it
-	BITMAP * m_pTempEffectBitmap_16;
-	BITMAP * m_pTempEffectBitmap_32;
-	BITMAP * m_pTempEffectBitmap_64;
-	BITMAP * m_pTempEffectBitmap_128;
-	BITMAP * m_pTempEffectBitmap_256;
-
     // Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.
     bool m_HSplit;
     // Whether the screen is split vertically across the screen, ie as two splitscreens side by side.
@@ -1163,8 +1028,6 @@ protected:
 	int m_NetworkFrameCurrent;
 	// Which frame is rendered and ready for transmission, 0 or 1
 	int m_NetworkFrameReady;
-
-	std::list<PostEffect> m_ScreenRelativeEffects[MAXSCREENCOUNT];
 
 	// If true then the network bitmap is being updated
 	bool m_NetworkBitmapIsLocked[MAXSCREENCOUNT];

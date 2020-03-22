@@ -2144,7 +2144,7 @@ void GameActivity::Update()
 
 void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int which)
 {
-    if (which < 0 || which >= MAXSCREENCOUNT)
+    if (which < 0 || which >= c_MaxScreenCount)
         return;
 
     char str[512];

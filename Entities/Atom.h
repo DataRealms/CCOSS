@@ -30,7 +30,6 @@ namespace RTE
 class SLTerrain;
 class MovableObject;
 
-typedef int MOID;
 enum { HITOR = 0, HITEE = 1 };
 enum { NormalCheckCount = 16 };
 

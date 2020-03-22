@@ -3,11 +3,30 @@
 
 namespace RTE {
 
+#pragma region Type Definitions
+	typedef int MOID; //!< Distinctive type definition for MovableObject IDs.
+	typedef int MID; //!< Distinctive type definition for Material IDs.
+#pragma endregion
+
 #pragma region Graphics Constants
+	static constexpr unsigned short c_MaxScreenCount = 4; //!< Maximum number of player screens.
 	static constexpr unsigned short c_PaletteEntriesNumber = 256; //!< Number of indexes in the graphics palette.
 	static constexpr unsigned short c_MOIDLayerBitDepth = 16; //!< Bit depth of MOID layer bitmap.
-
 	static constexpr unsigned short c_GoldMaterialID = 2; //!< Index of gold material in the material palette.
+
+	enum ColorKeys {
+		g_KeyColor = 0,
+		//g_KeyColorS = 0, //!< Key color to cleat 8-bit bitmaps used for MOID silhouettes layers.
+		g_KeyColorS = 0xF81F, //!< Key color to clear 16-bit bitmaps used for MOID silhouettes layers.
+		//g_KeyColorS = 16711935, //!< Key color to clear 32-bit bitmaps used for MOID silhouettes layers.
+		g_BlackColor = 245,
+		g_WhiteColor = 254,
+		g_RedColor = 13,
+		g_YellowGlowColor = 117,
+		g_NoMOID = 255
+	};
+
+	enum DotGlowColor { NoDot = 0, YellowDot, RedDot, BlueDot };
 
 	// GUI colors
 	#define c_GUIColorWhite makecol(255, 255, 255)
@@ -34,7 +53,8 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Network Constants
-	static constexpr unsigned short int c_MaxClients = 4;
+	static constexpr unsigned short c_MaxClients = 4;
+	static constexpr unsigned short c_MaxLayersStoredForNetwork = 10;
 #pragma endregion
 
 #pragma region Un-Definitions

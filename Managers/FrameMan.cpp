@@ -100,7 +100,7 @@ void FrameMan::Clear()
 	m_NetworkFrameCurrent = 0;
 	m_NetworkFrameReady = 1;
 
-    for (int i = 0; i < MAXSCREENCOUNT; ++i)
+    for (int i = 0; i < c_MaxScreenCount; ++i)
     {
         m_ScreenText[i].clear();
         m_TextDuration[i] = -1;
@@ -249,7 +249,7 @@ int FrameMan::Create()
     m_pBackBuffer8 = create_bitmap_ex(8, m_ResX, m_ResY);
     clear_to_color(m_pBackBuffer8, m_BlackColor);
 
-	for (int i = 0; i < MAXSCREENCOUNT; i++)
+	for (int i = 0; i < c_MaxScreenCount; i++)
 	{
 		for (int f = 0; f < 2; f++)
 		{
@@ -419,7 +419,7 @@ void FrameMan::ResetSplitScreens(bool hSplit, bool vSplit)
     }
 
     // Reset the flashes
-    for (int i = 0; i < MAXSCREENCOUNT; ++i)
+    for (int i = 0; i < c_MaxScreenCount; ++i)
     {
         m_FlashScreenColor[i] = -1;
         m_FlashedLastFrame[i] = false;
@@ -466,7 +466,7 @@ int FrameMan::Save(Writer &writer) const
 void FrameMan::Destroy()
 {
     destroy_bitmap(m_pBackBuffer8);
-	for (int i = 0; i < MAXSCREENCOUNT; i++)
+	for (int i = 0; i < c_MaxScreenCount; i++)
 	{
 		for (int f = 0; f < 2; f++)
 		{
@@ -565,7 +565,7 @@ int FrameMan::CalculateTextWidth(std::string text, bool isSmall)
 
 void FrameMan::SetScreenText(const std::string &msg, int which, int blinkInterval, int displayDuration, bool centered)
 {
-    if (which >= 0 && which < MAXSCREENCOUNT)
+    if (which >= 0 && which < c_MaxScreenCount)
     {
         // See if we can overwrite the previous message
         if (m_TextDurationTimer[which].IsPastRealMS(m_TextDuration[which]))
@@ -1474,7 +1474,7 @@ void FrameMan::Draw()
 				SLOffset[whichScreen][layerCount] = (*itr)->GetOffset();
 				layerCount++;
 
-				if (layerCount >= MAX_LAYERS_STORED_FOR_NETWORK)
+				if (layerCount >= c_MaxLayersStoredForNetwork)
 					break;
 			}
 		}
@@ -1774,7 +1774,7 @@ void FrameMan::Draw()
 		//m_NetworkFrameReady = 1;
 		//m_NetworkFrameCurrent = 0;
 
-		/*for (int i = 0; i < MAXSCREENCOUNT; i++)
+		/*for (int i = 0; i < c_MaxScreenCount; i++)
 		{
 			m_NetworkBitmapIsLocked[i] = true;
 			blit(m_pBackBuffer8, m_pNetworkBackBuffer8[i], 0, 0, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
@@ -1841,10 +1841,10 @@ int FrameMan::GetPlayerFrameBufferWidth(int whichPlayer) const
 { 
 	if (m_StoreNetworkBackBuffer)
 	{
-		if (whichPlayer < 0 || whichPlayer >= MAXSCREENCOUNT)
+		if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount)
 		{
 			int w = GetResX();
-			for (int i = 0; i < MAXSCREENCOUNT; i++)
+			for (int i = 0; i < c_MaxScreenCount; i++)
 				if (m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i] && m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->w < w)
 					w = m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->w;
 			return w;
@@ -1884,10 +1884,10 @@ int FrameMan::GetPlayerFrameBufferHeight(int whichPlayer) const
 { 
 	if (m_StoreNetworkBackBuffer)
 	{
-		if (whichPlayer < 0 || whichPlayer >= MAXSCREENCOUNT)
+		if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount)
 		{
 			int h = GetResY();
-			for (int i = 0; i < MAXSCREENCOUNT; i++)
+			for (int i = 0; i < c_MaxScreenCount; i++)
 				if (m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i] && m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < h)
 					h = m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->h;
 			return h;

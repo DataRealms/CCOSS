@@ -14,33 +14,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-typedef int MOID;
-typedef int MID;
 
 namespace RTE
 {
-enum
-{
-    g_KeyColor = 0,
-	//g_KeyColorS = 16711935,// Key color to clear 32-bit bitmaps used for MOID silhouettes layers
-	g_KeyColorS = 0xF81F,// Key color to clear 16-bit bitmaps used for MOID silhouettes layers
-	//g_KeyColorS = 0, //Key color to cleat 8-bit bitmaps used for MOID silhouettes layers
-    g_BlackColor = 245,
-    g_WhiteColor = 254,
-    g_RedColor = 13,
-    g_YellowGlowColor = 117,
-    g_NoMOID = 255
-};
-
-enum DotGlowColor
-{
-    NoDot = 0,
-    YellowDot,
-    RedDot,
-    BlueDot
-};
-}
-
 #include "RTETools.h"
 #include "Singleton.h"
 #define g_FrameMan FrameMan::Instance()
@@ -56,8 +32,6 @@ namespace RTE
 class AllegroScreen;
 class GUIFont;
 
-#define MAXSCREENCOUNT 4
-#define MAX_LAYERS_STORED_FOR_NETWORK 10
 
 enum TransperencyPreset
 {

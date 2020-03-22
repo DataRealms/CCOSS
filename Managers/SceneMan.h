@@ -64,7 +64,6 @@ enum
     g_MaterialDoor = 181
 };
 
-#define MAXSCREENCOUNT 4
 #define SCENEGRIDSIZE 24
 #define SCENESNAPSIZE 12
 #define MAXORPHANRADIUS 11
@@ -1759,26 +1758,26 @@ protected:
 	std::vector<Material *> m_MaterialCopiesVector;
 
     // The position of the upper left corner of the view.
-    Vector m_Offset[MAXSCREENCOUNT];
+    Vector m_Offset[c_MaxScreenCount];
     // The difference in current offset and the Update() before.
-    Vector m_DeltaOffset[MAXSCREENCOUNT];
+    Vector m_DeltaOffset[c_MaxScreenCount];
     // The final offset target of the current scroll interpolation, in scene coordinates!
-    Vector m_ScrollTarget[MAXSCREENCOUNT];
+    Vector m_ScrollTarget[c_MaxScreenCount];
     // The team associated with each screen.
-    int m_ScreenTeam[MAXSCREENCOUNT];
+    int m_ScreenTeam[c_MaxScreenCount];
     // The amount screen a screen is occluded or covered by GUI, etc
-    Vector m_ScreenOcclusion[MAXSCREENCOUNT];
+    Vector m_ScreenOcclusion[c_MaxScreenCount];
     // The normalized speed at screen the view scrolls.
     // 0 being no movement, and 1.0 being instant movement to the target in one frame.
-    float m_ScrollSpeed[MAXSCREENCOUNT];
+    float m_ScrollSpeed[c_MaxScreenCount];
     // Scroll timer for making scrolling work framerate independently
-    Timer m_ScrollTimer[MAXSCREENCOUNT];
+    Timer m_ScrollTimer[c_MaxScreenCount];
     // Whether the ScrollTarget got wrapped around the world this frame or not.
-    bool m_TargetWrapped[MAXSCREENCOUNT];
+    bool m_TargetWrapped[c_MaxScreenCount];
     // Keeps track of how many times and in screen directions the wrapping seam has been crossed.
     // This is used fo keeping the background layers' scroll from jumping when wrapping around.
     // X and Y
-    int m_SeamCrossCount[MAXSCREENCOUNT][2];
+    int m_SeamCrossCount[c_MaxScreenCount][2];
 
     // Sound of an unseen pixel on an unseen layer being revealed.
     Sound *m_pUnseenRevealSound;

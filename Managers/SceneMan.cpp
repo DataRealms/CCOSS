@@ -91,7 +91,7 @@ void SceneMan::Clear()
 
 	m_MaterialCopiesVector.clear();
 
-    for (int i = 0; i < MAXSCREENCOUNT; ++i) {
+    for (int i = 0; i < c_MaxScreenCount; ++i) {
         m_Offset[i].Reset();
         m_DeltaOffset[i].Reset();
         m_ScrollTarget[i].Reset();
@@ -672,7 +672,7 @@ Vector SceneMan::GetGlobalAcc() const
 
 void SceneMan::SetOffset(const long offsetX, const long offsetY, int screen)
 {
-    if (screen >= MAXSCREENCOUNT)
+    if (screen >= c_MaxScreenCount)
         return;
 
     m_Offset[screen].m_X = offsetX;
@@ -691,7 +691,7 @@ void SceneMan::SetOffset(const long offsetX, const long offsetY, int screen)
 
 void SceneMan::SetScroll(const Vector &center, int screen)
 {
-    if (screen >= MAXSCREENCOUNT)
+    if (screen >= c_MaxScreenCount)
         return;
 
 	if (g_FrameMan.IsInMultiplayerMode())

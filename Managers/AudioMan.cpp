@@ -288,7 +288,7 @@ namespace RTE {
 				g_ConsoleMan.PrintString("ERROR: Could not open music file " + std::string(filePath) + ": " + std::string(FMOD_ErrorString(result)));
 				return;
 			}
-
+			
 			result = musicStream->setLoopCount(loops);
 			if (result != FMOD_OK && (loops != 0 && loops != 1)) {
 				g_ConsoleMan.PrintString("ERROR: Failed to set looping for music file: " + std::string(filePath) + ". This means it will only play 1 time, instead of " + (loops == 0 ? "looping endlessly." : loops + " times.") + std::string(FMOD_ErrorString(result)));
@@ -300,6 +300,7 @@ namespace RTE {
 				g_ConsoleMan.PrintString("ERROR: Could not play music file: " + std::string(filePath));
 				return;
 			}
+			result = musicChannel->setPriority(PRIORITY_HIGH);
 
 			if (volumeOverrideIfNotMuted >= 0 && m_MusicVolume > 0) {
 				result = musicChannel->setVolume(volumeOverrideIfNotMuted);

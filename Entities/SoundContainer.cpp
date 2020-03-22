@@ -50,6 +50,9 @@ namespace RTE {
 			reader >> m_Loops;
 		} else if (propName == "Priority") {
 			reader >> m_Priority;
+			if (m_Priority < 0 || m_Priority > 256) {
+				reader.ReportError("SoundContainer priority must be between 256 (lowest priority) and 0 (highest priority).");
+			}
 		} else if (propName == "AffectedByGlobalPitch") {
 			reader >> m_AffectedByGlobalPitch;
 		} else {

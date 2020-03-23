@@ -715,7 +715,7 @@ namespace RTE
 						}
 
 						// We always have to add the newly made sound container to the map of server sounds, regardless of whether we were able to delete existing sounds above
-						if (sndDataPtr->State == AudioMan::SOUND_PLAY) { m_ServerSounds[serverSoundChannelIndex] = newlyMadeSoundContainer; }
+						if (sndDataPtr->State == AudioMan::SOUND_PLAY) { m_ServerSounds.insert({serverSoundChannelIndex, soundContainerToHandle}); }
 					}
 				}
 			}

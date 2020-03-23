@@ -1237,7 +1237,8 @@ namespace RTE
 			msg->SoundEventsCount++;
 			sndDataPtr++;
 
-			if (msg->SoundEventsCount >= 50)
+			//If one more sound would overflow the container, send sounds now then reset to continue
+			if ((msg->SoundEventsCount * sizeof(AudioMan::NetworkSoundData)) >= (MAX_PIXEL_LINE_BUFFER_SIZE - sizeof(AudioMan::NetworkSoundData) - sizeof(MsgSoundEvents)))
 			{
 				//char buf[128];
 				//sprintf_s(buf, sizeof(buf), "%d %d", msg->FrameNumber, msg->PostEffectsCount);

@@ -427,8 +427,9 @@ namespace RTE {
 			return false;
 		}
 
+		attenuation = Limit(attenuation, 0.95, 0); //Limit attenuation so it can't be closer than 0 (full volume) or farther than 0.95 (quiet but not quite silent)
 		priority = priority < 0 ? pSoundContainer->GetPriority() : priority;
-		pitch = pSoundContainer->IsAffectedByGlobalPitch() ? m_GlobalPitch : pitch;
+		pitch = Limit(pSoundContainer->IsAffectedByGlobalPitch() ? m_GlobalPitch : pitch, 8, 0.125); //Limit pitch change to 8 octaves up or down, and set it to global pitch if applicable
 
 		FMOD::Channel *channel;
 		FMOD_RESULT result = FMOD_OK;
@@ -442,8 +443,10 @@ namespace RTE {
 			result = result == FMOD_OK ? channel->getIndex(&channelIndex) : result;
 			result = result == FMOD_OK ? channel->setUserData(pSoundContainer) : result;
 			result = result == FMOD_OK ? channel->setCallback(SoundChannelEndedCallback) : result;
+			result = result == FMOD_OK ? channel->setVolume(1 - attenuation) : result;
 			result = result == FMOD_OK ? channel->setLoopCount(pSoundContainer->GetLoopSetting()) : result;
 			result = result == FMOD_OK ? channel->setPriority(priority) : result;
+			result = result == FMOD_OK ? channel->setPitch(pitch) : result;
 		}
 
 		if (result != FMOD_OK) {
@@ -451,14 +454,12 @@ namespace RTE {
 			return false;
 		}
 
-		pSoundContainer->AddPlayingChannel(channelIndex);
-		SetSoundAttenuation(pSoundContainer, attenuation);
-		if (pitch != 1) { SetSoundPitch(pSoundContainer, pitch); }
-
 		result = channel->setPaused(false);
 		if (result != FMOD_OK) {
 			g_ConsoleMan.PrintString("ERROR: Failed to start playing sounds from SoundContainer " + pSoundContainer->GetPresetName() + " after setting it up: " + std::string(FMOD_ErrorString(result)));
 		}
+
+		pSoundContainer->AddPlayingChannel(channelIndex);
 
 		// Now that the sound is playing we can register an event with the SoundContainer's channels, which can be used by clients to identify the sound being played.
 		if (m_IsInMultiplayerMode) {
@@ -604,7 +605,7 @@ namespace RTE {
 				if (channels) {
 					std::copy(channels->begin(), channels->end(), soundData.Channels);
 				}
-				std::fill_n(soundData.SoundFileHashes, c_MaxAudioChannels, 0);
+				std::fill_n(soundData.SoundFileHashes, c_MaxPlayingSoundsPerContainer, 0);
 				if (soundFileHashes) {
 					std::copy(soundFileHashes->begin(), soundFileHashes->end(), soundData.SoundFileHashes);
 				}

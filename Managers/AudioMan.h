@@ -296,7 +296,7 @@ namespace RTE {
 		/// <param name="priority">The priority of this sound from 256 (lowest) to 0 (highest). Higher priority sounds are more likely to be heard.</param>
 		/// <param name="pitchOrAffectedByGlobalPitch">
 		/// The pitch to play this SoundContainer's at where 1 is unmodified frequency and each multiple of 2 is an octave up or down.
-		/// -1 means the SoundContainer will be affected by global pitch instead of setting handling its pitch manually. Defaults to -1.
+		/// -1 means the SoundContainer will be affected by global pitch instead of setting handling its pitch manually.
 		/// </param>
 		/// <returns>Returns the new sound object being played. OWNERSHIP IS TRANSFERRED!</returns>
 		SoundContainer *PlaySound(const char *filePath, float attenuation, int player, int loops, int priority, double pitchOrAffectedByGlobalPitch);
@@ -308,7 +308,7 @@ namespace RTE {
 		/// <param name="attenuation">Distance attenuation scalar: 0 = full volume, 1.0 = max distant, but not silent. Defaults to 0.</param>
 		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players. Defaults to -1.</param>
 		/// <param name="priority">The priority of this sound - higher priority sounds are more likely to be heard. -1 means it'll use the SoundContainer's value. Defaults to -1.</param>
-		/// <param name="pitch">/// The pitch to play this SoundContainer's at where 1 is unmodified frequency and each multiple of 2 is an octave up or down. Defaults to 1.</param>
+		/// <param name="pitch">The pitch to play this SoundContainer's at where 1 is unmodified frequency and each multiple of 2 is an octave up or down. Defaults to 1.</param>
 		/// <returns>Whether or not playback of the Sound was successful.</returns>
 		bool PlaySound(SoundContainer *pSoundContainer, float attenuation = 0, int player = -1, int priority = -1, double pitch = 1);
 

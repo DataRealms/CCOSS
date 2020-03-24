@@ -250,7 +250,7 @@ namespace RTE {
 				soundInfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
 				soundInfo.length = fileSize;
 				//TODO Consider doing FMOD_CREATESAMPLE for dumping audio files into memory and FMOD_NONBLOCKING to async create sounds
-				FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(pRawData, FMOD_OPENMEMORY, &soundInfo, &pReturnSample);
+				FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(pRawData, FMOD_OPENMEMORY | FMOD_3D, &soundInfo, &pReturnSample);
 
 				if (result != FMOD_OK) {
 					errorMessage = "Unable to create sound because of FMOD error " + std::string(FMOD_ErrorString(result)) + ". Path and name was: ";

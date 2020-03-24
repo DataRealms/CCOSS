@@ -6,6 +6,7 @@
 #include "AudioMan.h"
 
 namespace RTE {
+	class Vector;
 
 	/// <summary>
 	/// A container for sounds that represent a specific sound effect.
@@ -40,8 +41,10 @@ namespace RTE {
 		/// </summary>
 		/// <param name="loops">The number of times this SoundContainer's sounds will loop. 0 means play once. -1 means play infinitely until stopped.</param>
 		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch.</param>
+		/// <param name="attenuationStartDistance">The distance at which this SoundContainer's sounds should start attenuating away.</param>
+		/// <param name="immobile">Whether this SoundContainer's sounds' positions will be treated as immobile, i.e. they won't be affected by 3D sound manipulation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(int loops = 0, bool affectedByGlobalPitch = true) { m_Loops = loops; m_AffectedByGlobalPitch = affectedByGlobalPitch; return 0; }
+		int Create(int loops = 0, bool affectedByGlobalPitch = true, float attenuationStartDistance = 0, bool immobile = false) { SetLoopSetting(loops); m_AffectedByGlobalPitch = affectedByGlobalPitch; m_AttenuationStartDistance = attenuationStartDistance; m_Immobile = immobile; return 0; }
 
 		/// <summary>
 		/// Creates a SoundContainer and gives it a path to its first sound.
@@ -49,8 +52,10 @@ namespace RTE {
 		/// <param name="soundPath">A path to the sound for this sound to have.</param>
 		/// <param name="loops">The number of times this SoundContainer's sounds will loop. 0 means play once. -1 means play infinitely until stopped.</param>
 		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch.</param>
+		/// <param name="attenuationStartDistance">The distance at which this SoundContainer's sounds should start attenuating away.</param>
+		/// <param name="immobile">Whether this SoundContainer's sounds' positions will be treated as immobile, i.e. they won't be affected by 3D sound manipulation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(std::string const soundPath, int loops = 0, bool affectedByGlobalPitch = true) { int result = Create(loops, affectedByGlobalPitch); AddSound(soundPath); return result; }
+		int Create(std::string const soundPath, int loops = 0, bool affectedByGlobalPitch = true, float attenuationStartDistance = 0, bool immobile = false) { int result = Create(loops, affectedByGlobalPitch, attenuationStartDistance, immobile); AddSound(soundPath); return result; }
 
 		/// <summary>
 		/// Adds a new Sound to this SoundContainer, loaded from a file.
@@ -100,7 +105,7 @@ namespace RTE {
 		virtual int Save(Writer &writer) const { return 0; }
 #pragma endregion
 
-#pragma region Getters and Setters
+#pragma region Sound Management Getters and Setters
 		/// <summary>
 		/// Gets the current list of sounds in the SoundContainer.
 		/// </summary>
@@ -160,13 +165,27 @@ namespace RTE {
 		/// </summary>
 		/// <param name="channel">The channel index to remove.</param>
 		void RemovePlayingChannel(unsigned short int channel) { m_PlayingChannels.erase(channel); }
+#pragma endregion
+
+#pragma region Sound Property Getters and Setters
+		/// <summary>
+		/// Updates the position of the SoundContainer's sounds while they're playing.
+		/// </summary>
+		/// <param name="position">The new position to play the SoundContainer's sounds.</param>
+		/// <returns>Whether this SoundContainer's attenuation setting was successful.</returns>
+		bool SetPosition(const Vector &position) { return g_AudioMan.SetSoundPosition(this, position); }
 
 		/// <summary>
-		/// Updates the distance attenuation of the SoundContainer's sounds while they're playing.
+		/// Gets the attenuation start distance of this SoundContainer.
 		/// </summary>
-		/// <param name="attenuation">How much distance attenuation to apply to the sound. 0 = full volume 1.0 = max distant, but still won't be completely inaudible.</param>
-		/// <returns>Whether this SoundContainer's attenuation setting was successful.</returns>
-		bool UpdateAttenuation(float attenuation) { return g_AudioMan.SetSoundAttenuation(this, attenuation); }
+		/// <returns>A float with the attenuation start distance.</returns>
+		float GetAttenuationStartDistance() const { return m_AttenuationStartDistance; }
+
+		/// <summary>
+		/// Sets the attenuation start distance of this SoundContainer. 
+		/// </summary>
+		/// <param name="attenuationStartDistance">The new attenuation start distance.</param>
+		void SetAttenuationStartDistance(float attenuationStartDistance) { m_AttenuationStartDistance = attenuationStartDistance; m_AllSoundPropertiesUpToDate = false; }
 
 		/// <summary>
 		/// Gets the looping setting of this SoundContainer.
@@ -178,8 +197,8 @@ namespace RTE {
 		/// Sets the looping setting of this SoundContainer. 
 		/// 0 means the sound is set to only play once. -1 means it loops indefinitely.
 		/// </summary>
-		/// <param name="loops">An int with the loop count.</param>
-		void SetLoopSetting(int loops);
+		/// <param name="loops">The new loop count.</param>
+		void SetLoopSetting(int loops) { m_Loops = loops; m_AllSoundPropertiesUpToDate = false; }
 
 		/// <summary>
 		/// Gets the current playback priority.
@@ -196,37 +215,62 @@ namespace RTE {
 		/// <summary>
 		/// Gets whether the sounds in this SoundContainer are affected by global pitch changes or not.
 		/// </summary>
-		/// <returns>Whether or not the Sounds in this SoundContainer affected by global pitch changes.</returns>
+		/// <returns>Whether or not the sounds in this SoundContainer are affected by global pitch changes.</returns>
 		bool IsAffectedByGlobalPitch() const { return m_AffectedByGlobalPitch; }
 
 		/// <summary>
 		/// Sets whether the sounds in this SoundContainer are affected by global pitch changes or not.
 		/// </summary>
-		/// <param name="pitched">Whether the sounds in this SoundContainer should be affected by global pitch or not.</param>
+		/// <param name="pitched">The new affected by global pitch setting.</param>
 		void SetAffectedByGlobalPitch(bool affectedByGlobalPitch) { m_AffectedByGlobalPitch = affectedByGlobalPitch; }
+
+		/// <summary>
+		/// Gets whether the sounds in this SoundContainer should be considered immobile, i.e. always play at the listener's position.
+		/// </summary>
+		/// <returns>Whether or not the sounds in this SoundContainer are immobile.</returns>
+		bool IsImmobile() const { return m_Immobile; }
+
+		/// <summary>
+		/// Sets whether the sounds in this SoundContainer should be considered immobile, i.e. always play at the listener's position.
+		/// </summary>
+		/// <param name="immobile">The new immobile setting.</param>
+		void SetImmobile(bool immobile) { m_Immobile = immobile; m_AllSoundPropertiesUpToDate = false; }
+
+		/// <summary>
+		/// Gets whether the sounds in this SoundContainer have all had all their properties set appropriately. Used to account for issues with ordering in INI loading.
+		/// </summary>
+		/// <returns>Whether or not the sounds in this SoundContainer have their properties set appropriately.</returns>
+		bool AllSoundPropertiesUpToDate() { return m_AllSoundPropertiesUpToDate; }
 #pragma endregion
 
 #pragma region Playback Controls
 		/// <summary>
-		/// Plays the next sound of this SoundContainer with default attenuation for all players.
+		/// Plays the next sound of this SoundContainer with at (0, 0) for all players.
 		/// </summary>
 		/// <returns>Whether this SoundContainer successfully started playing on any channels.</returns>
-		bool Play() { return Play(0, -1); }
+		bool Play() { return Play(Vector(), -1); }
 
 		/// <summary>
-		/// Plays the next sound of this SoundContainer with the given attenuation for all players.
+		/// Plays the next sound of this SoundContainer at the given position for all players.
 		/// </summary>
-		/// <param name="attenuation">How much distance attenuation to apply to the SoundContainer.</param>
+		/// <param name="position">The position at which to play the SoundContainer's sounds.</param>
 		/// <returns>Whether this SoundContainer successfully started playing on any channels.</returns>
-		bool Play(float attenuation) { return Play(attenuation, -1); }
+		bool Play(const Vector &position) { return Play(position, -1); }
+
+		/// <summary>
+		/// Plays the next sound of this container at (0, 0) for the given player. Mostly useful for immobile sounds.
+		/// </summary>
+		/// <param name="player">The player to start playback of this SoundContainer's sounds for.</param>
+		/// <returns>Whether there were sounds to play and they were able to be played.</returns>
+		bool Play(int player) { return Play(Vector(), player); }
 
 		/// <summary>
 		/// Plays the next sound of this SoundContainer with the given attenuation for a specific player.
 		/// </summary>
-		/// <param name="attenuation">How much distance attenuation to apply to the SoundContainer.</param>
-		/// <param name="player">Player to start playback of this SoundContainer for.</param>
+		/// <param name="position">The position at which to play the SoundContainer's sounds.</param>
+		/// <param name="player">The player to start playback of this SoundContainer's sounds for.</param>
 		/// <returns>Whether this SoundContainer successfully started playing on any channels.</returns>
-		bool Play(float attenuation, int player) { return HasAnySounds() ? g_AudioMan.PlaySound(this, attenuation, player) : false; }
+		bool Play(const Vector &position, int player) { return HasAnySounds() ? g_AudioMan.PlaySound(this, (m_Immobile ? Vector() : position), player) : false; }
 
 		/// <summary>
 		/// Stops playback of this SoundContainer for all players.
@@ -253,6 +297,15 @@ namespace RTE {
 		void FadeOut(int fadeOutTime = 1000) { if (IsBeingPlayed()) { return g_AudioMan.FadeOutSound(this, fadeOutTime); } }
 #pragma endregion
 
+#pragma region Miscellaneous
+		/// <summary>
+		/// Updates all sound properties to match this SoundContainer's settings.
+		/// Necessary because sounds loaded from ini seem to be used directly instead of loaded from PresetMan, so their correctness can't be guaranteed when they're played.
+		/// </summary>
+		/// <returns>The FMOD_RESULT for updating all of the SoundContainer's sounds' properties. If it's not FMOD_OK, something went wrong.</returns>
+		FMOD_RESULT UpdateSoundProperties();
+#pragma endregion
+
 	protected:
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
@@ -262,9 +315,13 @@ namespace RTE {
 
 		std::unordered_set<unsigned short int> m_PlayingChannels; //!< The channels this SoundContainer is currently using
 
+		float m_AttenuationStartDistance; //!< The distance away from the AudioSystem listenter to start attenuating this sound. Attenuation follows FMOD 3D Inverse Rolloff model.
 		int m_Loops; //!< Number of loops (repeats) the SoundContainer's sounds should play when played. 0 means it plays once, -1 means it plays until stopped 
 		int m_Priority; //!< The mixing priority of this SoundContainer's sounds. Higher values are more likely to be heard
 		bool m_AffectedByGlobalPitch; //!< Whether this SoundContainer's sounds should be able to be altered by global pitch changes
+		bool m_Immobile; //!< Whether this SoundContainer's sounds should be treated as immobile, i.e. not affected by 3D sound effects. Mostly used for GUI sounds and the like.
+
+		bool m_AllSoundPropertiesUpToDate; //!< Whether this SoundContainer's sounds' modes and properties are up to date. Used primarily to handle discrepancies that can occur when loading from ini if the line ordering isn't ideal.
 
 	private:
 		/// <summary>

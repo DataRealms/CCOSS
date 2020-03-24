@@ -11,9 +11,13 @@ namespace RTE {
 		m_Sounds.clear();
 		m_SelectedSounds.clear();
 		m_PlayingChannels.clear();
+		m_AttenuationStartDistance = 0;
 		m_Loops = 0;
 		m_Priority = AudioMan::PRIORITY_NORMAL;
 		m_AffectedByGlobalPitch = true;
+		m_Immobile = false;
+
+		m_AllSoundPropertiesUpToDate = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -27,9 +31,12 @@ namespace RTE {
 
 		m_SelectedSounds = reference.m_SelectedSounds;
 		m_PlayingChannels.clear();
+
+		m_AttenuationStartDistance = reference.m_AttenuationStartDistance;
 		m_Loops = reference.m_Loops;
 		m_Priority = reference.m_Priority;
 		m_AffectedByGlobalPitch = reference.m_AffectedByGlobalPitch;
+		m_Immobile = reference.m_Immobile;
 
 		return 0;
 	}
@@ -40,12 +47,13 @@ namespace RTE {
 		if (propName == "AddSample" || propName == "AddSound") {
 			ContentFile newFile;
 			reader >> newFile;
-
 			FMOD::Sound *pNewSample = newFile.GetAsSample();
 			if (!pNewSample) {
 				reader.ReportError(std::string("Failed to load the sample from the file"));
 			}
 			m_Sounds.push_back(std::pair<ContentFile, FMOD::Sound *>(newFile, pNewSample));
+		} else if (propName == "AttenuationStartDistance") {
+			reader >> m_AttenuationStartDistance;
 		} else if (propName == "LoopSetting") {
 			reader >> m_Loops;
 		} else if (propName == "Priority") {
@@ -55,6 +63,8 @@ namespace RTE {
 			}
 		} else if (propName == "AffectedByGlobalPitch") {
 			reader >> m_AffectedByGlobalPitch;
+		} else if (propName == "Immobile") {
+			reader >> m_Immobile;
 		} else {
 			// See if the base class(es) can find a match instead
 			return Entity::ReadProperty(propName, reader);
@@ -98,16 +108,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SoundContainer::SetLoopSetting(int loops) {
-		m_Loops = loops;
-		for (std::vector<std::pair<ContentFile, FMOD::Sound * >>::const_iterator itr = m_Sounds.begin(); itr != m_Sounds.end(); ++itr) {
-			FMOD_RESULT result = itr->second->setMode(m_Loops == 0 ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL);
-			result = itr->second->setLoopCount(m_Loops);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	bool SoundContainer::SelectNextSounds() {
 		int soundCount = GetSoundCount();
 		if (soundCount == 0) {
@@ -135,5 +135,23 @@ namespace RTE {
 		RTEAssert(m_SelectedSounds.size() > 0 && m_SelectedSounds[0] >= 0 && m_SelectedSounds[0] < soundCount, "Failed to select next sound, either none was selected or the selected sound was invalid.");
 		
 		return true;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	FMOD_RESULT SoundContainer::UpdateSoundProperties() {
+		FMOD_RESULT result = FMOD_OK;
+
+		for (std::vector<std::pair<ContentFile, FMOD::Sound * >>::const_iterator itr = m_Sounds.begin(); itr != m_Sounds.end() && result == FMOD_OK; ++itr) {
+			FMOD_MODE soundMode = m_Loops == 0 ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL;
+			soundMode |= m_Immobile ? FMOD_3D_HEADRELATIVE : FMOD_3D_WORLDRELATIVE;
+
+			result = result == FMOD_OK ? itr->second->setMode(soundMode) : result;
+			result = result == FMOD_OK ? itr->second->setLoopCount(m_Loops) : result;
+			result = result == FMOD_OK ? itr->second->set3DMinMaxDistance(m_AttenuationStartDistance, 100000) : result;
+		}
+		m_AllSoundPropertiesUpToDate = result == FMOD_OK;
+
+		return result;
 	}
 }

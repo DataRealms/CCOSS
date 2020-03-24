@@ -634,7 +634,7 @@ void HDFirearm::Reload()
         if (m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())
             m_FireSound.Stop();
 
-        m_ReloadStartSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_ReloadStartSound.Play(m_Pos);
         m_ReloadTmr.Reset();
         m_Reloading = true;
     }
@@ -867,7 +867,7 @@ void HDFirearm::Update()
                 // Sound the extra Round firing sound, if any is defined
                 if (!playedRoundFireSound && pRound->HasFireSound())
                 {
-                    pRound->GetFireSound()->Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                    pRound->GetFireSound()->Play(m_Pos);
                     playedRoundFireSound = true;
                 }
 
@@ -895,7 +895,7 @@ void HDFirearm::Update()
             if (m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())
                 m_FireSound.Stop();
 
-            m_ReloadStartSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+            m_ReloadStartSound.Play(m_Pos);
 
             m_ReloadTmr.Reset();
         }
@@ -905,7 +905,7 @@ void HDFirearm::Update()
     else if (((m_pMagazine && m_pMagazine->IsEmpty()) || !m_pMagazine) && m_Activated && !m_AlreadyClicked )
     {
         // Play empty pin click sound.
-        m_EmptySound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_EmptySound.Play(m_Pos);
         // Indicate that we have clicked once during the current activation. 
         m_AlreadyClicked = true;
 
@@ -920,7 +920,7 @@ void HDFirearm::Update()
         if (m_pMagazine)
         {
             m_pMagazine->Attach(this);
-            m_ReloadEndSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+            m_ReloadEndSound.Play(m_Pos);
 
             m_ActivationTmr.Reset();
             m_ActivationTmr.Reset();
@@ -986,7 +986,7 @@ void HDFirearm::Update()
         // Play firing sound
         // Only start playing if it's not a looping fire sound that is already playing, and if there's a mag
         if (!(m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed()) && m_pMagazine)
-            m_FireSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+            m_FireSound.Play(m_Pos);
     }
     else {
         m_Recoiled = false;

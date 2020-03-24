@@ -120,7 +120,7 @@ namespace RTE {
 	void ThrownDevice::Activate() {
 		if (!m_Activated) {
 			m_ActivationTmr.Reset();
-			m_ActivationSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+			m_ActivationSound.Play(m_Pos);
 			m_Activated = true;
 		}
 	}

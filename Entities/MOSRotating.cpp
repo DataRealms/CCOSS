@@ -1168,7 +1168,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
     m_AllAttachables.clear();
 
     // Play the gib sound
-    m_GibSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+    m_GibSound.Play(m_Pos);
 
     // Flash post effect if it is defined
     if (m_pScreenEffect && m_EffectOnGib && (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY())))

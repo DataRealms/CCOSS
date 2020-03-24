@@ -1228,10 +1228,13 @@ namespace RTE
 			sndDataPtr->State = (*eItr).State;
 			std::copy(std::begin(eItr->Channels), std::end(eItr->Channels), sndDataPtr->Channels);
 			std::copy(std::begin(eItr->SoundFileHashes), std::end(eItr->SoundFileHashes), sndDataPtr->SoundFileHashes);
-			sndDataPtr->Distance = (*eItr).Distance;
+			sndDataPtr->Position[0] = (*eItr).Position[0];
+			sndDataPtr->Position[1] = (*eItr).Position[1];
 			sndDataPtr->Loops = (*eItr).Loops;
 			sndDataPtr->Pitch = (*eItr).Pitch;
 			sndDataPtr->AffectedByGlobalPitch = (*eItr).AffectedByGlobalPitch;
+			sndDataPtr->AttenuationStartDistance = (*eItr).AttenuationStartDistance;
+			sndDataPtr->Immobile = (*eItr).Immobile;
 			sndDataPtr->FadeOutTime = (*eItr).FadeOutTime;
 
 			msg->SoundEventsCount++;

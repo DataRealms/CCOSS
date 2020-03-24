@@ -690,17 +690,17 @@ namespace RTE
 										soundContainerToHandle->Stop();
 										soundContainerToHandle->Reset();
 									}
-									soundContainerToHandle->Create(sndDataPtr->Loops, sndDataPtr->AffectedByGlobalPitch);
+									soundContainerToHandle->Create(sndDataPtr->Loops, sndDataPtr->AffectedByGlobalPitch, sndDataPtr->AttenuationStartDistance, sndDataPtr->Immobile);
 									for (size_t soundFileHash : sndDataPtr->SoundFileHashes) {
 										if (soundFileHash != 0) { soundContainerToHandle->AddSound(ContentFile::GetPathFromHash(soundFileHash)); }
 									}
-									g_AudioMan.PlaySound(soundContainerToHandle, sndDataPtr->Distance, -1, -1, sndDataPtr->Pitch);
+									g_AudioMan.PlaySound(soundContainerToHandle, Vector(sndDataPtr->Position[0], sndDataPtr->Position[1]), -1, -1, sndDataPtr->Pitch);
 									break;
 								case AudioMan::SOUND_STOP:
 									soundContainerToHandle->Stop();
 									break;
-								case AudioMan::SOUND_SET_ATTENUATION:
-									soundContainerToHandle->UpdateAttenuation(sndDataPtr->Distance);
+								case AudioMan::SOUND_SET_POSITION:
+									soundContainerToHandle->SetPosition(Vector(sndDataPtr->Position[0], sndDataPtr->Position[1]));
 									break;
 								case AudioMan::SOUND_SET_PITCH:
 									g_AudioMan.SetSoundPitch(soundContainerToHandle, sndDataPtr->Pitch);

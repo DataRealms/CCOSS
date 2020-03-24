@@ -409,6 +409,11 @@ public:
 
 	void SetPrintDebugInfo(bool printDebugInfo) { m_PrintDebugInfo = printDebugInfo; }
 
+	/// <summary>
+	/// The strength of the sound panning effect. 0 - 1, where 0 is no panning and 1 is fully panned
+	/// </summary>
+	float SoundPanningEffectStrength() const { return m_SoundPanningEffectStrength; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			ForceSoftwareGfxDriver
@@ -596,6 +601,8 @@ protected:
 	bool m_EndlessMode;
 	// Print some debug info in console
 	bool m_PrintDebugInfo;
+	// The strength of the sound panning effect, 0 (no panning) - 1 (full panning)
+	float m_SoundPanningEffectStrength;
 	//Whether CC uses additional Draws during MO's PreTravel and PostTravel to 
 	//update MO layer this frame with more precision(true), or it just uses data from the last frame with less precision(false)
 	bool m_PreciseCollisions;

@@ -11,7 +11,7 @@ namespace RTE {
 		m_Sounds.clear();
 		m_SelectedSounds.clear();
 		m_PlayingChannels.clear();
-		m_AttenuationStartDistance = 0;
+		m_AttenuationStartDistance = 1;
 		m_Loops = 0;
 		m_Priority = AudioMan::PRIORITY_NORMAL;
 		m_AffectedByGlobalPitch = true;

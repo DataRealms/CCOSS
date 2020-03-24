@@ -56,6 +56,7 @@ void SettingsMan::Clear()
 	m_ForceNonOverlayedWindowGfxDriver = false;
 	m_AllowSavingToBase = false;
 	m_RecommendedMOIDCount = 240;
+    m_SoundPanningEffectStrength = 0.5;
 	m_NetworkServerName = "";
 	m_PlayerNetworkName = "";
 
@@ -233,6 +234,8 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         reader >> m_PrintDebugInfo;
 	else if (propName == "RecommendedMOIDCount")
 		reader >> m_RecommendedMOIDCount;
+    else if (propName == "SoundPanningEffectStrength")
+        reader >> m_SoundPanningEffectStrength;
 	else if (propName == "PlayerNetworkName")
 		reader >> m_PlayerNetworkName;
 	else if (propName == "NetworkServerName")
@@ -403,6 +406,8 @@ int SettingsMan::Save(Writer &writer) const
     writer << m_PrintDebugInfo;
 	writer.NewProperty("RecommendedMOIDCount");
 	writer << m_RecommendedMOIDCount;
+    writer.NewProperty("SoundPanningEffectStrength");
+    writer << m_SoundPanningEffectStrength;
 	writer.NewProperty("PlayerNetworkName");
 	if (m_PlayerNetworkName == "")
 		writer << "Dummy";

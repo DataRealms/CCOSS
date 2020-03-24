@@ -42,9 +42,9 @@ namespace RTE {
 		/// <param name="loops">The number of times this SoundContainer's sounds will loop. 0 means play once. -1 means play infinitely until stopped.</param>
 		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch.</param>
 		/// <param name="attenuationStartDistance">The distance at which this SoundContainer's sounds should start attenuating away.</param>
-		/// <param name="immobile">Whether this SoundContainer's sounds' positions will be treated as immobile, i.e. they won't be affected by 3D sound manipulation.</param>
+		/// <param name="immobile">Whether this SoundContainer's sounds will be treated as immobile, i.e. they won't be affected by 3D sound manipulation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(int loops = 0, bool affectedByGlobalPitch = true, float attenuationStartDistance = 0, bool immobile = false) { SetLoopSetting(loops); m_AffectedByGlobalPitch = affectedByGlobalPitch; m_AttenuationStartDistance = attenuationStartDistance; m_Immobile = immobile; return 0; }
+		int Create(int loops = 0, bool affectedByGlobalPitch = true, float attenuationStartDistance = 1, bool immobile = false) { SetLoopSetting(loops); m_AffectedByGlobalPitch = affectedByGlobalPitch; m_AttenuationStartDistance = attenuationStartDistance; m_Immobile = immobile; return 0; }
 
 		/// <summary>
 		/// Creates a SoundContainer and gives it a path to its first sound.
@@ -53,9 +53,9 @@ namespace RTE {
 		/// <param name="loops">The number of times this SoundContainer's sounds will loop. 0 means play once. -1 means play infinitely until stopped.</param>
 		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch.</param>
 		/// <param name="attenuationStartDistance">The distance at which this SoundContainer's sounds should start attenuating away.</param>
-		/// <param name="immobile">Whether this SoundContainer's sounds' positions will be treated as immobile, i.e. they won't be affected by 3D sound manipulation.</param>
+		/// <param name="immobile">Whether this SoundContainer's sounds will be treated as immobile, i.e. they won't be affected by 3D sound manipulation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(std::string const soundPath, int loops = 0, bool affectedByGlobalPitch = true, float attenuationStartDistance = 0, bool immobile = false) { int result = Create(loops, affectedByGlobalPitch, attenuationStartDistance, immobile); AddSound(soundPath); return result; }
+		int Create(std::string const soundPath, int loops = 0, bool affectedByGlobalPitch = true, float attenuationStartDistance = 1, bool immobile = false) { int result = Create(loops, affectedByGlobalPitch, attenuationStartDistance, immobile); AddSound(soundPath); return result; }
 
 		/// <summary>
 		/// Adds a new Sound to this SoundContainer, loaded from a file.

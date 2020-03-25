@@ -13,6 +13,7 @@
 #define g_AudioMan AudioMan::Instance()
 
 namespace RTE {
+
 	class SoundContainer;
 
 	/// <summary>
@@ -56,15 +57,15 @@ namespace RTE {
 
 		struct NetworkSoundData {
 			unsigned char State;
-			unsigned short int Channels[c_MaxPlayingSoundsPerContainer];
+			unsigned short Channels[c_MaxPlayingSoundsPerContainer];
 			size_t SoundFileHashes[c_MaxPlayingSoundsPerContainer];
 			float Position[2];
-			short int Loops;
+			short Loops;
 			float Pitch;
 			bool AffectedByGlobalPitch;
 			float AttenuationStartDistance;
 			bool Immobile;
-			short int FadeOutTime;
+			short FadeOutTime;
 		};
 
 #pragma region Creation
@@ -91,14 +92,14 @@ namespace RTE {
 		/// Destroys and resets (through Clear()) the AudioMan object.
 		/// </summary>
 		void Destroy();
-#pragma endregion
 
-#pragma region Standard Methods
 		/// <summary>
 		/// Resets the entire AudioMan including it's inherited members to their default settings or values.
 		/// </summary>
 		void Reset() { Clear(); }
+#pragma endregion
 
+#pragma region Concrete Methods
 		/// <summary>
 		/// Updates the state of this AudioMan. Supposed to be done every frame before drawing.
 		/// </summary>
@@ -179,7 +180,7 @@ namespace RTE {
 		/// Sets/updates the frequency/pitch for the music channel.
 		/// </summary>
 		/// <param name="pitch">New pitch, a multiplier of the original normal frequency. Keep it > 0.</param>
-		/// <returns>Whether the music channel's pitch was succesfully updated.</returns>
+		/// <returns>Whether the music channel's pitch was successfully updated.</returns>
 		bool SetMusicPitch(float pitch);
 
 		/// <summary>
@@ -389,7 +390,7 @@ namespace RTE {
 		/// <param name="attenuationStartDistance">The distance at which the sound will start attenuating away.</param>
 		/// <param name="affectedByGlobalPitch">Whether the sound is affected by pitch.</param>
 		/// <param name="fadeOutTime">The amount of time, in ms, to fade out over.</param>
-		void RegisterSoundEvent(int player, NetworkSoundState state, std::unordered_set<unsigned short int> const *channels = NULL, std::vector<size_t> const *soundFileHashes = NULL, const Vector &position = Vector(), short int loops = 0, float pitch = 1, bool affectedByGlobalPitch = false, float attenuationStartDistance = 0, bool immobile = false, short int fadeOutTime = 0);
+		void RegisterSoundEvent(int player, NetworkSoundState state, std::unordered_set<unsigned short> const *channels = NULL, std::vector<size_t> const *soundFileHashes = NULL, const Vector &position = Vector(), short loops = 0, float pitch = 1, bool affectedByGlobalPitch = false, float attenuationStartDistance = 0, bool immobile = false, short fadeOutTime = 0);
 #pragma endregion
 
 	protected:
@@ -433,20 +434,20 @@ namespace RTE {
 		static FMOD_RESULT F_CALLBACK SoundChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
 
 		/// <summary>
-		/// Clears all the member variables of this AudioMan, effectively resetting the members of this abstraction level only.
-		/// </summary>
-		void Clear();
-
-		/// <summary>
 		/// Gets the corresponding FMOD_VECTOR for a given RTE Vector.
 		/// </summary>
 		/// <param name="vector">The vector to get as an FMOD_VECTOR.</param>
 		/// <returns>The FMOD_VECTOR that corresponds to the given RTE Vector</returns>
 		FMOD_VECTOR GetAsFMODVector(const Vector &vector, float zValue = 0);
 
+		/// <summary>
+		/// Clears all the member variables of this AudioMan, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+
 		// Disallow the use of some implicit methods.
 		AudioMan(const AudioMan &reference);
-		AudioMan & operator=(const AudioMan &rhs);
+		AudioMan & operator=(const AudioMan &rhs) {}
 	};
 }
 #endif

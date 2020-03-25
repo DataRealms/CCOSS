@@ -56,7 +56,7 @@ namespace RTE {
 
 		m_BackButtonPressSound.Create("Base.rte/Sounds/GUIs/BackButtonPress.wav", 0, false, 0, true);
 
-		m_ConfirmSound.Create("Base.rte/Sounds/GUIs/MenuExit2.wav", 0, false, 0, true);
+		m_ConfirmSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", 0, false, 0, true);
 
 		m_UserErrorSound.Create("Base.rte/Sounds/GUIs/UserError.wav", 0, false, 0, true);
 
@@ -93,13 +93,13 @@ namespace RTE {
 		m_CameraTravelSound.AddSound("Base.rte/Sounds/GUIs/CameraTravel3.wav");
 
 		//		m_AreaPickedSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", 0, false, 0, true);
-		m_AreaPickedSound = m_EnterMenuSound;
+		m_AreaPickedSound = m_ConfirmSound;
 
 		//		m_ObjectPickedSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", 0, false, 0, true);
-		m_ObjectPickedSound = m_EnterMenuSound;
+		m_ObjectPickedSound = m_ConfirmSound;
 
 		//		m_PurchaseMadeSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", 0, false, 0, true);
-		m_PurchaseMadeSound = m_EnterMenuSound;
+		m_PurchaseMadeSound = m_ConfirmSound;
 
 		m_PlacementBlip.Create("Base.rte/Sounds/GUIs/PlacementBlip.wav", 0, false, 0, true);
 

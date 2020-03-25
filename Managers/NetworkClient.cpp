@@ -84,8 +84,7 @@ namespace RTE
 		}
 
 		// Stop all sounds received from server
-		for (std::unordered_map<unsigned short int, SoundContainer *>::iterator it = m_ServerSounds.begin(); it != m_ServerSounds.end(); ++it)
-		{
+		for (std::unordered_map<unsigned short, SoundContainer *>::iterator it = m_ServerSounds.begin(); it != m_ServerSounds.end(); ++it) {
 			it->second->Stop();
 			delete it->second;
 		}
@@ -680,7 +679,7 @@ namespace RTE
 
 				for (unsigned short serverSoundChannelIndex : sndDataPtr->Channels) {
 					if (serverSoundChannelIndex < c_MaxAudioChannels && (sndDataPtr->State == AudioMan::SOUND_PLAY || m_ServerSounds.find(serverSoundChannelIndex) != m_ServerSounds.end())) {
-						SoundContainer *soundContainerToHandle = m_ServerSounds.find(serverSoundChannelIndex) == m_ServerSounds.end() ? NULL : m_ServerSounds.at(serverSoundChannelIndex);
+						SoundContainer *soundContainerToHandle = (m_ServerSounds.find(serverSoundChannelIndex) == m_ServerSounds.end()) ? NULL : m_ServerSounds.at(serverSoundChannelIndex);
 						if (alreadyHandledSoundContainers.find(soundContainerToHandle) == alreadyHandledSoundContainers.end()) {
 							switch (sndDataPtr->State) {
 								case AudioMan::SOUND_PLAY:
@@ -713,13 +712,11 @@ namespace RTE
 							}
 							alreadyHandledSoundContainers.insert(soundContainerToHandle);
 						}
-
 						// We always have to add the newly made sound container to the map of server sounds, regardless of whether we were able to delete existing sounds above
 						if (sndDataPtr->State == AudioMan::SOUND_PLAY) { m_ServerSounds.insert({serverSoundChannelIndex, soundContainerToHandle}); }
 					}
 				}
 			}
-
 			sndDataPtr++;
 		}
 	}

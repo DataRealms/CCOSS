@@ -250,7 +250,7 @@ namespace RTE
 		std::list<PostEffect> m_PostEffects[FRAMES_TO_REMEMBER];
 
 		// Unordered map of SoundContainers received from server. OWNED!!!
-		std::unordered_map<unsigned short int, SoundContainer *> m_ServerSounds;
+		std::unordered_map<unsigned short, SoundContainer *> m_ServerSounds;
 
 		BITMAP * m_pSceneBackgroundBitmap;
 		BITMAP * m_pSceneForegroundBitmap;

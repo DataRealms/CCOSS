@@ -140,7 +140,7 @@ namespace RTE {
 		/// Gets a vector of hashes of the sounds selected to be played next in this SoundContainer.
 		/// </summary>
 		/// <returns>The currently playing sounds hashes.</returns>
-		std::vector<std::size_t> GetSelectedSoundHashes();
+		std::vector<size_t> GetSelectedSoundHashes();
 
 		/// <summary>
 		/// Gets a vector of the sounds objects selected to be played next in this SoundContainer.
@@ -152,19 +152,19 @@ namespace RTE {
 		/// Gets the channels playing sounds from this SoundContainer.
 		/// </summary>
 		/// <returns>The channels currently being used.</returns>
-		std::unordered_set<unsigned short int> *GetPlayingChannels() { return &m_PlayingChannels; }
+		std::unordered_set<unsigned short> *GetPlayingChannels() { return &m_PlayingChannels; }
 
 		/// <summary>
 		/// Adds a channel index to the SoundContainer's collection of playing channels.
 		/// </summary>
 		/// <param name="channel">The channel index to add.</param>
-		void AddPlayingChannel(unsigned short int channel) { m_PlayingChannels.insert(channel); RTEAssert(m_PlayingChannels.size() <= c_MaxPlayingSoundsPerContainer, "Tried to play more than " + std::to_string(c_MaxPlayingSoundsPerContainer) + " sounds in SoundContainer " + GetPresetName()); }
+		void AddPlayingChannel(unsigned short channel) { m_PlayingChannels.insert(channel); RTEAssert(m_PlayingChannels.size() <= c_MaxPlayingSoundsPerContainer, "Tried to play more than " + std::to_string(c_MaxPlayingSoundsPerContainer) + " sounds in SoundContainer " + GetPresetName()); }
 
 		/// <summary>
 		/// Removes a channel index from the SoundContainer's collection of playing channels.
 		/// </summary>
 		/// <param name="channel">The channel index to remove.</param>
-		void RemovePlayingChannel(unsigned short int channel) { m_PlayingChannels.erase(channel); }
+		void RemovePlayingChannel(unsigned short channel) { m_PlayingChannels.erase(channel); }
 #pragma endregion
 
 #pragma region Sound Property Getters and Setters
@@ -313,9 +313,9 @@ namespace RTE {
 		std::vector<std::pair<ContentFile, FMOD::Sound *>> m_Sounds; // All the FMOD Sound objects in this SoundContainer, paired with their appropriate ContentFile. The sound objects within are owned by the ContentFile static maps
 		std::vector<size_t> m_SelectedSounds; //!< Vector of the indices of all selected sounds
 
-		std::unordered_set<unsigned short int> m_PlayingChannels; //!< The channels this SoundContainer is currently using
+		std::unordered_set<unsigned short> m_PlayingChannels; //!< The channels this SoundContainer is currently using
 
-		float m_AttenuationStartDistance; //!< The distance away from the AudioSystem listenter to start attenuating this sound. Attenuation follows FMOD 3D Inverse Rolloff model.
+		float m_AttenuationStartDistance; //!< The distance away from the AudioSystem listener to start attenuating this sound. Attenuation follows FMOD 3D Inverse roll-off model.
 		int m_Loops; //!< Number of loops (repeats) the SoundContainer's sounds should play when played. 0 means it plays once, -1 means it plays until stopped 
 		int m_Priority; //!< The mixing priority of this SoundContainer's sounds. Higher values are more likely to be heard
 		bool m_AffectedByGlobalPitch; //!< Whether this SoundContainer's sounds should be able to be altered by global pitch changes

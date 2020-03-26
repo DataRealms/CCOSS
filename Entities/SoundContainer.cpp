@@ -43,7 +43,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SoundContainer::ReadProperty(std::string propName, Reader &reader) {
-		if (propName == "AddSample" || propName == "AddSound") {
+		if (propName == "AddSound") {
 			ContentFile newFile;
 			reader >> newFile;
 			FMOD::Sound *pNewSample = newFile.GetAsSample();

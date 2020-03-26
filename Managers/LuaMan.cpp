@@ -519,7 +519,8 @@ int LuaMan::Create()
             .def("IsWithinBoxY", &Box::IsWithinBoxY)
             .def("GetWithinBoxX", &Box::GetWithinBoxX)
             .def("GetWithinBoxY", &Box::GetWithinBoxY)
-            .def("GetWithinBox", &Box::GetWithinBox),
+            .def("GetWithinBox", &Box::GetWithinBox)
+            .def("IntersectsBox", &Box::IntersectsBox),
 
         class_<Scene::Area>("Area")
             .def(constructor<>())

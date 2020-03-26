@@ -297,7 +297,7 @@ namespace RTE {
 				// Decipher the number of secs we're supposed to wait
 				int seconds = 0;
 				sscanf(nextString.c_str(), "@%i", &seconds);
-				m_SilenceTimer.SetRealTimeLimitS((seconds > 0 )? seconds : 0);
+				m_SilenceTimer.SetRealTimeLimitS((seconds > 0 ) ? seconds : 0);
 				m_SilenceTimer.Reset();
 
 				bool isPlaying;
@@ -306,9 +306,7 @@ namespace RTE {
 					if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_SILENCE, NULL, seconds); }
 					result = m_MusicChannelGroup->stop();
 				}
-				if (result != FMOD_OK) {
-					g_ConsoleMan.PrintString("ERROR: Could not set play silence as specified in music queue, when trying to play next stream: " + std::string(FMOD_ErrorString(result)));
-				}
+				if (result != FMOD_OK) { g_ConsoleMan.PrintString("ERROR: Could not set play silence as specified in music queue, when trying to play next stream: " + std::string(FMOD_ErrorString(result))); }
 			} else {
 				// Loop music if it's the last track in the playlist, otherwise just go to the next one
 				PlayMusic(nextString.c_str(), m_MusicPlayList.empty() ? -1 : 0); 
@@ -417,9 +415,8 @@ namespace RTE {
 			return false;
 		}
 		result = channel->setPaused(false);
-		if (result != FMOD_OK) {
-			g_ConsoleMan.PrintString("ERROR: Failed to start playing sounds from SoundContainer " + soundContainer->GetPresetName() + " after setting it up: " + std::string(FMOD_ErrorString(result)));
-		}
+		if (result != FMOD_OK) { g_ConsoleMan.PrintString("ERROR: Failed to start playing sounds from SoundContainer " + soundContainer->GetPresetName() + " after setting it up: " + std::string(FMOD_ErrorString(result))); }
+
 		soundContainer->AddPlayingChannel(channelIndex);
 
 		// Now that the sound is playing we can register an event with the SoundContainer's channels, which can be used by clients to identify the sound being played.
@@ -447,10 +444,7 @@ namespace RTE {
 				result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
 				++channelIterator; // NOTE - stopping the sound will remove the channel, screwing things up if we don't move to the next iterator preemptively
 				result = (result == FMOD_OK) ? soundChannel->stop() : result;
-				if (result != FMOD_OK) {
-					g_ConsoleMan.PrintString("Error: Failed to stop playing channel in SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
-				}
-
+				if (result != FMOD_OK) { g_ConsoleMan.PrintString("Error: Failed to stop playing channel in SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result))); }
 			}
 		}
 		return anySoundsPlaying;

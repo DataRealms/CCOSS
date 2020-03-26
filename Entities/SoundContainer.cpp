@@ -138,7 +138,7 @@ namespace RTE {
 
 		for (std::vector<std::pair<ContentFile, FMOD::Sound * >>::const_iterator itr = m_Sounds.begin(); itr != m_Sounds.end() && result == FMOD_OK; ++itr) {
 			FMOD_MODE soundMode = (m_Loops == 0) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL;
-			(soundMode |= m_Immobile) ? FMOD_3D_HEADRELATIVE : FMOD_3D_WORLDRELATIVE;
+			soundMode |= m_Immobile ? FMOD_3D_HEADRELATIVE : FMOD_3D_WORLDRELATIVE;
 
 			result = (result == FMOD_OK) ? itr->second->setMode(soundMode) : result;
 			result = (result == FMOD_OK) ? itr->second->setLoopCount(m_Loops) : result;

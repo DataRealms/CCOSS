@@ -462,7 +462,7 @@ void GibEditorGUI::Update()
             m_EditorGUIMode = PLACINGGIB;
             m_PreviousMode = ADDINGGIB;
             UpdatePieMenu();
-            g_GUISound.PlacementBlip().Play();
+            g_GUISound.PlacementBlip()->Play();
         }
     }
 
@@ -547,8 +547,8 @@ void GibEditorGUI::Update()
             // Increment the list order so we place over last placed item
             if (m_GibListOrder >= 0)
                 m_GibListOrder++;
-            g_GUISound.PlacementThud().Play();
-//                g_GUISound.PlacementGravel().Play();
+            g_GUISound.PlacementThud()->Play();
+//                g_GUISound.PlacementGravel()->Play();
             m_EditMade = true;
 
 // TEMP REMOVE WEHN YOU CLEAN UP THE ABOVE HARDCODED BRAIN PLACEMENT
@@ -617,11 +617,11 @@ void GibEditorGUI::Update()
                     m_PreviousMode = MOVINGGIB;
                     UpdatePieMenu();
                     m_BlinkTimer.Reset();
-                    g_GUISound.PlacementBlip().Play();
-                    g_GUISound.PlacementGravel().Play();
+                    g_GUISound.PlacementBlip()->Play();
+                    g_GUISound.PlacementGravel()->Play();
                 }
                 else
-                    g_GUISound.UserErrorSound().Play();
+                    g_GUISound.UserErrorSound()->Play();
             }
         }
 
@@ -647,7 +647,7 @@ void GibEditorGUI::Update()
 // TODO: Add awesome destruction sound here
                 }
                 else
-                    g_GUISound.UserErrorSound().Play();
+                    g_GUISound.UserErrorSound()->Play();
             }
         }
 
@@ -679,7 +679,7 @@ void GibEditorGUI::Update()
                     UpdatePieMenu();
                 }
                 else
-                    g_GUISound.UserErrorSound().Play();
+                    g_GUISound.UserErrorSound()->Play();
             }
         }
     }

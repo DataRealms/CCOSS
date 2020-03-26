@@ -345,7 +345,7 @@ void PieMenuGUI::SetEnabled(bool enable)
         // Reset mouse position in center of its trap so pre-activation direction doesn't affect the menu
         if (m_pController->IsMouseControlled())
             g_UInputMan.SetMouseValueMagnitude(0);
-		g_GUISound.PieMenuEnterSound().Play(0, m_pController->GetPlayer());
+		g_GUISound.PieMenuEnterSound()->Play(m_pController->GetPlayer());
     }
     else if (!enable && m_PieEnabled != DISABLED && m_PieEnabled != DISABLING)
     {
@@ -356,7 +356,7 @@ void PieMenuGUI::SetEnabled(bool enable)
             g_UInputMan.SetMouseValueMagnitude(0);
         // Only play regular exit sound if the special sounds for selected slices won't play
 //        if (!m_pHoveredSlice && !m_pActivatedSlice)
-		g_GUISound.PieMenuExitSound().Play(0, m_pController->GetPlayer());
+		g_GUISound.PieMenuExitSound()->Play(m_pController->GetPlayer());
     }
 }
 
@@ -921,9 +921,9 @@ void PieMenuGUI::Update()
             m_RedrawBG = true;
             // Play the change sound
             if (m_pHoveredSlice->m_Enabled)
-                g_GUISound.HoverChangeSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.HoverChangeSound()->Play(m_pController->GetPlayer());
             else
-                g_GUISound.HoverDisabledSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.HoverDisabledSound()->Play(m_pController->GetPlayer());
         }
     }
 
@@ -1030,10 +1030,10 @@ void PieMenuGUI::Update()
             {
                 m_pActivatedSlice = m_pHoveredSlice;
                 m_AlreadyActivated = m_pActivatedSlice->m_SliceType;
-				g_GUISound.SlicePickedSound().Play(0, m_pController->GetPlayer());
+				g_GUISound.SlicePickedSound()->Play(m_pController->GetPlayer());
             }
             else
-				g_GUISound.DisabledPickedSound().Play(0, m_pController->GetPlayer());
+				g_GUISound.DisabledPickedSound()->Play(m_pController->GetPlayer());
             // Reset the digital input hold timer so the hover stays here
             m_DInputHoldTimer.Reset();
         }
@@ -1045,10 +1045,10 @@ void PieMenuGUI::Update()
             {
                 m_pActivatedSlice = m_pHoveredSlice;
                 m_AlreadyActivated = m_pActivatedSlice->m_SliceType;
-				g_GUISound.SlicePickedSound().Play(0, m_pController->GetPlayer());
+				g_GUISound.SlicePickedSound()->Play(m_pController->GetPlayer());
             }
             else
-				g_GUISound.DisabledPickedSound().Play(0, m_pController->GetPlayer());
+				g_GUISound.DisabledPickedSound()->Play(m_pController->GetPlayer());
         }
 
         // Reset the timer so we can measure how long the cursor has been neutral before letting go of the hover
@@ -1409,9 +1409,9 @@ bool PieMenuGUI::SelectSlice(Slice *pSelected, bool moveCursor)
         m_RedrawBG = true;
         diffSlice = true;
         if (pSelected->m_Enabled)
-			g_GUISound.HoverChangeSound().Play(0, m_pController->GetPlayer());
+			g_GUISound.HoverChangeSound()->Play(m_pController->GetPlayer());
         else
-			g_GUISound.HoverDisabledSound().Play(0, m_pController->GetPlayer());
+			g_GUISound.HoverDisabledSound()->Play(m_pController->GetPlayer());
     }
 
     m_pHoveredSlice = pSelected;

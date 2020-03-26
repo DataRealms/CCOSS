@@ -227,7 +227,7 @@ ENTITYALLOCATION(Round)
 // Arguments:       None.
 // Return value:    A sound with the firing sample of this round. OINT!
 
-    Sound * GetFireSound() { return &m_FireSound; }
+    SoundContainer * GetFireSound() { return &m_FireSound; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -238,7 +238,7 @@ ENTITYALLOCATION(Round)
 // Return value:    Whether the firing Sound of this has been loaded, or the firing Device
 //                  will make the noise alone.
 
-    bool HasFireSound() const { return m_FireSound.HasAnySamples(); }
+    bool HasFireSound() const { return m_FireSound.HasAnySounds(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -313,7 +313,7 @@ protected:
     // The range of separation between particles in this round, in pixels.
     float m_Separation;
     // The extra firing audio of this Round being fired
-    Sound m_FireSound;
+    SoundContainer m_FireSound;
     // For overriding LifeTime when executing the AI shooting scripts.
     unsigned long m_AILifeTime;
     // For overriding FireVel when executing the AI shooting scripts.

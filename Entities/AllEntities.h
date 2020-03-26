@@ -34,7 +34,7 @@
 #include "MOSRotating.h"
 #include "Scene.h"
 #include "SLTerrain.h"
-#include "Sound.h"
+#include "SoundContainer.h"
 #include "TDExplosive.h"
 #include "ThrownDevice.h"
 #include "Turret.h"

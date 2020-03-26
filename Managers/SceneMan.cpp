@@ -215,7 +215,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
 
     // Get the unseen reveal sound
     if (!m_pUnseenRevealSound)
-        m_pUnseenRevealSound = dynamic_cast<Sound *>(g_PresetMan.GetEntityPreset("Sound", "Unseen Reveal Blip")->Clone());
+        m_pUnseenRevealSound = dynamic_cast<SoundContainer *>(g_PresetMan.GetEntityPreset("SoundContainer", "Unseen Reveal Blip")->Clone());
 
 //    m_pCurrentScene->GetTerrain()->CleanAir();
 
@@ -1519,7 +1519,7 @@ bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
             putpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY, g_KeyColor);
             // Play the reveal sound, if there's not too many already revealed this frame
             if (g_SettingsMan.BlipOnRevealUnseen() && m_pUnseenRevealSound && m_pCurrentScene->GetSeenPixels(team).size() < 5)
-                m_pUnseenRevealSound->Play(g_SceneMan.TargetDistanceScalar(Vector(posX, posY)));
+                m_pUnseenRevealSound->Play(Vector(posX, posY));
             // Show that we actually cleared an unseen pixel
             return true;
         }

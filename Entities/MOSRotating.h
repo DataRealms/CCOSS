@@ -1163,7 +1163,7 @@ protected:
     // The number of wound emitters allowed before this gets gibbed. 0 means this can't get gibbed
     int m_GibWoundLimit;
     // Gib sound effect
-    Sound m_GibSound;
+    SoundContainer m_GibSound;
     // Whether to flash effect on gib
     bool m_EffectOnGib;
     // How far this is audiable (in screens) when gibbing

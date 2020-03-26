@@ -40,7 +40,7 @@ class SceneObject;
 class TerrainObject;
 class MovableObject;
 class Material;
-class Sound;
+class SoundContainer;
 struct PostEffect;
 
 // Different modes to draw the SceneLayers in
@@ -1913,7 +1913,7 @@ protected:
     int m_SeamCrossCount[MAXSCREENCOUNT][2];
 
     // Sound of an unseen pixel on an unseen layer being revealed.
-    Sound *m_pUnseenRevealSound;
+    SoundContainer *m_pUnseenRevealSound;
 
     // The last screen everything has been updated to
     int m_LastUpdatedScreen;

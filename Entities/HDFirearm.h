@@ -805,16 +805,16 @@ protected:
     Attachable *m_pFlash;
 
     // The audio of this FireArm being fired.
-    Sound m_FireSound;
+    SoundContainer m_FireSound;
     // The audio that is played immediately upon activation, but perhaps before actual first firing, if there's a pre-delay
-    Sound m_ActiveSound;
+    SoundContainer m_ActiveSound;
     // The audio that is played immediately upon cease of activation
-    Sound m_DeactivationSound;
+    SoundContainer m_DeactivationSound;
     // The audio of this FireArm being fired empty.
-    Sound m_EmptySound;
+    SoundContainer m_EmptySound;
     // The audio of this FireArm being reloaded.
-    Sound m_ReloadStartSound;
-    Sound m_ReloadEndSound;
+    SoundContainer m_ReloadStartSound;
+    SoundContainer m_ReloadEndSound;
 
     // Rate of fire, in rounds per min.
     // If 0, firearm is semi-automatic (ie only one discharge per activation).

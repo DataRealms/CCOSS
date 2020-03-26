@@ -2346,7 +2346,7 @@ void ACrab::Update()
             if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD))
             {
                 pDevice->Reload();
-                m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                m_DeviceSwitchSound.Play(m_Pos);
 
                 // Interrupt sharp aiming
                 m_SharpAimTimer.Reset();
@@ -2581,7 +2581,7 @@ void ACrab::Update()
 
             // Play the stride sound, if applicable
             if (playStride)
-                m_StrideSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                m_StrideSound.Play(m_Pos);
         }
         // JUMPING
         else if ((m_pRFGLeg || m_pRBGLeg) && m_MoveState == JUMP)

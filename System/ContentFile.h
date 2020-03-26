@@ -3,18 +3,8 @@
 
 #include "Serializable.h"
 
-#ifdef __USE_SOUND_FMOD
-#include "fmod/fmod.h"
+#include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
-#define AUDIO_STRUCT FSOUND_SAMPLE
-struct FSOUND_STREAM;
-
-#elif __USE_SOUND_GORILLA
-#include "gorilla/ga.h"
-#include "gorilla/gau.h"
-#define AUDIO_STRUCT ga_Sound
-struct ga_Handle;
-#endif
 
 //struct DATAFILE; // DataFile loading not implemented.
 struct BITMAP;
@@ -200,8 +190,9 @@ namespace RTE {
 		/// <summary>
 		/// Loads and gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE. Note that ownership of the SAMPLE IS NOT TRANSFERRED!
 		/// </summary>
+		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
 		/// <returns>The pointer to the beginning of the data object loaded from the file. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
-		virtual AUDIO_STRUCT * GetAsSample();
+		virtual FMOD::Sound * GetAsSample(bool abortGameForInvalidSound = true);
 
 		/// <summary>
 		/// Loads and gets the data represented by this ContentFile object as a binary chunk of data. Note that ownership of the DATA IS NOT TRANSFERRED!
@@ -227,7 +218,7 @@ namespace RTE {
 		//TODO all of these could probably be replaced with unordered_maps and decrease lookup time.
 		static std::map<size_t, std::string> m_PathHashes; //!< Hash value of the path to this ContentFile's Datafile Object.
 		static std::map<std::string, BITMAP *> m_sLoadedBitmaps[BitDepthCount]; //!< Static map containing all the already loaded BITMAPs and their paths, and there's two maps, for each bit depth.
-		static std::map<std::string, AUDIO_STRUCT *> m_sLoadedSamples; //!< Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
+		static std::map<std::string, FMOD::Sound *> m_sLoadedSamples; //!< Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
 		//TODO Potentially use this to handle storing base files packed as Allegro .dat files
 		//static std::map<std::string, std::pair<char *, long>> m_sLoadedBinary; //!< Static map containing all the already loaded binary data. First in pair is the data, second is size in bytes.
 

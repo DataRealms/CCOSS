@@ -318,9 +318,6 @@
     <ClInclude Include="Entities\SLTerrain.h">
       <Filter>Entities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\Sound.h">
-      <Filter>Entities</Filter>
-    </ClInclude>
     <ClInclude Include="Entities\TDExplosive.h">
       <Filter>Entities</Filter>
     </ClInclude>
@@ -458,6 +455,9 @@
     </ClInclude>
     <ClInclude Include="System\Entity.h">
       <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\SoundContainer.h">
+      <Filter>Entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -737,9 +737,6 @@
     <ClCompile Include="Entities\SLTerrain.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
-    <ClCompile Include="Entities\Sound.cpp">
-      <Filter>Entities</Filter>
-    </ClCompile>
     <ClCompile Include="Entities\TDExplosive.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
@@ -863,6 +860,9 @@
     </ClCompile>
     <ClCompile Include="System\Entity.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\SoundContainer.cpp">
+      <Filter>Entities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

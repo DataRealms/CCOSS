@@ -255,7 +255,7 @@ namespace RTE {
 		*/
 		// Stop playback of sounds gracefully
 		if (m_EmissionSound.IsBeingPlayed())
-			m_EndSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+			m_EndSound.Play(m_Pos);
 		else
 			m_EndSound.Stop();
 
@@ -384,7 +384,7 @@ namespace RTE {
 			if (!m_WasEmitting)
 			{
 				// Start playing the sound
-				m_EmissionSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+				m_EmissionSound.Play(m_Pos);
 
 				// Reset the timers of all emissions so they will start/stop at the correct relative offsets from now
 				for (list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
@@ -392,7 +392,7 @@ namespace RTE {
 			}
 			// Update the distance attenuation
 			else
-				m_EmissionSound.UpdateAttenuation(g_SceneMan.TargetDistanceScalar(m_Pos));
+				m_EmissionSound.SetPosition(m_Pos);
 
 			// Get the parent root of this PEmitter
 			// TODO: Potentially get this once outside instead, like in attach/detach")
@@ -411,7 +411,7 @@ namespace RTE {
 			if (m_BurstTriggered && (m_BurstSpacing <= 0 || m_BurstTimer.IsPastSimMS(m_BurstSpacing)))
 			{
 				// Play burst sound
-				m_BurstSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+				m_BurstSound.Play(m_Pos);
 				// Start timing until next burst
 				m_BurstTimer.Reset();
 			}
@@ -521,7 +521,7 @@ namespace RTE {
 		{
 			m_EmissionSound.Stop();
 			m_BurstSound.Stop();
-			m_EndSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+			m_EndSound.Play(m_Pos);
 			m_WasEmitting = false;
 		}
 	}

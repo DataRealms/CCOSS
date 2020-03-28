@@ -463,8 +463,8 @@
       <Filter>Managers</Filter>
     </ClInclude>
     <ClInclude Include="Managers\PostProcessMan.h">
-    </ClInclude>
       <Filter>Managers</Filter>
+    </ClInclude>
     <ClInclude Include="Entities\SoundContainer.h">
       <Filter>Entities</Filter>
     </ClInclude>

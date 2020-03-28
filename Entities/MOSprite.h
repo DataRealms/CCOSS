@@ -15,7 +15,6 @@
 // Inclusions of header files
 
 #include "MovableObject.h"
-#include "Sound.h"
 #include "Box.h"
 
 namespace RTE

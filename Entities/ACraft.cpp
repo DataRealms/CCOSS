@@ -591,7 +591,7 @@ void ACraft::OpenHatch()
         m_HatchTimer.Reset();
 
         // PSCHHT
-        m_HatchOpenSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_HatchOpenSound.Play(m_Pos);
     }
 }
 
@@ -618,7 +618,7 @@ void ACraft::CloseHatch()
         m_NewInventory.clear();
 
         // PSCHHT
-        m_HatchOpenSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_HatchOpenSound.Play(m_Pos);
     }
 }
 
@@ -777,7 +777,7 @@ void ACraft::DropAllInventory()
     {
         if (m_HatchState != OPENING)
         {
-            m_HatchOpenSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+            m_HatchOpenSound.Play(m_Pos);
             g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, 0.4));
             m_HatchTimer.Reset();
         }
@@ -846,7 +846,7 @@ void ACraft::Update()
 // TODO: HELLA GHETTO, REWORK
         if (m_CrashTimer.GetElapsedSimTimeMS() > 500)
         {
-            m_CrashSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+            m_CrashSound.Play(m_Pos);
             m_CrashTimer.Reset();
         }
     }
@@ -918,7 +918,7 @@ void ACraft::Update()
         m_Status = DYING;
         m_HatchState = OPENING;
         m_HatchTimer.Reset();
-        m_HatchOpenSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_HatchOpenSound.Play(m_Pos);
     }
 */
     /////////////////////////////////////////

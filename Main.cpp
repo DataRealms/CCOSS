@@ -61,11 +61,9 @@ enum TITLESEQUENCE {
     LOGOFADEIN,
     LOGODISPLAY,
     LOGOFADEOUT,
-#ifdef __USE_SOUND_FMOD
 	FMODLOGOFADEIN,
 	FMODLOGODISPLAY,
 	FMODLOGOFADEOUT,
-#endif
     // Game notice
     NOTICEFADEIN,
     NOTICEDISPLAY,
@@ -360,11 +358,9 @@ bool PlayIntroTitle() {
     pDRLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.bmp"));
     pDRLogo->SetWrapDoubleDrawing(false);
 
-#ifdef __USE_SOUND_FMOD
 	MOSParticle *pFMODLogo = new MOSParticle();
 	pFMODLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.bmp"));
 	pFMODLogo->SetWrapDoubleDrawing(false);
-#endif
 
     SceneLayer *pBackdrop = new SceneLayer();
     pBackdrop->Create(ContentFile("Base.rte/GUIs/Title/Nebula.bmp"), false, Vector(), false, false, Vector(0, -1.0));//startYOffset + resY));
@@ -564,13 +560,11 @@ bool PlayIntroTitle() {
 		///////////////////////////////////////////////////////
 		// FMOD Logo drawing
 
-#ifdef __USE_SOUND_FMOD
 		if (g_IntroState >= FMODLOGOFADEIN && g_IntroState <= FMODLOGOFADEOUT) {
 			g_FrameMan.ClearBackBuffer32();
 			pFMODLogo->SetPos(Vector(g_FrameMan.GetResX() / 2, (g_FrameMan.GetResY() / 2) - 35));
 			pFMODLogo->Draw(g_FrameMan.GetBackBuffer32());
 		}
-#endif
 
         ///////////////////////////////////////////////////////
         // Notice drawing
@@ -894,7 +888,7 @@ bool PlayIntroTitle() {
             if (sectionSwitch)
             {
                 // Play juicy logo signature jingle/sound
-				g_GUISound.SplashSound().Play();
+				g_GUISound.SplashSound()->Play();
                 // Black fade
                 clear_to_color(pFadeScreen, 0);
                 duration = 0.25;
@@ -945,15 +939,10 @@ bool PlayIntroTitle() {
 
             if (elapsed >= duration || keyPressed)
             {
-#ifdef __USE_SOUND_FMOD
                 g_IntroState = FMODLOGOFADEIN;
-#elif __USE_SOUND_GORILLA
-				g_IntroState = NOTICEFADEIN;
-#endif
                 sectionSwitch = true;
             }
         }
-#ifdef __USE_SOUND_FMOD
 		else if (g_IntroState == FMODLOGOFADEIN) {
 			if (sectionSwitch) {
 				// Black fade
@@ -998,7 +987,6 @@ bool PlayIntroTitle() {
 				sectionSwitch = true;
 			}
 		}
-#endif
         else if (g_IntroState == NOTICEFADEIN)
         {
             if (sectionSwitch)
@@ -1428,7 +1416,7 @@ bool PlayIntroTitle() {
                 g_pScenarioGUI->SetEnabled(true);
 
                 // Play the scenario music with juicy start sound
-                g_GUISound.SplashSound().Play();
+                g_GUISound.SplashSound()->Play();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
             }
 
@@ -1509,7 +1497,7 @@ bool PlayIntroTitle() {
                 sectionSwitch = false;
 
                 // Play the campaign music with Meta sound start
-				g_GUISound.SplashSound().Play();
+				g_GUISound.SplashSound()->Play();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
             }
 
@@ -1893,7 +1881,6 @@ int main(int argc, char *argv[]) {
 	new PostProcessMan();
 	new PrimitiveMan();
     new AudioMan();
-	new GUISound();
     new UInputMan();
     new ActivityMan();
     new MovableMan();
@@ -1923,7 +1910,7 @@ int main(int argc, char *argv[]) {
     g_PresetMan.Create();
     g_FrameMan.Create();
 	g_PostProcessMan.Create();
-    g_AudioMan.Create();
+    g_AudioMan.Create(); //NOTE: By necessity of when things can be instantiated, this internally does: new GUISound()
 	g_GUISound.Create();
     g_UInputMan.Create();
 	if (g_NetworkServer.IsServerModeEnabled()) { g_UInputMan.SetMultiplayerMode(true); }
@@ -2009,4 +1996,5 @@ int main(int argc, char *argv[]) {
 	
     return 0;
 }
-END_OF_MAIN()
+
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) { return main(__argc, __argv); }

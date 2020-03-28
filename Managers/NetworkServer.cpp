@@ -1226,17 +1226,22 @@ namespace RTE
 		for (std::list<AudioMan::NetworkSoundData>::iterator eItr = events.begin(); eItr != events.end(); ++eItr)
 		{
 			sndDataPtr->State = (*eItr).State;
-			sndDataPtr->Channel = (*eItr).Channel;
-			sndDataPtr->Distance = (*eItr).Distance;
-			sndDataPtr->SoundHash = (*eItr).SoundHash;
+			std::copy(std::begin(eItr->Channels), std::end(eItr->Channels), sndDataPtr->Channels);
+			std::copy(std::begin(eItr->SoundFileHashes), std::end(eItr->SoundFileHashes), sndDataPtr->SoundFileHashes);
+			sndDataPtr->Position[0] = (*eItr).Position[0];
+			sndDataPtr->Position[1] = (*eItr).Position[1];
 			sndDataPtr->Loops = (*eItr).Loops;
 			sndDataPtr->Pitch = (*eItr).Pitch;
-			sndDataPtr->AffectedByPitch = (*eItr).AffectedByPitch;
+			sndDataPtr->AffectedByGlobalPitch = (*eItr).AffectedByGlobalPitch;
+			sndDataPtr->AttenuationStartDistance = (*eItr).AttenuationStartDistance;
+			sndDataPtr->Immobile = (*eItr).Immobile;
+			sndDataPtr->FadeOutTime = (*eItr).FadeOutTime;
 
 			msg->SoundEventsCount++;
 			sndDataPtr++;
 
-			if (msg->SoundEventsCount >= 50)
+			//If one more sound would overflow the container, send sounds now then reset to continue
+			if ((msg->SoundEventsCount * sizeof(AudioMan::NetworkSoundData)) >= (MAX_PIXEL_LINE_BUFFER_SIZE - sizeof(AudioMan::NetworkSoundData) - sizeof(MsgSoundEvents)))
 			{
 				//char buf[128];
 				//sprintf_s(buf, sizeof(buf), "%d %d", msg->FrameNumber, msg->PostEffectsCount);

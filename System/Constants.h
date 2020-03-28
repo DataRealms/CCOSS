@@ -52,6 +52,11 @@ namespace RTE {
 	static constexpr float c_SixteenthPI = 0.1963495F;
 #pragma endregion
 
+#pragma region Audio Constants
+	static constexpr unsigned short c_MaxAudioChannels = 512;
+	static constexpr unsigned short c_MaxPlayingSoundsPerContainer = 64;
+#pragma endregion
+
 #pragma region Network Constants
 	static constexpr unsigned short c_MaxClients = 4;
 	static constexpr unsigned short c_MaxLayersStoredForNetwork = 10;

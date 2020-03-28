@@ -1306,7 +1306,7 @@ ENTITYALLOCATION(Actor)
 	/// Returns the defined sound to be played on death.
 	/// </summary>
 	/// <returns>A sound with the death sample of this actor.</returns>
-	Sound GetDeathSound() const { return m_DeathSound; }
+	SoundContainer GetDeathSound() const { return m_DeathSound; }
 
 
 	/// <summary>
@@ -1318,7 +1318,7 @@ ENTITYALLOCATION(Actor)
 		if (samplePath == nullptr) {
 			m_DeathSound.Reset();
 		} else {
-			Sound newDeathSound;
+            SoundContainer newDeathSound;
 			newDeathSound.Create(samplePath, false);
 			m_DeathSound = newDeathSound;
 		}
@@ -1354,11 +1354,11 @@ protected:
     Controller m_Controller;
 
     // Sounds
-    Sound m_BodyHitSound;
-    Sound m_AlarmSound;
-    Sound m_PainSound;
-    Sound m_DeathSound;
-    Sound m_DeviceSwitchSound;
+    SoundContainer m_BodyHitSound;
+    SoundContainer m_AlarmSound;
+    SoundContainer m_PainSound;
+    SoundContainer m_DeathSound;
+    SoundContainer m_DeviceSwitchSound;
 
 //    bool m_FacingRight;
     int m_Status;

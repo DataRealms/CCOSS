@@ -18,7 +18,7 @@
 #include "Singleton.h"
 #define g_ActivityMan ActivityMan::Instance()
 
-#include "Sound.h"
+#include "SoundContainer.h"
 
 #include "SceneObject.h"
 #include "Controller.h"

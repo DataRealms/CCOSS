@@ -58,6 +58,7 @@ void SettingsMan::Clear()
 	m_ForceNonOverlayedWindowGfxDriver = false;
 	m_AllowSavingToBase = false;
 	m_RecommendedMOIDCount = 240;
+    m_SoundPanningEffectStrength = 0.5;
 	m_NetworkServerName = "";
 	m_PlayerNetworkName = "";
 
@@ -78,8 +79,6 @@ void SettingsMan::Clear()
 
 	m_UseNATService = false;
 	m_DisableLoadingScreen = false;
-
-	m_AudioChannels = 32;
 }
 
 
@@ -241,6 +240,8 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         reader >> m_PrintDebugInfo;
 	else if (propName == "RecommendedMOIDCount")
 		reader >> m_RecommendedMOIDCount;
+    else if (propName == "SoundPanningEffectStrength")
+        reader >> m_SoundPanningEffectStrength;
 	else if (propName == "PlayerNetworkName")
 		reader >> m_PlayerNetworkName;
 	else if (propName == "NetworkServerName")
@@ -277,8 +278,6 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
 		reader >> m_ServerSleepWhenIdle;
 	else if (propName == "ServerSimSleepWhenIdle")
 		reader >> m_ServerSimSleepWhenIdle;
-	else if (propName == "AudioChannels")
-		reader >> m_AudioChannels;
 	else if (propName == "DisableLoadingScreen")
 		reader >> m_DisableLoadingScreen;
 	else if (propName == "SoundVolume")
@@ -415,6 +414,8 @@ int SettingsMan::Save(Writer &writer) const
     writer << m_PrintDebugInfo;
 	writer.NewProperty("RecommendedMOIDCount");
 	writer << m_RecommendedMOIDCount;
+    writer.NewProperty("SoundPanningEffectStrength");
+    writer << m_SoundPanningEffectStrength;
 	writer.NewProperty("PlayerNetworkName");
 	if (m_PlayerNetworkName == "")
 		writer << "Dummy";
@@ -474,8 +475,6 @@ int SettingsMan::Save(Writer &writer) const
 	writer.NewProperty("DisableLoadingScreen");
 	writer << m_DisableLoadingScreen;
 
-	writer.NewProperty("AudioChannels");
-	writer << m_AudioChannels;
 	writer.NewProperty("SoundVolume");
     writer << g_AudioMan.GetSoundsVolume() * 100;
     writer.NewProperty("MusicVolume");

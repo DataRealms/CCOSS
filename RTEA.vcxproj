@@ -80,7 +80,7 @@
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\include\RakNet;${ProjectDir)external\include\LZ4;${ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ALLEGRO_NO_STD_HEADERS;__USE_SOUND_FMOD;__USE_SOUND_GORILLA_OFF;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ALLEGRO_NO_STD_HEADERS;ALLEGRO_SRC;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -96,7 +96,7 @@
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;liblz4.lib;fmodvc.lib;alld_s_c.lib;gorillaD.lib;lua515.x86.debug.lib;luabind.x86.debug.lib;RakNet_LibStatic_Debug_Win32.lib;libboost_thread-vc141-mt-gd-x32-1_55.lib;libboost_date_time-vc141-mt-gd-x32-1_55.lib;libboost_system-vc141-mt-gd-x32-1_55.lib;libboost_chrono-vc141-mt-gd-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;liblz4.lib;fmod_vc.lib;alld_s_c.lib;lua515.x86.debug.lib;luabind.x86.debug.lib;RakNet_LibStatic_Debug_Win32.lib;libboost_thread-vc141-mt-gd-x32-1_55.lib;libboost_date_time-vc141-mt-gd-x32-1_55.lib;libboost_system-vc141-mt-gd-x32-1_55.lib;libboost_chrono-vc141-mt-gd-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.debug.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -124,7 +124,7 @@
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\include\RakNet;${ProjectDir)external\include\LZ4;${ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ALLEGRO_NO_STD_HEADERS;__USE_SOUND_FMOD;__USE_SOUND_GORILLA_OFF;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;MIN_DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ALLEGRO_NO_STD_HEADERS;ALLEGRO_SRC;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;MIN_DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -140,7 +140,7 @@
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;liblz4.lib;fmodvc.lib;alld_s_c.lib;gorillaD.lib;lua515.x86.debug.lib;luabind.x86.debug.lib;RakNet_LibStatic_Debug_Win32.lib;libboost_thread-vc141-mt-gd-x32-1_55.lib;libboost_date_time-vc141-mt-gd-x32-1_55.lib;libboost_system-vc141-mt-gd-x32-1_55.lib;libboost_chrono-vc141-mt-gd-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;liblz4.lib;fmod_vc.lib;alld_s_c.lib;lua515.x86.debug.lib;luabind.x86.debug.lib;RakNet_LibStatic_Debug_Win32.lib;libboost_thread-vc141-mt-gd-x32-1_55.lib;libboost_date_time-vc141-mt-gd-x32-1_55.lib;libboost_system-vc141-mt-gd-x32-1_55.lib;libboost_chrono-vc141-mt-gd-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.debug.minimal.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -171,7 +171,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\include\RakNet;${ProjectDir)external\include\LZ4;${ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ALLEGRO_NO_STD_HEADERS;__USE_SOUND_FMOD;__USE_SOUND_GORILLA_OFF;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ALLEGRO_STATICLINK;ALLEGRO_NO_ASM;ALLEGRO_NO_STD_HEADERS;ALLEGRO_SRC;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -192,7 +192,7 @@
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;liblz4.lib;fmodvc.lib;alleg_s_c.lib;gorilla.lib;lua515.x86.release.lib;luabind.x86.release.lib;RakNet_LibStatic_Release_Win32.lib;libboost_thread-vc141-mt-x32-1_55.lib;libboost_date_time-vc141-mt-x32-1_55.lib;libboost_system-vc141-mt-x32-1_55.lib;libboost_chrono-vc141-mt-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;liblz4.lib;fmod_vc.lib;alleg_s_c.lib;lua515.x86.release.lib;luabind.x86.release.lib;RakNet_LibStatic_Release_Win32.lib;libboost_thread-vc141-mt-x32-1_55.lib;libboost_date_time-vc141-mt-x32-1_55.lib;libboost_system-vc141-mt-x32-1_55.lib;libboost_chrono-vc141-mt-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -335,7 +335,7 @@
     <ClInclude Include="Entities\SceneLayer.h" />
     <ClInclude Include="Entities\SceneObject.h" />
     <ClInclude Include="Entities\SLTerrain.h" />
-    <ClInclude Include="Entities\Sound.h" />
+    <ClInclude Include="Entities\SoundContainer.h" />
     <ClInclude Include="Entities\TDExplosive.h" />
     <ClInclude Include="Entities\TerrainDebris.h" />
     <ClInclude Include="Entities\TerrainObject.h" />
@@ -481,7 +481,7 @@
     <ClCompile Include="Entities\SceneLayer.cpp" />
     <ClCompile Include="Entities\SceneObject.cpp" />
     <ClCompile Include="Entities\SLTerrain.cpp" />
-    <ClCompile Include="Entities\Sound.cpp" />
+    <ClCompile Include="Entities\SoundContainer.cpp" />
     <ClCompile Include="Entities\TDExplosive.cpp" />
     <ClCompile Include="Entities\TerrainDebris.cpp" />
     <ClCompile Include="Entities\TerrainObject.cpp" />

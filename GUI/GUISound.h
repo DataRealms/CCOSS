@@ -1,7 +1,7 @@
 #ifndef _GUISOUND_
 #define _GUISOUND_
 
-#include "Sound.h"
+#include "SoundContainer.h"
 #include "Singleton.h"
 
 #define g_GUISound GUISound::Instance()
@@ -45,207 +45,205 @@ namespace RTE {
 		/// Gets juicy logo signature jingle Sound.
 		/// </summary>
 		/// <returns>Juicy logo signature jingle Sound.</returns>
-		Sound SplashSound() const { return m_SplashSound; }
+		SoundContainer *SplashSound() { return &m_SplashSound; }
 
 		/// <summary>
-		/// Gets Sound for enabling menu.
+		/// Gets SoundContainer for enabling menu.
 		/// </summary>
-		/// <returns>Sound for enabling menu.</returns>
-		Sound EnterMenuSound() const { return m_EnterMenuSound; }
+		/// <returns>SoundContainer for enabling menu.</returns>
+		SoundContainer *EnterMenuSound() { return &m_EnterMenuSound; }
 
 		/// <summary>
-		/// Gets Sound for disabling menu.
+		/// Gets SoundContainer for disabling menu.
 		/// </summary>
-		/// <returns>Sound for disabling menu.</returns>
-		Sound ExitMenuSound() const { return m_ExitMenuSound; }
+		/// <returns>SoundContainer for disabling menu.</returns>
+		SoundContainer *ExitMenuSound() { return &m_ExitMenuSound; }
 
 		/// <summary>
-		/// Gets Sound for changing focus.
+		/// Gets SoundContainer for changing focus.
 		/// </summary>
-		/// <returns>Sound for changing focus.</returns>
-		Sound FocusChangeSound() const { return m_FocusChangeSound; }
+		/// <returns>SoundContainer for changing focus.</returns>
+		SoundContainer *FocusChangeSound() { return &m_FocusChangeSound; }
 
 		/// <summary>
-		/// Gets Sound for selecting items in list, etc.
+		/// Gets SoundContainer for selecting items in list, etc.
 		/// </summary>
-		/// <returns>Sound for selecting items in list, etc.</returns>
-		Sound SelectionChangeSound() const { return m_SelectionChangeSound; }
+		/// <returns>SoundContainer for selecting items in list, etc.</returns>
+		SoundContainer *SelectionChangeSound() { return &m_SelectionChangeSound; }
 
 		/// <summary>
-		/// Gets Sound for adding or deleting items in list.
+		/// Gets SoundContainer for adding or deleting items in list.
 		/// </summary>
-		/// <returns>Sound for adding or deleting items in list.</returns>
-		Sound ItemChangeSound() const { return m_ItemChangeSound; }
+		/// <returns>SoundContainer for adding or deleting items in list.</returns>
+		SoundContainer *ItemChangeSound() { return &m_ItemChangeSound; }
 
 		/// <summary>
-		/// Gets Sound for button press.
+		/// Gets SoundContainer for button press.
 		/// </summary>
-		/// <returns>Sound for button press.</returns>
-		Sound ButtonPressSound() const { return m_ButtonPressSound; }
+		/// <returns>SoundContainer for button press.</returns>
+		SoundContainer *ButtonPressSound() { return &m_ButtonPressSound; }
 
 		/// <summary>
-		/// Gets Sound for button press of going back button.
+		/// Gets SoundContainer for button press of going back button.
 		/// </summary>
-		/// <returns>Sound for button press of going back button.</returns>
-		Sound BackButtonPressSound() const { return m_BackButtonPressSound; }
+		/// <returns>SoundContainer for button press of going back button.</returns>
+		SoundContainer *BackButtonPressSound() { return &m_BackButtonPressSound; }
 
 		/// <summary>
-		/// Gets Sound for confirming a selection.
+		/// Gets SoundContainer for confirming a selection.
 		/// </summary>
-		/// <returns>Sound for confirming a selection.</returns>
-		Sound ConfirmSound() const { return m_ConfirmSound; }
+		/// <returns>SoundContainer for confirming a selection.</returns>
+		SoundContainer *ConfirmSound() { return &m_ConfirmSound; }
 
 		/// <summary>
-		/// Gets Sound for erroneous input.
+		/// Gets SoundContainer for erroneous input.
 		/// </summary>
-		/// <returns>Sound for erroneous input.</returns>
-		Sound UserErrorSound() const { return m_UserErrorSound; }
+		/// <returns>SoundContainer for erroneous input.</returns>
+		SoundContainer *UserErrorSound() { return &m_UserErrorSound; }
 
 		/// <summary>
-		/// Gets Sound for testing volume when adjusting volume sliders.
+		/// Gets SoundContainer for testing volume when adjusting volume sliders.
 		/// </summary>
-		/// <returns>Sound for testing volume when adjusting volume sliders.</returns>
-		Sound TestSound() const { return m_TestSound; }
+		/// <returns>SoundContainer for testing volume when adjusting volume sliders.</returns>
+		SoundContainer *TestSound() { return &m_TestSound; }
 
 		/// <summary>
-		/// Gets Sound for opening pie menu.
+		/// Gets SoundContainer for opening pie menu.
 		/// </summary>
-		/// <returns>Sound for opening pie menu.</returns>
-		Sound PieMenuEnterSound() const { return m_PieMenuEnterSound; }
+		/// <returns>SoundContainer for opening pie menu.</returns>
+		SoundContainer *PieMenuEnterSound() { return &m_PieMenuEnterSound; }
 
 		/// <summary>
-		/// Gets Sound for closing pie menu.
+		/// Gets SoundContainer for closing pie menu.
 		/// </summary>
-		/// <returns>Sound for closing pie menu.</returns>
-		Sound PieMenuExitSound() const { return m_PieMenuExitSound; }
+		/// <returns>SoundContainer for closing pie menu.</returns>
+		SoundContainer *PieMenuExitSound() { return &m_PieMenuExitSound; }
 
 		/// <summary>
-		/// Gets Sound for when PieMenu hover arrow appears or changes slice.
+		/// Gets SoundContainer for when PieMenu hover arrow appears or changes slice.
 		/// </summary>
-		/// <returns>Sound for when PieMenu hover arrow appears or changes slice.</returns>
-		Sound HoverChangeSound() const { return m_HoverChangeSound; }
+		/// <returns>SoundContainer for when PieMenu hover arrow appears or changes slice.</returns>
+		SoundContainer *HoverChangeSound() { return &m_HoverChangeSound; }
 
 		/// <summary>
-		/// Gets Sound for when PieMenu hover arrow appears or changes to a disabled slice.
+		/// Gets SoundContainer for when PieMenu hover arrow appears or changes to a disabled slice.
 		/// </summary>
-		/// <returns>Sound for when PieMenu hover arrow appears or changes to a disabled slice.</returns>
-		Sound HoverDisabledSound() const { return m_HoverDisabledSound; }
+		/// <returns>SoundContainer for when PieMenu hover arrow appears or changes to a disabled slice.</returns>
+		SoundContainer *HoverDisabledSound() { return &m_HoverDisabledSound; }
 
 		/// <summary>
-		/// Gets Sound for picking a valid PieMenu slice.
+		/// Gets SoundContainer for picking a valid PieMenu slice.
 		/// </summary>
-		/// <returns>Sound for picking a valid PieMenu slice.</returns>
-		Sound SlicePickedSound() const { return m_SlicePickedSound; }
+		/// <returns>SoundContainer for picking a valid PieMenu slice.</returns>
+		SoundContainer *SlicePickedSound() { return &m_SlicePickedSound; }
 
 		/// <summary>
-		/// Gets Sound for erroneous input in PieMenu.
+		/// Gets SoundContainer for erroneous input in PieMenu.
 		/// </summary>
-		/// <returns>Sound for erroneous input in PieMenu.</returns>
-		Sound DisabledPickedSound() const { return m_DisabledPickedSound; }
+		/// <returns>SoundContainer for erroneous input in PieMenu.</returns>
+		SoundContainer *DisabledPickedSound() { return &m_DisabledPickedSound; }
 
 		/// <summary>
-		/// Gets Sound for when the funds of a team changes.
+		/// Gets SoundContainer for when the funds of a team changes.
 		/// </summary>
-		/// <returns>Sound for when the funds of a team changes.</returns>
-		Sound FundsChangedSound() const { return m_FundsChangedSound; }
+		/// <returns>SoundContainer for when the funds of a team changes.</returns>
+		SoundContainer *FundsChangedSound() { return &m_FundsChangedSound; }
 
 		/// <summary>
-		/// Gets Sound for switching between regular (non-brain) actors.
+		/// Gets SoundContainer for switching between regular (non-brain) actors.
 		/// </summary>
-		/// <returns>Sound for switching between regular (non-brain) actors.</returns>
-		Sound ActorSwitchSound() const { return m_ActorSwitchSound; }
+		/// <returns>SoundContainer for switching between regular (non-brain) actors.</returns>
+		SoundContainer *ActorSwitchSound() { return &m_ActorSwitchSound; }
 
 		/// <summary>
-		/// Gets Sound for switching to the brain shortcut.
+		/// Gets SoundContainer for switching to the brain shortcut.
 		/// </summary>
-		/// <returns>Sound for switching to the brain shortcut.</returns>
-		Sound BrainSwitchSound() const { return m_BrainSwitchSound; }
+		/// <returns>SoundContainer for switching to the brain shortcut.</returns>
+		SoundContainer *BrainSwitchSound() { return &m_BrainSwitchSound; }
 
 		/// <summary>
-		/// Gets Sound when camera is traveling between actors.
+		/// Gets SoundContainer when camera is traveling between actors.
 		/// </summary>
-		/// <returns>Sound when camera is traveling between actors.</returns>
-		Sound CameraTravelSound() const { return m_CameraTravelSound; }
+		/// <returns>SoundContainer when camera is traveling between actors.</returns>
+		SoundContainer *CameraTravelSound() { return &m_CameraTravelSound; }
 
 		/// <summary>
-		/// Gets Sound for making an area focus.
+		/// Gets SoundContainer for making an area focus.
 		/// </summary>
-		/// <returns>Sound for making an area focus.</returns>
-		Sound AreaPickedSound() const { return m_AreaPickedSound; }
+		/// <returns>SoundContainer for making an area focus.</returns>
+		SoundContainer *AreaPickedSound() { return &m_AreaPickedSound; }
 
 		/// <summary>
-		/// Gets Sound for making an object focus.
+		/// Gets SoundContainer for making an object focus.
 		/// </summary>
-		/// <returns>Sound for making an object focus.</returns>
-		Sound ObjectPickedSound() const { return m_ObjectPickedSound; }
+		/// <returns>SoundContainer for making an object focus.</returns>
+		SoundContainer *ObjectPickedSound() { return &m_ObjectPickedSound; }
 
 		/// <summary>
-		/// Gets Sound for making a purchase.
+		/// Gets SoundContainer for making a purchase.
 		/// </summary>
-		/// <returns>Sound for making a purchase.</returns>
-		Sound PurchaseMadeSound() const { return m_PurchaseMadeSound; }
+		/// <returns>SoundContainer for making a purchase.</returns>
+		SoundContainer *PurchaseMadeSound() { return &m_PurchaseMadeSound; }
 
 		/// <summary>
-		/// Gets Sound for placement of object to scene.
+		/// Gets SoundContainer for placement of object to scene.
 		/// </summary>
-		/// <returns>Sound for placement of object to scene.</returns>
-		Sound PlacementBlip() const { return m_PlacementBlip; }
+		/// <returns>SoundContainer for placement of object to scene.</returns>
+		SoundContainer *PlacementBlip() { return &m_PlacementBlip; }
 
 		/// <summary>
-		/// Gets Sound for placement of object to scene.
+		/// Gets SoundContainer for placement of object to scene.
 		/// </summary>
-		/// <returns>Sound for placement of object to scene.</returns>
-		Sound PlacementThud() const { return m_PlacementThud; }
+		/// <returns>SoundContainer for placement of object to scene.</returns>
+		SoundContainer *PlacementThud() { return &m_PlacementThud; }
 
 		/// <summary>
-		/// Gets Sound for gravely placement of object to scene.
+		/// Gets SoundContainer for gravely placement of object to scene.
 		/// </summary>
-		/// <returns>Sound for gravely placement of object to scene.</returns>
-		Sound PlacementGravel() const { return m_PlacementGravel; }
+		/// <returns>SoundContainer for gravely placement of object to scene.</returns>
+		SoundContainer *PlacementGravel() { return &m_PlacementGravel; }
 #pragma endregion
 
 	protected:
+		SoundContainer m_PoopSound;
+		SoundContainer m_SplashSound; //! Juicy logo signature jingle sound.
 
-		Sound m_SplashSound; //!< Juicy logo signature jingle sound.
+		SoundContainer m_EnterMenuSound; //! SoundContainer for enabling menu.
+		SoundContainer m_ExitMenuSound; //! SoundContainer for disabling menu.
 
-		Sound m_EnterMenuSound; //!< Sound for enabling menu.
-		Sound m_ExitMenuSound; //!< Sound for disabling menu.
+		SoundContainer m_FocusChangeSound; //! SoundContainer for changing focus.
 
-		Sound m_FocusChangeSound; //!< Sound for changing focus.
+		SoundContainer m_SelectionChangeSound; //! SoundContainer for selecting items in list, etc.
+		SoundContainer m_ItemChangeSound; //! SoundContainer for adding or deleting items in list.
 
-		Sound m_SelectionChangeSound; //!< Sound for selecting items in list, etc.
-		Sound m_ItemChangeSound; //!< Sound for adding or deleting items in list.
+		SoundContainer m_ButtonPressSound; //! SoundContainer for button press.
+		SoundContainer m_BackButtonPressSound; //! SoundContainer for button press of going back button.
+		SoundContainer m_ConfirmSound; //! SoundContainer for confirming a selection.
+		SoundContainer m_UserErrorSound; //! SoundContainer for erroneous input.
+		SoundContainer m_TestSound; //! SoundContainer for testing volume when adjusting volume sliders.
 
-		Sound m_ButtonPressSound; //!< Sound for button press.
-		Sound m_BackButtonPressSound; //!< Sound for button press of going back button.
-		Sound m_ConfirmSound; //!< Sound for confirming a selection.
-		Sound m_UserErrorSound; //!< Sound for erroneous input.
-		Sound m_TestSound; //!< Sound for testing volume when adjusting volume sliders.
+		SoundContainer m_PieMenuEnterSound; //! SoundContainer for opening pie menu.
+		SoundContainer m_PieMenuExitSound; //! SoundContainer for closing pie menu.
 
-		Sound m_PieMenuEnterSound; //!< Sound for opening pie menu.
-		Sound m_PieMenuExitSound; //!< Sound for closing pie menu.
+		SoundContainer m_HoverChangeSound; //! SoundContainer for when PieMenu hover arrow appears or changes slice.
+		SoundContainer m_HoverDisabledSound; //! SoundContainer for when PieMenu hover arrow appears or changes to a disabled slice.
+		SoundContainer m_SlicePickedSound; //! SoundContainer for picking a valid PieMenu slice.
+		SoundContainer m_DisabledPickedSound; //! SoundContainer for erroneous input in PieMenu.
 
-		Sound m_HoverChangeSound; //!< Sound for when PieMenu hover arrow appears or changes slice.
-		Sound m_HoverDisabledSound; //!< Sound for when PieMenu hover arrow appears or changes to a disabled slice.
-		Sound m_SlicePickedSound; //!< Sound for picking a valid PieMenu slice.
-		Sound m_DisabledPickedSound; //!< Sound for erroneous input in PieMenu.
+		SoundContainer m_FundsChangedSound; //! SoundContainer for when the funds of a team changes.
 
-		Sound m_FundsChangedSound; //!< Sound for when the funds of a team changes.
+		SoundContainer m_ActorSwitchSound; //! SoundContainer for switching between regular (non-brain) actors.
+		SoundContainer m_BrainSwitchSound; //! SoundContainer for switching to the brain shortcut.
 
-		Sound m_ActorSwitchSound; //!< Sound for switching between regular (non-brain) actors.
-		Sound m_BrainSwitchSound; //!< Sound for switching to the brain shortcut.
+		SoundContainer m_CameraTravelSound; //! SoundContainer when camera is traveling between actors.
 
-		Sound m_CameraTravelSound; //!< Sound when camera is traveling between actors.
+		SoundContainer m_AreaPickedSound; //! SoundContainer for making an area focus.
+		SoundContainer m_ObjectPickedSound; //! SoundContainer for making an object focus.
+		SoundContainer m_PurchaseMadeSound; //! SoundContainer for making a purchase.
 
-		Sound m_AreaPickedSound; //!< Sound for making an area focus.
-		Sound m_ObjectPickedSound; //!< Sound for making an object focus.
-		Sound m_PurchaseMadeSound; //!< Sound for making a purchase.
-
-		Sound m_PlacementBlip; //!< Sound for placement of object to scene.
-		Sound m_PlacementThud; //!< Sound for placement of object to scene.
-		Sound m_PlacementGravel; //!< Sound for gravely placement of object to scene.
-
-	private:
+		SoundContainer m_PlacementBlip; //! SoundContainer for placement of object to scene.
+		SoundContainer m_PlacementThud; //! SoundContainer for placement of object to scene.
+		SoundContainer m_PlacementGravel; //! SoundContainer for gravely placement of object to scene.
 
 		/// <summary>
 		/// Clears all the member variables of this GUISound, effectively resetting the members of this abstraction level only.

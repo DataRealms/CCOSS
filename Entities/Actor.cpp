@@ -845,7 +845,7 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
     }
 
     if (playSound && !muteSound)
-        m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_DeviceSwitchSound.Play(m_Pos);
 
     return pRetDev;
 }
@@ -897,7 +897,7 @@ MovableObject * Actor::SwapPrevInventory(MovableObject *pSwapIn)
     }
 
     if (playSound)
-        m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_DeviceSwitchSound.Play(m_Pos);
 
     return pRetDev;
 }
@@ -994,7 +994,7 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
 {
     // Play death sound
 // TODO: Don't attenuate since death is pretty important.. maybe only make this happen for teh brains
-    m_DeathSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+    m_DeathSound.Play(m_Pos);
 
     // Gib all the regular gibs
     MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
@@ -1556,11 +1556,11 @@ void Actor::Update()
 
     if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage / 2)
     {
-        m_BodyHitSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_BodyHitSound.Play(m_Pos);
     }
     if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage)
 	{
-        m_PainSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_PainSound.Play(m_Pos);
 		// TODO: IMPROVE AND DON'T HARDCODE
         //m_Health -= 10;
 		float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
@@ -1631,7 +1631,7 @@ void Actor::Update()
 
     if (m_Status != DYING && m_Status != DEAD && floorf(m_Health) <= 0)
     {
-        m_DeathSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_DeathSound.Play(m_Pos);
 		m_Controller.SetDisabled(true);
         DropAllInventory();
         m_Status = DYING;

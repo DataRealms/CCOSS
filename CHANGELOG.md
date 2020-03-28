@@ -7,14 +7,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 ### Added
 
+- Lua binding for Box::IntersectsBox(otherBox), that returns true if 2 boxes intersect.
+
 ### Changed
+
+- Upgraded to new, modern FMOD audio library. Sounds now play in 3D space, so they pan to the left and right, and attenuate automatically based on the player's viewpoint. ([Issue #72](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/72))
+
+- Sounds have been renamed to SoundContainers, and are able to handle multiple sounds playing at once. INI definitions have changed accordingly. They must be added using `... = SoundContainer`, and individual sounds for them must be added using `AddSound = ContentFile...`
+
+- Various lua bindings around audio have been upgraded, changed or fixed, giving modders a lot more control over sounds. See documentation for more details.
 
 ### Removed
 
 ### Fixed
 
 - Explosives (and other thrown devices) will no longer reset their explosion triggering timer when they're picked up. ([Issue #71](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/71))
+
 - Sprite Animation Mode ALWAYSPINGPONG now works properly. Sprite animation has also been moved to MOSprite instead of MOSRotating, they they'll be able to properly animate now. ([Issue#77](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/77))
+
+***
 
 ## [0.0.1.0] - 2020-01-27
 

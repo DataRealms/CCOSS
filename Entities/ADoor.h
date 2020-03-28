@@ -604,7 +604,7 @@ protected:
     // The time it takes to open or close the door, in ms.
     int m_DoorMoveTime;
     // Sound for opening the hatch
-    Sound m_DoorOpenSound;
+    SoundContainer m_DoorOpenSound;
     // Whether the clsoed position is the default
     bool m_ClosedByDefault;
     // How long the door stays in the non-default state before returning to the default

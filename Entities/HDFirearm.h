@@ -587,7 +587,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    Whetehr being reloaded.
 
-    virtual bool IsReloading() { return m_Reloading; }
+    virtual bool IsReloading() const { return m_Reloading; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

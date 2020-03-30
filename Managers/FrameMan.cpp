@@ -61,7 +61,6 @@ namespace RTE {
 		m_StoreNetworkBackBuffer = false;
 		m_NetworkFrameCurrent = 0;
 		m_NetworkFrameReady = 1;
-		m_BPP = 8;
 		m_PaletteFile.Reset();
 		//m_pPaletteDataFile = 0;
 		m_BlackColor = 245;
@@ -140,7 +139,7 @@ namespace RTE {
 		}
 
 		// Clear the screen buffer so it doesn't flash pink
-		clear_to_color(screen, (m_BPP == 8) ? m_BlackColor : 0);
+		clear_to_color(screen, 0);
 
 		// Sets the allowed color conversions when loading bitmaps from files
 		set_color_conversion(COLORCONV_MOST);
@@ -169,6 +168,9 @@ namespace RTE {
 		m_pBackBuffer8 = create_bitmap_ex(8, m_ResX, m_ResY);
 		clear_to_color(m_pBackBuffer8, m_BlackColor);
 
+		// Create the post-processing buffer, it'll be used for glow effects etc
+		m_pBackBuffer32 = create_bitmap_ex(32, m_ResX, m_ResY);
+
 		// Create all the network 8bpp back buffers
 		for (short i = 0; i < c_MaxScreenCount; i++) {
 			for (short f = 0; f < 2; f++) {
@@ -182,13 +184,6 @@ namespace RTE {
 				m_pNetworkBackBufferFinalGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 				clear_to_color(m_pNetworkBackBufferFinalGUI8[f][i], g_KeyColor);
 			}
-		}
-
-		// Create the post-processing buffer if in 32bpp video mode, it'll be used for glow effects etc
-		if (get_color_depth() == 32 && m_BPP == 32) {
-			// 32bpp so we can make the cool effects. Everything up to this is 8bpp, including the back buffer
-			m_pBackBuffer32 = create_bitmap_ex(32, m_ResX, m_ResY);
-			//clear_to_color(m_pBackBuffer32, m_BlackColor);
 		}
 
 		m_PlayerScreenWidth = m_pBackBuffer8->w;
@@ -229,10 +224,6 @@ namespace RTE {
 			reader >> m_VSplitOverride;
 		} else if (propName == "PaletteFile") {
 			reader >> m_PaletteFile;
-		} else if (propName == "TrueColorMode") {
-			bool trueColor;
-			reader >> trueColor;
-			m_BPP = trueColor ? 32 : 8;
 		} else if (propName == "PixelsPerMeter") {
 			reader >> m_PPM;
 			m_MPP = 1 / m_PPM;
@@ -265,8 +256,6 @@ namespace RTE {
 		writer << m_VSplitOverride;
 		writer.NewProperty("PaletteFile");
 		writer << m_PaletteFile;
-		writer.NewProperty("TrueColorMode");
-		writer << (m_BPP == 32);
 		writer.NewProperty("PixelsPerMeter");
 		writer << m_PPM;
 
@@ -376,7 +365,7 @@ namespace RTE {
 				g_SceneMan.Draw(pDrawScreen, pDrawScreenGUI, targetPos, true, true);
 			}
 			// Get only the scene-relative post effects that affect this player's screen
-			if (g_PostProcessMan.IsPostProcessing() && pActivity) {
+			if (pActivity) {
 				g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, pDrawScreen->w, pDrawScreen->h, screenRelativeEffects, pActivity->GetTeamOfPlayer(pActivity->PlayerOfScreen(whichScreen)));
 				g_PostProcessMan.GetGlowAreasWrapped(targetPos, pDrawScreen->w, pDrawScreen->h, screenRelativeGlowBoxes);
 
@@ -496,7 +485,7 @@ namespace RTE {
 			if (!m_StoreNetworkBackBuffer) { blit(pDrawScreen, m_pBackBuffer8, 0, 0, screenOffset.GetFloorIntX(), screenOffset.GetFloorIntY(), pDrawScreen->w, pDrawScreen->h); }
 
 			// Add the player screen's effects to the total screen effects list so they can be drawn in post processing
-			if (g_PostProcessMan.IsPostProcessing() && !IsInMultiplayerMode()) {
+			if (!IsInMultiplayerMode()) {
 				int occX = g_SceneMan.GetScreenOcclusion(whichScreen).GetFloorIntX();
 				int occY = g_SceneMan.GetScreenOcclusion(whichScreen).GetFloorIntY();
 
@@ -615,20 +604,17 @@ namespace RTE {
 		}
 
 		// Do post-processing effects, if applicable and enabled
-		if (g_PostProcessMan.IsPostProcessing() && g_InActivity && m_BPP == 32) { g_PostProcessMan.PostProcess(); }
+		if (g_InActivity) { g_PostProcessMan.PostProcess(); }
 
 		// Draw the console on top of everything
-		if (FlippingWith32BPP()) { g_ConsoleMan.Draw(m_pBackBuffer32); }
+		//if (FlippingWith32BPP()) { g_ConsoleMan.Draw(m_pBackBuffer32); }
+		g_ConsoleMan.Draw(m_pBackBuffer32);
 
 		release_bitmap(m_pBackBuffer8);
 
 		// Reset the frame timer so we can measure how much it takes until next frame being drawn
 		g_PerformanceMan.ResetFrameTimer();
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool FrameMan::FlippingWith32BPP() const { return get_color_depth() == 32 && m_BPP == 32 && m_pBackBuffer32 && g_InActivity && g_PostProcessMan.IsPostProcessing(); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -932,34 +918,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::FlipFrameBuffers() {
-		if (get_color_depth() == 32 && m_BPP == 32 && m_pBackBuffer32) {
-			if (g_InActivity) {
-				if (!m_Fullscreen && m_NxWindowed != 1) {
-					stretch_blit(g_PostProcessMan.IsPostProcessing() ? m_pBackBuffer32 : m_pBackBuffer8, screen, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
-				} else if (m_Fullscreen && m_NxFullscreen != 1) {
-					stretch_blit(g_PostProcessMan.IsPostProcessing() ? m_pBackBuffer32 : m_pBackBuffer8, screen, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
-				} else {
-					blit(g_PostProcessMan.IsPostProcessing() ? m_pBackBuffer32 : m_pBackBuffer8, screen, 0, 0, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h);
-				}
-			// Menu is always 32bpp
-			} else {
-				if (!m_Fullscreen && m_NxWindowed != 1) {
-					stretch_blit(m_pBackBuffer32, screen, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
-				} else if (m_Fullscreen && m_NxFullscreen != 1) {
-					stretch_blit(m_pBackBuffer32, screen, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
-				} else {
-					blit(m_pBackBuffer32, screen, 0, 0, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h);
-				}
-			}
-		// 8bpp video mode
+		if ((!m_Fullscreen && m_NxWindowed != 1) || (m_Fullscreen && m_NxFullscreen != 1)) {
+			stretch_blit(m_pBackBuffer32, screen, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
 		} else {
-			if (!m_Fullscreen && m_NxWindowed != 1) {
-				stretch_blit(m_pBackBuffer8, screen, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h, 0, 0, SCREEN_W, SCREEN_H);
-			} else if (m_Fullscreen && m_NxFullscreen != 1) {
-				stretch_blit(m_pBackBuffer8, screen, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h, 0, 0, SCREEN_W, SCREEN_H);
-			} else {
-				blit(m_pBackBuffer8, screen, 0, 0, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
-			}
+			blit(m_pBackBuffer32, screen, 0, 0, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h);
 		}
 	}
 

@@ -69,58 +69,11 @@ namespace RTE {
 		void ClearPostEffects() { m_PostSceneEffects.clear(); m_GlowAreas.clear(); }
 #pragma endregion
 
-#pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this FrameMan to an output stream for later recreation with Create(Reader &reader).
-		/// </summary>
-		/// <param name="writer">A Writer that the FrameMan will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
-#pragma endregion
-
 #pragma region Concrete Methods
 		/// <summary>
 		/// Takes the current state of the 8bpp back buffer, copies it, and adds post-processing effects on top like glows etc. Only works in 32bpp mode.
 		/// </summary>
 		void PostProcess();
-#pragma endregion
-
-#pragma region Getters and Setters
-		/// <summary>
-		/// Indicates whether we're post-processing or not.
-		/// </summary>
-		/// <returns>Whether post-processing is enabled or not.</returns>
-		bool IsPostProcessing() const;
-
-		/// <summary>
-		/// Sets whether we're post-processing at all.
-		/// </summary>
-		/// <param name="enable">Whether post-processing should be enabled or not.</param>
-		void EnablePostProcessing(bool enable = true) { m_PostProcessing = enable; }
-
-		/// <summary>
-		/// Indicates whether we're post-processing the pixel glow effect or not.
-		/// </summary>
-		/// <returns>Whether pixel post-processing is enabled or not.</returns>
-		bool IsPixelGlowEnabled() const { return IsPostProcessing() && m_PostPixelGlow; }
-
-		/// <summary>
-		/// Sets whether we're post-processing the pixel glow effect or not.
-		/// </summary>
-		/// <param name="enable">Whether pixel post-processing should be enabled or not..</param>
-		void EnablePixelGlow(bool enable = true) { if (enable) { EnablePostProcessing(enable); } m_PostPixelGlow = enable; }
 #pragma endregion
 
 #pragma region Post Effect Handling
@@ -222,9 +175,6 @@ namespace RTE {
 	protected:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
-
-		bool m_PostProcessing; //!< Whether post-processing is enabled or not.
-		bool m_PostPixelGlow; //!< Whether post-processing pixel glow is enabled or not.
 
 		std::list<PostEffect> m_PostScreenEffects; //!< List of effects to apply at the end of each frame. This list gets cleared out and re-filled each frame.
 		std::list<PostEffect> m_PostSceneEffects; //!< All post-processing effects registered for this draw frame in the scene.

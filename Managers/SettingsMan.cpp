@@ -136,8 +136,6 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "ResolutionY")
         g_FrameMan.ReadProperty(propName, reader);
-    else if (propName == "TrueColorMode")
-        g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "PaletteFile")
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "Fullscreen")
@@ -146,10 +144,6 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "NxFullscreen")
         g_FrameMan.ReadProperty(propName, reader);
-    else if (propName == "PostProcessing")
-        g_PostProcessMan.ReadProperty(propName, reader);
-    else if (propName == "PostPixelGlow")
-		g_PostProcessMan.ReadProperty(propName, reader);
     else if (propName == "PixelsPerMeter")
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "PlayIntro")
@@ -336,8 +330,6 @@ int SettingsMan::Save(Writer &writer) const
     writer << g_FrameMan.GetNewResX();
     writer.NewProperty("ResolutionY");
     writer << g_FrameMan.GetNewResY();
-    writer.NewProperty("TrueColorMode");
-    writer << (g_FrameMan.GetBPP() == 32);
     writer.NewProperty("PaletteFile");
     writer << g_FrameMan.GetPaletteFile();
     writer.NewProperty("Fullscreen");
@@ -346,10 +338,6 @@ int SettingsMan::Save(Writer &writer) const
     writer << g_FrameMan.NxWindowed();
     writer.NewProperty("NxFullscreen");
     writer << g_FrameMan.GetNewNxFullscreen();
-    writer.NewProperty("PostProcessing");
-    writer << g_PostProcessMan.IsPostProcessing();
-    writer.NewProperty("PostPixelGlow");
-    writer << g_PostProcessMan.IsPixelGlowEnabled();
     writer.NewProperty("PixelsPerMeter");
     writer << g_FrameMan.GetPPM();
     writer.NewProperty("PlayIntro");
@@ -532,8 +520,6 @@ int SettingsMan::SaveDefaults(Writer &writer) const
     writer << 960;
     writer.NewProperty("ResolutionY");
     writer << 540;
-    writer.NewProperty("TrueColorMode");
-    writer << 1;
     writer.NewProperty("PaletteFile");
     ContentFile paletteFile("Base.rte/palette.bmp");
     writer << paletteFile;
@@ -543,10 +529,6 @@ int SettingsMan::SaveDefaults(Writer &writer) const
     writer << 1;
     writer.NewProperty("NxFullscreen");
     writer << 2;
-    writer.NewProperty("PostProcessing");
-    writer << 1;
-    writer.NewProperty("PostPixelGlow");
-    writer << 1;
     writer.NewProperty("PixelsPerMeter");
     writer << 20;
     writer.NewProperty("PlayIntro");

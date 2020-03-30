@@ -407,19 +407,6 @@ int SceneMan::Save(Writer &writer) const
         writer << *(m_apMatPalette[i]);
     }
 
-// TODO: this")
-
-/* Not sure how to deal with this yet
-    writer.NewProperty("ResolutionX");
-    writer << m_ResX;
-    writer.NewProperty("ResolutionY");
-    writer << m_ResY;
-    writer.NewProperty("ColorDepth");
-    writer << m_BPP;
-    writer.NewProperty("PaletteFile");
-    writer << m_PaletteFile;
-*/
-
     return 0;
 }
 

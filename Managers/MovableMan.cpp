@@ -150,16 +150,7 @@ int MovableMan::Save(Writer &writer) const
     writer << m_Particles.size();
     for (deque<MovableObject *>::const_iterator itr2 = m_Particles.begin(); itr2 != m_Particles.end(); ++itr2)
         writer << **itr2;
-/* Not sure how to deal with this yet
-    writer.NewProperty("ResolutionX");
-    writer << m_ResX;
-    writer.NewProperty("ResolutionY");
-    writer << m_ResY;
-    writer.NewProperty("ColorDepth");
-    writer << m_BPP;
-    writer.NewProperty("PaletteFile");
-    writer << m_PaletteFile;
-*/
+
     return 0;
 }
 

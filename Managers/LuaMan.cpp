@@ -1423,7 +1423,6 @@ int LuaMan::Create()
             .property("LPP", &FrameMan::GetLPP)
             .property("ResX", &FrameMan::GetResX)
             .property("ResY", &FrameMan::GetResY)
-            .property("ResBPP", &FrameMan::GetBPP)
             .property("HSplit", &FrameMan::GetHSplit, &FrameMan::SetHSplit)
             .property("VSplit", &FrameMan::GetVSplit, &FrameMan::SetVSplit)
             .property("PlayerScreenWidth", &FrameMan::GetPlayerScreenWidth)
@@ -1446,8 +1445,6 @@ int LuaMan::Create()
 			.def("CalculateTextWidth", &FrameMan::CalculateTextWidth),
 
 		class_<PostProcessMan>("PostProcessManager")
-			.property("PostProcessing", &PostProcessMan::IsPostProcessing, &PostProcessMan::EnablePostProcessing)
-			.property("PostPixelGlow", &PostProcessMan::IsPixelGlowEnabled, &PostProcessMan::EnablePixelGlow)
 			.def("RegisterPostEffect", &PostProcessMan::RegisterPostEffect)
 			.def("ClearPostEffects", &PostProcessMan::ClearPostEffects),
 

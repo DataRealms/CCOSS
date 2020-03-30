@@ -97,18 +97,6 @@ namespace RTE {
 		BITMAP * GetBackBuffer32() const { return m_pBackBuffer32 ? m_pBackBuffer32 : m_pBackBuffer8; }
 
 		/// <summary>
-		/// Indicates whether the 32bpp frame buffer is currently being used or not when flipping the frame buffers.
-		/// </summary>
-		/// <returns>Whether the 32bpp is used or not (8bpp one is).</returns>
-		bool FlippingWith32BPP() const;
-
-		/// <summary>
-		/// Gets the bits per pixel color depth.
-		/// </summary>
-		/// <returns>An int describing the number of bits per pixel of the current color depth.</returns>
-		int GetBPP() const { return m_BPP; }
-
-		/// <summary>
 		/// Gets the ratio between the physics engine's meters and on-screen pixels.
 		/// </summary>
 		/// <returns>A float describing the current MPP ratio.</returns>
@@ -566,6 +554,8 @@ namespace RTE {
 	protected:
 
 		static const std::string c_ClassName; //!< The friendly-formatted type name of this object.
+		
+		static constexpr unsigned short m_BPP = 32; //!< Color depth (bits per pixel).
 
 		// Resolution
 		int m_ResX;
@@ -588,11 +578,6 @@ namespace RTE {
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.	
 		bool m_HSplitOverride; //!< Whether the screen is set to split horizontally in settings.		
 		bool m_VSplitOverride; //!< Whether the screen is set to split vertically in settings.
-
-
-
-		// Color depth (bits per pixel)
-		int m_BPP;
 
 		//!< Data file of the screen palette
 		ContentFile m_PaletteFile;

@@ -11,9 +11,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PostProcessMan::Clear() {
-
-		m_PostProcessing = false;
-		m_PostPixelGlow = false;
 		m_PostScreenEffects.clear();
 		m_PostSceneEffects.clear();
 		for (int i = 0; i < c_MaxScreenCount; ++i) {
@@ -53,33 +50,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int PostProcessMan::ReadProperty(std::string propName, Reader &reader) {
-		if (propName == "PostProcessing") {
-			reader >> m_PostProcessing;
-		} else if (propName == "PostPixelGlow") {
-			reader >> m_PostPixelGlow;
-		} else {
-			// See if the base class(es) can find a match instead
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int PostProcessMan::Save(Writer &writer) const {
-		Serializable::Save(writer);
-
-		writer.NewProperty("PostProcessing");
-		writer << m_PostProcessing;
-		writer.NewProperty("PostPixelGlow");
-		writer << m_PostPixelGlow;
-
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void PostProcessMan::PostProcess() {
 		// First copy the current 8bpp backbuffer to the 32bpp buffer; we'll add effects to it
 		blit(g_FrameMan.GetBackBuffer8(), g_FrameMan.GetBackBuffer32(), 0, 0, 0, 0, g_FrameMan.GetBackBuffer8()->w, g_FrameMan.GetBackBuffer8()->h);
@@ -92,49 +62,47 @@ namespace RTE {
 
 		// Randomly sample the entire backbuffer, looking for pixels to put a glow on
 		// NOTE THIS IS SLOW, especially on higher resolutions!
-		if (m_PostPixelGlow) {
-			int x = 0;
-			int y = 0;
-			int startX = 0;
-			int startY = 0;
-			int endX = 0;
-			int endY = 0;
-			unsigned short testpixel = 0;
+		int x = 0;
+		int y = 0;
+		int startX = 0;
+		int startY = 0;
+		int endX = 0;
+		int endY = 0;
+		unsigned short testpixel = 0;
 
-			for (std::list<Box>::iterator bItr = m_PostScreenGlowBoxes.begin(); bItr != m_PostScreenGlowBoxes.end(); ++bItr) {
-				startX = (*bItr).m_Corner.m_X;
-				startY = (*bItr).m_Corner.m_Y;
-				endX = startX + (*bItr).m_Width;
-				endY = startY + (*bItr).m_Height;
-				testpixel = 0;
+		for (std::list<Box>::iterator bItr = m_PostScreenGlowBoxes.begin(); bItr != m_PostScreenGlowBoxes.end(); ++bItr) {
+			startX = (*bItr).m_Corner.m_X;
+			startY = (*bItr).m_Corner.m_Y;
+			endX = startX + (*bItr).m_Width;
+			endY = startY + (*bItr).m_Height;
+			testpixel = 0;
 
-				// Sanity check a little at least
-				if (startX < 0 || startX >= g_FrameMan.GetBackBuffer8()->w || startY < 0 || startY >= g_FrameMan.GetBackBuffer8()->h ||
-					endX < 0 || endX >= g_FrameMan.GetBackBuffer8()->w || endY < 0 || endY >= g_FrameMan.GetBackBuffer8()->h) {
-					continue;
-				}
+			// Sanity check a little at least
+			if (startX < 0 || startX >= g_FrameMan.GetBackBuffer8()->w || startY < 0 || startY >= g_FrameMan.GetBackBuffer8()->h ||
+				endX < 0 || endX >= g_FrameMan.GetBackBuffer8()->w || endY < 0 || endY >= g_FrameMan.GetBackBuffer8()->h) {
+				continue;
+			}
 
-				// TODO: REMOVE TEMP DEBUG
-				//rect(m_pBackBuffer32, startX, startY, endX, endY, g_RedColor);
+			// TODO: REMOVE TEMP DEBUG
+			//rect(m_pBackBuffer32, startX, startY, endX, endY, g_RedColor);
 
-				for (y = startY; y < endY; ++y) {
-					for (x = startX; x < endX; ++x) {
-						testpixel = _getpixel(g_FrameMan.GetBackBuffer8(), x, y);
+			for (y = startY; y < endY; ++y) {
+				for (x = startX; x < endX; ++x) {
+					testpixel = _getpixel(g_FrameMan.GetBackBuffer8(), x, y);
 
-						// YELLOW
-						if ((testpixel == g_YellowGlowColor && PosRand() < 0.9) || testpixel == 98 || (testpixel == 120 && PosRand() < 0.7)) {
-							draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_pYellowGlow, x - 2, y - 2);
-						}
-						// RED
-						/*
-						if (testpixel == 13) {
-							draw_trans_sprite(m_pBackBuffer32, m_pRedGlow, x - 2, y - 2);
-						}
-						*/
-						// BLUE
-						if (testpixel == 166) {
-							draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_pBlueGlow, x - 2, y - 2);
-						}
+					// YELLOW
+					if ((testpixel == g_YellowGlowColor && PosRand() < 0.9) || testpixel == 98 || (testpixel == 120 && PosRand() < 0.7)) {
+						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_pYellowGlow, x - 2, y - 2);
+					}
+					// RED
+					/*
+					if (testpixel == 13) {
+						draw_trans_sprite(m_pBackBuffer32, m_pRedGlow, x - 2, y - 2);
+					}
+					*/
+					// BLUE
+					if (testpixel == 166) {
+						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_pBlueGlow, x - 2, y - 2);
 					}
 				}
 			}
@@ -198,10 +166,6 @@ namespace RTE {
 		// Clear the effects list for this frame
 		m_PostScreenEffects.clear();
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool PostProcessMan::IsPostProcessing() const { return m_PostProcessing && g_FrameMan.GetBPP() == 32; }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

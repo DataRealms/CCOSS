@@ -21,91 +21,63 @@ namespace RTE {
 
 const std::string FrameMan::c_ClassName = "FrameMan";
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Callback function for the allegro set_display_switch_callback. It will be called when
-// focus is switched away to the game window. 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Callback function for the allegro set_display_switch_callback. It will be called when
-// focus is switched back to the game window. It will temporarily disable positioning of
-// the mouse. This is so that when focus is switched back to the game window, it avoids
-// having the window fly away because the user clicked the title bar of the window.
-
-void DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this FrameMan, effectively
-//                  resetting the members of this abstraction level only.
-
-void FrameMan::Clear()
-{
-    m_ResX = 640;
-    m_ResY = 480;
-    m_BPP = 8;
-    m_NewResX = m_ResX;
-    m_NewResY = m_ResY;
-    m_pBackBuffer8 = 0;
+void FrameMan::Clear() {
+	m_ResX = 640;
+	m_ResY = 480;
+	m_NewResX = m_ResX;
+	m_NewResY = m_ResY;
+	m_Fullscreen = false;
+	m_NxWindowed = 1;
+	m_NxFullscreen = 1;
+	m_NewNxFullscreen = 1;
+	m_HSplit = false;
+	m_VSplit = false;
+	m_HSplitOverride = false;
+	m_VSplitOverride = false;
+	m_pPlayerScreen = 0;
+	m_PlayerScreenWidth = 0;
+	m_PlayerScreenHeight = 0;
+	m_pScreendumpBuffer = 0;
+	m_pBackBuffer8 = 0;
+	m_pBackBuffer32 = 0;
 	m_DrawNetworkBackBuffer = false;
 	m_StoreNetworkBackBuffer = false;
-	m_pBackBuffer32 = 0;
-    m_pScreendumpBuffer = 0;
-    m_PaletteFile.Reset();
-    m_pPaletteDataFile = 0;
-    m_BlackColor = 245;
-    m_AlmostBlackColor = 245;
-    m_Fullscreen = false;
-    m_NxWindowed = 1;
-    m_NxFullscreen = 1;
-    m_NewNxFullscreen = 1;
-    m_HSplit = false;
-    m_VSplit = false;
-    m_HSplitOverride = false;
-    m_VSplitOverride = false;
-    m_pPlayerScreen = 0;
-    m_PlayerScreenWidth = 0;
-    m_PlayerScreenHeight = 0;
-    m_PPM = 0;
-    m_pGUIScreen = 0;
-    m_pLargeFont = 0;
-    m_pSmallFont = 0;
-
 	m_NetworkFrameCurrent = 0;
 	m_NetworkFrameReady = 1;
+	m_BPP = 8;
+	m_PaletteFile.Reset();
+	//m_pPaletteDataFile = 0;
+	m_BlackColor = 245;
+	m_AlmostBlackColor = 245;
+	m_PPM = 0;
+	m_pGUIScreen = 0;
+	m_pLargeFont = 0;
+	m_pSmallFont = 0;
+	m_TextBlinkTimer.Reset();
 
-    for (int i = 0; i < c_MaxScreenCount; ++i)
-    {
-        m_ScreenText[i].clear();
-        m_TextDuration[i] = -1;
-        m_TextDurationTimer[i].Reset();
-        m_TextBlinking[i] = 0;
-        m_TextCentered[i] = false;
-        m_FlashScreenColor[i] = -1;
-        m_FlashedLastFrame[i] = false;
-        m_FlashTimer[i].Reset();
+	for (short i = 0; i < c_MaxScreenCount; ++i) {
+		m_ScreenText[i].clear();
+		m_TextDuration[i] = -1;
+		m_TextDurationTimer[i].Reset();
+		m_TextBlinking[i] = 0;
+		m_TextCentered[i] = false;
+		m_FlashScreenColor[i] = -1;
+		m_FlashedLastFrame[i] = false;
+		m_FlashTimer[i].Reset();
 
-		for (int f = 0; f < 2; f++)
-		{
+		for (short f = 0; f < 2; f++) {
 			m_pNetworkBackBufferIntermediate8[f][i] = 0;
 			m_pNetworkBackBufferFinal8[f][i] = 0;
 			m_pNetworkBackBufferIntermediateGUI8[f][i] = 0;
 			m_pNetworkBackBufferFinalGUI8[f][i] = 0;
 		}
 		m_NetworkBitmapIsLocked[i] = false;
-    }
-    m_TextBlinkTimer.Reset();
+	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the FrameMan object ready for use, which is to be used with
-//                  SettingsMan first.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int FrameMan::Create()
 {
@@ -116,57 +88,33 @@ int FrameMan::Create()
 //    destroy_gfx_mode_list(pList);
 
     // Refuse windowed multiplier if the resolution is too high
-    if (m_ResX > 1024)
-        m_NxWindowed = 1;
-/*
-    // Force double virtual fullscreen res if the res is too high
-    if (m_ResX >= 1280)// && m_Fullscreen && m_NxFullscreen == 1)
-    {
-        m_NxFullscreen = 2;
-        m_NewResX = m_ResX /= m_NxFullscreen;
-        m_NewResY = m_ResY /= m_NxFullscreen;
-    }
-    // Not oversized resolution
-    else
-        m_NxFullscreen = 1;
-*/
+	if (m_ResX > 1024) { m_NxWindowed = 1; }
 
 	int fullscreenGfxDriver = GFX_AUTODETECT_FULLSCREEN;
 	int windowedGfxDriver = GFX_AUTODETECT_WINDOWED;
 
-    fullscreenGfxDriver = GFX_DIRECTX_ACCEL;
+	fullscreenGfxDriver = GFX_DIRECTX_ACCEL;
 
-	if (g_SettingsMan.ForceSoftwareGfxDriver()) 
-		fullscreenGfxDriver = GFX_DIRECTX_SOFT;
-	if (g_SettingsMan.ForceSafeGfxDriver()) 
-		fullscreenGfxDriver = GFX_DIRECTX_SAFE;
-	if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) 
-		windowedGfxDriver = GFX_DIRECTX_OVL;
-	if (g_SettingsMan.ForceNonOverlayedWindowGfxDriver()) 
-		windowedGfxDriver = GFX_DIRECTX_WIN;
-	if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) 
-		windowedGfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
-
-
-    if (set_gfx_mode(m_Fullscreen ? fullscreenGfxDriver : windowedGfxDriver, m_Fullscreen ? m_ResX * m_NxFullscreen : m_ResX * m_NxWindowed, m_Fullscreen ? m_ResY * m_NxFullscreen : m_ResY * m_NxWindowed, 0, 0) != 0)
-    {
+	if (g_SettingsMan.ForceSoftwareGfxDriver()) { fullscreenGfxDriver = GFX_DIRECTX_SOFT; }
+	if (g_SettingsMan.ForceSafeGfxDriver()) { fullscreenGfxDriver = GFX_DIRECTX_SAFE; }
+	if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) { windowedGfxDriver = GFX_DIRECTX_OVL; }
+	if (g_SettingsMan.ForceNonOverlayedWindowGfxDriver()) { windowedGfxDriver = GFX_DIRECTX_WIN; }
+	if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) { windowedGfxDriver = GFX_DIRECTX_WIN_BORDERLESS; }
+		
+	if (set_gfx_mode(m_Fullscreen ? fullscreenGfxDriver : windowedGfxDriver, m_Fullscreen ? m_ResX * m_NxFullscreen : m_ResX * m_NxWindowed, m_Fullscreen ? m_ResY * m_NxFullscreen : m_ResY * m_NxWindowed, 0, 0) != 0) {
 		g_ConsoleMan.PrintString("Failed to set gfx mode, trying different windowed scaling.");
-
-		// If player somehow managed to set up a windowed 2X mode and then set a resoultion higher than physical, then disable 2X resolution
-		m_NxWindowed = m_NxWindowed == 2 ? 1 : m_NxWindowed;
-		if (set_gfx_mode(m_Fullscreen ? fullscreenGfxDriver : windowedGfxDriver, m_Fullscreen ? m_ResX * m_NxFullscreen : m_ResX * m_NxWindowed, m_Fullscreen ? m_ResY * m_NxFullscreen : m_ResY * m_NxWindowed, 0, 0) != 0)
-	    {
+		// If player somehow managed to set up a windowed 2X mode and then set a resolution higher than physical, then disable 2X resolution
+		m_NxWindowed = (m_NxWindowed == 2) ? 1 : m_NxWindowed;
+		if (set_gfx_mode(m_Fullscreen ? fullscreenGfxDriver : windowedGfxDriver, m_Fullscreen ? m_ResX * m_NxFullscreen : m_ResX * m_NxWindowed, m_Fullscreen ? m_ResY * m_NxFullscreen : m_ResY * m_NxWindowed, 0, 0) != 0) {
 			g_ConsoleMan.PrintString("Failed to set gfx mode, trying different fullscreen scaling.");
 
 			// TODO: this is whack if we're attempting windowed
 			// Oops, failed to set fullscreen mode, try a different fullscreen scaling
-			m_NewNxFullscreen = m_NxFullscreen = m_NxFullscreen == 1 ? 2 : 1;
-			if (set_gfx_mode(m_Fullscreen ? fullscreenGfxDriver : windowedGfxDriver, m_Fullscreen ? m_ResX * m_NxFullscreen : m_ResX * m_NxWindowed, m_Fullscreen ? m_ResY * m_NxFullscreen : m_ResY * m_NxWindowed, 0, 0) != 0)
-			{
+			m_NewNxFullscreen = m_NxFullscreen = (m_NxFullscreen == 1) ? 2 : 1;
+			if (set_gfx_mode(m_Fullscreen ? fullscreenGfxDriver : windowedGfxDriver, m_Fullscreen ? m_ResX * m_NxFullscreen : m_ResX * m_NxWindowed, m_Fullscreen ? m_ResY * m_NxFullscreen : m_ResY * m_NxWindowed, 0, 0) != 0) {
 				// Oops, failed to set the resolution specified in the setting file, so default to a safe one instead
 				allegro_message("Unable to set specified graphics mode because: %s!\n\nNow trying to default back to VGA...", allegro_error);
-				if (set_gfx_mode(m_Fullscreen ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0) != 0)
-				{
+				if (set_gfx_mode(m_Fullscreen ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0) != 0) {
 					set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
 					allegro_message("Unable to set any graphics mode because %s!", allegro_error);
 					return 1;
@@ -178,44 +126,40 @@ int FrameMan::Create()
 				m_NewNxFullscreen = m_NxFullscreen = 1;
 			}
 		}
-    }
+	}
 
-    // Clear the screen buffer so it doesn't flash pink
-    if (m_BPP == 8)
-        clear_to_color(screen, m_BlackColor);
-    else
-        clear_to_color(screen, 0);
+	// Clear the screen buffer so it doesn't flash pink
+	clear_to_color(screen, (m_BPP == 8) ? m_BlackColor : 0);
 
-    // Sets the allowed color conversions when loading bitmaps from files
-    set_color_conversion(COLORCONV_MOST);
+	// Sets the allowed color conversions when loading bitmaps from files
+	set_color_conversion(COLORCONV_MOST);
 
-    // Load and set the palette
-    if (!LoadPalette(m_PaletteFile.GetDataPath()))
-        return -1;
+	// Load and set the palette
+	if (!LoadPalette(m_PaletteFile.GetDataPath())) {
+		return -1;
+	}
 
-    // Set the switching mode; what happens when the app window is switched to and fro
-    set_display_switch_mode(SWITCH_BACKGROUND);
-//    set_display_switch_mode(SWITCH_PAUSE);
-    set_display_switch_callback(SWITCH_OUT, DisplaySwitchOut);
-    set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
+	// Set the switching mode; what happens when the app window is switched to and fro
+	set_display_switch_mode(SWITCH_BACKGROUND);
+	//set_display_switch_mode(SWITCH_PAUSE);
+	set_display_switch_callback(SWITCH_OUT, DisplaySwitchOut);
+	set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
 
-    // Create transparency color table
-    PALETTE ccpal;
-    get_palette(ccpal);
-    create_trans_table(&m_LessTransTable, ccpal, 192, 192, 192, 0);
-    create_trans_table(&m_HalfTransTable, ccpal, 128, 128, 128, 0);
-    create_trans_table(&m_MoreTransTable, ccpal, 64, 64, 64, 0);
-    // Set the one Allegro currently uses
-    color_map = &m_HalfTransTable;
+	// Create transparency color table
+	PALETTE ccpal;
+	get_palette(ccpal);
+	create_trans_table(&m_LessTransTable, ccpal, 192, 192, 192, 0);
+	create_trans_table(&m_HalfTransTable, ccpal, 128, 128, 128, 0);
+	create_trans_table(&m_MoreTransTable, ccpal, 64, 64, 64, 0);
+	// Set the one Allegro currently uses
+	color_map = &m_HalfTransTable;
 
-    // Create the back buffer, this is still in 8bpp, we will do any postprocessing on the PostProcessing bitmap
-    m_pBackBuffer8 = create_bitmap_ex(8, m_ResX, m_ResY);
-    clear_to_color(m_pBackBuffer8, m_BlackColor);
+	// Create the back buffer, this is still in 8bpp, we will do any post-processing on the PostProcessing bitmap
+	m_pBackBuffer8 = create_bitmap_ex(8, m_ResX, m_ResY);
+	clear_to_color(m_pBackBuffer8, m_BlackColor);
 
-	for (int i = 0; i < c_MaxScreenCount; i++)
-	{
-		for (int f = 0; f < 2; f++)
-		{
+	for (short i = 0; i < c_MaxScreenCount; i++) {
+		for (short f = 0; f < 2; f++) {
 			m_pNetworkBackBufferIntermediate8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 			clear_to_color(m_pNetworkBackBufferIntermediate8[f][i], m_BlackColor);
 			m_pNetworkBackBufferIntermediateGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
@@ -228,36 +172,120 @@ int FrameMan::Create()
 		}
 	}
 
-    // Create the post processing buffer if in 32bpp video mode, it'll be used for glow effects etc
-    if (get_color_depth() == 32 && m_BPP == 32)
-    {
-        // 32bpp so we can make ze cool effects. Everyhting up to this is 8bpp, including the back buffer
-        m_pBackBuffer32 = create_bitmap_ex(32, m_ResX, m_ResY);
-//        clear_to_color(m_pBackBuffer32, m_BlackColor);
+	// Create the post processing buffer if in 32bpp video mode, it'll be used for glow effects etc
+	if (get_color_depth() == 32 && m_BPP == 32) {
+		// 32bpp so we can make the cool effects. Everything up to this is 8bpp, including the back buffer
+		m_pBackBuffer32 = create_bitmap_ex(32, m_ResX, m_ResY);
+		//clear_to_color(m_pBackBuffer32, m_BlackColor);
 	}
 
-    m_PlayerScreenWidth = m_pBackBuffer8->w;
-    m_PlayerScreenHeight = m_pBackBuffer8->h;
+	m_PlayerScreenWidth = m_pBackBuffer8->w;
+	m_PlayerScreenHeight = m_pBackBuffer8->h;
 
-    // Create the splitscreen buffer
-    if (m_HSplit || m_VSplit)
-    {
-// TODO: Make this a Video-only memory bitmap: create_video_bitmap"
-        m_pPlayerScreen = create_bitmap_ex(8, m_ResX / (m_VSplit ? 2 : 1), m_ResY / (m_HSplit ? 2 : 1));
-        clear_to_color(m_pPlayerScreen, m_BlackColor);
-        set_clip_state(m_pPlayerScreen, 1);
+	// Create the splitscreen buffer
+	if (m_HSplit || m_VSplit) {
+		m_pPlayerScreen = create_bitmap_ex(8, m_ResX / (m_VSplit ? 2 : 1), m_ResY / (m_HSplit ? 2 : 1));
+		clear_to_color(m_pPlayerScreen, m_BlackColor);
+		set_clip_state(m_pPlayerScreen, 1);
 
-        // Update these to represent the split screens
-        m_PlayerScreenWidth = m_pPlayerScreen->w;
-        m_PlayerScreenHeight = m_pPlayerScreen->h;
-    }
-    return 0;
+		// Update these to represent the split screens
+		m_PlayerScreenWidth = m_pPlayerScreen->w;
+		m_PlayerScreenHeight = m_pPlayerScreen->h;
+	}
+	return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsValidResolution	
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns true if this resolution is supported
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int FrameMan::ReadProperty(std::string propName, Reader &reader) {
+	if (propName == "ResolutionX") {
+		reader >> m_ResX;
+		m_NewResX = m_ResX;
+	} else if (propName == "ResolutionY") {
+		reader >> m_ResY;
+		m_NewResY = m_ResY;
+	} else if (propName == "Fullscreen") {
+		reader >> m_Fullscreen;
+	} else if (propName == "NxWindowed") {
+		reader >> m_NxWindowed;
+	} else if (propName == "NxFullscreen") {
+		reader >> m_NxFullscreen;
+		m_NewNxFullscreen = m_NxFullscreen;
+	} else if (propName == "HSplitScreen") {
+		reader >> m_HSplitOverride;
+	} else if (propName == "VSplitScreen") {
+		reader >> m_VSplitOverride;
+	} else if (propName == "PaletteFile") {
+		reader >> m_PaletteFile;
+	} else if (propName == "TrueColorMode") {
+		bool trueColor;
+		reader >> trueColor;
+		m_BPP = trueColor ? 32 : 8;
+	} else if (propName == "PixelsPerMeter") {
+		reader >> m_PPM;
+		m_MPP = 1 / m_PPM;
+		// Calculate the Pixel per Liter and Liter per Pixel
+		float cmPP = 100 / m_PPM;
+		float LVolume = 10 * 10 * 10;
+		m_PPL = LVolume / (cmPP * cmPP * cmPP);
+		m_LPP = 1 / m_PPL;
+	} else {
+		// See if the base class(es) can find a match instead
+		return Serializable::ReadProperty(propName, reader);
+	}
+	return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int FrameMan::Save(Writer &writer) const {
+	Serializable::Save(writer);
+
+	writer.NewProperty("ResolutionX");
+	writer << m_ResX;
+	writer.NewProperty("ResolutionY");
+	writer << m_ResY;
+	writer.NewProperty("TrueColorMode");
+	writer << (m_BPP == 32);
+	writer.NewProperty("PaletteFile");
+	writer << m_PaletteFile;
+	writer.NewProperty("Fullscreen");
+	writer << m_Fullscreen;
+	writer.NewProperty("PixelsPerMeter");
+	writer << m_PPM;
+	writer.NewProperty("HSplitScreen");
+	writer << m_HSplitOverride;
+	writer.NewProperty("VSplitScreen");
+	writer << m_VSplitOverride;
+
+	return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void FrameMan::Destroy() {
+	destroy_bitmap(m_pBackBuffer8);
+	for (short i = 0; i < c_MaxScreenCount; i++) {
+		for (short f = 0; f < 2; f++) {
+			destroy_bitmap(m_pNetworkBackBufferIntermediate8[f][i]);
+			destroy_bitmap(m_pNetworkBackBufferIntermediateGUI8[f][i]);
+			destroy_bitmap(m_pNetworkBackBufferFinal8[f][i]);
+			destroy_bitmap(m_pNetworkBackBufferFinalGUI8[f][i]);
+		}
+	}
+	destroy_bitmap(m_pBackBuffer32);
+	destroy_bitmap(m_pPlayerScreen);
+	delete m_pGUIScreen;
+	delete m_pLargeFont;
+	delete m_pSmallFont;
+
+	//if (m_pPaletteDataFile) { unload_datafile_object(m_pPaletteDataFile); }
+
+	g_TimerMan.Destroy();
+	Clear();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool FrameMan::IsValidResolution(int width, int height) const {
 	int actualWidth = width;
@@ -271,220 +299,69 @@ bool FrameMan::IsValidResolution(int width, int height) const {
 	return (actualWidth < 360 || actualHeight < 360) ? false : true;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int FrameMan::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "ResolutionX")
-    {
-        reader >> m_ResX;
-        m_NewResX = m_ResX;
-    }
-    else if (propName == "ResolutionY")
-    {
-        reader >> m_ResY;
-        m_NewResY = m_ResY;
-    }
-    else if (propName == "TrueColorMode")
-    {
-        bool trueColor;
-        reader >> trueColor;
-        m_BPP = trueColor ? 32 : 8;
-    }
-    else if (propName == "PaletteFile")
-        reader >> m_PaletteFile;
-    else if (propName == "Fullscreen")
-    {
-        reader >> m_Fullscreen;
-#ifdef FULLSCREEN_OVERRIDE
-        m_Fullscreen = true;
-#endif // FULLSCREEN_OVERRIDE
-    }
-    else if (propName == "NxWindowed")
-        reader >> m_NxWindowed;
-    else if (propName == "NxFullscreen")
-    {
-        reader >> m_NxFullscreen;
-        m_NewNxFullscreen = m_NxFullscreen;
-    }
-    else if (propName == "PixelsPerMeter")
-    {
-        reader >> m_PPM;
-        m_MPP = 1 / m_PPM;
-        // Calculate the Pixle per Litre and Litre per Pixel
-        float cmPP = 100 / m_PPM;
-        float LVolume = 10 * 10 * 10;
-        m_PPL = LVolume / (cmPP * cmPP * cmPP);
-        m_LPP = 1 / m_PPL;
-    }
-    else if (propName == "HSplitScreen")
-        reader >> m_HSplitOverride;
-    else if (propName == "VSplitScreen")
-        reader >> m_VSplitOverride;
-    else
-        // See if the base class(es) can find a match instead
-        return Serializable::ReadProperty(propName, reader);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ResetSplitScreens
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets new values for the split screen configuration.
-
-void FrameMan::ResetSplitScreens(bool hSplit, bool vSplit)
-{
-    // Free the previous splitscreen, if any
-    if (m_pPlayerScreen)
-        release_bitmap(m_pPlayerScreen);
+void FrameMan::ResetSplitScreens(bool hSplit, bool vSplit) {
+	// Free the previous splitscreen, if any
+	if (m_pPlayerScreen)
+		release_bitmap(m_pPlayerScreen);
 
 	// Override screen splitting according to settings if needed
-	if ((hSplit || vSplit) && !(hSplit && vSplit) && (m_HSplitOverride || m_VSplitOverride))
-	{
+	if ((hSplit || vSplit) && !(hSplit && vSplit) && (m_HSplitOverride || m_VSplitOverride)) {
 		hSplit = m_HSplitOverride;
 		vSplit = m_VSplitOverride;
 	}
 
-    m_HSplit = hSplit;
-    m_VSplit = vSplit;
+	m_HSplit = hSplit;
+	m_VSplit = vSplit;
 
-    // Create the splitscreen buffer
-    if (m_HSplit || m_VSplit)
-    {
-// TODO: Make this a Video-only memory bitmap: create_video_bitmap"
-        m_pPlayerScreen = create_bitmap_ex(8, g_FrameMan.GetResX() / (m_VSplit ? 2 : 1), g_FrameMan.GetResY() / (m_HSplit ? 2 : 1));
-        clear_to_color(m_pPlayerScreen, m_BlackColor);
-        set_clip_state(m_pPlayerScreen, 1);
+	// Create the splitscreen buffer
+	if (m_HSplit || m_VSplit) {
+		m_pPlayerScreen = create_bitmap_ex(8, g_FrameMan.GetResX() / (m_VSplit ? 2 : 1), g_FrameMan.GetResY() / (m_HSplit ? 2 : 1));
+		clear_to_color(m_pPlayerScreen, m_BlackColor);
+		set_clip_state(m_pPlayerScreen, 1);
 
-        // Update these to represent the split screens
-        m_PlayerScreenWidth = m_pPlayerScreen->w;
-        m_PlayerScreenHeight = m_pPlayerScreen->h;
-    }
-    // No splits, so set the screen dimensions equal to the back buffer
-    else
-    {
-        m_PlayerScreenWidth = m_pBackBuffer8->w;
-        m_PlayerScreenHeight = m_pBackBuffer8->h;
-    }
-
-    // Reset the flashes
-    for (int i = 0; i < c_MaxScreenCount; ++i)
-    {
-        m_FlashScreenColor[i] = -1;
-        m_FlashedLastFrame[i] = false;
-    }
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this FrameMan with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int FrameMan::Save(Writer &writer) const
-{
-    Serializable::Save(writer);
-
-    writer.NewProperty("ResolutionX");
-    writer << m_ResX;
-    writer.NewProperty("ResolutionY");
-    writer << m_ResY;
-    writer.NewProperty("TrueColorMode");
-    writer << (m_BPP == 32);
-    writer.NewProperty("PaletteFile");
-    writer << m_PaletteFile;
-    writer.NewProperty("Fullscreen");
-    writer << m_Fullscreen;
-    writer.NewProperty("PixelsPerMeter");
-    writer << m_PPM;
-    writer.NewProperty("HSplitScreen");
-    writer << m_HSplitOverride;
-    writer.NewProperty("VSplitScreen");
-    writer << m_VSplitOverride;
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the FrameMan object.
-
-void FrameMan::Destroy()
-{
-    destroy_bitmap(m_pBackBuffer8);
-	for (int i = 0; i < c_MaxScreenCount; i++)
-	{
-		for (int f = 0; f < 2; f++)
-		{
-			destroy_bitmap(m_pNetworkBackBufferIntermediate8[f][i]);
-			destroy_bitmap(m_pNetworkBackBufferIntermediateGUI8[f][i]);
-			destroy_bitmap(m_pNetworkBackBufferFinal8[f][i]);
-			destroy_bitmap(m_pNetworkBackBufferFinalGUI8[f][i]);
-		}
+		// Update these to represent the split screens
+		m_PlayerScreenWidth = m_pPlayerScreen->w;
+		m_PlayerScreenHeight = m_pPlayerScreen->h;
 	}
-    destroy_bitmap(m_pBackBuffer32);
-    destroy_bitmap(m_pPlayerScreen);
-    if (m_pPaletteDataFile)
-        unload_datafile_object(m_pPaletteDataFile);
-    delete m_pGUIScreen;
-    delete m_pLargeFont;
-    delete m_pSmallFont;
+	// No splits, so set the screen dimensions equal to the back buffer
+	else {
+		m_PlayerScreenWidth = m_pBackBuffer8->w;
+		m_PlayerScreenHeight = m_pBackBuffer8->h;
+	}
 
-    g_TimerMan.Destroy();
-
-    Clear();
+	// Reset the flashes
+	for (int i = 0; i < c_MaxScreenCount; ++i) {
+		m_FlashScreenColor[i] = -1;
+		m_FlashedLastFrame[i] = false;
+	}
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetLargeFont
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the large font from the GUI engine's current skin. Ownership is
-//                  NOT transferred!
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-GUIFont * FrameMan::GetLargeFont()
-{
-    if (!m_pLargeFont)
-    {
-        if (!m_pGUIScreen)
-        {
-            m_pGUIScreen = new AllegroScreen(m_pBackBuffer8);
-        }
-        m_pLargeFont = new GUIFont("FatFont");
-        m_pLargeFont->Load(m_pGUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.bmp");
-    }
-    return m_pLargeFont;
+GUIFont * FrameMan::GetLargeFont() {
+	if (!m_pLargeFont) {
+		if (!m_pGUIScreen) {
+			m_pGUIScreen = new AllegroScreen(m_pBackBuffer8);
+		}
+		m_pLargeFont = new GUIFont("FatFont");
+		m_pLargeFont->Load(m_pGUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.bmp");
+	}
+	return m_pLargeFont;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSmallFont
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the large font from the GUI engine's current skin. Ownership is
-//                  NOT transferred!
-
-GUIFont * FrameMan::GetSmallFont()
-{
-    if (!m_pSmallFont)
-    {
-        if (!m_pGUIScreen)
-        {
-            m_pGUIScreen = new AllegroScreen(m_pBackBuffer8);
-        }
-        m_pSmallFont = new GUIFont("SmallFont");
-        m_pSmallFont->Load(m_pGUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.bmp");
-    }
-    return m_pSmallFont;
+GUIFont * FrameMan::GetSmallFont() {
+	if (!m_pSmallFont) {
+		if (!m_pGUIScreen) {
+			m_pGUIScreen = new AllegroScreen(m_pBackBuffer8);
+		}
+		m_pSmallFont = new GUIFont("SmallFont");
+		m_pSmallFont->Load(m_pGUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.bmp");
+	}
+	return m_pSmallFont;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -499,10 +376,7 @@ int FrameMan::CalculateTextWidth(std::string text, bool isSmall) {
 	return (isSmall) ? GetSmallFont()->CalculateWidth(text) : GetLargeFont()->CalculateWidth(text);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetScreenText
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the message to be displayed on top of each player's screen
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FrameMan::SetScreenText(const std::string &msg, int which, int blinkInterval, int displayDuration, bool centered)
 {
@@ -520,17 +394,23 @@ void FrameMan::SetScreenText(const std::string &msg, int which, int blinkInterva
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          LoadPalette
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads a palette from a .dat file and sets it as the currently used
-//                  screen palette.
+void FrameMan::ClearScreenText(int which = 0) {
+	if (which >= 0 && which < c_MaxScreenCount) {
+		m_ScreenText[which].clear();
+		m_TextDuration[which] = -1;
+		m_TextDurationTimer[which].Reset();
+		m_TextBlinking[which] = 0;
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool FrameMan::LoadPalette(std::string palettePath)
 {
     // Look for the '#' denoting the divider between the datafile and the datafile object's name is
-    // If we find one, that means we're trying to load from a datafile, otehrwise it's from an exposed bitmap
+    // If we find one, that means we're trying to load from a datafile, otherwise it's from an exposed bitmap
     int separatorPos = palettePath.rfind('#');
 
     // Check whether we're trying to load a palette from an exposed bitmap or from a datafile
@@ -553,8 +433,8 @@ bool FrameMan::LoadPalette(std::string palettePath)
         destroy_bitmap(tempBitmap);
     }
     // Loading from a datafile
-    else
-    {
+    else {
+		/*
         // Get the Path only, without the object name, using the separator index as length limiter
         string datafilePath = palettePath.substr(0, separatorPos);
         // Adjusting to the true first character of the datafile object's name string.
@@ -564,12 +444,10 @@ bool FrameMan::LoadPalette(std::string palettePath)
         DATAFILE *pTempFile = load_datafile_object(datafilePath.c_str(), objectName.c_str());
 
         // Make sure we loaded properly.
-        if (!pTempFile || !pTempFile->dat || pTempFile->type != DAT_PALETTE)
-            RTEAbort(("Failed to load palette datafile object with following path and name:\n\n" + palettePath).c_str());
+        if (!pTempFile || !pTempFile->dat || pTempFile->type != DAT_PALETTE) { RTEAbort(("Failed to load palette datafile object with following path and name:\n\n" + palettePath).c_str()); }      
 
         // Now when we know it's valid, go ahead and replace the old palette with it
-        if (m_pPaletteDataFile)
-            unload_datafile_object(m_pPaletteDataFile);
+		if (m_pPaletteDataFile) { unload_datafile_object(m_pPaletteDataFile); }        
         m_pPaletteDataFile = pTempFile;
 
         // Set the current palette
@@ -578,17 +456,14 @@ bool FrameMan::LoadPalette(std::string palettePath)
         // Update what black is now with the loaded palette
         m_BlackColor = bestfit_color(*((PALETTE *)m_pPaletteDataFile->dat), 0, 0, 0);
         m_AlmostBlackColor = bestfit_color(*((PALETTE *)m_pPaletteDataFile->dat), 5, 5, 5);
+		*/
     }
 
     // Indicate success
     return true;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FadeInPalette
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Fades the palette in from black at a specified speed.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FrameMan::FadeInPalette(int fadeSpeed) {
 	PALETTE pal;
@@ -597,39 +472,26 @@ void FrameMan::FadeInPalette(int fadeSpeed) {
 	fade_in(pal, fadeSpeed);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FadeOutPalette
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Fades the palette out to black at a specified speed.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FrameMan::FadeOutPalette(int fadeSpeed) {
 	fadeSpeed = Limit(fadeSpeed, 64, 1);
 	fade_out(fadeSpeed);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetTransTable
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets a specific precalculated transperency table which is used for
-//                  any subsequent transparency drawing.
-
-void FrameMan::SetTransTable(TransperencyPreset transSetting)
-{
-    if (transSetting == LessTrans)
-        color_map = &m_LessTransTable;
-    else if (transSetting == MoreTrans)
-        color_map = &m_MoreTransTable;
-    else
-        color_map = &m_HalfTransTable;
+void FrameMan::SetTransTable(TransperencyPreset transSetting) {
+	if (transSetting == LessTrans) {
+		color_map = &m_LessTransTable;
+	} else if (transSetting == MoreTrans) {
+		color_map = &m_MoreTransTable;
+	} else {
+		color_map = &m_HalfTransTable;
+	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SaveScreenToBMP
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Dumps a bitmap to a 8bpp BMP file.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int FrameMan::SaveScreenToBMP(const char *namebase)
 {
@@ -637,7 +499,7 @@ int FrameMan::SaveScreenToBMP(const char *namebase)
     char fullfilename[256];
     int maxFileTrys = 1000;
 
-    // Make sure its not a 0 namebase
+    // Make sure its not a 0 name base
     if (namebase == 0 || strlen(namebase) <= 0)
         return -1;
 
@@ -664,11 +526,7 @@ int FrameMan::SaveScreenToBMP(const char *namebase)
     return 0;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SaveWorldToBMP
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Dumps a bitmap of everything on the scene to the BMP file.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int FrameMan::SaveWorldToBMP(const char *namebase)
 {
@@ -679,7 +537,7 @@ int FrameMan::SaveWorldToBMP(const char *namebase)
     char fullfilename[256];
     int maxFileTrys = 1000;
 
-    // Make sure its not a 0 namebase
+    // Make sure its not a 0 name base
     if (namebase == 0 || strlen(namebase) <= 0)
         return -1;
 
@@ -774,12 +632,7 @@ int FrameMan::SaveWorldToBMP(const char *namebase)
     return 0;
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SaveBitmapToBMP
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Dumps a bitmap to a 8bpp BMP file.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int FrameMan::SaveBitmapToBMP(BITMAP *pBitmap, const char *namebase)
 {
@@ -787,7 +640,7 @@ int FrameMan::SaveBitmapToBMP(BITMAP *pBitmap, const char *namebase)
     char fullfilename[256];
     int maxFileTrys = 1000;
 
-    // Make sure its not a 0 namebase
+    // Make sure its not a 0 name base
     if (namebase == 0 || strlen(namebase) <= 0)
         return -1;
 
@@ -809,11 +662,7 @@ int FrameMan::SaveBitmapToBMP(BITMAP *pBitmap, const char *namebase)
     return 0;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ToggleFullscreen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Toggles to and from fullscreen and windowed mode.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int FrameMan::ToggleFullscreen()
 {
@@ -930,7 +779,7 @@ int FrameMan::ToggleFullscreen()
 
     // Adjust the speed of the mouse according to 2x of screen
     float mouseDenominator = IsFullscreen() ? NxFullscreen() : NxWindowed();
-    // If Nx fullscreen, adjust the mouse speed accordingly
+    // If NxFullscreen, adjust the mouse speed accordingly
     if (g_FrameMan.IsFullscreen() && g_FrameMan.NxFullscreen() > 1)
         set_mouse_speed(1, 1);
     else
@@ -940,11 +789,7 @@ int FrameMan::ToggleFullscreen()
     return 0;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SwitchWindowMultiplier
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets and switches to a new windowed mode multiplier.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int FrameMan::SwitchWindowMultiplier(int multiplier)
 {
@@ -952,7 +797,7 @@ int FrameMan::SwitchWindowMultiplier(int multiplier)
     if (multiplier <= 0 || multiplier > 4 || multiplier == m_NxWindowed)
         return -1;
 
-    // No need to do anyhting else if we're in fullscreen already
+    // No need to do anything else if we're in fullscreen already
     if (m_Fullscreen)
     {
         m_NxWindowed = multiplier;
@@ -976,7 +821,7 @@ int FrameMan::SwitchWindowMultiplier(int multiplier)
         // Oops, failed to set windowed mode, so go back to previous multiplier
         if (set_gfx_mode(GFX_AUTODETECT_WINDOWED, resX * m_NxWindowed, resY * m_NxWindowed, 0, 0) != 0)
         {
-            // Can't go back to prev mode either! total fail
+            // Can't go back to previous mode either! total fail
             set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
             allegro_message("Unable to set back to previous windowed mode multiplier because: %s!", allegro_error);
             return 1;
@@ -1004,11 +849,7 @@ int FrameMan::SwitchWindowMultiplier(int multiplier)
     return 0;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FlipFrameBuffers
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Flips the framebuffer.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FrameMan::FlipFrameBuffers()
 {
@@ -1050,11 +891,7 @@ void FrameMan::FlipFrameBuffers()
 
 bool FrameMan::FlippingWith32BPP() const { return get_color_depth() == 32 && m_BPP == 32 && m_pBackBuffer32 && g_InActivity && g_PostProcessMan.IsPostProcessing(); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawText
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws a text string to the bitmap of choice, using the internal
-//                  fontsets.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FrameMan::DrawText(BITMAP *pTargetBitmap,
                         const string &str,
@@ -1084,11 +921,7 @@ void FrameMan::DrawText(BITMAP *pTargetBitmap,
 */
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawLine
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws a line that can be dotted or with other effects.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int FrameMan::DrawLine(BITMAP *pBitmap, const Vector &start, const Vector &end, int color, int altColor, int skip, int skipStart, bool shortestWrap)
 {
@@ -1186,7 +1019,7 @@ int FrameMan::DrawLine(BITMAP *pBitmap, const Vector &start, const Vector &end, 
             // Slap a regular pixel on there
             putpixel(pBitmap, intPos[X], intPos[Y], drawAlt ? color : altColor);
 /*
-            // Slap a glow on there in absoltue scene coordinates if enabled
+            // Slap a glow on there in absolute scene coordinates if enabled
             if (glowIntensity > 0)
             {
                 glowPoint.SetXY(intPos[X], intPos[Y]);
@@ -1203,11 +1036,7 @@ int FrameMan::DrawLine(BITMAP *pBitmap, const Vector &start, const Vector &end, 
     return skipped;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawDotLine
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws a line that can be dotted with bitmaps.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int FrameMan::DrawDotLine(BITMAP *pBitmap, const Vector &start, const Vector &end, BITMAP *pDot, int skip, int skipStart, bool shortestWrap)
 {
@@ -1311,11 +1140,7 @@ int FrameMan::DrawDotLine(BITMAP *pBitmap, const Vector &start, const Vector &en
     return skipped;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the state of this FrameMan. Supposed to be done every frame.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FrameMan::Update() {
 	// Update all the performance counters.
@@ -1325,11 +1150,7 @@ void FrameMan::Update() {
 	g_PrimitiveMan.ClearPrimitivesList();
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws the current frame to the screen.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FrameMan::Draw()
 {
@@ -1384,14 +1205,14 @@ void FrameMan::Draw()
 		}
 
         Vector targetPos = g_SceneMan.GetOffset(whichScreen);
-        // Adjust the drawing position on the target screen for if the target screen is larger than the scene in nonwrapping dimension.
+        // Adjust the drawing position on the target screen for if the target screen is larger than the scene in non-wrapping dimension.
         // Scene needs to be displayed centered on the target bitmap then, and that has to be adjusted for when drawing to the screen
         if (!g_SceneMan.SceneWrapsX() && pDrawScreen->w > g_SceneMan.GetSceneWidth())
             targetPos.m_X += (pDrawScreen->w - g_SceneMan.GetSceneWidth()) / 2;
         if (!g_SceneMan.SceneWrapsY() && pDrawScreen->h > g_SceneMan.GetSceneHeight())
             targetPos.m_Y += (pDrawScreen->h - g_SceneMan.GetSceneHeight()) / 2;
 
-		// Try to move at the framebuffer copy time to maybe prevent wonkyness
+		// Try to move at the frame buffer copy time to maybe prevent wonkyness
 		m_TargetPos[m_NetworkFrameCurrent][whichScreen] = targetPos;
 
         // Draw the scene
@@ -1445,7 +1266,7 @@ void FrameMan::Draw()
 						yTextPos = (GetPlayerFrameBufferHeight(whichScreen) / 2) - 52;
 					int occOffsetX = g_SceneMan.GetScreenOcclusion(whichScreen).m_X;
 
-					// Draw blinking effect, but not of the text message itself, but some characters around it (so it's easier to read the msg)
+					// Draw blinking effect, but not of the text message itself, but some characters around it (so it's easier to read the message)
 					if (m_TextBlinking[whichScreen] && m_TextBlinkTimer.AlternateReal(m_TextBlinking[whichScreen]))
 						GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, (GetPlayerFrameBufferWidth(whichScreen) + occOffsetX) / 2, yTextPos, (">>> " + m_ScreenText[whichScreen] + " <<<").c_str(), GUIFont::Centre);
 					else
@@ -1460,7 +1281,7 @@ void FrameMan::Draw()
 					// If there's really no room to offset the text into, then don't
 					if (GetPlayerScreenWidth() <= GetResX() / 2)
 						occOffsetX = 0;
-					// Draw blinking effect, but not of the text message itself, but some characters around it (so it's easier to read the msg)
+					// Draw blinking effect, but not of the text message itself, but some characters around it (so it's easier to read the message)
 					if (m_TextBlinking[whichScreen] && m_TextBlinkTimer.AlternateReal(m_TextBlinking[whichScreen]))
 						GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, (GetPlayerScreenWidth() + occOffsetX) / 2, yTextPos, (">>> " + m_ScreenText[whichScreen] + " <<<").c_str(), GUIFont::Centre);
 					else
@@ -1473,7 +1294,7 @@ void FrameMan::Draw()
             // Performance stats
 			g_PerformanceMan.Draw(pPlayerGUIBitmap);
         }
-        // If superflous screen (as in a three-player match), make the fourth the Observer one
+        // If superfluous screen (as in a three-player match), make the fourth the Observer one
         else
         {
 //            yTextPos += 12;
@@ -1483,7 +1304,7 @@ void FrameMan::Draw()
         ////////////////////////////////////////
         // If we are dealing with split screens, then deal with the fact that we need to draw the player screens to different locations on the final buffer
 
-        // The position of the current drawscreen on the final screen
+        // The position of the current draw screen on the final screen
         Vector screenOffset;
 
         if (screenCount > 1)
@@ -1493,10 +1314,10 @@ void FrameMan::Draw()
                 screenOffset.SetIntXY(0, 0);
             else if (whichScreen == 1)
             {
-                // If both splits, or just Vsplit, then in upper right quadrant
+                // If both splits, or just VSplit, then in upper right quadrant
                 if ((m_VSplit && !m_HSplit) || (m_VSplit && m_HSplit))
                     screenOffset.SetIntXY(GetResX() / 2, 0);
-                // If only hsplit, then lower left quadrant
+                // If only HSplit, then lower left quadrant
                 else
                     screenOffset.SetIntXY(0, GetResY() / 2);
             }
@@ -1526,7 +1347,7 @@ void FrameMan::Draw()
                     m_FlashedLastFrame[whichScreen] = true;
                 }
             }
-            // Make things go into slight slomo - DANGER
+            // Make things go into slight slow-mo - DANGER
 //            g_TimerMan.SetOneSimUpdatePerFrame(!m_SloMoTimer.IsPastSimTimeLimit());
 //            g_TimerMan.IsOneSimUpdatePerFrame();
             // Stop with the flash after the designated period
@@ -1592,11 +1413,11 @@ void FrameMan::Draw()
 			vline(m_pBackBuffer8, (m_pBackBuffer8->w / 2), 0, m_pBackBuffer8->h - 1, m_AlmostBlackColor);
 		}
 
-		// Draw the console on top of teh 8 bpp buffer if post or 32bpp mode is active
+		// Draw the console on top of the 8 bpp buffer if post or 32bpp mode is active
 	//    if (!FlippingWith32BPP())
 	//        g_ConsoleMan.Draw(m_pBackBuffer32);
 
-		// Replace 8 bit backbuffer contents with network received image before postprocessing as it is where this buffer is copied to 32 bit buffer
+		// Replace 8 bit backbuffer contents with network received image before post-processing as it is where this buffer is copied to 32 bit buffer
 		if (m_DrawNetworkBackBuffer)
 		{
 			m_NetworkBitmapIsLocked[0] = true;
@@ -1751,4 +1572,19 @@ int FrameMan::GetPlayerFrameBufferHeight(int whichPlayer) const
 	}
 	return m_PlayerScreenHeight; 
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// <summary>
+/// Callback function for the allegro set_display_switch_callback. It will be called when focus is switched away to the game window.
+/// </summary>
+void DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// <summary>
+/// Callback function for the allegro set_display_switch_callback. It will be called when focus is switched back to the game window. It will temporarily disable positioning of the mouse.
+/// This is so that when focus is switched back to the game window, it avoids having the window fly away because the user clicked the title bar of the window.
+/// </summary>
+void DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
 }

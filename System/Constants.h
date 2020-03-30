@@ -27,6 +27,7 @@ namespace RTE {
 	};
 
 	enum DotGlowColor { NoDot = 0, YellowDot, RedDot, BlueDot };
+	enum TransperencyPreset { LessTrans = 0, HalfTrans, MoreTrans };
 
 	// GUI colors
 	#define c_GUIColorWhite makecol(255, 255, 255)

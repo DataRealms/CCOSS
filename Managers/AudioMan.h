@@ -406,6 +406,7 @@ namespace RTE {
 		FMOD::ChannelGroup *m_SoundChannelGroup; //!< The FMOD ChannelGroup for sounds.
 
 		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
+		int m_CurrentActivityHumanCount; //!< The stored number of humans in the current activity, used for audio splitscreen handling. Only updated when there's an activity running.
 
 		double m_SoundsVolume; //!< Global sounds effects volume.
 		double m_MusicVolume; //!< Global music volume.

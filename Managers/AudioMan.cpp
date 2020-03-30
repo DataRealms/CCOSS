@@ -2,6 +2,7 @@
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
 #include "SceneMan.h"
+#include "ActivityMan.h"
 #include "SoundContainer.h"
 #include "GUISound.h"
 
@@ -73,12 +74,35 @@ namespace RTE {
 	void AudioMan::Update() {
 		if (m_AudioEnabled) {
 
-			//TODO handle splitscreen - do m_AudioSystem->set3DNumListeners(numPlayers); and set each player's position
-			//TODO allow setting vel for AEmitter and PEmitter
-			m_AudioSystem->set3DListenerAttributes(0, &GetAsFMODVector(g_SceneMan.GetScrollTarget()), NULL, &c_FMODForward, &c_FMODUp);
-			m_AudioSystem->update();
+			//TODO allow setting vel for AEmitter and PEmitter. Also maybe consider setting vel on listener when sceneman target scrolling is happening.
 
-			// Done waiting for silence
+			FMOD_RESULT status = FMOD_OK;
+
+			if (g_ActivityMan.ActivityRunning()) {
+				Activity const *currentActivity = g_ActivityMan.GetActivity();
+
+				if (m_CurrentActivityHumanCount != (m_IsInMultiplayerMode ? 1 : currentActivity->GetHumanCount())) {
+					m_CurrentActivityHumanCount = m_IsInMultiplayerMode ? 1 : currentActivity->GetHumanCount();
+					status = m_AudioSystem->set3DNumListeners(m_CurrentActivityHumanCount);
+				}
+
+				int audioSystemPlayerNumber = 0;
+				for (int player = 0; player < currentActivity->GetPlayerCount() && audioSystemPlayerNumber < m_CurrentActivityHumanCount; player++) {
+					if (currentActivity->PlayerHuman(player)) {
+						status = m_AudioSystem->set3DListenerAttributes(audioSystemPlayerNumber, &GetAsFMODVector(g_SceneMan.GetScrollTarget(currentActivity->ScreenOfPlayer(player))), NULL, &c_FMODForward, &c_FMODUp);
+						audioSystemPlayerNumber++;
+					}
+				}
+			} else {
+				if (m_CurrentActivityHumanCount != 1) {
+					m_CurrentActivityHumanCount = 1;
+					status = m_AudioSystem->set3DNumListeners(1);
+				}
+				status = m_AudioSystem->set3DListenerAttributes(0, &GetAsFMODVector(g_SceneMan.GetScrollTarget()), NULL, &c_FMODForward, &c_FMODUp);
+			}
+
+			status = m_AudioSystem->update();
+
 			if (!IsMusicPlaying() && m_SilenceTimer.IsPastRealTimeLimit()) { PlayNextStream(); }
 		}
 	}

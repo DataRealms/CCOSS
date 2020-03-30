@@ -3615,13 +3615,11 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 //            m_pMOColorLayer->Draw(pTargetBitmap, targetBox);
 
 //            sprintf_s(str, sizeof(str), "Terrain Matter\nHit M to cycle modes");
-//            g_FrameMan.DrawText(pTargetBitmap, str, Vector(475, 4), false);
             break;
 
         case g_LayerMOID:
             m_pMOIDLayer->Draw(pTargetBitmap, targetBox);
 //            sprintf_s(str, sizeof(str), "MovableObject ID\nHit M to cycle modes");
-//            g_FrameMan.DrawText(pTargetBitmap, str, Vector(475, 4), false);
             break;
 
         // Draw normally
@@ -3661,7 +3659,6 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
             g_ActivityMan.GetActivity()->DrawGUI(pTargetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
 //            sprintf_s(str, sizeof(str), "Normal Layer Draw Mode\nHit M to cycle modes");
-//            g_FrameMan.DrawText(pTargetBitmap, str, Vector(475, 4), false);
 
 #ifdef DEBUG_BUILD
             m_pDebugLayer->Draw(pTargetBitmap, Box());

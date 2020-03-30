@@ -434,14 +434,6 @@ void MOSParticle::Draw(BITMAP *pTargetBitmap,
 //        int strength = m_EffectStartStrength + (m_AgeTimer.GetElapsedSimTimeMS() - m_EffectStartTime) * ((m_EffectStartStrength) / ())   m_EffectStartStrength * (1.0f - (float)(m_AgeTimer.GetElapsedSimTimeMS() - m_EffectStartTime) / (float)MIN(m_EffectStopTime, m_Lifetime));
 		g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, LERP(m_EffectStartTime, m_EffectStopTime, m_EffectStartStrength, m_EffectStopStrength, m_AgeTimer.GetElapsedSimTimeMS()), m_EffectRotAngle);
     }
-
-/*
-    if (!onlyPhysical) {
-        char str[64];
-        sprintf_s(str, sizeof(str), "aVel:%.2f", m_AngularVel);
-        g_FrameMan.DrawText(pTargetBitmap, str, m_Pos + Vector(-45, -75), false);
-    }
-*/
 }
 
 } // namespace RTE

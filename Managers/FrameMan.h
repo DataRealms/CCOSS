@@ -351,15 +351,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="which">Which screen message to clear..</param>
 		void ClearScreenText(int which = 0);
-
-		/// <summary>
-		/// Draws a text string to the bitmap of choice, using the internal font sets.
-		/// </summary>
-		/// <param name="pTargetBitmap">A pointer to a BITMAP to draw on.</param>
-		/// <param name="str">The string containing the text to draw.</param>
-		/// <param name="pos">The position the upper right corner of the first char of the text string will have on the bitmap.</param>
-		/// <param name="black">Whether to draw text with black chars or not (white).</param>
-		void DrawText(BITMAP *pTargetBitmap, const std::string &str, const Vector &pos, bool black = true);
 #pragma endregion
 
 #pragma region Drawing

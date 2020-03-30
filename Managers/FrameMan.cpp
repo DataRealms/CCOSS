@@ -931,32 +931,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::DrawText(BITMAP *pTargetBitmap, const string &str, const Vector &pos, bool black) {
-		RTEAbort("Old fonts are not ported yet!");
-		/*
-		BITMAP *pFont = black ? m_pBlackFont : m_pWhiteFont;
-		const char *drawChar = str.c_str();
-		int charWidth = pFont->GetTile()->GetBlockWidth() - 1;
-		int charHeight = pFont->GetTile()->GetBlockHeight() - 1;
-		int lineSep = 4;
-		int line = 0;
-
-		for (int i = 0, j = 0; i < str.size(); ++i, ++j) {
-			if (*drawChar == '\n') {
-				i++;
-				j = 0;
-				line++;
-				drawChar++;
-			}
-			pFont->SetPos(pos.m_X + (j * charWidth), pos.m_Y + (line * (charHeight + lineSep)));
-			pFont->SetFrame(*(drawChar++));
-			pFont->Draw(pTargetBitmap, 0, 0, CDXBLT_TRANS);
-		}
-		*/
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void FrameMan::FlipFrameBuffers() {
 		if (get_color_depth() == 32 && m_BPP == 32 && m_pBackBuffer32) {
 			if (g_InActivity) {

@@ -13,15 +13,15 @@ namespace RTE {
 	void PostProcessMan::Clear() {
 		m_PostScreenEffects.clear();
 		m_PostSceneEffects.clear();
-		for (int i = 0; i < c_MaxScreenCount; ++i) {
-			m_ScreenRelativeEffects->clear();
-		}
 		m_pYellowGlow = 0;
 		m_YellowGlowHash = 0;
 		m_pRedGlow = 0;
 		m_RedGlowHash = 0;
 		m_pBlueGlow = 0;
 		m_BlueGlowHash = 0;
+		for (short i = 0; i < c_MaxScreenCount; ++i) {
+			m_ScreenRelativeEffects->clear();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,8 +83,10 @@ namespace RTE {
 				continue;
 			}
 
-			// TODO: REMOVE TEMP DEBUG
+#ifdef DEBUG_BUILD
+			// Draw a rectangle around the glow box so we see it's position and size
 			//rect(m_pBackBuffer32, startX, startY, endX, endY, g_RedColor);
+#endif
 
 			for (y = startY; y < endY; ++y) {
 				for (x = startX; x < endX; ++x) {
@@ -239,7 +241,7 @@ namespace RTE {
 	void PostProcessMan::RegisterGlowDotEffect(const Vector &effectPos, DotGlowColor color, int strength) {
 		// These effects only apply only once per drawn sim update, and only on the first frame drawn after one or more sim updates
 		if (color != NoDot && g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0) {
-			RegisterPostEffect(effectPos, g_PostProcessMan.GetDotGlowEffect(color), g_PostProcessMan.GetDotGlowEffectHash(color), strength);
+			RegisterPostEffect(effectPos, GetDotGlowEffect(color), GetDotGlowEffectHash(color), strength);
 		}
 	}
 
@@ -335,28 +337,36 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	BITMAP * PostProcessMan::GetDotGlowEffect(DotGlowColor which) const {
-		if (which == NoDot) {
-			return 0;
-		} else if (which == YellowDot) {
-			return m_pYellowGlow;
-		} else if (which == RedDot) {
-			return m_pRedGlow;
-		} else {
-			return m_pBlueGlow;
+		switch (which) {
+			case NoDot:
+				return 0;
+			case YellowDot:
+				return m_pYellowGlow;
+			case RedDot:
+				return m_pRedGlow;
+			case BlueDot:
+				return m_pBlueGlow;
+			default:
+				RTEAbort("Undefined glow dot color value passed in. See DotGlowColor enumeration for defined values.");
+				return 0;
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	size_t PostProcessMan::GetDotGlowEffectHash(DotGlowColor which) const {
-		if (which == NoDot) {
-			return 0;
-		} else if (which == YellowDot) {
-			return m_YellowGlowHash;
-		} else if (which == RedDot) {
-			return m_RedGlowHash;
-		} else {
-			return m_BlueGlowHash;
+		switch (which) {
+			case NoDot:
+				return 0;
+			case YellowDot:
+				return m_YellowGlowHash;
+			case RedDot:
+				return m_RedGlowHash;
+			case BlueDot:
+				return m_BlueGlowHash;
+			default:
+				RTEAbort("Undefined glow dot color value passed in. See DotGlowColor enumeration for defined values.");
+				return 0;
 		}
 	}
 }

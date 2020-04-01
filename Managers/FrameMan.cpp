@@ -292,7 +292,7 @@ namespace RTE {
 		// Update all the performance counters.
 		g_PerformanceMan.Update();
 
-		//Remove all scheduled primitives, those will be re-added by updates from other entities.
+		// Remove all scheduled primitives, those will be re-added by updates from other entities.
 		g_PrimitiveMan.ClearPrimitivesList();
 	}
 
@@ -314,7 +314,6 @@ namespace RTE {
 		// Handy handle
 		Activity *pActivity = g_ActivityMan.GetActivity();
 
-		// Choose which buffer to draw to. If there are no splitscreens and 8bit modes, draw directly to the back buffer, else use a intermediary splitscreen buffer
 		for (int whichScreen = 0; whichScreen < screenCount; ++whichScreen) {
 			// Screen Update
 			screenRelativeEffects.clear();
@@ -381,7 +380,6 @@ namespace RTE {
 			g_PrimitiveMan.DrawLinePrimitive(Vector(0, 0), Vector(0, g_SceneMan.GetSceneHeight()), 5);
 #endif
 
-			///////////////////////////////////////
 			// Draw screen texts
 			int yTextPos = 0;
 
@@ -430,33 +428,35 @@ namespace RTE {
 				GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, GetPlayerScreenWidth() / 2, yTextPos, "- Observer View -", GUIFont::Centre);
 			}
 
-			////////////////////////////////////////
 			// If we are dealing with split screens, then deal with the fact that we need to draw the player screens to different locations on the final buffer
-
 			// The position of the current draw screen on the final screen
 			Vector screenOffset;
 
 			if (screenCount > 1) {
-				// Always upper left corner
-				if (whichScreen == 0) {
-					screenOffset.SetIntXY(0, 0);
-				} else if (whichScreen == 1) {
-					// If both splits, or just VSplit, then in upper right quadrant
-					if ((m_VSplit && !m_HSplit) || (m_VSplit && m_HSplit)) {
-						screenOffset.SetIntXY(GetResX() / 2, 0);
-						// If only HSplit, then lower left quadrant
-					} else {
+				switch (whichScreen) {
+					case 1:
+						// If both splits, or just VSplit, then in upper right quadrant
+						if ((m_VSplit && !m_HSplit) || (m_VSplit && m_HSplit)) {
+							screenOffset.SetIntXY(GetResX() / 2, 0);
+						} else {
+							// If only HSplit, then lower left quadrant
+							screenOffset.SetIntXY(0, GetResY() / 2);
+						}
+						break;
+					case 2:
+						// Always lower left quadrant
 						screenOffset.SetIntXY(0, GetResY() / 2);
-					}
-					// Always lower left quadrant
-				} else if (whichScreen == 2) {
-					screenOffset.SetIntXY(0, GetResY() / 2);
-					// Always lower right quadrant
-				} else if (whichScreen == 3) {
-					screenOffset.SetIntXY(GetResX() / 2, GetResY() / 2);
+						break;
+					case 3:
+						// Always lower right quadrant
+						screenOffset.SetIntXY(GetResX() / 2, GetResY() / 2);
+						break;
+					default:
+						// Always upper left corner
+						screenOffset.SetIntXY(0, 0);
+						break;
 				}
 			}
-
 			// Flash the screen if we're supposed to
 			if (m_FlashScreenColor[whichScreen] != -1) {
 				// If set to flash for a period of time, first be solid and then start flashing slower
@@ -541,19 +541,25 @@ namespace RTE {
 		//m_StoreNetworkBackBuffer = false;
 		if (m_StoreNetworkBackBuffer) {
 			// Blit all four internal player screens onto the backbuffer
-			for (int i = 0; i < c_MaxScreenCount; i++) {
+			for (short i = 0; i < c_MaxScreenCount; i++) {
 				int dx = 0;
 				int dy = 0;
 				int dw = m_pBackBuffer8->w / 2;
 				int dh = m_pBackBuffer8->h / 2;
 
-				if (i == 1) {
-					dx = dw;
-				} else if (i == 2) {
-					dy = dh;
-				} else if (i == 3) {
-					dx = dw;
-					dy = dh;
+				switch (i) {
+					case 1:
+						dx = dw;
+						break;
+					case 2:
+						dy = dh;
+						break;
+					case 3:
+						dx = dw;
+						dy = dh;
+						break;
+					default:
+						break;
 				}
 				//m_TargetPos[i] = g_SceneMan.GetOffset(i);
 
@@ -568,6 +574,7 @@ namespace RTE {
 				}
 			}
 
+#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
 			if (g_UInputMan.KeyHeld(KEY_1)) {
 				stretch_blit(m_pNetworkBackBufferFinal8[0][0], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][0]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][0]->h, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
 			}
@@ -580,20 +587,12 @@ namespace RTE {
 			if (g_UInputMan.KeyHeld(KEY_4)) {
 				stretch_blit(m_pNetworkBackBufferFinal8[m_NetworkFrameReady][3], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][3]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][3]->h, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
 			}
+#endif
 
 			// Rendering complete, we can finally mark current frame as ready
 			// This is needed to make rendering look totally atomic for the server pulling data in separate threads
-			//m_NetworkFrameReady = 1;
-			//m_NetworkFrameCurrent = 1;
 			m_NetworkFrameReady = m_NetworkFrameCurrent;
-
-			if (m_NetworkFrameCurrent == 0) {
-				m_NetworkFrameCurrent = 1;
-			} else {
-				m_NetworkFrameCurrent = 0;
-			}
-			//m_NetworkFrameReady = 1;
-			//m_NetworkFrameCurrent = 0;
+			m_NetworkFrameCurrent = (m_NetworkFrameCurrent == 0) ? 1 : 0;
 
 			/*for (int i = 0; i < c_MaxScreenCount; i++)
 			{
@@ -807,7 +806,7 @@ namespace RTE {
 			m_PlayerScreenHeight = m_pBackBuffer8->h;
 		}
 		// Reset the flashes
-		for (int i = 0; i < c_MaxScreenCount; ++i) {
+		for (short i = 0; i < c_MaxScreenCount; ++i) {
 			m_FlashScreenColor[i] = -1;
 			m_FlashedLastFrame[i] = false;
 		}
@@ -892,15 +891,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::SetScreenText(const std::string &msg, int which, int blinkInterval, int displayDuration, bool centered) {
-		if (which >= 0 && which < c_MaxScreenCount) {
-			// See if we can overwrite the previous message
-			if (m_TextDurationTimer[which].IsPastRealMS(m_TextDuration[which])) {
-				m_ScreenText[which] = msg;
-				m_TextDuration[which] = displayDuration;
-				m_TextDurationTimer[which].Reset();
-				m_TextBlinking[which] = blinkInterval;
-				m_TextCentered[which] = centered;
-			}
+		// See if we can overwrite the previous message
+		if (which >= 0 && which < c_MaxScreenCount && m_TextDurationTimer[which].IsPastRealMS(m_TextDuration[which])) {
+			m_ScreenText[which] = msg;
+			m_TextDuration[which] = displayDuration;
+			m_TextDurationTimer[which].Reset();
+			m_TextBlinking[which] = blinkInterval;
+			m_TextCentered[which] = centered;
 		}
 	}
 
@@ -927,13 +924,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SetTransTable(TransperencyPreset transSetting) {
-		if (transSetting == LessTrans) {
-			color_map = &m_LessTransTable;
-		} else if (transSetting == MoreTrans) {
-			color_map = &m_MoreTransTable;
-		} else {
-			color_map = &m_HalfTransTable;
+	void FrameMan::SetTransTable(TransparencyPreset transSetting) {
+		switch (transSetting) {
+			case LessTrans:
+				color_map = &m_LessTransTable;
+				break;
+			case MoreTrans:
+				color_map = &m_MoreTransTable;
+				break;
+			case HalfTrans:
+				color_map = &m_HalfTransTable;
+				break;
+			default:
+				RTEAbort("Undefined transparency preset value passed in. See TransparencyPreset enumeration for defined values.")
 		}
 	}
 
@@ -944,7 +947,6 @@ namespace RTE {
 
 		//acquire_bitmap(pBitmap);
 
-		int hitCount = 0;
 		int error = 0;
 		int dom = 0;
 		int sub = 0;
@@ -958,10 +960,7 @@ namespace RTE {
 
 		// Just make the alt the same color as the main one if no one was specified
 		if (altColor == 0) { altColor = color; }
-		/*
-		// Glow intensity
-		int glowIntensity = color == g_YellowGlowColor ? 55 + 200 * PosRand() : 0;
-		*/
+		
 		// Calculate the integer values
 		intPos[X] = floorf(start.m_X);
 		intPos[Y] = floorf(start.m_Y);
@@ -971,34 +970,28 @@ namespace RTE {
 			Vector deltaVec = g_SceneMan.ShortestDistance(start, end, false);
 			delta[X] = floorf(deltaVec.m_X);
 			delta[Y] = floorf(deltaVec.m_Y);
-
-			// No wrap
 		} else {
+			// No wrap
 			delta[X] = floorf(end.m_X) - intPos[X];
 			delta[Y] = floorf(end.m_Y) - intPos[Y];
 		}
-
 		if (delta[X] == 0 && delta[Y] == 0) {
 			return 0;
 		}
 
-		/////////////////////////////////////////////////////
 		// Bresenham's line drawing algorithm preparation
-
 		if (delta[X] < 0) {
 			increment[X] = -1;
 			delta[X] = -delta[X];
 		} else {
 			increment[X] = 1;
 		}
-
 		if (delta[Y] < 0) {
 			increment[Y] = -1;
 			delta[Y] = -delta[Y];
 		} else {
 			increment[Y] = 1;
 		}
-
 		// Scale by 2, for better accuracy of the error at the first pixel
 		delta2[X] = delta[X] << 1;
 		delta2[Y] = delta[Y] << 1;
@@ -1013,10 +1006,7 @@ namespace RTE {
 		}
 		error = delta2[sub] - delta[dom];
 
-		/////////////////////////////////////////////////////
 		// Bresenham's line drawing algorithm execution
-
-		Vector glowPoint;
 		for (domSteps = 0; domSteps < delta[dom]; ++domSteps) {
 			intPos[dom] += increment[dom];
 			if (error >= 0) {
@@ -1031,14 +1021,7 @@ namespace RTE {
 				g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
 				// Slap a regular pixel on there
-				putpixel(pBitmap, intPos[X], intPos[Y], drawAlt ? color : altColor);
-				/*
-				// Slap a glow on there in absolute scene coordinates if enabled
-				if (glowIntensity > 0) {
-					glowPoint.SetXY(intPos[X], intPos[Y]);
-					g_SceneMan.RegisterGlowDotEffect(glowPoint + targetOffset, m_pYellowEffect, glowIntensity);
-				}
-				*/
+				putpixel(pBitmap, intPos[X], intPos[Y], drawAlt ? color : altColor);			
 				drawAlt = !drawAlt;
 				skipped = 0;
 			}
@@ -1057,7 +1040,6 @@ namespace RTE {
 
 		//acquire_bitmap(pBitmap);
 
-		int hitCount = 0;
 		int	error = 0;
 		int	dom = 0;
 		int	sub = 0;
@@ -1079,9 +1061,9 @@ namespace RTE {
 		if (shortestWrap) {
 			Vector deltaVec = g_SceneMan.ShortestDistance(start, end, false);
 			delta[X] = floorf(deltaVec.m_X);
-			delta[Y] = floorf(deltaVec.m_Y);
-			// No wrap
+			delta[Y] = floorf(deltaVec.m_Y);	
 		} else {
+			// No wrap
 			delta[X] = floorf(end.m_X) - intPos[X];
 			delta[Y] = floorf(end.m_Y) - intPos[Y];
 		}
@@ -1089,9 +1071,7 @@ namespace RTE {
 			return 0;
 		}
 
-		/////////////////////////////////////////////////////
 		// Bresenham's line drawing algorithm preparation
-
 		if (delta[X] < 0) {
 			increment[X] = -1;
 			delta[X] = -delta[X];
@@ -1104,7 +1084,6 @@ namespace RTE {
 		} else {
 			increment[Y] = 1;
 		}
-
 		// Scale by 2, for better accuracy of the error at the first pixel
 		delta2[X] = delta[X] << 1;
 		delta2[Y] = delta[Y] << 1;
@@ -1119,10 +1098,7 @@ namespace RTE {
 		}
 		error = delta2[sub] - delta[dom];
 
-		/////////////////////////////////////////////////////
 		// Bresenham's line drawing algorithm execution
-
-		Vector glowPoint;
 		for (domSteps = 0; domSteps < delta[dom]; ++domSteps) {
 			intPos[dom] += increment[dom];
 			if (error >= 0) {

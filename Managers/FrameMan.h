@@ -361,7 +361,7 @@ namespace RTE {
 		/// Sets a specific recalculated transparency table which is used for any subsequent transparency drawing.
 		/// </summary>
 		/// <param name="transSetting">The transparency setting, see the enumerator.</param>
-		void SetTransTable(TransperencyPreset transSetting);
+		void SetTransTable(TransparencyPreset transSetting);
 
 		/// <summary>
 		/// Flashes any of the players' screen with the specified color for this frame.

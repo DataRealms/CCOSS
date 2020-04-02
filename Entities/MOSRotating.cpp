@@ -475,12 +475,28 @@ int MOSRotating::ReadProperty(std::string propName, Reader &reader)
         reader >> m_EffectOnGib;
     else if (propName == "LoudnessOnGib")
         reader >> m_LoudnessOnGib;
-	else if (propName == "DamageMultiplier")
-	{
+	else if (propName == "DamageMultiplier") {
 		reader >> m_DamageMultiplier;
 		m_DamageMultiplierRedefined = true;
-	}
-    else
+    } else if (propName == "AddCustomValue") {
+        std::string customValueType, customKey, customValue;
+        reader >> customValueType;
+        customKey = reader.ReadPropName();
+        customValue = reader.ReadPropValue();
+        if (customValueType == "NumberValue") {
+            try {
+                SetNumberValue(customKey, std::stod(customValue));
+            } catch (const std::invalid_argument) {
+                reader.ReportError("Tried to read a non-number value for SetNumberValue.");
+            }
+        } else if (customValueType == "StringValue") {
+            SetStringValue(customKey, customValue);
+        } else {
+            reader.ReportError("Invalid CustomValue type " + customValueType);
+        }
+        // Artificially end reading this property since we got all we needed
+        reader.NextProperty();
+    } else
         // See if the base class(es) can find a match instead
         return MOSprite::ReadProperty(propName, reader);
 

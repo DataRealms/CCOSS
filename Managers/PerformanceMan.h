@@ -199,7 +199,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="counter">Counter to get average value from.</param>
 		/// <returns>An average value for specified counter.</returns>
-		uint64_t GetPerormanceCounterAverage(PerformanceCounters counter);
+		uint64_t GetPerformanceCounterAverage(PerformanceCounters counter);
 #pragma endregion
 
 		/// <summary>

@@ -281,6 +281,7 @@ namespace RTE {
 			FMOD::Channel *musicChannel;
 			result = musicStream->set3DMinMaxDistance(100000, 100000);
 			result = (result == FMOD_OK) ? m_AudioSystem->playSound(musicStream, m_MusicChannelGroup, true, &musicChannel) : result;
+			result = (result == FMOD_OK) ? musicChannel->set3DAttributes(&GetAsFMODVector(Vector()), NULL) : result;
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not play music file: " + std::string(filePath) + ": " + std::string(FMOD_ErrorString(result)));
 				return;

@@ -3599,16 +3599,10 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
         case g_LayerTerrainMatter:
             pTerrain->SetToDrawMaterial(true);
             pTerrain->Draw(pTargetBitmap, targetBox);
-//            m_pMOColorLayer->Draw(pTargetBitmap, targetBox);
-
-//            sprintf_s(str, sizeof(str), "Terrain Matter\nHit M to cycle modes");
             break;
-
         case g_LayerMOID:
             m_pMOIDLayer->Draw(pTargetBitmap, targetBox);
-//            sprintf_s(str, sizeof(str), "MovableObject ID\nHit M to cycle modes");
             break;
-
         // Draw normally
         default:
 			if (skipSkybox)

@@ -422,6 +422,18 @@ namespace RTE {
 				}
 				g_PerformanceMan.Draw(pPlayerGUIBitmap);
 
+				// Draw info text when in MOID or material layer draw mode
+				switch (g_SceneMan.GetLayerDrawMode()) {
+					case g_LayerTerrainMatter:
+						GetSmallFont()->DrawAligned(&pPlayerGUIBitmap, GetPlayerScreenWidth() / 2, GetPlayerScreenHeight() - 12, "Viewing terrain material layer\nHit Ctrl+M to cycle modes", GUIFont::Centre, GUIFont::Bottom);
+						break;
+					case g_LayerMOID:
+						GetSmallFont()->DrawAligned(&pPlayerGUIBitmap, GetPlayerScreenWidth() / 2, GetPlayerScreenHeight() - 12, "Viewing MovableObject ID layer\nHit Ctrl+M to cycle modes", GUIFont::Centre, GUIFont::Bottom);
+						break;
+					default:
+						break;
+				}
+
 				// If superfluous screen (as in a three-player match), make the fourth the Observer one
 			} else {
 				//yTextPos += 12;

@@ -16,7 +16,7 @@ namespace RTE {
 	struct PostEffect {
 		BITMAP *m_pBitmap; //!< The bitmap to blend, not owned.
 		size_t m_BitmapHash; //!< Hash used to transmit glow events over the network.
-		Vector m_Pos; //!< Where, can be relative to the scene, or to the screen, depending on context.
+		Vector m_Pos; //!< Post effect position. Can be relative to the scene, or to the screen, depending on context.
 		float m_Angle; // Post effect angle.
 		int m_Strength; //!< Scalar float for how hard to blend it in, 0 - 255.
 

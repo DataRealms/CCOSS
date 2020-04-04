@@ -249,27 +249,24 @@ namespace RTE {
 
 	bool PostProcessMan::GetGlowAreasWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<Box> &areaList) {
 		bool foundAny = false;
+		Vector intRectPosRelativeToBox;
 
-		// The Box passed in here is the test box we're going to look if any glow areas intersect with.
-		IntRect testRect(boxPos.m_X, boxPos.m_Y, boxPos.m_X + boxWidth, boxPos.m_Y + boxHeight);
-		// Need to check for test box wrappings, so we'll end up with a list of at least one test box to check all glow areas against
-		std::list<IntRect> testRects;
-		g_SceneMan.WrapRect(testRect, testRects);
-
-		// Get all the wrapped instances of the existing registered glow areas.
+		// Account for wrapping in any registered glow IntRects, as well as on the box we're testing against
 		std::list<IntRect> wrappedGlowRects;
 		for (std::list<IntRect>::iterator grItr = m_GlowAreas.begin(); grItr != m_GlowAreas.end(); ++grItr) {
 			g_SceneMan.WrapRect((*grItr), wrappedGlowRects);
 		}
-		// Now check each wrapped test rect against all the wrapped glow rects, and add the intersecting ones to the output list
-		for (std::list<IntRect>::iterator trItr = testRects.begin(); trItr != testRects.end(); ++trItr) {
-			for (std::list<IntRect>::iterator wgrItr = wrappedGlowRects.begin(); wgrItr != wrappedGlowRects.end(); ++wgrItr) {
-				if ((*trItr).Intersects(*wgrItr)) {
-					// Cut down any intersecting boxes so they are only inside the box
-					IntRect cutRect(*wgrItr);
-					cutRect.IntersectionCut(*trItr);
-					// Create boxPos-relative Box out of the IntRect that is found to be intersecting with the test box!
-					areaList.push_back(Box(Vector(cutRect.m_Left - boxPos.m_X, cutRect.m_Top - boxPos.m_Y), cutRect.m_Right - cutRect.m_Left, cutRect.m_Bottom - cutRect.m_Top));
+		std::list<IntRect> wrappedTestRects;
+		g_SceneMan.WrapRect(IntRect(boxPos.m_X, boxPos.m_Y, boxPos.m_X + boxWidth, boxPos.m_Y + boxHeight), wrappedTestRects);
+
+		// Check for intersections. If any are found, cut down the intersecting IntRect to the bounds of the IntRect we're testing against, then make and store a Box out of it
+		for (IntRect wrappedTestRect : wrappedTestRects) {
+			for (IntRect wrappedGlowRect : wrappedGlowRects) {
+				if (wrappedTestRect.Intersects(wrappedGlowRect)) {
+					IntRect cutRect(wrappedGlowRect);
+					cutRect.IntersectionCut(wrappedTestRect);
+					intRectPosRelativeToBox = Vector(cutRect.m_Left - boxPos.m_X, cutRect.m_Top - boxPos.m_Y);
+					areaList.push_back(Box(intRectPosRelativeToBox, cutRect.m_Right - cutRect.m_Left, cutRect.m_Bottom - cutRect.m_Top));
 					foundAny = true;
 				}
 			}
@@ -304,13 +301,15 @@ namespace RTE {
 	bool PostProcessMan::GetPostScreenEffects(Vector boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, int team) {
 		bool found = false;
 		bool unseen = false;
+		Vector postEffectPosRelativeToBox;
+
 		for (std::list<PostEffect>::iterator itr = m_PostSceneEffects.begin(); itr != m_PostSceneEffects.end(); ++itr) {
 			if (team != Activity::NOTEAM) { unseen = g_SceneMan.IsUnseen((*itr).m_Pos.m_X, (*itr).m_Pos.m_Y, team); }
 
 			if (WithinBox((*itr).m_Pos, boxPos, boxWidth, boxHeight) && !unseen) {
 				found = true;
-				// Make the position returned relative to the box
-				effectsList.push_back(PostEffect((*itr).m_Pos - boxPos, (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
+				postEffectPosRelativeToBox = (*itr).m_Pos - boxPos;
+				effectsList.push_back(PostEffect(postEffectPosRelativeToBox, (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
 			}
 		}
 		return found;
@@ -321,14 +320,15 @@ namespace RTE {
 	bool PostProcessMan::GetPostScreenEffects(int left, int top, int right, int bottom, std::list<PostEffect> &effectsList, int team) {
 		bool found = false;
 		bool unseen = false;
-		Vector posInBox;
+		Vector postEffectPosRelativeToBox;
+
 		for (std::list<PostEffect>::iterator itr = m_PostSceneEffects.begin(); itr != m_PostSceneEffects.end(); ++itr) {
 			if (team != Activity::NOTEAM) { unseen = g_SceneMan.IsUnseen((*itr).m_Pos.m_X, (*itr).m_Pos.m_Y, team); }
 				
 			if (WithinBox((*itr).m_Pos, left, top, right, bottom) && !unseen) {
 				found = true;
-				// Make the position returned relative to the box
-				effectsList.push_back(PostEffect(Vector((*itr).m_Pos.m_X - left, (*itr).m_Pos.m_Y - top), (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
+				postEffectPosRelativeToBox = Vector((*itr).m_Pos.m_X - left, (*itr).m_Pos.m_Y - top);
+				effectsList.push_back(PostEffect(postEffectPosRelativeToBox, (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
 			}
 		}
 		return found;

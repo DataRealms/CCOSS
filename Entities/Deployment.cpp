@@ -671,8 +671,8 @@ bool Deployment::IsOnScenePoint(Vector &scenePoint) const
 
         if (IsWithinBox(aScenePoint[i], m_Pos + m_BitmapOffset, m_pFGColor->w, m_pFGColor->h))
         {
-            if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor ||
-               (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor) ||
+            if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor ||
+               (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor) ||
                (m_pMaterial && getpixel(m_pMaterial, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaterialAir))
                return true;
         }
@@ -684,7 +684,7 @@ bool Deployment::IsOnScenePoint(Vector &scenePoint) const
     {
         // Scene point on the bitmap
         Vector bitmapPoint = scenePoint - bitmapPos;
-        if (getpixel(pBitmap, bitmapPoint.m_X, bitmapPoint.m_Y) != g_KeyColor)
+        if (getpixel(pBitmap, bitmapPoint.m_X, bitmapPoint.m_Y) != g_MaskColor)
            return true;
     }
 

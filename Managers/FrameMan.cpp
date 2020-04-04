@@ -177,12 +177,12 @@ namespace RTE {
 				m_pNetworkBackBufferIntermediate8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 				clear_to_color(m_pNetworkBackBufferIntermediate8[f][i], m_BlackColor);
 				m_pNetworkBackBufferIntermediateGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
-				clear_to_color(m_pNetworkBackBufferIntermediateGUI8[f][i], g_KeyColor);
+				clear_to_color(m_pNetworkBackBufferIntermediateGUI8[f][i], g_MaskColor);
 
 				m_pNetworkBackBufferFinal8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 				clear_to_color(m_pNetworkBackBufferFinal8[f][i], m_BlackColor);
 				m_pNetworkBackBufferFinalGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
-				clear_to_color(m_pNetworkBackBufferFinalGUI8[f][i], g_KeyColor);
+				clear_to_color(m_pNetworkBackBufferFinalGUI8[f][i], g_MaskColor);
 			}
 		}
 
@@ -359,8 +359,8 @@ namespace RTE {
 			if (!m_StoreNetworkBackBuffer/* || g_UInputMan.KeyHeld(KEY_6)*/) {
 				g_SceneMan.Draw(pDrawScreen, pDrawScreenGUI, targetPos);
 			} else {
-				clear_to_color(pDrawScreen, g_KeyColor);
-				clear_to_color(pDrawScreenGUI, g_KeyColor);
+				clear_to_color(pDrawScreen, g_MaskColor);
+				clear_to_color(pDrawScreenGUI, g_MaskColor);
 				g_SceneMan.Draw(pDrawScreen, pDrawScreenGUI, targetPos, true, true);
 			}
 			// Get only the scene-relative post effects that affect this player's screen

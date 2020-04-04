@@ -304,7 +304,7 @@ int PieMenuGUI::Create(Controller *pController, Actor *pFocusActor)
     {
         int diameter = (m_EnabledRadius + m_Thickness + 2) * 2;
         m_pBGBitmap = create_bitmap_ex(8, diameter, diameter);
-        clear_to_color(m_pBGBitmap, g_KeyColor);
+        clear_to_color(m_pBGBitmap, g_MaskColor);
     }
 
     return 0;
@@ -1067,7 +1067,7 @@ void PieMenuGUI::Update()
     if (m_RedrawBG && m_PieEnabled != DISABLED)
     {
         // Clear it out
-        clear_to_color(m_pBGBitmap, g_KeyColor);
+        clear_to_color(m_pBGBitmap, g_MaskColor);
 
         int centerX = m_pBGBitmap->w / 2;
         int centerY = m_pBGBitmap->h / 2;
@@ -1075,7 +1075,7 @@ void PieMenuGUI::Update()
 //        circlefill(m_pBGBitmap, centerX, centerY, m_InnerRadius + m_Thickness, g_BlackColor);
         circlefill(m_pBGBitmap, centerX, centerY, m_InnerRadius + m_Thickness, 4);
         // Remove inner circle
-        circlefill(m_pBGBitmap, centerX, centerY, m_InnerRadius, g_KeyColor);
+        circlefill(m_pBGBitmap, centerX, centerY, m_InnerRadius, g_MaskColor);
 
         // Draw the separator lines, cutting up the circle into slices, only if fully enabled
         if (m_PieEnabled == ENABLED)
@@ -1086,10 +1086,10 @@ void PieMenuGUI::Update()
                 separator.SetIntXY(m_InnerRadius + m_Thickness + 2, 0);
                 separator.RadRotate((*sItr)->m_AreaStart);
                 // Draw four so that the result will be at least 2px thick, no matter what angle
-                line(m_pBGBitmap, centerX, centerY, centerX + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_KeyColor);
-                line(m_pBGBitmap, centerX + 1, centerY, centerX + 1 + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_KeyColor);
-                line(m_pBGBitmap, centerX, centerY + 1, centerX + separator.GetCeilingIntX(), centerY + 1 + separator.GetCeilingIntY(), g_KeyColor);
-                line(m_pBGBitmap, centerX + 1, centerY + 1, centerX + 1 + separator.GetCeilingIntX(), centerY + 1 + separator.GetCeilingIntY(), g_KeyColor);
+                line(m_pBGBitmap, centerX, centerY, centerX + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_MaskColor);
+                line(m_pBGBitmap, centerX + 1, centerY, centerX + 1 + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_MaskColor);
+                line(m_pBGBitmap, centerX, centerY + 1, centerX + separator.GetCeilingIntX(), centerY + 1 + separator.GetCeilingIntY(), g_MaskColor);
+                line(m_pBGBitmap, centerX + 1, centerY + 1, centerX + 1 + separator.GetCeilingIntX(), centerY + 1 + separator.GetCeilingIntY(), g_MaskColor);
             }
 
             // Indicate the highlighted segment, only if it is also enabled?

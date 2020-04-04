@@ -426,7 +426,7 @@ bool Atom::CalculateNormal(BITMAP *pSprite, Vector spriteCenter)
         checkPixel = getpixel(pSprite, atomPos.m_X + m_sNormalChecks[check][X], atomPos.m_Y + m_sNormalChecks[check][Y]);
 
         // If the pixel was outside of the bitmap, or on the key color, then that's a valid direction for normal, add it to the accumulated normal
-        if (checkPixel < 0 || checkPixel == g_KeyColor)
+        if (checkPixel < 0 || checkPixel == g_MaskColor)
         {
             m_Normal.m_X += m_sNormalChecks[check][X];
             m_Normal.m_Y += m_sNormalChecks[check][Y];

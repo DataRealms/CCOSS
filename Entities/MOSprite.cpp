@@ -402,8 +402,8 @@ bool MOSprite::IsOnScenePoint(Vector &scenePoint) const
     {
         if (IsWithinBox(aScenePoint[i], m_Pos + m_BitmapOffset, m_pFGColor->w, m_pFGColor->h))
         {
-            if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor ||
-               (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor) ||
+            if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor ||
+               (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor) ||
                (m_pMaterial && getpixel(m_pMaterial, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaterialAir))
                return true;
         }
@@ -417,7 +417,7 @@ bool MOSprite::IsOnScenePoint(Vector &scenePoint) const
         // Check over overlap
         int pixel = getpixel(m_aSprite[m_Frame], spritePoint.m_X - m_SpriteOffset.m_X, spritePoint.m_Y - m_SpriteOffset.m_Y);
         // Check that it isn't outside the bitmap, and not of the key color
-        if (pixel != -1 && pixel != g_KeyColor)
+        if (pixel != -1 && pixel != g_MaskColor)
            return true;
     }
 
@@ -574,7 +574,7 @@ void MOSprite::Draw(BITMAP *pTargetBitmap,
         else if (mode == g_DrawAir)
             draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_MaterialAir, -1);
         else if (mode == g_DrawKey)
-            draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_KeyColor, -1);
+            draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_MaskColor, -1);
         else if (mode == g_DrawWhite)
             draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_WhiteColor, -1);
         else if (mode == g_DrawMOID)

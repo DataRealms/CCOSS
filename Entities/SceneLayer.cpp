@@ -39,10 +39,10 @@ void SceneLayer::Clear()
     m_ScaledDimensions.SetXY(1.0, 1.0);
     m_WrapX = true;
     m_WrapY = true;
-    m_FillLeftColor = g_KeyColor;
-    m_FillRightColor = g_KeyColor;
-    m_FillUpColor = g_KeyColor;
-    m_FillDownColor = g_KeyColor;
+    m_FillLeftColor = g_MaskColor;
+    m_FillRightColor = g_MaskColor;
+    m_FillUpColor = g_MaskColor;
+    m_FillDownColor = g_MaskColor;
 }
 
 
@@ -141,10 +141,10 @@ int SceneLayer::Create(BITMAP *pBitmap,
     m_ScaledDimensions.SetXY(m_pMainBitmap->w * m_ScaleFactor.m_X, m_pMainBitmap->h * m_ScaleFactor.m_Y);
 
     // Sampled color at the edges of the layer that can be used to fill gap if the layer isn't large enough to cover a target bitmap
-    m_FillLeftColor = m_WrapX ? g_KeyColor : _getpixel(m_pMainBitmap, 0, m_pMainBitmap->h / 2);
-    m_FillRightColor = m_WrapX ? g_KeyColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w - 1, m_pMainBitmap->h / 2);
-    m_FillUpColor = m_WrapY ? g_KeyColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, 0);
-    m_FillDownColor = m_WrapY ? g_KeyColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, m_pMainBitmap->h - 1);
+    m_FillLeftColor = m_WrapX ? g_MaskColor : _getpixel(m_pMainBitmap, 0, m_pMainBitmap->h / 2);
+    m_FillRightColor = m_WrapX ? g_MaskColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w - 1, m_pMainBitmap->h / 2);
+    m_FillUpColor = m_WrapY ? g_MaskColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, 0);
+    m_FillDownColor = m_WrapY ? g_MaskColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, m_pMainBitmap->h - 1);
 
     return 0;
 }
@@ -231,10 +231,10 @@ int SceneLayer::LoadData()
     InitScrollRatios();
 
     // Sampled color at the edges of the layer that can be used to fill gap if the layer isn't large enough to cover a target bitmap
-    m_FillLeftColor = m_WrapX ? g_KeyColor : _getpixel(m_pMainBitmap, 0, m_pMainBitmap->h / 2);
-    m_FillRightColor = m_WrapX ? g_KeyColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w - 1, m_pMainBitmap->h / 2);
-    m_FillUpColor = m_WrapY ? g_KeyColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, 0);
-    m_FillDownColor = m_WrapY ? g_KeyColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, m_pMainBitmap->h - 1);
+    m_FillLeftColor = m_WrapX ? g_MaskColor : _getpixel(m_pMainBitmap, 0, m_pMainBitmap->h / 2);
+    m_FillRightColor = m_WrapX ? g_MaskColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w - 1, m_pMainBitmap->h / 2);
+    m_FillUpColor = m_WrapY ? g_MaskColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, 0);
+    m_FillDownColor = m_WrapY ? g_MaskColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, m_pMainBitmap->h - 1);
 
     return 0;
 }
@@ -716,17 +716,17 @@ void SceneLayer::Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrol
         // Detect if nonwrapping layer dimensions can't cover the whole target area with its main bitmap. If so, fill in the gap with appropriate solid color sampled from the hanging edge
         if (!m_WrapX && !screenLargerThanSceneX && m_ScrollRatio.m_X < 0)
         {
-            if (m_FillLeftColor != g_KeyColor && offsetX != 0)
+            if (m_FillLeftColor != g_MaskColor && offsetX != 0)
                 rectfill(pTargetBitmap, targetBox.GetCorner().m_X, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X - offsetX, targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_FillLeftColor);
-            if (m_FillRightColor != g_KeyColor)
+            if (m_FillRightColor != g_MaskColor)
                 rectfill(pTargetBitmap, (targetBox.GetCorner().m_X - offsetX) + m_pMainBitmap->w, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_FillRightColor);
         }
 
         if (!m_WrapY && !screenLargerThanSceneY && m_ScrollRatio.m_Y < 0)
         {
-            if (m_FillUpColor != g_KeyColor && offsetY != 0)
+            if (m_FillUpColor != g_MaskColor && offsetY != 0)
                 rectfill(pTargetBitmap, targetBox.GetCorner().m_X, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y - offsetY, m_FillUpColor);
-            if (m_FillDownColor != g_KeyColor)
+            if (m_FillDownColor != g_MaskColor)
                 rectfill(pTargetBitmap, targetBox.GetCorner().m_X, (targetBox.GetCorner().m_Y - offsetY) + m_pMainBitmap->h, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_FillDownColor);
         }
     }
@@ -921,17 +921,17 @@ void SceneLayer::DrawScaled(BITMAP *pTargetBitmap, Box &targetBox, const Vector 
         // Detect if nonwrapping layer dimensions can't cover the whole target area with its main bitmap. If so, fill in the gap with appropriate solid color sampled from the hanging edge
         if (!m_WrapX && !screenLargerThanSceneX && m_ScrollRatio.m_X < 0)
         {
-            if (m_FillLeftColor != g_KeyColor && offsetX != 0)
+            if (m_FillLeftColor != g_MaskColor && offsetX != 0)
                 rectfill(pTargetBitmap, targetBox.GetCorner().m_X, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X - offsetX, targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_FillLeftColor);
-            if (m_FillRightColor != g_KeyColor)
+            if (m_FillRightColor != g_MaskColor)
                 rectfill(pTargetBitmap, (targetBox.GetCorner().m_X - offsetX) + m_pMainBitmap->w, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_FillRightColor);
         }
 
         if (!m_WrapY && !screenLargerThanSceneY && m_ScrollRatio.m_Y < 0)
         {
-            if (m_FillUpColor != g_KeyColor && offsetY != 0)
+            if (m_FillUpColor != g_MaskColor && offsetY != 0)
                 rectfill(pTargetBitmap, targetBox.GetCorner().m_X, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y - offsetY, m_FillUpColor);
-            if (m_FillDownColor != g_KeyColor)
+            if (m_FillDownColor != g_MaskColor)
                 rectfill(pTargetBitmap, targetBox.GetCorner().m_X, (targetBox.GetCorner().m_Y - offsetY) + m_pMainBitmap->h, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_FillDownColor);
         }
 */

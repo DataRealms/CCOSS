@@ -222,7 +222,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
     // Re-create the MoveableObject:s color SceneLayer
     delete m_pMOColorLayer;
     BITMAP *pBitmap = create_bitmap_ex(8, GetSceneWidth(), GetSceneHeight());
-    clear_to_color(pBitmap, g_KeyColor);
+    clear_to_color(pBitmap, g_MaskColor);
     m_pMOColorLayer = new SceneLayer();
     m_pMOColorLayer->Create(pBitmap, true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
@@ -239,7 +239,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
     // Create the Debug SceneLayer
     delete m_pDebugLayer;
     pBitmap = create_bitmap_ex(8, GetSceneWidth(), GetSceneHeight());
-    clear_to_color(pBitmap, g_KeyColor);
+    clear_to_color(pBitmap, g_MaskColor);
     m_pDebugLayer = new SceneLayer();
     m_pDebugLayer->Create(pBitmap, true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
@@ -1047,7 +1047,7 @@ int SceneMan::RemoveOrphans(int posX, int posY,
             spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, posY));
 
         // No point generating a key-colored MOPixel
-        if (spawnColor.GetIndex() != g_KeyColor)
+        if (spawnColor.GetIndex() != g_MaskColor)
         {
 			// TEST COLOR
 			// spawnColor = 5;
@@ -1067,8 +1067,8 @@ int SceneMan::RemoveOrphans(int posX, int posY,
             g_MovableMan.AddParticle(pixelMO);
             pixelMO = 0;
         }
-        m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_KeyColor);
-		RegisterTerrainChange(posX, posY, 1, 1, g_KeyColor, false);
+        m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_MaskColor);
+		RegisterTerrainChange(posX, posY, 1, 1, g_MaskColor, false);
         m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, g_MaterialAir);
 	}
 
@@ -1242,7 +1242,7 @@ bool SceneMan::TryPenetrate(const int posX,
                 spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, posY));
 
             // No point generating a key-colored MOPixel
-            if (spawnColor.GetIndex() != g_KeyColor)
+            if (spawnColor.GetIndex() != g_MaskColor)
             {
                 // Get the new pixel from the pre-allocated pool, should be faster than dynamic allocation
                 // Density is used as the mass for the new MOPixel
@@ -1271,16 +1271,16 @@ bool SceneMan::TryPenetrate(const int posX,
                 g_MovableMan.AddParticle(pixelMO);
                 pixelMO = 0;
             }
-            m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_KeyColor);
-			RegisterTerrainChange(posX, posY, 1, 1, g_KeyColor, false);
+            m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_MaskColor);
+			RegisterTerrainChange(posX, posY, 1, 1, g_MaskColor, false);
 
             m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, g_MaterialAir);
         }
 // TODO: Improve / tweak randomized pushing away of terrain")
         else if (PosRand() <= airRatio)
         {
-            m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_KeyColor);
-			RegisterTerrainChange(posX, posY, 1, 1, g_KeyColor, false);
+            m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_MaskColor);
+			RegisterTerrainChange(posX, posY, 1, 1, g_MaskColor, false);
 
 			m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, g_MaterialAir);
         }
@@ -1290,7 +1290,7 @@ bool SceneMan::TryPenetrate(const int posX,
         retardation = -(sceneMat->strength / impMag);
 
         // If this is a scrap pixel, or there is no background pixel 'supporting' the knocked-loose pixel, make the column above also turn into particles
-        if (sceneMat->isScrap || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_KeyColor)
+        if (sceneMat->isScrap || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)
         {
             // Get quicker direct access to bitmaps
             BITMAP *pFGColor = m_pCurrentScene->GetTerrain()->GetFGColorBitmap();
@@ -1312,7 +1312,7 @@ bool SceneMan::TryPenetrate(const int posX,
                     sceneMat = GetMaterialFromID(testMaterialID);
 
                     // No support in the background layer, or is scrap material, so make particle of some of them
-                    if (sceneMat->isScrap || _getpixel(pBGColor, posX, testY) == g_KeyColor)
+                    if (sceneMat->isScrap || _getpixel(pBGColor, posX, testY) == g_MaskColor)
                     {
                         //  Only generate  particles of some of 'em
                         if (PosRand() > 0.75)
@@ -1325,7 +1325,7 @@ bool SceneMan::TryPenetrate(const int posX,
                                 spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, testY));
 
                             // No point generating a key-colored MOPixel
-                            if (spawnColor.GetIndex() != g_KeyColor)
+                            if (spawnColor.GetIndex() != g_MaskColor)
                             {
                                 // Figure out the randomized velocity the spray should have upward
                                 sprayVel.SetXY(sprayMag * NormalRand() * 0.5, (-sprayMag * 0.5) + (-sprayMag * 0.5 * PosRand()));
@@ -1345,8 +1345,8 @@ bool SceneMan::TryPenetrate(const int posX,
 						}
 
                         // Clear the terrain pixel now when the particle has been generated from it
-						RegisterTerrainChange(posX, testY, 1, 1, g_KeyColor, false);
-                        _putpixel(pFGColor, posX, testY, g_KeyColor);
+						RegisterTerrainChange(posX, testY, 1, 1, g_MaskColor, false);
+                        _putpixel(pFGColor, posX, testY, g_MaskColor);
                         _putpixel(pMaterial, posX, testY, g_MaterialAir);
                     }
                     // There is support, so stop checking
@@ -1470,7 +1470,7 @@ bool SceneMan::IsUnseen(const int posX, const int posY, const int team)
         Vector scale = pUnseenLayer->GetScaleInverse();
         int scaledX = posX * scale.m_X;
         int scaledY = posY * scale.m_Y;
-        return getpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY) != g_KeyColor;
+        return getpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY) != g_MaskColor;
     }
 
     return false;
@@ -1498,12 +1498,12 @@ bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
 
         // Make sure we're actually revealing an unseen pixel that is ON the bitmap!
         int pixel = getpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY);
-        if (pixel != g_KeyColor && pixel != -1)
+        if (pixel != g_MaskColor && pixel != -1)
         {
             // Add the pixel to the list of now seen pixels so it can be visually flashed
             m_pCurrentScene->GetSeenPixels(team).push_back(Vector(scaledX, scaledY));
             // Clear to key color that pixel on the map so it won't be detected as unseen again
-            putpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY, g_KeyColor);
+            putpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY, g_MaskColor);
             // Play the reveal sound, if there's not too many already revealed this frame
             if (g_SettingsMan.BlipOnRevealUnseen() && m_pUnseenRevealSound && m_pCurrentScene->GetSeenPixels(team).size() < 5)
                 m_pUnseenRevealSound->Play(Vector(posX, posY));
@@ -1577,7 +1577,7 @@ void SceneMan::RevealUnseenBox(const int posX, const int posY, const int width, 
         int scaledH = height * scale.m_Y;
 
         // Fill the box
-        rectfill(pUnseenLayer->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_KeyColor);
+        rectfill(pUnseenLayer->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_MaskColor);
     }
 }
 
@@ -3661,10 +3661,10 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 
 void SceneMan::ClearMOColorLayer()
 {
-    clear_to_color(m_pMOColorLayer->GetBitmap(), g_KeyColor);
+    clear_to_color(m_pMOColorLayer->GetBitmap(), g_MaskColor);
 
 #ifdef DEBUG_BUILD
-    clear_to_color(m_pDebugLayer->GetBitmap(), g_KeyColor);
+    clear_to_color(m_pDebugLayer->GetBitmap(), g_MaskColor);
 #endif
 }
 

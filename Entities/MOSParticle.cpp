@@ -406,7 +406,7 @@ void MOSParticle::Draw(BITMAP *pTargetBitmap,
     else if (mode == g_DrawAir)
         draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), g_MaterialAir, -1);
     else if (mode == g_DrawKey)
-        draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), g_KeyColor, -1);
+        draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), g_MaskColor, -1);
     else if (mode == g_DrawWhite)
         draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), g_WhiteColor, -1);
     else if (mode == g_DrawMOID)

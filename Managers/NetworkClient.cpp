@@ -425,7 +425,7 @@ namespace RTE
 		{
 			if (frameData->DataSize == 0)
 			{
-				memset(bmp->line[liney] + linex, g_KeyColor, width);
+				memset(bmp->line[liney] + linex, g_MaskColor, width);
 			}
 			else
 			{
@@ -614,17 +614,17 @@ namespace RTE
 							// Detect if nonwrapping layer dimensions can't cover the whole target area with its main bitmap. If so, fill in the gap with appropriate solid color sampled from the hanging edge
 					if (!m_aBackgroundLayers[frame][i].WrapX && !screenLargerThanSceneX && m_aBackgroundLayers[frame][i].ScrollRatioX < 0)
 					{
-						if (m_aBackgroundLayers[frame][i].FillLeftColor != g_KeyColor && offsetX != 0)
+						if (m_aBackgroundLayers[frame][i].FillLeftColor != g_MaskColor && offsetX != 0)
 							rectfill(pTargetBitmap, targetBox.GetCorner().m_X, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X - offsetX, targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_aBackgroundLayers[frame][i].FillLeftColor);
-						if (m_aBackgroundLayers[frame][i].FillRightColor != g_KeyColor)
+						if (m_aBackgroundLayers[frame][i].FillRightColor != g_MaskColor)
 							rectfill(pTargetBitmap, (targetBox.GetCorner().m_X - offsetX) + m_BackgroundBitmaps[i]->w, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_aBackgroundLayers[frame][i].FillRightColor);
 					}
 
 					if (!m_aBackgroundLayers[frame][i].WrapY && !screenLargerThanSceneY && m_aBackgroundLayers[frame][i].ScrollRatioY < 0)
 					{
-						if (m_aBackgroundLayers[frame][i].FillUpColor != g_KeyColor && offsetY != 0)
+						if (m_aBackgroundLayers[frame][i].FillUpColor != g_MaskColor && offsetY != 0)
 							rectfill(pTargetBitmap, targetBox.GetCorner().m_X, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y - offsetY, m_aBackgroundLayers[frame][i].FillUpColor);
-						if (m_aBackgroundLayers[frame][i].FillDownColor != g_KeyColor)
+						if (m_aBackgroundLayers[frame][i].FillDownColor != g_MaskColor)
 							rectfill(pTargetBitmap, targetBox.GetCorner().m_X, (targetBox.GetCorner().m_Y - offsetY) + m_BackgroundBitmaps[i]->h, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_aBackgroundLayers[frame][i].FillDownColor);
 					}
 				}
@@ -787,7 +787,7 @@ namespace RTE
 
 		// Have to clear to color to fallback if there's no skybox on client
 		clear_to_color(dst_bmp, g_BlackColor);
-		clear_to_color(dst_gui_bmp, g_KeyColor);
+		clear_to_color(dst_gui_bmp, g_MaskColor);
 
 		// Draw Scene background
 		int sourceX = m_TargetPos[m_CurrentFrame].m_X;
@@ -843,8 +843,8 @@ namespace RTE
 
 		g_PerformanceMan.SetCurrentPing(GetPing());
 
-		//clear_to_color(src_bmp, g_KeyColor);
-		//clear_to_color(src_gui_bmp, g_KeyColor);
+		//clear_to_color(src_bmp, g_MaskColor);
+		//clear_to_color(src_gui_bmp, g_MaskColor);
 
 		// DEBUG!!!
 		//if (m_CurrentFrame != m_CurrentFrameSetup)
@@ -894,8 +894,8 @@ namespace RTE
 			// Unpack box
 			if (frameData->DataSize == 0)
 			{
-				//memset(bmp->line[lineNumber], g_KeyColor, bmp->w);
-				rectfill(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_KeyColor);
+				//memset(bmp->line[lineNumber], g_MaskColor, bmp->w);
+				rectfill(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_MaskColor);
 			}
 			else
 			{
@@ -959,7 +959,7 @@ namespace RTE
 		{
 			if (frameData->DataSize == 0)
 			{
-				memset(bmp->line[lineNumber], g_KeyColor, bmp->w);
+				memset(bmp->line[lineNumber], g_MaskColor, bmp->w);
 			}
 			else 
 			{
@@ -1008,8 +1008,8 @@ namespace RTE
 
 	void NetworkClient::ReceiveSceneSetupMsg(RakNet::Packet * p)
 	{
-		clear_to_color(g_FrameMan.GetNetworkBackBufferIntermediateGUI8Ready(0), g_KeyColor);
-		clear_to_color(g_FrameMan.GetNetworkBackBufferGUI8Ready(0), g_KeyColor);
+		clear_to_color(g_FrameMan.GetNetworkBackBufferIntermediateGUI8Ready(0), g_MaskColor);
+		clear_to_color(g_FrameMan.GetNetworkBackBufferGUI8Ready(0), g_MaskColor);
 
 		RTE::MsgSceneSetup * frameData = (RTE::MsgSceneSetup *)p->data;
 
@@ -1023,7 +1023,7 @@ namespace RTE
 		m_pSceneBackgroundBitmap = create_bitmap_ex(8, frameData->Width, frameData->Height);
 		m_pSceneForegroundBitmap = create_bitmap_ex(8, frameData->Width, frameData->Height);
 		// This is purely for aesthetic reasons to draw bitmap during level loading
-		clear_to_color(m_pSceneForegroundBitmap, g_KeyColor);
+		clear_to_color(m_pSceneForegroundBitmap, g_MaskColor);
 
 		m_SceneWrapsX = frameData->SceneWrapsX;
 		m_SceneWidth = frameData->Width;

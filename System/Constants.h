@@ -15,10 +15,10 @@ namespace RTE {
 	static constexpr unsigned short c_GoldMaterialID = 2; //!< Index of gold material in the material palette.
 
 	enum ColorKeys {
-		g_KeyColor = 0,
-		//g_KeyColorS = 0, //!< Key color to cleat 8-bit bitmaps used for MOID silhouettes layers.
-		g_KeyColorS = 0xF81F, //!< Key color to clear 16-bit bitmaps used for MOID silhouettes layers.
-		//g_KeyColorS = 16711935, //!< Key color to clear 32-bit bitmaps used for MOID silhouettes layers.
+		g_MaskColor = 0, //!< Mask color for all 8bpp bitmaps (palette index 0 (255,0,255)). This color is fully transparent.
+		//g_MOIDMaskColor = 0, //!< Mask color for 8bpp MOID layer bitmaps (palette index 0 (255,0,255)). This color is fully transparent.
+		g_MOIDMaskColor = 0xF81F, //!< Mask color for 16bpp MOID layer bitmaps (255,0,255). This color is fully transparent.
+		//g_MOIDMaskColor = 0xFF00FF, //!< Mask color for 32bpp MOID layer bitmaps (255,0,255). This color is fully transparent.
 		g_BlackColor = 245,
 		g_WhiteColor = 254,
 		g_RedColor = 13,

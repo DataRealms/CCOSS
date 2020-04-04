@@ -170,9 +170,9 @@ namespace RTE {
 
 		std::string m_PerfCounterNames[PERF_COUNT]; //!< Performance counter's names displayed on screen.
 		unsigned short m_PerfPercentages[PERF_COUNT][c_MaxSamples]; //!< Array to store percentages from PERF_SIM_TOTAL
-		uint64_t m_PerfData[PERF_COUNT][c_MaxSamples]; //!< Array to store performance measurements in microseconds.	
-		uint64_t m_PerfMeasureStart[PERF_COUNT]; //!< Current measurement start time in microseconds.
-		uint64_t m_PerfMeasureStop[PERF_COUNT]; //!< Current measurement stop time in microseconds.
+		unsigned long long m_PerfData[PERF_COUNT][c_MaxSamples]; //!< Array to store performance measurements in microseconds.	
+		unsigned long long m_PerfMeasureStart[PERF_COUNT]; //!< Current measurement start time in microseconds.
+		unsigned long long m_PerfMeasureStop[PERF_COUNT]; //!< Current measurement stop time in microseconds.
 
 	private:
 
@@ -199,7 +199,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="counter">Counter to get average value from.</param>
 		/// <returns>An average value for specified counter.</returns>
-		uint64_t GetPerformanceCounterAverage(PerformanceCounters counter);
+		unsigned long long GetPerformanceCounterAverage(PerformanceCounters counter);
 #pragma endregion
 
 		/// <summary>

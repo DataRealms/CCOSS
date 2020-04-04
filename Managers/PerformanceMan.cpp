@@ -242,8 +242,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	uint64_t PerformanceMan::GetPerformanceCounterAverage(PerformanceCounters counter) {
-		uint64_t totalPerformanceMeasurement = 0;
+	unsigned long long PerformanceMan::GetPerformanceCounterAverage(PerformanceCounters counter) {
+		unsigned long long totalPerformanceMeasurement = 0;
 		unsigned short sample = m_Sample == 0 ? c_MaxSamples : m_Sample;
 		for (unsigned short i = 0; i < c_Average; ++i) {
 			totalPerformanceMeasurement += m_PerfData[counter][sample];

@@ -85,7 +85,7 @@ namespace RTE {
 
 #ifdef DEBUG_BUILD
 			// Draw a rectangle around the glow box so we see it's position and size
-			//rect(m_pBackBuffer32, startX, startY, endX, endY, g_RedColor);
+			rect(m_pBackBuffer32, startX, startY, endX, endY, g_RedColor);
 #endif
 
 			for (y = startY; y < endY; ++y) {
@@ -172,11 +172,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PostProcessMan::RegisterPostEffect(const Vector &effectPos, BITMAP *pEffect, size_t hash, int strength, float angle) {
-		// These effects get applied when there's a drawn frame that followed one or more sim updates
-		// They are not only registered on drawn sim updates; flashes and stuff could be missed otherwise if they occur on undrawn sim updates
-		if (pEffect && /*g_TimerMan.DrawnSimUpdate()) && */g_TimerMan.SimUpdatesSinceDrawn() >= 0) {
-			m_PostSceneEffects.push_back(PostEffect(effectPos, pEffect, hash, strength, angle));
-		}
+		// These effects get applied when there's a drawn frame that followed one or more sim updates.
+		// They are not only registered on drawn sim updates; flashes and stuff could be missed otherwise if they occur on undrawn sim updates.
+		if (pEffect && g_TimerMan.SimUpdatesSinceDrawn() >= 0) { m_PostSceneEffects.push_back(PostEffect(effectPos, pEffect, hash, strength, angle)); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

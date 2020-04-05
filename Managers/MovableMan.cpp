@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "MovableMan.h"
+#include "PostProcessMan.h"
 #include "PerformanceMan.h"
 #include "PresetMan.h"
 #include "AHuman.h"

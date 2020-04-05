@@ -502,13 +502,13 @@ namespace RTE {
 		/// Fades the palette in from black at a specified speed.
 		/// </summary>
 		/// <param name="fadeSpeed">Speed specified from (slowest) 1 - 64 (fastest).</param>
-		void FadeInPalette(int fadeSpeed = 1);
+		void FadeInPalette(int fadeSpeed = 1) { PALETTE pal; get_palette(pal); fade_in(pal, Limit(fadeSpeed, 64, 1)); }
 
 		/// <summary>
 		/// Fades the palette out to black at a specified speed.
 		/// </summary>
 		/// <param name="fadeSpeed">Speed specified from (slowest) 1 - 64 (fastest).</param>
-		void FadeOutPalette(int fadeSpeed = 1);
+		void FadeOutPalette(int fadeSpeed = 1) { fade_out(Limit(fadeSpeed, 64, 1)); }
 #pragma endregion
 
 #pragma region Screen Capture
@@ -581,7 +581,6 @@ namespace RTE {
 
 		//!< Data file of the screen palette
 		ContentFile m_PaletteFile;
-		//DATAFILE *m_pPaletteDataFile;
 
 		// Transparency color tables
 		COLOR_MAP m_LessTransTable;
@@ -603,9 +602,6 @@ namespace RTE {
 		float m_MPP; //!< Meters Per Pixel constant.	
 		float m_PPL; //!< Pixels per Liter constant.	
 		float m_LPP; //!< Liters Per Pixel constant.
-
-		// The GUI control managers for all teams
-	//    std::vector<GUIControlManager *> m_BuyGUIs;
 
 		//!< GUI screen object kept and owned just for the fonts.
 		AllegroScreen *m_pGUIScreen;

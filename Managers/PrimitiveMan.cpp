@@ -167,12 +167,10 @@ namespace RTE {
 			return;
 		}
 		Vector pos[2];
-		unsigned short passes = 0;
 
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			pos[0] = drawStart;
-			passes = 1;
 		} else {
 			Vector drawStartLeft;
 			Vector drawStartRight;
@@ -181,7 +179,6 @@ namespace RTE {
 
 			pos[0] = drawStartLeft;
 			pos[1] = drawStartRight;
-			passes = 2;
 		}
 		Matrix rotation = Matrix(m_RotAngle);
 

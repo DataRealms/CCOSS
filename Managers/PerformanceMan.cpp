@@ -29,13 +29,13 @@ namespace RTE {
 		m_FrameTimer = new Timer();
 		m_Sample = 0;
 
-		for (unsigned short c = 0; c < PERF_COUNT; ++c) {
+		for (unsigned short counter = 0; counter < PERF_COUNT; ++counter) {
 			for (unsigned short i = 0; i < c_MaxSamples; ++i) {
-				m_PerfData[c][i] = 0;
-				m_PerfPercentages[c][i] = 0;
+				m_PerfData[counter][i] = 0;
+				m_PerfPercentages[counter][i] = 0;
 			}
-			m_PerfMeasureStart[c] = 0;
-			m_PerfMeasureStop[c] = 0;
+			m_PerfMeasureStart[counter] = 0;
+			m_PerfMeasureStop[counter] = 0;
 		}
 		// Set up performance counter's names
 		m_PerfCounterNames[PERF_SIM_TOTAL] = "Total";
@@ -77,15 +77,16 @@ namespace RTE {
 		m_Sample++;
 		if (m_Sample >= c_MaxSamples) { m_Sample = 0; }
 
-		for (unsigned short pc = 0; pc < PERF_COUNT; ++pc) {
-			m_PerfData[pc][m_Sample] = 0;
-			m_PerfPercentages[pc][m_Sample] = 0;
+		for (unsigned short counter = 0; counter < PERF_COUNT; ++counter) {
+			m_PerfData[counter][m_Sample] = 0;
+			m_PerfPercentages[counter][m_Sample] = 0;
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PerformanceMan::Update() {
+		// TODO: Figure out how doing this here and then in Draw() evens out the fps values and see if we can get same results without this.
 		// Time and store the milliseconds per frame reading to the buffer, and trim the buffer as needed
 		m_MSPFs.push_back(m_FrameTimer->GetElapsedRealTimeMS());
 		while (m_MSPFs.size() > c_MSPFAverageSampleSize) {

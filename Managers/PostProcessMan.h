@@ -129,7 +129,7 @@ namespace RTE {
 		void RegisterGlowArea(const Vector &center, float radius);
 
 		/// <summary>
-		/// Registers a specific post yellow glow effect to be added at the very last stage of 32bpp rendering by the FrameMan.
+		/// Registers a specific glow dot effect to be added at the very last stage of 32bpp rendering by the FrameMan.
 		/// </summary>
 		/// <param name="effectPos">The absolute scene coordinates of the center of the effect.</param>
 		/// <param name="color">Which glow dot color to register, see the DotGlowColor enumerator.</param>

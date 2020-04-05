@@ -15,6 +15,7 @@
 // Inclusions of header files
 
 #include "MOSprite.h"
+#include "PostProcessMan.h"
 
 namespace RTE
 {

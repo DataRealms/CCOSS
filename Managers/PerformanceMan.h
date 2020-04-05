@@ -18,7 +18,9 @@ namespace RTE {
 
 	public:
 
-		//!< Enumeration of all available performance counters
+		/// <summary>
+		/// Enumeration of all available performance counters.
+		/// </summary>
 		enum PerformanceCounters {
 			PERF_SIM_TOTAL = 0,
 			PERF_ACTORS_AI,

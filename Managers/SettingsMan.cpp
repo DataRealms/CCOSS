@@ -151,9 +151,7 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "ToolTips")
         reader >> m_ToolTips;
 	else if (propName == "AdvancedPerformanceStats") {
-		bool enableAdvanced;
-		reader >> enableAdvanced;
-		g_PerformanceMan.ShowAdvancedPerformanceStats(enableAdvanced);	
+		g_PerformanceMan.ShowAdvancedPerformanceStats(std::stoi(reader.ReadPropValue()));	
 	} else if (propName == "FlashOnBrainDamage")
         reader >> m_FlashOnBrainDamage;
     else if (propName == "EnableHats")

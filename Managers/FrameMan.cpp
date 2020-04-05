@@ -24,7 +24,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// <summary>
-	/// Callback function for the allegro set_display_switch_callback. It will be called when focus is switched away to the game window.
+	/// Callback function for the allegro set_display_switch_callback. It will be called when focus is switched away from the game window.
 	/// </summary>
 	void DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true); }
 
@@ -62,7 +62,6 @@ namespace RTE {
 		m_NetworkFrameCurrent = 0;
 		m_NetworkFrameReady = 1;
 		m_PaletteFile.Reset();
-		//m_pPaletteDataFile = 0;
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
 		m_PPM = 0;
@@ -156,20 +155,21 @@ namespace RTE {
 		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
 
 		// Create transparency color table
-		PALETTE ccpal;
-		get_palette(ccpal);
-		create_trans_table(&m_LessTransTable, ccpal, 192, 192, 192, 0);
-		create_trans_table(&m_HalfTransTable, ccpal, 128, 128, 128, 0);
-		create_trans_table(&m_MoreTransTable, ccpal, 64, 64, 64, 0);
+		PALETTE ccPalette;
+		get_palette(ccPalette);
+		create_trans_table(&m_LessTransTable, ccPalette, 192, 192, 192, 0);
+		create_trans_table(&m_HalfTransTable, ccPalette, 128, 128, 128, 0);
+		create_trans_table(&m_MoreTransTable, ccPalette, 64, 64, 64, 0);
 		// Set the one Allegro currently uses
 		color_map = &m_HalfTransTable;
 
 		// Create the back buffer, this is still in 8bpp, we will do any post-processing on the PostProcessing bitmap
 		m_pBackBuffer8 = create_bitmap_ex(8, m_ResX, m_ResY);
-		clear_to_color(m_pBackBuffer8, m_BlackColor);
+		ClearBackBuffer8();
 
 		// Create the post-processing buffer, it'll be used for glow effects etc
 		m_pBackBuffer32 = create_bitmap_ex(32, m_ResX, m_ResY);
+		ClearBackBuffer32();
 
 		// Create all the network 8bpp back buffers
 		for (short i = 0; i < c_MaxScreenCount; i++) {
@@ -280,8 +280,6 @@ namespace RTE {
 		delete m_pLargeFont;
 		delete m_pSmallFont;
 
-		//if (m_pPaletteDataFile) { unload_datafile_object(m_pPaletteDataFile); }
-
 		g_TimerMan.Destroy();
 		Clear();
 	}
@@ -289,7 +287,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Update() {
-		// Update all the performance counters.
 		g_PerformanceMan.Update();
 
 		// Remove all scheduled primitives, those will be re-added by updates from other entities.
@@ -311,15 +308,13 @@ namespace RTE {
 		list<PostEffect> screenRelativeEffects;
 		list<Box> screenRelativeGlowBoxes;
 
-		// Handy handle
 		Activity *pActivity = g_ActivityMan.GetActivity();
 
 		for (int whichScreen = 0; whichScreen < screenCount; ++whichScreen) {
-			// Screen Update
 			screenRelativeEffects.clear();
 			screenRelativeGlowBoxes.clear();
 
-			BITMAP *pDrawScreen = /*get_color_depth() == 8 && */screenCount == 1 ? m_pBackBuffer8 : m_pPlayerScreen;
+			BITMAP *pDrawScreen = (screenCount == 1) ? m_pBackBuffer8 : m_pPlayerScreen;
 			BITMAP *pDrawScreenGUI = pDrawScreen;
 			if (m_StoreNetworkBackBuffer) {
 				pDrawScreen = m_pNetworkBackBufferIntermediate8[m_NetworkFrameCurrent][whichScreen];
@@ -331,8 +326,7 @@ namespace RTE {
 			// Update the scene view to line up with a specific screen and then draw it onto the intermediate screen
 			g_SceneMan.Update(whichScreen);
 
-			// Save scene layer's offsets for each screen, 
-			// server will pick them to build the frame state and send to client
+			// Save scene layer's offsets for each screen, server will pick them to build the frame state and send to client
 			if (m_StoreNetworkBackBuffer) {
 				int layerCount = 0;
 
@@ -356,13 +350,14 @@ namespace RTE {
 			m_TargetPos[m_NetworkFrameCurrent][whichScreen] = targetPos;
 
 			// Draw the scene
-			if (!m_StoreNetworkBackBuffer/* || g_UInputMan.KeyHeld(KEY_6)*/) {
+			if (!m_StoreNetworkBackBuffer) {
 				g_SceneMan.Draw(pDrawScreen, pDrawScreenGUI, targetPos);
 			} else {
 				clear_to_color(pDrawScreen, g_MaskColor);
 				clear_to_color(pDrawScreenGUI, g_MaskColor);
 				g_SceneMan.Draw(pDrawScreen, pDrawScreenGUI, targetPos, true, true);
 			}
+
 			// Get only the scene-relative post effects that affect this player's screen
 			if (pActivity) {
 				g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, pDrawScreen->w, pDrawScreen->h, screenRelativeEffects, pActivity->GetTeamOfPlayer(pActivity->PlayerOfScreen(whichScreen)));
@@ -375,9 +370,9 @@ namespace RTE {
 			// Enable clipping on the draw bitmap
 			set_clip_state(pDrawScreen, 1);
 
-			//Always draw seam in debug mode
 #ifdef DEBUG_BUILD
-			g_PrimitiveMan.DrawLinePrimitive(Vector(0, 0), Vector(0, g_SceneMan.GetSceneHeight()), 5);
+			// Draw scene seam
+			vline(m_pBackBuffer8, 0, 0, g_SceneMan.GetSceneHeight(), 5);
 #endif
 
 			// Draw screen texts
@@ -409,8 +404,8 @@ namespace RTE {
 						int occOffsetX = g_SceneMan.GetScreenOcclusion(whichScreen).m_X;
 
 						// If there's really no room to offset the text into, then don't
-						if (GetPlayerScreenWidth() <= GetResX() / 2)
-							occOffsetX = 0;
+						if (GetPlayerScreenWidth() <= GetResX() / 2) { occOffsetX = 0; }
+							
 						// Draw blinking effect, but not of the text message itself, but some characters around it (so it's easier to read the message)
 						if (m_TextBlinking[whichScreen] && m_TextBlinkTimer.AlternateReal(m_TextBlinking[whichScreen])) {
 							GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, (GetPlayerScreenWidth() + occOffsetX) / 2, yTextPos, (">>> " + m_ScreenText[whichScreen] + " <<<").c_str(), GUIFont::Centre);
@@ -573,17 +568,18 @@ namespace RTE {
 					default:
 						break;
 				}
-				//m_TargetPos[i] = g_SceneMan.GetOffset(i);
 
 				m_NetworkBitmapIsLocked[i] = true;
 				blit(m_pNetworkBackBufferIntermediate8[m_NetworkFrameCurrent][i], m_pNetworkBackBufferFinal8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->h);
 				blit(m_pNetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][i], m_pNetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_pNetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->w, m_pNetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->h);
 				m_NetworkBitmapIsLocked[i] = false;
 
+#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
 				// Draw all player's screen into one
 				if (g_UInputMan.KeyHeld(KEY_5)) {
 					stretch_blit(m_pNetworkBackBufferFinal8[m_NetworkFrameCurrent][i], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->h, dx, dy, dw, dh);
 				}
+#endif
 			}
 
 #if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
@@ -605,20 +601,11 @@ namespace RTE {
 			// This is needed to make rendering look totally atomic for the server pulling data in separate threads
 			m_NetworkFrameReady = m_NetworkFrameCurrent;
 			m_NetworkFrameCurrent = (m_NetworkFrameCurrent == 0) ? 1 : 0;
-
-			/*for (int i = 0; i < c_MaxScreenCount; i++)
-			{
-				m_NetworkBitmapIsLocked[i] = true;
-				blit(m_pBackBuffer8, m_pNetworkBackBuffer8[i], 0, 0, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
-				m_NetworkBitmapIsLocked[i] = false;
-			}*/
 		}
 
-		// Do post-processing effects, if applicable and enabled
 		if (g_InActivity) { g_PostProcessMan.PostProcess(); }
 
 		// Draw the console on top of everything
-		//if (FlippingWith32BPP()) { g_ConsoleMan.Draw(m_pBackBuffer32); }
 		g_ConsoleMan.Draw(m_pBackBuffer32);
 
 		release_bitmap(m_pBackBuffer8);
@@ -737,11 +724,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::SwitchWindowMultiplier(int multiplier) {
-		// Sanity check input
 		if (multiplier <= 0 || multiplier > 4 || multiplier == m_NxWindowed) {
 			return -1;
 		}
-		// No need to do anything else if we're in fullscreen already
 		if (m_Fullscreen) {
 			m_NxWindowed = multiplier;
 			return 0;
@@ -973,7 +958,6 @@ namespace RTE {
 		// Just make the alt the same color as the main one if no one was specified
 		if (altColor == 0) { altColor = color; }
 		
-		// Calculate the integer values
 		intPos[X] = floorf(start.m_X);
 		intPos[Y] = floorf(start.m_Y);
 
@@ -983,7 +967,6 @@ namespace RTE {
 			delta[X] = floorf(deltaVec.m_X);
 			delta[Y] = floorf(deltaVec.m_Y);
 		} else {
-			// No wrap
 			delta[X] = floorf(end.m_X) - intPos[X];
 			delta[Y] = floorf(end.m_Y) - intPos[Y];
 		}
@@ -1208,22 +1191,6 @@ namespace RTE {
 		}
 		// Indicate success
 		return true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void FrameMan::FadeInPalette(int fadeSpeed) {
-		PALETTE pal;
-		get_palette(pal);
-		fadeSpeed = Limit(fadeSpeed, 64, 1);
-		fade_in(pal, fadeSpeed);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void FrameMan::FadeOutPalette(int fadeSpeed) {
-		fadeSpeed = Limit(fadeSpeed, 64, 1);
-		fade_out(fadeSpeed);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

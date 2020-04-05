@@ -6,8 +6,6 @@
 
 #define g_PrimitiveMan PrimitiveMan::Instance()
 
-struct BITMAP;
-
 namespace RTE {
 
 	class Entity;

@@ -204,7 +204,7 @@ namespace RTE {
 
 			// Draw sample dots
 			unsigned short peak = 0;
-			unsigned short sample = m_Sample == 0 ? c_MaxSamples : m_Sample;
+			unsigned short sample = m_Sample;
 			for (unsigned short i = 0; i < c_MaxSamples; i++) {
 				// Show microseconds in graphs, assume that 33333 microseconds (one frame of 30 fps) is the highest value on the graph
 				unsigned short value = Limit(static_cast<unsigned short>(static_cast<float>(m_PerfData[pc][sample]) / (1000000 / 30) * 100), 100, 0);
@@ -213,7 +213,8 @@ namespace RTE {
 				bitmapToDrawTo.SetPixel(c_StatsOffsetX + c_MaxSamples - i, graphStart + c_GraphHeight - dotHeight, 13);
 				peak = Limit(peak, m_PerfData[pc][sample], 0);
 
-				sample = (sample-- == 0) ? c_MaxSamples : sample;
+				if (sample == 0) { sample = c_MaxSamples; }
+				sample--;
 			}
 
 			// Print peak values
@@ -244,11 +245,12 @@ namespace RTE {
 
 	unsigned long long PerformanceMan::GetPerformanceCounterAverage(PerformanceCounters counter) {
 		unsigned long long totalPerformanceMeasurement = 0;
-		unsigned short sample = m_Sample == 0 ? c_MaxSamples : m_Sample;
+		unsigned short sample = m_Sample;
 		for (unsigned short i = 0; i < c_Average; ++i) {
 			totalPerformanceMeasurement += m_PerfData[counter][sample];
-			sample = (sample-- == 0) ? c_MaxSamples : sample;
+			if (sample == 0) { sample = c_MaxSamples; }
+			sample--;
 		}
-		return totalPerformanceMeasurement/c_Average;
+		return totalPerformanceMeasurement / c_Average;
 	}
 }

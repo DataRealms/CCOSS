@@ -333,13 +333,13 @@ namespace RTE {
 		public:
 
 			float m_RotAngle; //! Angle to rotate bitmap in radians.
-			BITMAP *m_pBitmap; //! Bitmap to draw.
+			BITMAP *m_Bitmap; //! Bitmap to draw.
 
 			/// <summary>
 			/// Constructor method for BitmapPrimitive object.
 			/// </summary>
 			BitmapPrimitive() {
-				m_pBitmap = 0;
+				m_Bitmap = 0;
 				m_RotAngle = 0.0;
 				m_Player = -1;
 			}
@@ -349,7 +349,7 @@ namespace RTE {
 			/// </summary>
 			BitmapPrimitive(Vector pos, BITMAP * bitmap, float rotAngle) {
 				m_StartPos = pos;
-				m_pBitmap = bitmap;
+				m_Bitmap = bitmap;
 				m_RotAngle = rotAngle;
 				m_Player = -1;
 			}
@@ -359,7 +359,7 @@ namespace RTE {
 			/// </summary>
 			BitmapPrimitive(short player, Vector pos, BITMAP * bitmap, float rotAngle) {
 				m_StartPos = pos;
-				m_pBitmap = bitmap;
+				m_Bitmap = bitmap;
 				m_RotAngle = rotAngle;
 				m_Player = player;
 			}

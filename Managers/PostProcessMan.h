@@ -14,7 +14,7 @@ namespace RTE {
 	/// Structure for storing a post-process screen effect to be applied at the last stage of 32bpp rendering.
 	/// </summary>
 	struct PostEffect {
-		BITMAP *m_pBitmap; //!< The bitmap to blend, not owned.
+		BITMAP *m_Bitmap; //!< The bitmap to blend, not owned.
 		size_t m_BitmapHash; //!< Hash used to transmit glow events over the network.
 		Vector m_Pos; //!< Post effect position. Can be relative to the scene, or to the screen, depending on context.
 		float m_Angle; // Post effect angle.
@@ -23,14 +23,14 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a PostEffect object in system memory.
 		/// </summary>
-		PostEffect() { m_Pos.Reset(); m_pBitmap = 0; m_BitmapHash = 0;  m_Strength = 128; m_Angle = 0; }
+		PostEffect() { m_Pos.Reset(); m_Bitmap = 0; m_BitmapHash = 0;  m_Strength = 128; m_Angle = 0; }
 
 		/// <summary>
 		/// Constructor method used to instantiate a PostEffect object in system memory.
 		/// </summary>
 		PostEffect(const Vector &pos, BITMAP *pBitmap, size_t bitmapHash, int strength, float angle) {
 			m_Pos = pos;
-			m_pBitmap = pBitmap;
+			m_Bitmap = pBitmap;
 			m_BitmapHash = bitmapHash;
 			m_Strength = strength;
 			m_Angle = angle;
@@ -185,22 +185,22 @@ namespace RTE {
 		std::list<PostEffect> m_ScreenRelativeEffects[c_MaxScreenCount]; //!<
 		std::mutex ScreenRelativeEffectsMutex[c_MaxScreenCount]; //!<
 
-		BITMAP *m_pYellowGlow; //!<
+		BITMAP *m_YellowGlow; //!<
 		size_t m_YellowGlowHash; //!<
 
-		BITMAP *m_pRedGlow; //!<
+		BITMAP *m_RedGlow; //!<
 		size_t m_RedGlowHash; //!<
 
-		BITMAP *m_pBlueGlow; //!<
+		BITMAP *m_BlueGlow; //!<
 		size_t m_BlueGlowHash; //!<
 
 		//!< Temp bitmaps to rotate post effects in.
-		BITMAP *m_pTempEffectBitmap_16;
-		BITMAP *m_pTempEffectBitmap_32;
-		BITMAP *m_pTempEffectBitmap_64;
-		BITMAP *m_pTempEffectBitmap_128;
-		BITMAP *m_pTempEffectBitmap_256;
-		BITMAP *m_pTempEffectBitmap_512;
+		BITMAP *m_TempEffectBitmap_16;
+		BITMAP *m_TempEffectBitmap_32;
+		BITMAP *m_TempEffectBitmap_64;
+		BITMAP *m_TempEffectBitmap_128;
+		BITMAP *m_TempEffectBitmap_256;
+		BITMAP *m_TempEffectBitmap_512;
 
 #pragma region Post Effect Handling
 		/// <summary>

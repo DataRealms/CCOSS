@@ -13,11 +13,11 @@ namespace RTE {
 	void PostProcessMan::Clear() {
 		m_PostScreenEffects.clear();
 		m_PostSceneEffects.clear();
-		m_pYellowGlow = 0;
+		m_YellowGlow = 0;
 		m_YellowGlowHash = 0;
-		m_pRedGlow = 0;
+		m_RedGlow = 0;
 		m_RedGlowHash = 0;
-		m_pBlueGlow = 0;
+		m_BlueGlow = 0;
 		m_BlueGlowHash = 0;
 		for (short i = 0; i < c_MaxScreenCount; ++i) {
 			m_ScreenRelativeEffects->clear();
@@ -29,21 +29,21 @@ namespace RTE {
 	int PostProcessMan::Create() {
 		// TODO: Make more robust and load more glows!
 		ContentFile glowFile("Base.rte/Effects/Glows/YellowTiny.bmp");
-		m_pYellowGlow = glowFile.GetAsBitmap();
+		m_YellowGlow = glowFile.GetAsBitmap();
 		m_YellowGlowHash = glowFile.GetHash();
 		glowFile.SetDataPath("Base.rte/Effects/Glows/RedTiny.bmp");
-		m_pRedGlow = glowFile.GetAsBitmap();
+		m_RedGlow = glowFile.GetAsBitmap();
 		m_RedGlowHash = glowFile.GetHash();
 		glowFile.SetDataPath("Base.rte/Effects/Glows/BlueTiny.bmp");
-		m_pBlueGlow = glowFile.GetAsBitmap();
+		m_BlueGlow = glowFile.GetAsBitmap();
 		m_BlueGlowHash = glowFile.GetHash();
 
-		m_pTempEffectBitmap_16 = create_bitmap_ex(32, 16, 16);
-		m_pTempEffectBitmap_32 = create_bitmap_ex(32, 32, 32);
-		m_pTempEffectBitmap_64 = create_bitmap_ex(32, 64, 64);
-		m_pTempEffectBitmap_128 = create_bitmap_ex(32, 128, 128);
-		m_pTempEffectBitmap_256 = create_bitmap_ex(32, 256, 256);
-		m_pTempEffectBitmap_512 = create_bitmap_ex(32, 512, 512);
+		m_TempEffectBitmap_16 = create_bitmap_ex(32, 16, 16);
+		m_TempEffectBitmap_32 = create_bitmap_ex(32, 32, 32);
+		m_TempEffectBitmap_64 = create_bitmap_ex(32, 64, 64);
+		m_TempEffectBitmap_128 = create_bitmap_ex(32, 128, 128);
+		m_TempEffectBitmap_256 = create_bitmap_ex(32, 256, 256);
+		m_TempEffectBitmap_512 = create_bitmap_ex(32, 512, 512);
 
 		return 0;
 	}
@@ -57,8 +57,8 @@ namespace RTE {
 		// Set the screen blender mode for glows
 		set_screen_blender(128, 128, 128, 128);
 
-		//acquire_bitmap(m_pBackBuffer8);
-		//acquire_bitmap(m_pBackBuffer32);
+		//acquire_bitmap(m_BackBuffer8);
+		//acquire_bitmap(m_BackBuffer32);
 
 		// Randomly sample the entire backbuffer, looking for pixels to put a glow on
 		// NOTE THIS IS SLOW, especially on higher resolutions!
@@ -85,7 +85,7 @@ namespace RTE {
 
 #ifdef DEBUG_BUILD
 			// Draw a rectangle around the glow box so we see it's position and size
-			rect(m_pBackBuffer32, startX, startY, endX, endY, g_RedColor);
+			rect(m_BackBuffer32, startX, startY, endX, endY, g_RedColor);
 #endif
 
 			for (y = startY; y < endY; ++y) {
@@ -94,17 +94,17 @@ namespace RTE {
 
 					// YELLOW
 					if ((testpixel == g_YellowGlowColor && PosRand() < 0.9) || testpixel == 98 || (testpixel == 120 && PosRand() < 0.7)) {
-						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_pYellowGlow, x - 2, y - 2);
+						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_YellowGlow, x - 2, y - 2);
 					}
 					// RED
 					/*
 					if (testpixel == 13) {
-						draw_trans_sprite(m_pBackBuffer32, m_pRedGlow, x - 2, y - 2);
+						draw_trans_sprite(m_BackBuffer32, m_RedGlow, x - 2, y - 2);
 					}
 					*/
 					// BLUE
 					if (testpixel == 166) {
-						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_pBlueGlow, x - 2, y - 2);
+						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_BlueGlow, x - 2, y - 2);
 					}
 				}
 			}
@@ -118,8 +118,8 @@ namespace RTE {
 		float angle = 0;
 
 		for (std::list<PostEffect>::iterator eItr = m_PostScreenEffects.begin(); eItr != m_PostScreenEffects.end(); ++eItr) {
-			if ((*eItr).m_pBitmap) {
-				pBitmap = (*eItr).m_pBitmap;
+			if ((*eItr).m_Bitmap) {
+				pBitmap = (*eItr).m_Bitmap;
 				strength = (*eItr).m_Strength;
 				set_screen_blender(strength, strength, strength, strength);
 				effectPosX = (*eItr).m_Pos.GetFloorIntX() - (pBitmap->w / 2);
@@ -133,17 +133,17 @@ namespace RTE {
 					BITMAP * pTargetBitmap;
 
 					if (pBitmap->w < 16 && pBitmap->h < 16) {
-						pTargetBitmap = m_pTempEffectBitmap_16;
+						pTargetBitmap = m_TempEffectBitmap_16;
 					} else if (pBitmap->w < 32 && pBitmap->h < 32) {
-						pTargetBitmap = m_pTempEffectBitmap_32;
+						pTargetBitmap = m_TempEffectBitmap_32;
 					} else if (pBitmap->w < 64 && pBitmap->h < 64) {
-						pTargetBitmap = m_pTempEffectBitmap_64;
+						pTargetBitmap = m_TempEffectBitmap_64;
 					} else if (pBitmap->w < 128 && pBitmap->h < 128) {
-						pTargetBitmap = m_pTempEffectBitmap_128;
+						pTargetBitmap = m_TempEffectBitmap_128;
 					} else if (pBitmap->w < 256 && pBitmap->h < 256) {
-						pTargetBitmap = m_pTempEffectBitmap_256;
+						pTargetBitmap = m_TempEffectBitmap_256;
 					} else {
-						pTargetBitmap = m_pTempEffectBitmap_512;
+						pTargetBitmap = m_TempEffectBitmap_512;
 					}
 
 					clear_to_color(pTargetBitmap, 0);
@@ -159,8 +159,8 @@ namespace RTE {
 				}
 			}
 		}
-		//release_bitmap(m_pBackBuffer32);
-		//release_bitmap(m_pBackBuffer8);
+		//release_bitmap(m_BackBuffer32);
+		//release_bitmap(m_BackBuffer8);
 
 		// Set blender mode back??
 		//set_trans_blender(128, 128, 128, 128);
@@ -208,19 +208,16 @@ namespace RTE {
 
 	BITMAP *PostProcessMan::GetTempEffectBitmap(unsigned short bitmapSize) const {
 		if (bitmapSize <= 16) {
-			return m_pTempEffectBitmap_16;
+			return m_TempEffectBitmap_16;
 		} else if (bitmapSize <= 32) {
-			return m_pTempEffectBitmap_32;
+			return m_TempEffectBitmap_32;
 		} else if (bitmapSize <= 64) {
-			return m_pTempEffectBitmap_64;
+			return m_TempEffectBitmap_64;
 		} else if (bitmapSize <= 128) {
-			return m_pTempEffectBitmap_128;
+			return m_TempEffectBitmap_128;
 		} else if (bitmapSize <= 256) {
-			return m_pTempEffectBitmap_256;
+			return m_TempEffectBitmap_256;
 		} else {
-			return m_pTempEffectBitmap_512;
-		}
-	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -231,6 +228,7 @@ namespace RTE {
 	void PostProcessMan::RegisterGlowArea(const Vector &center, float radius) {
 		if (g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0) {
 			RegisterGlowArea(IntRect(center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius));
+			return m_TempEffectBitmap_512;
 		}
 	}
 
@@ -278,7 +276,7 @@ namespace RTE {
 		ScreenRelativeEffectsMutex[whichScreen].lock();
 		outputList.clear();
 		for (std::list<PostEffect>::iterator eItr = m_ScreenRelativeEffects[whichScreen].begin(); eItr != m_ScreenRelativeEffects[whichScreen].end(); ++eItr) {
-			outputList.push_back(PostEffect((*eItr).m_Pos, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle));
+			outputList.push_back(PostEffect((*eItr).m_Pos, (*eItr).m_Bitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle));
 		}
 		ScreenRelativeEffectsMutex[whichScreen].unlock();
 	}
@@ -289,7 +287,7 @@ namespace RTE {
 		ScreenRelativeEffectsMutex[whichScreen].lock();
 		m_ScreenRelativeEffects[whichScreen].clear();
 		for (std::list<PostEffect>::iterator eItr = inputList.begin(); eItr != inputList.end(); ++eItr) {
-			m_ScreenRelativeEffects[whichScreen].push_back(PostEffect((*eItr).m_Pos, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle));
+			m_ScreenRelativeEffects[whichScreen].push_back(PostEffect((*eItr).m_Pos, (*eItr).m_Bitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle));
 		}
 		ScreenRelativeEffectsMutex[whichScreen].unlock();
 	}
@@ -307,7 +305,7 @@ namespace RTE {
 			if (WithinBox((*itr).m_Pos, boxPos, boxWidth, boxHeight) && !unseen) {
 				found = true;
 				postEffectPosRelativeToBox = (*itr).m_Pos - boxPos;
-				effectsList.push_back(PostEffect(postEffectPosRelativeToBox, (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
+				effectsList.push_back(PostEffect(postEffectPosRelativeToBox, (*itr).m_Bitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
 			}
 		}
 		return found;
@@ -326,7 +324,7 @@ namespace RTE {
 			if (WithinBox((*itr).m_Pos, left, top, right, bottom) && !unseen) {
 				found = true;
 				postEffectPosRelativeToBox = Vector((*itr).m_Pos.m_X - left, (*itr).m_Pos.m_Y - top);
-				effectsList.push_back(PostEffect(postEffectPosRelativeToBox, (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
+				effectsList.push_back(PostEffect(postEffectPosRelativeToBox, (*itr).m_Bitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
 			}
 		}
 		return found;
@@ -339,11 +337,11 @@ namespace RTE {
 			case NoDot:
 				return 0;
 			case YellowDot:
-				return m_pYellowGlow;
+				return m_YellowGlow;
 			case RedDot:
-				return m_pRedGlow;
+				return m_RedGlow;
 			case BlueDot:
-				return m_pBlueGlow;
+				return m_BlueGlow;
 			default:
 				RTEAbort("Undefined glow dot color value passed in. See DotGlowColor enumeration for defined values.");
 				return 0;

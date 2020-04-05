@@ -88,13 +88,13 @@ namespace RTE {
 		/// Gets the 8bpp back buffer bitmap.
 		/// </summary>
 		/// <returns>A pointer to the BITMAP 8bpp back buffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetBackBuffer8() const { return m_pBackBuffer8; }
+		BITMAP * GetBackBuffer8() const { return m_BackBuffer8; }
 
 		/// <summary>
 		/// Gets the 32bpp back buffer bitmap, if available. If not, the 8bpp is returned. Make sure you don't do any blending stuff to the 8bpp one!
 		/// </summary>
 		/// <returns>A pointer to the BITMAP 32bpp back buffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetBackBuffer32() const { return m_pBackBuffer32 ? m_pBackBuffer32 : m_pBackBuffer8; }
+		BITMAP * GetBackBuffer32() const { return m_BackBuffer32 ? m_BackBuffer32 : m_BackBuffer8; }
 
 		/// <summary>
 		/// Gets the ratio between the physics engine's meters and on-screen pixels.
@@ -350,12 +350,12 @@ namespace RTE {
 		/// <summary>
 		/// Clears the 8bpp backbuffer with black.
 		/// </summary>
-		void ClearBackBuffer8() { clear_to_color(m_pBackBuffer8, m_BlackColor); }
+		void ClearBackBuffer8() { clear_to_color(m_BackBuffer8, m_BlackColor); }
 
 		/// <summary>
 		/// Clears the 32bpp backbuffer with black.
 		/// </summary>
-		void ClearBackBuffer32() { if (m_pBackBuffer32) clear_to_color(m_pBackBuffer32, 0); }
+		void ClearBackBuffer32() { if (m_BackBuffer32) clear_to_color(m_BackBuffer32, 0); }
 
 		/// <summary>
 		/// Sets a specific recalculated transparency table which is used for any subsequent transparency drawing.
@@ -405,20 +405,20 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Which player screen to get back buffer bitmap from.</param>
 		/// <returns>A pointer to the BITMAP 8bpp back buffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBuffer8Ready(int player) const { return m_pNetworkBackBufferFinal8[m_NetworkFrameReady][player]; }
-		BITMAP * GetNetworkBackBuffer8Current(int player) const { return m_pNetworkBackBufferFinal8[m_NetworkFrameCurrent][player]; }
-		BITMAP * GetNetworkBackBufferIntermediate8Ready(int player) const { return m_pNetworkBackBufferIntermediate8[m_NetworkFrameReady][player]; }
-		BITMAP * GetNetworkBackBufferIntermediate8Current(int player) const { return m_pNetworkBackBufferIntermediate8[m_NetworkFrameCurrent][player]; }
+		BITMAP * GetNetworkBackBuffer8Ready(int player) const { return m_NetworkBackBufferFinal8[m_NetworkFrameReady][player]; }
+		BITMAP * GetNetworkBackBuffer8Current(int player) const { return m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][player]; }
+		BITMAP * GetNetworkBackBufferIntermediate8Ready(int player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameReady][player]; }
+		BITMAP * GetNetworkBackBufferIntermediate8Current(int player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
-		BITMAP * GetNetworkBackBufferGUI8Ready(int player) const { return m_pNetworkBackBufferFinalGUI8[m_NetworkFrameReady][player]; }
-		BITMAP * GetNetworkBackBufferGUI8Current(int player) const { return m_pNetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][player]; }
-		BITMAP * GetNetworkBackBufferIntermediateGUI8Ready(int player) const { return m_pNetworkBackBufferIntermediateGUI8[m_NetworkFrameReady][player]; }
-		BITMAP * GetNetworkBackBufferIntermediateGUI8Current(int player) const { return m_pNetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][player]; }
+		BITMAP * GetNetworkBackBufferGUI8Ready(int player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameReady][player]; }
+		BITMAP * GetNetworkBackBufferGUI8Current(int player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][player]; }
+		BITMAP * GetNetworkBackBufferIntermediateGUI8Ready(int player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameReady][player]; }
+		BITMAP * GetNetworkBackBufferIntermediateGUI8Current(int player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
 		/// 
@@ -592,7 +592,7 @@ namespace RTE {
 		unsigned char m_AlmostBlackColor;
 		
 
-		BITMAP *m_pPlayerScreen; //!< Intermediary split screen bitmap.
+		BITMAP *m_PlayerScreen; //!< Intermediary split screen bitmap.
 
 		// Dimensions of each of the screens of each player. Will be smaller than resolution only if the screen is split
 		int m_PlayerScreenWidth;
@@ -604,10 +604,10 @@ namespace RTE {
 		float m_LPP; //!< Liters Per Pixel constant.
 
 		//!< GUI screen object kept and owned just for the fonts.
-		AllegroScreen *m_pGUIScreen;
+		AllegroScreen *m_GUIScreen;
 		//!< Standard fonts for quick access.
-		GUIFont *m_pLargeFont;
-		GUIFont *m_pSmallFont;
+		GUIFont *m_LargeFont;
+		GUIFont *m_SmallFont;
 		
 		std::string m_ScreenText[c_MaxScreenCount]; //!< The text to be displayed on each player's screen.		
 		int m_TextDuration[c_MaxScreenCount]; //!< The minimum duration the current message is supposed to show before it can be overwritten.		
@@ -624,17 +624,16 @@ namespace RTE {
 		Vector m_TargetPos[2][c_MaxScreenCount]; //!< Frame target pos for network players.
 
 
-		BITMAP *m_pBackBuffer8; //!< Screen back buffer, always 8bpp, gets copied to the 32bpp buffer if post processing is used.
-		BITMAP *m_pBackBuffer32; //!< 32Bits per pixel back buffer, only used if player elects, and only if in 32bpp video mode.
-		BITMAP *m_pScreendumpBuffer; //!< Temporary buffer for making quick screencaps.			
-		BITMAP *m_pNetworkBackBufferIntermediate8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw.
-		BITMAP *m_pNetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw used to draw UI only.
-		BITMAP *m_pNetworkBackBufferFinal8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to copy Intermediate before sending
-		BITMAP *m_pNetworkBackBufferFinalGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to copy Intermediate before sending used to draw UI only.
+		BITMAP *m_BackBuffer8; //!< Screen back buffer, always 8bpp, gets copied to the 32bpp buffer if post processing is used.
+		BITMAP *m_BackBuffer32; //!< 32Bits per pixel back buffer, only used if player elects, and only if in 32bpp video mode.
+		BITMAP *m_ScreendumpBuffer; //!< Temporary buffer for making quick screencaps.			
+		BITMAP *m_NetworkBackBufferIntermediate8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw.
+		BITMAP *m_NetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw used to draw UI only.
+		BITMAP *m_NetworkBackBufferFinal8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to copy Intermediate before sending
+		BITMAP *m_NetworkBackBufferFinalGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to copy Intermediate before sending used to draw UI only.
 
-
-		bool m_DrawNetworkBackBuffer; //!< If true, draws the contents of the m_pNetworkBackBuffer8 on top of m_pBackBuffer8 every frame in FrameMan.Draw.
-		bool m_StoreNetworkBackBuffer; //!< If true, dumps the contents of the m_pBackBuffer8 to the m_pNetworkBackBuffer8 every frame.
+		bool m_DrawNetworkBackBuffer; //!< If true, draws the contents of the m_NetworkBackBuffer8 on top of m_BackBuffer8 every frame in FrameMan.Draw.
+		bool m_StoreNetworkBackBuffer; //!< If true, dumps the contents of the m_BackBuffer8 to the m_NetworkBackBuffer8 every frame.
 
 		int m_NetworkFrameCurrent; //!< Which frame index is being rendered, 0 or 1.	
 		int m_NetworkFrameReady; //!< Which frame is rendered and ready for transmission, 0 or 1.

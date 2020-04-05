@@ -51,12 +51,12 @@ namespace RTE {
 		m_VSplit = false;
 		m_HSplitOverride = false;
 		m_VSplitOverride = false;
-		m_pPlayerScreen = 0;
+		m_PlayerScreen = 0;
 		m_PlayerScreenWidth = 0;
 		m_PlayerScreenHeight = 0;
-		m_pScreendumpBuffer = 0;
-		m_pBackBuffer8 = 0;
-		m_pBackBuffer32 = 0;
+		m_ScreendumpBuffer = 0;
+		m_BackBuffer8 = 0;
+		m_BackBuffer32 = 0;
 		m_DrawNetworkBackBuffer = false;
 		m_StoreNetworkBackBuffer = false;
 		m_NetworkFrameCurrent = 0;
@@ -65,9 +65,9 @@ namespace RTE {
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
 		m_PPM = 0;
-		m_pGUIScreen = 0;
-		m_pLargeFont = 0;
-		m_pSmallFont = 0;
+		m_GUIScreen = 0;
+		m_LargeFont = 0;
+		m_SmallFont = 0;
 		m_TextBlinkTimer.Reset();
 
 		for (short i = 0; i < c_MaxScreenCount; ++i) {
@@ -81,10 +81,10 @@ namespace RTE {
 			m_FlashTimer[i].Reset();
 
 			for (short f = 0; f < 2; f++) {
-				m_pNetworkBackBufferIntermediate8[f][i] = 0;
-				m_pNetworkBackBufferFinal8[f][i] = 0;
-				m_pNetworkBackBufferIntermediateGUI8[f][i] = 0;
-				m_pNetworkBackBufferFinalGUI8[f][i] = 0;
+				m_NetworkBackBufferIntermediate8[f][i] = 0;
+				m_NetworkBackBufferFinal8[f][i] = 0;
+				m_NetworkBackBufferIntermediateGUI8[f][i] = 0;
+				m_NetworkBackBufferFinalGUI8[f][i] = 0;
 			}
 			m_NetworkBitmapIsLocked[i] = false;
 		}
@@ -164,40 +164,40 @@ namespace RTE {
 		color_map = &m_HalfTransTable;
 
 		// Create the back buffer, this is still in 8bpp, we will do any post-processing on the PostProcessing bitmap
-		m_pBackBuffer8 = create_bitmap_ex(8, m_ResX, m_ResY);
+		m_BackBuffer8 = create_bitmap_ex(8, m_ResX, m_ResY);
 		ClearBackBuffer8();
 
 		// Create the post-processing buffer, it'll be used for glow effects etc
-		m_pBackBuffer32 = create_bitmap_ex(32, m_ResX, m_ResY);
+		m_BackBuffer32 = create_bitmap_ex(32, m_ResX, m_ResY);
 		ClearBackBuffer32();
 
 		// Create all the network 8bpp back buffers
 		for (short i = 0; i < c_MaxScreenCount; i++) {
 			for (short f = 0; f < 2; f++) {
-				m_pNetworkBackBufferIntermediate8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
-				clear_to_color(m_pNetworkBackBufferIntermediate8[f][i], m_BlackColor);
-				m_pNetworkBackBufferIntermediateGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
-				clear_to_color(m_pNetworkBackBufferIntermediateGUI8[f][i], g_MaskColor);
+				m_NetworkBackBufferIntermediate8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
+				clear_to_color(m_NetworkBackBufferIntermediate8[f][i], m_BlackColor);
+				m_NetworkBackBufferIntermediateGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
+				clear_to_color(m_NetworkBackBufferIntermediateGUI8[f][i], g_MaskColor);
 
-				m_pNetworkBackBufferFinal8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
-				clear_to_color(m_pNetworkBackBufferFinal8[f][i], m_BlackColor);
-				m_pNetworkBackBufferFinalGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
-				clear_to_color(m_pNetworkBackBufferFinalGUI8[f][i], g_MaskColor);
+				m_NetworkBackBufferFinal8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
+				clear_to_color(m_NetworkBackBufferFinal8[f][i], m_BlackColor);
+				m_NetworkBackBufferFinalGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
+				clear_to_color(m_NetworkBackBufferFinalGUI8[f][i], g_MaskColor);
 			}
 		}
 
-		m_PlayerScreenWidth = m_pBackBuffer8->w;
-		m_PlayerScreenHeight = m_pBackBuffer8->h;
+		m_PlayerScreenWidth = m_BackBuffer8->w;
+		m_PlayerScreenHeight = m_BackBuffer8->h;
 
 		// Create the splitscreen buffer
 		if (m_HSplit || m_VSplit) {
-			m_pPlayerScreen = create_bitmap_ex(8, m_ResX / (m_VSplit ? 2 : 1), m_ResY / (m_HSplit ? 2 : 1));
-			clear_to_color(m_pPlayerScreen, m_BlackColor);
-			set_clip_state(m_pPlayerScreen, 1);
+			m_PlayerScreen = create_bitmap_ex(8, m_ResX / (m_VSplit ? 2 : 1), m_ResY / (m_HSplit ? 2 : 1));
+			clear_to_color(m_PlayerScreen, m_BlackColor);
+			set_clip_state(m_PlayerScreen, 1);
 
 			// Update these to represent the split screens
-			m_PlayerScreenWidth = m_pPlayerScreen->w;
-			m_PlayerScreenHeight = m_pPlayerScreen->h;
+			m_PlayerScreenWidth = m_PlayerScreen->w;
+			m_PlayerScreenHeight = m_PlayerScreen->h;
 		}
 		return 0;
 	}
@@ -265,20 +265,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Destroy() {
-		destroy_bitmap(m_pBackBuffer8);
+		destroy_bitmap(m_BackBuffer8);
 		for (short i = 0; i < c_MaxScreenCount; i++) {
 			for (short f = 0; f < 2; f++) {
-				destroy_bitmap(m_pNetworkBackBufferIntermediate8[f][i]);
-				destroy_bitmap(m_pNetworkBackBufferIntermediateGUI8[f][i]);
-				destroy_bitmap(m_pNetworkBackBufferFinal8[f][i]);
-				destroy_bitmap(m_pNetworkBackBufferFinalGUI8[f][i]);
+				destroy_bitmap(m_NetworkBackBufferIntermediate8[f][i]);
+				destroy_bitmap(m_NetworkBackBufferIntermediateGUI8[f][i]);
+				destroy_bitmap(m_NetworkBackBufferFinal8[f][i]);
+				destroy_bitmap(m_NetworkBackBufferFinalGUI8[f][i]);
 			}
 		}
-		destroy_bitmap(m_pBackBuffer32);
-		destroy_bitmap(m_pPlayerScreen);
-		delete m_pGUIScreen;
-		delete m_pLargeFont;
-		delete m_pSmallFont;
+		destroy_bitmap(m_BackBuffer32);
+		destroy_bitmap(m_PlayerScreen);
+		delete m_GUIScreen;
+		delete m_LargeFont;
+		delete m_SmallFont;
 
 		g_TimerMan.Destroy();
 		Clear();
@@ -299,7 +299,7 @@ namespace RTE {
 		// Count how many split screens we'll need
 		int screenCount = (m_HSplit ? 2 : 1) * (m_VSplit ? 2 : 1);
 
-		RTEAssert(screenCount <= 1 || m_pPlayerScreen, "Splitscreen surface not ready when needed!");
+		RTEAssert(screenCount <= 1 || m_PlayerScreen, "Splitscreen surface not ready when needed!");
 
 		// Clear out the post processing screen effects list
 		g_PostProcessMan.Reset();
@@ -314,11 +314,11 @@ namespace RTE {
 			screenRelativeEffects.clear();
 			screenRelativeGlowBoxes.clear();
 
-			BITMAP *pDrawScreen = (screenCount == 1) ? m_pBackBuffer8 : m_pPlayerScreen;
+			BITMAP *pDrawScreen = (screenCount == 1) ? m_BackBuffer8 : m_PlayerScreen;
 			BITMAP *pDrawScreenGUI = pDrawScreen;
 			if (m_StoreNetworkBackBuffer) {
-				pDrawScreen = m_pNetworkBackBufferIntermediate8[m_NetworkFrameCurrent][whichScreen];
-				pDrawScreenGUI = m_pNetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][whichScreen];
+				pDrawScreen = m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][whichScreen];
+				pDrawScreenGUI = m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][whichScreen];
 			}
 
 			AllegroBitmap pPlayerGUIBitmap(pDrawScreenGUI);
@@ -372,7 +372,7 @@ namespace RTE {
 
 #ifdef DEBUG_BUILD
 			// Draw scene seam
-			vline(m_pBackBuffer8, 0, 0, g_SceneMan.GetSceneHeight(), 5);
+			vline(m_BackBuffer8, 0, 0, g_SceneMan.GetSceneHeight(), 5);
 #endif
 
 			// Draw screen texts
@@ -489,7 +489,7 @@ namespace RTE {
 			}
 
 			// Draw the intermediate draw splitscreen to the appropriate spot on the back buffer
-			if (!m_StoreNetworkBackBuffer) { blit(pDrawScreen, m_pBackBuffer8, 0, 0, screenOffset.GetFloorIntX(), screenOffset.GetFloorIntY(), pDrawScreen->w, pDrawScreen->h); }
+			if (!m_StoreNetworkBackBuffer) { blit(pDrawScreen, m_BackBuffer8, 0, 0, screenOffset.GetFloorIntX(), screenOffset.GetFloorIntY(), pDrawScreen->w, pDrawScreen->h); }
 
 			// Add the player screen's effects to the total screen effects list so they can be drawn in post processing
 			if (!IsInMultiplayerMode()) {
@@ -503,7 +503,7 @@ namespace RTE {
 				for (list<PostEffect>::iterator eItr = screenRelativeEffects.begin(); eItr != screenRelativeEffects.end(); ++eItr) {
 					// Make sure we won't be adding any effects to a part of the screen that is occluded by menus and such
 					if ((*eItr).m_Pos.m_X > occX && (*eItr).m_Pos.m_Y > occY && (*eItr).m_Pos.m_X < pDrawScreen->w + occX && (*eItr).m_Pos.m_Y < pDrawScreen->h + occY) {
-						g_PostProcessMan.GetPostScreenEffectsList()->push_back(PostEffect((*eItr).m_Pos + screenOffset, (*eItr).m_pBitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle));
+						g_PostProcessMan.GetPostScreenEffectsList()->push_back(PostEffect((*eItr).m_Pos + screenOffset, (*eItr).m_Bitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle));
 					}
 				}
 
@@ -521,23 +521,23 @@ namespace RTE {
 
 		if (!m_StoreNetworkBackBuffer) {
 			// Draw split screen lines
-			acquire_bitmap(m_pBackBuffer8);
+			acquire_bitmap(m_BackBuffer8);
 			if (m_HSplit) {
 				// Draw a horizontal separating line
-				hline(m_pBackBuffer8, 0, (m_pBackBuffer8->h / 2) - 1, m_pBackBuffer8->w - 1, m_AlmostBlackColor);
-				hline(m_pBackBuffer8, 0, (m_pBackBuffer8->h / 2), m_pBackBuffer8->w - 1, m_AlmostBlackColor);
+				hline(m_BackBuffer8, 0, (m_BackBuffer8->h / 2) - 1, m_BackBuffer8->w - 1, m_AlmostBlackColor);
+				hline(m_BackBuffer8, 0, (m_BackBuffer8->h / 2), m_BackBuffer8->w - 1, m_AlmostBlackColor);
 			}
 			if (m_VSplit) {
 				// Draw a vertical separating line
-				vline(m_pBackBuffer8, (m_pBackBuffer8->w / 2) - 1, 0, m_pBackBuffer8->h - 1, m_AlmostBlackColor);
-				vline(m_pBackBuffer8, (m_pBackBuffer8->w / 2), 0, m_pBackBuffer8->h - 1, m_AlmostBlackColor);
+				vline(m_BackBuffer8, (m_BackBuffer8->w / 2) - 1, 0, m_BackBuffer8->h - 1, m_AlmostBlackColor);
+				vline(m_BackBuffer8, (m_BackBuffer8->w / 2), 0, m_BackBuffer8->h - 1, m_AlmostBlackColor);
 			}
 
 			// Replace 8 bit backbuffer contents with network received image before post-processing as it is where this buffer is copied to 32 bit buffer
 			if (m_DrawNetworkBackBuffer) {
 				m_NetworkBitmapIsLocked[0] = true;
-				blit(m_pNetworkBackBufferFinal8[m_NetworkFrameReady][0], m_pBackBuffer8, 0, 0, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
-				masked_blit(m_pNetworkBackBufferFinalGUI8[m_NetworkFrameReady][0], m_pBackBuffer8, 0, 0, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
+				blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][0], m_BackBuffer8, 0, 0, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
+				masked_blit(m_NetworkBackBufferFinalGUI8[m_NetworkFrameReady][0], m_BackBuffer8, 0, 0, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 
 				if (g_UInputMan.FlagAltState() || g_UInputMan.FlagCtrlState() || g_UInputMan.FlagShiftState()) { g_PerformanceMan.DrawCurrentPing(); }
 
@@ -551,8 +551,8 @@ namespace RTE {
 			for (short i = 0; i < c_MaxScreenCount; i++) {
 				int dx = 0;
 				int dy = 0;
-				int dw = m_pBackBuffer8->w / 2;
-				int dh = m_pBackBuffer8->h / 2;
+				int dw = m_BackBuffer8->w / 2;
+				int dh = m_BackBuffer8->h / 2;
 
 				switch (i) {
 					case 1:
@@ -570,30 +570,30 @@ namespace RTE {
 				}
 
 				m_NetworkBitmapIsLocked[i] = true;
-				blit(m_pNetworkBackBufferIntermediate8[m_NetworkFrameCurrent][i], m_pNetworkBackBufferFinal8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->h);
-				blit(m_pNetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][i], m_pNetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_pNetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->w, m_pNetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->h);
+				blit(m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][i], m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->w, m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->h);
+				blit(m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][i], m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->w, m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->h);
 				m_NetworkBitmapIsLocked[i] = false;
 
 #if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
 				// Draw all player's screen into one
 				if (g_UInputMan.KeyHeld(KEY_5)) {
-					stretch_blit(m_pNetworkBackBufferFinal8[m_NetworkFrameCurrent][i], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->h, dx, dy, dw, dh);
+					stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h, dx, dy, dw, dh);
 				}
 #endif
 			}
 
 #if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
 			if (g_UInputMan.KeyHeld(KEY_1)) {
-				stretch_blit(m_pNetworkBackBufferFinal8[0][0], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][0]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][0]->h, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
+				stretch_blit(m_NetworkBackBufferFinal8[0][0], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 			}
 			if (g_UInputMan.KeyHeld(KEY_2)) {
-				stretch_blit(m_pNetworkBackBufferFinal8[1][0], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][1]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][1]->h, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
+				stretch_blit(m_NetworkBackBufferFinal8[1][0], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][1]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][1]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 			}
 			if (g_UInputMan.KeyHeld(KEY_3)) {
-				stretch_blit(m_pNetworkBackBufferFinal8[m_NetworkFrameReady][2], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][2]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][2]->h, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
+				stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][2], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][2]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][2]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 			}
 			if (g_UInputMan.KeyHeld(KEY_4)) {
-				stretch_blit(m_pNetworkBackBufferFinal8[m_NetworkFrameReady][3], m_pBackBuffer8, 0, 0, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][3]->w, m_pNetworkBackBufferFinal8[m_NetworkFrameReady][3]->h, 0, 0, m_pBackBuffer8->w, m_pBackBuffer8->h);
+				stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][3], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][3]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][3]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 			}
 #endif
 
@@ -606,9 +606,9 @@ namespace RTE {
 		if (g_InActivity) { g_PostProcessMan.PostProcess(); }
 
 		// Draw the console on top of everything
-		g_ConsoleMan.Draw(m_pBackBuffer32);
+		g_ConsoleMan.Draw(m_BackBuffer32);
 
-		release_bitmap(m_pBackBuffer8);
+		release_bitmap(m_BackBuffer8);
 
 		// Reset the frame timer so we can measure how much it takes until next frame being drawn
 		g_PerformanceMan.ResetFrameTimer();
@@ -777,7 +777,7 @@ namespace RTE {
 
 	void FrameMan::ResetSplitScreens(bool hSplit, bool vSplit) {
 		// Free the previous splitscreen, if any
-		if (m_pPlayerScreen) { release_bitmap(m_pPlayerScreen); }
+		if (m_PlayerScreen) { release_bitmap(m_PlayerScreen); }
 
 		// Override screen splitting according to settings if needed
 		if ((hSplit || vSplit) && !(hSplit && vSplit) && (m_HSplitOverride || m_VSplitOverride)) {
@@ -789,18 +789,18 @@ namespace RTE {
 
 		// Create the splitscreen buffer
 		if (m_HSplit || m_VSplit) {
-			m_pPlayerScreen = create_bitmap_ex(8, g_FrameMan.GetResX() / (m_VSplit ? 2 : 1), g_FrameMan.GetResY() / (m_HSplit ? 2 : 1));
-			clear_to_color(m_pPlayerScreen, m_BlackColor);
-			set_clip_state(m_pPlayerScreen, 1);
+			m_PlayerScreen = create_bitmap_ex(8, g_FrameMan.GetResX() / (m_VSplit ? 2 : 1), g_FrameMan.GetResY() / (m_HSplit ? 2 : 1));
+			clear_to_color(m_PlayerScreen, m_BlackColor);
+			set_clip_state(m_PlayerScreen, 1);
 
 			// Update these to represent the split screens
-			m_PlayerScreenWidth = m_pPlayerScreen->w;
-			m_PlayerScreenHeight = m_pPlayerScreen->h;
+			m_PlayerScreenWidth = m_PlayerScreen->w;
+			m_PlayerScreenHeight = m_PlayerScreen->h;
 
 		// No splits, so set the screen dimensions equal to the back buffer
 		} else {
-			m_PlayerScreenWidth = m_pBackBuffer8->w;
-			m_PlayerScreenHeight = m_pBackBuffer8->h;
+			m_PlayerScreenWidth = m_BackBuffer8->w;
+			m_PlayerScreenHeight = m_BackBuffer8->h;
 		}
 		// Reset the flashes
 		for (short i = 0; i < c_MaxScreenCount; ++i) {
@@ -816,12 +816,12 @@ namespace RTE {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
 				unsigned short w = GetResX();
 				for (short i = 0; i < c_MaxScreenCount; i++) {
-					if (m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->w < w)) { w = m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->w; }
+					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w < w)) { w = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w; }
 				}
 				return w;
 			} else {
-				if (m_pNetworkBackBufferFinal8[m_NetworkFrameReady][whichPlayer]) {
-					return m_pNetworkBackBufferFinal8[m_NetworkFrameReady][whichPlayer]->w;
+				if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][whichPlayer]) {
+					return m_NetworkBackBufferFinal8[m_NetworkFrameReady][whichPlayer]->w;
 				}
 			}
 		}
@@ -835,12 +835,12 @@ namespace RTE {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
 				unsigned short h = GetResY();
 				for (short i = 0; i < c_MaxScreenCount; i++) {
-					if (m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < h)) { h = m_pNetworkBackBufferFinal8[m_NetworkFrameReady][i]->h; }
+					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < h)) { h = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h; }
 				}
 				return h;
 			} else {
-				if (m_pNetworkBackBufferFinal8[m_NetworkFrameReady][whichPlayer]) {
-					return m_pNetworkBackBufferFinal8[m_NetworkFrameReady][whichPlayer]->h;
+				if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][whichPlayer]) {
+					return m_NetworkBackBufferFinal8[m_NetworkFrameReady][whichPlayer]->h;
 				}
 			}
 		}
@@ -850,27 +850,27 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	GUIFont * FrameMan::GetSmallFont() {
-		if (!m_pSmallFont) {
-			if (!m_pGUIScreen) {
-				m_pGUIScreen = new AllegroScreen(m_pBackBuffer8);
+		if (!m_SmallFont) {
+			if (!m_GUIScreen) {
+				m_GUIScreen = new AllegroScreen(m_BackBuffer8);
 			}
-			m_pSmallFont = new GUIFont("SmallFont");
-			m_pSmallFont->Load(m_pGUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.bmp");
+			m_SmallFont = new GUIFont("SmallFont");
+			m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.bmp");
 		}
-		return m_pSmallFont;
+		return m_SmallFont;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	GUIFont * FrameMan::GetLargeFont() {
-		if (!m_pLargeFont) {
-			if (!m_pGUIScreen) {
-				m_pGUIScreen = new AllegroScreen(m_pBackBuffer8);
+		if (!m_LargeFont) {
+			if (!m_GUIScreen) {
+				m_GUIScreen = new AllegroScreen(m_BackBuffer8);
 			}
-			m_pLargeFont = new GUIFont("FatFont");
-			m_pLargeFont->Load(m_pGUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.bmp");
+			m_LargeFont = new GUIFont("FatFont");
+			m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.bmp");
 		}
-		return m_pLargeFont;
+		return m_LargeFont;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -913,9 +913,9 @@ namespace RTE {
 
 	void FrameMan::FlipFrameBuffers() {
 		if ((!m_Fullscreen && m_NxWindowed != 1) || (m_Fullscreen && m_NxFullscreen != 1)) {
-			stretch_blit(m_pBackBuffer32, screen, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
+			stretch_blit(m_BackBuffer32, screen, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
 		} else {
-			blit(m_pBackBuffer32, screen, 0, 0, 0, 0, m_pBackBuffer32->w, m_pBackBuffer32->h);
+			blit(m_BackBuffer32, screen, 0, 0, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h);
 		}
 	}
 
@@ -1124,17 +1124,17 @@ namespace RTE {
 
 	void FrameMan::CreateNewPlayerBackBuffer(int player, int w, int h) {
 		for (int f = 0; f < 2; f++) {
-			destroy_bitmap(m_pNetworkBackBufferIntermediate8[f][player]);
-			m_pNetworkBackBufferIntermediate8[f][player] = create_bitmap_ex(8, w, h);
+			destroy_bitmap(m_NetworkBackBufferIntermediate8[f][player]);
+			m_NetworkBackBufferIntermediate8[f][player] = create_bitmap_ex(8, w, h);
 
-			destroy_bitmap(m_pNetworkBackBufferIntermediateGUI8[f][player]);
-			m_pNetworkBackBufferIntermediateGUI8[f][player] = create_bitmap_ex(8, w, h);
+			destroy_bitmap(m_NetworkBackBufferIntermediateGUI8[f][player]);
+			m_NetworkBackBufferIntermediateGUI8[f][player] = create_bitmap_ex(8, w, h);
 
-			destroy_bitmap(m_pNetworkBackBufferFinal8[f][player]);
-			m_pNetworkBackBufferFinal8[f][player] = create_bitmap_ex(8, w, h);
+			destroy_bitmap(m_NetworkBackBufferFinal8[f][player]);
+			m_NetworkBackBufferFinal8[f][player] = create_bitmap_ex(8, w, h);
 
-			destroy_bitmap(m_pNetworkBackBufferFinalGUI8[f][player]);
-			m_pNetworkBackBufferFinalGUI8[f][player] = create_bitmap_ex(8, w, h);
+			destroy_bitmap(m_NetworkBackBufferFinalGUI8[f][player]);
+			m_NetworkBackBufferFinalGUI8[f][player] = create_bitmap_ex(8, w, h);
 		}
 		m_PlayerScreenWidth = w;
 		m_PlayerScreenHeight = h;
@@ -1178,15 +1178,15 @@ namespace RTE {
 			if (!pTempFile || !pTempFile->dat || pTempFile->type != DAT_PALETTE) { RTEAbort(("Failed to load palette datafile object with following path and name:\n\n" + palettePath).c_str()); }
 
 			// Now when we know it's valid, go ahead and replace the old palette with it
-			if (m_pPaletteDataFile) { unload_datafile_object(m_pPaletteDataFile); }
-			m_pPaletteDataFile = pTempFile;
+			if (m_PaletteDataFile) { unload_datafile_object(m_PaletteDataFile); }
+			m_PaletteDataFile = pTempFile;
 
 			// Set the current palette
-			set_palette(*((PALETTE *)m_pPaletteDataFile->dat));
+			set_palette(*((PALETTE *)m_PaletteDataFile->dat));
 
 			// Update what black is now with the loaded palette
-			m_BlackColor = bestfit_color(*((PALETTE *)m_pPaletteDataFile->dat), 0, 0, 0);
-			m_AlmostBlackColor = bestfit_color(*((PALETTE *)m_pPaletteDataFile->dat), 5, 5, 5);
+			m_BlackColor = bestfit_color(*((PALETTE *)m_PaletteDataFile->dat), 0, 0, 0);
+			m_AlmostBlackColor = bestfit_color(*((PALETTE *)m_PaletteDataFile->dat), 5, 5, 5);
 			*/
 		}
 		// Indicate success
@@ -1215,12 +1215,12 @@ namespace RTE {
 
 		// Save out the screen bitmap, after making a copy of it, faster sometimes
 		if (screen) {
-			if (!m_pScreendumpBuffer) { m_pScreendumpBuffer = create_bitmap(screen->w, screen->h); }
+			if (!m_ScreendumpBuffer) { m_ScreendumpBuffer = create_bitmap(screen->w, screen->h); }
 
-			blit(screen, m_pScreendumpBuffer, 0, 0, 0, 0, screen->w, screen->h);
+			blit(screen, m_ScreendumpBuffer, 0, 0, 0, 0, screen->w, screen->h);
 			PALETTE palette;
 			get_palette(palette);
-			save_bmp(fullfilename, m_pScreendumpBuffer, palette);
+			save_bmp(fullfilename, m_ScreendumpBuffer, palette);
 
 			g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + string(fullfilename));
 		}
@@ -1281,7 +1281,7 @@ namespace RTE {
 			float angle = 0;
 
 			for (list<PostEffect>::iterator eItr = postEffects.begin(); eItr != postEffects.end(); ++eItr) {
-				pBitmap = (*eItr).m_pBitmap;
+				pBitmap = (*eItr).m_Bitmap;
 				strength = (*eItr).m_Strength;
 				set_screen_blender(strength, strength, strength, strength);
 				effectPosX = (*eItr).m_Pos.GetFloorIntX() - (pBitmap->w / 2);

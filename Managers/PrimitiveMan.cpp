@@ -163,7 +163,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PrimitiveMan::BitmapPrimitive::Draw(BITMAP *pDrawScreen, Vector targetPos) {
-		if (!m_pBitmap) {
+		if (!m_Bitmap) {
 			return;
 		}
 		Vector pos[2];
@@ -184,7 +184,7 @@ namespace RTE {
 
 		for (unsigned short i = 0; i < 2; i++) {
 			// Take into account the h-flipped pivot point
-			pivot_scaled_sprite(pDrawScreen, m_pBitmap, pos[i].GetFloorIntX(), pos[i].GetFloorIntY(), m_pBitmap->w / 2, m_pBitmap->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			pivot_scaled_sprite(pDrawScreen, m_Bitmap, pos[i].GetFloorIntX(), pos[i].GetFloorIntY(), m_Bitmap->w / 2, m_Bitmap->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
 		}
 	}
 

@@ -20,6 +20,8 @@ namespace RTE {
 
 	public:
 
+		Vector SLOffset[c_MaxScreenCount][c_MaxLayersStoredForNetwork]; //!<
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a FrameMan object in system memory. Create() should be called before using the object.
@@ -378,7 +380,7 @@ namespace RTE {
 		/// <param name="start">The absolute Start point.</param>
 		/// <param name="end">The absolute end point.</param>
 		/// <param name="color">The color value of the line.</param>
-		/// <param name="altColor">A color to alternate with every other pixel drawn will have this if !0.</param>
+		/// <param name="altColor">A color to alternate with. Every other pixel drawn will have this if !0.</param>
 		/// <param name="skip">How many pixels to skip drawing between drawn ones. 0 means solid line 2 means there's a gap of two pixels between each drawn one.</param>
 		/// <param name="skipStart">The start of the skipping phase. If skip is 10 and this is 5, the first dot will be drawn after 5 pixels.</param>
 		/// <param name="shortestWrap">Whether the line should take the shortest possible route across scene wraps.</param>
@@ -471,18 +473,13 @@ namespace RTE {
 		/// <param name="w"></param>
 		/// <param name="h"></param>
 		void CreateNewPlayerBackBuffer(int player, int w, int h);
-
-		/// <summary>
-		/// 
-		/// </summary>
-		Vector SLOffset[c_MaxScreenCount][c_MaxLayersStoredForNetwork];
 #pragma endregion
 
 #pragma region Palette Routines
 		/// <summary>
-		/// Loads a palette from a .dat file and sets it as the currently used screen palette.
+		/// Loads a palette from a bitmap file and sets it as the currently used screen palette.
 		/// </summary>
-		/// <param name="palettePath">String with the data path to the palette data object within a .dat.</param>
+		/// <param name="palettePath">String with the path to the palette bitmap file.</param>
 		/// <returns>Whether palette loaded successfully or not.</returns>
 		bool LoadPalette(std::string palettePath);
 
@@ -491,12 +488,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>An reference to a ContentFile which described the palette location.</returns>
 		const ContentFile & GetPaletteFile() const { return m_PaletteFile; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		unsigned char GetBlackIndex() const { return m_BlackColor; }
 
 		/// <summary>
 		/// Fades the palette in from black at a specified speed.
@@ -578,36 +569,29 @@ namespace RTE {
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.	
 		bool m_HSplitOverride; //!< Whether the screen is set to split horizontally in settings.		
 		bool m_VSplitOverride; //!< Whether the screen is set to split vertically in settings.
-
-		//!< Data file of the screen palette
-		ContentFile m_PaletteFile;
+	
+		ContentFile m_PaletteFile; //!< File of the screen palette.
 
 		// Transparency color tables
 		COLOR_MAP m_LessTransTable;
 		COLOR_MAP m_HalfTransTable;
 		COLOR_MAP m_MoreTransTable;
 
-		// Color black index
-		unsigned char m_BlackColor;
-		unsigned char m_AlmostBlackColor;
+		unsigned char m_BlackColor; //!< Palette index for the black color.
+		unsigned char m_AlmostBlackColor; //!< Palette index for the closest to black color.
 		
-
 		BITMAP *m_PlayerScreen; //!< Intermediary split screen bitmap.
-
-		// Dimensions of each of the screens of each player. Will be smaller than resolution only if the screen is split
-		int m_PlayerScreenWidth;
-		int m_PlayerScreenHeight;
+		int m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.
+		int m_PlayerScreenHeight; //!< Height of the screen of each player. Will be smaller than resolution only if the screen is split.
 	
 		float m_PPM; //!< Pixels Per Meter constant.		
 		float m_MPP; //!< Meters Per Pixel constant.	
 		float m_PPL; //!< Pixels per Liter constant.	
 		float m_LPP; //!< Liters Per Pixel constant.
-
-		//!< GUI screen object kept and owned just for the fonts.
-		AllegroScreen *m_GUIScreen;
-		//!< Standard fonts for quick access.
-		GUIFont *m_LargeFont;
-		GUIFont *m_SmallFont;
+	
+		AllegroScreen *m_GUIScreen; //!< GUI screen object kept and owned just for the fonts.
+		GUIFont *m_SmallFont; //!< Standard small font for quick access.	
+		GUIFont *m_LargeFont; //!< Standard large font for quick access.
 		
 		std::string m_ScreenText[c_MaxScreenCount]; //!< The text to be displayed on each player's screen.		
 		int m_TextDuration[c_MaxScreenCount]; //!< The minimum duration the current message is supposed to show before it can be overwritten.		
@@ -620,17 +604,16 @@ namespace RTE {
 		bool m_FlashedLastFrame[c_MaxScreenCount]; //!< Whether we flashed last frame or not.		
 		Timer m_FlashTimer[c_MaxScreenCount]; //!< Flash screen timer.
 		
+		BITMAP *m_BackBuffer8; //!< Screen back buffer, always 8bpp, gets copied to the 32bpp buffer for post-processing.
+		BITMAP *m_BackBuffer32; //!< 32bpp back buffer, only used for post-processing.
+		BITMAP *m_ScreendumpBuffer; //!< Temporary buffer for making quick screencaps.	
 
-		Vector m_TargetPos[2][c_MaxScreenCount]; //!< Frame target pos for network players.
-
-
-		BITMAP *m_BackBuffer8; //!< Screen back buffer, always 8bpp, gets copied to the 32bpp buffer if post processing is used.
-		BITMAP *m_BackBuffer32; //!< 32Bits per pixel back buffer, only used if player elects, and only if in 32bpp video mode.
-		BITMAP *m_ScreendumpBuffer; //!< Temporary buffer for making quick screencaps.			
 		BITMAP *m_NetworkBackBufferIntermediate8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw.
 		BITMAP *m_NetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw used to draw UI only.
-		BITMAP *m_NetworkBackBufferFinal8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to copy Intermediate before sending
+		BITMAP *m_NetworkBackBufferFinal8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to copy Intermediate before sending.
 		BITMAP *m_NetworkBackBufferFinalGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to copy Intermediate before sending used to draw UI only.
+
+		Vector m_TargetPos[2][c_MaxScreenCount]; //!< Frame target position for network players.
 
 		bool m_DrawNetworkBackBuffer; //!< If true, draws the contents of the m_NetworkBackBuffer8 on top of m_BackBuffer8 every frame in FrameMan.Draw.
 		bool m_StoreNetworkBackBuffer; //!< If true, dumps the contents of the m_BackBuffer8 to the m_NetworkBackBuffer8 every frame.
@@ -638,7 +621,8 @@ namespace RTE {
 		int m_NetworkFrameCurrent; //!< Which frame index is being rendered, 0 or 1.	
 		int m_NetworkFrameReady; //!< Which frame is rendered and ready for transmission, 0 or 1.
 
-		bool m_NetworkBitmapIsLocked[c_MaxScreenCount]; //!< If true then the network bitmap is being updated
+		bool m_NetworkBitmapIsLocked[c_MaxScreenCount]; //!< If true then the network bitmap is being updated.
+		// TODO: Test if this destroys the whole multiplayer and use instead of the one above if it doesn't.
 		//std::mutex m_NetworkBitmapIsLocked[c_MaxScreenCount];
 
 	private:

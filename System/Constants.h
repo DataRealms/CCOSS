@@ -4,6 +4,7 @@
 namespace RTE {
 
 #pragma region Type Definitions
+	// TODO: Look into not using distinctive types for IDs.
 	typedef int MOID; //!< Distinctive type definition for MovableObject IDs.
 	typedef int MID; //!< Distinctive type definition for Material IDs.
 #pragma endregion

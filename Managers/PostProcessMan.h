@@ -105,7 +105,12 @@ namespace RTE {
 		/// <returns>Whether any active post effects were found in that box.</returns>
 		bool GetPostScreenEffectsWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, int team = -1);
 
-		BITMAP *GetTempEffectBitmap(unsigned short bitmapSize) const;
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="bitmapSize"></param>
+		/// <returns></returns>
+		BITMAP* GetTempEffectBitmap(unsigned short bitmapSize) const;
 #pragma endregion
 
 #pragma region Post Pixel Glow Handling
@@ -113,20 +118,20 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		std::list<Box> *GetPostScreenGlowBoxesList() { return &m_PostScreenGlowBoxes; }
+		std::list<Box>* GetPostScreenGlowBoxesList() { return &m_PostScreenGlowBoxes; }
 
 		/// <summary>
 		/// Registers a specific IntRect to be post-processed and have special pixel colors lit up by glow effects in it.
 		/// </summary>
 		/// <param name="glowArea">The IntRect to have special color pixels glow in, in scene coordinates.</param>
-		void RegisterGlowArea(const IntRect &glowArea);
+		void RegisterGlowArea(const IntRect &glowArea) { if (g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0) { m_GlowAreas.push_back(glowArea); } }
 
 		/// <summary>
 		/// Registers a specific IntRect to be post-processed and have special pixel colors lit up by glow effects in it.
 		/// </summary>
 		/// <param name="center">The center of the IntRect.</param>
 		/// <param name="radius">The radius around it to add as an area.</param>
-		void RegisterGlowArea(const Vector &center, float radius);
+		void RegisterGlowArea(const Vector &center, float radius) { RegisterGlowArea(IntRect(center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius)); }
 
 		/// <summary>
 		/// Registers a specific glow dot effect to be added at the very last stage of 32bpp rendering by the FrameMan.
@@ -244,6 +249,15 @@ namespace RTE {
 #pragma endregion
 
 	private:
+		/// <summary>
+		/// 
+		/// </summary>
+		void DrawDotGlowEffects();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void DrawPostScreenEffects();
 
 		/// <summary>
 		/// Clears all the member variables of this PostProcessMan, effectively resetting the members of this abstraction level only.

@@ -79,6 +79,7 @@ namespace RTE {
 			m_FlashScreenColor[i] = -1;
 			m_FlashedLastFrame[i] = false;
 			m_FlashTimer[i].Reset();
+			m_NetworkBitmapIsLocked[i] = false;
 
 			for (short f = 0; f < 2; f++) {
 				m_NetworkBackBufferIntermediate8[f][i] = 0;
@@ -86,7 +87,6 @@ namespace RTE {
 				m_NetworkBackBufferIntermediateGUI8[f][i] = 0;
 				m_NetworkBackBufferFinalGUI8[f][i] = 0;
 			}
-			m_NetworkBitmapIsLocked[i] = false;
 		}
 	}
 
@@ -123,7 +123,7 @@ namespace RTE {
 				if (set_gfx_mode(m_Fullscreen ? fullscreenGfxDriver : windowedGfxDriver, m_Fullscreen ? m_ResX * m_NxFullscreen : m_ResX * m_NxWindowed, m_Fullscreen ? m_ResY * m_NxFullscreen : m_ResY * m_NxWindowed, 0, 0) != 0) {
 					// Oops, failed to set the resolution specified in the setting file, so default to a safe one instead
 					allegro_message("Unable to set specified graphics mode because: %s!\n\nNow trying to default back to VGA...", allegro_error);
-					if (set_gfx_mode(m_Fullscreen ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0) != 0) {
+					if (set_gfx_mode(m_Fullscreen ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED, 960, 540, 0, 0) != 0) {
 						set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
 						allegro_message("Unable to set any graphics mode because %s!", allegro_error);
 						return 1;
@@ -697,11 +697,9 @@ namespace RTE {
 		// Adjust the speed of the mouse according to 2x of screen
 		float mouseDenominator = IsFullscreen() ? NxFullscreen() : NxWindowed();
 		// If NxFullscreen, adjust the mouse speed accordingly
-		if (g_FrameMan.IsFullscreen() && g_FrameMan.NxFullscreen() > 1) {
-			set_mouse_speed(1, 1);
-		} else {
-			set_mouse_speed(2, 2);
-		}
+		unsigned char mouseSpeedMultiplier = (g_FrameMan.IsFullscreen() && g_FrameMan.NxFullscreen() > 1) ? 1 : 2;
+		set_mouse_speed(mouseSpeedMultiplier, mouseSpeedMultiplier);
+
 		set_mouse_range(0, 0, (GetResX() * mouseDenominator) - 3, (GetResY() * mouseDenominator) - 3);
 
 		return 0;
@@ -1117,71 +1115,35 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::LoadPalette(std::string palettePath) {
-		// Look for the '#' denoting the divider between the datafile and the datafile object's name is
-		// If we find one, that means we're trying to load from a datafile, otherwise it's from an exposed bitmap
-		int separatorPos = palettePath.rfind('#');
+		PALETTE newPalette;
+		BITMAP *tempBitmap = load_bitmap(palettePath.c_str(), newPalette);
+		RTEAssert(tempBitmap, ("Failed to load palette from bitmap with following path:\n\n" + palettePath).c_str());
 
-		// Check whether we're trying to load a palette from an exposed bitmap or from a datafile
-		if (separatorPos == -1 || separatorPos >= palettePath.length() - 1) {
-			// Just going to discard the bitmap, we're only interested in the palette
-			BITMAP *tempBitmap;
-			PALETTE newPalette;
-			if (!(tempBitmap = load_bitmap(palettePath.c_str(), newPalette))) { RTEAbort(("Failed to load palette from bitmap with following path:\n\n" + palettePath).c_str()); }
+		set_palette(newPalette);
 
-			// Set the current palette
-			set_palette(newPalette);
+		// Update what black is now with the loaded palette
+		m_BlackColor = bestfit_color(newPalette, 0, 0, 0);
+		m_AlmostBlackColor = bestfit_color(newPalette, 5, 5, 5);
 
-			// Update what black is now with the loaded palette
-			m_BlackColor = bestfit_color(newPalette, 0, 0, 0);
-			m_AlmostBlackColor = bestfit_color(newPalette, 5, 5, 5);
+		destroy_bitmap(tempBitmap);
 
-			// Free the temp bitmap that had the palette
-			destroy_bitmap(tempBitmap);	
-		// Loading from a datafile
-		} else {
-			/*
-			// Get the Path only, without the object name, using the separator index as length limiter
-			string datafilePath = palettePath.substr(0, separatorPos);
-			// Adjusting to the true first character of the datafile object's name string.
-			string objectName = palettePath.substr(separatorPos + 1);
-
-			// Try loading the datafile from the specified path + object names.
-			DATAFILE *pTempFile = load_datafile_object(datafilePath.c_str(), objectName.c_str());
-
-			// Make sure we loaded properly.
-			if (!pTempFile || !pTempFile->dat || pTempFile->type != DAT_PALETTE) { RTEAbort(("Failed to load palette datafile object with following path and name:\n\n" + palettePath).c_str()); }
-
-			// Now when we know it's valid, go ahead and replace the old palette with it
-			if (m_PaletteDataFile) { unload_datafile_object(m_PaletteDataFile); }
-			m_PaletteDataFile = pTempFile;
-
-			// Set the current palette
-			set_palette(*((PALETTE *)m_PaletteDataFile->dat));
-
-			// Update what black is now with the loaded palette
-			m_BlackColor = bestfit_color(*((PALETTE *)m_PaletteDataFile->dat), 0, 0, 0);
-			m_AlmostBlackColor = bestfit_color(*((PALETTE *)m_PaletteDataFile->dat), 5, 5, 5);
-			*/
-		}
-		// Indicate success
 		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SaveScreenToBMP(const char *namebase) {
+	int FrameMan::SaveScreenToBMP(const char *nameBase) {
 		int filenumber = 0;
 		char fullfilename[256];
 		int maxFileTrys = 1000;
 
-		// Make sure its not a 0 name base
-		if (namebase == 0 || strlen(namebase) <= 0) {
+		if (nameBase == 0 || strlen(nameBase) <= 0) {
 			return -1;
 		}
 
 		do {
 			// Check for the file namebase001.bmp; if it exists, try 002, etc.
-			sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", namebase, filenumber++);
+			sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", nameBase, filenumber++);
 			if (!exists(fullfilename)) {
 				break;
 			}

@@ -30,13 +30,12 @@ namespace RTE {
 		m_Sample = 0;
 
 		for (unsigned short counter = 0; counter < PERF_COUNT; ++counter) {
-			for (unsigned short i = 0; i < c_MaxSamples; ++i) {
-				m_PerfData[counter][i] = 0;
-				m_PerfPercentages[counter][i] = 0;
-			}
+			std::fill_n(m_PerfData[counter], c_MaxSamples, 0);
+			std::fill_n(m_PerfPercentages[counter], c_MaxSamples, 0);
 			m_PerfMeasureStart[counter] = 0;
 			m_PerfMeasureStop[counter] = 0;
 		}
+
 		// Set up performance counter's names
 		m_PerfCounterNames[PERF_SIM_TOTAL] = "Total";
 		m_PerfCounterNames[PERF_ACTORS_PASS1] = "Act Travel";

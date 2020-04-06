@@ -60,105 +60,9 @@ namespace RTE {
 		//acquire_bitmap(m_BackBuffer8);
 		//acquire_bitmap(m_BackBuffer32);
 
-		// Randomly sample the entire backbuffer, looking for pixels to put a glow on
-		// NOTE THIS IS SLOW, especially on higher resolutions!
-		int x = 0;
-		int y = 0;
-		int startX = 0;
-		int startY = 0;
-		int endX = 0;
-		int endY = 0;
-		unsigned short testpixel = 0;
+		DrawDotGlowEffects();
+		DrawPostScreenEffects();
 
-		for (std::list<Box>::iterator bItr = m_PostScreenGlowBoxes.begin(); bItr != m_PostScreenGlowBoxes.end(); ++bItr) {
-			startX = (*bItr).m_Corner.m_X;
-			startY = (*bItr).m_Corner.m_Y;
-			endX = startX + (*bItr).m_Width;
-			endY = startY + (*bItr).m_Height;
-			testpixel = 0;
-
-			// Sanity check a little at least
-			if (startX < 0 || startX >= g_FrameMan.GetBackBuffer8()->w || startY < 0 || startY >= g_FrameMan.GetBackBuffer8()->h ||
-				endX < 0 || endX >= g_FrameMan.GetBackBuffer8()->w || endY < 0 || endY >= g_FrameMan.GetBackBuffer8()->h) {
-				continue;
-			}
-
-#ifdef DEBUG_BUILD
-			// Draw a rectangle around the glow box so we see it's position and size
-			rect(m_BackBuffer32, startX, startY, endX, endY, g_RedColor);
-#endif
-
-			for (y = startY; y < endY; ++y) {
-				for (x = startX; x < endX; ++x) {
-					testpixel = _getpixel(g_FrameMan.GetBackBuffer8(), x, y);
-
-					// YELLOW
-					if ((testpixel == g_YellowGlowColor && PosRand() < 0.9) || testpixel == 98 || (testpixel == 120 && PosRand() < 0.7)) {
-						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_YellowGlow, x - 2, y - 2);
-					}
-					// RED
-					/*
-					if (testpixel == 13) {
-						draw_trans_sprite(m_BackBuffer32, m_RedGlow, x - 2, y - 2);
-					}
-					*/
-					// BLUE
-					if (testpixel == 166) {
-						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_BlueGlow, x - 2, y - 2);
-					}
-				}
-			}
-		}
-
-		// Draw all the scene screen effects accumulated this frame
-		BITMAP *pBitmap = 0;
-		int effectPosX = 0;
-		int effectPosY = 0;
-		int strength = 0;
-		float angle = 0;
-
-		for (std::list<PostEffect>::iterator eItr = m_PostScreenEffects.begin(); eItr != m_PostScreenEffects.end(); ++eItr) {
-			if ((*eItr).m_Bitmap) {
-				pBitmap = (*eItr).m_Bitmap;
-				strength = (*eItr).m_Strength;
-				set_screen_blender(strength, strength, strength, strength);
-				effectPosX = (*eItr).m_Pos.GetFloorIntX() - (pBitmap->w / 2);
-				effectPosY = (*eItr).m_Pos.GetFloorIntY() - (pBitmap->h / 2);
-				angle = (*eItr).m_Angle;
-				//draw_trans_sprite(m_pBackBuffer32, pBitmap, effectPosX, effectPosY);
-
-				if (angle == 0) {
-					draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pBitmap, effectPosX, effectPosY);
-				} else {
-					BITMAP * pTargetBitmap;
-
-					if (pBitmap->w < 16 && pBitmap->h < 16) {
-						pTargetBitmap = m_TempEffectBitmap_16;
-					} else if (pBitmap->w < 32 && pBitmap->h < 32) {
-						pTargetBitmap = m_TempEffectBitmap_32;
-					} else if (pBitmap->w < 64 && pBitmap->h < 64) {
-						pTargetBitmap = m_TempEffectBitmap_64;
-					} else if (pBitmap->w < 128 && pBitmap->h < 128) {
-						pTargetBitmap = m_TempEffectBitmap_128;
-					} else if (pBitmap->w < 256 && pBitmap->h < 256) {
-						pTargetBitmap = m_TempEffectBitmap_256;
-					} else {
-						pTargetBitmap = m_TempEffectBitmap_512;
-					}
-
-					clear_to_color(pTargetBitmap, 0);
-
-					//fixed fAngle;
-					//fAngle = fixmul(angle, radtofix_r);
-
-					Matrix m;
-					m.SetRadAngle(angle);
-
-					rotate_sprite(pTargetBitmap, pBitmap, 0, 0, ftofix(m.GetAllegroAngle()));
-					draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pTargetBitmap, effectPosX, effectPosY);
-				}
-			}
-		}
 		//release_bitmap(m_BackBuffer32);
 		//release_bitmap(m_BackBuffer8);
 
@@ -218,16 +122,6 @@ namespace RTE {
 		} else if (bitmapSize <= 256) {
 			return m_TempEffectBitmap_256;
 		} else {
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PostProcessMan::RegisterGlowArea(const IntRect &glowArea) { if (g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0) m_GlowAreas.push_back(glowArea); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PostProcessMan::RegisterGlowArea(const Vector &center, float radius) {
-		if (g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0) {
-			RegisterGlowArea(IntRect(center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius));
 			return m_TempEffectBitmap_512;
 		}
 	}
@@ -363,6 +257,114 @@ namespace RTE {
 			default:
 				RTEAbort("Undefined glow dot color value passed in. See DotGlowColor enumeration for defined values.");
 				return 0;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PostProcessMan::DrawDotGlowEffects() {
+		int x = 0;
+		int y = 0;
+		int startX = 0;
+		int startY = 0;
+		int endX = 0;
+		int endY = 0;
+		unsigned short testpixel = 0;
+
+		// Randomly sample the entire backbuffer, looking for pixels to put a glow on.
+		// NOTE THIS IS SLOW, especially on higher resolutions!
+		for (std::list<Box>::iterator bItr = m_PostScreenGlowBoxes.begin(); bItr != m_PostScreenGlowBoxes.end(); ++bItr) {
+			startX = (*bItr).m_Corner.m_X;
+			startY = (*bItr).m_Corner.m_Y;
+			endX = startX + (*bItr).m_Width;
+			endY = startY + (*bItr).m_Height;
+			testpixel = 0;
+
+			// Sanity check a little at least
+			if (startX < 0 || startX >= g_FrameMan.GetBackBuffer8()->w || startY < 0 || startY >= g_FrameMan.GetBackBuffer8()->h ||
+				endX < 0 || endX >= g_FrameMan.GetBackBuffer8()->w || endY < 0 || endY >= g_FrameMan.GetBackBuffer8()->h) {
+				continue;
+			}
+
+#ifdef DEBUG_BUILD
+			// Draw a rectangle around the glow box so we see it's position and size
+			rect(m_BackBuffer32, startX, startY, endX, endY, g_RedColor);
+#endif
+			
+			for (y = startY; y < endY; ++y) {
+				for (x = startX; x < endX; ++x) {
+					testpixel = _getpixel(g_FrameMan.GetBackBuffer8(), x, y);
+
+					// YELLOW
+					if ((testpixel == g_YellowGlowColor && PosRand() < 0.9) || testpixel == 98 || (testpixel == 120 && PosRand() < 0.7)) {
+						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_YellowGlow, x - 2, y - 2);
+					}
+					// TODO: Enable and add more colors once we actually have something that needs these.
+					// RED
+					/*
+					if (testpixel == 13) {
+						draw_trans_sprite(m_BackBuffer32, m_RedGlow, x - 2, y - 2);
+					}
+					// BLUE
+					if (testpixel == 166) {
+						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_BlueGlow, x - 2, y - 2);
+					}
+					*/
+				}
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PostProcessMan::DrawPostScreenEffects() {
+		BITMAP *pBitmap = 0;
+		int effectPosX = 0;
+		int effectPosY = 0;
+		int strength = 0;
+		float angle = 0;
+
+		for (std::list<PostEffect>::iterator eItr = m_PostScreenEffects.begin(); eItr != m_PostScreenEffects.end(); ++eItr) {
+			if ((*eItr).m_Bitmap) {
+				pBitmap = (*eItr).m_Bitmap;
+				strength = (*eItr).m_Strength;
+				set_screen_blender(strength, strength, strength, strength);
+				effectPosX = (*eItr).m_Pos.GetFloorIntX() - (pBitmap->w / 2);
+				effectPosY = (*eItr).m_Pos.GetFloorIntY() - (pBitmap->h / 2);
+				angle = (*eItr).m_Angle;
+
+				// Draw all the scene screen effects accumulated this frame
+				if (angle == 0) {
+					draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pBitmap, effectPosX, effectPosY);
+				} else {
+					BITMAP * pTargetBitmap;
+
+					if (pBitmap->w < 16 && pBitmap->h < 16) {
+						pTargetBitmap = m_TempEffectBitmap_16;
+					} else if (pBitmap->w < 32 && pBitmap->h < 32) {
+						pTargetBitmap = m_TempEffectBitmap_32;
+					} else if (pBitmap->w < 64 && pBitmap->h < 64) {
+						pTargetBitmap = m_TempEffectBitmap_64;
+					} else if (pBitmap->w < 128 && pBitmap->h < 128) {
+						pTargetBitmap = m_TempEffectBitmap_128;
+					} else if (pBitmap->w < 256 && pBitmap->h < 256) {
+						pTargetBitmap = m_TempEffectBitmap_256;
+					} else {
+						pTargetBitmap = m_TempEffectBitmap_512;
+					}
+
+					clear_to_color(pTargetBitmap, 0);
+
+					//fixed fAngle;
+					//fAngle = fixmul(angle, radtofix_r);
+
+					Matrix m;
+					m.SetRadAngle(angle);
+
+					rotate_sprite(pTargetBitmap, pBitmap, 0, 0, ftofix(m.GetAllegroAngle()));
+					draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pTargetBitmap, effectPosX, effectPosY);
+				}
+			}
 		}
 	}
 }

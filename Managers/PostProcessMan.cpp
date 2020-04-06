@@ -50,31 +50,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::PostProcess() {
-		// First copy the current 8bpp backbuffer to the 32bpp buffer; we'll add effects to it
-		blit(g_FrameMan.GetBackBuffer8(), g_FrameMan.GetBackBuffer32(), 0, 0, 0, 0, g_FrameMan.GetBackBuffer8()->w, g_FrameMan.GetBackBuffer8()->h);
-
-		// Set the screen blender mode for glows
-		set_screen_blender(128, 128, 128, 128);
-
-		//acquire_bitmap(m_BackBuffer8);
-		//acquire_bitmap(m_BackBuffer32);
-
-		DrawDotGlowEffects();
-		DrawPostScreenEffects();
-
-		//release_bitmap(m_BackBuffer32);
-		//release_bitmap(m_BackBuffer8);
-
-		// Set blender mode back??
-		//set_trans_blender(128, 128, 128, 128);
-
-		// Clear the effects list for this frame
-		m_PostScreenEffects.clear();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void PostProcessMan::RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, int strength, float angle) {
 		// These effects get applied when there's a drawn frame that followed one or more sim updates.
 		// They are not only registered on drawn sim updates; flashes and stuff could be missed otherwise if they occur on undrawn sim updates.
@@ -258,6 +233,31 @@ namespace RTE {
 				RTEAbort("Undefined glow dot color value passed in. See DotGlowColor enumeration for defined values.");
 				return 0;
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PostProcessMan::PostProcess() {
+		// First copy the current 8bpp backbuffer to the 32bpp buffer; we'll add effects to it
+		blit(g_FrameMan.GetBackBuffer8(), g_FrameMan.GetBackBuffer32(), 0, 0, 0, 0, g_FrameMan.GetBackBuffer8()->w, g_FrameMan.GetBackBuffer8()->h);
+
+		// Set the screen blender mode for glows
+		set_screen_blender(128, 128, 128, 128);
+
+		//acquire_bitmap(m_BackBuffer8);
+		//acquire_bitmap(m_BackBuffer32);
+
+		DrawDotGlowEffects();
+		DrawPostScreenEffects();
+
+		//release_bitmap(m_BackBuffer32);
+		//release_bitmap(m_BackBuffer8);
+
+		// Set blender mode back??
+		//set_trans_blender(128, 128, 128, 128);
+
+		// Clear the effects list for this frame
+		m_PostScreenEffects.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

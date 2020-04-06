@@ -57,33 +57,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::ResetFrameTimer() { m_FrameTimer->Reset(); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PerformanceMan::StartPerformanceMeasurement(PerformanceCounters counter) { m_PerfMeasureStart[counter] = g_TimerMan.GetAbsoulteTime(); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PerformanceMan::StopPerformanceMeasurement(PerformanceCounters counter) {
-		m_PerfMeasureStop[counter] = g_TimerMan.GetAbsoulteTime();
-		AddPerformanceSample(counter, m_PerfMeasureStop[counter] - m_PerfMeasureStart[counter]);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PerformanceMan::NewPerformanceSample() {
-		m_Sample++;
-		if (m_Sample >= c_MaxSamples) { m_Sample = 0; }
-
-		for (unsigned short counter = 0; counter < PERF_COUNT; ++counter) {
-			m_PerfData[counter][m_Sample] = 0;
-			m_PerfPercentages[counter][m_Sample] = 0;
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void PerformanceMan::Update() {
 		// TODO: Figure out how doing this here and then in Draw() evens out the fps values and see if we can get same results without this.
 		// Time and store the milliseconds per frame reading to the buffer, and trim the buffer as needed
@@ -114,6 +87,55 @@ namespace RTE {
 		} else {
 			m_SimSpeed = 1.0;
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PerformanceMan::ResetFrameTimer() { m_FrameTimer->Reset(); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PerformanceMan::StartPerformanceMeasurement(PerformanceCounters counter) { m_PerfMeasureStart[counter] = g_TimerMan.GetAbsoulteTime(); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PerformanceMan::StopPerformanceMeasurement(PerformanceCounters counter) {
+		m_PerfMeasureStop[counter] = g_TimerMan.GetAbsoulteTime();
+		AddPerformanceSample(counter, m_PerfMeasureStop[counter] - m_PerfMeasureStart[counter]);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PerformanceMan::NewPerformanceSample() {
+		m_Sample++;
+		if (m_Sample >= c_MaxSamples) { m_Sample = 0; }
+
+		for (unsigned short counter = 0; counter < PERF_COUNT; ++counter) {
+			m_PerfData[counter][m_Sample] = 0;
+			m_PerfPercentages[counter][m_Sample] = 0;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PerformanceMan::CalculateSamplePercentages() {
+		for (unsigned short counter = 0; counter < PERF_COUNT; ++counter) {
+			unsigned short samplePercentage = static_cast<unsigned int>(static_cast<float>(m_PerfData[counter][m_Sample]) / static_cast<float>(m_PerfData[counter][PERF_SIM_TOTAL]) * 100);
+			m_PerfPercentages[counter][m_Sample] = samplePercentage;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	unsigned long long PerformanceMan::GetPerformanceCounterAverage(PerformanceCounters counter) {
+		unsigned long long totalPerformanceMeasurement = 0;
+		unsigned short sample = m_Sample;
+		for (unsigned short i = 0; i < c_Average; ++i) {
+			totalPerformanceMeasurement += m_PerfData[counter][sample];
+			if (sample == 0) { sample = c_MaxSamples; }
+			sample--;
+		}
+		return totalPerformanceMeasurement / c_Average;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -229,27 +251,5 @@ namespace RTE {
 		char buf[32];
 		sprintf_s(buf, sizeof(buf), "PING: %u", m_CurrentPing);
 		g_FrameMan.GetLargeFont()->DrawAligned(&allegroBitmap, g_FrameMan.GetBackBuffer8()->w - 25, g_FrameMan.GetBackBuffer8()->h - 14, buf, GUIFont::Right);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PerformanceMan::CalculateSamplePercentages() {
-		for (unsigned short pc = 0; pc < PERF_COUNT; ++pc) {
-			unsigned short samplePercentage = static_cast<unsigned int>(static_cast<float>(m_PerfData[pc][m_Sample]) / static_cast<float>(m_PerfData[pc][PERF_SIM_TOTAL]) * 100);
-			m_PerfPercentages[pc][m_Sample] = samplePercentage;
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	unsigned long long PerformanceMan::GetPerformanceCounterAverage(PerformanceCounters counter) {
-		unsigned long long totalPerformanceMeasurement = 0;
-		unsigned short sample = m_Sample;
-		for (unsigned short i = 0; i < c_Average; ++i) {
-			totalPerformanceMeasurement += m_PerfData[counter][sample];
-			if (sample == 0) { sample = c_MaxSamples; }
-			sample--;
-		}
-		return totalPerformanceMeasurement / c_Average;
 	}
 }

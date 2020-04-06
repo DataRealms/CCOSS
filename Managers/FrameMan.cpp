@@ -1295,16 +1295,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	GUIFont * FrameMan::GetFont(bool fontSize) {
-		if ((!m_SmallFont || !m_LargeFont) && !m_GUIScreen) { m_GUIScreen = new AllegroScreen(m_BackBuffer8); }
+		if (!m_GUIScreen) { m_GUIScreen = new AllegroScreen(m_BackBuffer8); }
 
 		switch (fontSize) {
 			case false:
-				m_SmallFont = new GUIFont("SmallFont");
-				m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.bmp");
+				if (!m_SmallFont){
+					m_SmallFont = new GUIFont("SmallFont");
+					m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.bmp");
+				}
 				return m_SmallFont;
 			case true:
-				m_LargeFont = new GUIFont("FatFont");
-				m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.bmp");
+				if (!m_LargeFont){
+					m_LargeFont = new GUIFont("FatFont");
+					m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.bmp");
+				}
 				return m_LargeFont;
 		}
 		return 0;

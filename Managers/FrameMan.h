@@ -289,16 +289,16 @@ namespace RTE {
 
 #pragma region Text Handling
 		/// <summary>
-		/// Gets the large font from the GUI engine's current skin. Ownership is NOT transferred!
+		/// Gets the small font from the GUI engine's current skin. Ownership is NOT transferred!
 		/// </summary>
-		/// <returns>A pointer to the requested font, or 0 if no large font was found.</returns>
-		GUIFont * GetSmallFont();
+		/// <returns>A pointer to the requested font, or 0 if no small font was found.</returns>
+		GUIFont * GetSmallFont() { return GetFont(false); }
 
 		/// <summary>
 		/// Gets the large font from the GUI engine's current skin. Ownership is NOT transferred!
 		/// </summary>
 		/// <returns>A pointer to the requested font, or 0 if no large font was found.</returns>
-		GUIFont * GetLargeFont();
+		GUIFont * GetLargeFont() { return GetFont(true); }
 
 		/// <summary>
 		/// Returns max text width.
@@ -642,6 +642,13 @@ namespace RTE {
 		//std::mutex m_NetworkBitmapIsLocked[c_MaxScreenCount];
 
 	private:
+
+		/// <summary>
+		/// Gets the requested font from the GUI engine's current skin. Ownership is NOT transferred!
+		/// </summary>
+		/// <param name="fontSize">Size of font to get. True for large font, false for small font.</param>
+		/// <returns>A pointer to the requested font, or 0 if no font was found.</returns>
+		GUIFont * GetFont(bool fontSize);
 
 		/// <summary>
 		/// Clears all the member variables of this FrameMan, effectively resetting the members of this abstraction level only.

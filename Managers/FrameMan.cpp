@@ -849,32 +849,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	GUIFont * FrameMan::GetSmallFont() {
-		if (!m_SmallFont) {
-			if (!m_GUIScreen) {
-				m_GUIScreen = new AllegroScreen(m_BackBuffer8);
-			}
-			m_SmallFont = new GUIFont("SmallFont");
-			m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.bmp");
-		}
-		return m_SmallFont;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	GUIFont * FrameMan::GetLargeFont() {
-		if (!m_LargeFont) {
-			if (!m_GUIScreen) {
-				m_GUIScreen = new AllegroScreen(m_BackBuffer8);
-			}
-			m_LargeFont = new GUIFont("FatFont");
-			m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.bmp");
-		}
-		return m_LargeFont;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	int FrameMan::CalculateTextHeight(std::string text, int maxWidth, bool isSmall) {
 		return isSmall ? GetSmallFont()->CalculateHeight(text, maxWidth) : GetLargeFont()->CalculateHeight(text, maxWidth);
 	}
@@ -1352,6 +1326,24 @@ namespace RTE {
 			PALETTE palette;
 			get_palette(palette);
 			save_bmp(fullfilename, pBitmap, palette);
+		}
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	GUIFont * FrameMan::GetFont(bool fontSize) {
+		if ((!m_SmallFont || !m_LargeFont) && !m_GUIScreen) { m_GUIScreen = new AllegroScreen(m_BackBuffer8); }
+
+		switch (fontSize) {
+			case false:
+				m_SmallFont = new GUIFont("SmallFont");
+				m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.bmp");
+				return m_SmallFont;
+			case true:
+				m_LargeFont = new GUIFont("FatFont");
+				m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.bmp");
+				return m_LargeFont;
 		}
 		return 0;
 	}

@@ -148,7 +148,7 @@ namespace RTE {
 	protected:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
-		static constexpr unsigned short c_MSPFAverageSampleSize = 10;
+		static constexpr unsigned short c_MSPFAverageSampleSize = 10; //!< How many samples to use to calculate average MSPF value.
 		static constexpr unsigned short c_MaxSamples = 120; //!< How many performance samples to store, directly affects graph size.
 		static constexpr unsigned short c_Average = 10; //!< How many samples to use to calculate average value displayed on screen.
 
@@ -162,16 +162,16 @@ namespace RTE {
 		bool m_ShowPerfStats; //!< Whether to show performance stats on screen or not.
 		bool m_AdvancedPerfStats; //!< Whether to show performance graphs on screen or not.
 
-		Timer *m_FrameTimer; //!< Timer for measuring millisecs per frame for performance stats readings.
+		Timer *m_FrameTimer; //!< Timer for measuring milliseconds per frame for performance stats readings.
 		float m_SimSpeed; //!< The simulation speed over real time.
 		unsigned short m_Sample; //!< Sample counter.
 
 		std::deque<unsigned int> m_MSPFs; //!< History log of readings, for averaging the results.
-		unsigned short m_MSPFAverage; //!< The average of the MSPF reading buffer above, computer each frame.
+		unsigned short m_MSPFAverage; //!< The average of the MSPF reading buffer above, calculated each frame.
 		unsigned short m_CurrentPing; //!< Current ping value to display on screen.
 
-		std::string m_PerfCounterNames[PERF_COUNT]; //!< Performance counter's names displayed on screen.
-		unsigned short m_PerfPercentages[PERF_COUNT][c_MaxSamples]; //!< Array to store percentages from PERF_SIM_TOTAL
+		std::string m_PerfCounterNames[PERF_COUNT]; //!< Performance counter names displayed on screen.
+		unsigned short m_PerfPercentages[PERF_COUNT][c_MaxSamples]; //!< Array to store percentages from PERF_SIM_TOTAL.
 		unsigned long long m_PerfData[PERF_COUNT][c_MaxSamples]; //!< Array to store performance measurements in microseconds.	
 		unsigned long long m_PerfMeasureStart[PERF_COUNT]; //!< Current measurement start time in microseconds.
 		unsigned long long m_PerfMeasureStop[PERF_COUNT]; //!< Current measurement stop time in microseconds.
@@ -185,7 +185,7 @@ namespace RTE {
 		void DrawPeformanceGraphs(AllegroBitmap bitmapToDrawTo);
 
 		/// <summary>
-		/// Adds provided value to current sample of specified performance counter 
+		/// Adds provided value to current sample of specified performance counter.
 		/// </summary>
 		/// <param name="counter">Counter to update.</param>
 		/// <param name="value">Value to add to this counter.</param>

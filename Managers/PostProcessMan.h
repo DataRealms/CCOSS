@@ -28,9 +28,9 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a PostEffect object in system memory.
 		/// </summary>
-		PostEffect(const Vector &pos, BITMAP *pBitmap, size_t bitmapHash, int strength, float angle) {
+		PostEffect(const Vector &pos, BITMAP *bitmap, size_t bitmapHash, int strength, float angle) {
 			m_Pos = pos;
-			m_Bitmap = pBitmap;
+			m_Bitmap = bitmap;
 			m_BitmapHash = bitmapHash;
 			m_Strength = strength;
 			m_Angle = angle;
@@ -71,7 +71,7 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Takes the current state of the 8bpp back buffer, copies it, and adds post-processing effects on top like glows etc. Only works in 32bpp mode.
+		/// Takes the current state of the 8bpp back-buffer, copies it, and adds post-processing effects on top like glows etc.
 		/// </summary>
 		void PostProcess();
 #pragma endregion
@@ -87,11 +87,11 @@ namespace RTE {
 		/// Registers a post effect to be added at the very last stage of 32bpp rendering by the FrameMan.
 		/// </summary>
 		/// <param name="effectPos">The absolute scene coordinates of the center of the effect.</param>
-		/// <param name="pEffect">A 32bpp BITMAP screen should be drawn centered on the above scene location in the final frame buffer. Ownership is NOT transferred!</param>
+		/// <param name="effect">A 32bpp BITMAP screen should be drawn centered on the above scene location in the final frame buffer. Ownership is NOT transferred!</param>
 		/// <param name="hash"></param>
 		/// <param name="strength">The intensity level this effect should have when blended in post. 0 - 255.</param>
 		/// <param name="angle"></param>
-		void RegisterPostEffect(const Vector &effectPos, BITMAP *pEffect, size_t hash, int strength = 255, float angle = 0);
+		void RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, int strength = 255, float angle = 0);
 
 		/// <summary>
 		/// Gets all screen effects that are located within a box in the scene.
@@ -238,14 +238,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="which">Which of the dot glow colors to get, see the DotGlowColor enumerator.</param>
 		/// <returns>The requested glow dot BITMAP.</returns>
-		BITMAP * GetDotGlowEffect(DotGlowColor which) const;
+		BITMAP * GetDotGlowEffect(DotGlowColor whichColor) const;
 
 		/// <summary>
 		/// Gets the hash value of a specific standard dot glow effect for making pixels glow.
 		/// </summary>
 		/// <param name="which">Which of the dot glow colors to get, see the DotGlowColor enumerator.</param>
 		/// <returns>The hash value of the requested glow dot BITMAP.</returns>
-		size_t GetDotGlowEffectHash(DotGlowColor which) const;
+		size_t GetDotGlowEffectHash(DotGlowColor whichColor) const;
 #pragma endregion
 
 	private:

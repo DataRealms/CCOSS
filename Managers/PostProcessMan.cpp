@@ -75,10 +75,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::RegisterPostEffect(const Vector &effectPos, BITMAP *pEffect, size_t hash, int strength, float angle) {
+	void PostProcessMan::RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, int strength, float angle) {
 		// These effects get applied when there's a drawn frame that followed one or more sim updates.
 		// They are not only registered on drawn sim updates; flashes and stuff could be missed otherwise if they occur on undrawn sim updates.
-		if (pEffect && g_TimerMan.SimUpdatesSinceDrawn() >= 0) { m_PostSceneEffects.push_back(PostEffect(effectPos, pEffect, hash, strength, angle)); }
+		if (effect && g_TimerMan.SimUpdatesSinceDrawn() >= 0) { m_PostSceneEffects.push_back(PostEffect(effectPos, effect, hash, strength, angle)); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,8 +226,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	BITMAP * PostProcessMan::GetDotGlowEffect(DotGlowColor which) const {
-		switch (which) {
+	BITMAP * PostProcessMan::GetDotGlowEffect(DotGlowColor whichColor) const {
+		switch (whichColor) {
 			case NoDot:
 				return 0;
 			case YellowDot:
@@ -244,8 +244,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	size_t PostProcessMan::GetDotGlowEffectHash(DotGlowColor which) const {
-		switch (which) {
+	size_t PostProcessMan::GetDotGlowEffectHash(DotGlowColor whichColor) const {
+		switch (whichColor) {
 			case NoDot:
 				return 0;
 			case YellowDot:

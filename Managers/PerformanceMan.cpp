@@ -104,7 +104,7 @@ namespace RTE {
 		if (g_TimerMan.IsOneSimUpdatePerFrame()) {
 			m_SimSpeed = g_TimerMan.GetDeltaTimeMS() / static_cast<float>(m_MSPFAverage);
 
-			//TODO This should be built into the SimSpeed setter (which again, should be in TimerMan) so you can't screw it up.
+			// TODO: This should be built into the SimSpeed setter (which again, should be in TimerMan) so you can't screw it up.
 			if (g_TimerMan.IsSimSpeedLimited() && m_SimSpeed > 1.0) { m_SimSpeed = 1.0; }
 
 			// Soften the ratio of the pitch adjustment so it's not such an extreme effect on the audio
@@ -127,7 +127,6 @@ namespace RTE {
 				m_MSPFs.pop_front();
 			}
 			// Calculate the average milliseconds per frame over the last sampleSize frames
-			//unsigned short m_MSPFAverage = 0;
 			for (deque<unsigned int>::iterator fItr = m_MSPFs.begin(); fItr != m_MSPFs.end(); ++fItr) {
 				m_MSPFAverage += *fItr;
 			}

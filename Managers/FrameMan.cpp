@@ -298,17 +298,15 @@ namespace RTE {
 	void FrameMan::Draw() {
 		// Count how many split screens we'll need
 		int screenCount = (m_HSplit ? 2 : 1) * (m_VSplit ? 2 : 1);
-
 		RTEAssert(screenCount <= 1 || m_PlayerScreen, "Splitscreen surface not ready when needed!");
 
-		// Clear out the post processing screen effects list
 		g_PostProcessMan.Reset();
 
 		// These accumulate the effects for each player's screen area, and are then transferred to the above lists with the player screen offset applied
 		list<PostEffect> screenRelativeEffects;
 		list<Box> screenRelativeGlowBoxes;
 
-		Activity *pActivity = g_ActivityMan.GetActivity();
+		const Activity *pActivity = g_ActivityMan.GetActivity();
 
 		for (int whichScreen = 0; whichScreen < screenCount; ++whichScreen) {
 			screenRelativeEffects.clear();
@@ -316,7 +314,7 @@ namespace RTE {
 
 			BITMAP *pDrawScreen = (screenCount == 1) ? m_BackBuffer8 : m_PlayerScreen;
 			BITMAP *pDrawScreenGUI = pDrawScreen;
-			if (m_StoreNetworkBackBuffer) {
+			if (IsInMultiplayerMode()) {
 				pDrawScreen = m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][whichScreen];
 				pDrawScreenGUI = m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][whichScreen];
 			}
@@ -327,7 +325,7 @@ namespace RTE {
 			g_SceneMan.Update(whichScreen);
 
 			// Save scene layer's offsets for each screen, server will pick them to build the frame state and send to client
-			if (m_StoreNetworkBackBuffer) {
+			if (IsInMultiplayerMode()) {
 				int layerCount = 0;
 
 				for (std::list<SceneLayer *>::reverse_iterator itr = g_SceneMan.GetScene()->GetBackLayers().rbegin(); itr != g_SceneMan.GetScene()->GetBackLayers().rend(); ++itr) {
@@ -350,7 +348,7 @@ namespace RTE {
 			m_TargetPos[m_NetworkFrameCurrent][whichScreen] = targetPos;
 
 			// Draw the scene
-			if (!m_StoreNetworkBackBuffer) {
+			if (!IsInMultiplayerMode()) {
 				g_SceneMan.Draw(pDrawScreen, pDrawScreenGUI, targetPos);
 			} else {
 				clear_to_color(pDrawScreen, g_MaskColor);
@@ -370,70 +368,7 @@ namespace RTE {
 			// Enable clipping on the draw bitmap
 			set_clip_state(pDrawScreen, 1);
 
-#ifdef DEBUG_BUILD
-			// Draw scene seam
-			vline(m_BackBuffer8, 0, 0, g_SceneMan.GetSceneHeight(), 5);
-#endif
-
-			// Draw screen texts
-			int yTextPos = 0;
-
-			// Only draw this stuff for actual human players
-			if (whichScreen < g_ActivityMan.GetActivity()->GetHumanCount()) {
-				// Team of current screen's player
-				//int team = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-
-				yTextPos += 12;
-
-				// Message
-				if (!m_ScreenText[whichScreen].empty()) {
-					if (IsInMultiplayerMode()) {
-						if (m_TextCentered[whichScreen]) { yTextPos = (GetPlayerFrameBufferHeight(whichScreen) / 2) - 52; }
-
-						int occOffsetX = g_SceneMan.GetScreenOcclusion(whichScreen).m_X;
-
-						// Draw blinking effect, but not of the text message itself, but some characters around it (so it's easier to read the message)
-						if (m_TextBlinking[whichScreen] && m_TextBlinkTimer.AlternateReal(m_TextBlinking[whichScreen])) {
-							GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, (GetPlayerFrameBufferWidth(whichScreen) + occOffsetX) / 2, yTextPos, (">>> " + m_ScreenText[whichScreen] + " <<<").c_str(), GUIFont::Centre);
-						} else {
-							GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, (GetPlayerFrameBufferWidth(whichScreen) + occOffsetX) / 2, yTextPos, m_ScreenText[whichScreen].c_str(), GUIFont::Centre);
-						}
-					} else {
-						if (m_TextCentered[whichScreen]) { yTextPos = (GetPlayerScreenHeight() / 2) - 52; }
-
-						int occOffsetX = g_SceneMan.GetScreenOcclusion(whichScreen).m_X;
-
-						// If there's really no room to offset the text into, then don't
-						if (GetPlayerScreenWidth() <= GetResX() / 2) { occOffsetX = 0; }
-							
-						// Draw blinking effect, but not of the text message itself, but some characters around it (so it's easier to read the message)
-						if (m_TextBlinking[whichScreen] && m_TextBlinkTimer.AlternateReal(m_TextBlinking[whichScreen])) {
-							GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, (GetPlayerScreenWidth() + occOffsetX) / 2, yTextPos, (">>> " + m_ScreenText[whichScreen] + " <<<").c_str(), GUIFont::Centre);
-						} else {
-							GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, (GetPlayerScreenWidth() + occOffsetX) / 2, yTextPos, m_ScreenText[whichScreen].c_str(), GUIFont::Centre);
-						}
-					}
-					yTextPos += 12;
-				}
-				g_PerformanceMan.Draw(pPlayerGUIBitmap);
-
-				// Draw info text when in MOID or material layer draw mode
-				switch (g_SceneMan.GetLayerDrawMode()) {
-					case g_LayerTerrainMatter:
-						GetSmallFont()->DrawAligned(&pPlayerGUIBitmap, GetPlayerScreenWidth() / 2, GetPlayerScreenHeight() - 12, "Viewing terrain material layer\nHit Ctrl+M to cycle modes", GUIFont::Centre, GUIFont::Bottom);
-						break;
-					case g_LayerMOID:
-						GetSmallFont()->DrawAligned(&pPlayerGUIBitmap, GetPlayerScreenWidth() / 2, GetPlayerScreenHeight() - 12, "Viewing MovableObject ID layer\nHit Ctrl+M to cycle modes", GUIFont::Centre, GUIFont::Bottom);
-						break;
-					default:
-						break;
-				}
-
-				// If superfluous screen (as in a three-player match), make the fourth the Observer one
-			} else {
-				//yTextPos += 12;
-				GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, GetPlayerScreenWidth() / 2, yTextPos, "- Observer View -", GUIFont::Centre);
-			}
+			DrawScreenText(whichScreen, pPlayerGUIBitmap);
 
 			// If we are dealing with split screens, then deal with the fact that we need to draw the player screens to different locations on the final buffer
 			// The position of the current draw screen on the final screen
@@ -464,32 +399,11 @@ namespace RTE {
 						break;
 				}
 			}
-			// Flash the screen if we're supposed to
-			if (m_FlashScreenColor[whichScreen] != -1) {
-				// If set to flash for a period of time, first be solid and then start flashing slower
-				float left = m_FlashTimer[whichScreen].LeftTillRealTimeLimitMS();
 
-				if (/*left > 500 || */left < 10 || m_FlashTimer[whichScreen].AlternateReal(50)) {
-					// At most, only flash every other frame
-					if (m_FlashedLastFrame[whichScreen]) {
-						m_FlashedLastFrame[whichScreen] = false;
-					} else {
-						// FLASH!
-						rectfill(pDrawScreenGUI, 0, 0, pDrawScreenGUI->w, pDrawScreenGUI->h, m_FlashScreenColor[whichScreen]);
-						// Show that we did indeed flash this frame
-						m_FlashedLastFrame[whichScreen] = true;
-					}
-				}
-				// Make things go into slight slow-mo - DANGER
-				//g_TimerMan.SetOneSimUpdatePerFrame(!m_SloMoTimer.IsPastSimTimeLimit());
-				//g_TimerMan.IsOneSimUpdatePerFrame();
-
-				// Stop with the flash after the designated period
-				if (m_FlashTimer[whichScreen].IsPastRealTimeLimit()) { m_FlashScreenColor[whichScreen] = -1; }
-			}
+			DrawScreenFlash(whichScreen, pDrawScreenGUI);
 
 			// Draw the intermediate draw splitscreen to the appropriate spot on the back buffer
-			if (!m_StoreNetworkBackBuffer) { blit(pDrawScreen, m_BackBuffer8, 0, 0, screenOffset.GetFloorIntX(), screenOffset.GetFloorIntY(), pDrawScreen->w, pDrawScreen->h); }
+			if (!IsInMultiplayerMode()) { blit(pDrawScreen, m_BackBuffer8, 0, 0, screenOffset.GetFloorIntX(), screenOffset.GetFloorIntY(), pDrawScreen->w, pDrawScreen->h); }
 
 			// Add the player screen's effects to the total screen effects list so they can be drawn in post processing
 			if (!IsInMultiplayerMode()) {
@@ -519,16 +433,14 @@ namespace RTE {
 		// Clears the pixels that have been revealed from the unseen layers
 		g_SceneMan.ClearSeenPixels();
 
-		if (!m_StoreNetworkBackBuffer) {
-			// Draw split screen lines
+		if (!IsInMultiplayerMode()) {
+			// Draw separating lines for split-screens
 			acquire_bitmap(m_BackBuffer8);
 			if (m_HSplit) {
-				// Draw a horizontal separating line
 				hline(m_BackBuffer8, 0, (m_BackBuffer8->h / 2) - 1, m_BackBuffer8->w - 1, m_AlmostBlackColor);
 				hline(m_BackBuffer8, 0, (m_BackBuffer8->h / 2), m_BackBuffer8->w - 1, m_AlmostBlackColor);
 			}
 			if (m_VSplit) {
-				// Draw a vertical separating line
 				vline(m_BackBuffer8, (m_BackBuffer8->w / 2) - 1, 0, m_BackBuffer8->h - 1, m_AlmostBlackColor);
 				vline(m_BackBuffer8, (m_BackBuffer8->w / 2), 0, m_BackBuffer8->h - 1, m_AlmostBlackColor);
 			}
@@ -545,8 +457,7 @@ namespace RTE {
 			}
 		}
 
-		//m_StoreNetworkBackBuffer = false;
-		if (m_StoreNetworkBackBuffer) {
+		if (IsInMultiplayerMode()) {
 			// Blit all four internal player screens onto the backbuffer
 			for (short i = 0; i < c_MaxScreenCount; i++) {
 				int dx = 0;
@@ -607,6 +518,11 @@ namespace RTE {
 
 		// Draw the console on top of everything
 		g_ConsoleMan.Draw(m_BackBuffer32);
+
+#ifdef DEBUG_BUILD
+		// Draw scene seam
+		vline(m_BackBuffer8, 0, 0, g_SceneMan.GetSceneHeight(), 5);
+#endif
 
 		release_bitmap(m_BackBuffer8);
 
@@ -696,11 +612,11 @@ namespace RTE {
 
 		// Adjust the speed of the mouse according to 2x of screen
 		float mouseDenominator = IsFullscreen() ? NxFullscreen() : NxWindowed();
+		set_mouse_range(0, 0, (GetResX() * mouseDenominator) - 3, (GetResY() * mouseDenominator) - 3);
+
 		// If NxFullscreen, adjust the mouse speed accordingly
 		unsigned char mouseSpeedMultiplier = (g_FrameMan.IsFullscreen() && g_FrameMan.NxFullscreen() > 1) ? 1 : 2;
 		set_mouse_speed(mouseSpeedMultiplier, mouseSpeedMultiplier);
-
-		set_mouse_range(0, 0, (GetResX() * mouseDenominator) - 3, (GetResY() * mouseDenominator) - 3);
 
 		return 0;
 	}
@@ -810,11 +726,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::GetPlayerFrameBufferWidth(int whichPlayer) const {
-		if (m_StoreNetworkBackBuffer) {
+		if (IsInMultiplayerMode()) {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
 				unsigned short w = GetResX();
 				for (short i = 0; i < c_MaxScreenCount; i++) {
-					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w < w)) { w = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w; }
+					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w < w)) {
+						w = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w;
+					}
 				}
 				return w;
 			} else {
@@ -829,11 +747,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::GetPlayerFrameBufferHeight(int whichPlayer) const {
-		if (m_StoreNetworkBackBuffer) {
+		if (IsInMultiplayerMode()) {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
 				unsigned short h = GetResY();
 				for (short i = 0; i < c_MaxScreenCount; i++) {
-					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < h)) { h = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h; }
+					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < h)) { 
+						h = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h;
+					}
 				}
 				return h;
 			} else {
@@ -859,25 +779,25 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SetScreenText(const std::string &msg, int which, int blinkInterval, int displayDuration, bool centered) {
+	void FrameMan::SetScreenText(const std::string &message, int whichScreen, int blinkInterval, int displayDuration, bool centered) {
 		// See if we can overwrite the previous message
-		if (which >= 0 && which < c_MaxScreenCount && m_TextDurationTimer[which].IsPastRealMS(m_TextDuration[which])) {
-			m_ScreenText[which] = msg;
-			m_TextDuration[which] = displayDuration;
-			m_TextDurationTimer[which].Reset();
-			m_TextBlinking[which] = blinkInterval;
-			m_TextCentered[which] = centered;
+		if (whichScreen >= 0 && whichScreen < c_MaxScreenCount && m_TextDurationTimer[whichScreen].IsPastRealMS(m_TextDuration[whichScreen])) {
+			m_ScreenText[whichScreen] = message;
+			m_TextDuration[whichScreen] = displayDuration;
+			m_TextDurationTimer[whichScreen].Reset();
+			m_TextBlinking[whichScreen] = blinkInterval;
+			m_TextCentered[whichScreen] = centered;
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::ClearScreenText(int which) {
-		if (which >= 0 && which < c_MaxScreenCount) {
-			m_ScreenText[which].clear();
-			m_TextDuration[which] = -1;
-			m_TextDurationTimer[which].Reset();
-			m_TextBlinking[which] = 0;
+	void FrameMan::ClearScreenText(int whichScreen) {
+		if (whichScreen >= 0 && whichScreen < c_MaxScreenCount) {
+			m_ScreenText[whichScreen].clear();
+			m_TextDuration[whichScreen] = -1;
+			m_TextDurationTimer[whichScreen].Reset();
+			m_TextBlinking[whichScreen] = 0;
 		}
 	}
 
@@ -911,10 +831,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::DrawLine(BITMAP *pBitmap, const Vector &start, const Vector &end, int color, int altColor, int skip, int skipStart, bool shortestWrap) {
-		RTEAssert(pBitmap, "Trying to draw line to null Bitmap");
+	int FrameMan::DrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, int color, int altColor, int skip, int skipStart, bool shortestWrap) {
+		RTEAssert(bitmap, "Trying to draw line to null Bitmap");
 
-		//acquire_bitmap(pBitmap);
+		//acquire_bitmap(bitmap);
 
 		int error = 0;
 		int dom = 0;
@@ -988,12 +908,12 @@ namespace RTE {
 				g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
 				// Slap a regular pixel on there
-				putpixel(pBitmap, intPos[X], intPos[Y], drawAlt ? color : altColor);			
+				putpixel(bitmap, intPos[X], intPos[Y], drawAlt ? color : altColor);
 				drawAlt = !drawAlt;
 				skipped = 0;
 			}
 		}
-		//release_bitmap(pBitmap);
+		//release_bitmap(bitmap);
 
 		// Return the end phase state of the skipping
 		return skipped;
@@ -1001,11 +921,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::DrawDotLine(BITMAP *pBitmap, const Vector &start, const Vector &end, BITMAP *pDot, int skip, int skipStart, bool shortestWrap) {
-		RTEAssert(pBitmap, "Trying to draw line to null Bitmap");
-		RTEAssert(pDot, "Trying to draw line of dots without specifying a dot Bitmap");
+	int FrameMan::DrawDotLine(BITMAP *bitmap, const Vector &start, const Vector &end, BITMAP *dot, int skip, int skipStart, bool shortestWrap) {
+		RTEAssert(bitmap, "Trying to draw line to null Bitmap");
+		RTEAssert(dot, "Trying to draw line of dots without specifying a dot Bitmap");
 
-		//acquire_bitmap(pBitmap);
+		//acquire_bitmap(bitmap);
 
 		int	error = 0;
 		int	dom = 0;
@@ -1017,8 +937,8 @@ namespace RTE {
 		int delta2[2];
 		int increment[2];
 		bool drawAlt = false;
-		int dotHalfHeight = pDot->h / 2;
-		int dotHalfWidth = pDot->w / 2;
+		int dotHalfHeight = dot->h / 2;
+		int dotHalfWidth = dot->w / 2;
 
 		// Calculate the integer values
 		intPos[X] = floorf(start.m_X);
@@ -1080,13 +1000,13 @@ namespace RTE {
 				g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
 				// Slap the dot on there
-				masked_blit(pDot, pBitmap, 0, 0, intPos[X] - dotHalfWidth, intPos[Y] - dotHalfHeight, pDot->w, pDot->h);
+				masked_blit(dot, bitmap, 0, 0, intPos[X] - dotHalfWidth, intPos[Y] - dotHalfHeight, dot->w, dot->h);
 
 				drawAlt = !drawAlt;
 				skipped = 0;
 			}
 		}
-		//release_bitmap(pBitmap);
+		//release_bitmap(bitmap);
 
 		// Return the end phase state of the skipping
 		return skipped;
@@ -1165,7 +1085,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SaveWorldToBMP(const char *namebase) {
+	int FrameMan::SaveWorldToBMP(const char *nameBase) {
 		if (!g_ActivityMan.ActivityRunning()) {
 			return 0;
 		}
@@ -1175,13 +1095,13 @@ namespace RTE {
 		int maxFileTrys = 1000;
 
 		// Make sure its not a 0 name base
-		if (namebase == 0 || strlen(namebase) <= 0) {
+		if (nameBase == 0 || strlen(nameBase) <= 0) {
 			return -1;
 		}
 
 		do {
 			// Check for the file namebase001.bmp; if it exists, try 002, etc.
-			sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", namebase, filenumber++);
+			sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", nameBase, filenumber++);
 			if (!exists(fullfilename)) {
 				break;
 			}
@@ -1265,51 +1185,116 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SaveBitmapToBMP(BITMAP *pBitmap, const char *namebase) {
+	int FrameMan::SaveBitmapToBMP(BITMAP *bitmap, const char *nameBase) {
 		int filenumber = 0;
 		char fullfilename[256];
 		int maxFileTrys = 1000;
 
 		// Make sure its not a 0 name base
-		if (namebase == 0 || strlen(namebase) <= 0) {
+		if (nameBase == 0 || strlen(nameBase) <= 0) {
 			return -1;
 		}
 
 		do {
 			// Check for the file namebase001.bmp; if it exists, try 002, etc.
-			sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", namebase, filenumber++);
+			sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", nameBase, filenumber++);
 			if (!exists(fullfilename)) {
 				break;
 			}
 		} while (filenumber < maxFileTrys);
 
 		// Save out the bitmap
-		if (pBitmap) {
+		if (bitmap) {
 			PALETTE palette;
 			get_palette(palette);
-			save_bmp(fullfilename, pBitmap, palette);
+			save_bmp(fullfilename, bitmap, palette);
 		}
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	GUIFont * FrameMan::GetFont(bool fontSize) {
+	void FrameMan::DrawScreenText(short playerScreen, AllegroBitmap playerGUIBitmap) {
+		int textPosY = 0;
+		// Only draw screen text to actual human players
+		if (playerScreen < g_ActivityMan.GetActivity()->GetHumanCount()) {
+			textPosY += 12;
+
+			if (!m_ScreenText[playerScreen].empty()) {
+				unsigned short bufferOrScreenWidth = IsInMultiplayerMode() ? GetPlayerFrameBufferWidth(playerScreen) : GetPlayerScreenWidth();
+				unsigned short bufferOrScreenHeight = IsInMultiplayerMode() ? GetPlayerFrameBufferHeight(playerScreen) : GetPlayerScreenHeight();
+
+				if (m_TextCentered[playerScreen]) { textPosY = (bufferOrScreenHeight / 2) - 52; }
+
+				int screenOcclusionOffsetX = g_SceneMan.GetScreenOcclusion(playerScreen).m_X;
+				// If there's really no room to offset the text into, then don't
+				if (GetPlayerScreenWidth() <= GetResX() / 2) { screenOcclusionOffsetX = 0; }
+
+				// Draw text and handle blinking by turning on and off extra surrounding characters. Text is always drawn to keep it readable.
+				if (m_TextBlinking[playerScreen] && m_TextBlinkTimer.AlternateReal(m_TextBlinking[playerScreen])) {
+					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, (">>> " + m_ScreenText[playerScreen] + " <<<").c_str(), GUIFont::Centre);
+				} else {
+					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, m_ScreenText[playerScreen].c_str(), GUIFont::Centre);
+				}
+				textPosY += 12;
+			}
+
+			// Draw info text when in MOID or material layer draw mode
+			switch (g_SceneMan.GetLayerDrawMode()) {
+				case g_LayerTerrainMatter:
+					GetSmallFont()->DrawAligned(&playerGUIBitmap, GetPlayerScreenWidth() / 2, GetPlayerScreenHeight() - 12, "Viewing terrain material layer\nHit Ctrl+M to cycle modes", GUIFont::Centre, GUIFont::Bottom);
+					break;
+				case g_LayerMOID:
+					GetSmallFont()->DrawAligned(&playerGUIBitmap, GetPlayerScreenWidth() / 2, GetPlayerScreenHeight() - 12, "Viewing MovableObject ID layer\nHit Ctrl+M to cycle modes", GUIFont::Centre, GUIFont::Bottom);
+					break;
+				default:
+					break;
+			}
+			g_PerformanceMan.Draw(playerGUIBitmap);
+
+		} else {
+			// If superfluous screen (as in a three-player match), make the fourth the Observer one
+			GetLargeFont()->DrawAligned(&playerGUIBitmap, GetPlayerScreenWidth() / 2, textPosY, "- Observer View -", GUIFont::Centre);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::DrawScreenFlash(short playerScreen, BITMAP *playerGUIBitmap) {
+		if (m_FlashScreenColor[playerScreen] != -1) {
+			// If set to flash for a period of time, first be solid and then start flashing slower
+			float timeTillLimit = m_FlashTimer[playerScreen].LeftTillRealTimeLimitMS();
+
+			if (timeTillLimit < 10 || m_FlashTimer[playerScreen].AlternateReal(50)) {
+				if (m_FlashedLastFrame[playerScreen]) {
+					m_FlashedLastFrame[playerScreen] = false;
+				} else {
+					rectfill(playerGUIBitmap, 0, 0, playerGUIBitmap->w, playerGUIBitmap->h, m_FlashScreenColor[playerScreen]);
+					m_FlashedLastFrame[playerScreen] = true;
+				}
+			}
+			if (m_FlashTimer[playerScreen].IsPastRealTimeLimit()) { m_FlashScreenColor[playerScreen] = -1; }
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	GUIFont * FrameMan::GetFont(bool isSmall) {
 		if (!m_GUIScreen) { m_GUIScreen = new AllegroScreen(m_BackBuffer8); }
 
-		switch (fontSize) {
+		switch (isSmall) {
 			case false:
-				if (!m_SmallFont){
-					m_SmallFont = new GUIFont("SmallFont");
-					m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.bmp");
-				}
-				return m_SmallFont;
-			case true:
-				if (!m_LargeFont){
+				if (!m_LargeFont) {
 					m_LargeFont = new GUIFont("FatFont");
 					m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.bmp");
 				}
 				return m_LargeFont;
+			case true:
+				if (!m_SmallFont) {
+					m_SmallFont = new GUIFont("SmallFont");
+					m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.bmp");
+				}
+				return m_SmallFont;
 		}
 		return 0;
 	}

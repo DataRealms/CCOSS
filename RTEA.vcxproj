@@ -236,6 +236,7 @@
     <ClInclude Include="System\Constants.h" />
     <ClInclude Include="System\Controller.h" />
     <ClInclude Include="System\Entity.h" />
+    <ClInclude Include="System\Primitive.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
     <ClInclude Include="System\Color.h" />
@@ -379,6 +380,7 @@
     <ClCompile Include="Menus\LoadingGUI.cpp" />
     <ClCompile Include="System\Controller.cpp" />
     <ClCompile Include="System\Entity.cpp" />
+    <ClCompile Include="System\Primitive.cpp" />
     <ClCompile Include="System\StandardIncludes.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">StandardIncludes.h</PrecompiledHeaderFile>

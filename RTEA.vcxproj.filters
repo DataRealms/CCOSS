@@ -468,6 +468,9 @@
     <ClInclude Include="Entities\SoundContainer.h">
       <Filter>Entities</Filter>
     </ClInclude>
+    <ClInclude Include="System\Primitive.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -881,6 +884,9 @@
     </ClCompile>
     <ClCompile Include="Entities\SoundContainer.cpp">
       <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Primitive.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1411,42 +1411,25 @@ int LuaMan::Create()
             .def("TimeForSimUpdate", &TimerMan::TimeForSimUpdate)
             .def("DrawnSimUpdate", &TimerMan::DrawnSimUpdate),
 
-		class_<PerformanceMan>("PerformanceManager")
-			.def("ResetFrameTimer", &PerformanceMan::ResetFrameTimer)
-			.def("ShowPerformanceStats", &PerformanceMan::ShowPerformanceStats),
-
         class_<FrameMan>("FrameManager")
-            .def("ResetSplitScreens", &FrameMan::ResetSplitScreens)
-            .property("PPM", &FrameMan::GetPPM, &FrameMan::SetPPM)
+            .property("PPM", &FrameMan::GetPPM)
             .property("MPP", &FrameMan::GetMPP)
             .property("PPL", &FrameMan::GetPPL)
             .property("LPP", &FrameMan::GetLPP)
-            .property("ResX", &FrameMan::GetResX)
-            .property("ResY", &FrameMan::GetResY)
-            .property("HSplit", &FrameMan::GetHSplit, &FrameMan::SetHSplit)
-            .property("VSplit", &FrameMan::GetVSplit, &FrameMan::SetVSplit)
             .property("PlayerScreenWidth", &FrameMan::GetPlayerScreenWidth)
             .property("PlayerScreenHeight", &FrameMan::GetPlayerScreenHeight)
-            .def("GetPlayerFrameBufferWidth", &FrameMan::GetPlayerFrameBufferWidth)
-			.def("GetPlayerFrameBufferHeight", &FrameMan::GetPlayerFrameBufferHeight)
             .def("SetScreenText", &FrameMan::SetScreenText)
             .def("ClearScreenText", &FrameMan::ClearScreenText)
-            .def("IsFullscreen", &FrameMan::IsFullscreen)
-            .def("LoadPalette", &FrameMan::LoadPalette)
             .def("FadeInPalette", &FrameMan::FadeInPalette)
             .def("FadeOutPalette", &FrameMan::FadeOutPalette)
             .def("SaveScreenToBMP", &FrameMan::SaveScreenToBMP)
             .def("SaveBitmapToBMP", &FrameMan::SaveBitmapToBMP)
-            .def("ToggleFullscreen", &FrameMan::ToggleFullscreen)
-            .def("ClearBackBuffer8", &FrameMan::ClearBackBuffer8)
-            .def("ClearBackBuffer32", &FrameMan::ClearBackBuffer32)
             .def("FlashScreen", &FrameMan::FlashScreen)
 			.def("CalculateTextHeight", &FrameMan::CalculateTextHeight)
 			.def("CalculateTextWidth", &FrameMan::CalculateTextWidth),
 
 		class_<PostProcessMan>("PostProcessManager")
-			.def("RegisterPostEffect", &PostProcessMan::RegisterPostEffect)
-			.def("ClearPostEffects", &PostProcessMan::ClearPostEffects),
+			.def("RegisterPostEffect", &PostProcessMan::RegisterPostEffect),
 
 		class_<PrimitiveMan>("PrimitiveManager")
 			.def("DrawLinePrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, unsigned short color))&PrimitiveMan::DrawLinePrimitive)
@@ -2219,7 +2202,6 @@ int LuaMan::Create()
 
     // Assign the manager instances to globals in the lua master state
     globals(m_pMasterState)["TimerMan"] = &g_TimerMan;
-	globals(m_pMasterState)["PerformanceMan"] = &g_PerformanceMan;
     globals(m_pMasterState)["FrameMan"] = &g_FrameMan;
 	globals(m_pMasterState)["PostProcessMan"] = &g_PostProcessMan;
 	globals(m_pMasterState)["PrimitiveMan"] = &g_PrimitiveMan;

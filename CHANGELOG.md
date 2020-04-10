@@ -5,25 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
 ### Added
 
-- Lua binding for Box::IntersectsBox(otherBox), that returns true if 2 boxes intersect.
+- Lua binding for `Box::IntersectsBox(otherBox)`, that returns true if 2 boxes intersect.
+
+- Command line arguments for launching directly into editors using `-editor "EditorName"`.
+Valid editor names are: `ActorEditor`, `GibEditor`, `SceneEditor`, `AreaEditor` and `AssemblyEditor`.
+
+- Added handling for custom number and string values in INI.
+	```
+	AddCustomValue = NumberValue
+		YourKeyName = YourNumberValue // Integer or floating point number.
+	
+	AddCustomValue = StringValue
+		YourKeyName = YourStringValue
+	```
+	`YourKeyName` is a string value and is not limited to just numbers.
 
 ### Changed
 
+- Codebase now uses the C++14 standard.
+
+- Major cleanup and reformatting in the `System` folder.
+
 - Upgraded to new, modern FMOD audio library. Sounds now play in 3D space, so they pan to the left and right, and attenuate automatically based on the player's viewpoint. ([Issue #72](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/72))
 
-- Sounds have been renamed to SoundContainers, and are able to handle multiple sounds playing at once. INI definitions have changed accordingly. They must be added using `... = SoundContainer`, and individual sounds for them must be added using `AddSound = ContentFile...`
+- `Sound`s have been renamed to `SoundContainer`s, and are able to handle multiple sounds playing at once. INI definitions have changed accordingly. 
+They must be added using `... = SoundContainer`, and individual sounds for them must be added using `AddSound = ContentFile...`
 
 - Various lua bindings around audio have been upgraded, changed or fixed, giving modders a lot more control over sounds. See documentation for more details.
 
-### Removed
+- Centered the loading splash screen image when `DisableLoadingScreen` is true.
+
+- `Box:WithinBox` lua bindings have been renamed.
+`Box:WithinBox` is now `Box:IsWithinBox`.
+`Box:WithinBoxX` is now `Box:IsWithinBoxX`.
+`Box:WithinBoxY` is now `Box:IsWithinBoxY`.
+
+- Made `AHuman` show both weapon ammo states when 2 one-handed weapons are equipped.
 
 ### Fixed
 
+- Fixed LuaBind being all sorts of messed up. All lua bindings now work properly like they were before updating to the v141 toolset.
+
 - Explosives (and other thrown devices) will no longer reset their explosion triggering timer when they're picked up. ([Issue #71](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/71))
 
-- Sprite Animation Mode ALWAYSPINGPONG now works properly. Sprite animation has also been moved to MOSprite instead of MOSRotating, they they'll be able to properly animate now. ([Issue#77](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/77))
+- Sprite Animation Mode `ALWAYSPINGPONG` now works properly. Sprite animation has also been moved to `MOSprite` instead of `MOSRotating`, they they'll be able to properly animate now. ([Issue#77](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/77))
+
+- Fixed `BG Arm` flailing when reloading one-handed weapon, so shields are no longer so useless.
+
+### Removed
+
+- Removed all Gorilla Audio and SDL Mixer related code and files.
+
+- Removed all Steam Workshop and Achievement related code.
+
+- Removed a bunch of outdated/unused sources in the repo.
+
+- Removed all OSX/Linux related code and files because we don't care. See [Liberated Cortex](https://github.com/liberated-cortex) for working Linux port.
 
 ***
 
@@ -78,16 +118,6 @@ Removing wounds remains the same as before.
 
 - Built-in Actor angular velocity reduction on death has been lessened.
 
-### Removed
-
-- All licensing-related code has been removed since it's no longer needed.
-
-- Wounds can no longer be added via ini, as used to be doable buggily through ini `AddEmitter`.
-
-- All usage of the outdated Slick Profiler has been removed.
-
-- `TDExplosive.ParticleNumberToAdd` property has been removed.
-
 ### Fixed
 
 - SFX slider now works properly.
@@ -103,6 +133,17 @@ Removing wounds remains the same as before.
 - Various bug fixed related to all the Attachable and Emitter changes, so they can now me affected reliably and safely with lua.
 
 - Various minor other things that have gotten lost in the shuffle.
+
+
+### Removed
+
+- All licensing-related code has been removed since it's no longer needed.
+
+- Wounds can no longer be added via ini, as used to be doable buggily through ini `AddEmitter`.
+
+- All usage of the outdated Slick Profiler has been removed.
+
+- `TDExplosive.ParticleNumberToAdd` property has been removed.
 
 ***
 

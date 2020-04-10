@@ -3410,8 +3410,9 @@ void AHuman::Update()
             if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach)
             {
                 pDevice->Reload();
-                if (m_pBGArm && m_pBGArm->IsAttached())
+                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
                     m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                }
                 m_DeviceSwitchSound.Play(m_Pos);
 
                 // Interrupt sharp aiming
@@ -3422,15 +3423,17 @@ void AHuman::Update()
             // Detect reloading and move hand accordingly
             if (pDevice->IsReloading())
             {
-                if (m_pBGArm && m_pBGArm->IsAttached())
+                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
                     m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                }
             }
 
             // Detect reloading being completed and move hand accordingly
             if (pDevice->DoneReloading())
             {
-                if (m_pBGArm && m_pBGArm->IsAttached())
+                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
                     m_pBGArm->SetHandPos(pDevice->GetMagazinePos());
+                }
             }
         }
     }
@@ -4905,16 +4908,20 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             // Ammo
             if (pHeldFirearm)
             {
+                MovableObject *bgHeldItem = GetEquippedBGItem();
+                HDFirearm const *bgHeldFirearm = bgHeldItem == NULL ? NULL : dynamic_cast<HDFirearm *>(bgHeldItem);
+
                 str[0] = -56; str[1] = 0;
                 pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                if (pHeldFirearm->IsReloading())
-                    sprintf_s(str, sizeof(str), "%s", "Reloading...");
-                else
-                {
-                    if (pHeldFirearm->GetRoundInMagCount() < 0)
-                        sprintf_s(str, sizeof(str), "%s", "Infinite");
-                    else
-                        sprintf_s(str, sizeof(str), "%i", pHeldFirearm->GetRoundInMagCount());
+                std::string fgWeaponString = pHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(pHeldFirearm->GetRoundInMagCount());
+                fgWeaponString = pHeldFirearm->IsReloading() ? "Reloading" : fgWeaponString;
+
+                if (bgHeldItem && bgHeldFirearm) {
+                    std::string bgWeaponString = bgHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(bgHeldFirearm->GetRoundInMagCount());
+                    bgWeaponString = bgHeldFirearm->IsReloading() ? "Reloading" : bgWeaponString;
+                    sprintf_s(str, sizeof(str), "%s | %s", fgWeaponString.c_str(), bgWeaponString.c_str());
+                } else {
+                    sprintf_s(str, sizeof(str), "%s", fgWeaponString.c_str());
                 }
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
 

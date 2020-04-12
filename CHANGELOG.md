@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Lua binding for `Box::IntersectsBox(otherBox)`, that returns true if 2 boxes intersect.
 
-- Command line arguments for launching directly into editors using `-editor "EditorName"`.
+- Command line arguments for launching directly into editors using `-editor "EditorName"`.  
 Valid editor names are: `ActorEditor`, `GibEditor`, `SceneEditor`, `AreaEditor` and `AssemblyEditor`.
 
 - Added handling for custom number and string values in INI.
@@ -29,18 +29,19 @@ Valid editor names are: `ActorEditor`, `GibEditor`, `SceneEditor`, `AreaEditor` 
 
 - Major cleanup and reformatting in the `System` folder.
 
-- Upgraded to new, modern FMOD audio library. Sounds now play in 3D space, so they pan to the left and right, and attenuate automatically based on the player's viewpoint. ([Issue #72](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/72))
+- Upgraded to new, modern FMOD audio library. ([Issue #72](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/72))  
+Sounds now play in 3D space, so they pan to the left and right, and attenuate automatically based on the player's viewpoint.
 
-- `Sound`s have been renamed to `SoundContainer`s, and are able to handle multiple sounds playing at once. INI definitions have changed accordingly. 
-They must be added using `... = SoundContainer`, and individual sounds for them must be added using `AddSound = ContentFile...`
+- `Sound`s have been renamed to `SoundContainer`s, and are able to handle multiple sounds playing at once. INI definitions have changed accordingly.  
+They must be added using `... = SoundContainer`, and individual sounds for them must be added using `AddSound = ContentFile...`.
 
 - Various lua bindings around audio have been upgraded, changed or fixed, giving modders a lot more control over sounds. See documentation for more details.
 
 - Centered the loading splash screen image when `DisableLoadingScreen` is true.
 
-- `Box:WithinBox` lua bindings have been renamed.
-`Box:WithinBox` is now `Box:IsWithinBox`.
-`Box:WithinBoxX` is now `Box:IsWithinBoxX`.
+- `Box:WithinBox` lua bindings have been renamed.  
+`Box:WithinBox` is now `Box:IsWithinBox`.  
+`Box:WithinBoxX` is now `Box:IsWithinBoxX`.  
 `Box:WithinBoxY` is now `Box:IsWithinBoxY`.
 
 - Made `AHuman` show both weapon ammo states when 2 one-handed weapons are equipped.
@@ -54,6 +55,8 @@ They must be added using `... = SoundContainer`, and individual sounds for them 
 - Sprite Animation Mode `ALWAYSPINGPONG` now works properly. Sprite animation has also been moved to `MOSprite` instead of `MOSRotating`, they they'll be able to properly animate now. ([Issue#77](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/77))
 
 - Fixed `BG Arm` flailing when reloading one-handed weapon, so shields are no longer so useless.
+
+- Fixed crash when clearing an already empty preset list in the buy menu.
 
 ### Removed
 

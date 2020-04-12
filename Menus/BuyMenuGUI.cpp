@@ -1065,7 +1065,7 @@ void BuyMenuGUI::Update()
         {
             if (m_pSaveButton->HasFocus())
                 SaveCurrentLoadout();
-            else if (m_pClearButton->HasFocus())
+			else if (m_pClearButton->HasFocus() && m_Loadouts.size() != 0)
             {
                 m_Loadouts.pop_back();
                 // Update the list of loadout presets so the removal shows up

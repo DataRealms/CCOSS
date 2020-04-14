@@ -58,6 +58,8 @@ They must be added using `... = SoundContainer`, and individual sounds for them 
 
 - Fixed crash when clearing an already empty preset list in the buy menu.
 
+- Temporary fix for low mass attachables/emitters being thrown at ridiculous speeds when their parent is gibbed.
+
 ### Removed
 
 - Removed all Gorilla Audio and SDL Mixer related code and files.

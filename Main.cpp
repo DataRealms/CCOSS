@@ -1937,7 +1937,6 @@ int main(int argc, char *argv[]) {
 	if (g_NetworkServer.IsServerModeEnabled()) {
 		g_NetworkServer.Start();
 		g_FrameMan.SetMultiplayerMode(true);
-
 		g_AudioMan.SetMultiplayerMode(true);
 		g_AudioMan.SetSoundsVolume(0);
 		g_AudioMan.SetMusicVolume(0);

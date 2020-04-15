@@ -190,22 +190,22 @@ namespace RTE {
 		std::list<PostEffect> m_ScreenRelativeEffects[c_MaxScreenCount]; //!<
 		std::mutex ScreenRelativeEffectsMutex[c_MaxScreenCount]; //!<
 
-		BITMAP *m_YellowGlow; //!<
-		size_t m_YellowGlowHash; //!<
+		BITMAP *m_YellowGlow; //!< Bitmap for the yellow dot glow effect.
+		BITMAP *m_RedGlow; //!< Bitmap for the red dot glow effect.
+		BITMAP *m_BlueGlow; //!< Bitmap for the blue dot glow effect.
 
-		BITMAP *m_RedGlow; //!<
-		size_t m_RedGlowHash; //!<
+		size_t m_YellowGlowHash; //!< Hash value for the yellow dot glow effect bitmap.
+		size_t m_RedGlowHash; //!< Hash value for the red dot glow effect bitmap.
+		size_t m_BlueGlowHash; //!< Hash value for the blue dot glow effect bitmap.
+	
+		BITMAP *m_TempEffectBitmap_16; //!< Temporary 16x16 bitmap to rotate post effects in.
+		BITMAP *m_TempEffectBitmap_32; //!< Temporary 32x32 bitmap to rotate post effects in.
+		BITMAP *m_TempEffectBitmap_64; //!< Temporary 64x64 bitmap to rotate post effects in.
+		BITMAP *m_TempEffectBitmap_128; //!< Temporary 128x128 bitmap to rotate post effects in.
+		BITMAP *m_TempEffectBitmap_256; //!< Temporary 256x256 bitmap to rotate post effects in.
+		BITMAP *m_TempEffectBitmap_512; //!< Temporary 512x512 bitmap to rotate post effects in.
 
-		BITMAP *m_BlueGlow; //!<
-		size_t m_BlueGlowHash; //!<
-
-		//!< Temp bitmaps to rotate post effects in.
-		BITMAP *m_TempEffectBitmap_16;
-		BITMAP *m_TempEffectBitmap_32;
-		BITMAP *m_TempEffectBitmap_64;
-		BITMAP *m_TempEffectBitmap_128;
-		BITMAP *m_TempEffectBitmap_256;
-		BITMAP *m_TempEffectBitmap_512;
+	private:
 
 #pragma region Post Effect Handling
 		/// <summary>
@@ -222,10 +222,10 @@ namespace RTE {
 		/// <summary>
 		/// Gets all screen effects that are located within a box in the scene. Their coordinates will be returned relative to the upper left corner of the box passed in here.
 		/// </summary>
-		/// <param name="left">Dimensions of the box.</param>
-		/// <param name="top"></param>
-		/// <param name="right"></param>
-		/// <param name="bottom"></param>
+		/// <param name="left">Position of box left plane (X start).</param>
+		/// <param name="top">Position of box top plane (Y start).</param>
+		/// <param name="right">Position of box right plane (X end).</param>
+		/// <param name="bottom">Position of box bottom plane (Y end).</param>
 		/// <param name="effectsList">The list to add the screen effects that fall within the box to. The coordinates of the effects returned here will be relative to the boxPos passed in above.</param>
 		/// <param name="team">The team whose unseen area should block the glows.</param>
 		/// <returns>Whether any active post effects were found in that box.</returns>
@@ -248,7 +248,7 @@ namespace RTE {
 		size_t GetDotGlowEffectHash(DotGlowColor whichColor) const;
 #pragma endregion
 
-	private:
+#pragma region PostProcess Breakdown
 		/// <summary>
 		/// 
 		/// </summary>
@@ -258,6 +258,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		void DrawPostScreenEffects();
+#pragma endregion
 
 		/// <summary>
 		/// Clears all the member variables of this PostProcessMan, effectively resetting the members of this abstraction level only.

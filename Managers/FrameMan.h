@@ -340,7 +340,7 @@ namespace RTE {
 		/// <summary>
 		/// Clears the message to be displayed on top of each player's screen.
 		/// </summary>
-		/// <param name="whichScreen">Which screen message to clear..</param>
+		/// <param name="whichScreen">Which screen message to clear.</param>
 		void ClearScreenText(int whichScreen = 0);
 #pragma endregion
 
@@ -585,21 +585,19 @@ namespace RTE {
 		
 		static constexpr unsigned short m_BPP = 32; //!< Color depth (bits per pixel).
 
-		// Resolution
-		int m_ResX;
-		int m_ResY;
-
-		// These are the new resolution settings that will take effect next time the FrameMan is started
-		int m_NewResX;
-		int m_NewResY;
+		int m_ResX; //!< Display width.
+		int m_ResY; //!< Display height.
+		int m_NewResX; //!< New display width that will take effect next time the FrameMan is started.
+		int m_NewResY; //!< New display height that will take effect next time the FrameMan is started.
 
 		bool m_Fullscreen; //!< Whether in fullscreen mode or not.	
 		int m_NxWindowed; //!< The number of times the windowed mode resolution should be multiplied and stretched across for better visibility.
 
-		// The number of times the fullscreen mode resolution should be multiplied and stretched across for better visibility
-		// The internal virtual resolution (m_ResX, m_ResY) is 1/n of the actual fullscreen res that the graphics card outputs
+		/// <summary>
+		/// The number of times the fullscreen mode resolution should be multiplied and stretched across for better visibility.
+		/// The internal virtual resolution (m_ResX, m_ResY) is 1/n of the actual fullscreen resolution that the graphics card outputs.
+		/// </summary>
 		int m_NxFullscreen;
-
 		int m_NewNxFullscreen; //!< This is the new fullscreen multiple that will take effect next time the FrameMan is started.
 
 		bool m_HSplit; //!< Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.		

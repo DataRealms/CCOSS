@@ -244,15 +244,16 @@ namespace RTE {
 		// Set the screen blender mode for glows
 		set_screen_blender(128, 128, 128, 128);
 
+		// Reference. Do not remove.
 		//acquire_bitmap(m_BackBuffer8);
 		//acquire_bitmap(m_BackBuffer32);
 
 		DrawDotGlowEffects();
 		DrawPostScreenEffects();
 
+		// Reference. Do not remove.
 		//release_bitmap(m_BackBuffer32);
 		//release_bitmap(m_BackBuffer8);
-
 		// Set blender mode back??
 		//set_trans_blender(128, 128, 128, 128);
 

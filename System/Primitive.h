@@ -344,7 +344,7 @@ namespace RTE {
 		BitmapPrimitive(Vector pos, BITMAP * bitmap, float rotAngle) { BitmapPrimitive(-1, pos, bitmap, rotAngle); }
 
 		/// <summary>
-		/// 
+		/// Constructor method for BitmapPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
 		/// <param name="pos">Position of this primitive.</param>

@@ -827,7 +827,7 @@ namespace RTE {
 		do {
 			// Check for the file namebase001.bmp; if it exists, try 002, etc.
 			sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", nameBase, filenumber++);
-			if (!exists(fullfilename)) {
+			if (!std::experimental::filesystem::exists(fullfilename)) {
 				break;
 			}
 		} while (filenumber < maxFileTrys);
@@ -865,7 +865,7 @@ namespace RTE {
 		do {
 			// Check for the file namebase001.bmp; if it exists, try 002, etc.
 			sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", nameBase, filenumber++);
-			if (!exists(fullfilename)) {
+			if (!std::experimental::filesystem::exists(fullfilename)) {
 				break;
 			}
 		} while (filenumber < maxFileTrys);
@@ -961,7 +961,7 @@ namespace RTE {
 		do {
 			// Check for the file namebase001.bmp; if it exists, try 002, etc.
 			sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", nameBase, filenumber++);
-			if (!exists(fullfilename)) {
+			if (!std::experimental::filesystem::exists(fullfilename)) {
 				break;
 			}
 		} while (filenumber < maxFileTrys);

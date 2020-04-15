@@ -1143,8 +1143,9 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
         // Get handy handle to the object we're putting
         pAttachable = *aItr;
 
+		// TODO: Rework this whole system
         // Generate the velocities procedurally
-        velMin = internalBlast / pAttachable->GetMass();
+        velMin = internalBlast / (1 + pAttachable->GetMass());
         velRange = 10.0f;
 
         // Rotational angle velocity

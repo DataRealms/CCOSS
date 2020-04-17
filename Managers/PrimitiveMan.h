@@ -26,6 +26,11 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
+		/// Destructor method used to clean up a PrimitiveMan object before deletion from system memory.
+		/// </summary>
+		~PrimitiveMan() { ClearPrimitivesList(); }
+
+		/// <summary>
 		/// Delete all scheduled primitives, called on every FrameMan sim update.
 		/// </summary>
 		void ClearPrimitivesList();

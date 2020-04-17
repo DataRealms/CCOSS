@@ -50,6 +50,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void PostProcessMan::Destroy() {
+		ClearScreenPostEffects();
+		ClearScenePostEffects();
+		Clear();
+		destroy_bitmap(m_TempEffectBitmap_16);
+		destroy_bitmap(m_TempEffectBitmap_32);
+		destroy_bitmap(m_TempEffectBitmap_64);
+		destroy_bitmap(m_TempEffectBitmap_128);
+		destroy_bitmap(m_TempEffectBitmap_256);
+		destroy_bitmap(m_TempEffectBitmap_512);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PostProcessMan::RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, int strength, float angle) {
 		// These effects get applied when there's a drawn frame that followed one or more sim updates.
 		// They are not only registered on drawn sim updates; flashes and stuff could be missed otherwise if they occur on undrawn sim updates.

@@ -59,6 +59,16 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
+		/// Destructor method used to clean up a PostProcessMan object before deletion from system memory.
+		/// </summary>
+		~PostProcessMan() { Destroy(); }
+
+		/// <summary>
+		/// Destroys and resets (through Clear()) the PostProcessMan object.
+		/// </summary>
+		void Destroy();
+
+		/// <summary>
 		/// Clears the list of registered post-processing screen effects and glow boxes.
 		/// </summary>
 		void ClearScreenPostEffects() { m_PostScreenEffects.clear(); m_PostScreenGlowBoxes.clear(); }

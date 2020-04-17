@@ -1649,7 +1649,7 @@ void MovableMan::Update()
 
     // If this is the first sim update since a drawn one, then clear the post effects
     if (g_TimerMan.SimUpdatesSinceDrawn() == 0)
-		g_PostProcessMan.ClearPostEffects();
+		g_PostProcessMan.ClearScenePostEffects();
 
     // Lua transfer pointer needs to be cleared, what was set here last update isn't valid anymore
     m_pObjectToScriptUpdate = 0;

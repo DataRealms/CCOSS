@@ -184,7 +184,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
     // Clear out all the MO's in the scene
     g_MovableMan.PurgeAllMOs();
     // Clear the post effects
-    g_PostProcessMan.ClearPostEffects();
+    g_PostProcessMan.ClearScenePostEffects();
 
 	g_NetworkServer.LockScene(true);
 

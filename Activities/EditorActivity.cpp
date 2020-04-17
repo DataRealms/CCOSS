@@ -209,7 +209,7 @@ int EditorActivity::Start()
         return error;
 
     // Clear the post effects
-	g_PostProcessMan.ClearPostEffects();
+	g_PostProcessMan.ClearScenePostEffects();
 
     // Clear the screen messages
     g_FrameMan.ClearScreenText();

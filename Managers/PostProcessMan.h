@@ -61,12 +61,12 @@ namespace RTE {
 		/// <summary>
 		/// Clears the list of registered post-processing screen effects and glow boxes.
 		/// </summary>
-		void Reset() { m_PostScreenEffects.clear(); m_PostScreenGlowBoxes.clear(); }
+		void ClearScreenPostEffects() { m_PostScreenEffects.clear(); m_PostScreenGlowBoxes.clear(); }
 
 		/// <summary>
 		/// Clears the list of registered post-processing scene effects and glow areas.
 		/// </summary>
-		void ClearPostEffects() { m_PostSceneEffects.clear(); m_GlowAreas.clear(); }
+		void ClearScenePostEffects() { m_PostSceneEffects.clear(); m_GlowAreas.clear(); }
 #pragma endregion
 
 #pragma region Concrete Methods

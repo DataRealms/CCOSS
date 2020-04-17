@@ -1004,7 +1004,7 @@ namespace RTE {
 		int screenCount = (m_HSplit ? 2 : 1) * (m_VSplit ? 2 : 1);
 		RTEAssert(screenCount <= 1 || m_PlayerScreen, "Splitscreen surface not ready when needed!");
 
-		g_PostProcessMan.Reset();
+		g_PostProcessMan.ClearScreenPostEffects();
 
 		// These accumulate the effects for each player's screen area, and are then transferred to the above lists with the player screen offset applied
 		list<PostEffect> screenRelativeEffects;

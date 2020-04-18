@@ -58,11 +58,40 @@ namespace RTE {
 		int Create(std::string const soundPath, int loops = 0, bool affectedByGlobalPitch = true, float attenuationStartDistance = 1, bool immobile = false) { int result = Create(loops, affectedByGlobalPitch, attenuationStartDistance, immobile); AddSound(soundPath); return result; }
 
 		/// <summary>
-		/// Adds a new Sound to this SoundContainer, loaded from a file.
+		/// Adds a new sound to this SoundContainer, spitting out a lua error if it fails.
+		/// The Sound will have default configuration and be added to a new SoundSet.
 		/// </summary>
-		/// <param name="soundPath">A path to the new sound to add. This will be handled through PresetMan.</param>
-		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
-		void AddSound(std::string const soundPath, bool abortGameForInvalidSound = true);
+		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
+		void AddSound(std::string const &soundFilePath) { return AddSound(soundFilePath, false); }
+
+		/// <summary>
+		/// Adds a new sound to this SoundContainer, either spitting out a lua error or aborting if it fails.
+		/// The sound will have default configuration and be added to a new SoundSet.
+		/// </summary>
+		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
+		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error.</param>
+		void AddSound(std::string const &soundFilePath, bool abortGameForInvalidSound) { return AddSound(soundFilePath, Vector(), c_DefaultAttenuationStartDistance, abortGameForInvalidSound); }
+
+		/// <summary>
+		/// Adds a new sound to this SoundContainer, either spitting out a lua error or aborting if it fails.
+		/// The sound will be configured based on parameters, and be added to a new SoundSet.
+		/// </summary>
+		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
+		/// <param name="offset">The offset position to play this sound at, where (0, 0) is no offset.</param>
+		/// <param name="attenuationStartDistance">The attenuation start distance for this sound, -1 is default.</param>
+		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error.</param>
+		void AddSound(std::string const &soundFilePath, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound) { return AddSound(soundFilePath, m_SoundSets.size() + 1, Vector(), c_DefaultAttenuationStartDistance, abortGameForInvalidSound); }
+
+		/// <summary>
+		/// Adds a new sound to this SoundContainer, either spitting out a lua error or aborting if it fails.
+		/// The sound will be configured based on parameters, and be added to the SoundSet at the given index, or a new one if there is none at that index.
+		/// </summary>
+		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
+		/// <param name="soundSetIndex">The SoundSet index to add this new Sound to. If it's not an existing index, a new SoundSet will be added with this Sound.</param>
+		/// <param name="offset">The offset position to play this sound at, where (0, 0) is no offset.</param>
+		/// <param name="attenuationStartDistance">The attenuation start distance for this sound, -1 is default.</param>
+		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error.</param>
+		void AddSound(std::string const &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound);
 #pragma endregion
 
 #pragma region Destruction

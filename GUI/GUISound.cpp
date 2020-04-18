@@ -44,7 +44,7 @@ namespace RTE {
 		m_EnterMenuSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", 0, false, 0, true);
 
 		m_ExitMenuSound.Create("Base.rte/Sounds/GUIs/MenuExit1.wav", 0, false, 0, true);
-		m_ExitMenuSound.AddSound("Base.rte/Sounds/GUIs/MenuExit2.wav");
+		m_ExitMenuSound.AddSound("Base.rte/Sounds/GUIs/MenuExit2.wav", true);
 
 		m_FocusChangeSound.Create("Base.rte/Sounds/GUIs/FocusChange.wav", 0, false, 0, true);
 
@@ -78,19 +78,19 @@ namespace RTE {
 		m_DisabledPickedSound = m_PieMenuExitSound;
 
 		m_FundsChangedSound.Create("Base.rte/Sounds/GUIs/FundsChanged1.wav", 0, false, 0, true);
-		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged2.wav");
-		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged3.wav");
-		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged4.wav");
-		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged5.wav");
-		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged6.wav");
+		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged2.wav", true);
+		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged3.wav", true);
+		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged4.wav", true);
+		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged5.wav", true);
+		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged6.wav", true);
 
 		m_ActorSwitchSound.Create("Base.rte/Sounds/GUIs/ActorSwitch.wav", 0, false, 0, true);
 
 		m_BrainSwitchSound.Create("Base.rte/Sounds/GUIs/BrainSwitch.wav", 0, false, 0, true);
 
 		m_CameraTravelSound.Create("Base.rte/Sounds/GUIs/CameraTravel1.wav", 0, false, 0, true);
-		m_CameraTravelSound.AddSound("Base.rte/Sounds/GUIs/CameraTravel2.wav");
-		m_CameraTravelSound.AddSound("Base.rte/Sounds/GUIs/CameraTravel3.wav");
+		m_CameraTravelSound.AddSound("Base.rte/Sounds/GUIs/CameraTravel2.wav", true);
+		m_CameraTravelSound.AddSound("Base.rte/Sounds/GUIs/CameraTravel3.wav", true);
 
 		//		m_AreaPickedSound.Create("Base.rte/Sounds/GUIs/MenuEnter.wav", 0, false, 0, true);
 		m_AreaPickedSound = m_ConfirmSound;
@@ -104,12 +104,12 @@ namespace RTE {
 		m_PlacementBlip.Create("Base.rte/Sounds/GUIs/PlacementBlip.wav", 0, false, 0, true);
 
 		m_PlacementThud.Create("Base.rte/Sounds/GUIs/PlacementThud1.wav", 0, false, 0, true);
-		m_PlacementThud.AddSound("Base.rte/Sounds/GUIs/PlacementThud2.wav");
+		m_PlacementThud.AddSound("Base.rte/Sounds/GUIs/PlacementThud2.wav", true);
 
 		m_PlacementGravel.Create("Base.rte/Sounds/GUIs/PlacementGravel1.wav", 0, false, 0, true);
-		m_PlacementGravel.AddSound("Base.rte/Sounds/GUIs/PlacementGravel2.wav");
-		m_PlacementGravel.AddSound("Base.rte/Sounds/GUIs/PlacementGravel3.wav");
-		m_PlacementGravel.AddSound("Base.rte/Sounds/GUIs/PlacementGravel4.wav");
+		m_PlacementGravel.AddSound("Base.rte/Sounds/GUIs/PlacementGravel2.wav", true);
+		m_PlacementGravel.AddSound("Base.rte/Sounds/GUIs/PlacementGravel3.wav", true);
+		m_PlacementGravel.AddSound("Base.rte/Sounds/GUIs/PlacementGravel4.wav", true);
 
 		return 0;
 	}

@@ -34,8 +34,11 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Audio Constants
-	static constexpr unsigned short c_MaxAudioChannels = 512;
+	static constexpr unsigned short c_MaxSoftwareChannels = 128;
+	static constexpr unsigned short c_MaxVirtualChannels = 1024;
 	static constexpr unsigned short c_MaxPlayingSoundsPerContainer = 64;
+	static constexpr short c_ListenerZOffset = 0; //!< The Z offset for Audio listeners. Can be used to lessen harsh panning if panning effect strength is at max.
+	static constexpr short c_DefaultAttenuationStartDistance = 100; //!< The default start distance for attenuating sounds. Individual sounds can have different values for this.
 #pragma endregion
 
 #pragma region Network Constants

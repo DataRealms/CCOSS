@@ -34,27 +34,30 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int AudioMan::Create() {
-		FMOD_RESULT soundSystemSetupResult = FMOD::System_Create(&m_AudioSystem);
-		soundSystemSetupResult = (soundSystemSetupResult == FMOD_OK) ? m_AudioSystem->set3DSettings(1, g_FrameMan.GetPPM(), 1) : soundSystemSetupResult;
+		FMOD_RESULT audioSystemSetupResult = FMOD::System_Create(&m_AudioSystem);
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->set3DSettings(1, g_FrameMan.GetPPM(), 1) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->setSoftwareChannels(c_MaxSoftwareChannels) : audioSystemSetupResult;
 
-		soundSystemSetupResult = (soundSystemSetupResult == FMOD_OK) ? m_AudioSystem->init(c_MaxAudioChannels, FMOD_INIT_NORMAL, 0) : soundSystemSetupResult;
-		soundSystemSetupResult = (soundSystemSetupResult == FMOD_OK) ? m_AudioSystem->getMasterChannelGroup(&m_MasterChannelGroup) : soundSystemSetupResult;
-		soundSystemSetupResult = (soundSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("Music", &m_MusicChannelGroup) : soundSystemSetupResult;
-		soundSystemSetupResult = (soundSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("Sounds", &m_SoundChannelGroup) : soundSystemSetupResult;
-		soundSystemSetupResult = (soundSystemSetupResult == FMOD_OK) ? m_MasterChannelGroup->addGroup(m_MusicChannelGroup) : soundSystemSetupResult;
-		soundSystemSetupResult = (soundSystemSetupResult == FMOD_OK) ? m_MasterChannelGroup->addGroup(m_SoundChannelGroup) : soundSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->init(c_MaxVirtualChannels, FMOD_INIT_NORMAL, 0) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->getMasterChannelGroup(&m_MasterChannelGroup) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("Music", &m_MusicChannelGroup) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("Sounds", &m_SoundChannelGroup) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_MasterChannelGroup->addGroup(m_MusicChannelGroup) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_MasterChannelGroup->addGroup(m_SoundChannelGroup) : audioSystemSetupResult;
 		
-		m_AudioEnabled = true;
-		if (soundSystemSetupResult != FMOD_OK) {
-			m_AudioEnabled = false;
+		m_AudioEnabled = audioSystemSetupResult == FMOD_OK;
+
+		// NOTE: Anything that instantiates SoundContainers needs to wait until the Audio System is up and running before they start doing that. It'll fail safely even if Audio is not enabled.
+		new GUISound();
+
+		if (!m_AudioEnabled) {
+			g_ConsoleMan.PrintString("ERROR: Failed to enable audio: " + std::string(FMOD_ErrorString(audioSystemSetupResult)));
 			return -1;
-		}	
+		}
+
 		SetGlobalPitch(m_GlobalPitch);
 		SetSoundsVolume(m_SoundsVolume);
 		SetMusicVolume(m_MusicVolume);
-
-		// NOTE: Anything that instantiates SoundContainers needs to wait until the Audio System is up and running before they start doing that. It'll fail safely even if Audio is not enabled.
-		new GUISound(); 
 
 		return 0;
 	}
@@ -573,7 +576,7 @@ namespace RTE {
 				NetworkSoundData soundData;
 				soundData.State = state;
 
-				std::fill_n(soundData.Channels, c_MaxPlayingSoundsPerContainer, c_MaxAudioChannels + 1);
+				std::fill_n(soundData.Channels, c_MaxPlayingSoundsPerContainer, c_MaxVirtualChannels + 1);
 				if (channels) { std::copy(channels->begin(), channels->end(), soundData.Channels); }
 
 				std::fill_n(soundData.SoundFileHashes, c_MaxPlayingSoundsPerContainer, 0);
@@ -616,7 +619,7 @@ namespace RTE {
 			void *userData;
 			result = (result == FMOD_OK) ? channel->getUserData(&userData) : result;
 			SoundContainer *channelSoundContainer = (SoundContainer *)userData;
-			if (channelSoundContainer->GetPlayingSoundCount() > 0) { channelSoundContainer->RemovePlayingChannel(channelIndex); }
+			if (channelSoundContainer->IsBeingPlayed()) { channelSoundContainer->RemovePlayingChannel(channelIndex); }
 			result = (result == FMOD_OK) ? channel->setUserData(NULL) : result;
 
 			if (result != FMOD_OK) {
@@ -629,11 +632,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	FMOD_VECTOR AudioMan::GetAsFMODVector(const Vector &vector, float zValue) {
 		Vector sceneDimensions = g_SceneMan.GetSceneDim();
-		if (sceneDimensions.IsZero()) {
-			return FMOD_VECTOR{ 0, 0, zValue };
-		}
-		return FMOD_VECTOR{ vector.m_X, sceneDimensions.m_Y - vector.m_Y, zValue };
+		return sceneDimensions.IsZero() ? FMOD_VECTOR{0, 0, zValue} : FMOD_VECTOR{vector.m_X, sceneDimensions.m_Y - vector.m_Y, zValue};
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	Vector AudioMan::GetAsVector(FMOD_VECTOR fmodVector) {
+		Vector sceneDimensions = g_SceneMan.GetSceneDim();
+		return sceneDimensions.IsZero() ? Vector() : Vector(fmodVector.x, sceneDimensions.m_Y - fmodVector.y);
 	}
 }

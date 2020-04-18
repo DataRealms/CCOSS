@@ -70,15 +70,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SoundContainer::AddSound(std::string const soundPath, bool abortGameForInvalidSound) {
-		ContentFile newFile(soundPath.c_str());
+	void SoundContainer::AddSound(std::string const &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound) {
+		vector<SoundData> soundSet;
+		if (soundSetIndex < m_SoundSets.size()) { soundSet = m_SoundSets[soundSetIndex]; }
 
-		FMOD::Sound *newSample = newFile.GetAsSample(abortGameForInvalidSound);
-		if (newSample) {
-			FMOD_RESULT result = newSample->setMode((m_Loops == 0) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL);
-			result = (result == FMOD_OK) ? newSample->setLoopCount(m_Loops) : result;
-			m_Sounds.push_back(std::pair<ContentFile, FMOD::Sound *>(newFile, newSample));
+		ContentFile soundFile(soundFilePath.c_str());
+		FMOD::Sound *soundObject = soundFile.GetAsSample(abortGameForInvalidSound);
+		if (!soundObject) {
+			return;
 		}
+
+		soundSet.push_back({soundFile, soundObject, offset, attenuationStartDistance});
+		if (soundSetIndex >= m_SoundSets.size()) { m_SoundSets.push_back(soundSet); }
+
+		m_AllSoundPropertiesUpToDate = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

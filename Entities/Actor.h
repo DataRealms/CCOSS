@@ -1319,7 +1319,7 @@ ENTITYALLOCATION(Actor)
 			m_DeathSound.Reset();
 		} else {
             SoundContainer newDeathSound;
-			newDeathSound.Create(samplePath, false);
+			newDeathSound.Create(samplePath);
 			m_DeathSound = newDeathSound;
 		}
 	}

@@ -280,7 +280,14 @@ namespace RTE {
 		SoundContainer *PlaySound(const char *filePath) { return PlaySound(filePath, Vector(), -1); }
 
 		/// <summary>
-		/// Starts playing a certain sound file with a certain attenuation for a certain player.
+		/// Starts playing a certain sound file at a certain position for all players.
+		/// </summary>
+		/// <param name="filePath">The path to the sound file to play.</param>
+		/// <returns>The new SoundContainer being played. OWNERSHIP IS TRANSFERRED!</returns>
+		SoundContainer *PlaySound(const char *filePath, const Vector &position) { return PlaySound(filePath, position, -1); }
+
+		/// <summary>
+		/// Starts playing a certain sound file at a certain position for a certain player.
 		/// </summary>
 		/// <param name="filePath">The path to the sound file to play.</param>
 		/// <param name="position">The position at which to play the SoundContainer's sounds.</param>
@@ -394,6 +401,7 @@ namespace RTE {
 #pragma endregion
 
 	protected:
+
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
 
@@ -435,11 +443,19 @@ namespace RTE {
 		static FMOD_RESULT F_CALLBACK SoundChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
 
 		/// <summary>
+		/// <summary>
 		/// Gets the corresponding FMOD_VECTOR for a given RTE Vector.
 		/// </summary>
-		/// <param name="vector">The vector to get as an FMOD_VECTOR.</param>
-		/// <returns>The FMOD_VECTOR that corresponds to the given RTE Vector</returns>
+		/// <param name="vector">The RTE Vector to get as an FMOD_VECTOR.</param>
+		/// <returns>The FMOD_VECTOR that corresponds to the given RTE Vector.</returns>
 		FMOD_VECTOR GetAsFMODVector(const Vector &vector, float zValue = 0);
+
+		/// <summary>
+		/// Gets the corresponding RTE Vector for a given FMOD_VECTOR.
+		/// </summary>
+		/// <param name="fmodVector">The FMOD_VECTOR to get as an RTE Vector.</param>
+		/// <returns>The RTE Vector that corresponds to the given FMOD_VECTOR.</returns>
+		Vector GetAsVector(FMOD_VECTOR fmodVector);
 
 		/// <summary>
 		/// Clears all the member variables of this AudioMan, effectively resetting the members of this abstraction level only.

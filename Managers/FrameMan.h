@@ -21,7 +21,7 @@ namespace RTE {
 
 	public:
 
-		Vector SLOffset[c_MaxScreenCount][c_MaxLayersStoredForNetwork]; //!<
+		Vector SLOffset[c_MaxScreenCount][c_MaxLayersStoredForNetwork]; //!< SceneLayer offsets for each screen in online multiplayer.
 
 #pragma region Creation
 		/// <summary>
@@ -276,17 +276,17 @@ namespace RTE {
 		int GetPlayerScreenHeight() const { return GetPlayerFrameBufferHeight(-1); }
 
 		/// <summary>
-		/// Gets the width of the individual player screens. This will only be less than the backbuffer resolution if there are split screens.
+		/// Gets the width of the specified player screen. This will only be less than the backbuffer resolution if there are split screens.
 		/// </summary>
 		/// <param name="whichPlayer">Player to get screen width for, only used by multiplayer parts.</param>
-		/// <returns>The width of the player screens.</returns>
+		/// <returns>The width of the specified player screen.</returns>
 		int GetPlayerFrameBufferWidth(int whichPlayer) const;
 
 		/// <summary>
-		/// Gets the height of the individual player screens. This will only be less than the backbuffer resolution if there are split screens.
+		/// Gets the height of the specified player screen. This will only be less than the backbuffer resolution if there are split screens.
 		/// </summary>
 		/// <param name="whichPlayer">Player to get screen width for, only used by multiplayer parts.</param>
-		/// <returns>The height of the player screens.</returns>
+		/// <returns>The height of the specified player screen.</returns>
 		int GetPlayerFrameBufferHeight(int whichPlayer) const;
 #pragma endregion
 
@@ -591,7 +591,6 @@ namespace RTE {
 		int m_NewResY; //!< New display height that will take effect next time the FrameMan is started.
 
 		bool m_Fullscreen; //!< Whether in fullscreen mode or not.	
-		int m_NxWindowed; //!< The number of times the windowed mode resolution should be multiplied and stretched across for better visibility.
 
 		/// <summary>
 		/// The number of times the fullscreen mode resolution should be multiplied and stretched across for better visibility.
@@ -599,6 +598,7 @@ namespace RTE {
 		/// </summary>
 		int m_NxFullscreen;
 		int m_NewNxFullscreen; //!< This is the new fullscreen multiple that will take effect next time the FrameMan is started.
+		int m_NxWindowed; //!< The number of times the windowed mode resolution should be multiplied and stretched across for better visibility.
 
 		bool m_HSplit; //!< Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.		
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.	
@@ -660,6 +660,15 @@ namespace RTE {
 		//std::mutex m_NetworkBitmapIsLocked[c_MaxScreenCount];
 
 	private:
+
+#pragma region Create Breakdown
+		/// <summary>
+		/// Creates all the frame buffer bitmaps to be used by FrameMan. This is called during Create().
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int CreateBackBuffers();
+#pragma endregion
+
 #pragma region Draw Breakdown
 		/// <summary>
 		/// Draws all the text messages to the specified player screen. This is called during Draw().

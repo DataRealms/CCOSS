@@ -24,15 +24,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// <summary>
-	/// Callback function for the allegro set_display_switch_callback. It will be called when focus is switched away from the game window.
+	/// Callback function for the allegro set_display_switch_callback. It will be called when focus is switched away from the game window. 
+	/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
 	/// </summary>
 	void DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// <summary>
-	/// Callback function for the allegro set_display_switch_callback. It will be called when focus is switched back to the game window. It will temporarily disable positioning of the mouse.
-	/// This is so that when focus is switched back to the game window, it avoids having the window fly away because the user clicked the title bar of the window.
+	/// Callback function for the allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
 	/// </summary>
 	void DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
 
@@ -70,22 +70,22 @@ namespace RTE {
 		m_SmallFont = 0;
 		m_TextBlinkTimer.Reset();
 
-		for (short i = 0; i < c_MaxScreenCount; ++i) {
-			m_ScreenText[i].clear();
-			m_TextDuration[i] = -1;
-			m_TextDurationTimer[i].Reset();
-			m_TextBlinking[i] = 0;
-			m_TextCentered[i] = false;
-			m_FlashScreenColor[i] = -1;
-			m_FlashedLastFrame[i] = false;
-			m_FlashTimer[i].Reset();
-			m_NetworkBitmapIsLocked[i] = false;
+		for (short screenCount = 0; screenCount < c_MaxScreenCount; ++screenCount) {
+			m_ScreenText[screenCount].clear();
+			m_TextDuration[screenCount] = -1;
+			m_TextDurationTimer[screenCount].Reset();
+			m_TextBlinking[screenCount] = 0;
+			m_TextCentered[screenCount] = false;
+			m_FlashScreenColor[screenCount] = -1;
+			m_FlashedLastFrame[screenCount] = false;
+			m_FlashTimer[screenCount].Reset();
+			m_NetworkBitmapIsLocked[screenCount] = false;
 
-			for (short f = 0; f < 2; f++) {
-				m_NetworkBackBufferIntermediate8[f][i] = 0;
-				m_NetworkBackBufferFinal8[f][i] = 0;
-				m_NetworkBackBufferIntermediateGUI8[f][i] = 0;
-				m_NetworkBackBufferFinalGUI8[f][i] = 0;
+			for (short bufferFrame = 0; bufferFrame < 2; bufferFrame++) {
+				m_NetworkBackBufferIntermediate8[bufferFrame][screenCount] = 0;
+				m_NetworkBackBufferFinal8[bufferFrame][screenCount] = 0;
+				m_NetworkBackBufferIntermediateGUI8[bufferFrame][screenCount] = 0;
+				m_NetworkBackBufferFinalGUI8[bufferFrame][screenCount] = 0;
 			}
 		}
 	}
@@ -150,7 +150,6 @@ namespace RTE {
 
 		// Set the switching mode; what happens when the app window is switched to and from
 		set_display_switch_mode(SWITCH_BACKGROUND);
-		//set_display_switch_mode(SWITCH_PAUSE);
 		set_display_switch_callback(SWITCH_OUT, DisplaySwitchOut);
 		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
 
@@ -163,6 +162,14 @@ namespace RTE {
 		// Set the one Allegro currently uses
 		color_map = &m_HalfTransTable;
 
+		CreateBackBuffers();
+
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int FrameMan::CreateBackBuffers() {
 		// Create the back buffer, this is still in 8bpp, we will do any post-processing on the PostProcessing bitmap
 		m_BackBuffer8 = create_bitmap_ex(8, m_ResX, m_ResY);
 		ClearBackBuffer8();
@@ -280,7 +287,6 @@ namespace RTE {
 		delete m_LargeFont;
 		delete m_SmallFont;
 
-		g_TimerMan.Destroy();
 		Clear();
 	}
 
@@ -340,9 +346,9 @@ namespace RTE {
 			// Make sure everything gets caught up after the switch
 			rest(2000);
 			g_ConsoleMan.PrintString("SYSTEM: Switched to windowed mode");
-			m_Fullscreen = false;
-			// Switch to fullscreen
+			m_Fullscreen = false;			
 		} else {
+			// Switch to fullscreen
 			if (set_gfx_mode(fullscreenGfxDriver, resX * m_NxFullscreen, resY * m_NxFullscreen, 0, 0) != 0) {
 				// Oops, failed to set fullscreen mode, try a different fullscreen scaling
 				m_NewNxFullscreen = m_NxFullscreen = m_NxFullscreen == 1 ? 2 : 1;
@@ -453,7 +459,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::ResetSplitScreens(bool hSplit, bool vSplit) {
-		// Free the previous splitscreen, if any
 		if (m_PlayerScreen) { release_bitmap(m_PlayerScreen); }
 
 		// Override screen splitting according to settings if needed
@@ -470,16 +475,13 @@ namespace RTE {
 			clear_to_color(m_PlayerScreen, m_BlackColor);
 			set_clip_state(m_PlayerScreen, 1);
 
-			// Update these to represent the split screens
 			m_PlayerScreenWidth = m_PlayerScreen->w;
 			m_PlayerScreenHeight = m_PlayerScreen->h;
-
-		// No splits, so set the screen dimensions equal to the back buffer
 		} else {
+			// No splits, so set the screen dimensions equal to the back buffer
 			m_PlayerScreenWidth = m_BackBuffer8->w;
 			m_PlayerScreenHeight = m_BackBuffer8->h;
 		}
-		// Reset the flashes
 		for (short i = 0; i < c_MaxScreenCount; ++i) {
 			m_FlashScreenColor[i] = -1;
 			m_FlashedLastFrame[i] = false;
@@ -588,7 +590,7 @@ namespace RTE {
 				color_map = &m_HalfTransTable;
 				break;
 			default:
-				RTEAbort("Undefined transparency preset value passed in. See TransparencyPreset enumeration for defined values.")
+				RTEAbort("Undefined transparency preset value passed in. See TransparencyPreset enumeration for defined values.");
 		}
 	}
 

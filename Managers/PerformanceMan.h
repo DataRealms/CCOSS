@@ -180,11 +180,6 @@ namespace RTE {
 
 #pragma region Performance Counter Handling
 		/// <summary>
-		/// Draws the performance graphs to the screen. This will be called by Draw() if advanced performance stats are enabled.
-		/// </summary>
-		void DrawPeformanceGraphs(AllegroBitmap bitmapToDrawTo);
-
-		/// <summary>
 		/// Adds provided value to current sample of specified performance counter.
 		/// </summary>
 		/// <param name="counter">Counter to update.</param>
@@ -203,6 +198,11 @@ namespace RTE {
 		/// <returns>An average value for specified counter.</returns>
 		unsigned long long GetPerformanceCounterAverage(PerformanceCounters counter);
 #pragma endregion
+
+		/// <summary>
+		/// Draws the performance graphs to the screen. This will be called by Draw() if advanced performance stats are enabled.
+		/// </summary>
+		void DrawPeformanceGraphs(AllegroBitmap bitmapToDrawTo);
 
 		/// <summary>
 		/// Clears all the member variables of this PerformanceMan, effectively resetting the members of this abstraction level only.

@@ -88,9 +88,9 @@ namespace RTE {
 
 #pragma region Post Effect Handling
 		/// <summary>
-		/// 
+		/// Gets the list of effects to apply at the end of each frame.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The list of effects to apply at the end of each frame.</returns>
 		std::list<PostEffect> *GetPostScreenEffectsList() { return &m_PostScreenEffects; }
 
 		/// <summary>
@@ -116,18 +116,18 @@ namespace RTE {
 		bool GetPostScreenEffectsWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, int team = -1);
 
 		/// <summary>
-		/// 
+		/// Gets a temporary bitmap of specified size to rotate post effects in.
 		/// </summary>
-		/// <param name="bitmapSize"></param>
-		/// <returns></returns>
+		/// <param name="bitmapSize">Size of bitmap to get.</param>
+		/// <returns>Pointer to the temporary bitmap.</returns>
 		BITMAP* GetTempEffectBitmap(unsigned short bitmapSize) const;
 #pragma endregion
 
 #pragma region Post Pixel Glow Handling
 		/// <summary>
-		/// 
+		/// Gets the list of areas that will be processed with glow.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The list of areas that will be processed with glow.</returns>
 		std::list<Box>* GetPostScreenGlowBoxesList() { return &m_PostScreenGlowBoxes; }
 
 		/// <summary>
@@ -137,7 +137,7 @@ namespace RTE {
 		void RegisterGlowArea(const IntRect &glowArea) { if (g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0) { m_GlowAreas.push_back(glowArea); } }
 
 		/// <summary>
-		/// Registers a specific IntRect to be post-processed and have special pixel colors lit up by glow effects in it.
+		/// Creates an IntRect and registers it to be post-processed and have special pixel colors lit up by glow effects in it.
 		/// </summary>
 		/// <param name="center">The center of the IntRect.</param>
 		/// <param name="radius">The radius around it to add as an area.</param>
@@ -164,17 +164,19 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Network Post Effect Handling
+		// TODO: Figure out.
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="whichScreen"></param>
+		/// <param name="whichScreen">Which player screen to get list for.</param>
 		/// <param name="outputList"></param>
 		void GetNetworkPostEffectsList(int whichScreen, std::list<PostEffect> & outputList);
 
+		// TODO: Figure out.
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="whichScreen"></param>
+		/// <param name="whichScreen">Which player screen to set list for.</param>
 		/// <param name="inputList"></param>
 		void SetNetworkPostEffectsList(int whichScreen, std::list<PostEffect> & inputList);
 #pragma endregion
@@ -194,11 +196,11 @@ namespace RTE {
 		std::list<PostEffect> m_PostScreenEffects; //!< List of effects to apply at the end of each frame. This list gets cleared out and re-filled each frame.
 		std::list<PostEffect> m_PostSceneEffects; //!< All post-processing effects registered for this draw frame in the scene.
 
-		std::list<Box> m_PostScreenGlowBoxes; //!< List of screen-relative areas that will be processed with glow.
+		std::list<Box> m_PostScreenGlowBoxes; //!< List of areas that will be processed with glow.
 		std::list<IntRect> m_GlowAreas; //!< All the areas to do post glow pixel effects on, in scene coordinates.
 
-		std::list<PostEffect> m_ScreenRelativeEffects[c_MaxScreenCount]; //!<
-		std::mutex ScreenRelativeEffectsMutex[c_MaxScreenCount]; //!<
+		std::list<PostEffect> m_ScreenRelativeEffects[c_MaxScreenCount]; //!< List of screen relative effects for each player in online multiplayer.
+		std::mutex ScreenRelativeEffectsMutex[c_MaxScreenCount]; //!< Mutex for the ScreenRelativeEffects list when accessed by multiple threads in online multiplayer.
 
 		BITMAP *m_YellowGlow; //!< Bitmap for the yellow dot glow effect.
 		BITMAP *m_RedGlow; //!< Bitmap for the red dot glow effect.
@@ -260,12 +262,12 @@ namespace RTE {
 
 #pragma region PostProcess Breakdown
 		/// <summary>
-		/// 
+		/// Draws all the glow dot effects on pixels registered inside glow boxes for this frame. This is called from PostProcess().
 		/// </summary>
 		void DrawDotGlowEffects();
 
 		/// <summary>
-		/// 
+		/// Draws all the glow effects registered for this frame. This is called from PostProcess().
 		/// </summary>
 		void DrawPostScreenEffects();
 #pragma endregion

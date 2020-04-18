@@ -83,7 +83,6 @@ namespace RTE {
 		int right = left + boxWidth;
 		int bottom = top + boxHeight;
 
-		// Check wrapped rectangles
 		if (g_SceneMan.SceneWrapsX()) {
 			int sceneWidth = g_SceneMan.GetScene()->GetWidth();
 			if (left < 0) { found = GetPostScreenEffects(left + sceneWidth, top, right + sceneWidth, bottom, effectsList, team) || found; }
@@ -370,13 +369,10 @@ namespace RTE {
 
 					clear_to_color(pTargetBitmap, 0);
 
-					//fixed fAngle;
-					//fAngle = fixmul(angle, radtofix_r);
+					Matrix newAngle;
+					newAngle.SetRadAngle(angle);
 
-					Matrix m;
-					m.SetRadAngle(angle);
-
-					rotate_sprite(pTargetBitmap, pBitmap, 0, 0, ftofix(m.GetAllegroAngle()));
+					rotate_sprite(pTargetBitmap, pBitmap, 0, 0, ftofix(newAngle.GetAllegroAngle()));
 					draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pTargetBitmap, effectPosX, effectPosY);
 				}
 			}

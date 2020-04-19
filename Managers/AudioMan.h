@@ -123,7 +123,7 @@ namespace RTE {
 		/// Returns the number of audio channels currently used.
 		/// </summary>
 		/// <returns>The number of audio channels currently used.</returns>
-		int GetPlayingChannelCount() { int channelCount; return m_AudioSystem->getChannelsPlaying(&channelCount) == FMOD_OK ? channelCount : 0; }
+		int GetPlayingChannelCount() { int channelCount; return m_AudioSystem->getChannelsPlaying(&channelCount, NULL) == FMOD_OK ? channelCount : 0; }
 
 		/// <summary>
 		/// Returns the number of audio channels available in total.
@@ -140,9 +140,10 @@ namespace RTE {
 		/// <summary>
 		/// Sets the global pitch multiplier for all sounds, optionally the music too.
 		/// </summary>
-		/// <param name="pitch">The desired pitch multiplier. Keep it > 0.</param>
-		/// <param name="excludeMusic">Whether to exclude the music from pitch modification</param>
-		void SetGlobalPitch(double pitch = 1.0, bool excludeMusic = false);
+		/// <param name="pitch">New global pitch, limited to 8 octaves up or down (i.e. 0.125 - 8).</param>
+		/// <param name="excludeImmobileSounds">Whether to exclude immobile sounds (normally used for GUI and so on) from pitch modification.</param>
+		/// <param name="excludeMusic">Whether to exclude the music from pitch modification.</param>
+		void SetGlobalPitch(double pitch = 1.0, bool excludeImmobileSounds = false, bool excludeMusic = false);
 #pragma endregion
 
 #pragma region Music Getters and Setters
@@ -293,7 +294,7 @@ namespace RTE {
 		/// <param name="position">The position at which to play the SoundContainer's sounds.</param>
 		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players.</param>
 		/// <returns>The new SoundContainer being played. OWNERSHIP IS TRANSFERRED!</returns>
-		SoundContainer *PlaySound(const char *filePath, const Vector &position, int player) { return PlaySound(filePath, position, player, 0, PRIORITY_NORMAL, -1, 1, false); }
+		SoundContainer *PlaySound(const char *filePath, const Vector &position, int player) { return PlaySound(filePath, position, player, 0, PRIORITY_NORMAL, -1, c_DefaultAttenuationStartDistance, false); }
 
 		/// <summary>
 		/// Starts playing a certain sound file with various configuration settings.
@@ -307,7 +308,7 @@ namespace RTE {
 		/// The pitch to play this SoundContainer's at where 1 is unmodified frequency and each multiple of 2 is an octave up or down.
 		/// -1 means the SoundContainer will be affected by global pitch instead of setting handling its pitch manually.
 		/// </param>
-		/// <param name="attenuationStartDistance">The distance at which this SoundContainer's sounds should start attenuating away.</param>
+		/// <param name="attenuationStartDistance">The distance at which this SoundContainer's sounds should start attenuating away. -1 means default.</param>
 		/// </param name="immobile">Whether this SoundContainer's sounds will be treated as immobile, i.e. they won't be affected by 3D sound manipulation.</param>
 		/// <returns>Returns the new SoundContainer being played. OWNERSHIP IS TRANSFERRED!</returns>
 		SoundContainer *PlaySound(const char *filePath, const Vector &position, int player, int loops, int priority, double pitchOrAffectedByGlobalPitch, float attenuationStartDistance, bool immobile);
@@ -412,9 +413,13 @@ namespace RTE {
 		FMOD::ChannelGroup *m_MasterChannelGroup; //!< The top-level FMOD ChannelGroup that holds everything.
 		FMOD::ChannelGroup *m_MusicChannelGroup; //!< The FMOD ChannelGroup for music.
 		FMOD::ChannelGroup *m_SoundChannelGroup; //!< The FMOD ChannelGroup for sounds.
-
+		FMOD::ChannelGroup *m_MobileSoundChannelGroup; //!< The FMOD ChannelGroup for mobile sounds.
+		FMOD::ChannelGroup *m_ImmobileSoundChannelGroup; //!< The FMOD ChannelGroup for immobile sounds.
+		
 		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
 		int m_CurrentActivityHumanCount; //!< The stored number of humans in the current activity, used for audio splitscreen handling. Only updated when there's an activity running.
+
+		std::unordered_map<unsigned short, std::vector<FMOD_VECTOR>> soundChannelRolloffs; //!< An unordered map of Sound Channel indices to a std::vector of FMOD_VECTORs representing each Sound Channel's custom attenuation rolloff. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing.
 
 		double m_SoundsVolume; //!< Global sounds effects volume.
 		double m_MusicVolume; //!< Global music volume.
@@ -443,6 +448,21 @@ namespace RTE {
 		static FMOD_RESULT F_CALLBACK SoundChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
 
 		/// <summary>
+		/// A static callback function for Digital Signal Processing that does extra work with Panning and Attenuation to make them better for CC.
+		/// </summary>
+		static FMOD_RESULT F_CALLBACK AudioMan::PanAndAttenuationDSPCallback(FMOD_DSP_STATE *dspState, float *inBuffer, float *outBuffer, unsigned int length, int inChannels, int *outChannels);
+
+		/// <summary>
+		/// Updates 3D effects calculations for all sound channels whose SoundContainers isn't immobile.
+		/// </summary>
+		void UpdateCalculated3DEffectsForMobileSoundChannels();
+
+		/// <summary>
+		/// Updates 3D effects calculations on a given sound channel whose whose SoundContainer isn't immobile.
+		/// </summary>
+		/// <returns>FMOD_OK if the 3D effects were succesfully updated, otherwise an FMOD_ERROR.</returns>
+		FMOD_RESULT UpdateMobileSoundChannelCalculated3DEffects(FMOD::Channel *channel);
+
 		/// <summary>
 		/// Gets the corresponding FMOD_VECTOR for a given RTE Vector.
 		/// </summary>

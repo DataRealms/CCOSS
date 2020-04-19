@@ -231,7 +231,7 @@ namespace RTE {
 	bool Reader::DiscardEmptySpace() {
 		char peek;
 		int indent = 0;
-		bool ateLine = false;
+		bool discardedLine = false;
 		char report[512];
 
 		while (true) {
@@ -264,7 +264,7 @@ namespace RTE {
 					}
 				}
 				indent = 0;
-				ateLine = true;
+				discardedLine = true;
 				m_pStream->ignore(1);
 
 			// Comment line?
@@ -296,7 +296,7 @@ namespace RTE {
 		}
 
 		// This precaution enables us to use DiscardEmptySpace repeatedly without messing up the indentation tracking logic
-		if (ateLine) {
+		if (discardedLine) {
 			// Get indentation difference from the last line of the last call to DiscardEmptySpace(), and the last line of this call to DiscardEmptySpace().
 			m_IndentDifference = indent - m_PreviousIndent;
 			// Save the last tab count

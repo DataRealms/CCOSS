@@ -56,7 +56,12 @@ void SettingsMan::Clear()
 	m_ForceNonOverlayedWindowGfxDriver = false;
 	m_AllowSavingToBase = false;
 	m_RecommendedMOIDCount = 240;
-    m_SoundPanningEffectStrength = 0.5;
+    m_SoundPanningEffectStrength = 0.6;
+    //////////////////////////////////////////////////
+    //TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
+    m_ListenerZOffset = 0;
+    m_MinimumDistanceForPanning = 50;
+    //////////////////////////////////////////////////
 	m_NetworkServerName = "";
 	m_PlayerNetworkName = "";
 
@@ -236,6 +241,13 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
 		reader >> m_RecommendedMOIDCount;
     else if (propName == "SoundPanningEffectStrength")
         reader >> m_SoundPanningEffectStrength;
+    //////////////////////////////////////////////////
+    //TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
+    else if (propName == "ListenerZOffset")
+        reader >> m_ListenerZOffset;
+    else if (propName == "MinimumDistanceForPanning")
+        reader >> m_MinimumDistanceForPanning;
+    //////////////////////////////////////////////////
 	else if (propName == "PlayerNetworkName")
 		reader >> m_PlayerNetworkName;
 	else if (propName == "NetworkServerName")
@@ -408,6 +420,15 @@ int SettingsMan::Save(Writer &writer) const
 	writer << m_RecommendedMOIDCount;
     writer.NewProperty("SoundPanningEffectStrength");
     writer << m_SoundPanningEffectStrength;
+
+    //////////////////////////////////////////////////
+    //TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
+    writer.NewProperty("ListenerZOffset");
+    writer << m_ListenerZOffset;
+    writer.NewProperty("MinimumDistanceForPanning");
+    writer << m_MinimumDistanceForPanning;
+    //////////////////////////////////////////////////
+
 	writer.NewProperty("PlayerNetworkName");
 	if (m_PlayerNetworkName == "")
 		writer << "Dummy";

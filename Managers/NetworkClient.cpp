@@ -678,7 +678,7 @@ namespace RTE
 				std::unordered_set<SoundContainer *> alreadyHandledSoundContainers;
 
 				for (unsigned short serverSoundChannelIndex : sndDataPtr->Channels) {
-					if (serverSoundChannelIndex < c_MaxAudioChannels && (sndDataPtr->State == AudioMan::SOUND_PLAY || m_ServerSounds.find(serverSoundChannelIndex) != m_ServerSounds.end())) {
+					if (serverSoundChannelIndex < c_MaxVirtualChannels && (sndDataPtr->State == AudioMan::SOUND_PLAY || m_ServerSounds.find(serverSoundChannelIndex) != m_ServerSounds.end())) {
 						SoundContainer *soundContainerToHandle = (m_ServerSounds.find(serverSoundChannelIndex) == m_ServerSounds.end()) ? NULL : m_ServerSounds.at(serverSoundChannelIndex);
 						if (alreadyHandledSoundContainers.find(soundContainerToHandle) == alreadyHandledSoundContainers.end()) {
 							switch (sndDataPtr->State) {

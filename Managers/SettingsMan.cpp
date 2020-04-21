@@ -140,8 +140,6 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
 		g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "PaletteFile")
         g_FrameMan.ReadProperty(propName, reader);
-    else if (propName == "Fullscreen")
-        g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "PixelsPerMeter")
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "PlayIntro")
@@ -158,10 +156,6 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         reader >> m_BlipOnRevealUnseen;
     else if (propName == "ShowForeignItems")
         reader >> m_ShowForeignItems;
-    else if (propName == "ForceSoftwareGfxDriver")
-        reader >> m_ForceSoftwareGfxDriver;
-    else if (propName == "ForceSafeGfxDriver")
-        reader >> m_ForceSafeGfxDriver;
     else if (propName == "ForceVirtualFullScreenGfxDriver")
         reader >> m_ForceVirtualFullScreenGfxDriver;
     else if (propName == "ForceOverlayedWindowGfxDriver")
@@ -330,8 +324,6 @@ int SettingsMan::Save(Writer &writer) const
 	writer << g_FrameMan.ResolutionMultiplier();
     writer.NewProperty("PaletteFile");
     writer << g_FrameMan.GetPaletteFile();
-    writer.NewProperty("Fullscreen");
-    writer << g_FrameMan.IsFullscreen();
     writer.NewProperty("PixelsPerMeter");
     writer << g_FrameMan.GetPPM();
     writer.NewProperty("PlayIntro");
@@ -380,10 +372,6 @@ int SettingsMan::Save(Writer &writer) const
     writer << g_MovableMan.IsParticleSettlingEnabled();
     writer.NewProperty("EnableMOSubtraction");
     writer << g_MovableMan.IsMOSubtractionEnabled();
-    writer.NewProperty("ForceSoftwareGfxDriver");
-    writer << m_ForceSoftwareGfxDriver;
-    writer.NewProperty("ForceSafeGfxDriver");
-    writer << m_ForceSafeGfxDriver;
 	writer.NewProperty("ForceVirtualFullScreenGfxDriver");
 	writer << m_ForceVirtualFullScreenGfxDriver;
 	writer.NewProperty("ForceOverlayedWindowGfxDriver");
@@ -519,8 +507,6 @@ int SettingsMan::SaveDefaults(Writer &writer) const
     writer.NewProperty("PaletteFile");
     ContentFile paletteFile("Base.rte/palette.bmp");
     writer << paletteFile;
-    writer.NewProperty("Fullscreen");
-    writer << 0;
     writer.NewProperty("PixelsPerMeter");
     writer << 20;
     writer.NewProperty("PlayIntro");

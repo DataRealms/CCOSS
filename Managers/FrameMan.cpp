@@ -216,8 +216,6 @@ namespace RTE {
 		} else if (propName == "ResolutionY") {
 			reader >> m_ResY;
 			m_NewResY = m_ResY;
-		} else if (propName == "Fullscreen") {
-			reader >> m_Fullscreen;
 		} else if (propName == "ResolutionMultiplier") {
 			reader >> m_ResMultiplier;
 		} else if (propName == "HSplitScreen") {
@@ -250,8 +248,6 @@ namespace RTE {
 		writer << m_ResX;
 		writer.NewProperty("ResolutionY");
 		writer << m_ResY;
-		writer.NewProperty("Fullscreen");
-		writer << m_Fullscreen;
 		writer.NewProperty("HSplitScreen");
 		writer << m_HSplitOverride;
 		writer.NewProperty("VSplitScreen");

@@ -387,15 +387,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::IsValidResolution(int width, int height) const {
-		int actualWidth = width;
-		int actualHeight = height;
-
-		// If width is greater than 1280, the game will switch itself in 2X mode lowering actual resolution twice.
-		if (width >= 1280) {
-			actualWidth = width / 2;
-			actualHeight = height / 2;
+		if ((width >= 800 && height >= 600) && (width <= m_ScreenResX || height <= m_ScreenResY)) {
+			// Disallow 1366x768 because it's not supported by Allegro.
+			if (width == 1366 && height == 768) {
+				return false;
+			}
+			return true;
+		} else {
+			return false;
 		}
-		return (actualWidth < 360 || actualHeight < 360) ? false : true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -2030,119 +2030,81 @@ void MainMenuGUI::UpdateTeamBoxes()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the contents of the screen resolution combo box
 
-void MainMenuGUI::UpdateResolutionCombo()
-{
+void MainMenuGUI::UpdateResolutionCombo() {
     // Refill possible resolutions
     m_pResolutionCombo->SetText("");
     m_pResolutionCombo->ClearList();
 	
-    // Only refill possible resolutions if empty
-    if (m_pResolutionCombo->GetCount() <= 0)
-    {
-        GFX_MODE_LIST *pList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
+    if (m_pResolutionCombo->GetCount() <= 0) {
+		// Get a list of modes from the fullscreen driver even though we're not using it. This is so we don't need to populate the list manually and has all the reasonable resolutions.
+        GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
 
         int width = 0;
         int height = 0;
-        char resString[256] = "";
+		char resString[256] = "";
         // Index of found useful resolution (32bit)
         int foundIndex = 0;
-        // The saved index of the entry that has the current resolution setting
         int currentResIndex = -1;
 
         // Process and annotate the list
-        for (int i = 0; pList && i < pList->num_modes; ++i)
-        {
+        for (int i = 0; resList && i < resList->num_modes; ++i) {
             // Only list 32 bpp modes
-            if (pList->mode[i].bpp == 32)
-            {
-                width = pList->mode[i].width;
-                height = pList->mode[i].height;
+            if (resList->mode[i].bpp == 32) {
+                width = resList->mode[i].width;
+                height = resList->mode[i].height;
 
 				// Resolutions must be multiples of 4 or we'll get 'Overlays not supported' during GFX mode init
-				if (g_FrameMan.IsValidResolution(width, height) && width % 4 == 0)
-				{
+				if (g_FrameMan.IsValidResolution(width, height) && width % 4 == 0) {
 					// Fix wacky resolutions that are taller than wide
-					if (height > width)
-					{
-						height = pList->mode[i].width;
-						width = pList->mode[i].height;
+					if (height > width) {
+						height = resList->mode[i].width;
+						width = resList->mode[i].height;
 					}
-
-					// Try to figure the max available resotion
-					if (width > m_MaxResX)
-					{
+					// Try to figure the max available resolution
+					if (width > m_MaxResX) {
 						m_MaxResX = width;
 						m_MaxResY = height;
 					}
-
-					// Construct and add the resolution string to the combobox
 					sprintf_s(resString, sizeof(resString), "%ix%i", width, height);
 
 					// Add useful notation to the standardized resolutions
-					if (width == 320 && height == 200)
-						strcat(resString, " CGA");
-					if (width == 320 && height == 240)
-						strcat(resString, " QVGA");
-					if (width == 640 && height == 480)
-						strcat(resString, " VGA");
-					if (width == 720 && height == 480)
-						strcat(resString, " NTSC");
-					if (width == 768 && height == 576)
-						strcat(resString, " PAL");
-					if ((width == 800 || height == 854) && height == 480)
-						strcat(resString, " WVGA");
-					if (width == 800 && height == 600)
-						strcat(resString, " SVGA");
-					if (width == 1024 && height == 600)
-						strcat(resString, " WSVGA");
-					if (width == 1024 && height == 768)
-						strcat(resString, " XGA");
-					if (width == 1280 && height == 720)
-						strcat(resString, " HD720");
-					if (width == 1280 && (height == 768 || height == 800))
-						strcat(resString, " WXGA");
-	// These below are forced to be done in 2X pixels fullscreen
-					if (width == 1280 && height == 1024)
-						strcat(resString, " SXGA");
-					if (width == 1400 && height == 1050)
-						strcat(resString, " SXGA+");
-					if (width == 1600 && height == 1200)
-						strcat(resString, " UGA");
-					if (width == 1680 && height == 1050)
-						strcat(resString, " WSXGA+");
-					if (width == 1920 && height == 1080)
-						strcat(resString, " HD1080");
-					if (width == 1920 && height == 1200)
-						strcat(resString, " WUXGA");
-					if (width == 2048 && height == 1080)
-						strcat(resString, " 2K");
+					if (width == 800 && height == 600) { strcat_s(resString, sizeof(resString), " SVGA"); }
+					if (width == 1024 && height == 600) { strcat_s(resString, sizeof(resString), " WSVGA"); }
+					if (width == 1024 && height == 768) { strcat_s(resString, sizeof(resString), " XGA"); }
+					if (width == 1280 && height == 720) { strcat_s(resString, sizeof(resString), " HD"); }
+					if (width == 1280 && (height == 768 || height == 800)) { strcat_s(resString, sizeof(resString), " WXGA"); }
+					if (width == 1280 && height == 1024) { strcat_s(resString, sizeof(resString), " SXGA"); }
+					if (width == 1400 && height == 1050) { strcat_s(resString, sizeof(resString), " SXGA+"); }
+					if (width == 1600 && height == 900) { strcat_s(resString, sizeof(resString), " HD+"); }
+					if (width == 1600 && height == 1200) { strcat_s(resString, sizeof(resString), " UGA"); }
+					if (width == 1680 && height == 1050) { strcat_s(resString, sizeof(resString), " WSXGA+"); }
+					if (width == 1920 && height == 1080) { strcat_s(resString, sizeof(resString), " FHD"); }
+					if (width == 1920 && height == 1200) { strcat_s(resString, sizeof(resString), " WUXGA"); }
+					if (width == 2048 && height == 1080) { strcat_s(resString, sizeof(resString), " DCI 2K"); }
+					if (width == 2560 && height == 1440) { strcat_s(resString, sizeof(resString), " QHD"); }
+					if (width == 3200 && height == 1800) { strcat_s(resString, sizeof(resString), " QHD+"); }
+					if (width == 3840 && height == 2160) { strcat_s(resString, sizeof(resString), " 4K UHD"); }
+					if (width == 4096 && height == 2160) { strcat_s(resString, sizeof(resString), " DCI 4K"); }
 
 					m_pResolutionCombo->AddItem(resString);
 
 					// If this is what we're currently set to have at next start, select it afterward
-					if ((g_FrameMan.GetNewResX() * g_FrameMan.GetNewNxFullscreen()) == width && (g_FrameMan.GetNewResY() * g_FrameMan.GetNewNxFullscreen()) == height)
+					if ((g_FrameMan.GetNewResX() * g_FrameMan.ResolutionMultiplier()) == width && (g_FrameMan.GetNewResY() * g_FrameMan.ResolutionMultiplier()) == height) {
 						currentResIndex = foundIndex;
-
+					}
 					// Only increment this when we find a usable 32bit resolution
 					foundIndex++;
 				}
             }
         }
-
-        // Get rid of the mode list, we're done with it
-		if (pList)
-		{
-			destroy_gfx_mode_list(pList);
-		}
+		if (resList) { destroy_gfx_mode_list(resList); }
 		
         // If none of the listed matched our resolution set for next start, add a 'custom' one to display as the current res
-        if (currentResIndex < 0)
-        {
-            sprintf_s(resString, sizeof(resString), "%ix%i Custom", g_FrameMan.GetNewResX() * g_FrameMan.GetNewNxFullscreen(), g_FrameMan.GetNewResY() * g_FrameMan.GetNewNxFullscreen());
-            m_pResolutionCombo->AddItem(resString);
-            currentResIndex = m_pResolutionCombo->GetCount() - 1;
-        }
-
+		if (currentResIndex < 0) {
+			sprintf_s(resString, sizeof(resString), "%ix%i Custom", g_FrameMan.GetNewResX() * g_FrameMan.ResolutionMultiplier(), g_FrameMan.GetNewResY() * g_FrameMan.ResolutionMultiplier());
+			m_pResolutionCombo->AddItem(resString);
+			currentResIndex = m_pResolutionCombo->GetCount() - 1;
+		}
         // Show the current resolution item to be the selected one
         m_pResolutionCombo->SetSelectedIndex(currentResIndex);
     }

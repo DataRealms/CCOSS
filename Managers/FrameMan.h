@@ -564,18 +564,23 @@ namespace RTE {
 	protected:
 
 		static const std::string c_ClassName; //!< The friendly-formatted type name of this object.
-		
+
 		static constexpr unsigned short m_BPP = 32; //!< Color depth (bits per pixel).
 
-		int m_ResX; //!< Display width.
-		int m_ResY; //!< Display height.
-		int m_NewResX; //!< New display width that will take effect next time the FrameMan is started.
-		int m_NewResY; //!< New display height that will take effect next time the FrameMan is started.
+		int m_GfxDriver; //!< The graphics driver that will be used for rendering.
 
-		bool m_Fullscreen; //!< Whether in fullscreen mode or not.	
+		unsigned short m_ScreenResX; //!< Width of the physical screen (desktop resolution). 
+		unsigned short m_ScreenResY; //!< Height of the physical screen (desktop resolution).
+
+		unsigned short m_ResX; //!< Game window width.
+		unsigned short m_ResY; //!< Game window height.
+		unsigned short m_NewResX; //!< New game window width that will take effect next time the FrameMan is started.
+		unsigned short m_NewResY; //!< New game window height that will take effect next time the FrameMan is started.
 
 		unsigned char m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
 		unsigned char m_NewResMultiplier; //!< This is the new multiple that will take effect next time the FrameMan is started.
+
+		bool m_Fullscreen; //!< Whether in fullscreen mode (borderless window) or not.
 
 		bool m_HSplit; //!< Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.		
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.	

@@ -39,6 +39,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Clear() {
+		m_GfxDriver = GFX_AUTODETECT_WINDOWED;
+		m_ScreenResX = GetSystemMetrics(SM_CXSCREEN);
+		m_ScreenResY = GetSystemMetrics(SM_CYSCREEN);
 		m_ResX = 960;
 		m_ResY = 540;
 		m_NewResX = m_ResX;

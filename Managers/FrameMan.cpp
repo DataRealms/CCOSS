@@ -93,66 +93,79 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::Create() {
-		// Init allegro's graphics
-		set_color_depth(m_BPP);
+	void FrameMan::SetGraphicsDriver() {
+		if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) {
+			m_GfxDriver = GFX_DIRECTX_OVL;
+			g_ConsoleMan.PrintString("SYSTEM: Using overlay DirectX windowed driver!");
+		} else if (g_SettingsMan.ForceNonOverlayedWindowGfxDriver()) {
+			m_GfxDriver = GFX_DIRECTX_WIN;
+			g_ConsoleMan.PrintString("SYSTEM: Using non-overlay DirectX windowed driver!");
+		} else if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) {
+			m_GfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
+			g_ConsoleMan.PrintString("SYSTEM: Using DirectX fullscreen-windowed driver!");
+		} else {
+			m_GfxDriver = GFX_AUTODETECT_WINDOWED;
+		}
+	}
 
-		// Refuse windowed multiplier if the resolution is too high
-		if (m_ResX > 1024) { m_NxWindowed = 1; }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		int fullscreenGfxDriver = GFX_AUTODETECT_FULLSCREEN;
-		int windowedGfxDriver = GFX_AUTODETECT_WINDOWED;
-
-		fullscreenGfxDriver = GFX_DIRECTX_ACCEL;
-
-		if (g_SettingsMan.ForceSoftwareGfxDriver()) { fullscreenGfxDriver = GFX_DIRECTX_SOFT; }
-		if (g_SettingsMan.ForceSafeGfxDriver()) { fullscreenGfxDriver = GFX_DIRECTX_SAFE; }
-		if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) { windowedGfxDriver = GFX_DIRECTX_OVL; }
-		if (g_SettingsMan.ForceNonOverlayedWindowGfxDriver()) { windowedGfxDriver = GFX_DIRECTX_WIN; }
-		if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) { windowedGfxDriver = GFX_DIRECTX_WIN_BORDERLESS; }
-		
-		if (set_gfx_mode(m_Fullscreen ? fullscreenGfxDriver : windowedGfxDriver, m_Fullscreen ? m_ResX * m_NxFullscreen : m_ResX * m_NxWindowed, m_Fullscreen ? m_ResY * m_NxFullscreen : m_ResY * m_NxWindowed, 0, 0) != 0) {
-			g_ConsoleMan.PrintString("Failed to set gfx mode, trying different windowed scaling.");
-			// If player somehow managed to set up a windowed 2X mode and then set a resolution higher than physical, then disable 2X resolution
-			m_NxWindowed = (m_NxWindowed == 2) ? 1 : m_NxWindowed;
-			if (set_gfx_mode(m_Fullscreen ? fullscreenGfxDriver : windowedGfxDriver, m_Fullscreen ? m_ResX * m_NxFullscreen : m_ResX * m_NxWindowed, m_Fullscreen ? m_ResY * m_NxFullscreen : m_ResY * m_NxWindowed, 0, 0) != 0) {
-				g_ConsoleMan.PrintString("Failed to set gfx mode, trying different fullscreen scaling.");
-
-				// TODO: this is whack if we're attempting windowed
-				// Oops, failed to set fullscreen mode, try a different fullscreen scaling
-				m_NewNxFullscreen = m_NxFullscreen = (m_NxFullscreen == 1) ? 2 : 1;
-				if (set_gfx_mode(m_Fullscreen ? fullscreenGfxDriver : windowedGfxDriver, m_Fullscreen ? m_ResX * m_NxFullscreen : m_ResX * m_NxWindowed, m_Fullscreen ? m_ResY * m_NxFullscreen : m_ResY * m_NxWindowed, 0, 0) != 0) {
-					// Oops, failed to set the resolution specified in the setting file, so default to a safe one instead
-					allegro_message("Unable to set specified graphics mode because: %s!\n\nNow trying to default back to VGA...", allegro_error);
-					if (set_gfx_mode(m_Fullscreen ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED, 960, 540, 0, 0) != 0) {
-						set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
-						allegro_message("Unable to set any graphics mode because %s!", allegro_error);
-						return 1;
-					}
-					// Successfully reverted to VGA, so set that as the current resolution
-					m_ResX = m_NewResX = 960;
-					m_ResY = m_NewResY = 540;
-					m_NxWindowed = 1;
-					m_NewNxFullscreen = m_NxFullscreen = 1;
-				}
+	void FrameMan::ValidateResolution(unsigned short &resX, unsigned short &resY) {
+		if (resX * m_ResMultiplier > m_ScreenResX || resY * m_ResMultiplier > m_ScreenResY) {
+			allegro_message("Resolution too high to fit display, overriding to fit!\nResolution multiplier will be disabled!");
+			resX = m_NewResX = m_ScreenResX;
+			resY = m_NewResY = m_ScreenResY;
+			m_ResMultiplier = m_NewResMultiplier = 1;
+		} else if (resX * m_ResMultiplier == 1366 && resY * m_ResMultiplier == 768) {
+			allegro_message("Unfortunately, 1366x768 resolution is not supported by Cortex Command's graphics API. 1360x768 will be used instead!");
+			resX = m_NewResX = 1360;
+			resY = m_NewResX = 768;
+			m_ResMultiplier = m_NewResMultiplier = 1;
+		} else {
+			float currentAspectRatio = static_cast<float>(resX) / static_cast<float>(resY);
+			if (currentAspectRatio < 1 || currentAspectRatio > 4) {
+				allegro_message("Abnormal aspect ratio detected! Reverting to defaults!");
+				resX = m_NewResX = 960;
+				resY = m_NewResY = 540;
+				m_ResMultiplier = m_NewResMultiplier = 1;
 			}
 		}
+		if (resX * m_ResMultiplier == m_ScreenResX && resY * m_ResMultiplier == m_ScreenResY) { m_Fullscreen = true; }
+	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int FrameMan::Create() {
+		SetGraphicsDriver();
+		ValidateResolution(m_ResX, m_ResY);
+		set_color_depth(m_BPP);
+
+		if (set_gfx_mode(m_GfxDriver, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, 0, 0) != 0) {
+			// If a bad resolution somehow slipped past the validation, revert to defaults.
+			allegro_message("Unable to set specified graphics mode because: %s!\n\nNow trying to default back to VGA...", allegro_error);
+			if (set_gfx_mode(GFX_AUTODETECT_WINDOWED, 960, 540, 0, 0) != 0) {
+				set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
+				allegro_message("Unable to set any graphics mode because %s!", allegro_error);
+				return 1;
+			}
+			// Successfully reverted to defaults. so set that as the current resolution
+			m_ResX = m_NewResX = 960;
+			m_ResY = m_NewResY = 540;
+			m_ResMultiplier = m_NewResMultiplier = 1;
+		}
+			
 		// Clear the screen buffer so it doesn't flash pink
 		clear_to_color(screen, 0);
-
-		// Sets the allowed color conversions when loading bitmaps from files
-		set_color_conversion(COLORCONV_MOST);
-
-		// Load and set the palette
-		if (!LoadPalette(m_PaletteFile.GetDataPath())) {
-			return -1;
-		}
 
 		// Set the switching mode; what happens when the app window is switched to and from
 		set_display_switch_mode(SWITCH_BACKGROUND);
 		set_display_switch_callback(SWITCH_OUT, DisplaySwitchOut);
 		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
+
+		// Sets the allowed color conversions when loading bitmaps from files
+		set_color_conversion(COLORCONV_MOST);
+
+		LoadPalette(m_PaletteFile.GetDataPath());
 
 		// Create transparency color table
 		PALETTE ccPalette;

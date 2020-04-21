@@ -1922,18 +1922,6 @@ int main(int argc, char *argv[]) {
     ///////////////////////////////////////////////////////////////////
     // Main game driver
 
-	string fullscreenDriver = "";
-	string windowedDriver = "";
-
-	if (g_SettingsMan.ForceSoftwareGfxDriver()) { fullscreenDriver = "MSG: Using software DirectX fullscreen driver!"; }	
-	if (g_SettingsMan.ForceSafeGfxDriver()) { fullscreenDriver = "MSG: Using safe DirectX fullscreen driver!"; }
-	if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) { windowedDriver = "MSG: Using overlay DirectX windowed driver!"; }
-	if (g_SettingsMan.ForceNonOverlayedWindowGfxDriver()) { windowedDriver = "MSG: Using non-overlay DirectX windowed driver!"; }
-	if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) { windowedDriver = "MSG: Using DirectX fullscreen-windowed driver!"; }
-		
-	if (fullscreenDriver != "") { g_ConsoleMan.PrintString(fullscreenDriver); }
-	if (windowedDriver != "") { g_ConsoleMan.PrintString(windowedDriver); }
-		
 	if (g_NetworkServer.IsServerModeEnabled()) {
 		g_NetworkServer.Start();
 		g_FrameMan.SetMultiplayerMode(true);

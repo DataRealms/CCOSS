@@ -645,6 +645,18 @@ namespace RTE {
 
 #pragma region Create Breakdown
 		/// <summary>
+		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Create().
+		/// </summary>
+		void SetGraphicsDriver();
+
+		/// <summary>
+		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Create().
+		/// </summary>
+		/// <param name="resX">Game window width (m_ResX or m_NewResX).</param>
+		/// <param name="resY">Game window height (m_ResY or m_NewResY).</param>
+		void ValidateResolution(unsigned short &resX, unsigned short &resY);
+
+		/// <summary>
 		/// Creates all the frame buffer bitmaps to be used by FrameMan. This is called during Create().
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>

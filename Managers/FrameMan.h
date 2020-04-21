@@ -194,10 +194,10 @@ namespace RTE {
 		bool IsValidResolution(int width, int height) const;
 
 		/// <summary>
-		/// Tells how many times the windowed screen resolution is being multiplied and the back-buffer stretched across for better readability.
+		/// Tells how many times the screen resolution is being multiplied and the back-buffer stretched across for better readability.
 		/// </summary>
-		/// <returns>What multiple the windowed mode screen resolution is run in (1 normal).</returns>
-		int NxWindowed() const { return m_NxWindowed; }
+		/// <returns>What multiple the screen resolution is run in (1 normal).</returns>
+		int ResolutionMultiplier() const { return m_ResMultiplier; }
 
 		/// <summary>
 		/// Sets and switches to a new windowed mode multiplier.
@@ -205,24 +205,6 @@ namespace RTE {
 		/// <param name="multiplier">The multiplier to switch to.</param>
 		/// <returns>Error code, anything other than 0 is error.</returns>
 		int SwitchWindowMultiplier(int multiplier = 1);
-
-		/// <summary>
-		/// Tells how many times the fullscreen resolution is being multiplied and the back-buffer stretched across for better readability.
-		/// </summary>
-		/// <returns>What multiple the fullscreen mode screen resolution is run in (1 normal).</returns>
-		int NxFullscreen() const { return m_NxFullscreen; }
-
-		/// <summary>
-		/// Gets how many times the fullscreen resolution will be multiplied ON NEXT RESTART and the back-buffer stretched.
-		/// </summary>
-		/// <returns>What multiple the fullscreen mode screen resolution will be run in on next restart of game.</returns>
-		int GetNewNxFullscreen() const { return m_NewNxFullscreen; }
-
-		/// <summary>
-		/// Sets how many times the fullscreen resolution will be multiplied ON NEXT RESTART and the back-buffer stretched.
-		/// </summary>
-		/// <param name="newMultiple">What multiple the fullscreen mode screen resolution will be run in on next restart of game.</param>
-		void SetNewNxFullscreen(int newMultiple) { m_NewNxFullscreen = newMultiple; }
 #pragma endregion
 
 #pragma region Split-Screen Handling
@@ -592,13 +574,8 @@ namespace RTE {
 
 		bool m_Fullscreen; //!< Whether in fullscreen mode or not.	
 
-		/// <summary>
-		/// The number of times the fullscreen mode resolution should be multiplied and stretched across for better visibility.
-		/// The internal virtual resolution (m_ResX, m_ResY) is 1/n of the actual fullscreen resolution that the graphics card outputs.
-		/// </summary>
-		int m_NxFullscreen;
-		int m_NewNxFullscreen; //!< This is the new fullscreen multiple that will take effect next time the FrameMan is started.
-		int m_NxWindowed; //!< The number of times the windowed mode resolution should be multiplied and stretched across for better visibility.
+		unsigned char m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
+		unsigned char m_NewResMultiplier; //!< This is the new multiple that will take effect next time the FrameMan is started.
 
 		bool m_HSplit; //!< Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.		
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.	

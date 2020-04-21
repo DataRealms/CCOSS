@@ -136,13 +136,11 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "ResolutionY")
         g_FrameMan.ReadProperty(propName, reader);
+	else if (propName == "ResolutionMultiplier")
+		g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "PaletteFile")
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "Fullscreen")
-        g_FrameMan.ReadProperty(propName, reader);
-    else if (propName == "NxWindowed")
-        g_FrameMan.ReadProperty(propName, reader);
-    else if (propName == "NxFullscreen")
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "PixelsPerMeter")
         g_FrameMan.ReadProperty(propName, reader);
@@ -328,14 +326,12 @@ int SettingsMan::Save(Writer &writer) const
     writer << g_FrameMan.GetNewResX();
     writer.NewProperty("ResolutionY");
     writer << g_FrameMan.GetNewResY();
+	writer.NewProperty("ResolutionMultiplier");
+	writer << g_FrameMan.ResolutionMultiplier();
     writer.NewProperty("PaletteFile");
     writer << g_FrameMan.GetPaletteFile();
     writer.NewProperty("Fullscreen");
     writer << g_FrameMan.IsFullscreen();
-    writer.NewProperty("NxWindowed");
-    writer << g_FrameMan.NxWindowed();
-    writer.NewProperty("NxFullscreen");
-    writer << g_FrameMan.GetNewNxFullscreen();
     writer.NewProperty("PixelsPerMeter");
     writer << g_FrameMan.GetPPM();
     writer.NewProperty("PlayIntro");
@@ -518,15 +514,13 @@ int SettingsMan::SaveDefaults(Writer &writer) const
     writer << 960;
     writer.NewProperty("ResolutionY");
     writer << 540;
+	writer.NewProperty("ResolutionMultiplier");
+	writer << 1;
     writer.NewProperty("PaletteFile");
     ContentFile paletteFile("Base.rte/palette.bmp");
     writer << paletteFile;
     writer.NewProperty("Fullscreen");
     writer << 0;
-    writer.NewProperty("NxWindowed");
-    writer << 1;
-    writer.NewProperty("NxFullscreen");
-    writer << 2;
     writer.NewProperty("PixelsPerMeter");
     writer << 20;
     writer.NewProperty("PlayIntro");

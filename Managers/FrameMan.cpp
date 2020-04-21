@@ -44,9 +44,7 @@ namespace RTE {
 		m_NewResX = m_ResX;
 		m_NewResY = m_ResY;
 		m_Fullscreen = false;
-		m_NxWindowed = 1;
-		m_NxFullscreen = 1;
-		m_NewNxFullscreen = 1;
+		m_ResMultiplier = 1;
 		m_HSplit = false;
 		m_VSplit = false;
 		m_HSplitOverride = false;
@@ -220,11 +218,8 @@ namespace RTE {
 			m_NewResY = m_ResY;
 		} else if (propName == "Fullscreen") {
 			reader >> m_Fullscreen;
-		} else if (propName == "NxWindowed") {
-			reader >> m_NxWindowed;
-		} else if (propName == "NxFullscreen") {
-			reader >> m_NxFullscreen;
-			m_NewNxFullscreen = m_NxFullscreen;
+		} else if (propName == "ResolutionMultiplier") {
+			reader >> m_ResMultiplier;
 		} else if (propName == "HSplitScreen") {
 			reader >> m_HSplitOverride;
 		} else if (propName == "VSplitScreen") {
@@ -569,7 +564,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::FlipFrameBuffers() {
-		if ((!m_Fullscreen && m_NxWindowed != 1) || (m_Fullscreen && m_NxFullscreen != 1)) {
+		if (m_ResMultiplier > 1) {
 			stretch_blit(m_BackBuffer32, screen, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
 		} else {
 			blit(m_BackBuffer32, screen, 0, 0, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h);

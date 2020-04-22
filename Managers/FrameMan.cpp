@@ -112,15 +112,16 @@ namespace RTE {
 
 	void FrameMan::ValidateResolution(unsigned short &resX, unsigned short &resY) {
 		if (resX * m_ResMultiplier > m_ScreenResX || resY * m_ResMultiplier > m_ScreenResY) {
-			allegro_message("Resolution too high to fit display, overriding to fit!\nResolution multiplier will be disabled!");
-			resX = m_NewResX = m_ScreenResX;
-			resY = m_NewResY = m_ScreenResY;
-			m_ResMultiplier = m_NewResMultiplier = 1;
+			allegro_message("Resolution too high to fit display, overriding to fit!");
+			resX = m_NewResX = m_ScreenResX / m_ResMultiplier;
+			resY = m_NewResY = m_ScreenResY / m_ResMultiplier;
 		} else if (resX * m_ResMultiplier == 1366 && resY * m_ResMultiplier == 768) {
 			allegro_message("Unfortunately, 1366x768 resolution is not supported by Cortex Command's graphics API. 1360x768 will be used instead!");
-			resX = m_NewResX = 1360;
-			resY = m_NewResX = 768;
-			m_ResMultiplier = m_NewResMultiplier = 1;
+			resX = m_NewResX = 1360 / m_ResMultiplier;
+			resY = m_NewResY = 768 / m_ResMultiplier;
+		} else if ((resX * m_ResMultiplier) % 4 > 0) {
+			allegro_message("Resolution width that is not divisible by 4 is not supported!\nOverriding to closest valid width!");
+			resX = m_NewResX = std::floor(resX / 4) * 4;
 		} else {
 			float currentAspectRatio = static_cast<float>(resX) / static_cast<float>(resY);
 			if (currentAspectRatio < 1 || currentAspectRatio > 4) {

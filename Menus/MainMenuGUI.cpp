@@ -234,7 +234,7 @@ int MainMenuGUI::Create(Controller *pController)
     m_aSkirmishButton[P4TEAM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP4Team"));
     m_pCPUTeamLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelCPUTeam"));
 
-    m_aOptionButton[FULLSCREEN] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonFullscreen"));
+    m_aOptionButton[RESOLUTIONMULTIPLIER] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonFullscreen"));
     m_aOptionButton[P1NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP1NextDevice"));
     m_aOptionButton[P2NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP2NextDevice"));
     m_aOptionButton[P3NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP3NextDevice"));
@@ -353,15 +353,13 @@ int MainMenuGUI::Create(Controller *pController)
     m_pResolutionCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ComboResolution"));
     UpdateResolutionCombo();
 
-    // Set labels only when we know max resolution, as it defines whether we can switch to 2X windowed mode or not
-	if (g_FrameMan.IsFullscreen())
-        m_aOptionButton[FULLSCREEN]->SetText("Go 1X Window");
-    else
-    {
-        if (g_FrameMan.NxWindowed() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 - 25 && g_FrameMan.GetResY() <= m_MaxResY / 2 - 25)
-            m_aOptionButton[FULLSCREEN]->SetText("Go 2X Window");
-        else
-            m_aOptionButton[FULLSCREEN]->SetText("Go Fullscreen");
+	// Set labels only when we know max resolution, as it defines whether we can switch to 2X windowed mode or not
+	if (g_FrameMan.ResolutionMultiplier() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 && g_FrameMan.GetResY() <= m_MaxResY / 2) {
+		m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 2X");
+	} else if (g_FrameMan.ResolutionMultiplier() > 1) {
+		m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 1X");
+	} else {
+		m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Unavailable");
     }
 
     m_pResolutionNoticeLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelResolutionNotice"));
@@ -1025,40 +1023,28 @@ void MainMenuGUI::Update()
                 g_GUISound.ExitMenuSound()->Play();
             }
 
-			// Fullscreen toggle button pressed
-			if (anEvent.GetControl() == m_aOptionButton[FULLSCREEN])
-            {
-                g_GUISound.ButtonPressSound()->Play();
+			// Multiplier toggle button pressed
+			if (anEvent.GetControl() == m_aOptionButton[RESOLUTIONMULTIPLIER]) {
+				g_GUISound.ButtonPressSound()->Play();
 
-                // Was fullscreen, switch to 1x window
-                if (g_FrameMan.IsFullscreen())
-                {
-                    // First set the multiplier back to 1 and then switch to fullscreen so we get the right multiplier
-                    g_FrameMan.SwitchWindowMultiplier(1);
-                    g_FrameMan.ToggleFullscreen();
-                }
-                // Was windowed
-                else
-                {
-                    // Was at 1x, change to 2x, but only if resolution is reasonable
-                    if (g_FrameMan.NxWindowed() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 - 25 && g_FrameMan.GetResY() <= m_MaxResY / 2 - 25)
-                        g_FrameMan.SwitchWindowMultiplier(2);
-                    // Was at 2x, change to fullscreen
-                    else
-                        g_FrameMan.ToggleFullscreen();
-                }
+				if (g_FrameMan.ResolutionMultiplier() > 1) {
+					g_FrameMan.SwitchResolutionMultiplier(1);
+				} else if (g_FrameMan.ResolutionMultiplier() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 && g_FrameMan.GetResY() <= m_MaxResY / 2) {
+					g_FrameMan.SwitchResolutionMultiplier(2);
+				}
+			}
 
-                // Update the label to whatever we ended up with
-                if (g_FrameMan.IsFullscreen())
-                    m_aOptionButton[FULLSCREEN]->SetText("Go 1X Window");
-                else
-                {
-                    if (g_FrameMan.NxWindowed() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 - 25 && g_FrameMan.GetResY() <= m_MaxResY / 2 - 25)
-                        m_aOptionButton[FULLSCREEN]->SetText("Go 2X Window");
-                    else
-                        m_aOptionButton[FULLSCREEN]->SetText("Go Fullscreen");
-                }
-            }
+			// Update the label to whatever we ended up with
+			if (g_FrameMan.ResolutionMultiplier() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 && g_FrameMan.GetResY() <= m_MaxResY / 2) {
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetVisible(true);
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 2X");
+			} else if (g_FrameMan.ResolutionMultiplier() > 1) {
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetVisible(true); 
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 1X");
+			} else {
+				//m_aOptionButton[RESOLUTIONMULTIPLIER]->SetVisible(false);
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Unavailable");
+			}
 
 			// Return to main menu button pressed
 			if (anEvent.GetControl() == m_aMainMenuButton[BACKTOMAIN])
@@ -1595,19 +1581,10 @@ void MainMenuGUI::Update()
                         int newResY = g_FrameMan.GetResY();
                         sscanf(pResItem->m_Name.c_str(), "%4dx%4d", &newResX, &newResY);
                         // Sanity check the values and then set them as the new resolution to be switched to next time FrameMan is created
-                        /*if (newResX >= 400 && newResX < 3000 && newResY >= 400 && newResY < 3000)*/
-						if (g_FrameMan.IsValidResolution(newResX, newResY))
-                        {
-                            // Force double virtual fullscreen res if the res is too high
-                            if (newResX >= 1280)
-                                g_FrameMan.SetNewNxFullscreen(2);
-                            // Not oversized resolution
-                            else
-                                g_FrameMan.SetNewNxFullscreen(1);
-
-                            g_FrameMan.SetNewResX(newResX /= g_FrameMan.GetNewNxFullscreen());
-                            g_FrameMan.SetNewResY(newResY /= g_FrameMan.GetNewNxFullscreen());
-                        }
+						if (g_FrameMan.IsValidResolution(newResX, newResY)) {
+							g_FrameMan.SetNewResX(newResX / g_FrameMan.ResolutionMultiplier());
+							g_FrameMan.SetNewResY(newResY / g_FrameMan.ResolutionMultiplier());
+						}
                     }
 
                     // Update the resolution restart notice

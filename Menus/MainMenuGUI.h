@@ -509,7 +509,7 @@ protected:
 
     enum OptionsButtons
     {
-        FULLSCREEN = 0,
+        RESOLUTIONMULTIPLIER = 0,
         P1NEXT,
         P2NEXT,
         P3NEXT,

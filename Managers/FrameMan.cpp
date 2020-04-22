@@ -130,7 +130,6 @@ namespace RTE {
 				m_ResMultiplier = m_NewResMultiplier = 1;
 			}
 		}
-		if (resX * m_ResMultiplier == m_ScreenResX && resY * m_ResMultiplier == m_ScreenResY) { m_Fullscreen = true; }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -304,97 +303,6 @@ namespace RTE {
 
 		// Remove all scheduled primitives, those will be re-added by updates from other entities.
 		g_PrimitiveMan.ClearPrimitivesList();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int FrameMan::ToggleFullscreen() {
-		// Save the palette so we can re-set it after the change
-		PALETTE pal;
-		get_palette(pal);
-
-		// Refuse windowed multiplier if the resolution is too high
-		if (m_ResX > 1024) { m_NxWindowed = 1; }
-
-		// Need to save these first for recovery attempts to work (screen might be 0)
-		int resX = m_ResX;
-		int resY = m_ResY;
-
-		int fullscreenGfxDriver = GFX_AUTODETECT_FULLSCREEN;
-		int windowedGfxDriver = GFX_AUTODETECT_WINDOWED;
-
-		fullscreenGfxDriver = GFX_DIRECTX_ACCEL;
-
-		if (g_SettingsMan.ForceSoftwareGfxDriver()) { fullscreenGfxDriver = GFX_DIRECTX_SOFT; }
-		if (g_SettingsMan.ForceSafeGfxDriver()) { fullscreenGfxDriver = GFX_DIRECTX_SAFE; }
-		if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) { windowedGfxDriver = GFX_DIRECTX_OVL; }
-		if (g_SettingsMan.ForceNonOverlayedWindowGfxDriver()) { windowedGfxDriver = GFX_DIRECTX_WIN; }
-		if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) { windowedGfxDriver = GFX_DIRECTX_WIN_BORDERLESS; }
-
-		// Switch to windowed mode
-		if (m_Fullscreen) {
-			if (set_gfx_mode(windowedGfxDriver, resX * m_NxWindowed, resY * m_NxWindowed, 0, 0) != 0) {
-				// Oops, failed to set windowed mode, so go back to fullscreen
-				if (set_gfx_mode(fullscreenGfxDriver, resX * m_NxFullscreen, resY * m_NxFullscreen, 0, 0) != 0) {
-					// Can't go back to fullscreen either! total fail
-					set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
-					allegro_message("Unable to set back to fullscreen mode because: %s!", allegro_error);
-					return 1;
-				}
-				// Successfully reverted back to fullscreen
-				g_ConsoleMan.PrintString("ERROR: Failed to switch to windowed mode, reverted back to fullscreen!");
-				m_Fullscreen = true;
-				// Reset the palette.
-				set_palette(pal);
-				// Make sure everything gets caught up after the switch
-				rest(2000);
-				return 1;
-			}
-			// Make sure everything gets caught up after the switch
-			rest(2000);
-			g_ConsoleMan.PrintString("SYSTEM: Switched to windowed mode");
-			m_Fullscreen = false;			
-		} else {
-			// Switch to fullscreen
-			if (set_gfx_mode(fullscreenGfxDriver, resX * m_NxFullscreen, resY * m_NxFullscreen, 0, 0) != 0) {
-				// Oops, failed to set fullscreen mode, try a different fullscreen scaling
-				m_NewNxFullscreen = m_NxFullscreen = m_NxFullscreen == 1 ? 2 : 1;
-				if (set_gfx_mode(fullscreenGfxDriver, resX * m_NxFullscreen, resY * m_NxFullscreen, 0, 0) != 0) {
-					// That didn't work either, so go back to windowed
-					allegro_message("Unable enter fullscreen mode because: %s!\n\nWill try to revert to windowed mode now...", allegro_error);
-					if (set_gfx_mode(windowedGfxDriver, resX * m_NxWindowed, resY * m_NxWindowed, 0, 0) != 0) {
-						// Can't go back to windowed either! total fail
-						set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
-						allegro_message("Unable to set back to windowed mode because: %s!", allegro_error);
-						return 1;
-					}
-					// Successfully reverted back to windowed
-					g_ConsoleMan.PrintString("ERROR: Failed to switch to fullscreen mode, reverted back to windowed!");
-					m_Fullscreen = false;
-					// Make sure everything gets caught up after the switch
-					rest(1500);
-					// Reset the palette.
-					set_palette(pal);
-					return 1;
-				}
-			}
-			// Make sure everything gets caught up after the switch
-			rest(1500);
-			g_ConsoleMan.PrintString("SYSTEM: Switched to fullscreen mode");
-			m_Fullscreen = true;
-		}
-		// Reset the palette.
-		set_palette(pal);
-
-		// Adjust the speed of the mouse according to 2x of screen
-		float mouseDenominator = IsFullscreen() ? NxFullscreen() : NxWindowed();
-		set_mouse_range(0, 0, (GetResX() * mouseDenominator) - 3, (GetResY() * mouseDenominator) - 3);
-
-		// If NxFullscreen, adjust the mouse speed accordingly
-		unsigned char mouseSpeedMultiplier = (g_FrameMan.IsFullscreen() && g_FrameMan.NxFullscreen() > 1) ? 1 : 2;
-		set_mouse_speed(mouseSpeedMultiplier, mouseSpeedMultiplier);
-
-		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

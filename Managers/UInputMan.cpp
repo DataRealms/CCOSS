@@ -2793,11 +2793,6 @@ int UInputMan::Update()
             g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
     }
 
-    // Toggle fullscreen / windowed
-    if (key_shifts & KB_ALT_FLAG && KeyPressed(KEY_ENTER)) {
-        g_FrameMan.ToggleFullscreen();
-    }
-
     // Only allow performance tweaking if showing the stats
     if (g_PerformanceMan.IsShowingPerformanceStats())
     {

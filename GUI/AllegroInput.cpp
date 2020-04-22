@@ -37,7 +37,7 @@ AllegroInput::AllegroInput(int whichPlayer, bool keyJoyMouseCursor):
     // Set the speed of the mouse
     float mouseDenominator = g_FrameMan.ResolutionMultiplier();
     // If Nx fullscreen, adjust the mouse speed accordingly
-    if (g_FrameMan.IsFullscreen() && mouseDenominator > 1)
+    if (mouseDenominator > 1)
         set_mouse_speed(1, 1);
     else
         set_mouse_speed(2, 2);

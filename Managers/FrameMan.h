@@ -132,18 +132,6 @@ namespace RTE {
 
 #pragma region Resolution Handling
 		/// <summary>
-		/// Indicates whether we're in fullscreen mode or not.
-		/// </summary>
-		/// <returns>Whether we're in fullscreen mode.</returns>
-		bool IsFullscreen() const { return m_Fullscreen; }
-
-		/// <summary>
-		/// Toggles to and from fullscreen and windowed mode.
-		/// </summary>
-		/// <returns>Error code, anything other than 0 is error.</returns>
-		int ToggleFullscreen();
-
-		/// <summary>
 		/// Gets the horizontal resolution of the screen.
 		/// </summary>
 		/// <returns>An int describing the horizontal resolution of the screen in pixels.</returns>

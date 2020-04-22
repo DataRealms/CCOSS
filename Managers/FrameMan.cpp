@@ -321,53 +321,40 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SwitchWindowMultiplier(int multiplier) {
-		if (multiplier <= 0 || multiplier > 4 || multiplier == m_NxWindowed) {
+	int FrameMan::SwitchResolutionMultiplier(unsigned char multiplier) {
+		if (multiplier <= 0 || multiplier > 4 || multiplier == m_ResMultiplier) {
 			return -1;
 		}
-		if (m_Fullscreen) {
-			m_NxWindowed = multiplier;
-			return 0;
+		if (m_ResX > m_ScreenResX / multiplier) { 
+			return -1;
 		}
-
-		// Refuse windowed multiplier if the resolution is too high
-		if (m_ResX > 1024) { m_NxWindowed = 1; }
 
 		// Save the palette so we can re-set it after the switch.
 		PALETTE pal;
 		get_palette(pal);
+
 		// Need to save these first for recovery attempts to work (screen might be 0)
 		int resX = m_ResX;
 		int resY = m_ResY;
 
-		// Switch to new windowed mode
-		if (set_gfx_mode(GFX_AUTODETECT_WINDOWED, resX * multiplier, resY * multiplier, 0, 0) != 0) {
+		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations (specifically reducing window size) when switching from 2X mode to 1X mode.
+		// This will force a state where this is no actual game window, and the next set_gfx_mode call will recreate it correctly.
+		set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
+
+		if (set_gfx_mode(m_GfxDriver, resX * multiplier, resY * multiplier, 0, 0) != 0) {
 			// Oops, failed to set windowed mode, so go back to previous multiplier
-			if (set_gfx_mode(GFX_AUTODETECT_WINDOWED, resX * m_NxWindowed, resY * m_NxWindowed, 0, 0) != 0) {
-				// Can't go back to previous mode either! total fail
+			if (set_gfx_mode(m_GfxDriver, resX * m_ResMultiplier, resY * m_ResMultiplier, 0, 0) != 0) {
 				set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
 				allegro_message("Unable to set back to previous windowed mode multiplier because: %s!", allegro_error);
 				return 1;
 			}
-			// Successfully reverted back to previous setting
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new windowed mode multiplier, reverted back to previous setting!");
-			// Reset the palette.
 			set_palette(pal);
-			// Make sure everything gets caught up after the switch
-			rest(2000);
 			return 1;
 		}
-		// Make sure everything gets caught up after the switch
-		rest(2000);
-		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier");
-
-		// Save the new multiplier
-		m_NxWindowed = multiplier;
-		m_Fullscreen = false;
-
-		// Reset the palette.
+		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
+		m_ResMultiplier = multiplier;
 		set_palette(pal);
-
 		return 0;
 	}
 

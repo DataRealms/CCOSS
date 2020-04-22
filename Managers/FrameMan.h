@@ -188,11 +188,11 @@ namespace RTE {
 		int ResolutionMultiplier() const { return m_ResMultiplier; }
 
 		/// <summary>
-		/// Sets and switches to a new windowed mode multiplier.
+		/// Sets and switches to a new windowed mode resolution multiplier.
 		/// </summary>
 		/// <param name="multiplier">The multiplier to switch to.</param>
 		/// <returns>Error code, anything other than 0 is error.</returns>
-		int SwitchWindowMultiplier(int multiplier = 1);
+		int SwitchResolutionMultiplier(unsigned char multiplier = 1);
 #pragma endregion
 
 #pragma region Split-Screen Handling

@@ -46,6 +46,14 @@ They must be added using `... = SoundContainer`, and individual sounds for them 
 
 - Made `AHuman` show both weapon ammo states when 2 one-handed weapons are equipped.
 
+- Added support for multiple lines in item descriptions. This is done as follows:
+	```
+	Description = MultiLineText
+		AddLine = First line of text
+		AddLine = Second line of text
+		...
+	```
+
 ### Fixed
 
 - Fixed LuaBind being all sorts of messed up. All lua bindings now work properly like they were before updating to the v141 toolset.

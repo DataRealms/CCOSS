@@ -32,21 +32,21 @@ Valid editor names are: `ActorEditor`, `GibEditor`, `SceneEditor`, `AreaEditor` 
 - Upgraded to new, modern FMOD audio library. ([Issue #72](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/72))  
 Sounds now play in 3D space, so they pan to the left and right, and attenuate automatically based on the player's viewpoint.
 
-- `Sound`s have been renamed to `SoundContainer`s, and are able to handle multiple sounds playing at once. INI definitions have changed accordingly.  
+- `Sounds` have been renamed to `SoundContainers`, and are able to handle multiple sounds playing at once. INI definitions have changed accordingly.  
 They must be added using `... = SoundContainer`, and individual sounds for them must be added using `AddSound = ContentFile...`.
 
 - Various lua bindings around audio have been upgraded, changed or fixed, giving modders a lot more control over sounds. See documentation for more details.
 
 - Centered the loading splash screen image when `DisableLoadingScreen` is true.
 
-- `Box:WithinBox` lua bindings have been renamed.  
+- `Box:WithinBox` lua bindings have been renamed: 
 `Box:WithinBox` is now `Box:IsWithinBox`.  
 `Box:WithinBoxX` is now `Box:IsWithinBoxX`.  
 `Box:WithinBoxY` is now `Box:IsWithinBoxY`.
 
 - Made `AHuman` show both weapon ammo states when 2 one-handed weapons are equipped.
 
-- Added support for multiple lines in item descriptions. This is done as follows:
+- Added support for multiple lines in item descriptions ([Issue#58](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/58)). This is done as follows:
 	```
 	Description = MultiLineText
 		AddLine = First line of text

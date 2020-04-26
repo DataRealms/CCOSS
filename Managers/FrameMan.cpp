@@ -55,7 +55,8 @@ namespace RTE {
 		m_PlayerScreen = 0;
 		m_PlayerScreenWidth = 0;
 		m_PlayerScreenHeight = 0;
-		m_ScreendumpBuffer = 0;
+		m_ScreenDumpBuffer = 0;
+		m_WorldDumpBuffer = 0;
 		m_BackBuffer8 = 0;
 		m_BackBuffer32 = 0;
 		m_DrawNetworkBackBuffer = false;
@@ -290,6 +291,8 @@ namespace RTE {
 		}
 		destroy_bitmap(m_BackBuffer32);
 		destroy_bitmap(m_PlayerScreen);
+		destroy_bitmap(m_ScreenDumpBuffer);
+		destroy_bitmap(m_WorldDumpBuffer);
 		delete m_GUIScreen;
 		delete m_LargeFont;
 		delete m_SmallFont;
@@ -535,16 +538,70 @@ namespace RTE {
 		return true;
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int FrameMan::SaveBitmap(SaveBitmapMode modeToSave, const char *nameBase, BITMAP *bitmapToSave) {
+		if (modeToSave == WorldDump && !g_ActivityMan.ActivityRunning()) {
 			return 0;
 		}
 
+		if (nameBase == 0 || strlen(nameBase) <= 0) {
+			return -1;
 		}
 
+		unsigned short fileNumber = 0;
+		unsigned short maxFileTrys = 1000;
+		char fullFileName[256];
 
+		while (fileNumber < maxFileTrys) {
+			// Check for the file namebase001.bmp; if it exists, try 002, etc.
+			sprintf_s(fullFileName, sizeof(fullFileName), "%s%03i.bmp", nameBase, fileNumber++);
+			if (!std::experimental::filesystem::exists(fullFileName)) {
+				break;
 			}
-
-
 		}
+
+		PALETTE palette;
+		get_palette(palette);
+
+		switch (modeToSave) {
+			case SingleBitmap:
+				if (bitmapToSave) {
+					save_bmp(fullFileName, bitmapToSave, palette);
+					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(fullFileName));
+					return 0;
+				}
+				break;
+			case ScreenDump:
+				if (screen) {
+					if (!m_ScreenDumpBuffer) { m_ScreenDumpBuffer = create_bitmap(screen->w, screen->h); }
+
+					blit(screen, m_ScreenDumpBuffer, 0, 0, 0, 0, screen->w, screen->h);
+					save_bmp(fullFileName, m_ScreenDumpBuffer, palette);
+					g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
+					return 0;
+				}
+				break;
+			case WorldDump:
+				if (!m_WorldDumpBuffer) {
+					m_WorldDumpBuffer = create_bitmap(g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
+				} else {
+					// Recreate the buffer if the dimensions don't match the current scene.
+					if (m_WorldDumpBuffer->w != g_SceneMan.GetSceneWidth() || m_WorldDumpBuffer->h != g_SceneMan.GetSceneHeight()) {
+						m_WorldDumpBuffer = create_bitmap(g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
+					}
+					DrawWorldDump();
+					save_bmp(fullFileName, m_WorldDumpBuffer, palette);
+					g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + string(fullFileName));
+					return 0;
+				}
+				break;
+			default:
+				g_ConsoleMan.PrintString("ERROR: Wrong bitmap save mode passed in, no bitmap was saved!");
+				return -1;
+		}
+		g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + std::string(fullFileName));
+		return -1;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -644,168 +701,6 @@ namespace RTE {
 
 		// Return the end phase state of the skipping
 		return skipped;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int FrameMan::SaveScreenToBMP(const char *nameBase) {
-		int filenumber = 0;
-		char fullfilename[256];
-		int maxFileTrys = 1000;
-
-		if (nameBase == 0 || strlen(nameBase) <= 0) {
-			return -1;
-		}
-
-		do {
-			// Check for the file namebase001.bmp; if it exists, try 002, etc.
-			sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", nameBase, filenumber++);
-			if (!std::experimental::filesystem::exists(fullfilename)) {
-				break;
-			}
-		} while (filenumber < maxFileTrys);
-
-		// Save out the screen bitmap, after making a copy of it, faster sometimes
-		if (screen) {
-			if (!m_ScreendumpBuffer) { m_ScreendumpBuffer = create_bitmap(screen->w, screen->h); }
-
-			blit(screen, m_ScreendumpBuffer, 0, 0, 0, 0, screen->w, screen->h);
-			PALETTE palette;
-			get_palette(palette);
-			save_bmp(fullfilename, m_ScreendumpBuffer, palette);
-
-			g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + string(fullfilename));
-		}
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int FrameMan::SaveWorldToBMP(const char *nameBase) {
-		if (!g_ActivityMan.ActivityRunning()) {
-			return 0;
-		}
-
-		int filenumber = 0;
-		char fullfilename[256];
-		int maxFileTrys = 1000;
-
-		// Make sure its not a 0 name base
-		if (nameBase == 0 || strlen(nameBase) <= 0) {
-			return -1;
-		}
-
-		do {
-			// Check for the file namebase001.bmp; if it exists, try 002, etc.
-			sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", nameBase, filenumber++);
-			if (!std::experimental::filesystem::exists(fullfilename)) {
-				break;
-			}
-		} while (filenumber < maxFileTrys);
-
-
-		BITMAP * pWorldBitmap = create_bitmap_ex(32, g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
-		Vector targetPos(0, 0);
-		std::list<PostEffect> postEffects;
-
-		if (pWorldBitmap) {
-			clear_to_color(pWorldBitmap, makecol32(132, 192, 252)); // Light blue color
-
-			//Draw sky gradient
-			for (int i = 0; i < pWorldBitmap->h; i++) {
-				hline(pWorldBitmap, 0, i, pWorldBitmap->w - 1, makecol32(64 + (((float)i / (float)pWorldBitmap->h) * (128 - 64)), 64 + (((float)i / (float)pWorldBitmap->h) * (192 - 64)), 96 + ((float)i / (float)pWorldBitmap->h) * (255 - 96)));
-			}
-
-			// Draw scene
-			draw_sprite(pWorldBitmap, g_SceneMan.GetTerrain()->GetBGColorBitmap(), 0, 0);
-			draw_sprite(pWorldBitmap, g_SceneMan.GetTerrain()->GetFGColorBitmap(), 0, 0);
-
-			//Draw objects
-			draw_sprite(pWorldBitmap, g_SceneMan.GetMOColorBitmap(), 0, 0);
-
-			g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, pWorldBitmap->w, pWorldBitmap->h, postEffects, -1);
-
-			//Draw post-effects
-			BITMAP *pBitmap = 0;
-			int effectPosX = 0;
-			int effectPosY = 0;
-			int strength = 0;
-			float angle = 0;
-
-			for (list<PostEffect>::iterator eItr = postEffects.begin(); eItr != postEffects.end(); ++eItr) {
-				pBitmap = (*eItr).m_Bitmap;
-				strength = (*eItr).m_Strength;
-				set_screen_blender(strength, strength, strength, strength);
-				effectPosX = (*eItr).m_Pos.GetFloorIntX() - (pBitmap->w / 2);
-				effectPosY = (*eItr).m_Pos.GetFloorIntY() - (pBitmap->h / 2);
-				angle = (*eItr).m_Angle;
-
-				if (angle == 0) {
-					draw_trans_sprite(pWorldBitmap, pBitmap, effectPosX, effectPosY);
-				} else {
-					BITMAP * pTargetBitmap;
-
-					if (pBitmap->w < 16 && pBitmap->h < 16) {
-						pTargetBitmap = g_PostProcessMan.GetTempEffectBitmap(16);
-					} else if (pBitmap->w < 32 && pBitmap->h < 32) {
-						pTargetBitmap = g_PostProcessMan.GetTempEffectBitmap(32);
-					} else if (pBitmap->w < 64 && pBitmap->h < 64) {
-						pTargetBitmap = g_PostProcessMan.GetTempEffectBitmap(64);
-					} else if (pBitmap->w < 128 && pBitmap->h < 128) {
-						pTargetBitmap = g_PostProcessMan.GetTempEffectBitmap(128);
-					} else if (pBitmap->w < 256 && pBitmap->h < 256) {
-						pTargetBitmap = g_PostProcessMan.GetTempEffectBitmap(256);
-					} else {
-						pTargetBitmap = g_PostProcessMan.GetTempEffectBitmap(512);
-					}
-					clear_to_color(pTargetBitmap, 0);
-
-					fixed fAngle;
-					fAngle = fixmul(angle, radtofix_r);
-
-					rotate_sprite(pTargetBitmap, pBitmap, 0, 0, fAngle);
-					draw_trans_sprite(pWorldBitmap, pTargetBitmap, effectPosX, effectPosY);
-				}
-			}
-
-			PALETTE palette;
-			get_palette(palette);
-			save_bmp(fullfilename, pWorldBitmap, palette);
-
-			g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + string(fullfilename));
-
-			destroy_bitmap(pWorldBitmap);
-		}
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int FrameMan::SaveBitmapToBMP(BITMAP *bitmap, const char *nameBase) {
-		int filenumber = 0;
-		char fullfilename[256];
-		int maxFileTrys = 1000;
-
-		// Make sure its not a 0 name base
-		if (nameBase == 0 || strlen(nameBase) <= 0) {
-			return -1;
-		}
-
-		do {
-			// Check for the file namebase001.bmp; if it exists, try 002, etc.
-			sprintf_s(fullfilename, sizeof(fullfilename), "%s%03i.bmp", nameBase, filenumber++);
-			if (!std::experimental::filesystem::exists(fullfilename)) {
-				break;
-			}
-		} while (filenumber < maxFileTrys);
-
-		// Save out the bitmap
-		if (bitmap) {
-			PALETTE palette;
-			get_palette(palette);
-			save_bmp(fullfilename, bitmap, palette);
-		}
-		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1129,6 +1024,74 @@ namespace RTE {
 				}
 			}
 			if (m_FlashTimer[playerScreen].IsPastRealTimeLimit()) { m_FlashScreenColor[playerScreen] = -1; }
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::DrawWorldDump() {
+		float worldBitmapWidth = static_cast<float>(m_WorldDumpBuffer->w);
+		float worldBitmapHeight = static_cast<float>(m_WorldDumpBuffer->h);
+		BITMAP *bitmap = 0;
+		int effectPosX = 0;
+		int effectPosY = 0;
+		int strength = 0;
+		float angle = 0;
+		Vector targetPos(0, 0);
+		std::list<PostEffect> postEffects;
+
+		clear_to_color(m_WorldDumpBuffer, makecol32(132, 192, 252)); // Light blue color
+
+		// Draw sky gradient
+		for (int i = 0; i < m_WorldDumpBuffer->h; i++) {
+			int lineColor = makecol32(64 + ((static_cast<float>(i) / worldBitmapHeight) * (128 - 64)), 64 + ((static_cast<float>(i) / worldBitmapHeight) * (192 - 64)), 96 + ((static_cast<float>(i) / worldBitmapHeight) * (255 - 96)));
+			hline(m_WorldDumpBuffer, 0, i, worldBitmapWidth - 1, lineColor);
+		}
+
+		// Draw scene
+		draw_sprite(m_WorldDumpBuffer, g_SceneMan.GetTerrain()->GetBGColorBitmap(), 0, 0);
+		draw_sprite(m_WorldDumpBuffer, g_SceneMan.GetTerrain()->GetFGColorBitmap(), 0, 0);
+
+		// Draw objects
+		draw_sprite(m_WorldDumpBuffer, g_SceneMan.GetMOColorBitmap(), 0, 0);
+
+		//Draw post-effects
+		g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, worldBitmapWidth, worldBitmapHeight, postEffects, -1);
+
+		for (list<PostEffect>::iterator eItr = postEffects.begin(); eItr != postEffects.end(); ++eItr) {
+			bitmap = (*eItr).m_Bitmap;
+			strength = (*eItr).m_Strength;
+			set_screen_blender(strength, strength, strength, strength);
+			effectPosX = (*eItr).m_Pos.GetFloorIntX() - (bitmap->w / 2);
+			effectPosY = (*eItr).m_Pos.GetFloorIntY() - (bitmap->h / 2);
+			angle = (*eItr).m_Angle;
+
+			if (angle == 0) {
+				draw_trans_sprite(m_WorldDumpBuffer, bitmap, effectPosX, effectPosY);
+			} else {
+				BITMAP * targetBitmap;
+
+				if (bitmap->w < 16 && bitmap->h < 16) {
+					targetBitmap = g_PostProcessMan.GetTempEffectBitmap(16);
+				} else if (bitmap->w < 32 && bitmap->h < 32) {
+					targetBitmap = g_PostProcessMan.GetTempEffectBitmap(32);
+				} else if (bitmap->w < 64 && bitmap->h < 64) {
+					targetBitmap = g_PostProcessMan.GetTempEffectBitmap(64);
+				} else if (bitmap->w < 128 && bitmap->h < 128) {
+					targetBitmap = g_PostProcessMan.GetTempEffectBitmap(128);
+				} else if (bitmap->w < 256 && bitmap->h < 256) {
+					targetBitmap = g_PostProcessMan.GetTempEffectBitmap(256);
+				} else {
+					targetBitmap = g_PostProcessMan.GetTempEffectBitmap(512);
+				}
+				clear_to_color(targetBitmap, 0);
+
+				fixed fAngle;
+				fAngle = fixmul(angle, radtofix_r);
+
+				rotate_sprite(targetBitmap, bitmap, 0, 0, fAngle);
+				draw_trans_sprite(m_WorldDumpBuffer, targetBitmap, effectPosX, effectPosY);
+			}
 		}
 	}
 }

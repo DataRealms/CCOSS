@@ -515,34 +515,26 @@ namespace RTE {
 
 #pragma region Screen Capture
 		/// <summary>
+		/// Dumps a bitmap to a 8bpp BMP file.
+		/// </summary>
+		/// <param name="bitmap">The individual bitmap that will be dumped.</param>
+		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
+		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
+		int SaveBitmapToBMP(BITMAP *bitmap, const char *nameBase) { return SaveBitmap(SingleBitmap, nameBase, bitmap); }
+
+		/// <summary>
 		/// Dumps a bitmap of the screen back-buffer to a 8bpp BMP file.
 		/// </summary>
-		/// <param name="nameBase">
-		/// The filename of the file to save to, WITHOUT EXTENSION.
-		/// Eg, If "Test" is passed in, this function will save to Test000.bmp, if that file does not already exist. If it does exist, it will attempt 001, and so on.
-		/// </param>
+		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveScreenToBMP(const char *nameBase);
+		int SaveScreenToBMP(const char *nameBase) { return SaveBitmap(ScreenDump, nameBase); }
 
 		/// <summary>
 		/// Dumps a bitmap of everything on the scene to the BMP file.
 		/// </summary>
-		/// <param name="nameBase">
-		/// The filename of the file to save to, WITHOUT EXTENSION.
-		/// Eg, If "Test" is passed in, this function will save to Test000.bmp, if that file does not already exist. If it does exist, it will attempt 001, and so on.
-		/// </param>
+		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveWorldToBMP(const char *nameBase);
-
-		/// <summary>
-		/// Dumps a bitmap to a 8bpp BMP file.
-		/// </summary>
-		/// <param name="nameBase">
-		/// The filename of the file to save to, WITHOUT EXTENSION.
-		/// Eg, If "Test" is passed in, this function will save to Test000.bmp, if that file does not already exist. If it does exist, it will attempt 001, and so on.
-		/// </param>
-		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveBitmapToBMP(BITMAP *bitmap, const char *nameBase);
+		int SaveWorldToBMP(const char *nameBase) { return SaveBitmap(WorldDump, nameBase); }
 #pragma endregion
 
 #pragma region Class Info
@@ -614,7 +606,8 @@ namespace RTE {
 		
 		BITMAP *m_BackBuffer8; //!< Screen back-buffer, always 8bpp, gets copied to the 32bpp buffer for post-processing.
 		BITMAP *m_BackBuffer32; //!< 32bpp back-buffer, only used for post-processing.
-		BITMAP *m_ScreendumpBuffer; //!< Temporary buffer for making quick screencaps.	
+		BITMAP *m_ScreenDumpBuffer; //!< Temporary buffer for making quick screencaps.
+		BITMAP *m_WorldDumpBuffer; //!< Temporary buffer for making whole scene screencaps.
 
 		BITMAP *m_NetworkBackBufferIntermediate8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw.
 		BITMAP *m_NetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw. Used to draw UI only.
@@ -634,6 +627,11 @@ namespace RTE {
 		//std::mutex m_NetworkBitmapIsLocked[c_MaxScreenCount];
 
 	private:
+
+		/// <summary>
+		/// Enumeration with different settings for the SaveBitmap() method.
+		/// </summary>
+		enum SaveBitmapMode { SingleBitmap = 0, ScreenDump, WorldDump};
 
 #pragma region Create Breakdown
 		/// <summary>
@@ -671,6 +669,23 @@ namespace RTE {
 		void DrawScreenFlash(short playerScreen, BITMAP *playerGUIBitmap);
 #pragma endregion
 
+#pragma region Screen Capture
+		/// <summary>
+		/// Draws the current frame of the whole scene to a temporary buffer that is later saved as a screenshot. This is called from SaveBitmap().
+		/// </summary>
+		void DrawWorldDump();
+
+		/// <summary>
+		/// Shared method for saving screenshots or individual bitmaps. Will be called from SaveBitmapToBMP(), SaveScreenToBMP() or SaveWorldToBMP().
+		/// </summary>
+		/// <param name="modeToSave">What is being saved. See SaveBitmapMode enumeration for a list of modes.</param>
+		/// <param name="nameBase">
+		/// The filename of the file to save to, WITHOUT EXTENSION.
+		/// Eg, If "Test" is passed in, this function will save to Test000.bmp, if that file does not already exist. If it does exist, it will attempt 001, and so on.
+		/// </param>
+		/// <param name="bitmapToSave">The individual bitmap that will be dumped. 0 if not in SingleBitmap mode.</param>
+		int SaveBitmap(SaveBitmapMode modeToSave, const char *nameBase, BITMAP *bitmapToSave = 0);
+#pragma endregion
 
 		/// <summary>
 		/// Shared method for drawing lines to avoid duplicate code. Will by called by either DrawLine() or DrawDotLine().

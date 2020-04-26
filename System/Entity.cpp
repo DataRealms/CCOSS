@@ -75,7 +75,18 @@ namespace RTE {
 			// Indicate where this was read from
 			m_DefinedInModule = reader.GetReadModuleID();
 		} else if (propName == "Description") {
-			reader >> m_PresetDescription;
+			std::string descriptionValue = reader.ReadPropValue();
+			if (descriptionValue == "MultiLineText") {
+				m_PresetDescription.clear();
+				while (reader.NextProperty() && reader.ReadPropName() == "AddLine") {
+					m_PresetDescription += reader.ReadPropValue() + "\n\n";
+				}
+				if (!m_PresetDescription.empty()) {
+					m_PresetDescription.resize(m_PresetDescription.size() - 2);
+				}
+			} else {
+				m_PresetDescription = descriptionValue;
+			}
 		} else if (propName == "RandomWeight") {
 			reader >> m_RandomWeight;
 			m_RandomWeight = Limit(m_RandomWeight, 100, 0);

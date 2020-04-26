@@ -356,7 +356,9 @@ namespace RTE {
 		/// <param name="skipStart">The start of the skipping phase. If skip is 10 and this is 5, the first dot will be drawn after 5 pixels.</param>
 		/// <param name="shortestWrap">Whether the line should take the shortest possible route across scene wraps.</param>
 		/// <returns>The end state of the skipping phase. Eg if 4 is returned here the last dot was placed 4 pixels ago.</returns>
-		int DrawLine(BITMAP *pBitmap, const Vector &start, const Vector &end, int color, int altColor = 0, int skip = 0, int skipStart = 0, bool shortestWrap = false);
+		int DrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, int color, int altColor = 0, int skip = 0, int skipStart = 0, bool shortestWrap = false) {
+			return SharedDrawLine(bitmap, start, end, color, altColor, skip, skipStart, shortestWrap, false, 0);
+		}
 
 		/// <summary>
 		/// Draws a line that can be dotted with bitmaps.
@@ -369,7 +371,9 @@ namespace RTE {
 		/// <param name="skipStart">The start of the skipping phase. If skip is 10 and this is 5, the first dot will be drawn after 5 pixels.</param>
 		/// <param name="shortestWrap">Whether the line should take the shortest possible route across scene wraps.</param>
 		/// <returns>The end state of the skipping phase. Eg if 4 is returned here the last dot was placed 4 pixels ago.</returns>
-		int DrawDotLine(BITMAP *bitmap, const Vector &start, const Vector &end, BITMAP *dot, int skip = 0, int skipStart = 0, bool shortestWrap = false);
+		int DrawDotLine(BITMAP *bitmap, const Vector &start, const Vector &end, BITMAP *dot, int skip = 0, int skipStart = 0, bool shortestWrap = false) {
+			return SharedDrawLine(bitmap, start, end, 0, 0, skip, skipStart, shortestWrap, true, dot);
+		}
 #pragma endregion
 
 #pragma region Network Handling
@@ -666,6 +670,22 @@ namespace RTE {
 		/// <param name="guiBitmap">The bitmap the flash effect will be drawn on.</param>
 		void DrawScreenFlash(short playerScreen, BITMAP *playerGUIBitmap);
 #pragma endregion
+
+
+		/// <summary>
+		/// Shared method for drawing lines to avoid duplicate code. Will by called by either DrawLine() or DrawDotLine().
+		/// </summary>
+		/// <param name="pBitmap">The Bitmap to draw to. Ownership is NOT transferred.</param>
+		/// <param name="start">The absolute Start point.</param>
+		/// <param name="end">The absolute end point.</param>
+		/// <param name="color">The color value of the line.</param>
+		/// <param name="altColor">A color to alternate with. Every other pixel drawn will have this if !0.</param>
+		/// <param name="skip">How many pixels to skip drawing between drawn ones. 0 means solid line 2 means there's a gap of two pixels between each drawn one. Should be more than 0 for dots.</param>
+		/// <param name="skipStart">The start of the skipping phase. If skip is 10 and this is 5, the first dot will be drawn after 5 pixels.</param>
+		/// <param name="shortestWrap">Whether the line should take the shortest possible route across scene wraps.</param>
+		/// <param name="dot">The bitmap to be used for dots (will be centered).</param>
+		/// <returns>The end state of the skipping phase. Eg if 4 is returned here the last dot was placed 4 pixels ago.</returns>
+		int SharedDrawLine(BITMAP *pBitmap, const Vector &start, const Vector &end, int color, int altColor = 0, int skip = 0, int skipStart = 0, bool shortestWrap = false, bool drawDot = 0, BITMAP *dot = 0);
 
 		/// <summary>
 		/// Gets the requested font from the GUI engine's current skin. Ownership is NOT transferred!

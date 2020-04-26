@@ -499,189 +499,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::DrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, int color, int altColor, int skip, int skipStart, bool shortestWrap) {
-		RTEAssert(bitmap, "Trying to draw line to null Bitmap");
-
-		//acquire_bitmap(bitmap);
-
-		int error = 0;
-		int dom = 0;
-		int sub = 0;
-		int domSteps = 0;
-		int skipped = skip + (skipStart - skip);
-		int intPos[2];
-		int delta[2];
-		int delta2[2];
-		int increment[2];
-		bool drawAlt = false;
-
-		// Just make the alt the same color as the main one if no one was specified
-		if (altColor == 0) { altColor = color; }
-		
-		intPos[X] = floorf(start.m_X);
-		intPos[Y] = floorf(start.m_Y);
-
-		// Wrap line around the scene if it makes it shorter
-		if (shortestWrap) {
-			Vector deltaVec = g_SceneMan.ShortestDistance(start, end, false);
-			delta[X] = floorf(deltaVec.m_X);
-			delta[Y] = floorf(deltaVec.m_Y);
-		} else {
-			delta[X] = floorf(end.m_X) - intPos[X];
-			delta[Y] = floorf(end.m_Y) - intPos[Y];
-		}
-		if (delta[X] == 0 && delta[Y] == 0) {
-			return 0;
-		}
-
-		// Bresenham's line drawing algorithm preparation
-		if (delta[X] < 0) {
-			increment[X] = -1;
-			delta[X] = -delta[X];
-		} else {
-			increment[X] = 1;
-		}
-		if (delta[Y] < 0) {
-			increment[Y] = -1;
-			delta[Y] = -delta[Y];
-		} else {
-			increment[Y] = 1;
-		}
-		// Scale by 2, for better accuracy of the error at the first pixel
-		delta2[X] = delta[X] << 1;
-		delta2[Y] = delta[Y] << 1;
-
-		// If X is dominant, Y is submissive, and vice versa.
-		if (delta[X] > delta[Y]) {
-			dom = X;
-			sub = Y;
-		} else {
-			dom = Y;
-			sub = X;
-		}
-		error = delta2[sub] - delta[dom];
-
-		// Bresenham's line drawing algorithm execution
-		for (domSteps = 0; domSteps < delta[dom]; ++domSteps) {
-			intPos[dom] += increment[dom];
-			if (error >= 0) {
-				intPos[sub] += increment[sub];
-				error -= delta2[dom];
-			}
-			error += delta2[sub];
-
-			// Only draw pixel if we're not due to skip any
-			if (++skipped > skip) {
-				// Scene wrapping, if necessary
-				g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
-
-				// Slap a regular pixel on there
-				putpixel(bitmap, intPos[X], intPos[Y], drawAlt ? color : altColor);
-				drawAlt = !drawAlt;
-				skipped = 0;
-			}
-		}
-		//release_bitmap(bitmap);
-
-		// Return the end phase state of the skipping
-		return skipped;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int FrameMan::DrawDotLine(BITMAP *bitmap, const Vector &start, const Vector &end, BITMAP *dot, int skip, int skipStart, bool shortestWrap) {
-		RTEAssert(bitmap, "Trying to draw line to null Bitmap");
-		RTEAssert(dot, "Trying to draw line of dots without specifying a dot Bitmap");
-
-		//acquire_bitmap(bitmap);
-
-		int	error = 0;
-		int	dom = 0;
-		int	sub = 0;
-		int	domSteps = 0;
-		int	skipped = skip + (skipStart - skip);
-		int intPos[2];
-		int delta[2];
-		int delta2[2];
-		int increment[2];
-		bool drawAlt = false;
-		int dotHalfHeight = dot->h / 2;
-		int dotHalfWidth = dot->w / 2;
-
-		// Calculate the integer values
-		intPos[X] = floorf(start.m_X);
-		intPos[Y] = floorf(start.m_Y);
-
-		// Wrap line around the scene if it makes it shorter
-		if (shortestWrap) {
-			Vector deltaVec = g_SceneMan.ShortestDistance(start, end, false);
-			delta[X] = floorf(deltaVec.m_X);
-			delta[Y] = floorf(deltaVec.m_Y);	
-		} else {
-			// No wrap
-			delta[X] = floorf(end.m_X) - intPos[X];
-			delta[Y] = floorf(end.m_Y) - intPos[Y];
-		}
-		if (delta[X] == 0 && delta[Y] == 0) {
-			return 0;
-		}
-
-		// Bresenham's line drawing algorithm preparation
-		if (delta[X] < 0) {
-			increment[X] = -1;
-			delta[X] = -delta[X];
-		} else {
-			increment[X] = 1;
-		}
-		if (delta[Y] < 0) {
-			increment[Y] = -1;
-			delta[Y] = -delta[Y];
-		} else {
-			increment[Y] = 1;
-		}
-		// Scale by 2, for better accuracy of the error at the first pixel
-		delta2[X] = delta[X] << 1;
-		delta2[Y] = delta[Y] << 1;
-
-		// If X is dominant, Y is submissive, and vice versa.
-		if (delta[X] > delta[Y]) {
-			dom = X;
-			sub = Y;
-		} else {
-			dom = Y;
-			sub = X;
-		}
-		error = delta2[sub] - delta[dom];
-
-		// Bresenham's line drawing algorithm execution
-		for (domSteps = 0; domSteps < delta[dom]; ++domSteps) {
-			intPos[dom] += increment[dom];
-			if (error >= 0) {
-				intPos[sub] += increment[sub];
-				error -= delta2[dom];
-			}
-			error += delta2[sub];
-
-			// Only draw pixel if we're not due to skip any
-			if (++skipped > skip) {
-				// Scene wrapping, if necessary
-				g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
-
-				// Slap the dot on there
-				masked_blit(dot, bitmap, 0, 0, intPos[X] - dotHalfWidth, intPos[Y] - dotHalfHeight, dot->w, dot->h);
-
-				drawAlt = !drawAlt;
-				skipped = 0;
-			}
-		}
-		//release_bitmap(bitmap);
-
-		// Return the end phase state of the skipping
-		return skipped;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void FrameMan::CreateNewPlayerBackBuffer(int player, int w, int h) {
 		for (int f = 0; f < 2; f++) {
 			destroy_bitmap(m_NetworkBackBufferIntermediate8[f][player]);
@@ -716,6 +533,117 @@ namespace RTE {
 		destroy_bitmap(tempBitmap);
 
 		return true;
+	}
+
+			return 0;
+		}
+
+		}
+
+
+			}
+
+
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int FrameMan::SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, int color, int altColor, int skip, int skipStart, bool shortestWrap, bool drawDot, BITMAP *dot) {
+		RTEAssert(bitmap, "Trying to draw line to null Bitmap");
+		if (drawDot) { RTEAssert(dot, "Trying to draw line of dots without specifying a dot Bitmap"); }
+
+		int error = 0;
+		int dom = 0;
+		int sub = 0;
+		int domSteps = 0;
+		int skipped = skip + (skipStart - skip);
+		int intPos[2];
+		int delta[2];
+		int delta2[2];
+		int increment[2];
+		bool drawAlt = false;
+
+		int dotHeight = drawDot ? dot->h : 0;
+		int dotWidth = drawDot ? dot->w : 0;
+
+		//acquire_bitmap(bitmap);
+
+		// Just make the alt the same color as the main one if no one was specified
+		if (altColor == 0) { altColor = color; }
+
+		intPos[X] = floorf(start.m_X);
+		intPos[Y] = floorf(start.m_Y);
+
+		// Wrap line around the scene if it makes it shorter
+		if (shortestWrap) {
+			Vector deltaVec = g_SceneMan.ShortestDistance(start, end, false);
+			delta[X] = floorf(deltaVec.m_X);
+			delta[Y] = floorf(deltaVec.m_Y);
+		} else {
+			delta[X] = floorf(end.m_X) - intPos[X];
+			delta[Y] = floorf(end.m_Y) - intPos[Y];
+		}
+		if (delta[X] == 0 && delta[Y] == 0) {
+			return 0;
+		}
+
+		// Bresenham's line drawing algorithm preparation
+		if (delta[X] < 0) {
+			increment[X] = -1;
+			delta[X] = -delta[X];
+		} else {
+			increment[X] = 1;
+		}
+		if (delta[Y] < 0) {
+			increment[Y] = -1;
+			delta[Y] = -delta[Y];
+		} else {
+			increment[Y] = 1;
+		}
+
+		// Scale by 2, for better accuracy of the error at the first pixel
+		delta2[X] = delta[X] << 1;
+		delta2[Y] = delta[Y] << 1;
+
+		// If X is dominant, Y is submissive, and vice versa.
+		if (delta[X] > delta[Y]) {
+			dom = X;
+			sub = Y;
+		} else {
+			dom = Y;
+			sub = X;
+		}
+		error = delta2[sub] - delta[dom];
+
+		// Bresenham's line drawing algorithm execution
+		for (domSteps = 0; domSteps < delta[dom]; ++domSteps) {
+			intPos[dom] += increment[dom];
+			if (error >= 0) {
+				intPos[sub] += increment[sub];
+				error -= delta2[dom];
+			}
+			error += delta2[sub];
+
+			// Only draw pixel if we're not due to skip any
+			if (++skipped > skip) {
+				// Scene wrapping, if necessary
+				g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
+
+				if (drawDot) {
+					masked_blit(dot, bitmap, 0, 0, intPos[X] - (dotWidth / 2), intPos[Y] - (dotHeight / 2), dot->w, dot->h);
+				} else {
+					putpixel(bitmap, intPos[X], intPos[Y], drawAlt ? color : altColor);
+				}
+				drawAlt = !drawAlt;
+				skipped = 0;
+			}
+		}
+
+		//release_bitmap(bitmap);
+
+		// Return the end phase state of the skipping
+		return skipped;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

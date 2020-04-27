@@ -84,6 +84,16 @@ namespace RTE {
 		/// Takes the current state of the 8bpp back-buffer, copies it, and adds post-processing effects on top like glows etc.
 		/// </summary>
 		void PostProcess();
+
+		/// <summary>
+		/// Adjusts the offsets of all effects relative to the specified player screen and adds them to the total screen effects list so they can be drawn in PostProcess().
+		/// </summary>
+		/// <param name="playerScreen">Player screen to adjust effect offsets for.</param>
+		/// <param name="targetBitmap">Bitmap representing the player screen.</param>
+		/// <param name="targetBitmapOffset">The position of the specified player's draw screen on the backbuffer.</param>
+		/// <param name="screenRelativeEffectsList">List of the specified player's accumulated post effects for this frame.</param>
+		/// <param name="screenRelativeGlowBoxesList">List of the specified player's accumulated glow boxes for this frame.</param>
+		void AdjustEffectsPosToPlayerScreen(char playerScreen, BITMAP *targetBitmap, Vector targetBitmapOffset, std::list<PostEffect> &screenRelativeEffectsList, std::list<Box> &screenRelativeGlowBoxesList);
 #pragma endregion
 
 #pragma region Post Effect Handling

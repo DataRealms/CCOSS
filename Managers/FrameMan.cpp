@@ -727,6 +727,34 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void FrameMan::UpdateScreenOffsetForSplitScreen(char playerScreen, Vector &screenOffset) {
+		switch (playerScreen) {
+			case 1:
+				// If both splits, or just VSplit, then in upper right quadrant
+				if ((m_VSplit && !m_HSplit) || (m_VSplit && m_HSplit)) {
+					screenOffset.SetIntXY(GetResX() / 2, 0);
+				} else {
+					// If only HSplit, then lower left quadrant
+					screenOffset.SetIntXY(0, GetResY() / 2);
+				}
+				break;
+			case 2:
+				// Always lower left quadrant
+				screenOffset.SetIntXY(0, GetResY() / 2);
+				break;
+			case 3:
+				// Always lower right quadrant
+				screenOffset.SetIntXY(GetResX() / 2, GetResY() / 2);
+				break;
+			default:
+				// Always upper left corner
+				screenOffset.SetIntXY(0, 0);
+				break;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void FrameMan::Draw() {
 		// Count how many split screens we'll need
 		int screenCount = (m_HSplit ? 2 : 1) * (m_VSplit ? 2 : 1);
@@ -800,65 +828,21 @@ namespace RTE {
 			// Enable clipping on the draw bitmap
 			set_clip_state(pDrawScreen, 1);
 
-			DrawScreenText(whichScreen, pPlayerGUIBitmap);
-
-			// If we are dealing with split screens, then deal with the fact that we need to draw the player screens to different locations on the final buffer
-			// The position of the current draw screen on the final screen
+			DrawScreenText(playerScreen, playerGUIBitmap);
+			
+			// The position of the current draw screen on the backbuffer
 			Vector screenOffset;
 
-			if (screenCount > 1) {
-				switch (whichScreen) {
-					case 1:
-						// If both splits, or just VSplit, then in upper right quadrant
-						if ((m_VSplit && !m_HSplit) || (m_VSplit && m_HSplit)) {
-							screenOffset.SetIntXY(GetResX() / 2, 0);
-						} else {
-							// If only HSplit, then lower left quadrant
-							screenOffset.SetIntXY(0, GetResY() / 2);
-						}
-						break;
-					case 2:
-						// Always lower left quadrant
-						screenOffset.SetIntXY(0, GetResY() / 2);
-						break;
-					case 3:
-						// Always lower right quadrant
-						screenOffset.SetIntXY(GetResX() / 2, GetResY() / 2);
-						break;
-					default:
-						// Always upper left corner
-						screenOffset.SetIntXY(0, 0);
-						break;
-				}
-			}
+			// If we are dealing with split screens, then deal with the fact that we need to draw the player screens to different locations on the final buffer
+			if (screenCount > 1) { UpdateScreenOffsetForSplitScreen(playerScreen, screenOffset); }
 
-			DrawScreenFlash(whichScreen, pDrawScreenGUI);
-
-			// Draw the intermediate draw splitscreen to the appropriate spot on the back buffer
-			if (!IsInMultiplayerMode()) { blit(pDrawScreen, m_BackBuffer8, 0, 0, screenOffset.GetFloorIntX(), screenOffset.GetFloorIntY(), pDrawScreen->w, pDrawScreen->h); }
-
-			// Add the player screen's effects to the total screen effects list so they can be drawn in post processing
-			if (!IsInMultiplayerMode()) {
-				int occX = g_SceneMan.GetScreenOcclusion(whichScreen).GetFloorIntX();
-				int occY = g_SceneMan.GetScreenOcclusion(whichScreen).GetFloorIntY();
-
-				// Copy post effects received by client if in network mode
-				if (m_DrawNetworkBackBuffer) { g_PostProcessMan.GetNetworkPostEffectsList(0, screenRelativeEffects); }
-
-				// Adjust for the player screen's position on the final buffer
-				for (list<PostEffect>::iterator eItr = screenRelativeEffects.begin(); eItr != screenRelativeEffects.end(); ++eItr) {
-					// Make sure we won't be adding any effects to a part of the screen that is occluded by menus and such
-					if ((*eItr).m_Pos.m_X > occX && (*eItr).m_Pos.m_Y > occY && (*eItr).m_Pos.m_X < pDrawScreen->w + occX && (*eItr).m_Pos.m_Y < pDrawScreen->h + occY) {
-						g_PostProcessMan.GetPostScreenEffectsList()->push_back(PostEffect((*eItr).m_Pos + screenOffset, (*eItr).m_Bitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle));
-					}
-				}
-
-				// Adjust glow areas for the player screen's position on the final buffer
-				for (list<Box>::iterator bItr = screenRelativeGlowBoxes.begin(); bItr != screenRelativeGlowBoxes.end(); ++bItr) {
-					g_PostProcessMan.GetPostScreenGlowBoxesList()->push_back(*bItr);
-					// Adjust each added glow area for the player screen's position on the final buffer
-					g_PostProcessMan.GetPostScreenGlowBoxesList()->back().m_Corner += screenOffset;
-				}
+			DrawScreenFlash(playerScreen, drawScreenGUI);
+			
+			if (!IsInMultiplayerMode()) { 
+				// Draw the intermediate draw splitscreen to the appropriate spot on the back buffer
+				blit(drawScreen, m_BackBuffer8, 0, 0, screenOffset.GetFloorIntX(), screenOffset.GetFloorIntY(), drawScreen->w, drawScreen->h);
+		
+				g_PostProcessMan.AdjustEffectsPosToPlayerScreen(playerScreen, drawScreen, screenOffset, screenRelativeEffects, screenRelativeGlowBoxes);
 			}
 		}
 
@@ -867,7 +851,6 @@ namespace RTE {
 
 		if (!IsInMultiplayerMode()) {
 			// Draw separating lines for split-screens
-			acquire_bitmap(m_BackBuffer8);
 			if (m_HSplit) {
 				hline(m_BackBuffer8, 0, (m_BackBuffer8->h / 2) - 1, m_BackBuffer8->w - 1, m_AlmostBlackColor);
 				hline(m_BackBuffer8, 0, (m_BackBuffer8->h / 2), m_BackBuffer8->w - 1, m_AlmostBlackColor);
@@ -889,62 +872,7 @@ namespace RTE {
 			}
 		}
 
-		if (IsInMultiplayerMode()) {
-			// Blit all four internal player screens onto the backbuffer
-			for (short i = 0; i < c_MaxScreenCount; i++) {
-				int dx = 0;
-				int dy = 0;
-				int dw = m_BackBuffer8->w / 2;
-				int dh = m_BackBuffer8->h / 2;
-
-				switch (i) {
-					case 1:
-						dx = dw;
-						break;
-					case 2:
-						dy = dh;
-						break;
-					case 3:
-						dx = dw;
-						dy = dh;
-						break;
-					default:
-						break;
-				}
-
-				m_NetworkBitmapIsLocked[i] = true;
-				blit(m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][i], m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->w, m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->h);
-				blit(m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][i], m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->w, m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->h);
-				m_NetworkBitmapIsLocked[i] = false;
-
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
-				// Draw all player's screen into one
-				if (g_UInputMan.KeyHeld(KEY_5)) {
-					stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h, dx, dy, dw, dh);
-				}
-#endif
-			}
-
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
-			if (g_UInputMan.KeyHeld(KEY_1)) {
-				stretch_blit(m_NetworkBackBufferFinal8[0][0], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
-			}
-			if (g_UInputMan.KeyHeld(KEY_2)) {
-				stretch_blit(m_NetworkBackBufferFinal8[1][0], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][1]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][1]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
-			}
-			if (g_UInputMan.KeyHeld(KEY_3)) {
-				stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][2], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][2]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][2]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
-			}
-			if (g_UInputMan.KeyHeld(KEY_4)) {
-				stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][3], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][3]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][3]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
-			}
-#endif
-
-			// Rendering complete, we can finally mark current frame as ready
-			// This is needed to make rendering look totally atomic for the server pulling data in separate threads
-			m_NetworkFrameReady = m_NetworkFrameCurrent;
-			m_NetworkFrameCurrent = (m_NetworkFrameCurrent == 0) ? 1 : 0;
-		}
+		if (IsInMultiplayerMode()) { PrepareFrameForNetwork(); }
 
 		if (g_InActivity) { g_PostProcessMan.PostProcess(); }
 
@@ -955,8 +883,6 @@ namespace RTE {
 		// Draw scene seam
 		vline(m_BackBuffer8, 0, 0, g_SceneMan.GetSceneHeight(), 5);
 #endif
-
-		release_bitmap(m_BackBuffer8);
 
 		// Reset the frame timer so we can measure how much it takes until next frame being drawn
 		g_PerformanceMan.ResetFrameTimer();
@@ -1093,5 +1019,62 @@ namespace RTE {
 				draw_trans_sprite(m_WorldDumpBuffer, targetBitmap, effectPosX, effectPosY);
 			}
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::PrepareFrameForNetwork() {
+		unsigned short dx = 0;
+		unsigned short dy = 0;
+		unsigned short dw = m_BackBuffer8->w / 2;
+		unsigned short dh = m_BackBuffer8->h / 2;
+
+		// Blit all four internal player screens onto the backbuffer
+		for (unsigned char i = 0; i < c_MaxScreenCount; i++) {
+			switch (i) {
+				case 1:
+					dx = dw;
+					break;
+				case 2:
+					dy = dh;
+					break;
+				case 3:
+					dx = dw;
+					dy = dh;
+					break;
+				default:
+					break;
+			}
+
+			m_NetworkBitmapIsLocked[i] = true;
+			blit(m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][i], m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->w, m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->h);
+			blit(m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][i], m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->w, m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->h);
+			m_NetworkBitmapIsLocked[i] = false;
+
+#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+			// Draw all player's screen into one
+			if (g_UInputMan.KeyHeld(KEY_5)) {
+				stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h, dx, dy, dw, dh);
+			}
+#endif
+		}
+
+#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+		if (g_UInputMan.KeyHeld(KEY_1)) {
+			stretch_blit(m_NetworkBackBufferFinal8[0][0], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
+		}
+		if (g_UInputMan.KeyHeld(KEY_2)) {
+			stretch_blit(m_NetworkBackBufferFinal8[1][0], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][1]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][1]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
+		}
+		if (g_UInputMan.KeyHeld(KEY_3)) {
+			stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][2], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][2]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][2]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
+		}
+		if (g_UInputMan.KeyHeld(KEY_4)) {
+			stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][3], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][3]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][3]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
+		}
+#endif
+		// Rendering complete, we can finally mark current frame as ready. This is needed to make rendering look totally atomic for the server pulling data in separate threads.
+		m_NetworkFrameReady = m_NetworkFrameCurrent;
+		m_NetworkFrameCurrent = (m_NetworkFrameCurrent == 0) ? 1 : 0;
 	}
 }

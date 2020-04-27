@@ -655,6 +655,13 @@ namespace RTE {
 
 #pragma region Draw Breakdown
 		/// <summary>
+		/// Updates the drawing position of each player screen on the backbuffer when split screen is active. This is called during Draw().
+		/// </summary>
+		/// <param name="playerScreen">The player screen to update offset for.</param>
+		/// <param name="screenOffset">Vector representing the screen offset.</param>
+		void UpdateScreenOffsetForSplitScreen(char playerScreen, Vector &screenOffset);
+
+		/// <summary>
 		/// Draws all the text messages to the specified player screen. This is called during Draw().
 		/// </summary>
 		/// <param name="playerScreenToFlash">The player screen the text will be shown on.</param>
@@ -666,7 +673,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="playerScreenToFlash">The player screen the flash effect will be shown to.</param>
 		/// <param name="guiBitmap">The bitmap the flash effect will be drawn on.</param>
-		void DrawScreenFlash(short playerScreen, BITMAP *playerGUIBitmap);
+		void DrawScreenFlash(char playerScreen, BITMAP *playerGUIBitmap);
+
+		/// <summary>
+		/// Renders current frame and marks it ready for network transmission. This is called during Draw().
+		/// </summary>
+		void PrepareFrameForNetwork();
 #pragma endregion
 
 #pragma region Screen Capture

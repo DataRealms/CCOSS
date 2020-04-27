@@ -64,7 +64,33 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, int strength, float angle) {
+	void PostProcessMan::AdjustEffectsPosToPlayerScreen(char playerScreen, BITMAP *targetBitmap, Vector targetBitmapOffset, std::list<PostEffect> &screenRelativeEffectsList, std::list<Box> &screenRelativeGlowBoxesList) {
+		int screenOcclusionOffsetX = g_SceneMan.GetScreenOcclusion(playerScreen).GetFloorIntX();
+		int screenOcclusionOffsetY = g_SceneMan.GetScreenOcclusion(playerScreen).GetFloorIntY();
+		int occludedOffsetX = targetBitmap->w + screenOcclusionOffsetX;
+		int occludedOffsetY = targetBitmap->h + screenOcclusionOffsetY;
+
+		// Copy post effects received by client if in network mode
+		if (g_FrameMan.GetDrawNetworkBackBuffer()) { g_PostProcessMan.GetNetworkPostEffectsList(0, screenRelativeEffectsList); }
+
+		// Adjust for the player screen's position on the final buffer
+		for (list<PostEffect>::iterator eItr = screenRelativeEffectsList.begin(); eItr != screenRelativeEffectsList.end(); ++eItr) {
+			// Make sure we won't be adding any effects to a part of the screen that is occluded by menus and such
+			if ((*eItr).m_Pos.m_X > screenOcclusionOffsetX && (*eItr).m_Pos.m_Y > screenOcclusionOffsetY && (*eItr).m_Pos.m_X < occludedOffsetX && (*eItr).m_Pos.m_Y < occludedOffsetY) {
+				g_PostProcessMan.GetPostScreenEffectsList()->push_back(PostEffect((*eItr).m_Pos + targetBitmapOffset, (*eItr).m_Bitmap, (*eItr).m_BitmapHash, (*eItr).m_Strength, (*eItr).m_Angle));
+			}
+		}
+		// Adjust glow areas for the player screen's position on the final buffer
+		for (list<Box>::iterator bItr = screenRelativeGlowBoxesList.begin(); bItr != screenRelativeGlowBoxesList.end(); ++bItr) {
+			g_PostProcessMan.GetPostScreenGlowBoxesList()->push_back(*bItr);
+			// Adjust each added glow area for the player screen's position on the final buffer
+			g_PostProcessMan.GetPostScreenGlowBoxesList()->back().m_Corner += targetBitmapOffset;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PostProcessMan::RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, unsigned char strength, float angle) {
 		// These effects get applied when there's a drawn frame that followed one or more sim updates.
 		// They are not only registered on drawn sim updates; flashes and stuff could be missed otherwise if they occur on undrawn sim updates.
 		if (effect && g_TimerMan.SimUpdatesSinceDrawn() >= 0) { m_PostSceneEffects.push_back(PostEffect(effectPos, effect, hash, strength, angle)); }

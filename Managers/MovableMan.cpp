@@ -1765,7 +1765,7 @@ void MovableMan::Update()
 				(*aIt)->Update();
 				//g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
 				//g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
-                (*aIt)->UpdateScript();
+                (*aIt)->UpdateScripts();
 				//g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
                 (*aIt)->ApplyImpulses();
             }
@@ -1779,7 +1779,7 @@ void MovableMan::Update()
             for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count)
             {
                 (*iIt)->Update();
-                (*iIt)->UpdateScript();
+                (*iIt)->UpdateScripts();
                 (*iIt)->ApplyImpulses();
                 if (count <= itemLimit)
                 {
@@ -1794,7 +1794,7 @@ void MovableMan::Update()
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
                 (*parIt)->Update();
-                (*parIt)->UpdateScript();
+                (*parIt)->UpdateScripts();
                 (*parIt)->ApplyImpulses();
                 (*parIt)->RestDetection();
                 // Copy particles that are at rest to the terrain and mark them for deletion.

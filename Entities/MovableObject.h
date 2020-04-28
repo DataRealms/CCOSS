@@ -178,30 +178,35 @@ ENTITYALLOCATION(MovableObject)
 
     virtual void Destroy(bool notInherited = false);
 
+    /// <summary>
+    /// Loads the script at the given script path onto the object, checking for appropriately named functions within it.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to load.</param>
+    /// <param name="loadAsEnabledScript">Whether or not the script should load as enabled. Defaults to true.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    virtual int LoadScript(std::string const &scriptPath, bool loadAsEnabledScript = true);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads the preset scripts of this object, from a specified path.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int LoadScripts(std::string scriptPath);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReloadScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reloads the preset scripts of this object, from the same script file
-//                  path as was originally defined. This will also update the original
-//                  preset in the PresetMan with the updated scripts so future objects
-//                  spawned will use the new scripts.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
+    /// <summary>
+    /// Reloads the all of the scripts on this object. This will also update the original preset in PresetMan with the updated scripts so future objects spawned will use the new scripts.
+    /// </summary>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
     virtual int ReloadScripts();
+
+    /// <summary>
+    /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_LoadedScripts.end() if it's not.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to find.</param>
+    /// <returns>The iterator pointing to the vector entry for the script or the end of the vector if the script was not found.</returns>
+    virtual std::vector<std::pair<std::string, bool>>::iterator const FindScript(std::string const &scriptPath) { return std::find_if(m_LoadedScripts.begin(), m_LoadedScripts.end(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
+
+    /// <summary>
+    /// Checks if the script at the given path is one of the scripts on this MO.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to check.</param>
+    /// <returns>Whether or not the script is on this MO.</returns>
+    virtual bool const HasScript(std::string const &scriptPath) { return FindScript(scriptPath) != m_LoadedScripts.end(); }
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1458,13 +1463,13 @@ ENTITYALLOCATION(MovableObject)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateScript
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this MovableObject's Lua script. Supposed to be done every
+// Description:     Updates this MovableObject's Lua scripts. Supposed to be done every
 //                  frame after the rest of the hardcoded C++ update is done.
 // Arguments:       None.
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int UpdateScript();
+    virtual int UpdateScripts();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1831,8 +1836,9 @@ protected:
     // To draw this guy's HUD or not
     bool m_HUDVisible;
 
-    // The path to the lua script file that defines this' behaviors in update
-    std::string m_ScriptPath;
+    // A vector of scripts have been loaded onto this. Contains a pair with the script path and whether or not the script is enabled.
+    std::vector<std::pair<std::string, bool>> m_LoadedScripts;
+
     // The ID name unique to this' preset and its defined scripted functions in the lua state.
     std::string m_ScriptPresetName;
     // The ID name unique to this' object instance representation in the Lua state.

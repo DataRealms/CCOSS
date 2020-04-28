@@ -250,6 +250,12 @@ ENTITYALLOCATION(MovableObject)
 
     virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
 
+    /// <summary>
+    /// Override SetPresetName so it also resets script paths and script preset name. Note that this'll screw up lua that calls SetPresetName but that probably shouldn't be lua accessible anyway.
+    /// </summary>
+    /// <param name="newName">A string reference with the instance name of this Entity.</param>
+    virtual void SetPresetName(const std::string &newName) override { Entity::SetPresetName(newName); m_ScriptPresetName.clear(); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:   GetClassName

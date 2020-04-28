@@ -330,9 +330,10 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
 	}
 	else if (propName == "ScriptPath")
     {
-        reader >> m_ScriptPath;
-        // Read in the Lua script function definitions for this preset
-        LoadScripts(m_ScriptPath);
+        std::string scriptPath = reader.ReadPropValue();
+        if (LoadScript(scriptPath) == -2) {
+            reader.ReportError("Duplicate script path " + scriptPath);
+        }
     }
     else if (propName == "ScreenEffect")
     {

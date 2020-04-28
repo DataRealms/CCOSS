@@ -487,40 +487,21 @@ void Actor::Destroy(bool notInherited)
     Clear();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads the preset scripts of this object, from a specified path.
-
-int Actor::LoadScripts(string scriptPath)
-{
-    if (scriptPath.empty())
-        return -1;
-
-    int error = 0;
-
-    // Clear the temporary variable names that will hold the functions read in from the file
-    if ((error = g_LuaMan.RunScriptString("UpdateAI = nil;")) < 0)
-        return error;
-
-    // Read in the Lua script function definitions for this preset
-    if ((error = MovableObject::LoadScripts(scriptPath)) < 0)
-        return error;
-
-    // Add the UpdateAI function, if it exists.. if it doesn't, that's not a problem! We'll just be using the old C++ implementation
-    if (g_LuaMan.GlobalIsDefined("UpdateAI"))
-    {
-        // Mark that we have a Lua override for the UpdateAI function
-        m_ScriptedAIUpdate = true;
-        if ((error = g_LuaMan.RunScriptString("if UpdateAI then " + m_ScriptPresetName + ".UpdateAI = UpdateAI; end;")) < 0)
-            return error;
+int Actor::LoadScript(std::string const &scriptPath, bool loadAsEnabledScript) {
+    int status = MOSRotating::LoadScript(scriptPath, loadAsEnabledScript);
+    if (status < 0) {
+        return status;
     }
-    else
-        m_ScriptedAIUpdate = false;
 
-    return error;
+    // If UpdateAI existed it'll be in the lua global namespace, so we can check that to know whether or not to use Lua AI
+    m_ScriptedAIUpdate = g_LuaMan.GlobalIsDefined("UpdateAI");
+
+    return status;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1301,52 +1282,47 @@ bool Actor::UpdateMovePath()
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateAIScripted
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' AI state with the provided scripted AI Update function.
-
-bool Actor::UpdateAIScripted()
-{
-    // This preset doesn't seem to have any script file defined, so then just report we couldn't run scripted AI
-    if (!m_ScriptedAIUpdate || m_ScriptPath.empty() || m_ScriptPresetName.empty())
+bool Actor::UpdateAIScripted() {
+    if (!m_ScriptedAIUpdate || (m_LoadedScripts.empty()) || m_ScriptPresetName.empty()) {
         return false;
-
-    int error = 0;
-
-    // Check to make sure the preset of this is still defined in the Lua state. If not, re-create it and recover gracefully
-    if (!g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false))
-        ReloadScripts();
-
-    // First see if we even have a representation stored in the Lua state, and if not, create one
-    if (m_ScriptObjectName.empty())
-    {
-        // Get the unique object identifier for this object and construct the object isntance name in Lua that points to this object so we can pass it into the preset functions
-        m_ScriptObjectName = GetClassName() + "s." + g_LuaMan.GetNewObjectID();
-
-        // Give access to this in the Lua state
-        g_MovableMan.SetScriptedEntity(this);
-        // Create the Lua variable which will hold the object instance of this instance for as long as it exists
-        if ((error = g_LuaMan.RunScriptString(m_ScriptObjectName + " = To" + GetClassName() + "(MovableMan.ScriptedEntity);")) < 0)
-            return false;
-
-        // Call the scripted creation function, but only after first checking if it and this instance's Lua representation really exists
-        if ((error = g_LuaMan.RunScriptString("if " + m_ScriptPresetName + ".Create and " + m_ScriptObjectName + " then " + m_ScriptPresetName + ".Create(" + m_ScriptObjectName + "); end")) < 0)
-            return false;
     }
 
-    // Call the defined function, but only after first checking if it and this instance's Lua representation exists
+    // Check to make sure the preset of this is still defined in the Lua state. If not, re-create it and recover gracefully
+    if (!g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false)) {
+        ReloadScripts(); //TODO test if this should be here, I think it's junk cause for any cases where there's AI, update will always be called first. If it shouldn't, change the early return above.
+    }
+
+    // If we don't have a Lua representation for this object instance, create one and call the Lua Create function on it
+    if (m_ScriptObjectName.empty()) {
+        //TODO test if this should be here, I think it's junk cause for any cases where there's AI, update will always be called first. If it shouldn't, change the early return above.
+        m_ScriptObjectName = GetClassName() + "s." + g_LuaMan.GetNewObjectID();
+
+        // Give Lua access to this object, then use that access to set up the object's Lua representation
+        g_MovableMan.SetScriptedEntity(this);
+        if (g_LuaMan.RunScriptString(m_ScriptObjectName + " = To" + GetClassName() + "(MovableMan.ScriptedEntity);") < 0) {
+            return false;
+        }
+
+        for (std::pair<std::string, bool> scriptEntry : m_LoadedScripts) {
+            if (g_LuaMan.RunFunctionInPresetScript("Create", scriptEntry.first, m_ScriptPresetName, m_ScriptObjectName) < 0) {
+                return -3;
+            }
+        }
+    }
 
 	g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
-	error = g_LuaMan.RunScriptString("if " + m_ScriptPresetName + ".UpdateAI and " + m_ScriptObjectName + " then " + m_ScriptPresetName + ".UpdateAI(" + m_ScriptObjectName + "); end");
+    bool aiUpdateSucceeded = true;
+    for (std::pair<std::string, bool> scriptEntry : m_LoadedScripts) {
+        if (scriptEntry.second == true) {
+            aiUpdateSucceeded = g_LuaMan.RunFunctionInPresetScript("UpdateAI", scriptEntry.first, m_ScriptPresetName, m_ScriptObjectName) >= 0;
+        }
+        if (!aiUpdateSucceeded) { break; }
+    }
 	g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
 
-    if (error < 0)
-        return false;
-
-    // We made a successful scripted AI update!
-    return true;
+    return aiUpdateSucceeded;
 }
 
 

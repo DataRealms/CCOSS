@@ -227,6 +227,16 @@ enum ServerResult
 
     bool ExpressionIsTrue(std::string expression, bool consoleErrors);
 
+    /// <summary>
+    /// Helper method to run the given function in all of the given preset instance's scripts on the given object instance. Note that this method does not do any safety checks.
+    /// </summary>
+    /// <param name="functionName">The name of the function to run.</param>
+    /// <param name="scriptPath">The path to the script whose function is being run. Used as an identifier in Lua.</param>
+    /// <param name="presetLuaInstanceName">The name of the lua variable that holds the representation of the preset instance whose function is being run.</param>
+    /// <param name="objectLuaInstanceName">The name of the lua variable that holds the representation of the object instance the function is being run on.</param>
+    /// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
+    int LuaMan::RunFunctionInPresetScript(std::string const &functionName, std::string const &scriptPath, std::string const &presetLuaInstanceName, std::string const &objectLuaInstanceName);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RunScriptString

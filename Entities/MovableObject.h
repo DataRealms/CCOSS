@@ -1741,6 +1741,11 @@ ENTITYALLOCATION(MovableObject)
 
 protected:
 
+    /// <summary>
+    /// Gets a vector containing the script function names this class supports.
+    /// </summary>
+    /// <returns>A vector containing the script function names this class supports.</returns>
+    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() { return std::vector<std::string> {"Create", "Destroy", "Update", "OnPieMenu", "OnEnableScript", "OnDisableScript"}; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateChildMOIDs

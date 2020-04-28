@@ -14,6 +14,7 @@
 #include "MovableObject.h"
 #include "PresetMan.h"
 #include "SceneMan.h"
+#include "ConsoleMan.h"
 #include "SettingsMan.h"
 #include "LuaMan.h"
 #include "Atom.h"
@@ -556,10 +557,78 @@ int MovableObject::ReloadScripts() {
 
     return status;
 }
-    }
 
-    return error;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableObject::AddScript(std::string const &scriptPath) {
+    switch (LoadScript(scriptPath)) {
+        case 0:
+            // If we have a ScriptObjectName that means Create has already been run for pre-existing scripts. Run it right away for this one.
+            if (!m_ScriptObjectName.empty() &&g_LuaMan.RunFunctionInPresetScript("Create", scriptPath, m_ScriptPresetName, m_ScriptObjectName) < 0) {
+                g_ConsoleMan.PrintString("ERROR: Failed to run Create function for newly added script with path " + scriptPath);
+                return false;
+            }
+            return true;
+        case -1:
+            g_ConsoleMan.PrintString("ERROR: The script path was empty.");
+            break;
+        case -2:
+            g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + " is already loaded onto this object.");
+            break;
+        case -3:
+            g_ConsoleMan.PrintString("ERROR: Failed to do necessary setup to add scripts while attempting to add the script with path " + scriptPath + ". This has nothing to do with your script, please report it to a developer.");
+            break;
+        default:
+            RTEAbort("Reached default case while adding script. This should never happen!");
+            break;
+    }
+    return false;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableObject::RemoveScript(std::string const &scriptPath) {
+    auto scriptEntryIterator = FindScript(scriptPath);
+    if (scriptEntryIterator != m_LoadedScripts.end()) {
+        m_LoadedScripts.erase(scriptEntryIterator);
+        return true;
+    }
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableObject::EnableScript(std::string const &scriptPath) {
+    auto scriptEntryIterator = FindScript(scriptPath);
+    if (scriptEntryIterator != m_LoadedScripts.end() && scriptEntryIterator->second == false) {
+        scriptEntryIterator->second = true;
+
+        if (g_LuaMan.RunFunctionInPresetScript("OnEnableScript", scriptPath, m_ScriptPresetName, m_ScriptObjectName) < 0) {
+            g_ConsoleMan.PrintString("ERROR: Failed to run OnEnableScript function for newly enabled script with path " + scriptPath);
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableObject::DisableScript(std::string const &scriptPath) {
+    auto scriptEntryIterator = FindScript(scriptPath);
+    if (scriptEntryIterator != m_LoadedScripts.end() && scriptEntryIterator->second == true) {
+        scriptEntryIterator->second = false;
+
+        if (g_LuaMan.RunFunctionInPresetScript("OnDisableScript", scriptPath, m_ScriptPresetName, m_ScriptObjectName) < 0) {
+            g_ConsoleMan.PrintString("ERROR: Failed to run OnDisableScript function for newly disabled script with path " + scriptPath);
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////

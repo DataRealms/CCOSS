@@ -206,8 +206,40 @@ ENTITYALLOCATION(MovableObject)
     /// <returns>Whether or not the script is on this MO.</returns>
     virtual bool const HasScript(std::string const &scriptPath) { return FindScript(scriptPath) != m_LoadedScripts.end(); }
 
+    /// <summary>
+    /// Adds the script at the given path as one of the scripts on this MO.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to add.</param>
+    /// <returns>Whether or not the script was successfully added.</returns>
+    virtual bool AddScript(std::string const &scriptPath);
 
+    /// <summary>
+    /// Removes the script at the given path so it will no longer be one of the scripts on this MO.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to remove.</param>
+    /// <returns>Whether or not the script was successfully removed.</returns>
+    virtual bool RemoveScript(std::string const &scriptPath);
 
+    /// <summary>
+    /// Checks if the script at the given path is one of the enabled scripts on this MO.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to check.</param>
+    /// <returns>Whether or not the script is enabled on this MO.</returns>
+    virtual bool const ScriptEnabled(std::string const &scriptPath) { auto scriptIterator = FindScript(scriptPath); return scriptIterator != m_LoadedScripts.end() && scriptIterator->second == true; }
+
+    /// <summary>
+    /// Enable the script at the given path on this MO.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to enable.</param>
+    /// <returns>Whether or not the script was succesfully enabled.</returns>
+    virtual bool EnableScript(std::string const &scriptPath);
+
+    /// <summary>
+    /// Disables the script at the given path for this MO.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to disable.</param>
+    /// <returns>Whether or not the script was succesfully disabled..</returns>
+    virtual bool DisableScript(std::string const &scriptPath);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetClass

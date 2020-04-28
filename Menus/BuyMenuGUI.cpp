@@ -782,7 +782,7 @@ float BuyMenuGUI::GetCraftMass()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalOrderPassengers
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return teh total number of passengers in the order box.
+// Description:     Return the total number of passengers in the order box.
 // Arguments:       None.
 // Return value:    The total number of passengers.
 
@@ -791,8 +791,9 @@ int BuyMenuGUI::GetTotalOrderPassengers()
 	int passengers = 0;
 	for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
 	{
-		if (dynamic_cast<const Actor *>((*itr)->m_pEntity))
-			passengers++;
+        const Actor* passenger = dynamic_cast<const Actor*>((*itr)->m_pEntity);
+        if (passenger)
+			passengers = passengers + passenger->GetPassengerSlots();
 	}
 
 	return passengers;

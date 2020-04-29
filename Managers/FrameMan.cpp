@@ -788,8 +788,8 @@ namespace RTE {
 			if (IsInMultiplayerMode()) {
 				unsigned short layerCount = 0;
 
-				for (std::list<SceneLayer *>::reverse_iterator itr = g_SceneMan.GetScene()->GetBackLayers().rbegin(); itr != g_SceneMan.GetScene()->GetBackLayers().rend(); ++itr) {
-					SLOffset[playerScreen][layerCount] = (*itr)->GetOffset();
+				for (const SceneLayer *sceneLayer : g_SceneMan.GetScene()->GetBackLayers()) {
+					SLOffset[playerScreen][layerCount] = sceneLayer->GetOffset();
 					layerCount++;
 
 					if (layerCount >= c_MaxLayersStoredForNetwork) {

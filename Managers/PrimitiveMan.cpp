@@ -29,8 +29,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PrimitiveMan::ClearPrimitivesList() {
-		for (std::list<GraphicalPrimitive *>::const_iterator it = m_Primitives.begin(); it != m_Primitives.end(); ++it) {
-			delete (*it);
+		for (const GraphicalPrimitive *primitive : m_Primitives) {
+			delete primitive;
 		}
 		m_Primitives.clear();
 	}
@@ -38,8 +38,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PrimitiveMan::DrawPrimitives(short player, BITMAP *pTargetBitmap, const Vector &targetPos) {
-		for (std::list<GraphicalPrimitive *>::const_iterator it = m_Primitives.begin(); it != m_Primitives.end(); ++it) {
-			if (player == (*it)->m_Player || (*it)->m_Player == -1) { (*it)->Draw(pTargetBitmap, targetPos); }
+		for (GraphicalPrimitive *primitive : m_Primitives) {
+			if (player == primitive->m_Player || primitive->m_Player == -1) { primitive->Draw(pTargetBitmap, targetPos); }
 		}
 	}
 }

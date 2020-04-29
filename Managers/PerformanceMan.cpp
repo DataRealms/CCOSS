@@ -67,8 +67,8 @@ namespace RTE {
 
 		// Calculate the average milliseconds per frame over the last sampleSize frames
 		m_MSPFAverage = 0;
-		for (std::deque<unsigned int>::iterator fItr = m_MSPFs.begin(); fItr != m_MSPFs.end(); ++fItr) {
-			m_MSPFAverage += *fItr;
+		for (const unsigned int &mspf : m_MSPFs) {
+			m_MSPFAverage += mspf;
 		}
 		m_MSPFAverage /= m_MSPFs.size();
 
@@ -149,8 +149,8 @@ namespace RTE {
 				m_MSPFs.pop_front();
 			}
 			// Calculate the average milliseconds per frame over the last sampleSize frames
-			for (deque<unsigned int>::iterator fItr = m_MSPFs.begin(); fItr != m_MSPFs.end(); ++fItr) {
-				m_MSPFAverage += *fItr;
+			for(const unsigned int &mspf : m_MSPFs){
+				m_MSPFAverage += mspf;
 			}
 			m_MSPFAverage /= m_MSPFs.size();
 

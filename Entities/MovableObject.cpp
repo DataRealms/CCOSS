@@ -455,11 +455,7 @@ int MovableObject::Save(Writer &writer) const
 
 void MovableObject::Destroy(bool notInherited) {
     if (!m_ScriptObjectName.empty()) {
-        for (std::pair<std::string, bool> scriptEntry: m_LoadedScripts) {
-            if (scriptEntry.second == true) {
-                g_LuaMan.RunFunctionInPresetScript("Destroy", scriptEntry.first, m_ScriptPresetName, m_ScriptObjectName);
-            }
-        }
+        RunScriptedFunctionInAppropriateScripts("Destroy");
         g_LuaMan.RunScriptString(m_ScriptObjectName + " = nil;");
     }
 
@@ -499,7 +495,6 @@ int MovableObject::LoadScript(std::string const &scriptPath, bool loadAsEnabledS
     // If there's no ScriptPresetName this is the first script being loaded for this preset, or scripts have been reloaded.
     // Generate a ScriptPresetName, setup a table for the preset's functions, and clear the instance object name so it gets created in the first run of UpdateScripts
     if (m_ScriptPresetName.empty()) {
-        // TODO WAIT A MINUTE.. is this an original preset????!! .. does it matter? A: not really
         m_ScriptPresetName = GetClassName() + "s." + g_LuaMan.GetNewPresetID();
 
         if (g_LuaMan.RunScriptString(m_ScriptPresetName + " = {};") < 0) {
@@ -565,8 +560,8 @@ bool MovableObject::AddScript(std::string const &scriptPath) {
     switch (LoadScript(scriptPath)) {
         case 0:
             // If we have a ScriptObjectName that means Create has already been run for pre-existing scripts. Run it right away for this one.
-            if (!m_ScriptObjectName.empty() &&g_LuaMan.RunFunctionInPresetScript("Create", scriptPath, m_ScriptPresetName, m_ScriptObjectName) < 0) {
-                g_ConsoleMan.PrintString("ERROR: Failed to run Create function for newly added script with path " + scriptPath);
+            if (!m_ScriptObjectName.empty()) {
+                RunScriptedFunction(scriptPath, "Create");
                 return false;
             }
             return true;
@@ -589,9 +584,17 @@ bool MovableObject::AddScript(std::string const &scriptPath) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MovableObject::RemoveScript(std::string const &scriptPath) {
+    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
+        return false;
+    }
+
     auto scriptEntryIterator = FindScript(scriptPath);
     if (scriptEntryIterator != m_LoadedScripts.end()) {
         m_LoadedScripts.erase(scriptEntryIterator);
+        if (!m_ScriptObjectName.empty() && RunScriptedFunction(scriptPath, "OnScriptRemoveOrDisable", {}, {"true"}) < 0) {
+            g_ConsoleMan.PrintString("NOTE: The script has been removed despite this error.");
+            return false;
+        }
         return true;
     }
     return false;
@@ -600,14 +603,16 @@ bool MovableObject::RemoveScript(std::string const &scriptPath) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MovableObject::EnableScript(std::string const &scriptPath) {
+    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
+        return false;
+    }
+
     auto scriptEntryIterator = FindScript(scriptPath);
     if (scriptEntryIterator != m_LoadedScripts.end() && scriptEntryIterator->second == false) {
-        scriptEntryIterator->second = true;
-
-        if (g_LuaMan.RunFunctionInPresetScript("OnEnableScript", scriptPath, m_ScriptPresetName, m_ScriptObjectName) < 0) {
-            g_ConsoleMan.PrintString("ERROR: Failed to run OnEnableScript function for newly enabled script with path " + scriptPath);
+        if (!m_ScriptObjectName.empty() && RunScriptedFunction(scriptPath, "OnScriptEnable") < 0) {
             return false;
         }
+        scriptEntryIterator->second = true;
         return true;
     }
     return false;
@@ -616,17 +621,75 @@ bool MovableObject::EnableScript(std::string const &scriptPath) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MovableObject::DisableScript(std::string const &scriptPath) {
+    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
+        return false;
+    }
+
     auto scriptEntryIterator = FindScript(scriptPath);
     if (scriptEntryIterator != m_LoadedScripts.end() && scriptEntryIterator->second == true) {
-        scriptEntryIterator->second = false;
-
-        if (g_LuaMan.RunFunctionInPresetScript("OnDisableScript", scriptPath, m_ScriptPresetName, m_ScriptObjectName) < 0) {
-            g_ConsoleMan.PrintString("ERROR: Failed to run OnDisableScript function for newly disabled script with path " + scriptPath);
+        if (!m_ScriptObjectName.empty() && RunScriptedFunction(scriptPath, "OnScriptRemoveOrDisable", {}, {"false"}) < 0) {
             return false;
         }
+        scriptEntryIterator->second = false;
         return true;
     }
     return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int MovableObject::RunScriptedFunctionInAppropriateScripts(std::string const &functionName, bool runOnDisabledScripts, bool stopOnError, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
+    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty() || m_ScriptObjectName.empty()) {
+        return -1;
+    }
+
+    int status = 0;
+    for (std::pair<std::string, bool> scriptEntry : m_LoadedScripts) {
+        if (runOnDisabledScripts || scriptEntry.second == true) {
+            status = RunScriptedFunction(scriptEntry.first, functionName, functionEntityArguments, functionLiteralArguments);
+            if (status < 0 && stopOnError) {
+                return status;
+            }
+        }
+    }
+    return status;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int MovableObject::RunScriptedFunction(std::string const &scriptPath, std::string const &functionName, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
+    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty() || m_ScriptObjectName.empty()) {
+        return -1;
+    }
+
+    std::string presetAndFunctionName = m_ScriptPresetName + "." + functionName;
+    std::string scriptString = "if " + presetAndFunctionName + " and " + m_ScriptObjectName + " and " + presetAndFunctionName + "[\"" + scriptPath + "\"] then ";
+    if (!functionEntityArguments.empty()) {
+        scriptString += "local entityArguments = LuaMan.TempEntities; ";
+    }
+    scriptString += presetAndFunctionName + "[\"" + scriptPath + "\"](" + m_ScriptObjectName;
+    if (!functionEntityArguments.empty()) {
+        g_LuaMan.SetTempEntityVector(functionEntityArguments);
+        for (const Entity *functionEntityArgument : functionEntityArguments) {
+            scriptString += ", To" + functionEntityArgument->GetClassName() + "(entityArguments())";
+        }
+    }
+    if (!functionLiteralArguments.empty()) {
+        for (const std::string functionLiteralArgument : functionLiteralArguments) {
+            scriptString += ", " + functionLiteralArgument;
+        }
+    }
+    scriptString += +"); end";
+
+    int status = g_LuaMan.RunScriptString(scriptString);
+    functionEntityArguments.clear();
+    functionLiteralArguments.clear();
+    if (status < 0 && m_LoadedScripts.size() > 1) {
+        g_ConsoleMan.PrintString("ERROR: An error occured while trying to run " + functionName + "function for script at path " + scriptPath);
+        return -2;
+    }
+
+    return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -902,21 +965,18 @@ int MovableObject::UpdateScripts() {
 
         // Give Lua access to this object, then use that access to set up the object's Lua representation
         g_MovableMan.SetScriptedEntity(this);
+
         if (g_LuaMan.RunScriptString(m_ScriptObjectName + " = To" + GetClassName() + "(MovableMan.ScriptedEntity);") < 0) {
             return -2;
         }
 
-        for (std::pair<std::string, bool> scriptEntry : m_LoadedScripts) {
-            if (g_LuaMan.RunFunctionInPresetScript("Create", scriptEntry.first, m_ScriptPresetName, m_ScriptObjectName) < 0) {
-                return -3;
-            }
+        if (RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
+            return -3;
         }
     }
 
-    for (std::pair<std::string, bool> scriptEntry : m_LoadedScripts) {
-        if (scriptEntry.second == true && g_LuaMan.RunFunctionInPresetScript("Update", scriptEntry.first, m_ScriptPresetName, m_ScriptObjectName) < 0) {
-            return -3;
-        }
+    if (RunScriptedFunctionInAppropriateScripts("Update", false, true) < 0) {
+        return -3;
     }
 
     return 0;
@@ -930,12 +990,7 @@ int MovableObject::OnPieMenu(Actor * pActor) {
     }
 	m_pPieMenuActor = pActor;
 
-    int status = 0;
-    for (std::pair<std::string, bool> scriptEntry : m_LoadedScripts) {
-        status = scriptEntry.second == true ? g_LuaMan.RunFunctionInPresetScript("OnPieMenu", scriptEntry.first, m_ScriptPresetName, m_ScriptObjectName) : status;
-        if (status < 0) { break; }
-    }
-    return status;
+    return RunScriptedFunctionInAppropriateScripts("OnPieMenu"); //TODO try passing actor here, see if it works. If it does, maybe quietly refactor this whole thing
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

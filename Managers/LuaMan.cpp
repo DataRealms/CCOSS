@@ -2419,19 +2419,6 @@ bool LuaMan::ExpressionIsTrue(string expression, bool consoleErrors)
     return result;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int LuaMan::RunFunctionInPresetScript(std::string const &functionName, std::string const &scriptPath, std::string const &presetLuaInstanceName, std::string const &objectLuaInstanceName) {
-    std::string presetAndFunctionName = presetLuaInstanceName + "." + functionName;
-    return RunScriptString(
-        "if " + presetAndFunctionName + " and " + objectLuaInstanceName + " then " +
-            presetAndFunctionName + "[\""+scriptPath+"\"](" + objectLuaInstanceName + "); " +
-        "end"
-    );
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RunScriptString
 //////////////////////////////////////////////////////////////////////////////////////////

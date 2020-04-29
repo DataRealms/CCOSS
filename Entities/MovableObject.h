@@ -183,7 +183,7 @@ ENTITYALLOCATION(MovableObject)
     /// </summary>
     /// <param name="scriptPath">The path to the script to load.</param>
     /// <param name="loadAsEnabledScript">Whether or not the script should load as enabled. Defaults to true.</param>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    /// <returns>0 on success. -1 if scriptPath is empty. -2 if the script is already loaded. -3 if setup to load the script or modify the global lua state fails. -4 if the script fails to load.</returns>
     virtual int LoadScript(std::string const &scriptPath, bool loadAsEnabledScript = true);
 
     /// <summary>
@@ -240,6 +240,29 @@ ENTITYALLOCATION(MovableObject)
     /// <param name="scriptPath">The path to the script to disable.</param>
     /// <returns>Whether or not the script was succesfully disabled..</returns>
     virtual bool DisableScript(std::string const &scriptPath);
+
+    /// <summary>
+    /// Runs the given function in all scripts that have it, with the given arguments, with the ability to not run on disabled scripts and to cease running if there's an error.
+    /// The first argument to the function will always be 'self'. If either argument list is not emtpy, its entries will be passed into the Lua function in order, with entity arguments first.
+    /// </summary>
+    /// <param name="functionName">The name of the function to run.</param>
+    /// <param name="runOnDisabledScripts">Whether to run the function on disabled scripts. Defaults to false.</param>
+    /// <param name="stopOnError">Whether to stop if there's an error running any script, or simply print it to the console and continue. Defaults to false.</param>
+    /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
+    /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    int RunScriptedFunctionInAppropriateScripts(std::string const &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
+
+    /// <summary>
+    /// Runs the given function for the given script, with the given arguments. The first argument to the function will always be 'self'.
+    /// If either argument list is not emtpy, its entries will be passed into the Lua function in order, with entity arguments first.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to run.</param>
+    /// <param name="functionName">The name of the function to run.</param>
+    /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
+    /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    int RunScriptedFunction(std::string const &scriptPath, std::string const &functionName, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetClass
@@ -1751,7 +1774,7 @@ protected:
     /// Gets a vector containing the script function names this class supports.
     /// </summary>
     /// <returns>A vector containing the script function names this class supports.</returns>
-    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() { return std::vector<std::string> {"Create", "Destroy", "Update", "OnPieMenu", "OnEnableScript", "OnDisableScript"}; }
+    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() { return std::vector<std::string> {"Create", "Destroy", "Update", "OnPieMenu", "OnScriptRemoveOrDisable", "OnScriptEnable"}; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateChildMOIDs

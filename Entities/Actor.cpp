@@ -1285,18 +1285,20 @@ bool Actor::UpdateMovePath()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Actor::UpdateAIScripted() {
-    if (!m_ScriptedAIUpdate || (m_LoadedScripts.empty()) || m_ScriptPresetName.empty()) {
+    if (!m_ScriptedAIUpdate || m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return false;
     }
 
     // Check to make sure the preset of this is still defined in the Lua state. If not, re-create it and recover gracefully
     if (!g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false)) {
-        ReloadScripts(); //TODO test if this should be here, I think it's junk cause for any cases where there's AI, update will always be called first. If it shouldn't, change the early return above.
+        RTEAbort("Trying to run UpdateAIScripted with no ScriptPresetName. This shouldn't happen, please let a dev know.")
+        //ReloadScripts(); //TODO test if this should be here, I think it's junk cause for any cases where there's AI, update will always be called first. If it shouldn't, change the early return above.
     }
 
     // If we don't have a Lua representation for this object instance, create one and call the Lua Create function on it
     if (m_ScriptObjectName.empty()) {
-        //TODO test if this should be here, I think it's junk cause for any cases where there's AI, update will always be called first. If it shouldn't, change the early return above.
+        RTEAbort("Trying to run UpdateAIScripted with no ScriptObjectName. This shouldn't happen, please let a dev know.")
+        /*//TODO test if this should be here, I think it's junk cause for any cases where there's AI, update will always be called first. If it shouldn't, change the early return above.
         m_ScriptObjectName = GetClassName() + "s." + g_LuaMan.GetNewObjectID();
 
         // Give Lua access to this object, then use that access to set up the object's Lua representation
@@ -1309,17 +1311,11 @@ bool Actor::UpdateAIScripted() {
             if (g_LuaMan.RunFunctionInPresetScript("Create", scriptEntry.first, m_ScriptPresetName, m_ScriptObjectName) < 0) {
                 return -3;
             }
-        }
+        }*/
     }
 
 	g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
-    bool aiUpdateSucceeded = true;
-    for (std::pair<std::string, bool> scriptEntry : m_LoadedScripts) {
-        if (scriptEntry.second == true) {
-            aiUpdateSucceeded = g_LuaMan.RunFunctionInPresetScript("UpdateAI", scriptEntry.first, m_ScriptPresetName, m_ScriptObjectName) >= 0;
-        }
-        if (!aiUpdateSucceeded) { break; }
-    }
+    bool aiUpdateSucceeded = RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) < 0;
 	g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
 
     return aiUpdateSucceeded;

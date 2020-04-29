@@ -273,6 +273,10 @@ void Attachable::Attach(MOSRotating *pParent)
 
     // Reset the attachables timers so things that have been sitting in inventory don't make backed up emissions
     ResetAllTimers();
+
+    if (m_pParent != NULL) {
+        RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, {m_pParent});
+    }
 }
 
 
@@ -290,6 +294,7 @@ void Attachable::Detach()
     }
 
     m_Team = -1;
+    MOSRotating *temporaryParent = m_pParent;
     m_pParent = 0;
 	// Since it's no longer atteched it should belong to itself
 	m_RootMOID = m_MOID;
@@ -300,6 +305,10 @@ void Attachable::Detach()
 #endif
 
     m_RestTimer.Reset();
+
+    if (temporaryParent != NULL) {
+        RunScriptedFunctionInAppropriateScripts("OnDetach", false, false, {temporaryParent});
+    }
 }
 
 

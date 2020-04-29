@@ -1327,12 +1327,6 @@ ENTITYALLOCATION(Actor)
 
 protected:
 
-    /// <summary>
-    /// Gets a vector containing the script function names this class supports.
-    /// </summary>
-    /// <returns>A vector containing the script function names this class supports.</returns>
-    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() override { auto functionNames = MOSRotating::GetSupportedScriptFunctionNames(); functionNames.push_back("UpdateAI"); return functionNames; }
-
     // Member variables
     static Entity::ClassInfo m_sClass;
 
@@ -1539,6 +1533,12 @@ protected:
     Timer m_StuckTimer;
     // Timer for measuring interval between height checks
     Timer m_FallTimer;
+
+    /// <summary>
+    /// Gets a vector containing the script function names this class supports.
+    /// </summary>
+    /// <returns>A vector containing the script function names this class supports.</returns>
+    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() override { auto functionNames = MOSRotating::GetSupportedScriptFunctionNames(); functionNames.insert(functionNames.end(), {"UpdateAI"}); return functionNames; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

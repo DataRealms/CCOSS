@@ -700,6 +700,12 @@ protected:
 	// Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
 	bool m_IsCollidingWithTerrainWhileAttached;
 
+    /// <summary>
+    /// Gets a vector containing the script function names this class supports.
+    /// </summary>
+    /// <returns>A vector containing the script function names this class supports.</returns>
+    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() override { auto functionNames = MOSRotating::GetSupportedScriptFunctionNames(); functionNames.insert(functionNames.end(), {"OnAttach", "OnDetach"}); return functionNames; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

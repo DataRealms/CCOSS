@@ -2197,7 +2197,8 @@ int LuaMan::Create()
 			.property("ScreenSize", &ConsoleMan::GetConsoleScreenSize, &ConsoleMan::SetConsoleScreenSize),
 
         class_<LuaMan>("LuaManager")
-            .property("TempEntity", &LuaMan::GetTempEntity, &LuaMan::SetTempEntity)
+            .property("TempEntity", &LuaMan::GetTempEntity)
+            .def_readonly("TempEntities", &LuaMan::m_TempEntityVector, return_stl_iterator)
             .def("FileOpen", &LuaMan::FileOpen)
             .def("FileClose", &LuaMan::FileClose)
             .def("FileReadLine", &LuaMan::FileReadLine)

@@ -295,6 +295,11 @@ enum ServerResult
 
     Entity * GetTempEntity() const { return m_pTempEntity; }
 
+    /// <summary>
+    /// Sets a temporary vector of entities that can be accessed in the Lua state
+    /// </summary>
+    /// <param name="entityVector">The temporary vector of entities. Ownership is NOT transferred.</param>
+    void SetTempEntityVector(std::vector<Entity *> entityVector) { m_TempEntityVector = entityVector; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
@@ -398,6 +403,8 @@ protected:
     long m_NextObjectID;
     // Temporary holder for an Entity object that we want to pass into the Lua state without fuss
     Entity *m_pTempEntity;
+    // Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
+    std::vector<Entity *> m_TempEntityVector;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

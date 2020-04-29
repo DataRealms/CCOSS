@@ -311,7 +311,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool FrameMan::IsValidResolution(int width, int height) const {
+	bool FrameMan::IsValidResolution(unsigned short width, unsigned short height) const {
 		if ((width >= 800 && height >= 600) && (width <= m_ScreenResX || height <= m_ScreenResY)) {
 			// Disallow 1366x768 because it's not supported by Allegro.
 			if (width == 1366 && height == 768) {
@@ -338,11 +338,11 @@ namespace RTE {
 		get_palette(pal);
 
 		// Need to save these first for recovery attempts to work (screen might be 0)
-		int resX = m_ResX;
-		int resY = m_ResY;
+		unsigned short resX = m_ResX;
+		unsigned short resY = m_ResY;
 
 		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations (specifically reducing window size) when switching from 2X mode to 1X mode.
-		// This will force a state where this is no actual game window, and the next set_gfx_mode call will recreate it correctly.
+		// This will force a state where this is no actual game window between multiplier switches and the next set_gfx_mode call will recreate it correctly.
 		set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
 
 		if (set_gfx_mode(m_GfxDriver, resX * multiplier, resY * multiplier, 0, 0) != 0) {
@@ -396,16 +396,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::GetPlayerFrameBufferWidth(int whichPlayer) const {
+	unsigned short FrameMan::GetPlayerFrameBufferWidth(short whichPlayer) const {
 		if (IsInMultiplayerMode()) {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
-				unsigned short w = GetResX();
-				for (short i = 0; i < c_MaxScreenCount; i++) {
-					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w < w)) {
-						w = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w;
+				unsigned short width = GetResX();
+				for (unsigned short i = 0; i < c_MaxScreenCount; i++) {
+					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w < width)) {
+						width = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w;
 					}
 				}
-				return w;
+				return width;
 			} else {
 				if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][whichPlayer]) {
 					return m_NetworkBackBufferFinal8[m_NetworkFrameReady][whichPlayer]->w;
@@ -417,16 +417,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::GetPlayerFrameBufferHeight(int whichPlayer) const {
+	unsigned short FrameMan::GetPlayerFrameBufferHeight(short whichPlayer) const {
 		if (IsInMultiplayerMode()) {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
-				unsigned short h = GetResY();
-				for (short i = 0; i < c_MaxScreenCount; i++) {
-					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < h)) { 
-						h = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h;
+				unsigned short height = GetResY();
+				for (unsigned short i = 0; i < c_MaxScreenCount; i++) {
+					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < height)) { 
+						height = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h;
 					}
 				}
-				return h;
+				return height;
 			} else {
 				if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][whichPlayer]) {
 					return m_NetworkBackBufferFinal8[m_NetworkFrameReady][whichPlayer]->h;
@@ -438,19 +438,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::CalculateTextHeight(std::string text, int maxWidth, bool isSmall) {
+	unsigned short FrameMan::CalculateTextHeight(std::string text, unsigned short maxWidth, bool isSmall) {
 		return isSmall ? GetSmallFont()->CalculateHeight(text, maxWidth) : GetLargeFont()->CalculateHeight(text, maxWidth);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::CalculateTextWidth(std::string text, bool isSmall) {
+	unsigned short FrameMan::CalculateTextWidth(std::string text, bool isSmall) {
 		return isSmall ? GetSmallFont()->CalculateWidth(text) : GetLargeFont()->CalculateWidth(text);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SetScreenText(const std::string &message, int whichScreen, int blinkInterval, int displayDuration, bool centered) {
+	void FrameMan::SetScreenText(const std::string &message, short whichScreen, unsigned short blinkInterval, short displayDuration, bool centered) {
 		// See if we can overwrite the previous message
 		if (whichScreen >= 0 && whichScreen < c_MaxScreenCount && m_TextDurationTimer[whichScreen].IsPastRealMS(m_TextDuration[whichScreen])) {
 			m_ScreenText[whichScreen] = message;
@@ -463,7 +463,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::ClearScreenText(int whichScreen) {
+	void FrameMan::ClearScreenText(short whichScreen) {
 		if (whichScreen >= 0 && whichScreen < c_MaxScreenCount) {
 			m_ScreenText[whichScreen].clear();
 			m_TextDuration[whichScreen] = -1;
@@ -502,8 +502,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::CreateNewPlayerBackBuffer(int player, int w, int h) {
-		for (int f = 0; f < 2; f++) {
+	void FrameMan::CreateNewPlayerBackBuffer(short player, unsigned short w, unsigned short h) {
+		for (unsigned short f = 0; f < 2; f++) {
 			destroy_bitmap(m_NetworkBackBufferIntermediate8[f][player]);
 			m_NetworkBackBufferIntermediate8[f][player] = create_bitmap_ex(8, w, h);
 
@@ -588,6 +588,7 @@ namespace RTE {
 				} else {
 					// Recreate the buffer if the dimensions don't match the current scene.
 					if (m_WorldDumpBuffer->w != g_SceneMan.GetSceneWidth() || m_WorldDumpBuffer->h != g_SceneMan.GetSceneHeight()) {
+						destroy_bitmap(m_WorldDumpBuffer);
 						m_WorldDumpBuffer = create_bitmap(g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
 					}
 					DrawWorldDump();
@@ -606,7 +607,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, int color, int altColor, int skip, int skipStart, bool shortestWrap, bool drawDot, BITMAP *dot) {
+	int FrameMan::SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor, unsigned short skip, unsigned short skipStart, bool shortestWrap, bool drawDot, BITMAP *dot) {
 		RTEAssert(bitmap, "Trying to draw line to null Bitmap");
 		if (drawDot) { RTEAssert(dot, "Trying to draw line of dots without specifying a dot Bitmap"); }
 
@@ -621,8 +622,8 @@ namespace RTE {
 		int increment[2];
 		bool drawAlt = false;
 
-		int dotHeight = drawDot ? dot->h : 0;
-		int dotWidth = drawDot ? dot->w : 0;
+		unsigned short dotHeight = drawDot ? dot->h : 0;
+		unsigned short dotWidth = drawDot ? dot->w : 0;
 
 		//acquire_bitmap(bitmap);
 
@@ -727,7 +728,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::UpdateScreenOffsetForSplitScreen(char playerScreen, Vector &screenOffset) {
+	void FrameMan::UpdateScreenOffsetForSplitScreen(short playerScreen, Vector &screenOffset) {
 		switch (playerScreen) {
 			case 1:
 				// If both splits, or just VSplit, then in upper right quadrant
@@ -762,34 +763,33 @@ namespace RTE {
 
 		g_PostProcessMan.ClearScreenPostEffects();
 
-		// These accumulate the effects for each player's screen area, and are then transferred to the above lists with the player screen offset applied
+		// These accumulate the effects for each player's screen area, and are then transferred to the post-processing lists with the player screen offset applied
 		list<PostEffect> screenRelativeEffects;
 		list<Box> screenRelativeGlowBoxes;
 
 		const Activity *pActivity = g_ActivityMan.GetActivity();
 
-		for (int whichScreen = 0; whichScreen < screenCount; ++whichScreen) {
+		for (int playerScreen = 0; playerScreen < screenCount; ++playerScreen) {
 			screenRelativeEffects.clear();
 			screenRelativeGlowBoxes.clear();
 
-			BITMAP *pDrawScreen = (screenCount == 1) ? m_BackBuffer8 : m_PlayerScreen;
-			BITMAP *pDrawScreenGUI = pDrawScreen;
+			BITMAP *drawScreen = (screenCount == 1) ? m_BackBuffer8 : m_PlayerScreen;
+			BITMAP *drawScreenGUI = drawScreen;
 			if (IsInMultiplayerMode()) {
-				pDrawScreen = m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][whichScreen];
-				pDrawScreenGUI = m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][whichScreen];
+				drawScreen = m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][playerScreen];
+				drawScreenGUI = m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][playerScreen];
 			}
-
-			AllegroBitmap pPlayerGUIBitmap(pDrawScreenGUI);
+			AllegroBitmap playerGUIBitmap(drawScreenGUI);
 
 			// Update the scene view to line up with a specific screen and then draw it onto the intermediate screen
-			g_SceneMan.Update(whichScreen);
+			g_SceneMan.Update(playerScreen);
 
 			// Save scene layer's offsets for each screen, server will pick them to build the frame state and send to client
 			if (IsInMultiplayerMode()) {
-				int layerCount = 0;
+				unsigned short layerCount = 0;
 
 				for (std::list<SceneLayer *>::reverse_iterator itr = g_SceneMan.GetScene()->GetBackLayers().rbegin(); itr != g_SceneMan.GetScene()->GetBackLayers().rend(); ++itr) {
-					SLOffset[whichScreen][layerCount] = (*itr)->GetOffset();
+					SLOffset[playerScreen][layerCount] = (*itr)->GetOffset();
 					layerCount++;
 
 					if (layerCount >= c_MaxLayersStoredForNetwork) {
@@ -797,36 +797,36 @@ namespace RTE {
 					}
 				}
 			}
-			Vector targetPos = g_SceneMan.GetOffset(whichScreen);
+			Vector targetPos = g_SceneMan.GetOffset(playerScreen);
 
 			// Adjust the drawing position on the target screen for if the target screen is larger than the scene in non-wrapping dimension.
 			// Scene needs to be displayed centered on the target bitmap then, and that has to be adjusted for when drawing to the screen
-			if (!g_SceneMan.SceneWrapsX() && pDrawScreen->w > g_SceneMan.GetSceneWidth()) { targetPos.m_X += (pDrawScreen->w - g_SceneMan.GetSceneWidth()) / 2; }
-			if (!g_SceneMan.SceneWrapsY() && pDrawScreen->h > g_SceneMan.GetSceneHeight()) { targetPos.m_Y += (pDrawScreen->h - g_SceneMan.GetSceneHeight()) / 2; }
+			if (!g_SceneMan.SceneWrapsX() && drawScreen->w > g_SceneMan.GetSceneWidth()) { targetPos.m_X += (drawScreen->w - g_SceneMan.GetSceneWidth()) / 2; }
+			if (!g_SceneMan.SceneWrapsY() && drawScreen->h > g_SceneMan.GetSceneHeight()) { targetPos.m_Y += (drawScreen->h - g_SceneMan.GetSceneHeight()) / 2; }
 
 			// Try to move at the frame buffer copy time to maybe prevent wonkyness
-			m_TargetPos[m_NetworkFrameCurrent][whichScreen] = targetPos;
+			m_TargetPos[m_NetworkFrameCurrent][playerScreen] = targetPos;
 
 			// Draw the scene
 			if (!IsInMultiplayerMode()) {
-				g_SceneMan.Draw(pDrawScreen, pDrawScreenGUI, targetPos);
+				g_SceneMan.Draw(drawScreen, drawScreenGUI, targetPos);
 			} else {
-				clear_to_color(pDrawScreen, g_MaskColor);
-				clear_to_color(pDrawScreenGUI, g_MaskColor);
-				g_SceneMan.Draw(pDrawScreen, pDrawScreenGUI, targetPos, true, true);
+				clear_to_color(drawScreen, g_MaskColor);
+				clear_to_color(drawScreenGUI, g_MaskColor);
+				g_SceneMan.Draw(drawScreen, drawScreenGUI, targetPos, true, true);
 			}
 
 			// Get only the scene-relative post effects that affect this player's screen
 			if (pActivity) {
-				g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, pDrawScreen->w, pDrawScreen->h, screenRelativeEffects, pActivity->GetTeamOfPlayer(pActivity->PlayerOfScreen(whichScreen)));
-				g_PostProcessMan.GetGlowAreasWrapped(targetPos, pDrawScreen->w, pDrawScreen->h, screenRelativeGlowBoxes);
+				g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, drawScreen->w, drawScreen->h, screenRelativeEffects, pActivity->GetTeamOfPlayer(pActivity->PlayerOfScreen(playerScreen)));
+				g_PostProcessMan.GetGlowAreasWrapped(targetPos, drawScreen->w, drawScreen->h, screenRelativeGlowBoxes);
 
-				if (IsInMultiplayerMode()) { g_PostProcessMan.SetNetworkPostEffectsList(whichScreen, screenRelativeEffects); }
+				if (IsInMultiplayerMode()) { g_PostProcessMan.SetNetworkPostEffectsList(playerScreen, screenRelativeEffects); }
 			}
 
 			// TODO: Find out what keeps disabling the clipping on the draw bitmap
 			// Enable clipping on the draw bitmap
-			set_clip_state(pDrawScreen, 1);
+			set_clip_state(drawScreen, 1);
 
 			DrawScreenText(playerScreen, playerGUIBitmap);
 			
@@ -861,7 +861,7 @@ namespace RTE {
 			}
 
 			// Replace 8 bit backbuffer contents with network received image before post-processing as it is where this buffer is copied to 32 bit buffer
-			if (m_DrawNetworkBackBuffer) {
+			if (GetDrawNetworkBackBuffer()) {
 				m_NetworkBitmapIsLocked[0] = true;
 				blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][0], m_BackBuffer8, 0, 0, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 				masked_blit(m_NetworkBackBufferFinalGUI8[m_NetworkFrameReady][0], m_BackBuffer8, 0, 0, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
@@ -958,19 +958,19 @@ namespace RTE {
 	void FrameMan::DrawWorldDump() {
 		float worldBitmapWidth = static_cast<float>(m_WorldDumpBuffer->w);
 		float worldBitmapHeight = static_cast<float>(m_WorldDumpBuffer->h);
-		BITMAP *bitmap = 0;
+		Vector targetPos(0, 0);
+
+		std::list<PostEffect> postEffectsList;
+		BITMAP *effectBitmap = 0;
 		int effectPosX = 0;
 		int effectPosY = 0;
-		int strength = 0;
-		float angle = 0;
-		Vector targetPos(0, 0);
-		std::list<PostEffect> postEffects;
+		unsigned char effectStrength = 0;
 
 		clear_to_color(m_WorldDumpBuffer, makecol32(132, 192, 252)); // Light blue color
 
 		// Draw sky gradient
-		for (int i = 0; i < m_WorldDumpBuffer->h; i++) {
-			int lineColor = makecol32(64 + ((static_cast<float>(i) / worldBitmapHeight) * (128 - 64)), 64 + ((static_cast<float>(i) / worldBitmapHeight) * (192 - 64)), 96 + ((static_cast<float>(i) / worldBitmapHeight) * (255 - 96)));
+		for (unsigned int i = 0; i < m_WorldDumpBuffer->h; i++) {
+			unsigned int lineColor = makecol32(64 + ((static_cast<float>(i) / worldBitmapHeight) * (128 - 64)), 64 + ((static_cast<float>(i) / worldBitmapHeight) * (192 - 64)), 96 + ((static_cast<float>(i) / worldBitmapHeight) * (255 - 96)));
 			hline(m_WorldDumpBuffer, 0, i, worldBitmapWidth - 1, lineColor);
 		}
 
@@ -982,40 +982,25 @@ namespace RTE {
 		draw_sprite(m_WorldDumpBuffer, g_SceneMan.GetMOColorBitmap(), 0, 0);
 
 		//Draw post-effects
-		g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, worldBitmapWidth, worldBitmapHeight, postEffects, -1);
+		g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, worldBitmapWidth, worldBitmapHeight, postEffectsList, -1);
 
-		for (list<PostEffect>::iterator eItr = postEffects.begin(); eItr != postEffects.end(); ++eItr) {
-			bitmap = (*eItr).m_Bitmap;
-			strength = (*eItr).m_Strength;
-			set_screen_blender(strength, strength, strength, strength);
-			effectPosX = (*eItr).m_Pos.GetFloorIntX() - (bitmap->w / 2);
-			effectPosY = (*eItr).m_Pos.GetFloorIntY() - (bitmap->h / 2);
-			angle = (*eItr).m_Angle;
+		for (const PostEffect &postEffect : postEffectsList) {
+			effectBitmap = postEffect.m_Bitmap;
+			effectStrength = postEffect.m_Strength;
+			set_screen_blender(effectStrength, effectStrength, effectStrength, effectStrength);
+			effectPosX = postEffect.m_Pos.GetFloorIntX() - (effectBitmap->w / 2);
+			effectPosY = postEffect.m_Pos.GetFloorIntY() - (effectBitmap->h / 2);
 
-			if (angle == 0) {
-				draw_trans_sprite(m_WorldDumpBuffer, bitmap, effectPosX, effectPosY);
+			if (postEffect.m_Angle == 0) {
+				draw_trans_sprite(m_WorldDumpBuffer, effectBitmap, effectPosX, effectPosY);
 			} else {
-				BITMAP * targetBitmap;
-
-				if (bitmap->w < 16 && bitmap->h < 16) {
-					targetBitmap = g_PostProcessMan.GetTempEffectBitmap(16);
-				} else if (bitmap->w < 32 && bitmap->h < 32) {
-					targetBitmap = g_PostProcessMan.GetTempEffectBitmap(32);
-				} else if (bitmap->w < 64 && bitmap->h < 64) {
-					targetBitmap = g_PostProcessMan.GetTempEffectBitmap(64);
-				} else if (bitmap->w < 128 && bitmap->h < 128) {
-					targetBitmap = g_PostProcessMan.GetTempEffectBitmap(128);
-				} else if (bitmap->w < 256 && bitmap->h < 256) {
-					targetBitmap = g_PostProcessMan.GetTempEffectBitmap(256);
-				} else {
-					targetBitmap = g_PostProcessMan.GetTempEffectBitmap(512);
-				}
+				BITMAP *targetBitmap = g_PostProcessMan.GetTempEffectBitmap(effectBitmap);
 				clear_to_color(targetBitmap, 0);
 
 				fixed fAngle;
-				fAngle = fixmul(angle, radtofix_r);
+				fAngle = fixmul(postEffect.m_Angle, radtofix_r);
 
-				rotate_sprite(targetBitmap, bitmap, 0, 0, fAngle);
+				rotate_sprite(targetBitmap, effectBitmap, 0, 0, fAngle);
 				draw_trans_sprite(m_WorldDumpBuffer, targetBitmap, effectPosX, effectPosY);
 			}
 		}
@@ -1030,21 +1015,9 @@ namespace RTE {
 		unsigned short dh = m_BackBuffer8->h / 2;
 
 		// Blit all four internal player screens onto the backbuffer
-		for (unsigned char i = 0; i < c_MaxScreenCount; i++) {
-			switch (i) {
-				case 1:
-					dx = dw;
-					break;
-				case 2:
-					dy = dh;
-					break;
-				case 3:
-					dx = dw;
-					dy = dh;
-					break;
-				default:
-					break;
-			}
+		for (unsigned short i = 0; i < c_MaxScreenCount; i++) {
+			dx = (i == 1 || i == 3) ? dw : dx;
+			dy = (i == 2 || i == 3) ? dh : dy;
 
 			m_NetworkBitmapIsLocked[i] = true;
 			blit(m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][i], m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->w, m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->h);

@@ -93,7 +93,7 @@ namespace RTE {
 		/// <param name="targetBitmapOffset">The position of the specified player's draw screen on the backbuffer.</param>
 		/// <param name="screenRelativeEffectsList">List of the specified player's accumulated post effects for this frame.</param>
 		/// <param name="screenRelativeGlowBoxesList">List of the specified player's accumulated glow boxes for this frame.</param>
-		void AdjustEffectsPosToPlayerScreen(char playerScreen, BITMAP *targetBitmap, Vector targetBitmapOffset, std::list<PostEffect> &screenRelativeEffectsList, std::list<Box> &screenRelativeGlowBoxesList);
+		void AdjustEffectsPosToPlayerScreen(short playerScreen, BITMAP *targetBitmap, Vector targetBitmapOffset, std::list<PostEffect> &screenRelativeEffectsList, std::list<Box> &screenRelativeGlowBoxesList);
 #pragma endregion
 
 #pragma region Post Effect Handling
@@ -111,7 +111,7 @@ namespace RTE {
 		/// <param name="hash"></param>
 		/// <param name="strength">The intensity level this effect should have when blended in post. 0 - 255.</param>
 		/// <param name="angle"></param>
-		void RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, int strength = 255, float angle = 0);
+		void RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, unsigned char strength = 255, float angle = 0);
 
 		/// <summary>
 		/// Gets all screen effects that are located within a box in the scene.
@@ -123,14 +123,14 @@ namespace RTE {
 		/// <param name="effectsList">The list to add the screen effects that fall within the box to. The coordinates of the effects returned here will be relative to the boxPos passed in above.</param>
 		/// <param name="team">The team whose unseen layer should obscure the screen effects here.</param>
 		/// <returns>Whether any active post effects were found in that box.</returns>
-		bool GetPostScreenEffectsWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, int team = -1);
+		bool GetPostScreenEffectsWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, short team = -1);
 
 		/// <summary>
 		/// Gets a temporary bitmap of specified size to rotate post effects in.
 		/// </summary>
 		/// <param name="bitmapSize">Size of bitmap to get.</param>
 		/// <returns>Pointer to the temporary bitmap.</returns>
-		BITMAP* GetTempEffectBitmap(unsigned short bitmapSize) const;
+		BITMAP* GetTempEffectBitmap(BITMAP *bitmap) const;
 #pragma endregion
 
 #pragma region Post Pixel Glow Handling
@@ -159,7 +159,7 @@ namespace RTE {
 		/// <param name="effectPos">The absolute scene coordinates of the center of the effect.</param>
 		/// <param name="color">Which glow dot color to register, see the DotGlowColor enumerator.</param>
 		/// <param name="strength">The intensity level this effect should have when blended in post. 0 - 255.</param>
-		void RegisterGlowDotEffect(const Vector &effectPos, DotGlowColor color, int strength = 255);
+		void RegisterGlowDotEffect(const Vector &effectPos, DotGlowColor color, unsigned char strength = 255);
 
 		/// <summary>
 		/// Gets all glow areas that affect anything within a box in the scene. 
@@ -180,7 +180,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichScreen">Which player screen to get list for.</param>
 		/// <param name="outputList"></param>
-		void GetNetworkPostEffectsList(int whichScreen, std::list<PostEffect> & outputList);
+		void GetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> & outputList);
 
 		// TODO: Figure out.
 		/// <summary>
@@ -188,7 +188,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichScreen">Which player screen to set list for.</param>
 		/// <param name="inputList"></param>
-		void SetNetworkPostEffectsList(int whichScreen, std::list<PostEffect> & inputList);
+		void SetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> & inputList);
 #pragma endregion
 
 #pragma region Class Info
@@ -219,13 +219,8 @@ namespace RTE {
 		size_t m_YellowGlowHash; //!< Hash value for the yellow dot glow effect bitmap.
 		size_t m_RedGlowHash; //!< Hash value for the red dot glow effect bitmap.
 		size_t m_BlueGlowHash; //!< Hash value for the blue dot glow effect bitmap.
-	
-		BITMAP *m_TempEffectBitmap_16; //!< Temporary 16x16 bitmap to rotate post effects in.
-		BITMAP *m_TempEffectBitmap_32; //!< Temporary 32x32 bitmap to rotate post effects in.
-		BITMAP *m_TempEffectBitmap_64; //!< Temporary 64x64 bitmap to rotate post effects in.
-		BITMAP *m_TempEffectBitmap_128; //!< Temporary 128x128 bitmap to rotate post effects in.
-		BITMAP *m_TempEffectBitmap_256; //!< Temporary 256x256 bitmap to rotate post effects in.
-		BITMAP *m_TempEffectBitmap_512; //!< Temporary 512x512 bitmap to rotate post effects in.
+
+		std::unordered_map<unsigned short, BITMAP *> m_TempEffectBitmaps; //!< Stores temporary bitmaps to rotate post effects in for quick access.
 
 	private:
 
@@ -239,7 +234,7 @@ namespace RTE {
 		/// <param name="effectsList">The list to add the screen effects that fall within the box to. The coordinates of the effects returned here will be relative to the boxPos passed in above.</param>
 		/// <param name="team">The team whose unseen area should block the glows.</param>
 		/// <returns>Whether any active post effects were found in that box.</returns>
-		bool GetPostScreenEffects(Vector boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, int team = -1);
+		bool GetPostScreenEffects(Vector boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, short team = -1);
 
 		/// <summary>
 		/// Gets all screen effects that are located within a box in the scene. Their coordinates will be returned relative to the upper left corner of the box passed in here.
@@ -251,7 +246,7 @@ namespace RTE {
 		/// <param name="effectsList">The list to add the screen effects that fall within the box to. The coordinates of the effects returned here will be relative to the boxPos passed in above.</param>
 		/// <param name="team">The team whose unseen area should block the glows.</param>
 		/// <returns>Whether any active post effects were found in that box.</returns>
-		bool GetPostScreenEffects(int left, int top, int right, int bottom, std::list<PostEffect> &effectsList, int team = -1);
+		bool GetPostScreenEffects(int left, int top, int right, int bottom, std::list<PostEffect> &effectsList, short team = -1);
 #pragma endregion
 
 #pragma region Post Pixel Glow Handling

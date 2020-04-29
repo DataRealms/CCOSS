@@ -134,7 +134,7 @@ namespace RTE {
 		/// Sets the current ping value to display.
 		/// </summary>
 		/// <param name="ping">Ping value to display.</param>
-		void SetCurrentPing(unsigned int ping) { m_CurrentPing = ping; }
+		void SetCurrentPing(unsigned short ping) { m_CurrentPing = ping; }
 #pragma endregion
 
 #pragma region Class Info

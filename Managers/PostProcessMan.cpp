@@ -38,12 +38,15 @@ namespace RTE {
 		m_BlueGlow = glowFile.GetAsBitmap();
 		m_BlueGlowHash = glowFile.GetHash();
 
-		m_TempEffectBitmap_16 = create_bitmap_ex(32, 16, 16);
-		m_TempEffectBitmap_32 = create_bitmap_ex(32, 32, 32);
-		m_TempEffectBitmap_64 = create_bitmap_ex(32, 64, 64);
-		m_TempEffectBitmap_128 = create_bitmap_ex(32, 128, 128);
-		m_TempEffectBitmap_256 = create_bitmap_ex(32, 256, 256);
-		m_TempEffectBitmap_512 = create_bitmap_ex(32, 512, 512);
+		// Create temporary bitmaps to rotate post effects in.
+		m_TempEffectBitmaps = {
+			{16, create_bitmap(16, 16)},
+			{32, create_bitmap(32, 32)},
+			{64, create_bitmap(64, 64)},
+			{128, create_bitmap(128, 128)},
+			{256, create_bitmap(256, 256)},
+			{512, create_bitmap(512, 512)}
+		};
 
 		return 0;
 	}
@@ -54,17 +57,15 @@ namespace RTE {
 		ClearScreenPostEffects();
 		ClearScenePostEffects();
 		Clear();
-		destroy_bitmap(m_TempEffectBitmap_16);
-		destroy_bitmap(m_TempEffectBitmap_32);
-		destroy_bitmap(m_TempEffectBitmap_64);
-		destroy_bitmap(m_TempEffectBitmap_128);
-		destroy_bitmap(m_TempEffectBitmap_256);
-		destroy_bitmap(m_TempEffectBitmap_512);
+		for (std::pair<unsigned short, BITMAP *> tempBitmapEntry : m_TempEffectBitmaps) {
+			destroy_bitmap(tempBitmapEntry.second);
+		}
+		m_TempEffectBitmaps.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::AdjustEffectsPosToPlayerScreen(char playerScreen, BITMAP *targetBitmap, Vector targetBitmapOffset, std::list<PostEffect> &screenRelativeEffectsList, std::list<Box> &screenRelativeGlowBoxesList) {
+	void PostProcessMan::AdjustEffectsPosToPlayerScreen(short playerScreen, BITMAP *targetBitmap, Vector targetBitmapOffset, std::list<PostEffect> &screenRelativeEffectsList, std::list<Box> &screenRelativeGlowBoxesList) {
 		int screenOcclusionOffsetX = g_SceneMan.GetScreenOcclusion(playerScreen).GetFloorIntX();
 		int screenOcclusionOffsetY = g_SceneMan.GetScreenOcclusion(playerScreen).GetFloorIntY();
 		int occludedOffsetX = targetBitmap->w + screenOcclusionOffsetX;
@@ -98,7 +99,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PostProcessMan::GetPostScreenEffectsWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, int team) {
+	bool PostProcessMan::GetPostScreenEffectsWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, short team) {
 		bool found = false;
 
 		// Do the first unwrapped rect
@@ -124,25 +125,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	BITMAP *PostProcessMan::GetTempEffectBitmap(unsigned short bitmapSize) const {
-		if (bitmapSize <= 16) {
-			return m_TempEffectBitmap_16;
-		} else if (bitmapSize <= 32) {
-			return m_TempEffectBitmap_32;
-		} else if (bitmapSize <= 64) {
-			return m_TempEffectBitmap_64;
-		} else if (bitmapSize <= 128) {
-			return m_TempEffectBitmap_128;
-		} else if (bitmapSize <= 256) {
-			return m_TempEffectBitmap_256;
-		} else {
-			return m_TempEffectBitmap_512;
-		}
+	BITMAP *PostProcessMan::GetTempEffectBitmap(BITMAP *bitmap) const {
+		// Get the largest dimension of the bitmap and convert it to a multiple of 16, i.e. 16, 32, etc
+		unsigned short bitmapSizeNeeded = std::ceil(static_cast<float>(std::max(bitmap->w, bitmap->h)) / 16) * 16;
+		std::unordered_map<unsigned short, BITMAP *>::const_iterator correspondingBitmapSizeEntry = m_TempEffectBitmaps.find(bitmapSizeNeeded);
+
+		// If we didn't find a match then the bitmap size is greater than 512 but that's the biggest we've got, so return it
+		if (correspondingBitmapSizeEntry == m_TempEffectBitmaps.end()) { correspondingBitmapSizeEntry = m_TempEffectBitmaps.find(512); }
+
+		return correspondingBitmapSizeEntry->second;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::RegisterGlowDotEffect(const Vector &effectPos, DotGlowColor color, int strength) {
+	void PostProcessMan::RegisterGlowDotEffect(const Vector &effectPos, DotGlowColor color, unsigned char strength) {
 		// These effects only apply only once per drawn sim update, and only on the first frame drawn after one or more sim updates
 		if (color != NoDot && g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0) {
 			RegisterPostEffect(effectPos, GetDotGlowEffect(color), GetDotGlowEffectHash(color), strength);
@@ -180,7 +176,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::GetNetworkPostEffectsList(int whichScreen, std::list<PostEffect> & outputList) {
+	void PostProcessMan::GetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> & outputList) {
 		ScreenRelativeEffectsMutex[whichScreen].lock();
 		outputList.clear();
 		for (std::list<PostEffect>::iterator eItr = m_ScreenRelativeEffects[whichScreen].begin(); eItr != m_ScreenRelativeEffects[whichScreen].end(); ++eItr) {
@@ -191,7 +187,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::SetNetworkPostEffectsList(int whichScreen, std::list<PostEffect> & inputList) {
+	void PostProcessMan::SetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> & inputList) {
 		ScreenRelativeEffectsMutex[whichScreen].lock();
 		m_ScreenRelativeEffects[whichScreen].clear();
 		for (std::list<PostEffect>::iterator eItr = inputList.begin(); eItr != inputList.end(); ++eItr) {
@@ -202,7 +198,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PostProcessMan::GetPostScreenEffects(Vector boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, int team) {
+	bool PostProcessMan::GetPostScreenEffects(Vector boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, short team) {
 		bool found = false;
 		bool unseen = false;
 		Vector postEffectPosRelativeToBox;
@@ -221,7 +217,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PostProcessMan::GetPostScreenEffects(int left, int top, int right, int bottom, std::list<PostEffect> &effectsList, int team) {
+	bool PostProcessMan::GetPostScreenEffects(int left, int top, int right, int bottom, std::list<PostEffect> &effectsList, short team) {
 		bool found = false;
 		bool unseen = false;
 		Vector postEffectPosRelativeToBox;
@@ -358,48 +354,31 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PostProcessMan::DrawPostScreenEffects() {
-		BITMAP *pBitmap = 0;
+		BITMAP *effectBitmap = 0;
 		int effectPosX = 0;
 		int effectPosY = 0;
-		int strength = 0;
-		float angle = 0;
+		unsigned char effectStrength = 0;
 
-		for (std::list<PostEffect>::iterator eItr = m_PostScreenEffects.begin(); eItr != m_PostScreenEffects.end(); ++eItr) {
-			if ((*eItr).m_Bitmap) {
-				pBitmap = (*eItr).m_Bitmap;
-				strength = (*eItr).m_Strength;
-				set_screen_blender(strength, strength, strength, strength);
-				effectPosX = (*eItr).m_Pos.GetFloorIntX() - (pBitmap->w / 2);
-				effectPosY = (*eItr).m_Pos.GetFloorIntY() - (pBitmap->h / 2);
-				angle = (*eItr).m_Angle;
+		for (const PostEffect &postEffect : m_PostScreenEffects) {
+			if (postEffect.m_Bitmap) {
+				effectBitmap = postEffect.m_Bitmap;
+				effectStrength = postEffect.m_Strength;
+				effectPosX = postEffect.m_Pos.GetFloorIntX() - (effectBitmap->w / 2);
+				effectPosY = postEffect.m_Pos.GetFloorIntY() - (effectBitmap->h / 2);
+				set_screen_blender(effectStrength, effectStrength, effectStrength, effectStrength);
 
 				// Draw all the scene screen effects accumulated this frame
-				if (angle == 0) {
-					draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pBitmap, effectPosX, effectPosY);
+				if (postEffect.m_Angle == 0) {
+					draw_trans_sprite(g_FrameMan.GetBackBuffer32(), effectBitmap, effectPosX, effectPosY);
 				} else {
-					BITMAP * pTargetBitmap;
-
-					if (pBitmap->w < 16 && pBitmap->h < 16) {
-						pTargetBitmap = m_TempEffectBitmap_16;
-					} else if (pBitmap->w < 32 && pBitmap->h < 32) {
-						pTargetBitmap = m_TempEffectBitmap_32;
-					} else if (pBitmap->w < 64 && pBitmap->h < 64) {
-						pTargetBitmap = m_TempEffectBitmap_64;
-					} else if (pBitmap->w < 128 && pBitmap->h < 128) {
-						pTargetBitmap = m_TempEffectBitmap_128;
-					} else if (pBitmap->w < 256 && pBitmap->h < 256) {
-						pTargetBitmap = m_TempEffectBitmap_256;
-					} else {
-						pTargetBitmap = m_TempEffectBitmap_512;
-					}
-
-					clear_to_color(pTargetBitmap, 0);
+					BITMAP *targetBitmap = GetTempEffectBitmap(effectBitmap);
+					clear_to_color(targetBitmap, 0);
 
 					Matrix newAngle;
-					newAngle.SetRadAngle(angle);
+					newAngle.SetRadAngle(postEffect.m_Angle);
 
-					rotate_sprite(pTargetBitmap, pBitmap, 0, 0, ftofix(newAngle.GetAllegroAngle()));
-					draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pTargetBitmap, effectPosX, effectPosY);
+					rotate_sprite(targetBitmap, effectBitmap, 0, 0, ftofix(newAngle.GetAllegroAngle()));
+					draw_trans_sprite(g_FrameMan.GetBackBuffer32(), targetBitmap, effectPosX, effectPosY);
 				}
 			}
 		}

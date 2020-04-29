@@ -64,7 +64,7 @@ namespace RTE {
 		/// <param name="start">Start position of the primitive.</param>
 		/// <param name="end">End position of the primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		LinePrimitive(Vector start, Vector end, unsigned short color) { LinePrimitive(-1, start, end, color); }
+		LinePrimitive(Vector start, Vector end, unsigned char color) { LinePrimitive(-1, start, end, color); }
 
 		/// <summary>
 		/// Constructor method for LinePrimitive object.
@@ -73,7 +73,7 @@ namespace RTE {
 		/// <param name="start">Start position of the primitive.</param>
 		/// <param name="end">End position of the primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		LinePrimitive(short player, Vector start, Vector end, unsigned short color) {
+		LinePrimitive(short player, Vector start, Vector end, unsigned char color) {
 			m_StartPos = start;
 			m_EndPos = end;
 			m_Color = color;
@@ -103,7 +103,7 @@ namespace RTE {
 		/// <param name="start">Start position of the primitive.</param>
 		/// <param name="end">End position of the primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		BoxPrimitive(Vector start, Vector end, unsigned short color) { BoxPrimitive(-1, start, end, color); }
+		BoxPrimitive(Vector start, Vector end, unsigned char color) { BoxPrimitive(-1, start, end, color); }
 
 		/// <summary>
 		/// Constructor method for BoxPrimitive object.
@@ -112,7 +112,7 @@ namespace RTE {
 		/// <param name="start">Start position of the primitive.</param>
 		/// <param name="end">End position of the primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		BoxPrimitive(short player, Vector start, Vector end, unsigned short color) {
+		BoxPrimitive(short player, Vector start, Vector end, unsigned char color) {
 			m_StartPos = start;
 			m_EndPos = end;
 			m_Color = color;
@@ -142,7 +142,7 @@ namespace RTE {
 		/// <param name="start">Start position of the primitive.</param>
 		/// <param name="end">End position of the primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		BoxFillPrimitive(Vector start, Vector end, unsigned short color) { BoxFillPrimitive(-1, start, end, color); }
+		BoxFillPrimitive(Vector start, Vector end, unsigned char color) { BoxFillPrimitive(-1, start, end, color); }
 
 		/// <summary>
 		/// Constructor method for BoxFillPrimitive object.
@@ -151,7 +151,7 @@ namespace RTE {
 		/// <param name="start">Start position of the primitive.</param>
 		/// <param name="end">End position of the primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		BoxFillPrimitive(short player, Vector start, Vector end, unsigned short color) {
+		BoxFillPrimitive(short player, Vector start, Vector end, unsigned char color) {
 			m_StartPos = start;
 			m_EndPos = end;
 			m_Color = color;
@@ -188,7 +188,7 @@ namespace RTE {
 		/// <param name="pos">Position of this primitive.</param>
 		/// <param name="radius">Radius of the circle primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		CirclePrimitive(Vector pos, short radius, unsigned short color) { CirclePrimitive(-1, pos, radius, color); }
+		CirclePrimitive(Vector pos, short radius, unsigned char color) { CirclePrimitive(-1, pos, radius, color); }
 
 		/// <summary>
 		/// Constructor method for CirclePrimitive object.
@@ -197,7 +197,7 @@ namespace RTE {
 		/// <param name="pos">Position of this primitive.</param>
 		/// <param name="radius">Radius of the circle primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		CirclePrimitive(short player, Vector pos, short radius, unsigned short color) {
+		CirclePrimitive(short player, Vector pos, short radius, unsigned char color) {
 			m_StartPos = pos;
 			m_Color = color;
 			m_Radius = radius;
@@ -234,7 +234,7 @@ namespace RTE {
 		/// <param name="pos">Position of this primitive.</param>
 		/// <param name="radius">Radius of the circle primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		CircleFillPrimitive(Vector pos, short radius, unsigned short color) { CircleFillPrimitive(-1, pos, radius, color); }
+		CircleFillPrimitive(Vector pos, short radius, unsigned char color) { CircleFillPrimitive(-1, pos, radius, color); }
 
 		/// <summary>
 		/// Constructor method for CircleFillPrimitive object.
@@ -243,7 +243,7 @@ namespace RTE {
 		/// <param name="pos">Position of this primitive.</param>
 		/// <param name="radius">Radius of the circle primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		CircleFillPrimitive(short player, Vector pos, short radius, unsigned short color) {
+		CircleFillPrimitive(short player, Vector pos, short radius, unsigned char color) {
 			m_StartPos = pos;
 			m_Color = color;
 			m_Radius = radius;

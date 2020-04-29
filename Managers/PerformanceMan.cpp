@@ -192,7 +192,8 @@ namespace RTE {
 			sprintf_s(str, sizeof(str), "Sound channels: %d / %d ", g_AudioMan.GetPlayingChannelCount(), g_AudioMan.GetTotalChannelCount());
 			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 100, str, GUIFont::Left);
 
-			if (m_AdvancedPerfStats) { DrawPeformanceGraphs(bitmapToDrawTo); }
+			// If in split screen mode don't draw graphs because they don't fit anyway.
+			if (m_AdvancedPerfStats && g_FrameMan.GetScreenCount() == 1) { DrawPeformanceGraphs(bitmapToDrawTo); }
 		}
 	}
 

@@ -88,15 +88,15 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the 8bpp back-buffer bitmap.
+		/// Gets the 8bpp backbuffer bitmap.
 		/// </summary>
-		/// <returns>A pointer to the BITMAP 8bpp back-buffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
+		/// <returns>A pointer to the BITMAP 8bpp backbuffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetBackBuffer8() const { return m_BackBuffer8; }
 
 		/// <summary>
-		/// Gets the 32bpp back-buffer bitmap. Make sure you don't do any blending stuff to the 8bpp one!
+		/// Gets the 32bpp backbuffer bitmap. Make sure you don't do any blending stuff to the 8bpp one!
 		/// </summary>
-		/// <returns>A pointer to the BITMAP 32bpp back-buffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
+		/// <returns>A pointer to the BITMAP 32bpp backbuffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetBackBuffer32() const { return m_BackBuffer32; }
 
 		/// <summary>
@@ -182,7 +182,7 @@ namespace RTE {
 		bool IsValidResolution(unsigned short width, unsigned short height) const;
 
 		/// <summary>
-		/// Tells how many times the screen resolution is being multiplied and the back-buffer stretched across for better readability.
+		/// Tells how many times the screen resolution is being multiplied and the backbuffer stretched across for better readability.
 		/// </summary>
 		/// <returns>What multiple the screen resolution is run in (1 normal).</returns>
 		unsigned short ResolutionMultiplier() const { return m_ResMultiplier; }
@@ -316,7 +316,7 @@ namespace RTE {
 
 #pragma region Drawing
 		/// <summary>
-		/// Flips the frame buffers, showing the back-buffer on the current display.
+		/// Flips the frame buffers, showing the backbuffer on the current display.
 		/// </summary>
 		void FlipFrameBuffers();
 
@@ -378,80 +378,81 @@ namespace RTE {
 
 #pragma region Network Handling
 		/// <summary>
-		/// Returns true if this manager is in multiplayer mode, storing the 8bpp back-buffer for network transmission.
+		/// Returns true if this manager is in multiplayer mode, storing the 8bpp backbuffer for network transmission.
 		/// </summary>
 		/// <returns>True if in multiplayer mode.</returns>
 		bool IsInMultiplayerMode() const { return m_StoreNetworkBackBuffer; }
 
 		/// <summary>
-		/// Sets the multiplayer mode flag, telling the manager to store the 8bpp back-buffer for network transmission.
+		/// Sets the multiplayer mode flag, telling the manager to store the 8bpp backbuffer for network transmission.
 		/// </summary>
 		/// <param name="value">Whether this manager should operate in multiplayer mode.</param>
 		void SetMultiplayerMode(bool value) { m_StoreNetworkBackBuffer = value; }
 
 		/// <summary>
-		/// Gets the 8bpp back-buffer bitmap used to draw network transmitted image on top of everything.
+		/// Gets the ready 8bpp backbuffer bitmap used to draw network transmitted image on top of everything.
 		/// </summary>
-		/// <param name="player">Which player screen to get back-buffer bitmap from.</param>
-		/// <returns>A pointer to the 8bpp back-buffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
+		/// <param name="player">Which player screen to get backbuffer bitmap for.</param>
+		/// <returns>A pointer to the 8bpp backbuffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetNetworkBackBuffer8Ready(short player) const { return m_NetworkBackBufferFinal8[m_NetworkFrameReady][player]; }
 
 		/// <summary>
-		/// 
+		/// Gets the ready 8bpp backbuffer GUI bitmap used to draw network transmitted image on top of everything.
 		/// </summary>
-		/// <param name="player">Which player screen to get GUI back-buffer bitmap from.</param>
-		/// <returns>A pointer to the 8bpp GUI back-buffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
+		/// <param name="player">Which player screen to get GUI backbuffer bitmap for.</param>
+		/// <returns>A pointer to the 8bpp GUI backbuffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetNetworkBackBufferGUI8Ready(short player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameReady][player]; }
 
 		/// <summary>
-		/// 
+		/// Gets the current 8bpp backbuffer bitmap used to draw network transmitted image on top of everything.
 		/// </summary>
-		/// <param name="player"></param>
-		/// <returns></returns>
+		/// <param name="player">Which player screen to get backbuffer bitmap for.</param>
+		/// <returns>A pointer to the 8bpp backbuffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetNetworkBackBuffer8Current(short player) const { return m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
-		/// 
+		/// Gets the current 8bpp backbuffer GUI bitmap used to draw network transmitted image on top of everything.
 		/// </summary>
-		/// <param name="player"></param>
-		/// <returns></returns>
+		/// <param name="player">Which player screen to get backbuffer bitmap for.</param>
+		/// <returns>A pointer to the 8bpp GUI backbuffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetNetworkBackBufferGUI8Current(short player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
-		/// Gets the 8bpp intermediate bitmap used to send network transmitted image. 
+		/// Gets the ready 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending. 
 		/// </summary>
-		/// <param name="player">Which player screen to get intermediate bitmap from.</param>
+		/// <param name="player">Which player screen to get intermediate bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetNetworkBackBufferIntermediate8Ready(short player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameReady][player]; }
 
 		/// <summary>
-		/// 
+		/// Gets the ready 8bpp intermediate backbuffer GUI bitmap used to copy network transmitted image to before sending.
 		/// </summary>
-		/// <param name="player">Which player screen to get intermediate GUI bitmap from.</param>
+		/// <param name="player">Which player screen to get intermediate GUI bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate GUI BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetNetworkBackBufferIntermediate8Current(short player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
-		/// 
+		/// Gets the current 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending. 
 		/// </summary>
-		/// <param name="player"></param>
-		/// <returns></returns>
+		/// <param name="player">Which player screen to get intermediate bitmap for.</param>
+		/// <returns>A pointer to the 8bpp intermediate BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetNetworkBackBufferIntermediateGUI8Ready(short player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameReady][player]; }
 
 		/// <summary>
-		/// 
+		/// Gets the current 8bpp intermediate backbuffer GUI bitmap used to copy network transmitted image to before sending.
 		/// </summary>
-		/// <param name="player"></param>
-		/// <returns></returns>
+		/// <param name="player">Which player screen to get intermediate GUI bitmap for.</param>
+		/// <returns>A pointer to the 8bpp intermediate GUI BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetNetworkBackBufferIntermediateGUI8Current(short player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
-		/// 
+		/// Gets whether the network backbuffers are locked to be updated.
 		/// </summary>
-		/// <param name="player"></param>
-		/// <returns></returns>
+		/// <param name="player">Which player screen to check for.</param>
+		/// <returns>Whether the network backbuffers are locked to be updated.</returns>
 		bool IsNetworkBitmapLocked(short player) const { return m_NetworkBitmapIsLocked[player]; }
 
+		// TODO: Figure out.
 		/// <summary>
 		/// 
 		/// </summary>
@@ -460,30 +461,30 @@ namespace RTE {
 		Vector GetTargetPos(short screen) const { return m_TargetPos[m_NetworkFrameReady][screen]; }
 
 		/// <summary>
-		/// 
+		/// Gets whether we are drawing the contents of the network backbuffers on top of m_BackBuffer8 every frame.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether we are drawing the contents of the network backbuffers on top of m_BackBuffer8 every frame or not.</returns>
 		bool GetDrawNetworkBackBuffer() const { return m_DrawNetworkBackBuffer; }
 
 		/// <summary>
-		/// 
+		/// Sets whether to draw the contents of the network backbuffers on top of m_BackBuffer8 every frame.
 		/// </summary>
-		/// <param name="value"></param>
+		/// <param name="value">Whether to draw the contents of the network backbuffers on top of m_BackBuffer8 every frame or not.</param>
 		void SetDrawNetworkBackBuffer(bool value) { m_DrawNetworkBackBuffer = value; }
 
 		/// <summary>
-		/// 
+		/// Gets whether we are dumping the contents of the m_BackBuffer8 to the network backbuffers every frame.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether the contents of the m_BackBuffer8 are being dumped to the network backbuffers every frame.</returns>
 		bool GetStoreNetworkBackBuffer() const { return m_StoreNetworkBackBuffer; }
 
 		/// <summary>
-		/// 
+		/// Creates a new set of network backbuffers for the specified player.
 		/// </summary>
-		/// <param name="player"></param>
-		/// <param name="w"></param>
-		/// <param name="h"></param>
-		void CreateNewPlayerBackBuffer(short player, unsigned short w, unsigned short h);
+		/// <param name="player">Player to create new backbuffer for.</param>
+		/// <param name="width">Width of new backbuffer.</param>
+		/// <param name="height">Height of new backbuffer</param>
+		void CreateNewNetworkPlayerBackBuffer(short player, unsigned short width, unsigned short height);
 #pragma endregion
 
 #pragma region Palette Routines
@@ -523,7 +524,7 @@ namespace RTE {
 		int SaveBitmapToBMP(BITMAP *bitmap, const char *nameBase) { return SaveBitmap(SingleBitmap, nameBase, bitmap); }
 
 		/// <summary>
-		/// Dumps a bitmap of the screen back-buffer to a 8bpp BMP file.
+		/// Dumps a bitmap of the screen backbuffer to a 8bpp BMP file.
 		/// </summary>
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
@@ -604,8 +605,8 @@ namespace RTE {
 		bool m_FlashedLastFrame[c_MaxScreenCount]; //!< Whether we flashed last frame or not.
 		Timer m_FlashTimer[c_MaxScreenCount]; //!< Flash screen timer.
 
-		BITMAP *m_BackBuffer8; //!< Screen back-buffer, always 8bpp, gets copied to the 32bpp buffer for post-processing.
-		BITMAP *m_BackBuffer32; //!< 32bpp back-buffer, only used for post-processing.
+		BITMAP *m_BackBuffer8; //!< Screen backbuffer, always 8bpp, gets copied to the 32bpp buffer for post-processing.
+		BITMAP *m_BackBuffer32; //!< 32bpp backbuffer, only used for post-processing.
 		BITMAP *m_ScreenDumpBuffer; //!< Temporary buffer for making quick screencaps.
 		BITMAP *m_WorldDumpBuffer; //!< Temporary buffer for making whole scene screencaps.
 
@@ -616,13 +617,13 @@ namespace RTE {
 
 		Vector m_TargetPos[2][c_MaxScreenCount]; //!< Frame target position for network players.
 
-		bool m_DrawNetworkBackBuffer; //!< If true, draws the contents of the m_NetworkBackBuffer8 on top of m_BackBuffer8 every frame in FrameMan.Draw.
-		bool m_StoreNetworkBackBuffer; //!< If true, dumps the contents of the m_BackBuffer8 to the m_NetworkBackBuffer8 every frame.
+		bool m_StoreNetworkBackBuffer; //!< If true, dumps the contents of the m_BackBuffer8 to the network backbuffers every frame.
+		bool m_DrawNetworkBackBuffer; //!< If true, draws the contents of the network backbuffers on top of m_BackBuffer8 every frame in FrameMan.Draw.
 
 		unsigned short m_NetworkFrameCurrent; //!< Which frame index is being rendered, 0 or 1.
 		unsigned short m_NetworkFrameReady; //!< Which frame is rendered and ready for transmission, 0 or 1.
 
-		bool m_NetworkBitmapIsLocked[c_MaxScreenCount]; //!< If true then the network bitmap is being updated.
+		bool m_NetworkBitmapIsLocked[c_MaxScreenCount]; //!< If true then the network bitmap is being updated (Pseudo mutex lock/unlock).
 		// TODO: Test if this destroys the whole multiplayer and use instead of the one above if it doesn't.
 		//std::mutex m_NetworkBitmapIsLocked[c_MaxScreenCount];
 

@@ -50,9 +50,6 @@ void SettingsMan::Clear()
 	m_EndlessMode = false;
 	m_PrintDebugInfo = false;
 	m_PreciseCollisions = true;
-	m_ForceSafeGfxDriver = false;
-	m_ForceSoftwareGfxDriver = false;
-	m_ForceSafeGfxDriver = false;
 	m_ForceVirtualFullScreenGfxDriver = false;
 	m_ForceOverlayedWindowGfxDriver = false;
 	m_ForceNonOverlayedWindowGfxDriver = false;

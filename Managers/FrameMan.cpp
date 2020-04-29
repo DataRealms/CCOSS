@@ -502,22 +502,22 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::CreateNewPlayerBackBuffer(short player, unsigned short w, unsigned short h) {
+	void FrameMan::CreateNewNetworkPlayerBackBuffer(short player, unsigned short width, unsigned short height) {
 		for (unsigned short f = 0; f < 2; f++) {
 			destroy_bitmap(m_NetworkBackBufferIntermediate8[f][player]);
-			m_NetworkBackBufferIntermediate8[f][player] = create_bitmap_ex(8, w, h);
+			m_NetworkBackBufferIntermediate8[f][player] = create_bitmap_ex(8, width, height);
 
 			destroy_bitmap(m_NetworkBackBufferIntermediateGUI8[f][player]);
-			m_NetworkBackBufferIntermediateGUI8[f][player] = create_bitmap_ex(8, w, h);
+			m_NetworkBackBufferIntermediateGUI8[f][player] = create_bitmap_ex(8, width, height);
 
 			destroy_bitmap(m_NetworkBackBufferFinal8[f][player]);
-			m_NetworkBackBufferFinal8[f][player] = create_bitmap_ex(8, w, h);
+			m_NetworkBackBufferFinal8[f][player] = create_bitmap_ex(8, width, height);
 
 			destroy_bitmap(m_NetworkBackBufferFinalGUI8[f][player]);
-			m_NetworkBackBufferFinalGUI8[f][player] = create_bitmap_ex(8, w, h);
+			m_NetworkBackBufferFinalGUI8[f][player] = create_bitmap_ex(8, width, height);
 		}
-		m_PlayerScreenWidth = w;
-		m_PlayerScreenHeight = h;
+		m_PlayerScreenWidth = width;
+		m_PlayerScreenHeight = height;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

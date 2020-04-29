@@ -1855,7 +1855,7 @@ namespace RTE
 				m_ClientConnections[index].ResY = m->ResolutionY;
 				m_ClientConnections[index].IsActive = true;
 				m_ClientConnections[index].PlayerName = m->Name;
-				g_FrameMan.CreateNewPlayerBackBuffer(index, m->ResolutionX, m->ResolutionY);
+				g_FrameMan.CreateNewNetworkPlayerBackBuffer(index, m->ResolutionX, m->ResolutionY);
 
 				m_Server->SetTimeoutTime(5000, m_ClientConnections[index].ClientId);
 

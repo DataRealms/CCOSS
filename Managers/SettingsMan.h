@@ -584,10 +584,6 @@ protected:
 	//Whether CC uses additional Draws during MO's PreTravel and PostTravel to 
 	//update MO layer this frame with more precision(true), or it just uses data from the last frame with less precision(false)
 	bool m_PreciseCollisions;
-	// Whether we should try using software-mode drivers
-	bool m_ForceSoftwareGfxDriver;
-	// Whether we should try using safe-mode drivers
-	bool m_ForceSafeGfxDriver;
 	// Whether we should try using fullscreen mode
 	bool m_ForceVirtualFullScreenGfxDriver;
 	// Whether we should try using overlayed window driver

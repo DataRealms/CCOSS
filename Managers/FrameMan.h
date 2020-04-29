@@ -445,13 +445,6 @@ namespace RTE {
 		/// <returns>A pointer to the 8bpp intermediate GUI BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetNetworkBackBufferIntermediateGUI8Current(short player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][player]; }
 
-		/// <summary>
-		/// Gets whether the network backbuffers are locked to be updated.
-		/// </summary>
-		/// <param name="player">Which player screen to check for.</param>
-		/// <returns>Whether the network backbuffers are locked to be updated.</returns>
-		bool IsNetworkBitmapLocked(short player) const { return m_NetworkBitmapIsLocked[player]; }
-
 		// TODO: Figure out.
 		/// <summary>
 		/// 
@@ -623,9 +616,7 @@ namespace RTE {
 		unsigned short m_NetworkFrameCurrent; //!< Which frame index is being rendered, 0 or 1.
 		unsigned short m_NetworkFrameReady; //!< Which frame is rendered and ready for transmission, 0 or 1.
 
-		bool m_NetworkBitmapIsLocked[c_MaxScreenCount]; //!< If true then the network bitmap is being updated (Pseudo mutex lock/unlock).
-		// TODO: Test if this destroys the whole multiplayer and use instead of the one above if it doesn't.
-		//std::mutex m_NetworkBitmapIsLocked[c_MaxScreenCount];
+		std::mutex m_NetworkBitmapIsLocked[c_MaxScreenCount]; //!< Mutex lock for thread safe updating of the network backbuffer bitmaps.
 
 	private:
 

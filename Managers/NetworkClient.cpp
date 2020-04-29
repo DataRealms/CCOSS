@@ -778,7 +778,6 @@ namespace RTE
 
 	void NetworkClient::DrawFrame()
 	{
-		while (g_FrameMan.IsNetworkBitmapLocked(0));
 		BITMAP * src_bmp = g_FrameMan.GetNetworkBackBufferIntermediate8Ready(0);
 		BITMAP * dst_bmp = g_FrameMan.GetNetworkBackBuffer8Ready(0);
 

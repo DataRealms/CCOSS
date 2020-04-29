@@ -81,7 +81,6 @@ namespace RTE {
 			m_FlashScreenColor[screenCount] = -1;
 			m_FlashedLastFrame[screenCount] = false;
 			m_FlashTimer[screenCount].Reset();
-			m_NetworkBitmapIsLocked[screenCount] = false;
 
 			for (short bufferFrame = 0; bufferFrame < 2; bufferFrame++) {
 				m_NetworkBackBufferIntermediate8[bufferFrame][screenCount] = 0;
@@ -862,13 +861,14 @@ namespace RTE {
 
 			// Replace 8 bit backbuffer contents with network received image before post-processing as it is where this buffer is copied to 32 bit buffer
 			if (GetDrawNetworkBackBuffer()) {
-				m_NetworkBitmapIsLocked[0] = true;
+				m_NetworkBitmapIsLocked[0].lock();
+
 				blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][0], m_BackBuffer8, 0, 0, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 				masked_blit(m_NetworkBackBufferFinalGUI8[m_NetworkFrameReady][0], m_BackBuffer8, 0, 0, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 
 				if (g_UInputMan.FlagAltState() || g_UInputMan.FlagCtrlState() || g_UInputMan.FlagShiftState()) { g_PerformanceMan.DrawCurrentPing(); }
 
-				m_NetworkBitmapIsLocked[0] = false;
+				m_NetworkBitmapIsLocked[0].unlock();
 			}
 		}
 
@@ -1019,10 +1019,10 @@ namespace RTE {
 			dx = (i == 1 || i == 3) ? dw : dx;
 			dy = (i == 2 || i == 3) ? dh : dy;
 
-			m_NetworkBitmapIsLocked[i] = true;
+			m_NetworkBitmapIsLocked[i].lock();
 			blit(m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][i], m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->w, m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i]->h);
 			blit(m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][i], m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->w, m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->h);
-			m_NetworkBitmapIsLocked[i] = false;
+			m_NetworkBitmapIsLocked[i].unlock();
 
 #if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
 			// Draw all player's screen into one

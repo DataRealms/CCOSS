@@ -1435,7 +1435,6 @@ namespace RTE
 
 		// Wait till frameman releases bitmap
 		SetThreadExitReason(player, NetworkServer::LOCKED);
-		//while (g_FrameMan.IsNetworkBitmapLocked(player));
 		SetThreadExitReason(player, NetworkServer::NORMAL);
 
 		// Get backbuffer bitmap for this player

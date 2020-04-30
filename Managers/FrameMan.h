@@ -616,7 +616,7 @@ namespace RTE {
 		unsigned short m_NetworkFrameCurrent; //!< Which frame index is being rendered, 0 or 1.
 		unsigned short m_NetworkFrameReady; //!< Which frame is rendered and ready for transmission, 0 or 1.
 
-		std::mutex m_NetworkBitmapIsLocked[c_MaxScreenCount]; //!< Mutex lock for thread safe updating of the network backbuffer bitmaps.
+		std::mutex m_NetworkBitmapLock[c_MaxScreenCount]; //!< Mutex lock for thread safe updating of the network backbuffer bitmaps.
 
 	private:
 

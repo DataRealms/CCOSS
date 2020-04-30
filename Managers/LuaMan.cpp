@@ -394,6 +394,8 @@ void LuaMan::Clear()
     m_NextPresetID = 0;
     m_NextObjectID = 0;
     m_pTempEntity = 0;
+    m_TempEntityVector.clear();
+    m_TempEntityVector.shrink_to_fit();
 
 	//Clear files list
 	for (int i = 0; i < MAX_OPEN_FILES; ++i)
@@ -2157,7 +2159,6 @@ int LuaMan::Create()
             .def("GetAGResolution", &MovableMan::GetAGResolution)
             .def("GetSplashRatio", &MovableMan::GetSplashRatio)
             .property("MaxDroppedItems", &MovableMan::GetMaxDroppedItems, &MovableMan::SetMaxDroppedItems)
-            .property("ScriptedEntity", &MovableMan::GetScriptedEntity, &MovableMan::SetScriptedEntity)
             .def("SortTeamRoster", &MovableMan::SortTeamRoster)
 			.def("ChangeActorTeam", &MovableMan::ChangeActorTeam)
 			.def("AddMO", &AddMO, adopt(_2))

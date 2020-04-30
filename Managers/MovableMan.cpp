@@ -70,7 +70,6 @@ void MovableMan::Clear()
     m_SloMoDuration = 1000;
     m_SettlingEnabled = true;
     m_MOSubtractionEnabled = true;
-    m_pObjectToScriptUpdate = 0;
 }
 
 
@@ -1657,9 +1656,6 @@ void MovableMan::Update()
     // If this is the first sim update since a drawn one, then clear the post effects
     if (g_TimerMan.SimUpdatesSinceDrawn() == 0)
         g_SceneMan.ClearPostEffects();
-
-    // Lua transfer pointer needs to be cleared, what was set here last update isn't valid anymore
-    m_pObjectToScriptUpdate = 0;
 
     // Reset the draw HUD roster line settings
     m_SortTeamRoster[Activity::TEAM_1] = false;

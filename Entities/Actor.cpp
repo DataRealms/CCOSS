@@ -1289,36 +1289,13 @@ bool Actor::UpdateAIScripted() {
         return false;
     }
 
-    // Check to make sure the preset of this is still defined in the Lua state. If not, re-create it and recover gracefully
-    if (!g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false)) {
-        RTEAbort("Trying to run UpdateAIScripted with no ScriptPresetName. This shouldn't happen, please let a dev know.")
-        //ReloadScripts(); //TODO test if this should be here, I think it's junk cause for any cases where there's AI, update will always be called first. If it shouldn't, change the early return above.
-    }
+    int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
+    status = (status >= 0 && m_ScriptObjectName.empty()) ? SetupScriptObjectNameAndRunLuaCreateFunctions() : status;
+    g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
+    status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) : status;
+    g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
 
-    // If we don't have a Lua representation for this object instance, create one and call the Lua Create function on it
-    if (m_ScriptObjectName.empty()) {
-        RTEAbort("Trying to run UpdateAIScripted with no ScriptObjectName. This shouldn't happen, please let a dev know.")
-        /*//TODO test if this should be here, I think it's junk cause for any cases where there's AI, update will always be called first. If it shouldn't, change the early return above.
-        m_ScriptObjectName = GetClassName() + "s." + g_LuaMan.GetNewObjectID();
-
-        // Give Lua access to this object, then use that access to set up the object's Lua representation
-        g_MovableMan.SetScriptedEntity(this);
-        if (g_LuaMan.RunScriptString(m_ScriptObjectName + " = To" + GetClassName() + "(MovableMan.ScriptedEntity);") < 0) {
-            return false;
-        }
-
-        for (std::pair<std::string, bool> scriptEntry : m_LoadedScripts) {
-            if (g_LuaMan.RunFunctionInPresetScript("Create", scriptEntry.first, m_ScriptPresetName, m_ScriptObjectName) < 0) {
-                return -3;
-            }
-        }*/
-    }
-
-	g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
-    bool aiUpdateSucceeded = RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) < 0;
-	g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
-
-    return aiUpdateSucceeded;
+    return status >= 0;
 }
 
 

@@ -467,6 +467,24 @@ void MovableObject::Destroy(bool notInherited) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+int MovableObject::SetupScriptObjectNameAndRunLuaCreateFunctions() {
+    m_ScriptObjectName = GetClassName() + "s." + g_LuaMan.GetNewObjectID();
+
+    // Give Lua access to this object, then use that access to set up the object's Lua representation
+    g_LuaMan.SetTempEntity(this);
+
+    if (g_LuaMan.RunScriptString(m_ScriptObjectName + " = To" + GetClassName() + "(LuaMan.TempEntity);") < 0) {
+        return -2;
+    }
+
+    if (RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
+        return -3;
+    }
+    return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 int MovableObject::LoadScript(std::string const &scriptPath, bool loadAsEnabledScript) {
     // Return an error if the script path is empty or already there
     if (scriptPath.empty()) {
@@ -638,25 +656,6 @@ bool MovableObject::DisableScript(std::string const &scriptPath) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::RunScriptedFunctionInAppropriateScripts(std::string const &functionName, bool runOnDisabledScripts, bool stopOnError, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty() || m_ScriptObjectName.empty()) {
-        return -1;
-    }
-
-    int status = 0;
-    for (std::pair<std::string, bool> scriptEntry : m_LoadedScripts) {
-        if (runOnDisabledScripts || scriptEntry.second == true) {
-            status = RunScriptedFunction(scriptEntry.first, functionName, functionEntityArguments, functionLiteralArguments);
-            if (status < 0 && stopOnError) {
-                return status;
-            }
-        }
-    }
-    return status;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 int MovableObject::RunScriptedFunction(std::string const &scriptPath, std::string const &functionName, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
     if (m_LoadedScripts.empty() || m_ScriptPresetName.empty() || m_ScriptObjectName.empty()) {
         return -1;
@@ -690,6 +689,25 @@ int MovableObject::RunScriptedFunction(std::string const &scriptPath, std::strin
     }
 
     return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int MovableObject::RunScriptedFunctionInAppropriateScripts(std::string const &functionName, bool runOnDisabledScripts, bool stopOnError, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
+    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty() || m_ScriptObjectName.empty()) {
+        return -1;
+    }
+
+    int status = 0;
+    for (std::pair<std::string, bool> scriptEntry : m_LoadedScripts) {
+        if (runOnDisabledScripts || scriptEntry.second == true) {
+            status = RunScriptedFunction(scriptEntry.first, functionName, functionEntityArguments, functionLiteralArguments);
+            if (status < 0 && stopOnError) {
+                return status;
+            }
+        }
+    }
+    return status;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -956,30 +974,11 @@ int MovableObject::UpdateScripts() {
         return -1;
     }
 
-    // Check to make sure the preset of this is still defined in the Lua state. If not, re-create it and recover gracefully
-    if (!g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false)) { ReloadScripts(); }
+    int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
+    status = (status >= 0 && m_ScriptObjectName.empty()) ? SetupScriptObjectNameAndRunLuaCreateFunctions() : status;
+    status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("Update", false, true) : status;
 
-    // If we don't have a Lua representation for this object instance, create one and call the Lua Create function on it
-    if (m_ScriptObjectName.empty()) {
-        m_ScriptObjectName = GetClassName() + "s." + g_LuaMan.GetNewObjectID();
-
-        // Give Lua access to this object, then use that access to set up the object's Lua representation
-        g_MovableMan.SetScriptedEntity(this);
-
-        if (g_LuaMan.RunScriptString(m_ScriptObjectName + " = To" + GetClassName() + "(MovableMan.ScriptedEntity);") < 0) {
-            return -2;
-        }
-
-        if (RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
-            return -3;
-        }
-    }
-
-    if (RunScriptedFunctionInAppropriateScripts("Update", false, true) < 0) {
-        return -3;
-    }
-
-    return 0;
+    return status;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

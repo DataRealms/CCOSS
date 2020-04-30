@@ -401,7 +401,7 @@ protected:
     // The next unique object ID to hand out to the next scripted Entity instance that wants to run its preset's scripts
     // This gets incremented each time a new one is requested to give unique ID's to all scripted objects
     long m_NextObjectID;
-    // Temporary holder for an Entity object that we want to pass into the Lua state without fuss
+    // Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
     Entity *m_pTempEntity;
     // Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
     std::vector<Entity *> m_TempEntityVector;

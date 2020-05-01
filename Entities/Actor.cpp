@@ -1290,7 +1290,7 @@ bool Actor::UpdateAIScripted() {
     }
 
     int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
-    status = (status >= 0 && m_ScriptObjectName.empty()) ? SetupScriptObjectNameAndRunLuaCreateFunctions() : status;
+    status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;
     g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
     status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) : status;
     g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);

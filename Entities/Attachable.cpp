@@ -274,7 +274,7 @@ void Attachable::Attach(MOSRotating *pParent)
     // Reset the attachables timers so things that have been sitting in inventory don't make backed up emissions
     ResetAllTimers();
 
-    if (m_pParent != NULL) {
+    if (m_pParent != NULL && m_pParent->ObjectScriptsInitialized()) {
         RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, {m_pParent});
     }
 }

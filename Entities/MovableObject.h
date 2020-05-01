@@ -264,6 +264,12 @@ ENTITYALLOCATION(MovableObject)
     /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
     int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
 
+    /// <summary>
+    /// Gets whether or not the object has a script name, and there were no errors when initializing its Lua scripts. If there were, the object would need to be reloaded.
+    /// </summary>
+    /// <returns>Whether or not the object's scripts have been succesfully initialized.</returns>
+    bool ObjectScriptsInitialized() { return !m_ScriptObjectName.empty() && m_ScriptObjectName != "ERROR"; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetClass
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1776,7 +1782,7 @@ protected:
     /// Does necessary work to setup a script object name for this object, allowing it to be accessed in Lua, then runs all of the MO's scripts' Create functions in Lua.
     /// </summary>
     /// <returns>0 on success, -2 if it fails to setup the script object in Lua, and -3 if it fails to run any Create function.</returns>
-    int SetupScriptObjectNameAndRunLuaCreateFunctions();
+    int InitializeObjectScripts();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateChildMOIDs

@@ -24,6 +24,7 @@ namespace RTE {
 	public:
 		CLASSINFOGETTERS
 
+		// TODO: Add comments to all these.
 		enum PlaybackPriority {
 			PRIORITY_HIGH = 0,
 			PRIORITY_NORMAL = 128,
@@ -398,7 +399,7 @@ namespace RTE {
 		/// <param name="attenuationStartDistance">The distance at which the sound will start attenuating away.</param>
 		/// <param name="affectedByGlobalPitch">Whether the sound is affected by pitch.</param>
 		/// <param name="fadeOutTime">The amount of time, in ms, to fade out over.</param>
-		void RegisterSoundEvent(int player, NetworkSoundState state, std::unordered_set<unsigned short> const *channels = NULL, std::vector<size_t> const *soundFileHashes = NULL, const Vector &position = Vector(), short loops = 0, float pitch = 1, bool affectedByGlobalPitch = false, float attenuationStartDistance = 0, bool immobile = false, short fadeOutTime = 0);
+		void RegisterSoundEvent(int player, NetworkSoundState state, const std::unordered_set<unsigned short> *channels = NULL, const std::vector<size_t> *soundFileHashes = NULL, const Vector &position = Vector(), short loops = 0, float pitch = 1, bool affectedByGlobalPitch = false, float attenuationStartDistance = 0, bool immobile = false, short fadeOutTime = 0);
 #pragma endregion
 
 	protected:
@@ -458,9 +459,9 @@ namespace RTE {
 		void UpdateCalculated3DEffectsForMobileSoundChannels();
 
 		/// <summary>
-		/// Updates 3D effects calculations on a given sound channel whose whose SoundContainer isn't immobile.
+		/// Updates 3D effects calculations on a given sound channel whose SoundContainer isn't immobile.
 		/// </summary>
-		/// <returns>FMOD_OK if the 3D effects were succesfully updated, otherwise an FMOD_ERROR.</returns>
+		/// <returns>FMOD_OK if the 3D effects were successfully updated, otherwise an FMOD_ERROR.</returns>
 		FMOD_RESULT UpdateMobileSoundChannelCalculated3DEffects(FMOD::Channel *channel);
 
 		/// <summary>

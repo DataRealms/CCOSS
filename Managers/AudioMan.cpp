@@ -80,12 +80,12 @@ namespace RTE {
 	void AudioMan::Update() {
 		if (m_AudioEnabled) {
 
-			//TODO allow setting vel for AEmitter and PEmitter. Also maybe consider setting vel on listener when sceneman target scrolling is happening.
+			//TODO allow setting vel for AEmitter and PEmitter. Also maybe consider setting vel on listener when SceneMan target scrolling is happening.
 
 			FMOD_RESULT status = FMOD_OK;
 
 			if (g_ActivityMan.ActivityRunning()) {
-				Activity const *currentActivity = g_ActivityMan.GetActivity();
+				const Activity *currentActivity = g_ActivityMan.GetActivity();
 
 				if (m_CurrentActivityHumanCount != (m_IsInMultiplayerMode ? 1 : currentActivity->GetHumanCount())) {
 					m_CurrentActivityHumanCount = m_IsInMultiplayerMode ? 1 : currentActivity->GetHumanCount();
@@ -100,9 +100,7 @@ namespace RTE {
 					}
 				}
 
-				if (g_SettingsMan.SoundPanningEffectStrength() < 1) {
-					UpdateCalculated3DEffectsForMobileSoundChannels();
-				}
+				if (g_SettingsMan.SoundPanningEffectStrength() < 1) { UpdateCalculated3DEffectsForMobileSoundChannels(); }
 			} else {
 				if (m_CurrentActivityHumanCount != 1) {
 					m_CurrentActivityHumanCount = 1;
@@ -147,7 +145,7 @@ namespace RTE {
 			if (result == FMOD_OK && isPlaying) {
 				void *userData;
 				result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
-				SoundContainer const *channelSoundContainer = (SoundContainer *)userData;
+				const SoundContainer *channelSoundContainer = (SoundContainer *)userData;
 
 				if (channelSoundContainer->IsAffectedByGlobalPitch()) { soundChannel->setPitch(pitch); }
 			}
@@ -233,13 +231,13 @@ namespace RTE {
 		FMOD::Channel *soundChannel;
 		FMOD::Sound *sound;
 
-		std::unordered_set<unsigned short> const *playingChannels = soundContainer->GetPlayingChannels();
+		const std::unordered_set<unsigned short> *playingChannels = soundContainer->GetPlayingChannels();
 		for (unsigned short channelIndex : *playingChannels) {
 			result = m_AudioSystem->getChannel(channelIndex, &soundChannel);
 			result = (result == FMOD_OK) ? soundChannel->getCurrentSound(&sound) : result;
-			SoundContainer::SoundData const *soundData = soundContainer->GetSoundDataForSound(sound);
-
-			result = (result == FMOD_OK) ? soundChannel->set3DAttributes(&GetAsFMODVector(position + (soundData == NULL ? Vector() : soundData->Offset)), NULL) : result;
+			const SoundContainer::SoundData *soundData = soundContainer->GetSoundDataForSound(sound);
+			
+			result = (result == FMOD_OK) ? soundChannel->set3DAttributes(&GetAsFMODVector(position + ((soundData == NULL) ? Vector() : soundData->Offset)), NULL) : result;
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not set sound position for the sound being played on channel " + std::to_string(channelIndex) + " for SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
 			}
@@ -265,7 +263,7 @@ namespace RTE {
 		FMOD_RESULT result;
 		FMOD::Channel *soundChannel;
 
-		std::unordered_set<unsigned short> const *channels = soundContainer->GetPlayingChannels();
+		const std::unordered_set<unsigned short> *channels = soundContainer->GetPlayingChannels();
 		for (std::unordered_set<unsigned short>::iterator channelIterator = channels->begin(); channelIterator != channels->end(); ++channelIterator) {
 			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
 			if (result == FMOD_OK) { soundChannel->setPitch(pitch); }
@@ -500,7 +498,7 @@ namespace RTE {
 		bool anySoundsPlaying = soundContainer->IsBeingPlayed();
 
 		if (anySoundsPlaying) {
-			std::unordered_set<unsigned short> const *channels = soundContainer->GetPlayingChannels();
+			const std::unordered_set<unsigned short> *channels = soundContainer->GetPlayingChannels();
 			for (std::unordered_set<unsigned short>::iterator channelIterator = channels->begin(); channelIterator != channels->end();) {
 				result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
 				++channelIterator; // NOTE - stopping the sound will remove the channel, screwing things up if we don't move to the next iterator preemptively
@@ -528,7 +526,7 @@ namespace RTE {
 		unsigned long long parentClock;
 		float currentVolume;
 
-		std::unordered_set<unsigned short> const *channels = soundContainer->GetPlayingChannels();
+		const std::unordered_set<unsigned short> *channels = soundContainer->GetPlayingChannels();
 		for (std::unordered_set<unsigned short>::iterator channelIterator = channels->begin(); channelIterator != channels->end(); ++channelIterator) {
 			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
 			result = (result == FMOD_OK) ? soundChannel->getDSPClock(nullptr, &parentClock) : result;
@@ -570,9 +568,9 @@ namespace RTE {
 			musicData.Pitch = pitch;
 			musicData.Position = position;
 			if (filepath) {
-				strncpy(musicData.Path, filepath, 255);
+				std::strncpy(musicData.Path, filepath, 255);
 			} else {
-				memset(musicData.Path, 0, 255);
+				std::memset(musicData.Path, 0, 255);
 			}
 			g_SoundEventsListMutex[player].lock();
 			m_MusicEvents[player].push_back(musicData);
@@ -598,7 +596,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::RegisterSoundEvent(int player, NetworkSoundState state, std::unordered_set<unsigned short> const *channels, std::vector<size_t> const *soundFileHashes, const Vector &position, short loops, float pitch, bool affectedByGlobalPitch, float attenuationStartDistance, bool immobile, short fadeOutTime) {
+	void AudioMan::RegisterSoundEvent(int player, NetworkSoundState state, const std::unordered_set<unsigned short> *channels, const std::vector<size_t> *soundFileHashes, const Vector &position, short loops, float pitch, bool affectedByGlobalPitch, float attenuationStartDistance, bool immobile, short fadeOutTime) {
 		if (player == -1) {
 			for (int i = 0; i < c_MaxClients; i++) {
 				RegisterSoundEvent(i, state, channels, soundFileHashes, position, loops, pitch, affectedByGlobalPitch, fadeOutTime);
@@ -701,7 +699,7 @@ namespace RTE {
 			return result;
 		}
 
-		Activity const *currentActivity = g_ActivityMan.GetActivity();
+		const Activity *currentActivity = g_ActivityMan.GetActivity();
 		float shortestDistance = g_SceneMan.GetSceneDim().GetMagnitude();
 		float longestDistance = 0;
 		for (int player = 0; player < currentActivity->GetPlayerCount(); player++) {

@@ -33,9 +33,9 @@ namespace RTE {
 	int SoundContainer::Create(const SoundContainer &reference) {
 		Entity::Create(reference);
 
-		for (std::vector<SoundData> referenceSoundSet : reference.m_SoundSets) {
+		for (const std::vector<SoundData> &referenceSoundSet : reference.m_SoundSets) {
 			std::vector<SoundData> soundSet;
-			for (SoundData referenceData : referenceSoundSet) {
+			for (const SoundData &referenceData : referenceSoundSet) {
 				soundSet.push_back(SoundData {referenceData.SoundFile, referenceData.SoundObject, referenceData.Offset, referenceData.MinimumAudibleDistance, referenceData.AttenuationStartDistance});
 			}
 			m_SoundSets.push_back(soundSet);
@@ -152,8 +152,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SoundContainer::AddSound(std::string const &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance, bool abortGameForInvalidSound) {
-		vector<SoundData> soundSet;
+	void SoundContainer::AddSound(const std::string &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance, bool abortGameForInvalidSound) {
+		std::vector<SoundData> soundSet;
 		if (soundSetIndex < m_SoundSets.size()) { soundSet = m_SoundSets[soundSetIndex]; }
 
 		ContentFile soundFile(soundFilePath.c_str());
@@ -162,7 +162,7 @@ namespace RTE {
 			return;
 		}
 
-		attenuationStartDistance = attenuationStartDistance < 0 ? c_DefaultAttenuationStartDistance : attenuationStartDistance;
+		attenuationStartDistance = (attenuationStartDistance < 0) ? c_DefaultAttenuationStartDistance : attenuationStartDistance;
 		soundSet.push_back({soundFile, soundObject, offset, minimumAudibleDistance, attenuationStartDistance});
 		if (soundSetIndex >= m_SoundSets.size()) { m_SoundSets.push_back(soundSet); }
 
@@ -173,7 +173,7 @@ namespace RTE {
 	
 	std::vector<size_t> SoundContainer::GetSelectedSoundHashes() const {
 		std::vector<size_t> soundHashes;
-		for (SoundData selectedSoundData : m_SoundSets[m_SelectedSoundSet]) {
+		for (const SoundData &selectedSoundData : m_SoundSets[m_SelectedSoundSet]) {
 			soundHashes.push_back(selectedSoundData.SoundFile.GetHash());
 		}
 		return soundHashes;
@@ -182,8 +182,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	const SoundContainer::SoundData *SoundContainer::GetSoundDataForSound(const FMOD::Sound *sound) const {
-		for (std::vector<SoundData> const &soundSet : m_SoundSets) {
-			for (SoundData const &soundData : soundSet) {
+		for (const std::vector<SoundData> &soundSet : m_SoundSets) {
+			for (const SoundData &soundData : soundSet) {
 				if (sound == soundData.SoundObject) {
 					return &soundData;
 				}
@@ -206,9 +206,9 @@ namespace RTE {
 				break;
 			default:
 				auto selectRandomSound = [](int soundSetSize, size_t *outSelectedSoundSet) {
-					size_t soundToSelect = floorf(static_cast<float>(soundSetSize) * PosRand());
+					size_t soundToSelect = std::floorf(static_cast<float>(soundSetSize) * PosRand());
 					while (soundToSelect == *outSelectedSoundSet) {
-						soundToSelect = floorf(static_cast<float>(soundSetSize) * PosRand());
+						soundToSelect = std::floorf(static_cast<float>(soundSetSize) * PosRand());
 					}
 					*outSelectedSoundSet = soundToSelect;
 				};
@@ -254,7 +254,7 @@ namespace RTE {
 
 					//TODO Consider replacing this with normal min and max distance (but keep custom rolloff mode) so we can save some pointing issues. Might need to store min audible distance in audioman if fmod is strict about min and max distance sizes wrt each other.
 					soundData.CustomRolloffPoints[0] = FMOD_VECTOR{soundData.MinimumAudibleDistance, 0, 0};
-					soundData.CustomRolloffPoints[1] = FMOD_VECTOR{soundData.AttenuationStartDistance < 0 ? m_AttenuationStartDistance : soundData.AttenuationStartDistance, 1, 0};
+					soundData.CustomRolloffPoints[1] = FMOD_VECTOR{(soundData.AttenuationStartDistance < 0) ? m_AttenuationStartDistance : soundData.AttenuationStartDistance, 1, 0};
 					result = (result == FMOD_OK) ? soundData.SoundObject->set3DCustomRolloff(soundData.CustomRolloffPoints, 2) : result;
 				}
 			}
@@ -268,7 +268,7 @@ namespace RTE {
 
 	//TODO this needs to be used or be deleted
 	void SoundContainer::CalculateCustomRolloffPoints(const SoundData &soundDataToCalculateFor, FMOD_VECTOR *rolloffPoints, int numRolloffPoints) {
-		int attenuationStartDistance = soundDataToCalculateFor.AttenuationStartDistance < 0 ? m_AttenuationStartDistance : soundDataToCalculateFor.AttenuationStartDistance;
+		int attenuationStartDistance = (soundDataToCalculateFor.AttenuationStartDistance < 0) ? m_AttenuationStartDistance : soundDataToCalculateFor.AttenuationStartDistance;
 		float currentDistance = attenuationStartDistance;
 		float currentVolumeLevel = 1;
 
@@ -280,10 +280,10 @@ namespace RTE {
 			rolloffPoints[1] = FMOD_VECTOR{soundDataToCalculateFor.MinimumAudibleDistance - 0.1F, 0, 0};
 		}
 
-		for (i = (soundDataToCalculateFor.MinimumAudibleDistance > 0 ? 2 : 0); i < numRolloffPoints - 1; i++) {
+		for (i = ((soundDataToCalculateFor.MinimumAudibleDistance > 0) ? 2 : 0); i < numRolloffPoints - 1; i++) {
 			rolloffPoints[i] = FMOD_VECTOR{currentDistance, currentVolumeLevel, 0};
 			currentDistance += attenuationStartDistance;
-			currentVolumeLevel = currentDistance < c_SoundMaxAudibleDistance ? currentVolumeLevel * 0.5 : 0;
+			currentVolumeLevel = (currentDistance < c_SoundMaxAudibleDistance) ? currentVolumeLevel * 0.5F : 0;
 		}
 		rolloffPoints[numRolloffPoints - 1] = FMOD_VECTOR{currentDistance, 0, 0};
 	}

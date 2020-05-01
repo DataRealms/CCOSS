@@ -69,14 +69,14 @@ namespace RTE {
 		/// <param name="attenuationStartDistance">The distance at which this SoundContainer's sounds should start attenuating away.</param>
 		/// <param name="immobile">Whether this SoundContainer's sounds will be treated as immobile, i.e. they won't be affected by 3D sound manipulation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(std::string const soundFilePath, int loops = 0, bool affectedByGlobalPitch = true, float attenuationStartDistance = -1, bool immobile = false) { int result = Create(loops, affectedByGlobalPitch, attenuationStartDistance, immobile); AddSound(soundFilePath); return result; }
+		int Create(const std::string soundFilePath, int loops = 0, bool affectedByGlobalPitch = true, float attenuationStartDistance = -1, bool immobile = false) { int result = Create(loops, affectedByGlobalPitch, attenuationStartDistance, immobile); AddSound(soundFilePath); return result; }
 
 		/// <summary>
 		/// Adds a new sound to this SoundContainer, spitting out a lua error if it fails.
 		/// The Sound will have default configuration and be added to a new SoundSet.
 		/// </summary>
 		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
-		void AddSound(std::string const &soundFilePath) { return AddSound(soundFilePath, false); }
+		void AddSound(const std::string &soundFilePath) { return AddSound(soundFilePath, false); }
 
 		/// <summary>
 		/// Adds a new sound to this SoundContainer, either spitting out a lua error or aborting if it fails.
@@ -84,7 +84,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error.</param>
-		void AddSound(std::string const &soundFilePath, bool abortGameForInvalidSound) { return AddSound(soundFilePath, Vector(), c_DefaultAttenuationStartDistance, abortGameForInvalidSound); }
+		void AddSound(const std::string &soundFilePath, bool abortGameForInvalidSound) { return AddSound(soundFilePath, Vector(), c_DefaultAttenuationStartDistance, abortGameForInvalidSound); }
 
 		/// <summary>
 		/// Adds a new sound to this SoundContainer, either spitting out a lua error or aborting if it fails.
@@ -94,7 +94,7 @@ namespace RTE {
 		/// <param name="offset">The offset position to play this sound at, where (0, 0) is no offset.</param>
 		/// <param name="attenuationStartDistance">The attenuation start distance for this sound, -1 is default.</param>
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error.</param>
-		void AddSound(std::string const &soundFilePath, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound) { return AddSound(soundFilePath, m_SoundSets.size() + 1, Vector(), 0, c_DefaultAttenuationStartDistance, abortGameForInvalidSound); }
+		void AddSound(const std::string &soundFilePath, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound) { return AddSound(soundFilePath, m_SoundSets.size() + 1, Vector(), 0, c_DefaultAttenuationStartDistance, abortGameForInvalidSound); }
 
 		/// <summary>
 		/// Adds a new sound to this SoundContainer, either spitting out a lua error or aborting if it fails.
@@ -106,7 +106,7 @@ namespace RTE {
 		/// <param name="minimumAudibleDistance">The minimum distance at which this sound will be audible. 0 means there is none, which is normally the case.</param>
 		/// <param name="attenuationStartDistance">The attenuation start distance for this sound, -1 sets it to default.</param>
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error.</param>
-		void AddSound(std::string const &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance, bool abortGameForInvalidSound);
+		void AddSound(const std::string &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance, bool abortGameForInvalidSound);
 #pragma endregion
 
 #pragma region Destruction
@@ -251,7 +251,7 @@ namespace RTE {
 		/// Sets the attenuation start distance of this SoundContainer. Values < 0 set it to default. Does not affect currently playing sounds.
 		/// </summary>
 		/// <param name="attenuationStartDistance">The new attenuation start distance.</param>
-		void SetAttenuationStartDistance(float attenuationStartDistance) { m_AttenuationStartDistance = attenuationStartDistance < 0 ? c_DefaultAttenuationStartDistance : attenuationStartDistance; m_AllSoundPropertiesUpToDate = false; }
+		void SetAttenuationStartDistance(float attenuationStartDistance) { m_AttenuationStartDistance = (attenuationStartDistance < 0) ? c_DefaultAttenuationStartDistance : attenuationStartDistance; m_AllSoundPropertiesUpToDate = false; }
 
 		/// <summary>
 		/// Gets the looping setting of this SoundContainer.
@@ -392,18 +392,19 @@ namespace RTE {
 		bool m_AllSoundPropertiesUpToDate = false; //!< Whether this SoundContainer's sounds' modes and properties are up to date. Used primarily to handle discrepancies that can occur when loading from ini if the line ordering isn't ideal.
 
 	private:
-		/// <summary>
-		/// Clears all the member variables of this SoundContainer, effectively resetting the members of this abstraction level only.
-		/// </summary>
-		void Clear();
 
 		/// <summary>
-		/// TODO This is currently not used in favour of a simpler 2-point method but is kept in case it should be changed back. Examine this and remove or use it in future.
+		/// TODO This is currently not used in favor of a simpler 2-point method but is kept in case it should be changed back. Examine this and remove or use it in future.
 		/// </summary>
 		/// <param name="soundDataToCalculateFor"></param>
 		/// <param name="rolloffPoints"></param>
 		/// <param name="numRolloffPoints"></param>
 		void CalculateCustomRolloffPoints(const SoundData &soundDataToCalculateFor, FMOD_VECTOR *rolloffPoints, int numRolloffPoints);
+
+		/// <summary>
+		/// Clears all the member variables of this SoundContainer, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
 	};
 }
 #endif

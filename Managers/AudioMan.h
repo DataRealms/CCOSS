@@ -111,25 +111,25 @@ namespace RTE {
 		/// Gets the audio management system object used for playing all audio.
 		/// </summary>
 		/// <returns>The audio management system object used by AudioMan for playing audio.</returns>
-		FMOD::System *GetAudioSystem() { return m_AudioSystem; }
+		FMOD::System *GetAudioSystem() const { return m_AudioSystem; }
 
 		/// <summary>
 		/// Reports whether audio is enabled.
 		/// </summary>
 		/// <returns>Whether audio is enabled.</returns>
-		bool IsAudioEnabled() { return m_AudioEnabled; }
+		bool IsAudioEnabled() const { return m_AudioEnabled; }
 
 		/// <summary>
 		/// Returns the number of audio channels currently used.
 		/// </summary>
 		/// <returns>The number of audio channels currently used.</returns>
-		int GetPlayingChannelCount() { int channelCount; return m_AudioSystem->getChannelsPlaying(&channelCount, NULL) == FMOD_OK ? channelCount : 0; }
+		int GetPlayingChannelCount() const { int channelCount; return m_AudioSystem->getChannelsPlaying(&channelCount, NULL) == FMOD_OK ? channelCount : 0; }
 
 		/// <summary>
 		/// Returns the number of audio channels available in total.
 		/// </summary>
 		/// <returns>The number of audio channels available in total.</returns>
-		int GetTotalChannelCount() { int channelCount; return m_AudioSystem->getSoftwareChannels(&channelCount) == FMOD_OK ? channelCount : 0; }
+		int GetTotalChannelCount() const { int channelCount; return m_AudioSystem->getSoftwareChannels(&channelCount) == FMOD_OK ? channelCount : 0; }
 
 		/// <summary>
 		/// Gets the global pitch scalar value for all sounds and music.
@@ -151,7 +151,7 @@ namespace RTE {
 		/// Reports whether any music stream is currently playing.
 		/// </summary>
 		/// <returns>Whether any music stream is currently playing.</returns>
-		bool IsMusicPlaying() { bool isPlayingMusic; return m_AudioEnabled && m_MusicChannelGroup->isPlaying(&isPlayingMusic) == FMOD_OK ? isPlayingMusic : false; }
+		bool IsMusicPlaying() const { bool isPlayingMusic; return m_AudioEnabled && m_MusicChannelGroup->isPlaying(&isPlayingMusic) == FMOD_OK ? isPlayingMusic : false; }
 
 		/// <summary>
 		/// Gets the volume of music. Does not get volume of sounds.
@@ -188,7 +188,7 @@ namespace RTE {
 		/// Gets the position of playback of the current music stream, in seconds.
 		/// </summary>
 		/// <returns>The current position of the current stream playing, in seconds.</returns>
-		double GetMusicPosition();
+		double GetMusicPosition() const;
 
 		/// <summary>
 		/// Sets the music to a specific position in the song.
@@ -352,7 +352,7 @@ namespace RTE {
 		/// Returns true if manager is in multiplayer mode.
 		/// </summary>
 		/// <returns>True if in multiplayer mode.</returns>
-		bool IsInMultiplayerMode() { return m_IsInMultiplayerMode; }
+		bool IsInMultiplayerMode() const { return m_IsInMultiplayerMode; }
 
 		/// <summary>
 		/// Sets the multiplayer mode flag.
@@ -468,14 +468,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="vector">The RTE Vector to get as an FMOD_VECTOR.</param>
 		/// <returns>The FMOD_VECTOR that corresponds to the given RTE Vector.</returns>
-		FMOD_VECTOR GetAsFMODVector(const Vector &vector, float zValue = 0);
+		FMOD_VECTOR GetAsFMODVector(const Vector &vector, float zValue = 0) const;
 
 		/// <summary>
 		/// Gets the corresponding RTE Vector for a given FMOD_VECTOR.
 		/// </summary>
 		/// <param name="fmodVector">The FMOD_VECTOR to get as an RTE Vector.</param>
 		/// <returns>The RTE Vector that corresponds to the given FMOD_VECTOR.</returns>
-		Vector GetAsVector(FMOD_VECTOR fmodVector);
+		Vector GetAsVector(FMOD_VECTOR fmodVector) const;
 
 		/// <summary>
 		/// Clears all the member variables of this AudioMan, effectively resetting the members of this abstraction level only.

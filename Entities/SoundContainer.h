@@ -187,7 +187,7 @@ namespace RTE {
 		/// Indicates whether any sound in this SoundContainer is currently being played.
 		/// </summary>
 		/// <returns>Whether any sounds are playing.</returns>
-		bool IsBeingPlayed() { return m_PlayingChannels.size() > 0; }
+		bool IsBeingPlayed() const { return m_PlayingChannels.size() > 0; }
 
 		/// <summary>
 		/// Adds a channel index to the SoundContainer's collection of playing channels.
@@ -205,7 +205,7 @@ namespace RTE {
 		/// Gets the current sound selection cycle mode, which is used to determine what SoundSet to select next time SelectNextSoundSet is called.
 		/// </summary>
 		/// <returns>The current sound selection cycle mode.</returns>
-		SoundCycleMode GetSoundSelectionCycleMode() { return m_SoundSelectionCycleMode; }
+		SoundCycleMode GetSoundSelectionCycleMode() const { return m_SoundSelectionCycleMode; }
 
 		/// <summary>
 		/// Sets the current sound selection cycle mode, which is used to determine what SoundSet to select next time SelectNextSoundSet is called.
@@ -217,13 +217,13 @@ namespace RTE {
 		/// Gets the selected SoundSet for this SoundContainer. The selected SoundSet is changed with SelectNextSoundSet.
 		/// </summary>
 		/// <returns>The selected SoundSet.</returns>
-		std::vector<SoundData> GetSelectedSoundSet() { return m_SoundSets[m_SelectedSoundSet]; }
+		std::vector<SoundData> GetSelectedSoundSet() const { return m_SoundSets[m_SelectedSoundSet]; }
 
 		/// <summary>
 		/// Gets a vector of hashes of the sounds selected to be played next in this SoundContainer.
 		/// </summary>
 		/// <returns>The currently playing sounds hashes.</returns>
-		std::vector<size_t> GetSelectedSoundHashes();
+		std::vector<size_t> GetSelectedSoundHashes() const;
 
 		/// <summary>
 		/// Gets the SoundData object that corresponds to the given FMOD::Sound. If the sound can't be found, it returns a null pointer.
@@ -306,7 +306,7 @@ namespace RTE {
 		/// Gets whether the sounds in this SoundContainer have all had all their properties set appropriately. Used to account for issues with ordering in INI loading.
 		/// </summary>
 		/// <returns>Whether or not the sounds in this SoundContainer have their properties set appropriately.</returns>
-		bool AllSoundPropertiesUpToDate() { return m_AllSoundPropertiesUpToDate; }
+		bool AllSoundPropertiesUpToDate() const { return m_AllSoundPropertiesUpToDate; }
 #pragma endregion
 
 #pragma region Playback Controls

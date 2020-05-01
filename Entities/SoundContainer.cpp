@@ -171,7 +171,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	std::vector<size_t> SoundContainer::GetSelectedSoundHashes() {
+	std::vector<size_t> SoundContainer::GetSelectedSoundHashes() const {
 		std::vector<size_t> soundHashes;
 		for (SoundData selectedSoundData : m_SoundSets[m_SelectedSoundSet]) {
 			soundHashes.push_back(selectedSoundData.SoundFile.GetHash());

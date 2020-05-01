@@ -186,7 +186,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	double AudioMan::GetMusicPosition() {
+	double AudioMan::GetMusicPosition() const {
 		if (m_AudioEnabled || IsMusicPlaying()) {
 			FMOD_RESULT result;
 			FMOD::Channel *musicChannel;
@@ -745,14 +745,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	FMOD_VECTOR AudioMan::GetAsFMODVector(const Vector &vector, float zValue) {
+	FMOD_VECTOR AudioMan::GetAsFMODVector(const Vector &vector, float zValue) const {
 		Vector sceneDimensions = g_SceneMan.GetScene() ? g_SceneMan.GetSceneDim() : Vector();
 		return sceneDimensions.IsZero() ? FMOD_VECTOR{0, 0, zValue} : FMOD_VECTOR{vector.m_X, sceneDimensions.m_Y - vector.m_Y, zValue};
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	Vector AudioMan::GetAsVector(FMOD_VECTOR fmodVector) {
+	Vector AudioMan::GetAsVector(FMOD_VECTOR fmodVector) const {
 		Vector sceneDimensions = g_SceneMan.GetScene() ? g_SceneMan.GetSceneDim() : Vector();
 		return sceneDimensions.IsZero() ? Vector() : Vector(fmodVector.x, sceneDimensions.m_Y - fmodVector.y);
 	}

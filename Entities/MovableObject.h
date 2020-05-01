@@ -184,7 +184,7 @@ ENTITYALLOCATION(MovableObject)
     /// <param name="scriptPath">The path to the script to load.</param>
     /// <param name="loadAsEnabledScript">Whether or not the script should load as enabled. Defaults to true.</param>
     /// <returns>0 on success. -1 if scriptPath is empty. -2 if the script is already loaded. -3 if setup to load the script or modify the global lua state fails. -4 if the script fails to load.</returns>
-    virtual int LoadScript(std::string const &scriptPath, bool loadAsEnabledScript = true);
+    virtual int LoadScript(const std::string &scriptPath, bool loadAsEnabledScript = true);
 
     /// <summary>
     /// Reloads the all of the scripts on this object. This will also update the original preset in PresetMan with the updated scripts so future objects spawned will use the new scripts.
@@ -204,42 +204,42 @@ ENTITYALLOCATION(MovableObject)
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>
     /// <returns>Whether or not the script is on this MO.</returns>
-    virtual bool const HasScript(std::string const &scriptPath) { return FindScript(scriptPath) != m_LoadedScripts.end(); }
+    virtual bool const HasScript(const std::string &scriptPath) { return FindScript(scriptPath) != m_LoadedScripts.end(); }
 
     /// <summary>
     /// Adds the script at the given path as one of the scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to add.</param>
     /// <returns>Whether or not the script was successfully added.</returns>
-    virtual bool AddScript(std::string const &scriptPath);
+    virtual bool AddScript(const std::string &scriptPath);
 
     /// <summary>
     /// Removes the script at the given path so it will no longer be one of the scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to remove.</param>
     /// <returns>Whether or not the script was successfully removed.</returns>
-    virtual bool RemoveScript(std::string const &scriptPath);
+    virtual bool RemoveScript(const std::string &scriptPath);
 
     /// <summary>
     /// Checks if the script at the given path is one of the enabled scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>
     /// <returns>Whether or not the script is enabled on this MO.</returns>
-    virtual bool const ScriptEnabled(std::string const &scriptPath) { auto scriptIterator = FindScript(scriptPath); return scriptIterator != m_LoadedScripts.end() && scriptIterator->second == true; }
+    virtual bool const ScriptEnabled(const std::string &scriptPath) { auto scriptIterator = FindScript(scriptPath); return scriptIterator != m_LoadedScripts.end() && scriptIterator->second == true; }
 
     /// <summary>
     /// Enable the script at the given path on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to enable.</param>
     /// <returns>Whether or not the script was succesfully enabled.</returns>
-    virtual bool EnableScript(std::string const &scriptPath);
+    virtual bool EnableScript(const std::string &scriptPath);
 
     /// <summary>
     /// Disables the script at the given path for this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to disable.</param>
     /// <returns>Whether or not the script was succesfully disabled..</returns>
-    virtual bool DisableScript(std::string const &scriptPath);
+    virtual bool DisableScript(const std::string &scriptPath);
 
     /// <summary>
     /// Runs the given function for the given script, with the given arguments. The first argument to the function will always be 'self'.
@@ -250,7 +250,7 @@ ENTITYALLOCATION(MovableObject)
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
     /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-    int RunScriptedFunction(std::string const &scriptPath, std::string const &functionName, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
+    int RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
 
     /// <summary>
     /// Runs the given function in all scripts that have it, with the given arguments, with the ability to not run on disabled scripts and to cease running if there's an error.
@@ -262,7 +262,7 @@ ENTITYALLOCATION(MovableObject)
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
     /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-    int RunScriptedFunctionInAppropriateScripts(std::string const &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
+    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetClass
@@ -1532,15 +1532,11 @@ ENTITYALLOCATION(MovableObject)
 
     virtual int UpdateScripts();
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnPieMenu
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Executes the Lua-defined OnPieMenu event handler.
-// Arguments:       Actor which triggered the pie menu event
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
+    /// <summary>
+    /// Executes the Lua-defined OnPieMenu event handler for this MO.
+    /// </summary>
+    /// <param name="pActor">Actor which triggered the pie menu event.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
 	virtual int OnPieMenu(Actor *pActor);
 
 
@@ -1774,7 +1770,7 @@ protected:
     /// Gets a vector containing the script function names this class supports.
     /// </summary>
     /// <returns>A vector containing the script function names this class supports.</returns>
-    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() { return std::vector<std::string> {"Create", "Destroy", "Update", "OnPieMenu", "OnScriptRemoveOrDisable", "OnScriptEnable"}; }
+    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() { return std::vector<std::string> {"Create", "Destroy", "Update", "OnScriptRemoveOrDisable", "OnScriptEnable", "OnPieMenu"}; }
 
     /// <summary>
     /// Does necessary work to setup a script object name for this object, allowing it to be accessed in Lua, then runs all of the MO's scripts' Create functions in Lua.

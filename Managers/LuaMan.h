@@ -227,6 +227,18 @@ enum ServerResult
 
     bool ExpressionIsTrue(std::string expression, bool consoleErrors);
 
+    /// <summary>
+    /// Runs the given Lua function with optional safety checks and arguments. The first argument to the function will always be the self object.
+    /// If either argument list has entries, they will be passed into the function in order, with entity arguments first.
+    /// </summary>
+    /// <param name="functionName">The name that gives access to the function in the global Lua namespace.</param>
+    /// <param name="selfObjectName">The name that gives access to the self object in the global Lua namespace.</param>
+    /// <param name="variablesToSafetyCheck">Optional vector of strings that should be safety checked in order before running the Lua function. Defaults to empty.</param>
+    /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
+    /// <param name="functionLiteralArguments">Optional vector of strings that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    int RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, std::vector<std::string> variablesToSafetyCheck = std::vector<std::string>(), std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RunScriptString
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -237,7 +249,7 @@ enum ServerResult
 // Return value:    Returns less than zero if any errors encountered when running this script.
 //                  To get the actual error string, call GetLastError.
 
-    int RunScriptString(std::string scriptString, bool consoleErrors = true);
+    int RunScriptString(const std::string &scriptString, bool consoleErrors = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

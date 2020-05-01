@@ -2421,13 +2421,51 @@ bool LuaMan::ExpressionIsTrue(string expression, bool consoleErrors)
     return result;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, std::vector<std::string> variablesToSafetyCheck, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
+    std::string scriptString = "";
+    if (!variablesToSafetyCheck.empty()) {
+        scriptString += "if ";
+        for (const std::string &variableToSafetyCheck : variablesToSafetyCheck) {
+            if (&variableToSafetyCheck != &variablesToSafetyCheck[0]) {
+                scriptString += " and ";
+            }
+            scriptString += variableToSafetyCheck;
+        }
+        scriptString += " then ";
+    }
+    if (!functionEntityArguments.empty()) {
+        scriptString += "local entityArguments = LuaMan.TempEntities; ";
+    }
+    scriptString += functionName + "(" + selfObjectName;
+    if (!functionEntityArguments.empty()) {
+        g_LuaMan.SetTempEntityVector(functionEntityArguments);
+        for (const Entity *functionEntityArgument : functionEntityArguments) {
+            scriptString += ", To" + functionEntityArgument->GetClassName() + "(entityArguments())";
+        }
+    }
+    if (!functionLiteralArguments.empty()) {
+        for (const std::string functionLiteralArgument : functionLiteralArguments) {
+            scriptString += ", " + functionLiteralArgument;
+        }
+    }
+    scriptString += ");";
+
+    if (!variablesToSafetyCheck.empty()) { scriptString += " end"; };
+    
+    return RunScriptString(scriptString);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RunScriptString
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Takes a string containing a script snippet and runs it on the master
 //                  state.
 
-int LuaMan::RunScriptString(string scriptString, bool consoleErrors)
+int LuaMan::RunScriptString(const std::string &scriptString, bool consoleErrors)
 {
     if (scriptString.empty())
         return -1;

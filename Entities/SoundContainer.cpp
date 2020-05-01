@@ -113,6 +113,13 @@ namespace RTE {
 		std::string propValue = reader.ReadPropValue();
 		SoundData soundData;
 
+		/// <summary>
+		/// This lambda exists to have some easy, private reused code.
+		/// It loads an audio file by path in as a ContentFile, which in turn loads it into FMOD, then returns SoundData for it in the outParam outSoundData.
+		/// </summary>
+		/// <param name="soundPath">The path to the sound file.</param>
+		/// <param name="parentReader">The reader being used when calling this. Used to report errors if loading the sound fails.</param>
+		/// <param name="outSoundData">The outParam for the SoundData struct produced by reading the given sound.</param>
 		auto readSound = [](const std::string &soundPath, Reader &parentReader, SoundData *outSoundData) {
 			ContentFile soundFile(soundPath.c_str());
 			FMOD::Sound *soundObject = soundFile.GetAsSample();
@@ -174,9 +181,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	SoundContainer::SoundData *SoundContainer::GetSoundDataForSound(FMOD::Sound *sound) {
-		for (std::vector<SoundData> soundSet : m_SoundSets) {
-			for (SoundData soundData : soundSet) {
+	const SoundContainer::SoundData *SoundContainer::GetSoundDataForSound(const FMOD::Sound *sound) const {
+		for (std::vector<SoundData> const &soundSet : m_SoundSets) {
+			for (SoundData const &soundData : soundSet) {
 				if (sound == soundData.SoundObject) {
 					return &soundData;
 				}

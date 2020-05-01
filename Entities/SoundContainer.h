@@ -230,7 +230,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="sound">The FMOD::Sound to search for.</param>
 		/// <returns>A pointer to the corresponding SoundData or a null pointer.</returns>
-		SoundData *GetSoundDataForSound(FMOD::Sound *sound);
+		const SoundData *GetSoundDataForSound(const FMOD::Sound *sound) const;
 #pragma endregion
 
 #pragma region Sound Property Getters and Setters

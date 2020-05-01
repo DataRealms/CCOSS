@@ -205,7 +205,6 @@ namespace RTE {
 #pragma endregion
 
 	protected:
-		SoundContainer m_PoopSound;
 		SoundContainer m_SplashSound; //! Juicy logo signature jingle sound.
 
 		SoundContainer m_EnterMenuSound; //! SoundContainer for enabling menu.

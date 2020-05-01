@@ -53,9 +53,6 @@ namespace RTE {
 		
 		m_AudioEnabled = audioSystemSetupResult == FMOD_OK;
 
-		// NOTE: Anything that instantiates SoundContainers needs to wait until the Audio System is up and running before they start doing that. It'll fail safely even if Audio is not enabled.
-		new GUISound();
-
 		if (!m_AudioEnabled) {
 			g_ConsoleMan.PrintString("ERROR: Failed to enable audio: " + std::string(FMOD_ErrorString(audioSystemSetupResult)));
 			return -1;
@@ -749,14 +746,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	FMOD_VECTOR AudioMan::GetAsFMODVector(const Vector &vector, float zValue) {
-		Vector sceneDimensions = g_SceneMan.GetSceneDim();
+		Vector sceneDimensions = g_SceneMan.GetScene() ? g_SceneMan.GetSceneDim() : Vector();
 		return sceneDimensions.IsZero() ? FMOD_VECTOR{0, 0, zValue} : FMOD_VECTOR{vector.m_X, sceneDimensions.m_Y - vector.m_Y, zValue};
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	Vector AudioMan::GetAsVector(FMOD_VECTOR fmodVector) {
-		Vector sceneDimensions = g_SceneMan.GetSceneDim();
+		Vector sceneDimensions = g_SceneMan.GetScene() ? g_SceneMan.GetSceneDim() : Vector();
 		return sceneDimensions.IsZero() ? Vector() : Vector(fmodVector.x, sceneDimensions.m_Y - fmodVector.y);
 	}
 }

@@ -2793,6 +2793,10 @@ int UInputMan::Update()
             g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
     }
 
+	if (key_shifts & KB_ALT_FLAG && KeyPressed(KEY_ENTER)) {
+		g_FrameMan.SwitchResolutionMultiplier((g_FrameMan.ResolutionMultiplier() >= 2) ? 1 : 2);
+	}
+
     // Only allow performance tweaking if showing the stats
     if (g_PerformanceMan.IsShowingPerformanceStats())
     {

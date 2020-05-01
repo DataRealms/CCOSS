@@ -328,7 +328,8 @@ namespace RTE {
 		if (multiplier <= 0 || multiplier > 4 || multiplier == m_ResMultiplier) {
 			return -1;
 		}
-		if (m_ResX > m_ScreenResX / multiplier) { 
+		if (m_ResX > m_ScreenResX / multiplier || m_ResY > m_ScreenResY / multiplier) {
+			allegro_message("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!");
 			return -1;
 		}
 

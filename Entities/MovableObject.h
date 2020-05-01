@@ -1535,9 +1535,9 @@ ENTITYALLOCATION(MovableObject)
     /// <summary>
     /// Executes the Lua-defined OnPieMenu event handler for this MO.
     /// </summary>
-    /// <param name="pActor">Actor which triggered the pie menu event.</param>
+    /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
     /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-	virtual int OnPieMenu(Actor *pActor);
+	virtual int OnPieMenu(Actor *pieMenuActor);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1965,8 +1965,6 @@ protected:
 	unsigned int m_LastCollisionSimFrameNumber;
 	// If true, the object will receive OnPieMenu event whenever someone activated a pie menu
 	bool m_ProvidesPieMenuContext;
-	// Temp variable to process OnPieMenu events
-	Actor * m_pPieMenuActor;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

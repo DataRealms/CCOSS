@@ -661,7 +661,6 @@ int LuaMan::Create()
 			.property("HitWhatMOID", &MovableObject::HitWhatMOID)
 			.property("HitWhatTerrMaterial", &MovableObject::HitWhatTerrMaterial)
 			.property("ProvidesPieMenuContext", &MovableObject::ProvidesPieMenuContext, &MovableObject::SetProvidesPieMenuContext)
-			.def_readwrite("PieMenuActor", &MovableObject::m_pPieMenuActor)
 			.property("HitWhatParticleUniqueID", &MovableObject::HitWhatParticleUniqueID),
 
 		class_<Material, Entity>("Material")
@@ -1988,8 +1987,6 @@ int LuaMan::Create()
             .def_readwrite("GameTimer", &GameActivity::m_GameTimer)
             .def_readwrite("GameOverTimer", &GameActivity::m_GameOverTimer)
             .def_readwrite("GameOverPeriod", &GameActivity::m_GameOverPeriod)
-            .def_readwrite("OrbitedCraft", &GameActivity::m_pOrbitedCraft)
-			.def_readwrite("PieMenuActor", &GameActivity::m_pPieMenuActor)
 			.def("OtherTeam", &GameActivity::OtherTeam)
             .def("OneOrNoneTeamsLeft", &GameActivity::OneOrNoneTeamsLeft)
             .def("WhichTeamLeft", &GameActivity::WhichTeamLeft)
@@ -2090,8 +2087,6 @@ int LuaMan::Create()
 			.property("Direction", &PieMenuGUI::Slice::GetDirection),
 
         ABSTRACTLUABINDING(GlobalScript, Entity)
-            .def_readwrite("OrbitedCraft", &GlobalScript::m_pOrbitedCraft)
-			.def_readwrite("PieMenuActor", &GlobalScript::m_pPieMenuActor)
 			.def("Deactivate", &GlobalScript::Deactivate),
 
         class_<ActivityMan>("ActivityManager")

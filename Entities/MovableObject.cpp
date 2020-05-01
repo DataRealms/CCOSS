@@ -100,7 +100,6 @@ void MovableObject::Clear()
 	m_ParticleUniqueIDHit = 0;
 
 	m_ProvidesPieMenuContext = false;
-	m_pPieMenuActor = 0;
 }
 
 
@@ -246,7 +245,6 @@ int MovableObject::Create(const MovableObject &reference)
 	g_MovableMan.RegisterObject(this);
 
 	m_ProvidesPieMenuContext = reference.m_ProvidesPieMenuContext;
-	m_pPieMenuActor = reference.m_pPieMenuActor;
 
     return 0;
 }
@@ -968,13 +966,12 @@ int MovableObject::UpdateScripts() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::OnPieMenu(Actor * pActor) {
-    if (!pActor || m_LoadedScripts.empty() || m_ScriptPresetName.empty() || m_ScriptObjectName.empty()) {
+int MovableObject::OnPieMenu(Actor *pieMenuActor) {
+    if (!pieMenuActor || m_LoadedScripts.empty() || m_ScriptPresetName.empty() || m_ScriptObjectName.empty()) {
         return -1;
     }
-	m_pPieMenuActor = pActor;
 
-    return RunScriptedFunctionInAppropriateScripts("OnPieMenu"); //TODO try passing actor here, see if it works. If it does, maybe quietly refactor this whole thing
+    return RunScriptedFunctionInAppropriateScripts("OnPieMenu", false, false, {pieMenuActor});
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

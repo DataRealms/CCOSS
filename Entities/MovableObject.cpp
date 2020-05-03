@@ -205,7 +205,7 @@ int MovableObject::Create(const MovableObject &reference)
     m_MissionCritical = reference.m_MissionCritical;
     m_CanBeSquished = reference.m_CanBeSquished;
     m_HUDVisible = reference.m_HUDVisible;
-    for (std::pair<std::string, bool> scriptEntry : reference.m_LoadedScripts) {
+    for (const std::pair<std::string, bool> &scriptEntry : reference.m_LoadedScripts) {
         m_LoadedScripts.push_back({scriptEntry.first, scriptEntry.second});
     }
     m_ScriptPresetName = reference.m_ScriptPresetName;
@@ -329,9 +329,7 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
 	else if (propName == "ScriptPath")
     {
         std::string scriptPath = reader.ReadPropValue();
-        if (LoadScript(scriptPath) == -2) {
-            reader.ReportError("Duplicate script path " + scriptPath);
-        }
+        if (LoadScript(scriptPath) == -2) { reader.ReportError("Duplicate script path " + scriptPath); }
     }
     else if (propName == "ScreenEffect")
     {
@@ -495,7 +493,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
     m_LoadedScripts.push_back({scriptPath, loadAsEnabledScript});
 
     // Clear the temporary variable names that will hold the functions read in from the file
-    for (std::string functionName : GetSupportedScriptFunctionNames()) {
+    for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
         if (g_LuaMan.RunScriptString(functionName + " = nil;") < 0) {
             return -3;
         }
@@ -551,7 +549,7 @@ int MovableObject::ReloadScripts() {
         object->m_ScriptPresetName.clear();
 
         int status = 0;
-        for (std::pair<std::string, bool> scriptEntry : loadedScriptsCopy) {
+        for (const std::pair<std::string, bool> &scriptEntry : loadedScriptsCopy) {
             status = object->LoadScript(scriptEntry.first, scriptEntry.second);
             if (status < 0) {
                 return status;
@@ -606,7 +604,7 @@ bool MovableObject::RemoveScript(const std::string &scriptPath) {
         return false;
     }
 
-    auto scriptEntryIterator = FindScript(scriptPath);
+    std::vector<std::pair<std::string, bool>>::const_iterator scriptEntryIterator = FindScript(scriptPath);
     if (scriptEntryIterator != m_LoadedScripts.end()) {
         m_LoadedScripts.erase(scriptEntryIterator);
         if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptRemoveOrDisable", {}, {"true"}) < 0) {
@@ -625,7 +623,7 @@ bool MovableObject::EnableScript(const std::string &scriptPath) {
         return false;
     }
 
-    auto scriptEntryIterator = FindScript(scriptPath);
+    std::vector<std::pair<std::string, bool>>::iterator scriptEntryIterator = FindScript(scriptPath);
     if (scriptEntryIterator != m_LoadedScripts.end() && scriptEntryIterator->second == false) {
         if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptEnable") < 0) {
             return false;
@@ -643,7 +641,7 @@ bool MovableObject::DisableScript(const std::string &scriptPath) {
         return false;
     }
 
-    auto scriptEntryIterator = FindScript(scriptPath);
+    std::vector<std::pair<std::string, bool>>::iterator scriptEntryIterator = FindScript(scriptPath);
     if (scriptEntryIterator != m_LoadedScripts.end() && scriptEntryIterator->second == true) {
         if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptRemoveOrDisable", {}, {"false"}) < 0) {
             return false;
@@ -684,7 +682,7 @@ int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &fu
     }
 
     int status = 0;
-    for (std::pair<std::string, bool> scriptEntry : m_LoadedScripts) {
+    for (const std::pair<std::string, bool> &scriptEntry : m_LoadedScripts) {
         if (runOnDisabledScripts || scriptEntry.second == true) {
             status = RunScriptedFunction(scriptEntry.first, functionName, functionEntityArguments, functionLiteralArguments);
             if (status < 0 && stopOnError) {

@@ -200,11 +200,18 @@ ENTITYALLOCATION(MovableObject)
     virtual std::vector<std::pair<std::string, bool>>::iterator const FindScript(std::string const &scriptPath) { return std::find_if(m_LoadedScripts.begin(), m_LoadedScripts.end(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
 
     /// <summary>
+    /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_LoadedScripts.cend() if it's not.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to find.</param>
+    /// <returns>The iterator pointing to the vector entry for the script or the end of the vector if the script was not found.</returns>
+    virtual std::vector<std::pair<std::string, bool>>::const_iterator const FindScript(std::string const &scriptPath) const { return std::find_if(m_LoadedScripts.cbegin(), m_LoadedScripts.cend(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
+
+    /// <summary>
     /// Checks if the script at the given path is one of the scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>
     /// <returns>Whether or not the script is on this MO.</returns>
-    virtual bool const HasScript(const std::string &scriptPath) { return FindScript(scriptPath) != m_LoadedScripts.end(); }
+    virtual bool const HasScript(const std::string &scriptPath) const { return FindScript(scriptPath) != m_LoadedScripts.end(); }
 
     /// <summary>
     /// Adds the script at the given path as one of the scripts on this MO.
@@ -225,7 +232,7 @@ ENTITYALLOCATION(MovableObject)
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>
     /// <returns>Whether or not the script is enabled on this MO.</returns>
-    virtual bool const ScriptEnabled(const std::string &scriptPath) { auto scriptIterator = FindScript(scriptPath); return scriptIterator != m_LoadedScripts.end() && scriptIterator->second == true; }
+    virtual bool const ScriptEnabled(const std::string &scriptPath) const { auto scriptIterator = FindScript(scriptPath); return scriptIterator != m_LoadedScripts.end() && scriptIterator->second == true; }
 
     /// <summary>
     /// Enable the script at the given path on this MO.
@@ -268,7 +275,7 @@ ENTITYALLOCATION(MovableObject)
     /// Gets whether or not the object has a script name, and there were no errors when initializing its Lua scripts. If there were, the object would need to be reloaded.
     /// </summary>
     /// <returns>Whether or not the object's scripts have been succesfully initialized.</returns>
-    bool ObjectScriptsInitialized() { return !m_ScriptObjectName.empty() && m_ScriptObjectName != "ERROR"; }
+    bool ObjectScriptsInitialized() const { return !m_ScriptObjectName.empty() && m_ScriptObjectName != "ERROR"; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetClass
@@ -1776,7 +1783,7 @@ protected:
     /// Gets a vector containing the script function names this class supports.
     /// </summary>
     /// <returns>A vector containing the script function names this class supports.</returns>
-    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() { return std::vector<std::string> {"Create", "Destroy", "Update", "OnScriptRemoveOrDisable", "OnScriptEnable", "OnPieMenu"}; }
+    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() const { return std::vector<std::string> {"Create", "Destroy", "Update", "OnScriptRemoveOrDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO"}; }
 
     /// <summary>
     /// Does necessary work to setup a script object name for this object, allowing it to be accessed in Lua, then runs all of the MO's scripts' Create functions in Lua.

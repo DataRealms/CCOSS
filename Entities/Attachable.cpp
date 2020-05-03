@@ -306,7 +306,7 @@ void Attachable::Detach()
 
     m_RestTimer.Reset();
 
-    if (temporaryParent != NULL) {
+    if (temporaryParent != NULL && temporaryParent->ObjectScriptsInitialized()) {
         RunScriptedFunctionInAppropriateScripts("OnDetach", false, false, {temporaryParent});
     }
 }

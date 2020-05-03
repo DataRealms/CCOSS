@@ -704,7 +704,7 @@ protected:
     /// Gets a vector containing the script function names this class supports.
     /// </summary>
     /// <returns>A vector containing the script function names this class supports.</returns>
-    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() override { auto functionNames = MOSRotating::GetSupportedScriptFunctionNames(); functionNames.insert(functionNames.end(), {"OnAttach", "OnDetach"}); return functionNames; }
+    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() const override { auto functionNames = MOSRotating::GetSupportedScriptFunctionNames(); functionNames.insert(functionNames.end(), {"OnAttach", "OnDetach"}); return functionNames; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -438,13 +438,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsigned short FrameMan::CalculateTextHeight(std::string text, unsigned short maxWidth, bool isSmall) {
+	unsigned short FrameMan::CalculateTextHeight(const std::string &text, unsigned short maxWidth, bool isSmall) {
 		return isSmall ? GetSmallFont()->CalculateHeight(text, maxWidth) : GetLargeFont()->CalculateHeight(text, maxWidth);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsigned short FrameMan::CalculateTextWidth(std::string text, bool isSmall) {
+	unsigned short FrameMan::CalculateTextWidth(const std::string &text, bool isSmall) {
 		return isSmall ? GetSmallFont()->CalculateWidth(text) : GetLargeFont()->CalculateWidth(text);
 	}
 
@@ -522,7 +522,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool FrameMan::LoadPalette(std::string palettePath) {
+	bool FrameMan::LoadPalette(const std::string &palettePath) {
 		PALETTE newPalette;
 		BITMAP *tempBitmap = load_bitmap(palettePath.c_str(), newPalette);
 		RTEAssert(tempBitmap, ("Failed to load palette from bitmap with following path:\n\n" + palettePath).c_str());

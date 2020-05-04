@@ -83,7 +83,7 @@ namespace RTE {
 			// Soften the ratio of the pitch adjustment so it's not such an extreme effect on the audio
 			// TODO: This coefficient should probably move to SettingsMan and be loaded from ini. That way this effect can be lessened or even turned off entirely by users. 0.35 is a good default value though.
 			float pitch = m_SimSpeed + (1.0F - m_SimSpeed) * 0.35;
-			g_AudioMan.SetGlobalPitch(pitch, true);
+			g_AudioMan.SetGlobalPitch(pitch);
 		} else {
 			m_SimSpeed = 1.0;
 		}

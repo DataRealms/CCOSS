@@ -80,7 +80,7 @@ void SettingsMan::Clear()
 	m_ServerBoxHeight = 44;
 
 	m_UseNATService = false;
-	m_DisableLoadingScreen = false;
+	m_DisableLoadingScreen = true;
 }
 
 

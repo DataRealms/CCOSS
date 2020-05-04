@@ -279,7 +279,7 @@ namespace RTE {
 		/// <param name="text">Text string.</param>
 		/// <param name="isSmall">Whether to use small or large font.</param>
 		/// <returns>Width of the text string.</returns>
-		unsigned short CalculateTextWidth(std::string text, bool isSmall);
+		unsigned short CalculateTextWidth(const std::string &text, bool isSmall);
 
 		/// <summary>
 		/// Calculates the height of a text string using the given font size.
@@ -288,7 +288,7 @@ namespace RTE {
 		/// <param name="maxWidth">Maximum width of the text string.</param>
 		/// <param name="isSmall">Whether to use small or large font.</param>
 		/// <returns>Height of the text string.</returns>
-		unsigned short CalculateTextHeight(std::string text, unsigned short maxWidth, bool isSmall);
+		unsigned short CalculateTextHeight(const std::string &text, unsigned short maxWidth, bool isSmall);
 
 		/// <summary>
 		/// Gets the message to be displayed on top of each player's screen.
@@ -486,7 +486,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="palettePath">String with the path to the palette bitmap file.</param>
 		/// <returns>Whether palette loaded successfully or not.</returns>
-		bool LoadPalette(std::string palettePath);
+		bool LoadPalette(const std::string &palettePath);
 
 		/// <summary>
 		/// Gets the ContentFile describing the location of the color palette.

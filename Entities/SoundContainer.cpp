@@ -58,7 +58,7 @@ namespace RTE {
 
 	int SoundContainer::ReadProperty(std::string propName, Reader &reader) {
 		if (propName == "AddSound" || propName == "AddSoundSet") {
-			return ReadSoundSet(propName, reader);
+			return ReadSoundOrSoundSet(propName, reader);
 		} else if (propName == "CycleMode") {
 			std::string cycleModeString = reader.ReadPropValue();
 			if (c_CycleModeMap.find(cycleModeString) != c_CycleModeMap.end()) {
@@ -87,7 +87,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	int SoundContainer::ReadSoundSet(std::string propName, Reader &reader) {
+	int SoundContainer::ReadSoundOrSoundSet(const std::string &propName, Reader &reader) {
 		vector<SoundData> soundSet;
 		if (propName == "AddSound") {
 			soundSet.push_back(ReadSound(reader));

@@ -17,11 +17,17 @@ namespace RTE {
 		ENTITYALLOCATION(SoundContainer)
 		CLASSINFOGETTERS
 		
+		/// <summary>
+		/// How the SoundContainer should choose the next SoundSet to play when SelectNextSoundSet is called
+		/// </summary>
 		enum SoundCycleMode {
 			MODE_RANDOM = 0,
 			MODE_FORWARDS = 1
 		};
 
+		/// <summary>
+		/// Self-contained struct defining an individual sound in a SoundSet
+		/// </summary>
 		struct SoundData {
 			ContentFile SoundFile;
 			FMOD::Sound *SoundObject;
@@ -142,18 +148,18 @@ namespace RTE {
 		virtual int ReadProperty(std::string propName, Reader &reader);
 
 		/// <summary>
-		/// 
+		/// Handles reading a SoundSet from INI. If the Reader is trying to read a line adding a sound, it'll call ReadSound and add the resulting sound to a new SoundSet.
 		/// </summary>
-		/// <param name="propName"></param>
-		/// <param name="reader"></param>
-		/// <returns></returns>
-		int ReadSoundSet(std::string propName, Reader &reader);
+		/// <param name="propName">The name of the property to be read.</param>
+		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
+		/// <returns>An error return value signaling whether the property was successfully read or not. 0 means it was succesful, any nonzero value means it failed.</returns>
+		int ReadSoundOrSoundSet(const std::string &propName, Reader &reader);
 
 		/// <summary>
-		/// 
+		/// Handles reading a SoundData from INI, loading it in as a ContentFile and into FMOD, and reading any of its subproperties. Does not add the created SoundData to a SoundContainer.
 		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns></returns>
+		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
+		/// <returns>SoundData for the newly read sound.</returns>
 		SoundData ReadSound(Reader &reader);
 
 		/// <summary>

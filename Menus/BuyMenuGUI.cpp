@@ -793,7 +793,9 @@ int BuyMenuGUI::GetTotalOrderPassengers()
 	{
         const Actor* passenger = dynamic_cast<const Actor*>((*itr)->m_pEntity);
         if (passenger)
-			passengers = passengers + passenger->GetPassengerSlots();
+        {
+            passengers += passenger->GetPassengerSlots();
+        }
 	}
 
 	return passengers;

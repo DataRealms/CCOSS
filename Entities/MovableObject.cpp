@@ -543,6 +543,9 @@ int MovableObject::ReloadScripts() {
         return 0;
     }
 
+    /// <summary>
+    /// Internal lambda method to clear a given object's script configurations, and then load them all again in order to reset them.
+    /// </summary>
     auto clearScriptConfigurationAndLoadPreexistingScripts = [](MovableObject *object) {
         std::vector<std::pair<std::string, bool>> loadedScriptsCopy = object->m_LoadedScripts;
         object->m_LoadedScripts.clear();
@@ -562,6 +565,7 @@ int MovableObject::ReloadScripts() {
     if (status >= 0) {
         return status;
     }
+    //TODO consider getting rid of this const_cast. It would require either code duplication or creating some none const methods (specifically of PresetMan::GetEntityPreset, which may be unsafe. Could be this gross exceptional handling is the best way to go.
     MovableObject *pPreset = const_cast<MovableObject *>(dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(GetClassName(), GetPresetName(), GetModuleID())));
     if (pPreset && pPreset != this) {
         status = clearScriptConfigurationAndLoadPreexistingScripts(pPreset);
@@ -782,7 +786,16 @@ bool MovableObject::IsAtRest()
 
 bool MovableObject::OnMOHit(HitData &hd)
 {
+    if (hd.pBody[HITOR] == this || hd.pBody[HITEE] == this) {
+        RunScriptedFunctionInAppropriateScripts("OnCollideWithMO", false, false, {hd.pBody[hd.pBody[HITOR] == this ? HITEE : HITOR]});
+    }
     return hd.terminate[hd.pRootBody[HITOR] == this ? HITOR : HITEE] = OnMOHit(hd.pRootBody[hd.pRootBody[HITOR] == this ? HITEE : HITOR]);
+}
+
+void MovableObject::SetHitWhatTerrMaterial(unsigned char matID) {
+    m_TerrainMatHit = matID;
+    m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber();
+    RunScriptedFunctionInAppropriateScripts("OnCollideWithTerrain", false, false, {}, {std::to_string(m_TerrainMatHit)});
 }
 
 

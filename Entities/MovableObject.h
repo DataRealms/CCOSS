@@ -1780,8 +1780,7 @@ ENTITYALLOCATION(MovableObject)
 // Arguments:       The ID of the material, if any, that this MO hit during the last Travel.
 // Return value:    None.
 
-	virtual void SetHitWhatTerrMaterial(unsigned char matID) { m_TerrainMatHit = matID; m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber(); }
-
+    virtual void SetHitWhatTerrMaterial(unsigned char matID);
 
 	virtual bool ProvidesPieMenuContext() const { return m_ProvidesPieMenuContext; }
 

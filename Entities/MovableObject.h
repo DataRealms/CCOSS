@@ -26,6 +26,19 @@ struct BITMAP;
 namespace RTE
 {
 
+
+#pragma region Global Macro Definitions
+    #define SCRIPT_FUNCTION_NAMES(...) \
+        virtual std::vector<std::string> GetSupportedScriptFunctionNames() const { return {__VA_ARGS__}; }
+
+    #define ADD_SCRIPT_FUNCTION_NAMES(PARENT, ...) \
+        virtual std::vector<std::string> GetSupportedScriptFunctionNames() const override { \
+            std::vector<std::string> functionNames = PARENT::GetSupportedScriptFunctionNames(); \
+            functionNames.insert(functionNames.end(), {__VA_ARGS__}); \
+            return functionNames; \
+        }
+#pragma endregion
+
 struct HitData;
 
 
@@ -46,6 +59,7 @@ friend class LuaMan;
 // Public member variable, method and friend function declarations
 
 public:
+    SCRIPT_FUNCTION_NAMES("Create", "Destroy", "Update", "OnScriptRemoveOrDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
 
 enum MOType
 {
@@ -1778,13 +1792,6 @@ ENTITYALLOCATION(MovableObject)
 // Protected member variable and method declarations
 
 protected:
-
-    /// <summary>
-    /// Gets a vector containing the script function names this class supports.
-    /// </summary>
-    /// <returns>A vector containing the script function names this class supports.</returns>
-    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() const { return std::vector<std::string> {"Create", "Destroy", "Update", "OnScriptRemoveOrDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO"}; }
-
     /// <summary>
     /// Does necessary work to setup a script object name for this object, allowing it to be accessed in Lua, then runs all of the MO's scripts' Create functions in Lua.
     /// </summary>

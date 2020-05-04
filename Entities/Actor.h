@@ -72,6 +72,7 @@ public:
 
 // Concrete allocation and cloning definitions
 ENTITYALLOCATION(Actor)
+ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "UpdateAI")
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1533,12 +1534,6 @@ protected:
     Timer m_StuckTimer;
     // Timer for measuring interval between height checks
     Timer m_FallTimer;
-
-    /// <summary>
-    /// Gets a vector containing the script function names this class supports.
-    /// </summary>
-    /// <returns>A vector containing the script function names this class supports.</returns>
-    virtual const std::vector<std::string> GetSupportedScriptFunctionNames() const override { auto functionNames = MOSRotating::GetSupportedScriptFunctionNames(); functionNames.insert(functionNames.end(), {"UpdateAI"}); return functionNames; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

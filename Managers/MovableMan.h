@@ -485,28 +485,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetScriptedEntity
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the entity temporarily to be tranferred to the Lua interface for
-//                  its preset-defined scripts to be run on it.
-// Arguments:       The entity pointer to make accessible to the Lua state.
-// Return value:    None.
-
-    void SetScriptedEntity(Entity *pScriptedEntity) { m_pObjectToScriptUpdate = pScriptedEntity; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetScriptedEntity
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the entity temporarily to be tranferred to the Lua interface for
-//                  its preset-defined scripts to be run on it.
-// Arguments:       None.
-// Return value:    The entity pointer made accessible to the Lua state.
-
-    Entity * GetScriptedEntity() const { return m_pObjectToScriptUpdate; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SortTeamRoster
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets this to draw HUD lines for a specific team's roster this frame.
@@ -1073,10 +1051,6 @@ protected:
     bool m_MOSubtractionEnabled;
 
 	unsigned int m_SimUpdateFrameNumber;
-
-    // Temporary hold for scripted entites that are about to have their preset scripts run.
-    // This is a way to export an entity pointer properly to the Lua/Luabind environment.
-    Entity *m_pObjectToScriptUpdate;
 
 	// Global map which stores all objects so they could be foud by their unique ID
 	std::map<long int, MovableObject *> m_KnownObjects;

@@ -65,7 +65,7 @@ namespace RTE {
 				m_DefinedInModule = reader.GetReadModuleID();
 			}
 		} else if (propName == "PresetName" || propName == "InstanceName") {
-			reader >> m_PresetName;
+			SetPresetName(reader.ReadPropValue());
 			// Preset name might have "[ModuleName]/" preceding it, detect it here and select proper module!
 			int slashPos = m_PresetName.find_first_of('/');
 			if (slashPos != std::string::npos) { m_PresetName = m_PresetName.substr(slashPos + 1); }

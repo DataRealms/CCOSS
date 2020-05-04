@@ -70,7 +70,6 @@ void MovableMan::Clear()
     m_SloMoDuration = 1000;
     m_SettlingEnabled = true;
     m_MOSubtractionEnabled = true;
-    m_pObjectToScriptUpdate = 0;
 }
 
 
@@ -1658,9 +1657,6 @@ void MovableMan::Update()
     if (g_TimerMan.SimUpdatesSinceDrawn() == 0)
         g_SceneMan.ClearPostEffects();
 
-    // Lua transfer pointer needs to be cleared, what was set here last update isn't valid anymore
-    m_pObjectToScriptUpdate = 0;
-
     // Reset the draw HUD roster line settings
     m_SortTeamRoster[Activity::TEAM_1] = false;
     m_SortTeamRoster[Activity::TEAM_2] = false;
@@ -1765,7 +1761,7 @@ void MovableMan::Update()
 				(*aIt)->Update();
 				//g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
 				//g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
-                (*aIt)->UpdateScript();
+                (*aIt)->UpdateScripts();
 				//g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
                 (*aIt)->ApplyImpulses();
             }
@@ -1779,7 +1775,7 @@ void MovableMan::Update()
             for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count)
             {
                 (*iIt)->Update();
-                (*iIt)->UpdateScript();
+                (*iIt)->UpdateScripts();
                 (*iIt)->ApplyImpulses();
                 if (count <= itemLimit)
                 {
@@ -1794,7 +1790,7 @@ void MovableMan::Update()
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
                 (*parIt)->Update();
-                (*parIt)->UpdateScript();
+                (*parIt)->UpdateScripts();
                 (*parIt)->ApplyImpulses();
                 (*parIt)->RestDetection();
                 // Copy particles that are at rest to the terrain and mark them for deletion.

@@ -1756,9 +1756,9 @@ void MOSRotating::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
 
 
 /// <summary>
-/// Attaches the passed in Attachable and adds it to the list of attachables, not changing its parent offset and not treating it as hardcoded
+/// Attaches the passed in Attachable and adds it to the list of attachables, not changing its parent offset and not treating it as hardcoded.
 /// </summary>
-/// <param name="pAttachable">The Attachable to attach</param>
+/// <param name="pAttachable">The Attachable to attach.</param>
 void MOSRotating::AddAttachable(Attachable *pAttachable)
 {
 	if (pAttachable)
@@ -1769,10 +1769,10 @@ void MOSRotating::AddAttachable(Attachable *pAttachable)
 
 
 /// <summary>
-/// Attaches the passed in Attachable and adds it to the list of attachables, changing its parent offset to the passed in Vector but not treating it as hardcoded
+/// Attaches the passed in Attachable and adds it to the list of attachables, changing its parent offset to the passed in Vector but not treating it as hardcoded.
 /// </summary>
-/// <param name="pAttachable">The Attachable to add</param>
-/// <param name="parentOffsetToSet">The vector to set as the Attachable's parent offset</param>
+/// <param name="pAttachable">The Attachable to add.</param>
+/// <param name="parentOffsetToSet">The vector to set as the Attachable's parent offset.</param>
 void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet)
 {
 	AddAttachable(pAttachable, parentOffsetToSet, false);
@@ -1780,10 +1780,10 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector& parentOff
 
 
 /// <summary>
-/// Attaches the passed in Attachable and adds it to the list of attachables, not changing its parent offset but treating it as hardcoded depending on the passed in boolean
+/// Attaches the passed in Attachable and adds it to the list of attachables, not changing its parent offset but treating it as hardcoded depending on the passed in boolean.
 /// </summary>
-/// <param name="pAttachable">The Attachable to add</param>
-/// <param name="isHardcodedAttachable">Whether or not the Attachable should be treated as hardcoded</param>
+/// <param name="pAttachable">The Attachable to add.</param>
+/// <param name="isHardcodedAttachable">Whether or not the Attachable should be treated as hardcoded.</param>
 void MOSRotating::AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable)
 {
 	if (pAttachable)
@@ -1796,9 +1796,9 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, bool isHardcodedAttacha
 /// <summary>
 /// Attaches the passed in Attachable and adds it to the list of attachables, changing its parent offset to the passed in Vector and treating it as hardcoded depending on the passed in boolean.
 /// </summary>
-/// <param name="pAttachable">The Attachable to add</param>
-/// <param name="parentOffsetToSet">The vector to set as the Attachable's parent offset</param>
-/// <param name="isHardcodedAttachable">Whether or not the Attachable should be treated as hardcoded</param>
+/// <param name="pAttachable">The Attachable to add.</param>
+/// <param name="parentOffsetToSet">The vector to set as the Attachable's parent offset.</param>
+/// <param name="isHardcodedAttachable">Whether or not the Attachable should be treated as hardcoded.</param>
 void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOffsetToSet, bool isHardcodedAttachable)
 {
 	if (pAttachable)

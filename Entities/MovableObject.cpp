@@ -544,7 +544,7 @@ int MovableObject::ReloadScripts() {
     }
 
     /// <summary>
-    /// Internal lambda method to clear a given object's script configurations, and then load them all again in order to reset them.
+    /// Internal lambda function to clear a given object's script configurations, and then load them all again in order to reset them.
     /// </summary>
     auto clearScriptConfigurationAndLoadPreexistingScripts = [](MovableObject *object) {
         std::vector<std::pair<std::string, bool>> loadedScriptsCopy = object->m_LoadedScripts;

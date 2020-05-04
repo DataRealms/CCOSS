@@ -857,12 +857,12 @@ bool Activity::TeamFundsChanged(unsigned int which)
 // Description:     Indicates an Actor as having left the game scene and entered orbit.
 //                  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
 
-void Activity::EnteredOrbit(Actor *pActor)
+void Activity::EnteredOrbit(Actor *orbitedCraft)
 {
-    if (!pActor)
+    if (!orbitedCraft)
         return;
 
-    int team  = pActor->GetTeam();
+    int team  = orbitedCraft->GetTeam();
 /*
     if (m_pOrbitRocket[team])
     {
@@ -879,7 +879,7 @@ void Activity::EnteredOrbit(Actor *pActor)
 	{
 		for (int player = 0 ; player < MAXPLAYERCOUNT; player++)
 		{
-			if (GetTeamOfPlayer(player) == pActor->GetTeam())
+			if (GetTeamOfPlayer(player) == orbitedCraft->GetTeam())
 			{
 				MetaPlayer *pMetaPlayer = g_MetaMan.GetMetaPlayerOfInGamePlayer(player);
 				if (pMetaPlayer)
@@ -892,9 +892,9 @@ void Activity::EnteredOrbit(Actor *pActor)
 	}
 
     // Did a brain just evacuate the Scene??
-    bool brainOnBoard = pActor->HasObjectInGroup("Brains");
+    bool brainOnBoard = orbitedCraft->HasObjectInGroup("Brains");
     // Total value of ship and cargo and crew
-    float totalValue = pActor->GetTotalValue(0, foreignCostMult, nativeCostMult);
+    float totalValue = orbitedCraft->GetTotalValue(0, foreignCostMult, nativeCostMult);
 // TODO ARGH WHAT IF TWO PLAYERS ON SAME TEAM ARE OF DIFFERENT TECHSS??!?!?!?$?!?!$?!$?
 // A: Just let the base cost be the liquidation value.. they could cheat otherwise, one buying, one selling
     char str[64];
@@ -904,7 +904,7 @@ void Activity::EnteredOrbit(Actor *pActor)
         if (m_IsActive[player])
         {
             // Figure out whose brain just left the building
-            if (brainOnBoard && pActor == GetPlayerBrain(player))
+            if (brainOnBoard && orbitedCraft == GetPlayerBrain(player))
             {
                 m_BrainEvacuated[player] = true;
                 sprintf_s(str, sizeof(str), "YOUR BRAIN HAS BEEN EVACUATED BACK INTO ORBIT!");
@@ -920,8 +920,8 @@ void Activity::EnteredOrbit(Actor *pActor)
     }
 
     m_TeamFunds[team] += totalValue;
-    pActor->SetGoldCarried(0);
-    pActor->SetHealth(pActor->GetMaxHealth());
+    orbitedCraft->SetGoldCarried(0);
+    orbitedCraft->SetHealth(orbitedCraft->GetMaxHealth());
 //    m_pOrbitRocket[team] = pActor;
 
     // Counter-adjust the death toll because the craft leaving (being deleted) will increment

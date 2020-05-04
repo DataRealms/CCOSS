@@ -916,15 +916,7 @@ ENTITYALLOCATION(GameActivity)
 
 	void SetNetworkPlayerName(int player, std::string name);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnPieMenu
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Calls this to be processed by derived classes to enable pie-menu dynamic change
-// Arguments:       None.
-// Return value:    None.
-
-	virtual void OnPieMenu(Actor *pActor) { m_pPieMenuActor = pActor; };
+    virtual void OnPieMenu(Actor *actor) { /* Does nothing, kept here for program control flow. Method is not pure virtual to avoid a bunch of junk implementations in non-scritped activities. */};
 
 	virtual void AddPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
 	{ 
@@ -1187,10 +1179,6 @@ protected:
     long m_GameOverPeriod;
     // The winning team number, when the game is over
     int m_WinnerTeam;
-    // Temporary member for whatever craft goes into orbit, so Lua can access it. Not owned by this
-    Actor *m_pOrbitedCraft;
-	// Temporary member for whatever actor has enabled the pie menu. Not owned by this
-	Actor *m_pPieMenuActor;
 
 	std::vector<PieMenuGUI::Slice *> m_CurrentPieMenuSlices;
 

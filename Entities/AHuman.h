@@ -916,16 +916,12 @@ ENTITYALLOCATION(AHuman)
 
     virtual void Update();
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnPieMenu
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Executes the Lua-defined OnPieMenu event handler.
-// Arguments:       Actor which triggered the pie menu event
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	virtual int OnPieMenu(Actor * pActor);
+    /// <summary>
+    /// Executes the Lua-defined OnPieMenu event handler for this AHuman.
+    /// </summary>
+    /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+	virtual int OnPieMenu(Actor *pieMenuActor);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

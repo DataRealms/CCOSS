@@ -115,8 +115,6 @@ void GameActivity::Clear()
     m_GameOverTimer.Reset();
     m_GameOverPeriod = 5000;
     m_WinnerTeam = -1;
-    m_pOrbitedCraft = 0;
-	m_pPieMenuActor = 0;
 }
 
 

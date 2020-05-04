@@ -209,7 +209,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	FMOD::Sound * ContentFile::GetAsSample(bool abortGameForInvalidSound) {
-		if (m_DataPath.empty()) {
+		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return 0;
 		}
 		FMOD::Sound *pReturnSample = 0;

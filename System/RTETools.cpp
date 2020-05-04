@@ -25,13 +25,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float LERP(float xStart, float xEnd, float yStart, float yEnd, float progressScalar) {
-		if (progressScalar <= xStart) {
-			return yStart;
-		} else if (progressScalar >= xEnd) {
-			return yEnd;
+	float LERP(float scaleStart, float scaleEnd, float startValue, float endValue, float progressScalar) {
+		if (progressScalar <= scaleStart) {
+			return startValue;
+		} else if (progressScalar >= scaleEnd) {
+			return endValue;
 		}
-		return yStart + ((progressScalar - xStart) * ((yEnd - yStart) / (xEnd - xStart)));
+		return startValue + ((progressScalar - scaleStart) * ((endValue - startValue) / (scaleEnd - scaleStart)));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

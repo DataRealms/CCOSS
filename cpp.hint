@@ -5,3 +5,5 @@
 #define CLASSINFOGETTERS const Entity::ClassInfo & GetClass() const { return m_sClass; } const std::string & GetClassName() const { return m_sClass.GetName(); }
 #define ABSTRACTCLASSINFO(TYPE, PARENT) Entity::ClassInfo TYPE::m_sClass(#TYPE, &PARENT::m_sClass);
 #define CONCRETECLASSINFO(TYPE, PARENT, BLOCKCOUNT) Entity::ClassInfo TYPE::m_sClass(#TYPE, &PARENT::m_sClass, TYPE::Allocate, TYPE::Deallocate, TYPE::NewInstance, BLOCKCOUNT);
+#define SCRIPT_FUNCTION_NAMES(...) virtual std::vector<std::string> GetSupportedScriptFunctionNames() const { return {__VA_ARGS__}; }
+#define ADD_SCRIPT_FUNCTION_NAMES(PARENT, ...) virtual std::vector<std::string> GetSupportedScriptFunctionNames() const override { std::vector<std::string> functionNames = PARENT::GetSupportedScriptFunctionNames(); functionNames.insert(functionNames.end(), {__VA_ARGS__}); return functionNames; }

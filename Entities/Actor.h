@@ -72,6 +72,7 @@ public:
 
 // Concrete allocation and cloning definitions
 ENTITYALLOCATION(Actor)
+ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "UpdateAI")
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -192,16 +193,13 @@ ENTITYALLOCATION(Actor)
 
     virtual void Destroy(bool notInherited = false);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads the preset scripts of this object, from a specified path.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int LoadScripts(std::string scriptPath);
+    /// <summary>
+    /// Loads the script at the given script path onto the object, checking for appropriately named functions within it.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to load.</param>
+    /// <param name="loadAsEnabledScript">Whether or not the script should load as enabled. Defaults to true.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    virtual int LoadScript(std::string const &scriptPath, bool loadAsEnabledScript = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1319,7 +1317,7 @@ ENTITYALLOCATION(Actor)
 			m_DeathSound.Reset();
 		} else {
             SoundContainer newDeathSound;
-			newDeathSound.Create(samplePath, false);
+			newDeathSound.Create(samplePath);
 			m_DeathSound = newDeathSound;
 		}
 	}
@@ -1329,7 +1327,6 @@ ENTITYALLOCATION(Actor)
 // Protected member variable and method declarations
 
 protected:
-
 
     // Member variables
     static Entity::ClassInfo m_sClass;

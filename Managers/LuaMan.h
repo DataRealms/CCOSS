@@ -227,6 +227,17 @@ enum ServerResult
 
     bool ExpressionIsTrue(std::string expression, bool consoleErrors);
 
+    /// <summary>
+    /// Runs the given Lua function with optional safety checks and arguments. The first argument to the function will always be the self object.
+    /// If either argument list has entries, they will be passed into the function in order, with entity arguments first.
+    /// </summary>
+    /// <param name="functionName">The name that gives access to the function in the global Lua namespace.</param>
+    /// <param name="selfObjectName">The name that gives access to the self object in the global Lua namespace.</param>
+    /// <param name="variablesToSafetyCheck">Optional vector of strings that should be safety checked in order before running the Lua function. Defaults to empty.</param>
+    /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
+    /// <param name="functionLiteralArguments">Optional vector of strings that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    int RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, std::vector<std::string> variablesToSafetyCheck = std::vector<std::string>(), std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RunScriptString
@@ -238,7 +249,7 @@ enum ServerResult
 // Return value:    Returns less than zero if any errors encountered when running this script.
 //                  To get the actual error string, call GetLastError.
 
-    int RunScriptString(std::string scriptString, bool consoleErrors = true);
+    int RunScriptString(const std::string &scriptString, bool consoleErrors = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -296,6 +307,11 @@ enum ServerResult
 
     Entity * GetTempEntity() const { return m_pTempEntity; }
 
+    /// <summary>
+    /// Sets a temporary vector of entities that can be accessed in the Lua state
+    /// </summary>
+    /// <param name="entityVector">The temporary vector of entities. Ownership is NOT transferred.</param>
+    void SetTempEntityVector(std::vector<Entity *> entityVector) { m_TempEntityVector = entityVector; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
@@ -397,8 +413,10 @@ protected:
     // The next unique object ID to hand out to the next scripted Entity instance that wants to run its preset's scripts
     // This gets incremented each time a new one is requested to give unique ID's to all scripted objects
     long m_NextObjectID;
-    // Temporary holder for an Entity object that we want to pass into the Lua state without fuss
+    // Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
     Entity *m_pTempEntity;
+    // Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
+    std::vector<Entity *> m_TempEntityVector;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -394,6 +394,8 @@ void LuaMan::Clear()
     m_NextPresetID = 0;
     m_NextObjectID = 0;
     m_pTempEntity = 0;
+    m_TempEntityVector.clear();
+    m_TempEntityVector.shrink_to_fit();
 
 	//Clear files list
 	for (int i = 0; i < MAX_OPEN_FILES; ++i)
@@ -532,6 +534,8 @@ int LuaMan::Create()
             .def("AddBox", &Scene::Area::AddBox)
             .def("HasNoArea", &Scene::Area::HasNoArea)
             .def("IsInside", &Scene::Area::IsInside)
+            .def("IsInsideX", &Scene::Area::IsInsideX)
+            .def("IsInsideY", &Scene::Area::IsInsideY)
             .def("GetBoxInside", &Scene::Area::GetBoxInside)
             .def("RemoveBoxInside", &Scene::Area::RemoveBoxInside)
             .def("GetCenterPoint", &Scene::Area::GetCenterPoint)
@@ -560,7 +564,9 @@ int LuaMan::Create()
             .def("Play", (bool (SoundContainer:: *)(const Vector &position, int player)) &SoundContainer::Play)
             .def("Stop", (bool (SoundContainer:: *)()) &SoundContainer::Stop)
             .def("Stop", (bool (SoundContainer:: *)(int player)) &SoundContainer::Stop)
-            .def("AddSound", &SoundContainer::AddSound)
+            .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath)) &SoundContainer::AddSound)
+            .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound)) &SoundContainer::AddSound)
+            .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance, bool abortGameForInvalidSound)) &SoundContainer::AddSound)
 			.def("SetPosition", &SoundContainer::SetPosition)
 			.property("Loops", &SoundContainer::GetLoopSetting, &SoundContainer::SetLoopSetting)
             .property("Priority", &SoundContainer::GetPriority, &SoundContainer::SetPriority)
@@ -584,6 +590,12 @@ int LuaMan::Create()
         ABSTRACTLUABINDING(MovableObject, SceneObject)
 			.property("Material", &MovableObject::GetMaterial)
 			.def("ReloadScripts", &MovableObject::ReloadScripts)
+            .def("HasScript", &MovableObject::HasScript)
+            .def("AddScript", &MovableObject::AddScript)
+            .def("RemoveScript", &MovableObject::RemoveScript)
+            .def("ScriptEnabled", &MovableObject::ScriptEnabled)
+            .def("EnableScript", &MovableObject::EnableScript)
+            .def("DisableScript", &MovableObject::DisableScript)
             .property("Mass", &MovableObject::GetMass, &MovableObject::SetMass)
             .property("Pos", &MovableObject::GetPos, &MovableObject::SetPos)
             .property("Vel", &MovableObject::GetVel, &MovableObject::SetVel)
@@ -653,7 +665,6 @@ int LuaMan::Create()
 			.property("HitWhatMOID", &MovableObject::HitWhatMOID)
 			.property("HitWhatTerrMaterial", &MovableObject::HitWhatTerrMaterial)
 			.property("ProvidesPieMenuContext", &MovableObject::ProvidesPieMenuContext, &MovableObject::SetProvidesPieMenuContext)
-			.def_readwrite("PieMenuActor", &MovableObject::m_pPieMenuActor)
 			.property("HitWhatParticleUniqueID", &MovableObject::HitWhatParticleUniqueID),
 
 		class_<Material, Entity>("Material")
@@ -1488,6 +1499,7 @@ int LuaMan::Create()
             .def("QueueSilence", &AudioMan::QueueSilence)
             .def("ClearMusicQueue", &AudioMan::ClearMusicQueue)
             .def("PlaySound", (SoundContainer *(AudioMan:: *)(const char *filePath)) &AudioMan::PlaySound)
+            .def("PlaySound", (SoundContainer *(AudioMan:: *)(const char *filePath, const Vector &position)) &AudioMan::PlaySound)
             .def("PlaySound", (SoundContainer *(AudioMan:: *)(const char *filePath, const Vector &position, int player)) &AudioMan::PlaySound)
             .def("PlaySound", (SoundContainer *(AudioMan:: *)(const char *filePath, const Vector &position, int player, int loops, int priority, double pitchOrAffectedByGlobalPitch, float attenuationStartDistance, bool immobile)) &AudioMan::PlaySound)
             .def("StopSound", (bool (AudioMan:: *)(SoundContainer *soundContainer)) &AudioMan::StopSound)
@@ -1967,8 +1979,6 @@ int LuaMan::Create()
             .def_readwrite("GameTimer", &GameActivity::m_GameTimer)
             .def_readwrite("GameOverTimer", &GameActivity::m_GameOverTimer)
             .def_readwrite("GameOverPeriod", &GameActivity::m_GameOverPeriod)
-            .def_readwrite("OrbitedCraft", &GameActivity::m_pOrbitedCraft)
-			.def_readwrite("PieMenuActor", &GameActivity::m_pPieMenuActor)
 			.def("OtherTeam", &GameActivity::OtherTeam)
             .def("OneOrNoneTeamsLeft", &GameActivity::OneOrNoneTeamsLeft)
             .def("WhichTeamLeft", &GameActivity::WhichTeamLeft)
@@ -2069,8 +2079,6 @@ int LuaMan::Create()
 			.property("Direction", &PieMenuGUI::Slice::GetDirection),
 
         ABSTRACTLUABINDING(GlobalScript, Entity)
-            .def_readwrite("OrbitedCraft", &GlobalScript::m_pOrbitedCraft)
-			.def_readwrite("PieMenuActor", &GlobalScript::m_pPieMenuActor)
 			.def("Deactivate", &GlobalScript::Deactivate),
 
         class_<ActivityMan>("ActivityManager")
@@ -2138,7 +2146,6 @@ int LuaMan::Create()
             .def("GetAGResolution", &MovableMan::GetAGResolution)
             .def("GetSplashRatio", &MovableMan::GetSplashRatio)
             .property("MaxDroppedItems", &MovableMan::GetMaxDroppedItems, &MovableMan::SetMaxDroppedItems)
-            .property("ScriptedEntity", &MovableMan::GetScriptedEntity, &MovableMan::SetScriptedEntity)
             .def("SortTeamRoster", &MovableMan::SortTeamRoster)
 			.def("ChangeActorTeam", &MovableMan::ChangeActorTeam)
 			.def("AddMO", &AddMO, adopt(_2))
@@ -2178,7 +2185,8 @@ int LuaMan::Create()
 			.property("ScreenSize", &ConsoleMan::GetConsoleScreenSize, &ConsoleMan::SetConsoleScreenSize),
 
         class_<LuaMan>("LuaManager")
-            .property("TempEntity", &LuaMan::GetTempEntity, &LuaMan::SetTempEntity)
+            .property("TempEntity", &LuaMan::GetTempEntity)
+            .def_readonly("TempEntities", &LuaMan::m_TempEntityVector, return_stl_iterator)
             .def("FileOpen", &LuaMan::FileOpen)
             .def("FileClose", &LuaMan::FileClose)
             .def("FileReadLine", &LuaMan::FileReadLine)
@@ -2402,6 +2410,43 @@ bool LuaMan::ExpressionIsTrue(string expression, bool consoleErrors)
     return result;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, std::vector<std::string> variablesToSafetyCheck, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
+    std::string scriptString = "";
+    if (!variablesToSafetyCheck.empty()) {
+        scriptString += "if ";
+        for (const std::string &variableToSafetyCheck : variablesToSafetyCheck) {
+            if (&variableToSafetyCheck != &variablesToSafetyCheck[0]) {
+                scriptString += " and ";
+            }
+            scriptString += variableToSafetyCheck;
+        }
+        scriptString += " then ";
+    }
+    if (!functionEntityArguments.empty()) {
+        scriptString += "local entityArguments = LuaMan.TempEntities; ";
+    }
+    scriptString += functionName + "(" + selfObjectName;
+    if (!functionEntityArguments.empty()) {
+        g_LuaMan.SetTempEntityVector(functionEntityArguments);
+        for (const Entity *functionEntityArgument : functionEntityArguments) {
+            scriptString += ", To" + functionEntityArgument->GetClassName() + "(entityArguments())";
+        }
+    }
+    if (!functionLiteralArguments.empty()) {
+        for (const std::string functionLiteralArgument : functionLiteralArguments) {
+            scriptString += ", " + functionLiteralArgument;
+        }
+    }
+    scriptString += ");";
+
+    if (!variablesToSafetyCheck.empty()) { scriptString += " end"; };
+    
+    return RunScriptString(scriptString);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RunScriptString
@@ -2409,7 +2454,7 @@ bool LuaMan::ExpressionIsTrue(string expression, bool consoleErrors)
 // Description:     Takes a string containing a script snippet and runs it on the master
 //                  state.
 
-int LuaMan::RunScriptString(string scriptString, bool consoleErrors)
+int LuaMan::RunScriptString(const std::string &scriptString, bool consoleErrors)
 {
     if (scriptString.empty())
         return -1;

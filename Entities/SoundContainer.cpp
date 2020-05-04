@@ -114,30 +114,27 @@ namespace RTE {
 		SoundData soundData;
 
 		/// <summary>
-		/// This lambda exists to have some easy, private reused code.
-		/// It loads an audio file by path in as a ContentFile, which in turn loads it into FMOD, then returns SoundData for it in the outParam outSoundData.
+		/// Internal lambda function to load an audio file by path in as a ContentFile, which in turn loads it into FMOD, then returns SoundData for it in the outParam outSoundData.
 		/// </summary>
 		/// <param name="soundPath">The path to the sound file.</param>
-		/// <param name="parentReader">The reader being used when calling this. Used to report errors if loading the sound fails.</param>
-		/// <param name="outSoundData">The outParam for the SoundData struct produced by reading the given sound.</param>
-		auto readSound = [](const std::string &soundPath, Reader &parentReader, SoundData *outSoundData) {
+		auto readSound = [&soundData, &reader](const std::string &soundPath) {
 			ContentFile soundFile(soundPath.c_str());
 			FMOD::Sound *soundObject = soundFile.GetAsSample();
-			if (g_AudioMan.IsAudioEnabled() && !soundObject) { parentReader.ReportError(std::string("Failed to load the sound from the file")); }
+			if (g_AudioMan.IsAudioEnabled() && !soundObject) { reader.ReportError(std::string("Failed to load the sound from the file")); }
 
-			outSoundData->SoundFile = soundFile;
-			outSoundData->SoundObject = soundObject;
+			soundData.SoundFile = soundFile;
+			soundData.SoundObject = soundObject;
 		};
 
 		if (propValue != "Sound" && propValue != "ContentFile") {
-			readSound(propValue, reader, &soundData);
+			readSound(propValue);
 			return soundData;
 		}
 
 		while (reader.NextProperty()) {
 			std::string soundSubPropertyName = reader.ReadPropName();
 			if (soundSubPropertyName == "FilePath" || soundSubPropertyName == "Path") {
-				readSound(reader.ReadPropValue(), reader, &soundData);
+				readSound(reader.ReadPropValue());
 			} else if (soundSubPropertyName == "Offset") {
 				reader >> soundData.Offset;
 			} else if (soundSubPropertyName == "MinimumAudibleDistance") {
@@ -205,17 +202,20 @@ namespace RTE {
 				m_SelectedSoundSet = (m_SelectedSoundSet + 1) % 2;
 				break;
 			default:
-				auto selectRandomSound = [](int soundSetSize, size_t *outSelectedSoundSet) {
-					size_t soundToSelect = std::floorf(static_cast<float>(soundSetSize) * PosRand());
-					while (soundToSelect == *outSelectedSoundSet) {
-						soundToSelect = std::floorf(static_cast<float>(soundSetSize) * PosRand());
+				/// <summary>
+				/// Internal lambda function to pick a random sound that's not the previously played sound. Done to avoid scoping issues inside the switch below.
+				/// </summary>
+				auto selectRandomSound = [&soundSetCount, this]() {
+					size_t soundToSelect = std::floorf(static_cast<float>(soundSetCount) * PosRand());
+					while (soundToSelect == m_SelectedSoundSet) {
+						soundToSelect = std::floorf(static_cast<float>(soundSetCount) * PosRand());
 					}
-					*outSelectedSoundSet = soundToSelect;
+					m_SelectedSoundSet = soundToSelect;
 				};
 
 				switch (m_SoundSelectionCycleMode) {
 					case MODE_RANDOM:
-						selectRandomSound(soundSetCount, &m_SelectedSoundSet);
+						selectRandomSound();
 						break;
 					case MODE_FORWARDS:
 						m_SelectedSoundSet = (m_SelectedSoundSet + 1) % soundSetCount;

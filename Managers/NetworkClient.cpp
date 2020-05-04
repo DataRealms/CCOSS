@@ -672,7 +672,7 @@ namespace RTE
 
 		for (int msgIndex = 0; msgIndex < msg->SoundEventsCount; msgIndex++) {
 			if (sndDataPtr->State == AudioMan::SOUND_SET_GLOBAL_PITCH) {
-				g_AudioMan.SetGlobalPitch(sndDataPtr->Pitch, sndDataPtr->AffectedByGlobalPitch); //Note AffectedByGlobalPitch is hackily used to determine whether this affects music
+				g_AudioMan.SetGlobalPitch(sndDataPtr->Pitch);
 			} else {
 				// The set of SoundContainers that have already been handled for this event, used to hopefully avoid repeating actions when iterating over provided sound channel indices
 				std::unordered_set<SoundContainer *> alreadyHandledSoundContainers;

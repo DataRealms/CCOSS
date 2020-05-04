@@ -139,12 +139,12 @@ namespace RTE {
 		double GetGlobalPitch() const { return m_GlobalPitch; }
 
 		/// <summary>
-		/// Sets the global pitch multiplier for all sounds, optionally the music too.
+		/// Sets the global pitch multiplier for mobile sounds, optionally setting it for immobile sounds and music.
 		/// </summary>
-		/// <param name="pitch">New global pitch, limited to 8 octaves up or down (i.e. 0.125 - 8).</param>
-		/// <param name="excludeImmobileSounds">Whether to exclude immobile sounds (normally used for GUI and so on) from pitch modification.</param>
-		/// <param name="excludeMusic">Whether to exclude the music from pitch modification.</param>
-		void SetGlobalPitch(double pitch = 1.0, bool excludeImmobileSounds = false, bool excludeMusic = false);
+		/// <param name="pitch">New global pitch, limited to 8 octaves up or down (i.e. 0.125 - 8). Defaults to 1.</param>
+		/// <param name="includeImmobileSounds">Whether to include immobile sounds (normally used for GUI and so on) in global pitch modification. Defaults to false.</param>
+		/// <param name="includeMusic">Whether to include the music in global pitch modification. Defaults to false.</param>
+		void SetGlobalPitch(double pitch = 1.0, bool includeImmobileSounds = false, bool includeMusic = false);
 #pragma endregion
 
 #pragma region Music Getters and Setters

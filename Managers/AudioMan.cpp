@@ -58,7 +58,7 @@ namespace RTE {
 			return -1;
 		}
 
-		SetGlobalPitch(m_GlobalPitch);
+		SetGlobalPitch(m_GlobalPitch, false, false);
 		SetSoundsVolume(m_SoundsVolume);
 		SetMusicVolume(m_MusicVolume);
 
@@ -117,17 +117,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::SetGlobalPitch(double pitch, bool excludeImmobileSounds, bool excludeMusic) {
+	void AudioMan::SetGlobalPitch(double pitch, bool includeImmobileSounds, bool includeMusic) {
 		if (!m_AudioEnabled) {
 			return;
 		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_GLOBAL_PITCH, NULL, NULL, Vector(), 0, pitch, excludeMusic); }
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_GLOBAL_PITCH, NULL, NULL, Vector(), 0, pitch); }
 
 		// Limit pitch change to 8 octaves up or down
 		m_GlobalPitch = Limit(pitch, 8, 0.125); 
-		if (!excludeMusic) { m_MusicChannelGroup->setPitch(m_GlobalPitch); }
+		if (includeMusic) { m_MusicChannelGroup->setPitch(m_GlobalPitch); }
 
-		FMOD::ChannelGroup *channelGroupToUse = excludeImmobileSounds ? m_MobileSoundChannelGroup : m_SoundChannelGroup;
+		FMOD::ChannelGroup *channelGroupToUse = includeImmobileSounds ? m_SoundChannelGroup : m_MobileSoundChannelGroup;
 
 		int numChannels;
 		FMOD_RESULT result = channelGroupToUse->getNumChannels(&numChannels);
@@ -145,7 +145,7 @@ namespace RTE {
 			if (result == FMOD_OK && isPlaying) {
 				void *userData;
 				result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
-				const SoundContainer *channelSoundContainer = (SoundContainer *)userData;
+				const SoundContainer *channelSoundContainer = static_cast<SoundContainer *>(userData);
 
 				if (channelSoundContainer->IsAffectedByGlobalPitch()) { soundChannel->setPitch(pitch); }
 			}
@@ -641,14 +641,14 @@ namespace RTE {
 
 	FMOD_RESULT F_CALLBACK AudioMan::SoundChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *unusedCommandData1, void *unusedCommandData2) {
 		if (channelControlType == FMOD_CHANNELCONTROL_CHANNEL && callbackType == FMOD_CHANNELCONTROL_CALLBACK_END) {
-			FMOD::Channel *channel = (FMOD::Channel *) channelControl;
+			FMOD::Channel *channel = reinterpret_cast<FMOD::Channel *>(channelControl);
 			int channelIndex;
 			FMOD_RESULT result = channel->getIndex(&channelIndex);
 
 			// Remove this playing sound index from the SoundContainer if it has any playing sounds, i.e. it hasn't been reset before this callback happened.
 			void *userData;
 			result = (result == FMOD_OK) ? channel->getUserData(&userData) : result;
-			SoundContainer *channelSoundContainer = (SoundContainer *)userData;
+			SoundContainer *channelSoundContainer = static_cast<SoundContainer *>(userData);
 			if (channelSoundContainer->IsBeingPlayed()) { channelSoundContainer->RemovePlayingChannel(channelIndex); }
 			result = (result == FMOD_OK) ? channel->setUserData(NULL) : result;
 

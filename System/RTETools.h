@@ -47,15 +47,16 @@ namespace RTE {
 
 #pragma region Interpolation
 	/// <summary>
-	/// Simple Linear Interpolation, returns y for the last x passed in.
+	/// Simple Linear Interpolation, with an added bonus: scaleStart and scaleEnd let you define your scale, where 0 and 1 would be standard scale.
+	/// This scale is used to normalize your progressScalar value and lerp accordingly.
 	/// </summary>
-	/// <param name="xStart">X axis start value.</param>
-	/// <param name="xEnd">X axis end value.</param>
-	/// <param name="yStart">Y axis start value.</param>
-	/// <param name="yEnd">Y axis end value.</param>
-	/// <param name="progressScalar">Normalized positive progress scalar (0 - 1.0).</param>
+	/// <param name="scaleStart">The start of the scale to lerp along.</param>
+	/// <param name="scaleEnd">The end of the scale to lerp along.</param>
+	/// <param name="startValue">The start value of your lerp.</param>
+	/// <param name="endValue">The end value of your lerp.</param>
+	/// <param name="progressScalar">How far your lerp has progressed. Automatically normalized through use of scaleStart and scaleEnd.</param>
 	/// <returns>Interpolated value.</returns>
-	float LERP(float xStart, float xEnd, float yStart, float yEnd, float progressScalar);
+	float LERP(float scaleStart, float scaleEnd, float startValue, float endValue, float progressScalar);
 
 	/// <summary>
 	/// Nonlinear ease-in interpolation. Starts slow.

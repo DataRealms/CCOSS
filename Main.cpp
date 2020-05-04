@@ -1880,6 +1880,7 @@ int main(int argc, char *argv[]) {
     new PresetMan();
     new FrameMan();
     new AudioMan();
+    new GUISound();
     new UInputMan();
     new ActivityMan();
     new MovableMan();
@@ -1907,8 +1908,9 @@ int main(int argc, char *argv[]) {
     g_TimerMan.Create();
     g_PresetMan.Create();
     g_FrameMan.Create();
-    g_AudioMan.Create(); //NOTE: By necessity of when things can be instantiated, this internally does: new GUISound()
-	g_GUISound.Create();
+    if (g_AudioMan.Create() >= 0) {
+        g_GUISound.Create();
+    }
     g_UInputMan.Create();
 	if (g_NetworkServer.IsServerModeEnabled()) { g_UInputMan.SetMultiplayerMode(true); }
     g_ConsoleMan.Create();

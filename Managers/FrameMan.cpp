@@ -1970,7 +1970,7 @@ void FrameMan::Update()
 // TODO: Don't hardcode this coefficient - although it's a good defualt
         float pitch = m_SimSpeed + (1.0f - m_SimSpeed) * 0.35;
         // Set the pitch for all other applicable sounds other than music
-        g_AudioMan.SetGlobalPitch(pitch, true);
+        g_AudioMan.SetGlobalPitch(pitch);
 // MUSIC PITCHING IS SUCK.. ruins the songs
         // Only affect the music if it's really slow, so it doesn't sound funny and fluctuating
 // TODO: Don't hardcode this threshold - although it's a good defualt

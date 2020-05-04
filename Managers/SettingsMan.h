@@ -415,6 +415,13 @@ public:
 	float SoundPanningEffectStrength() const { return m_SoundPanningEffectStrength; }
 
 
+	//////////////////////////////////////////////////
+	//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
+	float c_ListenerZOffset() const { return m_ListenerZOffset; }
+	float c_MinimumDistanceForPanning() const { return m_MinimumDistanceForPanning; }
+	//////////////////////////////////////////////////
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:			ForceSoftwareGfxDriver
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -603,6 +610,11 @@ protected:
 	bool m_PrintDebugInfo;
 	// The strength of the sound panning effect, 0 (no panning) - 1 (full panning)
 	float m_SoundPanningEffectStrength;
+	//////////////////////////////////////////////////
+	//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
+	float m_ListenerZOffset;
+	float m_MinimumDistanceForPanning;
+	//////////////////////////////////////////////////
 	//Whether CC uses additional Draws during MO's PreTravel and PostTravel to 
 	//update MO layer this frame with more precision(true), or it just uses data from the last frame with less precision(false)
 	bool m_PreciseCollisions;

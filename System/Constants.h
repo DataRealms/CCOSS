@@ -34,8 +34,15 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Audio Constants
-	static constexpr unsigned short c_MaxAudioChannels = 512;
+	static constexpr unsigned short c_MaxSoftwareChannels = 128;
+	static constexpr unsigned short c_MaxVirtualChannels = 1024;
 	static constexpr unsigned short c_MaxPlayingSoundsPerContainer = 64;
+	/* TODO These have been temporarily replaced with variables in settingsman to allow for easy tweaking. This needs to be undone once our soundscape is sorted out.
+	static constexpr unsigned short c_ListenerZOffset = 50; //!< The Z offset for Audio listeners. Can be used to lessen harsh panning if panning effect strength is at max.
+	static constexpr unsigned short c_MinimumDistanceForPanning = 50; //!< The minimum distance before which sound panning should not occur. Not relevant for immobile sounds or in splitscreen.
+	*/
+	static constexpr unsigned short c_DefaultAttenuationStartDistance = 100; //!< The default start distance for attenuating sounds. Individual sounds can have different values for this.
+	static constexpr unsigned int c_SoundMaxAudibleDistance = 100000; //!< The maximum distance at which any sound can possibly be heard, after which point it will have 0 volume. Arbitrary default suggested by FMOD.
 #pragma endregion
 
 #pragma region Network Constants

@@ -17,6 +17,8 @@
 #include "UInputMan.h"
 #include "ActivityMan.h"
 #include "ConsoleMan.h"
+#include "PerformanceMan.h"
+#include "PostProcessMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUIControlManager.h"
@@ -48,9 +50,6 @@ void SettingsMan::Clear()
 	m_EndlessMode = false;
 	m_PrintDebugInfo = false;
 	m_PreciseCollisions = true;
-	m_ForceSafeGfxDriver = false;
-	m_ForceSoftwareGfxDriver = false;
-	m_ForceSafeGfxDriver = false;
 	m_ForceVirtualFullScreenGfxDriver = false;
 	m_ForceOverlayedWindowGfxDriver = false;
 	m_ForceNonOverlayedWindowGfxDriver = false;
@@ -81,7 +80,7 @@ void SettingsMan::Clear()
 	m_ServerBoxHeight = 44;
 
 	m_UseNATService = false;
-	m_DisableLoadingScreen = false;
+	m_DisableLoadingScreen = true;
 }
 
 
@@ -139,19 +138,9 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "ResolutionY")
         g_FrameMan.ReadProperty(propName, reader);
-    else if (propName == "TrueColorMode")
-        g_FrameMan.ReadProperty(propName, reader);
+	else if (propName == "ResolutionMultiplier")
+		g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "PaletteFile")
-        g_FrameMan.ReadProperty(propName, reader);
-    else if (propName == "Fullscreen")
-        g_FrameMan.ReadProperty(propName, reader);
-    else if (propName == "NxWindowed")
-        g_FrameMan.ReadProperty(propName, reader);
-    else if (propName == "NxFullscreen")
-        g_FrameMan.ReadProperty(propName, reader);
-    else if (propName == "PostProcessing")
-        g_FrameMan.ReadProperty(propName, reader);
-    else if (propName == "PostPixelGlow")
         g_FrameMan.ReadProperty(propName, reader);
     else if (propName == "PixelsPerMeter")
         g_FrameMan.ReadProperty(propName, reader);
@@ -159,7 +148,9 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         reader >> m_PlayIntro;
     else if (propName == "ToolTips")
         reader >> m_ToolTips;
-    else if (propName == "FlashOnBrainDamage")
+	else if (propName == "AdvancedPerformanceStats") {
+		g_PerformanceMan.ShowAdvancedPerformanceStats(std::stoi(reader.ReadPropValue()));	
+	} else if (propName == "FlashOnBrainDamage")
         reader >> m_FlashOnBrainDamage;
     else if (propName == "EnableHats")
         reader >> m_EnableHats;
@@ -167,10 +158,6 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         reader >> m_BlipOnRevealUnseen;
     else if (propName == "ShowForeignItems")
         reader >> m_ShowForeignItems;
-    else if (propName == "ForceSoftwareGfxDriver")
-        reader >> m_ForceSoftwareGfxDriver;
-    else if (propName == "ForceSafeGfxDriver")
-        reader >> m_ForceSafeGfxDriver;
     else if (propName == "ForceVirtualFullScreenGfxDriver")
         reader >> m_ForceVirtualFullScreenGfxDriver;
     else if (propName == "ForceOverlayedWindowGfxDriver")
@@ -342,26 +329,18 @@ int SettingsMan::Save(Writer &writer) const
     writer << g_FrameMan.GetNewResX();
     writer.NewProperty("ResolutionY");
     writer << g_FrameMan.GetNewResY();
-    writer.NewProperty("TrueColorMode");
-    writer << (g_FrameMan.GetBPP() == 32);
+	writer.NewProperty("ResolutionMultiplier");
+	writer << g_FrameMan.ResolutionMultiplier();
     writer.NewProperty("PaletteFile");
     writer << g_FrameMan.GetPaletteFile();
-    writer.NewProperty("Fullscreen");
-    writer << g_FrameMan.IsFullscreen();
-    writer.NewProperty("NxWindowed");
-    writer << g_FrameMan.NxWindowed();
-    writer.NewProperty("NxFullscreen");
-    writer << g_FrameMan.GetNewNxFullscreen();
-    writer.NewProperty("PostProcessing");
-    writer << g_FrameMan.IsPostProcessing();
-    writer.NewProperty("PostPixelGlow");
-    writer << g_FrameMan.IsPixelGlowEnabled();
     writer.NewProperty("PixelsPerMeter");
     writer << g_FrameMan.GetPPM();
     writer.NewProperty("PlayIntro");
     writer << m_PlayIntro;
     writer.NewProperty("ToolTips");
     writer << m_ToolTips;
+	writer.NewProperty("AdvancedPerformanceStats");
+	writer << g_PerformanceMan.AdvancedPerformanceStatsEnabled();
     writer.NewProperty("FlashOnBrainDamage");
     writer << m_FlashOnBrainDamage;
     writer.NewProperty("EnableHats");
@@ -402,10 +381,6 @@ int SettingsMan::Save(Writer &writer) const
     writer << g_MovableMan.IsParticleSettlingEnabled();
     writer.NewProperty("EnableMOSubtraction");
     writer << g_MovableMan.IsMOSubtractionEnabled();
-    writer.NewProperty("ForceSoftwareGfxDriver");
-    writer << m_ForceSoftwareGfxDriver;
-    writer.NewProperty("ForceSafeGfxDriver");
-    writer << m_ForceSafeGfxDriver;
 	writer.NewProperty("ForceVirtualFullScreenGfxDriver");
 	writer << m_ForceVirtualFullScreenGfxDriver;
 	writer.NewProperty("ForceOverlayedWindowGfxDriver");
@@ -545,27 +520,19 @@ int SettingsMan::SaveDefaults(Writer &writer) const
     writer << 960;
     writer.NewProperty("ResolutionY");
     writer << 540;
-    writer.NewProperty("TrueColorMode");
-    writer << 1;
+	writer.NewProperty("ResolutionMultiplier");
+	writer << 1;
     writer.NewProperty("PaletteFile");
     ContentFile paletteFile("Base.rte/palette.bmp");
     writer << paletteFile;
-    writer.NewProperty("Fullscreen");
-    writer << 0;
-    writer.NewProperty("NxWindowed");
-    writer << 1;
-    writer.NewProperty("NxFullscreen");
-    writer << 2;
-    writer.NewProperty("PostProcessing");
-    writer << 1;
-    writer.NewProperty("PostPixelGlow");
-    writer << 1;
     writer.NewProperty("PixelsPerMeter");
     writer << 20;
     writer.NewProperty("PlayIntro");
     writer << 1;
     writer.NewProperty("ToolTips");
     writer << 1;
+	writer.NewProperty("AdvancedPerformanceStats");
+	writer << 1;
     writer.NewProperty("FlashOnBrainDamage");
     writer << 1;
     writer.NewProperty("ShowForeignItems");

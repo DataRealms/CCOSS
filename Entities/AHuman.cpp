@@ -4534,7 +4534,7 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
             points[i] += m_pFGArm->GetParentOffset();
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-        g_SceneMan.RegisterGlowDotEffect(points[i], YellowDot, 55 + 100 * PosRand());
+		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, 55 + 100 * PosRand());
 
         putpixel(pTargetBitmap, points[i].m_X - targetPos.m_X, points[i].m_Y - targetPos.m_Y, g_YellowGlowColor);
     }

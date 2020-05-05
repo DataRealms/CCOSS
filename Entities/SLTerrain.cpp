@@ -14,7 +14,6 @@
 #include "SLTerrain.h"
 #include "TerrainDebris.h"
 #include "TerrainObject.h"
-#include "ContentFile.h"
 #include "PresetMan.h"
 #include "DataModule.h"
 #include "SceneObject.h"
@@ -394,14 +393,14 @@ int SLTerrain::LoadData()
             _putpixel(pFGBitmap, xPos, yPos, pixelColor);
 
             // Draw background texture on the background where this is stuff on the foreground
-            if (m_pBGTexture && pixelColor != g_KeyColor)
+            if (m_pBGTexture && pixelColor != g_MaskColor)
             {
                 pixelColor = _getpixel(m_pBGTexture, xPos % m_pBGTexture->w, yPos % m_pBGTexture->h);
                 _putpixel(pBGBitmap, xPos, yPos, pixelColor);
             }
             // Put a keycolor pixel in the bg otherwise
             else
-                _putpixel(pBGBitmap, xPos, yPos, g_KeyColor);
+                _putpixel(pBGBitmap, xPos, yPos, g_MaskColor);
         }
     }
 
@@ -737,11 +736,11 @@ unsigned char SLTerrain::GetFGColorPixel(const int pixelX, const int pixelY) con
     // If it's still below or to the sides out of bounds after
     // wrapping what is supposed to be wrapped, shit is out of bounds.
     if (posX < 0 || posX >= m_pMainBitmap->w || posY >= m_pMainBitmap->h)
-        return g_KeyColor;
+        return g_MaskColor;
 
     // If above terrain bitmap, return key color.
     if (posY < 0)
-        return g_KeyColor;
+        return g_MaskColor;
 
 //    RTEAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     return _getpixel(m_pFGColor->GetBitmap(), posX, posY);
@@ -764,11 +763,11 @@ unsigned char SLTerrain::GetBGColorPixel(const int pixelX, const int pixelY) con
     // If it's still below or to the sides out of bounds after
     // wrapping what is supposed to be wrapped, shit is out of bounds.
     if (posX < 0 || posX >= m_pMainBitmap->w || posY >= m_pMainBitmap->h)
-        return g_KeyColor;
+        return g_MaskColor;
 
     // If above terrain bitmap, return key color.
     if (posY < 0)
-        return g_KeyColor;
+        return g_MaskColor;
 
 //    RTEAssert(m_pMainBitmap->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
     return _getpixel(m_pBGColor->GetBitmap(), posX, posY);
@@ -1014,10 +1013,10 @@ deque<MOPixel *> SLTerrain::EraseSilhouette(BITMAP *pSprite,
             matPixel = getpixel(m_pMainBitmap, terrX, terrY);
             colorPixel = getpixel(m_pFGColor->GetBitmap(), terrX, terrY);
 
-            if (testPixel != g_KeyColor)
+            if (testPixel != g_MaskColor)
             {
                 // Only add PixelMO if we're not due to skip any
-                if (makeMOPs && matPixel != g_MaterialAir && colorPixel != g_KeyColor && ++skipCount > skipMOP && MOPDeque.size() < maxMOPs)
+                if (makeMOPs && matPixel != g_MaterialAir && colorPixel != g_MaskColor && ++skipCount > skipMOP && MOPDeque.size() < maxMOPs)
                 {
                     skipCount = 0;
                     sceneMat = g_SceneMan.GetMaterialFromID(matPixel);
@@ -1038,10 +1037,10 @@ deque<MOPixel *> SLTerrain::EraseSilhouette(BITMAP *pSprite,
                 // Clear the terrain pixels
                 if (matPixel != g_MaterialAir)
                     putpixel(m_pMainBitmap, terrX, terrY, g_MaterialAir);
-				if (colorPixel != g_KeyColor)
+				if (colorPixel != g_MaskColor)
 				{
-					putpixel(m_pFGColor->GetBitmap(), terrX, terrY, g_KeyColor);
-					g_SceneMan.RegisterTerrainChange(terrX, terrY, 1, 1, g_KeyColor, false);
+					putpixel(m_pFGColor->GetBitmap(), terrX, terrY, g_MaskColor);
+					g_SceneMan.RegisterTerrainChange(terrX, terrY, 1, 1, g_MaskColor, false);
 				}
             }
         }    
@@ -1129,7 +1128,7 @@ void SLTerrain::ApplyMovableObject(MovableObject *pMObject)
 		
         // COLOR
         // Clear and draw the source sprite onto the temp bitmap
-        clear_to_color(pTempBitmap, g_KeyColor);
+        clear_to_color(pTempBitmap, g_MaskColor);
         // Draw the actor and then the scene foreground to temp bitmap
         pMOSprite->Draw(pTempBitmap, bitmapScroll, g_DrawColor, true);
         m_pFGColor->Draw(pTempBitmap, notUsed, bitmapScroll);
@@ -1137,7 +1136,7 @@ void SLTerrain::ApplyMovableObject(MovableObject *pMObject)
         masked_blit(pTempBitmap, GetFGColorBitmap(), 0, 0, bitmapScroll.m_X, bitmapScroll.m_Y, pTempBitmap->w, pTempBitmap->h);
 
 		// Register terrain change
-		g_SceneMan.RegisterTerrainChange(bitmapScroll.m_X, bitmapScroll.m_Y, pTempBitmap->w, pTempBitmap->h, g_KeyColor, false);
+		g_SceneMan.RegisterTerrainChange(bitmapScroll.m_X, bitmapScroll.m_Y, pTempBitmap->w, pTempBitmap->h, g_MaskColor, false);
 
 
 // TODO: centralize seam drawing!
@@ -1205,11 +1204,11 @@ void SLTerrain::RegisterTerrainChange(TerrainObject *pTObject)
 
 	if (pTObject->HasBGColor())
 	{
-		g_SceneMan.RegisterTerrainChange(loc.m_X, loc.m_Y, pTObject->GetBitmapWidth(), pTObject->GetBitmapHeight(), g_KeyColor, true);
+		g_SceneMan.RegisterTerrainChange(loc.m_X, loc.m_Y, pTObject->GetBitmapWidth(), pTObject->GetBitmapHeight(), g_MaskColor, true);
 	}
 
 	// Register terrain change
-	g_SceneMan.RegisterTerrainChange(loc.m_X, loc.m_Y, pTObject->GetBitmapWidth(), pTObject->GetBitmapHeight(), g_KeyColor, false);
+	g_SceneMan.RegisterTerrainChange(loc.m_X, loc.m_Y, pTObject->GetBitmapWidth(), pTObject->GetBitmapHeight(), g_MaskColor, false);
 }
 
 
@@ -1248,11 +1247,11 @@ void SLTerrain::ApplyTerrainObject(TerrainObject *pTObject)
 	if (pTObject->HasBGColor())
 	{
 		draw_sprite(m_pBGColor->GetBitmap(), pTObject->GetBGColorBitmap(), loc.m_X, loc.m_Y);
-		g_SceneMan.RegisterTerrainChange(loc.m_X, loc.m_Y, pTObject->GetBitmapWidth(), pTObject->GetBitmapHeight(), g_KeyColor, true);
+		g_SceneMan.RegisterTerrainChange(loc.m_X, loc.m_Y, pTObject->GetBitmapWidth(), pTObject->GetBitmapHeight(), g_MaskColor, true);
 	}
 
 	// Register terrain change
-	g_SceneMan.RegisterTerrainChange(loc.m_X, loc.m_Y, pTObject->GetBitmapWidth(), pTObject->GetBitmapHeight(), g_KeyColor, false);
+	g_SceneMan.RegisterTerrainChange(loc.m_X, loc.m_Y, pTObject->GetBitmapWidth(), pTObject->GetBitmapHeight(), g_MaskColor, false);
 
     // Add a box to the updated areas list to show there's been change to the materials layer
     m_UpdatedMateralAreas.push_back(Box(loc, pTObject->GetMaterialBitmap()->w, pTObject->GetMaterialBitmap()->h));
@@ -1339,7 +1338,7 @@ void SLTerrain::CleanAirBox(Box box, bool wrapsX, bool wrapsY)
 					matPixel = g_MaterialAir;
 				}
 				if (matPixel == g_MaterialAir)
-					_putpixel(m_pFGColor->GetBitmap(), wrapX, wrapY, g_KeyColor);
+					_putpixel(m_pFGColor->GetBitmap(), wrapX, wrapY, g_MaskColor);
 			}
 
         }
@@ -1373,7 +1372,7 @@ void SLTerrain::CleanAir()
                 matPixel = g_MaterialAir;
             }
             if (matPixel == g_MaterialAir)
-                _putpixel(m_pFGColor->GetBitmap(), x, y, g_KeyColor);
+                _putpixel(m_pFGColor->GetBitmap(), x, y, g_MaskColor);
         }
     }
 
@@ -1390,7 +1389,7 @@ void SLTerrain::CleanAir()
 
 void SLTerrain::ClearAllMaterial()
 {
-    clear_to_color(m_pMainBitmap, g_KeyColor);
+    clear_to_color(m_pMainBitmap, g_MaskColor);
     clear_to_color(m_pFGColor->GetBitmap(), g_MaterialAir);
 }
 

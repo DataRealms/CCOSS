@@ -456,8 +456,20 @@
     <ClInclude Include="System\Entity.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="Managers\PerformanceMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Managers\PrimitiveMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Managers\PostProcessMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
     <ClInclude Include="Entities\SoundContainer.h">
       <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Primitive.h">
+      <Filter>System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -861,8 +873,20 @@
     <ClCompile Include="System\Entity.cpp">
       <Filter>System</Filter>
     </ClCompile>
+    <ClCompile Include="Managers\PerformanceMan.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Managers\PrimitiveMan.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Managers\PostProcessMan.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
     <ClCompile Include="Entities\SoundContainer.cpp">
       <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Primitive.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -20,6 +20,7 @@
 #include "SLTerrain.h"
 #include "GUIInput.h"
 #include "Icon.h"
+#include "PerformanceMan.h"
 
 extern volatile bool g_Quit;
 extern bool g_ResetActivity;
@@ -2026,11 +2027,10 @@ void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whi
     // Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
     if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == -1 || m_aControlScheme[whichPlayer].GetDevice() == DEVICE_MOUSE_KEYB))
     {
-        float windowResMultiplier = g_FrameMan.IsFullscreen() ? g_FrameMan.NxFullscreen() : g_FrameMan.NxWindowed();
-        int mouseX = MAX(x, mouse_x);
-        int mouseY = MAX(y, mouse_y);
-        mouseX = MIN(mouseX, x + width * windowResMultiplier);
-        mouseY = MIN(mouseY, y + height * windowResMultiplier);
+        int mouseX = std::max(x, static_cast<int>(mouse_x));
+        int mouseY = std::max(y, static_cast<int>(mouse_y));
+        mouseX = std::min(mouseX, x + width * g_FrameMan.ResolutionMultiplier());
+        mouseY = std::min(mouseY, y + height * g_FrameMan.ResolutionMultiplier());
 		
         position_mouse(mouseX, mouseY);
     }
@@ -2555,9 +2555,8 @@ int UInputMan::Update()
 
         // Enable the mouse cursor positioning again after having been disabled. Only do this when the mouse is within the drawing area so it
         // won't cause the whole window to move if the user clicks the title bar and unintentionally drags it due to programmatic positioning.
-        float mouseDenominator = g_FrameMan.IsFullscreen() ? g_FrameMan.NxFullscreen() : g_FrameMan.NxWindowed();
-        int mX = (float)mouse_x / mouseDenominator;
-        int mY = (float)mouse_y / mouseDenominator;
+        int mX = mouse_x / g_FrameMan.ResolutionMultiplier();
+        int mY = mouse_y / g_FrameMan.ResolutionMultiplier();
         if (m_DisableMouseMoving && m_PrepareToEnableMouseMoving && (mX >= 0 && mX < g_FrameMan.GetResX() && mY >= 0 && mY < g_FrameMan.GetResY()))
             m_DisableMouseMoving = m_PrepareToEnableMouseMoving = false;
     }
@@ -2794,13 +2793,12 @@ int UInputMan::Update()
             g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
     }
 
-    // Toggle fullscreen / windowed
-    if (key_shifts & KB_ALT_FLAG && KeyPressed(KEY_ENTER)) {
-        g_FrameMan.ToggleFullscreen();
-    }
+	if (key_shifts & KB_ALT_FLAG && KeyPressed(KEY_ENTER)) {
+		g_FrameMan.SwitchResolutionMultiplier((g_FrameMan.ResolutionMultiplier() >= 2) ? 1 : 2);
+	}
 
     // Only allow performance tweaking if showing the stats
-    if (g_FrameMan.IsShowingPerformanceStats())
+    if (g_PerformanceMan.IsShowingPerformanceStats())
     {
         // Manipulate timescaling
         if (KeyHeld(KEY_2))
@@ -2842,7 +2840,7 @@ int UInputMan::Update()
 
     // Perf stats display toggle
     if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_P))
-        g_FrameMan.ShowPerformanceStats(!g_FrameMan.IsShowingPerformanceStats());
+		g_PerformanceMan.ShowPerformanceStats(!g_PerformanceMan.IsShowingPerformanceStats());
 
     // Force one sim update per graphics frame
     if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_O))

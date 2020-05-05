@@ -234,7 +234,7 @@ int MainMenuGUI::Create(Controller *pController)
     m_aSkirmishButton[P4TEAM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP4Team"));
     m_pCPUTeamLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelCPUTeam"));
 
-    m_aOptionButton[FULLSCREEN] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonFullscreen"));
+    m_aOptionButton[RESOLUTIONMULTIPLIER] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonFullscreen"));
     m_aOptionButton[P1NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP1NextDevice"));
     m_aOptionButton[P2NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP2NextDevice"));
     m_aOptionButton[P3NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP3NextDevice"));
@@ -353,15 +353,13 @@ int MainMenuGUI::Create(Controller *pController)
     m_pResolutionCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ComboResolution"));
     UpdateResolutionCombo();
 
-    // Set labels only when we know max resolution, as it defines whether we can switch to 2X windowed mode or not
-	if (g_FrameMan.IsFullscreen())
-        m_aOptionButton[FULLSCREEN]->SetText("Go 1X Window");
-    else
-    {
-        if (g_FrameMan.NxWindowed() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 - 25 && g_FrameMan.GetResY() <= m_MaxResY / 2 - 25)
-            m_aOptionButton[FULLSCREEN]->SetText("Go 2X Window");
-        else
-            m_aOptionButton[FULLSCREEN]->SetText("Go Fullscreen");
+	// Set labels only when we know max resolution, as it defines whether we can switch to 2X windowed mode or not
+	if (g_FrameMan.ResolutionMultiplier() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 && g_FrameMan.GetResY() <= m_MaxResY / 2) {
+		m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 2X");
+	} else if (g_FrameMan.ResolutionMultiplier() > 1) {
+		m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 1X");
+	} else {
+		m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Unavailable");
     }
 
     m_pResolutionNoticeLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelResolutionNotice"));
@@ -1025,40 +1023,28 @@ void MainMenuGUI::Update()
                 g_GUISound.ExitMenuSound()->Play();
             }
 
-			// Fullscreen toggle button pressed
-			if (anEvent.GetControl() == m_aOptionButton[FULLSCREEN])
-            {
-                g_GUISound.ButtonPressSound()->Play();
+			// Multiplier toggle button pressed
+			if (anEvent.GetControl() == m_aOptionButton[RESOLUTIONMULTIPLIER]) {
+				g_GUISound.ButtonPressSound()->Play();
 
-                // Was fullscreen, switch to 1x window
-                if (g_FrameMan.IsFullscreen())
-                {
-                    // First set the multiplier back to 1 and then switch to fullscreen so we get the right multiplier
-                    g_FrameMan.SwitchWindowMultiplier(1);
-                    g_FrameMan.ToggleFullscreen();
-                }
-                // Was windowed
-                else
-                {
-                    // Was at 1x, change to 2x, but only if resolution is reasonable
-                    if (g_FrameMan.NxWindowed() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 - 25 && g_FrameMan.GetResY() <= m_MaxResY / 2 - 25)
-                        g_FrameMan.SwitchWindowMultiplier(2);
-                    // Was at 2x, change to fullscreen
-                    else
-                        g_FrameMan.ToggleFullscreen();
-                }
+				if (g_FrameMan.ResolutionMultiplier() > 1) {
+					g_FrameMan.SwitchResolutionMultiplier(1);
+				} else if (g_FrameMan.ResolutionMultiplier() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 && g_FrameMan.GetResY() <= m_MaxResY / 2) {
+					g_FrameMan.SwitchResolutionMultiplier(2);
+				}
+			}
 
-                // Update the label to whatever we ended up with
-                if (g_FrameMan.IsFullscreen())
-                    m_aOptionButton[FULLSCREEN]->SetText("Go 1X Window");
-                else
-                {
-                    if (g_FrameMan.NxWindowed() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 - 25 && g_FrameMan.GetResY() <= m_MaxResY / 2 - 25)
-                        m_aOptionButton[FULLSCREEN]->SetText("Go 2X Window");
-                    else
-                        m_aOptionButton[FULLSCREEN]->SetText("Go Fullscreen");
-                }
-            }
+			// Update the label to whatever we ended up with
+			if (g_FrameMan.ResolutionMultiplier() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 && g_FrameMan.GetResY() <= m_MaxResY / 2) {
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetVisible(true);
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 2X");
+			} else if (g_FrameMan.ResolutionMultiplier() > 1) {
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetVisible(true); 
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 1X");
+			} else {
+				//m_aOptionButton[RESOLUTIONMULTIPLIER]->SetVisible(false);
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Unavailable");
+			}
 
 			// Return to main menu button pressed
 			if (anEvent.GetControl() == m_aMainMenuButton[BACKTOMAIN])
@@ -1595,19 +1581,10 @@ void MainMenuGUI::Update()
                         int newResY = g_FrameMan.GetResY();
                         sscanf(pResItem->m_Name.c_str(), "%4dx%4d", &newResX, &newResY);
                         // Sanity check the values and then set them as the new resolution to be switched to next time FrameMan is created
-                        /*if (newResX >= 400 && newResX < 3000 && newResY >= 400 && newResY < 3000)*/
-						if (g_FrameMan.IsValidResolution(newResX, newResY))
-                        {
-                            // Force double virtual fullscreen res if the res is too high
-                            if (newResX >= 1280)
-                                g_FrameMan.SetNewNxFullscreen(2);
-                            // Not oversized resolution
-                            else
-                                g_FrameMan.SetNewNxFullscreen(1);
-
-                            g_FrameMan.SetNewResX(newResX /= g_FrameMan.GetNewNxFullscreen());
-                            g_FrameMan.SetNewResY(newResY /= g_FrameMan.GetNewNxFullscreen());
-                        }
+						if (g_FrameMan.IsValidResolution(newResX, newResY)) {
+							g_FrameMan.SetNewResX(newResX / g_FrameMan.ResolutionMultiplier());
+							g_FrameMan.SetNewResY(newResY / g_FrameMan.ResolutionMultiplier());
+						}
                     }
 
                     // Update the resolution restart notice
@@ -2030,119 +2007,81 @@ void MainMenuGUI::UpdateTeamBoxes()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the contents of the screen resolution combo box
 
-void MainMenuGUI::UpdateResolutionCombo()
-{
+void MainMenuGUI::UpdateResolutionCombo() {
     // Refill possible resolutions
     m_pResolutionCombo->SetText("");
     m_pResolutionCombo->ClearList();
 	
-    // Only refill possible resolutions if empty
-    if (m_pResolutionCombo->GetCount() <= 0)
-    {
-        GFX_MODE_LIST *pList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
+    if (m_pResolutionCombo->GetCount() <= 0) {
+		// Get a list of modes from the fullscreen driver even though we're not using it. This is so we don't need to populate the list manually and has all the reasonable resolutions.
+        GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
 
         int width = 0;
         int height = 0;
-        char resString[256] = "";
+		char resString[256] = "";
         // Index of found useful resolution (32bit)
         int foundIndex = 0;
-        // The saved index of the entry that has the current resolution setting
         int currentResIndex = -1;
 
         // Process and annotate the list
-        for (int i = 0; pList && i < pList->num_modes; ++i)
-        {
+        for (int i = 0; resList && i < resList->num_modes; ++i) {
             // Only list 32 bpp modes
-            if (pList->mode[i].bpp == 32)
-            {
-                width = pList->mode[i].width;
-                height = pList->mode[i].height;
+            if (resList->mode[i].bpp == 32) {
+                width = resList->mode[i].width;
+                height = resList->mode[i].height;
 
 				// Resolutions must be multiples of 4 or we'll get 'Overlays not supported' during GFX mode init
-				if (g_FrameMan.IsValidResolution(width, height) && width % 4 == 0)
-				{
+				if (g_FrameMan.IsValidResolution(width, height) && width % 4 == 0) {
 					// Fix wacky resolutions that are taller than wide
-					if (height > width)
-					{
-						height = pList->mode[i].width;
-						width = pList->mode[i].height;
+					if (height > width) {
+						height = resList->mode[i].width;
+						width = resList->mode[i].height;
 					}
-
-					// Try to figure the max available resotion
-					if (width > m_MaxResX)
-					{
+					// Try to figure the max available resolution
+					if (width > m_MaxResX) {
 						m_MaxResX = width;
 						m_MaxResY = height;
 					}
-
-					// Construct and add the resolution string to the combobox
 					sprintf_s(resString, sizeof(resString), "%ix%i", width, height);
 
 					// Add useful notation to the standardized resolutions
-					if (width == 320 && height == 200)
-						strcat(resString, " CGA");
-					if (width == 320 && height == 240)
-						strcat(resString, " QVGA");
-					if (width == 640 && height == 480)
-						strcat(resString, " VGA");
-					if (width == 720 && height == 480)
-						strcat(resString, " NTSC");
-					if (width == 768 && height == 576)
-						strcat(resString, " PAL");
-					if ((width == 800 || height == 854) && height == 480)
-						strcat(resString, " WVGA");
-					if (width == 800 && height == 600)
-						strcat(resString, " SVGA");
-					if (width == 1024 && height == 600)
-						strcat(resString, " WSVGA");
-					if (width == 1024 && height == 768)
-						strcat(resString, " XGA");
-					if (width == 1280 && height == 720)
-						strcat(resString, " HD720");
-					if (width == 1280 && (height == 768 || height == 800))
-						strcat(resString, " WXGA");
-	// These below are forced to be done in 2X pixels fullscreen
-					if (width == 1280 && height == 1024)
-						strcat(resString, " SXGA");
-					if (width == 1400 && height == 1050)
-						strcat(resString, " SXGA+");
-					if (width == 1600 && height == 1200)
-						strcat(resString, " UGA");
-					if (width == 1680 && height == 1050)
-						strcat(resString, " WSXGA+");
-					if (width == 1920 && height == 1080)
-						strcat(resString, " HD1080");
-					if (width == 1920 && height == 1200)
-						strcat(resString, " WUXGA");
-					if (width == 2048 && height == 1080)
-						strcat(resString, " 2K");
+					if (width == 800 && height == 600) { strcat_s(resString, sizeof(resString), " SVGA"); }
+					if (width == 1024 && height == 600) { strcat_s(resString, sizeof(resString), " WSVGA"); }
+					if (width == 1024 && height == 768) { strcat_s(resString, sizeof(resString), " XGA"); }
+					if (width == 1280 && height == 720) { strcat_s(resString, sizeof(resString), " HD"); }
+					if (width == 1280 && (height == 768 || height == 800)) { strcat_s(resString, sizeof(resString), " WXGA"); }
+					if (width == 1280 && height == 1024) { strcat_s(resString, sizeof(resString), " SXGA"); }
+					if (width == 1400 && height == 1050) { strcat_s(resString, sizeof(resString), " SXGA+"); }
+					if (width == 1600 && height == 900) { strcat_s(resString, sizeof(resString), " HD+"); }
+					if (width == 1600 && height == 1200) { strcat_s(resString, sizeof(resString), " UGA"); }
+					if (width == 1680 && height == 1050) { strcat_s(resString, sizeof(resString), " WSXGA+"); }
+					if (width == 1920 && height == 1080) { strcat_s(resString, sizeof(resString), " FHD"); }
+					if (width == 1920 && height == 1200) { strcat_s(resString, sizeof(resString), " WUXGA"); }
+					if (width == 2048 && height == 1080) { strcat_s(resString, sizeof(resString), " DCI 2K"); }
+					if (width == 2560 && height == 1440) { strcat_s(resString, sizeof(resString), " QHD"); }
+					if (width == 3200 && height == 1800) { strcat_s(resString, sizeof(resString), " QHD+"); }
+					if (width == 3840 && height == 2160) { strcat_s(resString, sizeof(resString), " 4K UHD"); }
+					if (width == 4096 && height == 2160) { strcat_s(resString, sizeof(resString), " DCI 4K"); }
 
 					m_pResolutionCombo->AddItem(resString);
 
 					// If this is what we're currently set to have at next start, select it afterward
-					if ((g_FrameMan.GetNewResX() * g_FrameMan.GetNewNxFullscreen()) == width && (g_FrameMan.GetNewResY() * g_FrameMan.GetNewNxFullscreen()) == height)
+					if ((g_FrameMan.GetNewResX() * g_FrameMan.ResolutionMultiplier()) == width && (g_FrameMan.GetNewResY() * g_FrameMan.ResolutionMultiplier()) == height) {
 						currentResIndex = foundIndex;
-
+					}
 					// Only increment this when we find a usable 32bit resolution
 					foundIndex++;
 				}
             }
         }
-
-        // Get rid of the mode list, we're done with it
-		if (pList)
-		{
-			destroy_gfx_mode_list(pList);
-		}
+		if (resList) { destroy_gfx_mode_list(resList); }
 		
         // If none of the listed matched our resolution set for next start, add a 'custom' one to display as the current res
-        if (currentResIndex < 0)
-        {
-            sprintf_s(resString, sizeof(resString), "%ix%i Custom", g_FrameMan.GetNewResX() * g_FrameMan.GetNewNxFullscreen(), g_FrameMan.GetNewResY() * g_FrameMan.GetNewNxFullscreen());
-            m_pResolutionCombo->AddItem(resString);
-            currentResIndex = m_pResolutionCombo->GetCount() - 1;
-        }
-
+		if (currentResIndex < 0) {
+			sprintf_s(resString, sizeof(resString), "%ix%i Custom", g_FrameMan.GetNewResX() * g_FrameMan.ResolutionMultiplier(), g_FrameMan.GetNewResY() * g_FrameMan.ResolutionMultiplier());
+			m_pResolutionCombo->AddItem(resString);
+			currentResIndex = m_pResolutionCombo->GetCount() - 1;
+		}
         // Show the current resolution item to be the selected one
         m_pResolutionCombo->SetSelectedIndex(currentResIndex);
     }

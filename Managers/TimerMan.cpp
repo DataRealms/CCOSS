@@ -190,7 +190,7 @@ void TimerMan::Update()
     m_RealTimeTicks = tickReading.QuadPart - m_StartTime;
 
     // Figure the increase in real time 
-    uint64_t timeIncrease = m_RealTimeTicks - prevTime;
+	unsigned long long timeIncrease = m_RealTimeTicks - prevTime;
     // Cap it if too long (as when the app went out of focus)
     if (timeIncrease > m_RealToSimCap)
         timeIncrease = m_RealToSimCap;

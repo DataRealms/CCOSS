@@ -122,16 +122,16 @@ int BunkerAssembly::Create(BunkerAssemblyScheme * pScheme)
         return -1;
 
 	m_pPresentationBitmap = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-	clear_to_color(m_pPresentationBitmap, g_KeyColor);
+	clear_to_color(m_pPresentationBitmap, g_MaskColor);
 
 	m_pFGColor = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-	clear_to_color(m_pFGColor, g_KeyColor);
+	clear_to_color(m_pFGColor, g_MaskColor);
 
 	m_pMaterial = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-	clear_to_color(m_pMaterial, g_KeyColor);
+	clear_to_color(m_pMaterial, g_MaskColor);
 
 	m_pBGColor = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-	clear_to_color(m_pBGColor, g_KeyColor);
+	clear_to_color(m_pBGColor, g_MaskColor);
 
 	m_BitmapOffset = pScheme->GetBitmapOffset();
 	m_ParentAssemblyScheme = pScheme->GetPresetName();
@@ -231,19 +231,19 @@ int BunkerAssembly::ReadProperty(std::string propName, Reader &reader)
 			//Delete existing bitmaps to avoid leaks if someone adds assembly to multiple groups by mistake
 			delete m_pPresentationBitmap;
 			m_pPresentationBitmap = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-			clear_to_color(m_pPresentationBitmap, g_KeyColor);
+			clear_to_color(m_pPresentationBitmap, g_MaskColor);
 
 			delete m_pFGColor;
 			m_pFGColor = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-			clear_to_color(m_pFGColor, g_KeyColor);
+			clear_to_color(m_pFGColor, g_MaskColor);
 
 			delete m_pMaterial;
 			m_pMaterial = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-			clear_to_color(m_pMaterial, g_KeyColor);
+			clear_to_color(m_pMaterial, g_MaskColor);
 
 			delete m_pBGColor;
 			m_pBGColor = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-			clear_to_color(m_pBGColor, g_KeyColor);
+			clear_to_color(m_pBGColor, g_MaskColor);
 
 			m_ParentAssemblyScheme = parentScheme;
 			m_BitmapOffset = pScheme->GetBitmapOffset();
@@ -448,7 +448,7 @@ bool BunkerAssembly::IsOnScenePoint(Vector &scenePoint) const
     {
         // Scene point on the bitmap
         Vector bitmapPoint = scenePoint - bitmapPos;
-        if (getpixel(m_pPresentationBitmap, bitmapPoint.m_X, bitmapPoint.m_Y) != g_KeyColor)
+        if (getpixel(m_pPresentationBitmap, bitmapPoint.m_X, bitmapPoint.m_Y) != g_MaskColor)
            return true;
     }
 

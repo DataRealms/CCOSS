@@ -423,28 +423,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:			ForceSoftwareGfxDriver
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Whether we're told to use software driver via settings
-//					Windows: GFX_DIRECTX_SOFT
-// Arguments:       None.
-// Return value:    true if forced to use software driver.
-
-	bool ForceSoftwareGfxDriver() const { return m_ForceSoftwareGfxDriver; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			ForceSafeGfxDriver
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Whether we're told to use safe driver via settings. Overrides software driver.
-//					Windows: GFX_DIRECTX_SAFE
-// Arguments:       None.
-// Return value:    true if forced to use software driver.
-
-	bool ForceSafeGfxDriver() const { return m_ForceSafeGfxDriver; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:			ForceVirtualFullScreenGfxDriver
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Whether we're told to use windowed driver with borderless style driver via settings.
@@ -618,10 +596,6 @@ protected:
 	//Whether CC uses additional Draws during MO's PreTravel and PostTravel to 
 	//update MO layer this frame with more precision(true), or it just uses data from the last frame with less precision(false)
 	bool m_PreciseCollisions;
-	// Whether we should try using software-mode drivers
-	bool m_ForceSoftwareGfxDriver;
-	// Whether we should try using safe-mode drivers
-	bool m_ForceSafeGfxDriver;
 	// Whether we should try using fullscreen mode
 	bool m_ForceVirtualFullScreenGfxDriver;
 	// Whether we should try using overlayed window driver

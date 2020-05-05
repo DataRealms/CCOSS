@@ -1424,52 +1424,41 @@ int LuaMan::Create()
             .def("DrawnSimUpdate", &TimerMan::DrawnSimUpdate),
 
         class_<FrameMan>("FrameManager")
-            .def("ResetSplitScreens", &FrameMan::ResetSplitScreens)
-            .property("PPM", &FrameMan::GetPPM, &FrameMan::SetPPM)
+            .property("PPM", &FrameMan::GetPPM)
             .property("MPP", &FrameMan::GetMPP)
             .property("PPL", &FrameMan::GetPPL)
             .property("LPP", &FrameMan::GetLPP)
-            .property("ResX", &FrameMan::GetResX)
-            .property("ResY", &FrameMan::GetResY)
-            .property("ResBPP", &FrameMan::GetBPP)
-            .property("HSplit", &FrameMan::GetHSplit, &FrameMan::SetHSplit)
-            .property("VSplit", &FrameMan::GetVSplit, &FrameMan::SetVSplit)
             .property("PlayerScreenWidth", &FrameMan::GetPlayerScreenWidth)
             .property("PlayerScreenHeight", &FrameMan::GetPlayerScreenHeight)
-            .def("GetPlayerFrameBufferWidth", &FrameMan::GetPlayerFrameBufferWidth)
-			.def("GetPlayerFrameBufferHeight", &FrameMan::GetPlayerFrameBufferHeight)
+			.def("LoadPalette", &FrameMan::LoadPalette)
             .def("SetScreenText", &FrameMan::SetScreenText)
             .def("ClearScreenText", &FrameMan::ClearScreenText)
-            .def("IsFullscreen", &FrameMan::IsFullscreen)
-            .property("PostProcessing", &FrameMan::IsPostProcessing, &FrameMan::EnablePostProcessing)
-            .property("PostPixelGlow", &FrameMan::IsPixelGlowEnabled, &FrameMan::EnablePixelGlow)
-            .def("LoadPalette", &FrameMan::LoadPalette)
             .def("FadeInPalette", &FrameMan::FadeInPalette)
             .def("FadeOutPalette", &FrameMan::FadeOutPalette)
             .def("SaveScreenToBMP", &FrameMan::SaveScreenToBMP)
             .def("SaveBitmapToBMP", &FrameMan::SaveBitmapToBMP)
-            .def("ResetFrameTimer", &FrameMan::ResetFrameTimer)
-            .def("ToggleFullscreen", &FrameMan::ToggleFullscreen)
-            .def("ClearBackBuffer8", &FrameMan::ClearBackBuffer8)
-            .def("ClearBackBuffer32", &FrameMan::ClearBackBuffer32)
-            .def("ShowPerformanceStats", &FrameMan::ShowPerformanceStats)
             .def("FlashScreen", &FrameMan::FlashScreen)
-            .def("DrawCirclePrimitive", (void (FrameMan::*)(Vector pos, int radius, int color))&FrameMan::DrawCirclePrimitive)
-            .def("DrawCircleFillPrimitive", (void (FrameMan::*)(Vector pos, int radius, int color))&FrameMan::DrawCircleFillPrimitive)
-            .def("DrawLinePrimitive", (void (FrameMan::*)(Vector start, Vector end, int color))&FrameMan::DrawLinePrimitive)
-            .def("DrawTextPrimitive", (void (FrameMan::*)(Vector start, std::string text, bool isSmall, int alignment))&FrameMan::DrawTextPrimitive)
-            .def("DrawBitmapPrimitive", (void (FrameMan::*)(Vector start, Entity * pEntity, float rotAngle, int frame))&FrameMan::DrawBitmapPrimitive)
-			.def("DrawBoxPrimitive", (void (FrameMan::*)(Vector start, Vector end, int color))&FrameMan::DrawBoxPrimitive)
-            .def("DrawBoxFillPrimitive", (void (FrameMan::*)(Vector start, Vector end, int color))&FrameMan::DrawBoxFillPrimitive)
-			.def("DrawCirclePrimitive", (void (FrameMan::*)(int player, Vector pos, int radius, int color))&FrameMan::DrawCirclePrimitive)
-			.def("DrawCircleFillPrimitive", (void (FrameMan::*)(int player, Vector pos, int radius, int color))&FrameMan::DrawCircleFillPrimitive)
-			.def("DrawLinePrimitive", (void (FrameMan::*)(int player, Vector start, Vector end, int color))&FrameMan::DrawLinePrimitive)
-			.def("DrawTextPrimitive", (void (FrameMan::*)(int player, Vector start, std::string text, bool isSmall, int alignment))&FrameMan::DrawTextPrimitive)
-			.def("DrawBitmapPrimitive", (void (FrameMan::*)(int player, Vector start, Entity * pEntity, float rotAngle, int frame))&FrameMan::DrawBitmapPrimitive)
-			.def("DrawBoxPrimitive", (void (FrameMan::*)(int player, Vector start, Vector end, int color))&FrameMan::DrawBoxPrimitive)
-			.def("DrawBoxFillPrimitive", (void (FrameMan::*)(int player, Vector start, Vector end, int color))&FrameMan::DrawBoxFillPrimitive)
 			.def("CalculateTextHeight", &FrameMan::CalculateTextHeight)
 			.def("CalculateTextWidth", &FrameMan::CalculateTextWidth),
+
+		class_<PostProcessMan>("PostProcessManager")
+			.def("RegisterPostEffect", &PostProcessMan::RegisterPostEffect),
+
+		class_<PrimitiveMan>("PrimitiveManager")
+			.def("DrawLinePrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawLinePrimitive)
+			.def("DrawLinePrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawLinePrimitive)
+			.def("DrawBoxPrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawBoxPrimitive)
+			.def("DrawBoxPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawBoxPrimitive)
+			.def("DrawBoxFillPrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawBoxFillPrimitive)
+			.def("DrawBoxFillPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawBoxFillPrimitive)
+			.def("DrawCirclePrimitive", (void (PrimitiveMan::*)(Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCirclePrimitive)
+			.def("DrawCirclePrimitive", (void (PrimitiveMan::*)(short player, Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCirclePrimitive)
+			.def("DrawCircleFillPrimitive", (void (PrimitiveMan::*)(Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCircleFillPrimitive)
+			.def("DrawCircleFillPrimitive", (void (PrimitiveMan::*)(short player, Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCircleFillPrimitive)
+			.def("DrawTextPrimitive", (void (PrimitiveMan::*)(Vector start, std::string text, bool isSmall, short alignment))&PrimitiveMan::DrawTextPrimitive)
+			.def("DrawTextPrimitive", (void (PrimitiveMan::*)(short player, Vector start, std::string text, bool isSmall, short alignment))&PrimitiveMan::DrawTextPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(Vector start, Entity * pEntity, float rotAngle, unsigned short frame))&PrimitiveMan::DrawBitmapPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Entity * pEntity, float rotAngle, unsigned short frame))&PrimitiveMan::DrawBitmapPrimitive),
 
         class_<PresetMan>("PresetManager")
             .def("LoadDataModule", (bool (PresetMan::*)(string))&PresetMan::LoadDataModule)
@@ -1761,11 +1750,9 @@ int LuaMan::Create()
             .def("ShortestDistance", &SceneMan::ShortestDistance)
             .def("ObscuredPoint", (bool (SceneMan::*)(Vector &, int))&SceneMan::ObscuredPoint)//, out_value(_2))
             .def("ObscuredPoint", (bool (SceneMan::*)(int, int, int))&SceneMan::ObscuredPoint)
-            .def("RegisterPostEffect", &SceneMan::RegisterPostEffect)
             .def("AddSceneObject", &SceneMan::AddSceneObject)
             .def("AddTerrainObject", &SceneMan::AddTerrainObject)
-			.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans)
-            .def("ClearPostEffects", &SceneMan::ClearPostEffects),
+			.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans),
 
 		class_<DataModule>("DataModule")
 			.def_readwrite("Presets", &DataModule::m_EntityList, return_stl_iterator)
@@ -2226,6 +2213,8 @@ int LuaMan::Create()
     // Assign the manager instances to globals in the lua master state
     globals(m_pMasterState)["TimerMan"] = &g_TimerMan;
     globals(m_pMasterState)["FrameMan"] = &g_FrameMan;
+	globals(m_pMasterState)["PostProcessMan"] = &g_PostProcessMan;
+	globals(m_pMasterState)["PrimitiveMan"] = &g_PrimitiveMan;
     globals(m_pMasterState)["PresetMan"] = &g_PresetMan;
     globals(m_pMasterState)["AudioMan"] = &g_AudioMan;
     globals(m_pMasterState)["UInputMan"] = &g_UInputMan;

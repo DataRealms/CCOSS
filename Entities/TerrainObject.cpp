@@ -93,7 +93,7 @@ int TerrainObject::Create(ContentFile *pBitmapFile,
     }
 
     if (m_DrawTrans = drawTrans)
-        m_pBitmap->SetColorKey(g_KeyColor);
+        m_pBitmap->SetColorKey(g_MaskColor);
 
     m_Offset = offset;
 
@@ -269,10 +269,10 @@ BITMAP * TerrainObject::GetGraphicalIcon()
 
     // Checking if the FG has anything to show, if not, show the bg layer isntead
     int piece = m_pFGColor->w / 10;
-    if (getpixel(m_pFGColor, m_pFGColor->w / 2, m_pFGColor->h / 2) != g_KeyColor ||
-        getpixel(m_pFGColor, piece, piece) != g_KeyColor ||
-        getpixel(m_pFGColor, m_pFGColor->w - piece, piece) != g_KeyColor ||
-        getpixel(m_pFGColor, piece, m_pFGColor->h - piece) != g_KeyColor)
+    if (getpixel(m_pFGColor, m_pFGColor->w / 2, m_pFGColor->h / 2) != g_MaskColor ||
+        getpixel(m_pFGColor, piece, piece) != g_MaskColor ||
+        getpixel(m_pFGColor, m_pFGColor->w - piece, piece) != g_MaskColor ||
+        getpixel(m_pFGColor, piece, m_pFGColor->h - piece) != g_MaskColor)
         return m_pFGColor;
     else
         return m_pBGColor;
@@ -329,8 +329,8 @@ bool TerrainObject::IsOnScenePoint(Vector &scenePoint) const
 
         if (IsWithinBox(aScenePoint[i], m_Pos + m_BitmapOffset, m_pFGColor->w, m_pFGColor->h))
         {
-            if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor ||
-               (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor) ||
+            if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor ||
+               (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor) ||
                (m_pMaterial && getpixel(m_pMaterial, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaterialAir))
                return true;
         }
@@ -341,8 +341,8 @@ bool TerrainObject::IsOnScenePoint(Vector &scenePoint) const
     {
         // Scene point on the bitmap
         Vector bitmapPoint = scenePoint - bitmapPos;
-        if (getpixel(m_pFGColor, bitmapPoint.m_X, bitmapPoint.m_Y) != g_KeyColor ||
-           (m_pBGColor && getpixel(m_pBGColor, bitmapPoint.m_X, bitmapPoint.m_Y) != g_KeyColor) ||
+        if (getpixel(m_pFGColor, bitmapPoint.m_X, bitmapPoint.m_Y) != g_MaskColor ||
+           (m_pBGColor && getpixel(m_pBGColor, bitmapPoint.m_X, bitmapPoint.m_Y) != g_MaskColor) ||
            (m_pMaterial && getpixel(m_pMaterial, bitmapPoint.m_X, bitmapPoint.m_Y) != g_MaterialAir))
            return true;
     }

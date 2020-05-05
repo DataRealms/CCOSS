@@ -319,7 +319,7 @@ int ScenarioGUI::Create(Controller *pController)
 	ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.bmp");
 	m_pDefaultPreviewBitmap = defaultPreview.LoadAndReleaseBitmap();
 
-	clear_to_color(m_pScenePreviewBitmap, g_KeyColor);
+	clear_to_color(m_pScenePreviewBitmap, g_MaskColor);
 
     // Set initial focus, category list, and label settings
     m_ScreenChange = true;
@@ -1182,7 +1182,7 @@ void ScenarioGUI::UpdateScenesBox()
 		if (pActivity)
 		{
 			// Clear preview bitmap
-			clear_to_color(m_pScenePreviewBitmap, g_KeyColor);
+			clear_to_color(m_pScenePreviewBitmap, g_MaskColor);
 		}
 
         // Set the currently selected scene's texts

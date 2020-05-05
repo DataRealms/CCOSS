@@ -173,8 +173,8 @@ namespace RTE {
 		virtual BITMAP *LoadAndReleaseBitmap(int conversionMode = 0);
 
 		/// <summary>
-		/// Gets the data represented by this ContentFile object as an array of Allegro BITMAPs, each representing a frame in the animation. It loads the BITMAPs into the static maps if they're not already loaded.
-		/// Note that ownership of the BITMAPS ARE NOT TRANSFERRED, BUT THE ARRAY ITSELF, IS!
+		/// Gets the data represented by this ContentFile object as an array of Allegro BITMAPs, each representing a frame in the animation.
+		/// It loads the BITMAPs into the static maps if they're not already loaded. Note that ownership of the BITMAPS ARE NOT TRANSFERRED, BUT THE ARRAY ITSELF, IS!
 		/// </summary>
 		/// <param name="frameCount">The number of frames to attempt to load, more than 1 frame will mean 00# is appended to datapath to handle naming conventions.</param>
 		/// <param name="conversionMode">
@@ -211,7 +211,7 @@ namespace RTE {
 
 	protected:
 
-		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.01, 002 etc.
+		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount }; //!< Enumeration for loading BITMAPs by bit depth. NOTE: This can't be lower down because m_sLoadedBitmaps relies on its definition.
 

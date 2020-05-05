@@ -51,7 +51,7 @@ public:
 	// Different scheme properties are encoded on colors of scheme bitmap
 	enum SchemeColor 
 	{
-		SCHEME_COLOR_EMPTY = g_KeyColor,  // Empty sections, MUST BE ALWAYS EMPTY
+		SCHEME_COLOR_EMPTY = g_MaskColor,  // Empty sections, MUST BE ALWAYS EMPTY
 		SCHEME_COLOR_PASSABLE = 5,		  // Passable sections, MUST BE ALWAYS PASSBLE, I.E. HAVE ONLY BACKGROUNDS
 		SCHEME_COLOR_VARIABLE = 4,		  // May be passable or not. Expect air.
 		SCHEME_COLOR_WALL = 3			  // Always impassable, but may be empty. Expect terrain.

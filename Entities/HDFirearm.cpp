@@ -1131,7 +1131,7 @@ void HDFirearm::Draw(BITMAP *pTargetBitmap,
     muzzlePos = m_Pos + RotateOffset(muzzlePos);
     // Set the screen flash effect to draw at the final post processing stage
     if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical && !g_SceneMan.ObscuredPoint(muzzlePos))
-        g_SceneMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55 + 200 * PosRand(), m_pFlash->GetEffectRotAngle());
+		g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55 + 200 * PosRand(), m_pFlash->GetEffectRotAngle());
 }
 
 
@@ -1184,10 +1184,10 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
         int glow = 155 + 100 * PosRand();
-        g_SceneMan.RegisterGlowDotEffect(aimPoint1, YellowDot, glow);
-        g_SceneMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
-        g_SceneMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
-        g_SceneMan.RegisterGlowDotEffect(aimPoint4, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint1, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint4, YellowDot, glow);
 
         // Make into target frame coordinates
         aimPoint1 -= targetPos;
@@ -1223,8 +1223,8 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
         int glow = 55 + 100 * PosRand();
-        g_SceneMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
-        g_SceneMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
 
         // Make into target frame coordinates
         aimPoint2 -= targetPos;

@@ -590,8 +590,8 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
                                 m_aSprite->GetTile()->GetBlockHeight(),
                                 CDXMEM_SYSTEMONLY);
         }
-        m_pTempBitmapB->Fill(g_KeyColor);
-        m_pTempBitmapB->SetColorKey(g_KeyColor);
+        m_pTempBitmapB->Fill(g_MaskColor);
+        m_pTempBitmapB->SetColorKey(g_MaskColor);
         m_aSprite->SetPos(0, 0);
 
         if (mode != g_DrawColor) {
@@ -602,15 +602,15 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
                                    m_aSprite->GetTile()->GetBlockHeight(),
                                    CDXMEM_SYSTEMONLY);
             }
-            m_pTempBitmapA->Fill(g_KeyColor);
-            m_pTempBitmapA->SetColorKey(g_KeyColor);
+            m_pTempBitmapA->Fill(g_MaskColor);
+            m_pTempBitmapA->SetColorKey(g_MaskColor);
 
             if (mode == g_DrawMaterial)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, GetSettleMaterialID());
             else if (mode == g_DrawAir)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, g_MaterialAir);
             else if (mode == g_DrawKey)
-                DrawMaterial(m_aSprite, m_pTempBitmapA, g_KeyColor);
+                DrawMaterial(m_aSprite, m_pTempBitmapA, g_MaskColor);
             else if (mode == g_DrawMOID)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, m_MOID);
             else
@@ -650,7 +650,7 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
         else if (mode == g_DrawAir)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_MaterialAir);
         else if (mode == g_DrawKey)
-            DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_KeyColor);
+            DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_MaskColor);
         else if (mode == g_DrawMOID)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, m_MOID);
         else

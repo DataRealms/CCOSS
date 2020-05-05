@@ -200,7 +200,7 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 	if (width > 0 && height > 0)
 	{
 		checkBitmap = create_bitmap_ex(8, width, height);
-		clear_to_color(checkBitmap, g_KeyColor);
+		clear_to_color(checkBitmap, g_MaskColor);
 
 		acquire_bitmap(refSprite);
 		acquire_bitmap(checkBitmap);
@@ -216,7 +216,7 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 				for (x = 0; x < width; ++x)
 				{
 					// Detect if we are crossing a silhouette boundary.
-					if (getpixel(refSprite, x, y) != g_KeyColor)
+					if (getpixel(refSprite, x, y) != g_MaskColor)
 					{
 						// Mark that an atom has been put in this location, to avoid duplicate Atom:s
 						putpixel(checkBitmap, x, y, 99);
@@ -235,7 +235,7 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 				for (x = width - 1; x >= 0; --x)
 				{
 					// Detect if we are crossing a silhouette boundary.
-					if (getpixel(refSprite, x, y) != g_KeyColor)
+					if (getpixel(refSprite, x, y) != g_MaskColor)
 					{
 						// Mark that an atom has been put in this location, to avoid duplicate Atom:s
 						putpixel(checkBitmap, x, y, 99);
@@ -259,7 +259,7 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 				{
 					// Detect if we are crossing a silhouette boundary, but make sure Atom wasn't
 					// already placed during the horizontal scans.
-					if (getpixel(refSprite, x, y) != g_KeyColor && getpixel(checkBitmap, x, y) == g_KeyColor)
+					if (getpixel(refSprite, x, y) != g_MaskColor && getpixel(checkBitmap, x, y) == g_MaskColor)
 					{
 						pAtom = new Atom;
 						pAtom->Create(Vector(x + spriteOffset.m_X, y + spriteOffset.m_Y - (int)inside), m_pMaterial, pOwnerMOSRotating);
@@ -277,7 +277,7 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 				{
 					// Detect if we are crossing a silhouette boundary, but make sure Atom wasn't
 					// already placed during the horizontal scans.
-					if (getpixel(refSprite, x, y) != g_KeyColor && getpixel(checkBitmap, x, y) == g_KeyColor)
+					if (getpixel(refSprite, x, y) != g_MaskColor && getpixel(checkBitmap, x, y) == g_MaskColor)
 					{
 						pAtom = new Atom;
 						pAtom->Create(Vector(x + spriteOffset.m_X, y + spriteOffset.m_Y - (int)inside), m_pMaterial, pOwnerMOSRotating);
@@ -303,8 +303,8 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 				for (x = 0; x < width; ++x)
 				{
 					// Detect if we are crossing a silhouette boundary.
-					if ((getpixel(refSprite, x, y) != g_KeyColor && !inside) ||
-						(getpixel(refSprite, x, y) == g_KeyColor && inside))
+					if ((getpixel(refSprite, x, y) != g_MaskColor && !inside) ||
+						(getpixel(refSprite, x, y) == g_MaskColor && inside))
 					{
 						// Reset the depth counter
 						depthCount = 0;
@@ -321,13 +321,13 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 							if (x + i >= refSprite->w ||
 								y + i >= refSprite->h ||
 								y - i < 0 ||
-								getpixel(refSprite, x + i, y) == g_KeyColor ||
-								getpixel(refSprite, x, y + i) == g_KeyColor ||
-								getpixel(refSprite, x, y - i) == g_KeyColor)
+								getpixel(refSprite, x + i, y) == g_MaskColor ||
+								getpixel(refSprite, x, y + i) == g_MaskColor ||
+								getpixel(refSprite, x, y - i) == g_MaskColor)
 								clear = false;
 						}
 						// Depth is cleared in all directions, so go ahead and place Atom.
-						if (clear && getpixel(checkBitmap, x, y) == g_KeyColor)
+						if (clear && getpixel(checkBitmap, x, y) == g_MaskColor)
 						{
 							// Mark that an atom has been put in this location, to avoid duplicate Atom:s
 							putpixel(checkBitmap, x, y, 99);
@@ -348,8 +348,8 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 				for (x = width - 1; x >= 0; --x)
 				{
 					// Detect if we are crossing a silhouette boundary.
-					if ((getpixel(refSprite, x, y) != g_KeyColor && !inside) ||
-						(getpixel(refSprite, x, y) == g_KeyColor && inside))
+					if ((getpixel(refSprite, x, y) != g_MaskColor && !inside) ||
+						(getpixel(refSprite, x, y) == g_MaskColor && inside))
 					{
 						// Reset the depth counter
 						depthCount = 0;
@@ -366,13 +366,13 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 							if (x - i < 0 ||
 								y + i >= refSprite->h ||
 								y - i < 0 ||
-								getpixel(refSprite, x - i, y) == g_KeyColor ||
-								getpixel(refSprite, x, y + i) == g_KeyColor ||
-								getpixel(refSprite, x, y - i) == g_KeyColor)
+								getpixel(refSprite, x - i, y) == g_MaskColor ||
+								getpixel(refSprite, x, y + i) == g_MaskColor ||
+								getpixel(refSprite, x, y - i) == g_MaskColor)
 								clear = false;
 						}
 						// Depth is cleared in all directions, so go ahead and place Atom.
-						if (clear && getpixel(checkBitmap, x, y) == g_KeyColor)
+						if (clear && getpixel(checkBitmap, x, y) == g_MaskColor)
 						{
 							// Mark that an atom has been put in this location, to avoid duplicate Atom:s
 							putpixel(checkBitmap, x, y, 99);
@@ -393,8 +393,8 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 				for (y = 0; y < height; ++y)
 				{
 					// Detect if we are crossing a silhouette boundary.
-					if ((getpixel(refSprite, x, y) != g_KeyColor && !inside) ||
-						(getpixel(refSprite, x, y) == g_KeyColor && inside))
+					if ((getpixel(refSprite, x, y) != g_MaskColor && !inside) ||
+						(getpixel(refSprite, x, y) == g_MaskColor && inside))
 					{
 						// Reset the depth counter
 						depthCount = 0;
@@ -411,13 +411,13 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 							if (x + i >= refSprite->w ||
 								x - i < 0 ||
 								y + i >= refSprite->h ||
-								getpixel(refSprite, x + i, y) == g_KeyColor ||
-								getpixel(refSprite, x - i, y) == g_KeyColor ||
-								getpixel(refSprite, x, y + i) == g_KeyColor)
+								getpixel(refSprite, x + i, y) == g_MaskColor ||
+								getpixel(refSprite, x - i, y) == g_MaskColor ||
+								getpixel(refSprite, x, y + i) == g_MaskColor)
 								clear = false;
 						}
 						// Depth is cleared in all directions, so go ahead and place Atom.
-						if (clear && getpixel(checkBitmap, x, y) == g_KeyColor)
+						if (clear && getpixel(checkBitmap, x, y) == g_MaskColor)
 						{
 							// Mark that an atom has been put in this location, to avoid duplicate Atom:s
 							putpixel(checkBitmap, x, y, 99);
@@ -438,8 +438,8 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 				for (y = height - 1; y >= 0; --y)
 				{
 					// Detect if we are crossing a silhouette boundary.
-					if ((getpixel(refSprite, x, y) != g_KeyColor && !inside) ||
-						(getpixel(refSprite, x, y) == g_KeyColor && inside))
+					if ((getpixel(refSprite, x, y) != g_MaskColor && !inside) ||
+						(getpixel(refSprite, x, y) == g_MaskColor && inside))
 					{
 						// Reset the depth counter
 						depthCount = 0;
@@ -456,13 +456,13 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 							if (x + i >= refSprite->w ||
 								x - i < 0 ||
 								y - i < 0 ||
-								getpixel(refSprite, x + i, y) == g_KeyColor ||
-								getpixel(refSprite, x - i, y) == g_KeyColor ||
-								getpixel(refSprite, x, y - i) == g_KeyColor)
+								getpixel(refSprite, x + i, y) == g_MaskColor ||
+								getpixel(refSprite, x - i, y) == g_MaskColor ||
+								getpixel(refSprite, x, y - i) == g_MaskColor)
 								clear = false;
 						}
 						// Depth is cleared in all directions, so go ahead and place Atom.
-						if (clear && getpixel(checkBitmap, x, y) == g_KeyColor)
+						if (clear && getpixel(checkBitmap, x, y) == g_MaskColor)
 						{
 							// Mark that an atom has been put in this location, to avoid duplicate Atom:s
 							putpixel(checkBitmap, x, y, 99);

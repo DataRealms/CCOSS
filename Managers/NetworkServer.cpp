@@ -1144,7 +1144,7 @@ namespace RTE
 	void NetworkServer::SendPostEffectData(int player)
 	{
 		std::list<PostEffect> effects;
-		g_FrameMan.GetPostEffectsList(player, effects);
+		g_PostProcessMan.GetNetworkPostEffectsList(player, effects);
 
 		if (effects.empty())
 			return;
@@ -1435,7 +1435,6 @@ namespace RTE
 
 		// Wait till frameman releases bitmap
 		SetThreadExitReason(player, NetworkServer::LOCKED);
-		//while (g_FrameMan.IsNetworkBitmapLocked(player));
 		SetThreadExitReason(player, NetworkServer::NORMAL);
 
 		// Get backbuffer bitmap for this player
@@ -1855,7 +1854,7 @@ namespace RTE
 				m_ClientConnections[index].ResY = m->ResolutionY;
 				m_ClientConnections[index].IsActive = true;
 				m_ClientConnections[index].PlayerName = m->Name;
-				g_FrameMan.CreateNewPlayerBackBuffer(index, m->ResolutionX, m->ResolutionY);
+				g_FrameMan.CreateNewNetworkPlayerBackBuffer(index, m->ResolutionX, m->ResolutionY);
 
 				m_Server->SetTimeoutTime(5000, m_ClientConnections[index].ClientId);
 

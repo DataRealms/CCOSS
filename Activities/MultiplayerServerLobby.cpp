@@ -350,7 +350,7 @@ namespace RTE {
 		ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.bmp");
 		m_pDefaultPreviewBitmap = defaultPreview.LoadAndReleaseBitmap();
 
-		clear_to_color(m_pScenePreviewBitmap, g_KeyColor);
+		clear_to_color(m_pScenePreviewBitmap, g_MaskColor);
 
 		m_apPlayerIcons[0] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 1"));
 		m_apPlayerIcons[1] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 2"));
@@ -1316,7 +1316,7 @@ namespace RTE {
 		BITMAP * drawBitmap = m_pUIDrawBitmap;
 		BITMAP * finalDestBitmap = 0;
 
-		clear_to_color(drawBitmap, g_KeyColor);
+		clear_to_color(drawBitmap, g_MaskColor);
 
 		// Store offset set for player 0
 		int baseOffsetX = m_pRootBox->GetXPos();

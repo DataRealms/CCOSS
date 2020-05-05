@@ -22,6 +22,8 @@ Valid editor names are: `ActorEditor`, `GibEditor`, `SceneEditor`, `AreaEditor` 
 		YourKeyName = YourStringValue
 	```
 	`YourKeyName` is a string value and is not limited to just numbers.
+	
+- New `Settings.ini` property `AdvancedPerformanceStats = 0/1` to disable/enable the performance counter graphs (enabled by default).
 
 ### Changed
 
@@ -54,6 +56,27 @@ They must be added using `... = SoundContainer`, and individual sounds for them 
 		...
 	```
 
+- `FrameMan` broken down to 4 managers. New managers are:  
+`PerformanceMan` to handle all performance stats and measurements.  
+`PostProcessMan` to handle all post-processing (glows).  
+`PrimitiveMan` to handle all lua primitive drawing.
+
+- Post-processing (glow effects) is now enabled at all times with no option to disable.
+
+- All lua primitive draw calls are now called from `PrimitiveMan`.  
+For example: `FrameMan:DrawLinePrimitive()` is now `PrimitiveMan:DrawLinePrimitive()`.
+
+- Resolution multiplier properties (`NxWindowed` and `NxFullscreen`) in settings merged into a single property `ResolutionMultiplier`.
+
+- Incompatible/bad resolution settings will be overriden at startup with messages expaining the issue instead of multiple mode switches and eventually a reset to default VGA.  
+Reset to defaults (now 960x540) will happen only on horrible aspect ratio or if you managed to really destroy something.
+
+- You can no longer toggle native fullscreen mode from the settings menu or ini. Instead, either select your desktop resolution at 1X mode or desktop resolution divided by 2 at 2X mode for borderless fullscreen windowed mode.  
+Due to limitations in Allegro 4, changing the actual resolution from within the game still requires a restart.
+
+- If the current game resolution is half the desktop resolution or less, you will be able to instantly switch between 1X and 2X resolution multiplier modes in the settings without screen flicker or delay.  
+If the conditions are not met, the mode switch button will show `Unavailable`.
+
 ### Fixed
 
 - Fixed LuaBind being all sorts of messed up. All lua bindings now work properly like they were before updating to the v141 toolset.
@@ -77,6 +100,18 @@ They must be added using `... = SoundContainer`, and individual sounds for them 
 - Removed a bunch of outdated/unused sources in the repo.
 
 - Removed all OSX/Linux related code and files because we don't care. See [Liberated Cortex](https://github.com/liberated-cortex) for working Linux port.
+
+- Removed a bunch of low-level `FrameMan` lua bindings:  
+`FrameMan:ResetSplitScreens`, `FrameMan:PPM` setter, `FrameMan:ResX/Y`, `FrameMan:HSplit/VSplit`, `FrameMan:GetPlayerFrameBufferWidth/Height`, `FrameMan:IsFullscreen`, `FrameMan:ToggleFullScreen`, 
+`FrameMan:ClearBackbuffer8/32`, `FrameMan:ClearPostEffects`, `FrameMan:ResetFrameTimer`, `FrameMan:ShowPerformanceStats`.
+
+- Native fullscreen mode has been removed due to poor performance compared to windowed/borderless mode and various input device issues.  
+The version of Allegro we're running is pretty old now (released in 2007) and probably doesn't properly support/utilize newer features and APIs leading to these issues.  
+The minimal amount of hardware acceleration CC has is still retained through Windows' DWM and that evidently does a better job.
+
+- Removed now obsolete `Settings.ini` properties:  
+Post-processing: `TrueColorMode`, `PostProcessing`, `PostPixelGlow`.   
+Native fullscreen mode: `Fullscreen`, `NxWindowed`, `NxFullscreen`, `ForceSoftwareGfxDriver`, `ForceSafeGfxDriver`.
 
 ***
 

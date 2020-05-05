@@ -945,7 +945,7 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
             RTEAssert(is_inside_bitmap(m_aSprite[m_Frame], intPos[X], intPos[Y], 0), "Particle penetration test is outside of sprite!");
 
             // Check if we are inside the sprite.
-            if (_getpixel(m_aSprite[m_Frame], intPos[X], intPos[Y]) != g_KeyColor)
+            if (_getpixel(m_aSprite[m_Frame], intPos[X], intPos[Y]) != g_MaskColor)
             {
                 inside = true;
                 // Break if the particle can't force its way through any further.
@@ -1195,7 +1195,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
     if (m_pScreenEffect && m_EffectOnGib && (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY())))
     {
         // Set the screen effect to draw at the final post processing stage
-        g_SceneMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, 255, m_EffectRotAngle);
+		g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, 255, m_EffectRotAngle);
     }
 
     // Things breaking apart makes alarming noises!
@@ -1386,8 +1386,8 @@ bool MOSRotating::IsOnScenePoint(Vector &scenePoint) const
     {
         if (IsWithinBox(aScenePoint[i], m_Pos + m_BitmapOffset, m_pFGColor->w, m_pFGColor->h))
         {
-            if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor ||
-               (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor) ||
+            if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor ||
+               (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor) ||
                (m_pMaterial && getpixel(m_pMaterial, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaterialAir))
                return true;
         }
@@ -1402,7 +1402,7 @@ bool MOSRotating::IsOnScenePoint(Vector &scenePoint) const
         // Check for overlap on the local rotated relative point. subtract spriteoffset to get into sprite bitmap's space
         int pixel = getpixel(m_aSprite[m_Frame], spritePoint.m_X - m_SpriteOffset.m_X, spritePoint.m_Y - m_SpriteOffset.m_Y);
         // Check that it isn't outside the bitmap, and not of the key color
-        if (pixel != -1 && pixel != g_KeyColor)
+        if (pixel != -1 && pixel != g_MaskColor)
            return true;
     }
 
@@ -1432,7 +1432,7 @@ void MOSRotating::EraseFromTerrain()
         // Don't size the intermediate bitmaps to teh m_Scale, because the scaling happens after they are done
         if (!m_pFlipBitmap)
             m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[m_Frame]->w, m_aSprite[m_Frame]->h);
-        clear_to_color(m_pFlipBitmap, g_KeyColor);
+        clear_to_color(m_pFlipBitmap, g_MaskColor);
 
         // Draw eitehr the source color bitmap or the intermediate material bitmap onto the intermediate flipping bitmap
         draw_sprite_h_flip(m_pFlipBitmap, m_aSprite[m_Frame], 0, 0);
@@ -1481,7 +1481,7 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
             // Don't size the intermediate bitmaps to teh m_Scale, because the scaling happens after they are done
             if (!m_pFlipBitmap)
                 m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[m_Frame]->w, m_aSprite[m_Frame]->h);
-            clear_to_color(m_pFlipBitmap, g_KeyColor);
+            clear_to_color(m_pFlipBitmap, g_MaskColor);
 
             // Draw eitehr the source color bitmap or the intermediate material bitmap onto the intermediate flipping bitmap
             draw_sprite_h_flip(m_pFlipBitmap, m_aSprite[m_Frame], 0, 0);
@@ -1918,14 +1918,14 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 
 	BITMAP * pTempBitmap = m_pTempBitmap;
 	BITMAP * pFlipBitmap = m_pFlipBitmap;
-	int keyColor = g_KeyColor;
+	int keyColor = g_MaskColor;
 
 	// Switch to non 8-bit drawing mode if we're drawing onto MO layer
 	if (mode == g_DrawMOID || mode == g_DrawNoMOID)
 	{
 		pTempBitmap = m_pTempBitmapS;
 		pFlipBitmap = m_pFlipBitmapS;
-		keyColor = g_KeyColorS;
+		keyColor = g_MOIDMaskColor;
 	}
 
     Vector spritePos(m_Pos.GetFloored() - targetPos);

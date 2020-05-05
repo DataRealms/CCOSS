@@ -14,6 +14,7 @@
 
 #include "Singleton.h"
 #include "UInputMan.h"
+#include "PostProcessMan.h"
 #include "SoundContainer.h"
 
 #include "Network.h"

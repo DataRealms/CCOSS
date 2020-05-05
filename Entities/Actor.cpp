@@ -28,6 +28,7 @@
 #include "MOPixel.h"
 #include "Scene.h"
 #include "SettingsMan.h"
+#include "PerformanceMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUIFont.h"
@@ -1291,9 +1292,9 @@ bool Actor::UpdateAIScripted() {
 
     int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
     status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;
-    g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
     status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) : status;
-    g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
 
     return status >= 0;
 }
@@ -1951,7 +1952,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 waypoint = (*vItr).first - targetPos;
                 circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 2, g_YellowGlowColor);
                 // Add pixel glow area around it, in scene coordinates
-                g_SceneMan.RegisterGlowArea((*vItr).first, 5);
+				g_PostProcessMan.RegisterGlowArea((*vItr).first, 5);
             }
 
             // Draw line from the last movetarget on the current path to the first waypoint in queue after that
@@ -1979,7 +1980,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             waypoint = m_MovePath.back() - targetPos;
             circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 2, g_YellowGlowColor);
             // Add pixel glow area around it, in scene coordinates
-            g_SceneMan.RegisterGlowArea(m_MovePath.back(), 5);
+			g_PostProcessMan.RegisterGlowArea(m_MovePath.back(), 5);
         }
         // If no points left on movepath, then draw straight line to the movetarget
         else
@@ -1990,7 +1991,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             waypoint = m_MoveTarget - targetPos;
             circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 2, g_YellowGlowColor);
             // Add pixel glow area around it, in scene coordinates
-            g_SceneMan.RegisterGlowArea(m_MoveTarget, 5);
+			g_PostProcessMan.RegisterGlowArea(m_MoveTarget, 5);
         }
     }
 

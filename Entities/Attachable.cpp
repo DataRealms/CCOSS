@@ -554,7 +554,7 @@ void Attachable::Update()
     MOSRotating::Update();
 
     // If we're attached to something, MoveableMan doesn't own us, and therefore isn't calling our ScriptUpdate (and our parent isn't calling it either), so we should here
-    if (m_pParent) { UpdateScripts(); }
+    if (m_pParent != NULL && m_pParent->ObjectScriptsInitialized()) { UpdateScripts(); }
 }
 
 

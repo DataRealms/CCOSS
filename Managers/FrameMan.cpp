@@ -359,6 +359,8 @@ namespace RTE {
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
 		m_ResMultiplier = multiplier;
 		set_palette(pal);
+
+		g_FrameMan.FlipFrameBuffers();
 		return 0;
 	}
 

@@ -609,7 +609,7 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
                 DrawMaterial(m_aSprite, m_pTempBitmapA, GetSettleMaterialID());
             else if (mode == g_DrawAir)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, g_MaterialAir);
-            else if (mode == g_DrawKey)
+            else if (mode == g_DrawMask)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, g_MaskColor);
             else if (mode == g_DrawMOID)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, m_MOID);
@@ -649,7 +649,7 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, GetSettleMaterialID());
         else if (mode == g_DrawAir)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_MaterialAir);
-        else if (mode == g_DrawKey)
+        else if (mode == g_DrawMask)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_MaskColor);
         else if (mode == g_DrawMOID)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, m_MOID);

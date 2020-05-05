@@ -124,8 +124,8 @@ namespace RTE {
 
 	bool ASCIIFileContainsString(std::string filePath, std::string findString) {
 		// Open the script file so we can check it out
-		std::ifstream *pFile = new std::ifstream(filePath.c_str());
-		if (!pFile->good()) {
+		std::ifstream *file = new std::ifstream(filePath.c_str());
+		if (!file->good()) {
 			return false;
 		}
 		char rawLine[1024];
@@ -135,22 +135,19 @@ namespace RTE {
 		std::string::size_type commentPos = std::string::npos;
 		bool blockCommented = false;
 
-		while (!pFile->eof()) {
+		while (!file->eof()) {
 			// Go through the script file, line by line
-			pFile->getline(rawLine, 1024);
+			file->getline(rawLine, 1024);
 			line = rawLine;
 			pos = endPos = 0;
-			commentPos = std::string::npos;
 
 			// Check for block comments
-			if (!blockCommented && (commentPos = line.find("/*", 0)) != std::string::npos) { blockCommented = true; }
+			if ((commentPos = line.find("/*", 0) != std::string::npos) && !blockCommented) { blockCommented = true; }
 
 			// Find the end of the block comment
-			if (blockCommented) {
-				if ((commentPos = line.find("*/", commentPos == std::string::npos ? 0 : commentPos)) != std::string::npos) {
-					blockCommented = false;
-					pos = commentPos;
-				}
+			if (((commentPos = line.find("*/", commentPos == std::string::npos ? 0 : commentPos)) != std::string::npos) && blockCommented) {
+				blockCommented = false;
+				pos = commentPos;
 			}
 			// Process the line as usual
 			if (!blockCommented) {
@@ -161,16 +158,16 @@ namespace RTE {
 					pos = line.find(findString.c_str(), pos);
 					if (pos != std::string::npos && pos < commentPos) {
 						// Found it!
-						delete pFile;
-						pFile = 0;
+						delete file;
+						file = 0;
 						return true;
 					}
 				} while (pos != std::string::npos && pos < commentPos);
 			}
 		}
 		// Didn't find the search string
-		delete pFile;
-		pFile = 0;
+		delete file;
+		file = 0;
 		return false;
 	}
 }

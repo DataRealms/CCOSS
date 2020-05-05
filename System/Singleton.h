@@ -22,21 +22,21 @@ namespace RTE {
 		/// Constructor method used to instantiate a Singleton object.
 		/// </summary>
 		Singleton() {
-			RTEAssert(!ms_Instance, "Trying to create a second instance of a Singleton");
+			RTEAssert(!s_Instance, "Trying to create a second instance of a Singleton");
 
 			// Take nonexistent object sitting at address 0x1 in memory,
 			// cast to both Singleton, and whatever is deriving, and with the
 			// difference calculate the singleton's instance pointer.
 			uintptr_t offset = (uintptr_t)(Type *)1 - (uintptr_t)(Singleton<Type> *)(Type *)1;
-			ms_Instance = (Type *)((uintptr_t)this + offset);
+			s_Instance = (Type *)((uintptr_t)this + offset);
 		}
 
 		/// <summary>
 		/// Destructor method used to clean up a Singleton object before deletion.
 		/// </summary>
 		~Singleton() {
-			RTEAssert(ms_Instance, "Trying to destruct nonexistent Singleton instance");
-			ms_Instance = 0;
+			RTEAssert(s_Instance, "Trying to destruct nonexistent Singleton instance");
+			s_Instance = 0;
 		}
 
 		/// <summary>
@@ -44,15 +44,15 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A reference to the sole instance of this Singleton.</returns>
 		static Type & Instance() {
-			RTEAssert(ms_Instance, "Trying to use Singleton before instantiation");
-			return *ms_Instance;
+			RTEAssert(s_Instance, "Trying to use Singleton before instantiation");
+			return *s_Instance;
 		}
 
 	private:
 
-		static Type *ms_Instance; //!< Pointer to instance of this singleton.
+		static Type *s_Instance; //!< Pointer to instance of this singleton.
 	};
 
-	template <typename Type> Type * Singleton<Type>::ms_Instance = 0;
+	template <typename Type> Type * Singleton<Type>::s_Instance = 0;
 }
 #endif

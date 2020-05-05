@@ -167,7 +167,7 @@ namespace RTE {
 		unsigned short m_Sample; //!< Sample counter.
 
 		std::deque<unsigned int> m_MSPFs; //!< History log of readings, for averaging the results.
-		unsigned short m_MSPFAverage; //!< The average of the MSPF reading buffer above, calculated each frame.
+		size_t m_MSPFAverage; //!< The average of the MSPF reading buffer above, calculated each frame.
 		unsigned short m_CurrentPing; //!< Current ping value to display on screen.
 
 		std::string m_PerfCounterNames[PERF_COUNT]; //!< Performance counter names displayed on screen.

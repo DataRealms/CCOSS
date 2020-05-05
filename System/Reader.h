@@ -76,7 +76,7 @@ namespace RTE {
 		/// Gets a pointer to the istream of this reader.
 		/// </summary>
 		/// <returns>A pointer to the istream object for this reader.</returns>
-		std::istream * GetStream() { return m_pStream; }
+		std::istream * GetStream() const { return m_Stream; }
 
 		/// <summary>
 		/// Gets the path of the current file this reader is reading from.
@@ -88,7 +88,7 @@ namespace RTE {
 		/// Gets the line of the current file line this reader is reading from.
 		/// </summary>
 		/// <returns>The line number that will be read from next.</returns>
-		int GetCurrentFileLine() const { return m_CurrentLine; }
+		unsigned int GetCurrentFileLine() const { return m_CurrentLine; }
 
 		/// <summary>
 		/// Gets the line of the current file line this reader is reading from.
@@ -100,7 +100,7 @@ namespace RTE {
 		/// Shows whether objects read from this will be overwriting any existing ones with the same names.
 		/// </summary>
 		/// <returns>Whether this overwrites or not.</returns>
-		bool GetPresetOverwriting() { return m_OverwriteExisting; }
+		bool GetPresetOverwriting() const { return m_OverwriteExisting; }
 
 		/// <summary>
 		/// Sets whether objects read from this will be overwriting any existing ones with the same names.
@@ -182,7 +182,7 @@ namespace RTE {
 		/// Shows whether this is still OK to read from. If file isn't present, etc, this will return false.
 		/// </summary>
 		/// <returns>Whether this Reader's stream is OK or not.</returns>
-		bool IsOK() { return m_pStream && m_pStream->good(); }
+		bool IsOK() const { return m_Stream && m_Stream->good(); }
 
 		/// <summary>
 		/// Makes an error message box pop up for the user that tells them something went wrong with the reading, and where.
@@ -197,18 +197,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="var">A reference to the variable that will be filled by the extracted data.</param>
 		/// <returns>A Reader reference for further use in an expression.</returns>
-		virtual Reader & operator>>(bool &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(char &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(unsigned char &var) { DiscardEmptySpace(); int temp; *m_pStream >> temp; var = temp; return *this; }
-		virtual Reader & operator>>(short &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(unsigned short &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(int &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(unsigned int &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(long &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(unsigned long &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(float &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(double &var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
-		virtual Reader & operator>>(char * var) { DiscardEmptySpace(); *m_pStream >> var; return *this; }
+		virtual Reader & operator>>(bool &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		virtual Reader & operator>>(char &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		virtual Reader & operator>>(unsigned char &var) { DiscardEmptySpace(); int temp; *m_Stream >> temp; var = temp; return *this; }
+		virtual Reader & operator>>(short &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		virtual Reader & operator>>(unsigned short &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		virtual Reader & operator>>(int &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		virtual Reader & operator>>(unsigned int &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		virtual Reader & operator>>(long &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		virtual Reader & operator>>(unsigned long &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		virtual Reader & operator>>(float &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		virtual Reader & operator>>(double &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		virtual Reader & operator>>(char * var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
 		virtual Reader & operator>>(std::string &var) { var.assign(ReadLine()); return *this; }
 #pragma endregion
 
@@ -217,7 +217,7 @@ namespace RTE {
 		/// Gets the class name of this Reader.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this Reader.</returns>
-		virtual const std::string & GetClassName() const { return m_ClassName; }
+		virtual const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:
@@ -226,24 +226,22 @@ namespace RTE {
 		/// A struct containing information from the currently used stream.
 		/// </summary>
 		struct StreamInfo {
-			// TODO: Figure out what the hell is this and what/how it does.
-			StreamInfo(std::ifstream *pStream, std::string filePath, int currentLine, int prevIndent) :
-				m_pStream(pStream), m_FilePath(filePath), m_CurrentLine(currentLine), m_PreviousIndent(prevIndent) { ; }
+			StreamInfo(std::ifstream *stream, std::string filePath, int currentLine, int prevIndent) : m_Stream(stream), m_FilePath(filePath), m_CurrentLine(currentLine), m_PreviousIndent(prevIndent) { ; }
 
 			// NOTE: These members are owned by the reader that owns this struct, so are not deleted when this is destroyed.
-			std::ifstream *m_pStream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
+			std::ifstream *m_Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
 			std::string m_FilePath; //!< Currently used stream's filepath.
-			int m_CurrentLine; //!< The line number the stream is on.
-			int m_PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
+			unsigned int m_CurrentLine; //!< The line number the stream is on.
+			unsigned short m_PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
 		};
 
-		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this.
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
-		std::ifstream *m_pStream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
+		std::ifstream *m_Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
 		std::list<StreamInfo> m_StreamStack; //!< Stack of stream and filepath pairs, each one representing a file opened to read from within another.
 		bool m_EndOfStreams; //!< All streams have been depleted.
 
-		ProgressCallback m_fpReportProgress; //!< Function pointer to report our reading progress to, by calling it and passing a descriptive string to it.
+		ProgressCallback m_ReportProgress; //!< Function pointer to report our reading progress to, by calling it and passing a descriptive string to it.
 
 		std::string m_FilePath; //!< Currently used stream's filepath.
 		std::string m_FileName; //!< Only the name of the currently read file, excluding the path.
@@ -251,11 +249,11 @@ namespace RTE {
 		std::string m_DataModuleName; //!< The current name of the data module being read from, including the .rte extension.
 		int m_DataModuleID; //!< The current ID of the data module being read from.
 
-		int m_PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
-		int m_IndentDifference; //!< Difference in indentation from the last line to the current line.
+		unsigned short m_PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
+		short m_IndentDifference; //!< Difference in indentation from the last line to the current line.
 		std::string m_ReportTabs; //!< String containing the proper amount of tabs for the report.
 
-		int m_CurrentLine; //!< The line number the stream is on.
+		unsigned int m_CurrentLine; //!< The line number the stream is on.
 		bool m_OverwriteExisting; //!< Whether object instances read from this should overwrite any already existing ones with the same names.
 		bool m_SkipIncludes; //!< Indicates whether reader should skip included files
 
@@ -264,6 +262,8 @@ namespace RTE {
 		/// this is incremented until it matches -m_IndentDifference, and then NextProperty will start returning true again.
 		/// </summary>
 		int m_ObjectEndings;
+
+	private:
 
 #pragma region Reading Operations
 		/// <summary>
@@ -280,8 +280,6 @@ namespace RTE {
 		/// <returns>Whether there were any stream on the stack to resume.</returns>
 		bool EndIncludeFile();
 #pragma endregion
-
-	private:
 
 		/// <summary>
 		/// Clears all the member variables of this Reader, effectively resetting the members of this abstraction level only.

@@ -129,13 +129,13 @@ namespace RTE {
 		/// Gets the absolute largest of the two elements. Will always be positive.
 		/// </summary>
 		/// <returns>A float describing the largest value of the two, but not the magnitude.</returns>
-		float GetLargest() const { return fabs(fabs(m_X) > fabs(m_Y) ? m_X : m_Y); }
+		float GetLargest() const { return std::fabs(std::fabs(m_X) > std::fabs(m_Y) ? m_X : m_Y); }
 
 		/// <summary>
 		/// Gets the absolute smallest of the two elements. Will always be positive.
 		/// </summary>
 		/// <returns>A float describing the smallest value of the two, but not the magnitude.</returns>
-		float GetSmallest() const { return fabs(fabs(m_X) > fabs(m_Y) ? m_Y : m_X); }
+		float GetSmallest() const { return std::fabs(std::fabs(m_X) > std::fabs(m_Y) ? m_Y : m_X); }
 
 		/// <summary>
 		/// Gets a Vector identical to this except that its X component is flipped.
@@ -184,7 +184,7 @@ namespace RTE {
 		/// Gets the magnitude of this Vector.
 		/// </summary>
 		/// <returns>A float describing the magnitude.</returns>
-		float GetMagnitude() const { return sqrt((m_X * m_X) + (m_Y * m_Y)); }
+		float GetMagnitude() const { return std::sqrt((m_X * m_X) + (m_Y * m_Y)); }
 
 		/// <summary>
 		/// Sets the magnitude of this Vector and keeps its angle intact.
@@ -264,22 +264,22 @@ namespace RTE {
 		/// <summary>
 		/// Rounds the X and Y values of this Vector upwards. E.g. 0.49 -> 0.0 and 0.5 -> 1.0.
 		/// </summary>
-		void Round() { m_X = floorf(m_X + 0.5); m_Y = floorf(m_Y + 0.5); }
+		void Round() { m_X = std::floorf(m_X + 0.5); m_Y = std::floorf(m_Y + 0.5); }
 
 		/// <summary>
 		/// Sets the X and Y of this Vector to the nearest half value. E.g. 1.0 -> 1.5 and 0.9 -> 0.5.
 		/// </summary>
-		void ToHalf() { m_X = floorf(m_X) + 0.5; m_Y = floorf(m_Y) + 0.5; }
+		void ToHalf() { m_X = std::floorf(m_X) + 0.5; m_Y = std::floorf(m_Y) + 0.5; }
 
 		/// <summary>
 		/// Sets the X and Y of this Vector.to the greatest integers that are not greater than their original values. E.g. -1.02 becomes -2.0.
 		/// </summary>
-		void Floor() { m_X = floorf(m_X); m_Y = floorf(m_Y); }
+		void Floor() { m_X = std::floorf(m_X); m_Y = std::floorf(m_Y); }
 
 		/// <summary>
 		/// Sets the X and Y of this Vector.to the lowest integers that are not less than their original values. E.g. -1.02 becomes -1.0.
 		/// </summary>
-		void Ceiling() { m_X = ceil(m_X); m_Y = ceil(m_Y); }
+		void Ceiling() { m_X = std::ceil(m_X); m_Y = std::ceil(m_Y); }
 
 		/// <summary>
 		/// Returns a rounded copy of this Vector. Does not alter this Vector.
@@ -291,13 +291,13 @@ namespace RTE {
 		/// Returns the rounded integer X value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the X value of this Vector.</returns>
-		int GetRoundIntX() const { return static_cast<int>(floorf(m_X + 0.5)); }
+		int GetRoundIntX() const { return static_cast<int>(std::floorf(m_X + 0.5)); }
 
 		/// <summary>
 		/// Returns the rounded integer Y value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the Y value of this Vector.</returns>
-		int GetRoundIntY() const { return static_cast<int>(floorf(m_Y + 0.5)); }
+		int GetRoundIntY() const { return static_cast<int>(std::floorf(m_Y + 0.5)); }
 
 		/// <summary>
 		/// Returns a floored copy of this Vector. Does not alter this Vector.
@@ -309,16 +309,16 @@ namespace RTE {
 		/// Returns the greatest integer that is not greater than the X value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the X value of this Vector.</returns>
-		int GetFloorIntX() const { return static_cast<int>(floorf(m_X)); }
+		int GetFloorIntX() const { return static_cast<int>(std::floorf(m_X)); }
 
 		/// <summary>
 		/// Returns the greatest integer that is not greater than the Y value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the Y value of this Vector.</returns>
-		int GetFloorIntY() const { return static_cast<int>(floorf(m_Y)); }
+		int GetFloorIntY() const { return static_cast<int>(std::floorf(m_Y)); }
 
 		/// <summary>
-		/// Returns a ceiling:ed copy of this Vector. Does not alter this Vector.
+		/// Returns a ceilinged copy of this Vector. Does not alter this Vector.
 		/// </summary>
 		/// <returns>A ceilinged copy of this Vector.</returns>
 		Vector GetCeilinged() const { Vector returnVector(GetCeilingIntX(), GetCeilingIntY()); return returnVector; }
@@ -327,13 +327,13 @@ namespace RTE {
 		/// Returns the lowest integer that is not less than the X value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the X value of this Vector.</returns>
-		int GetCeilingIntX() const { return static_cast<int>(ceil(m_X)); }
+		int GetCeilingIntX() const { return static_cast<int>(std::ceil(m_X)); }
 
 		/// <summary>
 		/// Returns the lowest integer that is not less than the Y value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the Y value of this Vector.</returns>
-		int GetCeilingIntY() const { return static_cast<int>(ceil(m_Y)); }
+		int GetCeilingIntY() const { return static_cast<int>(std::ceil(m_Y)); }
 #pragma endregion
 
 #pragma region Vector Products
@@ -447,7 +447,11 @@ namespace RTE {
 		/// </summary>
 		/// <param name="rhs">A float reference as the right hand side operand.</param>
 		/// <returns>The resulting Vector.</returns>
-		Vector operator/(const float &rhs) const { Vector returnVector(0, 0); if (rhs) { returnVector.SetXY(m_X / rhs, m_Y / rhs); } return returnVector; }
+		Vector operator/(const float &rhs) const {
+			Vector returnVector(0, 0);
+			if (rhs) { returnVector.SetXY(m_X / rhs, m_Y / rhs); }
+			return returnVector;
+		}
 
 		/// <summary>
 		/// Division operator overload for Vectors.
@@ -530,14 +534,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="rhs">An int index indicating which element is requested (X = 0, Y = 1).</param>
 		/// <returns>The requested element.</returns>
-		const float & operator[](const int &rhs) const { return rhs == 0 ? m_X : m_Y; }
+		const float & operator[](const int &rhs) const { return (rhs == 0) ? m_X : m_Y; }
 
 		/// <summary>
 		/// Array subscripting to access either the X or Y element of this Vector.
 		/// </summary>
 		/// <param name="rhs">An int index indicating which element is requested (X = 0, Y = 1).</param>
 		/// <returns>The requested element.</returns>
-		float & operator[](const int &rhs) { return rhs == 0 ? m_X : m_Y; }
+		float & operator[](const int &rhs) { return (rhs == 0) ? m_X : m_Y; }
 #pragma endregion
 
 #pragma region Class Info
@@ -545,12 +549,12 @@ namespace RTE {
 		/// Gets the class name of this Vector.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this Vector.</returns>
-		virtual const std::string & GetClassName() const { return m_ClassName; }
+		virtual const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:
 
-		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this.
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 	private:
 

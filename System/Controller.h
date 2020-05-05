@@ -88,8 +88,8 @@ namespace RTE {
 		/// Constructor method used to instantiate a Controller object in system memory. Create() should be called before using the object.
 		/// </summary>
 		/// <param name="mode">The controller input mode, like AI, player etc.</param>
-		/// <param name="pControlled">The Actor this is supposed to control. Ownership is NOT transferred!</param>
-		Controller(InputMode mode, Actor *pControlled) { Clear(); Create(mode, pControlled); }
+		/// <param name="controlledActor">The Actor this is supposed to control. Ownership is NOT transferred!</param>
+		Controller(InputMode mode, Actor *controlledActor) { Clear(); Create(mode, controlledActor); }
 
 		/// <summary>
 		/// Constructor method used to instantiate a Controller object in system memory. Create() should be called before using the object.
@@ -114,9 +114,9 @@ namespace RTE {
 		/// Makes the Controller object ready for use.
 		/// </summary>
 		/// <param name="mode">The controller input mode, like AI, player etc.</param>
-		/// <param name="pControlled">The Actor this is supposed to control. Ownership is NOT transferred!</param>
+		/// <param name="controlledActor">The Actor this is supposed to control. Ownership is NOT transferred!</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(InputMode mode, Actor *pControlled);
+		virtual int Create(InputMode mode, Actor *controlledActor);
 
 		/// <summary>
 		/// Makes the Controller object ready for use.
@@ -157,7 +157,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="otherThanPlayer">If you want to check if it's controlled by a player, AND that player is someone else than a specific one, pass in that player number here.</param>
 		/// <returns>Whether input mode is set to player input.</returns>
-		bool IsPlayerControlled(int otherThanPlayer = -1) { return (m_InputMode == CIM_PLAYER && (otherThanPlayer < 0 || m_Player != otherThanPlayer)); }
+		bool IsPlayerControlled(int otherThanPlayer = -1) const { return (m_InputMode == CIM_PLAYER && (otherThanPlayer < 0 || m_Player != otherThanPlayer)); }
 
 		/// <summary>
 		/// Shows whether this controller is disabled.
@@ -174,15 +174,16 @@ namespace RTE {
 		/// <summary>
 		/// Shows whether the current controller is in a specific state.
 		/// </summary>
+		/// <param name="controlState">What control state to check for.</param>
 		/// <returns>Whether the controller is in the specified state.</returns>
-		bool IsState(ControlState which) const { return m_ControlStates[which]; };
+		bool IsState(ControlState controlState) const { return m_ControlStates[controlState]; };
 
 		/// <summary>
 		/// Sets one of this controller's states.
 		/// </summary>
-		/// <param name="which>Which state to set.</param>
+		/// <param name="controlState>Which state to set.</param>
 		/// <param name="setting">Value of the state being set.</param>
-		void SetState(ControlState which, bool setting = true) { RTEAssert(which >= 0 && which < CONTROLSTATECOUNT, "Control state out of whack"); m_ControlStates[which] = setting; };
+		void SetState(ControlState controlState, bool setting = true) { RTEAssert(controlState >= 0 && controlState < CONTROLSTATECOUNT, "Control state out of whack"); m_ControlStates[controlState] = setting; };
 
 		/// <summary>
 		/// Gets the current mode of input for this Controller.
@@ -250,7 +251,7 @@ namespace RTE {
 		/// Gets which player's input this is listening to, if in player input mode.
 		/// </summary>
 		/// <returns>The player number, or -1 if not in player input mode.</returns>
-		int GetPlayer() const { return m_InputMode == CIM_PLAYER ? m_Player : -1; }
+		int GetPlayer() const { return (m_InputMode == CIM_PLAYER) ? m_Player : -1; }
 
 		/// <summary>
 		/// Sets which player's input this is listening to, and will enable player input mode.
@@ -268,19 +269,19 @@ namespace RTE {
 		/// Sets the team which is controlling this Controller's controlled Actor.
 		/// </summary>
 		/// <param name="team">The team number. 0 is the first team.</param>
-		void SetTeam(int team);
+		void SetTeam(short team);
 
 		/// <summary>
 		/// Gets which Actor is being controlled by this. 0 if none.
 		/// </summary>
 		/// <returns>A pointer to the Actor which is being controlled by this. Ownership is NOT transferred!</returns>
-		virtual Actor * GetControlledActor() const { return m_pControlled; }
+		virtual Actor * GetControlledActor() const { return m_ControlledActor; }
 
 		/// <summary>
 		/// Sets which Actor is supposed to be controlled by this.
 		/// </summary>
-		/// <param name="pControlled">A pointer to a an Actor which is being controlled by this. Ownership is NOT transferred!</param>
-		virtual void SetControlledActor(Actor *pControlled = 0) { m_pControlled = pControlled; }
+		/// <param name="controlledActor">A pointer to a an Actor which is being controlled by this. Ownership is NOT transferred!</param>
+		virtual void SetControlledActor(Actor *controlledActor = 0) { m_ControlledActor = controlledActor; }
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -308,7 +309,7 @@ namespace RTE {
 
 		InputMode m_InputMode; //!< The current controller input mode, like AI, player etc.
 
-		Actor *m_pControlled; //!< The actor controlled by this.
+		Actor *m_ControlledActor; //!< The actor controlled by this.
 
 		/// <summary>
 		/// The last player this controlled. This is necessary so we still have some control after controlled's death.
@@ -316,7 +317,7 @@ namespace RTE {
 		/// </summary>
 		int m_Player;
 
-		int m_Team; //!< The last team this controlled. This is necessary so we still have some control after controlled's death.
+		short m_Team; //!< The last team this controlled. This is necessary so we still have some control after controlled's death.
 
 		/// <summary>
 		/// These are hacks to make the switch to brain shortcut work without immediately switching away by 

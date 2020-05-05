@@ -6,7 +6,7 @@
 namespace RTE {
 
 	Entity::ClassInfo Entity::m_sClass("Entity");
-	Entity::ClassInfo * Entity::ClassInfo::m_sClassHead = 0;
+	Entity::ClassInfo * Entity::ClassInfo::s_ClassHead = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48,10 +48,10 @@ namespace RTE {
 	int Entity::ReadProperty(std::string propName, Reader &reader) {
 		if (propName == "CopyOf") {
 			std::string refName = reader.ReadPropValue();
-			const Entity *pPreset = g_PresetMan.GetEntityPreset(GetClassName(), refName, reader.GetReadModuleID());
+			const Entity *preset = g_PresetMan.GetEntityPreset(GetClassName(), refName, reader.GetReadModuleID());
 
-			if (pPreset) {
-				pPreset->Clone(this);
+			if (preset) {
+				preset->Clone(this);
 			} else {
 				// If we couldn't find the preset to copy from, read it as an original but report the problem in the console
 				g_ConsoleMan.PrintString("ERROR: Couldn't find the preset '" + refName + "' accessed in " + reader.GetCurrentFilePath() + " at line " + reader.GetCurrentFileLineString());
@@ -155,12 +155,12 @@ namespace RTE {
 		if (m_DefinedInModule < 0) {
 			return GetPresetName();
 		}
-		const DataModule *pModule = g_PresetMan.GetDataModule(m_DefinedInModule);
+		const DataModule *dataModule = g_PresetMan.GetDataModule(m_DefinedInModule);
 
-		if (!pModule) {
+		if (!dataModule) {
 			return GetPresetName();
 		}
-		return pModule->GetFileName() + "/" + GetPresetName();
+		return dataModule->GetFileName() + "/" + GetPresetName();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,24 +230,24 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Entity::ClassInfo::ClassInfo(const std::string &name, ClassInfo *pParentInfo, MemoryAllocate fpAllocFunc, MemoryDeallocate fpDeallocFunc, Entity * (*fpNewFunc)(), int allocBlockCount) :
+	Entity::ClassInfo::ClassInfo(const std::string &name, ClassInfo *parentInfo, MemoryAllocate allocFunc, MemoryDeallocate deallocFunc, Entity * (*newFunc)(), int allocBlockCount) :
 		m_Name(name),
-		m_pParentInfo(pParentInfo),
-		m_fpAllocate(fpAllocFunc),
-		m_fpDeallocate(fpDeallocFunc),
-		m_fpNewInstance(fpNewFunc),
-		m_NextClass(m_sClassHead) {
-			m_sClassHead = this;
+		m_ParentInfo(parentInfo),
+		m_Allocate(allocFunc),
+		m_Deallocate(deallocFunc),
+		m_NewInstance(newFunc),
+		m_NextClass(s_ClassHead) {
+			s_ClassHead = this;
 
 			m_AllocatedPool.clear();
-			m_PoolAllocBlockCount = allocBlockCount > 0 ? allocBlockCount : 10;
+			m_PoolAllocBlockCount = (allocBlockCount > 0) ? allocBlockCount : 10;
 		}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::list<std::string> Entity::ClassInfo::GetClassNames() {
 		std::list<std::string> retList;
-		for (const ClassInfo *itr = m_sClassHead; itr != 0; itr = itr->m_NextClass) {
+		for (const ClassInfo *itr = s_ClassHead; itr != 0; itr = itr->m_NextClass) {
 			retList.push_back(itr->GetName());
 		}
 		return retList;
@@ -259,7 +259,7 @@ namespace RTE {
 		if (name == "" || name == "None") {
 			return 0;
 		}
-		for (const ClassInfo *itr = m_sClassHead; itr != 0; itr = itr->m_NextClass) {
+		for (const ClassInfo *itr = s_ClassHead; itr != 0; itr = itr->m_NextClass) {
 			if (itr->GetName() == name) {
 				return itr;
 			}
@@ -270,7 +270,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Entity::ClassInfo::FillAllPools(int fillAmount) {
-		for (ClassInfo *itr = m_sClassHead; itr != 0; itr = itr->m_NextClass) {
+		for (ClassInfo *itr = s_ClassHead; itr != 0; itr = itr->m_NextClass) {
 			if (itr->IsConcrete()) { itr->FillPool(fillAmount); }
 		}
 	}
@@ -282,9 +282,9 @@ namespace RTE {
 		if (fillAmount <= 0) { fillAmount = m_PoolAllocBlockCount; }
 
 		// If concrete class, fill up the pool with pre-allocated memory blocks the size of the type
-		if (m_fpAllocate && fillAmount > 0) {
+		if (m_Allocate && fillAmount > 0) {
 			for (int i = 0; i < fillAmount; ++i) {
-				m_AllocatedPool.push_back(m_fpAllocate());
+				m_AllocatedPool.push_back(m_Allocate());
 			}
 		}
 	}
@@ -298,24 +298,24 @@ namespace RTE {
 		if (m_AllocatedPool.empty()) { FillPool((m_PoolAllocBlockCount > 0) ? m_PoolAllocBlockCount : 10); }
 
 		// Get the instance in the top of the pool and pop it off
-		void *pFoundMemory = m_AllocatedPool.back();
+		void *foundMemory = m_AllocatedPool.back();
 		m_AllocatedPool.pop_back();
 
-		RTEAssert(pFoundMemory, "Could not find an available instance in the pool, even after increasing its size!");
+		RTEAssert(foundMemory, "Could not find an available instance in the pool, even after increasing its size!");
 
 		// Keep track of the number of instances passed out
 		m_InstancesInUse++;
 
-		return pFoundMemory;
+		return foundMemory;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Entity::ClassInfo::ReturnPoolMemory(void *pReturnedMemory) {
-		if (!pReturnedMemory) {
+	int Entity::ClassInfo::ReturnPoolMemory(void *returnedMemory) {
+		if (!returnedMemory) {
 			return 0;
 		}
-		m_AllocatedPool.push_back(pReturnedMemory);
+		m_AllocatedPool.push_back(returnedMemory);
 
 		// Keep track of the number of instances passed in
 		m_InstancesInUse--;
@@ -326,7 +326,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Entity::ClassInfo::DumpPoolMemoryInfo(Writer &fileWriter) {
-		for (ClassInfo *itr = m_sClassHead; itr != 0; itr = itr->m_NextClass) {
+		for (const ClassInfo *itr = s_ClassHead; itr != 0; itr = itr->m_NextClass) {
 			if (itr->IsConcrete()) { fileWriter << itr->GetName() << ": " << itr->m_InstancesInUse << "\n"; }
 		}
 	}

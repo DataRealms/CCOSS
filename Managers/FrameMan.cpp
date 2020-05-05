@@ -360,7 +360,7 @@ namespace RTE {
 		m_ResMultiplier = multiplier;
 		set_palette(pal);
 
-		g_FrameMan.FlipFrameBuffers();
+		FlipFrameBuffers();
 		return 0;
 	}
 

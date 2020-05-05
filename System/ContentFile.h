@@ -100,20 +100,20 @@ namespace RTE {
 		/// Gets the ID of the Data Module this file is inside.
 		/// </summary>
 		/// <returns>The ID of the Data Module containing this' file.</returns>
-		int GetDataModuleID();
+		int GetDataModuleID() const;
 
 		//TODO Potentially use these DataSize and DataType methods (as well as their corresponding setters below) to assist with packing base files as Allegro .dat files
 		/// <summary>
 		/// Gets the file size of the content file represented by this ContentFile object, in bytes. This should be called AFTER using any of the GetAs methods.
 		/// </summary>
 		/// <returns>A long describing the file size of the content file.</returns>
-		//virtual unsigned long GetDataSize() { if (!m_pLoadedData) { GetContent(); } return m_LoadedDataSize; }
+		//virtual unsigned long GetDataSize() { if (!m_LoadedData) { GetContent(); } return m_LoadedDataSize; }
 
 		/// <summary>
 		/// Gets the Allegro DATAFILE type of the DATAFILE represented by this ContentFile.
 		/// </summary>
 		/// <returns>A DATAFILE type as described in the Allegro docs.</returns>
-		//virtual int GetDataType() { if (!m_pDataFile) { GetContent(); } return m_pDataFile->type; }
+		//virtual int GetDataType() { if (!m_DataFile) { GetContent(); } return m_DataFile->type; }
 
 		/// <summary>
 		/// Gets the file path of the content file represented by this ContentFile object.
@@ -150,7 +150,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="hash">Hash value to get file path from.</param>
 		/// <returns>Path to ContentFile.</returns>
-		static std::string GetPathFromHash(size_t hash) { return m_PathHashes.find(hash) == m_PathHashes.end() ? "" : m_PathHashes[hash]; }
+		static std::string GetPathFromHash(size_t hash) { return (s_PathHashes.find(hash) == s_PathHashes.end()) ? "" : s_PathHashes[hash]; }
 #pragma endregion
 
 #pragma region Data Handling
@@ -206,19 +206,19 @@ namespace RTE {
 		/// Gets the class name of this Entity.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return m_ClassName; }
+		virtual const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:
 
-		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
-		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount }; //!< Enumeration for loading BITMAPs by bit depth. NOTE: This can't be lower down because m_sLoadedBitmaps relies on its definition.
+		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount }; //!< Enumeration for loading BITMAPs by bit depth. NOTE: This can't be lower down because s_LoadedBitmaps relies on its definition.
 
 		//TODO all of these could probably be replaced with unordered_maps and decrease lookup time.
-		static std::map<size_t, std::string> m_PathHashes; //!< Hash value of the path to this ContentFile's Datafile Object.
-		static std::map<std::string, BITMAP *> m_sLoadedBitmaps[BitDepthCount]; //!< Static map containing all the already loaded BITMAPs and their paths, and there's two maps, for each bit depth.
-		static std::map<std::string, FMOD::Sound *> m_sLoadedSamples; //!< Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
+		static std::map<size_t, std::string> s_PathHashes; //!< Hash value of the path to this ContentFile's Datafile Object.
+		static std::map<std::string, BITMAP *> s_LoadedBitmaps[BitDepthCount]; //!< Static map containing all the already loaded BITMAPs and their paths, and there's two maps, for each bit depth.
+		static std::map<std::string, FMOD::Sound *> s_LoadedSamples; //!< Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
 		//TODO Potentially use this to handle storing base files packed as Allegro .dat files
 		//static std::map<std::string, std::pair<char *, long>> m_sLoadedBinary; //!< Static map containing all the already loaded binary data. First in pair is the data, second is size in bytes.
 
@@ -226,11 +226,11 @@ namespace RTE {
 
 		int m_DataModuleID; //!< Data Module ID of where this was loaded from.
 
-		void *m_pLoadedData; //!< Non-ownership pointer to the loaded data for convenience. Do not release/delete this.   
+		void *m_LoadedData; //!< Non-ownership pointer to the loaded data for convenience. Do not release/delete this.   
 		//long m_LoadedDataSize; //!< Size of loaded data.
 		//bool m_DataModified; //!< Whether the data itself has been modified since load, and should be saved out again to the path on write.
 
-		//DATAFILE *m_pDataFile; //!< This is only if the data is loaded from a datafile; needs to be saved so that it can be unloaded as some point.
+		//DATAFILE *m_DataFile; //!< This is only if the data is loaded from a datafile; needs to be saved so that it can be unloaded as some point.
 
 	private:
 

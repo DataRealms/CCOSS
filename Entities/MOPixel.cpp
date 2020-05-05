@@ -423,7 +423,7 @@ void MOPixel::Draw(BITMAP *pTargetBitmap,
 
 /*
     if (m_pAtom->GetMaterial().id == c_GoldMaterialID) {
-        if (mode == g_DrawKey) {
+        if (mode == g_DrawMask) {
             
         }
         else if (mode == g_DrawMOID)
@@ -433,7 +433,7 @@ void MOPixel::Draw(BITMAP *pTargetBitmap,
                             m_Pos.GetFloorIntY() - targetPos.m_Y,
                             mode == g_DrawMaterial ? m_pAtom->GetMaterial()->GetSettleMaterialID() :
                                                    (mode == g_DrawAir ? g_MaterialAir :
-                                                   (mode == g_DrawKey ? g_MaskColor :
+                                                   (mode == g_DrawMask ? g_MaskColor :
                                                    (mode == g_DrawMOID ? m_MOID :
                                                    (mode == g_DrawNoMOID ? g_NoMOID : m_Color.GetIndex())))));
 

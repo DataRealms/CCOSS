@@ -233,6 +233,7 @@
     <ClInclude Include="Managers\PrimitiveMan.h" />
     <ClInclude Include="Menus\LoadingGUI.h" />
     <ClInclude Include="Resources\resource.h" />
+    <ClInclude Include="System\Atom.h" />
     <ClInclude Include="System\Constants.h" />
     <ClInclude Include="System\Controller.h" />
     <ClInclude Include="System\Entity.h" />
@@ -311,7 +312,6 @@
     <ClInclude Include="Entities\AHuman.h" />
     <ClInclude Include="Entities\AllEntities.h" />
     <ClInclude Include="Entities\Arm.h" />
-    <ClInclude Include="Entities\Atom.h" />
     <ClInclude Include="Entities\AtomGroup.h" />
     <ClInclude Include="Entities\Attachable.h" />
     <ClInclude Include="Entities\BunkerAssembly.h" />
@@ -378,6 +378,7 @@
     <ClCompile Include="Managers\PostProcessMan.cpp" />
     <ClCompile Include="Managers\PrimitiveMan.cpp" />
     <ClCompile Include="Menus\LoadingGUI.cpp" />
+    <ClCompile Include="System\Atom.cpp" />
     <ClCompile Include="System\Controller.cpp" />
     <ClCompile Include="System\Entity.cpp" />
     <ClCompile Include="System\Primitive.cpp" />
@@ -458,7 +459,6 @@
     <ClCompile Include="Entities\AEmitter.cpp" />
     <ClCompile Include="Entities\AHuman.cpp" />
     <ClCompile Include="Entities\Arm.cpp" />
-    <ClCompile Include="Entities\Atom.cpp" />
     <ClCompile Include="Entities\AtomGroup.cpp" />
     <ClCompile Include="Entities\Attachable.cpp" />
     <ClCompile Include="Entities\BunkerAssembly.cpp" />

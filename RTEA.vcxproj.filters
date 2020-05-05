@@ -243,9 +243,6 @@
     <ClInclude Include="Entities\Arm.h">
       <Filter>Entities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\Atom.h">
-      <Filter>Entities</Filter>
-    </ClInclude>
     <ClInclude Include="Entities\AtomGroup.h">
       <Filter>Entities</Filter>
     </ClInclude>
@@ -471,6 +468,9 @@
     <ClInclude Include="System\Primitive.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="System\Atom.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -672,9 +672,6 @@
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="Entities\Arm.cpp">
-      <Filter>Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="Entities\Atom.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="Entities\AtomGroup.cpp">
@@ -886,6 +883,9 @@
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="System\Primitive.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Atom.cpp">
       <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>

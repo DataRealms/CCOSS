@@ -14,16 +14,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 Valid editor names are: `ActorEditor`, `GibEditor`, `SceneEditor`, `AreaEditor` and `AssemblyEditor`.
 
 - Added handling for custom number and string values in INI.
-	```
-	AddCustomValue = NumberValue
-		YourKeyName = YourNumberValue // Integer or floating point number.
-	
-	AddCustomValue = StringValue
-		YourKeyName = YourStringValue
-	```
-	`YourKeyName` is a string value and is not limited to just numbers.
+```
+AddCustomValue = NumberValue
+	YourKeyName = YourNumberValue // Integer or floating point number.
+
+AddCustomValue = StringValue
+	YourKeyName = YourStringValue
+```
+`YourKeyName` is a string value and is not limited to just numbers.
 	
 - New `Settings.ini` property `AdvancedPerformanceStats = 0/1` to disable/enable the performance counter graphs (enabled by default).
+
+- Added `PassengerSlots` INI and Lua property to Actors. This determines how many spaces in the buy menu an actor will take up (1 by default). It must be a whole number but can theoretically be 0 or less.
+
+- Added Lua bindings for `IsInsideX` and `IsInsideY` to `Area`. These act similarly to the pre-existing `IsInside`, but allow you to check for the X and Y axes individually.
 
 ### Changed
 
@@ -31,7 +35,7 @@ Valid editor names are: `ActorEditor`, `GibEditor`, `SceneEditor`, `AreaEditor` 
 
 - Major cleanup and reformatting in the `System` folder.
 
-- Upgraded to new, modern FMOD audio library. ([Issue #72](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/72))  
+- Upgraded to new, modern FMOD audio library. ([Issue #72](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/72)).  
 Sounds now play in 3D space, so they pan to the left and right, and attenuate automatically based on the player's viewpoint.
 
 - `Sounds` have been renamed to `SoundContainers`, and are able to handle multiple sounds playing at once. INI definitions have changed accordingly.  
@@ -49,12 +53,12 @@ They must be added using `... = SoundContainer`, and individual sounds for them 
 - Made `AHuman` show both weapon ammo states when 2 one-handed weapons are equipped.
 
 - Added support for multiple lines in item descriptions ([Issue#58](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/58)). This is done as follows:
-	```
-	Description = MultiLineText
-		AddLine = First line of text
-		AddLine = Second line of text
-		...
-	```
+```
+Description = MultiLineText
+	AddLine = First line of text
+	AddLine = Second line of text
+	...
+```
 
 - `FrameMan` broken down to 4 managers. New managers are:  
 `PerformanceMan` to handle all performance stats and measurements.  

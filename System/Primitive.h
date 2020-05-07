@@ -61,14 +61,6 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method for LinePrimitive object.
 		/// </summary>
-		/// <param name="start">Start position of the primitive.</param>
-		/// <param name="end">End position of the primitive.</param>
-		/// <param name="color">Color to draw this primitive with.</param>
-		LinePrimitive(Vector start, Vector end, unsigned char color) { LinePrimitive(-1, start, end, color); }
-
-		/// <summary>
-		/// Constructor method for LinePrimitive object.
-		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
 		/// <param name="start">Start position of the primitive.</param>
 		/// <param name="end">End position of the primitive.</param>
@@ -100,14 +92,6 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method for BoxPrimitive object.
 		/// </summary>
-		/// <param name="start">Start position of the primitive.</param>
-		/// <param name="end">End position of the primitive.</param>
-		/// <param name="color">Color to draw this primitive with.</param>
-		BoxPrimitive(Vector start, Vector end, unsigned char color) { BoxPrimitive(-1, start, end, color); }
-
-		/// <summary>
-		/// Constructor method for BoxPrimitive object.
-		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
 		/// <param name="start">Start position of the primitive.</param>
 		/// <param name="end">End position of the primitive.</param>
@@ -135,14 +119,6 @@ namespace RTE {
 	class BoxFillPrimitive : public GraphicalPrimitive {
 
 	public:
-
-		/// <summary>
-		/// Constructor method for BoxFillPrimitive object.
-		/// </summary>
-		/// <param name="start">Start position of the primitive.</param>
-		/// <param name="end">End position of the primitive.</param>
-		/// <param name="color">Color to draw this primitive with.</param>
-		BoxFillPrimitive(Vector start, Vector end, unsigned char color) { BoxFillPrimitive(-1, start, end, color); }
 
 		/// <summary>
 		/// Constructor method for BoxFillPrimitive object.
@@ -185,14 +161,6 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method for CirclePrimitive object.
 		/// </summary>
-		/// <param name="pos">Position of this primitive.</param>
-		/// <param name="radius">Radius of the circle primitive.</param>
-		/// <param name="color">Color to draw this primitive with.</param>
-		CirclePrimitive(Vector pos, short radius, unsigned char color) { CirclePrimitive(-1, pos, radius, color); }
-
-		/// <summary>
-		/// Constructor method for CirclePrimitive object.
-		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
 		/// <param name="pos">Position of this primitive.</param>
 		/// <param name="radius">Radius of the circle primitive.</param>
@@ -227,14 +195,6 @@ namespace RTE {
 		/// Constructor method for CircleFillPrimitive object.
 		/// </summary>
 		CircleFillPrimitive() { m_Radius = 0; }
-
-		/// <summary>
-		/// Constructor method for CircleFillPrimitive object.
-		/// </summary>
-		/// <param name="pos">Position of this primitive.</param>
-		/// <param name="radius">Radius of the circle primitive.</param>
-		/// <param name="color">Color to draw this primitive with.</param>
-		CircleFillPrimitive(Vector pos, short radius, unsigned char color) { CircleFillPrimitive(-1, pos, radius, color); }
 
 		/// <summary>
 		/// Constructor method for CircleFillPrimitive object.
@@ -284,15 +244,6 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method for TextPrimitive object.
 		/// </summary>
-		/// <param name="pos">Position of this primitive.</param>
-		/// <param name="text">String containing text to draw.</param>
-		/// <param name="isSmall">Use small or large font. True for small font.</param>
-		/// <param name="alignment">Alignment of text.</param>
-		TextPrimitive(Vector pos, std::string text, bool isSmall, short alignment) { TextPrimitive(-1, pos, text, isSmall, alignment); }
-
-		/// <summary>
-		/// Constructor method for TextPrimitive object.
-		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
 		/// <param name="pos">Position of this primitive.</param>
 		/// <param name="text">String containing text to draw.</param>
@@ -334,14 +285,6 @@ namespace RTE {
 			m_RotAngle = 0.0;
 			m_Player = -1;
 		}
-
-		/// <summary>
-		/// Constructor method for BitmapPrimitive object.
-		/// </summary>
-		/// <param name="pos">Position of this primitive.</param>
-		/// <param name="bitmap">Bitmap to draw.</param>
-		/// <param name="rotAngle">Angle to rotate bitmap in radians.</param>
-		BitmapPrimitive(Vector pos, BITMAP * bitmap, float rotAngle) { BitmapPrimitive(-1, pos, bitmap, rotAngle); }
 
 		/// <summary>
 		/// Constructor method for BitmapPrimitive object.

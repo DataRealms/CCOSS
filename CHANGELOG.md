@@ -29,6 +29,42 @@ AddCustomValue = StringValue
 
 - Added Lua bindings for `IsInsideX` and `IsInsideY` to `Area`. These act similarly to the pre-existing `IsInside`, but allow you to check for the X and Y axes individually.
 
+- Added the concept of `SoundSets`, which are collections of sounds inside a `SoundContainer`. This allows you to, for example, put multiple sounds for a given gunshot inside a `SoundSet` so they're played together.
+
+- `SoundContainers` have been overhauled to allow for a lot more customization, including per-sound customization. The following INI example shows all currently availble capabilities with explanatory comments:
+```
+AddSoundContainer = SoundContainer // Note that SoundContainers replace Sounds, so this can be used for things like FireSound = SoundContainer
+	PresetName = Preset Name Here
+	CycleMode = MODE_RANDOM (default) | MODE_FORWARDS // How the SoundContainer will cycle through its `SoundSets` whenever it's told to select a new one. The former is prior behaviour, the latter cycles through SoundSets in the order they were added.
+	LoopSetting = -1 | 0 (default) | 1+ // How the SoundContainer loops its sounds. -1 means it loops forever, 0 means it plays once, any number > 0 means it plays once and loops that many times.
+	Immobile = 0 (default) | 1 // Whether or not the SoundContainer's sounds should be treated as immobile. Immobile sounds are generally used for UI and system sounds; they will always play at full volume and will not be panned or affected by global pitch during game slowdown.
+	AttenuationStartDistance = Number (default -1) // The distance at which the SoundContainer's sounds will start to attenuate out, any number < 0 set it to the game's default. Attenuation calculations follows FMOD's Inverse Rolloff model, which you can find linked below.
+	Priority = 0 - 256 (default 128) // The priority at which the SoundContainer's sounds will be played, between 0 (highest priority) and 256 (lowest priority). Lower priority sounds are less likely to be played are a lot of sounds playing.
+	AffectedByGlobalPitch = 0 | 1 (default) // Whether or not the SoundContainer's sounds will be affected by global pitch, or only change pitch when manually made to do so via Lua (note that pitch setting is done via AudioMan).
+	AddSoundSet = SoundSet // This adds a SoundSet containing one or more sounds to the SoundContainer.
+		AddSound = ContentFile // This adds a sound to the SoundSet, allowing it to be customized as shown.
+			Filepath = "SomeRte.rte/Path/To/Sound.wav"
+			Offset = Vector // This specifies where the sound plays with respect to its SoundContainer. This allows, for example, different sounds in a gun's reload to come from slightly different locations.
+				X = Number
+				Y = Number
+			AttenuationStartDistance = Number // This functions identically to SoundContainer AttenuationStartDistance, allowing you to override it for specific sounds in the SoundContainer.
+			MinimumAudibleDistance = Number (default 0) // This allows you to make a sound not play while the listener is within a certain distance, e.g. for gunshot echoes. It is automatically accounted for in sound attenuation.
+		AddSound = "SomeRte.rte/Path/To/AnotherSound.wav" // This adds a sound to the SoundSet in oneline, allowing it to be compactly added (without customisation).
+	AddSound = "SomeRte.rte/Path/To/YetAnotherSound.wav" // This adds a sound to the SoundContainer, creating a new SoundSet for it with just this sound.
+```
+NOTE: Here is a link to [FMOD's Inverse Rolloff Model.](https://fmod.com/resources/documentation-api?version=2.0&page=white-papers-3d-sounds.html#inverse)
+	
+- `SoundContainer` Lua controls have been overhauled, allowing for more control in playing and replaying them. The following Lua bindings are available:  
+`soundContainer:HasAnySounds()` - Returns whether or not the `SoundContainer` has any sounds in it. True or false.  
+`soundContainer:IsBeingPlayed()` - Returns whether or not any sounds in the `SoundContainer` are currently being played. True or False.  
+`soundContainer:Play(optionalPosition, optionalPlayer)` - Plays the sounds belonging to the `SoundContainer's` currently selected `SoundSet`. The sound will play at the position and for the player specified, or at (0, 0) for all players if parameters aren't specified.  
+`soundContainer:Stop(optionalPlayer)` - Stops any playing sounds belonging to the `SoundContainer`, optionally only stopping them for a specified player.  
+`soundContainer:AddSound(filePath, optional soundSetToAddSoundTo, optionalSoundOffset, optionalAttenuationStartDistance, optionalAbortGameIfSoundIsInvalid)` - Adds the sound at the given filepath to the `SoundContainer`. If a `SoundSet` index is specified it'll add it to that `SoundSet`. If an offset or attenuation start distance are specified they'll be set, as mentioned in the INI section above. If set to abort for invalid sounds, the game will error out if it can't load the sound, otherwise it'll show a console error.  
+`soundContainer:SetPosition(position)` - Sets the position at which the `SoundContainer's` sounds will play.  
+`soundContainer:SelectNextSoundSet()` - Selects the next `SoundSet` to play when `soundContainer:Play(...)` is called, according to the INI defined `CycleMode`.  
+`soundContainer.Loops` - Set or get the number of loops for the `SoundContainer`, as mentioned in the INI section above.  
+`soundContainer.Priority` - Set or get the priority of the `SoundContainer`, as mentioned in the INI section above.  
+`soundContainer.AffectedByGlobalPitch` - Set or get whether the `SoundContainer` is affected by global pitch, as mentioned in the INI section above.  
 ### Changed
 
 - Codebase now uses the C++14 standard.
@@ -94,6 +130,10 @@ If the conditions are not met, the mode switch button will show `Unavailable`.
 - Fixed crash when clearing an already empty preset list in the buy menu.
 
 - Temporary fix for low mass attachables/emitters being thrown at ridiculous speeds when their parent is gibbed.
+
+- The audio system now better supports splitscreen games, turning off sound panning for them and attenuating according to the nearest player.
+
+- The audio system now better supports wrapping maps so sounds handle the seam better. Additionally, the game should be able to function if the audio system fails to start up.
 
 ### Removed
 

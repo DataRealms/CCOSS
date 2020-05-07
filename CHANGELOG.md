@@ -35,50 +35,94 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	```
 	AddSoundContainer = SoundContainer // Note that SoundContainers replace Sounds, so this can be used for things like FireSound = SoundContainer
 		PresetName = Preset Name Here
+		
 		CycleMode = MODE_RANDOM (default) | MODE_FORWARDS // How the SoundContainer will cycle through its `SoundSets` whenever it's told to select a new one. The former is prior behaviour, the latter cycles through SoundSets in the order they were added.
+		
 		LoopSetting = -1 | 0 (default) | 1+ // How the SoundContainer loops its sounds. -1 means it loops forever, 0 means it plays once, any number > 0 means it plays once and loops that many times.
+		
 		Immobile = 0 (default) | 1 // Whether or not the SoundContainer's sounds should be treated as immobile. Immobile sounds are generally used for UI and system sounds; they will always play at full volume and will not be panned or affected by global pitch during game slowdown.
+		
 		AttenuationStartDistance = Number (default -1) // The distance at which the SoundContainer's sounds will start to attenuate out, any number < 0 set it to the game's default. Attenuation calculations follows FMOD's Inverse Rolloff model, which you can find linked below.
+		
 		Priority = 0 - 256 (default 128) // The priority at which the SoundContainer's sounds will be played, between 0 (highest priority) and 256 (lowest priority). Lower priority sounds are less likely to be played are a lot of sounds playing.
+		
 		AffectedByGlobalPitch = 0 | 1 (default) // Whether or not the SoundContainer's sounds will be affected by global pitch, or only change pitch when manually made to do so via Lua (note that pitch setting is done via AudioMan).
+		
 		AddSoundSet = SoundSet // This adds a SoundSet containing one or more sounds to the SoundContainer.
+			
 			AddSound = ContentFile // This adds a sound to the SoundSet, allowing it to be customized as shown.
 				Filepath = "SomeRte.rte/Path/To/Sound.wav"
+				
 				Offset = Vector // This specifies where the sound plays with respect to its SoundContainer. This allows, for example, different sounds in a gun's reload to come from slightly different locations.
 					X = Number
 					Y = Number
+				
 				AttenuationStartDistance = Number // This functions identically to SoundContainer AttenuationStartDistance, allowing you to override it for specific sounds in the SoundContainer.
+				
 				MinimumAudibleDistance = Number (default 0) // This allows you to make a sound not play while the listener is within a certain distance, e.g. for gunshot echoes. It is automatically accounted for in sound attenuation.
+			
 			AddSound = "SomeRte.rte/Path/To/AnotherSound.wav" // This adds a sound to the SoundSet in oneline, allowing it to be compactly added (without customisation).
+		
 		AddSound = "SomeRte.rte/Path/To/YetAnotherSound.wav" // This adds a sound to the SoundContainer, creating a new SoundSet for it with just this sound.
 	```
 	NOTE: Here is a link to [FMOD's Inverse Rolloff Model.](https://fmod.com/resources/documentation-api?version=2.0&page=white-papers-3d-sounds.html#inverse)
 	
-- `SoundContainer` Lua controls have been overhauled, allowing for more control in playing and replaying them. The following Lua bindings are available:  
-	`soundContainer:HasAnySounds()` - Returns whether or not the `SoundContainer` has any sounds in it. True or false.  
-	`soundContainer:IsBeingPlayed()` - Returns whether or not any sounds in the `SoundContainer` are currently being played. True or False.  
-	`soundContainer:Play(optionalPosition, optionalPlayer)` - Plays the sounds belonging to the `SoundContainer's` currently selected `SoundSet`. The sound will play at the position and for the player specified, or at (0, 0) for all players if parameters aren't specified.  
-	`soundContainer:Stop(optionalPlayer)` - Stops any playing sounds belonging to the `SoundContainer`, optionally only stopping them for a specified player.  
-	`soundContainer:AddSound(filePath, optional soundSetToAddSoundTo, optionalSoundOffset, optionalAttenuationStartDistance, optionalAbortGameIfSoundIsInvalid)` - Adds the sound at the given filepath to the `SoundContainer`. If a `SoundSet` index is specified it'll add it to that `SoundSet`. If an offset or attenuation start distance are specified they'll be set, as mentioned in the INI section above. If set to abort for invalid sounds, the game will error out if it can't load the sound, otherwise it'll show a console error.  
-	`soundContainer:SetPosition(position)` - Sets the position at which the `SoundContainer's` sounds will play.  
-	`soundContainer:SelectNextSoundSet()` - Selects the next `SoundSet` to play when `soundContainer:Play(...)` is called, according to the INI defined `CycleMode`.  
-	`soundContainer.Loops` - Set or get the number of loops for the `SoundContainer`, as mentioned in the INI section above.  
-	`soundContainer.Priority` - Set or get the priority of the `SoundContainer`, as mentioned in the INI section above.  
-	`soundContainer.AffectedByGlobalPitch` - Set or get whether the `SoundContainer` is affected by global pitch, as mentioned in the INI section above.  
-	
+- `SoundContainer` Lua controls have been overhauled, allowing for more control in playing and replaying them. The following Lua bindings are available:
+	```
+	soundContainer:HasAnySounds() - Returns whether or not the SoundContainer has any sounds in it. Returns True or false.
+	```
+	```
+	soundContainer:IsBeingPlayed() - Returns whether or not any sounds in the SoundContainer are currently being played. Returns True or False.
+	```
+	```
+	soundContainer:Play(optionalPosition, optionalPlayer) - Plays the sounds belonging to the SoundContainer's currently selected SoundSet. The sound will play at the position and for the player specified, or at (0, 0) for all players if parameters aren't specified.
+	```
+	```
+	soundContainer:Stop(optionalPlayer) - Stops any playing sounds belonging to the SoundContainer, optionally only stopping them for a specified player.
+	```
+	```
+	soundContainer:AddSound(filePath, optional soundSetToAddSoundTo, optionalSoundOffset, optionalAttenuationStartDistance, optionalAbortGameIfSoundIsInvalid) - Adds the sound at the given filepath to the SoundContainer. If a SoundSet index is specified it'll add it to that SoundSet. If an offset or attenuation start distance are specified they'll be set, as mentioned in the INI section above. If set to abort for invalid sounds, the game will error out if it can't load the sound, otherwise it'll show a console error.
+	```
+	```
+	soundContainer:SetPosition(position) - Sets the position at which the SoundContainer's sounds will play.
+	```
+	```
+	soundContainer:SelectNextSoundSet() - Selects the next SoundSet to play when soundContainer:Play(...) is called, according to the INI defined CycleMode.
+	```
+	```
+	soundContainer.Loops - Set or get the number of loops for the SoundContainer, as mentioned in the INI section above.
+	```
+	```
+	soundContainer.Priority - Set or get the priority of the SoundContainer, as mentioned in the INI section above.
+	```
+	```
+	soundContainer.AffectedByGlobalPitch - Set or get whether the SoundContainer is affected by global pitch, as mentioned in the INI section above.
+	```
 - `MovableObjects` can now run multiple scripts by putting multiple `AddScript = FilePath.lua` lines in the INI definition. ([Issue #109](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/pull/109))  
 	Scripts will have their appropriate functions run in the order they were added. Note that all scripts share the same `self`, so care must be taken when naming self variables.  
 	Scripts can be checked for with `movableObject:HasScript(filePath);` and added and removed with `movableObject:AddScript(filePath);` and `movableObject:RemoveScript(filePath);`. They can also be enabled and disabled in Lua (preserving their ordering) with `movableObject:EnableScript(filePath);` and `movableObject:DisableScript(filePath);`.
 
 - Scripts on `MovableObjects` and anything that extends them (i.e. most things) now support the following new functions (in addition to `Create`, `Update`, `Destroy` and `OnPieMenu`). They are added in the same way as the aforementioned scripts:  
-	`OnScriptRemoveOrDisable(self, scriptWasRemoved)` - This is run when the script is removed or disabled. `scriptWasRemoved` will be True if the script was removed and False if it was disabled.  
-	`OnScriptEnable(self)` - This is run when the script was disabled and has been enabled.  
-	`OnCollideWithTerrain(self, terrainMaterial)` - This is run when the `MovableObject` this script on is in contact with terrain. `terrainMaterial` gives you the material ID for the terrain collided with. It is suggested to disable this script when not needed to save on overhead, as it will be run a lot!  
-	`OnCollideWithMO(self, collidedMO, collidedRootMO)` - This is run when the `MovableObject` this script is on is in contact with another `MovableObject`. `collidedMO` gives you the `MovableObject` that was collided with, and `collidedRootMO` gives you the root `MovableObject` of that `MovableObject` (note that they may be the same). Collisions with `MovableObjects` that share the same root `MovableObject` will not call this function.  
+	```
+	OnScriptRemoveOrDisable(self, scriptWasRemoved) - This is run when the script is removed or disabled. The scriptWasRemoved parameter will be True if the script was removed and False if it was disabled.
+	```
+	```
+	OnScriptEnable(self) - This is run when the script was disabled and has been enabled.
+	```
+	```
+	OnCollideWithTerrain(self, terrainMaterial) - This is run when the MovableObject this script on is in contact with terrain. The terrainMaterial parameter gives you the material ID for the terrain collided with. It is suggested to disable this script when not needed to save on overhead, as it will be run a lot!
+	```
+	```
+	OnCollideWithMO(self, collidedMO, collidedRootMO) - This is run when the MovableObject this script is on is in contact with another MovableObject. The collidedMO parameter gives you the MovableObject that was collided with, and the collidedRootMO parameter gives you the root MovableObject of that MovableObject (note that they may be the same). Collisions with MovableObjects that share the same root MovableObject will not call this function.
+	```
 	
 - Scripts on `Attachables` now support the following new functions:  
-	`OnAttach(self, newParent)` - This is run when the `Attachable` this script is on is attached to a new parent object. `newParent` gives you the object the `Attachable` is now attached to.  
-	`OnDetach(self, exParent)` - This is run when the `Attachable` this script is on is detached from an object. `exParent` gives you the object the `Attachable` was attached to.
+	```
+	OnAttach(self, newParent) - This is run when the Attachable this script is on is attached to a new parent object. The newParent parameter gives you the object the Attachable is now attached to.
+	```
+	```
+	OnDetach(self, exParent) - This is run when the Attachable this script is on is detached from an object. The exParent gives you the object the Attachable was attached to.
+	```
 
 ### Changed
 

@@ -568,6 +568,7 @@ int LuaMan::Create()
             .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound)) &SoundContainer::AddSound)
             .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance, bool abortGameForInvalidSound)) &SoundContainer::AddSound)
 			.def("SetPosition", &SoundContainer::SetPosition)
+            .def("SelectNextSoundSet", &SoundContainer::SelectNextSoundSet)
 			.property("Loops", &SoundContainer::GetLoopSetting, &SoundContainer::SetLoopSetting)
             .property("Priority", &SoundContainer::GetPriority, &SoundContainer::SetPriority)
             .property("AffectedByGlobalPitch", &SoundContainer::IsAffectedByGlobalPitch, &SoundContainer::SetAffectedByGlobalPitch),

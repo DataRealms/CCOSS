@@ -11,17 +11,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Lua binding for `Box::IntersectsBox(otherBox)`, that returns true if 2 boxes intersect.
 
 - Command line arguments for launching directly into editors using `-editor "EditorName"`.  
-Valid editor names are: `ActorEditor`, `GibEditor`, `SceneEditor`, `AreaEditor` and `AssemblyEditor`.
+	Valid editor names are: `ActorEditor`, `GibEditor`, `SceneEditor`, `AreaEditor` and `AssemblyEditor`.
 
 - Added handling for custom number and string values in INI.
-```
-AddCustomValue = NumberValue
-	YourKeyName = YourNumberValue // Integer or floating point number.
+	```
+	AddCustomValue = NumberValue
+		YourKeyName = YourNumberValue // Integer or floating point number.
 
-AddCustomValue = StringValue
-	YourKeyName = YourStringValue
-```
-`YourKeyName` is a string value and is not limited to just numbers.
+	AddCustomValue = StringValue
+		YourKeyName = YourStringValue
+	```
+	`YourKeyName` is a string value and is not limited to just numbers.
 	
 - New `Settings.ini` property `AdvancedPerformanceStats = 0/1` to disable/enable the performance counter graphs (enabled by default).
 
@@ -32,53 +32,53 @@ AddCustomValue = StringValue
 - Added the concept of `SoundSets`, which are collections of sounds inside a `SoundContainer`. This allows you to, for example, put multiple sounds for a given gunshot inside a `SoundSet` so they're played together.
 
 - `SoundContainers` have been overhauled to allow for a lot more customization, including per-sound customization. The following INI example shows all currently availble capabilities with explanatory comments:
-```
-AddSoundContainer = SoundContainer // Note that SoundContainers replace Sounds, so this can be used for things like FireSound = SoundContainer
-	PresetName = Preset Name Here
-	CycleMode = MODE_RANDOM (default) | MODE_FORWARDS // How the SoundContainer will cycle through its `SoundSets` whenever it's told to select a new one. The former is prior behaviour, the latter cycles through SoundSets in the order they were added.
-	LoopSetting = -1 | 0 (default) | 1+ // How the SoundContainer loops its sounds. -1 means it loops forever, 0 means it plays once, any number > 0 means it plays once and loops that many times.
-	Immobile = 0 (default) | 1 // Whether or not the SoundContainer's sounds should be treated as immobile. Immobile sounds are generally used for UI and system sounds; they will always play at full volume and will not be panned or affected by global pitch during game slowdown.
-	AttenuationStartDistance = Number (default -1) // The distance at which the SoundContainer's sounds will start to attenuate out, any number < 0 set it to the game's default. Attenuation calculations follows FMOD's Inverse Rolloff model, which you can find linked below.
-	Priority = 0 - 256 (default 128) // The priority at which the SoundContainer's sounds will be played, between 0 (highest priority) and 256 (lowest priority). Lower priority sounds are less likely to be played are a lot of sounds playing.
-	AffectedByGlobalPitch = 0 | 1 (default) // Whether or not the SoundContainer's sounds will be affected by global pitch, or only change pitch when manually made to do so via Lua (note that pitch setting is done via AudioMan).
-	AddSoundSet = SoundSet // This adds a SoundSet containing one or more sounds to the SoundContainer.
-		AddSound = ContentFile // This adds a sound to the SoundSet, allowing it to be customized as shown.
-			Filepath = "SomeRte.rte/Path/To/Sound.wav"
-			Offset = Vector // This specifies where the sound plays with respect to its SoundContainer. This allows, for example, different sounds in a gun's reload to come from slightly different locations.
-				X = Number
-				Y = Number
-			AttenuationStartDistance = Number // This functions identically to SoundContainer AttenuationStartDistance, allowing you to override it for specific sounds in the SoundContainer.
-			MinimumAudibleDistance = Number (default 0) // This allows you to make a sound not play while the listener is within a certain distance, e.g. for gunshot echoes. It is automatically accounted for in sound attenuation.
-		AddSound = "SomeRte.rte/Path/To/AnotherSound.wav" // This adds a sound to the SoundSet in oneline, allowing it to be compactly added (without customisation).
-	AddSound = "SomeRte.rte/Path/To/YetAnotherSound.wav" // This adds a sound to the SoundContainer, creating a new SoundSet for it with just this sound.
-```
-NOTE: Here is a link to [FMOD's Inverse Rolloff Model.](https://fmod.com/resources/documentation-api?version=2.0&page=white-papers-3d-sounds.html#inverse)
+	```
+	AddSoundContainer = SoundContainer // Note that SoundContainers replace Sounds, so this can be used for things like FireSound = SoundContainer
+		PresetName = Preset Name Here
+		CycleMode = MODE_RANDOM (default) | MODE_FORWARDS // How the SoundContainer will cycle through its `SoundSets` whenever it's told to select a new one. The former is prior behaviour, the latter cycles through SoundSets in the order they were added.
+		LoopSetting = -1 | 0 (default) | 1+ // How the SoundContainer loops its sounds. -1 means it loops forever, 0 means it plays once, any number > 0 means it plays once and loops that many times.
+		Immobile = 0 (default) | 1 // Whether or not the SoundContainer's sounds should be treated as immobile. Immobile sounds are generally used for UI and system sounds; they will always play at full volume and will not be panned or affected by global pitch during game slowdown.
+		AttenuationStartDistance = Number (default -1) // The distance at which the SoundContainer's sounds will start to attenuate out, any number < 0 set it to the game's default. Attenuation calculations follows FMOD's Inverse Rolloff model, which you can find linked below.
+		Priority = 0 - 256 (default 128) // The priority at which the SoundContainer's sounds will be played, between 0 (highest priority) and 256 (lowest priority). Lower priority sounds are less likely to be played are a lot of sounds playing.
+		AffectedByGlobalPitch = 0 | 1 (default) // Whether or not the SoundContainer's sounds will be affected by global pitch, or only change pitch when manually made to do so via Lua (note that pitch setting is done via AudioMan).
+		AddSoundSet = SoundSet // This adds a SoundSet containing one or more sounds to the SoundContainer.
+			AddSound = ContentFile // This adds a sound to the SoundSet, allowing it to be customized as shown.
+				Filepath = "SomeRte.rte/Path/To/Sound.wav"
+				Offset = Vector // This specifies where the sound plays with respect to its SoundContainer. This allows, for example, different sounds in a gun's reload to come from slightly different locations.
+					X = Number
+					Y = Number
+				AttenuationStartDistance = Number // This functions identically to SoundContainer AttenuationStartDistance, allowing you to override it for specific sounds in the SoundContainer.
+				MinimumAudibleDistance = Number (default 0) // This allows you to make a sound not play while the listener is within a certain distance, e.g. for gunshot echoes. It is automatically accounted for in sound attenuation.
+			AddSound = "SomeRte.rte/Path/To/AnotherSound.wav" // This adds a sound to the SoundSet in oneline, allowing it to be compactly added (without customisation).
+		AddSound = "SomeRte.rte/Path/To/YetAnotherSound.wav" // This adds a sound to the SoundContainer, creating a new SoundSet for it with just this sound.
+	```
+	NOTE: Here is a link to [FMOD's Inverse Rolloff Model.](https://fmod.com/resources/documentation-api?version=2.0&page=white-papers-3d-sounds.html#inverse)
 	
 - `SoundContainer` Lua controls have been overhauled, allowing for more control in playing and replaying them. The following Lua bindings are available:  
-`soundContainer:HasAnySounds()` - Returns whether or not the `SoundContainer` has any sounds in it. True or false.  
-`soundContainer:IsBeingPlayed()` - Returns whether or not any sounds in the `SoundContainer` are currently being played. True or False.  
-`soundContainer:Play(optionalPosition, optionalPlayer)` - Plays the sounds belonging to the `SoundContainer's` currently selected `SoundSet`. The sound will play at the position and for the player specified, or at (0, 0) for all players if parameters aren't specified.  
-`soundContainer:Stop(optionalPlayer)` - Stops any playing sounds belonging to the `SoundContainer`, optionally only stopping them for a specified player.  
-`soundContainer:AddSound(filePath, optional soundSetToAddSoundTo, optionalSoundOffset, optionalAttenuationStartDistance, optionalAbortGameIfSoundIsInvalid)` - Adds the sound at the given filepath to the `SoundContainer`. If a `SoundSet` index is specified it'll add it to that `SoundSet`. If an offset or attenuation start distance are specified they'll be set, as mentioned in the INI section above. If set to abort for invalid sounds, the game will error out if it can't load the sound, otherwise it'll show a console error.  
-`soundContainer:SetPosition(position)` - Sets the position at which the `SoundContainer's` sounds will play.  
-`soundContainer:SelectNextSoundSet()` - Selects the next `SoundSet` to play when `soundContainer:Play(...)` is called, according to the INI defined `CycleMode`.  
-`soundContainer.Loops` - Set or get the number of loops for the `SoundContainer`, as mentioned in the INI section above.  
-`soundContainer.Priority` - Set or get the priority of the `SoundContainer`, as mentioned in the INI section above.  
-`soundContainer.AffectedByGlobalPitch` - Set or get whether the `SoundContainer` is affected by global pitch, as mentioned in the INI section above.  
+	`soundContainer:HasAnySounds()` - Returns whether or not the `SoundContainer` has any sounds in it. True or false.  
+	`soundContainer:IsBeingPlayed()` - Returns whether or not any sounds in the `SoundContainer` are currently being played. True or False.  
+	`soundContainer:Play(optionalPosition, optionalPlayer)` - Plays the sounds belonging to the `SoundContainer's` currently selected `SoundSet`. The sound will play at the position and for the player specified, or at (0, 0) for all players if parameters aren't specified.  
+	`soundContainer:Stop(optionalPlayer)` - Stops any playing sounds belonging to the `SoundContainer`, optionally only stopping them for a specified player.  
+	`soundContainer:AddSound(filePath, optional soundSetToAddSoundTo, optionalSoundOffset, optionalAttenuationStartDistance, optionalAbortGameIfSoundIsInvalid)` - Adds the sound at the given filepath to the `SoundContainer`. If a `SoundSet` index is specified it'll add it to that `SoundSet`. If an offset or attenuation start distance are specified they'll be set, as mentioned in the INI section above. If set to abort for invalid sounds, the game will error out if it can't load the sound, otherwise it'll show a console error.  
+	`soundContainer:SetPosition(position)` - Sets the position at which the `SoundContainer's` sounds will play.  
+	`soundContainer:SelectNextSoundSet()` - Selects the next `SoundSet` to play when `soundContainer:Play(...)` is called, according to the INI defined `CycleMode`.  
+	`soundContainer.Loops` - Set or get the number of loops for the `SoundContainer`, as mentioned in the INI section above.  
+	`soundContainer.Priority` - Set or get the priority of the `SoundContainer`, as mentioned in the INI section above.  
+	`soundContainer.AffectedByGlobalPitch` - Set or get whether the `SoundContainer` is affected by global pitch, as mentioned in the INI section above.  
 	
 - `MovableObjects` can now run multiple scripts by putting multiple `AddScript = FilePath.lua` lines in the INI definition. ([Issue #109](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/pull/109))  
-Scripts will have their appropriate functions run in the order they were added. Note that all scripts share the same `self`, so care must be taken when naming self variables.  
-Scripts can be checked for with `movableObject:HasScript(filePath);` and added and removed with `movableObject:AddScript(filePath);` and `movableObject:RemoveScript(filePath);`. They can also be enabled and disabled in Lua (preserving their ordering) with `movableObject:EnableScript(filePath);` and `movableObject:DisableScript(filePath);`.
+	Scripts will have their appropriate functions run in the order they were added. Note that all scripts share the same `self`, so care must be taken when naming self variables.  
+	Scripts can be checked for with `movableObject:HasScript(filePath);` and added and removed with `movableObject:AddScript(filePath);` and `movableObject:RemoveScript(filePath);`. They can also be enabled and disabled in Lua (preserving their ordering) with `movableObject:EnableScript(filePath);` and `movableObject:DisableScript(filePath);`.
 
 - Scripts on `MovableObjects` and anything that extends them (i.e. most things) now support the following new functions (in addition to `Create`, `Update`, `Destroy` and `OnPieMenu`). They are added in the same way as the aforementioned scripts:  
-`OnScriptRemoveOrDisable(self, scriptWasRemoved)` - This is run when the script is removed or disabled. `scriptWasRemoved` will be True if the script was removed and False if it was disabled.  
-`OnScriptEnable(self)` - This is run when the script was disabled and has been enabled.  
-`OnCollideWithTerrain(self, terrainMaterial)` - This is run when the `MovableObject` this script on is in contact with terrain. `terrainMaterial` gives you the material ID for the terrain collided with. It is suggested to disable this script when not needed to save on overhead, as it will be run a lot!  
-`OnCollideWithMO(self, collidedMO, collidedRootMO)` - This is run when the `MovableObject` this script is on is in contact with another `MovableObject`. `collidedMO` gives you the `MovableObject` that was collided with, and `collidedRootMO` gives you the root `MovableObject` of that `MovableObject` (note that they may be the same). Collisions with `MovableObjects` that share the same root `MovableObject` will not call this function.  
+	`OnScriptRemoveOrDisable(self, scriptWasRemoved)` - This is run when the script is removed or disabled. `scriptWasRemoved` will be True if the script was removed and False if it was disabled.  
+	`OnScriptEnable(self)` - This is run when the script was disabled and has been enabled.  
+	`OnCollideWithTerrain(self, terrainMaterial)` - This is run when the `MovableObject` this script on is in contact with terrain. `terrainMaterial` gives you the material ID for the terrain collided with. It is suggested to disable this script when not needed to save on overhead, as it will be run a lot!  
+	`OnCollideWithMO(self, collidedMO, collidedRootMO)` - This is run when the `MovableObject` this script is on is in contact with another `MovableObject`. `collidedMO` gives you the `MovableObject` that was collided with, and `collidedRootMO` gives you the root `MovableObject` of that `MovableObject` (note that they may be the same). Collisions with `MovableObjects` that share the same root `MovableObject` will not call this function.  
 	
 - Scripts on `Attachables` now support the following new functions:  
-`OnAttach(self, newParent)` - This is run when the `Attachable` this script is on is attached to a new parent object. `newParent` gives you the object the `Attachable` is now attached to.  
-`OnDetach(self, exParent)` - This is run when the `Attachable` this script is on is detached from an object. `exParent` gives you the object the `Attachable` was attached to.
+	`OnAttach(self, newParent)` - This is run when the `Attachable` this script is on is attached to a new parent object. `newParent` gives you the object the `Attachable` is now attached to.  
+	`OnDetach(self, exParent)` - This is run when the `Attachable` this script is on is detached from an object. `exParent` gives you the object the `Attachable` was attached to.
 
 ### Changed
 
@@ -87,50 +87,50 @@ Scripts can be checked for with `movableObject:HasScript(filePath);` and added a
 - Major cleanup and reformatting in the `System` folder.
 
 - Upgraded to new, modern FMOD audio library. ([Issue #72](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/72)).  
-Sounds now play in 3D space, so they pan to the left and right, and attenuate automatically based on the player's viewpoint.
+	Sounds now play in 3D space, so they pan to the left and right, and attenuate automatically based on the player's viewpoint.
 
 - `Sounds` have been renamed to `SoundContainers`, and are able to handle multiple sounds playing at once. INI definitions have changed accordingly.  
-They must be added using `... = SoundContainer`, and individual sounds for them must be added using `AddSound = ContentFile...`.
+	They must be added using `... = SoundContainer`, and individual sounds for them must be added using `AddSound = ContentFile...`.
 
 - Various lua bindings around audio have been upgraded, changed or fixed, giving modders a lot more control over sounds. See documentation for more details.
 
 - Centered the loading splash screen image when `DisableLoadingScreen` is true.
 
 - `Box:WithinBox` lua bindings have been renamed: 
-`Box:WithinBox` is now `Box:IsWithinBox`.  
-`Box:WithinBoxX` is now `Box:IsWithinBoxX`.  
-`Box:WithinBoxY` is now `Box:IsWithinBoxY`.
+	`Box:WithinBox` is now `Box:IsWithinBox`.  
+	`Box:WithinBoxX` is now `Box:IsWithinBoxX`.  
+	`Box:WithinBoxY` is now `Box:IsWithinBoxY`.
 
 - Made `AHuman` show both weapon ammo states when 2 one-handed weapons are equipped.
 
 - Added support for multiple lines in item descriptions ([Issue#58](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/58)). This is done as follows:
-```
-Description = MultiLineText
-	AddLine = First line of text
-	AddLine = Second line of text
-	...
-```
+	```
+	Description = MultiLineText
+		AddLine = First line of text
+		AddLine = Second line of text
+		...
+	```
 
 - `FrameMan` broken down to 4 managers. New managers are:  
-`PerformanceMan` to handle all performance stats and measurements.  
-`PostProcessMan` to handle all post-processing (glows).  
-`PrimitiveMan` to handle all lua primitive drawing.
+	`PerformanceMan` to handle all performance stats and measurements.  
+	`PostProcessMan` to handle all post-processing (glows).  
+	`PrimitiveMan` to handle all lua primitive drawing.
 
 - Post-processing (glow effects) is now enabled at all times with no option to disable.
 
 - All lua primitive draw calls are now called from `PrimitiveMan`.  
-For example: `FrameMan:DrawLinePrimitive()` is now `PrimitiveMan:DrawLinePrimitive()`.
+	For example: `FrameMan:DrawLinePrimitive()` is now `PrimitiveMan:DrawLinePrimitive()`.
 
 - Resolution multiplier properties (`NxWindowed` and `NxFullscreen`) in settings merged into a single property `ResolutionMultiplier`.
 
 - Incompatible/bad resolution settings will be overriden at startup with messages expaining the issue instead of multiple mode switches and eventually a reset to default VGA.  
-Reset to defaults (now 960x540) will happen only on horrible aspect ratio or if you managed to really destroy something.
+	Reset to defaults (now 960x540) will happen only on horrible aspect ratio or if you managed to really destroy something.
 
 - You can no longer toggle native fullscreen mode from the settings menu or ini. Instead, either select your desktop resolution at 1X mode or desktop resolution divided by 2 at 2X mode for borderless fullscreen windowed mode.  
-Due to limitations in Allegro 4, changing the actual resolution from within the game still requires a restart.
+	Due to limitations in Allegro 4, changing the actual resolution from within the game still requires a restart.
 
 - If the current game resolution is half the desktop resolution or less, you will be able to instantly switch between 1X and 2X resolution multiplier modes in the settings without screen flicker or delay.  
-If the conditions are not met, the mode switch button will show `Unavailable`.
+	If the conditions are not met, the mode switch button will show `Unavailable`.
 
 - `PieMenuActor` and `OrbittedCraft` have now been removed. They are instead replaced with parameters in their respective functions, i.e. `OnPieMenu(pieMenuActor);` and `CraftEnteredOrbit(orbittedCraft);`. Their use is otherwise unchanged.
 
@@ -165,16 +165,16 @@ If the conditions are not met, the mode switch button will show `Unavailable`.
 - Removed all OSX/Linux related code and files because we don't care. See [Liberated Cortex](https://github.com/liberated-cortex) for working Linux port.
 
 - Removed a bunch of low-level `FrameMan` lua bindings:  
-`FrameMan:ResetSplitScreens`, `FrameMan:PPM` setter, `FrameMan:ResX/Y`, `FrameMan:HSplit/VSplit`, `FrameMan:GetPlayerFrameBufferWidth/Height`, `FrameMan:IsFullscreen`, `FrameMan:ToggleFullScreen`, 
-`FrameMan:ClearBackbuffer8/32`, `FrameMan:ClearPostEffects`, `FrameMan:ResetFrameTimer`, `FrameMan:ShowPerformanceStats`.
+	`FrameMan:ResetSplitScreens`, `FrameMan:PPM` setter, `FrameMan:ResX/Y`, `FrameMan:HSplit/VSplit`, `FrameMan:GetPlayerFrameBufferWidth/Height`, `FrameMan:IsFullscreen`, `FrameMan:ToggleFullScreen`, 
+	`FrameMan:ClearBackbuffer8/32`, `FrameMan:ClearPostEffects`, `FrameMan:ResetFrameTimer`, `FrameMan:ShowPerformanceStats`.
 
 - Native fullscreen mode has been removed due to poor performance compared to windowed/borderless mode and various input device issues.  
-The version of Allegro we're running is pretty old now (released in 2007) and probably doesn't properly support/utilize newer features and APIs leading to these issues.  
-The minimal amount of hardware acceleration CC has is still retained through Windows' DWM and that evidently does a better job.
+	The version of Allegro we're running is pretty old now (released in 2007) and probably doesn't properly support/utilize newer features and APIs leading to these issues.  
+	The minimal amount of hardware acceleration CC has is still retained through Windows' DWM and that evidently does a better job.
 
 - Removed now obsolete `Settings.ini` properties:  
-Post-processing: `TrueColorMode`, `PostProcessing`, `PostPixelGlow`.   
-Native fullscreen mode: `Fullscreen`, `NxWindowed`, `NxFullscreen`, `ForceSoftwareGfxDriver`, `ForceSafeGfxDriver`.
+	Post-processing: `TrueColorMode`, `PostProcessing`, `PostPixelGlow`.   
+	Native fullscreen mode: `Fullscreen`, `NxWindowed`, `NxFullscreen`, `ForceSoftwareGfxDriver`, `ForceSafeGfxDriver`.
 
 ***
 
@@ -185,19 +185,19 @@ Native fullscreen mode: `Fullscreen`, `NxWindowed`, `NxFullscreen`, `ForceSoftwa
 - You can now run the game with command line parameters, including `-h` to see help and `-c` to send ingame console input to cout.
 
 - `MOSprite` now has the `FlipFactor` property that returns -1 if the sprite is flipped and 1 if it's not.  
-Using any `nugNum` calculations based on `HFlipped` is now considered criminal activity.
+	Using any `nugNum` calculations based on `HFlipped` is now considered criminal activity.
 
 - `TDExplosive` now has the `IsAnimatedManually` property that lets modders set its frames manually through lua.
 
 - You can now add `AEmitters` to `MOSRotating` and have them function similarly to attachables.  
-**Addition:** `parent:AddEmitter(emitterToAdd)` or `parent:AddEmitter(emitterToAdd, parentOffsetVector)`  
-**Removal:** `parent:RemoveEmitter(emitterToRemove)` or `parent:RemoveEmitter(uniqueIdOfEmitterToRemove)`
+	**Addition:** `parent:AddEmitter(emitterToAdd)` or `parent:AddEmitter(emitterToAdd, parentOffsetVector)`  
+	**Removal:** `parent:RemoveEmitter(emitterToRemove)` or `parent:RemoveEmitter(uniqueIdOfEmitterToRemove)`
 
 - Attachables can now collide with terrain when attached.  
-**INI property:** `CollidesWithTerrainWhenAttached = 0/1`  
-**Check value:** `attachable.IsCollidingWithTerrainWhileAttached`  
-**Manipulate function:** `attachable:EnableTerrainCollisions(trueOrFalse)`  
-Collisions can be manipulated only if the attachable was set to `CollidesWithTerrainWhenAttached = 1` in ini.
+	**INI property:** `CollidesWithTerrainWhenAttached = 0/1`  
+	**Check value:** `attachable.IsCollidingWithTerrainWhileAttached`  
+	**Manipulate function:** `attachable:EnableTerrainCollisions(trueOrFalse)`  
+	Collisions can be manipulated only if the attachable was set to `CollidesWithTerrainWhenAttached = 1` in ini.
 
 - `Actor.DeathSound` is now accessible to lua using `Actor.DeathSound = "string pathToNewFile"` or `Actor.DeathSound = nil` for no DeathSound.
 
@@ -220,12 +220,12 @@ Collisions can be manipulated only if the attachable was set to `CollidesWithTer
 - The list of `MOSRotating` attchables (`mosr.Attachables`) now includes hardcoded attachables like dropship engines, legs, etc.
 
 - Attachable lua manipulation has been significantly revamped. The old method of doing `attachable:Attach(parent)` has been replaced with the following:  
-**Addition:** `parent:AddAttachable(attachableToAdd)` or `parent:AddAttachable(attachableToAdd, parentOffsetVector)`  
-**Removal:** `parent:RemoveAttachable(attachableToRemove)` or `parent:RemoveAttachable(uniqueIdOfAttachableToRemove)`
+	**Addition:** `parent:AddAttachable(attachableToAdd)` or `parent:AddAttachable(attachableToAdd, parentOffsetVector)`  
+	**Removal:** `parent:RemoveAttachable(attachableToRemove)` or `parent:RemoveAttachable(uniqueIdOfAttachableToRemove)`
   
 - Wounds have been separated internally from emitter attachables.  
-They can now be added with `parent:AddWound(woundEmitterToAdd)`.  
-Removing wounds remains the same as before.
+	They can now be added with `parent:AddWound(woundEmitterToAdd)`.  
+	Removing wounds remains the same as before.
 
 - Built-in Actor angular velocity reduction on death has been lessened.
 

@@ -65,6 +65,21 @@ NOTE: Here is a link to [FMOD's Inverse Rolloff Model.](https://fmod.com/resourc
 `soundContainer.Loops` - Set or get the number of loops for the `SoundContainer`, as mentioned in the INI section above.  
 `soundContainer.Priority` - Set or get the priority of the `SoundContainer`, as mentioned in the INI section above.  
 `soundContainer.AffectedByGlobalPitch` - Set or get whether the `SoundContainer` is affected by global pitch, as mentioned in the INI section above.  
+	
+- `MovableObjects` can now run multiple scripts by putting multiple `AddScript = FilePath.lua` lines in the INI definition. ([Issue #109](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/pull/109))  
+Scripts will have their appropriate functions run in the order they were added. Note that all scripts share the same `self`, so care must be taken when naming self variables.  
+Scripts can be checked for with `movableObject:HasScript(filePath);` and added and removed with `movableObject:AddScript(filePath);` and `movableObject:RemoveScript(filePath);`. They can also be enabled and disabled in Lua (preserving their ordering) with `movableObject:EnableScript(filePath);` and `movableObject:DisableScript(filePath);`.
+
+- Scripts on `MovableObjects` and anything that extends them (i.e. most things) now support the following new functions (in addition to `Create`, `Update`, `Destroy` and `OnPieMenu`). They are added in the same way as the aforementioned scripts:  
+`OnScriptRemoveOrDisable(self, scriptWasRemoved)` - This is run when the script is removed or disabled. `scriptWasRemoved` will be True if the script was removed and False if it was disabled.  
+`OnScriptEnable(self)` - This is run when the script was disabled and has been enabled.  
+`OnCollideWithTerrain(self, terrainMaterial)` - This is run when the `MovableObject` this script on is in contact with terrain. `terrainMaterial` gives you the material ID for the terrain collided with. It is suggested to disable this script when not needed to save on overhead, as it will be run a lot!  
+`OnCollideWithMO(self, collidedMO, collidedRootMO)` - This is run when the `MovableObject` this script is on is in contact with another `MovableObject`. `collidedMO` gives you the `MovableObject` that was collided with, and `collidedRootMO` gives you the root `MovableObject` of that `MovableObject` (note that they may be the same). Collisions with `MovableObjects` that share the same root `MovableObject` will not call this function.  
+	
+- Scripts on `Attachables` now support the following new functions:  
+`OnAttach(self, newParent)` - This is run when the `Attachable` this script is on is attached to a new parent object. `newParent` gives you the object the `Attachable` is now attached to.  
+`OnDetach(self, exParent)` - This is run when the `Attachable` this script is on is detached from an object. `exParent` gives you the object the `Attachable` was attached to.
+
 ### Changed
 
 - Codebase now uses the C++14 standard.
@@ -117,6 +132,8 @@ Due to limitations in Allegro 4, changing the actual resolution from within the 
 - If the current game resolution is half the desktop resolution or less, you will be able to instantly switch between 1X and 2X resolution multiplier modes in the settings without screen flicker or delay.  
 If the conditions are not met, the mode switch button will show `Unavailable`.
 
+- `PieMenuActor` and `OrbittedCraft` have now been removed. They are instead replaced with parameters in their respective functions, i.e. `OnPieMenu(pieMenuActor);` and `CraftEnteredOrbit(orbittedCraft);`. Their use is otherwise unchanged.
+
 ### Fixed
 
 - Fixed LuaBind being all sorts of messed up. All lua bindings now work properly like they were before updating to the v141 toolset.
@@ -134,6 +151,8 @@ If the conditions are not met, the mode switch button will show `Unavailable`.
 - The audio system now better supports splitscreen games, turning off sound panning for them and attenuating according to the nearest player.
 
 - The audio system now better supports wrapping maps so sounds handle the seam better. Additionally, the game should be able to function if the audio system fails to start up.
+
+- Scripts on attached attachables will only run if their parent exists in MovableMan. ([Issue #83](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/83))
 
 ### Removed
 

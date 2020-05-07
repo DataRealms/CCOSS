@@ -563,7 +563,7 @@ void HDFirearm::Activate()
 
     // Play the pre-fire sound
     if (!IsReloading() && !m_ActiveSound.IsBeingPlayed())
-        m_ActiveSound.Play();
+        m_ActiveSound.Play(this->m_Pos);
 }
 
 
@@ -646,7 +646,7 @@ void HDFirearm::Reload()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Tells whether the device is curtrently in need of being reloaded.
 
-bool HDFirearm::NeedsReloading()
+bool HDFirearm::NeedsReloading() const
 {
     if (!m_Reloading)
     {

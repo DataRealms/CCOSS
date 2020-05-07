@@ -587,7 +587,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    Whetehr being reloaded.
 
-    virtual bool IsReloading() const { return m_Reloading; }
+    virtual bool IsReloading() const override { return m_Reloading; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -597,7 +597,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    Whether just done reloading this frame.
 
-    virtual bool DoneReloading() { return m_DoneReloading; }
+    virtual bool DoneReloading() const override { return m_DoneReloading; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -607,7 +607,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    Whetehr in need of reloading (ie not full).
 
-    virtual bool NeedsReloading();
+    virtual bool NeedsReloading() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

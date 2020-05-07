@@ -477,26 +477,28 @@ void MOSprite::Update() {
 
 	if (m_SpriteAnimTimer.GetElapsedSimTimeMS() > frameTime) {
 		switch (m_SpriteAnimMode) {
-		case ALWAYSLOOP:
-			m_Frame = ((m_Frame + 1) % m_FrameCount);
-			break;
-		case ALWAYSRANDOM:
-			while (m_Frame == prevFrame) {
-				m_Frame = floorf(static_cast<float>(m_FrameCount) * PosRand());
-			}
-			break;
-		case ALWAYSPINGPONG:
-			if (m_Frame == m_FrameCount - 1) {
-				m_SpriteAnimIsReversingFrames = true;
-			} else if (m_Frame == 0) {
-				m_SpriteAnimIsReversingFrames = false;
-			}
-			m_SpriteAnimIsReversingFrames ? m_Frame-- : m_Frame++;
-			break;
-		default:
-			break;
+		    case ALWAYSLOOP:
+			    m_Frame = ((m_Frame + 1) % m_FrameCount);
+                m_SpriteAnimTimer.Reset();
+			    break;
+		    case ALWAYSRANDOM:
+			    while (m_Frame == prevFrame) {
+				    m_Frame = floorf(static_cast<float>(m_FrameCount) * PosRand());
+			    }
+                m_SpriteAnimTimer.Reset();
+			    break;
+		    case ALWAYSPINGPONG:
+			    if (m_Frame == m_FrameCount - 1) {
+				    m_SpriteAnimIsReversingFrames = true;
+			    } else if (m_Frame == 0) {
+				    m_SpriteAnimIsReversingFrames = false;
+			    }
+			    m_SpriteAnimIsReversingFrames ? m_Frame-- : m_Frame++;
+                m_SpriteAnimTimer.Reset();
+			    break;
+		    default:
+			    break;
 		}
-		m_SpriteAnimTimer.Reset();
 	}
 }
 

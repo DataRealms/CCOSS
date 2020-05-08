@@ -81,6 +81,7 @@ void SettingsMan::Clear()
 
 	m_UseNATService = false;
 	m_DisableLoadingScreen = true;
+	m_LoadingScreenReportPrecision = 100;
 }
 
 
@@ -172,6 +173,9 @@ int SettingsMan::ReadProperty(std::string propName, Reader &reader)
         reader >> ratio;
         g_ConsoleMan.SetConsoleScreenSize(ratio);
     }
+	else if (propName == "LoadingScreenReportPrecision") {
+		reader >> m_LoadingScreenReportPrecision;
+	}
     else if (propName == "DeltaTime")
     {
         float dt;
@@ -355,6 +359,8 @@ int SettingsMan::Save(Writer &writer) const
     writer << m_ShowForeignItems;
 	writer.NewProperty("ConsoleScreenRatio");
     writer << g_ConsoleMan.GetConsoleScreenSize();
+	writer.NewProperty("LoadingScreenReportPrecision");
+	writer << m_LoadingScreenReportPrecision;
     writer.NewProperty("DeltaTime");
     writer << g_TimerMan.GetDeltaTimeSecs();
     writer.NewProperty("RealToSimCap");
@@ -545,6 +551,8 @@ int SettingsMan::SaveDefaults(Writer &writer) const
     writer << 1;
     writer.NewProperty("ConsoleScreenRatio");
     writer << 0.4;
+	writer.NewProperty("LoadingScreenReportPrecision");
+	writer << 100;
     writer.NewProperty("DeltaTime");
     writer << 0.0166667;
 	writer.NewProperty("RealToSimCap");

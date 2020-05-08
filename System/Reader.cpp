@@ -1,6 +1,7 @@
 #include "Reader.h"
 #include "RTETools.h"
 #include "PresetMan.h"
+#include "SettingsMan.h"
 
 namespace RTE {
 
@@ -257,7 +258,7 @@ namespace RTE {
 				if (peek == '\n') {
 					m_CurrentLine++;
 					// Only report every few lines
-					if (m_ReportProgress && (m_CurrentLine % 100 == 0)) {
+					if (m_ReportProgress && (m_CurrentLine % g_SettingsMan.LoadingScreenReportPrecision() == 0)) {
 						sprintf_s(report, sizeof(report), "%s%s reading line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
 						m_ReportProgress(std::string(report), false);
 					}

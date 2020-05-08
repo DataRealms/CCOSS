@@ -464,6 +464,12 @@ public:
 
 	bool AllowSavingToBase() const { return m_AllowSavingToBase; }
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <returns></returns>
+	unsigned short LoadingScreenReportPrecision() const { return m_LoadingScreenReportPrecision; }
+
 
 	std::string GetPlayerNetworkName() const { return m_PlayerNetworkName;  }
 
@@ -606,6 +612,8 @@ protected:
 	bool m_AllowSavingToBase;
 	// Recommended max MOID's before removing actors from scenes
 	int m_RecommendedMOIDCount;
+
+	unsigned short m_LoadingScreenReportPrecision;
 
 	std::string m_PlayerNetworkName;
 

@@ -68,27 +68,27 @@ namespace RTE {
 				if (wrappedDown >= nodeYCount && scene->WrapsY()) { wrappedDown = 0; }
 
 				// Leave nulls if any are out of bounds, even after wrapping (ie there was no wrapping in effect in that direction)
-				if (wrappedUp >= 0) { node->m_Up = m_NodeGrid[x][wrappedUp]; }
-				if (wrappedRight < nodeXCount) { node->m_Right = m_NodeGrid[wrappedRight][y]; }
-				if (wrappedDown < nodeYCount) { node->m_Down = m_NodeGrid[x][wrappedDown]; }
-				if (wrappedLeft >= 0) { node->m_Left = m_NodeGrid[wrappedLeft][y]; }
+				if (wrappedUp >= 0) { node->Up = m_NodeGrid[x][wrappedUp]; }
+				if (wrappedRight < nodeXCount) { node->Right = m_NodeGrid[wrappedRight][y]; }
+				if (wrappedDown < nodeYCount) { node->Down = m_NodeGrid[x][wrappedDown]; }
+				if (wrappedLeft >= 0) { node->Left = m_NodeGrid[wrappedLeft][y]; }
 
 				// Diagonals
-				if (wrappedUp >= 0 && wrappedRight < nodeXCount) { node->m_UpRight = m_NodeGrid[wrappedRight][wrappedUp]; }
-				if (wrappedRight < nodeXCount && wrappedDown < nodeYCount) { node->m_RightDown = m_NodeGrid[wrappedRight][wrappedDown]; }
-				if (wrappedDown < nodeYCount && wrappedLeft >= 0) { node->m_DownLeft = m_NodeGrid[wrappedLeft][wrappedDown]; }
-				if (wrappedLeft >= 0 && wrappedUp >= 0) { node->m_LeftUp = m_NodeGrid[wrappedLeft][wrappedUp]; }
+				if (wrappedUp >= 0 && wrappedRight < nodeXCount) { node->UpRight = m_NodeGrid[wrappedRight][wrappedUp]; }
+				if (wrappedRight < nodeXCount && wrappedDown < nodeYCount) { node->RightDown = m_NodeGrid[wrappedRight][wrappedDown]; }
+				if (wrappedDown < nodeYCount && wrappedLeft >= 0) { node->DownLeft = m_NodeGrid[wrappedLeft][wrappedDown]; }
+				if (wrappedLeft >= 0 && wrappedUp >= 0) { node->LeftUp = m_NodeGrid[wrappedLeft][wrappedUp]; }
 			}
 		}
 		// Create and allocate the pather class which will do the work
 		m_Pather = new MicroPather(this, allocate);
 
 		// If the scene wraps we must find the cost over the seam before doing RecalculateAllCosts() the first time
-		// since the cost is equal to max(node->m_LeftCost, node->m_Left->m_RightCost)
+		// since the cost is equal to max(node->LeftCost, node->m_Left->RightCost)
 		if (scene->WrapsX()) {
 			for (int y = 0; y < nodeYCount; ++y) {
 				node = m_NodeGrid[0][y];
-				if (node->m_Left) { node->m_Left->m_RightCost = CostAlongLine(node->m_Pos, node->m_Left->m_Pos); }
+				if (node->Left) { node->Left->RightCost = CostAlongLine(node->Pos, node->Left->Pos); }
 			}
 		}
 		// Set up all the costs between all nodes
@@ -144,7 +144,7 @@ namespace RTE {
 
 			// Convert from a list of state void pointers to a list of scene position vectors
 			for (; itr != statePath.end(); ++itr) {
-				pathResult.push_back(((PathNode *)(*itr))->m_Pos);
+				pathResult.push_back(((PathNode *)(*itr))->Pos);
 			}
 
 			// Adjust the last point to be exactly where the end is supposed to be (really?)
@@ -173,7 +173,7 @@ namespace RTE {
 				node = m_NodeGrid[x][y];
 				UpdateNodeCosts(node);
 				// Should reset the changed flag since we're about to reset the pather
-				node->m_IsChanged = false;
+				node->IsChanged = false;
 			}
 		}
 		// Reset the pather when costs change, as per the docs
@@ -224,14 +224,14 @@ namespace RTE {
 		// Reset the changed flag on all nodes
 		for (unsigned int x = 0; x < m_NodeGrid.size(); ++x) {
 			for (unsigned int y = 0; y < m_NodeGrid[x].size(); ++y) {
-				m_NodeGrid[x][y]->m_IsChanged = false;
+				m_NodeGrid[x][y]->IsChanged = false;
 			}
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float PathFinder::LeastCostEstimate(void *startState, void *endState) { return g_SceneMan.ShortestDistance(((PathNode *)startState)->m_Pos, ((PathNode *)endState)->m_Pos).GetMagnitude(); }
+	float PathFinder::LeastCostEstimate(void *startState, void *endState) { return g_SceneMan.ShortestDistance(((PathNode *)startState)->Pos, ((PathNode *)endState)->Pos).GetMagnitude(); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void PathFinder::AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList) {
@@ -240,54 +240,54 @@ namespace RTE {
 		float strength = 0;
 
 		// Add cost for digging upwards
-		if (node->m_Up) {
-			strength = node->m_UpCost;
+		if (node->Up) {
+			strength = node->UpCost;
 			adjCost.cost = 1 + ((strength > m_DigStrength) ? strength * 2000 : strength * 4); // Four times more expensive when digging
-			adjCost.state = static_cast<void *>(node->m_Up);
+			adjCost.state = static_cast<void *>(node->Up);
 			adjacentList->push_back(adjCost);
 		}
-		if (node->m_Right) {
-			strength = node->m_RightCost;
+		if (node->Right) {
+			strength = node->RightCost;
 			adjCost.cost = 1 + ((strength > m_DigStrength) ? strength * 1000 : strength);
-			adjCost.state = static_cast<void *>(node->m_Right);
+			adjCost.state = static_cast<void *>(node->Right);
 			adjacentList->push_back(adjCost);
 		}
-		if (node->m_Down) {
-			strength = node->m_DownCost;
+		if (node->Down) {
+			strength = node->DownCost;
 			adjCost.cost = 1 + ((strength > m_DigStrength) ? strength * 1000 : strength);
-			adjCost.state = static_cast<void *>(node->m_Down);
+			adjCost.state = static_cast<void *>(node->Down);
 			adjacentList->push_back(adjCost);
 		}
-		if (node->m_Left) {
-			strength = node->m_LeftCost;
+		if (node->Left) {
+			strength = node->LeftCost;
 			adjCost.cost = 1 + ((strength > m_DigStrength) ? strength * 1000 : strength);
-			adjCost.state = static_cast<void *>(node->m_Left);
+			adjCost.state = static_cast<void *>(node->Left);
 			adjacentList->push_back(adjCost);
 		}
 
 		// Add cost for digging at 45 degrees and for digging upwards
-		if (node->m_UpRight) {
-			strength = node->m_UpRightCost;
+		if (node->UpRight) {
+			strength = node->UpRightCost;
 			adjCost.cost = 1.4 + ((strength > m_DigStrength) ? strength * 2828 : strength * 4.2);  // Three times more expensive when digging
-			adjCost.state = static_cast<void *>(node->m_UpRight);
+			adjCost.state = static_cast<void *>(node->UpRight);
 			adjacentList->push_back(adjCost);
 		}
-		if (node->m_RightDown) {
-			strength = node->m_RightDownCost;
+		if (node->RightDown) {
+			strength = node->RightDownCost;
 			adjCost.cost = 1.4 + ((strength > m_DigStrength) ? strength * 1414 : strength * 1.4);
-			adjCost.state = static_cast<void *>(node->m_RightDown);
+			adjCost.state = static_cast<void *>(node->RightDown);
 			adjacentList->push_back(adjCost);
 		}
-		if (node->m_DownLeft) {
-			strength = node->m_DownLeftCost;
+		if (node->DownLeft) {
+			strength = node->DownLeftCost;
 			adjCost.cost = 1.4 + ((strength > m_DigStrength) ? strength * 1414 : strength * 1.4);
-			adjCost.state = static_cast<void *>(node->m_DownLeft);
+			adjCost.state = static_cast<void *>(node->DownLeft);
 			adjacentList->push_back(adjCost);
 		}
-		if (node->m_LeftUp) {
-			strength = node->m_LeftUpCost;
+		if (node->LeftUp) {
+			strength = node->LeftUpCost;
 			adjCost.cost = 1.4 + ((strength > m_DigStrength) ? strength * 2828 : strength * 4.2);  // Three times more expensive when digging
-			adjCost.state = static_cast<void *>(node->m_LeftUp);
+			adjCost.state = static_cast<void *>(node->LeftUp);
 			adjacentList->push_back(adjCost);
 		}
 	}
@@ -299,18 +299,18 @@ namespace RTE {
 			return;
 		}
 		// Look at each existing adjacent node and calculate the cost for each, offset start and end to cover more terrain
-		if (node->m_Up) { node->m_UpCost = max(node->m_Up->m_DownCost, CostAlongLine(node->m_Pos + Vector(3, 0), node->m_Up->m_Pos + Vector(3, 0))); }
-		if (node->m_Right) { node->m_RightCost = CostAlongLine(node->m_Pos + Vector(0, 3), node->m_Right->m_Pos + Vector(0, 3)); }
-		if (node->m_Down) { node->m_DownCost = CostAlongLine(node->m_Pos + Vector(-3, 0), node->m_Down->m_Pos + Vector(-3, 0)); }
-		if (node->m_Left) { node->m_LeftCost = max(node->m_Left->m_RightCost, CostAlongLine(node->m_Pos + Vector(0, -3), node->m_Left->m_Pos + Vector(0, -3))); }
+		if (node->Up) { node->UpCost = max(node->Up->DownCost, CostAlongLine(node->Pos + Vector(3, 0), node->Up->Pos + Vector(3, 0))); }
+		if (node->Right) { node->RightCost = CostAlongLine(node->Pos + Vector(0, 3), node->Right->Pos + Vector(0, 3)); }
+		if (node->Down) { node->DownCost = CostAlongLine(node->Pos + Vector(-3, 0), node->Down->Pos + Vector(-3, 0)); }
+		if (node->Left) { node->LeftCost = max(node->Left->RightCost, CostAlongLine(node->Pos + Vector(0, -3), node->Left->Pos + Vector(0, -3))); }
 
-		if (node->m_UpRight) { node->m_UpRightCost = max(node->m_UpRight->m_DownLeftCost, CostAlongLine(node->m_Pos + Vector(2, 2), node->m_UpRight->m_Pos + Vector(2, 2))); }
-		if (node->m_RightDown) { node->m_RightDownCost = CostAlongLine(node->m_Pos + Vector(2, -2), node->m_RightDown->m_Pos + Vector(2, -2)); }
-		if (node->m_DownLeft) { node->m_DownLeftCost = CostAlongLine(node->m_Pos + Vector(-2, -2), node->m_DownLeft->m_Pos + Vector(-2, -2)); }
-		if (node->m_LeftUp) { node->m_LeftUpCost = max(node->m_LeftUp->m_RightDownCost, CostAlongLine(node->m_Pos + Vector(-2, 2), node->m_LeftUp->m_Pos + Vector(-2, 2))); }
+		if (node->UpRight) { node->UpRightCost = max(node->UpRight->DownLeftCost, CostAlongLine(node->Pos + Vector(2, 2), node->UpRight->Pos + Vector(2, 2))); }
+		if (node->RightDown) { node->RightDownCost = CostAlongLine(node->Pos + Vector(2, -2), node->RightDown->Pos + Vector(2, -2)); }
+		if (node->DownLeft) { node->DownLeftCost = CostAlongLine(node->Pos + Vector(-2, -2), node->DownLeft->Pos + Vector(-2, -2)); }
+		if (node->LeftUp) { node->LeftUpCost = max(node->LeftUp->RightDownCost, CostAlongLine(node->Pos + Vector(-2, 2), node->LeftUp->Pos + Vector(-2, 2))); }
 
 		// Mark this as already changed so the above expensive calculation isn't done redundantly
-		node->m_IsChanged = true;
+		node->IsChanged = true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -336,7 +336,7 @@ namespace RTE {
 			for (int nodeY = firstY; nodeY <= lastY; ++nodeY) {
 				node = m_NodeGrid[nodeX][nodeY];
 				// Update all the costs going out from each node which is found to be affected by the box
-				if (!node->m_IsChanged) { UpdateNodeCosts(node); }
+				if (!node->IsChanged) { UpdateNodeCosts(node); }
 			}
 		}
 	}

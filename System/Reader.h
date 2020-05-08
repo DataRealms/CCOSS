@@ -226,13 +226,13 @@ namespace RTE {
 		/// A struct containing information from the currently used stream.
 		/// </summary>
 		struct StreamInfo {
-			StreamInfo(std::ifstream *stream, std::string filePath, int currentLine, int prevIndent) : m_Stream(stream), m_FilePath(filePath), m_CurrentLine(currentLine), m_PreviousIndent(prevIndent) { ; }
+			StreamInfo(std::ifstream *stream, std::string filePath, int currentLine, int prevIndent) : Stream(stream), FilePath(filePath), CurrentLine(currentLine), PreviousIndent(prevIndent) { ; }
 
 			// NOTE: These members are owned by the reader that owns this struct, so are not deleted when this is destroyed.
-			std::ifstream *m_Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
-			std::string m_FilePath; //!< Currently used stream's filepath.
-			unsigned int m_CurrentLine; //!< The line number the stream is on.
-			unsigned short m_PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
+			std::ifstream *Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
+			std::string FilePath; //!< Currently used stream's filepath.
+			unsigned int CurrentLine; //!< The line number the stream is on.
+			unsigned short PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
 		};
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.

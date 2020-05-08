@@ -35,69 +35,6 @@ enum { NormalCheckCount = 16 };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Struct:          HitData
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A struct to keep all data about a rigid body collision in one package.
-// Parent(s):       None.
-// Class history:   12/23/2003  HitData created.
-
-struct HitData
-{
-    //////////////////////////
-    // Ctor and Clear
-
-    HitData() { Clear(); }
-    HitData(HitData &rhs) { *this = rhs; }
-    void Clear();
-    virtual void Reset() { Clear(); }
-    HitData & operator=(const HitData &rhs);
-    
-    ///////////////////////
-    // Member vars
-
-    // Pointers to the two hitting bodies. If hitee is 0, that means
-    // collision with terrain. The HitData struct doesn't own these.
-    MovableObject *pBody[2];
-    // Pointers to root parents of the two hitting bodies. If hitee is 0, that means
-    // collision with terrain. The HitData struct doesn't own these.
-    MovableObject *pRootBody[2];
-    // The hit point of the collision in absolute scene units.
-    Vector hitPoint;
-    // The collision velocity of the respective bodies at the hitPoint, including rotations.
-    Vector hitVel[2];
-    // The difference in velocity between the two bodie's hitpoint velocities.
-    Vector velDiff;
-    // Total mass of each body.
-    float mass[2];
-    // Moment of inertia. If 0, assume to be a point mass.
-    float momInertia[2];
-    // The vector *IN METERS* between the CoM and the HitPoint.
-    Vector hitRadius[2];
-    // The approximated normal vector of the bitmap that the hitee is
-    // presenting to the hittor at the collision point. The inverse of this
-    // is the one representing the hittor bitmap.
-    Vector bitmapNormal;
-    // The material of the respective bodies at the hit point.
-    Material const * hitMaterial[2];
-
-    // The torque handle used to calc the moment of inertia's effects, pre-squared.
-    float squaredMIHandle[2];
-    // The impulse equation's denominator for this collision.
-    float hitDenominator;
-    // The impulse force of each body at the hit point just prior to collision.
-    Vector preImpulse[2];
-    // The resulting impulse as response to the collision.
-    Vector resImpulse[2];
-    // The factor by which the final impulse vector should be scaled to account for
-    // multiple hits in the same step.
-    float impFactor[2];
-    // Whether either of the bodies should be stopped and
-    // deleted as a result of the collision.
-    bool terminate[2];
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Class:           Atom
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     A point (pixel) that tests for collisions with a BITMAP's drawn
@@ -114,6 +51,58 @@ class Atom:
 // Public member variable, method and friend function declarations
 
 public:
+#pragma region HitData
+	/// <summary>
+	/// A struct to keep all data about a rigid body collision in one package.
+	/// </summary>
+	struct HitData {
+
+		MovableObject *Body[2]; //!< Pointers to the two hitting bodies. If hitee is 0, that means collision with terrain. The HitData struct doesn't own these.
+		MovableObject *RootBody[2]; //!< Pointers to root parents of the two hitting bodies. If hitee is 0, that means collision with terrain. The HitData struct doesn't own these.
+
+		Vector BitmapNormal; //!< The approximated normal vector of the bitmap that the hitee is presenting to the hittor at the collision point. The inverse of this is the one representing the hittor bitmap.	
+
+		const Material *HitMaterial[2]; //!< The material of the respective bodies at the hit point.
+
+		float TotalMass[2]; //!< Total mass of each body.	
+		float MomInertia[2]; //!< Moment of inertia. If 0, assume to be a point mass.
+		float SquaredMIHandle[2]; //!< The torque handle used to calculate the moment of inertia's effects, pre-squared. 
+
+		Vector HitPoint; //!< The hit point of the collision in absolute scene units.	
+		Vector HitRadius[2]; //!< The vector IN METERS between the CoM and the HitPoint.
+		Vector HitVel[2]; //!< The collision velocity of the respective bodies at the HitPoint, including rotations.	
+		Vector VelDiff; //!< The difference in velocity between the two bodies HitPoint velocities.
+
+		Vector PreImpulse[2]; //!< The impulse force of each body at the hit point just prior to collision. 
+		Vector ResImpulse[2]; //!< The resulting impulse as response to the collision.
+
+		float HitDenominator; //!< The impulse equation's denominator for this collision.
+		float ImpulseFactor[2]; //!< The factor by which the final impulse vector should be scaled to account for multiple hits in the same step.
+		bool Terminate[2]; //!< Whether either of the bodies should be stopped and deleted as a result of the collision.
+
+		/// <summary>
+		/// Constructor method used to instantiate a HitData object in system memory.
+		/// </summary>
+		HitData() { Clear(); }
+
+		/// <summary>
+		/// Resets the entire HitData object to the default settings or values.
+		/// </summary>
+		virtual void Reset() { Clear(); }
+
+		/// <summary>
+		/// An assignment operator for setting one HitData equal to another.
+		/// </summary>
+		/// <param name="rhs">A HitData reference.</param>
+		/// <returns>A reference to the changed HitData.</returns>
+		HitData & operator=(const HitData &rhs);
+
+		/// <summary>
+		/// Clears all the member variables of this HitData, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+	};
+#pragma endregion
 
 
     // New and delete operator overloads for the pool allocation of Atom:s

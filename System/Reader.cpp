@@ -347,10 +347,10 @@ namespace RTE {
 		if (m_Stream->fail()) {
 			// Backpedal and set up to read the next property in the old stream
 			delete m_Stream;
-			m_Stream = m_StreamStack.back().m_Stream;
-			m_FilePath = m_StreamStack.back().m_FilePath;
-			m_CurrentLine = m_StreamStack.back().m_CurrentLine;
-			m_PreviousIndent = m_StreamStack.back().m_PreviousIndent;
+			m_Stream = m_StreamStack.back().Stream;
+			m_FilePath = m_StreamStack.back().FilePath;
+			m_CurrentLine = m_StreamStack.back().CurrentLine;
+			m_PreviousIndent = m_StreamStack.back().PreviousIndent;
 			m_StreamStack.pop_back();
 
 			ReportError("Failed to open included data file");
@@ -400,11 +400,11 @@ namespace RTE {
 		}
 		// Replace the current included stream with the parent one
 		delete m_Stream;
-		m_Stream = m_StreamStack.back().m_Stream;
-		m_FilePath = m_StreamStack.back().m_FilePath;
-		m_CurrentLine = m_StreamStack.back().m_CurrentLine;
+		m_Stream = m_StreamStack.back().Stream;
+		m_FilePath = m_StreamStack.back().FilePath;
+		m_CurrentLine = m_StreamStack.back().CurrentLine;
 		// Observe it's being added, not just replaced. This is to keep proper track when exiting out of a file
-		m_PreviousIndent += m_StreamStack.back().m_PreviousIndent;
+		m_PreviousIndent += m_StreamStack.back().PreviousIndent;
 		m_StreamStack.pop_back();
 
 		// Extract just the filename

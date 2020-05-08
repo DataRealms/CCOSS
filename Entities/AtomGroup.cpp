@@ -1075,21 +1075,21 @@ float AtomGroup::Travel(Vector &position,
                 {
                     // Calc and store the accurate hit radius of the Atom in relation to the CoM
                     tempVec = (*aItr)->GetOffset().GetXFlipped(hFlipped);
-                    hitData.hitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= g_FrameMan.GetMPP();
+                    hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= g_FrameMan.GetMPP();
                     // Figure out the pre-collision velocity of the hitting atom due to body translation and rotation.
-                    hitData.hitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
+                    hitData.HitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
 /*
-                    radMag = hitData.hitRadius[HITOR].GetMagnitude();
+                    radMag = hitData.HitRadius[HITOR].GetMagnitude();
                     // These are set temporarily here, will be re-set later when the normal of the hit terrain bitmap (ortho pixel side) is known.
-                    hitData.hitDenominator = (1.0 / distMass) + ((radMag * radMag) / distMI);
-                    hitData.preImpulse[HITOR] = hitData.hitVel[HITOR] / hitData.hitDenominator;
+                    hitData.HitDenominator = (1.0 / distMass) + ((radMag * radMag) / distMI);
+                    hitData.PreImpulse[HITOR] = hitData.HitVel[HITOR] / hitData.HitDenominator;
                     // Set the atom with the hit data with all the info we have so far.
                     (*aItr)->SetHitData(hitData);
 
                     hitFactor = 1.0;//  / (float)hitTerrAtoms.size();
                     (*aItr)->GetHitData().mass[HITOR] = mass;
-                    (*aItr)->GetHitData().momInertia[HITOR] = m_MomInertia;
-                    (*aItr)->GetHitData().impFactor[HITOR] = hitFactor;
+                    (*aItr)->GetHitData().MomInertia[HITOR] = m_MomInertia;
+                    (*aItr)->GetHitData().ImpulseFactor[HITOR] = hitFactor;
 
                     // Call the call-on-bounce function, if requested.
 //                    if (m_pOwnerMO && callOnBounce)
@@ -1097,24 +1097,24 @@ float AtomGroup::Travel(Vector &position,
 
                     // Compute and store this Atom's collision response impulse force.
                     // Calc effects of moment of inertia will have on the impulse.
-                    float MIhandle = m_LastHit.hitRadius[HITOR].GetPerpendicular().Dot(m_LastHit.bitmapNormal);
+                    float MIhandle = m_LastHit.HitRadius[HITOR].GetPerpendicular().Dot(m_LastHit.BitmapNormal);
 */
                     if (!(*aItr)->GetNormal().IsZero())
                     {
-                        hitData.resImpulse[HITOR] = m_pOwnerMO->RotateOffset((*aItr)->GetNormal());
-                        hitData.resImpulse[HITOR] = -hitData.resImpulse[HITOR];
-                        hitData.resImpulse[HITOR].SetMagnitude(hitData.hitVel[HITOR].GetMagnitude());
-//                        hitData.resImpulse[HITOR].SetMagnitude(hitData.hitVel[HITOR].GetMagnitude());
+                        hitData.ResImpulse[HITOR] = m_pOwnerMO->RotateOffset((*aItr)->GetNormal());
+                        hitData.ResImpulse[HITOR] = -hitData.ResImpulse[HITOR];
+                        hitData.ResImpulse[HITOR].SetMagnitude(hitData.HitVel[HITOR].GetMagnitude());
+//                        hitData.ResImpulse[HITOR].SetMagnitude(hitData.HitVel[HITOR].GetMagnitude());
 
                         // Apply terrain conflict response
-                        velocity += hitData.resImpulse[HITOR] / mass;
-                        angVel += hitData.hitRadius[HITOR].GetPerpendicular().Dot(hitData.resImpulse[HITOR]) / m_MomInertia;
+                        velocity += hitData.ResImpulse[HITOR] / mass;
+                        angVel += hitData.HitRadius[HITOR].GetPerpendicular().Dot(hitData.ResImpulse[HITOR]) / m_MomInertia;
                         // Accumulate all the impulse forces so the MO can determine if it took damaged as a result
-                        totalImpulse += hitData.resImpulse[HITOR];
+                        totalImpulse += hitData.ResImpulse[HITOR];
                     }
 // Dangerous, will cause oscillations
 //                    else
-//                        hitData.resImpulse[HITOR] = -hitData.hitVel[HITOR];
+//                        hitData.ResImpulse[HITOR] = -hitData.HitVel[HITOR];
                 }
             }
 #ifdef DEBUG_BUILD
@@ -1305,20 +1305,20 @@ float AtomGroup::Travel(Vector &position,
                 {
                     // Calc and store the accurate hit radius of the Atom in relation to the CoM
                     tempVec = (*aItr)->GetOffset().GetXFlipped(hFlipped);
-                    hitData.hitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= g_FrameMan.GetMPP();
+                    hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= g_FrameMan.GetMPP();
                     // Figure out the pre-collision velocity of the hitting atom due to body translation and rotation.
-                    hitData.hitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
+                    hitData.HitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
 
-                    radMag = hitData.hitRadius[HITOR].GetMagnitude();
+                    radMag = hitData.HitRadius[HITOR].GetMagnitude();
                     // These are set temporarily here, will be re-set later when the normal of the hit terrain bitmap (ortho pixel side) is known.
-                    hitData.hitDenominator = (1.0 / distMass) + ((radMag * radMag) / distMI);
-                    hitData.preImpulse[HITOR] = hitData.hitVel[HITOR] / hitData.hitDenominator;
+                    hitData.HitDenominator = (1.0 / distMass) + ((radMag * radMag) / distMI);
+                    hitData.PreImpulse[HITOR] = hitData.HitVel[HITOR] / hitData.HitDenominator;
                     // Set the atom with the hit data with all the info we have so far.
                     (*aItr)->SetHitData(hitData);
 
-//                    float test1 = hitData.preImpulse[HITOR].GetMagnitude();
+//                    float test1 = hitData.PreImpulse[HITOR].GetMagnitude();
 
-                    if (g_SceneMan.WillPenetrate((*aItr)->GetCurrentPos().m_X, (*aItr)->GetCurrentPos().m_Y, hitData.preImpulse[HITOR]))
+                    if (g_SceneMan.WillPenetrate((*aItr)->GetCurrentPos().m_X, (*aItr)->GetCurrentPos().m_Y, hitData.PreImpulse[HITOR]))
                     {
                         // Move the penetrating atom to the pen. list from the coll. list.
                         penetratingAtoms.push_back(*aItr);
@@ -1352,9 +1352,9 @@ float AtomGroup::Travel(Vector &position,
                 // Gather the collision response effects so that the impulse force can be calculated.
                 for (aItr = hitTerrAtoms.begin(); aItr != hitTerrAtoms.end(); ++aItr)
                 {
-                    (*aItr)->GetHitData().mass[HITOR] = mass;
-                    (*aItr)->GetHitData().momInertia[HITOR] = m_MomInertia;
-                    (*aItr)->GetHitData().impFactor[HITOR] = hitFactor;
+                    (*aItr)->GetHitData().TotalMass[HITOR] = mass;
+                    (*aItr)->GetHitData().MomInertia[HITOR] = m_MomInertia;
+                    (*aItr)->GetHitData().ImpulseFactor[HITOR] = hitFactor;
 
                     // Get the hitdata so far gathered for this Atom.
 //                  hitData = (*aItr)->GetHitData();
@@ -1406,34 +1406,34 @@ float AtomGroup::Travel(Vector &position,
 
 
                     // This gets re-set later according to the ortho pixel edges hit.
-//                  hitData.bitmapNormal = -(hitData.hitVel[HITOR].GetNormalized());
-//                  hitData.squaredMIHandle[HITOR] = hitData.hitRadius[HITOR].GetPerpendicular()/*.Dot(hitData.bitmapNormal)*/;
-//                  hitData.squaredMIHandle[HITOR] *= hitData.squaredMIHandle[HITOR];
-//                  hitData.hitDenominator = (1.0 / distMass) + (hitData.squaredMIHandle[HITOR] / distMI);
-//                  hitData.preImpulse[HITOR] = hitData.hitVel[HITOR] / hitData.hitDenominator;
+//                  hitData.BitmapNormal = -(hitData.HitVel[HITOR].GetNormalized());
+//                  hitData.SquaredMIHandle[HITOR] = hitData.HitRadius[HITOR].GetPerpendicular()/*.Dot(hitData.BitmapNormal)*/;
+//                  hitData.SquaredMIHandle[HITOR] *= hitData.SquaredMIHandle[HITOR];
+//                  hitData.HitDenominator = (1.0 / distMass) + (hitData.SquaredMIHandle[HITOR] / distMI);
+//                  hitData.PreImpulse[HITOR] = hitData.HitVel[HITOR] / hitData.HitDenominator;
 
                     // Get the hitdata so far gathered for this Atom.
                     hitData = (*aItr)->GetHitData();
 
                     if (g_SceneMan.TryPenetrate((*aItr)->GetCurrentPos().m_X,
                                                 (*aItr)->GetCurrentPos().m_Y,
-                                                hitData.preImpulse[HITOR],
-                                                hitData.hitVel[HITOR],
+                                                hitData.PreImpulse[HITOR],
+                                                hitData.HitVel[HITOR],
                                                 retardation,
                                                 1.0,
                                                 1/*(*aItr)->GetNumPenetrations()*/))
                     {
 
                         // Recalc these here without the distributed mass and MI.
-                        radMag = hitData.hitRadius[HITOR].GetMagnitude();
-                        hitData.hitDenominator = (1.0 / mass) + ((radMag * radMag) / m_MomInertia);
-                        hitData.preImpulse[HITOR] = hitData.hitVel[HITOR] / hitData.hitDenominator;
-                        hitData.mass[HITOR] = mass;
-                        hitData.momInertia[HITOR] = m_MomInertia;
-                        hitData.impFactor[HITOR] = hitFactor;
+                        radMag = hitData.HitRadius[HITOR].GetMagnitude();
+                        hitData.HitDenominator = (1.0 / mass) + ((radMag * radMag) / m_MomInertia);
+                        hitData.PreImpulse[HITOR] = hitData.HitVel[HITOR] / hitData.HitDenominator;
+                        hitData.TotalMass[HITOR] = mass;
+                        hitData.MomInertia[HITOR] = m_MomInertia;
+                        hitData.ImpulseFactor[HITOR] = hitFactor;
                         // Finally calculate the hit response impulse.
-                        hitData.resImpulse[HITOR] = ((hitData.hitVel[HITOR] * retardation) /
-                                                     hitData.hitDenominator) * hitFactor;
+                        hitData.ResImpulse[HITOR] = ((hitData.HitVel[HITOR] * retardation) /
+                                                     hitData.HitDenominator) * hitFactor;
 
                         // Call the call-on-sink function, if requested.
                         if (callOnSink)
@@ -1465,25 +1465,25 @@ float AtomGroup::Travel(Vector &position,
 
                 // Set the mass and other data pertaining to the hitor,
                 // aka this AtomGroup's owner MO.
-                hitData.mass[HITOR] = mass;
-                hitData.momInertia[HITOR] = m_MomInertia;
-                hitData.impFactor[HITOR] = 1.0 / (float)atomsHitMOsCount;
+                hitData.TotalMass[HITOR] = mass;
+                hitData.MomInertia[HITOR] = m_MomInertia;
+                hitData.ImpulseFactor[HITOR] = 1.0 / (float)atomsHitMOsCount;
 
                 for (mapMOItr = hitMOAtoms.begin(); mapMOItr != hitMOAtoms.end(); ++mapMOItr)
                 {
                     // The denominator that the MovableObject being hit should
                     // divide its mass with for each atom of this AtomGroup that is
                     // colliding with it during this step.
-                    hitData.impFactor[HITEE] = 1.0 / (float)((*mapMOItr).second.size());
+                    hitData.ImpulseFactor[HITEE] = 1.0 / (float)((*mapMOItr).second.size());
 
                     for (aItr = (*mapMOItr).second.begin(); aItr != (*mapMOItr).second.end(); ++aItr)
                     {
-//                      hitData.hitPoint = (*aItr)->GetCurrentPos();
+//                      hitData.HitPoint = (*aItr)->GetCurrentPos();
                         // Calc and store the accurate hit radius of the Atom in relation to the CoM
                         tempVec = (*aItr)->GetOffset().GetXFlipped(hFlipped);
-                        hitData.hitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= g_FrameMan.GetMPP();
+                        hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= g_FrameMan.GetMPP();
                         // Figure out the pre-collision velocity of the hitting atom due to body translation and rotation.
-                        hitData.hitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
+                        hitData.HitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
                         // Set the atom with the hit data with all the info we have so far.
                         (*aItr)->SetHitData(hitData);
                         // Let the atom calc the impulse force resulting from the collision., and only add it if collision is valid
@@ -1492,7 +1492,7 @@ float AtomGroup::Travel(Vector &position,
                             // Report the hit to both MO's in collision
                             HitData &hd = (*aItr)->GetHitData();
                             // Don't count collision if either says tehy got terminated
-                            if (!hd.pRootBody[HITOR]->OnMOHit(hd) && !hd.pRootBody[HITEE]->OnMOHit(hd))
+                            if (!hd.RootBody[HITOR]->OnMOHit(hd) && !hd.RootBody[HITEE]->OnMOHit(hd))
                             {
                                 // Save the filled out atom in the list for later application in this step.
                                 hitResponseAtoms.push_back(*aItr);
@@ -1516,11 +1516,11 @@ float AtomGroup::Travel(Vector &position,
 // TODO: Investigate damping!")
 // TODO: Clean up here!#$#$#$#")
                 hitData = (*aItr)->GetHitData();
-//                  tempVec = hitData.resImpulse[HITOR];
-                velocity += hitData.resImpulse[HITOR] / mass;
-                angVel += hitData.hitRadius[HITOR].GetPerpendicular().Dot(hitData.resImpulse[HITOR]) / m_MomInertia;
+//                  tempVec = hitData.ResImpulse[HITOR];
+                velocity += hitData.ResImpulse[HITOR] / mass;
+                angVel += hitData.HitRadius[HITOR].GetPerpendicular().Dot(hitData.ResImpulse[HITOR]) / m_MomInertia;
                 // Accumulate all the impulse forces so the MO can determine if it took damaged as a result
-                totalImpulse += hitData.resImpulse[HITOR];
+                totalImpulse += hitData.ResImpulse[HITOR];
             }
 
             // Make subpixel progress if there was a hit on the very first step.
@@ -1899,12 +1899,12 @@ before adding them to the MovableMan.
 
                 // Set the mass and other data pertaining to the hitor,
                 // aka this AtomGroup's owner MO.
-                hitData.mass[HITOR] = mass;
-                hitData.momInertia[HITOR] = 1.0;
-                hitData.impFactor[HITOR] = 1.0 / (float)atomsHitMOsCount;
+                hitData.TotalMass[HITOR] = mass;
+                hitData.MomInertia[HITOR] = 1.0;
+                hitData.ImpulseFactor[HITOR] = 1.0 / (float)atomsHitMOsCount;
                 // Figure out the pre-collision velocity of the
                 // hitting atoms due to the max push force allowed.
-                hitData.hitVel[HITOR] = forceVel;
+                hitData.HitVel[HITOR] = forceVel;
 
                 // The distributed mass of one hitting atom of the
                 // hitting (this AtomGroup's owner) MovableObject.
@@ -1917,7 +1917,7 @@ before adding them to the MovableMan.
                     // The denominator that the MovableObject being hit should
                     // divide its mass with for each atom of this AtomGroup that is
                     // colliding with it during this step.
-                    hitData.impFactor[HITEE] = 1.0 / (float)((*mapItr).second.size());
+                    hitData.ImpulseFactor[HITEE] = 1.0 / (float)((*mapItr).second.size());
 
                     for (aoItr = (*mapItr).second.begin(); aoItr != (*mapItr).second.end(); ++aoItr)
                     {
@@ -1927,20 +1927,20 @@ before adding them to the MovableMan.
                         hitPos[X] += (*aoItr).second.m_X;
                         hitPos[Y] += (*aoItr).second.m_Y;
 
-//                      hitData.hitPoint.SetXY(intPos[X], intPos[Y]);
+//                      hitData.HitPoint.SetXY(intPos[X], intPos[Y]);
                         // Calc and store the accurate hit radius of the Atom in relation to the CoM
-                        hitData.hitRadius[HITOR] = (*aoItr).second * g_FrameMan.GetMPP();
-                        hitData.hitPoint.Reset();
-                        hitData.bitmapNormal.Reset();
+                        hitData.HitRadius[HITOR] = (*aoItr).second * g_FrameMan.GetMPP();
+                        hitData.HitPoint.Reset();
+                        hitData.BitmapNormal.Reset();
 
                         // Check for the collision point in the dominant direction of travel.
                         if (delta[dom] && ((dom == X && g_SceneMan.GetMOIDPixel(hitPos[X], intPos[Y]) != g_NoMOID) ||
                                            (dom == Y && g_SceneMan.GetMOIDPixel(intPos[X], hitPos[Y]) != g_NoMOID)))
                         {
                             hit[dom] = true;
-                            hitData.hitPoint = dom == X ? Vector(hitPos[X], intPos[Y]) :
+                            hitData.HitPoint = dom == X ? Vector(hitPos[X], intPos[Y]) :
                                                           Vector(intPos[X], hitPos[Y]);
-                            hitData.bitmapNormal[dom] = -increment[dom];
+                            hitData.BitmapNormal[dom] = -increment[dom];
                         }
 
                         // Check for the collision point in the submissive direction of travel.
@@ -1948,14 +1948,14 @@ before adding them to the MovableMan.
                                                          (sub == Y && g_SceneMan.GetMOIDPixel(intPos[X], hitPos[Y]) != g_NoMOID)))
                         {
                             hit[sub] = true;
-//                            if (hitData.hitPoint.IsZero())
-                                hitData.hitPoint = sub == X ? Vector(hitPos[X], intPos[Y]) :
+//                            if (hitData.HitPoint.IsZero())
+                                hitData.HitPoint = sub == X ? Vector(hitPos[X], intPos[Y]) :
                                                               Vector(intPos[X], hitPos[Y]);
 // NOTE: THis can actually be wrong since there may not in fact be a corner pixel, but two pixels hit on X and Y directions
                             // We hit pixels in both sub and dom directions on the other MO, a corner hit.
 //                            else
-//                                hitData.hitPoint.SetXY(hitPos[X], hitPos[Y]);
-                            hitData.bitmapNormal[sub] = -increment[sub];
+//                                hitData.HitPoint.SetXY(hitPos[X], hitPos[Y]);
+                            hitData.BitmapNormal[sub] = -increment[sub];
                         }
 
                         // If neither the direct dominant or sub directions yielded a collision point, then
@@ -1963,10 +1963,10 @@ before adding them to the MovableMan.
                         if (!hit[dom] && !hit[sub])
                         {
                             hit[dom] = hit[sub] = true;
-                            hitData.hitPoint.SetXY(hitPos[X], hitPos[Y]);
-                            hitData.bitmapNormal.SetXY(-increment[X], -increment[Y]);
+                            hitData.HitPoint.SetXY(hitPos[X], hitPos[Y]);
+                            hitData.BitmapNormal.SetXY(-increment[X], -increment[Y]);
                         }
-                        hitData.bitmapNormal.Normalize();
+                        hitData.BitmapNormal.Normalize();
 
                         // Extract the current Atom's offset from the int positions.
                         intPos[X] -= (*aoItr).second.m_X;
@@ -1974,18 +1974,18 @@ before adding them to the MovableMan.
                         hitPos[X] -= (*aoItr).second.m_X;
                         hitPos[Y] -= (*aoItr).second.m_Y;
 
-                        MOID hitMOID = g_SceneMan.GetMOIDPixel(hitData.hitPoint.m_X, hitData.hitPoint.m_Y);
+                        MOID hitMOID = g_SceneMan.GetMOIDPixel(hitData.HitPoint.m_X, hitData.HitPoint.m_Y);
 
                         if (hitMOID != g_NoMOID)
                         {
-                            hitData.pBody[HITOR] = m_pOwnerMO;
-                            hitData.pBody[HITEE] = g_MovableMan.GetMOFromID(hitMOID);
-                            RTEAssert(hitData.pBody[HITEE], "Hitee MO is 0 in AtomGroup::PushTravel!");
+                            hitData.Body[HITOR] = m_pOwnerMO;
+                            hitData.Body[HITEE] = g_MovableMan.GetMOFromID(hitMOID);
+                            RTEAssert(hitData.Body[HITEE], "Hitee MO is 0 in AtomGroup::PushTravel!");
 
-                            hitData.pBody[HITEE]->CollideAtPoint(hitData);
+                            hitData.Body[HITEE]->CollideAtPoint(hitData);
 
                             // Save the impulse force resulting from the MO collision response calc.
-                            impulseForces.push_back(make_pair(hitData.resImpulse[HITOR], (*aoItr).second));
+                            impulseForces.push_back(make_pair(hitData.ResImpulse[HITOR], (*aoItr).second));
                         }
                     }
                 }

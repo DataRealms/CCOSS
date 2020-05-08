@@ -1103,13 +1103,13 @@ bool Actor::CollideAtPoint(HitData &hd)
 {
     return MOSRotating::CollideAtPoint(hd);
 
-//    if (hd.resImpulse[HITEE].GetMagnitude() > GetMaterial().strength) {
+//    if (hd.ResImpulse[HITEE].GetMagnitude() > GetMaterial().strength) {
 //        m_pParent->
 //    }
 /* Obsolete
     // Set item as being reached if it collides with us
-    if (hd.pBody[HITOR]->IsHeldDevice())
-        m_pItemInReach = dynamic_cast<HeldDevice *>(hd.pBody[HITOR]);
+    if (hd.Body[HITOR]->IsHeldDevice())
+        m_pItemInReach = dynamic_cast<HeldDevice *>(hd.Body[HITOR]);
 */
 //    if (Status != ACTIVE)
 }
@@ -1130,10 +1130,10 @@ bool Actor::ParticlePenetration(HitData &hd)
     // If penetrated, be alarmed (if not completely unperceptive, that is)!
     if (penetrated && m_Perceptiveness > 0)
     {
-        // Move the alarm point out a bit from the body so the reaction is better
-//        Vector extruded(g_SceneMan.ShortestDistance(m_Pos, hd.hitPoint));
+        // Move the alarm point out a bit from the Body so the reaction is better
+//        Vector extruded(g_SceneMan.ShortestDistance(m_Pos, hd.HitPoint));
 
-        Vector extruded(hd.hitVel[HITOR]);
+        Vector extruded(hd.HitVel[HITOR]);
         extruded.SetMagnitude(m_CharHeight);
         extruded = m_Pos - extruded;
         g_SceneMan.WrapPosition(extruded);
@@ -1423,7 +1423,7 @@ void Actor::VerifyMOIDs()
 void Actor::Update()
 {
     /////////////////////////////////
-    // Hit body update and handling
+    // Hit Body update and handling
     MOSRotating::Update();
 
     // Update the controller!

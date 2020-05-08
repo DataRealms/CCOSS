@@ -14,38 +14,38 @@ namespace RTE {
 	/// </summary>
 	struct PathNode {
 
-		Vector m_Pos; //!< Absolute position of the center of this node in the scene.    
-		bool m_IsChanged; //!< Whether this has been updated since last call to Reset the pather.
+		Vector Pos; //!< Absolute position of the center of this node in the scene.    
+		bool IsChanged; //!< Whether this has been updated since last call to Reset the pather.
 
 		/// <summary>
 		/// Pointers to all adjacent nodes. These are not owned, and may be 0 if adjacent to non-wrapping scene border.
 		/// </summary>
-		PathNode *m_Up;
-		PathNode *m_Right;
-		PathNode *m_Down;
-		PathNode *m_Left;
-		PathNode *m_UpRight;
-		PathNode *m_RightDown;
-		PathNode *m_DownLeft;
-		PathNode *m_LeftUp;
+		PathNode *Up;
+		PathNode *Right;
+		PathNode *Down;
+		PathNode *Left;
+		PathNode *UpRight;
+		PathNode *RightDown;
+		PathNode *DownLeft;
+		PathNode *LeftUp;
 
 		/// <summary>
 		/// Costs to get to each of the adjacent nodes.
 		/// </summary>
-		float m_UpCost;
-		float m_RightCost;
-		float m_DownCost;
-		float m_LeftCost;
-		float m_UpRightCost;
-		float m_RightDownCost;
-		float m_DownLeftCost;
-		float m_LeftUpCost;
+		float UpCost;
+		float RightCost;
+		float DownCost;
+		float LeftCost;
+		float UpRightCost;
+		float RightDownCost;
+		float DownLeftCost;
+		float LeftUpCost;
 
 		PathNode(Vector pos) {
-			m_Pos = pos;
-			m_Up = m_Right = m_Down = m_Left = m_UpRight = m_RightDown = m_DownLeft = m_LeftUp = 0;
+			Pos = pos;
+			Up = Right = Down = Left = UpRight = RightDown = DownLeft = LeftUp = 0;
 			// Costs are infinite unless recalculated as otherwise
-			m_UpCost = m_RightCost = m_DownCost = m_LeftCost = m_UpRightCost = m_RightDownCost = m_DownLeftCost = m_LeftUpCost = FLT_MAX;
+			UpCost = RightCost = DownCost = LeftCost = UpRightCost = RightDownCost = DownLeftCost = LeftUpCost = FLT_MAX;
 		}
 	};
 

@@ -438,14 +438,25 @@ bool PlayIntroTitle() {
     StarSize size;
 
     for (int star = 0; star < starCount; ++star) {
-        aStars[star].m_Size = size = PosRand() < 0.95 ? StarSmall : (PosRand() < 0.85 ? StarLarge : StarHuge);
-        aStars[star].m_pBitmap = size  == StarSmall ? apStarSmallBitmaps[SelectRand(0, starSmallBitmapCount - 1)] :
-                                (size  == StarLarge ? apStarLargeBitmaps[SelectRand(0, starLargeBitmapCount - 1)] : apStarHugeBitmaps[SelectRand(0, starLargeBitmapCount - 1)]);
+        if (PosRand() < 0.95) {
+            aStars[star].m_Size = StarSmall;
+            aStars[star].m_pBitmap = apStarSmallBitmaps[SelectRand(0, starSmallBitmapCount - 1)];
+            aStars[star].m_Intensity = RangeRand(0.001, 0.5);
+        }
+        else if (PosRand() < 0.85) {
+            aStars[star].m_Size = StarLarge;
+            aStars[star].m_pBitmap = apStarLargeBitmaps[SelectRand(0, starLargeBitmapCount - 1)];
+            aStars[star].m_Intensity = RangeRand(0.6, 1.0);
+        }
+        else {
+            aStars[star].m_Size = StarHuge;
+            aStars[star].m_pBitmap = apStarHugeBitmaps[SelectRand(0, starLargeBitmapCount - 1)];
+            aStars[star].m_Intensity = RangeRand(0.9, 1.0);
+        }
         aStars[star].m_Pos.SetXY(resX * PosRand(), pBackdrop->GetBitmap()->h * PosRand());//resY * PosRand());
         aStars[star].m_Pos.Floor();
         // To match the nebula scroll
         aStars[star].m_ScrollRatio = backdropScrollRatio;
-        aStars[star].m_Intensity = size == StarSmall ? RangeRand(0.001, 0.5) : (size == StarLarge ? RangeRand(0.6, 1.0) : RangeRand(0.9, 1.0));
     }
 
     // Font stuff

@@ -113,6 +113,7 @@ void Actor::Clear()
     m_WhiteFlashTimer.Reset();
     m_PieSlices.clear();
 	m_DeploymentID = 0;
+    m_PassengerSlots = 1;
 
     m_ScriptedAIUpdate = false;
     m_AIMode = AIMODE_NONE;
@@ -293,6 +294,7 @@ int Actor::Create(const Actor &reference)
         m_sIconsLoaded = true;
     }
 	m_DeploymentID = reference.m_DeploymentID;
+    m_PassengerSlots = reference.m_PassengerSlots;
 
     m_ScriptedAIUpdate = reference.m_ScriptedAIUpdate;
     m_AIMode = reference.m_AIMode;
@@ -338,6 +340,8 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_Status;
     else if (propName == "DeploymentID")
         reader >> m_DeploymentID;
+    else if (propName == "PassengerSlots")
+        reader >> m_PassengerSlots;
     else if (propName == "Health")
     {
         reader >> m_Health;

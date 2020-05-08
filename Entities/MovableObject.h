@@ -221,6 +221,12 @@ ENTITYALLOCATION(MovableObject)
     virtual std::vector<std::pair<std::string, bool>>::const_iterator const FindScript(std::string const &scriptPath) const { return std::find_if(m_LoadedScripts.cbegin(), m_LoadedScripts.cend(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
 
     /// <summary>
+    /// Checks if this MO has any scripts on it.
+    /// </summary>
+    /// <returns>Whether or not this MO has any scripts on it.</returns>
+    virtual bool const HasAnyScripts() const { return !m_LoadedScripts.empty(); }
+
+    /// <summary>
     /// Checks if the script at the given path is one of the scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>

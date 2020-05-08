@@ -476,7 +476,7 @@ ENTITYALLOCATION(HeldDevice)
 // Arguments:       None.
 // Return value:    Whether being activated.
 
-    virtual bool IsActivated() { return m_Activated; }
+    virtual bool IsActivated() const { return m_Activated; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -486,7 +486,7 @@ ENTITYALLOCATION(HeldDevice)
 // Arguments:       None.
 // Return value:    Whetehr being reloaded.
 
-    virtual bool IsReloading() { return false; }
+    virtual bool IsReloading() const { return false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -496,7 +496,7 @@ ENTITYALLOCATION(HeldDevice)
 // Arguments:       None.
 // Return value:    Whether just done reloading this frame.
 
-    virtual bool DoneReloading() { return false; }
+    virtual bool DoneReloading() const { return false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -506,7 +506,7 @@ ENTITYALLOCATION(HeldDevice)
 // Arguments:       None.
 // Return value:    Whetehr in need of reloading (ie not full).
 
-    virtual bool NeedsReloading() { return false; }
+    virtual bool NeedsReloading() const { return false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

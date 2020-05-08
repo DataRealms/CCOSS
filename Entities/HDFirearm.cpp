@@ -177,9 +177,10 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader)
     }
     else if (propName == "FireSound")
         reader >> m_FireSound;
-    else if (propName == "ActiveSound")
+    else if (propName == "ActiveSound") {
         reader >> m_ActiveSound;
-    else if (propName == "DeactivationSound")
+        m_ActiveSound.SetAffectedByGlobalPitch(false); //Active sound (i.e. weapon spinup) modifies its pitch, so it has to account for global pitch on its own.
+    } else if (propName == "DeactivationSound")
         reader >> m_DeactivationSound;
     else if (propName == "EmptySound")
         reader >> m_EmptySound;
@@ -563,7 +564,7 @@ void HDFirearm::Activate()
 
     // Play the pre-fire sound
     if (!IsReloading() && !m_ActiveSound.IsBeingPlayed())
-        m_ActiveSound.Play();
+        m_ActiveSound.Play(this->m_Pos);
 }
 
 
@@ -584,7 +585,7 @@ void HDFirearm::Deactivate()
 
     // Play the post-fire sound
     if (!m_DeactivationSound.IsBeingPlayed())
-        m_DeactivationSound.Play();
+        m_DeactivationSound.Play(m_Pos);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -646,7 +647,7 @@ void HDFirearm::Reload()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Tells whether the device is curtrently in need of being reloaded.
 
-bool HDFirearm::NeedsReloading()
+bool HDFirearm::NeedsReloading() const
 {
     if (!m_Reloading)
     {
@@ -692,6 +693,9 @@ bool HDFirearm::IsFull()
 void HDFirearm::Update()
 {
     HeldDevice::Update();
+
+    if (m_ActiveSound.IsBeingPlayed()) { m_ActiveSound.SetPosition(m_Pos); }
+    if (m_DeactivationSound.IsBeingPlayed()) { m_DeactivationSound.SetPosition(m_Pos); }
 
     /////////////////////////////////
     // Activation/firing logic
@@ -1007,13 +1011,13 @@ void HDFirearm::Update()
                 if (m_Activated && !m_Reloading && m_ActivationTmr.GetElapsedSimTimeMS() < m_ActivationDelay)
                 {
                     animDuration = (int)LERP(0, m_ActivationDelay, (float)(m_SpriteAnimDuration * 10), (float)m_SpriteAnimDuration, m_ActivationTmr.GetElapsedSimTimeMS());
-                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTmr.GetElapsedSimTimeMS()));
+                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTmr.GetElapsedSimTimeMS()) * g_AudioMan.GetGlobalPitch());
                 }
                 // Spin down
                 if ((!m_Activated || m_Reloading) && m_LastFireTmr.GetElapsedSimTimeMS() < m_DeactivationDelay)
                 {
                     animDuration = (int)LERP(0, m_DeactivationDelay, (float)m_SpriteAnimDuration, (float)(m_SpriteAnimDuration * 10), m_LastFireTmr.GetElapsedSimTimeMS());
-                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_DeactivationDelay, 1.0, 0, m_LastFireTmr.GetElapsedSimTimeMS()));
+                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_DeactivationDelay, 1.0, 0, m_LastFireTmr.GetElapsedSimTimeMS()) * g_AudioMan.GetGlobalPitch());
                 }
 
                 if (animDuration > 0 && !(m_Reloading && m_LastFireTmr.GetElapsedSimTimeMS() >= m_DeactivationDelay))

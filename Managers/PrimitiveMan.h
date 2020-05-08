@@ -51,7 +51,7 @@ namespace RTE {
 		/// <param name="start">Start position of primitive in scene coordinates.</param>
 		/// <param name="end">End position of primitive in scene coordinates.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawLinePrimitive(Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new LinePrimitive(start, end, color)); }
+		void DrawLinePrimitive(Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new LinePrimitive(-1, start, end, color)); }
 
 		/// <summary>
 		/// Schedule to draw a line primitive visible only to a specified player.
@@ -68,7 +68,7 @@ namespace RTE {
 		/// <param name="start">Start position of primitive in scene coordinates.</param>
 		/// <param name="end">End position of primitive in scene coordinates.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawBoxPrimitive(Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new BoxPrimitive(start, end, color)); }
+		void DrawBoxPrimitive(Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new BoxPrimitive(-1, start, end, color)); }
 
 		/// <summary>
 		/// Schedule to draw a box primitive visible only to a specified player.
@@ -85,7 +85,7 @@ namespace RTE {
 		/// <param name="start">Start position of primitive in scene coordinates.</param>
 		/// <param name="end">End position of primitive in scene coordinates.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawBoxFillPrimitive(Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new BoxFillPrimitive(start, end, color)); }
+		void DrawBoxFillPrimitive(Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new BoxFillPrimitive(-1, start, end, color)); }
 
 		/// <summary>
 		/// Schedule to draw a filled box primitive visible only to a specified player.
@@ -102,7 +102,7 @@ namespace RTE {
 		/// <param name="pos">Position of primitive in scene coordinates.</param>
 		/// <param name="radius">Radius of circle primitive.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawCirclePrimitive(Vector pos, short radius, unsigned char color) {m_Primitives.push_back(new CirclePrimitive(pos, radius, color));}
+		void DrawCirclePrimitive(Vector pos, short radius, unsigned char color) {m_Primitives.push_back(new CirclePrimitive(-1, pos, radius, color));}
 
 		/// <summary>
 		/// Schedule to draw a circle primitive visible only to a specified player.
@@ -119,7 +119,7 @@ namespace RTE {
 		/// <param name="pos">Position of primitive in scene coordinates.</param>
 		/// <param name="radius">Radius of circle primitive.</param>
 		/// <param name="color">Color to fill primitive with.</param>
-		void DrawCircleFillPrimitive(Vector pos, short radius, unsigned char color) {m_Primitives.push_back(new CircleFillPrimitive(pos, radius, color));}
+		void DrawCircleFillPrimitive(Vector pos, short radius, unsigned char color) {m_Primitives.push_back(new CircleFillPrimitive(-1, pos, radius, color));}
 
 		/// <summary>
 		/// Schedule to draw a filled circle primitive visible only to a specified player.
@@ -137,7 +137,7 @@ namespace RTE {
 		/// <param name="text">Text string to draw.</param>
 		/// <param name="isSmall">Use small or large font. True for small font.</param>
 		/// <param name="alignment">Alignment of text.</param>
-		void DrawTextPrimitive(Vector start, std::string text, bool isSmall, short alignment) {m_Primitives.push_back(new TextPrimitive(start, text, isSmall, alignment));}
+		void DrawTextPrimitive(Vector start, std::string text, bool isSmall, short alignment) {m_Primitives.push_back(new TextPrimitive(-1, start, text, isSmall, alignment));}
 
 		/// <summary>
 		/// Schedule to draw a text primitive visible only to a specified player.
@@ -156,7 +156,7 @@ namespace RTE {
 		/// <param name="entity">An entity to draw sprite from.</param>
 		/// <param name="rotAngle">Rotation angle in radians.</param>
 		/// <param name="">Frame to draw.</param>
-		void DrawBitmapPrimitive(Vector start, Entity *entity, float rotAngle, unsigned short frame);
+		void DrawBitmapPrimitive(Vector start, Entity *entity, float rotAngle, unsigned short frame) { DrawBitmapPrimitive(-1, start, entity, rotAngle, frame); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive visible only to a specified player.

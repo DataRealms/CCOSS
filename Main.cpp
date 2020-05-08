@@ -614,7 +614,7 @@ bool PlayIntroTitle() {
             for (int star = 0; star < starCount; ++star)
             {
                 size = aStars[star].m_Size;
-                int intensity = 185 * aStars[star].m_Intensity + (size == StarSmall ? 35 : (size == StarLarge ? 70 : 70)) * PosRand();
+                int intensity = 185 * aStars[star].m_Intensity + (size == StarSmall ? 35 : 70) * PosRand();
                 set_screen_blender(intensity, intensity, intensity, intensity);
                 starDrawPos.SetXY(aStars[star].m_Pos.m_X, aStars[star].m_Pos.m_Y - scrollOffset.m_Y * aStars[star].m_ScrollRatio);
                 draw_trans_sprite(g_FrameMan.GetBackBuffer32(), aStars[star].m_pBitmap, starDrawPos.GetFloorIntX(), starDrawPos.GetFloorIntY());

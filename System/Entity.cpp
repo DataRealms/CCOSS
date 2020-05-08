@@ -36,8 +36,8 @@ namespace RTE {
 		m_DefinedInModule = reference.m_DefinedInModule;
 		m_PresetDescription = reference.m_PresetDescription;
 
-		for (std::list<std::string>::const_iterator itr = reference.m_Groups.begin(); itr != reference.m_Groups.end(); ++itr) {
-			m_Groups.push_back(*itr);
+		for (const std::string &group : reference.m_Groups) {
+			m_Groups.push_back(group);
 		}
 		m_RandomWeight = reference.m_RandomWeight;
 		return 0;

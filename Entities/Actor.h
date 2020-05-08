@@ -905,7 +905,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "UpdateAI")
 //                  is there.
 // Return value:    None.
 
-    virtual void AlarmPoint(const Vector &alarmPoint) { if (m_AlarmTimer.GetElapsedSimTimeMS() > 50) { m_AlarmTimer.Reset(); m_LastAlarmPos = m_PointingTarget = alarmPoint; m_AlarmSound.Play(); } }
+    virtual void AlarmPoint(const Vector &alarmPoint) { if (m_AlarmTimer.GetElapsedSimTimeMS() > 50) { m_AlarmTimer.Reset(); m_LastAlarmPos = m_PointingTarget = alarmPoint; m_AlarmSound.Play(alarmPoint); } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -448,6 +448,17 @@ namespace RTE {
 		/// <returns></returns>
 		unsigned short LoadingScreenReportPrecision() const { return m_LoadingScreenReportPrecision; }
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		float GetMenuTransitionSpeed() const { return m_MenuTransitionSpeed; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="newSpeed"></param>
+		void SetMenuTransitionSpeed(float newSpeed) { m_MenuTransitionSpeed = (newSpeed >= 0.0F) ? newSpeed : 0.0F; }
 #pragma endregion
 
 #pragma region Class Info
@@ -511,6 +522,7 @@ namespace RTE {
 		bool m_ToolTips; //!< Whether ToolTips are enabled or not.	
 		bool m_DisableLoadingScreen; //!<
 		unsigned short m_LoadingScreenReportPrecision; //!<
+		float m_MenuTransitionSpeed; //!<
 		bool m_PrintDebugInfo; //!< Print some debug info in console.
 
 		std::list<std::string> m_VisibleAssemblyGroupsList; //!< List of assemblies groups always shown in editors.

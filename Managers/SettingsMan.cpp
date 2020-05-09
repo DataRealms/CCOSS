@@ -60,6 +60,7 @@ namespace RTE {
 		m_ToolTips = true;
 		m_DisableLoadingScreen = true;
 		m_LoadingScreenReportPrecision = 100;
+		m_MenuTransitionSpeed = 1.0F;
 		m_PrintDebugInfo = false;
 	}
 
@@ -207,6 +208,8 @@ namespace RTE {
 			g_ConsoleMan.SetConsoleScreenSize(std::stof(reader.ReadPropValue()));
 		} else if (propName == "AdvancedPerformanceStats") {
 			g_PerformanceMan.ShowAdvancedPerformanceStats(std::stoi(reader.ReadPropValue()));
+		} else if (propName == "MenuTransitionSpeed") {
+			SetMenuTransitionSpeed(std::stof(reader.ReadPropValue()));
 		} else if (propName == "PrintDebugInfo") {
 			reader >> m_PrintDebugInfo;
 		} else if (propName == "VisibleAssemblyGroup") {
@@ -397,6 +400,8 @@ namespace RTE {
 		writer << g_ConsoleMan.GetConsoleScreenSize();
 		writer.NewProperty("AdvancedPerformanceStats");
 		writer << g_PerformanceMan.AdvancedPerformanceStatsEnabled();
+		writer.NewProperty("MenuTransitionSpeed");
+		writer << m_MenuTransitionSpeed;
 		writer.NewProperty("PrintDebugInfo");
 		writer << m_PrintDebugInfo;
 

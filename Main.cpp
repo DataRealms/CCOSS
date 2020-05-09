@@ -1340,7 +1340,7 @@ bool PlayIntroTitle() {
         {
             if (sectionSwitch)
             {
-                duration = 1.0;
+				duration = 1.0F * g_SettingsMan.GetMenuTransitionSpeed();
                 sectionSwitch = false;
                 scrollOffset.m_Y = preMenuYOffset;
 
@@ -1409,7 +1409,7 @@ bool PlayIntroTitle() {
         {
             if (sectionSwitch)
             {
-                duration = 2.0;
+                duration = 2.0F * g_SettingsMan.GetMenuTransitionSpeed();
                 sectionSwitch = false;
 
                 // Reset the Scenario menu
@@ -1435,7 +1435,7 @@ bool PlayIntroTitle() {
                 // Black fade
                 clear_to_color(pFadeScreen, 0);
 
-                duration = 1.0;
+				duration = 1.0F * g_SettingsMan.GetMenuTransitionSpeed();
                 sectionSwitch = false;
             }
 
@@ -1493,7 +1493,7 @@ bool PlayIntroTitle() {
         {
             if (sectionSwitch)
             {
-                duration = 2.0;
+				duration = 2.0F * g_SettingsMan.GetMenuTransitionSpeed();
                 sectionSwitch = false;
 
                 // Play the campaign music with Meta sound start
@@ -1516,7 +1516,7 @@ bool PlayIntroTitle() {
                 // Black fade
                 clear_to_color(pFadeScreen, 0);
 
-                duration = 1.0;
+				duration = 1.0F * g_SettingsMan.GetMenuTransitionSpeed();
                 sectionSwitch = false;
             }
 
@@ -1565,7 +1565,7 @@ bool PlayIntroTitle() {
         {
             if (sectionSwitch)
             {
-                duration = 2.0;
+				duration = 2.0F * g_SettingsMan.GetMenuTransitionSpeed();
                 sectionSwitch = false;
             }
 
@@ -1581,7 +1581,7 @@ bool PlayIntroTitle() {
             {
                 // Black fade
                 clear_to_color(pFadeScreen, 0x00000000);
-                duration = 1.5;
+				duration = 1.5F * g_SettingsMan.GetMenuTransitionSpeed();
                 sectionSwitch = false;
             }
 
@@ -1607,7 +1607,7 @@ bool PlayIntroTitle() {
             {
                 // White fade
                 clear_to_color(pFadeScreen, 0x00000000);
-                duration = 1.5;
+				duration = 1.5F * g_SettingsMan.GetMenuTransitionSpeed();
                 sectionSwitch = false;
             }
 

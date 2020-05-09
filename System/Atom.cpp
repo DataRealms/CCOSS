@@ -447,7 +447,6 @@ namespace RTE {
 
 	int Atom::SetupSeg(Vector startPos, Vector trajectory, float stepRatio) {
 		RTEAssert(m_OwnerMO, "Stepping an Atom without a parent MO!");
-		bool inNewMO = false;
 		m_TerrainMatHit = g_MaterialAir;
 		m_MOIDHit = g_NoMOID;
 
@@ -613,7 +612,7 @@ namespace RTE {
 		bool &didWrap = m_OwnerMO->m_DidWrap;
 		m_LastHit.Reset();
 
-		BITMAP *trailBitmap;
+		BITMAP *trailBitmap = 0;
 
 		int hitCount = 0;
 		int error = 0;
@@ -629,21 +628,22 @@ namespace RTE {
 		int increment[2];
 
 		float timeLeft = travelTime;
-		float segProgress;
+		float segProgress = 0.0F;
 		float retardation;
 
 		bool hit[2];
 		bool sinkHit;
 		bool subStepped;
-		bool endOfTraj = false;
+		//bool endOfTraj = false;
 
-		unsigned char hitMaterialID;
-		unsigned char domMaterialID;
-		unsigned char subMaterialID;
+		const Material *hitMaterial = 0; //g_SceneMan.GetMaterialFromID(g_MaterialAir);
+		unsigned char hitMaterialID = 0;
 
-		Material const *hitMaterial = g_SceneMan.GetMaterialFromID(g_MaterialAir);
-		Material const *domMaterial = g_SceneMan.GetMaterialFromID(g_MaterialAir);
-		Material const *subMaterial = g_SceneMan.GetMaterialFromID(g_MaterialAir);
+		const Material *domMaterial = 0; //g_SceneMan.GetMaterialFromID(g_MaterialAir);
+		unsigned char domMaterialID = 0;
+
+		const Material *subMaterial = 0; //g_SceneMan.GetMaterialFromID(g_MaterialAir);
+		unsigned char subMaterialID = 0;
 
 		Vector segTraj;
 		Vector hitAccel;
@@ -680,14 +680,14 @@ namespace RTE {
 			delta[X] = std::floorf(position.m_X + segTraj.m_X) - intPos[X];
 			delta[Y] = std::floorf(position.m_Y + segTraj.m_Y) - intPos[Y];
 
-			segProgress = 0.0F;
+			//segProgress = 0.0F;
 			//delta2[X] = 0;
 			//delta2[Y] = 0;
 			//increment[X] = 0;
 			//increment[Y] = 0;
 			hit[X] = false;
 			hit[Y] = false;
-			domSteps = 0;
+			//domSteps = 0;
 			subSteps = 0;
 			subStepped = false;
 			sinkHit = false;
@@ -697,7 +697,6 @@ namespace RTE {
 				break;
 			}
 
-			hitMaterialID = domMaterialID = subMaterialID = 0;
 			//HitMaterial->Reset();
 			//domMaterial->Reset();
 			//subMaterial->Reset();
@@ -737,11 +736,11 @@ namespace RTE {
 					++hitCount;
 					hit[X] = hit[Y] = true;
 					if (g_SceneMan.TryPenetrate(intPos[X], intPos[Y], velocity * mass * sharpness, velocity, retardation, 0.5F, m_NumPenetrations, removeOrphansRadius, removeOrphansMaxArea, removeOrphansRate)) {
-						segProgress = 0.0F;
+						//segProgress = 0.0F;
 						velocity += velocity * retardation;
 						continue;
 					} else {
-						segProgress = 1.0F;
+						//segProgress = 1.0F;
 						velocity.SetXY(0, 0);
 						timeLeft = 0.0F;
 						break;

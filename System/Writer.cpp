@@ -35,4 +35,17 @@ namespace RTE {
 
 		return 0;
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Writer::NewLine(bool toIndent = true, unsigned short lineCount = 1) {
+		for (unsigned short lines = 0; lines < lineCount; lines++) {
+			*m_Stream << "\n";
+			if (toIndent) {
+				for (short indent = 0; indent < m_Indent; ++indent) {
+					*m_Stream << "\t";
+				}
+			}
+		}
+	}
 }

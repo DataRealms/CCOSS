@@ -85,19 +85,34 @@ namespace RTE {
 		/// <summary>
 		/// Used to specify the end of an object that has just been written.
 		/// </summary>
-		virtual void ObjectEnd() {
-			--m_Indent;
-			// Make an extra line between big object definitions
-			if (m_Indent == 0) { *m_Stream << "\n\n"; }
+		virtual void ObjectEnd() { m_Indent = 0; NewLine(false, 2); }
+
+		/// <summary>
+		/// Creates a new line that can be properly indented.
+		/// </summary>
+		/// <param name="toIndent">Whether to indent the new line or not.</param>
+		/// <param name="lineCount">How many new lines to create.</param>
+		virtual void NewLine(bool toIndent = true, unsigned short lineCount = 1);
+
+		/// <summary>
+		/// Creates a new line and writes the specified string to it.
+		/// </summary>
+		/// <param name="textString">The text string to write to the new line.</param>
+		/// <param name="toIndent">Whether to indent the new line or not.</param>
+		virtual void NewLineString(std::string textString, bool toIndent = true) {
+			NewLine(toIndent);
+			*m_Stream << textString;
 		}
 
 		/// <summary>
-		/// Creates a new line that is properly indented.
+		/// Creates a new line and fills it with slashes to create a divider line for INI.
 		/// </summary>
-		virtual void NewLine() {
-			*m_Stream << "\n";
-			for (int i = 0; i < m_Indent; ++i) {
-				*m_Stream << "\t";
+		/// <param name="toIndent">Whether to indent the new line or not.</param>
+		/// <param name="dividerLength">The length of the divider (number of slashes).</param>
+		virtual void NewDivider(bool toIndent = true, unsigned short dividerLength = 72) {
+			NewLine(toIndent);
+			for (unsigned short slash = 0; slash < dividerLength; slash++) {
+				*m_Stream << "/";
 			}
 		}
 

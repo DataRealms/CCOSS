@@ -515,6 +515,12 @@ ENTITYALLOCATION(MovableObject)
 
     int GetMOIDFootprint() const { return m_MOIDFootprint; }
 
+    /// <summary>
+    /// Returns whether or not this object has ever been added to MovableMan. Does not account for removal from MovableMan.
+    /// </summary>
+    /// <returns></returns>
+    bool HasEverBeenAddedToMovableMan() const { return m_HasEverBeenAddedToMovableMan; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetSharpness
@@ -832,6 +838,11 @@ ENTITYALLOCATION(MovableObject)
 // Return value:    None.
 
     virtual void SetID(const MOID newID) { m_MOID = newID; }
+
+    /// <summary>
+    /// Sets this object as having been added to MovableMan. Should only really be done in MovableMan::AddObject.
+    /// </summary>
+    virtual void SetAsAddedToMovableMan() { m_HasEverBeenAddedToMovableMan = true; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1917,6 +1928,8 @@ protected:
     // How many total (subsequent) MOID's this MO and all its children are taking up this frame.
     // ie if this MO has no children, this will likely be 1.
     int m_MOIDFootprint;
+    // Whether or not this object has been added to MovableMan. Does not take into account the object being removed from MovableMan, though in practice it usually will.
+    bool m_HasEverBeenAddedToMovableMan;
     // A set of ID:s of MO:s that already have collided with this MO during this frame.
     std::set<MOID> m_AlreadyHitBy;
     // A counter to count the oscillations in translational velocity, in order to detect settling.

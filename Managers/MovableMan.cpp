@@ -797,6 +797,8 @@ bool MovableMan::AddMO(MovableObject *pMOToAdd)
     if (!pMOToAdd)
         return false;
 
+    pMOToAdd->SetAsAddedToMovableMan();
+
     // Find out what kind it is and apply accordingly
     if (Actor *pActor = dynamic_cast<Actor *>(pMOToAdd))
     {
@@ -840,6 +842,7 @@ void MovableMan::AddActor(Actor *pActorToAdd)
 //        pActorToAdd->SetPrevPos(pActorToAdd->GetPos());
 //        pActorToAdd->Update();
 //        pActorToAdd->PostTravel();
+        pActorToAdd->SetAsAddedToMovableMan();
 
         // Filter out stupid fast objects
         if (pActorToAdd->IsTooFast())
@@ -876,6 +879,7 @@ void MovableMan::AddItem(MovableObject *pItemToAdd)
 //        pItemToAdd->SetPrevPos(pItemToAdd->GetPos());
 //        pItemToAdd->Update();
 //        pItemToAdd->PostTravel();
+        pItemToAdd->SetAsAddedToMovableMan();
 
         // Filter out stupid fast objects
         if (pItemToAdd->IsTooFast())
@@ -913,6 +917,7 @@ void MovableMan::AddParticle(MovableObject *pMOToAdd)
 //        pMOToAdd->Update();
 //        pMOToAdd->Travel();
 //        pMOToAdd->PostTravel();
+        pMOToAdd->SetAsAddedToMovableMan();
 
         // Filter out stupid fast objects
         if (pMOToAdd->IsTooFast())

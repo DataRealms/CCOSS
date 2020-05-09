@@ -21,7 +21,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SelectRand(int min, int max) { return min + static_cast<int>((max - min) * PosRand() + 0.5); }
+	int SelectRand(int min, int max) { return min + static_cast<int>((max - min) * PosRand() + 0.5F); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,11 +39,11 @@ namespace RTE {
 	float EaseIn(float start, float end, float progressScalar) {
 		if (progressScalar <= 0) {
 			return start;
-		} else if (progressScalar >= 1.0) {
+		} else if (progressScalar >= 1.0F) {
 			return end;
 		}
 		float t = 1 - progressScalar;
-		return (end - start) * (sinf(-t * c_HalfPI) + 1) + start;
+		return (end - start) * (std::sinf(-t * c_HalfPI) + 1) + start;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,16 +51,16 @@ namespace RTE {
 	float EaseOut(float start, float end, float progressScalar) {
 		if (progressScalar <= 0) {
 			return start;
-		} else if (progressScalar >= 1.0) {
+		} else if (progressScalar >= 1.0F) {
 			return end;
 		}
-		return (end - start) * -sinf(-progressScalar * c_HalfPI) + start;
+		return (end - start) * -std::sinf(-progressScalar * c_HalfPI) + start;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float EaseInOut(float start, float end, float progressScalar) {
-		return start * (2 * powf(progressScalar, 3) - 3 * powf(progressScalar, 2) + 1) + end * (3 * powf(progressScalar, 2) - 2 * powf(progressScalar, 3));
+		return start * (2 * std::powf(progressScalar, 3) - 3 * std::powf(progressScalar, 2) + 1) + end * (3 * std::powf(progressScalar, 2) - 2 * std::powf(progressScalar, 3));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -47,8 +47,8 @@ namespace RTE {
 
 	void ContentFile::FreeAllLoaded() {
 		for (int depth = Eight; depth < BitDepthCount; ++depth) {
-			for (std::map<std::string, BITMAP *>::iterator lbItr = s_LoadedBitmaps[depth].begin(); lbItr != s_LoadedBitmaps[depth].end(); ++lbItr) {
-				destroy_bitmap((*lbItr).second);
+			for (const std::pair<std::string, BITMAP *> &bitmap : s_LoadedBitmaps[depth]){
+				destroy_bitmap(bitmap.second);
 			}
 		}
 	}

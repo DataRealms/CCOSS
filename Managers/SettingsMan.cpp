@@ -7,7 +7,7 @@ extern bool g_ResetActivity;
 
 namespace RTE {
 
-	const std::string SettingsMan::m_ClassName = "Settings";
+	const std::string SettingsMan::c_ClassName = "Settings";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

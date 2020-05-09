@@ -498,17 +498,6 @@ namespace RTE {
 		Vector m_Normal; //!<
 		Material const * m_Material; //!<	
 		int m_SubgroupID; //!< Identifying ID for adding and removing atoms from AtomGroups.
-
-		// Bresenham line algorithm vars
-		int m_IntPos[2];
-		int m_PrevIntPos[2];
-		int m_TrailPos[2];
-		int m_HitPos[2];
-		int m_Delta[2];
-		int m_Delta2[2];
-		int m_Increment[2];
-		int m_Error, m_Dom, m_Sub, m_DomSteps, m_SubSteps;
-		bool m_SubStepped;
 		
 		bool m_StepWasTaken; //!< Whether the last call to StepForward actually resulted in a step or not.
 		float m_StepRatio;
@@ -542,6 +531,17 @@ namespace RTE {
 		bool m_ResultWrapped; //!< This is only true when the resulting position reflects a wrap around the scene.
 
 		int m_PrevError; //!< This is the stored error (fraction) at the end of the last travel move. To be used when the direction wasn't changed during a hit, and will make sure the continued trajectory is straight.
+
+		// Bresenham line algorithm variables
+		int m_IntPos[2];
+		int m_PrevIntPos[2];
+		int m_TrailPos[2];
+		int m_HitPos[2];
+		int m_Delta[2];
+		int m_Delta2[2];
+		int m_Increment[2];
+		int m_Error, m_Dom, m_Sub, m_DomSteps, m_SubSteps;
+		bool m_SubStepped;
 
 	private:
 

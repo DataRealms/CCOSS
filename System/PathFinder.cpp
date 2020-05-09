@@ -299,15 +299,15 @@ namespace RTE {
 			return;
 		}
 		// Look at each existing adjacent node and calculate the cost for each, offset start and end to cover more terrain
-		if (node->Up) { node->UpCost = max(node->Up->DownCost, CostAlongLine(node->Pos + Vector(3, 0), node->Up->Pos + Vector(3, 0))); }
+		if (node->Up) { node->UpCost = std::max(node->Up->DownCost, CostAlongLine(node->Pos + Vector(3, 0), node->Up->Pos + Vector(3, 0))); }
 		if (node->Right) { node->RightCost = CostAlongLine(node->Pos + Vector(0, 3), node->Right->Pos + Vector(0, 3)); }
 		if (node->Down) { node->DownCost = CostAlongLine(node->Pos + Vector(-3, 0), node->Down->Pos + Vector(-3, 0)); }
-		if (node->Left) { node->LeftCost = max(node->Left->RightCost, CostAlongLine(node->Pos + Vector(0, -3), node->Left->Pos + Vector(0, -3))); }
+		if (node->Left) { node->LeftCost = std::max(node->Left->RightCost, CostAlongLine(node->Pos + Vector(0, -3), node->Left->Pos + Vector(0, -3))); }
 
-		if (node->UpRight) { node->UpRightCost = max(node->UpRight->DownLeftCost, CostAlongLine(node->Pos + Vector(2, 2), node->UpRight->Pos + Vector(2, 2))); }
+		if (node->UpRight) { node->UpRightCost = std::max(node->UpRight->DownLeftCost, CostAlongLine(node->Pos + Vector(2, 2), node->UpRight->Pos + Vector(2, 2))); }
 		if (node->RightDown) { node->RightDownCost = CostAlongLine(node->Pos + Vector(2, -2), node->RightDown->Pos + Vector(2, -2)); }
 		if (node->DownLeft) { node->DownLeftCost = CostAlongLine(node->Pos + Vector(-2, -2), node->DownLeft->Pos + Vector(-2, -2)); }
-		if (node->LeftUp) { node->LeftUpCost = max(node->LeftUp->RightDownCost, CostAlongLine(node->Pos + Vector(-2, 2), node->LeftUp->Pos + Vector(-2, 2))); }
+		if (node->LeftUp) { node->LeftUpCost = std::max(node->LeftUp->RightDownCost, CostAlongLine(node->Pos + Vector(-2, 2), node->LeftUp->Pos + Vector(-2, 2))); }
 
 		// Mark this as already changed so the above expensive calculation isn't done redundantly
 		node->IsChanged = true;

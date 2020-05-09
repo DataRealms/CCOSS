@@ -7,7 +7,7 @@
 
 namespace RTE {
 
-	const string Atom::c_ClassName = "Atom";
+	const std::string Atom::c_ClassName = "Atom";
 	std::vector<void *> Atom::s_AllocatedPool;
 	int Atom::s_PoolAllocBlockCount = 200;
 	int Atom::s_InstancesInUse = 0;
@@ -261,8 +261,8 @@ namespace RTE {
 		}
 		// Check in AtomGroup-owned list if it's assigned to this atom
 		if (!ignored && m_IgnoreMOIDsByGroup) {
-			for (list<MOID>::const_iterator itr = m_IgnoreMOIDsByGroup->begin(); itr != m_IgnoreMOIDsByGroup->end(); ++itr) {
-				if ((*itr) == whichMOID) {
+			for (const MOID &moid : *m_IgnoreMOIDsByGroup) {
+				if (moid == whichMOID) {
 					ignored = true;
 					break;
 				}
@@ -939,7 +939,7 @@ namespace RTE {
 						}
 					}
 				} else if (m_TrailLength) {
-					trailPoints.push_back(make_pair(intPos[X], intPos[Y]));
+					trailPoints.push_back(std::make_pair(intPos[X], intPos[Y]));
 				}
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -983,8 +983,6 @@ namespace RTE {
 		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
 			int length = m_TrailLength /* + 3 * PosRand()*/;
 			for (int i = trailPoints.size() - MIN(length, trailPoints.size()); i < trailPoints.size(); ++i) {
-				//RTEAssert(is_inside_bitmap(trailBitmap, trailPoints[i].first, trailPoints[i].second, 0), "Trying to draw out of bounds trail!");
-				//_putpixel(trailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
 				putpixel(trailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
 			}
 		}

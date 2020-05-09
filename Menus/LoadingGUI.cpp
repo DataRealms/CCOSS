@@ -3,7 +3,10 @@
 #include "Writer.h"
 #include "DataModule.h"
 #include "SceneLayer.h"
-#include "RTEManagers.h"
+#include "SettingsMan.h"
+#include "PresetMan.h"
+#include "FrameMan.h"
+#include "UInputMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUICollectionBox.h"

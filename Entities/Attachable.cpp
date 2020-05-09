@@ -18,6 +18,7 @@
 #include "RTETools.h"
 #include "AEmitter.h"
 #include "Actor.h"
+#include "ConsoleMan.h"
 
 namespace RTE {
 

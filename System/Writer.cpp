@@ -38,7 +38,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Writer::NewLine(bool toIndent = true, unsigned short lineCount = 1) {
+	void Writer::NewLine(bool toIndent, unsigned short lineCount) {
 		for (unsigned short lines = 0; lines < lineCount; lines++) {
 			*m_Stream << "\n";
 			if (toIndent) {

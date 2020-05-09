@@ -85,7 +85,7 @@ namespace RTE {
 		/// <summary>
 		/// Used to specify the end of an object that has just been written.
 		/// </summary>
-		virtual void ObjectEnd() { m_Indent = 0; NewLine(false, 2); }
+		virtual void ObjectEnd() { --m_Indent; if (m_Indent == 0) { NewLine(false, 2); } }
 
 		/// <summary>
 		/// Creates a new line that can be properly indented.
@@ -99,10 +99,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="textString">The text string to write to the new line.</param>
 		/// <param name="toIndent">Whether to indent the new line or not.</param>
-		virtual void NewLineString(std::string textString, bool toIndent = true) {
-			NewLine(toIndent);
-			*m_Stream << textString;
-		}
+		virtual void NewLineString(std::string textString, bool toIndent = true) { NewLine(toIndent); *m_Stream << textString; }
 
 		/// <summary>
 		/// Creates a new line and fills it with slashes to create a divider line for INI.
@@ -120,11 +117,7 @@ namespace RTE {
 		/// Used to specify the name of a new property to be written.
 		/// </summary>
 		/// <param name="propName">The name of the property to be written.</param>
-		virtual void NewProperty(std::string propName) {
-			NewLine();
-			*m_Stream << propName;
-			*m_Stream << " = ";
-		}
+		virtual void NewProperty(std::string propName) { NewLine(); *m_Stream << propName; *m_Stream << " = "; }
 
 		/// <summary>
 		/// Marks that there is a null reference to an object here.

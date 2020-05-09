@@ -85,34 +85,10 @@ namespace RTE {
 
 #pragma region Engine Settings
 		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		bool DisableLoadingScreen() { return m_DisableLoadingScreen; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		unsigned short LoadingScreenReportPrecision() const { return m_LoadingScreenReportPrecision; }
-
-		/// <summary>
 		/// Returns the recommended MOID count. If this amount is exceeded then some unit may be removed at the start of the activity.
 		/// </summary>
 		/// <returns>Recommended MOID count.</returns>
 		unsigned int RecommendedMOIDCount() const { return m_RecommendedMOIDCount; }
-
-		/// <summary>
-		/// Returns true if debug inf mode is set.
-		/// </summary>
-		/// <returns>Whether we need to print some debug info.</returns>
-		bool PrintDebugInfo() const { return m_PrintDebugInfo; }
-
-		/// <summary>
-		/// Sets print debug info mode.
-		/// </summary>
-		/// <param name="printDebugInfo">New debug print mode value.</param>
-		void SetPrintDebugInfo(bool printDebugInfo) { m_PrintDebugInfo = printDebugInfo; }
 
 		/// <summary>
 		/// Gets whether we're using additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just data from the last frame with less precision.
@@ -355,30 +331,24 @@ namespace RTE {
 		bool GetServerSimSleepWhenIdle() { return m_ServerSimSleepWhenIdle; }
 #pragma endregion
 
-#pragma region Misc Settings
+#pragma region Editor Settings
 		/// <summary>
-		/// Is app set to play the game intro on startup?
+		/// Returns the list of visible assembly groups.
 		/// </summary>
-		/// <returns>Whether should play intro or not.</returns>
-		bool PlayIntro() const { return m_PlayIntro; }
+		/// <returns>List of visible assembly groups.</returns>
+		std::list<std::string> GetVisibleAssemblyGroupsList() const { return m_VisibleAssemblyGroupsList; }
 
 		/// <summary>
-		/// Is app set to play the game intro on startup?
+		/// Whether editors will allow to select Base.rte as a module to save in
 		/// </summary>
-		/// <param name="play">Whether should play intro or not.</param>
-		void SetPlayIntro(bool play) { m_PlayIntro = play; }
+		/// <returns>True of editors are allowed to select Base.rte as a module to save in.</returns>
+		bool AllowSavingToBase() const { return m_AllowSavingToBase; }
 
 		/// <summary>
-		/// Is app set to display tools tips on certain UI elements?
+		/// Whether we need to show MetaScenes in editors and scenario UI.
 		/// </summary>
-		/// <returns>Whether should show tool tips or not.</returns>
-		bool ToolTips() const { return m_ToolTips; }
-
-		/// <summary>
-		/// Sets whether app set to display tools tips on certain UI elements.
-		/// </summary>
-		/// <param name="showToolTips">Whether should show tool tips or not.</param>
-		void SetShowToolTips(bool showToolTips) { m_ToolTips = showToolTips; }
+		/// <returns>True if we need to show MetaScenes.</returns>
+		bool ShowMetascenes() const { return m_ShowMetaScenes; }
 #pragma endregion
 
 #pragma region Mod Manager
@@ -429,24 +399,55 @@ namespace RTE {
 		bool IsScriptEnabled(string scriptName);
 #pragma endregion
 
-#pragma region Editor Settings
+#pragma region Misc Settings
 		/// <summary>
-		/// Returns the list of visible assembly groups.
+		/// Is app set to play the game intro on startup?
 		/// </summary>
-		/// <returns>List of visible assembly groups.</returns>
-		std::list<std::string> GetVisibleAssemblyGroupsList() const { return m_VisibleAssemblyGroupsList; }
+		/// <returns>Whether should play intro or not.</returns>
+		bool PlayIntro() const { return m_PlayIntro; }
 
 		/// <summary>
-		/// Whether editors will allow to select Base.rte as a module to save in
+		/// Is app set to play the game intro on startup?
 		/// </summary>
-		/// <returns>True of editors are allowed to select Base.rte as a module to save in.</returns>
-		bool AllowSavingToBase() const { return m_AllowSavingToBase; }
+		/// <param name="play">Whether should play intro or not.</param>
+		void SetPlayIntro(bool play) { m_PlayIntro = play; }
 
 		/// <summary>
-		/// Whether we need to show MetaScenes in editors and scenario UI.
+		/// Is app set to display tools tips on certain UI elements?
 		/// </summary>
-		/// <returns>True if we need to show MetaScenes.</returns>
-		bool ShowMetascenes() const { return m_ShowMetaScenes; }
+		/// <returns>Whether should show tool tips or not.</returns>
+		bool ToolTips() const { return m_ToolTips; }
+
+		/// <summary>
+		/// Sets whether app set to display tools tips on certain UI elements.
+		/// </summary>
+		/// <param name="showToolTips">Whether should show tool tips or not.</param>
+		void SetShowToolTips(bool showToolTips) { m_ToolTips = showToolTips; }
+
+		/// <summary>
+		/// Returns true if debug inf mode is set.
+		/// </summary>
+		/// <returns>Whether we need to print some debug info.</returns>
+		bool PrintDebugInfo() const { return m_PrintDebugInfo; }
+
+		/// <summary>
+		/// Sets print debug info mode.
+		/// </summary>
+		/// <param name="printDebugInfo">New debug print mode value.</param>
+		void SetPrintDebugInfo(bool printDebugInfo) { m_PrintDebugInfo = printDebugInfo; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool DisableLoadingScreen() { return m_DisableLoadingScreen; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		unsigned short LoadingScreenReportPrecision() const { return m_LoadingScreenReportPrecision; }
+
 #pragma endregion
 
 #pragma region Class Info

@@ -215,13 +215,9 @@ namespace RTE {
 		} else if (propName == "VisibleAssemblyGroup") {
 			m_VisibleAssemblyGroupsList.push_back(reader.ReadPropValue());
 		} else if (propName == "DisableMod") {
-			std::string mod = reader.ReadPropValue();
-			std::transform(mod.begin(), mod.end(), mod.begin(), ::tolower);
-			DisableMod(mod);
+			DisableMod(reader.ReadPropValue());
 		} else if (propName == "EnableScript") {
-			std::string mod = reader.ReadPropValue();
-			std::transform(mod.begin(), mod.end(), mod.begin(), ::tolower);
-			EnableScript(mod);
+			EnableScript(reader.ReadPropValue());
 		} else if (propName == "MouseSensitivity") {
 			g_UInputMan.ReadProperty(propName, reader);
 		} else if (propName == "P1Scheme" || propName == "P2Scheme" || propName == "P3Scheme" || propName == "P4Scheme") {
@@ -481,7 +477,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool SettingsMan::IsModDisabled(string modModule) {
+	bool SettingsMan::IsModDisabled(std::string modModule) {
 		std::transform(modModule.begin(), modModule.end(), modModule.begin(), ::tolower);
 		if (m_DisabledMods.find(modModule) != m_DisabledMods.end()) {
 			return m_DisabledMods[modModule];
@@ -491,7 +487,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool SettingsMan::IsScriptEnabled(string scriptName) {
+	bool SettingsMan::IsScriptEnabled(std::string scriptName) {
 		std::transform(scriptName.begin(), scriptName.end(), scriptName.begin(), ::tolower);
 		if (m_EnabledScripts.find(scriptName) != m_EnabledScripts.end()) {
 			return m_EnabledScripts[scriptName];

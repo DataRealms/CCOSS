@@ -62,8 +62,8 @@ namespace RTE {
 		Writer *m_LoadingLogWriter; //!< The Writer that generates the loading log.
 		BITMAP *m_LoadingGUIBitmap; //!< BITMAP that the progress report will be drawn into.
 
-		unsigned short m_PosX; //!< Position of the progress report box on X axis.
-		unsigned short m_PosY; //!< Position of the progress report box on Y axis.
+		short m_PosX; //!< Position of the progress report box on X axis.
+		short m_PosY; //!< Position of the progress report box on Y axis.
 
 	private:
 

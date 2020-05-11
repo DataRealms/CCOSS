@@ -77,9 +77,9 @@ namespace RTE {
 
 #pragma region Getters
 		/// <summary>
-		/// 
+		/// Gets whether Settings.ini needs to be overwritten with the complete list of settings or not. Will be true only if Settings.ini was created with default values on first load or after settings delete.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether Settings.ini needs to be overwritten with the complete list of settings or not.</returns>
 		bool SettingsNeedOverwrite() const { return m_SettingsNeedOverwrite; }
 #pragma endregion
 
@@ -189,145 +189,141 @@ namespace RTE {
 
 #pragma region Network Settings
 		/// <summary>
-		/// 
+		/// Gets the player name that is used in network multiplayer matches.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>String with the network player name.</returns>
 		std::string GetPlayerNetworkName() const { return m_PlayerNetworkName; }
 
 		/// <summary>
-		/// 
+		/// Sets the player name that will be used in network multiplayer matches.
 		/// </summary>
-		/// <param name="newName"></param>
+		/// <param name="newName">String with the new player name to use.</param>
 		void SetPlayerNetworkName(std::string newName) { m_PlayerNetworkName = (newName == "") ? "Dummy" : newName; }
 
 		/// <summary>
-		/// 
+		/// Gets the LAN server address to connect to.
 		/// </summary>
-		/// <returns></returns>
-		std::string GetNetworkServerName() const { return m_NetworkServerName; }
+		/// <returns>The current LAN server address to connect to.</returns>
+		std::string GetNetworkServerAddress() const { return m_NetworkServerAddress; }
 
 		/// <summary>
-		/// 
+		/// Sets the LAN server address to connect to.
 		/// </summary>
-		/// <param name="newName"></param>
-		void SetNetworkServerName(std::string newName) { m_NetworkServerName = (newName == "") ? "127.0.0.1:8000" : newName; }
+		/// <param name="newName">New LAN server address to connect to.</param>
+		void SetNetworkServerAddress(std::string newAddress) { m_NetworkServerAddress = (newAddress == "") ? "127.0.0.1:8000" : newAddress; }
 
 		/// <summary>
-		/// 
+		/// Gets the NAT punch-through server address.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The current NAT punch-through server address to connect to.</returns>
 		std::string & GetNATServiceAddress() { return m_NATServiceAddress; }
 
 		/// <summary>
-		/// 
+		/// Sets the NAT punch-through server address.
 		/// </summary>
-		/// <param name="newValue"></param>
-		void SetNATServiceAddress(std::string newValue) { m_NATServiceAddress = (newValue == "") ? "127.0.0.1:61111" : newValue; }
+		/// <param name="newValue">New NAT punch-through server address to connect to.</param>
+		void SetNATServiceAddress(std::string newAddress) { m_NATServiceAddress = (newAddress == "") ? "127.0.0.1:61111" : newAddress; }
 
 		/// <summary>
-		/// 
+		/// Gets the server name used when connecting via NAT punch-through service.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Name of the NAT punch-through server.</returns>
 		std::string & GetNATServerName() { return m_NATServerName; }
 
 		/// <summary>
-		/// 
+		/// Sets the server name to use when connecting via NAT punch-through service.
 		/// </summary>
-		/// <param name="newValue"></param>
-		void SetNATServerName(std::string newValue) { m_NATServerName = (newValue == "") ? "DefaultServerName" : newValue; }
+		/// <param name="newValue">New NAT punch-through server name.</param>
+		void SetNATServerName(std::string newName) { m_NATServerName = (newName == "") ? "DefaultServerName" : newName; }
 
 		/// <summary>
-		/// 
+		/// Gets the server password to use when connecting via NAT punch-through service.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The server password to use when connecting via NAT punch-through service.</returns>
 		std::string & GetNATServerPassword() { return m_NATServerPassword; }
 
 		/// <summary>
-		/// 
+		/// Sets the server password to use when connecting via NAT punch-through service.
 		/// </summary>
-		/// <param name="newValue"></param>
+		/// <param name="newValue">New password to use when connecting via NAT punch-through service.</param>
 		void SetNATServerPassword(std::string newValue) { m_NATServerPassword = (newValue == "") ? "DefaultServerPassword" : newValue; }
 
 		/// <summary>
-		/// 
+		/// Gets whether server is using higher compression methods.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether server is using higher compression methods or not.</returns>
 		bool GetServerUseHighCompression() const { return m_ServerUseHighCompression; }
 
 		/// <summary>
-		/// 
+		/// Gets whether server is using faster compression methods.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether server is using faster compression methods or not.</returns>
 		bool GetServerUseFastCompression() const { return m_ServerUseFastCompression; }
 
 		/// <summary>
-		/// 
+		/// Gets the compression level used by the server when in high compressing mode.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The compression level currently used by the server.</returns>
 		int GetServerHighCompressionLevel() const { return m_ServerHighCompressionLevel; }
 
 		/// <summary>
-		/// 
+		/// Gets the server acceleration factor, higher values consume more bandwidth but less CPU.
 		/// </summary>
-		/// <returns></returns>
-		/// <remarks>
-		/// The larger the acceleration value, the faster the algorithm, but also lesser the compression. It's a trade-off. It can be fine tuned, with each successive value providing roughly +~3% to speed. 
-		/// An acceleration value of "1" is the same as regular LZ4_compress_default(). Values <= 0 will be replaced by ACCELERATION_DEFAULT(currently == 1, see lz4.c).
-		/// </remarks>
+		/// <returns>The acceleration factor currently used by the server.</returns>
 		int GetServerFastAccelerationFactor() const { return m_ServerFastAccelerationFactor; }
 
 		/// <summary>
-		/// 
+		/// Gets whether server is using interlacing to reduce bandwidth usage.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether server uses interlacing or not.</returns>
 		bool GetServerUseInterlacing() const { return m_ServerUseInterlacing; }
 
 		/// <summary>
-		/// 
+		/// Gets the server frame transmission rate.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The server frame transmission rate.</returns>
 		unsigned short GetServerEncodingFps() const { return m_ServerEncodingFps; }
 
 		/// <summary>
-		/// 
+		/// Gets the input send rate between the client and the server.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The input send rate.</returns>
 		unsigned short GetClientInputFps() const { return m_ClientInputFps; }
 
 		/// <summary>
-		/// 
+		/// Gets whether the server transmits frames as blocks instead of lines.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether the server transmits frames as blocks instead of lines or not.</returns>
 		bool GetServerTransmitAsBoxes() const { return m_ServerTransmitAsBoxes; }
 
 		/// <summary>
-		/// 
+		/// Gets the width of the transmitted block when transmitting frames as blocks.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The width of the transmitted block.</returns>
 		unsigned short GetServerBoxWidth() const { return m_ServerBoxWidth; }
 
 		/// <summary>
-		/// 
+		/// Gets the height of the transmitted block when transmitting frames as blocks.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The height of the transmitted block.</returns>
 		unsigned short GetServerBoxHeight() const { return m_ServerBoxHeight; }
 
 		/// <summary>
-		/// 
+		/// Gets whether a NAT service is used for punch-through.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether a NAT service is used for punch-through or not.</returns>
 		bool GetUseNATService() { return m_UseNATService; }
 
 		/// <summary>
-		/// 
+		/// Gets whether server puts threads to sleep if it didn't receive anything for 10 seconds to reduce CPU load.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether threads will be put to sleep when server isn't receiving any data or not.</returns>
 		bool GetServerSleepWhenIdle() { return m_ServerSleepWhenIdle; }
 
 		/// <summary>
-		/// 
+		/// Gets whether the server will try to put the thread to sleep to reduce CPU load if the sim frame took less time to complete than it should at 30 fps.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether threads will be put to sleep if server completed frame faster than it normally should or not.</returns>
 		bool GetServerSimSleepWhenIdle() { return m_ServerSimSleepWhenIdle; }
 #pragma endregion
 
@@ -437,27 +433,27 @@ namespace RTE {
 		void SetPrintDebugInfo(bool printDebugInfo) { m_PrintDebugInfo = printDebugInfo; }
 
 		/// <summary>
-		/// 
+		/// Gets whether the reader progress report is being displayed during module loading or not.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether the reader progress report is being displayed during module loading or not.</returns>
 		bool DisableLoadingScreen() { return m_DisableLoadingScreen; }
 
 		/// <summary>
-		/// 
+		/// Gets how accurately the reader progress report tells what line it's reading during module loading.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>How accurately the reader progress report tells what line it's reading during module loading.</returns>
 		unsigned short LoadingScreenReportPrecision() const { return m_LoadingScreenReportPrecision; }
 
 		/// <summary>
-		/// 
+		/// Gets the multiplier value for the transition durations between different menus.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The multiplier value for the transition durations between different menus. Lower values equal faster transitions.</returns>
 		float GetMenuTransitionSpeed() const { return m_MenuTransitionSpeed; }
 
 		/// <summary>
-		/// 
+		/// Sets the multiplier value for the transition durations between different menus.
 		/// </summary>
-		/// <param name="newSpeed"></param>
+		/// <param name="newSpeed">New multiplier value for the transition durations between different menus. Lower values equal faster transitions.</param>
 		void SetMenuTransitionSpeed(float newSpeed) { m_MenuTransitionSpeed = (newSpeed >= 0.0F) ? newSpeed : 0.0F; }
 #pragma endregion
 
@@ -493,24 +489,35 @@ namespace RTE {
 		bool m_EndlessMode; //!< Endless metagame mode.
 		bool m_EnableHats; //!< Hats enabled.
 
-		std::string m_PlayerNetworkName; //!<
-		std::string m_NetworkServerName; //!<
-		bool m_UseNATService; //!<
-		std::string m_NATServiceAddress; //!<
-		std::string m_NATServerName; //!<
-		std::string m_NATServerPassword; //!<
-		unsigned short m_ClientInputFps; //!<
-		bool m_ServerTransmitAsBoxes; //!<
-		unsigned short m_ServerBoxWidth; //!<
-		unsigned short m_ServerBoxHeight; //!<
-		bool m_ServerUseHighCompression; //!<
-		bool m_ServerUseFastCompression; //!<
-		int m_ServerHighCompressionLevel; //!<
-		int m_ServerFastAccelerationFactor; //!<
-		bool m_ServerUseInterlacing; //!<
-		unsigned short m_ServerEncodingFps; //!<
-		bool m_ServerSleepWhenIdle; //!<
-		bool m_ServerSimSleepWhenIdle; //!<
+		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
+		std::string m_NetworkServerAddress; //!< LAN server address to connect to.
+		bool m_UseNATService; //!< Whether a NAT service is used for punch-through.
+		std::string m_NATServiceAddress; //!< NAT punch-through server address.
+		std::string m_NATServerName; //!< Server name to use when connecting via NAT punch-through service.
+		std::string m_NATServerPassword; //!< Server password to use when connecting via NAT punch-through service.
+		unsigned short m_ClientInputFps; //!< Input send rate.
+		bool m_ServerUseHighCompression; //!< Whether to use higher compression methods (default).
+		bool m_ServerUseFastCompression; //!< Whether to use faster compression methods and conserve CPU.
+		int m_ServerHighCompressionLevel; //!< Compression level. 10 is optimal, 12 is highest.
+		bool m_ServerUseInterlacing; //!< Use interlacing to heavily reduce bandwidth usage at the cost of visual degradation (unusable at 30 fps, but may be suitable at 60 fps).
+		unsigned short m_ServerEncodingFps; //!< Frame transmission rate. Higher value equals more CPU and bandwidth consumption.
+		bool m_ServerSleepWhenIdle; //!< If true puts thread to sleep if it didn't receive anything for 10 seconds to avoid melting the CPU at 100% even if there are no connections.
+		bool m_ServerSimSleepWhenIdle; //!< If true the server will try to put the thread to sleep to reduce CPU load if the sim frame took less time to complete than it should at 30 fps.
+
+		/// <summary>
+		/// Acceleration factor, higher values consume more bandwidth but less CPU.
+		/// The larger the acceleration value, the faster the algorithm, but also lesser the compression. It's a trade-off. It can be fine tuned, with each successive value providing roughly +~3% to speed. 
+		/// An acceleration value of "1" is the same as regular LZ4_compress_default(). Values <= 0 will be replaced by ACCELERATION_DEFAULT(currently == 1, see lz4 documentation).
+		/// </summary>
+		int m_ServerFastAccelerationFactor;
+
+		/// <summary>
+		/// Transmit frames as blocks instead of lines. Provides better compression at the cost of higher CPU usage.
+		/// Though the compression is quite high it is recommended that Width * Height are less than MTU size or about 1500 bytes or packets may be fragmented by network hardware or dropped completely.
+		/// </summary>
+		bool m_ServerTransmitAsBoxes;
+		unsigned short m_ServerBoxWidth; //!< Width of the transmitted CPU block. Different values may improve bandwidth usage.
+		unsigned short m_ServerBoxHeight; //!< Height of the transmitted CPU block. Different values may improve bandwidth usage.
 
 		bool m_AllowSavingToBase; //!< Whether editors will allow to select Base.rte as a module to save in.
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.
@@ -519,10 +526,10 @@ namespace RTE {
 		bool m_PreciseCollisions; //!<Whether to use additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just uses data from the last frame with less precision.
 
 		bool m_PlayIntro; //!< Whether to play the intro of the game.	
-		bool m_ToolTips; //!< Whether ToolTips are enabled or not.	
-		bool m_DisableLoadingScreen; //!<
-		unsigned short m_LoadingScreenReportPrecision; //!<
-		float m_MenuTransitionSpeed; //!<
+		bool m_ToolTips; //!< Whether ToolTips are enabled or not.
+		bool m_DisableLoadingScreen; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
+		unsigned short m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
+		float m_MenuTransitionSpeed; //!< Multiplier value for the transition durations between different menus. Lower values equal faster transitions.
 		bool m_PrintDebugInfo; //!< Print some debug info in console.
 
 		std::list<std::string> m_VisibleAssemblyGroupsList; //!< List of assemblies groups always shown in editors.

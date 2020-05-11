@@ -30,7 +30,7 @@ namespace RTE {
 		m_EndlessMode = false;
 		m_EnableHats = false;
 
-		m_NetworkServerName = "127.0.0.1:8000";
+		m_NetworkServerAddress = "127.0.0.1:8000";
 		m_PlayerNetworkName = "Dummy";
 		m_UseNATService = false;
 		m_NATServiceAddress = "127.0.0.1:61111";
@@ -142,10 +142,44 @@ namespace RTE {
 			g_ActivityMan.SetDefaultActivityName(reader.ReadPropValue());
 		} else if (propName == "DefaultSceneName") {
 			g_SceneMan.SetDefaultSceneName(reader.ReadPropValue());
+		} else if (propName == "RecommendedMOIDCount") {
+			reader >> m_RecommendedMOIDCount;
+		} else if (propName == "PixelsPerMeter") {
+			g_FrameMan.ReadProperty(propName, reader);
+		} else if (propName == "PreciseCollisions") {
+			reader >> m_PreciseCollisions;
+		} else if (propName == "EnableParticleSettling") {
+			g_MovableMan.ReadProperty(propName, reader);
+		} else if (propName == "EnableMOSubtraction") {
+			g_MovableMan.ReadProperty(propName, reader);
+		} else if (propName == "DeltaTime") {
+			g_TimerMan.SetDeltaTimeSecs(std::stof(reader.ReadPropValue()));
+		} else if (propName == "RealToSimCap") {
+			g_TimerMan.SetRealToSimCap(std::stof(reader.ReadPropValue()));
+		} else if (propName == "AllowSavingToBase") {
+			reader >> m_AllowSavingToBase;
+		} else if (propName == "ShowMetaScenes") {
+			reader >> m_ShowMetaScenes;
+		} else if (propName == "PlayIntro") {
+			reader >> m_PlayIntro;
+		} else if (propName == "ToolTips") {
+			reader >> m_ToolTips;
+		} else if (propName == "DisableLoadingScreen") {
+			reader >> m_DisableLoadingScreen;
+		} else if (propName == "LoadingScreenReportPrecision") {
+			reader >> m_LoadingScreenReportPrecision;
+		} else if (propName == "ConsoleScreenRatio") {
+			g_ConsoleMan.SetConsoleScreenSize(std::stof(reader.ReadPropValue()));
+		} else if (propName == "AdvancedPerformanceStats") {
+			g_PerformanceMan.ShowAdvancedPerformanceStats(std::stoi(reader.ReadPropValue()));
+		} else if (propName == "MenuTransitionSpeed") {
+			SetMenuTransitionSpeed(std::stof(reader.ReadPropValue()));
+		} else if (propName == "PrintDebugInfo") {
+			reader >> m_PrintDebugInfo;
 		} else if (propName == "PlayerNetworkName") {
 			reader >> m_PlayerNetworkName;
 		} else if (propName == "NetworkServerName") {
-			reader >> m_NetworkServerName;
+			reader >> m_NetworkServerAddress;
 		} else if (propName == "UseNATService") {
 			reader >> m_UseNATService;
 		} else if (propName == "NATServiceAddress") {
@@ -178,40 +212,6 @@ namespace RTE {
 			reader >> m_ServerSleepWhenIdle;
 		} else if (propName == "ServerSimSleepWhenIdle") {
 			reader >> m_ServerSimSleepWhenIdle;
-		} else if (propName == "AllowSavingToBase") {
-			reader >> m_AllowSavingToBase;
-		} else if (propName == "ShowMetaScenes") {
-			reader >> m_ShowMetaScenes;
-		} else if (propName == "RecommendedMOIDCount") {
-			reader >> m_RecommendedMOIDCount;
-		} else if (propName == "PixelsPerMeter") {
-			g_FrameMan.ReadProperty(propName, reader);
-		} else if (propName == "PreciseCollisions") {
-			reader >> m_PreciseCollisions;
-		} else if (propName == "EnableParticleSettling") {
-			g_MovableMan.ReadProperty(propName, reader);
-		} else if (propName == "EnableMOSubtraction") {
-			g_MovableMan.ReadProperty(propName, reader);
-		} else if (propName == "DeltaTime") {
-			g_TimerMan.SetDeltaTimeSecs(std::stof(reader.ReadPropValue()));
-		} else if (propName == "RealToSimCap") {
-			g_TimerMan.SetRealToSimCap(std::stof(reader.ReadPropValue()));
-		} else if (propName == "PlayIntro") {
-			reader >> m_PlayIntro;
-		} else if (propName == "ToolTips") {
-			reader >> m_ToolTips;
-		} else if (propName == "DisableLoadingScreen") {
-			reader >> m_DisableLoadingScreen;
-		} else if (propName == "LoadingScreenReportPrecision") {
-			reader >> m_LoadingScreenReportPrecision;
-		} else if (propName == "ConsoleScreenRatio") {
-			g_ConsoleMan.SetConsoleScreenSize(std::stof(reader.ReadPropValue()));
-		} else if (propName == "AdvancedPerformanceStats") {
-			g_PerformanceMan.ShowAdvancedPerformanceStats(std::stoi(reader.ReadPropValue()));
-		} else if (propName == "MenuTransitionSpeed") {
-			SetMenuTransitionSpeed(std::stof(reader.ReadPropValue()));
-		} else if (propName == "PrintDebugInfo") {
-			reader >> m_PrintDebugInfo;
 		} else if (propName == "VisibleAssemblyGroup") {
 			m_VisibleAssemblyGroupsList.push_back(reader.ReadPropValue());
 		} else if (propName == "DisableMod") {
@@ -312,12 +312,61 @@ namespace RTE {
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);
+		writer.NewLineString("// Engine Settings", false);
+		writer.NewLine(false);
+		writer.NewProperty("RecommendedMOIDCount");
+		writer << m_RecommendedMOIDCount;
+		writer.NewProperty("PixelsPerMeter");
+		writer << g_FrameMan.GetPPM();
+		writer.NewProperty("PreciseCollisions");
+		writer << m_PreciseCollisions;
+		writer.NewProperty("EnableParticleSettling");
+		writer << g_MovableMan.IsParticleSettlingEnabled();
+		writer.NewProperty("EnableMOSubtraction");
+		writer << g_MovableMan.IsMOSubtractionEnabled();
+		writer.NewProperty("DeltaTime");
+		writer << g_TimerMan.GetDeltaTimeSecs();
+		writer.NewProperty("RealToSimCap");
+		writer << g_TimerMan.GetRealToSimCap();
+
+		writer.NewLine(false, 2);
+		writer.NewDivider(false);
+		writer.NewLineString("// Editor Settings", false);
+		writer.NewLine(false);
+		writer.NewProperty("AllowSavingToBase");
+		writer << m_AllowSavingToBase;
+		writer.NewProperty("ShowMetaScenes");
+		writer << m_ShowMetaScenes;
+
+		writer.NewLine(false, 2);
+		writer.NewDivider(false);
+		writer.NewLineString("// Misc Settings", false);
+		writer.NewLine(false);
+		writer.NewProperty("PlayIntro");
+		writer << m_PlayIntro;
+		writer.NewProperty("ToolTips");
+		writer << m_ToolTips;
+		writer.NewProperty("DisableLoadingScreen");
+		writer << m_DisableLoadingScreen;
+		writer.NewProperty("LoadingScreenReportPrecision");
+		writer << m_LoadingScreenReportPrecision;
+		writer.NewProperty("ConsoleScreenRatio");
+		writer << g_ConsoleMan.GetConsoleScreenSize();
+		writer.NewProperty("AdvancedPerformanceStats");
+		writer << g_PerformanceMan.AdvancedPerformanceStatsEnabled();
+		writer.NewProperty("MenuTransitionSpeed");
+		writer << m_MenuTransitionSpeed;
+		writer.NewProperty("PrintDebugInfo");
+		writer << m_PrintDebugInfo;
+
+		writer.NewLine(false, 2);
+		writer.NewDivider(false);
 		writer.NewLineString("// Network Settings", false);
 		writer.NewLine(false);
 		writer.NewProperty("PlayerNetworkName");
 		writer << m_PlayerNetworkName;
 		writer.NewProperty("NetworkServerName");
-		writer << m_NetworkServerName;
+		writer << m_NetworkServerAddress;
 		writer.NewProperty("UseNATService");
 		writer << m_UseNATService;
 		writer.NewProperty("NATServiceAddress");
@@ -355,55 +404,6 @@ namespace RTE {
 		writer << m_ServerSleepWhenIdle;
 		writer.NewProperty("ServerSimSleepWhenIdle");
 		writer << m_ServerSimSleepWhenIdle;
-
-		writer.NewLine(false, 2);
-		writer.NewDivider(false);
-		writer.NewLineString("// Editor Settings", false);
-		writer.NewLine(false);
-		writer.NewProperty("AllowSavingToBase");
-		writer << m_AllowSavingToBase;
-		writer.NewProperty("ShowMetaScenes");
-		writer << m_ShowMetaScenes;
-
-		writer.NewLine(false, 2);
-		writer.NewDivider(false);
-		writer.NewLineString("// Engine Settings", false);
-		writer.NewLine(false);
-		writer.NewProperty("RecommendedMOIDCount");
-		writer << m_RecommendedMOIDCount;
-		writer.NewProperty("PixelsPerMeter");
-		writer << g_FrameMan.GetPPM();
-		writer.NewProperty("PreciseCollisions");
-		writer << m_PreciseCollisions;
-		writer.NewProperty("EnableParticleSettling");
-		writer << g_MovableMan.IsParticleSettlingEnabled();
-		writer.NewProperty("EnableMOSubtraction");
-		writer << g_MovableMan.IsMOSubtractionEnabled();
-		writer.NewProperty("DeltaTime");
-		writer << g_TimerMan.GetDeltaTimeSecs();
-		writer.NewProperty("RealToSimCap");
-		writer << g_TimerMan.GetRealToSimCap();
-
-		writer.NewLine(false, 2);
-		writer.NewDivider(false);
-		writer.NewLineString("// Misc Settings", false);
-		writer.NewLine(false);
-		writer.NewProperty("PlayIntro");
-		writer << m_PlayIntro;
-		writer.NewProperty("ToolTips");
-		writer << m_ToolTips;
-		writer.NewProperty("DisableLoadingScreen");
-		writer << m_DisableLoadingScreen;
-		writer.NewProperty("LoadingScreenReportPrecision");
-		writer << m_LoadingScreenReportPrecision;
-		writer.NewProperty("ConsoleScreenRatio");
-		writer << g_ConsoleMan.GetConsoleScreenSize();
-		writer.NewProperty("AdvancedPerformanceStats");
-		writer << g_PerformanceMan.AdvancedPerformanceStatsEnabled();
-		writer.NewProperty("MenuTransitionSpeed");
-		writer << m_MenuTransitionSpeed;
-		writer.NewProperty("PrintDebugInfo");
-		writer << m_PrintDebugInfo;
 
 		if (!m_VisibleAssemblyGroupsList.empty()) {
 			writer.NewLine(false, 2);

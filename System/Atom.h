@@ -493,16 +493,16 @@ namespace RTE {
 		static int s_InstancesInUse; //!< The number of allocated instances passed out from the pool.
 		static const int s_NormalChecks[NormalCheckCount][2]; //!< This forms a circle around the Atom's offset center, to check for key color pixels in order to determine the normal at the Atom's position.
 
-		Vector m_Offset; //!<
+		Vector m_Offset; //!< The offset of this Atom for collision calculations.
 		Vector m_OriginalOffset; //!< This offset is before altering the m_Offset for use in composite groups.
-		Vector m_Normal; //!<
-		Material const * m_Material; //!<	
+		Vector m_Normal; //!< The current normalized surface normal Vector of this Atom.
+		Material const * m_Material; //!< The material this Atom is made of.
 		int m_SubgroupID; //!< Identifying ID for adding and removing atoms from AtomGroups.
 		
 		bool m_StepWasTaken; //!< Whether the last call to StepForward actually resulted in a step or not.
-		float m_StepRatio;
-		Vector m_SegTraj;
-		float m_SegProgress;
+		float m_StepRatio; //!< The normalized ratio of how many steps are actually taken to how many calls to TakeStep are made.
+		Vector m_SegTraj; //!< The segment trajectory currently set by SetupSeg.
+		float m_SegProgress; //!< The segment progress while taking steps.
 
 		bool m_MOHitsDisabled; //!< Temporary disabling of terrain collisions for this. Will be re-enabled once out of terrain again.  
 		bool m_TerrainHitsDisabled; //!< Temporary disabling of terrain collisions for this. Will be re-enabled once out of terrain again.

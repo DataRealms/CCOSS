@@ -1143,8 +1143,11 @@ ENTITYALLOCATION(MovableObject)
 //                  applied relative to the center of this MovableObject.
 // Return value:    None.
 
-    void AddImpulseForce(const Vector &impulse, const Vector &offset = Vector())
-        { RTEAssert(impulse.GetLargest() < 100000, "HUEG IMPULSE FORCE"); RTEAssert(offset.GetLargest() < 1000, "HUEG IMPULSE FORCE OFFSET"); m_ImpulseForces.push_back(std::make_pair(impulse, offset)); }
+	void AddImpulseForce(const Vector &impulse, const Vector &offset = Vector()) {
+		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
+		RTEAssert(offset.GetLargest() < 5000, "HUEG IMPULSE FORCE OFFSET");
+		m_ImpulseForces.push_back(std::make_pair(impulse, offset));
+	}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1158,9 +1161,10 @@ ENTITYALLOCATION(MovableObject)
 //                  force is being applied to the center of this MovableObject.
 // Return value:    None.
 
-    void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos)
-        { RTEAssert(impulse.GetLargest() < 100000, "HUEG IMPULSE FORCE");
-          m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * g_FrameMan.GetMPP())); }
+	void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos) {
+		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
+		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * g_FrameMan.GetMPP()));
+	}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

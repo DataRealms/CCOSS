@@ -441,8 +441,8 @@ void SceneMan::Destroy()
 
 Vector SceneMan::GetSceneDim() const
 {
-    RTEAssert(m_pCurrentScene && m_pCurrentScene->GetTerrain() && m_pCurrentScene->GetTerrain()->GetBitmap(), "Trying to get terrain info before there is a scene or terrain!");
     if (m_pCurrentScene)
+        //RTEAssert(m_pCurrentScene->GetTerrain() && m_pCurrentScene->GetTerrain()->GetBitmap(), "Trying to get terrain info before there is a scene or terrain!");
         return m_pCurrentScene->GetDimensions();
     return Vector();
 }

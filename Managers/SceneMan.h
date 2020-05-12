@@ -75,7 +75,9 @@ enum
 // Description:     A simple rectangle with integer coordinates.
 // Parent(s):       None.
 // Class history:   8/4/2007 IntRect created.
-
+/// <summary>
+/// A simple rectangle with integer coordinates.
+/// </summary>
 struct IntRect
 {
     int m_Left;
@@ -87,16 +89,11 @@ struct IntRect
     IntRect(int left, int top, int right, int bottom) { m_Left = left; m_Top = top; m_Right = right; m_Bottom = bottom; }
     bool Intersects(const IntRect &rhs) { return m_Left < rhs.m_Right && m_Right > rhs.m_Left && m_Top < rhs.m_Bottom && m_Bottom > rhs.m_Top; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IntersectionCut
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     If this and the passed in IntRect intersect, this will be modified to
-//                  represent the boolean AND of the two. If it doens't intersect, nothing
-//                  happens and false is returned.
-// Arguments:       The other IntRect to cut against.
-// Return value:    Whether an intersection was detected and this was cut down to the AND.
-
+    /// <summary>
+    /// If this and the passed in IntRect intersect, this will be modified to represent the boolean AND of the two. If it doens't intersect, nothing happens and false is returned.
+    /// </summary>
+    /// <param name="rhs">The other IntRect to cut against.</param>
+    /// <returns>Whether an intersection was detected and this was cut down to the AND.</returns>
     bool IntersectionCut(const IntRect &rhs);
 
 
@@ -121,14 +118,9 @@ class SceneMan:
 
 public:
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     SceneMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a SceneMan object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
-
+    /// <summary>
+    /// Constructor method used to instantiate a SceneMan object in system memory. Create() should be called before using the object.
+    /// </summary>
     SceneMan() { m_pOrphanSearchBitmap = 0; Clear(); }
 
 
@@ -138,7 +130,9 @@ public:
 // Description:     Destructor method used to clean up a SceneMan object before deletion
 //                  from system memory.
 // Arguments:       None.
-
+    /// <summary>
+    /// Destructor method used to clean up a SceneMan object before deletion from system memory.
+    /// </summary>
     virtual ~SceneMan() { Destroy(); }
 
 /*
@@ -153,245 +147,146 @@ public:
     virtual int Create();
 */
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the SceneMan object ready for use.
-// Arguments:       A string with the filepath to a Reader file from screen this SceneMan's
-//                  data should be created.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
+    /// <summary>
+    /// Makes the SceneMan object ready for use.
+    /// </summary>
+    /// <param name="readerFile">A string with the filepath to a Reader file from screen this SceneMan's data should be created.</param>
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
     virtual int Create(std::string readerFile);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetDefaultSceneName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the instance name of the default Scene to be loaded if nothing
-//                  else is available.
-// Arguments:       The default scene instance name.
-// Return value:    None.
-
+    /// <summary>
+    /// Sets the instance name of the default Scene to be loaded if nothing else is available.
+    /// </summary>
+    /// <param name="defaultSceneName">The default scene instance name.</param>
     void SetDefaultSceneName(std::string defaultSceneName) { m_DefaultSceneName = defaultSceneName; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDefaultSceneName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the name of the default A to be loaded if nothing
-//                  else is available.
-// Arguments:       None.
-// Return value:    The default Scene instance name.
-
+    /// <summary>
+    /// Gets the name of the default A to be loaded if nothing else is available.
+    /// </summary>
+    /// <returns>The default Scene instance name.</returns>
     std::string GetDefaultSceneName() const { return m_DefaultSceneName; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScene
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Actually loads a new Scene into memory. has to be done before using
-//                  this object.
-// Arguments:       The instance of the Scene, ownership IS transferred!
-//                  Whether the scene should actually apply all its SceneObject:s placed
-//                  in its definition.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
+    /// <summary>
+    /// Actually loads a new Scene into memory. has to be done before using this object.
+    /// </summary>
+    /// <param name="pNewScene">The instance of the Scene, ownership IS transferred!</param>
+    /// <param name="placeObjects">Whether the scene should actually apply all its SceneObject:s placed in its definition.</param>
+    /// <param name="placeUnits">Whether the scene should actually deploy all units placed in its definition.</param>
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
     virtual int LoadScene(Scene *pNewScene, bool placeObjects = true, bool placeUnits = true);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetSceneToLoad
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Stores a Scene reference to be loaded later into the SceneMan.
-// Arguments:       The instance reference of the Scene, ownership IS NOT (!!) transferred!
-//                  Whether the scene should actually apply all its SceneObject:s placed
-//                  in its definition.
-// Return value:    None.
-
+    /// <summary>
+    /// Stores a Scene reference to be loaded later into the SceneMan.
+    /// </summary>
+    /// <param name="pLoadScene">The instance reference of the Scene, ownership IS NOT (!!) transferred!</param>
+    /// <param name="placeObjects">Whether the scene should actually apply all its SceneObject:s placed in its definition.</param>
+    /// <param name="placeUnits">Whether the scene should actually deploy all units placed in its definition.</param>
     virtual void SetSceneToLoad(const Scene *pLoadScene, bool placeObjects = true, bool placeUnits = true) { m_pSceneToLoad = pLoadScene; m_PlaceObjects = placeObjects; m_PlaceUnits = placeUnits; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetSceneToLoad
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets a scene to load later, by preset name.
-// Arguments:       The name of the Scene preset instance to load.
-//                  Whether the scene should actually apply all its SceneObject:s placed
-//                  in its definition.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
+    /// <summary>
+    /// Sets a scene to load later, by preset name.
+    /// </summary>
+    /// <param name="sceneName">The name of the Scene preset instance to load.</param>
+    /// <param name="placeObjects">Whether the scene should actually apply all its SceneObject:s placed in its definition.</param>
+    /// <param name="placeUnits">Whether the scene should actually deploy all units placed in its definition.</param>
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
     virtual int SetSceneToLoad(std::string sceneName, bool placeObjects = true, bool placeUnits = true);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetSceneToLoad
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the stored Scene reference to be loaded later into the SceneMan.
-// Arguments:       None.
-// Return value:    The instance reference of the Scene, ownership IS NOT (!!) transferred!
-
+    /// <summary>
+    /// Gets the stored Scene reference to be loaded later into the SceneMan.
+    /// </summary>
+    /// <returns>The instance reference of the Scene, ownership IS NOT (!!) transferred!</returns>
     virtual const Scene * GetSceneToLoad() { return m_pSceneToLoad; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScene
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Actually loads the Scene set to be loaded in SetSceneToLoad.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
+    /// <summary>
+    /// Actually loads the Scene set to be loaded in SetSceneToLoad.
+    /// </summary>
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
     virtual int LoadScene();
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScene
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads a Scene right now, by preset name.
-// Arguments:       The name of the Scene preset instance to load.
-//                  Whether the scene should actually apply all its SceneObject:s placed
-//                  in its definition.
-//                  Whether the scene should actually deploy all units placed in its definition.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
+    /// <summary>
+    /// Loads a Scene right now, by preset name.
+    /// </summary>
+    /// <param name="sceneName">The name of the Scene preset instance to load.</param>
+    /// <param name="placeObjects">Whether the scene should actually apply all its SceneObject:s placed in its definition.</param>
+    /// <param name="placeUnits">Whether the scene should actually deploy all units placed in its definition.</param>
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
     virtual int LoadScene(std::string sceneName, bool placeObjects = true, bool placeUnits = true);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScene
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads a Scene right now, by preset name.
-// Arguments:       The name of the Scene preset instance to load.
-//                  Whether the scene should actually apply all its SceneObject:s placed
-//                  in its definition.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
+    /// <summary>
+    /// Loads a Scene right now, by preset name.
+    /// </summary>
+    /// <param name="sceneName">The name of the Scene preset instance to load.</param>
+    /// <param name="placeObjects">Whether the scene should actually apply all its SceneObject:s placed in its definition.</param>
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 	virtual int LoadScene(std::string sceneName, bool placeObjects = true) { return LoadScene(sceneName, placeObjects, true); }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
+    /// <summary>
+    /// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called. If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
+    /// </summary>
+    /// <param name="propName">The name of the property to be read.</param>
+    /// <param name="reader">A Reader lined up to the value of the property to be read.</param>
+    /// <returns>An error return value signaling whether the property was successfully read or not. 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.</returns>
     virtual int ReadProperty(std::string propName, Reader &reader);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the entire SceneMan, including its inherited members, to
-//                  their default settings or values.
-// Arguments:       None.
-// Return value:    None.
-
+    /// <summary>
+    /// Resets the entire SceneMan, including its inherited members, to their default settings or values.
+    /// </summary>
     virtual void Reset() { Clear(); }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this SceneMan to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the SceneMan will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
+    /// <summary>
+    /// Saves the complete state of this SceneMan to an output stream for later recreation with Create(Reader &reader);
+    /// </summary>
+    /// <param name="writer">A Writer that the SceneMan will save itself with.</param>
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
     virtual int Save(Writer &writer) const;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the SceneMan object.
-// Arguments:       None.
-// Return value:    None.
-
+    /// <summary>
+    /// Destroys and resets (through Clear()) the SceneMan object.
+    /// </summary>
     void Destroy();
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
+    /// <summary>
+    /// Gets the class name of this Entity.
+    /// </summary>
+    /// <returns>A string with the friendly-formatted type name of this object.</returns>
     virtual const std::string & GetClassName() const { return m_ClassName; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetScene
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the currently loaded scene, if any.
-// Arguments:       None.
-// Return value:    The scene, ownership IS NOT TRANSFERRED!
-
+    /// <summary>
+    /// Gets the currently loaded scene, if any.
+    /// </summary>
+    /// <returns>The scene, ownership IS NOT TRANSFERRED!</returns>
     Scene * GetScene() const { return m_pCurrentScene; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSceneDim
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total dimensions (width and height) of the scene, in pixels.
-// Arguments:       None.
-// Return value:    A Vector describing the scene dimensions.
-
+    /// <summary>
+    /// Gets the total dimensions (width and height) of the scene, in pixels.
+    /// </summary>
+    /// <returns>A Vector describing the scene dimensions.</returns>
     Vector GetSceneDim() const;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSceneWidth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total width of the scene, in pixels.
-// Arguments:       None.
-// Return value:    An int describing the scene width.
-
+    /// <summary>
+    /// Gets the total width of the scene, in pixels.
+    /// </summary>
+    /// <returns>An int describing the scene width.</returns>
     int GetSceneWidth() const;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSceneHeight
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total height of the scene, in pixels.
-// Arguments:       None.
-// Return value:    An int describing the scene width.
-
+    /// <summary>
+    /// Gets the total height of the scene, in pixels.
+    /// </summary>
+    /// <returns>An int describing the scene width.</returns>
     int GetSceneHeight() const;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMaterialPalette
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets access to the whole material palette array of 256 entries.
-// Arguments:       None.
-// Return value:    A pointer to the first Material in the palette. Index into it up to
-//                  255 to access the other Material:s in it.
-
+    /// <summary>
+    /// Gets access to the whole material palette array of 256 entries.
+    /// </summary>
+    /// <returns>A pointer to the first Material in the palette. Index into it up to 255 to access the other Material:s in it.</returns>
     Material ** GetMaterialPalette() { return m_apMatPalette; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMaterial
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a specific material by name. Ownership is NOT transferred!
-// Arguments:       The string name of the Material to get.
-// Return value:    A pointer to the requested material, or 0 if no material with that
-//                  name was found.
-
+/// <summary>
+/// Gets a specific material by name. Ownership is NOT transferred!
+/// </summary>
+/// <param name="matName">The string name of the Material to get.</param>
+/// <returns>A pointer to the requested material, or 0 if no material with that name was found.</returns>
     Material const * GetMaterial(const std::string &matName);
 
 
@@ -402,7 +297,11 @@ public:
 //                  transferred!
 // Arguments:       The unsigned char index specifying screen material to get (0-255).
 // Return value:    A reference to the requested material. OINT!
-
+    /// <summary>
+    /// Gets a specific material from the material palette. Ownership is NOT transferred!
+    /// </summary>
+    /// <param name="screen">The unsigned char index specifying screen material to get (0-255).</param>
+    /// <returns>A reference to the requested material. OINT!</returns>
     Material const * GetMaterialFromID(unsigned char screen) { return screen >= 0 && screen < c_PaletteEntriesNumber && m_apMatPalette[screen] ?  m_apMatPalette[screen] : m_apMatPalette[g_MaterialAir]; }
 
 

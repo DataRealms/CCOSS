@@ -8,7 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- New `Settings.ini` property `LoadingScreenReportPrecision = intValue` to control how accurately the module loading progress reports what line is currently being read.  
+	Only relevant when `DisableLoadingScreen = 0`. Default value is 100, lower values increase loading times (especially if set to 1).  
+	This should be used for debugging where you need to pinpoint the exact line that is crashing and the crash message isn't helping or doesn't exist at all.
+	
+- New `Settings.ini` property `MenuTransitionSpeed = floatValue` to control how fast transitions between different menu screens happen (e.g main menu to activity selection screen and back).  
+	This property is a multiplier, the default value is 1 (being the default hardcoded values), lower values increase transitions speeds. 0 makes transitions instant.
+
 ### Changed
+
+- `Settings.ini` will now fully populate with all available settings (now also broken into sections) when being created (first time or after delete) rather than with just a limited set of defaults.
 
 ### Fixed
 

@@ -3014,7 +3014,7 @@ void MetagameGUI::CompletedActivity()
             // Deep copy over all the edits made to the newly played Scene
             m_pPlayingScene->Destroy();
             m_pPlayingScene->Create(*pAlteredScene);
-            // Clear the bitmap data etc of the altered scene, we don't need to copy that over
+            // Clear the bitmap data etc of the scene, we don't need it
             m_pPlayingScene->ClearData();
             // Scrub the module ID so the migration goes well.. this is a bit hacky, but ok in this special case
             m_pPlayingScene->SetModuleID(-1);

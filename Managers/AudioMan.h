@@ -121,16 +121,24 @@ namespace RTE {
 		bool IsAudioEnabled() const { return m_AudioEnabled; }
 
 		/// <summary>
-		/// Returns the number of audio channels currently used.
+		/// Gets the virtual and real playing channel counts, filling in the passed-in out-parameters.
 		/// </summary>
-		/// <returns>The number of audio channels currently used.</returns>
-		int GetPlayingChannelCount() const { int channelCount; return m_AudioSystem->getChannelsPlaying(&channelCount, NULL) == FMOD_OK ? channelCount : 0; }
+		/// <param name="outVirtualChannelCount">The out-parameter that will hold the virtual channel count.</param>
+		/// <param name="outRealChannelCount">The out-parameter that will hold the real channel count.</param>
+		/// <returns>Whether or not the playing channel count was succesfully gotten.</returns>
+		bool GetPlayingChannelCount(int *outVirtualChannelCount, int *outRealChannelCount) const { return m_AudioSystem->getChannelsPlaying(outVirtualChannelCount, outRealChannelCount) == FMOD_OK; }
 
 		/// <summary>
-		/// Returns the number of audio channels available in total.
+		/// Returns the total number of virtual audio channels available.
 		/// </summary>
-		/// <returns>The number of audio channels available in total.</returns>
-		int GetTotalChannelCount() const { int channelCount; return m_AudioSystem->getSoftwareChannels(&channelCount) == FMOD_OK ? channelCount : 0; }
+		/// <returns>The number of virtual audio channels available.</returns>
+		int GetTotalVirtualChannelCount() const { return c_MaxVirtualChannels; }
+
+		/// <summary>
+		/// Returns the total number of real audio channels available.
+		/// </summary>
+		/// <returns>The number of real audio channels available.</returns>
+		int GetTotalRealChannelCount() const { int channelCount; return m_AudioSystem->getSoftwareChannels(&channelCount) == FMOD_OK ? channelCount : 0; }
 
 		/// <summary>
 		/// Gets the global pitch scalar value for all sounds and music.

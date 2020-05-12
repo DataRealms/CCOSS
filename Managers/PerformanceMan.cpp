@@ -189,7 +189,11 @@ namespace RTE {
 
 			if (g_TimerMan.IsOneSimUpdatePerFrame()) { g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 90, "ONE Sim Update Per Frame!", GUIFont::Left); }
 
-			sprintf_s(str, sizeof(str), "Sound channels: %d / %d ", g_AudioMan.GetPlayingChannelCount(), g_AudioMan.GetTotalChannelCount());
+			int totalPlayingChannelCount;
+			int realPlayingChannelCount;
+			if (g_AudioMan.GetPlayingChannelCount(&totalPlayingChannelCount, &realPlayingChannelCount)) {
+				sprintf_s(str, sizeof(str), "Sound Channels: %d / %d Real | %d / %d Virtual", realPlayingChannelCount, g_AudioMan.GetTotalRealChannelCount(), totalPlayingChannelCount - realPlayingChannelCount, g_AudioMan.GetTotalVirtualChannelCount());
+			}
 			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 100, str, GUIFont::Left);
 
 			// If in split screen mode don't draw graphs because they don't fit anyway.

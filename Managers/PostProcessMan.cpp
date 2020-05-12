@@ -324,7 +324,7 @@ namespace RTE {
 
 #ifdef DEBUG_BUILD
 			// Draw a rectangle around the glow box so we see it's position and size
-			rect(m_BackBuffer32, startX, startY, endX, endY, g_RedColor);
+			rect(g_FrameMan.GetBackBuffer32(), startX, startY, endX, endY, g_RedColor);
 #endif
 			
 			for (y = startY; y < endY; ++y) {

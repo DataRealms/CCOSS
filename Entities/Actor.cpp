@@ -501,7 +501,7 @@ int Actor::LoadScript(std::string const &scriptPath, bool loadAsEnabledScript) {
     }
 
     // If UpdateAI existed it'll be in the lua global namespace, so we can check that to know whether or not to use Lua AI
-    m_ScriptedAIUpdate = g_LuaMan.GlobalIsDefined("UpdateAI");
+    m_ScriptedAIUpdate = m_ScriptedAIUpdate || g_LuaMan.GlobalIsDefined("UpdateAI");
 
     return status;
 }

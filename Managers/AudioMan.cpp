@@ -185,7 +185,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	double AudioMan::GetMusicPosition() const {
-		if (m_AudioEnabled || IsMusicPlaying()) {
+		if (m_AudioEnabled && IsMusicPlaying()) {
 			FMOD_RESULT result;
 			FMOD::Channel *musicChannel;
 			unsigned int position;
@@ -202,7 +202,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AudioMan::SetMusicPosition(double position) {
-		if (m_AudioEnabled || IsMusicPlaying()) {
+		if (m_AudioEnabled && IsMusicPlaying()) {
 			FMOD::Channel *musicChannel;
 			FMOD_RESULT result = m_MusicChannelGroup->getChannel(0, &musicChannel);
 
@@ -307,6 +307,7 @@ namespace RTE {
 			result = musicChannel->setPriority(PRIORITY_HIGH);
 
 			if (volumeOverrideIfNotMuted >= 0 && m_MusicVolume > 0) {
+				volumeOverrideIfNotMuted = Limit((volumeOverrideIfNotMuted > 1 ? volumeOverrideIfNotMuted / 100 : volumeOverrideIfNotMuted), 1, 0);
 				result = musicChannel->setVolume(volumeOverrideIfNotMuted);
 				if (result != FMOD_OK && (loops != 0 && loops != 1)) {
 					g_ConsoleMan.PrintString("ERROR: Failed to set volume override for music file: " + std::string(filePath) + ". This means it will stay at " + std::to_string(m_MusicVolume) + ": " + std::string(FMOD_ErrorString(result)));
@@ -422,7 +423,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool AudioMan::PlaySound(SoundContainer *soundContainer, const Vector &position, int player, int priority, double pitch) {
-		if (!m_AudioEnabled || !soundContainer) {
+		if (!m_AudioEnabled || !soundContainer || soundContainer->GetPlayingChannels()->size() >= c_MaxPlayingSoundsPerContainer - 2) {
 			return false;
 		}
 		FMOD_RESULT result = FMOD_OK;
@@ -476,7 +477,6 @@ namespace RTE {
 				soundContainer->AddPlayingChannel(channelIndex);
 			}
 		}
-
 
 		// Now that the sound is playing we can register an event with the SoundContainer's channels, which can be used by clients to identify the sound being played.
 		if (m_IsInMultiplayerMode) {

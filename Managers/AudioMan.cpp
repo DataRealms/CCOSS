@@ -423,7 +423,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool AudioMan::PlaySound(SoundContainer *soundContainer, const Vector &position, int player, int priority, double pitch) {
-		if (!m_AudioEnabled || !soundContainer) {
+		if (!m_AudioEnabled || !soundContainer || soundContainer->GetPlayingChannels()->size() >= c_MaxPlayingSoundsPerContainer - 2) {
 			return false;
 		}
 		FMOD_RESULT result = FMOD_OK;

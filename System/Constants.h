@@ -57,7 +57,7 @@ namespace RTE {
 #pragma region Audio Constants
 	static constexpr unsigned short c_MaxSoftwareChannels = 128;
 	static constexpr unsigned short c_MaxVirtualChannels = 1024;
-	static constexpr unsigned short c_MaxPlayingSoundsPerContainer = 256;
+	static constexpr unsigned short c_MaxPlayingSoundsPerContainer = 128;
 	/* TODO These have been temporarily replaced with variables in settingsman to allow for easy tweaking. This needs to be undone once our soundscape is sorted out.
 	static constexpr unsigned short c_ListenerZOffset = 50; //!< The Z offset for Audio listeners. Can be used to lessen harsh panning if panning effect strength is at max.
 	static constexpr unsigned short c_MinimumDistanceForPanning = 50; //!< The minimum distance before which sound panning should not occur. Not relevant for immobile sounds or in splitscreen.

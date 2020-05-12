@@ -201,7 +201,7 @@ namespace RTE {
 		/// Adds a channel index to the SoundContainer's collection of playing channels.
 		/// </summary>
 		/// <param name="channel">The channel index to add.</param>
-		void AddPlayingChannel(unsigned short channel) { m_PlayingChannels.insert(channel); RTEAssert(m_PlayingChannels.size() <= c_MaxPlayingSoundsPerContainer, "Tried to play more than " + std::to_string(c_MaxPlayingSoundsPerContainer) + " sounds in SoundContainer " + GetPresetName()); }
+		void AddPlayingChannel(unsigned short channel) { m_PlayingChannels.insert(channel); }
 
 		/// <summary>
 		/// Removes a channel index from the SoundContainer's collection of playing channels.

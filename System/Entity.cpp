@@ -49,13 +49,11 @@ namespace RTE {
 		if (propName == "CopyOf") {
 			std::string refName = reader.ReadPropValue();
 			const Entity *preset = g_PresetMan.GetEntityPreset(GetClassName(), refName, reader.GetReadModuleID());
-
 			if (preset) {
 				preset->Clone(this);
 			} else {
 				// If we couldn't find the preset to copy from, read it as an original but report the problem in the console
 				g_ConsoleMan.PrintString("ERROR: Couldn't find the preset '" + refName + "' accessed in " + reader.GetCurrentFilePath() + " at line " + reader.GetCurrentFileLineString());
-
 				// Preset name might have "[ModuleName]/" preceding it, detect it here and select proper module!
 				int slashPos = refName.find_first_of('/');
 				m_PresetName = (slashPos != std::string::npos) ? refName.substr(slashPos + 1) : refName;
@@ -69,7 +67,6 @@ namespace RTE {
 			// Preset name might have "[ModuleName]/" preceding it, detect it here and select proper module!
 			int slashPos = m_PresetName.find_first_of('/');
 			if (slashPos != std::string::npos) { m_PresetName = m_PresetName.substr(slashPos + 1); }
-
 			// Mark this so that the derived class knows it should be added to the PresetMan when it's done reading all properties.
 			m_IsOriginalPreset = true;
 			// Indicate where this was read from

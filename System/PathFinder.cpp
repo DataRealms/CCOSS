@@ -21,8 +21,8 @@ namespace RTE {
 		int sceneHeight = g_SceneMan.GetSceneHeight();
 
 		// Make overlapping nodes at seams if necessary, to make sure all scene pixels are covered
-		int nodeXCount = ceilf(static_cast<float>(sceneWidth) / static_cast<float>(m_NodeDimension));
-		int nodeYCount = ceilf(static_cast<float>(sceneHeight) / static_cast<float>(m_NodeDimension));
+		int nodeXCount = std::ceilf(static_cast<float>(sceneWidth) / static_cast<float>(m_NodeDimension));
+		int nodeYCount = std::ceilf(static_cast<float>(sceneHeight) / static_cast<float>(m_NodeDimension));
 
 		// Create and assign scene coordinate positions for all nodes
 		PathNode *node = 0;
@@ -133,7 +133,7 @@ namespace RTE {
 
 		// Do the actual pathfinding, fetch out the list of states that comprise the best path
 		std::vector<void *> statePath;
-		int result = m_Pather->Solve((void *)(m_NodeGrid[startNodeX][startNodeY]), (void *)(m_NodeGrid[endNodeX][endNodeY]), &statePath, &totalCostResult);
+		int result = m_Pather->Solve(static_cast<void *>(m_NodeGrid[startNodeX][startNodeY]), static_cast<void *>(m_NodeGrid[endNodeX][endNodeY]), &statePath, &totalCostResult);
 
 		// We got something back
 		if (!statePath.empty()) {
@@ -144,7 +144,7 @@ namespace RTE {
 
 			// Convert from a list of state void pointers to a list of scene position vectors
 			for (; itr != statePath.end(); ++itr) {
-				pathResult.push_back(((PathNode *)(*itr))->Pos);
+				pathResult.push_back((static_cast<PathNode *>(*itr))->Pos);
 			}
 
 			// Adjust the last point to be exactly where the end is supposed to be (really?)
@@ -231,7 +231,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float PathFinder::LeastCostEstimate(void *startState, void *endState) { return g_SceneMan.ShortestDistance(((PathNode *)startState)->Pos, ((PathNode *)endState)->Pos).GetMagnitude(); }
+	float PathFinder::LeastCostEstimate(void *startState, void *endState) {
+		return g_SceneMan.ShortestDistance((static_cast<PathNode *>(startState))->Pos, (static_cast<PathNode *>(endState))->Pos).GetMagnitude();
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void PathFinder::AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList) {

@@ -63,9 +63,7 @@ namespace RTE {
 
 	int Matrix::ReadProperty(std::string propName, Reader &reader) {
 		if (propName == "AngleDegrees") {
-			float degAngle;
-			reader >> degAngle;
-			SetDegAngle(degAngle);
+			SetDegAngle(std::stof(reader.ReadPropValue()));
 		} else if (propName == "AngleRadians") {
 			reader >> m_Rotation;
 		} else {

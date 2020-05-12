@@ -33,18 +33,18 @@ namespace RTE {
 	/// <returns>A pointer to the newly dynamically allocated Entity. Ownership is transferred as well.</returns>
 	#define ENTITYALLOCATION(TYPE)																		\
 		static void * operator new (size_t size) { return TYPE::m_sClass.GetPoolMemory(); }				\
-		static void operator delete (void *pInstance) { TYPE::m_sClass.ReturnPoolMemory(pInstance); }	\
+		static void operator delete (void *instance) { TYPE::m_sClass.ReturnPoolMemory(instance); }		\
 		static void * operator new (size_t size, void *p) throw() { return p; }							\
 		static void operator delete (void *, void *) throw() {  }										\
-		static void * Allocate() { return malloc(sizeof(TYPE)); }										\
-		static void Deallocate(void *pInstance) { free(pInstance); }									\
+		static void * Allocate() { return std::malloc(sizeof(TYPE)); }									\
+		static void Deallocate(void *instance) { free(instance); }										\
 		static Entity * NewInstance() { return new TYPE; }												\
-		virtual Entity * Clone(Entity *cloneTo = 0) const {											\
-			TYPE *pEnt = cloneTo ? dynamic_cast<TYPE *>(cloneTo) : new TYPE();						\
-			RTEAssert(pEnt, "Tried to clone to an incompatible instance!");								\
-			if (cloneTo) { pEnt->Destroy(); }															\
-			pEnt->Create(*this);																		\
-			return pEnt;																				\
+		virtual Entity * Clone(Entity *cloneTo = 0) const {												\
+			TYPE *ent = cloneTo ? dynamic_cast<TYPE *>(cloneTo) : new TYPE();							\
+			RTEAssert(ent, "Tried to clone to an incompatible instance!");								\
+			if (cloneTo) { ent->Destroy(); }															\
+			ent->Create(*this);																			\
+			return ent;																					\
 		}
 #pragma endregion
 

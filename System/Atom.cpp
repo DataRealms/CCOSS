@@ -13,7 +13,7 @@ namespace RTE {
 	int Atom::s_InstancesInUse = 0;
 
 	// This forms a circle around the Atom's offset center, to check for mask color pixels in order to determine the normal at the Atom's position.
-	const int Atom::s_NormalChecks[NormalCheckCount][2] = { {0, -3}, {1, -3}, {2, -2}, {3, -1}, {3, 0}, {3, 1}, {2, 2}, {1, 3}, {0, 3}, {-1, 3}, {-2, 2}, {-3, 1}, {-3, 0}, {-3, -1}, {-2, -2}, {-1, -3} };
+	const int Atom::s_NormalChecks[c_NormalCheckCount][2] = { {0, -3}, {1, -3}, {2, -2}, {3, -1}, {3, 0}, {3, 1}, {2, 2}, {1, 3}, {0, 3}, {-1, 3}, {-2, 2}, {-3, 1}, {-3, 0}, {-3, -1}, {-2, -2}, {-1, -3} };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -209,7 +209,7 @@ namespace RTE {
 		// Go through all the check positions from the atom's position on the sprite
 		m_Normal.Reset();
 		int checkPixel = 0;
-		for (int check = 0; check < NormalCheckCount; ++check) {
+		for (int check = 0; check < c_NormalCheckCount; ++check) {
 			// Establish the current integer position to check for nothingness on the sprite
 			checkPixel = getpixel(sprite, atomPos.m_X + s_NormalChecks[check][X], atomPos.m_Y + s_NormalChecks[check][Y]);
 
@@ -950,7 +950,7 @@ namespace RTE {
 					// Calculate the progress made on this segment before hitting something.
 					// We count the hitting step made if it resulted in a terrain sink, because the Atoms weren't stepped back out of intersection.
 					//segProgress = static_cast<float>(domSteps + sinkHit) / static_cast<float>(delta[dom]);
-					segProgress = ((domSteps + sinkHit) < delta[dom]) ? (static_cast<float>(domSteps + sinkHit) / std::fabs(static_cast<float>(segTraj[dom]))) : 1.0F;
+					segProgress = (static_cast<float>(domSteps + static_cast<int>(sinkHit)) < delta[dom]) ? (static_cast<float>(domSteps + static_cast<int>(sinkHit)) / std::fabs(static_cast<float>(segTraj[dom]))) : 1.0F;
 
 					// Now calculate the total time left to travel, according to the progress made.
 					timeLeft -= timeLeft * segProgress;
@@ -958,11 +958,11 @@ namespace RTE {
 					// Move position forward to the hit position.
 					//position += segTraj * segProgress;
 					// Only move the dom forward by int domSteps, so we don't cross into a pixel too far
-					position[dom] += (domSteps + sinkHit) * increment[dom];
+					position[dom] += (domSteps + static_cast<int>(sinkHit)) * increment[dom];
 
 					// Move the submissive direction forward by as many int steps, or the full float segTraj if all sub-steps are clear
-					if ((subSteps + (subStepped && sinkHit)) < delta[sub]) {
-						position[sub] += (subSteps + (subStepped && sinkHit)) * increment[sub];
+					if ((subSteps + static_cast<int>(subStepped && sinkHit)) < delta[sub]) {
+						position[sub] += (subSteps + static_cast<int>(subStepped && sinkHit)) * increment[sub];
 					} else {
 						position[sub] += segTraj[sub];
 					}

@@ -11,7 +11,6 @@ namespace RTE {
 	class MovableObject;
 
 	enum { HITOR = 0, HITEE = 1 };
-	enum { NormalCheckCount = 16 };
 
 #pragma region HitData
 	/// <summary>
@@ -487,11 +486,12 @@ namespace RTE {
 	protected:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
+		static constexpr int c_NormalCheckCount = 16; //!< Array size for offsets to form circle in s_NormalChecks.
 
 		static std::vector<void *> s_AllocatedPool; //!< Pool of pre-allocated Atoms.	
 		static int s_PoolAllocBlockCount; //!< The number of instances to fill up the pool of Atoms with each time it runs dry.
 		static int s_InstancesInUse; //!< The number of allocated instances passed out from the pool.
-		static const int s_NormalChecks[NormalCheckCount][2]; //!< This forms a circle around the Atom's offset center, to check for key color pixels in order to determine the normal at the Atom's position.
+		static const int s_NormalChecks[c_NormalCheckCount][2]; //!< This forms a circle around the Atom's offset center, to check for key color pixels in order to determine the normal at the Atom's position.
 
 		Vector m_Offset; //!< The offset of this Atom for collision calculations.
 		Vector m_OriginalOffset; //!< This offset is before altering the m_Offset for use in composite groups.
@@ -540,7 +540,11 @@ namespace RTE {
 		int m_Delta[2];
 		int m_Delta2[2];
 		int m_Increment[2];
-		int m_Error, m_Dom, m_Sub, m_DomSteps, m_SubSteps;
+		int m_Error;
+		int m_Dom; 
+		int m_Sub;
+		int m_DomSteps;
+		int m_SubSteps;
 		bool m_SubStepped;
 
 	private:

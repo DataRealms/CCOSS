@@ -91,8 +91,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void DataModule::Destroy(bool notInherited) {
-		for (std::list<PresetEntry>::iterator itr = m_PresetList.begin(); itr != m_PresetList.end(); ++itr) {
-			delete (*itr).m_EntityPreset;
+		for (const PresetEntry &preset : m_PresetList){
+			delete preset.m_EntityPreset;
 		}
 		Clear();
 	}

@@ -3432,7 +3432,10 @@ bool SceneMan::AddSceneObject(SceneObject *pObject)
 
 void SceneMan::Update(int screen)
 {
-	RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    if (m_pCurrentScene == nullptr) {
+        return;
+    }
+    //RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
     // Record screen was the last updated screen
     m_LastUpdatedScreen = screen;
@@ -3572,7 +3575,10 @@ void SceneMan::Update(int screen)
 
 void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vector &targetPos, bool skipSkybox, bool skipTerrain)
 {
-    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    if (m_pCurrentScene == nullptr) {
+        return;
+    }
+    //RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
     // Handy
     SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
 
@@ -3687,6 +3693,12 @@ void SceneMan::ClearSeenPixels()
 
     for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
         m_pCurrentScene->ClearSeenPixels(team);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SceneMan::ClearCurrentScene() {
+    m_pCurrentScene = nullptr;
 }
 
 } // namespace RTE

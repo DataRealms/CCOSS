@@ -10,19 +10,19 @@ namespace RTE {
 	typedef std::function<void(void*)> MemoryDeallocate; //!< Convenient name definition for the memory deallocation callback function.
 
 #pragma region Global Macro Definitions
-	#define ABSTRACTCLASSINFO(TYPE, PARENT)	\
+	#define AbstractClassInfo(TYPE, PARENT)	\
 		Entity::ClassInfo TYPE::m_sClass(#TYPE, &PARENT::m_sClass);
 
-	#define CONCRETECLASSINFO(TYPE, PARENT, BLOCKCOUNT) \
+	#define ConcreteClassInfo(TYPE, PARENT, BLOCKCOUNT) \
 		Entity::ClassInfo TYPE::m_sClass(#TYPE, &PARENT::m_sClass, TYPE::Allocate, TYPE::Deallocate, TYPE::NewInstance, BLOCKCOUNT);
 
-	#define CONCRETESUBCLASSINFO(TYPE, SUPER, PARENT, BLOCKCOUNT) \
+	#define ConcreteSubClassInfo(TYPE, SUPER, PARENT, BLOCKCOUNT) \
 		Entity::ClassInfo SUPER::TYPE::m_sClass(#TYPE, &PARENT::m_sClass, SUPER::TYPE::Allocate, SUPER::TYPE::Deallocate, SUPER::TYPE::NewInstance, BLOCKCOUNT);
 
 	/// <summary>
 	/// Convenience macro to cut down on duplicate ClassInfo methods in classes that extend Entity.
 	/// </summary>
-	#define CLASSINFOGETTERS \
+	#define ClassInfoGetters \
 		const Entity::ClassInfo & GetClass() const { return m_sClass; } \
 		const std::string & GetClassName() const { return m_sClass.GetName(); }
 
@@ -31,7 +31,7 @@ namespace RTE {
 	/// This function is passed into the constructor of this Entity's static ClassInfo's constructor, so that it can instantiate MovableObjects.
 	/// </summary>
 	/// <returns>A pointer to the newly dynamically allocated Entity. Ownership is transferred as well.</returns>
-	#define ENTITYALLOCATION(TYPE)																		\
+	#define EnitityAllocation(TYPE)																		\
 		static void * operator new (size_t size) { return TYPE::m_sClass.GetPoolMemory(); }				\
 		static void operator delete (void *instance) { TYPE::m_sClass.ReturnPoolMemory(instance); }		\
 		static void * operator new (size_t size, void *p) throw() { return p; }							\

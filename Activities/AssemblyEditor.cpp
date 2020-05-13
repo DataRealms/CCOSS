@@ -51,7 +51,7 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(AssemblyEditor, EditorActivity, 0)
+ConcreteClassInfo(AssemblyEditor, EditorActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

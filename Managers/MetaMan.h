@@ -732,7 +732,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(MetaSave)
+EnitityAllocation(MetaSave)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

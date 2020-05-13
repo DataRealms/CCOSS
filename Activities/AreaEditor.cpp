@@ -47,7 +47,7 @@ extern bool g_ResetActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(AreaEditor, EditorActivity, 0)
+ConcreteClassInfo(AreaEditor, EditorActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

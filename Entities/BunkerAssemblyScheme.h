@@ -70,7 +70,7 @@ public:
 	const static int SchemeWidth = 2;
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(BunkerAssemblyScheme)
+EnitityAllocation(BunkerAssemblyScheme)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

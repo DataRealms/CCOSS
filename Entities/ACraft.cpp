@@ -35,7 +35,7 @@
 
 namespace RTE {
 
-ABSTRACTCLASSINFO(ACraft, Actor)
+AbstractClassInfo(ACraft, Actor)
 const string ACraft::Exit::m_sClassName = "Exit";
 
 #define EXITLINESPACING 7

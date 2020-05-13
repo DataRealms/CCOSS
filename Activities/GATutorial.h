@@ -42,7 +42,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(GATutorial)
+EnitityAllocation(GATutorial)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

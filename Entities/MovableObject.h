@@ -28,10 +28,10 @@ namespace RTE
 
 
 #pragma region Global Macro Definitions
-    #define SCRIPT_FUNCTION_NAMES(...) \
+    #define ScriptFunctionNames(...) \
         virtual std::vector<std::string> GetSupportedScriptFunctionNames() const { return {__VA_ARGS__}; }
 
-    #define ADD_SCRIPT_FUNCTION_NAMES(PARENT, ...) \
+    #define AddScriptFunctionNames(PARENT, ...) \
         virtual std::vector<std::string> GetSupportedScriptFunctionNames() const override { \
             std::vector<std::string> functionNames = PARENT::GetSupportedScriptFunctionNames(); \
             functionNames.insert(functionNames.end(), {__VA_ARGS__}); \
@@ -59,7 +59,7 @@ friend class LuaMan;
 // Public member variable, method and friend function declarations
 
 public:
-    SCRIPT_FUNCTION_NAMES("Create", "Destroy", "Update", "OnScriptRemoveOrDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
+    ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptRemoveOrDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
 
 enum MOType
 {
@@ -73,7 +73,7 @@ friend class Atom;
 
 /* Should be in all concrete subclasses
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(MovableObject)
+EnitityAllocation(MovableObject)
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////

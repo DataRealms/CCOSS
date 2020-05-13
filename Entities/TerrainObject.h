@@ -47,7 +47,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(TerrainObject)
+EnitityAllocation(TerrainObject)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -24,7 +24,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(MOSRotating, MOSprite, 100)
+ConcreteClassInfo(MOSRotating, MOSprite, 100)
 
 const string MOSRotating::Gib::m_sClassName = "Gib";
 

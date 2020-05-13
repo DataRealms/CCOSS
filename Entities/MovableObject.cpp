@@ -21,7 +21,7 @@
 
 namespace RTE {
 
-ABSTRACTCLASSINFO(MovableObject, SceneObject)
+AbstractClassInfo(MovableObject, SceneObject)
 
 unsigned long int MovableObject::m_UniqueIDCounter = 1;
 

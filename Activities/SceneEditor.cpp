@@ -48,7 +48,7 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(SceneEditor, EditorActivity, 0)
+ConcreteClassInfo(SceneEditor, EditorActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

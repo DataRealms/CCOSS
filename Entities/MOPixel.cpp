@@ -17,7 +17,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(MOPixel, MovableObject, 500)
+ConcreteClassInfo(MOPixel, MovableObject, 500)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

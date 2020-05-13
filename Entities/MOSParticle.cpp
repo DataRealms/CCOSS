@@ -18,7 +18,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(MOSParticle, MovableObject, 200)
+ConcreteClassInfo(MOSParticle, MovableObject, 200)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

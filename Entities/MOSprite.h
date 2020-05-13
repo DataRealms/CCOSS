@@ -55,7 +55,7 @@ public:
 
 /* abstract class
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(MOSprite)
+EnitityAllocation(MOSprite)
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////

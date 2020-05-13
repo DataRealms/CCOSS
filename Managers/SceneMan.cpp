@@ -442,7 +442,7 @@ void SceneMan::Destroy()
 Vector SceneMan::GetSceneDim() const
 {
     if (m_pCurrentScene)
-        //RTEAssert(m_pCurrentScene->GetTerrain() && m_pCurrentScene->GetTerrain()->GetBitmap(), "Trying to get terrain info before there is a scene or terrain!");
+        RTEAssert(m_pCurrentScene->GetTerrain() && m_pCurrentScene->GetTerrain()->GetBitmap(), "Trying to get terrain info before there is a scene or terrain!");
         return m_pCurrentScene->GetDimensions();
     return Vector();
 }
@@ -3435,7 +3435,6 @@ void SceneMan::Update(int screen)
     if (m_pCurrentScene == nullptr) {
         return;
     }
-    //RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
     // Record screen was the last updated screen
     m_LastUpdatedScreen = screen;
@@ -3578,7 +3577,6 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
     if (m_pCurrentScene == nullptr) {
         return;
     }
-    //RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
     // Handy
     SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
 

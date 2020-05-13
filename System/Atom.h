@@ -275,7 +275,7 @@ namespace RTE {
 		/// It will check pixels around it and see if they are inside the object or not, and infer a collision normal based on that. THIS ONLY WORKS IF THE ATOM IS ON THE SURFACE OF THE SPRITE!
 		/// </summary>
 		/// <param name="sprite">The bitmap to check against. Ownership IS NOT transferred!</param>
-		/// <param name="spriteCenter">Where the on the bitmap the center of the object is. This atom's offset will be applied automatically before checking for it normal.</param>
+		/// <param name="spriteCenter">Where on the bitmap the center of the object is. This atom's offset will be applied automatically before checking for its normal.</param>
 		/// <returns>Whether normal was successfully derived from the bitmap. If not, then a provisional one is derived from the offset.</returns>
 		bool CalculateNormal(BITMAP *sprite, Vector spriteCenter);
 #pragma endregion
@@ -337,7 +337,7 @@ namespace RTE {
 		int GetNumPenetrations() const { return m_NumPenetrations; }
 
 		/// <summary>
-		/// Returns the ID of the MO hit at the previously taken step by TakeStep. This will only potentially return non-g_NoMOID if this Atom is set to hit MO's and the MO hit isn't marked to be ignored.
+		/// Returns the ID of the MO hit at the previously taken step by TakeStep. This will potentially return g_NoMOID if this Atom is not set to hit MO's or the MO hit is marked to be ignored.
 		/// </summary>
 		/// <returns>The ID of the non-ignored MO, if any, that this Atom is now intersecting because of the last step taken.</returns>
 		MOID HitWhatMOID() const { return m_MOIDHit; }
@@ -459,7 +459,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="size"></param>
 		/// <returns></returns>
-		static void * operator new (size_t size) { return Atom::GetPoolMemory(); }
+		static void *operator new (size_t size) { return Atom::GetPoolMemory(); }
 
 		/// <summary>
 		/// Delete operator overload for the pool deallocation of Atoms.
@@ -504,7 +504,11 @@ namespace RTE {
 		Vector m_SegTraj; //!< The segment trajectory currently set by SetupSeg.
 		float m_SegProgress; //!< The segment progress while taking steps.
 
-		bool m_MOHitsDisabled; //!< Temporary disabling of terrain collisions for this. Will be re-enabled once out of terrain again.  
+		bool m_ChangedDir; //!< This is only true if there was a change in direction of trajectory during the last travel move of this Atom.		
+		int m_PrevError; //!< This is the stored error (fraction) at the end of the last travel move. To be used when the direction wasn't changed during a hit, and will make sure the continued trajectory is straight.
+		bool m_ResultWrapped; //!< This is only true when the resulting position reflects a wrap around the scene.
+
+		bool m_MOHitsDisabled; //!< Temporary disabling of MO collisions for this. 
 		bool m_TerrainHitsDisabled; //!< Temporary disabling of terrain collisions for this. Will be re-enabled once out of terrain again.
 
 		MovableObject *m_OwnerMO; //!< The owner of this Atom. The owner is obviously not owned by this Atom.	
@@ -512,10 +516,11 @@ namespace RTE {
 		std::list<MOID> m_IgnoreMOIDs; //!< ignore hits with MOs of these IDs.
 		std::list<MOID> const * m_IgnoreMOIDsByGroup; //!< Also ignore hits with MOs of these IDs. This one may be set externally by atom group.
 
-		MOID m_MOIDHit; //!< The MO, if any, this Atom hit on the last step.	
-		unsigned char m_TerrainMatHit; //!< The terrain material, if any, this Atom hit on the last step.
-
 		HitData m_LastHit; //!< Data containing information on the last collision experienced by this Atom.
+		MOID m_MOIDHit; //!< The MO, if any, this Atom hit on the last step.	
+		unsigned char m_TerrainMatHit; //!< The terrain material, if any, this Atom hit on the last step.	
+
+		int m_NumPenetrations; //!< Counts consecutive penetrations in a row. Resets to 0 as soon as penetration streak ends.
 
 		/*
 		Vector m_HitVel; //!< The velocity at which this atom last hit something.
@@ -525,12 +530,6 @@ namespace RTE {
 
 		Color m_TrailColor; //!< Trail color
 		int m_TrailLength; //!< The longest the trail should/can get drawn. If 0, no trail is drawn.
-
-		int m_NumPenetrations; //!< Counts consecutive penetrations in a row. Resets to 0 as soon as penetration streak ends.
-		bool m_ChangedDir; //!< This is only true if there was a change in direction of trajectory during the last travel move of this Atom.
-		bool m_ResultWrapped; //!< This is only true when the resulting position reflects a wrap around the scene.
-
-		int m_PrevError; //!< This is the stored error (fraction) at the end of the last travel move. To be used when the direction wasn't changed during a hit, and will make sure the continued trajectory is straight.
 
 		// Bresenham line algorithm variables
 		int m_IntPos[2];

@@ -66,19 +66,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Atom::Create(const Atom &reference) {
-		//Entity::Create(reference);
-
 		m_Offset = reference.m_Offset;
 		m_OriginalOffset = reference.m_OriginalOffset;
 		m_Normal = reference.m_Normal;
 		m_Material = reference.m_Material;
 		m_SubgroupID = reference.m_SubgroupID;
-		// Needs to be set manually by the new MO owner.
-		m_OwnerMO = 0;
-		// Needs to be set manually by the new AtomGroup owner.
-		m_IgnoreMOIDsByGroup = 0;
 		m_TrailColor = reference.m_TrailColor;
 		m_TrailLength = reference.m_TrailLength;
+
+		// These need to be set manually by the new owner.
+		m_OwnerMO = 0;
+		m_IgnoreMOIDsByGroup = 0;
 
 		return 0;
 	}
@@ -96,23 +94,6 @@ namespace RTE {
 			reader >> mat;
 			m_Material = g_SceneMan.AddMaterialCopy(&mat);
 			if (!m_Material) { RTEAbort("Failed to store material \"" + mat.GetPresetName() + "\". Aborting!"); }
-			/*
-			if (mat.id)
-				m_Material = g_SceneMan.GetMaterialFromID(mat.id);
-			else
-				m_Material = g_SceneMan.GetMaterial(mat.GetPresetName());
-
-			if (!m_Material)
-			{
-				g_ConsoleMan.PrintString("ERROR: Can't find material by ID or PresetName while processing \"" + mat.GetPresetName() + "\". Was it defined with AddMaterial?");
-				m_Material = g_SceneMan.GetMaterialFromID(g_MaterialAir);
-				// Crash if could not fall back to g_MaterialAir. Will crash due to null-pointer somewhere anyway
-				if (!m_Material)
-				{
-					RTEAbort("Failed to find a matching material \"" + mat.GetPresetName() + "\" or even fall back to g_MaterialAir. Aborting!");
-				}
-			}
-			*/
 		} else if (propName == "TrailColor") {
 			reader >> m_TrailColor;
 		} else if (propName == "TrailLength") {
@@ -194,7 +175,6 @@ namespace RTE {
 
 	bool Atom::CalculateNormal(BITMAP *sprite, Vector spriteCenter) {
 		RTEAssert(sprite, "Trying to set up Atom normal without passing in bitmap");
-		//RTEAssert(m_OwnerMO, "Trying to set up Atom normal without a parent MO!");
 
 		// Can't set up a normal on an atom that doesn't have an offset from its parent's center
 		if (m_Offset.IsZero()) {
@@ -672,7 +652,7 @@ namespace RTE {
 			// Get trail bitmap and put first pixel.
 			if (m_TrailLength) {
 				trailBitmap = g_SceneMan.GetMOColorBitmap();
-				trailPoints.push_back(std::make_pair(intPos[X], intPos[Y]));
+				trailPoints.push_back({ intPos[X], intPos[Y] });
 			}
 			// Compute and scale the actual on-screen travel trajectory for this segment, based on the velocity, the travel time and the pixels-per-meter constant.
 			segTraj = velocity * timeLeft * g_FrameMan.GetPPM();
@@ -939,7 +919,7 @@ namespace RTE {
 						}
 					}
 				} else if (m_TrailLength) {
-					trailPoints.push_back(std::make_pair(intPos[X], intPos[Y]));
+					trailPoints.push_back({ intPos[X], intPos[Y] });
 				}
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////

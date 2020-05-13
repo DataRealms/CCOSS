@@ -253,7 +253,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	const Entity::ClassInfo * Entity::ClassInfo::GetClass(const std::string &name) {
-		if (name == "" || name == "None") {
+		if (name.empty() || name == "None") {
 			return 0;
 		}
 		for (const ClassInfo *itr = s_ClassHead; itr != 0; itr = itr->m_NextClass) {

@@ -285,7 +285,7 @@ namespace RTE {
 		int m_ModuleID; //!< ID number assigned to this upon loading, for internal use only, don't reflect in ini's.
 
 		ContentFile m_IconFile; //!< File to the icon/symbol bitmap.
-		BITMAP *m_Icon; //!< Bitmap with the icon loaded form above file.
+		BITMAP *m_Icon; //!< Bitmap with the icon loaded from above file.
 
 		float m_CrabToHumanSpawnRatio; //!< Crab-to-human Spawn ratio to replace value from Constants.lua.
 

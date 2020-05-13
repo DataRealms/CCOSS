@@ -139,11 +139,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector & Vector::operator=(const Vector &rhs) {
-		if (*this == rhs) {
-			return *this;
+		if (*this != rhs) {
+			m_X = rhs.m_X;
+			m_Y = rhs.m_Y;
 		}
-		m_X = rhs.m_X;
-		m_Y = rhs.m_Y;
 		return *this;
 	}
 
@@ -151,13 +150,12 @@ namespace RTE {
 
 	Vector & Vector::operator=(const std::deque<Vector> &rhs) {
 		Clear();
-		if (rhs.empty()) {
-			return *this;
+		if (!rhs.empty()) {
+			for (const Vector &vector : rhs) {
+				*this += vector;
+			}
+			*this /= rhs.size();
 		}
-		for (const Vector &vector : rhs) {
-			*this += vector;
-		}
-		*this /= rhs.size();
 		return *this;
 	}
 }

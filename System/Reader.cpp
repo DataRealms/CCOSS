@@ -223,7 +223,7 @@ namespace RTE {
 	std::string Reader::ReadPropValue() {
 		std::string fullLine = ReadLine();
 		int begin = fullLine.find_first_of('=');
-		std::string subStr = ((begin == std::string::npos) ? fullLine : fullLine.substr(begin + 1));
+		std::string subStr = (begin == std::string::npos) ? fullLine : fullLine.substr(begin + 1);
 		return TrimString(subStr);
 	}
 

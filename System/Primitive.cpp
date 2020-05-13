@@ -145,15 +145,15 @@ namespace RTE {
 
 			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
 
-			AllegroBitmap payerGUIBitmap(drawScreen);
+			AllegroBitmap playerGUIBitmap(drawScreen);
 			switch (m_IsSmall) {
 				case false:
-					g_FrameMan.GetLargeFont()->DrawAligned(&payerGUIBitmap, drawStartLeft.m_X, drawStartLeft.m_Y, m_Text, m_Alignment);
-					g_FrameMan.GetLargeFont()->DrawAligned(&payerGUIBitmap, drawStartRight.m_X, drawStartRight.m_Y, m_Text, m_Alignment);
+					g_FrameMan.GetLargeFont()->DrawAligned(&playerGUIBitmap, drawStartLeft.m_X, drawStartLeft.m_Y, m_Text, m_Alignment);
+					g_FrameMan.GetLargeFont()->DrawAligned(&playerGUIBitmap, drawStartRight.m_X, drawStartRight.m_Y, m_Text, m_Alignment);
 					break;
 				case true:
-					g_FrameMan.GetSmallFont()->DrawAligned(&payerGUIBitmap, drawStartLeft.m_X, drawStartLeft.m_Y, m_Text, m_Alignment);
-					g_FrameMan.GetSmallFont()->DrawAligned(&payerGUIBitmap, drawStartRight.m_X, drawStartRight.m_Y, m_Text, m_Alignment);
+					g_FrameMan.GetSmallFont()->DrawAligned(&playerGUIBitmap, drawStartLeft.m_X, drawStartLeft.m_Y, m_Text, m_Alignment);
+					g_FrameMan.GetSmallFont()->DrawAligned(&playerGUIBitmap, drawStartRight.m_X, drawStartRight.m_Y, m_Text, m_Alignment);
 					break;
 			}
 		}

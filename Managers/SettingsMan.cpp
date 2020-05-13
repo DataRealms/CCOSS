@@ -7,7 +7,7 @@ extern bool g_ResetActivity;
 
 namespace RTE {
 
-	const std::string SettingsMan::c_ClassName = "Settings";
+	const std::string SettingsMan::c_ClassName = "SettingsMan";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -60,7 +60,7 @@ namespace RTE {
 		m_ToolTips = true;
 		m_DisableLoadingScreen = true;
 		m_LoadingScreenReportPrecision = 100;
-		m_MenuTransitionSpeed = 1.0F;
+		m_MenuTransitionDurationMultiplier = 1.0F;
 		m_PrintDebugInfo = false;
 	}
 
@@ -72,16 +72,14 @@ namespace RTE {
 		}
 
 		// Couldn't find the settings file, so create a new one with all the good defaults!
-		Writer writer("Base.rte/Settings.ini");
-		RTEAssert(writer.WriterOK(), "After failing to open the Base.rte/Settings.ini, could not then even create a new one to save settings to! Are you trying to run the game from a read-only disk? You need to install the game to a writable area before running it!");
+		Writer settingsWriter("Base.rte/Settings.ini");
+		RTEAssert(settingsWriter.WriterOK(), "After failing to open the Base.rte/Settings.ini, could not then even create a new one to save settings to!\nAre you trying to run the game from a read-only disk?\nYou need to install the game to a writable area before running it!");
 
-		WriteDefaultSettings(writer);
-		// Close the newly created default file, we're opening it again to read from
-		writer.Destroy();
+		WriteDefaultSettings(settingsWriter);
+		settingsWriter.Destroy();
 
-		Reader settings("Base.rte/Settings.ini");
-		// Now read from that same file
-		return Serializable::Create(settings, true, doCreate);
+		Reader settingsReader("Base.rte/Settings.ini");
+		return Serializable::Create(settingsReader, true, doCreate);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +176,7 @@ namespace RTE {
 		} else if (propName == "AdvancedPerformanceStats") {
 			g_PerformanceMan.ShowAdvancedPerformanceStats(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "MenuTransitionSpeed") {
-			SetMenuTransitionSpeed(std::stof(reader.ReadPropValue()));
+			SetMenuTransitionDurationMultiplier(std::stof(reader.ReadPropValue()));
 		} else if (propName == "PrintDebugInfo") {
 			reader >> m_PrintDebugInfo;
 		} else if (propName == "PlayerNetworkName") {
@@ -360,8 +358,8 @@ namespace RTE {
 		writer << g_ConsoleMan.GetConsoleScreenSize();
 		writer.NewProperty("AdvancedPerformanceStats");
 		writer << g_PerformanceMan.AdvancedPerformanceStatsEnabled();
-		writer.NewProperty("MenuTransitionSpeed");
-		writer << m_MenuTransitionSpeed;
+		writer.NewProperty("MenuTransitionDuration");
+		writer << m_MenuTransitionDurationMultiplier;
 		writer.NewProperty("PrintDebugInfo");
 		writer << m_PrintDebugInfo;
 

@@ -167,10 +167,10 @@ namespace RTE {
 		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
 
 		PathNode *node = 0;
-		for (unsigned int x = 0; x < m_NodeGrid.size(); ++x) {
-			// Update all the costs going out from each node
-			for (unsigned int y = 0; y < m_NodeGrid[x].size(); ++y) {
-				node = m_NodeGrid[x][y];
+		// Update all the costs going out from each node
+		for (const std::vector<PathNode *> &nodeEntry : m_NodeGrid) {
+			for (PathNode *pathNode : nodeEntry) {
+				node = pathNode;
 				UpdateNodeCosts(node);
 				// Should reset the changed flag since we're about to reset the pather
 				node->IsChanged = false;
@@ -222,9 +222,9 @@ namespace RTE {
 		m_Pather->Reset();
 
 		// Reset the changed flag on all nodes
-		for (unsigned int x = 0; x < m_NodeGrid.size(); ++x) {
-			for (unsigned int y = 0; y < m_NodeGrid[x].size(); ++y) {
-				m_NodeGrid[x][y]->IsChanged = false;
+		for (const std::vector<PathNode *> &nodeEntry : m_NodeGrid) {
+			for (PathNode *pathNode : nodeEntry) {
+				pathNode->IsChanged = false;
 			}
 		}
 	}
@@ -236,6 +236,7 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PathFinder::AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList) {
 		const PathNode *node = static_cast<PathNode *>(state);
 		micropather::StateCost adjCost;

@@ -75,7 +75,7 @@ namespace RTE {
 		virtual int Save(Writer &writer) const;
 #pragma endregion
 
-#pragma region Getters
+#pragma region Settings Manager Operations
 		/// <summary>
 		/// Gets whether Settings.ini needs to be overwritten with the complete list of settings or not. Will be true only if Settings.ini was created with default values on first load or after settings delete.
 		/// </summary>
@@ -85,7 +85,7 @@ namespace RTE {
 
 #pragma region Engine Settings
 		/// <summary>
-		/// Returns the recommended MOID count. If this amount is exceeded then some unit may be removed at the start of the activity.
+		/// Returns the recommended MOID count. If this amount is exceeded then some units may be removed at the start of the activity.
 		/// </summary>
 		/// <returns>Recommended MOID count.</returns>
 		unsigned int RecommendedMOIDCount() const { return m_RecommendedMOIDCount; }
@@ -105,19 +105,19 @@ namespace RTE {
 
 #pragma region Display Settings
 		/// <summary>
-		/// Whether we're told to use windowed driver with borderless style driver via settings. Overrides any other windowed drivers. Windows: GFX_DIRECTX_WIN_BORDERLESS.
+		/// Whether we're told to use windowed driver with borderless style driver via settings. Overrides any other windowed drivers. The driver that will be used is GFX_DIRECTX_WIN_BORDERLESS.
 		/// </summary>
 		/// <returns>True if forced to use software driver.</returns>
 		bool ForceVirtualFullScreenGfxDriver() const { return m_ForceVirtualFullScreenGfxDriver; }
 
 		/// <summary>
-		/// Whether we're told to use non overlapped windowed driver. Windows: GFX_DIRECT_OVL.
+		/// Whether we're told to use non overlapped windowed driver. The driver that will be used is GFX_DIRECTX_OVL.
 		/// </summary>
 		/// <returns>True if forced to use software driver.</returns>
 		bool ForceOverlayedWindowGfxDriver() const { return m_ForceOverlayedWindowGfxDriver; }
 
 		/// <summary>
-		/// Whether we're told to use non-overlay driver. Overrides overlayed driver setting.
+		/// Whether we're told to use non-overlay driver. Overrides overlayed driver setting. The driver that will be used is GFX_DIRECTX_WIN.
 		/// </summary>
 		/// <returns>True if forced to use software driver.</returns>
 		bool ForceNonOverlayedWindowGfxDriver() const { return m_ForceNonOverlayedWindowGfxDriver; }
@@ -198,7 +198,7 @@ namespace RTE {
 		/// Sets the player name that will be used in network multiplayer matches.
 		/// </summary>
 		/// <param name="newName">String with the new player name to use.</param>
-		void SetPlayerNetworkName(std::string newName) { m_PlayerNetworkName = (newName == "") ? "Dummy" : newName; }
+		void SetPlayerNetworkName(std::string newName) { m_PlayerNetworkName = newName.empty() ? "Dummy" : newName; }
 
 		/// <summary>
 		/// Gets the LAN server address to connect to.
@@ -210,7 +210,7 @@ namespace RTE {
 		/// Sets the LAN server address to connect to.
 		/// </summary>
 		/// <param name="newName">New LAN server address to connect to.</param>
-		void SetNetworkServerAddress(std::string newAddress) { m_NetworkServerAddress = (newAddress == "") ? "127.0.0.1:8000" : newAddress; }
+		void SetNetworkServerAddress(std::string newAddress) { m_NetworkServerAddress = newAddress.empty() ? "127.0.0.1:8000" : newAddress; }
 
 		/// <summary>
 		/// Gets the NAT punch-through server address.
@@ -222,7 +222,7 @@ namespace RTE {
 		/// Sets the NAT punch-through server address.
 		/// </summary>
 		/// <param name="newValue">New NAT punch-through server address to connect to.</param>
-		void SetNATServiceAddress(std::string newAddress) { m_NATServiceAddress = (newAddress == "") ? "127.0.0.1:61111" : newAddress; }
+		void SetNATServiceAddress(std::string newAddress) { m_NATServiceAddress = newAddress.empty() ? "127.0.0.1:61111" : newAddress; }
 
 		/// <summary>
 		/// Gets the server name used when connecting via NAT punch-through service.
@@ -234,7 +234,7 @@ namespace RTE {
 		/// Sets the server name to use when connecting via NAT punch-through service.
 		/// </summary>
 		/// <param name="newValue">New NAT punch-through server name.</param>
-		void SetNATServerName(std::string newName) { m_NATServerName = (newName == "") ? "DefaultServerName" : newName; }
+		void SetNATServerName(std::string newName) { m_NATServerName = newName.empty() ? "DefaultServerName" : newName; }
 
 		/// <summary>
 		/// Gets the server password to use when connecting via NAT punch-through service.
@@ -246,7 +246,7 @@ namespace RTE {
 		/// Sets the server password to use when connecting via NAT punch-through service.
 		/// </summary>
 		/// <param name="newValue">New password to use when connecting via NAT punch-through service.</param>
-		void SetNATServerPassword(std::string newValue) { m_NATServerPassword = (newValue == "") ? "DefaultServerPassword" : newValue; }
+		void SetNATServerPassword(std::string newValue) { m_NATServerPassword = newValue.empty() ? "DefaultServerPassword" : newValue; }
 
 		/// <summary>
 		/// Gets whether server is using higher compression methods.
@@ -379,51 +379,51 @@ namespace RTE {
 		/// Adds specified mod to internal list of disabled mods.
 		/// </summary>
 		/// <param name="scriptName">Mod to enable.</param>
-		void EnableScript(string scriptName) { std::transform(scriptName.begin(), scriptName.end(), scriptName.begin(), ::tolower); m_EnabledScripts[scriptName] = true; }
+		void EnableScript(std::string scriptName) { std::transform(scriptName.begin(), scriptName.end(), scriptName.begin(), ::tolower); m_EnabledScripts[scriptName] = true; }
 
 		/// <summary>
 		/// Adds specified script to internal list of installed scripts.
 		/// </summary>
 		/// <param name="scriptName">Script to disable.</param>
-		void DisableScript(string scriptName) { std::transform(scriptName.begin(), scriptName.end(), scriptName.begin(), ::tolower); m_EnabledScripts[scriptName] = false; }
+		void DisableScript(std::string scriptName) { std::transform(scriptName.begin(), scriptName.end(), scriptName.begin(), ::tolower); m_EnabledScripts[scriptName] = false; }
 
 		/// <summary>
 		/// Returns true if specified script is enabled in the settings.
 		/// </summary>
 		/// <param name="scriptName">Mod to check.</param>
 		/// <returns>Whether the script is enabled via settings.</returns>
-		bool IsScriptEnabled(string scriptName);
+		bool IsScriptEnabled(std::string scriptName);
 #pragma endregion
 
 #pragma region Misc Settings
 		/// <summary>
-		/// Is app set to play the game intro on startup?
+		/// Gets whether the game intro is set to play on game startup or not.
 		/// </summary>
-		/// <returns>Whether should play intro or not.</returns>
+		/// <returns>Whether intro is set to play or not.</returns>
 		bool PlayIntro() const { return m_PlayIntro; }
 
 		/// <summary>
-		/// Is app set to play the game intro on startup?
+		/// Sets whether the game intro should play on game startup or not.
 		/// </summary>
-		/// <param name="play">Whether should play intro or not.</param>
+		/// <param name="play">Whether to play game intro or not.</param>
 		void SetPlayIntro(bool play) { m_PlayIntro = play; }
 
 		/// <summary>
-		/// Is app set to display tools tips on certain UI elements?
+		/// Gets whether tooltip display on certain UI elements is enabled or not.
 		/// </summary>
-		/// <returns>Whether should show tool tips or not.</returns>
+		/// <returns>Whether tooltips are displayed or not.</returns>
 		bool ToolTips() const { return m_ToolTips; }
 
 		/// <summary>
-		/// Sets whether app set to display tools tips on certain UI elements.
+		/// Sets whether to display tooltips on certain UI elements or not.
 		/// </summary>
-		/// <param name="showToolTips">Whether should show tool tips or not.</param>
+		/// <param name="showToolTips">Whether to display tooltips or not.</param>
 		void SetShowToolTips(bool showToolTips) { m_ToolTips = showToolTips; }
 
 		/// <summary>
-		/// Returns true if debug inf mode is set.
+		/// Gets whether debug print mode is enabled or not.
 		/// </summary>
-		/// <returns>Whether we need to print some debug info.</returns>
+		/// <returns>Whether debug print mode is enabled or not.</returns>
 		bool PrintDebugInfo() const { return m_PrintDebugInfo; }
 
 		/// <summary>
@@ -448,13 +448,13 @@ namespace RTE {
 		/// Gets the multiplier value for the transition durations between different menus.
 		/// </summary>
 		/// <returns>The multiplier value for the transition durations between different menus. Lower values equal faster transitions.</returns>
-		float GetMenuTransitionSpeed() const { return m_MenuTransitionSpeed; }
+		float GetMenuTransitionDurationMultiplier() const { return m_MenuTransitionDurationMultiplier; }
 
 		/// <summary>
 		/// Sets the multiplier value for the transition durations between different menus.
 		/// </summary>
 		/// <param name="newSpeed">New multiplier value for the transition durations between different menus. Lower values equal faster transitions.</param>
-		void SetMenuTransitionSpeed(float newSpeed) { m_MenuTransitionSpeed = (newSpeed >= 0.0F) ? newSpeed : 0.0F; }
+		void SetMenuTransitionDurationMultiplier(float newSpeed) { m_MenuTransitionDurationMultiplier = std::max(0.0F, newSpeed); }
 #pragma endregion
 
 #pragma region Class Info
@@ -495,7 +495,7 @@ namespace RTE {
 		std::string m_NATServiceAddress; //!< NAT punch-through server address.
 		std::string m_NATServerName; //!< Server name to use when connecting via NAT punch-through service.
 		std::string m_NATServerPassword; //!< Server password to use when connecting via NAT punch-through service.
-		unsigned short m_ClientInputFps; //!< Input send rate.
+		unsigned short m_ClientInputFps; //!< The rate (in FPS) the client input is sent to the server.
 		bool m_ServerUseHighCompression; //!< Whether to use higher compression methods (default).
 		bool m_ServerUseFastCompression; //!< Whether to use faster compression methods and conserve CPU.
 		int m_ServerHighCompressionLevel; //!< Compression level. 10 is optimal, 12 is highest.
@@ -529,7 +529,7 @@ namespace RTE {
 		bool m_ToolTips; //!< Whether ToolTips are enabled or not.
 		bool m_DisableLoadingScreen; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
 		unsigned short m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
-		float m_MenuTransitionSpeed; //!< Multiplier value for the transition durations between different menus. Lower values equal faster transitions.
+		float m_MenuTransitionDurationMultiplier; //!< Multiplier value for the transition durations between different menus. Lower values equal faster transitions.
 		bool m_PrintDebugInfo; //!< Print some debug info in console.
 
 		std::list<std::string> m_VisibleAssemblyGroupsList; //!< List of assemblies groups always shown in editors.
@@ -539,7 +539,7 @@ namespace RTE {
 	private:
 
 		/// <summary>
-		/// Writes the minimal default settings needed for the game to run to an output stream. These will be overwritten with the full list of available settings as soon as the game beings loading.
+		/// Writes the minimal default settings needed for the game to run to an output stream. These will be overwritten with the full list of available settings as soon as the game begins loading.
 		/// </summary>
 		/// <param name="writer">A Writer that the SettingsMan will save itself with.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>

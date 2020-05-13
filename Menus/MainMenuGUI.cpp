@@ -1254,13 +1254,7 @@ void MainMenuGUI::Update()
                         m_MenuScreen = CONFIGSCREEN;
                         m_ScreenChange = true;
 
-						// Save joystick deadzones. Dead zone should work independently of the controller setup process
-						// bacuse faulty sticks will ruin setup process
-						float deadzone = g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->GetJoystickDeadzone();
-                        // Clear all the mappings when the user wants to config somehting
-                        g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->Reset();
-						g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->SetJoystickDeadzone(deadzone);
-                        g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->SetDevice(m_ConfiguringDevice);
+                        // Don't clear all the mappings when the user wants to config something.
 
                         g_GUISound.ButtonPressSound()->Play();
                     }

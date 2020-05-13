@@ -751,7 +751,7 @@ void UInputMan::Clear()
     m_aControlScheme[PLAYER_ONE].SetPreset(PRESET_P1DEFAULT);
     
     // Set up the default keyboard key bindings for player two
-    m_aControlScheme[PLAYER_ONE].SetDevice(DEVICE_KEYB_ONLY);
+    m_aControlScheme[PLAYER_TWO].SetDevice(DEVICE_KEYB_ONLY);
     m_aControlScheme[PLAYER_TWO].SetPreset(PRESET_P2DEFAULT);
 
     // Player three. These key mappings are for when 

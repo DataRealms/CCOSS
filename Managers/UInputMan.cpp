@@ -359,6 +359,93 @@ void UInputMan::InputScheme::SetPreset(int schemePreset)
 
 
     }
+    else if (m_SchemePreset == PRESET_P1DEFAULT) {
+        m_aInputMapping[INPUT_L_UP].SetKey(KEY_W);
+        m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_S);
+        m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_A);
+        m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_D);
+        m_aInputMapping[INPUT_R_UP].SetKey(KEY_W);
+        m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_S);
+        m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_A);
+        m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_D);
+        //    m_aInputMapping[INPUT_FIRE].SetKey(KEY_H);
+        m_aInputMapping[INPUT_FIRE].SetMouseButton(0);
+        //    m_aInputMapping[INPUT_AIM].SetKey(KEY_J);
+        //    m_aInputMapping[INPUT_AIM_UP].SetKey(KEY_W);
+        //    m_aInputMapping[INPUT_AIM_DOWN].SetKey(KEY_S);
+        //    m_aInputMapping[INPUT_PIEMENU].SetKey(KEY_K);
+        m_aInputMapping[INPUT_PIEMENU].SetMouseButton(1);
+        m_aInputMapping[INPUT_JUMP].SetKey(KEY_W);
+        m_aInputMapping[INPUT_CROUCH].SetKey(KEY_S);
+        m_aInputMapping[INPUT_NEXT].SetKey(KEY_E);
+        m_aInputMapping[INPUT_PREV].SetKey(KEY_Q);
+        m_aInputMapping[INPUT_WEAPON_RELOAD].SetKey(KEY_R);
+        m_aInputMapping[INPUT_WEAPON_DROP].SetKey(KEY_G);
+        m_aInputMapping[INPUT_WEAPON_PICKUP].SetKey(KEY_F);
+        m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetKey(KEY_C);
+    }
+    else if (m_SchemePreset == PRESET_P2DEFAULT) {
+        m_aInputMapping[INPUT_L_UP].SetKey(84);
+        m_aInputMapping[INPUT_L_DOWN].SetKey(85);
+        m_aInputMapping[INPUT_L_LEFT].SetKey(82);
+        m_aInputMapping[INPUT_L_RIGHT].SetKey(83);
+        //    m_aInputMapping[INPUT_R_UP].SetKey(KEY_UP);
+        //    m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_DOWN);
+        //    m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_LEFT);
+        //    m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_RIGHT);
+        m_aInputMapping[INPUT_FIRE].SetKey(38);
+        m_aInputMapping[INPUT_AIM].SetKey(39);
+        m_aInputMapping[INPUT_AIM_UP].SetKey(84);
+        m_aInputMapping[INPUT_AIM_DOWN].SetKey(85);
+        m_aInputMapping[INPUT_PIEMENU].SetKey(40);
+        m_aInputMapping[INPUT_JUMP].SetKey(91);
+        m_aInputMapping[INPUT_CROUCH].SetKey(90);
+        m_aInputMapping[INPUT_NEXT].SetKey(42);
+        m_aInputMapping[INPUT_PREV].SetKey(41);
+        m_aInputMapping[INPUT_WEAPON_RELOAD].SetKey(KEY_0_PAD);
+        m_aInputMapping[INPUT_WEAPON_DROP].SetKey(KEY_6_PAD);
+        m_aInputMapping[INPUT_WEAPON_PICKUP].SetKey(KEY_9_PAD);
+        m_aInputMapping[INPUT_WEAPON_CHANGE_PREV].SetKey(KEY_7_PAD);
+        m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetKey(KEY_8_PAD);
+    }
+    else if (m_SchemePreset == PRESET_P3DEFAULT) {
+        m_aInputMapping[INPUT_L_UP].SetKey(KEY_W);
+        m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_S);
+        m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_A);
+        m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_D);
+        m_aInputMapping[INPUT_R_UP].SetKey(KEY_W);
+        m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_S);
+        m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_A);
+        m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_D);
+        m_aInputMapping[INPUT_FIRE].SetKey(KEY_H);
+        m_aInputMapping[INPUT_AIM].SetKey(KEY_J);
+        m_aInputMapping[INPUT_AIM_UP].SetKey(KEY_W);
+        m_aInputMapping[INPUT_AIM_DOWN].SetKey(KEY_S);
+        m_aInputMapping[INPUT_PIEMENU].SetKey(KEY_K);
+        m_aInputMapping[INPUT_JUMP].SetKey(KEY_L);
+        m_aInputMapping[INPUT_CROUCH].SetKey(KEY_STOP);
+        m_aInputMapping[INPUT_NEXT].SetKey(KEY_U);
+        m_aInputMapping[INPUT_PREV].SetKey(KEY_Y);
+    }
+    else if (m_SchemePreset == PRESET_P4DEFAULT) {
+        m_aInputMapping[INPUT_L_UP].SetKey(KEY_UP);
+        m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_DOWN);
+        m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_LEFT);
+        m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_RIGHT);
+        m_aInputMapping[INPUT_R_UP].SetKey(KEY_UP);
+        m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_DOWN);
+        m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_LEFT);
+        m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_RIGHT);
+        m_aInputMapping[INPUT_FIRE].SetKey(KEY_1_PAD);
+        m_aInputMapping[INPUT_AIM].SetKey(KEY_2_PAD);
+        m_aInputMapping[INPUT_AIM_UP].SetKey(KEY_UP);
+        m_aInputMapping[INPUT_AIM_DOWN].SetKey(KEY_DOWN);
+        m_aInputMapping[INPUT_PIEMENU].SetKey(KEY_3_PAD);
+        m_aInputMapping[INPUT_JUMP].SetKey(KEY_DEL_PAD);
+        m_aInputMapping[INPUT_CROUCH].SetKey(KEY_STOP);
+        m_aInputMapping[INPUT_NEXT].SetKey(KEY_5_PAD);
+        m_aInputMapping[INPUT_PREV].SetKey(KEY_4_PAD);
+    }
     // Some generic defaults; no real preset is set
     else
     {
@@ -660,104 +747,21 @@ void UInputMan::Clear()
 	m_MouseSensitivity = 0.6;
 
     // Set up the default Mouse+keyboard key mappings for player one
-    InputScheme::InputMapping * pMappings = m_aControlScheme[PLAYER_ONE].GetInputMappings();
+    //InputScheme::InputMapping * pMappings = m_aControlScheme[PLAYER_ONE].GetInputMappings();
     m_aControlScheme[PLAYER_ONE].SetDevice(DEVICE_MOUSE_KEYB);
-    pMappings[INPUT_L_UP].SetKey(KEY_W);
-    pMappings[INPUT_L_DOWN].SetKey(KEY_S);
-    pMappings[INPUT_L_LEFT].SetKey(KEY_A);
-    pMappings[INPUT_L_RIGHT].SetKey(KEY_D);
-    pMappings[INPUT_R_UP].SetKey(KEY_W);
-    pMappings[INPUT_R_DOWN].SetKey(KEY_S);
-    pMappings[INPUT_R_LEFT].SetKey(KEY_A);
-    pMappings[INPUT_R_RIGHT].SetKey(KEY_D);
-//    pMappings[INPUT_FIRE].SetKey(KEY_H);
-    pMappings[INPUT_FIRE].SetMouseButton(0);
-//    pMappings[INPUT_AIM].SetKey(KEY_J);
-//    pMappings[INPUT_AIM_UP].SetKey(KEY_W);
-//    pMappings[INPUT_AIM_DOWN].SetKey(KEY_S);
-//    pMappings[INPUT_PIEMENU].SetKey(KEY_K);
-    pMappings[INPUT_PIEMENU].SetMouseButton(1);
-    pMappings[INPUT_JUMP].SetKey(KEY_W);
-    pMappings[INPUT_CROUCH].SetKey(KEY_S);
-    pMappings[INPUT_NEXT].SetKey(KEY_E);
-    pMappings[INPUT_PREV].SetKey(KEY_Q);
-
-	pMappings[INPUT_WEAPON_RELOAD].SetKey(KEY_R);
-	pMappings[INPUT_WEAPON_DROP].SetKey(KEY_G);
-	pMappings[INPUT_WEAPON_PICKUP].SetKey(KEY_F);
-	pMappings[INPUT_WEAPON_CHANGE_NEXT].SetKey(KEY_C);
-
-
+    m_aControlScheme[PLAYER_ONE].SetPreset(PRESET_P1DEFAULT);
+    
     // Set up the default keyboard key bindings for player two
-    pMappings = m_aControlScheme[PLAYER_TWO].GetInputMappings();
-    pMappings[INPUT_L_UP].SetKey(84);
-    pMappings[INPUT_L_DOWN].SetKey(85);
-    pMappings[INPUT_L_LEFT].SetKey(82);
-    pMappings[INPUT_L_RIGHT].SetKey(83);
-//    pMappings[INPUT_R_UP].SetKey(KEY_UP);
-//    pMappings[INPUT_R_DOWN].SetKey(KEY_DOWN);
-//    pMappings[INPUT_R_LEFT].SetKey(KEY_LEFT);
-//    pMappings[INPUT_R_RIGHT].SetKey(KEY_RIGHT);
-    pMappings[INPUT_FIRE].SetKey(38);
-    pMappings[INPUT_AIM].SetKey(39);
-    pMappings[INPUT_AIM_UP].SetKey(84);
-    pMappings[INPUT_AIM_DOWN].SetKey(85);
-    pMappings[INPUT_PIEMENU].SetKey(40);
-    pMappings[INPUT_JUMP].SetKey(91);
-    pMappings[INPUT_CROUCH].SetKey(90);
-    pMappings[INPUT_NEXT].SetKey(42);
-    pMappings[INPUT_PREV].SetKey(41);
-
-	pMappings[INPUT_WEAPON_RELOAD].SetKey(KEY_0_PAD);
-	pMappings[INPUT_WEAPON_DROP].SetKey(KEY_6_PAD);
-	pMappings[INPUT_WEAPON_PICKUP].SetKey(KEY_9_PAD);
-	pMappings[INPUT_WEAPON_CHANGE_PREV].SetKey(KEY_7_PAD);
-	pMappings[INPUT_WEAPON_CHANGE_NEXT].SetKey(KEY_8_PAD);
-
+    m_aControlScheme[PLAYER_ONE].SetDevice(DEVICE_KEYB_ONLY);
+    m_aControlScheme[PLAYER_TWO].SetPreset(PRESET_P2DEFAULT);
 
     // Player three. These key mappings are for when 
-    pMappings = m_aControlScheme[PLAYER_THREE].GetInputMappings();
     m_aControlScheme[PLAYER_THREE].SetDevice(DEVICE_GAMEPAD_1);
-    pMappings[INPUT_L_UP].SetKey(KEY_W);
-    pMappings[INPUT_L_DOWN].SetKey(KEY_S);
-    pMappings[INPUT_L_LEFT].SetKey(KEY_A);
-    pMappings[INPUT_L_RIGHT].SetKey(KEY_D);
-    pMappings[INPUT_R_UP].SetKey(KEY_W);
-    pMappings[INPUT_R_DOWN].SetKey(KEY_S);
-    pMappings[INPUT_R_LEFT].SetKey(KEY_A);
-    pMappings[INPUT_R_RIGHT].SetKey(KEY_D);
-    pMappings[INPUT_FIRE].SetKey(KEY_H);
-    pMappings[INPUT_AIM].SetKey(KEY_J);
-    pMappings[INPUT_AIM_UP].SetKey(KEY_W);
-    pMappings[INPUT_AIM_DOWN].SetKey(KEY_S);
-    pMappings[INPUT_PIEMENU].SetKey(KEY_K);
-    pMappings[INPUT_JUMP].SetKey(KEY_L);
-    pMappings[INPUT_CROUCH].SetKey(KEY_STOP);
-    pMappings[INPUT_NEXT].SetKey(KEY_U);
-    pMappings[INPUT_PREV].SetKey(KEY_Y);
+    m_aControlScheme[PLAYER_THREE].SetPreset(PRESET_P3DEFAULT);
 
     // Player four
-    pMappings = m_aControlScheme[PLAYER_FOUR].GetInputMappings();
     m_aControlScheme[PLAYER_FOUR].SetDevice(DEVICE_GAMEPAD_2);
-    pMappings[INPUT_L_UP].SetKey(KEY_UP);
-    pMappings[INPUT_L_DOWN].SetKey(KEY_DOWN);
-    pMappings[INPUT_L_LEFT].SetKey(KEY_LEFT);
-    pMappings[INPUT_L_RIGHT].SetKey(KEY_RIGHT);
-    pMappings[INPUT_R_UP].SetKey(KEY_UP);
-    pMappings[INPUT_R_DOWN].SetKey(KEY_DOWN);
-    pMappings[INPUT_R_LEFT].SetKey(KEY_LEFT);
-    pMappings[INPUT_R_RIGHT].SetKey(KEY_RIGHT);
-    pMappings[INPUT_FIRE].SetKey(KEY_1_PAD);
-    pMappings[INPUT_AIM].SetKey(KEY_2_PAD);
-    pMappings[INPUT_AIM_UP].SetKey(KEY_UP);
-    pMappings[INPUT_AIM_DOWN].SetKey(KEY_DOWN);
-    pMappings[INPUT_PIEMENU].SetKey(KEY_3_PAD);
-    pMappings[INPUT_JUMP].SetKey(KEY_DEL_PAD);
-    pMappings[INPUT_CROUCH].SetKey(KEY_STOP);
-    pMappings[INPUT_NEXT].SetKey(KEY_5_PAD);
-    pMappings[INPUT_PREV].SetKey(KEY_4_PAD);
-
-    pMappings = 0;
+    m_aControlScheme[PLAYER_FOUR].SetPreset(PRESET_P4DEFAULT);
 
     // Init the previous joybuttons so they don't make it seem like things have changed
     // Also neutralize the changed keys so that no Releases will be detected initially

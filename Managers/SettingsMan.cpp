@@ -146,8 +146,13 @@ namespace RTE {
 			reader >> m_RecommendedMOIDCount;
 		} else if (propName == "PixelsPerMeter") {
 			g_FrameMan.ReadProperty(propName, reader);
+
+		/*
+		// Temporarily removed from settings file due to being buggy when disabled by user.
 		} else if (propName == "PreciseCollisions") {
 			reader >> m_PreciseCollisions;
+		*/
+
 		} else if (propName == "EnableParticleSettling") {
 			g_MovableMan.ReadProperty(propName, reader);
 		} else if (propName == "EnableMOSubtraction") {
@@ -314,8 +319,13 @@ namespace RTE {
 		writer << m_RecommendedMOIDCount;
 		writer.NewProperty("PixelsPerMeter");
 		writer << g_FrameMan.GetPPM();
+
+		/*
+		// Temporarily removed from settings file due to being buggy when disabled by user.
 		writer.NewProperty("PreciseCollisions");
 		writer << m_PreciseCollisions;
+		*/
+
 		writer.NewProperty("EnableParticleSettling");
 		writer << g_MovableMan.IsParticleSettlingEnabled();
 		writer.NewProperty("EnableMOSubtraction");

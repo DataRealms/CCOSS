@@ -19,6 +19,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `Settings.ini` will now fully populate with all available settings (now also broken into sections) when being created (first time or after delete) rather than with just a limited set of defaults.
 
+- Temporarily removed `PreciseCollisions` from `Settings.ini` due to bad things happening when disabled by user.
+
 ### Fixed
 
 ### Removed

@@ -747,7 +747,6 @@ void UInputMan::Clear()
 	m_MouseSensitivity = 0.6;
 
     // Set up the default Mouse+keyboard key mappings for player one
-    //InputScheme::InputMapping * pMappings = m_aControlScheme[PLAYER_ONE].GetInputMappings();
     m_aControlScheme[PLAYER_ONE].SetDevice(DEVICE_MOUSE_KEYB);
     m_aControlScheme[PLAYER_ONE].SetPreset(PRESET_P1DEFAULT);
     

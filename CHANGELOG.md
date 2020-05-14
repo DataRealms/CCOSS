@@ -34,6 +34,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 			FilePath = pathToFile
 	```
 
+- Exposed `Actor.StableVelocityThreshold` to lua. New bindings are:  
+	`Actor:GetStableVelocityThreshold()` returns a `Vector` with the currently set stable velocity threshold.  
+	`Actor:SetStableVelocityThreshold(xFloatValue, yFloatValue)` sets the stable velocity threshold to the passed in float values.  
+	`Actor:SetStableVelocityThreshold(Vector)` sets the stable velocity threshold to the passed in `Vector`.
+
 ### Changed
 
 - `Settings.ini` will now fully populate with all available settings (now also broken into sections) when being created (first time or after delete) rather than with just a limited set of defaults.

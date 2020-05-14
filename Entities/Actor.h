@@ -1340,6 +1340,24 @@ AddScriptFunctionNames(MOSRotating, "UpdateAI")
 		}
 	}
 
+	/// <summary>
+	/// Gets the X and Y thresholds for how fast the actor can travel before losing stability.
+	/// </summary>
+	/// <returns>A Vector with the X and Y thresholds for how fast the actor can travel before losing stability.</returns>
+	Vector GetStableVel() const { return m_StableVel; }
+
+	/// <summary>
+	/// Sets the X and Y thresholds for how fast the actor can travel before losing stability.
+	/// </summary>
+	/// <param name="newVelX">New value for how fast the actor can travel before losing stability on X axis.</param>
+	/// <param name="newVelY">New value for how fast the actor can travel before losing stability on Y axis.</param>
+	void SetStableVel(float newVelX, float newVelY) { m_StableVel.SetXY(newVelX, newVelY); }
+
+	/// <summary>
+	/// Sets the X and Y thresholds for how fast the actor can travel before losing stability.
+	/// </summary>
+	/// <param name="newVelVector">Vector with new values for how fast the actor can travel before losing stability on both axis.</param>
+	void SetStableVel(Vector newVelVector) { m_StableVel.SetXY(newVelVector.m_X, newVelVector.m_Y); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1397,7 +1415,7 @@ protected:
     float m_TravelImpulseDamage;
     // Timer for timing the delay before regaining stability after losing it
     Timer m_StableRecoverTimer;
-    // Thresholds in both x and y for how fast the actor can travel before losing stability
+    // Thresholds in both x and y for how fast the actor can travel before losing stability. Meters per second (m/s).
     Vector m_StableVel;
     // Timer for the heartbeat of this Actor
     Timer m_HeartBeat;

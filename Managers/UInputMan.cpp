@@ -228,183 +228,179 @@ int UInputMan::InputScheme::Create()
 
 void UInputMan::InputScheme::SetPreset(int schemePreset)
 {
-    m_SchemePreset = schemePreset;
-    switch (m_SchemePreset) {
-        case PRESET_XBOX360:
-		    // Set up the default xbox 360 button bindings
-		    m_aInputMapping[INPUT_FIRE].SetJoyButton(JOY_1);
-		    m_aInputMapping[INPUT_FIRE].SetPresetDesc("A Button");
-		    // Hold down X to enter aim mode, then can use d-pad up/down to finely aim while sniping
-		    m_aInputMapping[INPUT_AIM].SetJoyButton(JOY_3);
-		    m_aInputMapping[INPUT_AIM].SetPresetDesc("X Button");
-		    // Pie menu also cancels buy menu, which makes sense for the B button
-		    m_aInputMapping[INPUT_PIEMENU].SetJoyButton(JOY_2);
-		    m_aInputMapping[INPUT_PIEMENU].SetPresetDesc("B Button");
-		    // Jump on top button of diamond makes sense
-		    m_aInputMapping[INPUT_JUMP].SetJoyButton(JOY_4);
-		    m_aInputMapping[INPUT_JUMP].SetPresetDesc("Y Button");
-		    m_aInputMapping[INPUT_NEXT].SetJoyButton(JOY_6);
-		    m_aInputMapping[INPUT_NEXT].SetPresetDesc("R Bumper Button");
-		    m_aInputMapping[INPUT_PREV].SetJoyButton(JOY_5);
-		    m_aInputMapping[INPUT_PREV].SetPresetDesc("L Bumper Button");
-		    m_aInputMapping[INPUT_START].SetJoyButton(JOY_8);
-		    m_aInputMapping[INPUT_START].SetPresetDesc("Start Button");
-		    m_aInputMapping[INPUT_BACK].SetJoyButton(JOY_7);
-		    m_aInputMapping[INPUT_BACK].SetPresetDesc("Back Button");
-		    // Set up the default xbox joy direction bindings
-		    m_aInputMapping[INPUT_L_UP].SetDirection(0, 1, JOYDIR_ONE);
-		    m_aInputMapping[INPUT_L_UP].SetPresetDesc("L Thumbstick Up");
-		    m_aInputMapping[INPUT_L_DOWN].SetDirection(0, 1, JOYDIR_TWO);
-		    m_aInputMapping[INPUT_L_DOWN].SetPresetDesc("L Thumbstick Down");
-		    m_aInputMapping[INPUT_L_LEFT].SetDirection(0, 0, JOYDIR_ONE);
-		    m_aInputMapping[INPUT_L_LEFT].SetPresetDesc("L Thumbstick Left");
-		    m_aInputMapping[INPUT_L_RIGHT].SetDirection(0, 0, JOYDIR_TWO);
-		    m_aInputMapping[INPUT_L_RIGHT].SetPresetDesc("L Thumbstick Right");
-		    m_aInputMapping[INPUT_R_UP].SetDirection(1, 0, JOYDIR_ONE);
-		    m_aInputMapping[INPUT_R_UP].SetPresetDesc("R Thumbstick Up");
-		    m_aInputMapping[INPUT_R_DOWN].SetDirection(1, 0, JOYDIR_TWO);
-		    m_aInputMapping[INPUT_R_DOWN].SetPresetDesc("R Thumbstick Down");
-		    m_aInputMapping[INPUT_R_LEFT].SetDirection(2, 0, JOYDIR_ONE);
-		    m_aInputMapping[INPUT_R_LEFT].SetPresetDesc("R Thumbstick Left");
-		    m_aInputMapping[INPUT_R_RIGHT].SetDirection(2, 0, JOYDIR_TWO);
-		    m_aInputMapping[INPUT_R_RIGHT].SetPresetDesc("R Thumbstick Right");
-		    m_aInputMapping[INPUT_FIRE].SetDirection(0, 2, JOYDIR_ONE);
-		    m_aInputMapping[INPUT_FIRE].SetPresetDesc("R Trigger");
-		    m_aInputMapping[INPUT_PIEMENU].SetDirection(0, 2, JOYDIR_TWO);
-		    m_aInputMapping[INPUT_PIEMENU].SetPresetDesc("L Trigger");
-		    m_aInputMapping[INPUT_JUMP].SetDirection(0, 1, JOYDIR_ONE);
-		    m_aInputMapping[INPUT_JUMP].SetPresetDesc("L Thumbstick Up");
-		    m_aInputMapping[INPUT_CROUCH].SetDirection(0, 1, JOYDIR_TWO);
-		    m_aInputMapping[INPUT_CROUCH].SetPresetDesc("L Thumbstick Down");
-		    // So fine aiming can be done with the d-pad while holding down X
-		    m_aInputMapping[INPUT_AIM_UP].SetDirection(3, 1, JOYDIR_ONE);
-		    m_aInputMapping[INPUT_AIM_UP].SetPresetDesc("D-Pad Up");
-		    m_aInputMapping[INPUT_AIM_DOWN].SetDirection(3, 1, JOYDIR_TWO);
-		    m_aInputMapping[INPUT_AIM_DOWN].SetPresetDesc("D-Pad Down");
-		    m_aInputMapping[INPUT_AIM_LEFT].SetDirection(3, 0, JOYDIR_ONE);
-		    m_aInputMapping[INPUT_AIM_LEFT].SetPresetDesc("D-Pad Left");
-		    m_aInputMapping[INPUT_AIM_RIGHT].SetDirection(3, 0, JOYDIR_TWO);
-		    m_aInputMapping[INPUT_AIM_RIGHT].SetPresetDesc("D-Pad Right");
-            break;
+	m_SchemePreset = schemePreset;
+	switch (m_SchemePreset) {
+		case PRESET_XBOX360:
+			// Set up the default xbox 360 button bindings
+			m_aInputMapping[INPUT_FIRE].SetJoyButton(JOY_1);
+			m_aInputMapping[INPUT_FIRE].SetPresetDesc("A Button");
+			// Hold down X to enter aim mode, then can use d-pad up/down to finely aim while sniping
+			m_aInputMapping[INPUT_AIM].SetJoyButton(JOY_3);
+			m_aInputMapping[INPUT_AIM].SetPresetDesc("X Button");
+			// Pie menu also cancels buy menu, which makes sense for the B button
+			m_aInputMapping[INPUT_PIEMENU].SetJoyButton(JOY_2);
+			m_aInputMapping[INPUT_PIEMENU].SetPresetDesc("B Button");
+			// Jump on top button of diamond makes sense
+			m_aInputMapping[INPUT_JUMP].SetJoyButton(JOY_4);
+			m_aInputMapping[INPUT_JUMP].SetPresetDesc("Y Button");
+			m_aInputMapping[INPUT_NEXT].SetJoyButton(JOY_6);
+			m_aInputMapping[INPUT_NEXT].SetPresetDesc("R Bumper Button");
+			m_aInputMapping[INPUT_PREV].SetJoyButton(JOY_5);
+			m_aInputMapping[INPUT_PREV].SetPresetDesc("L Bumper Button");
+			m_aInputMapping[INPUT_START].SetJoyButton(JOY_8);
+			m_aInputMapping[INPUT_START].SetPresetDesc("Start Button");
+			m_aInputMapping[INPUT_BACK].SetJoyButton(JOY_7);
+			m_aInputMapping[INPUT_BACK].SetPresetDesc("Back Button");
+			// Set up the default xbox joy direction bindings
+			m_aInputMapping[INPUT_L_UP].SetDirection(0, 1, JOYDIR_ONE);
+			m_aInputMapping[INPUT_L_UP].SetPresetDesc("L Thumbstick Up");
+			m_aInputMapping[INPUT_L_DOWN].SetDirection(0, 1, JOYDIR_TWO);
+			m_aInputMapping[INPUT_L_DOWN].SetPresetDesc("L Thumbstick Down");
+			m_aInputMapping[INPUT_L_LEFT].SetDirection(0, 0, JOYDIR_ONE);
+			m_aInputMapping[INPUT_L_LEFT].SetPresetDesc("L Thumbstick Left");
+			m_aInputMapping[INPUT_L_RIGHT].SetDirection(0, 0, JOYDIR_TWO);
+			m_aInputMapping[INPUT_L_RIGHT].SetPresetDesc("L Thumbstick Right");
+			m_aInputMapping[INPUT_R_UP].SetDirection(1, 0, JOYDIR_ONE);
+			m_aInputMapping[INPUT_R_UP].SetPresetDesc("R Thumbstick Up");
+			m_aInputMapping[INPUT_R_DOWN].SetDirection(1, 0, JOYDIR_TWO);
+			m_aInputMapping[INPUT_R_DOWN].SetPresetDesc("R Thumbstick Down");
+			m_aInputMapping[INPUT_R_LEFT].SetDirection(2, 0, JOYDIR_ONE);
+			m_aInputMapping[INPUT_R_LEFT].SetPresetDesc("R Thumbstick Left");
+			m_aInputMapping[INPUT_R_RIGHT].SetDirection(2, 0, JOYDIR_TWO);
+			m_aInputMapping[INPUT_R_RIGHT].SetPresetDesc("R Thumbstick Right");
+			m_aInputMapping[INPUT_FIRE].SetDirection(0, 2, JOYDIR_ONE);
+			m_aInputMapping[INPUT_FIRE].SetPresetDesc("R Trigger");
+			m_aInputMapping[INPUT_PIEMENU].SetDirection(0, 2, JOYDIR_TWO);
+			m_aInputMapping[INPUT_PIEMENU].SetPresetDesc("L Trigger");
+			m_aInputMapping[INPUT_JUMP].SetDirection(0, 1, JOYDIR_ONE);
+			m_aInputMapping[INPUT_JUMP].SetPresetDesc("L Thumbstick Up");
+			m_aInputMapping[INPUT_CROUCH].SetDirection(0, 1, JOYDIR_TWO);
+			m_aInputMapping[INPUT_CROUCH].SetPresetDesc("L Thumbstick Down");
+			// So fine aiming can be done with the d-pad while holding down X
+			m_aInputMapping[INPUT_AIM_UP].SetDirection(3, 1, JOYDIR_ONE);
+			m_aInputMapping[INPUT_AIM_UP].SetPresetDesc("D-Pad Up");
+			m_aInputMapping[INPUT_AIM_DOWN].SetDirection(3, 1, JOYDIR_TWO);
+			m_aInputMapping[INPUT_AIM_DOWN].SetPresetDesc("D-Pad Down");
+			m_aInputMapping[INPUT_AIM_LEFT].SetDirection(3, 0, JOYDIR_ONE);
+			m_aInputMapping[INPUT_AIM_LEFT].SetPresetDesc("D-Pad Left");
+			m_aInputMapping[INPUT_AIM_RIGHT].SetDirection(3, 0, JOYDIR_TWO);
+			m_aInputMapping[INPUT_AIM_RIGHT].SetPresetDesc("D-Pad Right");
+			break;
 
-        case PRESET_P1DEFAULT:
-            m_aInputMapping[INPUT_L_UP].SetKey(KEY_W);
-            m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_S);
-            m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_A);
-            m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_D);
-            m_aInputMapping[INPUT_R_UP].SetKey(KEY_W);
-            m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_S);
-            m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_A);
-            m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_D);
-            m_aInputMapping[INPUT_FIRE].SetMouseButton(0);
-            m_aInputMapping[INPUT_PIEMENU].SetMouseButton(1);
-            m_aInputMapping[INPUT_JUMP].SetKey(KEY_W);
-            m_aInputMapping[INPUT_CROUCH].SetKey(KEY_S);
-            m_aInputMapping[INPUT_NEXT].SetKey(KEY_E);
-            m_aInputMapping[INPUT_PREV].SetKey(KEY_Q);
-            m_aInputMapping[INPUT_WEAPON_RELOAD].SetKey(KEY_R);
-            m_aInputMapping[INPUT_WEAPON_DROP].SetKey(KEY_G);
-            m_aInputMapping[INPUT_WEAPON_PICKUP].SetKey(KEY_F);
-            m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetKey(KEY_C);
-            break;
+		case PRESET_P1DEFAULT:
+			m_aInputMapping[INPUT_L_UP].SetKey(KEY_W);
+			m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_S);
+			m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_A);
+			m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_D);
+			m_aInputMapping[INPUT_R_UP].SetKey(KEY_W);
+			m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_S);
+			m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_A);
+			m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_D);
+			m_aInputMapping[INPUT_FIRE].SetMouseButton(0);
+			m_aInputMapping[INPUT_PIEMENU].SetMouseButton(1);
+			m_aInputMapping[INPUT_JUMP].SetKey(KEY_W);
+			m_aInputMapping[INPUT_CROUCH].SetKey(KEY_S);
+			m_aInputMapping[INPUT_NEXT].SetKey(KEY_E);
+			m_aInputMapping[INPUT_PREV].SetKey(KEY_Q);
+			m_aInputMapping[INPUT_WEAPON_RELOAD].SetKey(KEY_R);
+			m_aInputMapping[INPUT_WEAPON_DROP].SetKey(KEY_G);
+			m_aInputMapping[INPUT_WEAPON_PICKUP].SetKey(KEY_F);
+			m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetKey(KEY_C);
+			break;
 
-        case PRESET_P2DEFAULT:
-            m_aInputMapping[INPUT_L_UP].SetKey(KEY_UP);
-            m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_DOWN);
-            m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_LEFT);
-            m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_RIGHT);
-            m_aInputMapping[INPUT_FIRE].SetKey(KEY_1_PAD);
-            m_aInputMapping[INPUT_AIM].SetKey(KEY_2_PAD);
-            m_aInputMapping[INPUT_AIM_UP].SetKey(KEY_UP);
-            m_aInputMapping[INPUT_AIM_DOWN].SetKey(KEY_DOWN);
-            m_aInputMapping[INPUT_PIEMENU].SetKey(KEY_3_PAD);
-            m_aInputMapping[INPUT_JUMP].SetKey(KEY_ENTER_PAD);
-            m_aInputMapping[INPUT_CROUCH].SetKey(KEY_DEL_PAD);
-            m_aInputMapping[INPUT_NEXT].SetKey(KEY_5_PAD);
-            m_aInputMapping[INPUT_PREV].SetKey(KEY_4_PAD);
-            m_aInputMapping[INPUT_WEAPON_RELOAD].SetKey(KEY_0_PAD);
-            m_aInputMapping[INPUT_WEAPON_DROP].SetKey(KEY_6_PAD);
-            m_aInputMapping[INPUT_WEAPON_PICKUP].SetKey(KEY_9_PAD);
-            m_aInputMapping[INPUT_WEAPON_CHANGE_PREV].SetKey(KEY_7_PAD);
-            m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetKey(KEY_8_PAD);
-            break;
+		case PRESET_P2DEFAULT:
+			m_aInputMapping[INPUT_L_UP].SetKey(KEY_UP);
+			m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_DOWN);
+			m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_LEFT);
+			m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_RIGHT);
+			m_aInputMapping[INPUT_FIRE].SetKey(KEY_1_PAD);
+			m_aInputMapping[INPUT_AIM].SetKey(KEY_2_PAD);
+			m_aInputMapping[INPUT_AIM_UP].SetKey(KEY_UP);
+			m_aInputMapping[INPUT_AIM_DOWN].SetKey(KEY_DOWN);
+			m_aInputMapping[INPUT_PIEMENU].SetKey(KEY_3_PAD);
+			m_aInputMapping[INPUT_JUMP].SetKey(KEY_ENTER_PAD);
+			m_aInputMapping[INPUT_CROUCH].SetKey(KEY_DEL_PAD);
+			m_aInputMapping[INPUT_NEXT].SetKey(KEY_5_PAD);
+			m_aInputMapping[INPUT_PREV].SetKey(KEY_4_PAD);
+			m_aInputMapping[INPUT_WEAPON_RELOAD].SetKey(KEY_0_PAD);
+			m_aInputMapping[INPUT_WEAPON_DROP].SetKey(KEY_6_PAD);
+			m_aInputMapping[INPUT_WEAPON_PICKUP].SetKey(KEY_9_PAD);
+			m_aInputMapping[INPUT_WEAPON_CHANGE_PREV].SetKey(KEY_7_PAD);
+			m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetKey(KEY_8_PAD);
+			break;
 
-        case PRESET_P3DEFAULT:
-            m_aInputMapping[INPUT_L_UP].SetKey(KEY_W);
-            m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_S);
-            m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_A);
-            m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_D);
-            m_aInputMapping[INPUT_R_UP].SetKey(KEY_W);
-            m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_S);
-            m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_A);
-            m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_D);
-            m_aInputMapping[INPUT_FIRE].SetKey(KEY_H);
-            m_aInputMapping[INPUT_AIM].SetKey(KEY_J);
-            m_aInputMapping[INPUT_AIM_UP].SetKey(KEY_W);
-            m_aInputMapping[INPUT_AIM_DOWN].SetKey(KEY_S);
-            m_aInputMapping[INPUT_PIEMENU].SetKey(KEY_K);
-            m_aInputMapping[INPUT_JUMP].SetKey(KEY_L);
-            m_aInputMapping[INPUT_CROUCH].SetKey(KEY_STOP);
-            m_aInputMapping[INPUT_NEXT].SetKey(KEY_U);
-            m_aInputMapping[INPUT_PREV].SetKey(KEY_Y);
-            break;
+		case PRESET_P3DEFAULT:
+			m_aInputMapping[INPUT_L_UP].SetKey(KEY_W);
+			m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_S);
+			m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_A);
+			m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_D);
+			m_aInputMapping[INPUT_R_UP].SetKey(KEY_W);
+			m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_S);
+			m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_A);
+			m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_D);
+			m_aInputMapping[INPUT_FIRE].SetKey(KEY_H);
+			m_aInputMapping[INPUT_AIM].SetKey(KEY_J);
+			m_aInputMapping[INPUT_AIM_UP].SetKey(KEY_W);
+			m_aInputMapping[INPUT_AIM_DOWN].SetKey(KEY_S);
+			m_aInputMapping[INPUT_PIEMENU].SetKey(KEY_K);
+			m_aInputMapping[INPUT_JUMP].SetKey(KEY_L);
+			m_aInputMapping[INPUT_CROUCH].SetKey(KEY_STOP);
+			m_aInputMapping[INPUT_NEXT].SetKey(KEY_U);
+			m_aInputMapping[INPUT_PREV].SetKey(KEY_Y);
+			break;
 
-        case PRESET_P4DEFAULT:
-            m_aInputMapping[INPUT_L_UP].SetKey(KEY_UP);
-            m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_DOWN);
-            m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_LEFT);
-            m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_RIGHT);
-            m_aInputMapping[INPUT_R_UP].SetKey(KEY_UP);
-            m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_DOWN);
-            m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_LEFT);
-            m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_RIGHT);
-            m_aInputMapping[INPUT_FIRE].SetKey(KEY_1_PAD);
-            m_aInputMapping[INPUT_AIM].SetKey(KEY_2_PAD);
-            m_aInputMapping[INPUT_AIM_UP].SetKey(KEY_UP);
-            m_aInputMapping[INPUT_AIM_DOWN].SetKey(KEY_DOWN);
-            m_aInputMapping[INPUT_PIEMENU].SetKey(KEY_3_PAD);
-            m_aInputMapping[INPUT_JUMP].SetKey(KEY_DEL_PAD);
-            m_aInputMapping[INPUT_CROUCH].SetKey(KEY_STOP);
-            m_aInputMapping[INPUT_NEXT].SetKey(KEY_5_PAD);
-            m_aInputMapping[INPUT_PREV].SetKey(KEY_4_PAD);
-            break;
+		case PRESET_P4DEFAULT:
+			m_aInputMapping[INPUT_L_UP].SetKey(KEY_UP);
+			m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_DOWN);
+			m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_LEFT);
+			m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_RIGHT);
+			m_aInputMapping[INPUT_R_UP].SetKey(KEY_UP);
+			m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_DOWN);
+			m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_LEFT);
+			m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_RIGHT);
+			m_aInputMapping[INPUT_FIRE].SetKey(KEY_1_PAD);
+			m_aInputMapping[INPUT_AIM].SetKey(KEY_2_PAD);
+			m_aInputMapping[INPUT_AIM_UP].SetKey(KEY_UP);
+			m_aInputMapping[INPUT_AIM_DOWN].SetKey(KEY_DOWN);
+			m_aInputMapping[INPUT_PIEMENU].SetKey(KEY_3_PAD);
+			m_aInputMapping[INPUT_JUMP].SetKey(KEY_DEL_PAD);
+			m_aInputMapping[INPUT_CROUCH].SetKey(KEY_STOP);
+			m_aInputMapping[INPUT_NEXT].SetKey(KEY_5_PAD);
+			m_aInputMapping[INPUT_PREV].SetKey(KEY_4_PAD);
+			break;
 
-        // Some generic defaults; no real preset is set
-        case PRESET_NONE:
-            // Set up the default mouse button bindings
-            m_aInputMapping[INPUT_FIRE].SetMouseButton(MOUSE_LEFT);
-            m_aInputMapping[INPUT_PIEMENU].SetMouseButton(MOUSE_RIGHT);
-            // Set up the default joystick button bindings
-            m_aInputMapping[INPUT_FIRE].SetJoyButton(JOY_1);
-            m_aInputMapping[INPUT_AIM].SetJoyButton(JOY_2);
-            m_aInputMapping[INPUT_PIEMENU].SetJoyButton(JOY_3);
-            m_aInputMapping[INPUT_JUMP].SetJoyButton(JOY_4);
-            m_aInputMapping[INPUT_NEXT].SetJoyButton(JOY_6);
-            m_aInputMapping[INPUT_PREV].SetJoyButton(JOY_5);
-            m_aInputMapping[INPUT_START].SetJoyButton(JOY_8);
-            m_aInputMapping[INPUT_BACK].SetJoyButton(JOY_7);
-            // Set up the default joystick direction bindings
-            m_aInputMapping[INPUT_L_UP].SetDirection(0, 1, JOYDIR_ONE);
-            m_aInputMapping[INPUT_L_DOWN].SetDirection(0, 1, JOYDIR_TWO);
-            m_aInputMapping[INPUT_L_LEFT].SetDirection(0, 0, JOYDIR_ONE);
-            m_aInputMapping[INPUT_L_RIGHT].SetDirection(0, 0, JOYDIR_TWO);
-            m_aInputMapping[INPUT_R_UP].SetDirection(2, 0, JOYDIR_ONE);
-            m_aInputMapping[INPUT_R_DOWN].SetDirection(2, 0, JOYDIR_TWO);
-            m_aInputMapping[INPUT_R_LEFT].SetDirection(1, 0, JOYDIR_ONE);
-            m_aInputMapping[INPUT_R_RIGHT].SetDirection(1, 0, JOYDIR_TWO);
-            m_aInputMapping[INPUT_FIRE].SetDirection(0, 2, JOYDIR_ONE);
-            m_aInputMapping[INPUT_JUMP].SetDirection(0, 1, JOYDIR_ONE);
-            m_aInputMapping[INPUT_CROUCH].SetDirection(0, 1, JOYDIR_TWO);
-            m_aInputMapping[INPUT_PIEMENU].SetDirection(0, 2, JOYDIR_TWO);
-            m_aInputMapping[INPUT_WEAPON_CHANGE_PREV].SetDirection(3, 0, JOYDIR_ONE);
-            m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetDirection(3, 0, JOYDIR_TWO);
-            m_aInputMapping[INPUT_WEAPON_RELOAD].SetDirection(3, 1, JOYDIR_ONE);
-            m_aInputMapping[INPUT_WEAPON_PICKUP].SetDirection(3, 1, JOYDIR_TWO);
-            break;
-
-        default:
-            RTEAbort("Undefined input preset value passed in. See InputPreset enumeration for defined values.");
-    }
+			// Some generic defaults; no real preset is set
+		default:
+			// Set up the default mouse button bindings
+			m_aInputMapping[INPUT_FIRE].SetMouseButton(MOUSE_LEFT);
+			m_aInputMapping[INPUT_PIEMENU].SetMouseButton(MOUSE_RIGHT);
+			// Set up the default joystick button bindings
+			m_aInputMapping[INPUT_FIRE].SetJoyButton(JOY_1);
+			m_aInputMapping[INPUT_AIM].SetJoyButton(JOY_2);
+			m_aInputMapping[INPUT_PIEMENU].SetJoyButton(JOY_3);
+			m_aInputMapping[INPUT_JUMP].SetJoyButton(JOY_4);
+			m_aInputMapping[INPUT_NEXT].SetJoyButton(JOY_6);
+			m_aInputMapping[INPUT_PREV].SetJoyButton(JOY_5);
+			m_aInputMapping[INPUT_START].SetJoyButton(JOY_8);
+			m_aInputMapping[INPUT_BACK].SetJoyButton(JOY_7);
+			// Set up the default joystick direction bindings
+			m_aInputMapping[INPUT_L_UP].SetDirection(0, 1, JOYDIR_ONE);
+			m_aInputMapping[INPUT_L_DOWN].SetDirection(0, 1, JOYDIR_TWO);
+			m_aInputMapping[INPUT_L_LEFT].SetDirection(0, 0, JOYDIR_ONE);
+			m_aInputMapping[INPUT_L_RIGHT].SetDirection(0, 0, JOYDIR_TWO);
+			m_aInputMapping[INPUT_R_UP].SetDirection(2, 0, JOYDIR_ONE);
+			m_aInputMapping[INPUT_R_DOWN].SetDirection(2, 0, JOYDIR_TWO);
+			m_aInputMapping[INPUT_R_LEFT].SetDirection(1, 0, JOYDIR_ONE);
+			m_aInputMapping[INPUT_R_RIGHT].SetDirection(1, 0, JOYDIR_TWO);
+			m_aInputMapping[INPUT_FIRE].SetDirection(0, 2, JOYDIR_ONE);
+			m_aInputMapping[INPUT_JUMP].SetDirection(0, 1, JOYDIR_ONE);
+			m_aInputMapping[INPUT_CROUCH].SetDirection(0, 1, JOYDIR_TWO);
+			m_aInputMapping[INPUT_PIEMENU].SetDirection(0, 2, JOYDIR_TWO);
+			m_aInputMapping[INPUT_WEAPON_CHANGE_PREV].SetDirection(3, 0, JOYDIR_ONE);
+			m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetDirection(3, 0, JOYDIR_TWO);
+			m_aInputMapping[INPUT_WEAPON_RELOAD].SetDirection(3, 1, JOYDIR_ONE);
+			m_aInputMapping[INPUT_WEAPON_PICKUP].SetDirection(3, 1, JOYDIR_TWO);
+	}
 }
 
 

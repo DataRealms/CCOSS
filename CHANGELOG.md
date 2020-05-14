@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Temporarily removed `PreciseCollisions` from `Settings.ini` due to bad things happening when disabled by user.
 
+- Lua error reporting has been improved so script errors will always show filename and line number.
+
 ### Fixed
 
 - Control schemes will no longer get deleted when being configured.

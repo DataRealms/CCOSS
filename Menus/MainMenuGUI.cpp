@@ -1277,7 +1277,7 @@ void MainMenuGUI::Update()
                         }
                         else
                         {
-                            UInputMan::InputPreset playerPreset = static_cast<UInputMan::InputPreset>(-(1 + which - P1CLEAR)); // Player 1's default preset is at -1 and so on.
+                            UInputMan::InputPreset playerPreset = static_cast<UInputMan::InputPreset>(P1CLEAR - which - 1); // Player 1's default preset is at -1 and so on.
                             UInputMan::Players inputPlayer = static_cast<UInputMan::Players>(which - P1CLEAR);
                             UInputMan::InputDevice deviceType[4] = { UInputMan::DEVICE_MOUSE_KEYB, UInputMan::DEVICE_KEYB_ONLY, UInputMan::DEVICE_GAMEPAD_1, UInputMan::DEVICE_GAMEPAD_2 };
                             // Set to a default control preset.

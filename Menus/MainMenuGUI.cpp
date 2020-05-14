@@ -1254,8 +1254,6 @@ void MainMenuGUI::Update()
                         m_MenuScreen = CONFIGSCREEN;
                         m_ScreenChange = true;
 
-                        // Don't clear all the mappings when the user wants to config something.
-
                         g_GUISound.ButtonPressSound()->Play();
                     }
                 }
@@ -1279,13 +1277,13 @@ void MainMenuGUI::Update()
                         }
                         else
                         {
-                            UInputMan::InputPreset PlayerPreset = static_cast<UInputMan::InputPreset>(-(1 + which - P1CLEAR)); // Player 1's default preset is at -1 and so on.
-                            UInputMan::Players Player = static_cast<UInputMan::Players>(which - P1CLEAR);
-                            UInputMan::InputDevice DeviceMap[4] = { UInputMan::DEVICE_MOUSE_KEYB, UInputMan::DEVICE_KEYB_ONLY, UInputMan::DEVICE_GAMEPAD_1, UInputMan::DEVICE_GAMEPAD_2 };
+                            UInputMan::InputPreset playerPreset = static_cast<UInputMan::InputPreset>(-(1 + which - P1CLEAR)); // Player 1's default preset is at -1 and so on.
+                            UInputMan::Players inputPlayer = static_cast<UInputMan::Players>(which - P1CLEAR);
+                            UInputMan::InputDevice deviceType[4] = { UInputMan::DEVICE_MOUSE_KEYB, UInputMan::DEVICE_KEYB_ONLY, UInputMan::DEVICE_GAMEPAD_1, UInputMan::DEVICE_GAMEPAD_2 };
                             // Set to a default control preset.
-                            g_UInputMan.GetControlScheme(Player)->SetPreset(PlayerPreset);
+                            g_UInputMan.GetControlScheme(inputPlayer)->SetPreset(playerPreset);
                             // Set to a device that fits this preset.
-                            g_UInputMan.GetControlScheme(Player)->SetDevice(DeviceMap[Player]);
+                            g_UInputMan.GetControlScheme(inputPlayer)->SetDevice(deviceType[inputPlayer]);
                             UpdateDeviceLabels();
 
 							// Set the dead zone slider value

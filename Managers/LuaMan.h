@@ -239,30 +239,21 @@ enum ServerResult
     /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
     int RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, std::vector<std::string> variablesToSafetyCheck = std::vector<std::string>(), std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RunScriptString
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Takes a string containing a script snippet and runs it on the master
-//                  state.
-// Arguments:       The string with the script snippet.
-//                  Whether to report any errors to the console immediately.
-// Return value:    Returns less than zero if any errors encountered when running this script.
-//                  To get the actual error string, call GetLastError.
-
+    /// <summary>
+    /// Takes a string containing a script snippet and runs it on the master state.
+    /// </summary>
+    /// <param name="scriptString">The string with the script snippet.</param>
+    /// <param name="consoleErrors">Whether to report any errors to the console immediately.</param>
+    /// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
     int RunScriptString(const std::string &scriptString, bool consoleErrors = true);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RunScriptFile
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Opens and loads a file containing a script and runs it on the master
-//                  state.
-// Arguments:       The path to the file to load and run.
-//                  Whether to report any errors to the console immediately.
-// Return value:    Returns less than zero if any errors encountered when running this script.
-//                  To get the actual error string, call GetLastError.
-
-    int RunScriptFile(std::string filePath, bool consoleErrors = true);
+    /// <summary>
+    /// Opens and loads a file containing a script and runs it on the master state.
+    /// </summary>
+    /// <param name="filePath">The path to the file to load and run.</param>
+    /// <param name="consoleErrors">Whether to report any errors to the console immediately.</param>
+    /// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
+    int RunScriptFile(const std::string &filePath, bool consoleErrors = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

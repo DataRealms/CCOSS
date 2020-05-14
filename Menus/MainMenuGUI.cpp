@@ -1254,14 +1254,6 @@ void MainMenuGUI::Update()
                         m_MenuScreen = CONFIGSCREEN;
                         m_ScreenChange = true;
 
-						// Save joystick deadzones. Dead zone should work independently of the controller setup process
-						// bacuse faulty sticks will ruin setup process
-						float deadzone = g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->GetJoystickDeadzone();
-                        // Clear all the mappings when the user wants to config somehting
-                        g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->Reset();
-						g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->SetJoystickDeadzone(deadzone);
-                        g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->SetDevice(m_ConfiguringDevice);
-
                         g_GUISound.ButtonPressSound()->Play();
                     }
                 }
@@ -1285,12 +1277,15 @@ void MainMenuGUI::Update()
                         }
                         else
                         {
-                            // Save the device type so we can re-set it after resetting - it's really annoying when the device changes
-                            int device = g_UInputMan.GetControlScheme(which - P1CLEAR)->GetDevice();
-                            g_UInputMan.GetControlScheme(which - P1CLEAR)->Reset();
-                            g_UInputMan.GetControlScheme(which - P1CLEAR)->SetDevice(device);
-                            // Set some default mappings so there's something at least
-                            g_UInputMan.GetControlScheme(which - P1CLEAR)->SetPreset(UInputMan::PRESET_NONE);
+                            // Set to a default control preset.
+                            UInputMan::Players inputPlayer = static_cast<UInputMan::Players>(which - P1CLEAR);
+                            UInputMan::InputPreset playerPreset = static_cast<UInputMan::InputPreset>(P1CLEAR - which - 1); // Player 1's default preset is at -1 and so on.
+                            g_UInputMan.GetControlScheme(inputPlayer)->SetPreset(playerPreset);
+                            
+                            // Set to a device that fits this preset.
+                            UInputMan::InputDevice deviceType[4] = { UInputMan::DEVICE_MOUSE_KEYB, UInputMan::DEVICE_KEYB_ONLY, UInputMan::DEVICE_GAMEPAD_1, UInputMan::DEVICE_GAMEPAD_2 };
+                            g_UInputMan.GetControlScheme(inputPlayer)->SetDevice(deviceType[inputPlayer]);
+                            
                             UpdateDeviceLabels();
 
 							// Set the dead zone slider value

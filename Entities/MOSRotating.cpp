@@ -1843,19 +1843,15 @@ bool MOSRotating::RemoveAttachable(long attachableUniqueId)
 /// </summary>
 /// <param name="pAttachable">The attachable to remove</param>
 /// <returns>False if the attachable is invalid, otherwise true</returns>
-bool MOSRotating::RemoveAttachable(Attachable *pAttachable)
-{
-	if (pAttachable)
-	{
-		if (m_Attachables.size() > 0)
-		{
+bool MOSRotating::RemoveAttachable(Attachable *pAttachable) {
+	if (pAttachable) {
+		if (m_Attachables.size() > 0) {
 			m_Attachables.remove(pAttachable);
 		}
-		if (m_AllAttachables.size() > 0)
-		{
+		if (m_AllAttachables.size() > 0) {
 			m_AllAttachables.remove(pAttachable);
 		}
-		pAttachable->Detach();
+		pAttachable->ToDeleteWithParent() ? pAttachable->SetToDelete() : pAttachable->Detach();
 		return true;
 	}
 	return false;

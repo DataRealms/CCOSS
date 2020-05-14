@@ -645,6 +645,12 @@ AddScriptFunctionNames(MOSRotating, "OnAttach", "OnDetach")
 	virtual void EnableTerrainCollisions(bool enable);
 
 
+	/// <summary>
+	/// Gets whether this attachable should be deleted along with it's parent when it's being deleted or not.
+	/// </summary>
+	/// <returns>Whether this attachable should be deleted along with it's parent or not.</returns>
+	bool ToDeleteWithParent() const { return m_DeleteWithParent; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -700,6 +706,8 @@ protected:
 
 	// Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
 	bool m_IsCollidingWithTerrainWhileAttached;
+
+	bool m_DeleteWithParent; //!< Whether this attachable should be deleted along with it's parent when it's being deleted or not.
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

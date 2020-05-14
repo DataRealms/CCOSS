@@ -56,7 +56,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EnitityAllocation(ACRocket)
+EntityAllocation(ACRocket)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -53,7 +53,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EnitityAllocation(AssemblyEditor)
+EntityAllocation(AssemblyEditor)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

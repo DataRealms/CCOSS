@@ -41,7 +41,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EnitityAllocation(Attachable)
+EntityAllocation(Attachable)
 AddScriptFunctionNames(MOSRotating, "OnAttach", "OnDetach")
 
 

@@ -38,7 +38,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EnitityAllocation(GABrainMatch)
+EntityAllocation(GABrainMatch)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

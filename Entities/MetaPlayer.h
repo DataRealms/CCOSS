@@ -41,7 +41,7 @@ public:
 // Give direct access to the GUI
 friend class MetagameGUI;
 // Concrete allocation and cloning definitions
-EnitityAllocation(MetaPlayer)
+EntityAllocation(MetaPlayer)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

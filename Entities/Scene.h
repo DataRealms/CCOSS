@@ -333,7 +333,7 @@ enum NeighborDirection
 };
 
 // Concrete allocation and cloning definitions
-EnitityAllocation(Scene)
+EntityAllocation(Scene)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

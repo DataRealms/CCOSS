@@ -55,7 +55,7 @@ namespace RTE
 	public:
 
 		// Concrete allocation and cloning definitions
-		EnitityAllocation(MultiplayerServerLobby)
+		EntityAllocation(MultiplayerServerLobby)
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		// Constructor:     MultiplayerServerLobby

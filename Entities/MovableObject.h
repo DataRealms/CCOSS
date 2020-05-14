@@ -73,7 +73,7 @@ friend class Atom;
 
 /* Should be in all concrete subclasses
 // Concrete allocation and cloning definitions
-EnitityAllocation(MovableObject)
+EntityAllocation(MovableObject)
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////

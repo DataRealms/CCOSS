@@ -40,7 +40,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EnitityAllocation(GABaseDefense)
+EntityAllocation(GABaseDefense)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -278,7 +278,7 @@ friend class LuaMan;
 
 
 // Concrete allocation and cloning definitions
-EnitityAllocation(MOSRotating)
+EntityAllocation(MOSRotating)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -31,7 +31,7 @@ namespace RTE {
 	/// This function is passed into the constructor of this Entity's static ClassInfo's constructor, so that it can instantiate MovableObjects.
 	/// </summary>
 	/// <returns>A pointer to the newly dynamically allocated Entity. Ownership is transferred as well.</returns>
-	#define EnitityAllocation(TYPE)																		\
+	#define EntityAllocation(TYPE)																		\
 		static void * operator new (size_t size) { return TYPE::m_sClass.GetPoolMemory(); }				\
 		static void operator delete (void *instance) { TYPE::m_sClass.ReturnPoolMemory(instance); }		\
 		static void * operator new (size_t size, void *p) throw() { return p; }							\

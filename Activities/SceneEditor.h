@@ -52,7 +52,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EnitityAllocation(SceneEditor)
+EntityAllocation(SceneEditor)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

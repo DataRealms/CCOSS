@@ -517,13 +517,10 @@ int UInputMan::InputScheme::Save(Writer &writer) const
 {
     Serializable::Save(writer);
 
-    writer.NewLine();
-    writer << "// 0 = Keyboard only, 1 = Mouse + Keyboard, 2 = Joystick One, 3 = Joystick Two, , 4 = Joystick Three, 5 = Joystick Four";
     writer.NewProperty("Device");
     writer << m_ActiveDevice;
     if (m_SchemePreset > PRESET_NONE)
     {
-        writer << "// 0 = No Preset, 1 = WASD, 2 = Cursor Keys, 3 = XBox 360 Controller";
         writer.NewProperty("Preset");
         writer << m_SchemePreset;
     }
@@ -806,20 +803,48 @@ int UInputMan::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this UInputMan with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int UInputMan::Save(Writer &writer) const
-{
-    writer.NewProperty("MouseSensitivity");
-    writer << m_MouseSensitivity;
-    writer.NewProperty("P1Scheme");
-    writer << m_aControlScheme[PLAYER_ONE];
-    writer.NewProperty("P2Scheme");
-    writer << m_aControlScheme[PLAYER_TWO];
-    writer.NewProperty("P3Scheme");
-    writer << m_aControlScheme[PLAYER_THREE];
-    writer.NewProperty("P4Scheme");
-    writer << m_aControlScheme[PLAYER_FOUR];
+int UInputMan::Save(Writer &writer) const {
+	writer.NewLine(false, 2);
+	writer.NewDivider(false);
+	writer.NewLineString("// Input Mapping", false);
+	writer.NewLine(false);
 
-    return 0;
+	writer.NewProperty("MouseSensitivity");
+	writer << m_MouseSensitivity;
+
+	writer.NewLine(false);
+	writer.NewLineString("// Input Devices:  0 = Keyboard only, 1 = Mouse + Keyboard, 2 = Joystick One, 3 = Joystick Two, , 4 = Joystick Three, 5 = Joystick Four");
+	writer.NewLineString("// Scheme Presets: 0 = No Preset, 1 = WASD, 2 = Cursor Keys, 3 = XBox 360 Controller");
+
+	writer.NewLine(false, 2);
+	writer.NewDivider(false);
+	writer.NewLineString("// Player 1", false);
+	writer.NewLine(false);
+	writer.NewProperty("P1Scheme");
+	writer << m_aControlScheme[PLAYER_ONE];
+
+	writer.NewLine(false);
+	writer.NewDivider(false);
+	writer.NewLineString("// Player 2", false);
+	writer.NewLine(false);
+	writer.NewProperty("P2Scheme");
+	writer << m_aControlScheme[PLAYER_TWO];
+
+	writer.NewLine(false);
+	writer.NewDivider(false);
+	writer.NewLineString("// Player 3", false);
+	writer.NewLine(false);
+	writer.NewProperty("P3Scheme");
+	writer << m_aControlScheme[PLAYER_THREE];
+
+	writer.NewLine(false);
+	writer.NewDivider(false);
+	writer.NewLineString("// Player 4", false);
+	writer.NewLine(false);
+	writer.NewProperty("P4Scheme");
+	writer << m_aControlScheme[PLAYER_FOUR];
+
+	return 0;
 }
 
 

@@ -14,8 +14,8 @@ namespace RTE {
 	class SoundContainer : public Entity {
 		
 	public:
-		ENTITYALLOCATION(SoundContainer)
-		CLASSINFOGETTERS
+		EntityAllocation(SoundContainer)
+		ClassInfoGetters
 		
 		/// <summary>
 		/// How the SoundContainer should choose the next SoundSet to play when SelectNextSoundSet is called

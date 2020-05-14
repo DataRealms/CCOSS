@@ -53,7 +53,7 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-	CONCRETECLASSINFO(MultiplayerServerLobby, Activity, 0)
+	ConcreteClassInfo(MultiplayerServerLobby, Activity, 0)
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          Clear

@@ -53,7 +53,7 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-	CONCRETECLASSINFO(MultiplayerGame, Activity, 0)
+	ConcreteClassInfo(MultiplayerGame, Activity, 0)
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          Clear
@@ -208,7 +208,7 @@ namespace RTE {
 
 		m_pStatusLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("StatusLabel"));
 
-		m_pServerNameTextBox->SetText(g_SettingsMan.GetNetworkServerName());
+		m_pServerNameTextBox->SetText(g_SettingsMan.GetNetworkServerAddress());
 		m_pPlayerNameTextBox->SetText(g_SettingsMan.GetPlayerNetworkName());
 
 		m_pNATServiceServerNameTextBox->SetText(g_SettingsMan.GetNATServiceAddress());
@@ -327,9 +327,9 @@ namespace RTE {
 							saveSettings = true;
 						}
 
-						if (g_SettingsMan.GetNetworkServerName() != m_pServerNameTextBox->GetText())
+						if (g_SettingsMan.GetNetworkServerAddress() != m_pServerNameTextBox->GetText())
 						{
-							g_SettingsMan.SetNetworkServerName(m_pServerNameTextBox->GetText());
+							g_SettingsMan.SetNetworkServerAddress(m_pServerNameTextBox->GetText());
 							saveSettings = true;
 						}
 

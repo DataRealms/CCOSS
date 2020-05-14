@@ -39,7 +39,7 @@ extern bool g_InActivity;
 
 namespace RTE {
     
-ABSTRACTCLASSINFO(Activity, Entity)
+AbstractClassInfo(Activity, Entity)
 const string ActivityMan::m_ClassName = "ActivityMan";
 
 

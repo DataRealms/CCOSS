@@ -71,8 +71,8 @@ public:
     };
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(Actor)
-ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "UpdateAI")
+EntityAllocation(Actor)
+AddScriptFunctionNames(MOSRotating, "UpdateAI")
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

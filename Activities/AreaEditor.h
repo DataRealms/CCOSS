@@ -51,7 +51,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(AreaEditor)
+EntityAllocation(AreaEditor)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

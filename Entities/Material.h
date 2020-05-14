@@ -41,7 +41,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(Material)
+EntityAllocation(Material)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

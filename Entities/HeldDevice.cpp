@@ -24,7 +24,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(HeldDevice, Attachable, 0)
+ConcreteClassInfo(HeldDevice, Attachable, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -306,8 +306,8 @@ bool HeldDevice::CollideAtPoint(HitData &hd)
 {
     return Attachable::CollideAtPoint(hd);
 /* Obsolete
-    if (hd.pBody[HITOR] && g_MovableMan.IsOfActor(hd.pBody[HITOR]->GetID())) {
-        MovableObject *pMO = g_MovableMan.GetMOFromID(hd.pBody[HITOR]->GetRootID());
+    if (hd.Body[HITOR] && g_MovableMan.IsOfActor(hd.Body[HITOR]->GetID())) {
+        MovableObject *pMO = g_MovableMan.GetMOFromID(hd.Body[HITOR]->GetRootID());
         if (pMO && pMO->IsActor())
             dynamic_cast<Actor *>(pMO)->SetItemInReach(this);
     }

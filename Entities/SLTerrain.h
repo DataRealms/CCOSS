@@ -233,7 +233,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(SLTerrain)
+EntityAllocation(SLTerrain)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

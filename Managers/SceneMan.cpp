@@ -441,8 +441,8 @@ void SceneMan::Destroy()
 
 Vector SceneMan::GetSceneDim() const
 {
-    RTEAssert(m_pCurrentScene && m_pCurrentScene->GetTerrain() && m_pCurrentScene->GetTerrain()->GetBitmap(), "Trying to get terrain info before there is a scene or terrain!");
     if (m_pCurrentScene)
+        RTEAssert(m_pCurrentScene->GetTerrain() && m_pCurrentScene->GetTerrain()->GetBitmap(), "Trying to get terrain info before there is a scene or terrain!");
         return m_pCurrentScene->GetDimensions();
     return Vector();
 }
@@ -3432,7 +3432,9 @@ bool SceneMan::AddSceneObject(SceneObject *pObject)
 
 void SceneMan::Update(int screen)
 {
-	RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    if (m_pCurrentScene == nullptr) {
+        return;
+    }
 
     // Record screen was the last updated screen
     m_LastUpdatedScreen = screen;
@@ -3572,7 +3574,9 @@ void SceneMan::Update(int screen)
 
 void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vector &targetPos, bool skipSkybox, bool skipTerrain)
 {
-    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    if (m_pCurrentScene == nullptr) {
+        return;
+    }
     // Handy
     SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
 
@@ -3687,6 +3691,12 @@ void SceneMan::ClearSeenPixels()
 
     for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
         m_pCurrentScene->ClearSeenPixels(team);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SceneMan::ClearCurrentScene() {
+    m_pCurrentScene = nullptr;
 }
 
 } // namespace RTE

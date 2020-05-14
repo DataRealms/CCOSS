@@ -26,7 +26,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(ADoor, Actor, 0)
+ConcreteClassInfo(ADoor, Actor, 0)
 const string ADoor::Sensor::m_sClassName = "Sensor";
 
 

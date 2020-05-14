@@ -27,9 +27,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="cpp.hint" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="System\Box.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -241,9 +238,6 @@
       <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\Arm.h">
-      <Filter>Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Entities\Atom.h">
       <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\AtomGroup.h">
@@ -471,6 +465,9 @@
     <ClInclude Include="System\Primitive.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="System\Atom.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -672,9 +669,6 @@
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="Entities\Arm.cpp">
-      <Filter>Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="Entities\Atom.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="Entities\AtomGroup.cpp">
@@ -888,6 +882,9 @@
     <ClCompile Include="System\Primitive.cpp">
       <Filter>System</Filter>
     </ClCompile>
+    <ClCompile Include="System\Atom.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\ccicon.ico">
@@ -898,5 +895,8 @@
     <ResourceCompile Include="Resources\RTEA.rc">
       <Filter>Resources</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

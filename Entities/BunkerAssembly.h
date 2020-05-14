@@ -48,7 +48,7 @@ class BunkerAssembly:
 public:
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(BunkerAssembly)
+EntityAllocation(BunkerAssembly)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

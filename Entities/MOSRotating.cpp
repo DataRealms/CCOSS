@@ -24,7 +24,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(MOSRotating, MOSprite, 100)
+ConcreteClassInfo(MOSRotating, MOSprite, 100)
 
 const string MOSRotating::Gib::m_sClassName = "Gib";
 
@@ -744,39 +744,39 @@ void MOSRotating::AddRecoil()
 
 bool MOSRotating::CollideAtPoint(HitData &hd)
 {
-    hd.resImpulse[HITOR].Reset();
-    hd.resImpulse[HITEE].Reset();
+    hd.ResImpulse[HITOR].Reset();
+    hd.ResImpulse[HITEE].Reset();
 
-//    if (m_AlreadyHitBy.find(hd.pBody[HITOR]->GetID()) == m_AlreadyHitBy.end())
+//    if (m_AlreadyHitBy.find(hd.Body[HITOR]->GetID()) == m_AlreadyHitBy.end())
 //    {
-//        m_AlreadyHitBy.insert(hd.pBody[HITOR]->GetID());
+//        m_AlreadyHitBy.insert(hd.Body[HITOR]->GetID());
 
-    hd.hitRadius[HITEE] = (hd.hitPoint - m_Pos) * g_FrameMan.GetMPP();
+    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * g_FrameMan.GetMPP();
 /*
     // Cancel if both hitor and hitee's hitpoint radii are pointing int he same direction, meaning the objects are really tangled
-    if (!hd.hitRadius[HITOR].IsZero() && hd.hitRadius[HITOR].Dot(hd.hitRadius[HITEE]) >= 0)
+    if (!hd.HitRadius[HITOR].IsZero() && hd.HitRadius[HITOR].Dot(hd.HitRadius[HITEE]) >= 0)
         return false;
 */
-    hd.mass[HITEE] = m_Mass;
-    hd.momInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
-    hd.hitVel[HITEE] = m_Vel + hd.hitRadius[HITEE].GetPerpendicular() * m_AngularVel;
-    hd.velDiff = hd.hitVel[HITOR] - hd.hitVel[HITEE];
+    hd.TotalMass[HITEE] = m_Mass;
+    hd.MomInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
+    hd.HitVel[HITEE] = m_Vel + hd.HitRadius[HITEE].GetPerpendicular() * m_AngularVel;
+    hd.VelDiff = hd.HitVel[HITOR] - hd.HitVel[HITEE];
 
     // Only do collision response for this if it appears the collision is happening in the 'right' direction, meaning away from the hitee collision normal
     // The wrong way happens when things are sunk into each other, and thus getting 'hooked' on each other
-    if (hd.velDiff.Dot(hd.bitmapNormal) < 0)
+    if (hd.VelDiff.Dot(hd.BitmapNormal) < 0)
     {
-        Vector hitAcc = -hd.velDiff * (1 + (hd.pBody[HITOR]->GetMaterial()->restitution * GetMaterial()->restitution));
+        Vector hitAcc = -hd.VelDiff * (1 + (hd.Body[HITOR]->GetMaterial()->restitution * GetMaterial()->restitution));
 
-        float hittorLever = hd.hitRadius[HITOR].GetPerpendicular().Dot(hd.bitmapNormal);
-        float hitteeLever = hd.hitRadius[HITEE].GetPerpendicular().Dot(hd.bitmapNormal);
+        float hittorLever = hd.HitRadius[HITOR].GetPerpendicular().Dot(hd.BitmapNormal);
+        float hitteeLever = hd.HitRadius[HITEE].GetPerpendicular().Dot(hd.BitmapNormal);
         hittorLever *= hittorLever;
         hitteeLever *= hitteeLever;
-        float impulse = hitAcc.Dot(hd.bitmapNormal) / (((1 / hd.mass[HITOR]) + (1 / hd.mass[HITEE])) +
-                        (hittorLever / hd.momInertia[HITOR]) + (hitteeLever / hd.momInertia[HITEE]));
+        float impulse = hitAcc.Dot(hd.BitmapNormal) / (((1 / hd.TotalMass[HITOR]) + (1 / hd.TotalMass[HITEE])) +
+                        (hittorLever / hd.MomInertia[HITOR]) + (hitteeLever / hd.MomInertia[HITEE]));
     // TODO: Should the impfactor not be swapped? -EE vs -OR?")
-        hd.resImpulse[HITOR] = hd.bitmapNormal * impulse * hd.impFactor[HITOR];
-        hd.resImpulse[HITEE] = hd.bitmapNormal * -impulse * hd.impFactor[HITEE];
+        hd.ResImpulse[HITOR] = hd.BitmapNormal * impulse * hd.ImpulseFactor[HITOR];
+        hd.ResImpulse[HITEE] = hd.BitmapNormal * -impulse * hd.ImpulseFactor[HITEE];
 
         // If a particle, which does not penetrate, but bounces, do any additional
         // effects of that bounce.
@@ -787,24 +787,24 @@ bool MOSRotating::CollideAtPoint(HitData &hd)
         }
 
         // If the hittee is pinned, see if the collision's impulse is enough to dislodge it.
-        float hiteePin = hd.pBody[HITEE]->GetPinStrength();
+        float hiteePin = hd.Body[HITEE]->GetPinStrength();
         // See if it's pinned, and compare it to the impulse force from the collision
-        if (m_PinStrength > 0 && hd.resImpulse[HITEE].GetMagnitude() > m_PinStrength)
+        if (m_PinStrength > 0 && hd.ResImpulse[HITEE].GetMagnitude() > m_PinStrength)
         {
             // Unpin and set the threshold to 0
-            hd.pBody[HITEE]->SetPinStrength(0);
+            hd.Body[HITEE]->SetPinStrength(0);
         }
         // If not knocked loose, then move the impulse of the hitee to the hitor
         else if (hiteePin)
         {
 // No good, causes crazy bounces
-//            hd.resImpulse[HITOR] -= hd.resImpulse[HITEE];
-            hd.resImpulse[HITEE].Reset();
+//            hd.ResImpulse[HITOR] -= hd.ResImpulse[HITEE];
+            hd.ResImpulse[HITEE].Reset();
         }
 
-        AddImpulseForce(hd.resImpulse[HITEE], hd.hitRadius[HITEE]);
-//        m_Vel += hd.resImpulse[HITEE] / hd.mass[HITEE];
-//        m_AngularVel += hd.hitRadius[HITEE].GetPerpendicular().Dot(hd.resImpulse[HITEE]) / hd.momInertia[HITEE];
+        AddImpulseForce(hd.ResImpulse[HITEE], hd.HitRadius[HITEE]);
+//        m_Vel += hd.ResImpulse[HITEE] / hd.mass[HITEE];
+//        m_AngularVel += hd.HitRadius[HITEE].GetPerpendicular().Dot(hd.ResImpulse[HITEE]) / hd.MomInertia[HITEE];
     }
     else
         return false;
@@ -839,7 +839,7 @@ bool MOSRotating::OnSink(HitData &hd)
 /*
     Vector oldPos(m_Pos);
     m_Pos = pos;
-    Draw(g_SceneMan.GetTerrainColorBitmap(), Vector(), g_DrawKey);
+    Draw(g_SceneMan.GetTerrainColorBitmap(), Vector(), g_DrawMask);
     Draw(g_SceneMan.GetTerrainMaterialBitmap(), Vector(), g_DrawAir);
     m_Pos = oldPos;
 */
@@ -858,16 +858,16 @@ bool MOSRotating::OnSink(HitData &hd)
 bool MOSRotating::ParticlePenetration(HitData &hd)
 {
     // Only particles can penetrate.
-    if (!(dynamic_cast<MOPixel *>(hd.pBody[HITOR]) || dynamic_cast<MOSParticle *>(hd.pBody[HITOR])))
+    if (!(dynamic_cast<MOPixel *>(hd.Body[HITOR]) || dynamic_cast<MOSParticle *>(hd.Body[HITOR])))
         return false;
 
-    float impulseForce = hd.resImpulse[HITEE].GetMagnitude();
+    float impulseForce = hd.ResImpulse[HITEE].GetMagnitude();
     Material const * myMat = GetMaterial();
-    float myStrength = myMat->strength / hd.pBody[HITOR]->GetSharpness();
+    float myStrength = myMat->strength / hd.Body[HITOR]->GetSharpness();
 
 
     // See if there is enough energy in the collision for the particle to penetrate
-    if (impulseForce * hd.pBody[HITOR]->GetSharpness() > myMat->strength)
+    if (impulseForce * hd.Body[HITOR]->GetSharpness() > myMat->strength)
     {
         // Ok penetration happened, now figure out if and where the exit point
         // would be by tracing a rasterized line through the sprite.
@@ -884,14 +884,14 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
         bounds[Y] = m_aSprite[m_Frame]->h;
 
         // Figure out the entry position in the un-rotated sprite's coordinates.
-        Vector entryPos = (g_SceneMan.ShortestDistance(m_Pos, hd.hitPoint) / m_Rotation).GetXFlipped(m_HFlipped) - m_SpriteOffset;
+        Vector entryPos = (g_SceneMan.ShortestDistance(m_Pos, hd.HitPoint) / m_Rotation).GetXFlipped(m_HFlipped) - m_SpriteOffset;
         intPos[X] = floorf(entryPos.m_X);
         intPos[Y] = floorf(entryPos.m_Y);
 
         // Get the un-rotated direction and max possible
         // travel length of the particle.
         Vector dir(max(bounds[X], bounds[Y]), 0);
-        dir.AbsRotateTo(hd.hitVel[HITOR] / m_Rotation);
+        dir.AbsRotateTo(hd.HitVel[HITOR] / m_Rotation);
         dir = dir.GetXFlipped(m_HFlipped);
 
         // Bresenham's line drawing algorithm preparation
@@ -982,7 +982,7 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
             // Add entry wound AEmitter to actor where the particle penetrated.
             AEmitter *pEntryWound = dynamic_cast<AEmitter *>(m_pEntryWound->Clone());
             pEntryWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle() + c_PI);
-			pEntryWound->SetDamageMultiplier(hd.pBody[HITOR]->WoundDamageMultiplier());
+			pEntryWound->SetDamageMultiplier(hd.Body[HITOR]->WoundDamageMultiplier());
             // Adjust position so that it looks like the hole is actually *on* the Hitee.
             entryPos[dom] += increment[dom] * (pEntryWound->GetSpriteFrame()->w / 2);
 			AddWound(pEntryWound, entryPos + m_SpriteOffset);
@@ -1001,30 +1001,30 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
                 // Adjust position so that it looks like the hole is actually *on* the Hitee.
                 exitPos[dom] -= increment[dom] * (pExitWound->GetSpriteFrame()->w / 2);
                 pExitWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle());
-				pExitWound->SetDamageMultiplier(hd.pBody[HITOR]->WoundDamageMultiplier());
+				pExitWound->SetDamageMultiplier(hd.Body[HITOR]->WoundDamageMultiplier());
 				AddWound(pExitWound, exitPos + m_SpriteOffset);
                 pExitWound = 0;
             }
 
             // Set the exiting particle's position to where the exit wound is,
             // in world coordinates.
-            hd.pBody[HITOR]->SetPos(((exitPos + m_SpriteOffset) / m_Rotation) + m_Pos);
+            hd.Body[HITOR]->SetPos(((exitPos + m_SpriteOffset) / m_Rotation) + m_Pos);
 
             // Finally apply the forces imposed on both this MOSRotating
             // and the hitting particle due to the penetrating and exiting hit.
             // These don't need to be manipulated if there was no exit, since this
             // absorbed all the energy, and the hittee gets deleted from the scene.
-            hd.resImpulse[HITEE] -= hd.resImpulse[HITEE] * (impulseForce / hd.resImpulse[HITEE].GetMagnitude());
-            hd.resImpulse[HITOR] = -(hd.resImpulse[HITEE]);
+            hd.ResImpulse[HITEE] -= hd.ResImpulse[HITEE] * (impulseForce / hd.ResImpulse[HITEE].GetMagnitude());
+            hd.ResImpulse[HITOR] = -(hd.ResImpulse[HITEE]);
         }
         // Particle got lodged inside this MOSRotating, so stop it and delete it from scene.
         else
         {
             // Set the exiting particle's position to where it looks lodged
-//            hd.pBody[HITOR]->SetPos(m_Pos - m_SpriteOffset + entryPos);
-//            hd.pBody[HITOR]->SetVel(Vector());
-            hd.pBody[HITOR]->SetToDelete(true);
-            hd.terminate[HITOR] = true;
+//            hd.Body[HITOR]->SetPos(m_Pos - m_SpriteOffset + entryPos);
+//            hd.Body[HITOR]->SetVel(Vector());
+            hd.Body[HITOR]->SetToDelete(true);
+            hd.Terminate[HITOR] = true;
         }
 
         // Report that penetration occured.
@@ -1462,7 +1462,7 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
         // Just make the outline of this disappear from the terrain
         {
 // TODO: These don't work at all because they're drawing shapes of color 0 to an intermediate field of 0!
-            Draw(g_SceneMan.GetTerrain()->GetFGColorBitmap(), Vector(), g_DrawKey, true);
+            Draw(g_SceneMan.GetTerrain()->GetFGColorBitmap(), Vector(), g_DrawMask, true);
             Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawAir, true);
         }
 */
@@ -1944,7 +1944,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_SettleMaterialDisabled ? GetMaterial()->id : GetMaterial()->GetSettleMaterialID(), -1);
         else if (mode == g_DrawAir)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_MaterialAir, -1);
-        else if (mode == g_DrawKey)
+        else if (mode == g_DrawMask)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, keyColor, -1);
         else if (mode == g_DrawWhite)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_WhiteColor, -1);

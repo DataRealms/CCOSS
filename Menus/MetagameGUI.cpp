@@ -3016,6 +3016,8 @@ void MetagameGUI::CompletedActivity()
             // Deep copy over all the edits made to the newly played Scene
             m_pPlayingScene->Destroy();
             m_pPlayingScene->Create(*pAlteredScene);
+            // Null the current scene, which is pointed to by pAlteredScene.
+            g_SceneMan.ClearCurrentScene();
             // Scrub the module ID so the migration goes well.. this is a bit hacky, but ok in this special case
             m_pPlayingScene->SetModuleID(-1);
             m_pPlayingScene->GetTerrain()->SetModuleID(-1);

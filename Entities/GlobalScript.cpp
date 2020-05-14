@@ -18,7 +18,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(GlobalScript, Entity, 0);
+ConcreteClassInfo(GlobalScript, Entity, 0);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

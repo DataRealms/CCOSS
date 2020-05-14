@@ -10,8 +10,8 @@ namespace RTE {
 	class TDExplosive : public ThrownDevice {
 
 	public:
-		ENTITYALLOCATION(TDExplosive);
-		CLASSINFOGETTERS
+		EntityAllocation(TDExplosive);
+		ClassInfoGetters
 
 #pragma region Creation
 		/// <summary>

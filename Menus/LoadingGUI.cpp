@@ -3,7 +3,10 @@
 #include "Writer.h"
 #include "DataModule.h"
 #include "SceneLayer.h"
-#include "RTEManagers.h"
+#include "SettingsMan.h"
+#include "PresetMan.h"
+#include "FrameMan.h"
+#include "UInputMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUICollectionBox.h"
@@ -58,6 +61,14 @@ namespace RTE {
 		pLoadingSplash = 0;
 
 		g_FrameMan.FlipFrameBuffers();
+
+		if (g_SettingsMan.SettingsNeedOverwrite()) {
+			// Overwrite Settings.ini after all the managers are created to fully populate the file. Up until this moment Settings.ini is populated only with minimal required properties to run.
+			// When the overwrite happens there is a short delay which causes the screen to remain black, so this is done here after the flip to mask that black screen.
+			Writer settingsWriter("Base.rte/Settings.ini");
+			g_SettingsMan.Save(settingsWriter);
+			settingsWriter.Destroy();
+		}
 
 		// Set up the loading GUI
 		if (!m_ControlManager) {

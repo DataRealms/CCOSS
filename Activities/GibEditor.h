@@ -52,7 +52,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(GibEditor)
+EntityAllocation(GibEditor)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

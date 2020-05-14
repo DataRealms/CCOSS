@@ -48,7 +48,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(HeldDevice)
+EntityAllocation(HeldDevice)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

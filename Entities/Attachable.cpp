@@ -18,10 +18,11 @@
 #include "RTETools.h"
 #include "AEmitter.h"
 #include "Actor.h"
+#include "ConsoleMan.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(Attachable, MOSRotating, 0)
+ConcreteClassInfo(Attachable, MOSRotating, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -183,8 +184,8 @@ bool Attachable::CollideAtPoint(HitData &hd)
     return MOSRotating::CollideAtPoint(hd);
 /*
     // See if the impact created a force enough to detach from parent.
-    if (m_pParent && hd.resImpulse[HITEE].GetMagnitude() > m_JointStrength) {
-        m_pParent->AddAbsImpulseForce(Vector(hd.resImpulse[HITEE]).SetMagnitude(m_JointStrength), m_JointPos);
+    if (m_pParent && hd.ResImpulse[HITEE].GetMagnitude() > m_JointStrength) {
+        m_pParent->AddAbsImpulseForce(Vector(hd.ResImpulse[HITEE]).SetMagnitude(m_JointStrength), m_JointPos);
         
         Detach();
     }
@@ -208,22 +209,22 @@ bool Attachable::ParticlePenetration(HitData &hd)
     bool penetrated = MOSRotating::ParticlePenetration(hd);
 
 	// Add damage points if MO is set to damage actors
-	if (hd.pBody[HITOR]->DamageOnCollision() != 0)
-		AddDamage(hd.pBody[HITOR]->DamageOnCollision());
+	if (hd.Body[HITOR]->DamageOnCollision() != 0)
+		AddDamage(hd.Body[HITOR]->DamageOnCollision());
 
     // If penetrated, propogate an alarm up to the root parent, if it's an actor
     if (penetrated && m_pParent)
     {
 		// Add damage points if MO is set to damage actors on penetration
-		if (hd.pBody[HITOR]->DamageOnPenetration() != 0)
-			AddDamage(hd.pBody[HITOR]->DamageOnPenetration());
+		if (hd.Body[HITOR]->DamageOnPenetration() != 0)
+			AddDamage(hd.Body[HITOR]->DamageOnPenetration());
 
         Actor *pParentActor = dynamic_cast<Actor *>(GetRootParent());
         if (pParentActor)
         {
             // Move the alarm point out a bit from the body so the reaction is better
-//            Vector extruded(g_SceneMan.ShortestDistance(pParentActor->GetPos(), hd.hitPoint));
-            Vector extruded(hd.hitVel[HITOR]);
+//            Vector extruded(g_SceneMan.ShortestDistance(pParentActor->GetPos(), hd.HitPoint));
+            Vector extruded(hd.HitVel[HITOR]);
             extruded.SetMagnitude(pParentActor->GetHeight());
             extruded = m_Pos - extruded;
             g_SceneMan.WrapPosition(extruded);
@@ -609,7 +610,7 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
                 DrawMaterial(m_aSprite, m_pTempBitmapA, GetSettleMaterialID());
             else if (mode == g_DrawAir)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, g_MaterialAir);
-            else if (mode == g_DrawKey)
+            else if (mode == g_DrawMask)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, g_MaskColor);
             else if (mode == g_DrawMOID)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, m_MOID);
@@ -649,7 +650,7 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, GetSettleMaterialID());
         else if (mode == g_DrawAir)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_MaterialAir);
-        else if (mode == g_DrawKey)
+        else if (mode == g_DrawMask)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_MaskColor);
         else if (mode == g_DrawMOID)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, m_MOID);

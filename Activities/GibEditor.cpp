@@ -50,7 +50,7 @@ extern bool g_ResetActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(GibEditor, EditorActivity, 0)
+ConcreteClassInfo(GibEditor, EditorActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

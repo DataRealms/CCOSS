@@ -358,9 +358,14 @@ namespace RTE {
 		}
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
 		m_ResMultiplier = multiplier;
+
+		Writer settingsWriter("Base.rte/Settings.ini");
+		g_SettingsMan.Save(settingsWriter);
+		settingsWriter.Destroy();
+
 		set_palette(pal);
 
-		g_FrameMan.FlipFrameBuffers();
+		FlipFrameBuffers();
 		return 0;
 	}
 

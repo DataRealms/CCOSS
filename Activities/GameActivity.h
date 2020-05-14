@@ -83,7 +83,7 @@ public:
 
 /* abstract class
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(GameActivity)
+EntityAllocation(GameActivity)
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////

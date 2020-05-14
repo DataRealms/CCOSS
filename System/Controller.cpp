@@ -8,15 +8,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Controller::Clear() {
-		for (int i = 0; i < CONTROLSTATECOUNT; ++i) {
-			m_ControlStates[i] = false;
-		}
+		std::fill_n(m_ControlStates, CONTROLSTATECOUNT, false);
 		m_AnalogMove.Reset();
 		m_AnalogAim.Reset();
 		m_AnalogCursor.Reset();
 
 		m_InputMode = CIM_PLAYER;
-		m_pControlled = 0;
+		m_ControlledActor = 0;
 		m_Team = 0;
 		m_Player = 0;
 		m_Disabled = false;
@@ -35,10 +33,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Controller::Create(InputMode mode, Actor *pControlled) {
+	int Controller::Create(InputMode mode, Actor *controlledActor) {
 		m_InputMode = mode;
-		m_pControlled = pControlled;
-		if (m_pControlled) { m_Team = m_pControlled->GetTeam(); }
+		m_ControlledActor = controlledActor;
+		if (m_ControlledActor) { m_Team = m_ControlledActor->GetTeam(); }
 
 		return Create();
 	}
@@ -78,16 +76,16 @@ namespace RTE {
 			altered = true;
 
 		// See if there's other analog input, only if the mouse isn't active (or the cursor will float if mouse is used!)
-		} else if (GetAnalogCursor().GetLargest() > 0.1 && !IsMouseControlled()) {
+		} else if (GetAnalogCursor().GetLargest() > 0.1F && !IsMouseControlled()) {
 			// See how much to accelerate the joystick input based on how long the stick has been pushed around
-			float acceleration = 0.5 + std::min(m_JoyAccelTimer.GetElapsedRealTimeS(), 0.5) * 6;
+			float acceleration = static_cast<float>(0.5 + std::min(m_JoyAccelTimer.GetElapsedRealTimeS(), 0.5) * 6);
 			cursorPos += GetAnalogCursor() * 10 * moveScale * acceleration;
 			altered = true;
 
 		// Digital movement
 		} else {
 			// See how much to accelerate the keyboard input based on how long any key has been pressed
-			float acceleration = 0.25 + std::min(m_KeyAccelTimer.GetElapsedRealTimeS(), 0.75) * 6;
+			float acceleration = static_cast<float>(0.25 + std::min(m_KeyAccelTimer.GetElapsedRealTimeS(), 0.75) * 6);
 
 			if (IsState(HOLD_LEFT)) {
 				cursorPos.m_X -= 10 * moveScale * acceleration;
@@ -111,24 +109,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool Controller::IsMouseControlled() const {
-		if (g_UInputMan.OverrideInput()) {
-			return UInputMan::DEVICE_MOUSE_KEYB;
-		} else {
-			return g_UInputMan.GetControlScheme(m_Player)->GetDevice() == UInputMan::DEVICE_MOUSE_KEYB;
-		}
-	}
+	bool Controller::IsMouseControlled() const { return g_UInputMan.OverrideInput() ? UInputMan::DEVICE_MOUSE_KEYB : g_UInputMan.GetControlScheme(m_Player)->GetDevice() == UInputMan::DEVICE_MOUSE_KEYB; }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Controller::GetTeam() const {
-		return m_pControlled ? m_pControlled->GetTeam() : m_Team;
-	}
+	int Controller::GetTeam() const { return m_ControlledActor ? m_ControlledActor->GetTeam() : m_Team; }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	void Controller::SetTeam(int team) {
-		if (m_pControlled) { m_pControlled->SetTeam(team); }
+	void Controller::SetTeam(short team) {
+		if (m_ControlledActor) { m_ControlledActor->SetTeam(team); }
 		m_Team = team;
 	}
 
@@ -136,16 +126,14 @@ namespace RTE {
 
 	void Controller::Update() {
 		// Reset all command states.
-		for (int i = 0; i < CONTROLSTATECOUNT; ++i) {
-			m_ControlStates[i] = false;
-		}
+		std::fill_n(m_ControlStates, CONTROLSTATECOUNT, false);
 		m_AnalogMove.Reset();
 		m_AnalogAim.Reset();
 		m_AnalogCursor.Reset();
 		m_MouseMovement.Reset();
 
 		// Update team indicator
-		if (m_pControlled) { m_Team = m_pControlled->GetTeam(); }
+		if (m_ControlledActor) { m_Team = m_ControlledActor->GetTeam(); }
 
 		// Player Input Mode
 		if (m_InputMode == CIM_PLAYER) {
@@ -164,9 +152,9 @@ namespace RTE {
 			}
 
 			// Update the AI state of the Actor we're controlling and to use any scripted AI defined for this Actor.
-			if (m_pControlled && !m_pControlled->UpdateAIScripted()) {
+			if (m_ControlledActor && !m_ControlledActor->UpdateAIScripted()) {
 				// If we can't, fall back on the legacy C++ implementation
-				m_pControlled->UpdateAI();
+				m_ControlledActor->UpdateAI();
 			}
 		}
 	}

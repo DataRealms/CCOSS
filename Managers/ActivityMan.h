@@ -122,7 +122,7 @@ public:
 
 /* abstract class
     // Concrete allocation and cloning definitions
-    ENTITYALLOCATION(Activity)
+    EntityAllocation(Activity)
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////

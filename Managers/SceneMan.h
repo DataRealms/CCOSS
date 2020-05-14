@@ -1714,6 +1714,10 @@ public:
 		bool back;
 	};
 
+    /// <summary>
+    /// Sets the current scene pointer to null
+    /// </summary>
+    void SceneMan::ClearCurrentScene();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1821,7 +1825,7 @@ private:
 
     void Clear();
 
-
+    
     // Disallow the use of some implicit methods.
     SceneMan(const SceneMan &reference);
     SceneMan & operator=(const SceneMan &rhs);

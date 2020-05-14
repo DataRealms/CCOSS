@@ -23,7 +23,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(SLTerrain, SceneLayer, 0)
+ConcreteClassInfo(SLTerrain, SceneLayer, 0)
 
 const string SLTerrain::TerrainFrosting::m_sClassName = "TerrainFrosting";
 BITMAP * SLTerrain::m_spTempBitmap16 = 0;

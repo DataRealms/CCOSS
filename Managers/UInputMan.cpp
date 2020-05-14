@@ -229,10 +229,9 @@ int UInputMan::InputScheme::Create()
 void UInputMan::InputScheme::SetPreset(int schemePreset)
 {
     m_SchemePreset = schemePreset;
-
-    if (m_SchemePreset == PRESET_XBOX360)
-    {
-		/*
+    switch (m_SchemePreset) {
+    case PRESET_XBOX360:
+        /*
         // Set up the default xbox 360 button bindings
         m_aInputMapping[INPUT_FIRE].SetJoyButton(JOY_1);
         m_aInputMapping[INPUT_FIRE].SetPresetDesc("A Button");
@@ -357,9 +356,7 @@ void UInputMan::InputScheme::SetPreset(int schemePreset)
 		m_aInputMapping[INPUT_AIM_RIGHT].SetDirection(3, 0, JOYDIR_TWO);
 		m_aInputMapping[INPUT_AIM_RIGHT].SetPresetDesc("D-Pad Right");
 
-
-    }
-    else if (m_SchemePreset == PRESET_P1DEFAULT) {
+    case PRESET_P1DEFAULT:
         m_aInputMapping[INPUT_L_UP].SetKey(KEY_W);
         m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_S);
         m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_A);
@@ -378,8 +375,8 @@ void UInputMan::InputScheme::SetPreset(int schemePreset)
         m_aInputMapping[INPUT_WEAPON_DROP].SetKey(KEY_G);
         m_aInputMapping[INPUT_WEAPON_PICKUP].SetKey(KEY_F);
         m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetKey(KEY_C);
-    }
-    else if (m_SchemePreset == PRESET_P2DEFAULT) {
+
+    case PRESET_P2DEFAULT:
         m_aInputMapping[INPUT_L_UP].SetKey(KEY_UP);
         m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_DOWN);
         m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_LEFT);
@@ -398,8 +395,8 @@ void UInputMan::InputScheme::SetPreset(int schemePreset)
         m_aInputMapping[INPUT_WEAPON_PICKUP].SetKey(KEY_9_PAD);
         m_aInputMapping[INPUT_WEAPON_CHANGE_PREV].SetKey(KEY_7_PAD);
         m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetKey(KEY_8_PAD);
-    }
-    else if (m_SchemePreset == PRESET_P3DEFAULT) {
+
+    case PRESET_P3DEFAULT:
         m_aInputMapping[INPUT_L_UP].SetKey(KEY_W);
         m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_S);
         m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_A);
@@ -417,8 +414,8 @@ void UInputMan::InputScheme::SetPreset(int schemePreset)
         m_aInputMapping[INPUT_CROUCH].SetKey(KEY_STOP);
         m_aInputMapping[INPUT_NEXT].SetKey(KEY_U);
         m_aInputMapping[INPUT_PREV].SetKey(KEY_Y);
-    }
-    else if (m_SchemePreset == PRESET_P4DEFAULT) {
+
+    case PRESET_P4DEFAULT:
         m_aInputMapping[INPUT_L_UP].SetKey(KEY_UP);
         m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_DOWN);
         m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_LEFT);
@@ -436,10 +433,9 @@ void UInputMan::InputScheme::SetPreset(int schemePreset)
         m_aInputMapping[INPUT_CROUCH].SetKey(KEY_STOP);
         m_aInputMapping[INPUT_NEXT].SetKey(KEY_5_PAD);
         m_aInputMapping[INPUT_PREV].SetKey(KEY_4_PAD);
-    }
+
     // Some generic defaults; no real preset is set
-    else
-    {
+    default:
         m_SchemePreset = PRESET_NONE;
 
         // Set up the default mouse button bindings

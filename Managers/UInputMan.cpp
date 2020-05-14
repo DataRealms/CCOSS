@@ -330,6 +330,7 @@ void UInputMan::InputScheme::SetPreset(int schemePreset)
 			break;
 
 		case PRESET_P3DEFAULT:
+            //TODO: Replace these with gamepad bindings.
 			m_aInputMapping[INPUT_L_UP].SetKey(KEY_W);
 			m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_S);
 			m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_A);
@@ -350,6 +351,7 @@ void UInputMan::InputScheme::SetPreset(int schemePreset)
 			break;
 
 		case PRESET_P4DEFAULT:
+            //TODO: Replace these with gamepad bindings.
 			m_aInputMapping[INPUT_L_UP].SetKey(KEY_UP);
 			m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_DOWN);
 			m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_LEFT);
@@ -369,8 +371,9 @@ void UInputMan::InputScheme::SetPreset(int schemePreset)
 			m_aInputMapping[INPUT_PREV].SetKey(KEY_4_PAD);
 			break;
 
-			// Some generic defaults; no real preset is set
+		// Some generic defaults; no real preset is set
 		default:
+            m_SchemePreset = PRESET_NONE;
 			// Set up the default mouse button bindings
 			m_aInputMapping[INPUT_FIRE].SetMouseButton(MOUSE_LEFT);
 			m_aInputMapping[INPUT_PIEMENU].SetMouseButton(MOUSE_RIGHT);

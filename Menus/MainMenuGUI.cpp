@@ -1277,13 +1277,15 @@ void MainMenuGUI::Update()
                         }
                         else
                         {
-                            UInputMan::InputPreset playerPreset = static_cast<UInputMan::InputPreset>(P1CLEAR - which - 1); // Player 1's default preset is at -1 and so on.
-                            UInputMan::Players inputPlayer = static_cast<UInputMan::Players>(which - P1CLEAR);
-                            UInputMan::InputDevice deviceType[4] = { UInputMan::DEVICE_MOUSE_KEYB, UInputMan::DEVICE_KEYB_ONLY, UInputMan::DEVICE_GAMEPAD_1, UInputMan::DEVICE_GAMEPAD_2 };
                             // Set to a default control preset.
+                            UInputMan::Players inputPlayer = static_cast<UInputMan::Players>(which - P1CLEAR);
+                            UInputMan::InputPreset playerPreset = static_cast<UInputMan::InputPreset>(P1CLEAR - which - 1); // Player 1's default preset is at -1 and so on.
                             g_UInputMan.GetControlScheme(inputPlayer)->SetPreset(playerPreset);
+                            
                             // Set to a device that fits this preset.
+                            UInputMan::InputDevice deviceType[4] = { UInputMan::DEVICE_MOUSE_KEYB, UInputMan::DEVICE_KEYB_ONLY, UInputMan::DEVICE_GAMEPAD_1, UInputMan::DEVICE_GAMEPAD_2 };
                             g_UInputMan.GetControlScheme(inputPlayer)->SetDevice(deviceType[inputPlayer]);
+                            
                             UpdateDeviceLabels();
 
 							// Set the dead zone slider value

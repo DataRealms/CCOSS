@@ -19,7 +19,7 @@ namespace RTE {
 
 //const string Emission::m_sClassName = "Emission";
 
-CONCRETECLASSINFO(Emission, Entity, 0)
+ConcreteClassInfo(Emission, Entity, 0)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

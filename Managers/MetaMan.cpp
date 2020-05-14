@@ -32,7 +32,7 @@ extern bool g_InActivity;
 namespace RTE {
 
 const string MetaMan::m_ClassName = "MetaMan";
-CONCRETECLASSINFO(MetaSave, Entity, 0)
+ConcreteClassInfo(MetaSave, Entity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

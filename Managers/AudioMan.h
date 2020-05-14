@@ -22,7 +22,7 @@ namespace RTE {
 	class AudioMan : public Singleton<AudioMan> {
 
 	public:
-		CLASSINFOGETTERS
+		ClassInfoGetters
 
 		// TODO: Add comments to all these.
 		enum PlaybackPriority {

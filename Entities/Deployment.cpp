@@ -24,7 +24,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(Deployment, SceneObject, 0)
+ConcreteClassInfo(Deployment, SceneObject, 0)
 
 
 BITMAP **Deployment::m_apArrowLeftBitmap = 0;

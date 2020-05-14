@@ -17,7 +17,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(MOPixel, MovableObject, 500)
+ConcreteClassInfo(MOPixel, MovableObject, 500)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -261,19 +261,19 @@ void MOPixel::SetToHitMOs(bool hitMOs)
 
 bool MOPixel::CollideAtPoint(HitData &hd)
 {
-    RTEAssert(hd.hitPoint.GetFloored() == m_Pos.GetFloored(), "Collision mismatch in MOPixel::CollideAtPoint!");
-    RTEAssert(hd.pBody[HITOR], "Valid MO not passed into MOPixel::CollideAtPoint!");
+    RTEAssert(hd.HitPoint.GetFloored() == m_Pos.GetFloored(), "Collision mismatch in MOPixel::CollideAtPoint!");
+    RTEAssert(hd.Body[HITOR], "Valid MO not passed into MOPixel::CollideAtPoint!");
 
-    hd.mass[HITEE] = m_Mass;
+    hd.TotalMass[HITEE] = m_Mass;
 
     // See if we were already hit by this MO earlier during this frame update.
-    if (m_AlreadyHitBy.find(hd.pBody[HITOR]->GetID()) != m_AlreadyHitBy.end())
+    if (m_AlreadyHitBy.find(hd.Body[HITOR]->GetID()) != m_AlreadyHitBy.end())
         // If we were hit, then remove so that if we 
-        m_AlreadyHitBy.erase(hd.pBody[HITOR]->GetID());
+        m_AlreadyHitBy.erase(hd.Body[HITOR]->GetID());
     // We weren't previously hit by this MO, so go ahead and apply collision response
     else {
         // Note that we now have been hit by this MO
-        m_AlreadyHitBy.insert(hd.pBody[HITOR]->GetID());
+        m_AlreadyHitBy.insert(hd.Body[HITOR]->GetID());
         
     }
 
@@ -423,7 +423,7 @@ void MOPixel::Draw(BITMAP *pTargetBitmap,
 
 /*
     if (m_pAtom->GetMaterial().id == c_GoldMaterialID) {
-        if (mode == g_DrawKey) {
+        if (mode == g_DrawMask) {
             
         }
         else if (mode == g_DrawMOID)
@@ -433,7 +433,7 @@ void MOPixel::Draw(BITMAP *pTargetBitmap,
                             m_Pos.GetFloorIntY() - targetPos.m_Y,
                             mode == g_DrawMaterial ? m_pAtom->GetMaterial()->GetSettleMaterialID() :
                                                    (mode == g_DrawAir ? g_MaterialAir :
-                                                   (mode == g_DrawKey ? g_MaskColor :
+                                                   (mode == g_DrawMask ? g_MaskColor :
                                                    (mode == g_DrawMOID ? m_MOID :
                                                    (mode == g_DrawNoMOID ? g_NoMOID : m_Color.GetIndex())))));
 

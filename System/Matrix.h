@@ -90,7 +90,7 @@ namespace RTE {
 		/// Gets whether or not this Matrix also mirrors the X component of any Vector it is multiplied with.
 		/// </summary>
 		/// <returns>A bool with the setting whether flipping the X components or not.</returns>
-		bool GetXFlipped() { return m_Flipped[X]; }
+		bool GetXFlipped() const { return m_Flipped[X]; }
 
 		/// <summary>
 		/// Sets whether or not this Matrix should also mirror the X component of any Vector it is multiplied with.
@@ -102,7 +102,7 @@ namespace RTE {
 		/// Gets whether or not this Matrix also mirrors the Y component of any Vector it is multiplied with.
 		/// </summary>
 		/// <returns>A bool with the setting whether flipping the Y components or not.</returns>
-		bool GetYFlipped() { return m_Flipped[Y]; }
+		bool GetYFlipped() const { return m_Flipped[Y]; }
 
 		/// <summary>
 		/// Sets whether or not this Matrix should also mirror the Y component of any Vector it is multiplied with.
@@ -315,12 +315,12 @@ namespace RTE {
 		/// Gets the class name of this Matrix.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this Matrix.</returns>
-		virtual const std::string & GetClassName() const { return m_ClassName; }
+		virtual const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:
 
-		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this.
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 	private:
 

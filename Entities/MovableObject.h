@@ -28,10 +28,10 @@ namespace RTE
 
 
 #pragma region Global Macro Definitions
-    #define SCRIPT_FUNCTION_NAMES(...) \
+    #define ScriptFunctionNames(...) \
         virtual std::vector<std::string> GetSupportedScriptFunctionNames() const { return {__VA_ARGS__}; }
 
-    #define ADD_SCRIPT_FUNCTION_NAMES(PARENT, ...) \
+    #define AddScriptFunctionNames(PARENT, ...) \
         virtual std::vector<std::string> GetSupportedScriptFunctionNames() const override { \
             std::vector<std::string> functionNames = PARENT::GetSupportedScriptFunctionNames(); \
             functionNames.insert(functionNames.end(), {__VA_ARGS__}); \
@@ -59,7 +59,7 @@ friend class LuaMan;
 // Public member variable, method and friend function declarations
 
 public:
-    SCRIPT_FUNCTION_NAMES("Create", "Destroy", "Update", "OnScriptRemoveOrDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
+    ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptRemoveOrDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
 
 enum MOType
 {
@@ -73,7 +73,7 @@ friend class Atom;
 
 /* Should be in all concrete subclasses
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(MovableObject)
+EnitityAllocation(MovableObject)
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1143,8 +1143,11 @@ ENTITYALLOCATION(MovableObject)
 //                  applied relative to the center of this MovableObject.
 // Return value:    None.
 
-    void AddImpulseForce(const Vector &impulse, const Vector &offset = Vector())
-        { RTEAssert(impulse.GetLargest() < 100000, "HUEG IMPULSE FORCE"); RTEAssert(offset.GetLargest() < 1000, "HUEG IMPULSE FORCE OFFSET"); m_ImpulseForces.push_back(std::make_pair(impulse, offset)); }
+	void AddImpulseForce(const Vector &impulse, const Vector &offset = Vector()) {
+		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
+		RTEAssert(offset.GetLargest() < 5000, "HUEG IMPULSE FORCE OFFSET");
+		m_ImpulseForces.push_back(std::make_pair(impulse, offset));
+	}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1158,9 +1161,10 @@ ENTITYALLOCATION(MovableObject)
 //                  force is being applied to the center of this MovableObject.
 // Return value:    None.
 
-    void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos)
-        { RTEAssert(impulse.GetLargest() < 100000, "HUEG IMPULSE FORCE");
-          m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * g_FrameMan.GetMPP())); }
+	void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos) {
+		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
+		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * g_FrameMan.GetMPP()));
+	}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

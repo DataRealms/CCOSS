@@ -45,7 +45,7 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-ABSTRACTCLASSINFO(GameActivity, Activity)
+AbstractClassInfo(GameActivity, Activity)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

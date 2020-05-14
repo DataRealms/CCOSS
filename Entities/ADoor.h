@@ -242,7 +242,7 @@ enum DoorState
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(ADoor)
+EnitityAllocation(ADoor)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

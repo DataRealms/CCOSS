@@ -37,7 +37,7 @@ extern bool g_ResetActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(GAScripted, GameActivity, 0)
+ConcreteClassInfo(GAScripted, GameActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

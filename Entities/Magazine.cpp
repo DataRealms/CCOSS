@@ -22,8 +22,8 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(Magazine, Attachable, 0)
-CONCRETECLASSINFO(Round, Entity, 0)
+ConcreteClassInfo(Magazine, Attachable, 0)
+ConcreteClassInfo(Round, Entity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

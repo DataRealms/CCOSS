@@ -21,7 +21,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SelectRand(int min, int max) { return min + static_cast<int>((max - min) * PosRand() + 0.5); }
+	int SelectRand(int min, int max) { return min + static_cast<int>((max - min) * PosRand() + 0.5F); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,11 +39,11 @@ namespace RTE {
 	float EaseIn(float start, float end, float progressScalar) {
 		if (progressScalar <= 0) {
 			return start;
-		} else if (progressScalar >= 1.0) {
+		} else if (progressScalar >= 1.0F) {
 			return end;
 		}
 		float t = 1 - progressScalar;
-		return (end - start) * (sinf(-t * c_HalfPI) + 1) + start;
+		return (end - start) * (std::sinf(-t * c_HalfPI) + 1) + start;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,16 +51,16 @@ namespace RTE {
 	float EaseOut(float start, float end, float progressScalar) {
 		if (progressScalar <= 0) {
 			return start;
-		} else if (progressScalar >= 1.0) {
+		} else if (progressScalar >= 1.0F) {
 			return end;
 		}
-		return (end - start) * -sinf(-progressScalar * c_HalfPI) + start;
+		return (end - start) * -std::sinf(-progressScalar * c_HalfPI) + start;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float EaseInOut(float start, float end, float progressScalar) {
-		return start * (2 * powf(progressScalar, 3) - 3 * powf(progressScalar, 2) + 1) + end * (3 * powf(progressScalar, 2) - 2 * powf(progressScalar, 3));
+		return start * (2 * std::powf(progressScalar, 3) - 3 * std::powf(progressScalar, 2) + 1) + end * (3 * std::powf(progressScalar, 2) - 2 * std::powf(progressScalar, 3));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,8 +124,8 @@ namespace RTE {
 
 	bool ASCIIFileContainsString(std::string filePath, std::string findString) {
 		// Open the script file so we can check it out
-		std::ifstream *pFile = new std::ifstream(filePath.c_str());
-		if (!pFile->good()) {
+		std::ifstream *file = new std::ifstream(filePath.c_str());
+		if (!file->good()) {
 			return false;
 		}
 		char rawLine[1024];
@@ -135,22 +135,19 @@ namespace RTE {
 		std::string::size_type commentPos = std::string::npos;
 		bool blockCommented = false;
 
-		while (!pFile->eof()) {
+		while (!file->eof()) {
 			// Go through the script file, line by line
-			pFile->getline(rawLine, 1024);
+			file->getline(rawLine, 1024);
 			line = rawLine;
 			pos = endPos = 0;
-			commentPos = std::string::npos;
 
 			// Check for block comments
-			if (!blockCommented && (commentPos = line.find("/*", 0)) != std::string::npos) { blockCommented = true; }
+			if ((commentPos = line.find("/*", 0) != std::string::npos) && !blockCommented) { blockCommented = true; }
 
 			// Find the end of the block comment
-			if (blockCommented) {
-				if ((commentPos = line.find("*/", commentPos == std::string::npos ? 0 : commentPos)) != std::string::npos) {
-					blockCommented = false;
-					pos = commentPos;
-				}
+			if (((commentPos = line.find("*/", commentPos == std::string::npos ? 0 : commentPos)) != std::string::npos) && blockCommented) {
+				blockCommented = false;
+				pos = commentPos;
 			}
 			// Process the line as usual
 			if (!blockCommented) {
@@ -161,16 +158,16 @@ namespace RTE {
 					pos = line.find(findString.c_str(), pos);
 					if (pos != std::string::npos && pos < commentPos) {
 						// Found it!
-						delete pFile;
-						pFile = 0;
+						delete file;
+						file = 0;
 						return true;
 					}
 				} while (pos != std::string::npos && pos < commentPos);
 			}
 		}
 		// Didn't find the search string
-		delete pFile;
-		pFile = 0;
+		delete file;
+		file = 0;
 		return false;
 	}
 }

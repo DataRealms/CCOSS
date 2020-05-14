@@ -10,8 +10,8 @@ namespace RTE {
 	class ThrownDevice : public HeldDevice {
 
 	public:
-		ENTITYALLOCATION(ThrownDevice);
-		CLASSINFOGETTERS
+		EnitityAllocation(ThrownDevice);
+		ClassInfoGetters
 
 #pragma region Creation
 		/// <summary>

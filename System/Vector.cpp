@@ -5,7 +5,7 @@
 
 namespace RTE {
 
-	const std::string Vector::m_ClassName = "Vector";
+	const std::string Vector::c_ClassName = "Vector";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -55,13 +55,13 @@ namespace RTE {
 
 	float Vector::GetAbsRadAngle() const {
 		if (m_X == 0) {
-			return m_Y > 0 ? -c_HalfPI : (m_Y < 0 ? c_HalfPI : 0);
+			return (m_Y > 0) ? -c_HalfPI : ((m_Y < 0) ? c_HalfPI : 0);
 		}
 		if (m_Y == 0) {
-			return m_X > 0 ? 0 : (m_X < 0 ? c_PI : 0);
+			return (m_X > 0) ? 0 : ((m_X < 0) ? c_PI : 0);
 		}
 		// TODO: Confirm that this is correct!")
-		float rawAngle = -atan(m_Y / m_X);
+		float rawAngle = -std::atan(m_Y / m_X);
 		if (m_X < 0) { rawAngle += c_PI; }
 
 		return rawAngle;
@@ -71,12 +71,12 @@ namespace RTE {
 
 	float Vector::GetAbsDegAngle() const {
 		if (m_X == 0) {
-			return m_Y > 0 ? -90 : (m_Y < 0 ? 90 : 0);
+			return (m_Y > 0) ? -90 : ((m_Y < 0) ? 90 : 0);
 		}
 		if (m_Y == 0) {
-			return m_X > 0 ? 0 : (m_X < 0 ? 180 : 0);
+			return (m_X > 0) ? 0 : ((m_X < 0) ? 180 : 0);
 		}
-		float rawAngle = -(atan(m_Y / m_X) / c_PI) * 180;
+		float rawAngle = -(std::atan(m_Y / m_X) / c_PI) * 180;
 		if (m_X < 0) { rawAngle += 180; }
 
 		return rawAngle;
@@ -86,8 +86,8 @@ namespace RTE {
 
 	Vector & Vector::RadRotate(float angle) {
 		angle = -angle;
-		float tempX = m_X * cos(angle) - m_Y * sin(angle);
-		float tempY = m_X * sin(angle) + m_Y * cos(angle);
+		float tempX = m_X * std::cos(angle) - m_Y * std::sin(angle);
+		float tempY = m_X * std::sin(angle) + m_Y * std::cos(angle);
 		m_X = tempX;
 		m_Y = tempY;
 
@@ -103,8 +103,8 @@ namespace RTE {
 		angle /= 180;
 		angle *= c_PI;
 
-		float tempX = m_X * cos(angle) - m_Y * sin(angle);
-		float tempY = m_X * sin(angle) + m_Y * cos(angle);
+		float tempX = m_X * std::cos(angle) - m_Y * std::sin(angle);
+		float tempY = m_X * std::sin(angle) + m_Y * std::cos(angle);
 		m_X = tempX;
 		m_Y = tempY;
 
@@ -116,11 +116,11 @@ namespace RTE {
 	Vector & Vector::AbsRotateTo(const Vector &refVector) {
 		float rawAngle;
 		if (refVector.m_X == 0) {
-			rawAngle = refVector.m_Y > 0 ? -c_HalfPI : (refVector.m_Y < 0 ? c_HalfPI : 0);
+			rawAngle = (refVector.m_Y > 0) ? -c_HalfPI : ((refVector.m_Y < 0) ? c_HalfPI : 0);
 		} else if (refVector.m_Y == 0) {
-			rawAngle = refVector.m_X > 0 ? 0 : (refVector.m_X < 0 ? c_PI : 0);
+			rawAngle = (refVector.m_X > 0) ? 0 : ((refVector.m_X < 0) ? c_PI : 0);
 		} else {
-			rawAngle = -atan(refVector.m_Y / refVector.m_X);
+			rawAngle = -std::atan(refVector.m_Y / refVector.m_X);
 			if (refVector.m_X < 0) { rawAngle += c_PI; }
 		}
 		rawAngle = -rawAngle;
@@ -128,8 +128,8 @@ namespace RTE {
 		m_X = GetMagnitude();
 		m_Y = 0.0;
 
-		float tempX = m_X * cos(rawAngle) - m_Y * sin(rawAngle);
-		float tempY = m_X * sin(rawAngle) + m_Y * cos(rawAngle);
+		float tempX = m_X * std::cos(rawAngle) - m_Y * std::sin(rawAngle);
+		float tempY = m_X * std::sin(rawAngle) + m_Y * std::cos(rawAngle);
 		m_X = tempX;
 		m_Y = tempY;
 
@@ -139,11 +139,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector & Vector::operator=(const Vector &rhs) {
-		if (*this == rhs) {
-			return *this;
+		if (*this != rhs) {
+			m_X = rhs.m_X;
+			m_Y = rhs.m_Y;
 		}
-		m_X = rhs.m_X;
-		m_Y = rhs.m_Y;
 		return *this;
 	}
 
@@ -151,11 +150,12 @@ namespace RTE {
 
 	Vector & Vector::operator=(const std::deque<Vector> &rhs) {
 		Clear();
-		if (rhs.empty()) { return *this; }
-		for (std::deque<Vector>::const_iterator itr = rhs.begin(); itr != rhs.end(); ++itr) {
-			*this += *itr;
+		if (!rhs.empty()) {
+			for (const Vector &vector : rhs) {
+				*this += vector;
+			}
+			*this /= rhs.size();
 		}
-		*this /= rhs.size();
 		return *this;
 	}
 }

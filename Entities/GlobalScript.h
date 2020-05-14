@@ -39,7 +39,7 @@ friend class LuaMan;
 
 public:
 
-ENTITYALLOCATION(GlobalScript)
+EnitityAllocation(GlobalScript)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GlobalScript

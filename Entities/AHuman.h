@@ -1007,6 +1007,18 @@ EnitityAllocation(AHuman)
 
 	virtual void SetLimbPathPushForce(float force);
 
+	/// <summary>
+	/// Gets the duration it takes this AHuman to fully charge a throw.
+	/// </summary>
+	/// <returns>The duration it takes to fully charge a throw in MS.</returns>
+	long GetThrowPrepTime() const { return m_ThrowPrepTime; }
+
+	/// <summary>
+	/// Sets the duration it takes this AHuman to fully charge a throw.
+	/// </summary>
+	/// <param name="newPrepTime">New duration to fully charge a throw in MS.</param>
+	void SetThrowPrepTime(long newPrepTime) { m_ThrowPrepTime = newPrepTime; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1106,8 +1118,8 @@ protected:
     int m_GoldInInventoryChunk;
     // For timing throws
     Timer m_ThrowTmr;
-    // The limit of time cycle while preparation of throwing 
-    long m_ThrowPrepTime;
+    
+    long m_ThrowPrepTime; //!< The duration it takes this AHuman to fully charge a throw.
 
     ////////////////
     // AI States

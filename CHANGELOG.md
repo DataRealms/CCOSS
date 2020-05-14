@@ -14,6 +14,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - New `Settings.ini` property `MenuTransitionDuration = floatValue` to control how fast transitions between different menu screens happen (e.g main menu to activity selection screen and back).  
 	This property is a multiplier, the default value is 1 (being the default hardcoded values), lower values decrease transition durations. 0 makes transitions instant.
+	
+- New `ADoor` sound properties:  
+	```
+	// Played when the door starts moving from fully open/closed position towards the opposite end.
+	DoorMoveStartSound = SoundContainer
+		AddSound = ContentFile
+			FilePath = pathToFile
+			
+	// Played while the door is moving, between fully open/closed position.
+	DoorMoveSound = SoundContainer
+		AddSound = ContentFile
+			FilePath = pathToFile
+		LoopSetting = -1 // Doesn't have to loop indefinitely, but generally should.
+	
+	// Played when the door stops moving and is at fully open/closed position.
+	DoorMoveEndSound = SoundContainer
+		AddSound = ContentFile
+			FilePath = pathToFile
+	```
 
 ### Changed
 

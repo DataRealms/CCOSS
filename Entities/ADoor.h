@@ -602,9 +602,7 @@ protected:
     // Timer for opening and closing the door
     Timer m_DoorMoveTimer;
     // The time it takes to open or close the door, in ms.
-    int m_DoorMoveTime;
-    // Sound for opening the hatch
-    SoundContainer m_DoorOpenSound;
+    int m_DoorMoveTime;   
     // Whether the clsoed position is the default
     bool m_ClosedByDefault;
     // How long the door stays in the non-default state before returning to the default
@@ -630,6 +628,9 @@ protected:
     // THe ID of the door material drawn to the terrain
     unsigned char m_DoorMaterialID;
 
+	SoundContainer m_DoorMoveStartSound; //!< Sound played when the door starts moving from fully open/closed position towards the opposite end.
+	SoundContainer m_DoorMoveSound; //!< Sound played while the door is moving, between open/closed position.
+	SoundContainer m_DoorMoveEndSound; //!< Sound played when the door stops moving and is at fully open/closed position.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

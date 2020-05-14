@@ -165,7 +165,6 @@ void ADoor::Clear()
     m_DoorState = CLOSED;
     m_DoorMoveTimer.Reset();
     m_DoorMoveTime = 0;
-    m_DoorOpenSound.Reset();
     m_ClosedByDefault = true;
     m_ResetDefaultDelay = 8000;
     m_ResetDefaultTimer.Reset();
@@ -177,6 +176,10 @@ void ADoor::Clear()
     m_LastDoorMaterialPos.Reset();
     m_DoorMaterialDrawn = false;
     m_MaterialDrawOverride = false;
+
+	m_DoorMoveStartSound.Reset();
+	m_DoorMoveSound.Reset();
+	m_DoorMoveEndSound.Reset();
 }
 
 
@@ -220,7 +223,9 @@ int ADoor::Create(const ADoor &reference)
 
     m_DoorState = reference.m_DoorState;
     m_DoorMoveTime = reference.m_DoorMoveTime;
-    m_DoorOpenSound = reference.m_DoorOpenSound;
+	m_DoorMoveStartSound = reference.m_DoorMoveStartSound;
+	m_DoorMoveSound = reference.m_DoorMoveSound;
+	m_DoorMoveEndSound = reference.m_DoorMoveEndSound;
     m_ClosedByDefault = reference.m_ClosedByDefault;
     // Set the inital door state to the opposite of the default, so it'll go to the default first thing
     // This will look cool, demonstrate that it's a movable door, and will force the drawing of the default state of door material
@@ -291,8 +296,12 @@ int ADoor::ReadProperty(std::string propName, Reader &reader)
     }
     else if (propName == "DoorMoveTime")
         reader >> m_DoorMoveTime;
-    else if (propName == "DoorOpenSound")
-        reader >> m_DoorOpenSound;
+	else if (propName == "DoorMoveStartSound") {
+		reader >> m_DoorMoveStartSound;
+	} else if (propName == "DoorMoveSound") {
+		reader >> m_DoorMoveSound;
+	} else if (propName == "DoorMoveEndSound")
+		reader >> m_DoorMoveEndSound;
     else if (propName == "ClosedByDefault")
     {
         reader >> m_ClosedByDefault;
@@ -347,8 +356,12 @@ int ADoor::Save(Writer &writer) const
     writer << Matrix(m_ClosedAngle);
     writer.NewProperty("DoorDelay");
     writer << m_DoorMoveTime;
-    writer.NewProperty("DoorOpenSound");
-    writer << m_DoorOpenSound;
+	writer.NewProperty("DoorMoveStartSound");
+	writer << m_DoorMoveStartSound;
+	writer.NewProperty("DoorMoveSound");
+	writer << m_DoorMoveSound;
+	writer.NewProperty("DoorMoveEndSound");
+	writer << m_DoorMoveEndSound;
     writer.NewProperty("ClosedByDefault");
     writer << m_ClosedByDefault;
     writer.NewProperty("ResetDefaultDelay");
@@ -379,6 +392,10 @@ void ADoor::Destroy(bool notInherited)
 //    g_MovableMan.RemoveEntityPreset(this);
 
 //    EraseDoorMaterial();
+
+	m_DoorMoveStartSound.Stop();
+	m_DoorMoveSound.Stop();
+	m_DoorMoveEndSound.Stop();
     delete m_pDoor;
 
     if (!notInherited)
@@ -427,8 +444,8 @@ void ADoor::SetID(const MOID newID)
 
 void ADoor::OpenDoor()
 {
-    if (m_DoorState == CLOSED)
-    {
+	if (m_DoorState == CLOSED) {
+		if (!m_DoorMoveStartSound.IsBeingPlayed()) { m_DoorMoveStartSound.Play(m_Pos); }
         m_DoorState = OPENING;
         m_DoorMoveTimer.Reset();
         // Clear the material rep of the door to the terrain from the closed state
@@ -454,8 +471,8 @@ void ADoor::OpenDoor()
 
 void ADoor::CloseDoor()
 {
-    if (m_DoorState == OPEN)
-    {
+	if (m_DoorState == OPEN) {
+		if (!m_DoorMoveStartSound.IsBeingPlayed()) { m_DoorMoveStartSound.Play(m_Pos); }
         m_DoorState = CLOSING;
         m_DoorMoveTimer.Reset();
         // Clear the material rep of the door to the terrain from the open state
@@ -576,12 +593,13 @@ void ADoor::Update()
     {
         m_pDoor->SetHFlipped(m_HFlipped);
 
-        if (m_DoorState == OPENING)
-        {
-            // Reached open state
-            if (m_DoorMoveTimer.IsPastSimMS(m_DoorMoveTime))
-            {
-                m_DoorState = OPEN;
+		if (m_DoorState == OPENING) {
+			if ((m_DoorMoveSound.GetLoopSetting() == -1) && !m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
+			// Reached open state
+			if (m_DoorMoveTimer.IsPastSimMS(m_DoorMoveTime)) {
+				m_DoorState = OPEN;
+				m_DoorMoveSound.Stop();
+				if (!m_DoorMoveEndSound.IsBeingPlayed()) { m_DoorMoveEndSound.Play(m_Pos); }
                 m_ResetDefaultTimer.Reset();
                 m_pDoor->SetJointPos(m_Pos + m_OpenOffset.GetXFlipped(m_HFlipped) * m_Rotation);
                 m_pDoor->SetRotAngle(m_Rotation.GetRadAngle() + (m_HFlipped ? -m_OpenAngle : m_OpenAngle));
@@ -606,12 +624,13 @@ void ADoor::Update()
                     m_pDoor->DeepCheck(true);
             }
         }
-        else if (m_DoorState == CLOSING)
-        {
-            // Reached closed state
-            if (m_DoorMoveTimer.IsPastSimMS(m_DoorMoveTime))
-            {
-                m_DoorState = CLOSED;
+		else if (m_DoorState == CLOSING) {
+			if ((m_DoorMoveSound.GetLoopSetting() == -1) && !m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
+			// Reached closed state
+			if (m_DoorMoveTimer.IsPastSimMS(m_DoorMoveTime)) {
+				m_DoorState = CLOSED;
+				m_DoorMoveSound.Stop();
+				if (!m_DoorMoveEndSound.IsBeingPlayed()) { m_DoorMoveEndSound.Play(m_Pos); }
                 m_ResetDefaultTimer.Reset();
                 m_pDoor->SetJointPos(m_Pos + m_ClosedOffset.GetXFlipped(m_HFlipped) * m_Rotation);
                 m_pDoor->SetRotAngle(m_Rotation.GetRadAngle() + (m_HFlipped ? -m_ClosedAngle : m_ClosedAngle));

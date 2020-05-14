@@ -187,6 +187,14 @@ namespace RTE {
 		bool EnableHats() const { return m_EnableHats; }
 #pragma endregion
 
+#pragma region Default Activity Settings
+		/// <summary>
+		/// Gets whether the intro and main menu should be skipped on game start and launch directly into the set default activity instead.
+		/// </summary>
+		/// <returns>Whether the game is set to launch directly into the set default activity or not.</returns>
+		bool LaunchIntoActivity() const { return m_LaunchIntoActivity; }
+#pragma endregion
+
 #pragma region Network Settings
 		/// <summary>
 		/// Gets the player name that is used in network multiplayer matches.
@@ -397,16 +405,16 @@ namespace RTE {
 
 #pragma region Misc Settings
 		/// <summary>
-		/// Gets whether the game intro is set to play on game startup or not.
+		/// Gets whether the game intro is set to be skipped on game startup or not.
 		/// </summary>
-		/// <returns>Whether intro is set to play or not.</returns>
-		bool PlayIntro() const { return m_PlayIntro; }
+		/// <returns>Whether intro is set to be skipped or not.</returns>
+		bool SkipIntro() const { return m_SkipIntro; }
 
 		/// <summary>
-		/// Sets whether the game intro should play on game startup or not.
+		/// Sets whether the game intro should be skipped on game startup or not.
 		/// </summary>
-		/// <param name="play">Whether to play game intro or not.</param>
-		void SetPlayIntro(bool play) { m_PlayIntro = play; }
+		/// <param name="play">Whether to skip[ game intro or not.</param>
+		void SetSkipIntro(bool play) { m_SkipIntro = play; }
 
 		/// <summary>
 		/// Gets whether tooltip display on certain UI elements is enabled or not.
@@ -525,7 +533,9 @@ namespace RTE {
 		unsigned int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
 		bool m_PreciseCollisions; //!<Whether to use additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just uses data from the last frame with less precision.
 
-		bool m_PlayIntro; //!< Whether to play the intro of the game.	
+		bool m_LaunchIntoActivity; //!< Whether to skip the intro and main menu and launch directly into the set default activity instead.
+
+		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
 		bool m_ToolTips; //!< Whether ToolTips are enabled or not.
 		bool m_DisableLoadingScreen; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
 		unsigned short m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.

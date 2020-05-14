@@ -1595,8 +1595,8 @@ void Activity::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 
 void ActivityMan::Clear()
 {
-    m_DefaultActivityType = "GABaseDefense";
-    m_DefaultActivityName = "Default Activity";
+    m_DefaultActivityType = "GATutorial";
+    m_DefaultActivityName = "Tutorial Mission";
     m_pStartActivity = 0;
     m_pActivity = 0;
     m_LastMusicPath = "";

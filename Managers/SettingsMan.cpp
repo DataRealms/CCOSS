@@ -56,7 +56,9 @@ namespace RTE {
 		m_RecommendedMOIDCount = 240;
 		m_PreciseCollisions = true;
 
-		m_PlayIntro = true;
+		m_LaunchIntoActivity = false;
+
+		m_SkipIntro = false;
 		m_ToolTips = true;
 		m_DisableLoadingScreen = true;
 		m_LoadingScreenReportPrecision = 100;
@@ -134,6 +136,8 @@ namespace RTE {
 			reader >> m_EndlessMode;
 		} else if (propName == "EnableHats") {
 			reader >> m_EnableHats;
+		} else if (propName == "LaunchIntoActivity") {
+			reader >> m_LaunchIntoActivity;
 		} else if (propName == "DefaultActivityType") {
 			g_ActivityMan.SetDefaultActivityType(reader.ReadPropValue());
 		} else if (propName == "DefaultActivityName") {
@@ -163,8 +167,8 @@ namespace RTE {
 			reader >> m_AllowSavingToBase;
 		} else if (propName == "ShowMetaScenes") {
 			reader >> m_ShowMetaScenes;
-		} else if (propName == "PlayIntro") {
-			reader >> m_PlayIntro;
+		} else if (propName == "SkipIntro") {
+			reader >> m_SkipIntro;
 		} else if (propName == "ToolTips") {
 			reader >> m_ToolTips;
 		} else if (propName == "DisableLoadingScreen") {
@@ -302,6 +306,8 @@ namespace RTE {
 		writer.NewDivider(false);
 		writer.NewLineString("// Default Activity Settings", false);
 		writer.NewLine(false);
+		writer.NewProperty("LaunchIntoActivity");
+		writer << m_LaunchIntoActivity;
 		writer.NewProperty("DefaultActivityType");
 		writer << g_ActivityMan.GetDefaultActivityType();
 		writer.NewProperty("DefaultActivityName");
@@ -346,8 +352,8 @@ namespace RTE {
 		writer.NewDivider(false);
 		writer.NewLineString("// Misc Settings", false);
 		writer.NewLine(false);
-		writer.NewProperty("PlayIntro");
-		writer << m_PlayIntro;
+		writer.NewProperty("SkipIntro");
+		writer << m_SkipIntro;
 		writer.NewProperty("ToolTips");
 		writer << m_ToolTips;
 		writer.NewProperty("DisableLoadingScreen");

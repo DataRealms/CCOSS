@@ -71,7 +71,7 @@ bool IntRect::IntersectionCut(const IntRect &rhs)
 
 void SceneMan::Clear()
 {
-    m_DefaultSceneName = "Physics Test";
+    m_DefaultSceneName = "Tutorial Bunker";
     m_pSceneToLoad = 0;
     m_PlaceObjects = true;
 	m_PlaceUnits = true;

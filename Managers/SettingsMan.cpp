@@ -175,7 +175,7 @@ namespace RTE {
 			g_ConsoleMan.SetConsoleScreenSize(std::stof(reader.ReadPropValue()));
 		} else if (propName == "AdvancedPerformanceStats") {
 			g_PerformanceMan.ShowAdvancedPerformanceStats(std::stoi(reader.ReadPropValue()));
-		} else if (propName == "MenuTransitionSpeed") {
+		} else if (propName == "MenuTransitionDuration") {
 			SetMenuTransitionDurationMultiplier(std::stof(reader.ReadPropValue()));
 		} else if (propName == "PrintDebugInfo") {
 			reader >> m_PrintDebugInfo;

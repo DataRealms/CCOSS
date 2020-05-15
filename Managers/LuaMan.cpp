@@ -60,10 +60,14 @@ int AddFileAndLineToError(lua_State* pState) {
         lua_getinfo(pState, "Sln", &luaDebug);
         std::string errorString = lua_tostring(pState, -1);
 
-        std::stringstream messageStream;
-        messageStream << ((luaDebug.name == nullptr || strstr(luaDebug.name, ".rte") == nullptr) ? luaDebug.short_src : luaDebug.name);
-        messageStream << ":" << luaDebug.currentline << "\n" << errorString;
-        lua_pushstring(pState, messageStream.str().c_str());
+        if (errorString.find(".lua") != std::string::npos) {
+            lua_pushstring(pState, errorString.c_str());
+        } else {
+            std::stringstream messageStream;
+            messageStream << ((luaDebug.name == nullptr || strstr(luaDebug.name, ".rte") == nullptr) ? luaDebug.short_src : luaDebug.name);
+            messageStream << ":" << luaDebug.currentline << ": " << errorString;
+            lua_pushstring(pState, messageStream.str().c_str());
+        }
     }
 
    return 1;

@@ -157,46 +157,29 @@ AddScriptFunctionNames(MOSRotating, "OnAttach", "OnDetach")
     virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRootParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MO which is the ultimate root parent of this Attachable and
-//                  its parent.
-// Arguments:       None.
-// Return value:    A pointer to the highest root parent of this Attachable.
+	/// <summary>
+	/// Gets the MO which is the parent of this Attachable.
+	/// </summary>
+	/// <returns>A pointer to the parent of this Attachable.</returns>
+	MovableObject * GetParent() override { return m_pParent; }
 
-    virtual MovableObject * GetRootParent() { return m_pParent ? m_pParent->GetRootParent() : this; }
+	/// <summary>
+	/// Gets the MO which is the parent of this Attachable. 
+	/// </summary>
+	/// <returns>A pointer to the parent of this Attachable.</returns>
+	const MovableObject * GetParent() const override { return m_pParent; }
 
+	/// <summary>
+	/// Gets the MO which is the ultimate root parent of this Attachable and its parent.
+	/// </summary>
+	/// <returns>A pointer to the highest root parent of this Attachable.</returns>
+	MovableObject * GetRootParent() override { return m_pParent ? m_pParent->GetRootParent() : this; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRootParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MO which is the ultimate root parent of this Attachable and
-//                  its parent.
-// Arguments:       None.
-// Return value:    A pointer to the highest root parent of this Attachable.
-
-    virtual const MovableObject * GetRootParent() const { return m_pParent ? m_pParent->GetRootParent() : this; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MO which is the parent of this Attachable.
-// Arguments:       None.
-// Return value:    A pointer to the highest root parent of this Attachable.
-
-	virtual MovableObject * GetParent() { return m_pParent; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MO which is the parent of this Attachable. 
-// Arguments:       None.
-// Return value:    A pointer to the highest root parent of this Attachable.
-
-	virtual const MovableObject * GetParent() const { return m_pParent; }
+	/// <summary>
+	/// Gets the MO which is the ultimate root parent of this Attachable and its parent.
+	/// </summary>
+	/// <returns>A pointer to the highest root parent of this Attachable.</returns>
+	const MovableObject * GetRootParent() const override { return m_pParent ? m_pParent->GetRootParent() : this; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

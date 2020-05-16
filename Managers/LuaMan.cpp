@@ -589,6 +589,10 @@ int LuaMan::Create()
             .def("IsOnScenePoint", &SceneObject::IsOnScenePoint),
 
         ABSTRACTLUABINDING(MovableObject, SceneObject)
+			.def("GetParent", (MovableObject * (MovableObject::*)())&MovableObject::GetParent)
+			.def("GetParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetParent)
+			.def("GetRootParent", (MovableObject * (MovableObject::*)())&MovableObject::GetRootParent)
+			.def("GetRootParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetRootParent)
 			.property("Material", &MovableObject::GetMaterial)
 			.def("ReloadScripts", &MovableObject::ReloadScripts)
             .def("HasScript", &MovableObject::HasScript)
@@ -784,10 +788,6 @@ int LuaMan::Create()
 			.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator),
 
         CONCRETELUABINDING(Attachable, MOSRotating)
-            .def("GetRootParent", (MovableObject * (Attachable::*)())&Attachable::GetRootParent)
-            .def("GetRootParent", (const MovableObject * (Attachable::*)() const)&Attachable::GetRootParent)
-			.def("GetParent", (MovableObject * (Attachable::*)())&Attachable::GetParent)
-			.def("GetParent", (const MovableObject * (Attachable::*)() const)&Attachable::GetParent)
 			.property("ParentOffset", &Attachable::GetParentOffset, &Attachable::SetParentOffset)
             .property("JointOffset", &Attachable::GetJointOffset, &Attachable::SetJointOffset)
             .property("JointStiffness", &Attachable::GetJointStiffness, &Attachable::SetJointStiffness)

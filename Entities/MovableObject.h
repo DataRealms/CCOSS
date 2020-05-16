@@ -533,25 +533,28 @@ EntityAllocation(MovableObject)
     virtual float GetSharpness() const { return m_Sharpness; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRootParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     **HAcK** Just returns a pointer to this MO, this is to enable
-//                  Attachables to get their root nodes;
-// Arguments:       None.
-// Return value:    A pointer to this MovableObject.
+	/// <summary>
+	/// Gets the MO which is the parent of this Attachable.
+	/// </summary>
+	/// <returns>A pointer to the parent of this Attachable.</returns>
+	virtual MovableObject * GetParent() { return this; }
 
+	/// <summary>
+	/// Gets the MO which is the parent of this Attachable. 
+	/// </summary>
+	/// <returns>A pointer to the parent of this Attachable.</returns>
+	virtual const MovableObject * GetParent() const { return this; }
+
+	/// <summary>
+	/// Returns a pointer to this MO, this is to enable Attachables to get their root nodes.
+	/// </summary>
+	/// <returns>A pointer to this MovableObject.</returns>
     virtual MovableObject * GetRootParent() { return this; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRootParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     **HAcK** Just returns a pointer to this MO, this is to enable
-//                  Attachables to get their root nodes;
-// Arguments:       None.
-// Return value:    A pointer to this MovableObject.
-
+	/// <summary>
+	/// Returns a pointer to this MO, this is to enable Attachables to get their root nodes.
+	/// </summary>
+	/// <returns>A pointer to this MovableObject.</returns>
     virtual const MovableObject * GetRootParent() const { return this; }
 
 

@@ -57,6 +57,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `Settings.ini` property `PlayIntro` renamed to `SkipIntro` and functionality changed to actually skip the intro and load user directly into main menu, rather than into the set default activity.
 
+- Lua calls for `GetParent` and `GetRootParent` can now be called by any `MovableObject` rather than being limited to `Attachable` only. ([Issue #102](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/102))  
+	In some cases a cast to the appropriate type (`ToWhateverType`, e.g `ToMOSRotating`) will be needed when attempting to manipulate the object returned, because it will be returned as `MovableObject` if it is the root parent.  
+	In cases where you need to iterate over a parent's attachable list the parent must be cast to the appropriate type that actually has an attachable list to iterate over.  
+	For example:  
+	```
+	for attachable in ToMOSRotating(self:GetParent()).Attachables do
+		...
+	end
+	
+	Or
+	
+	local parent = ToMOSRotating(self:GetParent());
+	for attachable in parent.Attachables do
+		...
+	end
+	```
+
 ### Fixed
 
 - Control schemes will no longer get deleted when being configured. Resetting the control scheme will load a preset instead of leaving it blank. ([Issue #121](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/121))

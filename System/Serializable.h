@@ -151,7 +151,7 @@ namespace RTE {
 		/// <summary>
 		/// Clears all the member variables of this Object, effectively resetting the members of this abstraction level only.
 		/// </summary>
-		void Clear() { ; }
+		void Clear() {}
 	};
 }
 #endif

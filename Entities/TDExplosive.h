@@ -4,13 +4,15 @@
 #include "ThrownDevice.h"
 
 namespace RTE {
+
 	/// <summary>
-	/// [Concrete Class] -  A thrown device that explodes after its trigger delay is completed after its activation.
+	/// [Concrete Class] - A thrown device that explodes after its trigger delay is completed after its activation.
 	/// </summary>
 	class TDExplosive : public ThrownDevice {
 
 	public:
-		EntityAllocation(TDExplosive);
+
+		EntityAllocation(TDExplosive)
 		ClassInfoGetters
 
 #pragma region Creation
@@ -25,6 +27,24 @@ namespace RTE {
 		/// <param name="reference">A reference to the TDExplosive to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const TDExplosive &reference);
+#pragma endregion
+
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a TDExplosive object before deletion from system memory.
+		/// </summary>
+		virtual ~TDExplosive() { Destroy(true); }
+
+		/// <summary>
+		/// Destroys and resets (through Clear()) the SceneLayer object.
+		/// </summary>
+		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
+		virtual void Destroy(bool notInherited = false) { if (!notInherited) { ThrownDevice::Destroy(); } Clear(); }
+
+		/// <summary>
+		/// Resets the entire TDExplosive, including its inherited members, to their default settings or values.
+		/// </summary>
+		virtual void Reset() { Clear(); ThrownDevice::Reset(); }
 #pragma endregion
 
 #pragma region INI Handling
@@ -48,25 +68,21 @@ namespace RTE {
 		virtual int Save(Writer &writer) const;
 #pragma endregion
 
-#pragma region Destruction
+#pragma region Getters and Setters
 		/// <summary>
-		/// Destructor method used to clean up a TDExplosive object before deletion from system memory.
+		/// If true, then the frame will not be changed automatically during update
 		/// </summary>
-		virtual ~TDExplosive() { Destroy(true); }
+		/// <returns>Whether or not the TDExplosive's Frame will change automatically during update</returns>
+		bool IsAnimatedManually() const { return m_IsAnimatedManually; }
 
 		/// <summary>
-		/// Destroys and resets (through Clear()) the SceneLayer object.
+		/// Sets whether this TDExplosive is animated manually.
 		/// </summary>
-		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false);
+		/// <param name="isAnimatedManually">Whether or not to animate manually</param>
+		void SetAnimatedManually(bool isAnimatedManually) { m_IsAnimatedManually = isAnimatedManually; }
 #pragma endregion
 
 #pragma region Virtual Override Methods
-		/// <summary>
-		/// Resets the entire TDExplosive, including its inherited members, to their default settings or values.
-		/// </summary>
-		virtual void Reset() { Clear(); ThrownDevice::Reset(); }
-
 		/// <summary>
 		/// Updates this MovableObject. Supposed to be done every frame.
 		/// </summary>
@@ -82,24 +98,11 @@ namespace RTE {
 		virtual void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
 #pragma endregion
 
-#pragma region Getters and Setters
-		/// <summary>
-		/// If true, then the frame will not be changed automatically during update
-		/// </summary>
-		/// <returns>Whether or not the TDExplosive's Frame will change automatically during update</returns>
-		bool IsAnimatedManually() const { return m_IsAnimatedManually; }
-
-		/// <summary>
-		/// Sets whether this TDExplosive is animated manually.
-		/// </summary>
-		/// <param name="isAnimatedManually">Whether or not to animate manually</param>
-		void SetAnimatedManually(bool isAnimatedManually) { m_IsAnimatedManually = isAnimatedManually; }
-#pragma endregion
-
 	protected:
-		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class
 
-		bool m_IsAnimatedManually; //!< If true m_Frame is not changed during an update hence the animation is done by external Lua code
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
+
+		bool m_IsAnimatedManually; //!< If true m_Frame is not changed during an update hence the animation is done by external Lua code.
 
 	private:
 		/// <summary>
@@ -108,8 +111,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		TDExplosive(const TDExplosive &reference);
-		TDExplosive & operator=(const TDExplosive &rhs);
+		TDExplosive(const TDExplosive &reference) {}
+		TDExplosive & operator=(const TDExplosive &rhs) {}
 	};
 }
 

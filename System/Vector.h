@@ -67,7 +67,7 @@ namespace RTE {
 		virtual int ReadProperty(std::string propName, Reader &reader);
 
 		/// <summary>
-		/// Saves the complete state of this Vector to an output stream for later recreation with Create(Reader &reader);
+		/// Saves the complete state of this Vector to an output stream for later recreation with Create(Reader &reader).
 		/// </summary>
 		/// <param name="writer">A Writer that the Vector will save itself with.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>

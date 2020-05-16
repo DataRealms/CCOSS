@@ -2750,7 +2750,7 @@ int UInputMan::Update()
         // Manipulate timescaling
         if (KeyHeld(KEY_2))
             g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() + 0.01);
-        if (KeyHeld(KEY_1) && g_TimerMan.GetTimeScale() > 0.01)
+        if (KeyHeld(KEY_1) && g_TimerMan.GetTimeScale() - 0.01 > 0.001)
             g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() - 0.01);
 
         // Increase real to sim cap

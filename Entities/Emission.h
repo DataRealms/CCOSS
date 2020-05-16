@@ -34,7 +34,7 @@ class Emission :
 public:
 
 	// Concrete allocation and cloning definitions
-	EnitityAllocation(Emission)
+	EntityAllocation(Emission)
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Constructor:     Emission

@@ -14,7 +14,7 @@ namespace RTE {
 	class SoundContainer : public Entity {
 		
 	public:
-		EnitityAllocation(SoundContainer)
+		EntityAllocation(SoundContainer)
 		ClassInfoGetters
 		
 		/// <summary>

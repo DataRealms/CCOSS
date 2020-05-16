@@ -41,7 +41,7 @@ public:
 	friend class LuaMan;
 
 // Concrete allocation and cloning definitions
-EnitityAllocation(AEmitter)
+EntityAllocation(AEmitter)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

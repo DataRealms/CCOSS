@@ -49,7 +49,7 @@ namespace RTE
 	public:
 
 		// Concrete allocation and cloning definitions
-		EnitityAllocation(MultiplayerGame)
+		EntityAllocation(MultiplayerGame)
 
 
 		enum MultiplayerGameMode

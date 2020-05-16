@@ -66,7 +66,7 @@ public:
 
 /* Not concrete
 // Concrete allocation and cloning definitions
-EnitityAllocation(EditorActivity)
+EntityAllocation(EditorActivity)
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////

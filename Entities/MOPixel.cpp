@@ -197,7 +197,7 @@ Material const * MOPixel::GetMaterial() const
 
 int MOPixel::GetDrawPriority() const
 {
-    return m_pAtom->GetMaterial()->priority;
+    return m_pAtom->GetMaterial()->GetPriority();
 }
 
 
@@ -431,7 +431,7 @@ void MOPixel::Draw(BITMAP *pTargetBitmap,
 */
     putpixel(pTargetBitmap, m_Pos.GetFloorIntX() - targetPos.m_X,
                             m_Pos.GetFloorIntY() - targetPos.m_Y,
-                            mode == g_DrawMaterial ? m_pAtom->GetMaterial()->GetSettleMaterialID() :
+                            mode == g_DrawMaterial ? m_pAtom->GetMaterial()->GetSettleMaterial() :
                                                    (mode == g_DrawAir ? g_MaterialAir :
                                                    (mode == g_DrawMask ? g_MaskColor :
                                                    (mode == g_DrawMOID ? m_MOID :

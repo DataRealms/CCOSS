@@ -604,7 +604,7 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
             m_pTempBitmapA->SetColorKey(g_MaskColor);
 
             if (mode == g_DrawMaterial)
-                DrawMaterial(m_aSprite, m_pTempBitmapA, GetSettleMaterialID());
+                DrawMaterial(m_aSprite, m_pTempBitmapA, GetSettleMaterial());
             else if (mode == g_DrawAir)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, g_MaterialAir);
             else if (mode == g_DrawMask)
@@ -644,7 +644,7 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
         m_aSprite->SetPos(spritePos.m_X, spritePos.m_Y);
 
         if (mode == g_DrawMaterial)
-            DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, GetSettleMaterialID());
+            DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, GetSettleMaterial());
         else if (mode == g_DrawAir)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_MaterialAir);
         else if (mode == g_DrawMask)

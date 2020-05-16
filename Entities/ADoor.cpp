@@ -264,7 +264,7 @@ int ADoor::ReadProperty(std::string propName, Reader &reader)
         delete m_pDoor;
         m_pDoor = new Attachable;
         reader >> m_pDoor;
-        m_DoorMaterialID = m_pDoor->GetMaterial()->id;
+        m_DoorMaterialID = m_pDoor->GetMaterial()->GetIndex();
     }
     else if (propName == "OpenOffset")
         reader >> m_OpenOffset;

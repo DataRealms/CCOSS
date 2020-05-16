@@ -248,7 +248,7 @@ void TerrainDebris::ApplyDebris(SLTerrain *pTerrain)
 				if (checkPixel != g_MaterialAir)
 				{
 					// Found target material
-					if (checkPixel == m_TargetMaterial.id)
+					if (checkPixel == m_TargetMaterial.GetIndex())
 					{
 						place = true;
 						break;
@@ -287,7 +287,7 @@ void TerrainDebris::ApplyDebris(SLTerrain *pTerrain)
         // Draw the color sprite onto the terrain color layer.
         draw_sprite(pTerrBitmap, m_aBitmaps[itr->first], itr->second.m_X, itr->second.m_Y);
         // Draw the material representation onto the terrain's material layer
-        draw_character_ex(pMatBitmap, m_aBitmaps[itr->first], itr->second.m_X, itr->second.m_Y, m_Material.id, -1);
+        draw_character_ex(pMatBitmap, m_aBitmaps[itr->first], itr->second.m_X, itr->second.m_Y, m_Material.GetIndex(), -1);
     }
 
     release_bitmap(pTerrBitmap);

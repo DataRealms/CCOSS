@@ -309,7 +309,7 @@ EntityAllocation(MOPixel)
 // Arguments:       None.
 // Return value:    Whether this MovableObject is of Gold or not.
 
-    virtual bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->id == c_GoldMaterialID; }
+    virtual bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->GetIndex() == c_GoldMaterialID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

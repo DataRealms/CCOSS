@@ -169,7 +169,7 @@ Material const * MOSParticle::GetMaterial() const
 
 int MOSParticle::GetDrawPriority() const
 {
-    return m_pAtom->GetMaterial()->priority;
+    return m_pAtom->GetMaterial()->GetPriority();
 }
 
 
@@ -402,7 +402,7 @@ void MOSParticle::Draw(BITMAP *pTargetBitmap,
 
     // Draw the requested material sihouette on the material bitmap
     if (mode == g_DrawMaterial)
-        draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), m_SettleMaterialDisabled ? GetMaterial()->id : GetMaterial()->GetSettleMaterialID(), -1);
+        draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
     else if (mode == g_DrawAir)
         draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), g_MaterialAir, -1);
     else if (mode == g_DrawMask)

@@ -766,7 +766,7 @@ bool MOSRotating::CollideAtPoint(HitData &hd)
     // The wrong way happens when things are sunk into each other, and thus getting 'hooked' on each other
     if (hd.VelDiff.Dot(hd.BitmapNormal) < 0)
     {
-        Vector hitAcc = -hd.VelDiff * (1 + (hd.Body[HITOR]->GetMaterial()->restitution * GetMaterial()->restitution));
+        Vector hitAcc = -hd.VelDiff * (1 + (hd.Body[HITOR]->GetMaterial()->GetRestitution() * GetMaterial()->GetRestitution()));
 
         float hittorLever = hd.HitRadius[HITOR].GetPerpendicular().Dot(hd.BitmapNormal);
         float hitteeLever = hd.HitRadius[HITEE].GetPerpendicular().Dot(hd.BitmapNormal);
@@ -863,11 +863,11 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
 
     float impulseForce = hd.ResImpulse[HITEE].GetMagnitude();
     Material const * myMat = GetMaterial();
-    float myStrength = myMat->strength / hd.Body[HITOR]->GetSharpness();
+    float myStrength = myMat->GetIntegrity() / hd.Body[HITOR]->GetSharpness();
 
 
     // See if there is enough energy in the collision for the particle to penetrate
-    if (impulseForce * hd.Body[HITOR]->GetSharpness() > myMat->strength)
+    if (impulseForce * hd.Body[HITOR]->GetSharpness() > myMat->GetIntegrity())
     {
         // Ok penetration happened, now figure out if and where the exit point
         // would be by tracing a rasterized line through the sprite.
@@ -1502,7 +1502,7 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
                     tally -= 1.0;
                     (*itr)->SetPos((*itr)->GetPos() - m_Vel.GetNormalized() * depth);
                     (*itr)->SetVel(Vector(velMag * splashDir * PosRand(), -velMag * PosRand()));
-                    m_DeepHardness += (*itr)->GetMaterial()->strength * (*itr)->GetMaterial()->pixelDensity;
+                    m_DeepHardness += (*itr)->GetMaterial()->GetIntegrity() * (*itr)->GetMaterial()->GetPixelDensity();
                     g_MovableMan.AddParticle(*itr);
                     *itr = 0;
                 }
@@ -1937,7 +1937,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 // TODO: Fix that MaterialAir and KeyColor don't work at all because they're drawing 0 to a field of 0's
         // Draw the requested material sihouette on the material bitmap
         if (mode == g_DrawMaterial)
-            draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_SettleMaterialDisabled ? GetMaterial()->id : GetMaterial()->GetSettleMaterialID(), -1);
+            draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
         else if (mode == g_DrawAir)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_MaterialAir, -1);
         else if (mode == g_DrawMask)

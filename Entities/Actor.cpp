@@ -1564,11 +1564,11 @@ void Actor::Update()
                             new Atom(Vector(), AuMat, 0, AuMat.color, 2),
                             0);
 */
-            MOPixel *pixelMO = new MOPixel(AuMat->color,
-                                           AuMat->pixelDensity,
+            MOPixel *pixelMO = new MOPixel(AuMat->GetColor(),
+                                           AuMat->GetPixelDensity(),
                                            Vector(m_Pos.m_X, m_Pos.m_Y - 10),
                                            Vector(4 * NormalRand(), RangeRand(-5, -7)),
-                                           new Atom(Vector(), AuMat->id, 0, AuMat->color, 2),
+                                           new Atom(Vector(), AuMat->GetIndex(), 0, AuMat->GetColor(), 2),
                                            0);
 
             pixelMO->SetToHitMOs(false);

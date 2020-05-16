@@ -342,7 +342,7 @@ namespace RTE {
 				// Edit the normal accordingly.
 				m_LastHit.BitmapNormal[m_Dom] = -m_Increment[m_Dom];
 				// Bounce according to the collision.
-				hitAcc[m_Dom] = -hitAcc[m_Dom] - hitAcc[m_Dom] * m_Material->restitution * domMaterial->restitution;
+				hitAcc[m_Dom] = -hitAcc[m_Dom] - hitAcc[m_Dom] * m_Material->GetRestitution() * domMaterial->GetRestitution();
 			}
 
 			// Check for and react upon a collision in the submissive direction of travel.
@@ -354,7 +354,7 @@ namespace RTE {
 				// Edit the normal accordingly.
 				m_LastHit.BitmapNormal[m_Sub] = -m_Increment[m_Sub];
 				// Bounce according to the collision.
-				hitAcc[m_Sub] = -hitAcc[m_Sub] - hitAcc[m_Sub] * m_Material->restitution * subMaterial->restitution;
+				hitAcc[m_Sub] = -hitAcc[m_Sub] - hitAcc[m_Sub] * m_Material->GetRestitution() * subMaterial->GetRestitution();
 			}
 
 			// If hit right on the corner of a pixel, bounce straight back with no friction.
@@ -364,16 +364,16 @@ namespace RTE {
 				m_LastHit.BitmapNormal[m_Sub] = -m_Increment[m_Sub];
 
 				hit[m_Dom] = true;
-				hitAcc[m_Dom] = -hitAcc[m_Dom] - hitAcc[m_Dom] * m_Material->restitution * hitMaterial->restitution;
+				hitAcc[m_Dom] = -hitAcc[m_Dom] - hitAcc[m_Dom] * m_Material->GetRestitution() * hitMaterial->GetRestitution();
 				hit[m_Sub] = true;
-				hitAcc[m_Sub] = -hitAcc[m_Sub] - hitAcc[m_Sub] * m_Material->restitution * hitMaterial->restitution;
+				hitAcc[m_Sub] = -hitAcc[m_Sub] - hitAcc[m_Sub] * m_Material->GetRestitution() * hitMaterial->GetRestitution();
 			} else if (hit[m_Dom] && !hit[m_Sub]) {
 				// Calculate the effects of friction.
-				m_LastHit.BitmapNormal[m_Sub] = -m_Increment[m_Sub] * m_Material->friction * domMaterial->friction;
-				hitAcc[m_Sub] = -hitAcc[m_Sub] * m_Material->friction * domMaterial->friction;
+				m_LastHit.BitmapNormal[m_Sub] = -m_Increment[m_Sub] * m_Material->GetFriction() * domMaterial->GetFriction();
+				hitAcc[m_Sub] = -hitAcc[m_Sub] * m_Material->GetFriction() * domMaterial->GetFriction();
 			} else if (hit[m_Sub] && !hit[m_Dom]) {
-				m_LastHit.BitmapNormal[m_Dom] = -m_Increment[m_Dom] * m_Material->friction * domMaterial->friction;
-				hitAcc[m_Dom] = -hitAcc[m_Dom] * m_Material->friction * subMaterial->friction;
+				m_LastHit.BitmapNormal[m_Dom] = -m_Increment[m_Dom] * m_Material->GetFriction() * domMaterial->GetFriction();
+				hitAcc[m_Dom] = -hitAcc[m_Dom] * m_Material->GetFriction() * subMaterial->GetFriction();
 			}
 			m_LastHit.BitmapNormal.Normalize();
 
@@ -782,7 +782,7 @@ namespace RTE {
 
 					// Gold special collection case!
 					// TODO: Make material IDs more robust!")
-					if (m_Material->id == c_GoldMaterialID && g_MovableMan.IsOfActor(m_MOIDHit)) {
+					if (m_Material->GetIndex() == c_GoldMaterialID && g_MovableMan.IsOfActor(m_MOIDHit)) {
 						Actor *pActor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(m_LastHit.Body[HITEE]->GetRootID()));
 						if (pActor) {
 							pActor->AddGold(m_OwnerMO->GetMass() * g_SceneMan.GetOzPerKg() * removeOrphansRadius ? 1.25F : 1.0F);
@@ -853,7 +853,7 @@ namespace RTE {
 					if (m_TrailLength) { putpixel(trailBitmap, intPos[X], intPos[Y], 199); }
 #endif
 					// Try penetration of the terrain.
-					if (hitMaterial->id != g_MaterialOutOfBounds && g_SceneMan.TryPenetrate(intPos[X], intPos[Y], velocity * mass * sharpness, velocity, retardation, 0.65F, m_NumPenetrations, removeOrphansRadius, removeOrphansMaxArea, removeOrphansRate)) {
+					if (hitMaterial->GetIndex() != g_MaterialOutOfBounds && g_SceneMan.TryPenetrate(intPos[X], intPos[Y], velocity * mass * sharpness, velocity, retardation, 0.65F, m_NumPenetrations, removeOrphansRadius, removeOrphansMaxArea, removeOrphansRate)) {
 						hit[dom] = hit[sub] = sinkHit = true;
 						++m_NumPenetrations;
 						m_ChangedDir = false;
@@ -876,7 +876,7 @@ namespace RTE {
 
 						// TODO: improve sticky logic!
 						// Check if particle is sticky and should adhere to where it collided
-						if (m_Material->stickiness >= PosRand() && velocity.GetLargest() > 0.5F) {
+						if (m_Material->GetStickiness() >= PosRand() && velocity.GetLargest() > 0.5F) {
 							// SPLAT, so update position, apply to terrain and delete, and stop traveling
 							m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
 							g_SceneMan.GetTerrain()->ApplyMovableObject(m_OwnerMO);
@@ -892,7 +892,7 @@ namespace RTE {
 							domMaterial = g_SceneMan.GetMaterialFromID(domMaterialID);
 
 							// Bounce according to the collision.
-							hitAccel[dom] = -velocity[dom] - velocity[dom] * m_Material->restitution * domMaterial->restitution;
+							hitAccel[dom] = -velocity[dom] - velocity[dom] * m_Material->GetRestitution() * domMaterial->GetRestitution();
 						}
 
 						// Check for and react upon a collision in the submissive direction of travel.
@@ -902,20 +902,20 @@ namespace RTE {
 							subMaterial = g_SceneMan.GetMaterialFromID(subMaterialID);
 
 							// Bounce according to the collision.
-							hitAccel[sub] = -velocity[sub] - velocity[sub] * m_Material->restitution * subMaterial->restitution;
+							hitAccel[sub] = -velocity[sub] - velocity[sub] * m_Material->GetRestitution() * subMaterial->GetRestitution();
 						}
 
 						// If hit right on the corner of a pixel, bounce straight back with no friction.
 						if (!hit[dom] && !hit[sub]) {
 							hit[dom] = true;
-							hitAccel[dom] = -velocity[dom] - velocity[dom] * m_Material->restitution *  hitMaterial->restitution;
+							hitAccel[dom] = -velocity[dom] - velocity[dom] * m_Material->GetRestitution() *  hitMaterial->GetRestitution();
 							hit[sub] = true;
-							hitAccel[sub] = -velocity[sub] - velocity[sub] * m_Material->restitution * hitMaterial->restitution;
+							hitAccel[sub] = -velocity[sub] - velocity[sub] * m_Material->GetRestitution() * hitMaterial->GetRestitution();
 						} else if (hit[dom] && !hit[sub]) {
 							// Calculate the effects of friction.
-							hitAccel[sub] -= velocity[sub] * m_Material->friction * domMaterial->friction;
+							hitAccel[sub] -= velocity[sub] * m_Material->GetFriction() * domMaterial->GetFriction();
 						} else if (hit[sub] && !hit[dom]) {
-							hitAccel[dom] -= velocity[dom] * m_Material->friction * subMaterial->friction;
+							hitAccel[dom] -= velocity[dom] * m_Material->GetFriction() * subMaterial->GetFriction();
 						}
 					}
 				} else if (m_TrailLength) {

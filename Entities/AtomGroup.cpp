@@ -72,7 +72,7 @@ int AtomGroup::Create()
 
 		m_Atoms.push_back(pAtom);
 	}
-    else if (m_pMaterial->id != m_Atoms.front()->GetMaterial()->id)
+    else if (m_pMaterial->GetIndex() != m_Atoms.front()->GetMaterial()->GetIndex())
         m_pMaterial = m_Atoms.front()->GetMaterial();
 
     return 0;
@@ -516,8 +516,8 @@ int AtomGroup::ReadProperty(std::string propName, Reader &reader)
 		Material mat;
 		mat.Reset();
 		reader >> mat;
-		if (mat.id)
-			m_pMaterial = g_SceneMan.GetMaterialFromID(mat.id);
+		if (mat.GetIndex())
+			m_pMaterial = g_SceneMan.GetMaterialFromID(mat.GetIndex());
 		else
 			m_pMaterial = g_SceneMan.GetMaterial(mat.GetPresetName());
 
@@ -2068,8 +2068,8 @@ before adding them to the MovableMan.
 
                         // Bounce according to the collision.
                         tempVel[dom] = -tempVel[dom] *
-                                       (*aoItr).first->GetMaterial()->restitution *
-                                       domMaterial->restitution;
+                                       (*aoItr).first->GetMaterial()->GetRestitution() *
+                                       domMaterial->GetRestitution();
                     }
 
                     // Check for and react upon a collision in the submissive direction of travel.
@@ -2083,8 +2083,8 @@ before adding them to the MovableMan.
 
                         // Bounce according to the collision.
                         tempVel[sub] = -tempVel[sub] *
-                                       (*aoItr).first->GetMaterial()->restitution *
-                                       subMaterial->restitution;
+                                       (*aoItr).first->GetMaterial()->GetRestitution() *
+                                       subMaterial->GetRestitution();
                     }
 
                     // If hit right on the corner of a pixel, bounce straight back with no friction.
@@ -2092,21 +2092,21 @@ before adding them to the MovableMan.
                     {
                         hit[dom] = true;
                         tempVel[dom] = -tempVel[dom] *
-                                       (*aoItr).first->GetMaterial()->restitution *
-                                       hitMaterial->restitution;
+                                       (*aoItr).first->GetMaterial()->GetRestitution() *
+                                       hitMaterial->GetRestitution();
                         hit[sub] = true;
                         tempVel[sub] = -tempVel[sub] *
-                                       (*aoItr).first->GetMaterial()->restitution *
-                                       hitMaterial->restitution;
+                                       (*aoItr).first->GetMaterial()->GetRestitution() *
+                                       hitMaterial->GetRestitution();
                     }
                     // Calculate the effects of friction.
                     else if (hit[dom] && !hit[sub])
                     {
-                        tempVel[sub] -= tempVel[sub] * (*aoItr).first->GetMaterial()->friction * domMaterial->friction;
+                        tempVel[sub] -= tempVel[sub] * (*aoItr).first->GetMaterial()->GetFriction() * domMaterial->GetFriction();
                     }
                     else if (hit[sub] && !hit[dom])
                     {
-                        tempVel[dom] -= tempVel[dom] * (*aoItr).first->GetMaterial()->friction * subMaterial->friction;
+                        tempVel[dom] -= tempVel[dom] * (*aoItr).first->GetMaterial()->GetFriction() * subMaterial->GetFriction();
                     }
 
                     // Compute and store this Atom's collision response impulse force.
@@ -2398,7 +2398,7 @@ bool AtomGroup::ResolveTerrainIntersection(Vector &position, Matrix &rotation, u
     list<Atom *>::iterator aItr;
     list<Atom *> intersectingAtoms;
     MOID hitMaterial = g_MaterialAir;
-    float strengthThreshold = strongerThan != g_MaterialAir ? g_SceneMan.GetMaterialFromID(strongerThan)->strength : 0;
+    float strengthThreshold = strongerThan != g_MaterialAir ? g_SceneMan.GetMaterialFromID(strongerThan)->GetIntegrity() : 0;
     bool rayHit = false;
 
     exitDirection.Reset();
@@ -2416,7 +2416,7 @@ bool AtomGroup::ResolveTerrainIntersection(Vector &position, Matrix &rotation, u
         atomPos = (*aItr)->GetCurrentPos();
         if ((hitMaterial = g_SceneMan.GetTerrain()->GetPixel(atomPos.m_X, atomPos.m_Y)) != g_MaterialAir)
         {
-            if (strengthThreshold > 0 && g_SceneMan.GetMaterialFromID(hitMaterial)->strength > strengthThreshold)
+            if (strengthThreshold > 0 && g_SceneMan.GetMaterialFromID(hitMaterial)->GetIntegrity() > strengthThreshold)
             {
                 // Add atom to list of intersecting ones
                 intersectingAtoms.push_back(*aItr);

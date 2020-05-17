@@ -10,6 +10,32 @@ namespace RTE {
 
 	class Vector;
 
+#pragma region Physics Constants Getters
+	/// <summary>
+	/// Gets the ratio between the physics engine's meters and on-screen pixels.
+	/// </summary>
+	/// <returns>A float describing the current MPP ratio.</returns>
+	float GetMPP();
+
+	/// <summary>
+	/// Gets the ratio between on-screen pixels and the physics engine's meters.
+	/// </summary>
+	/// <returns>A float describing the current PPM ratio.</returns>
+	float GetPPM();
+
+	/// <summary>
+	/// Gets the ratio between the physics engine's Liters and on-screen pixels.
+	/// </summary>
+	/// <returns>A float describing the current LPP ratio.</returns>
+	float GetLPP();
+
+	/// <summary>
+	/// Gets the ratio between the on-screen pixels and the physics engine's Liters.
+	/// </summary>
+	/// <returns>A float describing the current PPL ratio.</returns>
+	float GetPPL();
+#pragma endregion
+
 #pragma region Random Numbers
 	/// <summary>
 	/// Seeds the rand with the current runtime time.

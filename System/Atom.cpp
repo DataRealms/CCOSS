@@ -655,7 +655,7 @@ namespace RTE {
 				trailPoints.push_back({ intPos[X], intPos[Y] });
 			}
 			// Compute and scale the actual on-screen travel trajectory for this segment, based on the velocity, the travel time and the pixels-per-meter constant.
-			segTraj = velocity * timeLeft * g_FrameMan.GetPPM();
+			segTraj = velocity * timeLeft * c_PPM;
 
 			delta[X] = std::floorf(position.m_X + segTraj.m_X) - intPos[X];
 			delta[Y] = std::floorf(position.m_Y + segTraj.m_Y) - intPos[Y];

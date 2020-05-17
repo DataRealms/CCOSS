@@ -733,7 +733,7 @@ float AtomGroup::GetMomentOfInertia()
         float radius = 0;
         for (list<Atom *>::const_iterator itr = m_Atoms.begin(); itr != m_Atoms.end(); ++itr)
         {
-            radius = (*itr)->GetOffset().GetMagnitude() * g_FrameMan.GetMPP();
+            radius = (*itr)->GetOffset().GetMagnitude() * c_MPP;
             m_MomInertia += distMass * radius * radius;
         }
     }
@@ -1075,7 +1075,7 @@ float AtomGroup::Travel(Vector &position,
                 {
                     // Calc and store the accurate hit radius of the Atom in relation to the CoM
                     tempVec = (*aItr)->GetOffset().GetXFlipped(hFlipped);
-                    hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= g_FrameMan.GetMPP();
+                    hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= c_MPP;
                     // Figure out the pre-collision velocity of the hitting atom due to body translation and rotation.
                     hitData.HitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
 /*
@@ -1125,7 +1125,7 @@ float AtomGroup::Travel(Vector &position,
 
         // Compute and scale the actual on-screen travel trajectory of the origin of thid AtomGroup
         // for this segment, using the remaining travel time and the pixels-per-meter constant.
-        linSegTraj = velocity * timeLeft * g_FrameMan.GetPPM();
+        linSegTraj = velocity * timeLeft * c_PPM;
 
         // The amount of rotation to be achieved during the time slot, in radians
         rotDelta = angVel * timeLeft;
@@ -1305,7 +1305,7 @@ float AtomGroup::Travel(Vector &position,
                 {
                     // Calc and store the accurate hit radius of the Atom in relation to the CoM
                     tempVec = (*aItr)->GetOffset().GetXFlipped(hFlipped);
-                    hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= g_FrameMan.GetMPP();
+                    hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= c_MPP;
                     // Figure out the pre-collision velocity of the hitting atom due to body translation and rotation.
                     hitData.HitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
 
@@ -1396,7 +1396,7 @@ float AtomGroup::Travel(Vector &position,
                 // Figure out the pre-collision velocity of the
                 // hitting atom due to body translation and rotation.
                 (*aItr)->SetHitVel(velocity + (*aItr)->GetOffset().RadRotate(rotation + c_HalfPI) *
-                                            g_FrameMan.GetMPP() * angVel);
+                                            c_MPP * angVel);
 */
                 hitFactor = 1.0 / (float)penetratingAtoms.size();
 
@@ -1481,7 +1481,7 @@ float AtomGroup::Travel(Vector &position,
 //                      hitData.HitPoint = (*aItr)->GetCurrentPos();
                         // Calc and store the accurate hit radius of the Atom in relation to the CoM
                         tempVec = (*aItr)->GetOffset().GetXFlipped(hFlipped);
-                        hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= g_FrameMan.GetMPP();
+                        hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= c_MPP;
                         // Figure out the pre-collision velocity of the hitting atom due to body translation and rotation.
                         hitData.HitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
                         // Set the atom with the hit data with all the info we have so far.
@@ -1623,7 +1623,7 @@ Vector AtomGroup::PushTravel(Vector &position,
 
     // Compute and scale the actual on-screen travel trajectory for this travel, using
     // the passed in travel time and the pixels-per-meter constant.
-    Vector trajectory = velocity * travelTime * g_FrameMan.GetPPM();
+    Vector trajectory = velocity * travelTime * c_PPM;
 
     int legCount = 0, stepCount = 0, hitCount = 0, atomsHitMOsCount = 0;
     int /*startPos[2], */intPos[2], hitPos[2], delta[2], delta2[2], increment[2];
@@ -1714,7 +1714,7 @@ before adding them to the MovableMan.
         prevTrajMag = trajectory.GetMagnitude();
         // Compute and scale the actual on-screen travel trajectory for this leg, using
         // the remaining travel time and the pixels-per-meter constant.
-        trajectory = velocity * timeLeft * g_FrameMan.GetPPM();
+        trajectory = velocity * timeLeft * c_PPM;
 
         delta[X] = floorf(position.m_X + trajectory.m_X) - intPos[X];
         delta[Y] = floorf(position.m_Y + trajectory.m_Y) - intPos[Y];
@@ -1929,7 +1929,7 @@ before adding them to the MovableMan.
 
 //                      hitData.HitPoint.SetXY(intPos[X], intPos[Y]);
                         // Calc and store the accurate hit radius of the Atom in relation to the CoM
-                        hitData.HitRadius[HITOR] = (*aoItr).second * g_FrameMan.GetMPP();
+                        hitData.HitRadius[HITOR] = (*aoItr).second * c_MPP;
                         hitData.HitPoint.Reset();
                         hitData.BitmapNormal.Reset();
 
@@ -2268,7 +2268,7 @@ bool AtomGroup::PushAsLimb(const Vector &jointPos,
 
     // Add the resulting impulse force, add the lever of the joint offset if set to do so
     if (affectRotation)
-        m_pOwnerMO->AddImpulseForce(pushImpulse, g_SceneMan.ShortestDistance(m_pOwnerMO->GetPos(), jointPos) * g_FrameMan.GetMPP());
+        m_pOwnerMO->AddImpulseForce(pushImpulse, g_SceneMan.ShortestDistance(m_pOwnerMO->GetPos(), jointPos) * c_MPP);
     else
         m_pOwnerMO->AddImpulseForce(pushImpulse, Vector());
 

@@ -146,8 +146,6 @@ namespace RTE {
 			g_SceneMan.SetDefaultSceneName(reader.ReadPropValue());
 		} else if (propName == "RecommendedMOIDCount") {
 			reader >> m_RecommendedMOIDCount;
-		} else if (propName == "PixelsPerMeter") {
-			g_FrameMan.ReadProperty(propName, reader);
 
 		/*
 		// Temporarily removed from settings file due to being buggy when disabled by user.
@@ -321,8 +319,6 @@ namespace RTE {
 		writer.NewLine(false);
 		writer.NewProperty("RecommendedMOIDCount");
 		writer << m_RecommendedMOIDCount;
-		writer.NewProperty("PixelsPerMeter");
-		writer << g_FrameMan.GetPPM();
 
 		/*
 		// Temporarily removed from settings file due to being buggy when disabled by user.
@@ -479,8 +475,6 @@ namespace RTE {
 		writer << 40;
 		writer.NewProperty("MusicVolume");
 		writer << 60;
-		writer.NewProperty("PixelsPerMeter");
-		writer << 20;
 
 		writer.ObjectEnd();
 

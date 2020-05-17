@@ -486,13 +486,13 @@ float HDFirearm::CompareTrajectories(HDFirearm * pWeapon)
         time = time * time * 0.5;
         Vector FuturePos1 = GetMuzzlePos();
         g_SceneMan.WrapPosition(FuturePos1);
-        FuturePos1 = FuturePos1 * g_FrameMan.GetMPP() + RotateOffset(Vel1) + g_SceneMan.GetGlobalAcc() * GetBulletAccScalar() * time;
+        FuturePos1 = FuturePos1 * c_MPP + RotateOffset(Vel1) + g_SceneMan.GetGlobalAcc() * GetBulletAccScalar() * time;
 
         Vector FuturePos2 = GetMuzzlePos();
         g_SceneMan.WrapPosition(FuturePos2);
-        FuturePos2 = pWeapon->GetMuzzlePos() * g_FrameMan.GetMPP() + RotateOffset(Vel2) + g_SceneMan.GetGlobalAcc() * pWeapon->GetBulletAccScalar() * time;
+        FuturePos2 = pWeapon->GetMuzzlePos() * c_MPP + RotateOffset(Vel2) + g_SceneMan.GetGlobalAcc() * pWeapon->GetBulletAccScalar() * time;
 
-        return (FuturePos2 - FuturePos1).GetMagnitude() * g_FrameMan.GetPPM();
+        return (FuturePos2 - FuturePos1).GetMagnitude() * c_PPM;
     }
 
     return 100000;

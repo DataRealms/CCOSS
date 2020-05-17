@@ -581,7 +581,7 @@ bool ACrab::CollideAtPoint(HitData &hd)
 /*
     hd.ResImpulse[HITOR].Reset();
     hd.ResImpulse[HITEE].Reset();
-    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * g_FrameMan.GetMPP();
+    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * c_MPP;
     hd.mass[HITEE] = m_Mass;
     hd.MomInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
     hd.HitVel[HITEE] = m_Vel + hd.HitRadius[HITEE].GetPerpendicular() * m_AngularVel;

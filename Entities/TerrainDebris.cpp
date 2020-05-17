@@ -116,7 +116,7 @@ namespace RTE {
 
 		// How many pieces of debris we're spreading out.
 		unsigned int terrainWidth = terrBitmap->w;	
-		unsigned int pieceCount = (terrainWidth * g_FrameMan.GetMPP()) * m_Density;
+		unsigned int pieceCount = (terrainWidth * c_MPP) * m_Density;
 
 		// First is index in the bitmap array, Second is blit location
 		std::list<std::pair<int, Vector>> piecesToPlace;

@@ -66,7 +66,6 @@ namespace RTE {
 		m_PaletteFile.Reset();
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
-		m_PPM = 0;
 		m_GUIScreen = 0;
 		m_LargeFont = 0;
 		m_SmallFont = 0;
@@ -240,14 +239,6 @@ namespace RTE {
 			reader >> m_VSplitOverride;
 		} else if (propName == "PaletteFile") {
 			reader >> m_PaletteFile;
-		} else if (propName == "PixelsPerMeter") {
-			reader >> m_PPM;
-			m_MPP = 1 / m_PPM;
-			// Calculate the Pixel per Liter and Liter per Pixel
-			float cmPP = 100 / m_PPM;
-			float LVolume = 10 * 10 * 10;
-			m_PPL = LVolume / (cmPP * cmPP * cmPP);
-			m_LPP = 1 / m_PPL;
 		} else {
 			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
@@ -270,8 +261,6 @@ namespace RTE {
 		writer << m_VSplitOverride;
 		writer.NewProperty("PaletteFile");
 		writer << m_PaletteFile;
-		writer.NewProperty("PixelsPerMeter");
-		writer << m_PPM;
 
 		return 0;
 	}

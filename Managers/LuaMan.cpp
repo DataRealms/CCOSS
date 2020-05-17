@@ -1430,10 +1430,6 @@ int LuaMan::Create()
             .def("DrawnSimUpdate", &TimerMan::DrawnSimUpdate),
 
         class_<FrameMan>("FrameManager")
-            .property("PPM", &FrameMan::GetPPM)
-            .property("MPP", &FrameMan::GetMPP)
-            .property("PPL", &FrameMan::GetPPL)
-            .property("LPP", &FrameMan::GetLPP)
             .property("PlayerScreenWidth", &FrameMan::GetPlayerScreenWidth)
             .property("PlayerScreenHeight", &FrameMan::GetPlayerScreenHeight)
 			.def("LoadPalette", &FrameMan::LoadPalette)
@@ -2213,7 +2209,11 @@ int LuaMan::Create()
         def("EaseIn", &EaseIn),
         def("EaseOut", &EaseOut),
         def("EaseInOut", &EaseInOut),
-        def("Clamp", &Limit)
+        def("Clamp", &Limit),
+		def("GetPPM", &GetPPM),
+		def("GetMPP", &GetMPP),
+		def("GetPPL", &GetPPL),
+		def("GetLPP", &GetLPP)
     ];
 
     // Assign the manager instances to globals in the lua master state
@@ -2249,41 +2249,6 @@ void LuaMan::ClearUserModuleCache()
 	luaL_dostring(m_pMasterState, "for m, n in pairs(package.loaded) do if type(n) == \"boolean\" then package.loaded[m] = nil end end");
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
-
-int LuaMan::ReadProperty(std::string propName, Reader &reader)
-{
-//    if (propName == "AddEffect")
-//        g_PresetMan.GetEntityPreset(reader);
-//    else
-        // See if the base class(es) can find a match instead
-        return Serializable::ReadProperty(propName, reader);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this LuaMan with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int LuaMan::Save(Writer &writer) const
-{
-
-// TODO: "Do this!")
-
-    return 0;
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy

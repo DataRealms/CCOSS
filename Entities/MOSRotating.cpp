@@ -751,7 +751,7 @@ bool MOSRotating::CollideAtPoint(HitData &hd)
 //    {
 //        m_AlreadyHitBy.insert(hd.Body[HITOR]->GetID());
 
-    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * g_FrameMan.GetMPP();
+    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * c_MPP;
 /*
     // Cancel if both hitor and hitee's hitpoint radii are pointing int he same direction, meaning the objects are really tangled
     if (!hd.HitRadius[HITOR].IsZero() && hd.HitRadius[HITOR].Dot(hd.HitRadius[HITEE]) >= 0)

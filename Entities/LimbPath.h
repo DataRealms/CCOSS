@@ -284,7 +284,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The total time (ms) this should take to travel along, if unobstructed.
 
-    float GetTotalPathTime() const { return ((m_TotalLength * g_FrameMan.GetMPP()) / m_TravelSpeed[m_WhichSpeed]) * 1000; }
+    float GetTotalPathTime() const { return ((m_TotalLength * c_MPP) / m_TravelSpeed[m_WhichSpeed]) * 1000; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -295,7 +295,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The total time (ms) this should take to travel along, if unobstructed.
 
-    float GetRegularPathTime() const { return ((m_RegularLength * g_FrameMan.GetMPP()) / m_TravelSpeed[m_WhichSpeed]) * 1000; }
+    float GetRegularPathTime() const { return ((m_RegularLength * c_MPP) / m_TravelSpeed[m_WhichSpeed]) * 1000; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

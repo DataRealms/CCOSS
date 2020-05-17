@@ -1,5 +1,4 @@
 #include "Material.h"
-#include "FrameMan.h"
 
 namespace RTE {
 
@@ -70,11 +69,11 @@ namespace RTE {
 		} else if (propName == "DensityKGPerVolumeL") {
 			reader >> m_VolumeDensity;
 			// Overrides the pixel density
-			m_PixelDensity = m_VolumeDensity * g_FrameMan.GetLPP();
+			m_PixelDensity = m_VolumeDensity * c_LPP;
 		} else if (propName == "DensityKGPerPixel") {
 			reader >> m_PixelDensity;
 			// Overrides the volume density
-			m_VolumeDensity = m_PixelDensity * g_FrameMan.GetPPL();
+			m_VolumeDensity = m_PixelDensity * c_PPL;
 		} else if (propName == "GibImpulseLimitPerVolumeL") {
 			reader >> m_GibImpulseLimitPerLiter;
 		} else if (propName == "GibWoundLimitPerVolumeL") {

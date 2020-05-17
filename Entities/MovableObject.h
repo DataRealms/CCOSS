@@ -1087,7 +1087,7 @@ EntityAllocation(MovableObject)
 // Return value:    None.
 
     void AddAbsForce(const Vector &force, const Vector &absPos)
-        { m_Forces.push_back(std::make_pair(force, g_SceneMan.ShortestDistance(m_Pos, absPos) * g_FrameMan.GetMPP())); }
+        { m_Forces.push_back(std::make_pair(force, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP)); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1121,7 +1121,7 @@ EntityAllocation(MovableObject)
 
 	void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos) {
 		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
-		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * g_FrameMan.GetMPP()));
+		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP));
 	}
 
 

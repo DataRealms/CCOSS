@@ -67,7 +67,7 @@ namespace RTE {
 		void Draw();
 #pragma endregion
 
-#pragma region Getters and Setters
+#pragma region Getters
 		/// <summary>
 		/// Gets the 8bpp backbuffer bitmap.
 		/// </summary>
@@ -79,36 +79,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A pointer to the BITMAP 32bpp backbuffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetBackBuffer32() const { return m_BackBuffer32; }
-
-		/// <summary>
-		/// Gets the ratio between the physics engine's meters and on-screen pixels.
-		/// </summary>
-		/// <returns>A float describing the current MPP ratio.</returns>
-		float GetMPP() const { return m_MPP; }
-
-		/// <summary>
-		/// Gets the ratio between on-screen pixels and the physics engine's meters.
-		/// </summary>
-		/// <returns>A float describing the current PPM ratio.</returns>
-		float GetPPM() const { return m_PPM; }
-
-		/// <summary>
-		/// Sets the ratio between on-screen pixels and the physics engine's meters.
-		/// </summary>
-		/// <param name="newPPM">A float specifying the new PPM ratio.</param>
-		void SetPPM(const float newPPM) { m_PPM = newPPM; }
-
-		/// <summary>
-		/// Gets the ratio between the physics engine's Liters and on-screen pixels.
-		/// </summary>
-		/// <returns>A float describing the current LPP ratio.</returns>
-		float GetLPP() const { return m_LPP; }
-
-		/// <summary>
-		/// Gets the ratio between the on-screen pixels and the physics engine's Liters.
-		/// </summary>
-		/// <returns>A float describing the current PPL ratio.</returns>
-		float GetPPL() const { return m_PPL; }
 #pragma endregion
 
 #pragma region Resolution Handling
@@ -559,11 +529,6 @@ namespace RTE {
 		unsigned short m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.
 		unsigned short m_PlayerScreenHeight; //!< Height of the screen of each player. Will be smaller than resolution only if the screen is split.
 	
-		float m_PPM; //!< Pixels Per Meter constant.
-		float m_MPP; //!< Meters Per Pixel constant.
-		float m_PPL; //!< Pixels per Liter constant.
-		float m_LPP; //!< Liters Per Pixel constant.
-
 		AllegroScreen *m_GUIScreen; //!< GUI screen object kept and owned just for the fonts.
 		GUIFont *m_SmallFont; //!< Pointer to the standard small font for quick access.
 		GUIFont *m_LargeFont; //!< Pointer to the standard large font for quick access.

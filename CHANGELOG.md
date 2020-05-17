@@ -74,11 +74,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	end
 	```
 
+- Physics constants handling removed from `FrameMan` and now hardcoded in `Constants`. Lua bindings moved to `RTETools` and are now called without the `FrameMan` prefix like so:  
+	`GetPPM()`, `GetMPP()`, `GetPPL()`, `GetLPP()`.
+
 ### Fixed
 
 - Control schemes will no longer get deleted when being configured. Resetting the control scheme will load a preset instead of leaving it blank. ([Issue #121](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/121))
 
 ### Removed
+
+- Removed `Settings.ini` property `PixelsPerMeter`. Now hardcoded and cannot be changed by the user.
 
 ***
 
@@ -365,7 +370,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Various bug fixed related to all the Attachable and Emitter changes, so they can now me affected reliably and safely with lua.
 
 - Various minor other things that have gotten lost in the shuffle.
-
 
 ### Removed
 

@@ -1277,7 +1277,7 @@ void PieMenuGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
 			//Calculate estimated jetpack impulse
 			AEmitter *pJetpack = pCrab->GetJetpack();
 			if (pJetpack && pJetpack->IsAttached())
-				jetImpulseFactor = pJetpack->EstimateImpulse(false) * g_FrameMan.GetPPM() / g_TimerMan.GetDeltaTimeSecs();
+				jetImpulseFactor = pJetpack->EstimateImpulse(false) * c_PPM / g_TimerMan.GetDeltaTimeSecs();
 		}*/
 
 		x += width / 2 + gap * 2;

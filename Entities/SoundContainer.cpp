@@ -149,6 +149,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	int SoundContainer::Save(Writer &writer) const { return 0; }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SoundContainer::AddSound(const std::string &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance, bool abortGameForInvalidSound) {
 		std::vector<SoundData> soundSet;
 		if (soundSetIndex < m_SoundSets.size()) { soundSet = m_SoundSets[soundSetIndex]; }

@@ -88,18 +88,6 @@ public:
 
     virtual int Create();
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this PresetMan to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the PresetMan will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset

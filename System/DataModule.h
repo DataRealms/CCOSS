@@ -28,6 +28,8 @@ namespace RTE {
 
 	public:
 
+		SerializableOverrideMethods
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a DataModule object in system memory. Create() should be called before using the object.
@@ -78,25 +80,6 @@ namespace RTE {
 		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this DataModule's creation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int ReadModuleProperties(std::string moduleName, ProgressCallback progressCallback = 0);
-
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this DataModule to an output stream for later recreation with Create(Reader &reader).
-		/// </summary>
-		/// <param name="writer">A Writer that the DataModule will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
 
 		/// <summary>
 		/// Returns true if loader should ignore missing items in this module.

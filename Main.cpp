@@ -123,11 +123,7 @@ const char *g_EditorToLaunch = ""; //!< String with editor activity name to laun
 bool g_InActivity = false;
 bool g_ResetActivity = false;
 bool g_ResumeActivity = false;
-bool g_ReturnToMainMenu = false;
 int g_IntroState = START;
-int g_TeamCount = 2;
-int g_PlayerCount = 3;
-int g_DifficultySetting = 4;
 int g_StationOffsetX;
 int g_StationOffsetY;
 

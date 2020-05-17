@@ -590,7 +590,7 @@ int LuaMan::Create()
 
         ABSTRACTLUABINDING(MovableObject, SceneObject)
 			.property("Material", &MovableObject::GetMaterial)
-			.def("ReloadScripts", &MovableObject::ReloadScripts)
+            .def("ReloadScripts", (int (MovableObject:: *)()) &MovableObject::ReloadScripts)
             .def("HasScript", &MovableObject::HasScript)
             .def("AddScript", &MovableObject::AddScript)
             .def("RemoveScript", &MovableObject::RemoveScript)

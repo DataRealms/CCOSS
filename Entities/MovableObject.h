@@ -204,7 +204,14 @@ EntityAllocation(MovableObject)
     /// Reloads the all of the scripts on this object. This will also update the original preset in PresetMan with the updated scripts so future objects spawned will use the new scripts.
     /// </summary>
     /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-    virtual int ReloadScripts();
+    int ReloadScripts() { return ReloadScripts(true); }
+
+    /// <summary>
+    /// Reloads the all of the scripts on this object. This will also optionally update the original preset in PresetMan with the updated scripts so future objects spawned will use the new scripts.
+    /// </summary>
+    /// <param name="reloadPresetScripts">Whether to reload scripts on the original preset as well as the object instance. Defaults to true.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    virtual int ReloadScripts(bool reloadPresetScripts);
 
     /// <summary>
     /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_LoadedScripts.end() if it's not.
@@ -1948,6 +1955,8 @@ protected:
 
     // A vector of scripts have been loaded onto this. Contains a pair with the script path and whether or not the script is enabled.
     std::vector<std::pair<std::string, bool>> m_LoadedScripts;
+    // A map of function name strings to vectors of scripts for each function name. Said vectors contain pointers to pairs with the script path and whether or not the script is enabled. Used to efficiently avoid extra Lua calls.
+    std::unordered_map<std::string, std::vector<std::pair<std::string, bool> *>> m_FunctionsAndScripts;
 
     // The ID name unique to this' preset and its defined scripted functions in the lua state.
     std::string m_ScriptPresetName;

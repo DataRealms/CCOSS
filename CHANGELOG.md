@@ -28,6 +28,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Control schemes will no longer get deleted when being configured.
 Resetting the control scheme will load a preset instead of leaving it blank. (Issue #121)
 
+- Time scale can no longer be lowered to 0 through the performance stats interface.
+
 ### Removed
 
 ***

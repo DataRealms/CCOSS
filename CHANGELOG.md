@@ -76,6 +76,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Physics constants handling removed from `FrameMan` and now hardcoded in `Constants`. Lua bindings moved to `RTETools` and are now called without the `FrameMan` prefix like so:  
 	`GetPPM()`, `GetMPP()`, `GetPPL()`, `GetLPP()`.
+	
+- Removed hardcoded 10 second `LifeTime` restriction for `MOPixel` and `MOSParticle`.
 
 ### Fixed
 

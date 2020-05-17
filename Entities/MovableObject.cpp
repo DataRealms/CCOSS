@@ -73,7 +73,7 @@ void MovableObject::Clear()
     m_ToSettle = false;
     m_ToDelete = false;
     m_HUDVisible = true;
-    m_LoadedScripts.clear();
+    m_AllLoadedScripts.clear();
     m_FunctionsAndScripts.clear();
     m_ScriptPresetName.clear();
     m_ScriptObjectName.clear();
@@ -208,8 +208,8 @@ int MovableObject::Create(const MovableObject &reference)
     m_CanBeSquished = reference.m_CanBeSquished;
     m_HUDVisible = reference.m_HUDVisible;
     
-    for (const std::pair<std::string, bool> &referenceScriptEntry : reference.m_LoadedScripts) {
-        m_LoadedScripts.push_back({referenceScriptEntry.first, referenceScriptEntry.second});
+    for (const std::pair<std::string, bool> &referenceScriptEntry : reference.m_AllLoadedScripts) {
+        m_AllLoadedScripts.push_back({referenceScriptEntry.first, referenceScriptEntry.second});
     }
     ReloadScripts(false);
 
@@ -494,7 +494,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
     } else if (HasScript(scriptPath)) {
         return -2;
     }
-    m_LoadedScripts.push_back({scriptPath, loadAsEnabledScript});
+    m_AllLoadedScripts.push_back({scriptPath, loadAsEnabledScript});
 
     // Clear the temporary variable names that will hold the functions read in from the file
     for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
@@ -530,7 +530,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
             if (m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
                 m_FunctionsAndScripts.insert({functionName, std::vector<std::pair<std::string, bool> *>()});
             }
-            m_FunctionsAndScripts.find(functionName)->second.push_back(&m_LoadedScripts.back());
+            m_FunctionsAndScripts.find(functionName)->second.push_back(&m_AllLoadedScripts.back());
             int error = g_LuaMan.RunScriptString(
                 m_ScriptPresetName + "." + functionName + " = " + m_ScriptPresetName + "." + functionName + " or {}; " +
                 m_ScriptPresetName + "." + functionName + "[\"" + scriptPath + "\"] = " + functionName + ";"
@@ -547,7 +547,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::ReloadScripts(bool reloadPresetScripts) {
-    if (m_LoadedScripts.empty()) {
+    if (m_AllLoadedScripts.empty()) {
         return 0;
     }
 
@@ -555,8 +555,8 @@ int MovableObject::ReloadScripts(bool reloadPresetScripts) {
     /// Internal lambda function to clear a given object's script configurations, and then load them all again in order to reset them.
     /// </summary>
     auto clearScriptConfigurationAndLoadPreexistingScripts = [](MovableObject *object) {
-        std::vector<std::pair<std::string, bool>> loadedScriptsCopy = object->m_LoadedScripts;
-        object->m_LoadedScripts.clear();
+        std::vector<std::pair<std::string, bool>> loadedScriptsCopy = object->m_AllLoadedScripts;
+        object->m_AllLoadedScripts.clear();
         object->m_FunctionsAndScripts.clear();
         object->m_ScriptPresetName.clear();
 
@@ -616,14 +616,14 @@ bool MovableObject::AddScript(const std::string &scriptPath) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MovableObject::RemoveScript(const std::string &scriptPath) {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return false;
     }
 
     std::vector<std::pair<std::string, bool>>::const_iterator scriptEntryIterator = FindScript(scriptPath);
-    if (scriptEntryIterator != m_LoadedScripts.end()) {
+    if (scriptEntryIterator != m_AllLoadedScripts.end()) {
         // Erase the script from both collections. Erasure from the latter is done with the aid of std::remove_if, due to the complexity of the datastructure.
-        m_LoadedScripts.erase(scriptEntryIterator);
+        m_AllLoadedScripts.erase(scriptEntryIterator);
         for (std::pair<const std::string, std::vector<std::pair<std::string, bool> *>> &functionAndScripts : m_FunctionsAndScripts) {
             functionAndScripts.second.erase(std::remove_if(functionAndScripts.second.begin(), functionAndScripts.second.end(), [scriptPath](const std::pair<std::string, bool> *scriptEntry) {
                 return scriptEntry->first == scriptPath;
@@ -641,12 +641,12 @@ bool MovableObject::RemoveScript(const std::string &scriptPath) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MovableObject::EnableScript(const std::string &scriptPath) {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return false;
     }
 
     std::vector<std::pair<std::string, bool>>::iterator scriptEntryIterator = FindScript(scriptPath);
-    if (scriptEntryIterator != m_LoadedScripts.end() && scriptEntryIterator->second == false) {
+    if (scriptEntryIterator != m_AllLoadedScripts.end() && scriptEntryIterator->second == false) {
         if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptEnable") < 0) {
             return false;
         }
@@ -659,12 +659,12 @@ bool MovableObject::EnableScript(const std::string &scriptPath) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MovableObject::DisableScript(const std::string &scriptPath) {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return false;
     }
 
     std::vector<std::pair<std::string, bool>>::iterator scriptEntryIterator = FindScript(scriptPath);
-    if (scriptEntryIterator != m_LoadedScripts.end() && scriptEntryIterator->second == true) {
+    if (scriptEntryIterator != m_AllLoadedScripts.end() && scriptEntryIterator->second == true) {
         if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptRemoveOrDisable", {}, {"false"}) < 0) {
             return false;
         }
@@ -677,7 +677,7 @@ bool MovableObject::DisableScript(const std::string &scriptPath) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
         return -1;
     }
 
@@ -688,7 +688,7 @@ int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std:
     functionEntityArguments.clear();
     functionLiteralArguments.clear();
     
-    if (status < 0 && m_LoadedScripts.size() > 1) {
+    if (status < 0 && m_AllLoadedScripts.size() > 1) {
         g_ConsoleMan.PrintString("ERROR: An error occured while trying to run the " + functionName + " function for script at path " + scriptPath);
         return -2;
     }
@@ -699,7 +699,7 @@ int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std:
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
         return -1;
     }
 
@@ -984,7 +984,7 @@ void MovableObject::Update()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::UpdateScripts() {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return -1;
     }
 
@@ -998,7 +998,7 @@ int MovableObject::UpdateScripts() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::OnPieMenu(Actor *pieMenuActor) {
-    if (!pieMenuActor || m_LoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
+    if (!pieMenuActor || m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
         return -1;
     }
 

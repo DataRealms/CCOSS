@@ -53,12 +53,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	``` 
 	This mode handles exactly like (now removed) `MOSParticle.Framerate = 0` and will complete the sprite's animation cycle over the course of it's existence. `SpriteAnimDuration` is inapplicable when using this mode and will do nothing.  
 	For example, an object that has a sprite with 10 frames and a lifetime of 10 seconds will animate at a rate of 1 frame per second, finishing it's animation cycle just before being deleted from the scene.  
-	If this mode is used on an object that has `LifeTime = 0` (infinite) it will be overriden to `SpriteAnimMode = 1` (ALWAYSLOOP) otherwise it will never animate.  
+	If this mode is used on an object that has `LifeTime = 0` (infinite) it will be overridden to `SpriteAnimMode = 1` (ALWAYSLOOP) otherwise it will never animate.  
 	```
 	SpriteAnimMode = 8 // ONCOLLIDE
 	```
 	This mode will drive the animation forward based on collisions this object has with other MOs or the terrain. `SpriteAnimDuration` is inapplicable when using this mode and will do nothing.  
-	This mode is `MOSParticle` specific and used mainly for animating casings. Using this mode on anything other than `MOSParticle` will do nothing.	
+	This mode is `MOSParticle` specific and used mainly for animating casings and small gibs. Using this mode on anything other than `MOSParticle` will do nothing.	
+
+- New `Settings.ini` properties `EnableCrabBombs = 0/1` and `CrabBombThreshold = intValue`.  
+	When `EnableCrabBombs` is enabled, releasing a number of crabs equal to `CrabBombThreshold` or more at once will trigger the crab bomb effect.  
+	If disabled releasing whatever number of crabs will do nothing except release whatever number of crabs.
 
 ### Changed
 
@@ -78,9 +82,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	for attachable in ToMOSRotating(self:GetParent()).Attachables do
 		...
 	end
-	
+	```
 	Or
-	
+	```
 	local parent = ToMOSRotating(self:GetParent());
 	for attachable in parent.Attachables do
 		...
@@ -94,7 +98,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `MOSParticle` animation can now be set with `SpriteAnimMode` and `SpriteAnimDuration`. If the property isn't defined it will default to `SpriteAnimMode = 7` (OVERLIFETIME).
 
+- Reworked crab bombing behavior. When enabled through `Settings.ini` and triggered will gib all living actors on scene except brains and doors. Devices and non-actor MOs will remain untouched.
+
 ### Fixed
+
+- Fix crash when returning to `MetaGame` scenario screen after activity end.
 
 - Control schemes will no longer get deleted when being configured. Resetting the control scheme will load a preset instead of leaving it blank. ([Issue #121](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/121))
 
@@ -135,7 +143,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added the concept of `SoundSets`, which are collections of sounds inside a `SoundContainer`. This allows you to, for example, put multiple sounds for a given gunshot inside a `SoundSet` so they're played together.
 
-- `SoundContainers` have been overhauled to allow for a lot more customization, including per-sound customization. The following INI example shows all currently availble capabilities with explanatory comments:
+- `SoundContainers` have been overhauled to allow for a lot more customization, including per-sound customization. The following INI example shows all currently available capabilities with explanatory comments:
 	```
 	AddSoundContainer = SoundContainer // Note that SoundContainers replace Sounds, so this can be used for things like FireSound = SoundContainer
 		PresetName = Preset Name Here
@@ -271,7 +279,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Resolution multiplier properties (`NxWindowed` and `NxFullscreen`) in settings merged into a single property `ResolutionMultiplier`.
 
-- Incompatible/bad resolution settings will be overriden at startup with messages expaining the issue instead of multiple mode switches and eventually a reset to default VGA.  
+- Incompatible/bad resolution settings will be overridden at startup with messages explaining the issue instead of multiple mode switches and eventually a reset to default VGA.  
 	Reset to defaults (now 960x540) will happen only on horrible aspect ratio or if you managed to really destroy something.
 
 - You can no longer toggle native fullscreen mode from the settings menu or ini. Instead, either select your desktop resolution at 1X mode or desktop resolution divided by 2 at 2X mode for borderless fullscreen windowed mode.  
@@ -360,11 +368,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `ACrab.AimRange` can now be split into `AimRangeUpperLimit` and `AimRangeLowerLimit`, allowing asymmetric ranges.
 
-- Objective arrows and Delivery arrows are now color co-ordinated to match their teams, instead of being only green or red.
+- Objective arrows and Delivery arrows are now color coordinated to match their teams, instead of being only green or red.
 
 - BuyMenu `Bombs` tab will now show all `ThrownDevices` instead of just `TDExplosives`.
 
-- The list of `MOSRotating` attchables (`mosr.Attachables`) now includes hardcoded attachables like dropship engines, legs, etc.
+- The list of `MOSRotating` attachables (`mosr.Attachables`) now includes hardcoded attachables like dropship engines, legs, etc.
 
 - Attachable lua manipulation has been significantly revamped. The old method of doing `attachable:Attach(parent)` has been replaced with the following:  
 	**Addition:** `parent:AddAttachable(attachableToAdd)` or `parent:AddAttachable(attachableToAdd, parentOffsetVector)`  

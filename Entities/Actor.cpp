@@ -984,21 +984,17 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     // Gib all the regular gibs
     MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 
-	// Count crabs to simulate crab-bomb behavior
-	int crabs = 0;
-    for (deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
-		if (dynamic_cast<ACrab *>(*gItr) && (*gItr)->GetPresetName() == "Crab")
-			crabs++;
-
-	// If we have enough crabs - gib everything
-	if (crabs > 10 && g_MovableMan.GetMOIDCount() + crabs * 5 > 255)
-	{
-		for (int id = 1; id < g_MovableMan.GetMOIDCount() - 1; id++)
-		{
-			MovableObject * MO = g_MovableMan.GetMOFromID(id);
-			MOSRotating * MOSR = dynamic_cast<MOSRotating *>(MO);
-			if (MOSR && MOSR != this)
-				MOSR->GibThis();
+	if (g_SettingsMan.EnableCrabBombs()) {
+		unsigned short crabCount = 0;
+		for (const MovableObject *inventoryEntry : m_Inventory) {
+			if (inventoryEntry->GetPresetName() == "Crab") { crabCount++; }
+		}
+		// If we have enough crabs gib all actors on scene except brains and doors
+		if (crabCount >= g_SettingsMan.CrabBombThreshold()) {
+			for (int moid = 1; moid < g_MovableMan.GetMOIDCount() - 1; moid++) {
+				Actor *actor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(moid));
+				if (actor && actor != this && actor->GetClassName() != "ADoor" && !actor->IsInGroup("Brains")) { actor->GibThis(); }
+			}
 		}
 	}
 

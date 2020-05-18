@@ -501,7 +501,7 @@ void MOSprite::Update() {
                 m_SpriteAnimTimer.Reset();
 			    break;
 			case OVERLIFETIME:
-				lifeTimeFrame = static_cast<double>(m_FrameCount) * m_AgeTimer.GetElapsedSimTimeMS() / static_cast<double>(m_Lifetime));
+				lifeTimeFrame = static_cast<double>(m_FrameCount) * (m_AgeTimer.GetElapsedSimTimeMS() / static_cast<double>(m_Lifetime));
 				m_Frame = std::floorf(lifeTimeFrame);
 				break;
 		    default:

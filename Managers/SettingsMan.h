@@ -162,10 +162,22 @@ namespace RTE {
 		void SetShowForeignItems(bool newValue) { m_ShowForeignItems = newValue; }
 
 		/// <summary>
-		/// Whether random hats on actors are enabled or not.
+		/// Whether randomized hat attachables will be attached to all AHuman actors.
 		/// </summary>
 		/// <returns>Whether random hats are enabled or not.</returns>
 		bool EnableHats() const { return m_EnableHats; }
+
+		/// <summary>
+		/// Gets whether the crab bomb effect is enabled or not. False means releasing whatever number of crabs will do nothing except release a whatever number of crabs.
+		/// </summary>
+		/// <returns>Whether the crab bomb effect is enabled or not.</returns>
+		bool EnableCrabBombs() const { return m_EnableCrabBombs; }
+
+		/// <summary>
+		/// Gets the number of crabs needed to be released at once to trigger the crab bomb effect.
+		/// </summary>
+		/// <returns>The number of crabs needed to be released at once to trigger the crab bomb effect.</returns>
+		unsigned short CrabBombThreshold() const { return m_CrabBombThreshold; }
 #pragma endregion
 
 #pragma region Default Activity Settings
@@ -475,8 +487,10 @@ namespace RTE {
 		bool m_ShowForeignItems; //!< Do not show foreign items in buy menu.
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.	
-		bool m_EndlessMode; //!< Endless metagame mode.
-		bool m_EnableHats; //!< Hats enabled.
+		bool m_EndlessMode; //!< Endless MetaGame mode.
+		bool m_EnableHats; //!< Whether randomized hat attachables will be attached to all AHuman actors.
+		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
+		unsigned short m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
 
 		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
 		std::string m_NetworkServerAddress; //!< LAN server address to connect to.

@@ -29,6 +29,8 @@ namespace RTE {
 		m_BlipOnRevealUnseen = true;
 		m_EndlessMode = false;
 		m_EnableHats = false;
+		m_EnableCrabBombs = false;
+		m_CrabBombThreshold = 42;
 
 		m_NetworkServerAddress = "127.0.0.1:8000";
 		m_PlayerNetworkName = "Dummy";
@@ -136,6 +138,10 @@ namespace RTE {
 			reader >> m_EndlessMode;
 		} else if (propName == "EnableHats") {
 			reader >> m_EnableHats;
+		} else if (propName == "EnableCrabBombs") {
+			reader >> m_EnableCrabBombs;
+		} else if (propName == "CrabBombThreshold") {
+			reader >> m_CrabBombThreshold;
 		} else if (propName == "LaunchIntoActivity") {
 			reader >> m_LaunchIntoActivity;
 		} else if (propName == "DefaultActivityType") {
@@ -299,6 +305,10 @@ namespace RTE {
 		writer << m_EndlessMode;
 		writer.NewProperty("EnableHats");
 		writer << m_EnableHats;
+		writer.NewProperty("EnableCrabBombs");
+		writer << m_EnableCrabBombs;
+		writer.NewProperty("CrabBombThreshold");
+		writer << m_CrabBombThreshold;
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

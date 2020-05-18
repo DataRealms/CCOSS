@@ -46,6 +46,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Exposed `AHuman.ThrowPrepTime` to lua and ini: ([Issue #101](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/101))  
 	`ThrowPrepTime = valueInMS` will set how long it takes the `AHuman` to fully charge a throw. Default value is 1000.  
 	`AHuman.ThrowPrepTime` to get/set values via lua.
+	
+- Added new `SpriteAnimMode` modes:  
+	```
+	SpriteAnimMode = 7 // OVERLIFETIME
+	``` 
+	This mode handles exactly like (now removed) `MOSParticle.Framerate = 0` and will complete the sprite's animation cycle over the course of it's existence. `SpriteAnimDuration` is inapplicable when using this mode and will do nothing.  
+	For example, an object that has a sprite with 10 frames and a lifetime of 10 seconds will animate at a rate of 1 frame per second, finishing it's animation cycle just before being deleted from the scene.  
+	If this mode is used on an object that has `LifeTime = 0` (infinite) it will be overriden to `SpriteAnimMode = 1` (ALWAYSLOOP) otherwise it will never animate.  
+	```
+	SpriteAnimMode = 8 // ONCOLLIDE
+	```
+	This mode will drive the animation forward based on collisions this object has with other MOs or the terrain. `SpriteAnimDuration` is inapplicable when using this mode and will do nothing.  
+	This mode is `MOSParticle` specific and used mainly for animating casings. Using this mode on anything other than `MOSParticle` will do nothing.	
 
 ### Changed
 
@@ -79,6 +92,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Removed hardcoded 10 second `LifeTime` restriction for `MOPixel` and `MOSParticle`.
 
+- `MOSParticle` animation can now be set with `SpriteAnimMode` and `SpriteAnimDuration`. If the property isn't defined it will default to `SpriteAnimMode = 7` (OVERLIFETIME).
+
 ### Fixed
 
 - Control schemes will no longer get deleted when being configured. Resetting the control scheme will load a preset instead of leaving it blank. ([Issue #121](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/121))
@@ -86,6 +101,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Removed
 
 - Removed `Settings.ini` property `PixelsPerMeter`. Now hardcoded and cannot be changed by the user.
+
+- Removed `MOSParticle` property `Framerate` and lua bindings. `MOSParticle` animation is now handled with `SpriteAnimMode` like everything else.
 
 ***
 

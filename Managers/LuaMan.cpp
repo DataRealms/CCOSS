@@ -707,7 +707,9 @@ int LuaMan::Create()
                 value("ALWAYSPINGPONG", 3),
                 value("LOOPWHENMOVING", 4),
                 value("LOOPWHENOPENCLOSE", 5),
-                value("PINGPONGOPENCLOSE", 6)
+                value("PINGPONGOPENCLOSE", 6),
+                value("OVERLIFETIME", 7),
+                value("ONCOLLIDE", 8)
             ]
             /*.property("Material", &MOSprite::GetMaterial)*/
             .property("Diameter", &MOSprite::GetDiameter)
@@ -735,7 +737,6 @@ int LuaMan::Create()
 
         CONCRETELUABINDING(MOSParticle, MOSprite)
             /*.property("Material", &MOSParticle::GetMaterial)*/
-            .property("Framerate", &MOSParticle::GetFramerate, &MOSParticle::SetFramerate)
 //            .property("Atom", &MOSParticle::GetAtom, &MOSParticle:SetAtom)
             .property("IsGold", &MOSParticle::IsGold),
 

@@ -53,6 +53,8 @@ public:
         LOOPWHENMOVING,
         LOOPWHENOPENCLOSE,
         PINGPONGOPENCLOSE,
+		OVERLIFETIME,
+		ONCOLLIDE,
         SpriteAnimModeCount
     };
 

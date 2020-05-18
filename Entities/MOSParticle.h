@@ -101,18 +101,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newAtom">A reference to the new Atom.</param>
 		void SetAtom(Atom *newAtom);
-
-		/// <summary>
-		/// Gets the current frame rate of the animation playback.
-		/// </summary>
-		/// <returns>The current frame rate in frames per second.</returns>
-		float GetFramerate() const { return m_Framerate; }
-
-		/// <summary>
-		/// Sets the current frame rate of the animation playback.
-		/// </summary>
-		/// <param name="newFramerate">The new frame rate in frames per second.</param>
-		void SetFramerate(float newFramerate) { m_Framerate = newFramerate; }
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -168,8 +156,6 @@ namespace RTE {
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
 		Atom *m_Atom; //!< The Atom that will be the physical representation of this MOSParticle.
-
-		float m_Framerate; //!< Frame rate of the animation playback in fps. Negative means backwards.
 		float m_TimeRest; //!< Accumulated time in seconds that did not cause a frame change.
 
 	private:

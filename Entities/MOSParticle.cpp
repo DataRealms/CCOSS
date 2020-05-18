@@ -11,8 +11,7 @@ namespace RTE {
 
 	void MOSParticle::Clear() {
 		m_Atom = 0;
-		m_Framerate = 0;
-		m_TimeRest = 0;
+		m_SpriteAnimMode = OVERLIFETIME;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,7 +31,6 @@ namespace RTE {
 
 		m_Atom = new Atom(*(reference.m_Atom));
 		m_Atom->SetOwner(this);
-		m_Framerate = reference.m_Framerate;
 
 		return 0;
 	}
@@ -44,8 +42,6 @@ namespace RTE {
 			if (!m_Atom) { m_Atom = new Atom; }
 			reader >> *m_Atom;
 			m_Atom->SetOwner(this);
-		} else if (propName == "Framerate") {
-			reader >> m_Framerate;
 		} else {
 			// See if the base class(es) can find a match instead
 			return MOSprite::ReadProperty(propName, reader);
@@ -62,8 +58,6 @@ namespace RTE {
 		/*
 		writer.NewProperty("Atom");
 		writer << m_Atom;
-		writer.NewProperty("Framerate");
-		writer << m_Framerate;
 		*/
 
 		return 0;
@@ -131,27 +125,23 @@ namespace RTE {
 		// Now clear out the ignore override for next frame
 		m_Atom->ClearMOIDIgnoreList();
 
-		// Change angular velocity after collision.
-		if (hitCount >= 1) {
-			m_AngularVel *= 0.5F * velMag * NormalRand();
-			m_AngularVel = -m_AngularVel;
-		}
+		if (m_SpriteAnimMode == ONCOLLIDE) {
+			// Change angular velocity after collision.
+			if (hitCount >= 1) {
+				m_AngularVel *= 0.5F * velMag * NormalRand();
+				m_AngularVel = -m_AngularVel;
+			}
 
-		// Animate based on rotation.. temporary.
-		if (m_Framerate) {
+			// TODO: Rework this is it's less incomprehensible black magic math and not driven by AngularVel.
 			double newFrame = m_Rotation.GetRadAngle();
 			newFrame -= std::floorf(m_Rotation.GetRadAngle() / (2 * c_PI)) * (2 * c_PI);
 			newFrame /= (2 * c_PI);
 			newFrame *= m_FrameCount;
 			m_Frame = std::floorf(newFrame);
-			m_Rotation += static_cast<long double>(m_AngularVel) * static_cast<long double>(deltaTime);
-		} else {
-			// Animate over lifetime
-			double newFrame = static_cast<double>(m_FrameCount) * (static_cast<double>(m_AgeTimer.GetElapsedSimTimeMS()) / static_cast<double>(m_Lifetime));
-			m_Frame = std::floorf(newFrame);
-		}
+			m_Rotation += m_AngularVel * deltaTime;
 
-		if (m_Frame >= m_FrameCount) { m_Frame = m_FrameCount - 1; }		
+			if (m_Frame >= m_FrameCount) { m_Frame = m_FrameCount - 1; }
+		}			
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

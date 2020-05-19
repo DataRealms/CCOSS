@@ -639,7 +639,7 @@ bool MovableObject::DisableScript(const std::string &scriptPath) {
 
     std::vector<std::pair<std::string, bool>>::iterator scriptEntryIterator = FindScript(scriptPath);
     if (scriptEntryIterator != m_AllLoadedScripts.end() && scriptEntryIterator->second == true) {
-        if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptRemoveOrDisable", {}, {"false"}) < 0) {
+        if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptDisable") < 0) {
             return false;
         }
         scriptEntryIterator->second = false;

@@ -59,7 +59,7 @@ friend class LuaMan;
 // Public member variable, method and friend function declarations
 
 public:
-    ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptRemoveOrDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
+    ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
 
 enum MOType
 {

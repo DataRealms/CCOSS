@@ -546,7 +546,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::ReloadScripts(bool alsoReloadPresetcripts) {
+int MovableObject::ReloadScripts(bool alsoReloadPresetScripts) {
     if (m_AllLoadedScripts.empty()) {
         return 0;
     }
@@ -578,7 +578,7 @@ int MovableObject::ReloadScripts(bool alsoReloadPresetcripts) {
     MovableObject *pPreset = const_cast<MovableObject *>(dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(GetClassName(), GetPresetName(), GetModuleID())));
 
     int status = clearScriptConfigurationAndLoadPreexistingScripts(this, pPreset == this);
-    if (alsoReloadPresetcripts && status <= 0 && pPreset && pPreset != this) {
+    if (alsoReloadPresetScripts && status <= 0 && pPreset && pPreset != this) {
         status = clearScriptConfigurationAndLoadPreexistingScripts(pPreset, true);
     }
 

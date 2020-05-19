@@ -525,7 +525,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
     }
 
     // Assign the different functions read in from the script to their permanent locations in the preset's table
-    for (std::string functionName : GetSupportedScriptFunctionNames()) {
+    for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
         if (g_LuaMan.GlobalIsDefined(functionName)) {
             if (m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
                 m_FunctionsAndScripts.insert({functionName, std::vector<std::pair<std::string, bool> *>()});
@@ -546,7 +546,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::ReloadScripts(bool reloadPresetScripts) {
+int MovableObject::ReloadScripts(bool alsoReloadPresetcripts) {
     if (m_AllLoadedScripts.empty()) {
         return 0;
     }
@@ -554,13 +554,17 @@ int MovableObject::ReloadScripts(bool reloadPresetScripts) {
     /// <summary>
     /// Internal lambda function to clear a given object's script configurations, and then load them all again in order to reset them.
     /// </summary>
-    auto clearScriptConfigurationAndLoadPreexistingScripts = [](MovableObject *object) {
+    auto clearScriptConfigurationAndLoadPreexistingScripts = [](MovableObject *object, bool shouldClearScriptPresetName) {
         std::vector<std::pair<std::string, bool>> loadedScriptsCopy = object->m_AllLoadedScripts;
         object->m_AllLoadedScripts.clear();
         object->m_FunctionsAndScripts.clear();
-        object->m_ScriptPresetName.clear();
+        if (shouldClearScriptPresetName) {
+            object->m_ScriptPresetName.clear();
+        } else {
+            object->m_ScriptObjectName.clear();
+        }
 
-        int status = 0;
+        int status = 0; 
         for (const std::pair<std::string, bool> &scriptEntry : loadedScriptsCopy) {
             status = object->LoadScript(scriptEntry.first, scriptEntry.second);
             if (status < 0) {
@@ -570,17 +574,12 @@ int MovableObject::ReloadScripts(bool reloadPresetScripts) {
         return status;
     };
 
-    int status = clearScriptConfigurationAndLoadPreexistingScripts(this);
-    if (status >= 0) {
-        return status;
-    }
+    //TODO consider getting rid of this const_cast. It would require either code duplication or creating some none const methods (specifically of PresetMan::GetEntityPreset, which may be unsafe. Could be this gross exceptional handling is the best way to go.
+    MovableObject *pPreset = const_cast<MovableObject *>(dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(GetClassName(), GetPresetName(), GetModuleID())));
 
-    if (reloadPresetScripts) {
-        //TODO consider getting rid of this const_cast. It would require either code duplication or creating some none const methods (specifically of PresetMan::GetEntityPreset, which may be unsafe. Could be this gross exceptional handling is the best way to go.
-        MovableObject *pPreset = const_cast<MovableObject *>(dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(GetClassName(), GetPresetName(), GetModuleID())));
-        if (pPreset && pPreset != this) {
-            status = clearScriptConfigurationAndLoadPreexistingScripts(pPreset);
-        }
+    int status = clearScriptConfigurationAndLoadPreexistingScripts(this, pPreset == this);
+    if (alsoReloadPresetcripts && status <= 0 && pPreset && pPreset != this) {
+        status = clearScriptConfigurationAndLoadPreexistingScripts(pPreset, true);
     }
 
     return status;
@@ -623,12 +622,12 @@ bool MovableObject::RemoveScript(const std::string &scriptPath) {
     std::vector<std::pair<std::string, bool>>::const_iterator scriptEntryIterator = FindScript(scriptPath);
     if (scriptEntryIterator != m_AllLoadedScripts.end()) {
         // Erase the script from both collections. Erasure from the latter is done with the aid of std::remove_if, due to the complexity of the datastructure.
-        m_AllLoadedScripts.erase(scriptEntryIterator);
         for (std::pair<const std::string, std::vector<std::pair<std::string, bool> *>> &functionAndScripts : m_FunctionsAndScripts) {
             functionAndScripts.second.erase(std::remove_if(functionAndScripts.second.begin(), functionAndScripts.second.end(), [scriptPath](const std::pair<std::string, bool> *scriptEntry) {
                 return scriptEntry->first == scriptPath;
             }));
         }
+        m_AllLoadedScripts.erase(scriptEntryIterator);
         if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptRemoveOrDisable", {}, {"true"}) < 0) {
             g_ConsoleMan.PrintString("NOTE: The script has been removed despite this error.");
             return false;

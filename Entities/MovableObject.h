@@ -201,17 +201,17 @@ EntityAllocation(MovableObject)
     virtual int LoadScript(const std::string &scriptPath, bool loadAsEnabledScript = true);
 
     /// <summary>
-    /// Reloads the all of the scripts on this object. This will also update the original preset in PresetMan with the updated scripts so future objects spawned will use the new scripts.
+    /// Reloads the all of the scripts on this object. This will also reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
     /// </summary>
     /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
     int ReloadScripts() { return ReloadScripts(true); }
 
     /// <summary>
-    /// Reloads the all of the scripts on this object. This will also optionally update the original preset in PresetMan with the updated scripts so future objects spawned will use the new scripts.
+    /// Reloads the all of the scripts on this object. This will also optionally reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
     /// </summary>
-    /// <param name="reloadPresetScripts">Whether to reload scripts on the original preset as well as the object instance. Defaults to true.</param>
+    /// <param name="alsoReloadPresetObjectScripts">Whether to reload scripts on the PresetMan preset as well as those on the object instance. Irrelevant if the object instance is the preset.</param>
     /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-    virtual int ReloadScripts(bool reloadPresetScripts);
+    virtual int ReloadScripts(bool alsoReloadPresetcripts);
 
     /// <summary>
     /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_AllLoadedScripts.end() if it's not.

@@ -12,15 +12,8 @@
 // Inclusions of header files
 
 #include "Loadout.h"
-
 #include "PresetMan.h"
-
-#include "DataModule.h"
-#include "SceneObject.h"
 #include "MovableObject.h"
-#include "MOSprite.h"
-#include "HeldDevice.h"
-#include "AHuman.h"
 #include "ACraft.h"
 
 namespace RTE {

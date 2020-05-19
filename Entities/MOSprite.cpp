@@ -12,8 +12,7 @@
 // Inclusions of header files
 
 #include "MOSprite.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
+#include "PresetMan.h"
 #include "AEmitter.h"
 
 namespace RTE {

@@ -1,7 +1,6 @@
 #include "MOSParticle.h"
 #include "Atom.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
+#include "PostProcessMan.h"
 
 namespace RTE {
 

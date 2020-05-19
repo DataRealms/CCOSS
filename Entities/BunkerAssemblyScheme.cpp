@@ -13,9 +13,8 @@
 
 #include "BunkerAssemblyScheme.h"
 #include "PresetMan.h"
-#include "ContentFile.h"
+
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {

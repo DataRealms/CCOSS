@@ -12,9 +12,7 @@
 // Inclusions of header files
 
 #include "Turret.h"
-#include "RTETools.h"
 #include "HeldDevice.h"
-#include "ContentFile.h"
 #include "PresetMan.h"
 
 namespace RTE {

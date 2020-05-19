@@ -12,10 +12,8 @@
 // Inclusions of header files
 
 #include "HDFirearm.h"
+#include "PresetMan.h"
 #include "Magazine.h"
-#include "Atom.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
 #include "ThrownDevice.h"
 #include "MOPixel.h"
 #include "Actor.h"

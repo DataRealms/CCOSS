@@ -12,10 +12,8 @@
 // Inclusions of header files
 
 #include "Arm.h"
-#include "RTETools.h"
 #include "HDFirearm.h"
 #include "ThrownDevice.h"
-#include "ContentFile.h"
 #include "PresetMan.h"
 
 namespace RTE {

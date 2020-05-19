@@ -12,11 +12,8 @@
 // Inclusions of header files
 
 #include "AtomGroup.h"
-#include "RTEManagers.h"
 #include "SLTerrain.h"
-#include "MovableObject.h"
 #include "MOSRotating.h"
-
 #include "ConsoleMan.h"
 
 namespace RTE {

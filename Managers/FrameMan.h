@@ -1,7 +1,6 @@
 #ifndef _RTEFRAMEMAN_
 #define _RTEFRAMEMAN_
 
-#include "RTETools.h"
 #include "ContentFile.h"
 #include "Timer.h"
 #include "Box.h"

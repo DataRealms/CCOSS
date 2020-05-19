@@ -12,13 +12,10 @@
 // Inclusions of header files
 
 #include "Magazine.h"
-#include "Atom.h"
+#include "PresetMan.h"
 #include "MOSParticle.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
 #include "MOPixel.h"
 #include "AEmitter.h"
-#include "float.h"
 
 namespace RTE {
 

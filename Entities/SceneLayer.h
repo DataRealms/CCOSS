@@ -14,13 +14,10 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
 #include "Entity.h"
-#include "Vector.h"
 #include "Box.h"
 #include "FrameMan.h"
 #include "SceneMan.h"
-//#include "MovableMan.h"
 
 namespace RTE
 {

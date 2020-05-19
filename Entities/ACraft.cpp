@@ -12,15 +12,9 @@
 // Inclusions of header files
 
 #include "ACraft.h"
-#include "Atom.h"
 #include "AtomGroup.h"
-#include "Attachable.h"
-#include "HeldDevice.h"
-#include "Arm.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "RTETools.h"
-#include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
 #include "HDFirearm.h"
@@ -30,7 +24,6 @@
 #include "Scene.h"
 
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {

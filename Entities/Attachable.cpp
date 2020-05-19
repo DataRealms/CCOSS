@@ -12,10 +12,9 @@
 // Inclusions of header files
 
 #include "Attachable.h"
-#include "Atom.h"
 #include "AtomGroup.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
+#include "PresetMan.h"
+#include "MovableMan.h"
 #include "AEmitter.h"
 #include "Actor.h"
 #include "ConsoleMan.h"

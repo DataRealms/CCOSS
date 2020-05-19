@@ -14,12 +14,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
 #include "SceneObject.h"
-#include "Vector.h"
-#include "FrameMan.h"
 #include "SceneMan.h"
-//#include "MovableMan.h"
 
 #define ICON_WIDTH 69
 #define AREA_PER_DEPLOYMENT 64

@@ -1,7 +1,6 @@
 #ifndef _RTEPOSTPROCESSMAN_
 #define _RTEPOSTPROCESSMAN_
 
-#include "Serializable.h"
 #include "Singleton.h"
 #include "Box.h"
 #include "SceneMan.h"
@@ -40,7 +39,7 @@ namespace RTE {
 	/// <summary>
 	/// Singleton manager responsible for all 32bpp post-process effect drawing.
 	/// </summary>
-	class PostProcessMan : public Singleton<PostProcessMan>, public Serializable {
+	class PostProcessMan : public Singleton<PostProcessMan> {
 
 	public:
 

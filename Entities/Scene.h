@@ -14,14 +14,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
 #include "Entity.h"
-#include "FrameMan.h"
 #include "SceneMan.h"
 #include "ActivityMan.h"
 #include "Box.h"
 #include "BunkerAssembly.h"
-//#include "MovableMan.h"
 
 namespace RTE
 {

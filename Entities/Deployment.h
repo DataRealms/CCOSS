@@ -17,7 +17,6 @@
 #include "RTETools.h"
 #include "SceneObject.h"
 #include "Vector.h"
-#include "FrameMan.h"
 #include "SceneMan.h"
 //#include "MovableMan.h"
 

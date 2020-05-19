@@ -12,7 +12,6 @@
 // Inclusions of header files
 
 #include "LimbPath.h"
-#include "FrameMan.h"
 #include "PresetMan.h"
 #include "SLTerrain.h"
 

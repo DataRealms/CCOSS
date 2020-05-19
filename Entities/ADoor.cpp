@@ -12,17 +12,10 @@
 // Inclusions of header files
 
 #include "ADoor.h"
-#include "Atom.h"
 #include "AtomGroup.h"
 #include "Attachable.h"
-#include "RTETools.h"
 #include "Matrix.h"
 #include "SLTerrain.h"
-#include "PresetMan.h"
-
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroBitmap.h"
 
 namespace RTE {
 

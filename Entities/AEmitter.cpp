@@ -13,7 +13,6 @@
 
 #include "AEmitter.h"
 #include "Atom.h"
-#include "RTETools.h"
 #include "PresetMan.h"
 #include "Emission.h"
 

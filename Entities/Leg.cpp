@@ -12,10 +12,7 @@
 // Inclusions of header files
 
 #include "Leg.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
-#include "HeldDevice.h"
-#include "ContentFile.h"
+#include "PresetMan.h"
 
 namespace RTE {
 

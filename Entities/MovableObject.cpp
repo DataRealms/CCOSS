@@ -614,31 +614,6 @@ bool MovableObject::AddScript(const std::string &scriptPath) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool MovableObject::RemoveScript(const std::string &scriptPath) {
-    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
-        return false;
-    }
-
-    std::vector<std::pair<std::string, bool>>::const_iterator scriptEntryIterator = FindScript(scriptPath);
-    if (scriptEntryIterator != m_AllLoadedScripts.end()) {
-        // Erase the script from both collections. Erasure from the latter is done with the aid of std::remove_if, due to the complexity of the datastructure.
-        for (std::pair<const std::string, std::vector<std::pair<std::string, bool> *>> &functionAndScripts : m_FunctionsAndScripts) {
-            functionAndScripts.second.erase(std::remove_if(functionAndScripts.second.begin(), functionAndScripts.second.end(), [scriptPath](const std::pair<std::string, bool> *scriptEntry) {
-                return scriptEntry->first == scriptPath;
-            }));
-        }
-        m_AllLoadedScripts.erase(scriptEntryIterator);
-        if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptRemoveOrDisable", {}, {"true"}) < 0) {
-            g_ConsoleMan.PrintString("NOTE: The script has been removed despite this error.");
-            return false;
-        }
-        return true;
-    }
-    return false;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 bool MovableObject::EnableScript(const std::string &scriptPath) {
     if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return false;

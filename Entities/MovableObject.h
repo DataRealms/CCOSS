@@ -248,13 +248,6 @@ EntityAllocation(MovableObject)
     virtual bool AddScript(const std::string &scriptPath);
 
     /// <summary>
-    /// Removes the script at the given path so it will no longer be one of the scripts on this MO.
-    /// </summary>
-    /// <param name="scriptPath">The path to the script to remove.</param>
-    /// <returns>Whether or not the script was successfully removed.</returns>
-    virtual bool RemoveScript(const std::string &scriptPath);
-
-    /// <summary>
     /// Checks if the script at the given path is one of the enabled scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>

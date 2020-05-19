@@ -52,167 +52,33 @@ enum DoorState
 };
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Nested class:    Sensor
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     The ray-casting sensor which triggers the door opening or closing,
-    //                  depending on the team of the Actor that broke the ray.
-    // Parent(s):       Serializable.
-    // Class history:   11/20/2007 Sensor created.
-
-    class Sensor:
-        public Serializable
-    {
-
-    friend class ADoor;
-
-	SerializableOverrideMethods
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Public member variable, method and friend function declarations
-
-    public:
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Constructor:     Sensor
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Constructor method used to instantiate a Sensor object in system
-    //                  memory. Create() should be called before using the object.
-    // Arguments:       None.
-
-        Sensor() { Clear(); }
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Create
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Makes the Sensor object ready for use.
-    // Arguments:       None.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Create();
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Create
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Creates a Sensor to be identical to another, by deep copy.
-    // Arguments:       A reference to the Sensor to deep copy.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Create(const Sensor &reference);
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Reset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Resets the entire Serializable, including its inherited members, to their
-    //                  default settings or values.
-    // Arguments:       None.
-    // Return value:    None.
-
-        virtual void Reset() { Clear(); }
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-        virtual const std::string & GetClassName() const { return m_sClassName; }
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetStartOffset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the starting position offset of this sensor from the owning ADoor
-    //                  position.
-    // Arguments:       None.
-    // Return value:    The starting coordinates relative to the m_Pos of this' ADoor.
-
-        virtual Vector GetStartOffset() const { return m_StartOffset; }
 
 
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  SetStartOffset
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Sets the starting position offset of this sensor from the owning ADoor
-	//                  position.
-	// Arguments:       The starting coordinates relative to the m_Pos of this' ADoor..
-	// Return value:    None
-
-		virtual void SetStartOffset(Vector startOffsetValue) { m_StartOffset = startOffsetValue; }
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetSensorRay
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the sensor ray vector out fromt he start offset's position.
-    // Arguments:       None.
-    // Return value:    The sensor ray
-
-        virtual Vector GetSensorRay() const { return m_SensorRay; }
 
 
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  SetSensorRay
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Sets the sensor ray vector out fromt he start offset's position.
-	// Arguments:       The sensor ray.
-	// Return value:    None
-
-		virtual void SetSensorRay(Vector sensorRayValue)  { m_SensorRay = sensorRayValue; }
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  SenseActor
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Casts the ray along the sensor vector and returns any Actor that was
-    //                  found along it.
-    // Arguments:       The position, rotation and flipping of of the owner.
-    //                  Which MOID to ignore, if any.
-    // Return value:    The root Actor of the first MOID hit by the sensor ray. 0 if none.
-
-        virtual Actor * SenseActor(Vector &doorPos, Matrix &doorRot, bool doorHFlipped = false, MOID ignoreMOID = g_NoMOID);
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Protected member variable and method declarations
-
-    protected:
-
-        // Member variables
-        static const std::string m_sClassName;
-        // The offset of the sensor ray start relative the position of its ADoor
-        Vector m_StartOffset;
-        // The ray out from the offset
-        Vector m_SensorRay;
-        // How many pixels to skip between sensing pixels
-        int m_Skip;
 
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Private member variable and method declarations
 
-    private:
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          Clear
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Clears all the member variables of this Sensor, effectively
-    //                  resetting the members of this abstraction level only.
-    // Arguments:       None.
-    // Return value:    None.
-
-        void Clear();
-
-    };
 
 
 // Concrete allocation and cloning definitions

@@ -23,6 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Lua error reporting has been improved so script errors will always show filename and line number.
 
+- Specially handled Lua function `OnScriptRemoveOrDisable` has been changed to `OnScriptDisable`, and no longer has a parameter saying whether it was removed or disabled, since you can no longer remove scripts.
+
 ### Fixed
 
 - Control schemes will no longer get deleted when being configured.
@@ -31,6 +33,8 @@ Resetting the control scheme will load a preset instead of leaving it blank. (Is
 - Time scale can no longer be lowered to 0 through the performance stats interface.
 
 ### Removed
+
+- Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.
 
 ***
 

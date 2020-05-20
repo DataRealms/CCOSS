@@ -90,7 +90,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(AHuman)
+EntityAllocation(AHuman)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -916,16 +916,12 @@ ENTITYALLOCATION(AHuman)
 
     virtual void Update();
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnPieMenu
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Executes the Lua-defined OnPieMenu event handler.
-// Arguments:       Actor which triggered the pie menu event
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	virtual int OnPieMenu(Actor * pActor);
+    /// <summary>
+    /// Executes the Lua-defined OnPieMenu event handler for this AHuman.
+    /// </summary>
+    /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+	virtual int OnPieMenu(Actor *pieMenuActor);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1076,7 +1072,7 @@ protected:
     AtomGroup *m_pFGFootGroup;
     AtomGroup *m_pBGFootGroup;
     // The sound of the actor taking a step (think robot servo)
-    Sound m_StrideSound;
+    SoundContainer m_StrideSound;
     // Jetpack booster.
     AEmitter *m_pJetpack;
     // The max total time, in ms, that the jetpack can be used without pause

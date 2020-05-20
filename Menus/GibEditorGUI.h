@@ -15,7 +15,6 @@
 // Inclusions of header files
 
 //#include "FrameMan.h"
-#include "Sound.h"
 #include "Timer.h"
 #include "Vector.h"
 #include "Controller.h"
@@ -27,6 +26,7 @@ namespace RTE
 {
 
 class MovableObject;
+class MOSRotating;
 class ObjectPickerGUI;
 class PieMenuGUI;
 

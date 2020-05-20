@@ -93,7 +93,7 @@ void AssemblyEditorGUI::Clear()
 
 int AssemblyEditorGUI::Create(Controller *pController, FeatureSets featureSet, int whichModuleSpace, int nativeTechModule, float foreignCostMult)
 {
-    AAssert(pController, "No controller sent to AssemblyEditorGUI on creation!");
+    RTEAssert(pController, "No controller sent to AssemblyEditorGUI on creation!");
     m_pController = pController;
 
     m_FeatureSet = featureSet;
@@ -535,7 +535,7 @@ void AssemblyEditorGUI::Update()
             m_PreviousMode = ADDINGOBJECT;
             m_ModeChanged = true;
             UpdatePieMenu();
-            g_GUISound.PlacementBlip().Play();
+            g_GUISound.PlacementBlip()->Play();
         }
 
         // Apply the team to the current actor, if applicable
@@ -681,7 +681,7 @@ void AssemblyEditorGUI::Update()
 							g_SceneMan.GetScene()->AddPlacedObject(editedSet, pNewObject, objectListPosition);
 
 							m_EditMade = true;
-							g_GUISound.PlacementThud().Play();
+							g_GUISound.PlacementThud()->Play();
 							toPlace = false;
 						}
 					}
@@ -699,7 +699,7 @@ void AssemblyEditorGUI::Update()
 									pBrainAHuman->AddInventoryItem(dynamic_cast<MovableObject *>(m_pCurrentObject->Clone()));
 									pBrainAHuman->FlashWhite(150);
 									m_EditMade = true;
-									g_GUISound.PlacementThud().Play();
+									g_GUISound.PlacementThud()->Play();
 									toPlace = false;
 								}
 							}
@@ -744,7 +744,7 @@ void AssemblyEditorGUI::Update()
 					}
 				}
 
-				g_GUISound.PlacementThud().Play();
+				g_GUISound.PlacementThud()->Play();
 				m_EditMade = true;
 				toPlace = false;
 			}
@@ -800,7 +800,7 @@ void AssemblyEditorGUI::Update()
 						m_ObjectListOrder++;
 				}
 				m_CurrentAssemblyName = pBA->GetPresetName();
-				g_GUISound.PlacementThud().Play();
+				g_GUISound.PlacementThud()->Play();
 				m_EditMade = true;
 				toPlace = false;
 			}
@@ -812,7 +812,7 @@ void AssemblyEditorGUI::Update()
 				// Increment the list order so we place over last placed item
 				if (m_ObjectListOrder >= 0)
 					m_ObjectListOrder++;
-				g_GUISound.PlacementThud().Play();
+				g_GUISound.PlacementThud()->Play();
 				m_EditMade = true;
             }
 // TEMP REMOVE WEHN YOU CLEAN UP THE ABOVE HARDCODED BRAIN PLACEMENT
@@ -893,11 +893,11 @@ void AssemblyEditorGUI::Update()
                     m_ModeChanged = true;
                     UpdatePieMenu();
                     m_BlinkTimer.Reset();
-                    g_GUISound.PlacementBlip().Play();
-                    g_GUISound.PlacementGravel().Play();
+                    g_GUISound.PlacementBlip()->Play();
+                    g_GUISound.PlacementGravel()->Play();
                 }
                 else
-                    g_GUISound.UserErrorSound().Play();
+                    g_GUISound.UserErrorSound()->Play();
             }
         }
 
@@ -928,7 +928,7 @@ void AssemblyEditorGUI::Update()
 // TODO: Add awesome destruction sound here
                 }
                 else
-                    g_GUISound.UserErrorSound().Play();
+                    g_GUISound.UserErrorSound()->Play();
             }
         }
     }

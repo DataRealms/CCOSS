@@ -13,12 +13,12 @@
 
 #include "MOSprite.h"
 #include "RTEManagers.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "AEmitter.h"
 
 namespace RTE {
 
-ABSTRACTCLASSINFO(MOSprite, MovableObject)
+AbstractClassInfo(MOSprite, MovableObject)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -37,6 +37,7 @@ void MOSprite::Clear()
     m_SpriteAnimMode = NOANIM;
     m_SpriteAnimDuration = 500;
     m_SpriteAnimTimer.Reset();
+    m_SpriteAnimIsReversingFrames = false;
     m_HFlipped = false;
     m_MaxRadius = 1;
     m_MaxDiameter = 2;
@@ -399,10 +400,10 @@ bool MOSprite::IsOnScenePoint(Vector &scenePoint) const
     // Check all the passes needed
     for (int i = 0; i < passes; ++i)
     {
-        if (WithinBox(aScenePoint[i], m_Pos + m_BitmapOffset, m_pFGColor->w, m_pFGColor->h))
+        if (IsWithinBox(aScenePoint[i], m_Pos + m_BitmapOffset, m_pFGColor->w, m_pFGColor->h))
         {
-            if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor ||
-               (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_KeyColor) ||
+            if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor ||
+               (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor) ||
                (m_pMaterial && getpixel(m_pMaterial, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaterialAir))
                return true;
         }
@@ -416,7 +417,7 @@ bool MOSprite::IsOnScenePoint(Vector &scenePoint) const
         // Check over overlap
         int pixel = getpixel(m_aSprite[m_Frame], spritePoint.m_X - m_SpriteOffset.m_X, spritePoint.m_Y - m_SpriteOffset.m_Y);
         // Check that it isn't outside the bitmap, and not of the key color
-        if (pixel != -1 && pixel != g_KeyColor)
+        if (pixel != -1 && pixel != g_MaskColor)
            return true;
     }
 
@@ -451,17 +452,56 @@ Vector MOSprite::UnRotateOffset(const Vector &offset) const
     return rotOff;
 }
 
-/*
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Pure v. method:  Update
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this MOSprite. Supposed to be done every frame.
 
-void MOSprite::Update()
-{
-    MovableObject::Update();
+void MOSprite::Update() {
+	MovableObject::Update();
+
+	// First, check that the sprite has enough frames to even have an animation and override the setting if not
+	if (m_FrameCount > 1) {
+		// If animation mode is set to something other than ALWAYSLOOP but only has 2 frames, override it because it's pointless
+		if ((m_SpriteAnimMode == ALWAYSRANDOM || m_SpriteAnimMode == ALWAYSPINGPONG) && m_FrameCount == 2) {
+			m_SpriteAnimMode = ALWAYSLOOP;
+		}
+	} else {
+		m_SpriteAnimMode = NOANIM;
+	}
+
+	// Animate the sprite, if applicable
+	unsigned int frameTime = m_SpriteAnimDuration / m_FrameCount;
+	unsigned int prevFrame = m_Frame;
+
+	if (m_SpriteAnimTimer.GetElapsedSimTimeMS() > frameTime) {
+		switch (m_SpriteAnimMode) {
+		    case ALWAYSLOOP:
+			    m_Frame = ((m_Frame + 1) % m_FrameCount);
+                m_SpriteAnimTimer.Reset();
+			    break;
+		    case ALWAYSRANDOM:
+			    while (m_Frame == prevFrame) {
+				    m_Frame = floorf(static_cast<float>(m_FrameCount) * PosRand());
+			    }
+                m_SpriteAnimTimer.Reset();
+			    break;
+		    case ALWAYSPINGPONG:
+			    if (m_Frame == m_FrameCount - 1) {
+				    m_SpriteAnimIsReversingFrames = true;
+			    } else if (m_Frame == 0) {
+				    m_SpriteAnimIsReversingFrames = false;
+			    }
+			    m_SpriteAnimIsReversingFrames ? m_Frame-- : m_Frame++;
+                m_SpriteAnimTimer.Reset();
+			    break;
+		    default:
+			    break;
+		}
+	}
 }
-*/
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
@@ -475,7 +515,7 @@ void MOSprite::Draw(BITMAP *pTargetBitmap,
                     bool onlyPhysical) const
 {
     if (!m_aSprite[m_Frame])
-        DDTAbort("Sprite frame pointer is null when drawing MOSprite!");
+        RTEAbort("Sprite frame pointer is null when drawing MOSprite!");
 
     // Apply offsets and positions.
     Vector spriteOffset;
@@ -531,12 +571,12 @@ void MOSprite::Draw(BITMAP *pTargetBitmap,
     for (int i = 0; i < passes; ++i)
     {
         if (mode == g_DrawMaterial) {
-            DDTAbort("Ordered to draw an MOSprite in its material, which is not possible!");
+            RTEAbort("Ordered to draw an MOSprite in its material, which is not possible!");
         }
         else if (mode == g_DrawAir)
             draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_MaterialAir, -1);
-        else if (mode == g_DrawKey)
-            draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_KeyColor, -1);
+        else if (mode == g_DrawMask)
+            draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_MaskColor, -1);
         else if (mode == g_DrawWhite)
             draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_WhiteColor, -1);
         else if (mode == g_DrawMOID)

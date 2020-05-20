@@ -44,7 +44,7 @@ extern bool g_ResetActivity;
 
 namespace RTE {
 
-ABSTRACTCLASSINFO(EditorActivity, Activity)
+AbstractClassInfo(EditorActivity, Activity)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -209,7 +209,7 @@ int EditorActivity::Start()
         return error;
 
     // Clear the post effects
-    g_SceneMan.ClearPostEffects();
+	g_PostProcessMan.ClearScenePostEffects();
 
     // Clear the screen messages
     g_FrameMan.ClearScreenText();
@@ -243,7 +243,7 @@ int EditorActivity::Start()
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
 
     return error;
 }
@@ -438,7 +438,7 @@ void EditorActivity::Update()
                     if (pItem && !pItem->m_Name.empty())
                     {
                         SLTerrain *pNewTerrain = dynamic_cast<SLTerrain *>(g_PresetMan.GetEntityPreset("SLTerrain", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        AAssert(pNewTerrain, "No SLTerrain of that name defined!");
+                        RTEAssert(pNewTerrain, "No SLTerrain of that name defined!");
                         pNewScene->Create(pNewTerrain);
                     }
 
@@ -447,21 +447,21 @@ void EditorActivity::Update()
                     if (pItem && !pItem->m_Name.empty())
                     {
                         SceneLayer *pNewLayer = dynamic_cast<SceneLayer *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        AAssert(pNewLayer, "No SceneLayer of the name set as BG1 is defined!");
+                        RTEAssert(pNewLayer, "No SceneLayer of the name set as BG1 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
                     pItem = m_pNewBG2Combo->GetItem(m_pNewBG2Combo->GetSelectedIndex());
                     if (pItem && !pItem->m_Name.empty())
                     {
                         SceneLayer *pNewLayer = dynamic_cast<SceneLayer *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        AAssert(pNewLayer, "No SceneLayer of the name set as BG2 is defined!");
+                        RTEAssert(pNewLayer, "No SceneLayer of the name set as BG2 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
                     pItem = m_pNewBG3Combo->GetItem(m_pNewBG3Combo->GetSelectedIndex());
                     if (pItem && !pItem->m_Name.empty())
                     {
                         SceneLayer *pNewLayer = dynamic_cast<SceneLayer *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        AAssert(pNewLayer, "No SceneLayer of the name set as BG3 is defined!");
+                        RTEAssert(pNewLayer, "No SceneLayer of the name set as BG3 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
 
@@ -493,7 +493,7 @@ void EditorActivity::Update()
                     if (g_SceneMan.GetScene())
                     {
                         m_ModuleSpaceID = g_SceneMan.GetScene()->GetModuleID();
-                        AAssert(m_ModuleSpaceID >= 0, "Loaded Scene's DataModule ID is negative? Should always be a specific one..");
+                        RTEAssert(m_ModuleSpaceID >= 0, "Loaded Scene's DataModule ID is negative? Should always be a specific one..");
                         m_pEditorGUI->Destroy();
                         m_pEditorGUI->Create(&(m_PlayerController[0]), SceneEditorGUI::ONLOADEDIT, m_ModuleSpaceID);
 // TODO: Should read in all the already placed objects in the loaded scene and have them appear int he editor instead

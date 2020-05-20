@@ -20,7 +20,7 @@
 #include "Turret.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
@@ -36,7 +36,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(ACrab, Actor, 0)
+ConcreteClassInfo(ACrab, Actor, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -425,7 +425,7 @@ int ACrab::Create(istream &stream, bool checkType)
         stream >> name;
         if (name != m_sClass.GetName())
         {
-           DDTAbort("Wrong type in stream when passed to Create");
+           RTEAbort("Wrong type in stream when passed to Create");
            return -1;
         }
     }
@@ -579,24 +579,24 @@ bool ACrab::CollideAtPoint(HitData &hd)
     return Actor::CollideAtPoint(hd);
 
 /*
-    hd.resImpulse[HITOR].Reset();
-    hd.resImpulse[HITEE].Reset();
-    hd.hitRadius[HITEE] = (hd.hitPoint - m_Pos) * g_FrameMan.GetMPP();
+    hd.ResImpulse[HITOR].Reset();
+    hd.ResImpulse[HITEE].Reset();
+    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * g_FrameMan.GetMPP();
     hd.mass[HITEE] = m_Mass;
-    hd.momInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
-    hd.hitVel[HITEE] = m_Vel + hd.hitRadius[HITEE].GetPerpendicular() * m_AngularVel;
-    hd.velDiff = hd.hitVel[HITOR] - hd.hitVel[HITEE];
-    Vector hitAcc = -hd.velDiff * (1 + hd.pBody[HITOR]->GetMaterial().restitution * GetMaterial().restitution);
+    hd.MomInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
+    hd.HitVel[HITEE] = m_Vel + hd.HitRadius[HITEE].GetPerpendicular() * m_AngularVel;
+    hd.VelDiff = hd.HitVel[HITOR] - hd.HitVel[HITEE];
+    Vector hitAcc = -hd.VelDiff * (1 + hd.Body[HITOR]->GetMaterial().restitution * GetMaterial().restitution);
 
-    float hittorLever = hd.hitRadius[HITOR].GetPerpendicular().Dot(hd.bitmapNormal);
-    float hitteeLever = hd.hitRadius[HITEE].GetPerpendicular().Dot(hd.bitmapNormal);
+    float hittorLever = hd.HitRadius[HITOR].GetPerpendicular().Dot(hd.BitmapNormal);
+    float hitteeLever = hd.HitRadius[HITEE].GetPerpendicular().Dot(hd.BitmapNormal);
     hittorLever *= hittorLever;
     hitteeLever *= hitteeLever;
-    float impulse = hitAcc.Dot(hd.bitmapNormal) / (((1 / hd.mass[HITOR]) + (1 / hd.mass[HITEE])) +
-                    (hittorLever / hd.momInertia[HITOR]) + (hitteeLever / hd.momInertia[HITEE]));
+    float impulse = hitAcc.Dot(hd.BitmapNormal) / (((1 / hd.mass[HITOR]) + (1 / hd.mass[HITEE])) +
+                    (hittorLever / hd.MomInertia[HITOR]) + (hitteeLever / hd.MomInertia[HITEE]));
 
-    hd.resImpulse[HITOR] = hd.bitmapNormal * impulse * hd.impFactor[HITOR];
-    hd.resImpulse[HITEE] = hd.bitmapNormal * -impulse * hd.impFactor[HITEE];
+    hd.ResImpulse[HITOR] = hd.BitmapNormal * impulse * hd.ImpulseFactor[HITOR];
+    hd.ResImpulse[HITEE] = hd.BitmapNormal * -impulse * hd.ImpulseFactor[HITEE];
 
     ////////////////////////////////////////////////////////////////////////////////
     // If a particle, which does not penetrate, but bounces, do any additional
@@ -606,9 +606,9 @@ bool ACrab::CollideAtPoint(HitData &hd)
         ;
     }
 
-    m_Vel += hd.resImpulse[HITEE] / hd.mass[HITEE];
-    m_AngularVel += hd.hitRadius[HITEE].GetPerpendicular().Dot(hd.resImpulse[HITEE]) /
-                    hd.momInertia[HITEE];
+    m_Vel += hd.ResImpulse[HITEE] / hd.mass[HITEE];
+    m_AngularVel += hd.HitRadius[HITEE].GetPerpendicular().Dot(hd.ResImpulse[HITEE]) /
+                    hd.MomInertia[HITEE];
 */
 }
 
@@ -2346,7 +2346,7 @@ void ACrab::Update()
             if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD))
             {
                 pDevice->Reload();
-                m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                m_DeviceSwitchSound.Play(m_Pos);
 
                 // Interrupt sharp aiming
                 m_SharpAimTimer.Reset();
@@ -2581,7 +2581,7 @@ void ACrab::Update()
 
             // Play the stride sound, if applicable
             if (playStride)
-                m_StrideSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                m_StrideSound.Play(m_Pos);
         }
         // JUMPING
         else if ((m_pRFGLeg || m_pRBGLeg) && m_MoveState == JUMP)

@@ -19,7 +19,7 @@
 #include "ACraft.h"
 #include "AtomGroup.h"
 #include "Controller.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "SceneMan.h"
 #include "HeldDevice.h"
 #include "PresetMan.h"
@@ -28,6 +28,7 @@
 #include "MOPixel.h"
 #include "Scene.h"
 #include "SettingsMan.h"
+#include "PerformanceMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUIFont.h"
@@ -35,7 +36,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(Actor, MOSRotating, 0);
+ConcreteClassInfo(Actor, MOSRotating, 0);
 
 BITMAP **Actor::m_apNoTeamIcon;
 BITMAP *Actor::m_apAIIcons[AIMODE_COUNT];
@@ -112,6 +113,7 @@ void Actor::Clear()
     m_WhiteFlashTimer.Reset();
     m_PieSlices.clear();
 	m_DeploymentID = 0;
+    m_PassengerSlots = 1;
 
     m_ScriptedAIUpdate = false;
     m_AIMode = AIMODE_NONE;
@@ -133,7 +135,7 @@ void Actor::Clear()
     m_ProgressTimer.Reset();
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
-    m_DigStrenght = 1;
+    m_DigStrength = 1;
 }
 
 
@@ -292,6 +294,7 @@ int Actor::Create(const Actor &reference)
         m_sIconsLoaded = true;
     }
 	m_DeploymentID = reference.m_DeploymentID;
+    m_PassengerSlots = reference.m_PassengerSlots;
 
     m_ScriptedAIUpdate = reference.m_ScriptedAIUpdate;
     m_AIMode = reference.m_AIMode;
@@ -337,6 +340,8 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_Status;
     else if (propName == "DeploymentID")
         reader >> m_DeploymentID;
+    else if (propName == "PassengerSlots")
+        reader >> m_PassengerSlots;
     else if (propName == "Health")
     {
         reader >> m_Health;
@@ -376,7 +381,7 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "AddInventoryDevice" || propName == "AddInventory")
     {
         MovableObject *pInvMO = dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader));
-        AAssert(pInvMO, "Reader has been fed bad Inventory MovableObject in Actor::Create");
+        RTEAssert(pInvMO, "Reader has been fed bad Inventory MovableObject in Actor::Create");
         m_Inventory.push_back(pInvMO);
     }
     else if (propName == "MaxMass")
@@ -487,40 +492,21 @@ void Actor::Destroy(bool notInherited)
     Clear();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads the preset scripts of this object, from a specified path.
-
-int Actor::LoadScripts(string scriptPath)
-{
-    if (scriptPath.empty())
-        return -1;
-
-    int error = 0;
-
-    // Clear the temporary variable names that will hold the functions read in from the file
-    if ((error = g_LuaMan.RunScriptString("UpdateAI = nil;")) < 0)
-        return error;
-
-    // Read in the Lua script function definitions for this preset
-    if ((error = MovableObject::LoadScripts(scriptPath)) < 0)
-        return error;
-
-    // Add the UpdateAI function, if it exists.. if it doesn't, that's not a problem! We'll just be using the old C++ implementation
-    if (g_LuaMan.GlobalIsDefined("UpdateAI"))
-    {
-        // Mark that we have a Lua override for the UpdateAI function
-        m_ScriptedAIUpdate = true;
-        if ((error = g_LuaMan.RunScriptString("if UpdateAI then " + m_ScriptPresetName + ".UpdateAI = UpdateAI; end;")) < 0)
-            return error;
+int Actor::LoadScript(std::string const &scriptPath, bool loadAsEnabledScript) {
+    int status = MOSRotating::LoadScript(scriptPath, loadAsEnabledScript);
+    if (status < 0) {
+        return status;
     }
-    else
-        m_ScriptedAIUpdate = false;
 
-    return error;
+    // If UpdateAI existed it'll be in the lua global namespace, so we can check that to know whether or not to use Lua AI
+    m_ScriptedAIUpdate = m_ScriptedAIUpdate || g_LuaMan.GlobalIsDefined("UpdateAI");
+
+    return status;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -844,7 +830,7 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
     }
 
     if (playSound && !muteSound)
-        m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_DeviceSwitchSound.Play(m_Pos);
 
     return pRetDev;
 }
@@ -896,7 +882,7 @@ MovableObject * Actor::SwapPrevInventory(MovableObject *pSwapIn)
     }
 
     if (playSound)
-        m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_DeviceSwitchSound.Play(m_Pos);
 
     return pRetDev;
 }
@@ -993,7 +979,7 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
 {
     // Play death sound
 // TODO: Don't attenuate since death is pretty important.. maybe only make this happen for teh brains
-    m_DeathSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+    m_DeathSound.Play(m_Pos);
 
     // Gib all the regular gibs
     MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
@@ -1117,13 +1103,13 @@ bool Actor::CollideAtPoint(HitData &hd)
 {
     return MOSRotating::CollideAtPoint(hd);
 
-//    if (hd.resImpulse[HITEE].GetMagnitude() > GetMaterial().strength) {
+//    if (hd.ResImpulse[HITEE].GetMagnitude() > GetMaterial().strength) {
 //        m_pParent->
 //    }
 /* Obsolete
     // Set item as being reached if it collides with us
-    if (hd.pBody[HITOR]->IsHeldDevice())
-        m_pItemInReach = dynamic_cast<HeldDevice *>(hd.pBody[HITOR]);
+    if (hd.Body[HITOR]->IsHeldDevice())
+        m_pItemInReach = dynamic_cast<HeldDevice *>(hd.Body[HITOR]);
 */
 //    if (Status != ACTIVE)
 }
@@ -1144,10 +1130,10 @@ bool Actor::ParticlePenetration(HitData &hd)
     // If penetrated, be alarmed (if not completely unperceptive, that is)!
     if (penetrated && m_Perceptiveness > 0)
     {
-        // Move the alarm point out a bit from the body so the reaction is better
-//        Vector extruded(g_SceneMan.ShortestDistance(m_Pos, hd.hitPoint));
+        // Move the alarm point out a bit from the Body so the reaction is better
+//        Vector extruded(g_SceneMan.ShortestDistance(m_Pos, hd.HitPoint));
 
-        Vector extruded(hd.hitVel[HITOR]);
+        Vector extruded(hd.HitVel[HITOR]);
         extruded.SetMagnitude(m_CharHeight);
         extruded = m_Pos - extruded;
         g_SceneMan.WrapPosition(extruded);
@@ -1235,7 +1221,7 @@ bool Actor::UpdateMovePath()
 
     // If we're following someone/thing, then never advance waypoints until that thing disappears
     if (g_MovableMan.ValidMO(m_pMOMoveTarget))
-        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, m_DigStrenght);
+        g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_pMOMoveTarget->GetPos(), m_MovePath, m_DigStrength);
     else
     {
         // Do we currently have a path to a static target we would like to still pursue?
@@ -1245,7 +1231,7 @@ bool Actor::UpdateMovePath()
             if (!m_Waypoints.empty())
             {
                 // Make sure the path starts from the ground and not somewhere up in the air if/when dropped out of ship
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, m_DigStrenght);
+                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_Waypoints.front().first, m_MovePath, m_DigStrength);
                 // If the waypoint was tied to an MO to pursue, then load it into the current MO target
                 if (g_MovableMan.ValidMO(m_Waypoints.front().second))
                     m_pMOMoveTarget = m_Waypoints.front().second;
@@ -1256,11 +1242,11 @@ bool Actor::UpdateMovePath()
             }
             // Just try to get to the last Move Target
             else
-                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, m_DigStrenght);
+                g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), m_MoveTarget, m_MovePath, m_DigStrength);
         }
         // We had a path before trying to update, so use its last point as the final destination
         else
-            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, m_DigStrenght);
+            g_SceneMan.GetScene()->CalculatePath(g_SceneMan.MovePointToGround(m_Pos, m_CharHeight*0.2, 10), Vector(m_MovePath.back()), m_MovePath, m_DigStrength);
     }
 
     // Place back the material representation of all doors of this guy's team so they are as we found them
@@ -1301,52 +1287,20 @@ bool Actor::UpdateMovePath()
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateAIScripted
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' AI state with the provided scripted AI Update function.
-
-bool Actor::UpdateAIScripted()
-{
-    // This preset doesn't seem to have any script file defined, so then just report we couldn't run scripted AI
-    if (!m_ScriptedAIUpdate || m_ScriptPath.empty() || m_ScriptPresetName.empty())
+bool Actor::UpdateAIScripted() {
+    if (!m_ScriptedAIUpdate || m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return false;
-
-    int error = 0;
-
-    // Check to make sure the preset of this is still defined in the Lua state. If not, re-create it and recover gracefully
-    if (!g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false))
-        ReloadScripts();
-
-    // First see if we even have a representation stored in the Lua state, and if not, create one
-    if (m_ScriptObjectName.empty())
-    {
-        // Get the unique object identifier for this object and construct the object isntance name in Lua that points to this object so we can pass it into the preset functions
-        m_ScriptObjectName = GetClassName() + "s." + g_LuaMan.GetNewObjectID();
-
-        // Give access to this in the Lua state
-        g_MovableMan.SetScriptedEntity(this);
-        // Create the Lua variable which will hold the object instance of this instance for as long as it exists
-        if ((error = g_LuaMan.RunScriptString(m_ScriptObjectName + " = To" + GetClassName() + "(MovableMan.ScriptedEntity);")) < 0)
-            return false;
-
-        // Call the scripted creation function, but only after first checking if it and this instance's Lua representation really exists
-        if ((error = g_LuaMan.RunScriptString("if " + m_ScriptPresetName + ".Create and " + m_ScriptObjectName + " then " + m_ScriptPresetName + ".Create(" + m_ScriptObjectName + "); end")) < 0)
-            return false;
     }
 
-    // Call the defined function, but only after first checking if it and this instance's Lua representation exists
+    int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
+    status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
+    status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) : status;
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
 
-	g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
-	error = g_LuaMan.RunScriptString("if " + m_ScriptPresetName + ".UpdateAI and " + m_ScriptObjectName + " then " + m_ScriptPresetName + ".UpdateAI(" + m_ScriptObjectName + "); end");
-	g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
-
-    if (error < 0)
-        return false;
-
-    // We made a successful scripted AI update!
-    return true;
+    return status >= 0;
 }
 
 
@@ -1457,7 +1411,7 @@ void Actor::VerifyMOIDs()
 
 	for (std::vector<MOID>::iterator it = MOIDs.begin(); it != MOIDs.end(); it++)
 	{
-		DAssert(*it == g_NoMOID || *it < g_MovableMan.GetMOIDCount(), "Invalid MOID in actor");
+		RTEAssert(*it == g_NoMOID || *it < g_MovableMan.GetMOIDCount(), "Invalid MOID in actor");
 	}
 }
 
@@ -1469,7 +1423,7 @@ void Actor::VerifyMOIDs()
 void Actor::Update()
 {
     /////////////////////////////////
-    // Hit body update and handling
+    // Hit Body update and handling
     MOSRotating::Update();
 
     // Update the controller!
@@ -1555,11 +1509,11 @@ void Actor::Update()
 
     if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage / 2)
     {
-        m_BodyHitSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_BodyHitSound.Play(m_Pos);
     }
     if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage)
 	{
-        m_PainSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_PainSound.Play(m_Pos);
 		// TODO: IMPROVE AND DON'T HARDCODE
         //m_Health -= 10;
 		float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
@@ -1630,7 +1584,7 @@ void Actor::Update()
 
     if (m_Status != DYING && m_Status != DEAD && floorf(m_Health) <= 0)
     {
-        m_DeathSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_DeathSound.Play(m_Pos);
 		m_Controller.SetDisabled(true);
         DropAllInventory();
         m_Status = DYING;
@@ -2002,7 +1956,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 waypoint = (*vItr).first - targetPos;
                 circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 2, g_YellowGlowColor);
                 // Add pixel glow area around it, in scene coordinates
-                g_SceneMan.RegisterGlowArea((*vItr).first, 5);
+				g_PostProcessMan.RegisterGlowArea((*vItr).first, 5);
             }
 
             // Draw line from the last movetarget on the current path to the first waypoint in queue after that
@@ -2030,7 +1984,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             waypoint = m_MovePath.back() - targetPos;
             circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 2, g_YellowGlowColor);
             // Add pixel glow area around it, in scene coordinates
-            g_SceneMan.RegisterGlowArea(m_MovePath.back(), 5);
+			g_PostProcessMan.RegisterGlowArea(m_MovePath.back(), 5);
         }
         // If no points left on movepath, then draw straight line to the movetarget
         else
@@ -2041,7 +1995,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             waypoint = m_MoveTarget - targetPos;
             circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 2, g_YellowGlowColor);
             // Add pixel glow area around it, in scene coordinates
-            g_SceneMan.RegisterGlowArea(m_MoveTarget, 5);
+			g_PostProcessMan.RegisterGlowArea(m_MoveTarget, 5);
         }
     }
 
@@ -2062,9 +2016,9 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         {
             // Find this in the list, both ways
             list<Actor *>::reverse_iterator selfRItr = find(pRoster->rbegin(), pRoster->rend(), this);
-            DAssert(selfRItr != pRoster->rend(), "Actor couldn't find self in Team roster!");
+            RTEAssert(selfRItr != pRoster->rend(), "Actor couldn't find self in Team roster!");
             list<Actor *>::iterator selfItr = find(pRoster->begin(), pRoster->end(), this);
-            DAssert(selfItr != pRoster->end(), "Actor couldn't find self in Team roster!");
+            RTEAssert(selfItr != pRoster->end(), "Actor couldn't find self in Team roster!");
             
             // Find the adjacent actors
             if (selfItr != pRoster->end())

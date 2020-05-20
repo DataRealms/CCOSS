@@ -23,7 +23,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(BunkerAssembly, SceneObject, 0)
+ConcreteClassInfo(BunkerAssembly, SceneObject, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -122,16 +122,16 @@ int BunkerAssembly::Create(BunkerAssemblyScheme * pScheme)
         return -1;
 
 	m_pPresentationBitmap = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-	clear_to_color(m_pPresentationBitmap, g_KeyColor);
+	clear_to_color(m_pPresentationBitmap, g_MaskColor);
 
 	m_pFGColor = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-	clear_to_color(m_pFGColor, g_KeyColor);
+	clear_to_color(m_pFGColor, g_MaskColor);
 
 	m_pMaterial = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-	clear_to_color(m_pMaterial, g_KeyColor);
+	clear_to_color(m_pMaterial, g_MaskColor);
 
 	m_pBGColor = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-	clear_to_color(m_pBGColor, g_KeyColor);
+	clear_to_color(m_pBGColor, g_MaskColor);
 
 	m_BitmapOffset = pScheme->GetBitmapOffset();
 	m_ParentAssemblyScheme = pScheme->GetPresetName();
@@ -231,19 +231,19 @@ int BunkerAssembly::ReadProperty(std::string propName, Reader &reader)
 			//Delete existing bitmaps to avoid leaks if someone adds assembly to multiple groups by mistake
 			delete m_pPresentationBitmap;
 			m_pPresentationBitmap = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-			clear_to_color(m_pPresentationBitmap, g_KeyColor);
+			clear_to_color(m_pPresentationBitmap, g_MaskColor);
 
 			delete m_pFGColor;
 			m_pFGColor = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-			clear_to_color(m_pFGColor, g_KeyColor);
+			clear_to_color(m_pFGColor, g_MaskColor);
 
 			delete m_pMaterial;
 			m_pMaterial = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-			clear_to_color(m_pMaterial, g_KeyColor);
+			clear_to_color(m_pMaterial, g_MaskColor);
 
 			delete m_pBGColor;
 			m_pBGColor = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-			clear_to_color(m_pBGColor, g_KeyColor);
+			clear_to_color(m_pBGColor, g_MaskColor);
 
 			m_ParentAssemblyScheme = parentScheme;
 			m_BitmapOffset = pScheme->GetBitmapOffset();
@@ -261,7 +261,7 @@ int BunkerAssembly::ReadProperty(std::string propName, Reader &reader)
 			// Do not allow to define assemblies prior to corresponding assembly scheme
 			char s[256];
 			sprintf_s(s, sizeof(s), "Required BunkerAssemblyScheme '%s%' not found when trying to load BunkerAssembly '%s'! BunkerAssemblySchemes MUST be defined before dependent BunkerAssmeblies.", parentScheme.c_str(), m_PresetName.c_str());
-			DDTAbort(s);
+			RTEAbort(s);
 		}
 	} else
         // See if the base class(es) can find a match instead
@@ -448,7 +448,7 @@ bool BunkerAssembly::IsOnScenePoint(Vector &scenePoint) const
     {
         // Scene point on the bitmap
         Vector bitmapPoint = scenePoint - bitmapPos;
-        if (getpixel(m_pPresentationBitmap, bitmapPoint.m_X, bitmapPoint.m_Y) != g_KeyColor)
+        if (getpixel(m_pPresentationBitmap, bitmapPoint.m_X, bitmapPoint.m_Y) != g_MaskColor)
            return true;
     }
 
@@ -480,7 +480,7 @@ void BunkerAssembly::SetTeam(int team)
 void BunkerAssembly::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const
 {
     if (!m_pFGColor)
-        DDTAbort("TerrainObject's bitmaps are null when drawing!");
+        RTEAbort("TerrainObject's bitmaps are null when drawing!");
 
     // Take care of wrapping situations
     Vector aDrawPos[4];

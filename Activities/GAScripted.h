@@ -45,7 +45,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(GAScripted)
+EntityAllocation(GAScripted)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -209,15 +209,11 @@ ENTITYALLOCATION(GAScripted)
     virtual bool SceneIsCompatible(Scene *pScene, int teams = -1);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  EnteredOrbit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates an Actor as having left the game scene and entered orbit.
-//                  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
-// Arguments:       The actor instance. Ownership IS NOT TRANSFERRED!
-// Return value:    None.
-
-    virtual void EnteredOrbit(Actor *pActor);
+    /// <summary>
+    /// Indicates an Actor as having left the game scene and entered orbit.  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
+    /// </summary>
+    /// <param name="orbitedCraft">The actor instance that entered orbit. Ownership IS NOT TRANSFERRED!</param>
+    virtual void EnteredOrbit(Actor *orbitedCraft);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -283,14 +279,11 @@ ENTITYALLOCATION(GAScripted)
 	virtual void UpdateGlobalScripts(bool lateUpdate);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnPieMenu
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Calls this to be processed by derived classes to enable pie-menu dynamic change
-// Arguments:       None.
-// Return value:    None.
-
-	virtual void OnPieMenu(Actor *pActor);
+    /// <summary>
+    /// Calls this to be processed by derived classes to enable pie-menu dynamic change.
+    /// </summary>
+    /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
+	virtual void OnPieMenu(Actor *pieMenuActor);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

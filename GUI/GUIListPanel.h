@@ -15,7 +15,7 @@
 // Inclusions of header files
 
 #include "GUIScrollPanel.h"
-#include "GUIBitmap.h"
+#include "GUI/Interface.h"
 
 
 namespace RTE
@@ -554,7 +554,7 @@ private:
     GUIBitmap            *m_BaseBitmap;
     GUIBitmap            *m_DrawBitmap;
     GUIBitmap            *m_FrameBitmap;
-    Uint32                m_FontSelectColor;
+    unsigned long                m_FontSelectColor;
 
     bool                m_UpdateLocked;
 
@@ -577,7 +577,7 @@ private:
 
     std::vector<Item *>    m_Items;
     std::vector<Item *>    m_SelectedList;
-    Uint32                m_SelectedColorIndex;
+    unsigned long                m_SelectedColorIndex;
 };
 
 

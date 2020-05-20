@@ -96,9 +96,9 @@ void GUICheckbox::Create(GUIProperties *Props)
     m_Check = Unchecked;
     string value;
     Props->GetValue("Checked", &value);
-    if (DDTstricmp(value.c_str(), "Checked") == 0)
+    if (stricmp(value.c_str(), "Checked") == 0)
         m_Check = Checked;
-    else if (DDTstricmp(value.c_str(), "Greycheck") == 0)
+    else if (stricmp(value.c_str(), "Greycheck") == 0)
         m_Check = Greycheck;
 
     Props->GetValue("Text", &m_Text);
@@ -137,7 +137,7 @@ void GUICheckbox::ChangeSkin(GUISkin *Skin)
 void GUICheckbox::BuildBitmap(void)
 {
     string Filename;
-    Uint32 ColorIndex = 0;
+    unsigned long ColorIndex = 0;
     int Values[4];
 
     // Load the image
@@ -426,9 +426,9 @@ void GUICheckbox::ApplyProperties(GUIProperties *Props)
     m_Check = Unchecked;
     string value;
     m_Properties.GetValue("Checked", &value);
-    if (DDTstricmp(value.c_str(), "Checked") == 0)
+    if (stricmp(value.c_str(), "Checked") == 0)
         m_Check = Checked;
-    else if (DDTstricmp(value.c_str(), "Greycheck") == 0)
+    else if (stricmp(value.c_str(), "Greycheck") == 0)
         m_Check = Greycheck;
 
     m_Properties.GetValue("Text", &m_Text);

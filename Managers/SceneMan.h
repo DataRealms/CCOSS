@@ -17,7 +17,7 @@
 // *** TEMP
 //#include "resource.h"
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Singleton.h"
 #define g_SceneMan SceneMan::Instance()
 #include "Serializable.h"
@@ -40,7 +40,7 @@ class SceneObject;
 class TerrainObject;
 class MovableObject;
 class Material;
-class Sound;
+class SoundContainer;
 struct PostEffect;
 
 // Different modes to draw the SceneLayers in
@@ -65,7 +65,6 @@ enum
     g_MaterialDoor = 181
 };
 
-#define MAXSCREENCOUNT 4
 #define SCENEGRIDSIZE 24
 #define SCENESNAPSIZE 12
 #define MAXORPHANRADIUS 11
@@ -1603,90 +1602,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterPostEffect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers a post effect to be added at the very last stage of 32bpp
-//                  rendering by the FrameMan.
-// Arguments:       The absolute scene coordinates of the center of the effect.
-//                  A 32bpp BITMAP screen should be drawn centered on the above scene
-//                  location in the final framebuffer. Ownership is NOT transferred!
-//                  The intensity level this effect should have when blended in post.
-//                  0 - 255.
-// Return value:    None.
-
-    void RegisterPostEffect(const Vector &effectPos, BITMAP *pEffect, size_t hash, int strength = 255, float angle = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterGlowDotEffect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers a specific post yellow glow effect to be added at the very
-//                  last stage of 32bpp rendering by the FrameMan.
-// Arguments:       The absolute scene coordinates of the center of the effect.
-//                  Which glow dot color to register, see the DotGlowColor enum.
-//                  The intensity level this effect should have when blended in post.
-//                  0 - 255.
-// Return value:    None.
-
-    void RegisterGlowDotEffect(const Vector &effectPos, DotGlowColor color, int strength = 255);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPostScreenEffectsWrapped
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets all screen effects that are located within a box in the scene.
-//                  Their coordinates will be returned relative to the upper left corner
-//                  of the box passed in here. Wrapping of the box will be taken care of.
-// Arguments:       The top left coordinates of the box to get post effects for.
-//                  The height and width of the box
-//                  The list to add the screen effects that fall within the box to. The
-//                  coordinates of the effects returned here will be relative to the
-//                  boxPos passed in above.
-//                  The team whose unseen layer should obscure the screen effects here.
-// Return value:    Whether any active post effects were found in that box.
-
-    bool GetPostScreenEffectsWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, int team = -1);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterGlowArea
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers a specific IntRect to be post-processed and have special pixel
-//                  colors lit up by glow effects in it.
-// Arguments:       The IntRect to have special color pixels glow in, in scene coordinates.
-// Return value:    None.
-
-    void RegisterGlowArea(const IntRect &glowArea) { if (g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0) m_GlowAreas.push_back(glowArea); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterGlowArea
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers a specific IntRect to be post-processed and have special pixel
-//                  colors lit up by glow effects in it.
-// Arguments:       The center and radius around it to add as an area.
-// Return value:    None.
-
-    void RegisterGlowArea(const Vector &center, float radius) { if (g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0) RegisterGlowArea(IntRect(center.m_X - radius, center.m_Y - radius, center.m_X + radius, center.m_Y + radius)); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGlowAreasWrapped
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets all glow areas that affect anyhting within a box in the scene.
-//                  Their coordinates will be returned relative to the upper left corner
-//                  of the box passed in here. Wrapping of the box will be taken care of.
-// Arguments:       The top left coordinates of the box to get post effects for.
-//                  The height and width of the box
-//                  The list to add the glow Box:es that intersect to. The coordinates of
-//                  the Box:es returned here will be relative to the boxPos passed in above.
-// Return value:    Whether any active post effects were found in that box.
-
-    bool GetGlowAreasWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<Box> &areaList);
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddTerrainObject
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Takes TerrainObject and applies it to the terrain
@@ -1756,16 +1671,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearPostEffects
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears the list of registered post processing scene effects.
-// Arguments:       None.
-// Return value:    None.
-
-    void ClearPostEffects() { m_PostSceneEffects.clear(); m_GlowAreas.clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ClearSeenPixels
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Clears the list of pixels on the unseen map that have been revealed.
@@ -1809,44 +1714,15 @@ public:
 		bool back;
 	};
 
+    /// <summary>
+    /// Sets the current scene pointer to null
+    /// </summary>
+    void SceneMan::ClearCurrentScene();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPostScreenEffects
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets all screen effects that are located within a box in the scene.
-//                  Their coordinates will be returned relative to the upper left corner
-//                  of the box passed in here.
-// Arguments:       The top left coordinates of the box to get post effects for.
-//                  The height and width of the box
-//                  The list to add the screen effects that fall within the box to. The
-//                  coordinates of the effects returned here will be relative to the
-//                  boxPos passed in above.
-//                  The team whose unseen area should block the glows.
-// Return value:    Whether any active post effects were found in that box.
-
-    bool GetPostScreenEffects(Vector boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, int team = -1);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPostScreenEffects
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets all screen effects that are located within a box in the scene.
-//                  Their coordinates will be returned relative to the upper left corner
-//                  of the box passed in here.
-// Arguments:       The dimensions of the box.
-//                  The list to add the screen effects that fall within the box to. The
-//                  coordinates of the effects returned here will be relative to the
-//                  boxPos passed in above.
-//                  The team whose unseen area should block the glows.
-// Return value:    Whether any active post effects were found in that box.
-
-    bool GetPostScreenEffects(int left, int top, int right, int bottom, std::list<PostEffect> &effectsList, int team = -1);
-
 
     // Member variables
     static const std::string m_ClassName;
@@ -1868,10 +1744,6 @@ protected:
     SceneLayer *m_pMOIDLayer;
     // All the areas drawn within on the MOID layer since last Update
     std::list<IntRect> m_MOIDDrawings;
-    // All post-processing effects registered for this draw frame in the scene. Vector in scene coordinates, BITMAPs not owned
-    std::list<PostEffect> m_PostSceneEffects;
-    // All the areas to do post glow pixel effects on, in scene coordinates
-    std::list<IntRect> m_GlowAreas;
 
     // Debug layer for seeing cast rays etc
     SceneLayer *m_pDebugLayer;
@@ -1891,29 +1763,29 @@ protected:
 	std::vector<Material *> m_MaterialCopiesVector;
 
     // The position of the upper left corner of the view.
-    Vector m_Offset[MAXSCREENCOUNT];
+    Vector m_Offset[c_MaxScreenCount];
     // The difference in current offset and the Update() before.
-    Vector m_DeltaOffset[MAXSCREENCOUNT];
+    Vector m_DeltaOffset[c_MaxScreenCount];
     // The final offset target of the current scroll interpolation, in scene coordinates!
-    Vector m_ScrollTarget[MAXSCREENCOUNT];
+    Vector m_ScrollTarget[c_MaxScreenCount];
     // The team associated with each screen.
-    int m_ScreenTeam[MAXSCREENCOUNT];
+    int m_ScreenTeam[c_MaxScreenCount];
     // The amount screen a screen is occluded or covered by GUI, etc
-    Vector m_ScreenOcclusion[MAXSCREENCOUNT];
+    Vector m_ScreenOcclusion[c_MaxScreenCount];
     // The normalized speed at screen the view scrolls.
     // 0 being no movement, and 1.0 being instant movement to the target in one frame.
-    float m_ScrollSpeed[MAXSCREENCOUNT];
+    float m_ScrollSpeed[c_MaxScreenCount];
     // Scroll timer for making scrolling work framerate independently
-    Timer m_ScrollTimer[MAXSCREENCOUNT];
+    Timer m_ScrollTimer[c_MaxScreenCount];
     // Whether the ScrollTarget got wrapped around the world this frame or not.
-    bool m_TargetWrapped[MAXSCREENCOUNT];
+    bool m_TargetWrapped[c_MaxScreenCount];
     // Keeps track of how many times and in screen directions the wrapping seam has been crossed.
     // This is used fo keeping the background layers' scroll from jumping when wrapping around.
     // X and Y
-    int m_SeamCrossCount[MAXSCREENCOUNT][2];
+    int m_SeamCrossCount[c_MaxScreenCount][2];
 
     // Sound of an unseen pixel on an unseen layer being revealed.
-    Sound *m_pUnseenRevealSound;
+    SoundContainer *m_pUnseenRevealSound;
 
     // The last screen everything has been updated to
     int m_LastUpdatedScreen;
@@ -1953,7 +1825,7 @@ private:
 
     void Clear();
 
-
+    
     // Disallow the use of some implicit methods.
     SceneMan(const SceneMan &reference);
     SceneMan & operator=(const SceneMan &rhs);

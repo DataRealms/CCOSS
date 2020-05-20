@@ -32,7 +32,7 @@ extern bool g_InActivity;
 namespace RTE {
 
 const string MetaMan::m_ClassName = "MetaMan";
-CONCRETECLASSINFO(MetaSave, Entity, 0)
+ConcreteClassInfo(MetaSave, Entity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1526,7 +1526,7 @@ void MetaMan::Update()
     // Whoops, state is f'd up, restart the last round
     else
     {
-        DDTAbort("Metagame State is out of bounds!?");
+        RTEAbort("Metagame State is out of bounds!?");
         m_GameState = REVEALSCENES;
     }
 }

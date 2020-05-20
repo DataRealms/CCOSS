@@ -167,7 +167,7 @@ void ScenarioGUI::Clear()
 
 int ScenarioGUI::Create(Controller *pController)
 {
-    AAssert(pController, "No controller sent to ScenarioGUI on creation!");
+    RTEAssert(pController, "No controller sent to ScenarioGUI on creation!");
     m_pController = pController;
 
     if (!m_pGUIScreen)
@@ -177,7 +177,7 @@ int ScenarioGUI::Create(Controller *pController)
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/MainMenu"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
     m_pGUIController->Load("Base.rte/GUIs/ScenarioGUI.ini");
 
     // Make sure we have convenient points to the containing GUI collection boxes that we will manipulate the positions of
@@ -319,7 +319,7 @@ int ScenarioGUI::Create(Controller *pController)
 	ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.bmp");
 	m_pDefaultPreviewBitmap = defaultPreview.LoadAndReleaseBitmap();
 
-	clear_to_color(m_pScenePreviewBitmap, g_KeyColor);
+	clear_to_color(m_pScenePreviewBitmap, g_MaskColor);
 
     // Set initial focus, category list, and label settings
     m_ScreenChange = true;
@@ -378,12 +378,12 @@ void ScenarioGUI::SetEnabled(bool enable)
     if (enable && m_MenuEnabled != ENABLED && m_MenuEnabled != ENABLING)
     {
         m_MenuEnabled = ENABLING;
-        g_GUISound.EnterMenuSound().Play();
+        g_GUISound.EnterMenuSound()->Play();
     }
     else if (!enable && m_MenuEnabled != DISABLED && m_MenuEnabled != DISABLING)
     {
         m_MenuEnabled = DISABLING;
-        g_GUISound.ExitMenuSound().Play();
+        g_GUISound.ExitMenuSound()->Play();
     }
     else if (enable && m_MenuEnabled == ENABLED)
     {
@@ -490,7 +490,7 @@ void ScenarioGUI::Update()
 		bool mouseIsInBox = false;
 
 		// Detect if mouse is inside UI boxes
-		RECT * r;
+		GUIRect * r;
 		r = m_pActivityBox->GetRect();
 		if (mouseX > r->left && mouseX < r->right &&
 			mouseY > r->top && mouseY < r->bottom)
@@ -534,7 +534,7 @@ void ScenarioGUI::Update()
             {
                 m_pHoveredScene = (*newCandidateItr);
                 foundNewHover = true;
-                g_GUISound.SelectionChangeSound().Play();
+                g_GUISound.SelectionChangeSound()->Play();
 				UpdateScenesBox();
             }
 
@@ -554,7 +554,7 @@ void ScenarioGUI::Update()
                 if (m_pHoveredScene)
                 {
                     m_pSelectedScene = m_pHoveredScene;
-                    g_GUISound.ItemChangeSound().Play();
+                    g_GUISound.ItemChangeSound()->Play();
 					UpdateScenesBox();
                 }
 /* Can't do this, doesn't take into account clicks on floating UI boxes
@@ -562,7 +562,7 @@ void ScenarioGUI::Update()
                 else if (m_pSelectedScene)
                 {
                     m_pSelectedScene = 0;
-                    g_GUISound.FocusChangeSound().Play();
+                    g_GUISound.FocusChangeSound()->Play();
                 }
 */
             }
@@ -867,7 +867,7 @@ void ScenarioGUI::UpdateInput()
                 m_MenuScreen = SCENESELECT;
                 m_ScreenChange = true;
 
-                g_GUISound.BackButtonPressSound().Play();
+                g_GUISound.BackButtonPressSound()->Play();
             }
 
 			// Quit program button pressed
@@ -878,13 +878,13 @@ void ScenarioGUI::UpdateInput()
                 m_ScreenChange = true;
                 g_Quit = true;
 
-                g_GUISound.BackButtonPressSound().Play();
+                g_GUISound.BackButtonPressSound()->Play();
             }
 
 			if (anEvent.GetControl()->GetName() == "ButtonResume")
             {
                 m_ActivityResumed = true;
-                g_GUISound.BackButtonPressSound().Play();
+                g_GUISound.BackButtonPressSound()->Play();
             }
 
 			// Most big dialog cancel buttons lead back to the game menu too
@@ -895,7 +895,7 @@ void ScenarioGUI::UpdateInput()
                 HideAllScreens();
                 m_MenuScreen = SCENESELECT;
                 m_ScreenChange = true;
-                g_GUISound.BackButtonPressSound().Play();
+                g_GUISound.BackButtonPressSound()->Play();
             }
 
 		    // Start Scenario Here menu button pressed
@@ -908,7 +908,7 @@ void ScenarioGUI::UpdateInput()
                 m_MenuScreen = PLAYERSETUP;
                 m_ScreenChange = true;
 
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Start game button pressed
@@ -921,17 +921,17 @@ void ScenarioGUI::UpdateInput()
                     HideAllScreens();
 //                    m_MenuScreen = SCENESELECT;
 //                    m_ScreenChange = true;
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 }
                 else
-                    g_GUISound.UserErrorSound().Play();
+                    g_GUISound.UserErrorSound()->Play();
             }
 
 			// Scene info box close button pressed
 			if (anEvent.GetControl() == m_pSceneCloseButton)
             {
                 m_pSelectedScene = 0;
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
         }
 
@@ -942,7 +942,7 @@ void ScenarioGUI::UpdateInput()
             if (dynamic_cast<GUIButton *>(anEvent.GetControl()))
             {
                 if (anEvent.GetMsg() == GUIButton::Focused)
-                    g_GUISound.SelectionChangeSound().Play();
+                    g_GUISound.SelectionChangeSound()->Play();
                 // Also stop dragging any panels if we're over any button
                 m_pDraggedBox = 0;
                 m_EngageDrag = true;
@@ -981,7 +981,7 @@ void ScenarioGUI::UpdateInput()
 
                     // Update the scene info box
                     UpdateScenesBox();
-                    g_GUISound.ItemChangeSound().Play();
+                    g_GUISound.ItemChangeSound()->Play();
                 }
             }
         }
@@ -1182,7 +1182,7 @@ void ScenarioGUI::UpdateScenesBox()
 		if (pActivity)
 		{
 			// Clear preview bitmap
-			clear_to_color(m_pScenePreviewBitmap, g_KeyColor);
+			clear_to_color(m_pScenePreviewBitmap, g_MaskColor);
 		}
 
         // Set the currently selected scene's texts
@@ -1384,7 +1384,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                                 //    m_aapPlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
                             }
                         }
-                        g_GUISound.FocusChangeSound().Play();
+                        g_GUISound.FocusChangeSound()->Play();
 
 						//Check if we need to clear or set CPU disabled team icon
 						bool noCPUs = true;
@@ -1412,7 +1412,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                     else if (m_aapPlayerBoxes[player][team]->GetDrawColor() != c_GUIColorLightBlue)
                     {
                         m_aapPlayerBoxes[player][team]->SetDrawColor(c_GUIColorLightBlue);
-                        g_GUISound.SelectionChangeSound().Play();
+                        g_GUISound.SelectionChangeSound()->Play();
                     }
                 }
                 // Un-highlight all other cells

@@ -14,13 +14,14 @@
 #include "MovableObject.h"
 #include "PresetMan.h"
 #include "SceneMan.h"
+#include "ConsoleMan.h"
 #include "SettingsMan.h"
 #include "LuaMan.h"
 #include "Atom.h"
 
 namespace RTE {
 
-ABSTRACTCLASSINFO(MovableObject, SceneObject)
+AbstractClassInfo(MovableObject, SceneObject)
 
 unsigned long int MovableObject::m_UniqueIDCounter = 1;
 
@@ -65,13 +66,15 @@ void MovableObject::Clear()
     m_DidWrap = false;
     m_MOID = g_NoMOID;
     m_RootMOID = g_NoMOID;
+    m_HasEverBeenAddedToMovableMan = false;
     m_MOIDFootprint = 0;
     m_AlreadyHitBy.clear();
     m_VelOscillations = 0;
     m_ToSettle = false;
     m_ToDelete = false;
     m_HUDVisible = true;
-    m_ScriptPath.clear();
+    m_AllLoadedScripts.clear();
+    m_FunctionsAndScripts.clear();
     m_ScriptPresetName.clear();
     m_ScriptObjectName.clear();
     m_ScreenEffectFile.Reset();
@@ -99,7 +102,6 @@ void MovableObject::Clear()
 	m_ParticleUniqueIDHit = 0;
 
 	m_ProvidesPieMenuContext = false;
-	m_pPieMenuActor = 0;
 }
 
 
@@ -205,10 +207,12 @@ int MovableObject::Create(const MovableObject &reference)
     m_MissionCritical = reference.m_MissionCritical;
     m_CanBeSquished = reference.m_CanBeSquished;
     m_HUDVisible = reference.m_HUDVisible;
-    m_ScriptPath = reference.m_ScriptPath;
-    m_ScriptPresetName = reference.m_ScriptPresetName;
-    // Should be unique to the object, will be created lazily upon first UpdateScript
-//    m_ScriptObjectName
+    
+    for (const std::pair<std::string, bool> &referenceScriptEntry : reference.m_AllLoadedScripts) {
+        m_AllLoadedScripts.push_back({referenceScriptEntry.first, referenceScriptEntry.second});
+    }
+    ReloadScripts(false);
+
     if (reference.m_pScreenEffect)
     {
         m_ScreenEffectFile = reference.m_ScreenEffectFile;
@@ -245,7 +249,6 @@ int MovableObject::Create(const MovableObject &reference)
 	g_MovableMan.RegisterObject(this);
 
 	m_ProvidesPieMenuContext = reference.m_ProvidesPieMenuContext;
-	m_pPieMenuActor = reference.m_pPieMenuActor;
 
     return 0;
 }
@@ -329,9 +332,8 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
 	}
 	else if (propName == "ScriptPath")
     {
-        reader >> m_ScriptPath;
-        // Read in the Lua script function definitions for this preset
-        LoadScripts(m_ScriptPath);
+        std::string scriptPath = reader.ReadPropValue();
+        if (LoadScript(scriptPath) == -2) { reader.ReportError("Duplicate script path " + scriptPath); }
     }
     else if (propName == "ScreenEffect")
     {
@@ -449,112 +451,245 @@ int MovableObject::Save(Writer &writer) const
     return 0;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the MovableObject object.
-
-void MovableObject::Destroy(bool notInherited)
-{
-    // Clean up the existence of this in the script state
-    if (!m_ScriptObjectName.empty())
-    {
-        // Call the scripted destruction function, but only after first checking if it and this instance's Lua representation really exists
-        g_LuaMan.RunScriptString("if " + m_ScriptPresetName + " and " + m_ScriptPresetName + ".Destroy and " + m_ScriptObjectName + " then " + m_ScriptPresetName + ".Destroy(" + m_ScriptObjectName + "); end");
-        // Assign nil to the variable that held this' representation in Lua
-        g_LuaMan.RunScriptString("if " + m_ScriptObjectName + " then " + m_ScriptObjectName + " = nil; end");
+void MovableObject::Destroy(bool notInherited) {
+    if (ObjectScriptsInitialized()) {
+        RunScriptedFunctionInAppropriateScripts("Destroy");
+        g_LuaMan.RunScriptString(m_ScriptObjectName + " = nil;");
     }
 
-    if (!notInherited)
-        SceneObject::Destroy();
+    if (!notInherited) { SceneObject::Destroy(); }
     Clear();
 
 	g_MovableMan.UnregisterObject(this);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads the preset scripts of this object, from a specified path.
+int MovableObject::InitializeObjectScripts() {
+    m_ScriptObjectName = GetClassName() + "s." + g_LuaMan.GetNewObjectID();
 
-int MovableObject::LoadScripts(string scriptPath)
-{
-    if (scriptPath.empty())
-        return -1;
+    // Give Lua access to this object, then use that access to set up the object's Lua representation
+    g_LuaMan.SetTempEntity(this);
 
-    // Read in the Lua script function definitions for this preset
-    int error = 0;
-
-    // Save the script path
-    m_ScriptPath = scriptPath;
-
-    // Clear the temporary variable names that will hold the functions read in from the file
-    if ((error = g_LuaMan.RunScriptString("Create = nil; Destroy = nil; Update = nil;")) < 0)
-        return error;
-
-    // Run the file that specifies the Lua functions for this' operating logic
-    if ((error = g_LuaMan.RunScriptFile(m_ScriptPath)) < 0)
-        return error;
-
-    // Create a new table for all presets and object instances of this class, to organize things a bit
-    if ((error = g_LuaMan.RunScriptString("if not " + GetClassName() + "s then " + GetClassName() + "s = {}; end")) < 0)
-        return error;
-// TODO WAIT A MINUTE.. is this an original preset????!! .. does it matter? A: not really
-    // Get a new ID for this original preset so we can assign the read-in function definitions to it
-    m_ScriptPresetName = GetClassName() + "s." + g_LuaMan.GetNewPresetID();
-
-    // Clear out the instance object name so it gets created in the state upon first UpdateScript
-    m_ScriptObjectName.clear();
-
-    // Under the class' table, create a new table for all functions of this specific preset and its unique ID
-    if ((error = g_LuaMan.RunScriptString(m_ScriptPresetName + " = {};")) < 0)
-        return error;
-
-    // Now assign the different functions read in from the script file to the permanent locations of this original preset's table
-    if ((error = g_LuaMan.RunScriptString("if Create then " + m_ScriptPresetName + ".Create = Create; end;")) < 0)
-        return error;
-    if ((error = g_LuaMan.RunScriptString("if Destroy then " + m_ScriptPresetName + ".Destroy = Destroy; end;")) < 0)
-        return error;
-    if ((error = g_LuaMan.RunScriptString("if Update then " + m_ScriptPresetName + ".Update = Update; end;")) < 0)
-        return error;
-	if ((error = g_LuaMan.RunScriptString("if OnPieMenu then " + m_ScriptPresetName + ".OnPieMenu = OnPieMenu; end;")) < 0)
-		return error;
-
-    return error;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReloadScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reloads the preset scripts of this object, from the same script file
-//                  path as was originally defined. This will also update the original
-//                  preset in the PresetMan with the updated scripts so future objects
-//                  spawned will use the new scripts.
-
-int MovableObject::ReloadScripts()
-{
-    int error = 0;
-
-    // Read in the Lua script function definitions for this preset
-    if (!m_ScriptPath.empty())
-    {
-        // Reload the preset funcitons of this instance
-        if ((error = LoadScripts(m_ScriptPath)) < 0)
-            return error;
-        // Now also reload the ones of the original preset of this so all future objects will use the new scripts
-        MovableObject *pPreset = const_cast<MovableObject *>(dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(GetClassName(), GetPresetName(), GetModuleID())));
-        if (pPreset && pPreset != this)
-        {
-            if ((error = pPreset->LoadScripts(m_ScriptPath)) < 0)
-            return error;
-        }
+    if (g_LuaMan.RunScriptString(m_ScriptObjectName + " = To" + GetClassName() + "(LuaMan.TempEntity);") < 0) {
+        m_ScriptObjectName = "ERROR";
+        return -2;
     }
 
-    return error;
+    if (RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
+        m_ScriptObjectName = "ERROR";
+        return -3;
+    }
+    return 0;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledScript) {
+    // Return an error if the script path is empty or already there
+    if (scriptPath.empty()) {
+        return -1;
+    } else if (HasScript(scriptPath)) {
+        return -2;
+    }
+    m_AllLoadedScripts.push_back({scriptPath, loadAsEnabledScript});
+
+    // Clear the temporary variable names that will hold the functions read in from the file
+    for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
+        if (g_LuaMan.RunScriptString(functionName + " = nil;") < 0) {
+            return -3;
+        }
+    }
+    // Create a new table for all presets and object instances of this class, to organize things a bit
+    if (g_LuaMan.RunScriptString(GetClassName() + "s = " + GetClassName() + "s or {};") < 0) {
+        return -3;
+    }
+
+    // Run the specified lua file to load everything in it into the global namespace for assignment
+    if (g_LuaMan.RunScriptFile(scriptPath) < 0) {
+        return -4;
+    }
+
+    // If there's no ScriptPresetName this is the first script being loaded for this preset, or scripts have been reloaded.
+    // Generate a ScriptPresetName, setup a table for the preset's functions, and clear the instance object name so it gets created in the first run of UpdateScripts
+    if (m_ScriptPresetName.empty()) {
+        m_ScriptPresetName = GetClassName() + "s." + g_LuaMan.GetNewPresetID();
+
+        if (g_LuaMan.RunScriptString(m_ScriptPresetName + " = {};") < 0) {
+            return -3;
+        }
+
+        m_ScriptObjectName.clear();
+    }
+
+    // Assign the different functions read in from the script to their permanent locations in the preset's table
+    for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
+        if (g_LuaMan.GlobalIsDefined(functionName)) {
+            if (m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
+                m_FunctionsAndScripts.insert({functionName, std::vector<std::pair<std::string, bool> *>()});
+            }
+            m_FunctionsAndScripts.find(functionName)->second.push_back(&m_AllLoadedScripts.back());
+            int error = g_LuaMan.RunScriptString(
+                m_ScriptPresetName + "." + functionName + " = " + m_ScriptPresetName + "." + functionName + " or {}; " +
+                m_ScriptPresetName + "." + functionName + "[\"" + scriptPath + "\"] = " + functionName + ";"
+            );
+
+            if (error < 0) {
+                return -3;
+            }
+        }
+    }
+    return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int MovableObject::ReloadScripts(bool alsoReloadPresetScripts) {
+    if (m_AllLoadedScripts.empty()) {
+        return 0;
+    }
+
+    /// <summary>
+    /// Internal lambda function to clear a given object's script configurations, and then load them all again in order to reset them.
+    /// </summary>
+    auto clearScriptConfigurationAndLoadPreexistingScripts = [](MovableObject *object, bool shouldClearScriptPresetName) {
+        std::vector<std::pair<std::string, bool>> loadedScriptsCopy = object->m_AllLoadedScripts;
+        object->m_AllLoadedScripts.clear();
+        object->m_FunctionsAndScripts.clear();
+        if (shouldClearScriptPresetName) {
+            object->m_ScriptPresetName.clear();
+        } else {
+            object->m_ScriptObjectName.clear();
+        }
+
+        int status = 0; 
+        for (const std::pair<std::string, bool> &scriptEntry : loadedScriptsCopy) {
+            status = object->LoadScript(scriptEntry.first, scriptEntry.second);
+            if (status < 0) {
+                return status;
+            }
+        }
+        return status;
+    };
+
+    //TODO consider getting rid of this const_cast. It would require either code duplication or creating some none const methods (specifically of PresetMan::GetEntityPreset, which may be unsafe. Could be this gross exceptional handling is the best way to go.
+    MovableObject *pPreset = const_cast<MovableObject *>(dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(GetClassName(), GetPresetName(), GetModuleID())));
+
+    int status = clearScriptConfigurationAndLoadPreexistingScripts(this, pPreset == this);
+    if (alsoReloadPresetScripts && status <= 0 && pPreset && pPreset != this) {
+        status = clearScriptConfigurationAndLoadPreexistingScripts(pPreset, true);
+    }
+
+    return status;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableObject::AddScript(const std::string &scriptPath) {
+    switch (LoadScript(scriptPath)) {
+        case 0:
+            // If we have a ScriptObjectName that means Create has already been run for pre-existing scripts. Run it right away for this one.
+            if (ObjectScriptsInitialized()) {
+                RunScriptedFunction(scriptPath, "Create");
+                return false;
+            }
+            return true;
+        case -1:
+            g_ConsoleMan.PrintString("ERROR: The script path was empty.");
+            break;
+        case -2:
+            g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + " is already loaded onto this object.");
+            break;
+        case -3:
+            g_ConsoleMan.PrintString("ERROR: Failed to do necessary setup to add scripts while attempting to add the script with path " + scriptPath + ". This has nothing to do with your script, please report it to a developer.");
+            break;
+        default:
+            RTEAbort("Reached default case while adding script. This should never happen!");
+            break;
+    }
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableObject::EnableScript(const std::string &scriptPath) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
+        return false;
+    }
+
+    std::vector<std::pair<std::string, bool>>::iterator scriptEntryIterator = FindScript(scriptPath);
+    if (scriptEntryIterator != m_AllLoadedScripts.end() && scriptEntryIterator->second == false) {
+        if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptEnable") < 0) {
+            return false;
+        }
+        scriptEntryIterator->second = true;
+        return true;
+    }
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableObject::DisableScript(const std::string &scriptPath) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
+        return false;
+    }
+
+    std::vector<std::pair<std::string, bool>>::iterator scriptEntryIterator = FindScript(scriptPath);
+    if (scriptEntryIterator != m_AllLoadedScripts.end() && scriptEntryIterator->second == true) {
+        if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptDisable") < 0) {
+            return false;
+        }
+        scriptEntryIterator->second = false;
+        return true;
+    }
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
+        return -1;
+    }
+
+    std::string presetAndFunctionName = m_ScriptPresetName + "." + functionName;
+    std::string fullFunctionName = presetAndFunctionName + "[\"" + scriptPath + "\"]";
+    
+    int status = g_LuaMan.RunScriptedFunction(fullFunctionName, m_ScriptObjectName, {presetAndFunctionName, m_ScriptObjectName, fullFunctionName}, functionEntityArguments, functionLiteralArguments);
+    functionEntityArguments.clear();
+    functionLiteralArguments.clear();
+    
+    if (status < 0 && m_AllLoadedScripts.size() > 1) {
+        g_ConsoleMan.PrintString("ERROR: An error occured while trying to run the " + functionName + " function for script at path " + scriptPath);
+        return -2;
+    }
+
+    return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
+        return -1;
+    }
+
+    int status = 0;
+    for (const std::pair<std::string, bool> *scriptEntry : m_FunctionsAndScripts.at(functionName)) {
+        if (runOnDisabledScripts || scriptEntry->second == true) {
+            status = RunScriptedFunction(scriptEntry->first, functionName, functionEntityArguments, functionLiteralArguments);
+            if (status < 0 && stopOnError) {
+                return status;
+            }
+        }
+    }
+    return status;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -643,7 +778,16 @@ bool MovableObject::IsAtRest()
 
 bool MovableObject::OnMOHit(HitData &hd)
 {
-    return hd.terminate[hd.pRootBody[HITOR] == this ? HITOR : HITEE] = OnMOHit(hd.pRootBody[hd.pRootBody[HITOR] == this ? HITEE : HITOR]);
+    if (hd.RootBody[HITOR] != hd.RootBody[HITEE] && (hd.Body[HITOR] == this || hd.Body[HITEE] == this)) {
+        RunScriptedFunctionInAppropriateScripts("OnCollideWithMO", false, false, {hd.Body[hd.Body[HITOR] == this ? HITEE : HITOR], hd.RootBody[hd.Body[HITOR] == this ? HITEE : HITOR]});
+    }
+    return hd.Terminate[hd.RootBody[HITOR] == this ? HITOR : HITEE] = OnMOHit(hd.RootBody[hd.RootBody[HITOR] == this ? HITEE : HITOR]);
+}
+
+void MovableObject::SetHitWhatTerrMaterial(unsigned char matID) {
+    m_TerrainMatHit = matID;
+    m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber();
+    RunScriptedFunctionInAppropriateScripts("OnCollideWithTerrain", false, false, {}, {std::to_string(m_TerrainMatHit)});
 }
 
 
@@ -811,74 +955,31 @@ void MovableObject::Update()
 }
 */
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateScript
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this MovableObject's Lua script. Supposed to be done every
-//                  frame after the rest of the hardcoded C++ update is done.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::UpdateScript()
-{
-    // This preset doesn't seem to have any script file defined, so then just return
-    if (m_ScriptPath.empty() || m_ScriptPresetName.empty())
+int MovableObject::UpdateScripts() {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return -1;
-
-    int error = 0;
-
-    // Check to make sure the preset of this is still defined in the Lua state. If not, re-create it and recover gracefully
-    if (!g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false))
-        ReloadScripts();
-
-    // First see if we even have a representation stored in the Lua state, and if not, create one
-    if (m_ScriptObjectName.empty())
-    {
-        // Get the unique object identifier for this object and construct the object isntance name in Lua that points to this object so we can pass it into the preset functions
-        m_ScriptObjectName = GetClassName() + "s." + g_LuaMan.GetNewObjectID();
-
-        // Give access to this in the Lua state
-        g_MovableMan.SetScriptedEntity(this);
-        // Create the Lua variable which will hold the object instance of this instance for as long as it exists
-        if ((error = g_LuaMan.RunScriptString(m_ScriptObjectName + " = To" + GetClassName() + "(MovableMan.ScriptedEntity);")) < 0)
-            return error;
-
-        // Call the scripted creation function, but only after first checking if it and this instance's Lua representation really exists
-        if ((error = g_LuaMan.RunScriptString("if " + m_ScriptPresetName + ".Create and " + m_ScriptObjectName + " then " + m_ScriptPresetName + ".Create(" + m_ScriptObjectName + "); end")) < 0)
-            return error;
     }
 
-    // Call the defined function, but only after first checking if it and this instance's Lua representation exists
-    if ((error = g_LuaMan.RunScriptString("if " + m_ScriptPresetName + ".Update and " + m_ScriptObjectName + " then " + m_ScriptPresetName + ".Update(" + m_ScriptObjectName + "); end")) < 0)
-        return error;
+    int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
+    status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;
+    status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("Update", false, true) : status;
 
-    return error;
+    return status;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnPieMenu
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Executes the Lua-defined OnPieMenu event handler.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::OnPieMenu(Actor * pActor)
-{
-	if (!pActor)
-		return -1;
+int MovableObject::OnPieMenu(Actor *pieMenuActor) {
+    if (!pieMenuActor || m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
+        return -1;
+    }
 
-	// This preset doesn't seem to have any script file defined, so then just return
-	if (m_ScriptPath.empty() || m_ScriptPresetName.empty())
-		return -1;
-
-	if (m_ScriptObjectName.empty())
-		return -1;
-
-	m_pPieMenuActor = pActor;
-
-	int error = 0;
-
-	if ((error = g_LuaMan.RunScriptString("if " + m_ScriptPresetName + ".OnPieMenu and " + m_ScriptObjectName + " then " + m_ScriptPresetName + ".OnPieMenu(" + m_ScriptObjectName + "); end")) < 0)
-		return error;
-
-	return error;
+    return RunScriptedFunctionInAppropriateScripts("OnPieMenu", false, false, {pieMenuActor});
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::Update()
 {

@@ -48,7 +48,7 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(SceneEditor, EditorActivity, 0)
+ConcreteClassInfo(SceneEditor, EditorActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -382,7 +382,7 @@ void SceneEditor::Update()
 			const Activity *pActivityPreset = dynamic_cast<const Activity *>(g_PresetMan.GetEntityPreset("GAScripted", "Skirmish Defense"));
 			Activity * pActivity = dynamic_cast<Activity *>(pActivityPreset->Clone());
 			GameActivity *pTestGame = dynamic_cast<GameActivity *>(pActivity);
-            AAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GAScripted Activity! Has it been defined?");
+            RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GAScripted Activity! Has it been defined?");
             pTestGame->SetPlayerCount(1);
             pTestGame->SetTeamCount(2);
             pTestGame->SetTeamOfPlayer(0, 0);
@@ -395,7 +395,7 @@ void SceneEditor::Update()
 
 
             /*GABaseDefense *pTestGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Test Activity")->Clone());
-            AAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
+            RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
             pTestGame->SetPlayerCount(1);
             pTestGame->SetTeamCount(2);
             pTestGame->SetTeamOfPlayer(0, 0);
@@ -438,7 +438,7 @@ void SceneEditor::Update()
                     if (pItem && !pItem->m_Name.empty())
                     {
                         SLTerrain *pNewTerrain = dynamic_cast<SLTerrain *>(g_PresetMan.GetEntityPreset("SLTerrain", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        AAssert(pNewTerrain, "No SLTerrain of that name defined!");
+                        RTEAssert(pNewTerrain, "No SLTerrain of that name defined!");
                         pNewScene->Create(pNewTerrain);
                     }
 
@@ -447,21 +447,21 @@ void SceneEditor::Update()
                     if (pItem && !pItem->m_Name.empty())
                     {
                         SceneLayer *pNewLayer = dynamic_cast<SceneLayer *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        AAssert(pNewLayer, "No SceneLayer of the name set as BG1 is defined!");
+                        RTEAssert(pNewLayer, "No SceneLayer of the name set as BG1 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
                     pItem = m_pNewBG2Combo->GetItem(m_pNewBG2Combo->GetSelectedIndex());
                     if (pItem && !pItem->m_Name.empty())
                     {
                         SceneLayer *pNewLayer = dynamic_cast<SceneLayer *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        AAssert(pNewLayer, "No SceneLayer of the name set as BG2 is defined!");
+                        RTEAssert(pNewLayer, "No SceneLayer of the name set as BG2 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
                     pItem = m_pNewBG3Combo->GetItem(m_pNewBG3Combo->GetSelectedIndex());
                     if (pItem && !pItem->m_Name.empty())
                     {
                         SceneLayer *pNewLayer = dynamic_cast<SceneLayer *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        AAssert(pNewLayer, "No SceneLayer of the name set as BG3 is defined!");
+                        RTEAssert(pNewLayer, "No SceneLayer of the name set as BG3 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
 
@@ -512,7 +512,7 @@ void SceneEditor::Update()
                     if (g_SceneMan.GetScene())
                     {
                         m_ModuleSpaceID = g_SceneMan.GetScene()->GetModuleID();
-                        AAssert(m_ModuleSpaceID >= 0, "Loaded Scene's DataModule ID is negative? Should always be a specific one..");
+                        RTEAssert(m_ModuleSpaceID >= 0, "Loaded Scene's DataModule ID is negative? Should always be a specific one..");
                         m_pEditorGUI->Destroy();
 						if (m_ModuleSpaceID == g_PresetMan.GetModuleID("Scenes.rte"))
 							m_pEditorGUI->Create(&(m_PlayerController[0]), SceneEditorGUI::ONLOADEDIT, -1);

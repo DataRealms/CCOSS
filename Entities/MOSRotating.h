@@ -15,6 +15,7 @@
 // Inclusions of header files
 
 #include "MOSprite.h"
+#include "PostProcessMan.h"
 
 namespace RTE
 {
@@ -277,7 +278,7 @@ friend class LuaMan;
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(MOSRotating)
+EntityAllocation(MOSRotating)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1163,7 +1164,7 @@ protected:
     // The number of wound emitters allowed before this gets gibbed. 0 means this can't get gibbed
     int m_GibWoundLimit;
     // Gib sound effect
-    Sound m_GibSound;
+    SoundContainer m_GibSound;
     // Whether to flash effect on gib
     bool m_EffectOnGib;
     // How far this is audiable (in screens) when gibbing
@@ -1217,6 +1218,12 @@ private:
 // Return value:    None.
 
     void Clear();
+
+    /// <summary>
+    /// Handles reading for custom values, dealing with the various types of custom values.
+    /// </summary>
+    /// <param name="reader">A Reader lined up to the custom value type to be read.</param>
+    void ReadCustomValueProperty(Reader &reader);
 
 
     // Disallow the use of some implicit methods.

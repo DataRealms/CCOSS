@@ -14,7 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "SceneObject.h"
 #include "Vector.h"
 #include "FrameMan.h"
@@ -47,7 +47,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(TerrainObject)
+EntityAllocation(TerrainObject)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -415,8 +415,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    TerrainObject(const TerrainObject &reference) { DDTAbort("Tried to use forbidden method"); }
-    void operator=(const TerrainObject &rhs) { DDTAbort("Tried to use forbidden method"); }
+    TerrainObject(const TerrainObject &reference) { RTEAbort("Tried to use forbidden method"); }
+    void operator=(const TerrainObject &rhs) { RTEAbort("Tried to use forbidden method"); }
 
 };
 

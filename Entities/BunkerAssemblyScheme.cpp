@@ -20,7 +20,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(BunkerAssemblyScheme, SceneObject, 0)
+ConcreteClassInfo(BunkerAssemblyScheme, SceneObject, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ int BunkerAssemblyScheme::ReadProperty(std::string propName, Reader &reader)
         m_pBitmap = m_BitmapFile.GetAsBitmap();
 
 		m_pPresentationBitmap = create_bitmap_ex(8, m_pBitmap->w * ScaleX, m_pBitmap->h * ScaleY);
-		clear_to_color(m_pPresentationBitmap, g_KeyColor);
+		clear_to_color(m_pPresentationBitmap, g_MaskColor);
 
 		// Create internal presentation bitmap which will be drawn by editor
 		// Create horizontal outlines
@@ -207,7 +207,7 @@ int BunkerAssemblyScheme::ReadProperty(std::string propName, Reader &reader)
 		float scale = (float)ICON_WIDTH / (float)m_pPresentationBitmap->w;
 
 		m_pIconBitmap = create_bitmap_ex(8, m_pPresentationBitmap->w * scale, m_pPresentationBitmap->h * scale);
-		clear_to_color(m_pIconBitmap, g_KeyColor);
+		clear_to_color(m_pIconBitmap, g_MaskColor);
 
         for (int x = 0; x < m_pBitmap->w ; ++x)
 	        for (int y = 0; y < m_pBitmap->h; ++y)
@@ -351,7 +351,7 @@ void BunkerAssemblyScheme::SetTeam(int team)
 void BunkerAssemblyScheme::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const
 {
     if (!m_pPresentationBitmap)
-        DDTAbort("BunkerAssemblyScheme's bitmaps are null when drawing!");
+        RTEAbort("BunkerAssemblyScheme's bitmaps are null when drawing!");
 
     // Take care of wrapping situations
     Vector aDrawPos[4];

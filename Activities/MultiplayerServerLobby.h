@@ -12,7 +12,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "ActivityMan.h"
 #include "GameActivity.h"
 
@@ -55,7 +55,7 @@ namespace RTE
 	public:
 
 		// Concrete allocation and cloning definitions
-		ENTITYALLOCATION(MultiplayerServerLobby)
+		EntityAllocation(MultiplayerServerLobby)
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		// Constructor:     MultiplayerServerLobby

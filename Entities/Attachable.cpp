@@ -15,13 +15,14 @@
 #include "Atom.h"
 #include "AtomGroup.h"
 #include "RTEManagers.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "AEmitter.h"
 #include "Actor.h"
+#include "ConsoleMan.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(Attachable, MOSRotating, 0)
+ConcreteClassInfo(Attachable, MOSRotating, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -183,8 +184,8 @@ bool Attachable::CollideAtPoint(HitData &hd)
     return MOSRotating::CollideAtPoint(hd);
 /*
     // See if the impact created a force enough to detach from parent.
-    if (m_pParent && hd.resImpulse[HITEE].GetMagnitude() > m_JointStrength) {
-        m_pParent->AddAbsImpulseForce(Vector(hd.resImpulse[HITEE]).SetMagnitude(m_JointStrength), m_JointPos);
+    if (m_pParent && hd.ResImpulse[HITEE].GetMagnitude() > m_JointStrength) {
+        m_pParent->AddAbsImpulseForce(Vector(hd.ResImpulse[HITEE]).SetMagnitude(m_JointStrength), m_JointPos);
         
         Detach();
     }
@@ -208,22 +209,22 @@ bool Attachable::ParticlePenetration(HitData &hd)
     bool penetrated = MOSRotating::ParticlePenetration(hd);
 
 	// Add damage points if MO is set to damage actors
-	if (hd.pBody[HITOR]->DamageOnCollision() != 0)
-		AddDamage(hd.pBody[HITOR]->DamageOnCollision());
+	if (hd.Body[HITOR]->DamageOnCollision() != 0)
+		AddDamage(hd.Body[HITOR]->DamageOnCollision());
 
     // If penetrated, propogate an alarm up to the root parent, if it's an actor
     if (penetrated && m_pParent)
     {
 		// Add damage points if MO is set to damage actors on penetration
-		if (hd.pBody[HITOR]->DamageOnPenetration() != 0)
-			AddDamage(hd.pBody[HITOR]->DamageOnPenetration());
+		if (hd.Body[HITOR]->DamageOnPenetration() != 0)
+			AddDamage(hd.Body[HITOR]->DamageOnPenetration());
 
         Actor *pParentActor = dynamic_cast<Actor *>(GetRootParent());
         if (pParentActor)
         {
             // Move the alarm point out a bit from the body so the reaction is better
-//            Vector extruded(g_SceneMan.ShortestDistance(pParentActor->GetPos(), hd.hitPoint));
-            Vector extruded(hd.hitVel[HITOR]);
+//            Vector extruded(g_SceneMan.ShortestDistance(pParentActor->GetPos(), hd.HitPoint));
+            Vector extruded(hd.HitVel[HITOR]);
             extruded.SetMagnitude(pParentActor->GetHeight());
             extruded = m_Pos - extruded;
             g_SceneMan.WrapPosition(extruded);
@@ -273,6 +274,10 @@ void Attachable::Attach(MOSRotating *pParent)
 
     // Reset the attachables timers so things that have been sitting in inventory don't make backed up emissions
     ResetAllTimers();
+
+    if (m_pParent != NULL && GetRootParent()->HasEverBeenAddedToMovableMan()) {
+        RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, {m_pParent});
+    }
 }
 
 
@@ -290,16 +295,21 @@ void Attachable::Detach()
     }
 
     m_Team = -1;
+    MOSRotating *temporaryParent = m_pParent;
     m_pParent = 0;
 	// Since it's no longer atteched it should belong to itself
 	m_RootMOID = m_MOID;
 
 #if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
-	DAssert(m_RootMOID == g_NoMOID || (m_RootMOID >= 0 && m_RootMOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
-	DAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
+	RTEAssert(m_RootMOID == g_NoMOID || (m_RootMOID >= 0 && m_RootMOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
+	RTEAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
 #endif
 
     m_RestTimer.Reset();
+
+    if (temporaryParent != NULL && temporaryParent->GetRootParent()->HasEverBeenAddedToMovableMan()) {
+        RunScriptedFunctionInAppropriateScripts("OnDetach", false, false, {temporaryParent});
+    }
 }
 
 
@@ -545,8 +555,7 @@ void Attachable::Update()
     MOSRotating::Update();
 
     // If we're attached to something, MoveableMan doesn't own us, and therefore isn't calling our ScriptUpdate (and our parent isn't calling it either), so we should here
-    if (m_pParent && !m_ScriptPath.empty())
-        UpdateScript();
+    if (m_pParent != NULL && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }
 }
 
 
@@ -582,8 +591,8 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
                                 m_aSprite->GetTile()->GetBlockHeight(),
                                 CDXMEM_SYSTEMONLY);
         }
-        m_pTempBitmapB->Fill(g_KeyColor);
-        m_pTempBitmapB->SetColorKey(g_KeyColor);
+        m_pTempBitmapB->Fill(g_MaskColor);
+        m_pTempBitmapB->SetColorKey(g_MaskColor);
         m_aSprite->SetPos(0, 0);
 
         if (mode != g_DrawColor) {
@@ -594,19 +603,19 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
                                    m_aSprite->GetTile()->GetBlockHeight(),
                                    CDXMEM_SYSTEMONLY);
             }
-            m_pTempBitmapA->Fill(g_KeyColor);
-            m_pTempBitmapA->SetColorKey(g_KeyColor);
+            m_pTempBitmapA->Fill(g_MaskColor);
+            m_pTempBitmapA->SetColorKey(g_MaskColor);
 
             if (mode == g_DrawMaterial)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, GetSettleMaterialID());
             else if (mode == g_DrawAir)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, g_MaterialAir);
-            else if (mode == g_DrawKey)
-                DrawMaterial(m_aSprite, m_pTempBitmapA, g_KeyColor);
+            else if (mode == g_DrawMask)
+                DrawMaterial(m_aSprite, m_pTempBitmapA, g_MaskColor);
             else if (mode == g_DrawMOID)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, m_MOID);
             else
-                DDTAbort("Unknown draw mode selected in Attachable:Draw()!");
+                RTEAbort("Unknown draw mode selected in Attachable:Draw()!");
 
             m_pTempBitmapA->DrawTransHFlip(m_pTempBitmapB, 0, 0);
         }
@@ -641,8 +650,8 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, GetSettleMaterialID());
         else if (mode == g_DrawAir)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_MaterialAir);
-        else if (mode == g_DrawKey)
-            DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_KeyColor);
+        else if (mode == g_DrawMask)
+            DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_MaskColor);
         else if (mode == g_DrawMOID)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, m_MOID);
         else

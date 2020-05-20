@@ -10,8 +10,8 @@ namespace RTE {
 	class ThrownDevice : public HeldDevice {
 
 	public:
-		ENTITYALLOCATION(ThrownDevice);
-		CLASSINFOGETTERS
+		EntityAllocation(ThrownDevice);
+		ClassInfoGetters
 
 #pragma region Creation
 		/// <summary>
@@ -76,7 +76,7 @@ namespace RTE {
 		/// <summary>
 		/// Resets all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.
 		/// </summary>
-		virtual void ResetAllTimers() { HeldDevice::ResetAllTimers(); m_ThrownTmr.Reset(); }
+		virtual void ResetAllTimers();
 
 		/// <summary>
 		/// Activates this Device as long as it's not set to activate when released or it has no parent.
@@ -142,18 +142,16 @@ namespace RTE {
 #pragma endregion
 
 	protected:
-		static Entity::ClassInfo m_sClass; //! ClassInfo for this class
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class
 
-		Timer m_ThrownTmr; //! Timer for timing how long ago this ThrownDevice was thrown
+		SoundContainer m_ActivationSound; //!< Activation sound
 
-		Sound m_ActivationSound; //! Activation sound
-
-		Vector m_StartThrowOffset; //! The position offset at which a throw of this Device begins
-		Vector m_EndThrowOffset; //! The position offset at which a throw of this Device ends
-		float m_MinThrowVel; //! The minimum throw velocity this gets when thrown
-		float m_MaxThrowVel; //! The maximum throw velocity this gets when thrown
-		long m_TriggerDelay; //! Time in millisecs from the time of being thrown to triggering whatever it is that this ThrownDevice does
-		bool m_ActivatesWhenReleased; //! Whether this activates when its throw is started, or waits until it is released from the arm that is throwing it
+		Vector m_StartThrowOffset; //!< The position offset at which a throw of this Device begins
+		Vector m_EndThrowOffset; //!< The position offset at which a throw of this Device ends
+		float m_MinThrowVel; //!< The minimum throw velocity this gets when thrown
+		float m_MaxThrowVel; //!< The maximum throw velocity this gets when thrown
+		long m_TriggerDelay; //!< Time in millisecs from the time of being thrown to triggering whatever it is that this ThrownDevice does
+		bool m_ActivatesWhenReleased; //!< Whether this activates when its throw is started, or waits until it is released from the arm that is throwing it
 
 	private:
 		/// <summary>

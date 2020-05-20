@@ -12,12 +12,12 @@
 // Inclusions of header files
 
 #include "Material.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "FrameMan.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(Material, Entity, 0)
+ConcreteClassInfo(Material, Entity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -14,7 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Entity.h"
 #include "FrameMan.h"
 #include "SceneMan.h"
@@ -333,7 +333,7 @@ enum NeighborDirection
 };
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(Scene)
+EntityAllocation(Scene)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1497,8 +1497,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Scene(const Scene &reference) { DDTAbort("Tried to use forbidden method"); }
-    void operator=(const Scene &rhs) { DDTAbort("Tried to use forbidden method"); }
+    Scene(const Scene &reference) { RTEAbort("Tried to use forbidden method"); }
+    void operator=(const Scene &rhs) { RTEAbort("Tried to use forbidden method"); }
 
 };
 

@@ -18,7 +18,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(GlobalScript, Entity, 0);
+ConcreteClassInfo(GlobalScript, Entity, 0);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -30,8 +30,6 @@ void GlobalScript::Clear()
 {
     m_ScriptPath.clear();
     m_LuaClassName.clear();
-    m_pOrbitedCraft = 0;
-	m_pPieMenuActor = 0;
 	m_IsActive = false;
 	m_LateUpdate = false;
 }
@@ -47,8 +45,6 @@ int GlobalScript::Create(const GlobalScript &reference)
 
     m_ScriptPath = reference.m_ScriptPath;
     m_LuaClassName = reference.m_LuaClassName;
-	m_pOrbitedCraft = reference.m_pOrbitedCraft;
-	m_pPieMenuActor = reference.m_pPieMenuActor;
 	m_IsActive = reference.m_IsActive;
 	m_LateUpdate = reference.m_LateUpdate;
 
@@ -128,41 +124,23 @@ int GlobalScript::ReloadScripts()
     return error;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  EnteredOrbit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates an Actor as having left the game scene and entered orbit.
-//                  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void GlobalScript::EnteredOrbit(Actor *pActor)
-{
-    // Save the ACraft actor temporarily to member so the lua function can access it
-    m_pOrbitedCraft = pActor;
-
-    if (m_pOrbitedCraft && g_MovableMan.IsActor(m_pOrbitedCraft))
-    {
-        // Call the defined function, but only after first checking if it exists
-        g_LuaMan.RunScriptString("if " + m_LuaClassName + ".CraftEnteredOrbit then " + m_LuaClassName + ":CraftEnteredOrbit(); end");
+void GlobalScript::EnteredOrbit(Actor *orbitedActor) {
+    if (orbitedActor && g_MovableMan.IsActor(orbitedActor)) {
+        g_LuaMan.RunScriptedFunction(m_LuaClassName + ".CraftEnteredOrbit", m_LuaClassName, {m_LuaClassName, m_LuaClassName + ".CraftEnteredOrbit"}, {orbitedActor});
     }
-
-    // Let go because it's about to be deleted later this frame
-    m_pOrbitedCraft = 0;
 }
 
-void GlobalScript::OnPieMenu(Actor *pActor)
-{
-	// Save the actor temporarily to member so the lua function can access it
-	m_pPieMenuActor = pActor;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	if (m_pPieMenuActor && g_MovableMan.IsActor(m_pPieMenuActor))
-	{
-		// Call the defined function, but only after first checking if it exists
-		g_LuaMan.RunScriptString("if " + m_LuaClassName + ".OnPieMenu then " + m_LuaClassName + ":OnPieMenu(); end");
+void GlobalScript::OnPieMenu(Actor *pieMenuActor) {
+	if (pieMenuActor && g_MovableMan.IsActor(pieMenuActor)) {
+        g_LuaMan.RunScriptedFunction(m_LuaClassName + ".OnPieMenu", m_LuaClassName, {m_LuaClassName, m_LuaClassName + ".OnPieMenu"}, {pieMenuActor});
 	}
-
-	// Let go because it's about to be deleted later this frame
-	m_pPieMenuActor = 0;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Start

@@ -37,7 +37,7 @@ extern bool g_ResetActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(GAScripted, GameActivity, 0)
+ConcreteClassInfo(GAScripted, GameActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -269,54 +269,33 @@ bool GAScripted::SceneIsCompatible(Scene *pScene, int teams)
     return g_LuaMan.GlobalIsDefined("TestScene");
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  EnteredOrbit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates an Actor as having left the game scene and entered orbit.
-//                  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
+void GAScripted::EnteredOrbit(Actor *orbitedCraft) {
+    GameActivity::EnteredOrbit(orbitedCraft);
 
-void GAScripted::EnteredOrbit(Actor *pActor)
-{
-    GameActivity::EnteredOrbit(pActor);
-
-    // Save the ACraft actor temporarily to member so the lua function can access it
-    m_pOrbitedCraft = pActor;
-
-    if (m_pOrbitedCraft && g_MovableMan.IsActor(m_pOrbitedCraft))
-    {
-        // Call the defined function, but only after first checking if it exists
-        g_LuaMan.RunScriptString("if " + m_LuaClassName + ".CraftEnteredOrbit then " + m_LuaClassName + ":CraftEnteredOrbit(); end");
-
-		// Trigger orbited craft for all global scripts
-		for (std::vector<GlobalScript *>::iterator sItr = m_GlobalScriptsList.begin(); sItr < m_GlobalScriptsList.end(); ++sItr)
-			if ((*sItr)->IsActive())
-				(*sItr)->EnteredOrbit(m_pOrbitedCraft);
+    if (orbitedCraft && g_MovableMan.IsActor(orbitedCraft)) {
+        g_LuaMan.RunScriptedFunction(m_LuaClassName + ".CraftEnteredOrbit", m_LuaClassName, {m_LuaClassName, m_LuaClassName + ".CraftEnteredOrbit"}, {orbitedCraft});
+        for (GlobalScript *globalScript : m_GlobalScriptsList) {
+            if (globalScript->IsActive()) { globalScript->EnteredOrbit(orbitedCraft); }
+        }
     }
-
-    // Let go because it's about to be deleted later this frame
-    m_pOrbitedCraft = 0;
 }
 
-void GAScripted::OnPieMenu(Actor *pActor)
-{
-	m_pPieMenuActor = pActor;
-	if (pActor && g_MovableMan.IsActor(pActor))
-	{
-		m_pPieMenuActor->OnPieMenu(pActor);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		g_MovableMan.OnPieMenu(pActor);
-
-		// Call the defined function, but only after first checking if it exists
-		g_LuaMan.RunScriptString("if " + m_LuaClassName + ".OnPieMenu then " + m_LuaClassName + ":OnPieMenu(); end");
-
-		// Trigger pie menu for all global scripts
-		for (std::vector<GlobalScript *>::iterator sItr = m_GlobalScriptsList.begin(); sItr < m_GlobalScriptsList.end(); ++sItr)
-			if ((*sItr)->IsActive())
-				(*sItr)->OnPieMenu(m_pPieMenuActor);
+void GAScripted::OnPieMenu(Actor *pieMenuActor) {
+	if (pieMenuActor && g_MovableMan.IsActor(pieMenuActor)) {
+        pieMenuActor->OnPieMenu(pieMenuActor);
+		g_MovableMan.OnPieMenu(pieMenuActor);
+        g_LuaMan.RunScriptedFunction(m_LuaClassName + ".OnPieMenu", m_LuaClassName, {m_LuaClassName, m_LuaClassName + ".OnPieMenu"}, {pieMenuActor});
+        for (GlobalScript *globalScript : m_GlobalScriptsList) {
+            if (globalScript->IsActive()) { globalScript->OnPieMenu(pieMenuActor); }
+        }
 	}
-
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Start

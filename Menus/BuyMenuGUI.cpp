@@ -123,7 +123,7 @@ void BuyMenuGUI::Clear()
 
 int BuyMenuGUI::Create(Controller *pController)
 {
-    AAssert(pController, "No controller sent to BuyMenyGUI on creation!");
+    RTEAssert(pController, "No controller sent to BuyMenyGUI on creation!");
     m_pController = pController;
 
     if (!m_pGUIScreen)
@@ -133,7 +133,7 @@ int BuyMenuGUI::Create(Controller *pController)
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
     m_pGUIController->Load("Base.rte/GUIs/BuyMenuGUI.ini");
     m_pGUIController->EnableMouse(pController->IsMouseControlled());
 
@@ -559,7 +559,7 @@ void BuyMenuGUI::SetEnabled(bool enable)
 		UpdateTotalPassengersLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftPassengersLabel);
 		UpdateTotalMassLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftMassLabel);
 
-        g_GUISound.EnterMenuSound().Play(0, m_pController->GetPlayer());
+        g_GUISound.EnterMenuSound()->Play(m_pController->GetPlayer());
     }
     else if (!enable && m_MenuEnabled != DISABLED && m_MenuEnabled != DISABLING)
     {
@@ -568,7 +568,7 @@ void BuyMenuGUI::SetEnabled(bool enable)
         g_UInputMan.TrapMousePos(true, m_pController->GetPlayer());
         // Only play switching away sound
 //        if (!m_PurchaseMade)
-            g_GUISound.ExitMenuSound().Play(0, m_pController->GetPlayer());
+            g_GUISound.ExitMenuSound()->Play(m_pController->GetPlayer());
     }
 }
 
@@ -782,7 +782,7 @@ float BuyMenuGUI::GetCraftMass()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalOrderPassengers
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return teh total number of passengers in the order box.
+// Description:     Return the total number of passengers in the order box.
 // Arguments:       None.
 // Return value:    The total number of passengers.
 
@@ -791,8 +791,11 @@ int BuyMenuGUI::GetTotalOrderPassengers()
 	int passengers = 0;
 	for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
 	{
-		if (dynamic_cast<const Actor *>((*itr)->m_pEntity))
-			passengers++;
+        const Actor* passenger = dynamic_cast<const Actor*>((*itr)->m_pEntity);
+        if (passenger)
+        {
+            passengers += passenger->GetPassengerSlots();
+        }
 	}
 
 	return passengers;
@@ -990,7 +993,7 @@ void BuyMenuGUI::Update()
         {
             m_MenuFocus = FOCUSCOUNT - 1;
             m_FocusChange = 0;
-            g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+            g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
         }
         // Skip categories if we're going sideways from the sets buttons
         if (m_MenuFocus == CATEGORIES)
@@ -1020,7 +1023,7 @@ void BuyMenuGUI::Update()
         if (m_MenuFocus < 0)
         {
             m_MenuFocus = 0;
-            g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+            g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
         }
         // Skip giving focus to the order or item list if they're empty
         if (m_MenuFocus == ORDER && m_pCartList->GetItemList()->empty())
@@ -1037,7 +1040,7 @@ void BuyMenuGUI::Update()
     }
     // Play focus change sound, if applicable
     if (m_FocusChange && m_MenuEnabled != ENABLING)
-        g_GUISound.FocusChangeSound().Play(0, m_pController->GetPlayer());
+        g_GUISound.FocusChangeSound()->Play(m_pController->GetPlayer());
 /* Blah, should control whatever is currently focused
     // Mouse wheel only controls the categories, so switch to it and make the category go up or down
     if (m_pController->IsState(SCROLL_UP) || m_pController->IsState(SCROLL_DOWN))
@@ -1065,7 +1068,7 @@ void BuyMenuGUI::Update()
         {
             if (m_pSaveButton->HasFocus())
                 SaveCurrentLoadout();
-            else if (m_pClearButton->HasFocus())
+			else if (m_pClearButton->HasFocus() && m_Loadouts.size() != 0)
             {
                 m_Loadouts.pop_back();
                 // Update the list of loadout presets so the removal shows up
@@ -1073,7 +1076,7 @@ void BuyMenuGUI::Update()
                 // Set focus back on the save button (CatChange changed it)
                 m_pClearButton->SetFocus();
             }
-            g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+            g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
         }
 
         // Switch back focus to the category list if the player presses up while on the save button
@@ -1087,7 +1090,7 @@ void BuyMenuGUI::Update()
             else if (m_pClearButton->HasFocus())
             {
                 m_pSaveButton->SetFocus();
-                g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
         }
         else if (m_pController->IsState(PRESS_DOWN) || m_pController->IsState(SCROLL_DOWN))
@@ -1095,10 +1098,10 @@ void BuyMenuGUI::Update()
             if (m_pSaveButton->HasFocus())
             {
                 m_pClearButton->SetFocus();
-                g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
             else if (m_pClearButton->HasFocus())
-                g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
         }
     }
 
@@ -1122,7 +1125,7 @@ void BuyMenuGUI::Update()
                 // Go to the preset buttons if hit down on the last one
                 m_MenuFocus = SETBUTTONS;
                 m_FocusChange = -1;
-//                g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+//                g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
             }
 /*
             // Loop Around
@@ -1132,7 +1135,7 @@ void BuyMenuGUI::Update()
             else
             {
                 CategoryChange();
-                g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
         }
         else if (pressUp)
@@ -1141,7 +1144,7 @@ void BuyMenuGUI::Update()
             if (m_MenuCategory < 0)
             {
                 m_MenuCategory = 0;
-                g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
             }
 /*
             // Loop around
@@ -1151,7 +1154,7 @@ void BuyMenuGUI::Update()
             else
             {
                 CategoryChange();
-                g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
         }
     }
@@ -1188,7 +1191,7 @@ void BuyMenuGUI::Update()
             // Update the selected shop item index
             m_CategoryItemIndex[m_MenuCategory] = m_ListItemIndex;
             m_pShopList->SetSelectedIndex(m_ListItemIndex);
-            g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+            g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
         }
         else if (pressUp)
         {
@@ -1200,7 +1203,7 @@ void BuyMenuGUI::Update()
             // Update the selected shop item index
             m_CategoryItemIndex[m_MenuCategory] = m_ListItemIndex;
             m_pShopList->SetSelectedIndex(m_ListItemIndex);
-            g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+            g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
         }
 
         // Get handle to the currently selected item, if any
@@ -1244,10 +1247,10 @@ void BuyMenuGUI::Update()
             {
                 // Make appropriate sound
                 if (!m_aExpandedModules[pItem->m_ExtraIndex])
-                    g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                    g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                 // Different, maybe?
                 else
-                    g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                    g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                 // Toggle the expansion of the module group item's items below
                 m_aExpandedModules[pItem->m_ExtraIndex] = !m_aExpandedModules[pItem->m_ExtraIndex];
                 // Re-populate the item list with the new module expansion configuation
@@ -1258,7 +1261,7 @@ void BuyMenuGUI::Update()
             {
                 // Beep if there's an error
                 if (!DeployLoadout(m_ListItemIndex))
-                    g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+                    g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
             }
             // User mashed button on a regular shop item, add it to cargo, or select craft
             else if (pItem && pItem->m_pEntity)
@@ -1284,7 +1287,7 @@ void BuyMenuGUI::Update()
                     GUIBitmap *pItemBitmap = new AllegroBitmap(dynamic_cast<AllegroBitmap *>(pItem->m_pBitmap)->GetBitmap());
                     m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
                 }
-                g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
             }
 
             UpdateTotalCostLabel(m_pController->GetTeam());
@@ -1330,7 +1333,7 @@ void BuyMenuGUI::Update()
             else
             {
                 m_pCartList->SetSelectedIndex(m_ListItemIndex);
-                g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
         }
         else if (pressUp)
@@ -1339,13 +1342,13 @@ void BuyMenuGUI::Update()
             if (m_ListItemIndex < 0)
             {
                 m_ListItemIndex = 0;
-                g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
             }
             // Only do list change logic if we actually did change
             else
             {
                 m_pCartList->SetSelectedIndex(m_ListItemIndex);
-                g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
         }
 
@@ -1388,7 +1391,7 @@ void BuyMenuGUI::Update()
 			UpdateTotalPassengersLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftPassengersLabel);
 			UpdateTotalMassLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftMassLabel);
 
-            g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+            g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
         }
     }
 
@@ -1416,7 +1419,7 @@ void BuyMenuGUI::Update()
             m_FocusChange = -1;
         }
         else if (m_pController->IsState(PRESS_DOWN) || m_pController->IsState(SCROLL_DOWN))
-            g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+            g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
     }
 
     // If mouse clicked outside the buy menu, the user is considered havin g tried to buy
@@ -1448,7 +1451,7 @@ void BuyMenuGUI::Update()
                 SaveCurrentLoadout();
                 m_MenuFocus = SETBUTTONS;
 //                m_FocusChange = -1;
-                g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
 			}
 
             // CLEAR button clicks
@@ -1465,7 +1468,7 @@ void BuyMenuGUI::Update()
                 m_pClearButton->SetFocus();
                 m_MenuFocus = SETBUTTONS;
 //                m_FocusChange = -1;
-                g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
 			}
 
             // BUY button clicks
@@ -1473,7 +1476,7 @@ void BuyMenuGUI::Update()
             {
                 m_pBuyButton->SetFocus();
                 TryPurchase();
-//                g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+//                g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
 			}
         }
         else if (anEvent.GetType() == GUIEvent::Notification)
@@ -1499,7 +1502,7 @@ void BuyMenuGUI::Update()
                         m_MenuCategory = cat;
                         m_pCategoryTabs[m_MenuCategory]->SetFocus();
                         CategoryChange();
-                        g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                        g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
                     }
                 }
             }
@@ -1514,7 +1517,7 @@ void BuyMenuGUI::Update()
                 if(anEvent.GetMsg() == GUIListBox::Select)
                 {
                     if (m_ListItemIndex != m_pShopList->GetSelectedIndex())
-                        g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                        g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
                     m_CategoryItemIndex[m_MenuCategory] = m_ListItemIndex = m_pShopList->GetSelectedIndex();
                 }
                 // Mouse down, added something to cart!
@@ -1530,10 +1533,10 @@ void BuyMenuGUI::Update()
                     {
                         // Make appropriate sound
                         if (!m_aExpandedModules[pItem->m_ExtraIndex])
-                            g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                            g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                         // Different, maybe?
                         else
-                            g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                            g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                         // Toggle the expansion of the module group item's items below
                         m_aExpandedModules[pItem->m_ExtraIndex] = !m_aExpandedModules[pItem->m_ExtraIndex];
                         // Re-populate the item list with the new module expansion configuation
@@ -1544,7 +1547,7 @@ void BuyMenuGUI::Update()
                     {
                         // Beep if there's an error
                         if (!DeployLoadout(m_ListItemIndex))
-                            g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+                            g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
                     }
                     // Normal: only add an item if there's an entity attached to the list item
                     else if (pItem && pItem->m_pEntity)
@@ -1596,7 +1599,7 @@ void BuyMenuGUI::Update()
 								m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
 							}
                         }
-                        g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                        g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                     }
                     // Undo the click deselection if nothing was selected
 //                    else
@@ -1626,7 +1629,7 @@ void BuyMenuGUI::Update()
 
                             // Play select sound if new index
                             if (m_ListItemIndex != pItem->m_ID)
-                                g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
                             // Update the seleciton in both the GUI control and our menu
                             m_pShopList->SetSelectedIndex(m_CategoryItemIndex[m_MenuCategory] = m_ListItemIndex = pItem->m_ID);
                         }
@@ -1644,7 +1647,7 @@ void BuyMenuGUI::Update()
                 if(anEvent.GetMsg() == GUIListBox::Select)
                 {                   
                     if (m_ListItemIndex != m_pCartList->GetSelectedIndex())
-                        g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                        g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
                     m_ListItemIndex = m_pCartList->GetSelectedIndex();
                 }
                 // Somehting was clicked upon, therefore should be removed
@@ -1675,7 +1678,7 @@ void BuyMenuGUI::Update()
 						UpdateTotalPassengersLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftPassengersLabel);
 						UpdateTotalMassLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftMassLabel);
 
-                        g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                        g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                     }
                     // Undo the click deselection if nothing was selected
 //                    else
@@ -1705,7 +1708,7 @@ void BuyMenuGUI::Update()
 
                             // Play select sound if new index
                             if (m_ListItemIndex != pItem->m_ID)
-                                g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
                             // Update the seleciton in both the GUI control and our menu
                             m_pCartList->SetSelectedIndex(m_ListItemIndex = pItem->m_ID);
                         }
@@ -2263,7 +2266,7 @@ void BuyMenuGUI::TryPurchase()
         CategoryChange();
         m_FocusChange = -2;
         m_MenuFocus = ITEMS;
-        g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+        g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
         // Set the notification blinker
         m_BlinkMode = NOCRAFT;
         m_BlinkTimer.Reset();
@@ -2272,7 +2275,7 @@ void BuyMenuGUI::TryPurchase()
     // Can't afford it :(
     else if (GetTotalOrderCost() > g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam()))
     {
-        g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+        g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
         // Set the notification blinker
         m_BlinkMode = NOFUNDS;
         m_BlinkTimer.Reset();
@@ -2286,7 +2289,7 @@ void BuyMenuGUI::TryPurchase()
 			// Enforce max mass
 			if (pCraft->GetMaxMass() > 0 && GetTotalOrderMass() > pCraft->GetMaxMass() && m_EnforceMaxMassConstraint)
 			{
-				g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+				g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
 				// Set the notification blinker
 				m_BlinkMode = MAXMASS;
 				m_BlinkTimer.Reset();
@@ -2296,7 +2299,7 @@ void BuyMenuGUI::TryPurchase()
 			// Enforce max passengers
 			if (pCraft->GetMaxPassengers() >= 0 && GetTotalOrderPassengers() > pCraft->GetMaxPassengers() && m_EnforceMaxPassengersConstraint)
 			{
-				g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+				g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
 				// Set the notification blinker
 				m_BlinkMode = MAXPASSENGERS;
 				m_BlinkTimer.Reset();
@@ -2310,7 +2313,7 @@ void BuyMenuGUI::TryPurchase()
 	{
 		//            m_pBuyButton->OnKeyPress(0, 0);
 		m_PurchaseMade = true;
-		g_GUISound.PurchaseMadeSound().Play(0, m_pController->GetPlayer());
+		g_GUISound.PurchaseMadeSound()->Play(m_pController->GetPlayer());
 	}
 }
 

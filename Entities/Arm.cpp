@@ -12,7 +12,7 @@
 // Inclusions of header files
 
 #include "Arm.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "HDFirearm.h"
 #include "ThrownDevice.h"
 #include "ContentFile.h"
@@ -20,7 +20,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(Arm, Attachable, 0)
+ConcreteClassInfo(Arm, Attachable, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ int Arm::Create(const Arm &reference)
 
     m_HandFile = reference.m_HandFile;
     m_pHand = m_HandFile.GetAsBitmap();
-    AAssert(m_pHand, "Failed to load hand bitmap in Arm::Create")
+    RTEAssert(m_pHand, "Failed to load hand bitmap in Arm::Create")
 
     m_MaxLength = reference.m_MaxLength;
     m_HandOffset = reference.m_HandOffset;
@@ -518,17 +518,7 @@ void Arm::Update()
             else
             {
                 Vector handTarget = g_SceneMan.ShortestDistance(m_JointPos, m_TargetPoint);
-    /*
-                if (m_PresetName == "Player BG Arm") {
-                    char str[64];
-                    sprintf_s(str, sizeof(str), "TargetOffset: %f, %f", m_TargetPoint.m_X, m_TargetPoint.m_Y);
-                    g_FrameMan.DrawText(g_SceneMan.GetMOBitmap(), str, m_Pos + Vector(4, -140), false);
-                    sprintf_s(str, sizeof(str), "m_Pos: %f, %f", m_Pos.m_X, m_Pos.m_Y);
-                    g_FrameMan.DrawText(g_SceneMan.GetMOBitmap(), str, m_Pos + Vector(4, -120), false);
-                    sprintf_s(str, sizeof(str), "handTarget: %f, %f", handTarget.m_X, handTarget.m_Y);
-                    g_FrameMan.DrawText(g_SceneMan.GetMOBitmap(), str, m_Pos + Vector(4, -100), false);
-                }
-    */
+
                 // Check if handTarget is within arm's length.
     // TEMP the +3 is a hack! improve
                 if (handTarget.GetMagnitude() <= m_MaxLength || !m_WillIdle/* && handTarget.GetFloored() != m_HandOffset.GetFloored()*/)
@@ -647,15 +637,6 @@ void Arm::Draw(BITMAP *pTargetBitmap,
 
     if (m_pHeldMO && ((!m_pHeldMO->IsHeldDevice() && !m_pHeldMO->IsThrownDevice()) || m_pHeldMO->IsDrawnAfterParent()))
         m_pHeldMO->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-/*
-#ifdef DEBUG_BUILD
-    if (m_PresetName == "Player BG Arm") {
-        char str[64];
-        sprintf_s(str, sizeof(str), "m_Pos in draw: %f, %f", m_Pos.m_X, m_Pos.m_Y);
-        g_FrameMan.DrawText(pTargetBitmap, str, m_Pos + Vector(4, -80), false);
-    }
-#endif
-*/
 }
 
 
@@ -680,15 +661,6 @@ void Arm::DrawHand(BITMAP *pTargetBitmap,
         draw_sprite(pTargetBitmap, m_pHand, handPos.m_X, handPos.m_Y);
     else
         draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.m_X, handPos.m_Y);
-/*
-#ifdef DEBUG_BUILD
-    if (m_PresetName == "Player BG Arm") {
-        char str[64];
-        sprintf_s(str, sizeof(str), "HandPos in hand draw: %f, %f", handPos.m_X, handPos.m_Y);
-        g_FrameMan.DrawText(pTargetBitmap, str, handPos + Vector(4, -40), false);
-    }
-#endif
-*/
 }
 
 } // namespace RTE

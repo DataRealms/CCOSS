@@ -12,14 +12,14 @@
 // Inclusions of header files
 
 #include "Turret.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "HeldDevice.h"
 #include "ContentFile.h"
 #include "PresetMan.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(Turret, Attachable, 0)
+ConcreteClassInfo(Turret, Attachable, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

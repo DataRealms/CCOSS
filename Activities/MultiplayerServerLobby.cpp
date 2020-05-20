@@ -53,7 +53,7 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-	CONCRETECLASSINFO(MultiplayerServerLobby, Activity, 0)
+	ConcreteClassInfo(MultiplayerServerLobby, Activity, 0)
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          Clear
@@ -235,7 +235,7 @@ namespace RTE {
 		if (!m_pGUIController)
 			m_pGUIController = new GUIControlManager();
 		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-			DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
 
 		m_pGUIController->Load("Base.rte/GUIs/MultiplayerServerLobbyGUI.ini");
 		m_pGUIController->EnableMouse(true);
@@ -350,7 +350,7 @@ namespace RTE {
 		ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.bmp");
 		m_pDefaultPreviewBitmap = defaultPreview.LoadAndReleaseBitmap();
 
-		clear_to_color(m_pScenePreviewBitmap, g_KeyColor);
+		clear_to_color(m_pScenePreviewBitmap, g_MaskColor);
 
 		m_apPlayerIcons[0] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 1"));
 		m_apPlayerIcons[1] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 2"));
@@ -704,7 +704,7 @@ namespace RTE {
 									//    m_aapPlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps8()[0]));
 								}
 							}
-							//g_GUISound.FocusChangeSound().Play();
+							//g_GUISound.FocusChangeSound()->Play();
 
 							//Check if we need to clear or set CPU disabled team icon
 							bool noCPUs = true;
@@ -733,7 +733,7 @@ namespace RTE {
 						else if (m_aapPlayerBoxes[player][team]->GetDrawColor() != c_PlayerSlotColorHovered)
 						{
 							m_aapPlayerBoxes[player][team]->SetDrawColor(c_PlayerSlotColorHovered);
-							//g_GUISound.SelectionChangeSound().Play();
+							//g_GUISound.SelectionChangeSound()->Play();
 						}
 					}
 					// Un-highlight all other cells
@@ -1240,10 +1240,10 @@ namespace RTE {
 						//HideAllScreens();
 						//                    m_MenuScreen = SCENESELECT;
 						//                    m_ScreenChange = true;
-						//g_GUISound.ButtonPressSound().Play();
+						//g_GUISound.ButtonPressSound()->Play();
 					}
 					else
-						g_GUISound.UserErrorSound().Play();
+						g_GUISound.UserErrorSound()->Play();
 				}
 			}
 
@@ -1282,7 +1282,7 @@ namespace RTE {
 
 						// Update the scene info box
 						//UpdateScenesBox();
-						//g_GUISound.ItemChangeSound().Play();
+						//g_GUISound.ItemChangeSound()->Play();
 					}
 				}
 
@@ -1316,7 +1316,7 @@ namespace RTE {
 		BITMAP * drawBitmap = m_pUIDrawBitmap;
 		BITMAP * finalDestBitmap = 0;
 
-		clear_to_color(drawBitmap, g_KeyColor);
+		clear_to_color(drawBitmap, g_MaskColor);
 
 		// Store offset set for player 0
 		int baseOffsetX = m_pRootBox->GetXPos();

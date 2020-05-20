@@ -1,58 +1,37 @@
 #ifndef _GUI_
 #define _GUI_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUI.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Main header file for the GUI library
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+#pragma region Rectangle Structure
+/// <summary>
+/// The GUIRect structure defines a rectangle by the coordinates of its upper-left and lower-right corners.
+/// </summary>
+struct GUIRect { long left; long top; long right; long bottom; };
 
+/// <summary>
+/// Sets the bounds of a GUIRect.
+/// </summary>
+/// <param name="pRect">Pointer to the GUIRect.</param>
+/// <param name="left">Position of top left corner on X axis.</param>
+/// <param name="top">Position of top left corner on Y axis.</param>
+/// <param name="right">Position of bottom right corner on X axis.</param>
+/// <param name="bottom">Position of bottom right corner on Y axis.</param>
+void SetRect(GUIRect *pRect, int left, int top, int right, int bottom);
+#pragma endregion
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// GUI Types
-typedef unsigned long Uint32;
+#include "RTETools.h"
 
-struct RECT
-{
-    long    left;
-    long    top;
-    long    right;
-    long    bottom;
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
-#include "allegro.h"
-#include "Constants.h"
-#include "GUIProperties.h"
-#include "GUIInput.h"
-#include "GUIBitmap.h"
-#include "GUISound.h"
-#include "GUIScreen.h"
-#include "GUIFont.h"
-#include "GUISkin.h"
-#include "GUIPanel.h"
-#include "GUIManager.h"
-#include "GUIUtil.h"
-#include "GUIControl.h"
-#include "GUIEvent.h"
-#include "GUIControlFactory.h"
-#include "GUIControlManager.h"
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// GUI Library macros
-
-void SetRect(RECT *pRect,
-             int left,
-             int top,
-             int right,
-             int bottom);
-
-
-int DDTstricmp(const char *s1, const char *s2);
+#include "GUI/Interface.h"
+#include "GUI/GUIProperties.h"
+#include "GUI/GUIInput.h"
+#include "GUI/GUIFont.h"
+#include "GUI/GUISkin.h"
+#include "GUI/GUIPanel.h"
+#include "GUI/GUIManager.h"
+#include "GUI/GUIUtil.h"
+#include "GUI/GUIControl.h"
+#include "GUI/GUIEvent.h"
+#include "GUI/GUIControlFactory.h"
+#include "GUI/GUIControlManager.h"
+#include "GUI/GUISound.h"
 
 #endif

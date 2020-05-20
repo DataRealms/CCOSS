@@ -14,7 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "SceneObject.h"
 #include "Vector.h"
 #include "FrameMan.h"
@@ -51,7 +51,7 @@ public:
 	// Different scheme properties are encoded on colors of scheme bitmap
 	enum SchemeColor 
 	{
-		SCHEME_COLOR_EMPTY = g_KeyColor,  // Empty sections, MUST BE ALWAYS EMPTY
+		SCHEME_COLOR_EMPTY = g_MaskColor,  // Empty sections, MUST BE ALWAYS EMPTY
 		SCHEME_COLOR_PASSABLE = 5,		  // Passable sections, MUST BE ALWAYS PASSBLE, I.E. HAVE ONLY BACKGROUNDS
 		SCHEME_COLOR_VARIABLE = 4,		  // May be passable or not. Expect air.
 		SCHEME_COLOR_WALL = 3			  // Always impassable, but may be empty. Expect terrain.
@@ -70,7 +70,7 @@ public:
 	const static int SchemeWidth = 2;
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(BunkerAssemblyScheme)
+EntityAllocation(BunkerAssemblyScheme)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -409,8 +409,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    BunkerAssemblyScheme(const BunkerAssemblyScheme &reference) { DDTAbort("Tried to use forbidden method"); }
-    void operator=(const BunkerAssemblyScheme &rhs) { DDTAbort("Tried to use forbidden method"); }
+    BunkerAssemblyScheme(const BunkerAssemblyScheme &reference) { RTEAbort("Tried to use forbidden method"); }
+    void operator=(const BunkerAssemblyScheme &rhs) { RTEAbort("Tried to use forbidden method"); }
 
 };
 

@@ -14,11 +14,11 @@
 #include "MOSParticle.h"
 #include "Atom.h"
 #include "RTEManagers.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(MOSParticle, MovableObject, 200)
+ConcreteClassInfo(MOSParticle, MovableObject, 200)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -405,8 +405,8 @@ void MOSParticle::Draw(BITMAP *pTargetBitmap,
         draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), m_SettleMaterialDisabled ? GetMaterial()->id : GetMaterial()->GetSettleMaterialID(), -1);
     else if (mode == g_DrawAir)
         draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), g_MaterialAir, -1);
-    else if (mode == g_DrawKey)
-        draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), g_KeyColor, -1);
+    else if (mode == g_DrawMask)
+        draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), g_MaskColor, -1);
     else if (mode == g_DrawWhite)
         draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), g_WhiteColor, -1);
     else if (mode == g_DrawMOID)
@@ -431,17 +431,8 @@ void MOSParticle::Draw(BITMAP *pTargetBitmap,
     // Set the screen effect to draw at the final post processing stage
     if (m_pScreenEffect && mode == g_DrawColor && !onlyPhysical && m_AgeTimer.IsPastSimMS(m_EffectStartTime) && (m_EffectStopTime == 0 || !m_AgeTimer.IsPastSimMS(m_EffectStopTime)) &&  (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY())))
     {
-//        int strength = m_EffectStartStrength + (m_AgeTimer.GetElapsedSimTimeMS() - m_EffectStartTime) * ((m_EffectStartStrength) / ())   m_EffectStartStrength * (1.0f - (float)(m_AgeTimer.GetElapsedSimTimeMS() - m_EffectStartTime) / (float)MIN(m_EffectStopTime, m_Lifetime));
-        g_SceneMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, LERP(m_EffectStartTime, m_EffectStopTime, m_EffectStartStrength, m_EffectStopStrength, m_AgeTimer.GetElapsedSimTimeMS()), m_EffectRotAngle);
+		g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, LERP(m_EffectStartTime, m_EffectStopTime, m_EffectStartStrength, m_EffectStopStrength, m_AgeTimer.GetElapsedSimTimeMS()), m_EffectRotAngle);
     }
-
-/*
-    if (!onlyPhysical) {
-        char str[64];
-        sprintf_s(str, sizeof(str), "aVel:%.2f", m_AngularVel);
-        g_FrameMan.DrawText(pTargetBitmap, str, m_Pos + Vector(-45, -75), false);
-    }
-*/
 }
 
 } // namespace RTE

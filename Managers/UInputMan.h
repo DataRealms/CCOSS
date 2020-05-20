@@ -14,7 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Singleton.h"
 #define g_UInputMan UInputMan::Instance()
 #include "Serializable.h"
@@ -71,6 +71,10 @@ enum InputDevice
 
 enum InputPreset
 {
+    PRESET_P1DEFAULT = -1,
+    PRESET_P2DEFAULT = -2,
+    PRESET_P3DEFAULT = -3,
+    PRESET_P4DEFAULT = -4,
     PRESET_NONE = 0,
     PRESET_WASDKEYS,
     PRESET_CURSORKEYS,

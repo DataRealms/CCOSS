@@ -53,6 +53,7 @@
 #include "GibEditor.h"
 #include "ActorEditor.h"
 #include "AssemblyEditor.h"
+#include "EditorActivity.h"
 #include "MultiplayerGame.h"
 
 extern int g_IntroState;
@@ -162,7 +163,7 @@ void MainMenuGUI::Clear()
 
 int MainMenuGUI::Create(Controller *pController)
 {
-    AAssert(pController, "No controller sent to MainMenuGUI on creation!");
+    RTEAssert(pController, "No controller sent to MainMenuGUI on creation!");
     m_pController = pController;
 
     if (!m_pGUIScreen)
@@ -172,7 +173,7 @@ int MainMenuGUI::Create(Controller *pController)
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/MainMenu"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
     m_pGUIController->Load("Base.rte/GUIs/MainMenuGUI.ini");
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
@@ -233,7 +234,7 @@ int MainMenuGUI::Create(Controller *pController)
     m_aSkirmishButton[P4TEAM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP4Team"));
     m_pCPUTeamLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelCPUTeam"));
 
-    m_aOptionButton[FULLSCREEN] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonFullscreen"));
+    m_aOptionButton[RESOLUTIONMULTIPLIER] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonFullscreen"));
     m_aOptionButton[P1NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP1NextDevice"));
     m_aOptionButton[P2NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP2NextDevice"));
     m_aOptionButton[P3NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP3NextDevice"));
@@ -352,15 +353,13 @@ int MainMenuGUI::Create(Controller *pController)
     m_pResolutionCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ComboResolution"));
     UpdateResolutionCombo();
 
-    // Set labels only when we know max resolution, as it defines whether we can switch to 2X windowed mode or not
-	if (g_FrameMan.IsFullscreen())
-        m_aOptionButton[FULLSCREEN]->SetText("Go 1X Window");
-    else
-    {
-        if (g_FrameMan.NxWindowed() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 - 25 && g_FrameMan.GetResY() <= m_MaxResY / 2 - 25)
-            m_aOptionButton[FULLSCREEN]->SetText("Go 2X Window");
-        else
-            m_aOptionButton[FULLSCREEN]->SetText("Go Fullscreen");
+	// Set labels only when we know max resolution, as it defines whether we can switch to 2X windowed mode or not
+	if (g_FrameMan.ResolutionMultiplier() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 && g_FrameMan.GetResY() <= m_MaxResY / 2) {
+		m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 2X");
+	} else if (g_FrameMan.ResolutionMultiplier() > 1) {
+		m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 1X");
+	} else {
+		m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Unavailable");
     }
 
     m_pResolutionNoticeLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelResolutionNotice"));
@@ -586,12 +585,12 @@ void MainMenuGUI::SetEnabled(bool enable)
     if (enable && m_MenuEnabled != ENABLED && m_MenuEnabled != ENABLING)
     {
         m_MenuEnabled = ENABLING;
-        g_GUISound.EnterMenuSound().Play();
+        g_GUISound.EnterMenuSound()->Play();
     }
     else if (!enable && m_MenuEnabled != DISABLED && m_MenuEnabled != DISABLING)
     {
         m_MenuEnabled = DISABLING;
-        g_GUISound.ExitMenuSound().Play();
+        g_GUISound.ExitMenuSound()->Play();
     }
 
     m_ScreenChange = true;
@@ -680,7 +679,7 @@ void MainMenuGUI::Update()
 				m_pGUIInput->GetMousePosition(&mouseX, &mouseY);
 				Vector mouse(mouseX, mouseY);
 
-				if (m_PioneerPromoBox.WithinBox(mouse))
+				if (m_PioneerPromoBox.IsWithinBox(mouse))
 				{
 					OpenBrowserToURL("http://store.steampowered.com/app/300260/");
 				}
@@ -890,12 +889,12 @@ void MainMenuGUI::Update()
                 if (m_aMainMenuButton[CAMPAIGN]->GetText() == "Campaign")
                 {
                     m_aMainMenuButton[CAMPAIGN]->SetText("COMING SOON!");
-                    g_GUISound.ExitMenuSound().Play();
+                    g_GUISound.ExitMenuSound()->Play();
                 }
                 else
                 {
                     m_aMainMenuButton[CAMPAIGN]->SetText("Campaign");
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 }
 */
                 // Show the metagame notice screen if it hasn't already been shown yet
@@ -910,7 +909,7 @@ void MainMenuGUI::Update()
 
                 HideAllScreens();
                 m_ScreenChange = true;
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Skirmish button pressed
@@ -927,8 +926,8 @@ void MainMenuGUI::Update()
 //                m_MenuScreen = PLAYERSSCREEN;
                 m_MenuScreen = MAINSCREEN;
                 m_ScreenChange = true;
-                g_GUISound.ButtonPressSound().Play();
-//                g_GUISound.ExitMenuSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
+//                g_GUISound.ExitMenuSound()->Play();
             }
 
 			if (anEvent.GetControl() == m_aMainMenuButton[MULTIPLAYER])
@@ -944,14 +943,14 @@ void MainMenuGUI::Update()
 				//                m_MenuScreen = PLAYERSSCREEN;
 				//m_MenuScreen = MAINSCREEN;
 				//m_ScreenChange = true;
-				g_GUISound.ButtonPressSound().Play();
-				//                g_GUISound.ExitMenuSound().Play();
+				g_GUISound.ButtonPressSound()->Play();
+				//                g_GUISound.ExitMenuSound()->Play();
 
 				HideAllScreens();
 				m_MenuScreen = MAINSCREEN;
 				m_ScreenChange = true;
 				m_ActivityRestarted = true;
-				g_GUISound.ExitMenuSound().Play();
+				g_GUISound.ExitMenuSound()->Play();
 
 				g_SceneMan.SetSceneToLoad("Editor Scene");
 				MultiplayerGame *pMultiplayerGame = new MultiplayerGame;
@@ -967,7 +966,7 @@ void MainMenuGUI::Update()
                 m_MenuScreen = OPTIONSSCREEN;
                 m_ScreenChange = true;
 
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Editor button pressed
@@ -983,8 +982,8 @@ void MainMenuGUI::Update()
                 m_MenuScreen = EDITORSCREEN;
                 m_ScreenChange = true;
 
-                g_GUISound.ButtonPressSound().Play();
-//                g_GUISound.UserErrorSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
+//                g_GUISound.UserErrorSound()->Play();
             }
 
 			// Editor button pressed
@@ -995,7 +994,7 @@ void MainMenuGUI::Update()
                 m_MenuScreen = MODMANAGERSCREEN;
                 m_ScreenChange = true;
 
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Credits button pressed
@@ -1006,14 +1005,14 @@ void MainMenuGUI::Update()
                 m_MenuScreen = CREDITSSCREEN;
                 m_ScreenChange = true;
 
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Quit button pressed
 			if (anEvent.GetControl() == m_aMainMenuButton[QUIT])
             {
                 QuitLogic();
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Resume button pressed
@@ -1021,43 +1020,31 @@ void MainMenuGUI::Update()
             {
                 m_ActivityResumed = true;
 
-                g_GUISound.ExitMenuSound().Play();
+                g_GUISound.ExitMenuSound()->Play();
             }
 
-			// Fullscreen toggle button pressed
-			if (anEvent.GetControl() == m_aOptionButton[FULLSCREEN])
-            {
-                g_GUISound.ButtonPressSound().Play();
+			// Multiplier toggle button pressed
+			if (anEvent.GetControl() == m_aOptionButton[RESOLUTIONMULTIPLIER]) {
+				g_GUISound.ButtonPressSound()->Play();
 
-                // Was fullscreen, switch to 1x window
-                if (g_FrameMan.IsFullscreen())
-                {
-                    // First set the multiplier back to 1 and then switch to fullscreen so we get the right multiplier
-                    g_FrameMan.SwitchWindowMultiplier(1);
-                    g_FrameMan.ToggleFullscreen();
-                }
-                // Was windowed
-                else
-                {
-                    // Was at 1x, change to 2x, but only if resolution is reasonable
-                    if (g_FrameMan.NxWindowed() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 - 25 && g_FrameMan.GetResY() <= m_MaxResY / 2 - 25)
-                        g_FrameMan.SwitchWindowMultiplier(2);
-                    // Was at 2x, change to fullscreen
-                    else
-                        g_FrameMan.ToggleFullscreen();
-                }
+				if (g_FrameMan.ResolutionMultiplier() > 1) {
+					g_FrameMan.SwitchResolutionMultiplier(1);
+				} else if (g_FrameMan.ResolutionMultiplier() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 && g_FrameMan.GetResY() <= m_MaxResY / 2) {
+					g_FrameMan.SwitchResolutionMultiplier(2);
+				}
+			}
 
-                // Update the label to whatever we ended up with
-                if (g_FrameMan.IsFullscreen())
-                    m_aOptionButton[FULLSCREEN]->SetText("Go 1X Window");
-                else
-                {
-                    if (g_FrameMan.NxWindowed() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 - 25 && g_FrameMan.GetResY() <= m_MaxResY / 2 - 25)
-                        m_aOptionButton[FULLSCREEN]->SetText("Go 2X Window");
-                    else
-                        m_aOptionButton[FULLSCREEN]->SetText("Go Fullscreen");
-                }
-            }
+			// Update the label to whatever we ended up with
+			if (g_FrameMan.ResolutionMultiplier() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 && g_FrameMan.GetResY() <= m_MaxResY / 2) {
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetVisible(true);
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 2X");
+			} else if (g_FrameMan.ResolutionMultiplier() > 1) {
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetVisible(true); 
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 1X");
+			} else {
+				//m_aOptionButton[RESOLUTIONMULTIPLIER]->SetVisible(false);
+				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Unavailable");
+			}
 
 			// Return to main menu button pressed
 			if (anEvent.GetControl() == m_aMainMenuButton[BACKTOMAIN])
@@ -1083,7 +1070,7 @@ void MainMenuGUI::Update()
                 m_MenuScreen = MAINSCREEN;
                 m_ScreenChange = true;
 
-                g_GUISound.BackButtonPressSound().Play();
+                g_GUISound.BackButtonPressSound()->Play();
             }
 
 			// Return to options menu button pressed
@@ -1095,7 +1082,7 @@ void MainMenuGUI::Update()
                 m_MenuScreen = OPTIONSSCREEN;
                 m_ScreenChange = true;
 
-                g_GUISound.BackButtonPressSound().Play();
+                g_GUISound.BackButtonPressSound()->Play();
             }
 
             /////////////////////////////////////////////
@@ -1125,7 +1112,7 @@ void MainMenuGUI::Update()
                 else
                     m_StartPlayers = 0;
 
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
             /////////////////////////////////////////////
@@ -1146,7 +1133,7 @@ void MainMenuGUI::Update()
 
                         UpdateTeamBoxes();
 
-                        g_GUISound.ButtonPressSound().Play();
+                        g_GUISound.ButtonPressSound()->Play();
                     }
                 }
 
@@ -1163,7 +1150,7 @@ void MainMenuGUI::Update()
                         m_ScreenChange = true;
                         m_ActivityRestarted = true;
                         SetupSkirmishActivity();
-                        g_GUISound.ExitMenuSound().Play();
+                        g_GUISound.ExitMenuSound()->Play();
                     }
                     // CPU team present, so ask for the difficulty level of it before starting
                     else
@@ -1172,7 +1159,7 @@ void MainMenuGUI::Update()
                         m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 280);
                         m_MenuScreen = DIFFICULTYSCREEN;
                         m_ScreenChange = true;
-                        g_GUISound.ButtonPressSound().Play();
+                        g_GUISound.ButtonPressSound()->Play();
                     }
                 }
             }
@@ -1207,8 +1194,8 @@ void MainMenuGUI::Update()
 
                 SetupSkirmishActivity();
 
-//                g_GUISound.BackButtonPressSound().Play();
-                g_GUISound.ExitMenuSound().Play();
+//                g_GUISound.BackButtonPressSound()->Play();
+                g_GUISound.ExitMenuSound()->Play();
             }
 
             /////////////////////////////////////////////
@@ -1250,7 +1237,7 @@ void MainMenuGUI::Update()
                         g_UInputMan.GetControlScheme(player)->SetDevice(currentDevice);
                         UpdateDeviceLabels();
 
-                        g_GUISound.ButtonPressSound().Play();
+                        g_GUISound.ButtonPressSound()->Play();
                     }
                 }
 
@@ -1267,15 +1254,7 @@ void MainMenuGUI::Update()
                         m_MenuScreen = CONFIGSCREEN;
                         m_ScreenChange = true;
 
-						// Save joystick deadzones. Dead zone should work independently of the controller setup process
-						// bacuse faulty sticks will ruin setup process
-						float deadzone = g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->GetJoystickDeadzone();
-                        // Clear all the mappings when the user wants to config somehting
-                        g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->Reset();
-						g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->SetJoystickDeadzone(deadzone);
-                        g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->SetDevice(m_ConfiguringDevice);
-
-                        g_GUISound.ButtonPressSound().Play();
+                        g_GUISound.ButtonPressSound()->Play();
                     }
                 }
 
@@ -1294,16 +1273,19 @@ void MainMenuGUI::Update()
                             for (int otherButton = P1CLEAR; otherButton <= P4CLEAR; ++otherButton)
                                 if (otherButton != which)
                                     m_aOptionButton[otherButton]->SetText("Reset");
-                            g_GUISound.ButtonPressSound().Play();
+                            g_GUISound.ButtonPressSound()->Play();
                         }
                         else
                         {
-                            // Save the device type so we can re-set it after resetting - it's really annoying when the device changes
-                            int device = g_UInputMan.GetControlScheme(which - P1CLEAR)->GetDevice();
-                            g_UInputMan.GetControlScheme(which - P1CLEAR)->Reset();
-                            g_UInputMan.GetControlScheme(which - P1CLEAR)->SetDevice(device);
-                            // Set some default mappings so there's something at least
-                            g_UInputMan.GetControlScheme(which - P1CLEAR)->SetPreset(UInputMan::PRESET_NONE);
+                            // Set to a default control preset.
+                            UInputMan::Players inputPlayer = static_cast<UInputMan::Players>(which - P1CLEAR);
+                            UInputMan::InputPreset playerPreset = static_cast<UInputMan::InputPreset>(P1CLEAR - which - 1); // Player 1's default preset is at -1 and so on.
+                            g_UInputMan.GetControlScheme(inputPlayer)->SetPreset(playerPreset);
+                            
+                            // Set to a device that fits this preset.
+                            UInputMan::InputDevice deviceType[4] = { UInputMan::DEVICE_MOUSE_KEYB, UInputMan::DEVICE_KEYB_ONLY, UInputMan::DEVICE_GAMEPAD_1, UInputMan::DEVICE_GAMEPAD_2 };
+                            g_UInputMan.GetControlScheme(inputPlayer)->SetDevice(deviceType[inputPlayer]);
+                            
                             UpdateDeviceLabels();
 
 							// Set the dead zone slider value
@@ -1311,7 +1293,7 @@ void MainMenuGUI::Update()
 
 //                            m_aOptionsLabel[P1DEVICE + (which - P1CLEAR)]->SetText("NEEDS CONFIG!");
 //                            m_aOptionButton[P1CONFIG + (which - P1CLEAR)]->SetText("-> CONFIGURE <-");
-                            g_GUISound.ExitMenuSound().Play();
+                            g_GUISound.ExitMenuSound()->Play();
                         }
                     }
                 }
@@ -1329,7 +1311,7 @@ void MainMenuGUI::Update()
                     m_ConfigureStep++;
                     m_ScreenChange = true;
 
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 }
 
 			    // DPad Gamepad type selected
@@ -1339,7 +1321,7 @@ void MainMenuGUI::Update()
                     m_ConfigureStep++;
                     m_ScreenChange = true;
 
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 }
 
 			    // XBox Gamepad type selected
@@ -1358,7 +1340,7 @@ void MainMenuGUI::Update()
                     m_MenuScreen = OPTIONSSCREEN;
                     m_ScreenChange = true;
 
-                    g_GUISound.ExitMenuSound().Play();
+                    g_GUISound.ExitMenuSound()->Play();
                 }
 
 			    // Skip ahead one config step button pressed
@@ -1368,7 +1350,7 @@ void MainMenuGUI::Update()
                     m_ConfigureStep++;
                     m_ScreenChange = true;
 
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 }
 
 			    // Go back one config step button pressed
@@ -1378,10 +1360,10 @@ void MainMenuGUI::Update()
                     {
                         m_ConfigureStep--;
                         m_ScreenChange = true;
-                        g_GUISound.BackButtonPressSound().Play();
+                        g_GUISound.BackButtonPressSound()->Play();
                     }
                     else
-                        g_GUISound.UserErrorSound().Play();
+                        g_GUISound.UserErrorSound()->Play();
                 }
             }
 
@@ -1406,49 +1388,20 @@ void MainMenuGUI::Update()
 //                set_palette(;
 
                 // Create and start the appropriate editor Activity
-                if (anEvent.GetControl() == m_aEditorButton[SCENEEDITOR])
-                {
-                    g_SceneMan.SetSceneToLoad("Editor Scene");
-                    SceneEditor *pNewEditor = new SceneEditor;
-                    pNewEditor->Create();
-                    pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-                    g_ActivityMan.SetStartActivity(pNewEditor);
-                }
-                else if (anEvent.GetControl() == m_aEditorButton[AREAEDITOR])
-                {
-                    g_SceneMan.SetSceneToLoad("Editor Scene");
-                    AreaEditor *pNewEditor = new AreaEditor;
-                    pNewEditor->Create();
-                    pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-                    g_ActivityMan.SetStartActivity(pNewEditor);
-                }
-                else if (anEvent.GetControl() == m_aEditorButton[ASSEMBLYEDITOR])
-                {
-                    g_SceneMan.SetSceneToLoad("Editor Scene");
-                    AssemblyEditor *pNewEditor = new AssemblyEditor;
-                    pNewEditor->Create();
-                    pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-                    g_ActivityMan.SetStartActivity(pNewEditor);
-                }
-                else if (anEvent.GetControl() == m_aEditorButton[GIBEDITOR])
-                {
-                    g_SceneMan.SetSceneToLoad("Editor Scene");
-                    GibEditor *pNewEditor = new GibEditor;
-                    pNewEditor->Create();
-                    pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-                    g_ActivityMan.SetStartActivity(pNewEditor);
-                }
-                else if (anEvent.GetControl() == m_aEditorButton[ACTOREDITOR])
-                {
-                    g_SceneMan.SetSceneToLoad("Editor Scene");
-                    ActorEditor *pNewEditor = new ActorEditor;
-                    pNewEditor->Create();
-                    pNewEditor->SetEditorMode(EditorActivity::LOADDIALOG);
-                    g_ActivityMan.SetStartActivity(pNewEditor);
-                }
+				if (anEvent.GetControl() == m_aEditorButton[SCENEEDITOR]) {
+					StartSceneEditor();
+				} else if (anEvent.GetControl() == m_aEditorButton[AREAEDITOR]) {
+					StartAreaEditor();
+				} else if (anEvent.GetControl() == m_aEditorButton[ASSEMBLYEDITOR]) {
+					StartAssemblyEditor();
+				} else if (anEvent.GetControl() == m_aEditorButton[GIBEDITOR]) {
+					StartGibEditor();
+				} else if (anEvent.GetControl() == m_aEditorButton[ACTOREDITOR]) {
+					StartActorEditor();
+				}
 
-//                g_GUISound.BackButtonPressSound().Play();
-                g_GUISound.ExitMenuSound().Play();
+//                g_GUISound.BackButtonPressSound()->Play();
+                g_GUISound.ExitMenuSound()->Play();
             }
 
             /////////////////////////////////////////////
@@ -1472,7 +1425,7 @@ void MainMenuGUI::Update()
                     g_SceneMan.SetSceneToLoad("Tutorial Bunker");
                     m_ActivityRestarted = true;
 
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 }
                 // Go to registration dialog button
                 else if (anEvent.GetControl() == m_aMainMenuButton[METACONTINUE])
@@ -1483,7 +1436,7 @@ void MainMenuGUI::Update()
                     HideAllScreens();
                     m_MenuScreen = MAINSCREEN;
                     m_ScreenChange = true;
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 }
             }
 
@@ -1503,7 +1456,7 @@ void MainMenuGUI::Update()
 					HideAllScreens();
 					m_MenuScreen = MAINSCREEN;
 					m_ScreenChange = true;
-					g_GUISound.BackButtonPressSound().Play();
+					g_GUISound.BackButtonPressSound()->Play();
 				}
 
 				// Disable/Enable mod pressed
@@ -1533,7 +1486,7 @@ void MainMenuGUI::Update()
                     HideAllScreens();
                     m_ScreenChange = true;
 
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 }
                 // Cancel quitting
                 else if (anEvent.GetControl() == m_aMainMenuButton[QUITCANCEL])
@@ -1543,7 +1496,7 @@ void MainMenuGUI::Update()
                     m_MenuScreen = MAINSCREEN;
                     m_ScreenChange = true;
 
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 }
             }
         }
@@ -1555,7 +1508,7 @@ void MainMenuGUI::Update()
             if (dynamic_cast<GUIButton *>(anEvent.GetControl()))
             {
                 if (anEvent.GetMsg() == GUIButton::Focused)
-                    g_GUISound.SelectionChangeSound().Play();
+                    g_GUISound.SelectionChangeSound()->Play();
             }
 
 			// Mod list pressed
@@ -1623,19 +1576,10 @@ void MainMenuGUI::Update()
                         int newResY = g_FrameMan.GetResY();
                         sscanf(pResItem->m_Name.c_str(), "%4dx%4d", &newResX, &newResY);
                         // Sanity check the values and then set them as the new resolution to be switched to next time FrameMan is created
-                        /*if (newResX >= 400 && newResX < 3000 && newResY >= 400 && newResY < 3000)*/
-						if (g_FrameMan.IsValidResolution(newResX, newResY))
-                        {
-                            // Force double virtual fullscreen res if the res is too high
-                            if (newResX >= 1280)
-                                g_FrameMan.SetNewNxFullscreen(2);
-                            // Not oversized resolution
-                            else
-                                g_FrameMan.SetNewNxFullscreen(1);
-
-                            g_FrameMan.SetNewResX(newResX /= g_FrameMan.GetNewNxFullscreen());
-                            g_FrameMan.SetNewResY(newResY /= g_FrameMan.GetNewNxFullscreen());
-                        }
+						if (g_FrameMan.IsValidResolution(newResX, newResY)) {
+							g_FrameMan.SetNewResX(newResX / g_FrameMan.ResolutionMultiplier());
+							g_FrameMan.SetNewResY(newResY / g_FrameMan.ResolutionMultiplier());
+						}
                     }
 
                     // Update the resolution restart notice
@@ -1648,7 +1592,7 @@ void MainMenuGUI::Update()
             {
                 // See if we should play test sound after the volume has been set
                 bool playTest = false;
-                if (((double)m_pSoundSlider->GetValue() / 100) != g_AudioMan.GetSoundsVolume() && !g_AudioMan.IsPlaying(&g_GUISound.TestSound()))
+                if (((double)m_pSoundSlider->GetValue() / 100) != g_AudioMan.GetSoundsVolume() && !g_GUISound.TestSound()->IsBeingPlayed())
                     playTest = true;
 
                 g_AudioMan.SetSoundsVolume((double)m_pSoundSlider->GetValue() / 100);
@@ -1656,7 +1600,7 @@ void MainMenuGUI::Update()
 
                 // Play test sound after new volume is set
                 if (playTest)
-                    g_GUISound.TestSound().Play();
+                    g_GUISound.TestSound()->Play();
 			}
 
 			// Music Volume slider changed
@@ -1885,7 +1829,7 @@ void MainMenuGUI::SetupSkirmishActivity()
             g_SceneMan.SetSceneToLoad(m_pSceneSelector->GetItem(m_pSceneSelector->GetSelectedIndex())->m_Name);
 // TODO: Let player choose the GABaseDefense activity instance!
             GABaseDefense *pNewGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Skirmish Defense")->Clone());
-            AAssert(pNewGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
+            RTEAssert(pNewGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
             pNewGame->SetPlayerCount(m_StartPlayers);
             pNewGame->SetTeamCount(m_StartTeams);
 
@@ -2058,125 +2002,81 @@ void MainMenuGUI::UpdateTeamBoxes()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the contents of the screen resolution combo box
 
-void MainMenuGUI::UpdateResolutionCombo()
-{
+void MainMenuGUI::UpdateResolutionCombo() {
     // Refill possible resolutions
     m_pResolutionCombo->SetText("");
     m_pResolutionCombo->ClearList();
 	
-    // Only refill possible resolutions if empty
-    if (m_pResolutionCombo->GetCount() <= 0)
-    {
-#if defined(__APPLE__)
-		GFX_MODE_LIST* pList = get_gfx_mode_list(g_FrameMan.IsFullscreen() ? GFX_QUARTZ_FULLSCREEN : GFX_QUARTZ_WINDOW);
-#elif defined(__unix__)
-		GFX_MODE_LIST* pList = get_gfx_mode_list(g_FrameMan.IsFullscreen() ? GFX_XWINDOWS_FULLSCREEN : GFX_XWINDOWS);
-#else
-        GFX_MODE_LIST *pList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
-#endif // defined(__APPLE__)
+    if (m_pResolutionCombo->GetCount() <= 0) {
+		// Get a list of modes from the fullscreen driver even though we're not using it. This is so we don't need to populate the list manually and has all the reasonable resolutions.
+        GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
 
         int width = 0;
         int height = 0;
-        char resString[256] = "";
+		char resString[256] = "";
         // Index of found useful resolution (32bit)
         int foundIndex = 0;
-        // The saved index of the entry that has the current resolution setting
         int currentResIndex = -1;
 
         // Process and annotate the list
-        for (int i = 0; pList && i < pList->num_modes; ++i)
-        {
+        for (int i = 0; resList && i < resList->num_modes; ++i) {
             // Only list 32 bpp modes
-            if (pList->mode[i].bpp == 32)
-            {
-                width = pList->mode[i].width;
-                height = pList->mode[i].height;
+            if (resList->mode[i].bpp == 32) {
+                width = resList->mode[i].width;
+                height = resList->mode[i].height;
 
 				// Resolutions must be multiples of 4 or we'll get 'Overlays not supported' during GFX mode init
-				if (g_FrameMan.IsValidResolution(width, height) && width % 4 == 0)
-				{
+				if (g_FrameMan.IsValidResolution(width, height) && width % 4 == 0) {
 					// Fix wacky resolutions that are taller than wide
-					if (height > width)
-					{
-						height = pList->mode[i].width;
-						width = pList->mode[i].height;
+					if (height > width) {
+						height = resList->mode[i].width;
+						width = resList->mode[i].height;
 					}
-
-					// Try to figure the max available resotion
-					if (width > m_MaxResX)
-					{
+					// Try to figure the max available resolution
+					if (width > m_MaxResX) {
 						m_MaxResX = width;
 						m_MaxResY = height;
 					}
-
-					// Construct and add the resolution string to the combobox
 					sprintf_s(resString, sizeof(resString), "%ix%i", width, height);
 
 					// Add useful notation to the standardized resolutions
-					if (width == 320 && height == 200)
-						strcat(resString, " CGA");
-					if (width == 320 && height == 240)
-						strcat(resString, " QVGA");
-					if (width == 640 && height == 480)
-						strcat(resString, " VGA");
-					if (width == 720 && height == 480)
-						strcat(resString, " NTSC");
-					if (width == 768 && height == 576)
-						strcat(resString, " PAL");
-					if ((width == 800 || height == 854) && height == 480)
-						strcat(resString, " WVGA");
-					if (width == 800 && height == 600)
-						strcat(resString, " SVGA");
-					if (width == 1024 && height == 600)
-						strcat(resString, " WSVGA");
-					if (width == 1024 && height == 768)
-						strcat(resString, " XGA");
-					if (width == 1280 && height == 720)
-						strcat(resString, " HD720");
-					if (width == 1280 && (height == 768 || height == 800))
-						strcat(resString, " WXGA");
-	// These below are forced to be done in 2X pixels fullscreen
-					if (width == 1280 && height == 1024)
-						strcat(resString, " SXGA");
-					if (width == 1400 && height == 1050)
-						strcat(resString, " SXGA+");
-					if (width == 1600 && height == 1200)
-						strcat(resString, " UGA");
-					if (width == 1680 && height == 1050)
-						strcat(resString, " WSXGA+");
-					if (width == 1920 && height == 1080)
-						strcat(resString, " HD1080");
-					if (width == 1920 && height == 1200)
-						strcat(resString, " WUXGA");
-					if (width == 2048 && height == 1080)
-						strcat(resString, " 2K");
+					if (width == 800 && height == 600) { strcat_s(resString, sizeof(resString), " SVGA"); }
+					if (width == 1024 && height == 600) { strcat_s(resString, sizeof(resString), " WSVGA"); }
+					if (width == 1024 && height == 768) { strcat_s(resString, sizeof(resString), " XGA"); }
+					if (width == 1280 && height == 720) { strcat_s(resString, sizeof(resString), " HD"); }
+					if (width == 1280 && (height == 768 || height == 800)) { strcat_s(resString, sizeof(resString), " WXGA"); }
+					if (width == 1280 && height == 1024) { strcat_s(resString, sizeof(resString), " SXGA"); }
+					if (width == 1400 && height == 1050) { strcat_s(resString, sizeof(resString), " SXGA+"); }
+					if (width == 1600 && height == 900) { strcat_s(resString, sizeof(resString), " HD+"); }
+					if (width == 1600 && height == 1200) { strcat_s(resString, sizeof(resString), " UGA"); }
+					if (width == 1680 && height == 1050) { strcat_s(resString, sizeof(resString), " WSXGA+"); }
+					if (width == 1920 && height == 1080) { strcat_s(resString, sizeof(resString), " FHD"); }
+					if (width == 1920 && height == 1200) { strcat_s(resString, sizeof(resString), " WUXGA"); }
+					if (width == 2048 && height == 1080) { strcat_s(resString, sizeof(resString), " DCI 2K"); }
+					if (width == 2560 && height == 1440) { strcat_s(resString, sizeof(resString), " QHD"); }
+					if (width == 3200 && height == 1800) { strcat_s(resString, sizeof(resString), " QHD+"); }
+					if (width == 3840 && height == 2160) { strcat_s(resString, sizeof(resString), " 4K UHD"); }
+					if (width == 4096 && height == 2160) { strcat_s(resString, sizeof(resString), " DCI 4K"); }
 
 					m_pResolutionCombo->AddItem(resString);
 
 					// If this is what we're currently set to have at next start, select it afterward
-					if ((g_FrameMan.GetNewResX() * g_FrameMan.GetNewNxFullscreen()) == width && (g_FrameMan.GetNewResY() * g_FrameMan.GetNewNxFullscreen()) == height)
+					if ((g_FrameMan.GetNewResX() * g_FrameMan.ResolutionMultiplier()) == width && (g_FrameMan.GetNewResY() * g_FrameMan.ResolutionMultiplier()) == height) {
 						currentResIndex = foundIndex;
-
+					}
 					// Only increment this when we find a usable 32bit resolution
 					foundIndex++;
 				}
             }
         }
-
-        // Get rid of the mode list, we're done with it
-		if (pList)
-		{
-			destroy_gfx_mode_list(pList);
-		}
+		if (resList) { destroy_gfx_mode_list(resList); }
 		
         // If none of the listed matched our resolution set for next start, add a 'custom' one to display as the current res
-        if (currentResIndex < 0)
-        {
-            sprintf_s(resString, sizeof(resString), "%ix%i Custom", g_FrameMan.GetNewResX() * g_FrameMan.GetNewNxFullscreen(), g_FrameMan.GetNewResY() * g_FrameMan.GetNewNxFullscreen());
-            m_pResolutionCombo->AddItem(resString);
-            currentResIndex = m_pResolutionCombo->GetCount() - 1;
-        }
-
+		if (currentResIndex < 0) {
+			sprintf_s(resString, sizeof(resString), "%ix%i Custom", g_FrameMan.GetNewResX() * g_FrameMan.ResolutionMultiplier(), g_FrameMan.GetNewResY() * g_FrameMan.ResolutionMultiplier());
+			m_pResolutionCombo->AddItem(resString);
+			currentResIndex = m_pResolutionCombo->GetCount() - 1;
+		}
         // Show the current resolution item to be the selected one
         m_pResolutionCombo->SetSelectedIndex(currentResIndex);
     }
@@ -3126,7 +3026,7 @@ void MainMenuGUI::UpdateConfigScreen()
 	g_UInputMan.SetInputClass(NULL);
 	
     if (m_ScreenChange)
-        g_GUISound.ExitMenuSound().Play();
+        g_GUISound.ExitMenuSound()->Play();
 }
 
 
@@ -3231,3 +3131,31 @@ void MainMenuGUI::ToggleScript()
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartActorEditor() { StartEditorActivity(new ActorEditor); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartGibEditor() { StartEditorActivity(new GibEditor); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartSceneEditor() { StartEditorActivity(new SceneEditor); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartAreaEditor() { StartEditorActivity(new AreaEditor); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartAssemblyEditor() { StartEditorActivity(new AssemblyEditor); }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MainMenuGUI::StartEditorActivity(EditorActivity *editorActivityToStart) {
+    g_SceneMan.SetSceneToLoad("Editor Scene");
+    editorActivityToStart->Create();
+    editorActivityToStart->SetEditorMode(EditorActivity::LOADDIALOG);
+    g_ActivityMan.SetStartActivity(editorActivityToStart);
+}

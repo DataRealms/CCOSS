@@ -15,14 +15,14 @@
 #include "Magazine.h"
 #include "Atom.h"
 #include "RTEManagers.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "ThrownDevice.h"
 #include "MOPixel.h"
 #include "Actor.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(HDFirearm, HeldDevice, 0)
+ConcreteClassInfo(HDFirearm, HeldDevice, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -177,9 +177,10 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader)
     }
     else if (propName == "FireSound")
         reader >> m_FireSound;
-    else if (propName == "ActiveSound")
+    else if (propName == "ActiveSound") {
         reader >> m_ActiveSound;
-    else if (propName == "DeactivationSound")
+        m_ActiveSound.SetAffectedByGlobalPitch(false); //Active sound (i.e. weapon spinup) modifies its pitch, so it has to account for global pitch on its own.
+    } else if (propName == "DeactivationSound")
         reader >> m_DeactivationSound;
     else if (propName == "EmptySound")
         reader >> m_EmptySound;
@@ -563,7 +564,7 @@ void HDFirearm::Activate()
 
     // Play the pre-fire sound
     if (!IsReloading() && !m_ActiveSound.IsBeingPlayed())
-        m_ActiveSound.Play();
+        m_ActiveSound.Play(this->m_Pos);
 }
 
 
@@ -584,7 +585,7 @@ void HDFirearm::Deactivate()
 
     // Play the post-fire sound
     if (!m_DeactivationSound.IsBeingPlayed())
-        m_DeactivationSound.Play();
+        m_DeactivationSound.Play(m_Pos);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -634,7 +635,7 @@ void HDFirearm::Reload()
         if (m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())
             m_FireSound.Stop();
 
-        m_ReloadStartSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_ReloadStartSound.Play(m_Pos);
         m_ReloadTmr.Reset();
         m_Reloading = true;
     }
@@ -646,7 +647,7 @@ void HDFirearm::Reload()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Tells whether the device is curtrently in need of being reloaded.
 
-bool HDFirearm::NeedsReloading()
+bool HDFirearm::NeedsReloading() const
 {
     if (!m_Reloading)
     {
@@ -692,6 +693,9 @@ bool HDFirearm::IsFull()
 void HDFirearm::Update()
 {
     HeldDevice::Update();
+
+    if (m_ActiveSound.IsBeingPlayed()) { m_ActiveSound.SetPosition(m_Pos); }
+    if (m_DeactivationSound.IsBeingPlayed()) { m_DeactivationSound.SetPosition(m_Pos); }
 
     /////////////////////////////////
     // Activation/firing logic
@@ -867,7 +871,7 @@ void HDFirearm::Update()
                 // Sound the extra Round firing sound, if any is defined
                 if (!playedRoundFireSound && pRound->HasFireSound())
                 {
-                    pRound->GetFireSound()->Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                    pRound->GetFireSound()->Play(m_Pos);
                     playedRoundFireSound = true;
                 }
 
@@ -895,7 +899,7 @@ void HDFirearm::Update()
             if (m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())
                 m_FireSound.Stop();
 
-            m_ReloadStartSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+            m_ReloadStartSound.Play(m_Pos);
 
             m_ReloadTmr.Reset();
         }
@@ -905,7 +909,7 @@ void HDFirearm::Update()
     else if (((m_pMagazine && m_pMagazine->IsEmpty()) || !m_pMagazine) && m_Activated && !m_AlreadyClicked )
     {
         // Play empty pin click sound.
-        m_EmptySound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+        m_EmptySound.Play(m_Pos);
         // Indicate that we have clicked once during the current activation. 
         m_AlreadyClicked = true;
 
@@ -920,7 +924,7 @@ void HDFirearm::Update()
         if (m_pMagazine)
         {
             m_pMagazine->Attach(this);
-            m_ReloadEndSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+            m_ReloadEndSound.Play(m_Pos);
 
             m_ActivationTmr.Reset();
             m_ActivationTmr.Reset();
@@ -986,7 +990,7 @@ void HDFirearm::Update()
         // Play firing sound
         // Only start playing if it's not a looping fire sound that is already playing, and if there's a mag
         if (!(m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed()) && m_pMagazine)
-            m_FireSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+            m_FireSound.Play(m_Pos);
     }
     else {
         m_Recoiled = false;
@@ -1007,13 +1011,13 @@ void HDFirearm::Update()
                 if (m_Activated && !m_Reloading && m_ActivationTmr.GetElapsedSimTimeMS() < m_ActivationDelay)
                 {
                     animDuration = (int)LERP(0, m_ActivationDelay, (float)(m_SpriteAnimDuration * 10), (float)m_SpriteAnimDuration, m_ActivationTmr.GetElapsedSimTimeMS());
-                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTmr.GetElapsedSimTimeMS()));
+                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTmr.GetElapsedSimTimeMS()) * g_AudioMan.GetGlobalPitch());
                 }
                 // Spin down
                 if ((!m_Activated || m_Reloading) && m_LastFireTmr.GetElapsedSimTimeMS() < m_DeactivationDelay)
                 {
                     animDuration = (int)LERP(0, m_DeactivationDelay, (float)m_SpriteAnimDuration, (float)(m_SpriteAnimDuration * 10), m_LastFireTmr.GetElapsedSimTimeMS());
-                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_DeactivationDelay, 1.0, 0, m_LastFireTmr.GetElapsedSimTimeMS()));
+                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_DeactivationDelay, 1.0, 0, m_LastFireTmr.GetElapsedSimTimeMS()) * g_AudioMan.GetGlobalPitch());
                 }
 
                 if (animDuration > 0 && !(m_Reloading && m_LastFireTmr.GetElapsedSimTimeMS() >= m_DeactivationDelay))
@@ -1131,7 +1135,7 @@ void HDFirearm::Draw(BITMAP *pTargetBitmap,
     muzzlePos = m_Pos + RotateOffset(muzzlePos);
     // Set the screen flash effect to draw at the final post processing stage
     if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical && !g_SceneMan.ObscuredPoint(muzzlePos))
-        g_SceneMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55 + 200 * PosRand(), m_pFlash->GetEffectRotAngle());
+		g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55 + 200 * PosRand(), m_pFlash->GetEffectRotAngle());
 }
 
 
@@ -1184,10 +1188,10 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
         int glow = 155 + 100 * PosRand();
-        g_SceneMan.RegisterGlowDotEffect(aimPoint1, YellowDot, glow);
-        g_SceneMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
-        g_SceneMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
-        g_SceneMan.RegisterGlowDotEffect(aimPoint4, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint1, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint4, YellowDot, glow);
 
         // Make into target frame coordinates
         aimPoint1 -= targetPos;
@@ -1223,8 +1227,8 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
         int glow = 55 + 100 * PosRand();
-        g_SceneMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
-        g_SceneMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
 
         // Make into target frame coordinates
         aimPoint2 -= targetPos;

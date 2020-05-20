@@ -17,6 +17,7 @@
 #include "ActivityMan.h"
 #include "UInputMan.h"
 #include "ConsoleMan.h"
+#include "PrimitiveMan.h"
 #include "SettingsMan.h"
 #include "Scene.h"
 #include "SLTerrain.h"
@@ -78,7 +79,6 @@ void SceneMan::Clear()
     m_pMOColorLayer = 0;
     m_pMOIDLayer = 0;
     m_MOIDDrawings.clear();
-    m_PostSceneEffects.clear();
     m_pDebugLayer = 0;
     m_LastRayHitPos.Reset();
 
@@ -91,7 +91,7 @@ void SceneMan::Clear()
 
 	m_MaterialCopiesVector.clear();
 
-    for (int i = 0; i < MAXSCREENCOUNT; ++i) {
+    for (int i = 0; i < c_MaxScreenCount; ++i) {
         m_Offset[i].Reset();
         m_DeltaOffset[i].Reset();
         m_ScrollTarget[i].Reset();
@@ -184,7 +184,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
     // Clear out all the MO's in the scene
     g_MovableMan.PurgeAllMOs();
     // Clear the post effects
-    ClearPostEffects();
+    g_PostProcessMan.ClearScenePostEffects();
 
 	g_NetworkServer.LockScene(true);
 
@@ -215,14 +215,14 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
 
     // Get the unseen reveal sound
     if (!m_pUnseenRevealSound)
-        m_pUnseenRevealSound = dynamic_cast<Sound *>(g_PresetMan.GetEntityPreset("Sound", "Unseen Reveal Blip")->Clone());
+        m_pUnseenRevealSound = dynamic_cast<SoundContainer *>(g_PresetMan.GetEntityPreset("SoundContainer", "Unseen Reveal Blip")->Clone());
 
 //    m_pCurrentScene->GetTerrain()->CleanAir();
 
     // Re-create the MoveableObject:s color SceneLayer
     delete m_pMOColorLayer;
     BITMAP *pBitmap = create_bitmap_ex(8, GetSceneWidth(), GetSceneHeight());
-    clear_to_color(pBitmap, g_KeyColor);
+    clear_to_color(pBitmap, g_MaskColor);
     m_pMOColorLayer = new SceneLayer();
     m_pMOColorLayer->Create(pBitmap, true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
@@ -239,7 +239,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
     // Create the Debug SceneLayer
     delete m_pDebugLayer;
     pBitmap = create_bitmap_ex(8, GetSceneWidth(), GetSceneHeight());
-    clear_to_color(pBitmap, g_KeyColor);
+    clear_to_color(pBitmap, g_MaskColor);
     m_pDebugLayer = new SceneLayer();
     m_pDebugLayer->Create(pBitmap, true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
@@ -376,7 +376,7 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
             else if (tryId == pNewMat->id - 1)
             {
 // TODO: find the closest matching mateiral and map to it?
-                DDTAbort("Tried to load material \"" + pNewMat->GetPresetName() + "\" but the material palette (256 max) is full! Try consolidating or removing some redundant materials, or removing some entire data modules.");
+                RTEAbort("Tried to load material \"" + pNewMat->GetPresetName() + "\" but the material palette (256 max) is full! Try consolidating or removing some redundant materials, or removing some entire data modules.");
                 break;
             }
         }
@@ -406,19 +406,6 @@ int SceneMan::Save(Writer &writer) const
         writer.NewProperty("AddMaterial");
         writer << *(m_apMatPalette[i]);
     }
-
-// TODO: this")
-
-/* Not sure how to deal with this yet
-    writer.NewProperty("ResolutionX");
-    writer << m_ResX;
-    writer.NewProperty("ResolutionY");
-    writer << m_ResY;
-    writer.NewProperty("ColorDepth");
-    writer << m_BPP;
-    writer.NewProperty("PaletteFile");
-    writer << m_PaletteFile;
-*/
 
     return 0;
 }
@@ -454,8 +441,8 @@ void SceneMan::Destroy()
 
 Vector SceneMan::GetSceneDim() const
 {
-    DAssert(m_pCurrentScene && m_pCurrentScene->GetTerrain() && m_pCurrentScene->GetTerrain()->GetBitmap(), "Trying to get terrain info before there is a scene or terrain!");
     if (m_pCurrentScene)
+        RTEAssert(m_pCurrentScene->GetTerrain() && m_pCurrentScene->GetTerrain()->GetBitmap(), "Trying to get terrain info before there is a scene or terrain!");
         return m_pCurrentScene->GetDimensions();
     return Vector();
 }
@@ -468,7 +455,7 @@ Vector SceneMan::GetSceneDim() const
 
 int SceneMan::GetSceneWidth() const
 {
-//    DAssert(m_pCurrentScene, "Trying to get terrain info before there is a scene or terrain!");
+//    RTEAssert(m_pCurrentScene, "Trying to get terrain info before there is a scene or terrain!");
     if (m_pCurrentScene)
         return m_pCurrentScene->GetWidth();
     return 0;
@@ -482,7 +469,7 @@ int SceneMan::GetSceneWidth() const
 
 int SceneMan::GetSceneHeight() const
 {
-//    DAssert(m_pCurrentScene, "Trying to get terrain info before there is a scene or terrain!");
+//    RTEAssert(m_pCurrentScene, "Trying to get terrain info before there is a scene or terrain!");
     if (m_pCurrentScene)
         return m_pCurrentScene->GetHeight();
     return 0;
@@ -522,7 +509,7 @@ bool SceneMan::SceneWrapsY() const
 
 SLTerrain * SceneMan::GetTerrain()
 {
-//    DAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
+//    RTEAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
     if (m_pCurrentScene)
         return m_pCurrentScene->GetTerrain();
 
@@ -578,7 +565,7 @@ bool SceneMan::MOIDClearCheck()
             {
                 g_FrameMan.SaveBitmapToBMP(pMOIDMap, "MOIDCheck");
                 g_FrameMan.SaveBitmapToBMP(m_pMOColorLayer->GetBitmap(), "MOIDCheck");
-                DDTAbort("Bad MOID of MO detected: " + g_MovableMan.GetMOFromID(badMOID)->GetPresetName());
+                RTEAbort("Bad MOID of MO detected: " + g_MovableMan.GetMOFromID(badMOID)->GetPresetName());
                 return false;
             }
         }
@@ -595,7 +582,7 @@ bool SceneMan::MOIDClearCheck()
 
 unsigned char SceneMan::GetTerrMatter(int pixelX, int pixelY)
 {
-    DAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
+    RTEAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
 
     WrapPosition(pixelX, pixelY);
 
@@ -660,7 +647,7 @@ Material const * SceneMan::GetMaterial(const std::string &matName)
 
 Vector SceneMan::GetGlobalAcc() const
 {
-    DAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
+    RTEAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
     return m_pCurrentScene->GetGlobalAcc();
 }
 
@@ -672,7 +659,7 @@ Vector SceneMan::GetGlobalAcc() const
 
 void SceneMan::SetOffset(const long offsetX, const long offsetY, int screen)
 {
-    if (screen >= MAXSCREENCOUNT)
+    if (screen >= c_MaxScreenCount)
         return;
 
     m_Offset[screen].m_X = offsetX;
@@ -691,7 +678,7 @@ void SceneMan::SetOffset(const long offsetX, const long offsetY, int screen)
 
 void SceneMan::SetScroll(const Vector &center, int screen)
 {
-    if (screen >= MAXSCREENCOUNT)
+    if (screen >= c_MaxScreenCount)
         return;
 
 	if (g_FrameMan.IsInMultiplayerMode())
@@ -796,11 +783,11 @@ float SceneMan::TargetDistanceScalar(Vector point)
 
 void SceneMan::CheckOffset(int screen)
 {
-    DAssert(m_pCurrentScene, "Trying to check offset before there is a scene or terrain!");
+    RTEAssert(m_pCurrentScene, "Trying to check offset before there is a scene or terrain!");
 
     // Handy
     SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
-    DAssert(pTerrain, "Trying to get terrain matter before there is a scene or terrain!");
+    RTEAssert(pTerrain, "Trying to get terrain matter before there is a scene or terrain!");
 
     if (!pTerrain->WrapsX() && m_Offset[screen].m_X < 0)
         m_Offset[screen].m_X = 0;
@@ -844,7 +831,7 @@ void SceneMan::CheckOffset(int screen)
 
 void SceneMan::LockScene()
 {
-//    AAssert(!m_pCurrentScene->IsLocked(), "Hey, locking already locked scene!");
+//    RTEAssert(!m_pCurrentScene->IsLocked(), "Hey, locking already locked scene!");
     if (!m_pCurrentScene->IsLocked())
     {
         m_pCurrentScene->Lock();
@@ -864,7 +851,7 @@ void SceneMan::LockScene()
 
 void SceneMan::UnlockScene()
 {
-//    AAssert(m_pCurrentScene->IsLocked(), "Hey, unlocking already unlocked scene!");
+//    RTEAssert(m_pCurrentScene->IsLocked(), "Hey, unlocking already unlocked scene!");
     if (m_pCurrentScene->IsLocked())
     {
         m_pCurrentScene->Unlock();
@@ -881,7 +868,7 @@ void SceneMan::UnlockScene()
 
 bool SceneMan::SceneIsLocked() const
 {
-    DAssert(m_pCurrentScene, "Trying to check offset before there is a scene or terrain!");
+    RTEAssert(m_pCurrentScene, "Trying to check offset before there is a scene or terrain!");
     return m_pCurrentScene->IsLocked();
 }
 
@@ -974,7 +961,7 @@ bool SceneMan::WillPenetrate(const int posX,
                              const int posY,
                              const Vector &impulse)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
     if (!m_pCurrentScene->GetTerrain()->IsWithinBounds(posX, posY))
         return false;
@@ -1060,7 +1047,7 @@ int SceneMan::RemoveOrphans(int posX, int posY,
             spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, posY));
 
         // No point generating a key-colored MOPixel
-        if (spawnColor.GetIndex() != g_KeyColor)
+        if (spawnColor.GetIndex() != g_MaskColor)
         {
 			// TEST COLOR
 			// spawnColor = 5;
@@ -1080,8 +1067,8 @@ int SceneMan::RemoveOrphans(int posX, int posY,
             g_MovableMan.AddParticle(pixelMO);
             pixelMO = 0;
         }
-        m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_KeyColor);
-		RegisterTerrainChange(posX, posY, 1, 1, g_KeyColor, false);
+        m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_MaskColor);
+		RegisterTerrainChange(posX, posY, 1, 1, g_MaskColor, false);
         m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, g_MaterialAir);
 	}
 
@@ -1224,7 +1211,7 @@ bool SceneMan::TryPenetrate(const int posX,
 					        const int removeOrphansMaxArea,
 					        const float removeOrphansRate)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
     if (!m_pCurrentScene->GetTerrain()->IsWithinBounds(posX, posY))
         return false;
@@ -1232,7 +1219,7 @@ bool SceneMan::TryPenetrate(const int posX,
     unsigned char materialID = _getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
     if (materialID == g_MaterialAir)
     {
-//        DDTAbort("Why are we penetrating air??");
+//        RTEAbort("Why are we penetrating air??");
         return true;
     }
     Material const * sceneMat = GetMaterialFromID(materialID);
@@ -1255,7 +1242,7 @@ bool SceneMan::TryPenetrate(const int posX,
                 spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, posY));
 
             // No point generating a key-colored MOPixel
-            if (spawnColor.GetIndex() != g_KeyColor)
+            if (spawnColor.GetIndex() != g_MaskColor)
             {
                 // Get the new pixel from the pre-allocated pool, should be faster than dynamic allocation
                 // Density is used as the mass for the new MOPixel
@@ -1284,16 +1271,16 @@ bool SceneMan::TryPenetrate(const int posX,
                 g_MovableMan.AddParticle(pixelMO);
                 pixelMO = 0;
             }
-            m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_KeyColor);
-			RegisterTerrainChange(posX, posY, 1, 1, g_KeyColor, false);
+            m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_MaskColor);
+			RegisterTerrainChange(posX, posY, 1, 1, g_MaskColor, false);
 
             m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, g_MaterialAir);
         }
 // TODO: Improve / tweak randomized pushing away of terrain")
         else if (PosRand() <= airRatio)
         {
-            m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_KeyColor);
-			RegisterTerrainChange(posX, posY, 1, 1, g_KeyColor, false);
+            m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_MaskColor);
+			RegisterTerrainChange(posX, posY, 1, 1, g_MaskColor, false);
 
 			m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, g_MaterialAir);
         }
@@ -1303,7 +1290,7 @@ bool SceneMan::TryPenetrate(const int posX,
         retardation = -(sceneMat->strength / impMag);
 
         // If this is a scrap pixel, or there is no background pixel 'supporting' the knocked-loose pixel, make the column above also turn into particles
-        if (sceneMat->isScrap || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_KeyColor)
+        if (sceneMat->isScrap || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)
         {
             // Get quicker direct access to bitmaps
             BITMAP *pFGColor = m_pCurrentScene->GetTerrain()->GetFGColorBitmap();
@@ -1325,7 +1312,7 @@ bool SceneMan::TryPenetrate(const int posX,
                     sceneMat = GetMaterialFromID(testMaterialID);
 
                     // No support in the background layer, or is scrap material, so make particle of some of them
-                    if (sceneMat->isScrap || _getpixel(pBGColor, posX, testY) == g_KeyColor)
+                    if (sceneMat->isScrap || _getpixel(pBGColor, posX, testY) == g_MaskColor)
                     {
                         //  Only generate  particles of some of 'em
                         if (PosRand() > 0.75)
@@ -1338,7 +1325,7 @@ bool SceneMan::TryPenetrate(const int posX,
                                 spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, testY));
 
                             // No point generating a key-colored MOPixel
-                            if (spawnColor.GetIndex() != g_KeyColor)
+                            if (spawnColor.GetIndex() != g_MaskColor)
                             {
                                 // Figure out the randomized velocity the spray should have upward
                                 sprayVel.SetXY(sprayMag * NormalRand() * 0.5, (-sprayMag * 0.5) + (-sprayMag * 0.5 * PosRand()));
@@ -1358,8 +1345,8 @@ bool SceneMan::TryPenetrate(const int posX,
 						}
 
                         // Clear the terrain pixel now when the particle has been generated from it
-						RegisterTerrainChange(posX, testY, 1, 1, g_KeyColor, false);
-                        _putpixel(pFGColor, posX, testY, g_KeyColor);
+						RegisterTerrainChange(posX, testY, 1, 1, g_MaskColor, false);
+                        _putpixel(pFGColor, posX, testY, g_MaskColor);
                         _putpixel(pMaterial, posX, testY, g_MaterialAir);
                     }
                     // There is support, so stop checking
@@ -1392,7 +1379,7 @@ bool SceneMan::TryPenetrate(const int posX,
 
 void SceneMan::MakeAllUnseen(Vector pixelSize, const int team)
 {
-    AAssert(m_pCurrentScene, "Messing with scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Messing with scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return;
 
@@ -1438,7 +1425,7 @@ bool SceneMan::LoadUnseenLayer(std::string bitmapPath, int team)
 
 bool SceneMan::AnythingUnseen(const int team)
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 
     return m_pCurrentScene->GetUnseenLayer(team) != 0;
 // TODO: Actually check all pixels on the map too?
@@ -1453,7 +1440,7 @@ bool SceneMan::AnythingUnseen(const int team)
 
 Vector SceneMan::GetUnseenResolution(const int team) const
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return Vector(1, 1);
 
@@ -1472,7 +1459,7 @@ Vector SceneMan::GetUnseenResolution(const int team) const
 
 bool SceneMan::IsUnseen(const int posX, const int posY, const int team)
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return false;
 
@@ -1483,7 +1470,7 @@ bool SceneMan::IsUnseen(const int posX, const int posY, const int team)
         Vector scale = pUnseenLayer->GetScaleInverse();
         int scaledX = posX * scale.m_X;
         int scaledY = posY * scale.m_Y;
-        return getpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY) != g_KeyColor;
+        return getpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY) != g_MaskColor;
     }
 
     return false;
@@ -1497,7 +1484,7 @@ bool SceneMan::IsUnseen(const int posX, const int posY, const int team)
 
 bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return false;
 
@@ -1511,15 +1498,15 @@ bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
 
         // Make sure we're actually revealing an unseen pixel that is ON the bitmap!
         int pixel = getpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY);
-        if (pixel != g_KeyColor && pixel != -1)
+        if (pixel != g_MaskColor && pixel != -1)
         {
             // Add the pixel to the list of now seen pixels so it can be visually flashed
             m_pCurrentScene->GetSeenPixels(team).push_back(Vector(scaledX, scaledY));
             // Clear to key color that pixel on the map so it won't be detected as unseen again
-            putpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY, g_KeyColor);
+            putpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY, g_MaskColor);
             // Play the reveal sound, if there's not too many already revealed this frame
             if (g_SettingsMan.BlipOnRevealUnseen() && m_pUnseenRevealSound && m_pCurrentScene->GetSeenPixels(team).size() < 5)
-                m_pUnseenRevealSound->Play(g_SceneMan.TargetDistanceScalar(Vector(posX, posY)));
+                m_pUnseenRevealSound->Play(Vector(posX, posY));
             // Show that we actually cleared an unseen pixel
             return true;
         }
@@ -1536,7 +1523,7 @@ bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
 
 bool SceneMan::RestoreUnseen(const int posX, const int posY, const int team)
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return false;
 
@@ -1575,7 +1562,7 @@ bool SceneMan::RestoreUnseen(const int posX, const int posY, const int team)
 
 void SceneMan::RevealUnseenBox(const int posX, const int posY, const int width, const int height, const int team)
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return;
 
@@ -1590,7 +1577,7 @@ void SceneMan::RevealUnseenBox(const int posX, const int posY, const int width, 
         int scaledH = height * scale.m_Y;
 
         // Fill the box
-        rectfill(pUnseenLayer->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_KeyColor);
+        rectfill(pUnseenLayer->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_MaskColor);
     }
 }
 
@@ -1602,7 +1589,7 @@ void SceneMan::RevealUnseenBox(const int posX, const int posY, const int width, 
 
 void SceneMan::RestoreUnseenBox(const int posX, const int posY, const int width, const int height, const int team)
 {
-    AAssert(m_pCurrentScene, "Checking scene before the scene exists!");
+    RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
 	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
 		return;
 
@@ -3010,7 +2997,7 @@ bool SceneMan::IsWithinBounds(const int pixelX, const int pixelY, const int marg
 
 bool SceneMan::ForceBounds(int &posX, int &posY)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
     return m_pCurrentScene->GetTerrain()->ForceBounds(posX, posY);
 }
 
@@ -3023,7 +3010,7 @@ bool SceneMan::ForceBounds(int &posX, int &posY)
 
 bool SceneMan::ForceBounds(Vector &pos)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
     int posX = floorf(pos.m_X);
     int posY = floorf(pos.m_Y);
@@ -3045,7 +3032,7 @@ bool SceneMan::ForceBounds(Vector &pos)
 
 bool SceneMan::WrapPosition(int &posX, int &posY)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
     return m_pCurrentScene->GetTerrain()->WrapPosition(posX, posY);
 }
 
@@ -3058,7 +3045,7 @@ bool SceneMan::WrapPosition(int &posX, int &posY)
 
 bool SceneMan::WrapPosition(Vector &pos)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
     int posX = floorf(pos.m_X);
     int posY = floorf(pos.m_Y);
@@ -3383,179 +3370,6 @@ int SceneMan::WrapBox(const Box &wrapBox, list<Box> &outputList)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterPostEffect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers a post effect to be added at the very last stage of 32bpp
-//                  rendering by the FrameMan.
-
-void SceneMan::RegisterPostEffect(const Vector &effectPos, BITMAP *pEffect, size_t hash, int strength, float angle)
-{
-    // These effects get applied when there's a drawn frame that followed one or more sim updates
-    // They are not only registered on drawn sim updates; flashes and stuff could be missed otherwise if they occur on undrawn sim updates
-    if (pEffect && /*g_TimerMan.DrawnSimUpdate()) && */g_TimerMan.SimUpdatesSinceDrawn() >= 0)
-        m_PostSceneEffects.push_back(PostEffect(effectPos, pEffect, hash, strength, angle));
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RegisterGlowDotEffect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Registers a specific post yellow glow effect to be added at the very
-//                  last stage of 32bpp rendering by the FrameMan.
-
-void SceneMan::RegisterGlowDotEffect(const Vector &effectPos, DotGlowColor color, int strength)
-{
-    // These effects only apply only once per drawn sim update, and only on the first frame drawn after one or more sim updates
-    if (color != NoDot && g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0)
-        RegisterPostEffect(effectPos, g_FrameMan.GetDotGlowEffect(color), g_FrameMan.GetDotGlowEffectHash(color) , strength);
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPostScreenEffectsWrapped
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets all screen effects that are located within a box in the scene.
-//                  Their coordinates will be returned relative to the upper left corner
-//                  of the box passed in here.
-
-bool SceneMan::GetPostScreenEffectsWrapped(const Vector &boxPos, int boxWidth, int boxHeight, list<PostEffect> &effectsList, int team)
-{
-    bool found = false;
-
-    // Do the first unwrapped rect
-    found = GetPostScreenEffects(boxPos, boxWidth, boxHeight, effectsList, team);
-
-    int left = boxPos.m_X;
-    int top = boxPos.m_Y;
-    int right = left + boxWidth;
-    int bottom = top + boxHeight;
-
-    // Check wrapped rectangles
-    if (g_SceneMan.SceneWrapsX())
-    {
-        int sceneWidth = m_pCurrentScene->GetWidth();
-
-        if (left < 0)
-            found = GetPostScreenEffects(left + sceneWidth, top, right + sceneWidth, bottom, effectsList, team) || found;
-        if (right >= sceneWidth)
-            found = GetPostScreenEffects(left - sceneWidth, top, right - sceneWidth, bottom, effectsList, team) || found;
-    }
-    if (g_SceneMan.SceneWrapsY())
-    {
-        int sceneHeight = m_pCurrentScene->GetHeight();
-
-        if (top < 0)
-            found = GetPostScreenEffects(left, top + sceneHeight, right, bottom + sceneHeight, effectsList, team) || found;
-        if (bottom >= sceneHeight)
-            found = GetPostScreenEffects(left, top - sceneHeight, right, bottom - sceneHeight, effectsList, team) || found;
-    }
-
-    return found;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGlowAreasWrapped
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets all glow areas that affect anyhting within a box in the scene.
-//                  Their coordinates will be returned relative to the upper left corner
-//                  of the box passed in here. Wrapping of the box will be taken care of.
-
-bool SceneMan::GetGlowAreasWrapped(const Vector &boxPos, int boxWidth, int boxHeight, list<Box> &areaList)
-{
-    bool foundAny = false;
-
-    // The Box passed in here is the test box we're going to look if any glow areas intersect with.
-    IntRect testRect(boxPos.m_X, boxPos.m_Y, boxPos.m_X + boxWidth, boxPos.m_Y + boxHeight);
-    // Need to check for test box wrappings, so we'll end up with a list of at least one test box to check all glow areas against
-    list<IntRect> testRects;
-    WrapRect(testRect, testRects);
-
-    // Get all the wrapped instances of the existing registered glow areas.
-    list<IntRect> wrappedGlowRects;
-    for (list<IntRect>::iterator grItr = m_GlowAreas.begin(); grItr != m_GlowAreas.end(); ++grItr)
-        WrapRect((*grItr), wrappedGlowRects);
-
-    // Now check each wrapped test rect against all the wrapped glow rects, and add the intersecting ones to the output list
-    for (list<IntRect>::iterator trItr = testRects.begin(); trItr != testRects.end(); ++trItr)
-    {
-        for (list<IntRect>::iterator wgrItr = wrappedGlowRects.begin(); wgrItr != wrappedGlowRects.end(); ++wgrItr)
-        {
-            if ((*trItr).Intersects(*wgrItr))
-            {
-                // Cut down any intersecting boxes so they are only inside the box
-                IntRect cutRect(*wgrItr);
-                cutRect.IntersectionCut(*trItr);
-                // Create boxPos-relative Box out of the IntRect that is found to be intersecting with the test box!
-                areaList.push_back(Box(Vector(cutRect.m_Left - boxPos.m_X, cutRect.m_Top - boxPos.m_Y), cutRect.m_Right - cutRect.m_Left, cutRect.m_Bottom - cutRect.m_Top));
-                foundAny = true;
-            }
-        }
-    }
-
-    return foundAny;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPostScreenEffects
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets all screen effects that are located within a box in the scene.
-//                  Their coordinates will be returned relative to the upper left corner
-//                  of the box passed in here.
-
-bool SceneMan::GetPostScreenEffects(Vector boxPos, int boxWidth, int boxHeight, list<PostEffect> &effectsList, int team)
-{
-    bool found = false;
-    bool unseen = false;
-    for (list<PostEffect>::iterator itr = m_PostSceneEffects.begin(); itr != m_PostSceneEffects.end(); ++itr)
-    {
-        if (team != Activity::NOTEAM)
-            unseen = IsUnseen((*itr).m_Pos.m_X, (*itr).m_Pos.m_Y, team);
-
-        if (WithinBox((*itr).m_Pos, boxPos, boxWidth, boxHeight) && !unseen)
-        {
-            found = true;
-            // Make the position returned relative to the box
-            effectsList.push_back(PostEffect((*itr).m_Pos - boxPos, (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
-        }
-    }
-
-    return found;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPostScreenEffects
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets all screen effects that are located within a box in the scene.
-//                  Their coordinates will be returned relative to the upper left corner
-//                  of the box passed in here.
-
-bool SceneMan::GetPostScreenEffects(int left, int top, int right, int bottom, list<PostEffect> &effectsList, int team)
-{
-    bool found = false;
-    bool unseen = false;
-    Vector posInBox;
-    for (list<PostEffect>::iterator itr = m_PostSceneEffects.begin(); itr != m_PostSceneEffects.end(); ++itr)
-    {
-        if (team != Activity::NOTEAM)
-            unseen = IsUnseen((*itr).m_Pos.m_X, (*itr).m_Pos.m_Y, team);
-
-        if (WithinBox((*itr).m_Pos, left, top, right, bottom) && !unseen)
-        {
-            found = true;
-            // Make the position returned relative to the box
-            effectsList.push_back(PostEffect(Vector((*itr).m_Pos.m_X - left, (*itr).m_Pos.m_Y - top), (*itr).m_pBitmap, (*itr).m_BitmapHash, (*itr).m_Strength, (*itr).m_Angle));
-        }
-    }
-
-    return found;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddTerrainObject
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Takes TerrainObject and applies it to the terrain
@@ -3618,7 +3432,9 @@ bool SceneMan::AddSceneObject(SceneObject *pObject)
 
 void SceneMan::Update(int screen)
 {
-	DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    if (m_pCurrentScene == nullptr) {
+        return;
+    }
 
     // Record screen was the last updated screen
     m_LastUpdatedScreen = screen;
@@ -3758,7 +3574,9 @@ void SceneMan::Update(int screen)
 
 void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vector &targetPos, bool skipSkybox, bool skipTerrain)
 {
-    DAssert(m_pCurrentScene, "Trying to access scene before there is one!");
+    if (m_pCurrentScene == nullptr) {
+        return;
+    }
     // Handy
     SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
 
@@ -3785,18 +3603,10 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
         case g_LayerTerrainMatter:
             pTerrain->SetToDrawMaterial(true);
             pTerrain->Draw(pTargetBitmap, targetBox);
-//            m_pMOColorLayer->Draw(pTargetBitmap, targetBox);
-
-//            sprintf_s(str, sizeof(str), "Terrain Matter\nHit M to cycle modes");
-//            g_FrameMan.DrawText(pTargetBitmap, str, Vector(475, 4), false);
             break;
-
         case g_LayerMOID:
             m_pMOIDLayer->Draw(pTargetBitmap, targetBox);
-//            sprintf_s(str, sizeof(str), "MovableObject ID\nHit M to cycle modes");
-//            g_FrameMan.DrawText(pTargetBitmap, str, Vector(475, 4), false);
             break;
-
         // Draw normally
         default:
 			if (skipSkybox)
@@ -3829,12 +3639,11 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 
             // Actor and gameplay HUDs and GUIs
             g_MovableMan.DrawHUD(pTargetGUIBitmap, targetPos, m_LastUpdatedScreen);
-			g_FrameMan.DrawPrimitives(m_LastUpdatedScreen, pTargetGUIBitmap, targetPos);
+			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, pTargetGUIBitmap, targetPos);
 //            g_ActivityMan.GetActivity()->Draw(pTargetBitmap, targetPos, m_LastUpdatedScreen);
             g_ActivityMan.GetActivity()->DrawGUI(pTargetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
 //            sprintf_s(str, sizeof(str), "Normal Layer Draw Mode\nHit M to cycle modes");
-//            g_FrameMan.DrawText(pTargetBitmap, str, Vector(475, 4), false);
 
 #ifdef DEBUG_BUILD
             m_pDebugLayer->Draw(pTargetBitmap, Box());
@@ -3850,10 +3659,10 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 
 void SceneMan::ClearMOColorLayer()
 {
-    clear_to_color(m_pMOColorLayer->GetBitmap(), g_KeyColor);
+    clear_to_color(m_pMOColorLayer->GetBitmap(), g_MaskColor);
 
 #ifdef DEBUG_BUILD
-    clear_to_color(m_pDebugLayer->GetBitmap(), g_KeyColor);
+    clear_to_color(m_pDebugLayer->GetBitmap(), g_MaskColor);
 #endif
 }
 
@@ -3882,6 +3691,12 @@ void SceneMan::ClearSeenPixels()
 
     for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
         m_pCurrentScene->ClearSeenPixels(team);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SceneMan::ClearCurrentScene() {
+    m_pCurrentScene = nullptr;
 }
 
 } // namespace RTE

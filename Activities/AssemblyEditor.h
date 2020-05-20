@@ -14,7 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "EditorActivity.h"
 #include "BunkerAssembly.h"
 
@@ -53,7 +53,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(AssemblyEditor)
+EntityAllocation(AssemblyEditor)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

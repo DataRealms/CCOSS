@@ -16,7 +16,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(SceneLayer, Entity, 0)
+ConcreteClassInfo(SceneLayer, Entity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -39,10 +39,10 @@ void SceneLayer::Clear()
     m_ScaledDimensions.SetXY(1.0, 1.0);
     m_WrapX = true;
     m_WrapY = true;
-    m_FillLeftColor = g_KeyColor;
-    m_FillRightColor = g_KeyColor;
-    m_FillUpColor = g_KeyColor;
-    m_FillDownColor = g_KeyColor;
+    m_FillLeftColor = g_MaskColor;
+    m_FillRightColor = g_MaskColor;
+    m_FillUpColor = g_MaskColor;
+    m_FillDownColor = g_MaskColor;
 }
 
 
@@ -76,7 +76,7 @@ int SceneLayer::Create(ContentFile bitmapFile,
     m_BitmapFile = bitmapFile;
 
     m_pMainBitmap = m_BitmapFile.GetAsBitmap();
-    AAssert(m_pMainBitmap, "Failed to load BITMAP in SceneLayer::Create");
+    RTEAssert(m_pMainBitmap, "Failed to load BITMAP in SceneLayer::Create");
 
     Create(m_pMainBitmap, drawTrans, offset, wrapX, wrapY, scrollInfo);
 
@@ -102,7 +102,7 @@ int SceneLayer::Create(BITMAP *pBitmap,
                        Vector scrollInfo)
 {
     m_pMainBitmap = pBitmap;
-    AAssert(m_pMainBitmap, "Null bitmap passed in when creating SceneLayer");
+    RTEAssert(m_pMainBitmap, "Null bitmap passed in when creating SceneLayer");
     m_MainBitmapOwned = true;
 
     m_DrawTrans = drawTrans;
@@ -141,10 +141,10 @@ int SceneLayer::Create(BITMAP *pBitmap,
     m_ScaledDimensions.SetXY(m_pMainBitmap->w * m_ScaleFactor.m_X, m_pMainBitmap->h * m_ScaleFactor.m_Y);
 
     // Sampled color at the edges of the layer that can be used to fill gap if the layer isn't large enough to cover a target bitmap
-    m_FillLeftColor = m_WrapX ? g_KeyColor : _getpixel(m_pMainBitmap, 0, m_pMainBitmap->h / 2);
-    m_FillRightColor = m_WrapX ? g_KeyColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w - 1, m_pMainBitmap->h / 2);
-    m_FillUpColor = m_WrapY ? g_KeyColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, 0);
-    m_FillDownColor = m_WrapY ? g_KeyColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, m_pMainBitmap->h - 1);
+    m_FillLeftColor = m_WrapX ? g_MaskColor : _getpixel(m_pMainBitmap, 0, m_pMainBitmap->h / 2);
+    m_FillRightColor = m_WrapX ? g_MaskColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w - 1, m_pMainBitmap->h / 2);
+    m_FillUpColor = m_WrapY ? g_MaskColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, 0);
+    m_FillDownColor = m_WrapY ? g_MaskColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, m_pMainBitmap->h - 1);
 
     return 0;
 }
@@ -167,11 +167,11 @@ int SceneLayer::Create(const SceneLayer &reference)
     {
         // Copy the bitmap from the ContentFile, because we're going to be changing it!
         BITMAP *pCopyFrom = reference.m_pMainBitmap;
-        AAssert(pCopyFrom, "Couldn't load the bitmap file specified for SceneLayer!");
+        RTEAssert(pCopyFrom, "Couldn't load the bitmap file specified for SceneLayer!");
 
         // Destination
         m_pMainBitmap = create_bitmap_ex(8, pCopyFrom->w, pCopyFrom->h);
-        AAssert(m_pMainBitmap, "Failed to allocate BITMAP in SceneLayer::Create");
+        RTEAssert(m_pMainBitmap, "Failed to allocate BITMAP in SceneLayer::Create");
 
         // Copy!
         blit(pCopyFrom, m_pMainBitmap, 0, 0, 0, 0, pCopyFrom->w, pCopyFrom->h);
@@ -214,11 +214,11 @@ int SceneLayer::LoadData()
 /* No need to do this copying, we are re-loading fresh from disk each time
     // Copy the bitmap from the ContentFile, because we're going to be changing it!
     BITMAP *pCopyFrom = m_BitmapFile.GetAsBitmap();
-    AAssert(pCopyFrom, "Couldn't load the bitmap file specified for SceneLayer!");
+    RTEAssert(pCopyFrom, "Couldn't load the bitmap file specified for SceneLayer!");
 
     // Destination
     m_pMainBitmap = create_bitmap_ex(8, pCopyFrom->w, pCopyFrom->h);
-    AAssert(m_pMainBitmap, "Failed to allocate BITMAP in SceneLayer::Create");
+    RTEAssert(m_pMainBitmap, "Failed to allocate BITMAP in SceneLayer::Create");
 
     // Copy!
     blit(pCopyFrom, m_pMainBitmap, 0, 0, 0, 0, pCopyFrom->w, pCopyFrom->h);
@@ -231,10 +231,10 @@ int SceneLayer::LoadData()
     InitScrollRatios();
 
     // Sampled color at the edges of the layer that can be used to fill gap if the layer isn't large enough to cover a target bitmap
-    m_FillLeftColor = m_WrapX ? g_KeyColor : _getpixel(m_pMainBitmap, 0, m_pMainBitmap->h / 2);
-    m_FillRightColor = m_WrapX ? g_KeyColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w - 1, m_pMainBitmap->h / 2);
-    m_FillUpColor = m_WrapY ? g_KeyColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, 0);
-    m_FillDownColor = m_WrapY ? g_KeyColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, m_pMainBitmap->h - 1);
+    m_FillLeftColor = m_WrapX ? g_MaskColor : _getpixel(m_pMainBitmap, 0, m_pMainBitmap->h / 2);
+    m_FillRightColor = m_WrapX ? g_MaskColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w - 1, m_pMainBitmap->h / 2);
+    m_FillUpColor = m_WrapY ? g_MaskColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, 0);
+    m_FillDownColor = m_WrapY ? g_MaskColor : _getpixel(m_pMainBitmap, m_pMainBitmap->w / 2, m_pMainBitmap->h - 1);
 
     return 0;
 }
@@ -390,8 +390,8 @@ unsigned char SceneLayer::GetPixel(const int pixelX, const int pixelY)
     // Make sure it's within the boundaries of the bitmap.
     if (pixelX < 0 || pixelX >= m_pMainBitmap->w || pixelY < 0 || pixelY >= m_pMainBitmap->h)
         return 0;
-//    AAssert(m_pTerrain->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
-//    DAssert(is_inside_bitmap(m_pMainBitmap, pixelX, pixelY, 0), "Trying to access pixel outside of SceneLayer's bitmap's boundaries!");
+//    RTEAssert(m_pTerrain->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(is_inside_bitmap(m_pMainBitmap, pixelX, pixelY, 0), "Trying to access pixel outside of SceneLayer's bitmap's boundaries!");
     return  _getpixel(m_pMainBitmap, pixelX, pixelY);
 }
 
@@ -405,7 +405,7 @@ unsigned char SceneLayer::GetPixel(const int pixelX, const int pixelY)
 
 void SceneLayer::SetPixel(const int pixelX, const int pixelY, const unsigned char value)
 {
-    AAssert(m_MainBitmapOwned, "Trying to set a pixel of a SceneLayer's bitmap which isn't owned!");
+    RTEAssert(m_MainBitmapOwned, "Trying to set a pixel of a SceneLayer's bitmap which isn't owned!");
 
     // Make sure it's within the boundaries of the bitmap.
     if (pixelX < 0 ||
@@ -413,8 +413,8 @@ void SceneLayer::SetPixel(const int pixelX, const int pixelY, const unsigned cha
        pixelY < 0 ||
        pixelY >= m_pMainBitmap->h)
        return;
-//    AAssert(m_pTerrain->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
-//    DAssert(is_inside_bitmap(m_pMainBitmap, pixelX, pixelY, 0), "Trying to access pixel outside of SceneLayer's bitmap's boundaries!");
+//    RTEAssert(m_pTerrain->GetBitmap()->m_LockCount > 0, "Trying to access unlocked terrain bitmap");
+//    RTEAssert(is_inside_bitmap(m_pMainBitmap, pixelX, pixelY, 0), "Trying to access pixel outside of SceneLayer's bitmap's boundaries!");
 //    _putpixel(m_pMainBitmap, pixelX, pixelY, value);
     putpixel(m_pMainBitmap, pixelX, pixelY, value);
 }
@@ -588,7 +588,7 @@ struct SLDrawBox
 
 void SceneLayer::Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride) const
 {
-    DAssert(m_pMainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
+    RTEAssert(m_pMainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
 
     int sourceX = 0;
     int sourceY = 0;
@@ -716,17 +716,17 @@ void SceneLayer::Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrol
         // Detect if nonwrapping layer dimensions can't cover the whole target area with its main bitmap. If so, fill in the gap with appropriate solid color sampled from the hanging edge
         if (!m_WrapX && !screenLargerThanSceneX && m_ScrollRatio.m_X < 0)
         {
-            if (m_FillLeftColor != g_KeyColor && offsetX != 0)
+            if (m_FillLeftColor != g_MaskColor && offsetX != 0)
                 rectfill(pTargetBitmap, targetBox.GetCorner().m_X, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X - offsetX, targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_FillLeftColor);
-            if (m_FillRightColor != g_KeyColor)
+            if (m_FillRightColor != g_MaskColor)
                 rectfill(pTargetBitmap, (targetBox.GetCorner().m_X - offsetX) + m_pMainBitmap->w, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_FillRightColor);
         }
 
         if (!m_WrapY && !screenLargerThanSceneY && m_ScrollRatio.m_Y < 0)
         {
-            if (m_FillUpColor != g_KeyColor && offsetY != 0)
+            if (m_FillUpColor != g_MaskColor && offsetY != 0)
                 rectfill(pTargetBitmap, targetBox.GetCorner().m_X, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y - offsetY, m_FillUpColor);
-            if (m_FillDownColor != g_KeyColor)
+            if (m_FillDownColor != g_MaskColor)
                 rectfill(pTargetBitmap, targetBox.GetCorner().m_X, (targetBox.GetCorner().m_Y - offsetY) + m_pMainBitmap->h, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_FillDownColor);
         }
     }
@@ -748,7 +748,7 @@ void SceneLayer::DrawScaled(BITMAP *pTargetBitmap, Box &targetBox, const Vector 
     if (m_ScaleFactor.m_X == 1.0 && m_ScaleFactor.m_Y == 1.0)
         return Draw(pTargetBitmap, targetBox, scrollOverride);
 
-    DAssert(m_pMainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
+    RTEAssert(m_pMainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
 
 
 /*
@@ -921,17 +921,17 @@ void SceneLayer::DrawScaled(BITMAP *pTargetBitmap, Box &targetBox, const Vector 
         // Detect if nonwrapping layer dimensions can't cover the whole target area with its main bitmap. If so, fill in the gap with appropriate solid color sampled from the hanging edge
         if (!m_WrapX && !screenLargerThanSceneX && m_ScrollRatio.m_X < 0)
         {
-            if (m_FillLeftColor != g_KeyColor && offsetX != 0)
+            if (m_FillLeftColor != g_MaskColor && offsetX != 0)
                 rectfill(pTargetBitmap, targetBox.GetCorner().m_X, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X - offsetX, targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_FillLeftColor);
-            if (m_FillRightColor != g_KeyColor)
+            if (m_FillRightColor != g_MaskColor)
                 rectfill(pTargetBitmap, (targetBox.GetCorner().m_X - offsetX) + m_pMainBitmap->w, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_FillRightColor);
         }
 
         if (!m_WrapY && !screenLargerThanSceneY && m_ScrollRatio.m_Y < 0)
         {
-            if (m_FillUpColor != g_KeyColor && offsetY != 0)
+            if (m_FillUpColor != g_MaskColor && offsetY != 0)
                 rectfill(pTargetBitmap, targetBox.GetCorner().m_X, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y - offsetY, m_FillUpColor);
-            if (m_FillDownColor != g_KeyColor)
+            if (m_FillDownColor != g_MaskColor)
                 rectfill(pTargetBitmap, targetBox.GetCorner().m_X, (targetBox.GetCorner().m_Y - offsetY) + m_pMainBitmap->h, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_FillDownColor);
         }
 */

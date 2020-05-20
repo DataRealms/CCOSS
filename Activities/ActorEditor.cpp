@@ -49,7 +49,7 @@ extern bool g_ResetActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(ActorEditor, EditorActivity, 0)
+ConcreteClassInfo(ActorEditor, EditorActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -339,7 +339,7 @@ void ActorEditor::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int wh
     }
 
     // Clear out annoying blooms
-    g_SceneMan.ClearPostEffects();
+    g_PostProcessMan.ClearScenePostEffects();
 
     m_pPicker->Draw(pTargetBitmap);
     m_pPieMenu->Draw(pTargetBitmap, targetPos);

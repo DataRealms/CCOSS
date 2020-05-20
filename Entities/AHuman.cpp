@@ -20,7 +20,7 @@
 #include "Arm.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
@@ -37,7 +37,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(AHuman, Actor, 0)
+ConcreteClassInfo(AHuman, Actor, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -425,7 +425,7 @@ int AHuman::Create(istream &stream, bool checkType)
         stream >> name;
         if (name != m_sClass.GetName())
         {
-           DDTAbort("Wrong type in stream when passed to Create");
+           RTEAbort("Wrong type in stream when passed to Create");
            return -1;
         }
     }
@@ -636,24 +636,24 @@ bool AHuman::CollideAtPoint(HitData &hd)
     return Actor::CollideAtPoint(hd);
 
 /*
-    hd.resImpulse[HITOR].Reset();
-    hd.resImpulse[HITEE].Reset();
-    hd.hitRadius[HITEE] = (hd.hitPoint - m_Pos) * g_FrameMan.GetMPP();
+    hd.ResImpulse[HITOR].Reset();
+    hd.ResImpulse[HITEE].Reset();
+    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * g_FrameMan.GetMPP();
     hd.mass[HITEE] = m_Mass;
-    hd.momInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
-    hd.hitVel[HITEE] = m_Vel + hd.hitRadius[HITEE].GetPerpendicular() * m_AngularVel;
-    hd.velDiff = hd.hitVel[HITOR] - hd.hitVel[HITEE];
-    Vector hitAcc = -hd.velDiff * (1 + hd.pBody[HITOR]->GetMaterial().restitution * GetMaterial().restitution);
+    hd.MomInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
+    hd.HitVel[HITEE] = m_Vel + hd.HitRadius[HITEE].GetPerpendicular() * m_AngularVel;
+    hd.VelDiff = hd.HitVel[HITOR] - hd.HitVel[HITEE];
+    Vector hitAcc = -hd.VelDiff * (1 + hd.Body[HITOR]->GetMaterial().restitution * GetMaterial().restitution);
 
-    float hittorLever = hd.hitRadius[HITOR].GetPerpendicular().Dot(hd.bitmapNormal);
-    float hitteeLever = hd.hitRadius[HITEE].GetPerpendicular().Dot(hd.bitmapNormal);
+    float hittorLever = hd.HitRadius[HITOR].GetPerpendicular().Dot(hd.BitmapNormal);
+    float hitteeLever = hd.HitRadius[HITEE].GetPerpendicular().Dot(hd.BitmapNormal);
     hittorLever *= hittorLever;
     hitteeLever *= hitteeLever;
-    float impulse = hitAcc.Dot(hd.bitmapNormal) / (((1 / hd.mass[HITOR]) + (1 / hd.mass[HITEE])) +
-                    (hittorLever / hd.momInertia[HITOR]) + (hitteeLever / hd.momInertia[HITEE]));
+    float impulse = hitAcc.Dot(hd.BitmapNormal) / (((1 / hd.mass[HITOR]) + (1 / hd.mass[HITEE])) +
+                    (hittorLever / hd.MomInertia[HITOR]) + (hitteeLever / hd.MomInertia[HITEE]));
 
-    hd.resImpulse[HITOR] = hd.bitmapNormal * impulse * hd.impFactor[HITOR];
-    hd.resImpulse[HITEE] = hd.bitmapNormal * -impulse * hd.impFactor[HITEE];
+    hd.ResImpulse[HITOR] = hd.BitmapNormal * impulse * hd.ImpulseFactor[HITOR];
+    hd.ResImpulse[HITEE] = hd.BitmapNormal * -impulse * hd.ImpulseFactor[HITEE];
 
     ////////////////////////////////////////////////////////////////////////////////
     // If a particle, which does not penetrate, but bounces, do any additional
@@ -663,9 +663,9 @@ bool AHuman::CollideAtPoint(HitData &hd)
         ;
     }
 
-    m_Vel += hd.resImpulse[HITEE] / hd.mass[HITEE];
-    m_AngularVel += hd.hitRadius[HITEE].GetPerpendicular().Dot(hd.resImpulse[HITEE]) /
-                    hd.momInertia[HITEE];
+    m_Vel += hd.ResImpulse[HITEE] / hd.mass[HITEE];
+    m_AngularVel += hd.HitRadius[HITEE].GetPerpendicular().Dot(hd.ResImpulse[HITEE]) /
+                    hd.MomInertia[HITEE];
 */
 }
 
@@ -902,7 +902,7 @@ bool AHuman::EquipFirearm(bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                m_DeviceSwitchSound.Play(m_Pos);
             }
 
             return true;
@@ -964,7 +964,7 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                m_DeviceSwitchSound.Play(m_Pos);
             }
 
             return true;
@@ -1026,7 +1026,7 @@ bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool d
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                m_DeviceSwitchSound.Play(m_Pos);
             }
 
             return true;
@@ -1088,7 +1088,7 @@ bool AHuman::EquipNamedDevice(const string name, bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                m_DeviceSwitchSound.Play(m_Pos);
             }
 
             return true;
@@ -1152,7 +1152,7 @@ bool AHuman::EquipThrowable(bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                m_DeviceSwitchSound.Play(m_Pos);
             }
 
             return true;
@@ -1214,7 +1214,7 @@ bool AHuman::EquipDiggingTool(bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                m_DeviceSwitchSound.Play(m_Pos);
             }
 
             return true;
@@ -1309,7 +1309,7 @@ bool AHuman::EquipShield()
             EquipShieldInBGArm();
 
             // Play the device switching sound
-            m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+            m_DeviceSwitchSound.Play(m_Pos);
 
             return true;
         }
@@ -1381,7 +1381,7 @@ bool AHuman::EquipShieldInBGArm()
             // Play the device switching sound only if activity is running
 			if (g_ActivityMan.ActivityRunning())
 			{
-				m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+				m_DeviceSwitchSound.Play(m_Pos);
 			}
 
             return true;
@@ -1823,7 +1823,7 @@ void AHuman::ResetAllTimers()
 bool AHuman::UpdateMovePath()
 {
     // Estimate how much material this actor can dig through
-    m_DigStrenght = EstimateDigStrenght();
+    m_DigStrength = EstimateDigStrenght();
     
     // Do the real path calc; abort and pass along the message if it didn't happen due to throttling
     if (!Actor::UpdateMovePath())
@@ -3141,21 +3141,19 @@ void AHuman::UpdateAI()
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnPieMenu
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Executes the Lua-defined OnPieMenu event handler.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int AHuman::OnPieMenu(Actor * pActor)
-{
-	int error = Actor::OnPieMenu(pActor);
+int AHuman::OnPieMenu(Actor *pieMenuActor) {
+	int status = Actor::OnPieMenu(pieMenuActor);
 
-	// Call OnPieMenu handlers for a currently held device if any
-	if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsDevice())
-		return m_pFGArm->GetHeldDevice()->OnPieMenu(pActor);
+    if (status >= 0 && m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsDevice()) {
+        return m_pFGArm->GetHeldDevice()->OnPieMenu(pieMenuActor);
+    }
 
-	return 0;
+	return status;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -3410,9 +3408,10 @@ void AHuman::Update()
             if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach)
             {
                 pDevice->Reload();
-                if (m_pBGArm && m_pBGArm->IsAttached())
+                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
                     m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-                m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                }
+                m_DeviceSwitchSound.Play(m_Pos);
 
                 // Interrupt sharp aiming
                 m_SharpAimTimer.Reset();
@@ -3422,15 +3421,17 @@ void AHuman::Update()
             // Detect reloading and move hand accordingly
             if (pDevice->IsReloading())
             {
-                if (m_pBGArm && m_pBGArm->IsAttached())
+                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
                     m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+                }
             }
 
             // Detect reloading being completed and move hand accordingly
             if (pDevice->DoneReloading())
             {
-                if (m_pBGArm && m_pBGArm->IsAttached())
+                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
                     m_pBGArm->SetHandPos(pDevice->GetMagazinePos());
+                }
             }
         }
     }
@@ -3729,7 +3730,7 @@ void AHuman::Update()
                 m_Inventory.push_back(m_pItemInReach);
             }
             m_PieNeedsUpdate = true;
-            m_DeviceSwitchSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+            m_DeviceSwitchSound.Play(m_Pos);
         }
     }
 
@@ -3795,7 +3796,7 @@ void AHuman::Update()
 
             // Play the stride sound, if applicable
             if (playStride && !m_ArmClimbing[FGROUND] && !m_ArmClimbing[BGROUND])
-                m_StrideSound.Play(g_SceneMan.TargetDistanceScalar(m_Pos));
+                m_StrideSound.Play(m_Pos);
 
             ////////////////////////////////////////
             // Arm Climbing if the leg paths failed to find clear spot to restart
@@ -4533,7 +4534,7 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
             points[i] += m_pFGArm->GetParentOffset();
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-        g_SceneMan.RegisterGlowDotEffect(points[i], YellowDot, 55 + 100 * PosRand());
+		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, 55 + 100 * PosRand());
 
         putpixel(pTargetBitmap, points[i].m_X - targetPos.m_X, points[i].m_Y - targetPos.m_Y, g_YellowGlowColor);
     }
@@ -4905,16 +4906,20 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             // Ammo
             if (pHeldFirearm)
             {
+                MovableObject *bgHeldItem = GetEquippedBGItem();
+                HDFirearm const *bgHeldFirearm = bgHeldItem == NULL ? NULL : dynamic_cast<HDFirearm *>(bgHeldItem);
+
                 str[0] = -56; str[1] = 0;
                 pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                if (pHeldFirearm->IsReloading())
-                    sprintf_s(str, sizeof(str), "%s", "Reloading...");
-                else
-                {
-                    if (pHeldFirearm->GetRoundInMagCount() < 0)
-                        sprintf_s(str, sizeof(str), "%s", "Infinite");
-                    else
-                        sprintf_s(str, sizeof(str), "%i", pHeldFirearm->GetRoundInMagCount());
+                std::string fgWeaponString = pHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(pHeldFirearm->GetRoundInMagCount());
+                fgWeaponString = pHeldFirearm->IsReloading() ? "Reloading" : fgWeaponString;
+
+                if (bgHeldItem && bgHeldFirearm) {
+                    std::string bgWeaponString = bgHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(bgHeldFirearm->GetRoundInMagCount());
+                    bgWeaponString = bgHeldFirearm->IsReloading() ? "Reloading" : bgWeaponString;
+                    sprintf_s(str, sizeof(str), "%s | %s", fgWeaponString.c_str(), bgWeaponString.c_str());
+                } else {
+                    sprintf_s(str, sizeof(str), "%s", fgWeaponString.c_str());
                 }
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
 

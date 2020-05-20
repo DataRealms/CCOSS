@@ -15,7 +15,6 @@
 // Inclusions of header files
 
 #include "MovableObject.h"
-#include "Sound.h"
 #include "Box.h"
 
 namespace RTE
@@ -56,7 +55,7 @@ public:
 
 /* abstract class
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(MOSprite)
+EntityAllocation(MOSprite)
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -586,7 +585,7 @@ ENTITYALLOCATION(MOSprite)
 
 	virtual void SetSpriteAnimDuration(int newDuration) { m_SpriteAnimDuration = newDuration; }
 
-/*
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -594,8 +593,8 @@ ENTITYALLOCATION(MOSprite)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update() = 0;
-*/
+    virtual void Update();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
@@ -622,7 +621,7 @@ ENTITYALLOCATION(MOSprite)
 // Arguments:       None.
 // Return value:    1 for not flipped, -1 for flipped.
 
-	virtual int GetFlipFactor() { return m_HFlipped ? -1 : 1; }
+	int GetFlipFactor() const { return m_HFlipped ? -1 : 1; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -651,6 +650,8 @@ protected:
     int m_SpriteAnimDuration;
     // The timer to keep track of the body animation
     Timer m_SpriteAnimTimer;
+    // Keep track of animation direction (mainly for ALWAYSPINGPONG), true is decreasing frame, false is increasing frame
+    bool m_SpriteAnimIsReversingFrames;
     // Whether flipped horizontally or not.
     bool m_HFlipped;
     // The precalculated maximum possible radius and diameter of this, in pixels

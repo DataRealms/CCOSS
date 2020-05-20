@@ -19,7 +19,7 @@
 #include "Arm.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
@@ -31,7 +31,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(ACDropShip, ACraft, 0)
+ConcreteClassInfo(ACDropShip, ACraft, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -12,6 +12,8 @@
 // Inclusions of header files
 
 #include "MovableMan.h"
+#include "PostProcessMan.h"
+#include "PerformanceMan.h"
 #include "PresetMan.h"
 #include "AHuman.h"
 #include "MOPixel.h"
@@ -70,7 +72,6 @@ void MovableMan::Clear()
     m_SloMoDuration = 1000;
     m_SettlingEnabled = true;
     m_MOSubtractionEnabled = true;
-    m_pObjectToScriptUpdate = 0;
 }
 
 
@@ -149,16 +150,7 @@ int MovableMan::Save(Writer &writer) const
     writer << m_Particles.size();
     for (deque<MovableObject *>::const_iterator itr2 = m_Particles.begin(); itr2 != m_Particles.end(); ++itr2)
         writer << **itr2;
-/* Not sure how to deal with this yet
-    writer.NewProperty("ResolutionX");
-    writer << m_ResX;
-    writer.NewProperty("ResolutionY");
-    writer << m_ResY;
-    writer.NewProperty("ColorDepth");
-    writer << m_BPP;
-    writer.NewProperty("PaletteFile");
-    writer << m_PaletteFile;
-*/
+
     return 0;
 }
 
@@ -188,7 +180,7 @@ void MovableMan::Destroy()
 
 MovableObject * MovableMan::GetMOFromID(MOID whichID)
 {
-    DAssert(whichID == g_NoMOID || (whichID >= 0 && whichID < m_MOIDIndex.size()), "MOID out of bounds!");
+    RTEAssert(whichID == g_NoMOID || (whichID >= 0 && whichID < m_MOIDIndex.size()), "MOID out of bounds!");
 
     if (whichID != g_NoMOID && whichID != 0 && whichID < m_MOIDIndex.size())
     {
@@ -313,7 +305,7 @@ Actor * MovableMan::GetNextActorInGroup(std::string group, Actor *pAfterThis)
             ;
 
         // Still nothing?? Should at least get the specified actor and return it! - EDIT No becuase it just may not be there!
-//        DAssert(aIt != m_Actors.end(), "Search for something after specified actor, and didn't even find the specified actor!?");
+//        RTEAssert(aIt != m_Actors.end(), "Search for something after specified actor, and didn't even find the specified actor!?");
     }
 
     // Still nothing, so return nothing
@@ -369,7 +361,7 @@ Actor * MovableMan::GetPrevActorInGroup(std::string group, Actor *pBeforeThis)
             ;
 
         // Still nothing?? Should at least get the specified actor and return it! - EDIT No becuase it just may not be there!
-//        DAssert(aIt != m_Actors.rend(), "Search for something after specified actor, and didn't even find the specified actor!?");
+//        RTEAssert(aIt != m_Actors.rend(), "Search for something after specified actor, and didn't even find the specified actor!?");
     }
 
     // Still nothing, so return nothing
@@ -425,7 +417,7 @@ Actor * MovableMan::GetNextTeamActor(int team, Actor *pAfterThis)
             ;
 
         // Still nothing?? Should at least get the specified actor and return it! - EDIT No becuase it just may not be there!
-//        DAssert(aIt != m_Actors.end(), "Search for something after specified actor, and didn't even find the specified actor!?");
+//        RTEAssert(aIt != m_Actors.end(), "Search for something after specified actor, and didn't even find the specified actor!?");
     }
 
     // Still nothing, so return nothing
@@ -463,7 +455,7 @@ Actor * MovableMan::GetNextTeamActor(int team, Actor *pAfterThis)
         }
     }
 
-    DAssert((*aIt)->GetTeam() == team, "Actor of wrong team found in the wrong roster!");
+    RTEAssert((*aIt)->GetTeam() == team, "Actor of wrong team found in the wrong roster!");
     return *aIt;
 }
 
@@ -510,7 +502,7 @@ Actor * MovableMan::GetPrevTeamActor(int team, Actor *pBeforeThis)
             ;
 
         // Still nothing?? Should at least get the specified actor and return it! - EDIT No becuase it just may not be there!
-//        DAssert(aIt != m_Actors.rend(), "Search for something after specified actor, and didn't even find the specified actor!?");
+//        RTEAssert(aIt != m_Actors.rend(), "Search for something after specified actor, and didn't even find the specified actor!?");
     }
 
     // Still nothing, so return nothing
@@ -548,7 +540,7 @@ Actor * MovableMan::GetPrevTeamActor(int team, Actor *pBeforeThis)
         }
     }
 
-    DAssert((*aIt)->GetTeam() == team, "Actor of wrong team found in the wrong roster!");
+    RTEAssert((*aIt)->GetTeam() == team, "Actor of wrong team found in the wrong roster!");
     return *aIt;
 }
 
@@ -805,6 +797,8 @@ bool MovableMan::AddMO(MovableObject *pMOToAdd)
     if (!pMOToAdd)
         return false;
 
+    pMOToAdd->SetAsAddedToMovableMan();
+
     // Find out what kind it is and apply accordingly
     if (Actor *pActor = dynamic_cast<Actor *>(pMOToAdd))
     {
@@ -848,6 +842,7 @@ void MovableMan::AddActor(Actor *pActorToAdd)
 //        pActorToAdd->SetPrevPos(pActorToAdd->GetPos());
 //        pActorToAdd->Update();
 //        pActorToAdd->PostTravel();
+        pActorToAdd->SetAsAddedToMovableMan();
 
         // Filter out stupid fast objects
         if (pActorToAdd->IsTooFast())
@@ -884,6 +879,7 @@ void MovableMan::AddItem(MovableObject *pItemToAdd)
 //        pItemToAdd->SetPrevPos(pItemToAdd->GetPos());
 //        pItemToAdd->Update();
 //        pItemToAdd->PostTravel();
+        pItemToAdd->SetAsAddedToMovableMan();
 
         // Filter out stupid fast objects
         if (pItemToAdd->IsTooFast())
@@ -921,6 +917,7 @@ void MovableMan::AddParticle(MovableObject *pMOToAdd)
 //        pMOToAdd->Update();
 //        pMOToAdd->Travel();
 //        pMOToAdd->PostTravel();
+        pMOToAdd->SetAsAddedToMovableMan();
 
         // Filter out stupid fast objects
         if (pMOToAdd->IsTooFast())
@@ -1656,10 +1653,7 @@ void MovableMan::Update()
 
     // If this is the first sim update since a drawn one, then clear the post effects
     if (g_TimerMan.SimUpdatesSinceDrawn() == 0)
-        g_SceneMan.ClearPostEffects();
-
-    // Lua transfer pointer needs to be cleared, what was set here last update isn't valid anymore
-    m_pObjectToScriptUpdate = 0;
+		g_PostProcessMan.ClearScenePostEffects();
 
     // Reset the draw HUD roster line settings
     m_SortTeamRoster[Activity::TEAM_1] = false;
@@ -1691,7 +1685,7 @@ void MovableMan::Update()
 
     {
         // Travel Actors
-		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS1);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS1);
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
@@ -1713,7 +1707,7 @@ void MovableMan::Update()
                 (*aIt)->NewFrame();
             }
         }
-		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS1);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS1);
 
         // Travel items
         {
@@ -1731,7 +1725,7 @@ void MovableMan::Update()
         }
 
         // Travel particles
-		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_PARTICLES_PASS1);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS1);
         {
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
@@ -1745,7 +1739,7 @@ void MovableMan::Update()
                 (*parIt)->NewFrame();
             }
         }
-		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_PARTICLES_PASS1);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS1);
 
         g_SceneMan.UnlockScene();
     }
@@ -1757,7 +1751,7 @@ void MovableMan::Update()
         g_SceneMan.LockScene();
 
         // Actors
-		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS2);
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
@@ -1765,12 +1759,12 @@ void MovableMan::Update()
 				(*aIt)->Update();
 				//g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
 				//g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
-                (*aIt)->UpdateScript();
+                (*aIt)->UpdateScripts();
 				//g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
                 (*aIt)->ApplyImpulses();
             }
         }
-		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS2);
 
         // Items
         {
@@ -1779,7 +1773,7 @@ void MovableMan::Update()
             for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count)
             {
                 (*iIt)->Update();
-                (*iIt)->UpdateScript();
+                (*iIt)->UpdateScripts();
                 (*iIt)->ApplyImpulses();
                 if (count <= itemLimit)
                 {
@@ -1789,12 +1783,12 @@ void MovableMan::Update()
         }
 
         // Particles
-		g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_PARTICLES_PASS2);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS2);
         {
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
                 (*parIt)->Update();
-                (*parIt)->UpdateScript();
+                (*parIt)->UpdateScripts();
                 (*parIt)->ApplyImpulses();
                 (*parIt)->RestDetection();
                 // Copy particles that are at rest to the terrain and mark them for deletion.
@@ -1805,7 +1799,7 @@ void MovableMan::Update()
                 }
             }
         }
-		g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_PARTICLES_PASS2);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS2);
     }
 
     ///////////////////////////////////////////////////
@@ -2085,8 +2079,8 @@ void MovableMan::VerifyMOIDIndex()
 	{
 		if (*aIt)
 		{
-			DAssert((*aIt)->GetID() == g_NoMOID || (*aIt)->GetID() == count, "MOIDIndex broken!");
-			DAssert((*aIt)->GetRootID() == g_NoMOID || ((*aIt)->GetRootID() >= 0 && (*aIt)->GetRootID() < g_MovableMan.GetMOIDCount()), "MOIDIndex broken!");
+			RTEAssert((*aIt)->GetID() == g_NoMOID || (*aIt)->GetID() == count, "MOIDIndex broken!");
+			RTEAssert((*aIt)->GetRootID() == g_NoMOID || ((*aIt)->GetRootID() >= 0 && (*aIt)->GetRootID() < g_MovableMan.GetMOIDCount()), "MOIDIndex broken!");
 		}
 		count++;
 		if (count == g_NoMOID) count++;
@@ -2095,14 +2089,14 @@ void MovableMan::VerifyMOIDIndex()
 
 	for (deque<MovableObject *>::iterator itr = m_Items.begin(); itr != m_Items.end(); ++itr)
 	{
-		DAssert((*itr)->GetID() == g_NoMOID || (*itr)->GetID() < GetMOIDCount(), "MOIDIndex broken!");
-		DAssert((*itr)->GetRootID() == g_NoMOID || ((*itr)->GetRootID() >= 0 && (*itr)->GetRootID() < g_MovableMan.GetMOIDCount()), "MOIDIndex broken!");
+		RTEAssert((*itr)->GetID() == g_NoMOID || (*itr)->GetID() < GetMOIDCount(), "MOIDIndex broken!");
+		RTEAssert((*itr)->GetRootID() == g_NoMOID || ((*itr)->GetRootID() >= 0 && (*itr)->GetRootID() < g_MovableMan.GetMOIDCount()), "MOIDIndex broken!");
 	}
 	// Try the items just added this frame
 	for (deque<MovableObject *>::iterator itr = m_AddedItems.begin(); itr != m_AddedItems.end(); ++itr)
 	{
-		DAssert((*itr)->GetID() == g_NoMOID || (*itr)->GetID() < GetMOIDCount(), "MOIDIndex broken!");
-		DAssert((*itr)->GetRootID() == g_NoMOID || ((*itr)->GetRootID() >= 0 && (*itr)->GetRootID() < g_MovableMan.GetMOIDCount()), "MOIDIndex broken!");
+		RTEAssert((*itr)->GetID() == g_NoMOID || (*itr)->GetID() < GetMOIDCount(), "MOIDIndex broken!");
+		RTEAssert((*itr)->GetRootID() == g_NoMOID || ((*itr)->GetRootID() >= 0 && (*itr)->GetRootID() < g_MovableMan.GetMOIDCount()), "MOIDIndex broken!");
 	}
 }
 

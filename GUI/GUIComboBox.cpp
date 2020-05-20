@@ -144,9 +144,9 @@ void GUIComboBox::Create(GUIProperties *Props)
 
     string Val;
     Props->GetValue("DropDownStyle", &Val);
-    if (DDTstricmp(Val.c_str(), "DropDownList") == 0)
+    if (stricmp(Val.c_str(), "DropDownList") == 0)
         m_DropDownStyle = DropDownList;
-    else if (DDTstricmp(Val.c_str(), "DropDown") == 0)
+    else if (stricmp(Val.c_str(), "DropDown") == 0)
         m_DropDownStyle = DropDown;
 
     m_TextPanel->SetLocked((m_DropDownStyle == DropDownList));
@@ -731,9 +731,9 @@ void GUIComboBox::ApplyProperties(GUIProperties *Props)
 
     string Val;
     m_Properties.GetValue("DropDownStyle", &Val);
-    if (DDTstricmp(Val.c_str(), "DropDownList") == 0)
+    if (stricmp(Val.c_str(), "DropDownList") == 0)
         m_DropDownStyle = DropDownList;
-    else if (DDTstricmp(Val.c_str(), "DropDown") == 0)
+    else if (stricmp(Val.c_str(), "DropDown") == 0)
         m_DropDownStyle = DropDown;
 
     m_TextPanel->SetLocked((m_DropDownStyle == DropDownList));
@@ -786,13 +786,13 @@ void GUIComboBoxButton::ChangeSkin(GUISkin *Skin)
     if (!Arrow)
         return;
 
-    Uint32 ColorKey;
+    unsigned long ColorKey;
     Skin->GetValue("ComboBox_Arrow", "ColorKeyIndex", &ColorKey);
     ColorKey = Skin->ConvertColor(ColorKey, m_DrawBitmap->GetColorDepth());
     Arrow->SetColorKey(ColorKey);
 
     int Values[4];
-    RECT Rect;
+    GUIRect Rect;
     Skin->GetValue("ComboBox_Arrow", "Rect", Values, 4);
     SetRect(&Rect, Values[0], Values[1], Values[0]+Values[2], Values[1]+Values[3]);
 
@@ -815,7 +815,7 @@ void GUIComboBoxButton::ChangeSkin(GUISkin *Skin)
 
 void GUIComboBoxButton::Draw(GUIScreen *Screen)
 {
-    RECT Rect;
+    GUIRect Rect;
     SetRect(&Rect, 0, m_Pushed ? m_Height : 0, m_Width, m_Pushed ? m_Height*2 : m_Height);
 
     m_DrawBitmap->Draw(Screen->GetBitmap(), m_X, m_Y, &Rect);

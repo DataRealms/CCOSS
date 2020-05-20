@@ -39,7 +39,7 @@ friend class LuaMan;
 
 public:
 
-ENTITYALLOCATION(GlobalScript)
+EntityAllocation(GlobalScript)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GlobalScript
@@ -233,19 +233,18 @@ ENTITYALLOCATION(GlobalScript)
 
     virtual void Update();
 
+    /// <summary>
+    /// Indicates an Actor as having left the game scene and entered orbit.  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
+    /// </summary>
+    /// <param name="orbitedActor">The actor instance that entered orbit. Ownership IS NOT TRANSFERRED!</param>
+    virtual void EnteredOrbit(Actor *orbitedCraft);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  EnteredOrbit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates an Actor as having left the game scene and entered orbit.
-//                  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
-// Arguments:       The actor instance. Ownership IS NOT TRANSFERRED!
-// Return value:    None.
-
-    virtual void EnteredOrbit(Actor *pActor);
-
-
-	virtual void OnPieMenu(Actor *pActor);
+    /// <summary>
+    /// Executes the Lua-defined OnPieMenu event handler for this global script.
+    /// </summary>
+    /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+	virtual void OnPieMenu(Actor *pieMenuActor);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -276,11 +275,6 @@ protected:
     std::string m_ScriptPath;
 	// Whether this script allowed to run
 	bool m_IsActive;
-	// Orbited craft
-	Actor * m_pOrbitedCraft;
-	// Actor who opened pie menu
-	Actor * m_pPieMenuActor;
-
 
 	// Whether the script should Update before MovableMan or after
 	bool m_LateUpdate;

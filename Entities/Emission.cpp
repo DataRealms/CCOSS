@@ -11,7 +11,7 @@
 #include "Emission.h"
 #include "MovableObject.h"
 #include "Reader.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "PresetMan.h"
 
 namespace RTE {
@@ -19,7 +19,7 @@ namespace RTE {
 
 //const string Emission::m_sClassName = "Emission";
 
-CONCRETECLASSINFO(Emission, Entity, 0)
+ConcreteClassInfo(Emission, Entity, 0)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -99,7 +99,7 @@ int Emission::ReadProperty(std::string propName, Reader &reader)
 	if (propName == "EmittedParticle")
 	{
 		m_pEmission = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
-		AAssert(m_pEmission, "Stream suggests allocating an unallocatable type in AEmitter::Emission::Create!");
+		RTEAssert(m_pEmission, "Stream suggests allocating an unallocatable type in AEmitter::Emission::Create!");
 	}
 	else if (propName == "ParticlesPerMinute")
 		reader >> m_PPM;

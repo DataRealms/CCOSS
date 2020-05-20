@@ -14,7 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "EditorActivity.h"
 
 namespace RTE
@@ -52,7 +52,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(SceneEditor)
+EntityAllocation(SceneEditor)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

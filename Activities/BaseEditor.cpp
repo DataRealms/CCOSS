@@ -52,7 +52,7 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(BaseEditor, Activity, 0)
+ConcreteClassInfo(BaseEditor, Activity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

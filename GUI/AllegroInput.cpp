@@ -35,9 +35,9 @@ AllegroInput::AllegroInput(int whichPlayer, bool keyJoyMouseCursor):
 
 #ifndef GUI_STANDALONE
     // Set the speed of the mouse
-    float mouseDenominator = g_FrameMan.IsFullscreen() ? g_FrameMan.NxFullscreen() : g_FrameMan.NxWindowed();
+    float mouseDenominator = g_FrameMan.ResolutionMultiplier();
     // If Nx fullscreen, adjust the mouse speed accordingly
-    if (g_FrameMan.IsFullscreen() && g_FrameMan.NxFullscreen() > 1)
+    if (mouseDenominator > 1)
         set_mouse_speed(1, 1);
     else
         set_mouse_speed(2, 2);
@@ -106,16 +106,6 @@ void AllegroInput::Update(void)
 		uint8_t scancode = (rawkey >> 8);
 
 		m_ScanCodeState[scancode] = Pushed;
-
-#if defined(__APPLE__)
-
-		// [CHRISK] HACK: Apple ignore map - need to look into
-		// this more. Backspace and arrow keys generate extraneous keypresses
-		// 127 == Delete
-		// 63 == ?
-		if (ascii == 63 || ascii == 127)
-			continue;
-#endif // defined(__APPLE__)
 
 		m_KeyboardBuffer[ascii] = Pushed;
 	}
@@ -293,7 +283,7 @@ void AllegroInput::Update(void)
 */
 #ifndef GUI_STANDALONE
     // Get mouse cursor movement denominator based on window size multiplication
-    float mouseDenominator = g_FrameMan.IsFullscreen() ? g_FrameMan.NxFullscreen() : g_FrameMan.NxWindowed();
+    float mouseDenominator = g_FrameMan.ResolutionMultiplier();
 
     // If joysticks and keyboard can control the mouse cursor too
     if (m_KeyJoyMouseCursor)

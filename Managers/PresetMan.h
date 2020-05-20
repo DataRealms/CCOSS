@@ -14,7 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Singleton.h"
 #define g_PresetMan PresetMan::Instance()
 
@@ -144,7 +144,7 @@ public:
 //                  with information about the progress of this DataModule's creation.
 // Return value:    Whether the DataModule was read and added correctly.
 
-    bool LoadDataModule(std::string moduleName, bool official, void (*fpProgressCallback)(std::string, bool) = 0);
+    bool LoadDataModule(std::string moduleName, bool official, ProgressCallback fpProgressCallback = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -157,6 +157,17 @@ public:
 
     bool LoadDataModule(std::string moduleName) { return LoadDataModule(moduleName, false, 0); }
 
+	/// <summary>
+	/// Loads all the official data modules individually with LoadDataModule, then proceeds to look for any non-official modules and loads them as well.
+	/// </summary>
+	/// <returns></returns>
+	bool LoadAllDataModules();
+
+	/// <summary>
+	/// Sets the single module to be loaded after the official modules. This will be the ONLY non-official module to be loaded.
+	/// </summary>
+	/// <param name="moduleName">Name of the module to load.</param>
+	void SetSingleModuleToLoad(std::string moduleName) { m_SingleModuleToLoad = moduleName; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetDataModule
@@ -520,6 +531,8 @@ protected:
     // How many modules are 'official' and shipped with the game, and guaranteed to not have name conflicts among them
     // All official modules are in the beginning of the m_TypeMap, so this count shows how many into that vector they represent
     int m_OfficialModuleCount;
+
+	std::string m_SingleModuleToLoad; //!< Name of the single module to load after the official modules.
 
     // List of all Entity groups ever registered, all uniques
     // This is just a handy total of all the groups registered in all the individual DataModule:s

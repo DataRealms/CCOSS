@@ -15,15 +15,15 @@
 #include "Atom.h"
 #include "MOSParticle.h"
 #include "RTEManagers.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "MOPixel.h"
 #include "AEmitter.h"
 #include "float.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(Magazine, Attachable, 0)
-CONCRETECLASSINFO(Round, Entity, 0)
+ConcreteClassInfo(Magazine, Attachable, 0)
+ConcreteClassInfo(Round, Entity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ int Round::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "Particle")
     {
         m_pParticle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
-        AAssert(m_pParticle, "Stream suggests allocating an unallocatable type in Round::Create!");
+        RTEAssert(m_pParticle, "Stream suggests allocating an unallocatable type in Round::Create!");
     }
     else if (propName == "Shell")
         m_pShell = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));

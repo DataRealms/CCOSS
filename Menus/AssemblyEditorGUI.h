@@ -15,7 +15,6 @@
 // Inclusions of header files
 
 //#include "FrameMan.h"
-#include "Sound.h"
 #include "Timer.h"
 #include "Vector.h"
 #include "BunkerAssemblyScheme.h"

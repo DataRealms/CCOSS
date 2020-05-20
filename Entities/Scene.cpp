@@ -35,7 +35,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(Scene, Entity, 0)
+ConcreteClassInfo(Scene, Entity, 0)
 const string Scene::Area::m_sClassName = "Area";
 
 
@@ -185,7 +185,7 @@ bool Scene::Area::IsInside(const Vector &point) const
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
-            if (wItr->WithinBox(point))
+            if (wItr->IsWithinBox(point))
                 return true;
         }
     }
@@ -211,7 +211,7 @@ bool Scene::Area::IsInsideX(float pointX) const
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
-            if (wItr->WithinBoxX(pointX))
+            if (wItr->IsWithinBoxX(pointX))
                 return true;
         }
     }
@@ -237,7 +237,7 @@ bool Scene::Area::IsInsideY(float pointY) const
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
-            if (wItr->WithinBoxY(pointY))
+            if (wItr->IsWithinBoxY(pointY))
                 return true;
         }
     }
@@ -324,7 +324,7 @@ Box * Scene::Area::GetBoxInside(const Vector &point)
         for (list<Box>::const_iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
             // Return the BoxList box, not the inconsequential wrapped copy
-            if (wItr->WithinBox(point))
+            if (wItr->IsWithinBox(point))
                 return &(*aItr);
         }
     }
@@ -351,7 +351,7 @@ Box Scene::Area::RemoveBoxInside(const Vector &point)
         // Iterate through the wrapped boxes - will only be one if there's no wrapping
         for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
         {
-            if (wItr->WithinBox(point))
+            if (wItr->IsWithinBox(point))
             {
                 // Remove the BoxList box, not the inconsequential wrapped copy
                 returnBox = (*aItr);
@@ -549,7 +549,7 @@ int Scene::Create(const Scene &reference)
         BITMAP *pCopyFrom = reference.m_pPreviewBitmap;
 		// Destination
 		m_pPreviewBitmap = create_bitmap_ex(8, pCopyFrom->w, pCopyFrom->h);
-		AAssert(m_pPreviewBitmap, "Failed to allocate BITMAP in Scene::Create");
+		RTEAssert(m_pPreviewBitmap, "Failed to allocate BITMAP in Scene::Create");
 
 		// Copy!
 		blit(pCopyFrom, m_pPreviewBitmap, 0, 0, 0, 0, pCopyFrom->w, pCopyFrom->h);
@@ -569,13 +569,13 @@ int Scene::Create(const Scene &reference)
 
 int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 {
-    DAssert(m_pTerrain, "Terrain not instantiated before trying to load its data!");
+    RTEAssert(m_pTerrain, "Terrain not instantiated before trying to load its data!");
 
     ///////////////////////////////////
     // Load Terrain's data
     if (m_pTerrain->LoadData() < 0)
     {
-        DDTAbort("Loading Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
+        RTEAbort("Loading Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
         return -1;
     }
     
@@ -836,7 +836,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
                                 int scaledW = ceilf(pTO->GetFGColorBitmap()->w * scale.m_X);
                                 int scaledH = ceilf(pTO->GetFGColorBitmap()->h * scale.m_Y);
                                 // Fill the box with key color for the owner ownerTeam, revealing the area that this thing is on
-                                rectfill(m_apUnseenLayer[ownerTeam]->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_KeyColor);
+                                rectfill(m_apUnseenLayer[ownerTeam]->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_MaskColor);
                                 // Expand the box a little so the whole placed object is going to be hidden
                                 scaledX -= 1;
                                 scaledY -= 1;
@@ -907,7 +907,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
         // Load Background layers' data
         for (list<SceneLayer *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
         {
-            DAssert((*slItr), "Background layer not instantiated before trying to load its data!");
+            RTEAssert((*slItr), "Background layer not instantiated before trying to load its data!");
             if ((*slItr)->LoadData() < 0)
             {
                 g_ConsoleMan.PrintString("ERROR: Loading background layer " + (*slItr)->GetPresetName() + "\'s data failed!");
@@ -1017,7 +1017,7 @@ int Scene::SaveData(string pathBase)
     // Save Terrain's data
     if (m_pTerrain->SaveData(pathBase) < 0)
     {
-        DDTAbort("Saving Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
+        RTEAbort("Saving Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
         return -1;
     }
 
@@ -1150,7 +1150,7 @@ int Scene::SavePreview(string bitmapPath)
 	if (!m_pPreviewBitmap)
 	{
 		m_pPreviewBitmap = create_bitmap_ex(8,PREVIEW_WIDTH, PREVIEW_HEIGHT);
-		clear_to_color(m_pPreviewBitmap, g_KeyColor);
+		clear_to_color(m_pPreviewBitmap, g_MaskColor);
 	}
 
 	// Calculate resized bitmap size and scale
@@ -1176,8 +1176,8 @@ int Scene::SavePreview(string bitmapPath)
 	BITMAP * pTemp = create_bitmap_ex(8, width, height);
 
 	//Save default layer
-	clear_to_color(pTemp, g_KeyColor);
-	clear_to_color(m_pPreviewBitmap, g_KeyColor);
+	clear_to_color(pTemp, g_MaskColor);
+	clear_to_color(m_pPreviewBitmap, g_MaskColor);
 
 	// Draw terrain
 	BITMAP * bmpFG = m_pTerrain->GetFGColorBitmap();
@@ -1221,14 +1221,14 @@ int Scene::ClearData()
     // Clear Terrain's data
     if (m_pTerrain->ClearData() < 0)
     {
-        DDTAbort("Clearing Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
+        RTEAbort("Clearing Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
         return -1;
     }
 
     // Clear Background layers' data
     for (list<SceneLayer *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
     {
-        DAssert((*slItr), "Background layer not instantiated before trying to clear its data!");
+        RTEAssert((*slItr), "Background layer not instantiated before trying to clear its data!");
         if ((*slItr)->ClearData() < 0)
         {
             g_ConsoleMan.PrintString("ERROR: Clearing background layer " + (*slItr)->GetPresetName() + "\'s data failed!");
@@ -1339,7 +1339,7 @@ int Scene::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "AddBackgroundLayer")
     {
         SceneLayer *pLayer = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
-        AAssert(pLayer, "Something went wrong with reading SceneLayer");
+        RTEAssert(pLayer, "Something went wrong with reading SceneLayer");
         if (pLayer)
             m_BackLayerList.push_back(pLayer);
     }
@@ -1836,7 +1836,7 @@ void Scene::ClearSeenPixels(int team)
         {
             for (list<Vector>::iterator itr = m_SeenPixels[team].begin(); itr != m_SeenPixels[team].end(); ++itr)
             {
-                putpixel(m_apUnseenLayer[team]->GetBitmap(), (*itr).m_X, (*itr).m_Y, g_KeyColor);
+                putpixel(m_apUnseenLayer[team]->GetBitmap(), (*itr).m_X, (*itr).m_Y, g_MaskColor);
 
                 // Clean up around the removed pixels too
                 CleanOrphanPixel((*itr).m_X + 1, (*itr).m_Y, W, team);
@@ -1878,7 +1878,7 @@ bool Scene::CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom,
     m_apUnseenLayer[team]->WrapPosition(posX, posY, false);
 
     // First check the actual position of the checked pixel, it may already been seen.
-    if (getpixel(m_apUnseenLayer[team]->GetBitmap(), posX, posY) == g_KeyColor)
+    if (getpixel(m_apUnseenLayer[team]->GetBitmap(), posX, posY) == g_MaskColor)
         return false;
 
     // Ok, not seen, so check surrounding pixels for 'support', ie unseen ones that will keep this also unseen
@@ -1889,62 +1889,62 @@ bool Scene::CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom,
         testPosX = posX + 1;
         testPosY = posY;
         m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
-        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_KeyColor ? 1 : 0;
+        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 1 : 0;
     }
     if (checkingFrom != W)
     {
         testPosX = posX - 1;
         testPosY = posY;
         m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
-        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_KeyColor ? 1 : 0;
+        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 1 : 0;
     }
     if (checkingFrom != S)
     {
         testPosX = posX;
         testPosY = posY + 1;
         m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
-        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_KeyColor ? 1 : 0;
+        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 1 : 0;
     }
     if (checkingFrom != N)
     {
         testPosX = posX;
         testPosY = posY - 1;
         m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
-        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_KeyColor ? 1 : 0;
+        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 1 : 0;
     }
     if (checkingFrom != SE)
     {
         testPosX = posX + 1;
         testPosY = posY + 1;
         m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
-        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_KeyColor ? 0.5f : 0;
+        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 0.5f : 0;
     }
     if (checkingFrom != SW)
     {
         testPosX = posX - 1;
         testPosY = posY + 1;
         m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
-        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_KeyColor ? 0.5f : 0;
+        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 0.5f : 0;
     }
     if (checkingFrom != NW)
     {
         testPosX = posX - 1;
         testPosY = posY - 1;
         m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
-        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_KeyColor ? 0.5f : 0;
+        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 0.5f : 0;
     }
     if (checkingFrom != NE)
     {
         testPosX = posX + 1;
         testPosY = posY - 1;
         m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
-        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_KeyColor ? 0.5f : 0;
+        support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 0.5f : 0;
     }
 
     // Orphaned enough to remove?
     if (support <= 2.5)
     {
-        putpixel(m_apUnseenLayer[team]->GetBitmap(), posX, posY, g_KeyColor);
+        putpixel(m_apUnseenLayer[team]->GetBitmap(), posX, posY, g_MaskColor);
         m_CleanedPixels[team].push_back(Vector(posX, posY));
         return true;
     }    
@@ -2006,7 +2006,7 @@ bool Scene::PlaceResidentBrain(int player, Activity &newActivity)
 {
     if (m_ResidentBrains[player])
     {
-        DAssert(m_ResidentBrains[player]->GetTeam() == newActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team!!");
+        RTEAssert(m_ResidentBrains[player]->GetTeam() == newActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team!!");
 
         Actor *pBrainActor = dynamic_cast<Actor *>(m_ResidentBrains[player]);
         if (pBrainActor)// && pBrainActor->IsActor())
@@ -2061,7 +2061,7 @@ int Scene::RetrieveResidentBrains(Activity &oldActivity)
 
     for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
     {
-//        DAssert(oldActivity.GetPlayerBrain(player) && oldActivity.GetPlayerBrain(player)->GetTeam() == oldActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team BEFORE being retrieved!!");
+//        RTEAssert(oldActivity.GetPlayerBrain(player) && oldActivity.GetPlayerBrain(player)->GetTeam() == oldActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team BEFORE being retrieved!!");
 
         // Replace existing brain residencies
         delete m_ResidentBrains[player];
@@ -2076,7 +2076,7 @@ int Scene::RetrieveResidentBrains(Activity &oldActivity)
         else
             m_ResidentBrains[player] = 0;
 
-//        DAssert(m_ResidentBrains[player] && m_ResidentBrains[player]->GetTeam() == oldActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team AFTER being retrieved!!");
+//        RTEAssert(m_ResidentBrains[player] && m_ResidentBrains[player]->GetTeam() == oldActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team AFTER being retrieved!!");
     }
 
     return found;
@@ -3062,7 +3062,7 @@ int Scene::CalculateScenePath(const Vector start, const Vector end, bool movePat
 
 void Scene::Lock()
 {
-//    AAssert(!m_Locked, "Hey, locking already locked scene!");
+//    RTEAssert(!m_Locked, "Hey, locking already locked scene!");
     if (!m_Locked)
     {
         m_pTerrain->LockBitmaps();
@@ -3081,7 +3081,7 @@ void Scene::Lock()
 
 void Scene::Unlock()
 {
-//    AAssert(m_Locked, "Hey, unlocking already unlocked scene!");
+//    RTEAssert(m_Locked, "Hey, unlocking already unlocked scene!");
     if (m_Locked)
     {
         m_pTerrain->UnlockBitmaps();

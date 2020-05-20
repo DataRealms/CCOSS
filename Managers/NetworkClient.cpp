@@ -19,6 +19,7 @@
 #include "FrameMan.h"
 #include "AudioMan.h"
 #include "SettingsMan.h"
+#include "PerformanceMan.h"
 
 #include "NetworkClient.h"
 
@@ -84,13 +85,12 @@ namespace RTE
 		}
 
 		// Stop all sounds received from server
-		for (std::map<short int, Sound *>::iterator it = m_Sounds.begin(); it != m_Sounds.end(); ++it)
-		{
+		for (std::unordered_map<unsigned short, SoundContainer *>::iterator it = m_ServerSounds.begin(); it != m_ServerSounds.end(); ++it) {
 			it->second->Stop();
 			delete it->second;
 		}
 
-		m_Sounds.clear();
+		m_ServerSounds.clear();
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -425,7 +425,7 @@ namespace RTE
 		{
 			if (frameData->DataSize == 0)
 			{
-				memset(bmp->line[liney] + linex, g_KeyColor, width);
+				memset(bmp->line[liney] + linex, g_MaskColor, width);
 			}
 			else
 			{
@@ -614,17 +614,17 @@ namespace RTE
 							// Detect if nonwrapping layer dimensions can't cover the whole target area with its main bitmap. If so, fill in the gap with appropriate solid color sampled from the hanging edge
 					if (!m_aBackgroundLayers[frame][i].WrapX && !screenLargerThanSceneX && m_aBackgroundLayers[frame][i].ScrollRatioX < 0)
 					{
-						if (m_aBackgroundLayers[frame][i].FillLeftColor != g_KeyColor && offsetX != 0)
+						if (m_aBackgroundLayers[frame][i].FillLeftColor != g_MaskColor && offsetX != 0)
 							rectfill(pTargetBitmap, targetBox.GetCorner().m_X, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X - offsetX, targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_aBackgroundLayers[frame][i].FillLeftColor);
-						if (m_aBackgroundLayers[frame][i].FillRightColor != g_KeyColor)
+						if (m_aBackgroundLayers[frame][i].FillRightColor != g_MaskColor)
 							rectfill(pTargetBitmap, (targetBox.GetCorner().m_X - offsetX) + m_BackgroundBitmaps[i]->w, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_aBackgroundLayers[frame][i].FillRightColor);
 					}
 
 					if (!m_aBackgroundLayers[frame][i].WrapY && !screenLargerThanSceneY && m_aBackgroundLayers[frame][i].ScrollRatioY < 0)
 					{
-						if (m_aBackgroundLayers[frame][i].FillUpColor != g_KeyColor && offsetY != 0)
+						if (m_aBackgroundLayers[frame][i].FillUpColor != g_MaskColor && offsetY != 0)
 							rectfill(pTargetBitmap, targetBox.GetCorner().m_X, targetBox.GetCorner().m_Y, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y - offsetY, m_aBackgroundLayers[frame][i].FillUpColor);
-						if (m_aBackgroundLayers[frame][i].FillDownColor != g_KeyColor)
+						if (m_aBackgroundLayers[frame][i].FillDownColor != g_MaskColor)
 							rectfill(pTargetBitmap, targetBox.GetCorner().m_X, (targetBox.GetCorner().m_Y - offsetY) + m_BackgroundBitmaps[i]->h, targetBox.GetCorner().m_X + targetBox.GetWidth(), targetBox.GetCorner().m_Y + targetBox.GetHeight(), m_aBackgroundLayers[frame][i].FillDownColor);
 					}
 				}
@@ -667,90 +667,59 @@ namespace RTE
 		//g_ConsoleMan.PrintString(buf);
 	}
 
-	void NetworkClient::ReceiveSoundEventsMsg(RakNet::Packet * p)
-	{
+	void NetworkClient::ReceiveSoundEventsMsg(RakNet::Packet * p) {
 		MsgSoundEvents * msg = (MsgSoundEvents *)p->data;
 		AudioMan::NetworkSoundData * sndDataPtr = (AudioMan::NetworkSoundData *)((char *)msg + sizeof(MsgSoundEvents));
 
-		for (int i = 0; i < msg->SoundEventsCount; i++)
-		{
-			if (sndDataPtr->State == AudioMan::SOUND_PLAY)
-			{
-				BITMAP * bmp = 0;
-				std::string path = ContentFile::GetPathFromHash(sndDataPtr->SoundHash);
-				if (path != "")
-				{
-					Sound *pSound = new Sound();
-					pSound->Create(path, sndDataPtr->AffectedByPitch > 0 ? true : false, sndDataPtr->Loops);
-					g_AudioMan.SetSoundPitch(pSound, sndDataPtr->Pitch);
+		for (int msgIndex = 0; msgIndex < msg->SoundEventsCount; msgIndex++) {
+			if (sndDataPtr->State == AudioMan::SOUND_SET_GLOBAL_PITCH) {
+				g_AudioMan.SetGlobalPitch(sndDataPtr->Pitch);
+			} else {
+				// The set of SoundContainers that have already been handled for this event, used to hopefully avoid repeating actions when iterating over provided sound channel indices
+				std::unordered_set<SoundContainer *> alreadyHandledSoundContainers;
 
-					pSound->Play(sndDataPtr->Distance);
-
-					// Stop sound at this channel just in case
-					if (m_Sounds.count(sndDataPtr->Channel) > 0)
-					{
-						m_Sounds[sndDataPtr->Channel]->Stop();
-						delete m_Sounds[sndDataPtr->Channel];
-					}
-
-					m_Sounds[sndDataPtr->Channel] = pSound;
-
-					//char buf[128];
-					//sprintf_s(buf, sizeof(buf), "PLAY %d %d %f %s", sndDataPtr->Loops, pSound->GetCurrentChannel(), sndDataPtr->Pitch, path.c_str());
-					//g_ConsoleMan.PrintString(buf);
-				}
-				else 
-				{
-					//char buf[128];
-					//sprintf_s(buf, sizeof(buf), "NO SOUND %d", sndDataPtr->SoundHash);
-					//g_ConsoleMan.PrintString(buf);
-				}
-			}
-			else if (sndDataPtr->State == AudioMan::SOUND_SET_PITCH)
-			{
-				if (sndDataPtr->SoundHash == 0)
-				{
-					g_AudioMan.SetGlobalPitch(sndDataPtr->Pitch, sndDataPtr->AffectedByPitch > 0 ? true : false);
-					//char buf[128];
-					//sprintf_s(buf, sizeof(buf), "GLOBAL PITCH %f %d", sndDataPtr->Pitch, sndDataPtr->AffectedByPitch);
-					//g_ConsoleMan.PrintString(buf);
-				}
-				else
-				{
-					if (m_Sounds.count(sndDataPtr->Channel) > 0)
-					{
-						//char buf[128];
-						//sprintf_s(buf, sizeof(buf), "PITCH %d %f", m_Sounds[sndDataPtr->Channel]->GetCurrentChannel(), sndDataPtr->Pitch);
-						//g_ConsoleMan.PrintString(buf);
-
-						g_AudioMan.SetSoundPitch(m_Sounds[sndDataPtr->Channel], sndDataPtr->Pitch);
-					}
-					else
-					{
-						//char buf[128];
-						//sprintf_s(buf, sizeof(buf), "Not found %d", sndDataPtr->Channel);
-						//g_ConsoleMan.PrintString(buf);
+				for (unsigned short serverSoundChannelIndex : sndDataPtr->Channels) {
+					if (serverSoundChannelIndex < c_MaxVirtualChannels && (sndDataPtr->State == AudioMan::SOUND_PLAY || m_ServerSounds.find(serverSoundChannelIndex) != m_ServerSounds.end())) {
+						SoundContainer *soundContainerToHandle = (m_ServerSounds.find(serverSoundChannelIndex) == m_ServerSounds.end()) ? NULL : m_ServerSounds.at(serverSoundChannelIndex);
+						if (alreadyHandledSoundContainers.find(soundContainerToHandle) == alreadyHandledSoundContainers.end()) {
+							switch (sndDataPtr->State) {
+								case AudioMan::SOUND_PLAY:
+									if (soundContainerToHandle == NULL) {
+										soundContainerToHandle = new SoundContainer();
+									} else {
+										soundContainerToHandle->Stop();
+										soundContainerToHandle->Reset();
+									}
+									soundContainerToHandle->Create(sndDataPtr->Loops, sndDataPtr->AffectedByGlobalPitch, sndDataPtr->AttenuationStartDistance, sndDataPtr->Immobile);
+									for (size_t soundFileHash : sndDataPtr->SoundFileHashes) {
+										if (soundFileHash != 0) { soundContainerToHandle->AddSound(ContentFile::GetPathFromHash(soundFileHash)); }
+									}
+									g_AudioMan.PlaySound(soundContainerToHandle, Vector(sndDataPtr->Position[0], sndDataPtr->Position[1]), -1, -1, sndDataPtr->Pitch);
+									break;
+								case AudioMan::SOUND_STOP:
+									soundContainerToHandle->Stop();
+									break;
+								case AudioMan::SOUND_SET_POSITION:
+									soundContainerToHandle->SetPosition(Vector(sndDataPtr->Position[0], sndDataPtr->Position[1]));
+									break;
+								case AudioMan::SOUND_SET_PITCH:
+									g_AudioMan.SetSoundPitch(soundContainerToHandle, sndDataPtr->Pitch);
+									break;
+								case AudioMan::SOUND_FADE_OUT:
+									g_AudioMan.FadeOutSound(soundContainerToHandle, sndDataPtr->FadeOutTime);
+									break;
+								default:
+									RTEAbort("Multiplayer client tried to receive unhandled Sound Event, of state " + sndDataPtr->State);
+							}
+							alreadyHandledSoundContainers.insert(soundContainerToHandle);
+						}
+						// We always have to add the newly made sound container to the map of server sounds, regardless of whether we were able to delete existing sounds above
+						if (sndDataPtr->State == AudioMan::SOUND_PLAY) { m_ServerSounds.insert({serverSoundChannelIndex, soundContainerToHandle}); }
 					}
 				}
 			}
-			else if (sndDataPtr->State == AudioMan::SOUND_STOP)
-			{
-				if (m_Sounds.count(sndDataPtr->Channel) > 0)
-				{
-					//char buf[128];
-					//sprintf_s(buf, sizeof(buf), "STOP %d", m_Sounds[sndDataPtr->Channel]->GetCurrentChannel());
-					//g_ConsoleMan.PrintString(buf);
-
-					m_Sounds[sndDataPtr->Channel]->Stop();
-				}
-			}
-
 			sndDataPtr++;
 		}
-
-		//char buf[128];
-		//sprintf_s(buf, sizeof(buf), "%d %d %d", msg->FrameNumber, m_PostEffects[msg->FrameNumber].size(), msg->PostEffectsCount);
-		//g_ConsoleMan.PrintString(buf);
 	}
 
 
@@ -803,13 +772,12 @@ namespace RTE
 
 	void NetworkClient::DrawPostEffects(int frame)
 	{
-		g_FrameMan.SetPostEffectsList(0, m_PostEffects[frame]);
+		g_PostProcessMan.SetNetworkPostEffectsList(0, m_PostEffects[frame]);
 		//m_PostEffects[frame].clear();
 	}
 
 	void NetworkClient::DrawFrame()
 	{
-		while (g_FrameMan.IsNetworkBitmapLocked(0));
 		BITMAP * src_bmp = g_FrameMan.GetNetworkBackBufferIntermediate8Ready(0);
 		BITMAP * dst_bmp = g_FrameMan.GetNetworkBackBuffer8Ready(0);
 
@@ -818,7 +786,7 @@ namespace RTE
 
 		// Have to clear to color to fallback if there's no skybox on client
 		clear_to_color(dst_bmp, g_BlackColor);
-		clear_to_color(dst_gui_bmp, g_KeyColor);
+		clear_to_color(dst_gui_bmp, g_MaskColor);
 
 		// Draw Scene background
 		int sourceX = m_TargetPos[m_CurrentFrame].m_X;
@@ -872,10 +840,10 @@ namespace RTE
 
 		DrawPostEffects(m_CurrentFrame);
 
-		g_FrameMan.SetCurrentPing(GetPing());
+		g_PerformanceMan.SetCurrentPing(GetPing());
 
-		//clear_to_color(src_bmp, g_KeyColor);
-		//clear_to_color(src_gui_bmp, g_KeyColor);
+		//clear_to_color(src_bmp, g_MaskColor);
+		//clear_to_color(src_gui_bmp, g_MaskColor);
 
 		// DEBUG!!!
 		//if (m_CurrentFrame != m_CurrentFrameSetup)
@@ -925,8 +893,8 @@ namespace RTE
 			// Unpack box
 			if (frameData->DataSize == 0)
 			{
-				//memset(bmp->line[lineNumber], g_KeyColor, bmp->w);
-				rectfill(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_KeyColor);
+				//memset(bmp->line[lineNumber], g_MaskColor, bmp->w);
+				rectfill(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_MaskColor);
 			}
 			else
 			{
@@ -990,7 +958,7 @@ namespace RTE
 		{
 			if (frameData->DataSize == 0)
 			{
-				memset(bmp->line[lineNumber], g_KeyColor, bmp->w);
+				memset(bmp->line[lineNumber], g_MaskColor, bmp->w);
 			}
 			else 
 			{
@@ -1039,8 +1007,8 @@ namespace RTE
 
 	void NetworkClient::ReceiveSceneSetupMsg(RakNet::Packet * p)
 	{
-		clear_to_color(g_FrameMan.GetNetworkBackBufferIntermediateGUI8Ready(0), g_KeyColor);
-		clear_to_color(g_FrameMan.GetNetworkBackBufferGUI8Ready(0), g_KeyColor);
+		clear_to_color(g_FrameMan.GetNetworkBackBufferIntermediateGUI8Ready(0), g_MaskColor);
+		clear_to_color(g_FrameMan.GetNetworkBackBufferGUI8Ready(0), g_MaskColor);
 
 		RTE::MsgSceneSetup * frameData = (RTE::MsgSceneSetup *)p->data;
 
@@ -1054,7 +1022,7 @@ namespace RTE
 		m_pSceneBackgroundBitmap = create_bitmap_ex(8, frameData->Width, frameData->Height);
 		m_pSceneForegroundBitmap = create_bitmap_ex(8, frameData->Width, frameData->Height);
 		// This is purely for aesthetic reasons to draw bitmap during level loading
-		clear_to_color(m_pSceneForegroundBitmap, g_KeyColor);
+		clear_to_color(m_pSceneForegroundBitmap, g_MaskColor);
 
 		m_SceneWrapsX = frameData->SceneWrapsX;
 		m_SceneWidth = frameData->Width;

@@ -12,12 +12,12 @@
 // Inclusions of header files
 
 #include "Icon.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "FrameMan.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(Icon, Entity, 0)
+ConcreteClassInfo(Icon, Entity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

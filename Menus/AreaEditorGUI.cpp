@@ -67,7 +67,7 @@ void AreaEditorGUI::Clear()
 
 int AreaEditorGUI::Create(Controller *pController, bool fullFeatured, int whichModuleSpace)
 {
-    AAssert(pController, "No controller sent to AreaEditorGUI on creation!");
+    RTEAssert(pController, "No controller sent to AreaEditorGUI on creation!");
     m_pController = pController;
 
     m_FullFeatured = fullFeatured;
@@ -445,7 +445,7 @@ void AreaEditorGUI::Update()
             }
 
             UpdatePieMenu();
-            g_GUISound.PlacementBlip().Play();
+            g_GUISound.PlacementBlip()->Play();
         }
         // Just hovering over things, show what would be moved if we started dragging
         else
@@ -510,7 +510,7 @@ void AreaEditorGUI::Update()
                 m_EditMade = true;
                 m_EditorGUIMode = PREADDMOVEBOX;
                 m_PreviousMode = MOVINGBOX;
-                g_GUISound.PlacementThud().Play();
+                g_GUISound.PlacementThud()->Play();
             }
         }
 
@@ -538,7 +538,7 @@ void AreaEditorGUI::Update()
                 m_EditMade = true;
                 m_EditorGUIMode = PREADDMOVEBOX;
                 m_PreviousMode = ADDINGBOX;
-                g_GUISound.PlacementThud().Play();
+                g_GUISound.PlacementThud()->Play();
             }
         }
 
@@ -564,7 +564,7 @@ void AreaEditorGUI::Update()
                 Box removed = m_pCurrentArea->RemoveBoxInside(m_CursorPos);
                 // If we didnt' remove any box, play error sound
                 if (removed.IsEmpty())
-                    g_GUISound.UserErrorSound().Play();
+                    g_GUISound.UserErrorSound()->Play();
                 else
                     m_EditMade = true;
             }

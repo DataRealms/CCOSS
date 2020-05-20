@@ -20,7 +20,7 @@
 #include "Arm.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
@@ -32,7 +32,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(ACRocket, ACraft, 0)
+ConcreteClassInfo(ACRocket, ACraft, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

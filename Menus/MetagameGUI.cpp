@@ -363,7 +363,7 @@ int MetagameGUI::Create()
 
 int MetagameGUI::Create(Controller *pController)
 {
-    AAssert(pController, "No controller sent to MetagameGUI on creation!");
+    RTEAssert(pController, "No controller sent to MetagameGUI on creation!");
     m_pController = pController;
 
     char str[256];
@@ -375,7 +375,7 @@ int MetagameGUI::Create(Controller *pController)
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/MainMenu"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
     m_pGUIController->Load("Base.rte/GUIs/MetagameGUI.ini");
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
@@ -881,12 +881,12 @@ void MetagameGUI::SetEnabled(bool enable)
     if (enable && m_MenuEnabled != ENABLED && m_MenuEnabled != ENABLING)
     {
         m_MenuEnabled = ENABLING;
-        g_GUISound.EnterMenuSound().Play();
+        g_GUISound.EnterMenuSound()->Play();
     }
     else if (!enable && m_MenuEnabled != DISABLED && m_MenuEnabled != DISABLING)
     {
         m_MenuEnabled = DISABLING;
-        g_GUISound.ExitMenuSound().Play();
+        g_GUISound.ExitMenuSound()->Play();
     }
 
     m_ScreenChange = true;
@@ -968,7 +968,7 @@ bool MetagameGUI::SelectScene(std::string sceneName)
 
 void MetagameGUI::SwitchToScreen(int newScreen)
 {
-    AAssert(newScreen >= ROOTBOX && newScreen < SCREENCOUNT, "Tried to switch to an out of bounds screen!");
+    RTEAssert(newScreen >= ROOTBOX && newScreen < SCREENCOUNT, "Tried to switch to an out of bounds screen!");
 
     // Hide all previously shown screens
     HideAllScreens();
@@ -1588,7 +1588,7 @@ void MetagameGUI::Update()
     {
         m_pPhaseBox->SetVisible(true);
         // Never let a game go if we have 0 players
-//        AAssert(g_MetaMan.m_Players.size() > 0, "Game in progress without any players!");
+//        RTEAssert(g_MetaMan.m_Players.size() > 0, "Game in progress without any players!");
     }
 
     // Deselect scenes and player bars on state change
@@ -1897,7 +1897,7 @@ void MetagameGUI::Update()
             {
                 m_pHoveredScene = (*newCandidateItr);
                 foundNewHover = true;
-                g_GUISound.SelectionChangeSound().Play();
+                g_GUISound.SelectionChangeSound()->Play();
             }
 
             // If we didn't find anything to hover over, then remove the hover status
@@ -1916,14 +1916,14 @@ void MetagameGUI::Update()
                 if (m_pHoveredScene)
                 {
                     SelectScene(m_pHoveredScene);
-                    g_GUISound.ItemChangeSound().Play();
+                    g_GUISound.ItemChangeSound()->Play();
                 }
 /* Can't do this, doesn't take into account clicks on floating UI boxes
                 // Not hovering over anything on click, so deselect whatever was selected
                 else if (m_pSelectedScene)
                 {
                     m_pSelectedScene = 0;
-                    g_GUISound.FocusChangeSound().Play();
+                    g_GUISound.FocusChangeSound()->Play();
                 }
 */
             }
@@ -2268,7 +2268,7 @@ void MetagameGUI::UpdateInput()
             {
                 g_MetaMan.SetSuspend(true);
                 SwitchToScreen(MENUDIALOG);
-                g_GUISound.BackButtonPressSound().Play();
+                g_GUISound.BackButtonPressSound()->Play();
             }
 
 			// Return to main menu button pressed
@@ -2280,7 +2280,7 @@ void MetagameGUI::UpdateInput()
                 HideAllScreens();
                 // Signal that we want to go back to main menu
                 m_BackToMain = true;
-                g_GUISound.BackButtonPressSound().Play();
+                g_GUISound.BackButtonPressSound()->Play();
 				
             }
 
@@ -2289,7 +2289,7 @@ void MetagameGUI::UpdateInput()
             {
                 g_MetaMan.SetSuspend(true);
                 SwitchToScreen(SAVEDIALOG);
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Open load menu button pressed
@@ -2298,7 +2298,7 @@ void MetagameGUI::UpdateInput()
             {
                 g_MetaMan.SetSuspend(true);
                 SwitchToScreen(LOADDIALOG);
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// New Game menu button pressed
@@ -2307,7 +2307,7 @@ void MetagameGUI::UpdateInput()
                 g_MetaMan.SetSuspend(true);
                 SwitchToScreen(NEWDIALOG);
                 UpdatePlayerSetup();
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Quit Program button pressed
@@ -2318,7 +2318,7 @@ void MetagameGUI::UpdateInput()
                 m_pConfirmationLabel->SetText("Sure you want to quit to OS?\nAny unsaved progress\nwill be lost!");
                 m_pConfirmationButton->SetText("Quit");
                 m_pConfirmationBox->SetVisible(true);
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Resume Game menu button pressed
@@ -2333,7 +2333,7 @@ void MetagameGUI::UpdateInput()
                 }
                 else
                     SwitchToScreen(ROOTBOX);
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Confirm button pressed
@@ -2368,7 +2368,7 @@ void MetagameGUI::UpdateInput()
                 g_MetaMan.SetSuspend(false);
                 SwitchToScreen(ROOTBOX);
 
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
             // NEW GAME SETUP DIALOG
@@ -2387,7 +2387,7 @@ void MetagameGUI::UpdateInput()
                     // Show changes in affected player' gizmos
                     UpdatePlayerSetup();
                     
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 } 
             }
 
@@ -2405,7 +2405,7 @@ void MetagameGUI::UpdateInput()
                 else
                     StartNewGame();
 
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Save game button pressed
@@ -2433,12 +2433,12 @@ void MetagameGUI::UpdateInput()
                             SwitchToScreen(MENUDIALOG);
 //                        }
                     }
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 }
                 else
                 {
                     m_apMetaButton[SAVENOW]->SetText("CONFIRM?");
-                    g_GUISound.ItemChangeSound().Play();
+                    g_GUISound.ItemChangeSound()->Play();
                 }
             }
 
@@ -2464,7 +2464,7 @@ void MetagameGUI::UpdateInput()
                     SwitchToScreen(ROOTBOX);
                 }
 
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Graphical 'Continue Phase' button pressed; set the signal flag and handle at the end of UpdateInput
@@ -2481,7 +2481,7 @@ void MetagameGUI::UpdateInput()
                 if (g_MetaMan.GetRemainingFundsOfPlayer(metaPlayer, 0, false, false) < SCANCOST)
                 {
                     m_apMetaButton[SCENEACTION]->SetText("NOT ENOUGH FUNDS!");
-                    g_GUISound.UserErrorSound().Play();
+                    g_GUISound.UserErrorSound()->Play();
                 }
                 // Ask whether the player wants to scan now or later, with two new buttons
                 else
@@ -2493,7 +2493,7 @@ void MetagameGUI::UpdateInput()
                     m_pScanInfoLabel->SetVisible(true);
                     m_pScanInfoLabel->SetText("or");
 
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 }
             }
 
@@ -2525,7 +2525,7 @@ void MetagameGUI::UpdateInput()
                     g_ActivityMan.SetStartActivity(pNewEditor);
                     m_ActivityRestarted = true;
 
-                    g_GUISound.ButtonPressSound().Play();
+                    g_GUISound.ButtonPressSound()->Play();
                 }
             }
 
@@ -2563,7 +2563,7 @@ void MetagameGUI::UpdateInput()
                 g_ActivityMan.SetStartActivity(pScanActivity);
                 m_ActivityRestarted = true;
 
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Scan Later button pressed; mark the Scene for scanning by this metaplayer's team
@@ -2573,7 +2573,7 @@ void MetagameGUI::UpdateInput()
                 int team = g_MetaMan.m_Players[metaPlayer].GetTeam();
                 // Double-check to make sure we do have the funds to do this AND that the scan hasn't already been paid for
                 if (g_MetaMan.m_Players[metaPlayer].m_Funds < SCANCOST && !m_pSelectedScene->IsScanScheduled(team))
-                    g_GUISound.UserErrorSound().Play();
+                    g_GUISound.UserErrorSound()->Play();
                 else
                 {
                     // Show the cost change the funds meter
@@ -2592,7 +2592,7 @@ void MetagameGUI::UpdateInput()
                         m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
 
                     // Play an appropriate sound to indicate that the scan is bought and scheduled
-                    g_GUISound.ItemChangeSound().Play();
+                    g_GUISound.ItemChangeSound()->Play();
                 }
             }
 
@@ -2600,7 +2600,7 @@ void MetagameGUI::UpdateInput()
 			if (anEvent.GetControl() == m_pSceneCloseButton)
             {
                 m_pSelectedScene = 0;
-                g_GUISound.ButtonPressSound().Play();
+                g_GUISound.ButtonPressSound()->Play();
             }
         }
 
@@ -2611,7 +2611,7 @@ void MetagameGUI::UpdateInput()
             if (dynamic_cast<GUIButton *>(anEvent.GetControl()))
             {
                 if (anEvent.GetMsg() == GUIButton::Focused)
-                    g_GUISound.SelectionChangeSound().Play();
+                    g_GUISound.SelectionChangeSound()->Play();
                 // Also stop dragging any panels if we're over any button
                 m_pDraggedBox = 0;
                 m_EngageDrag = true;
@@ -2714,7 +2714,7 @@ void MetagameGUI::UpdateInput()
 					UpdateAISkillSliders(player);
 
                     UpdatePlayerSetup();
-//                    g_GUISound.ButtonPressSound().Play();
+//                    g_GUISound.ButtonPressSound()->Play();
                 }
             }
 
@@ -2754,7 +2754,7 @@ void MetagameGUI::UpdateInput()
                 else
                     m_apMetaButton[LOADNOW]->SetVisible(false);
                 // Play a ding
-                g_GUISound.ItemChangeSound().Play();
+                g_GUISound.ItemChangeSound()->Play();
             }
 
             // Save overwrite combo box selection changed
@@ -2799,7 +2799,7 @@ void MetagameGUI::UpdateInput()
                 }
 
                 // Play a ding
-                g_GUISound.ItemChangeSound().Play();
+                g_GUISound.ItemChangeSound()->Play();
             }
         }
     }
@@ -2817,7 +2817,7 @@ void MetagameGUI::UpdateInput()
             SwitchToScreen(MENUDIALOG);
         else
             m_ContinuePhase = true;
-        g_GUISound.ButtonPressSound().Play();
+        g_GUISound.ButtonPressSound()->Play();
     }
 }
 
@@ -3016,6 +3016,8 @@ void MetagameGUI::CompletedActivity()
             // Deep copy over all the edits made to the newly played Scene
             m_pPlayingScene->Destroy();
             m_pPlayingScene->Create(*pAlteredScene);
+            // Null the current scene, which is pointed to by pAlteredScene.
+            g_SceneMan.ClearCurrentScene();
             // Scrub the module ID so the migration goes well.. this is a bit hacky, but ok in this special case
             m_pPlayingScene->SetModuleID(-1);
             m_pPlayingScene->GetTerrain()->SetModuleID(-1);
@@ -3064,7 +3066,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             pScene = (*sItr);
     }
 */
-    AAssert(pScene, "Couldn't find the Site that has been selected as auto resolution of an attack!");
+    RTEAssert(pScene, "Couldn't find the Site that has been selected as auto resolution of an attack!");
 
     // Check all players for active brains, and deactivate them if they don't have them
     if (brainCheck)
@@ -3324,7 +3326,7 @@ void MetagameGUI::UpdateSiteRevealing()
         }
         // Where we need to go with the animation
         m_AnimCountEnd = m_AnimCountStart + delta;
-        AAssert(m_AnimCountEnd <= g_MetaMan.m_Scenes.size(), "Trying to reveal more scenes than there are!");
+        RTEAssert(m_AnimCountEnd <= g_MetaMan.m_Scenes.size(), "Trying to reveal more scenes than there are!");
 
         // Clear and add target crosshairs pointing out all the new scenes
         m_NewSiteIndicators.clear();
@@ -4112,7 +4114,7 @@ void MetagameGUI::UpdateBaseBuilding()
                 m_AnimTotalFunds = g_MetaMan.m_Players[m_AnimMetaPlayer].m_Funds;
                 // Get a handy pointer to the scene we're talking about
                 m_pAnimScene = m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_pScene;
-                AAssert(m_pAnimScene, "Couldn't find the scene that we're building the base on!");
+                RTEAssert(m_pAnimScene, "Couldn't find the scene that we're building the base on!");
                 // Using the line target as the going-from point
                 m_AnimFundsMax = m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_FundsAmount;
                 // The calculated budget use is the target value we're shrinking to
@@ -4420,7 +4422,7 @@ void MetagameGUI::UpdateOffensives()
             if ((*sItr)->IsRevealed() && (*sItr)->GetPresetName() == g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->GetSceneName())
                 m_pAnimScene = (*sItr);
         }
-        AAssert(m_pAnimScene, "Couldn't find the Site that has been selected as attacked!");
+        RTEAssert(m_pAnimScene, "Couldn't find the Site that has been selected as attacked!");
 
         // It's owned by a team, so set up and show its defenders
         if (m_pAnimScene->GetTeamOwnership() != Activity::NOTEAM)
@@ -5062,7 +5064,7 @@ void MetagameGUI::UpdateOffensives()
         {
             m_BattleToResume = false;
             m_ActivityResumed = true;
-            g_GUISound.ExitMenuSound().Play();
+            g_GUISound.ExitMenuSound()->Play();
         }
         // Starting the next battle
         else
@@ -6857,7 +6859,7 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
                                           bool squareSite,
                                           bool drawMeterOverride) const
 {
-    AAssert(metaPlayer >= Activity::PLAYER_1 && metaPlayer < Activity::MAXPLAYERCOUNT, "Player out of bounds");
+    RTEAssert(metaPlayer >= Activity::PLAYER_1 && metaPlayer < Activity::MAXPLAYERCOUNT, "Player out of bounds");
     // No part of the line is visible with these params, so just quit
     if ((onlyFirstSegments == 0 || onlyLastSegments == 0) && !drawMeterOverride)
         return false;

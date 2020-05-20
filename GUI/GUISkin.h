@@ -116,7 +116,7 @@ public:
 // Description:     Gets a single unsigned integer value.
 // Arguments:       Section, Variable, Unsigned Integer pointer
 
-    bool GetValue(const std::string Section, const std::string Variable, Uint32 *Value);
+    bool GetValue(const std::string Section, const std::string Variable, unsigned long *Value);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -176,7 +176,7 @@ public:
 //                  should be converted to. If this is 0, then the current video color depth
 //                  will be used as target.
     
-    Uint32 ConvertColor(Uint32 color, int targetDepth = 0);
+    unsigned long ConvertColor(unsigned long color, int targetDepth = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

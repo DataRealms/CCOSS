@@ -20,6 +20,7 @@
 #include "ConsoleMan.h"
 #include "PresetMan.h"
 #include "DataModule.h"
+#include "PostProcessMan.h"
 #include "Controller.h"
 #include "Scene.h"
 #include "Actor.h"
@@ -44,7 +45,7 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-ABSTRACTCLASSINFO(GameActivity, Activity)
+AbstractClassInfo(GameActivity, Activity)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -114,8 +115,6 @@ void GameActivity::Clear()
     m_GameOverTimer.Reset();
     m_GameOverPeriod = 5000;
     m_WinnerTeam = -1;
-    m_pOrbitedCraft = 0;
-	m_pPieMenuActor = 0;
 }
 
 
@@ -786,7 +785,7 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
 
         // Go 'ding!', but only if player is human, or it may be confusing
 		if (PlayerHuman(player))
-			g_GUISound.ConfirmSound().Play(0, player);
+			g_GUISound.ConfirmSound()->Play(player);
 
         // Clear out the override purchase list, whether anything was in there or not, it should not override twice.
         m_PurchaseOverride[player].clear();
@@ -1472,7 +1471,7 @@ void GameActivity::Update()
                 // Switch back to normal view
                 m_ViewState[player] = NORMAL;
                 // Play err sound to indicate cancellation
-                g_GUISound.UserErrorSound().Play(0, player);
+                g_GUISound.UserErrorSound()->Play(player);
                 // Flash the same actor, jsut to show the control went back to him
                 m_pPieMenu[player]->DisableAnim();
             }
@@ -1488,7 +1487,7 @@ void GameActivity::Update()
                     SwitchToActor(pMarkedActor, player, team);
                 // If not, boop
                 else
-                    g_GUISound.UserErrorSound().Play(0, player);
+                    g_GUISound.UserErrorSound()->Play(player);
 
                 // Switch back to normal view
                 m_ViewState[player] = NORMAL;
@@ -1734,18 +1733,18 @@ void GameActivity::Update()
             if (m_PlayerController[player].IsState(PRESS_DOWN))// || m_PlayerController[player].IsState(PRESS_SECONDARY))
             {
                 if (m_AIReturnCraft[player])
-                    g_GUISound.SelectionChangeSound().Play(0, player);
+                    g_GUISound.SelectionChangeSound()->Play(player);
                 else
-                    g_GUISound.UserErrorSound().Play(0, player);
+                    g_GUISound.UserErrorSound()->Play(player);
 
                 m_AIReturnCraft[player] = false;
             }
             else if (m_PlayerController[player].IsState(PRESS_UP))// || m_PlayerController[player].IsState(PRESS_SECONDARY))
             {
                 if (!m_AIReturnCraft[player])
-                    g_GUISound.SelectionChangeSound().Play(0, player);
+                    g_GUISound.SelectionChangeSound()->Play(player);
                 else
-                    g_GUISound.UserErrorSound().Play(0, player);
+                    g_GUISound.UserErrorSound()->Play(player);
 
                 m_AIReturnCraft[player] = true;
             }
@@ -1758,7 +1757,7 @@ void GameActivity::Update()
                 // Play err sound to indicate cancellation
                 g_FrameMan.SetScreenText("Order canceled!", ScreenOfPlayer(player), 333);
                 m_MsgTimer[player].Reset();
-                g_GUISound.UserErrorSound().Play(0, player);
+                g_GUISound.UserErrorSound()->Play(player);
                 // Flash the same actor, jsut to show the control went back to him
                 m_pPieMenu[player]->DisableAnim();
             }
@@ -2143,7 +2142,7 @@ void GameActivity::Update()
 
 void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int which)
 {
-    if (which < 0 || which >= MAXSCREENCOUNT)
+    if (which < 0 || which >= c_MaxScreenCount)
         return;
 
     char str[512];
@@ -2271,7 +2270,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
             for (list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
             {
                 // See if we found the point to be within the screen or not
-                if (wItr->WithinBox((*itr).m_ScenePos))
+                if (wItr->IsWithinBox((*itr).m_ScenePos))
                 {
                     nearestBoxItr = wItr;
                     withinAny = true;
@@ -2376,7 +2375,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
         Vector center = m_ActorCursor[PoS] - targetPos;
         circle(pTargetBitmap, center.m_X, center.m_Y, m_CursorTimer.AlternateReal(150) ? 6 : 8, g_YellowGlowColor);
         // Add pixel glow area around it, in scene coordinates
-        g_SceneMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
+		g_PostProcessMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
 /* Crosshairs
         putpixel(pTargetBitmap, center.m_X, center.m_Y, g_YellowGlowColor);
         hline(pTargetBitmap, center.m_X - 5, center.m_Y, center.m_X - 2, g_YellowGlowColor);
@@ -2393,7 +2392,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
         circlefill(pTargetBitmap, center.m_X, center.m_Y, 2, g_YellowGlowColor);
 //            putpixel(pTargetBitmap, center.m_X, center.m_Y, g_YellowGlowColor);
         // Add pixel glow area around it, in scene coordinates
-        g_SceneMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
+		g_PostProcessMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
 
         // Draw a line from the last set waypoint to the cursor
         if (m_pControlledActor[PoS] && g_MovableMan.IsActor(m_pControlledActor[PoS]))
@@ -2475,13 +2474,13 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 						unwrappedPos = m_ActorCursor[PoS] + Vector(sceneWidth , 0);
 					else
 						unwrappedPos = m_ActorCursor[PoS] - Vector(sceneWidth , 0);
-					g_SceneMan.RegisterGlowArea(unwrappedPos, 10);
+					g_PostProcessMan.RegisterGlowArea(unwrappedPos, 10);
 				}
 			}
 			else
 				unwrappedPos = m_ActorCursor[PoS];
 
-			g_SceneMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
+			g_PostProcessMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
 
 			//Glowing dotted circle version
 			int dots = 2 * c_PI * radius / 25;//5 + (int)(radius / 10);
@@ -2521,7 +2520,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 					}
 
 					circlefill(pTargetBitmap, dotDrawPos.m_X, dotDrawPos.m_Y, 1, g_YellowGlowColor);
-					g_SceneMan.RegisterGlowArea(dotPos, 3);
+					g_PostProcessMan.RegisterGlowArea(dotPos, 3);
 				}
 			}
 		}

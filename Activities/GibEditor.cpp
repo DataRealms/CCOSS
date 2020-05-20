@@ -50,7 +50,7 @@ extern bool g_ResetActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(GibEditor, EditorActivity, 0)
+ConcreteClassInfo(GibEditor, EditorActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -466,7 +466,7 @@ void GibEditor::Update()
                     if (pItem && !pItem->m_Name.empty())
                     {
                         SLTerrain *pNewTerrain = dynamic_cast<SLTerrain *>(g_PresetMan.GetEntityPreset("SLTerrain", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        AAssert(pNewTerrain, "No SLTerrain of that name defined!");
+                        RTEAssert(pNewTerrain, "No SLTerrain of that name defined!");
                         pNewScene->Create(pNewTerrain);
                     }
 
@@ -475,21 +475,21 @@ void GibEditor::Update()
                     if (pItem && !pItem->m_Name.empty())
                     {
                         SceneLayer *pNewLayer = dynamic_cast<SceneLayer *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        AAssert(pNewLayer, "No SceneLayer of the name set as BG1 is defined!");
+                        RTEAssert(pNewLayer, "No SceneLayer of the name set as BG1 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
                     pItem = m_pNewBG2Combo->GetItem(m_pNewBG2Combo->GetSelectedIndex());
                     if (pItem && !pItem->m_Name.empty())
                     {
                         SceneLayer *pNewLayer = dynamic_cast<SceneLayer *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        AAssert(pNewLayer, "No SceneLayer of the name set as BG2 is defined!");
+                        RTEAssert(pNewLayer, "No SceneLayer of the name set as BG2 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
                     pItem = m_pNewBG3Combo->GetItem(m_pNewBG3Combo->GetSelectedIndex());
                     if (pItem && !pItem->m_Name.empty())
                     {
                         SceneLayer *pNewLayer = dynamic_cast<SceneLayer *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        AAssert(pNewLayer, "No SceneLayer of the name set as BG3 is defined!");
+                        RTEAssert(pNewLayer, "No SceneLayer of the name set as BG3 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
 
@@ -517,7 +517,7 @@ void GibEditor::Update()
                 {
                     // Get the module space ID
                     m_ModuleSpaceID = m_pEditedObject->GetModuleID();
-                    AAssert(m_ModuleSpaceID >= 0, "Loaded Object's DataModule ID is negative? Should always be a specific one..");
+                    RTEAssert(m_ModuleSpaceID >= 0, "Loaded Object's DataModule ID is negative? Should always be a specific one..");
 
                     // Restart the editor GUI
                     m_pEditorGUI->Destroy();
@@ -770,7 +770,7 @@ bool GibEditor::SaveObject(string saveAsName, bool forceOverwrite)
         }
         // Create the writer
         Writer objectWriter(objectFilePath.c_str(), false);
-        AAssert(objectWriter.WriterOK(), "Couldn't open file " + objectFilePath + "to write to! Check if directory exists..?");
+        RTEAssert(objectWriter.WriterOK(), "Couldn't open file " + objectFilePath + "to write to! Check if directory exists..?");
         objectWriter.NewProperty("AddObject");
         // Write the object out to the new ini
         m_pEditedObject->MOSRotating::Save(objectWriter);

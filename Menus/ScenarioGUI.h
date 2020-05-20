@@ -15,7 +15,6 @@
 // Inclusions of header files
 
 #include "ActivityMan.h"
-#include "Sound.h"
 #include "Timer.h"
 
 struct BITMAP;

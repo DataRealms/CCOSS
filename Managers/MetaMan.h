@@ -14,7 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Singleton.h"
 #define g_MetaMan MetaMan::Instance()
 
@@ -732,7 +732,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(MetaSave)
+EntityAllocation(MetaSave)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

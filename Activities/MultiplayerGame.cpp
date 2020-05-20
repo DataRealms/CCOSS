@@ -53,7 +53,7 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-	CONCRETECLASSINFO(MultiplayerGame, Activity, 0)
+	ConcreteClassInfo(MultiplayerGame, Activity, 0)
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          Clear
@@ -181,7 +181,7 @@ namespace RTE {
 		if (!m_pGUIController)
 			m_pGUIController = new GUIControlManager();
 		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-			DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
 
 		m_pGUIController->Load("Base.rte/GUIs/MultiplayerGameGUI.ini");
 		m_pGUIController->EnableMouse(true);
@@ -208,7 +208,7 @@ namespace RTE {
 
 		m_pStatusLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("StatusLabel"));
 
-		m_pServerNameTextBox->SetText(g_SettingsMan.GetNetworkServerName());
+		m_pServerNameTextBox->SetText(g_SettingsMan.GetNetworkServerAddress());
 		m_pPlayerNameTextBox->SetText(g_SettingsMan.GetPlayerNetworkName());
 
 		m_pNATServiceServerNameTextBox->SetText(g_SettingsMan.GetNATServiceAddress());
@@ -327,9 +327,9 @@ namespace RTE {
 							saveSettings = true;
 						}
 
-						if (g_SettingsMan.GetNetworkServerName() != m_pServerNameTextBox->GetText())
+						if (g_SettingsMan.GetNetworkServerAddress() != m_pServerNameTextBox->GetText())
 						{
-							g_SettingsMan.SetNetworkServerName(m_pServerNameTextBox->GetText());
+							g_SettingsMan.SetNetworkServerAddress(m_pServerNameTextBox->GetText());
 							saveSettings = true;
 						}
 
@@ -339,7 +339,7 @@ namespace RTE {
 						m_pGUIController->EnableMouse(false);
 						m_Mode = CONNECTION;
 						m_ConnectionWaitTimer.Reset();
-						g_GUISound.ButtonPressSound().Play();
+						g_GUISound.ButtonPressSound()->Play();
 					}
 
 
@@ -403,7 +403,7 @@ namespace RTE {
 						m_pGUIController->EnableMouse(false);
 						m_Mode = CONNECTION;
 						m_ConnectionWaitTimer.Reset();
-						g_GUISound.ButtonPressSound().Play();
+						g_GUISound.ButtonPressSound()->Play();
 					}
 				}
 				// Notifications

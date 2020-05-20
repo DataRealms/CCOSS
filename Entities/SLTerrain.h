@@ -17,11 +17,12 @@
 #include "SceneLayer.h"
 #include "Matrix.h"
 #include "Box.h"
+#include "Material.h"
 
 namespace RTE
 {
 
-class Material;
+class MOPixel;
 class TerrainDebris;
 
 
@@ -232,7 +233,7 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(SLTerrain)
+EntityAllocation(SLTerrain)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

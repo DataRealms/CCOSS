@@ -284,7 +284,7 @@ enum
 
 
 // Concrete allocation and cloning definitions
-//ENTITYALLOCATION(ACraft)
+//EntityAllocation(ACraft)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -728,7 +728,7 @@ protected:
     // The time it takes to open or close the hatch, in ms.
     int m_HatchDelay;
     // Sound for opening the hatch
-    Sound m_HatchOpenSound;
+    SoundContainer m_HatchOpenSound;
     // The new intermediate inventory of things that have been thrown into the craft while the doors are open,
     // but they shouldn't be ejected until the doors are closed and then opened again.
     std::deque<MovableObject *> m_NewInventory;
@@ -751,7 +751,7 @@ protected:
     // Timer to measure how long ago a crash sound was played
     Timer m_CrashTimer;
     // Crash sound
-    Sound m_CrashSound;
+    SoundContainer m_CrashSound;
     // The recomended, not absolute, maximum number of actors that fit in the inventory
     int m_MaxPassengers;
 

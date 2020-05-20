@@ -38,7 +38,7 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(GATutorial, GameActivity, 0)
+ConcreteClassInfo(GATutorial, GameActivity, 0)
 
 
 GATutorial::TutStep::TutStep(string text, int stepDuration, string screensPath, int frameCount, int frameDuration)
@@ -705,7 +705,7 @@ void GATutorial::Update()
         for (int area = 0; area < AREACOUNT; ++area)
         {
             // Switch if within the trigger box of a new area
-            if (area != m_CurrentArea && m_TriggerBoxes[area].WithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
+            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
             {
                 // Change to the new area
                 m_PrevArea = m_CurrentArea;
@@ -722,7 +722,7 @@ void GATutorial::Update()
         {
 
             // Switch if within the trigger box of a new area
-            if (area != m_CurrentArea && m_TriggerBoxes[area].WithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
+            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
             {
 
             if (m_FightTriggers[stage].Reset();
@@ -843,7 +843,7 @@ void GATutorial::Update()
     if (m_pControlledActor[m_TutorialPlayer])
     {
         // Triggered defending stage
-        if (m_CurrentFightStage == NOFIGHT && m_FightTriggers[DEFENDING].WithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
+        if (m_CurrentFightStage == NOFIGHT && m_FightTriggers[DEFENDING].IsWithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
         {
             // Take over control of screen messages
             m_MsgTimer[m_TutorialPlayer].Reset();

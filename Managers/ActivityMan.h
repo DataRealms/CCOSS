@@ -14,11 +14,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Singleton.h"
 #define g_ActivityMan ActivityMan::Instance()
 
-#include "Sound.h"
+#include "SoundContainer.h"
 
 #include "SceneObject.h"
 #include "Controller.h"
@@ -122,7 +122,7 @@ public:
 
 /* abstract class
     // Concrete allocation and cloning definitions
-    ENTITYALLOCATION(Activity)
+    EntityAllocation(Activity)
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -852,15 +852,11 @@ public:
     virtual bool SceneIsCompatible(Scene *pScene, int teams = -1) { return pScene && teams <= m_MinTeamsRequired; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  EnteredOrbit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates an Actor as having left the game scene and entered orbit.
-//                  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
-// Arguments:       The actor instance. Ownership IS NOT TRANSFERRED!
-// Return value:    None.
-
-    virtual void EnteredOrbit(Actor *pActor);
+    /// <summary>
+    /// Indicates an Actor as having left the game scene and entered orbit.  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
+    /// </summary>
+    /// <param name="orbitedCraft">The actor instance that entered orbit. Ownership IS NOT TRANSFERRED!</param>
+    virtual void EnteredOrbit(Actor *orbitedCraft);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

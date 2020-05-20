@@ -71,7 +71,8 @@ public:
     };
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(Actor)
+EntityAllocation(Actor)
+AddScriptFunctionNames(MOSRotating, "UpdateAI")
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -192,16 +193,13 @@ ENTITYALLOCATION(Actor)
 
     virtual void Destroy(bool notInherited = false);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads the preset scripts of this object, from a specified path.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int LoadScripts(std::string scriptPath);
+    /// <summary>
+    /// Loads the script at the given script path onto the object, checking for appropriately named functions within it.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to load.</param>
+    /// <param name="loadAsEnabledScript">Whether or not the script should load as enabled. Defaults to true.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    virtual int LoadScript(std::string const &scriptPath, bool loadAsEnabledScript = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -397,6 +395,15 @@ ENTITYALLOCATION(Actor)
 
     float GetAimAngle(bool adjustForFlipped = true) const { return adjustForFlipped ? FacingAngle(m_AimAngle) : m_AimAngle; }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetPassengerSlots
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets this Actor's passenger slots.
+// Arguments:       None.
+// Return value:    The Actor's passenger plots
+
+    int GetPassengerSlots() const { return m_PassengerSlots; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetCPUPos
@@ -531,6 +538,15 @@ ENTITYALLOCATION(Actor)
 // Return value:    None.
 
     void SetAimAngle(float newAngle) { m_AimAngle = newAngle; Clamp(m_AimAngle, m_AimRange, -m_AimRange); }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          SetPassengerSlots
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets this Actor's passenger slots.
+// Arguments:       A new amount of passenger slots.
+// Return value:    None.
+
+    void SetPassengerSlots(int newPassengerSlots) { m_PassengerSlots = newPassengerSlots;; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -889,7 +905,7 @@ ENTITYALLOCATION(Actor)
 //                  is there.
 // Return value:    None.
 
-    virtual void AlarmPoint(const Vector &alarmPoint) { if (m_AlarmTimer.GetElapsedSimTimeMS() > 50) { m_AlarmTimer.Reset(); m_LastAlarmPos = m_PointingTarget = alarmPoint; m_AlarmSound.Play(); } }
+    virtual void AlarmPoint(const Vector &alarmPoint) { if (m_AlarmTimer.GetElapsedSimTimeMS() > 50) { m_AlarmTimer.Reset(); m_LastAlarmPos = m_PointingTarget = alarmPoint; m_AlarmSound.Play(alarmPoint); } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1306,7 +1322,7 @@ ENTITYALLOCATION(Actor)
 	/// Returns the defined sound to be played on death.
 	/// </summary>
 	/// <returns>A sound with the death sample of this actor.</returns>
-	Sound GetDeathSound() const { return m_DeathSound; }
+	SoundContainer GetDeathSound() const { return m_DeathSound; }
 
 
 	/// <summary>
@@ -1318,8 +1334,8 @@ ENTITYALLOCATION(Actor)
 		if (samplePath == nullptr) {
 			m_DeathSound.Reset();
 		} else {
-			Sound newDeathSound;
-			newDeathSound.Create(samplePath, false);
+            SoundContainer newDeathSound;
+			newDeathSound.Create(samplePath);
 			m_DeathSound = newDeathSound;
 		}
 	}
@@ -1329,7 +1345,6 @@ ENTITYALLOCATION(Actor)
 // Protected member variable and method declarations
 
 protected:
-
 
     // Member variables
     static Entity::ClassInfo m_sClass;
@@ -1354,11 +1369,11 @@ protected:
     Controller m_Controller;
 
     // Sounds
-    Sound m_BodyHitSound;
-    Sound m_AlarmSound;
-    Sound m_PainSound;
-    Sound m_DeathSound;
-    Sound m_DeviceSwitchSound;
+    SoundContainer m_BodyHitSound;
+    SoundContainer m_AlarmSound;
+    SoundContainer m_PainSound;
+    SoundContainer m_DeathSound;
+    SoundContainer m_DeviceSwitchSound;
 
 //    bool m_FacingRight;
     int m_Status;
@@ -1454,9 +1469,11 @@ protected:
     // Extra pie menu options that this should add to any Pie Menu that focuses on this
     std::list<PieMenuGUI::Slice> m_PieSlices;
     // What material strength this actor is capable of digging trough.
-    float m_DigStrenght;
+    float m_DigStrength;
 	// ID of deployment which spawned this actor
 	unsigned int m_DeploymentID;
+    // How many passenger slots this actor will take in a craft
+    int m_PassengerSlots;
 
 
     ////////////////////

@@ -14,15 +14,17 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#if defined(_MSC_VER)
-#define RECT WINDOWS_RECT // grr typedef repeat fix
+// TODO: Figure out where we can include this without imploding the whole game and keeping QPC working and having no method/macro conflicts.
 #include <allegro.h>
 #include <winalleg.h>
-#undef RECT			
-#undef GetClassName // grr MACRO NAMESPACE clash
-#undef PlaySound	// and again == windows is a parasite
-#endif // defined(WIN32)
 
+// Windows.h defines these and they conflict with our methods so we need to undefine them manually.
+#undef GetClassName
+#undef PlaySound
+
+// minwindef.h defines these and they conflict with the std methods so we need to undefine them manually.
+#undef min
+#undef max
 
 //#include "Entity.h"
 #include "Singleton.h"

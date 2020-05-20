@@ -41,7 +41,7 @@ public:
 	friend class LuaMan;
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(AEmitter)
+EntityAllocation(AEmitter)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -635,9 +635,9 @@ protected:
     // The list of MO instances that get emitted
     std::list<Emission *> m_EmissionList;
     // Sounds
-    Sound m_EmissionSound;
-    Sound m_BurstSound;
-    Sound m_EndSound;
+    SoundContainer m_EmissionSound;
+    SoundContainer m_BurstSound;
+    SoundContainer m_EndSound;
     // Whether emitting is currently enabled or not.
     bool m_EmitEnabled;
     // Whether or not the it was emitting last frame or not.

@@ -94,7 +94,7 @@ void ObjectPickerGUI::Clear()
 
 int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, string onlyOfType)
 {
-    AAssert(pController, "No controller sent to ObjectPickerGUI on creation!");
+    RTEAssert(pController, "No controller sent to ObjectPickerGUI on creation!");
     m_pController = pController;
 
     if (!m_pGUIScreen)
@@ -104,7 +104,7 @@ int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, strin
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
     if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-        DDTAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
     m_pGUIController->Load("Base.rte/GUIs/ObjectPickerGUI.ini");
     m_pGUIController->EnableMouse(pController->IsMouseControlled());
 
@@ -269,7 +269,7 @@ void ObjectPickerGUI::SetEnabled(bool enable)
         else
             m_PickerFocus = OBJECTS;
         m_FocusChange = true;
-        g_GUISound.EnterMenuSound().Play(0, m_pController->GetPlayer());
+        g_GUISound.EnterMenuSound()->Play(m_pController->GetPlayer());
     }
     else if (!enable && m_PickerEnabled != DISABLED && m_PickerEnabled != DISABLING)
     {
@@ -278,7 +278,7 @@ void ObjectPickerGUI::SetEnabled(bool enable)
         g_UInputMan.TrapMousePos(true, m_pController->GetPlayer());
         // Only play switching away sound
 //        if (!m_pPickedObject)
-            g_GUISound.ExitMenuSound().Play(0, m_pController->GetPlayer());
+            g_GUISound.ExitMenuSound()->Play(m_pController->GetPlayer());
     }
 }
 
@@ -409,7 +409,7 @@ const SceneObject * ObjectPickerGUI::GetNextObject()
     GUIListPanel::Item *pItem = m_pObjectsList->GetSelected();
     if (pItem)
     {
-        g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+        g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
         return dynamic_cast<const SceneObject *>(pItem->m_pEntity);
     }
     return 0;
@@ -433,7 +433,7 @@ const SceneObject * ObjectPickerGUI::GetPrevObject()
     GUIListPanel::Item *pItem = m_pObjectsList->GetSelected();
     if (pItem)
     {
-        g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+        g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
         return dynamic_cast<const SceneObject *>(pItem->m_pEntity);
     }
     return 0;
@@ -593,7 +593,7 @@ void ObjectPickerGUI::Update()
             m_PickerFocus = FOCUSCOUNT - 1;
             // Only play sound when the picker is completely deployed
             if (m_PickerEnabled == ENABLED)
-                g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
         }
         else
             m_FocusChange = 1;
@@ -608,7 +608,7 @@ void ObjectPickerGUI::Update()
             m_PickerFocus = 0;
             // Only play sound when the picker is completely deployed
             if (m_PickerEnabled == ENABLED)
-                g_GUISound.UserErrorSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
         }
         else
             m_FocusChange = -1;
@@ -616,7 +616,7 @@ void ObjectPickerGUI::Update()
 
     // Play focus change sound, if applicable
     if (m_FocusChange && m_PickerEnabled != ENABLING)
-        g_GUISound.FocusChangeSound().Play(0, m_pController->GetPlayer());
+        g_GUISound.FocusChangeSound()->Play(m_pController->GetPlayer());
 
     /////////////////////////////////////////
     // GROUPS LIST focus
@@ -653,10 +653,10 @@ void ObjectPickerGUI::Update()
             if (pItem)
             {
                 UpdateObjectsList();
-                g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
             }
 
-//            g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+//            g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
         }
         else if (pressUp)
         {
@@ -671,10 +671,10 @@ void ObjectPickerGUI::Update()
             if (pItem)
             {
                 UpdateObjectsList();
-                g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
             }
 
-//            g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+//            g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
         }
 
         // Move cursor to the object list if button is pressed on a groups list item
@@ -729,7 +729,7 @@ void ObjectPickerGUI::Update()
             GUIListPanel::Item *pItem = m_pObjectsList->GetSelected();
             if (pItem)
                 m_pPickedObject = dynamic_cast<const SceneObject *>(pItem->m_pEntity);
-            g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+            g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
         }
         else if (pressUp)
         {
@@ -744,7 +744,7 @@ void ObjectPickerGUI::Update()
             if (pItem)
                 m_pPickedObject = dynamic_cast<const SceneObject *>(pItem->m_pEntity);
 
-            g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+            g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
         }
 
         // Get handle to the currently selected item, if any
@@ -789,10 +789,10 @@ void ObjectPickerGUI::Update()
             {
                 // Make appropriate sound
                 if (!m_aExpandedModules[pItem->m_ExtraIndex])
-                    g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                    g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                 // Different, maybe?
                 else
-                    g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                    g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                 // Toggle the expansion of the module group item's items below
                 m_aExpandedModules[pItem->m_ExtraIndex] = !m_aExpandedModules[pItem->m_ExtraIndex];
                 // Re-populate the item list with the new module expansion configuation
@@ -804,7 +804,7 @@ void ObjectPickerGUI::Update()
                 // User has made final selection, so close the Picker
                 if (m_pPickedObject = dynamic_cast<const SceneObject *>(pItem->m_pEntity))
                 {
-                    g_GUISound.ObjectPickedSound().Play(0, m_pController->GetPlayer());
+                    g_GUISound.ObjectPickedSound()->Play(m_pController->GetPlayer());
                     SetEnabled(false);
                 }
             }
@@ -820,7 +820,7 @@ void ObjectPickerGUI::Update()
             // User has made final selection, so close the Picker
             if (m_pPickedObject = dynamic_cast<const SceneObject *>(pItem->m_pEntity))
             {
-                g_GUISound.ObjectPickedSound().Play(0, m_pController->GetPlayer());
+                g_GUISound.ObjectPickedSound()->Play(m_pController->GetPlayer());
                 SetEnabled(false);
             }
         }
@@ -862,7 +862,7 @@ void ObjectPickerGUI::Update()
                     {
                         m_SelectedGroupIndex = m_pGroupsList->GetSelectedIndex();
                         UpdateObjectsList();
-                        g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                        g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                     }
                     // Undo the click deselection if nothing was selected
                     else
@@ -895,7 +895,7 @@ void ObjectPickerGUI::Update()
                 if(anEvent.GetMsg() == GUIListBox::Select)
                 {
                     if (m_SelectedObjectIndex != m_pObjectsList->GetSelectedIndex())
-                        g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                        g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
                     m_SelectedObjectIndex = m_pObjectsList->GetSelectedIndex();
                 }
                 // MouseDown, picked somehting
@@ -909,10 +909,10 @@ void ObjectPickerGUI::Update()
                     {
                         // Make appropriate sound
                         if (!m_aExpandedModules[pItem->m_ExtraIndex])
-                            g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                            g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                         // Different, maybe?
                         else
-                            g_GUISound.ItemChangeSound().Play(0, m_pController->GetPlayer());
+                            g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                         // Toggle the expansion of the module group item's items below
                         m_aExpandedModules[pItem->m_ExtraIndex] = !m_aExpandedModules[pItem->m_ExtraIndex];
                         // Re-populate the item list with the new module expansion configuation
@@ -925,7 +925,7 @@ void ObjectPickerGUI::Update()
                         // User has made a pick, so close the Picker
                         if (m_pPickedObject = dynamic_cast<const SceneObject *>(pItem->m_pEntity))
                         {
-                            g_GUISound.ObjectPickedSound().Play(0, m_pController->GetPlayer());
+                            g_GUISound.ObjectPickedSound()->Play(m_pController->GetPlayer());
                             SetEnabled(false);
                         }
                     }
@@ -954,7 +954,7 @@ void ObjectPickerGUI::Update()
 
                             // Play select sound if new index
                             if (m_SelectedObjectIndex != pItem->m_ID)
-                                g_GUISound.SelectionChangeSound().Play(0, m_pController->GetPlayer());
+                                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
                             // Update the seleciton in both the GUI control and our menu
                             m_pObjectsList->SetSelectedIndex(m_SelectedObjectIndex = pItem->m_ID);
                         }
@@ -977,7 +977,7 @@ void ObjectPickerGUI::Update()
                 // User has made final selection, so close the Picker
                 if (m_pPickedObject = dynamic_cast<const SceneObject *>(pItem->m_pEntity))
                 {
-                    g_GUISound.ObjectPickedSound().Play(0, m_pController->GetPlayer());
+                    g_GUISound.ObjectPickedSound()->Play(m_pController->GetPlayer());
                     SetEnabled(false);
                 }
             }

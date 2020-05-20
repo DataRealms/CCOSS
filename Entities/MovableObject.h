@@ -26,6 +26,19 @@ struct BITMAP;
 namespace RTE
 {
 
+
+#pragma region Global Macro Definitions
+    #define ScriptFunctionNames(...) \
+        virtual std::vector<std::string> GetSupportedScriptFunctionNames() const { return {__VA_ARGS__}; }
+
+    #define AddScriptFunctionNames(PARENT, ...) \
+        virtual std::vector<std::string> GetSupportedScriptFunctionNames() const override { \
+            std::vector<std::string> functionNames = PARENT::GetSupportedScriptFunctionNames(); \
+            functionNames.insert(functionNames.end(), {__VA_ARGS__}); \
+            return functionNames; \
+        }
+#pragma endregion
+
 struct HitData;
 
 
@@ -46,6 +59,7 @@ friend class LuaMan;
 // Public member variable, method and friend function declarations
 
 public:
+    ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
 
 enum MOType
 {
@@ -59,7 +73,7 @@ friend class Atom;
 
 /* Should be in all concrete subclasses
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(MovableObject)
+EntityAllocation(MovableObject)
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -178,31 +192,110 @@ ENTITYALLOCATION(MovableObject)
 
     virtual void Destroy(bool notInherited = false);
 
+    /// <summary>
+    /// Loads the script at the given script path onto the object, checking for appropriately named functions within it.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to load.</param>
+    /// <param name="loadAsEnabledScript">Whether or not the script should load as enabled. Defaults to true.</param>
+    /// <returns>0 on success. -1 if scriptPath is empty. -2 if the script is already loaded. -3 if setup to load the script or modify the global lua state fails. -4 if the script fails to load.</returns>
+    virtual int LoadScript(const std::string &scriptPath, bool loadAsEnabledScript = true);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads the preset scripts of this object, from a specified path.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
+    /// <summary>
+    /// Reloads the all of the scripts on this object. This will also reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
+    /// </summary>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    int ReloadScripts() { return ReloadScripts(true); }
 
-    virtual int LoadScripts(std::string scriptPath);
+    /// <summary>
+    /// Reloads the all of the scripts on this object. This will also optionally reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
+    /// </summary>
+    /// <param name="alsoReloadPresetScripts">Whether to reload scripts on the PresetMan preset as well as those on the object instance. Irrelevant if the object instance is the preset.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    virtual int ReloadScripts(bool alsoReloadPresetScripts);
 
+    /// <summary>
+    /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_AllLoadedScripts.end() if it's not.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to find.</param>
+    /// <returns>The iterator pointing to the vector entry for the script or the end of the vector if the script was not found.</returns>
+    virtual std::vector<std::pair<std::string, bool>>::iterator const FindScript(std::string const &scriptPath) { return std::find_if(m_AllLoadedScripts.begin(), m_AllLoadedScripts.end(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReloadScripts
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reloads the preset scripts of this object, from the same script file
-//                  path as was originally defined. This will also update the original
-//                  preset in the PresetMan with the updated scripts so future objects
-//                  spawned will use the new scripts.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
+    /// <summary>
+    /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_AllLoadedScripts.cend() if it's not.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to find.</param>
+    /// <returns>The iterator pointing to the vector entry for the script or the end of the vector if the script was not found.</returns>
+    virtual std::vector<std::pair<std::string, bool>>::const_iterator const FindScript(std::string const &scriptPath) const { return std::find_if(m_AllLoadedScripts.cbegin(), m_AllLoadedScripts.cend(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
 
-    virtual int ReloadScripts();
+    /// <summary>
+    /// Checks if this MO has any scripts on it.
+    /// </summary>
+    /// <returns>Whether or not this MO has any scripts on it.</returns>
+    virtual bool const HasAnyScripts() const { return !m_AllLoadedScripts.empty(); }
 
+    /// <summary>
+    /// Checks if the script at the given path is one of the scripts on this MO.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to check.</param>
+    /// <returns>Whether or not the script is on this MO.</returns>
+    virtual bool const HasScript(const std::string &scriptPath) const { return FindScript(scriptPath) != m_AllLoadedScripts.end(); }
+
+    /// <summary>
+    /// Adds the script at the given path as one of the scripts on this MO.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to add.</param>
+    /// <returns>Whether or not the script was successfully added.</returns>
+    virtual bool AddScript(const std::string &scriptPath);
+
+    /// <summary>
+    /// Checks if the script at the given path is one of the enabled scripts on this MO.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to check.</param>
+    /// <returns>Whether or not the script is enabled on this MO.</returns>
+    virtual bool const ScriptEnabled(const std::string &scriptPath) const { auto scriptIterator = FindScript(scriptPath); return scriptIterator != m_AllLoadedScripts.end() && scriptIterator->second == true; }
+
+    /// <summary>
+    /// Enable the script at the given path on this MO.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to enable.</param>
+    /// <returns>Whether or not the script was succesfully enabled.</returns>
+    virtual bool EnableScript(const std::string &scriptPath);
+
+    /// <summary>
+    /// Disables the script at the given path for this MO.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to disable.</param>
+    /// <returns>Whether or not the script was succesfully disabled..</returns>
+    virtual bool DisableScript(const std::string &scriptPath);
+
+    /// <summary>
+    /// Runs the given function for the given script, with the given arguments. The first argument to the function will always be 'self'.
+    /// If either argument list is not emtpy, its entries will be passed into the Lua function in order, with entity arguments first.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script to run.</param>
+    /// <param name="functionName">The name of the function to run.</param>
+    /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
+    /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    int RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
+
+    /// <summary>
+    /// Runs the given function in all scripts that have it, with the given arguments, with the ability to not run on disabled scripts and to cease running if there's an error.
+    /// The first argument to the function will always be 'self'. If either argument list is not emtpy, its entries will be passed into the Lua function in order, with entity arguments first.
+    /// </summary>
+    /// <param name="functionName">The name of the function to run.</param>
+    /// <param name="runOnDisabledScripts">Whether to run the function on disabled scripts. Defaults to false.</param>
+    /// <param name="stopOnError">Whether to stop if there's an error running any script, or simply print it to the console and continue. Defaults to false.</param>
+    /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
+    /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
+
+    /// <summary>
+    /// Gets whether or not the object has a script name, and there were no errors when initializing its Lua scripts. If there were, the object would need to be reloaded.
+    /// </summary>
+    /// <returns>Whether or not the object's scripts have been succesfully initialized.</returns>
+    bool ObjectScriptsInitialized() const { return !m_ScriptObjectName.empty() && m_ScriptObjectName != "ERROR"; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetClass
@@ -212,6 +305,12 @@ ENTITYALLOCATION(MovableObject)
 // Return value:    A reference to the ClassInfo of this' class.
 
     virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
+
+    /// <summary>
+    /// Override SetPresetName so it also resets script preset name and then reloads scripts to safely allow for multiple scripts.
+    /// </summary>
+    /// <param name="newName">A string reference with the instance name of this Entity.</param>
+    virtual void SetPresetName(const std::string &newName) override { Entity::SetPresetName(newName); m_ScriptPresetName.clear(); ReloadScripts(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -415,6 +514,12 @@ ENTITYALLOCATION(MovableObject)
 // Return value:    The number of MOID indices this MO and all its children are taking up.
 
     int GetMOIDFootprint() const { return m_MOIDFootprint; }
+
+    /// <summary>
+    /// Returns whether or not this object has ever been added to MovableMan. Does not account for removal from MovableMan.
+    /// </summary>
+    /// <returns></returns>
+    bool HasEverBeenAddedToMovableMan() const { return m_HasEverBeenAddedToMovableMan; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -734,6 +839,11 @@ ENTITYALLOCATION(MovableObject)
 
     virtual void SetID(const MOID newID) { m_MOID = newID; }
 
+    /// <summary>
+    /// Sets this object as having been added to MovableMan. Should only really be done in MovableMan::AddObject.
+    /// </summary>
+    virtual void SetAsAddedToMovableMan() { m_HasEverBeenAddedToMovableMan = true; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetSharpness
@@ -1033,8 +1143,11 @@ ENTITYALLOCATION(MovableObject)
 //                  applied relative to the center of this MovableObject.
 // Return value:    None.
 
-    void AddImpulseForce(const Vector &impulse, const Vector &offset = Vector())
-        { DAssert(impulse.GetLargest() < 10000, "HUEG IMPULSE FORCE"); DAssert(offset.GetLargest() < 1000, "HUEG IMPULSE FORCE OFFSET"); m_ImpulseForces.push_back(std::make_pair(impulse, offset)); }
+	void AddImpulseForce(const Vector &impulse, const Vector &offset = Vector()) {
+		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
+		RTEAssert(offset.GetLargest() < 5000, "HUEG IMPULSE FORCE OFFSET");
+		m_ImpulseForces.push_back(std::make_pair(impulse, offset));
+	}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1048,9 +1161,10 @@ ENTITYALLOCATION(MovableObject)
 //                  force is being applied to the center of this MovableObject.
 // Return value:    None.
 
-    void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos)
-        { DAssert(impulse.GetLargest() < 10000, "HUEG IMPULSE FORCE");
-          m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * g_FrameMan.GetMPP())); }
+	void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos) {
+		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
+		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * g_FrameMan.GetMPP()));
+	}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1458,24 +1572,20 @@ ENTITYALLOCATION(MovableObject)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateScript
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this MovableObject's Lua script. Supposed to be done every
+// Description:     Updates this MovableObject's Lua scripts. Supposed to be done every
 //                  frame after the rest of the hardcoded C++ update is done.
 // Arguments:       None.
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int UpdateScript();
+    virtual int UpdateScripts();
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnPieMenu
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Executes the Lua-defined OnPieMenu event handler.
-// Arguments:       Actor which triggered the pie menu event
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	virtual int OnPieMenu(Actor *pActor);
+    /// <summary>
+    /// Executes the Lua-defined OnPieMenu event handler for this MO.
+    /// </summary>
+    /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+	virtual int OnPieMenu(Actor *pieMenuActor);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1691,8 +1801,7 @@ ENTITYALLOCATION(MovableObject)
 // Arguments:       The ID of the material, if any, that this MO hit during the last Travel.
 // Return value:    None.
 
-	virtual void SetHitWhatTerrMaterial(unsigned char matID) { m_TerrainMatHit = matID; m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber(); }
-
+    virtual void SetHitWhatTerrMaterial(unsigned char matID);
 
 	virtual bool ProvidesPieMenuContext() const { return m_ProvidesPieMenuContext; }
 
@@ -1703,7 +1812,11 @@ ENTITYALLOCATION(MovableObject)
 // Protected member variable and method declarations
 
 protected:
-
+    /// <summary>
+    /// Does necessary work to setup a script object name for this object, allowing it to be accessed in Lua, then runs all of the MO's scripts' Create functions in Lua.
+    /// </summary>
+    /// <returns>0 on success, -2 if it fails to setup the script object in Lua, and -3 if it fails to run any Create function.</returns>
+    int InitializeObjectScripts();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateChildMOIDs
@@ -1819,6 +1932,8 @@ protected:
     // How many total (subsequent) MOID's this MO and all its children are taking up this frame.
     // ie if this MO has no children, this will likely be 1.
     int m_MOIDFootprint;
+    // Whether or not this object has been added to MovableMan. Does not take into account the object being removed from MovableMan, though in practice it usually will.
+    bool m_HasEverBeenAddedToMovableMan;
     // A set of ID:s of MO:s that already have collided with this MO during this frame.
     std::set<MOID> m_AlreadyHitBy;
     // A counter to count the oscillations in translational velocity, in order to detect settling.
@@ -1831,8 +1946,11 @@ protected:
     // To draw this guy's HUD or not
     bool m_HUDVisible;
 
-    // The path to the lua script file that defines this' behaviors in update
-    std::string m_ScriptPath;
+    // A vector of scripts have been loaded onto this. Contains a pair with the script path and whether or not the script is enabled.
+    std::vector<std::pair<std::string, bool>> m_AllLoadedScripts;
+    // A map of function name strings to vectors of scripts for each function name. Said vectors contain pointers to pairs with the script path and whether or not the script is enabled. Used to efficiently avoid extra Lua calls.
+    std::unordered_map<std::string, std::vector<std::pair<std::string, bool> *>> m_FunctionsAndScripts;
+
     // The ID name unique to this' preset and its defined scripted functions in the lua state.
     std::string m_ScriptPresetName;
     // The ID name unique to this' object instance representation in the Lua state.
@@ -1891,8 +2009,6 @@ protected:
 	unsigned int m_LastCollisionSimFrameNumber;
 	// If true, the object will receive OnPieMenu event whenever someone activated a pie menu
 	bool m_ProvidesPieMenuContext;
-	// Temp variable to process OnPieMenu events
-	Actor * m_pPieMenuActor;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

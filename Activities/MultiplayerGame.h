@@ -12,7 +12,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "ActivityMan.h"
 
 namespace RTE
@@ -49,7 +49,7 @@ namespace RTE
 	public:
 
 		// Concrete allocation and cloning definitions
-		ENTITYALLOCATION(MultiplayerGame)
+		EntityAllocation(MultiplayerGame)
 
 
 		enum MultiplayerGameMode

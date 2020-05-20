@@ -14,12 +14,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "Singleton.h"
 #define g_ConsoleMan ConsoleMan::Instance()
-
-#include "Serializable.h"
-#include "Sound.h"
 
 namespace RTE
 {
@@ -79,7 +76,7 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(bool logToCli = false);
+    virtual int Create();
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -318,9 +315,6 @@ protected:
 
 	// If true the console is drawn no matter what
 	bool m_ForceVisible;
-
-    bool m_LogToCli;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

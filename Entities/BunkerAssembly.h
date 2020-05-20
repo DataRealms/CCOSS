@@ -14,7 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "DDTTools.h"
+#include "RTETools.h"
 #include "TerrainObject.h"
 #include "Vector.h"
 #include "FrameMan.h"
@@ -48,7 +48,7 @@ class BunkerAssembly:
 public:
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(BunkerAssembly)
+EntityAllocation(BunkerAssembly)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -353,8 +353,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    BunkerAssembly(const BunkerAssembly &reference) { DDTAbort("Tried to use forbidden method"); }
-    void operator=(const BunkerAssembly &rhs) { DDTAbort("Tried to use forbidden method"); }
+    BunkerAssembly(const BunkerAssembly &reference) { RTEAbort("Tried to use forbidden method"); }
+    void operator=(const BunkerAssembly &rhs) { RTEAbort("Tried to use forbidden method"); }
 
 };
 

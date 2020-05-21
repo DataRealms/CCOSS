@@ -33,7 +33,7 @@ namespace RTE {
 			FMOD::Sound *SoundObject;
 			Vector Offset = Vector();
 			float MinimumAudibleDistance = 0;
-			float AttenuationStartDistance = c_DefaultAttenuationStartDistance;
+			float AttenuationStartDistance = -1;
 			FMOD_VECTOR CustomRolloffPoints[2];
 		};
 

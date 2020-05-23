@@ -300,7 +300,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::IsValidResolution(unsigned short width, unsigned short height) const {
-		if ((width >= 800 && height >= 600) && (width <= m_ScreenResX || height <= m_ScreenResY)) {
+		if ((width >= 640 && height >= 480) && (width <= m_ScreenResX || height <= m_ScreenResY)) {
 			// Disallow 1366x768 because it's not supported by Allegro.
 			if (width == 1366 && height == 768) {
 				return false;
@@ -331,7 +331,7 @@ namespace RTE {
 		unsigned short resY = m_ResY;
 
 		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations (specifically reducing window size) when switching from 2X mode to 1X mode.
-		// This will force a state where this is no actual game window between multiplier switches and the next set_gfx_mode call will recreate it correctly.
+		// This will force a state where there is no actual game window between multiplier switches and the next set_gfx_mode call will recreate it correctly.
 		set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
 
 		if (set_gfx_mode(m_GfxDriver, resX * multiplier, resY * multiplier, 0, 0) != 0) {

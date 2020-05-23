@@ -135,24 +135,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MOPixel::Update() {
-		MovableObject::Update();
-
-		if (m_HitsMOs && m_Sharpness > 0) {
-			m_DistanceTraveled += m_Vel.GetLargest() * g_TimerMan.GetDeltaTimeSecs();
-			if (m_DistanceTraveled > m_LethalRange) {
-				if (m_Sharpness < m_LethalSharpness) {
-					m_Sharpness = std::max(m_Sharpness * (1.0F - (20.0F * g_TimerMan.GetDeltaTimeSecs())) - 0.1F, 0.0F);
-				} else {
-					m_Sharpness *= 1.0F - (10.0F * g_TimerMan.GetDeltaTimeSecs());
-				}
-				if (m_LethalRange > 0) { m_HitsMOs = false; }
-			}
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void MOPixel::Travel() {
 		MovableObject::Travel();
 
@@ -203,6 +185,24 @@ namespace RTE {
 		if ((m_ToSettle || IsAtRest()) && g_SceneMan.OverAltitude(m_Pos, 2, 0)) {
 			m_RestTimer.Reset();
 			m_ToSettle = false;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MOPixel::Update() {
+		MovableObject::Update();
+
+		if (m_HitsMOs && m_Sharpness > 0) {
+			m_DistanceTraveled += m_Vel.GetLargest() * g_TimerMan.GetDeltaTimeSecs();
+			if (m_DistanceTraveled > m_LethalRange) {
+				if (m_Sharpness < m_LethalSharpness) {
+					m_Sharpness = std::max(m_Sharpness * (1.0F - (20.0F * g_TimerMan.GetDeltaTimeSecs())) - 0.1F, 0.0F);
+				} else {
+					m_Sharpness *= 1.0F - (10.0F * g_TimerMan.GetDeltaTimeSecs());
+				}
+				if (m_LethalRange > 0) { m_HitsMOs = false; }
+			}
 		}
 	}
 

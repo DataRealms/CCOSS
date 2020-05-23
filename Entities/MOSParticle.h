@@ -105,11 +105,6 @@ namespace RTE {
 
 #pragma region Virtual Override Methods
 		/// <summary>
-		/// Updates this MOSParticle. Supposed to be done every frame.
-		/// </summary>
-		virtual void Update();
-
-		/// <summary>
 		/// Travels this MOSParticle, using its physical representation.
 		/// </summary>
 		virtual void Travel();
@@ -140,6 +135,11 @@ namespace RTE {
 		/// <param name="hd">The HitData describing the collision in detail.</param>
 		/// <returns>Whether the MOSParticle should immediately halt any travel going on after this sinkage.</returns>
 		virtual bool OnSink(HitData &hd) { return false; }
+
+		/// <summary>
+		/// Updates this MOSParticle. Supposed to be done every frame.
+		/// </summary>
+		virtual void Update();
 
 		/// <summary>
 		/// Draws this MOSParticle's current graphical representation to a BITMAP of choice.

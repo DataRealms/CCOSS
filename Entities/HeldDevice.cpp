@@ -302,13 +302,6 @@ bool HeldDevice::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 bool HeldDevice::CollideAtPoint(HitData &hd)
 {
     return Attachable::CollideAtPoint(hd);
-/* Obsolete
-    if (hd.Body[HITOR] && g_MovableMan.IsOfActor(hd.Body[HITOR]->GetID())) {
-        MovableObject *pMO = g_MovableMan.GetMOFromID(hd.Body[HITOR]->GetRootID());
-        if (pMO && pMO->IsActor())
-            dynamic_cast<Actor *>(pMO)->SetItemInReach(this);
-    }
-*/
 }
 
 
@@ -351,22 +344,6 @@ void HeldDevice::Deactivate()
 
 bool HeldDevice::OnMOHit(MovableObject *pOtherMO)
 {
-/* The ACraft now actively suck things in with cast rays instead
-    // See if we hit any craft with open doors to get sucked into
-    ACraft *pCraft = dynamic_cast<ACraft *>(pOtherMO);
-
-    if (!IsSetToDelete() && pCraft && (pCraft->GetHatchState() == ACraft::OPEN || pCraft->GetHatchState() == ACraft::OPENING))
-    {
-        // Detach from whomever holds this
-        Detach();
-        // Add (copy) to the ship's inventory
-        pCraft->AddInventoryItem(dynamic_cast<MovableObject *>(this->Clone()));
-        // Delete the original from scene - this is safer than 'removing' or handing over ownership halfway through MovableMan's update
-        this->SetToDelete();
-        // Terminate; we got sucked into the craft; so communicate this out
-        return true;
-    }
-*/
     // Don't terminate, continue on
     return false;
 }

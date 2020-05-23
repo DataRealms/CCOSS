@@ -22,6 +22,7 @@ namespace RTE {
 	class AudioMan : public Singleton<AudioMan> {
 
 	public:
+
 		ClassInfoGetters
 
 		// TODO: Add comments to all these.
@@ -492,7 +493,7 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		AudioMan(const AudioMan &reference);
+		AudioMan(const AudioMan &reference) {}
 		AudioMan & operator=(const AudioMan &rhs) {}
 	};
 }

@@ -1310,7 +1310,7 @@ ClassInfoGetters
 	/// Sets the X and Y thresholds for how fast the actor can travel before losing stability.
 	/// </summary>
 	/// <param name="newVelVector">Vector with new values for how fast the actor can travel before losing stability on both axis.</param>
-	void SetStableVel(Vector newVelVector) { m_StableVel.SetXY(newVelVector.m_X, newVelVector.m_Y); }
+	void SetStableVel(Vector newVelVector) { m_StableVel = newVelVector; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

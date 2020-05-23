@@ -27,6 +27,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 		AddSound = ContentFile
 			FilePath = pathToFile
 		LoopSetting = -1 // Doesn't have to loop indefinitely, but generally should.
+		
+	// Played when the door changes direction while moving between fully open/closed position.
+	DoorDirectionChangeSound = SoundContainer
+		AddSound = ContentFile
+			FilePath = pathToFile
 	
 	// Played when the door stops moving and is at fully open/closed position.
 	DoorMoveEndSound = SoundContainer
@@ -63,6 +68,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New `Settings.ini` properties `EnableCrabBombs = 0/1` and `CrabBombThreshold = intValue`.  
 	When `EnableCrabBombs` is enabled, releasing a number of crabs equal to `CrabBombThreshold` or more at once will trigger the crab bomb effect.  
 	If disabled releasing whatever number of crabs will do nothing except release whatever number of crabs.
+	
+- Doors can now be stopped at their exact position using `ADoor:StopDoor()` via lua. When stopped, doors will stop updating their sensors and will not try to reset to a default state.  
+	If the door was stopped by the user, it needs to opened/closed by calling either `ADoor:OpenDoor()` or `ADoor:CloseDoor()` otherwise it will remain in the exact position it was stopped forever.  
+	If either `DrawMaterialLayerWhenOpen` or `DrawMaterialLayerWhenClosed` properties are set true, a material layer will be drawn when the door is stopped. This is to prevent a situation where the material layer will be drawn only if the door is travelling in one direction, without adding an extra property.
+	
+- New value `STOPPED` (4) was to the `ADoor.DoorState` enumeration. `ADoor:GetDoorState` will return this if the door was stopped by the user via `ADoor:StopDoor`.
 
 ### Changed
 
@@ -99,6 +110,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `MOSParticle` animation can now be set with `SpriteAnimMode` and `SpriteAnimDuration`. If the property isn't defined it will default to `SpriteAnimMode = 7` (OVERLIFETIME).
 
 - Reworked crab bombing behavior. When enabled through `Settings.ini` and triggered will gib all living actors on scene except brains and doors. Devices and non-actor MOs will remain untouched.
+
+- `ADoor` properties `DrawWhenOpen` and `DrawWhenClosed` renamed to `DrawMaterialLayerWhenOpen` and `DrawMaterialLayerWhenClosed` so they are more clear on what they actually do.
 
 ### Fixed
 

@@ -973,12 +973,14 @@ int LuaMan::Create()
 				value("CLOSED", 0),
 				value("OPENING", 1),
 				value("OPEN", 2),
-				value("CLOSING", 3)
+				value("CLOSING", 3),
+				value("STOPPED", 4)
 			]
             .property("Door", &ADoor::GetDoor)
 			.def("GetDoorState", &ADoor::GetDoorState)
 			.def("OpenDoor", &ADoor::OpenDoor)
 			.def("CloseDoor", &ADoor::CloseDoor)
+			.def("StopDoor", &ADoor::StopDoor)
 			.def("SetClosedByDefault", &ADoor::SetClosedByDefault),
 
 		ABSTRACTLUABINDING(Arm, Attachable)

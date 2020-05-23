@@ -304,6 +304,8 @@ int Magazine::Create(const Magazine &reference)
     m_pTracerRound = reference.m_pTracerRound;
     m_Discardable = reference.m_Discardable;
     m_AIBlastRadius = reference.m_AIBlastRadius;
+	m_AIAimPenetration = reference.m_AIAimPenetration;
+	m_AIAimVel = reference.m_AIAimVel;
 
     return 0;
 }

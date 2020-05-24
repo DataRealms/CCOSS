@@ -25,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Specially handled Lua function `OnScriptRemoveOrDisable` has been changed to `OnScriptDisable`, and no longer has a parameter saying whether it was removed or disabled, since you can no longer remove scripts.
 
+- Game will now Abort with error message when trying to load a non-existent AtomGroup Presetname.
+
 ### Fixed
 
 - Control schemes will no longer get deleted when being configured.

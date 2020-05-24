@@ -52,6 +52,9 @@ namespace RTE {
 			if (preset) {
 				preset->Clone(this);
 			} else {
+				if (GetClassName() == "AtomGroup") {
+					reader.ReportError("The PresetName to be copied was not found in data modules.");
+				}
 				// If we couldn't find the preset to copy from, read it as an original but report the problem in the console
 				g_ConsoleMan.PrintString("ERROR: Couldn't find the preset '" + refName + "' accessed in " + reader.GetCurrentFilePath() + " at line " + reader.GetCurrentFileLineString());
 				// Preset name might have "[ModuleName]/" preceding it, detect it here and select proper module!

@@ -1285,7 +1285,7 @@ bool Actor::UpdateMovePath()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Actor::UpdateAIScripted() {
-    if (!m_ScriptedAIUpdate || m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
+    if (!m_ScriptedAIUpdate || m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return false;
     }
 

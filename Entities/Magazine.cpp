@@ -292,17 +292,19 @@ int Magazine::Create()
 
 int Magazine::Create(const Magazine &reference)
 {
-    Attachable::Create(reference);
+	Attachable::Create(reference);
 
-    m_RoundCount = reference.m_RoundCount;
-    m_FullCapacity = reference.m_FullCapacity;
-    m_RTTRatio = reference.m_RTTRatio;
-    m_pRegularRound = reference.m_pRegularRound;
-    m_pTracerRound = reference.m_pTracerRound;
-    m_Discardable = reference.m_Discardable;
-    m_AIBlastRadius = reference.m_AIBlastRadius;
+	m_RoundCount = reference.m_RoundCount;
+	m_FullCapacity = reference.m_FullCapacity;
+	m_RTTRatio = reference.m_RTTRatio;
+	m_pRegularRound = reference.m_pRegularRound;
+	m_pTracerRound = reference.m_pTracerRound;
+	m_Discardable = reference.m_Discardable;
+	m_AIBlastRadius = reference.m_AIBlastRadius;
+	m_AIAimPenetration = reference.m_AIAimPenetration;
+	m_AIAimVel = reference.m_AIAimVel;
 
-    return 0;
+	return 0;
 }
 
 

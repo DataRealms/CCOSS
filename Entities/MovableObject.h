@@ -59,7 +59,8 @@ friend class LuaMan;
 // Public member variable, method and friend function declarations
 
 public:
-    ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptRemoveOrDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
+
+	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
 	SerializableOverrideMethods
 	ClassInfoGetters
 
@@ -175,37 +176,44 @@ EntityAllocation(MovableObject)
     virtual int LoadScript(const std::string &scriptPath, bool loadAsEnabledScript = true);
 
     /// <summary>
-    /// Reloads the all of the scripts on this object. This will also update the original preset in PresetMan with the updated scripts so future objects spawned will use the new scripts.
+    /// Reloads the all of the scripts on this object. This will also reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
     /// </summary>
     /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-    virtual int ReloadScripts();
+    int ReloadScripts() { return ReloadScripts(true); }
 
     /// <summary>
-    /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_LoadedScripts.end() if it's not.
+    /// Reloads the all of the scripts on this object. This will also optionally reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
+    /// </summary>
+    /// <param name="alsoReloadPresetScripts">Whether to reload scripts on the PresetMan preset as well as those on the object instance. Irrelevant if the object instance is the preset.</param>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    virtual int ReloadScripts(bool alsoReloadPresetScripts);
+
+    /// <summary>
+    /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_AllLoadedScripts.end() if it's not.
     /// </summary>
     /// <param name="scriptPath">The path to the script to find.</param>
     /// <returns>The iterator pointing to the vector entry for the script or the end of the vector if the script was not found.</returns>
-    virtual std::vector<std::pair<std::string, bool>>::iterator const FindScript(std::string const &scriptPath) { return std::find_if(m_LoadedScripts.begin(), m_LoadedScripts.end(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
+    virtual std::vector<std::pair<std::string, bool>>::iterator const FindScript(std::string const &scriptPath) { return std::find_if(m_AllLoadedScripts.begin(), m_AllLoadedScripts.end(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
 
     /// <summary>
-    /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_LoadedScripts.cend() if it's not.
+    /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_AllLoadedScripts.cend() if it's not.
     /// </summary>
     /// <param name="scriptPath">The path to the script to find.</param>
     /// <returns>The iterator pointing to the vector entry for the script or the end of the vector if the script was not found.</returns>
-    virtual std::vector<std::pair<std::string, bool>>::const_iterator const FindScript(std::string const &scriptPath) const { return std::find_if(m_LoadedScripts.cbegin(), m_LoadedScripts.cend(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
+    virtual std::vector<std::pair<std::string, bool>>::const_iterator const FindScript(std::string const &scriptPath) const { return std::find_if(m_AllLoadedScripts.cbegin(), m_AllLoadedScripts.cend(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
 
     /// <summary>
     /// Checks if this MO has any scripts on it.
     /// </summary>
     /// <returns>Whether or not this MO has any scripts on it.</returns>
-    virtual bool const HasAnyScripts() const { return !m_LoadedScripts.empty(); }
+    virtual bool const HasAnyScripts() const { return !m_AllLoadedScripts.empty(); }
 
     /// <summary>
     /// Checks if the script at the given path is one of the scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>
     /// <returns>Whether or not the script is on this MO.</returns>
-    virtual bool const HasScript(const std::string &scriptPath) const { return FindScript(scriptPath) != m_LoadedScripts.end(); }
+    virtual bool const HasScript(const std::string &scriptPath) const { return FindScript(scriptPath) != m_AllLoadedScripts.end(); }
 
     /// <summary>
     /// Adds the script at the given path as one of the scripts on this MO.
@@ -215,18 +223,11 @@ EntityAllocation(MovableObject)
     virtual bool AddScript(const std::string &scriptPath);
 
     /// <summary>
-    /// Removes the script at the given path so it will no longer be one of the scripts on this MO.
-    /// </summary>
-    /// <param name="scriptPath">The path to the script to remove.</param>
-    /// <returns>Whether or not the script was successfully removed.</returns>
-    virtual bool RemoveScript(const std::string &scriptPath);
-
-    /// <summary>
     /// Checks if the script at the given path is one of the enabled scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>
     /// <returns>Whether or not the script is enabled on this MO.</returns>
-    virtual bool const ScriptEnabled(const std::string &scriptPath) const { auto scriptIterator = FindScript(scriptPath); return scriptIterator != m_LoadedScripts.end() && scriptIterator->second == true; }
+    virtual bool const ScriptEnabled(const std::string &scriptPath) const { auto scriptIterator = FindScript(scriptPath); return scriptIterator != m_AllLoadedScripts.end() && scriptIterator->second == true; }
 
     /// <summary>
     /// Enable the script at the given path on this MO.
@@ -1905,7 +1906,9 @@ protected:
     bool m_HUDVisible;
 
     // A vector of scripts have been loaded onto this. Contains a pair with the script path and whether or not the script is enabled.
-    std::vector<std::pair<std::string, bool>> m_LoadedScripts;
+    std::vector<std::pair<std::string, bool>> m_AllLoadedScripts;
+    // A map of function name strings to vectors of scripts for each function name. Said vectors contain pointers to pairs with the script path and whether or not the script is enabled. Used to efficiently avoid extra Lua calls.
+    std::unordered_map<std::string, std::vector<std::pair<std::string, bool> *>> m_FunctionsAndScripts;
 
     // The ID name unique to this' preset and its defined scripted functions in the lua state.
     std::string m_ScriptPresetName;

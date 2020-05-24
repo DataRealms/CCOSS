@@ -113,6 +113,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `ADoor` properties `DrawWhenOpen` and `DrawWhenClosed` renamed to `DrawMaterialLayerWhenOpen` and `DrawMaterialLayerWhenClosed` so they are more clear on what they actually do.
 
+- Specially handled Lua function `OnScriptRemoveOrDisable` has been changed to `OnScriptDisable`, and no longer has a parameter saying whether it was removed or disabled, since you can no longer remove scripts.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.
@@ -121,7 +123,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Fix glow effects being drawn one frame past `EffectStartTime` making objects that exist for a single frame not draw glows. ([Issue #67](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/67))
 
+- Time scale can no longer be lowered to 0 through the performance stats interface.
+
 ### Removed
+
+- Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.
 
 - Removed `Settings.ini` property `PixelsPerMeter`. Now hardcoded and cannot be changed by the user.
 

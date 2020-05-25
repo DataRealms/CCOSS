@@ -48,11 +48,12 @@ namespace RTE {
 	int Entity::ReadProperty(std::string propName, Reader &reader) {
 		if (propName == "CopyOf") {
 			std::string refName = reader.ReadPropValue();
-			const Entity *preset = g_PresetMan.GetEntityPreset(GetClassName(), refName, reader.GetReadModuleID());
+			std::string className = GetClassName();
+			const Entity *preset = g_PresetMan.GetEntityPreset(className, refName, reader.GetReadModuleID());
 			if (preset) {
 				preset->Clone(this);
 			} else {
-				if (GetClassName() == "AtomGroup") {
+				if (className == "AtomGroup" || className == "Attachable" || className == "AEmitter") {
 					reader.ReportError("The PresetName to be copied was not found in data modules.");
 				}
 				// If we couldn't find the preset to copy from, read it as an original but report the problem in the console

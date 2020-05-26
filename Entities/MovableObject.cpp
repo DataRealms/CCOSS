@@ -478,10 +478,10 @@ int MovableObject::InitializeObjectScripts() {
         return -2;
     }
 
-    if (RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
-        m_ScriptObjectName = "ERROR";
-        return -3;
-    }
+	if (!(*m_FunctionsAndScripts.find("Create")).second.empty() && RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
+		m_ScriptObjectName = "ERROR";
+		return -3;
+	}
     return 0;
 }
 

@@ -46,7 +46,8 @@ namespace RTE {
 		/// <summary>
 		/// Destroys and resets (through Clear()) the ADSensor object.
 		/// </summary>
-		virtual void Destroy() { Clear(); }
+		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
+		virtual void Destroy(bool notInherited = false) { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters

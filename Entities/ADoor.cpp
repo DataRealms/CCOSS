@@ -350,14 +350,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::OpenDoor() {
-		if (m_DoorState == CLOSED || m_DoorState == CLOSING) {
-			SharedDoorControls();
-			m_DoorState = OPENING;
-		} else if (m_DoorState == STOPPED) {
+		if (m_DoorState == STOPPED) {
 			SharedDoorControls();
 			m_DoorState = CLOSING;
 			m_ChangedDirectionAfterStop = (m_DoorState == m_DoorStateOnStop) ? false : true;
-			OpenDoor();
+		}
+		if (m_DoorState == CLOSED || m_DoorState == CLOSING) {
+			SharedDoorControls();
+			m_DoorState = OPENING;
 		}
 		m_ResetDefaultTimer.Reset();
 	}
@@ -365,14 +365,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::CloseDoor() {
-		if (m_DoorState == OPEN || m_DoorState == OPENING) {
-			SharedDoorControls();
-			m_DoorState = CLOSING;
-		} else if (m_DoorState == STOPPED) {
+		if (m_DoorState == STOPPED) {
 			SharedDoorControls();
 			m_DoorState = OPENING;
 			m_ChangedDirectionAfterStop = (m_DoorState == m_DoorStateOnStop) ? false : true;
-			CloseDoor();
+		}
+		if (m_DoorState == OPEN || m_DoorState == OPENING) {
+			SharedDoorControls();
+			m_DoorState = CLOSING;
 		}
 		m_ResetDefaultTimer.Reset();
 	}

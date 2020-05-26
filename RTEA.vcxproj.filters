@@ -474,6 +474,9 @@
     <ClInclude Include="Entities\Gib.h">
       <Filter>Entities</Filter>
     </ClInclude>
+    <ClInclude Include="Entities\Round.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -895,6 +898,9 @@
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="Entities\Gib.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Round.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
   </ItemGroup>

@@ -221,6 +221,7 @@
     <ClInclude Include="Entities\Emission.h" />
     <ClInclude Include="Entities\Gib.h" />
     <ClInclude Include="Entities\PEmitter.h" />
+    <ClInclude Include="Entities\Round.h" />
     <ClInclude Include="GUI\Interface.h" />
     <ClInclude Include="GUI\GUISound.h" />
     <ClInclude Include="Managers\Network.h" />
@@ -372,6 +373,7 @@
     <ClCompile Include="Entities\Emission.cpp" />
     <ClCompile Include="Entities\Gib.cpp" />
     <ClCompile Include="Entities\PEmitter.cpp" />
+    <ClCompile Include="Entities\Round.cpp" />
     <ClCompile Include="GUI\GUISound.cpp" />
     <ClCompile Include="Managers\NetworkClient.cpp" />
     <ClCompile Include="Managers\NetworkServer.cpp" />

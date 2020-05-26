@@ -26,8 +26,6 @@ namespace RTE {
 
 ConcreteClassInfo(MOSRotating, MOSprite, 100)
 
-const string MOSRotating::Gib::m_sClassName = "Gib";
-
 BITMAP * MOSRotating::m_spTempBitmap16 = 0;
 BITMAP * MOSRotating::m_spTempBitmap32 = 0;
 BITMAP * MOSRotating::m_spTempBitmap64 = 0;
@@ -41,135 +39,6 @@ BITMAP * MOSRotating::m_spTempBitmapS64 = 0;
 BITMAP * MOSRotating::m_spTempBitmapS128 = 0;
 BITMAP * MOSRotating::m_spTempBitmapS256 = 0;
 BITMAP * MOSRotating::m_spTempBitmapS512 = 0;
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this Gib, effectively
-//                  resetting the members of this abstraction level only.
-
-void MOSRotating::Gib::Clear()
-{
-    m_pGibParticle = 0;
-    m_Offset.Reset();
-    m_Count = 1;
-    m_Spread = c_PI;
-    m_MinVelocity = 0;
-    m_MaxVelocity = 0;
-    m_LifeVariation = 0.1;
-    m_InheritsVel = true;
-}
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Gib object ready for use.
-
-int MOSRotating::Gib::Create()
-{
-    if (Serializable::Create() < 0)
-        return -1;
-
-    return 0;
-}
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a Gib to be identical to another, by deep copy.
-
-int MOSRotating::Gib::Create(const Gib &reference)
-{
-    m_pGibParticle = reference.m_pGibParticle;
-    m_Offset = reference.m_Offset;
-    m_Count = reference.m_Count;
-    m_Spread = reference.m_Spread;
-    m_MinVelocity = reference.m_MinVelocity;
-    m_MaxVelocity = reference.m_MaxVelocity;
-    m_LifeVariation = reference.m_LifeVariation;
-    m_InheritsVel = reference.m_InheritsVel;
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
-
-int MOSRotating::Gib::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "GibParticle")
-    {
-        m_pGibParticle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
-        RTEAssert(m_pGibParticle, "Stream suggests allocating an unallocatable type in Gib::Create!");
-    }
-    else if (propName == "Offset")
-        reader >> m_Offset;
-    else if (propName == "Count")
-        reader >> m_Count;
-    else if (propName == "Spread")
-        reader >> m_Spread;
-    else if (propName == "MinVelocity")
-        reader >> m_MinVelocity;
-    else if (propName == "MaxVelocity")
-        reader >> m_MaxVelocity;
-    else if (propName == "LifeVariation")
-        reader >> m_LifeVariation;
-    else if (propName == "InheritsVel")
-        reader >> m_InheritsVel;
-    else
-        // See if the base class(es) can find a match instead
-        return Serializable::ReadProperty(propName, reader);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Gib with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int MOSRotating::Gib::Save(Writer &writer) const
-{
-    Serializable::Save(writer);
-
-    writer.NewProperty("GibParticle");
-
-	// All of this is needed to make a preset look like not original and save as CopyOf instead of separate preset.
-	Entity * e = m_pGibParticle->Clone();
-	e->ResetOriginalPresetFlag();
-	writer << e;
-	delete e;
-	e = 0;
-
-    writer.NewProperty("Offset");
-    writer << m_Offset;
-/* Make propert gib
-    writer.NewProperty("Count");
-    writer << m_Count;
-    writer.NewProperty("Spread");
-    writer << m_Spread;
-    writer.NewProperty("MinVelocity");
-    writer << m_MinVelocity;
-    writer.NewProperty("MaxVelocity");
-    writer << m_MaxVelocity;
-    writer.NewProperty("LifeVariation");
-    writer << m_LifeVariation;
-    writer.NewProperty("InheritsVel");
-    writer << m_InheritsVel;
-*/
-
-    return 0;
-}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -388,7 +257,7 @@ int MOSRotating::Create(const MOSRotating &reference)
     }
 
 	// Gib copies
-    for (list<MOSRotating::Gib>::const_iterator gItr = reference.m_Gibs.begin(); gItr != reference.m_Gibs.end(); ++gItr)
+    for (list<Gib>::const_iterator gItr = reference.m_Gibs.begin(); gItr != reference.m_Gibs.end(); ++gItr)
     {
         m_Gibs.push_back(*gItr);
     }
@@ -1052,7 +921,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
     MovableObject *pGib = 0;
     float velMin, velRange, spread, angularVel;
     Vector gibROffset, gibVel;
-    for (list<MOSRotating::Gib>::iterator gItr = m_Gibs.begin(); gItr != m_Gibs.end(); ++gItr)
+    for (list<Gib>::iterator gItr = m_Gibs.begin(); gItr != m_Gibs.end(); ++gItr)
     {
 		// Throwing out gibs
         for (int i = 0; i < (*gItr).GetCount(); ++i)
@@ -1117,7 +986,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
             }
 
             // Only add the velocity of the parent if it's suppposed to
-            if ((*gItr).InheritsVel())
+            if ((*gItr).InheritsVelocity())
                 pGib->SetVel(m_Vel + gibVel);
             else
                 pGib->SetVel(gibVel);

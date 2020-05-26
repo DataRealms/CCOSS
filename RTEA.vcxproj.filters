@@ -471,6 +471,9 @@
     <ClInclude Include="Entities\ADSensor.h">
       <Filter>Entities</Filter>
     </ClInclude>
+    <ClInclude Include="Entities\Gib.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -889,6 +892,9 @@
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="Entities\ADSensor.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Gib.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
   </ItemGroup>

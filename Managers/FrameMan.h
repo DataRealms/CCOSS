@@ -479,6 +479,13 @@ namespace RTE {
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
 		int SaveWorldToBMP(const char *nameBase) { return SaveBitmap(WorldDump, nameBase); }
+
+		/// <summary>
+		/// Dumps a miniature screenshot of the whole scene to be used as a preview.
+		/// </summary>
+		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
+		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
+		int SaveWorldToPreviewBMP(const char *nameBase) { return SaveBitmap(ScenePreviewDump, nameBase); }
 #pragma endregion
 
 #pragma region Class Info
@@ -547,6 +554,7 @@ namespace RTE {
 		BITMAP *m_BackBuffer32; //!< 32bpp backbuffer, only used for post-processing.
 		BITMAP *m_ScreenDumpBuffer; //!< Temporary buffer for making quick screencaps.
 		BITMAP *m_WorldDumpBuffer; //!< Temporary buffer for making whole scene screencaps.
+		BITMAP *m_ScenePreviewDumpGradient; //!< BITMAP for the scene preview sky gradient (easier to load from a pre-made file because it's dithered).
 
 		BITMAP *m_NetworkBackBufferIntermediate8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw.
 		BITMAP *m_NetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw. Used to draw UI only.
@@ -568,7 +576,7 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration with different settings for the SaveBitmap() method.
 		/// </summary>
-		enum SaveBitmapMode { SingleBitmap = 0, ScreenDump, WorldDump};
+		enum SaveBitmapMode { SingleBitmap = 0, ScreenDump, WorldDump, ScenePreviewDump};
 
 #pragma region Create Breakdown
 		/// <summary>
@@ -622,10 +630,11 @@ namespace RTE {
 		/// <summary>
 		/// Draws the current frame of the whole scene to a temporary buffer that is later saved as a screenshot. This is called from SaveBitmap().
 		/// </summary>
-		void DrawWorldDump();
+		/// <param name="drawForScenePreview">If true will skip drawing objects, post-effects and sky gradient in the WorldDump. To be used for dumping scene preview images.</param>
+		void DrawWorldDump(bool drawForScenePreview = false);
 
 		/// <summary>
-		/// Shared method for saving screenshots or individual bitmaps. Will be called from SaveBitmapToBMP(), SaveScreenToBMP() or SaveWorldToBMP().
+		/// Shared method for saving screenshots or individual bitmaps. Will be called from SaveBitmapToBMP(), SaveScreenToBMP(), SaveWorldToBMP() or SaveWorldToPreviewBMP().
 		/// </summary>
 		/// <param name="modeToSave">What is being saved. See SaveBitmapMode enumeration for a list of modes.</param>
 		/// <param name="nameBase">

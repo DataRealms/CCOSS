@@ -5,7 +5,7 @@
 
 namespace RTE {
 
-	static BITMAP *g_pScreendumpBuffer = 0; //!< Buffer for saving abort screendumps.
+	static BITMAP *g_ScreendumpBuffer = 0; //!< Buffer for saving abort screendumps.
 
 	/// <summary>
 	/// Pops up a message box dialog in the OS. For debug purposes mostly.

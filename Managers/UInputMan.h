@@ -19,10 +19,7 @@
 #define g_UInputMan UInputMan::Instance()
 #include "Serializable.h"
 #include "Timer.h"
-
-#include "FrameMan.h"
-//#include "SceneMan.h"
-//#include "MovableMan.h"
+#include "Vector.h"
 
 namespace RTE
 {

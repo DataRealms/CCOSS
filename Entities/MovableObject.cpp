@@ -18,6 +18,7 @@
 #include "SettingsMan.h"
 #include "LuaMan.h"
 #include "Atom.h"
+#include "Actor.h"
 
 namespace RTE {
 

@@ -14,6 +14,7 @@
 
 #include "SceneMan.h"
 #include "PresetMan.h"
+#include "FrameMan.h"
 #include "ActivityMan.h"
 #include "UInputMan.h"
 #include "ConsoleMan.h"

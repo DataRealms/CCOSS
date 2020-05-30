@@ -13,6 +13,7 @@
 
 #include "BunkerAssemblyScheme.h"
 #include "PresetMan.h"
+#include "FrameMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"

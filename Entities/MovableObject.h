@@ -20,6 +20,7 @@
 #include "Timer.h"
 #include "Material.h"
 #include "MovableMan.h"
+#include "FrameMan.h"
 
 struct BITMAP;
 

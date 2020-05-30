@@ -14,22 +14,13 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
-#include "Singleton.h"
-#define g_MovableMan MovableMan::Instance()
-
 #include "Serializable.h"
 #include "Entity.h"
-#include "FrameMan.h"
 #include "SceneMan.h"
 #include "LuaMan.h"
-#include "ActivityMan.h"
-#include "Vector.h"
-//#include "MOPixel.h"
-//#include "AHuman.h"
-//#include "MovableObject.h"
-//#include "LimbPath.h"
-//#include "AtomGroup.h"
+#include "Singleton.h"
+
+#define g_MovableMan MovableMan::Instance()
 
 namespace RTE
 {
@@ -37,10 +28,7 @@ namespace RTE
 class MovableObject;
 class Actor;
 class MOPixel;
-//class Actor;
 class AHuman;
-//class AtomGroup;
-//class Atom;
 class SceneLayer;
 
 

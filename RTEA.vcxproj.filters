@@ -96,9 +96,6 @@
     <ClInclude Include="Managers\PresetMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="Managers\RTEManagers.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
     <ClInclude Include="Managers\SceneMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
@@ -232,9 +229,6 @@
       <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\AHuman.h">
-      <Filter>Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Entities\AllEntities.h">
       <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\Arm.h">

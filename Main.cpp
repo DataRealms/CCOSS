@@ -23,9 +23,12 @@
 
 #include "System.h"
 
-#include "RTEManagers.h"
 #include "MetaMan.h"
+#include "SettingsMan.h"
 #include "ConsoleMan.h"
+#include "PresetMan.h"
+#include "PerformanceMan.h"
+#include "PrimitiveMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"

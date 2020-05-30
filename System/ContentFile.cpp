@@ -1,4 +1,5 @@
 #include "ContentFile.h"
+#include "AudioMan.h"
 #include "PresetMan.h"
 #include "ConsoleMan.h"
 

@@ -15,6 +15,7 @@
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
+#include "FrameMan.h"
 #include "AudioMan.h"
 #include "ConsoleMan.h"
 #include "MetaMan.h"

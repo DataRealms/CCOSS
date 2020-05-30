@@ -1,6 +1,7 @@
 #include "MetaPlayer.h"
 #include "DataModule.h"
 #include "PresetMan.h"
+#include "ActivityMan.h"
 
 namespace RTE {
 

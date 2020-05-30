@@ -12,9 +12,12 @@
 // Inclusions of header files
 
 #include "ConsoleMan.h"
-#include "RTEManagers.h"
 #include "Writer.h"
 #include "System.h"
+
+#include "LuaMan.h"
+#include "UInputMan.h"
+#include "FrameMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"

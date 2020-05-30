@@ -14,25 +14,15 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
-#include "Singleton.h"
-#define g_PresetMan PresetMan::Instance()
-
-//#include "Serializable.h"
 #include "Entity.h"
-#include "Actor.h"
-//#include "FrameMan.h"
-//#include "SceneMan.h"
-//#include "Vector.h"
-//#include "MOPixel.h"
-//#include "AHuman.h"
-//#include "MovableEntity.h"
-//#include "LimbPath.h"
-//#include "AtomGroup.h"
+#include "Singleton.h"
+
+#define g_PresetMan PresetMan::Instance()
 
 namespace RTE
 {
 
+class Actor;
 class DataModule;
 
 

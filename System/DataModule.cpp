@@ -1,5 +1,7 @@
 #include "DataModule.h"
-#include "RTEManagers.h"
+#include "PresetMan.h"
+#include "SceneMan.h"
+#include "LuaMan.h"
 
 namespace RTE {
 

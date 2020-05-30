@@ -1,7 +1,10 @@
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
+#include "MovableMan.h"
+#include "FrameMan.h"
+#include "PerformanceMan.h"
 #include "PostProcessMan.h"
-#include "RTEManagers.h"
+#include "UInputMan.h"
 
 extern bool g_ResetActivity;
 

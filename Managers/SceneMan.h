@@ -14,20 +14,14 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-// *** TEMP
-//#include "resource.h"
-
-#include "RTETools.h"
-#include "Singleton.h"
-#define g_SceneMan SceneMan::Instance()
 #include "Serializable.h"
-
-#include "FrameMan.h"
-#include "ActivityMan.h"
-//#include "MovableMan.h"
-#include "Vector.h"
+#include "Timer.h"
 #include "Box.h"
-//#include "SceneLayer.h"
+#include "Singleton.h"
+
+#include "ActivityMan.h"
+
+#define g_SceneMan SceneMan::Instance()
 
 namespace RTE
 {

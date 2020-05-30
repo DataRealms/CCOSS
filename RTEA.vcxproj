@@ -264,7 +264,6 @@
     <ClInclude Include="Managers\MetaMan.h" />
     <ClInclude Include="Managers\MovableMan.h" />
     <ClInclude Include="Managers\PresetMan.h" />
-    <ClInclude Include="Managers\RTEManagers.h" />
     <ClInclude Include="Managers\SceneMan.h" />
     <ClInclude Include="Managers\SettingsMan.h" />
     <ClInclude Include="Managers\TimerMan.h" />
@@ -310,7 +309,6 @@
     <ClInclude Include="Entities\ADoor.h" />
     <ClInclude Include="Entities\AEmitter.h" />
     <ClInclude Include="Entities\AHuman.h" />
-    <ClInclude Include="Entities\AllEntities.h" />
     <ClInclude Include="Entities\Arm.h" />
     <ClInclude Include="Entities\AtomGroup.h" />
     <ClInclude Include="Entities\Attachable.h" />

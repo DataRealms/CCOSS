@@ -77,6 +77,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New shortcut `ALT + W` to generate a detailed 140x55px mini `WorldDump` to be used for scene previews. No relying on `SceneEditor`, stretches over whole image, no ugly cyan bunkers, no actors or glows and has sky gradient.
 
+- All text in textbox (any textbox) can now be selected using `CTRL + A`.
+
 ### Changed
 
 - Lua error reporting has been improved so script errors will always show filename and line number.

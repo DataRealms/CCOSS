@@ -346,6 +346,15 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier)
         return;
     }
 
+	// ModKey-A (Select All)
+	if (asciiChar == 'a' && ModKey) {
+		DoSelection(0, m_Text.size());
+
+		UpdateText();
+
+		return;
+	}
+
     // Enter key
     if (KeyCode == '\n' || KeyCode =='\r') {
         SendSignal(Enter, 0);

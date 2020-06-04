@@ -34,7 +34,6 @@ namespace RTE
 {
 
 const string UInputMan::m_ClassName = "UInputMan";
-const string UInputMan::InputScheme::m_sClassName = "InputScheme";
 char *UInputMan::s_aLastKeys = new char[KEY_MAX];
 char *UInputMan::s_aChangedKeys = new char[KEY_MAX];
 GUIInput* UInputMan::s_InputClass = NULL; 
@@ -43,410 +42,6 @@ bool UInputMan::m_aMousePrevButtonState[MAX_MOUSE_BUTTONS];
 bool UInputMan::m_aMouseChangedButtonState[MAX_MOUSE_BUTTONS];
 JOYSTICK_INFO UInputMan::s_aaPrevJoyState[MAX_PLAYERS];
 JOYSTICK_INFO UInputMan::s_aaChangedJoyState[MAX_PLAYERS];
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this InputScheme, effectively
-//                  resetting the members of this abstraction level only.
-
-void UInputMan::InputScheme::Clear()
-{
-    m_ActiveDevice = DEVICE_KEYB_ONLY;
-    m_SchemePreset = PRESET_NONE;
-	m_JoystickDeadzone = 0.01;
-	m_JoystickDeadzoneType = DeadZoneType::CIRCLE;
-
-    // Clear all mappings
-    for (int mapping = 0; mapping < INPUT_COUNT; ++mapping)
-    {
-        m_aInputMapping[mapping].Clear();
-    }
-
-    // Set up the default mouse button bindings - do these here becuase there are no config steps for them yet
-    m_aInputMapping[INPUT_FIRE].SetMouseButton(MOUSE_LEFT);
-    m_aInputMapping[INPUT_PIEMENU].SetMouseButton(MOUSE_RIGHT);
-}
-
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the InputScheme object ready for use.
-
-int UInputMan::InputScheme::Create()
-{
-    if (Serializable::Create() < 0)
-        return -1;
-
-    return 0;
-}
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetPreset
-//////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Sets up a specific preset scheme that is sensible and recommended.
-
-void UInputMan::InputScheme::SetPreset(int schemePreset)
-{
-	m_SchemePreset = schemePreset;
-	switch (m_SchemePreset) {
-		case PRESET_XBOX360:
-			// Set up the default xbox 360 button bindings
-			m_aInputMapping[INPUT_FIRE].SetJoyButton(JOY_1);
-			m_aInputMapping[INPUT_FIRE].SetPresetDesc("A Button");
-			// Hold down X to enter aim mode, then can use d-pad up/down to finely aim while sniping
-			m_aInputMapping[INPUT_AIM].SetJoyButton(JOY_3);
-			m_aInputMapping[INPUT_AIM].SetPresetDesc("X Button");
-			// Pie menu also cancels buy menu, which makes sense for the B button
-			m_aInputMapping[INPUT_PIEMENU].SetJoyButton(JOY_2);
-			m_aInputMapping[INPUT_PIEMENU].SetPresetDesc("B Button");
-			// Jump on top button of diamond makes sense
-			m_aInputMapping[INPUT_JUMP].SetJoyButton(JOY_4);
-			m_aInputMapping[INPUT_JUMP].SetPresetDesc("Y Button");
-			m_aInputMapping[INPUT_NEXT].SetJoyButton(JOY_6);
-			m_aInputMapping[INPUT_NEXT].SetPresetDesc("R Bumper Button");
-			m_aInputMapping[INPUT_PREV].SetJoyButton(JOY_5);
-			m_aInputMapping[INPUT_PREV].SetPresetDesc("L Bumper Button");
-			m_aInputMapping[INPUT_START].SetJoyButton(JOY_8);
-			m_aInputMapping[INPUT_START].SetPresetDesc("Start Button");
-			m_aInputMapping[INPUT_BACK].SetJoyButton(JOY_7);
-			m_aInputMapping[INPUT_BACK].SetPresetDesc("Back Button");
-			// Set up the default xbox joy direction bindings
-			m_aInputMapping[INPUT_L_UP].SetDirection(0, 1, JOYDIR_ONE);
-			m_aInputMapping[INPUT_L_UP].SetPresetDesc("L Thumbstick Up");
-			m_aInputMapping[INPUT_L_DOWN].SetDirection(0, 1, JOYDIR_TWO);
-			m_aInputMapping[INPUT_L_DOWN].SetPresetDesc("L Thumbstick Down");
-			m_aInputMapping[INPUT_L_LEFT].SetDirection(0, 0, JOYDIR_ONE);
-			m_aInputMapping[INPUT_L_LEFT].SetPresetDesc("L Thumbstick Left");
-			m_aInputMapping[INPUT_L_RIGHT].SetDirection(0, 0, JOYDIR_TWO);
-			m_aInputMapping[INPUT_L_RIGHT].SetPresetDesc("L Thumbstick Right");
-			m_aInputMapping[INPUT_R_UP].SetDirection(1, 0, JOYDIR_ONE);
-			m_aInputMapping[INPUT_R_UP].SetPresetDesc("R Thumbstick Up");
-			m_aInputMapping[INPUT_R_DOWN].SetDirection(1, 0, JOYDIR_TWO);
-			m_aInputMapping[INPUT_R_DOWN].SetPresetDesc("R Thumbstick Down");
-			m_aInputMapping[INPUT_R_LEFT].SetDirection(2, 0, JOYDIR_ONE);
-			m_aInputMapping[INPUT_R_LEFT].SetPresetDesc("R Thumbstick Left");
-			m_aInputMapping[INPUT_R_RIGHT].SetDirection(2, 0, JOYDIR_TWO);
-			m_aInputMapping[INPUT_R_RIGHT].SetPresetDesc("R Thumbstick Right");
-			m_aInputMapping[INPUT_FIRE].SetDirection(0, 2, JOYDIR_ONE);
-			m_aInputMapping[INPUT_FIRE].SetPresetDesc("R Trigger");
-			m_aInputMapping[INPUT_PIEMENU].SetDirection(0, 2, JOYDIR_TWO);
-			m_aInputMapping[INPUT_PIEMENU].SetPresetDesc("L Trigger");
-			m_aInputMapping[INPUT_JUMP].SetDirection(0, 1, JOYDIR_ONE);
-			m_aInputMapping[INPUT_JUMP].SetPresetDesc("L Thumbstick Up");
-			m_aInputMapping[INPUT_CROUCH].SetDirection(0, 1, JOYDIR_TWO);
-			m_aInputMapping[INPUT_CROUCH].SetPresetDesc("L Thumbstick Down");
-			// So fine aiming can be done with the d-pad while holding down X
-			m_aInputMapping[INPUT_AIM_UP].SetDirection(3, 1, JOYDIR_ONE);
-			m_aInputMapping[INPUT_AIM_UP].SetPresetDesc("D-Pad Up");
-			m_aInputMapping[INPUT_AIM_DOWN].SetDirection(3, 1, JOYDIR_TWO);
-			m_aInputMapping[INPUT_AIM_DOWN].SetPresetDesc("D-Pad Down");
-			m_aInputMapping[INPUT_AIM_LEFT].SetDirection(3, 0, JOYDIR_ONE);
-			m_aInputMapping[INPUT_AIM_LEFT].SetPresetDesc("D-Pad Left");
-			m_aInputMapping[INPUT_AIM_RIGHT].SetDirection(3, 0, JOYDIR_TWO);
-			m_aInputMapping[INPUT_AIM_RIGHT].SetPresetDesc("D-Pad Right");
-			break;
-
-		case PRESET_P1DEFAULT:
-			m_aInputMapping[INPUT_L_UP].SetKey(KEY_W);
-			m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_S);
-			m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_A);
-			m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_D);
-			m_aInputMapping[INPUT_R_UP].SetKey(KEY_W);
-			m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_S);
-			m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_A);
-			m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_D);
-			m_aInputMapping[INPUT_FIRE].SetMouseButton(0);
-			m_aInputMapping[INPUT_PIEMENU].SetMouseButton(1);
-			m_aInputMapping[INPUT_JUMP].SetKey(KEY_W);
-			m_aInputMapping[INPUT_CROUCH].SetKey(KEY_S);
-			m_aInputMapping[INPUT_NEXT].SetKey(KEY_E);
-			m_aInputMapping[INPUT_PREV].SetKey(KEY_Q);
-			m_aInputMapping[INPUT_WEAPON_RELOAD].SetKey(KEY_R);
-			m_aInputMapping[INPUT_WEAPON_DROP].SetKey(KEY_G);
-			m_aInputMapping[INPUT_WEAPON_PICKUP].SetKey(KEY_F);
-			m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetKey(KEY_C);
-			break;
-
-		case PRESET_P2DEFAULT:
-			m_aInputMapping[INPUT_L_UP].SetKey(KEY_UP);
-			m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_DOWN);
-			m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_LEFT);
-			m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_RIGHT);
-			m_aInputMapping[INPUT_FIRE].SetKey(KEY_1_PAD);
-			m_aInputMapping[INPUT_AIM].SetKey(KEY_2_PAD);
-			m_aInputMapping[INPUT_AIM_UP].SetKey(KEY_UP);
-			m_aInputMapping[INPUT_AIM_DOWN].SetKey(KEY_DOWN);
-			m_aInputMapping[INPUT_PIEMENU].SetKey(KEY_3_PAD);
-			m_aInputMapping[INPUT_JUMP].SetKey(KEY_ENTER_PAD);
-			m_aInputMapping[INPUT_CROUCH].SetKey(KEY_DEL_PAD);
-			m_aInputMapping[INPUT_NEXT].SetKey(KEY_5_PAD);
-			m_aInputMapping[INPUT_PREV].SetKey(KEY_4_PAD);
-			m_aInputMapping[INPUT_WEAPON_RELOAD].SetKey(KEY_0_PAD);
-			m_aInputMapping[INPUT_WEAPON_DROP].SetKey(KEY_6_PAD);
-			m_aInputMapping[INPUT_WEAPON_PICKUP].SetKey(KEY_9_PAD);
-			m_aInputMapping[INPUT_WEAPON_CHANGE_PREV].SetKey(KEY_7_PAD);
-			m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetKey(KEY_8_PAD);
-			break;
-
-		case PRESET_P3DEFAULT:
-            //TODO: Replace these with gamepad bindings.
-			m_aInputMapping[INPUT_L_UP].SetKey(KEY_W);
-			m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_S);
-			m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_A);
-			m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_D);
-			m_aInputMapping[INPUT_R_UP].SetKey(KEY_W);
-			m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_S);
-			m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_A);
-			m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_D);
-			m_aInputMapping[INPUT_FIRE].SetKey(KEY_H);
-			m_aInputMapping[INPUT_AIM].SetKey(KEY_J);
-			m_aInputMapping[INPUT_AIM_UP].SetKey(KEY_W);
-			m_aInputMapping[INPUT_AIM_DOWN].SetKey(KEY_S);
-			m_aInputMapping[INPUT_PIEMENU].SetKey(KEY_K);
-			m_aInputMapping[INPUT_JUMP].SetKey(KEY_L);
-			m_aInputMapping[INPUT_CROUCH].SetKey(KEY_STOP);
-			m_aInputMapping[INPUT_NEXT].SetKey(KEY_U);
-			m_aInputMapping[INPUT_PREV].SetKey(KEY_Y);
-			break;
-
-		case PRESET_P4DEFAULT:
-            //TODO: Replace these with gamepad bindings.
-			m_aInputMapping[INPUT_L_UP].SetKey(KEY_UP);
-			m_aInputMapping[INPUT_L_DOWN].SetKey(KEY_DOWN);
-			m_aInputMapping[INPUT_L_LEFT].SetKey(KEY_LEFT);
-			m_aInputMapping[INPUT_L_RIGHT].SetKey(KEY_RIGHT);
-			m_aInputMapping[INPUT_R_UP].SetKey(KEY_UP);
-			m_aInputMapping[INPUT_R_DOWN].SetKey(KEY_DOWN);
-			m_aInputMapping[INPUT_R_LEFT].SetKey(KEY_LEFT);
-			m_aInputMapping[INPUT_R_RIGHT].SetKey(KEY_RIGHT);
-			m_aInputMapping[INPUT_FIRE].SetKey(KEY_1_PAD);
-			m_aInputMapping[INPUT_AIM].SetKey(KEY_2_PAD);
-			m_aInputMapping[INPUT_AIM_UP].SetKey(KEY_UP);
-			m_aInputMapping[INPUT_AIM_DOWN].SetKey(KEY_DOWN);
-			m_aInputMapping[INPUT_PIEMENU].SetKey(KEY_3_PAD);
-			m_aInputMapping[INPUT_JUMP].SetKey(KEY_DEL_PAD);
-			m_aInputMapping[INPUT_CROUCH].SetKey(KEY_STOP);
-			m_aInputMapping[INPUT_NEXT].SetKey(KEY_5_PAD);
-			m_aInputMapping[INPUT_PREV].SetKey(KEY_4_PAD);
-			break;
-
-		// Some generic defaults; no real preset is set
-		default:
-            m_SchemePreset = PRESET_NONE;
-			// Set up the default mouse button bindings
-			m_aInputMapping[INPUT_FIRE].SetMouseButton(MOUSE_LEFT);
-			m_aInputMapping[INPUT_PIEMENU].SetMouseButton(MOUSE_RIGHT);
-			// Set up the default joystick button bindings
-			m_aInputMapping[INPUT_FIRE].SetJoyButton(JOY_1);
-			m_aInputMapping[INPUT_AIM].SetJoyButton(JOY_2);
-			m_aInputMapping[INPUT_PIEMENU].SetJoyButton(JOY_3);
-			m_aInputMapping[INPUT_JUMP].SetJoyButton(JOY_4);
-			m_aInputMapping[INPUT_NEXT].SetJoyButton(JOY_6);
-			m_aInputMapping[INPUT_PREV].SetJoyButton(JOY_5);
-			m_aInputMapping[INPUT_START].SetJoyButton(JOY_8);
-			m_aInputMapping[INPUT_BACK].SetJoyButton(JOY_7);
-			// Set up the default joystick direction bindings
-			m_aInputMapping[INPUT_L_UP].SetDirection(0, 1, JOYDIR_ONE);
-			m_aInputMapping[INPUT_L_DOWN].SetDirection(0, 1, JOYDIR_TWO);
-			m_aInputMapping[INPUT_L_LEFT].SetDirection(0, 0, JOYDIR_ONE);
-			m_aInputMapping[INPUT_L_RIGHT].SetDirection(0, 0, JOYDIR_TWO);
-			m_aInputMapping[INPUT_R_UP].SetDirection(2, 0, JOYDIR_ONE);
-			m_aInputMapping[INPUT_R_DOWN].SetDirection(2, 0, JOYDIR_TWO);
-			m_aInputMapping[INPUT_R_LEFT].SetDirection(1, 0, JOYDIR_ONE);
-			m_aInputMapping[INPUT_R_RIGHT].SetDirection(1, 0, JOYDIR_TWO);
-			m_aInputMapping[INPUT_FIRE].SetDirection(0, 2, JOYDIR_ONE);
-			m_aInputMapping[INPUT_JUMP].SetDirection(0, 1, JOYDIR_ONE);
-			m_aInputMapping[INPUT_CROUCH].SetDirection(0, 1, JOYDIR_TWO);
-			m_aInputMapping[INPUT_PIEMENU].SetDirection(0, 2, JOYDIR_TWO);
-			m_aInputMapping[INPUT_WEAPON_CHANGE_PREV].SetDirection(3, 0, JOYDIR_ONE);
-			m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT].SetDirection(3, 0, JOYDIR_TWO);
-			m_aInputMapping[INPUT_WEAPON_RELOAD].SetDirection(3, 1, JOYDIR_ONE);
-			m_aInputMapping[INPUT_WEAPON_PICKUP].SetDirection(3, 1, JOYDIR_TWO);
-	}
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a InputScheme to be identical to another, by deep copy.
-
-int UInputMan::InputScheme::Create(const InputScheme &reference)
-{
-    m_ActiveDevice = reference.m_ActiveDevice;
-    m_SchemePreset = reference.m_SchemePreset;
-	m_JoystickDeadzone = reference.m_JoystickDeadzone;
-	m_JoystickDeadzoneType = reference.m_JoystickDeadzoneType;
-
-    for (int mapping = 0; mapping < INPUT_COUNT; ++mapping)
-        m_aInputMapping[mapping].Create(reference.m_aInputMapping[mapping]);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
-
-int UInputMan::InputScheme::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "Device")
-        reader >> m_ActiveDevice;
-    else if (propName == "Preset")
-    {
-        reader >> m_SchemePreset;
-        SetPreset(m_SchemePreset);
-    }
-    else if (propName == "LeftUp")
-        reader >> m_aInputMapping[INPUT_L_UP];
-    else if (propName == "LeftDown")
-        reader >> m_aInputMapping[INPUT_L_DOWN];
-    else if (propName == "LeftLeft")
-        reader >> m_aInputMapping[INPUT_L_LEFT];
-    else if (propName == "LeftRight")
-        reader >> m_aInputMapping[INPUT_L_RIGHT];
-    else if (propName == "RightUp")
-        reader >> m_aInputMapping[INPUT_R_UP];
-    else if (propName == "RightDown")
-        reader >> m_aInputMapping[INPUT_R_DOWN];
-    else if (propName == "RightLeft")
-        reader >> m_aInputMapping[INPUT_R_LEFT];
-    else if (propName == "RightRight")
-        reader >> m_aInputMapping[INPUT_R_RIGHT];
-    else if (propName == "Fire")
-        reader >> m_aInputMapping[INPUT_FIRE];
-    else if (propName == "Aim")
-        reader >> m_aInputMapping[INPUT_AIM];
-    else if (propName == "AimUp")
-        reader >> m_aInputMapping[INPUT_AIM_UP];
-    else if (propName == "AimDown")
-        reader >> m_aInputMapping[INPUT_AIM_DOWN];
-    else if (propName == "AimLeft")
-        reader >> m_aInputMapping[INPUT_AIM_LEFT];
-    else if (propName == "AimRight")
-        reader >> m_aInputMapping[INPUT_AIM_RIGHT];
-    else if (propName == "PieMenu")
-        reader >> m_aInputMapping[INPUT_PIEMENU];
-    else if (propName == "Jump")
-        reader >> m_aInputMapping[INPUT_JUMP];
-    else if (propName == "Crouch")
-        reader >> m_aInputMapping[INPUT_CROUCH];
-    else if (propName == "Next")
-        reader >> m_aInputMapping[INPUT_NEXT];
-    else if (propName == "Prev")
-        reader >> m_aInputMapping[INPUT_PREV];
-    else if (propName == "Start")
-        reader >> m_aInputMapping[INPUT_START];
-    else if (propName == "Back")
-        reader >> m_aInputMapping[INPUT_BACK];
-	else if (propName == "WeaponChangeNext")
-		reader >> m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT];
-	else if (propName == "WeaponChangePrev")
-		reader >> m_aInputMapping[INPUT_WEAPON_CHANGE_PREV];
-	else if (propName == "WeaponPickup")
-		reader >> m_aInputMapping[INPUT_WEAPON_PICKUP];
-	else if (propName == "WeaponDrop")
-		reader >> m_aInputMapping[INPUT_WEAPON_DROP];
-	else if (propName == "WeaponReload")
-		reader >> m_aInputMapping[INPUT_WEAPON_RELOAD];
-	else if (propName == "JoystickDeadzone")
-		reader >> m_JoystickDeadzone;
-	else if (propName == "JoystickDeadzoneType")
-		reader >> m_JoystickDeadzoneType;
-	else
-        // See if the base class(es) can find a match instead
-        return Serializable::ReadProperty(propName, reader);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this InputScheme with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int UInputMan::InputScheme::Save(Writer &writer) const
-{
-    Serializable::Save(writer);
-
-    writer.NewProperty("Device");
-    writer << m_ActiveDevice;
-    if (m_SchemePreset > PRESET_NONE)
-    {
-        writer.NewProperty("Preset");
-        writer << m_SchemePreset;
-    }
-    writer.NewProperty("LeftUp");
-    writer << m_aInputMapping[INPUT_L_UP];
-    writer.NewProperty("LeftDown");
-    writer << m_aInputMapping[INPUT_L_DOWN];
-    writer.NewProperty("LeftLeft");
-    writer << m_aInputMapping[INPUT_L_LEFT];
-    writer.NewProperty("LeftRight");
-    writer << m_aInputMapping[INPUT_L_RIGHT];
-    writer.NewProperty("RightUp");
-    writer << m_aInputMapping[INPUT_R_UP];
-    writer.NewProperty("RightDown");
-    writer << m_aInputMapping[INPUT_R_DOWN];
-    writer.NewProperty("RightLeft");
-    writer << m_aInputMapping[INPUT_R_LEFT];
-    writer.NewProperty("RightRight");
-    writer << m_aInputMapping[INPUT_R_RIGHT];
-    writer.NewProperty("Fire");
-    writer << m_aInputMapping[INPUT_FIRE];
-    writer.NewProperty("Aim");
-    writer << m_aInputMapping[INPUT_AIM];
-    writer.NewProperty("AimUp");
-    writer << m_aInputMapping[INPUT_AIM_UP];
-    writer.NewProperty("AimDown");
-    writer << m_aInputMapping[INPUT_AIM_DOWN];
-    writer.NewProperty("AimLeft");
-    writer << m_aInputMapping[INPUT_AIM_LEFT];
-    writer.NewProperty("AimRight");
-    writer << m_aInputMapping[INPUT_AIM_RIGHT];
-    writer.NewProperty("PieMenu");
-    writer << m_aInputMapping[INPUT_PIEMENU];
-    writer.NewProperty("Jump");
-    writer << m_aInputMapping[INPUT_JUMP];
-    writer.NewProperty("Crouch");
-    writer << m_aInputMapping[INPUT_CROUCH];
-    writer.NewProperty("Next");
-    writer << m_aInputMapping[INPUT_NEXT];
-    writer.NewProperty("Prev");
-    writer << m_aInputMapping[INPUT_PREV];
-    writer.NewProperty("Start");
-    writer << m_aInputMapping[INPUT_START];
-    writer.NewProperty("Back");
-    writer << m_aInputMapping[INPUT_BACK];
-	writer.NewProperty("WeaponChangeNext");
-	writer << m_aInputMapping[INPUT_WEAPON_CHANGE_NEXT];
-	writer.NewProperty("WeaponChangePrev");
-	writer << m_aInputMapping[INPUT_WEAPON_CHANGE_PREV];
-	writer.NewProperty("WeaponPickup");
-	writer << m_aInputMapping[INPUT_WEAPON_PICKUP];
-	writer.NewProperty("WeaponDrop");
-	writer << m_aInputMapping[INPUT_WEAPON_DROP];
-	writer.NewProperty("WeaponReload");
-	writer << m_aInputMapping[INPUT_WEAPON_RELOAD];
-	writer.NewProperty("JoystickDeadzone");
-	writer << m_JoystickDeadzone;
-	writer.NewProperty("JoystickDeadzoneType");
-	writer << m_JoystickDeadzoneType;
-
-    return 0;
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -493,7 +88,7 @@ void UInputMan::Clear()
     {
 		m_TrapMousePosPerPlayer[player] = false;
 
-        m_aControlScheme[player].Clear();
+        m_aControlScheme[player].Reset();
 		m_NetworkAccumulatedRawMouseMovement[player].Reset();
 
 		for (int element = 0; element < INPUT_COUNT; element++)
@@ -840,7 +435,7 @@ string UInputMan::GetMappingName(int whichPlayer, int whichElement)
     int preset = m_aControlScheme[whichPlayer].GetPreset();
 
     // Get handy pointer to the relevant input element
-    InputScheme::InputMapping * pElement = &(m_aControlScheme[whichPlayer].GetInputMappings()[whichElement]);
+    InputMapping * pElement = &(m_aControlScheme[whichPlayer].GetInputMappings()[whichElement]);
 
     // If there is a preset, just return the element name set by the preset previously
     if (preset != PRESET_NONE && !pElement->GetPresetDesc().empty())
@@ -909,7 +504,7 @@ bool UInputMan::CaptureKeyMapping(int whichPlayer, int whichInput)
         if (KeyPressed(whichKey) /* s_aLastKeys[whichKey] && s_aChangedKeys[whichKey]*/)
         {
             // Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
-            m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Clear();
+            m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset();
             SetKeyMapping(whichPlayer, whichInput, whichKey);
             return true;
         }
@@ -936,7 +531,7 @@ bool UInputMan::CaptureButtonMapping(int whichPlayer, int whichJoy, int whichInp
     if (whichButton != JOY_NONE)
     {
         // Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
-        m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Clear();
+        m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset();
         SetButtonMapping(whichPlayer, whichInput, whichButton);
         return true;
     }
@@ -967,7 +562,7 @@ bool UInputMan::CaptureDirectionMapping(int whichPlayer, int whichJoy, int which
             if (joy[whichJoy].stick[stick].axis[axis].d1 && s_aaChangedJoyState[whichJoy].stick[stick].axis[axis].d1)
             {
                 // Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
-                m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Clear();
+                m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset();
                 // Capture the mapping!
                 m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].SetDirection(stick, axis, JOYDIR_ONE);
                 return true;
@@ -976,7 +571,7 @@ bool UInputMan::CaptureDirectionMapping(int whichPlayer, int whichJoy, int which
             else if (joy[whichJoy].stick[stick].axis[axis].d2 && s_aaChangedJoyState[whichJoy].stick[stick].axis[axis].d2)
             {
                 // Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
-                m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Clear();
+                m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset();
                 // Capture the mapping!
                 m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].SetDirection(stick, axis, JOYDIR_TWO);
                 return true;
@@ -1100,7 +695,7 @@ bool UInputMan::ElementPressed(int whichPlayer, int whichElement)
     int device = m_aControlScheme[whichPlayer].GetDevice();
 
     // Get handy pointer to the relevant input element
-    InputScheme::InputMapping * pElement = &(m_aControlScheme[whichPlayer].GetInputMappings()[whichElement]);
+    InputMapping * pElement = &(m_aControlScheme[whichPlayer].GetInputMappings()[whichElement]);
 
     // Keyboard is involved
     // Don't check certain elements which don't make sense when in mouse mode
@@ -1157,7 +752,7 @@ bool UInputMan::ElementReleased(int whichPlayer, int whichElement)
     int device = m_aControlScheme[whichPlayer].GetDevice();
 
     // Get handy pointer to the relevant input element
-    InputScheme::InputMapping * pElement = &(m_aControlScheme[whichPlayer].GetInputMappings()[whichElement]);
+    InputMapping * pElement = &(m_aControlScheme[whichPlayer].GetInputMappings()[whichElement]);
 
     // Keyboard is involved
     // Don't check certain elements which don't make sense when in mouse mode
@@ -1221,7 +816,7 @@ bool UInputMan::ElementHeld(int whichPlayer, int whichElement)
     int device = m_aControlScheme[whichPlayer].GetDevice();
 
     // Get handy pointer to the relevant input element
-    InputScheme::InputMapping * pElement = &(m_aControlScheme[whichPlayer].GetInputMappings()[whichElement]);
+    InputMapping * pElement = &(m_aControlScheme[whichPlayer].GetInputMappings()[whichElement]);
 
     // Keyboard is involved
     // Don't check certain elements which don't make sense when in mouse mode
@@ -1613,7 +1208,7 @@ Vector UInputMan::AnalogMoveValues(int whichPlayer)
     int device = m_aControlScheme[whichPlayer].GetDevice();
 
     // Get handy pointer to the relevant input elements
-    InputScheme::InputMapping * pElement = m_aControlScheme[whichPlayer].GetInputMappings();
+    InputMapping * pElement = m_aControlScheme[whichPlayer].GetInputMappings();
 /*
     // Mouse is involved
     if (device == DEVICE_MOUSE_KEYB)
@@ -1654,7 +1249,7 @@ Vector UInputMan::AnalogAimValues(int whichPlayer)
 		device = UInputMan::DEVICE_MOUSE_KEYB;
 
     // Get handy pointer to the relevant input elements
-    InputScheme::InputMapping * pElement = m_aControlScheme[whichPlayer].GetInputMappings();
+    InputMapping * pElement = m_aControlScheme[whichPlayer].GetInputMappings();
 
     // Mouse is involved
     if (device == DEVICE_MOUSE_KEYB)
@@ -2402,7 +1997,7 @@ int UInputMan::Update()
 		// Disable input if it's in circle deadzone
 		if (player > -1 && deadzonetype == UInputMan::DeadZoneType::CIRCLE && deadzone > 0.0)
 		{
-			InputScheme::InputMapping * pElement = m_aControlScheme[player].GetInputMappings();
+			InputMapping * pElement = m_aControlScheme[player].GetInputMappings();
 
 			Vector aimValues;
 

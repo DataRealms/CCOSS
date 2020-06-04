@@ -79,6 +79,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - All text in textbox (any textbox) can now be selected using `CTRL + A`.
 
+- Console can now be resized using `CTRL + UP/DOWN` (arrow keys) while open.
+
 ### Changed
 
 - Lua error reporting has been improved so script errors will always show filename and line number.
@@ -119,6 +121,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Specially handled Lua function `OnScriptRemoveOrDisable` has been changed to `OnScriptDisable`, and no longer has a parameter saying whether it was removed or disabled, since you can no longer remove scripts.
 
+- When pasting multiple lines of code into the console all of them will be executed instead of the last line being pasted into the textbox and all before it executing.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.
@@ -136,6 +140,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Removed `Settings.ini` property `PixelsPerMeter`. Now hardcoded and cannot be changed by the user.
 
 - Removed `MOSParticle` property `Framerate` and lua bindings. `MOSParticle` animation is now handled with `SpriteAnimMode` like everything else.
+
+- Removed `ConsoleMan.ForceVisibility` and `ConsoleMan.ScreenSize` lua bindings.
 
 ***
 

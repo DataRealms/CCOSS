@@ -2758,15 +2758,16 @@ int UInputMan::Update()
 		if (!g_ConsoleMan.IsEnabled()) { g_ConsoleMan.SetEnabled(); }
 
 		g_ConsoleMan.PrintString("--- SHORTCUTS ---");
-		g_ConsoleMan.PrintString("~ - This console. CTRL + ~ - Console without input capture");
-		g_ConsoleMan.PrintString("CTRL + S / Prnt Scrn - Make a screenshot");
+		g_ConsoleMan.PrintString("CTRL + ~ - Console in read-only mode without input capture");
+		g_ConsoleMan.PrintString("CTRL + DOWN / UP - Increase/decrease console height (Only while console is open)");
+		g_ConsoleMan.PrintString("CTRL + S / PrintScrn - Make a screenshot");
 		g_ConsoleMan.PrintString("CTRL + W - Make a screenshot of the entire level");
 		g_ConsoleMan.PrintString("ALT  + W - Make a miniature preview image of the entire level");
 		g_ConsoleMan.PrintString("CTRL + P - Show performance stats");
 		g_ConsoleMan.PrintString("CTRL + R - Reset activity");
 		g_ConsoleMan.PrintString("CTRL + M - Switch display mode: Draw -> Material -> MO");
 		g_ConsoleMan.PrintString("CTRL + O - Toggle one sim update per frame");
-
+		g_ConsoleMan.PrintString("----------------");
 		g_ConsoleMan.PrintString("F2 - Reload all scripts");
 		g_ConsoleMan.PrintString("F3 - Save Console.log");
 		g_ConsoleMan.PrintString("F4 - Save input log");
@@ -2775,7 +2776,7 @@ int UInputMan::Update()
 
 	if (KeyPressed(KEY_F2)) {
 		g_PresetMan.ReloadAllScripts();
-		g_ConsoleMan.PrintString("Scripts reloaded");
+		g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded!");
 	}
 
 	if (KeyPressed(KEY_F3)) { g_ConsoleMan.SaveAllText("Console.dump.log"); }

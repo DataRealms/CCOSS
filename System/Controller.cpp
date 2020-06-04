@@ -137,8 +137,8 @@ namespace RTE {
 
 		// Player Input Mode
 		if (m_InputMode == CIM_PLAYER) {
-			// Disable player input if the console is open, or the controller is disabled or has no player
-			if (g_ConsoleMan.IsEnabled() || m_Disabled || m_Player < 0) {
+			// Disable player input if the console is open but isn't in read-only mode, or the controller is disabled or has no player
+			if ((g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) || m_Disabled || m_Player < 0) {
 				return;
 			}
 			// Update all the player input

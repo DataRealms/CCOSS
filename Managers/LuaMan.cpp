@@ -2216,9 +2216,7 @@ int LuaMan::Create()
             .def("PrintString", &ConsoleMan::PrintString)
             .def("SaveInputLog", &ConsoleMan::SaveInputLog)
             .def("SaveAllText", &ConsoleMan::SaveAllText)
-            .def("Clear", &ConsoleMan::ClearLog)
-			.property("ForceVisibility", &ConsoleMan::IsForceVisible, &ConsoleMan::ForceVisibility)
-			.property("ScreenSize", &ConsoleMan::GetConsoleScreenSize, &ConsoleMan::SetConsoleScreenSize),
+            .def("Clear", &ConsoleMan::ClearLog),
 
         class_<LuaMan>("LuaManager")
             .property("TempEntity", &LuaMan::GetTempEntity)

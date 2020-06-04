@@ -471,6 +471,9 @@
     <ClInclude Include="Entities\Round.h">
       <Filter>Entities</Filter>
     </ClInclude>
+    <ClInclude Include="System\InputMapping.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -896,6 +899,9 @@
     </ClCompile>
     <ClCompile Include="Entities\Round.cpp">
       <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="System\InputMapping.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

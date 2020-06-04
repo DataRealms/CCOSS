@@ -402,9 +402,6 @@
     <ClInclude Include="Managers\NetworkServer.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="Managers\Network.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
     <ClInclude Include="Managers\NetworkMessages.h">
       <Filter>Managers</Filter>
     </ClInclude>

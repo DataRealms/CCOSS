@@ -17,7 +17,18 @@
 #include "PostProcessMan.h"
 #include "SoundContainer.h"
 
-#include "Network.h"
+#define WIN32_LEAN_AND_MEAN
+#define NOGDI
+
+#include <WinSock2.h>
+#include "RakPeerInterface.h"
+#include "MessageIdentifiers.h"
+
+#undef WIN32_LEAN_AND_MEAN
+#undef NO_GDI
+
+#include "NetworkMessages.h"
+
 #include "NatPunchthroughClient.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////

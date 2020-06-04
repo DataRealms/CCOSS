@@ -224,7 +224,6 @@
     <ClInclude Include="Entities\Round.h" />
     <ClInclude Include="GUI\Interface.h" />
     <ClInclude Include="GUI\GUISound.h" />
-    <ClInclude Include="Managers\Network.h" />
     <ClInclude Include="Managers\NetworkClient.h" />
     <ClInclude Include="Managers\NetworkMessages.h" />
     <ClInclude Include="Managers\NetworkServer.h" />

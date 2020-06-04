@@ -46,7 +46,6 @@
 #include "MultiplayerServerLobby.h"
 #include "NetworkServer.h"
 #include "NetworkClient.h"
-#include "Network.h"
 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 

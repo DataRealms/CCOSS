@@ -16,7 +16,6 @@
 #include "UInputMan.h"
 #include "SceneMan.h"
 
-#include "Network.h"
 #include "NetworkClient.h"
 #include "NatPunchthroughClient.h"
 

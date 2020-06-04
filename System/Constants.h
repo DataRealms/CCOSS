@@ -78,6 +78,112 @@ namespace RTE {
 	static constexpr unsigned short c_MaxLayersStoredForNetwork = 10;
 #pragma endregion
 
+#pragma region Input Constants
+	/// <summary>
+	/// Enumeration for different types of input devices.
+	/// </summary>
+	enum InputDevice {
+		DEVICE_KEYB_ONLY = 0,
+		DEVICE_MOUSE_KEYB,
+		DEVICE_GAMEPAD_1,
+		DEVICE_GAMEPAD_2,
+		DEVICE_GAMEPAD_3,
+		DEVICE_GAMEPAD_4,
+		DEVICE_COUNT
+	};
+
+	/// <summary>
+	/// Enumeration for different input scheme presets.
+	/// </summary>
+	enum InputPreset {
+		PRESET_P1DEFAULT = -1,
+		PRESET_P2DEFAULT = -2,
+		PRESET_P3DEFAULT = -3,
+		PRESET_P4DEFAULT = -4,
+		PRESET_NONE = 0,
+		PRESET_WASDKEYS,
+		PRESET_CURSORKEYS,
+		PRESET_XBOX360,
+		PRESET_COUNT
+	};
+
+	/// <summary>
+	/// Enumeration for different elements the input scheme is composed of.
+	/// </summary>
+	enum InputElements {
+		INPUT_L_UP = 0,
+		INPUT_L_DOWN,
+		INPUT_L_LEFT,
+		INPUT_L_RIGHT,
+		INPUT_R_UP,
+		INPUT_R_DOWN,
+		INPUT_R_LEFT,
+		INPUT_R_RIGHT,
+		INPUT_FIRE,
+		INPUT_AIM,
+		INPUT_AIM_UP,
+		INPUT_AIM_DOWN,
+		INPUT_AIM_LEFT,
+		INPUT_AIM_RIGHT,
+		INPUT_PIEMENU,
+		INPUT_JUMP,
+		INPUT_CROUCH,
+		INPUT_NEXT,
+		INPUT_PREV,
+		INPUT_START,
+		INPUT_BACK,
+		INPUT_WEAPON_CHANGE_NEXT,
+		INPUT_WEAPON_CHANGE_PREV,
+		INPUT_WEAPON_PICKUP,
+		INPUT_WEAPON_DROP,
+		INPUT_WEAPON_RELOAD,
+		INPUT_COUNT
+	};
+
+	/// <summary>
+	/// Enumeration for mouse button types.
+	/// </summary>
+	enum MouseButtons {
+		MOUSE_NONE = -1,
+		MOUSE_LEFT = 0,
+		MOUSE_RIGHT,
+		MOUSE_MIDDLE,
+		MAX_MOUSE_BUTTONS
+	};
+
+	/// <summary>
+	/// Enumeration for joystick button types.
+	/// </summary>
+	enum JoyButtons {
+		JOY_NONE = -1,
+		JOY_1 = 0,
+		JOY_2,
+		JOY_3,
+		JOY_4,
+		JOY_5,
+		JOY_6,
+		JOY_7,
+		JOY_8,
+		JOY_9,
+		JOY_10,
+		JOY_11,
+		JOY_12,
+		MAX_JOY_BUTTONS
+	};
+
+	/// <summary>
+	/// Enumeration for joystick direction types.
+	/// </summary>
+	enum JoyDirections { JOYDIR_ONE = 0, JOYDIR_TWO };
+
+	/// <summary>
+	/// Enumeration for joystick dead zone types. 
+	/// Square deadzone cuts-off any input from every axis separately. For example if x-axis has less than 20% input and y-axis has more, x-axis input is ignored.
+	/// Circle uses a round zone to capture stick position on both axis then cut-off if this position is inside the round dead zone.
+	/// </summary>
+	enum DeadZoneType { CIRCLE = 0, SQUARE = 1 };
+#pragma endregion
+
 #pragma region Un-Definitions
 	// Allegro defines these via define in astdint.h and Boost with stdlib go crazy so we need to undefine them manually.
 	#undef int8_t

@@ -262,22 +262,22 @@ namespace RTE
 		msg.MouseY = (int)mouse.GetY();
 
 		// Those are update in Update every frame to cath short events like clicks and releases
-		msg.MouseButtonPressed[UInputMan::MOUSE_LEFT] = m_aMouseButtonPressedState[UInputMan::MOUSE_LEFT] == 1 ? true : false;
-		msg.MouseButtonPressed[UInputMan::MOUSE_MIDDLE] = m_aMouseButtonPressedState[UInputMan::MOUSE_MIDDLE] == 1 ? true : false;
-		msg.MouseButtonPressed[UInputMan::MOUSE_RIGHT] = m_aMouseButtonPressedState[UInputMan::MOUSE_RIGHT] == 1 ? true : false;
+		msg.MouseButtonPressed[MOUSE_LEFT] = m_aMouseButtonPressedState[MOUSE_LEFT] == 1 ? true : false;
+		msg.MouseButtonPressed[MOUSE_MIDDLE] = m_aMouseButtonPressedState[MOUSE_MIDDLE] == 1 ? true : false;
+		msg.MouseButtonPressed[MOUSE_RIGHT] = m_aMouseButtonPressedState[MOUSE_RIGHT] == 1 ? true : false;
 
-//		if (m_aMouseButtonPressedState[UInputMan::MOUSE_LEFT] == 1) g_ConsoleMan.PrintString("#");
+//		if (m_aMouseButtonPressedState[MOUSE_LEFT] == 1) g_ConsoleMan.PrintString("#");
 
 
-		msg.MouseButtonReleased[UInputMan::MOUSE_LEFT] = m_aMouseButtonReleasedState[UInputMan::MOUSE_LEFT] == 1 ? true : false;
-		msg.MouseButtonReleased[UInputMan::MOUSE_MIDDLE] = m_aMouseButtonReleasedState[UInputMan::MOUSE_MIDDLE] == 1 ? true : false;
-		msg.MouseButtonReleased[UInputMan::MOUSE_RIGHT] = m_aMouseButtonReleasedState[UInputMan::MOUSE_RIGHT] == 1 ? true : false;
+		msg.MouseButtonReleased[MOUSE_LEFT] = m_aMouseButtonReleasedState[MOUSE_LEFT] == 1 ? true : false;
+		msg.MouseButtonReleased[MOUSE_MIDDLE] = m_aMouseButtonReleasedState[MOUSE_MIDDLE] == 1 ? true : false;
+		msg.MouseButtonReleased[MOUSE_RIGHT] = m_aMouseButtonReleasedState[MOUSE_RIGHT] == 1 ? true : false;
 
-//		if (m_aMouseButtonReleasedState[UInputMan::MOUSE_LEFT] == 1) g_ConsoleMan.PrintString("0");
+//		if (m_aMouseButtonReleasedState[MOUSE_LEFT] == 1) g_ConsoleMan.PrintString("0");
 
-		msg.MouseButtonHeld[UInputMan::MOUSE_LEFT] = g_UInputMan.MouseButtonHeld(UInputMan::MOUSE_LEFT, -1);
-		msg.MouseButtonHeld[UInputMan::MOUSE_MIDDLE] = g_UInputMan.MouseButtonHeld(UInputMan::MOUSE_MIDDLE, -1);
-		msg.MouseButtonHeld[UInputMan::MOUSE_RIGHT] = g_UInputMan.MouseButtonHeld(UInputMan::MOUSE_RIGHT, -1);
+		msg.MouseButtonHeld[MOUSE_LEFT] = g_UInputMan.MouseButtonHeld(MOUSE_LEFT, -1);
+		msg.MouseButtonHeld[MOUSE_MIDDLE] = g_UInputMan.MouseButtonHeld(MOUSE_MIDDLE, -1);
+		msg.MouseButtonHeld[MOUSE_RIGHT] = g_UInputMan.MouseButtonHeld(MOUSE_RIGHT, -1);
 
 		for (int i = 0; i < 3; i++)
 		{
@@ -300,17 +300,17 @@ namespace RTE
 
 		//char buf[256];
 
-		/*if (msg.MouseButtonHeld[UInputMan::MOUSE_LEFT])
+		/*if (msg.MouseButtonHeld[MOUSE_LEFT])
 			buf[0] = '1';
 		else
 			buf[0] = '0';
 
-		if (msg.MouseButtonPressed[UInputMan::MOUSE_LEFT])
+		if (msg.MouseButtonPressed[MOUSE_LEFT])
 			buf[1] = '1';
 		else
 			buf[1] = '0';
 
-		if (msg.MouseButtonReleased[UInputMan::MOUSE_LEFT])
+		if (msg.MouseButtonReleased[MOUSE_LEFT])
 			buf[2] = '1';
 		else
 			buf[2] = '0';
@@ -318,7 +318,7 @@ namespace RTE
 		buf[3] = 0;*/
 
 		// Store element states as bit flags
-		for (int i = 0; i < UInputMan::INPUT_COUNT; i++)
+		for (int i = 0; i < INPUT_COUNT; i++)
 		{
 			if (g_UInputMan.ElementHeld(0, i))
 			{
@@ -340,7 +340,7 @@ namespace RTE
 		}
 
 		g_UInputMan.ClearAccumulatedStates();
-		//buf[UInputMan::INPUT_COUNT] = 0;
+		//buf[INPUT_COUNT] = 0;
 
 		m_Client->Send((const char *)&msg, sizeof(msg), IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, m_ServerID, false);
 
@@ -1337,30 +1337,30 @@ namespace RTE
 		}
 
 		// Detect short mouse events like presses and releases. Helds are detected during input send
-		if (m_aMouseButtonPressedState[UInputMan::MOUSE_LEFT] < 1)
+		if (m_aMouseButtonPressedState[MOUSE_LEFT] < 1)
 		{
-			m_aMouseButtonPressedState[UInputMan::MOUSE_LEFT] = g_UInputMan.MouseButtonPressed(UInputMan::MOUSE_LEFT, -1) ? 1 : 0;
-			//if (m_aMouseButtonPressedState[UInputMan::MOUSE_LEFT] == 1) g_ConsoleMan.PrintString("+");
+			m_aMouseButtonPressedState[MOUSE_LEFT] = g_UInputMan.MouseButtonPressed(MOUSE_LEFT, -1) ? 1 : 0;
+			//if (m_aMouseButtonPressedState[MOUSE_LEFT] == 1) g_ConsoleMan.PrintString("+");
 		}
 
-		if (m_aMouseButtonPressedState[UInputMan::MOUSE_RIGHT] < 1)
-			m_aMouseButtonPressedState[UInputMan::MOUSE_RIGHT] = g_UInputMan.MouseButtonPressed(UInputMan::MOUSE_RIGHT, -1) ? 1 : 0;
+		if (m_aMouseButtonPressedState[MOUSE_RIGHT] < 1)
+			m_aMouseButtonPressedState[MOUSE_RIGHT] = g_UInputMan.MouseButtonPressed(MOUSE_RIGHT, -1) ? 1 : 0;
 
-		if (m_aMouseButtonPressedState[UInputMan::MOUSE_MIDDLE] < 1)
-			m_aMouseButtonPressedState[UInputMan::MOUSE_MIDDLE] = g_UInputMan.MouseButtonPressed(UInputMan::MOUSE_MIDDLE, -1) ? 1 : 0;
+		if (m_aMouseButtonPressedState[MOUSE_MIDDLE] < 1)
+			m_aMouseButtonPressedState[MOUSE_MIDDLE] = g_UInputMan.MouseButtonPressed(MOUSE_MIDDLE, -1) ? 1 : 0;
 
 
-		if (m_aMouseButtonReleasedState[UInputMan::MOUSE_LEFT] < 1)
+		if (m_aMouseButtonReleasedState[MOUSE_LEFT] < 1)
 		{
-			m_aMouseButtonReleasedState[UInputMan::MOUSE_LEFT] = g_UInputMan.MouseButtonReleased(UInputMan::MOUSE_LEFT, -1) ? 1 : 0;
-			//if (m_aMouseButtonPressedState[UInputMan::MOUSE_LEFT] == 1) g_ConsoleMan.PrintString("-");
+			m_aMouseButtonReleasedState[MOUSE_LEFT] = g_UInputMan.MouseButtonReleased(MOUSE_LEFT, -1) ? 1 : 0;
+			//if (m_aMouseButtonPressedState[MOUSE_LEFT] == 1) g_ConsoleMan.PrintString("-");
 		}
 
-		if (m_aMouseButtonReleasedState[UInputMan::MOUSE_RIGHT] < 1)
-			m_aMouseButtonReleasedState[UInputMan::MOUSE_RIGHT] = g_UInputMan.MouseButtonReleased(UInputMan::MOUSE_RIGHT, -1) ? 1 : 0;
+		if (m_aMouseButtonReleasedState[MOUSE_RIGHT] < 1)
+			m_aMouseButtonReleasedState[MOUSE_RIGHT] = g_UInputMan.MouseButtonReleased(MOUSE_RIGHT, -1) ? 1 : 0;
 
-		if (m_aMouseButtonReleasedState[UInputMan::MOUSE_MIDDLE] < 1)
-			m_aMouseButtonReleasedState[UInputMan::MOUSE_MIDDLE] = g_UInputMan.MouseButtonReleased(UInputMan::MOUSE_MIDDLE, -1) ? 1 : 0;
+		if (m_aMouseButtonReleasedState[MOUSE_MIDDLE] < 1)
+			m_aMouseButtonReleasedState[MOUSE_MIDDLE] = g_UInputMan.MouseButtonReleased(MOUSE_MIDDLE, -1) ? 1 : 0;
 
 
 		// Input is sent at whetever settings are set in inputs per second

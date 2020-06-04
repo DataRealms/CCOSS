@@ -739,7 +739,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
 	// Show who controls the cursor
 	int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
 
-	if (device >= UInputMan::DEVICE_GAMEPAD_1)
+	if (device >= DEVICE_GAMEPAD_1)
 	{
 		int mouseX, mouseY;
 		m_pGUIInput->GetMousePosition(&mouseX, &mouseY);
@@ -754,7 +754,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
 	{
 		if (g_UInputMan.JoystickActive(joy))
 		{
-			int matchedDevice = UInputMan::DEVICE_GAMEPAD_1 + joy;
+			int matchedDevice = DEVICE_GAMEPAD_1 + joy;
 
 			if (matchedDevice != device)
 			{

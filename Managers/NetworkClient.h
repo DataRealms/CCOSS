@@ -127,9 +127,9 @@ namespace RTE
 
 			int MouseX;
 			int MouseY;
-			bool MouseButtonPressed[UInputMan::MAX_MOUSE_BUTTONS];
-			bool MouseButtonReleased[UInputMan::MAX_MOUSE_BUTTONS];
-			bool MouseButtonHeld[UInputMan::MAX_MOUSE_BUTTONS];
+			bool MouseButtonPressed[MAX_MOUSE_BUTTONS];
+			bool MouseButtonReleased[MAX_MOUSE_BUTTONS];
+			bool MouseButtonHeld[MAX_MOUSE_BUTTONS];
 			bool ResetActivityVote;
 
 			int MouseWheelMoved;

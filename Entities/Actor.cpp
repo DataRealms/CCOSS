@@ -1789,13 +1789,13 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 				{
 					m_pControllerIcon = 0;
 					if (m_Team == 0)
-						m_pControllerIcon = g_UInputMan.GetDeviceIcon(UInputMan::DEVICE_GAMEPAD_1);
+						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_1);
 					else if (m_Team == 1)
-						m_pControllerIcon = g_UInputMan.GetDeviceIcon(UInputMan::DEVICE_GAMEPAD_2);
+						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_2);
 					else if (m_Team == 2)
-						m_pControllerIcon = g_UInputMan.GetDeviceIcon(UInputMan::DEVICE_GAMEPAD_3);
+						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_3);
 					else if (m_Team == 3)
-						m_pControllerIcon = g_UInputMan.GetDeviceIcon(UInputMan::DEVICE_GAMEPAD_4);
+						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_4);
 					if (m_pControllerIcon)
 					{
 						BITMAP **apControllerBitmaps = 0;

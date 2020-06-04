@@ -1900,22 +1900,22 @@ namespace RTE
 			input.m_Y = msg.MouseY;
 			g_UInputMan.SetNetworkMouseInput(player, input);
 
-			g_UInputMan.SetNetworkMouseButtonHeldState(player, UInputMan::MOUSE_LEFT, msg.MouseButtonHeld[UInputMan::MOUSE_LEFT]);
-			g_UInputMan.SetNetworkMouseButtonPressedState(player, UInputMan::MOUSE_LEFT, msg.MouseButtonPressed[UInputMan::MOUSE_LEFT]);
-			g_UInputMan.SetNetworkMouseButtonReleasedState(player, UInputMan::MOUSE_LEFT, msg.MouseButtonReleased[UInputMan::MOUSE_LEFT]);
+			g_UInputMan.SetNetworkMouseButtonHeldState(player, MOUSE_LEFT, msg.MouseButtonHeld[MOUSE_LEFT]);
+			g_UInputMan.SetNetworkMouseButtonPressedState(player, MOUSE_LEFT, msg.MouseButtonPressed[MOUSE_LEFT]);
+			g_UInputMan.SetNetworkMouseButtonReleasedState(player, MOUSE_LEFT, msg.MouseButtonReleased[MOUSE_LEFT]);
 
-			if (msg.MouseButtonPressed[UInputMan::MOUSE_LEFT] || msg.MouseButtonHeld[UInputMan::MOUSE_LEFT])
+			if (msg.MouseButtonPressed[MOUSE_LEFT] || msg.MouseButtonHeld[MOUSE_LEFT])
 				m_MouseState1[player] = 1;
 			else
 				m_MouseState1[player] = 0;
 
-			g_UInputMan.SetNetworkMouseButtonHeldState(player, UInputMan::MOUSE_RIGHT, msg.MouseButtonHeld[UInputMan::MOUSE_RIGHT]);
-			g_UInputMan.SetNetworkMouseButtonPressedState(player, UInputMan::MOUSE_RIGHT, msg.MouseButtonPressed[UInputMan::MOUSE_RIGHT]);
-			g_UInputMan.SetNetworkMouseButtonReleasedState(player, UInputMan::MOUSE_RIGHT, msg.MouseButtonReleased[UInputMan::MOUSE_RIGHT]);
+			g_UInputMan.SetNetworkMouseButtonHeldState(player, MOUSE_RIGHT, msg.MouseButtonHeld[MOUSE_RIGHT]);
+			g_UInputMan.SetNetworkMouseButtonPressedState(player, MOUSE_RIGHT, msg.MouseButtonPressed[MOUSE_RIGHT]);
+			g_UInputMan.SetNetworkMouseButtonReleasedState(player, MOUSE_RIGHT, msg.MouseButtonReleased[MOUSE_RIGHT]);
 
-			g_UInputMan.SetNetworkMouseButtonHeldState(player, UInputMan::MOUSE_MIDDLE, msg.MouseButtonHeld[UInputMan::MOUSE_MIDDLE]);
-			g_UInputMan.SetNetworkMouseButtonPressedState(player, UInputMan::MOUSE_MIDDLE, msg.MouseButtonPressed[UInputMan::MOUSE_MIDDLE]);
-			g_UInputMan.SetNetworkMouseButtonReleasedState(player, UInputMan::MOUSE_MIDDLE, msg.MouseButtonReleased[UInputMan::MOUSE_MIDDLE]);
+			g_UInputMan.SetNetworkMouseButtonHeldState(player, MOUSE_MIDDLE, msg.MouseButtonHeld[MOUSE_MIDDLE]);
+			g_UInputMan.SetNetworkMouseButtonPressedState(player, MOUSE_MIDDLE, msg.MouseButtonPressed[MOUSE_MIDDLE]);
+			g_UInputMan.SetNetworkMouseButtonReleasedState(player, MOUSE_MIDDLE, msg.MouseButtonReleased[MOUSE_MIDDLE]);
 
 
 			GUIInput::SetNetworkMouseButton(player, m_MouseState1[player], m_MouseState2[player], m_MouseState3[player]);
@@ -1926,7 +1926,7 @@ namespace RTE
 			unsigned int mask = 0x1;
 
 			// Store element states as bit flags
-			for (int i = 0; i < UInputMan::INPUT_COUNT; i++)
+			for (int i = 0; i < INPUT_COUNT; i++)
 			{
 				bool val = (msg.InputElementHeld & mask) > 0;
 
@@ -1968,7 +1968,7 @@ namespace RTE
 
 			msg.MouseX = m->MouseX;
 			msg.MouseY = m->MouseY;
-			for (int i = 0; i < UInputMan::MAX_MOUSE_BUTTONS; i++)
+			for (int i = 0; i < MAX_MOUSE_BUTTONS; i++)
 			{
 				msg.MouseButtonPressed[i] = m->MouseButtonPressed[i];
 				msg.MouseButtonReleased[i] = m->MouseButtonReleased[i];
@@ -1991,7 +1991,7 @@ namespace RTE
 
 				if (msg.MouseX != lastmsg.MouseX) skip = false;
 				if (msg.MouseY != lastmsg.MouseY) skip = false;;
-				for (int i = 0; i < UInputMan::MAX_MOUSE_BUTTONS; i++)
+				for (int i = 0; i < MAX_MOUSE_BUTTONS; i++)
 				{
 					if (msg.MouseButtonPressed[i] != lastmsg.MouseButtonPressed[i]) skip = false;;
 					if (msg.MouseButtonReleased[i] != lastmsg.MouseButtonReleased[i]) skip = false;;

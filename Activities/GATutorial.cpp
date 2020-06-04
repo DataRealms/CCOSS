@@ -34,7 +34,7 @@
 extern bool g_ResetActivity;
 extern bool g_InActivity;
 
-#define MAPNAME(element) g_UInputMan.GetMappingName(m_TutorialPlayer, UInputMan::element)
+#define MAPNAME(element) g_UInputMan.GetMappingName(m_TutorialPlayer, element)
 
 namespace RTE {
 
@@ -997,7 +997,7 @@ void GATutorial::SetupAreas()
     // Adjust for special commands when using the keyboard-only setup
     string JumpName = MAPNAME(INPUT_L_UP);
     string CrouchName = MAPNAME(INPUT_L_DOWN);
-    if (device == UInputMan::DEVICE_KEYB_ONLY)
+    if (device == DEVICE_KEYB_ONLY)
     {
         JumpName = MAPNAME(INPUT_JUMP);
         CrouchName = MAPNAME(INPUT_CROUCH);
@@ -1006,7 +1006,7 @@ void GATutorial::SetupAreas()
     // If no preset, adjust the pie menu and fire names when using the defaults on a gamepad.. otherwise it'll show up as an unhelpful "Joystick"
     string PieName = MAPNAME(INPUT_PIEMENU);
     string FireName = MAPNAME(INPUT_FIRE);
-    if (device >= UInputMan::DEVICE_GAMEPAD_1 && preset == UInputMan::PRESET_NONE)
+    if (device >= DEVICE_GAMEPAD_1 && preset == PRESET_NONE)
     {
         PieName = "Pie Menu Trigger";
         FireName = "Fire Trigger";

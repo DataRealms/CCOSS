@@ -1246,7 +1246,7 @@ Vector UInputMan::AnalogAimValues(int whichPlayer)
     // Which Device is used by this player
     int device = m_aControlScheme[whichPlayer].GetDevice();
 	if (m_OverrideInput)
-		device = UInputMan::DEVICE_MOUSE_KEYB;
+		device = DEVICE_MOUSE_KEYB;
 
     // Get handy pointer to the relevant input elements
     InputMapping * pElement = m_aControlScheme[whichPlayer].GetInputMappings();
@@ -1976,13 +1976,13 @@ int UInputMan::Update()
 
 		// Determine deadzone settings
 		float deadzone = 0.0;
-		int deadzonetype = UInputMan::DeadZoneType::CIRCLE;
+		int deadzonetype = DeadZoneType::CIRCLE;
 		int player = -1;
 
 		// Retreive deadzone settings from player's input scheme
 		for (int p = 0; p < UInputMan::MAX_PLAYERS; p++)
 		{
-			int device = m_aControlScheme[p].GetDevice() - UInputMan::DEVICE_GAMEPAD_1;
+			int device = m_aControlScheme[p].GetDevice() - DEVICE_GAMEPAD_1;
 
 			if (device == joystick)
 			{
@@ -1995,7 +1995,7 @@ int UInputMan::Update()
 
 
 		// Disable input if it's in circle deadzone
-		if (player > -1 && deadzonetype == UInputMan::DeadZoneType::CIRCLE && deadzone > 0.0)
+		if (player > -1 && deadzonetype == DeadZoneType::CIRCLE && deadzone > 0.0)
 		{
 			InputMapping * pElement = m_aControlScheme[player].GetInputMappings();
 
@@ -2104,7 +2104,7 @@ int UInputMan::Update()
             {
 
 				// Adjust joystick values to eliminate values in deadzone
-				if (player > -1 && deadzonetype == UInputMan::DeadZoneType::SQUARE && deadzone > 0.0)
+				if (player > -1 && deadzonetype == DeadZoneType::SQUARE && deadzone > 0.0)
 				{
 					// !!! REFERENCE CODE DO NOT UNCOMMENT !!!
 					// Taken from AnalogAxiesValue

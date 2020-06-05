@@ -177,6 +177,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void ConsoleMan::ShowShortcuts() {
+		if (!IsEnabled()) { SetEnabled(); }
+
+		PrintString("--- SHORTCUTS ---");
+		PrintString("CTRL + ~ - Console in read-only mode without input capture");
+		PrintString("CTRL + DOWN / UP - Increase/decrease console size (Only while console is open)");
+		PrintString("CTRL + S / PrintScrn - Make a screenshot");
+		PrintString("CTRL + W - Make a screenshot of the entire level");
+		PrintString("ALT  + W - Make a miniature preview image of the entire level");
+		PrintString("CTRL + P - Show performance stats");
+		PrintString("CTRL + R - Reset activity");
+		PrintString("CTRL + M - Switch display mode: Draw -> Material -> MO");
+		PrintString("CTRL + O - Toggle one sim update per frame");
+		PrintString("----------------");
+		PrintString("F2 - Reload all Lua scripts");
+		PrintString("F3 - Save console log");
+		PrintString("F4 - Save console user input log");
+		PrintString("F5 - Clear console log ");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void ConsoleMan::Update() {
 		if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_TILDE)) {
 			SetReadOnly();		

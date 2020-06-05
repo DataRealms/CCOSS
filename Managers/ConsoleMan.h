@@ -105,6 +105,11 @@ namespace RTE {
 		void PrintString(std::string stringToPrint);
 
 		/// <summary>
+		/// Opens the console and prints the shortcut help text. This is called from UInputMan when F1 is pressed.
+		/// </summary>
+		void ShowShortcuts();
+
+		/// <summary>
 		/// Updates the state of this ConsoleMan. Supposed to be done every frame before drawing.
 		/// </summary>
 		void Update();

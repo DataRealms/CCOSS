@@ -71,7 +71,7 @@ int GlobalScript::ReadProperty(std::string propName, Reader &reader)
 	{
 		PieMenuGUI::Slice newSlice;
 		reader >> newSlice;
-		PieMenuGUI::AddAvailableSlice(newSlice);
+		PieMenuGUI::StoreCustomLuaSlice(newSlice);
 	}
 	else
         return Entity::ReadProperty(propName, reader);

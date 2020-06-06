@@ -312,10 +312,10 @@ void ActorEditor::Update()
     if (pSlice)
     {
         // User chose to reload the Actor's data
-        if (pSlice->m_SliceType == PieMenuGUI::PSI_LOAD)
+        if (pSlice->GetType() == PieMenuGUI::PSI_LOAD)
             ReloadActorData();
         // User chose to pick a new Actor to edit
-        else if (pSlice->m_SliceType == PieMenuGUI::PSI_PICK)
+        else if (pSlice->GetType() == PieMenuGUI::PSI_PICK)
         {
             m_EditorMode = EditorActivity::LOADDIALOG;
             m_ModeChange = true;

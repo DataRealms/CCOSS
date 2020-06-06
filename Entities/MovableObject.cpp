@@ -328,7 +328,7 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
 	{
 		PieMenuGUI::Slice newSlice;
 		reader >> newSlice;
-		PieMenuGUI::AddAvailableSlice(newSlice);
+		PieMenuGUI::StoreCustomLuaSlice(newSlice);
 	}
 	else if (propName == "ScriptPath")
     {

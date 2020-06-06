@@ -391,7 +391,7 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
         PieMenuGUI::Slice newSlice;
         reader >> newSlice;
         m_PieSlices.push_back(newSlice);
-		PieMenuGUI::AddAvailableSlice(newSlice);
+		PieMenuGUI::StoreCustomLuaSlice(newSlice);
     }
     else if (propName == "AIMode")
     {

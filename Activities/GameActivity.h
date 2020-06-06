@@ -934,7 +934,7 @@ EntityAllocation(GameActivity)
 	{
 		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
 			return m_pPieMenu[m_CurrentPieMenuPlayer]->RemoveSliceLua(description, functionName);
-		return PieMenuGUI::Slice("", PieMenuGUI::PieSliceIndex::PSI_NONE, 0, false);
+		return PieMenuGUI::Slice("", PieMenuGUI::PieSliceIndex::PSI_NONE, PieMenuGUI::Slice::SliceDirection::NONE, false);
 	};
 
 	virtual std::vector<PieMenuGUI::Slice *> GetCurrentPieMenuSlices(int player) const 

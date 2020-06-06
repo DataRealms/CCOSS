@@ -1078,7 +1078,7 @@ void AssemblyEditorGUI::UpdatePieMenu()
 		if (!m_pCurrentScheme)
 		{
 			PieMenuGUI::Slice saveSceneSlice("Can's save, scheme not selected", PieMenuGUI::PSI_SAVE, PieMenuGUI::Slice::DOWN);
-			saveSceneSlice.m_Enabled = false;
+			saveSceneSlice.SetEnabled(false);
 			m_pPieMenu->AddSlice(saveSceneSlice);
 		} else {
 			PieMenuGUI::Slice saveSceneSlice("Save Assembly", PieMenuGUI::PSI_SAVE, PieMenuGUI::Slice::DOWN);

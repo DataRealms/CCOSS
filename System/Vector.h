@@ -191,14 +191,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newMag">A float value that the magnitude will be set to.</param>
 		/// <returns>A reference to this after the change.</returns>
-		Vector & SetMagnitude(float newMag);
+		Vector &SetMagnitude(float newMag);
 
 		/// <summary>
 		/// Caps the magnitude of this Vector to a max value and keeps its angle intact.
 		/// </summary>
 		/// <param name="capMag">A float value that the magnitude will be capped by.</param>
 		/// <returns>A reference to this after the change.</returns>
-		Vector & CapMagnitude(float capMag);
+		Vector &CapMagnitude(float capMag);
 
 		/// <summary>
 		/// Returns a Vector that has the same direction as this but with a magnitude of 1.0.
@@ -210,7 +210,7 @@ namespace RTE {
 		/// Scales this vector to have the same direction but a magnitude of 1.0.
 		/// </summary>
 		/// <returns>Vector reference to this after the operation.</returns>
-		Vector & Normalize() { return *this /= GetMagnitude(); }
+		Vector &Normalize() { return *this /= GetMagnitude(); }
 #pragma endregion
 
 #pragma region Rotation
@@ -245,7 +245,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="refVector">The reference Vector whose absolute angle from positive X (0 degrees) this Vector will be rotated to.</param>
 		/// <returns>This vector, rotated.</returns>
-		Vector & AbsRotateTo(const Vector &refVector);
+		Vector &AbsRotateTo(const Vector &refVector);
 
 		/// <summary>
 		/// Returns a Vector that is perpendicular to this, rotated PI/2.

@@ -36,7 +36,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::SetMagnitude(float newMag) {
+	Vector &Vector::SetMagnitude(float newMag) {
 		Vector temp(*this);
 		SetXY(newMag, 0);
 		AbsRotateTo(temp);
@@ -45,7 +45,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::CapMagnitude(float capMag) {
+	Vector &Vector::CapMagnitude(float capMag) {
 		if (capMag == 0) { Reset(); }
 		if (GetMagnitude() > capMag) { SetMagnitude(capMag); }
 		return *this;
@@ -113,7 +113,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::AbsRotateTo(const Vector &refVector) {
+	Vector &Vector::AbsRotateTo(const Vector &refVector) {
 		float rawAngle;
 		if (refVector.m_X == 0) {
 			rawAngle = (refVector.m_Y > 0) ? -c_HalfPI : ((refVector.m_Y < 0) ? c_HalfPI : 0);
@@ -138,7 +138,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::operator=(const Vector &rhs) {
+	Vector &Vector::operator=(const Vector &rhs) {
 		if (*this != rhs) {
 			m_X = rhs.m_X;
 			m_Y = rhs.m_Y;
@@ -148,7 +148,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::operator=(const std::deque<Vector> &rhs) {
+	Vector &Vector::operator=(const std::deque<Vector> &rhs) {
 		Clear();
 		if (!rhs.empty()) {
 			for (const Vector &vector : rhs) {

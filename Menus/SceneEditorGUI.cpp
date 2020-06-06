@@ -907,7 +907,7 @@ void SceneEditorGUI::Update()
 						m_EditorGUIMode = PICKINGOBJECT;
 						m_ModeChanged = true;
 						// Try to switch away from brains so it's clear we placed it
-						if (!m_pPicker->ShowSpecificGroup("Primary Weapons"))
+						if (!m_pPicker->ShowSpecificGroup("Weapons - Primary"))
 							m_pPicker->ShowSpecificGroup("Weapons");
 						// Also jolt the cursor off the newly placed brain to make it even clearer
 						m_CursorPos.m_X += 40;

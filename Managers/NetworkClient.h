@@ -8,24 +8,14 @@
 // Project:         Retro Terrain Engine
 // Author(s):       
 
-// Without this nested includes somewhere deep inside Allegro will summon winsock.h and it will conflict with winsock2.h from RakNet
-// and we can't move "Network.h" here because for whatever reasons everything will collapse
-#define WIN32_LEAN_AND_MEAN
-
 #include "Singleton.h"
 #include "UInputMan.h"
 #include "PostProcessMan.h"
 #include "SoundContainer.h"
 
-#define WIN32_LEAN_AND_MEAN
-#define NOGDI
-
 #include <WinSock2.h>
 #include "RakPeerInterface.h"
 #include "MessageIdentifiers.h"
-
-#undef WIN32_LEAN_AND_MEAN
-#undef NO_GDI
 
 #include "NetworkMessages.h"
 

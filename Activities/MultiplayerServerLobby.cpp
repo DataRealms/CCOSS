@@ -9,10 +9,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-// Without this nested includes somewhere deep inside Allegro will summon winsock.h and it will conflict with winsock2.h from RakNet
-// and we can't move "Network.h" here because for whatever reasons everything will collapse
-#define WIN32_LEAN_AND_MEAN
-
 #include "MultiplayerServerLobby.h"
 #include "PresetMan.h"
 #include "MovableMan.h"

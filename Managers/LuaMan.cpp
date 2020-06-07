@@ -381,6 +381,18 @@ void AddParticle(MovableMan &This, MovableObject *pParticle)
         This.AddParticle(pParticle);
 }
 
+// Can't have global enums in the master state so we use this dummy struct as a class and register the enums under it.
+struct enum_wrapper {
+	// Nested structs for each enum because we can't register enum_wrapper multiple times under a different name.
+	// We're doing this so we can access each enum separately by name rather than having all of them accessed from a shared name.
+	// If this proves to be a hassle then we can easily revert to the shared name access by registering everything under enum_wrapper.
+	struct input_device {};
+	struct input_elements {};
+	struct mouse_buttons {};
+	struct joy_buttons {};
+	struct joy_directions {};
+};
+
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Wrapper for the GAScripted so we can derive new classes from it purely in lua:
@@ -1552,71 +1564,6 @@ int LuaMan::Create()
                 value("PLAYER_FOUR", 3),
                 value("MAX_PLAYERS", 4)
             ]
-            .enum_("InputDevice")
-            [
-                value("DEVICE_KEYB_ONLY", 0),
-                value("DEVICE_MOUSE_KEYB", 1),
-                value("DEVICE_GAMEPAD_1", 2),
-                value("DEVICE_GAMEPAD_2", 3),
-                value("DEVICE_GAMEPAD_3", 4),
-                value("DEVICE_GAMEPAD_4", 5),
-                value("DEVICE_COUNT", 6)
-            ]
-            .enum_("InputElements")
-            [
-                value("INPUT_L_UP", 0),
-                value("INPUT_L_DOWN", 1),
-                value("INPUT_L_LEFT", 2),
-                value("INPUT_L_RIGHT", 3),
-                value("INPUT_R_UP", 4),
-                value("INPUT_R_DOWN", 5),
-                value("INPUT_R_LEFT", 6),
-                value("INPUT_R_RIGHT", 7),
-                value("INPUT_FIRE", 8),
-                value("INPUT_AIM", 9),
-                value("INPUT_AIM_UP", 10),
-                value("INPUT_AIM_DOWN", 11),
-                value("INPUT_AIM_LEFT", 12),
-                value("INPUT_AIM_RIGHT", 13),
-                value("INPUT_PIEMENU", 14),
-                value("INPUT_JUMP", 15),
-                value("INPUT_CROUCH", 16),
-                value("INPUT_NEXT", 17),
-                value("INPUT_PREV", 18),
-                value("INPUT_START", 19),
-                value("INPUT_BACK", 20),
-                value("INPUT_COUNT", 21)
-            ]
-            .enum_("MouseButtons")
-            [
-                value("MOUSE_NONE", -1),
-                value("MOUSE_LEFT", 0),
-                value("MOUSE_RIGHT", 1),
-                value("MOUSE_MIDDLE", 2),
-                value("MAX_MOUSE_BUTTONS", 3)
-            ]
-            .enum_("JoyButtons")
-            [
-                value("JOY_NONE", -1),
-                value("JOY_1", 0),
-                value("JOY_2", 1),
-                value("JOY_3", 2),
-                value("JOY_4", 3),
-                value("JOY_5", 4),
-                value("JOY_6", 5),
-                value("JOY_7", 6),
-                value("JOY_8", 7),
-                value("JOY_9", 8),
-                value("JOY_10", 9),
-                value("JOY_11", 10),
-                value("JOY_12", 11),
-                value("MAX_JOY_BUTTONS", 12)
-            ]
-            .enum_("JoyDirections")
-            [
-                value("JOYDIR_ONE", 0),
-                value("JOYDIR_TWO", 1)
-            ]
             .def("ElementPressed", &UInputMan::ElementPressed)
             .def("ElementReleased", &UInputMan::ElementReleased)
             .def("ElementHeld", &UInputMan::ElementHeld)
@@ -2245,7 +2192,77 @@ int LuaMan::Create()
 		def("GetPPM", &GetPPM),
 		def("GetMPP", &GetMPP),
 		def("GetPPL", &GetPPL),
-		def("GetLPP", &GetLPP)
+		def("GetLPP", &GetLPP),
+
+		class_<enum_wrapper::input_device>("InputDevice")
+			.enum_("InputDevice") [
+				value("DEVICE_KEYB_ONLY", 0),
+				value("DEVICE_MOUSE_KEYB", 1),
+				value("DEVICE_GAMEPAD_1", 2),
+				value("DEVICE_GAMEPAD_2", 3),
+				value("DEVICE_GAMEPAD_3", 4),
+				value("DEVICE_GAMEPAD_4", 5),
+				value("DEVICE_COUNT", 6)
+			],
+
+		class_<enum_wrapper::input_elements>("InputElements")
+			.enum_("InputElements") [
+				value("INPUT_L_UP", 0),
+				value("INPUT_L_DOWN", 1),
+				value("INPUT_L_LEFT", 2),
+				value("INPUT_L_RIGHT", 3),
+				value("INPUT_R_UP", 4),
+				value("INPUT_R_DOWN", 5),
+				value("INPUT_R_LEFT", 6),
+				value("INPUT_R_RIGHT", 7),
+				value("INPUT_FIRE", 8),
+				value("INPUT_AIM", 9),
+				value("INPUT_AIM_UP", 10),
+				value("INPUT_AIM_DOWN", 11),
+				value("INPUT_AIM_LEFT", 12),
+				value("INPUT_AIM_RIGHT", 13),
+				value("INPUT_PIEMENU", 14),
+				value("INPUT_JUMP", 15),
+				value("INPUT_CROUCH", 16),
+				value("INPUT_NEXT", 17),
+				value("INPUT_PREV", 18),
+				value("INPUT_START", 19),
+				value("INPUT_BACK", 20),
+				value("INPUT_COUNT", 21)
+			],
+
+		class_<enum_wrapper::mouse_buttons>("MouseButtons")
+			.enum_("MouseButtons") [
+				value("MOUSE_NONE", -1),
+				value("MOUSE_LEFT", 0),
+				value("MOUSE_RIGHT", 1),
+				value("MOUSE_MIDDLE", 2),
+				value("MAX_MOUSE_BUTTONS", 3)
+			],
+
+		class_<enum_wrapper::joy_buttons>("JoyButtons")
+			.enum_("JoyButtons") [
+				value("JOY_NONE", -1),
+				value("JOY_1", 0),
+				value("JOY_2", 1),
+				value("JOY_3", 2),
+				value("JOY_4", 3),
+				value("JOY_5", 4),
+				value("JOY_6", 5),
+				value("JOY_7", 6),
+				value("JOY_8", 7),
+				value("JOY_9", 8),
+				value("JOY_10", 9),
+				value("JOY_11", 10),
+				value("JOY_12", 11),
+				value("MAX_JOY_BUTTONS", 12)
+			],
+
+		class_<enum_wrapper::joy_directions>("JoyDirections")
+			.enum_("JoyDirections") [
+				value("JOYDIR_ONE", 0),
+				value("JOYDIR_TWO", 1)
+			]
     ];
 
     // Assign the manager instances to globals in the lua master state

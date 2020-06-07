@@ -123,6 +123,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - When pasting multiple lines of code into the console all of them will be executed instead of the last line being pasted into the textbox and all before it executing.
 
+- Input enums moved from `UInputMan` to `Constants` and are no longer accessed with the `UInputManager` prefix. These enums are now accessed with their own names as the prefix.  
+	For example: `UInputManager.DEVICE_KEYB_ONLY` is now `InputDevice.DEVICE_KEYB_ONLY`, `UInputManager.INPUT_L_UP` is now `InputElements.INPUT_L_UP` and so on.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.

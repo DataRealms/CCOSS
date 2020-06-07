@@ -225,7 +225,6 @@
     <ClInclude Include="GUI\Interface.h" />
     <ClInclude Include="GUI\GUISound.h" />
     <ClInclude Include="Managers\NetworkClient.h" />
-    <ClInclude Include="Managers\NetworkMessages.h" />
     <ClInclude Include="Managers\NetworkServer.h" />
     <ClInclude Include="Managers\PerformanceMan.h" />
     <ClInclude Include="Managers\PostProcessMan.h" />
@@ -238,6 +237,7 @@
     <ClInclude Include="System\Entity.h" />
     <ClInclude Include="System\InputMapping.h" />
     <ClInclude Include="System\InputScheme.h" />
+    <ClInclude Include="System\NetworkMessages.h" />
     <ClInclude Include="System\Primitive.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />

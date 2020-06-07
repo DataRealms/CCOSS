@@ -402,9 +402,6 @@
     <ClInclude Include="Managers\NetworkServer.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="Managers\NetworkMessages.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
     <ClInclude Include="Activities\MultiplayerGame.h">
       <Filter>Activities</Filter>
     </ClInclude>
@@ -467,6 +464,9 @@
     </ClInclude>
     <ClInclude Include="Entities\Round.h">
       <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="System\NetworkMessages.h">
+      <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="System\InputScheme.h">
       <Filter>System</Filter>

@@ -21,6 +21,9 @@
 
 #include "NatPunchthroughClient.h"
 
+#define MAX_PIXEL_LINE_BUFFER_SIZE 8192
+#define FRAMES_TO_REMEMBER 3
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 

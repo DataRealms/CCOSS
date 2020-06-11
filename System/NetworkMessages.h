@@ -1,9 +1,11 @@
 #ifndef _RTENETWORKMSG_
 #define _RTENETWORKMSG_
 
+#include "MessageIdentifiers.h"
+
 namespace RTE {
 
-#define MAX_BACKGROUND_LAYERS_TRANSMITTED 10
+#define c_MaxBackgroundLayersTransmitted 10 
 
 	/// <summary>
 	/// Enumeration for the different types of network message IDs.
@@ -104,8 +106,8 @@ namespace RTE {
 		short int TargetPosX;
 		short int TargetPosY;
 
-		float OffsetX[MAX_BACKGROUND_LAYERS_TRANSMITTED];
-		float OffsetY[MAX_BACKGROUND_LAYERS_TRANSMITTED];
+		float OffsetX[c_MaxBackgroundLayersTransmitted];
+		float OffsetY[c_MaxBackgroundLayersTransmitted];
 	};
 
 	/// <summary>
@@ -190,7 +192,7 @@ namespace RTE {
 		bool SceneWrapsX;
 
 		short int BackgroundLayerCount;
-		LightweightSceneLayer BackgroundLayers[MAX_BACKGROUND_LAYERS_TRANSMITTED];
+		LightweightSceneLayer BackgroundLayers[c_MaxBackgroundLayersTransmitted];
 	};
 
 	/// <summary>

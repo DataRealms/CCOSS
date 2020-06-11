@@ -26,6 +26,7 @@
 #include "PresetMan.h"
 #include "PerformanceMan.h"
 #include "PrimitiveMan.h"
+#include "UInputMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -42,7 +43,6 @@
 
 #include "MultiplayerServerLobby.h"
 #include "NetworkServer.h"
-#include "NetworkClient.h"
 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 

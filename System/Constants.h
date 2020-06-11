@@ -75,7 +75,9 @@ namespace RTE {
 
 #pragma region Network Constants
 	static constexpr unsigned short c_MaxClients = 4;
+	static constexpr unsigned short c_FramesToRemember = 3;
 	static constexpr unsigned short c_MaxLayersStoredForNetwork = 10;
+	static constexpr unsigned short c_MaxPixelLineBufferSize = 8192;
 #pragma endregion
 
 #pragma region Input Constants

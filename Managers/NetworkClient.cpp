@@ -393,7 +393,7 @@ namespace RTE {
 
 	void NetworkClient::ReceiveSceneMsg(RakNet::Packet *packet) {
 		const MsgSceneLine *frameData = (MsgSceneLine *)packet->data;
-		if (frameData->SceneId != m_SceneId) {
+		if (frameData->SceneId != m_SceneID) {
 			return;
 		}
 
@@ -441,7 +441,7 @@ namespace RTE {
 
 		const MsgSceneSetup *frameData = (MsgSceneSetup *)packet->data;
 
-		m_SceneId = frameData->SceneId;
+		m_SceneID = frameData->SceneId;
 
 		if (m_SceneBackgroundBitmap) { destroy_bitmap(m_SceneBackgroundBitmap); }
 		if (m_SceneForegroundBitmap) { destroy_bitmap(m_SceneForegroundBitmap); }
@@ -510,7 +510,7 @@ namespace RTE {
 
 	void NetworkClient::ReceiveTerrainChangeMsg(RakNet::Packet *packet) {
 		const MsgTerrainChange *frameData = (MsgTerrainChange *)packet->data;
-		if (frameData->SceneId != m_SceneId) {
+		if (frameData->SceneId != m_SceneID) {
 			return;
 		}
 

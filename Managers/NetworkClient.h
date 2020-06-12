@@ -172,7 +172,7 @@ namespace RTE {
 
 		std::unordered_map<unsigned short, SoundContainer *> m_ServerSounds; //!< Unordered map of SoundContainers received from server. OWNED!!!
 
-		unsigned char m_SceneId; //!<
+		unsigned char m_SceneID; //!<
 		int m_CurrentSceneLayerReceived; //!<
 
 		BITMAP *m_SceneBackgroundBitmap; //!<

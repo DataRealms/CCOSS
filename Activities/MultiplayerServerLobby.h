@@ -16,8 +16,6 @@
 #include "ActivityMan.h"
 #include "GameActivity.h"
 
-#include "NetworkServer.h"
-
 namespace RTE
 {
 	class GUIScreen;

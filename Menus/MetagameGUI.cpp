@@ -21,6 +21,7 @@
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
 #include "MetaMan.h"
+#include "MetaSave.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"

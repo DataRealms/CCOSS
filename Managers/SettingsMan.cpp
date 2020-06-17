@@ -2,11 +2,10 @@
 #include "ConsoleMan.h"
 #include "MovableMan.h"
 #include "FrameMan.h"
+#include "AudioMan.h"
 #include "PerformanceMan.h"
 #include "PostProcessMan.h"
 #include "UInputMan.h"
-
-extern bool g_ResetActivity;
 
 namespace RTE {
 

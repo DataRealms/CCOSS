@@ -1772,12 +1772,6 @@ protected:
 	BITMAP * m_pOrphanSearchBitmap;
 
 
-// TODO TEMP REMOVE
-    // Debug deque with integers showing how many sim
-//    std::deque<bool> m_DrawnUpdates;
-//    std::deque<int> m_SUSDs;
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations
 

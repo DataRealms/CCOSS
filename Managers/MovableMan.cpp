@@ -1755,12 +1755,8 @@ void MovableMan::Update()
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
-				//g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
 				(*aIt)->Update();
-				//g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
-				//g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
                 (*aIt)->UpdateScripts();
-				//g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
                 (*aIt)->ApplyImpulses();
             }
         }

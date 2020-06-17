@@ -2,6 +2,7 @@
 #define _RTENETWORKCLIENT_
 
 #include "Singleton.h"
+#include "SoundContainer.h"
 
 #include <WinSock2.h>
 #include "RakPeerInterface.h"
@@ -18,7 +19,6 @@
 namespace RTE {
 
 	struct PostEffect;
-	class SoundContainer;
 
 	/// <summary>
 	/// The centralized singleton manager of the network multiplayer client.

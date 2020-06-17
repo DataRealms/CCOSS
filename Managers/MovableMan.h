@@ -378,20 +378,6 @@ public:
 
     Actor * GetUnassignedBrain(int team = 0) const;
 
-/* uuuh?
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPlayerBrain
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Get a pointer to the resident brain actor of a specific player, or
-//                  failing that, a brain of a team which 
-//                  been assigned to a player yet.
-// Arguments:       Which team to try to get the brain for. 0 means first team, 1 means 2nd.
-// Return value:    An Actor pointer to the requested team's first brain encountered
-//                  in the list that hasn't been assigned to a player. 0 if there are no
-//                  unassigned brains of that team.
-
-    Actor * GetPlayerBrain(int team = 0) const;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetParticleCount
@@ -849,19 +835,6 @@ public:
 
     void UpdateDrawMOIDs(BITMAP *pTargetBitmap);
 
-
-
-/* Obsolete, now done in SceneMan's version with registered rectangles
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws NoMOID ID where all this MovableMan's MO's with registered MOIDs
-//                  are on a BITMAP of choice. It essentially undos the effect of UpdateDrawMOIDs.
-// Arguments:       None.
-// Return value:    None.
-
-    void ClearMOIDs();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Draw

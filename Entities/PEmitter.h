@@ -16,6 +16,7 @@
 
 #include "MOSParticle.h"
 #include "Emission.h"
+#include "SoundContainer.h"
 
 namespace RTE
 {

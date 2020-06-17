@@ -138,6 +138,17 @@ namespace RTE
 
 const string LuaMan::m_ClassName = "LuaMan";
 
+// Can't have global enums in the master state so we use this dummy struct as a class and register the enums under it.
+struct enum_wrapper {
+	// Nested structs for each enum because we can't register enum_wrapper multiple times under a different name.
+	// We're doing this so we can access each enum separately by name rather than having all of them accessed from a shared name.
+	// If this proves to be a hassle then we can easily revert to the shared name access by registering everything under enum_wrapper.
+	struct input_device {};
+	struct input_elements {};
+	struct mouse_buttons {};
+	struct joy_buttons {};
+	struct joy_directions {};
+};
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Preset clone adapters that will return the exact pre-cast types so we don't have to do:
@@ -380,18 +391,6 @@ void AddParticle(MovableMan &This, MovableObject *pParticle)
     else
         This.AddParticle(pParticle);
 }
-
-// Can't have global enums in the master state so we use this dummy struct as a class and register the enums under it.
-struct enum_wrapper {
-	// Nested structs for each enum because we can't register enum_wrapper multiple times under a different name.
-	// We're doing this so we can access each enum separately by name rather than having all of them accessed from a shared name.
-	// If this proves to be a hassle then we can easily revert to the shared name access by registering everything under enum_wrapper.
-	struct input_device {};
-	struct input_elements {};
-	struct mouse_buttons {};
-	struct joy_buttons {};
-	struct joy_directions {};
-};
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -732,7 +731,6 @@ int LuaMan::Create()
 
         CONCRETELUABINDING(MOPixel, MovableObject),
 //            .property("Material", &MOPixel::GetMaterial),
-//            .property("Framerate", &MOPixel::GetFramerate, &MOPixel::SetFramerate)
 //            .property("Atom", &MOPixel::GetAtom, &MOPixel:SetAtom)
 //            .property("IsGold", &MOPixel::IsGold),
 
@@ -1683,9 +1681,6 @@ int LuaMan::Create()
             .def("GetTerrain", &SceneMan::GetTerrain)
             .def("GetMaterial", &SceneMan::GetMaterial)
             .def("GetMaterialFromID", &SceneMan::GetMaterialFromID)
-//            .property("MOColorBitmap", &SceneMan::GetMOColorBitmap)
-//            .property("DebugBitmap", &SceneMan::GetDebugBitmap)
-//            .property("MOIDBitmap", &SceneMan::GetMOIDBitmap)
             .property("LayerDrawMode", &SceneMan::GetLayerDrawMode, &SceneMan::SetLayerDrawMode)
             .def("GetTerrMatter", &SceneMan::GetTerrMatter)
             .def("GetMOIDPixel", &SceneMan::GetMOIDPixel)

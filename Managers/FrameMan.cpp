@@ -14,7 +14,6 @@
 #include "GUI/AllegroBitmap.h"
 #include "GUI/AllegroScreen.h"
 
-extern bool g_ResetActivity;
 extern bool g_InActivity;
 
 namespace RTE {

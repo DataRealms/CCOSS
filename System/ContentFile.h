@@ -194,7 +194,10 @@ namespace RTE {
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
-		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount }; //!< Enumeration for loading BITMAPs by bit depth. NOTE: This can't be lower down because s_LoadedBitmaps relies on its definition.
+		/// <summary>
+		/// //!< Enumeration for loading BITMAPs by bit depth. NOTE: This can't be lower down because s_LoadedBitmaps relies on this definition.
+		/// </summary>
+		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount };
 
 		//TODO all of these could probably be replaced with unordered_maps and decrease lookup time.
 		static std::map<size_t, std::string> s_PathHashes; //!< Hash value of the path to this ContentFile's Datafile Object.

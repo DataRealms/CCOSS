@@ -152,7 +152,7 @@ namespace RTE {
 		if (fillAmount > 0) {
 			// As many as we're asked to make
 			for (int i = 0; i < fillAmount; ++i) {
-				s_AllocatedPool.push_back(std::malloc(sizeof(Atom)));
+				s_AllocatedPool.push_back(malloc(sizeof(Atom)));
 			}
 		}
 	}
@@ -962,7 +962,7 @@ namespace RTE {
 		// Draw the trail
 		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
 			int length = m_TrailLength /* + 3 * PosRand()*/;
-			for (int i = trailPoints.size() - MIN(length, trailPoints.size()); i < trailPoints.size(); ++i) {
+			for (int i = trailPoints.size() - std::min(length, static_cast<int>(trailPoints.size())); i < trailPoints.size(); ++i) {
 				putpixel(trailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
 			}
 		}

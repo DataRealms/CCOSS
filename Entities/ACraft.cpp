@@ -926,7 +926,7 @@ void ACraft::Update()
         m_ToDelete = true;
     }
 
-	if (g_ActivityMan.GetActivity()->GetCraftsOrbitAtTheEdge())
+	if (g_ActivityMan.GetActivity()->GetCraftOrbitAtTheEdge())
 	{
 		if (g_SceneMan.GetScene() && !g_SceneMan.GetScene()->WrapsX())
 		{

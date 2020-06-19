@@ -1813,8 +1813,6 @@ void MainMenuGUI::SetupSkirmishActivity()
             g_SceneMan.SetSceneToLoad(m_pSceneSelector->GetItem(m_pSceneSelector->GetSelectedIndex())->m_Name);
 // TODO: Let player choose the GABrainMatch activity instance!
             GABrainMatch *pNewGame = new GABrainMatch;
-            pNewGame->SetPlayerCount(m_StartPlayers);
-            pNewGame->SetTeamCount(m_StartTeams);
 
             for (int player = 0; player < m_StartPlayers; ++player)
                 pNewGame->SetTeamOfPlayer(player, m_aTeamAssignments[player]);
@@ -1830,8 +1828,6 @@ void MainMenuGUI::SetupSkirmishActivity()
 // TODO: Let player choose the GABaseDefense activity instance!
             GABaseDefense *pNewGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Skirmish Defense")->Clone());
             RTEAssert(pNewGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
-            pNewGame->SetPlayerCount(m_StartPlayers);
-            pNewGame->SetTeamCount(m_StartTeams);
 
             for (int player = 0; player < m_StartPlayers; ++player)
                 pNewGame->SetTeamOfPlayer(player, m_aTeamAssignments[player]);

@@ -258,10 +258,10 @@ int GABrainMatch::Start()
 
 /* Obsolete with resident brains
         // Find and assign any available brains in the scene to players without them
-        if (!m_pBrain[player])
+        if (!m_Brain[player])
         {
             // If we can't find an unassigned brain in the scene to give each player, then force to go into editing mode to place one
-            if (!(m_pBrain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
+            if (!(m_Brain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
             {
                 m_ActivityState = EDITING;
                 // Play editing music
@@ -276,11 +276,11 @@ int GABrainMatch::Start()
             // Set the found brain to be the selected actor at start
             else
             {
-                SwitchToActor(m_pBrain[player], player, m_Team[player]);
-                m_ActorCursor[player] = m_pBrain[player]->GetPos();
-                m_LandingZone[player].m_X = m_pBrain[player]->GetPos().m_X;
+                SwitchToActor(m_Brain[player], player, m_Team[player]);
+                m_ActorCursor[player] = m_Brain[player]->GetPos();
+                m_LandingZone[player].m_X = m_Brain[player]->GetPos().m_X;
                 // Set the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-                m_ObservationTarget[player] = m_pBrain[player]->GetPos();
+                m_ObservationTarget[player] = m_Brain[player]->GetPos();
             }
         }
 */
@@ -397,7 +397,7 @@ void GABrainMatch::Update()
         if (m_ActivityState != OVER)
         {
             // Check if any player's brain is dead
-            if (!g_MovableMan.IsActor(m_pBrain[player]) || !m_pBrain[player]->HasObjectInGroup("Brains"))
+            if (!g_MovableMan.IsActor(m_Brain[player]) || !m_Brain[player]->HasObjectInGroup("Brains"))
             {
                 SetPlayerBrain(0, player);
                 // Try to find a new unasigned brain this player can use instead, or if his old brain entered a craft
@@ -427,15 +427,15 @@ void GABrainMatch::Update()
             else
             {
                 // Update the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-                SetObservationTarget(m_pBrain[player]->GetPos(), player);
+                SetObservationTarget(m_Brain[player]->GetPos(), player);
                 // Mark each brain to be protected and destroyed by the respective teams
-                AddObjectivePoint("Protect!", m_pBrain[player]->GetAboveHUDPos(), team, GameActivity::ARROWDOWN);
+                AddObjectivePoint("Protect!", m_Brain[player]->GetAboveHUDPos(), team, GameActivity::ARROWDOWN);
                 for (int t = Activity::TEAM_1; t < MAXTEAMCOUNT; ++t)
                 {
                     if (!m_TeamActive[team])
                         continue;
                     if (t != team)
-                        AddObjectivePoint("Destroy!", m_pBrain[player]->GetAboveHUDPos(), t, GameActivity::ARROWDOWN);
+                        AddObjectivePoint("Destroy!", m_Brain[player]->GetAboveHUDPos(), t, GameActivity::ARROWDOWN);
                 }
             }
         }

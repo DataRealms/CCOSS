@@ -217,6 +217,7 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Entities\Activity.h" />
     <ClInclude Include="Entities\ADSensor.h" />
     <ClInclude Include="Entities\Emission.h" />
     <ClInclude Include="Entities\Gib.h" />
@@ -369,6 +370,7 @@
     <ClInclude Include="Menus\SceneEditorGUI.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Entities\Activity.cpp" />
     <ClCompile Include="Entities\ADSensor.cpp" />
     <ClCompile Include="Entities\Emission.cpp" />
     <ClCompile Include="Entities\Gib.cpp" />

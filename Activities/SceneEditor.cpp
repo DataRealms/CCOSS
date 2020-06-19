@@ -383,8 +383,6 @@ void SceneEditor::Update()
 			Activity * pActivity = dynamic_cast<Activity *>(pActivityPreset->Clone());
 			GameActivity *pTestGame = dynamic_cast<GameActivity *>(pActivity);
             RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GAScripted Activity! Has it been defined?");
-            pTestGame->SetPlayerCount(1);
-            pTestGame->SetTeamCount(2);
             pTestGame->SetTeamOfPlayer(0, 0);
             pTestGame->SetCPUTeam(1);
 			pTestGame->SetStartingGold(10000);
@@ -396,8 +394,6 @@ void SceneEditor::Update()
 
             /*GABaseDefense *pTestGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Test Activity")->Clone());
             RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
-            pTestGame->SetPlayerCount(1);
-            pTestGame->SetTeamCount(2);
             pTestGame->SetTeamOfPlayer(0, 0);
             pTestGame->SetCPUTeam(1);
             pTestGame->SetDifficulty(GameActivity::MAXDIFFICULTY);

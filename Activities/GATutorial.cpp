@@ -372,7 +372,7 @@ int GATutorial::Start()
         SetBrainLZWidth(player, 0);
 
         // If we can't find an unassigned brain in the scene to give each player, then force to go into editing mode to place one
-        if (!(m_pBrain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
+        if (!(m_Brain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
         {
             g_ConsoleMan.PrintString("ERROR: Can't find brain for tutorial game mode!");
         }
@@ -380,11 +380,11 @@ int GATutorial::Start()
         else
         {
             m_TutorialPlayer = player;
-            SwitchToActor(m_pBrain[player], player, m_Team[player]);
-            m_ActorCursor[player] = m_pBrain[player]->GetPos();
-            m_LandingZone[player].m_X = m_pBrain[player]->GetPos().m_X;
+            SwitchToActor(m_Brain[player], player, m_Team[player]);
+            m_ActorCursor[player] = m_Brain[player]->GetPos();
+            m_LandingZone[player].m_X = m_Brain[player]->GetPos().m_X;
             // Set the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-            m_ObservationTarget[player] = m_pBrain[player]->GetPos();
+            m_ObservationTarget[player] = m_Brain[player]->GetPos();
         }
 /*
         if (m_ActivityState == EDITING)
@@ -502,8 +502,8 @@ void GATutorial::End()
         {
             playerWon = true;
             // Set the winner's observation view to his controlled actors instead of his brain
-            if (m_pControlledActor[player] && g_MovableMan.IsActor(m_pControlledActor[player]))
-                m_ObservationTarget[player] = m_pControlledActor[player]->GetPos();
+            if (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player]))
+                m_ObservationTarget[player] = m_ControlledActor[player]->GetPos();
         }
     }
 
@@ -574,9 +574,9 @@ void GATutorial::Update()
         if (m_ActivityState != OVER)
         {
             // Check if any player's brain is dead
-            if (!g_MovableMan.IsActor(m_pBrain[player]))
+            if (!g_MovableMan.IsActor(m_Brain[player]))
             {
-                m_pBrain[player] = 0;
+                m_Brain[player] = 0;
                 g_FrameMan.SetScreenText("Your brain has been destroyed!", ScreenOfPlayer(player), 333);
 
                 // Now see if all brains are dead of this player's team, and if so, end the game
@@ -592,9 +592,9 @@ void GATutorial::Update()
             else if (m_CurrentFightStage >= DEFENDING)
             {
                 // Update the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-//                SetObservationTarget(m_pBrain[player]->GetPos(), player);
+//                SetObservationTarget(m_Brain[player]->GetPos(), player);
                 // Mark the player's brain to be protected by his team
-                AddObjectivePoint("Protect!", m_pBrain[player]->GetPos() + Vector(0, 10), team, GameActivity::ARROWUP);
+                AddObjectivePoint("Protect!", m_Brain[player]->GetPos() + Vector(0, 10), team, GameActivity::ARROWUP);
                 // Mark the CPU brain for desctruction too
                 if (g_MovableMan.IsActor(m_pCPUBrain))
                     AddObjectivePoint("Destroy!", m_pCPUBrain->GetPos() + Vector(0, 12), team, GameActivity::ARROWUP);
@@ -700,12 +700,12 @@ void GATutorial::Update()
     // TUTORIAL LOGIC
 
     // Detect the player going into new areas
-    if (m_pControlledActor[m_TutorialPlayer])
+    if (m_ControlledActor[m_TutorialPlayer])
     {
         for (int area = 0; area < AREACOUNT; ++area)
         {
             // Switch if within the trigger box of a new area
-            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
+            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_ControlledActor[m_TutorialPlayer]->GetPos()))
             {
                 // Change to the new area
                 m_PrevArea = m_CurrentArea;
@@ -722,7 +722,7 @@ void GATutorial::Update()
         {
 
             // Switch if within the trigger box of a new area
-            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
+            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_ControlledActor[m_TutorialPlayer]->GetPos()))
             {
 
             if (m_FightTriggers[stage].Reset();
@@ -840,10 +840,10 @@ void GATutorial::Update()
     ////////////////////////
     // FIGHT LOGIC
 
-    if (m_pControlledActor[m_TutorialPlayer])
+    if (m_ControlledActor[m_TutorialPlayer])
     {
         // Triggered defending stage
-        if (m_CurrentFightStage == NOFIGHT && m_FightTriggers[DEFENDING].IsWithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
+        if (m_CurrentFightStage == NOFIGHT && m_FightTriggers[DEFENDING].IsWithinBox(m_ControlledActor[m_TutorialPlayer]->GetPos()))
         {
             // Take over control of screen messages
             m_MsgTimer[m_TutorialPlayer].Reset();

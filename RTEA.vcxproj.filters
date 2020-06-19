@@ -477,6 +477,9 @@
     <ClInclude Include="Entities\MetaSave.h">
       <Filter>Entities</Filter>
     </ClInclude>
+    <ClInclude Include="Entities\Activity.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -910,6 +913,9 @@
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="Entities\MetaSave.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Activity.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
   </ItemGroup>

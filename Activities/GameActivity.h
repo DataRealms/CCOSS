@@ -23,6 +23,7 @@
 namespace RTE
 {
 
+#define OBJARROWFRAMECOUNT 4
 #define LZCURSORFRAMECOUNT 4
 
 class Actor;

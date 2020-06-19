@@ -159,6 +159,8 @@ namespace RTE {
 		ExtractArchivedModules();
 		// Load all unpacked modules
 		g_PresetMan.LoadAllDataModules();
+		// Load the different input device icons. This can't be done during UInputMan::Create() because the icon presets don't exist so we need to do this after modules are loaded.
+		g_UInputMan.LoadDeviceIcons();
 
 		return true;
 	}

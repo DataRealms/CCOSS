@@ -1,2302 +1,1394 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            UInputMan.cpp
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Source file for the UInputMan class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "UInputMan.h"
 #include "SceneMan.h"
 #include "ActivityMan.h"
 #include "FrameMan.h"
 #include "ConsoleMan.h"
 #include "PresetMan.h"
-#include "SLTerrain.h"
+#include "PerformanceMan.h"
 #include "GUIInput.h"
 #include "Icon.h"
-#include "PerformanceMan.h"
 
 extern volatile bool g_Quit;
 extern bool g_ResetActivity;
 extern bool g_InActivity;
-extern int g_IntroState;
 extern bool g_LaunchIntoEditor;
-//extern int g_TempXOff;
-//extern int g_TempYOff;
 
-namespace RTE
-{
+namespace RTE {
 
-const string UInputMan::m_ClassName = "UInputMan";
-char *UInputMan::s_aLastKeys = new char[KEY_MAX];
-char *UInputMan::s_aChangedKeys = new char[KEY_MAX];
-GUIInput* UInputMan::s_InputClass = NULL; 
-bool UInputMan::m_aMouseButtonState[MAX_MOUSE_BUTTONS];
-bool UInputMan::m_aMousePrevButtonState[MAX_MOUSE_BUTTONS];
-bool UInputMan::m_aMouseChangedButtonState[MAX_MOUSE_BUTTONS];
-JOYSTICK_INFO UInputMan::s_aaPrevJoyState[MAX_PLAYERS];
-JOYSTICK_INFO UInputMan::s_aaChangedJoyState[MAX_PLAYERS];
+	const std::string UInputMan::c_ClassName = "UInputMan";
+	GUIInput* UInputMan::s_InputClass = NULL;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this UInputMan, effectively
-//                  resetting the members of this abstraction level only.
+	char *UInputMan::s_PrevKeyStates = new char[KEY_MAX];
+	char *UInputMan::s_ChangedKeyStates = new char[KEY_MAX];
 
-void UInputMan::Clear()
-{
-    m_DebugArmed = false;
+	bool UInputMan::s_MouseButtonStates[MAX_MOUSE_BUTTONS];
+	bool UInputMan::s_PrevMouseButtonStates[MAX_MOUSE_BUTTONS];
+	bool UInputMan::s_ChangedMouseButtonStates[MAX_MOUSE_BUTTONS];
 
-    // Init the previous keys so they don't make it seem like things have changed
-    memcpy(s_aLastKeys, const_cast<const char *>(key), KEY_MAX);
+	JOYSTICK_INFO UInputMan::s_PrevJoystickStates[MAX_PLAYERS];
+	JOYSTICK_INFO UInputMan::s_ChangedJoystickStates[MAX_PLAYERS];
 
-    // Neutralize the changed keys so that no Releases will be detected initially
-    for (int i = 0; i < KEY_MAX; ++i)
-    {
-        s_aChangedKeys[i] = false;
-    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    m_DisableKeyboard = false;
+	void UInputMan::Clear() {
+		// Init the previous keys so they don't make it seem like things have changed
+		std::memcpy(s_PrevKeyStates, const_cast<const char *>(key), KEY_MAX);
 
-    // Reset mouse button data
-    m_aMouseButtonState[MOUSE_LEFT] = m_aMousePrevButtonState[MOUSE_LEFT] = m_aMouseChangedButtonState[MOUSE_LEFT] = false;
-    m_aMouseButtonState[MOUSE_RIGHT] = m_aMousePrevButtonState[MOUSE_RIGHT] = m_aMouseChangedButtonState[MOUSE_RIGHT] = false;
-    m_aMouseButtonState[MOUSE_MIDDLE] = m_aMousePrevButtonState[MOUSE_MIDDLE] = m_aMouseChangedButtonState[MOUSE_MIDDLE] = false;
-	
-    // Set Mouse analog stick emualtion data defaults
-    m_RawMouseMovement.Reset();
-    m_AnalogMouseData.Reset();
-    m_TrapMousePos = false;
-    m_MouseTrapRadius = 350;
+		// Neutralize the changed keys so that no Releases will be detected initially
+		for (int i = 0; i < KEY_MAX; ++i) {
+			s_ChangedKeyStates[i] = false;
+		}
+		m_DisableKeyboard = false;
 
-    // Mouse wheel init
-    position_mouse_z(0);
-    m_MouseWheelChange = 0;
+		m_OverrideInput = false;
+		m_LastDeviceWhichControlledGUICursor = 0;
 
-    m_DisableMouseMoving = false;
-    m_PrepareToEnableMouseMoving = false;
+		// Reset mouse button data
+		s_MouseButtonStates[MOUSE_LEFT] = s_PrevMouseButtonStates[MOUSE_LEFT] = s_ChangedMouseButtonStates[MOUSE_LEFT] = false;
+		s_MouseButtonStates[MOUSE_RIGHT] = s_PrevMouseButtonStates[MOUSE_RIGHT] = s_ChangedMouseButtonStates[MOUSE_RIGHT] = false;
+		s_MouseButtonStates[MOUSE_MIDDLE] = s_PrevMouseButtonStates[MOUSE_MIDDLE] = s_ChangedMouseButtonStates[MOUSE_MIDDLE] = false;
 
-    // Reset all schemes
-    int player;
-    for (player = 0; player < MAX_PLAYERS; ++player)
-    {
-		m_TrapMousePosPerPlayer[player] = false;
+		// Mouse wheel init
+		position_mouse_z(0);
+		m_MouseWheelChange = 0;
 
-        m_aControlScheme[player].Reset();
-		m_NetworkAccumulatedRawMouseMovement[player].Reset();
+		// Set Mouse analog stick emulation data defaults
+		m_RawMouseMovement.Reset();
+		m_AnalogMouseData.Reset();
+		m_TrapMousePos = false;
+		m_MouseTrapRadius = 350;
+		m_MouseSensitivity = 0.6F;
 
-		for (int element = 0; element < INPUT_COUNT; element++)
-		{
-			m_aNetworkInputElementHeld[player][element] = false;
-			m_aNetworkInputElementPressed[player][element] = false;
-			m_aNetworkInputElementReleased[player][element] = false;
+		m_DisableMouseMoving = false;
+		m_PrepareToEnableMouseMoving = false;
+
+		// Reset all schemes
+		for (int player = 0; player < MAX_PLAYERS; ++player) {
+			m_ControlScheme[player].Reset();
+			m_NetworkAccumulatedRawMouseMovement[player].Reset();
+
+			for (int element = 0; element < INPUT_COUNT; element++) {
+				m_NetworkInputElementHeld[player][element] = false;
+				m_NetworkInputElementPressed[player][element] = false;
+				m_NetworkInputElementReleased[player][element] = false;
+			}
+			for (int mouseButton = 0; mouseButton < MAX_MOUSE_BUTTONS; mouseButton++) {
+				m_NetworkMouseButtonHeldState[player][mouseButton] = false;
+				m_NetworkMouseButtonPressedState[player][mouseButton] = false;
+				m_NetworkMouseButtonReleasedState[player][mouseButton] = false;
+			}
+			m_NetworkAnalogMoveData[player].Reset();
+			m_TrapMousePosPerPlayer[player] = false;
+		}
+		for (int element = 0; element < INPUT_COUNT; element++) {
+			m_NetworkAccumulatedElementPressed[element] = false;
+			m_NetworkAccumulatedElementReleased[element] = false;
+		}
+		for (int device = 0; device < DEVICE_COUNT; device++) {
+			m_DeviceIcons[device] = 0;
 		}
 
-		for (int btn = 0; btn < MAX_MOUSE_BUTTONS; btn++)
-		{
-			m_aNetworkMouseButtonHeldState[player][btn] = false;
-			m_aNetworkMouseButtonPressedState[player][btn] = false;
-			m_aNetworkMouseButtonReleasedState[player][btn] = false;
-		}
-		m_aNetworkAnalogMoveData[player].Reset();
-    }
-
-	for (int element = 0; element < INPUT_COUNT; element++)
-	{
-		m_aNetworkAccumulatedElementPressed[element];
-		m_aNetworkAccumulatedElementReleased[element];
-	}
-
-    for (int device = 0; device < DEVICE_COUNT; ++device)
-    {
-        m_apDeviceIcons[device] = 0;
-    }
-
-	m_MouseSensitivity = 0.6;
-
-    // Set up the default Mouse+keyboard key mappings for player one
-    m_aControlScheme[PLAYER_ONE].SetDevice(DEVICE_MOUSE_KEYB);
-    m_aControlScheme[PLAYER_ONE].SetPreset(PRESET_P1DEFAULT);
-    
-    // Set up the default keyboard key bindings for player two
-    m_aControlScheme[PLAYER_TWO].SetDevice(DEVICE_KEYB_ONLY);
-    m_aControlScheme[PLAYER_TWO].SetPreset(PRESET_P2DEFAULT);
-
-    // Player three. These key mappings are for when 
-    m_aControlScheme[PLAYER_THREE].SetDevice(DEVICE_GAMEPAD_1);
-    m_aControlScheme[PLAYER_THREE].SetPreset(PRESET_P3DEFAULT);
-
-    // Player four
-    m_aControlScheme[PLAYER_FOUR].SetDevice(DEVICE_GAMEPAD_2);
-    m_aControlScheme[PLAYER_FOUR].SetPreset(PRESET_P4DEFAULT);
-
-    // Init the previous joybuttons so they don't make it seem like things have changed
-    // Also neutralize the changed keys so that no Releases will be detected initially
-    int joystick, button, stick, axis;
-    // This has to use MAX_PLAYERS instead of num_joysticks, because the latter may not have been inited yet
-    for (joystick = 0; joystick < MAX_PLAYERS; ++joystick)
-    {
-        // Init button change state detection data
-        for (button = 0; button < joy[joystick].num_buttons; ++button)
-        {
-            s_aaPrevJoyState[joystick].button[button].b = false;
-            s_aaChangedJoyState[joystick].button[button].b = false;
-        }
-
-        // Init stick-axis-direction change state detection data
-        for (stick = 0; stick < joy[joystick].num_sticks; ++stick)
-        {
-            for (axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis)
-            {
-                s_aaPrevJoyState[joystick].stick[stick].axis[axis].d1 = 0;
-                s_aaPrevJoyState[joystick].stick[stick].axis[axis].d2 = 0;
-                s_aaChangedJoyState[joystick].stick[stick].axis[axis].d1 = 0;
-                s_aaChangedJoyState[joystick].stick[stick].axis[axis].d2 = 0;
-            }
-        }
-    }
-
-	m_LastDeviceWhichControlledGUICursor = 0;
-	m_OverrideInput = false;
-	m_IsInMultiplayerMode = false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the UInputMan object ready for use.
-
-int UInputMan::Create()
-{
-    if (Serializable::Create() < 0)
-        return -1;
-
-    // This is a hack to fix the keyboard and mouse losing focus when in windowed mode.. it's a known allegro issue
-//    if (!g_FrameMan.IsFullscreen())
-//        rest(500);
-
-    // Get the Allegro keyboard going
-    install_keyboard();
-    // Hack to not have the keyboard lose focus permanently when window is started without focus
-    //win_grab_input();
-
-    // Get the Joysticks going
-	if (install_joystick(JOY_TYPE_WIN32) != 0)
-	{
-		//RTEAbort("Error initialising joysticks!");
-		// No win 32 joysticks? Try DX then
-		if (num_joysticks == 0)
-		{
-			remove_joystick();
-			if (install_joystick(JOY_TYPE_DIRECTX) != 0)
-			{
-				//RTEAbort("Error initialising joysticks!");
-
-				// No dx either? Try whatever is possible
-				if (num_joysticks   == 0)
-				{
-					remove_joystick();
-					if (install_joystick(JOY_TYPE_AUTODETECT) != 0)
-						RTEAbort("Error initialising joysticks!");
+		// Init the previous joy buttons so they don't make it seem like things have changed. Also neutralize the changed keys so that no Releases will be detected initially.
+		// This has to use MAX_PLAYERS instead of num_joysticks, because the latter may not have been initialized yet
+		for (int joystick = 0; joystick < MAX_PLAYERS; ++joystick) {
+			// Init button change state detection data
+			for (int button = 0; button < joy[joystick].num_buttons; ++button) {
+				s_PrevJoystickStates[joystick].button[button].b = false;
+				s_ChangedJoystickStates[joystick].button[button].b = false;
+			}
+			// Init stick-axis-direction change state detection data
+			for (int stick = 0; stick < joy[joystick].num_sticks; ++stick) {
+				for (int axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis) {
+					s_PrevJoystickStates[joystick].stick[stick].axis[axis].d1 = 0;
+					s_PrevJoystickStates[joystick].stick[stick].axis[axis].d2 = 0;
+					s_ChangedJoystickStates[joystick].stick[stick].axis[axis].d1 = 0;
+					s_ChangedJoystickStates[joystick].stick[stick].axis[axis].d2 = 0;
 				}
 			}
 		}
+
+		// Set up the default key mappings for each player
+		m_ControlScheme[PLAYER_ONE].SetDevice(DEVICE_MOUSE_KEYB);
+		m_ControlScheme[PLAYER_ONE].SetPreset(PRESET_P1DEFAULT);
+		m_ControlScheme[PLAYER_TWO].SetDevice(DEVICE_KEYB_ONLY);
+		m_ControlScheme[PLAYER_TWO].SetPreset(PRESET_P2DEFAULT);
+		m_ControlScheme[PLAYER_THREE].SetDevice(DEVICE_GAMEPAD_1);
+		m_ControlScheme[PLAYER_THREE].SetPreset(PRESET_P3DEFAULT);
+		m_ControlScheme[PLAYER_FOUR].SetDevice(DEVICE_GAMEPAD_2);
+		m_ControlScheme[PLAYER_FOUR].SetPreset(PRESET_P4DEFAULT);
 	}
 
-    poll_joystick();
-/* Can't do this now, the data modules aren't loaded yet.. this is done lazily as the first one is gotten
-    // Get the device Icons
-    m_apDeviceIcons[DEVICE_KEYB_ONLY] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Keyboard"));
-    m_apDeviceIcons[DEVICE_MOUSE_KEYB] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Mouse"));
-    m_apDeviceIcons[DEVICE_GAMEPAD_1] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 1"));
-    m_apDeviceIcons[DEVICE_GAMEPAD_2] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 2"));
-    m_apDeviceIcons[DEVICE_GAMEPAD_3] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 3"));
-    m_apDeviceIcons[DEVICE_GAMEPAD_4] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 4"));
-*/
-    return 0;
-}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	int UInputMan::Create() {
+		if (Serializable::Create() < 0) {
+			return -1;
+		}
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
+		if (install_keyboard() != 0) { RTEAbort("Failed to initialize keyboard!"); }
+		if (install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
 
-int UInputMan::ReadProperty(std::string propName, Reader &reader)
-{
-    int mappedButton = 0;
+		poll_joystick();
 
-
-    if (propName == "P1Scheme")
-        reader >> m_aControlScheme[PLAYER_ONE];
-    else if (propName == "P2Scheme")
-        reader >> m_aControlScheme[PLAYER_TWO];
-    else if (propName == "P3Scheme")
-        reader >> m_aControlScheme[PLAYER_THREE];
-    else if (propName == "P4Scheme")
-        reader >> m_aControlScheme[PLAYER_FOUR];
-    else if (propName == "MouseSensitivity")
-        reader >> m_MouseSensitivity;
-	else
-        // See if the base class(es) can find a match instead
-        return Serializable::ReadProperty(propName, reader);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this UInputMan with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int UInputMan::Save(Writer &writer) const {
-	writer.NewLine(false, 2);
-	writer.NewDivider(false);
-	writer.NewLineString("// Input Mapping", false);
-	writer.NewLine(false);
-
-	writer.NewProperty("MouseSensitivity");
-	writer << m_MouseSensitivity;
-
-	writer.NewLine(false);
-	writer.NewLineString("// Input Devices:  0 = Keyboard only, 1 = Mouse + Keyboard, 2 = Joystick One, 3 = Joystick Two, , 4 = Joystick Three, 5 = Joystick Four");
-	writer.NewLineString("// Scheme Presets: 0 = No Preset, 1 = WASD, 2 = Cursor Keys, 3 = XBox 360 Controller");
-
-	writer.NewLine(false, 2);
-	writer.NewDivider(false);
-	writer.NewLineString("// Player 1", false);
-	writer.NewLine(false);
-	writer.NewProperty("P1Scheme");
-	writer << m_aControlScheme[PLAYER_ONE];
-
-	writer.NewLine(false);
-	writer.NewDivider(false);
-	writer.NewLineString("// Player 2", false);
-	writer.NewLine(false);
-	writer.NewProperty("P2Scheme");
-	writer << m_aControlScheme[PLAYER_TWO];
-
-	writer.NewLine(false);
-	writer.NewDivider(false);
-	writer.NewLineString("// Player 3", false);
-	writer.NewLine(false);
-	writer.NewProperty("P3Scheme");
-	writer << m_aControlScheme[PLAYER_THREE];
-
-	writer.NewLine(false);
-	writer.NewDivider(false);
-	writer.NewLineString("// Player 4", false);
-	writer.NewLine(false);
-	writer.NewProperty("P4Scheme");
-	writer << m_aControlScheme[PLAYER_FOUR];
-
-	return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the UInputMan object.
-
-void UInputMan::Destroy()
-{
-    Clear();
-}
-	
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ReInitKeyboard
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Re-initalizes the keyboard for when windows regains focus. This is
-//                  really used to work around an Allegro bug.
-
-void UInputMan::ReInitKeyboard()
-{
-//    remove_keyboard();
-    install_keyboard();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetInputClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the input class for use if one is available
-void UInputMan::SetInputClass(GUIInput* pInputClass)
-{
-	s_InputClass = pInputClass;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSchemeIcon
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Get the current device Icon of a specific player's scheme
-
-const Icon * UInputMan::GetSchemeIcon(int whichPlayer)
-{
-    if (whichPlayer < Activity::PLAYER_1 || whichPlayer >= Activity::MAXPLAYERCOUNT)
-        return 0;
-
-    // Lazy load of these.. can't load earlier
-    if (!m_apDeviceIcons[DEVICE_KEYB_ONLY])
-    {
-        m_apDeviceIcons[DEVICE_KEYB_ONLY] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Keyboard"));
-        m_apDeviceIcons[DEVICE_MOUSE_KEYB] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Mouse"));
-        m_apDeviceIcons[DEVICE_GAMEPAD_1] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 1"));
-        m_apDeviceIcons[DEVICE_GAMEPAD_2] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 2"));
-        m_apDeviceIcons[DEVICE_GAMEPAD_3] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 3"));
-        m_apDeviceIcons[DEVICE_GAMEPAD_4] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 4"));
-    }
-    return m_apDeviceIcons[m_aControlScheme[whichPlayer].GetDevice()];
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDeviceIcon
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Get the current Icon of a specific device's scheme
-
-const Icon * UInputMan::GetDeviceIcon(int whichDevice)
-{
-	if (whichDevice < DEVICE_KEYB_ONLY || whichDevice > DEVICE_GAMEPAD_4)
 		return 0;
+	}
 
-	// Lazy load of these.. can't load earlier
-	if (!m_apDeviceIcons[DEVICE_KEYB_ONLY])
-		GetSchemeIcon(0);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	return m_apDeviceIcons[whichDevice];
-}
+	int UInputMan::ReadProperty(std::string propName, Reader &reader) {
+		if (propName == "MouseSensitivity") {
+			reader >> m_MouseSensitivity;
+		} else if (propName == "P1Scheme") {
+			reader >> m_ControlScheme[PLAYER_ONE];
+		} else if (propName == "P2Scheme") {
+			reader >> m_ControlScheme[PLAYER_TWO];
+		} else if (propName == "P3Scheme") {
+			reader >> m_ControlScheme[PLAYER_THREE];
+		} else if (propName == "P4Scheme") {
+			reader >> m_ControlScheme[PLAYER_FOUR];
+		} else {
+			// See if the base class(es) can find a match instead
+			return Serializable::ReadProperty(propName, reader);
+		}
+		return 0;
+	}
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoystickActive
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns true if specified joystick is active
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool UInputMan::JoystickActive(int joystickNumber) const
-{
-	if (joystickNumber < 0 || joystickNumber >= MAX_PLAYERS)
+	int UInputMan::Save(Writer &writer) const {
+		writer.NewLine(false, 2);
+		writer.NewDivider(false);
+		writer.NewLineString("// Input Mapping", false);
+		writer.NewLine(false);
+
+		writer.NewProperty("MouseSensitivity");
+		writer << m_MouseSensitivity;
+
+		writer.NewLine(false);
+		writer.NewLineString("// Input Devices:  0 = Keyboard Only, 1 = Mouse + Keyboard, 2 = Joystick One, 3 = Joystick Two, , 4 = Joystick Three, 5 = Joystick Four");
+		writer.NewLineString("// Scheme Presets: 0 = No Preset, 1 = WASD, 2 = Cursor Keys, 3 = XBox 360 Controller");
+
+		writer.NewLine(false, 2);
+		writer.NewDivider(false);
+		writer.NewLineString("// Player 1", false);
+		writer.NewLine(false);
+		writer.NewProperty("P1Scheme");
+		writer << m_ControlScheme[PLAYER_ONE];
+
+		writer.NewLine(false);
+		writer.NewDivider(false);
+		writer.NewLineString("// Player 2", false);
+		writer.NewLine(false);
+		writer.NewProperty("P2Scheme");
+		writer << m_ControlScheme[PLAYER_TWO];
+
+		writer.NewLine(false);
+		writer.NewDivider(false);
+		writer.NewLineString("// Player 3", false);
+		writer.NewLine(false);
+		writer.NewProperty("P3Scheme");
+		writer << m_ControlScheme[PLAYER_THREE];
+
+		writer.NewLine(false);
+		writer.NewDivider(false);
+		writer.NewLineString("// Player 4", false);
+		writer.NewLine(false);
+		writer.NewProperty("P4Scheme");
+		writer << m_ControlScheme[PLAYER_FOUR];
+
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::LoadDeviceIcons() {
+		m_DeviceIcons[DEVICE_KEYB_ONLY] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Keyboard"));
+		m_DeviceIcons[DEVICE_MOUSE_KEYB] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Mouse"));
+		m_DeviceIcons[DEVICE_GAMEPAD_1] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 1"));
+		m_DeviceIcons[DEVICE_GAMEPAD_2] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 2"));
+		m_DeviceIcons[DEVICE_GAMEPAD_3] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 3"));
+		m_DeviceIcons[DEVICE_GAMEPAD_4] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 4"));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::SetInputClass(GUIInput* inputClass) { s_InputClass = inputClass; }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const Icon * UInputMan::GetSchemeIcon(int whichPlayer) {
+		return (whichPlayer < Activity::PLAYER_1 || whichPlayer >= Activity::MAXPLAYERCOUNT) ? 0 : m_DeviceIcons[m_ControlScheme[whichPlayer].GetDevice()];
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string UInputMan::GetMappingName(int whichPlayer, int whichElement) {
+		if (whichPlayer < PLAYER_ONE || whichPlayer >= MAX_PLAYERS) {
+			return "";
+		}
+
+		int device = m_ControlScheme[whichPlayer].GetDevice();
+		int preset = m_ControlScheme[whichPlayer].GetPreset();
+		const InputMapping *element = &(m_ControlScheme[whichPlayer].GetInputMappings()[whichElement]);
+
+		// If there is a preset, just return the element name set by the preset previously
+		if (preset != PRESET_NONE && !element->GetPresetDesc().empty()) {
+			return element->GetPresetDesc();
+		}
+
+		// Joystick input is used, more important to show than keyboard
+		if (device >= DEVICE_GAMEPAD_1) {
+			// Translate the device selection to the joystick numbering (0-3)
+			int whichJoy = device - DEVICE_GAMEPAD_1;
+
+			// Check joystick button presses
+			if (element->GetJoyButton() != JOY_NONE) {
+				return joy[whichJoy].button[element->GetJoyButton()].name;
+			}
+			// Check joystick axis directions
+			if (element->JoyDirMapped()) {
+				return "Joystick";
+			}
+		}
+		// Mouse input is used, more important to show than keyboard
+		if (device == DEVICE_MOUSE_KEYB && element->GetMouseButton() != MOUSE_NONE) {
+			int button = element->GetMouseButton();
+
+			switch (button) {
+				case MOUSE_LEFT:
+					return "Left Mouse";
+				case MOUSE_RIGHT:
+					return "Right Mouse";
+				case MOUSE_MIDDLE:
+					return "Middle Mouse";
+			}
+		}
+		// Keyboard defaults - don't check certain elements which don't make sense when in mouse mode
+		if (device == DEVICE_KEYB_ONLY || (device == DEVICE_MOUSE_KEYB && !(whichElement == INPUT_AIM_UP || whichElement == INPUT_AIM_DOWN)) && element->GetKey() != 0) {
+			return scancode_to_name(element->GetKey());
+		}
+		return "";
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::CaptureKeyMapping(int whichPlayer, int whichInput) {
+		if (whichPlayer < PLAYER_ONE || whichPlayer >= MAX_PLAYERS) {
+			return false;
+		}
+		// Update the key array
+		if (keyboard_needs_poll()) { poll_keyboard(); }
+
+		for (int whichKey = 0; whichKey < KEY_MAX; ++whichKey) {
+			if (KeyPressed(whichKey)) {
+				// Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
+				m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset();
+				SetKeyMapping(whichPlayer, whichInput, whichKey);
+				return true;
+			}
+		}
 		return false;
-
-	/*if (s_aaPrevJoyState[joystickNumber].num_buttons > 0)
-		return true;
-
-	if (s_aaChangedJoyState[joystickNumber].num_buttons > 0)
-		return true;*/
-
-	if (joystickNumber < num_joysticks)
-		return true;
-
-	return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetJoystickCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the number of active joysticks
-
-int UInputMan::GetJoystickCount() const
-{
-	if (num_joysticks > MAX_PLAYERS)
-		return MAX_PLAYERS;
-	else
-		return num_joysticks;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMappingName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the name of the key/mouse/joy button/key/direction that a
-//                  particular input element is mapped to.
-
-string UInputMan::GetMappingName(int whichPlayer, int whichElement)
-{
-    if (whichPlayer < PLAYER_ONE || whichPlayer >= MAX_PLAYERS)
-        return "";
-
-    // Which Device is used by this player
-    int device = m_aControlScheme[whichPlayer].GetDevice();
-
-    // Which scheme preset, if any, this adheres to
-    int preset = m_aControlScheme[whichPlayer].GetPreset();
-
-    // Get handy pointer to the relevant input element
-    InputMapping * pElement = &(m_aControlScheme[whichPlayer].GetInputMappings()[whichElement]);
-
-    // If there is a preset, just return the element name set by the preset previously
-    if (preset != PRESET_NONE && !pElement->GetPresetDesc().empty())
-        return pElement->GetPresetDesc();
-
-    // Joystick input is used, more important to show than keyboard
-    if (device >= DEVICE_GAMEPAD_1)
-    {
-        // Translate the device selection to the joystick numbering (0-3)
-        int whichJoy = device - DEVICE_GAMEPAD_1;
-
-        // Check joysitck button presses
-        if (pElement->GetJoyButton() != JOY_NONE)
-            return joy[whichJoy].button[pElement->GetJoyButton()].name;
-
-        // Check joystick axis directions
-        if (pElement->JoyDirMapped())
-        {
-            return "Joystick";
-//            pressed = JoyDirectionPressed(whichJoy, pElement->GetStick(), pElement->GetAxis(), pElement->GetDirection());
-        }
-    }
-
-    // Mouse input is used, more important to show than keyboard
-    if (device == DEVICE_MOUSE_KEYB && pElement->GetMouseButton() != MOUSE_NONE)
-    {
-        // Check mouse
-        int button = pElement->GetMouseButton();
-        if (button == MOUSE_LEFT)
-            return "Left Mouse";
-        else if (button == MOUSE_RIGHT)
-            return "Right Mouse";
-        else if (button == MOUSE_MIDDLE)
-            return "Middle Mouse";
-    }
-
-    // Keyboard defualts - don't check certain elements which don't make sense when in mouse mode
-    if (device == DEVICE_KEYB_ONLY || (device == DEVICE_MOUSE_KEYB && !(whichElement == INPUT_AIM_UP || whichElement == INPUT_AIM_DOWN)))
-    {
-        // Return keyboard mapping name
-        if (pElement->GetKey() != 0)
-            return scancode_to_name(pElement->GetKey());
-    }
-
-    return "";
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CaptureKeyMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks for the any key press this frame, and creates an input mapping
-//                  for a specific player accordingly.
-
-bool UInputMan::CaptureKeyMapping(int whichPlayer, int whichInput)
-{	
-    if (whichPlayer < PLAYER_ONE || whichPlayer >= MAX_PLAYERS)
-        return false;
-
-    // Update the key array
-	if (keyboard_needs_poll())
-        poll_keyboard();
-
-    for (int whichKey = 0; whichKey < KEY_MAX; ++whichKey)
-    {	
-        if (KeyPressed(whichKey) /* s_aLastKeys[whichKey] && s_aChangedKeys[whichKey]*/)
-        {
-            // Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
-            m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset();
-            SetKeyMapping(whichPlayer, whichInput, whichKey);
-            return true;
-        }
-
-    }
-
-    return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CaptureButtonMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks for the any button press this frame, and creates an input mapping
-//                  for a specific player accordingly.
-
-bool UInputMan::CaptureButtonMapping(int whichPlayer, int whichJoy, int whichInput)
-{
-    if (whichPlayer < PLAYER_ONE || whichPlayer >= MAX_PLAYERS)
-        return false;
-
-    int whichButton = WhichJoyButtonPressed(whichJoy);
-
-    if (whichButton != JOY_NONE)
-    {
-        // Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
-        m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset();
-        SetButtonMapping(whichPlayer, whichInput, whichButton);
-        return true;
-    }
-
-    return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CaptureDirectionMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks for the any joystick pad or stick direction press this frame,
-//                  and creates an input mapping for a specific player accordingly.
-
-bool UInputMan::CaptureDirectionMapping(int whichPlayer, int whichJoy, int whichInput)
-{
-    if (whichPlayer < PLAYER_ONE || whichPlayer >= MAX_PLAYERS)
-        return false;
-
-    int stick, axis;
-    // Go through all the sticks on this joystick
-    for (stick = 0; stick < joy[whichJoy].num_sticks; ++stick)
-    {
-        // Go through all the axes on this joystick
-        for (axis = 0; axis < joy[whichJoy].stick[stick].num_axis; ++axis)
-        {
-            // See if there is direction press in the first direction
-            if (joy[whichJoy].stick[stick].axis[axis].d1 && s_aaChangedJoyState[whichJoy].stick[stick].axis[axis].d1)
-            {
-                // Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
-                m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset();
-                // Capture the mapping!
-                m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].SetDirection(stick, axis, JOYDIR_ONE);
-                return true;
-            }
-            // Check the other direction
-            else if (joy[whichJoy].stick[stick].axis[axis].d2 && s_aaChangedJoyState[whichJoy].stick[stick].axis[axis].d2)
-            {
-                // Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
-                m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset();
-                // Capture the mapping!
-                m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].SetDirection(stick, axis, JOYDIR_TWO);
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CaptureJoystickMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks for the any button or direction press this frame, and creates
-//                  an input mapping for a specific player accordingly.
-
-bool UInputMan::CaptureJoystickMapping(int whichPlayer, int whichJoy, int whichInput)
-{
-    // Try buttons first
-    if (CaptureButtonMapping(whichPlayer, whichJoy, whichInput))
-        return true;
-    // Then directions
-    if (CaptureDirectionMapping(whichPlayer, whichJoy, whichInput))
-        return true;
-
-    return false;
-}
-
-Vector UInputMan::GetNetworkAccumulatedRawMouseMovement(int player)
-{
-	Vector tmp = m_NetworkAccumulatedRawMouseMovement[player];
-	m_NetworkAccumulatedRawMouseMovement[player].Reset();
-	return tmp;
-	//return m_NetworkAccumulatedRawMouseMovement[player];
-}
-
-void UInputMan::SetNetworkMouseInput(int player, Vector input)
-{
-	m_OverrideInput = true;
-	m_NetworkAccumulatedRawMouseMovement[player] = input;
-}
-
-void UInputMan::SetNetworkInputElementHeldState(int player, int element, bool state)
-{
-	m_OverrideInput = true;
-	if (element >= 0 && element < INPUT_COUNT && player >= 0 && player < MAX_PLAYERS)
-	{
-		m_aNetworkInputElementHeld[player][element] = state;
-		/*if (state && element == INPUT_L_LEFT)
-			g_ConsoleMan.PrintString("L #");
-		if (!state && element == INPUT_L_LEFT)
-			g_ConsoleMan.PrintString("L O");*/
 	}
-}
 
-void UInputMan::SetNetworkInputElementPressedState(int player, int element, bool state)
-{
-	m_OverrideInput = true;
-	if (element >= 0 && element < INPUT_COUNT && player >= 0 && player < MAX_PLAYERS)
-		m_aNetworkInputElementPressed[player][element] = state;
-}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void UInputMan::SetNetworkInputElementReleasedState(int player, int element, bool state)
-{
-	m_OverrideInput = true;
-	if (element >= 0 && element < INPUT_COUNT && player >= 0 && player < MAX_PLAYERS)
-		m_aNetworkInputElementReleased[player][element] = state;
-}
-
-
-
-void UInputMan::SetNetworkMouseButtonPressedState(int player, int whichButton, bool state)
-{
-	m_OverrideInput = true;
-	if (whichButton >= 0 && whichButton < MAX_MOUSE_BUTTONS && player >= 0 && player < MAX_PLAYERS)
-		m_aNetworkMouseButtonPressedState[player][whichButton] = state;
-}
-
-void UInputMan::SetNetworkMouseButtonReleasedState(int player, int whichButton, bool state)
-{
-	m_OverrideInput = true;
-	if (whichButton >= 0 && whichButton < MAX_MOUSE_BUTTONS && player >= 0 && player < MAX_PLAYERS)
-		m_aNetworkMouseButtonReleasedState[player][whichButton] = state;
-}
-
-
-void UInputMan::SetNetworkMouseButtonHeldState(int player, int whichButton, bool state)
-{
-	m_OverrideInput = true;
-	if (whichButton >= 0 && whichButton < MAX_MOUSE_BUTTONS && player >= 0 && player < MAX_PLAYERS)
-		m_aNetworkMouseButtonHeldState[player][whichButton] = state;
-}
-
-void UInputMan::SetNetworkMouseWheelState(int player, int state)
-{
-	m_OverrideInput = true;
-	if (player >= 0 && player < MAX_PLAYERS)
-		m_aNetworkMouseWheelState[player] = state;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ElementPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a specific input element was depressed between the last
-//                  update and the one previous to it.
-
-bool UInputMan::ElementPressed(int whichPlayer, int whichElement)
-{
-	if (m_OverrideInput && whichPlayer >= 0 && whichPlayer < MAX_PLAYERS)
-	{
-		if (m_TrapMousePosPerPlayer[whichPlayer])
-			return m_aNetworkInputElementPressed[whichPlayer][whichElement];
-		else
+	bool UInputMan::CaptureButtonMapping(int whichPlayer, int whichJoy, int whichInput) {
+		if (whichPlayer < PLAYER_ONE || whichPlayer >= MAX_PLAYERS) {
 			return false;
+		}
+		int whichButton = WhichJoyButtonPressed(whichJoy);
+
+		if (whichButton != JOY_NONE) {
+			m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset();
+			SetButtonMapping(whichPlayer, whichInput, whichButton);
+			return true;
+		}
+		return false;
 	}
 
-    bool pressed = false;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Which Device is used by this player
-    int device = m_aControlScheme[whichPlayer].GetDevice();
-
-    // Get handy pointer to the relevant input element
-    InputMapping * pElement = &(m_aControlScheme[whichPlayer].GetInputMappings()[whichElement]);
-
-    // Keyboard is involved
-    // Don't check certain elements which don't make sense when in mouse mode
-    if (device == DEVICE_KEYB_ONLY || (device == DEVICE_MOUSE_KEYB && !(whichElement == INPUT_AIM_UP || whichElement == INPUT_AIM_DOWN)))
-    {
-        // Check keyboard
-        pressed = pressed ? true : KeyPressed(pElement->GetKey());
-    }
-
-    // Mouse is involved
-    if (device == DEVICE_MOUSE_KEYB && m_TrapMousePos)
-    {
-        // Check mouse
-        pressed = pressed ? true : MouseButtonPressed(pElement->GetMouseButton(), whichPlayer);
-    }
-
-    // Joystick input is applicable
-    if (device >= DEVICE_GAMEPAD_1)
-    {
-        // Translate the device selection to the joystick numbering (0-3)
-        int whichJoy = device - DEVICE_GAMEPAD_1;
-
-        // Check joysitck button presses
-        pressed = pressed ? true : JoyButtonPressed(whichJoy, pElement->GetJoyButton());
-
-        // Check joystick axis directions
-        if (!pressed && pElement->JoyDirMapped())
-            pressed = JoyDirectionPressed(whichJoy, pElement->GetStick(), pElement->GetAxis(), pElement->GetDirection());
-    }
-
-    return pressed;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ElementReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a specific input element was released between the last
-//                  update and the one previous to it.
-
-bool UInputMan::ElementReleased(int whichPlayer, int whichElement)
-{
-	if (m_OverrideInput && whichPlayer >= 0 && whichPlayer < MAX_PLAYERS)
-	{
-		if (m_TrapMousePosPerPlayer[whichPlayer])
-			return m_aNetworkInputElementReleased[whichPlayer][whichElement];
-		else
+	bool UInputMan::CaptureDirectionMapping(int whichPlayer, int whichJoy, int whichInput) {
+		if (whichPlayer < PLAYER_ONE || whichPlayer >= MAX_PLAYERS) {
 			return false;
-	}
+		}
 
-    bool released = false;
-
-    // Which Device is used by this player
-    int device = m_aControlScheme[whichPlayer].GetDevice();
-
-    // Get handy pointer to the relevant input element
-    InputMapping * pElement = &(m_aControlScheme[whichPlayer].GetInputMappings()[whichElement]);
-
-    // Keyboard is involved
-    // Don't check certain elements which don't make sense when in mouse mode
-    if (device == DEVICE_KEYB_ONLY || (device == DEVICE_MOUSE_KEYB && !(whichElement == INPUT_AIM_UP || whichElement == INPUT_AIM_DOWN)))
-    {
-        // Check keyboard
-        released = released ? true : KeyReleased(pElement->GetKey());
-    }
-
-    // Mouse is involved
-    if (device == DEVICE_MOUSE_KEYB && m_TrapMousePos)
-    {
-        // Check mouse
-        released = released ? true : MouseButtonReleased(pElement->GetMouseButton(), whichPlayer);
-    }
-
-    // Joystick input is applicable
-    if (device >= DEVICE_GAMEPAD_1)
-    {
-        // Translate the device selection to the joystick numbering (0-3)
-        int whichJoy = device - DEVICE_GAMEPAD_1;
-
-        // Check joysitck button presses
-        released = released ? true : JoyButtonReleased(whichJoy, pElement->GetJoyButton());
-
-        // Check joystick axis directions
-        if (!released && pElement->JoyDirMapped())
-            released = JoyDirectionReleased(whichJoy, pElement->GetStick(), pElement->GetAxis(), pElement->GetDirection());
-    }
-
-    return released;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ElementHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a specific input element was held during the last update.
-
-bool UInputMan::ElementHeld(int whichPlayer, int whichElement)
-{
-	if (m_OverrideInput && whichPlayer >= 0 && whichPlayer < MAX_PLAYERS)
-	{
-		/*if (whichElement == INPUT_L_LEFT)
-		{
-			if (m_aNetworkInputElementPressed[whichPlayer][whichElement])
-				g_ConsoleMan.PrintString("L +");
-			else
-				g_ConsoleMan.PrintString("L -");
-		}*/
-
-		if (m_TrapMousePosPerPlayer[whichPlayer])
-			return m_aNetworkInputElementHeld[whichPlayer][whichElement];
-		else
-			return false;
-	}
-
-    bool held = false;
-
-    // Which Device is used by this player
-    int device = m_aControlScheme[whichPlayer].GetDevice();
-
-    // Get handy pointer to the relevant input element
-    InputMapping * pElement = &(m_aControlScheme[whichPlayer].GetInputMappings()[whichElement]);
-
-    // Keyboard is involved
-    // Don't check certain elements which don't make sense when in mouse mode
-    if (device == DEVICE_KEYB_ONLY || (device == DEVICE_MOUSE_KEYB && !(whichElement == INPUT_AIM_UP || whichElement == INPUT_AIM_DOWN)))
-    {
-        // Check keyboard
-        held = held ? true : KeyHeld(pElement->GetKey());
-    }
-
-    // Mouse is involved
-    if (device == DEVICE_MOUSE_KEYB && m_TrapMousePos)
-    {
-        // Check mouse
-        held = held ? true : MouseButtonHeld(pElement->GetMouseButton(), whichPlayer);
-    }
-
-    // Joystick input is applicable
-    if (device >= DEVICE_GAMEPAD_1)
-    {
-        // Translate the device selection to the joystick numbering (0-3)
-        int whichJoy = device - DEVICE_GAMEPAD_1;
-
-        // Check joysitck button holds
-        held = held ? true : JoyButtonHeld(whichJoy, pElement->GetJoyButton());
-
-        // Check joystick axis direction holds
-        if (!held && pElement->JoyDirMapped())
-            held = JoyDirectionHeld(whichJoy, pElement->GetStick(), pElement->GetAxis(), pElement->GetDirection());
-    }
-
-    return held;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          KeyPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a key was depressed between the last update and the one
-//                  previous to it.
-
-bool UInputMan::KeyPressed(const char keyToTest)
-{
-    // Keyboard disabled
-    if (m_DisableKeyboard && (keyToTest >= KEY_A && keyToTest < KEY_ESC))
-        return false;
-
-	bool pressed = false;
-	
-	if (s_InputClass)
-	{		
-		pressed = (s_InputClass->GetScanCodeState(keyToTest) == GUIInput::Pushed);
-	}
-	else
-	{
-		pressed = s_aLastKeys[keyToTest] && s_aChangedKeys[keyToTest];
-	}
-	
-//    s_aChangedKeys[keyToTest] = false;
-    return pressed;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          KeyReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a key was released between the last update and the one
-//                  previous to it.
-
-bool UInputMan::KeyReleased(const char keyToTest)
-{
-    // Keyboard disabled
-    if (m_DisableKeyboard && (keyToTest >= KEY_A && keyToTest < KEY_ESC))
-        return false;
-
-    bool released = !s_aLastKeys[keyToTest] && s_aChangedKeys[keyToTest];
-//    s_aChangedKeys[keyToTest] = false;
-    return released;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          KeyHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a key is being held right now.
-
-bool UInputMan::KeyHeld(const char keyToTest)
-{
-    // Keyboard disabled
-    if (m_DisableKeyboard && (keyToTest >= KEY_A && keyToTest < KEY_ESC))
-        return false;
-
-    return s_aLastKeys[keyToTest];
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WhichKeyHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows the first keyboard key button which is currently down.
-
-int UInputMan::WhichKeyHeld()
-{
-    int key = readkey();
-    // decode the scancode and return it
-    return key >> 8;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MouseButtonPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a mosue button was depressed between the last update and
-//                  the one previous to it.
-
-bool UInputMan::MouseButtonPressed(int whichButton, int whichPlayer)
-{
-    if (whichButton < 0 || whichButton >= MAX_MOUSE_BUTTONS)
-        return false;
-
-	if (m_OverrideInput)
-	{
-		if (whichPlayer < 0 || whichPlayer >= MAX_PLAYERS)
-		{
-			for (int i = 0; i < MAX_PLAYERS; i++)
-			{
-				if (m_aNetworkMouseButtonPressedState[i][whichButton])
-					return m_aNetworkMouseButtonPressedState[i][whichButton];
+		// Go through all the sticks on this joystick
+		for (int stick = 0; stick < joy[whichJoy].num_sticks; ++stick) {
+			// Go through all the axes on this joystick
+			for (int axis = 0; axis < joy[whichJoy].stick[stick].num_axis; ++axis) {
+				// See if there is direction press in the first direction
+				if (joy[whichJoy].stick[stick].axis[axis].d1 && s_ChangedJoystickStates[whichJoy].stick[stick].axis[axis].d1) {
+					m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset();
+					m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].SetDirection(stick, axis, JOYDIR_ONE);
+					return true;
+				} else if (joy[whichJoy].stick[stick].axis[axis].d2 && s_ChangedJoystickStates[whichJoy].stick[stick].axis[axis].d2) {
+					m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset();
+					m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].SetDirection(stick, axis, JOYDIR_TWO);
+					return true;
+				}
 			}
-			return m_aNetworkMouseButtonPressedState[0][whichButton];
 		}
-		else
-		{
-			return m_aNetworkMouseButtonPressedState[whichPlayer][whichButton];
-		}
+		return false;
 	}
 
-    bool pressed = m_aMouseButtonState[whichButton] && m_aMouseChangedButtonState[whichButton];
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    return pressed;
-}
+	bool UInputMan::CaptureJoystickMapping(int whichPlayer, int whichJoy, int whichInput) {
+		if (CaptureButtonMapping(whichPlayer, whichJoy, whichInput)) {
+			return true;
+		}
+		if (CaptureDirectionMapping(whichPlayer, whichJoy, whichInput)) {
+			return true;
+		}
+		return false;
+	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MouseButtonReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a mosue button was released between the last update and
-//                  the one previous to it.
+	Vector UInputMan::AnalogMoveValues(int whichPlayer) {
+		int device = m_ControlScheme[whichPlayer].GetDevice();
+		const InputMapping *element = m_ControlScheme[whichPlayer].GetInputMappings();
+		Vector moveValues;
 
-bool UInputMan::MouseButtonReleased(int whichButton, int whichPlayer)
-{
-    if (whichButton < 0 || whichButton >= MAX_MOUSE_BUTTONS)
-        return false;
+		// Joystick input is applicable
+		if (device >= DEVICE_GAMEPAD_1) {
+			// Translate the device selection to the joystick numbering (0-3)
+			int whichJoy = device - DEVICE_GAMEPAD_1;
 
-	if (m_OverrideInput)
-	{
-		if (whichPlayer <0 || whichPlayer >= MAX_PLAYERS)
-		{
-			for (int i = 0; i < MAX_PLAYERS; i++)
-			{
-				if (m_aNetworkMouseButtonReleasedState[i][whichButton])
-					return m_aNetworkMouseButtonReleasedState[i][whichButton];
+			// Assume axes are stretched out over up-down, and left-right
+			if (element[INPUT_L_LEFT].JoyDirMapped()) { moveValues.m_X = AnalogAxisValue(whichJoy, element[INPUT_L_LEFT].GetStick(), element[INPUT_L_LEFT].GetAxis()); }
+			if (element[INPUT_L_UP].JoyDirMapped()) { moveValues.m_Y = AnalogAxisValue(whichJoy, element[INPUT_L_UP].GetStick(), element[INPUT_L_UP].GetAxis()); }
+		}
+		return moveValues;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Vector UInputMan::AnalogAimValues(int whichPlayer) {
+		int device = m_ControlScheme[whichPlayer].GetDevice();
+
+		if (IsInMultiplayerMode()) { device = DEVICE_MOUSE_KEYB; }
+
+		const InputMapping *element = m_ControlScheme[whichPlayer].GetInputMappings();
+		Vector aimValues;
+
+		if (device == DEVICE_MOUSE_KEYB) {
+			// Return the normalized mouse analog stick emulation value
+			aimValues = (IsInMultiplayerMode() && whichPlayer >= 0 && whichPlayer < MAX_PLAYERS) ? (m_NetworkAnalogMoveData[whichPlayer] / m_MouseTrapRadius) : (m_AnalogMouseData / m_MouseTrapRadius);
+		}
+		if (device >= DEVICE_GAMEPAD_1) {
+			// Translate the device selection to the joystick numbering (0-3)
+			int whichJoy = device - DEVICE_GAMEPAD_1;
+
+			// Assume axes are stretched out over up-down, and left-right
+			if (element[INPUT_R_LEFT].JoyDirMapped()) { aimValues.m_X = AnalogAxisValue(whichJoy, element[INPUT_R_LEFT].GetStick(), element[INPUT_R_LEFT].GetAxis()); }
+			if (element[INPUT_R_UP].JoyDirMapped()) { aimValues.m_Y = AnalogAxisValue(whichJoy, element[INPUT_R_UP].GetStick(), element[INPUT_R_UP].GetAxis()); }
+		}
+		return aimValues;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::ElementHeld(int whichPlayer, int whichElement) {
+		if (IsInMultiplayerMode() && whichPlayer >= 0 && whichPlayer < MAX_PLAYERS) {
+			return m_TrapMousePosPerPlayer[whichPlayer] ? m_NetworkInputElementHeld[whichPlayer][whichElement] : false;
+		}
+		bool held = false;
+		int device = m_ControlScheme[whichPlayer].GetDevice();
+		const InputMapping *element = &(m_ControlScheme[whichPlayer].GetInputMappings()[whichElement]);
+
+		// Don't check certain elements which don't make sense when in mouse mode
+		if (device == DEVICE_KEYB_ONLY || (device == DEVICE_MOUSE_KEYB && !(whichElement == INPUT_AIM_UP || whichElement == INPUT_AIM_DOWN))) { held = held ? true : KeyHeld(element->GetKey()); }
+
+		if (device == DEVICE_MOUSE_KEYB && m_TrapMousePos) { held = held ? true : MouseButtonHeld(element->GetMouseButton(), whichPlayer); }
+
+		if (device >= DEVICE_GAMEPAD_1) {
+			// Translate the device selection to the joystick numbering (0-3)
+			int whichJoy = device - DEVICE_GAMEPAD_1;
+
+			// Check joystick button holds
+			held = held ? true : JoyButtonHeld(whichJoy, element->GetJoyButton());
+
+			// Check joystick axis direction holds
+			if (!held && element->JoyDirMapped()) { held = JoyDirectionHeld(whichJoy, element->GetStick(), element->GetAxis(), element->GetDirection()); }
+		}
+		return held;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::ElementPressed(int whichPlayer, int whichElement) {
+		if (IsInMultiplayerMode() && whichPlayer >= 0 && whichPlayer < MAX_PLAYERS) {
+			return m_TrapMousePosPerPlayer[whichPlayer] ? m_NetworkInputElementPressed[whichPlayer][whichElement] : false;
+		}
+		bool pressed = false;
+		int device = m_ControlScheme[whichPlayer].GetDevice();
+		const InputMapping *element = &(m_ControlScheme[whichPlayer].GetInputMappings()[whichElement]);
+
+		if (device == DEVICE_KEYB_ONLY || (device == DEVICE_MOUSE_KEYB && !(whichElement == INPUT_AIM_UP || whichElement == INPUT_AIM_DOWN))) { pressed = pressed ? true : KeyPressed(element->GetKey()); }
+		if (device == DEVICE_MOUSE_KEYB && m_TrapMousePos) { pressed = pressed ? true : MouseButtonPressed(element->GetMouseButton(), whichPlayer); }
+		if (device >= DEVICE_GAMEPAD_1) {
+			int whichJoy = device - DEVICE_GAMEPAD_1;
+			pressed = pressed ? true : JoyButtonPressed(whichJoy, element->GetJoyButton());
+			if (!pressed && element->JoyDirMapped()) { pressed = JoyDirectionPressed(whichJoy, element->GetStick(), element->GetAxis(), element->GetDirection()); }
+		}
+		return pressed;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::ElementReleased(int whichPlayer, int whichElement) {
+		if (IsInMultiplayerMode() && whichPlayer >= 0 && whichPlayer < MAX_PLAYERS) {
+			return m_TrapMousePosPerPlayer[whichPlayer] ? m_NetworkInputElementReleased[whichPlayer][whichElement] : false;
+		}
+		bool released = false;
+		int device = m_ControlScheme[whichPlayer].GetDevice();
+		const InputMapping *element = &(m_ControlScheme[whichPlayer].GetInputMappings()[whichElement]);
+
+		if (device == DEVICE_KEYB_ONLY || (device == DEVICE_MOUSE_KEYB && !(whichElement == INPUT_AIM_UP || whichElement == INPUT_AIM_DOWN))) { released = released ? true : KeyReleased(element->GetKey()); }
+		if (device == DEVICE_MOUSE_KEYB && m_TrapMousePos) { released = released ? true : MouseButtonReleased(element->GetMouseButton(), whichPlayer); }
+		if (device >= DEVICE_GAMEPAD_1) {
+			int whichJoy = device - DEVICE_GAMEPAD_1;
+			released = released ? true : JoyButtonReleased(whichJoy, element->GetJoyButton());
+			if (!released && element->JoyDirMapped()) { released = JoyDirectionReleased(whichJoy, element->GetStick(), element->GetAxis(), element->GetDirection()); }
+		}
+		return released;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Vector UInputMan::GetMenuDirectional() {
+		Vector allInput;
+		for (int player = 0; player < MAX_PLAYERS; ++player) {
+			int device = m_ControlScheme[player].GetDevice();
+
+			switch (device) {
+				case DEVICE_KEYB_ONLY:
+					if (ElementHeld(player, INPUT_L_UP)) {
+						allInput.m_Y += -1.0F;
+					} else if (ElementHeld(player, INPUT_L_DOWN)) {
+						allInput.m_Y += 1.0F;
+					} else if (ElementHeld(player, INPUT_L_LEFT)) {
+						allInput.m_X += -1.0F;
+					} else if (ElementHeld(player, INPUT_L_RIGHT)) {
+						allInput.m_X += 1.0F;
+					}
+					break;
+				case DEVICE_MOUSE_KEYB:
+					// Mouse player shouldn't be doing anything here, he should be using the mouse!
+					break;
+				default:
+					if (device == DEVICE_COUNT) {
+						break;
+					}
+
+					// Analog enabled device (DEVICE_GAMEPAD_1-4)
+					if (AnalogMoveValues(player).GetLargest() > 0.05F) {
+						allInput += AnalogMoveValues(player);
+						m_LastDeviceWhichControlledGUICursor = device;
+					}
+					if (AnalogAimValues(player).GetLargest() > 0.05F) {
+						allInput += AnalogAimValues(player);
+						m_LastDeviceWhichControlledGUICursor = device;
+					}
+					break;
 			}
-			return m_aNetworkMouseButtonReleasedState[0][whichButton];
-		
 		}
-		else 
-		{
-			return m_aNetworkMouseButtonReleasedState[whichPlayer][whichButton];
-		}
+		allInput.CapMagnitude(1.0F);
+
+		return allInput;
 	}
 
-    bool released = !m_aMouseButtonState[whichButton] && m_aMouseChangedButtonState[whichButton];
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    return released;
-}
+	bool UInputMan::MenuButtonHeld(int whichButton) {
+		bool button = false;
+		for (int player = 0; player < MAX_PLAYERS && !button; ++player) {
+			int device = m_ControlScheme[player].GetDevice();
 
+			if (whichButton >= MENU_PRIMARY) { button = ElementHeld(player, INPUT_FIRE) || MouseButtonHeld(MOUSE_LEFT, player) || button; }
+			if (whichButton >= MENU_SECONDARY) { button = ElementHeld(player, INPUT_PIEMENU) || MouseButtonHeld(MOUSE_RIGHT, player) || button; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MouseButtonHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a mouse button is being held down right now.
-
-bool UInputMan::MouseButtonHeld(int whichButton, int whichPlayer)
-{
-    if (whichButton < 0 || whichButton >= MAX_MOUSE_BUTTONS)
-        return false;
-
-	if (m_OverrideInput)
-	{
-		if (whichPlayer < 0 || whichPlayer >= MAX_PLAYERS)
-		{
-			for (int i = 0; i < MAX_PLAYERS; i++)
-			{
-				if (m_aNetworkMouseButtonHeldState[i][whichButton])
-					return m_aNetworkMouseButtonHeldState[i][whichButton];
-			}
-			return m_aNetworkMouseButtonHeldState[0][whichButton];
-
-		}
-		else
-		{
-			return m_aNetworkMouseButtonHeldState[whichPlayer][whichButton];
-		}
-	}
-
-    return m_aMouseButtonState[whichButton];
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoyButtonPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a joy button was depressed between the last update and
-//                  the one previous to it.
-
-bool UInputMan::JoyButtonPressed(int whichJoy, int whichButton)
-{
-    if (whichJoy < 0 || whichJoy >= num_joysticks)
-        return false;
-
-    if (whichButton < 0 || whichButton >= joy[whichJoy].num_buttons)
-        return false;
-
-    bool pressed = joy[whichJoy].button[whichButton].b && s_aaChangedJoyState[whichJoy].button[whichButton].b;
-//    s_aaChangedJoyState[whichJoy].button[whichButton].b = false;
-    return pressed;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoyButtonReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a joy button was released between the last update and
-//                  the one previous to it.
-
-bool UInputMan::JoyButtonReleased(int whichJoy, int whichButton)
-{
-    if (whichJoy < 0 || whichJoy >= num_joysticks)
-        return false;
-
-    if (whichButton < 0 || whichButton >= joy[whichJoy].num_buttons)
-        return false;
-
-    bool released = !joy[whichJoy].button[whichButton].b && s_aaChangedJoyState[whichJoy].button[whichButton].b;
-//    s_aaChangedJoyState[whichJoy].button[whichButton].b = false;
-    return released;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoyButtonHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a joystick button is being held down right now.
-
-bool UInputMan::JoyButtonHeld(int whichJoy, int whichButton)
-{
-    if (whichJoy < 0 || whichJoy >= num_joysticks)
-        return false;
-
-    if (whichButton < 0 || whichButton >= joy[whichJoy].num_buttons)
-        return false;
-
-    return joy[whichJoy].button[whichButton].b;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WhichJoyButtonHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows the first joystick button which is currently down.
-
-int UInputMan::WhichJoyButtonHeld(int whichJoy)
-{
-    if (whichJoy < 0 || whichJoy >= num_joysticks)
-        return JOY_NONE;
-
-    for (int button = 0; button < joy[whichJoy].num_buttons; ++button)
-    {
-        if (joy[whichJoy].button[button].b)
-            return button;
-    }
-
-    // No button is held down
-    return JOY_NONE;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WhichJoyButtonPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows the first joystick button which was pressed down since last frame.
-
-int UInputMan::WhichJoyButtonPressed(int whichJoy)
-{
-    if (whichJoy < 0 || whichJoy >= num_joysticks)
-        return JOY_NONE;
-
-    for (int button = 0; button < joy[whichJoy].num_buttons; ++button)
-    {
-        if (joy[whichJoy].button[button].b)
-        {
-            if (JoyButtonPressed(whichJoy, button))
-                return button;
-        }
-    }
-
-    // No button was pressed down
-    return JOY_NONE;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoyDirectionPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a joystick axis direction was depressed between the
-//                  last update and the one previous to it.
-
-bool UInputMan::JoyDirectionPressed(int whichJoy, int whichStick, int whichAxis, int whichDir)
-{
-    if (whichJoy < 0 || whichJoy >= num_joysticks ||
-        whichStick < 0 || whichStick >= joy[whichJoy].num_sticks ||
-        whichAxis < 0 || whichAxis >= joy[whichJoy].stick[whichStick].num_axis)
-        return false;
-
-    if (whichDir == JOYDIR_TWO)
-        return joy[whichJoy].stick[whichStick].axis[whichAxis].d2 && s_aaChangedJoyState[whichJoy].stick[whichStick].axis[whichAxis].d2;
-    else
-        return joy[whichJoy].stick[whichStick].axis[whichAxis].d1 && s_aaChangedJoyState[whichJoy].stick[whichStick].axis[whichAxis].d1;
-
-    return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoyDirectionReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a joystick axis direction was released between the
-//                  last update and the one previous to it.
-
-bool UInputMan::JoyDirectionReleased(int whichJoy, int whichStick, int whichAxis, int whichDir)
-{
-    if (whichJoy < 0 || whichJoy >= num_joysticks ||
-        whichStick < 0 || whichStick >= joy[whichJoy].num_sticks ||
-        whichAxis < 0 || whichAxis >= joy[whichJoy].stick[whichStick].num_axis)
-        return false;
-
-    if (whichDir == JOYDIR_TWO)
-        return !joy[whichJoy].stick[whichStick].axis[whichAxis].d2 && s_aaChangedJoyState[whichJoy].stick[whichStick].axis[whichAxis].d2;
-    else
-        return !joy[whichJoy].stick[whichStick].axis[whichAxis].d1 && s_aaChangedJoyState[whichJoy].stick[whichStick].axis[whichAxis].d1;
-
-    return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoyDirectionHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a joystick axis is being held down in a specific
-//                  direction right now. Two adjacent direcitons can be held down to produce
-//                  diagonals.
-
-bool UInputMan::JoyDirectionHeld(int whichJoy, int whichStick, int whichAxis, int whichDir)
-{
-    if (whichJoy < 0 || whichJoy >= num_joysticks ||
-        whichStick < 0 || whichStick >= joy[whichJoy].num_sticks ||
-        whichAxis < 0 || whichAxis >= joy[whichJoy].stick[whichStick].num_axis)
-        return false;
-
-    if (whichDir == JOYDIR_TWO)
-        return joy[whichJoy].stick[whichStick].axis[whichAxis].d2;
-    else
-        return joy[whichJoy].stick[whichStick].axis[whichAxis].d1;
-
-    return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnalogMoveValues
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the analog moving values of a specific player's control scheme.
-
-Vector UInputMan::AnalogMoveValues(int whichPlayer)
-{
-    Vector moveValues;
-
-    // Which Device is used by this player
-    int device = m_aControlScheme[whichPlayer].GetDevice();
-
-    // Get handy pointer to the relevant input elements
-    InputMapping * pElement = m_aControlScheme[whichPlayer].GetInputMappings();
-/*
-    // Mouse is involved
-    if (device == DEVICE_MOUSE_KEYB)
-    {
-        // Check mouse
-        
-    }
-*/
-    // Joystick input is applicable
-    if (device >= DEVICE_GAMEPAD_1)
-    {
-        // Translate the device selection to the joystick numbering (0-3)
-        int whichJoy = device - DEVICE_GAMEPAD_1;
-
-        // Assume axes are stretched out over up-down, and left-right
-		if (pElement[INPUT_L_LEFT].JoyDirMapped())
-			moveValues.m_X = AnalogAxisValue(whichJoy, pElement[INPUT_L_LEFT].GetStick(), pElement[INPUT_L_LEFT].GetAxis());
-		if (pElement[INPUT_L_UP].JoyDirMapped())
-			moveValues.m_Y = AnalogAxisValue(whichJoy, pElement[INPUT_L_UP].GetStick(), pElement[INPUT_L_UP].GetAxis());
-    }
-
-    return moveValues;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnalogAimValues
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the analog aiming values of a specific player's control scheme.
-
-Vector UInputMan::AnalogAimValues(int whichPlayer)
-{
-    Vector aimValues;
-
-    // Which Device is used by this player
-    int device = m_aControlScheme[whichPlayer].GetDevice();
-	if (m_OverrideInput)
-		device = DEVICE_MOUSE_KEYB;
-
-    // Get handy pointer to the relevant input elements
-    InputMapping * pElement = m_aControlScheme[whichPlayer].GetInputMappings();
-
-    // Mouse is involved
-    if (device == DEVICE_MOUSE_KEYB)
-    {
-        // Return the normalized mouse analog stick emulation value
-		if (m_OverrideInput && whichPlayer >= 0 && whichPlayer < MAX_PLAYERS)
-			aimValues = m_aNetworkAnalogMoveData[whichPlayer] / m_MouseTrapRadius;
-		else
-			aimValues = m_AnalogMouseData / m_MouseTrapRadius;
-    }
-
-    // Joystick input is applicable
-    if (device >= DEVICE_GAMEPAD_1)
-    {
-        // Translate the device selection to the joystick numbering (0-3)
-        int whichJoy = device - DEVICE_GAMEPAD_1;
-
-        // Assume axes are stretched out over up-down, and left-right
-		if (pElement[INPUT_R_LEFT].JoyDirMapped())
-			aimValues.m_X = AnalogAxisValue(whichJoy, pElement[INPUT_R_LEFT].GetStick(), pElement[INPUT_R_LEFT].GetAxis());
-		if (pElement[INPUT_R_UP].JoyDirMapped())
-			aimValues.m_Y = AnalogAxisValue(whichJoy, pElement[INPUT_R_UP].GetStick(), pElement[INPUT_R_UP].GetAxis());
-    }
-
-    return aimValues;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnalogAxisValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the normalized value of a certain joystick's stick's axis.
-
-float UInputMan::AnalogAxisValue(int whichJoy, int whichStick, int whichAxis)
-{
-    if (whichJoy < num_joysticks && whichStick < joy[whichJoy].num_sticks && whichAxis < joy[whichJoy].stick[whichStick].num_axis)
-    {
-        // Treat unsigned (throttle axes) as rudders, with a range of 0-255 and midpoint of 128
-        if (joy[whichJoy].stick[whichStick].flags & JOYFLAG_UNSIGNED)
-            return (float)(joy[whichJoy].stick[whichStick].axis[whichAxis].pos - 128) / (float)128;
-        // Regular signed axis with range of -128 to 128
-        else
-            return (float)joy[whichJoy].stick[whichStick].axis[whichAxis].pos / (float)128;
-    }
-    return  0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnalogStickValues
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the analog values of a certain joystick device stick.
-
-Vector UInputMan::AnalogStickValues(int whichJoy, int whichStick)
-{
-/*
-// HACK! make work with 360 controller
-    if (whichStick == 1)
-    {
-        return Vector((float)(joy[whichJoy].stick[1].axis[0].pos - 128) / (float)128,
-                      (float)(joy[whichJoy].stick[2].axis[0].pos - 128) / (float)128);
-    }
-*/
-    return Vector(AnalogAxisValue(whichJoy, whichStick, 0), AnalogAxisValue(whichJoy, whichStick, 1));
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMouseMovement
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the relative movement of the mouse since last update. Only returns
-//                  true if the selected player actuall is using the mouse.
-
-Vector UInputMan::GetMouseMovement(int whichPlayer)
-{
-    Vector mouseMovement;
-	if (m_OverrideInput)
-	{
-		if (whichPlayer >= 0 && whichPlayer < MAX_PLAYERS)
-		{
-			mouseMovement = m_NetworkAccumulatedRawMouseMovement[whichPlayer];
-			return mouseMovement;
-		}
-	}
-
-    if (whichPlayer == -1 || m_aControlScheme[whichPlayer].GetDevice() == DEVICE_MOUSE_KEYB)
-        mouseMovement = m_RawMouseMovement;
-
-    return mouseMovement;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DisableMouseMoving
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Will temporarily disable positioniong of the mouse. This is so that
-//                  when focus is swtiched back to the game window, it avoids having the
-//                  window fly away because the user clicked the title bar of the window.
-// Arguments:       Whether to disable or not.
-// Return value:    None.
-
-void UInputMan::DisableMouseMoving(bool disable)
-{
-    if (disable)
-    {
-        m_DisableMouseMoving = true;
-        m_PrepareToEnableMouseMoving = false;
-        // Set these to outside the screen so the mouse has to be updated first before checking if they're in the screen or not
-        mouse_x = mouse_y = -1;
-    }
-    else
-        m_PrepareToEnableMouseMoving = true;
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetMousePos
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the absolute screen position of the mouse cursor.
-// Arguments:       Where to place the mouse.
-
-void UInputMan::SetMousePos(Vector &newPos, int whichPlayer)
-{
-    // Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
-    if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == -1 || m_aControlScheme[whichPlayer].GetDevice() == DEVICE_MOUSE_KEYB))
-        position_mouse(newPos.m_X, newPos.m_Y);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ForceMouseWithinPlayerScreen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Forces the mouse within a specific player's screen area.
-
-void UInputMan::ForceMouseWithinPlayerScreen(int whichPlayer)
-{
-    if (whichPlayer < PLAYER_ONE || whichPlayer >= PLAYER_FOUR)
-        return;
-
-    int screenWidth = g_FrameMan.GetPlayerFrameBufferWidth(whichPlayer);
-    int screenHeight = g_FrameMan.GetPlayerFrameBufferHeight(whichPlayer);
-
-    // If we are dealing with split screens, then draw the intermediate draw splitscreen to the appropriate spot on the back buffer
-    if (g_FrameMan.GetScreenCount() > 1)
-    {
-        // Always upper left corner
-        if (whichPlayer == 0)
-            ForceMouseWithinBox(0, 0, screenWidth, screenHeight, whichPlayer);
-        else if (whichPlayer == 1)
-        {
-            // If both splits, or just Vsplit, then in upper right quadrant
-            if ((g_FrameMan.GetVSplit() && !g_FrameMan.GetHSplit()) || (g_FrameMan.GetVSplit() && g_FrameMan.GetHSplit()))
-                ForceMouseWithinBox(g_FrameMan.GetResX() / 2, 0, screenWidth, screenHeight, whichPlayer);
-            // If only hsplit, then lower left quadrant
-            else
-                ForceMouseWithinBox(0, g_FrameMan.GetResY() / 2, screenWidth, screenHeight, whichPlayer);
-        }
-        // Always lower left quadrant
-        else if (whichPlayer == 2)
-            ForceMouseWithinBox(0, g_FrameMan.GetResY() / 2, screenWidth, screenHeight, whichPlayer);
-        // Always lower right quadrant
-        else if (whichPlayer == 3)
-            ForceMouseWithinBox(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2, screenWidth, screenHeight, whichPlayer);
-    }
-    // No splitscreen, jsut constrain hte mouse to the full screen
-    else
-        ForceMouseWithinBox(0, 0, screenWidth, screenHeight, whichPlayer);
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ForceMouseWithinBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Forces the mouse within a box on the screen.
-
-void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer)
-{
-    // Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
-    if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == -1 || m_aControlScheme[whichPlayer].GetDevice() == DEVICE_MOUSE_KEYB))
-    {
-        int mouseX = std::max(x, static_cast<int>(mouse_x));
-        int mouseY = std::max(y, static_cast<int>(mouse_y));
-        mouseX = std::min(mouseX, x + width * g_FrameMan.ResolutionMultiplier());
-        mouseY = std::min(mouseY, y + height * g_FrameMan.ResolutionMultiplier());
-		
-        position_mouse(mouseX, mouseY);
-    }
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyJoyInput
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any joystick input at all, buttons or d-pad.
-
-bool UInputMan::AnyJoyInput()
-{
-    bool input = false;
-
-    poll_joystick();
-
-    int joystick, button, stick, axis;
-    for (joystick = 0; joystick < MAX_PLAYERS && !input; ++joystick)
-    {
-        // Check all buttons
-        for (button = 0; button < MAX_JOY_BUTTONS && !input; ++button)
-        {
-            input = joy[joystick].button[button].b ? true : input;
-        }
-
-        if (!input)
-        {
-            // Stick, axis, directions
-            for (stick = 0; stick < joy[joystick].num_sticks; ++stick)
-            {
-                for (axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis)
-                {
-                    input = JoyDirectionHeld(joystick, stick, axis, JOYDIR_ONE) || JoyDirectionHeld(joystick, stick, axis, JOYDIR_TWO);
-                }
-            }
-        }
-    }
-
-    return input;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyJoyPress
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any joystick presses at all, buttons or d-pad.
-
-bool UInputMan::AnyJoyPress()
-{
-    bool input = false;
-
-    int joystick, button, stick, axis;
-    for (joystick = 0; joystick < MAX_PLAYERS && !input; ++joystick)
-    {
-        // Check for button presses
-        for (button = 0; button < MAX_JOY_BUTTONS && !input; ++button)
-        {
-            input = JoyButtonPressed(joystick, button) ? true : input;
-        }
-
-        if (!input)
-        {
-            // Stick, axis, directions
-            for (stick = 0; stick < joy[joystick].num_sticks; ++stick)
-            {
-                for (axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis)
-                {
-                    input = JoyDirectionPressed(joystick, stick, axis, JOYDIR_ONE) || JoyDirectionPressed(joystick, stick, axis, JOYDIR_TWO);
-                }
-            }
-        }
-    }
-
-    return input;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyMouseButtonPress
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any mouse button presses at all
-
-bool UInputMan::AnyMouseButtonPress()
-{
-    bool input = false;
-
-    for (int button = 0; button < MAX_MOUSE_BUTTONS && !input; ++button)
-    {
-        input = MouseButtonPressed(button, -1) ? true : input;
-    }
-
-    return input;
-}
-
-
-void UInputMan::TrapMousePos(bool trap, int whichPlayer)
-{ 
-	if (whichPlayer == -1 || m_aControlScheme[whichPlayer].GetDevice() == DEVICE_MOUSE_KEYB) 
-	{ 
-		m_TrapMousePos = trap; 
-	} 
-	m_TrapMousePosPerPlayer[whichPlayer] = trap;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MouseUsedByPlayer
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reports if any, and which player is using the mouse for control at
-//                  this time.
-
-int UInputMan::MouseUsedByPlayer() const
-{
-    if (m_aControlScheme[PLAYER_ONE].GetDevice() == DEVICE_MOUSE_KEYB)
-        return PLAYER_ONE;
-    else if (m_aControlScheme[PLAYER_TWO].GetDevice() == DEVICE_MOUSE_KEYB)
-        return PLAYER_TWO;
-    else if (m_aControlScheme[PLAYER_THREE].GetDevice() == DEVICE_MOUSE_KEYB)
-        return PLAYER_THREE;
-    else if (m_aControlScheme[PLAYER_FOUR].GetDevice() == DEVICE_MOUSE_KEYB)
-        return PLAYER_FOUR;
-
-    return PLAYER_NONE;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyJoyButtonPress
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any joystick button presses at all, but not
-//                  d-pad input.
-
-bool UInputMan::AnyJoyButtonPress(int whichJoy)
-{
-    bool input = false;
-
-    for (int button = 0; button < MAX_JOY_BUTTONS && !input; ++button)
-    {
-        input = JoyButtonPressed(whichJoy, button) ? true : input;
-    }
-
-    return input;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMenuDirectional
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the generic direction input from any and all players which can
-//                  affect a shared menu cursor. Normalized to 1.0 max
-
-Vector UInputMan::GetMenuDirectional()
-{
-    Vector allInput;
-
-	//m_LastDeviceWhichControlledGUICursor = 0;
-
-    // Go through all players
-    for (int player = 0; player < MAX_PLAYERS; ++player)
-    {
-        // Which Device is used by this player
-        int device = m_aControlScheme[player].GetDevice();
-
-        // Keyboard input
-        if (device == DEVICE_KEYB_ONLY)
-        {
-            if (ElementHeld(player, INPUT_L_UP))
-                allInput.m_Y += -1.0;
-            else if (ElementHeld(player, INPUT_L_DOWN))
-                allInput.m_Y += 1.0;
-            if (ElementHeld(player, INPUT_L_LEFT))
-                allInput.m_X += -1.0;
-            else if (ElementHeld(player, INPUT_L_RIGHT))
-                allInput.m_X += 1.0;
-        }
-        // Mouse player shouldn't be doing anything here, he should be using the mouse!
-        else if (device == DEVICE_MOUSE_KEYB)
-        {
-            
-        }
-        // Analog enabled device (joystick, really)
-        else if (device >= DEVICE_GAMEPAD_1)
-        {
-			if (AnalogMoveValues(player).GetLargest() > 0.05)
-			{
-				allInput += AnalogMoveValues(player);
+			if (button) {
 				m_LastDeviceWhichControlledGUICursor = device;
-			}
-			if (AnalogAimValues(player).GetLargest() > 0.05)
-			{
-				allInput += AnalogAimValues(player);
-				m_LastDeviceWhichControlledGUICursor = device;
-			}
-        }
-    }
-
-    // Normalize/cap
-    allInput.CapMagnitude(1.0);
-
-    return allInput;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MenuButtonPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether any generic button with the menu cursor was pressed
-//                  between previous update and this.
-
-bool UInputMan::MenuButtonPressed(int whichButton)
-{
-    bool button = false;
-
-    // Go through all players
-    for (int player = 0; player < MAX_PLAYERS && !button; ++player)
-    {
-        // Which Device is used by this player
-        int device = m_aControlScheme[player].GetDevice();
-
-        // Check for primary/secondary button presses
-		if (whichButton >= MENU_PRIMARY)
-			button = ElementPressed(player, INPUT_FIRE) || MouseButtonPressed(MOUSE_LEFT, player) || button;
-		if (whichButton >= MENU_SECONDARY)
-			button = ElementPressed(player, INPUT_PIEMENU) || MouseButtonPressed(MOUSE_RIGHT, player) || button;
-
-		if (button/* && m_aControlScheme[player].GetDevice() >= DEVICE_GAMEPAD_1*/)
-			m_LastDeviceWhichControlledGUICursor = device;
-    }
-
-    return button;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MenuButtonReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether any generic button with the menu cursor is held down.
-
-bool UInputMan::MenuButtonReleased(int whichButton)
-{
-    bool button = false;
-
-    // Go through all players
-    for (int player = 0; player < MAX_PLAYERS && !button; ++player)
-    {
-        // Which Device is used by this player
-        int device = m_aControlScheme[player].GetDevice();
-
-        // Check for primary/secondary button presses
-		if (whichButton >= MENU_PRIMARY)
-			button = ElementReleased(player, INPUT_FIRE) || MouseButtonReleased(MOUSE_LEFT, player) || button;
-        if (whichButton >= MENU_SECONDARY)
-            button = ElementReleased(player, INPUT_PIEMENU) || MouseButtonReleased(MOUSE_RIGHT, player) || button;
-    }
-
-    return button;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MenuButtonHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether any generic button with the menu cursor is held down.
-
-bool UInputMan::MenuButtonHeld(int whichButton)
-{
-    bool button = false;
-
-    // Go through all players
-    for (int player = 0; player < MAX_PLAYERS && !button; ++player)
-    {
-        // Which Device is used by this player
-        int device = m_aControlScheme[player].GetDevice();
-
-        // Check for primary/secondary button presses
-		if (whichButton >= MENU_PRIMARY)
-			button = ElementHeld(player, INPUT_FIRE) || MouseButtonHeld(MOUSE_LEFT, player) || button;
-		if (whichButton >= MENU_SECONDARY)
-			button = ElementHeld(player, INPUT_PIEMENU) || MouseButtonHeld(MOUSE_RIGHT, player) || button;
-
-		if (button/* && m_aControlScheme[player].GetDevice() >= DEVICE_GAMEPAD_1*/)
-		{
-			m_LastDeviceWhichControlledGUICursor = device;
-			break;
-		}
-    }
-
-    return button;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyInput
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any input at all, keyboard or buttons or d-pad.
-
-bool UInputMan::AnyInput()
-{
-    // Check keyboard
-    bool input = keypressed();
-
-    // Check all joysticks
-    if (!input)
-        input = AnyJoyInput();
-
-    return input;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyPress
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any key, button, or d-pad presses at all.
-
-bool UInputMan::AnyPress()
-{
-    bool pressed = false;
-
-    // Check keyboard for presses
-    for (int testKey = 0; testKey < KEY_MAX; ++testKey)
-        pressed = s_aLastKeys[testKey] && s_aChangedKeys[testKey] ? true : pressed;
-
-    // Check mouse buttons for presses
-    if (!pressed)
-        pressed = AnyMouseButtonPress();
-
-    // Check all joysticks
-    if (!pressed)
-        pressed = AnyJoyPress();
-
-    return pressed;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyStartPress
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any start key/button presses at all.
-//                  MUST call Update before calling this for it to work properly!
-
-bool UInputMan::AnyStartPress()
-{
-    bool pressed = false;
-
-    // Check keyboard for presses
-    if (KeyPressed(KEY_ESC) || KeyPressed(KEY_SPACE))
-        pressed = true;
-
-    // Check all user bound start buttons
-    for (int player = 0; player < MAX_PLAYERS && !pressed; ++player)
-    {
-        pressed = pressed || ElementPressed(player, INPUT_START);
-        pressed = pressed || ElementPressed(player, INPUT_BACK);
-    }
-
-    return pressed;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WaitForSpace
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Halts thread and waits for space to be pressed. This is for debug
-//                  purposes mostly.
-
-void UInputMan::WaitForSpace()
-{
-/*
-    if (m_DebugArmed) {
-        while (KeyPressed(KEY_SPACE) != CDXKEY_PRESS)
-            m_pInput->Update();
-
-        m_pInput->Update();
-    }
-*/
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the state of this UInputMan. Supposed to be done every frame.
-
-int UInputMan::Update()
-{
-	m_LastDeviceWhichControlledGUICursor = 0;
-
-    // Only update inputs on drawn frames
-//    if (!g_TimerMan.DrawnSimUpdate())
-//        return 0;
-
-//    clear_keybuf();
-
-    if (keyboard_needs_poll())
-        poll_keyboard();
-
-    if (mouse_needs_poll())
-        poll_mouse();
-
-    poll_joystick();
-
-    // Detect and store key changes since last Update()
-    for (int i = 0; i < KEY_MAX; ++i)
-        s_aChangedKeys[i] = key[i] != s_aLastKeys[i];
-
-    // Store mouse movement
-    int mickeyX, mickeyY;
-    get_mouse_mickeys(&mickeyX, &mickeyY);
-    m_RawMouseMovement.SetXY(mickeyX, mickeyY);
-/* Figured out that it was a acceleration setting in AllegroConfig.txt that caused this problem
-    // Adjust for the wackiness that happens to the mickeys when 2x fullscreen screened
-    if (g_FrameMan.IsFullscreen() && g_FrameMan.NxFullscreen() > 1)
-    {
-        m_RawMouseMovement *= 0.2 / g_FrameMan.NxFullscreen();
-        m_RawMouseMovement.Ceiling();
-    }
-*/
-// TODO: Have proper mouse sensitivity controls somewhere
-    m_RawMouseMovement *= m_MouseSensitivity;
-
-	// NETWORK SERVER: Apply mouse input received from client
-	if (m_OverrideInput)
-	{ 
-		for (int p = 0; p < MAX_PLAYERS; p++)
-		{
-			if (m_NetworkAccumulatedRawMouseMovement[p].GetX() != 0 || m_NetworkAccumulatedRawMouseMovement[p].GetY() != 0)
-			{
-				Vector mouseMovement = m_NetworkAccumulatedRawMouseMovement[p];
-
-				m_aNetworkAnalogMoveData[p].m_X += mouseMovement.m_X * 3;
-				m_aNetworkAnalogMoveData[p].m_Y += mouseMovement.m_Y * 3;
-				m_aNetworkAnalogMoveData[p].CapMagnitude(m_MouseTrapRadius);
-
-				//m_NetworkAccumulatedRawMouseMovement[p].Reset();
-			}
-
-			// By the time we reach here all events should've been processed by recipients during the last update
-			// Wee need to clear press and release event or otherwise it will look like player clicks buttons every frame till
-			// the nex frame arrives after 33 ms with those states are off.
-
-			// Clear pressed and released events as they should've been already processed during ActivityUpdate
-			// It is vital that press and release events are processed just once or multiple events will be 
-			// triggered on a single press
-			for (int el = 0; el < INPUT_COUNT; el++)
-			{
-				m_aNetworkInputElementPressed[p][el] = false;
-				m_aNetworkInputElementReleased[p][el] = false;
-			}
-
-			// Reset mouse movement
-			m_NetworkAccumulatedRawMouseMovement[p].m_X = 0;
-			m_NetworkAccumulatedRawMouseMovement[p].m_Y = 0;
-
-			// Reset mouse button states to stop double clicking
-			m_aNetworkMouseButtonPressedState[p][0] = false;
-			m_aNetworkMouseButtonPressedState[p][1] = false;
-			m_aNetworkMouseButtonPressedState[p][2] = false;
-
-			m_aNetworkMouseButtonReleasedState[p][0] = false;
-			m_aNetworkMouseButtonReleasedState[p][1] = false;
-			m_aNetworkMouseButtonReleasedState[p][2] = false;
-
-			// Reset mouse wheel state to stop overwheeling
-			m_aNetworkMouseWheelState[p] = 0;
-		}
-	} 
-	else
-	{
-		// This one is for client collecting mouse input
-		m_NetworkAccumulatedRawMouseMovement[0] += m_RawMouseMovement;
-	}
-
-    // Detect and store mouse button input
-    m_aMouseButtonState[MOUSE_LEFT] = mouse_b & 1;
-    m_aMouseButtonState[MOUSE_RIGHT] = mouse_b & 2;
-    m_aMouseButtonState[MOUSE_MIDDLE] = mouse_b & 4;
-
-    // Detect changes in mouse button input
-    m_aMouseChangedButtonState[MOUSE_LEFT] = m_aMouseButtonState[MOUSE_LEFT] != m_aMousePrevButtonState[MOUSE_LEFT];
-    m_aMouseChangedButtonState[MOUSE_RIGHT] = m_aMouseButtonState[MOUSE_RIGHT] != m_aMousePrevButtonState[MOUSE_RIGHT];
-    m_aMouseChangedButtonState[MOUSE_MIDDLE] = m_aMouseButtonState[MOUSE_MIDDLE] != m_aMousePrevButtonState[MOUSE_MIDDLE];
-
-    // Detect and store mouse movement input, translated to analog stick emulation
-    int mousePlayer;
-    if ((mousePlayer = MouseUsedByPlayer()) != PLAYER_NONE)
-    {
-// TODO: temporary? Make framerate independent!
-        // Mouse analog emulation input returns to 0;
-//        m_AnalogMouseData *= 0.9;
-
-// TODO: Make proper sensitivty setting and GUI controls
-		m_AnalogMouseData.m_X += m_RawMouseMovement.m_X * 3;
-		m_AnalogMouseData.m_Y += m_RawMouseMovement.m_Y * 3;
-        // Cap the mouse input in a circle
-        m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius);
-
-        // Only mess with the mouse pos if the original mouse position is not above the screen and may be grabbing the title bar of the game window
-        if (!m_DisableMouseMoving)
-        {
-			if (!m_OverrideInput && !m_IsInMultiplayerMode)
-			{
-				// Trap the (invisible) mouse cursor in the middle of the screen, so it doens't fly out in windowed mode and some other window gets clicked
-				if (m_TrapMousePos)
-					position_mouse(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
-				// The mouse cursor is visible and can move about the screen/window, but it shuold still be contained within the mouse player's part of the window
-				else if (g_InActivity)
-					ForceMouseWithinPlayerScreen(mousePlayer);
-			}
-        }
-
-        // Mouse wheel update, translate motion into discrete ticks
-        if (abs(mouse_z) >= 1)
-        {
-            // Save the direction
-            m_MouseWheelChange = mouse_z;
-            // Reset the position
-            position_mouse_z(0);
-        }
-        // Or just leave as no change
-        else
-            m_MouseWheelChange = 0;
-
-        // Enable the mouse cursor positioning again after having been disabled. Only do this when the mouse is within the drawing area so it
-        // won't cause the whole window to move if the user clicks the title bar and unintentionally drags it due to programmatic positioning.
-        int mX = mouse_x / g_FrameMan.ResolutionMultiplier();
-        int mY = mouse_y / g_FrameMan.ResolutionMultiplier();
-        if (m_DisableMouseMoving && m_PrepareToEnableMouseMoving && (mX >= 0 && mX < g_FrameMan.GetResX() && mY >= 0 && mY < g_FrameMan.GetResY()))
-            m_DisableMouseMoving = m_PrepareToEnableMouseMoving = false;
-    }
-
-    // Detect and store joystick button changed since last Update()
-    int joystick, button, stick, axis;
-    for (joystick = 0; joystick < num_joysticks; ++joystick)
-    {
-        // Buttons
-        for (button = 0; button < joy[joystick].num_buttons; ++button)
-            s_aaChangedJoyState[joystick].button[button].b = joy[joystick].button[button].b != s_aaPrevJoyState[joystick].button[button].b;
-
-		// Determine deadzone settings
-		float deadzone = 0.0;
-		int deadzonetype = DeadZoneType::CIRCLE;
-		int player = -1;
-
-		// Retreive deadzone settings from player's input scheme
-		for (int p = 0; p < UInputMan::MAX_PLAYERS; p++)
-		{
-			int device = m_aControlScheme[p].GetDevice() - DEVICE_GAMEPAD_1;
-
-			if (device == joystick)
-			{
-				deadzone = m_aControlScheme[p].GetJoystickDeadzone();
-				deadzonetype = m_aControlScheme[p].GetJoystickDeadzoneType();
-				player = p;
 				break;
 			}
 		}
+		return button;
+	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		// Disable input if it's in circle deadzone
-		if (player > -1 && deadzonetype == DeadZoneType::CIRCLE && deadzone > 0.0)
-		{
-			InputMapping * pElement = m_aControlScheme[player].GetInputMappings();
+	bool UInputMan::MenuButtonPressed(int whichButton) {
+		bool button = false;
+		for (int player = 0; player < MAX_PLAYERS && !button; ++player) {
+			int device = m_ControlScheme[player].GetDevice();
 
-			Vector aimValues;
+			if (whichButton >= MENU_PRIMARY) { button = ElementPressed(player, INPUT_FIRE) || MouseButtonPressed(MOUSE_LEFT, player) || button; }
+			if (whichButton >= MENU_SECONDARY) { button = ElementPressed(player, INPUT_PIEMENU) || MouseButtonPressed(MOUSE_RIGHT, player) || button; }
 
-			// Assume axes are stretched out over up-down, and left-right
-			/*if (pElement[INPUT_R_LEFT].JoyDirMapped())
-				if (joy[joystick].stick[pElement[INPUT_R_LEFT].GetStick()].flags & JOYFLAG_UNSIGNED)
-					aimValues.m_X = joy[joystick].stick[pElement[INPUT_R_LEFT].GetStick()].axis[pElement[INPUT_R_LEFT].GetAxis()].pos - 128;
-				else
-					aimValues.m_X = joy[joystick].stick[pElement[INPUT_R_LEFT].GetStick()].axis[pElement[INPUT_R_LEFT].GetAxis()].pos;
+			if (button) { m_LastDeviceWhichControlledGUICursor = device; }
+		}
+		return button;
+	}
 
-			if (pElement[INPUT_R_UP].JoyDirMapped())
-				if (joy[joystick].stick[pElement[INPUT_R_UP].GetStick()].flags & JOYFLAG_UNSIGNED)
-					aimValues.m_Y = joy[joystick].stick[pElement[INPUT_R_UP].GetStick()].axis[pElement[INPUT_R_UP].GetAxis()].pos - 128;
-				else
-					aimValues.m_Y = joy[joystick].stick[pElement[INPUT_R_UP].GetStick()].axis[pElement[INPUT_R_UP].GetAxis()].pos;*/
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool UInputMan::MenuButtonReleased(int whichButton) {
+		bool button = false;
+		for (int player = 0; player < MAX_PLAYERS && !button; ++player) {
+			if (whichButton >= MENU_PRIMARY) { button = ElementReleased(player, INPUT_FIRE) || MouseButtonReleased(MOUSE_LEFT, player) || button; }
+			if (whichButton >= MENU_SECONDARY) { button = ElementReleased(player, INPUT_PIEMENU) || MouseButtonReleased(MOUSE_RIGHT, player) || button; }
+		}
+		return button;
+	}
 
-			// Left stick
-			if (pElement[INPUT_L_LEFT].JoyDirMapped())
-				aimValues.m_X = AnalogAxisValue(joystick, pElement[INPUT_L_LEFT].GetStick(), pElement[INPUT_L_LEFT].GetAxis());
-			if (pElement[INPUT_L_UP].JoyDirMapped())
-				aimValues.m_Y = AnalogAxisValue(joystick, pElement[INPUT_L_UP].GetStick(), pElement[INPUT_L_UP].GetAxis());
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			if (aimValues.GetMagnitude() < deadzone * 2)
-			{
-				if (pElement[INPUT_L_LEFT].JoyDirMapped())
-				{
-					if (joy[joystick].stick[pElement[INPUT_L_LEFT].GetStick()].flags & JOYFLAG_UNSIGNED)
-					{
-						joy[joystick].stick[pElement[INPUT_L_LEFT].GetStick()].axis[pElement[INPUT_L_LEFT].GetAxis()].pos = 128;
-						joy[joystick].stick[pElement[INPUT_L_LEFT].GetStick()].axis[pElement[INPUT_L_LEFT].GetAxis()].d1 = 0;
-						joy[joystick].stick[pElement[INPUT_L_LEFT].GetStick()].axis[pElement[INPUT_L_LEFT].GetAxis()].d2 = 0;
-					}
-					else {
-						joy[joystick].stick[pElement[INPUT_L_LEFT].GetStick()].axis[pElement[INPUT_L_LEFT].GetAxis()].pos = 0;
-						joy[joystick].stick[pElement[INPUT_L_LEFT].GetStick()].axis[pElement[INPUT_L_LEFT].GetAxis()].d1 = 0;
-						joy[joystick].stick[pElement[INPUT_L_LEFT].GetStick()].axis[pElement[INPUT_L_LEFT].GetAxis()].d2 = 0;
+	bool UInputMan::KeyPressed(const char keyToTest) {
+		if (m_DisableKeyboard && (keyToTest >= KEY_A && keyToTest < KEY_ESC)) {
+			return false;
+		}
+		bool pressed = false;
+		pressed = (s_InputClass) ? (s_InputClass->GetScanCodeState(keyToTest) == GUIInput::Pushed) : (s_PrevKeyStates[keyToTest] && s_ChangedKeyStates[keyToTest]);
+		return pressed;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::KeyReleased(const char keyToTest) {
+		if (m_DisableKeyboard && (keyToTest >= KEY_A && keyToTest < KEY_ESC)) {
+			return false;
+		}
+		bool released = !s_PrevKeyStates[keyToTest] && s_ChangedKeyStates[keyToTest];
+		return released;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::AnyInput() {
+		// Check keyboard
+		bool input = keypressed();
+		// Check all joysticks
+		if (!input) { input = AnyJoyInput(); }
+		return input;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::AnyPress() {
+		bool pressed = false;
+		// Check keyboard for presses
+		for (int testKey = 0; testKey < KEY_MAX; ++testKey) {
+			pressed = s_PrevKeyStates[testKey] && s_ChangedKeyStates[testKey] ? true : pressed;
+		}
+		// Check mouse buttons for presses
+		if (!pressed) { pressed = AnyMouseButtonPress(); }
+		// Check all joysticks
+		if (!pressed) { pressed = AnyJoyPress(); }
+		return pressed;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::AnyStartPress() {
+		bool pressed = false;
+		if (KeyPressed(KEY_ESC) || KeyPressed(KEY_SPACE)) { pressed = true; }
+
+		// Check all user bound start buttons
+		for (int player = 0; player < MAX_PLAYERS && !pressed; ++player) {
+			pressed = pressed || ElementPressed(player, INPUT_START);
+			pressed = pressed || ElementPressed(player, INPUT_BACK);
+		}
+		return pressed;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int UInputMan::MouseUsedByPlayer() const {
+		if (m_ControlScheme[PLAYER_ONE].GetDevice() == DEVICE_MOUSE_KEYB) {
+			return PLAYER_ONE;
+		} else if (m_ControlScheme[PLAYER_TWO].GetDevice() == DEVICE_MOUSE_KEYB) {
+			return PLAYER_TWO;
+		} else if (m_ControlScheme[PLAYER_THREE].GetDevice() == DEVICE_MOUSE_KEYB) {
+			return PLAYER_THREE;
+		} else if (m_ControlScheme[PLAYER_FOUR].GetDevice() == DEVICE_MOUSE_KEYB) {
+			return PLAYER_FOUR;
+		}
+		return PLAYER_NONE;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::DisableMouseMoving(bool disable) {
+		if (disable) {
+			m_DisableMouseMoving = true;
+			m_PrepareToEnableMouseMoving = false;
+			// Set these to outside the screen so the mouse has to be updated first before checking if they're in the screen or not
+			mouse_x = mouse_y = -1;
+		} else {
+			m_PrepareToEnableMouseMoving = true;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Vector UInputMan::GetMouseMovement(int whichPlayer) {
+		Vector mouseMovement;
+		if (IsInMultiplayerMode() && whichPlayer >= 0 && whichPlayer < MAX_PLAYERS) {
+			mouseMovement = m_NetworkAccumulatedRawMouseMovement[whichPlayer];
+			return mouseMovement;
+		}
+		if (whichPlayer == -1 || m_ControlScheme[whichPlayer].GetDevice() == DEVICE_MOUSE_KEYB) { mouseMovement = m_RawMouseMovement; }
+
+		return mouseMovement;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::SetMousePos(Vector &newPos, int whichPlayer) {
+		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
+		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == -1 || m_ControlScheme[whichPlayer].GetDevice() == DEVICE_MOUSE_KEYB)) { position_mouse(newPos.m_X, newPos.m_Y); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::MouseButtonHeld(int whichButton, int whichPlayer) {
+		if (whichButton < 0 || whichButton >= MAX_MOUSE_BUTTONS) {
+			return false;
+		}
+		if (IsInMultiplayerMode()) {
+			if (whichPlayer < 0 || whichPlayer >= MAX_PLAYERS) {
+				for (int player = 0; player < MAX_PLAYERS; player++) {
+					if (m_NetworkMouseButtonHeldState[player][whichButton]) {
+						return m_NetworkMouseButtonHeldState[player][whichButton];
 					}
 				}
-
-				if (pElement[INPUT_L_UP].JoyDirMapped())
-				{
-					if (joy[joystick].stick[pElement[INPUT_L_UP].GetStick()].flags & JOYFLAG_UNSIGNED)
-					{
-						joy[joystick].stick[pElement[INPUT_L_UP].GetStick()].axis[pElement[INPUT_L_UP].GetAxis()].pos = 128;
-						joy[joystick].stick[pElement[INPUT_L_UP].GetStick()].axis[pElement[INPUT_L_UP].GetAxis()].d1 = 0;
-						joy[joystick].stick[pElement[INPUT_L_UP].GetStick()].axis[pElement[INPUT_L_UP].GetAxis()].d2 = 0;
-					}
-					else {
-						joy[joystick].stick[pElement[INPUT_L_UP].GetStick()].axis[pElement[INPUT_L_UP].GetAxis()].pos = 0;
-						joy[joystick].stick[pElement[INPUT_L_UP].GetStick()].axis[pElement[INPUT_L_UP].GetAxis()].d1 = 0;
-						joy[joystick].stick[pElement[INPUT_L_UP].GetStick()].axis[pElement[INPUT_L_UP].GetAxis()].d2 = 0;
-					}
-				}
+				return m_NetworkMouseButtonHeldState[0][whichButton];
+			} else {
+				return m_NetworkMouseButtonHeldState[whichPlayer][whichButton];
 			}
+		}
+		return s_MouseButtonStates[whichButton];
+	}
 
-			aimValues.SetX(0);
-			aimValues.SetY(0);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			// Right stick
-			if (pElement[INPUT_R_LEFT].JoyDirMapped())
-				aimValues.m_X = AnalogAxisValue(joystick, pElement[INPUT_R_LEFT].GetStick(), pElement[INPUT_R_LEFT].GetAxis());
-			if (pElement[INPUT_R_UP].JoyDirMapped())
-				aimValues.m_Y = AnalogAxisValue(joystick, pElement[INPUT_R_UP].GetStick(), pElement[INPUT_R_UP].GetAxis());
-
-			if (aimValues.GetMagnitude() < deadzone * 2)
-			{
-				if (pElement[INPUT_R_LEFT].JoyDirMapped())
-				{
-					if (joy[joystick].stick[pElement[INPUT_R_LEFT].GetStick()].flags & JOYFLAG_UNSIGNED)
-					{
-						joy[joystick].stick[pElement[INPUT_R_LEFT].GetStick()].axis[pElement[INPUT_R_LEFT].GetAxis()].pos = 128;
-						joy[joystick].stick[pElement[INPUT_R_LEFT].GetStick()].axis[pElement[INPUT_R_LEFT].GetAxis()].d1 = 0;
-						joy[joystick].stick[pElement[INPUT_R_LEFT].GetStick()].axis[pElement[INPUT_R_LEFT].GetAxis()].d2 = 0;
-					}
-					else {
-						joy[joystick].stick[pElement[INPUT_R_LEFT].GetStick()].axis[pElement[INPUT_R_LEFT].GetAxis()].pos = 0;
-						joy[joystick].stick[pElement[INPUT_R_LEFT].GetStick()].axis[pElement[INPUT_R_LEFT].GetAxis()].d1 = 0;
-						joy[joystick].stick[pElement[INPUT_R_LEFT].GetStick()].axis[pElement[INPUT_R_LEFT].GetAxis()].d2 = 0;
+	bool UInputMan::MouseButtonPressed(int whichButton, int whichPlayer) {
+		if (whichButton < 0 || whichButton >= MAX_MOUSE_BUTTONS) {
+			return false;
+		}
+		if (IsInMultiplayerMode()) {
+			if (whichPlayer < 0 || whichPlayer >= MAX_PLAYERS) {
+				for (int i = 0; i < MAX_PLAYERS; i++) {
+					if (m_NetworkMouseButtonPressedState[i][whichButton]) {
+						return m_NetworkMouseButtonPressedState[i][whichButton];
 					}
 				}
+				return m_NetworkMouseButtonPressedState[0][whichButton];
+			} else {
+				return m_NetworkMouseButtonPressedState[whichPlayer][whichButton];
+			}
+		}
+		bool pressed = s_MouseButtonStates[whichButton] && s_ChangedMouseButtonStates[whichButton];
 
-				if (pElement[INPUT_R_UP].JoyDirMapped())
-				{
-					if (joy[joystick].stick[pElement[INPUT_R_UP].GetStick()].flags & JOYFLAG_UNSIGNED)
-					{
-						joy[joystick].stick[pElement[INPUT_R_UP].GetStick()].axis[pElement[INPUT_R_UP].GetAxis()].pos = 128;
-						joy[joystick].stick[pElement[INPUT_R_UP].GetStick()].axis[pElement[INPUT_R_UP].GetAxis()].d1 = 0;
-						joy[joystick].stick[pElement[INPUT_R_UP].GetStick()].axis[pElement[INPUT_R_UP].GetAxis()].d2 = 0;
+		return pressed;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::MouseButtonReleased(int whichButton, int whichPlayer) {
+		if (whichButton < 0 || whichButton >= MAX_MOUSE_BUTTONS) {
+			return false;
+		}
+		if (IsInMultiplayerMode()) {
+			if (whichPlayer < 0 || whichPlayer >= MAX_PLAYERS) {
+				for (int i = 0; i < MAX_PLAYERS; i++) {
+					if (m_NetworkMouseButtonReleasedState[i][whichButton]) {
+						return m_NetworkMouseButtonReleasedState[i][whichButton];
 					}
-					else {
-						joy[joystick].stick[pElement[INPUT_R_UP].GetStick()].axis[pElement[INPUT_R_UP].GetAxis()].pos = 0;
-						joy[joystick].stick[pElement[INPUT_R_UP].GetStick()].axis[pElement[INPUT_R_UP].GetAxis()].d1 = 0;
-						joy[joystick].stick[pElement[INPUT_R_UP].GetStick()].axis[pElement[INPUT_R_UP].GetAxis()].d2 = 0;
+				}
+				return m_NetworkMouseButtonReleasedState[0][whichButton];
+			} else {
+				return m_NetworkMouseButtonReleasedState[whichPlayer][whichButton];
+			}
+		}
+		bool released = !s_MouseButtonStates[whichButton] && s_ChangedMouseButtonStates[whichButton];
+
+		return released;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::AnyMouseButtonPress() {
+		bool input = false;
+		for (int button = 0; button < MAX_MOUSE_BUTTONS && !input; ++button) {
+			input = MouseButtonPressed(button, -1) ? true : input;
+		}
+		return input;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::TrapMousePos(bool trap, int whichPlayer) {
+		if (whichPlayer == -1 || m_ControlScheme[whichPlayer].GetDevice() == DEVICE_MOUSE_KEYB) {
+			m_TrapMousePos = trap;
+		}
+		m_TrapMousePosPerPlayer[whichPlayer] = trap;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer) {
+		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
+		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == -1 || m_ControlScheme[whichPlayer].GetDevice() == DEVICE_MOUSE_KEYB)) {
+			int mouseX = std::max(x, static_cast<int>(mouse_x));
+			int mouseY = std::max(y, static_cast<int>(mouse_y));
+			mouseX = std::min(mouseX, x + width * g_FrameMan.ResolutionMultiplier());
+			mouseY = std::min(mouseY, y + height * g_FrameMan.ResolutionMultiplier());
+
+			position_mouse(mouseX, mouseY);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::ForceMouseWithinPlayerScreen(int whichPlayer) {
+		if (whichPlayer < PLAYER_ONE || whichPlayer >= PLAYER_FOUR) {
+			return;
+		}
+		int screenWidth = g_FrameMan.GetPlayerFrameBufferWidth(whichPlayer);
+		int screenHeight = g_FrameMan.GetPlayerFrameBufferHeight(whichPlayer);
+
+		// If we are dealing with split screens, then draw the intermediate draw splitscreen to the appropriate spot on the back buffer
+		if (g_FrameMan.GetScreenCount() > 1) {
+			if (whichPlayer == 0) {
+				// Always upper left corner
+				ForceMouseWithinBox(0, 0, screenWidth, screenHeight, whichPlayer);
+			} else if (whichPlayer == 1) {
+				// If both splits, or just V-Split, then in upper right quadrant
+				if ((g_FrameMan.GetVSplit() && !g_FrameMan.GetHSplit()) || (g_FrameMan.GetVSplit() && g_FrameMan.GetHSplit())) {
+					ForceMouseWithinBox(g_FrameMan.GetResX() / 2, 0, screenWidth, screenHeight, whichPlayer);
+				} else {
+					ForceMouseWithinBox(0, g_FrameMan.GetResY() / 2, screenWidth, screenHeight, whichPlayer);
+				}
+			} else if (whichPlayer == 2) {
+				// Always lower left quadrant
+				ForceMouseWithinBox(0, g_FrameMan.GetResY() / 2, screenWidth, screenHeight, whichPlayer);
+
+			} else if (whichPlayer == 3) {
+				// Always lower right quadrant
+				ForceMouseWithinBox(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2, screenWidth, screenHeight, whichPlayer);
+			}
+		} else {
+			ForceMouseWithinBox(0, 0, screenWidth, screenHeight, whichPlayer);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::JoystickActive(int joystickNumber) const {
+		if (joystickNumber < 0 || joystickNumber >= MAX_PLAYERS) {
+			return false;
+		}
+		if (joystickNumber < num_joysticks) {
+			return true;
+		}
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::JoyButtonHeld(int whichJoy, int whichButton) {
+		if (whichJoy < 0 || whichJoy >= num_joysticks) {
+			return false;
+		}
+		if (whichButton < 0 || whichButton >= joy[whichJoy].num_buttons) {
+			return false;
+		}
+		return joy[whichJoy].button[whichButton].b;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int UInputMan::WhichJoyButtonHeld(int whichJoy) {
+		if (whichJoy < 0 || whichJoy >= num_joysticks) {
+			return JOY_NONE;
+		}
+		for (int button = 0; button < joy[whichJoy].num_buttons; ++button) {
+			if (joy[whichJoy].button[button].b) {
+				return button;
+			}
+		}
+		// No button is held down
+		return JOY_NONE;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::JoyButtonPressed(int whichJoy, int whichButton) {
+		if (whichJoy < 0 || whichJoy >= num_joysticks) {
+			return false;
+		}
+		if (whichButton < 0 || whichButton >= joy[whichJoy].num_buttons) {
+			return false;
+		}
+		bool pressed = joy[whichJoy].button[whichButton].b && s_ChangedJoystickStates[whichJoy].button[whichButton].b;
+
+		return pressed;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int UInputMan::WhichJoyButtonPressed(int whichJoy) {
+		if (whichJoy < 0 || whichJoy >= num_joysticks) {
+			return JOY_NONE;
+		}
+		for (int button = 0; button < joy[whichJoy].num_buttons; ++button) {
+			if (joy[whichJoy].button[button].b && JoyButtonPressed(whichJoy, button)) {
+				return button;
+			}
+		}
+		// No button was pressed down
+		return JOY_NONE;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::JoyButtonReleased(int whichJoy, int whichButton) {
+		if (whichJoy < 0 || whichJoy >= num_joysticks) {
+			return false;
+		}
+		if (whichButton < 0 || whichButton >= joy[whichJoy].num_buttons) {
+			return false;
+		}
+		bool released = !joy[whichJoy].button[whichButton].b && s_ChangedJoystickStates[whichJoy].button[whichButton].b;
+
+		return released;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::JoyDirectionHeld(int whichJoy, int whichStick, int whichAxis, int whichDir) {
+		if (whichJoy < 0 || whichJoy >= num_joysticks || whichStick < 0 || whichStick >= joy[whichJoy].num_sticks || whichAxis < 0 || whichAxis >= joy[whichJoy].stick[whichStick].num_axis) {
+			return false;
+		}
+		if (whichDir == JOYDIR_TWO) {
+			return joy[whichJoy].stick[whichStick].axis[whichAxis].d2;
+		} else {
+			return joy[whichJoy].stick[whichStick].axis[whichAxis].d1;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::JoyDirectionPressed(int whichJoy, int whichStick, int whichAxis, int whichDir) {
+		if (whichJoy < 0 || whichJoy >= num_joysticks || whichStick < 0 || whichStick >= joy[whichJoy].num_sticks || whichAxis < 0 || whichAxis >= joy[whichJoy].stick[whichStick].num_axis) {
+			return false;
+		}
+		if (whichDir == JOYDIR_TWO) {
+			return joy[whichJoy].stick[whichStick].axis[whichAxis].d2 && s_ChangedJoystickStates[whichJoy].stick[whichStick].axis[whichAxis].d2;
+		} else {
+			return joy[whichJoy].stick[whichStick].axis[whichAxis].d1 && s_ChangedJoystickStates[whichJoy].stick[whichStick].axis[whichAxis].d1;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::JoyDirectionReleased(int whichJoy, int whichStick, int whichAxis, int whichDir) {
+		if (whichJoy < 0 || whichJoy >= num_joysticks || whichStick < 0 || whichStick >= joy[whichJoy].num_sticks || whichAxis < 0 || whichAxis >= joy[whichJoy].stick[whichStick].num_axis) {
+			return false;
+		}
+		if (whichDir == JOYDIR_TWO) {
+			return !joy[whichJoy].stick[whichStick].axis[whichAxis].d2 && s_ChangedJoystickStates[whichJoy].stick[whichStick].axis[whichAxis].d2;
+		} else {
+			return !joy[whichJoy].stick[whichStick].axis[whichAxis].d1 && s_ChangedJoystickStates[whichJoy].stick[whichStick].axis[whichAxis].d1;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float UInputMan::AnalogAxisValue(int whichJoy, int whichStick, int whichAxis) {
+		if (whichJoy < num_joysticks && whichStick < joy[whichJoy].num_sticks && whichAxis < joy[whichJoy].stick[whichStick].num_axis) {
+			if (joy[whichJoy].stick[whichStick].flags & JOYFLAG_UNSIGNED) {
+				// Treat unsigned (throttle axes) as rudders, with a range of 0-255 and midpoint of 128
+				return static_cast<float>(joy[whichJoy].stick[whichStick].axis[whichAxis].pos - 128) / 128.0F;
+			} else {
+				// Regular signed axis with range of -128 to 128
+				return static_cast<float>(joy[whichJoy].stick[whichStick].axis[whichAxis].pos) / 128.0F;
+			}
+		}
+		return  0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::AnyJoyInput() {
+		bool input = false;
+		int joystick;
+		int button;
+		int stick;
+		int axis;
+
+		poll_joystick();
+
+		for (joystick = 0; joystick < MAX_PLAYERS && !input; ++joystick) {
+			for (button = 0; button < MAX_JOY_BUTTONS && !input; ++button) {
+				input = joy[joystick].button[button].b ? true : input;
+			}
+			if (!input) {
+				for (stick = 0; stick < joy[joystick].num_sticks; ++stick) {
+					for (axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis) {
+						input = JoyDirectionHeld(joystick, stick, axis, JOYDIR_ONE) || JoyDirectionHeld(joystick, stick, axis, JOYDIR_TWO);
 					}
 				}
 			}
 		}
+		return input;
+	}
 
-        // Stick, axis, directions
-        for (stick = 0; stick < joy[joystick].num_sticks; ++stick)
-        {
-            for (axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis)
-            {
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-				// Adjust joystick values to eliminate values in deadzone
-				if (player > -1 && deadzonetype == DeadZoneType::SQUARE && deadzone > 0.0)
-				{
-					// !!! REFERENCE CODE DO NOT UNCOMMENT !!!
-					// Taken from AnalogAxiesValue
-					// Treat unsigned (throttle axes) as rudders, with a range of 0-255 and midpoint of 128
-					//if (joy[whichJoy].stick[whichStick].flags & JOYFLAG_UNSIGNED)
-					//	return (float)(joy[whichJoy].stick[whichStick].axis[whichAxis].pos - 128) / (float)128;
-					// Regular signed axis with range of -128 to 128
-					//else
-					//	return (float)joy[whichJoy].stick[whichStick].axis[whichAxis].pos / (float)128;
+	bool UInputMan::AnyJoyPress() {
+		bool input = false;
+		int joystick;
+		int button;
+		int stick;
+		int axis;
 
-					// This one heavily relies on AnalogAxiesValue method of processing joystick data. Code above for the reference
-					if (joy[joystick].stick[stick].flags & JOYFLAG_UNSIGNED)
-					{
-						if (abs(joy[joystick].stick[stick].axis[axis].pos - 128) > 0.0 && abs(joy[joystick].stick[stick].axis[axis].pos - 128) / (float)128 < deadzone)
-						{
-							joy[joystick].stick[stick].axis[axis].pos = 128;
-							joy[joystick].stick[stick].axis[axis].d1 = 0;
-							joy[joystick].stick[stick].axis[axis].d2 = 0;
-						}
-
-					}
-					else {
-						if (abs(joy[joystick].stick[stick].axis[axis].pos) > 0 && abs(joy[joystick].stick[stick].axis[axis].pos) / (float)128 < deadzone)
-						{
-							joy[joystick].stick[stick].axis[axis].pos = 0;
-							joy[joystick].stick[stick].axis[axis].d1 = 0;
-							joy[joystick].stick[stick].axis[axis].d2 = 0;
-						}
+		for (joystick = 0; joystick < MAX_PLAYERS && !input; ++joystick) {
+			for (button = 0; button < MAX_JOY_BUTTONS && !input; ++button) {
+				input = JoyButtonPressed(joystick, button) ? true : input;
+			}
+			if (!input) {
+				for (stick = 0; stick < joy[joystick].num_sticks; ++stick) {
+					for (axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis) {
+						input = JoyDirectionPressed(joystick, stick, axis, JOYDIR_ONE) || JoyDirectionPressed(joystick, stick, axis, JOYDIR_TWO);
 					}
 				}
+			}
+		}
+		return input;
+	}
 
-                s_aaChangedJoyState[joystick].stick[stick].axis[axis].d1 = joy[joystick].stick[stick].axis[axis].d1 != s_aaPrevJoyState[joystick].stick[stick].axis[axis].d1;
-                s_aaChangedJoyState[joystick].stick[stick].axis[axis].d2 = joy[joystick].stick[stick].axis[axis].d2 != s_aaPrevJoyState[joystick].stick[stick].axis[axis].d2;
-            }
-        }
-    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// If Escape is pressed, go to the main menu or close the app
-	if (KeyPressed(KEY_ESC)) {
-		// If we launched into editor directly, skip the logic and quit quickly.
-		if (g_LaunchIntoEditor) { g_Quit = true; }
+	bool UInputMan::AnyJoyButtonPress(int whichJoy) {
+		bool input = false;
 
-		// TODO: Make this more robust and purty!")
-		// If in the game pause and exit to menu on esc
+		for (int button = 0; button < MAX_JOY_BUTTONS && !input; ++button) {
+			input = JoyButtonPressed(whichJoy, button) ? true : input;
+		}
+		return input;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Vector UInputMan::GetNetworkAccumulatedRawMouseMovement(int player) {
+		Vector accumulatedMovement = m_NetworkAccumulatedRawMouseMovement[player];
+		m_NetworkAccumulatedRawMouseMovement[player].Reset();
+		return accumulatedMovement;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::SetNetworkInputElementHeldState(int player, int element, bool state) {
+		if (element >= 0 && element < INPUT_COUNT && player >= 0 && player < MAX_PLAYERS) { m_NetworkInputElementHeld[player][element] = state; }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::SetNetworkInputElementPressedState(int player, int element, bool state) {
+		if (element >= 0 && element < INPUT_COUNT && player >= 0 && player < MAX_PLAYERS) { m_NetworkInputElementPressed[player][element] = state; }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::SetNetworkInputElementReleasedState(int player, int element, bool state) {
+		if (element >= 0 && element < INPUT_COUNT && player >= 0 && player < MAX_PLAYERS) { m_NetworkInputElementReleased[player][element] = state; }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::SetNetworkMouseWheelState(int player, int state) {
+		if (player >= 0 && player < MAX_PLAYERS) { m_NetworkMouseWheelState[player] = state; }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::SetNetworkMouseButtonHeldState(int player, int whichButton, bool state) {
+		if (whichButton >= 0 && whichButton < MAX_MOUSE_BUTTONS && player >= 0 && player < MAX_PLAYERS) { m_NetworkMouseButtonHeldState[player][whichButton] = state; }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::SetNetworkMouseButtonPressedState(int player, int whichButton, bool state) {
+		if (whichButton >= 0 && whichButton < MAX_MOUSE_BUTTONS && player >= 0 && player < MAX_PLAYERS) { m_NetworkMouseButtonPressedState[player][whichButton] = state; }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::SetNetworkMouseButtonReleasedState(int player, int whichButton, bool state) {
+		if (whichButton >= 0 && whichButton < MAX_MOUSE_BUTTONS && player >= 0 && player < MAX_PLAYERS) { m_NetworkMouseButtonReleasedState[player][whichButton] = state; }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::ClearAccumulatedStates() {
+		for (int element = 0; element < INPUT_COUNT; element++) {
+			m_NetworkAccumulatedElementPressed[element] = false;
+			m_NetworkAccumulatedElementReleased[element] = false;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int UInputMan::Update() {
+		m_LastDeviceWhichControlledGUICursor = 0;
+
+		if (keyboard_needs_poll()) { poll_keyboard(); }
+		if (mouse_needs_poll()) { poll_mouse(); }
+		poll_joystick();
+
+		// Detect and store key changes since last Update()
+		for (int i = 0; i < KEY_MAX; ++i) {
+			s_ChangedKeyStates[i] = key[i] != s_PrevKeyStates[i];
+		}
+
+		// Store mouse movement
+		int mickeyX;
+		int mickeyY;
+		get_mouse_mickeys(&mickeyX, &mickeyY);
+		m_RawMouseMovement.SetXY(mickeyX, mickeyY);
+
+		// TODO: Have proper mouse sensitivity controls somewhere
+		m_RawMouseMovement *= m_MouseSensitivity;
+
+		// NETWORK SERVER: Apply mouse input received from client or collect mouse input
+		IsInMultiplayerMode() ? UpdateNetworkMouseMovement() : m_NetworkAccumulatedRawMouseMovement[0] += m_RawMouseMovement;
+
+		UpdateMouseInput();
+		if (num_joysticks > 0) { UpdateJoystickInput(); }
+
+		// If Escape is pressed, go to the main menu or close the app
+		if (KeyPressed(KEY_ESC)) {
+			// If we launched into editor directly, skip the logic and quit quickly.
+			if (g_LaunchIntoEditor) { g_Quit = true; }
+
+			// If in activity pause and exit to menu on esc
+			if (g_InActivity) {
+				g_ActivityMan.PauseActivity();
+				g_InActivity = false;
+			}
+		}
+
 		if (g_InActivity) {
-			g_ActivityMan.PauseActivity();
-			g_InActivity = false;
-		}
-	}
+			// Reset Activity if Ctrl+R is pressed
+			if (FlagCtrlState() && KeyPressed(KEY_R)) { g_ResetActivity = true; }
 
-	if (g_InActivity) {
-		// Reset Activity if Ctrl+R is pressed
-		if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_R)) { g_ResetActivity = true; }
+			// Check for resets and start button presses on controllers of all active players
+			if (g_ActivityMan.GetActivity()) {
+				for (int player = PLAYER_ONE; player < MAX_PLAYERS; ++player) {
+					if (g_ActivityMan.GetActivity()->PlayerActive(player)) {
+						g_ResetActivity = g_ResetActivity || ElementPressed(PLAYER_ONE, INPUT_BACK);
 
-		// Check for resets and start button presses on controllers of all active players
-		if (g_ActivityMan.GetActivity()) {
-			for (int player = PLAYER_ONE; player < MAX_PLAYERS; ++player) {
-				if (g_ActivityMan.GetActivity()->PlayerActive(player)) {
-					g_ResetActivity = g_ResetActivity || ElementPressed(PLAYER_ONE, INPUT_BACK);
-
-					if (ElementPressed(player, INPUT_START)) {
-						g_ActivityMan.PauseActivity();
-						g_InActivity = false;
+						if (ElementPressed(player, INPUT_START)) {
+							g_ActivityMan.PauseActivity();
+							g_InActivity = false;
+						}
 					}
 				}
 			}
+			if (g_ResetActivity) { g_ConsoleMan.PrintString("SYSTEM: Activity was reset!"); }
 		}
-		if (g_ResetActivity) { g_ConsoleMan.PrintString("SYSTEM: Activity was reset!"); }
+
+		// Alt+Enter to switch resolution multiplier between 1X and 2X
+		if (FlagAltState() && KeyPressed(KEY_ENTER)) { g_FrameMan.SwitchResolutionMultiplier((g_FrameMan.ResolutionMultiplier() >= 2) ? 1 : 2); }
+
+		// Only allow performance tweaking if showing the stats
+		if (g_PerformanceMan.IsShowingPerformanceStats()) {
+			// Manipulate time scaling
+			if (KeyHeld(KEY_2)) { g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() + 0.01F); }
+			if (KeyHeld(KEY_1) && g_TimerMan.GetTimeScale() - 0.01F > 0.001F) { g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() - 0.01F); }
+
+			// Manipulate real to sim cap
+			if (KeyHeld(KEY_4)) { g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() + 0.001F); }
+			if (KeyHeld(KEY_3) && g_TimerMan.GetRealToSimCap() > 0) { g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() - 0.001F); }
+
+			// Manipulate DeltaTime
+			if (KeyHeld(KEY_6)) { g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() + 0.001F); }
+			if (KeyHeld(KEY_5) && g_TimerMan.GetDeltaTimeSecs() > 0) { g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() - 0.001F); }
+		}
+
+		// Screenshot, Ctrl+S
+		if ((FlagCtrlState() && KeyHeld(KEY_S)) || KeyHeld(KEY_PRTSCR)) { g_FrameMan.SaveScreenToBMP("ScreenDump"); }
+
+		// Screenshot entire scene, Ctrl+W
+		if (FlagCtrlState() && KeyHeld(KEY_W)) { g_FrameMan.SaveWorldToBMP("WorldDump"); }
+
+		// Dump scene preview (scaled down WorldDump), Alt+W
+		if (FlagAltState() && KeyHeld(KEY_W)) { g_FrameMan.SaveWorldToPreviewBMP("ScenePreviewDump"); }
+
+		// Material draw toggle, Ctrl+M
+		if (FlagCtrlState() && KeyPressed(KEY_M)) { g_SceneMan.SetLayerDrawMode((g_SceneMan.GetLayerDrawMode() + 1) % 3); }
+
+		// Performance stats display toggle, Ctrl+P
+		if (FlagCtrlState() && KeyPressed(KEY_P)) { g_PerformanceMan.ShowPerformanceStats(!g_PerformanceMan.IsShowingPerformanceStats()); }
+
+		// Force one sim update per graphics frame, Ctrl+O
+		if (FlagCtrlState() && KeyPressed(KEY_O)) { g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame()); }
+
+		if (KeyPressed(KEY_F1)) { g_ConsoleMan.ShowShortcuts(); }
+		if (KeyPressed(KEY_F2)) {
+			g_PresetMan.ReloadAllScripts();
+			g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded!");
+		}
+		if (KeyPressed(KEY_F3)) { g_ConsoleMan.SaveAllText("Console.dump.log"); }
+		if (KeyPressed(KEY_F4)) { g_ConsoleMan.SaveInputLog("Console.input.log"); }
+		if (KeyPressed(KEY_F5)) { g_ConsoleMan.ClearLog(); }
+
+		StoreInputEventsForNextUpdate();
+
+		return 0;
 	}
 
-	// Alt+Enter to switch resolution multiplier between 1X and 2X
-	if (key_shifts & KB_ALT_FLAG && KeyPressed(KEY_ENTER)) { g_FrameMan.SwitchResolutionMultiplier((g_FrameMan.ResolutionMultiplier() >= 2) ? 1 : 2); }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// Only allow performance tweaking if showing the stats
-	if (g_PerformanceMan.IsShowingPerformanceStats()) {
-		// Manipulate time scaling
-		if (KeyHeld(KEY_2)) { g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() + 0.01F); }
-		if (KeyHeld(KEY_1) && g_TimerMan.GetTimeScale() - 0.01F > 0.001F) { g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() - 0.01F); }
+	void UInputMan::UpdateNetworkMouseMovement() {
+		for (int player = 0; player < MAX_PLAYERS; player++) {
+			if (m_NetworkAccumulatedRawMouseMovement[player].GetX() != 0 || m_NetworkAccumulatedRawMouseMovement[player].GetY() != 0) {
+				Vector networkMouseMovement = m_NetworkAccumulatedRawMouseMovement[player];
 
-		// Manipulate real to sim cap
-		if (KeyHeld(KEY_4)) { g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() + 0.001F); }
-		if (KeyHeld(KEY_3) && g_TimerMan.GetRealToSimCap() > 0) { g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() - 0.001F); }
+				m_NetworkAnalogMoveData[player].m_X += networkMouseMovement.m_X * 3;
+				m_NetworkAnalogMoveData[player].m_Y += networkMouseMovement.m_Y * 3;
+				m_NetworkAnalogMoveData[player].CapMagnitude(m_MouseTrapRadius);
+			}
 
-		// Manipulate DeltaTime
-		if (KeyHeld(KEY_6)) { g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() + 0.001F); }
-		if (KeyHeld(KEY_5) && g_TimerMan.GetDeltaTimeSecs() > 0) { g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() - 0.001F); }
+			// By the time we reach here all events should've been processed by recipients during the last update.
+			// We need to clear press and release event or otherwise it will look like player clicks buttons every frame till the next frame arrives after 33 ms with those states are off.
+
+			// Clear pressed and released events as they should've been already processed during ActivityUpdate.
+			// It is vital that press and release events are processed just once or multiple events will be triggered on a single press.
+			for (int el = 0; el < INPUT_COUNT; el++) {
+				m_NetworkInputElementPressed[player][el] = false;
+				m_NetworkInputElementReleased[player][el] = false;
+			}
+
+			// Reset mouse movement
+			m_NetworkAccumulatedRawMouseMovement[player].Reset();
+
+			// Reset mouse button states to stop double clicking
+			for (int i = 0; i < MAX_MOUSE_BUTTONS; i++) {
+				m_NetworkMouseButtonPressedState[player][i] = false;
+				m_NetworkMouseButtonReleasedState[player][i] = false;
+			}
+
+			// Reset mouse wheel state to stop over-wheeling
+			m_NetworkMouseWheelState[player] = 0;
+		}
 	}
 
-	// Screenshot, Ctrl+S
-	if (((key_shifts & KB_CTRL_FLAG) && KeyHeld(KEY_S)) || KeyHeld(KEY_PRTSCR)) { g_FrameMan.SaveScreenToBMP("ScreenDump"); }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// Screenshot entire scene, Ctrl+W
-	if ((key_shifts & KB_CTRL_FLAG) && KeyHeld(KEY_W)) { g_FrameMan.SaveWorldToBMP("WorldDump"); }
+	void UInputMan::UpdateMouseInput() {
+		// Detect and store mouse button input
+		s_MouseButtonStates[MOUSE_LEFT] = mouse_b & 1;
+		s_MouseButtonStates[MOUSE_RIGHT] = mouse_b & 2;
+		s_MouseButtonStates[MOUSE_MIDDLE] = mouse_b & 4;
 
-	// Dump scene preview (scaled down WorldDump), Alt+W
-	if ((key_shifts & KB_ALT_FLAG) && KeyHeld(KEY_W)) { g_FrameMan.SaveWorldToPreviewBMP("ScenePreviewDump"); }
+		// Detect changes in mouse button input
+		s_ChangedMouseButtonStates[MOUSE_LEFT] = s_MouseButtonStates[MOUSE_LEFT] != s_PrevMouseButtonStates[MOUSE_LEFT];
+		s_ChangedMouseButtonStates[MOUSE_RIGHT] = s_MouseButtonStates[MOUSE_RIGHT] != s_PrevMouseButtonStates[MOUSE_RIGHT];
+		s_ChangedMouseButtonStates[MOUSE_MIDDLE] = s_MouseButtonStates[MOUSE_MIDDLE] != s_PrevMouseButtonStates[MOUSE_MIDDLE];
 
-    // Material draw toggle, Ctrl+M
-    if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_M)) { g_SceneMan.SetLayerDrawMode((g_SceneMan.GetLayerDrawMode() + 1) % 3); }
-        
-    // Performance stats display toggle
-    if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_P)) { g_PerformanceMan.ShowPerformanceStats(!g_PerformanceMan.IsShowingPerformanceStats()); }
-		
-    // Force one sim update per graphics frame
-    if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_O)) { g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame()); }     
+		// Detect and store mouse movement input, translated to analog stick emulation
+		int mousePlayer = MouseUsedByPlayer();
+		if (mousePlayer != PLAYER_NONE) {
+			m_AnalogMouseData.m_X += m_RawMouseMovement.m_X * 3;
+			m_AnalogMouseData.m_Y += m_RawMouseMovement.m_Y * 3;
+			// Cap the mouse input in a circle
+			m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius);
 
-	// Dump all shortcuts to console window
-	if (KeyPressed(KEY_F1)) { g_ConsoleMan.ShowShortcuts(); }
+			// Only mess with the mouse pos if the original mouse position is not above the screen and may be grabbing the title bar of the game window
+			if (!m_DisableMouseMoving && !IsInMultiplayerMode()) {
+				if (m_TrapMousePos) {
+					// Trap the (invisible) mouse cursor in the middle of the screen, so it doesn't fly out in windowed mode and some other window gets clicked
+					position_mouse(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
+				} else if (g_InActivity) {
+					// The mouse cursor is visible and can move about the screen/window, but it should still be contained within the mouse player's part of the window
+					ForceMouseWithinPlayerScreen(mousePlayer);
+				}
+			}
 
-	if (KeyPressed(KEY_F2)) {
-		g_PresetMan.ReloadAllScripts();
-		g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded!");
+			// Mouse wheel update, translate motion into discrete ticks
+			if (std::abs(mouse_z) >= 1) {
+				// Save the direction
+				m_MouseWheelChange = mouse_z;
+				// Reset the position
+				position_mouse_z(0);
+			} else {
+				m_MouseWheelChange = 0;
+			}
+
+			// Enable the mouse cursor positioning again after having been disabled. Only do this when the mouse is within the drawing area so it
+			// won't cause the whole window to move if the user clicks the title bar and unintentionally drags it due to programmatic positioning.
+			int mX = mouse_x / g_FrameMan.ResolutionMultiplier();
+			int mY = mouse_y / g_FrameMan.ResolutionMultiplier();
+			if (m_DisableMouseMoving && m_PrepareToEnableMouseMoving && (mX >= 0 && mX < g_FrameMan.GetResX() && mY >= 0 && mY < g_FrameMan.GetResY())) {
+				m_DisableMouseMoving = m_PrepareToEnableMouseMoving = false;
+			}
+		}
 	}
 
-	if (KeyPressed(KEY_F3)) { g_ConsoleMan.SaveAllText("Console.dump.log"); }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	if (KeyPressed(KEY_F4)) { g_ConsoleMan.SaveInputLog("Console.input.log"); }
+	void UInputMan::UpdateJoystickInput() {
+		// Detect and store joystick button changed since last Update()
+		for (int joystick = 0; joystick < num_joysticks; ++joystick) {
+			for (int button = 0; button < joy[joystick].num_buttons; ++button) {
+				s_ChangedJoystickStates[joystick].button[button].b = joy[joystick].button[button].b != s_PrevJoystickStates[joystick].button[button].b;
+			}
 
-	if (KeyPressed(KEY_F5)) { g_ConsoleMan.ClearLog(); }
+			// Determine deadzone settings
+			float deadZone = 0.0F;
+			int deadZoneType = DeadZoneType::CIRCLE;
+			int player = -1;
 
-    ///////////////////////////////////////////////////////////
+			// Retrieve deadzone settings from player's input scheme
+			for (int p = 0; p < UInputMan::MAX_PLAYERS; p++) {
+				int device = m_ControlScheme[p].GetDevice() - DEVICE_GAMEPAD_1;
 
-    // Save the current state of the keyboard so that we can compare it
-    // next frame and see which key states have been changed in the mean time.
-    memcpy(s_aLastKeys, const_cast<const char *>(key), KEY_MAX);
+				if (device == joystick) {
+					deadZone = m_ControlScheme[p].GetJoystickDeadzone();
+					deadZoneType = m_ControlScheme[p].GetJoystickDeadzoneType();
+					player = p;
+					break;
+				}
+			}
 
-    // Save the mouse button states so taht we can compare it next frame and see which buttons have changed.
-    for (int mbutton = 0; mbutton < MAX_MOUSE_BUTTONS; ++mbutton)
-    {
-        m_aMousePrevButtonState[mbutton] = m_aMouseButtonState[mbutton];
-    }
+			// Disable input if it's in circle deadzone
+			if (player > -1 && deadZoneType == DeadZoneType::CIRCLE && deadZone > 0.0F) {
+				const InputMapping *element = m_ControlScheme[player].GetInputMappings();
+				Vector aimValues;
 
-    // Save the current state of the joysticks
-    for (joystick = 0; joystick < num_joysticks; ++joystick)
-    {
-        // Buttons
-        for (button = 0; button < joy[joystick].num_buttons; ++button)
-            s_aaPrevJoyState[joystick].button[button].b = joy[joystick].button[button].b;
+				// Left stick
+				if (element[INPUT_L_LEFT].JoyDirMapped()) { aimValues.m_X = AnalogAxisValue(joystick, element[INPUT_L_LEFT].GetStick(), element[INPUT_L_LEFT].GetAxis()); }
+				if (element[INPUT_L_UP].JoyDirMapped()) { aimValues.m_Y = AnalogAxisValue(joystick, element[INPUT_L_UP].GetStick(), element[INPUT_L_UP].GetAxis()); }
 
-        // Stick, axis, directions
-        for (stick = 0; stick < joy[joystick].num_sticks; ++stick)
-        {
-            for (axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis)
-            {
-                s_aaPrevJoyState[joystick].stick[stick].axis[axis].d1 = joy[joystick].stick[stick].axis[axis].d1;
-                s_aaPrevJoyState[joystick].stick[stick].axis[axis].d2 = joy[joystick].stick[stick].axis[axis].d2;
-            }
-        }
-    }
+				if (aimValues.GetMagnitude() < deadZone * 2) {
+					if (element[INPUT_L_LEFT].JoyDirMapped()) {
+						if (joy[joystick].stick[element[INPUT_L_LEFT].GetStick()].flags & JOYFLAG_UNSIGNED) {
+							joy[joystick].stick[element[INPUT_L_LEFT].GetStick()].axis[element[INPUT_L_LEFT].GetAxis()].pos = 128;
+							joy[joystick].stick[element[INPUT_L_LEFT].GetStick()].axis[element[INPUT_L_LEFT].GetAxis()].d1 = 0;
+							joy[joystick].stick[element[INPUT_L_LEFT].GetStick()].axis[element[INPUT_L_LEFT].GetAxis()].d2 = 0;
+						} else {
+							joy[joystick].stick[element[INPUT_L_LEFT].GetStick()].axis[element[INPUT_L_LEFT].GetAxis()].pos = 0;
+							joy[joystick].stick[element[INPUT_L_LEFT].GetStick()].axis[element[INPUT_L_LEFT].GetAxis()].d1 = 0;
+							joy[joystick].stick[element[INPUT_L_LEFT].GetStick()].axis[element[INPUT_L_LEFT].GetAxis()].d2 = 0;
+						}
+					}
+					if (element[INPUT_L_UP].JoyDirMapped()) {
+						if (joy[joystick].stick[element[INPUT_L_UP].GetStick()].flags & JOYFLAG_UNSIGNED) {
+							joy[joystick].stick[element[INPUT_L_UP].GetStick()].axis[element[INPUT_L_UP].GetAxis()].pos = 128;
+							joy[joystick].stick[element[INPUT_L_UP].GetStick()].axis[element[INPUT_L_UP].GetAxis()].d1 = 0;
+							joy[joystick].stick[element[INPUT_L_UP].GetStick()].axis[element[INPUT_L_UP].GetAxis()].d2 = 0;
+						} else {
+							joy[joystick].stick[element[INPUT_L_UP].GetStick()].axis[element[INPUT_L_UP].GetAxis()].pos = 0;
+							joy[joystick].stick[element[INPUT_L_UP].GetStick()].axis[element[INPUT_L_UP].GetAxis()].d1 = 0;
+							joy[joystick].stick[element[INPUT_L_UP].GetStick()].axis[element[INPUT_L_UP].GetAxis()].d2 = 0;
+						}
+					}
+				}
 
+				aimValues.Reset();
 
-	// Store pressed and released events to be picked by NetworkClient during it's on-timer update
-	for (int element = 0; element < INPUT_COUNT; element++)
-	{
-		// Only store press and release events if they happened, Client will clear those after update so we don't care about false
-		if (ElementPressed(0, element))
-			m_aNetworkAccumulatedElementPressed[element] = true;
-		if (ElementReleased(0, element))
-			m_aNetworkAccumulatedElementReleased[element] = true;
+				// Right stick
+				if (element[INPUT_R_LEFT].JoyDirMapped()) { aimValues.m_X = AnalogAxisValue(joystick, element[INPUT_R_LEFT].GetStick(), element[INPUT_R_LEFT].GetAxis()); }
+				if (element[INPUT_R_UP].JoyDirMapped()) { aimValues.m_Y = AnalogAxisValue(joystick, element[INPUT_R_UP].GetStick(), element[INPUT_R_UP].GetAxis()); }
+
+				if (aimValues.GetMagnitude() < deadZone * 2) {
+					if (element[INPUT_R_LEFT].JoyDirMapped()) {
+						if (joy[joystick].stick[element[INPUT_R_LEFT].GetStick()].flags & JOYFLAG_UNSIGNED) {
+							joy[joystick].stick[element[INPUT_R_LEFT].GetStick()].axis[element[INPUT_R_LEFT].GetAxis()].pos = 128;
+							joy[joystick].stick[element[INPUT_R_LEFT].GetStick()].axis[element[INPUT_R_LEFT].GetAxis()].d1 = 0;
+							joy[joystick].stick[element[INPUT_R_LEFT].GetStick()].axis[element[INPUT_R_LEFT].GetAxis()].d2 = 0;
+						} else {
+							joy[joystick].stick[element[INPUT_R_LEFT].GetStick()].axis[element[INPUT_R_LEFT].GetAxis()].pos = 0;
+							joy[joystick].stick[element[INPUT_R_LEFT].GetStick()].axis[element[INPUT_R_LEFT].GetAxis()].d1 = 0;
+							joy[joystick].stick[element[INPUT_R_LEFT].GetStick()].axis[element[INPUT_R_LEFT].GetAxis()].d2 = 0;
+						}
+					}
+					if (element[INPUT_R_UP].JoyDirMapped()) {
+						if (joy[joystick].stick[element[INPUT_R_UP].GetStick()].flags & JOYFLAG_UNSIGNED) {
+							joy[joystick].stick[element[INPUT_R_UP].GetStick()].axis[element[INPUT_R_UP].GetAxis()].pos = 128;
+							joy[joystick].stick[element[INPUT_R_UP].GetStick()].axis[element[INPUT_R_UP].GetAxis()].d1 = 0;
+							joy[joystick].stick[element[INPUT_R_UP].GetStick()].axis[element[INPUT_R_UP].GetAxis()].d2 = 0;
+						} else {
+							joy[joystick].stick[element[INPUT_R_UP].GetStick()].axis[element[INPUT_R_UP].GetAxis()].pos = 0;
+							joy[joystick].stick[element[INPUT_R_UP].GetStick()].axis[element[INPUT_R_UP].GetAxis()].d1 = 0;
+							joy[joystick].stick[element[INPUT_R_UP].GetStick()].axis[element[INPUT_R_UP].GetAxis()].d2 = 0;
+						}
+					}
+				}
+			}
+
+			// Stick, axis, directions
+			for (int stick = 0; stick < joy[joystick].num_sticks; ++stick) {
+				for (int axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis) {
+					// Adjust joystick values to eliminate values in deadzone
+					if (player > -1 && deadZoneType == DeadZoneType::SQUARE && deadZone > 0.0F) {
+						// This one heavily relies on AnalogAxiesValue method of processing joystick data.
+						if (joy[joystick].stick[stick].flags & JOYFLAG_UNSIGNED) {
+							if (std::abs(joy[joystick].stick[stick].axis[axis].pos - 128) > 0.0F && std::abs(joy[joystick].stick[stick].axis[axis].pos - 128) / 128 < deadZone) {
+								joy[joystick].stick[stick].axis[axis].pos = 128;
+								joy[joystick].stick[stick].axis[axis].d1 = 0;
+								joy[joystick].stick[stick].axis[axis].d2 = 0;
+							}
+						} else {
+							if (std::abs(joy[joystick].stick[stick].axis[axis].pos) > 0 && std::abs(joy[joystick].stick[stick].axis[axis].pos) / 128 < deadZone) {
+								joy[joystick].stick[stick].axis[axis].pos = 0;
+								joy[joystick].stick[stick].axis[axis].d1 = 0;
+								joy[joystick].stick[stick].axis[axis].d2 = 0;
+							}
+						}
+					}
+					s_ChangedJoystickStates[joystick].stick[stick].axis[axis].d1 = joy[joystick].stick[stick].axis[axis].d1 != s_PrevJoystickStates[joystick].stick[stick].axis[axis].d1;
+					s_ChangedJoystickStates[joystick].stick[stick].axis[axis].d2 = joy[joystick].stick[stick].axis[axis].d2 != s_PrevJoystickStates[joystick].stick[stick].axis[axis].d2;
+				}
+			}
+		}
 	}
 
-    return 0;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::StoreInputEventsForNextUpdate() {
+		// Save the current state of the keyboard so that we can compare it next frame and see which key states have been changed in the mean time.
+		std::memcpy(s_PrevKeyStates, const_cast<const char *>(key), KEY_MAX);
+
+		// Save the mouse button states so that we can compare it next frame and see which buttons have changed.
+		for (int mouseButton = 0; mouseButton < MAX_MOUSE_BUTTONS; ++mouseButton) {
+			s_PrevMouseButtonStates[mouseButton] = s_MouseButtonStates[mouseButton];
+		}
+
+		// Save the current state of the joysticks
+		for (int joystick = 0; joystick < num_joysticks; ++joystick) {
+			for (int button = 0; button < joy[joystick].num_buttons; ++button) {
+				s_PrevJoystickStates[joystick].button[button].b = joy[joystick].button[button].b;
+			}
+			for (int stick = 0; stick < joy[joystick].num_sticks; ++stick) {
+				for (int axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis) {
+					s_PrevJoystickStates[joystick].stick[stick].axis[axis].d1 = joy[joystick].stick[stick].axis[axis].d1;
+					s_PrevJoystickStates[joystick].stick[stick].axis[axis].d2 = joy[joystick].stick[stick].axis[axis].d2;
+				}
+			}
+		}
+
+		// Store pressed and released events to be picked by NetworkClient during it's on-timer update
+		for (int element = 0; element < INPUT_COUNT; element++) {
+			// Only store press and release events if they happened, Client will clear those after update so we don't care about false
+			if (ElementPressed(0, element)) { m_NetworkAccumulatedElementPressed[element] = true; }
+			if (ElementReleased(0, element)) { m_NetworkAccumulatedElementReleased[element] = true; }
+		}
+	}
 }
-
-
-void UInputMan::ClearAccumulatedStates()
-{
-	for (int element = 0; element < INPUT_COUNT; element++)
-	{
-		m_aNetworkAccumulatedElementPressed[element] = false;
-		m_aNetworkAccumulatedElementReleased[element] = false;
-	}
-}
-
-bool UInputMan::AccumulatedElementPressed(int element)
-{
-	if (element < 0 || element >= INPUT_COUNT)
-		return false;
-
-	return m_aNetworkAccumulatedElementPressed[element];
-}
-
-
-bool UInputMan::AccumulatedElementReleased(int element)
-{
-	if (element < 0 || element >= INPUT_COUNT)
-		return false;
-
-	return m_aNetworkAccumulatedElementReleased[element];
-}
-
-
-
-
-} // namespace RTE

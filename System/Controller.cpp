@@ -109,7 +109,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool Controller::IsMouseControlled() const { return g_UInputMan.OverrideInput() ? DEVICE_MOUSE_KEYB : g_UInputMan.GetControlScheme(m_Player)->GetDevice() == DEVICE_MOUSE_KEYB; }
+	bool Controller::IsMouseControlled() const { return g_UInputMan.IsInMultiplayerMode() ? DEVICE_MOUSE_KEYB : g_UInputMan.GetControlScheme(m_Player)->GetDevice() == DEVICE_MOUSE_KEYB; }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

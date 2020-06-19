@@ -273,6 +273,8 @@ namespace RTE {
 		writer << m_PlayerCount;
 		writer.NewProperty("Difficulty");
 		writer << m_Difficulty;
+		writer.NewProperty("CraftOrbitAtTheEdge");
+		writer << m_CraftOrbitAtTheEdge;
 
 		if (m_IsActive[PLAYER_1]) {
 			writer.NewProperty("TeamOfPlayer1");

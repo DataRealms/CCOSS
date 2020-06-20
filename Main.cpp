@@ -406,10 +406,6 @@ bool PlayIntroTitle() {
 	pPioneerScreaming->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerScreaming.bmp"));
 	pPioneerScreaming->SetWrapDoubleDrawing(false);
 
-	MOSRotating *pPioneerPromo = new MOSRotating();
-	pPioneerPromo->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerPromo.bmp"));
-	pPioneerPromo->SetWrapDoubleDrawing(false);
-
 	MOSParticle * pFirePuffLarge = dynamic_cast<MOSParticle *>(g_PresetMan.GetEntityPreset("MOSParticle", "Fire Puff Large", "Base.rte")->Clone());
 	MOSParticle * pFirePuffMedium = dynamic_cast<MOSParticle *>(g_PresetMan.GetEntityPreset("MOSParticle", "Fire Puff Medium", "Base.rte")->Clone());
 
@@ -681,21 +677,6 @@ bool PlayIntroTitle() {
 					Box promoBox(pioneerScreamPos.m_X - 125, pioneerScreamPos.m_Y - 70, pioneerScreamPos.m_X + 125, pioneerScreamPos.m_Y + 70);
 					g_pMainMenuGUI->SetPioneerPromoBox(promoBox);
 				} 
-
-				if (orbitRotation < -c_PI * 1.65 && orbitRotation > -c_PI * 1.95)
-				{
-					Vector promoPos = planetPos - Vector(320 - 128, 320 + 29);
-
-					// Draw pioneer promo
-					pPioneerPromo->SetPos(promoPos);
-					pPioneerPromo->Draw(g_FrameMan.GetBackBuffer32());
-
-					// Enable the promo banner and tell the menu where it can be clicked
-					g_pMainMenuGUI->EnablePioneerPromoButton();
-
-					Box promoBox(promoPos.m_X - 128, promoPos.m_Y - 80, promoPos.m_X + 128, promoPos.m_Y + 80);
-					g_pMainMenuGUI->SetPioneerPromoBox(promoBox);
-				}
 			}
 				
 			// Place, rotate and draw station

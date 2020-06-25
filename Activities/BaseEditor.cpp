@@ -44,7 +44,7 @@
 #include "GUI/GUIComboBox.h"
 
 #include "SceneEditorGUI.h"
-#include "PieMenuGUI.h"
+#include "PieSlice.h"
 #include "GABaseDefense.h"
 
 extern bool g_ResetActivity;
@@ -336,7 +336,7 @@ void BaseEditor::Update()
 
     // Get any mode change commands that the user gave the Editor GUI
     // Done with editing for now; save and return to campaign screen
-    if (m_pEditorGUI->GetActivatedPieSlice() == PieMenuGUI::PSI_DONE)
+    if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PSI_DONE)
     {
         m_pEditorGUI->SetEditorGUIMode(SceneEditorGUI::INACTIVE);
 

@@ -308,14 +308,14 @@ void ActorEditor::Update()
         m_pPieMenu->SetEnabled(false);
 
     // Handle what user does with the pie menu
-    const PieMenuGUI::Slice *pSlice = m_pPieMenu->SliceActivated();
+    const PieSlice *pSlice = m_pPieMenu->SliceActivated();
     if (pSlice)
     {
         // User chose to reload the Actor's data
-        if (pSlice->GetType() == PieMenuGUI::PSI_LOAD)
+        if (pSlice->GetType() == PieSlice::PSI_LOAD)
             ReloadActorData();
         // User chose to pick a new Actor to edit
-        else if (pSlice->GetType() == PieMenuGUI::PSI_PICK)
+        else if (pSlice->GetType() == PieSlice::PSI_PICK)
         {
             m_EditorMode = EditorActivity::LOADDIALOG;
             m_ModeChange = true;
@@ -382,9 +382,9 @@ bool ActorEditor::LoadActor(const Entity *pActorToLoad)
         // Set up the pie menu with the actor's own slices
         m_pPieMenu->ResetSlices();
         // Add the reload data slice
-		PieMenuGUI::Slice reloadSlice("Reload Actor's Data", PieMenuGUI::PSI_LOAD, PieMenuGUI::Slice::UP, true);
+		PieSlice reloadSlice("Reload Actor's Data", PieSlice::PSI_LOAD, PieSlice::UP, true);
         m_pPieMenu->AddSlice(reloadSlice);
-        PieMenuGUI::Slice chooseSlice("Choose a different Actor", PieMenuGUI::PSI_PICK, PieMenuGUI::Slice::RIGHT, true);
+        PieSlice chooseSlice("Choose a different Actor", PieSlice::PSI_PICK, PieSlice::RIGHT, true);
 		m_pPieMenu->AddSlice(chooseSlice);
         // Add the Actor's slices
         m_pEditedActor->AddPieMenuSlices(m_pPieMenu);

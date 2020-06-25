@@ -326,7 +326,7 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
 		reader >> m_ProvidesPieMenuContext;
 	else if (propName == "AddPieSlice")
 	{
-		PieMenuGUI::Slice newSlice;
+		PieSlice newSlice;
 		reader >> newSlice;
 		PieMenuGUI::StoreCustomLuaSlice(newSlice);
 	}

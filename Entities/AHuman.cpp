@@ -740,35 +740,35 @@ bool AHuman::OnSink(const Vector &pos)
 bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
     if (m_pItemInReach) {
-		PieMenuGUI::Slice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieMenuGUI::PSI_PICKUP, PieMenuGUI::Slice::UP, m_pFGArm && m_pFGArm->IsAttached() && m_pItemInReach);
+		PieSlice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieSlice::PSI_PICKUP, PieSlice::UP, m_pFGArm && m_pFGArm->IsAttached() && m_pItemInReach);
 		
         pPieMenu->AddSlice(pickUpSlice);
     } else {
-		PieMenuGUI::Slice reloadSlice(m_pFGArm ? "Reload" : "NO ARM!", PieMenuGUI::PSI_RELOAD, PieMenuGUI::Slice::UP, m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull());
+		PieSlice reloadSlice(m_pFGArm ? "Reload" : "NO ARM!", PieSlice::PSI_RELOAD, PieSlice::UP, m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull());
         pPieMenu->AddSlice(reloadSlice);
 	}
 	
-	PieMenuGUI::Slice dropSlice(m_pFGArm && m_pFGArm->GetHeldMO() ? "Drop " + m_pFGArm->GetHeldMO()->GetPresetName() : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieMenuGUI::PSI_DROP, PieMenuGUI::Slice::DOWN, m_pFGArm && m_pFGArm->GetHeldMO());
+	PieSlice dropSlice(m_pFGArm && m_pFGArm->GetHeldMO() ? "Drop " + m_pFGArm->GetHeldMO()->GetPresetName() : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieSlice::PSI_DROP, PieSlice::DOWN, m_pFGArm && m_pFGArm->GetHeldMO());
     pPieMenu->AddSlice(dropSlice);
 
-	PieMenuGUI::Slice nextItemSlice(m_pFGArm ? "Next Item" : "NO ARM!", PieMenuGUI::PSI_NEXTITEM, PieMenuGUI::Slice::RIGHT, m_pFGArm && !m_Inventory.empty());
+	PieSlice nextItemSlice(m_pFGArm ? "Next Item" : "NO ARM!", PieSlice::PSI_NEXTITEM, PieSlice::RIGHT, m_pFGArm && !m_Inventory.empty());
     pPieMenu->AddSlice(nextItemSlice);
-    PieMenuGUI::Slice prevItemSlice(m_pFGArm ? "Prev Item" : "NO ARM!", PieMenuGUI::PSI_PREVITEM, PieMenuGUI::Slice::LEFT, m_pFGArm && !m_Inventory.empty());
+    PieSlice prevItemSlice(m_pFGArm ? "Prev Item" : "NO ARM!", PieSlice::PSI_PREVITEM, PieSlice::LEFT, m_pFGArm && !m_Inventory.empty());
 	pPieMenu->AddSlice(prevItemSlice);
 
-	PieMenuGUI::Slice sentryAISlice("Sentry AI Mode", PieMenuGUI::PSI_SENTRY, PieMenuGUI::Slice::DOWN);
+	PieSlice sentryAISlice("Sentry AI Mode", PieSlice::PSI_SENTRY, PieSlice::DOWN);
     pPieMenu->AddSlice(sentryAISlice);
-    PieMenuGUI::Slice patrolAISlice("Patrol AI Mode", PieMenuGUI::PSI_PATROL, PieMenuGUI::Slice::DOWN);
+    PieSlice patrolAISlice("Patrol AI Mode", PieSlice::PSI_PATROL, PieSlice::DOWN);
 	pPieMenu->AddSlice(patrolAISlice);
-	PieMenuGUI::Slice formSquadSlice("Form Squad", PieMenuGUI::PSI_FORMSQUAD, PieMenuGUI::Slice::UP);
+	PieSlice formSquadSlice("Form Squad", PieSlice::PSI_FORMSQUAD, PieSlice::UP);
     pPieMenu->AddSlice(formSquadSlice);
 	
-	PieMenuGUI::Slice goToSlice("Go-To AI Mode", PieMenuGUI::PSI_GOTO, PieMenuGUI::Slice::DOWN);
+	PieSlice goToSlice("Go-To AI Mode", PieSlice::PSI_GOTO, PieSlice::DOWN);
     pPieMenu->AddSlice(goToSlice);
-    PieMenuGUI::Slice goldAISlice("Gold Dig AI Mode", PieMenuGUI::PSI_GOLDDIG, PieMenuGUI::Slice::DOWN);
+    PieSlice goldAISlice("Gold Dig AI Mode", PieSlice::PSI_GOLDDIG, PieSlice::DOWN);
 	pPieMenu->AddSlice(goldAISlice);
 
-    PieMenuGUI::Slice huntAISlice("Brain Hunt AI Mode", PieMenuGUI::PSI_BRAINHUNT, PieMenuGUI::Slice::RIGHT);
+    PieSlice huntAISlice("Brain Hunt AI Mode", PieSlice::PSI_BRAINHUNT, PieSlice::RIGHT);
 	pPieMenu->AddSlice(huntAISlice);
 
     // Add any custom added slices after we've added the hardcoded ones, so they are lower priorty and don't hog the cardinal axes
@@ -790,36 +790,36 @@ bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 
 bool AHuman::HandlePieCommand(int pieSliceIndex)
 {
-    if (pieSliceIndex != PieMenuGUI::PSI_NONE)
+    if (pieSliceIndex != PieSlice::PSI_NONE)
     {
-        if (pieSliceIndex == PieMenuGUI::PSI_PICKUP)
+        if (pieSliceIndex == PieSlice::PSI_PICKUP)
             m_Controller.SetState(WEAPON_PICKUP);
-        else if (pieSliceIndex == PieMenuGUI::PSI_DROP)
+        else if (pieSliceIndex == PieSlice::PSI_DROP)
             m_Controller.SetState(WEAPON_DROP);
-        else if (pieSliceIndex == PieMenuGUI::PSI_RELOAD)
+        else if (pieSliceIndex == PieSlice::PSI_RELOAD)
             m_Controller.SetState(WEAPON_RELOAD);
-        else if (pieSliceIndex == PieMenuGUI::PSI_NEXTITEM)
+        else if (pieSliceIndex == PieSlice::PSI_NEXTITEM)
             m_Controller.SetState(WEAPON_CHANGE_NEXT, true);
-        else if (pieSliceIndex == PieMenuGUI::PSI_PREVITEM)
+        else if (pieSliceIndex == PieSlice::PSI_PREVITEM)
             m_Controller.SetState(WEAPON_CHANGE_PREV, true);
-        else if (pieSliceIndex == PieMenuGUI::PSI_SENTRY)
+        else if (pieSliceIndex == PieSlice::PSI_SENTRY)
             m_AIMode = AIMODE_SENTRY;
-        else if (pieSliceIndex == PieMenuGUI::PSI_PATROL)
+        else if (pieSliceIndex == PieSlice::PSI_PATROL)
             m_AIMode = AIMODE_PATROL;
-        else if (pieSliceIndex == PieMenuGUI::PSI_BRAINHUNT)
+        else if (pieSliceIndex == PieSlice::PSI_BRAINHUNT)
         {
             m_AIMode = AIMODE_BRAINHUNT;
             // Clear out the waypoints; player will set new ones with UI in gameactivity
             ClearAIWaypoints();
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_GOTO)
+        else if (pieSliceIndex == PieSlice::PSI_GOTO)
         {
             m_AIMode = AIMODE_GOTO;
             // Clear out the waypoints; player will set new ones with UI in gameactivity
             ClearAIWaypoints();
             m_UpdateMovePath = true;
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_GOLDDIG)
+        else if (pieSliceIndex == PieSlice::PSI_GOLDDIG)
             m_AIMode = AIMODE_GOLDDIG;
         else
             return Actor::HandlePieCommand(pieSliceIndex);

@@ -624,7 +624,7 @@ protected:
     // Blink timer for the icon
     Timer m_BlinkTimer;
     // Extra pie menu options that this should add to any actor who holds this device
-    std::list<PieMenuGUI::Slice> m_PieSlices;
+    std::list<PieSlice> m_PieSlices;
     // How loud this device is when activated. 0 means perfectly quiet 0.5 means half of normal (normal equals audiable from ~half a screen)
     float m_Loudness;
     // If this weapon belongs to the "Explosive Weapons" grroup or not

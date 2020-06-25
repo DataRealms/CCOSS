@@ -522,14 +522,14 @@ void ACraft::SetTeam(int team)
 
 bool ACraft::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
-	PieMenuGUI::Slice deliverSlice("Deliver Cargo", PieMenuGUI::PSI_DELIVER, PieMenuGUI::Slice::RIGHT);
+	PieSlice deliverSlice("Deliver Cargo", PieSlice::PSI_DELIVER, PieSlice::RIGHT);
     pPieMenu->AddSlice(deliverSlice);
-    PieMenuGUI::Slice returnSlice("Return", PieMenuGUI::PSI_RETURN, PieMenuGUI::Slice::UP);
+    PieSlice returnSlice("Return", PieSlice::PSI_RETURN, PieSlice::UP);
 	pPieMenu->AddSlice(returnSlice);
 	
-	PieMenuGUI::Slice staySlice("Stay", PieMenuGUI::PSI_STAY, PieMenuGUI::Slice::DOWN);
+	PieSlice staySlice("Stay", PieSlice::PSI_STAY, PieSlice::DOWN);
     pPieMenu->AddSlice(staySlice);
-    PieMenuGUI::Slice scuttleSlice("Scuttle!", PieMenuGUI::PSI_SCUTTLE, PieMenuGUI::Slice::LEFT);
+    PieSlice scuttleSlice("Scuttle!", PieSlice::PSI_SCUTTLE, PieSlice::LEFT);
 	pPieMenu->AddSlice(scuttleSlice);
 
     Actor::AddPieMenuSlices(pPieMenu);
@@ -546,25 +546,25 @@ bool ACraft::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 
 bool ACraft::HandlePieCommand(int pieSliceIndex)
 {
-    if (pieSliceIndex != PieMenuGUI::PSI_NONE)
+    if (pieSliceIndex != PieSlice::PSI_NONE)
     {
-        if (pieSliceIndex == PieMenuGUI::PSI_DELIVER)
+        if (pieSliceIndex == PieSlice::PSI_DELIVER)
         {
             m_AIMode = AIMODE_DELIVER;
             m_DeliveryState = FALL;
             m_HasDelivered = false;
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_RETURN)
+        else if (pieSliceIndex == PieSlice::PSI_RETURN)
         {
             m_AIMode = AIMODE_RETURN;
             m_DeliveryState = LAUNCH;
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_STAY)
+        else if (pieSliceIndex == PieSlice::PSI_STAY)
         {
             m_AIMode = AIMODE_STAY;
             m_DeliveryState = FALL;
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_SCUTTLE)
+        else if (pieSliceIndex == PieSlice::PSI_SCUTTLE)
             m_AIMode = AIMODE_SCUTTLE;
         else
             return Actor::HandlePieCommand(pieSliceIndex);

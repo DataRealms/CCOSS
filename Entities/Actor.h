@@ -1467,7 +1467,7 @@ protected:
     // The timer that measures and deducts past time from the remaining white flash time
     Timer m_WhiteFlashTimer;
     // Extra pie menu options that this should add to any Pie Menu that focuses on this
-    std::list<PieMenuGUI::Slice> m_PieSlices;
+    std::list<PieSlice> m_PieSlices;
     // What material strength this actor is capable of digging trough.
     float m_DigStrength;
 	// ID of deployment which spawned this actor

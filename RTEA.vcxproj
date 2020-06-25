@@ -234,6 +234,7 @@
     <ClInclude Include="System\Constants.h" />
     <ClInclude Include="System\Controller.h" />
     <ClInclude Include="System\Entity.h" />
+    <ClInclude Include="System\PieSlice.h" />
     <ClInclude Include="System\Primitive.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
@@ -375,6 +376,7 @@
     <ClCompile Include="Managers\PostProcessMan.cpp" />
     <ClCompile Include="Managers\PrimitiveMan.cpp" />
     <ClCompile Include="Menus\LoadingGUI.cpp" />
+    <ClCompile Include="PieSlice.cpp" />
     <ClCompile Include="System\Atom.cpp" />
     <ClCompile Include="System\Controller.cpp" />
     <ClCompile Include="System\Entity.cpp" />

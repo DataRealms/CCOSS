@@ -460,34 +460,34 @@ void SceneEditorGUI::Update()
     ///////////////////////////////////////
     // Handle pie menu selections
 
-    if (m_pPieMenu->GetPieCommand() != PieMenuGUI::PSI_NONE)
+    if (m_pPieMenu->GetPieCommand() != PieSlice::PSI_NONE)
     {
-        if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_PICK)
+        if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_PICK)
             m_EditorGUIMode = PICKINGOBJECT;
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_MOVE)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_MOVE)
             m_EditorGUIMode = MOVINGOBJECT;
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_REMOVE)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_REMOVE)
             m_EditorGUIMode = DELETINGOBJECT;
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_BRAINHUNT)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_BRAINHUNT)
             m_EditorGUIMode = INSTALLINGBRAIN;
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_DONE)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_DONE)
             m_EditorGUIMode = DONEEDITING;
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_INFRONT)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_INFRONT)
         {
             m_PreviousMode = m_EditorGUIMode;
             m_EditorGUIMode = PLACEINFRONT;
         }
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_BEHIND)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_BEHIND)
         {
             m_PreviousMode = m_EditorGUIMode;
             m_EditorGUIMode = PLACEBEHIND;
         }
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_TEAM1)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_TEAM1)
             m_PlaceTeam = Activity::TEAM_1;
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_TEAM2)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_TEAM2)
             m_PlaceTeam = Activity::TEAM_2;
         // Toggle between normal scene object editing, and AI plan editing
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_MINIMAP)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_MINIMAP)
             m_FeatureSet = m_FeatureSet == ONLOADEDIT ? AIPLANEDIT : ONLOADEDIT;
 
         UpdateBrainPath();
@@ -1563,100 +1563,100 @@ void SceneEditorGUI::UpdatePieMenu()
     // Add pie menu slices and align them
     if (m_FeatureSet == ONLOADEDIT)
     {
-		PieMenuGUI::Slice newSceneSlice("New Scene", PieMenuGUI::PSI_NEW, PieMenuGUI::Slice::UP);
+		PieSlice newSceneSlice("New Scene", PieSlice::PSI_NEW, PieSlice::UP);
         m_pPieMenu->AddSlice(newSceneSlice);
-		PieMenuGUI::Slice loadSceneSlice("Load Scene", PieMenuGUI::PSI_LOAD, PieMenuGUI::Slice::UP);
+		PieSlice loadSceneSlice("Load Scene", PieSlice::PSI_LOAD, PieSlice::UP);
 		m_pPieMenu->AddSlice(loadSceneSlice);
 		
-		PieMenuGUI::Slice testSceneSlice("Test Scene", PieMenuGUI::PSI_DONE, PieMenuGUI::Slice::UP);
+		PieSlice testSceneSlice("Test Scene", PieSlice::PSI_DONE, PieSlice::UP);
         m_pPieMenu->AddSlice(testSceneSlice);
-        PieMenuGUI::Slice moveObjectsSlice("Move Objects", PieMenuGUI::PSI_MOVE, PieMenuGUI::Slice::LEFT);
+        PieSlice moveObjectsSlice("Move Objects", PieSlice::PSI_MOVE, PieSlice::LEFT);
 		m_pPieMenu->AddSlice(moveObjectsSlice);
 		
-		PieMenuGUI::Slice removeObjectsSlice("Remove Objects", PieMenuGUI::PSI_REMOVE, PieMenuGUI::Slice::LEFT);
+		PieSlice removeObjectsSlice("Remove Objects", PieSlice::PSI_REMOVE, PieSlice::LEFT);
         m_pPieMenu->AddSlice(removeObjectsSlice);
-		PieMenuGUI::Slice addNewSlice("Add New Object", PieMenuGUI::PSI_PICK, PieMenuGUI::Slice::RIGHT);
+		PieSlice addNewSlice("Add New Object", PieSlice::PSI_PICK, PieSlice::RIGHT);
 		m_pPieMenu->AddSlice(addNewSlice);
 		
-		PieMenuGUI::Slice saveSceneSlice("Save Scene", PieMenuGUI::PSI_SAVE, PieMenuGUI::Slice::DOWN);
+		PieSlice saveSceneSlice("Save Scene", PieSlice::PSI_SAVE, PieSlice::DOWN);
         m_pPieMenu->AddSlice(saveSceneSlice);
-		PieMenuGUI::Slice setToEditSlice("Edit AI Plan", PieMenuGUI::PSI_MINIMAP, PieMenuGUI::Slice::RIGHT);
+		PieSlice setToEditSlice("Edit AI Plan", PieSlice::PSI_MINIMAP, PieSlice::RIGHT);
         m_pPieMenu->AddSlice(setToEditSlice);
         if (m_pCurrentObject)
         {
-			PieMenuGUI::Slice team1Slice("Team 1 Actor", PieMenuGUI::PSI_TEAM1, PieMenuGUI::Slice::DOWN);
+			PieSlice team1Slice("Team 1 Actor", PieSlice::PSI_TEAM1, PieSlice::DOWN);
             m_pPieMenu->AddSlice(team1Slice);
-			PieMenuGUI::Slice team2Slice("Team 2 Actor", PieMenuGUI::PSI_TEAM2, PieMenuGUI::Slice::DOWN);
+			PieSlice team2Slice("Team 2 Actor", PieSlice::PSI_TEAM2, PieSlice::DOWN);
 			m_pPieMenu->AddSlice(team2Slice);
         }
         if (m_EditorGUIMode == ADDINGOBJECT)
         {
-			PieMenuGUI::Slice inFrontSlice("Put In Front Of", PieMenuGUI::PSI_INFRONT, PieMenuGUI::Slice::LEFT);
+			PieSlice inFrontSlice("Put In Front Of", PieSlice::PSI_INFRONT, PieSlice::LEFT);
             m_pPieMenu->AddSlice(inFrontSlice);
-            PieMenuGUI::Slice behindSlice("Put Behind Of", PieMenuGUI::PSI_BEHIND, PieMenuGUI::Slice::LEFT);
+            PieSlice behindSlice("Put Behind Of", PieSlice::PSI_BEHIND, PieSlice::LEFT);
 			m_pPieMenu->AddSlice(behindSlice);
         }
     }
     // When a metaplayer is designing his base blueprints to build in a metagame
     else if (m_FeatureSet == BLUEPRINTEDIT)
     {
-		PieMenuGUI::Slice doneBaseSlice("DONE Designing Base", PieMenuGUI::PSI_DONE, PieMenuGUI::Slice::UP);
+		PieSlice doneBaseSlice("DONE Designing Base", PieSlice::PSI_DONE, PieSlice::UP);
         m_pPieMenu->AddSlice(doneBaseSlice);
-        PieMenuGUI::Slice moveObjectSlice("Move Objects", PieMenuGUI::PSI_MOVE, PieMenuGUI::Slice::LEFT);
+        PieSlice moveObjectSlice("Move Objects", PieSlice::PSI_MOVE, PieSlice::LEFT);
 		m_pPieMenu->AddSlice(moveObjectSlice);
 		
-		PieMenuGUI::Slice removeObjectSlice("Remove Objects", PieMenuGUI::PSI_REMOVE, PieMenuGUI::Slice::DOWN);
+		PieSlice removeObjectSlice("Remove Objects", PieSlice::PSI_REMOVE, PieSlice::DOWN);
         m_pPieMenu->AddSlice(removeObjectSlice);
-		PieMenuGUI::Slice addNewSlice("Add New Object", PieMenuGUI::PSI_PICK, PieMenuGUI::Slice::RIGHT);
+		PieSlice addNewSlice("Add New Object", PieSlice::PSI_PICK, PieSlice::RIGHT);
 		m_pPieMenu->AddSlice(addNewSlice);
 		
-		PieMenuGUI::Slice placeBrainSlice("Place Brain", PieMenuGUI::PSI_BRAINHUNT, PieMenuGUI::Slice::RIGHT);
+		PieSlice placeBrainSlice("Place Brain", PieSlice::PSI_BRAINHUNT, PieSlice::RIGHT);
         m_pPieMenu->AddSlice(placeBrainSlice);
         if (m_EditorGUIMode == ADDINGOBJECT)
         {
-			PieMenuGUI::Slice inFrontSlice("Place Later Than", PieMenuGUI::PSI_INFRONT, PieMenuGUI::Slice::LEFT);
+			PieSlice inFrontSlice("Place Later Than", PieSlice::PSI_INFRONT, PieSlice::LEFT);
             m_pPieMenu->AddSlice(inFrontSlice);
-            PieMenuGUI::Slice behindSlice("Insert Prior To", PieMenuGUI::PSI_BEHIND, PieMenuGUI::Slice::LEFT);
+            PieSlice behindSlice("Insert Prior To", PieSlice::PSI_BEHIND, PieSlice::LEFT);
 			m_pPieMenu->AddSlice(behindSlice);
         }
     }
     // When the plans for an AI-built base are designed ahead of time
     else if (m_FeatureSet == AIPLANEDIT)
     {
-		PieMenuGUI::Slice loadSceneSlice("Load Scene", PieMenuGUI::PSI_LOAD, PieMenuGUI::Slice::UP);
+		PieSlice loadSceneSlice("Load Scene", PieSlice::PSI_LOAD, PieSlice::UP);
 		m_pPieMenu->AddSlice(loadSceneSlice);
 
-        PieMenuGUI::Slice moveObjectsSlice("Move Objects", PieMenuGUI::PSI_MOVE, PieMenuGUI::Slice::LEFT);
+        PieSlice moveObjectsSlice("Move Objects", PieSlice::PSI_MOVE, PieSlice::LEFT);
 		m_pPieMenu->AddSlice(moveObjectsSlice);
 		
-		PieMenuGUI::Slice removeObjectsSlice("Remove Objects", PieMenuGUI::PSI_REMOVE, PieMenuGUI::Slice::LEFT);
+		PieSlice removeObjectsSlice("Remove Objects", PieSlice::PSI_REMOVE, PieSlice::LEFT);
         m_pPieMenu->AddSlice(removeObjectsSlice);
-		PieMenuGUI::Slice addNewSlice("Add New Object", PieMenuGUI::PSI_PICK, PieMenuGUI::Slice::RIGHT);
+		PieSlice addNewSlice("Add New Object", PieSlice::PSI_PICK, PieSlice::RIGHT);
 		m_pPieMenu->AddSlice(addNewSlice);
 		
-		PieMenuGUI::Slice saveSceneSlice("Save Scene", PieMenuGUI::PSI_SAVE, PieMenuGUI::Slice::DOWN);
+		PieSlice saveSceneSlice("Save Scene", PieSlice::PSI_SAVE, PieSlice::DOWN);
         m_pPieMenu->AddSlice(saveSceneSlice);
-		PieMenuGUI::Slice setToEditSlice("Edit Scene Objects", PieMenuGUI::PSI_MINIMAP, PieMenuGUI::Slice::RIGHT);
+		PieSlice setToEditSlice("Edit Scene Objects", PieSlice::PSI_MINIMAP, PieSlice::RIGHT);
         m_pPieMenu->AddSlice(setToEditSlice);
         if (m_EditorGUIMode == ADDINGOBJECT)
         {
-			PieMenuGUI::Slice inFrontSlice("Place Later Than", PieMenuGUI::PSI_INFRONT, PieMenuGUI::Slice::LEFT);
+			PieSlice inFrontSlice("Place Later Than", PieSlice::PSI_INFRONT, PieSlice::LEFT);
             m_pPieMenu->AddSlice(inFrontSlice);
-            PieMenuGUI::Slice behindSlice("Insert Prior To", PieMenuGUI::PSI_BEHIND, PieMenuGUI::Slice::LEFT);
+            PieSlice behindSlice("Insert Prior To", PieSlice::PSI_BEHIND, PieSlice::LEFT);
 			m_pPieMenu->AddSlice(behindSlice);
         }
     }
     // In-game editing mode
     else
     {
-		PieMenuGUI::Slice moveObjectSlice("(Re)Move Object", PieMenuGUI::PSI_REMOVE, PieMenuGUI::Slice::UP, false);
+		PieSlice moveObjectSlice("(Re)Move Object", PieSlice::PSI_REMOVE, PieSlice::UP, false);
         m_pPieMenu->AddSlice(moveObjectSlice);
-        PieMenuGUI::Slice doneSlice("DONE Building!", PieMenuGUI::PSI_DONE, PieMenuGUI::Slice::LEFT);
+        PieSlice doneSlice("DONE Building!", PieSlice::PSI_DONE, PieSlice::LEFT);
 		m_pPieMenu->AddSlice(doneSlice);
 		
-		PieMenuGUI::Slice pickObjectSlice("Pick Object", PieMenuGUI::PSI_PICK, PieMenuGUI::Slice::RIGHT);
+		PieSlice pickObjectSlice("Pick Object", PieSlice::PSI_PICK, PieSlice::RIGHT);
         m_pPieMenu->AddSlice(pickObjectSlice);
-        PieMenuGUI::Slice saveSceneSlice("Save Scene", PieMenuGUI::PSI_SAVE, PieMenuGUI::Slice::DOWN, false);
+        PieSlice saveSceneSlice("Save Scene", PieSlice::PSI_SAVE, PieSlice::DOWN, false);
 		m_pPieMenu->AddSlice(saveSceneSlice);
     }
     m_pPieMenu->RealignSlices();

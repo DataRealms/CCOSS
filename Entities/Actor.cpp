@@ -253,7 +253,7 @@ int Actor::Create(const Actor &reference)
 
     m_MaxMass = reference.m_MaxMass;
 
-    for (list<PieMenuGUI::Slice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
         m_PieSlices.push_back(*itr);
     
     // Only load the static AI mode icons once
@@ -388,7 +388,7 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_MaxMass;
     else if (propName == "AddPieSlice")
     {
-        PieMenuGUI::Slice newSlice;
+        PieSlice newSlice;
         reader >> newSlice;
         m_PieSlices.push_back(newSlice);
 		PieMenuGUI::StoreCustomLuaSlice(newSlice);
@@ -465,7 +465,7 @@ int Actor::Save(Writer &writer) const
     }
     writer.NewProperty("MaxMass");
     writer << m_MaxMass;
-    for (list<PieMenuGUI::Slice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
     {
         writer.NewProperty("AddPieSlice");
         writer << *itr;
@@ -765,7 +765,7 @@ float Actor::FacingAngle(float angle) const
 bool Actor::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
     // Add the custom scripted options of this Actor
-    for (list<PieMenuGUI::Slice>::iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
         pPieMenu->AddSlice(*itr);
 
     m_PieNeedsUpdate = false;

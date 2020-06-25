@@ -918,33 +918,33 @@ EntityAllocation(GameActivity)
 
     virtual void OnPieMenu(Actor *actor) { /* Does nothing, kept here for program control flow. Method is not pure virtual to avoid a bunch of junk implementations in non-scritped activities. */};
 
-	virtual void AddPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
+	virtual void AddPieMenuSlice(std::string description, std::string functionName, PieSlice::SliceDirection direction, bool isEnabled)
 	{ 
 		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
 			m_pPieMenu[m_CurrentPieMenuPlayer]->AddSliceLua(description, functionName, direction, isEnabled);
 	};
 
-	virtual void AlterPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
+	virtual void AlterPieMenuSlice(std::string description, std::string functionName, PieSlice::SliceDirection direction, bool isEnabled)
 	{
 		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
 			m_pPieMenu[m_CurrentPieMenuPlayer]->AlterSliceLua(description, functionName, direction, isEnabled);
 	};
 
-	virtual PieMenuGUI::Slice RemovePieMenuSlice(std::string description, std::string functionName)
+	virtual PieSlice RemovePieMenuSlice(std::string description, std::string functionName)
 	{
 		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
 			return m_pPieMenu[m_CurrentPieMenuPlayer]->RemoveSliceLua(description, functionName);
-		return PieMenuGUI::Slice("", PieMenuGUI::PieSliceIndex::PSI_NONE, PieMenuGUI::Slice::SliceDirection::NONE, false);
+		return PieSlice("", PieSlice::PieSliceIndex::PSI_NONE, PieSlice::SliceDirection::NONE, false);
 	};
 
-	virtual std::vector<PieMenuGUI::Slice *> GetCurrentPieMenuSlices(int player) const 
+	virtual std::vector<PieSlice *> GetCurrentPieMenuSlices(int player) const 
 	{ 
 		//if (player >= 0 && player < Activity::MAXPLAYERCOUNT)
 			return m_pPieMenu[player]->GetCurrentSlices();
 		//return 0;
 	}
 
-	/*virtual std::vector<PieMenuGUI::Slice> * GetAvailablePieMenuSlices(int player) const 
+	/*virtual std::vector<PieSlice> * GetAvailablePieMenuSlices(int player) const 
 	{ 
 		if (player >= 0 && player < Activity::MAXPLAYERCOUNT)
 			return &m_pPieMenu[player]->GetAvailableSlices();
@@ -1180,7 +1180,7 @@ protected:
     // The winning team number, when the game is over
     int m_WinnerTeam;
 
-	std::vector<PieMenuGUI::Slice *> m_CurrentPieMenuSlices;
+	std::vector<PieSlice *> m_CurrentPieMenuSlices;
 
 	int m_CurrentPieMenuPlayer;
 

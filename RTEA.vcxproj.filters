@@ -468,6 +468,9 @@
     <ClInclude Include="System\Atom.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="System\PieSlice.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -883,6 +886,9 @@
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="System\Atom.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="PieSlice.cpp">
       <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>

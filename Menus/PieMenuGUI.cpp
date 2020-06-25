@@ -1,7 +1,6 @@
 #include "PieMenuGUI.h"
 
 #include "FrameMan.h"
-#include "PresetMan.h"
 #include "UInputMan.h"
 
 #include "Controller.h"
@@ -14,198 +13,8 @@
 
 using namespace RTE;
 
-const string PieMenuGUI::Slice::m_sClassName = "Slice";
 BITMAP *PieMenuGUI::s_Cursor;
-std::unordered_map<std::string, PieMenuGUI::Slice> PieMenuGUI::s_AllCustomLuaSlices;
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void PieMenuGUI::Slice::Clear() {
-	m_SliceType = PieMenuGUI::PSI_NONE;
-	m_Description.clear();
-	m_Direction = UP;
-	m_Enabled = true;
-	m_Icon.Reset();
-	m_AreaStart = 0;
-	m_AreaArc = c_QuarterPI;
-	m_MidAngle = m_AreaStart + (m_AreaArc / 2);
-	m_ScriptPath.clear();
-	m_FunctionName.clear();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int PieMenuGUI::Slice::Create() {
-	if (Serializable::Create() < 0) {
-		return -1;
-	}
-
-	switch (m_SliceType) {
-		case PSI_NONE:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Blank"));
-			break;
-		case PSI_PICKUP:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Pick Up"));
-			break;
-		case PSI_DROP:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Drop"));
-			break;
-		case PSI_NEXTITEM:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Next"));
-			break;
-		case PSI_PREVITEM:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Previous"));
-			break;
-		case PSI_RELOAD:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Reload"));
-			break;
-		case PSI_BUYMENU:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Trade Star"));
-			break;
-		case PSI_STATS:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Stats"));
-			break;
-		case PSI_MINIMAP:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Minimap"));
-			break;
-		case PSI_FORMSQUAD:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Follow"));
-			break;
-		case PSI_CEASEFIRE:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "White Flag"));
-			break;
-		case PSI_SENTRY:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Eye"));
-			break;
-		case PSI_PATROL:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Cycle"));
-			break;
-		case PSI_BRAINHUNT:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Brain"));
-			break;
-		case PSI_GOLDDIG:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Dig"));
-			break;
-		case PSI_GOTO:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Go To"));
-			break;
-		case PSI_RETURN:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Launch"));
-			break;
-		case PSI_STAY:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Land"));
-			break;
-		case PSI_SCUTTLE:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Death"));
-			break;
-		case PSI_DONE:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Check"));
-			break;
-		case PSI_LOAD:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Load"));
-			break;
-		case PSI_SAVE:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Save"));
-			break;
-		case PSI_NEW:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Clear"));
-			break;
-		case PSI_PICK:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Menu"));
-			break;
-		case PSI_MOVE:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Move"));
-			break;
-		case PSI_REMOVE:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Remove"));
-			break;
-		case PSI_INFRONT:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "In Front"));
-			break;
-		case PSI_BEHIND:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Behind"));
-			break;
-		case PSI_ZOOMIN:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Zoom In"));
-			break;
-		case PSI_ZOOMOUT:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Zoom Out"));
-			break;
-		case PSI_TEAM1:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Team 1"));
-			break;
-		case PSI_TEAM2:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Team 2"));
-			break;
-		case PSI_TEAM3:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Team 3"));
-			break;
-		case PSI_TEAM4:
-			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Team 4"));
-			break;
-		case PSI_SCRIPTED:
-			break;
-		default:
-			RTEAbort("Invalid sliceType " + m_SliceType);
-	}
-	return 0;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int PieMenuGUI::Slice::Create(const Slice &reference) {
-	m_SliceType = reference.m_SliceType;
-	m_Description = reference.m_Description;
-	m_Direction = reference.m_Direction;
-	m_Enabled = reference.m_Enabled;
-	m_Icon = reference.m_Icon;
-	m_AreaStart = reference.m_AreaStart;
-	m_AreaArc = reference.m_AreaArc;
-	m_MidAngle = reference.m_MidAngle;
-	m_ScriptPath = reference.m_ScriptPath;
-	m_FunctionName = reference.m_FunctionName;
-
-	return 0;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int PieMenuGUI::Slice::ReadProperty(std::string propName, Reader &reader) {
-	if (propName == "Description") {
-		reader >> m_Description;
-	} else if (propName == "Icon") {
-		reader >> m_Icon;
-	} else if (propName == "Direction") {
-		m_Direction = static_cast<SliceDirection>(std::stoi(reader.ReadPropValue()));
-	} else if (propName == "ScriptPath") {
-		reader >> m_ScriptPath;
-	} else if (propName == "FunctionName") {
-		reader >> m_FunctionName;
-	} else {
-		return Serializable::ReadProperty(propName, reader);
-	}
-
-	return 0;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int PieMenuGUI::Slice::Save(Writer &writer) const {
-	Serializable::Save(writer);
-
-	writer.NewProperty("Description");
-	writer << m_Description;
-	writer.NewProperty("Icon");
-	writer << m_Icon;
-	writer.NewProperty("Direction");
-	writer << m_Direction;
-	writer.NewProperty("ScriptPath");
-	writer << m_ScriptPath;
-	writer.NewProperty("FunctionName");
-	writer << m_FunctionName;
-
-	return 0;
-}
+std::unordered_map<std::string, PieSlice> PieMenuGUI::s_AllCustomLuaSlices;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -324,28 +133,28 @@ void PieMenuGUI::ResetSlices() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool PieMenuGUI::AddSlice(Slice &newSlice, bool takeAnyFreeCardinal) {
+bool PieMenuGUI::AddSlice(PieSlice &newSlice, bool takeAnyFreeCardinal) {
 	if (newSlice.GetIcon().GetFrameCount() <= 0) {
 		newSlice.Create();
 	}
-	std::unordered_map<Slice::SliceDirection, Slice *> sliceCardinalDirections = {
-		{Slice::UP, &m_UpSlice}, {Slice::LEFT, &m_LeftSlice}, {Slice::DOWN, &m_DownSlice}, {Slice::RIGHT, &m_RightSlice}
+	std::unordered_map<PieSlice::SliceDirection, PieSlice *> sliceCardinalDirections = {
+		{PieSlice::UP, &m_UpSlice}, {PieSlice::LEFT, &m_LeftSlice}, {PieSlice::DOWN, &m_DownSlice}, {PieSlice::RIGHT, &m_RightSlice}
 	};
-	std::unordered_map<Slice::SliceDirection, std::pair<std::list<Slice> *, std::list<Slice> *>> sliceIntercardinalDirections = {
-		{Slice::UP, {&m_UpRightSlices, &m_UpLeftSlices}},
-		{Slice::LEFT, {&m_UpLeftSlices, &m_DownLeftSlices}},
-		{Slice::DOWN, {&m_DownLeftSlices, &m_DownRightSlices}},
-		{Slice::RIGHT, {&m_UpRightSlices, &m_DownRightSlices}}
+	std::unordered_map<PieSlice::SliceDirection, std::pair<std::list<PieSlice> *, std::list<PieSlice> *>> sliceIntercardinalDirections = {
+		{PieSlice::UP, {&m_UpRightSlices, &m_UpLeftSlices}},
+		{PieSlice::LEFT, {&m_UpLeftSlices, &m_DownLeftSlices}},
+		{PieSlice::DOWN, {&m_DownLeftSlices, &m_DownRightSlices}},
+		{PieSlice::RIGHT, {&m_UpRightSlices, &m_DownRightSlices}}
 	};
 
-	for (const std::pair<const Slice::SliceDirection, Slice *> &sliceEntry : sliceCardinalDirections) {
-		if ((takeAnyFreeCardinal || sliceEntry.first == newSlice.GetDirection()) && sliceEntry.second->GetType() == PSI_NONE) {
+	for (const std::pair<const PieSlice::SliceDirection, PieSlice *> &sliceEntry : sliceCardinalDirections) {
+		if ((takeAnyFreeCardinal || sliceEntry.first == newSlice.GetDirection()) && sliceEntry.second->GetType() == PieSlice::PSI_NONE) {
 			*sliceEntry.second = newSlice;
 			return true;
 		}
 	}
 
-	std::pair<std::list<Slice> *, std::list<Slice> *> intercardinalDirectionsToCheck = sliceIntercardinalDirections.at(newSlice.GetDirection());
+	std::pair<std::list<PieSlice> *, std::list<PieSlice> *> intercardinalDirectionsToCheck = sliceIntercardinalDirections.at(newSlice.GetDirection());
 	if (intercardinalDirectionsToCheck.first->size() <= intercardinalDirectionsToCheck.second->size()) {
 		intercardinalDirectionsToCheck.first->push_back(newSlice);
 	} else {
@@ -359,28 +168,28 @@ bool PieMenuGUI::AddSlice(Slice &newSlice, bool takeAnyFreeCardinal) {
 
 void PieMenuGUI::RealignSlices() {
 	float sliceSpacer = c_EighthPI;
-	std::vector<Slice *> cardinalSlices = {&m_UpSlice, &m_LeftSlice, &m_DownSlice, &m_RightSlice};
-	std::vector<std::list<Slice> *> intercardinalSliceCollections = {&m_UpRightSlices, &m_UpLeftSlices, &m_DownLeftSlices, &m_DownRightSlices};
+	std::vector<PieSlice *> cardinalSlices = {&m_UpSlice, &m_LeftSlice, &m_DownSlice, &m_RightSlice};
+	std::vector<std::list<PieSlice> *> intercardinalSliceCollections = {&m_UpRightSlices, &m_UpLeftSlices, &m_DownLeftSlices, &m_DownRightSlices};
 
 	m_CurrentSlices.clear();
 
 	/// <summary>
 	/// Internal lambda function to set area values for a given intercardinal slice, and add it to the list of all slices.
 	/// </summary>
-	/// <param name="slice">A reference to the slice object.</param>
+	/// <param name="pieSlice">A reference to the slice object.</param>
 	/// <param name="sliceListSize">The size of the list the slice is in.</param>
 	/// <param name="currentSliceNumber">The current slice number being handled in the current list of intercardinal slices.</param>
 	/// <param name="currentAngleOffset">The current angle offset for this list of intercardinal slices.</param>
-	auto handleIntercardinalSlice = [this](Slice &slice, int sliceListSize, int currentSliceNumber, float currentAngleOffset) {
-		slice.SetAreaArc(c_QuarterPI / sliceListSize);
-		slice.SetAreaStart(currentAngleOffset + currentSliceNumber * slice.GetAreaArc());
-		m_CurrentSlices.push_back(&slice);
+	auto handleIntercardinalSlice = [this](PieSlice &pieSlice, int sliceListSize, int currentSliceNumber, float currentAngleOffset) {
+		pieSlice.SetAreaArc(c_QuarterPI / sliceListSize);
+		pieSlice.SetAreaStart(currentAngleOffset + currentSliceNumber * pieSlice.GetAreaArc());
+		m_CurrentSlices.push_back(&pieSlice);
 	};
 
-	std::list<Slice>::reverse_iterator sliceReverseIterator;
+	std::list<PieSlice>::reverse_iterator sliceReverseIterator;
 	float currentAngleOffset = sliceSpacer;
 	for (int i = 0; i < intercardinalSliceCollections.size(); i++) {
-		std::list<Slice> &currentIntercardinalSliceList = *intercardinalSliceCollections[i];
+		std::list<PieSlice> &currentIntercardinalSliceList = *intercardinalSliceCollections[i];
 
 		if (!currentIntercardinalSliceList.empty()) {
 			// Narrow the previous direction's cardinal slice's arc area, to account for intercardinal slices here.
@@ -396,7 +205,7 @@ void PieMenuGUI::RealignSlices() {
 					currentSliceNumber++;
 				}
 			} else {
-				for (Slice &slice : currentIntercardinalSliceList) {
+				for (PieSlice &slice : currentIntercardinalSliceList) {
 					handleIntercardinalSlice(slice, currentIntercardinalSliceList.size(), currentSliceNumber, currentAngleOffset);
 					currentSliceNumber++;
 				}
@@ -414,7 +223,7 @@ void PieMenuGUI::RealignSlices() {
 		currentAngleOffset += c_HalfPI;
 	}
 
-	for (Slice *slice : m_CurrentSlices) {
+	for (PieSlice *slice : m_CurrentSlices) {
 		slice->SetMidAngle(slice->GetAreaStart() + (slice->GetAreaArc() / 2));
 	}
 	m_RedrawBG = true;
@@ -422,9 +231,9 @@ void PieMenuGUI::RealignSlices() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const PieMenuGUI::Slice *PieMenuGUI::GetSliceOnAngle(float angle) const {
+const PieSlice *PieMenuGUI::GetSliceOnAngle(float angle) const {
 	float areaEnd;
-	for (const Slice *slice : m_CurrentSlices) {
+	for (const PieSlice *slice : m_CurrentSlices) {
 		areaEnd = slice->GetAreaStart() + slice->GetAreaArc();
 		if (slice->GetAreaStart() <= angle && areaEnd > angle) {
 			return slice;
@@ -439,9 +248,9 @@ const PieMenuGUI::Slice *PieMenuGUI::GetSliceOnAngle(float angle) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool PieMenuGUI::AddSliceLua(const std::string &description, const std::string &functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled) {
+bool PieMenuGUI::AddSliceLua(const std::string &description, const std::string &functionName, PieSlice::SliceDirection direction, bool isEnabled) {
 	if (s_AllCustomLuaSlices.find(description + "::" + functionName) != s_AllCustomLuaSlices.end()) {
-		Slice foundSlice = s_AllCustomLuaSlices[description + "::" + functionName];
+		PieSlice foundSlice = s_AllCustomLuaSlices[description + "::" + functionName];
 		foundSlice.SetDirection(direction);
 		foundSlice.SetEnabled(isEnabled);
 		AddSlice(foundSlice);
@@ -452,13 +261,13 @@ bool PieMenuGUI::AddSliceLua(const std::string &description, const std::string &
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PieMenuGUI::AlterSliceLua(const std::string &description, const std::string &functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled) {
-	Slice foundSlice;
-	std::vector<Slice *>::iterator sliceIterator = std::find_if(m_CurrentSlices.begin(), m_CurrentSlices.end(), [&description, &functionName](const Slice *slice) {
+void PieMenuGUI::AlterSliceLua(const std::string &description, const std::string &functionName, PieSlice::SliceDirection direction, bool isEnabled) {
+	PieSlice foundSlice;
+	std::vector<PieSlice *>::iterator sliceIterator = std::find_if(m_CurrentSlices.begin(), m_CurrentSlices.end(), [&description, &functionName](const PieSlice *slice) {
 		return slice->GetDescription() == description && slice->GetFunctionName() == functionName;
 	});
 
-	if (sliceIterator != m_CurrentSlices.end() && (*sliceIterator)->GetType() != PieSliceIndex::PSI_NONE) {
+	if (sliceIterator != m_CurrentSlices.end() && (*sliceIterator)->GetType() != PieSlice::PSI_NONE) {
 		foundSlice.SetDirection(direction);
 		foundSlice.SetEnabled(isEnabled);
 
@@ -471,8 +280,8 @@ void PieMenuGUI::AlterSliceLua(const std::string &description, const std::string
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PieMenuGUI::Slice PieMenuGUI::RemoveSliceLua(const std::string &description, const std::string &functionName) {
-	Slice removedSlice;
+PieSlice PieMenuGUI::RemoveSliceLua(const std::string &description, const std::string &functionName) {
+	PieSlice removedSlice;
 
 	if (m_UpSlice.GetDescription() == description && m_UpSlice.GetFunctionName() == functionName)
 		m_UpSlice.Reset();
@@ -483,9 +292,9 @@ PieMenuGUI::Slice PieMenuGUI::RemoveSliceLua(const std::string &description, con
 	if (m_RightSlice.GetDescription() == description && m_RightSlice.GetFunctionName() == functionName)
 		m_RightSlice.Reset();
 	else {
-		std::vector<std::list<Slice> *> sliceCollections = {&m_UpRightSlices, &m_UpLeftSlices, &m_DownLeftSlices, &m_DownRightSlices};
-		for (std::list<Slice> *sliceList : sliceCollections) {
-			std::list<Slice>::iterator sliceIterator = std::find_if(sliceList->begin(), sliceList->end(), [&description, &functionName](const Slice &slice) {
+		std::vector<std::list<PieSlice> *> sliceCollections = {&m_UpRightSlices, &m_UpLeftSlices, &m_DownLeftSlices, &m_DownRightSlices};
+		for (std::list<PieSlice> *sliceList : sliceCollections) {
+			std::list<PieSlice>::iterator sliceIterator = std::find_if(sliceList->begin(), sliceList->end(), [&description, &functionName](const PieSlice &slice) {
 				return slice.GetDescription() == description && slice.GetFunctionName() == functionName;
 			});
 			if (sliceIterator != sliceList->end()) {
@@ -569,7 +378,7 @@ void PieMenuGUI::Draw(BITMAP *targetBitmap, const Vector &targetPos) const  {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool PieMenuGUI::SelectSlice(const Slice *sliceToSelect, bool moveCursorToSlice) {
+bool PieMenuGUI::SelectSlice(const PieSlice *sliceToSelect, bool moveCursorToSlice) {
 	if (sliceToSelect == nullptr || sliceToSelect == m_HoveredSlice) {
 		return false;
 	}
@@ -645,7 +454,7 @@ bool PieMenuGUI::UpdateAnalogInput() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool PieMenuGUI::UpdateDigitalInput() {
-	std::map<ControlState, Slice *> controlStateSlices = {
+	std::map<ControlState, PieSlice *> controlStateSlices = {
 		{PRESS_UP, &m_UpSlice},
 		{PRESS_LEFT, &m_LeftSlice},
 		{PRESS_DOWN, &m_DownSlice},
@@ -664,7 +473,7 @@ bool PieMenuGUI::UpdateDigitalInput() {
 		{PRESS_RIGHT, {{0, m_LeftSlice.GetMidAngle()}, true}}
 	};
 
-	for (std::pair<ControlState, Slice *> controlStateSliceEntry : controlStateSlices) {
+	for (std::pair<ControlState, PieSlice *> controlStateSliceEntry : controlStateSlices) {
 		if (m_Controller->IsState(controlStateSliceEntry.first)) {
 			const std::pair<float, float> &selectionZoomAngles = controlStateSelectionZoomAngles.at(controlStateSliceEntry.first).first;
 			bool shouldZoom = !m_HoveredSlice;
@@ -680,7 +489,7 @@ bool PieMenuGUI::UpdateDigitalInput() {
 					((m_CursorAngle > selectionStepAngles.first && m_CursorAngle < selectionStepAngles.second) ? -1 : 1) :
 					((m_CursorAngle > selectionStepAngles.first || m_CursorAngle < selectionStepAngles.second) ? -1 : 1);
 
-				vector<Slice *>::iterator sliceToSelect = std::find(m_CurrentSlices.begin(), m_CurrentSlices.end(), m_HoveredSlice) + stepDirection;
+				vector<PieSlice *>::iterator sliceToSelect = std::find(m_CurrentSlices.begin(), m_CurrentSlices.end(), m_HoveredSlice) + stepDirection;
 				if (sliceToSelect >= m_CurrentSlices.end()) {
 					sliceToSelect = m_CurrentSlices.begin();
 				} else if (sliceToSelect < m_CurrentSlices.begin()) {
@@ -708,7 +517,7 @@ void PieMenuGUI::UpdateSliceActivation() {
 		soundToPlay->Play();
 	}
 
-	if (GetPieCommand() == PSI_SCRIPTED) {
+	if (GetPieCommand() == PieSlice::PSI_SCRIPTED) {
 		g_LuaMan.SetTempEntity(m_Actor);
 		// TODO: Investigate reloading the file each time. I think it's needed cause this stuff isn't in PresetMan, so this is the only way for it to be reloadable. To test, have script on slice, edit it and see what happens with and without this.
 		g_LuaMan.RunScriptFile(m_ActivatedSlice->GetScriptPath());
@@ -729,7 +538,7 @@ void PieMenuGUI::RedrawMenuBackground() {
 		Vector separator;
 
 		// Draw four separator lines between each slice so the resulting separation will be at least 2 pixels thick, regardless of the separated slices' angles.
-		for (const Slice *slice : m_CurrentSlices) {
+		for (const PieSlice *slice : m_CurrentSlices) {
 			separator.SetIntXY(m_InnerRadius + m_Thickness + 2, 0);
 			separator.RadRotate(slice->GetAreaStart());
 			line(m_BGBitmap, centerX, centerY, centerX + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_MaskColor);
@@ -936,7 +745,7 @@ void PieMenuGUI::DrawPieIcons(BITMAP *targetBitmap, const Vector &drawPos) const
 	int sliceFrameCount;
 	Vector sliceIconOffset;
 
-	for (const Slice *slice : m_CurrentSlices) {
+	for (const PieSlice *slice : m_CurrentSlices) {
 		sliceFrames = slice->GetIcon().GetBitmaps8();
 		sliceFrameCount = slice->GetIcon().GetFrameCount();
 

@@ -2022,7 +2022,7 @@ int LuaMan::Create()
             .def("RemovePieMenuSlice", &GameActivity::RemovePieMenuSlice)
 			.def_readwrite("PieMenuSlices", &GameActivity::m_CurrentPieMenuSlices, return_stl_iterator),
 		
-		class_<PieMenuGUI::Slice>("Slice")
+		class_<PieSlice>("Slice")
 			.enum_("Direction")
 			[
 				value("NONE", 0),
@@ -2074,10 +2074,10 @@ int LuaMan::Create()
 				]
 
 			.def(constructor<>())
-			.property("FunctionName", &PieMenuGUI::Slice::GetFunctionName)
-			.property("Description", &PieMenuGUI::Slice::GetDescription)
-			.property("Type", &PieMenuGUI::Slice::GetType)
-			.property("Direction", &PieMenuGUI::Slice::GetDirection),
+			.property("FunctionName", &PieSlice::GetFunctionName)
+			.property("Description", &PieSlice::GetDescription)
+			.property("Type", &PieSlice::GetType)
+			.property("Direction", &PieSlice::GetDirection),
 
         ABSTRACTLUABINDING(GlobalScript, Entity)
 			.def("Deactivate", &GlobalScript::Deactivate),

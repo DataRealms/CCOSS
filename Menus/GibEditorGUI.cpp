@@ -283,32 +283,32 @@ void GibEditorGUI::Update()
     ///////////////////////////////////////
     // Handle pie menu selections
 
-    if (m_pPieMenu->GetPieCommand() != PieMenuGUI::PSI_NONE)
+    if (m_pPieMenu->GetPieCommand() != PieSlice::PSI_NONE)
     {
-        if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_PICK)
+        if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_PICK)
             m_EditorGUIMode = PICKINGGIB;
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_LOAD)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_LOAD)
         {
             // Set up the picker to pick an MOSRotating to load
             m_EditorGUIMode = PICKOBJECTTOLOAD;
             m_pPicker->ShowOnlyType("MOSRotating");
         }
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_MOVE)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_MOVE)
             m_EditorGUIMode = MOVINGGIB;
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_REMOVE)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_REMOVE)
             m_EditorGUIMode = DELETINGGIB;
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_DONE)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_DONE)
             m_EditorGUIMode = DONEEDITING;
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_ZOOMIN && m_ZoomFactor < MAXZOOMFACTOR)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_ZOOMIN && m_ZoomFactor < MAXZOOMFACTOR)
             m_ZoomFactor++;
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_ZOOMOUT && m_ZoomFactor > MINZOOMFACTOR)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_ZOOMOUT && m_ZoomFactor > MINZOOMFACTOR)
             m_ZoomFactor--;
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_INFRONT)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_INFRONT)
         {
             m_PreviousMode = m_EditorGUIMode;
             m_EditorGUIMode = PLACEINFRONT;
         }
-        else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_BEHIND)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_BEHIND)
         {
             m_PreviousMode = m_EditorGUIMode;
             m_EditorGUIMode = PLACEBEHIND;
@@ -823,31 +823,31 @@ void GibEditorGUI::UpdatePieMenu()
     m_pPieMenu->ResetSlices();
 
     // Add pie menu slices and align them
-//    m_pPieMenu->AddSlice(PieMenuGUI::Slice("New Object", PieMenuGUI::PSI_NEW, PieMenuGUI::Slice::UP));
-	PieMenuGUI::Slice loadObjectSlice("Load Object", PieMenuGUI::PSI_LOAD, PieMenuGUI::Slice::UP);
+//    m_pPieMenu->AddSlice(PieSlice("New Object", PieSlice::PSI_NEW, PieSlice::UP));
+	PieSlice loadObjectSlice("Load Object", PieSlice::PSI_LOAD, PieSlice::UP);
     m_pPieMenu->AddSlice(loadObjectSlice);
-    PieMenuGUI::Slice testGibSlice("Test Gib Object", PieMenuGUI::PSI_DONE, PieMenuGUI::Slice::UP);
+    PieSlice testGibSlice("Test Gib Object", PieSlice::PSI_DONE, PieSlice::UP);
 	m_pPieMenu->AddSlice(testGibSlice);
 	
-	PieMenuGUI::Slice moveGibSlice("(Re)Move Gibs", PieMenuGUI::PSI_MOVE, PieMenuGUI::Slice::LEFT);
+	PieSlice moveGibSlice("(Re)Move Gibs", PieSlice::PSI_MOVE, PieSlice::LEFT);
     m_pPieMenu->AddSlice(moveGibSlice);
-    PieMenuGUI::Slice deleteGibSlice("Delete Gibs", PieMenuGUI::PSI_REMOVE, PieMenuGUI::Slice::LEFT);
+    PieSlice deleteGibSlice("Delete Gibs", PieSlice::PSI_REMOVE, PieSlice::LEFT);
 	m_pPieMenu->AddSlice(deleteGibSlice);
 	
-	PieMenuGUI::Slice addGibSlice("Add New Gib", PieMenuGUI::PSI_PICK, PieMenuGUI::Slice::RIGHT);
+	PieSlice addGibSlice("Add New Gib", PieSlice::PSI_PICK, PieSlice::RIGHT);
     m_pPieMenu->AddSlice(addGibSlice);
-    PieMenuGUI::Slice zoomInSlice("Zoom In", PieMenuGUI::PSI_ZOOMIN, PieMenuGUI::Slice::RIGHT, m_ZoomFactor < MAXZOOMFACTOR);
+    PieSlice zoomInSlice("Zoom In", PieSlice::PSI_ZOOMIN, PieSlice::RIGHT, m_ZoomFactor < MAXZOOMFACTOR);
 	m_pPieMenu->AddSlice(zoomInSlice);
 	
-	PieMenuGUI::Slice zoomOutSlice("Zoom Out", PieMenuGUI::PSI_ZOOMOUT, PieMenuGUI::Slice::RIGHT, m_ZoomFactor > MINZOOMFACTOR);
+	PieSlice zoomOutSlice("Zoom Out", PieSlice::PSI_ZOOMOUT, PieSlice::RIGHT, m_ZoomFactor > MINZOOMFACTOR);
     m_pPieMenu->AddSlice(zoomOutSlice);
-    PieMenuGUI::Slice saveObjectSlice("Save Object", PieMenuGUI::PSI_SAVE, PieMenuGUI::Slice::DOWN);
+    PieSlice saveObjectSlice("Save Object", PieSlice::PSI_SAVE, PieSlice::DOWN);
 	m_pPieMenu->AddSlice(saveObjectSlice);
     if (m_EditorGUIMode == ADDINGGIB)
     {
-		PieMenuGUI::Slice inFrontSlice("Put In Front Of", PieMenuGUI::PSI_INFRONT, PieMenuGUI::Slice::LEFT);
+		PieSlice inFrontSlice("Put In Front Of", PieSlice::PSI_INFRONT, PieSlice::LEFT);
         m_pPieMenu->AddSlice(inFrontSlice);
-        PieMenuGUI::Slice behindSlice("Put Behind Of", PieMenuGUI::PSI_BEHIND, PieMenuGUI::Slice::LEFT);
+        PieSlice behindSlice("Put Behind Of", PieSlice::PSI_BEHIND, PieSlice::LEFT);
 		m_pPieMenu->AddSlice(behindSlice);
     }
 

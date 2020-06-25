@@ -134,7 +134,7 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_Supported = reference.m_Supported;
     m_Loudness = reference.m_Loudness;
 
-    for (list<PieMenuGUI::Slice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
         m_PieSlices.push_back(*itr);
 
     return 0;
@@ -169,7 +169,7 @@ int HeldDevice::ReadProperty(std::string propName, Reader &reader)
         reader >> m_Loudness;
     else if (propName == "AddPieSlice")
     {
-        PieMenuGUI::Slice newSlice;
+        PieSlice newSlice;
         reader >> newSlice;
         m_PieSlices.push_back(newSlice);
 		PieMenuGUI::StoreCustomLuaSlice(newSlice);
@@ -209,7 +209,7 @@ int HeldDevice::Save(Writer &writer) const
     writer << m_MaxSharpLength;
     writer.NewProperty("Loudness");
     writer << m_Loudness;
-    for (list<PieMenuGUI::Slice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
     {
         writer.NewProperty("AddPieSlice");
         writer << *itr;
@@ -287,7 +287,7 @@ Vector HeldDevice::GetMagazinePos() const
 bool HeldDevice::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
     // Add the custom scripted options of this specific device
-    for (list<PieMenuGUI::Slice>::iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
         pPieMenu->AddSlice(*itr);
 
     return false;

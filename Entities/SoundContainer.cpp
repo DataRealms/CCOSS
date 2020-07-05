@@ -159,7 +159,6 @@ namespace RTE {
 			return;
 		}
 
-		attenuationStartDistance = (attenuationStartDistance < 0) ? c_DefaultAttenuationStartDistance : attenuationStartDistance;
 		soundSet.push_back({soundFile, soundObject, offset, minimumAudibleDistance, attenuationStartDistance});
 		if (soundSetIndex >= m_SoundSets.size()) { m_SoundSets.push_back(soundSet); }
 

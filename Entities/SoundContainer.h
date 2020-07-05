@@ -147,7 +147,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error.</param>
-		void AddSound(const std::string &soundFilePath, bool abortGameForInvalidSound) { return AddSound(soundFilePath, Vector(), c_DefaultAttenuationStartDistance, abortGameForInvalidSound); }
+		void AddSound(const std::string &soundFilePath, bool abortGameForInvalidSound) { return AddSound(soundFilePath, Vector(), -1, abortGameForInvalidSound); }
 
 		/// <summary>
 		/// Adds a new sound to this SoundContainer, either spitting out a lua error or aborting if it fails.

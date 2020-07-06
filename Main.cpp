@@ -146,12 +146,12 @@ struct Star {
     // Scrolling ratio
     float m_ScrollRatio = 1.0F;
     // Normalized intensity 0-1.0
-    float m_Intensity = 1.0F;
+    int m_Intensity = 1;
     // Type
     StarSize m_Size = StarSmall;
 
     Star() {}
-	Star(BITMAP* pBitmap, const std::array<int, 2>& pos, float scrollRatio, float intensity)
+	Star(BITMAP* pBitmap, const std::array<int, 2>& pos, float scrollRatio, int intensity)
 		: m_pBitmap(pBitmap),
 		m_Pos(pos),
 		m_ScrollRatio(scrollRatio),
@@ -430,17 +430,17 @@ bool PlayIntroTitle() {
         if (RandomNum() < 0.95F) {
 			// Default size is StarSmall.
             aStars[star].m_pBitmap = apStarSmallBitmaps[RandomNum(0, starSmallBitmapCount - 1)];
-            aStars[star].m_Intensity = RandomNum(0.001F, 0.5F);
+			aStars[star].m_Intensity = RandomNum(0, 92); //185 * RangeRand(0.001F, 0.5F)
         }
         else if (RandomNum() < 0.85F) {
             aStars[star].m_Size = StarLarge;
             aStars[star].m_pBitmap = apStarLargeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
-            aStars[star].m_Intensity = RandomNum(0.6F, 1.0F);
+			aStars[star].m_Intensity = RandomNum(111, 185);
         }
         else {
             aStars[star].m_Size = StarHuge;
             aStars[star].m_pBitmap = apStarHugeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
-            aStars[star].m_Intensity = RandomNum(0.9F, 1.0F);
+            aStars[star].m_Intensity = RandomNum(166, 185);
         }
 		aStars[star].m_Pos = std::array<int, 2>{RandomNum(0, resX), RandomNum(0, pBackdrop->GetBitmap()->h)};
         // To match the nebula scroll
@@ -602,9 +602,9 @@ bool PlayIntroTitle() {
             for (int star = 0; star < starCount; ++star)
             {
                 size = aStars[star].m_Size;
-				int intensity = 185 * aStars[star].m_Intensity + 35 * (size + 1) * RandomNum();
+				int intensity = aStars[star].m_Intensity + RandomNum(0, 35 * (size + 1));
                 set_screen_blender(intensity, intensity, intensity, intensity);
-				starDrawPos = std::array<int, 2>{aStars[star].m_Pos[0], static_cast<int>(aStars[star].m_Pos[1] - scrollOffset.m_Y * aStars[star].m_ScrollRatio)};
+				starDrawPos = std::array<int, 2> { aStars[star].m_Pos[0], static_cast<int>(aStars[star].m_Pos[1] - scrollOffset.m_Y * aStars[star].m_ScrollRatio) };
                 draw_trans_sprite(g_FrameMan.GetBackBuffer32(), aStars[star].m_pBitmap, starDrawPos[0], starDrawPos[1]);
             }
 

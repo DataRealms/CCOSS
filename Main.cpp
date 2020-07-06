@@ -430,7 +430,7 @@ bool PlayIntroTitle() {
         if (RandomNum() < 0.95F) {
 			// Default size is StarSmall.
             aStars[star].m_pBitmap = apStarSmallBitmaps[RandomNum(0, starSmallBitmapCount - 1)];
-			aStars[star].m_Intensity = RandomNum(0, 92); //185 * RangeRand(0.001F, 0.5F)
+			aStars[star].m_Intensity = RandomNum(0, 92);
         }
         else if (RandomNum() < 0.85F) {
             aStars[star].m_Size = StarLarge;

@@ -95,17 +95,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ThrownDevice::ResetAllTimers() {
-		double elapsedTime = 0;
-		if (m_Activated) { elapsedTime = m_ActivationTmr.GetElapsedSimTimeMS(); }
+		double elapsedTime = m_Activated ? m_ActivationTimer.GetElapsedSimTimeMS() : 0;
 		HeldDevice::ResetAllTimers();
-		if (m_Activated) { m_ActivationTmr.SetElapsedSimTimeMS(elapsedTime); }
+		if (m_Activated) { m_ActivationTimer.SetElapsedSimTimeMS(elapsedTime); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ThrownDevice::Activate() {
 		if (!m_Activated) {
-			m_ActivationTmr.Reset();
+			m_ActivationTimer.Reset();
 			m_ActivationSound.Play(m_Pos);
 			m_Activated = true;
 		}

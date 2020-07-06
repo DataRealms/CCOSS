@@ -55,7 +55,6 @@ namespace RTE {
 		} else if (propName == "InheritsVel") {
 			reader >> m_InheritsVel;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;

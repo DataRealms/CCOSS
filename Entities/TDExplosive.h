@@ -6,7 +6,7 @@
 namespace RTE {
 
 	/// <summary>
-	/// [Concrete Class] - A thrown device that explodes after its trigger delay is completed after its activation.
+	/// A thrown device that explodes after its trigger delay is completed after its activation.
 	/// </summary>
 	class TDExplosive : public ThrownDevice {
 
@@ -52,13 +52,13 @@ namespace RTE {
 		/// <summary>
 		/// If true, then the frame will not be changed automatically during update
 		/// </summary>
-		/// <returns>Whether or not the TDExplosive's Frame will change automatically during update</returns>
+		/// <returns>Whether or not the TDExplosive's Frame will change automatically during update.</returns>
 		bool IsAnimatedManually() const { return m_IsAnimatedManually; }
 
 		/// <summary>
 		/// Sets whether this TDExplosive is animated manually.
 		/// </summary>
-		/// <param name="isAnimatedManually">Whether or not to animate manually</param>
+		/// <param name="isAnimatedManually">Whether or not to animate manually.</param>
 		void SetAnimatedManually(bool isAnimatedManually) { m_IsAnimatedManually = isAnimatedManually; }
 #pragma endregion
 
@@ -71,11 +71,11 @@ namespace RTE {
 		/// <summary>
 		/// Draws this' current graphical HUD overlay representation to a BITMAP of choice.
 		/// </summary>
-		/// <param name="pTargetBitmap">A pointer to a BITMAP to draw on.</param>
+		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
 		/// <param name="whichScreen">Which player's screen this is being drawn to. May affect what HUD elements get drawn etc.</param>
-		/// <param name="playerControlled">Whether or not this MovableObject is currently player controlled (not applicable for TDExplosive)</param>
-		virtual void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
+		/// <param name="playerControlled">Whether or not this MovableObject is currently player controlled (not applicable for TDExplosive).</param>
+		virtual void DrawHUD(BITMAP *targetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
 #pragma endregion
 
 	protected:
@@ -85,6 +85,7 @@ namespace RTE {
 		bool m_IsAnimatedManually; //!< If true m_Frame is not changed during an update hence the animation is done by external Lua code.
 
 	private:
+
 		/// <summary>
 		/// Clears all the member variables of this TDExplosive, effectively resetting the members of this abstraction level only.
 		/// </summary>

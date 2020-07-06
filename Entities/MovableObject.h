@@ -1025,7 +1025,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    Whether this MovableObject is of Gold or not.
 
-    virtual bool IsGold() const { return m_MOType == TypeGeneric && 0; }
+    bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->GetIndex() == c_GoldMaterialID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

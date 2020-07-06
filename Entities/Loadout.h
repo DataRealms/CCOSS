@@ -157,7 +157,7 @@ ClassInfoGetters
 // Description:     Gets the preset of the delivery craft set for this loadout. Owenership
 //                  is NOT transferred!
 // Arguments:       None.
-// Return value:    A pointer to the ACraft preset instance. OINT.
+// Return value:    A pointer to the ACraft preset instance. OWNERSHIP IS NOT TRANSFERRED!
 
     virtual const ACraft * GetDeliveryCraft() const { return m_pDeliveryCraft; }
 
@@ -167,7 +167,7 @@ ClassInfoGetters
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the preset of the delivery craft set for this loadout. Owenership
 //                  is NOT transferred!
-// Arguments:       A pointer to the ACraft preset instance. OINT.
+// Arguments:       A pointer to the ACraft preset instance. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    None.
 
     virtual void SetDeliveryCraft(const ACraft *pCraft) { m_pDeliveryCraft = pCraft; m_Complete = m_Complete && m_pDeliveryCraft; }
@@ -178,7 +178,7 @@ ClassInfoGetters
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the list of cargo Entity items this Loadout represents.
 // Arguments:       None.
-// Return value:    A pointer to the list of cargo Entity items. OINT.
+// Return value:    A pointer to the list of cargo Entity items. OWNERSHIP IS NOT TRANSFERRED!
 
     virtual std::list<const SceneObject *> * GetCargoList() { return &m_CargoItems; }
 

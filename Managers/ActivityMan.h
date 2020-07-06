@@ -1338,7 +1338,7 @@ public:
 // Description:     Gets the activity set to use a copy of for next restart. Ownership is
 //                  NOT transferred!
 // Arguments:       None.
-// Return value:    The activity to put into effect next time ResetActivity is called. OINT!
+// Return value:    The activity to put into effect next time ResetActivity is called. OWNERSHIP IS NOT TRANSFERRED!
 
     Activity * GetStartActivity() { return m_pStartActivity; }
 

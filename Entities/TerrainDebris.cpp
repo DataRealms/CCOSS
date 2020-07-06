@@ -73,7 +73,6 @@ namespace RTE {
 		} else if (propName == "DensityPerMeter") {
 			reader >> m_Density;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Entity::ReadProperty(propName, reader);
 		}
 		return 0;

@@ -328,7 +328,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SelectScene
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets a specific scene as the currently selected one. OINT.
+// Description:     Sets a specific scene as the currently selected one. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       The Scene to set as selected. Ownership is NOT transferred.
 // Return value:    None.
 
@@ -562,8 +562,8 @@ protected:
 // Description:     Automatically resolves an offensive fight without actually launching
 //                  and going through an Activity. Will randomly determine who won and
 //                  what the consequences are.
-// Arguments:       The Offsenive Activity to resolve and manipulate accordingly. OINT
-//                  The Scene this Offensive is supposed to take place on. OINT
+// Arguments:       The Offsenive Activity to resolve and manipulate accordingly. OWNERSHIP IS NOT TRANSFERRED!
+//                  The Scene this Offensive is supposed to take place on. OWNERSHIP IS NOT TRANSFERRED!
 //                  Whether to check the validity of all players based on whether they
 //                  have brains remaining alive. If false, all active players will be
 //                  instead be flagged as having had brains at some point.

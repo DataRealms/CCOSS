@@ -42,7 +42,6 @@ namespace RTE {
 			reader >> *m_Atom;
 			m_Atom->SetOwner(this);
 		} else {
-			// See if the base class(es) can find a match instead
 			return MOSprite::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -121,7 +120,6 @@ namespace RTE {
 		// Do static particle bounce calculations.
 		int hitCount = m_Atom->Travel(g_TimerMan.GetDeltaTimeSecs(), true, g_SceneMan.SceneIsLocked());
 
-		// Now clear out the ignore override for next frame
 		m_Atom->ClearMOIDIgnoreList();
 
 		if (m_SpriteAnimMode == ONCOLLIDE) {
@@ -131,7 +129,7 @@ namespace RTE {
 				m_AngularVel = -m_AngularVel;
 			}
 
-			// TODO: Rework this is it's less incomprehensible black magic math and not driven by AngularVel.
+			// TODO: Rework this so it's less incomprehensible black magic math and not driven by AngularVel.
 			double newFrame = m_Rotation.GetRadAngle();
 			newFrame -= std::floorf(m_Rotation.GetRadAngle() / (2 * c_PI)) * (2 * c_PI);
 			newFrame /= (2 * c_PI);
@@ -145,19 +143,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MOSParticle::Update() {
-		MOSprite::Update();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void MOSParticle::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
 		Vector spritePos(m_Pos + m_SpriteOffset - targetPos);
 
 		int spriteX = 0;
 		int spriteY = 0;
 
-		// Draw the requested material silhouette on the material bitmap
 		switch (mode) {
 			case g_DrawMaterial:
 				draw_character_ex(targetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY(), m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
@@ -191,13 +182,16 @@ namespace RTE {
 				draw_sprite(targetBitmap, m_aSprite[m_Frame], spritePos.GetFloorIntX(), spritePos.GetFloorIntY());
 				break;
 		}
+		
+		if (m_pScreenEffect && mode == g_DrawColor && !onlyPhysical) { SetPostScreenEffectToDraw(); }
+	}
 
-		// Set the screen effect to draw at the final post processing stage
-		if (m_pScreenEffect && mode == g_DrawColor && !onlyPhysical) {
-			if (m_AgeTimer.GetElapsedSimTimeMS() >= m_EffectStartTime && (m_EffectStopTime == 0 || !m_AgeTimer.IsPastSimMS(m_EffectStopTime))) {
-				if (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY())) {
-					g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, LERP(m_EffectStartTime, m_EffectStopTime, m_EffectStartStrength, m_EffectStopStrength, m_AgeTimer.GetElapsedSimTimeMS()), m_EffectRotAngle);
-				}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MOSParticle::SetPostScreenEffectToDraw() const {
+		if (m_AgeTimer.GetElapsedSimTimeMS() >= m_EffectStartTime && (m_EffectStopTime == 0 || !m_AgeTimer.IsPastSimMS(m_EffectStopTime))) {
+			if (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY())) {
+				g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, LERP(m_EffectStartTime, m_EffectStopTime, m_EffectStartStrength, m_EffectStopStrength, m_AgeTimer.GetElapsedSimTimeMS()), m_EffectRotAngle);
 			}
 		}
 	}

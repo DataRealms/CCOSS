@@ -110,13 +110,13 @@ namespace RTE {
 		/// Gets the absolute largest of the two elements. Will always be positive.
 		/// </summary>
 		/// <returns>A float describing the largest value of the two, but not the magnitude.</returns>
-		float GetLargest() const { return std::fabs(std::fabs(m_X) > std::fabs(m_Y) ? m_X : m_Y); }
+		float GetLargest() const { return (std::fabs(std::fabs(m_X) > std::fabs(m_Y)) ? m_X : m_Y); }
 
 		/// <summary>
 		/// Gets the absolute smallest of the two elements. Will always be positive.
 		/// </summary>
 		/// <returns>A float describing the smallest value of the two, but not the magnitude.</returns>
-		float GetSmallest() const { return std::fabs(std::fabs(m_X) > std::fabs(m_Y) ? m_Y : m_X); }
+		float GetSmallest() const { return (std::fabs(std::fabs(m_X) > std::fabs(m_Y)) ? m_Y : m_X); }
 
 		/// <summary>
 		/// Gets a Vector identical to this except that its X component is flipped.

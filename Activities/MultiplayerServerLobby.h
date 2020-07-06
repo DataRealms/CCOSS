@@ -182,7 +182,7 @@ namespace RTE
 		//////////////////////////////////////////////////////////////////////////////////////////
 		// Description:     Draws this ActivityMan's current graphical representation to a
 		//                  BITMAP of choice. This includes all game-related graphics.
-		// Arguments:       A pointer to a BITMAP to draw on. OINT.
+		// Arguments:       A pointer to a BITMAP to draw on. OWNERSHIP IS NOT TRANSFERRED!
 		//                  The absolute position of the target bitmap's upper left corner in the scene.
 		// Return value:    None.
 

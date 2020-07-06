@@ -78,7 +78,6 @@ namespace RTE {
 		} else if (propName == "Immobile") {
 			reader >> m_Immobile;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Entity::ReadProperty(propName, reader);
 		}
 

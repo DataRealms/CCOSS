@@ -318,8 +318,8 @@ friend class MetaSave;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the next Scene in play that is owned by a specific player.
 // Arguments:       The player to get the next owned Scene of.
-//                  The Scene to start searching from in the current roster of Scenes, OINT.
-// Return value:    A pointer to the next Scene found in the sequence. OINT.
+//                  The Scene to start searching from in the current roster of Scenes, OWNERSHIP IS NOT TRANSFERRED!
+// Return value:    A pointer to the next Scene found in the sequence. OWNERSHIP IS NOT TRANSFERRED!
 
     const Scene * GetNextSceneOfPlayer(int metaPlayer, const Scene *pScene = 0) const;
 

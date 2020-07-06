@@ -406,7 +406,7 @@ namespace RTE {
 		/// <summary>
 		/// Sets whether the game intro should be skipped on game startup or not.
 		/// </summary>
-		/// <param name="play">Whether to skip[ game intro or not.</param>
+		/// <param name="play">Whether to skip game intro or not.</param>
 		void SetSkipIntro(bool play) { m_SkipIntro = play; }
 
 		/// <summary>

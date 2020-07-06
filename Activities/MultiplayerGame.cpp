@@ -124,7 +124,6 @@ namespace RTE {
 
 	int MultiplayerGame::ReadProperty(std::string propName, Reader &reader)
 	{
-		// See if the base class(es) can find a match instead
 		return Activity::ReadProperty(propName, reader);
 	}
 

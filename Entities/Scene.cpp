@@ -101,7 +101,6 @@ int Scene::Area::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "Name")
         reader >> m_Name;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -1401,7 +1400,6 @@ int Scene::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "GlobalAcceleration")
         reader >> m_GlobalAcc;
     else
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
 
     return 0;
@@ -2279,7 +2277,7 @@ int Scene::ClearPlacedObjectSet(int whichSet)
 // Method:          GetResidentBrain
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the resident brain Actor of a specific player from this scene,
-//                  if there is any. OINT!
+//                  if there is any. OWNERSHIP IS NOT TRANSFERRED!
 
 SceneObject * Scene::GetResidentBrain(int player) const
 {

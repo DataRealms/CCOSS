@@ -187,7 +187,7 @@ public:
 // Description:     Gets the currently held Object in the cursor of this Editor. Ownership
 //                  IS NOT transferred!
 // Arguments:       None.
-// Return value:    The currently held object, if any. OINT!
+// Return value:    The currently held object, if any. OWNERSHIP IS NOT TRANSFERRED!
 
     const SceneObject * GetCurrentObject() const { return m_pCurrentObject; }
 

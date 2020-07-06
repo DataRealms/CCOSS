@@ -236,7 +236,6 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "ScuttleIfFlippedTime")
         reader >> m_ScuttleIfFlippedTime;
     else
-        // See if the base class(es) can find a match instead
         return ACraft::ReadProperty(propName, reader);
 
     return 0;

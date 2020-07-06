@@ -102,7 +102,6 @@ int SLTerrain::TerrainFrosting::ReadProperty(std::string propName, Reader &reade
     else if (propName == "InAirOnly")
         reader >> m_InAirOnly;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -627,7 +626,6 @@ int SLTerrain::ReadProperty(std::string propName, Reader &reader)
         m_TerrainObjects.push_back(pTerrainObject);
     }
     else
-        // See if the base class(es) can find a match instead
         return SceneLayer::ReadProperty(propName, reader);
 
     return 0;

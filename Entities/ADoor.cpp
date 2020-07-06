@@ -11,28 +11,30 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::Clear() {
-		m_InitialSpriteAnimDuration = m_SpriteAnimDuration;
+		m_InitialSpriteAnimDuration = 0;
 		m_Sensors.clear();
 		m_SensorTimer.Reset();
 		m_SensorInterval = 1000;
 		m_Door = 0;
 		m_DoorState = CLOSED;
+		m_DoorStateOnStop = CLOSED;
 		m_ClosedByDefault = true;
 		m_OpenOffset.Reset();
 		m_ClosedOffset.Reset();
 		m_OpenAngle = 0;
 		m_ClosedAngle = 0;
-		m_ChangedDirectionAfterStop = false;
 		m_DoorMoveTimer.Reset();
 		m_DoorMoveTime = 0;
-		m_DoorMoveStopTime = 0;
 		m_ResumeAfterStop = false;
-		m_ResetDefaultTimer.Reset();
-		m_ResetDefaultDelay = 8000;
+		m_ChangedDirectionAfterStop = false;
+		m_DoorMoveStopTime = 0;
+		m_ResetToDefaultStateTimer.Reset();
+		m_ResetToDefaultStateDelay = 5000;
 		m_DrawMaterialLayerWhenOpen = true;
 		m_DrawMaterialLayerWhenClosed = true;
+		m_DoorMaterialID = 0;
 		m_DoorMaterialDrawn = false;
-		m_MaterialDrawOverride = false;
+		m_DoorMaterialTempErased = false;
 		m_LastDoorMaterialPos.Reset();
 		m_DoorMoveStartSound.Reset();
 		m_DoorMoveSound.Reset();
@@ -45,35 +47,36 @@ namespace RTE {
 	int ADoor::Create(const ADoor &reference) {
 		Actor::Create(reference);
 
-		if (reference.m_Door) {
-			m_Door = dynamic_cast<Attachable *>(reference.m_Door->Clone());
-			AddAttachable(m_Door, m_ClosedOffset, true);
-		}
-		m_OpenOffset = reference.m_OpenOffset;
-		m_ClosedOffset = reference.m_ClosedOffset;
-		m_OpenAngle = reference.m_OpenAngle;
-		m_ClosedAngle = reference.m_ClosedAngle;
-		m_DoorState = reference.m_DoorState;
-		m_DoorMoveTime = reference.m_DoorMoveTime;
-		m_DoorMoveStartSound = reference.m_DoorMoveStartSound;
-		m_DoorMoveSound = reference.m_DoorMoveSound;
-		m_DoorDirectionChangeSound = reference.m_DoorDirectionChangeSound;
-		m_DoorMoveEndSound = reference.m_DoorMoveEndSound;
-		m_ClosedByDefault = reference.m_ClosedByDefault;
-		m_ResetDefaultDelay = reference.m_ResetDefaultDelay;
-
-		// Set the initial door state to the opposite of the default, so it'll go to the default first thing.
-		// This will look cool, demonstrate that it's a movable door and will force the drawing of the default state of door material.
-		m_DoorState = reference.m_ClosedByDefault ? OPEN : CLOSED;
+		m_InitialSpriteAnimDuration = reference.m_SpriteAnimDuration;
 
 		for (const ADSensor &sensor : reference.m_Sensors) {
 			m_Sensors.push_back(sensor);
 		}
 		m_SensorInterval = reference.m_SensorInterval;
+
+		if (reference.m_Door) {
+			m_Door = dynamic_cast<Attachable *>(reference.m_Door->Clone());
+			AddAttachable(m_Door, m_ClosedOffset, true);
+		}
+
+		// Set the initial door state to the opposite of default so it'll move to default when spawned and draw the door material layer.
+		m_DoorState = reference.m_ClosedByDefault ? OPEN : CLOSED;
+
+		m_ClosedByDefault = reference.m_ClosedByDefault;
+		m_OpenOffset = reference.m_OpenOffset;
+		m_ClosedOffset = reference.m_ClosedOffset;
+		m_OpenAngle = reference.m_OpenAngle;
+		m_ClosedAngle = reference.m_ClosedAngle;
+		m_DoorMoveTime = reference.m_DoorMoveTime;
+		m_ResetToDefaultStateDelay = reference.m_ResetToDefaultStateDelay;
 		m_DrawMaterialLayerWhenOpen = reference.m_DrawMaterialLayerWhenOpen;
 		m_DrawMaterialLayerWhenClosed = reference.m_DrawMaterialLayerWhenClosed;
-		m_MaterialDrawOverride = reference.m_MaterialDrawOverride;
 		m_DoorMaterialID = reference.m_DoorMaterialID;
+		m_DoorMaterialTempErased = reference.m_DoorMaterialTempErased;
+		m_DoorMoveStartSound = reference.m_DoorMoveStartSound;
+		m_DoorMoveSound = reference.m_DoorMoveSound;
+		m_DoorDirectionChangeSound = reference.m_DoorDirectionChangeSound;
+		m_DoorMoveEndSound = reference.m_DoorMoveEndSound;
 
 		return 0;
 	}
@@ -111,7 +114,7 @@ namespace RTE {
 		} else if (propName == "ClosedByDefault") {
 			reader >> m_ClosedByDefault;
 		} else if (propName == "ResetDefaultDelay") {
-			reader >> m_ResetDefaultDelay;
+			reader >> m_ResetToDefaultStateDelay;
 		} else if (propName == "SensorInterval") {
 			reader >> m_SensorInterval;
 		} else if (propName == "AddSensor") {
@@ -131,7 +134,6 @@ namespace RTE {
 		} else if (propName == "DoorMoveEndSound") {
 			reader >> m_DoorMoveEndSound;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Actor::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -157,7 +159,7 @@ namespace RTE {
 		writer.NewProperty("ClosedByDefault");
 		writer << m_ClosedByDefault;
 		writer.NewProperty("ResetDefaultDelay");
-		writer << m_ResetDefaultDelay;
+		writer << m_ResetToDefaultStateDelay;
 		writer.NewProperty("SensorInterval");
 		writer << m_SensorInterval;
 		for (const ADSensor &sensor : m_Sensors) {
@@ -227,32 +229,22 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::DrawDoorMaterial() {
-		if (!m_Door || m_MaterialDrawOverride || !g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
+		if (!m_Door || m_DoorMaterialTempErased || !g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
 			return;
 		}
+		if (m_DoorMaterialDrawn) { EraseDoorMaterial(false); }
 
-		// Erase the previous drawing if it already exists
-		if (m_DoorMaterialDrawn) {
-			int fillX = m_LastDoorMaterialPos.GetFloorIntX();
-			int fillY = m_LastDoorMaterialPos.GetFloorIntY();
-
-			if (g_SceneMan.GetTerrMatter(fillX, fillY) != g_MaterialAir) { floodfill(g_SceneMan.GetTerrain()->GetMaterialBitmap(), fillX, fillY, g_MaterialAir); }
-		}
-
-		// Now draw the material silhouette to the terrain
-		Vector notUsed;
-		m_Door->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), notUsed, g_DrawMaterial, true);
+		m_Door->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawMaterial, true);
 		m_LastDoorMaterialPos = m_Door->GetPos();
 		m_DoorMaterialDrawn = true;
 
-		// Register that we changed the material layer of the terrain
 		g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool ADoor::EraseDoorMaterial() {
-		m_DoorMaterialDrawn = false;
+	bool ADoor::EraseDoorMaterial(bool updateMaterialArea, bool keepMaterialDrawnFlag) {
+		if (!keepMaterialDrawnFlag) { m_DoorMaterialDrawn = false; }
 
 		if (!m_Door || !g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
 			return false;
@@ -263,8 +255,7 @@ namespace RTE {
 
 		if (g_SceneMan.GetTerrMatter(fillX, fillY) != g_MaterialAir) {
 			floodfill(g_SceneMan.GetTerrain()->GetMaterialBitmap(), fillX, fillY, g_MaterialAir);
-			// Register that we changed the material layer of the terrain
-			g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox());
+			if (updateMaterialArea) { g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox()); }
 			return true;
 		}
 		return false;
@@ -276,29 +267,18 @@ namespace RTE {
 		if (!g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
 			return;
 		}
+
 		if (enable) {
 			// Erase the material temporarily if we have drawn it and the override isn't already in effect
-			if (m_DoorMaterialDrawn && m_MaterialDrawOverride != enable) {
-				int fillX = m_LastDoorMaterialPos.GetFloorIntX();
-				int fillY = m_LastDoorMaterialPos.GetFloorIntY();
-
-				if (g_SceneMan.GetTerrMatter(fillX, fillY) != g_MaterialAir) {
-					floodfill(g_SceneMan.GetTerrain()->GetMaterialBitmap(), fillX, fillY, g_MaterialAir);
-					// Register that we changed the material layer of the terrain
-					g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox());
-				}
-			}
-			m_MaterialDrawOverride = enable;
+			if (m_DoorMaterialDrawn && m_DoorMaterialTempErased != enable) { EraseDoorMaterial(true, true); }
 		} else {
 			// Draw the door back if we were indeed temporarily suppressing it before
-			if (m_DoorMaterialDrawn && m_MaterialDrawOverride != enable) {
-				Vector notUsed;
-				m_Door->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), notUsed, g_DrawMaterial, true);
-				// Register that we changed the material layer of the terrain
+			if (m_DoorMaterialDrawn && m_DoorMaterialTempErased != enable) {
+				m_Door->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawMaterial, true);
 				g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox());
 			}
-			m_MaterialDrawOverride = enable;
 		}
+		m_DoorMaterialTempErased = enable;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -306,18 +286,16 @@ namespace RTE {
 	int ADoor::RemoveAnyRandomWounds(int amount) {
 		float damage = 0;
 		for (int i = 0; i < amount; i++) {
-			// Fill the list of damaged bodyparts
-			std::vector<MOSRotating *> bodyParts;
-			if (GetWoundCount() > 0) { bodyParts.push_back(this); }
-			if (m_Door && m_Door->GetWoundCount()) { bodyParts.push_back(m_Door); }
+			std::vector<MOSRotating *> woundedBodyParts;
+			if (GetWoundCount() > 0) { woundedBodyParts.push_back(this); }
+			if (m_Door && m_Door->GetWoundCount()) { woundedBodyParts.push_back(m_Door); }
 
-			// Stop removing wounds if there are not any left
-			if (bodyParts.size() == 0) {
-				break;
+			if (woundedBodyParts.size() == 0) {
+				return damage;
 			}
 
-			int partIndex = RangeRand(0, bodyParts.size() - 1);
-			MOSRotating * part = bodyParts[partIndex];
+			int partIndex = RangeRand(0, woundedBodyParts.size() - 1);
+			MOSRotating *part = woundedBodyParts[partIndex];
 			damage += part->RemoveWounds(1);
 		}
 		return damage;
@@ -327,7 +305,6 @@ namespace RTE {
 
 	void ADoor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *ignoreMO) {
 		if (m_Door && m_Door->IsAttached()) {
-			// Remove the material representation of the door, if any
 			EraseDoorMaterial();
 			m_Door->DeepCheck(true);
 			m_Door->SetPinStrength(0);
@@ -359,7 +336,7 @@ namespace RTE {
 			SharedDoorControls();
 			m_DoorState = OPENING;
 		}
-		m_ResetDefaultTimer.Reset();
+		m_ResetToDefaultStateTimer.Reset();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -374,7 +351,7 @@ namespace RTE {
 			SharedDoorControls();
 			m_DoorState = CLOSING;
 		}
-		m_ResetDefaultTimer.Reset();
+		m_ResetToDefaultStateTimer.Reset();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -426,11 +403,10 @@ namespace RTE {
 		}
 
 		if (m_Door && !ApplyAttachableForces(m_Door)) {
-			// Remove the material representation if the door fell off
 			EraseDoorMaterial();
-			// Start the spinning out of control animation for the motor, start it slow
-			m_SpriteAnimDuration *= 4;
 			m_Door = 0;
+			// Start the spinning out of control animation for the motor, start it slow
+			m_SpriteAnimDuration *= 4;			
 		}
 
 		if (m_SpriteAnimMode == LOOPWHENOPENCLOSE && m_FrameCount > 1 && (m_DoorState == OPENING || m_DoorState == CLOSING) && m_SpriteAnimTimer.IsPastSimMS(m_SpriteAnimDuration)) {
@@ -464,7 +440,7 @@ namespace RTE {
 			foundActor = sensor.SenseActor(m_Pos, m_Rotation, m_HFlipped, m_MOID);
 			if (foundActor && foundActor->IsControllable()) {
 				anySensorInput = true;
-				// Look for enemy actors first and break the loop so we don't accidentally open the door for a friendly actor is enemies are nearby.
+				// If a sensor has found an enemy Actor, close the door and break so we don't accidentally open it for a friendly Actor.
 				if (foundActor->GetTeam() != m_Team) {
 					CloseDoor();
 					break;
@@ -473,8 +449,7 @@ namespace RTE {
 				}
 			}
 		}
-		// If no sensor input, return to default state if it's time. This won't override any actions that the sensors started
-		if (!anySensorInput && m_ResetDefaultTimer.IsPastSimMS(m_ResetDefaultDelay)) {
+		if (!anySensorInput && m_ResetToDefaultStateTimer.IsPastSimMS(m_ResetToDefaultStateDelay)) {
 			if (m_ClosedByDefault && m_DoorState == OPEN) {
 				CloseDoor();
 			} else if (!m_ClosedByDefault && m_DoorState == CLOSED) {
@@ -497,12 +472,11 @@ namespace RTE {
 				if (!m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
 
 				if (m_DoorMoveTimer.IsPastSimMS(m_DoorMoveTime)) {
-					m_ResetDefaultTimer.Reset();
+					m_ResetToDefaultStateTimer.Reset();
 
 					m_Door->SetJointPos(m_Pos + m_OpenOffset.GetXFlipped(m_HFlipped) * m_Rotation);
 					m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (m_OpenAngle * GetFlipFactor()));
 
-					// Draw the material representation of the door to the terrain in the open state
 					if (m_DrawMaterialLayerWhenOpen) { DrawDoorMaterial(); }
 
 					m_DoorMoveSound.Stop();
@@ -510,7 +484,6 @@ namespace RTE {
 
 					m_DoorState = OPEN;
 				} else {
-					// Find interpolated positions and angles for opening
 					Vector openingOffset(LERP(0, m_DoorMoveTime, m_ClosedOffset.m_X, m_OpenOffset.m_X, m_DoorMoveTimer.GetElapsedSimTimeMS()), LERP(0, m_DoorMoveTime, m_ClosedOffset.m_Y, m_OpenOffset.m_Y, m_DoorMoveTimer.GetElapsedSimTimeMS()));
 					// TODO: Make this work across rotation 0
 					float openingAngle = LERP(0, m_DoorMoveTime, m_ClosedAngle, m_OpenAngle, m_DoorMoveTimer.GetElapsedSimTimeMS());
@@ -518,7 +491,7 @@ namespace RTE {
 					m_Door->SetJointPos(m_Pos + openingOffset.GetXFlipped(m_HFlipped) * m_Rotation);
 					m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (openingAngle * GetFlipFactor()));
 
-					// Do the deep check to clear away any terrain debris when the door is moving but only after a little while so it doesn't take a chunk out of the ground before being snapped into place
+					// Clear away any terrain debris when the door is moving but only after a short delay so it doesn't take a chunk out of the ground
 					if (m_DoorMoveTimer.IsPastSimMS(50)) { m_Door->DeepCheck(true); }
 				}
 				break;
@@ -530,7 +503,7 @@ namespace RTE {
 				if (!m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
 
 				if (m_DoorMoveTimer.IsPastSimMS(m_DoorMoveTime)) {
-					m_ResetDefaultTimer.Reset();
+					m_ResetToDefaultStateTimer.Reset();
 					
 					m_Door->SetJointPos(m_Pos + m_ClosedOffset.GetXFlipped(m_HFlipped) * m_Rotation);
 					m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (m_ClosedAngle * GetFlipFactor()));
@@ -543,7 +516,6 @@ namespace RTE {
 
 					m_DoorState = CLOSED;
 				} else {
-					// Find interpolated positions and angles for closing
 					Vector closingOffset(LERP(0, m_DoorMoveTime, m_OpenOffset.m_X, m_ClosedOffset.m_X, m_DoorMoveTimer.GetElapsedSimTimeMS()), LERP(0, m_DoorMoveTime, m_OpenOffset.m_Y, m_ClosedOffset.m_Y, m_DoorMoveTimer.GetElapsedSimTimeMS()));
 					// TODO: Make this work across rotation 0
 					float closingAngle = LERP(0, m_DoorMoveTime, m_OpenAngle, m_ClosedAngle, m_DoorMoveTimer.GetElapsedSimTimeMS());
@@ -551,7 +523,7 @@ namespace RTE {
 					m_Door->SetJointPos(m_Pos + closingOffset.GetXFlipped(m_HFlipped) * m_Rotation);
 					m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (closingAngle * GetFlipFactor()));
 
-					// Do the deep check to clear away any terrain debris when the door is moving but only after a little while so it doesn't take a chunk out of the ground before being snapped into place
+					// Clear away any terrain debris when the door is moving but only after a short delay so it doesn't take a chunk out of the ground
 					if (m_DoorMoveTimer.IsPastSimMS(50)) { m_Door->DeepCheck(true); }
 				}
 				break;

@@ -93,12 +93,6 @@ namespace RTE {
 		virtual const Material * GetMaterial() const;
 
 		/// <summary>
-		/// Indicates whether this MOPixel is made of Gold or not.
-		/// </summary>
-		/// <returns>Whether this MOPixel is of Gold or not.</returns>
-		virtual bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->GetIndex() == c_GoldMaterialID; }
-
-		/// <summary>
 		/// Gets the current Atom of this MOPixel.
 		/// </summary>
 		/// <returns>A const reference to the current Atom.</returns>
@@ -198,6 +192,11 @@ namespace RTE {
 		float m_LethalSharpness; //!< When Sharpness has decreased below this threshold the MO becomes m_HitsMOs = false. Default is Sharpness * 0.5.
 
 	private:
+
+		/// <summary>
+		/// Sets the screen effect to draw at the final post-processing stage.
+		/// </summary>
+		void SetPostScreenEffectToDraw() const;
 
 		/// <summary>
 		/// Clears all the member variables of this MOPixel, effectively resetting the members of this abstraction level only.

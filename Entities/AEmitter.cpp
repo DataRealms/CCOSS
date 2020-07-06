@@ -207,7 +207,6 @@ int AEmitter::ReadProperty(std::string propName, Reader &reader)
         reader >> m_LoudnessOnEmit;
     else
     {
-        // See if the base class(es) can find a match instead
         return Attachable::ReadProperty(propName, reader);
     }
 

@@ -33,7 +33,6 @@ namespace RTE {
 		} else if (propName == "SkipPixels") {
 			reader >> m_Skip;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -58,22 +57,16 @@ namespace RTE {
 
 	Actor * ADSensor::SenseActor(Vector &doorPos, Matrix &doorRot, bool doorHFlipped, MOID ignoreMOID) {
 		Actor *sensedActor = 0;
-		MOID validMOID = 0;
 		MOID foundMOID = g_SceneMan.CastMORay(doorPos + m_StartOffset.GetXFlipped(doorHFlipped) * doorRot, m_SensorRay.GetXFlipped(doorHFlipped) * doorRot, ignoreMOID, Activity::NOTEAM, 0, true, m_Skip);
 
-		// Convert the found MOID into actor, if it indeed is an Actor
 		if (foundMOID) {
-			validMOID = g_MovableMan.GetRootMOID(foundMOID);
-			if (validMOID) { sensedActor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(validMOID)); }
+			sensedActor = static_cast<Actor *>(g_MovableMan.GetMOFromID(g_MovableMan.GetRootMOID(foundMOID)));
 
 			// If we found an invalid MO casting form that direction, then reverse the ray and see if we hit anything else that is relevant
 			if (!sensedActor || (sensedActor && !sensedActor->IsControllable())) {
 				foundMOID = g_SceneMan.CastMORay(doorPos + (m_StartOffset.GetXFlipped(doorHFlipped) + m_SensorRay.GetXFlipped(doorHFlipped)) * doorRot, (-m_SensorRay.GetXFlipped(doorHFlipped)) * doorRot, ignoreMOID, Activity::NOTEAM, 0, true, m_Skip);
 
-				if (foundMOID) {
-					validMOID = g_MovableMan.GetRootMOID(foundMOID);
-					if (validMOID) { sensedActor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(validMOID)); }
-				}
+				if (foundMOID) { sensedActor = static_cast<Actor *>(g_MovableMan.GetMOFromID(g_MovableMan.GetRootMOID(foundMOID))); }
 			}
 		}
 		return sensedActor;

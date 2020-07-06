@@ -144,8 +144,6 @@ int GABaseDefense::ReadProperty(std::string propName, Reader &reader)
             m_AttackerSpawns.push_back(pNewSpawn);
     }
     else
-
-        // See if the base class(es) can find a match instead
         return GameActivity::ReadProperty(propName, reader);
 
     return 0;

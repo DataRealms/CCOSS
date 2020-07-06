@@ -120,7 +120,6 @@ int GibEditor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_DeliveryDelay;
     else
 */
-        // See if the base class(es) can find a match instead
         return EditorActivity::ReadProperty(propName, reader);
 
     return 0;
@@ -832,7 +831,7 @@ void GibEditor::StuffEditedGibs(MOSRotating *pEditedObject)
     for (list<MovableObject *>::iterator gItr = pProxyGibList->begin(); gItr != pProxyGibList->end(); ++gItr)
     {
         Gib newGib;
-        // Only set the refernce instance directly from the isntanceman. OINT
+        // Only set the refernce instance directly from the isntanceman. OWNERSHIP IS NOT TRANSFERRED!
         newGib.m_GibParticle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset((*gItr)->GetClassName(), (*gItr)->GetPresetName(), m_ModuleSpaceID));
         if (newGib.m_GibParticle)
         {

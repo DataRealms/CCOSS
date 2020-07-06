@@ -9,13 +9,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MOPixel::Clear() {
-		m_Color.Reset();
 		m_Atom = 0;
+		m_Color.Reset();
 		m_DistanceTraveled = 0;
+		m_LethalRange = std::max(g_FrameMan.GetPlayerScreenWidth(), g_FrameMan.GetPlayerScreenHeight()) / c_MPP;
 		m_MinLethalRange = 1;
 		m_MaxLethalRange = 1;
 		m_LethalSharpness = 1;
-		m_LethalRange = std::max(g_FrameMan.GetPlayerScreenWidth(), g_FrameMan.GetPlayerScreenHeight()) / c_MPP;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,13 +50,13 @@ namespace RTE {
 	int MOPixel::Create(const MOPixel &reference) {
 		MovableObject::Create(reference);
 
-		m_Color = reference.m_Color;
 		m_Atom = new Atom(*(reference.m_Atom));
 		m_Atom->SetOwner(this);
+		m_Color = reference.m_Color;
 		m_LethalRange = reference.m_LethalRange;
-		m_LethalSharpness = reference.m_LethalSharpness;
 		m_MinLethalRange = reference.m_MinLethalRange;
 		m_MaxLethalRange = reference.m_MaxLethalRange;
+		m_LethalSharpness = reference.m_LethalSharpness;
 
 		return 0;
 	}
@@ -64,18 +64,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int MOPixel::ReadProperty(std::string propName, Reader &reader) {
-		if (propName == "Color") {
-			reader >> m_Color;
-		} else if (propName == "Atom") {
+		if (propName == "Atom") {
 			if (!m_Atom) { m_Atom = new Atom; }
 			reader >> m_Atom;
 			m_Atom->SetOwner(this);
+		} else if (propName == "Color") {
+			reader >> m_Color;
 		} else if (propName == "MinLethalRange") {
 			reader >> m_MinLethalRange;
 		} else if (propName == "MaxLethalRange") {
 			reader >> m_MaxLethalRange;
 		} else {
-			// See if the base class(es) can find a match instead
 			return MovableObject::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -86,10 +85,10 @@ namespace RTE {
 	int MOPixel::Save(Writer &writer) const {
 		MovableObject::Save(writer);
 
-		writer.NewProperty("Color");
-		writer << m_Color;
 		writer.NewProperty("Atom");
 		writer << m_Atom;
+		writer.NewProperty("Color");
+		writer << m_Color;
 		writer.NewProperty("MinLethalRange");
 		writer << m_MinLethalRange;
 		writer.NewProperty("MaxLethalRange");
@@ -153,7 +152,6 @@ namespace RTE {
 		// Do static particle bounce calculations.
 		int hitCount = m_Atom->Travel(g_TimerMan.GetDeltaTimeSecs(), true, g_SceneMan.SceneIsLocked());
 
-		// Now clear out the ignore override for next frame
 		m_Atom->ClearMOIDIgnoreList();
 	}
 
@@ -167,8 +165,7 @@ namespace RTE {
 
 		// See if we were already hit by this MO earlier during this frame update.
 		if (m_AlreadyHitBy.find(hd.Body[HITOR]->GetID()) != m_AlreadyHitBy.end()) {
-			// TODO: Find out so that if we what.
-			// If we were hit, then remove so that if we 
+			// TODO: Figure out why we're removing the already hit flag if we got hit
 			m_AlreadyHitBy.erase(hd.Body[HITOR]->GetID());
 		} else {
 			m_AlreadyHitBy.insert(hd.Body[HITOR]->GetID());
@@ -193,6 +190,7 @@ namespace RTE {
 	void MOPixel::Update() {
 		MovableObject::Update();
 
+		// TODO: Rework this once we figure out how we want to handle it
 		if (m_HitsMOs && m_Sharpness > 0) {
 			m_DistanceTraveled += m_Vel.GetLargest() * g_TimerMan.GetDeltaTimeSecs();
 			if (m_DistanceTraveled > m_LethalRange) {
@@ -241,14 +239,19 @@ namespace RTE {
 		putpixel(targetBitmap, m_Pos.GetFloorIntX() - targetPos.m_X, m_Pos.GetFloorIntY() - targetPos.m_Y, drawColor);
 		release_bitmap(targetBitmap);
 
-		if (mode == g_DrawMOID) { g_SceneMan.RegisterMOIDDrawing(m_Pos - targetPos, 1); }
+		if (mode == g_DrawMOID) {
+			g_SceneMan.RegisterMOIDDrawing(m_Pos - targetPos, 1);
+		} else if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
+			SetPostScreenEffectToDraw();
+		}
+	}
 
-		// Set the screen effect to draw at the final post processing stage
-		if (m_pScreenEffect && mode == g_DrawColor && !onlyPhysical) {
-			if (m_AgeTimer.GetElapsedSimTimeMS() >= m_EffectStartTime && (m_EffectStopTime == 0 || !m_AgeTimer.IsPastSimMS(m_EffectStopTime))) {
-				if (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY())) {
-					g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, LERP(m_EffectStartTime, m_EffectStopTime, m_EffectStartStrength, m_EffectStopStrength, m_AgeTimer.GetElapsedSimTimeMS()), m_EffectRotAngle);
-				}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MOPixel::SetPostScreenEffectToDraw() const {
+		if (m_AgeTimer.GetElapsedSimTimeMS() >= m_EffectStartTime && (m_EffectStopTime == 0 || !m_AgeTimer.IsPastSimMS(m_EffectStopTime))) {
+			if (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY())) {
+				g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, LERP(m_EffectStartTime, m_EffectStopTime, m_EffectStartStrength, m_EffectStopStrength, m_AgeTimer.GetElapsedSimTimeMS()), m_EffectRotAngle);
 			}
 		}
 	}

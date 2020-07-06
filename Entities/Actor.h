@@ -957,7 +957,7 @@ ClassInfoGetters
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the deque of inventory of this. Ownership is NOT transferred.
 // Arguments:       None.
-// Return value:    A const pointer to the inventory deque of this. OINT!
+// Return value:    A const pointer to the inventory deque of this. OWNERSHIP IS NOT TRANSFERRED!
 
     virtual const std::deque<MovableObject *> * GetInventory() { return &m_Inventory; }
 

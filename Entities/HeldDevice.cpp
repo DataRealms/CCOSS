@@ -35,7 +35,7 @@ void HeldDevice::Clear()
     m_HeldDeviceType = WEAPON;
     m_IsExplosiveWeapon = false;
     m_Activated = false;
-    m_ActivationTmr.Reset();
+    m_ActivationTimer.Reset();
     m_OneHanded = false;
 	m_DualWieldable = false;
     m_StanceOffset.Reset();
@@ -118,7 +118,7 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_HeldDeviceType = reference.m_HeldDeviceType;
 
     m_Activated = reference.m_Activated;
-    m_ActivationTmr = reference.m_ActivationTmr;
+    m_ActivationTimer = reference.m_ActivationTimer;
 
     m_OneHanded = reference.m_OneHanded;
 	m_DualWieldable = reference.m_DualWieldable;
@@ -172,7 +172,6 @@ int HeldDevice::ReadProperty(std::string propName, Reader &reader)
 		PieMenuGUI::AddAvailableSlice(newSlice);
     }
     else
-        // See if the base class(es) can find a match instead
         return Attachable::ReadProperty(propName, reader);
 
     return 0;
@@ -314,7 +313,7 @@ void HeldDevice::Activate()
 {
     if (!m_Activated)
     {
-        m_ActivationTmr.Reset();
+        m_ActivationTimer.Reset();
         // Register alarming event!
         if (m_Loudness > 0)
             g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, m_Loudness));

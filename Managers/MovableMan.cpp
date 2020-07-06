@@ -126,7 +126,6 @@ int MovableMan::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "EnableMOSubtraction")
         reader >> m_MOSubtractionEnabled;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;

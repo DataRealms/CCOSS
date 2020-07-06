@@ -335,9 +335,9 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetLZArea
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the Area within which a team can land things. OINT.
+// Description:     Gets the Area within which a team can land things. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       The number of the team we're setting for.
-// Return value:    The Area we're using to limit their landings within. OINT.
+// Return value:    The Area we're using to limit their landings within. OWNERSHIP IS NOT TRANSFERRED!
 
     const Scene::Area & GetLZArea(int team) const { return m_LandingZoneArea[team]; }
 
@@ -403,7 +403,7 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds somehting to the purchase list that will override what is set
 //                  in the buy guy next time CreateDelivery is called.
-// Arguments:       The SceneObject preset to add to the override purchase list. OINT!
+// Arguments:       The SceneObject preset to add to the override purchase list. OWNERSHIP IS NOT TRANSFERRED!
 //                  Which player's list to add an override purchase item to.
 // Return value:    The new total value of what's in the override purchase list.
 
@@ -415,7 +415,7 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     First clears and then adds all the stuff in a Loadout to the override
 //                  purchase list.
-// Arguments:       The Loadout preset to set the override purchase list to reflect. OINT!
+// Arguments:       The Loadout preset to set the override purchase list to reflect. OWNERSHIP IS NOT TRANSFERRED!
 //                  The player we're talking about.
 // Return value:    The new total value of what's in the override purchase list.
 
@@ -579,7 +579,7 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this ActivityMan's current graphical representation to a
 //                  BITMAP of choice. This includes all game-related graphics.
-// Arguments:       A pointer to a BITMAP to draw on. OINT.
+// Arguments:       A pointer to a BITMAP to draw on. OWNERSHIP IS NOT TRANSFERRED!
 //                  The absolute position of the target bitmap's upper left corner in the scene.
 // Return value:    None.
 

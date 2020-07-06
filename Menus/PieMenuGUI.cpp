@@ -196,7 +196,6 @@ int PieMenuGUI::Slice::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "FunctionName")
         reader >> m_FunctionName;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;

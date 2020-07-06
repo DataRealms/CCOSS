@@ -582,9 +582,9 @@ ClassInfoGetters
 
 
 	/// <summary>
-	/// Gets whether this attachable should be deleted along with it's parent when it's being deleted or not.
+	/// Gets whether this attachable is marked be deleted along with it's parent when it's being deleted or not.
 	/// </summary>
-	/// <returns>Whether this attachable should be deleted along with it's parent or not.</returns>
+	/// <returns>Whether this attachable is marked to be deleted along with it's parent or not.</returns>
 	bool ToDeleteWithParent() const { return m_DeleteWithParent; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -643,7 +643,7 @@ protected:
 	// Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
 	bool m_IsCollidingWithTerrainWhileAttached;
 
-	bool m_DeleteWithParent; //!< Whether this attachable should be deleted along with it's parent when it's being deleted or not.
+	bool m_DeleteWithParent; //!< Whether this attachable is marked to be deleted along with it's parent when it's being deleted or not.
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -456,7 +456,7 @@ public:
 // Method:          GetGroups
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Fills out a list with all groups registered in a specific module.
-// Arguments:       The list that all found groups will be ADDED to. OINT.
+// Arguments:       The list that all found groups will be ADDED to. OWNERSHIP IS NOT TRANSFERRED!
 //                  Which module to get the groups for. -1 means get ALL groups ever reg'd.
 //                  Pass a type name here and only groups with entitys of that type will be
 //                  be included. "All" means don't consider what types are in the groups.
@@ -470,7 +470,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Fills out a list with all groups registered in all official modules,
 //                  PLUS a specific non-official module as well.
-// Arguments:       The list that all found groups will be ADDED to. OINT.
+// Arguments:       The list that all found groups will be ADDED to. OWNERSHIP IS NOT TRANSFERRED!
 //                  Which module to get the groups for, in addition to all groups in
 //                  official modules loaded earlier than the one specified here. -1 means
 //                  get ALL groups ever reg'd.

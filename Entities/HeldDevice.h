@@ -541,7 +541,7 @@ ClassInfoGetters
 	/// <summary>
 	/// Resest all the timers used by this. Can be emitters, etc. This is to prevent backed up emissions to come out all at once while this has been held dormant in an inventory.
 	/// </summary>
-	virtual void ResetAllTimers() { Attachable::ResetAllTimers(); m_ActivationTmr.Reset(); }
+	virtual void ResetAllTimers() { Attachable::ResetAllTimers(); m_ActivationTimer.Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -556,7 +556,7 @@ protected:
     // Is this HeldDevice that are currently activated?
     bool m_Activated;
     // Timer for timing how long a feature has been activated.
-    Timer m_ActivationTmr;
+    Timer m_ActivationTimer;
     // Can be weilded well with one hand or not
     bool m_OneHanded;
 	// Can be weilded with bg hand or not

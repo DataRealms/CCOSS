@@ -212,7 +212,7 @@ enum
     //                  exit. If so, it will alter the positiona nd velocity of the objet so
     //                  it flies into the exit until it is sufficiently inside and then it'll
     //                  return the MO here, OWNERHIP NOT TRANSFERRED! It is still in MovableMan!
-    // Arguments:       A pointer to the ACraft owner of this Exit. OINT.
+    // Arguments:       A pointer to the ACraft owner of this Exit. OWNERSHIP IS NOT TRANSFERRED!
     // Return value:    If an MO has been fully drawn into the exit, it will be returned here,
     //                  OWNERSHIP NOT TRANSFERRED!
 

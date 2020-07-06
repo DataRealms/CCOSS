@@ -340,7 +340,6 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "AimRangeLowerLimit")
         reader >> m_AimRangeLowerLimit;
     else
-        // See if the base class(es) can find a match instead
         return Actor::ReadProperty(propName, reader);
 
     return 0;
@@ -730,7 +729,7 @@ Attachable * ACrab::GetTurret() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the turret, if anything. OINT.
+// Description:     Returns whatever is equipped in the turret, if anything. OWNERSHIP IS NOT TRANSFERRED!
 
 MovableObject * ACrab::GetEquippedItem() const
 {

@@ -134,7 +134,6 @@ int UInputMan::InputScheme::InputMapping::ReadProperty(std::string propName, Rea
         m_DirectionMapped = true;
     }
 	else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -500,7 +499,6 @@ int UInputMan::InputScheme::ReadProperty(std::string propName, Reader &reader)
 	else if (propName == "JoystickDeadzoneType")
 		reader >> m_JoystickDeadzoneType;
 	else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -790,7 +788,6 @@ int UInputMan::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "MouseSensitivity")
         reader >> m_MouseSensitivity;
 	else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;

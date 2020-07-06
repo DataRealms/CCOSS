@@ -272,7 +272,6 @@ int GameActivity::ReadProperty(std::string propName, Reader &reader)
 	else if (propName == "RequireClearPathToOrbitSwitchEnabled")
         reader >> m_RequireClearPathToOrbitSwitchEnabled;
     else
-        // See if the base class(es) can find a match instead
         return Activity::ReadProperty(propName, reader);
 
     return 0;

@@ -6,7 +6,7 @@
 namespace RTE {
 
 	/// <summary>
-	/// [Abstract Class] - A device that is carried and thrown by Actors.
+	/// A device that is carried and thrown by Actors.
 	/// </summary>
 	class ThrownDevice : public HeldDevice {
 
@@ -47,6 +47,11 @@ namespace RTE {
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
 		virtual void Destroy(bool notInherited = false) { if (!notInherited) { HeldDevice::Destroy(); } Clear(); }
+
+		/// <summary>
+		/// Resets the entire ThrownDevice, including its inherited members, to their default settings or values.
+		/// </summary>
+		virtual void Reset() { Clear(); Attachable::Reset(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -99,11 +104,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A const reference to the current stance parent offset.</returns>
 		Vector GetStanceOffset() const override { return m_StanceOffset.GetXFlipped(m_HFlipped); }
-
-		/// <summary>
-		/// Resets the entire ThrownDevice, including its inherited members, to their default settings or values.
-		/// </summary>
-		virtual void Reset() { Clear(); Attachable::Reset(); }
 
 		/// <summary>
 		/// Resets all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.

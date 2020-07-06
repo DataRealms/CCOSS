@@ -180,7 +180,6 @@ int LimbPath::ReadProperty(std::string propName, Reader &reader)
 		//m_PushForce = m_PushForce / 1.5;
 	}
     else
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
 
     return 0;

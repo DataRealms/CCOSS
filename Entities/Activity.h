@@ -192,7 +192,7 @@ namespace RTE {
 		/// <param name="scene">The Scene to check if it supports this Activity. Ownership IS NOT TRANSFERRED!</param>
 		/// <param name="teams">How many teams we're checking for. Some scenes may support and Activity but only for a limited number of teams. If -1, not applicable.</param>
 		/// <returns>Whether the Scene has the right stuff.</returns>
-		virtual bool SceneIsCompatible(Scene *scene, int teams = -1) const;
+		virtual bool SceneIsCompatible(Scene *scene, int teams = -1) { return scene && teams <= m_MinTeamsRequired; }
 
 		/// <summary>
 		/// Shows in which stage of the Campaign this appears.

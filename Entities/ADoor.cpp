@@ -462,76 +462,58 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::UpdateDoorAttachable() {
+		Vector startOffset;
+		Vector endOffset;
+		float startAngle;
+		float endAngle;
+
 		m_Door->SetHFlipped(m_HFlipped);
-		switch (m_DoorState) {
-			case OPEN:
-				m_Door->SetJointPos(m_Pos + m_OpenOffset.GetXFlipped(m_HFlipped) * m_Rotation);
-				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (m_OpenAngle * GetFlipFactor()));
-				break;
-			case OPENING:
-				if (!m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
 
-				if (m_DoorMoveTimer.IsPastSimMS(m_DoorMoveTime)) {
-					m_ResetToDefaultStateTimer.Reset();
+		if (m_DoorState == OPEN || m_DoorState == OPENING) {
+			startOffset = m_ClosedOffset;
+			endOffset = m_OpenOffset;
+			startAngle = m_ClosedAngle;
+			endAngle = m_OpenAngle;
+		} else if (m_DoorState == CLOSED || m_DoorState == CLOSING) {
+			startOffset = m_OpenOffset;
+			endOffset = m_ClosedOffset;
+			startAngle = m_OpenAngle;
+			endAngle = m_ClosedAngle;
+		}
 
-					m_Door->SetJointPos(m_Pos + m_OpenOffset.GetXFlipped(m_HFlipped) * m_Rotation);
-					m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (m_OpenAngle * GetFlipFactor()));
+		if (m_DoorState == OPEN || m_DoorState == CLOSED) {
+			m_Door->SetJointPos(m_Pos + endOffset.GetXFlipped(m_HFlipped) * m_Rotation);
+			m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * GetFlipFactor()));
+		} else if (m_DoorState == OPENING || m_DoorState == CLOSING) {
+			if (!m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
 
+			if (m_DoorMoveTimer.IsPastSimMS(m_DoorMoveTime)) {
+				m_ResetToDefaultStateTimer.Reset();
+
+				m_Door->SetJointPos(m_Pos + endOffset.GetXFlipped(m_HFlipped) * m_Rotation);
+				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * GetFlipFactor()));
+
+				m_DoorMoveSound.Stop();
+				m_DoorMoveEndSound.Play(m_Pos);
+
+				if (m_DoorState == OPENING) {
 					if (m_DrawMaterialLayerWhenOpen) { DrawDoorMaterial(); }
-
-					m_DoorMoveSound.Stop();
-					m_DoorMoveEndSound.Play(m_Pos);
-
 					m_DoorState = OPEN;
-				} else {
-					Vector openingOffset(LERP(0, m_DoorMoveTime, m_ClosedOffset.m_X, m_OpenOffset.m_X, m_DoorMoveTimer.GetElapsedSimTimeMS()), LERP(0, m_DoorMoveTime, m_ClosedOffset.m_Y, m_OpenOffset.m_Y, m_DoorMoveTimer.GetElapsedSimTimeMS()));
-					// TODO: Make this work across rotation 0
-					float openingAngle = LERP(0, m_DoorMoveTime, m_ClosedAngle, m_OpenAngle, m_DoorMoveTimer.GetElapsedSimTimeMS());
-
-					m_Door->SetJointPos(m_Pos + openingOffset.GetXFlipped(m_HFlipped) * m_Rotation);
-					m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (openingAngle * GetFlipFactor()));
-
-					// Clear away any terrain debris when the door is moving but only after a short delay so it doesn't take a chunk out of the ground
-					if (m_DoorMoveTimer.IsPastSimMS(50)) { m_Door->DeepCheck(true); }
-				}
-				break;
-			case CLOSED:
-				m_Door->SetJointPos(m_Pos + m_ClosedOffset.GetXFlipped(m_HFlipped) * m_Rotation);
-				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (m_ClosedAngle * GetFlipFactor()));
-				break;
-			case CLOSING:
-				if (!m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
-
-				if (m_DoorMoveTimer.IsPastSimMS(m_DoorMoveTime)) {
-					m_ResetToDefaultStateTimer.Reset();
-					
-					m_Door->SetJointPos(m_Pos + m_ClosedOffset.GetXFlipped(m_HFlipped) * m_Rotation);
-					m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (m_ClosedAngle * GetFlipFactor()));
-
-					// Draw the material representation of the door to the terrain in the closed state
+				} else if (m_DoorState == CLOSING) {
 					if (m_DrawMaterialLayerWhenClosed) { DrawDoorMaterial(); }
-
-					m_DoorMoveSound.Stop();
-					m_DoorMoveEndSound.Play(m_Pos);
-
 					m_DoorState = CLOSED;
-				} else {
-					Vector closingOffset(LERP(0, m_DoorMoveTime, m_OpenOffset.m_X, m_ClosedOffset.m_X, m_DoorMoveTimer.GetElapsedSimTimeMS()), LERP(0, m_DoorMoveTime, m_OpenOffset.m_Y, m_ClosedOffset.m_Y, m_DoorMoveTimer.GetElapsedSimTimeMS()));
-					// TODO: Make this work across rotation 0
-					float closingAngle = LERP(0, m_DoorMoveTime, m_OpenAngle, m_ClosedAngle, m_DoorMoveTimer.GetElapsedSimTimeMS());
-
-					m_Door->SetJointPos(m_Pos + closingOffset.GetXFlipped(m_HFlipped) * m_Rotation);
-					m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (closingAngle * GetFlipFactor()));
-
-					// Clear away any terrain debris when the door is moving but only after a short delay so it doesn't take a chunk out of the ground
-					if (m_DoorMoveTimer.IsPastSimMS(50)) { m_Door->DeepCheck(true); }
 				}
-				break;
-			case STOPPED:
-				break;
-			default:
-				RTEAbort("Undefined door state value passed in. See DoorState enumeration for defined values.");
-				break;
+			} else {
+				Vector updatedOffset(LERP(0, m_DoorMoveTime, startOffset.m_X, endOffset.m_X, m_DoorMoveTimer.GetElapsedSimTimeMS()), LERP(0, m_DoorMoveTime, startOffset.m_Y, endOffset.m_Y, m_DoorMoveTimer.GetElapsedSimTimeMS()));
+				// TODO: Make this work across rotation 0
+				float updatedAngle = LERP(0, m_DoorMoveTime, startAngle, endAngle, m_DoorMoveTimer.GetElapsedSimTimeMS());
+
+				m_Door->SetJointPos(m_Pos + updatedOffset.GetXFlipped(m_HFlipped) * m_Rotation);
+				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (updatedAngle * GetFlipFactor()));
+
+				// Clear away any terrain debris when the door is moving but only after a short delay so it doesn't take a chunk out of the ground
+				if (m_DoorMoveTimer.IsPastSimMS(50)) { m_Door->DeepCheck(true); }
+			}
 		}
 		m_Door->Update();
 	}

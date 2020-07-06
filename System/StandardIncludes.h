@@ -46,7 +46,6 @@ using std::map;
 using std::set;
 using std::vector;
 using std::ios_base;
-using std::array;
 using std::make_pair;
 using std::min;
 using std::max;

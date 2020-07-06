@@ -140,20 +140,23 @@ enum StarSize {
 
 struct Star {
     // Bitmap representation
-    BITMAP *m_pBitmap;
+    BITMAP *m_pBitmap = nullptr;
     // Center location on screen
-    Vector m_Pos;
-    // Bitmap offset
-//    int m_Offset;
+	std::array<int, 2> m_Pos = { 0 };
     // Scrolling ratio
-    float m_ScrollRatio;
+    float m_ScrollRatio = 1.0F;
     // Normalized intensity 0-1.0
-    float m_Intensity;
+    float m_Intensity = 1.0F;
     // Type
-    StarSize m_Size;
+    StarSize m_Size = StarSmall;
 
-    Star() { m_pBitmap = 0; m_Pos.Reset(); m_ScrollRatio = 1.0; m_Intensity = 1.0; m_Size = StarSmall; }
-    Star(BITMAP *pBitmap, Vector &pos, float scrollRatio, float intensity) { m_pBitmap = pBitmap; m_Pos = pos; m_ScrollRatio = scrollRatio; m_Intensity = intensity; }
+    Star() {}
+	Star(BITMAP* pBitmap, const std::array<int, 2>& pos, float scrollRatio, float intensity)
+		: m_pBitmap(pBitmap),
+		m_Pos(pos),
+		m_ScrollRatio(scrollRatio),
+		m_Intensity(intensity)
+	{}
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -425,7 +428,7 @@ bool PlayIntroTitle() {
 
     for (int star = 0; star < starCount; ++star) {
         if (RandomNum() < 0.95F) {
-            aStars[star].m_Size = StarSmall;
+			// Default size is StarSmall.
             aStars[star].m_pBitmap = apStarSmallBitmaps[RandomNum(0, starSmallBitmapCount - 1)];
             aStars[star].m_Intensity = RandomNum(0.001F, 0.5F);
         }
@@ -439,8 +442,7 @@ bool PlayIntroTitle() {
             aStars[star].m_pBitmap = apStarHugeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
             aStars[star].m_Intensity = RandomNum(0.9F, 1.0F);
         }
-        aStars[star].m_Pos.SetXY(resX * RandomNum(), pBackdrop->GetBitmap()->h * RandomNum());//resY * RandomNum());
-        aStars[star].m_Pos.Floor();
+		aStars[star].m_Pos = std::array<int, 2>{RandomNum(0, resX), RandomNum(0, pBackdrop->GetBitmap()->h)};
         // To match the nebula scroll
         aStars[star].m_ScrollRatio = backdropScrollRatio;
     }
@@ -596,14 +598,14 @@ bool PlayIntroTitle() {
 			Box backdropBox;
             pBackdrop->Draw(g_FrameMan.GetBackBuffer32(), backdropBox, scrollOffset * backdropScrollRatio);
 
-            Vector starDrawPos;
+			std::array<int, 2> starDrawPos;
             for (int star = 0; star < starCount; ++star)
             {
                 size = aStars[star].m_Size;
-                int intensity = 185 * aStars[star].m_Intensity + (size == StarSmall ? 35 : 70) * RandomNum();
+				int intensity = 185 * aStars[star].m_Intensity + 35 * (size + 1) * RandomNum();
                 set_screen_blender(intensity, intensity, intensity, intensity);
-                starDrawPos.SetXY(aStars[star].m_Pos.m_X, aStars[star].m_Pos.m_Y - scrollOffset.m_Y * aStars[star].m_ScrollRatio);
-                draw_trans_sprite(g_FrameMan.GetBackBuffer32(), aStars[star].m_pBitmap, starDrawPos.GetFloorIntX(), starDrawPos.GetFloorIntY());
+				starDrawPos = std::array<int, 2>{aStars[star].m_Pos[0], static_cast<int>(aStars[star].m_Pos[1] - scrollOffset.m_Y * aStars[star].m_ScrollRatio)};
+                draw_trans_sprite(g_FrameMan.GetBackBuffer32(), aStars[star].m_pBitmap, starDrawPos[0], starDrawPos[1]);
             }
 
             planetPos.SetXY(g_FrameMan.GetResX() / 2, 567 - scrollOffset.GetFloorIntY());

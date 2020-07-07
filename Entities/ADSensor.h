@@ -61,7 +61,7 @@ namespace RTE {
 		/// Sets the starting position offset of this ADSensor from the owning ADoor position.
 		/// </summary>
 		/// <param name="startOffsetValue">The new starting coordinates relative to the m_Pos of this' ADoor.</param>
-		void SetStartOffset(Vector startOffsetValue) { m_StartOffset = startOffsetValue; }
+		void SetStartOffset(const Vector &startOffsetValue) { m_StartOffset = startOffsetValue; }
 
 		/// <summary>
 		/// Gets the sensor ray vector out from the start offset's position.
@@ -73,7 +73,7 @@ namespace RTE {
 		/// Sets the sensor ray vector out from the start offset's position.
 		/// </summary>
 		/// <param name="sensorRayValue">The new sensor ray vector.</param>
-		void SetSensorRay(Vector sensorRayValue) { m_SensorRay = sensorRayValue; }
+		void SetSensorRay(const Vector &sensorRayValue) { m_SensorRay = sensorRayValue; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -85,7 +85,7 @@ namespace RTE {
 		/// <param name="doorHFlipped">Flipping of this ADSensor's ADoor.</param>
 		/// <param name="ignoreMOID">Which MOID to ignore, if any.</param>
 		/// <returns>The root Actor of the first MOID hit by the sensor ray. 0 if none.</returns>
-		Actor * SenseActor(Vector &doorPos, Matrix &doorRot, bool doorHFlipped = false, MOID ignoreMOID = g_NoMOID);
+		Actor * SenseActor(const Vector &doorPos, const Matrix &doorRot, bool doorHFlipped = false, MOID ignoreMOID = g_NoMOID);
 #pragma endregion
 
 #pragma region Class Info

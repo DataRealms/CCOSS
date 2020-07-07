@@ -55,18 +55,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Actor * ADSensor::SenseActor(Vector &doorPos, Matrix &doorRot, bool doorHFlipped, MOID ignoreMOID) {
+	Actor * ADSensor::SenseActor(const Vector &doorPos, const Matrix &doorRot, bool doorHFlipped, MOID ignoreMOID) {
 		Actor *sensedActor = 0;
 		MOID foundMOID = g_SceneMan.CastMORay(doorPos + m_StartOffset.GetXFlipped(doorHFlipped) * doorRot, m_SensorRay.GetXFlipped(doorHFlipped) * doorRot, ignoreMOID, Activity::NOTEAM, 0, true, m_Skip);
 
 		if (foundMOID) {
-			sensedActor = static_cast<Actor *>(g_MovableMan.GetMOFromID(g_MovableMan.GetRootMOID(foundMOID)));
+			sensedActor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(g_MovableMan.GetRootMOID(foundMOID)));
 
-			// If we found an invalid MO casting form that direction, then reverse the ray and see if we hit anything else that is relevant
-			if (!sensedActor || (sensedActor && !sensedActor->IsControllable())) {
+			// Reverse the ray direction if the sensed actor was not valid, to see if we hit anything else relevant.
+			if (!sensedActor || !sensedActor->IsControllable()) {
 				foundMOID = g_SceneMan.CastMORay(doorPos + (m_StartOffset.GetXFlipped(doorHFlipped) + m_SensorRay.GetXFlipped(doorHFlipped)) * doorRot, (-m_SensorRay.GetXFlipped(doorHFlipped)) * doorRot, ignoreMOID, Activity::NOTEAM, 0, true, m_Skip);
 
-				if (foundMOID) { sensedActor = static_cast<Actor *>(g_MovableMan.GetMOFromID(g_MovableMan.GetRootMOID(foundMOID))); }
+				if (foundMOID) { sensedActor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(g_MovableMan.GetRootMOID(foundMOID))); }
 			}
 		}
 		return sensedActor;

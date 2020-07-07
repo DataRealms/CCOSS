@@ -698,7 +698,7 @@ bool Actor::Look(float FOVSpread, float range)
     if (lookVector.GetLargest() < 0.01)
     {
         lookVector.SetXY(range, 0);
-        lookVector.DegRotate(180.0F * NormalRand());
+		lookVector.DegRotate(FRandom(-180.0F, 180.0F));
     }
     else
     {
@@ -1385,7 +1385,7 @@ int Actor::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = SelectRand(0, bodyParts.size() - 1);
+		int partIndex = IRandom(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}
@@ -1554,14 +1554,14 @@ void Actor::Update()
             pixelMO->Create(AuMat.color,
                             AuMat.pixelDensity,
                             Vector(m_Pos.m_X, m_Pos.m_Y - 10),
-                            Vector(4 * NormalRand(), RangeRand(-5, -7)),
+                            Vector(4 * NormalRand(), FRandom(-5, -7)),
                             new Atom(Vector(), AuMat, 0, AuMat.color, 2),
                             0);
 */
             MOPixel *pixelMO = new MOPixel(AuMat->GetColor(),
                                            AuMat->GetPixelDensity(),
                                            Vector(m_Pos.m_X, m_Pos.m_Y - 10),
-                                           Vector(4.0F * NormalRand(), RangeRand(-5.0F, -7.0F)),
+                                           Vector(4.0F * NormalRand(), FRandom(-5.0F, -7.0F)),
                                            new Atom(Vector(), AuMat->GetIndex(), 0, AuMat->GetColor(), 2),
                                            0);
 

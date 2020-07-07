@@ -10,9 +10,9 @@ namespace RTE {
 
 	class Vector;
 
-	static std::mt19937 RTETools_RNG;
-	static std::uniform_real_distribution<float> RTETools_dist1(0.0F, std::nextafter(1.0F, std::numeric_limits<float>::max()));
-	static std::uniform_real_distribution<float> RTETools_dist2(0.0F, std::nextafter(2.0F, std::numeric_limits<float>::max()));
+	static std::mt19937 RTETools_RNG; //!< The random number generator used for all random functions.
+	static std::uniform_real_distribution<float> RTETools_dist1(0.0F, std::nextafter(1.0F, std::numeric_limits<float>::max())); //!< Distribution allowing to pick a float in the range [0, 1].
+	static std::uniform_real_distribution<float> RTETools_dist2(0.0F, std::nextafter(2.0F, std::numeric_limits<float>::max())); //!< Distribution allowing to pick a float in the range [0, 2]. It's used to generate numbers in the range [-1, 1] by subtracting 1 from the result.
 
 #pragma region Physics Constants Getters
 	/// <summary>
@@ -43,36 +43,49 @@ namespace RTE {
 #pragma region Random Numbers
 	/// <summary>
 	/// Seed the mt19937 random number generator.
+	/// mt19937 is the standard mersenne_twister_engine.
 	/// </summary>
-	void SeedRand(unsigned int seed);
+	/// <param name="seed">Seed for the random number generator.</param>
+	void SeedRNG(unsigned int seed);
 
 	/// <summary>
 	/// Uniformly distributed random double in the range [min, max].
 	/// The min must be lesser or equal to max.
 	/// </summary>
-	double UDRand(double min, double max);
+	/// <param name="min">Lower boundary of the range to pick a number from.</param>
+	/// <param name="max">Upper boundary of the range to pick a number from.</param>
+	/// <returns>Uniformly distributed random double in the range [min, max].</returns>
+	double DRandom(double min, double max);
 
 	/// <summary>
 	/// Uniformly distributed random float in the range [0, 1].
 	/// </summary>
+	/// <returns>Uniformly distributed random float in the range [0, 1].</returns>
 	float PosRand();
 
 	/// <summary>
 	/// Uniformly distributed random float in the range [-1, 1].
 	/// </summary>
+	/// <returns>Uniformly distributed random float in the range [-1, 1].</returns>
 	float NormalRand();
 
 	/// <summary>
 	/// Uniformly distributed random float in the range [min, max].
 	/// The min must be lesser or equal to max.
 	/// </summary>
-	float RangeRand(float min, float max);
+	/// <param name="min">Lower boundary of the range to pick a number from.</param>
+	/// <param name="max">Upper boundary of the range to pick a number from.</param>
+	/// <returns>Uniformly distributed random float in the range [min, max].</returns>
+	float FRandom(float min, float max);
 
 	/// <summary>
 	/// Uniformly distributed random int in the range [min, max].
 	/// The min must be lesser or equal to max.
 	/// </summary>
-	int SelectRand(int min, int max);
+	/// <param name="min">Lower boundary of the range to pick a number from.</param>
+	/// <param name="max">Upper boundary of the range to pick a number from.</param>
+	/// <returns>Uniformly distributed random int in the range [min, max].</returns>
+	int IRandom(int min, int max);
 #pragma endregion
 
 #pragma region Interpolation

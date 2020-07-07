@@ -622,7 +622,7 @@ Entity * PresetMan::GetRandomOfGroup(string group, string type, int whichModule)
 
     // Pick one and return it
     int current = 0;
-    int selection = SelectRand(0, entityList.size() - 1);
+    int selection = IRandom(0, entityList.size() - 1);
     for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
     {
         if (current == selection)
@@ -710,7 +710,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 
     // Pick one and return it
     int current = 0;
-    int selection = SelectRand(0, entityList.size() - 1);
+    int selection = IRandom(0, entityList.size() - 1);
 
 	int totalWeight = 0;
 	for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
@@ -722,7 +722,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 		if (totalWeight == 0)
 			return 0;
 
-		selection = SelectRand(0, totalWeight - 1);
+		selection = IRandom(0, totalWeight - 1);
 
 		for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
 		{
@@ -829,7 +829,7 @@ Entity * PresetMan::GetRandomOfGroupInModuleSpace(string group, string type, int
 
     // Pick one and return it
     int current = 0;
-    int selection = SelectRand(0, entityList.size() - 1);
+    int selection = IRandom(0, entityList.size() - 1);
     for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
     {
         if (current == selection)

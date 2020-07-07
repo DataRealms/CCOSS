@@ -1023,9 +1023,7 @@ void ACRocket::Update()
     ////////////////////////////////////////
     // Hatch Operation
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
-	RTEAssert(m_FrameCount > 0, "Frame count for ACRocket hatch is 0");
-#endif
+	RTEAssert(m_FrameCount > 0, "Frame count for ACRocket hatch is 0.");
 
     unsigned int lastFrame = m_FrameCount - 1;
 
@@ -1139,7 +1137,7 @@ int ACRocket::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = SelectRand(0, bodyParts.size() - 1);
+		int partIndex = IRandom(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}

@@ -436,18 +436,18 @@ bool PlayIntroTitle() {
     for (int star = 0; star < starCount; ++star) {
         if (PosRand() < 0.95F) {
             aStars[star].m_Size = StarSmall;
-            aStars[star].m_pBitmap = apStarSmallBitmaps[SelectRand(0, starSmallBitmapCount - 1)];
-            aStars[star].m_Intensity = RangeRand(0.001F, 0.5F);
+            aStars[star].m_pBitmap = apStarSmallBitmaps[IRandom(0, starSmallBitmapCount - 1)];
+            aStars[star].m_Intensity = FRandom(0.001F, 0.5F);
         }
         else if (PosRand() < 0.85F) {
             aStars[star].m_Size = StarLarge;
-            aStars[star].m_pBitmap = apStarLargeBitmaps[SelectRand(0, starLargeBitmapCount - 1)];
-            aStars[star].m_Intensity = RangeRand(0.6F, 1.0F);
+            aStars[star].m_pBitmap = apStarLargeBitmaps[IRandom(0, starLargeBitmapCount - 1)];
+            aStars[star].m_Intensity = FRandom(0.6F, 1.0F);
         }
         else {
             aStars[star].m_Size = StarHuge;
-            aStars[star].m_pBitmap = apStarHugeBitmaps[SelectRand(0, starLargeBitmapCount - 1)];
-            aStars[star].m_Intensity = RangeRand(0.9F, 1.0F);
+            aStars[star].m_pBitmap = apStarHugeBitmaps[IRandom(0, starLargeBitmapCount - 1)];
+            aStars[star].m_Intensity = FRandom(0.9F, 1.0F);
         }
         aStars[star].m_Pos.SetXY(resX * PosRand(), pBackdrop->GetBitmap()->h * PosRand());//resY * PosRand());
         aStars[star].m_Pos.Floor();
@@ -626,8 +626,8 @@ bool PlayIntroTitle() {
 			// Manually shake our shakeOffset to randomize some effects
 			if (g_TimerMan.GetAbsoulteTime() > lastShake + 50000)
 			{
-				shakeOffset.m_X = RangeRand(-3.0F, 3.0F);
-				shakeOffset.m_Y = RangeRand(-3.0F, 3.0F);
+				shakeOffset.m_X = FRandom(-3.0F, 3.0F);
+				shakeOffset.m_Y = FRandom(-3.0F, 3.0F);
 				lastShake = g_TimerMan.GetAbsoulteTime();
 			}
 
@@ -788,7 +788,7 @@ bool PlayIntroTitle() {
 
             pTitle->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);
             // Screen blend the title glow on top, with some flickering in its intensity
-			int blendAmount = 220 + SelectRand(-35, 35);
+			int blendAmount = 220 + IRandom(-35, 35);
             set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
             pTitleGlow->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawTrans);
         }
@@ -1873,9 +1873,8 @@ int main(int argc, char *argv[]) {
     set_close_button_callback(QuitHandler);
 
     // Seed the random number generator
-	auto rd = new std::random_device; // Used to obtain a seed for the random number engine.
-    SeedRand((*rd)());
-	delete rd;
+	std::random_device rd; // Used to obtain a seed for the random number engine.
+    SeedRNG(rd());
 
     ///////////////////////////////////////////////////////////////////
     // Instantiate all the managers

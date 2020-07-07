@@ -325,7 +325,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-	virtual void NewID() { m_ID = SelectRand(1, 0xFFFF); };
+	virtual void NewID() { m_ID = IRandom(1, 0xFFFF); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

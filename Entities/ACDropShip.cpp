@@ -1034,7 +1034,7 @@ int ACDropShip::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = SelectRand(0, bodyParts.size() - 1);
+		int partIndex = IRandom(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}

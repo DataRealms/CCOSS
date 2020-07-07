@@ -21,17 +21,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SeedRand(unsigned int seed) {
-		RTETools_RNG = std::mt19937(seed); // Standard mersenne_twister_engine seeded with rd().
+	void SeedRNG(unsigned int seed) {
+		RTETools_RNG = std::mt19937(seed);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	double UDRand(double min, double max)
-	{
-	#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
-		RTEAssert(max >= min, "min is greater than max in UDRand().");
-	#endif
+	double DRandom(double min, double max) {
+		RTEAssert(max >= min, "min is greater than max in DRandom().");
 		return (std::uniform_real_distribution<double>(0.0, std::nextafter(max - min, std::numeric_limits<double>::max()))(RTETools_RNG) + min);
 	}
 
@@ -45,22 +42,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float RangeRand(float min, float max)
-	{
-	#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
-		RTEAssert(max>=min, "min is greater than max in RangeRand().");
-	#endif
+	float FRandom(float min, float max) {
+		RTEAssert(max>=min, "min is greater than max in FRandom().");
 		return (std::uniform_real_distribution<float>(0.0F, std::nextafter(max - min, std::numeric_limits<float>::max()))(RTETools_RNG) + min);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SelectRand(int min, int max)
-	{
-	#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
-		RTEAssert(max >= min, "min is greater than max in SelectRand().");
-	#endif
-		return (std::uniform_int_distribution<int>(0, std::nextafter(max - min, std::numeric_limits<int>::max()))(RTETools_RNG) + min);
+	int IRandom(int min, int max) {
+		RTEAssert(max >= min, "min is greater than max in IRandom().");
+		return (std::uniform_int_distribution<int>(0, max - min)(RTETools_RNG) + min);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

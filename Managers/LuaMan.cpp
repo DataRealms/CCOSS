@@ -2194,11 +2194,11 @@ int LuaMan::Create()
 
         // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
         def("DeleteEntity", &DeleteEntity, adopt(_1)),
-		def("UDRand", &UDRand),
+		def("DRandom", &DRandom),
         def("PosRand", &PosRand),
         def("NormalRand", &NormalRand),
-        def("RangeRand", &RangeRand),
-        def("SelectRand", &SelectRand),
+        def("RangeRand", &FRandom),
+        def("SelectRand", &IRandom),
         def("LERP", &LERP),
         def("EaseIn", &EaseIn),
         def("EaseOut", &EaseOut),

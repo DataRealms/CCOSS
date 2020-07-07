@@ -225,7 +225,7 @@ int MovableObject::Create(const MovableObject &reference)
 	m_RandomizeEffectRotAngleEveryFrame = reference.m_RandomizeEffectRotAngleEveryFrame;
 
 	if (m_RandomizeEffectRotAngle)
-		m_EffectRotAngle = c_PI * 2.0F * NormalRand();
+		m_EffectRotAngle = c_PI * FRandom(-2.0F, 2.0F);
 
 	m_ScreenEffectHash = reference.m_ScreenEffectHash;
     m_EffectStartTime = reference.m_EffectStartTime;

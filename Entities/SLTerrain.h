@@ -138,7 +138,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    The thickness sample.
 
-		virtual int GetThicknessSample() { return m_MinThickness + SelectRand(0, m_MaxThickness - m_MinThickness); }
+		virtual int GetThicknessSample() { return m_MinThickness + IRandom(0, m_MaxThickness - m_MinThickness); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////

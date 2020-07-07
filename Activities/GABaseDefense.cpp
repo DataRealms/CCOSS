@@ -474,7 +474,7 @@ void GABaseDefense::Update()
             {
                 if (!m_AttackerSpawns.empty())
                 {
-					int whichSpawn = SelectRand(0, m_AttackerSpawns.size() - 1);
+					int whichSpawn = IRandom(0, m_AttackerSpawns.size() - 1);
                     Actor *pSpawn = dynamic_cast<Actor *>(m_AttackerSpawns[whichSpawn]->Clone());
                     if (pSpawn)
                     {
@@ -495,7 +495,7 @@ void GABaseDefense::Update()
                         }
                         else
                         {
-							landingZone.m_X = static_cast<float>(SelectRand(0, g_SceneMan.GetSceneWidth()));
+							landingZone.m_X = static_cast<float>(IRandom(0, g_SceneMan.GetSceneWidth()));
                         }
                         Vector dropStart(landingZone.m_X, -50);
                         pSpawn->SetPos(dropStart);

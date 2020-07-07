@@ -17,8 +17,7 @@ namespace RTE {
 
 	int Icon::Create() {
 		if (!m_BitmapsIndexed || !m_BitmapsTrueColor) {
-			// If no file specified, load the default icon bitmap
-			if (m_BitmapFile.GetDataPath().empty()) { m_BitmapFile.SetDataPath("Base.rte/GUIs/PieIcons/Blank001.bmp"); }
+			if (m_BitmapFile.GetDataPath().empty()) { m_BitmapFile.SetDataPath("Base.rte/GUIs/DefaultIcon.bmp"); }
 
 			m_BitmapsIndexed = m_BitmapFile.GetAsAnimation(m_FrameCount, COLORCONV_REDUCE_TO_256);
 			m_BitmapsTrueColor = m_BitmapFile.GetAsAnimation(m_FrameCount, COLORCONV_8_TO_32);
@@ -54,7 +53,6 @@ namespace RTE {
 		} else if (propName == "FrameCount") {
 			reader >> m_FrameCount;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Entity::ReadProperty(propName, reader);
 		}
 		return 0;

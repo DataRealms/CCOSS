@@ -129,7 +129,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error.</param>
-		void AddSound(const std::string &soundFilePath, bool abortGameForInvalidSound) { return AddSound(soundFilePath, Vector(), c_DefaultAttenuationStartDistance, abortGameForInvalidSound); }
+		void AddSound(const std::string &soundFilePath, bool abortGameForInvalidSound) { return AddSound(soundFilePath, Vector(), -1, abortGameForInvalidSound); }
 
 		/// <summary>
 		/// Adds a new sound to this SoundContainer, either spitting out a lua error or aborting if it fails.
@@ -137,9 +137,9 @@ namespace RTE {
 		/// </summary>
 		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
 		/// <param name="offset">The offset position to play this sound at, where (0, 0) is no offset.</param>
-		/// <param name="attenuationStartDistance">The attenuation start distance for this sound, -1 is default.</param>
+		/// <param name="attenuationStartDistance">The attenuation start distance for this sound, -1 means it uses the parent SoundContainer's attenuation start distance.</param>
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error.</param>
-		void AddSound(const std::string &soundFilePath, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound) { return AddSound(soundFilePath, m_SoundSets.size() + 1, Vector(), 0, c_DefaultAttenuationStartDistance, abortGameForInvalidSound); }
+		void AddSound(const std::string &soundFilePath, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound) { return AddSound(soundFilePath, m_SoundSets.size(), Vector(), 0, attenuationStartDistance, abortGameForInvalidSound); }
 
 		/// <summary>
 		/// Adds a new sound to this SoundContainer, either spitting out a lua error or aborting if it fails.

@@ -123,7 +123,6 @@ int Attachable::ReadProperty(std::string propName, Reader &reader)
 	else if (propName == "DeleteWithParent")
 		reader >> m_DeleteWithParent;
     else
-        // See if the base class(es) can find a match instead
         return MOSRotating::ReadProperty(propName, reader);
 
     return 0;

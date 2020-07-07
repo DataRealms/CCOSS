@@ -18,7 +18,7 @@ namespace RTE {
 		m_IsAnimatedManually = reference.m_IsAnimatedManually;
 
 		// All Explosives should hit against other objects etc, like grenades flying and hitting actors etc EXCEPT when they are laying on the ground etc
-		m_IgnoresAGHitsWhenSlowerThan = 1.0;
+		m_IgnoresAGHitsWhenSlowerThan = 1.0F;
 
 		if (IsInGroup("Bombs - Payloads")) { m_HUDVisible = false; }
 
@@ -60,7 +60,7 @@ namespace RTE {
 			m_ToSettle = false;
 		}
 		// Blow up if the activation timer has reached the trigger delay limit
-		if (m_Activated && m_ActivationTmr.GetElapsedSimTimeMS() >= m_TriggerDelay) {
+		if (m_Activated && m_ActivationTimer.GetElapsedSimTimeMS() >= m_TriggerDelay) {
 			m_Activated = false;
 			GibThis();
 		}
@@ -68,11 +68,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TDExplosive::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
+	void TDExplosive::DrawHUD(BITMAP *targetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
 		if (!m_HUDVisible) {
 			return;
 		}
 		// Only draw the pickup HUD if not activated
-		if (!m_Activated) { ThrownDevice::DrawHUD(pTargetBitmap, targetPos, whichScreen); }
+		if (!m_Activated) { ThrownDevice::DrawHUD(targetBitmap, targetPos, whichScreen); }
 	}
 }

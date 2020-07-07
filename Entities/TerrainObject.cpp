@@ -198,7 +198,6 @@ int TerrainObject::ReadProperty(std::string propName, Reader &reader)
 		reader >> m_DisplayAsTerrain;
 	}
     else
-        // See if the base class(es) can find a match instead
         return SceneObject::ReadProperty(propName, reader);
 
     return 0;

@@ -55,7 +55,7 @@ namespace RTE {
 				// in a case they are all commented out or it's the last line in file.
 				// Also ReadModuleProperty may return "" when it skips IncludeFile till the end of file.
 				if (propName != "" && ReadProperty(propName, reader) < 0) {
-					// TODO: Log here!
+					// TODO: Could not match property. Log here!
 				}
 			}
 

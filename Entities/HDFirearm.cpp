@@ -234,7 +234,6 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "EjectionOffset")
         reader >> m_EjectOff;
     else
-        // See if the base class(es) can find a match instead
         return HeldDevice::ReadProperty(propName, reader);
 
     return 0;
@@ -729,8 +728,8 @@ void HDFirearm::Update()
                     m_LastFireTmr.SetElapsedSimTimeMS(MAX(m_LastFireTmr.GetElapsedSimTimeMS() - mspr, 0));
                 }
                 // How many rounds are going to fly since holding down activation. Make sure gun can't be fired faster by tapping activation fast
-                if (m_LastFireTmr.GetElapsedSimTimeMS() > (m_ActivationTmr.GetElapsedSimTimeMS() - m_ActivationDelay))
-                    roundsFired += (m_ActivationTmr.GetElapsedSimTimeMS() - m_ActivationDelay) / mspr;
+                if (m_LastFireTmr.GetElapsedSimTimeMS() > (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay))
+                    roundsFired += (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay) / mspr;
                 else
                     roundsFired += m_LastFireTmr.GetElapsedSimTimeMS() / mspr;
             }
@@ -924,8 +923,8 @@ void HDFirearm::Update()
             m_pMagazine->Attach(this);
             m_ReloadEndSound.Play(m_Pos);
 
-            m_ActivationTmr.Reset();
-            m_ActivationTmr.Reset();
+            m_ActivationTimer.Reset();
+            m_ActivationTimer.Reset();
             m_LastFireTmr.Reset();
         }
 
@@ -1006,10 +1005,10 @@ void HDFirearm::Update()
                 // Max rate of the animation when fully activated and firing
                 int animDuration = m_SpriteAnimDuration;
                 // Spin up - can only spin up if mag is inserted
-                if (m_Activated && !m_Reloading && m_ActivationTmr.GetElapsedSimTimeMS() < m_ActivationDelay)
+                if (m_Activated && !m_Reloading && m_ActivationTimer.GetElapsedSimTimeMS() < m_ActivationDelay)
                 {
-                    animDuration = (int)LERP(0, m_ActivationDelay, (float)(m_SpriteAnimDuration * 10), (float)m_SpriteAnimDuration, m_ActivationTmr.GetElapsedSimTimeMS());
-                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTmr.GetElapsedSimTimeMS()) * g_AudioMan.GetGlobalPitch());
+                    animDuration = (int)LERP(0, m_ActivationDelay, (float)(m_SpriteAnimDuration * 10), (float)m_SpriteAnimDuration, m_ActivationTimer.GetElapsedSimTimeMS());
+                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTimer.GetElapsedSimTimeMS()) * g_AudioMan.GetGlobalPitch());
                 }
                 // Spin down
                 if ((!m_Activated || m_Reloading) && m_LastFireTmr.GetElapsedSimTimeMS() < m_DeactivationDelay)

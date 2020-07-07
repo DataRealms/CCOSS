@@ -243,7 +243,6 @@ namespace RTE {
 		} else if (propName == "PaletteFile") {
 			reader >> m_PaletteFile;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -284,6 +283,7 @@ namespace RTE {
 		destroy_bitmap(m_PlayerScreen);
 		destroy_bitmap(m_ScreenDumpBuffer);
 		destroy_bitmap(m_WorldDumpBuffer);
+		destroy_bitmap(m_ScenePreviewDumpGradient);
 		delete m_GUIScreen;
 		delete m_LargeFont;
 		delete m_SmallFont;

@@ -183,7 +183,6 @@ int ACDropShip::ReadProperty(std::string propName, Reader &reader)
 	else if (propName == "LateralControlSpeed")
 		reader >> m_LateralControlSpeed;
 	else
-        // See if the base class(es) can find a match instead
         return ACraft::ReadProperty(propName, reader);
 
     return 0;

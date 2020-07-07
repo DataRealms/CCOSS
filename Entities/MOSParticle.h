@@ -73,7 +73,7 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the drawing priority of this MOSParticle, if two things were overlap when copying to the terrain, the higher priority MO would end up getting drawn.
+		/// Gets the drawing priority of this MOSParticle. If two things are overlapping when copying to the terrain, the higher priority MO would end up getting drawn.
 		/// </summary>
 		/// <returns>The drawing priority of this MOSParticle.</returns>
 		virtual int GetDrawPriority() const;
@@ -83,12 +83,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The material of this MOSParticle.</returns>
 		virtual const Material * GetMaterial() const;
-
-		/// <summary>
-		/// Indicates whether this MOSParticle is made of Gold or not.
-		/// </summary>
-		/// <returns>Whether this MOSParticle is of Gold or not.</returns>
-		virtual bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->GetIndex() == c_GoldMaterialID; }
 
 		/// <summary>
 		/// Gets the current Atom of this MOSParticle.
@@ -137,11 +131,6 @@ namespace RTE {
 		virtual bool OnSink(HitData &hd) { return false; }
 
 		/// <summary>
-		/// Updates this MOSParticle. Supposed to be done every frame.
-		/// </summary>
-		virtual void Update();
-
-		/// <summary>
 		/// Draws this MOSParticle's current graphical representation to a BITMAP of choice.
 		/// </summary>
 		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
@@ -159,6 +148,11 @@ namespace RTE {
 		float m_TimeRest; //!< Accumulated time in seconds that did not cause a frame change.
 
 	private:
+
+		/// <summary>
+		/// Sets the screen effect to draw at the final post-processing stage.
+		/// </summary>
+		void SetPostScreenEffectToDraw() const;
 
 		/// <summary>
 		/// Clears all the member variables of this MOSParticle, effectively resetting the members of this abstraction level only.

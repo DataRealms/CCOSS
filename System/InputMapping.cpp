@@ -52,7 +52,6 @@ namespace RTE {
 			reader >> m_DirectionMap;
 			m_DirectionMapped = true;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;

@@ -99,7 +99,6 @@ namespace RTE {
 		} else if (propName == "TrailLength") {
 			reader >> m_TrailLength;
 		} else {
-			// See if the base class(es) can find a match instead.
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;

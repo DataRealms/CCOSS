@@ -8,7 +8,7 @@ namespace RTE {
 	class MovableObject;
 
 	/// <summary>
-	/// A round containing a number of projectile particles and a one shell.
+	/// A round containing a number of projectile particles and one shell.
 	/// </summary>
 	class Round : public Entity {
 
@@ -112,7 +112,7 @@ namespace RTE {
 		bool HasFireSound() const { return m_FireSound.HasAnySounds(); }
 
 		/// <summary>
-		/// Gets the extra firing sound of this Round, which can be played in addition to the weapon's own firing sound. OINT!
+		/// Gets the extra firing sound of this Round, which can be played in addition to the weapon's own firing sound. OWNERSHIP IS NOT TRANSFERRED!
 		/// </summary>
 		/// <returns>A sound with the firing sample of this round.</returns>
 		SoundContainer * GetFireSound() { return &m_FireSound; }
@@ -132,7 +132,7 @@ namespace RTE {
 		int GetAIFireVel() const { return m_AIFireVel; }
 
 		/// <summary>
-		/// Returns the bullets ability to penetrate material when executing the AI shooting scripts.
+		/// Returns the bullet's ability to penetrate material when executing the AI shooting scripts.
 		/// </summary>
 		/// <returns>A value equivalent to Mass * Sharpness * Vel.</returns>
 		int GetAIPenetration() const { return m_AIPenetration; }
@@ -150,11 +150,11 @@ namespace RTE {
 		const MovableObject *m_Shell; //!< Shell particle MovableObject preset instance.
 		float m_ShellVel; //!< The velocity with which this Round's shell/casing is launched.
 
+		SoundContainer m_FireSound; //!< The extra firing audio of this Round being fired.
+
 		unsigned long m_AILifeTime; //!< For overriding LifeTime when executing the AI shooting scripts.
 		int m_AIFireVel; //!< For overriding FireVel when executing the AI shooting scripts.
 		int m_AIPenetration; //!< For overriding the bullets ability to penetrate material when executing the AI shooting scripts.
-
-		SoundContainer m_FireSound; //!< The extra firing audio of this Round being fired.
 
 	private:
 

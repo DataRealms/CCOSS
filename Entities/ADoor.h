@@ -38,7 +38,7 @@ namespace RTE {
 		/// Makes the ADoor object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create() { return (Actor::Create() < 0) ? -1 : 0; }
+		virtual int Create() { return Actor::Create(); }
 
 		/// <summary>
 		/// Creates a ADoor to be identical to another, by deep copy.
@@ -166,7 +166,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
-		/// <param name="mode">In which mode to draw in. See the DrawMode enumeration for the modes.</param>
+		/// <param name="mode">Which mode to draw in. See the DrawMode enumeration for the modes.</param>
 		/// <param name="onlyPhysical">Whether to not draw any extra 'ghost' items of this ADoor, indicator arrows or hovering HUD text and so on.</param>
 		virtual void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const;
 
@@ -184,7 +184,7 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		int m_InitialSpriteAnimDuration; //!< This stores the original SpriteAnimDuration value so we can drive the death spin-up animation using LERP.
+		int m_InitialSpriteAnimDuration; //!< This stores the original SpriteAnimDuration value so we can drive the death spin-up animation using LERP. For internal use only.
 
 		std::list<ADSensor> m_Sensors; //!< All the sensors for detecting Actors approaching the door.
 		Timer m_SensorTimer; //!< Times the exit interval.
@@ -193,7 +193,7 @@ namespace RTE {
 		Attachable *m_Door; //!< Actual door module that moves. Owned by this.
 
 		DoorState m_DoorState; //!< Current door action state.
-		DoorState m_DoorStateOnStop; //!< The state this door was in when it was stopped.
+		DoorState m_DoorStateOnStop; //!< The state this door was in when it was stopped. For internal use only.
 
 		bool m_ClosedByDefault; //!< Whether the closed position is the default.
 
@@ -206,19 +206,19 @@ namespace RTE {
 		Timer m_DoorMoveTimer; //!< Timer for opening and closing the door.
 		int m_DoorMoveTime; //!< The time it takes to open or close the door in ms.
 
-		bool m_ResumeAfterStop; //!< Whether the door is starting movement after being forced stopped.
-		bool m_ChangedDirectionAfterStop; //!< Whether the door changed directions while moving between states.
-		double m_DoorMoveStopTime; //!< The elapsed time of m_DoorMoveTimer when the door was forced stopped.
+		bool m_ResumeAfterStop; //!< Whether the door is starting movement after being forced stopped. For internal use only.
+		bool m_ChangedDirectionAfterStop; //!< Whether the door changed directions while moving between states. For internal use only.
+		double m_DoorMoveStopTime; //!< The elapsed time of m_DoorMoveTimer when the door was forced stopped. For internal use only.
 		
-		Timer m_ResetDefaultTimer; //!< Timer for the resetting to the default state.
-		int m_ResetDefaultDelay; //!< How long the door stays in the non-default state before returning to the default state.
+		Timer m_ResetToDefaultStateTimer; //!< Timer for the resetting to the default state.
+		int m_ResetToDefaultStateDelay; //!< How long the door stays in the non-default state before returning to the default state.
 
 		bool m_DrawMaterialLayerWhenOpen; //!< Whether to draw the door's silhouette to the terrain material layer when fully open.
 		bool m_DrawMaterialLayerWhenClosed; //!< Whether to draw the door's silhouette to the terrain material layer when fully closed.
 
-		unsigned char m_DoorMaterialID; //!< THe ID of the door material drawn to the terrain.
+		unsigned char m_DoorMaterialID; //!< The ID of the door material drawn to the terrain.
 		bool m_DoorMaterialDrawn; //!< Whether the door material is currently drawn onto the material layer.
-		bool m_MaterialDrawOverride; //!< Whether the drawing override is enabled (meaning drawing has been removed and will NOT happen).
+		bool m_DoorMaterialTempErased; //!< Whether the drawing override is enabled and the door material is erased to allow better pathfinding.
 		Vector m_LastDoorMaterialPos; //!< The position the door attachable had when its material was drawn to the material bitmap. This is used to erase the previous material representation.
 
 		SoundContainer m_DoorMoveStartSound; //!< Sound played when the door starts moving from fully open/closed position towards the opposite end.
@@ -262,8 +262,10 @@ namespace RTE {
 		/// Flood-fills the material area under the last position of the door attachable that matches the material index of it.
 		/// This is to get rid of the material footprint made with DrawDoorMaterial when the door part starts to move.
 		/// </summary>
+		/// <param name="updateMaterialArea">Whether to update the MaterialArea after erasing or not. Used for DrawDoorMaterial().</param>
+		/// <param name="keepMaterialDrawnFlag">Whether to keep the DoorMaterialDrawn flag or not. Used for MaterialDrawOverride().</param>
 		/// <returns>Whether the fill erasure was successful (if the same material as the door was found and erased).</returns>
-		bool EraseDoorMaterial();
+		bool EraseDoorMaterial(bool updateMaterialArea = true, bool keepMaterialDrawnFlag = false);
 
 		/// <summary>
 		/// Clears all the member variables of this ADoor, effectively resetting the members of this abstraction level only.

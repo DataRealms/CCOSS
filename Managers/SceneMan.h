@@ -29,7 +29,6 @@ namespace RTE
 class Scene;
 class SceneLayer;
 class SLTerrain;
-class Terrain;
 class SceneObject;
 class TerrainObject;
 class MovableObject;
@@ -369,7 +368,7 @@ public:
 // Description:     Gets a specific material from the material palette. Ownership is NOT
 //                  transferred!
 // Arguments:       The unsigned char index specifying screen material to get (0-255).
-// Return value:    A reference to the requested material. OINT!
+// Return value:    A reference to the requested material. OWNERSHIP IS NOT TRANSFERRED!
 
     Material const * GetMaterialFromID(unsigned char screen) { return screen >= 0 && screen < c_PaletteEntriesNumber && m_apMatPalette[screen] ?  m_apMatPalette[screen] : m_apMatPalette[g_MaterialAir]; }
 

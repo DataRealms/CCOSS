@@ -213,7 +213,6 @@ int MOSprite::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "ExitWound")
         m_pExitWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
     else
-        // See if the base class(es) can find a match instead
         return MovableObject::ReadProperty(propName, reader);
 
     return 0;

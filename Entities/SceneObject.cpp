@@ -98,7 +98,6 @@ int SceneObject::SOPlacer::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "Team")
         reader >> m_Team;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -278,7 +277,6 @@ int SceneObject::ReadProperty(std::string propName, Reader &reader)
         reader >> m_PlacedByPlayer;
     else
     {
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
     }
 

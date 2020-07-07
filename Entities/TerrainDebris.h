@@ -90,20 +90,20 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		ContentFile m_DebrisFile; //!< Shows where the bitmaps are	
+		ContentFile m_DebrisFile; //!< Shows where the bitmaps are.
 		BITMAP **m_Bitmaps; //!< All the different bitmaps for each chunk of debris. Not owned.	
-		unsigned short m_BitmapCount; //!< How many bitmaps we have loaded
+		unsigned short m_BitmapCount; //!< How many bitmaps we have loaded.
 
-		Material m_Material; //!< The material of all this debris	
-		Material m_TargetMaterial; //!< The target material in which this debris should only exist in
+		Material m_Material; //!< The material of all this debris.
+		Material m_TargetMaterial; //!< The target material in which this debris should only exist in.
 
-		bool m_OnlyOnSurface; //!< Whether to only place if the target material is exposed on the surface of the terrain. If false, checking will continue to penetrate down into non-air materials to try to find the target material.	
-		bool m_OnlyBuried; //!< Whether to only place a piece of this if we find a spot for it to fit completely buried int eh terrain
+		bool m_OnlyOnSurface; //!< Whether to only place if the target material is exposed on the surface of the terrain. If false, checking will continue to penetrate down into non-air materials to try to find the target material.
+		bool m_OnlyBuried; //!< Whether to only place a piece of this if we find a spot for it to fit completely buried in the terrain.
 
-		int m_MinDepth; //!< Minimum depth into the terrain contour. This can be negative for debris placed above ground
-		int m_MaxDepth; //!< Max depth into the terrain contour. This can be negative for debris placed above ground
+		int m_MinDepth; //!< Minimum depth into the terrain contour. This can be negative for debris placed above ground.
+		int m_MaxDepth; //!< Max depth into the terrain contour. This can be negative for debris placed above ground.
 
-		float m_Density; //!< Approximate Density count per meter
+		float m_Density; //!< Approximate Density count per meter.
 
 	private:
 

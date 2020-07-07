@@ -313,7 +313,6 @@ int SceneLayer::ReadProperty(std::string propName, Reader &reader)
         SetScaleFactor(m_ScaleFactor);
     }
     else
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
 
     return 0;

@@ -177,7 +177,6 @@ namespace RTE {
 			reader >> m_LoudnessOnEmit;
 		else
 		{
-			// See if the base class(es) can find a match instead
 			return MOSParticle::ReadProperty(propName, reader);
 		}
 

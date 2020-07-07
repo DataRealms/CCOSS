@@ -66,7 +66,6 @@ namespace RTE {
 		} else if (propName == "SiteCount") {
 			reader >> m_SiteCount;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Entity::ReadProperty(propName, reader);
 		}
 		return 0;

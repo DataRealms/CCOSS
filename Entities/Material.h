@@ -50,7 +50,7 @@ namespace RTE {
 		/// Gets the texture bitmap of this Material, if any is associated with it.
 		/// </summary>
 		/// <returns>Pointer to the texture bitmap of this Material.</returns>
-		BITMAP * GetTexture() const { return m_Texture; }
+		BITMAP * GetTexture() const { return m_TerrainTexture; }
 
 		/// <summary>
 		/// Gets the index of this Material in the material palette.
@@ -73,7 +73,7 @@ namespace RTE {
 		/// <summary>
 		/// The impulse force that a particle needs to knock loose a terrain pixel of this material. In kg * m/s.
 		/// </summary>
-		/// <returns>Returns impulse force that a particle needs to knock loose a terrain pixel of this material.</returns>
+		/// <returns>The impulse force that a particle needs to knock loose a terrain pixel of this material.</returns>
 		float GetIntegrity() const { return m_Integrity; }
 
 		/// <summary>
@@ -121,7 +121,7 @@ namespace RTE {
 		/// <summary>
 		/// Whether this material is scrap material made from gibs of things that have already been blown apart.
 		/// </summary>
-		/// <returns>Returns whether this material is scrap material.</returns>
+		/// <returns>Whether this material is scrap material.</returns>
 		bool IsScrap() const { return m_IsScrap; }
 
 		/// <summary>
@@ -133,7 +133,7 @@ namespace RTE {
 		/// <summary>
 		/// Indicates whether or not to use the Material's own color when a pixel of this Material is knocked loose from the terrain.
 		/// </summary>
-		/// <returns>A bool that if false, means the terrain pixel's color should be applied instead.</returns>
+		/// <returns>Whether the Material's color, or the terrain pixel's color should be applied.</returns>
 		bool UsesOwnColor() const { return m_UseOwnColor; }
 #pragma endregion
 
@@ -173,7 +173,7 @@ namespace RTE {
 		bool m_UseOwnColor; //!< Whether or not to use the own color when a pixel of this material is knocked loose from the terrain. If 0, then the terrain pixel's color will be applied instead.
 
 		ContentFile m_TextureFile; //!< The file pointing to the terrain texture of this Material 
-		BITMAP *m_Texture; //!< The texture of this material, used when building an SLTerrain.
+		BITMAP *m_TerrainTexture; //!< The texture of this material, used when building an SLTerrain.
 
 	private:
 

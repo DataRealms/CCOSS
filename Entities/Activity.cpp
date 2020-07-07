@@ -246,7 +246,6 @@ namespace RTE {
 		} else if (propName == "Team4Icon") {
 			reader >> m_TeamIcons[TEAM_4];
 		} else {
-		   // See if the base class(es) can find a match instead
 			return Entity::ReadProperty(propName, reader);
 		}
 		return 0;

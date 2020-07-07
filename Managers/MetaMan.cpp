@@ -323,7 +323,6 @@ int MetaMan::ReadProperty(string propName, Reader &reader)
     else if (propName == "MetaGUI")
         reader >> m_pMetaGUI;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;

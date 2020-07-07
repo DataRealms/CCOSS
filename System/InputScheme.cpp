@@ -101,7 +101,6 @@ namespace RTE {
 		} else if (propName == "JoystickDeadzoneType") {
 			reader >> m_JoystickDeadzoneType;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;

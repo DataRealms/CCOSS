@@ -33,7 +33,7 @@ namespace RTE {
 		/// Makes the MetaPlayer object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create() { return (Entity::Create() < 0) ? -1 : 0; }
+		virtual int Create() { return Entity::Create(); }
 
 		/// <summary>
 		/// Creates a MetaPlayer to be identical to another, by deep copy.

@@ -13,9 +13,9 @@ namespace RTE {
 		m_Name = "";
 		m_Team = Activity::NOTEAM;
 		m_Human = true;
-		m_GameOverRound = -1;
 		m_InGamePlayer = Activity::PLAYER_1;
 		m_Aggressiveness = 0.5F;
+		m_GameOverRound = -1;
 
 		// Everything is natively priced
 		m_NativeTechModule = 0;
@@ -38,9 +38,9 @@ namespace RTE {
 		m_Name = reference.m_Name;
 		m_Team = reference.m_Team;
 		m_Human = reference.m_Human;
-		m_GameOverRound = reference.m_GameOverRound;
 		m_InGamePlayer = reference.m_InGamePlayer;
 		m_Aggressiveness = reference.m_Aggressiveness;
+		m_GameOverRound = reference.m_GameOverRound;
 		m_NativeTechModule = reference.m_NativeTechModule;
 		m_NativeCostMult = reference.m_NativeCostMult;
 		m_ForeignCostMult = reference.m_ForeignCostMult;
@@ -63,12 +63,12 @@ namespace RTE {
 			reader >> m_Team;
 		} else if (propName == "Human") {
 			reader >> m_Human;
-		} else if (propName == "GameOverRound") {
-			reader >> m_GameOverRound;
 		} else if (propName == "InGamePlayer") {
 			reader >> m_InGamePlayer;
 		} else if (propName == "Aggressiveness") {
 			reader >> m_Aggressiveness;
+		} else if (propName == "GameOverRound") {
+			reader >> m_GameOverRound;
 		// Need to match the name to the index
 		} else if (propName == "NativeTechModule") {
 			m_NativeTechModule = g_PresetMan.GetModuleID(reader.ReadPropValue());
@@ -87,7 +87,6 @@ namespace RTE {
 		} else if (propName == "OffensiveTarget") {
 			reader >> m_OffensiveTarget;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Entity::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -104,12 +103,12 @@ namespace RTE {
 		writer << m_Team;
 		writer.NewProperty("Human");
 		writer << m_Human;
-		writer.NewProperty("GameOverRound");
-		writer << m_GameOverRound;
 		writer.NewProperty("InGamePlayer");
 		writer << m_InGamePlayer;
 		writer.NewProperty("Aggressiveness");
 		writer << m_Aggressiveness;
+		writer.NewProperty("GameOverRound");
+		writer << m_GameOverRound;
 
 		// Need to write out the name, and not just the index of the module. it might change
 		writer.NewProperty("NativeTechModule");

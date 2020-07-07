@@ -236,7 +236,6 @@ namespace RTE {
 		} else if (propName == "P1Scheme" || propName == "P2Scheme" || propName == "P3Scheme" || propName == "P4Scheme") {
 			g_UInputMan.ReadProperty(propName, reader);
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;

@@ -62,7 +62,6 @@ namespace RTE {
 			m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
 			s_PathHashes[GetHash()] = m_DataPath;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;

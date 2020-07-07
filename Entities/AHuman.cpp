@@ -317,7 +317,6 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "DislodgeLimbPath")
         reader >> m_Paths[FGROUND][DISLODGE];
     else
-        // See if the base class(es) can find a match instead
         return Actor::ReadProperty(propName, reader);
 
     return 0;
@@ -1349,7 +1348,7 @@ bool AHuman::UnequipBGArm()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the FG Arm, if anything. OINT.
+// Description:     Returns whatever is equipped in the FG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
 
 MovableObject * AHuman::GetEquippedItem() const
 {
@@ -1364,7 +1363,7 @@ MovableObject * AHuman::GetEquippedItem() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedBGItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the FG Arm, if anything. OINT.
+// Description:     Returns whatever is equipped in the FG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
 
 MovableObject * AHuman::GetEquippedBGItem() const
 {

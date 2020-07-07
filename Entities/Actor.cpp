@@ -399,7 +399,6 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
         m_AIMode = static_cast<AIMode>(mode);
     }
     else
-        // See if the base class(es) can find a match instead
         return MOSRotating::ReadProperty(propName, reader);
 
     return 0;

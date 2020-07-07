@@ -350,7 +350,6 @@ int MOSRotating::ReadProperty(std::string propName, Reader &reader)
     } else if (propName == "AddCustomValue") {
         ReadCustomValueProperty(reader);
     } else
-        // See if the base class(es) can find a match instead
         return MOSprite::ReadProperty(propName, reader);
 
     return 0;

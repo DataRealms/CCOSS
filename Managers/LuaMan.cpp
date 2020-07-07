@@ -730,9 +730,6 @@ int LuaMan::Create()
 			.property("IsScrap", &Material::IsScrap),
 
         CONCRETELUABINDING(MOPixel, MovableObject),
-//            .property("Material", &MOPixel::GetMaterial),
-//            .property("Atom", &MOPixel::GetAtom, &MOPixel:SetAtom)
-//            .property("IsGold", &MOPixel::IsGold),
 
         CONCRETELUABINDING(TerrainObject, SceneObject)
             .def("GetBitmapOffset", &TerrainObject::GetBitmapOffset)
@@ -752,7 +749,6 @@ int LuaMan::Create()
                 value("OVERLIFETIME", 7),
                 value("ONCOLLIDE", 8)
             ]
-            /*.property("Material", &MOSprite::GetMaterial)*/
             .property("Diameter", &MOSprite::GetDiameter)
             .property("BoundingBox", &MOSprite::GetBoundingBox)
             .property("FrameCount", &MOSprite::GetFrameCount)
@@ -776,16 +772,12 @@ int LuaMan::Create()
 			.def("GetEntryWoundPresetName", &MOSprite::GetEntryWoundPresetName)
 			.def("GetExitWoundPresetName", &MOSprite::GetExitWoundPresetName),
 
-        CONCRETELUABINDING(MOSParticle, MOSprite)
-            /*.property("Material", &MOSParticle::GetMaterial)*/
-//            .property("Atom", &MOSParticle::GetAtom, &MOSParticle:SetAtom)
-            .property("IsGold", &MOSParticle::IsGold),
+        CONCRETELUABINDING(MOSParticle, MOSprite),
 
         CONCRETELUABINDING(MOSRotating, MOSprite)
             /*.property("Material", &MOSRotating::GetMaterial)*/
             .property("RecoilForce", &MOSRotating::GetRecoilForce)
             .property("RecoilOffset", &MOSRotating::GetRecoilOffset)
-            .property("IsGold", &MOSRotating::IsGold)
 			.property("TravelImpulse", &MOSRotating::GetTravelImpulse, &MOSRotating::SetTravelImpulse)
 			.property("GibWoundLimit", &MOSRotating::GetGibWoundLimit, &MOSRotating::SetGibWoundLimit)
 			.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)

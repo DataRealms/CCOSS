@@ -27,7 +27,7 @@ namespace RTE {
 		/// Makes the ADSensor object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create() { return (Serializable::Create() < 0) ? -1 : 0; }
+		virtual int Create() { return Serializable::Create(); }
 
 		/// <summary>
 		/// Creates an ADSensor to be identical to another, by deep copy.
@@ -100,7 +100,7 @@ namespace RTE {
 
 		static const std::string m_sClassName; //!< A string with the friendly formatted type name of this object.
 		
-		Vector m_StartOffset; //!< The offset of the sensor ray start relative the position of its ADoor.		
+		Vector m_StartOffset; //!< The offset of the sensor ray start relative to the position of its ADoor.
 		Vector m_SensorRay; //!< The ray out from the offset.
 		
 		short m_Skip; //!< How many pixels to skip between sensing pixels.

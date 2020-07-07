@@ -183,7 +183,7 @@ namespace RTE {
 		/// <summary>
 		/// Fills out a list with all groups registered with this that contain any objects of a specific type and it derivatives.
 		/// </summary>
-		/// <param name="groupList">The list that all found groups will be ADDED to. OINT.</param>
+		/// <param name="groupList">The list that all found groups will be ADDED to. OWNERSHIP IS NOT TRANSFERRED!</param>
 		/// <param name="withType">The name of the type to only get groups of.</param>
 		/// <returns>Whether any groups with the specified type was found.</returns>
 		bool GetGroupsWithType(std::list<std::string> &groupList, std::string withType);
@@ -309,7 +309,7 @@ namespace RTE {
 		/// This will NOT check if duplicates are added to any type-list, so please use GetEntityIfExactType to check this beforehand.
 		/// Dupes are allowed if there are no more than one of the exact class and name.
 		/// </summary>
-		/// <param name="entityToAdd">The new object instance to add. OINT!</param>
+		/// <param name="entityToAdd">The new object instance to add. OWNERSHIP IS NOT TRANSFERRED!</param>
 		/// <returns>Whether the Entity was added successfully or not.</returns>
 		bool AddToTypeMap(Entity *entityToAdd);
 #pragma endregion

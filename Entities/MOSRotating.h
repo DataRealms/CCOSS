@@ -261,15 +261,6 @@ ClassInfoGetters
     virtual void SetToHitMOs(bool hitMOs = true);
 */
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this MO is made of Gold or not.
-// Arguments:       None.
-// Return value:    Whether this MovableObject is of Gold or not.
-
-    virtual bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->GetIndex() == c_GoldMaterialID; }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddRecoil

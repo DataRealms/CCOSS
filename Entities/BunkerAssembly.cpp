@@ -264,7 +264,6 @@ int BunkerAssembly::ReadProperty(std::string propName, Reader &reader)
 			RTEAbort(s);
 		}
 	} else
-        // See if the base class(es) can find a match instead
         return SceneObject::ReadProperty(propName, reader);
 
     return 0;

@@ -592,7 +592,7 @@ public:
 // Virtual Method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the menu
-// Arguments:       A pointer to a BITMAP to draw on. OINT.
+// Arguments:       A pointer to a BITMAP to draw on. OWNERSHIP IS NOT TRANSFERRED!
 //                  The absolute position of the target bitmap's upper left corner in the scene.
 // Return value:    None.
 
@@ -611,7 +611,7 @@ protected:
 // Method:          SelectSlice
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets a slice to be selected.
-// Arguments:       The slice to be selected. Has to be a slice currently in this - OINT!
+// Arguments:       The slice to be selected. Has to be a slice currently in this - OWNERSHIP IS NOT TRANSFERRED!
 //                  Whether to also move the cursor to the center of the newly selected slice.
 // Return value:    Whether this resulted in a different actual slice being selected (not 0).
 

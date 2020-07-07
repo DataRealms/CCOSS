@@ -78,7 +78,6 @@ namespace RTE {
 		} else if (propName == "Immobile") {
 			reader >> m_Immobile;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Entity::ReadProperty(propName, reader);
 		}
 
@@ -163,7 +162,6 @@ namespace RTE {
 			return;
 		}
 
-		attenuationStartDistance = (attenuationStartDistance < 0) ? c_DefaultAttenuationStartDistance : attenuationStartDistance;
 		soundSet.push_back({soundFile, soundObject, offset, minimumAudibleDistance, attenuationStartDistance});
 		if (soundSetIndex >= m_SoundSets.size()) { m_SoundSets.push_back(soundSet); }
 

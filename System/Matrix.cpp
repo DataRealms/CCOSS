@@ -67,7 +67,6 @@ namespace RTE {
 		} else if (propName == "AngleRadians") {
 			reader >> m_Rotation;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;

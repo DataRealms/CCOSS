@@ -622,7 +622,7 @@ ClassInfoGetters
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the FG Arm, if anything. OINT.
+// Description:     Returns whatever is equipped in the FG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       None.
 // Return value:    The currently equipped item, if any.
 
@@ -632,7 +632,7 @@ ClassInfoGetters
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedBGItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the BG Arm, if anything. OINT.
+// Description:     Returns whatever is equipped in the BG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       None.
 // Return value:    The currently equipped item, if any.
 

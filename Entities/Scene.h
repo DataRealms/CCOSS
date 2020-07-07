@@ -763,7 +763,7 @@ EntityAllocation(Scene)
 // Description:     Places the individual brain of a single player which may be stationed
 //                  on this Scene, and registers them as such in an Activity.
 // Arguments:       The player's brain to place.
-//                  The Activity to register the placed brains with.. OINT!
+//                  The Activity to register the placed brains with. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    If the brain was successfully found as resident and placed.
 
     bool PlaceResidentBrain(int player, Activity &newActivity);
@@ -774,7 +774,7 @@ EntityAllocation(Scene)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Places the individual brains of the various players which may be
 //                  stationed on this Scene, and registers them as such in an Activity.
-// Arguments:       The Activity to register the placed brains with.. OINT!
+// Arguments:       The Activity to register the placed brains with. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    How many brains were finally placed.
 
     int PlaceResidentBrains(Activity &newActivity);
@@ -786,7 +786,7 @@ EntityAllocation(Scene)
 // Description:     Looks at the Activity and its players' registered brain Actors, and
 //                  saves them as resident brains for this Scene. Done when a fight is over
 //                  and the survivors remain!
-// Arguments:       The Activity to check for registered brains.. OINT!
+// Arguments:       The Activity to check for registered brains. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    How many brains were found registered with the passed in Activity.
 
     int RetrieveResidentBrains(Activity &oldActivity);
@@ -898,7 +898,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Method:          GetResidentBrain
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the resident brain Actor of a specific player from this scene,
-//                  if there is any. OINT!
+//                  if there is any. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       Which player to get the resident brain of.
 // Return value:    The SO containing the brain, or 0 if there aren't any of that player.
 

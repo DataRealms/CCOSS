@@ -362,7 +362,7 @@ ClassInfoGetters
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the turret, if anything. OINT.
+// Description:     Returns whatever is equipped in the turret, if anything. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       None.
 // Return value:    The currently equipped item, if any.
 

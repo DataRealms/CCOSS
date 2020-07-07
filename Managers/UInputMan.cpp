@@ -147,7 +147,6 @@ namespace RTE {
 		} else if (propName == "P4Scheme") {
 			reader >> m_ControlScheme[PLAYER_FOUR];
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;

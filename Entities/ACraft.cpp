@@ -107,7 +107,6 @@ int ACraft::Exit::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "Range")
         reader >> m_Range;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -366,7 +365,6 @@ int ACraft::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "MaxPassengers")
         reader >> m_MaxPassengers;
     else
-        // See if the base class(es) can find a match instead
         return Actor::ReadProperty(propName, reader);
 
     return 0;

@@ -100,10 +100,12 @@ namespace RTE {
 			Matrix rotation;
 			reader >> rotation;
 			m_OpenAngle = rotation.GetRadAngle();
+			if (m_OpenAngle < 0) { reader.ReportError("Door OpenAngle cannot be less than 0."); }
 		} else if (propName == "ClosedAngle") {
 			Matrix rotation;
 			reader >> rotation;
 			m_ClosedAngle = rotation.GetRadAngle();
+			if (m_ClosedAngle < 0) { reader.ReportError("Door ClosedAngle cannot be less than 0."); }
 		} else if (propName == "OpenClosedAngle") {
 			Matrix rotation;
 			reader >> rotation;
@@ -502,7 +504,7 @@ namespace RTE {
 				}
 			} else {
 				Vector updatedOffset(LERP(0, m_DoorMoveTime, startOffset.m_X, endOffset.m_X, m_DoorMoveTimer.GetElapsedSimTimeMS()), LERP(0, m_DoorMoveTime, startOffset.m_Y, endOffset.m_Y, m_DoorMoveTimer.GetElapsedSimTimeMS()));
-				// TODO: Make this work across rotation 0
+				// TODO: Make this work across rotation 0. Probably the best solution would be to setup an angle LERP that properly handles the 2PI border and +- angles.
 				float updatedAngle = LERP(0, m_DoorMoveTime, startAngle, endAngle, m_DoorMoveTimer.GetElapsedSimTimeMS());
 
 				m_Door->SetJointPos(m_Pos + updatedOffset.GetXFlipped(m_HFlipped) * m_Rotation);

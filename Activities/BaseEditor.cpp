@@ -118,7 +118,6 @@ int BaseEditor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_DeliveryDelay;
     else
 */
-        // See if the base class(es) can find a match instead
         return Activity::ReadProperty(propName, reader);
 
     return 0;

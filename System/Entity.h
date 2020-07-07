@@ -75,6 +75,8 @@ namespace RTE {
 
 	public:
 
+		SerializableOverrideMethods
+
 #pragma region ClassInfo
 		/// <summary>
 		/// The class that describes each subclass of Entity. There should be one ClassInfo static instance for every Entity child.
@@ -251,25 +253,6 @@ namespace RTE {
 #pragma endregion
 
 #pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this Entity to an output stream for later recreation with Create(istream &stream).
-		/// </summary>
-		/// <param name="writer">A Writer that the Entity will save itself to.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
-
 		/// <summary> 
 		/// Only saves out a Preset reference of this to the stream.
 		/// Is only applicable to objects that are not original presets and haven't been altered since they were copied from their original.

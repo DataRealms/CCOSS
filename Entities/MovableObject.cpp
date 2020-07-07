@@ -376,7 +376,6 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
 	else if (propName == "IgnoreTerrain")
 		reader >> m_IgnoreTerrain;
 	else
-        // See if the base class(es) can find a match instead
         return SceneObject::ReadProperty(propName, reader);
 
     return 0;
@@ -478,10 +477,10 @@ int MovableObject::InitializeObjectScripts() {
         return -2;
     }
 
-    if (RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
-        m_ScriptObjectName = "ERROR";
-        return -3;
-    }
+	if (!(*m_FunctionsAndScripts.find("Create")).second.empty() && RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
+		m_ScriptObjectName = "ERROR";
+		return -3;
+	}
     return 0;
 }
 

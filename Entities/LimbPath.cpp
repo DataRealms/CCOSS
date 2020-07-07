@@ -12,7 +12,6 @@
 // Inclusions of header files
 
 #include "LimbPath.h"
-#include "FrameMan.h"
 #include "PresetMan.h"
 #include "SLTerrain.h"
 
@@ -181,7 +180,6 @@ int LimbPath::ReadProperty(std::string propName, Reader &reader)
 		//m_PushForce = m_PushForce / 1.5;
 	}
     else
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
 
     return 0;
@@ -300,7 +298,7 @@ Vector LimbPath::GetCurrentVel(const Vector &limbPos)
 
     if (IsStaticPoint())
     {
-        returnVel = distVect * g_FrameMan.GetMPP() / 0.020/* + m_JointVel*/;
+        returnVel = distVect * c_MPP / 0.020/* + m_JointVel*/;
         returnVel.CapMagnitude(m_TravelSpeed[m_WhichSpeed]);
         returnVel += m_JointVel;
 
@@ -344,7 +342,7 @@ float LimbPath::GetNextTimeChunk(const Vector &limbPos)
     {
         Vector distance;
         // Figure out the distance, in meters, between the limb position and the target.
-        distance = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()) * g_FrameMan.GetMPP();
+        distance = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()) * c_MPP;
         // Add the distance needed to be traveled due to the joint velocity.
 //        distance += m_JointVel * m_TimeLeft;
 
@@ -404,7 +402,7 @@ void LimbPath::ReportProgress(const Vector &limbPos)
         }
 
         // Make sure we're not stuck on one segment, time that it isn't taking unreasonably long, and restart the path if it seems stuck
-        if (!m_Ended && m_SegTimer.IsPastSimMS(((segMag * g_FrameMan.GetMPP()) / GetSpeed()) * 1000 * 2))
+        if (!m_Ended && m_SegTimer.IsPastSimMS(((segMag * c_MPP) / GetSpeed()) * 1000 * 2))
 //        if (!m_Ended && m_SegTimer.IsPastSimMS(333))
         {
             Terminate();

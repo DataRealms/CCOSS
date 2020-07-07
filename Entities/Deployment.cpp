@@ -145,7 +145,6 @@ int Deployment::ReadProperty(std::string propName, Reader &reader)
 	else if (propName == "HFlipped")
 		reader >> m_HFlipped;
     else
-        // See if the base class(es) can find a match instead
         return SceneObject::ReadProperty(propName, reader);
 
     return 0;

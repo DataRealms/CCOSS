@@ -468,6 +468,15 @@
     <ClInclude Include="System\Atom.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="Entities\ADSensor.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Gib.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Round.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -884,6 +893,15 @@
     </ClCompile>
     <ClCompile Include="System\Atom.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\ADSensor.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Gib.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Round.cpp">
+      <Filter>Entities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

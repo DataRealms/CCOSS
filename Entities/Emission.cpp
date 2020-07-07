@@ -9,9 +9,6 @@
 
 
 #include "Emission.h"
-#include "MovableObject.h"
-#include "Reader.h"
-#include "RTETools.h"
 #include "PresetMan.h"
 
 namespace RTE {
@@ -135,7 +132,6 @@ int Emission::ReadProperty(std::string propName, Reader &reader)
 		m_StopTimer.SetSimTimeLimitMS(stopTime);
 	}
 	else
-		// See if the base class(es) can find a match instead
 		return Serializable::ReadProperty(propName, reader);
 
 	return 0;

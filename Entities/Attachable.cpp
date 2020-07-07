@@ -12,10 +12,9 @@
 // Inclusions of header files
 
 #include "Attachable.h"
-#include "Atom.h"
 #include "AtomGroup.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
+#include "PresetMan.h"
+#include "MovableMan.h"
 #include "AEmitter.h"
 #include "Actor.h"
 #include "ConsoleMan.h"
@@ -48,6 +47,7 @@ void Attachable::Clear()
 	m_InheritsRotAngle = true;
 	m_CanCollideWithTerrainWhenAttached = false;
 	m_IsCollidingWithTerrainWhileAttached = false;
+	m_DeleteWithParent = false;
 }
 
 
@@ -88,6 +88,7 @@ int Attachable::Create(const Attachable &reference)
     m_OnlyLinForces = reference.m_OnlyLinForces;
 	m_InheritsRotAngle = reference.m_InheritsRotAngle;
 	m_CanCollideWithTerrainWhenAttached = reference.m_CanCollideWithTerrainWhenAttached;
+	m_DeleteWithParent = reference.m_DeleteWithParent;
 
     return 0;
 }
@@ -119,8 +120,9 @@ int Attachable::ReadProperty(std::string propName, Reader &reader)
         reader >> m_DrawAfterParent;
     else if (propName == "CollidesWithTerrainWhenAttached")
         reader >> m_CanCollideWithTerrainWhenAttached;
+	else if (propName == "DeleteWithParent")
+		reader >> m_DeleteWithParent;
     else
-        // See if the base class(es) can find a match instead
         return MOSRotating::ReadProperty(propName, reader);
 
     return 0;
@@ -153,6 +155,8 @@ int Attachable::Save(Writer &writer) const
     writer << m_DrawAfterParent;
     writer.NewProperty("CollidesWithTerrainWhenAttached");
     writer << m_CanCollideWithTerrainWhenAttached;
+	writer.NewProperty("DeleteWithParent");
+	writer << m_DeleteWithParent;
 
     return 0;
 }
@@ -242,17 +246,8 @@ bool Attachable::ParticlePenetration(HitData &hd)
 // Description:     Gibs this, effectively destroying it and creating multiple gibs or
 //                  pieces in its place.
 
-void Attachable::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    if (m_pParent)
-    {
-        (MOSRotating *)m_pParent->RemoveAttachable(this);
-    }
-    else
-    {
-        Detach();
-    }
-
+void Attachable::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO) {
+    m_pParent ? m_pParent->RemoveAttachable(this) : Detach();
     MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }
 
@@ -607,7 +602,7 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
             m_pTempBitmapA->SetColorKey(g_MaskColor);
 
             if (mode == g_DrawMaterial)
-                DrawMaterial(m_aSprite, m_pTempBitmapA, GetSettleMaterialID());
+                DrawMaterial(m_aSprite, m_pTempBitmapA, GetSettleMaterial());
             else if (mode == g_DrawAir)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, g_MaterialAir);
             else if (mode == g_DrawMask)
@@ -647,7 +642,7 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
         m_aSprite->SetPos(spritePos.m_X, spritePos.m_Y);
 
         if (mode == g_DrawMaterial)
-            DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, GetSettleMaterialID());
+            DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, GetSettleMaterial());
         else if (mode == g_DrawAir)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_MaterialAir);
         else if (mode == g_DrawMask)

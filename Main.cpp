@@ -123,11 +123,7 @@ const char *g_EditorToLaunch = ""; //!< String with editor activity name to laun
 bool g_InActivity = false;
 bool g_ResetActivity = false;
 bool g_ResumeActivity = false;
-bool g_ReturnToMainMenu = false;
 int g_IntroState = START;
-int g_TeamCount = 2;
-int g_PlayerCount = 3;
-int g_DifficultySetting = 4;
 int g_StationOffsetX;
 int g_StationOffsetY;
 
@@ -1947,20 +1943,21 @@ int main(int argc, char *argv[]) {
 	g_LoadingGUI.InitLoadingScreen();
 	InitMainMenu();
 
-	if (g_LaunchIntoEditor) { 
-		// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
-		g_UInputMan.GetControlScheme(0)->SetDevice(1);
-		g_UInputMan.GetControlScheme(0)->SetPreset(1);
-		// Disable intro sequence.
-		g_SettingsMan.SetPlayIntro(false);
-		// Start the specified editor activity.
-		EnterEditorActivity(g_EditorToLaunch);
+    if (!g_NetworkServer.IsServerModeEnabled()) {
+		if (g_LaunchIntoEditor) {
+			// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
+			g_UInputMan.GetControlScheme(0)->SetDevice(1);
+			g_UInputMan.GetControlScheme(0)->SetPreset(1);
+			// Start the specified editor activity.
+			EnterEditorActivity(g_EditorToLaunch);
+		} else if (!g_SettingsMan.LaunchIntoActivity()) {
+			g_IntroState = g_SettingsMan.SkipIntro() ? MENUAPPEAR : START;
+			PlayIntroTitle();
+		}
+	} else {
+		// NETWORK Create multiplayer lobby activity to start as default if server is running
+		EnterMultiplayerLobby();
 	}
-
-    if (g_SettingsMan.PlayIntro() && !g_NetworkServer.IsServerModeEnabled()) { PlayIntroTitle(); }
-
-	// NETWORK Create multiplayer lobby activity to start as default if server is running
-	if (g_NetworkServer.IsServerModeEnabled()) { EnterMultiplayerLobby(); }
 
     // If we fail to start/reset the activity, then revert to the intro/menu
     if (!ResetActivity()) { PlayIntroTitle(); }

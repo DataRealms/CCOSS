@@ -15,6 +15,8 @@ namespace RTE {
 
 	public:
 
+		SerializableOverrideMethods
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsMan object in system memory. Create() should be called before using the object.
@@ -52,27 +54,6 @@ namespace RTE {
 		/// Resets the entire SettingsMan, including its inherited members, to their default settings or values.
 		/// </summary>
 		virtual void Reset() { Clear(); }
-#pragma endregion
-
-#pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this SettingsMan to an output stream for later recreation with Create(Reader &reader);
-		/// </summary>
-		/// <param name="writer">A Writer that the SettingsMan will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
 #pragma endregion
 
 #pragma region Settings Manager Operations
@@ -181,10 +162,30 @@ namespace RTE {
 		void SetShowForeignItems(bool newValue) { m_ShowForeignItems = newValue; }
 
 		/// <summary>
-		/// Whether random hats on actors are enabled or not.
+		/// Whether randomized hat attachables will be attached to all AHuman actors.
 		/// </summary>
 		/// <returns>Whether random hats are enabled or not.</returns>
 		bool EnableHats() const { return m_EnableHats; }
+
+		/// <summary>
+		/// Gets whether the crab bomb effect is enabled or not. False means releasing whatever number of crabs will do nothing except release a whatever number of crabs.
+		/// </summary>
+		/// <returns>Whether the crab bomb effect is enabled or not.</returns>
+		bool EnableCrabBombs() const { return m_EnableCrabBombs; }
+
+		/// <summary>
+		/// Gets the number of crabs needed to be released at once to trigger the crab bomb effect.
+		/// </summary>
+		/// <returns>The number of crabs needed to be released at once to trigger the crab bomb effect.</returns>
+		unsigned short CrabBombThreshold() const { return m_CrabBombThreshold; }
+#pragma endregion
+
+#pragma region Default Activity Settings
+		/// <summary>
+		/// Gets whether the intro and main menu should be skipped on game start and launch directly into the set default activity instead.
+		/// </summary>
+		/// <returns>Whether the game is set to launch directly into the set default activity or not.</returns>
+		bool LaunchIntoActivity() const { return m_LaunchIntoActivity; }
 #pragma endregion
 
 #pragma region Network Settings
@@ -397,16 +398,16 @@ namespace RTE {
 
 #pragma region Misc Settings
 		/// <summary>
-		/// Gets whether the game intro is set to play on game startup or not.
+		/// Gets whether the game intro is set to be skipped on game startup or not.
 		/// </summary>
-		/// <returns>Whether intro is set to play or not.</returns>
-		bool PlayIntro() const { return m_PlayIntro; }
+		/// <returns>Whether intro is set to be skipped or not.</returns>
+		bool SkipIntro() const { return m_SkipIntro; }
 
 		/// <summary>
-		/// Sets whether the game intro should play on game startup or not.
+		/// Sets whether the game intro should be skipped on game startup or not.
 		/// </summary>
-		/// <param name="play">Whether to play game intro or not.</param>
-		void SetPlayIntro(bool play) { m_PlayIntro = play; }
+		/// <param name="play">Whether to skip game intro or not.</param>
+		void SetSkipIntro(bool play) { m_SkipIntro = play; }
 
 		/// <summary>
 		/// Gets whether tooltip display on certain UI elements is enabled or not.
@@ -486,8 +487,10 @@ namespace RTE {
 		bool m_ShowForeignItems; //!< Do not show foreign items in buy menu.
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.	
-		bool m_EndlessMode; //!< Endless metagame mode.
-		bool m_EnableHats; //!< Hats enabled.
+		bool m_EndlessMode; //!< Endless MetaGame mode.
+		bool m_EnableHats; //!< Whether randomized hat attachables will be attached to all AHuman actors.
+		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
+		unsigned short m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
 
 		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
 		std::string m_NetworkServerAddress; //!< LAN server address to connect to.
@@ -525,7 +528,9 @@ namespace RTE {
 		unsigned int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
 		bool m_PreciseCollisions; //!<Whether to use additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just uses data from the last frame with less precision.
 
-		bool m_PlayIntro; //!< Whether to play the intro of the game.	
+		bool m_LaunchIntoActivity; //!< Whether to skip the intro and main menu and launch directly into the set default activity instead.
+
+		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
 		bool m_ToolTips; //!< Whether ToolTips are enabled or not.
 		bool m_DisableLoadingScreen; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
 		unsigned short m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.

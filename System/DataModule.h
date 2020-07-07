@@ -28,6 +28,8 @@ namespace RTE {
 
 	public:
 
+		SerializableOverrideMethods
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a DataModule object in system memory. Create() should be called before using the object.
@@ -78,25 +80,6 @@ namespace RTE {
 		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this DataModule's creation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int ReadModuleProperties(std::string moduleName, ProgressCallback progressCallback = 0);
-
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this DataModule to an output stream for later recreation with Create(Reader &reader).
-		/// </summary>
-		/// <param name="writer">A Writer that the DataModule will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
 
 		/// <summary>
 		/// Returns true if loader should ignore missing items in this module.
@@ -200,7 +183,7 @@ namespace RTE {
 		/// <summary>
 		/// Fills out a list with all groups registered with this that contain any objects of a specific type and it derivatives.
 		/// </summary>
-		/// <param name="groupList">The list that all found groups will be ADDED to. OINT.</param>
+		/// <param name="groupList">The list that all found groups will be ADDED to. OWNERSHIP IS NOT TRANSFERRED!</param>
 		/// <param name="withType">The name of the type to only get groups of.</param>
 		/// <returns>Whether any groups with the specified type was found.</returns>
 		bool GetGroupsWithType(std::list<std::string> &groupList, std::string withType);
@@ -326,7 +309,7 @@ namespace RTE {
 		/// This will NOT check if duplicates are added to any type-list, so please use GetEntityIfExactType to check this beforehand.
 		/// Dupes are allowed if there are no more than one of the exact class and name.
 		/// </summary>
-		/// <param name="entityToAdd">The new object instance to add. OINT!</param>
+		/// <param name="entityToAdd">The new object instance to add. OWNERSHIP IS NOT TRANSFERRED!</param>
 		/// <returns>Whether the Entity was added successfully or not.</returns>
 		bool AddToTypeMap(Entity *entityToAdd);
 #pragma endregion

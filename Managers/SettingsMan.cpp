@@ -29,6 +29,8 @@ namespace RTE {
 		m_BlipOnRevealUnseen = true;
 		m_EndlessMode = false;
 		m_EnableHats = false;
+		m_EnableCrabBombs = false;
+		m_CrabBombThreshold = 42;
 
 		m_NetworkServerAddress = "127.0.0.1:8000";
 		m_PlayerNetworkName = "Dummy";
@@ -56,7 +58,9 @@ namespace RTE {
 		m_RecommendedMOIDCount = 240;
 		m_PreciseCollisions = true;
 
-		m_PlayIntro = true;
+		m_LaunchIntoActivity = false;
+
+		m_SkipIntro = false;
 		m_ToolTips = true;
 		m_DisableLoadingScreen = true;
 		m_LoadingScreenReportPrecision = 100;
@@ -134,6 +138,12 @@ namespace RTE {
 			reader >> m_EndlessMode;
 		} else if (propName == "EnableHats") {
 			reader >> m_EnableHats;
+		} else if (propName == "EnableCrabBombs") {
+			reader >> m_EnableCrabBombs;
+		} else if (propName == "CrabBombThreshold") {
+			reader >> m_CrabBombThreshold;
+		} else if (propName == "LaunchIntoActivity") {
+			reader >> m_LaunchIntoActivity;
 		} else if (propName == "DefaultActivityType") {
 			g_ActivityMan.SetDefaultActivityType(reader.ReadPropValue());
 		} else if (propName == "DefaultActivityName") {
@@ -142,8 +152,6 @@ namespace RTE {
 			g_SceneMan.SetDefaultSceneName(reader.ReadPropValue());
 		} else if (propName == "RecommendedMOIDCount") {
 			reader >> m_RecommendedMOIDCount;
-		} else if (propName == "PixelsPerMeter") {
-			g_FrameMan.ReadProperty(propName, reader);
 
 		/*
 		// Temporarily removed from settings file due to being buggy when disabled by user.
@@ -163,8 +171,8 @@ namespace RTE {
 			reader >> m_AllowSavingToBase;
 		} else if (propName == "ShowMetaScenes") {
 			reader >> m_ShowMetaScenes;
-		} else if (propName == "PlayIntro") {
-			reader >> m_PlayIntro;
+		} else if (propName == "SkipIntro") {
+			reader >> m_SkipIntro;
 		} else if (propName == "ToolTips") {
 			reader >> m_ToolTips;
 		} else if (propName == "DisableLoadingScreen") {
@@ -226,7 +234,6 @@ namespace RTE {
 		} else if (propName == "P1Scheme" || propName == "P2Scheme" || propName == "P3Scheme" || propName == "P4Scheme") {
 			g_UInputMan.ReadProperty(propName, reader);
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -297,11 +304,17 @@ namespace RTE {
 		writer << m_EndlessMode;
 		writer.NewProperty("EnableHats");
 		writer << m_EnableHats;
+		writer.NewProperty("EnableCrabBombs");
+		writer << m_EnableCrabBombs;
+		writer.NewProperty("CrabBombThreshold");
+		writer << m_CrabBombThreshold;
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);
 		writer.NewLineString("// Default Activity Settings", false);
 		writer.NewLine(false);
+		writer.NewProperty("LaunchIntoActivity");
+		writer << m_LaunchIntoActivity;
 		writer.NewProperty("DefaultActivityType");
 		writer << g_ActivityMan.GetDefaultActivityType();
 		writer.NewProperty("DefaultActivityName");
@@ -315,8 +328,6 @@ namespace RTE {
 		writer.NewLine(false);
 		writer.NewProperty("RecommendedMOIDCount");
 		writer << m_RecommendedMOIDCount;
-		writer.NewProperty("PixelsPerMeter");
-		writer << g_FrameMan.GetPPM();
 
 		/*
 		// Temporarily removed from settings file due to being buggy when disabled by user.
@@ -346,8 +357,8 @@ namespace RTE {
 		writer.NewDivider(false);
 		writer.NewLineString("// Misc Settings", false);
 		writer.NewLine(false);
-		writer.NewProperty("PlayIntro");
-		writer << m_PlayIntro;
+		writer.NewProperty("SkipIntro");
+		writer << m_SkipIntro;
 		writer.NewProperty("ToolTips");
 		writer << m_ToolTips;
 		writer.NewProperty("DisableLoadingScreen");
@@ -473,8 +484,6 @@ namespace RTE {
 		writer << 40;
 		writer.NewProperty("MusicVolume");
 		writer << 60;
-		writer.NewProperty("PixelsPerMeter");
-		writer << 20;
 
 		writer.ObjectEnd();
 

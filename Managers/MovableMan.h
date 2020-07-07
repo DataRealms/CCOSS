@@ -84,6 +84,8 @@ class MovableMan:
 
 public:
 
+	SerializableOverrideMethods
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     MovableMan
@@ -114,34 +116,6 @@ public:
 //                  Anything below 0 is an error signal.
 
     virtual int Create();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this MovableMan to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the MovableMan will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -298,7 +272,7 @@ public:
 //                  The maximum radius around that scene point to search.
 //                  A float to be filled out with the distance of the returned closest to
 //                  the search point. Will be unaltered if no object was found within radius.
-//                  An Actor to exclude from the search. OINT.
+//                  An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    An Actor pointer to the requested team's Actor closest to the Scene
 //                  point, but not outside the max radius. If no Actor other than the
 //                  excluded one was found within the radius of the point, 0 is returned.
@@ -346,7 +320,7 @@ public:
 //                  The maximum radius around that scene point to search.
 //                  A float to be filled out with the distance of the returned closest to
 //                  the search point. Will be unaltered if no object was found within radius.
-//                  An Actor to exclude from the search. OINT.
+//                  An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    An Actor pointer to the requested Actor closest to the Scene
 //                  point, but not outside the max radius. If no Actor other than the
 //                  excluded one was found within the radius of the point, 0 is returned.
@@ -358,11 +332,11 @@ public:
 // Method:          GetClosestBrainActor
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get a pointer to the brain actor of a specific team that is closest to
-//                  a scene point. OINT.
+//                  a scene point. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       Which team to try to get the brain for. 0 means first team, 1 means 2nd.
 //                  The point in the scene where to look for the closest opposite team brain.
 // Return value:    An Actor pointer to the requested team's brain closest to the point.
-//                  0 if there are no brains of that team. OINT.
+//                  0 if there are no brains of that team. OWNERSHIP IS NOT TRANSFERRED!
 
     Actor * GetClosestBrainActor(int team, const Vector &scenePoint) const;
 
@@ -371,11 +345,11 @@ public:
 // Method:          GetFirstBrainActor
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get a pointer to the brain actor of a specific team that is closest to
-//                  a scene point. OINT.
+//                  a scene point. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       Which team to try to get the brain for. 0 means first team, 1 means 2nd.
 //                  The point in the scene where to look for the closest opposite team brain.
 // Return value:    An Actor pointer to the requested team's brain closest to the point.
-//                  0 if there are no brains of that team. OINT.
+//                  0 if there are no brains of that team. OWNERSHIP IS NOT TRANSFERRED!
 
     Actor * GetFirstBrainActor(int team) const { return GetClosestBrainActor(team, Vector()); }
 
@@ -384,11 +358,11 @@ public:
 // Method:          GetClosestOtherBrainActor
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get a pointer to the brain actor NOT of a specific team that is closest
-//                  to a scene point. OINT.
+//                  to a scene point. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       Which team to NOT get the brain for. 0 means first team, 1 means 2nd.
 //                  The point where to look for the closest brain not of this team.
 // Return value:    An Actor pointer to the requested brain closest to the point.
-//                  0 if there are no brains not on that team. OINT.
+//                  0 if there are no brains not on that team. OWNERSHIP IS NOT TRANSFERRED!
 
     Actor * GetClosestOtherBrainActor(int notOfTeam, const Vector &scenePoint) const;
 
@@ -396,10 +370,10 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetFirstOtherBrainActor
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Get a pointer to the brain actor NOT of a specific team. OINT.
+// Description:     Get a pointer to the brain actor NOT of a specific team. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       Which team to NOT get the brain for. 0 means first team, 1 means 2nd.
 // Return value:    An Actor pointer to the requested brain of that team.
-//                  0 if there are no brains not on that team. OINT.
+//                  0 if there are no brains not on that team. OWNERSHIP IS NOT TRANSFERRED!
 
     Actor * GetFirstOtherBrainActor(int notOfTeam) const { return GetClosestOtherBrainActor(notOfTeam, Vector()); }
 

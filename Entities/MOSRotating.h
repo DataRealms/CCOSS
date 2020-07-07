@@ -15,6 +15,7 @@
 // Inclusions of header files
 
 #include "MOSprite.h"
+#include "Gib.h"
 #include "PostProcessMan.h"
 
 namespace RTE
@@ -48,237 +49,11 @@ friend class AtomGroup;
 friend class SLTerrain;
 friend class LuaMan;
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Nested class:    Gib
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Something to bundle the properties of Gib piece together.
-    // Parent(s):       Serializable.
-    // Class history:   10/24/2006 Gib created.
-
-    class Gib:
-        public Serializable
-    {
-
-    friend class GibEditor;
-    friend class TDExplosive;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Public member variable, method and friend function declarations
-
-    public:
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Constructor:     Gib
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Constructor method used to instantiate a Gib object in system
-    //                  memory. Create() should be called before using the object.
-    // Arguments:       None.
-
-        Gib() { Clear(); }
-
-/*
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Create
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Makes the Gib object ready for use.
-    // Arguments:       None.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Create();
-*/
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Create
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Creates a Gib to be identical to another, by deep copy.
-    // Arguments:       A reference to the Gib to deep copy.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Create(const Gib &reference);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  ReadProperty
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Reads a property value from a Reader stream. If the name isn't
-    //                  recognized by this class, then ReadProperty of the parent class
-    //                  is called. If the property isn't recognized by any of the base classes,
-    //                  false is returned, and the Reader's position is untouched.
-    // Arguments:       The name of the property to be read.
-    //                  A Reader lined up to the value of the property to be read.
-    // Return value:    An error return value signaling whether the property was successfully
-    //                  read or not. 0 means it was read successfully, and any nonzero indicates
-    //                  that a property of that name could not be found in this or base classes.
-
-        virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Reset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Resets the entire Serializable, including its inherited members, to their
-    //                  default settings or values.
-    // Arguments:       None.
-    // Return value:    None.
-
-        virtual void Reset() { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Save
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Saves the complete state of this Gib to an output stream for
-    //                  later recreation with Create(Reader &reader);
-    // Arguments:       A Writer that the Gib will save itself with.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Save(Writer &writer) const;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-        virtual const std::string & GetClassName() const { return m_sClassName; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetParticlePreset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the reference particle to be used as a gib. Owenership is NOT transferred!
-    // Arguments:       None.
-    // Return value:    A pointer to the particle to be emitted. Not transferred!
-
-        virtual const MovableObject * GetParticlePreset() { return m_pGibParticle; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetOffset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the spawn offset from the parent's position.
-    // Arguments:       None.
-    // Return value:    The offset in pixels from the parent's position where this gets spawned.
-
-        virtual Vector GetOffset() const { return m_Offset; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetCount
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the number of emissions to make of this emission type in a burst.
-    // Arguments:       None.
-    // Return value:    The number of emissions there should be of this type in an emission.
-
-        virtual int GetCount() const { return m_Count; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetSpread
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the angle spread of velocity of the emitted MO's to each side of
-    //                  the m_EmitAngle angle. in radians. PI/2 would mean that MO's fly out to
-    //                  one side only, with the m_Rotation defining the middle of that half circle.
-    // Arguments:       None.
-    // Return value:    The emission spread in radians.
-
-        virtual float GetSpread() const { return m_Spread; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetMinVelocity
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the specified minimum velocity an emitted MO can have when emitted.
-    // Arguments:       None.
-    // Return value:    The min emission velocity in m/s.
-
-        virtual float GetMinVelocity() const { return MIN(m_MinVelocity, m_MaxVelocity); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetMaxVelocity
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the specified maximum velocity an emitted MO can have when emitted.
-    // Arguments:       None.
-    // Return value:    The max emission velocity in m/s.
-
-        virtual float GetMaxVelocity() const { return MAX(m_MinVelocity, m_MaxVelocity); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetLifeVariation
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the specified variation in lifetime of the gibbed object.
-    // Arguments:       None.
-    // Return value:    The life variation rationally expressed.. 0.1 = up to 10% varitaion.
-
-        virtual float GetLifeVariation() const { return m_LifeVariation; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  InheritsVel
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Shows whether this's gibs should inherit the velocity of the gibbing
-    //                  parent.
-    // Arguments:       None.
-    // Return value:    Whetehr this inherits velocity or not.
-
-        virtual bool InheritsVel() const { return m_InheritsVel; }
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Protected member variable and method declarations
-
-    protected:
-
-        // Member variables
-        static const std::string m_sClassName;
-        // The pointer to the preset instance, that copies of which will be emitted. Not Owned
-        const MovableObject *m_pGibParticle;
-        // Offset spawn position from owner/parent's position
-        Vector m_Offset;
-        // The number of emissions of this type should be emitted
-        int m_Count;
-        // The angle spread of velocity of the emitted MO's to each
-        // side of the m_EmitAngle angle. in radians.
-        // PI/2 would mean that MO's fly out to one side only, with the
-        // m_Rotation defining the middle of that half circle.
-        float m_Spread;
-        // The minimum velocity an emitted MO can have when emitted
-        float m_MinVelocity;
-        // The maximum velocity an emitted MO can have when emitted
-        float m_MaxVelocity;
-        // The per-gib variation in life time, in percentage of the existing life time of the gib
-        float m_LifeVariation;
-        // Whether this gib should inherit the velocity of the exploding parent or not
-        bool m_InheritsVel;
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Private member variable and method declarations
-
-    private:
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          Clear
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Clears all the member variables of this Gib, effectively
-    //                  resetting the members of this abstraction level only.
-    // Arguments:       None.
-    // Return value:    None.
-
-        void Clear();
-
-    };
-
 
 // Concrete allocation and cloning definitions
 EntityAllocation(MOSRotating)
+SerializableOverrideMethods
+ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -346,22 +121,6 @@ EntityAllocation(MOSRotating)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire MOSRotating, including its inherited members, to their
@@ -373,18 +132,6 @@ EntityAllocation(MOSRotating)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this MOSRotating to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the MOSRotating will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Destroy
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Destroys and resets (through Clear()) the SceneLayer object.
@@ -393,26 +140,6 @@ EntityAllocation(MOSRotating)
 // Return value:    None.
 
     virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -533,15 +260,6 @@ EntityAllocation(MOSRotating)
 
     virtual void SetToHitMOs(bool hitMOs = true);
 */
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this MO is made of Gold or not.
-// Arguments:       None.
-// Return value:    Whether this MovableObject is of Gold or not.
-
-    virtual bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->id == c_GoldMaterialID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

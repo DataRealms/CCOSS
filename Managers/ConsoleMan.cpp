@@ -111,42 +111,6 @@ int ConsoleMan::Create()
     return 0;
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
-
-int ConsoleMan::ReadProperty(std::string propName, Reader &reader)
-{
-//    if (propName == "AddEffect")
-//        g_PresetMan.GetEntityPreset(reader);
-//    else
-        // See if the base class(es) can find a match instead
-        return Serializable::ReadProperty(propName, reader);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this ConsoleMan with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int ConsoleMan::Save(Writer &writer) const
-{
-
-// TODO: "Do this!")
-
-    return 0;
-}
-*/
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy
 //////////////////////////////////////////////////////////////////////////////////////////

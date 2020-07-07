@@ -15,7 +15,6 @@ namespace RTE {
 		} else if (propName == "Y") {
 			reader >> m_Y;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;

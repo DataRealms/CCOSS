@@ -358,7 +358,6 @@ int Activity::ReadProperty(std::string propName, Reader &reader)
 	else if (propName == "CraftsOrbitAtTheEdge")
 		reader >> m_CraftsOrbitAtTheEdge;
     else
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
 
     return 0;
@@ -1595,8 +1594,8 @@ void Activity::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 
 void ActivityMan::Clear()
 {
-    m_DefaultActivityType = "GABaseDefense";
-    m_DefaultActivityName = "Default Activity";
+    m_DefaultActivityType = "GATutorial";
+    m_DefaultActivityName = "Tutorial Mission";
     m_pStartActivity = 0;
     m_pActivity = 0;
     m_LastMusicPath = "";

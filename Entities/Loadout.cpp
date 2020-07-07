@@ -12,15 +12,8 @@
 // Inclusions of header files
 
 #include "Loadout.h"
-
 #include "PresetMan.h"
-
-#include "DataModule.h"
-#include "SceneObject.h"
 #include "MovableObject.h"
-#include "MOSprite.h"
-#include "HeldDevice.h"
-#include "AHuman.h"
 #include "ACraft.h"
 
 namespace RTE {
@@ -127,7 +120,6 @@ int Loadout::ReadProperty(std::string propName, Reader &reader)
         pCargo = 0;
     }
     else
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
 
     return 0;

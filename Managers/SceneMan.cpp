@@ -71,7 +71,7 @@ bool IntRect::IntersectionCut(const IntRect &rhs)
 
 void SceneMan::Clear()
 {
-    m_DefaultSceneName = "Physics Test";
+    m_DefaultSceneName = "Tutorial Bunker";
     m_pSceneToLoad = 0;
     m_PlaceObjects = true;
 	m_PlaceUnits = true;
@@ -350,20 +350,20 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
 
         // If the initially requested material slot is available, then put it there
         // But if it's not available, then check if any subsequent one is, looping around the palette if necessary
-        for (int tryId = pNewMat->id; tryId < c_PaletteEntriesNumber; ++tryId)
+        for (int tryId = pNewMat->GetIndex(); tryId < c_PaletteEntriesNumber; ++tryId)
         {
             // We found an empty slot in the Material palette!
             if (m_apMatPalette[tryId] == 0)
             {
                 // If the final ID isn't the same as the one originally requested by the data file, then make the mapping so
                 // subsequent ID references to this within the same data module can be translated to the actual ID of this material
-                if (tryId != pNewMat->id)
-                    g_PresetMan.AddMaterialMapping(pNewMat->id, tryId, reader.GetReadModuleID());
+                if (tryId != pNewMat->GetIndex())
+                    g_PresetMan.AddMaterialMapping(pNewMat->GetIndex(), tryId, reader.GetReadModuleID());
 
                 // Assign the final ID to the material and register it in the palette
-                pNewMat->id = tryId;
+                pNewMat->SetIndex(tryId);
                 m_apMatPalette[tryId] = pNewMat;
-                m_MatNameMap.insert(pair<string, unsigned char>(string(pNewMat->GetPresetName()), pNewMat->id));
+                m_MatNameMap.insert(pair<string, unsigned char>(string(pNewMat->GetPresetName()), pNewMat->GetIndex()));
                 // Now add the instance, when ID has been registered!
                 g_PresetMan.AddEntityPreset(pNewMat, reader.GetReadModuleID(), reader.GetPresetOverwriting(), objectFilePath);
                 ++m_MaterialCount;
@@ -373,7 +373,7 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
             else if (tryId >= c_PaletteEntriesNumber - 1)
                 tryId = 0;
             // If we've looped around without finding anything, break and throw error
-            else if (tryId == pNewMat->id - 1)
+            else if (tryId == pNewMat->GetIndex() - 1)
             {
 // TODO: find the closest matching mateiral and map to it?
                 RTEAbort("Tried to load material \"" + pNewMat->GetPresetName() + "\" but the material palette (256 max) is full! Try consolidating or removing some redundant materials, or removing some entire data modules.");
@@ -382,7 +382,6 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
         }
     }
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -969,7 +968,7 @@ bool SceneMan::WillPenetrate(const int posX,
     float impMag = impulse.GetMagnitude();
     unsigned char materialID = getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
 
-    return impMag >= GetMaterialFromID(materialID)->strength;
+    return impMag >= GetMaterialFromID(materialID)->GetIntegrity();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1038,11 +1037,11 @@ int SceneMan::RemoveOrphans(int posX, int posY,
 	{
 		Material const * sceneMat = GetMaterialFromID(materialID);
 		Material const * spawnMat;
-        spawnMat = sceneMat->spawnMaterial ? GetMaterialFromID(sceneMat->spawnMaterial) : sceneMat;
+        spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
 		float sprayScale = 0.1;
         Color spawnColor;
         if (spawnMat->UsesOwnColor())
-            spawnColor = spawnMat->color;
+            spawnColor = spawnMat->GetColor();
         else
             spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, posY));
 
@@ -1055,14 +1054,14 @@ int SceneMan::RemoveOrphans(int posX, int posY,
             // Get the new pixel from the pre-allocated pool, should be faster than dynamic allocation
             // Density is used as the mass for the new MOPixel
             MOPixel *pixelMO = new MOPixel(spawnColor,
-                                           spawnMat->pixelDensity,
+                                           spawnMat->GetPixelDensity(),
                                            Vector(posX, posY),
                                            Vector(-RangeRand((2 * sprayScale) / 2 , 2 * sprayScale),
                                                   -RangeRand((2 * sprayScale) / 2 , 2 * sprayScale)),
-                                           new Atom(Vector(), spawnMat->id, 0, spawnColor, 2),
+                                           new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2),
                                            0);
 
-            pixelMO->SetToHitMOs(spawnMat->id == c_GoldMaterialID);
+            pixelMO->SetToHitMOs(spawnMat->GetIndex() == c_GoldMaterialID);
             pixelMO->SetToGetHitByMOs(false);
             g_MovableMan.AddParticle(pixelMO);
             pixelMO = 0;
@@ -1230,14 +1229,14 @@ bool SceneMan::TryPenetrate(const int posX,
     float impMag = impulse.GetMagnitude();
 
     // Test if impulse force is enough to penetrate
-    if (impMag >= sceneMat->strength)
+    if (impMag >= sceneMat->GetIntegrity())
     {
         if (numPenetrations <= 3)
         {
-            spawnMat = sceneMat->spawnMaterial ? GetMaterialFromID(sceneMat->spawnMaterial) : sceneMat;
+            spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
             Color spawnColor;
             if (spawnMat->UsesOwnColor())
-                spawnColor = spawnMat->color;
+                spawnColor = spawnMat->GetColor();
             else
                 spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, posY));
 
@@ -1257,16 +1256,16 @@ bool SceneMan::TryPenetrate(const int posX,
                                 0);
 */
                 MOPixel *pixelMO = new MOPixel(spawnColor,
-                                               spawnMat->pixelDensity,
+                                               spawnMat->GetPixelDensity(),
                                                Vector(posX, posY),
                                                Vector(-RangeRand((velocity.m_X * sprayScale) / 2 , velocity.m_X * sprayScale),
                                                       -RangeRand((velocity.m_Y * sprayScale) / 2 , velocity.m_Y * sprayScale)),
 //                                              -(impulse * (sprayScale * PosRand() / spawnMat.density)),
-                                               new Atom(Vector(), spawnMat->id, 0, spawnColor, 2),
+                                               new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2),
                                                0);
 
 // TODO: Make material IDs more robust!")
-                pixelMO->SetToHitMOs(spawnMat->id == c_GoldMaterialID);
+                pixelMO->SetToHitMOs(spawnMat->GetIndex() == c_GoldMaterialID);
                 pixelMO->SetToGetHitByMOs(false);
                 g_MovableMan.AddParticle(pixelMO);
                 pixelMO = 0;
@@ -1287,10 +1286,10 @@ bool SceneMan::TryPenetrate(const int posX,
 
         // Save the impulse force effects of the penetrating particle.
 //        retardation = -sceneMat.density;
-        retardation = -(sceneMat->strength / impMag);
+        retardation = -(sceneMat->GetIntegrity() / impMag);
 
         // If this is a scrap pixel, or there is no background pixel 'supporting' the knocked-loose pixel, make the column above also turn into particles
-        if (sceneMat->isScrap || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)
+        if (sceneMat->IsScrap() || _getpixel(m_pCurrentScene->GetTerrain()->GetBGColorBitmap(), posX, posY) == g_MaskColor)
         {
             // Get quicker direct access to bitmaps
             BITMAP *pFGColor = m_pCurrentScene->GetTerrain()->GetFGColorBitmap();
@@ -1312,15 +1311,15 @@ bool SceneMan::TryPenetrate(const int posX,
                     sceneMat = GetMaterialFromID(testMaterialID);
 
                     // No support in the background layer, or is scrap material, so make particle of some of them
-                    if (sceneMat->isScrap || _getpixel(pBGColor, posX, testY) == g_MaskColor)
+                    if (sceneMat->IsScrap() || _getpixel(pBGColor, posX, testY) == g_MaskColor)
                     {
                         //  Only generate  particles of some of 'em
                         if (PosRand() > 0.75)
                         {
                             // Figure out the mateiral and color of the new spray particle
-                            spawnMat = sceneMat->spawnMaterial ? GetMaterialFromID(sceneMat->spawnMaterial) : sceneMat;
+                            spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
                             if (spawnMat->UsesOwnColor())
-                                spawnColor = spawnMat->color;
+                                spawnColor = spawnMat->GetColor();
                             else
                                 spawnColor.SetRGBWithIndex(m_pCurrentScene->GetTerrain()->GetFGColorPixel(posX, testY));
 
@@ -1331,10 +1330,10 @@ bool SceneMan::TryPenetrate(const int posX,
                                 sprayVel.SetXY(sprayMag * NormalRand() * 0.5, (-sprayMag * 0.5) + (-sprayMag * 0.5 * PosRand()));
 
                                 // Create the new spray pixel
-								pixelMO = new MOPixel(spawnColor, spawnMat->pixelDensity, Vector(posX, testY), sprayVel, new Atom(Vector(), spawnMat->id, 0, spawnColor, 2), 0);
+								pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(posX, testY), sprayVel, new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2), 0);
 
                                 // Let it loose into the world
-                                pixelMO->SetToHitMOs(spawnMat->id == c_GoldMaterialID);
+                                pixelMO->SetToHitMOs(spawnMat->GetIndex() == c_GoldMaterialID);
                                 pixelMO->SetToGetHitByMOs(false);
                                 g_MovableMan.AddParticle(pixelMO);
                                 pixelMO = 0;
@@ -1707,7 +1706,7 @@ bool SceneMan::CastUnseenRay(int team, const Vector &start, const Vector &ray, V
             // Get the material object
             foundMaterial = GetMaterialFromID(materialID);
             // Add the encountered material's strength to the tally
-            totalStrength += foundMaterial->strength;
+            totalStrength += foundMaterial->GetIntegrity();
             // See if we have hit the limits of our ray's strength
             if (totalStrength >= strengthLimit)
             {
@@ -2104,7 +2103,7 @@ float SceneMan::CastStrengthSumRay(const Vector &start, const Vector &end, int s
             // Sum all strengths
             materialID = GetTerrMatter(intPos[X], intPos[Y]);
             if (materialID != g_MaterialAir && materialID != ignoreMaterial)
-                strengthSum += GetMaterialFromID(materialID)->strength;
+                strengthSum += GetMaterialFromID(materialID)->GetIntegrity();
 
             skipped = 0;
         }
@@ -2198,7 +2197,7 @@ float SceneMan::CastMaxStrengthRay(const Vector &start, const Vector &end, int s
             // Sum all strengths
             materialID = GetTerrMatter(intPos[X], intPos[Y]);
             if (materialID != g_MaterialDoor)
-                maxStrength = MAX(maxStrength, GetMaterialFromID(materialID)->strength);
+                maxStrength = std::max(maxStrength, GetMaterialFromID(materialID)->GetIntegrity());
 
             skipped = 0;
         }
@@ -2300,7 +2299,7 @@ bool SceneMan::CastStrengthRay(const Vector &start, const Vector &ray, float str
                 foundMaterial = GetMaterialFromID(materialID);
 
                 // See if we found a pixel of equal or more strength than the threshold
-                if (foundMaterial->strength >= strength)
+                if (foundMaterial->GetIntegrity() >= strength)
                 {
                     // Save result and report success
                     foundPixel = true;
@@ -2420,7 +2419,7 @@ bool SceneMan::CastWeaknessRay(const Vector &start, const Vector &ray, float str
             foundMaterial = GetMaterialFromID(materialID);
 
             // See if we found a pixel of equal or less strength than the threshold
-            if (foundMaterial->strength <= strength)
+            if (foundMaterial->GetIntegrity() <= strength)
             {
                 // Save result and report success
                 foundPixel = true;

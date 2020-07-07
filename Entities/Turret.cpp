@@ -12,9 +12,7 @@
 // Inclusions of header files
 
 #include "Turret.h"
-#include "RTETools.h"
 #include "HeldDevice.h"
-#include "ContentFile.h"
 #include "PresetMan.h"
 
 namespace RTE {
@@ -93,7 +91,6 @@ int Turret::ReadProperty(std::string propName, Reader &reader)
         pEntity = 0;
     }
     else
-        // See if the base class(es) can find a match instead
         return Attachable::ReadProperty(propName, reader);
 
     return 0;

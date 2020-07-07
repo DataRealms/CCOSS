@@ -12,26 +12,19 @@
 // Inclusions of header files
 
 #include "ACrab.h"
-#include "Atom.h"
 #include "AtomGroup.h"
 #include "Attachable.h"
-#include "HeldDevice.h"
 #include "ThrownDevice.h"
 #include "Turret.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "RTETools.h"
-#include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
 #include "HDFirearm.h"
-#include "SLTerrain.h"
-#include "PresetMan.h"
 #include "PieMenuGUI.h"
 #include "Scene.h"
 
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {
@@ -347,7 +340,6 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "AimRangeLowerLimit")
         reader >> m_AimRangeLowerLimit;
     else
-        // See if the base class(es) can find a match instead
         return Actor::ReadProperty(propName, reader);
 
     return 0;
@@ -581,7 +573,7 @@ bool ACrab::CollideAtPoint(HitData &hd)
 /*
     hd.ResImpulse[HITOR].Reset();
     hd.ResImpulse[HITEE].Reset();
-    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * g_FrameMan.GetMPP();
+    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * c_MPP;
     hd.mass[HITEE] = m_Mass;
     hd.MomInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
     hd.HitVel[HITEE] = m_Vel + hd.HitRadius[HITEE].GetPerpendicular() * m_AngularVel;
@@ -737,7 +729,7 @@ Attachable * ACrab::GetTurret() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the turret, if anything. OINT.
+// Description:     Returns whatever is equipped in the turret, if anything. OWNERSHIP IS NOT TRANSFERRED!
 
 MovableObject * ACrab::GetEquippedItem() const
 {

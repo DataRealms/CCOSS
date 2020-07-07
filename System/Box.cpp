@@ -54,7 +54,6 @@ namespace RTE {
 		} else if (propName == "Height") {
 			reader >> m_Height;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;

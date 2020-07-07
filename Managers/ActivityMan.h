@@ -53,6 +53,8 @@ class Activity:
 
 public:
 
+	SerializableOverrideMethods
+
     enum ActivityState
     {
         NOACTIVITY = -1,
@@ -168,22 +170,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire Activity, including its inherited members, to their
@@ -192,18 +178,6 @@ public:
 // Return value:    None.
 
     virtual void Reset() { Clear(); Entity::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Activity to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the Activity will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1364,7 +1338,7 @@ public:
 // Description:     Gets the activity set to use a copy of for next restart. Ownership is
 //                  NOT transferred!
 // Arguments:       None.
-// Return value:    The activity to put into effect next time ResetActivity is called. OINT!
+// Return value:    The activity to put into effect next time ResetActivity is called. OWNERSHIP IS NOT TRANSFERRED!
 
     Activity * GetStartActivity() { return m_pStartActivity; }
 

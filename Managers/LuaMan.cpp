@@ -589,6 +589,10 @@ int LuaMan::Create()
             .def("IsOnScenePoint", &SceneObject::IsOnScenePoint),
 
         ABSTRACTLUABINDING(MovableObject, SceneObject)
+			.def("GetParent", (MovableObject * (MovableObject::*)())&MovableObject::GetParent)
+			.def("GetParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetParent)
+			.def("GetRootParent", (MovableObject * (MovableObject::*)())&MovableObject::GetRootParent)
+			.def("GetRootParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetRootParent)
 			.property("Material", &MovableObject::GetMaterial)
             .def("ReloadScripts", (int (MovableObject:: *)()) &MovableObject::ReloadScripts)
             .def("HasScript", &MovableObject::HasScript)
@@ -668,13 +672,13 @@ int LuaMan::Create()
 			.property("HitWhatParticleUniqueID", &MovableObject::HitWhatParticleUniqueID),
 
 		class_<Material, Entity>("Material")
-			.property("ID", &Material::GetId)
+			.property("ID", &Material::GetIndex)
 			.property("Restitution", &Material::GetRestitution)
 			.property("Bounce", &Material::GetRestitution)
 			.property("Friction", &Material::GetFriction)
 			.property("Stickiness", &Material::GetStickiness)
-			.property("Strength", &Material::GetStrength)
-			.property("StructuralIntegrity", &Material::GetStrength)
+			.property("Strength", &Material::GetIntegrity)
+			.property("StructuralIntegrity", &Material::GetIntegrity)
 			.property("DensityKGPerVolumeL", &Material::GetVolumeDensity)
 			.property("DensityKGPerPixel", &Material::GetPixelDensity)
 			.property("SettleMaterial", &Material::GetSettleMaterial)
@@ -683,10 +687,6 @@ int LuaMan::Create()
 			.property("IsScrap", &Material::IsScrap),
 
         CONCRETELUABINDING(MOPixel, MovableObject),
-//            .property("Material", &MOPixel::GetMaterial),
-//            .property("Framerate", &MOPixel::GetFramerate, &MOPixel::SetFramerate)
-//            .property("Atom", &MOPixel::GetAtom, &MOPixel:SetAtom)
-//            .property("IsGold", &MOPixel::IsGold),
 
         CONCRETELUABINDING(TerrainObject, SceneObject)
             .def("GetBitmapOffset", &TerrainObject::GetBitmapOffset)
@@ -702,9 +702,10 @@ int LuaMan::Create()
                 value("ALWAYSPINGPONG", 3),
                 value("LOOPWHENMOVING", 4),
                 value("LOOPWHENOPENCLOSE", 5),
-                value("PINGPONGOPENCLOSE", 6)
+                value("PINGPONGOPENCLOSE", 6),
+                value("OVERLIFETIME", 7),
+                value("ONCOLLIDE", 8)
             ]
-            /*.property("Material", &MOSprite::GetMaterial)*/
             .property("Diameter", &MOSprite::GetDiameter)
             .property("BoundingBox", &MOSprite::GetBoundingBox)
             .property("FrameCount", &MOSprite::GetFrameCount)
@@ -728,17 +729,12 @@ int LuaMan::Create()
 			.def("GetEntryWoundPresetName", &MOSprite::GetEntryWoundPresetName)
 			.def("GetExitWoundPresetName", &MOSprite::GetExitWoundPresetName),
 
-        CONCRETELUABINDING(MOSParticle, MOSprite)
-            /*.property("Material", &MOSParticle::GetMaterial)*/
-            .property("Framerate", &MOSParticle::GetFramerate, &MOSParticle::SetFramerate)
-//            .property("Atom", &MOSParticle::GetAtom, &MOSParticle:SetAtom)
-            .property("IsGold", &MOSParticle::IsGold),
+        CONCRETELUABINDING(MOSParticle, MOSprite),
 
         CONCRETELUABINDING(MOSRotating, MOSprite)
             /*.property("Material", &MOSRotating::GetMaterial)*/
             .property("RecoilForce", &MOSRotating::GetRecoilForce)
             .property("RecoilOffset", &MOSRotating::GetRecoilOffset)
-            .property("IsGold", &MOSRotating::IsGold)
 			.property("TravelImpulse", &MOSRotating::GetTravelImpulse, &MOSRotating::SetTravelImpulse)
 			.property("GibWoundLimit", &MOSRotating::GetGibWoundLimit, &MOSRotating::SetGibWoundLimit)
 			.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
@@ -783,10 +779,6 @@ int LuaMan::Create()
 			.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator),
 
         CONCRETELUABINDING(Attachable, MOSRotating)
-            .def("GetRootParent", (MovableObject * (Attachable::*)())&Attachable::GetRootParent)
-            .def("GetRootParent", (const MovableObject * (Attachable::*)() const)&Attachable::GetRootParent)
-			.def("GetParent", (MovableObject * (Attachable::*)())&Attachable::GetParent)
-			.def("GetParent", (const MovableObject * (Attachable::*)() const)&Attachable::GetParent)
 			.property("ParentOffset", &Attachable::GetParentOffset, &Attachable::SetParentOffset)
             .property("JointOffset", &Attachable::GetJointOffset, &Attachable::SetJointOffset)
             .property("JointStiffness", &Attachable::GetJointStiffness, &Attachable::SetJointStiffness)
@@ -904,6 +896,9 @@ int LuaMan::Create()
             .def("SetControllerMode", &Actor::SetControllerMode)
             .def("SwapControllerModes", &Actor::SwapControllerModes)
 			.property("ImpulseDamageThreshold", &Actor::GetTravelImpulseDamage, &Actor::SetTravelImpulseDamage)
+			.def("GetStableVelocityThreshold", &Actor::GetStableVel)
+			.def("SetStableVelocityThreshold", (void (Actor::*)(float, float))&Actor::SetStableVel)
+			.def("SetStableVelocityThreshold", (void (Actor::*)(Vector))&Actor::SetStableVel)
             .property("Status", &Actor::GetStatus, &Actor::SetStatus)
             .property("Health", &Actor::GetHealth, &Actor::SetHealth)
             .property("MaxHealth", &Actor::GetMaxHealth, &Actor::SetMaxHealth)
@@ -968,12 +963,14 @@ int LuaMan::Create()
 				value("CLOSED", 0),
 				value("OPENING", 1),
 				value("OPEN", 2),
-				value("CLOSING", 3)
+				value("CLOSING", 3),
+				value("STOPPED", 4)
 			]
             .property("Door", &ADoor::GetDoor)
 			.def("GetDoorState", &ADoor::GetDoorState)
 			.def("OpenDoor", &ADoor::OpenDoor)
 			.def("CloseDoor", &ADoor::CloseDoor)
+			.def("StopDoor", &ADoor::StopDoor)
 			.def("SetClosedByDefault", &ADoor::SetClosedByDefault),
 
 		ABSTRACTLUABINDING(Arm, Attachable)
@@ -1064,6 +1061,7 @@ int LuaMan::Create()
             .property("Jetpack", &AHuman::GetJetpack)
             .property("JetTimeTotal", &AHuman::GetJetTimeTotal, &AHuman::SetJetTimeTotal)
             .property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
+			.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
             .def("EquipFirearm", &AHuman::EquipFirearm)
             .def("EquipThrowable", &AHuman::EquipThrowable)
             .def("EquipDiggingTool", &AHuman::EquipDiggingTool)
@@ -1425,10 +1423,6 @@ int LuaMan::Create()
             .def("DrawnSimUpdate", &TimerMan::DrawnSimUpdate),
 
         class_<FrameMan>("FrameManager")
-            .property("PPM", &FrameMan::GetPPM)
-            .property("MPP", &FrameMan::GetMPP)
-            .property("PPL", &FrameMan::GetPPL)
-            .property("LPP", &FrameMan::GetLPP)
             .property("PlayerScreenWidth", &FrameMan::GetPlayerScreenWidth)
             .property("PlayerScreenHeight", &FrameMan::GetPlayerScreenHeight)
 			.def("LoadPalette", &FrameMan::LoadPalette)
@@ -2208,7 +2202,11 @@ int LuaMan::Create()
         def("EaseIn", &EaseIn),
         def("EaseOut", &EaseOut),
         def("EaseInOut", &EaseInOut),
-        def("Clamp", &Limit)
+        def("Clamp", &Limit),
+		def("GetPPM", &GetPPM),
+		def("GetMPP", &GetMPP),
+		def("GetPPL", &GetPPL),
+		def("GetLPP", &GetLPP)
     ];
 
     // Assign the manager instances to globals in the lua master state
@@ -2244,41 +2242,6 @@ void LuaMan::ClearUserModuleCache()
 	luaL_dostring(m_pMasterState, "for m, n in pairs(package.loaded) do if type(n) == \"boolean\" then package.loaded[m] = nil end end");
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
-
-int LuaMan::ReadProperty(std::string propName, Reader &reader)
-{
-//    if (propName == "AddEffect")
-//        g_PresetMan.GetEntityPreset(reader);
-//    else
-        // See if the base class(es) can find a match instead
-        return Serializable::ReadProperty(propName, reader);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this LuaMan with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int LuaMan::Save(Writer &writer) const
-{
-
-// TODO: "Do this!")
-
-    return 0;
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy

@@ -180,7 +180,7 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		Writer(const Writer &reference);
+		Writer(const Writer &reference) {}
 		Writer & operator=(const Writer &rhs) {}
 	};
 }

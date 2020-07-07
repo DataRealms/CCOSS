@@ -12,17 +12,12 @@
 // Inclusions of header files
 
 #include "AHuman.h"
-#include "Atom.h"
 #include "AtomGroup.h"
-#include "Attachable.h"
-#include "HeldDevice.h"
 #include "ThrownDevice.h"
 #include "Arm.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "RTETools.h"
 #include "MOPixel.h"
-#include "Matrix.h"
 #include "AEmitter.h"
 #include "HDFirearm.h"
 #include "SLTerrain.h"
@@ -32,7 +27,6 @@
 #include "SettingsMan.h"
 
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {
@@ -137,35 +131,6 @@ int AHuman::Create()
     return 0;
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the AHuman object ready for use.
-
-int AHuman::Create(BITMAP *pSprite,
-                   Controller *pController,
-                   const float mass,
-                   const Vector &position,
-                   const Vector &velocity,
-                   AtomGroup *hitBody,
-                   const unsigned long lifetime,
-                   Status status,
-                   const int health)
-{
-    
-
-    return Actor::Create(pSprite,
-                         pController,
-                         mass,
-                         position,
-                         velocity,
-                         hitBody,
-                         lifetime,
-                         status,
-                         health);
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -175,6 +140,8 @@ int AHuman::Create(BITMAP *pSprite,
 int AHuman::Create(const AHuman &reference)
 {
     Actor::Create(reference);
+
+	m_ThrowPrepTime = reference.m_ThrowPrepTime;
 
     if (reference.m_pHead) {
         m_pHead = dynamic_cast<Attachable *>(reference.m_pHead->Clone());
@@ -258,7 +225,9 @@ int AHuman::Create(const AHuman &reference)
 
 int AHuman::ReadProperty(std::string propName, Reader &reader)
 {
-    if (propName == "Head")
+	if (propName == "ThrowPrepTime")
+		reader >> m_ThrowPrepTime;
+	else if (propName == "Head")
     {
         delete m_pHead;
         m_pHead = new Attachable;
@@ -348,7 +317,6 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "DislodgeLimbPath")
         reader >> m_Paths[FGROUND][DISLODGE];
     else
-        // See if the base class(es) can find a match instead
         return Actor::ReadProperty(propName, reader);
 
     return 0;
@@ -365,6 +333,8 @@ int AHuman::Save(Writer &writer) const
 {
     Actor::Save(writer);
 
+	writer.NewProperty("ThrowPrepTime");
+	writer << m_ThrowPrepTime;
     writer.NewProperty("Head");
     writer << m_pHead;
     writer.NewProperty("Jetpack");
@@ -411,47 +381,6 @@ int AHuman::Save(Writer &writer) const
     return 0;
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the AHuman object ready for use.
-
-int AHuman::Create(istream &stream, bool checkType)
-{
-    if (checkType)
-    {
-        string name;
-        stream >> name;
-        if (name != m_sClass.GetName())
-        {
-           RTEAbort("Wrong type in stream when passed to Create");
-           return -1;
-        }
-    }
-
-    Actor::Create(stream);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this AHuman to an output stream for
-//                  later recreation with Create(istream &stream);
-
-int AHuman::Save(ostream &stream) const
-{
-    stream << m_sClass.GetName() << " ";
-
-    Actor::Save(stream);
-//    stream << " ";
-
-    return 0;
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy
@@ -638,7 +567,7 @@ bool AHuman::CollideAtPoint(HitData &hd)
 /*
     hd.ResImpulse[HITOR].Reset();
     hd.ResImpulse[HITEE].Reset();
-    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * g_FrameMan.GetMPP();
+    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * c_MPP;
     hd.mass[HITEE] = m_Mass;
     hd.MomInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
     hd.HitVel[HITEE] = m_Vel + hd.HitRadius[HITEE].GetPerpendicular() * m_AngularVel;
@@ -1419,7 +1348,7 @@ bool AHuman::UnequipBGArm()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the FG Arm, if anything. OINT.
+// Description:     Returns whatever is equipped in the FG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
 
 MovableObject * AHuman::GetEquippedItem() const
 {
@@ -1434,7 +1363,7 @@ MovableObject * AHuman::GetEquippedItem() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedBGItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the FG Arm, if anything. OINT.
+// Description:     Returns whatever is equipped in the FG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
 
 MovableObject * AHuman::GetEquippedBGItem() const
 {

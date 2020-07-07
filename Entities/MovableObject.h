@@ -59,7 +59,10 @@ friend class LuaMan;
 // Public member variable, method and friend function declarations
 
 public:
-    ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
+
+	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
+	SerializableOverrideMethods
+	ClassInfoGetters
 
 enum MOType
 {
@@ -144,22 +147,6 @@ EntityAllocation(MovableObject)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire MovableObject, including its inherited members, to their
@@ -168,18 +155,6 @@ EntityAllocation(MovableObject)
 // Return value:    None.
 
     virtual void Reset() { Clear(); SceneObject::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this MovableObject with a Writer for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the MovableObject will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -297,30 +272,11 @@ EntityAllocation(MovableObject)
     /// <returns>Whether or not the object's scripts have been succesfully initialized.</returns>
     bool ObjectScriptsInitialized() const { return !m_ScriptObjectName.empty() && m_ScriptObjectName != "ERROR"; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
     /// <summary>
     /// Override SetPresetName so it also resets script preset name and then reloads scripts to safely allow for multiple scripts.
     /// </summary>
     /// <param name="newName">A string reference with the instance name of this Entity.</param>
     virtual void SetPresetName(const std::string &newName) override { Entity::SetPresetName(newName); m_ScriptPresetName.clear(); ReloadScripts(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -533,25 +489,28 @@ EntityAllocation(MovableObject)
     virtual float GetSharpness() const { return m_Sharpness; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRootParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     **HAcK** Just returns a pointer to this MO, this is to enable
-//                  Attachables to get their root nodes;
-// Arguments:       None.
-// Return value:    A pointer to this MovableObject.
+	/// <summary>
+	/// Gets the MO which is the parent of this Attachable.
+	/// </summary>
+	/// <returns>A pointer to the parent of this Attachable.</returns>
+	virtual MovableObject * GetParent() { return this; }
 
+	/// <summary>
+	/// Gets the MO which is the parent of this Attachable. 
+	/// </summary>
+	/// <returns>A pointer to the parent of this Attachable.</returns>
+	virtual const MovableObject * GetParent() const { return this; }
+
+	/// <summary>
+	/// Returns a pointer to this MO, this is to enable Attachables to get their root nodes.
+	/// </summary>
+	/// <returns>A pointer to this MovableObject.</returns>
     virtual MovableObject * GetRootParent() { return this; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRootParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     **HAcK** Just returns a pointer to this MO, this is to enable
-//                  Attachables to get their root nodes;
-// Arguments:       None.
-// Return value:    A pointer to this MovableObject.
-
+	/// <summary>
+	/// Returns a pointer to this MO, this is to enable Attachables to get their root nodes.
+	/// </summary>
+	/// <returns>A pointer to this MovableObject.</returns>
     virtual const MovableObject * GetRootParent() const { return this; }
 
 
@@ -1066,7 +1025,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    Whether this MovableObject is of Gold or not.
 
-    virtual bool IsGold() const { return m_MOType == TypeGeneric && 0; }
+    bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->GetIndex() == c_GoldMaterialID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1129,7 +1088,7 @@ EntityAllocation(MovableObject)
 // Return value:    None.
 
     void AddAbsForce(const Vector &force, const Vector &absPos)
-        { m_Forces.push_back(std::make_pair(force, g_SceneMan.ShortestDistance(m_Pos, absPos) * g_FrameMan.GetMPP())); }
+        { m_Forces.push_back(std::make_pair(force, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP)); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1163,7 +1122,7 @@ EntityAllocation(MovableObject)
 
 	void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos) {
 		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
-		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * g_FrameMan.GetMPP()));
+		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP));
 	}
 
 

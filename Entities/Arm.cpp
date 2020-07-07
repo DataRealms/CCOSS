@@ -12,10 +12,8 @@
 // Inclusions of header files
 
 #include "Arm.h"
-#include "RTETools.h"
 #include "HDFirearm.h"
 #include "ThrownDevice.h"
-#include "ContentFile.h"
 #include "PresetMan.h"
 
 namespace RTE {
@@ -125,7 +123,6 @@ int Arm::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "MoveSpeed")
         reader >> m_MoveSpeed;
     else
-        // See if the base class(es) can find a match instead
         return Attachable::ReadProperty(propName, reader);
 
     return 0;

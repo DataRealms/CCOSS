@@ -12,15 +12,9 @@
 // Inclusions of header files
 
 #include "ACraft.h"
-#include "Atom.h"
 #include "AtomGroup.h"
-#include "Attachable.h"
-#include "HeldDevice.h"
-#include "Arm.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "RTETools.h"
-#include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
 #include "HDFirearm.h"
@@ -30,7 +24,6 @@
 #include "Scene.h"
 
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {
@@ -114,7 +107,6 @@ int ACraft::Exit::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "Range")
         reader >> m_Range;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -373,7 +365,6 @@ int ACraft::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "MaxPassengers")
         reader >> m_MaxPassengers;
     else
-        // See if the base class(es) can find a match instead
         return Actor::ReadProperty(propName, reader);
 
     return 0;

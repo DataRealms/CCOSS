@@ -12,11 +12,11 @@ namespace RTE {
 	extern bool RTEAbortFunc(const char *description, const char *file, int line) {
 		// Save out the screen bitmap, after making a copy of it, faster sometimes
 		if (screen) {
-			if (!g_pScreendumpBuffer) { g_pScreendumpBuffer = create_bitmap(screen->w, screen->h); }
-			blit(screen, g_pScreendumpBuffer, 0, 0, 0, 0, screen->w, screen->h);
+			if (!g_ScreendumpBuffer) { g_ScreendumpBuffer = create_bitmap(screen->w, screen->h); }
+			blit(screen, g_ScreendumpBuffer, 0, 0, 0, 0, screen->w, screen->h);
 			PALETTE palette;
 			get_palette(palette);
-			save_bmp("abortscreen.bmp", g_pScreendumpBuffer, palette);
+			save_bmp("abortscreen.bmp", g_ScreendumpBuffer, palette);
 		}
 		// Ditch the video mode so the message box appears without problems
 		if (screen != 0) { set_gfx_mode(GFX_TEXT, 0, 0, 0, 0); }

@@ -176,7 +176,7 @@ public:
 // Description:     Gets the list of already placed gibs of the currently edited object.
 //                  Ownership of neither list not objects IS NOT transferred!
 // Arguments:       None.
-// Return value:    The current list of placed gibs. OINT!
+// Return value:    The current list of placed gibs. OWNERSHIP IS NOT TRANSFERRED!
 
     std::list<MovableObject *> * GetPlacedGibs() { return &m_PlacedGibs; }
 
@@ -187,7 +187,7 @@ public:
 // Description:     Gets the currently held Object in the cursor of this Editor. Ownership
 //                  IS NOT transferred!
 // Arguments:       None.
-// Return value:    The currently held object, if any. OINT!
+// Return value:    The currently held object, if any. OWNERSHIP IS NOT TRANSFERRED!
 
     const MovableObject * GetCurrentGib() { return m_pCurrentGib; }
 
@@ -198,7 +198,7 @@ public:
 // Description:     Returns a refernece instance of an object if it has been picked to be
 //                  loaded into the editor. Ownership is NOT transferred.
 // Arguments:       None.
-// Return value:    Reference instance of the picked object to be loaded. OINT. 0 if nothing
+// Return value:    Reference instance of the picked object to be loaded. 0 if nothing. OWNERSHIP IS NOT TRANSFERRED!
 //                  was picked since last update.
 
     const MOSRotating * GetObjectToLoad() { return m_pObjectToLoad; }

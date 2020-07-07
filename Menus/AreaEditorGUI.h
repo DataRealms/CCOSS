@@ -163,7 +163,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the currently selected Area of this Editor. Ownership IS NOT
 //                  transferred!
-// Arguments:       The new area for this to work with, if any. OINT!
+// Arguments:       The new area for this to work with, if any. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    None.
 
     void SetCurrentArea(Scene::Area *pArea);
@@ -175,7 +175,7 @@ public:
 // Description:     Gets the currently held Area in the cursor of this Editor. Ownership
 //                  IS NOT transferred!
 // Arguments:       None.
-// Return value:    The currently held Area, if any. OINT!
+// Return value:    The currently held Area, if any. OWNERSHIP IS NOT TRANSFERRED!
 
     Scene::Area * GetCurrentArea() { return m_pCurrentArea; }
 

@@ -134,7 +134,6 @@ int UInputMan::InputScheme::InputMapping::ReadProperty(std::string propName, Rea
         m_DirectionMapped = true;
     }
 	else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -500,7 +499,6 @@ int UInputMan::InputScheme::ReadProperty(std::string propName, Reader &reader)
 	else if (propName == "JoystickDeadzoneType")
 		reader >> m_JoystickDeadzoneType;
 	else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -790,7 +788,6 @@ int UInputMan::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "MouseSensitivity")
         reader >> m_MouseSensitivity;
 	else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -2684,125 +2681,84 @@ int UInputMan::Update()
         }
     }
 
-    // If Escape is pressed, go to the mainmenu or close the app
-    if (KeyPressed(KEY_ESC))
-    {
+	// If Escape is pressed, go to the main menu or close the app
+	if (KeyPressed(KEY_ESC)) {
 		// If we launched into editor directly, skip the logic and quit quickly.
-		if (g_LaunchIntoEditor) {
-			g_Quit = true;
+		if (g_LaunchIntoEditor) { g_Quit = true; }
+
+		// TODO: Make this more robust and purty!")
+		// If in the game pause and exit to menu on esc
+		if (g_InActivity) {
+			g_ActivityMan.PauseActivity();
+			g_InActivity = false;
 		}
-
-// TODO: Make this more robust and purty!")
-        // If in the game pause and exit to menu on esc
-        if (g_InActivity)
-        {
-            g_ActivityMan.PauseActivity();
-            g_InActivity = false;
-        }
-        // Do nothing if the intro is playing, has own handling
-// Now handled in MainMenuGUI
-//        else if (g_IntroState <= 0 || g_IntroState >= 17)
-//            g_Quit = true;
-    }
-/*
-    if (KeyPressed(KEY_Q)) {
-        m_DebugArmed = true;
-    }
-*/
-    // Reset RTE if back is pressed
-    if (g_InActivity)
-    {
-        // Ctrl-R resets
-        if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_R))
-        {
-            g_ResetActivity = true;
-        }
-
-        // Check for resets and start button presses on controllers of all active players
-        if (g_ActivityMan.GetActivity())
-        {
-            for (int player = PLAYER_ONE; player < MAX_PLAYERS; ++player)
-            {
-                if (g_ActivityMan.GetActivity()->PlayerActive(player))
-                {
-                    g_ResetActivity = g_ResetActivity || ElementPressed(PLAYER_ONE, INPUT_BACK);
-
-                    if (ElementPressed(player, INPUT_START))
-                    {
-                        g_ActivityMan.PauseActivity();
-                        g_InActivity = false;
-                    }
-                }
-            }
-        }
-
-        if (g_ResetActivity)
-            g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
-    }
-
-	if (key_shifts & KB_ALT_FLAG && KeyPressed(KEY_ENTER)) {
-		g_FrameMan.SwitchResolutionMultiplier((g_FrameMan.ResolutionMultiplier() >= 2) ? 1 : 2);
 	}
 
-    // Only allow performance tweaking if showing the stats
-    if (g_PerformanceMan.IsShowingPerformanceStats())
-    {
-        // Manipulate timescaling
-        if (KeyHeld(KEY_2))
-            g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() + 0.01);
-        if (KeyHeld(KEY_1) && g_TimerMan.GetTimeScale() - 0.01 > 0.001)
-            g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() - 0.01);
+	if (g_InActivity) {
+		// Reset Activity if Ctrl+R is pressed
+		if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_R)) { g_ResetActivity = true; }
 
-        // Increase real to sim cap
-        if (KeyHeld(KEY_4))
-            g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() + 0.001);
-        // Decrease frame delay
-        if (KeyHeld(KEY_3) && g_TimerMan.GetRealToSimCap() > 0)
-            g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() - 0.001);
-        // Manipulate deltatime
-        if (KeyHeld(KEY_6))
-            g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() + 0.001);
-        // Decrease frame delay
-        if (KeyHeld(KEY_5) && g_TimerMan.GetDeltaTimeSecs() > 0)
-            g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() - 0.001);
-    }
+		// Check for resets and start button presses on controllers of all active players
+		if (g_ActivityMan.GetActivity()) {
+			for (int player = PLAYER_ONE; player < MAX_PLAYERS; ++player) {
+				if (g_ActivityMan.GetActivity()->PlayerActive(player)) {
+					g_ResetActivity = g_ResetActivity || ElementPressed(PLAYER_ONE, INPUT_BACK);
 
-    // Screendump - Ctrl+S
-    if ((((key_shifts & KB_CTRL_FLAG)/* && (key_shifts & KB_SHIFT_FLAG)*/ && KeyHeld(KEY_S)) || KeyHeld(KEY_PRTSCR)))// && g_TimerMan.DrawnSimUpdate())
-    {
-        g_FrameMan.SaveScreenToBMP("ScreenDump");
-// TEMP!!
-//        g_FrameMan.SaveBitmapToBMP(g_SceneMan.GetTerrain()->GetBGColorBitmap(), "SceneBG");
-    }
+					if (ElementPressed(player, INPUT_START)) {
+						g_ActivityMan.PauseActivity();
+						g_InActivity = false;
+					}
+				}
+			}
+		}
+		if (g_ResetActivity) { g_ConsoleMan.PrintString("SYSTEM: Activity was reset!"); }
+	}
 
-	// Dump entire map, Ctrl+W
-    if ((key_shifts & KB_CTRL_FLAG) && KeyHeld(KEY_W))
-    {
-        g_FrameMan.SaveWorldToBMP("WorldDump");
-    }
+	// Alt+Enter to switch resolution multiplier between 1X and 2X
+	if (key_shifts & KB_ALT_FLAG && KeyPressed(KEY_ENTER)) { g_FrameMan.SwitchResolutionMultiplier((g_FrameMan.ResolutionMultiplier() >= 2) ? 1 : 2); }
 
-    // Material draw toggle, Ctrl + M
-    if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_M))
-        g_SceneMan.SetLayerDrawMode((g_SceneMan.GetLayerDrawMode() + 1) % 3);
+	// Only allow performance tweaking if showing the stats
+	if (g_PerformanceMan.IsShowingPerformanceStats()) {
+		// Manipulate time scaling
+		if (KeyHeld(KEY_2)) { g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() + 0.01F); }
+		if (KeyHeld(KEY_1) && g_TimerMan.GetTimeScale() - 0.01F > 0.001F) { g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() - 0.01F); }
 
-    // Perf stats display toggle
-    if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_P))
-		g_PerformanceMan.ShowPerformanceStats(!g_PerformanceMan.IsShowingPerformanceStats());
+		// Manipulate real to sim cap
+		if (KeyHeld(KEY_4)) { g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() + 0.001F); }
+		if (KeyHeld(KEY_3) && g_TimerMan.GetRealToSimCap() > 0) { g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() - 0.001F); }
 
+		// Manipulate DeltaTime
+		if (KeyHeld(KEY_6)) { g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() + 0.001F); }
+		if (KeyHeld(KEY_5) && g_TimerMan.GetDeltaTimeSecs() > 0) { g_TimerMan.SetDeltaTimeSecs(g_TimerMan.GetDeltaTimeSecs() - 0.001F); }
+	}
+
+	// Screenshot, Ctrl+S
+	if (((key_shifts & KB_CTRL_FLAG) && KeyHeld(KEY_S)) || KeyHeld(KEY_PRTSCR)) { g_FrameMan.SaveScreenToBMP("ScreenDump"); }
+
+	// Screenshot entire scene, Ctrl+W
+	if ((key_shifts & KB_CTRL_FLAG) && KeyHeld(KEY_W)) { g_FrameMan.SaveWorldToBMP("WorldDump"); }
+
+	// Dump scene preview (scaled down WorldDump), Alt+W
+	if ((key_shifts & KB_ALT_FLAG) && KeyHeld(KEY_W)) { g_FrameMan.SaveWorldToPreviewBMP("ScenePreviewDump"); }
+
+    // Material draw toggle, Ctrl+M
+    if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_M)) { g_SceneMan.SetLayerDrawMode((g_SceneMan.GetLayerDrawMode() + 1) % 3); }
+        
+    // Performance stats display toggle
+    if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_P)) { g_PerformanceMan.ShowPerformanceStats(!g_PerformanceMan.IsShowingPerformanceStats()); }
+		
     // Force one sim update per graphics frame
-    if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_O))
-        g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame());
+    if ((key_shifts & KB_CTRL_FLAG) && KeyPressed(KEY_O)) { g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame()); }     
 
 	// Dump all shortcuts to console window
-	if (KeyPressed(KEY_F1))
-	{
-		if (!g_ConsoleMan.IsEnabled())
-			g_ConsoleMan.SetEnabled();
+	if (KeyPressed(KEY_F1)) {
+		if (!g_ConsoleMan.IsEnabled()) { g_ConsoleMan.SetEnabled(); }
 
 		g_ConsoleMan.PrintString("--- SHORTCUTS ---");
 		g_ConsoleMan.PrintString("~ - This console. CTRL + ~ - Console without input capture");
 		g_ConsoleMan.PrintString("CTRL + S / Prnt Scrn - Make a screenshot");
 		g_ConsoleMan.PrintString("CTRL + W - Make a screenshot of the entire level");
+		g_ConsoleMan.PrintString("ALT  + W - Make a miniature preview image of the entire level");
 		g_ConsoleMan.PrintString("CTRL + P - Show performance stats");
 		g_ConsoleMan.PrintString("CTRL + R - Reset activity");
 		g_ConsoleMan.PrintString("CTRL + M - Switch display mode: Draw -> Material -> MO");
@@ -2814,39 +2770,19 @@ int UInputMan::Update()
 		g_ConsoleMan.PrintString("F5 - Clear console log ");
 	}
 
-	if (KeyPressed(KEY_F2))
-	{
+	if (KeyPressed(KEY_F2)) {
 		g_PresetMan.ReloadAllScripts();
 		g_ConsoleMan.PrintString("Scripts reloaded");
 	}
 
-	if (KeyPressed(KEY_F3))
-	{
-		g_ConsoleMan.SaveAllText("Console.dump.log");
-	}
+	if (KeyPressed(KEY_F3)) { g_ConsoleMan.SaveAllText("Console.dump.log"); }
 
-	if (KeyPressed(KEY_F4))
-	{
-		g_ConsoleMan.SaveInputLog("Console.input.log");
-	}
+	if (KeyPressed(KEY_F4)) { g_ConsoleMan.SaveInputLog("Console.input.log"); }
 
-	if (KeyPressed(KEY_F5))
-	{
-		g_ConsoleMan.ClearLog();
-	}
+	if (KeyPressed(KEY_F5)) { g_ConsoleMan.ClearLog(); }
 
     ///////////////////////////////////////////////////////////
-    // Scrolling test
-/*
-    if (KeyHeld(KEY_LEFT))
-        g_TempXOff--;
-    if (KeyHeld(KEY_RIGHT))
-        g_TempXOff++;
-    if (KeyHeld(KEY_DOWN))
-        g_TempYOff++;
-    if (KeyHeld(KEY_UP))
-        g_TempYOff--;
-*/
+
     // Save the current state of the keyboard so that we can compare it
     // next frame and see which key states have been changed in the mean time.
     memcpy(s_aLastKeys, const_cast<const char *>(key), KEY_MAX);

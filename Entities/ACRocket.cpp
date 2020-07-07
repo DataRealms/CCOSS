@@ -13,21 +13,14 @@
 
 
 #include "ACRocket.h"
-#include "Atom.h"
 #include "AtomGroup.h"
 #include "Attachable.h"
-#include "HeldDevice.h"
-#include "Arm.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "RTETools.h"
-#include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
-#include "HDFirearm.h"
 
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {
@@ -243,7 +236,6 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "ScuttleIfFlippedTime")
         reader >> m_ScuttleIfFlippedTime;
     else
-        // See if the base class(es) can find a match instead
         return ACraft::ReadProperty(propName, reader);
 
     return 0;

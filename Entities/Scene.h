@@ -14,14 +14,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
 #include "Entity.h"
-#include "FrameMan.h"
 #include "SceneMan.h"
 #include "ActivityMan.h"
 #include "Box.h"
 #include "BunkerAssembly.h"
-//#include "MovableMan.h"
 
 namespace RTE
 {
@@ -48,6 +45,9 @@ class Scene:
 // Public member variable, method and friend function declarations
 
 public:
+
+	SerializableOverrideMethods
+	ClassInfoGetters
 
 	//Available placed objects sets
 	enum PlacedObjectSets
@@ -81,6 +81,7 @@ public:
 
     public:
 
+		SerializableOverrideMethods
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Constructor:     Area
@@ -117,22 +118,6 @@ public:
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  ReadProperty
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Reads a property value from a Reader stream. If the name isn't
-    //                  recognized by this class, then ReadProperty of the parent class
-    //                  is called. If the property isn't recognized by any of the base classes,
-    //                  false is returned, and the Reader's position is untouched.
-    // Arguments:       The name of the property to be read.
-    //                  A Reader lined up to the value of the property to be read.
-    // Return value:    An error return value signaling whether the property was successfully
-    //                  read or not. 0 means it was read successfully, and any nonzero indicates
-    //                  that a property of that name could not be found in this or base classes.
-
-        virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
     // Virtual method:  Reset
     //////////////////////////////////////////////////////////////////////////////////////////
     // Description:     Resets the entire Serializable, including its inherited members, to their
@@ -141,18 +126,6 @@ public:
     // Return value:    None.
 
         virtual void Reset() { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Save
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Saves the complete state of this Area to an output stream for
-    //                  later recreation with Create(Reader &reader);
-    // Arguments:       A Writer that the Area will save itself with.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Save(Writer &writer) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -462,22 +435,6 @@ EntityAllocation(Scene)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire Scene, including its inherited members, to
@@ -489,18 +446,6 @@ EntityAllocation(Scene)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Pure V. method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Scene to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the Scene will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Pure V. method:  Destroy
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Destroys and resets (through Clear()) the Scene object.
@@ -509,26 +454,6 @@ EntityAllocation(Scene)
 // Return value:    None.
 
     virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -838,7 +763,7 @@ EntityAllocation(Scene)
 // Description:     Places the individual brain of a single player which may be stationed
 //                  on this Scene, and registers them as such in an Activity.
 // Arguments:       The player's brain to place.
-//                  The Activity to register the placed brains with.. OINT!
+//                  The Activity to register the placed brains with. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    If the brain was successfully found as resident and placed.
 
     bool PlaceResidentBrain(int player, Activity &newActivity);
@@ -849,7 +774,7 @@ EntityAllocation(Scene)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Places the individual brains of the various players which may be
 //                  stationed on this Scene, and registers them as such in an Activity.
-// Arguments:       The Activity to register the placed brains with.. OINT!
+// Arguments:       The Activity to register the placed brains with. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    How many brains were finally placed.
 
     int PlaceResidentBrains(Activity &newActivity);
@@ -861,7 +786,7 @@ EntityAllocation(Scene)
 // Description:     Looks at the Activity and its players' registered brain Actors, and
 //                  saves them as resident brains for this Scene. Done when a fight is over
 //                  and the survivors remain!
-// Arguments:       The Activity to check for registered brains.. OINT!
+// Arguments:       The Activity to check for registered brains. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    How many brains were found registered with the passed in Activity.
 
     int RetrieveResidentBrains(Activity &oldActivity);
@@ -973,7 +898,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Method:          GetResidentBrain
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the resident brain Actor of a specific player from this scene,
-//                  if there is any. OINT!
+//                  if there is any. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       Which player to get the resident brain of.
 // Return value:    The SO containing the brain, or 0 if there aren't any of that player.
 

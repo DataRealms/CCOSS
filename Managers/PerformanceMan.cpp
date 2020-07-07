@@ -226,7 +226,7 @@ namespace RTE {
 
 			// Draw graph backgrounds
 			bitmapToDrawTo.DrawRectangle(c_StatsOffsetX, graphStart, c_MaxSamples, c_GraphHeight, 240, true);
-			bitmapToDrawTo.DrawLine(c_StatsOffsetX, graphStart + c_GraphHeight / 2, c_StatsOffsetX + c_MaxSamples, graphStart + c_GraphHeight / 2, 96);
+			bitmapToDrawTo.DrawLine(c_StatsOffsetX, graphStart + c_GraphHeight / 2, c_StatsOffsetX - 1 + c_MaxSamples, graphStart + c_GraphHeight / 2, 96);
 
 			// Draw sample dots
 			unsigned short peak = 0;
@@ -236,7 +236,7 @@ namespace RTE {
 				unsigned short value = Limit(static_cast<unsigned short>(static_cast<float>(m_PerfData[pc][sample]) / (1000000 / 30) * 100), 100, 0);
 				unsigned short dotHeight = static_cast<unsigned short>(static_cast<float>(c_GraphHeight) / 100.0 * static_cast<float>(value));
 
-				bitmapToDrawTo.SetPixel(c_StatsOffsetX + c_MaxSamples - i, graphStart + c_GraphHeight - dotHeight, 13);
+				bitmapToDrawTo.SetPixel(c_StatsOffsetX - 1 + c_MaxSamples - i, graphStart + c_GraphHeight - dotHeight, 13);
 				peak = Limit(peak, m_PerfData[pc][sample], 0);
 
 				if (sample == 0) { sample = c_MaxSamples; }

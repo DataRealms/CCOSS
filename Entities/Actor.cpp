@@ -31,7 +31,6 @@
 #include "PerformanceMan.h"
 
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {
@@ -400,7 +399,6 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
         m_AIMode = static_cast<AIMode>(mode);
     }
     else
-        // See if the base class(es) can find a match instead
         return MOSRotating::ReadProperty(propName, reader);
 
     return 0;
@@ -984,21 +982,17 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     // Gib all the regular gibs
     MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 
-	// Count crabs to simulate crab-bomb behavior
-	int crabs = 0;
-    for (deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
-		if (dynamic_cast<ACrab *>(*gItr) && (*gItr)->GetPresetName() == "Crab")
-			crabs++;
-
-	// If we have enough crabs - gib everything
-	if (crabs > 10 && g_MovableMan.GetMOIDCount() + crabs * 5 > 255)
-	{
-		for (int id = 1; id < g_MovableMan.GetMOIDCount() - 1; id++)
-		{
-			MovableObject * MO = g_MovableMan.GetMOFromID(id);
-			MOSRotating * MOSR = dynamic_cast<MOSRotating *>(MO);
-			if (MOSR && MOSR != this)
-				MOSR->GibThis();
+	if (g_SettingsMan.EnableCrabBombs()) {
+		unsigned short crabCount = 0;
+		for (const MovableObject *inventoryEntry : m_Inventory) {
+			if (inventoryEntry->GetPresetName() == "Crab") { crabCount++; }
+		}
+		// If we have enough crabs gib all actors on scene except brains and doors
+		if (crabCount >= g_SettingsMan.CrabBombThreshold()) {
+			for (int moid = 1; moid < g_MovableMan.GetMOIDCount() - 1; moid++) {
+				Actor *actor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(moid));
+				if (actor && actor != this && actor->GetClassName() != "ADoor" && !actor->IsInGroup("Brains")) { actor->GibThis(); }
+			}
 		}
 	}
 
@@ -1564,11 +1558,11 @@ void Actor::Update()
                             new Atom(Vector(), AuMat, 0, AuMat.color, 2),
                             0);
 */
-            MOPixel *pixelMO = new MOPixel(AuMat->color,
-                                           AuMat->pixelDensity,
+            MOPixel *pixelMO = new MOPixel(AuMat->GetColor(),
+                                           AuMat->GetPixelDensity(),
                                            Vector(m_Pos.m_X, m_Pos.m_Y - 10),
                                            Vector(4 * NormalRand(), RangeRand(-5, -7)),
-                                           new Atom(Vector(), AuMat->id, 0, AuMat->color, 2),
+                                           new Atom(Vector(), AuMat->GetIndex(), 0, AuMat->GetColor(), 2),
                                            0);
 
             pixelMO->SetToHitMOs(false);

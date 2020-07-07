@@ -126,7 +126,6 @@ int MovableMan::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "EnableMOSubtraction")
         reader >> m_MOSubtractionEnabled;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -1975,12 +1974,12 @@ void MovableMan::Update()
         {
             Vector parPos((*parIt)->GetPos().GetFloored());
             Material const * terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.m_X, parPos.m_Y));
-            if ((*parIt)->GetDrawPriority() >= terrMat->priority)
+            if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority())
             {
                 // Gold particle special case to avoid compacting of gold
-                if ((*parIt)->GetMaterial()->id == c_GoldMaterialID)
+                if ((*parIt)->GetMaterial()->GetIndex() == c_GoldMaterialID)
                 {
-                    for (int s = 0; terrMat->id == c_GoldMaterialID; ++s)
+                    for (int s = 0; terrMat->GetIndex() == c_GoldMaterialID; ++s)
                     {
                         if (s % 2 == 0)
                             parPos.m_Y -= 1.0;

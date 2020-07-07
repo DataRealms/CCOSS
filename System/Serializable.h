@@ -14,6 +14,15 @@ namespace RTE {
 
 	public:
 
+#pragma region Global Macro Definitions
+		/// <summary>
+		/// Convenience macro to cut down on duplicate ReadProperty and Save methods in classes that extend Serializable.
+		/// </summary>
+		#define SerializableOverrideMethods \
+			int ReadProperty(std::string propName, Reader &reader) override; \
+			int Save(Writer &writer) const override;
+#pragma endregion
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a Serializable object in system memory. Create() should be called before using the object.
@@ -151,7 +160,7 @@ namespace RTE {
 		/// <summary>
 		/// Clears all the member variables of this Object, effectively resetting the members of this abstraction level only.
 		/// </summary>
-		void Clear() { ; }
+		void Clear() {}
 	};
 }
 #endif

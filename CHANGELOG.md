@@ -14,14 +14,106 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `MenuTransitionDuration = floatValue` to control how fast transitions between different menu screens happen (e.g main menu to activity selection screen and back).  
 	This property is a multiplier, the default value is 1 (being the default hardcoded values), lower values decrease transition durations. 0 makes transitions instant.
+	
+- New `ADoor` sound properties: ([Issue #106](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/106))  
+	```
+	// Played when the door starts moving from fully open/closed position towards the opposite end.
+	DoorMoveStartSound = SoundContainer
+		AddSound = ContentFile
+			FilePath = pathToFile
+			
+	// Played while the door is moving, between fully open/closed position.
+	DoorMoveSound = SoundContainer
+		AddSound = ContentFile
+			FilePath = pathToFile
+		LoopSetting = -1 // Doesn't have to loop indefinitely, but generally should.
+		
+	// Played when the door changes direction while moving between fully open/closed position.
+	DoorDirectionChangeSound = SoundContainer
+		AddSound = ContentFile
+			FilePath = pathToFile
+	
+	// Played when the door stops moving and is at fully open/closed position.
+	DoorMoveEndSound = SoundContainer
+		AddSound = ContentFile
+			FilePath = pathToFile
+	```
+
+- Exposed `Actor.StableVelocityThreshold` to lua. New bindings are: ([Issue #101](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/101))  
+	`Actor:GetStableVelocityThreshold()` returns a `Vector` with the currently set stable velocity threshold.  
+	`Actor:SetStableVelocityThreshold(xFloatValue, yFloatValue)` sets the stable velocity threshold to the passed in float values.  
+	`Actor:SetStableVelocityThreshold(Vector)` sets the stable velocity threshold to the passed in `Vector`.
+	
+- New `Attachable` and `AEmitter` property `DeleteWithParent = 0/1`. If enabled the attachable/emitter will be deleted along with the parent if parent is deleted/gibbed/destroyed. ([Issue #97](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/97))
+
+- New `Settings.ini` property `LaunchIntoActivity = 0/1`. With `PlayIntro` functionality changed to actually skip the intro and load into main menu, this flag exists to skip both the intro and main menu and load directly into the set default activity.
+
+- Exposed `AHuman.ThrowPrepTime` to lua and ini: ([Issue #101](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/101))  
+	`ThrowPrepTime = valueInMS` will set how long it takes the `AHuman` to fully charge a throw. Default value is 1000.  
+	`AHuman.ThrowPrepTime` to get/set values via lua.
+	
+- Added new `SpriteAnimMode` modes:  
+	```
+	SpriteAnimMode = 7 // OVERLIFETIME
+	``` 
+	This mode handles exactly like (now removed) `MOSParticle.Framerate = 0` and will complete the sprite's animation cycle over the course of its existence. `SpriteAnimDuration` is inapplicable when using this mode and will do nothing.  
+	For example, an object that has a sprite with 10 frames and a lifetime of 10 seconds will animate at a rate of 1 frame per second, finishing its animation cycle just before being deleted from the scene.  
+	If this mode is used on an object that has `LifeTime = 0` (infinite) it will be overridden to `SpriteAnimMode = 1` (ALWAYSLOOP) otherwise it will never animate.  
+	```
+	SpriteAnimMode = 8 // ONCOLLIDE
+	```
+	This mode will drive the animation forward based on collisions this object has with other MOs or the terrain. `SpriteAnimDuration` is inapplicable when using this mode and will do nothing.  
+	This mode is `MOSParticle` specific and used mainly for animating casings and small gibs. Using this mode on anything other than `MOSParticle` will do nothing.	
+
+- New `Settings.ini` properties `EnableCrabBombs = 0/1` and `CrabBombThreshold = intValue`.  
+	When `EnableCrabBombs` is enabled, releasing a number of crabs equal to `CrabBombThreshold` or more at once will trigger the crab bomb effect.  
+	If disabled releasing whatever number of crabs will do nothing except release whatever number of crabs.
+	
+- Doors can now be stopped at their exact position using `ADoor:StopDoor()` via lua. When stopped, doors will stop updating their sensors and will not try to reset to a default state.  
+	If the door was stopped in a script, it needs to opened/closed by calling either `ADoor:OpenDoor()` or `ADoor:CloseDoor()` otherwise it will remain in the exact position it was stopped forever.  
+	If either `DrawMaterialLayerWhenOpen` or `DrawMaterialLayerWhenClosed` properties are set true, a material layer will be drawn when the door is stopped. This is to prevent a situation where the material layer will be drawn only if the door is travelling in one direction, without adding an extra property.
+	
+- New value `STOPPED` (4) was to the `ADoor.DoorState` enumeration. `ADoor:GetDoorState` will return this if the door was stopped by the user via `ADoor:StopDoor`.
+
+- New shortcut `ALT + W` to generate a detailed 140x55px mini `WorldDump` to be used for scene previews. No relying on `SceneEditor`, stretches over whole image, no ugly cyan bunkers, no actors or glows and has sky gradient.
 
 ### Changed
+
+- Lua error reporting has been improved so script errors will always show filename and line number.
 
 - `Settings.ini` will now fully populate with all available settings (now also broken into sections) when being created (first time or after delete) rather than with just a limited set of defaults.
 
 - Temporarily removed `PreciseCollisions` from `Settings.ini` due to bad things happening when disabled by user.
 
-- Lua error reporting has been improved so script errors will always show filename and line number.
+- `Settings.ini` property `PlayIntro` renamed to `SkipIntro` and functionality changed to actually skip the intro and load user directly into main menu, rather than into the set default activity.
+
+- Lua calls for `GetParent` and `GetRootParent` can now be called by any `MovableObject` rather than being limited to `Attachable` only. ([Issue #102](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/102))  
+	In some cases a cast to the appropriate type (`ToWhateverType`, e.g `ToMOSRotating`) will be needed when attempting to manipulate the object returned, because it will be returned as `MovableObject` if it is the root parent.  
+	In cases where you need to iterate over a parent's attachable list the parent must be cast to the appropriate type that actually has an attachable list to iterate over.  
+	For example:  
+	```
+	for attachable in ToMOSRotating(self:GetParent()).Attachables do
+		...
+	end
+	```
+	Or
+	```
+	local parent = ToMOSRotating(self:GetParent());
+	for attachable in parent.Attachables do
+		...
+	end
+	```
+
+- Physics constants handling removed from `FrameMan` and now hardcoded in `Constants`. Lua bindings moved to `RTETools` and are now called without the `FrameMan` prefix like so:  
+	`GetPPM()`, `GetMPP()`, `GetPPL()`, `GetLPP()`.
+	
+- Removed hardcoded 10 second `LifeTime` restriction for `MOPixel` and `MOSParticle`.
+
+- `MOSParticle` animation can now be set with `SpriteAnimMode` and `SpriteAnimDuration`. If the property isn't defined it will default to `SpriteAnimMode = 7` (OVERLIFETIME).
+
+- Reworked crab bombing behavior. When enabled through `Settings.ini` and triggered will gib all living actors on scene except brains and doors. Devices and non-actor MOs will remain untouched.
+
+- `ADoor` properties `DrawWhenOpen` and `DrawWhenClosed` renamed to `DrawMaterialLayerWhenOpen` and `DrawMaterialLayerWhenClosed` so they are more clear on what they actually do.
 
 - Specially handled Lua function `OnScriptRemoveOrDisable` has been changed to `OnScriptDisable`, and no longer has a parameter saying whether it was removed or disabled, since you can no longer remove scripts.
 
@@ -29,14 +121,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
-- Control schemes will no longer get deleted when being configured.
-Resetting the control scheme will load a preset instead of leaving it blank. (Issue #121)
+- Fix crash when returning to `MetaGame` scenario screen after activity end.
+
+- Control schemes will no longer get deleted when being configured. Resetting the control scheme will load a preset instead of leaving it blank. ([Issue #121](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/121))
+
+- Fix glow effects being drawn one frame past `EffectStartTime` making objects that exist for a single frame not draw glows. ([Issue #67](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/67))
 
 - Time scale can no longer be lowered to 0 through the performance stats interface.
 
 ### Removed
 
 - Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.
+
+- Removed `Settings.ini` property `PixelsPerMeter`. Now hardcoded and cannot be changed by the user.
+
+- Removed `MOSParticle` property `Framerate` and lua bindings. `MOSParticle` animation is now handled with `SpriteAnimMode` like everything else.
 
 ***
 
@@ -67,7 +166,7 @@ Resetting the control scheme will load a preset instead of leaving it blank. (Is
 
 - Added the concept of `SoundSets`, which are collections of sounds inside a `SoundContainer`. This allows you to, for example, put multiple sounds for a given gunshot inside a `SoundSet` so they're played together.
 
-- `SoundContainers` have been overhauled to allow for a lot more customization, including per-sound customization. The following INI example shows all currently availble capabilities with explanatory comments:
+- `SoundContainers` have been overhauled to allow for a lot more customization, including per-sound customization. The following INI example shows all currently available capabilities with explanatory comments:
 	```
 	AddSoundContainer = SoundContainer // Note that SoundContainers replace Sounds, so this can be used for things like FireSound = SoundContainer
 		PresetName = Preset Name Here
@@ -176,7 +275,7 @@ Resetting the control scheme will load a preset instead of leaving it blank. (Is
 
 - Centered the loading splash screen image when `DisableLoadingScreen` is true.
 
-- `Box:WithinBox` lua bindings have been renamed:
+- `Box:WithinBox` lua bindings have been renamed:  
 	`Box:WithinBox` is now `Box:IsWithinBox`.  
 	`Box:WithinBoxX` is now `Box:IsWithinBoxX`.  
 	`Box:WithinBoxY` is now `Box:IsWithinBoxY`.
@@ -203,7 +302,7 @@ Resetting the control scheme will load a preset instead of leaving it blank. (Is
 
 - Resolution multiplier properties (`NxWindowed` and `NxFullscreen`) in settings merged into a single property `ResolutionMultiplier`.
 
-- Incompatible/bad resolution settings will be overriden at startup with messages expaining the issue instead of multiple mode switches and eventually a reset to default VGA.  
+- Incompatible/bad resolution settings will be overridden at startup with messages explaining the issue instead of multiple mode switches and eventually a reset to default VGA.  
 	Reset to defaults (now 960x540) will happen only on horrible aspect ratio or if you managed to really destroy something.
 
 - You can no longer toggle native fullscreen mode from the settings menu or ini. Instead, either select your desktop resolution at 1X mode or desktop resolution divided by 2 at 2X mode for borderless fullscreen windowed mode.  
@@ -245,16 +344,15 @@ Resetting the control scheme will load a preset instead of leaving it blank. (Is
 - Removed all OSX/Linux related code and files because we don't care. See [Liberated Cortex](https://github.com/liberated-cortex) for working Linux port.
 
 - Removed a bunch of low-level `FrameMan` lua bindings:  
-	`FrameMan:ResetSplitScreens`, `FrameMan:PPM` setter, `FrameMan:ResX/Y`, `FrameMan:HSplit/VSplit`, `FrameMan:GetPlayerFrameBufferWidth/Height`, `FrameMan:IsFullscreen`, `FrameMan:ToggleFullScreen`,
-	`FrameMan:ClearBackbuffer8/32`, `FrameMan:ClearPostEffects`, `FrameMan:ResetFrameTimer`, `FrameMan:ShowPerformanceStats`.
+	`FrameMan:ResetSplitScreens`, `FrameMan:PPM` setter, `FrameMan:ResX/Y`, `FrameMan:HSplit/VSplit`, `FrameMan:GetPlayerFrameBufferWidth/Height`, `FrameMan:IsFullscreen`, `FrameMan:ToggleFullScreen`, `FrameMan:ClearBackbuffer8/32`, `FrameMan:ClearPostEffects`, `FrameMan:ResetFrameTimer`, `FrameMan:ShowPerformanceStats`.
 
 - Native fullscreen mode has been removed due to poor performance compared to windowed/borderless mode and various input device issues.  
 	The version of Allegro we're running is pretty old now (released in 2007) and probably doesn't properly support/utilize newer features and APIs leading to these issues.  
 	The minimal amount of hardware acceleration CC has is still retained through Windows' DWM and that evidently does a better job.
 
 - Removed now obsolete `Settings.ini` properties:  
-	Post-processing: `TrueColorMode`, `PostProcessing`, `PostPixelGlow`.   
-	Native fullscreen mode: `Fullscreen`, `NxWindowed`, `NxFullscreen`, `ForceSoftwareGfxDriver`, `ForceSafeGfxDriver`.
+	**Post-processing:** `TrueColorMode`, `PostProcessing`, `PostPixelGlow`.   
+	**Native fullscreen mode:** `Fullscreen`, `NxWindowed`, `NxFullscreen`, `ForceSoftwareGfxDriver`, `ForceSafeGfxDriver`.
 
 ***
 
@@ -293,11 +391,11 @@ Resetting the control scheme will load a preset instead of leaving it blank. (Is
 
 - `ACrab.AimRange` can now be split into `AimRangeUpperLimit` and `AimRangeLowerLimit`, allowing asymmetric ranges.
 
-- Objective arrows and Delivery arrows are now color co-ordinated to match their teams, instead of being only green or red.
+- Objective arrows and Delivery arrows are now color coordinated to match their teams, instead of being only green or red.
 
 - BuyMenu `Bombs` tab will now show all `ThrownDevices` instead of just `TDExplosives`.
 
-- The list of `MOSRotating` attchables (`mosr.Attachables`) now includes hardcoded attachables like dropship engines, legs, etc.
+- The list of `MOSRotating` attachables (`mosr.Attachables`) now includes hardcoded attachables like dropship engines, legs, etc.
 
 - Attachable lua manipulation has been significantly revamped. The old method of doing `attachable:Attach(parent)` has been replaced with the following:  
 	**Addition:** `parent:AddAttachable(attachableToAdd)` or `parent:AddAttachable(attachableToAdd, parentOffsetVector)`  
@@ -324,7 +422,6 @@ Resetting the control scheme will load a preset instead of leaving it blank. (Is
 - Various bug fixed related to all the Attachable and Emitter changes, so they can now me affected reliably and safely with lua.
 
 - Various minor other things that have gotten lost in the shuffle.
-
 
 ### Removed
 

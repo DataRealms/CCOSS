@@ -15,6 +15,8 @@ namespace RTE {
 
 	public:
 
+		SerializableOverrideMethods
+
 		float m_X; //!< X value of this vector.
 		float m_Y; //!< Y value of this vector.
 
@@ -51,27 +53,6 @@ namespace RTE {
 		/// Sets both the X and Y of this Vector to zero.
 		/// </summary>
 		void Reset() { m_X = m_Y = 0.0F; }
-#pragma endregion
-
-#pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called. 
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any non-zero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this Vector to an output stream for later recreation with Create(Reader &reader);
-		/// </summary>
-		/// <param name="writer">A Writer that the Vector will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -129,13 +110,13 @@ namespace RTE {
 		/// Gets the absolute largest of the two elements. Will always be positive.
 		/// </summary>
 		/// <returns>A float describing the largest value of the two, but not the magnitude.</returns>
-		float GetLargest() const { return std::fabs(std::fabs(m_X) > std::fabs(m_Y) ? m_X : m_Y); }
+		float GetLargest() const { return std::fabs((std::fabs(m_X) > std::fabs(m_Y)) ? m_X : m_Y); }
 
 		/// <summary>
 		/// Gets the absolute smallest of the two elements. Will always be positive.
 		/// </summary>
 		/// <returns>A float describing the smallest value of the two, but not the magnitude.</returns>
-		float GetSmallest() const { return std::fabs(std::fabs(m_X) > std::fabs(m_Y) ? m_Y : m_X); }
+		float GetSmallest() const { return std::fabs((std::fabs(m_X) > std::fabs(m_Y)) ? m_Y : m_X); }
 
 		/// <summary>
 		/// Gets a Vector identical to this except that its X component is flipped.

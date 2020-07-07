@@ -130,7 +130,6 @@ int GAScripted::ReadProperty(std::string propName, Reader &reader)
 		PieMenuGUI::AddAvailableSlice(newSlice);
 	}
 	else
-        // See if the base class(es) can find a match instead
         return GameActivity::ReadProperty(propName, reader);
 
     return 0;

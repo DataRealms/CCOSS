@@ -102,7 +102,6 @@ int SLTerrain::TerrainFrosting::ReadProperty(std::string propName, Reader &reade
     else if (propName == "InAirOnly")
         reader >> m_InAirOnly;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -378,7 +377,7 @@ int SLTerrain::LoadData()
             {
                 // If the color hasn't been retrieved yet, then do so
                 if (!aColors[matIndex])
-                    aColors[matIndex] = pMaterial->color.GetIndex();
+                    aColors[matIndex] = pMaterial->GetColor().GetIndex();
                 // Use the color
                 pixelColor = aColors[matIndex];
             }
@@ -412,8 +411,8 @@ int SLTerrain::LoadData()
     BITMAP *pFrostingTex = 0;
     for (list<TerrainFrosting>::iterator tfItr = m_TerrainFrostings.begin(); tfItr != m_TerrainFrostings.end(); ++tfItr)
     {
-        targetId = (*tfItr).GetTargetMaterial().id;
-        frostingId = (*tfItr).GetFrostingMaterial().id;
+        targetId = (*tfItr).GetTargetMaterial().GetIndex();
+        frostingId = (*tfItr).GetFrostingMaterial().GetIndex();
         // Try to get the color texture of the frosting material. If fail, we'll use the color isntead
         pFrostingTex = (*tfItr).GetFrostingMaterial().GetTexture();
         if (pFrostingTex)
@@ -451,7 +450,7 @@ int SLTerrain::LoadData()
                     if (pFrostingTex)
                         pixelColor = _getpixel(pFrostingTex, xPos % pFrostingTex->w, yPos % pFrostingTex->h);
                     else
-                        pixelColor = (*tfItr).GetFrostingMaterial().color.GetIndex();
+                        pixelColor = (*tfItr).GetFrostingMaterial().GetColor().GetIndex();
 
                     // Put the frosting pixel color on the FG color layer
                     _putpixel(pFGBitmap, xPos, yPos, pixelColor);
@@ -627,7 +626,6 @@ int SLTerrain::ReadProperty(std::string propName, Reader &reader)
         m_TerrainObjects.push_back(pTerrainObject);
     }
     else
-        // See if the base class(es) can find a match instead
         return SceneLayer::ReadProperty(propName, reader);
 
     return 0;
@@ -1020,13 +1018,13 @@ deque<MOPixel *> SLTerrain::EraseSilhouette(BITMAP *pSprite,
                 {
                     skipCount = 0;
                     sceneMat = g_SceneMan.GetMaterialFromID(matPixel);
-                    spawnMat = sceneMat->spawnMaterial ? g_SceneMan.GetMaterialFromID(sceneMat->spawnMaterial) : sceneMat;
+                    spawnMat = sceneMat->GetSpawnMaterial() ? g_SceneMan.GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
                     // Create the MOPixel based off the Terrain data.
                     pPixel = new MOPixel(colorPixel,
-                                         spawnMat->pixelDensity,
+                                         spawnMat->GetPixelDensity(),
                                          Vector(terrX, terrY),
                                          Vector(),
-                                         new Atom(Vector(), spawnMat->id, 0, colorPixel, 2),
+                                         new Atom(Vector(), spawnMat->GetIndex(), 0, colorPixel, 2),
                                          0);
 
                     pPixel->SetToHitMOs(false);

@@ -67,6 +67,10 @@ class GameActivity:
 // Public member variable, method and friend function declarations
 
 public:
+
+	SerializableOverrideMethods
+	ClassInfoGetters
+
     enum ObjectiveArrowDir
     {
         ARROWDOWN = 0,
@@ -129,22 +133,6 @@ EntityAllocation(GameActivity)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire GameActivity, including its inherited members, to their
@@ -156,18 +144,6 @@ EntityAllocation(GameActivity)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this GameActivity to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the GameActivity will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Destroy
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Destroys and resets (through Clear()) the GameActivity object.
@@ -176,27 +152,6 @@ EntityAllocation(GameActivity)
 // Return value:    None.
 
     virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -380,9 +335,9 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetLZArea
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the Area within which a team can land things. OINT.
+// Description:     Gets the Area within which a team can land things. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       The number of the team we're setting for.
-// Return value:    The Area we're using to limit their landings within. OINT.
+// Return value:    The Area we're using to limit their landings within. OWNERSHIP IS NOT TRANSFERRED!
 
     const Scene::Area & GetLZArea(int team) const { return m_LandingZoneArea[team]; }
 
@@ -448,7 +403,7 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds somehting to the purchase list that will override what is set
 //                  in the buy guy next time CreateDelivery is called.
-// Arguments:       The SceneObject preset to add to the override purchase list. OINT!
+// Arguments:       The SceneObject preset to add to the override purchase list. OWNERSHIP IS NOT TRANSFERRED!
 //                  Which player's list to add an override purchase item to.
 // Return value:    The new total value of what's in the override purchase list.
 
@@ -460,7 +415,7 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     First clears and then adds all the stuff in a Loadout to the override
 //                  purchase list.
-// Arguments:       The Loadout preset to set the override purchase list to reflect. OINT!
+// Arguments:       The Loadout preset to set the override purchase list to reflect. OWNERSHIP IS NOT TRANSFERRED!
 //                  The player we're talking about.
 // Return value:    The new total value of what's in the override purchase list.
 
@@ -624,7 +579,7 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this ActivityMan's current graphical representation to a
 //                  BITMAP of choice. This includes all game-related graphics.
-// Arguments:       A pointer to a BITMAP to draw on. OINT.
+// Arguments:       A pointer to a BITMAP to draw on. OWNERSHIP IS NOT TRANSFERRED!
 //                  The absolute position of the target bitmap's upper left corner in the scene.
 // Return value:    None.
 

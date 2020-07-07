@@ -162,7 +162,7 @@ namespace RTE {
 
 		// Check for intersections. If any are found, cut down the intersecting IntRect to the bounds of the IntRect we're testing against, then make and store a Box out of it
 		for (IntRect &wrappedTestRect : wrappedTestRects) {
-			for (IntRect &wrappedGlowRect : wrappedGlowRects) {
+			for (const IntRect &wrappedGlowRect : wrappedGlowRects) {
 				if (wrappedTestRect.Intersects(wrappedGlowRect)) {
 					IntRect cutRect(wrappedGlowRect);
 					cutRect.IntersectionCut(wrappedTestRect);

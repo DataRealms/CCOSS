@@ -57,6 +57,7 @@ namespace RTE {
 		m_PlayerScreenHeight = 0;
 		m_ScreenDumpBuffer = 0;
 		m_WorldDumpBuffer = 0;
+		m_ScenePreviewDumpGradient = 0;
 		m_BackBuffer8 = 0;
 		m_BackBuffer32 = 0;
 		m_DrawNetworkBackBuffer = false;
@@ -66,7 +67,6 @@ namespace RTE {
 		m_PaletteFile.Reset();
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
-		m_PPM = 0;
 		m_GUIScreen = 0;
 		m_LargeFont = 0;
 		m_SmallFont = 0;
@@ -178,6 +178,9 @@ namespace RTE {
 
 		CreateBackBuffers();
 
+		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.bmp");
+		m_ScenePreviewDumpGradient = scenePreviewGradientFile.LoadAndReleaseBitmap(COLORCONV_8_TO_32);
+
 		return 0;
 	}
 
@@ -240,16 +243,7 @@ namespace RTE {
 			reader >> m_VSplitOverride;
 		} else if (propName == "PaletteFile") {
 			reader >> m_PaletteFile;
-		} else if (propName == "PixelsPerMeter") {
-			reader >> m_PPM;
-			m_MPP = 1 / m_PPM;
-			// Calculate the Pixel per Liter and Liter per Pixel
-			float cmPP = 100 / m_PPM;
-			float LVolume = 10 * 10 * 10;
-			m_PPL = LVolume / (cmPP * cmPP * cmPP);
-			m_LPP = 1 / m_PPL;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -270,8 +264,6 @@ namespace RTE {
 		writer << m_VSplitOverride;
 		writer.NewProperty("PaletteFile");
 		writer << m_PaletteFile;
-		writer.NewProperty("PixelsPerMeter");
-		writer << m_PPM;
 
 		return 0;
 	}
@@ -292,6 +284,7 @@ namespace RTE {
 		destroy_bitmap(m_PlayerScreen);
 		destroy_bitmap(m_ScreenDumpBuffer);
 		destroy_bitmap(m_WorldDumpBuffer);
+		destroy_bitmap(m_ScenePreviewDumpGradient);
 		delete m_GUIScreen;
 		delete m_LargeFont;
 		delete m_SmallFont;
@@ -311,7 +304,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::IsValidResolution(unsigned short width, unsigned short height) const {
-		if ((width >= 800 && height >= 600) && (width <= m_ScreenResX || height <= m_ScreenResY)) {
+		if ((width >= 640 && height >= 480) && (width <= m_ScreenResX || height <= m_ScreenResY)) {
 			// Disallow 1366x768 because it's not supported by Allegro.
 			if (width == 1366 && height == 768) {
 				return false;
@@ -342,7 +335,7 @@ namespace RTE {
 		unsigned short resY = m_ResY;
 
 		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations (specifically reducing window size) when switching from 2X mode to 1X mode.
-		// This will force a state where this is no actual game window between multiplier switches and the next set_gfx_mode call will recreate it correctly.
+		// This will force a state where there is no actual game window between multiplier switches and the next set_gfx_mode call will recreate it correctly.
 		set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
 
 		if (set_gfx_mode(m_GfxDriver, resX * multiplier, resY * multiplier, 0, 0) != 0) {
@@ -548,7 +541,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::SaveBitmap(SaveBitmapMode modeToSave, const char *nameBase, BITMAP *bitmapToSave) {
-		if (modeToSave == WorldDump && !g_ActivityMan.ActivityRunning()) {
+		if ((modeToSave == WorldDump || modeToSave == ScenePreviewDump) && !g_ActivityMan.ActivityRunning()) {
 			return 0;
 		}
 
@@ -589,21 +582,33 @@ namespace RTE {
 					return 0;
 				}
 				break;
+			case ScenePreviewDump:
 			case WorldDump:
-				if (!m_WorldDumpBuffer) {
+				if (!m_WorldDumpBuffer) { m_WorldDumpBuffer = create_bitmap(g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight()); }
+
+				// Recreate the buffer if the dimensions don't match the current scene.
+				if (m_WorldDumpBuffer->w != g_SceneMan.GetSceneWidth() || m_WorldDumpBuffer->h != g_SceneMan.GetSceneHeight()) {
+					destroy_bitmap(m_WorldDumpBuffer);
 					m_WorldDumpBuffer = create_bitmap(g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
+				}
+				if (modeToSave == ScenePreviewDump) {
+					DrawWorldDump(true);
+
+					BITMAP *scenePreviewDumpBuffer = create_bitmap(140, 55);
+					blit(m_ScenePreviewDumpGradient, scenePreviewDumpBuffer, 0, 0, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
+					masked_stretch_blit(m_WorldDumpBuffer, scenePreviewDumpBuffer, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
+
+					save_bmp(fullFileName, scenePreviewDumpBuffer, palette);
+					destroy_bitmap(scenePreviewDumpBuffer);
+
+					g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + std::string(fullFileName));
+					return 0;
 				} else {
-					// Recreate the buffer if the dimensions don't match the current scene.
-					if (m_WorldDumpBuffer->w != g_SceneMan.GetSceneWidth() || m_WorldDumpBuffer->h != g_SceneMan.GetSceneHeight()) {
-						destroy_bitmap(m_WorldDumpBuffer);
-						m_WorldDumpBuffer = create_bitmap(g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
-					}
 					DrawWorldDump();
 					save_bmp(fullFileName, m_WorldDumpBuffer, palette);
-					g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + string(fullFileName));
+					g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + std::string(fullFileName));
 					return 0;
 				}
-				break;
 			default:
 				g_ConsoleMan.PrintString("ERROR: Wrong bitmap save mode passed in, no bitmap was saved!");
 				return -1;
@@ -963,53 +968,59 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::DrawWorldDump() {
+	void FrameMan::DrawWorldDump(bool drawForScenePreview) {
 		float worldBitmapWidth = static_cast<float>(m_WorldDumpBuffer->w);
 		float worldBitmapHeight = static_cast<float>(m_WorldDumpBuffer->h);
-		Vector targetPos(0, 0);
 
-		std::list<PostEffect> postEffectsList;
-		BITMAP *effectBitmap = 0;
-		int effectPosX = 0;
-		int effectPosY = 0;
-		unsigned char effectStrength = 0;
-
-		clear_to_color(m_WorldDumpBuffer, makecol32(132, 192, 252)); // Light blue color
-
-		// Draw sky gradient
-		for (unsigned int i = 0; i < m_WorldDumpBuffer->h; i++) {
-			unsigned int lineColor = makecol32(64 + ((static_cast<float>(i) / worldBitmapHeight) * (128 - 64)), 64 + ((static_cast<float>(i) / worldBitmapHeight) * (192 - 64)), 96 + ((static_cast<float>(i) / worldBitmapHeight) * (255 - 96)));
-			hline(m_WorldDumpBuffer, 0, i, worldBitmapWidth - 1, lineColor);
+		// Draw sky gradient if we're not dumping a scene preview
+		if (!drawForScenePreview) {
+			clear_to_color(m_WorldDumpBuffer, makecol32(132, 192, 252)); // Light blue color
+			for (unsigned int i = 0; i < m_WorldDumpBuffer->h; i++) {
+				unsigned int lineColor = makecol32(64 + ((static_cast<float>(i) / worldBitmapHeight) * (128 - 64)), 64 + ((static_cast<float>(i) / worldBitmapHeight) * (192 - 64)), 96 + ((static_cast<float>(i) / worldBitmapHeight) * (255 - 96)));
+				hline(m_WorldDumpBuffer, 0, i, worldBitmapWidth - 1, lineColor);
+			}
+		} else {
+			clear_to_color(m_WorldDumpBuffer, makecol32(255, 0, 255)); // Magenta
 		}
 
 		// Draw scene
 		draw_sprite(m_WorldDumpBuffer, g_SceneMan.GetTerrain()->GetBGColorBitmap(), 0, 0);
 		draw_sprite(m_WorldDumpBuffer, g_SceneMan.GetTerrain()->GetFGColorBitmap(), 0, 0);
 
-		// Draw objects
-		draw_sprite(m_WorldDumpBuffer, g_SceneMan.GetMOColorBitmap(), 0, 0);
+		// If we're not dumping a scene preview, draw objects and post-effects.
+		if (!drawForScenePreview) {
+			std::list<PostEffect> postEffectsList;
+			BITMAP *effectBitmap = 0;
+			int effectPosX = 0;
+			int effectPosY = 0;
+			unsigned char effectStrength = 0;
+			Vector targetPos(0, 0);
 
-		//Draw post-effects
-		g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, worldBitmapWidth, worldBitmapHeight, postEffectsList, -1);
+			// Draw objects
+			draw_sprite(m_WorldDumpBuffer, g_SceneMan.GetMOColorBitmap(), 0, 0);
 
-		for (const PostEffect &postEffect : postEffectsList) {
-			effectBitmap = postEffect.m_Bitmap;
-			effectStrength = postEffect.m_Strength;
-			set_screen_blender(effectStrength, effectStrength, effectStrength, effectStrength);
-			effectPosX = postEffect.m_Pos.GetFloorIntX() - (effectBitmap->w / 2);
-			effectPosY = postEffect.m_Pos.GetFloorIntY() - (effectBitmap->h / 2);
+			// Draw post-effects
+			g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, worldBitmapWidth, worldBitmapHeight, postEffectsList, -1);
 
-			if (postEffect.m_Angle == 0) {
-				draw_trans_sprite(m_WorldDumpBuffer, effectBitmap, effectPosX, effectPosY);
-			} else {
-				BITMAP *targetBitmap = g_PostProcessMan.GetTempEffectBitmap(effectBitmap);
-				clear_to_color(targetBitmap, 0);
+			for (const PostEffect &postEffect : postEffectsList) {
+				effectBitmap = postEffect.m_Bitmap;
+				effectStrength = postEffect.m_Strength;
+				set_screen_blender(effectStrength, effectStrength, effectStrength, effectStrength);
+				effectPosX = postEffect.m_Pos.GetFloorIntX() - (effectBitmap->w / 2);
+				effectPosY = postEffect.m_Pos.GetFloorIntY() - (effectBitmap->h / 2);
 
-				fixed fAngle;
-				fAngle = fixmul(postEffect.m_Angle, radtofix_r);
+				if (postEffect.m_Angle == 0) {
+					draw_trans_sprite(m_WorldDumpBuffer, effectBitmap, effectPosX, effectPosY);
+				} else {
+					BITMAP *targetBitmap = g_PostProcessMan.GetTempEffectBitmap(effectBitmap);
+					clear_to_color(targetBitmap, 0);
 
-				rotate_sprite(targetBitmap, effectBitmap, 0, 0, fAngle);
-				draw_trans_sprite(m_WorldDumpBuffer, targetBitmap, effectPosX, effectPosY);
+					fixed fAngle;
+					fAngle = fixmul(postEffect.m_Angle, radtofix_r);
+
+					rotate_sprite(targetBitmap, effectBitmap, 0, 0, fAngle);
+					draw_trans_sprite(m_WorldDumpBuffer, targetBitmap, effectPosX, effectPosY);
+				}
 			}
 		}
 	}

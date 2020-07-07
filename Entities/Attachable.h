@@ -43,7 +43,8 @@ public:
 // Concrete allocation and cloning definitions
 EntityAllocation(Attachable)
 AddScriptFunctionNames(MOSRotating, "OnAttach", "OnDetach")
-
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Attachable
@@ -88,22 +89,6 @@ AddScriptFunctionNames(MOSRotating, "OnAttach", "OnDetach")
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire Attachable, including its inherited members, to their
@@ -112,18 +97,6 @@ AddScriptFunctionNames(MOSRotating, "OnAttach", "OnDetach")
 // Return value:    None.
 
     virtual void Reset() { Clear(); MOSRotating::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Attachable to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the Attachable will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -137,66 +110,29 @@ AddScriptFunctionNames(MOSRotating, "OnAttach", "OnDetach")
     virtual void Destroy(bool notInherited = false);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
+	/// <summary>
+	/// Gets the MO which is the parent of this Attachable.
+	/// </summary>
+	/// <returns>A pointer to the parent of this Attachable.</returns>
+	MovableObject * GetParent() override { return m_pParent; }
 
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
+	/// <summary>
+	/// Gets the MO which is the parent of this Attachable. 
+	/// </summary>
+	/// <returns>A pointer to the parent of this Attachable.</returns>
+	const MovableObject * GetParent() const override { return m_pParent; }
 
+	/// <summary>
+	/// Gets the MO which is the ultimate root parent of this Attachable and its parent.
+	/// </summary>
+	/// <returns>A pointer to the highest root parent of this Attachable.</returns>
+	MovableObject * GetRootParent() override { return m_pParent ? m_pParent->GetRootParent() : this; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRootParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MO which is the ultimate root parent of this Attachable and
-//                  its parent.
-// Arguments:       None.
-// Return value:    A pointer to the highest root parent of this Attachable.
-
-    virtual MovableObject * GetRootParent() { return m_pParent ? m_pParent->GetRootParent() : this; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRootParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MO which is the ultimate root parent of this Attachable and
-//                  its parent.
-// Arguments:       None.
-// Return value:    A pointer to the highest root parent of this Attachable.
-
-    virtual const MovableObject * GetRootParent() const { return m_pParent ? m_pParent->GetRootParent() : this; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MO which is the parent of this Attachable.
-// Arguments:       None.
-// Return value:    A pointer to the highest root parent of this Attachable.
-
-	virtual MovableObject * GetParent() { return m_pParent; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MO which is the parent of this Attachable. 
-// Arguments:       None.
-// Return value:    A pointer to the highest root parent of this Attachable.
-
-	virtual const MovableObject * GetParent() const { return m_pParent; }
+	/// <summary>
+	/// Gets the MO which is the ultimate root parent of this Attachable and its parent.
+	/// </summary>
+	/// <returns>A pointer to the highest root parent of this Attachable.</returns>
+	const MovableObject * GetRootParent() const override { return m_pParent ? m_pParent->GetRootParent() : this; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -645,6 +581,12 @@ AddScriptFunctionNames(MOSRotating, "OnAttach", "OnDetach")
 	virtual void EnableTerrainCollisions(bool enable);
 
 
+	/// <summary>
+	/// Gets whether this attachable is marked be deleted along with it's parent when it's being deleted or not.
+	/// </summary>
+	/// <returns>Whether this attachable is marked to be deleted along with it's parent or not.</returns>
+	bool ToDeleteWithParent() const { return m_DeleteWithParent; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -700,6 +642,8 @@ protected:
 
 	// Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
 	bool m_IsCollidingWithTerrainWhileAttached;
+
+	bool m_DeleteWithParent; //!< Whether this attachable is marked to be deleted along with it's parent when it's being deleted or not.
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

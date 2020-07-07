@@ -12,11 +12,8 @@
 // Inclusions of header files
 
 #include "AtomGroup.h"
-#include "RTEManagers.h"
 #include "SLTerrain.h"
-#include "MovableObject.h"
 #include "MOSRotating.h"
-
 #include "ConsoleMan.h"
 
 namespace RTE {
@@ -72,7 +69,7 @@ int AtomGroup::Create()
 
 		m_Atoms.push_back(pAtom);
 	}
-    else if (m_pMaterial->id != m_Atoms.front()->GetMaterial()->id)
+    else if (m_pMaterial->GetIndex() != m_Atoms.front()->GetMaterial()->GetIndex())
         m_pMaterial = m_Atoms.front()->GetMaterial();
 
     return 0;
@@ -516,8 +513,8 @@ int AtomGroup::ReadProperty(std::string propName, Reader &reader)
 		Material mat;
 		mat.Reset();
 		reader >> mat;
-		if (mat.id)
-			m_pMaterial = g_SceneMan.GetMaterialFromID(mat.id);
+		if (mat.GetIndex())
+			m_pMaterial = g_SceneMan.GetMaterialFromID(mat.GetIndex());
 		else
 			m_pMaterial = g_SceneMan.GetMaterial(mat.GetPresetName());
 
@@ -545,7 +542,6 @@ int AtomGroup::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "JointOffset")
         reader >> m_JointOffset;
     else
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
 
     return 0;
@@ -733,7 +729,7 @@ float AtomGroup::GetMomentOfInertia()
         float radius = 0;
         for (list<Atom *>::const_iterator itr = m_Atoms.begin(); itr != m_Atoms.end(); ++itr)
         {
-            radius = (*itr)->GetOffset().GetMagnitude() * g_FrameMan.GetMPP();
+            radius = (*itr)->GetOffset().GetMagnitude() * c_MPP;
             m_MomInertia += distMass * radius * radius;
         }
     }
@@ -1075,7 +1071,7 @@ float AtomGroup::Travel(Vector &position,
                 {
                     // Calc and store the accurate hit radius of the Atom in relation to the CoM
                     tempVec = (*aItr)->GetOffset().GetXFlipped(hFlipped);
-                    hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= g_FrameMan.GetMPP();
+                    hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= c_MPP;
                     // Figure out the pre-collision velocity of the hitting atom due to body translation and rotation.
                     hitData.HitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
 /*
@@ -1125,7 +1121,7 @@ float AtomGroup::Travel(Vector &position,
 
         // Compute and scale the actual on-screen travel trajectory of the origin of thid AtomGroup
         // for this segment, using the remaining travel time and the pixels-per-meter constant.
-        linSegTraj = velocity * timeLeft * g_FrameMan.GetPPM();
+        linSegTraj = velocity * timeLeft * c_PPM;
 
         // The amount of rotation to be achieved during the time slot, in radians
         rotDelta = angVel * timeLeft;
@@ -1305,7 +1301,7 @@ float AtomGroup::Travel(Vector &position,
                 {
                     // Calc and store the accurate hit radius of the Atom in relation to the CoM
                     tempVec = (*aItr)->GetOffset().GetXFlipped(hFlipped);
-                    hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= g_FrameMan.GetMPP();
+                    hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= c_MPP;
                     // Figure out the pre-collision velocity of the hitting atom due to body translation and rotation.
                     hitData.HitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
 
@@ -1396,7 +1392,7 @@ float AtomGroup::Travel(Vector &position,
                 // Figure out the pre-collision velocity of the
                 // hitting atom due to body translation and rotation.
                 (*aItr)->SetHitVel(velocity + (*aItr)->GetOffset().RadRotate(rotation + c_HalfPI) *
-                                            g_FrameMan.GetMPP() * angVel);
+                                            c_MPP * angVel);
 */
                 hitFactor = 1.0 / (float)penetratingAtoms.size();
 
@@ -1481,7 +1477,7 @@ float AtomGroup::Travel(Vector &position,
 //                      hitData.HitPoint = (*aItr)->GetCurrentPos();
                         // Calc and store the accurate hit radius of the Atom in relation to the CoM
                         tempVec = (*aItr)->GetOffset().GetXFlipped(hFlipped);
-                        hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= g_FrameMan.GetMPP();
+                        hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= c_MPP;
                         // Figure out the pre-collision velocity of the hitting atom due to body translation and rotation.
                         hitData.HitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
                         // Set the atom with the hit data with all the info we have so far.
@@ -1623,7 +1619,7 @@ Vector AtomGroup::PushTravel(Vector &position,
 
     // Compute and scale the actual on-screen travel trajectory for this travel, using
     // the passed in travel time and the pixels-per-meter constant.
-    Vector trajectory = velocity * travelTime * g_FrameMan.GetPPM();
+    Vector trajectory = velocity * travelTime * c_PPM;
 
     int legCount = 0, stepCount = 0, hitCount = 0, atomsHitMOsCount = 0;
     int /*startPos[2], */intPos[2], hitPos[2], delta[2], delta2[2], increment[2];
@@ -1714,7 +1710,7 @@ before adding them to the MovableMan.
         prevTrajMag = trajectory.GetMagnitude();
         // Compute and scale the actual on-screen travel trajectory for this leg, using
         // the remaining travel time and the pixels-per-meter constant.
-        trajectory = velocity * timeLeft * g_FrameMan.GetPPM();
+        trajectory = velocity * timeLeft * c_PPM;
 
         delta[X] = floorf(position.m_X + trajectory.m_X) - intPos[X];
         delta[Y] = floorf(position.m_Y + trajectory.m_Y) - intPos[Y];
@@ -1929,7 +1925,7 @@ before adding them to the MovableMan.
 
 //                      hitData.HitPoint.SetXY(intPos[X], intPos[Y]);
                         // Calc and store the accurate hit radius of the Atom in relation to the CoM
-                        hitData.HitRadius[HITOR] = (*aoItr).second * g_FrameMan.GetMPP();
+                        hitData.HitRadius[HITOR] = (*aoItr).second * c_MPP;
                         hitData.HitPoint.Reset();
                         hitData.BitmapNormal.Reset();
 
@@ -2068,8 +2064,8 @@ before adding them to the MovableMan.
 
                         // Bounce according to the collision.
                         tempVel[dom] = -tempVel[dom] *
-                                       (*aoItr).first->GetMaterial()->restitution *
-                                       domMaterial->restitution;
+                                       (*aoItr).first->GetMaterial()->GetRestitution() *
+                                       domMaterial->GetRestitution();
                     }
 
                     // Check for and react upon a collision in the submissive direction of travel.
@@ -2083,8 +2079,8 @@ before adding them to the MovableMan.
 
                         // Bounce according to the collision.
                         tempVel[sub] = -tempVel[sub] *
-                                       (*aoItr).first->GetMaterial()->restitution *
-                                       subMaterial->restitution;
+                                       (*aoItr).first->GetMaterial()->GetRestitution() *
+                                       subMaterial->GetRestitution();
                     }
 
                     // If hit right on the corner of a pixel, bounce straight back with no friction.
@@ -2092,21 +2088,21 @@ before adding them to the MovableMan.
                     {
                         hit[dom] = true;
                         tempVel[dom] = -tempVel[dom] *
-                                       (*aoItr).first->GetMaterial()->restitution *
-                                       hitMaterial->restitution;
+                                       (*aoItr).first->GetMaterial()->GetRestitution() *
+                                       hitMaterial->GetRestitution();
                         hit[sub] = true;
                         tempVel[sub] = -tempVel[sub] *
-                                       (*aoItr).first->GetMaterial()->restitution *
-                                       hitMaterial->restitution;
+                                       (*aoItr).first->GetMaterial()->GetRestitution() *
+                                       hitMaterial->GetRestitution();
                     }
                     // Calculate the effects of friction.
                     else if (hit[dom] && !hit[sub])
                     {
-                        tempVel[sub] -= tempVel[sub] * (*aoItr).first->GetMaterial()->friction * domMaterial->friction;
+                        tempVel[sub] -= tempVel[sub] * (*aoItr).first->GetMaterial()->GetFriction() * domMaterial->GetFriction();
                     }
                     else if (hit[sub] && !hit[dom])
                     {
-                        tempVel[dom] -= tempVel[dom] * (*aoItr).first->GetMaterial()->friction * subMaterial->friction;
+                        tempVel[dom] -= tempVel[dom] * (*aoItr).first->GetMaterial()->GetFriction() * subMaterial->GetFriction();
                     }
 
                     // Compute and store this Atom's collision response impulse force.
@@ -2268,7 +2264,7 @@ bool AtomGroup::PushAsLimb(const Vector &jointPos,
 
     // Add the resulting impulse force, add the lever of the joint offset if set to do so
     if (affectRotation)
-        m_pOwnerMO->AddImpulseForce(pushImpulse, g_SceneMan.ShortestDistance(m_pOwnerMO->GetPos(), jointPos) * g_FrameMan.GetMPP());
+        m_pOwnerMO->AddImpulseForce(pushImpulse, g_SceneMan.ShortestDistance(m_pOwnerMO->GetPos(), jointPos) * c_MPP);
     else
         m_pOwnerMO->AddImpulseForce(pushImpulse, Vector());
 
@@ -2398,7 +2394,7 @@ bool AtomGroup::ResolveTerrainIntersection(Vector &position, Matrix &rotation, u
     list<Atom *>::iterator aItr;
     list<Atom *> intersectingAtoms;
     MOID hitMaterial = g_MaterialAir;
-    float strengthThreshold = strongerThan != g_MaterialAir ? g_SceneMan.GetMaterialFromID(strongerThan)->strength : 0;
+    float strengthThreshold = strongerThan != g_MaterialAir ? g_SceneMan.GetMaterialFromID(strongerThan)->GetIntegrity() : 0;
     bool rayHit = false;
 
     exitDirection.Reset();
@@ -2416,7 +2412,7 @@ bool AtomGroup::ResolveTerrainIntersection(Vector &position, Matrix &rotation, u
         atomPos = (*aItr)->GetCurrentPos();
         if ((hitMaterial = g_SceneMan.GetTerrain()->GetPixel(atomPos.m_X, atomPos.m_Y)) != g_MaterialAir)
         {
-            if (strengthThreshold > 0 && g_SceneMan.GetMaterialFromID(hitMaterial)->strength > strengthThreshold)
+            if (strengthThreshold > 0 && g_SceneMan.GetMaterialFromID(hitMaterial)->GetIntegrity() > strengthThreshold)
             {
                 // Add atom to list of intersecting ones
                 intersectingAtoms.push_back(*aItr);

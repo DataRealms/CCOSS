@@ -1,7 +1,6 @@
 #ifndef _RTEFRAMEMAN_
 #define _RTEFRAMEMAN_
 
-#include "RTETools.h"
 #include "ContentFile.h"
 #include "Timer.h"
 #include "Box.h"
@@ -20,6 +19,8 @@ namespace RTE {
 	class FrameMan : public Singleton<FrameMan>, public Serializable {
 
 	public:
+
+		SerializableOverrideMethods
 
 		Vector SLOffset[c_MaxScreenCount][c_MaxLayersStoredForNetwork]; //!< SceneLayer offsets for each screen in online multiplayer.
 
@@ -53,27 +54,6 @@ namespace RTE {
 		virtual void Reset() { Clear(); }
 #pragma endregion
 
-#pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this FrameMan to an output stream for later recreation with Create(Reader &reader).
-		/// </summary>
-		/// <param name="writer">A Writer that the FrameMan will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
-#pragma endregion
-
 #pragma region Concrete Methods
 		/// <summary>
 		/// Updates the state of this FrameMan. Supposed to be done every frame.
@@ -86,7 +66,7 @@ namespace RTE {
 		void Draw();
 #pragma endregion
 
-#pragma region Getters and Setters
+#pragma region Getters
 		/// <summary>
 		/// Gets the 8bpp backbuffer bitmap.
 		/// </summary>
@@ -98,36 +78,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A pointer to the BITMAP 32bpp backbuffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetBackBuffer32() const { return m_BackBuffer32; }
-
-		/// <summary>
-		/// Gets the ratio between the physics engine's meters and on-screen pixels.
-		/// </summary>
-		/// <returns>A float describing the current MPP ratio.</returns>
-		float GetMPP() const { return m_MPP; }
-
-		/// <summary>
-		/// Gets the ratio between on-screen pixels and the physics engine's meters.
-		/// </summary>
-		/// <returns>A float describing the current PPM ratio.</returns>
-		float GetPPM() const { return m_PPM; }
-
-		/// <summary>
-		/// Sets the ratio between on-screen pixels and the physics engine's meters.
-		/// </summary>
-		/// <param name="newPPM">A float specifying the new PPM ratio.</param>
-		void SetPPM(const float newPPM) { m_PPM = newPPM; }
-
-		/// <summary>
-		/// Gets the ratio between the physics engine's Liters and on-screen pixels.
-		/// </summary>
-		/// <returns>A float describing the current LPP ratio.</returns>
-		float GetLPP() const { return m_LPP; }
-
-		/// <summary>
-		/// Gets the ratio between the on-screen pixels and the physics engine's Liters.
-		/// </summary>
-		/// <returns>A float describing the current PPL ratio.</returns>
-		float GetPPL() const { return m_PPL; }
 #pragma endregion
 
 #pragma region Resolution Handling
@@ -529,6 +479,13 @@ namespace RTE {
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
 		int SaveWorldToBMP(const char *nameBase) { return SaveBitmap(WorldDump, nameBase); }
+
+		/// <summary>
+		/// Dumps a miniature screenshot of the whole scene to be used as a preview.
+		/// </summary>
+		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
+		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
+		int SaveWorldToPreviewBMP(const char *nameBase) { return SaveBitmap(ScenePreviewDump, nameBase); }
 #pragma endregion
 
 #pragma region Class Info
@@ -578,11 +535,6 @@ namespace RTE {
 		unsigned short m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.
 		unsigned short m_PlayerScreenHeight; //!< Height of the screen of each player. Will be smaller than resolution only if the screen is split.
 	
-		float m_PPM; //!< Pixels Per Meter constant.
-		float m_MPP; //!< Meters Per Pixel constant.
-		float m_PPL; //!< Pixels per Liter constant.
-		float m_LPP; //!< Liters Per Pixel constant.
-
 		AllegroScreen *m_GUIScreen; //!< GUI screen object kept and owned just for the fonts.
 		GUIFont *m_SmallFont; //!< Pointer to the standard small font for quick access.
 		GUIFont *m_LargeFont; //!< Pointer to the standard large font for quick access.
@@ -602,6 +554,7 @@ namespace RTE {
 		BITMAP *m_BackBuffer32; //!< 32bpp backbuffer, only used for post-processing.
 		BITMAP *m_ScreenDumpBuffer; //!< Temporary buffer for making quick screencaps.
 		BITMAP *m_WorldDumpBuffer; //!< Temporary buffer for making whole scene screencaps.
+		BITMAP *m_ScenePreviewDumpGradient; //!< BITMAP for the scene preview sky gradient (easier to load from a pre-made file because it's dithered).
 
 		BITMAP *m_NetworkBackBufferIntermediate8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw.
 		BITMAP *m_NetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw. Used to draw UI only.
@@ -623,7 +576,7 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration with different settings for the SaveBitmap() method.
 		/// </summary>
-		enum SaveBitmapMode { SingleBitmap = 0, ScreenDump, WorldDump};
+		enum SaveBitmapMode { SingleBitmap = 0, ScreenDump, WorldDump, ScenePreviewDump};
 
 #pragma region Create Breakdown
 		/// <summary>
@@ -677,10 +630,11 @@ namespace RTE {
 		/// <summary>
 		/// Draws the current frame of the whole scene to a temporary buffer that is later saved as a screenshot. This is called from SaveBitmap().
 		/// </summary>
-		void DrawWorldDump();
+		/// <param name="drawForScenePreview">If true will skip drawing objects, post-effects and sky gradient in the WorldDump. To be used for dumping scene preview images.</param>
+		void DrawWorldDump(bool drawForScenePreview = false);
 
 		/// <summary>
-		/// Shared method for saving screenshots or individual bitmaps. Will be called from SaveBitmapToBMP(), SaveScreenToBMP() or SaveWorldToBMP().
+		/// Shared method for saving screenshots or individual bitmaps. Will be called from SaveBitmapToBMP(), SaveScreenToBMP(), SaveWorldToBMP() or SaveWorldToPreviewBMP().
 		/// </summary>
 		/// <param name="modeToSave">What is being saved. See SaveBitmapMode enumeration for a list of modes.</param>
 		/// <param name="nameBase">

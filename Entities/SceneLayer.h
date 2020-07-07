@@ -14,13 +14,10 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
 #include "Entity.h"
-#include "Vector.h"
 #include "Box.h"
 #include "FrameMan.h"
 #include "SceneMan.h"
-//#include "MovableMan.h"
 
 namespace RTE
 {
@@ -48,6 +45,8 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(SceneLayer)
+SerializableOverrideMethods
+ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -201,22 +200,6 @@ EntityAllocation(SceneLayer)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire SLTerrain, including its inherited members, to their
@@ -228,43 +211,6 @@ EntityAllocation(SceneLayer)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this SceneLayer to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the SceneLayer will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the SceneLayer object ready for use.
-// Arguments:       An input stream that the SceneLayer will create itself from.
-//                  Whether there is a class name in the stream to check against to make
-//                  sure the correct type is being read from the stream.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create(std::istream &stream, bool checkType = true);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this SceneLayer to an output stream for
-//                  later recreation with Create(istream &stream);
-// Arguments:       An output stream that the SceneLayer will save itself to.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(std::ostream &stream) const;
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Destroys and resets (through Clear()) the SceneLayer object.
@@ -273,26 +219,6 @@ EntityAllocation(SceneLayer)
 // Return value:    None.
 
     virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

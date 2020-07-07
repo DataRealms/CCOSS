@@ -419,11 +419,8 @@ namespace RTE {
 			m_SpriteAnimMode = ALWAYSLOOP;
 			m_SpriteAnimDuration = LERP(0, m_MaxHealth, 10, m_InitialSpriteAnimDuration, m_Health);
 
-			// TODO: Figure out how to pitch this correctly so it goes up as SpriteAnimDuration goes down.
-			/*
 			if (!m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
-			g_AudioMan.SetSoundPitch(&m_DoorMoveSound, LERP(0, m_InitialSpriteAnimDuration, 0, 5, m_SpriteAnimDuration));
-			*/
+			g_AudioMan.SetSoundPitch(&m_DoorMoveSound, LERP(10, m_InitialSpriteAnimDuration, 2, 1, m_SpriteAnimDuration) * g_AudioMan.GetGlobalPitch());
 
 			m_Health -= 0.4F;
 		}

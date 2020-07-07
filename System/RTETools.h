@@ -10,6 +10,10 @@ namespace RTE {
 
 	class Vector;
 
+	static std::mt19937 RTETools_RNG;
+	static std::uniform_real_distribution<float> RTETools_dist1(0.0F, std::nextafter(1.0F, std::numeric_limits<float>::max()));
+	static std::uniform_real_distribution<float> RTETools_dist2(0.0F, std::nextafter(2.0F, std::numeric_limits<float>::max()));
+
 #pragma region Physics Constants Getters
 	/// <summary>
 	/// Gets the ratio between the physics engine's meters and on-screen pixels.
@@ -38,36 +42,36 @@ namespace RTE {
 
 #pragma region Random Numbers
 	/// <summary>
-	/// Seeds the rand with the current runtime time.
+	/// Seed the mt19937 random number generator.
 	/// </summary>
-	void SeedRand();
+	void SeedRand(unsigned int seed);
 
 	/// <summary>
-	/// A good rand function that return a float between 0.0 and 0.999.
+	/// Uniformly distributed random double in the range [min, max].
+	/// The min must be lesser or equal to max.
 	/// </summary>
-	/// <returns>Random number.</returns>
-	double PosRand();
+	double UDRand(double min, double max);
 
 	/// <summary>
-	/// A good rand function that returns a floating point value between -1.0 and 1.0, both inclusive.
+	/// Uniformly distributed random float in the range [0, 1].
 	/// </summary>
-	/// <returns>Random number.</returns>
-	double NormalRand();
+	float PosRand();
 
 	/// <summary>
-	/// A good rand function that returns a floating point value between two given thresholds, the min being inclusive, but the max not.
+	/// Uniformly distributed random float in the range [-1, 1].
 	/// </summary>
-	/// <param name="min">Minimum value this can return.</param>
-	/// <param name="max">Maximum value this can return.</param>
-	/// <returns>Random number between limits.</returns>
-	double RangeRand(float min, float max);
+	float NormalRand();
 
 	/// <summary>
-	/// A rand function that returns an int between min and max, both inclusive.
+	/// Uniformly distributed random float in the range [min, max].
+	/// The min must be lesser or equal to max.
 	/// </summary>
-	/// <param name="min">Minimum value this can return.</param>
-	/// <param name="max">Maximum value this can return.</param>
-	/// <returns>Random number between limits.</returns>
+	float RangeRand(float min, float max);
+
+	/// <summary>
+	/// Uniformly distributed random int in the range [min, max].
+	/// The min must be lesser or equal to max.
+	/// </summary>
 	int SelectRand(int min, int max);
 #pragma endregion
 

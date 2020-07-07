@@ -1578,7 +1578,7 @@ bool AHuman::Look(float FOVSpread, float range)
     aimMatrix.SetXFlipped(m_HFlipped);
     lookVector *= aimMatrix;
     // Add the spread
-    lookVector.DegRotate(FOVSpread * NormalRand());
+	lookVector.DegRotate(FOVSpread * NormalRand());
 
     // TODO: generate an alarm event if we spot an enemy actor?
 
@@ -1596,7 +1596,7 @@ bool AHuman::Look(float FOVSpread, float range)
 bool AHuman::LookForGold(float FOVSpread, float range, Vector &foundLocation)
 {
     Vector ray(m_HFlipped ? -range : range, 0);
-    ray.DegRotate(FOVSpread * NormalRand());
+	ray.DegRotate(FOVSpread * NormalRand());
 
     return g_SceneMan.CastMaterialRay(m_Pos, ray, g_MaterialGold, foundLocation, 4);
 }
@@ -3095,7 +3095,7 @@ void AHuman::Update()
 	{
 		m_GotHat = true;
 
-		if (PosRand() > 0.8)
+		if (PosRand() > 0.8F)
 		{
 			int hat = SelectRand(1, 20);
 
@@ -3528,10 +3528,10 @@ void AHuman::Update()
                     {
                         pMO->SetPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) + Vector(m_HFlipped ? -15 : 15, -8));
                         float throwScalar = (float)MIN(m_ThrowTmr.GetElapsedSimTimeMS(), m_ThrowPrepTime) / (float)m_ThrowPrepTime;
-                        Vector tossVec(pThrown->GetMinThrowVel() + ((pThrown->GetMaxThrowVel() - pThrown->GetMinThrowVel()) * throwScalar), 0.5 * NormalRand());
+                        Vector tossVec(pThrown->GetMinThrowVel() + ((pThrown->GetMaxThrowVel() - pThrown->GetMinThrowVel()) * throwScalar), 0.5F * NormalRand());
                         tossVec.RadRotate(m_AimAngle);
                         pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-                        pMO->SetAngularVel(5 * NormalRand());
+                        pMO->SetAngularVel(5.0F * NormalRand());
 
                         if (pMO->IsHeldDevice())
                         {
@@ -3593,9 +3593,9 @@ void AHuman::Update()
             MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
             if (pMO) {
                 pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
-                Vector tossVec(5 + 2 * NormalRand(), -2 + 1 * NormalRand());
+                Vector tossVec(5.0F + 2.0F * NormalRand(), -2.0F + 1.0F * NormalRand());
                 pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-                pMO->SetAngularVel(5 * NormalRand());
+                pMO->SetAngularVel(5.0F * NormalRand());
                 if (pMO->IsDevice())
                     g_MovableMan.AddItem(pMO);
                 else {
@@ -4463,7 +4463,7 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
             points[i] += m_pFGArm->GetParentOffset();
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, 55 + 100 * PosRand());
+		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, 55.0F + RangeRand(0.0F, 100.0F));
 
         putpixel(pTargetBitmap, points[i].m_X - targetPos.m_X, points[i].m_Y - targetPos.m_Y, g_YellowGlowColor);
     }
@@ -4505,7 +4505,7 @@ int AHuman::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = RangeRand(0, bodyParts.size() - 1);
+		int partIndex = SelectRand(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}

@@ -485,7 +485,10 @@ void MOSprite::Update() {
 			    break;
 		    case ALWAYSRANDOM:
 			    while (m_Frame == prevFrame) {
-				    m_Frame = std::floorf(static_cast<float>(m_FrameCount) * PosRand());
+					m_Frame = SelectRand(0, m_FrameCount - 1);
+#if defined DEBUG_BUILD|| MIN_DEBUG_BUILD
+					RTEAssert(m_Frame < m_FrameCount, "frame number is out of bounds.")
+#endif
 			    }
                 m_SpriteAnimTimer.Reset();
 			    break;

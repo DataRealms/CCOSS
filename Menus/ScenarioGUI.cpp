@@ -628,7 +628,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
     // Transparency effect on the scene dots and lines
     drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
     // Screen blend the dots and lines, with some flicekring in its intensity
-    int blendAmount = 120 + 55 * NormalRand();
+	int blendAmount = 120 + SelectRand(-55, 55);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
     // Draw sites etc only when selecting them
@@ -647,11 +647,11 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
 				color = c_GUIColorYellow;
 
             screenLocation = m_PlanetCenter + (*sItr)->GetLocation() + (*sItr)->GetLocationOffset();
-            blendAmount = 85 + 25 * NormalRand();
+			blendAmount = 85 + SelectRand(-25, 25);
             set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
             circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 4, color);
             circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 2, color);
-            blendAmount = 200 + 55 * NormalRand();
+			blendAmount = 200 + SelectRand(-55, 55);
             set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
             circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 1, color);
         }
@@ -1894,7 +1894,7 @@ void ScenarioGUI::UpdateSiteNameLabel(bool visible, string text, const Vector &l
 
 void ScenarioGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Vector &end, int color) const
 {
-    int blendAmount = 210 + 15 * NormalRand();
+	int blendAmount = 210 + SelectRand(-15, 15);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
     line(drawBitmap, start.m_X, start.m_Y, end.m_X, end.m_Y, color);
 /* Looks like ass
@@ -1910,7 +1910,7 @@ void ScenarioGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Ve
         line(drawBitmap, start.m_X - 1, start.m_Y, end.m_X - 1, end.m_Y, color);
     }
 */
-    blendAmount = 45 + 25 * NormalRand();
+	blendAmount = 45 + SelectRand(-25, 25);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
     line(drawBitmap, start.m_X + 1, start.m_Y, end.m_X + 1, end.m_Y, color);
     line(drawBitmap, start.m_X - 1, start.m_Y, end.m_X - 1, end.m_Y, color);
@@ -2023,7 +2023,7 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     // Draw a circle around the site target
     if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments))
     {
-        int blendAmount = 225 + 20 * NormalRand();
+		int blendAmount = 225 + SelectRand(-20, 20);
         set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
         // If specified, draw a squareSite instead (with chamfered corners)

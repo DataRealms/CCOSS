@@ -529,13 +529,13 @@ void AEmitter::Update()
 						pParticle->SetPos(m_Pos + RotateOffset((*eItr)->GetOffset()));
 					}
     // TODO: Optimize making the random angles!")
-                    emitVel.SetXY(velMin + velRange * PosRand(), 0);
-                    emitVel.RadRotate(m_EmitAngle.GetRadAngle() + spread * NormalRand());
+                    emitVel.SetXY(velMin + velRange * PosRand(), 0.0F);
+					emitVel.RadRotate(m_EmitAngle.GetRadAngle() + spread * PosRand());
                     emitVel = RotateOffset(emitVel);
                     pParticle->SetVel(parentVel + emitVel);
 
                     if (pParticle->GetLifetime() != 0)
-                        pParticle->SetLifetime(pParticle->GetLifetime() * (1.0 + ((*eItr)->GetLifeVariation() * NormalRand())));
+                        pParticle->SetLifetime(pParticle->GetLifetime() * (1.0F + ((*eItr)->GetLifeVariation() * NormalRand())));
                     pParticle->SetTeam(m_Team);
                     pParticle->SetIgnoresTeamHits(true);
 
@@ -653,7 +653,7 @@ void AEmitter::Draw(BITMAP *pTargetBitmap,
         emitPos.RadRotate(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
         emitPos = m_Pos + RotateOffset(m_EmissionOffset) + emitPos;
         if(!g_SceneMan.ObscuredPoint(emitPos))
-            g_PostProcessMan.RegisterPostEffect(emitPos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55 + 200 * PosRand(), m_pFlash->GetEffectRotAngle());
+            g_PostProcessMan.RegisterPostEffect(emitPos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55.0F + RangeRand(0.0F, 200.0F), m_pFlash->GetEffectRotAngle());
 //            g_SceneMan.RegisterPostEffect(emitPos, m_pFlash->GetScreenEffect(), 55 + (200 * PosRand() * ((float)1 - ((float)m_AgeTimer.GetElapsedSimTimeMS() / (float)m_Lifetime))));
     }
 }

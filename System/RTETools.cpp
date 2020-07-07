@@ -21,23 +21,47 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SeedRand() { srand(time(0)); }
+	void SeedRand(unsigned int seed) {
+		RTETools_RNG = std::mt19937(seed); // Standard mersenne_twister_engine seeded with rd().
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	double PosRand() { return (rand() / (RAND_MAX / 1000 + 1)) / 1000.0; }
+	double UDRand(double min, double max)
+	{
+	#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+		RTEAssert(max >= min, "min is greater than max in UDRand().");
+	#endif
+		return (std::uniform_real_distribution<double>(0.0, std::nextafter(max - min, std::numeric_limits<double>::max()))(RTETools_RNG) + min);
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	double NormalRand() { return (static_cast<double>(rand()) / (RAND_MAX / 2)) - 1.0; }
+	float PosRand() { return RTETools_dist1(RTETools_RNG); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	double RangeRand(float min, float max) { return min + ((max - min) * PosRand()); }
+	float NormalRand() { return (RTETools_dist2(RTETools_RNG) - 1.0F); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SelectRand(int min, int max) { return min + static_cast<int>((max - min) * PosRand() + 0.5F); }
+	float RangeRand(float min, float max)
+	{
+	#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+		RTEAssert(max>=min, "min is greater than max in RangeRand().");
+	#endif
+		return (std::uniform_real_distribution<float>(0.0F, std::nextafter(max - min, std::numeric_limits<float>::max()))(RTETools_RNG) + min);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int SelectRand(int min, int max)
+	{
+	#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+		RTEAssert(max >= min, "min is greater than max in SelectRand().");
+	#endif
+		return (std::uniform_int_distribution<int>(0, std::nextafter(max - min, std::numeric_limits<int>::max()))(RTETools_RNG) + min);
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

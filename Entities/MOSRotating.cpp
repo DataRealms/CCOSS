@@ -948,12 +948,12 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
             gibROffset = RotateOffset((*gItr).GetOffset());
             // Put variation on the lifetime, if it's not set to be endless
             if (pGib->GetLifetime() != 0)
-                pGib->SetLifetime(pGib->GetLifetime() * (1.0 + ((*gItr).GetLifeVariation() * NormalRand())));
+                pGib->SetLifetime(pGib->GetLifetime() * (1.0F + ((*gItr).GetLifeVariation() * NormalRand())));
             // Set up its position and velocity according to the parameters of this AEmitter.
             pGib->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
             pGib->SetRotAngle(m_Rotation.GetRadAngle() + pGib->GetRotMatrix().GetRadAngle());
             // Rotational angle
-            pGib->SetAngularVel((pGib->GetAngularVel() * 0.35) + (pGib->GetAngularVel() * 0.65 / pGib->GetMass()) * PosRand());
+            pGib->SetAngularVel((pGib->GetAngularVel() * 0.35F) + (pGib->GetAngularVel() * 0.65F / pGib->GetMass()) * PosRand());
             // Make it rotate away in the appropriate direction depending on which side of the object it is on
             // If the object is far to the relft or right of the center, make it always rotate outwards to some degree
             if (gibROffset.m_X > m_aSprite[0]->w / 3)
@@ -966,18 +966,18 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
             // Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
             else
             {
-                pGib->SetAngularVel((pGib->GetAngularVel() * 0.5 + pGib->GetAngularVel() * PosRand()) * (NormalRand() > 0 ? 1 : -1));
+                pGib->SetAngularVel((pGib->GetAngularVel() * 0.5F + pGib->GetAngularVel() * PosRand()) * (NormalRand() > 0.0F ? 1.0F : -1.0F));
             }
 
 // TODO: Optimize making the random angles!")
             {
 				// Pretty much always zero
                 gibVel = gibROffset;
-                if (gibVel.IsZero())
-                    gibVel.SetXY(velMin + velRange * PosRand(), 0);
-                else
-                    gibVel.SetMagnitude(velMin + velRange * PosRand());
-                gibVel.RadRotate(impactImpulse.GetAbsRadAngle() + spread * NormalRand());
+				if (gibVel.IsZero())
+					gibVel.SetXY(velMin + velRange * PosRand(), 0);
+				else
+					gibVel.SetMagnitude(velMin + velRange * PosRand());
+				gibVel.RadRotate(impactImpulse.GetAbsRadAngle() + spread * PosRand());
 // Don't! the offset was already rotated!
 //                gibVel = RotateOffset(gibVel);
                 // Distribute any impact implse out over all the gibs
@@ -1017,7 +1017,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
         velRange = 10.0f;
 
         // Rotational angle velocity
-        pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.35) + (pAttachable->GetAngularVel() * 0.65 / pAttachable->GetMass()) * PosRand());
+        pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.35F) + (pAttachable->GetAngularVel() * 0.65F / pAttachable->GetMass()) * PosRand());
         // Make it rotate away in the appropriate direction depending on which side of the object it is on
         // If the object is far to the relft or right of the center, make it always rotate outwards to some degree
         if (pAttachable->GetParentOffset().m_X > m_aSprite[0]->w / 3)
@@ -1030,7 +1030,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
         // Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
         else
         {
-            pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.5 + pAttachable->GetAngularVel() * PosRand()) * (NormalRand() > 0 ? 1 : -1));
+            pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.5F + pAttachable->GetAngularVel() * PosRand()) * (NormalRand() > 0.0F ? 1.0F : -1.0F));
         }
 
 // TODO: Optimize making the random angles!")
@@ -1369,7 +1369,7 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
                 {
                     tally -= 1.0;
                     (*itr)->SetPos((*itr)->GetPos() - m_Vel.GetNormalized() * depth);
-                    (*itr)->SetVel(Vector(velMag * splashDir * PosRand(), -velMag * PosRand()));
+					(*itr)->SetVel(Vector(velMag * splashDir * PosRand(), -velMag * PosRand()));
                     m_DeepHardness += (*itr)->GetMaterial()->GetIntegrity() * (*itr)->GetMaterial()->GetPixelDensity();
                     g_MovableMan.AddParticle(*itr);
                     *itr = 0;

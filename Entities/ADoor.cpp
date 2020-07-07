@@ -296,7 +296,7 @@ namespace RTE {
 				return damage;
 			}
 
-			int partIndex = RangeRand(0, woundedBodyParts.size() - 1);
+			int partIndex = SelectRand(0, woundedBodyParts.size() - 1);
 			MOSRotating *part = woundedBodyParts[partIndex];
 			damage += part->RemoveWounds(1);
 		}

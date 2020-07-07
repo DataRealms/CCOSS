@@ -30,6 +30,7 @@
 #include <cerrno>
 #include <cassert>
 #include <limits>
+#include <random>
 // TODO: don't forget to replace with <filesystem> when eventually enable ++17 standard.
 #include <experimental/filesystem>
 

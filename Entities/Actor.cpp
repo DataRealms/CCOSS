@@ -698,7 +698,7 @@ bool Actor::Look(float FOVSpread, float range)
     if (lookVector.GetLargest() < 0.01)
     {
         lookVector.SetXY(range, 0);
-        lookVector.DegRotate(180 * NormalRand());
+        lookVector.DegRotate(180.0F * NormalRand());
     }
     else
     {
@@ -905,35 +905,35 @@ void Actor::DropAllInventory()
 		if (pObject)
 		{
 			// Generate the velocities procedurally
-			velMin = 3.0f;
-			velRange = 10.0f;
+			velMin = 3.0F;
+			velRange = 10.0F;
 
 			// Randomize the offset from center to be within the original object
-			gibROffset.SetXY(m_MaxRadius * 0.35 * NormalRand(), m_MaxRadius * 0.35 * NormalRand());
+			gibROffset.SetXY(m_MaxRadius * 0.35F * NormalRand(), m_MaxRadius * 0.35F * NormalRand());
 			// Set up its position and velocity according to the parameters of this AEmitter.
 			pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
 			pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
 			// Rotational angle
-			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35) + (pObject->GetAngularVel() * 0.65 / pObject->GetMass()) * PosRand());
+			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / pObject->GetMass()) * PosRand());
 			// Make it rotate away in the appropriate direction depending on which side of the object it is on
 			// If the object is far to the relft or right of the center, make it always rotate outwards to some degree
 			if (gibROffset.m_X > m_aSprite[0]->w / 3)
 			{
 				float offCenterRatio = gibROffset.m_X / (m_aSprite[0]->w / 2);
-				angularVel = fabs(pObject->GetAngularVel() * 0.5);
-				angularVel += fabs(pObject->GetAngularVel() * 0.5 * offCenterRatio);
-				pObject->SetAngularVel(angularVel * (gibROffset.m_X > 0 ? -1 : 1));
+				angularVel = fabs(pObject->GetAngularVel() * 0.5F);
+				angularVel += fabs(pObject->GetAngularVel() * 0.5F * offCenterRatio);
+				pObject->SetAngularVel(angularVel * (gibROffset.m_X > 0.0F ? -1 : 1));
 			}
 			// Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
 			else
 			{
-				pObject->SetAngularVel((pObject->GetAngularVel() * 0.5 + pObject->GetAngularVel() * PosRand()) * (NormalRand() > 0 ? 1 : -1));
+				pObject->SetAngularVel((pObject->GetAngularVel() * 0.5F + pObject->GetAngularVel() * PosRand()) * (NormalRand() > 0.0F ? 1.0F : -1.0F));
 			}
 
 			// TODO: Optimize making the random angles!")
 			gibVel = gibROffset;
 			if (gibVel.IsZero())
-				gibVel.SetXY(velMin + velRange * PosRand(), 0);
+				gibVel.SetXY(velMin + velRange * PosRand(), 0.0F);
 			else
 				gibVel.SetMagnitude(velMin + velRange * PosRand());
 			// Don't! the offset was already rotated!
@@ -948,8 +948,8 @@ void Actor::DropAllInventory()
 			if (pPassenger = dynamic_cast<Actor *>(pObject))
 			{
 				pPassenger->SetRotAngle(c_HalfPI * NormalRand());
-				pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5);
-				pPassenger->SetHFlipped(PosRand() > 0.5);
+				pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5.0F);
+				pPassenger->SetHFlipped(PosRand() > 0.5F);
 				pPassenger->SetStatus(UNSTABLE);
 				g_MovableMan.AddActor(pPassenger);
 			}
@@ -1008,34 +1008,34 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
 
         // Generate the velocities procedurally
         velMin = internalBlast / pObject->GetMass();
-        velRange = 10.0f;
+        velRange = 10.0F;
 
         // Randomize the offset from center to be within the original object
-        gibROffset.SetXY(m_MaxRadius * 0.35 * NormalRand(), m_MaxRadius * 0.35 * NormalRand());
+        gibROffset.SetXY(m_MaxRadius * 0.35F * NormalRand(), m_MaxRadius * 0.35F * NormalRand());
         // Set up its position and velocity according to the parameters of this AEmitter.
         pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
         pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
         // Rotational angle
-        pObject->SetAngularVel((pObject->GetAngularVel() * 0.35) + (pObject->GetAngularVel() * 0.65 / pObject->GetMass()) * PosRand());
+        pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / pObject->GetMass()) * PosRand());
         // Make it rotate away in the appropriate direction depending on which side of the object it is on
         // If the object is far to the relft or right of the center, make it always rotate outwards to some degree
         if (gibROffset.m_X > m_aSprite[0]->w / 3)
         {
             float offCenterRatio = gibROffset.m_X / (m_aSprite[0]->w / 2);
-            angularVel = fabs(pObject->GetAngularVel() * 0.5);
-            angularVel += fabs(pObject->GetAngularVel() * 0.5 * offCenterRatio);
+            angularVel = fabs(pObject->GetAngularVel() * 0.5F);
+            angularVel += fabs(pObject->GetAngularVel() * 0.5F * offCenterRatio);
             pObject->SetAngularVel(angularVel * (gibROffset.m_X > 0 ? -1 : 1));
         }
         // Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
         else
         {
-            pObject->SetAngularVel((pObject->GetAngularVel() * 0.5 + pObject->GetAngularVel() * PosRand()) * (NormalRand() > 0 ? 1 : -1));
+            pObject->SetAngularVel((pObject->GetAngularVel() * 0.5F + pObject->GetAngularVel() * PosRand()) * (NormalRand() > 0.0F ? 1.0F : -1.0F));
         }
 
 // TODO: Optimize making the random angles!")
         gibVel = gibROffset;
         if (gibVel.IsZero())
-            gibVel.SetXY(velMin + velRange * PosRand(), 0);
+            gibVel.SetXY(velMin + velRange * PosRand(), 0.0F);
         else
             gibVel.SetMagnitude(velMin + velRange * PosRand());
         gibVel.RadRotate(impactImpulse.GetAbsRadAngle());
@@ -1055,8 +1055,8 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
         if (pPassenger = dynamic_cast<Actor *>(pObject))
         {
             pPassenger->SetRotAngle(c_HalfPI * NormalRand());
-            pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5);
-            pPassenger->SetHFlipped(PosRand() > 0.5);
+            pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5.0F);
+            pPassenger->SetHFlipped(PosRand() > 0.5F);
             pPassenger->SetStatus(UNSTABLE);
             g_MovableMan.AddActor(pPassenger);
         }
@@ -1385,7 +1385,7 @@ int Actor::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = RangeRand(0, bodyParts.size() - 1);
+		int partIndex = SelectRand(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}
@@ -1561,7 +1561,7 @@ void Actor::Update()
             MOPixel *pixelMO = new MOPixel(AuMat->GetColor(),
                                            AuMat->GetPixelDensity(),
                                            Vector(m_Pos.m_X, m_Pos.m_Y - 10),
-                                           Vector(4 * NormalRand(), RangeRand(-5, -7)),
+                                           Vector(4.0F * NormalRand(), RangeRand(-5.0F, -7.0F)),
                                            new Atom(Vector(), AuMat->GetIndex(), 0, AuMat->GetColor(), 2),
                                            0);
 

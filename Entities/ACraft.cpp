@@ -732,7 +732,7 @@ void ACraft::DropAllInventory()
             else
             {
                 (*exitee)->SetVel(m_Vel + exitVel * antiGravBoost);
-                (*exitee)->SetAngularVel(5 * NormalRand());
+                (*exitee)->SetAngularVel(5.0F * NormalRand());
                 // Avoid it having immediate collisions with this
                 (*exitee)->SetWhichMOToNotHit(this, 0.5f);
                 // Avoid this immediate collisions with it

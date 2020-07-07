@@ -156,7 +156,7 @@ enum
     // Arguments:       None.
     // Return value:    The velocity vector for anything exiting through this.
 
-        virtual Vector GetVelocity() const { return m_Velocity * (1.0 + m_VelSpread * NormalRand()); }
+        virtual Vector GetVelocity() const { return m_Velocity * (1.0F + m_VelSpread * NormalRand()); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////

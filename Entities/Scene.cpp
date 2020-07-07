@@ -402,7 +402,7 @@ Vector Scene::Area::GetRandomPoint() const
         return Vector();
 
     // Randomly choose a box, and a point within it
-    return m_BoxList[floor(RangeRand(0, m_BoxList.size()))].GetRandomPoint();
+	return m_BoxList[SelectRand(0, m_BoxList.size() - 1)].GetRandomPoint();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

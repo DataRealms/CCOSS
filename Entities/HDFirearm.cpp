@@ -617,7 +617,7 @@ void HDFirearm::Reload()
         if (m_pMagazine)
         {
             m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
-			m_pMagazine->SetAngularVel(6.0F + (-FRandom(0.0F, 6.0F)));
+			m_pMagazine->SetAngularVel(6.0F + (-FloatRand(0.0F, 6.0F)));
             m_pMagazine->Detach();
             // Whether the magazine is ok to release into scene
             if (m_pMagazine->IsDiscardable())
@@ -980,7 +980,7 @@ void HDFirearm::Update()
             m_pFlash->SetHFlipped(m_HFlipped);
             m_pFlash->SetJointPos(m_Pos + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation));
             m_pFlash->SetRotAngle(m_Rotation.GetRadAngle());
-			m_pFlash->SetFrame(IRandom(0, m_pFlash->GetFrameCount() - 1));
+			m_pFlash->SetFrame(IntRand(0, m_pFlash->GetFrameCount() - 1));
             m_pFlash->Update();
         }
 
@@ -1132,7 +1132,7 @@ void HDFirearm::Draw(BITMAP *pTargetBitmap,
     muzzlePos = m_Pos + RotateOffset(muzzlePos);
     // Set the screen flash effect to draw at the final post processing stage
     if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical && !g_SceneMan.ObscuredPoint(muzzlePos))
-		g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55.0F + FRandom(0.0F,200.0F), m_pFlash->GetEffectRotAngle());
+		g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55.0F + FloatRand(0.0F,200.0F), m_pFlash->GetEffectRotAngle());
 }
 
 
@@ -1184,7 +1184,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
         aimPoint4 += m_Pos;
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-		int glow = static_cast<int>(155.0F + IRandom(0, 100));
+		int glow = static_cast<int>(155.0F + IntRand(0, 100));
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint1, YellowDot, glow);
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
@@ -1223,7 +1223,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
         aimPoint3 += m_Pos;
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-        int glow = (55 + IRandom(0, 100));
+        int glow = (55 + IntRand(0, 100));
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
 

@@ -1061,8 +1061,8 @@ int SceneMan::RemoveOrphans(int posX, int posY,
             MOPixel *pixelMO = new MOPixel(spawnColor,
                                            spawnMat->GetPixelDensity(),
                                            Vector(posX, posY),
-                                           Vector(-FRandom(tempMin, tempMax),
-                                                  -FRandom(tempMin, tempMax)),
+                                           Vector(-FloatRand(tempMin, tempMax),
+                                                  -FloatRand(tempMin, tempMax)),
                                            new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2),
                                            0);
 
@@ -1254,8 +1254,8 @@ bool SceneMan::TryPenetrate(const int posX,
                 pixelMO->Create(spawnColor,
                                 spawnMat.pixelDensity,
                                 Vector(posX, posY),
-                                Vector(-FRandom((velocity.m_X * sprayScale) / 2 , velocity.m_X * sprayScale),
-                                       -FRandom((velocity.m_Y * sprayScale) / 2 , velocity.m_Y * sprayScale)),
+                                Vector(-FloatRand((velocity.m_X * sprayScale) / 2 , velocity.m_X * sprayScale),
+                                       -FloatRand((velocity.m_Y * sprayScale) / 2 , velocity.m_Y * sprayScale)),
 //                                               -(impulse * (sprayScale * PosRand() / spawnMat.density)),
                                 new Atom(Vector(), spawnMat, 0, spawnColor, 2),
                                 0);
@@ -1270,8 +1270,8 @@ bool SceneMan::TryPenetrate(const int posX,
                 MOPixel *pixelMO = new MOPixel(spawnColor,
                                                spawnMat->GetPixelDensity(),
                                                Vector(posX, posY),
-                                               Vector(-FRandom(tempMin, tempMax),
-                                                      -FRandom(tempMin, tempMax)),
+                                               Vector(-FloatRand(tempMin, tempMax),
+                                                      -FloatRand(tempMin, tempMax)),
 //                                              -(impulse * (sprayScale * PosRand() / spawnMat.density)),
                                                new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2),
                                                0);
@@ -1339,7 +1339,7 @@ bool SceneMan::TryPenetrate(const int posX,
                             if (spawnColor.GetIndex() != g_MaskColor)
                             {
                                 // Figure out the randomized velocity the spray should have upward
-								sprayVel.SetXY(sprayMag* NormalRand() * 0.5F, (-sprayMag * 0.5F) + (-sprayMag * FRandom(0.0F, 0.5F)));
+								sprayVel.SetXY(sprayMag* NormalRand() * 0.5F, (-sprayMag * 0.5F) + (-sprayMag * FloatRand(0.0F, 0.5F)));
 
                                 // Create the new spray pixel
 								pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(posX, testY), sprayVel, new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2), 0);

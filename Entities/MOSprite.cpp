@@ -485,7 +485,7 @@ void MOSprite::Update() {
 			    break;
 		    case ALWAYSRANDOM:
 			    while (m_Frame == prevFrame) {
-					m_Frame = IRandom(0, m_FrameCount - 1);
+					m_Frame = IntRand(0, m_FrameCount - 1);
 					RTEAssert(m_Frame < m_FrameCount, "Tried to select out of bounds frame during AlwaysRandom animation mode for "+ GetClassName()+": "+ GetPresetName() + ".");
 			    }
                 m_SpriteAnimTimer.Reset();

@@ -31,6 +31,7 @@
 #include <cassert>
 #include <limits>
 #include <random>
+#include <array>
 // TODO: don't forget to replace with <filesystem> when eventually enable ++17 standard.
 #include <experimental/filesystem>
 
@@ -43,6 +44,7 @@ using std::map;
 using std::set;
 using std::vector;
 using std::ios_base;
+using std::array;
 using std::make_pair;
 using std::min;
 using std::max;

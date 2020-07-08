@@ -46,7 +46,14 @@ namespace RTE {
 	/// mt19937 is the standard mersenne_twister_engine.
 	/// </summary>
 	/// <param name="seed">Seed for the random number generator.</param>
-	void SeedRNG(unsigned int seed);
+	void SeedRNG(unsigned int seed = 0);
+
+	/// <summary>
+	/// Generate a pre-seed for the mt19937 random number generator.
+	/// The pre-seed is used in SeedRNG with seed = 0 to create a good seed sequence for the RNG.
+	/// </summary>
+	/// <returns>A pre-seed for the mt19937 random number generator.</returns>
+	std::array<int, 624> GeneratePreSeed();
 
 	/// <summary>
 	/// Uniformly distributed random double in the range [min, max].
@@ -55,7 +62,7 @@ namespace RTE {
 	/// <param name="min">Lower boundary of the range to pick a number from.</param>
 	/// <param name="max">Upper boundary of the range to pick a number from.</param>
 	/// <returns>Uniformly distributed random double in the range [min, max].</returns>
-	double DRandom(double min, double max);
+	double DoubleRand(double min, double max);
 
 	/// <summary>
 	/// Uniformly distributed random float in the range [0, 1].
@@ -76,7 +83,7 @@ namespace RTE {
 	/// <param name="min">Lower boundary of the range to pick a number from.</param>
 	/// <param name="max">Upper boundary of the range to pick a number from.</param>
 	/// <returns>Uniformly distributed random float in the range [min, max].</returns>
-	float FRandom(float min, float max);
+	float FloatRand(float min, float max);
 
 	/// <summary>
 	/// Uniformly distributed random int in the range [min, max].
@@ -85,7 +92,7 @@ namespace RTE {
 	/// <param name="min">Lower boundary of the range to pick a number from.</param>
 	/// <param name="max">Upper boundary of the range to pick a number from.</param>
 	/// <returns>Uniformly distributed random int in the range [min, max].</returns>
-	int IRandom(int min, int max);
+	int IntRand(int min, int max);
 #pragma endregion
 
 #pragma region Interpolation

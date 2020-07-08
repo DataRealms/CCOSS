@@ -22,13 +22,30 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SeedRNG(unsigned int seed) {
-		RTETools_RNG = std::mt19937(seed);
+		if (seed == 0) {
+			std::array<int, 624> seedData = GeneratePreSeed();
+			std::seed_seq sequence(std::begin(seedData), std::end(seedData));
+			RTETools_RNG.seed(sequence);
+		} else {
+			RTETools_RNG.seed(seed);
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	double DRandom(double min, double max) {
-		RTEAssert(max >= min, "min is greater than max in DRandom().");
+	std::array<int, 624> GeneratePreSeed()
+	{
+		std::array<int, 624> seedData;
+		std::random_device randomDevice;
+		std::generate_n(seedData.data(), seedData.size(), std::ref(randomDevice));
+		return seedData;
+
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	double DoubleRand(double min, double max) {
+		RTEAssert(max >= min, "min is greater than max in DoubleRand().");
 		return (std::uniform_real_distribution<double>(0.0, std::nextafter(max - min, std::numeric_limits<double>::max()))(RTETools_RNG) + min);
 	}
 
@@ -42,15 +59,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float FRandom(float min, float max) {
-		RTEAssert(max>=min, "min is greater than max in FRandom().");
+	float FloatRand(float min, float max) {
+		RTEAssert(max>=min, "min is greater than max in FloatRand().");
 		return (std::uniform_real_distribution<float>(0.0F, std::nextafter(max - min, std::numeric_limits<float>::max()))(RTETools_RNG) + min);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int IRandom(int min, int max) {
-		RTEAssert(max >= min, "min is greater than max in IRandom().");
+	int IntRand(int min, int max) {
+		RTEAssert(max >= min, "min is greater than max in IntRand().");
 		return (std::uniform_int_distribution<int>(0, max - min)(RTETools_RNG) + min);
 	}
 

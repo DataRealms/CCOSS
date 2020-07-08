@@ -232,8 +232,8 @@ void Arm::SetHeldMO(MovableObject *newHeldMO)
         HeldDevice *pHeldDev = dynamic_cast<HeldDevice *>(m_pHeldMO);
         pHeldDev->Detach();
 // TODO: Refine throwing force to dropped device here?")
-		pHeldDev->SetVel(Vector(FRandom(0.0F, 10.0F), -FRandom(0.0F, 15.0F)));
-		pHeldDev->SetAngularVel(-FRandom(0.0F, 10.0F));
+		pHeldDev->SetVel(Vector(FloatRand(0.0F, 10.0F), -FloatRand(0.0F, 15.0F)));
+		pHeldDev->SetAngularVel(-FloatRand(0.0F, 10.0F));
         g_MovableMan.AddItem(pHeldDev);
         m_pHeldMO = pHeldDev = 0;
     }
@@ -427,7 +427,7 @@ void Arm::Update()
     if (!m_pParent) {
         // When arm is detached, let go of whatever it is holding 
         if (m_pHeldMO) {
-			m_pHeldMO->SetVel(m_Vel + Vector(-FRandom(0.0F, 10.0F), -FRandom(0.0F, 15.0F)));
+			m_pHeldMO->SetVel(m_Vel + Vector(-FloatRand(0.0F, 10.0F), -FloatRand(0.0F, 15.0F)));
             m_pHeldMO->SetAngularVel(-7);
             if (m_pHeldMO->IsDevice())
                 dynamic_cast<Attachable *>(m_pHeldMO)->Detach();

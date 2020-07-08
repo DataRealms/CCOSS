@@ -423,7 +423,7 @@ std::vector<Deployment *> BunkerAssembly::GetDeployments()
 		if (candidatesList.size() == 0 )
 			break;
 
-		int selection = IRandom(0, candidatesList.size() - 1);
+		int selection = IntRand(0, candidatesList.size() - 1);
 		deploymentsList.push_back(candidatesList.at(selection));
 		candidatesList.erase(candidatesList.begin() + selection);
 	}

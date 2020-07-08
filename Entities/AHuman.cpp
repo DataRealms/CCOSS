@@ -3097,7 +3097,7 @@ void AHuman::Update()
 
 		if (PosRand() > 0.8F)
 		{
-			int hat = IRandom(1, 20);
+			int hat = IntRand(1, 20);
 
             std::stringstream hatName;
             hatName << "Random Hat " << hat;
@@ -4463,7 +4463,7 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
             points[i] += m_pFGArm->GetParentOffset();
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, 55.0F + FRandom(0.0F, 100.0F));
+		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, 55.0F + FloatRand(0.0F, 100.0F));
 
         putpixel(pTargetBitmap, points[i].m_X - targetPos.m_X, points[i].m_Y - targetPos.m_Y, g_YellowGlowColor);
     }
@@ -4505,7 +4505,7 @@ int AHuman::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = IRandom(0, bodyParts.size() - 1);
+		int partIndex = IntRand(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}

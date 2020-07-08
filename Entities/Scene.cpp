@@ -402,7 +402,7 @@ Vector Scene::Area::GetRandomPoint() const
         return Vector();
 
     // Randomly choose a box, and a point within it
-	return m_BoxList[IRandom(0, m_BoxList.size() - 1)].GetRandomPoint();
+	return m_BoxList[IntRand(0, m_BoxList.size() - 1)].GetRandomPoint();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -871,7 +871,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 					team = 0;
 				if (brainLocations[team].size() > 0)
 				{
-					int selection = IRandom(0, brainLocations[team].size() - 1);
+					int selection = IntRand(0, brainLocations[team].size() - 1);
 					pBrains[t]->SetPos(brainLocations[team].at(selection));
 				}
 			}

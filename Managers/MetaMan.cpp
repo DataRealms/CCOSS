@@ -128,7 +128,7 @@ int MetaMan::NewGame(float gameSize)
 			}
 		}
 		// Finally select some random metascene
-		int selection = IRandom(0, metascenesList.size() - 1);
+		int selection = IntRand(0, metascenesList.size() - 1);
 		Scene * pSelectedScene = metascenesList.at(selection);
 
 		//Copy selected scene
@@ -1062,7 +1062,7 @@ int MetaMan::SelectScenePresets(float gameSize, int playerCount, list<Scene *> *
         {
             // Randomly select one of the scenes and remove it
             currentIndex = 0;
-			randomIndex = IRandom(0, scenePresets.size() - 1);
+			randomIndex = IntRand(0, scenePresets.size() - 1);
             for (list<Scene *>::iterator pItr = scenePresets.begin(); pItr != scenePresets.end(); ++pItr)
             {
                 if (currentIndex == randomIndex)
@@ -1206,10 +1206,10 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
 		{
 			// And the target scene, randomly selected for now from all unfriendly targets
 			int unfriendlySceneCount = enemyScenes.size() + unclaimedScenes.size();
-			int targetIndex = IRandom(0, unfriendlySceneCount - 1);
+			int targetIndex = IntRand(0, unfriendlySceneCount - 1);
 			// Give it a strong preference for unclaimed scenes! They make more strategic sense than to attack a hardened target
 			if (!unclaimedScenes.empty() && targetIndex >= unclaimedScenes.size())
-				targetIndex = PosRand() < 0.75F ? IRandom(0, unclaimedScenes.size() - 1) : targetIndex;
+				targetIndex = PosRand() < 0.75F ? IntRand(0, unclaimedScenes.size() - 1) : targetIndex;
 			// From index to actual Scene and selection
 			Scene *selectedTarget = targetIndex < unclaimedScenes.size() ? unclaimedScenes[targetIndex] : enemyScenes[targetIndex - unclaimedScenes.size()];
 			if (selectedTarget)

@@ -1,6 +1,6 @@
 #include "Vector.h"
 
-#pragma intrinsic (sin, cos)
+#pragma intrinsic (sin, cos, atan2)
 #pragma float_control(precise, on)
 
 namespace RTE {
@@ -53,32 +53,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float Vector::GetAbsRadAngle() const {
-		if (m_X == 0) {
-			return (m_Y > 0) ? -c_HalfPI : ((m_Y < 0) ? c_HalfPI : 0);
-		}
-		if (m_Y == 0) {
-			return (m_X > 0) ? 0 : ((m_X < 0) ? c_PI : 0);
-		}
-		// TODO: Confirm that this is correct!")
-		float rawAngle = -std::atan(m_Y / m_X);
-		if (m_X < 0) { rawAngle += c_PI; }
-
-		return rawAngle;
+		float radAngle = -std::atan2(m_Y,m_X);
+		return (radAngle < -c_HalfPI) ? (radAngle + c_TwoPI) : radAngle;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float Vector::GetAbsDegAngle() const {
-		if (m_X == 0) {
-			return (m_Y > 0) ? -90 : ((m_Y < 0) ? 90 : 0);
-		}
-		if (m_Y == 0) {
-			return (m_X > 0) ? 0 : ((m_X < 0) ? 180 : 0);
-		}
-		float rawAngle = -(std::atan(m_Y / m_X) / c_PI) * 180;
-		if (m_X < 0) { rawAngle += 180; }
-
-		return rawAngle;
+		return GetAbsRadAngle() / c_PI * 180.0F;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,43 +78,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector & Vector::DegRotate(float angle) {
-		angle = -angle;
-
-		// Convert to radians.
-		angle /= 180;
-		angle *= c_PI;
-
-		float tempX = m_X * std::cos(angle) - m_Y * std::sin(angle);
-		float tempY = m_X * std::sin(angle) + m_Y * std::cos(angle);
-		m_X = tempX;
-		m_Y = tempY;
-
-		return *this;
+		return RadRotate(angle * c_PI / 180.0F);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector & Vector::AbsRotateTo(const Vector &refVector) {
-		float rawAngle;
-		if (refVector.m_X == 0) {
-			rawAngle = (refVector.m_Y > 0) ? -c_HalfPI : ((refVector.m_Y < 0) ? c_HalfPI : 0);
-		} else if (refVector.m_Y == 0) {
-			rawAngle = (refVector.m_X > 0) ? 0 : ((refVector.m_X < 0) ? c_PI : 0);
-		} else {
-			rawAngle = -std::atan(refVector.m_Y / refVector.m_X);
-			if (refVector.m_X < 0) { rawAngle += c_PI; }
-		}
-		rawAngle = -rawAngle;
-
-		m_X = GetMagnitude();
-		m_Y = 0.0;
-
-		float tempX = m_X * std::cos(rawAngle) - m_Y * std::sin(rawAngle);
-		float tempY = m_X * std::sin(rawAngle) + m_Y * std::cos(rawAngle);
-		m_X = tempX;
-		m_Y = tempY;
-
-		return *this;
+		return RadRotate(refVector.GetAbsRadAngle() - GetAbsRadAngle());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

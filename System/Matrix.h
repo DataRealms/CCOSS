@@ -14,10 +14,9 @@ namespace RTE {
 	public:
 
 		SerializableOverrideMethods
-
-		float m_Rotation; //!< The angle represented, in radians.
-		bool m_Flipped[2]; //!< Whether or not this Matrix also mirrors the X axis of its invoked Vectors.
-		float m_Elements[2][2]; //!< The elements of the matrix, which represent the angle.
+		float m_Rotation; //!< The angle, represented in radians. Pi/2 points up.
+		bool m_Flipped[2]; //!< Whether or not this Matrix also mirrors the respective axes of its invoked Vectors.
+		float m_Elements[2][2]; //!< The elements of the matrix, which represent the negative of the angle. Allows matrix\vector multiplications while considering upside-down coordinate system.
 		bool m_ElementsUpdated; //!< Whether the elements are currently updated to the set angle.
 
 #pragma region Creation
@@ -107,13 +106,13 @@ namespace RTE {
 		/// Returns the angle this rotational Matrix is currently representing.
 		/// </summary>
 		/// <returns>A float with the represented angle in degrees.</returns>
-		float GetDegAngle() const { return (m_Rotation / c_PI) * 180; }
+		float GetDegAngle() const { return (m_Rotation / c_PI) * 180.0F; }
 
 		/// <summary>
 		/// Sets the angle that this rotational Matrix should represent.
 		/// </summary>
 		/// <param name="newAngle">A float with the new angle, in degrees.</param>
-		void SetDegAngle(float newAngle) { m_Rotation = (newAngle / 180) * c_PI; m_ElementsUpdated = false; }
+		void SetDegAngle(float newAngle) { m_Rotation = (newAngle / 180.0F) * c_PI; m_ElementsUpdated = false; }
 
 		/// <summary>
 		/// Returns the angle difference between what this is currently representing, to another angle in radians.
@@ -135,7 +134,7 @@ namespace RTE {
 		/// Returns the angle this rotational Matrix is currently representing.
 		/// </summary>
 		/// <returns>A float with the represented angle as full rotations being 256.</returns>
-		float GetAllegroAngle() const { return (m_Rotation / c_PI) * -128; }
+		float GetAllegroAngle() const { return (m_Rotation / c_PI) * -128.0F; }
 #pragma endregion
 
 #pragma region Operator Overloads
@@ -246,6 +245,7 @@ namespace RTE {
 
 		/// <summary>
 		/// Multiplication operator overload for a Matrix and a Vector. The vector will be transformed according to the Matrix's elements.
+		/// Flipping, if set, is performed before rotating.
 		/// </summary>
 		/// <param name="rhs">A Vector reference as the right hand side operand.</param>
 		/// <returns>The resulting transformed Vector.</returns>

@@ -1055,9 +1055,6 @@ int SceneMan::RemoveOrphans(int posX, int posY,
             // Density is used as the mass for the new MOPixel
 			float tempMax = 2.0F * sprayScale;
 			float tempMin = tempMax / 2.0F;
-			if (tempMax<0) {
-				std::swap(tempMin, tempMax);
-			}
             MOPixel *pixelMO = new MOPixel(spawnColor,
                                            spawnMat->GetPixelDensity(),
                                            Vector(posX, posY),

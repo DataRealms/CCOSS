@@ -45,7 +45,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	double DoubleRand(double min, double max) {
-		RTEAssert(max >= min, "min is greater than max in DoubleRand().");
+		if (max < min) {
+			std::swap(min, max);
+		}
 		return (std::uniform_real_distribution<double>(0.0, std::nextafter(max - min, std::numeric_limits<double>::max()))(RTETools_RNG) + min);
 	}
 
@@ -60,14 +62,18 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float FloatRand(float min, float max) {
-		RTEAssert(max>=min, "min is greater than max in FloatRand().");
+		if (max < min) {
+			std::swap(min, max);
+		}
 		return (std::uniform_real_distribution<float>(0.0F, std::nextafter(max - min, std::numeric_limits<float>::max()))(RTETools_RNG) + min);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int IntRand(int min, int max) {
-		RTEAssert(max >= min, "min is greater than max in IntRand().");
+		if (max < min) {
+			std::swap(min, max);
+		}
 		return (std::uniform_int_distribution<int>(0, max - min)(RTETools_RNG) + min);
 	}
 

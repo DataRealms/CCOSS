@@ -16,7 +16,7 @@ namespace RTE {
 		SerializableOverrideMethods
 		float m_Rotation; //!< The angle, represented in radians. Pi/2 points up.
 		bool m_Flipped[2]; //!< Whether or not this Matrix also mirrors the respective axes of its invoked Vectors.
-		float m_Elements[2][2]; //!< The elements of the matrix, which represent the negative of the angle. Allows matrix\vector multiplications while considering upside-down coordinate system.
+		float m_Elements[2][2]; //!< The elements of the matrix, which represent the negative of the angle. Allows matrix/vector multiplications while considering upside-down coordinate system.
 		bool m_ElementsUpdated; //!< Whether the elements are currently updated to the set angle.
 
 #pragma region Creation

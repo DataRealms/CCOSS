@@ -335,7 +335,7 @@ MovableObject * Arm::SwapHeldMO(MovableObject *newMO)
 
 void Arm::Reach(const Vector &scenePoint)
 {
-    m_TargetPoint = scenePoint.GetFloored();
+    m_TargetPoint = scenePoint;
     m_WillIdle = true;
 /*
     if (m_HFlipped) {
@@ -454,7 +454,7 @@ void Arm::Update()
 //            handTarget.RadRotate(m_pParent->GetRotMatrix());
 
             // Predict where the new muzzle position will be if we don't try to clear the muzzle of terrain
-            Vector newMuzzlePos = (m_JointPos.GetFloored() + handTarget) - RotateOffset(pHeldDev->GetJointOffset()) + RotateOffset(pHeldDev->GetMuzzleOffset());
+            Vector newMuzzlePos = (m_JointPos + handTarget) - RotateOffset(pHeldDev->GetJointOffset()) + RotateOffset(pHeldDev->GetMuzzleOffset());
             // Adjust the hand offset back if necessary so that the weapon's muzzle doesn't poke into terrain
             Vector midToMuzzle(pHeldDev->GetRadius(), 0);
             midToMuzzle = RotateOffset(midToMuzzle);
@@ -478,7 +478,7 @@ void Arm::Update()
             ConstrainHand();
 
             float handAngle = m_HandOffset.GetAbsRadAngle();
-            pHeldDev->SetJointPos(m_JointPos.GetFloored() + m_HandOffset);
+            pHeldDev->SetJointPos(m_JointPos + m_HandOffset);
             pHeldDev->SetRotAngle(m_Rotation.GetRadAngle());
             pHeldDev->Update();
             if (pHeldDev->IsRecoiled())
@@ -490,9 +490,9 @@ void Arm::Update()
 
             // Redo the positioning of the arm now since the rotation has changed and RotateOffset will return different results
             if (!m_JointPos.IsZero())
-                m_Pos = m_JointPos.GetFloored() - RotateOffset(m_JointOffset);
+                m_Pos = m_JointPos - RotateOffset(m_JointOffset);
             else
-                m_Pos = m_pParent->GetPos().GetFloored() - RotateOffset(m_JointOffset);
+                m_Pos = m_pParent->GetPos() - RotateOffset(m_JointOffset);
 
             // Apply forces and detach if necessary
             // OBSERVE the memeber pointer is what gets set to 0!$@#$@
@@ -537,18 +537,18 @@ void Arm::Update()
 
             // Redo the positioning of the arm now since the rotation has changed and RotateOffset will return different results
             if (!m_JointPos.IsZero())
-                m_Pos = m_JointPos.GetFloored() - RotateOffset(m_JointOffset);
+                m_Pos = m_JointPos - RotateOffset(m_JointOffset);
             else
-                m_Pos = m_pParent->GetPos().GetFloored() - RotateOffset(m_JointOffset);
+                m_Pos = m_pParent->GetPos() - RotateOffset(m_JointOffset);
 
             // If holding something other than a FireArm, then update it
             if (m_pHeldMO)
             {
                 Attachable *pHeldDev = dynamic_cast<Attachable *>(m_pHeldMO);
                 if (pHeldDev)
-                    pHeldDev->SetJointPos(m_JointPos.GetFloored() + m_HandOffset);
+                    pHeldDev->SetJointPos(m_JointPos + m_HandOffset);
                 else
-                    m_pHeldMO->SetPos(m_JointPos.GetFloored() + m_HandOffset);
+                    m_pHeldMO->SetPos(m_JointPos + m_HandOffset);
                 m_pHeldMO->SetHFlipped(m_HFlipped);
                 m_pHeldMO->SetRotAngle(m_Rotation.GetRadAngle());
                 m_pHeldMO->Update();
@@ -648,16 +648,17 @@ void Arm::DrawHand(BITMAP *pTargetBitmap,
                    DrawMode mode) const
 {
 
-    Vector handPos(m_JointPos.GetFloored() +
+    Vector handPos(m_JointPos +
                    m_HandOffset +
                    (m_Recoiled ? m_RecoilOffset : Vector()) -
                    targetPos);
     handPos.m_X -= (m_pHand->w / 2) + 1;
     handPos.m_Y -= (m_pHand->h / 2) + 1;
+
     if (!m_HFlipped)
-        draw_sprite(pTargetBitmap, m_pHand, handPos.m_X, handPos.m_Y);
+        draw_sprite(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY());
     else
-        draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.m_X, handPos.m_Y);
+        draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY());
 }
 
 } // namespace RTE

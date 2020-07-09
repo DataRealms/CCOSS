@@ -482,7 +482,7 @@ protected:
     float m_MoveSpeed;
     // Wether this Arm will go to idle position if it didn't reach or not.
     bool m_WillIdle;
-    // Wether this Arm reaached the reach target last Update.
+    // Whether this Arm reached the reach target last Update.
     bool m_DidReach;
 
 

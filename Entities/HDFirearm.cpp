@@ -617,7 +617,7 @@ void HDFirearm::Reload()
         if (m_pMagazine)
         {
             m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
-			m_pMagazine->SetAngularVel(6.0F + (-FloatRand(0.0F, 6.0F)));
+			m_pMagazine->SetAngularVel(6.0F + (-RandomNum(0.0F, 6.0F)));
             m_pMagazine->Detach();
             // Whether the magazine is ok to release into scene
             if (m_pMagazine->IsDiscardable())
@@ -800,7 +800,7 @@ void HDFirearm::Update()
                     pParticle = pRound->PopNextParticle();
 
                     // Only make the particles separate back behind the nozzle, not in front. THis is to avoid silly penetration firings
-					particlePos = tempNozzle + (roundVel.GetNormalized() * (-PosRand()) * pRound->GetSeparation());
+					particlePos = tempNozzle + (roundVel.GetNormalized() * (-RandomNum()) * pRound->GetSeparation());
                     pParticle->SetPos(m_Pos + particlePos);
 
                     particleVel = roundVel;
@@ -886,7 +886,7 @@ void HDFirearm::Update()
         if (roundsFired <= 0 && m_pMagazine->IsEmpty())
         {
             m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
-            m_pMagazine->SetAngularVel(6 + (-6 * PosRand()));
+            m_pMagazine->SetAngularVel(6 + (-6 * RandomNum()));
             m_pMagazine->Detach();
             g_MovableMan.AddParticle(m_pMagazine);
             m_pMagazine = 0;
@@ -1132,7 +1132,7 @@ void HDFirearm::Draw(BITMAP *pTargetBitmap,
     muzzlePos = m_Pos + RotateOffset(muzzlePos);
     // Set the screen flash effect to draw at the final post processing stage
     if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical && !g_SceneMan.ObscuredPoint(muzzlePos))
-		g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55.0F + FloatRand(0.0F,200.0F), m_pFlash->GetEffectRotAngle());
+		g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55.0F + RandomNum(0.0F,200.0F), m_pFlash->GetEffectRotAngle());
 }
 
 

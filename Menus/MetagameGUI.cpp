@@ -3123,7 +3123,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
                 // Also declare winner of the activity
                 pOffensive->SetWinnerTeam(pOffensive->GetTeamOfPlayer(activePlayer));
                 // Just mess with the funds; the metaplayers' funds will be affected afterward, according to their shares etc
-//                pOffensive->SetTeamFunds(pOffensive->GetTeamFunds(pOffensive->GetTeamOfPlayer(activePlayer)) * PosRand(), pOffensive->GetTeamOfPlayer(activePlayer));
+//                pOffensive->SetTeamFunds(pOffensive->GetTeamFunds(pOffensive->GetTeamOfPlayer(activePlayer)) * RandomNum(), pOffensive->GetTeamOfPlayer(activePlayer));
                 // For now, just deduct the price of the brain
                 pOffensive->ChangeTeamFunds(-cost, pOffensive->GetTeamOfPlayer(activePlayer));
                 // Signal that ownership of the site has changed
@@ -3135,7 +3135,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
     else
     {
         // First see if NO TEAM will get this - could be all brains die
-        if (PosRand() < 0.05F)
+        if (RandomNum() < 0.05F)
         {
             // See if we should signal change of ownership
             if (pScene->GetTeamOwnership() != Activity::NOTEAM)
@@ -3197,7 +3197,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
                     aTeamChance[team] = aTeamChance[team] / totalPoints;
             }
             // The deciding normalized scalar number
-            float decision = PosRand();
+            float decision = RandomNum();
             // Keeps track of the thresholds
             float teamChanceTally = 0;
             int winnerTeam = Activity::NOTEAM;
@@ -3275,7 +3275,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             {
                 // LOSER.. but evacuated successfully?
                 if (pOffensive->PlayerActive(player) && pOffensive->PlayerHadBrain(player) && aMetaPlayers[player] && aMetaPlayers[player]->GetTeam() != winnerTeam)
-                    pOffensive->SetBrainEvacuated(player, PosRand() < 0.25F);
+                    pOffensive->SetBrainEvacuated(player, RandomNum() < 0.25F);
             }
         }
 
@@ -3287,7 +3287,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             {
                 // Just mess with the funds; the metaplayers' funds will be affected afterward, according to their shares
                 // Never let team funds dip below 0
-                pOffensive->SetTeamFunds(MAX(0, pOffensive->GetTeamFunds(team) * PosRand()), team);
+                pOffensive->SetTeamFunds(MAX(0, pOffensive->GetTeamFunds(team) * RandomNum()), team);
             }
         }
     }
@@ -4830,7 +4830,7 @@ void MetagameGUI::UpdateOffensives()
                     !g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->BrainWasEvacuated(g_MetaMan.m_Players[mp].GetInGamePlayer()))
                 {
                     // If not yet blown up, then see if we should yet
-                    if (!m_aAnimDestroyed[mp] && m_AnimTimer2.GetElapsedRealTimeMS() > (m_AnimModeDuration * 0.5F) && PosRand() < 0.05F)
+                    if (!m_aAnimDestroyed[mp] && m_AnimTimer2.GetElapsedRealTimeMS() > (m_AnimModeDuration * 0.5F) && RandomNum() < 0.05F)
                     {
                         // Add circle explosion effect to where the brain icon used to be
                         m_SiteSwitchIndicators.push_back(SiteTarget(m_aBrainIconPos[mp], 0, SiteTarget::CIRCLEGROW, c_GUIColorRed));

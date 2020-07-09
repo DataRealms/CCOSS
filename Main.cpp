@@ -434,22 +434,22 @@ bool PlayIntroTitle() {
     StarSize size;
 
     for (int star = 0; star < starCount; ++star) {
-        if (PosRand() < 0.95F) {
+        if (RandomNum() < 0.95F) {
             aStars[star].m_Size = StarSmall;
             aStars[star].m_pBitmap = apStarSmallBitmaps[IntRand(0, starSmallBitmapCount - 1)];
-            aStars[star].m_Intensity = FloatRand(0.001F, 0.5F);
+            aStars[star].m_Intensity = RandomNum(0.001F, 0.5F);
         }
-        else if (PosRand() < 0.85F) {
+        else if (RandomNum() < 0.85F) {
             aStars[star].m_Size = StarLarge;
             aStars[star].m_pBitmap = apStarLargeBitmaps[IntRand(0, starLargeBitmapCount - 1)];
-            aStars[star].m_Intensity = FloatRand(0.6F, 1.0F);
+            aStars[star].m_Intensity = RandomNum(0.6F, 1.0F);
         }
         else {
             aStars[star].m_Size = StarHuge;
             aStars[star].m_pBitmap = apStarHugeBitmaps[IntRand(0, starLargeBitmapCount - 1)];
-            aStars[star].m_Intensity = FloatRand(0.9F, 1.0F);
+            aStars[star].m_Intensity = RandomNum(0.9F, 1.0F);
         }
-        aStars[star].m_Pos.SetXY(resX * PosRand(), pBackdrop->GetBitmap()->h * PosRand());//resY * PosRand());
+        aStars[star].m_Pos.SetXY(resX * RandomNum(), pBackdrop->GetBitmap()->h * RandomNum());//resY * RandomNum());
         aStars[star].m_Pos.Floor();
         // To match the nebula scroll
         aStars[star].m_ScrollRatio = backdropScrollRatio;
@@ -610,7 +610,7 @@ bool PlayIntroTitle() {
             for (int star = 0; star < starCount; ++star)
             {
                 size = aStars[star].m_Size;
-                int intensity = 185 * aStars[star].m_Intensity + (size == StarSmall ? 35 : 70) * PosRand();
+                int intensity = 185 * aStars[star].m_Intensity + (size == StarSmall ? 35 : 70) * RandomNum();
                 set_screen_blender(intensity, intensity, intensity, intensity);
                 starDrawPos.SetXY(aStars[star].m_Pos.m_X, aStars[star].m_Pos.m_Y - scrollOffset.m_Y * aStars[star].m_ScrollRatio);
                 draw_trans_sprite(g_FrameMan.GetBackBuffer32(), aStars[star].m_pBitmap, starDrawPos.GetFloorIntX(), starDrawPos.GetFloorIntY());
@@ -626,8 +626,8 @@ bool PlayIntroTitle() {
 			// Manually shake our shakeOffset to randomize some effects
 			if (g_TimerMan.GetAbsoulteTime() > lastShake + 50000)
 			{
-				shakeOffset.m_X = FloatRand(-3.0F, 3.0F);
-				shakeOffset.m_Y = FloatRand(-3.0F, 3.0F);
+				shakeOffset.m_X = RandomNum(-3.0F, 3.0F);
+				shakeOffset.m_Y = RandomNum(-3.0F, 3.0F);
 				lastShake = g_TimerMan.GetAbsoulteTime();
 			}
 

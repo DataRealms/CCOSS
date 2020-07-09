@@ -2194,8 +2194,9 @@ int LuaMan::Create()
 
         // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
         def("DeleteEntity", &DeleteEntity, adopt(_1)),
-		def("RangeRand", &DoubleRand),
-        def("PosRand", &PosRand),
+		def("RangeRand", (double(*)(double, double))& RandomNum),
+        //def("PosRand", (double(*)(void))& RandomNum),
+		def("PosRand", &PosRand),
         def("NormalRand", &NormalRand),
         def("SelectRand", &IntRand),
         def("LERP", &LERP),
@@ -2207,7 +2208,7 @@ int LuaMan::Create()
 		def("GetMPP", &GetMPP),
 		def("GetPPL", &GetPPL),
 		def("GetLPP", &GetLPP)
-    ];
+	];
 
     // Assign the manager instances to globals in the lua master state
     globals(m_pMasterState)["TimerMan"] = &g_TimerMan;

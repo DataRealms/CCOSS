@@ -1984,7 +1984,7 @@ void MovableMan::Update()
                         if (s % 2 == 0)
                             parPos.m_Y -= 1.0;
                         else
-                            parPos.m_X += (PosRand() >= 0.5F ? 1.0F : -1.0F);
+                            parPos.m_X += (RandomNum() >= 0.5F ? 1.0F : -1.0F);
                         terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.m_X, parPos.m_Y));
                     }
                     (*parIt)->SetPos(parPos);

@@ -1198,7 +1198,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
     {
         pThisPlayer->SetOffensiveBudget(pThisPlayer->GetFunds() * offenseRatio);
 		// Use two methods to select which scene to attack, first one is based on the previously obtained scene mark and the second is mostly random
-		if (PosRand() < 0.6F && pBestAttackCandidateScene)
+		if (RandomNum() < 0.6F && pBestAttackCandidateScene)
 		{
 			pThisPlayer->SetOffensiveTargetName(pBestAttackCandidateScene->GetPresetName());
 		}
@@ -1209,7 +1209,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
 			int targetIndex = IntRand(0, unfriendlySceneCount - 1);
 			// Give it a strong preference for unclaimed scenes! They make more strategic sense than to attack a hardened target
 			if (!unclaimedScenes.empty() && targetIndex >= unclaimedScenes.size())
-				targetIndex = PosRand() < 0.75F ? IntRand(0, unclaimedScenes.size() - 1) : targetIndex;
+				targetIndex = RandomNum() < 0.75F ? IntRand(0, unclaimedScenes.size() - 1) : targetIndex;
 			// From index to actual Scene and selection
 			Scene *selectedTarget = targetIndex < unclaimedScenes.size() ? unclaimedScenes[targetIndex] : enemyScenes[targetIndex - unclaimedScenes.size()];
 			if (selectedTarget)

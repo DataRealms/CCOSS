@@ -1657,7 +1657,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     if (m_pHead && m_pHead->IsAttached())
     {
         RemoveAttachable(m_pHead);
-        m_pHead->SetVel(m_Vel + m_pHead->GetParentOffset() * PosRand());
+        m_pHead->SetVel(m_Vel + m_pHead->GetParentOffset() * RandomNum());
         m_pHead->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pHead);
         m_pHead = 0;
@@ -1673,7 +1673,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     if (m_pFGArm && m_pFGArm->IsAttached())
     {
         RemoveAttachable(m_pFGArm);
-        m_pFGArm->SetVel(m_Vel + m_pFGArm->GetParentOffset() * PosRand());
+        m_pFGArm->SetVel(m_Vel + m_pFGArm->GetParentOffset() * RandomNum());
         m_pFGArm->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pFGArm);
         m_pFGArm = 0;
@@ -1681,7 +1681,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     if (m_pBGArm && m_pBGArm->IsAttached())
     {
         RemoveAttachable(m_pBGArm);
-        m_pBGArm->SetVel(m_Vel + m_pBGArm->GetParentOffset() * PosRand());
+        m_pBGArm->SetVel(m_Vel + m_pBGArm->GetParentOffset() * RandomNum());
         m_pBGArm->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pBGArm);
         m_pBGArm = 0;
@@ -1689,7 +1689,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     if (m_pFGLeg && m_pFGLeg->IsAttached())
     {
         RemoveAttachable(m_pFGLeg);
-        m_pFGLeg->SetVel(m_Vel + m_pFGLeg->GetParentOffset() * PosRand());
+        m_pFGLeg->SetVel(m_Vel + m_pFGLeg->GetParentOffset() * RandomNum());
         m_pFGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pFGLeg);
         m_pFGLeg = 0;
@@ -1697,7 +1697,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     if (m_pBGLeg && m_pBGLeg->IsAttached())
     {
         RemoveAttachable(m_pBGLeg);
-        m_pBGLeg->SetVel(m_Vel + m_pBGLeg->GetParentOffset() * PosRand());
+        m_pBGLeg->SetVel(m_Vel + m_pBGLeg->GetParentOffset() * RandomNum());
         m_pBGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pBGLeg);
         m_pBGLeg = 0;
@@ -3095,7 +3095,7 @@ void AHuman::Update()
 	{
 		m_GotHat = true;
 
-		if (PosRand() > 0.8F)
+		if (RandomNum() > 0.8F)
 		{
 			int hat = IntRand(1, 20);
 
@@ -3621,7 +3621,7 @@ void AHuman::Update()
     // Try to detect a new item
     if (!m_pItemInReach && m_Status == STABLE)
     {
-        MOID itemMOID = g_SceneMan.CastMORay(m_Pos, Vector((m_HFlipped ? -reach : reach) * PosRand(), reach * PosRand()), m_MOID, Activity::NOTEAM, g_MaterialGrass, true, 2);
+        MOID itemMOID = g_SceneMan.CastMORay(m_Pos, Vector((m_HFlipped ? -reach : reach) * RandomNum(), RandomNum(0.0F, reach)), m_MOID, Activity::NOTEAM, g_MaterialGrass, true, 2);
         MovableObject *pItem = g_MovableMan.GetMOFromID(itemMOID);
         if (pItem)
         {
@@ -4463,7 +4463,7 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
             points[i] += m_pFGArm->GetParentOffset();
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, 55.0F + FloatRand(0.0F, 100.0F));
+		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, 55.0F + RandomNum(0.0F, 100.0F));
 
         putpixel(pTargetBitmap, points[i].m_X - targetPos.m_X, points[i].m_Y - targetPos.m_Y, g_YellowGlowColor);
     }

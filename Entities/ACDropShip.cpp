@@ -533,7 +533,7 @@ void ACDropShip::UpdateAI()
             if (!IsInventoryEmpty() && m_AIMode != AIMODE_STAY)
             {
                 // Randomly choose a direction to be going when unloading
-                m_LateralMoveState = PosRand() > 0.5F ? LAT_LEFT : LAT_RIGHT;
+                m_LateralMoveState = RandomNum() > 0.5F ? LAT_LEFT : LAT_RIGHT;
                 DropAllInventory();
                 m_DeliveryState = UNLOAD;
                 // Start ascending since we're probably doing downward at max already

@@ -187,8 +187,8 @@ void Turret::SetMountedMO(MovableObject *newHeldMO)
         HeldDevice *pHeldDev = dynamic_cast<HeldDevice *>(m_pMountedMO);
         pHeldDev->Detach();
 // TODO: Refine throwing force to dropped device here?")
-		pHeldDev->SetVel(Vector(FloatRand(0.0F, 10.0F), -FloatRand(0.0F, 15.0)));
-		pHeldDev->SetAngularVel(-FloatRand(0.0F, 10.0F));
+		pHeldDev->SetVel(Vector(RandomNum(0.0F, 10.0F), -RandomNum(0.0F, 15.0F)));
+		pHeldDev->SetAngularVel(-RandomNum(0.0F, 10.0F));
         g_MovableMan.AddItem(pHeldDev);
         m_pMountedMO = pHeldDev = 0;
     }
@@ -296,7 +296,7 @@ void Turret::Update()
         if (m_pMountedMO)
         {
 /*
-            m_pMountedMO->SetVel(m_Vel + Vector(-10 * PosRand(), -15 * PosRand()));
+            m_pMountedMO->SetVel(m_Vel + Vector(-10 * RandomNum(), -15 * RandomNum()));
             m_pMountedMO->SetAngularVel(-7);
             if (m_pMountedMO->IsDevice())
                 dynamic_cast<Attachable *>(m_pMountedMO)->Detach();

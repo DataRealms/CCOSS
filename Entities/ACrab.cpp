@@ -983,7 +983,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     if (m_pTurret && m_pTurret->IsAttached())
     {
         RemoveAttachable(m_pTurret);
-        m_pTurret->SetVel(m_Vel + m_pTurret->GetParentOffset() * PosRand());
+        m_pTurret->SetVel(m_Vel + m_pTurret->GetParentOffset() * RandomNum());
         m_pTurret->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pTurret);
         m_pTurret = 0;
@@ -999,7 +999,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     if (m_pLFGLeg && m_pLFGLeg->IsAttached())
     {
         RemoveAttachable(m_pLFGLeg);
-        m_pLFGLeg->SetVel(m_Vel + m_pLFGLeg->GetParentOffset() * PosRand());
+        m_pLFGLeg->SetVel(m_Vel + m_pLFGLeg->GetParentOffset() * RandomNum());
         m_pLFGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pLFGLeg);
         m_pLFGLeg = 0;
@@ -1007,7 +1007,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     if (m_pLBGLeg && m_pLBGLeg->IsAttached())
     {
         RemoveAttachable(m_pLBGLeg);
-        m_pLBGLeg->SetVel(m_Vel + m_pLBGLeg->GetParentOffset() * PosRand());
+        m_pLBGLeg->SetVel(m_Vel + m_pLBGLeg->GetParentOffset() * RandomNum());
         m_pLBGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pLBGLeg);
         m_pLBGLeg = 0;
@@ -1015,7 +1015,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     if (m_pRFGLeg && m_pRFGLeg->IsAttached())
     {
         RemoveAttachable(m_pRFGLeg);
-        m_pRFGLeg->SetVel(m_Vel + m_pRFGLeg->GetParentOffset() * PosRand());
+        m_pRFGLeg->SetVel(m_Vel + m_pRFGLeg->GetParentOffset() * RandomNum());
         m_pRFGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pRFGLeg);
         m_pRFGLeg = 0;
@@ -1023,7 +1023,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     if (m_pRBGLeg && m_pRBGLeg->IsAttached())
     {
         RemoveAttachable(m_pRBGLeg);
-        m_pRBGLeg->SetVel(m_Vel + m_pRBGLeg->GetParentOffset() * PosRand());
+        m_pRBGLeg->SetVel(m_Vel + m_pRBGLeg->GetParentOffset() * RandomNum());
         m_pRBGLeg->SetAngularVel(NormalRand());
         g_MovableMan.AddParticle(m_pRBGLeg);
         m_pRBGLeg = 0;

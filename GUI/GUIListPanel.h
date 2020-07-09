@@ -50,7 +50,8 @@ public:
         MouseEnter, // Mouse left the panel
         MouseLeave, // Mouse left the panel
         DoubleClick,// Double click
-        KeyDown    // Key Down
+		KeyDown,    // Key Down
+		EdgeHit //!< Tried scrolling the selection past the first or last item. data = 0 for top edge, data = 1 for bottom edge.
     } Signal;
 
     // Item structure
@@ -207,6 +208,16 @@ public:
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
     virtual void OnDoubleClick(int X, int Y, int Buttons, int Modifier);
+
+
+	/// <summary>
+	/// Called when the mouse scroll wheel is moved.
+	/// </summary>
+	/// <param name="x">Mouse X position.</param>
+	/// <param name="y">Mouse Y position.</param>
+	/// <param name="modifier">Activated modifier buttons.</param>
+	/// <param name="mouseWheelChange">The amount of wheel movement. Positive is scroll up, negative is scroll down.</param>
+	void OnMouseWheelChange(int x, int y, int modifier, int mouseWheelChange) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -500,6 +511,20 @@ public:
     void ScrollToBottom();
 
 
+	/// <summary>
+	/// Sets whether the scroll panel scrolls in a loop or not.
+	/// </summary>
+	/// <param name="scrollLoop">True to scroll in a loop, false to scroll with edge stopping.</param>
+	void SetSelectionScrollingLoop(bool scrollLoop);
+
+
+	/// <summary>
+	/// Sets whether the list panel can be scrolled with the mouse scroll wheel.
+	/// </summary>
+	/// <param name="mouseScroll">True to enable scrolling, false to disable.</param>
+	void SetMouseScrolling(bool mouseScroll);
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -548,6 +573,20 @@ private:
     void SelectItem(int X, int Y, int Modifier);
 
 
+	/// <summary>
+	/// Perform list scrolling through the scrollbar.
+	/// </summary>
+	/// <param name="MouseWheelChange">Amount and direction of scrolling. Positive to scroll up, negative to scroll down.</param>
+	void ScrollBarScrolling(int mouseWheelChange);
+
+
+	/// <summary>
+	/// Perform list scrolling by changing the currently selected list item.
+	/// </summary>
+	/// <param name="MouseWheelChange">Amount and direction of scrolling. Positive to scroll up, negative to scroll down.</param>
+	void SelectionListScrolling(int mouseWheelChange);
+
+
 // Members    
 
     GUISkin                *m_Skin;
@@ -571,6 +610,8 @@ private:
     bool                m_MultiSelect;
     bool                m_HotTracking;
     int                    m_LastSelected;
+	bool				m_LoopSelectionScroll; //!< Whether the list panel scrolls in a loop or not, while scrolling the selection list (as opposed to the scrollbar).
+	bool				m_MouseScroll; //!< Whether the list panel enables scrolling with the mouse scroll wheel.
     
     // This draws items differently, not with boxes etc.
     bool                m_AlternateDrawMode;

@@ -119,6 +119,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Game will now Abort with error message when trying to load a copy of a non-existent Presetname that is an AtomGroup, Attachable or AEmitter.
 
+- Comboboxes (dropdown lists) can now also be closed by clicking on their top part.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.
@@ -130,6 +132,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Time scale can no longer be lowered to 0 through the performance stats interface.
 
 - Actors now support their held devices identically while facing to either side. ([Issue #31](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/31))
+
+- Fixed issue where clicking a combobox's scrollbar would release the mouse, thus causing unexpected behavior like not being able to close the list by clicking outside of it.
+
+- Fixed issue where comboboxes did not save the current selection, thus if the combobox was deselected without making a selection then the selection would revert to the default value instead of the last selected value.
+
+- Fixed issue with double clicks and missing clicks in menus (anything that uses AllegroInput).
 
 ### Removed
 

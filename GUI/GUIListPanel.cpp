@@ -27,25 +27,28 @@ using namespace RTE;
 GUIListPanel::GUIListPanel(GUIManager *Manager)
 : GUIPanel(Manager)
 {
-    m_BaseBitmap = 0;
-    m_DrawBitmap = 0;
-    m_FrameBitmap = 0;
-    m_Font = 0;
-    m_Items.clear();
-    m_SelectedList.clear();
-    m_UpdateLocked = false;
-    m_LargestWidth = 0;
-    m_MultiSelect = false;
-    m_LastSelected = -1;
-    m_FontColor = 0;
-    m_FontSelectColor = 0;
-    m_CapturedHorz = false;
-    m_CapturedVert = false;
-    m_ExternalCapture = false;
-    m_HotTracking = false;
-    m_HorzScrollEnabled = true;
-    m_VertScrollEnabled = true;
-    m_AlternateDrawMode = false;
+	m_BaseBitmap = 0;
+	m_DrawBitmap = 0;
+	m_FrameBitmap = 0;
+	m_Font = 0;
+	m_Items.clear();
+	m_SelectedList.clear();
+	m_UpdateLocked = false;
+	m_LargestWidth = 0;
+	m_MultiSelect = false;
+	m_LastSelected = -1;
+	m_FontColor = 0;
+	m_FontSelectColor = 0;
+	m_SelectedColorIndex = 0;
+	m_CapturedHorz = false;
+	m_CapturedVert = false;
+	m_ExternalCapture = false;
+	m_HotTracking = false;
+	m_HorzScrollEnabled = true;
+	m_VertScrollEnabled = true;
+	m_AlternateDrawMode = false;
+	m_LoopSelectionScroll = false;
+	m_MouseScroll = false;
 }
 
 
@@ -58,26 +61,28 @@ GUIListPanel::GUIListPanel(GUIManager *Manager)
 GUIListPanel::GUIListPanel()
 : GUIPanel()
 {
-    m_BaseBitmap = 0;
-    m_DrawBitmap = 0;
-    m_FrameBitmap = 0;
-    m_Font = 0;    
-    m_Items.clear();
-    m_SelectedList.clear();
-    m_UpdateLocked = false;
-    m_LargestWidth = 0;
-    m_MultiSelect = false;
-    m_LastSelected = -1;
-    m_FontColor = 0;
-    m_FontSelectColor = 0;
-    m_SelectedColorIndex = 0;
-    m_CapturedHorz = false;
-    m_CapturedVert = false;
-    m_ExternalCapture = false;
-    m_HotTracking = false;
-    m_HorzScrollEnabled = true;
-    m_VertScrollEnabled = true;
-    m_AlternateDrawMode = false;
+	m_BaseBitmap = 0;
+	m_DrawBitmap = 0;
+	m_FrameBitmap = 0;
+	m_Font = 0;
+	m_Items.clear();
+	m_SelectedList.clear();
+	m_UpdateLocked = false;
+	m_LargestWidth = 0;
+	m_MultiSelect = false;
+	m_LastSelected = -1;
+	m_FontColor = 0;
+	m_FontSelectColor = 0;
+	m_SelectedColorIndex = 0;
+	m_CapturedHorz = false;
+	m_CapturedVert = false;
+	m_ExternalCapture = false;
+	m_HotTracking = false;
+	m_HorzScrollEnabled = true;
+	m_VertScrollEnabled = true;
+	m_AlternateDrawMode = false;
+	m_LoopSelectionScroll = false;
+	m_MouseScroll = false;
 }
 
 
@@ -510,9 +515,21 @@ void GUIListPanel::OnMouseDown(int X, int Y, int Buttons, int Modifier)
         SelectItem(X, Y, Modifier);
         SendSignal(MouseDown, Buttons);
     } else {
-        // Clicked anywhere
+        // Click signifies mouse down anywhere outside the list panel.
         SendSignal(Click, Buttons);
     }
+}
+
+
+void GUIListPanel::OnMouseWheelChange(int x, int y, int modifier, int mouseWheelChange)
+{
+	if (!m_MouseScroll) {
+		return;
+	} else if (m_VertScroll->_GetVisible() && m_VertScroll->PointInside(x, y)) {
+		ScrollBarScrolling(mouseWheelChange);
+	} else if (PointInsideList(x, y) && !m_MultiSelect) {
+		SelectionListScrolling(mouseWheelChange);
+	}
 }
 
 
@@ -676,26 +693,17 @@ void GUIListPanel::OnMouseUp(int X, int Y, int Buttons, int Modifier)
 
 void GUIListPanel::OnMouseMove(int X, int Y, int Buttons, int Modifier)
 {
-    if (m_CapturedVert)
-        m_VertScroll->OnMouseMove(X, Y, Buttons, Modifier);
-    else if (m_CapturedHorz)
-        m_HorzScroll->OnMouseMove(X, Y, Buttons, Modifier);
-    else {
-        if (PointInside(X, Y)) {
-
-            // Don't send signals or do selection if over scroll bars
-            if (m_VertScroll->_GetVisible() && X >= (m_X+m_Width)-m_VertScroll->GetWidth())
-                return;
-            if (m_HorzScroll->_GetVisible() && Y >= (m_Y+m_Height)-m_HorzScroll->GetHeight())
-                return;
-
-            // Using Hot-Tracking
-            if (m_HotTracking)
-                SelectItem(X, Y, Modifier);
-
-            SendSignal(MouseMove, Buttons);
-        }
-    }
+	if (m_CapturedVert) {
+		m_VertScroll->OnMouseMove(X, Y, Buttons, Modifier);
+	} else if (m_CapturedHorz) {
+		m_HorzScroll->OnMouseMove(X, Y, Buttons, Modifier);
+	} else if (PointInsideList(X, Y)) {
+		// Using Hot-Tracking
+		if (m_HotTracking && GetItem(X, Y) != nullptr && (GetItem(X, Y) != GetSelected())) {
+			SelectItem(X, Y, Modifier);
+		}
+		SendSignal(MouseMove, Buttons);
+	}
 }
 
 
@@ -821,6 +829,62 @@ void GUIListPanel::ScrollToBottom()
     else
         ScrollToItem(m_Items.back());
     BuildBitmap(false, true);
+}
+
+
+void GUIListPanel::SetSelectionScrollingLoop(bool scrollLoop)
+{
+	m_LoopSelectionScroll = scrollLoop;
+}
+
+
+void GUIListPanel::SetMouseScrolling(bool mouseScroll)
+{
+	m_MouseScroll = mouseScroll;
+}
+
+
+void GUIListPanel::ScrollBarScrolling(int mouseWheelChange)
+{
+	int newValue = 0;
+	Item* lastItem = GetItem(GetItemList()->size() - 1);
+	int avgItemHeight = static_cast<int>((GetStackHeight(lastItem) + GetItemHeight(lastItem)) / GetItemList()->size());
+	if (mouseWheelChange < 0) {
+		newValue = m_VertScroll->GetValue() - (mouseWheelChange * avgItemHeight);
+		int maxValue = GetStackHeight(lastItem) + GetItemHeight(lastItem) - m_VertScroll->GetPageSize();
+		newValue = static_cast<int>(Limit(newValue, maxValue, 0));
+	} else {
+		newValue = m_VertScroll->GetValue() - (mouseWheelChange * avgItemHeight);
+		if (newValue < 0) {
+			newValue = 0;
+		}
+	}
+	m_VertScroll->SetValue(newValue);
+	BuildBitmap(false, true);
+}
+
+
+void GUIListPanel::SelectionListScrolling(int scrollDir)
+{
+	std::size_t itemListSize = GetItemList()->size();
+	if (!itemListSize || !scrollDir) {
+		return;
+	}
+
+	int oldItemIndex = GetSelectedIndex();
+	int newItemIndex = (scrollDir > 0) ? (oldItemIndex - 1) : (oldItemIndex + 1);
+	if (newItemIndex < 0 || newItemIndex >= itemListSize) {
+		if (m_LoopSelectionScroll) {
+			newItemIndex = (newItemIndex + itemListSize) % itemListSize;
+		} else {
+			newItemIndex = Limit(newItemIndex, itemListSize - 1, 0);
+			if (oldItemIndex == newItemIndex) {
+				SendSignal(EdgeHit, (newItemIndex < 0) ? 0 : 1);
+				return;
+			}
+		}
+	}
+	SetSelectedIndex(newItemIndex);
 }
 
 
@@ -1064,49 +1128,40 @@ void GUIListPanel::OnLoseFocus(void)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Called when receiving a signal.
 
-void GUIListPanel::ReceiveSignal(GUIPanel *Source, int Code, int Data)
+void GUIListPanel::ReceiveSignal(GUIPanel* Source, int Code, int Data)
 {
-    // ChangeValue signal from scrollpanels?
-    assert(Source);
+	// ChangeValue signal from scrollpanels?
+	assert(Source);
 
-    if (Source->GetPanelID() == m_VertScroll->GetPanelID() ||
-       Source->GetPanelID() == m_HorzScroll->GetPanelID()) {
+	int sourcePanelID = Source->GetPanelID();
 
-        if (Code == GUIScrollPanel::ChangeValue)
-            BuildBitmap(false, true);
-    }
+	if ((sourcePanelID == m_VertScroll->GetPanelID() || sourcePanelID == m_HorzScroll->GetPanelID()) && Code == GUIScrollPanel::ChangeValue) {
+		BuildBitmap(false, true);
+	}
 
-    // Vertical Scrollbar
-    if (Source->GetPanelID() == m_VertScroll->GetPanelID()) {
-        // Grab
-        if (Code == GUIScrollPanel::Grab) {
-            m_CapturedVert = true;
-            CaptureMouse();
-        }
-        // Release
-        if (Code == GUIScrollPanel::Release) {
-            m_CapturedVert = false;
-// WTF IS THE BIG IDEA WITH THIS ANYWAY??!
-//            if (!m_ExternalCapture)
-                ReleaseMouse();
-        }
-    }
+	// Vertical Scrollbar
+	else if (sourcePanelID == m_VertScroll->GetPanelID()) {
+		// Grab
+		if (Code == GUIScrollPanel::Grab) {
+			m_CapturedVert = true;
+		}
+		// Release
+		else if (Code == GUIScrollPanel::Release) {
+			m_CapturedVert = false;
+		}
+	}
 
-    // Horizontal Scrollbar
-    if (Source->GetPanelID() == m_HorzScroll->GetPanelID()) {
-        // Grab
-        if (Code == GUIScrollPanel::Grab) {
-            m_CapturedHorz = true;
-            CaptureMouse();
-        }
-        // Release
-        if (Code == GUIScrollPanel::Release) {
-            m_CapturedHorz = false;
-// WTF IS THE BIG IDEA WITH THIS ANYWAY??!
-//            if (!m_ExternalCapture)
-                ReleaseMouse();
-        }
-    }
+	// Horizontal Scrollbar
+	else if (sourcePanelID == m_HorzScroll->GetPanelID()) {
+		// Grab
+		if (Code == GUIScrollPanel::Grab) {
+			m_CapturedHorz = true;
+		}
+		// Release
+		else if (Code == GUIScrollPanel::Release) {
+			m_CapturedHorz = false;
+		}
+	}
 }
 
 

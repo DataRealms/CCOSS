@@ -546,6 +546,7 @@ namespace RTE {
 		/// </summary>
 		void Clear() { m_X = m_Y = 0; }
 
+		// TODO: Investigate, based on where this value is used, whether making it Larger (by one or two orders of magnitude) can produce more desirable results.
 		float m_FloatTolerance = 0.0000001F; //!< Floating point comparison tolerance.
 
 	};

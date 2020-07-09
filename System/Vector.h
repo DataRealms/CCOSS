@@ -148,7 +148,7 @@ namespace RTE {
 		/// Indicates whether both X and Y components of this Vector are 0.
 		/// </summary>
 		/// <returns>Whether both X and Y components of this Vector are 0.</returns>
-		bool IsZero() const { return fabs(m_X) < m_Tol && fabs(m_Y) < m_Tol; }
+		bool IsZero() const { return fabs(m_X) < m_FloatTolerance && fabs(m_Y) < m_FloatTolerance; }
 
 		/// <summary>
 		/// Indicates whether the X and Y components of this Vector each have opposite signs to their corresponding components of a passed in Vector.
@@ -156,7 +156,7 @@ namespace RTE {
 		/// <param name="opp">The Vector to compare with.</param>
 		/// <returns>Whether the X and Y components of this Vector each have opposite signs to their corresponding components of a passed in Vector.</returns>
 		bool IsOpposedTo(const Vector &opp) { 
-			return ((fabs(m_X) < m_Tol && fabs(opp.m_X) < m_Tol) || (signbit(m_X) != signbit(opp.m_X))) && ((fabs(m_Y) < m_Tol && fabs(opp.m_Y) < m_Tol) || (signbit(m_Y) != signbit(opp.m_Y)));
+			return ((fabs(m_X) < m_FloatTolerance && fabs(opp.m_X) < m_FloatTolerance) || (signbit(m_X) != signbit(opp.m_X))) && ((fabs(m_Y) < m_FloatTolerance && fabs(opp.m_Y) < m_FloatTolerance) || (signbit(m_Y) != signbit(opp.m_Y)));
 		}
 #pragma endregion
 

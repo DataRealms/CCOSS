@@ -197,7 +197,7 @@ namespace RTE {
 #pragma region Rotation
 		/// <summary>
 		/// Get this Vector's absolute angle in radians. e.g: when x = 1, y = 0, the value returned here will be 0. x = 0, y = 1 yields -pi/2 here.
-		/// Returns a value in the interval [- 0.5 pi, 1.5 pi).
+		/// Returns a value in the interval [-0.5 pi, 1.5 pi).
 		/// </summary>
 		/// <returns>The absolute angle in radians.</returns>
 		float GetAbsRadAngle() const;
@@ -207,7 +207,7 @@ namespace RTE {
 		/// Returns a value in the interval [-90, 270).
 		/// </summary>
 		/// <returns>The absolute angle in degrees.</returns>
-		float GetAbsDegAngle() const;
+		float GetAbsDegAngle() const { return GetAbsRadAngle() / c_PI * 180.0F; }
 
 		/// <summary>
 		/// Rotate this Vector relatively by an angle in radians.
@@ -221,14 +221,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="angle">The angle in degrees to rotate by. Positive angles rotate counter-clockwise, and negative angles clockwise.</param>
 		/// <returns>This vector, rotated.</returns>
-		Vector & DegRotate(float angle);
+		Vector & DegRotate(float angle) { return RadRotate(angle * c_PI / 180.0F); }
 
 		/// <summary>
 		/// Set this Vector to an absolute rotation based on the absolute rotation of another Vector.
 		/// </summary>
 		/// <param name="refVector">The reference Vector whose absolute angle from positive X (0 degrees) this Vector will be rotated to.</param>
 		/// <returns>This vector, rotated.</returns>
-		Vector & AbsRotateTo(const Vector &refVector);
+		Vector & AbsRotateTo(const Vector &refVector) { return RadRotate(refVector.GetAbsRadAngle() - GetAbsRadAngle()); }
 
 		/// <summary>
 		/// Returns a Vector that is perpendicular to this, rotated PI/2.
@@ -546,7 +546,7 @@ namespace RTE {
 		/// </summary>
 		void Clear() { m_X = m_Y = 0; }
 
-		float m_Tol = 0.0000001F; //!< Floating point comparison tolerance.
+		float m_FloatTolerance = 0.0000001F; //!< Floating point comparison tolerance.
 
 	};
 }

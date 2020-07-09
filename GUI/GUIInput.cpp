@@ -55,6 +55,8 @@ GUIInput::GUIInput(int whichPlayer, bool keyJoyMouseCursor)
     m_KeyJoyMouseCursor = keyJoyMouseCursor;
 
 	m_Player = whichPlayer;
+
+	m_MouseWheelChange = 0;
 }
 
 

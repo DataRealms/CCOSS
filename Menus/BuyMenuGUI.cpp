@@ -1080,7 +1080,7 @@ void BuyMenuGUI::Update()
         }
 
         // Switch back focus to the category list if the player presses up while on the save button
-        if (m_pController->IsState(PRESS_UP) || m_pController->IsState(SCROLL_UP))
+        if (pressUp)
         {
             if (m_pSaveButton->HasFocus())
             {
@@ -1093,7 +1093,7 @@ void BuyMenuGUI::Update()
                 g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
         }
-        else if (m_pController->IsState(PRESS_DOWN) || m_pController->IsState(SCROLL_DOWN))
+        else if (pressDown)
         {
             if (m_pSaveButton->HasFocus())
             {
@@ -1413,12 +1413,12 @@ void BuyMenuGUI::Update()
         }
 
         // Switch back focus to the order list if the player presses up
-        if (m_pController->IsState(PRESS_UP) || m_pController->IsState(SCROLL_UP))
+        if (pressUp)
         {
             m_MenuFocus = ORDER;
             m_FocusChange = -1;
         }
-        else if (m_pController->IsState(PRESS_DOWN) || m_pController->IsState(SCROLL_DOWN))
+        else if (pressDown)
             g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
     }
 

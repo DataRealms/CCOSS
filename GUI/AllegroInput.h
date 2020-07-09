@@ -14,9 +14,9 @@
 
 
 enum aMButtons {
-    AMBLEFT = 1,
-    AMBRIGHT = 2,
-    AMBMIDDLE = 4
+    AMBLEFT = 1, // 0b1
+    AMBRIGHT = 2, // 0b10
+    AMBMIDDLE = 4 // 0b100
 };
 
 namespace RTE

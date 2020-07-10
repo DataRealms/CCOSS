@@ -145,10 +145,22 @@ namespace RTE {
 		void FlipY(bool flipY = true) { m_Y = flipY ? -m_Y : m_Y; }
 
 		/// <summary>
+		/// Indicates whether the X component of this Vector is 0.
+		/// </summary>
+		/// <returns>Whether the X component of this Vector is 0.</returns>
+		bool XIsZero() const { return m_X == 0; }
+
+		/// <summary>
+		/// Indicates whether the Y component of this Vector is 0.
+		/// </summary>
+		/// <returns>Whether the Y component of this Vector is 0.</returns>
+		bool YIsZero() const { return m_Y == 0; }
+
+		/// <summary>
 		/// Indicates whether both X and Y components of this Vector are 0.
 		/// </summary>
 		/// <returns>Whether both X and Y components of this Vector are 0.</returns>
-		bool IsZero() const { return fabs(m_X) < m_FloatTolerance && fabs(m_Y) < m_FloatTolerance; }
+		bool IsZero() const { return XIsZero() && YIsZero(); }
 
 		/// <summary>
 		/// Indicates whether the X and Y components of this Vector each have opposite signs to their corresponding components of a passed in Vector.
@@ -156,7 +168,7 @@ namespace RTE {
 		/// <param name="opp">The Vector to compare with.</param>
 		/// <returns>Whether the X and Y components of this Vector each have opposite signs to their corresponding components of a passed in Vector.</returns>
 		bool IsOpposedTo(const Vector &opp) { 
-			return ((fabs(m_X) < m_FloatTolerance && fabs(opp.m_X) < m_FloatTolerance) || (signbit(m_X) != signbit(opp.m_X))) && ((fabs(m_Y) < m_FloatTolerance && fabs(opp.m_Y) < m_FloatTolerance) || (signbit(m_Y) != signbit(opp.m_Y)));
+			return ((XIsZero() && opp.XIsZero()) || (signbit(m_X) != signbit(opp.m_X))) && ((YIsZero() && opp.YIsZero()) || (signbit(m_Y) != signbit(opp.m_Y)));
 		}
 #pragma endregion
 
@@ -545,10 +557,6 @@ namespace RTE {
 		/// Clears all the member variables of this Vector, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear() { m_X = m_Y = 0; }
-
-		// TODO: Investigate, based on where this value is used, whether making it Larger (by one or two orders of magnitude) can produce more desirable results.
-		float m_FloatTolerance = 0.0000001F; //!< Floating point comparison tolerance.
-
 	};
 }
 #endif

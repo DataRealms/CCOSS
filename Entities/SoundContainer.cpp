@@ -208,9 +208,9 @@ namespace RTE {
 				/// Internal lambda function to pick a random sound that's not the previously played sound. Done to avoid scoping issues inside the switch below.
 				/// </summary>
 				auto selectRandomSound = [&soundSetCount, this]() {
-					size_t soundToSelect = IntRand(0, soundSetCount - 1);
+					size_t soundToSelect = RandomNum<int>(0, soundSetCount - 1);
 					while (soundToSelect == m_SelectedSoundSet) {
-						soundToSelect = IntRand(0, soundSetCount - 1);
+						soundToSelect = RandomNum<int>(0, soundSetCount - 1);
 					}
 					m_SelectedSoundSet = soundToSelect;
 				};

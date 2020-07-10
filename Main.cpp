@@ -436,17 +436,17 @@ bool PlayIntroTitle() {
     for (int star = 0; star < starCount; ++star) {
         if (RandomNum() < 0.95F) {
             aStars[star].m_Size = StarSmall;
-            aStars[star].m_pBitmap = apStarSmallBitmaps[IntRand(0, starSmallBitmapCount - 1)];
+            aStars[star].m_pBitmap = apStarSmallBitmaps[RandomNum<int>(0, starSmallBitmapCount - 1)];
             aStars[star].m_Intensity = RandomNum(0.001F, 0.5F);
         }
         else if (RandomNum() < 0.85F) {
             aStars[star].m_Size = StarLarge;
-            aStars[star].m_pBitmap = apStarLargeBitmaps[IntRand(0, starLargeBitmapCount - 1)];
+            aStars[star].m_pBitmap = apStarLargeBitmaps[RandomNum<int>(0, starLargeBitmapCount - 1)];
             aStars[star].m_Intensity = RandomNum(0.6F, 1.0F);
         }
         else {
             aStars[star].m_Size = StarHuge;
-            aStars[star].m_pBitmap = apStarHugeBitmaps[IntRand(0, starLargeBitmapCount - 1)];
+            aStars[star].m_pBitmap = apStarHugeBitmaps[RandomNum<int>(0, starLargeBitmapCount - 1)];
             aStars[star].m_Intensity = RandomNum(0.9F, 1.0F);
         }
         aStars[star].m_Pos.SetXY(resX * RandomNum(), pBackdrop->GetBitmap()->h * RandomNum());//resY * RandomNum());
@@ -788,7 +788,7 @@ bool PlayIntroTitle() {
 
             pTitle->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);
             // Screen blend the title glow on top, with some flickering in its intensity
-			int blendAmount = 220 + IntRand(-35, 35);
+			int blendAmount = 220 + RandomNum<int>(-35, 35);
             set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
             pTitleGlow->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawTrans);
         }

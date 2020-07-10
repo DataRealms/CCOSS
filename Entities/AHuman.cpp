@@ -3097,7 +3097,7 @@ void AHuman::Update()
 
 		if (RandomNum() > 0.8F)
 		{
-			int hat = IntRand(1, 20);
+			int hat = RandomNum<int>(1, 20);
 
             std::stringstream hatName;
             hatName << "Random Hat " << hat;
@@ -4505,7 +4505,7 @@ int AHuman::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = IntRand(0, bodyParts.size() - 1);
+		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}

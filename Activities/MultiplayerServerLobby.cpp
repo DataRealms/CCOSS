@@ -982,7 +982,7 @@ namespace RTE {
 				// If the "random" selection, choose one from the list of loaded techs
 				if (m_apTeamTechSelect[team]->GetSelectedIndex() == 1)//pTechItem->m_ExtraIndex < 0)
 				{
-					int selection = IntRand(1, m_apTeamTechSelect[team]->GetListPanel()->GetItemList()->size() - 1);
+					int selection = RandomNum<int>(1, m_apTeamTechSelect[team]->GetListPanel()->GetItemList()->size() - 1);
 					m_apTeamTechSelect[team]->SetSelectedIndex(selection);
 					pTechItem = m_apTeamTechSelect[team]->GetSelectedItem();
 

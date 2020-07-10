@@ -2198,7 +2198,7 @@ int LuaMan::Create()
         //def("PosRand", (double(*)(void))& RandomNum),
 		def("PosRand", &PosRand),
         def("NormalRand", &NormalRand),
-        def("SelectRand", &IntRand),
+        def("SelectRand", (int(*)(int, int)) &RandomNum),
         def("LERP", &LERP),
         def("EaseIn", &EaseIn),
         def("EaseOut", &EaseOut),

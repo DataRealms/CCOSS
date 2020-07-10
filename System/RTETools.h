@@ -60,9 +60,9 @@ namespace RTE {
 	std::array<int, 624> GeneratePreSeed();
 
 	/// <summary>
-	/// Uniformly distributed random float in the range [0, 1].
+	/// Uniformly distributed random double in the range [0, 1].
 	/// </summary>
-	/// <returns>Uniformly distributed random float in the range [0, 1].</returns>
+	/// <returns>Uniformly distributed random double in the range [0, 1].</returns>
 	double PosRand();
 
 	/// <summary>
@@ -108,14 +108,6 @@ namespace RTE {
 		}
 		return (std::uniform_int_distribution<intType>(intType(0), max - min)(RTETools_RNG) + min);
 	}
-
-	/// <summary>
-	/// Uniformly distributed random int in the range [min, max].
-	/// </summary>
-	/// <param name="min">Lower boundary of the range to pick a number from.</param>
-	/// <param name="max">Upper boundary of the range to pick a number from.</param>
-	/// <returns>Uniformly distributed random int in the range [min, max].</returns>
-	int IntRand(int min, int max);
 #pragma endregion
 
 #pragma region Interpolation

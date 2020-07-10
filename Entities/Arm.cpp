@@ -556,7 +556,11 @@ void Arm::Update()
         }
 
         // Set correct frame for arm bend.
-		int newFrame = static_cast<int>((m_HandOffset.GetMagnitude() / m_MaxLength) * static_cast<float>(m_FrameCount));
+		float halfMax = m_MaxLength / 2.0F;
+		int newFrame = static_cast<int>(((m_HandOffset.GetMagnitude()- halfMax) / halfMax) * static_cast<float>(m_FrameCount));
+		if (newFrame < 0) {
+			newFrame = 0;
+		}
 		RTEAssert(newFrame <= m_FrameCount, "Arm frame is out of bounds for "+ GetClassName()+": "+ GetPresetName() + ".");
 		if (newFrame == m_FrameCount) {
 			--newFrame;

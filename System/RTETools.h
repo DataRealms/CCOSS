@@ -63,7 +63,7 @@ namespace RTE {
 	/// Uniformly distributed random float in the range [0, 1].
 	/// </summary>
 	/// <returns>Uniformly distributed random float in the range [0, 1].</returns>
-	float PosRand();
+	double PosRand();
 
 	/// <summary>
 	/// Uniformly distributed random float in the range [-1, 1].

@@ -139,6 +139,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Fixed issue with double clicks and missing clicks in menus (anything that uses AllegroInput).
 
+- Fixed GetHandPos and SetHandPos (lua property: HandPos). They now properly get the hand position (as relative to the arm joint position) and set it (by setting the hand offset as relative to the arm's joint position), respectively. Before, these were both relative to the arm's center of mass.
+
 ### Removed
 
 - Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.

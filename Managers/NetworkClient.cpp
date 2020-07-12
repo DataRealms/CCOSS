@@ -114,7 +114,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkClient::PerformNATPunchThrough(std::string serviceServerName, unsigned short serverPort, std::string playerName, std::string serverName, std::string serverPassword) {
+	void NetworkClient::PerformNATPunchThrough(std::string serviceServerName, unsigned short serviceServerPort, std::string playerName, std::string serverName, std::string serverPassword) {
 		m_UseNATPunchThroughService = true;
 
 		g_ConsoleMan.PrintString("CLIENT: Connecting to NAT service" + serverName);
@@ -125,7 +125,7 @@ namespace RTE {
 		m_Client->SetOccasionalPing(true);
 		m_PlayerName = playerName;
 		g_ConsoleMan.PrintString("CLIENT: Connect request sent");
-		m_NATServiceServerID = ConnectBlocking(m_Client, serviceServerName.c_str(), serverPort);
+		m_NATServiceServerID = ConnectBlocking(m_Client, serviceServerName.c_str(), serviceServerPort);
 
 		if (m_NATServiceServerID == RakNet::UNASSIGNED_SYSTEM_ADDRESS) {
 			g_ConsoleMan.PrintString("CLIENT: Unable to connect");
@@ -965,7 +965,7 @@ namespace RTE {
 		long long currentTicks = g_TimerMan.GetRealTickCount();
 		if (currentTicks - m_LastInputSentTime < 0) { m_LastInputSentTime = currentTicks; }
 
-		if (static_cast<double>(currentTicks - m_LastInputSentTime) / g_TimerMan.GetTicksPerSecond() > 1.0 / inputSend) {
+		if (static_cast<double>((currentTicks - m_LastInputSentTime) / g_TimerMan.GetTicksPerSecond()) > 1.0 / inputSend) {
 			m_LastInputSentTime = g_TimerMan.GetRealTickCount();
 			if (IsConnectedAndRegistred()) { SendInputMsg(); }
 		}

@@ -10,8 +10,8 @@ namespace RTE {
 	void InputScheme::Clear() {
 		m_ActiveDevice = DEVICE_KEYB_ONLY;
 		m_SchemePreset = PRESET_NONE;
-		m_JoystickDeadzone = 0.01F;
 		m_JoystickDeadzoneType = DeadZoneType::CIRCLE;
+		m_JoystickDeadzone = 0.01F;
 
 		for (int mapping = 0; mapping < INPUT_COUNT; ++mapping) {
 			m_InputMapping[mapping].Reset();
@@ -27,8 +27,8 @@ namespace RTE {
 	int InputScheme::Create(const InputScheme &reference) {
 		m_ActiveDevice = reference.m_ActiveDevice;
 		m_SchemePreset = reference.m_SchemePreset;
-		m_JoystickDeadzone = reference.m_JoystickDeadzone;
 		m_JoystickDeadzoneType = reference.m_JoystickDeadzoneType;
+		m_JoystickDeadzone = reference.m_JoystickDeadzone;
 
 		for (int mapping = 0; mapping < INPUT_COUNT; ++mapping) {
 			m_InputMapping[mapping].Create(reference.m_InputMapping[mapping]);
@@ -96,10 +96,10 @@ namespace RTE {
 			reader >> m_InputMapping[INPUT_WEAPON_DROP];
 		} else if (propName == "WeaponReload") {
 			reader >> m_InputMapping[INPUT_WEAPON_RELOAD];
-		} else if (propName == "JoystickDeadzone") {
-			reader >> m_JoystickDeadzone;
 		} else if (propName == "JoystickDeadzoneType") {
 			reader >> m_JoystickDeadzoneType;
+		} else if (propName == "JoystickDeadzone") {
+			reader >> m_JoystickDeadzone;
 		} else {
 			return Serializable::ReadProperty(propName, reader);
 		}
@@ -169,17 +169,17 @@ namespace RTE {
 		writer << m_InputMapping[INPUT_WEAPON_DROP];
 		writer.NewProperty("WeaponReload");
 		writer << m_InputMapping[INPUT_WEAPON_RELOAD];
-		writer.NewProperty("JoystickDeadzone");
-		writer << m_JoystickDeadzone;
 		writer.NewProperty("JoystickDeadzoneType");
 		writer << m_JoystickDeadzoneType;
+		writer.NewProperty("JoystickDeadzone");
+		writer << m_JoystickDeadzone;
 
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void InputScheme::SetPreset(int schemePreset) {
+	void InputScheme::SetPreset(short schemePreset) {
 		m_SchemePreset = schemePreset;
 		switch (m_SchemePreset) {
 			case PRESET_XBOX360:

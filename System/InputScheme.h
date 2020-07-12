@@ -51,25 +51,25 @@ namespace RTE {
 		/// Gets the number of the device that this scheme is using.
 		/// </summary>
 		/// <returns>The device number of this scheme. See InputDevice enumeration.</returns>
-		int GetDevice() const { return m_ActiveDevice; }
+		unsigned short GetDevice() const { return m_ActiveDevice; }
 
 		/// <summary>
 		/// Sets the device this scheme is supposed to use.
 		/// </summary>
 		/// <param name="activeDevice">The number of the device this scheme should use. See InputDevice enumeration.</param>
-		void SetDevice(int activeDevice = 0) { m_ActiveDevice = activeDevice; }
+		void SetDevice(unsigned short activeDevice = 0) { m_ActiveDevice = activeDevice; }
 
 		/// <summary>
 		/// Gets the number of the last preset that this was set to.
 		/// </summary>
 		/// <returns>The last preset number set of this scheme. See InputPreset enumeration.</returns>
-		int GetPreset() const { return m_SchemePreset; }
+		short GetPreset() const { return m_SchemePreset; }
 
 		/// <summary>
 		/// Sets up a specific preset scheme that is sensible and recommended.
 		/// </summary>
 		/// <param name="schemePreset">The preset number to set the scheme to match. See InputPreset enumeration.</param>
-		void SetPreset(int schemePreset = 0);
+		void SetPreset(short schemePreset = 0);
 
 		/// <summary>
 		/// Gets the InputMappings for this.
@@ -93,7 +93,7 @@ namespace RTE {
 		/// Get the deadzone type for this control scheme.
 		/// </summary>
 		/// <returns>Joystick dead zone type this scheme is set to use.</returns>
-		int GetJoystickDeadzoneType() { return m_JoystickDeadzoneType; }
+		short GetJoystickDeadzoneType() { return m_JoystickDeadzoneType; }
 
 		/// <summary>
 		/// Set the deadzone type for this control scheme.
@@ -121,11 +121,11 @@ namespace RTE {
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
-		int m_ActiveDevice; //!< The currently active device for this scheme.		
-		int m_SchemePreset; //!< The preset this scheme was last set to, if any.
+		short m_ActiveDevice; //!< The currently active device for this scheme.
+		short m_SchemePreset; //!< The preset this scheme was last set to, if any.
 
-		float m_JoystickDeadzone; //!< How much of the input to treat like a deadzone input, not registered by the game.	
-		int m_JoystickDeadzoneType; //!< Which deadzone type is used.
+		short m_JoystickDeadzoneType; //!< Which deadzone type is used.
+		float m_JoystickDeadzone; //!< How much of the input to treat like a deadzone input, not registered by the game.
 
 		InputMapping m_InputMapping[INPUT_COUNT]; //!< The device input element mappings.
 

@@ -69,13 +69,13 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// 
+		/// Gets whether server mode is enabled or not.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether server mode is enabled or not.</returns>
 		bool IsServerModeEnabled() const { return m_IsInServerMode; }
 
 		/// <summary>
-		/// 
+		/// Enables server mode.
 		/// </summary>
 		void EnableServerMode() { m_IsInServerMode = true; }
 
@@ -86,10 +86,10 @@ namespace RTE {
 		bool ReadyForSimulation();
 
 		/// <summary>
-		///
+		/// Gets the network player's name.
 		/// </summary>
 		/// <param name="player">The player to check for.</param>
-		/// <returns></returns>
+		/// <returns>A string with the network player's name.</returns>
 		std::string & GetPlayerName(short player) { return m_ClientConnections[player].PlayerName; }
 
 		/// <summary>
@@ -100,22 +100,22 @@ namespace RTE {
 		bool IsPlayerConnected(short player) const { return m_ClientConnections[player].IsActive; }
 
 		/// <summary>
-		/// 
+		/// Sets the port this server will be using.
 		/// </summary>
-		/// <param name="newPort"></param>
+		/// <param name="newPort">The new port to set.</param>
 		void SetServerPort(std::string newPort) { m_ServerPort = newPort; }
 
 		/// <summary>
-		/// 
+		/// Sets whether interlacing is used to reduce bandwidth usage or not.
 		/// </summary>
-		/// <param name="newMode"></param>
+		/// <param name="newMode">Whether to use interlacing or not.</param>
 		void SetInterlacingMode(bool newMode) { m_UseInterlacing = newMode; }
 
 		/// <summary>
-		/// 
+		/// Sets the duration this thread should be put to sleep for in milliseconds.
 		/// </summary>
 		/// <param name="player">The player to set for.</param>
-		/// <param name="msecs"></param>
+		/// <param name="msecs">Milliseconds to sleep for.</param>
 		void SetMSecsToSleep(short player, int msecs) { m_MSecsToSleep[player] = msecs; };
 
 		/// <summary>
@@ -135,7 +135,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the state of this NetworkServer. Supposed to be done every frame before drawing.
 		/// </summary>
-		/// <param name="processInput"></param>
+		/// <param name="processInput">Whether to process packets of player input data or not.</param>
 		void Update(bool processInput = false);
 #pragma endregion
 
@@ -172,13 +172,13 @@ namespace RTE {
 		/// 
 		/// </summary>
 		struct ClientConnection {
-			bool IsActive;
-			RakNet::SystemAddress ClientId;
-			RakNet::SystemAddress InternalId;
-			int ResX;
-			int ResY;
-			std::thread *SendThread;
-			std::string PlayerName;
+			bool IsActive; //!<
+			RakNet::SystemAddress ClientId; //!<
+			RakNet::SystemAddress InternalId; //!<
+			int ResX; //!<
+			int ResY; //!<
+			std::thread *SendThread; //!<
+			std::string PlayerName; //!<
 		};
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.

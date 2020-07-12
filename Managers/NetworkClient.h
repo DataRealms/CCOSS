@@ -88,15 +88,16 @@ namespace RTE {
 		void Disconnect();
 
 		/// <summary>
-		/// 
+		/// Connects to a NAT service and performs punch-through.
 		/// </summary>
-		/// <param name="serviceServerName"></param>
-		/// <param name="serverPort"></param>
-		/// <param name="playerName"></param>
-		/// <param name="serverName"></param>
-		/// <param name="serverPassword"></param>
-		void PerformNATPunchThrough(std::string serviceServerName, unsigned short serverPort, std::string playerName, std::string serverName, std::string serverPassword);
+		/// <param name="serviceServerName">NAT service server name (or address) to use for punch-through.</param>
+		/// <param name="serverPort">NAT service server port.</param>
+		/// <param name="playerName">Player name to be used in network game.</param>
+		/// <param name="serverName">Server name (or address) to connect to.</param>
+		/// <param name="serverPassword">Server password.</param>
+		void PerformNATPunchThrough(std::string serviceServerName, unsigned short serviceServerPort, std::string playerName, std::string serverName, std::string serverPassword);
 
+		// TODO: Figure out
 		/// <summary>
 		/// 
 		/// </summary>
@@ -122,13 +123,13 @@ namespace RTE {
 		static constexpr unsigned short c_PlayerNameCharLimit = 15; //!< Maximum length of the player name.
 		std::string m_PlayerName; //!< The player name the will be used by the client in network games.
 
-		RakNet::RakPeerInterface *m_Client; //!<
+		RakNet::RakPeerInterface *m_Client; //!< The client RakPeerInterface.
 		RakNet::SystemAddress m_ClientID; //!< The client's identifier.
 
 		RakNet::SystemAddress m_ServerID; //!< The server's identifier.
 		RakNet::RakNetGUID m_ServerGUID; //!< The server's Globally Unique Identifier.
 
-		RakNet::NatPunchthroughClient m_NATPunchthroughClient; //!<
+		RakNet::NatPunchthroughClient m_NATPunchthroughClient; //!< The NAT punch-through client.
 		RakNet::SystemAddress m_NATServiceServerID; //!< The NAT server's identifier.
 
 		bool m_UseNATPunchThroughService; //!< Whether to use NAT service for connecting to server.
@@ -142,13 +143,13 @@ namespace RTE {
 		long int m_ReceivedData; //!<
 		long int m_CompressedData; //!<
 
-		int m_ClientInputFps; //!<
-		long long m_LastInputSentTime; //!<
+		int m_ClientInputFps; //!< The rate (in FPS) the client input is sent to the server.
+		long long m_LastInputSentTime; //!< The last time input was sent in real time ticks.
 
 		int m_CurrentFrame; //!<
 
 		Vector m_TargetPos[c_FramesToRemember]; //!<
-		std::list<PostEffect> m_PostEffects[c_FramesToRemember]; //!<
+		std::list<PostEffect> m_PostEffects[c_FramesToRemember]; //!< List of post-effects received from server.
 
 		std::unordered_map<unsigned short, SoundContainer *> m_ServerSounds; //!< Unordered map of SoundContainers received from server. OWNED!!!
 
@@ -265,27 +266,27 @@ namespace RTE {
 		void SendSceneSetupAcceptedMsg();
 
 		/// <summary>
-		/// 
+		/// Receive and handle a packet of terrain change data.
 		/// </summary>
-		/// <param name="packet"></param>
+		/// <param name="packet">The packet to handle.</param>
 		void ReceiveTerrainChangeMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		/// Receive and handle a packet of post-effect data. 
 		/// </summary>
-		/// <param name="packet"></param>
+		/// <param name="packet">The packet to handle.</param>
 		void ReceivePostEffectsMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		/// Receive and handle a packet of sound event data.
 		/// </summary>
-		/// <param name="packet"></param>
+		/// <param name="packet">The packet to handle.</param>
 		void ReceiveSoundEventsMsg(RakNet::Packet *packet);
 
 		/// <summary>
-		/// 
+		/// Receive and handle a packet of music event data.
 		/// </summary>
-		/// <param name="packet"></param>
+		/// <param name="packet">The packet to handle.</param>
 		void ReceiveMusicEventsMsg(RakNet::Packet *packet);
 #pragma endregion
 

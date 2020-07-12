@@ -1339,7 +1339,7 @@ namespace RTE {
 					if (player > -1 && deadZoneType == DeadZoneType::SQUARE && deadZone > 0.0F) {
 						// This one heavily relies on AnalogAxiesValue method of processing joystick data.
 						if (joy[joystick].stick[stick].flags & JOYFLAG_UNSIGNED) {
-							if (std::abs(joy[joystick].stick[stick].axis[axis].pos - 128) > 0.0F && std::abs(joy[joystick].stick[stick].axis[axis].pos - 128) / 128 < deadZone) {
+							if (std::abs(joy[joystick].stick[stick].axis[axis].pos - 128) > 0 && std::abs(joy[joystick].stick[stick].axis[axis].pos - 128) / 128 < deadZone) {
 								joy[joystick].stick[stick].axis[axis].pos = 128;
 								joy[joystick].stick[stick].axis[axis].d1 = 0;
 								joy[joystick].stick[stick].axis[axis].d2 = 0;

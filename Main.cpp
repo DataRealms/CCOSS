@@ -1754,9 +1754,9 @@ bool RunGameLoop() {
 				if (g_MetaMan.GameInProgress()) {
 					g_IntroState = CAMPAIGNFADEIN;
 				} else {
-					Activity * pActivity = g_ActivityMan.GetActivity();
+					const Activity *activity = g_ActivityMan.GetActivity();
 					// If we edited something then return to main menu instead of scenario menu player will probably switch to area/scene editor.
-					if (pActivity && pActivity->GetPresetName() == "None") {
+					if (activity && activity->GetPresetName() == "None") {
 						g_IntroState = MENUAPPEAR;
 					} else {
 						g_IntroState = MAINTOSCENARIO;
@@ -1785,10 +1785,10 @@ bool RunGameLoop() {
 				serverUpdated = true;
 			}
 			if (g_SettingsMan.GetServerSimSleepWhenIdle()) {
-				signed long long ticksToSleep = g_TimerMan.GetTimeToSleep();
+				long long ticksToSleep = g_TimerMan.GetTimeToSleep();
 				if (ticksToSleep > 0) {
-					double secsToSleep = (double)ticksToSleep / (double)g_TimerMan.GetTicksPerSecond();
-					long long milisToSleep = (long long)secsToSleep * (1000);
+					double secsToSleep = static_cast<double>(ticksToSleep) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
+					long long milisToSleep = static_cast<long long>(secsToSleep) * 1000;
 					std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
 				}
 			}

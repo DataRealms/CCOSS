@@ -1531,6 +1531,7 @@ int LuaMan::Create()
                 value("PLAYER_FOUR", 3),
                 value("MAX_PLAYERS", 4)
             ]
+			.def("GetInputDevice", &UInputMan::GetInputDevice)
             .def("ElementPressed", &UInputMan::ElementPressed)
             .def("ElementReleased", &UInputMan::ElementReleased)
             .def("ElementHeld", &UInputMan::ElementHeld)

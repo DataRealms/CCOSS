@@ -77,9 +77,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New shortcut `ALT + W` to generate a detailed 140x55px mini `WorldDump` to be used for scene previews. No relying on `SceneEditor`, stretches over whole image, no ugly cyan bunkers, no actors or glows and has sky gradient.
 
-- All text in textbox (any textbox) can now be selected using `CTRL + A`.
+- All text in TextBox (any TextBox) can now be selected using `CTRL + A`.
 
 - Console can now be resized using `CTRL + UP/DOWN` (arrow keys) while open.
+
+- Added new lua function `UInputMan:GetInputDevice(playerNum)` to get a number value representing the input device used by the specified player. Should be useful for making custom key bindings compatible with different input devices.
 
 ### Changed
 
@@ -130,7 +132,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Game will now Abort with an error message when trying to load a copy of a non-existent `AtomGroup`, `Attachable` or `AEmitter` preset.
 
-- Comboboxes (dropdown lists) can now also be closed by clicking on their top part.
+- ComboBoxes (dropdown lists) can now also be closed by clicking on their top part.
 
 ### Fixed
 
@@ -144,9 +146,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Actors now support their held devices identically while facing to either side. ([Issue #31](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/31))
 
-- Fixed issue where clicking a combobox's scrollbar would release the mouse, thus causing unexpected behavior like not being able to close the list by clicking outside of it.
+- Fixed issue where clicking a ComboBox's scrollbar would release the mouse, thus causing unexpected behavior like not being able to close the list by clicking outside of it.
 
-- Fixed issue where comboboxes did not save the current selection, thus if the combobox was deselected without making a selection then the selection would revert to the default value instead of the last selected value.
+- Fixed issue where ComboBoxes did not save the current selection, thus if the ComboBox was deselected without making a selection then the selection would revert to the default value instead of the last selected value.
 
 - Fixed issue with double clicks and missing clicks in menus (anything that uses AllegroInput).
 

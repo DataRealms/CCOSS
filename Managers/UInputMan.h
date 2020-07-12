@@ -98,6 +98,13 @@ namespace RTE {
 		void SetInputClass(GUIInput *inputClass);
 
 		/// <summary>
+		/// Gets the currently used input device of the specified player.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to get input device for.</param>
+		/// <returns>A number value representing the currently used input device of this player. See InputDevice enumeration for values.</returns>
+		short GetInputDevice(short whichPlayer) const { return m_ControlScheme[whichPlayer].GetDevice(); }
+
+		/// <summary>
 		/// Access a specific players' control scheme.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to get the scheme for.</param>

@@ -16,8 +16,6 @@
 
 #include "RakNetStatistics.h"
 #include "RakSleep.h"
-//#include "GetTime.h"
-//#include "BitStream.h"
 
 #include "LZ4/lz4.h"
 #include "LZ4/lz4hc.h"
@@ -31,7 +29,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::BackgroundSendThreadFunction(NetworkServer *server, int player) {
+	void NetworkServer::BackgroundSendThreadFunction(NetworkServer *server, short player) {
 		while (server->IsServerModeEnabled() && server->IsPlayerConnected(player)) {
 			if (server->NeedToSendSceneSetupData(player) && server->IsSceneAvailable(player)) {
 				server->SendSceneSetupData(player);
@@ -59,7 +57,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::Clear() {
-		for (int i = 0; i < c_MaxClients; i++) {
+		for (short i = 0; i < c_MaxClients; i++) {
 			m_BackBuffer8[i] = 0;
 			m_BackBufferGUI8[i] = 0;
 
@@ -102,7 +100,7 @@ namespace RTE {
 			ClearInputMessages(i);
 		}
 
-		for (int i = 0; i < MAX_STAT_RECORDS; i++) {
+		for (short i = 0; i < MAX_STAT_RECORDS; i++) {
 			m_FramesSent[i] = 0;
 			m_FramesSkipped[i] = 0;
 
@@ -187,7 +185,7 @@ namespace RTE {
 		// We're done with the network
 		RakNet::RakPeerInterface::DestroyInstance(m_Server);
 
-		for (int i = 0; i < c_MaxClients; i++) {
+		for (short i = 0; i < c_MaxClients; i++) {
 			DestroyBackBuffer(i);
 
 			if (m_LZ4CompressionState[i]) { free(m_LZ4CompressionState[i]); }		
@@ -202,12 +200,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool NetworkServer::ReadyForSimulation() {
-		int playersReady = 0;
-		int playersTotal = 0;
+		short playersReady = 0;
+		short playersTotal = 0;
 
-		for (int i = 0; i < c_MaxClients; i++) {
-			if (IsPlayerConnected(i)) { playersTotal++; }
-			if (SendFrameData(i)) { playersReady++; }
+		for (short player = 0; player < c_MaxClients; player++) {
+			if (IsPlayerConnected(player)) { playersTotal++; }
+			if (SendFrameData(player)) { playersReady++; }
 		}
 
 		return playersReady >= playersTotal;
@@ -252,7 +250,7 @@ namespace RTE {
 			m_NATServiceServerID = ConnectBlocking(m_Server, serverName.c_str(), port);
 
 			if (m_NATServiceServerID != RakNet::UNASSIGNED_SYSTEM_ADDRESS) {
-				m_Server->AttachPlugin(&m_NatPunchthroughClient);
+				m_Server->AttachPlugin(&m_NATPunchthroughClient);
 				SendNATServerRegistrationMsg(m_NATServiceServerID);
 			}
 		}
@@ -288,11 +286,11 @@ namespace RTE {
 
 	void NetworkServer::RegisterTerrainChange(SceneMan::TerrainChange terrChange) {
 		if (m_IsInServerMode) {
-			for (int p = 0; p < c_MaxClients; p++) {
-				if (IsPlayerConnected(p)) {
-					m_Mutex[p].lock();
-					m_PendingTerrainChanges[p].push(terrChange);
-					m_Mutex[p].unlock();
+			for (short player = 0; player < c_MaxClients; player++) {
+				if (IsPlayerConnected(player)) {
+					m_Mutex[player].lock();
+					m_PendingTerrainChanges[player].push(terrChange);
+					m_Mutex[player].unlock();
 				}
 			}
 		}
@@ -300,15 +298,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsigned char NetworkServer::GetPacketIdentifier(RakNet::Packet *packet) {
+	unsigned char NetworkServer::GetPacketIdentifier(RakNet::Packet *packet) const {
 		if (packet == 0) {
 			return 255;
 		}
-		if (static_cast<unsigned char>(packet->data[0]) == ID_TIMESTAMP) {
+		if (packet->data[0] == ID_TIMESTAMP) {
 			RakAssert(packet->length > sizeof(RakNet::MessageID) + sizeof(RakNet::Time));
-			return static_cast<unsigned char>(packet->data[sizeof(RakNet::MessageID) + sizeof(RakNet::Time)]);
+			return packet->data[sizeof(RakNet::MessageID) + sizeof(RakNet::Time)];
 		} else {
-			return static_cast<unsigned char>(packet->data[0]);
+			return packet->data[0];
 		}
 	}
 
@@ -361,7 +359,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::SendAcceptedMsg(int player) {
+	void NetworkServer::SendAcceptedMsg(short player) {
 		MsgAccepted msg;
 		msg.Id = ID_SRV_ACCEPTED;
 		m_Server->Send((const char *)&msg, sizeof(MsgAccepted), HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, m_ClientConnections[player].ClientId, false);
@@ -405,7 +403,7 @@ namespace RTE {
 		msg += buf;
 		g_ConsoleMan.PrintString(msg);
 
-		for (int index = 0; index < c_MaxClients; index++) {
+		for (short index = 0; index < c_MaxClients; index++) {
 			if (m_ClientConnections[index].ClientId == packet->systemAddress) {
 				m_ClientConnections[index].ResX = msgReg->ResolutionX;
 				m_ClientConnections[index].ResY = msgReg->ResolutionY;
@@ -444,7 +442,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::ReceiveInputMsg(RakNet::Packet *packet) {
-		const NetworkClient::MsgInput *m = (NetworkClient::MsgInput *)packet->data;
+		const MsgInput *m = (MsgInput *)packet->data;
 
 		int player = -1;
 
@@ -454,7 +452,7 @@ namespace RTE {
 
 		if (player >= 0 && player < c_MaxClients) {
 			// Copy message data
-			NetworkClient::MsgInput msg;
+			MsgInput msg;
 
 			msg.Id = m->Id;
 
@@ -476,7 +474,7 @@ namespace RTE {
 			bool skip = true;
 
 			if (!m_InputMessages[player].empty()) {
-				NetworkClient::MsgInput lastmsg = m_InputMessages[player].back();
+				MsgInput lastmsg = m_InputMessages[player].back();
 
 				if (msg.MouseX != lastmsg.MouseX) { skip = false; }
 				if (msg.MouseY != lastmsg.MouseY) { skip = false; }
@@ -503,7 +501,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::ProcessInputMsg(int player, NetworkClient::MsgInput msg) {
+	void NetworkServer::ProcessInputMsg(short player, MsgInput msg) {
 		if (player >= 0 && player < c_MaxClients) {
 			Vector input;
 			input.m_X = msg.MouseX;
@@ -552,7 +550,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::ClearInputMessages(int player) {
+	void NetworkServer::ClearInputMessages(short player) {
 		if (player >= 0 && player < c_MaxClients) {
 			while (!m_InputMessages[player].empty()) {
 				m_InputMessages[player].pop();
@@ -562,7 +560,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::SendSoundData(int player) {
+	void NetworkServer::SendSoundData(short player) {
 		std::list<AudioMan::NetworkSoundData> events;
 		g_AudioMan.GetSoundEvents(player, events);
 
@@ -625,7 +623,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::SendMusicData(int player) {
+	void NetworkServer::SendMusicData(short player) {
 		std::list<AudioMan::NetworkMusicData> events;
 		g_AudioMan.GetMusicEvents(player, events);
 
@@ -682,18 +680,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::SendSceneSetupData(int player) {
+	void NetworkServer::SendSceneSetupData(short player) {
 		MsgSceneSetup msgSceneSetup;
 		msgSceneSetup.Id = ID_SRV_SCENE_SETUP;
 		msgSceneSetup.SceneId = m_SceneID;
-		msgSceneSetup.Width = g_SceneMan.GetSceneWidth();
-		msgSceneSetup.Height = g_SceneMan.GetSceneHeight();
+		msgSceneSetup.Width = static_cast<short>(g_SceneMan.GetSceneWidth());
+		msgSceneSetup.Height = static_cast<short>(g_SceneMan.GetSceneHeight());
 		msgSceneSetup.SceneWrapsX = g_SceneMan.SceneWrapsX();
 
 		Scene *scene = g_SceneMan.GetScene();
 
 		std::list<SceneLayer *> sceneLayers = scene->GetBackLayers();
-		int index = 0;
+		short index = 0;
 
 		for (SceneLayer * &layer : sceneLayers) {
 			// Recalculate layers internal values for this player
@@ -754,9 +752,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::ReceiveSceneSetupDataAccepted(RakNet::Packet *packet) {
-		int player = -1;
+		short player = -1;
 
-		for (int index = 0; index < c_MaxClients; index++) {
+		for (short index = 0; index < c_MaxClients; index++) {
 			if (m_ClientConnections[index].ClientId == packet->systemAddress) { player = index; }
 		}
 
@@ -769,7 +767,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::SendSceneData(int player) {
+	void NetworkServer::SendSceneData(short player) {
 		// Check for congestion
 		RakNet::RakNetStatistics rns;
 
@@ -880,7 +878,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::ClearTerrainChangeQueue(int player) {
+	void NetworkServer::ClearTerrainChangeQueue(short player) {
 		m_Mutex[player].lock();
 		while (!m_PendingTerrainChanges[player].empty()) {
 			m_PendingTerrainChanges[player].pop();
@@ -893,7 +891,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool NetworkServer::NeedToProcessTerrainChanges(int player) {
+	bool NetworkServer::NeedToProcessTerrainChanges(short player) {
 		bool result;
 
 		m_Mutex[player].lock();
@@ -905,7 +903,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::ProcessTerrainChanges(int player) {
+	void NetworkServer::ProcessTerrainChanges(short player) {
 		m_Mutex[player].lock();
 		while (!m_PendingTerrainChanges[player].empty()) {
 			m_CurrentTerrainChanges[player].push(m_PendingTerrainChanges[player].front());
@@ -954,7 +952,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::SendTerrainChangeMsg(int player, SceneMan::TerrainChange terrChange) {
+	void NetworkServer::SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrChange) {
 		if (terrChange.w == 1 && terrChange.h == 1) {
 			MsgTerrainChange msg;
 			msg.Id = ID_SRV_TERRAIN;
@@ -1037,14 +1035,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::ReceiveSceneAcceptedMsg(RakNet::Packet *packet) {
-		for (int player = 0; player < c_MaxClients; player++) {
+		for (short player = 0; player < c_MaxClients; player++) {
 			if (m_ClientConnections[player].ClientId == packet->systemAddress) { m_SendFrameData[player] = true; }
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::SendSceneEndMsg(int player) {
+	void NetworkServer::SendSceneEndMsg(short player) {
 		MsgSceneEnd msg;
 		msg.Id = ID_SRV_SCENE_END;
 		m_Server->Send((const char *)&msg, sizeof(MsgSceneSetup), HIGH_PRIORITY, RELIABLE_ORDERED, 0, m_ClientConnections[player].ClientId, false);
@@ -1052,14 +1050,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::CreateBackBuffer(int player, int w, int h) {
+	void NetworkServer::CreateBackBuffer(short player, int w, int h) {
 		m_BackBuffer8[player] = create_bitmap_ex(8, w, h);
 		m_BackBufferGUI8[player] = create_bitmap_ex(8, w, h);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::DestroyBackBuffer(int player) {
+	void NetworkServer::DestroyBackBuffer(short player) {
 		if (m_BackBuffer8) { destroy_bitmap(m_BackBuffer8[player]); }
 		m_BackBuffer8[player] = 0;
 
@@ -1069,14 +1067,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::SendFrameSetupMsg(int player) {
+	void NetworkServer::SendFrameSetupMsg(short player) {
 		MsgFrameSetup msgFrameSetup;
 		msgFrameSetup.Id = ID_SRV_FRAME_SETUP;
 		msgFrameSetup.FrameNumber = m_FrameNumbers[player];
 		msgFrameSetup.TargetPosX = g_FrameMan.GetTargetPos(player).m_X;
 		msgFrameSetup.TargetPosY = g_FrameMan.GetTargetPos(player).m_Y;
 
-		for (int i = 0; i < c_MaxBackgroundLayersTransmitted; i++) {
+		for (int i = 0; i < c_MaxLayersStoredForNetwork; i++) {
 			msgFrameSetup.OffsetX[i] = g_FrameMan.SLOffset[player][i].m_X;
 			msgFrameSetup.OffsetY[i] = g_FrameMan.SLOffset[player][i].m_Y;
 		}
@@ -1099,7 +1097,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::SendPostEffectData(int player) {
+	void NetworkServer::SendPostEffectData(short player) {
 		std::list<PostEffect> effects;
 		g_PostProcessMan.GetNetworkPostEffectsList(player, effects);
 
@@ -1155,7 +1153,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int NetworkServer::SendFrame(int player) {
+	int NetworkServer::SendFrame(short player) {
 		long long currentTicks = g_TimerMan.GetRealTickCount();
 		double fps = static_cast<double>(m_EncodingFps);
 		double secsPerFrame = 1.0 / fps;
@@ -1167,17 +1165,17 @@ namespace RTE {
 
 		// Is it time to send frame?
 		// Return time to sleep till next frame in microseconds
-		m_MSecsSinceLastUpdate[player] = secsSinceLastFrame * 1000;
+		m_MSecsSinceLastUpdate[player] = static_cast<long>(secsSinceLastFrame * 1000.0);
 
 		if (secsSinceLastFrame < secsPerFrame) {
 			SetThreadExitReason(player, NetworkServer::TOO_EARLY_TO_SEND);
-			return (secsPerFrame - secsSinceLastFrame) * microSeconds;
+			return static_cast<int>((secsPerFrame - secsSinceLastFrame) * microSeconds);
 		}
 
 		// Accumulate delayed frames counter for stats
 		if (secsSinceLastFrame > secsPerFrame * 1.5) { m_DelayedFrames[player]++; }
 
-		m_MsecPerFrame[player] = secsSinceLastFrame * 1000;
+		m_MsecPerFrame[player] = static_cast<int>(secsSinceLastFrame * 1000.0);
 
 		m_LastFrameSentTime[player] = g_TimerMan.GetRealTickCount();
 
@@ -1192,7 +1190,7 @@ namespace RTE {
 		if (rns.isLimitedByCongestionControl) {
 			SetThreadExitReason(player, NetworkServer::SEND_BUFFER_IS_LIMITED_BY_CONGESTION);
 			m_FramesSkipped[player]++;
-			return (1 / fps) * microSeconds;
+			return static_cast<int>((1.0 / fps) * microSeconds);
 		}
 		if (rns.messageInSendBuffer[MEDIUM_PRIORITY] > 1000) {
 			SetThreadExitReason(player, NetworkServer::SEND_BUFFER_IS_FULL);
@@ -1477,7 +1475,7 @@ namespace RTE {
 		ProcessTerrainChanges(player);
 
 		double secsSinceSendStart = static_cast<double>(g_TimerMan.GetRealTickCount() - currentTicks) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
-		m_MsecPerSendCall[player] = secsSinceSendStart * 1000;
+		m_MsecPerSendCall[player] = static_cast<int>(secsSinceSendStart * 1000.0);
 
 		SetThreadExitReason(player, NetworkServer::NORMAL);
 		return 0;
@@ -1485,7 +1483,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::UpdateStats(int player) {
+	void NetworkServer::UpdateStats(short player) {
 		long long currentTicks = g_TimerMan.GetRealTickCount();
 
 		if (currentTicks - m_LastStatResetTime[player] > g_TimerMan.GetTicksPerSecond() || currentTicks - m_LastStatResetTime[player] < -g_TimerMan.GetTicksPerSecond()) {
@@ -1570,7 +1568,7 @@ namespace RTE {
 		m_EmptyBlocks[c_MaxClients] = 0;
 
 
-		for (int i = 0; i < MAX_STAT_RECORDS; i++) {
+		for (short i = 0; i < MAX_STAT_RECORDS; i++) {
 			// Update sum
 			if (i < c_MaxClients) {
 				m_FramesSent[c_MaxClients] += m_FramesSent[i];
@@ -1602,11 +1600,12 @@ namespace RTE {
 
 			int fps = 0;
 			if (m_MsecPerFrame[i] > 0) { fps = 1000 / m_MsecPerFrame[i]; }
+			std::string playerName = IsPlayerConnected(i) ? GetPlayerName(i) : "- NO PLAYER -";
 
 			// Jesus christ
 			sprintf_s(buf, sizeof(buf),
 					  "%s\nPing %u\nCmp Mbit: %.1f\nUnc Mbit: %.1f\nR: %.2f\nFrame Kbit: %lu\nGlow Kbit: %lu\nSound Kbit: %lu\nScene Kbit: %lu\nFrames sent: %uK\nFrame skipped: %uK\nBlocks full: %uK\nBlocks empty: %uK\nBlk Ratio: %.2f\nFPS: %d\nSend Ms %d\nTotal Data %lu MB",
-					  (i == c_MaxClients) ? "- TOTALS - " : IsPlayerConnected(i) ? GetPlayerName(i).c_str() : "- NO PLAYER -",
+					  (i == c_MaxClients) ? "- TOTALS - " : playerName.c_str(),
 					  (i < c_MaxClients) ? m_Ping[i] : 0,
 					  static_cast<double>(m_DataSentCurrent[i][STAT_SHOWN]) / 125000,
 					  static_cast<double>(m_DataUncompressedCurrent[i][STAT_SHOWN]) / 125000,
@@ -1637,7 +1636,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	RakNet::SystemAddress NetworkServer::ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, int port) {
+	RakNet::SystemAddress NetworkServer::ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port) {
 		if (rakPeer->Connect(address, port, 0, 0) != RakNet::CONNECTION_ATTEMPT_STARTED) {
 			return RakNet::UNASSIGNED_SYSTEM_ADDRESS;
 		}
@@ -1663,35 +1662,35 @@ namespace RTE {
 		HandleNetworkPackets();
 
 		if (processInput) {
-			for (int p = 0; p < c_MaxClients; p++) {
-				if (!m_InputMessages[p].empty()) {
-					NetworkClient::MsgInput msg = m_InputMessages[p].front();
-					m_InputMessages[p].pop();
-					ProcessInputMsg(p, msg);
+			for (short player = 0; player < c_MaxClients; player++) {
+				if (!m_InputMessages[player].empty()) {
+					MsgInput msg = m_InputMessages[player].front();
+					m_InputMessages[player].pop();
+					ProcessInputMsg(player, msg);
 				}
 			}
 
 			// Process reset votes
 			int votesNeeded = 0;
 			int votes = 0;
-			for (int p = 0; p < c_MaxClients; p++) {
-				if (IsPlayerConnected(p)) {
+			for (short player = 0; player < c_MaxClients; player++) {
+				if (IsPlayerConnected(player)) {
 					votesNeeded++;
-					if (m_ResetActivityVotes[p]) { votes++; }
+					if (m_ResetActivityVotes[player]) { votes++; }
 				}
 			}
 			if (votes > 0) {
 				char buf[128];
 
 				sprintf_s(buf, sizeof(buf), "Voting to end activity %d of %d", votes, votesNeeded);
-				for (int i = 0; i < c_MaxClients; i++) {
+				for (short i = 0; i < c_MaxClients; i++) {
 					g_FrameMan.SetScreenText(buf, i, 0, -1, false);
 				}
 
 			}
 			if (votes == votesNeeded && votesNeeded > 0) {
-				for (int p = 0; p < c_MaxClients; p++) {
-					m_ResetActivityVotes[p] = false;
+				for (short player = 0; player < c_MaxClients; player++) {
+					m_ResetActivityVotes[player] = false;
 				}
 				// Only reset gameplay activities, and not server lobby
 				if (g_InActivity && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
@@ -1705,19 +1704,19 @@ namespace RTE {
 		DrawStatisticsData();
 
 		// Clear sound events for unconnected players because AudioMan does not know about their state and stores broadcast sounds to their event lists
-		std::list<AudioMan::NetworkSoundData> ls;
-		std::list<AudioMan::NetworkMusicData> lm;
+		std::list<AudioMan::NetworkSoundData> soundList;
+		std::list<AudioMan::NetworkMusicData> musicList;
 
-		for (int i = 0; i < c_MaxClients; i++) {
-			if (!IsPlayerConnected(i)) {
-				g_AudioMan.GetSoundEvents(i, ls);
-				g_AudioMan.GetMusicEvents(i, lm);
+		for (short player = 0; player < c_MaxClients; player++) {
+			if (!IsPlayerConnected(player)) {
+				g_AudioMan.GetSoundEvents(player, soundList);
+				g_AudioMan.GetMusicEvents(player, musicList);
 			}
 		}
 
 		if (g_SettingsMan.GetServerSleepWhenIdle() && m_LastPackedReceived.IsPastRealMS(10000)) {
-			int playersConnected = 0;
-			for (int player = 0; player < c_MaxClients; player++)
+			short playersConnected = 0;
+			for (short player = 0; player < c_MaxClients; player++)
 				if (IsPlayerConnected(player)) {
 					playersConnected++;
 					break;

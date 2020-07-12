@@ -40,7 +40,7 @@ namespace RTE {
 		for (int f = 0; f < c_FramesToRemember; f++) {
 			m_TargetPos[f].Reset();
 		}
-		for (int i = 0; i < c_MaxBackgroundLayersTransmitted; i++) {
+		for (int i = 0; i < c_MaxLayersStoredForNetwork; i++) {
 			m_BackgroundBitmaps[i] = 0;
 		}
 		for (int i = 0; i < MAX_MOUSE_BUTTONS; i++) {
@@ -131,7 +131,7 @@ namespace RTE {
 			g_ConsoleMan.PrintString("CLIENT: Unable to connect");
 		} else {
 			m_Client->SetTimeoutTime(5000, m_NATServiceServerID);
-			m_Client->AttachPlugin(&m_NatPunchthroughClient);
+			m_Client->AttachPlugin(&m_NATPunchthroughClient);
 			SendServerGUIDRequest(m_NATServiceServerID, serverName, serverPassword);
 		}
 	}
@@ -159,15 +159,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsigned char NetworkClient::GetPacketIdentifier(RakNet::Packet *packet) {
+	unsigned char NetworkClient::GetPacketIdentifier(RakNet::Packet *packet) const {
 		if (packet == 0) {
 			return 255;
 		}
-		if (static_cast<unsigned char>(packet->data[0]) == ID_TIMESTAMP) {
+		if (packet->data[0] == ID_TIMESTAMP) {
 			RakAssert(packet->length > sizeof(RakNet::MessageID) + sizeof(RakNet::Time));
-			return static_cast<unsigned char>(packet->data[sizeof(RakNet::MessageID) + sizeof(RakNet::Time)]);
+			return packet->data[sizeof(RakNet::MessageID) + sizeof(RakNet::Time)];
 		} else {
-			return static_cast<unsigned char>(packet->data[0]);
+			return packet->data[0];
 		}
 	}
 
@@ -214,7 +214,7 @@ namespace RTE {
 	void NetworkClient::ReceiveServerGUIDAnswer(RakNet::Packet *packet) {
 		const MsgGetServerAnswer *msg = (MsgGetServerAnswer *)packet->data;
 		m_ServerGUID.FromString(msg->ServerGuid);
-		m_NatPunchthroughClient.OpenNAT(m_ServerGUID, m_NATServiceServerID);
+		m_NATPunchthroughClient.OpenNAT(m_ServerGUID, m_NATServiceServerID);
 		g_ConsoleMan.PrintString("CLIENT: Open NAT to server");
 		g_ConsoleMan.PrintString(m_ServerGUID.ToString());
 	}
@@ -286,7 +286,7 @@ namespace RTE {
 		m_TargetPos[m_CurrentFrame].m_X = frameData->TargetPosX;
 		m_TargetPos[m_CurrentFrame].m_Y = frameData->TargetPosY;
 
-		for (int i = 0; i < c_MaxBackgroundLayersTransmitted; i++) {
+		for (int i = 0; i < c_MaxLayersStoredForNetwork; i++) {
 			m_BackgroundLayers[m_CurrentFrame][i].OffsetX = frameData->OffsetX[i];
 			m_BackgroundLayers[m_CurrentFrame][i].OffsetY = frameData->OffsetY[i];
 		}
@@ -696,32 +696,30 @@ namespace RTE {
 					// Regular scroll
 					offsetX = std::floorf(m_BackgroundLayers[frame][i].OffsetX * m_BackgroundLayers[frame][i].ScrollRatioX);
 					offsetY = std::floorf(m_BackgroundLayers[frame][i].OffsetY * m_BackgroundLayers[frame][i].ScrollRatioY);
+			
+					// Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0
+					// ForceBounds(offsetX, offsetY);
+					// WrapPosition(offsetX, offsetY);
+					int width = m_BackgroundBitmaps[i]->w;
+					int height = m_BackgroundBitmaps[i]->h;
 
-					{
-						// Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0
-						// ForceBounds(offsetX, offsetY);
-						// WrapPosition(offsetX, offsetY);
-						int width = m_BackgroundBitmaps[i]->w;
-						int height = m_BackgroundBitmaps[i]->h;
-
-						if (m_BackgroundLayers[frame][i].WrapX) {
-							if (offsetX < 0) {
-								while (offsetX < 0) {
-									offsetX += width;
-								}
-							} else if (offsetX >= width) {
-								offsetX %= width;
+					if (m_BackgroundLayers[frame][i].WrapX) {
+						if (offsetX < 0) {
+							while (offsetX < 0) {
+								offsetX += width;
 							}
+						} else if (offsetX >= width) {
+							offsetX %= width;
 						}
+					}
 
-						if (m_BackgroundLayers[frame][i].WrapY) {
-							if (offsetY < 0) {
-								while (offsetY < 0) {
-									offsetY += height;
-								}
-							} else if (offsetY >= height) {
-								offsetY %= height;
+					if (m_BackgroundLayers[frame][i].WrapY) {
+						if (offsetY < 0) {
+							while (offsetY < 0) {
+								offsetY += height;
 							}
+						} else if (offsetY >= height) {
+							offsetY %= height;
 						}
 					}
 				}

@@ -5,8 +5,6 @@
 
 namespace RTE {
 
-#define c_MaxBackgroundLayersTransmitted 10 
-
 	/// <summary>
 	/// Enumeration for the different types of network message IDs.
 	/// </summary>
@@ -106,8 +104,8 @@ namespace RTE {
 		short int TargetPosX;
 		short int TargetPosY;
 
-		float OffsetX[c_MaxBackgroundLayersTransmitted];
-		float OffsetY[c_MaxBackgroundLayersTransmitted];
+		float OffsetX[c_MaxLayersStoredForNetwork];
+		float OffsetY[c_MaxLayersStoredForNetwork];
 	};
 
 	/// <summary>
@@ -192,7 +190,7 @@ namespace RTE {
 		bool SceneWrapsX;
 
 		short int BackgroundLayerCount;
-		LightweightSceneLayer BackgroundLayers[c_MaxBackgroundLayersTransmitted];
+		LightweightSceneLayer BackgroundLayers[c_MaxLayersStoredForNetwork];
 	};
 
 	/// <summary>
@@ -276,6 +274,26 @@ namespace RTE {
 		unsigned char Id;
 		unsigned char FrameNumber;
 		int MusicEventsCount;
+	};
+
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgInput {
+		unsigned char Id;
+
+		int MouseX;
+		int MouseY;
+		bool MouseButtonPressed[MAX_MOUSE_BUTTONS];
+		bool MouseButtonReleased[MAX_MOUSE_BUTTONS];
+		bool MouseButtonHeld[MAX_MOUSE_BUTTONS];
+		bool ResetActivityVote;
+
+		int MouseWheelMoved;
+
+		unsigned int InputElementPressed;
+		unsigned int InputElementReleased;
+		unsigned int InputElementHeld;
 	};
 
 // TODO: Figure out why we need this and add comment.

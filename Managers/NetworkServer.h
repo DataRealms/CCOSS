@@ -88,18 +88,18 @@ namespace RTE {
 		bool ReadyForSimulation();
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
-		/// <param name="player"></param>
+		/// <param name="player">The player to check for.</param>
 		/// <returns></returns>
-		std::string & GetPlayerName(int player) { return m_ClientConnections[player].PlayerName; }
+		std::string & GetPlayerName(short player) { return m_ClientConnections[player].PlayerName; }
 
 		/// <summary>
-		/// 
+		/// Gets whether the specified player is connected to the server or not.
 		/// </summary>
-		/// <param name="player"></param>
-		/// <returns></returns>
-		bool IsPlayerConnected(int player) const { return m_ClientConnections[player].IsActive; }
+		/// <param name="player">The player to check for.</param>
+		/// <returns>Whether the player is connected to the server or not.</returns>
+		bool IsPlayerConnected(short player) const { return m_ClientConnections[player].IsActive; }
 
 		/// <summary>
 		/// 
@@ -116,16 +116,16 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="player"></param>
+		/// <param name="player">The player to set for.</param>
 		/// <param name="msecs"></param>
-		void SetMSecsToSleep(int player, int msecs) { m_MSecsToSleep[player] = msecs; };
+		void SetMSecsToSleep(short player, int msecs) { m_MSecsToSleep[player] = msecs; };
 
 		/// <summary>
-		/// 
+		/// Gets the ping time of the specified player.
 		/// </summary>
-		/// <param name="player"></param>
-		/// <returns></returns>
-		unsigned short GetPing(int player) const { return m_Ping[player]; }
+		/// <param name="player">The player to get for.</param>
+		/// <returns>The ping time of the player.</returns>
+		unsigned short GetPing(short player) const { return m_Ping[player]; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -135,7 +135,7 @@ namespace RTE {
 		void Start();
 
 		/// <summary>
-		/// 
+		/// Updates the state of this NetworkServer. Supposed to be done every frame before drawing.
 		/// </summary>
 		/// <param name="processInput"></param>
 		void Update(bool processInput = false);
@@ -198,7 +198,7 @@ namespace RTE {
 
 		ClientConnection m_ClientConnections[c_MaxClients]; //!<
 
-		RakNet::NatPunchthroughClient m_NatPunchthroughClient; //!<
+		RakNet::NatPunchthroughClient m_NATPunchthroughClient; //!<
 		RakNet::SystemAddress m_NATServiceServerID; //!<
 		bool m_NatServerConnected; //!<
 
@@ -243,7 +243,7 @@ namespace RTE {
 		std::mutex m_Mutex[c_MaxClients]; //!<
 
 		//std::mutex m_InputQueueMutex[c_MaxClients];
-		std::queue<NetworkClient::MsgInput>m_InputMessages[c_MaxClients]; //!<
+		std::queue<MsgInput>m_InputMessages[c_MaxClients]; //!<
 
 		unsigned char m_SceneID; //!<
 
@@ -251,8 +251,7 @@ namespace RTE {
 
 		int m_FrameNumbers[c_MaxClients]; //!<
 
-		unsigned int m_Ping[c_MaxClients]; //!<
-
+		unsigned short m_Ping[c_MaxClients]; //!< 
 		Timer m_PingTimer[c_MaxClients]; //!<
 
 		Timer m_LastPackedReceived; //!<
@@ -273,8 +272,8 @@ namespace RTE {
 		long long m_LastFrameSentTime[c_MaxClients]; //!<
 		long long m_LastStatResetTime[c_MaxClients]; //!<
 
-		unsigned int m_FramesSent[MAX_STAT_RECORDS]; //!<
-		unsigned int m_FramesSkipped[MAX_STAT_RECORDS]; //!<
+		unsigned int m_FramesSent[MAX_STAT_RECORDS]; //!< Number of frames sent by the server to each client and total.
+		unsigned int m_FramesSkipped[MAX_STAT_RECORDS]; //!< Numbers of frames skipped by the server for each client and total.
 
 		unsigned long m_DataSentCurrent[MAX_STAT_RECORDS][2]; //!<
 		unsigned long m_DataSentTotal[MAX_STAT_RECORDS]; //!<
@@ -305,14 +304,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="server"></param>
 		/// <param name="player"></param>
-		static void BackgroundSendThreadFunction(NetworkServer *server, int player);
+		static void BackgroundSendThreadFunction(NetworkServer *server, short player);
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="reason"></param>
-		void SetThreadExitReason(int player, int reason) { m_ThreadExitReason[player] = reason; };
+		void SetThreadExitReason(short player, int reason) { m_ThreadExitReason[player] = reason; };
 #pragma endregion
 
 #pragma region Network Event Handling
@@ -321,7 +320,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="packet"></param>
 		/// <returns></returns>
-		unsigned char GetPacketIdentifier(RakNet::Packet *packet);
+		unsigned char GetPacketIdentifier(RakNet::Packet *packet) const;
 
 		/// <summary>
 		/// 
@@ -333,7 +332,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void SendAcceptedMsg(int player);
+		void SendAcceptedMsg(short player);
 
 		/// <summary>
 		/// 
@@ -364,25 +363,25 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="msg"></param>
-		void ProcessInputMsg(int player, NetworkClient::MsgInput msg);
+		void ProcessInputMsg(short player, MsgInput msg);
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void ClearInputMessages(int player);
+		void ClearInputMessages(short player);
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void SendSoundData(int player);
+		void SendSoundData(short player);
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void SendMusicData(int player);
+		void SendMusicData(short player);
 #pragma endregion
 
 #pragma region Network Scene Handling
@@ -391,20 +390,20 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
-		bool IsSceneAvailable(int player) const { return m_SceneAvailable[player]; }
+		bool IsSceneAvailable(short player) const { return m_SceneAvailable[player]; }
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
-		bool NeedToSendSceneSetupData(int player) const { return m_SendSceneSetupData[player]; }
+		bool NeedToSendSceneSetupData(short player) const { return m_SendSceneSetupData[player]; }
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void SendSceneSetupData(int player);
+		void SendSceneSetupData(short player);
 
 		/// <summary>
 		/// 
@@ -417,39 +416,39 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
-		bool NeedToSendSceneData(int player) const { return m_SendSceneData[player]; }
+		bool NeedToSendSceneData(short player) const { return m_SendSceneData[player]; }
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void SendSceneData(int player);
+		void SendSceneData(short player);
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void NetworkServer::ClearTerrainChangeQueue(int player);
+		void NetworkServer::ClearTerrainChangeQueue(short player);
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
-		bool NeedToProcessTerrainChanges(int player);
+		bool NeedToProcessTerrainChanges(short player);
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void ProcessTerrainChanges(int player);
+		void ProcessTerrainChanges(short player);
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
 		/// <param name="terrChange"></param>
-		void SendTerrainChangeMsg(int player, SceneMan::TerrainChange terrChange);
+		void SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrChange);
 
 		/// <summary>
 		/// 
@@ -461,7 +460,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void SendSceneEndMsg(int player);
+		void SendSceneEndMsg(short player);
 #pragma endregion
 
 #pragma region Network Frame Handling and Drawing
@@ -471,39 +470,39 @@ namespace RTE {
 		/// <param name="player"></param>
 		/// <param name="w"></param>
 		/// <param name="h"></param>
-		void CreateBackBuffer(int player, int w, int h);
+		void CreateBackBuffer(short player, int w, int h);
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void DestroyBackBuffer(int player);
+		void DestroyBackBuffer(short player);
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void SendFrameSetupMsg(int player);
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="player"></param>
-		/// <returns></returns>
-		bool SendFrameData(int player) const { return m_SendFrameData[player]; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="player"></param>
-		void SendPostEffectData(int player);
+		void SendFrameSetupMsg(short player);
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
 		/// <returns></returns>
-		int SendFrame(int player);
+		bool SendFrameData(short player) const { return m_SendFrameData[player]; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="player"></param>
+		void SendPostEffectData(short player);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="player"></param>
+		/// <returns></returns>
+		int SendFrame(short player);
 #pragma endregion
 
 #pragma region Network Stats Handling
@@ -511,7 +510,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void UpdateStats(int player);
+		void UpdateStats(short player);
 
 		/// <summary>
 		/// 
@@ -527,9 +526,9 @@ namespace RTE {
 #pragma endregion
 
 		/// <summary>
-		/// 
+		/// Gets the Globally Unique Identifier of the server.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The GUID of the server.</returns>
 		RakNet::RakNetGUID GetServerGUID() const { return m_Server->GetGuidFromSystemAddress(RakNet::UNASSIGNED_SYSTEM_ADDRESS); }
 
 		/// <summary>
@@ -539,7 +538,7 @@ namespace RTE {
 		/// <param name="address"></param>
 		/// <param name="port"></param>
 		/// <returns></returns>
-		RakNet::SystemAddress NetworkServer::ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, int port);
+		RakNet::SystemAddress NetworkServer::ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port);
 
 		/// <summary>
 		/// Clears all the member variables of this NetworkServer, effectively resetting the members of this abstraction level only.

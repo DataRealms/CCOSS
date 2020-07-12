@@ -120,14 +120,14 @@ namespace RTE {
 
 	void PerformanceMan::CalculateSamplePercentages() {
 		for (unsigned short counter = 0; counter < PERF_COUNT; ++counter) {
-			unsigned short samplePercentage = static_cast<unsigned int>(static_cast<float>(m_PerfData[counter][m_Sample]) / static_cast<float>(m_PerfData[counter][PERF_SIM_TOTAL]) * 100);
+			unsigned short samplePercentage = static_cast<unsigned short>(static_cast<float>(m_PerfData[counter][m_Sample]) / static_cast<float>(m_PerfData[counter][PERF_SIM_TOTAL]) * 100);
 			m_PerfPercentages[counter][m_Sample] = samplePercentage;
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsigned long long PerformanceMan::GetPerformanceCounterAverage(PerformanceCounters counter) {
+	unsigned long long PerformanceMan::GetPerformanceCounterAverage(PerformanceCounters counter) const {
 		unsigned long long totalPerformanceMeasurement = 0;
 		unsigned short sample = m_Sample;
 		for (unsigned short i = 0; i < c_Average; ++i) {

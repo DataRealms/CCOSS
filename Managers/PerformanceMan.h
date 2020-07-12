@@ -196,7 +196,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="counter">Counter to get average value from.</param>
 		/// <returns>An average value for specified counter.</returns>
-		unsigned long long GetPerformanceCounterAverage(PerformanceCounters counter);
+		unsigned long long GetPerformanceCounterAverage(PerformanceCounters counter) const;
 #pragma endregion
 
 		/// <summary>

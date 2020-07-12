@@ -1,16 +1,3 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            LuaMan.cpp
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Source file for the LuaMan class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "LuaMan.h"
 #include "System.h"
 
@@ -39,20 +26,19 @@
 #include "MOSRotating.h"
 #include "Scene.h"
 #include "SLTerrain.h"
+#include "TerrainObject.h"
 #include "SoundContainer.h"
 #include "TDExplosive.h"
 #include "ThrownDevice.h"
 #include "Turret.h"
 
 #include "DataModule.h"
-#include "SLTerrain.h"
 #include "GAScripted.h"
 #include "Box.h"
 #include "BuyMenuGUI.h"
 #include "SceneEditorGUI.h"
 #include "MetaPlayer.h"
 #include "GUIBanner.h"
-#include "TerrainObject.h"
 
 #include "MetaMan.h"
 #include "ConsoleMan.h"
@@ -423,11 +409,7 @@ struct GAScriptedWrapper:
 };
 */
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this LuaMan, effectively
-//                  resetting the members of this abstraction level only.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LuaMan::Clear()
 {
@@ -445,10 +427,7 @@ void LuaMan::Clear()
 		m_Files[i] = 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the LuaMan object ready for use.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int LuaMan::Create()
 {
@@ -1455,12 +1434,11 @@ int LuaMan::Create()
         class_<TimerMan>("TimerManager")
             .property("TicksPerSecond", &TimerMan::GetTicksPerSecondInLua)
             .property("TimeScale", &TimerMan::GetTimeScale, &TimerMan::SetTimeScale)
-            .def("EnableAveraging", &TimerMan::EnableAveraging)
             .property("RealToSimCap", &TimerMan::GetRealToSimCap, &TimerMan::SetRealToSimCap)
             .property("DeltaTimeTicks", &TimerMan::GetDeltaTimeTicks, &TimerMan::SetDeltaTimeTicks)
             .property("DeltaTimeSecs", &TimerMan::GetDeltaTimeSecs, &TimerMan::SetDeltaTimeSecs)
             .property("DeltaTimeMS", &TimerMan::GetDeltaTimeMS)
-            .def("PauseSim", &TimerMan::PauseSim)
+            //.def("PauseSim", &TimerMan::PauseSim) // Forcing this during activity will kill input and your only option will be to Alt+F4. Need to rework input so it's not tied to sim time for this to work.
             .property("OneSimUpdatePerFrame", &TimerMan::IsOneSimUpdatePerFrame, &TimerMan::SetOneSimUpdatePerFrame)
             .def("TimeForSimUpdate", &TimerMan::TimeForSimUpdate)
             .def("DrawnSimUpdate", &TimerMan::DrawnSimUpdate),
@@ -1507,7 +1485,6 @@ int LuaMan::Create()
             .def("GetOfficialModuleCount", &PresetMan::GetOfficialModuleCount)
             .def("AddPreset", &PresetMan::AddEntityPreset)
 			.def_readwrite("Modules", &PresetMan::m_pDataModules, return_stl_iterator)
-			// Disambiguate overloaded member funcs
             .def("GetPreset", (const Entity *(PresetMan::*)(string, string, int))&PresetMan::GetEntityPreset)
             .def("GetPreset", (const Entity *(PresetMan::*)(string, string, string))&PresetMan::GetEntityPreset)
             .def("GetLoadout", (Actor * (PresetMan::*)(std::string, std::string, bool))&PresetMan::GetLoadout, adopt(result))
@@ -1561,11 +1538,11 @@ int LuaMan::Create()
             .def("KeyReleased", &UInputMan::KeyReleased)
             .def("KeyHeld", &UInputMan::KeyHeld)
             .def("WhichKeyHeld", &UInputMan::WhichKeyHeld)
-            .def("MouseButtonPressed", (bool (UInputMan::*)(int,int))&UInputMan::MouseButtonPressed) 
+            .def("MouseButtonPressed", (bool (UInputMan::*)(int,short))&UInputMan::MouseButtonPressed) 
 			.def("MouseButtonPressed", (bool (UInputMan::*)(int))&UInputMan::MouseButtonPressed) 
-			.def("MouseButtonReleased", (bool (UInputMan::*)(int, int))&UInputMan::MouseButtonReleased)
+			.def("MouseButtonReleased", (bool (UInputMan::*)(int, short))&UInputMan::MouseButtonReleased)
 			.def("MouseButtonReleased", (bool (UInputMan::*)(int))&UInputMan::MouseButtonReleased)
-			.def("MouseButtonHeld", (bool (UInputMan::*)(int, int))&UInputMan::MouseButtonHeld)
+			.def("MouseButtonHeld", (bool (UInputMan::*)(int, short))&UInputMan::MouseButtonHeld)
 			.def("MouseButtonHeld", (bool (UInputMan::*)(int))&UInputMan::MouseButtonHeld)
 			.def("MouseWheelMoved", &UInputMan::MouseWheelMoved)
             .def("JoyButtonPressed", &UInputMan::JoyButtonPressed)
@@ -1989,8 +1966,7 @@ int LuaMan::Create()
 			.def_readwrite("PieMenuSlices", &GameActivity::m_CurrentPieMenuSlices, return_stl_iterator),
 		
 		class_<PieMenuGUI::Slice>("Slice")
-			.enum_("Direction")
-			[
+			.enum_("Direction") [
 				value("NONE", 0),
 				value("UP", 1),
 				value("RIGHT", 2),
@@ -1998,46 +1974,45 @@ int LuaMan::Create()
 				value("LEFT", 4)
 			]
 
-			.enum_("Type")
-				[
-					value("PSI_NONE", 0),
-					value("PSI_PICKUP", 1),
-					value("PSI_DROP", 2),
-					value("PSI_NEXTITEM", 3),
-					value("PSI_PREVITEM", 4),
-					value("PSI_RELOAD", 5),
-					value("PSI_BUYMENU", 6),
-					value("PSI_STATS", 7),
-					value("PSI_MINIMAP", 8),
-					value("PSI_FORMSQUAD", 9),
-					value("PSI_CEASEFIRE", 10),
-					value("PSI_SENTRY", 11),
-					value("PSI_PATROL", 12),
-					value("PSI_BRAINHUNT", 13),
-					value("PSI_GOLDDIG", 14),
-					value("PSI_GOTO", 15),
-					value("PSI_RETURN", 16),
-					value("PSI_STAY", 17),
-					value("PSI_DELIVER", 18),
-					value("PSI_SCUTTLE", 19),
-					value("PSI_DONE", 20),
-					value("PSI_LOAD", 21),
-					value("PSI_SAVE", 22),
-					value("PSI_NEW", 23),
-					value("PSI_PICK", 24),
-					value("PSI_MOVE", 25),
-					value("PSI_REMOVE", 26),
-					value("PSI_INFRONT", 27),
-					value("PSI_BEHIND", 28),
-					value("PSI_ZOOMIN", 29),
-					value("PSI_ZOOMOUT", 30),
-					value("PSI_TEAM1", 31),
-					value("PSI_TEAM2", 32),
-					value("PSI_TEAM3", 33),
-					value("PSI_TEAM4", 34),
-					value("PSI_SCRIPTED", 35),
-					value("PSI_COUNT", 36)
-				]
+			.enum_("Type") [
+				value("PSI_NONE", 0),
+				value("PSI_PICKUP", 1),
+				value("PSI_DROP", 2),
+				value("PSI_NEXTITEM", 3),
+				value("PSI_PREVITEM", 4),
+				value("PSI_RELOAD", 5),
+				value("PSI_BUYMENU", 6),
+				value("PSI_STATS", 7),
+				value("PSI_MINIMAP", 8),
+				value("PSI_FORMSQUAD", 9),
+				value("PSI_CEASEFIRE", 10),
+				value("PSI_SENTRY", 11),
+				value("PSI_PATROL", 12),
+				value("PSI_BRAINHUNT", 13),
+				value("PSI_GOLDDIG", 14),
+				value("PSI_GOTO", 15),
+				value("PSI_RETURN", 16),
+				value("PSI_STAY", 17),
+				value("PSI_DELIVER", 18),
+				value("PSI_SCUTTLE", 19),
+				value("PSI_DONE", 20),
+				value("PSI_LOAD", 21),
+				value("PSI_SAVE", 22),
+				value("PSI_NEW", 23),
+				value("PSI_PICK", 24),
+				value("PSI_MOVE", 25),
+				value("PSI_REMOVE", 26),
+				value("PSI_INFRONT", 27),
+				value("PSI_BEHIND", 28),
+				value("PSI_ZOOMIN", 29),
+				value("PSI_ZOOMOUT", 30),
+				value("PSI_TEAM1", 31),
+				value("PSI_TEAM2", 32),
+				value("PSI_TEAM3", 33),
+				value("PSI_TEAM4", 34),
+				value("PSI_SCRIPTED", 35),
+				value("PSI_COUNT", 36)
+			]
 
 			.def(constructor<>())
 			.property("FunctionName", &PieMenuGUI::Slice::GetFunctionName)
@@ -2075,7 +2050,6 @@ int LuaMan::Create()
 
         class_<MetaMan>("MetaManager")
             .property("GameName", &MetaMan::GetGameName, &MetaMan::SetGameName)
-//            .property("GUI", &MetaMan::GetGUI)
             .property("PlayerTurn", &MetaMan::GetPlayerTurn)
             .property("PlayerCount", &MetaMan::GetPlayerCount)
             .def("GetTeamOfPlayer", &MetaMan::GetTeamOfPlayer)
@@ -2277,16 +2251,14 @@ int LuaMan::Create()
     return 0;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void LuaMan::ClearUserModuleCache()
 {
 	luaL_dostring(m_pMasterState, "for m, n in pairs(package.loaded) do if type(n) == \"boolean\" then package.loaded[m] = nil end end");
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the LuaMan object.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LuaMan::Destroy()
 {
@@ -2299,12 +2271,7 @@ void LuaMan::Destroy()
     Clear();
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SavePointerAsGlobal
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Takes a pointer to an object and saves it in the Lua state as a global
-//                  of a specified variable name.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int LuaMan::SavePointerAsGlobal(void *pToSave, string globalName)
 {
@@ -2316,11 +2283,7 @@ int LuaMan::SavePointerAsGlobal(void *pToSave, string globalName)
     return 0;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GlobalIsDefined
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks if there is anything defined on a specific global var in Lua.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool LuaMan::GlobalIsDefined(string globalName)
 {
@@ -2334,11 +2297,7 @@ bool LuaMan::GlobalIsDefined(string globalName)
     return isDefined;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          TableEntryIsDefined
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks if there is anything defined in a specific index of a table.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool LuaMan::TableEntryIsDefined(string tableName, string indexName)
 {
@@ -2362,12 +2321,7 @@ bool LuaMan::TableEntryIsDefined(string tableName, string indexName)
     return isDefined;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ExpressionIsTrue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the result of an arbirary expression in lua as evaluating to
-//                  true or false.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool LuaMan::ExpressionIsTrue(string expression, bool consoleErrors)
 {
@@ -2525,13 +2479,6 @@ int LuaMan::RunScriptFile(const std::string &filePath, bool consoleErrors) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetNewPresetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns an ID string unique to this runtime for use by original presets
-//                  that have scripts associated with them.
-
 string LuaMan::GetNewPresetID()
 {
     // Generate the new ID
@@ -2543,13 +2490,7 @@ string LuaMan::GetNewPresetID()
     return string(newID);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetNewObjectID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns an ID string unique to this runtime for use by individual
-//                  objects that are also tracked in the Lua state and have scripts
-//                  associated with them.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 string LuaMan::GetNewObjectID()
 {
@@ -2562,23 +2503,14 @@ string LuaMan::GetNewObjectID()
     return string(newID);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the state of this LuaMan. Supposed to be done every frame
-//                  before drawing.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LuaMan::Update()
 {
 	lua_gc(m_pMasterState, LUA_GCSTEP, 1);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FileOpen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Opens file. You can open files only inside .rte folders of game directory.
-//					you can open no more that MAX_OPEN_FILES file simultaneously.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int LuaMan::FileOpen(std::string filename, std::string mode)
 {
@@ -2626,10 +2558,7 @@ int LuaMan::FileOpen(std::string filename, std::string mode)
 	return -1;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FileClose
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Closes a previously opened file.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LuaMan::FileClose(int file)
 {
@@ -2640,11 +2569,7 @@ void LuaMan::FileClose(int file)
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FileCloseAll
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Closes all previously opened files.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LuaMan::FileCloseAll()
 {
@@ -2652,13 +2577,7 @@ void LuaMan::FileCloseAll()
 		FileClose(file);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FileReadLine
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a line from file.
-// Arguments:       File number.
-// Return value:    Line from file, or empty string on error.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::string LuaMan::FileReadLine(int file)
 {
@@ -2672,12 +2591,7 @@ std::string LuaMan::FileReadLine(int file)
 	return "";
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FileWriteLine
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Writes a text line to file.
-// Arguments:       File number.
-// Return value:    None.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LuaMan::FileWriteLine(int file, std::string line)
 {
@@ -2687,12 +2601,7 @@ void LuaMan::FileWriteLine(int file, std::string line)
 		g_ConsoleMan.PrintString("Error: Tried to write to a closed file.");
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FileEOF
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns true if end of file was reached
-// Arguments:       File number.
-// Return value:    Whether or not EOF was reached.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool LuaMan::FileEOF(int file)
 {
@@ -2701,5 +2610,4 @@ bool LuaMan::FileEOF(int file)
 			return false;
 	return true;
 }
-
-} // namespace RTE
+}

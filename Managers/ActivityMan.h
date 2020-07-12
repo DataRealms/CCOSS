@@ -69,7 +69,7 @@ namespace RTE {
 		/// Gets the Activity set to use a copy of for next restart. Ownership is NOT transferred!
 		/// </summary>
 		/// <returns>The Activity to put into effect next time ResetActivity is called.</returns>
-		Activity * GetStartActivity() { return m_StartActivity; }
+		Activity * GetStartActivity() const { return m_StartActivity; }
 
 		/// <summary>
 		/// Sets a new Activity to copy for next restart. You have to use RestartActivity to get it going. Ownership IS transferred!
@@ -81,7 +81,7 @@ namespace RTE {
 		/// Gets the current Activity in effect. Won't be what has been set by SetStartActivity unless RestartActivity has been called since.
 		/// </summary>
 		/// <returns>The current Activity in effect. Will be 0 if no Activity is going.</returns>
-		Activity * GetActivity() { return m_Activity; }
+		Activity * GetActivity() const { return m_Activity; }
 
 		/// <summary>
 		/// Indicates whether the game is currently running or not (not editing, over or paused)

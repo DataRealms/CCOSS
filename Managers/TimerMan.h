@@ -61,7 +61,7 @@ namespace RTE {
 		/// Returns current time stamp in microseconds unrelated to TimerMan updates. Can be used to measure time intervals during single frame update.
 		/// </summary>
 		/// <returns>Current time stamp in microseconds.</returns>
-		long long GetAbsoulteTime();
+		long long GetAbsoulteTime() const;
 
 		/// <summary>
 		/// Enables or disables the averaging of time measurements done each Update(). These help smooth out and prevent choppy animation.

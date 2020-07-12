@@ -27,26 +27,6 @@ namespace RTE {
 
 	public:
 
-		/// <summary>
-		/// 
-		/// </summary>
-		struct MsgInput {
-			unsigned char Id;
-
-			int MouseX;
-			int MouseY;
-			bool MouseButtonPressed[MAX_MOUSE_BUTTONS];
-			bool MouseButtonReleased[MAX_MOUSE_BUTTONS];
-			bool MouseButtonHeld[MAX_MOUSE_BUTTONS];
-			bool ResetActivityVote;
-
-			int MouseWheelMoved;
-
-			unsigned int InputElementPressed;
-			unsigned int InputElementReleased;
-			unsigned int InputElementHeld;
-		};
-
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a NetworkClient object in system memory. Create() should be called before using the object.
@@ -143,19 +123,19 @@ namespace RTE {
 		std::string m_PlayerName; //!< The player name the will be used by the client in network games.
 
 		RakNet::RakPeerInterface *m_Client; //!<
-		RakNet::SystemAddress m_ClientID; //!<
+		RakNet::SystemAddress m_ClientID; //!< The client's identifier.
 
-		RakNet::SystemAddress m_ServerID; //!<
+		RakNet::SystemAddress m_ServerID; //!< The server's identifier.
 		RakNet::RakNetGUID m_ServerGUID; //!< The server's Globally Unique Identifier.
 
-		RakNet::NatPunchthroughClient m_NatPunchthroughClient; //!<
-		RakNet::SystemAddress m_NATServiceServerID; //!<
+		RakNet::NatPunchthroughClient m_NATPunchthroughClient; //!<
+		RakNet::SystemAddress m_NATServiceServerID; //!< The NAT server's identifier.
 
-		bool m_UseNATPunchThroughService; //!<
+		bool m_UseNATPunchThroughService; //!< Whether to use NAT service for connecting to server.
 
-		bool m_IsConnected; //!<
-		bool m_IsRegistered; //!<
-		bool m_IsNATPunched; //!<
+		bool m_IsConnected; //!< Is client connected to server.
+		bool m_IsRegistered; //!< Is client registered at server.
+		bool m_IsNATPunched; //!< Is client connected through NAT service.
 
 		unsigned char m_PixelLineBuffer[c_MaxPixelLineBufferSize]; //!<
 
@@ -172,14 +152,14 @@ namespace RTE {
 
 		std::unordered_map<unsigned short, SoundContainer *> m_ServerSounds; //!< Unordered map of SoundContainers received from server. OWNED!!!
 
-		unsigned char m_SceneID; //!<
+		unsigned char m_SceneID; //!< 
 		int m_CurrentSceneLayerReceived; //!<
 
 		BITMAP *m_SceneBackgroundBitmap; //!<
 		BITMAP *m_SceneForegroundBitmap; //!<
 
-		BITMAP *m_BackgroundBitmaps[c_MaxBackgroundLayersTransmitted]; //!<
-		LightweightSceneLayer m_BackgroundLayers[c_FramesToRemember][c_MaxBackgroundLayersTransmitted]; //!<
+		BITMAP *m_BackgroundBitmaps[c_MaxLayersStoredForNetwork]; //!<
+		LightweightSceneLayer m_BackgroundLayers[c_FramesToRemember][c_MaxLayersStoredForNetwork]; //!<
 		int m_ActiveBackgroundLayers; //!<
 		bool m_SceneWrapsX; //!<
 		int m_SceneWidth; //!<
@@ -203,7 +183,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="packet"></param>
 		/// <returns></returns>
-		unsigned char GetPacketIdentifier(RakNet::Packet *packet);
+		unsigned char GetPacketIdentifier(RakNet::Packet *packet) const;
 
 		/// <summary>
 		/// 

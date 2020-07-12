@@ -34,7 +34,7 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// 
+		/// Enumeration for the mouse button actions.
 		/// </summary>
 		enum MenuCursorButtons {
 			MENU_PRIMARY = 0,
@@ -90,7 +90,6 @@ namespace RTE {
 		int Update();
 #pragma endregion
 
-
 #pragma region Control Scheme and Input Mapping Handling
 		/// <summary>
 		/// Sets the input class for use if one is available.
@@ -103,14 +102,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichPlayer">Which player to get the scheme for.</param>
 		/// <returns>A pointer to the requested player's control scheme. Ownership is NOT transferred!</returns>
-		InputScheme * GetControlScheme(int whichPlayer) { return m_OverrideInput ? &m_ControlScheme[0] : &m_ControlScheme[whichPlayer]; }
+		InputScheme * GetControlScheme(short whichPlayer) { return m_OverrideInput ? &m_ControlScheme[0] : &m_ControlScheme[whichPlayer]; }
 
 		/// <summary>
 		/// Get the current device Icon of a specific player's scheme.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to get the scheme device icon of.</param>
 		/// <returns>A const pointer to the requested player's control scheme icon. Ownership is NOT transferred!</returns>
-		const Icon * GetSchemeIcon(int whichPlayer);
+		const Icon * GetSchemeIcon(short whichPlayer) const;
 
 		/// <summary>
 		/// Get the current device Icon of a specific device.
@@ -124,7 +123,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichPlayer">Which player to affect.</param>
 		/// <param name="whichInput">Which input element to clear all mappings of.</param>
-		void ClearMapping(int whichPlayer, int whichInput) { m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset(); }
+		void ClearMapping(short whichPlayer, int whichInput) { m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset(); }
 
 		/// <summary>
 		/// Gets the name of the key/mouse/joystick button/direction that a particular input element is mapped to.
@@ -132,7 +131,7 @@ namespace RTE {
 		/// <param name="whichPlayer">Which player to look up.</param>
 		/// <param name="whichElement">Which input element to look up.</param>
 		/// <returns>A string with the appropriate clear text description of the mapped thing.</returns>
-		std::string GetMappingName(int whichPlayer, int whichElement);
+		std::string GetMappingName(short whichPlayer, int whichElement);
 
 		/// <summary>
 		/// Gets which keyboard key is mapped to a specific input element.
@@ -140,7 +139,7 @@ namespace RTE {
 		/// <param name="whichPlayer">Which player to look up.</param>
 		/// <param name="whichInput">Which input element to look up.</param>
 		/// <returns>Which keyboard key is mapped to the specified player and element.</returns>
-		int GetKeyMapping(int whichPlayer, int whichInput) { return m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].GetKey(); }
+		int GetKeyMapping(short whichPlayer, int whichInput) { return m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].GetKey(); }
 
 		/// <summary>
 		/// Sets a keyboard key mapped to a specific input element.
@@ -148,7 +147,7 @@ namespace RTE {
 		/// <param name="whichPlayer">Which player to do this for.</param>
 		/// <param name="whichInput">Which input element to map to.</param>
 		/// <param name="whichKey">The scancode of which keyboard key to map to above input element.</param>
-		void SetKeyMapping(int whichPlayer, int whichInput, int whichKey) { m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].SetKey(whichKey); }
+		void SetKeyMapping(short whichPlayer, int whichInput, int whichKey) { m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].SetKey(whichKey); }
 
 		/// <summary>
 		/// Gets which joystick button is mapped to a specific input element.
@@ -156,7 +155,7 @@ namespace RTE {
 		/// <param name="whichPlayer">Which player to look up.</param>
 		/// <param name="whichInput">Which input element to look up.</param>
 		/// <returns>Which joystick button is mapped to the specified player and element.</returns>
-		int GetButtonMapping(int whichPlayer, int whichInput) { return m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].GetJoyButton(); }
+		int GetButtonMapping(short whichPlayer, int whichInput) { return m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].GetJoyButton(); }
 
 		/// <summary>
 		/// Sets a joystick button mapped to a specific input element.
@@ -164,7 +163,7 @@ namespace RTE {
 		/// <param name="whichPlayer">Which player to do this for.</param>
 		/// <param name="whichInput">Which input element to map to.</param>
 		/// <param name="whichButton">Which joystick button to map to above input element.</param>
-		void SetButtonMapping(int whichPlayer, int whichInput, int whichButton) { m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].SetJoyButton(whichButton); }
+		void SetButtonMapping(short whichPlayer, int whichInput, int whichButton) { m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].SetJoyButton(whichButton); }
 
 		/// <summary>
 		/// Checks for the any key press this frame and creates an input mapping for a specific player accordingly.
@@ -172,7 +171,7 @@ namespace RTE {
 		/// <param name="whichPlayer">Which player to do create a map for.</param>
 		/// <param name="whichInput">Which input element to map to for that player.</param>
 		/// <returns>Whether there were any key presses this frame and therefore whether a mapping was successfully captured or not.</returns>
-		bool CaptureKeyMapping(int whichPlayer, int whichInput);
+		bool CaptureKeyMapping(short whichPlayer, int whichInput);
 
 		/// <summary>
 		/// Checks for the any button press this frame and creates an input mapping for a specific player accordingly.
@@ -181,7 +180,7 @@ namespace RTE {
 		/// <param name="whichJoy">Which joystick to scan for button presses.</param>
 		/// <param name="whichInput">Which input element to map to for that player.</param>
 		/// <returns>Whether there were any button presses this frame and therefore whether a mapping was successfully captured or not.</returns>
-		bool CaptureButtonMapping(int whichPlayer, int whichJoy, int whichInput);
+		bool CaptureButtonMapping(short whichPlayer, int whichJoy, int whichInput);
 
 		/// <summary>
 		/// Checks for the any joystick pad or stick direction press this frame and creates an input mapping for a specific player accordingly.
@@ -190,7 +189,7 @@ namespace RTE {
 		/// <param name="whichJoy">Which joystick to scan for pad and stick direction presses.</param>
 		/// <param name="whichInput">Which input element to map to for that player.</param>
 		/// <returns>Whether there were any direction presses this frame and therefore whether a mapping was successfully captured or not.</returns>
-		bool CaptureDirectionMapping(int whichPlayer, int whichJoy, int whichInput);
+		bool CaptureDirectionMapping(short whichPlayer, int whichJoy, int whichInput);
 
 		/// <summary>
 		/// Checks for the any button or direction press this frame and creates an input mapping for a specific player accordingly.
@@ -199,7 +198,7 @@ namespace RTE {
 		/// <param name="whichJoy">Which joystick to scan for button and stick presses.</param>
 		/// <param name="whichInput">Which input element to map to for that player.</param>
 		/// <returns>Whether there were any button or stick presses this frame and therefore whether a mapping was successfully captured or not.</returns>
-		bool CaptureJoystickMapping(int whichPlayer, int whichJoy, int whichInput);
+		bool CaptureJoystickMapping(short whichPlayer, int whichJoy, int whichInput);
 #pragma endregion
 
 #pragma region General Input Handling
@@ -214,14 +213,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <returns>The analog axis values ranging between -1.0 to 1.0, in both axes.</returns>
-		Vector AnalogMoveValues(int whichPlayer = 0);
+		Vector AnalogMoveValues(short whichPlayer = 0);
 
 		/// <summary>
 		/// Gets the analog aiming values of a specific player's control scheme.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <returns>The analog axis values ranging between -1.0 to 1.0, in both axes.</returns>
-		Vector AnalogAimValues(int whichPlayer = 0);
+		Vector AnalogAimValues(short whichPlayer = 0);
 
 		/// <summary>
 		/// Shows whether a specific input element was held during the last update.
@@ -229,7 +228,7 @@ namespace RTE {
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <param name="whichElement">Which element to check for..</param>
 		/// <returns>Element held or not.</returns>
-		bool ElementHeld(int whichPlayer, int whichElement);
+		bool ElementHeld(short whichPlayer, int whichElement);
 
 		/// <summary>
 		/// Shows whether a specific input element was depressed between the last update and the one previous to it.
@@ -237,7 +236,7 @@ namespace RTE {
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <param name="whichElement">Which element to check for..</param>
 		/// <returns>Element pressed or not.</returns>
-		bool ElementPressed(int whichPlayer, int whichElement);
+		bool ElementPressed(short whichPlayer, int whichElement);
 
 		/// <summary>
 		/// Shows whether a specific input element was released between the last update and the one previous to it.
@@ -245,7 +244,7 @@ namespace RTE {
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <param name="whichElement">Which element to check for..</param>
 		/// <returns>Element released or not.</returns>
-		bool ElementReleased(int whichPlayer, int whichElement);
+		bool ElementReleased(short whichPlayer, int whichElement);
 
 		/// <summary>
 		/// Gets the generic direction input from any and all players which can affect a shared menu cursor. Normalized to 1.0 max.
@@ -365,7 +364,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichPlayer">Which player to get movement for. If the player doesn't use the mouse this always returns a zero vector.</param>
 		/// <returns>The relative mouse movements, in both axes.</returns>
-		Vector GetMouseMovement(int whichPlayer = -1);
+		Vector GetMouseMovement(short whichPlayer = -1);
 
 		/// <summary>
 		/// Set the mouse's analog emulation output to be of a specific normalized magnitude.
@@ -378,12 +377,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newPos">Where to place the mouse.</param>
 		/// <param name="whichPlayer">Which player is trying to control the mouse. Only the player with actual control over the mouse will be affected. -1 means do it regardless of player.</param>
-		void SetMousePos(Vector &newPos, int whichPlayer = -1);
+		void SetMousePos(Vector &newPos, short whichPlayer = -1);
 
 		/// <summary>
 		/// Gets mouse sensitivity.
 		/// </summary>
-		/// <returns>Returns current mouse sensitivity.</returns>
+		/// <returns>The current mouse sensitivity.</returns>
 		float GetMouseSensitivity() const { return m_MouseSensitivity; }
 
 		/// <summary>
@@ -398,7 +397,7 @@ namespace RTE {
 		/// <param name="whichButton">Which button to check for.</param>
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <returns>Held or not.</returns>
-		bool MouseButtonHeld(int whichButton, int whichPlayer);
+		bool MouseButtonHeld(int whichButton, short whichPlayer);
 
 		/// <summary>
 		/// (ONLY FOR LUA BACKWARD COMPATIBILITY) Shows whether a mouse button is being held down right now.
@@ -413,7 +412,7 @@ namespace RTE {
 		/// <param name="whichButton">Which button to check for.</param>
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <returns>Pressed or not.</returns>
-		bool MouseButtonPressed(int whichButton, int whichPlayer);
+		bool MouseButtonPressed(int whichButton, short whichPlayer);
 
 		/// <summary>
 		/// (ONLY FOR LUA BACKWARD COMPATIBILITY) Shows whether a mouse button was pressed between the last update and the one previous to it.
@@ -428,7 +427,7 @@ namespace RTE {
 		/// <param name="whichButton">Which button to check for.</param>
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <returns>Released or not.</returns>
-		bool MouseButtonReleased(int whichButton, int whichPlayer);
+		bool MouseButtonReleased(int whichButton, short whichPlayer);
 
 		/// <summary>
 		/// (ONLY FOR LUA BACKWARD COMPATIBILITY) Shows whether a mouse button was released between the last update and the one previous to it.
@@ -443,13 +442,12 @@ namespace RTE {
 		/// <returns>The direction the mouse wheel has been moved which is past that threshold. 0 means not past, negative means moved down, positive means moved up.</returns>
 		int MouseWheelMoved() const { return m_MouseWheelChange; }
 
-		// TODO: fill
 		/// <summary>
-		/// 
+		/// Gets the relative mouse wheel position for the specified player.
 		/// </summary>
-		/// <param name="player"></param>
-		/// <returns></returns>
-		int MouseWheelMovedByPlayer(int player) const { return (m_OverrideInput && player >= 0 && player < MAX_PLAYERS) ? m_NetworkMouseWheelState[player] : m_MouseWheelChange; }
+		/// <param name="player">The player to get mouse wheel position for.</param>
+		/// <returns>The relative mouse wheel position for the specified player.</returns>
+		int MouseWheelMovedByPlayer(short player) const { return (m_OverrideInput && player >= 0 && player < MAX_PLAYERS) ? m_NetworkMouseWheelState[player] : m_MouseWheelChange; }
 
 		/// <summary>
 		/// Return true if there is any mouse button presses at all.
@@ -466,7 +464,7 @@ namespace RTE {
 		/// Which player is trying to control the mouse.
 		/// Only the player with actual control over the mouse will affect its trapping here. -1 means change mouse trapping regardless of player.
 		/// </param>
-		void TrapMousePos(bool trap = true, int whichPlayer = -1);
+		void TrapMousePos(bool trap = true, short whichPlayer = -1);
 
 		/// <summary>
 		/// Forces the mouse within a box on the screen.
@@ -476,13 +474,13 @@ namespace RTE {
 		/// <param name="width">The width of the box.</param>
 		/// <param name="height">The height of the box.</param>
 		/// <param name="whichPlayer">Which player is trying to control the mouse. Only the player with actual control over the mouse will be affected. -1 means do it regardless of player.</param>
-		void ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer = -1);
+		void ForceMouseWithinBox(int x, int y, int width, int height, short whichPlayer = -1);
 
 		/// <summary>
 		/// Forces the mouse within a specific player's screen area.
 		/// </summary>
 		/// <param name="whichPlayer">Which player's screen to constrain the mouse to. Only the player with actual control over the mouse will be affected.</param>
-		void ForceMouseWithinPlayerScreen(int whichPlayer);
+		void ForceMouseWithinPlayerScreen(short whichPlayer);
 #pragma endregion
 
 #pragma region Joystick Handling
@@ -618,18 +616,18 @@ namespace RTE {
 		void SetMultiplayerMode(bool value) { m_OverrideInput = value; }
 
 		/// <summary>
-		/// 
+		/// Gets the position of the mouse for a player during network multiplayer.
 		/// </summary>
-		/// <param name="player"></param>
-		/// <returns></returns>
-		Vector GetNetworkAccumulatedRawMouseMovement(int player);
+		/// <param name="player">The player to get for.</param>
+		/// <returns>The position of the mouse for the specified player</returns>
+		Vector GetNetworkAccumulatedRawMouseMovement(short player);
 
 		/// <summary>
-		/// 
+		/// Sets the position of the mouse for a player during network multiplayer.
 		/// </summary>
-		/// <param name="player"></param>
-		/// <param name="input"></param>
-		void SetNetworkMouseMovement(int player, Vector input) { m_NetworkAccumulatedRawMouseMovement[player] = input; }
+		/// <param name="player">The player to set for.</param>
+		/// <param name="input">The new position of the mouse.</param>
+		void SetNetworkMouseMovement(short player, Vector input) { m_NetworkAccumulatedRawMouseMovement[player] = input; }
 
 		/// <summary>
 		/// Sets whether an input element is held by a player during network multiplayer.
@@ -637,7 +635,7 @@ namespace RTE {
 		/// <param name="player">Which player to set for.</param>
 		/// <param name="element">Which input element to set for.</param>
 		/// <param name="state">The new state of the input element. True or false.</param>
-		void SetNetworkInputElementHeldState(int player, int element, bool state);
+		void SetNetworkInputElementHeldState(short player, int element, bool state);
 
 		/// <summary>
 		/// Sets whether an input element is pressed by a player during network multiplayer.
@@ -645,7 +643,7 @@ namespace RTE {
 		/// <param name="player">Which player to set for.</param>
 		/// <param name="element">Which input element to set for.</param>
 		/// <param name="state">The new state of the input element. True or false.</param>
-		void SetNetworkInputElementPressedState(int player, int element, bool state);
+		void SetNetworkInputElementPressedState(short player, int element, bool state);
 
 		/// <summary>
 		/// Sets whether an input element is released by a player during network multiplayer.
@@ -653,7 +651,7 @@ namespace RTE {
 		/// <param name="player">Which player to set for.</param>
 		/// <param name="element">Which input element to set for.</param>
 		/// <param name="state">The new state of the input element. True or false.</param>
-		void SetNetworkInputElementReleasedState(int player, int element, bool state);
+		void SetNetworkInputElementReleasedState(short player, int element, bool state);
 
 		/// <summary>
 		/// Sets whether a mouse button is held by a player during network multiplayer.
@@ -661,7 +659,7 @@ namespace RTE {
 		/// <param name="player">Which player to set for.</param>
 		/// <param name="whichButton">Which mouse button to set for.</param>
 		/// <param name="state">The new state of the mouse button. True or false.</param>
-		void SetNetworkMouseButtonHeldState(int player, int whichButton, bool state);
+		void SetNetworkMouseButtonHeldState(short player, int whichButton, bool state);
 
 		/// <summary>
 		/// Sets whether a mouse button is pressed by a player during network multiplayer.
@@ -669,7 +667,7 @@ namespace RTE {
 		/// <param name="player">Which player to set for.</param>
 		/// <param name="whichButton">Which mouse button to set for.</param>
 		/// <param name="state">The new state of the mouse button. True or false.</param>
-		void SetNetworkMouseButtonPressedState(int player, int whichButton, bool state);
+		void SetNetworkMouseButtonPressedState(short player, int whichButton, bool state);
 
 		/// <summary>
 		/// Sets whether a mouse button is released by a player during network multiplayer.
@@ -677,31 +675,31 @@ namespace RTE {
 		/// <param name="player">Which player to set for.</param>
 		/// <param name="whichButton">Which mouse button to set for.</param>
 		/// <param name="state">The new state of the mouse button. True or false.</param>
-		void SetNetworkMouseButtonReleasedState(int player, int whichButton, bool state);
+		void SetNetworkMouseButtonReleasedState(short player, int whichButton, bool state);
 
 		/// <summary>
-		/// 
+		/// Sets the state of the mouse wheel for a player during network multiplayer.
 		/// </summary>
-		/// <param name="player"></param>
-		/// <param name="state"></param>
-		void SetNetworkMouseWheelState(int player, int state);
+		/// <param name="player">The player to set for.</param>
+		/// <param name="state">The new state of the mouse wheel.</param>
+		void SetNetworkMouseWheelState(short player, int state);
 
 		/// <summary>
-		/// 
+		/// Gets whether the specified input element is pressed during network multiplayer.
 		/// </summary>
-		/// <param name="element"></param>
-		/// <returns></returns>
+		/// <param name="element">The input element to check for.</param>
+		/// <returns>Whether the specified input element is pressed or not.</returns>
 		bool AccumulatedElementPressed(int element) { return (element < 0 || element >= INPUT_COUNT) ? false : m_NetworkAccumulatedElementPressed[element]; }
 
 		/// <summary>
-		/// 
+		/// Gets whether the specified input element is released during network multiplayer.
 		/// </summary>
-		/// <param name="element"></param>
-		/// <returns></returns>
+		/// <param name="element">The input element to check for.</param>
+		/// <returns>Whether the specified input element is released or not.</returns>
 		bool AccumulatedElementReleased(int element) const { return (element < 0 || element >= INPUT_COUNT) ? false : m_NetworkAccumulatedElementReleased[element]; }
 
 		/// <summary>
-		/// 
+		/// Clears all the accumulated input element states.
 		/// </summary>
 		void ClearAccumulatedStates();
 #pragma endregion
@@ -755,11 +753,9 @@ namespace RTE {
 		/// This is to avoid having the window fly away because the user clicked the title bar.
 		/// </summary>
 		bool m_PrepareToEnableMouseMoving;
-
-		Vector m_NetworkAccumulatedRawMouseMovement[MAX_PLAYERS]; //!<
-
-		bool m_NetworkAccumulatedElementPressed[INPUT_COUNT]; //!<
-		bool m_NetworkAccumulatedElementReleased[INPUT_COUNT]; //!<
+ 
+		bool m_NetworkAccumulatedElementPressed[INPUT_COUNT]; //!< Whether an input element is pressed or not during network multiplayer.
+		bool m_NetworkAccumulatedElementReleased[INPUT_COUNT]; //!< Whether an input element is released or not during network multiplayer.
 
 		bool m_NetworkInputElementHeld[MAX_PLAYERS][INPUT_COUNT]; //!< Whether an input element is held by a player during network multiplayer.
 		bool m_NetworkInputElementPressed[MAX_PLAYERS][INPUT_COUNT]; //!< Whether an input element is pressed by a player during network multiplayer.
@@ -769,11 +765,11 @@ namespace RTE {
 		bool m_NetworkMouseButtonPressedState[MAX_PLAYERS][MAX_MOUSE_BUTTONS]; //!< Whether a mouse button is pressed by a player during network multiplayer.
 		bool m_NetworkMouseButtonReleasedState[MAX_PLAYERS][MAX_MOUSE_BUTTONS]; //!< Whether a mouse button is released by a player during network multiplayer.
 
-		int m_NetworkMouseWheelState[MAX_PLAYERS]; //!< The position 
+		Vector m_NetworkAccumulatedRawMouseMovement[MAX_PLAYERS]; //!< The position of the mouse for each player during network multiplayer.
+		Vector m_NetworkAnalogMoveData[MAX_PLAYERS]; //!< Mouse analog movement data for each player during network multiplayer. 
+		int m_NetworkMouseWheelState[MAX_PLAYERS]; //!< The position of a player's mouse wheel during network multiplayer.
 
-		Vector m_NetworkAnalogMoveData[MAX_PLAYERS]; //!<
-
-		bool m_TrapMousePosPerPlayer[MAX_PLAYERS]; //!<
+		bool m_TrapMousePosPerPlayer[MAX_PLAYERS]; //!< Whether to trap the mouse position to the middle of the screen for each player during network multiplayer.
 
 	private:
 

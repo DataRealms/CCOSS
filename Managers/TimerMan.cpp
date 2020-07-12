@@ -35,8 +35,7 @@ namespace RTE {
 		QueryPerformanceFrequency(&tempLInt);
 		m_TicksPerSecond = tempLInt.QuadPart;
 
-		// Reset the real time setting so that we can measure how much real time
-		// has passed till the next Update.
+		// Reset the real time setting so that we can measure how much real time has passed till the next Update.
 		ResetTime();
 
 		// Calculate a reasonable delta time in ticks, based on the now known frequency
@@ -50,7 +49,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	long long TimerMan::GetAbsoulteTime() {
+	long long TimerMan::GetAbsoulteTime() const {
 		long long ticks;
 		LARGE_INTEGER tickReading;
 
@@ -72,7 +71,6 @@ namespace RTE {
 		QueryPerformanceCounter(&tempLInt);
 		m_StartTime = tempLInt.QuadPart;
 
-		// Reset the counters
 		m_RealTimeTicks = 0;
 		m_SimAccumulator = 0;
 		m_SimTimeTicks = 0;

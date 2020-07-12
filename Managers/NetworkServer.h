@@ -6,8 +6,6 @@
 
 #include "NetworkClient.h"
 
-#include "boost/thread.hpp"
-
 #define g_NetworkServer NetworkServer::Instance()
 
 /////////////////////////////////////////////////////////////////////////
@@ -179,7 +177,7 @@ namespace RTE {
 			RakNet::SystemAddress InternalId;
 			int ResX;
 			int ResY;
-			boost::thread *SendThread;
+			std::thread *SendThread;
 			std::string PlayerName;
 		};
 

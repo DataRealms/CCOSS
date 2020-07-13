@@ -54,6 +54,70 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void ArcPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
+			Vector drawStart = m_StartPos - targetPos;
+			if (m_Thickness > 1) {
+				for (short i = 0; i < m_Thickness; i++) {
+					arc(drawScreen, drawStart.m_X, drawStart.m_Y, ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
+				}
+			} else {
+				arc(drawScreen, drawStart.m_X, drawStart.m_Y, ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), m_Radius, m_Color);
+			}
+		} else {
+			Vector drawStartLeft;
+			Vector drawStartRight;
+
+			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
+
+			if (m_Thickness > 1) {
+				for (short i = 0; i < m_Thickness; i++){
+					arc(drawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
+					arc(drawScreen, drawStartRight.m_X, drawStartRight.m_Y, ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
+				}
+			} else {
+				arc(drawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), m_Radius, m_Color);
+				arc(drawScreen, drawStartRight.m_X, drawStartRight.m_Y, ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), m_Radius, m_Color);
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SplinePrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
+			Vector drawStart = m_StartPos - targetPos;
+			Vector drawGuideA = m_GuidePointAPos - targetPos;
+			Vector drawGuideB = m_GuidePointBPos - targetPos;
+			Vector drawEnd = m_EndPos - targetPos;
+
+			int guidePoints[8] = { drawStart.GetIntX(), drawStart.GetIntY(), drawGuideA.GetIntX(), drawGuideA.GetIntY(), drawGuideB.GetIntX(), drawGuideB.GetIntY(), drawEnd.GetIntX(), drawEnd.GetIntY() };
+			spline(drawScreen, guidePoints, m_Color);
+		} else {
+			Vector drawStartLeft;
+			Vector drawGuideALeft;
+			Vector drawGuideBLeft;
+			Vector drawEndLeft;
+			Vector drawStartRight;
+			Vector drawGuideARight;
+			Vector drawGuideBRight;
+			Vector drawEndRight;
+
+			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
+			TranslateCoordinates(targetPos, m_GuidePointAPos, drawGuideALeft, drawGuideARight);
+			TranslateCoordinates(targetPos, m_GuidePointBPos, drawGuideBLeft, drawGuideBRight);
+			TranslateCoordinates(targetPos, m_EndPos, drawEndLeft, drawEndRight);
+
+			int guidePointsLeft[8] = { drawStartLeft.GetIntX(), drawStartLeft.GetIntY(), drawGuideALeft.GetIntX(), drawGuideALeft.GetIntY(), drawGuideBLeft.GetIntX(), drawGuideBLeft.GetIntY(), drawEndLeft.GetIntX(), drawEndLeft.GetIntY() };
+			int guidePointsRight[8] = { drawStartRight.GetIntX(), drawStartRight.GetIntY(), drawGuideARight.GetIntX(), drawGuideARight.GetIntY(), drawGuideBRight.GetIntX(), drawGuideBRight.GetIntY(), drawEndRight.GetIntX(), drawEndRight.GetIntY() };
+
+			spline(drawScreen, guidePointsLeft, m_Color);
+			spline(drawScreen, guidePointsRight, m_Color);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void BoxPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;

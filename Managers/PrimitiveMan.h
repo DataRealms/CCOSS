@@ -63,6 +63,48 @@ namespace RTE {
 		void DrawLinePrimitive(short player, Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new LinePrimitive(player, start, end, color)); }
 
 		/// <summary>
+		/// Schedule to draw an arc primitive.
+		/// </summary>
+		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="startAngle">The angle from which the arc drawing begins.</param>
+		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
+		/// <param name="radius">Radius of the arc primitive.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		void DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, short thickness, unsigned char color) { m_Primitives.push_back(new ArcPrimitive(-1, pos, startAngle, endAngle, radius, thickness, color)); }
+
+		/// <summary>
+		/// Schedule to draw an arc primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="startAngle">The angle from which the arc drawing begins.</param>
+		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
+		/// <param name="radius">Radius of the arc primitive.</param>
+		/// <param name="thickness">Thickness of the arc in pixels.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		void DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, short thickness, unsigned char color) { m_Primitives.push_back(new ArcPrimitive(player, pos, startAngle, endAngle, radius, thickness, color)); }
+
+		/// <summary>
+		/// Schedule to draw a Bezier spline primitive.
+		/// </summary>
+		/// <param name="start">Start position of primitive in scene coordinates.</param>
+		/// <param name="guideA">The first guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
+		/// <param name="guideB">The second guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
+		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		void DrawSplinePrimitive(Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color) { m_Primitives.push_back(new SplinePrimitive(-1, start, guideA, guideB, end, color)); }
+
+		/// <summary>
+		/// Schedule to draw a Bezier spline primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="guideA">The first guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
+		/// <param name="guideB">The second guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
+		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		void DrawSplinePrimitive(short player, Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color) { m_Primitives.push_back(new SplinePrimitive(player, start, guideA, guideB, end, color)); }
+
+		/// <summary>
 		/// Schedule to draw a box primitive.
 		/// </summary>
 		/// <param name="start">Start position of primitive in scene coordinates.</param>

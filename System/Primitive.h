@@ -81,6 +81,85 @@ namespace RTE {
 	};
 #pragma endregion
 
+#pragma region Arc Primitive
+	/// <summary>
+	/// Class used to schedule drawing of arc line primitives created from Lua.
+	/// </summary>
+	class ArcPrimitive : public GraphicalPrimitive {
+
+	public:
+
+		float m_StartAngle; //!< The angle from which the arc begins.
+		float m_EndAngle; //!< The angle at which the arc ends.
+		float m_Radius; //!< Radius of the arc primitive.
+		short m_Thickness; //!< Thickness of the arc primitive in pixels.
+
+		/// <summary>
+		/// Constructor method for ArcPrimitive object.
+		/// </summary>
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="pos">Position of this primitive.</param>
+		/// <param name="startAngle">The angle from which the arc drawing begins.</param>
+		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
+		/// <param name="radius">Radius of the arc primitive.</param>
+		/// <param name="color">Color to draw this primitive with.</param>
+		ArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, short thickness, unsigned char color) {
+			m_StartPos = pos;
+			m_Color = color;
+			m_StartAngle = startAngle;
+			m_EndAngle = endAngle;
+			m_Radius = radius;
+			m_Thickness = thickness;
+			m_Player = player;
+		}
+
+		/// <summary>
+		/// Draws this primitive on provided bitmap.
+		/// </summary>
+		/// <param name="drawScreen">Bitmap to draw on.</param>
+		/// <param name="targetPos">Position of graphical primitive.</param>
+		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+	};
+#pragma endregion
+
+#pragma region Spline Primitive
+	/// <summary>
+	/// Class used to schedule drawing of spline primitives created from Lua.
+	/// </summary>
+	class SplinePrimitive : public GraphicalPrimitive {
+
+	public:
+
+		Vector m_GuidePointAPos; //!< A guide point that controls the curve of the spline.
+		Vector m_GuidePointBPos; //!< A guide point that controls the curve of the spline.
+
+		/// <summary>
+		/// Constructor method for SplinePrimitive object.
+		/// </summary>
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="start">Start position of the primitive.</param>
+		/// <param name="guideA">The first guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
+		/// <param name="guideB">The second guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
+		/// <param name="end">End position of the primitive.</param>
+		/// <param name="color">Color to draw this primitive with.</param>
+		SplinePrimitive(short player, Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color) {
+			m_StartPos = start;
+			m_GuidePointAPos = guideA;
+			m_GuidePointBPos = guideB;
+			m_EndPos = end;
+			m_Color = color;
+			m_Player = player;
+		}
+
+		/// <summary>
+		/// Draws this primitive on provided bitmap.
+		/// </summary>
+		/// <param name="drawScreen">Bitmap to draw on.</param>
+		/// <param name="targetPos">Position of graphical primitive.</param>
+		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+	};
+#pragma endregion
+
 #pragma region Box Primitive
 	/// <summary>
 	/// Class used to schedule drawing of box primitives created from Lua.

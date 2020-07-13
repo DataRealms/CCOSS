@@ -87,6 +87,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`PrimitiveMan:DrawBitmapPrimitive(pos, entity, rotAngle, frame, bool hFlipped, bool vFlipped)`  
 	`PrimitiveMan:DrawBitmapPrimitive(player, pos, entity, rotAngle, frame, bool hFlipped, bool vFlipped)`  
 	Original bindings with no flip arguments are untouched and can be called as they were.
+	
+- Added new primitive drawing functions to `PrimitiveMan`:  
+	```
+	//
+	PrimitiveMan:DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, short thickness, unsigned char color)
+	PrimitiveMan:DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, short thickness, unsigned char color)
+	
+	//
+	PrimitiveMan:DrawSplinePrimitive(Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color)
+	PrimitiveMan:DrawSplinePrimitive(short player, Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color)
+	```
 
 ### Changed
 

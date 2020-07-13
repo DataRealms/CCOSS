@@ -160,6 +160,102 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void RoundBoxPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
+			Vector drawStart = m_StartPos - targetPos;
+			Vector drawEnd = m_EndPos - targetPos;
+
+			// Top left corner
+			arc(drawScreen, drawStart.m_X + m_CornerRadius, drawEnd.m_Y + m_CornerRadius, itofix(64), itofix(128), m_CornerRadius, m_Color);
+			// Bottom left corner
+			arc(drawScreen, drawStart.m_X + m_CornerRadius, drawStart.m_Y - m_CornerRadius, itofix(128), itofix(-64), m_CornerRadius, m_Color);
+			// Top right corner
+			arc(drawScreen, drawEnd.m_X - m_CornerRadius, drawEnd.m_Y + m_CornerRadius, itofix(0), itofix(64), m_CornerRadius, m_Color);
+			// Bottom right corner
+			arc(drawScreen, drawEnd.m_X - m_CornerRadius, drawStart.m_Y - m_CornerRadius, itofix(-64), itofix(0), m_CornerRadius, m_Color);
+
+			// Top plane
+			hline(drawScreen, drawStart.m_X + m_CornerRadius, drawStart.m_Y, drawEnd.m_X - m_CornerRadius, m_Color);	
+			// Bottom plane
+			hline(drawScreen, drawStart.m_X + m_CornerRadius, drawEnd.m_Y, drawEnd.m_X - m_CornerRadius, m_Color);
+			// Left plane
+			vline(drawScreen, drawStart.m_X, drawStart.m_Y - m_CornerRadius, drawEnd.m_Y + m_CornerRadius, m_Color);
+			// Right plane
+			vline(drawScreen, drawEnd.m_X, drawStart.m_Y - m_CornerRadius, drawEnd.m_Y + m_CornerRadius, m_Color);
+		} else {
+			Vector drawStartLeft;
+			Vector drawEndLeft;
+			Vector drawStartRight;
+			Vector drawEndRight;
+
+			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
+			TranslateCoordinates(targetPos, m_EndPos, drawEndLeft, drawEndRight);
+
+			arc(drawScreen, drawStartLeft.m_X + m_CornerRadius, drawEndLeft.m_Y + m_CornerRadius, itofix(64), itofix(128), m_CornerRadius, m_Color);
+			arc(drawScreen, drawStartLeft.m_X + m_CornerRadius, drawStartLeft.m_Y - m_CornerRadius, itofix(128), itofix(-64), m_CornerRadius, m_Color);
+			arc(drawScreen, drawEndLeft.m_X - m_CornerRadius, drawEndLeft.m_Y + m_CornerRadius, itofix(0), itofix(64), m_CornerRadius, m_Color);
+			arc(drawScreen, drawEndLeft.m_X - m_CornerRadius, drawStartLeft.m_Y - m_CornerRadius, itofix(-64), itofix(0), m_CornerRadius, m_Color);
+			hline(drawScreen, drawStartLeft.m_X + m_CornerRadius, drawStartLeft.m_Y, drawEndLeft.m_X - m_CornerRadius, m_Color);
+			hline(drawScreen, drawStartLeft.m_X + m_CornerRadius, drawEndLeft.m_Y, drawEndLeft.m_X - m_CornerRadius, m_Color);
+			vline(drawScreen, drawStartLeft.m_X, drawStartLeft.m_Y - m_CornerRadius, drawEndLeft.m_Y + m_CornerRadius, m_Color);
+			vline(drawScreen, drawEndLeft.m_X, drawStartLeft.m_Y - m_CornerRadius, drawEndLeft.m_Y + m_CornerRadius, m_Color);
+
+			arc(drawScreen, drawStartRight.m_X + m_CornerRadius, drawEndRight.m_Y + m_CornerRadius, itofix(64), itofix(128), m_CornerRadius, m_Color);
+			arc(drawScreen, drawStartRight.m_X + m_CornerRadius, drawStartRight.m_Y - m_CornerRadius, itofix(128), itofix(-64), m_CornerRadius, m_Color);
+			arc(drawScreen, drawEndRight.m_X - m_CornerRadius, drawEndRight.m_Y + m_CornerRadius, itofix(0), itofix(64), m_CornerRadius, m_Color);
+			arc(drawScreen, drawEndRight.m_X - m_CornerRadius, drawStartRight.m_Y - m_CornerRadius, itofix(-64), itofix(0), m_CornerRadius, m_Color);
+			hline(drawScreen, drawStartRight.m_X + m_CornerRadius, drawStartRight.m_Y, drawEndRight.m_X - m_CornerRadius, m_Color);
+			hline(drawScreen, drawStartRight.m_X + m_CornerRadius, drawEndRight.m_Y, drawEndRight.m_X - m_CornerRadius, m_Color);
+			vline(drawScreen, drawStartRight.m_X, drawStartRight.m_Y - m_CornerRadius, drawEndRight.m_Y + m_CornerRadius, m_Color);
+			vline(drawScreen, drawEndRight.m_X, drawStartRight.m_Y - m_CornerRadius, drawEndRight.m_Y + m_CornerRadius, m_Color);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void RoundBoxFillPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
+			Vector drawStart = m_StartPos - targetPos;
+			Vector drawEnd = m_EndPos - targetPos;
+			
+			// Top left corner
+			circlefill(drawScreen, drawStart.m_X + m_CornerRadius, drawEnd.m_Y + m_CornerRadius, m_CornerRadius, m_Color);
+			// Bottom left corner
+			circlefill(drawScreen, drawStart.m_X + m_CornerRadius, drawStart.m_Y - m_CornerRadius, m_CornerRadius, m_Color);
+			// Top right corner
+			circlefill(drawScreen, drawEnd.m_X - m_CornerRadius, drawEnd.m_Y + m_CornerRadius, m_CornerRadius, m_Color);
+			// Bottom right corner
+			circlefill(drawScreen, drawEnd.m_X - m_CornerRadius, drawStart.m_Y - m_CornerRadius, m_CornerRadius, m_Color);
+
+			rectfill(drawScreen, drawStart.m_X, drawStart.m_Y - m_CornerRadius, drawEnd.m_X, drawEnd.m_Y + m_CornerRadius, m_Color);
+			rectfill(drawScreen, drawStart.m_X + m_CornerRadius, drawStart.m_Y, drawEnd.m_X - m_CornerRadius, drawEnd.m_Y, m_Color);
+		} else {
+			Vector drawStartLeft;
+			Vector drawEndLeft;
+			Vector drawStartRight;
+			Vector drawEndRight;
+
+			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
+			TranslateCoordinates(targetPos, m_EndPos, drawEndLeft, drawEndRight);
+
+			circlefill(drawScreen, drawStartLeft.m_X + m_CornerRadius, drawEndLeft.m_Y + m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawStartLeft.m_X + m_CornerRadius, drawStartLeft.m_Y - m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawEndLeft.m_X - m_CornerRadius, drawEndLeft.m_Y + m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawEndLeft.m_X - m_CornerRadius, drawStartLeft.m_Y - m_CornerRadius, m_CornerRadius, m_Color);
+			rectfill(drawScreen, drawStartLeft.m_X, drawStartLeft.m_Y - m_CornerRadius, drawEndLeft.m_X, drawEndLeft.m_Y + m_CornerRadius, m_Color);
+			rectfill(drawScreen, drawStartLeft.m_X + m_CornerRadius, drawStartLeft.m_Y, drawEndLeft.m_X - m_CornerRadius, drawEndLeft.m_Y, m_Color);
+
+			circlefill(drawScreen, drawStartRight.m_X + m_CornerRadius, drawEndRight.m_Y + m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawStartRight.m_X + m_CornerRadius, drawStartRight.m_Y - m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawEndRight.m_X - m_CornerRadius, drawEndRight.m_Y + m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawEndRight.m_X - m_CornerRadius, drawStartRight.m_Y - m_CornerRadius, m_CornerRadius, m_Color);
+			rectfill(drawScreen, drawStartRight.m_X, drawStartRight.m_Y - m_CornerRadius, drawEndRight.m_X, drawEndRight.m_Y + m_CornerRadius, m_Color);
+			rectfill(drawScreen, drawStartRight.m_X + m_CornerRadius, drawStartRight.m_Y, drawEndRight.m_X - m_CornerRadius, drawEndRight.m_Y, m_Color);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void CirclePrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;

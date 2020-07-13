@@ -139,6 +139,44 @@ namespace RTE {
 		void DrawBoxFillPrimitive(short player, Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new BoxFillPrimitive(player, start, end, color)); }
 
 		/// <summary>
+		/// Schedule to draw a round box primitive.
+		/// </summary>
+		/// <param name="start">Start position of primitive in scene coordinates.</param>
+		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		void DrawRoundBoxPrimitive(Vector start, Vector end, float cornerRadius, unsigned char color) { m_Primitives.push_back(new RoundBoxPrimitive(-1, start, end, cornerRadius, color)); }
+
+		/// <summary>
+		/// Schedule to draw a round box primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="start">Start position of primitive in scene coordinates.</param>
+		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		void DrawRoundBoxPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color) { m_Primitives.push_back(new RoundBoxPrimitive(player, start, end, cornerRadius, color)); }
+
+		/// <summary>
+		/// Schedule to draw a filled round box primitive.
+		/// </summary>
+		/// <param name="start">Start position of primitive in scene coordinates.</param>
+		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		void DrawRoundBoxFillPrimitive(Vector start, Vector end, float cornerRadius, unsigned char color) { m_Primitives.push_back(new RoundBoxFillPrimitive(-1, start, end, cornerRadius, color)); }
+
+		/// <summary>
+		/// Schedule to draw a filled round box primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="start">Start position of primitive in scene coordinates.</param>
+		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		void DrawRoundBoxFillPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color) { m_Primitives.push_back(new RoundBoxFillPrimitive(player, start, end, cornerRadius, color)); }
+
+		/// <summary>
 		/// Schedule to draw a circle primitive.
 		/// </summary>
 		/// <param name="pos">Position of primitive in scene coordinates.</param>

@@ -93,10 +93,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	//
 	PrimitiveMan:DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, short thickness, unsigned char color)
 	PrimitiveMan:DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, short thickness, unsigned char color)
-	
+
 	//
 	PrimitiveMan:DrawSplinePrimitive(Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color)
 	PrimitiveMan:DrawSplinePrimitive(short player, Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color)
+
+	//
+	PrimitiveMan:DrawRoundBoxPrimitive(Vector start, Vector end, float cornerRadius, unsigned char color)
+	PrimitiveMan:DrawRoundBoxPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color)
+
+	//
+	PrimitiveMan:DrawRoundBoxFillPrimitive(Vector start, Vector end, float cornerRadius, unsigned char color)
+	PrimitiveMan:DrawRoundBoxFillPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color)	
 	```
 
 ### Changed

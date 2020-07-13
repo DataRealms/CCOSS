@@ -222,6 +222,76 @@ namespace RTE {
 	};
 #pragma endregion
 
+#pragma region Round Box Primitive
+	/// <summary>
+	/// Class used to schedule drawing of box with round corners primitives created from Lua.
+	/// </summary>
+	class RoundBoxPrimitive : public GraphicalPrimitive {
+
+	public:
+
+		float m_CornerRadius; //!< The radius of the corners of the box.
+
+		/// <summary>
+		/// Constructor method for RoundBoxPrimitive object.
+		/// </summary>
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="start">Start position of the primitive.</param>
+		/// <param name="end">End position of the primitive.</param>
+		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
+		/// <param name="color">Color to draw this primitive with.</param>
+		RoundBoxPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color) {
+			m_StartPos = start;
+			m_EndPos = end;
+			m_CornerRadius = cornerRadius;
+			m_Color = color;
+			m_Player = player;
+		}
+
+		/// <summary>
+		/// Draws this primitive on provided bitmap.
+		/// </summary>
+		/// <param name="drawScreen">Bitmap to draw on.</param>
+		/// <param name="targetPos">Position of graphical primitive.</param>
+		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+	};
+#pragma endregion
+
+#pragma region Filled Round Box Primitive
+	/// <summary>
+	/// Class used to schedule drawing of filled box with round corners primitives created from Lua.
+	/// </summary>
+	class RoundBoxFillPrimitive : public GraphicalPrimitive {
+
+	public:
+
+		float m_CornerRadius; //!< The radius of the corners of the box.
+
+		/// <summary>
+		/// Constructor method for RoundBoxFillPrimitive object.
+		/// </summary>
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="start">Start position of the primitive.</param>
+		/// <param name="end">End position of the primitive.</param>
+		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
+		/// <param name="color">Color to draw this primitive with.</param>
+		RoundBoxFillPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color) {
+			m_StartPos = start;
+			m_EndPos = end;
+			m_CornerRadius = cornerRadius;
+			m_Color = color;
+			m_Player = player;
+		}
+
+		/// <summary>
+		/// Draws this primitive on provided bitmap.
+		/// </summary>
+		/// <param name="drawScreen">Bitmap to draw on.</param>
+		/// <param name="targetPos">Position of graphical primitive.</param>
+		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+	};
+#pragma endregion
+
 #pragma region Cicrcle Primitive
 	/// <summary>
 	/// Class used to schedule drawing of circle primitives created from Lua.

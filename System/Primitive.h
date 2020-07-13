@@ -367,6 +367,79 @@ namespace RTE {
 		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
 	};
 #pragma endregion
+#pragma region Triangle Primitive
+	/// <summary>
+	/// Class used to schedule drawing of triangle primitives created from Lua.
+	/// </summary>
+	class TrianglePrimitive : public GraphicalPrimitive {
+
+	public:
+
+		Vector m_PointAPos; //!< First point of the triangle.
+		Vector m_PointBPos; //!< Second point of the triangle.
+		Vector m_PointCPos; //!< Third point of the triangle.
+
+		/// <summary>
+		/// Constructor method for TrianglePrimitive object.
+		/// </summary>
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="pointA">Position of the first point of the triangle.</param>
+		/// <param name="pointB">Position of the second point of the triangle</param>
+		/// <param name="pointC">Position of the third point of the triangle</param>
+		/// <param name="color">Color to draw this primitive with.</param>
+		TrianglePrimitive(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color) {
+			m_PointAPos = pointA;
+			m_PointBPos = pointB;
+			m_PointCPos = pointC;
+			m_Color = color;
+			m_Player = player;
+		}
+
+		/// <summary>
+		/// Draws this primitive on provided bitmap.
+		/// </summary>
+		/// <param name="drawScreen">Bitmap to draw on.</param>
+		/// <param name="targetPos">Position of graphical primitive.</param>
+		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+	};
+#pragma endregion
+
+#pragma region Filled Triangle Primitive
+	/// <summary>
+	/// Class used to schedule drawing of filled triangle primitives created from Lua.
+	/// </summary>
+	class TriangleFillPrimitive : public GraphicalPrimitive {
+
+	public:
+
+		Vector m_PointAPos; //!< First point of the triangle.
+		Vector m_PointBPos; //!< Second point of the triangle.
+		Vector m_PointCPos; //!< Third point of the triangle.
+
+		/// <summary>
+		/// Constructor method for TriangleFillPrimitive object.
+		/// </summary>
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="pointA">Position of the first point of the triangle.</param>
+		/// <param name="pointB">Position of the second point of the triangle</param>
+		/// <param name="pointC">Position of the third point of the triangle</param>
+		/// <param name="color">Color to draw this primitive with.</param>
+		TriangleFillPrimitive(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color) {
+			m_PointAPos = pointA;
+			m_PointBPos = pointB;
+			m_PointCPos = pointC;
+			m_Color = color;
+			m_Player = player;
+		}
+
+		/// <summary>
+		/// Draws this primitive on provided bitmap.
+		/// </summary>
+		/// <param name="drawScreen">Bitmap to draw on.</param>
+		/// <param name="targetPos">Position of graphical primitive.</param>
+		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+	};
+#pragma endregion
 
 #pragma region Text Primitive
 	/// <summary>

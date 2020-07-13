@@ -290,6 +290,62 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void TrianglePrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
+			Vector drawPointA = m_PointAPos - targetPos;
+			Vector drawPointB = m_PointBPos - targetPos;
+			Vector drawPointC = m_PointCPos - targetPos;
+			line(drawScreen, drawPointA.m_X, drawPointA.m_Y, drawPointB.m_X, drawPointB.m_Y, m_Color);
+			line(drawScreen, drawPointB.m_X, drawPointB.m_Y, drawPointC.m_X, drawPointC.m_Y, m_Color);
+			line(drawScreen, drawPointC.m_X, drawPointC.m_Y, drawPointA.m_X, drawPointA.m_Y, m_Color);
+		} else {
+			Vector drawPointALeft;
+			Vector drawPointBLeft;
+			Vector drawPointCLeft;
+			Vector drawPointARight;
+			Vector drawPointBRight;
+			Vector drawPointCRight;
+
+			TranslateCoordinates(targetPos, m_PointAPos, drawPointALeft, drawPointARight);
+			TranslateCoordinates(targetPos, m_PointBPos, drawPointBLeft, drawPointBRight);
+			TranslateCoordinates(targetPos, m_PointCPos, drawPointCLeft, drawPointCRight);
+
+			line(drawScreen, drawPointALeft.m_X, drawPointALeft.m_Y, drawPointBLeft.m_X, drawPointBLeft.m_Y, m_Color);
+			line(drawScreen, drawPointARight.m_X, drawPointARight.m_Y, drawPointBRight.m_X, drawPointBRight.m_Y, m_Color);
+			line(drawScreen, drawPointBLeft.m_X, drawPointBLeft.m_Y, drawPointCLeft.m_X, drawPointCLeft.m_Y, m_Color);
+			line(drawScreen, drawPointBRight.m_X, drawPointBRight.m_Y, drawPointCRight.m_X, drawPointCRight.m_Y, m_Color);
+			line(drawScreen, drawPointCLeft.m_X, drawPointCLeft.m_Y, drawPointALeft.m_X, drawPointALeft.m_Y, m_Color);
+			line(drawScreen, drawPointCRight.m_X, drawPointCRight.m_Y, drawPointARight.m_X, drawPointARight.m_Y, m_Color);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TriangleFillPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
+			Vector drawPointA = m_PointAPos - targetPos;
+			Vector drawPointB = m_PointBPos - targetPos;
+			Vector drawPointC = m_PointCPos - targetPos;
+			triangle(drawScreen, drawPointA.m_X, drawPointA.m_Y, drawPointB.m_X, drawPointB.m_Y, drawPointC.m_X, drawPointC.m_Y, m_Color);
+		} else {
+			Vector drawPointALeft;
+			Vector drawPointBLeft;
+			Vector drawPointCLeft;
+			Vector drawPointARight;
+			Vector drawPointBRight;
+			Vector drawPointCRight;
+
+			TranslateCoordinates(targetPos, m_PointAPos, drawPointALeft, drawPointARight);
+			TranslateCoordinates(targetPos, m_PointBPos, drawPointBLeft, drawPointBRight);
+			TranslateCoordinates(targetPos, m_PointCPos, drawPointCLeft, drawPointCRight);
+
+			triangle(drawScreen, drawPointALeft.m_X, drawPointALeft.m_Y, drawPointBLeft.m_X, drawPointBLeft.m_Y, drawPointCLeft.m_X, drawPointCLeft.m_Y, m_Color);
+			triangle(drawScreen, drawPointARight.m_X, drawPointARight.m_Y, drawPointBRight.m_X, drawPointBRight.m_Y, drawPointCRight.m_X, drawPointCRight.m_Y, m_Color);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void TextPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;

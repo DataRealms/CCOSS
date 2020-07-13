@@ -104,7 +104,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 	//
 	PrimitiveMan:DrawRoundBoxFillPrimitive(Vector start, Vector end, float cornerRadius, unsigned char color)
-	PrimitiveMan:DrawRoundBoxFillPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color)	
+	PrimitiveMan:DrawRoundBoxFillPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color)
+
+	//
+	PrimitiveMan:DrawTrianglePrimitive(Vector pointA, Vector pointB, Vector pointC, unsigned char color)
+	PrimitiveMan:DrawTrianglePrimitive(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color)
+
+	//
+	PrimitiveMan:DrawTriangleFillPrimitive(Vector pointA, Vector pointB, Vector pointC, unsigned char color)
+	PrimitiveMan:DrawTriangleFillPrimitive(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color)	
 	```
 
 ### Changed

@@ -209,6 +209,43 @@ namespace RTE {
 		/// <param name="radius">Radius of circle primitive.</param>
 		/// <param name="color">Color to fill primitive with.</param>
 		void DrawCircleFillPrimitive(short player, Vector pos, short radius, unsigned char color) {m_Primitives.push_back(new CircleFillPrimitive(player, pos, radius, color));}
+		/// <summary>
+		/// Schedule to draw a triangle primitive.
+		/// </summary>
+		/// <param name="pointA">Position of the first point of the triangle in scene coordinates.</param>
+		/// <param name="pointB">Position of the second point of the triangle in scene coordinates.</param>
+		/// <param name="pointC">Position of the third point of the triangle in scene coordinates.</param>
+		/// <param name="color">Color to fill primitive with.</param>
+		void DrawTrianglePrimitive(Vector pointA, Vector pointB, Vector pointC, unsigned char color) { m_Primitives.push_back(new TrianglePrimitive(-1, pointA, pointB, pointC, color)); }
+
+		/// <summary>
+		/// Schedule to draw a triangle primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="pointA">Position of the first point of the triangle in scene coordinates.</param>
+		/// <param name="pointB">Position of the second point of the triangle in scene coordinates.</param>
+		/// <param name="pointC">Position of the third point of the triangle in scene coordinates.</param>
+		/// <param name="color">Color to fill primitive with.</param>
+		void DrawTrianglePrimitive(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color) { m_Primitives.push_back(new TrianglePrimitive(player, pointA, pointB, pointC, color)); }
+
+		/// <summary>
+		/// Schedule to draw a filled triangle primitive.
+		/// </summary>
+		/// <param name="pointA">Position of the first point of the triangle in scene coordinates.</param>
+		/// <param name="pointB">Position of the second point of the triangle in scene coordinates.</param>
+		/// <param name="pointC">Position of the third point of the triangle in scene coordinates.</param>
+		/// <param name="color">Color to fill primitive with.</param>
+		void DrawTriangleFillPrimitive(Vector pointA, Vector pointB, Vector pointC, unsigned char color) { m_Primitives.push_back(new TriangleFillPrimitive(-1, pointA, pointB, pointC, color)); }
+
+		/// <summary>
+		/// Schedule to draw a filled triangle primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="pointA">Position of the first point of the triangle in scene coordinates.</param>
+		/// <param name="pointB">Position of the second point of the triangle in scene coordinates.</param>
+		/// <param name="pointC">Position of the third point of the triangle in scene coordinates.</param>
+		/// <param name="color">Color to fill primitive with.</param>
+		void DrawTriangleFillPrimitive(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color) { m_Primitives.push_back(new TriangleFillPrimitive(player, pointA, pointB, pointC, color)); }
 
 		/// <summary>
 		/// Schedule to draw a text primitive.

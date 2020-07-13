@@ -652,9 +652,9 @@ void Arm::DrawHand(BITMAP *pTargetBitmap,
     handPos.m_Y -= (m_pHand->h / 2) + 1;
 
     if (!m_HFlipped)
-        draw_sprite(pTargetBitmap, m_pHand, handPos.GetFloorIntX(), handPos.GetFloorIntY());
+        draw_sprite(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY());
     else
-        draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.GetFloorIntX(), handPos.GetFloorIntY());
+        draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY());
 }
 
 } // namespace RTE

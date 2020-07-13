@@ -8,11 +8,25 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::DrawBitmapPrimitive(short player, Vector start, Entity *entity, float rotAngle, unsigned short frame) {
+	void PrimitiveMan::DrawBitmapPrimitive(short player, Vector start, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped) {
 		const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity);
 		if (moSprite) {
-			BITMAP *pBitmap = moSprite->GetSpriteFrame(frame);
-			if (pBitmap) { m_Primitives.push_back(new BitmapPrimitive(player, start, pBitmap, rotAngle)); }
+			BITMAP *bitmap = moSprite->GetSpriteFrame(frame);
+
+			if (bitmap) {
+				BITMAP *flipBitmap = create_bitmap_ex(8, bitmap->w, bitmap->h);
+				clear_to_color(flipBitmap, 0);
+
+				if (hFlipped && !vFlipped) {
+					draw_sprite_h_flip(flipBitmap, bitmap, 0, 0);
+				} else if (!hFlipped && vFlipped) {
+					draw_sprite_v_flip(flipBitmap, bitmap, 0, 0);
+				} else if (hFlipped && vFlipped) {
+					draw_sprite_vh_flip(flipBitmap, bitmap, 0, 0);
+				}
+
+				m_Primitives.push_back(new BitmapPrimitive(player, start, (hFlipped || vFlipped) ? flipBitmap : bitmap, rotAngle));
+			}
 		}
 	}
 

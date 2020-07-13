@@ -83,6 +83,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added new lua function `UInputMan:GetInputDevice(playerNum)` to get a number value representing the input device used by the specified player. Should be useful for making custom key bindings compatible with different input devices.
 
+- Added H/V flipping capabilities to Bitmap primitives.  New bindings with arguments for flip are:  
+	`PrimitiveMan:DrawBitmapPrimitive(pos, entity, rotAngle, frame, bool hFlipped, bool vFlipped)`  
+	`PrimitiveMan:DrawBitmapPrimitive(player, pos, entity, rotAngle, frame, bool hFlipped, bool vFlipped)`  
+	Original bindings with no flip arguments are untouched and can be called as they were.
+
 ### Changed
 
 - Lua error reporting has been improved so script errors will always show filename and line number.

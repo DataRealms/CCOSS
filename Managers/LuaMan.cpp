@@ -1473,8 +1473,10 @@ int LuaMan::Create()
 			.def("DrawCircleFillPrimitive", (void (PrimitiveMan::*)(short player, Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCircleFillPrimitive)
 			.def("DrawTextPrimitive", (void (PrimitiveMan::*)(Vector start, std::string text, bool isSmall, short alignment))&PrimitiveMan::DrawTextPrimitive)
 			.def("DrawTextPrimitive", (void (PrimitiveMan::*)(short player, Vector start, std::string text, bool isSmall, short alignment))&PrimitiveMan::DrawTextPrimitive)
-			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(Vector start, Entity * pEntity, float rotAngle, unsigned short frame))&PrimitiveMan::DrawBitmapPrimitive)
-			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Entity * pEntity, float rotAngle, unsigned short frame))&PrimitiveMan::DrawBitmapPrimitive),
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(Vector start, Entity *entity, float rotAngle, unsigned short frame))&PrimitiveMan::DrawBitmapPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(Vector start, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Entity *entity, float rotAngle, unsigned short frame))&PrimitiveMan::DrawBitmapPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive),
 
         class_<PresetMan>("PresetManager")
             .def("LoadDataModule", (bool (PresetMan::*)(string))&PresetMan::LoadDataModule)

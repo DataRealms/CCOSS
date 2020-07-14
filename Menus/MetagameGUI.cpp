@@ -2004,7 +2004,7 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
             else
             {
                 // Make it flicker more if it's currently being fought over
-				blendAmount = 95 + battleSite ? RandomNum<int>(-25, 25) : RandomNum<int>(-15, 15);
+				blendAmount = 95 + (battleSite ? RandomNum<int>(-25, 25) : RandomNum<int>(-15, 15));
                 set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
                 circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 4, c_GUIColorYellow);
                 circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 2, c_GUIColorYellow);

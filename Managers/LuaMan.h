@@ -144,7 +144,7 @@ enum ServerResult
 // Arguments:       None.
 // Return value:    Whether errors exist.
 
-    bool ErrorExists() const { return m_LastError.empty(); }
+    bool ErrorExists() const { return !m_LastError.empty(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

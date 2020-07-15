@@ -188,195 +188,153 @@ void GUITextPanel::Draw(GUIScreen *Screen)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Called when a key is pressed (OnDown & repeating).
 
-void GUITextPanel::OnKeyPress(int KeyCode, int Modifier)
-{
-    bool Shift = ((Modifier & MODI_SHIFT) != 0);        // Condition here to stop the compiler
-                                                        // bitching about performance
-    bool ModKey = ((Modifier & MODI_CTRL) != 0);        // Ditto
+void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
+
+	// TODO: Figure out what the "performance bitching" is.
+	// Condition here to stop the compiler bitching about performance
+	bool Shift = ((Modifier & MODI_SHIFT) != 0); 
+	bool ModKey = ((Modifier & MODI_CTRL) != 0);
+
 	// To convert to allegro's crazy scheme with their keyboard function returning the order of the letter when ctrl is pressed
-    int asciiChar = ModKey ? KeyCode + 96 : KeyCode;
+	int asciiChar = ModKey ? KeyCode + 96 : KeyCode;
 
-    if (m_Locked)
-        return;
+	if (m_Locked) {
+		return;
+	}
 
-    // Backspace
-    if (KeyCode == GUIInput::Key_Backspace) {
-        if (m_GotSelection) {
-            RemoveSelectionText();
-        } else {
-            if (m_CursorIndex > 0) {
-                // Decrement the cursor
-                m_CursorIndex--;            
-
-                // Delete the character before the cursor
-                m_Text.erase(m_CursorIndex, 1);
-            }
-        }
-
-        UpdateText();
-
-        SendSignal(Changed, 0);
-
-        return;
-    }
-
-    // Delete
-    if (KeyCode == GUIInput::Key_Delete) {
-        if (m_GotSelection) {
-            RemoveSelectionText();
-        } else {
-            if (m_CursorIndex < m_Text.size()) {
-                // Delete the character after the cursor
-                m_Text.erase(m_CursorIndex,1);
-            }
-        }        
-
-        UpdateText();
-
-        SendSignal(Changed, 0);
-
-        return;
-    }
-
-    // Left Arrow
-    if (KeyCode == GUIInput::Key_LeftArrow) {
-        if (m_CursorIndex > 0) {
-            // Do Selection
-            if (Shift)
-                DoSelection(m_CursorIndex, m_CursorIndex-1);
-            else
-                m_GotSelection = false;
-
-            // Decrement the cursor
-            m_CursorIndex--;
-            
-            UpdateText();
-        }
-
-        return;
-    }
-
-    // Right Arrow
-    if (KeyCode == GUIInput::Key_RightArrow) {
-        if (m_CursorIndex < m_Text.size()) {
-
-            // Do Selection
-            if (Shift)
-                DoSelection(m_CursorIndex, m_CursorIndex+1);
-            else
-                m_GotSelection = false;
-            
-            // Increment the cursor
-            m_CursorIndex++;
-            
-            UpdateText();
-        }
-
-        return;
-    }
-
-    // Home
-    if (KeyCode == GUIInput::Key_Home) {
-        // Do Selection
-        if (Shift)
-            DoSelection(m_CursorIndex, 0);
-        else
-            m_GotSelection = false;
-
-        m_CursorIndex = 0;
-
-        UpdateText();
-
-        return;
-    }
-
-    // End
-    if (KeyCode == GUIInput::Key_End) {
-        // Do Selection
-        if (Shift)
-            DoSelection(m_CursorIndex, m_Text.size());
-        else
-            m_GotSelection = false;
-
-        m_CursorIndex = m_Text.size();
-
-        UpdateText();
-
-        return;
-    }
-
-    // ModKey-X (Cut)
-    if (asciiChar == 'x' && ModKey) {
-        if (m_GotSelection) {
-            // Set the clipboard text
-            WinUtil::SetClipboardText(GetSelectionText());
+	// Backspace
+	if (KeyCode == GUIInput::Key_Backspace) {
+		if (m_GotSelection) {
 			RemoveSelectionText();
+		} else {
+			if (m_CursorIndex > 0) {
+				m_CursorIndex--;
+				// Delete the character before the cursor
+				m_Text.erase(m_CursorIndex, 1);
+			}
+		}
+		UpdateText();
+		SendSignal(Changed, 0);
+		return;
+	}
 
-            SendSignal(Changed, 0);
-        }
+	// Delete
+	if (KeyCode == GUIInput::Key_Delete) {
+		if (m_GotSelection) {
+			RemoveSelectionText();
+		} else {
+			if (m_CursorIndex < m_Text.size()) {
+				m_Text.erase(m_CursorIndex, 1);
+			}
+		}
+		UpdateText();
+		SendSignal(Changed, 0);
+		return;
+	}
 
-        return;
-    }
+	// Left Arrow
+	if (KeyCode == GUIInput::Key_LeftArrow) {
+		if (m_CursorIndex > 0) {
+			if (Shift) {
+				DoSelection(m_CursorIndex, m_CursorIndex - 1);
+			} else {
+				m_GotSelection = false;
+			}
+			m_CursorIndex--;
+			UpdateText();
+		}
+		return;
+	}
 
-    // ModKey-C (Copy)
-    if (asciiChar == 'c' && ModKey) {
-        if (m_GotSelection) {		
-            // Set the clipboard text
-            WinUtil::SetClipboardText(GetSelectionText());
-        }
+	// Right Arrow
+	if (KeyCode == GUIInput::Key_RightArrow) {
+		if (m_CursorIndex < m_Text.size()) {
+			if (Shift) {
+				DoSelection(m_CursorIndex, m_CursorIndex + 1);
+			} else {
+				m_GotSelection = false;
+			}
+			m_CursorIndex++;
+			UpdateText();
+		}
+		return;
+	}
 
-        return;
-    }
+	// Home
+	if (KeyCode == GUIInput::Key_Home) {
+		if (Shift) {
+			DoSelection(m_CursorIndex, 0);
+		} else {
+			m_GotSelection = false;
+		}
+		m_CursorIndex = 0;
+		UpdateText();
+		return;
+	}
 
-    // ModKey-V (Paste)
-    if (asciiChar == 'v' && ModKey) {
-        RemoveSelectionText();
+	// End
+	if (KeyCode == GUIInput::Key_End) {
+		if (Shift) {
+			DoSelection(m_CursorIndex, m_Text.size());
+		} else {
+			m_GotSelection = false;
+		}
+		m_CursorIndex = m_Text.size();
+		UpdateText();
+		return;
+	}
 
-        string Text = "";
-        WinUtil::GetClipboardText(&Text);
-		
-        // Insert the text
-        m_Text.insert(m_CursorIndex, Text);
-        m_CursorIndex += Text.size();
+	// ModKey-X (Cut)
+	if (asciiChar == 'x' && ModKey) {
+		if (m_GotSelection) {
+			WinUtil::SetClipboardText(GetSelectionText());
+			RemoveSelectionText();
+			SendSignal(Changed, 0);
+		}
+		return;
+	}
 
-        UpdateText(true, true);
+	// ModKey-C (Copy)
+	if (asciiChar == 'c' && ModKey) {
+		if (m_GotSelection) { WinUtil::SetClipboardText(GetSelectionText()); }
+		return;
+	}
 
-        SendSignal(Changed, 0);
-        
-        return;
-    }
+	// ModKey-V (Paste)
+	if (asciiChar == 'v' && ModKey) {
+		RemoveSelectionText();
+		string Text = "";
+		WinUtil::GetClipboardText(&Text);
+		m_Text.insert(m_CursorIndex, Text);
+		m_CursorIndex += Text.size();
+		UpdateText(true, true);
+		SendSignal(Changed, 0);
+		return;
+	}
 
 	// ModKey-A (Select All)
 	if (asciiChar == 'a' && ModKey) {
 		DoSelection(0, m_Text.size());
-
 		UpdateText();
-
 		return;
 	}
 
-    // Enter key
-    if (KeyCode == '\n' || KeyCode =='\r') {
-        SendSignal(Enter, 0);
-        return;
-    }
+	// Enter key
+	if (KeyCode == '\n' || KeyCode == '\r') {
+		SendSignal(Enter, 0);
+		return;
+	}
 
-
-    // Add valid ascii characters
-    if (KeyCode >= 32 && KeyCode < 128) {
-        RemoveSelectionText();
-
-        char buf[2] = {static_cast<char>(KeyCode), '\0'};
-
-        // Insert the text
-        m_Text.insert(m_CursorIndex, buf);
-        m_CursorIndex++;
-
-        SendSignal(Changed, 0);
-
-        UpdateText(true);
-        return;
-    }
+	// Add valid ASCII characters
+	if (KeyCode >= 32 && KeyCode < 128) {
+		RemoveSelectionText();
+		char buf[2] = { static_cast<char>(KeyCode), '\0' };
+		m_Text.insert(m_CursorIndex, buf);
+		m_CursorIndex++;
+		SendSignal(Changed, 0);
+		UpdateText(true);
+		return;
+	}
 }
 
 

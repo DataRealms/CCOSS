@@ -367,6 +367,78 @@ namespace RTE {
 		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
 	};
 #pragma endregion
+
+#pragma region Ellipse Primitive
+	/// <summary>
+	/// Class used to schedule drawing of ellipse primitives created from Lua.
+	/// </summary>
+	class EllipsePrimitive : public GraphicalPrimitive {
+
+	public:
+
+		float m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
+		float m_VertRadius; //!< The vertical radius of the ellipse primitive.
+
+		/// <summary>
+		/// Constructor method for EllipsePrimitive object.
+		/// </summary>
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="pos">Position of this primitive.</param>
+		/// <param name="horizRadius">Horizontal radius of the ellipse primitive.</param>
+		/// <param name="vertRadius">Vertical radius of the ellipse primitive.</param>
+		/// <param name="color">Color to draw this primitive with.</param>
+		EllipsePrimitive(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color) {
+			m_StartPos = pos;
+			m_Color = color;
+			m_HorizRadius = horizRadius;
+			m_VertRadius = vertRadius;
+			m_Player = player;
+		}
+
+		/// <summary>
+		/// Draws this primitive on provided bitmap.
+		/// </summary>
+		/// <param name="drawScreen">Bitmap to draw on.</param>
+		/// <param name="targetPos">Position of graphical primitive.</param>
+		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+	};
+#pragma endregion
+
+#pragma region Filled Ellipse Primitive
+	/// <summary>
+	/// Class used to schedule drawing of filled ellipse primitives created from Lua
+	/// </summary>
+	class EllipseFillPrimitive : public GraphicalPrimitive {
+
+	public:
+
+		float m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
+		float m_VertRadius; //!< The vertical radius of the ellipse primitive.
+
+		/// <summary>
+		/// Constructor method for EllipseFillPrimitive object.
+		/// </summary>
+		/// <param name="player">Player screen to draw this primitive on.</param>
+		/// <param name="pos">Position of this primitive.</param>
+		/// <param name="radius">Radius of the circle primitive.</param>
+		/// <param name="color">Color to draw this primitive with.</param>
+		EllipseFillPrimitive(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color) {
+			m_StartPos = pos;
+			m_Color = color;
+			m_HorizRadius = horizRadius;
+			m_VertRadius = vertRadius;
+			m_Player = player;
+		}
+
+		/// <summary>
+		/// Draws this primitive on provided bitmap.
+		/// </summary>
+		/// <param name="drawScreen">Bitmap to draw on.</param>
+		/// <param name="targetPos">Position of graphical primitive.</param>
+		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+	};
+#pragma endregion
+
 #pragma region Triangle Primitive
 	/// <summary>
 	/// Class used to schedule drawing of triangle primitives created from Lua.

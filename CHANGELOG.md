@@ -112,7 +112,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 	//
 	PrimitiveMan:DrawTriangleFillPrimitive(Vector pointA, Vector pointB, Vector pointC, unsigned char color)
-	PrimitiveMan:DrawTriangleFillPrimitive(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color)	
+	PrimitiveMan:DrawTriangleFillPrimitive(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color)
+
+	//
+	PrimitiveMan:DrawEllipsePrimitive(Vector pos, short horizRadius, short vertRadius, unsigned char color)
+	PrimitiveMan:DrawEllipsePrimitive(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color)
+
+	//
+	PrimitiveMan:DrawEllipseFillPrimitive(Vector pos, short horizRadius, short vertRadius, unsigned char color)
+	PrimitiveMan:DrawEllipseFillPrimitive(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color)
 	```
 
 ### Changed

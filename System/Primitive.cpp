@@ -290,6 +290,40 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void EllipsePrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
+			Vector drawStart = m_StartPos - targetPos;
+			ellipse(drawScreen, drawStart.m_X, drawStart.m_Y, m_HorizRadius, m_VertRadius, m_Color);
+		} else {
+			Vector drawStartLeft;
+			Vector drawStartRight;
+
+			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
+
+			ellipse(drawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, m_HorizRadius, m_VertRadius, m_Color);
+			ellipse(drawScreen, drawStartRight.m_X, drawStartRight.m_Y, m_HorizRadius, m_VertRadius, m_Color);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void EllipseFillPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
+			Vector drawStart = m_StartPos - targetPos;
+			ellipsefill(drawScreen, drawStart.m_X, drawStart.m_Y, m_HorizRadius, m_VertRadius, m_Color);
+		} else {
+			Vector drawStartLeft;
+			Vector drawStartRight;
+
+			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
+
+			ellipsefill(drawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, m_HorizRadius, m_VertRadius, m_Color);
+			ellipsefill(drawScreen, drawStartRight.m_X, drawStartRight.m_Y, m_HorizRadius, m_VertRadius, m_Color);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void TrianglePrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawPointA = m_PointAPos - targetPos;

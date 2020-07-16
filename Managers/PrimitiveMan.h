@@ -209,6 +209,45 @@ namespace RTE {
 		/// <param name="radius">Radius of circle primitive.</param>
 		/// <param name="color">Color to fill primitive with.</param>
 		void DrawCircleFillPrimitive(short player, Vector pos, short radius, unsigned char color) {m_Primitives.push_back(new CircleFillPrimitive(player, pos, radius, color));}
+
+		/// <summary>
+		/// Schedule to draw an ellipse primitive.
+		/// </summary>
+		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="horizRadius">Horizontal radius of the ellipse primitive.</param>
+		/// <param name="vertRadius">Vertical radius of the ellipse primitive.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		void DrawEllipsePrimitive(Vector pos, short horizRadius, short vertRadius, unsigned char color) { m_Primitives.push_back(new EllipsePrimitive(-1, pos, horizRadius, vertRadius, color)); }
+
+		/// <summary>
+		/// Schedule to draw an ellipse primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="horizRadius">Horizontal radius of the ellipse primitive.</param>
+		/// <param name="vertRadius">Vertical radius of the ellipse primitive.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		void DrawEllipsePrimitive(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color) { m_Primitives.push_back(new EllipsePrimitive(player, pos, horizRadius, vertRadius, color)); }
+
+		/// <summary>
+		/// Schedule to draw a filled ellipse primitive.
+		/// </summary>
+		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="horizRadius">Horizontal radius of the ellipse primitive.</param>
+		/// <param name="vertRadius">Vertical radius of the ellipse primitive.</param>
+		/// <param name="color">Color to fill primitive with.</param>
+		void DrawEllipseFillPrimitive(Vector pos, short horizRadius, short vertRadius, unsigned char color) { m_Primitives.push_back(new EllipseFillPrimitive(-1, pos, horizRadius, vertRadius, color)); }
+
+		/// <summary>
+		/// Schedule to draw a filled ellipse primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="horizRadius">Horizontal radius of the ellipse primitive.</param>
+		/// <param name="vertRadius">Vertical radius of the ellipse primitive.</param>
+		/// <param name="color">Color to fill primitive with.</param>
+		void DrawEllipseFillPrimitive(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color) { m_Primitives.push_back(new EllipseFillPrimitive(player, pos, horizRadius, vertRadius, color)); }
+
 		/// <summary>
 		/// Schedule to draw a triangle primitive.
 		/// </summary>

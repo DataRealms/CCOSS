@@ -14,18 +14,21 @@ namespace RTE {
 			BITMAP *bitmap = moSprite->GetSpriteFrame(frame);
 
 			if (bitmap) {
-				BITMAP *flipBitmap = create_bitmap_ex(8, bitmap->w, bitmap->h);
-				clear_to_color(flipBitmap, 0);
+				if (!hFlipped && !vFlipped) {
+					m_Primitives.push_back(new BitmapPrimitive(player, start, bitmap, rotAngle));
+				} else {
+					BITMAP *flipBitmap = create_bitmap_ex(8, bitmap->w, bitmap->h);
+					clear_to_color(flipBitmap, 0);
 
-				if (hFlipped && !vFlipped) {
-					draw_sprite_h_flip(flipBitmap, bitmap, 0, 0);
-				} else if (!hFlipped && vFlipped) {
-					draw_sprite_v_flip(flipBitmap, bitmap, 0, 0);
-				} else if (hFlipped && vFlipped) {
-					draw_sprite_vh_flip(flipBitmap, bitmap, 0, 0);
+					if (hFlipped && !vFlipped) {
+						draw_sprite_h_flip(flipBitmap, bitmap, 0, 0);
+					} else if (!hFlipped && vFlipped) {
+						draw_sprite_v_flip(flipBitmap, bitmap, 0, 0);
+					} else if (hFlipped && vFlipped) {
+						draw_sprite_vh_flip(flipBitmap, bitmap, 0, 0);
+					}
+					m_Primitives.push_back(new BitmapPrimitive(player, start, flipBitmap, rotAngle));
 				}
-
-				m_Primitives.push_back(new BitmapPrimitive(player, start, (hFlipped || vFlipped) ? flipBitmap : bitmap, rotAngle));
 			}
 		}
 	}
@@ -41,9 +44,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::DrawPrimitives(short player, BITMAP *pTargetBitmap, const Vector &targetPos) {
+	void PrimitiveMan::DrawPrimitives(short player, BITMAP *targetBitmap, const Vector &targetPos) const {
 		for (GraphicalPrimitive *primitive : m_Primitives) {
-			if (player == primitive->m_Player || primitive->m_Player == -1) { primitive->Draw(pTargetBitmap, targetPos); }
+			if (player == primitive->m_Player || primitive->m_Player == -1) { primitive->Draw(targetBitmap, targetPos); }
 		}
 	}
 }

@@ -90,39 +90,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Added new primitive drawing functions to `PrimitiveMan`:  
 	```
-	//
-	PrimitiveMan:DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, unsigned char color)
-	PrimitiveMan:DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, unsigned char color, short thickness)
-	PrimitiveMan:DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, unsigned char color)
-	PrimitiveMan:DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, unsigned char color, short thickness)
+	-- Arc
+	PrimitiveMan:DrawArcPrimitive(Vector pos, startAngle, endAngle, radius, color)
+	PrimitiveMan:DrawArcPrimitive(player, Vector pos, startAngle, endAngle, radius, color)
+	
+	PrimitiveMan:DrawArcPrimitive(Vector pos, startAngle, endAngle, radius, color, thickness)
+	PrimitiveMan:DrawArcPrimitive(player, Vector pos, startAngle, endAngle, radius, color, thickness)
 
-	//
-	PrimitiveMan:DrawSplinePrimitive(Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color)
-	PrimitiveMan:DrawSplinePrimitive(short player, Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color)
+	-- Spline (Bézier Curve)
+	PrimitiveMan:DrawSplinePrimitive(Vector start, Vector guideA, Vector guideB, Vector end, color)
+	PrimitiveMan:DrawSplinePrimitive(player, Vector start, Vector guideA, Vector guideB, Vector end, color)
 
-	//
-	PrimitiveMan:DrawRoundBoxPrimitive(Vector start, Vector end, float cornerRadius, unsigned char color)
-	PrimitiveMan:DrawRoundBoxPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color)
+	-- Box with round corners (Squircle)
+	PrimitiveMan:DrawRoundBoxPrimitive(Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
+	PrimitiveMan:DrawRoundBoxPrimitive(player, Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
+	
+	PrimitiveMan:DrawRoundBoxFillPrimitive(Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
+	PrimitiveMan:DrawRoundBoxFillPrimitive(player, Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
 
-	//
-	PrimitiveMan:DrawRoundBoxFillPrimitive(Vector start, Vector end, float cornerRadius, unsigned char color)
-	PrimitiveMan:DrawRoundBoxFillPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color)
+	-- Triangle
+	PrimitiveMan:DrawTrianglePrimitive(Vector pointA, Vector pointB, Vector pointC, color)
+	PrimitiveMan:DrawTrianglePrimitive(player, Vector pointA, Vector pointB, Vector pointC, color)
+	
+	PrimitiveMan:DrawTriangleFillPrimitive(Vector pointA, Vector pointB, Vector pointC, color)
+	PrimitiveMan:DrawTriangleFillPrimitive(player, Vector pointA, Vector pointB, Vector pointC, color)
 
-	//
-	PrimitiveMan:DrawTrianglePrimitive(Vector pointA, Vector pointB, Vector pointC, unsigned char color)
-	PrimitiveMan:DrawTrianglePrimitive(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color)
-
-	//
-	PrimitiveMan:DrawTriangleFillPrimitive(Vector pointA, Vector pointB, Vector pointC, unsigned char color)
-	PrimitiveMan:DrawTriangleFillPrimitive(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color)
-
-	//
-	PrimitiveMan:DrawEllipsePrimitive(Vector pos, short horizRadius, short vertRadius, unsigned char color)
-	PrimitiveMan:DrawEllipsePrimitive(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color)
-
-	//
-	PrimitiveMan:DrawEllipseFillPrimitive(Vector pos, short horizRadius, short vertRadius, unsigned char color)
-	PrimitiveMan:DrawEllipseFillPrimitive(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color)
+	-- Ellipse
+	PrimitiveMan:DrawEllipsePrimitive(Vector pos, horizRadius, vertRadius, color)
+	PrimitiveMan:DrawEllipsePrimitive(player, Vector pos, horizRadius, vertRadius, color)
+	
+	PrimitiveMan:DrawEllipseFillPrimitive(Vector pos, short horizRadius, short vertRadius, color)
+	PrimitiveMan:DrawEllipseFillPrimitive(player, Vector pos, horizRadius, vertRadius, color)
 	```
 
 ### Changed

@@ -41,9 +41,9 @@ namespace RTE {
 		/// Draws all stored primitives on the screen for specified player.
 		/// </summary>
 		/// <param name="player">Player to draw for.</param>
-		/// <param name="pTargetBitmap">Bitmap to draw on.</param>
+		/// <param name="targetBitmap">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position to draw.</param>
-		void DrawPrimitives(short player, BITMAP *pTargetBitmap, const Vector &targetPos);
+		void DrawPrimitives(short player, BITMAP *targetBitmap, const Vector &targetPos) const;
 
 		/// <summary>
 		/// Schedule to draw a line primitive.
@@ -204,7 +204,7 @@ namespace RTE {
 		/// <param name="pos">Position of primitive in scene coordinates.</param>
 		/// <param name="radius">Radius of circle primitive.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawCirclePrimitive(Vector pos, short radius, unsigned char color) {m_Primitives.push_back(new CirclePrimitive(-1, pos, radius, color));}
+		void DrawCirclePrimitive(Vector pos, short radius, unsigned char color) { m_Primitives.push_back(new CirclePrimitive(-1, pos, radius, color)); }
 
 		/// <summary>
 		/// Schedule to draw a circle primitive visible only to a specified player.
@@ -213,7 +213,7 @@ namespace RTE {
 		/// <param name="pos">Position of primitive in scene coordinates.</param>
 		/// <param name="radius">Radius of circle primitive.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawCirclePrimitive(short player, Vector pos, short radius, unsigned char color) {m_Primitives.push_back(new CirclePrimitive(player, pos, radius, color));}
+		void DrawCirclePrimitive(short player, Vector pos, short radius, unsigned char color) { m_Primitives.push_back(new CirclePrimitive(player, pos, radius, color)); }
 
 		/// <summary>
 		/// Schedule to draw a filled circle primitive.
@@ -221,7 +221,7 @@ namespace RTE {
 		/// <param name="pos">Position of primitive in scene coordinates.</param>
 		/// <param name="radius">Radius of circle primitive.</param>
 		/// <param name="color">Color to fill primitive with.</param>
-		void DrawCircleFillPrimitive(Vector pos, short radius, unsigned char color) {m_Primitives.push_back(new CircleFillPrimitive(-1, pos, radius, color));}
+		void DrawCircleFillPrimitive(Vector pos, short radius, unsigned char color) { m_Primitives.push_back(new CircleFillPrimitive(-1, pos, radius, color)); }
 
 		/// <summary>
 		/// Schedule to draw a filled circle primitive visible only to a specified player.
@@ -230,7 +230,7 @@ namespace RTE {
 		/// <param name="pos">Position of primitive in scene coordinates.</param>
 		/// <param name="radius">Radius of circle primitive.</param>
 		/// <param name="color">Color to fill primitive with.</param>
-		void DrawCircleFillPrimitive(short player, Vector pos, short radius, unsigned char color) {m_Primitives.push_back(new CircleFillPrimitive(player, pos, radius, color));}
+		void DrawCircleFillPrimitive(short player, Vector pos, short radius, unsigned char color) { m_Primitives.push_back(new CircleFillPrimitive(player, pos, radius, color)); }
 
 		/// <summary>
 		/// Schedule to draw an ellipse primitive.
@@ -315,7 +315,7 @@ namespace RTE {
 		/// <param name="text">Text string to draw.</param>
 		/// <param name="isSmall">Use small or large font. True for small font.</param>
 		/// <param name="alignment">Alignment of text.</param>
-		void DrawTextPrimitive(Vector start, std::string text, bool isSmall, short alignment) {m_Primitives.push_back(new TextPrimitive(-1, start, text, isSmall, alignment));}
+		void DrawTextPrimitive(Vector start, std::string text, bool isSmall, short alignment) { m_Primitives.push_back(new TextPrimitive(-1, start, text, isSmall, alignment)); }
 
 		/// <summary>
 		/// Schedule to draw a text primitive visible only to a specified player.
@@ -325,7 +325,7 @@ namespace RTE {
 		/// <param name="text">Text string to draw.</param>
 		/// <param name="isSmall">Use small or large font. True for small font.</param>
 		/// <param name="alignment">Alignment of text.</param>
-		void DrawTextPrimitive(short player, Vector start, std::string text, bool isSmall, short alignment) {m_Primitives.push_back(new TextPrimitive(player, start, text, isSmall, alignment));}
+		void DrawTextPrimitive(short player, Vector start, std::string text, bool isSmall, short alignment) { m_Primitives.push_back(new TextPrimitive(player, start, text, isSmall, alignment)); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive.

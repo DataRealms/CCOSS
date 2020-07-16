@@ -20,11 +20,6 @@ namespace RTE {
 		short m_Player; //!< Player screen to draw this primitive on.
 
 		/// <summary>
-		/// Constructor method for GraphicalPrimitive objects.
-		/// </summary>
-		GraphicalPrimitive() { m_Color = 0; m_Player = -1; }
-
-		/// <summary>
 		/// Translates coordinates from scene to this bitmap offset producing two coordinates.
 		/// </summary>
 		/// <param name="targetPos">Target position.</param>
@@ -91,7 +86,7 @@ namespace RTE {
 
 		float m_StartAngle; //!< The angle from which the arc begins.
 		float m_EndAngle; //!< The angle at which the arc ends.
-		float m_Radius; //!< Radius of the arc primitive.
+		short m_Radius; //!< Radius of the arc primitive.
 		short m_Thickness; //!< Thickness of the arc primitive in pixels.
 
 		/// <summary>
@@ -230,7 +225,7 @@ namespace RTE {
 
 	public:
 
-		float m_CornerRadius; //!< The radius of the corners of the box.
+		short m_CornerRadius; //!< The radius of the corners of the box.
 
 		/// <summary>
 		/// Constructor method for RoundBoxPrimitive object.
@@ -240,7 +235,7 @@ namespace RTE {
 		/// <param name="end">End position of the primitive.</param>
 		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		RoundBoxPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color) {
+		RoundBoxPrimitive(short player, Vector start, Vector end, short cornerRadius, unsigned char color) {
 			m_StartPos = start;
 			m_EndPos = end;
 			m_CornerRadius = cornerRadius;
@@ -265,7 +260,7 @@ namespace RTE {
 
 	public:
 
-		float m_CornerRadius; //!< The radius of the corners of the box.
+		short m_CornerRadius; //!< The radius of the corners of the box.
 
 		/// <summary>
 		/// Constructor method for RoundBoxFillPrimitive object.
@@ -275,7 +270,7 @@ namespace RTE {
 		/// <param name="end">End position of the primitive.</param>
 		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		RoundBoxFillPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color) {
+		RoundBoxFillPrimitive(short player, Vector start, Vector end, short cornerRadius, unsigned char color) {
 			m_StartPos = start;
 			m_EndPos = end;
 			m_CornerRadius = cornerRadius;
@@ -300,12 +295,7 @@ namespace RTE {
 
 	public:
 
-		float m_Radius; //!< Radius of the circle primitive.
-
-		/// <summary>
-		/// Constructor method for CirclePrimitive object.
-		/// </summary>
-		CirclePrimitive() { m_Radius = 0; }
+		short m_Radius; //!< Radius of the circle primitive.
 
 		/// <summary>
 		/// Constructor method for CirclePrimitive object.
@@ -338,12 +328,7 @@ namespace RTE {
 
 	public:
 
-		float m_Radius; //!< Radius of the circle primitive.
-
-		/// <summary>
-		/// Constructor method for CircleFillPrimitive object.
-		/// </summary>
-		CircleFillPrimitive() { m_Radius = 0; }
+		short m_Radius; //!< Radius of the circle primitive.
 
 		/// <summary>
 		/// Constructor method for CircleFillPrimitive object.
@@ -376,8 +361,8 @@ namespace RTE {
 
 	public:
 
-		float m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
-		float m_VertRadius; //!< The vertical radius of the ellipse primitive.
+		short m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
+		short m_VertRadius; //!< The vertical radius of the ellipse primitive.
 
 		/// <summary>
 		/// Constructor method for EllipsePrimitive object.
@@ -412,8 +397,8 @@ namespace RTE {
 
 	public:
 
-		float m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
-		float m_VertRadius; //!< The vertical radius of the ellipse primitive.
+		short m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
+		short m_VertRadius; //!< The vertical radius of the ellipse primitive.
 
 		/// <summary>
 		/// Constructor method for EllipseFillPrimitive object.
@@ -528,16 +513,6 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method for TextPrimitive object.
 		/// </summary>
-		TextPrimitive() {
-			m_IsSmall = true;
-			m_Text = "";
-			m_Alignment = 0;
-			m_Player = -1;
-		}
-
-		/// <summary>
-		/// Constructor method for TextPrimitive object.
-		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
 		/// <param name="pos">Position of this primitive.</param>
 		/// <param name="text">String containing text to draw.</param>
@@ -570,15 +545,6 @@ namespace RTE {
 
 		float m_RotAngle; //!< Angle to rotate bitmap in radians.
 		BITMAP *m_Bitmap; //!< Bitmap to draw.
-
-		/// <summary>
-		/// Constructor method for BitmapPrimitive object.
-		/// </summary>
-		BitmapPrimitive() {
-			m_Bitmap = 0;
-			m_RotAngle = 0.0;
-			m_Player = -1;
-		}
 
 		/// <summary>
 		/// Constructor method for BitmapPrimitive object.

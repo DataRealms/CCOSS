@@ -59,10 +59,10 @@ namespace RTE {
 			Vector drawStart = m_StartPos - targetPos;
 			if (m_Thickness > 1) {
 				for (short i = 0; i < m_Thickness; i++) {
-					arc(drawScreen, drawStart.m_X, drawStart.m_Y, ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
+					arc(drawScreen, drawStart.m_X, drawStart.m_Y, ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
 				}
 			} else {
-				arc(drawScreen, drawStart.m_X, drawStart.m_Y, ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), m_Radius, m_Color);
+				arc(drawScreen, drawStart.m_X, drawStart.m_Y, ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), m_Radius, m_Color);
 			}
 		} else {
 			Vector drawStartLeft;
@@ -72,12 +72,12 @@ namespace RTE {
 
 			if (m_Thickness > 1) {
 				for (short i = 0; i < m_Thickness; i++){
-					arc(drawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
-					arc(drawScreen, drawStartRight.m_X, drawStartRight.m_Y, ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
+					arc(drawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
+					arc(drawScreen, drawStartRight.m_X, drawStartRight.m_Y, ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
 				}
 			} else {
-				arc(drawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), m_Radius, m_Color);
-				arc(drawScreen, drawStartRight.m_X, drawStartRight.m_Y, ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), m_Radius, m_Color);
+				arc(drawScreen, drawStartLeft.m_X, drawStartLeft.m_Y, ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), m_Radius, m_Color);
+				arc(drawScreen, drawStartRight.m_X, drawStartRight.m_Y, ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), m_Radius, m_Color);
 			}
 		}
 	}
@@ -383,12 +383,12 @@ namespace RTE {
 	void TextPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
-			AllegroBitmap pPlayerGUIBitmap(drawScreen);
+			AllegroBitmap playerGUIBitmap(drawScreen);
 
 			if (m_IsSmall) {
-				g_FrameMan.GetSmallFont()->DrawAligned(&pPlayerGUIBitmap, drawStart.m_X, drawStart.m_Y, m_Text, m_Alignment);
+				g_FrameMan.GetSmallFont()->DrawAligned(&playerGUIBitmap, drawStart.m_X, drawStart.m_Y, m_Text, m_Alignment);
 			} else {
-				g_FrameMan.GetLargeFont()->DrawAligned(&pPlayerGUIBitmap, drawStart.m_X, drawStart.m_Y, m_Text, m_Alignment);
+				g_FrameMan.GetLargeFont()->DrawAligned(&playerGUIBitmap, drawStart.m_X, drawStart.m_Y, m_Text, m_Alignment);
 			}
 		} else {
 			Vector drawStartLeft;

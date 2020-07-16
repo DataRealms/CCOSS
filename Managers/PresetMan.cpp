@@ -182,17 +182,10 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallbac
 
 bool PresetMan::LoadAllDataModules() {
 	// Load all the official modules first!
-	if (!LoadDataModule("Base.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-
-	if (!LoadDataModule("Coalition.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Imperatus.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Techion.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Dummy.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Ronin.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Browncoats.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Uzira.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("MuIlaak.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Missions.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	std::array<string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
+	for each (string officialModule in officialModules) {
+		if (!LoadDataModule(officialModule, true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	}
 
 	// If a single module is specified, skip loading all other unofficial modules and load specified module only.
 	if (m_SingleModuleToLoad != "Base.rte" && m_SingleModuleToLoad != "") {

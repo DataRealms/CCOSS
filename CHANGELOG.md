@@ -91,8 +91,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added new primitive drawing functions to `PrimitiveMan`:  
 	```
 	//
-	PrimitiveMan:DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, short thickness, unsigned char color)
-	PrimitiveMan:DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, short thickness, unsigned char color)
+	PrimitiveMan:DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, unsigned char color)
+	PrimitiveMan:DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, unsigned char color, short thickness)
+	PrimitiveMan:DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, unsigned char color)
+	PrimitiveMan:DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, unsigned char color, short thickness)
 
 	//
 	PrimitiveMan:DrawSplinePrimitive(Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color)

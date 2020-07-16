@@ -70,7 +70,18 @@ namespace RTE {
 		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
 		/// <param name="radius">Radius of the arc primitive.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, short thickness, unsigned char color) { m_Primitives.push_back(new ArcPrimitive(-1, pos, startAngle, endAngle, radius, thickness, color)); }
+		void DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, unsigned char color) { m_Primitives.push_back(new ArcPrimitive(-1, pos, startAngle, endAngle, radius, 1, color)); }
+
+		/// <summary>
+		/// Schedule to draw an arc primitive with the option to change thickness.
+		/// </summary>
+		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="startAngle">The angle from which the arc drawing begins.</param>
+		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
+		/// <param name="radius">Radius of the arc primitive.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="thickness">Thickness of the arc in pixels.</param>
+		void DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, unsigned char color, short thickness) { m_Primitives.push_back(new ArcPrimitive(-1, pos, startAngle, endAngle, radius, thickness, color)); }
 
 		/// <summary>
 		/// Schedule to draw an arc primitive visible only to a specified player.
@@ -80,9 +91,20 @@ namespace RTE {
 		/// <param name="startAngle">The angle from which the arc drawing begins.</param>
 		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
 		/// <param name="radius">Radius of the arc primitive.</param>
-		/// <param name="thickness">Thickness of the arc in pixels.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, short thickness, unsigned char color) { m_Primitives.push_back(new ArcPrimitive(player, pos, startAngle, endAngle, radius, thickness, color)); }
+		void DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, unsigned char color) { m_Primitives.push_back(new ArcPrimitive(player, pos, startAngle, endAngle, radius, 1, color)); }
+
+		/// <summary>
+		/// Schedule to draw an arc primitive visible only to a specified player with the option to change thickness.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="startAngle">The angle from which the arc drawing begins.</param>
+		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
+		/// <param name="radius">Radius of the arc primitive.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		/// <param name="thickness">Thickness of the arc in pixels.</param>
+		void DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, unsigned char color, short thickness) { m_Primitives.push_back(new ArcPrimitive(player, pos, startAngle, endAngle, radius, thickness, color)); }
 
 		/// <summary>
 		/// Schedule to draw a Bezier spline primitive.

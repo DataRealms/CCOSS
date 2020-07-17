@@ -167,9 +167,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="opp">The Vector to compare with.</param>
 		/// <returns>Whether the X and Y components of this Vector each have opposite signs to their corresponding components of a passed in Vector.</returns>
-		bool IsOpposedTo(const Vector &opp) { 
-			return ((XIsZero() && opp.XIsZero()) || (signbit(m_X) != signbit(opp.m_X))) && ((YIsZero() && opp.YIsZero()) || (signbit(m_Y) != signbit(opp.m_Y)));
-		}
+		bool IsOpposedTo(const Vector &opp) { return ((XIsZero() && opp.XIsZero()) || (signbit(m_X) != signbit(opp.m_X))) && ((YIsZero() && opp.YIsZero()) || (signbit(m_Y) != signbit(opp.m_Y))); }
 #pragma endregion
 
 #pragma region Magnitude
@@ -177,7 +175,7 @@ namespace RTE {
 		/// Gets the magnitude of this Vector.
 		/// </summary>
 		/// <returns>A float describing the magnitude.</returns>
-		float GetMagnitude() const { return std::sqrtf(std::powf(m_X,2.0F) + std::powf(m_Y,2.0F)); }
+		float GetMagnitude() const { return std::sqrtf(std::powf(m_X, 2.0F) + std::powf(m_Y, 2.0F)); }
 
 		/// <summary>
 		/// Sets the magnitude of this Vector and keeps its angle intact.
@@ -209,16 +207,14 @@ namespace RTE {
 #pragma region Rotation
 		/// <summary>
 		/// Get this Vector's absolute angle in radians. e.g: when x = 1, y = 0, the value returned here will be 0. x = 0, y = 1 yields -pi/2 here.
-		/// Returns a value in the interval [-0.5 pi, 1.5 pi).
 		/// </summary>
-		/// <returns>The absolute angle in radians.</returns>
+		/// <returns>The absolute angle in radians, in the interval [-0.5 pi, 1.5 pi).</returns>
 		float GetAbsRadAngle() const;
 
 		/// <summary>
 		/// Get this Vector's absolute angle in degrees. e.g: when x = 1, y = 0, the value returned here will be 0. x = 0, y = 1 yields -90 here.
-		/// Returns a value in the interval [-90, 270).
 		/// </summary>
-		/// <returns>The absolute angle in degrees.</returns>
+		/// <returns>The absolute angle in degrees, in the interval [-90, 270).</returns>
 		float GetAbsDegAngle() const { return GetAbsRadAngle() / c_PI * 180.0F; }
 
 		/// <summary>

@@ -14,6 +14,7 @@ namespace RTE {
 	public:
 
 		SerializableOverrideMethods
+
 		float m_Rotation; //!< The angle, represented in radians. Pi/2 points up.
 		bool m_Flipped[2]; //!< Whether or not this Matrix also mirrors the respective axes of its invoked Vectors.
 		float m_Elements[2][2]; //!< The elements of the matrix, which represent the negative of the angle. Allows multiplication between matrices and vectors while considering upside-down coordinate system.

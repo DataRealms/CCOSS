@@ -53,7 +53,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float Vector::GetAbsRadAngle() const {
-		float radAngle = -std::atan2(m_Y, m_X);
+		float radAngle = -std::atan2f(m_Y, m_X);
 		return (radAngle < -c_HalfPI) ? (radAngle + c_TwoPI) : radAngle;
 	}
 
@@ -61,8 +61,8 @@ namespace RTE {
 
 	Vector & Vector::RadRotate(float angle) {
 		angle = -angle;
-		float tempX = m_X * std::cos(angle) - m_Y * std::sin(angle);
-		float tempY = m_X * std::sin(angle) + m_Y * std::cos(angle);
+		float tempX = m_X * std::cosf(angle) - m_Y * std::sinf(angle);
+		float tempY = m_X * std::sinf(angle) + m_Y * std::cosf(angle);
 		m_X = tempX;
 		m_Y = tempY;
 

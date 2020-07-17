@@ -12,7 +12,7 @@ namespace RTE {
 #pragma region Physics Constants
 	static constexpr float c_PPM = 20.0F; //!< Pixels per Meter constant.
 	static constexpr float c_MPP = 1.0F / c_PPM; //!< Meters per Pixel constant.
-	static constexpr float c_PPL = 1000.F / ((100.0F / c_PPM) * (100.0F / c_PPM) * (100.0F / c_PPM)); //!< Pixels per Liter constant.
+	static constexpr float c_PPL = 1000.0F / ((100.0F / c_PPM) * (100.0F / c_PPM) * (100.0F / c_PPM)); //!< Pixels per Liter constant.
 	static constexpr float c_LPP = 1.0F / c_PPL; //!< Liters per Pixel constant.
 #pragma endregion
 

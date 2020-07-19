@@ -1,6 +1,5 @@
 #include "Vector.h"
 
-#pragma intrinsic (sin, cos, atan2)
 #pragma float_control(precise, on)
 
 namespace RTE {

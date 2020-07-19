@@ -1,7 +1,5 @@
 #include "Matrix.h"
 
-#pragma intrinsic (sin, cos)
-
 namespace RTE {
 
 	const std::string Matrix::c_ClassName = "Matrix";

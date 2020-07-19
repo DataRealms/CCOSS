@@ -183,7 +183,7 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallbac
 bool PresetMan::LoadAllDataModules() {
 	// Load all the official modules first!
 	std::array<string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
-	for each (string officialModule in officialModules) {
+	for (const string &officialModule : officialModules) {
 		if (!LoadDataModule(officialModule, true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
 	}
 

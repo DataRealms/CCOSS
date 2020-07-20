@@ -20,7 +20,7 @@ namespace RTE {
 		ClassInfoGetters
 
 		/// <summary>
-		/// 
+		/// Enumeration for the different states the Activity can be in.
 		/// </summary>
 		enum ActivityState {
 			NOACTIVITY = -1,
@@ -100,7 +100,7 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a Activity object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate an Activity object in system memory. Create() should be called before using the object.
 		/// </summary>
 		Activity() { Clear(); }
 
@@ -111,7 +111,7 @@ namespace RTE {
 		virtual int Create();
 
 		/// <summary>
-		/// Creates a Activity to be identical to another, by deep copy.
+		/// Creates an Activity to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the Activity to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
@@ -120,7 +120,7 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a Activity object before deletion from system memory.
+		/// Destructor method used to clean up an Activity object before deletion from system memory.
 		/// </summary>
 		virtual ~Activity() { Destroy(true); }
 
@@ -541,7 +541,7 @@ namespace RTE {
 		/// Shows whether ANY player evacuated their Brain.
 		/// </summary>
 		/// <returns>Whether any player evacuated their Brain yet.</returns>
-		bool AnyEvacuees() const;
+		bool AnyBrainWasEvacuated() const;
 
 		/// <summary>
 		/// Shows whether the passed in actor is the Brain of any player.
@@ -628,7 +628,7 @@ namespace RTE {
 		/// <summary>
 		/// Forces the ActivityMan to focus player control to a specific Actor for a specific team. OWNERSHIP IS NOT TRANSFERRED!
 		/// </summary>
-		/// <param name="actor">Which Actor to switch focus to. The team of this Actor will be set once it is passed in. The Actor should be added to MovableMan already.</param>
+		/// <param name="actor">Which Actor to switch focus to. The team of this Actor will be set once it is passed in. The actor should have been added to MovableMan already.</param>
 		/// <param name="player">Player to force for.</param>
 		/// <param name="team">Which team to switch to next actor on.</param>
 		/// <returns>Whether the focus switch was successful or not.</returns>
@@ -699,7 +699,7 @@ namespace RTE {
 		Icon m_TeamIcons[MAXTEAMCOUNT]; //!< Icons for each team.
 
 		int m_TeamCount; //!< The number of teams in the current Activity.
-		bool m_TeamActive[MAXTEAMCOUNT]; //!< Team is active or not in this Activity.
+		bool m_TeamActive[MAXTEAMCOUNT]; //!< Whether a specific team is active or not in this Activity.
 		int m_Team[MAXPLAYERCOUNT]; //!< The designated team of each player.	
 		int m_TeamDeaths[MAXTEAMCOUNT]; //!< The count of how many actors have died on this team.
 		int m_TeamAISkillLevels[MAXTEAMCOUNT]; //!< AI skill levels for teams.

@@ -44,7 +44,7 @@ namespace RTE {
 		virtual ~MetaSave() { Destroy(true); }
 
 		/// <summary>
-		/// Destroys and resets (through Clear()) the SceneLayer object.
+		/// Destroys and resets (through Clear()) the MetaSave object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
 		virtual void Destroy(bool notInherited = false) { if (!notInherited) { Entity::Destroy(); } Clear(); }

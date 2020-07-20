@@ -33,7 +33,7 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		enum TreadExitReasons {
+		enum ThreadExitReasons {
 			NORMAL = 0,
 			THREAD_FINISH,
 			TOO_EARLY_TO_SEND,
@@ -154,8 +154,8 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="tc"></param>
-		void RegisterTerrainChange(SceneMan::TerrainChange terrChange);
+		/// <param name="terrainChange"></param>
+		void RegisterTerrainChange(SceneMan::TerrainChange terrainChange);
 #pragma endregion
 
 #pragma region Class Info
@@ -241,7 +241,7 @@ namespace RTE {
 		std::mutex m_Mutex[c_MaxClients]; //!<
 
 		//std::mutex m_InputQueueMutex[c_MaxClients];
-		std::queue<MsgInput>m_InputMessages[c_MaxClients]; //!<
+		std::queue<MsgInput> m_InputMessages[c_MaxClients]; //!<
 
 		unsigned char m_SceneID; //!<
 
@@ -445,8 +445,8 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		/// <param name="terrChange"></param>
-		void SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrChange);
+		/// <param name="terrainChange"></param>
+		void SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrainChange);
 
 		/// <summary>
 		/// 

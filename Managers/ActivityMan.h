@@ -17,7 +17,7 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a ActivityMan object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate an ActivityMan object in system memory. Create() should be called before using the object.
 		/// </summary>
 		ActivityMan() { Clear(); }
 
@@ -30,7 +30,7 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a ActivityMan object before deletion from system memory.
+		/// Destructor method used to clean up an ActivityMan object before deletion from system memory.
 		/// </summary>
 		virtual ~ActivityMan() { Destroy(); }
 
@@ -66,7 +66,7 @@ namespace RTE {
 		void SetDefaultActivityName(std::string defaultActivityName) { m_DefaultActivityName = defaultActivityName; }
 
 		/// <summary>
-		/// Gets the Activity set to use a copy of for next restart. Ownership is NOT transferred!
+		/// Gets the Activity that will be used in the next restart. Ownership is NOT transferred!
 		/// </summary>
 		/// <returns>The Activity to put into effect next time ResetActivity is called.</returns>
 		Activity * GetStartActivity() const { return m_StartActivity; }
@@ -108,12 +108,12 @@ namespace RTE {
 		/// Officially gets and starts the Activity described.
 		/// </summary>
 		/// <param name="className">The class name of the Activity to start.</param>
-		/// <param name="instanceName">The preset name of the Activity to start.</param>
+		/// <param name="presetName">The PresetName of the Activity to start.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int StartActivity(std::string className, std::string instanceName);
+		int StartActivity(std::string className, std::string presetName);
 
 		/// <summary>
-		/// Pauses and unpauses the game.
+		/// Pauses/unpauses the game and saving/resuming in-game music if possible, or queuing default music if not.
 		/// </summary>
 		/// <param name="pause">Whether to pause the game or not.</param>
 		void PauseActivity(bool pause = true);

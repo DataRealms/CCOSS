@@ -46,7 +46,6 @@ namespace RTE {
 		// Stop all music, will be started by the Activity right below
 		g_AudioMan.StopMusic();
 
-		// Replace the start activity
 		delete m_StartActivity;
 		m_StartActivity = activity;
 
@@ -75,7 +74,6 @@ namespace RTE {
 		// Reset the mouse input to the center
 		g_UInputMan.SetMouseValueMagnitude(0.05F);
 
-		// Reset the last music position
 		m_LastMusicPath = "";
 		m_LastMusicPos = 0;
 
@@ -84,8 +82,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ActivityMan::StartActivity(string className, string instanceName) {
-		const Entity *entity = g_PresetMan.GetEntityPreset(className, instanceName);
+	int ActivityMan::StartActivity(string className, string presetName) {
+		const Entity *entity = g_PresetMan.GetEntityPreset(className, presetName);
 
 		if (entity) {
 			Activity *newActivity = dynamic_cast<Activity *>(entity->Clone());
@@ -93,7 +91,7 @@ namespace RTE {
 				return StartActivity(newActivity);
 			}
 		} else {
-			g_ConsoleMan.PrintString("ERROR: Couldn't find the " + className + " named " + instanceName + " to start! Has it been defined?");
+			g_ConsoleMan.PrintString("ERROR: Couldn't find the " + className + " named " + presetName + " to start! Has it been defined?");
 			return -1;
 		}
 		return 0;
@@ -108,11 +106,9 @@ namespace RTE {
 
 		if (m_Activity) {		
 			if (pause) {
-				// Save the current in-game music position on pause
 				m_LastMusicPath = g_AudioMan.GetMusicPath();
 				m_LastMusicPos = g_AudioMan.GetMusicPosition();
 			} else {
-				// Re-start it again where it was on unpause but only if we have a position to actually resume
 				if (!m_LastMusicPath.empty() && m_LastMusicPos > 0) {
 					g_AudioMan.ClearMusicQueue();
 					g_AudioMan.PlayMusic(m_LastMusicPath.c_str());
@@ -134,14 +130,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ActivityMan::RestartActivity() {
-		// If we have a start activity set, then clone it and pass in. (have to clone, or will delete self in StartActivity)
 		if (m_StartActivity) {
+			// Need to pass in a clone of the activity because the original will be deleted and re-set during StartActivity.
 			return StartActivity(dynamic_cast<Activity *>(m_StartActivity->Clone()));
-		} else {
-			return StartActivity(m_DefaultActivityType, m_DefaultActivityName);
 		}
-		// Report that we had to start the default because there wasn't a specified start activity
-		return -1;
+		return StartActivity(m_DefaultActivityType, m_DefaultActivityName);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

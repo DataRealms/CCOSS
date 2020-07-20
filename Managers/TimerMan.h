@@ -30,7 +30,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a TimerMan object in system memory. Create() should be called before using the object.
 		/// </summary>
-		TimerMan() { Clear(); Create(); }
+		TimerMan() { Clear(); }
 
 		/// <summary>
 		/// Makes the TimerMan object ready for use.
@@ -58,10 +58,10 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Returns current time stamp in microseconds unrelated to TimerMan updates. Can be used to measure time intervals during single frame update.
+		/// Gets the current time stamp in microseconds unrelated to TimerMan updates. Can be used to measure time intervals during a single frame update.
 		/// </summary>
 		/// <returns>Current time stamp in microseconds.</returns>
-		long long GetAbsoulteTime() const;
+		long long GetAbsoluteTime() const;
 
 		/// <summary>
 		/// Enables or disables the averaging of time measurements done each Update(). These help smooth out and prevent choppy animation.
@@ -110,7 +110,7 @@ namespace RTE {
 		/// Gets the cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.
 		/// </summary>
 		/// <returns>A float describing the current cap in seconds.</returns>
-		float GetRealToSimCap() const { return (float)m_RealToSimCap / (float)m_TicksPerSecond; }
+		float GetRealToSimCap() const { return static_cast<float>(m_RealToSimCap) / static_cast<float>(m_TicksPerSecond); }
 
 		/// <summary>
 		/// Sets the cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.
@@ -173,7 +173,7 @@ namespace RTE {
 		long long GetSimTimeMS() const { return (m_SimTimeTicks / m_TicksPerSecond) * 0.001F; }
 
 		/// <summary>
-		/// Returns the current number of ticks that the of the simulation updates in.
+		/// Gets the current number of ticks that the simulation should be updating with.
 		/// </summary>
 		/// <returns>The current fixed delta time that the simulation should be updating with, in ticks.</returns>
 		int GetDeltaTimeTicks() const { return m_DeltaTime; }
@@ -185,13 +185,13 @@ namespace RTE {
 		void SetDeltaTimeTicks(int newDelta) { m_DeltaTime = newDelta; m_DeltaTimeS = m_DeltaTime / m_TicksPerSecond; }
 
 		/// <summary>
-		/// Returns the current fixed delta time of the simulation updates, in ms.
+		/// Gets the current fixed delta time of the simulation updates, in ms.
 		/// </summary>
 		/// <returns>The current fixed delta time that the simulation should be updating with, in ms.</returns>
 		float GetDeltaTimeMS() const { return m_DeltaTimeS * 1000; }
 
 		/// <summary>
-		/// Returns the current fixed delta time of the simulation updates, in seconds.
+		/// Gets the current fixed delta time of the simulation updates, in seconds.
 		/// </summary>
 		/// <returns>The current fixed delta time that the simulation should be updating with, in seconds.</returns>
 		float GetDeltaTimeSecs() const { return m_DeltaTimeS; }
@@ -210,19 +210,19 @@ namespace RTE {
 		void ResetTime();
 
 		/// <summary>
-		/// Updates the simulation time to represent the current amount of simulation time passed from the start of the simulation up to the this last update.
+		/// Updates the simulation time to represent the current amount of simulation time passed from the start of the simulation up to the last update.
 		/// </summary>
 		void UpdateSim();
 
 		/// <summary>
-		/// Updates the real time ticks based on the actual time clock time and adding it to the accumulator which the simulation ticks will draw from in whole DeltaTime-sized chunks.
+		/// Updates the real time ticks based on the actual clock time and adds it to the accumulator which the simulation ticks will draw from in whole DeltaTime-sized chunks.
 		/// </summary>
 		void Update();
 #pragma endregion
 
 #pragma region Network Handling
 		/// <summary>
-		/// Gets the duration the thread should be put to sleep. This is used when ServerSimSleepWhenIdle is true to put the thread to sleep the sim frame is finished faster than it usually should.
+		/// Gets the duration the thread should be put to sleep. This is used when ServerSimSleepWhenIdle is true to put the thread to sleep if the sim frame is finished faster than it usually should.
 		/// </summary>
 		/// <returns>The duration the thread should be put to sleep.</returns>
 		long long GetTimeToSleep() const { return (m_DeltaTime - m_SimAccumulator) / 2; };
@@ -250,12 +250,12 @@ namespace RTE {
 
 		long long m_DeltaTime; //!< The fixed delta time chunk of the simulation update.	
 		float m_DeltaTimeS; //!< The simulation update step size, in seconds.
-		std::deque<float> m_DeltaBuffer; //!< The buffer of measured the most recent real time differences, used for averaging out the readings.
+		std::deque<float> m_DeltaBuffer; //!< Buffer for measuring the most recent real time differences, used for averaging out the readings.
 
 		int m_SimUpdatesSinceDrawn; //!< How many sim updates have been done since the last drawn one.
 		bool m_DrawnSimUpdate; //!< Tells whether the current simulation update will be drawn in a frame.
 
-		float m_TimeScale; //!< Time scale. The relationship between the real world actual time, and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.
+		float m_TimeScale; //!< The relationship between the real world actual time and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.
 
 		bool m_AveragingEnabled; //!< Whether calculated delta time averaging is enabled.
 		bool m_SimPaused; //!< Simulation paused; no real time ticks will go to the sim accumulator.

@@ -185,58 +185,58 @@ namespace RTE {
 			case PRESET_XBOX360:
 				// Set up the default xbox 360 button bindings
 				m_InputMapping[INPUT_FIRE].SetJoyButton(JOY_1);
-				m_InputMapping[INPUT_FIRE].SetPresetDesc("A Button");
+				m_InputMapping[INPUT_FIRE].SetPresetDescription("A Button");
 				// Hold down X to enter aim mode, then can use d-pad up/down to finely aim while sniping
 				m_InputMapping[INPUT_AIM].SetJoyButton(JOY_3);
-				m_InputMapping[INPUT_AIM].SetPresetDesc("X Button");
+				m_InputMapping[INPUT_AIM].SetPresetDescription("X Button");
 				// Pie menu also cancels buy menu, which makes sense for the B button
 				m_InputMapping[INPUT_PIEMENU].SetJoyButton(JOY_2);
-				m_InputMapping[INPUT_PIEMENU].SetPresetDesc("B Button");
+				m_InputMapping[INPUT_PIEMENU].SetPresetDescription("B Button");
 				// Jump on top button of diamond makes sense
 				m_InputMapping[INPUT_JUMP].SetJoyButton(JOY_4);
-				m_InputMapping[INPUT_JUMP].SetPresetDesc("Y Button");
+				m_InputMapping[INPUT_JUMP].SetPresetDescription("Y Button");
 				m_InputMapping[INPUT_NEXT].SetJoyButton(JOY_6);
-				m_InputMapping[INPUT_NEXT].SetPresetDesc("R Bumper Button");
+				m_InputMapping[INPUT_NEXT].SetPresetDescription("R Bumper Button");
 				m_InputMapping[INPUT_PREV].SetJoyButton(JOY_5);
-				m_InputMapping[INPUT_PREV].SetPresetDesc("L Bumper Button");
+				m_InputMapping[INPUT_PREV].SetPresetDescription("L Bumper Button");
 				m_InputMapping[INPUT_START].SetJoyButton(JOY_8);
-				m_InputMapping[INPUT_START].SetPresetDesc("Start Button");
+				m_InputMapping[INPUT_START].SetPresetDescription("Start Button");
 				m_InputMapping[INPUT_BACK].SetJoyButton(JOY_7);
-				m_InputMapping[INPUT_BACK].SetPresetDesc("Back Button");
+				m_InputMapping[INPUT_BACK].SetPresetDescription("Back Button");
 				// Set up the default xbox joy direction bindings
 				m_InputMapping[INPUT_L_UP].SetDirection(0, 1, JOYDIR_ONE);
-				m_InputMapping[INPUT_L_UP].SetPresetDesc("L Thumbstick Up");
+				m_InputMapping[INPUT_L_UP].SetPresetDescription("L Thumbstick Up");
 				m_InputMapping[INPUT_L_DOWN].SetDirection(0, 1, JOYDIR_TWO);
-				m_InputMapping[INPUT_L_DOWN].SetPresetDesc("L Thumbstick Down");
+				m_InputMapping[INPUT_L_DOWN].SetPresetDescription("L Thumbstick Down");
 				m_InputMapping[INPUT_L_LEFT].SetDirection(0, 0, JOYDIR_ONE);
-				m_InputMapping[INPUT_L_LEFT].SetPresetDesc("L Thumbstick Left");
+				m_InputMapping[INPUT_L_LEFT].SetPresetDescription("L Thumbstick Left");
 				m_InputMapping[INPUT_L_RIGHT].SetDirection(0, 0, JOYDIR_TWO);
-				m_InputMapping[INPUT_L_RIGHT].SetPresetDesc("L Thumbstick Right");
+				m_InputMapping[INPUT_L_RIGHT].SetPresetDescription("L Thumbstick Right");
 				m_InputMapping[INPUT_R_UP].SetDirection(1, 0, JOYDIR_ONE);
-				m_InputMapping[INPUT_R_UP].SetPresetDesc("R Thumbstick Up");
+				m_InputMapping[INPUT_R_UP].SetPresetDescription("R Thumbstick Up");
 				m_InputMapping[INPUT_R_DOWN].SetDirection(1, 0, JOYDIR_TWO);
-				m_InputMapping[INPUT_R_DOWN].SetPresetDesc("R Thumbstick Down");
+				m_InputMapping[INPUT_R_DOWN].SetPresetDescription("R Thumbstick Down");
 				m_InputMapping[INPUT_R_LEFT].SetDirection(2, 0, JOYDIR_ONE);
-				m_InputMapping[INPUT_R_LEFT].SetPresetDesc("R Thumbstick Left");
+				m_InputMapping[INPUT_R_LEFT].SetPresetDescription("R Thumbstick Left");
 				m_InputMapping[INPUT_R_RIGHT].SetDirection(2, 0, JOYDIR_TWO);
-				m_InputMapping[INPUT_R_RIGHT].SetPresetDesc("R Thumbstick Right");
+				m_InputMapping[INPUT_R_RIGHT].SetPresetDescription("R Thumbstick Right");
 				m_InputMapping[INPUT_FIRE].SetDirection(0, 2, JOYDIR_ONE);
-				m_InputMapping[INPUT_FIRE].SetPresetDesc("R Trigger");
+				m_InputMapping[INPUT_FIRE].SetPresetDescription("R Trigger");
 				m_InputMapping[INPUT_PIEMENU].SetDirection(0, 2, JOYDIR_TWO);
-				m_InputMapping[INPUT_PIEMENU].SetPresetDesc("L Trigger");
+				m_InputMapping[INPUT_PIEMENU].SetPresetDescription("L Trigger");
 				m_InputMapping[INPUT_JUMP].SetDirection(0, 1, JOYDIR_ONE);
-				m_InputMapping[INPUT_JUMP].SetPresetDesc("L Thumbstick Up");
+				m_InputMapping[INPUT_JUMP].SetPresetDescription("L Thumbstick Up");
 				m_InputMapping[INPUT_CROUCH].SetDirection(0, 1, JOYDIR_TWO);
-				m_InputMapping[INPUT_CROUCH].SetPresetDesc("L Thumbstick Down");
+				m_InputMapping[INPUT_CROUCH].SetPresetDescription("L Thumbstick Down");
 				// So fine aiming can be done with the d-pad while holding down X
 				m_InputMapping[INPUT_AIM_UP].SetDirection(3, 1, JOYDIR_ONE);
-				m_InputMapping[INPUT_AIM_UP].SetPresetDesc("D-Pad Up");
+				m_InputMapping[INPUT_AIM_UP].SetPresetDescription("D-Pad Up");
 				m_InputMapping[INPUT_AIM_DOWN].SetDirection(3, 1, JOYDIR_TWO);
-				m_InputMapping[INPUT_AIM_DOWN].SetPresetDesc("D-Pad Down");
+				m_InputMapping[INPUT_AIM_DOWN].SetPresetDescription("D-Pad Down");
 				m_InputMapping[INPUT_AIM_LEFT].SetDirection(3, 0, JOYDIR_ONE);
-				m_InputMapping[INPUT_AIM_LEFT].SetPresetDesc("D-Pad Left");
+				m_InputMapping[INPUT_AIM_LEFT].SetPresetDescription("D-Pad Left");
 				m_InputMapping[INPUT_AIM_RIGHT].SetDirection(3, 0, JOYDIR_TWO);
-				m_InputMapping[INPUT_AIM_RIGHT].SetPresetDesc("D-Pad Right");
+				m_InputMapping[INPUT_AIM_RIGHT].SetPresetDescription("D-Pad Right");
 				break;
 
 			case PRESET_P1DEFAULT:

@@ -91,7 +91,7 @@ namespace RTE {
 		/// Connects to a NAT service and performs punch-through.
 		/// </summary>
 		/// <param name="serviceServerName">NAT service server name (or address) to use for punch-through.</param>
-		/// <param name="serverPort">NAT service server port.</param>
+		/// <param name="serviceServerPort">NAT service server port.</param>
 		/// <param name="playerName">Player name to be used in network game.</param>
 		/// <param name="serverName">Server name (or address) to connect to.</param>
 		/// <param name="serverPassword">Server password.</param>
@@ -204,10 +204,10 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="addr"></param>
+		/// <param name="address"></param>
 		/// <param name="serverName"></param>
 		/// <param name="serverPassword"></param>
-		void SendServerGUIDRequest(RakNet::SystemAddress addr, std::string serverName, std::string serverPassword);
+		void SendServerGUIDRequest(RakNet::SystemAddress address, std::string serverName, std::string serverPassword);
 
 		/// <summary>
 		/// 

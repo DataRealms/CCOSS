@@ -14,7 +14,15 @@ namespace RTE {
 
 	const std::string NetworkClient::c_ClassName = "NetworkClient";
 
-	struct SLDrawBox { int sourceX; int sourceY; int sourceW; int sourceH; int destX; int destY; };
+	// Data structure for constructing the draw boxes we'll need to use for drawing SceneLayers.
+	struct SLDrawBox {
+		int sourceX;
+		int sourceY;
+		int sourceW;
+		int sourceH;
+		int destX;
+		int destY;
+	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -52,12 +60,6 @@ namespace RTE {
 			soundEntry.second->Stop();
 			delete soundEntry.second;
 		}
-		/*
-		for (std::unordered_map<unsigned short, SoundContainer *>::iterator it = m_ServerSounds.begin(); it != m_ServerSounds.end(); ++it) {
-			it->second->Stop();
-			delete it->second;
-		}
-		*/
 		m_ServerSounds.clear();
 	}
 
@@ -201,12 +203,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkClient::SendServerGUIDRequest(RakNet::SystemAddress addr, std::string serverName, std::string serverPassword) {
+	void NetworkClient::SendServerGUIDRequest(RakNet::SystemAddress address, std::string serverName, std::string serverPassword) {
 		MsgGetServerRequest msg;
 		msg.Id = ID_NAT_SERVER_GET_SERVER_GUID;
 		strncpy(msg.ServerName, serverName.c_str(), 62);
 		strncpy(msg.ServerPassword, serverPassword.c_str(), 62);
-		m_Client->Send((const char *)&msg, sizeof(RTE::MsgGetServerRequest), IMMEDIATE_PRIORITY, RELIABLE, 0, addr, false);
+		m_Client->Send((const char *)&msg, sizeof(RTE::MsgGetServerRequest), IMMEDIATE_PRIORITY, RELIABLE, 0, address, false);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

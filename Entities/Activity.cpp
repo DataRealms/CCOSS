@@ -380,8 +380,6 @@ namespace RTE {
 		if (!g_FrameMan.IsInMultiplayerMode()) {
 			g_UInputMan.DisableMouseMoving(true);
 			g_UInputMan.DisableMouseMoving(false);
-
-			// Enable keys again
 			g_UInputMan.DisableKeys(false);
 		}
 
@@ -725,7 +723,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool Activity::AnyEvacuees() const {
+	bool Activity::AnyBrainWasEvacuated() const {
 		for (int i = 0; i < MAXPLAYERCOUNT; ++i) {
 			if (m_BrainEvacuated[i]) {
 				return true;
@@ -1121,7 +1119,7 @@ namespace RTE {
 		orbitedCraft->SetGoldCarried(0);
 		orbitedCraft->SetHealth(orbitedCraft->GetMaxHealth());
 
-		// Counter-adjust the death toll because the craft leaving (being deleted) will increment
+		// The craft entering orbit will count as a death for the team because it's being deleted, so we need to decrement the team's death count to keep it correct.
 		m_TeamDeaths[team]--;
 	}
 

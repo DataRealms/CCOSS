@@ -623,11 +623,11 @@ bool PlayIntroTitle() {
             pPlanet->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);
 
 			// Manually shake our shakeOffset to randomize some effects
-			if (g_TimerMan.GetAbsoulteTime() > lastShake + 50000)
+			if (g_TimerMan.GetAbsoluteTime() > lastShake + 50000)
 			{
 				shakeOffset.m_X = RangeRand(-3, 3);
 				shakeOffset.m_Y = RangeRand(-3, 3);
-				lastShake = g_TimerMan.GetAbsoulteTime();
+				lastShake = g_TimerMan.GetAbsoluteTime();
 			}
 
 			// Tell the menu that PP promo is off
@@ -705,9 +705,9 @@ bool PlayIntroTitle() {
 			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.25 && orbitRotation > -c_TwoPI)
 			{
 				// Add explosions delay and count them
-				if (g_TimerMan.GetAbsoulteTime() > lastPuff + 1000000)
+				if (g_TimerMan.GetAbsoluteTime() > lastPuff + 1000000)
 				{
-					lastPuff = g_TimerMan.GetAbsoulteTime();
+					lastPuff = g_TimerMan.GetAbsoluteTime();
 					puffActive = true;
 					puffCount++;
 				}
@@ -719,9 +719,9 @@ bool PlayIntroTitle() {
 					if (puffCount == 1)
 					{
 						pFirePuffLarge->SetPos(planetPos + stationOffset);
-						if (g_TimerMan.GetAbsoulteTime() > lastPuffFrame + 50000)
+						if (g_TimerMan.GetAbsoluteTime() > lastPuffFrame + 50000)
 						{
-							lastPuffFrame = g_TimerMan.GetAbsoulteTime();
+							lastPuffFrame = g_TimerMan.GetAbsoluteTime();
 							puffFrame++;
 
 							if (puffFrame >= pFirePuffLarge->GetFrameCount())
@@ -736,9 +736,9 @@ bool PlayIntroTitle() {
 						pFirePuffLarge->Draw(g_FrameMan.GetBackBuffer32());
 					} else {
 						pFirePuffMedium->SetPos(planetPos + stationOffset + shakeOffset);
-						if (g_TimerMan.GetAbsoulteTime() > lastPuffFrame + 50000)
+						if (g_TimerMan.GetAbsoluteTime() > lastPuffFrame + 50000)
 						{
-							lastPuffFrame = g_TimerMan.GetAbsoulteTime();
+							lastPuffFrame = g_TimerMan.GetAbsoluteTime();
 							puffFrame++;
 
 							if (puffFrame >= pFirePuffLarge->GetFrameCount())

@@ -95,12 +95,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::StartPerformanceMeasurement(PerformanceCounters counter) { m_PerfMeasureStart[counter] = g_TimerMan.GetAbsoulteTime(); }
+	void PerformanceMan::StartPerformanceMeasurement(PerformanceCounters counter) { m_PerfMeasureStart[counter] = g_TimerMan.GetAbsoluteTime(); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PerformanceMan::StopPerformanceMeasurement(PerformanceCounters counter) {
-		m_PerfMeasureStop[counter] = g_TimerMan.GetAbsoulteTime();
+		m_PerfMeasureStop[counter] = g_TimerMan.GetAbsoluteTime();
 		AddPerformanceSample(counter, m_PerfMeasureStop[counter] - m_PerfMeasureStart[counter]);
 	}
 

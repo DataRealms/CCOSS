@@ -16,12 +16,12 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a InputMapping object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate an InputMapping object in system memory. Create() should be called before using the object.
 		/// </summary>
 		InputMapping() { Clear(); }
 
 		/// <summary>
-		/// Creates a InputMapping to be identical to another, by deep copy.
+		/// Creates an InputMapping to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the InputMapping to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
@@ -30,7 +30,7 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a InputMapping object before deletion from system memory.
+		/// Destructor method used to clean up an InputMapping object before deletion from system memory.
 		/// </summary>
 		virtual ~InputMapping() { Destroy(); }
 
@@ -50,13 +50,13 @@ namespace RTE {
 		/// Gets the description of the input scheme preset that this element is part of, if any preset has been set for this element's scheme.
 		/// </summary>
 		/// <returns>The description associated with this element by the scheme preset, if any has been set. This string is empty otherwise.</returns>
-		std::string GetPresetDesc() const { return m_PresetDesc; }
+		std::string GetPresetDescription() const { return m_PresetDescription; }
 
 		/// <summary>
 		/// Sets the description of the input scheme preset that this element is part of, if any preset has been set for this element's scheme.
 		/// </summary>
 		/// <param name="presetDesc">The description associated with this element by the scheme preset, if any has been set. This string should be empty otherwise.</param>
-		void SetPresetDesc(std::string presetDesc) { m_PresetDesc = presetDesc; }
+		void SetPresetDescription(std::string presetDesc) { m_PresetDescription = presetDesc; }
 #pragma endregion
 
 #pragma region Keyboard Getters and Setters
@@ -145,7 +145,7 @@ namespace RTE {
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
-		std::string m_PresetDesc; //!< The friendly description that is associated with the scheme preset element, if any is set.
+		std::string m_PresetDescription; //!< The friendly description that is associated with the scheme preset element, if any is set.
 
 		int m_KeyMap; //!< The keyboard key mapping.	
 		int m_MouseButtonMap; //!< The mouse button mapping.	

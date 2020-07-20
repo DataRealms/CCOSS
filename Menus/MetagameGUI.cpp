@@ -4926,7 +4926,7 @@ void MetagameGUI::UpdateOffensives()
             }
 
             // The duration of this depends on whethere there are any evacuees to travel back
-            m_AnimModeDuration = g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyEvacuees() ? 2000 : 500;
+            m_AnimModeDuration = g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyBrainWasEvacuated() ? 2000 : 500;
             m_AnimTimer1.Reset();
             m_AnimTimer2.Reset();
         }
@@ -4937,7 +4937,7 @@ void MetagameGUI::UpdateOffensives()
         m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // The retreating brain label travel animations get updated to go back to their pools
-        if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyEvacuees())
+        if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyBrainWasEvacuated())
             UpdatePostBattleRetreaters(EaseInOut(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
         else
             UpdatePostBattleRetreaters(1.0);
@@ -4950,7 +4950,7 @@ void MetagameGUI::UpdateOffensives()
         if (m_AnimTimer2.GetElapsedRealTimeMS() > m_AnimModeDuration)
         {
             // Change the display to show the evacuees transferring back to their brain pools
-            if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyEvacuees())
+            if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyBrainWasEvacuated())
             {
                 // Find the players who are evacuated anything this battle
                 for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)

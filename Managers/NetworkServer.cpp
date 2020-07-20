@@ -284,12 +284,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::RegisterTerrainChange(SceneMan::TerrainChange terrChange) {
+	void NetworkServer::RegisterTerrainChange(SceneMan::TerrainChange terrainChange) {
 		if (m_IsInServerMode) {
 			for (short player = 0; player < c_MaxClients; player++) {
 				if (IsPlayerConnected(player)) {
 					m_Mutex[player].lock();
-					m_PendingTerrainChanges[player].push(terrChange);
+					m_PendingTerrainChanges[player].push(terrainChange);
 					m_Mutex[player].unlock();
 				}
 			}
@@ -914,28 +914,28 @@ namespace RTE {
 		while (!m_CurrentTerrainChanges[player].empty()) {
 			int maxSize = 1280;
 
-			SceneMan::TerrainChange terrChange = m_CurrentTerrainChanges[player].front();
+			SceneMan::TerrainChange terrainChange = m_CurrentTerrainChanges[player].front();
 			m_CurrentTerrainChanges[player].pop();
 
 			// Fragment region if it does not fit one packet
-			if (terrChange.w * terrChange.h > maxSize) {
+			if (terrainChange.w * terrainChange.h > maxSize) {
 				int size = 0;
 				int height = 1;
 				int heightStart = 0;
 
-				for (int y = 0; y < terrChange.h; y++) {
+				for (int y = 0; y < terrainChange.h; y++) {
 					height++;
-					size += terrChange.w;
+					size += terrainChange.w;
 
 					// Store changed block if the size is over the MTU or if it's the last block.
-					if (size + terrChange.w >= maxSize || y == terrChange.h - 1) {
+					if (size + terrainChange.w >= maxSize || y == terrainChange.h - 1) {
 						SceneMan::TerrainChange tcf;
-						tcf.x = terrChange.x;
-						tcf.y = terrChange.y + heightStart;
-						tcf.w = terrChange.w;
+						tcf.x = terrainChange.x;
+						tcf.y = terrainChange.y + heightStart;
+						tcf.w = terrainChange.w;
 						tcf.h = height;
-						tcf.back = terrChange.back;
-						tcf.color = terrChange.color;
+						tcf.back = terrainChange.back;
+						tcf.color = terrainChange.color;
 
 						SendTerrainChangeMsg(player, tcf);
 
@@ -945,26 +945,26 @@ namespace RTE {
 					}
 				}
 			} else {
-				SendTerrainChangeMsg(player, terrChange);
+				SendTerrainChangeMsg(player, terrainChange);
 			}
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkServer::SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrChange) {
-		if (terrChange.w == 1 && terrChange.h == 1) {
+	void NetworkServer::SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrainChange) {
+		if (terrainChange.w == 1 && terrainChange.h == 1) {
 			MsgTerrainChange msg;
 			msg.Id = ID_SRV_TERRAIN;
-			msg.X = terrChange.x;
-			msg.Y = terrChange.y;
-			msg.W = terrChange.w;
-			msg.H = terrChange.h;
+			msg.X = terrainChange.x;
+			msg.Y = terrainChange.y;
+			msg.W = terrainChange.w;
+			msg.H = terrainChange.h;
 			msg.DataSize = 0;
 			msg.UncompressedSize = 0;
 			msg.SceneId = m_SceneID;
-			msg.Color = terrChange.color;
-			msg.Back = terrChange.back;
+			msg.Color = terrainChange.color;
+			msg.Back = terrainChange.back;
 
 			int payloadSize = sizeof(MsgTerrainChange);
 
@@ -981,16 +981,16 @@ namespace RTE {
 		} else {
 			MsgTerrainChange *msg = (MsgTerrainChange *)m_PixelLineBuffer[player];
 			msg->Id = ID_SRV_TERRAIN;
-			msg->X = terrChange.x;
-			msg->Y = terrChange.y;
-			msg->W = terrChange.w;
-			msg->H = terrChange.h;
+			msg->X = terrainChange.x;
+			msg->Y = terrainChange.y;
+			msg->W = terrainChange.w;
+			msg->H = terrainChange.h;
 			int size = msg->W * msg->H;
 			msg->DataSize = size;
 			msg->UncompressedSize = size;
 			msg->SceneId = m_SceneID;
-			msg->Color = terrChange.color;
-			msg->Back = terrChange.back;
+			msg->Color = terrainChange.color;
+			msg->Back = terrainChange.back;
 
 			Scene * scene = g_SceneMan.GetScene();
 			SLTerrain * terrain = scene->GetTerrain();

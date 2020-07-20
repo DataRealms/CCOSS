@@ -231,8 +231,8 @@ namespace RTE {
 		const InputMapping *element = &(m_ControlScheme[whichPlayer].GetInputMappings()[whichElement]);
 
 		// If there is a preset, just return the element name set by the preset previously
-		if (preset != PRESET_NONE && !element->GetPresetDesc().empty()) {
-			return element->GetPresetDesc();
+		if (preset != PRESET_NONE && !element->GetPresetDescription().empty()) {
+			return element->GetPresetDescription();
 		}
 
 		// Joystick input is used, more important to show than keyboard

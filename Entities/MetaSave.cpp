@@ -29,7 +29,6 @@ namespace RTE {
 		}
 		m_SavePath = savePath;
 
-		// Get some basic info about the game so we can display it in a dialog for the player
 		m_PlayerCount = g_MetaMan.m_Players.size();
 		m_Difficulty = g_MetaMan.m_Difficulty;
 		m_RoundCount = g_MetaMan.m_CurrentRound;

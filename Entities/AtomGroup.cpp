@@ -2307,7 +2307,7 @@ bool AtomGroup::InTerrain()
 // TODO: UNCOMMENT
     for (const Atom * aItr : m_Atoms)
     {
-        aPos = (m_pOwnerMO->GetPos() + (aItr->GetOffset().GetXFlipped(m_pOwnerMO->m_HFlipped) * m_pOwnerMO->GetRotMatrix())).GetFloored();
+        aPos = (m_pOwnerMO->GetPos() + (aItr->GetOffset().GetXFlipped(m_pOwnerMO->m_HFlipped) * m_pOwnerMO->GetRotMatrix()));
 		if (g_SceneMan.GetTerrMatter(aPos.GetFloorIntX(), aPos.GetFloorIntY()) != g_MaterialAir) {
 			penetrates = true;
 			break;
@@ -2342,7 +2342,7 @@ float AtomGroup::RatioInTerrain()
 
     for (const Atom * aItr : m_Atoms)
     {
-        aPos = (m_pOwnerMO->GetPos() + ((aItr)->GetOffset().GetXFlipped(m_pOwnerMO->m_HFlipped) * m_pOwnerMO->GetRotMatrix())).GetFloored();
+        aPos = (m_pOwnerMO->GetPos() + ((aItr)->GetOffset().GetXFlipped(m_pOwnerMO->m_HFlipped) * m_pOwnerMO->GetRotMatrix()));
         if (g_SceneMan.GetTerrMatter(aPos.GetFloorIntX(), aPos.GetFloorIntY()) != g_MaterialAir)
             inTerrain++;
     }

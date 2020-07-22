@@ -1228,8 +1228,8 @@ float AtomGroup::Travel(Vector &position,
             {
                 penetratingAtoms.clear();
 
-                distMass = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1.0F));
-                distMI = m_MomInertia / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1.0F));
+                distMass = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
+                distMI = m_MomInertia / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
 				for (std::list<Atom*>::iterator aItr = hitTerrAtoms.begin(); aItr != hitTerrAtoms.end(); )
                 {
@@ -1959,7 +1959,7 @@ before adding them to the MovableMan.
             do {
                 penetratingAtoms.clear();
 
-                massDist = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1.0F));
+                massDist = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
                 for (deque<pair<Atom *, Vector> >::iterator aoItr = hitTerrAtoms.begin(); aoItr != hitTerrAtoms.end(); )
                 {

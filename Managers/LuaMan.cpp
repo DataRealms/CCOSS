@@ -265,6 +265,7 @@ LUAENTITYCAST(MovableObject)
 LUAENTITYCAST(Entity)
 LUAENTITYCAST(Attachable)
 LUAENTITYCAST(Arm)
+LUAENTITYCAST(Leg)
 LUAENTITYCAST(Emission)
 LUAENTITYCAST(AEmitter)
 LUAENTITYCAST(Turret)
@@ -976,6 +977,10 @@ int LuaMan::Create()
 		ABSTRACTLUABINDING(Arm, Attachable)
 			.property("IdleOffset", &Arm::GetIdleOffset, &Arm::SetIdleOffset)
 			.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos),
+
+
+        ABSTRACTLUABINDING(Leg, Attachable)
+            .property("Foot", &Leg::GetFoot),
 
         CONCRETELUABINDING(AHuman, Actor)
             .enum_("UpperBodyState")
@@ -2395,7 +2400,7 @@ int LuaMan::RunScriptedFunction(const std::string &functionName, const std::stri
     if (!functionEntityArguments.empty()) {
         g_LuaMan.SetTempEntityVector(functionEntityArguments);
         for (const Entity *functionEntityArgument : functionEntityArguments) {
-            scriptString += ", To" + functionEntityArgument->GetClassName() + "(entityArguments())";
+            scriptString += ", (To" + functionEntityArgument->GetClassName() + " and To" + functionEntityArgument->GetClassName() + "(entityArguments()) or entityArguments())";
         }
     }
     if (!functionLiteralArguments.empty()) {

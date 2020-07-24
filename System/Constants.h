@@ -186,6 +186,20 @@ namespace RTE {
 	enum DeadZoneType { CIRCLE = 0, SQUARE = 1 };
 #pragma endregion
 
+#pragma region Global Enumerations
+	/// <summary>
+	/// Enumeration all available players.
+	/// </summary>
+	enum Players {
+		NoPlayer = -1,
+		PlayerOne = 0,
+		PlayerTwo,
+		PlayerThree,
+		PlayerFour,
+		MaxPlayerCount
+	};
+#pragma endregion
+
 #pragma region Un-Definitions
 	// Allegro defines these via define in astdint.h and Boost with stdlib go crazy so we need to undefine them manually.
 	#undef int8_t

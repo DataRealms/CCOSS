@@ -1076,7 +1076,7 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
 	{
 		int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
 		// Only flash if player is human (AI players don't have screens!)
-		if (brainOfPlayer != Activity::NOPLAYER && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
+		if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
 		{
 			// Croaked.. flash for a longer period
 			if (m_ToDelete || m_Status == DEAD)
@@ -1643,7 +1643,7 @@ void Actor::Update()
 	if (g_SettingsMan.FlashOnBrainDamage())
 	{
 		int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
-		if (brainOfPlayer != Activity::NOPLAYER && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
+		if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
 		{
 			// Got Hurt
 			if (m_PrevHealth - m_Health > 1.5)

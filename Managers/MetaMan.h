@@ -279,7 +279,7 @@ friend class MetaSave;
 // Arguments:       Which player.
 // Return value:    The team of that player.
 
-    int GetTeamOfPlayer(int metaPlayer) const { return metaPlayer >= Activity::PLAYER_1 && metaPlayer < m_Players.size() ? m_Players[metaPlayer].GetTeam() : Activity::NOTEAM; }
+    int GetTeamOfPlayer(int metaPlayer) const { return metaPlayer >= Players::PlayerOne && metaPlayer < m_Players.size() ? m_Players[metaPlayer].GetTeam() : Activity::NOTEAM; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -289,7 +289,7 @@ friend class MetaSave;
 // Arguments:       Which player.
 // Return value:    The requested MetaPlayer
 
-    MetaPlayer * GetPlayer(int metaPlayer) { return (metaPlayer >= Activity::PLAYER_1 && metaPlayer < m_Players.size()) ? &(m_Players[metaPlayer]) : 0; }
+    MetaPlayer * GetPlayer(int metaPlayer) { return (metaPlayer >= Players::PlayerOne && metaPlayer < m_Players.size()) ? &(m_Players[metaPlayer]) : 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -501,7 +501,7 @@ friend class MetaSave;
 // Arguments:       None.
 // Return value:    Whether the player index passed in is active for the current game.
 
-    bool IsActivePlayer(int metaPlayer) { return metaPlayer >= Activity::PLAYER_1 && metaPlayer < m_Players.size(); }
+    bool IsActivePlayer(int metaPlayer) { return metaPlayer >= Players::PlayerOne && metaPlayer < m_Players.size(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -215,7 +215,7 @@ namespace RTE
 		// These add on the player and team max counts
 		enum PlayerColumns
 		{
-			PLAYER_CPU = Activity::MAXPLAYERCOUNT,
+			PLAYER_CPU = Players::MaxPlayerCount,
 			PLAYERCOLUMNCOUNT
 		};
 

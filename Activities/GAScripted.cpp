@@ -51,18 +51,6 @@ void GAScripted::Clear()
     m_ScriptPath.clear();
     m_LuaClassName.clear();
     m_RequiredAreas.clear();
-
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
 }
 
 
@@ -162,17 +150,6 @@ int GAScripted::Save(Writer &writer) const
 
 void GAScripted::Destroy(bool notInherited)
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
 	// Delete global scripts
 	for (std::vector<GlobalScript *>::iterator sItr = m_GlobalScriptsList.begin(); sItr < m_GlobalScriptsList.end(); ++sItr)
 		delete (*sItr);
@@ -420,7 +397,7 @@ void GAScripted::Update()
 {
     GameActivity::Update();
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;

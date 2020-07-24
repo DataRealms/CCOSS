@@ -36,18 +36,6 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		enum Player {
-			NOPLAYER = -1,
-			PLAYER_1 = 0,
-			PLAYER_2,
-			PLAYER_3,
-			PLAYER_4,
-			MAXPLAYERCOUNT
-		};
-
-		/// <summary>
-		/// 
-		/// </summary>
 		enum Team {
 			NOTEAM = -1,
 			TEAM_1 = 0,
@@ -276,7 +264,7 @@ namespace RTE {
 		/// <summary>
 		/// Sets up a specific player for this Activity, AI or Human.
 		/// </summary>
-		/// <param name="player">Which player slot to set up - PLAYER_1 to PLAYER_4.</param>
+		/// <param name="player">Which player slot to set up - PlayerOne to PlayerFour.</param>
 		/// <param name="isHuman">Whether this player is Human.</param>
 		/// <param name="team">Which Team this player belongs to.</param>
 		/// <param name="funds">How many funds this player contributes to its Team's total funds.</param>
@@ -328,7 +316,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Which player index to convert.</param>
 		/// <returns>An int with the screen index, or -1 if nonhuman player or no players.</returns>
-		int ScreenOfPlayer(int player) const { return (player >= PLAYER_1 && player < MAXPLAYERCOUNT) ? m_PlayerScreen[player] : -1; }
+		int ScreenOfPlayer(int player) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_PlayerScreen[player] : -1; }
 
 		/// <summary>
 		/// Converts a screen index into a player index, if that screen exists.
@@ -355,7 +343,7 @@ namespace RTE {
 		/// Resets the message timer for one player.
 		/// </summary>
 		/// <param name="player">The player to reset the message timer for.</param>
-		void ResetMessageTimer(int player = 0) { if (player >= 0 && player < MAXPLAYERCOUNT) { m_MsgTimer[player].Reset(); } }
+		void ResetMessageTimer(int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_MsgTimer[player].Reset(); } }
 #pragma endregion
 
 #pragma region Team Handling
@@ -464,7 +452,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Which player to check for.</param>
 		/// <returns>A float with the funds originally deposited by this player.</returns>
-		float GetPlayerFundsContribution(int player) const { return (player >= Activity::PLAYER_1 && player < Activity::MAXPLAYERCOUNT) ? m_FundsContribution[player] : 0; }
+		float GetPlayerFundsContribution(int player) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_FundsContribution[player] : 0; }
 
 		/// <summary>
 		/// Sets a new amount of starting funds for a player, after he has already been added.
@@ -500,7 +488,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Which player to get the brain actor for.</param>
 		/// <returns>A pointer to the Brain Actor. Ownership is NOT transferred!</returns>
-		Actor * GetPlayerBrain(int player = 0) const { return (player >= Activity::PLAYER_1 && player < Activity::MAXPLAYERCOUNT) ? m_Brain[player] : 0; }
+		Actor * GetPlayerBrain(int player = 0) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_Brain[player] : 0; }
 
 		/// <summary>
 		/// Sets the current Brain actor for a specific player.
@@ -514,28 +502,28 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Which player to check whether they ever had a Brain.</param>
 		/// <returns>Whether this player ever had a Brain.</returns>
-		bool PlayerHadBrain(int player = 0) const { return (player >= Activity::PLAYER_1 && player < Activity::MAXPLAYERCOUNT) ? m_HadBrain[player] : false; }
+		bool PlayerHadBrain(int player = 0) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_HadBrain[player] : false; }
 
 		/// <summary>
 		/// Sets to indicate that the player had a Brain at some point. This is to simulate that in automated battle cases.
 		/// </summary>
 		/// <param name="player">Which player to set whether he had a Brain or not.</param>
 		/// <param name="hadBrain">Whether he should be flagged as having had a Brain.</param>
-		void SetPlayerHadBrain(int player, bool hadBrain = true) { if (player >= Activity::PLAYER_1 && player < Activity::MAXPLAYERCOUNT) m_HadBrain[player] = hadBrain; }
+		void SetPlayerHadBrain(int player, bool hadBrain = true) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) m_HadBrain[player] = hadBrain; }
 
 		/// <summary>
 		/// Shows whether a specific player's Brain was evacuated into orbit so far.
 		/// </summary>
 		/// <param name="player">Which player to check whether their Brain was evacuated.</param>
 		/// <returns>Whether this player had a Brain that was evacuated.</returns>
-		bool BrainWasEvacuated(int player = 0) const { return (player >= Activity::PLAYER_1 && player < Activity::MAXPLAYERCOUNT) ? m_BrainEvacuated[player] : false; }
+		bool BrainWasEvacuated(int player = 0) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_BrainEvacuated[player] : false; }
 
 		/// <summary>
 		/// Sets whether a player's Brain was evacuated during the Activity.
 		/// </summary>
 		/// <param name="player">Which player to check whether their Brain was evacuated.</param>
 		/// <param name="evacuated">Whether it was evacuated yet.</param>
-		void SetBrainEvacuated(int player = 0, bool evacuated = true) { if (player >= Activity::PLAYER_1 && player < Activity::MAXPLAYERCOUNT) { m_BrainEvacuated[player] = evacuated; } }
+		void SetBrainEvacuated(int player = 0, bool evacuated = true) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_BrainEvacuated[player] = evacuated; } }
 
 		/// <summary>
 		/// Shows whether ANY player evacuated their Brain.
@@ -616,7 +604,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Which player to get the controlled actor of.</param>
 		/// <returns>A pointer to the controlled Actor. Ownership is NOT transferred! 0 If no actor is currently controlled by this player.</returns>
-		Actor * GetControlledActor(int player = 0) { return (player >= Activity::PLAYER_1 && player < Activity::MAXPLAYERCOUNT) ? m_ControlledActor[player] : 0; }
+		Actor * GetControlledActor(int player = 0) { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_ControlledActor[player] : 0; }
 
 		/// <summary>
 		/// Makes the player's ControlledActor the leader of any squad it is a member of.
@@ -689,34 +677,34 @@ namespace RTE {
 		int m_MinTeamsRequired; //!< How many separate teams this Activity can support at the same time.
 
 		int m_PlayerCount; //!< The number of total players in the current Activity, AI and Human.
-		bool m_IsActive[MAXPLAYERCOUNT]; //!< Whether a specific player is at all active and playing this Activity.
-		bool m_IsHuman[MAXPLAYERCOUNT]; //!< Whether a specific player is Human or not, and needs a screen etc.
+		bool m_IsActive[Players::MaxPlayerCount]; //!< Whether a specific player is at all active and playing this Activity.
+		bool m_IsHuman[Players::MaxPlayerCount]; //!< Whether a specific player is Human or not, and needs a screen etc.
 
-		int m_PlayerScreen[MAXPLAYERCOUNT]; //!< The screen index of each player - only applicable to human players. -1 if AI or other.
-		int m_ViewState[MAXPLAYERCOUNT]; //!< What to be viewing for each player.
+		int m_PlayerScreen[Players::MaxPlayerCount]; //!< The screen index of each player - only applicable to human players. -1 if AI or other.
+		int m_ViewState[Players::MaxPlayerCount]; //!< What to be viewing for each player.
 
 		std::string m_TeamNames[MAXTEAMCOUNT]; //!< Names for each team.
 		Icon m_TeamIcons[MAXTEAMCOUNT]; //!< Icons for each team.
 
 		int m_TeamCount; //!< The number of teams in the current Activity.
 		bool m_TeamActive[MAXTEAMCOUNT]; //!< Whether a specific team is active or not in this Activity.
-		int m_Team[MAXPLAYERCOUNT]; //!< The designated team of each player.	
+		int m_Team[Players::MaxPlayerCount]; //!< The designated team of each player.	
 		int m_TeamDeaths[MAXTEAMCOUNT]; //!< The count of how many actors have died on this team.
 		int m_TeamAISkillLevels[MAXTEAMCOUNT]; //!< AI skill levels for teams.
 
 		float m_TeamFunds[MAXTEAMCOUNT]; //!< Gold counter for each team.
-		float m_TeamFundsShare[MAXPLAYERCOUNT]; //!< The ratio of how much this player contributed to his team's funds at the start of the Activity.
+		float m_TeamFundsShare[Players::MaxPlayerCount]; //!< The ratio of how much this player contributed to his team's funds at the start of the Activity.
 		bool m_FundsChanged[MAXTEAMCOUNT]; //!< Whether the team funds have changed during the current frame.
-		float m_FundsContribution[MAXPLAYERCOUNT]; //!< How much this player contributed to his team's funds at the start of the Activity.
+		float m_FundsContribution[Players::MaxPlayerCount]; //!< How much this player contributed to his team's funds at the start of the Activity.
 
-		Actor *m_Brain[MAXPLAYERCOUNT]; //!< The Brain of each player. Not owned!
-		bool m_HadBrain[MAXPLAYERCOUNT]; //!< Whether each player has yet had a Brain. If not, then their Activity doesn't end if no brain is found.
-		bool m_BrainEvacuated[MAXPLAYERCOUNT]; //!< Whether a player has evacuated his Brain into orbit.
+		Actor *m_Brain[Players::MaxPlayerCount]; //!< The Brain of each player. Not owned!
+		bool m_HadBrain[Players::MaxPlayerCount]; //!< Whether each player has yet had a Brain. If not, then their Activity doesn't end if no brain is found.
+		bool m_BrainEvacuated[Players::MaxPlayerCount]; //!< Whether a player has evacuated his Brain into orbit.
 
-		Actor *m_ControlledActor[MAXPLAYERCOUNT]; //!< Currently controlled actor, not owned.
-		Controller m_PlayerController[MAXPLAYERCOUNT]; //!< The Controllers of all the players for the GUIs.
+		Actor *m_ControlledActor[Players::MaxPlayerCount]; //!< Currently controlled actor, not owned.
+		Controller m_PlayerController[Players::MaxPlayerCount]; //!< The Controllers of all the players for the GUIs.
 
-		Timer m_MsgTimer[MAXPLAYERCOUNT]; //!< Message timer for each player.
+		Timer m_MsgTimer[Players::MaxPlayerCount]; //!< Message timer for each player.
 
 	private:
 

@@ -1348,12 +1348,12 @@ protected:
     // Total income this place generates per Metagame round for its owner team
     float m_RoundIncome;
     // The special placed brain actors of each player that inhabit this Scene, OWNED here
-    SceneObject *m_ResidentBrains[Activity::MAXPLAYERCOUNT];
+    SceneObject *m_ResidentBrains[Players::MaxPlayerCount];
     // Budget in oz this place is allocated per player for a metagame round for building (applying) blueprint objects.
-    float m_BuildBudget[Activity::MAXPLAYERCOUNT];
+    float m_BuildBudget[Players::MaxPlayerCount];
     // Budget in ratio of the player for a metagame round. This is used to re-set the BuildBudget to match the ratio
     // that a player budgeted to this site in the previous turn.
-    float m_BuildBudgetRatio[Activity::MAXPLAYERCOUNT];
+    float m_BuildBudgetRatio[Players::MaxPlayerCount];
     // Whether this should be automatically designed by the AI Plan even if it's owned by a human player
     bool m_AutoDesigned;
     // The total amount of gold (in oz) that has been invested in the defenses of this site, by all teams

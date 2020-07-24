@@ -499,10 +499,10 @@ int MetaMan::GetPlayerTurn() const
 {
     // Player 1's turn is coming up on this round
     if (g_MetaMan.m_GameState <= PLAYER1TURN)
-        return Activity::PLAYER_1;
+        return Players::PlayerOne;
     // we're past the player turns on this round, so player 1 is up next again
     else if ((g_MetaMan.m_GameState - PLAYER1TURN) > (m_Players.size() - 1))
-        return Activity::PLAYER_1;
+        return Players::PlayerOne;
 
     // Return whos player's turn it is
     return g_MetaMan.m_GameState - PLAYER1TURN;
@@ -578,7 +578,7 @@ const Scene * MetaMan::GetNextSceneOfPlayer(int player, const Scene *pStartScene
 
 int MetaMan::GetTotalBrainCountOfPlayer(int metaPlayer, bool countPoolsOnly) const
 {
-    if (metaPlayer <= Activity::NOPLAYER || metaPlayer >= Activity::MAXPLAYERCOUNT)
+    if (metaPlayer <= Players::NoPlayer || metaPlayer >= Players::MaxPlayerCount)
         return 0;
 
     // Count the pool first
@@ -612,7 +612,7 @@ int MetaMan::GetGoldCountOfTeam(int team) const
 
     float goldTotal = 0;
     // Go through all players and add up the funds of all who belong to this team
-    for (int metaPlayer = Activity::PLAYER_1; metaPlayer < m_Players.size(); ++metaPlayer)
+    for (int metaPlayer = Players::PlayerOne; metaPlayer < m_Players.size(); ++metaPlayer)
     {
         if (m_Players[metaPlayer].GetTeam() == team)
             goldTotal += m_Players[metaPlayer].GetFunds();
@@ -659,7 +659,7 @@ int MetaMan::GetTotalBrainCountOfTeam(int team, bool countPoolsOnly) const
     // Go through all players and add up the brains of the ones who are on this team 
     int brainCount = 0;
 
-    for (int metaPlayer = Activity::PLAYER_1; metaPlayer < m_Players.size(); ++metaPlayer)
+    for (int metaPlayer = Players::PlayerOne; metaPlayer < m_Players.size(); ++metaPlayer)
     {
         if (m_Players[metaPlayer].GetTeam() == team)
             brainCount += GetTotalBrainCountOfPlayer(metaPlayer, countPoolsOnly);
@@ -1545,7 +1545,7 @@ void MetaMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
     AllegroBitmap pBitmapInt(pTargetBitmap);
 
     // Iterate through all players
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         ;
     }

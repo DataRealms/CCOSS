@@ -46,18 +46,6 @@ ConcreteClassInfo(GABrainMatch, GameActivity, 0)
 void GABrainMatch::Clear()
 {
     m_pCPUBrain = 0;
-
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
 }
 
 
@@ -73,23 +61,7 @@ int GABrainMatch::Create()
 
     if (m_Description.empty())
         m_Description = "Each team starts by building a bunker and installs their respective brain. When everyone is done, the battle starts and ends only when one team with a survivng brain remains!";
-/*
-    ////////////////////////////////
-    // Set up teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-
-    ///////////////////////////////////////
-    // Set up players
-
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-*/
     return 0;
 }
 
@@ -164,17 +136,6 @@ int GABrainMatch::Save(Writer &writer) const
 
 void GABrainMatch::Destroy(bool notInherited)
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
     if (!notInherited)
         GameActivity::Destroy();
     Clear();
@@ -239,7 +200,7 @@ int GABrainMatch::Start()
     ///////////////////////////////////////
     // Set up players
 
-    for (int player = PLAYER_1; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!m_IsActive[player])
             continue;
@@ -293,7 +254,7 @@ int GABrainMatch::Start()
     }
 
     // Second pass after we have determined whether we need to be editing or not
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!m_IsActive[player])
             continue;
@@ -331,7 +292,7 @@ void GABrainMatch::Pause(bool pause)
 void GABrainMatch::End()
 {
     // Show appropriate end game messages
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!m_IsActive[player])
             continue;
@@ -382,7 +343,7 @@ void GABrainMatch::Update()
     ///////////////////////////////////////////
     // Iterate through all human players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!m_IsActive[player])
             continue;
@@ -478,7 +439,7 @@ void GABrainMatch::Update()
 // TODO Don't hardcode the rocket cost!
             if (m_TeamFunds[team] < 0)//&& Only brain is left of actors)
             {
-                for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+                for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
                 {
                     if (!m_IsActive[player])
                         continue;

@@ -1113,13 +1113,13 @@ protected:
     // The income-related lines to keep drawing each frame
     std::vector<SiteLine> m_IncomeSiteLines;
     // Indices to the player sitelines that point at the moving station
-    int m_aStationIncomeLineIndices[Activity::MAXPLAYERCOUNT];
+    int m_aStationIncomeLineIndices[Players::MaxPlayerCount];
     // Indices to the player sitelines that point at the their own brain pool counters
-    int m_aBrainSaleIncomeLineIndices[Activity::MAXPLAYERCOUNT];
+    int m_aBrainSaleIncomeLineIndices[Players::MaxPlayerCount];
     // Which player are currently showing their player lines. -1 means none
     int m_ActivePlayerIncomeLines;
     // The action-related lines to keep drawing each frame
-    std::vector<SiteLine> m_ActionSiteLines[Activity::MAXPLAYERCOUNT];
+    std::vector<SiteLine> m_ActionSiteLines[Players::MaxPlayerCount];
     // Override to alwasys draw the player action meters, no matter what
     bool m_ActionMeterDrawOverride;
     // The attack target crosshair info
@@ -1157,42 +1157,42 @@ protected:
     GUIButton *m_pConfirmationButton;
 
     // The player floating bars
-    GUICollectionBox *m_apPlayerBox[Activity::MAXPLAYERCOUNT];
+    GUICollectionBox *m_apPlayerBox[Players::MaxPlayerCount];
     // The player flag icon in the floating bars
-    GUICollectionBox *m_apPlayerTeamBox[Activity::MAXPLAYERCOUNT];
+    GUICollectionBox *m_apPlayerTeamBox[Players::MaxPlayerCount];
     // Funds label in the floating bars
-    GUILabel *m_apPlayerBarLabel[Activity::MAXPLAYERCOUNT];
+    GUILabel *m_apPlayerBarLabel[Players::MaxPlayerCount];
     // Brain Pool label next to the floating bars
-    GUILabel *m_apBrainPoolLabel[Activity::MAXPLAYERCOUNT];
+    GUILabel *m_apBrainPoolLabel[Players::MaxPlayerCount];
     // The animated label that shows a message to the player over his bar
-//    GUILabel *m_apPlayerMessageLabel[Activity::MAXPLAYERCOUNT];
+//    GUILabel *m_apPlayerMessageLabel[Players::MaxPlayerCount];
     // The animated label that shows a change in the funds of a player, animating up or downward
-    GUILabel *m_apFundsChangeLabel[Activity::MAXPLAYERCOUNT];
+    GUILabel *m_apFundsChangeLabel[Players::MaxPlayerCount];
     // The animated label that shows a change in the brain pool of a player, animating up or downward
-    GUILabel *m_apBrainChangeLabel[Activity::MAXPLAYERCOUNT];
+    GUILabel *m_apBrainChangeLabel[Players::MaxPlayerCount];
 
     // Timer for animating the message labels going northward
-//    Timer m_apPlayerMessageTimer[Activity::MAXPLAYERCOUNT];
+//    Timer m_apPlayerMessageTimer[Players::MaxPlayerCount];
     // Timer for animating the change labels going northward
-    Timer m_apFundsChangeTimer[Activity::MAXPLAYERCOUNT];
+    Timer m_apFundsChangeTimer[Players::MaxPlayerCount];
     // Timer for animating the change labels going northward
-    Timer m_apBrainsChangeTimer[Activity::MAXPLAYERCOUNT];
+    Timer m_apBrainsChangeTimer[Players::MaxPlayerCount];
     // Previous pos of mouse to calculate dragging
     Vector m_PrevMousePos;
 
     // Battle site display
     // The player flag icon that surrrounds the battle sites
-    GUICollectionBox *m_apPlayerTeamActionBox[Activity::MAXPLAYERCOUNT];
+    GUICollectionBox *m_apPlayerTeamActionBox[Players::MaxPlayerCount];
     // Traveling brain label that ends up around battle sites, showing info
-    GUILabel *m_apPlayerBrainTravelLabel[Activity::MAXPLAYERCOUNT];
+    GUILabel *m_apPlayerBrainTravelLabel[Players::MaxPlayerCount];
     // How much funds have been allocated to each player's battle chest for the next battle
-    float m_aBattleFunds[Activity::MAXPLAYERCOUNT];
+    float m_aBattleFunds[Players::MaxPlayerCount];
     // Which of the players are currently attacking a place - just used for icons
-    bool m_aBattleAttacker[Activity::MAXPLAYERCOUNT];
+    bool m_aBattleAttacker[Players::MaxPlayerCount];
     // Which of the battling brains are yet graphically destroyed
-    bool m_aAnimDestroyed[Activity::MAXPLAYERCOUNT];
+    bool m_aAnimDestroyed[Players::MaxPlayerCount];
     // Where the center of the brain icon is on the traveling brain label
-    Vector m_aBrainIconPos[Activity::MAXPLAYERCOUNT];
+    Vector m_aBrainIconPos[Players::MaxPlayerCount];
     // Which quadrant positions of the battle matrix that have been taken by which metaplayer. NOPLAYER means no player (duh)
     int m_aQuadTakenBy[4];
 
@@ -1249,13 +1249,13 @@ protected:
     GUILabel *m_pLengthLabel;
     GUISlider *m_pLengthSlider;
     GUILabel *m_pErrorLabel;
-    GUIButton *m_apPlayerControlButton[Activity::MAXPLAYERCOUNT];
-    GUIComboBox *m_apPlayerTeamSelect[Activity::MAXPLAYERCOUNT];
-    GUIComboBox *m_apPlayerTechSelect[Activity::MAXPLAYERCOUNT];
-    GUIComboBox *m_apPlayerHandicap[Activity::MAXPLAYERCOUNT];
-    GUITextBox *m_apPlayerNameBox[Activity::MAXPLAYERCOUNT];
-    GUISlider *m_apPlayerAISkillSlider[Activity::MAXPLAYERCOUNT];
-    GUILabel *m_apPlayerAISkillLabel[Activity::MAXPLAYERCOUNT];
+    GUIButton *m_apPlayerControlButton[Players::MaxPlayerCount];
+    GUIComboBox *m_apPlayerTeamSelect[Players::MaxPlayerCount];
+    GUIComboBox *m_apPlayerTechSelect[Players::MaxPlayerCount];
+    GUIComboBox *m_apPlayerHandicap[Players::MaxPlayerCount];
+    GUITextBox *m_apPlayerNameBox[Players::MaxPlayerCount];
+    GUISlider *m_apPlayerAISkillSlider[Players::MaxPlayerCount];
+    GUILabel *m_apPlayerAISkillLabel[Players::MaxPlayerCount];
 
     // SAVING/LOADING GAME DIALOGS
     GUITextBox *m_NewSaveBox;

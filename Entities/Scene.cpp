@@ -419,7 +419,7 @@ void Scene::Clear()
     m_Revealed = false;
     m_OwnedByTeam = Activity::NOTEAM;
     m_RoundIncome = 1000;
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         m_ResidentBrains[player] = 0;
         m_BuildBudget[player] = 0;
@@ -503,7 +503,7 @@ int Scene::Create(const Scene &reference)
     m_Revealed = reference.m_Revealed;
     m_OwnedByTeam = reference.m_OwnedByTeam;
     m_RoundIncome = reference.m_RoundIncome;
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (reference.m_ResidentBrains[player])
             m_ResidentBrains[player] = dynamic_cast<SceneObject *>(reference.m_ResidentBrains[player]->Clone());
@@ -822,7 +822,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 					if (pTO)
                     {
                         // First clear out the box of unseen layer for whichever team placed this
-                        if (pTO->GetFGColorBitmap() && pTO->GetPlacedByPlayer() != Activity::NOPLAYER && g_ActivityMan.GetActivity())
+                        if (pTO->GetFGColorBitmap() && pTO->GetPlacedByPlayer() != Players::NoPlayer && g_ActivityMan.GetActivity())
                         {
                             // Learn which team placed this thing so we can reveal for them only
                             int ownerTeam = pTO->GetTeam();
@@ -1279,29 +1279,29 @@ int Scene::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "RoundIncome")
         reader >> m_RoundIncome;
     else if (propName == "P1ResidentBrain")
-        m_ResidentBrains[Activity::PLAYER_1] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
+        m_ResidentBrains[Players::PlayerOne] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
     else if (propName == "P2ResidentBrain")
-        m_ResidentBrains[Activity::PLAYER_2] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
+        m_ResidentBrains[Players::PlayerTwo] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
     else if (propName == "P3ResidentBrain")
-        m_ResidentBrains[Activity::PLAYER_3] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
+        m_ResidentBrains[Players::PlayerThree] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
     else if (propName == "P4ResidentBrain")
-        m_ResidentBrains[Activity::PLAYER_4] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
+        m_ResidentBrains[Players::PlayerFour] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
     else if (propName == "P1BuildBudget")
-        reader >> m_BuildBudget[Activity::PLAYER_1];
+        reader >> m_BuildBudget[Players::PlayerOne];
     else if (propName == "P2BuildBudget")
-        reader >> m_BuildBudget[Activity::PLAYER_2];
+        reader >> m_BuildBudget[Players::PlayerTwo];
     else if (propName == "P3BuildBudget")
-        reader >> m_BuildBudget[Activity::PLAYER_3];
+        reader >> m_BuildBudget[Players::PlayerThree];
     else if (propName == "P4BuildBudget")
-        reader >> m_BuildBudget[Activity::PLAYER_4];
+        reader >> m_BuildBudget[Players::PlayerFour];
     else if (propName == "P1BuildBudgetRatio")
-        reader >> m_BuildBudgetRatio[Activity::PLAYER_1];
+        reader >> m_BuildBudgetRatio[Players::PlayerOne];
     else if (propName == "P2BuildBudgetRatio")
-        reader >> m_BuildBudgetRatio[Activity::PLAYER_2];
+        reader >> m_BuildBudgetRatio[Players::PlayerTwo];
     else if (propName == "P3BuildBudgetRatio")
-        reader >> m_BuildBudgetRatio[Activity::PLAYER_3];
+        reader >> m_BuildBudgetRatio[Players::PlayerThree];
     else if (propName == "P4BuildBudgetRatio")
-        reader >> m_BuildBudgetRatio[Activity::PLAYER_4];
+        reader >> m_BuildBudgetRatio[Players::PlayerFour];
     else if (propName == "AutoDesigned")
         reader >> m_AutoDesigned;
     else if (propName == "TotalInvestment")
@@ -1440,7 +1440,7 @@ int Scene::Save(Writer &writer) const
     writer << m_RoundIncome;
     // Write out the brains and the minimal info needed to place them in the scene
     char str[64];
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (m_ResidentBrains[player])
         {
@@ -1490,21 +1490,21 @@ int Scene::Save(Writer &writer) const
         }
     }
     writer.NewProperty("P1BuildBudget");
-    writer << m_BuildBudget[Activity::PLAYER_1];
+    writer << m_BuildBudget[Players::PlayerOne];
     writer.NewProperty("P2BuildBudget");
-    writer << m_BuildBudget[Activity::PLAYER_2];
+    writer << m_BuildBudget[Players::PlayerTwo];
     writer.NewProperty("P3BuildBudget");
-    writer << m_BuildBudget[Activity::PLAYER_3];
+    writer << m_BuildBudget[Players::PlayerThree];
     writer.NewProperty("P4BuildBudget");
-    writer << m_BuildBudget[Activity::PLAYER_4];
+    writer << m_BuildBudget[Players::PlayerFour];
     writer.NewProperty("P1BuildBudgetRatio");
-    writer << m_BuildBudgetRatio[Activity::PLAYER_1];
+    writer << m_BuildBudgetRatio[Players::PlayerOne];
     writer.NewProperty("P2BuildBudgetRatio");
-    writer << m_BuildBudgetRatio[Activity::PLAYER_2];
+    writer << m_BuildBudgetRatio[Players::PlayerTwo];
     writer.NewProperty("P3BuildBudgetRatio");
-    writer << m_BuildBudgetRatio[Activity::PLAYER_3];
+    writer << m_BuildBudgetRatio[Players::PlayerThree];
     writer.NewProperty("P4BuildBudgetRatio");
-    writer << m_BuildBudgetRatio[Activity::PLAYER_4];
+    writer << m_BuildBudgetRatio[Players::PlayerFour];
     writer.NewProperty("AutoDesigned");
     writer << m_AutoDesigned;
     writer.NewProperty("TotalInvestment");
@@ -1532,7 +1532,7 @@ int Scene::Save(Writer &writer) const
             writer.NewProperty("Position");
             writer << (*oItr)->GetPos();
 
-            if ((*oItr)->GetPlacedByPlayer() != Activity::NOPLAYER)
+            if ((*oItr)->GetPlacedByPlayer() != Players::NoPlayer)
             {
                 writer.NewProperty("PlacedByPlayer");
                 writer << (*oItr)->GetPlacedByPlayer();
@@ -1717,7 +1717,7 @@ void Scene::Destroy(bool notInherited)
     delete m_pTerrain;
     delete m_pPathFinder;
 
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
         delete m_ResidentBrains[player];
 
     for (int set = PLACEONLOAD; set < PLACEDSETSCOUNT; ++set)
@@ -2036,7 +2036,7 @@ int Scene::PlaceResidentBrains(Activity &newActivity)
 {
     int found = 0;
 
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (PlaceResidentBrain(player, newActivity))
             ++found;
@@ -2057,7 +2057,7 @@ int Scene::RetrieveResidentBrains(Activity &oldActivity)
 {
     int found = 0;
 
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
 //        RTEAssert(oldActivity.GetPlayerBrain(player) && oldActivity.GetPlayerBrain(player)->GetTeam() == oldActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team BEFORE being retrieved!!");
 
@@ -2241,7 +2241,7 @@ void Scene::UpdatePlacedObjects(int whichSet)
 {
     if (whichSet == PLACEONLOAD)
     {
-        for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+        for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
             if (m_ResidentBrains[player])
                 m_ResidentBrains[player]->Update();
     }
@@ -2312,7 +2312,7 @@ void Scene::SetResidentBrain(int player, SceneObject *pNewBrain)
 int Scene::GetResidentBrainCount() const
 {
     int count = 0;
-    for (int p = Activity::PLAYER_1; p < Activity::MAXPLAYERCOUNT; ++p)
+    for (int p = Players::PlayerOne; p < Players::MaxPlayerCount; ++p)
     {
         if (m_ResidentBrains[p])
             count++;
@@ -2454,7 +2454,7 @@ float Scene::CalcBuildBudgetUse(int player, int *pAffordCount, int *pAffordAIPla
     if (pAffordCount)
         *pAffordCount = 0;
 
-    if (player < Activity::PLAYER_1 || player >= Activity::MAXPLAYERCOUNT)
+    if (player < Players::PlayerOne || player >= Players::MaxPlayerCount)
         return 0;
 
     // Take metaplayer tech modifiers into account when calculating costs of this Deployment spawn
@@ -2584,7 +2584,7 @@ float Scene::ApplyAIPlan(int player, int *pObjectsApplied)
     if (pObjectsApplied)
         *pObjectsApplied = 0;
 
-    if (player < Activity::PLAYER_1 || player >= Activity::MAXPLAYERCOUNT)
+    if (player < Players::PlayerOne || player >= Players::MaxPlayerCount)
         return 0;
 
     // Take metaplayer tech modifiers into account when calculating costs of this Deployment spawn
@@ -2654,7 +2654,7 @@ float Scene::ApplyBuildBudget(int player, int *pObjectsBuilt)
     if (pObjectsBuilt)
         *pObjectsBuilt = 0;
 
-    if (player < Activity::PLAYER_1 || player >= Activity::MAXPLAYERCOUNT)
+    if (player < Players::PlayerOne || player >= Players::MaxPlayerCount)
         return 0;
 
     // Take metaplayer tech modifiers into account when calculating costs of this Deployment spawn

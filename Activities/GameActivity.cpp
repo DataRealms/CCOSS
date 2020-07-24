@@ -59,7 +59,7 @@ void GameActivity::Clear()
 {
     m_CPUTeam = -1;
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         m_ObservationTarget[player].Reset();
         m_DeathViewTarget[player].Reset();
@@ -130,25 +130,9 @@ int GameActivity::Create()
         return -1;
 
 //    m_Description = "Define and edit Areas on this Scene.";
-/*
-    ////////////////////////////////
-    // Set up teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-
-    ///////////////////////////////////////
-    // Set up players
-
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-*/
     // Load banners
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         m_pBannerRed[player] = new GUIBanner();
         m_pBannerYellow[player] = new GUIBanner();
@@ -175,7 +159,7 @@ int GameActivity::Create(const GameActivity &reference)
 
     m_CPUTeam = reference.m_CPUTeam;
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         m_ObservationTarget[player] = reference.m_ObservationTarget[player];
         m_DeathViewTarget[player] = reference.m_DeathViewTarget[player];
@@ -305,7 +289,7 @@ int GameActivity::Save(Writer &writer) const
 
 void GameActivity::Destroy(bool notInherited)
 {
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         delete m_pPieMenu[player];
         delete m_pBuyGUI[player];
@@ -383,7 +367,7 @@ void GameActivity::SetCPUTeam(int team)
 
 /* whaaaa?
     // Also set the newer human indicator flags
-    for (int player = PLAYER_1; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
         m_IsHuman[m_Team[player]] = m_IsActive[player] && m_Team[player] != team;
 */
 }
@@ -479,7 +463,7 @@ void GameActivity::YSortObjectivePoints()
 
 int GameActivity::AddOverridePurchase(const SceneObject *pPurchase, int player)
 {
-	if (player >= Activity::PLAYER_1 && player < Activity::MAXPLAYERCOUNT)
+	if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 	{
 		// Add to purchase list if valid item
 		if (pPurchase)
@@ -877,7 +861,7 @@ int GameActivity::Start()
     ///////////////////////////////////////
     // Set up human players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -910,7 +894,7 @@ int GameActivity::Start()
         m_pBuyGUI[player]->Create(&m_PlayerController[player]);
 
 		// Load correct loadouts into buy menu if we're starting a non meta-game activity
-		if (m_pBuyGUI[player]->GetMetaPlayer() == Activity::NOPLAYER)
+		if (m_pBuyGUI[player]->GetMetaPlayer() == Players::NoPlayer)
 		{
 			m_pBuyGUI[player]->SetNativeTechModule(g_PresetMan.GetModuleID(GetTeamTech(GetTeamOfPlayer(player))));
 			m_pBuyGUI[player]->SetForeignCostMultiplier(1.0);
@@ -1069,7 +1053,7 @@ void GameActivity::End()
     bool playerWon = false;
 
     // Disable control of actors.. will be handed over to the observation targets instead
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -1137,7 +1121,7 @@ void GameActivity::UpdateEditing()
     ///////////////////////////////////////////
     // Iterate through all human players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -1182,7 +1166,7 @@ void GameActivity::UpdateEditing()
 
     // Have all players flagged themselves as ready to start the game?
     bool allReady = true;
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -1194,7 +1178,7 @@ void GameActivity::UpdateEditing()
     if (allReady)
     {
         // Make sure any players haven't moved or entombed their brains in the period after flagging themselves "done"
-        for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+        for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
         {
             if (!(m_IsActive[player] && m_IsHuman[player]))
                 continue;
@@ -1218,7 +1202,7 @@ void GameActivity::UpdateEditing()
         if (allReady)
         {
             // All resident brains are still in valid spots - place them into the simulation
-            for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+            for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
             {
                 if (!(m_IsActive[player] && m_IsHuman[player]))
                     continue;
@@ -1294,7 +1278,7 @@ void GameActivity::Update()
     ///////////////////////////////////////////
     // Iterate through all human players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -1708,7 +1692,7 @@ void GameActivity::Update()
                 // Add up the static LZ loaded from the Scene to the one(s) around the player's team's brains
                 Scene::Area totalLZ(m_LandingZoneArea[m_Team[player]]);
 /* This whole concept kinda sucks - defensive AA robots are more fun way to go to prevent bumrushing the brain with craft
-                for (int p = 0; p < MAXPLAYERCOUNT; ++p)
+                for (int p = Players::PlayerOne; p < Players::MaxPlayerCount; ++p)
                 {
                     if (!(m_IsActive[p] && m_IsHuman[p] && m_BrainLZWidth[p] > 0))
                         continue;
@@ -2110,26 +2094,26 @@ void GameActivity::Update()
     if (m_PlayerCount == 3)
     {
         // Update the controller of the observation view
-        m_PlayerController[PLAYER_4].Update();
+        m_PlayerController[Players::PlayerFour].Update();
 
         // Observer user control override
-        if (m_PlayerController[PLAYER_4].RelativeCursorMovement(m_ObservationTarget[PLAYER_4], 1.2))
-            m_DeathTimer[PLAYER_4].Reset();
+        if (m_PlayerController[Players::PlayerFour].RelativeCursorMovement(m_ObservationTarget[Players::PlayerFour], 1.2))
+            m_DeathTimer[Players::PlayerFour].Reset();
 
         // If no user input in a few seconds, start scrolling along the terrain
-        if (m_DeathTimer[PLAYER_4].IsPastSimMS(5000))
+        if (m_DeathTimer[Players::PlayerFour].IsPastSimMS(5000))
         {
             // Make it scroll along
-            m_ObservationTarget[PLAYER_4].m_X += 0.5;
+            m_ObservationTarget[Players::PlayerFour].m_X += 0.5;
 
             // Make view follow the terrain
-            float prevHeight = m_ObservationTarget[PLAYER_4].m_Y;
-            m_ObservationTarget[PLAYER_4].m_Y = 0;
-            m_ObservationTarget[PLAYER_4].m_Y = prevHeight + ((g_SceneMan.FindAltitude(m_ObservationTarget[PLAYER_4], g_SceneMan.GetSceneHeight(), 20) - prevHeight) * 0.02);
+            float prevHeight = m_ObservationTarget[Players::PlayerFour].m_Y;
+            m_ObservationTarget[Players::PlayerFour].m_Y = 0;
+            m_ObservationTarget[Players::PlayerFour].m_Y = prevHeight + ((g_SceneMan.FindAltitude(m_ObservationTarget[Players::PlayerFour], g_SceneMan.GetSceneHeight(), 20) - prevHeight) * 0.02);
         }
 
         // Set the view to the observation position
-        g_SceneMan.SetScrollTarget(m_ObservationTarget[PLAYER_4], 0.1, g_SceneMan.ForceBounds(m_ObservationTarget[PLAYER_4]), ScreenOfPlayer(PLAYER_4));
+        g_SceneMan.SetScrollTarget(m_ObservationTarget[Players::PlayerFour], 0.1, g_SceneMan.ForceBounds(m_ObservationTarget[Players::PlayerFour]), ScreenOfPlayer(Players::PlayerFour));
     }
 */
 }
@@ -2150,7 +2134,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     int team = NOTEAM;
     int cursor = 0;
     int PoS = PlayerOfScreen(which);
-    if (PoS < 0 || PoS >= Activity::MAXPLAYERCOUNT)
+    if (PoS < Players::PlayerOne || PoS >= Players::MaxPlayerCount)
         return;
     Box screenBox(targetPos, pTargetBitmap->w, pTargetBitmap->h);
     GUIFont *pLargeFont = g_FrameMan.GetLargeFont();
@@ -2160,7 +2144,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     Vector landZone;
 
     // Iterate through all players, drawing each currently used LZ cursor.
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -2556,7 +2540,7 @@ void GameActivity::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
     Vector landZone;
 
     // Iterate through all players, drawing each currently used LZ cursor.
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -2928,7 +2912,7 @@ void GameActivity::ObjectivePoint::Draw(BITMAP *pTargetBitmap, BITMAP *pArrowBit
 
 std::string & GameActivity::GetNetworkPlayerName(int player)
 {
-	if (player >= 0 && player < MAXPLAYERCOUNT)
+	if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 		return m_NetworkPlayerNames[player];
 	else
 		return m_NetworkPlayerNames[0];
@@ -2936,7 +2920,7 @@ std::string & GameActivity::GetNetworkPlayerName(int player)
 
 void GameActivity::SetNetworkPlayerName(int player, std::string name)
 {
-	if (player >= 0 && player < MAXPLAYERCOUNT)
+	if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 		m_NetworkPlayerNames[player] = name;
 }
 

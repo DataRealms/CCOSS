@@ -73,7 +73,7 @@ namespace RTE {
 		m_pDifficultyLabel = 0;
 		m_pDifficultySlider = 0;
 
-		for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+		for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
 		{
 			for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
 			{
@@ -251,7 +251,7 @@ namespace RTE {
 
 		// Player team assignment box
 		char str[128];
-		for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+		for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
 		{
 			for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
 			{
@@ -558,7 +558,7 @@ namespace RTE {
 			}
 
 			// Set up the matrix of player control boxes
-			for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+			for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
 			{
 				for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
 				{
@@ -657,7 +657,7 @@ namespace RTE {
 							// If CPU changed to an actual team assignment, clear all human players off his new team
 							if (player == PLAYER_CPU && team != TEAM_DISABLED)
 							{
-								for (int p2 = Activity::PLAYER_1; p2 < Activity::MAXPLAYERCOUNT; ++p2)
+								for (int p2 = Players::PlayerOne; p2 < Players::MaxPlayerCount; ++p2)
 								{
 									// Deselect the player's team assignment if he's on the same team as the CPU
 									if (m_aapPlayerBoxes[p2][team]->GetDrawType() == GUICollectionBox::Image)
@@ -787,7 +787,7 @@ namespace RTE {
 				if (pActivity->TeamActive(team))
 				{
 					teamHasPlayers = false;
-					for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+					for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
 					{
 						// CPU is sometimes disabled, but still counts as a team
 						if (team != TEAM_DISABLED && m_aapPlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image)
@@ -892,7 +892,7 @@ namespace RTE {
 	{
 		int count = 0;
 		// Go through all the on-team non-CPU cells and see how many players are already assigned.
-		for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
 		{
 			for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
 			{
@@ -951,7 +951,7 @@ namespace RTE {
 
 		// Set up the player and team assignments
 		pActivity->ClearPlayers(false);
-		for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+		for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
 		{
 			for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
 			{

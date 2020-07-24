@@ -13,7 +13,7 @@ namespace RTE {
 		m_Name = "";
 		m_Team = Activity::NOTEAM;
 		m_Human = true;
-		m_InGamePlayer = Activity::PLAYER_1;
+		m_InGamePlayer = Players::PlayerOne;
 		m_Aggressiveness = 0.5F;
 		m_GameOverRound = -1;
 

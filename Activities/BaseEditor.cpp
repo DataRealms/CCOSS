@@ -196,13 +196,13 @@ int BaseEditor::Start()
     // Set up player - ONLY ONE ever in a base building activity
 
     // Figure which player is editing this base.. the first active one we find
-    int editingPlayer = Activity::PLAYER_1;
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    int editingPlayer = Players::PlayerOne;
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
         if (m_IsActive[player])
             editingPlayer = player;
 // TODO: support multiple coop players editing the same base?? - A: NO, silly
 
-//    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+//    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
 //    {
 //        if (!m_IsActive[player])
 //            continue;

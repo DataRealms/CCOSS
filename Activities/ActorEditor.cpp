@@ -270,7 +270,7 @@ void ActorEditor::Update()
 
     // Set the screen occlusion situation
     if (!m_pPicker->IsVisible())
-        g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(PLAYER_1));
+        g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(Players::PlayerOne));
 
     // Picking something to load into the editor
     if (m_EditorMode == EditorActivity::LOADDIALOG)
@@ -377,7 +377,7 @@ bool ActorEditor::LoadActor(const Entity *pActorToLoad)
     if (m_pEditedActor)
     {
         // Set up the editor for the new actor
-        m_pEditedActor->SetControllerMode(Controller::CIM_PLAYER, UInputMan::PLAYER_ONE);
+        m_pEditedActor->SetControllerMode(Controller::CIM_PLAYER, Players::PlayerOne);
         // Set up the pie menu with the actor's own slices
         m_pPieMenu->ResetSlices();
         // Add the reload data slice

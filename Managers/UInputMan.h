@@ -22,18 +22,6 @@ namespace RTE {
 		SerializableOverrideMethods
 
 		/// <summary>
-		/// Enumeration for the player controllers.
-		/// </summary>
-		enum Players {
-			PLAYER_NONE = -1,
-			PLAYER_ONE = 0,
-			PLAYER_TWO,
-			PLAYER_THREE,
-			PLAYER_FOUR,
-			MAX_PLAYERS
-		};
-
-		/// <summary>
 		/// Enumeration for the mouse button actions.
 		/// </summary>
 		enum MenuCursorButtons {
@@ -454,7 +442,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">The player to get mouse wheel position for.</param>
 		/// <returns>The relative mouse wheel position for the specified player.</returns>
-		int MouseWheelMovedByPlayer(short player) const { return (m_OverrideInput && player >= 0 && player < MAX_PLAYERS) ? m_NetworkMouseWheelState[player] : m_MouseWheelChange; }
+		int MouseWheelMovedByPlayer(short player) const { return (m_OverrideInput && player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_NetworkMouseWheelState[player] : m_MouseWheelChange; }
 
 		/// <summary>
 		/// Return true if there is any mouse button presses at all.
@@ -495,7 +483,7 @@ namespace RTE {
 		/// Returns the number of active joysticks.
 		/// </summary>
 		/// <returns>The number of active joysticks.</returns>
-		int GetJoystickCount() const { return (num_joysticks > MAX_PLAYERS) ? MAX_PLAYERS : num_joysticks; }
+		int GetJoystickCount() const { return (num_joysticks > Players::MaxPlayerCount) ? Players::MaxPlayerCount : num_joysticks; }
 
 		/// <summary>
 		/// Returns true if specified joystick is active.
@@ -734,12 +722,12 @@ namespace RTE {
 		static bool s_PrevMouseButtonStates[MAX_MOUSE_BUTTONS]; //!< Mouse states as they were the previous update.
 		static bool s_ChangedMouseButtonStates[MAX_MOUSE_BUTTONS]; //!< Mouse states that have changed.
 
-		static JOYSTICK_INFO s_PrevJoystickStates[MAX_PLAYERS]; //!< Joystick states as they were the previous update.
-		static JOYSTICK_INFO s_ChangedJoystickStates[MAX_PLAYERS]; //!< Joystick states that have changed.
+		static JOYSTICK_INFO s_PrevJoystickStates[Players::MaxPlayerCount]; //!< Joystick states as they were the previous update.
+		static JOYSTICK_INFO s_ChangedJoystickStates[Players::MaxPlayerCount]; //!< Joystick states that have changed.
 
 		bool m_OverrideInput; //!< If true then this instance operates in multiplayer mode and the input is overridden by network input.
 
-		InputScheme m_ControlScheme[MAX_PLAYERS]; //!< Which control scheme is being used by each player.
+		InputScheme m_ControlScheme[Players::MaxPlayerCount]; //!< Which control scheme is being used by each player.
 		const Icon *m_DeviceIcons[DEVICE_COUNT]; //!< The Icons representing all different devices.
 	
 		Vector m_RawMouseMovement; //!< The raw absolute movement of the mouse between the last two Updates.
@@ -764,19 +752,19 @@ namespace RTE {
 		bool m_NetworkAccumulatedElementPressed[INPUT_COUNT]; //!< Whether an input element is pressed or not during network multiplayer.
 		bool m_NetworkAccumulatedElementReleased[INPUT_COUNT]; //!< Whether an input element is released or not during network multiplayer.
 
-		bool m_NetworkInputElementHeld[MAX_PLAYERS][INPUT_COUNT]; //!< Whether an input element is held by a player during network multiplayer.
-		bool m_NetworkInputElementPressed[MAX_PLAYERS][INPUT_COUNT]; //!< Whether an input element is pressed by a player during network multiplayer.
-		bool m_NetworkInputElementReleased[MAX_PLAYERS][INPUT_COUNT]; //!< Whether an input element is released by a player during network multiplayer.
+		bool m_NetworkInputElementHeld[Players::MaxPlayerCount][INPUT_COUNT]; //!< Whether an input element is held by a player during network multiplayer.
+		bool m_NetworkInputElementPressed[Players::MaxPlayerCount][INPUT_COUNT]; //!< Whether an input element is pressed by a player during network multiplayer.
+		bool m_NetworkInputElementReleased[Players::MaxPlayerCount][INPUT_COUNT]; //!< Whether an input element is released by a player during network multiplayer.
 
-		bool m_NetworkMouseButtonHeldState[MAX_PLAYERS][MAX_MOUSE_BUTTONS]; //!< Whether a mouse button is held by a player during network multiplayer.
-		bool m_NetworkMouseButtonPressedState[MAX_PLAYERS][MAX_MOUSE_BUTTONS]; //!< Whether a mouse button is pressed by a player during network multiplayer.
-		bool m_NetworkMouseButtonReleasedState[MAX_PLAYERS][MAX_MOUSE_BUTTONS]; //!< Whether a mouse button is released by a player during network multiplayer.
+		bool m_NetworkMouseButtonHeldState[Players::MaxPlayerCount][MAX_MOUSE_BUTTONS]; //!< Whether a mouse button is held by a player during network multiplayer.
+		bool m_NetworkMouseButtonPressedState[Players::MaxPlayerCount][MAX_MOUSE_BUTTONS]; //!< Whether a mouse button is pressed by a player during network multiplayer.
+		bool m_NetworkMouseButtonReleasedState[Players::MaxPlayerCount][MAX_MOUSE_BUTTONS]; //!< Whether a mouse button is released by a player during network multiplayer.
 
-		Vector m_NetworkAccumulatedRawMouseMovement[MAX_PLAYERS]; //!< The position of the mouse for each player during network multiplayer.
-		Vector m_NetworkAnalogMoveData[MAX_PLAYERS]; //!< Mouse analog movement data for each player during network multiplayer. 
-		int m_NetworkMouseWheelState[MAX_PLAYERS]; //!< The position of a player's mouse wheel during network multiplayer.
+		Vector m_NetworkAccumulatedRawMouseMovement[Players::MaxPlayerCount]; //!< The position of the mouse for each player during network multiplayer.
+		Vector m_NetworkAnalogMoveData[Players::MaxPlayerCount]; //!< Mouse analog movement data for each player during network multiplayer. 
+		int m_NetworkMouseWheelState[Players::MaxPlayerCount]; //!< The position of a player's mouse wheel during network multiplayer.
 
-		bool m_TrapMousePosPerPlayer[MAX_PLAYERS]; //!< Whether to trap the mouse position to the middle of the screen for each player during network multiplayer.
+		bool m_TrapMousePosPerPlayer[Players::MaxPlayerCount]; //!< Whether to trap the mouse position to the middle of the screen for each player during network multiplayer.
 
 	private:
 

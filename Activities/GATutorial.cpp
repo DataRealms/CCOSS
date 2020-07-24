@@ -68,18 +68,7 @@ GATutorial::TutStep::TutStep(string text, int stepDuration, string screensPath, 
 
 void GATutorial::Clear()
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
-    m_TutorialPlayer = Activity::PLAYER_1;
+    m_TutorialPlayer = Players::PlayerOne;
 
     for (int area = 0; area < AREACOUNT; ++area)
     {
@@ -123,23 +112,7 @@ int GATutorial::Create()
         return -1;
 
     m_Description = "A tutorial for learning how to play Cortex Command. A good place to start!";
-/*
-    ////////////////////////////////
-    // Set up teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-
-    ///////////////////////////////////////
-    // Set up players
-
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-*/
     return 0;
 }
 
@@ -246,17 +219,6 @@ int GATutorial::Save(Writer &writer) const
 
 void GATutorial::Destroy(bool notInherited)
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
     if (!notInherited)
         GameActivity::Destroy();
     Clear();
@@ -359,7 +321,7 @@ int GATutorial::Start()
     ///////////////////////////////////////
     // Set up players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -492,7 +454,7 @@ void GATutorial::End()
 
     bool playerWon = false;
     // Show appropriate end game messages
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -560,7 +522,7 @@ void GATutorial::Update()
     ///////////////////////////////////////////
     // Iterate through all human players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -675,7 +637,7 @@ void GATutorial::Update()
 // TODO Don't hardcode the rocket cost!
             if (m_TeamFunds[team] < 0)//&& Only brain is left of actors)
             {
-                for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+                for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
                 {
                     if (!(m_IsActive[player] && m_IsHuman[player]))
                         continue;

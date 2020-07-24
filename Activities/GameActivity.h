@@ -183,7 +183,7 @@ EntityAllocation(GameActivity)
 //                  Which player to set it for.
 // Return value:    None.
 
-    void SetObservationTarget(const Vector &newTarget, int player = 0) { if (player >= 0 && player < Activity::MAXPLAYERCOUNT) m_ObservationTarget[player] = newTarget; }
+    void SetObservationTarget(const Vector &newTarget, int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) m_ObservationTarget[player] = newTarget; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -195,7 +195,7 @@ EntityAllocation(GameActivity)
 //                  Which player to set it for.
 // Return value:    None.
 
-    void SetDeathViewTarget(const Vector &newTarget, int player = 0) { if (player >= 0 && player < Activity::MAXPLAYERCOUNT) m_DeathViewTarget[player] = newTarget; }
+    void SetDeathViewTarget(const Vector &newTarget, int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) m_DeathViewTarget[player] = newTarget; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -206,7 +206,7 @@ EntityAllocation(GameActivity)
 //                  Which player to set it for.
 // Return value:    None.
 
-    void SetLandingZone(const Vector &newZone, int player = 0) { if (player >= 0 && player < Activity::MAXPLAYERCOUNT) m_LandingZone[player] = newZone; }
+    void SetLandingZone(const Vector &newZone, int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) m_LandingZone[player] = newZone; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -216,7 +216,7 @@ EntityAllocation(GameActivity)
 // Arguments:       Which player to get it for.
 // Return value:    The new absolute position to set as the last selected landing zone.
 
-    Vector GetLandingZone(int player = 0) { if (player >= 0 && player < Activity::MAXPLAYERCOUNT) return m_LandingZone[player]; else return Vector(); }
+    Vector GetLandingZone(int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) return m_LandingZone[player]; else return Vector(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +227,7 @@ EntityAllocation(GameActivity)
 //                  Which player to set it for.
 // Return value:    None.
 
-    void SetActorSelectCursor(const Vector &newPos, int player = 0) { if (player >= 0 && player < Activity::MAXPLAYERCOUNT) m_ActorCursor[player] = newPos; }
+    void SetActorSelectCursor(const Vector &newPos, int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) m_ActorCursor[player] = newPos; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -319,7 +319,7 @@ EntityAllocation(GameActivity)
 //                  Which player's banner to get.
 // Return value:    A pointer to the GUIBanner object that we can 
 
-    GUIBanner * GetBanner(int whichColor = YELLOW, int player = Activity::PLAYER_1) { return whichColor == YELLOW ? m_pBannerYellow[player] : m_pBannerRed[player]; }
+    GUIBanner * GetBanner(int whichColor = YELLOW, int player = Players::PlayerOne) { return whichColor == YELLOW ? m_pBannerYellow[player] : m_pBannerRed[player]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -876,33 +876,33 @@ EntityAllocation(GameActivity)
 
 	virtual void AddPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
 	{ 
-		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
+		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
 			m_pPieMenu[m_CurrentPieMenuPlayer]->AddSliceLua(description, functionName, direction, isEnabled);
 	};
 
 	virtual void AlterPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
 	{
-		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
+		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
 			m_pPieMenu[m_CurrentPieMenuPlayer]->AlterSliceLua(description, functionName, direction, isEnabled);
 	};
 
 	virtual PieMenuGUI::Slice RemovePieMenuSlice(std::string description, std::string functionName)
 	{
-		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
+		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
 			return m_pPieMenu[m_CurrentPieMenuPlayer]->RemoveSliceLua(description, functionName);
 		return PieMenuGUI::Slice("", PieMenuGUI::PieSliceIndex::PSI_NONE, 0, false);
 	};
 
 	virtual std::vector<PieMenuGUI::Slice *> GetCurrentPieMenuSlices(int player) const 
 	{ 
-		//if (player >= 0 && player < Activity::MAXPLAYERCOUNT)
+		//if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 			return m_pPieMenu[player]->GetCurrentSlices();
 		//return 0;
 	}
 
 	/*virtual std::vector<PieMenuGUI::Slice> * GetAvailablePieMenuSlices(int player) const 
 	{ 
-		if (player >= 0 && player < Activity::MAXPLAYERCOUNT)
+		if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 			return &m_pPieMenu[player]->GetAvailableSlices();
 		return 0;
 	}*/
@@ -1048,44 +1048,44 @@ protected:
     bool m_TeamIsCPU[MAXTEAMCOUNT];
 
     // The observation sceneman scroll targets, for when the game is over or a player is in observation mode
-    Vector m_ObservationTarget[Activity::MAXPLAYERCOUNT];
+    Vector m_ObservationTarget[Players::MaxPlayerCount];
     // The player death sceneman scroll targets, for when a player-controlled actor dies and the view should go to his last position
-    Vector m_DeathViewTarget[Activity::MAXPLAYERCOUNT];
+    Vector m_DeathViewTarget[Players::MaxPlayerCount];
     // Timers for measuring death cam delays.
-    Timer m_DeathTimer[Activity::MAXPLAYERCOUNT];
+    Timer m_DeathTimer[Players::MaxPlayerCount];
     // Times the delay between regular actor swtich, and going into manual siwtch mode
-    Timer m_ActorSelectTimer[Activity::MAXPLAYERCOUNT];
+    Timer m_ActorSelectTimer[Players::MaxPlayerCount];
     // The cursor for selecting new Actors
-    Vector m_ActorCursor[Activity::MAXPLAYERCOUNT];
+    Vector m_ActorCursor[Players::MaxPlayerCount];
     // Highlighted actor while cursor switching; will be switched to if switch button is released now
-    Actor *m_pLastMarkedActor[Activity::MAXPLAYERCOUNT];
+    Actor *m_pLastMarkedActor[Players::MaxPlayerCount];
     // The last selected landing zone
-    Vector m_LandingZone[Activity::MAXPLAYERCOUNT];
+    Vector m_LandingZone[Players::MaxPlayerCount];
     // Whether the last craft was set to return or not after delivering
-    bool m_AIReturnCraft[Activity::MAXPLAYERCOUNT];
+    bool m_AIReturnCraft[Players::MaxPlayerCount];
     // The pie menus for each player
-    PieMenuGUI *m_pPieMenu[Activity::MAXPLAYERCOUNT];
+    PieMenuGUI *m_pPieMenu[Players::MaxPlayerCount];
     // The in-game buy GUIs for each player
-    BuyMenuGUI *m_pBuyGUI[Activity::MAXPLAYERCOUNT];
+    BuyMenuGUI *m_pBuyGUI[Players::MaxPlayerCount];
     // The in-game scene editor GUI for each player
-    SceneEditorGUI *m_pEditorGUI[Activity::MAXPLAYERCOUNT];
+    SceneEditorGUI *m_pEditorGUI[Players::MaxPlayerCount];
     // The in-game important message banners for each player
-    GUIBanner *m_pBannerRed[Activity::MAXPLAYERCOUNT];
-    GUIBanner *m_pBannerYellow[Activity::MAXPLAYERCOUNT];
+    GUIBanner *m_pBannerRed[Players::MaxPlayerCount];
+    GUIBanner *m_pBannerYellow[Players::MaxPlayerCount];
     // How many times a banner has been repeated.. so we dont' annoy by repeating forever
-    int m_BannerRepeats[Activity::MAXPLAYERCOUNT];
+    int m_BannerRepeats[Players::MaxPlayerCount];
     // Whether each player has marked himself as ready to start. Can still edit while this is set, but when all are set, the game starts
-    bool m_ReadyToStart[Activity::MAXPLAYERCOUNT];
+    bool m_ReadyToStart[Players::MaxPlayerCount];
     // An override purchase list that can be set by a script and will be used instead of what's in the buy menu. Object held in here are NOT OWNED
     // Once a delivery is made with anything in here, this list is automatically cleared out, and the next delivery will be what's set in the buy menu.
-    std::list<const SceneObject *> m_PurchaseOverride[Activity::MAXPLAYERCOUNT];
+    std::list<const SceneObject *> m_PurchaseOverride[Players::MaxPlayerCount];
 
     // The delivery queue which contains all the info about all the made orders currently in transit to delivery
     std::deque<Delivery> m_Deliveries[Activity::MAXTEAMCOUNT];
     // The box within where landing zones can be put
     Scene::Area m_LandingZoneArea[Activity::MAXTEAMCOUNT];
     // How wide around the brain the automatic LZ is following
-    int m_BrainLZWidth[Activity::MAXPLAYERCOUNT];
+    int m_BrainLZWidth[Players::MaxPlayerCount];
     // The objective points for each team
     std::list<ObjectivePoint> m_Objectives;
 
@@ -1140,7 +1140,7 @@ protected:
 
 	int m_CurrentPieMenuPlayer;
 
-	std::string m_NetworkPlayerNames[MAXPLAYERCOUNT];
+	std::string m_NetworkPlayerNames[Players::MaxPlayerCount];
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

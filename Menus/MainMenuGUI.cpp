@@ -115,14 +115,14 @@ void MainMenuGUI::Clear()
     m_StartPlayers = 1;
     m_StartTeams = 2;
     m_StartFunds = 1600;
-    for (int player = 0; player < SKIRMISHPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player)
         m_aTeamAssignments[player] = Activity::TEAM_1;
     m_CPUTeam = -1;
     m_StartDifficulty = GameActivity::MEDIUMDIFFICULTY;
     m_Quit = false;
 
     // Config screen
-    m_ConfiguringPlayer = UInputMan::PLAYER_ONE;
+    m_ConfiguringPlayer = Players::PlayerOne;
     m_ConfiguringDevice = DEVICE_KEYB_ONLY;
     m_ConfiguringGamepad = DPAD;
     m_ConfigureStep = 0;
@@ -1120,7 +1120,7 @@ void MainMenuGUI::Update()
 
 			if (m_MenuScreen == SKIRMISHSCREEN)
             {
-                for (int player = 0; player < SKIRMISHPLAYERCOUNT; ++player)
+                for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player)
                 {
                     // Player team toggle button
 			        if (anEvent.GetControl() == m_aSkirmishButton[player])
@@ -1211,7 +1211,7 @@ void MainMenuGUI::Update()
                 for (which = P1NEXT; which <= P4PREV; ++which)
                 {
                     // Calculate the owner of the currently checked button, and if it's next/prev button
-                    player = (which - P1NEXT) % UInputMan::MAX_PLAYERS;
+                    player = (which - P1NEXT) % Players::MaxPlayerCount;
                     bool nextButton = which < P1PREV;
 
                     // Handle the appropriate player's device setting
@@ -1278,7 +1278,7 @@ void MainMenuGUI::Update()
                         else
                         {
                             // Set to a default control preset.
-                            UInputMan::Players inputPlayer = static_cast<UInputMan::Players>(which - P1CLEAR);
+                            Players inputPlayer = static_cast<Players>(which - P1CLEAR);
                             InputPreset playerPreset = static_cast<InputPreset>(P1CLEAR - which - 1); // Player 1's default preset is at -1 and so on.
                             g_UInputMan.GetControlScheme(inputPlayer)->SetPreset(playerPreset);
                             
@@ -1736,17 +1736,17 @@ void MainMenuGUI::Draw(BITMAP *drawBitmap) const
 	}
 
 	// Show which joysticks are detected by the game
-	for (int joy = 0; joy < UInputMan::MAX_PLAYERS; joy++)
+	for (int joystick = Players::PlayerOne; joystick < Players::MaxPlayerCount; joystick++)
 	{
-		if (g_UInputMan.JoystickActive(joy))
+		if (g_UInputMan.JoystickActive(joystick))
 		{
-			int matchedDevice = DEVICE_GAMEPAD_1 + joy;
+			int matchedDevice = DEVICE_GAMEPAD_1 + joystick;
 
 			if (matchedDevice != device)
 			{
 				const Icon * pIcon = g_UInputMan.GetDeviceIcon(matchedDevice);
 				if (pIcon)
-					draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * joy, g_FrameMan.GetResY() - 25);
+					draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * joystick, g_FrameMan.GetResY() - 25);
 			}
 		}
 	}
@@ -1814,7 +1814,7 @@ void MainMenuGUI::SetupSkirmishActivity()
 // TODO: Let player choose the GABrainMatch activity instance!
             GABrainMatch *pNewGame = new GABrainMatch;
 
-            for (int player = 0; player < m_StartPlayers; ++player)
+            for (int player = Players::PlayerOne; player < m_StartPlayers; ++player)
                 pNewGame->SetTeamOfPlayer(player, m_aTeamAssignments[player]);
 
             pNewGame->SetCPUTeam(m_CPUTeam);
@@ -1829,7 +1829,7 @@ void MainMenuGUI::SetupSkirmishActivity()
             GABaseDefense *pNewGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Skirmish Defense")->Clone());
             RTEAssert(pNewGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
 
-            for (int player = 0; player < m_StartPlayers; ++player)
+            for (int player = Players::PlayerOne; player < m_StartPlayers; ++player)
                 pNewGame->SetTeamOfPlayer(player, m_aTeamAssignments[player]);
 
             pNewGame->SetCPUTeam(m_CPUTeam);
@@ -1947,7 +1947,7 @@ void MainMenuGUI::UpdateTeamBoxes()
     }
 
     // Update button labels
-    for (int player = 0; player < SKIRMISHPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player)
     {
         if (m_aTeamAssignments[player] == Activity::TEAM_1)
         {
@@ -1968,7 +1968,7 @@ void MainMenuGUI::UpdateTeamBoxes()
     // Count how many players on each team
     int team0Count = 0;
     int team1Count = 0;
-    for (int player = 0; player < m_StartPlayers; ++player)
+    for (int player = Players::PlayerOne; player < m_StartPlayers; ++player)
     {
         if (m_aTeamAssignments[player] == 0)
             team0Count++;
@@ -2111,7 +2111,7 @@ void MainMenuGUI::UpdateDeviceLabels()
     string label;
 
     // Cycle through all players
-    for (int player = 0; player < UInputMan::MAX_PLAYERS; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         device = g_UInputMan.GetControlScheme(player)->GetDevice();
 

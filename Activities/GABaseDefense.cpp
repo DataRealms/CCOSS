@@ -45,17 +45,6 @@ ConcreteClassInfo(GABaseDefense, GameActivity, 0)
 
 void GABaseDefense::Clear()
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
     m_SpawnTimer.Reset();
     m_SpawnInterval = 20000;
     m_SpawnIntervalEasiest = 20000;
@@ -76,23 +65,7 @@ int GABaseDefense::Create()
 
     if (m_Description.empty())
         m_Description = "Defend your base in an AI onslaught.";
-/*
-    ////////////////////////////////
-    // Set up teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-
-    ///////////////////////////////////////
-    // Set up players
-
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-*/
     return 0;
 }
 
@@ -182,18 +155,6 @@ int GABaseDefense::Save(Writer &writer) const
 
 void GABaseDefense::Destroy(bool notInherited)
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
-
     for (vector<Actor *>::const_iterator itr = m_AttackerSpawns.begin(); itr != m_AttackerSpawns.end(); ++itr)
     {
         delete (*itr);
@@ -229,7 +190,7 @@ int GABaseDefense::Start()
     ///////////////////////////////////////
     // Set up players
 
-    for (int player = PLAYER_1; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -283,7 +244,7 @@ int GABaseDefense::Start()
     }
 
     // Second pass after we have determined whether we need to be editing or not
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         // Only applies to human players
         if (!(m_IsActive[player] && m_IsHuman[player]))
@@ -336,7 +297,7 @@ void GABaseDefense::End()
 // TODO: Update these messages to reflect attack budget running out!
 
     // Show appropriate end game messages
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!m_IsActive[player])
             continue;
@@ -388,7 +349,7 @@ void GABaseDefense::Update()
     ///////////////////////////////////////////
     // Iterate through all human players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!m_IsActive[player])
             continue;
@@ -523,7 +484,7 @@ void GABaseDefense::Update()
 // TODO Don't hardcode the rocket cost!
             if (m_TeamFunds[team] < 0)//&& Only brain is left of actors)
             {
-                for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+                for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
                 {
                     if (!m_IsActive[player])
                         continue;

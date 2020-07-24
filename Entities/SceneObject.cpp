@@ -201,7 +201,7 @@ void SceneObject::Clear()
     m_OzValue = 0;
     m_Buyable = true;
     m_Team = Activity::NOTEAM;
-    m_PlacedByPlayer = Activity::NOPLAYER;
+    m_PlacedByPlayer = Players::NoPlayer;
 }
 
 /*

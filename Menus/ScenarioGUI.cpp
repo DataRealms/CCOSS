@@ -106,7 +106,7 @@ void ScenarioGUI::Clear()
     m_pSceneCloseButton = 0;
     m_pSceneNameLabel = 0;
     m_pSceneInfoLabel = 0;
-    for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
     {
         for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
         {
@@ -216,7 +216,7 @@ int ScenarioGUI::Create(Controller *pController)
 
     // Player team assignment box
     char str[128];
-    for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
     {
         for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
         {
@@ -750,17 +750,17 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
 	}
 
 	// Show which joysticks are detected by the game
-	for (int joy = 0; joy < UInputMan::MAX_PLAYERS; joy++)
+	for (int joystick = Players::PlayerOne; joystick < Players::MaxPlayerCount; joystick++)
 	{
-		if (g_UInputMan.JoystickActive(joy))
+		if (g_UInputMan.JoystickActive(joystick))
 		{
-			int matchedDevice = DEVICE_GAMEPAD_1 + joy;
+			int matchedDevice = DEVICE_GAMEPAD_1 + joystick;
 
 			if (matchedDevice != device)
 			{
 				const Icon * pIcon = g_UInputMan.GetDeviceIcon(matchedDevice);
 				if (pIcon)
-					draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * joy, g_FrameMan.GetResY() - 25);
+					draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * joystick, g_FrameMan.GetResY() - 25);
 			}
 		}
 	}
@@ -1245,7 +1245,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
         }
 
         // Set up the matrix of player control boxes
-        for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+        for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
         {
             for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
             {
@@ -1342,7 +1342,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                         // If CPU changed to an actual team assignment, clear all human players off his new team
                         if (player == PLAYER_CPU && team != TEAM_DISABLED)
                         {
-                            for (int p2 = Activity::PLAYER_1; p2 < Activity::MAXPLAYERCOUNT; ++p2)
+                            for (int p2 = Players::PlayerOne; p2 < Players::MaxPlayerCount; ++p2)
                             {
                                 // Deselect the player's team assignment if he's on the same team as the CPU
                                 if (m_aapPlayerBoxes[p2][team]->GetDrawType() == GUICollectionBox::Image)
@@ -1471,7 +1471,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
             if (pActivity->TeamActive(team))
             {
                 teamHasPlayers = false;
-                for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+                for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
                 {
                     // CPU is sometimes disabled, but still counts as a team
                     if (team != TEAM_DISABLED && m_aapPlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image)
@@ -1577,7 +1577,7 @@ int ScenarioGUI::PlayerCount()
 {
     int count = 0;
     // Go through all the on-team non-CPU cells and see how many players are already assigned.
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
         {
@@ -1632,7 +1632,7 @@ bool ScenarioGUI::StartGame()
 
     // Set up the player and team assignments
     pActivity->ClearPlayers(false);
-    for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
     {
         for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
         {

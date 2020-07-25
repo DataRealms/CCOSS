@@ -77,6 +77,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New shortcut `ALT + W` to generate a detailed 140x55px mini `WorldDump` to be used for scene previews. No relying on `SceneEditor`, stretches over whole image, no ugly cyan bunkers, no actors or glows and has sky gradient.
 
+- Scripts can now be attached to `ACrab Turrets` and `Legs`. Additionally, a binding to get the Foot of a leg has been added.
+
 ### Changed
 
 - Lua error reporting has been improved so script errors will always show filename and line number.
@@ -138,6 +140,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed issue where comboboxes did not save the current selection, thus if the combobox was deselected without making a selection then the selection would revert to the default value instead of the last selected value.
 
 - Fixed issue with double clicks and missing clicks in menus (anything that uses AllegroInput).
+
+- Fixed issue where OnPieMenu function wasn't working for `AHuman` equipped items, and made it work for `BGArm` equipped items as well as `FGArm` ones.
 
 ### Removed
 

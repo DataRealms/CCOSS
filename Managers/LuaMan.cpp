@@ -978,7 +978,6 @@ int LuaMan::Create()
 			.property("IdleOffset", &Arm::GetIdleOffset, &Arm::SetIdleOffset)
 			.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos),
 
-
         ABSTRACTLUABINDING(Leg, Attachable)
             .property("Foot", &Leg::GetFoot),
 
@@ -1173,6 +1172,8 @@ int LuaMan::Create()
 			.property("LimbPathPushForce", &ACrab::GetLimbPathPushForce, &ACrab::SetLimbPathPushForce)
 			.def("GetLimbPathSpeed", &ACrab::GetLimbPathSpeed)
 			.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed),
+
+        ABSTRACTLUABINDING(Turret, Attachable),
 
         ABSTRACTLUABINDING(ACraft, Actor)
             .enum_("HatchState")

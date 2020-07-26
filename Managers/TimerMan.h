@@ -28,9 +28,10 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a TimerMan object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate a TimerMan object in system memory. This constructor calls Create() so it shouldn't be called again.
 		/// </summary>
-		TimerMan() { Clear(); }
+		// TODO: Figure out why removing Create() here kills fps and if it's already here then why are we calling Create() again during main().
+		TimerMan() { Clear(); Create(); }
 
 		/// <summary>
 		/// Makes the TimerMan object ready for use.

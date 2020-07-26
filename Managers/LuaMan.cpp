@@ -129,7 +129,6 @@ struct enum_wrapper {
 	// Nested structs for each enum because we can't register enum_wrapper multiple times under a different name.
 	// We're doing this so we can access each enum separately by name rather than having all of them accessed from a shared name.
 	// If this proves to be a hassle then we can easily revert to the shared name access by registering everything under enum_wrapper.
-	struct players {};
 	struct input_device {};
 	struct input_elements {};
 	struct mouse_buttons {};
@@ -1753,6 +1752,15 @@ int LuaMan::Create()
             .def("TestBrainResidence", &SceneEditorGUI::TestBrainResidence),
 
         class_<Activity, Entity>("Activity")
+			.enum_("Players")[
+				value("PLAYER_NONE", -1),
+				value("PLAYER_1", 0),
+				value("PLAYER_2", 1),
+				value("PLAYER_3", 2),
+				value("PLAYER_4", 3),
+				value("MAXPLAYERCOUNT", 4)
+			]
+
             .enum_("ActivityState")
             [
                 value("NOACTIVITY", -1),
@@ -2139,16 +2147,6 @@ int LuaMan::Create()
 		def("GetMPP", &GetMPP),
 		def("GetPPL", &GetPPL),
 		def("GetLPP", &GetLPP),
-
-		class_<enum_wrapper::players>("Players")
-			.enum_("Players") [
-				value("PLAYER_NONE", -1),
-				value("PLAYER_ONE", 0),
-				value("PLAYER_TWO", 1),
-				value("PLAYER_THREE", 2),
-				value("PLAYER_FOUR", 3),
-				value("MAX_PLAYER_COUNT", 4)
-			],
 
 		class_<enum_wrapper::input_device>("InputDevice")
 			.enum_("InputDevice") [

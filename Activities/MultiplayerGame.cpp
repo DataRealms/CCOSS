@@ -218,11 +218,11 @@ namespace RTE {
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Pauses and unpauses the game.
 
-	void MultiplayerGame::Pause(bool pause)
+	void MultiplayerGame::SetPaused(bool pause)
 	{
 		// Override the pause
 		//m_Paused = false;
-		Activity::Pause(pause);
+		Activity::SetPaused(pause);
 
 		if (pause)
 		{

@@ -33,7 +33,7 @@ namespace RTE {
 		ID_SRV_MUSIC_EVENTS
 	};
 
-// TODO: Figure out why we need this and add comment.
+// Pack the structs so 1 byte members are exactly 1 byte in memory instead of being aligned by 4 bytes (padding) so the correct representation is sent over the network without empty bytes consumed by alignment.
 #pragma pack(push, 1)
 
 	// TODO: Figure out all these and add comments.
@@ -296,7 +296,7 @@ namespace RTE {
 		unsigned int InputElementHeld;
 	};
 
-// TODO: Figure out why we need this and add comment.
+// Disables the previously set pack pragma.
 #pragma pack(pop)
 }
 #endif

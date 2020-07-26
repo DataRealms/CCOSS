@@ -253,7 +253,7 @@ int EditorActivity::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void EditorActivity::Pause(bool pause)
+void EditorActivity::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;

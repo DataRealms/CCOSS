@@ -205,7 +205,7 @@ int GAScripted::ReloadScripts()
 // Description:     Tells if a particular Scene supports this specific Activity on it.
 //                  Usually that means certain Area:s need to be defined in the Scene.
 
-bool GAScripted::SceneIsCompatible(Scene *pScene, int teams)
+bool GAScripted::SceneIsCompatible(Scene *pScene, short teams)
 {
     if (!GameActivity::SceneIsCompatible(pScene, teams))
         return false;
@@ -331,9 +331,9 @@ int GAScripted::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void GAScripted::Pause(bool pause)
+void GAScripted::SetPaused(bool pause)
 {
-    GameActivity::Pause(pause);
+    GameActivity::SetPaused(pause);
 
     // Call the defined function, but only after first checking if it exists
     g_LuaMan.RunScriptString("if " + m_LuaClassName + ".PauseActivity then " + m_LuaClassName + ":PauseActivity(" + (pause ? "true" : "false") + "); end");

@@ -578,14 +578,13 @@ namespace RTE {
 
 	bool UInputMan::AnyPress() {
 		bool pressed = false;
-		// Check keyboard for presses
+
 		for (int testKey = 0; testKey < KEY_MAX; ++testKey) {
 			pressed = s_PrevKeyStates[testKey] && s_ChangedKeyStates[testKey] ? true : pressed;
 		}
-		// Check mouse buttons for presses
 		if (!pressed) { pressed = AnyMouseButtonPress(); }
-		// Check all joysticks
 		if (!pressed) { pressed = AnyJoyPress(); }
+
 		return pressed;
 	}
 
@@ -595,8 +594,7 @@ namespace RTE {
 		bool pressed = false;
 		if (KeyPressed(KEY_ESC) || KeyPressed(KEY_SPACE)) { pressed = true; }
 
-		// Check all user bound start buttons
-		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount && !pressed; ++player) {
+		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount && !pressed; ++player) {
 			pressed = pressed || ElementPressed(player, INPUT_START);
 			pressed = pressed || ElementPressed(player, INPUT_BACK);
 		}
@@ -820,7 +818,6 @@ namespace RTE {
 				return button;
 			}
 		}
-		// No button is held down
 		return JOY_NONE;
 	}
 
@@ -992,48 +989,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::SetNetworkInputElementHeldState(short player, int element, bool state) {
-		if (element >= 0 && element < INPUT_COUNT && player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkInputElementHeld[player][element] = state; }
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void UInputMan::SetNetworkInputElementPressedState(short player, int element, bool state) {
-		if (element >= 0 && element < INPUT_COUNT && player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkInputElementPressed[player][element] = state; }
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void UInputMan::SetNetworkInputElementReleasedState(short player, int element, bool state) {
-		if (element >= 0 && element < INPUT_COUNT && player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkInputElementReleased[player][element] = state; }
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void UInputMan::SetNetworkMouseWheelState(short player, int state) {
-		if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkMouseWheelState[player] = state; }
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void UInputMan::SetNetworkMouseButtonHeldState(short player, int whichButton, bool state) {
-		if (whichButton >= 0 && whichButton < MAX_MOUSE_BUTTONS && player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkMouseButtonHeldState[player][whichButton] = state; }
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void UInputMan::SetNetworkMouseButtonPressedState(short player, int whichButton, bool state) {
-		if (whichButton >= 0 && whichButton < MAX_MOUSE_BUTTONS && player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkMouseButtonPressedState[player][whichButton] = state; }
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void UInputMan::SetNetworkMouseButtonReleasedState(short player, int whichButton, bool state) {
-		if (whichButton >= 0 && whichButton < MAX_MOUSE_BUTTONS && player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkMouseButtonReleasedState[player][whichButton] = state; }
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void UInputMan::ClearAccumulatedStates() {
 		for (int element = 0; element < INPUT_COUNT; element++) {
 			m_NetworkAccumulatedElementPressed[element] = false;
@@ -1088,7 +1043,7 @@ namespace RTE {
 
 			// Check for resets and start button presses on controllers of all active players
 			if (g_ActivityMan.GetActivity()) {
-				for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+				for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 					if (g_ActivityMan.GetActivity()->PlayerActive(player)) {
 						g_ResetActivity = g_ResetActivity || ElementPressed(Players::PlayerOne, INPUT_BACK);
 

@@ -289,7 +289,7 @@ int BaseEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void BaseEditor::Pause(bool pause)
+void BaseEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;

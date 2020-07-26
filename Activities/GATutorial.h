@@ -120,7 +120,7 @@ ClassInfoGetters
 //                  but only for a limited number of teams. If -1, not applicable.
 // Return value:    Whether the Scene has the right stuff.
 
-    virtual bool SceneIsCompatible(Scene *pScene, int teams = -1);
+    virtual bool SceneIsCompatible(Scene *pScene, short teams = -1);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +141,7 @@ ClassInfoGetters
 // Arguments:       Whether to pause the game or not.
 // Return value:    None.
 
-    virtual void Pause(bool pause = true);
+    virtual void SetPaused(bool pause = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -2923,7 +2923,7 @@ void MetagameGUI::CompletedActivity()
             m_PreTurn = true;
         }
         // If a MetaFight activity isn't over yet, that means we're just pausing and will resume
-        else if (pDoneScriptedActivity && pDoneScriptedActivity->GetLuaClassName() == "MetaFight" && !pDoneActivity->ActivityOver())
+        else if (pDoneScriptedActivity && pDoneScriptedActivity->GetLuaClassName() == "MetaFight" && !pDoneActivity->IsOver())
         {
             m_AnimTimer2.Reset();
             m_apMetaButton[CONTINUE]->SetText("Resume");
@@ -2946,7 +2946,7 @@ void MetagameGUI::CompletedActivity()
             // Offensive action session needs some things done after a battle is concluded
             else if (pDoneScriptedActivity && pDoneScriptedActivity->GetLuaClassName() == "MetaFight")
             {
-                if (pDoneActivity->ActivityOver())
+                if (pDoneActivity->IsOver())
                 {
                     // If this ended for whatever reason without a winning team, then resolve the rest of the fight automatically
                     if (pDoneScriptedActivity->GetWinnerTeam() == Activity::NOTEAM)//pDoneActivity->HumanBrainCount() == 0)

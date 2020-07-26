@@ -164,6 +164,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Removed `ActivityMan.PlayerCount` and `ActivityMan.TeamCount` setters lua bindings (obsolete and did nothing).
 
+- Removed `Activity` properties `TeamCount` and `PlayerCount`. These are handled internally and do nothing when set in ini.
+
+- Removed `Activity` property `FundsOfTeam#`, use `Team#Funds` instead.
+
 ***
 
 ## [0.1.0 pre-release 2][0.1.0-pre2] - 2020/05/08

@@ -269,7 +269,7 @@ int SceneEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void SceneEditor::Pause(bool pause)
+void SceneEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;

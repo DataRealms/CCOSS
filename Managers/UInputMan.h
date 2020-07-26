@@ -93,7 +93,7 @@ namespace RTE {
 		short GetInputDevice(short whichPlayer) const { return m_ControlScheme[whichPlayer].GetDevice(); }
 
 		/// <summary>
-		/// Access a specific players' control scheme.
+		/// Access a specific player's control scheme.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to get the scheme for.</param>
 		/// <returns>A pointer to the requested player's control scheme. Ownership is NOT transferred!</returns>
@@ -114,7 +114,7 @@ namespace RTE {
 		const Icon * GetDeviceIcon(int whichDevice) { return (whichDevice < DEVICE_KEYB_ONLY || whichDevice > DEVICE_GAMEPAD_4) ? 0 : m_DeviceIcons[whichDevice]; }
 
 		/// <summary>
-		/// Clears a all mappings for a specific input element of a specific player.
+		/// Clears all mappings for a specific input element of a specific player.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to affect.</param>
 		/// <param name="whichInput">Which input element to clear all mappings of.</param>
@@ -161,33 +161,33 @@ namespace RTE {
 		void SetButtonMapping(short whichPlayer, int whichInput, int whichButton) { m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].SetJoyButton(whichButton); }
 
 		/// <summary>
-		/// Checks for the any key press this frame and creates an input mapping for a specific player accordingly.
+		/// Checks for any key press this frame and creates an input mapping for a specific player accordingly.
 		/// </summary>
-		/// <param name="whichPlayer">Which player to do create a map for.</param>
+		/// <param name="whichPlayer">Which player to create a map for.</param>
 		/// <param name="whichInput">Which input element to map to for that player.</param>
 		/// <returns>Whether there were any key presses this frame and therefore whether a mapping was successfully captured or not.</returns>
 		bool CaptureKeyMapping(short whichPlayer, int whichInput);
 
 		/// <summary>
-		/// Checks for the any button press this frame and creates an input mapping for a specific player accordingly.
+		/// Checks for any button press this frame and creates an input mapping for a specific player accordingly.
 		/// </summary>
-		/// <param name="whichPlayer">Which player to do create a map for.</param>
+		/// <param name="whichPlayer">Which player to create a map for.</param>
 		/// <param name="whichJoy">Which joystick to scan for button presses.</param>
 		/// <param name="whichInput">Which input element to map to for that player.</param>
 		/// <returns>Whether there were any button presses this frame and therefore whether a mapping was successfully captured or not.</returns>
 		bool CaptureButtonMapping(short whichPlayer, int whichJoy, int whichInput);
 
 		/// <summary>
-		/// Checks for the any joystick pad or stick direction press this frame and creates an input mapping for a specific player accordingly.
+		/// Checks for any joystick pad or stick direction press this frame and creates an input mapping for a specific player accordingly.
 		/// </summary>
-		/// <param name="whichPlayer">Which player to do create a map for.</param>
+		/// <param name="whichPlayer">Which player to create a map for.</param>
 		/// <param name="whichJoy">Which joystick to scan for pad and stick direction presses.</param>
 		/// <param name="whichInput">Which input element to map to for that player.</param>
 		/// <returns>Whether there were any direction presses this frame and therefore whether a mapping was successfully captured or not.</returns>
 		bool CaptureDirectionMapping(short whichPlayer, int whichJoy, int whichInput);
 
 		/// <summary>
-		/// Checks for the any button or direction press this frame and creates an input mapping for a specific player accordingly.
+		/// Checks for any button or direction press this frame and creates an input mapping for a specific player accordingly.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to do create a map for.</param>
 		/// <param name="whichJoy">Which joystick to scan for button and stick presses.</param>
@@ -221,24 +221,24 @@ namespace RTE {
 		/// Shows whether a specific input element was held during the last update.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to check for.</param>
-		/// <param name="whichElement">Which element to check for..</param>
-		/// <returns>Element held or not.</returns>
+		/// <param name="whichElement">Which element to check for.</param>
+		/// <returns>Whether the element is held or not.</returns>
 		bool ElementHeld(short whichPlayer, int whichElement);
 
 		/// <summary>
 		/// Shows whether a specific input element was depressed between the last update and the one previous to it.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to check for.</param>
-		/// <param name="whichElement">Which element to check for..</param>
-		/// <returns>Element pressed or not.</returns>
+		/// <param name="whichElement">Which element to check for.</param>
+		/// <returns>Whether the element is pressed or not.</returns>
 		bool ElementPressed(short whichPlayer, int whichElement);
 
 		/// <summary>
 		/// Shows whether a specific input element was released between the last update and the one previous to it.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to check for.</param>
-		/// <param name="whichElement">Which element to check for..</param>
-		/// <returns>Element released or not.</returns>
+		/// <param name="whichElement">Which element to check for.</param>
+		/// <returns>Whether the element is released or not.</returns>
 		bool ElementReleased(short whichPlayer, int whichElement);
 
 		/// <summary>
@@ -251,21 +251,21 @@ namespace RTE {
 		/// Shows whether any generic button with the menu cursor is held down.
 		/// </summary>
 		/// <param name="whichButton">Which generic menu cursor button to check for.</param>
-		/// <returns>Held or not.</returns>
+		/// <returns>Whether the button is held or not.</returns>
 		bool MenuButtonHeld(int whichButton);
 
 		/// <summary>
 		/// Shows whether any generic button with the menu cursor was pressed between previous update and this.
 		/// </summary>
 		/// <param name="whichButton">Which generic menu cursor button to check for.</param>
-		/// <returns>Pressed or not.</returns>
+		/// <returns>Whether the button is pressed or not.</returns>
 		bool MenuButtonPressed(int whichButton);
 
 		/// <summary>
 		/// Shows whether any generic button with the menu cursor was released between previous update and this.
 		/// </summary>
 		/// <param name="whichButton">Which generic menu cursor button to check for.</param>
-		/// <returns>Released or not.</returns>
+		/// <returns>Whether the button is released or not.</returns>
 		bool MenuButtonReleased(int whichButton);
 
 		/// <summary>
@@ -497,7 +497,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
 		/// <param name="whichButton">Which joystick button to check for.</param>
-		/// <returns>Held or not.</returns>
+		/// <returns>Whether the joystick button is held or not.</returns>
 		bool JoyButtonHeld(int whichJoy, int whichButton);
 
 		/// <summary>
@@ -512,7 +512,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
 		/// <param name="whichButton">Which joystick button to check for.</param>
-		/// <returns>Pressed or not.</returns>
+		/// <returns>Whether the joystick button is pressed or not.</returns>
 		bool JoyButtonPressed(int whichJoy, int whichButton);
 
 		/// <summary>
@@ -527,7 +527,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
 		/// <param name="whichButton">Which joystick button to check for.</param>
-		/// <returns>Released or not.</returns>
+		/// <returns>Whether the joystick button is released or not.</returns>
 		bool JoyButtonReleased(int whichJoy, int whichButton);
 
 		/// <summary>
@@ -537,7 +537,7 @@ namespace RTE {
 		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <param name="whichDir">Which direction to check for.</param>
-		/// <returns>Held or not.</returns>
+		/// <returns>Whether the stick axis is held in the specified direction or not.</returns>
 		bool JoyDirectionHeld(int whichJoy, int whichStick, int whichAxis, int whichDir);
 
 		/// <summary>
@@ -547,7 +547,7 @@ namespace RTE {
 		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <param name="whichDir">Which direction to check for.</param>
-		/// <returns>Pressed or not.</returns>
+		/// <returns>Whether the stick axis is pressed or not.</returns>
 		bool JoyDirectionPressed(int whichJoy, int whichStick, int whichAxis, int whichDir);
 
 		/// <summary>
@@ -557,7 +557,7 @@ namespace RTE {
 		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
 		/// <param name="whichDir">Which direction to check for.</param>
-		/// <returns>Released or not.</returns>
+		/// <returns>Whether the stick axis is released or not.</returns>
 		bool JoyDirectionReleased(int whichJoy, int whichStick, int whichAxis, int whichDir);
 
 		/// <summary>
@@ -630,7 +630,9 @@ namespace RTE {
 		/// <param name="player">Which player to set for.</param>
 		/// <param name="element">Which input element to set for.</param>
 		/// <param name="state">The new state of the input element. True or false.</param>
-		void SetNetworkInputElementHeldState(short player, int element, bool state);
+		void SetNetworkInputElementHeldState(short player, int element, bool state) {
+			if (element >= 0 && element < INPUT_COUNT && player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkInputElementHeld[player][element] = state; }
+		}
 
 		/// <summary>
 		/// Sets whether an input element is pressed by a player during network multiplayer.
@@ -638,7 +640,9 @@ namespace RTE {
 		/// <param name="player">Which player to set for.</param>
 		/// <param name="element">Which input element to set for.</param>
 		/// <param name="state">The new state of the input element. True or false.</param>
-		void SetNetworkInputElementPressedState(short player, int element, bool state);
+		void SetNetworkInputElementPressedState(short player, int element, bool state) {
+			if (element >= 0 && element < INPUT_COUNT && player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkInputElementPressed[player][element] = state; }
+		}
 
 		/// <summary>
 		/// Sets whether an input element is released by a player during network multiplayer.
@@ -646,7 +650,9 @@ namespace RTE {
 		/// <param name="player">Which player to set for.</param>
 		/// <param name="element">Which input element to set for.</param>
 		/// <param name="state">The new state of the input element. True or false.</param>
-		void SetNetworkInputElementReleasedState(short player, int element, bool state);
+		void SetNetworkInputElementReleasedState(short player, int element, bool state) {
+			if (element >= 0 && element < INPUT_COUNT && player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkInputElementReleased[player][element] = state; }
+		}
 
 		/// <summary>
 		/// Sets whether a mouse button is held by a player during network multiplayer.
@@ -654,7 +660,9 @@ namespace RTE {
 		/// <param name="player">Which player to set for.</param>
 		/// <param name="whichButton">Which mouse button to set for.</param>
 		/// <param name="state">The new state of the mouse button. True or false.</param>
-		void SetNetworkMouseButtonHeldState(short player, int whichButton, bool state);
+		void SetNetworkMouseButtonHeldState(short player, int whichButton, bool state) {
+			if (whichButton >= 0 && whichButton < MAX_MOUSE_BUTTONS && player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkMouseButtonHeldState[player][whichButton] = state; }
+		}
 
 		/// <summary>
 		/// Sets whether a mouse button is pressed by a player during network multiplayer.
@@ -662,7 +670,9 @@ namespace RTE {
 		/// <param name="player">Which player to set for.</param>
 		/// <param name="whichButton">Which mouse button to set for.</param>
 		/// <param name="state">The new state of the mouse button. True or false.</param>
-		void SetNetworkMouseButtonPressedState(short player, int whichButton, bool state);
+		void SetNetworkMouseButtonPressedState(short player, int whichButton, bool state) {
+			if (whichButton >= 0 && whichButton < MAX_MOUSE_BUTTONS && player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkMouseButtonPressedState[player][whichButton] = state; }
+		}
 
 		/// <summary>
 		/// Sets whether a mouse button is released by a player during network multiplayer.
@@ -670,14 +680,16 @@ namespace RTE {
 		/// <param name="player">Which player to set for.</param>
 		/// <param name="whichButton">Which mouse button to set for.</param>
 		/// <param name="state">The new state of the mouse button. True or false.</param>
-		void SetNetworkMouseButtonReleasedState(short player, int whichButton, bool state);
+		void SetNetworkMouseButtonReleasedState(short player, int whichButton, bool state) {
+			if (whichButton >= 0 && whichButton < MAX_MOUSE_BUTTONS && player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkMouseButtonReleasedState[player][whichButton] = state; }
+		}
 
 		/// <summary>
 		/// Sets the state of the mouse wheel for a player during network multiplayer.
 		/// </summary>
 		/// <param name="player">The player to set for.</param>
 		/// <param name="state">The new state of the mouse wheel.</param>
-		void SetNetworkMouseWheelState(short player, int state);
+		void SetNetworkMouseWheelState(short player, int state) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkMouseWheelState[player] = state; } }
 
 		/// <summary>
 		/// Gets whether the specified input element is pressed during network multiplayer.

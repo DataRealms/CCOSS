@@ -48,21 +48,21 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the number of the device that this scheme is using.
+		/// Gets the InputDevice that this scheme is using.
 		/// </summary>
-		/// <returns>The device number of this scheme. See InputDevice enumeration.</returns>
+		/// <returns>The InputDevice of this scheme. See InputDevice enumeration.</returns>
 		InputDevice GetDevice() const { return static_cast<InputDevice>(m_ActiveDevice); }
 
 		/// <summary>
-		/// Sets the device this scheme is supposed to use.
+		/// Sets the InputDevice this scheme is supposed to use.
 		/// </summary>
-		/// <param name="activeDevice">The number of the device this scheme should use. See InputDevice enumeration.</param>
+		/// <param name="activeDevice">The InputDevice this scheme should use. See InputDevice enumeration.</param>
 		void SetDevice(unsigned short activeDevice = 0) { m_ActiveDevice = activeDevice; }
 
 		/// <summary>
-		/// Gets the number of the last preset that this was set to.
+		/// Gets the InputPreset that this is set to.
 		/// </summary>
-		/// <returns>The last preset number set of this scheme. See InputPreset enumeration.</returns>
+		/// <returns>The InputPreset of this scheme. See InputPreset enumeration.</returns>
 		InputPreset GetPreset() const { return static_cast<InputPreset>(m_SchemePreset); }
 
 		/// <summary>
@@ -90,15 +90,15 @@ namespace RTE {
 		void SetJoystickDeadzone(float deadzoneValue) { m_JoystickDeadzone = deadzoneValue; }
 
 		/// <summary>
-		/// Get the deadzone type for this control scheme.
+		/// Get the DeadZoneType for this control scheme.
 		/// </summary>
-		/// <returns>Joystick dead zone type this scheme is set to use.</returns>
+		/// <returns>The DeadZoneType this scheme is set to use. See DeadZoneType enumeration.</returns>
 		DeadZoneType GetJoystickDeadzoneType() { return static_cast<DeadZoneType>(m_JoystickDeadzoneType); }
 
 		/// <summary>
-		/// Set the deadzone type for this control scheme.
+		/// Set the DeadZoneType for this control scheme.
 		/// </summary>
-		/// <param name="deadzoneType">Joystick dead zone type this scheme should use. See DeadZoneType enumeration.</param>
+		/// <param name="deadzoneType">The DeadZoneType this scheme should use. See DeadZoneType enumeration.</param>
 		void SetJoystickDeadzoneType(int deadzoneType) { m_JoystickDeadzoneType = deadzoneType; }
 #pragma endregion
 

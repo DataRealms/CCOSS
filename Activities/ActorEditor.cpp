@@ -198,7 +198,7 @@ int ActorEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void ActorEditor::Pause(bool pause)
+void ActorEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;

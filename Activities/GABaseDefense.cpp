@@ -265,66 +265,9 @@ int GABaseDefense::Start()
 
     m_SpawnTimer.Reset();
 
-    if (m_Difficulty == TESTDIFFICULTY)
-    {
-//        m_SpawnInterval = 200000;
-//        m_SpawnTimer.SetElapsedSimTimeMS(210000);
-        m_SpawnInterval = 25000;
-    }
-
     return error;
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Pause
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Pauses and unpauses the game.
-
-void GABaseDefense::Pause(bool pause)
-{
-    m_Paused = pause;
-}
-*/
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          End
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Forces the current game's end.
-
-void GABaseDefense::End()
-{
-// TODO: Update these messages to reflect attack budget running out!
-
-    // Show appropriate end game messages
-    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
-    {
-        if (!m_IsActive[player])
-            continue;
-
-        if (m_Team[player] == m_WinnerTeam)
-            g_FrameMan.SetScreenText("Your competition's wetware is mush!", ScreenOfPlayer(player));
-        else
-            g_FrameMan.SetScreenText("Your brain has been destroyed!", ScreenOfPlayer(player));
-
-        m_MsgTimer[player].Reset();
-    }
-
-    GameActivity::End();
-}
-*/
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateEditing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     This is a special update step for when any player is still editing the
-//                  scene.
-
-void GABaseDefense::UpdateEditing()
-{
-    GameActivity::UpdateEditing();
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update

@@ -1793,8 +1793,7 @@ int LuaMan::Create()
                 value("MEDIUMDIFFICULTY", 60),
                 value("HARDDIFFICULTY", 85),
                 value("NUTSDIFFICULTY", 98),
-                value("MAXDIFFICULTY", 100),
-                value("TESTDIFFICULTY", -1)
+                value("MAXDIFFICULTY", 100)
             ]
             .enum_("AISkillSetting")
             [
@@ -1842,9 +1841,9 @@ int LuaMan::Create()
             .def("TeamFundsChanged", &Activity::TeamFundsChanged)
             .def("ReportDeath", &Activity::ReportDeath)
             .def("GetTeamDeathCount", &Activity::GetTeamDeathCount)
-            .def("Running", &Activity::Running)
-            .def("Paused", &Activity::Paused)
-            .def("ActivityOver", &Activity::ActivityOver)
+            .def("Running", &Activity::IsRunning)
+            .def("Paused", &Activity::IsPaused)
+            .def("ActivityOver", &Activity::IsOver)
             .def("EnteredOrbit", &Activity::EnteredOrbit)
             .def("SwitchToActor", &Activity::SwitchToActor)
             .def("SwitchToNextActor", &Activity::SwitchToNextActor)

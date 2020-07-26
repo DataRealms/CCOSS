@@ -87,13 +87,13 @@ namespace RTE {
 		/// Indicates whether the game is currently running or not (not editing, over or paused)
 		/// </summary>
 		/// <returns>Whether the game is running or not.</returns>
-		bool ActivityRunning() const { return m_Activity ? m_Activity->Running() : false; }
+		bool ActivityRunning() const { return m_Activity ? m_Activity->IsRunning() : false; }
 
 		/// <summary>
 		/// Indicates whether the game is currently paused or not.
 		/// </summary>
 		/// <returns>Whether the game is paused or not.</returns>
-		bool ActivityPaused() const { return m_Activity ? m_Activity->Paused() : true; }
+		bool ActivityPaused() const { return m_Activity ? m_Activity->IsPaused() : true; }
 #pragma endregion
 
 #pragma region Concrete Methods

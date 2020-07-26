@@ -245,7 +245,7 @@ int AssemblyEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void AssemblyEditor::Pause(bool pause)
+void AssemblyEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;

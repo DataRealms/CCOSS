@@ -1036,9 +1036,9 @@ int GameActivity::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void GameActivity::Pause(bool pause)
+void GameActivity::SetPaused(bool pause)
 {
-    Activity::Pause(pause);
+    Activity::SetPaused(pause);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1997,7 +1997,7 @@ void GameActivity::Update()
         ///////////////////////////////////////
         // Configure banners to show when important things happen, like the game over or death of brain
 
-        if (ActivityOver())
+        if (IsOver())
         {
             // Override previous messages
             if (m_pBannerRed[player]->IsVisible() && m_pBannerRed[player]->GetBannerText() != "FAIL")

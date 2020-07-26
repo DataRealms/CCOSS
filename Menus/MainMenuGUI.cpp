@@ -541,6 +541,9 @@ int MainMenuGUI::Create(Controller *pController)
 
 	m_PioneerPromoVisible = false;
 
+	// Load the different input device icons. This can't be done during UInputMan::Create() because the icon presets don't exist so we need to do this after modules are loaded.
+	g_UInputMan.LoadDeviceIcons();
+
     return 0;
 }
 

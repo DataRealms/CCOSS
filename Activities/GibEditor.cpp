@@ -268,7 +268,7 @@ int GibEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void GibEditor::Pause(bool pause)
+void GibEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;

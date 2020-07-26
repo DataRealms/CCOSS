@@ -43,7 +43,7 @@ namespace RTE {
 
 		int error = 0;
 
-		// Stop all music, will be started by the Activity right below
+		// Stop all music played by the current activity. It will be re-started by the new Activity. 
 		g_AudioMan.StopMusic();
 
 		delete m_StartActivity;
@@ -63,8 +63,9 @@ namespace RTE {
 			return error;
 		}
 
-		// Make sure the main menu and console exits and we're in the game when the activity starts
+		// Close the console in case it was open by the player or because of a previous Activity error.
 		g_ConsoleMan.SetEnabled(false);
+
 		g_ResumeActivity = true;
 		g_InActivity = true;
 
@@ -87,9 +88,7 @@ namespace RTE {
 
 		if (entity) {
 			Activity *newActivity = dynamic_cast<Activity *>(entity->Clone());
-			if (newActivity) {
-				return StartActivity(newActivity);
-			}
+			return StartActivity(newActivity);
 		} else {
 			g_ConsoleMan.PrintString("ERROR: Couldn't find the " + className + " named " + presetName + " to start! Has it been defined?");
 			return -1;
@@ -100,7 +99,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ActivityMan::PauseActivity(bool pause) {
-		if (!m_Activity || (pause && m_Activity->Paused()) || (!pause && !m_Activity->Paused())) {
+		if (!m_Activity || (pause && m_Activity->IsPaused()) || (!pause && !m_Activity->IsPaused())) {
 			return;
 		}
 
@@ -120,7 +119,7 @@ namespace RTE {
 				}
 			}
 
-			m_Activity->Pause(pause);
+			m_Activity->SetPaused(pause);
 			g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was " + (pause ? "paused" : "resumed"));
 		} else {
 			g_ConsoleMan.PrintString("ERROR: No Activity to pause!");

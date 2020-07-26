@@ -231,7 +231,7 @@ void GATutorial::Destroy(bool notInherited)
 // Description:     Tells if a particular Scene supports this specific Activity on it.
 //                  Usually that means certain Area:s need to be defined in the Scene.
 
-bool GATutorial::SceneIsCompatible(Scene *pScene, int teams)
+bool GATutorial::SceneIsCompatible(Scene *pScene, short teams)
 {
     if (!GameActivity::SceneIsCompatible(pScene, teams))
         return false;
@@ -433,9 +433,9 @@ int GATutorial::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void GATutorial::Pause(bool pause)
+void GATutorial::SetPaused(bool pause)
 {
-    GameActivity::Pause(pause);
+    GameActivity::SetPaused(pause);
 
     // Re-setup the ares with any updated control mappings that the player might have made in teh menu
     if (!pause)
@@ -860,7 +860,7 @@ void GATutorial::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 {
     GameActivity::DrawGUI(pTargetBitmap, targetPos, which);
 
-    if (Running())// && (m_AreaTimer.AlternateReal(500) || m_AreaTimer.AlternateReal(250) || m_AreaTimer.AlternateReal(125)))
+    if (IsRunning())// && (m_AreaTimer.AlternateReal(500) || m_AreaTimer.AlternateReal(250) || m_AreaTimer.AlternateReal(125)))
     {
         AllegroBitmap pBitmapInt(pTargetBitmap);
         Vector screenTextPos = m_ScreenPositions[m_CurrentArea] + m_TextOffsets[m_CurrentArea] - targetPos;

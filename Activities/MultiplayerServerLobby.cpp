@@ -1116,7 +1116,7 @@ namespace RTE {
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Pauses and unpauses the game.
 
-	void MultiplayerServerLobby::Pause(bool pause)
+	void MultiplayerServerLobby::SetPaused(bool pause)
 	{
 		// Override the pause
 		m_Paused = false;

@@ -174,7 +174,7 @@ EntityAllocation(EditorActivity)
 // Arguments:       Whether to pause the game or not.
 // Return value:    None.
 
-    virtual void Pause(bool pause = true);
+    virtual void SetPaused(bool pause = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

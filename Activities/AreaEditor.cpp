@@ -256,7 +256,7 @@ int AreaEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void AreaEditor::Pause(bool pause)
+void AreaEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;

@@ -123,7 +123,7 @@ namespace RTE {
 		/// Gets the current Activity state code. See the ActivityState enumeration for values.
 		/// </summary>
 		/// <returns>The current state of this Activity. See ActivityState enumeration.</returns>
-		ActivityState GetActivityState() const { return static_cast<ActivityState>(m_ActivityState); }
+		ActivityState GetActivityState() const { return m_ActivityState; }
 
 		/// <summary>
 		/// Overrides the current Activity state. Should not be used much, use dedicated state setting functions instead.
@@ -660,7 +660,7 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		int m_ActivityState; //!< Current state of this Activity.	
+		ActivityState m_ActivityState; //!< Current state of this Activity.	
 		bool m_Paused; //!< Whether this Activity is paused or not.
 
 		std::string m_Description; //!< User-friendly description of what this Activity is all about.

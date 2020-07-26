@@ -1945,8 +1945,8 @@ int main(int argc, char *argv[]) {
     if (!g_NetworkServer.IsServerModeEnabled()) {
 		if (g_LaunchIntoEditor) {
 			// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
-			g_UInputMan.GetControlScheme(0)->SetDevice(1);
-			g_UInputMan.GetControlScheme(0)->SetPreset(1);
+			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetDevice(InputDevice::DEVICE_MOUSE_KEYB);
+			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetPreset(InputPreset::PRESET_WASDKEYS);
 			// Start the specified editor activity.
 			EnterEditorActivity(g_EditorToLaunch);
 		} else if (!g_SettingsMan.LaunchIntoActivity()) {

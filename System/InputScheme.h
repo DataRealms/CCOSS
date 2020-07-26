@@ -51,25 +51,25 @@ namespace RTE {
 		/// Gets the InputDevice that this scheme is using.
 		/// </summary>
 		/// <returns>The InputDevice of this scheme. See InputDevice enumeration.</returns>
-		InputDevice GetDevice() const { return static_cast<InputDevice>(m_ActiveDevice); }
+		InputDevice GetDevice() const { return m_ActiveDevice; }
 
 		/// <summary>
 		/// Sets the InputDevice this scheme is supposed to use.
 		/// </summary>
 		/// <param name="activeDevice">The InputDevice this scheme should use. See InputDevice enumeration.</param>
-		void SetDevice(unsigned short activeDevice = 0) { m_ActiveDevice = activeDevice; }
+		void SetDevice(InputDevice activeDevice = InputDevice::DEVICE_KEYB_ONLY) { m_ActiveDevice = activeDevice; }
 
 		/// <summary>
-		/// Gets the InputPreset that this is set to.
+		/// Gets the InputPreset that this scheme is using.
 		/// </summary>
 		/// <returns>The InputPreset of this scheme. See InputPreset enumeration.</returns>
-		InputPreset GetPreset() const { return static_cast<InputPreset>(m_SchemePreset); }
+		InputPreset GetPreset() const { return m_SchemePreset; }
 
 		/// <summary>
 		/// Sets up a specific preset scheme that is sensible and recommended.
 		/// </summary>
 		/// <param name="schemePreset">The preset number to set the scheme to match. See InputPreset enumeration.</param>
-		void SetPreset(short schemePreset = 0);
+		void SetPreset(InputPreset schemePreset = InputPreset::PRESET_NONE);
 
 		/// <summary>
 		/// Gets the InputMappings for this.
@@ -81,7 +81,7 @@ namespace RTE {
 		/// Get the deadzone value for this control scheme.
 		/// </summary>
 		/// <returns>Joystick dead zone from 0.0 to 1.0.</returns>
-		float GetJoystickDeadzone() { return m_JoystickDeadzone; }
+		float GetJoystickDeadzone() const { return m_JoystickDeadzone; }
 
 		/// <summary>
 		/// Set the deadzone value for this control scheme.
@@ -93,13 +93,13 @@ namespace RTE {
 		/// Get the DeadZoneType for this control scheme.
 		/// </summary>
 		/// <returns>The DeadZoneType this scheme is set to use. See DeadZoneType enumeration.</returns>
-		DeadZoneType GetJoystickDeadzoneType() { return static_cast<DeadZoneType>(m_JoystickDeadzoneType); }
+		DeadZoneType GetJoystickDeadzoneType() { return m_JoystickDeadzoneType; }
 
 		/// <summary>
 		/// Set the DeadZoneType for this control scheme.
 		/// </summary>
 		/// <param name="deadzoneType">The DeadZoneType this scheme should use. See DeadZoneType enumeration.</param>
-		void SetJoystickDeadzoneType(int deadzoneType) { m_JoystickDeadzoneType = deadzoneType; }
+		void SetJoystickDeadzoneType(DeadZoneType deadzoneType) { m_JoystickDeadzoneType = deadzoneType; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -121,10 +121,10 @@ namespace RTE {
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
-		unsigned short m_ActiveDevice; //!< The currently active device for this scheme.
-		short m_SchemePreset; //!< The preset this scheme was last set to, if any.
+		InputDevice m_ActiveDevice; //!< The currently active device for this scheme.
+		InputPreset m_SchemePreset; //!< The preset this scheme was last set to, if any.
 
-		unsigned short m_JoystickDeadzoneType; //!< Which deadzone type is used.
+		DeadZoneType m_JoystickDeadzoneType; //!< Which deadzone type is used.
 		float m_JoystickDeadzone; //!< How much of the input to treat as a deadzone input, i.e. one not registered by the game.
 
 		InputMapping m_InputMapping[INPUT_COUNT]; //!< The device input element mappings.

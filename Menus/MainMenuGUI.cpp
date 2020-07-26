@@ -1237,7 +1237,7 @@ void MainMenuGUI::Update()
                                 currentDevice = DEVICE_COUNT - 1;
                         }
                         // Set the device and update labels
-                        g_UInputMan.GetControlScheme(player)->SetDevice(currentDevice);
+                        g_UInputMan.GetControlScheme(player)->SetDevice(static_cast<InputDevice>(currentDevice));
                         UpdateDeviceLabels();
 
                         g_GUISound.ButtonPressSound()->Play();

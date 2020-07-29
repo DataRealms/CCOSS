@@ -221,7 +221,7 @@ namespace RTE {
 			returnSample = (*itr).second;
 		} else {
 			int separatorPos = m_DataPath.rfind('#'); // Used for handling separators between the datafile name and the object name in .dat datafiles. NOTE: Not currently used
-			long fileSize;
+			unsigned long long fileSize;
 			char *rawData = 0;
 
 			if (separatorPos == m_DataPath.length()) {
@@ -231,7 +231,7 @@ namespace RTE {
 				return returnSample;
 			} else if (separatorPos == -1) {
 				// Open the file, allocate space for it, read it and load it in as a Sound object
-				fileSize = file_size(m_DataPath.c_str());
+				fileSize = file_size_ex(m_DataPath.c_str());
 				PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
 
 				if (!pFile || fileSize <= 0) {

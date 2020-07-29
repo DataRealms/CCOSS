@@ -20,7 +20,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ConsoleMan::Clear() {
-		m_ConsoleState = DISABLED;
+		m_ConsoleState = ConsoleState::Disabled;
 		m_ReadOnly = false;
 		m_ConsoleScreenRatio = 0.3F;
 		m_GUIScreen = 0;
@@ -88,11 +88,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ConsoleMan::SetEnabled(bool enable) {
-		if (enable && m_ConsoleState != ENABLED && m_ConsoleState != ENABLING) {
-			m_ConsoleState = ENABLING;
+		if (enable && m_ConsoleState != ConsoleState::Enabled && m_ConsoleState != ConsoleState::Enabling) {
+			m_ConsoleState = ConsoleState::Enabling;
 			g_GUISound.EnterMenuSound()->Play();
-		} else if (!enable && m_ConsoleState != DISABLED && m_ConsoleState != DISABLING) {
-			m_ConsoleState = DISABLING;
+		} else if (!enable && m_ConsoleState != ConsoleState::Disabled && m_ConsoleState != ConsoleState::Disabling) {
+			m_ConsoleState = ConsoleState::Disabling;
 			g_GUISound.ExitMenuSound()->Play();
 		}
 	}
@@ -214,9 +214,9 @@ namespace RTE {
 			}
 		}
 
-		if (m_ConsoleState != ENABLED && m_ConsoleState != DISABLED) { ConsoleOpenClose(); }
+		if (m_ConsoleState != ConsoleState::Enabled && m_ConsoleState != ConsoleState::Disabled) { ConsoleOpenClose(); }
 
-		if (m_ConsoleState != ENABLED) {
+		if (m_ConsoleState != ConsoleState::Enabled) {
 			return;
 		}
 
@@ -262,15 +262,15 @@ namespace RTE {
 	void ConsoleMan::ConsoleOpenClose() {
 		float travelCompletionDistance = 0;
 
-		if (m_ConsoleState == ENABLING) {
+		if (m_ConsoleState == ConsoleState::Enabling) {
 			m_ParentBox->SetEnabled(true);
 			m_ParentBox->SetVisible(true);
 
 			travelCompletionDistance = std::floorf(static_cast<float>(m_ParentBox->GetYPos()) * 0.5F);
 			m_ParentBox->SetPositionAbs(0, m_ParentBox->GetYPos() - static_cast<int>(travelCompletionDistance));
 
-			if (m_ParentBox->GetYPos() >= 0) { m_ConsoleState = ENABLED; }
-		} else if (m_ConsoleState == DISABLING) {
+			if (m_ParentBox->GetYPos() >= 0) { m_ConsoleState = ConsoleState::Enabled; }
+		} else if (m_ConsoleState == ConsoleState::Disabling) {
 			travelCompletionDistance = std::ceilf((static_cast<float>(m_ParentBox->GetHeight()) + static_cast<float>(m_ParentBox->GetYPos())) * 0.5F);
 			m_ParentBox->SetPositionAbs(0, m_ParentBox->GetYPos() - static_cast<int>(travelCompletionDistance));
 
@@ -279,15 +279,15 @@ namespace RTE {
 				m_ParentBox->SetVisible(false);
 				m_InputTextBox->SetEnabled(false);
 				m_GUIControlManager->GetManager()->SetFocus(0);
-				m_ConsoleState = DISABLED;
+				m_ConsoleState = ConsoleState::Disabled;
 			}
 		}
 
 		// If supposed to be enabled or disabled but appears to be the opposite, enable or disable accordingly.
-		if (m_ConsoleState == ENABLED && (m_ParentBox->GetYPos() < 0)) {
-			m_ConsoleState = ENABLING;
-		} else if (m_ConsoleState == DISABLED && (m_ParentBox->GetYPos() > -m_ParentBox->GetHeight())) {
-			m_ConsoleState = DISABLING;
+		if (m_ConsoleState == ConsoleState::Enabled && (m_ParentBox->GetYPos() < 0)) {
+			m_ConsoleState = ConsoleState::Enabling;
+		} else if (m_ConsoleState == ConsoleState::Disabled && (m_ParentBox->GetYPos() > -m_ParentBox->GetHeight())) {
+			m_ConsoleState = ConsoleState::Disabling;
 		}
 	}
 
@@ -366,7 +366,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ConsoleMan::Draw(BITMAP *targetBitmap) {
-		if (m_ConsoleState != DISABLED) {
+		if (m_ConsoleState != ConsoleState::Disabled) {
 			AllegroScreen drawScreen(targetBitmap);
 			m_GUIControlManager->Draw(&drawScreen);
 		}

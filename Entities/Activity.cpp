@@ -17,7 +17,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Activity::Clear() {
-		m_ActivityState = ActivityState::NOTSTARTED;
+		m_ActivityState = ActivityState::NotStarted;
 		m_Paused = false;
 		m_Description.clear();
 		m_SceneName.clear();
@@ -34,8 +34,8 @@ void Activity::Clear() {
 			m_IsActive[player] = player == Players::PlayerOne;
 			m_IsHuman[player] = player == Players::PlayerOne;
 			m_PlayerScreen[player] = player == Players::PlayerOne ? 0 : -1;
-			m_ViewState[player] = ViewState::NORMAL;
-			m_Team[player] = Team::TEAM_1;
+			m_ViewState[player] = ViewState::Normal;
+			m_Team[player] = Teams::TeamOne;
 			m_TeamFundsShare[player] = 1.0F;
 			m_FundsContribution[player] = 0;
 			m_Brain[player] = 0;
@@ -43,16 +43,16 @@ void Activity::Clear() {
 			m_BrainEvacuated[player] = false;
 			m_ControlledActor[player] = 0;
 			m_PlayerController[player].Reset();
-			m_MsgTimer[player].Reset();
+			m_MessageTimer[player].Reset();
 		}
 
-		for (unsigned short team = Team::TEAM_1; team < Team::MAXTEAMCOUNT; ++team) {
+		for (unsigned short team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team) {
 			m_TeamNames[team] = "Team " + std::to_string(team + 1);
 			m_TeamIcons[team].Reset();
 			// Team 1 is active by default, for the editors etc
-			m_TeamActive[team] = team == Team::TEAM_1;
+			m_TeamActive[team] = team == Teams::TeamOne;
 			m_TeamDeaths[team] = 0;
-			m_TeamAISkillLevels[team] = AISkillSetting::DEFAULTSKILL;
+			m_TeamAISkillLevels[team] = AISkillSetting::DefaultSkill;
 			m_TeamFunds[team] = 2000;
 			m_FundsChanged[team] = false;
 		}
@@ -104,7 +104,7 @@ void Activity::Clear() {
 			m_PlayerController[player] = reference.m_PlayerController[player];
 		}
 
-		for (unsigned short team = Team::TEAM_1; team < Team::MAXTEAMCOUNT; ++team) {
+		for (unsigned short team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team) {
 			m_TeamActive[team] = reference.m_TeamActive[team];
 			m_TeamFunds[team] = reference.m_TeamFunds[team];
 			m_FundsChanged[team] = reference.m_FundsChanged[team];
@@ -135,12 +135,12 @@ void Activity::Clear() {
 		} else if (propName == "InCampaignStage") {
 			reader >> m_InCampaignStage;
 		} else if (propName == "TeamOfPlayer1" || propName == "TeamOfPlayer2" || propName == "TeamOfPlayer3" || propName == "TeamOfPlayer4") {
-			for (unsigned short playerTeam = Team::TEAM_1; playerTeam < Team::MAXTEAMCOUNT; playerTeam++) {
+			for (unsigned short playerTeam = Teams::TeamOne; playerTeam < Teams::MaxTeamCount; playerTeam++) {
 				std::string playerTeamNum = std::to_string(playerTeam + 1);
 				if (propName == "TeamOfPlayer" + playerTeamNum) {
 					unsigned short team;
 					reader >> team;
-					if (team >= Team::TEAM_1 && team < Team::MAXTEAMCOUNT) {
+					if (team >= Teams::TeamOne && team < Teams::MaxTeamCount) {
 						m_Team[playerTeam] = team;
 						m_IsActive[playerTeam] = true;
 						if (!m_TeamActive[team]) { m_TeamCount++; }
@@ -160,7 +160,7 @@ void Activity::Clear() {
 				}
 			}
 		} else if (propName == "Team1Name" || propName == "Team2Name" || propName == "Team3Name" || propName == "Team4Name") {
-			for (unsigned short team = Team::TEAM_1; team < Team::MAXTEAMCOUNT; team++) {
+			for (unsigned short team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
 				std::string teamNum = std::to_string(team + 1);
 				if (propName == "Team" + teamNum + "Name") {
 					reader >> m_TeamNames[team];
@@ -170,7 +170,7 @@ void Activity::Clear() {
 				}
 			}
 		} else if (propName == "Team1Icon" || propName == "Team2Icon" || propName == "Team3Icon" || propName == "Team4Icon") {
-			for (unsigned short team = Team::TEAM_1; team < Team::MAXTEAMCOUNT; team++) {
+			for (unsigned short team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
 				std::string teamNum = std::to_string(team + 1);
 				if (propName == "Team" + teamNum + "Icon") {
 					reader >> m_TeamIcons[team];
@@ -178,7 +178,7 @@ void Activity::Clear() {
 				}
 			}
 		} else if (propName == "Team1Funds" || propName == "Team2Funds" || propName == "Team3Funds" || propName == "Team4Funds") {
-			for (unsigned short team = Team::TEAM_1; team < Team::MAXTEAMCOUNT; team++) {
+			for (unsigned short team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
 				std::string teamNum = std::to_string(team + 1);
 				if (propName == "Team" + teamNum + "Funds") {
 					reader >> m_TeamFunds[team];
@@ -240,11 +240,11 @@ void Activity::Clear() {
 				writer << m_IsHuman[player];
 			} else {
 				writer.NewProperty("TeamOfPlayer" + playerNum);
-				writer << Team::NOTEAM;
+				writer << Teams::NoTeam;
 			}
 		}
 
-		for (unsigned short team = Team::TEAM_1; team < Team::MAXTEAMCOUNT; team++) {
+		for (unsigned short team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
 			std::string teamNum = std::to_string(team);
 			if (m_TeamActive[team]) {
 				writer.NewProperty("Team" + teamNum + "Funds");
@@ -262,7 +262,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Activity::Start() {
-		m_ActivityState = ActivityState::RUNNING;
+		m_ActivityState = ActivityState::Running;
 		m_Paused = false;
 
 		// Reset the mouse moving so that it won't trap the mouse if the window isn't in focus (common after loading)
@@ -277,7 +277,7 @@ void Activity::Clear() {
 			return error;
 		}
 
-		for (int team = Team::TEAM_1; team < Team::MAXTEAMCOUNT; ++team) {
+		for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team) {
 			if (!m_TeamActive[team]) {
 				continue;
 			}
@@ -287,7 +287,7 @@ void Activity::Clear() {
 
 		// Intentionally doing all players, all need controllers
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			m_ViewState[player] = ViewState::NORMAL;
+			m_ViewState[player] = ViewState::Normal;
 			g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
 			g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
 
@@ -295,7 +295,7 @@ void Activity::Clear() {
 			m_PlayerController[player].Create(Controller::CIM_PLAYER, player);
 			m_PlayerController[player].SetTeam(m_Team[player]);
 
-			m_MsgTimer[player].Reset();
+			m_MessageTimer[player].Reset();
 		}
 
 		return 0;
@@ -306,9 +306,9 @@ void Activity::Clear() {
 	void Activity::End() {
 		// Actor control is automatically disabled when players are set to observation mode, so no need to do anything directly.
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			m_ViewState[player] = ViewState::OBSERVE;
+			m_ViewState[player] = ViewState::Observe;
 		}
-		m_ActivityState = ActivityState::OVER;
+		m_ActivityState = ActivityState::Over;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -317,7 +317,7 @@ void Activity::Clear() {
 		m_TeamCount = 0;
 		m_PlayerCount = 0;
 
-		for (int team = Team::TEAM_1; team < Team::MAXTEAMCOUNT; ++team) {
+		for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team) {
 			m_TeamActive[team] = false;
 		}
 
@@ -368,7 +368,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	short Activity::AddPlayer(short playerToAdd, bool isHuman, short team, int funds, const Icon *teamIcon) {
-		if (playerToAdd < Players::PlayerOne || playerToAdd >= Players::MaxPlayerCount || team < Team::TEAM_1 || team >= Team::MAXTEAMCOUNT) {
+		if (playerToAdd < Players::PlayerOne || playerToAdd >= Players::MaxPlayerCount || team < Teams::TeamOne || team >= Teams::MaxTeamCount) {
 			return m_PlayerCount;
 		}
 
@@ -415,7 +415,7 @@ void Activity::Clear() {
 			}
 		}
 
-		for (int team = Team::TEAM_1; team < Team::MAXTEAMCOUNT; ++team) {
+		for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team) {
 			m_TeamActive[team] = false;
 			if (resetFunds) { m_TeamFunds[team] = 0; }
 		}
@@ -436,7 +436,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Activity::SetTeamOfPlayer(short player, short team) {
-		if (team < Team::TEAM_1 || team >= Team::MAXTEAMCOUNT || player < Players::PlayerOne || player >= Players::MaxPlayerCount) {
+		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount || player < Players::PlayerOne || player >= Players::MaxPlayerCount) {
 			return;
 		}
 
@@ -459,8 +459,8 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string Activity::GetTeamName(unsigned short whichTeam) const {
-		if (whichTeam >= Team::TEAM_1 && whichTeam < Team::MAXTEAMCOUNT) {
 			return (whichTeam >= TEAM_1 && whichTeam < MAXTEAMCOUNT && m_TeamActive[whichTeam]) ? m_TeamNames[whichTeam] : "Inactive Team";
+		if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) {
 		} else {
 			return "";
 		}
@@ -493,7 +493,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Activity::ChangeTeamFunds(float howMuch, unsigned short whichTeam) {
-		if (whichTeam >= Team::TEAM_1 && whichTeam < Team::MAXTEAMCOUNT) {
+		if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) {
 			m_TeamFunds[whichTeam] += howMuch;
 			m_FundsChanged[whichTeam] = true;
 			if (IsPlayerTeam(whichTeam)) { g_GUISound.FundsChangedSound()->Play(); }
@@ -503,7 +503,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Activity::TeamFundsChanged(unsigned short whichTeam) {
-		if (whichTeam >= Team::TEAM_1 && whichTeam < Team::MAXTEAMCOUNT) {
+		if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) {
 			bool changed = m_FundsChanged[whichTeam];
 			m_FundsChanged[whichTeam] = false;
 			return changed;
@@ -639,15 +639,15 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string Activity::GetDifficultyString(int difficulty) {
-		if (difficulty < DifficultySetting::CAKEDIFFICULTY) {
+		if (difficulty < DifficultySetting::CakeDifficulty) {
 			return "Cake";
-		} else if (difficulty < DifficultySetting::EASYDIFFICULTY) {
+		} else if (difficulty < DifficultySetting::EasyDifficulty) {
 			return "Easy";
-		} else if (difficulty < DifficultySetting::MEDIUMDIFFICULTY) {
+		} else if (difficulty < DifficultySetting::MediumDifficulty) {
 			return "Medium";
-		} else if (difficulty < DifficultySetting::HARDDIFFICULTY) {
+		} else if (difficulty < DifficultySetting::HardDifficulty) {
 			return "Hard";
-		} else if (difficulty < DifficultySetting::NUTSDIFFICULTY) {
+		} else if (difficulty < DifficultySetting::NutsDifficulty) {
 			return "Nuts";
 		} else {
 			return "Nuts!";
@@ -658,15 +658,15 @@ void Activity::Clear() {
 
 	void Activity::SetDifficulty(int difficulty) {
 		// Translate specific enums to be within their ranges, and not just at the limits
-		if (difficulty == DifficultySetting::CAKEDIFFICULTY) {
+		if (difficulty == DifficultySetting::CakeDifficulty) {
 			m_Difficulty = 10;
-		} else if (difficulty == DifficultySetting::EASYDIFFICULTY) {
+		} else if (difficulty == DifficultySetting::EasyDifficulty) {
 			m_Difficulty = 30;
-		} else if (difficulty == DifficultySetting::MEDIUMDIFFICULTY) {
+		} else if (difficulty == DifficultySetting::MediumDifficulty) {
 			m_Difficulty = 50;
-		} else if (difficulty == DifficultySetting::HARDDIFFICULTY) {
+		} else if (difficulty == DifficultySetting::HardDifficulty) {
 			m_Difficulty = 70;
-		} else if (difficulty == DifficultySetting::NUTSDIFFICULTY) {
+		} else if (difficulty == DifficultySetting::NutsDifficulty) {
 			m_Difficulty = 95;
 		} else {
 			m_Difficulty = difficulty;
@@ -676,11 +676,11 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string Activity::GetAISkillString(int skill) {
-		if (skill < AISkillSetting::INFERIORSKILL) {
+		if (skill < AISkillSetting::InferiorSkill) {
 			return "Inferior";
-		} else if (skill < AISkillSetting::AVERAGESKILL) {
+		} else if (skill < AISkillSetting::AverageSkill) {
 			return "Average";
-		} else if (skill < AISkillSetting::GOODSKILL) {
+		} else if (skill < AISkillSetting::GoodSkill) {
 			return "Good";
 		} else {
 			return "Unfair";
@@ -690,32 +690,32 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Activity::GetTeamAISkill(int team) const {
-		if (team >= Team::TEAM_1 && team < Team::MAXTEAMCOUNT) {
+		if (team >= Teams::TeamOne && team < Teams::MaxTeamCount) {
 			return m_TeamAISkillLevels[team];
 		} else {
 			int avgskill = 0;
 			int count = 0;
 
-			for (short playerTeam = Team::TEAM_1; playerTeam < Team::MAXTEAMCOUNT; playerTeam++) {
+			for (short playerTeam = Teams::TeamOne; playerTeam < Teams::MaxTeamCount; playerTeam++) {
 				if (TeamActive(playerTeam)) {
 					avgskill += GetTeamAISkill(playerTeam);
 					count++;
 				}
 			}
-			return (count > 0) ? avgskill / count : AISkillSetting::DEFAULTSKILL;
+			return (count > 0) ? avgskill / count : AISkillSetting::DefaultSkill;
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Activity::SetTeamAISkill(int team, int skill) {
-		if (team < Team::TEAM_1 || team >= Team::MAXTEAMCOUNT) {
+		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount) {
 			return;
 		}
 
-		Limit(skill, AISkillSetting::UNFAIRSKILL, 1);
+		Limit(skill, AISkillSetting::UnfairSkill, 1);
 
-		if (team >= Team::TEAM_1 && team < Team::MAXTEAMCOUNT) { m_TeamAISkillLevels[team] = skill; }
+		if (team >= Teams::TeamOne && team < Teams::MaxTeamCount) { m_TeamAISkillLevels[team] = skill; }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -766,7 +766,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Activity::SwitchToActor(Actor *actor, short player, short team) {
-		if (team < Team::TEAM_1 || team >= Team::MAXTEAMCOUNT || player < Players::PlayerOne || player >= Players::MaxPlayerCount) {
+		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount || player < Players::PlayerOne || player >= Players::MaxPlayerCount) {
 			return false;
 		}
 		if (!actor || !g_MovableMan.IsActor(actor)) {
@@ -808,7 +808,7 @@ void Activity::Clear() {
 			ReassignSquadLeader(player, team);
 		}
 		// Follow the new guy normally
-		m_ViewState[player] = NORMAL;
+		m_ViewState[player] = Normal;
 
 		return true;
 	}
@@ -816,7 +816,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Activity::SwitchToNextActor(short player, short team, Actor *skip) {
-		if (team < Team::TEAM_1 || team >= Team::MAXTEAMCOUNT || player < Players::PlayerOne || player >= Players::MaxPlayerCount) {
+		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount || player < Players::PlayerOne || player >= Players::MaxPlayerCount) {
 			return;
 		}
 
@@ -871,7 +871,7 @@ void Activity::Clear() {
 			if (prevActor && Vector(prevActor->GetPos() - m_ControlledActor[player]->GetPos()).GetMagnitude() > g_FrameMan.GetResX() / 2) { g_GUISound.CameraTravelSound()->Play(); }
 
 			// Follow the new guy normally
-			m_ViewState[player] = NORMAL;
+			m_ViewState[player] = Normal;
 
 			ReassignSquadLeader(player, team);
 		}
@@ -880,7 +880,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Activity::SwitchToPrevActor(short player, short team, Actor *skip) {
-		if (team < Team::TEAM_1 || team >= Team::MAXTEAMCOUNT || player < Players::PlayerOne || player >= Players::MaxPlayerCount) {
+		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount || player < Players::PlayerOne || player >= Players::MaxPlayerCount) {
 			return;
 		}
 		Actor *prevActor = 0;
@@ -935,7 +935,7 @@ void Activity::Clear() {
 		}
 
 		// Follow the new guy normally
-		m_ViewState[player] = NORMAL;
+		m_ViewState[player] = Normal;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -980,7 +980,7 @@ void Activity::Clear() {
 				if (m_Team[player] == team) {
 					g_FrameMan.ClearScreenText(ScreenOfPlayer(ScreenOfPlayer(player)));
 					g_FrameMan.SetScreenText(str, ScreenOfPlayer(player), 0, 3500);
-					m_MsgTimer[player].Reset();
+					m_MessageTimer[player].Reset();
 				}
 			}
 		}
@@ -997,7 +997,7 @@ void Activity::Clear() {
 
 	void Activity::Update() {
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			if (m_MsgTimer[player].IsPastSimMS(5000)) { g_FrameMan.ClearScreenText(ScreenOfPlayer(player)); }
+			if (m_MessageTimer[player].IsPastSimMS(5000)) { g_FrameMan.ClearScreenText(ScreenOfPlayer(player)); }
 			if (m_IsActive[player]) { m_PlayerController[player].Update(); }
 		}
 	}

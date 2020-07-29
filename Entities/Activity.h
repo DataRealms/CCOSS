@@ -23,66 +23,66 @@ namespace RTE {
 		/// Enumeration for the different states the Activity can be in.
 		/// </summary>
 		enum ActivityState {
-			NOACTIVITY = -1,
-			NOTSTARTED = 0,
-			STARTING,
-			EDITING,
-			PREGAME,
-			RUNNING,
-			INERROR,
-			OVER
+			NoActivity = -1,
+			NotStarted = 0,
+			Starting,
+			Editing,
+			PreGame,
+			Running,
+			HasError,
+			Over
 		};
 
 		/// <summary>
 		/// Enumeration for the different teams in an activity.
 		/// </summary>
-		enum Team {
-			NOTEAM = -1,
-			TEAM_1 = 0,
-			TEAM_2,
-			TEAM_3,
-			TEAM_4,
-			MAXTEAMCOUNT
+		enum Teams {
+			NoTeam = -1,
+			TeamOne = 0,
+			TeamTwo,
+			TeamThree,
+			TeamFour,
+			MaxTeamCount
 		};
 
 		/// <summary>
 		/// Enumeration for the different observations states (camera viewpoint).
 		/// </summary>
 		enum ViewState {
-			NORMAL = 0,
-			OBSERVE,
-			DEATHWATCH,
-			ACTORSELECT,
-			AISENTRYPOINT,
-			AIPATROLPOINTS,
-			AIGOLDDIGPOINT,
-			AIGOTOPOINT,
-			LZSELECT,
-			UNITSELECTCIRCLE,
+			Normal = 0,
+			Observe,
+			DeathWatch,
+			ActorSelect,
+			AISentryPoint,
+			AIPatrolPoints,
+			AIGoldDigPoint,
+			AIGoToPoint,
+			LandingZoneSelect,
+			UnitSelectCircle,
 		};
 
 		/// <summary>
 		/// Enumeration for the different difficulty settings.
 		/// </summary>
 		enum DifficultySetting {
-			MINDIFFICULTY = 0,
-			CAKEDIFFICULTY = 15,
-			EASYDIFFICULTY = 40,
-			MEDIUMDIFFICULTY = 60,
-			HARDDIFFICULTY = 85,
-			NUTSDIFFICULTY = 98,
-			MAXDIFFICULTY = 100,
+			MinDifficulty = 0,
+			CakeDifficulty = 15,
+			EasyDifficulty = 40,
+			MediumDifficulty = 60,
+			HardDifficulty = 85,
+			NutsDifficulty = 98,
+			MaxDifficulty = 100,
 		};
 
 		/// <summary>
 		/// Enumeration for the different AI skill settings.
 		/// </summary>
 		enum AISkillSetting {
-			INFERIORSKILL = 35,
-			AVERAGESKILL = 70,
-			GOODSKILL = 99,
-			UNFAIRSKILL = 100,
-			DEFAULTSKILL = 50
+			InferiorSkill = 35,
+			DefaultSkill = 50,
+			AverageSkill = 70,
+			GoodSkill = 99,
+			UnfairSkill = 100
 		};
 
 #pragma region Creation
@@ -135,7 +135,7 @@ namespace RTE {
 		/// Indicates whether the Activity is currently running or not (not editing, over or paused)
 		/// </summary>
 		/// <returns>Whether the Activity is running or not.</returns>
-		bool IsRunning() const { return (m_ActivityState == ActivityState::RUNNING || m_ActivityState == ActivityState::EDITING) && !m_Paused; }
+		bool IsRunning() const { return (m_ActivityState == ActivityState::Running || m_ActivityState == ActivityState::Editing) && !m_Paused; }
 
 		/// <summary>
 		/// Indicates whether the Activity is currently paused or not.
@@ -153,7 +153,7 @@ namespace RTE {
 		/// Indicates whether the Activity is over or not.
 		/// </summary>
 		/// <returns>Whether the Activity is over or not.</returns>
-		bool IsOver() const { return m_ActivityState == ActivityState::OVER; }
+		bool IsOver() const { return m_ActivityState == ActivityState::Over; }
 
 		/// <summary>
 		/// Gets the user-friendly description of this Activity.
@@ -336,13 +336,13 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichViewState">The state to set to.</param>
 		/// <param name="whichPlayer">Which player to set the view state for.</param>
-		void SetViewState(int whichViewState, short whichPlayer = 0) { m_ViewState[whichPlayer] = whichViewState; }
+		void SetViewState(ViewState whichViewState, Players whichPlayer = Players::PlayerOne) { m_ViewState[whichPlayer] = whichViewState; }
 
 		/// <summary>
 		/// Resets the message timer for one player.
 		/// </summary>
 		/// <param name="player">The player to reset the message timer for.</param>
-		void ResetMessageTimer(int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_MsgTimer[player].Reset(); } }
+		void ResetMessageTimer(int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_MessageTimer[player].Reset(); } }
 #pragma endregion
 
 #pragma region Team Handling
@@ -364,28 +364,28 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichTeam">Which team to set the name of. 0 = first team.</param>
 		/// <param name="newName">The name to set it to.</param>
-		void SetTeamName(unsigned short whichTeam, const std::string &newName) { if (whichTeam >= Team::TEAM_1 && whichTeam < Team::MAXTEAMCOUNT) { m_TeamNames[whichTeam] = newName; } }
+		void SetTeamName(unsigned short whichTeam, const std::string &newName) { if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) { m_TeamNames[whichTeam] = newName; } }
 
 		/// <summary>
 		/// Gets the Icon of a specific team.
 		/// </summary>
 		/// <param name="whichTeam">Which team to get the Icon of. 0 = first team.</param>
 		/// <returns>The current Icon of that team.</returns>
-		const Icon * GetTeamIcon(unsigned short whichTeam = 0) const { return (whichTeam >= Team::TEAM_1 && whichTeam < Team::MAXTEAMCOUNT) ? &m_TeamIcons[whichTeam] : 0; }
+		const Icon * GetTeamIcon(unsigned short whichTeam = 0) const { return (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) ? &m_TeamIcons[whichTeam] : 0; }
 
 		/// <summary>
 		/// Sets the Icon of a specific team.
 		/// </summary>
 		/// <param name="whichTeam">Which team to set the Icon of. 0 = first team.</param>
 		/// <param name="newIcon">The Icon to set it to.</param>
-		void SetTeamIcon(unsigned short whichTeam, const Icon &newIcon) { if (whichTeam >= Team::TEAM_1 && whichTeam < Team::MAXTEAMCOUNT) { m_TeamIcons[whichTeam] = newIcon; } }
+		void SetTeamIcon(unsigned short whichTeam, const Icon &newIcon) { if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) { m_TeamIcons[whichTeam] = newIcon; } }
 
 		/// <summary>
 		/// Indicates whether a specific team is active in the current game.
 		/// </summary>
 		/// <param name="team">Which team index to check.</param>
 		/// <returns>Whether the team is active in the current Activity.</returns>
-		bool TeamActive(short team) const { return (team >= Team::TEAM_1 && team < Team::MAXTEAMCOUNT) ? m_TeamActive[team] : false; }
+		bool TeamActive(short team) const { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamActive[team] : false; }
 
 		/// <summary>
 		/// Indicates whether a team is player controlled or not.
@@ -406,7 +406,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichTeam">Which team to get the death tally of. 0 = first team.</param>
 		/// <returns>The current death count.</returns>
-		int GetTeamDeathCount(unsigned short whichTeam = 0) const { return (whichTeam >= Team::TEAM_1 && whichTeam < Team::MAXTEAMCOUNT) ? m_TeamDeaths[whichTeam] : 0; }
+		int GetTeamDeathCount(unsigned short whichTeam = 0) const { return (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) ? m_TeamDeaths[whichTeam] : 0; }
 
 		/// <summary>
 		/// Increments the tally of a death of an actor on a specific team.
@@ -414,7 +414,7 @@ namespace RTE {
 		/// <param name="whichTeam">Which team to increase the death count of. 0 = first team.</param>
 		/// <param name="howMany">The new death count.</param>
 		/// <returns>The updated death count of the team.</returns>
-		int ReportDeath(unsigned short whichTeam = 0, int howMany = 1) { return (whichTeam >= Team::TEAM_1 && whichTeam < Team::MAXTEAMCOUNT) ? m_TeamDeaths[whichTeam] += howMany : 0; }
+		int ReportDeath(unsigned short whichTeam = 0, int howMany = 1) { return (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) ? m_TeamDeaths[whichTeam] += howMany : 0; }
 #pragma endregion
 
 #pragma region Funds Handling
@@ -423,14 +423,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichTeam">Which team to get the fund count from. 0 = first team.</param>
 		/// <returns>A float with the funds tally for the requested team.</returns>
-		float GetTeamFunds(unsigned short whichTeam = 0) const { return (whichTeam >= Team::TEAM_1 && whichTeam < Team::MAXTEAMCOUNT) ? m_TeamFunds[whichTeam] : 0; }
+		float GetTeamFunds(unsigned short whichTeam = 0) const { return (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) ? m_TeamFunds[whichTeam] : 0; }
 
 		/// <summary>
 		/// Sets the amount of funds a specific team currently has in the Activity.
 		/// </summary>
 		/// <param name="newFunds">Which team to set the fund count for. 0 = first team.</param>
 		/// <param name="which">A float with the funds tally for the requested team.</param>
-		void SetTeamFunds(float newFunds, unsigned short whichTeam = 0) { if (whichTeam >= Team::TEAM_1 && whichTeam < Team::MAXTEAMCOUNT) { m_TeamFunds[whichTeam] = newFunds; } }
+		void SetTeamFunds(float newFunds, unsigned short whichTeam = 0) { if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) { m_TeamFunds[whichTeam] = newFunds; } }
 
 		/// <summary>
 		/// Changes a team's funds level by a certain amount.
@@ -678,20 +678,20 @@ namespace RTE {
 		bool m_IsHuman[Players::MaxPlayerCount]; //!< Whether a specific player is Human or not, and needs a screen etc.
 
 		int m_PlayerScreen[Players::MaxPlayerCount]; //!< The screen index of each player - only applicable to human players. -1 if AI or other.
-		int m_ViewState[Players::MaxPlayerCount]; //!< What to be viewing for each player.
+		ViewState m_ViewState[Players::MaxPlayerCount]; //!< What to be viewing for each player.
 
-		std::string m_TeamNames[MAXTEAMCOUNT]; //!< Names for each team.
-		Icon m_TeamIcons[MAXTEAMCOUNT]; //!< Icons for each team.
+		std::string m_TeamNames[Teams::MaxTeamCount]; //!< Names for each team.
+		Icon m_TeamIcons[Teams::MaxTeamCount]; //!< Icons for each team.
 
 		short m_TeamCount; //!< The number of teams in the current Activity.
-		bool m_TeamActive[MAXTEAMCOUNT]; //!< Whether a specific team is active or not in this Activity.
-		int m_Team[Players::MaxPlayerCount]; //!< The designated team of each player.	
-		int m_TeamDeaths[MAXTEAMCOUNT]; //!< The count of how many actors have died on this team.
-		int m_TeamAISkillLevels[MAXTEAMCOUNT]; //!< AI skill levels for teams.
+		bool m_TeamActive[Teams::MaxTeamCount]; //!< Whether a specific team is active or not in this Activity.
+		short m_Team[Players::MaxPlayerCount]; //!< The designated team of each player.	
+		int m_TeamDeaths[Teams::MaxTeamCount]; //!< The count of how many actors have died on this team.
+		unsigned short m_TeamAISkillLevels[Teams::MaxTeamCount]; //!< AI skill levels for teams.
 
-		float m_TeamFunds[MAXTEAMCOUNT]; //!< Gold counter for each team.
+		float m_TeamFunds[Teams::MaxTeamCount]; //!< Gold counter for each team.
 		float m_TeamFundsShare[Players::MaxPlayerCount]; //!< The ratio of how much this player contributed to his team's funds at the start of the Activity.
-		bool m_FundsChanged[MAXTEAMCOUNT]; //!< Whether the team funds have changed during the current frame.
+		bool m_FundsChanged[Teams::MaxTeamCount]; //!< Whether the team funds have changed during the current frame.
 		float m_FundsContribution[Players::MaxPlayerCount]; //!< How much this player contributed to his team's funds at the start of the Activity.
 
 		Actor *m_Brain[Players::MaxPlayerCount]; //!< The Brain of each player. Not owned!
@@ -701,7 +701,7 @@ namespace RTE {
 		Actor *m_ControlledActor[Players::MaxPlayerCount]; //!< Currently controlled actor, not owned.
 		Controller m_PlayerController[Players::MaxPlayerCount]; //!< The Controllers of all the players for the GUIs.
 
-		Timer m_MsgTimer[Players::MaxPlayerCount]; //!< Message timer for each player.
+		Timer m_MessageTimer[Players::MaxPlayerCount]; //!< Message timer for each player.
 
 	private:
 

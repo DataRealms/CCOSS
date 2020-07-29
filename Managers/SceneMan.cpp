@@ -96,7 +96,7 @@ void SceneMan::Clear()
         m_Offset[i].Reset();
         m_DeltaOffset[i].Reset();
         m_ScrollTarget[i].Reset();
-        m_ScreenTeam[i] = Activity::NOTEAM;
+        m_ScreenTeam[i] = Activity::NoTeam;
         m_ScrollSpeed[i] = 0.1;
         m_ScrollTimer[i].Reset();
         m_ScreenOcclusion[i].Reset();
@@ -202,7 +202,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
 
     // Set the proper scales of the unseen obscuring SceneLayers
     SceneLayer *pUnseenLayer = 0;
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
     {
         if (!g_ActivityMan.GetActivity()->TeamActive(team))
             continue;
@@ -1380,7 +1380,7 @@ bool SceneMan::TryPenetrate(const int posX,
 void SceneMan::MakeAllUnseen(Vector pixelSize, const int team)
 {
     RTEAssert(m_pCurrentScene, "Messing with scene before the scene exists!");
-	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
+	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return;
 
     m_pCurrentScene->FillUnseenLayer(pixelSize, team);
@@ -1441,7 +1441,7 @@ bool SceneMan::AnythingUnseen(const int team)
 Vector SceneMan::GetUnseenResolution(const int team) const
 {
     RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
-	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
+	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return Vector(1, 1);
 
     SceneLayer *pUnseenLayer = m_pCurrentScene->GetUnseenLayer(team);
@@ -1460,7 +1460,7 @@ Vector SceneMan::GetUnseenResolution(const int team) const
 bool SceneMan::IsUnseen(const int posX, const int posY, const int team)
 {
     RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
-	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
+	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return false;
 
     SceneLayer *pUnseenLayer = m_pCurrentScene->GetUnseenLayer(team);
@@ -1485,7 +1485,7 @@ bool SceneMan::IsUnseen(const int posX, const int posY, const int team)
 bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
 {
     RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
-	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
+	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return false;
 
     SceneLayer *pUnseenLayer = m_pCurrentScene->GetUnseenLayer(team);
@@ -1524,7 +1524,7 @@ bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
 bool SceneMan::RestoreUnseen(const int posX, const int posY, const int team)
 {
     RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
-	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
+	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return false;
 
     SceneLayer *pUnseenLayer = m_pCurrentScene->GetUnseenLayer(team);
@@ -1563,7 +1563,7 @@ bool SceneMan::RestoreUnseen(const int posX, const int posY, const int team)
 void SceneMan::RevealUnseenBox(const int posX, const int posY, const int width, const int height, const int team)
 {
     RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
-	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
+	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return;
 
     SceneLayer *pUnseenLayer = m_pCurrentScene->GetUnseenLayer(team);
@@ -1590,7 +1590,7 @@ void SceneMan::RevealUnseenBox(const int posX, const int posY, const int width, 
 void SceneMan::RestoreUnseenBox(const int posX, const int posY, const int width, const int height, const int team)
 {
     RTEAssert(m_pCurrentScene, "Checking scene before the scene exists!");
-	if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT) 
+	if (team < Activity::TeamOne || team >= Activity::MaxTeamCount) 
 		return;
 
     SceneLayer *pUnseenLayer = m_pCurrentScene->GetUnseenLayer(team);
@@ -2540,7 +2540,7 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
             if (hitMOID != g_NoMOID && hitMOID != ignoreMOID && g_MovableMan.GetRootMOID(hitMOID) != ignoreMOID)
             {
                 // Check if we're supposed to ignore the team of what we hit
-                if (ignoreTeam != Activity::NOTEAM)
+                if (ignoreTeam != Activity::NoTeam)
                 {
                     const MovableObject *pHitMO = g_MovableMan.GetMOFromID(hitMOID);
                     pHitMO = pHitMO ? pHitMO->GetRootParent() : 0;
@@ -2811,7 +2811,7 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
                 {
                     checkMOID = pHitMO->GetRootID();
                     // Check if we're supposed to ignore the team of what we hit
-                    if (ignoreTeam != Activity::NOTEAM)
+                    if (ignoreTeam != Activity::NoTeam)
                     {
                         pHitMO = pHitMO->GetRootParent();
                         // We are indeed supposed to ignore this object because of its ignoring of its specific team
@@ -3242,7 +3242,7 @@ bool SceneMan::ObscuredPoint(int x, int y, int team)
 {
     bool obscured = m_pMOIDLayer->GetPixel(x, y) != g_NoMOID || m_pCurrentScene->GetTerrain()->GetPixel(x, y) != g_MaterialAir;
 
-    if (team != Activity::NOTEAM)
+    if (team != Activity::NoTeam)
         obscured = obscured || IsUnseen(x, y, team);
 
     return obscured;
@@ -3448,7 +3448,7 @@ void SceneMan::Update(int screen)
 
     // Learn about the unseen layer, if any
     int team = m_ScreenTeam[screen];
-    SceneLayer *pUnseenLayer = team != Activity::NOTEAM ? m_pCurrentScene->GetUnseenLayer(team) : 0;
+    SceneLayer *pUnseenLayer = team != Activity::NoTeam ? m_pCurrentScene->GetUnseenLayer(team) : 0;
 
     ////////////////////////////////
     // Scrolling interpolation
@@ -3582,7 +3582,7 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 
     // Learn about the unseen layer, if any
     int team = m_ScreenTeam[m_LastUpdatedScreen];
-    SceneLayer *pUnseenLayer = team != Activity::NOTEAM ? m_pCurrentScene->GetUnseenLayer(team) : 0;
+    SceneLayer *pUnseenLayer = team != Activity::NoTeam ? m_pCurrentScene->GetUnseenLayer(team) : 0;
 
     // Set up the target box to draw to on the target bitmap, if it is larger than the scene in either dimension
     Box targetBox(Vector(0, 0), pTargetBitmap->w, pTargetBitmap->h);
@@ -3689,7 +3689,7 @@ void SceneMan::ClearSeenPixels()
     if (!m_pCurrentScene)
         return;
 
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
         m_pCurrentScene->ClearSeenPixels(team);
 }
 

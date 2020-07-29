@@ -158,20 +158,20 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetCPUTeam
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the current CPU-assisted team, if any (NOTEAM) - LEGACY function
+// Description:     Gets the current CPU-assisted team, if any (NoTeam) - LEGACY function
 // Arguments:       None.
-// Return value:    The current setting. NOTEAM is no team is assisted.
+// Return value:    The current setting. NoTeam is no team is assisted.
 
     int GetCPUTeam() const { return m_CPUTeam; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetCPUTeam
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the current CPU-assisted team, if any (NOTEAM) - LEGACY function
-// Arguments:       The new setting. NOTEAM is no team is assisted.
+// Description:     Sets the current CPU-assisted team, if any (NoTeam) - LEGACY function
+// Arguments:       The new setting. NoTeam is no team is assisted.
 // Return value:    None.
 
-    void SetCPUTeam(int team = Activity::NOTEAM);
+    void SetCPUTeam(int team = Activity::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -376,7 +376,7 @@ EntityAllocation(GameActivity)
 //                  The desired direction of the arrow when the point is on screen.
 // Return value:    None.
 
-    void AddObjectivePoint(std::string description, Vector objPos, int whichTeam = Activity::TEAM_1, ObjectiveArrowDir arrowDir = ARROWDOWN);
+    void AddObjectivePoint(std::string description, Vector objPos, int whichTeam = Teams::TeamOne, ObjectiveArrowDir arrowDir = ARROWDOWN);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -594,13 +594,7 @@ EntityAllocation(GameActivity)
 // Description:     Returns the name of the tech module selected for this team during scenario setup
 // Arguments:       Team to return tech module for
 // Return value:    Tech module name, for example Dummy.rte, or empty string if there is no team
-	std::string GetTeamTech(int team)
-	{
-		if (team >= 0 && team < MAXTEAMCOUNT)
-			return m_TeamTech[team];
-		else
-			return "";
-	}
+	std::string GetTeamTech(int team) { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamTech[team] : ""; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetTeamTech
@@ -617,7 +611,7 @@ EntityAllocation(GameActivity)
 // Description:     Indicates whether a specific team is assigned a CPU player in the current game.
 // Arguments:       Which team index to check.
 // Return value:    Whether the team is assigned a CPU player in the current activity.
-    bool TeamIsCPU(int team) const { return (team >= TEAM_1 && team < MAXTEAMCOUNT) ? m_TeamIsCPU[team] : false; }
+    bool TeamIsCPU(int team) const { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamIsCPU[team] : false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -932,8 +926,8 @@ protected:
 
     struct ObjectivePoint
     {
-        ObjectivePoint() { m_Description.clear(); m_ScenePos.Reset(); m_Team = Activity::NOTEAM; m_ArrowDir = ARROWDOWN; }
-        ObjectivePoint(const std::string &desc, const Vector &pos, int team = -1, ObjectiveArrowDir arrowDir = ARROWDOWN) { m_Description = desc; m_ScenePos = pos; m_Team = (Activity::Team)team; m_ArrowDir = arrowDir; }
+        ObjectivePoint() { m_Description.clear(); m_ScenePos.Reset(); m_Team = Teams::NoTeam; m_ArrowDir = ARROWDOWN; }
+        ObjectivePoint(const std::string &desc, const Vector &pos, int team = -1, ObjectiveArrowDir arrowDir = ARROWDOWN) { m_Description = desc; m_ScenePos = pos; m_Team = (Teams)team; m_ArrowDir = arrowDir; }
 
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -954,7 +948,7 @@ protected:
         // Absolute position in the scene where this is pointed
         Vector m_ScenePos;
         // The team this objective is relevant to
-        Activity::Team m_Team;
+        Teams m_Team;
         // The positioning of the arrow that points at this objective
         ObjectiveArrowDir m_ArrowDir;
     };
@@ -996,7 +990,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates which single team is left, if any.
 // Arguments:       None.
-// Return value:    Which team stands alone with any brains in its ranks, if any. NOTEAM
+// Return value:    Which team stands alone with any brains in its ranks, if any. NoTeam
 //                  is returned if there's either more than one team, OR there are no
 //                  teams at all left with brains in em.
 
@@ -1031,10 +1025,10 @@ protected:
 // Description:     Goes through all Actor:s currently in the MovableMan and disables or
 //                  enables each one with a Controller set to AI input.
 // Arguments:       Whether to disable or enable them;
-//                  Which team to do this to. If all, then pass Activity::NOTEAM
+//                  Which team to do this to. If all, then pass Teams::NoTeam
 // Return value:    None.
 
-    void DisableAIs(bool disable = true, int whichTeam = NOTEAM);
+    void DisableAIs(bool disable = true, int whichTeam = Teams::NoTeam);
 
 
 
@@ -1045,7 +1039,7 @@ protected:
     // Which team is CPU-managed, if any (-1) - LEGACY, now controlled by Activity::m_IsHuman
     int m_CPUTeam;
     // Team is active or not this game
-    bool m_TeamIsCPU[MAXTEAMCOUNT];
+    bool m_TeamIsCPU[Teams::MaxTeamCount];
 
     // The observation sceneman scroll targets, for when the game is over or a player is in observation mode
     Vector m_ObservationTarget[Players::MaxPlayerCount];
@@ -1081,16 +1075,16 @@ protected:
     std::list<const SceneObject *> m_PurchaseOverride[Players::MaxPlayerCount];
 
     // The delivery queue which contains all the info about all the made orders currently in transit to delivery
-    std::deque<Delivery> m_Deliveries[Activity::MAXTEAMCOUNT];
+    std::deque<Delivery> m_Deliveries[Teams::MaxTeamCount];
     // The box within where landing zones can be put
-    Scene::Area m_LandingZoneArea[Activity::MAXTEAMCOUNT];
+    Scene::Area m_LandingZoneArea[Teams::MaxTeamCount];
     // How wide around the brain the automatic LZ is following
     int m_BrainLZWidth[Players::MaxPlayerCount];
     // The objective points for each team
     std::list<ObjectivePoint> m_Objectives;
 
     // Tech of player
-    std::string m_TeamTech[Activity::MAXTEAMCOUNT];
+    std::string m_TeamTech[Teams::MaxTeamCount];
 
 	// Initial gold amount selected by player in scenario setup dialog
 	int m_StartingGold;

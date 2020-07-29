@@ -416,7 +416,7 @@ protected:
 
     enum TeamRows
     {
-        TEAM_DISABLED = Activity::MAXTEAMCOUNT,
+        TEAM_DISABLED = Activity::MaxTeamCount,
         TEAMROWCOUNT
     };
 
@@ -485,11 +485,11 @@ protected:
     int m_LockedCPUTeam;
 
     //Tech selection combos
-	GUIComboBox *m_apTeamTechSelect[Activity::MAXTEAMCOUNT];
+	GUIComboBox *m_apTeamTechSelect[Activity::MaxTeamCount];
 	
 	// AI skill selection
-	GUISlider *m_apTeamAISkillSlider[Activity::MAXTEAMCOUNT];
-	GUILabel *m_apTeamAISkillLabel[Activity::MAXTEAMCOUNT];
+	GUISlider *m_apTeamAISkillSlider[Activity::MaxTeamCount];
+	GUILabel *m_apTeamAISkillLabel[Activity::MaxTeamCount];
 
     GUILabel *m_pGoldLabel;
     GUISlider *m_pGoldSlider;

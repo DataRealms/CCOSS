@@ -12,7 +12,7 @@ namespace RTE {
 	void MetaSave::Clear() {
 		m_SavePath.clear();
 		m_PlayerCount = 0;
-		m_Difficulty = GameActivity::MEDIUMDIFFICULTY;
+		m_Difficulty = Activity::MediumDifficulty;
 		m_RoundCount = 0;
 		m_SiteCount = 0;
 	}

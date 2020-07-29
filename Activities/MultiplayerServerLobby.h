@@ -221,7 +221,7 @@ namespace RTE
 
 		enum TeamRows
 		{
-			TEAM_DISABLED = Activity::MAXTEAMCOUNT,
+			TEAM_DISABLED = Teams::MaxTeamCount,
 			TEAMROWCOUNT
 		};
 
@@ -257,11 +257,11 @@ namespace RTE
 		int m_LockedCPUTeam;
 
 		//Tech selection combos
-		GUIComboBox *m_apTeamTechSelect[Activity::MAXTEAMCOUNT];
+		GUIComboBox *m_apTeamTechSelect[Teams::MaxTeamCount];
 
 		// AI skill selection
-		GUISlider *m_apTeamAISkillSlider[Activity::MAXTEAMCOUNT];
-		GUILabel *m_apTeamAISkillLabel[Activity::MAXTEAMCOUNT];
+		GUISlider *m_apTeamAISkillSlider[Teams::MaxTeamCount];
+		GUILabel *m_apTeamAISkillLabel[Teams::MaxTeamCount];
 
 		GUILabel *m_pGoldLabel;
 		GUISlider *m_pGoldSlider;

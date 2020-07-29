@@ -258,14 +258,14 @@ int GATutorial::Start()
     // Set up teams
 
     // Team 2 is always CPU
-    SetCPUTeam(Activity::TEAM_2);
+    SetCPUTeam(Teams::TeamTwo);
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
 
-        if (team == Activity::TEAM_1)
+        if (team == Teams::TeamOne)
         {
             // See if there are specified landing zone areas defined in the scene
             char str[64];
@@ -300,9 +300,9 @@ int GATutorial::Start()
                     // No brain found on other team... then just place somewhere in the ground, spaced out
                     else
                     {
-                        if (team == TEAM_1)
+                        if (team == Teams::TeamOne)
                             brainPos.SetXY((float)g_SceneMan.GetSceneWidth() * 0.25, (float)g_SceneMan.GetSceneHeight() * 0.75);
-                        if (team == TEAM_2)
+                        if (team == Teams::TeamTwo)
                             brainPos.SetXY((float)g_SceneMan.GetSceneWidth() * 0.75, (float)g_SceneMan.GetSceneHeight() * 0.75);
                     }
                     m_pCPUBrain->SetPos(brainPos);
@@ -348,9 +348,9 @@ int GATutorial::Start()
             m_ObservationTarget[player] = m_Brain[player]->GetPos();
         }
 /*
-        if (m_ActivityState == EDITING)
+        if (m_ActivityState == ActivityState::Editing)
             g_FrameMan.SetScreenText((player % 2 == 0) ? "Place your brain vault and build your bunker around it..." : "...then select \"DONE\" from the pie menu!", ScreenOfPlayer(player), 0);
-        else if (m_ActivityState == RUNNING)
+        else if (m_ActivityState == ActivityState::Running)
             g_FrameMan.SetScreenText((player % 2 == 0) ? "Mine Gold and buy more firepower with the funds..." : "...then smash the competing brain to claim victory!", ScreenOfPlayer(player), 0);
 */
     }
@@ -404,7 +404,7 @@ int GATutorial::Start()
     SetupAreas();
 
     // Disable all enemy AIs so they dont attack prematurely
-    DisableAIs(true, Activity::TEAM_2);
+    DisableAIs(true, Teams::TeamTwo);
 
     //////////////////////////////////
     // FIGHT TRIGGERS
@@ -508,7 +508,7 @@ void GATutorial::UpdateEditing()
 void GATutorial::Update()
 {
     // Avoid game logic when we're editing
-    if (m_ActivityState == EDITING)
+    if (m_ActivityState == ActivityState::Editing)
     {
         UpdateEditing();
         return;
@@ -528,11 +528,11 @@ void GATutorial::Update()
             continue;
         // The current player's team
         int team = m_Team[player];
-        if (team == NOTEAM)
+        if (team == Teams::NoTeam)
             continue;
 
         // Make sure the game is not already ending
-        if (m_ActivityState != OVER)
+        if (m_ActivityState != ActivityState::Over)
         {
             // Check if any player's brain is dead
             if (!g_MovableMan.IsActor(m_Brain[player]))
@@ -547,7 +547,7 @@ void GATutorial::Update()
                     End();
                 }
 
-                m_MsgTimer[player].Reset();
+                m_MessageTimer[player].Reset();
             }
             // Mark the player brain to be protected when the fight happens
             else if (m_CurrentFightStage >= DEFENDING)
@@ -575,7 +575,7 @@ void GATutorial::Update()
     ///////////////////////////////////////////
     // Iterate through all teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -585,7 +585,7 @@ void GATutorial::Update()
         if (team == m_CPUTeam)
         {
             // Spawn the CPU team's attacking forces
-            if (m_SpawnTimer.IsPastSimMS(m_SpawnInterval) && m_ActivityState != OVER)
+            if (m_SpawnTimer.IsPastSimMS(m_SpawnInterval) && m_ActivityState != ActivityState::Over)
             {
                 if (!m_AttackerSpawns.empty())
                 {
@@ -629,7 +629,7 @@ void GATutorial::Update()
         // Check for victory conditions
 
         // Make sure the game is not already ending
-        if (m_ActivityState != OVER && team != m_CPUTeam)
+        if (m_ActivityState != ActivityState::Over && team != m_CPUTeam)
         {
 // TODO: Gotto have budget restrictions in this activity!
 /*
@@ -649,7 +649,7 @@ void GATutorial::Update()
                         g_FrameMan.SetScreenText("Your competition is bankrupt!", ScreenOfPlayer(player));
                         m_WinnerTeam = m_Team[player];
                     }
-                    m_MsgTimer[player].Reset();
+                    m_MessageTimer[player].Reset();
                 }
                 End();
             }
@@ -718,7 +718,7 @@ void GATutorial::Update()
 
 /* Draw this manually over the current screen in DrawGUI
     // Take over control of screen messages
-    m_MsgTimer[m_TutorialPlayer].Reset();
+    m_MessageTimer[m_TutorialPlayer].Reset();
     // Display the text of the current step
 //    g_FrameMan.ClearScreenText();
     g_FrameMan.SetScreenText(m_TutAreaSteps[m_CurrentArea][m_CurrentStep].m_Text, 0, 500, -1, true);//, m_TutAreaSteps[m_CurrentArea][m_CurrentStep].m_Duration);
@@ -807,13 +807,13 @@ void GATutorial::Update()
         if (m_CurrentFightStage == NOFIGHT && m_FightTriggers[DEFENDING].IsWithinBox(m_ControlledActor[m_TutorialPlayer]->GetPos()))
         {
             // Take over control of screen messages
-            m_MsgTimer[m_TutorialPlayer].Reset();
+            m_MessageTimer[m_TutorialPlayer].Reset();
             // Display the text of the current step
             g_FrameMan.ClearScreenText(ScreenOfPlayer(m_TutorialPlayer));
             g_FrameMan.SetScreenText("DEFEND YOUR BRAIN AGAINST THE INCOMING FORCES!", ScreenOfPlayer(m_TutorialPlayer), 500, 8000, true);
             // This will make all the enemy team AI's go into brain hunt mode
             GameActivity::InitAIs();
-            DisableAIs(false, Activity::TEAM_2);
+            DisableAIs(false, Teams::TeamTwo);
 
             // Advance the stage
             m_CurrentFightStage = DEFENDING;
@@ -824,17 +824,17 @@ void GATutorial::Update()
     // Check for victory conditions
 
     // Check if the CPU brain is dead, if we're playing against the CPU
-    if (!g_MovableMan.IsActor(m_pCPUBrain) && m_ActivityState != OVER)
+    if (!g_MovableMan.IsActor(m_pCPUBrain) && m_ActivityState != ActivityState::Over)
     {
         m_pCPUBrain = 0;
         // Proclaim player winner and end
-        m_WinnerTeam = Activity::TEAM_1;
+        m_WinnerTeam = Teams::TeamOne;
         // Finito!
         End();
     }
 
     // After a while of game over and we won, exit to the campaign menu automatically
-    if (m_ActivityState == OVER && m_WinnerTeam == Activity::TEAM_1)
+    if (m_ActivityState == ActivityState::Over && m_WinnerTeam == Teams::TeamOne)
     {
         if (m_GameOverTimer.IsPastSimMS(m_GameOverPeriod))
         {
@@ -908,7 +908,7 @@ void GATutorial::InitAIs()
     Actor *pActor = 0;
     Actor *pFirstActor = 0;
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;

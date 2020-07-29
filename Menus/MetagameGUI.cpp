@@ -188,7 +188,7 @@ void MetagameGUI::Clear()
     m_AnimModeChange = false;
     m_AnimModeDuration = 2000;
     m_AnimMetaPlayer = Players::NoPlayer;
-    m_AnimDefenseTeam = Activity::NOTEAM;
+    m_AnimDefenseTeam = Activity::NoTeam;
     m_AnimActivityChange = false;
     Scene *m_pAnimScene = 0;
     m_AnimRatio = 0;
@@ -271,7 +271,7 @@ void MetagameGUI::Clear()
     m_BattleToResume = false;
     m_PostBattleReview = false;
     m_BattleCausedOwnershipChange = false;
-    m_PreBattleTeamOwnership = Activity::NOTEAM;
+    m_PreBattleTeamOwnership = Activity::NoTeam;
 
     m_pScenePlanetLabel = 0;
     m_pSceneInfoPopup = 0;
@@ -314,7 +314,7 @@ void MetagameGUI::Clear()
     m_ActivityResumed = false;
     m_StartFunds = 1600;
     m_CPUPlayer = -1;
-    m_StartDifficulty = GameActivity::MEDIUMDIFFICULTY;
+    m_StartDifficulty = Activity::MediumDifficulty;
     m_BackToMain = false;
     m_Quit = false;
 }
@@ -1039,7 +1039,7 @@ bool MetagameGUI::StartNewGame()
     m_NewSiteIndicators.clear();
     m_SiteSwitchIndicators.clear();
 
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
         g_MetaMan.m_TeamIcons[team].Reset();
 
     // Create the MetaPlayer:s based on the settings in the dialog box
@@ -1051,8 +1051,8 @@ bool MetagameGUI::StartNewGame()
     const Icon *pTeamIcon = 0;
 
 	//Clear metaman's AI skill to defaults
-	for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; team++)
-		g_MetaMan.m_TeamAISkill[team] = Activity::DEFAULTSKILL;
+	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; team++)
+		g_MetaMan.m_TeamAISkill[team] = Activity::DefaultSkill;
 
     // Starting gold amount is common to all
     int startGold = STARTGOLDMIN + ((STARTGOLDMAX - STARTGOLDMIN) * (float)m_pGoldSlider->GetValue() / 100.0);
@@ -1088,15 +1088,15 @@ bool MetagameGUI::StartNewGame()
 			// Set native cost multypliiers according to difficulty
 			if (!newPlayer.IsHuman())
 			{
-				if (g_MetaMan.m_Difficulty < GameActivity::CAKEDIFFICULTY)
+				if (g_MetaMan.m_Difficulty < Activity::CakeDifficulty)
 					newPlayer.SetNativeCostMultiplier(1.2);
-				else if (g_MetaMan.m_Difficulty < GameActivity::EASYDIFFICULTY)
+				else if (g_MetaMan.m_Difficulty < Activity::EasyDifficulty)
 					newPlayer.SetNativeCostMultiplier(1.1);
-				else if (g_MetaMan.m_Difficulty < GameActivity::MEDIUMDIFFICULTY)
+				else if (g_MetaMan.m_Difficulty < Activity::MediumDifficulty)
 					newPlayer.SetNativeCostMultiplier(1.0);
-				else if (g_MetaMan.m_Difficulty < GameActivity::HARDDIFFICULTY)
+				else if (g_MetaMan.m_Difficulty < Activity::HardDifficulty)
 					newPlayer.SetNativeCostMultiplier(0.80);
-				else if (g_MetaMan.m_Difficulty < GameActivity::NUTSDIFFICULTY)
+				else if (g_MetaMan.m_Difficulty < Activity::NutsDifficulty)
 					newPlayer.SetNativeCostMultiplier(0.60);
 				else
 					newPlayer.SetNativeCostMultiplier(0.40);
@@ -1113,7 +1113,7 @@ bool MetagameGUI::StartNewGame()
 
             // See if the player is designated to a new team or one that has already been created
             bool newTeam = true;
-            for (int team = Activity::TEAM_1; team < g_MetaMan.m_TeamCount; ++team)
+            for (int team = Activity::TeamOne; team < g_MetaMan.m_TeamCount; ++team)
             {
                 // Join existing team!
                 if (pTeamIcon->GetPresetName() == g_MetaMan.m_TeamIcons[team].GetPresetName())
@@ -1498,15 +1498,15 @@ void MetagameGUI::Update()
                 char info[512];
 				std::string difficultyString;
 
-				if (pAutoSave->GetDifficulty() < GameActivity::CAKEDIFFICULTY)
+				if (pAutoSave->GetDifficulty() < Activity::CakeDifficulty)
 					difficultyString = "Difficulty: Cake";
-				else if (pAutoSave->GetDifficulty() < GameActivity::EASYDIFFICULTY)
+				else if (pAutoSave->GetDifficulty() < Activity::EasyDifficulty)
 					difficultyString = "Difficulty: Easy";
-				else if (pAutoSave->GetDifficulty() < GameActivity::MEDIUMDIFFICULTY)
+				else if (pAutoSave->GetDifficulty() < Activity::MediumDifficulty)
 					difficultyString = "Difficulty: Medium";
-				else if (pAutoSave->GetDifficulty() < GameActivity::HARDDIFFICULTY)
+				else if (pAutoSave->GetDifficulty() < Activity::HardDifficulty)
 					difficultyString = "Difficulty: Hard";
-				else if (pAutoSave->GetDifficulty() < GameActivity::NUTSDIFFICULTY)
+				else if (pAutoSave->GetDifficulty() < Activity::NutsDifficulty)
 					difficultyString = "Difficulty: Nuts";
 				else
 					difficultyString = "Difficulty: Nuts!";
@@ -1781,7 +1781,7 @@ void MetagameGUI::Update()
             int winnerTeam = g_MetaMan.WhichTeamIsLeading();
 
             // Noone left??
-            if (winnerTeam == Activity::NOTEAM)
+            if (winnerTeam == Activity::NoTeam)
             {
                 m_pBannerRedTop->ShowText("EVERYONE", GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
                 m_pBannerYellowBottom->ShowText("-DIED-", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);                
@@ -2732,15 +2732,15 @@ void MetagameGUI::UpdateInput()
                     char info[512];
 					std::string difficultyString;
 
-					if (pGame->GetDifficulty() < GameActivity::CAKEDIFFICULTY)
+					if (pGame->GetDifficulty() < Activity::CakeDifficulty)
 						difficultyString = "Difficulty: Cake";
-					else if (pGame->GetDifficulty() < GameActivity::EASYDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::EasyDifficulty)
 						difficultyString = "Difficulty: Easy";
-					else if (pGame->GetDifficulty() < GameActivity::MEDIUMDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::MediumDifficulty)
 						difficultyString = "Difficulty: Medium";
-					else if (pGame->GetDifficulty() < GameActivity::HARDDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::HardDifficulty)
 						difficultyString = "Difficulty: Hard";
-					else if (pGame->GetDifficulty() < GameActivity::NUTSDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::NutsDifficulty)
 						difficultyString = "Difficulty: Nuts";
 					else
 						difficultyString = "Difficulty: Nuts!";
@@ -2771,15 +2771,15 @@ void MetagameGUI::UpdateInput()
                     char info[512];
 					std::string difficultyString;
 
-					if (pGame->GetDifficulty() < GameActivity::CAKEDIFFICULTY)
+					if (pGame->GetDifficulty() < Activity::CakeDifficulty)
 						difficultyString = "Difficulty: Cake";
-					else if (pGame->GetDifficulty() < GameActivity::EASYDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::EasyDifficulty)
 						difficultyString = "Difficulty: Easy";
-					else if (pGame->GetDifficulty() < GameActivity::MEDIUMDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::MediumDifficulty)
 						difficultyString = "Difficulty: Medium";
-					else if (pGame->GetDifficulty() < GameActivity::HARDDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::HardDifficulty)
 						difficultyString = "Difficulty: Hard";
-					else if (pGame->GetDifficulty() < GameActivity::NUTSDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::NutsDifficulty)
 						difficultyString = "Difficulty: Nuts";
 					else
 						difficultyString = "Difficulty: Nuts!";
@@ -2910,13 +2910,13 @@ void MetagameGUI::CompletedActivity()
     GAScripted *pDoneScriptedActivity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
     Scene *pAlteredScene = g_SceneMan.GetScene();
     bool autoResolved = false;
-    int winningTeam = Activity::NOTEAM;
+    int winningTeam = Activity::NoTeam;
 
     // Retain any changes done to the Scene just played to the one that is kept by the MetaMan session
     if (pDoneActivity && pAlteredScene && m_pPlayingScene)
     {
         // There was an error with the activity and it bailed.. try to recover
-        if (pDoneActivity->GetActivityState() == Activity::INERROR)
+        if (pDoneActivity->GetActivityState() == Activity::HasError)
         {
             m_AnimTimer2.Reset();
             m_apMetaButton[CONTINUE]->SetText("Start!");
@@ -2949,7 +2949,7 @@ void MetagameGUI::CompletedActivity()
                 if (pDoneActivity->IsOver())
                 {
                     // If this ended for whatever reason without a winning team, then resolve the rest of the fight automatically
-                    if (pDoneScriptedActivity->GetWinnerTeam() == Activity::NOTEAM)//pDoneActivity->HumanBrainCount() == 0)
+                    if (pDoneScriptedActivity->GetWinnerTeam() == Activity::NoTeam)//pDoneActivity->HumanBrainCount() == 0)
                     {
                         // Resolve the rest of the fight between the AI guys and display the outcome
                         m_BattleCausedOwnershipChange = AutoResolveOffensive(pDoneScriptedActivity, pAlteredScene, true);
@@ -3139,12 +3139,12 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
         if (PosRand() < 0.05)
         {
             // See if we should signal change of ownership
-            if (pScene->GetTeamOwnership() != Activity::NOTEAM)
+            if (pScene->GetTeamOwnership() != Activity::NoTeam)
                 changedOwnership = true;
 
             // Eliminate all ownership of this place
-			pScene->RemoveAllPlacedActors(Activity::NOTEAM);
-            pScene->SetTeamOwnership(Activity::NOTEAM);
+			pScene->RemoveAllPlacedActors(Activity::NoTeam);
+            pScene->SetTeamOwnership(Activity::NoTeam);
 
             // Each player's brain gets wiped out
             for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
@@ -3158,15 +3158,15 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
         {
             MetaPlayer * aMetaPlayers[Players::MaxPlayerCount];
             // The normalized scalar chances of each team to win
-            float aTeamChance[Activity::MAXTEAMCOUNT];
-			for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+            float aTeamChance[Activity::MaxTeamCount];
+			for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
 				aTeamChance[team] = 0;
 
             // The total number of 'chance' points that all teams have in aggregate
             float totalPoints = 0;
 
             // Add the points representing the defense investment for the defenders
-            for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+            for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
             {
                 // Invested defenses counts for half the points.. some may have been destroyed, defense is harder etc
                 if (pOffensive->TeamActive(team) && pScene->GetTeamOwnership() == team)
@@ -3186,13 +3186,13 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             }
 
             // Now tally up the total chance points
-            for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+            for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
             {
                 if (pOffensive->TeamActive(team))
                     totalPoints += aTeamChance[team];
             }
             // Normalize all the teams' chances
-            for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+            for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
             {
                 if (pOffensive->TeamActive(team))
                     aTeamChance[team] = aTeamChance[team] / totalPoints;
@@ -3201,9 +3201,9 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             float decision = PosRand();
             // Keeps track of the thresholds
             float teamChanceTally = 0;
-            int winnerTeam = Activity::NOTEAM;
+            int winnerTeam = Activity::NoTeam;
             // See who actually won, based on the respective chances
-            for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+            for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
             {
                 if (pOffensive->TeamActive(team))
                 {
@@ -3281,7 +3281,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
         }
 
         // Now make the party cost for all the teams
-        for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+        for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
         {
             // Only mess with active teams
             if (pOffensive->TeamActive(team))
@@ -4264,7 +4264,7 @@ void MetagameGUI::SetupOffensives()
     string targetName;
     float offensiveBudget;
     bool playerDone = false;
-    int team = Activity::NOTEAM;
+    int team = Activity::NoTeam;
     int offensiveCount = 0;
     for (int metaPlayer = Players::PlayerOne; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
     {
@@ -4307,14 +4307,14 @@ void MetagameGUI::SetupOffensives()
 						// Set difficulty
 						pOffensive->SetDifficulty(g_MetaMan.m_Difficulty);
 						// Set AI skill levels
-						for (int t = Activity::TEAM_1; t < Activity::MAXTEAMCOUNT; t++)
+						for (int t = Activity::TeamOne; t < Activity::MaxTeamCount; t++)
 							pOffensive->SetTeamAISkill(t, g_MetaMan.m_TeamAISkill[t]);
 
                         // Attacker
                         pOffensive->AddPlayer(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer(), g_MetaMan.m_Players[metaPlayer].IsHuman(), team, offensiveBudget, &(g_MetaMan.GetTeamIcon(team)));
 
                         // Unless exploring an unclaimed spot, there's going to be defenders
-                        if ((*sItr)->GetTeamOwnership() != Activity::NOTEAM)
+                        if ((*sItr)->GetTeamOwnership() != Activity::NoTeam)
                         {
                             // Go through all players and add the ones of the defending team, based on who has resident brains here
                             for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
@@ -4425,7 +4425,7 @@ void MetagameGUI::UpdateOffensives()
         RTEAssert(m_pAnimScene, "Couldn't find the Site that has been selected as attacked!");
 
         // It's owned by a team, so set up and show its defenders
-        if (m_pAnimScene->GetTeamOwnership() != Activity::NOTEAM)
+        if (m_pAnimScene->GetTeamOwnership() != Activity::NoTeam)
             m_AnimDefenseTeam = m_pAnimScene->GetTeamOwnership();
 
         // Set up all the offensive and defensive lines for each player involved in this site's battle
@@ -4520,7 +4520,7 @@ void MetagameGUI::UpdateOffensives()
         // New battle, reset the post battle flags
         m_PostBattleReview = false;
         m_BattleCausedOwnershipChange = false;
-        m_PreBattleTeamOwnership = Activity::NOTEAM;
+        m_PreBattleTeamOwnership = Activity::NoTeam;
 
         ChangeAnimMode(TARGETZEROING);
         m_AnimActivityChange = false;
@@ -5164,7 +5164,7 @@ bool MetagameGUI::FinalizeOffensive()
 
     // If the battle caused ownership change, then show it with a cool indication
     if (m_BattleCausedOwnershipChange)
-        m_SiteSwitchIndicators.push_back(SiteTarget(m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 0, m_pAnimScene->GetTeamOwnership() != Activity::NOTEAM ? SiteTarget::SQUAREGROW : SiteTarget::CIRCLEGROW, c_GUIColorRed, m_AnimTimer2.GetElapsedRealTimeMS()));
+        m_SiteSwitchIndicators.push_back(SiteTarget(m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 0, m_pAnimScene->GetTeamOwnership() != Activity::NoTeam ? SiteTarget::SQUAREGROW : SiteTarget::CIRCLEGROW, c_GUIColorRed, m_AnimTimer2.GetElapsedRealTimeMS()));
 
     // Clear the battle info of the last one
     ResetBattleInfo();
@@ -6023,7 +6023,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
         m_pSceneNameLabel->SetText(m_pSelectedScene->GetPresetName());
 
         // Show which team owns this place, and how many resident brains there are here of that team
-        if (m_pSelectedScene->GetTeamOwnership() > Activity::NOTEAM && m_pSelectedScene->GetTeamOwnership() < Activity::MAXTEAMCOUNT)
+        if (m_pSelectedScene->GetTeamOwnership() > Activity::NoTeam && m_pSelectedScene->GetTeamOwnership() < Activity::MaxTeamCount)
         {
             // Set the team flag icon
             m_pSceneOwnerTeam->SetVisible(true);
@@ -6264,15 +6264,15 @@ void MetagameGUI::UpdateGameSizeLabels()
     sprintf_s(str, sizeof(str), "Game Length: %c%c%d starting brains", -48, -36, brainCount);
     m_pLengthLabel->SetText(str);
 
-    if (m_pDifficultySlider->GetValue() < GameActivity::CAKEDIFFICULTY)
+    if (m_pDifficultySlider->GetValue() < Activity::CakeDifficulty)
         m_pDifficultyLabel->SetText("Difficulty: Cake");
-    else if (m_pDifficultySlider->GetValue() < GameActivity::EASYDIFFICULTY)
+    else if (m_pDifficultySlider->GetValue() < Activity::EasyDifficulty)
         m_pDifficultyLabel->SetText("Difficulty: Easy");
-    else if (m_pDifficultySlider->GetValue() < GameActivity::MEDIUMDIFFICULTY)
+    else if (m_pDifficultySlider->GetValue() < Activity::MediumDifficulty)
         m_pDifficultyLabel->SetText("Difficulty: Medium");
-    else if (m_pDifficultySlider->GetValue() < GameActivity::HARDDIFFICULTY)
+    else if (m_pDifficultySlider->GetValue() < Activity::HardDifficulty)
         m_pDifficultyLabel->SetText("Difficulty: Hard");
-    else if (m_pDifficultySlider->GetValue() < GameActivity::NUTSDIFFICULTY)
+    else if (m_pDifficultySlider->GetValue() < Activity::NutsDifficulty)
         m_pDifficultyLabel->SetText("Difficulty: Nuts");
     else
         m_pDifficultyLabel->SetText("Difficulty: Nuts!");

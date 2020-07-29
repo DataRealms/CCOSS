@@ -51,7 +51,7 @@ namespace RTE {
 		/// Reports whether the console is enabled or not.
 		/// </summary>
 		/// <returns>Whether the console is enabled or not.</returns>
-		bool IsEnabled() const { return m_ConsoleState == ENABLED || m_ConsoleState == ENABLING; }
+		bool IsEnabled() const { return m_ConsoleState == ConsoleState::Enabled || m_ConsoleState == ConsoleState::Enabling; }
 
 		/// <summary>
 		/// Enables or disables the console.
@@ -136,7 +136,7 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration for console states when enabling/disabling the console. NOTE: This can't be lower down because m_ConsoleState relies on this definition.
 		/// </summary>
-		enum ConsoleState { ENABLING = 0, ENABLED, DISABLING, DISABLED };
+		enum ConsoleState { Enabling = 0, Enabled, Disabling, Disabled };
 
 		ConsoleState m_ConsoleState; //!< Current state of the console.
 		bool m_ReadOnly; //!< Read-only mode where console text input is disabled and controller input should be preserved.

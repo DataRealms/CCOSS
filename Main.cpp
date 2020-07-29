@@ -241,7 +241,7 @@ bool ResetActivity()
 /// Start the simulation back up after being paused.
 /// </summary>
 void ResumeActivity() {
-	if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NOTSTARTED) {
+	if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NotStarted) {
 		g_Quit = false;
 		g_InActivity = true;
 		g_ResumeActivity = false;

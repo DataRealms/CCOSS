@@ -648,7 +648,7 @@ EntityAllocation(Scene)
 //                  LoadData is called on this.
 // Return value:    None.
 
-    void FillUnseenLayer(Vector pixelSize, int team = Activity::TEAM_1, bool createNow = true);
+    void FillUnseenLayer(Vector pixelSize, int team = Activity::TeamOne, bool createNow = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -659,7 +659,7 @@ EntityAllocation(Scene)
 //                  Which team to get the unseen layer for.
 // Return value:    None.
 
-    void SetUnseenLayer(SceneLayer *pNewLayer, int team = Activity::TEAM_1);
+    void SetUnseenLayer(SceneLayer *pNewLayer, int team = Activity::TeamOne);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -670,7 +670,7 @@ EntityAllocation(Scene)
 // Return value:    A pointer to the SceneLayer representing what hasn't been seen by a
 //                  specific team yet. Ownership is NOT transferred!
 
-    SceneLayer * GetUnseenLayer(int team = Activity::TEAM_1) const { return team != Activity::NOTEAM ? m_apUnseenLayer[team] : 0; }
+    SceneLayer * GetUnseenLayer(int team = Activity::TeamOne) const { return team != Activity::NoTeam ? m_apUnseenLayer[team] : 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -680,7 +680,7 @@ EntityAllocation(Scene)
 // Arguments:       Which team to get the unseen layer for.
 // Return value:    The list of pixel coordinates in the unseen layer's scale.
 
-    std::list<Vector> & GetSeenPixels(int team = Activity::TEAM_1) { return m_SeenPixels[team]; }
+    std::list<Vector> & GetSeenPixels(int team = Activity::TeamOne) { return m_SeenPixels[team]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -690,7 +690,7 @@ EntityAllocation(Scene)
 // Arguments:       Which team to get the unseen layer for.
 // Return value:    None.
 
-    void ClearSeenPixels(int team = Activity::TEAM_1);
+    void ClearSeenPixels(int team = Activity::TeamOne);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -704,7 +704,7 @@ EntityAllocation(Scene)
 //                  Which team's unseen layer to check the pixel on.
 // Return value:    Whether the pixel was deemed to be orphan and thus cleaned up.
 
-    bool CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom = NODIR, int team = Activity::TEAM_1);
+    bool CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom = NODIR, int team = Activity::TeamOne);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -798,7 +798,7 @@ EntityAllocation(Scene)
 // Description:     Sucks up all the Actors and Devices currently active in MovableMan and
 //                  puts them into this' list of objects to place on next load.
 //                  Should be done AFTER RetrieveResidentBrains!
-// Arguments:       The team to only retrieve Actors of. If NOTEAM, then all will be grabbed.
+// Arguments:       The team to only retrieve Actors of. If NoTeam, then all will be grabbed.
 //                  Whether to not get any brains at all.
 // Return value:    How many objects were found knocking about in the world, and stored.
 
@@ -1372,15 +1372,15 @@ protected:
     // List of background layers, first is the closest to the terrain, last is closest to the back
     std::list<SceneLayer *> m_BackLayerList;
     // Dimensions of the pixels of the unseen layers, when they are dynamically generated. If 0, the layer was not generated
-    Vector m_UnseenPixelSize[Activity::MAXTEAMCOUNT];
+    Vector m_UnseenPixelSize[Activity::MaxTeamCount];
     // Layers representing the unknown areas for each team
-    SceneLayer *m_apUnseenLayer[Activity::MAXTEAMCOUNT];
+    SceneLayer *m_apUnseenLayer[Activity::MaxTeamCount];
     // Which pixels of the unseen map have just been revealed this frame, in the coordinates of the unseen map
-    std::list<Vector> m_SeenPixels[Activity::MAXTEAMCOUNT];
+    std::list<Vector> m_SeenPixels[Activity::MaxTeamCount];
     // Pixels on the unseen map deemed to be orphans and cleaned up, will be moved to seen pixels next update
-    std::list<Vector> m_CleanedPixels[Activity::MAXTEAMCOUNT];
+    std::list<Vector> m_CleanedPixels[Activity::MaxTeamCount];
     // Whether this Scene is scheduled to be orbitally scanned by any team
-    bool m_ScanScheduled[Activity::MAXTEAMCOUNT];
+    bool m_ScanScheduled[Activity::MaxTeamCount];
 
     // List of all the specified Area:s of the scene
     std::list<Area> m_AreaList;

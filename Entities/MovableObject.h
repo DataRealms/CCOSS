@@ -599,7 +599,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    Which team this ignores hits with, if any.
 
-    int IgnoresWhichTeam() const { return m_IgnoresTeamHits ? m_Team : Activity::NOTEAM; }
+    int IgnoresWhichTeam() const { return m_IgnoresTeamHits ? m_Team : Activity::NoTeam; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

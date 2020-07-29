@@ -51,7 +51,7 @@ void MetaMan::Clear()
     m_GameName = DEFAULTGAMENAME;
     m_Players.clear();
     m_TeamCount = 0;
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
         m_TeamIcons[team].Reset();
     m_CurrentRound = 0;
     m_Scenes.clear();
@@ -61,10 +61,10 @@ void MetaMan::Clear()
     m_RoundOffensives.clear();
     m_CurrentOffensive = 0;
     m_PhaseTimer.Reset();
-	m_Difficulty = GameActivity::MEDIUMDIFFICULTY;
+	m_Difficulty = Activity::MediumDifficulty;
 
-	for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; team++)
-		m_TeamAISkill[team] = Activity::DEFAULTSKILL;
+	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; team++)
+		m_TeamAISkill[team] = Activity::DefaultSkill;
 }
 
 
@@ -153,7 +153,7 @@ int MetaMan::NewGame(float gameSize)
         // Make them unique presets in their own Data Module so they don't get referenced from the original presets they were made from
         m_Scenes.back()->MigrateToModule(g_PresetMan.GetModuleID(METASAVEMODULENAME));
         // Make them unexplored by all teams
-        for (int team = Activity::TEAM_1; team < m_TeamCount; ++team)
+        for (int team = Activity::TeamOne; team < m_TeamCount; ++team)
             m_Scenes.back()->FillUnseenLayer(Vector(25, 25), team, false);
 
 		//	Go through all AI plan elements and expand all bunker schemes to concrete assemblies 
@@ -231,8 +231,8 @@ int MetaMan::Load(const MetaSave *pSave)
         return -1;
 
 	// Reset Metaman's AI skill in case those won't be loaded from older saves
-	for (int team = Activity::TEAM_1 ; team < Activity::MAXTEAMCOUNT; team++)
-		m_TeamAISkill[team] = Activity::DEFAULTSKILL;
+	for (int team = Activity::TeamOne ; team < Activity::MaxTeamCount; team++)
+		m_TeamAISkill[team] = Activity::DefaultSkill;
 
     // Create the reader to read the metagame state from
     Reader reader(pSave->GetSavePath().c_str(), false, 0, false);
@@ -281,13 +281,13 @@ int MetaMan::ReadProperty(string propName, Reader &reader)
     else if (propName == "TeamCount")
         reader >> m_TeamCount;
     else if (propName == "Team1Icon")
-        reader >> m_TeamIcons[Activity::TEAM_1];
+        reader >> m_TeamIcons[Activity::TeamOne];
     else if (propName == "Team2Icon")
-        reader >> m_TeamIcons[Activity::TEAM_2];
+        reader >> m_TeamIcons[Activity::TeamTwo];
     else if (propName == "Team3Icon")
-        reader >> m_TeamIcons[Activity::TEAM_3];
+        reader >> m_TeamIcons[Activity::TeamThree];
     else if (propName == "Team4Icon")
-        reader >> m_TeamIcons[Activity::TEAM_4];
+        reader >> m_TeamIcons[Activity::TeamFour];
     else if (propName == "CurrentRound")
         reader >> m_CurrentRound;
     else if(propName == "AddScene")
@@ -313,13 +313,13 @@ int MetaMan::ReadProperty(string propName, Reader &reader)
     else if (propName == "Difficulty")
         reader >> m_Difficulty;
     else if (propName == "Team1AISkill")
-		reader >> m_TeamAISkill[Activity::TEAM_1];
+		reader >> m_TeamAISkill[Activity::TeamOne];
     else if (propName == "Team2AISkill")
-		reader >> m_TeamAISkill[Activity::TEAM_2];
+		reader >> m_TeamAISkill[Activity::TeamTwo];
     else if (propName == "Team3AISkill")
-		reader >> m_TeamAISkill[Activity::TEAM_3];
+		reader >> m_TeamAISkill[Activity::TeamThree];
     else if (propName == "Team4AISkill")
-		reader >> m_TeamAISkill[Activity::TEAM_4];
+		reader >> m_TeamAISkill[Activity::TeamFour];
     else if (propName == "MetaGUI")
         reader >> m_pMetaGUI;
     else
@@ -346,13 +346,13 @@ int MetaMan::Save(Writer &writer) const
     writer.NewProperty("Difficulty");
     writer << m_Difficulty;
 	writer.NewProperty("Team1AISkill");
-	writer << m_TeamAISkill[Activity::TEAM_1];
+	writer << m_TeamAISkill[Activity::TeamOne];
 	writer.NewProperty("Team2AISkill");
-	writer << m_TeamAISkill[Activity::TEAM_2];
+	writer << m_TeamAISkill[Activity::TeamTwo];
 	writer.NewProperty("Team3AISkill");
-	writer << m_TeamAISkill[Activity::TEAM_3];
+	writer << m_TeamAISkill[Activity::TeamThree];
 	writer.NewProperty("Team4AISkill");
-	writer << m_TeamAISkill[Activity::TEAM_4];
+	writer << m_TeamAISkill[Activity::TeamFour];
     for (vector<MetaPlayer>::const_iterator tItr = m_Players.begin(); tItr != m_Players.end(); ++tItr)
     {
         writer.NewProperty("AddPlayer");
@@ -363,22 +363,22 @@ int MetaMan::Save(Writer &writer) const
     if (m_TeamCount >= 1)
     {
         writer.NewProperty("Team1Icon");
-        m_TeamIcons[Activity::TEAM_1].SavePresetCopy(writer);
+        m_TeamIcons[Activity::TeamOne].SavePresetCopy(writer);
     }
     if (m_TeamCount >= 2)
     {
         writer.NewProperty("Team2Icon");
-        m_TeamIcons[Activity::TEAM_2].SavePresetCopy(writer);
+        m_TeamIcons[Activity::TeamTwo].SavePresetCopy(writer);
     }
     if (m_TeamCount >= 3)
     {
         writer.NewProperty("Team3Icon");
-        m_TeamIcons[Activity::TEAM_3].SavePresetCopy(writer);
+        m_TeamIcons[Activity::TeamThree].SavePresetCopy(writer);
     }
     if (m_TeamCount >= 4)
     {
         writer.NewProperty("Team4Icon");
-        m_TeamIcons[Activity::TEAM_4].SavePresetCopy(writer);
+        m_TeamIcons[Activity::TeamFour].SavePresetCopy(writer);
     }
     writer.NewProperty("CurrentRound");
     writer << m_CurrentRound;
@@ -607,7 +607,7 @@ int MetaMan::GetTotalBrainCountOfPlayer(int metaPlayer, bool countPoolsOnly) con
 
 int MetaMan::GetGoldCountOfTeam(int team) const
 {
-    if (team <= Activity::NOTEAM || team >= m_TeamCount)
+    if (team <= Activity::NoTeam || team >= m_TeamCount)
         return 0;
 
     float goldTotal = 0;
@@ -629,7 +629,7 @@ int MetaMan::GetGoldCountOfTeam(int team) const
 
 int MetaMan::GetSceneCountOfTeam(int team) const
 {
-    if (team <= Activity::NOTEAM || team >= m_TeamCount)
+    if (team <= Activity::NoTeam || team >= m_TeamCount)
         return 0;
 
     // Go through all scenes and add up all the ones owned by this team
@@ -653,7 +653,7 @@ int MetaMan::GetSceneCountOfTeam(int team) const
 
 int MetaMan::GetTotalBrainCountOfTeam(int team, bool countPoolsOnly) const
 {
-    if (team <= Activity::NOTEAM || team >= m_TeamCount)
+    if (team <= Activity::NoTeam || team >= m_TeamCount)
         return 0;
 
     // Go through all players and add up the brains of the ones who are on this team 
@@ -679,8 +679,8 @@ int MetaMan::OnlyTeamWithAnyBrainPoolLeft()
 {
     // See if only one team remains with any brains
     int brainTeamCount = 0;
-    int brainTeam = Activity::NOTEAM;
-    for (int t = Activity::TEAM_1; t < m_TeamCount; ++t)
+    int brainTeam = Activity::NoTeam;
+    for (int t = Activity::TeamOne; t < m_TeamCount; ++t)
     {
         // Only count brains in pools; not resident ones also
         if (GetTotalBrainCountOfTeam(t, true) > 0)
@@ -695,7 +695,7 @@ int MetaMan::OnlyTeamWithAnyBrainPoolLeft()
         return brainTeam;
 
     // None OR more than two teams are left with brains!
-    return Activity::NOTEAM;
+    return Activity::NoTeam;
 }
 
 /*
@@ -709,8 +709,8 @@ bool MetaMan::OneOrNoneTeamsLeft()
 {
     // See if only one team remains with any brains
     int brainTeamCount = 0;
-    int brainTeam = Activity::NOTEAM;
-    for (int t = Activity::TEAM_1; t < m_TeamCount; ++t)
+    int brainTeam = Activity::NoTeam;
+    for (int t = Activity::TeamOne; t < m_TeamCount; ++t)
     {
         // Any brains left on this team? If so, they're a potential winner
         if (GetTotalBrainCountOfTeam(t) > 0)
@@ -721,7 +721,7 @@ bool MetaMan::OneOrNoneTeamsLeft()
     }
 
     // If less than two teams left with any brains, they get indicated
-    // Also, if NO teams with brain are left, that is indicated with NOTEAM
+    // Also, if NO teams with brain are left, that is indicated with NoTeam
     if (brainTeamCount <= 1)
         return true;
 
@@ -737,12 +737,12 @@ bool MetaMan::OneOrNoneTeamsLeft()
 
 int MetaMan::WhichTeamLeft()
 {
-    int whichTeam = Activity::NOTEAM;
+    int whichTeam = Activity::NoTeam;
 
     // See if only one team remains with any brains
     int brainTeamCount = 0;
-    int brainTeam = Activity::NOTEAM;
-    for (int t = Activity::TEAM_1; t < m_TeamCount; ++t)
+    int brainTeam = Activity::NoTeam;
+    for (int t = Activity::TeamOne; t < m_TeamCount; ++t)
     {
         if (GetTotalBrainCountOfTeam(t) > 0)
         {
@@ -756,7 +756,7 @@ int MetaMan::WhichTeamLeft()
         return brainTeam;
 
     // No team is left with brains!
-    return Activity::NOTEAM;
+    return Activity::NoTeam;
 }
 */
 
@@ -786,9 +786,9 @@ bool MetaMan::NoBrainsLeftInAnyPool()
 
 int MetaMan::WhichTeamIsLeading()
 {
-    int leaderTeam = Activity::NOTEAM;
-    bool tiedTeams[Activity::MAXTEAMCOUNT];
-    for (int t = Activity::TEAM_1; t < m_TeamCount; ++t)
+    int leaderTeam = Activity::NoTeam;
+    bool tiedTeams[Activity::MaxTeamCount];
+    for (int t = Activity::TeamOne; t < m_TeamCount; ++t)
         tiedTeams[t] = false;
 
     int baseCount = 0;
@@ -796,14 +796,14 @@ int MetaMan::WhichTeamIsLeading()
     bool baseCountTie = false;
     // This is the record so far; negative so the first team with 0 won't detect as tied
     int highestBaseCount = -1;
-    for (int team = Activity::TEAM_1; team < m_TeamCount; ++team)
+    for (int team = Activity::TeamOne; team < m_TeamCount; ++team)
     {
         baseCount = GetSceneCountOfTeam(team);
         // We have a tie!
         if (baseCount == highestBaseCount)
         {
             // No leader - there's a tie
-            leaderTeam = Activity::NOTEAM;
+            leaderTeam = Activity::NoTeam;
             tiedTeams[team] = true;
             baseCountTie = true;  
         }
@@ -814,7 +814,7 @@ int MetaMan::WhichTeamIsLeading()
             leaderTeam = team;
             highestBaseCount = baseCount;
             // No more tie
-            for (int t = Activity::TEAM_1; t < m_TeamCount; ++t)
+            for (int t = Activity::TeamOne; t < m_TeamCount; ++t)
                 tiedTeams[t] = false;
             // This team is now tied with itself (ie not tied)
             tiedTeams[team] = true;
@@ -828,7 +828,7 @@ int MetaMan::WhichTeamIsLeading()
     {
         float highestGold = 0;
         // Go through all tied teams
-        for (int team = Activity::TEAM_1; team < m_TeamCount; ++team)
+        for (int team = Activity::TeamOne; team < m_TeamCount; ++team)
         {
             // One of the teams tied in bases
             if (tiedTeams[team])
@@ -923,25 +923,25 @@ void MetaMan::SetSuspend(bool suspend)
 
 int MetaMan::WhichTeamOwnsAllSites()
 {
-    int owner = Activity::NOTEAM;
+    int owner = Activity::NoTeam;
     for (vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
     {
         if ((*sItr)->IsRevealed())
         {
             // A site with no owner means that not all sites have been taken duh
-            if ((*sItr)->GetTeamOwnership() == Activity::NOTEAM)
+            if ((*sItr)->GetTeamOwnership() == Activity::NoTeam)
             {
-                owner = Activity::NOTEAM;
+                owner = Activity::NoTeam;
                 break;
             }
 
             // So the site is owned by someone, and that someone is the only encountered owner yet
-            if (owner == Activity::NOTEAM || (*sItr)->GetTeamOwnership() == owner)
+            if (owner == Activity::NoTeam || (*sItr)->GetTeamOwnership() == owner)
                 owner = (*sItr)->GetTeamOwnership();
             // We found two diff teams owning sites, so noone owns em all
             else
             {
-                owner = Activity::NOTEAM;
+                owner = Activity::NoTeam;
                 break;                
             }
         }
@@ -958,13 +958,13 @@ int MetaMan::WhichTeamOwnsAllSites()
 bool MetaMan::IsGameOver()
 {
 // This is the old condition of all sites being conquered
-//    if (m_RevealedScenes >= m_Scenes.size() && WhichTeamOwnsAllSites() != Activity::NOTEAM)
+//    if (m_RevealedScenes >= m_Scenes.size() && WhichTeamOwnsAllSites() != Activity::NoTeam)
 //        return true;
 
     // GAME IS OVER:
     // IF no players have any brains left in their respective pool, OR only one team does AND they are the leader in sites owned
     int onlyTeamLeft = OnlyTeamWithAnyBrainPoolLeft();
-    if (NoBrainsLeftInAnyPool() || (onlyTeamLeft != Activity::NOTEAM && WhichTeamIsLeading() == onlyTeamLeft))
+    if (NoBrainsLeftInAnyPool() || (onlyTeamLeft != Activity::NoTeam && WhichTeamIsLeading() == onlyTeamLeft))
         return true;
 
     return false;
@@ -1141,7 +1141,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
         if ((*sItr)->GetTeamOwnership() == pThisPlayer->GetTeam())
             ownedScenes.push_back(*sItr);
         // Enemy-owned scene
-        else if ((*sItr)->GetTeamOwnership() != Activity::NOTEAM)
+        else if ((*sItr)->GetTeamOwnership() != Activity::NoTeam)
 		{
             enemyScenes.push_back(*sItr);
 			// Scenes with heavy investment owned by a team with lots of funds are less likely to attack

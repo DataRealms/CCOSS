@@ -279,7 +279,7 @@ friend class MetaSave;
 // Arguments:       Which player.
 // Return value:    The team of that player.
 
-    int GetTeamOfPlayer(int metaPlayer) const { return metaPlayer >= Players::PlayerOne && metaPlayer < m_Players.size() ? m_Players[metaPlayer].GetTeam() : Activity::NOTEAM; }
+    int GetTeamOfPlayer(int metaPlayer) const { return metaPlayer >= Players::PlayerOne && metaPlayer < m_Players.size() ? m_Players[metaPlayer].GetTeam() : Activity::NoTeam; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -398,7 +398,7 @@ friend class MetaSave;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates which single team is left with brains, if any.
 // Arguments:       None.
-// Return value:    Which team stands alone with any brains in its ranks, if any. NOTEAM
+// Return value:    Which team stands alone with any brains in its ranks, if any. NoTeam
 //                  is returned if there's either more than one team, OR there are no
 //                  teams at all left with brains in em.
 
@@ -511,7 +511,7 @@ friend class MetaSave;
 // Arguments:       None.
 // Return value:    Whether the team index passed in is active for the current game.
 
-    bool IsActiveTeam(int team) { return team >= Activity::TEAM_1 && team < m_TeamCount; }
+    bool IsActiveTeam(int team) { return team >= Activity::TeamOne && team < m_TeamCount; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -519,7 +519,7 @@ friend class MetaSave;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether one team has ownership of all revealed sites.
 // Arguments:       None.
-// Return value:    Which team has all sites, if any. If not NOTEAM is returned.
+// Return value:    Which team has all sites, if any. If not NoTeam is returned.
 
     int WhichTeamOwnsAllSites();
 
@@ -638,7 +638,7 @@ protected:
     // The number of Team:s in play this game
     int m_TeamCount;
     // The flag icons of all teams
-    Icon m_TeamIcons[Activity::MAXTEAMCOUNT];
+    Icon m_TeamIcons[Activity::MaxTeamCount];
     // The current round the game is on, starting with count on 0
     int m_CurrentRound;
     // All Scenes of the current game, OWNED by this. Stored sequentially in order of revealing
@@ -657,7 +657,7 @@ protected:
 	// Game difficulty
 	int m_Difficulty;
 	// Teams AI Skill
-	int m_TeamAISkill[Activity::MAXTEAMCOUNT];
+	int m_TeamAISkill[Activity::MaxTeamCount];
 
     // Timer for measuring how long each phase has gone for
     Timer m_PhaseTimer;

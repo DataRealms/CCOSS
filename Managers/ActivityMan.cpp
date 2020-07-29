@@ -59,7 +59,7 @@ namespace RTE {
 			g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was successfully started");
 		else {
 			g_ConsoleMan.PrintString("ERROR: Activity \"" + m_Activity->GetPresetName() + "\" was NOT started due to errors!");
-			m_Activity->SetActivityState(Activity::INERROR);
+			m_Activity->SetActivityState(Activity::HasError);
 			return error;
 		}
 

@@ -1805,11 +1805,11 @@ int LuaMan::Create()
             ]
             .enum_("AISkillSetting")
             [
-				value("INFERIORSKILL", Activity::INFERIORSKILL),
-				value("AVERAGESKILL", Activity::AVERAGESKILL),
-				value("GOODSKILL", Activity::GOODSKILL),
-				value("UNFAIRSKILL", Activity::UNFAIRSKILL),
-				value("DEFAULTSKILL", Activity::DEFAULTSKILL)
+				value("INFERIORSKILL", Activity::AISkillSetting::InferiorSkill),
+				value("DEFAULTSKILL", Activity::AISkillSetting::DefaultSkill),
+				value("AVERAGESKILL", Activity::AISkillSetting::AverageSkill),
+				value("GOODSKILL", Activity::AISkillSetting::GoodSkill),
+				value("UNFAIRSKILL", Activity::AISkillSetting::UnfairSkill)	
             ]
             .def(constructor<>())
             .property("ClassName", &Activity::GetClassName)

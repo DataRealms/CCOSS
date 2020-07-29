@@ -201,12 +201,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::LoadDeviceIcons() {
-		m_DeviceIcons[DEVICE_KEYB_ONLY] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Keyboard"));
-		m_DeviceIcons[DEVICE_MOUSE_KEYB] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Mouse"));
-		m_DeviceIcons[DEVICE_GAMEPAD_1] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 1"));
-		m_DeviceIcons[DEVICE_GAMEPAD_2] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 2"));
-		m_DeviceIcons[DEVICE_GAMEPAD_3] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 3"));
-		m_DeviceIcons[DEVICE_GAMEPAD_4] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 4"));
+		m_DeviceIcons[InputDevice::DEVICE_KEYB_ONLY] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Keyboard"));
+		m_DeviceIcons[InputDevice::DEVICE_MOUSE_KEYB] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Mouse"));
+		m_DeviceIcons[InputDevice::DEVICE_GAMEPAD_1] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 1"));
+		m_DeviceIcons[InputDevice::DEVICE_GAMEPAD_2] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 2"));
+		m_DeviceIcons[InputDevice::DEVICE_GAMEPAD_3] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 3"));
+		m_DeviceIcons[InputDevice::DEVICE_GAMEPAD_4] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad 4"));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -662,7 +662,7 @@ namespace RTE {
 						return m_NetworkMouseButtonHeldState[player][whichButton];
 					}
 				}
-				return m_NetworkMouseButtonHeldState[0][whichButton];
+				return m_NetworkMouseButtonHeldState[Players::PlayerOne][whichButton];
 			} else {
 				return m_NetworkMouseButtonHeldState[whichPlayer][whichButton];
 			}
@@ -683,7 +683,7 @@ namespace RTE {
 						return m_NetworkMouseButtonPressedState[i][whichButton];
 					}
 				}
-				return m_NetworkMouseButtonPressedState[0][whichButton];
+				return m_NetworkMouseButtonPressedState[Players::PlayerOne][whichButton];
 			} else {
 				return m_NetworkMouseButtonPressedState[whichPlayer][whichButton];
 			}
@@ -706,7 +706,7 @@ namespace RTE {
 						return m_NetworkMouseButtonReleasedState[i][whichButton];
 					}
 				}
-				return m_NetworkMouseButtonReleasedState[0][whichButton];
+				return m_NetworkMouseButtonReleasedState[Players::PlayerOne][whichButton];
 			} else {
 				return m_NetworkMouseButtonReleasedState[whichPlayer][whichButton];
 			}
@@ -1321,7 +1321,7 @@ namespace RTE {
 		std::memcpy(s_PrevKeyStates, const_cast<const char *>(key), KEY_MAX);
 
 		// Save the mouse button states so that we can compare it next frame and see which buttons have changed.
-		for (int mouseButton = 0; mouseButton < MAX_MOUSE_BUTTONS; ++mouseButton) {
+		for (int mouseButton = 0; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; ++mouseButton) {
 			s_PrevMouseButtonStates[mouseButton] = s_MouseButtonStates[mouseButton];
 		}
 
@@ -1339,7 +1339,7 @@ namespace RTE {
 		}
 
 		// Store pressed and released events to be picked by NetworkClient during it's on-timer update
-		for (int element = 0; element < INPUT_COUNT; element++) {
+		for (int element = 0; element < InputElements::INPUT_COUNT; element++) {
 			// Only store press and release events if they happened, Client will clear those after update so we don't care about false
 			if (ElementPressed(0, element)) { m_NetworkAccumulatedElementPressed[element] = true; }
 			if (ElementReleased(0, element)) { m_NetworkAccumulatedElementReleased[element] = true; }

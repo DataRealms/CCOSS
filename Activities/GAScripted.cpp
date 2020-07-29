@@ -404,12 +404,12 @@ void GAScripted::Update()
 
         // The current player's team
         int team = m_Team[player];
-        if (team == NOTEAM)
+        if (team == Teams::NoTeam)
             continue;
     }
 
     // If the game didn't end, keep updating activity
-    if (m_ActivityState != OVER)
+    if (m_ActivityState != ActivityState::Over)
     {   
         // Call the defined function, but only after first checking if it exists
         g_LuaMan.RunScriptString("if " + m_LuaClassName + ".UpdateActivity then " + m_LuaClassName + ":UpdateActivity(); end");
@@ -556,7 +556,7 @@ void GAScripted::InitAIs()
     Actor *pActor = 0;
     Actor *pFirstActor = 0;
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;

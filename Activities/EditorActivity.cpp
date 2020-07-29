@@ -217,7 +217,7 @@ int EditorActivity::Start()
     g_UInputMan.DisableMouseMoving(true);
     g_UInputMan.DisableMouseMoving(false);
 
-    m_ActivityState = EDITING;
+    m_ActivityState = ActivityState::Editing;
     m_Paused = true;
 //    g_TimerMan.PauseSim(true);
     m_ModeChange = true;
@@ -271,7 +271,7 @@ void EditorActivity::End()
 
     
 
-    m_ActivityState = OVER;
+    m_ActivityState = ActivityState::Over;
 }
 
 
@@ -284,7 +284,7 @@ void EditorActivity::End()
 void EditorActivity::Update()
 {
     // Always show teh messages of the editor
-    m_MsgTimer[0].Reset();
+    m_MessageTimer[0].Reset();
 
     Activity::Update();
 

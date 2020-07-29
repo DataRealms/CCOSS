@@ -11,7 +11,7 @@ namespace RTE {
 
 	void MetaPlayer::Clear() {
 		m_Name = "";
-		m_Team = Activity::NOTEAM;
+		m_Team = Activity::NoTeam;
 		m_Human = true;
 		m_InGamePlayer = Players::PlayerOne;
 		m_Aggressiveness = 0.5F;

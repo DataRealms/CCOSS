@@ -75,20 +75,20 @@ namespace RTE {
 
 		for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
 		{
-			for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
+			for (int team = Teams::TeamOne; team < TEAMROWCOUNT; ++team)
 			{
 				//            m_aaControls = team == TEAM_DISABLED;
 				m_aapPlayerBoxes[player][team] = 0;
 			}
 		}
 
-		for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
+		for (int team = Teams::TeamOne; team < TEAMROWCOUNT; ++team)
 		{
 			m_apTeamBoxes[team] = 0;
 			m_apTeamNameLabels[team] = 0;
 		}
 
-		for (int team = Activity::TEAM_1; team < RTE::Activity::MAXTEAMCOUNT; ++team)
+		for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
 		{
 			m_apTeamTechSelect[team] = 0;
 			m_apTeamAISkillSlider[team] = 0;
@@ -97,7 +97,7 @@ namespace RTE {
 
 		m_pStartErrorLabel = 0;
 		m_pCPULockLabel = 0;
-		m_LockedCPUTeam = Activity::NOTEAM;
+		m_LockedCPUTeam = Teams::NoTeam;
 
 		m_pGoldLabel = 0;
 		m_pGoldSlider = 0;
@@ -253,7 +253,7 @@ namespace RTE {
 		char str[128];
 		for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
 		{
-			for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
+			for (int team = Teams::TeamOne; team < TEAMROWCOUNT; ++team)
 			{
 				// +1 because the controls are indexed starting at 1, not 0
 				sprintf_s(str, sizeof(str), "P%dT%dBox", player + 1, team + 1);
@@ -261,30 +261,30 @@ namespace RTE {
 			}
 		}
 		m_apTeamBoxes[TEAM_DISABLED] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("TDIcon"));
-		m_apTeamBoxes[Activity::TEAM_1] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T1Icon"));
-		m_apTeamBoxes[Activity::TEAM_2] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T2Icon"));
-		m_apTeamBoxes[Activity::TEAM_3] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T3Icon"));
-		m_apTeamBoxes[Activity::TEAM_4] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T4Icon"));
+		m_apTeamBoxes[Teams::TeamOne] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T1Icon"));
+		m_apTeamBoxes[Teams::TeamTwo] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T2Icon"));
+		m_apTeamBoxes[Teams::TeamThree] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T3Icon"));
+		m_apTeamBoxes[Teams::TeamFour] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T4Icon"));
 		m_apTeamNameLabels[TEAM_DISABLED] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("TDLabel"));
-		m_apTeamNameLabels[Activity::TEAM_1] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T1Label"));
-		m_apTeamNameLabels[Activity::TEAM_2] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T2Label"));
-		m_apTeamNameLabels[Activity::TEAM_3] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T3Label"));
-		m_apTeamNameLabels[Activity::TEAM_4] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T4Label"));
-		m_apTeamTechSelect[Activity::TEAM_1] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T1TechCombo"));
-		m_apTeamTechSelect[Activity::TEAM_2] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T2TechCombo"));
-		m_apTeamTechSelect[Activity::TEAM_3] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T3TechCombo"));
-		m_apTeamTechSelect[Activity::TEAM_4] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T4TechCombo"));
-		m_apTeamAISkillSlider[Activity::TEAM_1] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T1AISkillSlider"));
-		m_apTeamAISkillSlider[Activity::TEAM_2] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T2AISkillSlider"));
-		m_apTeamAISkillSlider[Activity::TEAM_3] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T3AISkillSlider"));
-		m_apTeamAISkillSlider[Activity::TEAM_4] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T4AISkillSlider"));
-		m_apTeamAISkillLabel[Activity::TEAM_1] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T1AISkillLabel"));
-		m_apTeamAISkillLabel[Activity::TEAM_2] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T2AISkillLabel"));
-		m_apTeamAISkillLabel[Activity::TEAM_3] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T3AISkillLabel"));
-		m_apTeamAISkillLabel[Activity::TEAM_4] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T4AISkillLabel"));
+		m_apTeamNameLabels[Teams::TeamOne] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T1Label"));
+		m_apTeamNameLabels[Teams::TeamTwo] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T2Label"));
+		m_apTeamNameLabels[Teams::TeamThree] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T3Label"));
+		m_apTeamNameLabels[Teams::TeamFour] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T4Label"));
+		m_apTeamTechSelect[Teams::TeamOne] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T1TechCombo"));
+		m_apTeamTechSelect[Teams::TeamTwo] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T2TechCombo"));
+		m_apTeamTechSelect[Teams::TeamThree] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T3TechCombo"));
+		m_apTeamTechSelect[Teams::TeamFour] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T4TechCombo"));
+		m_apTeamAISkillSlider[Teams::TeamOne] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T1AISkillSlider"));
+		m_apTeamAISkillSlider[Teams::TeamTwo] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T2AISkillSlider"));
+		m_apTeamAISkillSlider[Teams::TeamThree] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T3AISkillSlider"));
+		m_apTeamAISkillSlider[Teams::TeamFour] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T4AISkillSlider"));
+		m_apTeamAISkillLabel[Teams::TeamOne] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T1AISkillLabel"));
+		m_apTeamAISkillLabel[Teams::TeamTwo] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T2AISkillLabel"));
+		m_apTeamAISkillLabel[Teams::TeamThree] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T3AISkillLabel"));
+		m_apTeamAISkillLabel[Teams::TeamFour] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T4AISkillLabel"));
 
 
-		for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; team++)
+		for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; team++)
 		{
 			// Hide tech combobxes by default
 			m_apTeamTechSelect[team]->SetEnabled(false);
@@ -296,7 +296,7 @@ namespace RTE {
 			// Hide AIs skill combobxes by default
 			m_apTeamAISkillSlider[team]->SetEnabled(false);
 			m_apTeamAISkillSlider[team]->SetVisible(false);
-			m_apTeamAISkillSlider[team]->SetValue(Activity::DEFAULTSKILL);
+			m_apTeamAISkillSlider[team]->SetValue(AISkillSetting::DefaultSkill);
 
 			m_apTeamAISkillLabel[team]->SetEnabled(false);
 			m_apTeamAISkillLabel[team]->SetVisible(false);
@@ -319,18 +319,18 @@ namespace RTE {
 				if ((techPos = techName.find(techString)) != string::npos)
 				{
 					techName.replace(techPos, techString.length(), "");
-					m_apTeamTechSelect[Activity::TEAM_1]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-					m_apTeamTechSelect[Activity::TEAM_2]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-					m_apTeamTechSelect[Activity::TEAM_3]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-					m_apTeamTechSelect[Activity::TEAM_4]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+					m_apTeamTechSelect[Teams::TeamOne]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+					m_apTeamTechSelect[Teams::TeamTwo]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+					m_apTeamTechSelect[Teams::TeamThree]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+					m_apTeamTechSelect[Teams::TeamFour]->GetListPanel()->AddItem(techName, "", 0, 0, i);
 				}
 			}
 		}
 		// Make the lists be scrolled to the top when they are initially dropped
-		m_apTeamTechSelect[Activity::TEAM_1]->GetListPanel()->ScrollToTop();
-		m_apTeamTechSelect[Activity::TEAM_2]->GetListPanel()->ScrollToTop();
-		m_apTeamTechSelect[Activity::TEAM_3]->GetListPanel()->ScrollToTop();
-		m_apTeamTechSelect[Activity::TEAM_4]->GetListPanel()->ScrollToTop();
+		m_apTeamTechSelect[Teams::TeamOne]->GetListPanel()->ScrollToTop();
+		m_apTeamTechSelect[Teams::TeamTwo]->GetListPanel()->ScrollToTop();
+		m_apTeamTechSelect[Teams::TeamThree]->GetListPanel()->ScrollToTop();
+		m_apTeamTechSelect[Teams::TeamFour]->GetListPanel()->ScrollToTop();
 
 		m_pGoldLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("GoldLabel"));
 		m_pGoldSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("GoldSlider"));
@@ -463,27 +463,27 @@ namespace RTE {
 			return;
 
 		// Set gold slider value if activity sepcifies default gold amounts for difficulties
-		if (m_pDifficultySlider->GetValue() < GameActivity::CAKEDIFFICULTY)
+		if (m_pDifficultySlider->GetValue() < DifficultySetting::CakeDifficulty)
 		{
 			if (pSelectedGA->GetDefaultGoldCake() > -1)
 				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldCake());
 		}
-		else if (m_pDifficultySlider->GetValue() < GameActivity::EASYDIFFICULTY)
+		else if (m_pDifficultySlider->GetValue() < DifficultySetting::EasyDifficulty)
 		{
 			if (pSelectedGA->GetDefaultGoldEasy() > -1)
 				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldEasy());
 		}
-		else if (m_pDifficultySlider->GetValue() < GameActivity::MEDIUMDIFFICULTY)
+		else if (m_pDifficultySlider->GetValue() < DifficultySetting::MediumDifficulty)
 		{
 			if (pSelectedGA->GetDefaultGoldMedium() > -1)
 				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldMedium());
 		}
-		else if (m_pDifficultySlider->GetValue() < GameActivity::HARDDIFFICULTY)
+		else if (m_pDifficultySlider->GetValue() < DifficultySetting::HardDifficulty)
 		{
 			if (pSelectedGA->GetDefaultGoldHard() > -1)
 				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldHard());
 		}
-		else if (m_pDifficultySlider->GetValue() < GameActivity::NUTSDIFFICULTY)
+		else if (m_pDifficultySlider->GetValue() < DifficultySetting::NutsDifficulty)
 		{
 			if (pSelectedGA->GetDefaultGoldNuts() > -1)
 				m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldNuts());
@@ -499,15 +499,15 @@ namespace RTE {
 	void MultiplayerServerLobby::UpdateDifficultySlider()
 	{
 		// Set the description
-		if (m_pDifficultySlider->GetValue() < GameActivity::CAKEDIFFICULTY)
+		if (m_pDifficultySlider->GetValue() < DifficultySetting::CakeDifficulty)
 			m_pDifficultyLabel->SetText("Difficulty: Cake");
-		else if (m_pDifficultySlider->GetValue() < GameActivity::EASYDIFFICULTY)
+		else if (m_pDifficultySlider->GetValue() < DifficultySetting::EasyDifficulty)
 			m_pDifficultyLabel->SetText("Difficulty: Easy");
-		else if (m_pDifficultySlider->GetValue() < GameActivity::MEDIUMDIFFICULTY)
+		else if (m_pDifficultySlider->GetValue() < DifficultySetting::MediumDifficulty)
 			m_pDifficultyLabel->SetText("Difficulty: Medium");
-		else if (m_pDifficultySlider->GetValue() < GameActivity::HARDDIFFICULTY)
+		else if (m_pDifficultySlider->GetValue() < DifficultySetting::HardDifficulty)
 			m_pDifficultyLabel->SetText("Difficulty: Hard");
-		else if (m_pDifficultySlider->GetValue() < GameActivity::NUTSDIFFICULTY)
+		else if (m_pDifficultySlider->GetValue() < DifficultySetting::NutsDifficulty)
 			m_pDifficultyLabel->SetText("Difficulty: Nuts");
 		else
 			m_pDifficultyLabel->SetText("Difficulty: Nuts!");
@@ -553,14 +553,14 @@ namespace RTE {
 				// The pre-set team that should absolutely be CPU played
 				m_LockedCPUTeam = pGameActivity->GetCPUTeam();
 				// Align the locked CPU team text label with the appropriate row
-				if (m_LockedCPUTeam != Activity::NOTEAM)
+				if (m_LockedCPUTeam != Teams::NoTeam)
 					m_pCPULockLabel->SetPositionAbs(m_pCPULockLabel->GetXPos(), m_apTeamNameLabels[m_LockedCPUTeam]->GetYPos());
 			}
 
 			// Set up the matrix of player control boxes
 			for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
 			{
-				for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
+				for (int team = Teams::TeamOne; team < TEAMROWCOUNT; ++team)
 				{
 					if (newActivity)
 					{
@@ -580,7 +580,7 @@ namespace RTE {
 						}
 
 						// The CPU gets placed on its locked team
-						if (m_LockedCPUTeam != Activity::NOTEAM && player == PLAYER_CPU)
+						if (m_LockedCPUTeam != Teams::NoTeam && player == PLAYER_CPU)
 						{
 							if (team == m_LockedCPUTeam)
 							{
@@ -604,7 +604,7 @@ namespace RTE {
 						// That isn't on a team row locked to the CPU
 						&& m_LockedCPUTeam != team
 						// And not the CPU player if he is locked to a CPU team
-						&& (m_LockedCPUTeam == Activity::NOTEAM || player != PLAYER_CPU))
+						&& (m_LockedCPUTeam == Teams::NoTeam || player != PLAYER_CPU))
 						// And a cell not already selected
 						//&& m_aapPlayerBoxes[player][team]->GetDrawType() != GUICollectionBox::Image)
 						// And players aren't maxed out for this Activity, or we are removing a player from team assignment
@@ -615,7 +615,7 @@ namespace RTE {
 						{
 							// Need to clear all other rows of this column
 	// TODO:  -- unless the CPU column?
-							for (int t2 = Activity::TEAM_1; t2 < TEAMROWCOUNT; ++t2)
+							for (int t2 = Teams::TeamOne; t2 < TEAMROWCOUNT; ++t2)
 							{
 								// This clicked cell should get the icon of this column
 								if (t2 == team)
@@ -675,7 +675,7 @@ namespace RTE {
 							// If Player clicked CPU disabled button, clear CPU row
 							if (player == PLAYER_CPU && team == TEAM_DISABLED)
 							{
-								for (int t2 = Activity::TEAM_1; t2 <= Activity::TEAM_4; ++t2)
+								for (int t2 = Teams::TeamOne; t2 <= Teams::TeamFour; ++t2)
 								{
 									if (m_aapPlayerBoxes[PLAYER_CPU][t2]->GetDrawType() == GUICollectionBox::Image)
 									{
@@ -703,7 +703,7 @@ namespace RTE {
 
 							//Check if we need to clear or set CPU disabled team icon
 							bool noCPUs = true;
-							for (int t2 = Activity::TEAM_1; t2 <= Activity::TEAM_4; ++t2)
+							for (int t2 = Teams::TeamOne; t2 <= Teams::TeamFour; ++t2)
 							{
 								if (m_aapPlayerBoxes[PLAYER_CPU][t2]->GetDrawType() == GUICollectionBox::Image)
 									noCPUs = false;
@@ -738,7 +738,7 @@ namespace RTE {
 			}
 
 			// Team info columns
-			for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
+			for (int team = Teams::TeamOne; team < TEAMROWCOUNT; ++team)
 			{
 				// Update the team names and such
 				if (newActivity)
@@ -811,7 +811,7 @@ namespace RTE {
 				}
 				else
 				{
-					if (team >= Activity::TEAM_1 && team < Activity::MAXTEAMCOUNT)
+					if (team >= Teams::TeamOne && team < Teams::MaxTeamCount)
 					{
 						m_apTeamTechSelect[team]->SetEnabled(false);
 						m_apTeamTechSelect[team]->SetVisible(false);
@@ -868,7 +868,7 @@ namespace RTE {
 
 
 			// Set skill labels
-			for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; team++)
+			for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; team++)
 			{
 				m_apTeamAISkillLabel[team]->SetText(Activity::GetAISkillString(m_apTeamAISkillSlider[team]->GetValue()));
 			}
@@ -879,7 +879,7 @@ namespace RTE {
 		{
 			m_pStartScenarioButton->SetVisible(false);
 			m_pStartErrorLabel->SetVisible(true);
-			m_pCPULockLabel->SetVisible(m_LockedCPUTeam != Activity::NOTEAM);
+			m_pCPULockLabel->SetVisible(m_LockedCPUTeam != Teams::NoTeam);
 		}
 	}
 
@@ -894,7 +894,7 @@ namespace RTE {
 		// Go through all the on-team non-CPU cells and see how many players are already assigned.
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
 		{
-			for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+			for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
 			{
 				if (m_aapPlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image)
 					++count;
@@ -953,7 +953,7 @@ namespace RTE {
 		pActivity->ClearPlayers(false);
 		for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
 		{
-			for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
+			for (int team = Teams::TeamOne; team < TEAMROWCOUNT; ++team)
 			{
 				if (team != TEAM_DISABLED && m_aapPlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image)
 				{
@@ -969,7 +969,7 @@ namespace RTE {
 			}
 		}
 
-		for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+		for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
 		{
 			// Set up techs
 			GUIListPanel::Item *pTechItem = m_apTeamTechSelect[team]->GetSelectedItem();
@@ -998,7 +998,7 @@ namespace RTE {
 			if (m_apTeamAISkillSlider[team]->IsEnabled())
 				pGameActivity->SetTeamAISkill(team, m_apTeamAISkillSlider[team]->GetValue());
 			else
-				pGameActivity->SetTeamAISkill(team, Activity::DEFAULTSKILL);
+				pGameActivity->SetTeamAISkill(team, AISkillSetting::DefaultSkill);
 		}
 
 		//Force close all previously opened files
@@ -1131,7 +1131,7 @@ namespace RTE {
 	{
 		Activity::End();
 
-		m_ActivityState = OVER;
+		m_ActivityState = ActivityState::Over;
 		g_FrameMan.SetDrawNetworkBackBuffer(false);
 	}
 
@@ -1358,7 +1358,7 @@ namespace RTE {
 			// Draw the Player-Team matrix lines and disabled overlay effects
 			const Activity *pActivity = m_pActivitySelect->GetSelectedItem() ? dynamic_cast<const Activity *>(m_pActivitySelect->GetSelectedItem()->m_pEntity) : 0;
 			int lineY = 80;
-			for (int team = 0; team < Activity::MAXTEAMCOUNT; ++team)
+			for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
 			{
 				// Disabled shaded boxes
 				if (pActivity && (!pActivity->TeamActive(team) || m_LockedCPUTeam == team))
@@ -1379,7 +1379,7 @@ namespace RTE {
 			}
 
 			// Manually draw UI elements on top of colored rectangle
-			for (int team = Activity::MAXTEAMCOUNT - 1; team >= Activity::TEAM_1; team--)
+			for (int team = Teams::MaxTeamCount - 1; team >= Teams::TeamOne; team--)
 			{
 				if (m_apTeamTechSelect[team]->GetVisible())
 				{

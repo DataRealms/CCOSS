@@ -41,13 +41,13 @@ class SceneLayer;
 
 struct AlarmEvent
 {
-    AlarmEvent() { m_ScenePos.Reset(); m_Team = Activity::NOTEAM; m_Range = 1; }
-    AlarmEvent(const Vector &pos, int team = Activity::NOTEAM, float range = 1) { m_ScenePos = pos; m_Team = (Activity::Team)team; m_Range = range; }
+    AlarmEvent() { m_ScenePos.Reset(); m_Team = Activity::NoTeam; m_Range = 1; }
+    AlarmEvent(const Vector &pos, int team = Activity::NoTeam, float range = 1) { m_ScenePos = pos; m_Team = (Activity::Teams)team; m_Range = range; }
     
     // Absolute position in the scene where this occurred
     Vector m_ScenePos;
     // The team of whatever object that caused this event
-    Activity::Team m_Team;
+    Activity::Teams m_Team;
     // The range multiplier, that this alarming event can be heard
     float m_Range;
 };
@@ -273,7 +273,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get a pointer to an Actor in the internal Actor list that is is not of
 //                  the specified team and closest to a specific scene point.
-// Arguments:       Which team to try to get an enemy Actor for. NOTEAM means all teams.
+// Arguments:       Which team to try to get an enemy Actor for. NoTeam means all teams.
 //                  The Scene point to search for the closest to.
 //                  The maximum radius around that scene point to search.
 //                  A vector to be filled out with the distance of the returned closest to
@@ -660,7 +660,7 @@ public:
 // Method:          KillAllActors
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Kills and destroys all actors of a specific team.
-// Arguments:       The team to NOT annihilate, if NOTEAM, then ALL actors die.
+// Arguments:       The team to NOT annihilate, if NoTeam, then ALL actors die.
 // Return value:    How many Actors were killed.
 
     int KillAllActors(int exceptTeam = -1);
@@ -672,7 +672,7 @@ public:
 // Description:     Adds to a list ALL Actors in the world and removes them from the
 //                  MovableMan. Ownership IS transferred!
 // Arguments:       The list of Actors to put the evacuated Actor instances in.
-//                  The team to only eject Actors of. If NOTEAM, then all will be grabbed.
+//                  The team to only eject Actors of. If NoTeam, then all will be grabbed.
 //                  Whether to not grab any brains at all.
 // Return value:    How many Actors was transferred to the list.
 
@@ -696,10 +696,10 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Opens all doors and keeps them open until this is called again with false.
 // Arguments:       Whether to open all doors (true), or undo this action (false)
-//                  Which team to do this for. NOTEAM means all teams.
+//                  Which team to do this for. NoTeam means all teams.
 // Return value:    None.
 
-    void OpenAllDoors(bool open = true, int team = Activity::NOTEAM);
+    void OpenAllDoors(bool open = true, int team = Activity::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -709,10 +709,10 @@ public:
 //                  Used for making pathfinding work better, allowing teammember to navigate
 //                  through friendly bases.
 // Arguments:       Whether to enable the override (true), or undo this action (false)
-//                  Which team to do this for. NOTEAM means all teams.
+//                  Which team to do this for. NoTeam means all teams.
 // Return value:    None.
 
-    void OverrideMaterialDoors(bool enable, int team = Activity::NOTEAM);
+    void OverrideMaterialDoors(bool enable, int team = Activity::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -945,11 +945,11 @@ protected:
     std::deque<MovableObject *> m_AddedParticles;
 
     // Roster of each team's actors, sorted by their X positions in the scene. Actors not owned here
-    std::list<Actor *> m_ActorRoster[Activity::MAXTEAMCOUNT];
+    std::list<Actor *> m_ActorRoster[Activity::MaxTeamCount];
     // Whether to draw HUD lines between the actors of a specific team
-    bool m_SortTeamRoster[Activity::MAXTEAMCOUNT];
+    bool m_SortTeamRoster[Activity::MaxTeamCount];
 	// Every team's MO footprint
-	int m_TeamMOIDCount[Activity::MAXTEAMCOUNT];
+	int m_TeamMOIDCount[Activity::MaxTeamCount];
 
     // Optimization implementation
     // MO's that have already been asked whether they exist in the manager this frame, and the search result.

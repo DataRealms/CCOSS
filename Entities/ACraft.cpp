@@ -216,18 +216,18 @@ MOSRotating * ACraft::Exit::SuckInMOs(ACraft *pExitOwner)
         rayVec = pExitOwner->RotateOffset(m_Velocity);
         rayVec.SetMagnitude(m_Range);
 
-        MOID itemMOID = g_SceneMan.CastMORay(exitCorner, rayVec, pExitOwner->GetRootID(), Activity::NOTEAM, g_MaterialGrass, true, 4);
+        MOID itemMOID = g_SceneMan.CastMORay(exitCorner, rayVec, pExitOwner->GetRootID(), Activity::NoTeam, g_MaterialGrass, true, 4);
         // Try the other side if we didn't find anything
         if (itemMOID == g_NoMOID)
         {
             exitCorner -= exitRadius * 2;
-            itemMOID = g_SceneMan.CastMORay(exitCorner, rayVec, pExitOwner->GetRootID(), Activity::NOTEAM, g_MaterialGrass, true, 4);
+            itemMOID = g_SceneMan.CastMORay(exitCorner, rayVec, pExitOwner->GetRootID(), Activity::NoTeam, g_MaterialGrass, true, 4);
         }
         // Try center beam if we STILL didn't find anything
         if (itemMOID == g_NoMOID)
         {
             exitCorner += exitRadius;
-            itemMOID = g_SceneMan.CastMORay(exitCorner, rayVec, pExitOwner->GetRootID(), Activity::NOTEAM, g_MaterialGrass, true, 4);
+            itemMOID = g_SceneMan.CastMORay(exitCorner, rayVec, pExitOwner->GetRootID(), Activity::NoTeam, g_MaterialGrass, true, 4);
         }
 
         // See if we caught anything
@@ -983,7 +983,7 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
     // Only draw if the team viewing this is on the same team OR has seen the space where this is located
     int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NOTEAM)
+    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
     {
         if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
             return;
@@ -1045,7 +1045,7 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         {
             char str[64];
             int iconOff = m_apAIIcons[0]->w + 2;
-            int iconColor = m_Team == Activity::TEAM_1 ? AIICON_RED : AIICON_GREEN;
+            int iconColor = m_Team == Activity::TeamOne ? AIICON_RED : AIICON_GREEN;
             Vector iconPos = GetCPUPos() - targetPos;
             
             if (m_AIMode == AIMODE_RETURN)

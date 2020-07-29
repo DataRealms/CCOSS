@@ -155,7 +155,7 @@ int GABrainMatch::Start()
     ////////////////////////////////
     // Set up teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -182,9 +182,9 @@ int GABrainMatch::Start()
                     // No brain found on other team... then just place somewhere in the ground, spaced out
                     else
                     {
-                        if (team == TEAM_1)
+                        if (team == Teams::TeamOne)
                             brainPos.SetXY((float)g_SceneMan.GetSceneWidth() * 0.25, (float)g_SceneMan.GetSceneHeight() * 0.75);
-                        if (team == TEAM_2)
+                        if (team == Teams::TeamTwo)
                             brainPos.SetXY((float)g_SceneMan.GetSceneWidth() * 0.75, (float)g_SceneMan.GetSceneHeight() * 0.75);
                     }
                     m_pCPUBrain->SetPos(brainPos);
@@ -208,7 +208,7 @@ int GABrainMatch::Start()
         // Make sure all players have resident brains, or make them edit one in
         if (!g_SceneMan.GetScene()->GetResidentBrain(player))
         {
-            m_ActivityState = EDITING;
+            m_ActivityState = ActivityState::Editing;
             const Entity *pBrainBunker = g_PresetMan.GetEntityPreset("TerrainObject", "Brain Vault");
             m_pEditorGUI[player]->SetCurrentObject(dynamic_cast<SceneObject *>(pBrainBunker->Clone()));
             m_pEditorGUI[player]->SetEditorGUIMode(SceneEditorGUI::INSTALLINGBRAIN);
@@ -223,7 +223,7 @@ int GABrainMatch::Start()
             // If we can't find an unassigned brain in the scene to give each player, then force to go into editing mode to place one
             if (!(m_Brain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
             {
-                m_ActivityState = EDITING;
+                m_ActivityState = ActivityState::Editing;
                 // Play editing music
                 g_AudioMan.ClearMusicQueue();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/ccambient4.ogg");
@@ -246,7 +246,7 @@ int GABrainMatch::Start()
 */
     }
 
-    if (m_ActivityState == EDITING)
+    if (m_ActivityState == ActivityState::Editing)
     {
         // Play editing music
         g_AudioMan.ClearMusicQueue();
@@ -260,14 +260,14 @@ int GABrainMatch::Start()
             continue;
 
         g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
-        if (m_ActivityState == EDITING)
+        if (m_ActivityState == ActivityState::Editing)
             g_FrameMan.SetScreenText((player % 2 == 0) ? "Place your brain vault and build your bunker around it..." : "...then select \"DONE\" from the pie menu!", ScreenOfPlayer(player), 0, 3000);
-        else if (m_ActivityState == RUNNING)
+        else if (m_ActivityState == ActivityState::Running)
             g_FrameMan.SetScreenText((player % 2 == 0) ? "Mine Gold and buy more firepower with the funds..." : "...then smash the competing brain to claim victory!", ScreenOfPlayer(player), 0, 3000);
     }
 
     // Disable AI if we are editing
-    DisableAIs(m_ActivityState == EDITING);
+    DisableAIs(m_ActivityState == ActivityState::Editing);
 
     return error;
 }
@@ -282,7 +282,7 @@ int GABrainMatch::Start()
 void GABrainMatch::Update()
 {
     // Avoid game logic when we're editing
-    if (m_ActivityState == EDITING)
+    if (m_ActivityState == ActivityState::Editing)
     {
         UpdateEditing();
         return;
@@ -303,11 +303,11 @@ void GABrainMatch::Update()
 
         // The current player's team
         int team = m_Team[player];
-        if (team == NOTEAM)
+        if (team == Teams::NoTeam)
             continue;
 
         // Make sure the game is not already ending
-        if (m_ActivityState != OVER)
+        if (m_ActivityState != ActivityState::Over)
         {
             // Check if any player's brain is dead
             if (!g_MovableMan.IsActor(m_Brain[player]) || !m_Brain[player]->HasObjectInGroup("Brains"))
@@ -334,7 +334,7 @@ void GABrainMatch::Update()
                             End();
                         }
                     }
-                    m_MsgTimer[player].Reset();
+                    m_MessageTimer[player].Reset();
                 }
             }
             else
@@ -343,7 +343,7 @@ void GABrainMatch::Update()
                 SetObservationTarget(m_Brain[player]->GetPos(), player);
                 // Mark each brain to be protected and destroyed by the respective teams
                 AddObjectivePoint("Protect!", m_Brain[player]->GetAboveHUDPos(), team, GameActivity::ARROWDOWN);
-                for (int t = Activity::TEAM_1; t < MAXTEAMCOUNT; ++t)
+                for (int t = Teams::TeamOne; t < Teams::MaxTeamCount; ++t)
                 {
                     if (!m_TeamActive[team])
                         continue;
@@ -366,7 +366,7 @@ void GABrainMatch::Update()
     ///////////////////////////////////////////
     // Iterate through all teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -374,7 +374,7 @@ void GABrainMatch::Update()
         // Check for victory conditions
 
         // Make sure the game is not already ending
-        if (m_ActivityState != OVER)
+        if (m_ActivityState != ActivityState::Over)
         {
             // Check if the CPU brain is dead, if we're playing against the CPU
             if (m_CPUTeam >= 0 && team == m_CPUTeam && !g_MovableMan.IsActor(m_pCPUBrain))
@@ -404,7 +404,7 @@ void GABrainMatch::Update()
                         g_FrameMan.SetScreenText("Your competition is bankrupt!", ScreenOfPlayer(player));
                         m_WinnerTeam = m_Team[player];
                     }
-                    m_MsgTimer[player].Reset();
+                    m_MessageTimer[player].Reset();
                 }
                 End();
             }

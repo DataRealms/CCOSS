@@ -116,9 +116,9 @@ void MainMenuGUI::Clear()
     m_StartTeams = 2;
     m_StartFunds = 1600;
     for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player)
-        m_aTeamAssignments[player] = Activity::TEAM_1;
+        m_aTeamAssignments[player] = Activity::TeamOne;
     m_CPUTeam = -1;
-    m_StartDifficulty = GameActivity::MEDIUMDIFFICULTY;
+    m_StartDifficulty = Activity::MediumDifficulty;
     m_Quit = false;
 
     // Config screen
@@ -641,7 +641,7 @@ void MainMenuGUI::Update()
         {
             m_apScreenBox[MAINSCREEN]->SetVisible(true);
 
-            if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::RUNNING || g_ActivityMan.GetActivity()->GetActivityState() == Activity::EDITING))
+            if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing))
             {
                 m_apScreenBox[MAINSCREEN]->Resize(128, 220);
                 m_aMainMenuButton[RESUME]->SetVisible(true);
@@ -1129,10 +1129,10 @@ void MainMenuGUI::Update()
 			        if (anEvent.GetControl() == m_aSkirmishButton[player])
                     {
                         // Toggle
-                        if (m_aTeamAssignments[player] == Activity::TEAM_1)
-                            m_aTeamAssignments[player] = Activity::TEAM_2;
+                        if (m_aTeamAssignments[player] == Activity::TeamOne)
+                            m_aTeamAssignments[player] = Activity::TeamTwo;
                         else
-                            m_aTeamAssignments[player] = Activity::TEAM_1;
+                            m_aTeamAssignments[player] = Activity::TeamOne;
 
                         UpdateTeamBoxes();
 
@@ -1185,15 +1185,15 @@ void MainMenuGUI::Update()
 
                 // Set appropriate difficulty level
                 if (anEvent.GetControl()->GetName() == "ButtonStartEasy")
-                    m_StartDifficulty = GameActivity::EASYDIFFICULTY;
+                    m_StartDifficulty = Activity::EasyDifficulty;
                 else if (anEvent.GetControl()->GetName() == "ButtonStartMedium")
-                    m_StartDifficulty = GameActivity::MEDIUMDIFFICULTY;
+                    m_StartDifficulty = Activity::MediumDifficulty;
                 else if (anEvent.GetControl()->GetName() == "ButtonStartHard")
-                    m_StartDifficulty = GameActivity::HARDDIFFICULTY;
+                    m_StartDifficulty = Activity::HardDifficulty;
                 else if (anEvent.GetControl()->GetName() == "ButtonStartDeath")
-                    m_StartDifficulty = GameActivity::MAXDIFFICULTY;
+                    m_StartDifficulty = Activity::MaxDifficulty;
                 else
-                    m_StartDifficulty = GameActivity::MEDIUMDIFFICULTY;
+                    m_StartDifficulty = Activity::MediumDifficulty;
 
                 SetupSkirmishActivity();
 
@@ -1780,7 +1780,7 @@ void MainMenuGUI::HideAllScreens()
 void MainMenuGUI::QuitLogic()
 {
     // If quit confirm dialog not already showing, or an activity is running, show it
-    if (m_MenuScreen != QUITSCREEN && g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::RUNNING || g_ActivityMan.GetActivity()->GetActivityState() == Activity::EDITING))
+    if (m_MenuScreen != QUITSCREEN && g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing))
     {
         HideAllScreens();
         m_MenuScreen = QUITSCREEN;
@@ -1811,7 +1811,7 @@ void MainMenuGUI::SetupSkirmishActivity()
 // TODO: ******* add the game mode drop down and base the game mode selection off that instead
 
         // No CPU team, so Brain match
-        if (m_CPUTeam == Activity::NOTEAM)
+        if (m_CPUTeam == Activity::NoTeam)
         {
             g_SceneMan.SetSceneToLoad(m_pSceneSelector->GetItem(m_pSceneSelector->GetSelectedIndex())->m_Name);
 // TODO: Let player choose the GABrainMatch activity instance!
@@ -1952,7 +1952,7 @@ void MainMenuGUI::UpdateTeamBoxes()
     // Update button labels
     for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player)
     {
-        if (m_aTeamAssignments[player] == Activity::TEAM_1)
+        if (m_aTeamAssignments[player] == Activity::TeamOne)
         {
             m_aSkirmishBox[player]->SetDrawColor(makecol(70, 27, 12));
             sprintf_s(str, sizeof(str), "Player %i: %c", player + 1, -62);

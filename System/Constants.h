@@ -9,6 +9,10 @@ namespace RTE {
 	typedef int MID; //!< Distinctive type definition for Material IDs.
 #pragma endregion
 
+#pragma region Filesystem Constants
+	static constexpr char *c_ScreenshotDirectory = { "_Screenshots" };
+#pragma endregion
+
 #pragma region Physics Constants
 	static constexpr float c_PPM = 20.0F; //!< Pixels per Meter constant.
 	static constexpr float c_MPP = 1.0F / c_PPM; //!< Meters per Pixel constant.

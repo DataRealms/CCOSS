@@ -1942,6 +1942,9 @@ int main(int argc, char *argv[]) {
 	g_LoadingGUI.InitLoadingScreen();
 	InitMainMenu();
 
+	std::string screenshotSaveDir = g_System.GetWorkingDirectory() + "/" + c_ScreenshotDirectory;
+	if (!std::experimental::filesystem::exists(screenshotSaveDir)) { g_System.MakeDirectory(screenshotSaveDir); }
+
     if (!g_NetworkServer.IsServerModeEnabled()) {
 		if (g_LaunchIntoEditor) {
 			// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.

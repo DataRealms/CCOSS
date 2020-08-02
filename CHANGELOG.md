@@ -138,6 +138,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `Activity:IsPlayerTeam` renamed to `Activity:IsHumanTeam`.
 
+- Screenshot functionality changed: ([Issue #162](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/162))  
+	The `PrintScreen` button will now take a single screenshot on key release and will not take more until the key is pressed and released again.  
+	The `Ctrl+S` key combination is unchanged and will take a single screenshot every frame while the keys are held.  
+	The `Ctrl+W` and `Alt+W` key combinations will now take a single WorldDump/ScenePreview on `W` key release (while `Ctrl/Alt` are still held) and will not take more until the key is pressed and released again.
+	
+	Additionally, all screenshots (excluding abortscreen) will now be saved into a `_Screenshots` folder (`_` so it's on top and not hiding between module folders) to avoid polluting the root directory. ([Issue #163](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/163))  
+	This folder will be created automatically after modules are loaded if it is missing.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.

@@ -262,13 +262,13 @@ namespace RTE {
 		// Store element states as bit flags
 		for (int i = 0; i < INPUT_COUNT; i++) {
 			if (g_UInputMan.ElementHeld(0, i)) { msg.InputElementHeld = msg.InputElementHeld | bitMask; }
-			if (g_UInputMan.AccumulatedElementPressed(i)) { msg.InputElementPressed = msg.InputElementPressed | bitMask; }
-			if (g_UInputMan.AccumulatedElementReleased(i)) { msg.InputElementReleased = msg.InputElementReleased | bitMask; }
+			if (g_UInputMan.NetworkAccumulatedElementPressed(i)) { msg.InputElementPressed = msg.InputElementPressed | bitMask; }
+			if (g_UInputMan.NetworkAccumulatedElementReleased(i)) { msg.InputElementReleased = msg.InputElementReleased | bitMask; }
 
 			bitMask <<= 1;
 		}
 
-		g_UInputMan.ClearAccumulatedStates();
+		g_UInputMan.ClearNetworkAccumulatedStates();
 		m_Client->Send((const char *)&msg, sizeof(msg), IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, m_ServerID, false);
 	}
 

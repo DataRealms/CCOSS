@@ -378,7 +378,7 @@ void GameActivity::SetCPUTeam(int team)
 // Description:     Forces the this to focus player control to a specific Actor for a
 //                  specific team. OWNERSHIP IS NOT TRANSFERRED!
 
-bool GameActivity::SwitchToActor(Actor *pActor, int player, int team)
+bool GameActivity::SwitchToActor(Actor *pActor, short player, short team)
 {
     // Computer players don't focus on any Actor
     if (!m_IsHuman[player])
@@ -401,7 +401,7 @@ bool GameActivity::SwitchToActor(Actor *pActor, int player, int team)
 // Description:     Forces the this to focus player control to the next Actor of a
 //                  specific team, other than the current one focused on.
 
-void GameActivity::SwitchToNextActor(int player, int team, Actor *pSkip)
+void GameActivity::SwitchToNextActor(short player, short team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
     m_pPieMenu[player]->DisableAnim();
@@ -420,7 +420,7 @@ void GameActivity::SwitchToNextActor(int player, int team, Actor *pSkip)
 // Description:     Forces this to focus player control to the previous Actor of a
 //                  specific team, other than the current one focused on.
 
-void GameActivity::SwitchToPrevActor(int player, int team, Actor *pSkip)
+void GameActivity::SwitchToPrevActor(short player, short team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
     m_pPieMenu[player]->DisableAnim();

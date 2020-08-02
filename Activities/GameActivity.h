@@ -260,7 +260,7 @@ EntityAllocation(GameActivity)
 //                  be added to MovableMan already.
 // Return value:    Whether the focus switch was successful or not.
 
-    virtual bool SwitchToActor(Actor *pActor, int player = 0, int team = 0);
+    virtual bool SwitchToActor(Actor *pActor, short player = 0, short team = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -272,7 +272,7 @@ EntityAllocation(GameActivity)
 //                  An actor pointer to skip in the sequence.
 // Return value:    None.
 
-    virtual void SwitchToNextActor(int player, int team, Actor *pSkip = 0);
+    virtual void SwitchToNextActor(short player, short team, Actor *pSkip = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -284,7 +284,7 @@ EntityAllocation(GameActivity)
 //                  An actor pointer to skip in the sequence.
 // Return value:    None.
 
-    virtual void SwitchToPrevActor(int player, int team, Actor *pSkip = 0);
+    virtual void SwitchToPrevActor(short player, short team, Actor *pSkip = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

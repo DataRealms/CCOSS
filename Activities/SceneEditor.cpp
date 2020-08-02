@@ -395,7 +395,7 @@ void SceneEditor::Update()
             RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
             pTestGame->SetTeamOfPlayer(0, 0);
             pTestGame->SetCPUTeam(1);
-            pTestGame->SetDifficulty(GameActivity::MAXDIFFICULTY);
+            pTestGame->SetDifficulty(GameActivity::MaxDifficulty);
             pTestGame->Create();
             g_ActivityMan.SetStartActivity(pTestGame);
             g_ResetActivity = true;*/

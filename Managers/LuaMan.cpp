@@ -1510,11 +1510,11 @@ int LuaMan::Create()
             .def("KeyReleased", &UInputMan::KeyReleased)
             .def("KeyHeld", &UInputMan::KeyHeld)
             .def("WhichKeyHeld", &UInputMan::WhichKeyHeld)
-            .def("MouseButtonPressed", (bool (UInputMan::*)(int,short))&UInputMan::MouseButtonPressed) 
-			.def("MouseButtonPressed", (bool (UInputMan::*)(int))&UInputMan::MouseButtonPressed) 
-			.def("MouseButtonReleased", (bool (UInputMan::*)(int, short))&UInputMan::MouseButtonReleased)
+            .def("MouseButtonPressed", (bool (UInputMan::*)(int,short) const)&UInputMan::MouseButtonPressed) 
+			.def("MouseButtonPressed", (bool (UInputMan::*)(int))&UInputMan::MouseButtonPressed)
+			.def("MouseButtonReleased", (bool (UInputMan::*)(int, short) const)&UInputMan::MouseButtonReleased)
 			.def("MouseButtonReleased", (bool (UInputMan::*)(int))&UInputMan::MouseButtonReleased)
-			.def("MouseButtonHeld", (bool (UInputMan::*)(int, short))&UInputMan::MouseButtonHeld)
+			.def("MouseButtonHeld", (bool (UInputMan::*)(int, short) const)&UInputMan::MouseButtonHeld)
 			.def("MouseButtonHeld", (bool (UInputMan::*)(int))&UInputMan::MouseButtonHeld)
 			.def("MouseWheelMoved", &UInputMan::MouseWheelMoved)
             .def("JoyButtonPressed", &UInputMan::JoyButtonPressed)
@@ -1535,10 +1535,11 @@ int LuaMan::Create()
             .def("DisableMouseMoving", &UInputMan::DisableMouseMoving)
             .def("SetMousePos", &UInputMan::SetMousePos)
             .def("ForceMouseWithinBox", &UInputMan::ForceMouseWithinBox)
+			.def("AnyKeyPress", &UInputMan::AnyKeyPress)
             .def("AnyJoyInput", &UInputMan::AnyJoyInput)
             .def("AnyJoyPress", &UInputMan::AnyJoyPress)
             .def("AnyJoyButtonPress", &UInputMan::AnyJoyButtonPress)
-            .def("AnyInput", &UInputMan::AnyInput)
+            .def("AnyInput", &UInputMan::AnyKeyOrJoyInput)
             .def("AnyPress", &UInputMan::AnyPress)
             .def("AnyStartPress", &UInputMan::AnyStartPress)
             .property("FlagAltState", &UInputMan::FlagAltState)
@@ -1772,6 +1773,7 @@ int LuaMan::Create()
 				value("MAXDIFFICULTY", Activity::DifficultySetting::MaxDifficulty)
 			]
 			.enum_("AISkillSetting")[
+				value("MINSKILL", Activity::AISkillSetting::MinSkill),
 				value("INFERIORSKILL", Activity::AISkillSetting::InferiorSkill),
 				value("DEFAULTSKILL", Activity::AISkillSetting::DefaultSkill),
 				value("AVERAGESKILL", Activity::AISkillSetting::AverageSkill),
@@ -1824,12 +1826,8 @@ int LuaMan::Create()
             .def("SwitchToNextActor", &Activity::SwitchToNextActor)
             .def("SwitchToPrevActor", &Activity::SwitchToPrevActor)
             .property("Difficulty", &Activity::GetDifficulty, &Activity::SetDifficulty)
-            .def("IsPlayerTeam", &Activity::IsPlayerTeam)
-            .def("ResetMessageTimer", &Activity::ResetMessageTimer)
-// These are defined later in GAScripted
-/*            .def("Start", &Activity::Start)
-            .def("Pause", &Activity::Pause)
-            .def("End", &Activity::End)*/,
+            .def("IsHumanTeam", &Activity::IsHumanTeam)
+            .def("ResetMessageTimer", &Activity::ResetMessageTimer),
 
 		class_<GUIBanner>("GUIBanner")
 			.enum_("AnimMode")[

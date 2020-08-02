@@ -85,6 +85,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Major cleanup and reformatting in the `Managers` folder.
+
 - Lua error reporting has been improved so script errors will always show filename and line number.
 
 - `Settings.ini` will now fully populate with all available settings (now also broken into sections) when being created (first time or after delete) rather than with just a limited set of defaults.
@@ -133,6 +135,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Game will now Abort with an error message when trying to load a copy of a non-existent `AtomGroup`, `Attachable` or `AEmitter` preset.
 
 - ComboBoxes (dropdown lists) can now also be closed by clicking on their top part.
+
+- `Activity:IsPlayerTeam` renamed to `Activity:IsHumanTeam`.
 
 ### Fixed
 

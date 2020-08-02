@@ -123,6 +123,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Comboboxes (dropdown lists) can now also be closed by clicking on their top part.
 
+- Updated game framework to Allegro 4.4.3.1-custom from Allegro 4.2.3.1-custom.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.

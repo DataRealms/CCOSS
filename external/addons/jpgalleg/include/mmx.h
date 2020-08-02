@@ -1,1 +1,0 @@
-/* #undef JPGALLEG_MMX */

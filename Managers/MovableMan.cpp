@@ -177,16 +177,11 @@ void MovableMan::Destroy()
 // Description:     Gets a MO from its MOID. Note that MOID's are only valid during the
 //                  same frame as they were assigned to the MOs!
 
-MovableObject * MovableMan::GetMOFromID(MOID whichID)
-{
-    RTEAssert(whichID == g_NoMOID || (whichID >= 0 && whichID < m_MOIDIndex.size()), "MOID out of bounds!");
-
-    if (whichID != g_NoMOID && whichID != 0 && whichID < m_MOIDIndex.size())
-    {
-        return m_MOIDIndex[whichID];
-    }
-    
-    return 0;
+MovableObject * MovableMan::GetMOFromID(MOID whichID) {
+	if (whichID != g_NoMOID && whichID != 0 && whichID < m_MOIDIndex.size()) {
+		return m_MOIDIndex[whichID];
+	}
+	return nullptr;
 }
 
 

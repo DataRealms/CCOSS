@@ -30,17 +30,8 @@
 
 
 #define MAX_JOYSTICKS            8
-
-// [CHRISK] This is to support linking propertly with the
-// old Allegro framework and should fix joystick support on osx
-#if defined(__APPLE__)
-#define MAX_JOYSTICK_AXIS        6
-#define MAX_JOYSTICK_STICKS      10 
-#else
 #define MAX_JOYSTICK_AXIS        3
 #define MAX_JOYSTICK_STICKS      5
-#endif 
-
 #define MAX_JOYSTICK_BUTTONS     32
 
 

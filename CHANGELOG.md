@@ -83,7 +83,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added new lua function `UInputMan:GetInputDevice(playerNum)` to get a number value representing the input device used by the specified player. Should be useful for making custom key bindings compatible with different input devices.
 
+- Scripts can now be attached to `ACrab.Turret` and `Leg`. Additionally, a binding to get the Foot of a Leg has been added.
+
 ### Changed
+
+- Updated game framework from Allegro 4.2.3.1 to Allegro 4.4.3.1.
 
 - Major cleanup and reformatting in the `Managers` folder.
 
@@ -163,6 +167,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed issue where ComboBoxes did not save the current selection, thus if the ComboBox was deselected without making a selection then the selection would revert to the default value instead of the last selected value.
 
 - Fixed issue with double clicks and missing clicks in menus (anything that uses AllegroInput).
+
+- Fixed issue where OnPieMenu function wasn't working for `AHuman` equipped items, and made it work for `BGArm` equipped items as well as `FGArm` ones.
 
 ### Removed
 

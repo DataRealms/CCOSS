@@ -1175,6 +1175,8 @@ int LuaMan::Create()
 			.def("GetLimbPathSpeed", &ACrab::GetLimbPathSpeed)
 			.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed),
 
+        ABSTRACTLUABINDING(Turret, Attachable),
+
 		ABSTRACTLUABINDING(ACraft, Actor)
 			.enum_("HatchState")[
 				value("CLOSED", ACraft::HatchState::CLOSED),

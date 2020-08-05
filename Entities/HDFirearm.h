@@ -453,7 +453,7 @@ ClassInfoGetters
 // Arguments:       Pointer to the MOSprite to attach to. Ownership is NOT transferred!
 // Return value:    None.
 
-    virtual void Attach(MOSRotating *pParent) { HeldDevice::Attach(pParent); m_Reloading = false; m_ReloadTmr.Reset(); }
+    virtual void Attach(MOSRotating *newParent) { HeldDevice::Attach(newParent); m_Reloading = false; m_ReloadTmr.Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

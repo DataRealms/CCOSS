@@ -57,7 +57,7 @@ namespace RTE {
 		/// Gets whether the client is connected and registered to a server.
 		/// </summary>
 		/// <returns>Whether the client is connected and registered to a server.</returns>
-		bool IsConnectedAndRegistred() const { return m_IsConnected && m_IsRegistered; }
+		bool IsConnectedAndRegistered() const { return m_IsConnected && m_IsRegistered; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -313,7 +313,7 @@ namespace RTE {
 		/// Gets the ping time between the client and the server.
 		/// </summary>
 		/// <returns>The ping time between the client and the server.</returns>
-		unsigned short GetPing() const { return IsConnectedAndRegistred() ? m_Client->GetLastPing(m_ServerID) : 0; }
+		unsigned short GetPing() const { return IsConnectedAndRegistered() ? m_Client->GetLastPing(m_ServerID) : 0; }
 
 		/// <summary>
 		/// Clears all the member variables of this NetworkClient, effectively resetting the members of this abstraction level only.

@@ -409,7 +409,7 @@ namespace RTE {
 
 		if (m_Mode == CONNECTION)
 		{
-			if (g_NetworkClient.IsConnectedAndRegistred())
+			if (g_NetworkClient.IsConnectedAndRegistered())
 				m_Mode = GAMEPLAY;
 
 			if (m_ConnectionWaitTimer.IsPastRealMS(8000))
@@ -427,7 +427,7 @@ namespace RTE {
 			g_FrameMan.SetDrawNetworkBackBuffer(true);
 			m_pGUIController->EnableMouse(false);
 
-			if (!g_NetworkClient.IsConnectedAndRegistred())
+			if (!g_NetworkClient.IsConnectedAndRegistered())
 			{
 				//g_ActivityMan.EndActivity();
 				//g_ResetActivity = true;

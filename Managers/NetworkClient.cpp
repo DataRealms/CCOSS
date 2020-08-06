@@ -967,9 +967,9 @@ namespace RTE {
 		long long currentTicks = g_TimerMan.GetRealTickCount();
 		if (currentTicks - m_LastInputSentTime < 0) { m_LastInputSentTime = currentTicks; }
 
-		if (static_cast<double>((currentTicks - m_LastInputSentTime) / g_TimerMan.GetTicksPerSecond()) > 1.0 / inputSend) {
+		if (static_cast<double>((currentTicks - m_LastInputSentTime)) / static_cast<double>(g_TimerMan.GetTicksPerSecond()) > 1.0 / inputSend) {
 			m_LastInputSentTime = g_TimerMan.GetRealTickCount();
-			if (IsConnectedAndRegistred()) { SendInputMsg(); }
+			if (IsConnectedAndRegistered()) { SendInputMsg(); }
 		}
 	}
 

@@ -457,9 +457,8 @@ void Activity::Clear() {
 	std::string Activity::GetTeamName(short whichTeam) const {
 		if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) {
 			return m_TeamActive[whichTeam] ? m_TeamNames[whichTeam] : "Inactive Team";
-		} else {
-			return "";
 		}
+		return "";
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -591,8 +590,8 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Activity::IsOtherPlayerBrain(Actor *actor, short player) const {
-		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			if (m_IsActive[player] && player != player && actor == m_Brain[player]) {
+		for (short playerToCheck = Players::PlayerOne; playerToCheck < Players::MaxPlayerCount; ++playerToCheck) {
+			if (m_IsActive[playerToCheck] && playerToCheck != player && actor == m_Brain[playerToCheck]) {
 				return true;
 			}
 		}
@@ -706,7 +705,7 @@ void Activity::Clear() {
 			return false;
 		}
 
-		const Actor *prevActor = 0;
+		const Actor *prevActor = nullptr;
 		// Disable human player control of the Actor we're switching from and set the AI controller to handle him
 		if (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player])) {
 			m_ControlledActor[player]->SetControllerMode(Controller::CIM_AI);
@@ -812,14 +811,14 @@ void Activity::Clear() {
 			return;
 		}
 
-		Actor *prevOrNextActor = 0;
+		Actor *prevOrNextActor = nullptr;
 		// Disable human player control of the Actor we're switching from and set the AI controller to handle him
 		if (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player])) {
 			m_ControlledActor[player]->SetControllerMode(Controller::CIM_AI);
 			m_ControlledActor[player]->GetController()->SetDisabled(false);
 			prevOrNextActor = m_ControlledActor[player];
 		} else {
-			m_ControlledActor[player] = 0;
+			m_ControlledActor[player] = nullptr;
 		}
 
 		m_ControlledActor[player] = nextActor ? g_MovableMan.GetNextTeamActor(team, m_ControlledActor[player]) : g_MovableMan.GetPrevTeamActor(team, m_ControlledActor[player]);
@@ -843,7 +842,7 @@ void Activity::Clear() {
 				} else if (g_MovableMan.IsActor(startingActor)) {
 					m_ControlledActor[player] = startingActor;
 				} else {
-					m_ControlledActor[player] = 0;
+					m_ControlledActor[player] = nullptr;
 				}
 				break;
 			}

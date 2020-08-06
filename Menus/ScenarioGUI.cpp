@@ -776,6 +776,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
 
 void ScenarioGUI::UpdateInput()
 {
+	// TODO: if activity is running, allow esc to resume activity instead of quitting.
     // If esc pressed, show quit dialog if applicable
     if (g_UInputMan.KeyPressed(KEY_ESC))
     {

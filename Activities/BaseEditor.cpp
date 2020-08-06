@@ -48,7 +48,6 @@
 #include "GABaseDefense.h"
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
@@ -344,7 +343,6 @@ void BaseEditor::Update()
 
         // Quit to metagame view
         g_ActivityMan.PauseActivity();
-        g_InActivity = false;
     }
 }
 

@@ -994,10 +994,8 @@ namespace RTE {
 				g_Quit = true;
 				return;
 			}
-			// If in activity pause and exit to menu on esc
 			if (g_InActivity) {
 				g_ActivityMan.PauseActivity();
-				g_InActivity = false;
 			}
 		}
 		if (g_InActivity) {
@@ -1012,7 +1010,6 @@ namespace RTE {
 
 						if (ElementPressed(player, INPUT_START)) {
 							g_ActivityMan.PauseActivity();
-							g_InActivity = false;
 						}
 					}
 				}

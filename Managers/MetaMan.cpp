@@ -28,7 +28,6 @@
 
 extern bool g_ResetActivity;
 extern bool g_ResumeActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 

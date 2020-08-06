@@ -120,6 +120,7 @@ namespace RTE {
 			}
 
 			m_Activity->SetPaused(pause);
+			g_InActivity = !pause;
 			g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was " + (pause ? "paused" : "resumed"));
 		} else {
 			g_ConsoleMan.PrintString("ERROR: No Activity to pause!");

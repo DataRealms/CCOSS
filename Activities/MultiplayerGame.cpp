@@ -45,7 +45,6 @@
 
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
@@ -441,11 +440,6 @@ namespace RTE {
 
 		/*if (g_UInputMan.ElementHeld(0, UInputMan::INPUT_FIRE))
 			g_FrameMan.SetScreenText("FIRE", 0, 0, -1, false);
-		else
-			g_FrameMan.SetScreenText("-", 0, 0, -1, false);*/
-
-		/*if (g_InActivity)
-			g_FrameMan.SetScreenText("IN ACITVITY", 0, 0, -1, false);
 		else
 			g_FrameMan.SetScreenText("-", 0, 0, -1, false);*/
 

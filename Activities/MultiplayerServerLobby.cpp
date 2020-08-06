@@ -45,7 +45,6 @@
 
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
@@ -1005,13 +1004,11 @@ namespace RTE {
 		g_LuaMan.FileCloseAll();
 
 		// Put the new and newly set up Activity as the one to start
-		//g_ActivityMan.PauseActivity();
 		g_ActivityMan.EndActivity();
 
 		g_AudioMan.ClearMusicQueue();
 		g_AudioMan.StopMusic();
 
-		//g_InActivity = false;
 		g_ResetActivity = true;
 		g_ActivityMan.SetStartActivity(pActivity);
 

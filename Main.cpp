@@ -191,8 +191,8 @@ bool InitMainMenu() {
 /// Reset the current activity.
 /// </summary>
 /// <returns></returns>
-bool ResetActivity()
-{
+bool ResetActivity() {
+	g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
     g_ResetActivity = false;
 
     // Clear and reset out things

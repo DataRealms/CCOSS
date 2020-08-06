@@ -397,16 +397,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::AnyStartPress() {
-		if (KeyPressed(KEY_ESC) || KeyPressed(KEY_SPACE)) {
+	bool UInputMan::AnyStartPress(bool includeSpacebar, bool checkBackOnly) {		
+		if (!checkBackOnly && (KeyPressed(KEY_ESC) || (includeSpacebar && KeyPressed(KEY_SPACE)))) {
 			return true;
 		}
+
+		bool pressed = false;
 		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			if (ElementPressed(player, InputElements::INPUT_START) || ElementPressed(player, InputElements::INPUT_BACK)) {
-				return true;
+			if (!checkBackOnly && !pressed) { pressed = ElementPressed(player, InputElements::INPUT_START); }
+			if (!pressed) { pressed = ElementPressed(player, InputElements::INPUT_BACK); }
+			if (pressed) {
+				break;
 			}
 		}
-		return false;
+		return pressed;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -820,33 +824,22 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::HandleSpecialInput() {
-		if (KeyPressed(KEY_ESC)) {
-			// If we launched into editor directly, skip the logic and quit quickly.
-			if (g_LaunchIntoEditor) { 
-				g_Quit = true;
+		// If we launched into editor directly, skip the logic and quit quickly.
+		if (KeyPressed(KEY_ESC) && g_LaunchIntoEditor) {
+			g_Quit = true;
+			return;
+		}
+
+		if (g_InActivity) {
+			if (AnyStartPress(false)) {
+				g_ActivityMan.PauseActivity();
 				return;
 			}
-			if (g_InActivity) {
-				g_ActivityMan.PauseActivity();
+			// Ctrl+R or Back button for controllers to reset activity.
+			if (!g_ResetActivity) { g_ResetActivity = FlagCtrlState() && KeyPressed(KEY_R) || AnyStartPress(false, true); }
+			if (g_ResetActivity) {
+				return;
 			}
-		}
-		if (g_InActivity) {
-			// Ctrl+R to reset Activity
-			if (FlagCtrlState() && KeyPressed(KEY_R)) { g_ResetActivity = true; }
-
-			// Check for resets and start button presses on controllers of all active players
-			if (g_ActivityMan.GetActivity()) {
-				for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-					if (g_ActivityMan.GetActivity()->PlayerActive(player)) {
-						g_ResetActivity = g_ResetActivity || ElementPressed(Players::PlayerOne, InputElements::INPUT_BACK);
-
-						if (ElementPressed(player, InputElements::INPUT_START)) {
-							g_ActivityMan.PauseActivity();
-						}
-					}
-				}
-			}
-			if (g_ResetActivity) { g_ConsoleMan.PrintString("SYSTEM: Activity was reset!"); }
 		}
 
 		if (FlagCtrlState() && !FlagAltState()) {

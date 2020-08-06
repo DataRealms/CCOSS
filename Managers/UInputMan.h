@@ -281,37 +281,39 @@ namespace RTE {
 		bool MenuButtonReleased(int whichButton) { return GetMenuButtonState(whichButton, InputState::Released); }
 
 		/// <summary>
-		/// Return true if there is any input at all, keyboard or buttons or D-pad.
+		/// Gets whether there is any input at all, keyboard or buttons or D-pad.
 		/// </summary>
 		/// <returns>Whether any buttons of pads are pressed at all.</returns>
 		bool AnyKeyOrJoyInput();
 
 		/// <summary>
-		/// Return true if there is any key, button, or D-pad presses at all. MUST call Update before calling this for it to work properly!
+		/// Gets whether there are any key, button, or D-pad presses at all. MUST call Update before calling this for it to work properly!
 		/// </summary>
 		/// <returns>Whether any buttons of pads have been pressed at all since last frame.</returns>
 		bool AnyPress();
 
 		/// <summary>
-		/// Return true if there is any start key/button presses at all. MUST call Update before calling this for it to work properly!
+		/// Gets whether there are any start key/button presses at all. MUST call Update before calling this for it to work properly!
 		/// </summary>
+		/// <param="includeSpacebar">Whether to check for space bar presses or not. 
+		/// <param="checkBackOnly">Whether to check only for back button presses. 
 		/// <returns>Whether any start buttons or keys have been pressed at all since last frame.</returns>
-		bool AnyStartPress();
+		bool AnyStartPress(bool includeSpacebar = true, bool checkBackOnly = false);
 
 		/// <summary>
-		/// Returns the state of the Ctrl key.
+		/// Gets the state of the Ctrl key.
 		/// </summary>
 		/// <returns>The state of the Ctrl key.</returns>
 		bool FlagCtrlState() const { return ((key_shifts & KB_CTRL_FLAG) > 0) ? true : false; }
 
 		/// <summary>
-		/// Returns the state of the Alt key.
+		/// Gets the state of the Alt key.
 		/// </summary>
 		/// <returns>The state of the Alt key.</returns>
 		bool FlagAltState() const { return ((key_shifts & KB_ALT_FLAG) > 0) ? true : false; }
 
 		/// <summary>
-		/// Returns the state of the Shift key.
+		/// Gets the state of the Shift key.
 		/// </summary>
 		/// <returns>The state of the Shift key.</returns>
 		bool FlagShiftState() const { return ((key_shifts & KB_SHIFT_FLAG) > 0) ? true : false; }

@@ -107,7 +107,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichPlayer">Which player to get the scheme for.</param>
 		/// <returns>A pointer to the requested player's control scheme. Ownership is NOT transferred!</returns>
-		InputScheme * GetControlScheme(short whichPlayer) { return m_OverrideInput ? &m_ControlScheme[0] : &m_ControlScheme[whichPlayer]; }
+		InputScheme * GetControlScheme(short whichPlayer) { return IsInMultiplayerMode() ? &m_ControlScheme[0] : &m_ControlScheme[whichPlayer]; }
 
 		/// <summary>
 		/// Get the current device Icon of a specific player's scheme.
@@ -123,7 +123,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichDevice">Which device to get the icon of.</param>
 		/// <returns>A const pointer to the requested device's control scheme icon. Ownership is NOT transferred!</returns>
-		const Icon * GetDeviceIcon(int whichDevice) { return (whichDevice < InputDevice::DEVICE_KEYB_ONLY || whichDevice > InputDevice::DEVICE_GAMEPAD_4) ? 0 : m_DeviceIcons[whichDevice]; }
+		const Icon * GetDeviceIcon(int whichDevice) const { return (whichDevice < InputDevice::DEVICE_KEYB_ONLY || whichDevice > InputDevice::DEVICE_GAMEPAD_4) ? nullptr : m_DeviceIcons[whichDevice]; }
 
 		/// <summary>
 		/// Clears all mappings for a specific input element of a specific player.
@@ -284,21 +284,26 @@ namespace RTE {
 		/// Gets whether there is any input at all, keyboard or buttons or D-pad.
 		/// </summary>
 		/// <returns>Whether any buttons of pads are pressed at all.</returns>
-		bool AnyKeyOrJoyInput();
+		bool AnyKeyOrJoyInput() const;
 
 		/// <summary>
 		/// Gets whether there are any key, button, or D-pad presses at all. MUST call Update before calling this for it to work properly!
 		/// </summary>
 		/// <returns>Whether any buttons of pads have been pressed at all since last frame.</returns>
-		bool AnyPress();
+		bool AnyPress() const;
 
 		/// <summary>
 		/// Gets whether there are any start key/button presses at all. MUST call Update before calling this for it to work properly!
 		/// </summary>
 		/// <param="includeSpacebar">Whether to check for space bar presses or not. 
-		/// <param="checkBackOnly">Whether to check only for back button presses. 
 		/// <returns>Whether any start buttons or keys have been pressed at all since last frame.</returns>
-		bool AnyStartPress(bool includeSpacebar = true, bool checkBackOnly = false);
+		bool AnyStartPress(bool includeSpacebar = true);
+
+		/// <summary>
+		/// Gets whether there are any back button presses at all. MUST call Update before calling this for it to work properly!
+		/// </summary>
+		/// <returns>Whether any back buttons have been pressed at all since last frame.</returns>
+		bool AnyBackPress();
 
 		/// <summary>
 		/// Gets the state of the Ctrl key.
@@ -337,7 +342,7 @@ namespace RTE {
 		/// Shows the scancode of the keyboard key which is currently down.
 		/// </summary>
 		/// <returns>The scancode of the first keyboard key in the keyboard buffer. 0 means none.</returns>
-		int WhichKeyHeld() { int key = readkey(); return key >> 8; }
+		int WhichKeyHeld() const { int key = readkey(); return key >> 8; }
 
 		/// <summary>
 		/// Gets whether a key was pressed between the last update and the one previous to it.
@@ -412,14 +417,14 @@ namespace RTE {
 		/// <param name="whichButton">Which button to check for.</param>
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <returns>Whether the mouse button is held or not.</returns>
-		bool MouseButtonHeld(int whichButton, short whichPlayer) { return GetMouseButtonState(whichPlayer, whichButton, InputState::Held); }
+		bool MouseButtonHeld(int whichButton, short whichPlayer) const { return GetMouseButtonState(whichPlayer, whichButton, InputState::Held); }
 
 		/// <summary>
 		/// (ONLY FOR LUA BACKWARD COMPATIBILITY) Gets whether a mouse button is being held down right now.
 		/// </summary>
 		/// <param name="whichButton">Which button to check for.</param>
 		/// <returns>Whether the mouse button is held or not.</returns>
-		bool MouseButtonHeld(int whichButton) { return GetMouseButtonState(Players::PlayerOne, whichButton, InputState::Held); }
+		bool MouseButtonHeld(int whichButton) const { return GetMouseButtonState(Players::PlayerOne, whichButton, InputState::Held); }
 
 		/// <summary>
 		/// Gets whether a mouse button was pressed between the last update and the one previous to it.
@@ -427,14 +432,14 @@ namespace RTE {
 		/// <param name="whichButton">Which button to check for.</param>
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <returns>Whether the mouse button is pressed or not.</returns>
-		bool MouseButtonPressed(int whichButton, short whichPlayer) { return GetMouseButtonState(whichPlayer, whichButton, InputState::Pressed); }
+		bool MouseButtonPressed(int whichButton, short whichPlayer) const { return GetMouseButtonState(whichPlayer, whichButton, InputState::Pressed); }
 
 		/// <summary>
 		/// (ONLY FOR LUA BACKWARD COMPATIBILITY) Gets whether a mouse button was pressed between the last update and the one previous to it.
 		/// </summary>
 		/// <param name="whichButton">Which button to check for.</param>
 		/// <returns>Whether the mouse button is pressed or not.</returns>
-		bool MouseButtonPressed(int whichButton) { return GetMouseButtonState(Players::PlayerOne, whichButton, InputState::Pressed); }
+		bool MouseButtonPressed(int whichButton) const { return GetMouseButtonState(Players::PlayerOne, whichButton, InputState::Pressed); }
 
 		/// <summary>
 		/// Gets whether a mouse button was released between the last update and the one previous to it.
@@ -442,14 +447,14 @@ namespace RTE {
 		/// <param name="whichButton">Which button to check for.</param>
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <returns>Whether the mouse button is released or not.</returns>
-		bool MouseButtonReleased(int whichButton, short whichPlayer) { return GetMouseButtonState(whichPlayer, whichButton, InputState::Released); }
+		bool MouseButtonReleased(int whichButton, short whichPlayer) const { return GetMouseButtonState(whichPlayer, whichButton, InputState::Released); }
 
 		/// <summary>
 		/// (ONLY FOR LUA BACKWARD COMPATIBILITY) Gets whether a mouse button was released between the last update and the one previous to it.
 		/// </summary>
 		/// <param name="whichButton">Which button to check for.</param>
 		/// <returns>Whether the mouse button is released or not.</returns>
-		bool MouseButtonReleased(int whichButton) { return GetMouseButtonState(Players::PlayerOne, whichButton, InputState::Released); }
+		bool MouseButtonReleased(int whichButton) const { return GetMouseButtonState(Players::PlayerOne, whichButton, InputState::Released); }
 
 		/// <summary>
 		/// Gets whether the mouse wheel has been moved past the threshold limit in either direction this frame.
@@ -462,13 +467,15 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">The player to get mouse wheel position for.</param>
 		/// <returns>The relative mouse wheel position for the specified player.</returns>
-		int MouseWheelMovedByPlayer(short player) const { return (m_OverrideInput && player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_NetworkMouseWheelState[player] : m_MouseWheelChange; }
+		int MouseWheelMovedByPlayer(short player) const {
+			return (IsInMultiplayerMode() && player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_NetworkMouseWheelState[player] : m_MouseWheelChange;
+		}
 
 		/// <summary>
 		/// Return true if there are any mouse button presses at all.
 		/// </summary>
 		/// <returns>Whether any mouse buttons have been pressed at all since last frame.</returns>
-		bool AnyMouseButtonPress();
+		bool AnyMouseButtonPress() const;
 
 		/// <summary>
 		/// Sets the mouse to be trapped in the middle of the screen so it doesn't go out and click on other windows etc.
@@ -527,7 +534,7 @@ namespace RTE {
 		/// <param name="whichJoy">Which joystick to check for.</param>
 		/// <param name="whichButton">Which joystick button to check for.</param>
 		/// <returns>Whether the joystick button is held or not.</returns>
-		bool JoyButtonHeld(int whichJoy, int whichButton) { return GetJoystickButtonState(whichJoy, whichButton, InputState::Held); }
+		bool JoyButtonHeld(int whichJoy, int whichButton) const { return GetJoystickButtonState(whichJoy, whichButton, InputState::Held); }
 
 		/// <summary>
 		/// Shows the first joystick button which is currently down.
@@ -542,14 +549,14 @@ namespace RTE {
 		/// <param name="whichJoy">Which joystick to check for.</param>
 		/// <param name="whichButton">Which joystick button to check for.</param>
 		/// <returns>Whether the joystick button is pressed or not.</returns>
-		bool JoyButtonPressed(int whichJoy, int whichButton) { return GetJoystickButtonState(whichJoy, whichButton, InputState::Pressed); }
+		bool JoyButtonPressed(int whichJoy, int whichButton) const { return GetJoystickButtonState(whichJoy, whichButton, InputState::Pressed); }
 
 		/// <summary>
 		/// Shows the first joystick button which was pressed down since last frame.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
 		/// <returns>The first button in the sequence of button enumerations that is pressed since the previous frame. JOY_NONE means none.</returns>
-		int WhichJoyButtonPressed(int whichJoy);
+		int WhichJoyButtonPressed(int whichJoy) const;
 
 		/// <summary>
 		/// Gets whether a joystick button was released between the last update and the one previous to it.
@@ -557,7 +564,7 @@ namespace RTE {
 		/// <param name="whichJoy">Which joystick to check for.</param>
 		/// <param name="whichButton">Which joystick button to check for.</param>
 		/// <returns>Whether the joystick button is released or not.</returns>
-		bool JoyButtonReleased(int whichJoy, int whichButton) { return GetJoystickButtonState(whichJoy, whichButton, InputState::Released); }
+		bool JoyButtonReleased(int whichJoy, int whichButton) const { return GetJoystickButtonState(whichJoy, whichButton, InputState::Released); }
 
 		/// <summary>
 		/// Gets whether a joystick axis is being held down in a specific direction right now. Two adjacent directions can be held down to produce diagonals.
@@ -604,27 +611,27 @@ namespace RTE {
 		/// <param name="whichJoy">Which joystick to check for.</param>
 		/// <param name="whichStick">Which joystick stick to check for.</param>
 		/// <returns>The analog axis values ranging between -1.0 to 1.0.</returns>
-		Vector AnalogStickValues(int whichJoy = 0, int whichStick = 0) { return Vector(AnalogAxisValue(whichJoy, whichStick, 0), AnalogAxisValue(whichJoy, whichStick, 1)); }
+		Vector AnalogStickValues(int whichJoy = 0, int whichStick = 0) const { return Vector(AnalogAxisValue(whichJoy, whichStick, 0), AnalogAxisValue(whichJoy, whichStick, 1)); }
 
 		/// <summary>
 		/// Gets whether there is any joystick input at all, buttons or D-pad.
 		/// </summary>
 		/// <param name="checkForPresses">Whether to check specifically for presses since last frame.</param>
 		/// <returns>Whether any buttons of pads are pressed at all or since the last frame.</returns>
-		bool AnyJoyInput(bool checkForPresses = false);
+		bool AnyJoyInput(bool checkForPresses = false) const;
 
 		/// <summary>
 		/// Return true if there are any joystick presses at all, buttons or D-pad.
 		/// </summary>
 		/// <returns>Whether any buttons or pads have been pressed at all since last frame.</returns>
-		bool AnyJoyPress() { return AnyJoyInput(true); }
+		bool AnyJoyPress() const { return AnyJoyInput(true); }
 
 		/// <summary>
 		/// Gets whether there are any joystick button presses at all, but not D-pad input, for a specific joystick.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>
 		/// <returns>Whether any joystick buttons have been pressed at all since last frame, of a specific joystick.</returns>
-		bool AnyJoyButtonPress(int whichJoy);
+		bool AnyJoyButtonPress(int whichJoy) const;
 #pragma endregion
 
 #pragma region Network Handling
@@ -714,7 +721,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="element">The input element to check for.</param>
 		/// <returns>Whether the specified input element is pressed or not.</returns>
-		bool NetworkAccumulatedElementPressed(int element) { return NetworkAccumulatedElementState(element, InputState::Pressed); }
+		bool NetworkAccumulatedElementPressed(int element) const { return NetworkAccumulatedElementState(element, InputState::Pressed); }
 
 		/// <summary>
 		/// Gets whether the specified input element is released during network multiplayer.
@@ -805,7 +812,7 @@ namespace RTE {
 		/// <param name="whichButton">Which menu button to check for. See MenuButtons enumeration.</param>
 		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
 		/// <returns>Whether the menu button is in the specified state or not.</returns>
-		bool GetMenuButtonState(short whichButton, InputState whichState);
+		bool GetMenuButtonState(short whichButton, InputState whichState) ;
 
 		/// <summary>
 		/// Gets whether a keyboard key is in the specified state.

@@ -188,7 +188,7 @@ namespace RTE {
 		}
 
 		InputPreset preset = m_ControlScheme[whichPlayer].GetPreset();
-		const InputMapping *element = &m_ControlScheme[whichPlayer].GetInputMappings()[whichElement];
+		const InputMapping *element = &(m_ControlScheme[whichPlayer].GetInputMappings()[whichElement]);
 		if (preset != InputPreset::PRESET_NONE && !element->GetPresetDescription().empty()) {
 			return element->GetPresetDescription();
 		}
@@ -377,7 +377,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::AnyKeyOrJoyInput() {
+	bool UInputMan::AnyKeyOrJoyInput() const {
 		bool input = keypressed();
 		if (!input) { input = AnyJoyInput(); }
 		return input;
@@ -385,7 +385,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::AnyPress() {
+	bool UInputMan::AnyPress() const {
 		bool pressed = false;
 
 		if (!pressed) { pressed = AnyKeyPress(); }
@@ -397,20 +397,27 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::AnyStartPress(bool includeSpacebar, bool checkBackOnly) {		
-		if (!checkBackOnly && (KeyPressed(KEY_ESC) || (includeSpacebar && KeyPressed(KEY_SPACE)))) {
+	bool UInputMan::AnyStartPress(bool includeSpacebar) {
+		if (KeyPressed(KEY_ESC) || (includeSpacebar && KeyPressed(KEY_SPACE))) {
 			return true;
 		}
-
-		bool pressed = false;
 		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			if (!checkBackOnly && !pressed) { pressed = ElementPressed(player, InputElements::INPUT_START); }
-			if (!pressed) { pressed = ElementPressed(player, InputElements::INPUT_BACK); }
-			if (pressed) {
-				break;
+			if (ElementPressed(player, InputElements::INPUT_START)) {
+				return true;
 			}
 		}
-		return pressed;
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool UInputMan::AnyBackPress() {
+		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+			if (ElementPressed(player, InputElements::INPUT_BACK)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -471,7 +478,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::AnyMouseButtonPress() {
+	bool UInputMan::AnyMouseButtonPress() const {
 		for (short button = MouseButtons::MOUSE_LEFT; button < MouseButtons::MAX_MOUSE_BUTTONS; ++button) {
 			if (MouseButtonPressed(button, -1)) {
 				return true;
@@ -548,7 +555,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int UInputMan::WhichJoyButtonPressed(int whichJoy) {
+	int UInputMan::WhichJoyButtonPressed(int whichJoy) const {
 		if (whichJoy >= 0 || whichJoy < num_joysticks) {
 			for (int button = 0; button < joy[whichJoy].num_buttons; ++button) {
 				if (joy[whichJoy].button[button].b && JoyButtonPressed(whichJoy, button)) {
@@ -576,7 +583,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::AnyJoyInput(bool checkForPresses) {
+	bool UInputMan::AnyJoyInput(bool checkForPresses) const {
 		poll_joystick();
 
 		for (int joystick = Players::PlayerOne; joystick < Players::MaxPlayerCount; ++joystick) {
@@ -610,7 +617,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::AnyJoyButtonPress(int whichJoy) {
+	bool UInputMan::AnyJoyButtonPress(int whichJoy) const {
 		for (int button = JoyButtons::JOY_1; button < JoyButtons::MAX_JOY_BUTTONS; ++button) {
 			if (JoyButtonPressed(whichJoy, button)) {
 				return true;
@@ -836,7 +843,7 @@ namespace RTE {
 				return;
 			}
 			// Ctrl+R or Back button for controllers to reset activity.
-			if (!g_ResetActivity) { g_ResetActivity = FlagCtrlState() && KeyPressed(KEY_R) || AnyStartPress(false, true); }
+			if (!g_ResetActivity) { g_ResetActivity = FlagCtrlState() && KeyPressed(KEY_R) || AnyBackPress(); }
 			if (g_ResetActivity) {
 				return;
 			}

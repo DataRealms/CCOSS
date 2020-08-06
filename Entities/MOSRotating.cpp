@@ -432,22 +432,18 @@ int MOSRotating::Save(Writer &writer) const
 /// </summary>
 /// <param name="pWound">The wound AEmitter to add</param>
 /// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset</param>
-void MOSRotating::AddWound(AEmitter *pWound, const Vector & parentOffsetToSet, bool checkGibWoundLimit)
-{
-	if (pWound)
-	{
-		if (checkGibWoundLimit && !ToDelete() && m_GibWoundLimit && m_Wounds.size() + 1 > m_GibWoundLimit)
-		{
+void MOSRotating::AddWound(AEmitter *pWound, const Vector & parentOffsetToSet, bool checkGibWoundLimit) {
+	if (pWound) {
+		if (checkGibWoundLimit && !ToDelete() && m_GibWoundLimit && m_Wounds.size() + 1 > m_GibWoundLimit) {
 			// Indicate blast in opposite direction of emission
 			// TODO: don't hardcode here, get some data from the emitter
 			Vector blast(-5, 0);
 			blast.RadRotate(pWound->GetEmitAngle());
 			GibThis(blast);
 			return;
-		}
-		else
-		{
-			pWound->Attach(this, parentOffsetToSet);
+		} else {
+            pWound->SetParentOffset(parentOffsetToSet);
+            pWound->SetParent(this);
 			m_Wounds.push_back(pWound);
 		}
 	}
@@ -1667,22 +1663,15 @@ void MOSRotating::AddAttachable(Attachable *pAttachable, bool isHardcodedAttacha
 /// <param name="pAttachable">The Attachable to add.</param>
 /// <param name="parentOffsetToSet">The vector to set as the Attachable's parent offset.</param>
 /// <param name="isHardcodedAttachable">Whether or not the Attachable should be treated as hardcoded.</param>
-void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOffsetToSet, bool isHardcodedAttachable)
-{
-	if (pAttachable)
-	{
-		pAttachable->Attach(this, parentOffsetToSet);
+void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOffsetToSet, bool isHardcodedAttachable) {
+	if (pAttachable) {
+        pAttachable->SetParentOffset(parentOffsetToSet);
+        pAttachable->SetParent(this);
 
 		// Set the attachable's subgroup ID to it's Unique ID to avoid any possible conflicts when adding atoms to parent group.
 		pAttachable->SetAtomSubgroupID(pAttachable->GetUniqueID());
 
-		if (pAttachable->CanCollideWithTerrainWhenAttached())
-		{
-			pAttachable->EnableTerrainCollisions(true);
-		}
-
-		if (!isHardcodedAttachable)
-		{
+		if (!isHardcodedAttachable) {
 			m_Attachables.push_back(pAttachable);
 		}
 		m_AllAttachables.push_back(pAttachable);
@@ -1719,7 +1708,11 @@ bool MOSRotating::RemoveAttachable(Attachable *pAttachable) {
 		if (m_AllAttachables.size() > 0) {
 			m_AllAttachables.remove(pAttachable);
 		}
-		pAttachable->ToDeleteWithParent() ? pAttachable->SetToDelete() : pAttachable->Detach();
+        if (pAttachable->ToDeleteWithParent()) {
+            pAttachable->SetToDelete();
+        } else {
+            pAttachable->SetParent(nullptr);
+        }
 		return true;
 	}
 	return false;
@@ -1730,14 +1723,12 @@ bool MOSRotating::RemoveAttachable(Attachable *pAttachable) {
 /// Either detaches or deletes all of this MOSRotating's attachables
 /// </summary>
 /// <param name="destroy">Whether to detach or delete the attachables. Setting this to true deletes them, setting it to false detaches them</param>
-void MOSRotating::DetachOrDestroyAll(bool destroy)
-{
-	for (list<Attachable *>::const_iterator aItr = m_AllAttachables.begin(); aItr != m_AllAttachables.end(); ++aItr)
-	{
+void MOSRotating::DetachOrDestroyAll(bool destroy) {
+	for (list<Attachable *>::const_iterator aItr = m_AllAttachables.begin(); aItr != m_AllAttachables.end(); ++aItr) {
 		if (destroy)
 			delete (*aItr);
 		else
-			(*aItr)->Detach();
+			(*aItr)->SetParent(nullptr);
 	}
 
 	m_AllAttachables.clear();

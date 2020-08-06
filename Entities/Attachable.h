@@ -11,6 +11,7 @@ namespace RTE {
 	/// An articulated, detachable part of an Actor's body.
 	/// </summary>
 	class Attachable : public MOSRotating {
+		friend class MOSRotating;
 
 	public:
 
@@ -66,6 +67,19 @@ namespace RTE {
 		const MovableObject *GetParent() const override { return m_Parent; }
 
 		/// <summary>
+		/// Indicates whether this Attachable is attached to an MOSRotating parent or not.
+		/// </summary>
+		/// <returns>Whether it's attached or not.</returns>
+		bool IsAttached() const { return m_Parent != nullptr; }
+
+		/// <summary>
+		/// Indicates whether this Attachable is attached to the specified MOSRotating or not.
+		/// </summary>
+		/// <param name="parentToCheck">A pointer to which MOSRotating you want to check for.</param>
+		/// <returns>Whether it's attached or not.</returns>
+		bool IsAttachedTo(const MOSRotating *parentToCheck) const { return m_Parent == parentToCheck; }
+
+		/// <summary>
 		/// Gets the MO which is the ultimate root parent of this Attachable and its parent.
 		/// </summary>
 		/// <returns>A pointer to the highest root parent of this Attachable.</returns>
@@ -86,20 +100,32 @@ namespace RTE {
 		/// <summary>
 		/// Sets the stored offset between this Attachable's parent's Pos and the joint position. This should be maintained by the parent.
 		/// </summary>
-		/// <param name="newParOff">A const reference to the new parent offset.</param>
+		/// <param name="newParentOffset">A const reference to the new parent offset.</param>
 		void SetParentOffset(const Vector &newParentOffset) { m_ParentOffset = newParentOffset; }
 
 		/// <summary>
-		/// Indicates whether this Attachable is to be drawn after (in front of) or before (behind) the parent.
+		/// Gets whether this Attachable is to be drawn after (in front of) or before (behind) the parent.
 		/// </summary>
-		/// <returns>Whether it's to be drawn after parent or not.</returns>
-		virtual bool IsDrawnAfterParent() const { return m_DrawAfterParent; }
+		/// <returns>Whether this Attachable is to be drawn after its parent or not.</returns>
+		bool IsDrawnAfterParent() const override { return m_DrawAfterParent; }
 
 		/// <summary>
-		/// Gets whether this attachable should be deleted automatically when its parent is being deleted or not.
+		/// Gets whether this Attachable will collect its damage and transfer it to its parent if attached. Transferred damage accounts for the Attachable's damage multiplier.
+		/// </summary>
+		/// <returns>Whether this Attachable will transfer damage to its parent or not.</returns>
+		bool GetTransfersDamageToParent() const { return m_TransfersDamageToParent; }
+
+		/// <summary>
+		/// Sets whether this Attachable will collect its damage and transfer it to its parent if attached. Transferred damage accounts for the Attachable's damage multiplier.
+		/// </summary>
+		/// <param name="transfersDamageToParent">Whether this Attachable should transfer damage to its parent.</param>
+		void SetTransfersDamageToParent(bool transfersDamageToParent) { m_TransfersDamageToParent = transfersDamageToParent; }
+
+		/// <summary>
+		/// Gets whether this attachable will be deleted automatically when its parent is being deleted or not.
 		/// </summary>
 		/// <returns>Whether this attachable is marked to be deleted along with it's parent or not.</returns>
-		bool ShouldDeleteWithParent() const { return m_DeleteWithParent; }
+		bool ToDeleteWithParent() const { return m_DeleteWithParent; }
 #pragma endregion
 
 #pragma region Joint Getters and Setters
@@ -198,16 +224,28 @@ namespace RTE {
 		float CollectDamage();
 
 		/// <summary>
-		/// Gets the AEmitter that represents the wound created when this Attachable gets detached from its parent, if it's set as Vital. OWNERSHIP IS NOT TRANSFERRED!
+		/// Gets the AEmitter that represents the wound added to this Attachable when it gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
 		/// </summary>
 		/// <returns>A const pointer to the break wound AEmitter.</returns>
 		const AEmitter *GetBreakWound() const { return m_BreakWound; }
 
 		/// <summary>
-		/// Sets the AEmitter that represents the wound created when this Attachable gets detached from its parent, if it's set as Vital. OWNERSHIP IS NOT TRANSFERRED!
+		/// Sets the AEmitter that represents the wound added to this Attachable when it gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
 		/// </summary>
-		/// <param name="breakWound"></param>
+		/// <param name="breakWound">The AEmitter to use for this Attachable's breakwound.</param>
 		void SetBreakWound(const AEmitter *breakWound) { m_BreakWound = breakWound; } //TODO I added this for consistency but do we want it? Maybe should have a string version that does the presetman lookup, cause we need to have a working pointer to the breakwound.
+
+		/// <summary>
+		/// Gets the AEmitter that represents the wound added to this Attachable's parent when this Attachable gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
+		/// </summary>
+		/// <returns>A const pointer to the parent break wound AEmitter.</returns>
+		const AEmitter *GetParentBreakWound() const { return m_ParentBreakWound; }
+
+		/// <summary>
+		/// Sets the AEmitter that represents the wound added to this Attachable's parent when this Attachable gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
+		/// </summary>
+		/// <param name="breakWound">The AEmitter to use for the parent's breakwound.</param>
+		void SetParentBreakWound(const AEmitter *breakWound) { m_ParentBreakWound = breakWound; }
 #pragma endregion
 
 #pragma region Rotation Getters and Setters
@@ -222,20 +260,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="inheritsRotAngle">Whether or not to inherit its parent's RotAngle.</param>
 		void SetInheritsRotAngle(bool inheritsRotAngle) { m_InheritsRotAngle = inheritsRotAngle; }
-
-		/// <summary>
-		/// Gets the target rotation that this Attachable should be striving to match its real rotation with, if it is attached.
-		/// The joint stiffness will determine how strong the scalar spring is between the current rotation and the target set here.
-		/// </summary>
-		/// <returns>A float for the current target angle in radians.</returns>
-		float GetRotTarget() const { return m_RotTarget.GetRadAngle(); }
-
-		/// <summary>
-		/// Sets the target rotation angle in radians that this Attachable should be striving to match its real rotation with, if it is attached.
-		/// The joint stiffness will determine how strong the scalar spring is between the current rotation and the target set here.
-		/// </summary>
-		/// <param name="rotRadAngle">A float describing the target angle in radians.</param>
-		void SetRotTarget(float rotRadAngle) { m_RotTarget.SetRadAngle(rotRadAngle); }
 #pragma endregion
 
 #pragma region Collision Management
@@ -252,78 +276,19 @@ namespace RTE {
 		void SetAtomSubgroupID(long int subgroupID = 0) { m_AtomSubgroupID = subgroupID; }
 
 		/// <summary>
-		/// Whether this attachable is capable of having terrain collisions enabled/disabled when attached to a parent.
-		/// </summary>
-		/// <return>If true, can have terrain collisions enabled/disabled when attached.</return>
-		virtual bool CanCollideWithTerrainWhenAttached() const { return m_CanCollideWithTerrainWhenAttached; }
-
-		/// <summary>
-		/// Sets whether this attachable is capable of having terrain collisions enabled/disabled when attached to a parent.
-		/// </summary>
-		/// <param name="canCollide">Whether this attachable can have terrain collisions enabled/disabled when attached.</param>
-		virtual void SetCanCollideWithTerrainWhenAttached(bool canCollide) { m_CanCollideWithTerrainWhenAttached = canCollide; }
-
-		/// <summary>
 		/// Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
 		/// </summary>
 		/// <return>If true, terrain collisions while attached are enabled and atoms are present in parent AtomGroup.</return>
-		virtual bool IsCollidingWithTerrainWhileAttached() const { return m_IsCollidingWithTerrainWhileAttached; }
+		bool GetCollidesWithTerrainWhileAttached() const { return m_CollidesWithTerrainWhileAttached; }
 
 		/// <summary>
 		/// Sets whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
 		/// </summary>
-		/// <param name="collide">Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.</param>
-		virtual void SetIsCollidingWithTerrainWhileAttached(bool isColliding) { m_IsCollidingWithTerrainWhileAttached = isColliding; }
-
-		/// <summary>
-		/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its atoms to/from its parent AtomGroup.
-		/// </summary>
-		/// <param name="enable">Whether or not to add or remove this Attachable's atoms to/from the parent's AtomGroup.</param>
-		virtual void EnableTerrainCollisions(bool enable);
-#pragma endregion
-
-#pragma region Attachment Managment
-		/// <summary>
-		/// Indicates whether this Attachable is attached to an MOSRotating parent or not.
-		/// </summary>
-		/// <returns>Whether it's attached or not.</returns>
-		bool IsAttached() const { return m_Parent != nullptr; }
-
-		/// <summary>
-		/// Indicates whether this Attachable is attached to the specified MOSRotating or not.
-		/// </summary>
-		/// <param name="parentToCheck">A pointer to which MOSRotating you want to check for.</param>
-		/// <returns>Whether it's attached or not.</returns>
-		bool IsAttachedTo(const MOSRotating *parentToCheck) const { return m_Parent == parentToCheck; }
-
-		/// <summary>
-		/// Attaches this Attachable to a new parent MOSRotating.
-		/// </summary>
-		/// <param name="newParent">A pointer to the MOSRotating to attach to. Ownership is NOT transferred!</param>
-		virtual void Attach(MOSRotating *newParent);
-
-		/// <summary>
-		/// Attaches this Attachable to a new parent MOSRotating, with the specified parent offset.
-		/// </summary>
-		/// <param name="newParent">A pointer to the MOSRotating to attach to. Ownership is NOT transferred!</param>
-		/// <param name="parentOffset">The offset from the parent's Pos to the joint Pos.</param>
-		void Attach(MOSRotating *newParent, const Vector &parentOffset) { Attach(newParent); m_ParentOffset = parentOffset; }
-
-		/// <summary>
-		/// Detaches this Attachable from its host MOSprite
-		/// </summary>
-		virtual void Detach();
+		/// <param name="collidesWithTerrainWhileAttached">Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.</param>
+		void SetCollidesWithTerrainWhileAttached(bool collidesWithTerrainWhileAttached);
 #pragma endregion
 
 #pragma region Override Methods
-		/// <summary>
-		/// Calculates the collision response when another MO's Atom collides with this MO's physical representation.
-		/// The effects will be applied directly to this MO, and also represented in the passed in HitData.
-		/// </summary>
-		/// <param name="hitData">Reference to the HitData struct which describes the collision. This will be modified to represent the results of the collision.</param>
-		/// <returns>Whether the collision has been deemed valid. If false, then disregard any impulses in the Hitdata.</returns>
-		bool CollideAtPoint(HitData &hitData) override;
-
 		/// <summary>
 		/// Determines whether a particle which has hit this MO will penetrate, and if so, whether it gets lodged or exits on the other side of this MO.
 		/// Appropriate effects will be determined and applied ONLY IF there was penetration! If not, nothing will be affected.
@@ -351,6 +316,14 @@ namespace RTE {
 		//TODO This is crap but MOSR needs to account for damage multiplier
 		virtual int RemoveWounds(int amount) { return MOSRotating::RemoveWounds(amount) * m_DamageMultiplier; }
 
+	protected:
+
+		/// <summary>
+		/// Attaches this Attachable to a new parent MOSRotating, safely detaching from its old parent first if there is one.
+		/// </summary>
+		/// <param name="newParent">A pointer to the MOSRotating to attach to. Ownership is NOT transferred!</param>
+		void SetParent(MOSRotating *newParent);
+
 	private:
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
@@ -358,6 +331,7 @@ namespace RTE {
 		MOSRotating *m_Parent; //!< Pointer to the MOSRotating this attachable is attached to.
 		Vector m_ParentOffset; //!< The offset from the parent's Pos to the joint point this Attachable is attached with.
 		bool m_DrawAfterParent; //!< Whether to draw this Attachable after (in front of) or before (behind) the parent.
+		bool m_TransfersDamageToParent; //<! Whether this Attachable will collect its damage and send it to its parent, accounting for its damage multiplier.
 		bool m_DeleteWithParent; //!< Whether this attachable should be deleted when its parent is set ToDelete.
 		
 		float m_JointStrength; //!< The amount of impulse force needed on this to deatch it from the host Actor, in kg * m/s.
@@ -368,14 +342,19 @@ namespace RTE {
 		bool m_OnlyLinearForces; //!< Whether to only record linear forces, ie no torquing due to the parent offset.
 
 		float m_DamageCount; //!< The number of damage points that this Attachable has accumulated since the last time CollectDamage() was called.
-		const AEmitter *m_BreakWound; //!< The wound this Attachable will cause when it breaks from its parent.
+		const AEmitter *m_BreakWound; //!< The wound this Attachable will receive when it breaks from its parent.
+		const AEmitter *m_ParentBreakWound; //!< The wound this Attachable's parent will receive when the Attachable breaks from its parent.
 
 		bool m_InheritsRotAngle; //!< Whether this Attachable should inherit its parent's RotAngle.
-		Matrix m_RotTarget; //!< The desired rotation of this Attachable, the angle it's trying to achieve through angle springs.
 
 		long int m_AtomSubgroupID; //!< The Atom IDs this' atoms will have when attached and added to a parent's AtomGroup.
-		bool m_CanCollideWithTerrainWhenAttached; //!< Whether this attachable is capable of having terrain collisions enabled/disabled when attached to a parent.
-		bool m_IsCollidingWithTerrainWhileAttached; //!< Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
+		bool m_CollidesWithTerrainWhileAttached; //!< Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
+
+		/// <summary>
+		/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its atoms to/from its parent AtomGroup.
+		/// </summary>
+		/// <param name="addToParent">Whether to add this Attachable's atoms to the parent's AtomGroup or remove them.</param>
+		void OrganizeAtomsInParent(bool addToParent);
 
 		/// <summary>
 		/// Clears all the member variables of this Attachable, effectively resetting the members of this abstraction level only.

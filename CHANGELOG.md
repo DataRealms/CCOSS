@@ -77,6 +77,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New shortcut `ALT + W` to generate a detailed 140x55px mini `WorldDump` to be used for scene previews. No relying on `SceneEditor`, stretches over whole image, no ugly cyan bunkers, no actors or glows and has sky gradient.
 
+- New INI and Lua (R/W) properties for Attachables:
+	`TransfersDamageToParent = 0/1`. If enabled, the Attachable will act like hardcoded ones and transfer damage to its parent. For Attachables attached to other Attachables, the parent Attachable (and any of its parents, etc.) must have this enabled for it to work.
+	`ParentBreakWound = AEmitter...`. Use this to optionally define different BreakWounds for the Attachable and its parent. Matches BreakWound by default for ease of use.
+	`BreakWound` is also now R/W accessible to Lua.
+
 ### Changed
 
 - Lua error reporting has been improved so script errors will always show filename and line number.
@@ -138,6 +143,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Removed `Settings.ini` property `PixelsPerMeter`. Now hardcoded and cannot be changed by the user.
 
 - Removed `MOSParticle` property `Framerate` and lua bindings. `MOSParticle` animation is now handled with `SpriteAnimMode` like everything else.
+
+- Removed `Attachable` Lua write capability for `AtomSubGroupID` as changing this can cause all kinds of problems, and `RotTarget` as this didn't actually work.
 
 ***
 

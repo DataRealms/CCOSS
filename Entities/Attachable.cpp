@@ -15,6 +15,7 @@ namespace RTE {
 		m_Parent = 0;
 		m_ParentOffset.Reset();
 		m_DrawAfterParent = true;
+		m_TransfersDamageToParent = false;
 		m_DeleteWithParent = false;
 
 		m_JointStrength = 10;
@@ -26,13 +27,12 @@ namespace RTE {
 
 		m_DamageCount = 0;
 		m_BreakWound = 0;
+		m_ParentBreakWound = 0;
 
 		m_InheritsRotAngle = true;
-		m_RotTarget.Reset();
 
 		m_AtomSubgroupID = -1;
-		m_CanCollideWithTerrainWhenAttached = false;
-		m_IsCollidingWithTerrainWhileAttached = false;
+		m_CollidesWithTerrainWhileAttached = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,6 +43,7 @@ namespace RTE {
 		m_Parent = reference.m_Parent;
 		m_ParentOffset = reference.m_ParentOffset;
 		m_DrawAfterParent = reference.m_DrawAfterParent;
+		m_TransfersDamageToParent = reference.m_TransfersDamageToParent;
 		m_DeleteWithParent = reference.m_DeleteWithParent;
 
 		m_JointStrength = reference.m_JointStrength;
@@ -54,13 +55,12 @@ namespace RTE {
 
 		m_DamageCount = reference.m_DamageCount;
 		m_BreakWound = reference.m_BreakWound;
+		m_ParentBreakWound = reference.m_ParentBreakWound;
 
 		m_InheritsRotAngle = reference.m_InheritsRotAngle;
-		m_RotTarget = reference.m_RotTarget;
 
 		m_AtomSubgroupID = reference.m_AtomSubgroupID;
-		m_CanCollideWithTerrainWhenAttached = reference.m_CanCollideWithTerrainWhenAttached;
-		m_IsCollidingWithTerrainWhileAttached = reference.m_IsCollidingWithTerrainWhileAttached;
+		m_CollidesWithTerrainWhileAttached = reference.m_CollidesWithTerrainWhileAttached;
 
 		return 0;
 	}
@@ -72,6 +72,8 @@ namespace RTE {
 			reader >> m_ParentOffset;
 		} else if (propName == "DrawAfterParent") {
 			reader >> m_DrawAfterParent;
+		} else if (propName == "TransfersDamageToParent") {
+			reader >> m_TransfersDamageToParent;
 		} else if (propName == "DeleteWithParent") {
 			reader >> m_DeleteWithParent;
 		} else if (propName == "JointStrength" || propName == "Strength") {
@@ -82,10 +84,13 @@ namespace RTE {
 			reader >> m_JointOffset;
 		} else if (propName == "BreakWound") {
 			m_BreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
+			if (!m_ParentBreakWound) { m_ParentBreakWound = m_BreakWound; }
+		} else if (propName == "ParentBreakWound") {
+			m_ParentBreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
 		} else if (propName == "InheritsRotAngle") {
 			reader >> m_InheritsRotAngle;
 		} else if (propName == "CollidesWithTerrainWhenAttached") {
-			reader >> m_CanCollideWithTerrainWhenAttached;
+			reader >> m_CollidesWithTerrainWhileAttached;
 		} else {
 			return MOSRotating::ReadProperty(propName, reader);
 		}
@@ -102,6 +107,8 @@ namespace RTE {
 		writer << m_ParentOffset;
 		writer.NewProperty("DrawAfterParent");
 		writer << m_DrawAfterParent;
+		writer.NewProperty("TransfersDamageToParent");
+		writer << m_TransfersDamageToParent;
 		writer.NewProperty("DeleteWithParent");
 		writer << m_DeleteWithParent;
 
@@ -114,11 +121,13 @@ namespace RTE {
 
 		writer.NewProperty("BreakWound");
 		writer << m_BreakWound;
+		writer.NewProperty("ParentBreakWound");
+		writer << m_ParentBreakWound;
 
 		writer.NewProperty("InheritsRotAngle");
 		writer << m_InheritsRotAngle;
-		writer.NewProperty("CollidesWithTerrainWhenAttached");
-		writer << m_CanCollideWithTerrainWhenAttached;
+		writer.NewProperty("CollidesWithTerrainWhileAttached");
+		writer << m_CollidesWithTerrainWhileAttached;
 
 		return 0;
 	}
@@ -197,80 +206,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Attachable::EnableTerrainCollisions(bool enable) {
-		if (IsAttached() && CanCollideWithTerrainWhenAttached()) {
-			if (!IsCollidingWithTerrainWhileAttached() && enable) {
-				m_Parent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset());
-				SetIsCollidingWithTerrainWhileAttached(true);
-			} else if (IsCollidingWithTerrainWhileAttached() && !enable) {
-				m_Parent->GetAtomGroup()->RemoveAtoms(GetAtomSubgroupID());
-				SetIsCollidingWithTerrainWhileAttached(false);
-			}
-		} else if (IsAttached() && !CanCollideWithTerrainWhenAttached()) {
-			if (enable || !enable) {
-				g_ConsoleMan.PrintString("ERROR: Tried to toggle collisions for attachable that was not set to collide when initially created!");
-			}
+	void Attachable::SetCollidesWithTerrainWhileAttached(bool collidesWithTerrainWhileAttached) {
+		if (m_CollidesWithTerrainWhileAttached != collidesWithTerrainWhileAttached) {
+			OrganizeAtomsInParent(collidesWithTerrainWhileAttached);
+			m_CollidesWithTerrainWhileAttached = collidesWithTerrainWhileAttached;
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void Attachable::Attach(MOSRotating *newParent) {
-		if (newParent != nullptr) {
-			m_Parent = newParent;
-			m_Team = m_Parent->GetTeam();
-
-			//TODO see if this is reasonable. Seems like inventory swapping should do this cleanup internally. Also note that it used to be done regardless of newParent existing but I changed that, might be bad?
-			// Timers are reset here as a precaution, so that if something was sitting in an inventory, it doesn't cause backed up emissions.
-			ResetAllTimers();
-
-			if (GetRootParent()->HasEverBeenAddedToMovableMan()) {
-				RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, {m_Parent});
-			}
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void Attachable::Detach() {
-		if (m_Parent) {
-			m_Parent->GetAtomGroup()->RemoveAtoms(m_AtomSubgroupID);
-		}
-
-		m_Team = -1;
-		MOSRotating *temporaryParent = m_Parent;
-		m_Parent = 0;
-		m_RootMOID = m_MOID;
-
-		//TODO I don't think we need these at all? They're basically duplicates, and I think the m_MOID = g_NoMOID is backwards anyway???
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
-		RTEAssert(m_RootMOID == g_NoMOID || (m_RootMOID >= 0 && m_RootMOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
-		RTEAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
-#endif
-
-		m_RestTimer.Reset();
-
-		if (temporaryParent != nullptr && temporaryParent->GetRootParent()->HasEverBeenAddedToMovableMan()) {
-			RunScriptedFunctionInAppropriateScripts("OnDetach", false, false, {temporaryParent});
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool Attachable::CollideAtPoint(HitData &hd) {
-		return MOSRotating::CollideAtPoint(hd);
-		//TODO potentially make this happen, I guess the concepts are handled in MOSR::ApplyAttachableForces, which seems weird. If I don't implement, remove this whole override method cause it's otherwise unused.
-	/*
-		// See if the impact created a force enough to detach from parent.
-		if (m_pParent && hd.ResImpulse[HITEE].GetMagnitude() > m_JointStrength) {
-			m_pParent->AddAbsImpulseForce(Vector(hd.ResImpulse[HITEE]).SetMagnitude(m_JointStrength), m_JointPos);
-
-			Detach();
-		}
-		else {
-
-		}
-	*/
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -308,7 +248,7 @@ namespace RTE {
 		if (m_Parent) {
 			m_Parent->RemoveAttachable(this);
 		} else {
-			Detach();
+			SetParent(nullptr);
 		}
 		MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 	}
@@ -333,31 +273,6 @@ namespace RTE {
 
 			//TODO RotAngle should be set here based on whether or not this InheritsRotAngle. It's currently done by MOSR which is dumdum. Alternatively, see below.
 
-			//TODO m_RotTarget is handled here, the idea is to use spring concepts instead of just setting RotAngle. Either fix it, or delete it and the header stuff for it.
-			/*
-			float springDelta = m_Rotation.GetRadAngle() - m_RotTarget.GetRadAngle();
-			// Eliminate full rotations
-			while (fabs(springDelta) > c_TwoPI) {
-				springDelta -= springDelta > 0 ? c_TwoPI : -c_TwoPI;
-			}
-			// Eliminate rotations over half a turn
-			//if (fabs(springDelta) > c_PI) {
-			//	springDelta = (springDelta > 0 ? -c_PI : c_PI) + (springDelta - (springDelta > 0 ? c_PI : -c_PI));
-			//}
-
-			// Break the spring if close to target angle.
-			if (fabs(springDelta) > 0.1) {
-				m_AngularVel -= springDelta * fabs(springDelta);// * m_JointStiffness;
-			} else if (fabs(m_AngularVel) > 0.1) {
-				m_AngularVel *= 0.5;
-			}
-			//m_Rotation += springDelta * m_JointStiffness;
-			//m_AngularVel -= springDelta * m_JointStiffness;
-
-			// Apply the rotational velocity
-			//m_Rotation += m_AngularVel * g_TimerMan.GetDeltaTimeSecs();
-			*/
-
 			m_DeepCheck = false;
 		}
 
@@ -365,5 +280,48 @@ namespace RTE {
 
 		// If we're attached to something, MovableMan doesn't own us, and therefore isn't calling our UpdateScripts method (and neither is our parent), so we should here.
 		if (m_Parent != nullptr && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Attachable::SetParent(MOSRotating *newParent) {
+		if (newParent == m_Parent) {
+			return;
+		}
+
+		m_Team = newParent ? newParent->GetTeam() : -1;
+		MOSRotating *parentToUseForScriptCall = newParent ? newParent : m_Parent;
+		
+		if (newParent) {
+			//TODO see if this is reasonable. Seems like inventory swapping should do this cleanup internally. Also note that it used to be done regardless of newParent existing (i.e. any time Attach was called) but I changed that, might be bad?
+			
+			// Timers are reset here as a precaution, so that if something was sitting in an inventory, it doesn't cause backed up emissions.
+			ResetAllTimers();
+
+			m_Parent = newParent;
+			OrganizeAtomsInParent(newParent != nullptr);
+		} else {
+			m_RootMOID = m_MOID;
+			m_RestTimer.Reset();
+
+			OrganizeAtomsInParent(newParent != nullptr);
+			m_Parent = newParent;
+		}
+
+		if (parentToUseForScriptCall && parentToUseForScriptCall->GetRootParent()->HasEverBeenAddedToMovableMan()) {
+			RunScriptedFunctionInAppropriateScripts(newParent ? "OnAttach" : "OnDetach", false, false, {parentToUseForScriptCall});
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Attachable::OrganizeAtomsInParent(bool addToParent) {
+		if (IsAttached()) {
+			if (addToParent) {
+				m_Parent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset());
+			} else {
+				m_Parent->GetAtomGroup()->RemoveAtoms(GetAtomSubgroupID());
+			}
+		}
 	}
 }

@@ -149,6 +149,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 	Additionally, all screenshots (excluding abortscreen) will now be saved into a `_Screenshots` folder (`_` so it's on top and not hiding between module folders) to avoid polluting the root directory. ([Issue #163](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/163))  
 	This folder will be created automatically after modules are loaded if it is missing.
+	
+- Controller deadzone setting ignores more input. Previously setting it to the maximum was just enough to eliminate stick drift.
 
 ### Fixed
 

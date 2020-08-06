@@ -1625,7 +1625,7 @@ void MainMenuGUI::Update()
 					m_aDeadZoneLabel[which]->SetText(s);
 
 					// Update control scheme
-					g_UInputMan.GetControlScheme(which)->SetJoystickDeadzone((float)m_aDeadZoneSlider[which]->GetValue() / 250.0);
+					g_UInputMan.GetControlScheme(which)->SetJoystickDeadzone((float)m_aDeadZoneSlider[which]->GetValue() / 200.0F);
 				}
 
 				if (anEvent.GetControl() == m_aDeadZoneCheckbox[which])

@@ -66,7 +66,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates this MovableObject. Supposed to be done every frame.
 		/// </summary>
-		virtual void Update();
+		void Update() override;
 
 		/// <summary>
 		/// Draws this' current graphical HUD overlay representation to a BITMAP of choice.

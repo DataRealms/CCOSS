@@ -867,7 +867,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
     /// <summary>
     /// Executes the Lua-defined OnPieMenu event handler for this AHuman.

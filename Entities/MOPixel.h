@@ -165,7 +165,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates this MOPixel. Supposed to be done every frame.
 		/// </summary>
-		virtual void Update();
+		void Update() override;
 
 		/// <summary>
 		/// Draws this MOPixel's current graphical representation to a BITMAP of choice.

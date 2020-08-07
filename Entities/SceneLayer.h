@@ -453,7 +453,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	virtual void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

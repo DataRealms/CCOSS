@@ -1290,7 +1290,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Arguments:       None.
 // Return value:    None.
 
-    void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

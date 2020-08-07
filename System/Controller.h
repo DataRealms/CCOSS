@@ -288,7 +288,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates this Controller. Supposed to be done every frame.
 		/// </summary>
-		virtual void Update();
+		void Update();
 #pragma endregion
 
 #pragma region Operator Overloads

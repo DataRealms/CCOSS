@@ -67,7 +67,7 @@ public:
 // Description:     Updates the Input.
 // Arguments:       None.
 
-    void Update(void);
+    void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

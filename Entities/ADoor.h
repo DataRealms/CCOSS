@@ -159,7 +159,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates this ADoor. Supposed to be done every frame.
 		/// </summary>
-		virtual void Update();
+		void Update() override;
 
 		/// <summary>
 		/// Draws this ADoor's current graphical representation to a BITMAP of choice.

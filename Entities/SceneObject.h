@@ -522,7 +522,7 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update() { return; }
+	virtual void Update() { return; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

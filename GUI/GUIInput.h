@@ -122,7 +122,7 @@ public:
 // Description:     Updates the Input.
 // Arguments:       None.
 
-    virtual void Update(void);
+    virtual void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

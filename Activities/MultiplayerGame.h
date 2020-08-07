@@ -165,7 +165,7 @@ namespace RTE
 		// Arguments:       None.
 		// Return value:    None.
 
-		virtual void Update();
+		void Update() override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////

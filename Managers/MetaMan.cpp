@@ -476,7 +476,7 @@ int MetaMan::ClearSceneData()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Destroys and resets (through Clear()) the MetaMan object.
 
-void MetaMan::Destroy(bool notInherited)
+void MetaMan::Destroy()
 {
     delete m_pMetaGUI;
 

@@ -113,11 +113,11 @@ friend class MetaSave;
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  NewGame
+// Method:  NewGame
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Wipes any current and sets up a new game based on a size parameter.
 // Arguments:       The size of the new Metagame, from 0 to 1.0, which will affect how
@@ -125,29 +125,29 @@ friend class MetaSave;
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int NewGame(float gameSize = 0.5);
+	int NewGame(float gameSize = 0.5);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  EndGame
+// Method:  EndGame
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Wipes any current metagame and sets things back to as if program start.
 // Arguments:       None.
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int EndGame();
+	int EndGame();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Load
+// Method:  Load
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Load a Metagame from disk out of the special Metagame.rte data module
 // Arguments:       The MetaSave object to load from - Ownership Is Not Transferred!
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Load(const MetaSave *pSave);
+	int Load(const MetaSave *pSave);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -188,35 +188,33 @@ friend class MetaSave;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire MetaMan, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() override { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Destroys and resets (through Clear()) the MetaMan object.
-// Arguments:       Whether to only destroy the members defined in this derived class, or
-//                  to destroy all inherited members also.
 // Return value:    None.
 
-    void Destroy(bool notInherited = false);
+    void Destroy();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
+// Method:  GetClassName
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the class name of this Entity.
 // Arguments:       None.
 // Return value:    A string with the friendly-formatted type name of this object.
 
-    virtual const std::string & GetClassName() const { return m_ClassName; }
+    const std::string & GetClassName() const override { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

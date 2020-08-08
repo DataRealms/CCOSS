@@ -37,14 +37,14 @@ namespace RTE {
 		/// Makes the TimerMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create();
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a TimerMan object before deletion from system memory.
 		/// </summary>
-		virtual ~TimerMan() { Destroy(); }
+		~TimerMan() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the TimerMan object.
@@ -54,7 +54,7 @@ namespace RTE {
 		/// <summary>
 		/// Resets the entire TimerMan, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -234,7 +234,7 @@ namespace RTE {
 		/// Gets the class name of this object.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:

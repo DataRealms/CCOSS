@@ -52,14 +52,14 @@ namespace RTE {
 		/// Makes the NetworkServer object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create();
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a NetworkServer object before deletion from system memory.
 		/// </summary>
-		virtual ~NetworkServer() { Destroy(); }
+		~NetworkServer() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the NetworkServer object.
@@ -163,7 +163,7 @@ namespace RTE {
 		/// Gets the class name of this object.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:

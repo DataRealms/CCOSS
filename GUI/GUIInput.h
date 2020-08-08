@@ -90,7 +90,7 @@ public:
 // Description:     Destroy the screen
 // Arguments:       None.
 
-    virtual void Destroy(void);
+    virtual void Destroy();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -171,7 +171,7 @@ public:
 // Description:     Gets the key modifiers.
 // Arguments:       None.
 
-    int GetModifier(void);
+    int GetModifier();
 
 
 	/// <summary>

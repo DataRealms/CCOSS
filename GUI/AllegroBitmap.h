@@ -63,7 +63,7 @@ public:
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~AllegroBitmap() { Destroy(); }
+	~AllegroBitmap() override { Destroy(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ public:
 // Description:     Destroys and frees the bitmap
 // Arguments:       None.
 
-    virtual void Destroy(void);
+	void Destroy() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +118,7 @@ public:
 // Description:     Draw this bitmap scaled onto another bitmap ignoring color-keyed pixels.
 // Arguments:       Destination Bitmap, Position, Size
 
-    virtual void DrawTransScaled(GUIBitmap *pDestBitmap, int X, int Y, int width, int height);
+	void DrawTransScaled(GUIBitmap *pDestBitmap, int X, int Y, int width, int height) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +127,7 @@ public:
 // Description:     Draws a line.
 // Arguments:       Start Position, End Position, Color.
 
-    virtual void DrawLine(int x1, int y1, int x2, int y2, unsigned long Color);
+	void DrawLine(int x1, int y1, int x2, int y2, unsigned long Color) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ public:
 // Description:     Draws a rectangle.
 // Arguments:       Position, Size, Color, Filled.
 
-    void DrawRectangle(int X, int Y, int Width, int Height, unsigned long Color, bool Filled);
+    void DrawRectangle(int X, int Y, int Width, int Height, unsigned long Color, bool Filled) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ public:
 // Description:     Gets the colour of a pixel at a specific point.
 // Arguments:       Point.
 
-    unsigned long GetPixel(int X, int Y);
+    unsigned long GetPixel(int X, int Y) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -154,7 +154,7 @@ public:
 // Description:     Sets the color of a pixel at a specific point.
 // Arguments:       Point, Color.
 
-    void SetPixel(int X, int Y, unsigned long Color);
+    void SetPixel(int X, int Y, unsigned long Color) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +163,7 @@ public:
 // Description:     Gets the Width of the bitmap.
 // Arguments:       None.
 
-    int GetWidth(void);
+    int GetWidth() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ public:
 // Description:     Gets the Height of the bitmap.
 // Arguments:       None.
 
-    int GetHeight(void);
+    int GetHeight() override;
 
 /* NA, color key is always 0 with allegro
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -200,7 +200,7 @@ public:
 // Description:     Gets the number of bits per pixel color depth of this bitmap.
 // Returns:         8, 16, 32 etc
 
-    virtual int GetColorDepth();
+	int GetColorDepth() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -209,7 +209,7 @@ public:
 // Description:     Gets the clipping rectangle of the bitmap.
 // Arguments:       Pointer to GUIRect struct to fill out.
 
-    virtual void GetClipRect(GUIRect *Rect);
+	void GetClipRect(GUIRect *Rect) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -218,7 +218,7 @@ public:
 // Description:     Sets the clipping rectangle of the bitmap.
 // Arguments:       Rectangle pointer. 0 for no clipping.
 
-    virtual void SetClipRect(GUIRect *pRect);
+	void SetClipRect(GUIRect *pRect) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -229,7 +229,7 @@ public:
 //                  described by the passed-in rect. 
 // Arguments:       Rectangle pointer.
 
-    virtual void AddClipRect(GUIRect *Rect);
+	void AddClipRect(GUIRect *Rect) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -238,7 +238,7 @@ public:
 // Description:     Returns the path to the datafile object this GUIBitmap uses.
 // Arguments:       None.
 
-    virtual std::string GetDataPath();
+	std::string GetDataPath() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -257,7 +257,7 @@ public:
 // Arguments:       None.
 // Returns:         Whether this contains bitmap data or not.
 
-    virtual bool HasBitmap() { return m_pBitmap != 0; }
+	bool HasBitmap() override { return m_pBitmap != 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

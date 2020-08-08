@@ -84,7 +84,7 @@ public:
 // Description:     Draws the panel
 // Arguments:       Screen class
 
-    void Draw(GUIScreen *Screen);
+    void Draw(GUIScreen *Screen) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ public:
 // Description:     Called when the mouse goes down on the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    void OnMouseDown(int X, int Y, int Buttons, int Modifier);
+    void OnMouseDown(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -102,7 +102,7 @@ public:
 // Description:     Called when the mouse goes up on the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    void OnMouseUp(int X, int Y, int Buttons, int Modifier);
+    void OnMouseUp(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +111,7 @@ public:
 // Description:     Called when the mouse moves (over the panel, or when captured).
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    void OnMouseMove(int X, int Y, int Buttons, int Modifier);
+    void OnMouseMove(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@ public:
 // Description:     Called when a key is pressed (OnDown & repeating).
 // Arguments:       KeyCode, Modifier.
 
-    void OnKeyPress(int KeyCode, int Modifier);
+    void OnKeyPress(int KeyCode, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -147,7 +147,7 @@ public:
 // Description:     Gets the text in the textpanel.
 // Arguments:       None.
 
-    std::string GetText(void) { return m_Text; }
+    std::string GetText() { return m_Text; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ public:
 // Description:     Gets the extra text which appears right-justified in the textpanel.
 // Arguments:       None.
 
-    std::string GetRightText(void) { return m_RightText; }
+    std::string GetRightText() { return m_RightText; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -175,7 +175,7 @@ public:
 // Arguments:       None.
 // Returns:         Index of the start of the selection. -1 if no selection
 
-    int GetSelectionStart(void);
+    int GetSelectionStart();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -185,7 +185,7 @@ public:
 // Arguments:       None.
 // Returns:         Index of the end of the selection. -1 if no selection
 
-    int GetSelectionEnd(void);
+    int GetSelectionEnd();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -194,7 +194,7 @@ public:
 // Description:     Clears the selection. Does NOT remove the selection text though.
 // Arguments:       None.
 
-    void ClearSelection(void);
+    void ClearSelection();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +203,7 @@ public:
 // Description:     Gets the selection text.
 // Arguments:       None.
 
-    std::string GetSelectionText(void);
+    std::string GetSelectionText();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +212,7 @@ public:
 // Description:     Removes the characters in the selection.
 // Arguments:       None.
 
-    void RemoveSelectionText(void);
+    void RemoveSelectionText();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +239,7 @@ public:
 // Description:     Gets the locked state on the textbox.
 // Arguments:       None.
 
-    bool GetLocked(void);
+    bool GetLocked();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

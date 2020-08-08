@@ -74,7 +74,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position.
 
-    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1);
+    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -83,7 +83,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Properties.
 
-    void Create(GUIProperties *Props);
+    void Create(GUIProperties *Props) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ public:
 // Description:     Called when the control has been destroyed.
 // Arguments:       None.
 
-    void Destroy(void);
+    void Destroy() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ public:
 // Description:     Called when the control is activated and ready for use.
 // Arguments:       None.
 
-    void Activate(void);
+    void Activate() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ public:
 // Description:     Called when the skin has been changed.
 // Arguments:       New skin pointer.
 
-    void ChangeSkin(GUISkin *Skin);
+    void ChangeSkin(GUISkin *Skin) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +119,7 @@ public:
 // Description:     Draws the panel
 // Arguments:       Screen class
 
-    void Draw(GUIScreen *Screen);
+    void Draw(GUIScreen *Screen) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ public:
 // Arguments:       None.
 // Returns:         0 if the control does not have a panel, otherwise the topmost panel.
 
-    GUIPanel *GetPanel(void);
+    GUIPanel * GetPanel() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +139,7 @@ public:
 // Arguments:       None.
 // Returns:         The ListPanel component of this ComboBox.
 
-    GUIListPanel *GetListPanel(void) { return m_ListPanel; }
+    GUIListPanel *GetListPanel() { return m_ListPanel; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ public:
 // Description:     Returns a string representing the control's ID
 // Arguments:       None.
 
-    static std::string GetControlID(void)    { return "COMBOBOX"; };
+    static std::string GetControlID()    { return "COMBOBOX"; };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -157,7 +157,7 @@ public:
 // Description:     Called when receiving a signal.
 // Arguments:       Signal source, Signal code, Signal data.
 
-    void ReceiveSignal(GUIPanel *Source, int Code, int Data);
+    void ReceiveSignal(GUIPanel *Source, int Code, int Data) override;
 
     
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -166,7 +166,7 @@ public:
 // Description:     Locks the control from updating every time a new item is added.
 // Arguments:       None.
 
-    void BeginUpdate(void);
+    void BeginUpdate();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -176,7 +176,7 @@ public:
 //                  Will automatically update the control.
 // Arguments:       None.
 
-    void EndUpdate(void);
+    void EndUpdate();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -185,7 +185,7 @@ public:
 // Description:     Called when the control needs to be moved.
 // Arguments:       New position.
 
-    void Move(int X, int Y);
+    void Move(int X, int Y) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -194,7 +194,7 @@ public:
 // Description:     Called when the control needs to be resized.
 // Arguments:       New size.
 
-    void Resize(int Width, int Height);
+    void Resize(int Width, int Height) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +203,7 @@ public:
 // Description:     Gets the rectangle of the control.
 // Arguments:       Position, Size.
 
-    void GetControlRect(int *X, int *Y, int *Width, int *Height);
+    void GetControlRect(int *X, int *Y, int *Width, int *Height) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -230,7 +230,7 @@ public:
 // Description:     Clears the liost.
 // Arguments:       None.
 
-    void ClearList(void);
+    void ClearList();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +239,7 @@ public:
 // Description:     Get the item count.
 // Arguments:       None.
 
-    int GetCount(void);
+    int GetCount();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -248,7 +248,7 @@ public:
 // Description:     Get the index of the selected item.
 // Arguments:       None.
 
-    int GetSelectedIndex(void);
+    int GetSelectedIndex();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -258,7 +258,7 @@ public:
 //                  made.
 // Arguments:       None.
 
-    int GetOldSelectionIndex(void) { return m_OldSelection; }
+    int GetOldSelectionIndex() { return m_OldSelection; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -315,7 +315,7 @@ public:
 // Description:     Gets the control to store the values into properties.
 // Arguments:       None.
 
-    void StoreProperties(void);
+    void StoreProperties() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -333,7 +333,7 @@ public:
 // Description:     Gets the drop down style of the combo box.
 // Arguments:       None.
 
-    int GetDropDownStyle(void);
+    int GetDropDownStyle();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -342,7 +342,7 @@ public:
 // Description:     Sets the visibility of the control.
 // Arguments:       Visible.
 
-    void SetVisible(bool Visible);
+	void SetVisible(bool Visible) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -351,7 +351,7 @@ public:
 // Description:     Gets the visibility of the control.
 // Arguments:       None.
 
-    bool GetVisible(void);
+    bool GetVisible() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -360,7 +360,7 @@ public:
 // Description:     Sets the enabled state of the control.
 // Arguments:       Enabled.
 
-    void SetEnabled(bool Enabled);
+    void SetEnabled(bool Enabled) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -369,7 +369,7 @@ public:
 // Description:     Gets the enabled state of the control.
 // Arguments:       None.
 
-    bool GetEnabled(void);
+    bool GetEnabled() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -379,7 +379,7 @@ public:
 // Arguments:       None.
 // Returns:         Text. Returns empty string is style is not DropDown.
 
-    std::string GetText(void);
+    std::string GetText();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -397,7 +397,7 @@ public:
 // Description:     Applies new properties to the control.
 // Arguments:       GUIProperties.
 
-    void ApplyProperties(GUIProperties *Props);
+    void ApplyProperties(GUIProperties *Props) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -407,7 +407,7 @@ public:
 // Arguments:       None.
 // Returns:         Whether this is currently dropped down and showing the list.
 
-    bool IsDropped(void) { return m_ListPanel->_GetVisible(); }
+    bool IsDropped() { return m_ListPanel->_GetVisible(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -475,7 +475,7 @@ public:
 // Description:     Draws the panel
 // Arguments:       Screen class
 
-    void Draw(GUIScreen *Screen);
+    void Draw(GUIScreen *Screen) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -493,7 +493,7 @@ public:
 // Description:     Destroys the button.
 // Arguments:       None.
 
-    void Destroy(void);
+    void Destroy();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -502,7 +502,7 @@ public:
 // Description:     Called when the mouse goes down on the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    void OnMouseDown(int X, int Y, int Buttons, int Modifier);
+    void OnMouseDown(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -511,7 +511,7 @@ public:
 // Description:     Called when the mouse goes up on the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    void OnMouseUp(int X, int Y, int Buttons, int Modifier);
+    void OnMouseUp(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

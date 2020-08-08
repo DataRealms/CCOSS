@@ -110,14 +110,14 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire MainMenuGUI, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+    void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -229,7 +229,7 @@ public:
 // Arguments:       None.
 // Return value:    true if we're in the main menu i.e. allowed to show PP promo
 
-	virtual bool AllowPioneerPromo() { return m_MenuScreen == MAINSCREEN; }
+	bool AllowPioneerPromo() { return m_MenuScreen == MAINSCREEN; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Static method:   EnablePioneerPromoButton
@@ -270,13 +270,13 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  Draw
+// Method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the menu
 // Arguments:       The bitmap to draw on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *drawBitmap) const;
+    void Draw(BITMAP *drawBitmap) const;
 
 #pragma region Editor Activity Handling
 	/// <summary>
@@ -318,7 +318,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void HideAllScreens();
+    void HideAllScreens();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -338,7 +338,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void SetupSkirmishActivity();
+    void SetupSkirmishActivity();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -348,7 +348,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateScenesBox();
+    void UpdateScenesBox();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -359,7 +359,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateTeamBoxes();
+    void UpdateTeamBoxes();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -369,7 +369,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateResolutionCombo();
+    void UpdateResolutionCombo();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -380,7 +380,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateVolumeSliders();
+    void UpdateVolumeSliders();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -390,7 +390,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateDeviceLabels();
+    void UpdateDeviceLabels();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -400,7 +400,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateConfigScreen();
+    void UpdateConfigScreen();
 
 
 
@@ -411,7 +411,7 @@ protected:
 // Arguments:       None.
 // Return value:    String with mod info.
 
-	virtual std::string MakeModString(ModRecord r);
+	std::string MakeModString(ModRecord r);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -421,7 +421,7 @@ protected:
 // Arguments:       None.
 // Return value:    String with script info.
 
-	virtual std::string MakeScriptString(ScriptRecord r);
+	std::string MakeScriptString(ScriptRecord r);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +431,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-	virtual void ToggleMod();
+	void ToggleMod();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -441,7 +441,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-	virtual void ToggleScript();
+	void ToggleScript();
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////

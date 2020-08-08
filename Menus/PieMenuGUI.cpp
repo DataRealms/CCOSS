@@ -33,7 +33,7 @@
 
 using namespace RTE;
 
-const string PieMenuGUI::Slice::m_sClassName = "Slice";
+const string PieMenuGUI::Slice::c_ClassName = "Slice";
 BITMAP *PieMenuGUI::s_pCursor;
 //BITMAP *PieMenuGUI::s_pCursorGlow;
 

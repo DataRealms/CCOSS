@@ -33,7 +33,7 @@ namespace RTE
         virtual std::vector<std::string> GetSupportedScriptFunctionNames() const { return {__VA_ARGS__}; }
 
     #define AddScriptFunctionNames(PARENT, ...) \
-        virtual std::vector<std::string> GetSupportedScriptFunctionNames() const override { \
+        std::vector<std::string> GetSupportedScriptFunctionNames() const override { \
             std::vector<std::string> functionNames = PARENT::GetSupportedScriptFunctionNames(); \
             functionNames.insert(functionNames.end(), {__VA_ARGS__}); \
             return functionNames; \
@@ -75,10 +75,6 @@ enum MOType
 
 friend class Atom;
 
-/* Should be in all concrete subclasses
-// Concrete allocation and cloning definitions
-EntityAllocation(MovableObject)
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     MovableObject

@@ -443,16 +443,6 @@ protected:
 
 	void ToggleScript();
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CategoryChange
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes sure all things that to happen when category is changed, happens.
-// Arguments:       None.
-// Return value:    None.
-
-    void CategoryChange();
-*/
 
     enum MenuEnabled
     {
@@ -786,8 +776,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MainMenuGUI(const MainMenuGUI &reference);
-    MainMenuGUI & operator=(const MainMenuGUI &rhs);
+	MainMenuGUI(const MainMenuGUI &reference) {}
+	MainMenuGUI & operator=(const MainMenuGUI &rhs) {}
 
 };
 

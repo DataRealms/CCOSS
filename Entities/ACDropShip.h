@@ -153,32 +153,6 @@ ClassInfoGetters
 
     void SetID(const MOID newID) override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnBounce
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  bounces off of something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The position where the bounce-hit occurred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this bounce.
-
-	bool OnBounce(const Vector &pos) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnSink
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  sink into something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The position where the sink-hit occurred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this sinkage.
-
-	bool OnSink(const Vector &pos) override;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AutoStabilizing

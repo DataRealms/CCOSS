@@ -124,33 +124,6 @@ ClassInfoGetters
 
    int Create() override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the AHuman object ready for use.
-// Arguments:       A pointer to a BITMAP that this AHuman will own and destroy.
-//                  A pointer to a Controller that this AHuman will own and destroy.
-//                  A float specifying the object's mass in Kilograms (kg).
-//                  A Vector specifying the initial position.
-//                  A Vector specifying the initial velocity.
-//                  A AtomGroup that will make up the collision 'cage' of this mass object.
-//                  The amount of time in ms this MovableObject will exist. 0 means unlim.
-//                  An initial Status.
-//                  An int with the initial health value of this AHuman.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	int Create(BITMAP *pSprite,
-                       Controller *pController,
-                       const float mass,
-                       const Vector &position = Vector(0, 0),
-                       const Vector &velocity = Vector(0, 0),
-                       AtomGroup *hitBody = new AtomGroup(),
-                       const unsigned long lifetime = 0,
-                       Status status = ACTIVE,
-                       const int health = 100);
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Create
@@ -420,32 +393,6 @@ ClassInfoGetters
 
     bool CollideAtPoint(HitData &hitData) override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnBounce
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  bounces off of something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The position where the bounce-hit occurred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this bounce.
-
-	bool OnBounce(const Vector &pos) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnSink
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  sink into something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The position where the sink-hit occurred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this sinkage.
-
-	bool OnSink(const Vector &pos) override;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  AddPieMenuSlices

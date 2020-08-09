@@ -425,8 +425,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    ObjectPickerGUI(const ObjectPickerGUI &reference);
-    ObjectPickerGUI & operator=(const ObjectPickerGUI &rhs);
+	ObjectPickerGUI(const ObjectPickerGUI &reference) {}
+	ObjectPickerGUI & operator=(const ObjectPickerGUI &rhs) {}
 
 };
 

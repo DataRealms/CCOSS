@@ -58,10 +58,6 @@ public:
         SpriteAnimModeCount
     };
 
-/* abstract class
-// Concrete allocation and cloning definitions
-EntityAllocation(MOSprite)
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     MOSprite
@@ -433,28 +429,6 @@ EntityAllocation(MOSprite)
 
 	bool IsOnScenePoint(Vector &scenePoint) const override;
 
-/* implemented in MovableObject
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  PreTravel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does stuff that needs to be done before Update(). Always call before
-//                  calling Update.
-// Arguments:       None.
-// Return value:    None.
-
-    void PreTravel() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  PostTravel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does stuff that needs to be done after Update(). Always call after
-//                  calling Update.
-// Arguments:       None.
-// Return value:    None.
-
-    void PostTravel() override;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RotateOffset

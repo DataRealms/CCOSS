@@ -167,17 +167,6 @@ ClassInfoGetters
 
 	Material const * GetMaterial() const override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HitsMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets whether this MovableObject is set to collide with other
-//                  MovableObject:s during travel.
-// Arguments:       None.
-// Return value:    Whether to hit other MO's during travel, or not.
-
-    bool HitsMOs() const;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetDrawPriority
@@ -210,20 +199,7 @@ ClassInfoGetters
 // Return value:    A const reference to the current recoil offset.
 
     const Vector & GetRecoilOffset() const { return m_RecoilOffset; }
-/*
-// TODO: Improve this one! Really crappy fit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetBoundingBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the oriented bounding box which is guaranteed to contain this,
-//                  taking rotation etc into account. It's not guaranteed to be fit
-//                  perfectly though. TODO: MAKE FIT BETTER
-// Arguments:       None.
-// Return value:    A Box which is guaranteed to contain this. Does nto take wrapping into
-//                  account, and parts of this box may be out of bounds!
 
-	Box GetBoundingBox() const { return Box(m_Pos + Vector(-m_MaxRadius, -m_MaxRadius), m_MaxDiameter, m_MaxDiameter); }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGibList
@@ -233,28 +209,6 @@ ClassInfoGetters
 // Return value:    A pointer to the list of gibs. Ownership is NOT transferred!
 
     std::list<Gib> * GetGibList() { return &m_Gibs; }
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetAtom
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Replaces the current Atom of this MOSRotating with a new one.
-// Arguments:       A reference to the new Atom.
-// Return value:    None.
-
-    void SetAtom(Atom *newAtom);
-*/
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetToHitMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets this MovableObject to collide with other MovableObjects during
-//                  travel.
-// Arguments:       Whether to hit other MO's during travel, or not.
-// Return value:    None.
-
-	void SetToHitMOs(bool hitMOs = true);
-*/
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

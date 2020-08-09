@@ -129,17 +129,6 @@ ClassInfoGetters
 
 	Round * PopNextRound();
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetParentOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the current position offset of this Magazine relative to the
-//                  parent Actor's position, if attached.
-// Arguments:       A const reference to the new parent offset.
-// Return value:    None.
-
-    void SetParentOffset(const Vector &newOffset) { m_ParentOffset = newOffset; }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetRoundCount

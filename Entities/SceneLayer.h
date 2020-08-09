@@ -480,32 +480,6 @@ ClassInfoGetters
 
 protected:
 
-/* not neccessary
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  FillContour
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads a contour file and applies it to this SceneLayer by filling the
-//                  area above or below the contour with a texture on this SceneLayer.
-// Arguments:       Whether the area above or below the contour should be filled.
-//                  A ContentFile pointer that handles a contour file. If the pointer
-//                  is 0, the whole 
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	int LoadContour(bool fillBelowContour, ContentFile *contourFile);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  FillMaterialContour
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads a terrain contour file and applies it to this SceneLayer.
-// Arguments:       The material index that should be filled into one side of 
-//                  A ContentFile reference that handles a contour file.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	int LoadContour(char material, bool dirtBelowContour, ContentFile &contourFile);
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  InitScrollRatios

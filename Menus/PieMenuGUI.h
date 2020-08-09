@@ -707,8 +707,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    PieMenuGUI(const PieMenuGUI &reference);
-    PieMenuGUI & operator=(const PieMenuGUI &rhs);
+	PieMenuGUI(const PieMenuGUI &reference) {}
+	PieMenuGUI & operator=(const PieMenuGUI &rhs) {}
 
 };
 

@@ -255,16 +255,6 @@ ClassInfoGetters
 
     MOSRotating * GetOwner() const { return m_pOwnerMO; }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          HitsMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this Atom is set to collide with MovableObject:s.
-// Arguments:       None.
-// Return value:    Whether or not this Atom is checking for collisions with MOs or not.
-
-    bool HitsMOs() const { return (*(m_Atoms.begin()))->HitsMOs(); }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetResolution
@@ -324,18 +314,6 @@ ClassInfoGetters
 // Return value:    None.
 
     void SetOwner(MOSRotating *newOwner);
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetToHitMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this AtomGroup will collide with MovableObject:s or not.
-// Arguments:       Whether or not this should check for collisions with MOs or not.
-// Return value:    None.
-
-    void SetToHitMOs(bool hitMOs) { for (std::list<Atom *>::iterator itr = m_Atoms.begin(); itr != m_Atoms.end(); ++itr)
-                                        (*itr)->SetToHitMOs(hitMOs); }
-*/
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

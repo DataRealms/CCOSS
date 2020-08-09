@@ -324,8 +324,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    AreaEditorGUI(const AreaEditorGUI &reference);
-    AreaEditorGUI & operator=(const AreaEditorGUI &rhs);
+	AreaEditorGUI(const AreaEditorGUI &reference) {}
+	AreaEditorGUI & operator=(const AreaEditorGUI &rhs) {}
 
 };
 

@@ -423,17 +423,6 @@ ClassInfoGetters
 
 	void SetMuzzleOffset(Vector newOffset) override { m_MuzzleOff = newOffset; }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetParentOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the current position offset of this HDFirearm relative to the
-//                  parent Actor's position, if attached.
-// Arguments:       None.
-// Return value:    A const reference to the current parent offset.
-
-    const Vector & GetParentOffset() const { return m_ParentOffset; }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetID

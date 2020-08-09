@@ -599,17 +599,6 @@ public:
 
 protected:
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  FocusChange
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes sure all things that to happen when focus is moved from one area
-//                  or control to the next within the menu, will happen.
-// Arguments:       None.
-// Return value:    None.
-
-    void FocusChange();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  CategoryChange
@@ -869,8 +858,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    BuyMenuGUI(const BuyMenuGUI &reference);
-    BuyMenuGUI & operator=(const BuyMenuGUI &rhs);
+	BuyMenuGUI(const BuyMenuGUI &reference) {}
+	BuyMenuGUI & operator=(const BuyMenuGUI &rhs) {}
 
 };
 

@@ -410,8 +410,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    SceneEditorGUI(const SceneEditorGUI &reference);
-    SceneEditorGUI & operator=(const SceneEditorGUI &rhs);
+	SceneEditorGUI(const SceneEditorGUI &reference) {}
+	SceneEditorGUI & operator=(const SceneEditorGUI &rhs) {}
 
 };
 

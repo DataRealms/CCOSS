@@ -533,9 +533,9 @@ private:
     void Clear();
 
 
-    // Disallow the use of some implicit methods.
-    PresetMan(const PresetMan &reference);
-    PresetMan & operator=(const PresetMan &rhs);
+	// Disallow the use of some implicit methods.
+	PresetMan(const PresetMan &reference) {}
+	PresetMan & operator=(const PresetMan &rhs) {}
 
 };
 

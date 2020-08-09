@@ -379,29 +379,6 @@ friend class MetaSave;
 
     int OnlyTeamWithAnyBrainPoolLeft();
 
-/* obsolete, diff win condition now
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OneOrNoneTeamsLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether there is less than two teams left in this game with
-//                  a brain in its ranks at all.
-// Arguments:       None.
-// Return value:    Whether less than two teams have any brains in them left.
-
-    bool OneOrNoneTeamsLeft();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WhichTeamLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates which single team is left with brains, if any.
-// Arguments:       None.
-// Return value:    Which team stands alone with any brains in its ranks, if any. NoTeam
-//                  is returned if there's either more than one team, OR there are no
-//                  teams at all left with brains in em.
-
-    int WhichTeamLeft();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          NoBrainsLeftInAnyPool
@@ -678,8 +655,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MetaMan(const MetaMan &reference);
-    MetaMan & operator=(const MetaMan &rhs);
+	MetaMan(const MetaMan &reference) {}
+	MetaMan & operator=(const MetaMan &rhs) {}
 
 };
 } // namespace RTE

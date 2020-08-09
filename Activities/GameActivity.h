@@ -86,10 +86,6 @@ public:
         YELLOW
     };
 
-/* abstract class
-// Concrete allocation and cloning definitions
-EntityAllocation(GameActivity)
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GameActivity

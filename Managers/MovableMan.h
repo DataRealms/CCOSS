@@ -1008,8 +1008,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MovableMan(const MovableMan &reference);
-    MovableMan & operator=(const MovableMan &rhs);
+	MovableMan(const MovableMan &reference) {}
+	MovableMan & operator=(const MovableMan &rhs) {}
 
 };
 

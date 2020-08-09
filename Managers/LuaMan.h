@@ -39,20 +39,6 @@ class LuaMan:
 
 public:
 
-/*
-enum ServerResult
-{
-    SUCCESS = 0,
-    FAILEDCONNECTION,
-    INVALIDXML,
-    MAXCOUNT,
-    INVALIDKEY,
-    INVALIDPRODUCT,
-    EXPIREDKEY,
-    INVALIDMACHINE,
-    UNKNOWNERROR
-};
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     LuaMan
@@ -391,8 +377,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    LuaMan(const LuaMan &reference);
-    LuaMan & operator=(const LuaMan &rhs);
+	LuaMan(const LuaMan &reference) {}
+	LuaMan & operator=(const LuaMan &rhs) {}
 
 	//Internal list of opened files used by File* functions 
 	FILE * m_Files[MAX_OPEN_FILES];

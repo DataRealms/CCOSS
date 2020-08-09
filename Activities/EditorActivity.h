@@ -67,10 +67,6 @@ public:
         EDITORMODECOUNT
     };
 
-/* Not concrete
-// Concrete allocation and cloning definitions
-EntityAllocation(EditorActivity)
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     EditorActivity

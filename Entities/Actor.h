@@ -106,33 +106,6 @@ ClassInfoGetters
 
    int Create() override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Actor object ready for use.
-// Arguments:       A pointer to a BITMAP that this Actor will own and destroy.
-//                  A pointer to a Controller that this Actor will own and destroy.
-//                  A float specifying the object's mass in Kilograms (kg).
-//                  A Vector specifying the initial position.
-//                  A Vector specifying the initial velocity.
-//                  A AtomGroup that will make up the collision 'cage' of this mass object
-//                  The amount of time in ms this MovableObject will exist. 0 means unlim.
-//                  An initial Status.
-//                  An int with the initial health value of this Actor.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	int Create(BITMAP *pSprite,
-                       Controller *pController,
-                       const float mass,
-                       const Vector &position = Vector(0, 0),
-                       const Vector &velocity = Vector(0, 0),
-                       AtomGroup *hitBody = new AtomGroup(),
-                       const unsigned long lifetime = 0,
-                       Status status = ACTIVE,
-                       const int health = 100);
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Create

@@ -108,7 +108,7 @@ EntityAllocation(GameActivity)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~GameActivity() { Destroy(true); }
+	~GameActivity() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +119,7 @@ EntityAllocation(GameActivity)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -130,7 +130,7 @@ EntityAllocation(GameActivity)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const GameActivity &reference);
+	int Create(const GameActivity &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +141,7 @@ EntityAllocation(GameActivity)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Activity::Reset(); }
+	void Reset() override { Clear(); Activity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +152,7 @@ EntityAllocation(GameActivity)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+	void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -260,7 +260,7 @@ EntityAllocation(GameActivity)
 //                  be added to MovableMan already.
 // Return value:    Whether the focus switch was successful or not.
 
-    virtual bool SwitchToActor(Actor *pActor, short player = 0, short team = 0);
+	bool SwitchToActor(Actor *pActor, short player = 0, short team = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -272,7 +272,7 @@ EntityAllocation(GameActivity)
 //                  An actor pointer to skip in the sequence.
 // Return value:    None.
 
-    virtual void SwitchToNextActor(short player, short team, Actor *pSkip = 0);
+	void SwitchToNextActor(short player, short team, Actor *pSkip = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -284,7 +284,7 @@ EntityAllocation(GameActivity)
 //                  An actor pointer to skip in the sequence.
 // Return value:    None.
 
-    virtual void SwitchToPrevActor(short player, short team, Actor *pSkip = 0);
+	void SwitchToPrevActor(short player, short team, Actor *pSkip = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -507,7 +507,7 @@ EntityAllocation(GameActivity)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void SetupPlayers();
+	void SetupPlayers() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -518,7 +518,7 @@ EntityAllocation(GameActivity)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Start();
+	int Start() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -528,7 +528,7 @@ EntityAllocation(GameActivity)
 // Arguments:       Whether to pause the game or not.
 // Return value:    None.
 
-    virtual void SetPaused(bool pause = true);
+	void SetPaused(bool pause = true) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -538,18 +538,18 @@ EntityAllocation(GameActivity)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void End();
+	void End() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateEditing
+// Method:  UpdateEditing
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     This is a special update step for when any player is still editing the
 //                  scene.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateEditing();
+	void UpdateEditing();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -572,7 +572,7 @@ EntityAllocation(GameActivity)
 //                  Which screen's GUI to draw onto the bitmap.
 // Return value:    None.
 
-    virtual void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0);
+	void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -584,7 +584,7 @@ EntityAllocation(GameActivity)
 //                  The absolute position of the target bitmap's upper left corner in the scene.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector());
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) override;
 
 
 
@@ -868,33 +868,33 @@ EntityAllocation(GameActivity)
 
     virtual void OnPieMenu(Actor *actor) { /* Does nothing, kept here for program control flow. Method is not pure virtual to avoid a bunch of junk implementations in non-scritped activities. */};
 
-	virtual void AddPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
+	void AddPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
 	{ 
 		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
 			m_pPieMenu[m_CurrentPieMenuPlayer]->AddSliceLua(description, functionName, direction, isEnabled);
 	};
 
-	virtual void AlterPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
+	void AlterPieMenuSlice(std::string description, std::string functionName, PieMenuGUI::Slice::SliceDirection direction, bool isEnabled)
 	{
 		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
 			m_pPieMenu[m_CurrentPieMenuPlayer]->AlterSliceLua(description, functionName, direction, isEnabled);
 	};
 
-	virtual PieMenuGUI::Slice RemovePieMenuSlice(std::string description, std::string functionName)
+	PieMenuGUI::Slice RemovePieMenuSlice(std::string description, std::string functionName)
 	{
 		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
 			return m_pPieMenu[m_CurrentPieMenuPlayer]->RemoveSliceLua(description, functionName);
 		return PieMenuGUI::Slice("", PieMenuGUI::PieSliceIndex::PSI_NONE, 0, false);
 	};
 
-	virtual std::vector<PieMenuGUI::Slice *> GetCurrentPieMenuSlices(int player) const 
+	std::vector<PieMenuGUI::Slice *> GetCurrentPieMenuSlices(int player) const 
 	{ 
 		//if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 			return m_pPieMenu[player]->GetCurrentSlices();
 		//return 0;
 	}
 
-	/*virtual std::vector<PieMenuGUI::Slice> * GetAvailablePieMenuSlices(int player) const 
+	/*std::vector<PieMenuGUI::Slice> * GetAvailablePieMenuSlices(int player) const 
 	{ 
 		if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 			return &m_pPieMenu[player]->GetAvailableSlices();

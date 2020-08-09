@@ -66,7 +66,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~GAScripted() { Destroy(true); }
+	~GAScripted() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(std::string scriptPath, std::string scriptClassName) { m_ScriptPath = scriptPath; m_LuaClassName = scriptClassName; return Create(); };
+	int Create(std::string scriptPath, std::string scriptClassName) { m_ScriptPath = scriptPath; m_LuaClassName = scriptClassName; return Create(); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const GAScripted &reference);
+	int Create(const GAScripted &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +111,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Activity::Reset(); }
+	void Reset() override { Clear(); Activity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -122,7 +122,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+	void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int ReloadScripts();
+	int ReloadScripts() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +146,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A string with the friendly-formatted Lua type name of this object.
 
-    virtual const std::string & GetLuaClassName() const { return m_LuaClassName; }
+	const std::string & GetLuaClassName() const { return m_LuaClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -159,14 +159,14 @@ ClassInfoGetters
 //                  but only for a limited number of teams. If -1, not applicable.
 // Return value:    Whether the Scene has the right stuff.
 
-    virtual bool SceneIsCompatible(Scene *pScene, short teams = -1);
+	bool SceneIsCompatible(Scene *pScene, short teams = -1) override;
 
 
     /// <summary>
     /// Indicates an Actor as having left the game scene and entered orbit.  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
     /// </summary>
     /// <param name="orbitedCraft">The actor instance that entered orbit. Ownership IS NOT TRANSFERRED!</param>
-    virtual void EnteredOrbit(Actor *orbitedCraft);
+	void EnteredOrbit(Actor *orbitedCraft) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +177,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Start();
+	int Start() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -187,7 +187,7 @@ ClassInfoGetters
 // Arguments:       Whether to pause the game or not.
 // Return value:    None.
 
-    virtual void SetPaused(bool pause = true);
+	void SetPaused(bool pause = true) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -197,7 +197,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void End();
+	void End() override;
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -208,7 +208,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateEditing();
+	void UpdateEditing();
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -229,14 +229,14 @@ ClassInfoGetters
 // Arguments:       Whether it's an early update, during Activity update, or late update, after MovableMan
 // Return value:    None.
 
-	virtual void UpdateGlobalScripts(bool lateUpdate);
+	void UpdateGlobalScripts(bool lateUpdate);
 
 
     /// <summary>
     /// Calls this to be processed by derived classes to enable pie-menu dynamic change.
     /// </summary>
     /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
-	virtual void OnPieMenu(Actor *pieMenuActor);
+	void OnPieMenu(Actor *pieMenuActor) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -248,7 +248,7 @@ ClassInfoGetters
 //                  Which screen's GUI to draw onto the bitmap.
 // Return value:    None.
 
-    virtual void DrawGUI(BITMAP *pTargetBitmap, const Vector& targetPos = Vector(), int which = 0);
+	void DrawGUI(BITMAP *pTargetBitmap, const Vector& targetPos = Vector(), int which = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -260,7 +260,7 @@ ClassInfoGetters
 //                  The absolute position of the target bitmap's upper left corner in the scene.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap, const Vector& targetPos = Vector());
+	void Draw(BITMAP *pTargetBitmap, const Vector& targetPos = Vector()) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -270,14 +270,14 @@ protected:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  CollectRequiredAreas
+// Method:  CollectRequiredAreas
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Goes through the script file and checks for any mentions and uses of
 //                  Area:s that are required for this Activity to run in a Scene.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void CollectRequiredAreas();
+	void CollectRequiredAreas();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -289,7 +289,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void InitAIs();
+	void InitAIs() override;
 
 
     // Member variables

@@ -74,7 +74,7 @@ namespace RTE
 		//                  from system memory.
 		// Arguments:       None.
 
-		virtual ~MultiplayerServerLobby() { Destroy(true); }
+		~MultiplayerServerLobby() override { Destroy(true); }
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ namespace RTE
 		// Return value:    An error return value signaling sucess or any particular failure.
 		//                  Anything below 0 is an error signal.
 
-		virtual int Create();
+		int Create() override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ namespace RTE
 		// Return value:    An error return value signaling sucess or any particular failure.
 		//                  Anything below 0 is an error signal.
 
-		virtual int Create(const MultiplayerServerLobby &reference);
+		int Create(const MultiplayerServerLobby &reference);
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ namespace RTE
 		// Arguments:       None.
 		// Return value:    None.
 
-		virtual void Reset() { Clear(); Activity::Reset(); }
+		void Reset() override { Clear(); Activity::Reset(); }
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +118,7 @@ namespace RTE
 		//                  to destroy all inherited members also.
 		// Return value:    None.
 
-		virtual void Destroy(bool notInherited = false);
+		void Destroy(bool notInherited = false) override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ namespace RTE
 		// Return value:    An error return value signaling sucess or any particular failure.
 		//                  Anything below 0 is an error signal.
 
-		virtual int Start();
+		int Start() override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +139,7 @@ namespace RTE
 		// Arguments:       Whether to pause the game or not.
 		// Return value:    None.
 
-		virtual void SetPaused(bool pause = true);
+		void SetPaused(bool pause = true) override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +149,7 @@ namespace RTE
 		// Arguments:       None.
 		// Return value:    None.
 
-		virtual void End();
+		void End() override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ namespace RTE
 		//                  Which screen's GUI to draw onto the bitmap.
 		// Return value:    None.
 
-		virtual void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0);
+		void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0) override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -184,7 +184,7 @@ namespace RTE
 		//                  The absolute position of the target bitmap's upper left corner in the scene.
 		// Return value:    None.
 
-		virtual void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector());
+		void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) override;
 
 		void UpdateInput();
 

@@ -77,7 +77,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~ACRocket() { Destroy(true); }
+	~ACRocket() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +88,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const ACRocket &reference);
+	int Create(const ACRocket &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); ACraft::Reset(); }
+    void Reset() override { Clear(); ACraft::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +121,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -132,7 +132,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+    float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ ClassInfoGetters
 //                  here means less calculation.
 // Return value:    The rough altitude over the terrain, in pixels.
 
-    virtual float GetAltitude(int max = 0, int accuracy = 0);
+	float GetAltitude(int max = 0, int accuracy = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -156,9 +156,9 @@ ClassInfoGetters
 //                  assigned for this frame.
 // Return value:    None.
 
-    virtual void SetID(const MOID newID);
+    void SetID(const MOID newID) override;
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          OnBounce
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +169,7 @@ ClassInfoGetters
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this bounce.
 
-    virtual bool OnBounce(const Vector &pos);
+	bool OnBounce(const Vector &pos) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -182,8 +182,8 @@ ClassInfoGetters
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this sinkage.
 
-    virtual bool OnSink(const Vector &pos);
-
+	bool OnSink(const Vector &pos) override;
+*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GibThis
@@ -195,7 +195,7 @@ ClassInfoGetters
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+	void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -206,7 +206,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateAI();
+	void UpdateAI() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +227,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetEmissionTimers();
+	void ResetEmissionTimers() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -237,7 +237,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Returns total number of wounds of this actor.
 
-	virtual int GetTotalWoundCount() const; 
+	int GetTotalWoundCount() const override; 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +247,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Returns total wound limit of this actor.
 
-	virtual int GetTotalWoundLimit() const; 
+	int GetTotalWoundLimit() const override; 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -262,10 +262,7 @@ ClassInfoGetters
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -277,7 +274,7 @@ ClassInfoGetters
 // Return value:    An integer with the recomended number of actors that fit in the craft.
 //                  Default is two.
 
-    virtual int GetMaxPassengers() const { return m_MaxPassengers > -1 ? m_MaxPassengers : 2; }
+	int GetMaxPassengers() const override { return m_MaxPassengers > -1 ? m_MaxPassengers : 2; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RemoveAnyRandomWounds
@@ -286,7 +283,7 @@ ClassInfoGetters
 // Arguments:       Amount of wounds to remove.
 // Return value:    Damage taken from removed wounds.
 
-	virtual int RemoveAnyRandomWounds(int amount);
+	int RemoveAnyRandomWounds(int amount) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -296,7 +293,7 @@ ClassInfoGetters
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -306,7 +303,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    An AEmitter pointer.
 
-	virtual AEmitter * GetMThruster() const { return m_pMThruster; }
+	AEmitter * GetMThruster() const { return m_pMThruster; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -316,7 +313,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    An AEmitter pointer.
 
-	virtual AEmitter * GetRThruster() const { return m_pRThruster; }
+	AEmitter * GetRThruster() const { return m_pRThruster; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -326,7 +323,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    An AEmitter pointer.
 
-	virtual AEmitter * GetLThruster() const { return m_pLThruster; }
+	AEmitter * GetLThruster() const { return m_pLThruster; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -336,7 +333,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    An AEmitter pointer.
 
-	virtual AEmitter * GetURThruster() const { return m_pURThruster; }
+	AEmitter * GetURThruster() const { return m_pURThruster; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -346,7 +343,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    An AEmitter pointer.
 
-	virtual AEmitter * GetULThruster() const { return m_pULThruster; }
+	AEmitter * GetULThruster() const { return m_pULThruster; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -356,7 +353,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Current landing gear state.
 
-	virtual unsigned int GetGearState() const { return m_GearState; }
+	unsigned int GetGearState() const { return m_GearState; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -376,9 +373,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
     // Member variables
@@ -425,8 +420,8 @@ private:
     void Clear();
 
     // Disallow the use of some implicit methods.
-    ACRocket(const ACRocket &reference);
-    ACRocket & operator=(const ACRocket &rhs);
+	ACRocket(const ACRocket &reference) {}
+	ACRocket & operator=(const ACRocket &rhs) {}
 
 };
 

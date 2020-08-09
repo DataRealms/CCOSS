@@ -97,7 +97,7 @@ EntityAllocation(MovableObject)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~MovableObject() { Destroy(true); }
+	~MovableObject() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -108,7 +108,7 @@ EntityAllocation(MovableObject)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -126,14 +126,7 @@ EntityAllocation(MovableObject)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(float mass,
-                       const Vector &position = Vector(0, 0),
-                       const Vector &velocity = Vector(0, 0),
-                       float rotAngle = 0,
-                       float angleVel = 0,
-                       unsigned long lifetime = 0,
-                       bool hitMOs = true,
-                       bool getHitByMOs = false);
+	int Create(float mass, const Vector &position = Vector(0, 0), const Vector &velocity = Vector(0, 0), float rotAngle = 0, float angleVel = 0, unsigned long lifetime = 0, bool hitMOs = true, bool getHitByMOs = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +148,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); SceneObject::Reset(); }
+    void Reset() override { Clear(); SceneObject::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -166,7 +159,7 @@ EntityAllocation(MovableObject)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
     /// <summary>
     /// Loads the script at the given script path onto the object, checking for appropriately named functions within it.
@@ -179,105 +172,105 @@ EntityAllocation(MovableObject)
     /// <summary>
     /// Reloads the all of the scripts on this object. This will also reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
     /// </summary>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-    int ReloadScripts() { return ReloadScripts(true); }
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+    int ReloadScripts() override { return ReloadScripts(true); }
 
     /// <summary>
     /// Reloads the all of the scripts on this object. This will also optionally reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
     /// </summary>
     /// <param name="alsoReloadPresetScripts">Whether to reload scripts on the PresetMan preset as well as those on the object instance. Irrelevant if the object instance is the preset.</param>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-    virtual int ReloadScripts(bool alsoReloadPresetScripts);
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+	int ReloadScripts(bool alsoReloadPresetScripts);
 
     /// <summary>
     /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_AllLoadedScripts.end() if it's not.
     /// </summary>
     /// <param name="scriptPath">The path to the script to find.</param>
     /// <returns>The iterator pointing to the vector entry for the script or the end of the vector if the script was not found.</returns>
-    virtual std::vector<std::pair<std::string, bool>>::iterator const FindScript(std::string const &scriptPath) { return std::find_if(m_AllLoadedScripts.begin(), m_AllLoadedScripts.end(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
+	std::vector<std::pair<std::string, bool>>::iterator const FindScript(std::string const &scriptPath) { return std::find_if(m_AllLoadedScripts.begin(), m_AllLoadedScripts.end(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
 
     /// <summary>
     /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_AllLoadedScripts.cend() if it's not.
     /// </summary>
     /// <param name="scriptPath">The path to the script to find.</param>
     /// <returns>The iterator pointing to the vector entry for the script or the end of the vector if the script was not found.</returns>
-    virtual std::vector<std::pair<std::string, bool>>::const_iterator const FindScript(std::string const &scriptPath) const { return std::find_if(m_AllLoadedScripts.cbegin(), m_AllLoadedScripts.cend(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
+	std::vector<std::pair<std::string, bool>>::const_iterator const FindScript(std::string const &scriptPath) const { return std::find_if(m_AllLoadedScripts.cbegin(), m_AllLoadedScripts.cend(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
 
     /// <summary>
     /// Checks if this MO has any scripts on it.
     /// </summary>
     /// <returns>Whether or not this MO has any scripts on it.</returns>
-    virtual bool const HasAnyScripts() const { return !m_AllLoadedScripts.empty(); }
+	bool const HasAnyScripts() const { return !m_AllLoadedScripts.empty(); }
 
     /// <summary>
     /// Checks if the script at the given path is one of the scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>
     /// <returns>Whether or not the script is on this MO.</returns>
-    virtual bool const HasScript(const std::string &scriptPath) const { return FindScript(scriptPath) != m_AllLoadedScripts.end(); }
+	bool const HasScript(const std::string &scriptPath) const { return FindScript(scriptPath) != m_AllLoadedScripts.end(); }
 
     /// <summary>
     /// Adds the script at the given path as one of the scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to add.</param>
     /// <returns>Whether or not the script was successfully added.</returns>
-    virtual bool AddScript(const std::string &scriptPath);
+	bool AddScript(const std::string &scriptPath);
 
     /// <summary>
     /// Checks if the script at the given path is one of the enabled scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>
     /// <returns>Whether or not the script is enabled on this MO.</returns>
-    virtual bool const ScriptEnabled(const std::string &scriptPath) const { auto scriptIterator = FindScript(scriptPath); return scriptIterator != m_AllLoadedScripts.end() && scriptIterator->second == true; }
+	bool const ScriptEnabled(const std::string &scriptPath) const { auto scriptIterator = FindScript(scriptPath); return scriptIterator != m_AllLoadedScripts.end() && scriptIterator->second == true; }
 
     /// <summary>
     /// Enable the script at the given path on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to enable.</param>
-    /// <returns>Whether or not the script was succesfully enabled.</returns>
-    virtual bool EnableScript(const std::string &scriptPath);
+    /// <returns>Whether or not the script was successfully enabled.</returns>
+	bool EnableScript(const std::string &scriptPath);
 
     /// <summary>
     /// Disables the script at the given path for this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to disable.</param>
-    /// <returns>Whether or not the script was succesfully disabled..</returns>
-    virtual bool DisableScript(const std::string &scriptPath);
+    /// <returns>Whether or not the script was successfully disabled..</returns>
+	bool DisableScript(const std::string &scriptPath);
 
     /// <summary>
     /// Runs the given function for the given script, with the given arguments. The first argument to the function will always be 'self'.
-    /// If either argument list is not emtpy, its entries will be passed into the Lua function in order, with entity arguments first.
+    /// If either argument list is not empty, its entries will be passed into the Lua function in order, with entity arguments first.
     /// </summary>
     /// <param name="scriptPath">The path to the script to run.</param>
     /// <param name="functionName">The name of the function to run.</param>
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
     int RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
 
     /// <summary>
     /// Runs the given function in all scripts that have it, with the given arguments, with the ability to not run on disabled scripts and to cease running if there's an error.
-    /// The first argument to the function will always be 'self'. If either argument list is not emtpy, its entries will be passed into the Lua function in order, with entity arguments first.
+    /// The first argument to the function will always be 'self'. If either argument list is not empty, its entries will be passed into the Lua function in order, with entity arguments first.
     /// </summary>
     /// <param name="functionName">The name of the function to run.</param>
     /// <param name="runOnDisabledScripts">Whether to run the function on disabled scripts. Defaults to false.</param>
     /// <param name="stopOnError">Whether to stop if there's an error running any script, or simply print it to the console and continue. Defaults to false.</param>
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
     int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
 
     /// <summary>
     /// Gets whether or not the object has a script name, and there were no errors when initializing its Lua scripts. If there were, the object would need to be reloaded.
     /// </summary>
-    /// <returns>Whether or not the object's scripts have been succesfully initialized.</returns>
+    /// <returns>Whether or not the object's scripts have been successfully initialized.</returns>
     bool ObjectScriptsInitialized() const { return !m_ScriptObjectName.empty() && m_ScriptObjectName != "ERROR"; }
 
     /// <summary>
     /// Override SetPresetName so it also resets script preset name and then reloads scripts to safely allow for multiple scripts.
     /// </summary>
     /// <param name="newName">A string reference with the instance name of this Entity.</param>
-    virtual void SetPresetName(const std::string &newName) override { Entity::SetPresetName(newName); m_ScriptPresetName.clear(); ReloadScripts(); }
+    void SetPresetName(const std::string &newName) override { Entity::SetPresetName(newName); m_ScriptPresetName.clear(); ReloadScripts(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -287,7 +280,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    An int describing the MO Type code of this MovableObject.
 
-    virtual int GetMOType() const { return m_MOType; }
+	int GetMOType() const { return m_MOType; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -487,7 +480,7 @@ EntityAllocation(MovableObject)
 // Return value:    The sharpness factor of this MO. 1.0 means normal sharpness, no alter-
 //                  ation to any of the impulses.
 
-    virtual float GetSharpness() const { return m_Sharpness; }
+	float GetSharpness() const { return m_Sharpness; }
 
 
 	/// <summary>
@@ -728,7 +721,7 @@ EntityAllocation(MovableObject)
 // Arguments:       The new absolute angle in radians.
 // Return value:    None.
 
-    virtual void SetRotAngle(float newAngle) { ; }
+	void SetRotAngle(float newAngle) override {}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetEffectRotAngle
@@ -737,7 +730,7 @@ EntityAllocation(MovableObject)
 // Arguments:       The new absolute angle in radians.
 // Return value:    None.
 
-	virtual void SetEffectRotAngle(float newAngle) { m_EffectRotAngle = newAngle; }
+	void SetEffectRotAngle(float newAngle) { m_EffectRotAngle = newAngle; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetEffectRotAngle
@@ -746,7 +739,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    The absolute angle in radians.
 
-	virtual float GetEffectRotAngle() const { return m_EffectRotAngle; }
+	float GetEffectRotAngle() const { return m_EffectRotAngle; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetAngularVel
@@ -756,7 +749,7 @@ EntityAllocation(MovableObject)
 // Arguments:       The new angular velocity in radians per second.
 // Return value:    None.
 
-    virtual void SetAngularVel(float newRotVel) { ; }
+    virtual void SetAngularVel(float newRotVel) {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -802,7 +795,7 @@ EntityAllocation(MovableObject)
     /// <summary>
     /// Sets this object as having been added to MovableMan. Should only really be done in MovableMan::AddObject.
     /// </summary>
-    virtual void SetAsAddedToMovableMan() { m_HasEverBeenAddedToMovableMan = true; }
+	void SetAsAddedToMovableMan() { m_HasEverBeenAddedToMovableMan = true; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -813,7 +806,7 @@ EntityAllocation(MovableObject)
 //                  ation to any of the impulses.
 // Return value:    None.
 
-    virtual void SetSharpness(const float sharpness) { m_Sharpness = sharpness; }
+	void SetSharpness(const float sharpness) { m_Sharpness = sharpness; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -975,7 +968,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    Whether this MovableObject is of Type Generic or not.
 
-    virtual bool IsGeneric() const { return m_MOType == TypeGeneric; }
+	bool IsGeneric() const { return m_MOType == TypeGeneric; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -985,7 +978,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    Whether this MovableObject is of Type Actor or not.
 
-    virtual bool IsActor() const { return m_MOType == TypeActor; }
+	bool IsActor() const { return m_MOType == TypeActor; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -995,7 +988,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    Whether this MovableObject is of Type Device (Held or Thrown) or not.
 
-    virtual bool IsDevice() const { return m_MOType == TypeHeldDevice || m_MOType == TypeThrownDevice; }
+	bool IsDevice() const { return m_MOType == TypeHeldDevice || m_MOType == TypeThrownDevice; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1006,7 +999,7 @@ EntityAllocation(MovableObject)
 // Return value:    Whether this MovableObject is of Type HeldDevice or not.
 
 // LEGACY CRAP
-    virtual bool IsHeldDevice() const { return m_MOType == TypeHeldDevice || m_MOType == TypeThrownDevice; }
+	bool IsHeldDevice() const { return m_MOType == TypeHeldDevice || m_MOType == TypeThrownDevice; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1016,7 +1009,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    Whether this MovableObject is of Type ThrownDevice or not.
 
-    virtual bool IsThrownDevice() const { return m_MOType == TypeThrownDevice; }
+	bool IsThrownDevice() const { return m_MOType == TypeThrownDevice; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1134,7 +1127,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ClearForces() { m_Forces.clear(); }
+	void ClearForces() { m_Forces.clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1144,7 +1137,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ClearImpulseForces() { m_ImpulseForces.clear(); }
+	void ClearImpulseForces() { m_ImpulseForces.clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1180,7 +1173,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetAllTimers() { ; }
+	virtual void ResetAllTimers() {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1203,7 +1196,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void NotResting() { m_RestTimer.Reset(); m_ToSettle = false; }
+	void NotResting() { m_RestTimer.Reset(); m_ToSettle = false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1214,7 +1207,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    Wheter the MovableObject has been at rest for more than one full second.
 
-    virtual bool IsAtRest();
+	bool IsAtRest();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1282,7 +1275,7 @@ EntityAllocation(MovableObject)
 // Return value:    Whether the collision has been deemed valid. If false, then disregard
 //                  any impulses in the Hitdata.
 
-    virtual bool CollideAtPoint(HitData &hd) = 0;
+    virtual bool CollideAtPoint(HitData &hitData) = 0;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1295,7 +1288,7 @@ EntityAllocation(MovableObject)
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this hit.
 
-    virtual bool OnMOHit(HitData &hd);
+	bool OnMOHit(HitData &hd);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1393,7 +1386,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    Number of entries in Forces list.
 
-	virtual int GetForcesCount() { return m_Forces.size(); };
+	int GetForcesCount() { return m_Forces.size(); };
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetForceVector()
@@ -1402,7 +1395,7 @@ EntityAllocation(MovableObject)
 // Arguments:       Force record index to get data from.
 // Return value:    Force vector in newtons of the specified Force record.
 
-	virtual Vector GetForceVector(int n) { if (n > 0 && n < m_Forces.size()) return m_Forces[n].first; else return Vector(0, 0); }
+	Vector GetForceVector(int n) { if (n > 0 && n < m_Forces.size()) return m_Forces[n].first; else return Vector(0, 0); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1412,7 +1405,7 @@ EntityAllocation(MovableObject)
 // Arguments:       Force record index to get data from.
 // Return value:    Offset vector in meters of the specified Force record.
 
-	virtual Vector GetForceOffset(int n) { if (n > 0 && n < m_Forces.size()) return m_Forces[n].second; else return Vector(0, 0); }
+	Vector GetForceOffset(int n) { if (n > 0 && n < m_Forces.size()) return m_Forces[n].second; else return Vector(0, 0); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1422,7 +1415,7 @@ EntityAllocation(MovableObject)
 // Arguments:       Force record index to get data from. New Vector force value in newtons.
 // Return value:    None.
 
-	virtual void SetForceVector(int n, Vector v) { if (n > 0 && n < m_Forces.size()) m_Forces[n].first = v; }
+	void SetForceVector(int n, Vector v) { if (n > 0 && n < m_Forces.size()) m_Forces[n].first = v; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1432,7 +1425,7 @@ EntityAllocation(MovableObject)
 // Arguments:       Force record index to get data from. New Vector offset value in meters.
 // Return value:    None.
 
-	virtual void SetForceOffset(int n, Vector v) { if (n > 0 && n < m_Forces.size()) m_Forces[n].second = v; }
+	void SetForceOffset(int n, Vector v) { if (n > 0 && n < m_Forces.size()) m_Forces[n].second = v; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1442,7 +1435,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    Number of entries in ImpulseForces list.
 
-	virtual int GetImpulsesCount() { return m_ImpulseForces.size(); }
+	int GetImpulsesCount() { return m_ImpulseForces.size(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1452,7 +1445,7 @@ EntityAllocation(MovableObject)
 // Arguments:       Impulse record index to get data from.
 // Return value:    Impulse vector in newtons of the specified Impulse record.
 
-	virtual Vector GetImpulseVector(int n) { if (n > 0 && n < m_ImpulseForces.size()) return m_ImpulseForces[n].first; else return Vector(0, 0); }
+	Vector GetImpulseVector(int n) { if (n > 0 && n < m_ImpulseForces.size()) return m_ImpulseForces[n].first; else return Vector(0, 0); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1462,17 +1455,17 @@ EntityAllocation(MovableObject)
 // Arguments:       Impulse record index to get data from.
 // Return value:    Offset vector in meters of the specified Impulse record.
 
-	virtual Vector GetImpulseOffset(int n) { if (n > 0 && n < m_ImpulseForces.size()) return m_ImpulseForces[n].second; else return Vector(0, 0); }
+	Vector GetImpulseOffset(int n) { if (n > 0 && n < m_ImpulseForces.size()) return m_ImpulseForces[n].second; else return Vector(0, 0); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetImpulseOffset()
+// Virtual method:  SetImpulseVector()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns offset vector in METERS (not pixels) of the specified Impulse record.
 // Arguments:       Impulse record index to get data from.
 // Return value:    Offset vector in meters of the specified Impulse record.
 
-	virtual void SetImpulseVector(int n, Vector v) { if (n > 0 && n < m_ImpulseForces.size()) m_ImpulseForces[n].first = v; }
+	void SetImpulseVector(int n, Vector v) { if (n > 0 && n < m_ImpulseForces.size()) m_ImpulseForces[n].first = v; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1482,7 +1475,7 @@ EntityAllocation(MovableObject)
 // Arguments:       Impulse record index to get data from. New Vector offset value in meters.
 // Return value:    None.
 
-	virtual void SetImpulseOffset(int n, Vector v) { if (n > 0 && n < m_ImpulseForces.size()) m_ImpulseForces[n].second = v; }
+	void SetImpulseOffset(int n, Vector v) { if (n > 0 && n < m_ImpulseForces.size()) m_ImpulseForces[n].second = v; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1538,7 +1531,7 @@ EntityAllocation(MovableObject)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int UpdateScripts();
+	int UpdateScripts();
 
     /// <summary>
     /// Executes the Lua-defined OnPieMenu event handler for this MO.
@@ -1556,9 +1549,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateMOID(std::vector<MovableObject *> &MOIDIndex,
-                            MOID rootMOID = g_NoMOID,
-                            bool makeNewMOID = true);
+	void UpdateMOID(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1630,7 +1621,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None
 // Return value:    Amount of damage to apply.
 
-	virtual float DamageOnCollision() const { return m_DamageOnCollision; }
+	float DamageOnCollision() const { return m_DamageOnCollision; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1641,7 +1632,7 @@ EntityAllocation(MovableObject)
 // Arguments:       Amount of damage to apply.
 // Return value:    None.
 
-	virtual void SetDamageOnCollision(float value) { m_DamageOnCollision = value; }
+	void SetDamageOnCollision(float value) { m_DamageOnCollision = value; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1652,7 +1643,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None
 // Return value:    Amount of damage to apply.
 
-	virtual float DamageOnPenetration() const { return m_DamageOnPenetration; }
+	float DamageOnPenetration() const { return m_DamageOnPenetration; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1663,7 +1654,7 @@ EntityAllocation(MovableObject)
 // Arguments:       Amount of damage to apply.
 // Return value:    None.
 
-	virtual void SetDamageOnPenetration(float value) { m_DamageOnPenetration = value; }
+	void SetDamageOnPenetration(float value) { m_DamageOnPenetration = value; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1673,17 +1664,17 @@ EntityAllocation(MovableObject)
 // Arguments:       None
 // Return value:    Damage multiplier to apply to wound.
 
-	virtual float WoundDamageMultiplier() const { return m_WoundDamageMultiplier; }
+	float WoundDamageMultiplier() const { return m_WoundDamageMultiplier; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  WoundDamageMultiplier
+// Virtual method:  SetWoundDamageMultiplier
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets damage multiplier transferred to wound inflicted by this object on penetration
 // Arguments:       New damage multiplier to apply to wound.
 // Return value:    None.
 
-	virtual void SetWoundDamageMultiplier(float value) { m_WoundDamageMultiplier = value; }
+	void SetWoundDamageMultiplier(float value) { m_WoundDamageMultiplier = value; }
 
 
 
@@ -1707,7 +1698,7 @@ EntityAllocation(MovableObject)
 // Return value:    The ID of the non-ignored MO, if any, that this object's Atom or AtomGroup is now
 //                  intersecting because of the last Travel taken.
 
-	virtual MOID HitWhatMOID() const { if (m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber()) return m_MOIDHit; else return g_NoMOID; }
+	MOID HitWhatMOID() const { if (m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber()) return m_MOIDHit; else return g_NoMOID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1720,7 +1711,7 @@ EntityAllocation(MovableObject)
 //                  intersecting because of the last Travel taken.
 // Return value:    None.
 
-	virtual void SetHitWhatMOID(MOID id) { m_MOIDHit = id;  m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber(); }
+	void SetHitWhatMOID(MOID id) { m_MOIDHit = id;  m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1730,7 +1721,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    Unique ID of the particle hit at the previously taken Travel
 
-	virtual long int HitWhatParticleUniqueID() const { if (m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber()) return m_ParticleUniqueIDHit; else return 0; }
+	long int HitWhatParticleUniqueID() const { if (m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber()) return m_ParticleUniqueIDHit; else return 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1740,7 +1731,7 @@ EntityAllocation(MovableObject)
 // Arguments:       Unique ID of the particle hit at the previously taken Travel.
 // Return value:    None.
 
-	virtual void SetHitWhatParticleUniqueID(long int id) { m_ParticleUniqueIDHit = id; m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber(); }
+	void SetHitWhatParticleUniqueID(long int id) { m_ParticleUniqueIDHit = id; m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1751,7 +1742,7 @@ EntityAllocation(MovableObject)
 // Arguments:       None.
 // Return value:    The ID of the material, if any, that this MO hit during the last Travel.
 
-	virtual unsigned char HitWhatTerrMaterial() const { if (m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber()) return m_TerrainMatHit; else return g_MaterialAir; }
+	unsigned char HitWhatTerrMaterial() const { if (m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber()) return m_TerrainMatHit; else return g_MaterialAir; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1761,11 +1752,11 @@ EntityAllocation(MovableObject)
 // Arguments:       The ID of the material, if any, that this MO hit during the last Travel.
 // Return value:    None.
 
-    virtual void SetHitWhatTerrMaterial(unsigned char matID);
+	void SetHitWhatTerrMaterial(unsigned char matID);
 
-	virtual bool ProvidesPieMenuContext() const { return m_ProvidesPieMenuContext; }
+	bool ProvidesPieMenuContext() const { return m_ProvidesPieMenuContext; }
 
-	virtual void SetProvidesPieMenuContext(bool value) { m_ProvidesPieMenuContext = value; }
+	void SetProvidesPieMenuContext(bool value) { m_ProvidesPieMenuContext = value; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1790,9 +1781,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                  MOID rootMOID = g_NoMOID,
-                                  bool makeNewMOID = true) { ; }
+	virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) {}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RegMOID
@@ -1807,9 +1796,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void RegMOID(std::vector<MovableObject *> &MOIDIndex,
-                         MOID rootMOID = g_NoMOID,
-                         bool makeNewMOID = true);
+	void RegMOID(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     MovableObject
@@ -1818,9 +1805,6 @@ protected:
 //                  identical to an already existing one.
 // Arguments:       A MovableObject object which is passed in by reference.
 
-    MovableObject(const MovableObject &reference);
-
-    MovableObject& operator=(const MovableObject& ref);
 
     // Member variables
     static Entity::ClassInfo m_sClass;
@@ -1985,6 +1969,9 @@ private:
 
     void Clear();
 
+	// Disallow the use of some implicit methods.
+	MovableObject(const MovableObject &reference) {}
+	MovableObject& operator=(const MovableObject& ref) {}
 };
 
 } // namespace RTE

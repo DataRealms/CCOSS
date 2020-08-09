@@ -28,7 +28,7 @@ namespace RTE {
 		/// Makes the MOSParticle object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Makes the MOSParticle object ready for use.
@@ -40,7 +40,7 @@ namespace RTE {
 		/// <param name="velocity">A Vector specifying the initial velocity.</param>
 		/// <param name="lifetime">The amount of time in ms this MOSParticle will exist. 0 means unlimited.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(ContentFile spriteFile, const int frameCount = 1, const float mass = 1, const Vector &position = Vector(0, 0), const Vector &velocity = Vector(0, 0), const unsigned long lifetime = 0) {
+		int Create(ContentFile spriteFile, const int frameCount = 1, const float mass = 1, const Vector &position = Vector(0, 0), const Vector &velocity = Vector(0, 0), const unsigned long lifetime = 0) {
 			MOSprite::Create(spriteFile, frameCount, mass, position, velocity, lifetime);
 			return 0;
 		}
@@ -57,18 +57,18 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a MOSParticle object before deletion from system memory.
 		/// </summary>
-		virtual ~MOSParticle() { Destroy(true); }
+		~MOSParticle() override { Destroy(true); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the SceneLayer object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false);
+		void Destroy(bool notInherited = false) override;
 
 		/// <summary>
 		/// Resets the entire MOSParticle, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); MOSprite::Reset(); }
+		void Reset() override { Clear(); MOSprite::Reset(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -76,13 +76,13 @@ namespace RTE {
 		/// Gets the drawing priority of this MOSParticle. If two things are overlapping when copying to the terrain, the higher priority MO would end up getting drawn.
 		/// </summary>
 		/// <returns>The drawing priority of this MOSParticle.</returns>
-		virtual int GetDrawPriority() const;
+		int GetDrawPriority() const override;
 
 		/// <summary>
 		/// Gets the main material of this MOSParticle.
 		/// </summary>
 		/// <returns>The material of this MOSParticle.</returns>
-		virtual const Material * GetMaterial() const;
+		const Material * GetMaterial() const override;
 
 		/// <summary>
 		/// Gets the current Atom of this MOSParticle.
@@ -101,7 +101,7 @@ namespace RTE {
 		/// <summary>
 		/// Travels this MOSParticle, using its physical representation.
 		/// </summary>
-		virtual void Travel();
+		void Travel() override;
 
 		/// <summary>
 		/// Calculates the collision response when another MO's Atom collides with this MO's physical representation. 
@@ -109,26 +109,26 @@ namespace RTE {
 		/// </summary>
 		/// <param name="hitData">Reference to the HitData struct which describes the collision. This will be modified to represent the results of the collision.</param>
 		/// <returns>Whether the collision has been deemed valid. If false, then disregard any impulses in the HitData.</returns>
-		virtual bool CollideAtPoint(HitData &hitData) { return true; }
+		bool CollideAtPoint(HitData &hitData) override { return true; }
 
 		/// <summary>
 		/// Does the calculations necessary to detect whether this MO appears to have has settled in the world and is at rest or not. IsAtRest() retrieves the answer.
 		/// </summary>
-		virtual void RestDetection();
+		void RestDetection() override;
 
 		/// <summary>
 		/// Defines what should happen when this MOSParticle hits and then bounces off of something. This is called by the owned Atom/AtomGroup of this MOSParticle during travel.
 		/// </summary>
 		/// <param name="hd">The HitData describing the collision in detail.</param>
 		/// <returns>Whether the MOSParticle should immediately halt any travel going on after this bounce.</returns>
-		virtual bool OnBounce(HitData &hd) { return false; }
+		bool OnBounce(HitData &hd) override { return false; }
 
 		/// <summary>
 		/// Defines what should happen when this MOSParticle hits and then sink into something. This is called by the owned Atom/AtomGroup of this MOSParticle during travel.
 		/// </summary>
 		/// <param name="hd">The HitData describing the collision in detail.</param>
 		/// <returns>Whether the MOSParticle should immediately halt any travel going on after this sinkage.</returns>
-		virtual bool OnSink(HitData &hd) { return false; }
+		bool OnSink(HitData &hd) override { return false; }
 
 		/// <summary>
 		/// Draws this MOSParticle's current graphical representation to a BITMAP of choice.
@@ -137,7 +137,7 @@ namespace RTE {
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
 		/// <param name="mode">In which mode to draw in. See the DrawMode enumeration for the modes.</param>
 		/// <param name="onlyPhysical">Whether to not draw any extra 'ghost' items of this MOSParticle, indicator arrows or hovering HUD text and so on.</param>
-		virtual void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const;
+		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 #pragma endregion
 
 	protected:

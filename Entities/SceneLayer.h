@@ -66,7 +66,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~SceneLayer() { Destroy(true); }
+	~SceneLayer() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -104,12 +104,7 @@ ClassInfoGetters
 //                  Anything below 0 is an error signal.
 
 // TODO: streamline interface")
-    virtual int Create(ContentFile bitmapFile,
-                       bool drawTrans,
-                       Vector offset,
-                       bool wrapX,
-                       bool wrapY,
-                       Vector scrollInfo);
+	int Create(ContentFile bitmapFile, bool drawTrans, Vector offset, bool wrapX, bool wrapY, Vector scrollInfo);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -136,12 +131,7 @@ ClassInfoGetters
 //                  Anything below 0 is an error signal.
 
 // TODO: streamline interface")
-    virtual int Create(BITMAP *pBitmap,
-                       bool drawTrans,
-                       Vector offset,
-                       bool wrapX,
-                       bool wrapY,
-                       Vector scrollInfo);
+	int Create(BITMAP *pBitmap, bool drawTrans, Vector offset, bool wrapX, bool wrapY, Vector scrollInfo);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -207,7 +197,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Entity::Reset(); }
+    void Reset() override { Clear(); Entity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -218,7 +208,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -453,7 +443,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-	virtual void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -502,7 +492,7 @@ protected:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadContour(bool fillBelowContour, ContentFile *contourFile);
+	int LoadContour(bool fillBelowContour, ContentFile *contourFile);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -514,7 +504,7 @@ protected:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadContour(char material, bool dirtBelowContour, ContentFile &contourFile);
+	int LoadContour(char material, bool dirtBelowContour, ContentFile &contourFile);
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -525,7 +515,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void InitScrollRatios();
+	void InitScrollRatios();
 
 	void UpdateScrollRatiosForNetworkPlayer(int player);
 
@@ -572,8 +562,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    SceneLayer(const SceneLayer &reference) { RTEAbort("Tried to use forbidden method"); }
-    void operator=(const SceneLayer &rhs) { RTEAbort("Tried to use forbidden method"); }
+    SceneLayer(const SceneLayer &reference) {}
+    void operator=(const SceneLayer &rhs) {}
 
 };
 

@@ -63,7 +63,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Turret() { Destroy(true); }
+	~Turret() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Attachable::Reset(); }
+    void Reset() override { Clear(); Attachable::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+    float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -175,7 +175,7 @@ ClassInfoGetters
 //                  assigned for this frame.
 // Return value:    None.
 
-    virtual void SetID(const MOID newID);
+    void SetID(const MOID newID) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -254,7 +254,7 @@ ClassInfoGetters
 // Arguments:       The new offset angle in radians, relative from the rest of the turret.
 // Return value:    None.
 
-    virtual void SetMountedRotOffset(float newOffsetAngle) { m_MountedRotOffset = newOffsetAngle; }
+	void SetMountedRotOffset(float newOffsetAngle) { m_MountedRotOffset = newOffsetAngle; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -267,7 +267,7 @@ ClassInfoGetters
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -292,10 +292,7 @@ ClassInfoGetters
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 
@@ -306,7 +303,7 @@ ClassInfoGetters
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -328,9 +325,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
     // Member variables
@@ -359,8 +354,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Turret(const Turret &reference);
-    Turret & operator=(const Turret &rhs);
+	Turret(const Turret &reference) {}
+	Turret & operator=(const Turret &rhs) {}
 
 };
 

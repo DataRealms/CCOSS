@@ -68,7 +68,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~BunkerAssembly() { Destroy(true); }
+	~BunkerAssembly() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(BunkerAssemblyScheme * scheme);
+	int Create(BunkerAssemblyScheme * scheme);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -112,7 +112,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); SceneObject::Reset(); }
+    void Reset() override { Clear(); SceneObject::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -123,7 +123,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -146,11 +146,11 @@ ClassInfoGetters
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+	bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetDeployments
+// Method:  GetDeployments
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Retrieves the list of random deployemtns selected to be deployed by this assembly
 //					based on it's parent scheme MaxDeployments value. This list will always include all
@@ -158,7 +158,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    List of deployments.
 
-	virtual std::vector<Deployment *> GetDeployments();
+	std::vector<Deployment *> GetDeployments();
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -168,7 +168,7 @@ ClassInfoGetters
 // Arguments:       The assigned team number.
 // Return value:    None.
 
-    virtual void SetTeam(int team);
+	void SetTeam(int team) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -202,7 +202,7 @@ ClassInfoGetters
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-	virtual BITMAP * GetGraphicalIcon() { return m_pPresentationBitmap; };
+	BITMAP * GetGraphicalIcon() override { return m_pPresentationBitmap; };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +212,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Symmetric assembly name.
 
-	virtual string GetSymmetricAssemblyName() const { return m_SymmetricAssembly; };
+	string GetSymmetricAssemblyName() const { return m_SymmetricAssembly; };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +222,7 @@ ClassInfoGetters
 // Arguments:       Symmetric assembly name.
 // Return value:    None.
 
-	virtual void SetSymmetricAssemblyName(string newSymmetricAssembly) { m_SymmetricAssembly = newSymmetricAssembly; };
+	void SetSymmetricAssemblyName(string newSymmetricAssembly) { m_SymmetricAssembly = newSymmetricAssembly; };
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
@@ -236,10 +236,7 @@ ClassInfoGetters
 //                  like indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 
@@ -280,8 +277,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    BunkerAssembly(const BunkerAssembly &reference) { RTEAbort("Tried to use forbidden method"); }
-    void operator=(const BunkerAssembly &rhs) { RTEAbort("Tried to use forbidden method"); }
+    BunkerAssembly(const BunkerAssembly &reference) {}
+    void operator=(const BunkerAssembly &rhs) {}
 
 };
 

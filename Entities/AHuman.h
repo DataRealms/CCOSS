@@ -111,7 +111,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~AHuman() { Destroy(true); }
+	~AHuman() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -122,7 +122,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +141,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(BITMAP *pSprite,
+	int Create(BITMAP *pSprite,
                        Controller *pController,
                        const float mass,
                        const Vector &position = Vector(0, 0),
@@ -160,7 +160,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const AHuman &reference);
+	int Create(const AHuman &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -171,7 +171,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Actor::Reset(); }
+    void Reset() override { Clear(); Actor::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -182,7 +182,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -193,7 +193,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+    float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +203,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The current amount of carried gold, in Oz.
 
-    virtual float GetGoldCarried() const { return m_GoldCarried + m_GoldInInventoryChunk; }
+    float GetGoldCarried() const override { return m_GoldCarried + m_GoldInInventoryChunk; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -217,14 +217,14 @@ ClassInfoGetters
 //                  How much to multiply the value if this happens to be a foreign Tech.
 // Return value:    The current value of this Actor and all his carried assets.
 
-    virtual float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const;
+	float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalValueOld
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     DOES THE SAME THING AS GetTotalValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
 
-	virtual float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const { return GetTotalValue(nativeModule, foreignMult, 1.0); }
+	float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, 1.0); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          HasObject
@@ -235,7 +235,7 @@ ClassInfoGetters
 // Arguments:       The Preset name of the object to look for.
 // Return value:    Whetehr the object was found carried by this.
 
-    virtual bool HasObject(std::string objectName) const;
+	bool HasObject(std::string objectName) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +247,7 @@ ClassInfoGetters
 // Arguments:       The name of the group to look for.
 // Return value:    Whetehr the object in the group was found carried by this.
 
-    virtual bool HasObjectInGroup(std::string groupName) const;
+	bool HasObjectInGroup(std::string groupName) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -257,7 +257,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A Vector with the absolute position of this' brain.
 
-    virtual Vector GetCPUPos() const;
+	Vector GetCPUPos() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -268,7 +268,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A Vector with the absolute position of this' eye or view point.
 
-    virtual Vector GetEyePos() const;
+    Vector GetEyePos() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -404,7 +404,7 @@ ClassInfoGetters
 //                  assigned for this frame.
 // Return value:    None.
 
-    virtual void SetID(const MOID newID);
+    void SetID(const MOID newID) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -418,9 +418,9 @@ ClassInfoGetters
 // Return value:    Whether the collision has been deemed valid. If false, then disregard
 //                  any impulses in the Hitdata.
 
-    virtual bool CollideAtPoint(HitData &hitData);
+    bool CollideAtPoint(HitData &hitData) override;
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          OnBounce
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +431,7 @@ ClassInfoGetters
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this bounce.
 
-    virtual bool OnBounce(const Vector &pos);
+	bool OnBounce(const Vector &pos) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -444,8 +444,8 @@ ClassInfoGetters
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this sinkage.
 
-    virtual bool OnSink(const Vector &pos);
-
+	bool OnSink(const Vector &pos) override;
+*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  AddPieMenuSlices
@@ -454,7 +454,7 @@ ClassInfoGetters
 // Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
 // Return value:    Whether any slices were added.
 
-    virtual bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
+   bool AddPieMenuSlices(PieMenuGUI *pPieMenu) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -466,7 +466,7 @@ ClassInfoGetters
 // Return value:    Whetehr any slice was handled. False if no matching slice handler was
 //                  found, or there was no slice currently activated by the pie menu.
 
-    virtual bool HandlePieCommand(int pieSliceIndex);
+    bool HandlePieCommand(int pieSliceIndex) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -477,7 +477,7 @@ ClassInfoGetters
 // Arguments:       An pointer to the new item to add. Ownership IS TRANSFERRED!
 // Return value:    None.
 
-    virtual void AddInventoryItem(MovableObject *pItemToAdd);
+	void AddInventoryItem(MovableObject *pItemToAdd) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -490,7 +490,7 @@ ClassInfoGetters
 //                  or just report that it's there or not.
 // Return value:    Whether a firearm was successfully switched to, or already held.
 
-    virtual bool EquipFirearm(bool doEquip = true);
+	bool EquipFirearm(bool doEquip = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -546,7 +546,7 @@ ClassInfoGetters
 //                  or just report that it's there or not.
 // Return value:    Whether a ThrownDevice was successfully switched to, or already held.
 
-    virtual bool EquipThrowable(bool doEquip = true);
+	bool EquipThrowable(bool doEquip = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -559,7 +559,7 @@ ClassInfoGetters
 //                  or just report that it's there or not.
 // Return value:    Whether a digging tool was successfully switched to.
 
-    virtual bool EquipDiggingTool(bool doEquip = true);
+	bool EquipDiggingTool(bool doEquip = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -582,7 +582,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whether a shield was successfully switched to, or already held.
 
-    virtual bool EquipShield();
+	bool EquipShield();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -594,7 +594,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whether a shield was successfully equipped in the background arm.
 
-    virtual bool EquipShieldInBGArm();
+	bool EquipShieldInBGArm();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -606,7 +606,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whether a shield was successfully equipped in the background arm.
 
-//	virtual bool EquipDualWieldableInBGArm();
+//	bool EquipDualWieldableInBGArm();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -616,27 +616,27 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whether there was anything to unequip.
 
-    virtual bool UnequipBGArm();
+	bool UnequipBGArm();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetEquippedItem
+// Method:  GetEquippedItem
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns whatever is equipped in the FG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       None.
 // Return value:    The currently equipped item, if any.
 
-    virtual MovableObject * GetEquippedItem() const;
+	MovableObject * GetEquippedItem() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetEquippedBGItem
+// Method:  GetEquippedBGItem
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns whatever is equipped in the BG Arm, if anything. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       None.
 // Return value:    The currently equipped item, if any.
 
-	virtual MovableObject * GetEquippedBGItem() const;
+	MovableObject * GetEquippedBGItem() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -647,68 +647,68 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whether a currently HDFirearm (if any) is ready for use.
 
-    virtual bool FirearmIsReady() const;
+	bool FirearmIsReady() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  ThrowableIsReady
+// Method:  ThrowableIsReady
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held ThrownDevice's is ready to go.
 // Arguments:       None.
 // Return value:    Whether a currently held ThrownDevice (if any) is ready for use.
 
-    virtual bool ThrowableIsReady() const;
+	bool ThrowableIsReady() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  FirearmIsEmpty
+// Method:  FirearmIsEmpty
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held HDFirearm's is out of ammo.
 // Arguments:       None.
 // Return value:    Whether a currently HDFirearm (if any) is out of ammo.
 
-    virtual bool FirearmIsEmpty() const;
+	bool FirearmIsEmpty() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  FirearmNeedsReload
+// Method:  FirearmNeedsReload
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held HDFirearm's is almost out of ammo.
 // Arguments:       None.
 // Return value:    Whether a currently HDFirearm (if any) has less than half of ammo left.
 
-    virtual bool FirearmNeedsReload() const;
+	bool FirearmNeedsReload() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  FirearmIsSemiAuto
+// Method:  FirearmIsSemiAuto
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held HDFirearm's is semi or full auto.
 // Arguments:       None.
 // Return value:    Whether a currently HDFirearm (if any) is a semi auto device.
 
-    virtual bool FirearmIsSemiAuto() const;
+	bool FirearmIsSemiAuto() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  FirearmActivationDelay
+// Method:  FirearmActivationDelay
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the currently held device's delay between pulling the trigger
 //                  and activating.
 // Arguments:       None.
 // Return value:    Delay in ms or zero if not a HDFirearm.
 
-    virtual int FirearmActivationDelay() const;
+	int FirearmActivationDelay() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  ReloadFirearm
+// Method:  ReloadFirearm
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Reloads the currently held firearm, if any.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ReloadFirearm();
+	void ReloadFirearm();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -719,7 +719,7 @@ ClassInfoGetters
 // Arguments:       A Vector with the aboslute coordinates of a point to check.
 // Return value:    Whether the point is within close range of this.
 
-    virtual bool IsWithinRange(Vector &point) const;
+	bool IsWithinRange(Vector &point) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -731,11 +731,11 @@ ClassInfoGetters
 //                  The range, in pixels, beyond the actors sharp aim that the ray will have.
 // Return value:    Whether any unseen pixels were revealed by this look.
 
-    virtual bool Look(float FOVSpread, float range);
+	bool Look(float FOVSpread, float range) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LookForGold
+// Method:  LookForGold
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Casts a material detecting ray in the direction of where this is facing.
 // Arguments:       The degree angle to deviate from the current view point in the ray
@@ -746,11 +746,11 @@ ClassInfoGetters
 // Return value:    Whether gold was spotted by this ray cast. If so, foundLocation
 //                  has been filled out with the absolute location of the gold.
 
-    virtual bool LookForGold(float FOVSpread, float range, Vector &foundLocation);
+	bool LookForGold(float FOVSpread, float range, Vector &foundLocation);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LookForMOs
+// Method:  LookForMOs
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Casts an MO detecting ray in the direction of where the head is looking
 //                  at the time. Factors including head rotation, sharp aim mode, and
@@ -761,7 +761,7 @@ ClassInfoGetters
 //                  Whether to ignore all terrain or not (true means 'x-ray vision').
 // Return value:    A pointer to the MO seen while looking.
 
-    virtual MovableObject * LookForMOs(float FOVSpread = 45, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false);
+	MovableObject * LookForMOs(float FOVSpread = 45, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -774,7 +774,7 @@ ClassInfoGetters
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -786,7 +786,7 @@ ClassInfoGetters
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    virtual BITMAP * GetGraphicalIcon() { return GetHeadBitmap(); }
+    BITMAP * GetGraphicalIcon() override { return GetHeadBitmap(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -797,7 +797,7 @@ ClassInfoGetters
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+	bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -807,7 +807,7 @@ ClassInfoGetters
 // Arguments:       Amount of wounds to remove.
 // Return value:    Damage taken from removed wounds.
 
-	virtual int RemoveAnyRandomWounds(int amount);
+	int RemoveAnyRandomWounds(int amount) override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetTotalWoundCount
@@ -816,7 +816,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Returns total number of wounds of this actor.
 
-	virtual int GetTotalWoundCount() const; 
+	int GetTotalWoundCount() const override; 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetTotalWoundLimit
@@ -825,7 +825,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Returns total wound limit of this actor.
 
-	virtual int GetTotalWoundLimit() const; 
+	int GetTotalWoundLimit() const override; 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
@@ -836,7 +836,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetAllTimers();
+    void ResetAllTimers() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -846,7 +846,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual bool UpdateMovePath();
+	bool UpdateMovePath() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -857,7 +857,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateAI();
+	void UpdateAI() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -874,7 +874,7 @@ ClassInfoGetters
     /// </summary>
     /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
     /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-	virtual int OnPieMenu(Actor *pieMenuActor);
+	int OnPieMenu(Actor *pieMenuActor) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -889,10 +889,7 @@ ClassInfoGetters
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -906,7 +903,7 @@ ClassInfoGetters
 //                  get drawn etc.
 // Return value:    None.
 
-    virtual void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
+    void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -916,49 +913,49 @@ ClassInfoGetters
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetLimbPathSpeed
+// Method:  GetLimbPathSpeed
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get walking limb path speed for the specified preset.
 // Arguments:       Speed preset to set 0 = LimbPath::SLOW, 1 = Limbpath::NORMAL, 2 = LimbPath::FAST
 // Return value:    Limb path speed for the specified preset in m/s.
 
-	virtual float GetLimbPathSpeed(int speedPreset) const;
+	float GetLimbPathSpeed(int speedPreset) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetLimbPathSpeed
+// Method:  SetLimbPathSpeed
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Set walking limb path speed for the specified preset.
 // Arguments:       Speed preset to set 0 = LimbPath::SLOW, 1 = Limbpath::NORMAL, 2 = LimbPath::FAST. New speed value in m/s.
 // Return value:    None.
 
-	virtual void SetLimbPathSpeed(int speedPreset, float speed);
+	void SetLimbPathSpeed(int speedPreset, float speed);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetLimbPathPushForce
+// Method:  GetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the default force that a limb traveling walking LimbPath can push against
 //                  stuff in the scene with. 
 // Arguments:       None.
 // Return value:    The default set force maximum, in kg * m/s^2.
 
-	virtual float GetLimbPathPushForce() const;
+	float GetLimbPathPushForce() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetLimbPathPushForce
+// Method:  SetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the default force that a limb traveling walking LimbPath can push against
 //                  stuff in the scene with. 
 // Arguments:       The default set force maximum, in kg * m/s^2.
 // Return value:    None
 
-	virtual void SetLimbPathPushForce(float force);
+	void SetLimbPathPushForce(float force);
 
 	/// <summary>
 	/// Gets the duration it takes this AHuman to fully charge a throw.
@@ -990,9 +987,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1007,7 +1002,7 @@ protected:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawThrowingReticule
+// Method:  DrawThrowingReticule
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws an aiming aid in front of this HeldDevice for throwing.
 // Arguments:       A pointer to a BITMAP to draw on.
@@ -1016,7 +1011,7 @@ protected:
 //                  reticule should be drawn, to indicate force in the throw.
 // Return value:    None.
 
-    virtual void DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), float amount = 1.0);
+	void DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), float amount = 1.0);
 
 
     // Member variables
@@ -1168,8 +1163,8 @@ private:
     void Clear();
 
     // Disallow the use of some implicit methods.
-    AHuman(const AHuman &reference);
-    AHuman & operator=(const AHuman &rhs);
+	AHuman(const AHuman &reference) {}
+	AHuman & operator=(const AHuman &rhs) {}
 
 };
 

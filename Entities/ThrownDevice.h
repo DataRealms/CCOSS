@@ -26,7 +26,7 @@ namespace RTE {
 		/// Makes the ThrownDevice object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Creates a ThrownDevice to be identical to another, by deep copy.
@@ -40,18 +40,18 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a ThrownDevice object before deletion from system memory.
 		/// </summary>
-		virtual ~ThrownDevice() { Destroy(true); }
+		~ThrownDevice() override { Destroy(true); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the SceneLayer object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false) { if (!notInherited) { HeldDevice::Destroy(); } Clear(); }
+		void Destroy(bool notInherited = false) override { if (!notInherited) { HeldDevice::Destroy(); } Clear(); }
 
 		/// <summary>
 		/// Resets the entire ThrownDevice, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); Attachable::Reset(); }
+		void Reset() override { Clear(); Attachable::Reset(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -108,17 +108,17 @@ namespace RTE {
 		/// <summary>
 		/// Resets all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.
 		/// </summary>
-		virtual void ResetAllTimers();
+		void ResetAllTimers() override;
 
 		/// <summary>
 		/// Activates this Device as long as it's not set to activate when released or it has no parent.
 		/// </summary>
-		virtual void Activate();
+		void Activate() override;
 
 		/// <summary>
 		/// Does the calculations necessary to detect whether this MO appears to have has settled in the world and is at rest or not. IsAtRest() retrieves the answer.
 		/// </summary>
-		virtual void RestDetection() { HeldDevice::RestDetection(); if (m_Activated) { m_RestTimer.Reset(); } }
+		void RestDetection() override { HeldDevice::RestDetection(); if (m_Activated) { m_RestTimer.Reset(); } }
 #pragma endregion
 
 	protected:

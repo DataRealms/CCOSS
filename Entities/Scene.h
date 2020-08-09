@@ -103,7 +103,7 @@ public:
     // Return value:    An error return value signaling sucess or any particular failure.
     //                  Anything below 0 is an error signal.
 
-        virtual int Create();
+		int Create() override;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +114,7 @@ public:
     // Return value:    An error return value signaling sucess or any particular failure.
     //                  Anything below 0 is an error signal.
 
-        virtual int Create(const Area &reference);
+		int Create(const Area &reference);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -125,7 +125,7 @@ public:
     // Arguments:       None.
     // Return value:    None.
 
-        virtual void Reset() { Clear(); }
+        void Reset() override { Clear(); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +135,7 @@ public:
     // Arguments:       None.
     // Return value:    A string with the friendly-formatted type name of this object.
 
-        virtual const std::string & GetClassName() const { return m_sClassName; }
+		const std::string & GetClassName() const override { return m_sClassName; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ public:
     // Arguments:       The Box to add. A copy will be made and added.
     // Return value:    Whether the Box was successfully added or not.
 
-        virtual bool AddBox(const Box &newBox);
+		bool AddBox(const Box &newBox);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ public:
     // Arguments:       None.
     // Return value:    Whether this Area actually covers any area.
 
-        virtual bool HasNoArea() const;
+		bool HasNoArea() const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -166,7 +166,7 @@ public:
     // Arguments:       The point to check if it's inside the Area, in absolute scene coordinates.
     // Return value:    Whether the point is inside any of this Area's Box:es.
 
-        virtual bool IsInside(const Vector &point) const;
+		bool IsInside(const Vector &point) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +177,7 @@ public:
     // Arguments:       The x coord to check if it's inside the Area, in absolute scene units.
     // Return value:    Whether the point is inside any of this Area's Box:es in the X axis.
 
-        virtual bool IsInsideX(float pointX) const;
+		bool IsInsideX(float pointX) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +188,7 @@ public:
     // Arguments:       The x coord to check if it's inside the Area, in absolute scene units.
     // Return value:    Whether the point is inside any of this Area's Box:es in the Y axis.
 
-        virtual bool IsInsideY(float pointY) const;
+		bool IsInsideY(float pointY) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -201,7 +201,7 @@ public:
     //                  negative dir, 0 means can look in both directions.
     // Return value:    Whether the point was moved at all to get inside this' x-space.
 
-        virtual bool MovePointInsideX(float &pointX, int direction = 0) const;
+		bool MovePointInsideX(float &pointX, int direction = 0) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +212,7 @@ public:
     // Return value:    Pointer to the first Box which was found to contain the point. 0 if
     //                  none was found. OWNERSHIP IS NOT TRANSFERRED!
 
-        virtual Box * GetBoxInside(const Vector &point);
+		Box * GetBoxInside(const Vector &point);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +222,7 @@ public:
     // Arguments:       The point to check for Box collision, in absolute scene coordinates.
     // Return value:    Copy of the Box that was removed. Will be  NoArea Box if none was found.
 
-        virtual Box RemoveBoxInside(const Vector &point);
+		Box RemoveBoxInside(const Vector &point);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -233,7 +233,7 @@ public:
     // Return value:    A center point of this area, can be outside the actual area though, if
     //                  pulled apart by two separate boxes, for example. 0,0 if this has no Area
 
-        virtual Vector GetCenterPoint() const;
+		Vector GetCenterPoint() const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -243,7 +243,7 @@ public:
     // Arguments:       None.
     // Return value:    A random point that is within this Area. 0,0 if this has no Area
 
-        virtual Vector GetRandomPoint() const;
+		Vector GetRandomPoint() const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -253,7 +253,7 @@ public:
     // Arguments:       None.
     // Return value:    The name used to ID this Area.
 
-        virtual std::string GetName() const { return m_Name; }
+		std::string GetName() const { return m_Name; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -326,7 +326,7 @@ EntityAllocation(Scene)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Scene() { Destroy(true); }
+	~Scene() override { Destroy(true); }
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -337,7 +337,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -348,7 +348,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(SLTerrain *pNewTerrain);
+	int Create(SLTerrain *pNewTerrain);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -376,7 +376,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadData(bool placeObjects = true, bool initPathfinding = true, bool placeUnits = true);
+	int LoadData(bool placeObjects = true, bool initPathfinding = true, bool placeUnits = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -387,7 +387,7 @@ EntityAllocation(Scene)
 // Arguments:       None.
 // Return value:    None.
 
-	virtual int ExpandAIPlanAssemblySchemes();
+	int ExpandAIPlanAssemblySchemes();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -399,7 +399,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int SaveData(std::string pathBase);
+	int SaveData(std::string pathBase);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -410,7 +410,7 @@ EntityAllocation(Scene)
 // Arguments:       The full filepath the where to save the Bitmap data.
 // Return value:    None.
 
-	virtual int SavePreview(string bitmapPath);
+	int SavePreview(string bitmapPath);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DrawPlacedObjectsPreview
@@ -420,7 +420,7 @@ EntityAllocation(Scene)
 //					scaled map offset, scale.
 // Return value:    None.
 
-	virtual void DrawPlacedObjectsPreview(BITMAP * pBitmap, int set, int width, int height, int xOffset, int yOffset, float scale);
+	void DrawPlacedObjectsPreview(BITMAP * pBitmap, int set, int width, int height, int xOffset, int yOffset, float scale);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +431,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int ClearData();
+	int ClearData();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -442,7 +442,7 @@ EntityAllocation(Scene)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Entity::Reset(); }
+    void Reset() override { Clear(); Entity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -453,7 +453,7 @@ EntityAllocation(Scene)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -465,7 +465,7 @@ EntityAllocation(Scene)
 // Return value:    Whether the migration was successful. If you tried to migrate to the
 //                  same module it already was in, this would return false.
 
-    virtual bool MigrateToModule(int whichModule);
+	bool MigrateToModule(int whichModule) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1242,7 +1242,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Arguments:       None.
 // Return value:    The number of waypoints in the ScenePath.
 
-    virtual int GetScenePathSize() const { return m_ScenePath.size(); }
+	int GetScenePathSize() const { return m_ScenePath.size(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1422,8 +1422,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Scene(const Scene &reference) { RTEAbort("Tried to use forbidden method"); }
-    void operator=(const Scene &rhs) { RTEAbort("Tried to use forbidden method"); }
+    Scene(const Scene &reference) {}
+    void operator=(const Scene &rhs) {}
 
 };
 

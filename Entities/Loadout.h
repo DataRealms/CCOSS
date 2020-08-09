@@ -81,14 +81,14 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
+// Method:  Create
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a Loadout to be identical to another, by deep copy.
 // Arguments:       A reference to the Loadout to deep copy.
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const Loadout &reference);
+	int Create(const Loadout &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Entity::Reset(); }
+    void Reset() override { Clear(); Entity::Reset(); }
 
 
 /*
@@ -111,10 +111,10 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 */
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsComplete
+// Method:  IsComplete
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Shows whether this loadout is complete, or some Entity within could
 //                  not be found on load.
@@ -125,7 +125,7 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  CreateFirstActor
+// Method:  CreateFirstActor
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates and returns the first Actor that this Loadout has and equips.
 //                  Ownership IS transferred!! All items of the Loadout of this Deployment
@@ -135,11 +135,11 @@ ClassInfoGetters
 // Return value:    The Actor instance, if any, that is first defined in this Loadout.
 //                  OWNERSHIP IS TRANSFERRED!
 
-    virtual Actor * CreateFirstActor(int nativeModule, float foreignMult, float nativeMult, float &costTally) const;
+	Actor * CreateFirstActor(int nativeModule, float foreignMult, float nativeMult, float &costTally) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  CreateFirstDevice
+// Method:  CreateFirstDevice
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates and returns the first Device that is defined in this Loadout.
 //                  Ownership IS transferred!! Only the first Device is created.
@@ -148,49 +148,49 @@ ClassInfoGetters
 // Return value:    The SceneObject instance, if any, that this Loadout defines first.
 //                  OWNERSHIP IS TRANSFERRED!
 
-    virtual SceneObject * CreateFirstDevice(int nativeModule, float foreignMult, float nativeMult,  float &costTally) const;
+	SceneObject * CreateFirstDevice(int nativeModule, float foreignMult, float nativeMult,  float &costTally) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetDeliveryCraft
+// Method:  GetDeliveryCraft
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the preset of the delivery craft set for this loadout. Owenership
 //                  is NOT transferred!
 // Arguments:       None.
 // Return value:    A pointer to the ACraft preset instance. OWNERSHIP IS NOT TRANSFERRED!
 
-    virtual const ACraft * GetDeliveryCraft() const { return m_pDeliveryCraft; }
+	const ACraft * GetDeliveryCraft() const { return m_pDeliveryCraft; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetDeliveryCraft
+// Method:  SetDeliveryCraft
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the preset of the delivery craft set for this loadout. Owenership
 //                  is NOT transferred!
 // Arguments:       A pointer to the ACraft preset instance. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    None.
 
-    virtual void SetDeliveryCraft(const ACraft *pCraft) { m_pDeliveryCraft = pCraft; m_Complete = m_Complete && m_pDeliveryCraft; }
+	void SetDeliveryCraft(const ACraft *pCraft) { m_pDeliveryCraft = pCraft; m_Complete = m_Complete && m_pDeliveryCraft; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetCargoList
+// Method:  GetCargoList
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the list of cargo Entity items this Loadout represents.
 // Arguments:       None.
 // Return value:    A pointer to the list of cargo Entity items. OWNERSHIP IS NOT TRANSFERRED!
 
-    virtual std::list<const SceneObject *> * GetCargoList() { return &m_CargoItems; }
+	std::list<const SceneObject *> * GetCargoList() { return &m_CargoItems; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddToCargoList
+// Method:  AddToCargoList
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds a new Preset to the list of cargo items to be included in this.
 // Arguments:       A const pointer to the ScneObject preset we want to add to this loadout.
 // Return value:    None.
 
-    virtual void AddToCargoList(const SceneObject *pNewItem) { if (pNewItem) m_CargoItems.push_back(pNewItem); }
+	void AddToCargoList(const SceneObject *pNewItem) { if (pNewItem) m_CargoItems.push_back(pNewItem); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

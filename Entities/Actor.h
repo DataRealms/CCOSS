@@ -93,7 +93,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Actor() { Destroy(true); }
+	~Actor() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -123,7 +123,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(BITMAP *pSprite,
+	int Create(BITMAP *pSprite,
                        Controller *pController,
                        const float mass,
                        const Vector &position = Vector(0, 0),
@@ -142,7 +142,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const Actor &reference);
+	int Create(const Actor &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +153,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); MOSRotating::Reset(); m_MOType = MovableObject::TypeActor; }
+    void Reset() override { Clear(); MOSRotating::Reset(); m_MOType = MovableObject::TypeActor; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -164,15 +164,15 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
     /// <summary>
     /// Loads the script at the given script path onto the object, checking for appropriately named functions within it.
     /// </summary>
     /// <param name="scriptPath">The path to the script to load.</param>
     /// <param name="loadAsEnabledScript">Whether or not the script should load as enabled. Defaults to true.</param>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-    virtual int LoadScript(std::string const &scriptPath, bool loadAsEnabledScript = false);
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+	int LoadScript(std::string const &scriptPath, bool loadAsEnabledScript = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -183,7 +183,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+    float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -305,14 +305,14 @@ ClassInfoGetters
 //                  How much to multiply the value if this happens to be a foreign Tech.
 // Return value:    The current value of this Actor and all his carried assets.
 
-    virtual float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const;
+	float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalValueOld
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     DOES THE SAME THING AS GetTotalValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
 
-	virtual float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const { return GetTotalValue(nativeModule, foreignMult, 1.0); }
+	float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, 1.0); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -324,7 +324,7 @@ ClassInfoGetters
 // Arguments:       The Preset name of the object to look for.
 // Return value:    Whetehr the object was found carried by this.
 
-    virtual bool HasObject(std::string objectName) const;
+	bool HasObject(std::string objectName) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -336,7 +336,7 @@ ClassInfoGetters
 // Arguments:       The name of the group to look for.
 // Return value:    Whetehr the object in the group was found carried by this.
 
-    virtual bool HasObjectInGroup(std::string groupName) const;
+	bool HasObjectInGroup(std::string groupName) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -386,7 +386,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A Vector with the absolute position of this' HUD stack top point.
 
-    virtual Vector GetAboveHUDPos() const { return m_Pos + Vector(0, m_HUDStack + 6); }
+	Vector GetAboveHUDPos() const override { return m_Pos + Vector(0, m_HUDStack + 6); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -408,7 +408,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A Vector with the direction in which this is looking along.
 
-    virtual Vector GetLookVector() const { return m_ViewPoint - GetEyePos(); }
+	Vector GetLookVector() const { return m_ViewPoint - GetEyePos(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -428,7 +428,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A float with the approximate height, in pixels.
 
-    virtual float GetHeight() const { return m_CharHeight; }
+	float GetHeight() const { return m_CharHeight; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -470,7 +470,7 @@ ClassInfoGetters
 // Arguments:       The assigned team number.
 // Return value:    None.
 
-    virtual void SetTeam(int team);
+	void SetTeam(int team) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -580,7 +580,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void RestDetection();
+    void RestDetection() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -652,7 +652,7 @@ ClassInfoGetters
 // Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
 // Return value:    Whether any slices were added.
 
-    virtual bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
+	virtual bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -674,7 +674,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetAI() { m_AIMode; }
+    void ResetAI() { m_AIMode; }
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -684,7 +684,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The current AI mode.
 
-    virtual int GetAIMode() const { return m_AIMode; }
+	int GetAIMode() const { return m_AIMode; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -694,7 +694,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The current AI mode icon of this. Ownership is NOT transferred!
 
-    virtual BITMAP * GetAIModeIcon();
+	BITMAP * GetAIModeIcon();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -704,7 +704,7 @@ ClassInfoGetters
 // Arguments:       The new AI mode.
 // Return value:    None.
 
-    virtual void SetAIMode(AIMode newMode = AIMODE_SENTRY) { m_AIMode = newMode; }
+	void SetAIMode(AIMode newMode = AIMODE_SENTRY) { m_AIMode = newMode; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -716,7 +716,7 @@ ClassInfoGetters
 //                  are reached.
 // Return value:    None.
 
-    virtual void AddAISceneWaypoint(const Vector &waypoint) { m_Waypoints.push_back(std::pair<Vector, MovableObject *>(waypoint, (MovableObject*)NULL)); }
+	void AddAISceneWaypoint(const Vector &waypoint) { m_Waypoints.push_back(std::pair<Vector, MovableObject *>(waypoint, (MovableObject*)NULL)); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -727,7 +727,7 @@ ClassInfoGetters
 //                  OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    None.
 
-    virtual void AddAIMOWaypoint(const MovableObject *pMOWaypoint);
+	void AddAIMOWaypoint(const MovableObject *pMOWaypoint);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -738,7 +738,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ClearAIWaypoints() { m_pMOMoveTarget = 0; m_Waypoints.clear(); m_MovePath.clear(); m_MoveTarget = m_Pos; m_MoveVector.Reset(); }
+	void ClearAIWaypoints() { m_pMOMoveTarget = 0; m_Waypoints.clear(); m_MovePath.clear(); m_MoveTarget = m_Pos; m_MoveVector.Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -749,7 +749,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The furthest set AI waypoint of this.
 
-    virtual Vector GetLastAIWaypoint() { if (!m_Waypoints.empty()) { return m_Waypoints.back().first; } else if (!m_MovePath.empty()) { return m_MovePath.back(); } return m_Pos; }
+	Vector GetLastAIWaypoint() { if (!m_Waypoints.empty()) { return m_Waypoints.back().first; } else if (!m_MovePath.empty()) { return m_MovePath.back(); } return m_Pos; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -759,7 +759,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The furthest set AI MO waypoint of this.
 
-    virtual MOID GetAIMOWaypointID();
+	MOID GetAIMOWaypointID();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -769,7 +769,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    How many waypoints.
 
-    virtual int GetWaypointsSize() { return m_Waypoints.size(); };
+	int GetWaypointsSize() { return m_Waypoints.size(); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -780,7 +780,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ClearMovePath() { m_MovePath.clear(); m_MoveTarget = m_Pos; m_MoveVector.Reset(); }
+	void ClearMovePath() { m_MovePath.clear(); m_MoveTarget = m_Pos; m_MoveVector.Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -791,7 +791,7 @@ ClassInfoGetters
 // Arguments:       The new coordinate to add to the front of the MovePath.
 // Return value:    None.
 
-    virtual void AddToMovePathBeginning(Vector newCoordinate) { m_MovePath.push_front(newCoordinate); m_MoveTarget = newCoordinate; m_MoveVector.Reset(); }
+	void AddToMovePathBeginning(Vector newCoordinate) { m_MovePath.push_front(newCoordinate); m_MoveTarget = newCoordinate; m_MoveVector.Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -802,11 +802,11 @@ ClassInfoGetters
 // Arguments:       The new coordinate to add to the end of the MovePath.
 // Return value:    None.
 
-    virtual void AddToMovePathEnd(Vector newCoordinate) { m_MovePath.push_back(newCoordinate); }
+	void AddToMovePathEnd(Vector newCoordinate) { m_MovePath.push_back(newCoordinate); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RemoveMovePathBeginning
+// Method:  RemoveMovePathBeginning
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes a coordinate from the beginning of the MovePath, meaning the
 //                  one closest to this Actor.
@@ -814,7 +814,7 @@ ClassInfoGetters
 // Return value:    Whether there was any coordinate to remove. If false, the MovePath
 //                  is empty.
 
-    virtual bool RemoveMovePathBeginning() { if (!m_MovePath.empty()) { m_MovePath.pop_front(); m_MoveTarget = m_MovePath.empty() ? m_Pos : m_MovePath.front(); m_MoveVector.Reset(); return true; } return false; }
+	bool RemoveMovePathBeginning() { if (!m_MovePath.empty()) { m_MovePath.pop_front(); m_MoveTarget = m_MovePath.empty() ? m_Pos : m_MovePath.front(); m_MoveVector.Reset(); return true; } return false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -826,31 +826,31 @@ ClassInfoGetters
 // Return value:    Whether there was any coordinate to remove. If false, the MovePath
 //                  is empty.
 
-    virtual bool RemoveMovePathEnd() { if (!m_MovePath.empty()) { m_MovePath.pop_back(); return true; } return false; }
+	bool RemoveMovePathEnd() { if (!m_MovePath.empty()) { m_MovePath.pop_back(); return true; } return false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetPerceptiveness
+// Method:  SetPerceptiveness
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets this' perceptiveness to alarming events going on around him.
 // Arguments:       The current perceptiveness, 0.0 - 1.0
 // Return value:    None.
 
-    virtual void SetPerceptiveness(float newPerceptiveness) { m_Perceptiveness = newPerceptiveness; }
+	void SetPerceptiveness(float newPerceptiveness) { m_Perceptiveness = newPerceptiveness; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetPerceptiveness
+// Method:  GetPerceptiveness
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets this' perceptiveness to alarming events going on around him.
 // Arguments:       None.
 // Return value:    The current perceptiveness, 0.0 - 1.0
 
-    virtual float GetPerceptiveness() const { return m_Perceptiveness; }
+	float GetPerceptiveness() const { return m_Perceptiveness; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AlarmPoint
+// Method:  AlarmPoint
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes this alarmed about a certian point on in the scene, overriding
 //                  the current AI mode until a certain time has passed.
@@ -858,18 +858,18 @@ ClassInfoGetters
 //                  is there.
 // Return value:    None.
 
-    virtual void AlarmPoint(const Vector &alarmPoint) { if (m_AlarmTimer.GetElapsedSimTimeMS() > 50) { m_AlarmTimer.Reset(); m_LastAlarmPos = m_PointingTarget = alarmPoint; m_AlarmSound.Play(alarmPoint); } }
+	void AlarmPoint(const Vector &alarmPoint) { if (m_AlarmTimer.GetElapsedSimTimeMS() > 50) { m_AlarmTimer.Reset(); m_LastAlarmPos = m_PointingTarget = alarmPoint; m_AlarmSound.Play(alarmPoint); } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetAlarmPoint
+// Method:  GetAlarmPoint
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any point on the scene this actor should be alarmed about this frame.
 // Arguments:       None.
 // Return value:    The new scene point this should look at and see if anything dangerous
 //                  is there or (0,0) if nothing is alarming.
 
-    virtual Vector GetAlarmPoint() { if (m_AlarmTimer.GetElapsedSimTimeMS() > g_TimerMan.GetDeltaTimeMS()) { return Vector(); } return m_LastAlarmPos; }
+	Vector GetAlarmPoint() { if (m_AlarmTimer.GetElapsedSimTimeMS() > g_TimerMan.GetDeltaTimeMS()) { return Vector(); } return m_LastAlarmPos; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -884,17 +884,17 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  RemoveInventoryItem
+// Method:  RemoveInventoryItem
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Removes a specified item from the actor's inventory. Only one item is removed at a time.
 // Arguments:       Preset name of an item to remove.
 // Return value:    None.
 
-    virtual void RemoveInventoryItem(string presetName);
+	void RemoveInventoryItem(string presetName);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SwapNextInventory
+// Method:  SwapNextInventory
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Swaps the next MovableObject carried by this Actor and puts one not
 //                  currently carried into the into the back of the inventory of this.
@@ -904,11 +904,11 @@ ClassInfoGetters
 // Return value:    The next MovableObject in this Actor's inventory. Ownership IS xferred!
 //                  If there are no MovableObject:s in inventory, 0 will be returned.
 
-    virtual MovableObject * SwapNextInventory(MovableObject *pSwapIn = 0, bool muteSound = false);
+	MovableObject * SwapNextInventory(MovableObject *pSwapIn = 0, bool muteSound = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SwapPrevInventory
+// Method:  SwapPrevInventory
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Swaps the prev MovableObject carried by this Actor and puts one not
 //                  currently carried into the into the back of the inventory of this.
@@ -917,7 +917,7 @@ ClassInfoGetters
 // Return value:    The prev MovableObject in this Actor's inventory. Ownership IS xferred!
 //                  If there are no MovableObject:s in inventory, 0 will be returned.
 
-    virtual MovableObject * SwapPrevInventory(MovableObject *pSwapIn = 0);
+	MovableObject * SwapPrevInventory(MovableObject *pSwapIn = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -933,55 +933,55 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetInventorySize
+// Method:  GetInventorySize
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Tells how many things are in the invetory
 // Arguments:       None.
 // Return value:    The number of things in the inventory
 
-    virtual int GetInventorySize() const { return m_Inventory.size(); }
+	int GetInventorySize() const { return m_Inventory.size(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsInventoryEmpty
+// Method:  IsInventoryEmpty
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Tells whether inventory is completely empty
 // Arguments:       None.
 // Return value:    Whether inventory is completely empty.
 
-    virtual bool IsInventoryEmpty() { return m_Inventory.empty(); }
+	bool IsInventoryEmpty() { return m_Inventory.empty(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetInventory
+// Method:  GetInventory
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the deque of inventory of this. Ownership is NOT transferred.
 // Arguments:       None.
 // Return value:    A const pointer to the inventory deque of this. OWNERSHIP IS NOT TRANSFERRED!
 
-    virtual const std::deque<MovableObject *> * GetInventory() { return &m_Inventory; }
+	const std::deque<MovableObject *> * GetInventory() { return &m_Inventory; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMaxMass
+// Method:  GetMaxMass
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Tells how much total mass (in kg) this Actor is recommended to weigh
 //                  at most INCLUDING his own weight AND all his inventory!
 // Arguments:       None.
 // Return value:    The max recommend total mass for this Actor
 
-    virtual float GetMaxMass() const { return m_MaxMass; }
+	float GetMaxMass() const { return m_MaxMass; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetAimRange
+// Method:  GetAimRange
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     The limit of this actors aiming angle, in each direction, in radians.
 // Arguments:       None.
 // Return value:    The arc range of the aiming angle in radians.
 //                  Eg if HalfPI, it means full 180 degree range
 
-    virtual float GetAimRange() const { return m_AimRange; }
+	float GetAimRange() const { return m_AimRange; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -992,7 +992,7 @@ ClassInfoGetters
 //                  Eg if HalfPI, it means full 180 degree range
 // Return value:    None.
 
-	virtual void SetAimRange(float range) { m_AimRange = range; }
+	void SetAimRange(float range) { m_AimRange = range; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1027,7 +1027,7 @@ ClassInfoGetters
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1041,7 +1041,7 @@ ClassInfoGetters
 // Return value:    Whether the collision has been deemed valid. If false, then disregard
 //                  any impulses in the Hitdata.
 
-    virtual bool CollideAtPoint(HitData &hitData);
+    bool CollideAtPoint(HitData &hitData) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1057,7 +1057,7 @@ ClassInfoGetters
 //                  somehting but a MOPixel or MOSParticle is being passed in as hitor,
 //                  false will trivially be returned here.
 
-    virtual bool ParticlePenetration(HitData &hd);
+	bool ParticlePenetration(HitData &hd) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1070,7 +1070,7 @@ ClassInfoGetters
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this hit.
 
-    virtual bool OnMOHit(MovableObject *pOtherMO);
+	bool OnMOHit(MovableObject *pOtherMO) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1081,7 +1081,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void PreTravel() { MOSRotating::PreTravel(); m_GoldPicked = false; }
+	void PreTravel() override { MOSRotating::PreTravel(); m_GoldPicked = false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1092,7 +1092,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void SetMovePathToUpdate() { m_UpdateMovePath = true; }
+	void SetMovePathToUpdate() { m_UpdateMovePath = true; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1102,7 +1102,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The number of waypoints in the MovePath.
 
-    virtual int GetMovePathSize() const { return m_MovePath.size(); }
+	int GetMovePathSize() const { return m_MovePath.size(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1121,14 +1121,14 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateAIScripted
+// Method:  UpdateAIScripted
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this' AI state with the provided scripted AI Update function.
 // Arguments:       None.
 // Return value:    Whether there was an AI Update function defined for this in its script,
 //                  and if it was executed successfully.
 
-    virtual bool UpdateAIScripted();
+	bool UpdateAIScripted();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1159,17 +1159,17 @@ ClassInfoGetters
 // Arguments:       New deployment id.
 // Return value:    None.
 
-	virtual void SetDeploymentID(unsigned int newID) { m_DeploymentID = newID; }
+	void SetDeploymentID(unsigned int newID) { m_DeploymentID = newID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetDeploymentID
+// Method:  GetDeploymentID
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:		Gets deployment ID of this actor
 // Arguments:       None.
 // Return value:    Returns deployment id of this actor.
 
-	virtual unsigned int GetDeploymentID() const { return m_DeploymentID; }
+	unsigned int GetDeploymentID() const { return m_DeploymentID; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetTotalWoundCount
@@ -1198,7 +1198,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Returns actor's sight distance.
 
-	virtual float GetSightDistance() const { return m_SightDistance; }
+	float GetSightDistance() const { return m_SightDistance; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetSightDistance
@@ -1207,7 +1207,7 @@ ClassInfoGetters
 // Arguments:       New sight distance value.
 // Return value:    None.
 
-	virtual void SetSightDistance(float newValue) { m_SightDistance = newValue; }
+	void SetSightDistance(float newValue) { m_SightDistance = newValue; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
@@ -1221,10 +1221,7 @@ ClassInfoGetters
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1238,7 +1235,7 @@ ClassInfoGetters
 //                  get drawn etc.
 // Return value:    None.
 
-    virtual void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
+    void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1542,8 +1539,8 @@ private:
     void Clear();
 
     // Disallow the use of some implicit methods.
-    Actor(const Actor &reference);
-    Actor & operator=(const Actor &rhs);
+	Actor(const Actor &reference) {}
+	Actor & operator=(const Actor &rhs) {}
 
 };
 

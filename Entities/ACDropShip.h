@@ -63,7 +63,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~ACDropShip() { Destroy(true); }
+	~ACDropShip() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); ACraft::Reset(); }
+    void Reset() override { Clear(); ACraft::Reset(); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Destroy
@@ -106,7 +106,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -117,7 +117,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+    float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -130,7 +130,7 @@ ClassInfoGetters
 //                  here means less calculation.
 // Return value:    The rough altitude over the terrain, in pixels.
 
-    virtual float GetAltitude(int max = 0, int accuracy = 0);
+	float GetAltitude(int max = 0, int accuracy = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +140,7 @@ ClassInfoGetters
 // Arguments:       How far ahead of travel direction to check for obstacles.
 // Return value:    Which MOID was detected as obstacle. g_NoMOID means nothing was detected.
 
-    virtual MOID DetectObstacle(float distance);
+	MOID DetectObstacle(float distance);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -151,7 +151,7 @@ ClassInfoGetters
 //                  assigned for this frame.
 // Return value:    None.
 
-    virtual void SetID(const MOID newID);
+    void SetID(const MOID newID) override;
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +164,7 @@ ClassInfoGetters
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this bounce.
 
-    virtual bool OnBounce(const Vector &pos);
+	bool OnBounce(const Vector &pos) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +177,7 @@ ClassInfoGetters
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this sinkage.
 
-    virtual bool OnSink(const Vector &pos);
+	bool OnSink(const Vector &pos) override;
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +188,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Wheter this will try to auto stabilize.
 
-    virtual bool AutoStabilizing() { return true; }
+	bool AutoStabilizing() override { return true; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -201,7 +201,7 @@ ClassInfoGetters
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+	void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +212,7 @@ ClassInfoGetters
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+    bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +223,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateAI();
+	void UpdateAI() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -248,10 +248,7 @@ ClassInfoGetters
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -263,7 +260,7 @@ ClassInfoGetters
 // Return value:    An integer with the recomended number of actors that fit in the craft.
 //                  Default is four.
 
-    virtual int GetMaxPassengers() const { return m_MaxPassengers > -1 ? m_MaxPassengers : 4; }
+	int GetMaxPassengers() const override { return m_MaxPassengers > -1 ? m_MaxPassengers : 4; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -334,7 +331,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetEmissionTimers();
+    void ResetEmissionTimers() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -344,7 +341,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Returns total number of wounds of this actor.
 
-	virtual int GetTotalWoundCount() const; 
+	int GetTotalWoundCount() const override; 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetTotalWoundLimit
@@ -353,7 +350,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Returns total wound limit of this actor.
 
-	virtual int GetTotalWoundLimit() const; 
+	int GetTotalWoundLimit() const override; 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -363,7 +360,7 @@ ClassInfoGetters
 // Arguments:       Amount of wounds to remove.
 // Return value:    Damage taken from removed wounds.
 
-	virtual int RemoveAnyRandomWounds(int amount);
+	int RemoveAnyRandomWounds(int amount) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -373,7 +370,7 @@ ClassInfoGetters
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -383,7 +380,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Max engine angle in degrees.
 
-	virtual float GetMaxEngineAngle() const { return m_MaxEngineAngle; }
+	float GetMaxEngineAngle() const { return m_MaxEngineAngle; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -393,7 +390,7 @@ ClassInfoGetters
 // Arguments:       Max engine angle in degrees.
 // Return value:    None.
 
-	virtual void SetMaxEngineAngle(float newAngle) { m_MaxEngineAngle = newAngle; }
+	void SetMaxEngineAngle(float newAngle) { m_MaxEngineAngle = newAngle; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -417,7 +414,7 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetMaxEngineAngle
+// Virtual method:  GetLateralControl
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets lateral control value -1.0 to 1.0 control of sideways movement. 0 means try to stand still in X.
 // Arguments:       None.
@@ -443,9 +440,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
     // Member variables
@@ -496,8 +491,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    ACDropShip(const ACDropShip &reference);
-    ACDropShip & operator=(const ACDropShip &rhs);
+	ACDropShip(const ACDropShip &reference) {}
+	ACDropShip & operator=(const ACDropShip &rhs) {}
 
 };
 

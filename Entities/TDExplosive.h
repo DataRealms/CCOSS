@@ -34,18 +34,18 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a TDExplosive object before deletion from system memory.
 		/// </summary>
-		virtual ~TDExplosive() { Destroy(true); }
+		~TDExplosive() override { Destroy(true); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the SceneLayer object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false) { if (!notInherited) { ThrownDevice::Destroy(); } Clear(); }
+		void Destroy(bool notInherited = false) override { if (!notInherited) { ThrownDevice::Destroy(); } Clear(); }
 
 		/// <summary>
 		/// Resets the entire TDExplosive, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); ThrownDevice::Reset(); }
+		void Reset() override { Clear(); ThrownDevice::Reset(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -75,7 +75,7 @@ namespace RTE {
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
 		/// <param name="whichScreen">Which player's screen this is being drawn to. May affect what HUD elements get drawn etc.</param>
 		/// <param name="playerControlled">Whether or not this MovableObject is currently player controlled (not applicable for TDExplosive).</param>
-		virtual void DrawHUD(BITMAP *targetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
+		void DrawHUD(BITMAP *targetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
 #pragma endregion
 
 	protected:

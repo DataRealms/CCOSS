@@ -73,7 +73,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~LimbPath() { Destroy(true); }
+	~LimbPath() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const Vector &startPoint,
+	int Create(const Vector &startPoint,
                        const unsigned int segCount = 1,
                        const Vector *aSegArray = new Vector,
                        const float travelSpeed = 1.0);
@@ -126,7 +126,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Entity::Reset(); }
+    void Reset() override { Clear(); Entity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -137,7 +137,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -589,7 +589,7 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
+// Method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this LimbPath's current graphical debug representation to a
 //                  BITMAP of choice.
@@ -598,9 +598,7 @@ ClassInfoGetters
 //                  The color to draw the path's pixels as.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      unsigned char color = 34) const;
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), unsigned char color = 34) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -96,27 +96,27 @@ namespace RTE {
 		/// Makes the Activity object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Creates an Activity to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the Activity to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const Activity &reference);
+		int Create(const Activity &reference);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up an Activity object before deletion from system memory.
 		/// </summary>
-		virtual ~Activity() { Destroy(true); }
+		~Activity() override { Destroy(true); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the Activity object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false) { if (!notInherited) { Entity::Destroy(); } Clear(); }
+		void Destroy(bool notInherited = false) override { if (!notInherited) { Entity::Destroy(); } Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters

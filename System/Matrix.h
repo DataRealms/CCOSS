@@ -42,21 +42,21 @@ namespace RTE {
 		/// Makes the Matrix object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Makes the Matrix object ready for use.
 		/// </summary>
 		/// <param name="angle">The float angle in radians which this rotational matrix should represent.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(float angle);
+		int Create(float angle);
 
 		/// <summary>
 		/// Creates a Matrix to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the Matrix to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const Matrix &reference);
+		int Create(const Matrix &reference);
 #pragma endregion
 
 #pragma region Destruction
@@ -297,7 +297,7 @@ namespace RTE {
 		/// Gets the class name of this Matrix.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this Matrix.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	protected:
@@ -309,7 +309,7 @@ namespace RTE {
 		/// <summary>
 		/// Makes the elements of this matrix update to represent the set angle.
 		/// </summary>
-		virtual void UpdateElements();
+		void UpdateElements();
 
 		/// <summary>
 		/// Clears all the member variables of this Matrix, effectively resetting the members of this abstraction level only.

@@ -49,7 +49,7 @@ namespace RTE {
 		/// <summary>
 		/// Resets the entire HitData object to the default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() { Clear(); }
 
 		/// <summary>
 		/// An assignment operator for setting one HitData equal to another.
@@ -111,7 +111,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="reference">A reference to the Atom to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const Atom &reference);
+		int Create(const Atom &reference);
 
 		/// <summary>
 		/// Makes the Atom object ready for use.
@@ -122,25 +122,19 @@ namespace RTE {
 		/// <param name="trailColor">The trail color.</param>
 		/// <param name="trailLength">The trail length. If 0, no trail will be drawn.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const Vector &offset, Material const *material, MovableObject *owner, Color trailColor = Color(), int trailLength = 0);
+		int Create(const Vector &offset, Material const *material, MovableObject *owner, Color trailColor = Color(), int trailLength = 0);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up an Atom object before deletion from system memory.
 		/// </summary>
-		virtual ~Atom() { Destroy(true); }
+		~Atom() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the Atom object.
 		/// </summary>
-		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false) { Clear(); }
-
-		/// <summary>
-		/// Resets the entire Atom, including its inherited members, to their default settings or values.
-		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Destroy() { Clear(); }
 #pragma endregion
 
 #pragma region Memory Management
@@ -461,7 +455,7 @@ namespace RTE {
 		/// Gets the class name of this object.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	protected:

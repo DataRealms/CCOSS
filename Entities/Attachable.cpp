@@ -21,7 +21,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(Attachable, MOSRotating, 0)
+ConcreteClassInfo(Attachable, MOSRotating, 100)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

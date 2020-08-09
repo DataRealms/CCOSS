@@ -35,7 +35,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(Actor, MOSRotating, 0);
+ConcreteClassInfo(Actor, MOSRotating, 20);
 
 BITMAP **Actor::m_apNoTeamIcon;
 BITMAP *Actor::m_apAIIcons[AIMODE_COUNT];

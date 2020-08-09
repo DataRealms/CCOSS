@@ -21,7 +21,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(HeldDevice, Attachable, 0)
+ConcreteClassInfo(HeldDevice, Attachable, 50)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -29,12 +29,7 @@
 #include "TerrainObject.h"
 #include "Emission.h"
 
-extern "C"
-{
-  #include "lua.h"
-  #include "lualib.h"
-  #include "lauxlib.h"
-}
+#include "lua.hpp"
 
 // LuaBind
 #include "luabind/luabind.hpp"

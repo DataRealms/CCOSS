@@ -437,6 +437,12 @@ int LuaMan::Create()
 	lua_pushliteral(m_pMasterState, LUA_LOADLIBNAME);
 	lua_call(m_pMasterState, 1, 0);
 
+	lua_pushcfunction(m_pMasterState, luaopen_jit);
+	lua_pushliteral(m_pMasterState, LUA_LOADLIBNAME);
+	lua_call(m_pMasterState, 1, 0);
+
+	// LuaJIT should start automatically after we load the library but we're making sure it did anyway.
+	if (!luaJIT_setmode(m_pMasterState, 0, LUAJIT_MODE_ENGINE | LUAJIT_MODE_ON)) { RTEAbort("Failed to initialize LuaJIT!"); }
 
     // From LuaBind documentation:
     // As mentioned in the Lua documentation, it is possible to pass an error handler function to lua_pcall().

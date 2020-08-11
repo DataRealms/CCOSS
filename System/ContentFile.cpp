@@ -252,7 +252,7 @@ namespace RTE {
 				FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(rawData, FMOD_OPENMEMORY | FMOD_3D, &soundInfo, &returnSample);
 
 				if (result != FMOD_OK) {
-					errorMessage = "Unable to create sound because of FMOD error " + std::string(FMOD_ErrorString(result)) + ". Path and name was: ";
+					errorMessage = "Unable to create sound because of FMOD error:\n" + std::string(FMOD_ErrorString(result)) + "\nPath and name was: ";
 					if (abortGameForInvalidSound) { RTEAbort(errorMessage + "\n\n" + m_DataPath); }
 					g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
 					return returnSample;

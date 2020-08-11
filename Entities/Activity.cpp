@@ -694,40 +694,36 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Activity::SwitchToActor(Actor *actor, short player, short team) {
-		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount || player < Players::PlayerOne || player >= Players::MaxPlayerCount) {
+		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount || player < Players::PlayerOne || player >= Players::MaxPlayerCount || !m_IsHuman[player]) {
 			return false;
 		}
-		if (!m_IsHuman[player] || (!actor || !g_MovableMan.IsActor(actor))) {
+		if (!actor || !g_MovableMan.IsActor(actor)) {
 			return false;
 		}
-		if (actor != m_Brain[player] && actor->IsPlayerControlled() || IsOtherPlayerBrain(m_ControlledActor[player], player)) {
+		if ((actor != m_Brain[player] && actor->IsPlayerControlled()) || IsOtherPlayerBrain(actor, player)) {
 			g_GUISound.UserErrorSound()->Play(player);
 			return false;
 		}
 
-		const Actor *prevActor = nullptr;
-		// Disable human player control of the Actor we're switching from and set the AI controller to handle him
-		if (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player])) {
-			m_ControlledActor[player]->SetControllerMode(Controller::CIM_AI);
-			m_ControlledActor[player]->GetController()->SetDisabled(false);
-			prevActor = m_ControlledActor[player];
+		Actor *preSwitchActor = (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player])) ? m_ControlledActor[player] : 0;
+		if (preSwitchActor) {
+			preSwitchActor->SetControllerMode(Controller::CIM_AI);
+			preSwitchActor->GetController()->SetDisabled(false);
 		}
+
 		m_ControlledActor[player] = actor;
+		m_ControlledActor[player]->SetTeam(team);
+		m_ControlledActor[player]->SetControllerMode(Controller::CIM_PLAYER, player);
+		m_ControlledActor[player]->GetController()->SetDisabled(false);
 
-		// Now set the controller and team of the actor we switched to.
-		if (m_ControlledActor[player]) {
-			m_ControlledActor[player]->SetTeam(team);
-			m_ControlledActor[player]->SetControllerMode(Controller::CIM_PLAYER, player);
-			m_ControlledActor[player]->GetController()->SetDisabled(false);
+		SoundContainer *actorSwitchSoundToPlay = (m_ControlledActor[player] == m_Brain[player]) ? g_GUISound.BrainSwitchSound() : g_GUISound.ActorSwitchSound();
+		actorSwitchSoundToPlay->Play(player);
 
-			// Play actor switching sound effects
-			(m_ControlledActor[player] == m_Brain[player]) ? g_GUISound.BrainSwitchSound()->Play(player) : g_GUISound.ActorSwitchSound()->Play(player);
-			// Only play air swoosh if actors are out of sight of each other
-			if (prevActor && Vector(prevActor->GetPos() - m_ControlledActor[player]->GetPos()).GetMagnitude() > g_FrameMan.GetResX() / 2) { g_GUISound.CameraTravelSound()->Play(player); }
-
-			ReassignSquadLeader(player, team);
+		if (preSwitchActor && g_SceneMan.ShortestDistance(preSwitchActor->GetPos(), m_ControlledActor[player]->GetPos(), g_SceneMan.SceneWrapsX()).GetMagnitude() > g_FrameMan.GetResX() / 2) {
+			g_GUISound.CameraTravelSound()->Play(player);
 		}
-		// Follow the new guy normally
+
+		ReassignSquadLeader(player, team);
 		m_ViewState[player] = Normal;
 
 		return true;
@@ -743,10 +739,9 @@ void Activity::Clear() {
 		char messageString[64];
 		float foreignCostMult = 1.0F;
 		float nativeCostMult = 1.0F;
-		short orbitedCraftTeam = orbitedCraft->GetTeam();
+		short orbitedCraftTeam = orbitedCraft->GetTeam(); //TODO this should be explicitly casted. Preferred solution would be to use short consistently for teams.
 		bool brainOnBoard = orbitedCraft->HasObjectInGroup("Brains");
 		
-		// Find out cost multipliers for metagame, or we end up AI's earning money when their craft return if their nativeCostMultiplier is too low
 		if (g_MetaMan.GameInProgress()) {
 			for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 				if (GetTeamOfPlayer(static_cast<Players>(player)) == orbitedCraftTeam) {
@@ -806,63 +801,33 @@ void Activity::Clear() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Activity::SwitchToPrevOrNextActor(bool nextActor, short player, short team, Actor *skip) {
-		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount || player < Players::PlayerOne || player >= Players::MaxPlayerCount) {
+	void Activity::SwitchToPrevOrNextActor(bool nextActor, short player, short team, const Actor *actorToSkip) {
+		if (team < Teams::TeamOne || team >= Teams::MaxTeamCount || player < Players::PlayerOne || player >= Players::MaxPlayerCount || !m_IsHuman[player]) {
 			return;
 		}
 
-		Actor *prevOrNextActor = nullptr;
-		// Disable human player control of the Actor we're switching from and set the AI controller to handle him
-		if (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player])) {
-			m_ControlledActor[player]->SetControllerMode(Controller::CIM_AI);
-			m_ControlledActor[player]->GetController()->SetDisabled(false);
-			prevOrNextActor = m_ControlledActor[player];
-		} else {
-			m_ControlledActor[player] = nullptr;
-		}
+		Actor *preSwitchActor = m_ControlledActor[player];
+		Actor *actorToSwitchTo = nextActor ? g_MovableMan.GetNextTeamActor(team, preSwitchActor) : g_MovableMan.GetPrevTeamActor(team, preSwitchActor);
+		const Actor *firstAttemptedSwitchActor = nullptr;
 
-		m_ControlledActor[player] = nextActor ? g_MovableMan.GetNextTeamActor(team, m_ControlledActor[player]) : g_MovableMan.GetPrevTeamActor(team, m_ControlledActor[player]);
-
-		Actor *startingActor = m_ControlledActor[player];
-		// If it's the Actor to skip, then skip him OR if it's a non-brain Actor controlled by another player on the same team, then skip him too
-		while ((skip && skip == m_ControlledActor[player]) || (m_ControlledActor[player] && m_ControlledActor[player] != m_Brain[player] && m_ControlledActor[player]->IsPlayerControlled()) || (IsOtherPlayerBrain(m_ControlledActor[player], player))) {
-			m_ControlledActor[player] = nextActor ? g_MovableMan.GetNextTeamActor(team, m_ControlledActor[player]) : g_MovableMan.GetPrevTeamActor(team, m_ControlledActor[player]);
-
-			// Looped around the whole actor chain, and couldn't find an available actor, so switch back to the original
-			if (m_ControlledActor[player] == prevOrNextActor) {
+		bool actorSwitchSucceedOrTriedAllActors = false;
+		while (!actorSwitchSucceedOrTriedAllActors) {
+			if (actorToSwitchTo == preSwitchActor) {
 				g_GUISound.UserErrorSound()->Play(player);
-				m_ControlledActor[player] = prevOrNextActor;
-				break;
-			}
-
-			// If we're gone around without even finding the one we started with (he might be dead), then try to switch to the brain, and if not that, then just the start.
-			if (m_ControlledActor[player] == startingActor) {
+				actorSwitchSucceedOrTriedAllActors = true;
+			} else if (actorToSwitchTo == firstAttemptedSwitchActor) {
 				if (m_Brain[player]) {
-					m_ControlledActor[player] = m_Brain[player];
-				} else if (g_MovableMan.IsActor(startingActor)) {
-					m_ControlledActor[player] = startingActor;
+					SwitchToActor(m_Brain[player]);
 				} else {
 					m_ControlledActor[player] = nullptr;
 				}
-				break;
-			}
-		}
-
-		if (m_ControlledActor[player]) {
-			m_ControlledActor[player]->SetControllerMode(Controller::CIM_PLAYER, player);
-
-			if (m_ControlledActor[player] == m_Brain[player]) {
-				g_GUISound.BrainSwitchSound()->Play(player);
+				actorSwitchSucceedOrTriedAllActors = true;
 			} else {
-				g_GUISound.ActorSwitchSound()->Play(player);
+				actorSwitchSucceedOrTriedAllActors = (actorToSwitchTo != actorToSkip && SwitchToActor(actorToSwitchTo, player, team));
 			}
-
-			// Only play air swoosh if actors are out of sight of each other
-			if (prevOrNextActor && Vector(prevOrNextActor->GetPos() - m_ControlledActor[player]->GetPos()).GetMagnitude() > g_FrameMan.GetResX() / 2) { g_GUISound.CameraTravelSound()->Play(player); }
-
-			ReassignSquadLeader(player, team);
+			firstAttemptedSwitchActor = firstAttemptedSwitchActor ? firstAttemptedSwitchActor : actorToSwitchTo;
+			if (!actorSwitchSucceedOrTriedAllActors) { actorToSwitchTo = nextActor ? g_MovableMan.GetNextTeamActor(team, actorToSwitchTo) : g_MovableMan.GetPrevTeamActor(team, actorToSwitchTo); }
 		}
-		m_ViewState[player] = Normal;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

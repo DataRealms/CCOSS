@@ -33,7 +33,7 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		enum TreadExitReasons {
+		enum ThreadExitReasons {
 			NORMAL = 0,
 			THREAD_FINISH,
 			TOO_EARLY_TO_SEND,
@@ -52,14 +52,14 @@ namespace RTE {
 		/// Makes the NetworkServer object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create();
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a NetworkServer object before deletion from system memory.
 		/// </summary>
-		virtual ~NetworkServer() { Destroy(); }
+		~NetworkServer() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the NetworkServer object.
@@ -154,8 +154,8 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="tc"></param>
-		void RegisterTerrainChange(SceneMan::TerrainChange terrChange);
+		/// <param name="terrainChange"></param>
+		void RegisterTerrainChange(SceneMan::TerrainChange terrainChange);
 #pragma endregion
 
 #pragma region Class Info
@@ -163,7 +163,7 @@ namespace RTE {
 		/// Gets the class name of this object.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:
@@ -241,7 +241,7 @@ namespace RTE {
 		std::mutex m_Mutex[c_MaxClients]; //!<
 
 		//std::mutex m_InputQueueMutex[c_MaxClients];
-		std::queue<MsgInput>m_InputMessages[c_MaxClients]; //!<
+		std::queue<MsgInput> m_InputMessages[c_MaxClients]; //!<
 
 		unsigned char m_SceneID; //!<
 
@@ -445,8 +445,8 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		/// <param name="terrChange"></param>
-		void SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrChange);
+		/// <param name="terrainChange"></param>
+		void SendTerrainChangeMsg(short player, SceneMan::TerrainChange terrainChange);
 
 		/// <summary>
 		/// 

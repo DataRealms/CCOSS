@@ -44,7 +44,6 @@
 #include "GABaseDefense.h"
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
@@ -269,7 +268,7 @@ int SceneEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void SceneEditor::Pause(bool pause)
+void SceneEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;
@@ -287,7 +286,7 @@ void SceneEditor::End()
 
     
 
-    m_ActivityState = OVER;
+    m_ActivityState = ActivityState::Over;
 }
 
 
@@ -386,7 +385,7 @@ void SceneEditor::Update()
             pTestGame->SetCPUTeam(1);
 			pTestGame->SetStartingGold(10000);
 			pTestGame->SetFogOfWarEnabled(false);
-            pTestGame->SetDifficulty(GameActivity::MEDIUMDIFFICULTY);
+            pTestGame->SetDifficulty(DifficultySetting::MediumDifficulty);
             g_ActivityMan.SetStartActivity(pTestGame);
             g_ResetActivity = true;
 
@@ -395,7 +394,7 @@ void SceneEditor::Update()
             RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
             pTestGame->SetTeamOfPlayer(0, 0);
             pTestGame->SetCPUTeam(1);
-            pTestGame->SetDifficulty(GameActivity::MAXDIFFICULTY);
+            pTestGame->SetDifficulty(GameActivity::MaxDifficulty);
             pTestGame->Create();
             g_ActivityMan.SetStartActivity(pTestGame);
             g_ResetActivity = true;*/
@@ -622,7 +621,6 @@ void SceneEditor::Update()
                 if (g_SceneMan.GetScene()->GetPresetName() == "Editor Scene")
                 {
                     g_ActivityMan.PauseActivity();
-                    g_InActivity = false;
                 }
                 // Just do normal cancel of the dialog and go back to editing
                 else

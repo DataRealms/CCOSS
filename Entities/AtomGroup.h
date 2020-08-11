@@ -81,7 +81,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~AtomGroup() { Destroy(true); }
+	~AtomGroup() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -103,15 +103,15 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const AtomGroup &reference);
+	int Create(const AtomGroup &reference);
 
     /// <summary>
     /// Creates an AtomGroup to be identical to another, by deep copy, with the option to only copy atoms that belong to the reference AtomGroup's owner
     /// </summary>
     /// <param name="reference">A reference to the AtomGroup to deep copy</param>
     /// <param name="onlyCopyOwnerAtoms">Whether or not to only copy atoms that belong to the reference AtomGroup's owner directly</param>
-    /// <returns>An error return value signalling success or any particular failure. Anything below 0 is an error signal.</returns>
-    virtual int Create(const AtomGroup & reference, bool onlyCopyOwnerAtoms);
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+	int Create(const AtomGroup & reference, bool onlyCopyOwnerAtoms);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -157,7 +157,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Entity::Reset(); }
+    void Reset() override { Clear(); Entity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -168,7 +168,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -255,16 +255,6 @@ ClassInfoGetters
 
     MOSRotating * GetOwner() const { return m_pOwnerMO; }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          HitsMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this Atom is set to collide with MovableObject:s.
-// Arguments:       None.
-// Return value:    Whether or not this Atom is checking for collisions with MOs or not.
-
-    bool HitsMOs() const { return (*(m_Atoms.begin()))->HitsMOs(); }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetResolution
@@ -324,18 +314,6 @@ ClassInfoGetters
 // Return value:    None.
 
     void SetOwner(MOSRotating *newOwner);
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetToHitMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this AtomGroup will collide with MovableObject:s or not.
-// Arguments:       Whether or not this should check for collisions with MOs or not.
-// Return value:    None.
-
-    void SetToHitMOs(bool hitMOs) { for (std::list<Atom *>::iterator itr = m_Atoms.begin(); itr != m_Atoms.end(); ++itr)
-                                        (*itr)->SetToHitMOs(hitMOs); }
-*/
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -450,10 +428,7 @@ ClassInfoGetters
 // Return value:    The amount of time remaining of the travelTime passed in, in s. This
 //                  may only possibly be a nonzero if callOnBounce or callOnSink are true.
 
-    virtual float Travel(float travelTime,
-                         bool callOnBounce = false,
-                         bool callOnSink = false,
-                         bool scenePreLocked = false);
+	float Travel(float travelTime, bool callOnBounce = false, bool callOnSink = false, bool scenePreLocked = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -484,17 +459,7 @@ ClassInfoGetters
 // Return value:    The amount of time remaining of the travelTime passed in, in s. This
 //                  may only possibly be a nonzero if callOnBounce or callOnSink are true.
 
-    virtual float Travel(Vector &position,
-                         Vector &velocity,
-                         Matrix &rotation,
-                         float &angVel,
-                         bool &didWrap,
-                         Vector &totalImpulse,
-                         float mass,
-                         float travelTime,
-                         bool callOnBounce = false,
-                         bool callOnSink = false,
-                         bool scenePreLocked = false);
+	float Travel(Vector &position, Vector &velocity, Matrix &rotation, float &angVel, bool &didWrap, Vector &totalImpulse, float mass, float travelTime, bool callOnBounce = false, bool callOnSink = false, bool scenePreLocked = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -520,14 +485,7 @@ ClassInfoGetters
 // Return value:    The resulting push impulse force is reported back through here, in\
 //                  kg * m/s.
 
-    virtual Vector PushTravel(Vector &position,
-                              Vector velocity,
-                              float pushForce,
-                              bool &didWrap,
-                              float travelTime,
-                              bool callOnBounce = false,
-                              bool callOnSink = false,
-                              bool scenePreLocked = false);
+	Vector PushTravel(Vector &position, Vector velocity, float pushForce, bool &didWrap, float travelTime, bool callOnBounce = false, bool callOnSink = false, bool scenePreLocked = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -551,13 +509,7 @@ ClassInfoGetters
 //                  the owner, or only have translational effect.
 // Return value:    Whether the LimbPath passed in could start free of terrain or not.
 
-    virtual bool PushAsLimb(const Vector &jointPos,
-                            const Vector &velocity,
-                            const Matrix &rotation,
-                            LimbPath &limbPath,
-                            const float travelTime,
-                            bool *pRestarted = 0,
-                            bool affectRotation = true);
+	bool PushAsLimb(const Vector &jointPos, const Vector &velocity, const Matrix &rotation, LimbPath &limbPath, const float travelTime, bool *pRestarted = 0, bool affectRotation = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -575,13 +527,7 @@ ClassInfoGetters
 //                  The amount of time in s that this Atom is supposed to travel.
 // Return value:    None.
 
-    virtual void FlailAsLimb(const Vector ownerPos,
-                             const Vector jointOffset,
-                             const float limbRadius,
-                             const Vector velocity,
-                             const float angVel,
-                             const float mass,
-                             const float travelTime);
+	void FlailAsLimb(const Vector ownerPos, const Vector jointOffset, const float limbRadius, const Vector velocity, const float angVel, const float mass, const float travelTime);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -592,7 +538,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whether any Atom of this AtomGroup is on top of a terrain pixel.
 
-    virtual bool InTerrain();
+	bool InTerrain();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -603,7 +549,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The ratio of atoms on top of terrain pixels, form 0 to 1.0
 
-    virtual float RatioInTerrain();
+	float RatioInTerrain();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -617,7 +563,7 @@ ClassInfoGetters
 // Return value:    Whether any intersection was successfully resolved. Will return true
 //                  even if there wasn't any intersections to begin with.
 
-    virtual bool ResolveTerrainIntersection(Vector &position, Matrix &rotation, unsigned char strongerThan = 0);
+	bool ResolveTerrainIntersection(Vector &position, Matrix &rotation, unsigned char strongerThan = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -632,7 +578,7 @@ ClassInfoGetters
 // Return value:    Whether all intersections were successfully eliminated in the alloted
 //                  number of attempts.
 
-    virtual bool ResolveMOSIntersection(Vector &position, Matrix &rotation);
+	bool ResolveMOSIntersection(Vector &position, Matrix &rotation);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -647,10 +593,7 @@ ClassInfoGetters
 //                  The color to draw the atoms' pixels as.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      bool useLimbPos = false,
-                      unsigned char color = 34) const;
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), bool useLimbPos = false, unsigned char color = 34) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

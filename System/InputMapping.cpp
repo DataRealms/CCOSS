@@ -7,7 +7,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void InputMapping::Clear() {
-		m_PresetDesc.clear();
+		m_PresetDescription.clear();
 		m_KeyMap = 0;
 		m_MouseButtonMap = -1;
 		m_DirectionMapped = false;
@@ -73,7 +73,7 @@ namespace RTE {
 			writer.NewProperty("JoyButtonMap");
 			writer << m_JoyButtonMap;
 		}
-		// Only save direction map if it's enabled
+
 		if (m_DirectionMapped) {
 			writer.NewProperty("StickMap");
 			writer << m_StickMap;

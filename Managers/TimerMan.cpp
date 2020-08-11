@@ -49,24 +49,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	long long TimerMan::GetAbsoulteTime() const {
-		long long ticks;
+	long long TimerMan::GetAbsoluteTime() const {
 		LARGE_INTEGER tickReading;
-
 		QueryPerformanceCounter(&tickReading);
+		long long ticks = tickReading.QuadPart;
 
-		ticks = tickReading.QuadPart;
-
-		ticks *= 1000000;
-		ticks /= m_TicksPerSecond;
-
-		return ticks;
+		return (ticks * 1000000) / m_TicksPerSecond;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TimerMan::ResetTime() {
-		// Set the new starting point
 		LARGE_INTEGER tempLInt;
 		QueryPerformanceCounter(&tempLInt);
 		m_StartTime = tempLInt.QuadPart;

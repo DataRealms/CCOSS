@@ -17,7 +17,7 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a ActivityMan object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate an ActivityMan object in system memory. Create() should be called before using the object.
 		/// </summary>
 		ActivityMan() { Clear(); }
 
@@ -25,14 +25,14 @@ namespace RTE {
 		/// Makes the ActivityMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create() { return 0; }
+		int Create() { return 0; }
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a ActivityMan object before deletion from system memory.
+		/// Destructor method used to clean up an ActivityMan object before deletion from system memory.
 		/// </summary>
-		virtual ~ActivityMan() { Destroy(); }
+		~ActivityMan() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the ActivityMan object.
@@ -66,7 +66,7 @@ namespace RTE {
 		void SetDefaultActivityName(std::string defaultActivityName) { m_DefaultActivityName = defaultActivityName; }
 
 		/// <summary>
-		/// Gets the Activity set to use a copy of for next restart. Ownership is NOT transferred!
+		/// Gets the Activity that will be used in the next restart. Ownership is NOT transferred!
 		/// </summary>
 		/// <returns>The Activity to put into effect next time ResetActivity is called.</returns>
 		Activity * GetStartActivity() const { return m_StartActivity; }
@@ -87,13 +87,13 @@ namespace RTE {
 		/// Indicates whether the game is currently running or not (not editing, over or paused)
 		/// </summary>
 		/// <returns>Whether the game is running or not.</returns>
-		bool ActivityRunning() const { return m_Activity ? m_Activity->Running() : false; }
+		bool ActivityRunning() const { return m_Activity ? m_Activity->IsRunning() : false; }
 
 		/// <summary>
 		/// Indicates whether the game is currently paused or not.
 		/// </summary>
 		/// <returns>Whether the game is paused or not.</returns>
-		bool ActivityPaused() const { return m_Activity ? m_Activity->Paused() : true; }
+		bool ActivityPaused() const { return m_Activity ? m_Activity->IsPaused() : true; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -108,12 +108,12 @@ namespace RTE {
 		/// Officially gets and starts the Activity described.
 		/// </summary>
 		/// <param name="className">The class name of the Activity to start.</param>
-		/// <param name="instanceName">The preset name of the Activity to start.</param>
+		/// <param name="presetName">The PresetName of the Activity to start.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int StartActivity(std::string className, std::string instanceName);
+		int StartActivity(std::string className, std::string presetName);
 
 		/// <summary>
-		/// Pauses and unpauses the game.
+		/// Pauses/unpauses the game and saving/resuming in-game music if possible, or queuing default music if not.
 		/// </summary>
 		/// <param name="pause">Whether to pause the game or not.</param>
 		void PauseActivity(bool pause = true);
@@ -145,7 +145,7 @@ namespace RTE {
 		/// Gets the class name of this object.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:

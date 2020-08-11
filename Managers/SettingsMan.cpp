@@ -233,7 +233,7 @@ namespace RTE {
 			EnableScript(reader.ReadPropValue());
 		} else if (propName == "MouseSensitivity") {
 			g_UInputMan.ReadProperty(propName, reader);
-		} else if (propName == "P1Scheme" || propName == "P2Scheme" || propName == "P3Scheme" || propName == "P4Scheme") {
+		} else if (propName == "Player1Scheme" || propName == "Player2Scheme" || propName == "Player3Scheme" || propName == "Player4Scheme") {
 			g_UInputMan.ReadProperty(propName, reader);
 		} else {
 			return Serializable::ReadProperty(propName, reader);

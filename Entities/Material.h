@@ -42,7 +42,7 @@ namespace RTE {
 		/// <summary>
 		/// Resets the entire Material, including its inherited members, to it's default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); Entity::Reset(); }
+		void Reset() override { Clear(); Entity::Reset(); }
 #pragma endregion
 
 #pragma region Getters and Setters

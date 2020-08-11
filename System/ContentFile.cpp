@@ -47,7 +47,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ContentFile::FreeAllLoaded() {
-		for (int depth = Eight; depth < BitDepthCount; ++depth) {
+		for (int depth = BitDepths::Eight; depth < BitDepths::BitDepthCount; ++depth) {
 			for (const std::pair<std::string, BITMAP *> &bitmap : s_LoadedBitmaps[depth]){
 				destroy_bitmap(bitmap.second);
 			}
@@ -103,7 +103,7 @@ namespace RTE {
 		BITMAP *returnBitmap = 0;
 
 		// Determine the bit depth this bitmap will be loaded as
-		int bitDepth = conversionMode == COLORCONV_8_TO_32 ? ThirtyTwo : Eight;
+		int bitDepth = conversionMode == COLORCONV_8_TO_32 ? BitDepths::ThirtyTwo : BitDepths::Eight;
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data. Otherwise, load it
 		std::map<std::string, BITMAP *>::iterator itr = s_LoadedBitmaps[bitDepth].find(m_DataPath);
@@ -221,7 +221,7 @@ namespace RTE {
 			returnSample = (*itr).second;
 		} else {
 			int separatorPos = m_DataPath.rfind('#'); // Used for handling separators between the datafile name and the object name in .dat datafiles. NOTE: Not currently used
-			long fileSize;
+			unsigned long long fileSize;
 			char *rawData = 0;
 
 			if (separatorPos == m_DataPath.length()) {
@@ -231,7 +231,7 @@ namespace RTE {
 				return returnSample;
 			} else if (separatorPos == -1) {
 				// Open the file, allocate space for it, read it and load it in as a Sound object
-				fileSize = file_size(m_DataPath.c_str());
+				fileSize = file_size_ex(m_DataPath.c_str());
 				PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
 
 				if (!pFile || fileSize <= 0) {

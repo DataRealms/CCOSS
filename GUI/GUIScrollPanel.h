@@ -88,7 +88,7 @@ public:
 // Description:     Called when the panel has been destroyed.
 // Arguments:       None.
 
-    void Destroy(void);    
+    void Destroy(); 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ public:
 // Description:     Draws the panel
 // Arguments:       Screen class
 
-    void Draw(GUIScreen *Screen);
+    void Draw(GUIScreen *Screen) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -115,7 +115,7 @@ public:
 // Description:     Called when the mouse goes down on the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    void OnMouseDown(int X, int Y, int Buttons, int Modifier);
+    void OnMouseDown(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +124,7 @@ public:
 // Description:     Called when the mouse goes up on the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    void OnMouseUp(int X, int Y, int Buttons, int Modifier);
+    void OnMouseUp(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -133,7 +133,7 @@ public:
 // Description:     Called when the mouse moves (over the panel, or when captured).
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    void OnMouseMove(int X, int Y, int Buttons, int Modifier);
+    void OnMouseMove(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +142,7 @@ public:
 // Description:     Called when the mouse is hovering over the panel (has to be enabled)
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    void OnMouseHover(int X, int Y, int Buttons, int Modifier);
+    void OnMouseHover(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +169,7 @@ public:
 // Description:     Gets the minimum value for the scrollpanel
 // Arguments:       None.
 
-    int GetMinimum(void);
+    int GetMinimum();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -187,7 +187,7 @@ public:
 // Description:     Gets the maximum value for the scrollpanel
 // Arguments:       None.
 
-    int GetMaximum(void);
+    int GetMaximum();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -205,7 +205,7 @@ public:
 // Description:     Gets the current value of the scrollpanel.
 // Arguments:       None.
 
-    int GetValue(void);
+    int GetValue();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +223,7 @@ public:
 // Description:     Gets the size of the page.
 // Arguments:       None.
 
-    int GetPageSize(void);
+    int GetPageSize();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -241,7 +241,7 @@ public:
 // Description:     Gets the orientation of the scrollpanel.
 // Arguments:       None.
 
-    int GetOrientation(void);
+    int GetOrientation();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -259,7 +259,7 @@ public:
 // Description:     Gets the small change value.
 // Arguments:       None.
 
-    int GetSmallChange(void);
+    int GetSmallChange();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -322,7 +322,7 @@ private:
 // Description:     Build the background.
 // Arguments:       None.
 
-    void BuildBackground(void);
+    void BuildBackground();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -340,7 +340,7 @@ private:
 // Description:     Calculate the knob size and position.
 // Arguments:       None.
 
-    void CalculateKnob(void);
+    void CalculateKnob();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

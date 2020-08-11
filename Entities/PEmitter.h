@@ -63,7 +63,7 @@ public:
 	//                  from system memory.
 	// Arguments:       None.
 
-	virtual ~PEmitter() { Destroy(true); }
+	~PEmitter() override { Destroy(true); }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@ public:
 	// Return value:    An error return value signaling sucess or any particular failure.
 	//                  Anything below 0 is an error signal.
 
-	virtual int Create();
+	int Create() override;
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ public:
 	// Arguments:       None.
 	// Return value:    None.
 
-	virtual void Reset() { Clear(); MOSParticle::Reset(); }
+	void Reset() override { Clear(); MOSParticle::Reset(); }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ public:
 	//                  to destroy all inherited members also.
 	// Return value:    None.
 
-	virtual void Destroy(bool notInherited = false);
+	void Destroy(bool notInherited = false) override;
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -437,21 +437,8 @@ public:
 	// Arguments:       None.
 	// Return value:    None.
 
-	virtual void ResetAllTimers() { m_BurstTimer.Reset(); m_LastEmitTmr.Reset(); }
+	void ResetAllTimers() override { m_BurstTimer.Reset(); m_LastEmitTmr.Reset(); }
 
-	/*
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GibThis
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-	//                  pieces in its place.
-	// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-	//					The internal blast impulse which will push the gibs away from the center.
-	//                  A pointer to an MO which the gibs shuold not be colliding with!
-	// Return value:    None.
-
-	virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
-	*/
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Virtual method:  Update
@@ -460,7 +447,7 @@ public:
 	// Arguments:       None.
 	// Return value:    None.
 
-	virtual void Update();
+	void Update() override;
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -475,10 +462,7 @@ public:
 	//                  indicator arrows or hovering HUD text and so on.
 	// Return value:    None.
 
-	virtual void Draw(BITMAP *pTargetBitmap,
-		const Vector &targetPos = Vector(),
-		DrawMode mode = g_DrawColor,
-		bool onlyPhysical = false) const;
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Protected member variable and method declarations
@@ -558,8 +542,8 @@ private:
 
 
 	// Disallow the use of some implicit methods.
-	PEmitter(const PEmitter &reference);
-	PEmitter & operator=(const PEmitter &rhs);
+	PEmitter(const PEmitter &reference) {}
+	PEmitter & operator=(const PEmitter &rhs) {}
 
 };
 

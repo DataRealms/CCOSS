@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Implemented Lua Just-In-Time compilation (MoonJIT 2.2.0).
+
 - New `Settings.ini` property `LoadingScreenReportPrecision = intValue` to control how accurately the module loading progress reports what line is currently being read.  
 	Only relevant when `DisableLoadingScreen = 0`. Default value is 100, lower values increase loading times (especially if set to 1).  
 	This should be used for debugging where you need to pinpoint the exact line that is crashing and the crash message isn't helping or doesn't exist at all.
@@ -83,6 +85,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added new lua function `UInputMan:GetInputDevice(playerNum)` to get a number value representing the input device used by the specified player. Should be useful for making custom key bindings compatible with different input devices.
 
+- Scripts can now be attached to `ACrab.Turret` and `Leg`. Additionally, a binding to get the Foot of a Leg has been added.
+
 - Added H/V flipping capabilities to Bitmap primitives.  New bindings with arguments for flip are:  
 	`PrimitiveMan:DrawBitmapPrimitive(pos, entity, rotAngle, frame, bool hFlipped, bool vFlipped)`  
 	`PrimitiveMan:DrawBitmapPrimitive(player, pos, entity, rotAngle, frame, bool hFlipped, bool vFlipped)`  
@@ -124,6 +128,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	```
 
 ### Changed
+
+- Updated game framework from Allegro 4.2.3.1 to Allegro 4.4.3.1.
+
+- Major cleanup and reformatting in the `Managers` folder.
 
 - Lua error reporting has been improved so script errors will always show filename and line number.
 
@@ -174,6 +182,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - ComboBoxes (dropdown lists) can now also be closed by clicking on their top part.
 
+- `Activity:IsPlayerTeam` renamed to `Activity:IsHumanTeam`.
+
+- Screenshot functionality changed: ([Issue #162](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/162))  
+	The `PrintScreen` button will now take a single screenshot on key release and will not take more until the key is pressed and released again.  
+	The `Ctrl+S` key combination is unchanged and will take a single screenshot every frame while the keys are held.  
+	The `Ctrl+W` and `Alt+W` key combinations will now take a single WorldDump/ScenePreview on `W` key release (while `Ctrl/Alt` are still held) and will not take more until the key is pressed and released again.
+	
+	Additionally, all screenshots (excluding abortscreen) will now be saved into a `_Screenshots` folder (`_` so it's on top and not hiding between module folders) to avoid polluting the root directory. ([Issue #163](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/163))  
+	This folder will be created automatically after modules are loaded if it is missing.
+	
+- Controller deadzone setting ignores more input. Previously setting it to the maximum was just enough to eliminate stick drift.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.
@@ -192,6 +212,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Fixed issue with double clicks and missing clicks in menus (anything that uses AllegroInput).
 
+- Fixed issue where OnPieMenu function wasn't working for `AHuman` equipped items, and made it work for `BGArm` equipped items as well as `FGArm` ones.
+
+- The "woosh" sound played when switching actors from a distance will now take scene wrapping into account. Additionally, attempting to switch to previous or next actor with only one actor will play the more correct "error" sound.
+
 ### Removed
 
 - Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.
@@ -203,6 +227,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Removed `ConsoleMan.ForceVisibility` and `ConsoleMan.ScreenSize` lua bindings.
 
 - Removed `ActivityMan.PlayerCount` and `ActivityMan.TeamCount` setters lua bindings (obsolete and did nothing).
+
+- Removed `Activity` properties `TeamCount` and `PlayerCount`. These are handled internally and do nothing when set in ini.
+
+- Removed `Activity` property `FundsOfTeam#`, use `Team#Funds` instead.
 
 ***
 

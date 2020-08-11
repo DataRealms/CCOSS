@@ -113,7 +113,7 @@ public:
 // Description:     Called when the panel has been destroyed.
 // Arguments:       None.
 
-    void Destroy(void);    
+    void Destroy(); 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +135,7 @@ public:
 // Description:     Clears the liost.
 // Arguments:       None.
 
-    void ClearList(void);
+    void ClearList();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +153,7 @@ public:
 // Description:     Draws the panel
 // Arguments:       Screen class
 
-    void Draw(GUIScreen *Screen);
+    void Draw(GUIScreen *Screen) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -162,7 +162,7 @@ public:
 // Description:     Called when the mouse goes down on the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    virtual void OnMouseDown(int X, int Y, int Buttons, int Modifier);
+	void OnMouseDown(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -171,7 +171,7 @@ public:
 // Description:     Called when the mouse goes up on the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    virtual void OnMouseUp(int X, int Y, int Buttons, int Modifier);
+	void OnMouseUp(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +180,7 @@ public:
 // Description:     Called when the mouse moves (over the panel, or when captured).
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    virtual void OnMouseMove(int X, int Y, int Buttons, int Modifier);
+	void OnMouseMove(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -189,7 +189,7 @@ public:
 // Description:     Called when the mouse enters the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    virtual void OnMouseEnter(int X, int Y, int Buttons, int Modifier);
+	void OnMouseEnter(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -198,7 +198,7 @@ public:
 // Description:     Called when the mouse leaves the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    virtual void OnMouseLeave(int X, int Y, int Buttons, int Modifier);
+	void OnMouseLeave(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -207,7 +207,7 @@ public:
 // Description:     Called when the mouse has double-clicked on the pane.
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    virtual void OnDoubleClick(int X, int Y, int Buttons, int Modifier);
+	void OnDoubleClick(int X, int Y, int Buttons, int Modifier) override;
 
 
 	/// <summary>
@@ -226,7 +226,7 @@ public:
 // Description:     Called when a key is pressed (OnDown & repeating).
 // Arguments:       KeyCode, Modifier.
 
-    virtual void OnKeyPress(int KeyCode, int Modifier);
+	void OnKeyPress(int KeyCode, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -235,7 +235,7 @@ public:
 // Description:     Called when a key goes down.
 // Arguments:       KeyCode, Modifier.
 
-    virtual void OnKeyDown(int KeyCode, int Modifier);
+	void OnKeyDown(int KeyCode, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -255,7 +255,7 @@ public:
 // Description:     Called when the panel gains focus.
 // Arguments:       None.
 
-    virtual void OnGainFocus(void);
+	void OnGainFocus() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -264,7 +264,7 @@ public:
 // Description:     Called when the panel looses focus.
 // Arguments:       None.
 
-    virtual void OnLoseFocus(void);
+	void OnLoseFocus() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -273,7 +273,7 @@ public:
 // Description:     Called when receiving a signal.
 // Arguments:       Signal source, Signal code, Signal data.
 
-    void ReceiveSignal(GUIPanel *Source, int Code, int Data);
+    void ReceiveSignal(GUIPanel *Source, int Code, int Data) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -282,7 +282,7 @@ public:
 // Description:     Locks the control from updating every time a new item is added.
 // Arguments:       None.
 
-    void BeginUpdate(void);
+    void BeginUpdate();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -292,7 +292,7 @@ public:
 //                  Will automatically update the control.
 // Arguments:       None.
 
-    void EndUpdate(void);
+    void EndUpdate();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -310,7 +310,7 @@ public:
 // Description:     Gets the multi-selection value.
 // Arguments:       None.
 
-    bool GetMultiSelect(void);
+    bool GetMultiSelect();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -328,7 +328,7 @@ public:
 // Description:     Gets the selected (or first in the selected list) item.
 // Arguments:       None.
 
-    Item *GetSelected(void);
+    Item *GetSelected();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -337,7 +337,7 @@ public:
 // Description:     Gets the item list.
 // Arguments:       None.
 
-    std::vector<Item *> *GetItemList(void);
+    std::vector<Item *> *GetItemList();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -406,7 +406,7 @@ public:
 // Arguments:       None.
 // Returns:         Index, or -1 if there is no items selected.
 
-    int GetSelectedIndex(void);
+    int GetSelectedIndex();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -435,7 +435,7 @@ public:
 // Description:     Gets the selection list.
 // Arguments:       None.
 
-    std::vector<Item *>    *GetSelectionList(void);
+    std::vector<Item *>    *GetSelectionList();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -453,7 +453,7 @@ public:
 // Description:     Adjusts the size of the panel.
 // Arguments:       Width, Height.
 
-    void SetSize(int Width, int Height);
+    void SetSize(int Width, int Height) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -552,7 +552,7 @@ private:
 // Description:     Build the drawing bitmap.
 // Arguments:       None.
 
-    void BuildDrawBitmap(void);
+    void BuildDrawBitmap();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -561,7 +561,7 @@ private:
 // Description:     Adjusts the scrollbars.
 // Arguments:       None.
 
-    void AdjustScrollbars(void);
+    void AdjustScrollbars();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

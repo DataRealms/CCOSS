@@ -28,20 +28,20 @@ namespace RTE {
 		/// </summary>
 		/// <param name="reference">A reference to the Gib to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const Gib &reference);
+		int Create(const Gib &reference);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a Gib object before deletion from system memory.
 		/// </summary>
-		virtual ~Gib() { Destroy(); }
+		~Gib() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the Gib object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false) { Clear(); }
+		void Destroy() { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -100,7 +100,7 @@ namespace RTE {
 		/// Gets the class name of this Entity.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return m_sClassName; }
+		const std::string & GetClassName() const override { return m_sClassName; }
 #pragma endregion
 
 	protected:

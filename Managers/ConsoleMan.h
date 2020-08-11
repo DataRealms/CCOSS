@@ -31,7 +31,7 @@ namespace RTE {
 		/// Makes the ConsoleMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create();
 #pragma endregion
 
 #pragma region Destruction
@@ -51,7 +51,7 @@ namespace RTE {
 		/// Reports whether the console is enabled or not.
 		/// </summary>
 		/// <returns>Whether the console is enabled or not.</returns>
-		bool IsEnabled() const { return m_ConsoleState == ENABLED || m_ConsoleState == ENABLING; }
+		bool IsEnabled() const { return m_ConsoleState == ConsoleState::Enabled || m_ConsoleState == ConsoleState::Enabling; }
 
 		/// <summary>
 		/// Enables or disables the console.
@@ -126,7 +126,7 @@ namespace RTE {
 		/// Gets the class name of this object.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:
@@ -134,9 +134,9 @@ namespace RTE {
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		/// <summary>
-		/// //!< Enumeration for console states when enabling/disabling the console. NOTE: This can't be lower down because m_ConsoleState relies on this definition.
+		/// Enumeration for console states when enabling/disabling the console. NOTE: This can't be lower down because m_ConsoleState relies on this definition.
 		/// </summary>
-		enum ConsoleState { ENABLING = 0, ENABLED, DISABLING, DISABLED };
+		enum ConsoleState { Enabling = 0, Enabled, Disabling, Disabled };
 
 		ConsoleState m_ConsoleState; //!< Current state of the console.
 		bool m_ReadOnly; //!< Read-only mode where console text input is disabled and controller input should be preserved.
@@ -144,16 +144,16 @@ namespace RTE {
 
 		GUIScreen *m_GUIScreen; //!< GUI Screen for use by the in-game GUI.
 		GUIInput *m_GUIInput; //!< GUI Input controller.
-		GUIControlManager *m_GUIController; //!< Manager of the console GUI elements.
+		GUIControlManager *m_GUIControlManager; //!< Manager of the console GUI elements.
 		GUICollectionBox *m_ParentBox; //!< Collection box of the console GUI.
 		GUILabel *m_ConsoleText; //!< The label which presents the console output.
-		GUITextBox *m_InputTextBox; //!< The Textbox which the user types in the edited line.
+		GUITextBox *m_InputTextBox; //!< The TextBox which the user types in the edited line.
 
 		std::deque<std::string> m_InputLog; //!< Log of previously entered input strings.
 		std::deque<std::string>::iterator m_InputLogPosition; //!< Iterator to the current position in the log.
 
 		std::string m_LastInputString; //!< Place to save the last worked on input string before deactivating the console.
-		short m_LastLogMove; //!< The lat direction the log marker was moved. Needed so that changing directions won't need double tapping.
+		short m_LastLogMove; //!< The last direction the log marker was moved. Needed so that changing directions won't need double tapping.
 
 	private:
 
@@ -164,25 +164,26 @@ namespace RTE {
 
 #pragma region Update Breakdown
 		/// <summary>
-		/// Executes the input string when Enter is pressed and clears the textbox. This is called from Update().
-		/// </summary>
-		void FeedString();
-
-		/// <summary>
-		/// Executes multiple input strings that were pasted into the console. This is called from Update().
-		/// </summary>
-		void FeedMultipleStrings();
-
-		/// <summary>
 		/// Console open/close animation handling and GUI element enabling/disabling. This is called from Update().
 		/// </summary>
 		void ConsoleOpenClose();
+
+		/// <summary>
+		/// Executes the string currently in the console textbox or multiple strings if a newline character is found.
+		/// The input string is saved to the input log if it's different from the previous string. This is called from Update().
+		/// </summary>
+		void FeedString();
 
 		/// <summary>
 		/// Loads a previously entered console string from the input log when pressing up or down. This is called from Update().
 		/// </summary>
 		/// <param name="nextEntry">Whether to load the next entry in the log (true) or the previous (false).</param>
 		void LoadLoggedInput(bool nextEntry);
+
+		/// <summary>
+		/// Removes any grave accents (`) that are pasted or typed into the textbox by opening/closing it. This is called from Update().
+		/// </summary>
+		void RemoveGraveAccents();
 #pragma endregion
 
 		/// <summary>

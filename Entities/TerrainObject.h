@@ -68,7 +68,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~TerrainObject() { Destroy(true); }
+	~TerrainObject() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ ClassInfoGetters
 //                  Anything below 0 is an error signal.
 
 // TODO: streamline interface")
-    virtual int Create(ContentFile *pBitmapFile,
+	int Create(ContentFile *pBitmapFile,
                        bool drawTrans,
                        Vector offset,
                        bool wrapX,
@@ -133,7 +133,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); SceneObject::Reset(); }
+    void Reset() override { Clear(); SceneObject::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -144,7 +144,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +155,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A Vector describing the bitmap offset, in pixels.
 
-    virtual const Vector & GetBitmapOffset() const { return m_BitmapOffset; }
+	const Vector & GetBitmapOffset() const { return m_BitmapOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -233,7 +233,7 @@ ClassInfoGetters
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    virtual BITMAP * GetGraphicalIcon();
+    BITMAP * GetGraphicalIcon() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -254,7 +254,7 @@ ClassInfoGetters
 // Arguments:       The assigned team number.
 // Return value:    None.
 
-    virtual void SetTeam(int team);
+	void SetTeam(int team) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -265,7 +265,7 @@ ClassInfoGetters
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+	bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -280,10 +280,7 @@ ClassInfoGetters
 //                  like indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -294,7 +291,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Returns true if this module should be drawn as part of terrain on minimap.
 
-	virtual bool const GetDisplayAsTerrain() { return m_DisplayAsTerrain; }
+	bool const GetDisplayAsTerrain() { return m_DisplayAsTerrain; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -343,8 +340,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    TerrainObject(const TerrainObject &reference) { RTEAbort("Tried to use forbidden method"); }
-    void operator=(const TerrainObject &rhs) { RTEAbort("Tried to use forbidden method"); }
+    TerrainObject(const TerrainObject &reference) {}
+    void operator=(const TerrainObject &rhs) {}
 
 };
 

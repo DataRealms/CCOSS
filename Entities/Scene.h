@@ -103,7 +103,7 @@ public:
     // Return value:    An error return value signaling sucess or any particular failure.
     //                  Anything below 0 is an error signal.
 
-        virtual int Create();
+		int Create() override;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +114,7 @@ public:
     // Return value:    An error return value signaling sucess or any particular failure.
     //                  Anything below 0 is an error signal.
 
-        virtual int Create(const Area &reference);
+		int Create(const Area &reference);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -125,7 +125,7 @@ public:
     // Arguments:       None.
     // Return value:    None.
 
-        virtual void Reset() { Clear(); }
+        void Reset() override { Clear(); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +135,7 @@ public:
     // Arguments:       None.
     // Return value:    A string with the friendly-formatted type name of this object.
 
-        virtual const std::string & GetClassName() const { return m_sClassName; }
+		const std::string & GetClassName() const override { return m_sClassName; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ public:
     // Arguments:       The Box to add. A copy will be made and added.
     // Return value:    Whether the Box was successfully added or not.
 
-        virtual bool AddBox(const Box &newBox);
+		bool AddBox(const Box &newBox);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ public:
     // Arguments:       None.
     // Return value:    Whether this Area actually covers any area.
 
-        virtual bool HasNoArea() const;
+		bool HasNoArea() const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -166,7 +166,7 @@ public:
     // Arguments:       The point to check if it's inside the Area, in absolute scene coordinates.
     // Return value:    Whether the point is inside any of this Area's Box:es.
 
-        virtual bool IsInside(const Vector &point) const;
+		bool IsInside(const Vector &point) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +177,7 @@ public:
     // Arguments:       The x coord to check if it's inside the Area, in absolute scene units.
     // Return value:    Whether the point is inside any of this Area's Box:es in the X axis.
 
-        virtual bool IsInsideX(float pointX) const;
+		bool IsInsideX(float pointX) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +188,7 @@ public:
     // Arguments:       The x coord to check if it's inside the Area, in absolute scene units.
     // Return value:    Whether the point is inside any of this Area's Box:es in the Y axis.
 
-        virtual bool IsInsideY(float pointY) const;
+		bool IsInsideY(float pointY) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -201,7 +201,7 @@ public:
     //                  negative dir, 0 means can look in both directions.
     // Return value:    Whether the point was moved at all to get inside this' x-space.
 
-        virtual bool MovePointInsideX(float &pointX, int direction = 0) const;
+		bool MovePointInsideX(float &pointX, int direction = 0) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +212,7 @@ public:
     // Return value:    Pointer to the first Box which was found to contain the point. 0 if
     //                  none was found. OWNERSHIP IS NOT TRANSFERRED!
 
-        virtual Box * GetBoxInside(const Vector &point);
+		Box * GetBoxInside(const Vector &point);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +222,7 @@ public:
     // Arguments:       The point to check for Box collision, in absolute scene coordinates.
     // Return value:    Copy of the Box that was removed. Will be  NoArea Box if none was found.
 
-        virtual Box RemoveBoxInside(const Vector &point);
+		Box RemoveBoxInside(const Vector &point);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -233,7 +233,7 @@ public:
     // Return value:    A center point of this area, can be outside the actual area though, if
     //                  pulled apart by two separate boxes, for example. 0,0 if this has no Area
 
-        virtual Vector GetCenterPoint() const;
+		Vector GetCenterPoint() const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -243,7 +243,7 @@ public:
     // Arguments:       None.
     // Return value:    A random point that is within this Area. 0,0 if this has no Area
 
-        virtual Vector GetRandomPoint() const;
+		Vector GetRandomPoint() const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -253,7 +253,7 @@ public:
     // Arguments:       None.
     // Return value:    The name used to ID this Area.
 
-        virtual std::string GetName() const { return m_Name; }
+		std::string GetName() const { return m_Name; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -326,19 +326,8 @@ EntityAllocation(Scene)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Scene() { Destroy(true); }
+	~Scene() override { Destroy(true); }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Scene object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Create
@@ -348,7 +337,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(SLTerrain *pNewTerrain);
+	int Create(SLTerrain *pNewTerrain);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -376,7 +365,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadData(bool placeObjects = true, bool initPathfinding = true, bool placeUnits = true);
+	int LoadData(bool placeObjects = true, bool initPathfinding = true, bool placeUnits = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -387,7 +376,7 @@ EntityAllocation(Scene)
 // Arguments:       None.
 // Return value:    None.
 
-	virtual int ExpandAIPlanAssemblySchemes();
+	int ExpandAIPlanAssemblySchemes();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -399,7 +388,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int SaveData(std::string pathBase);
+	int SaveData(std::string pathBase);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -410,7 +399,7 @@ EntityAllocation(Scene)
 // Arguments:       The full filepath the where to save the Bitmap data.
 // Return value:    None.
 
-	virtual int SavePreview(string bitmapPath);
+	int SavePreview(string bitmapPath);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DrawPlacedObjectsPreview
@@ -420,7 +409,7 @@ EntityAllocation(Scene)
 //					scaled map offset, scale.
 // Return value:    None.
 
-	virtual void DrawPlacedObjectsPreview(BITMAP * pBitmap, int set, int width, int height, int xOffset, int yOffset, float scale);
+	void DrawPlacedObjectsPreview(BITMAP * pBitmap, int set, int width, int height, int xOffset, int yOffset, float scale);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +420,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int ClearData();
+	int ClearData();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -442,7 +431,7 @@ EntityAllocation(Scene)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Entity::Reset(); }
+    void Reset() override { Clear(); Entity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -453,7 +442,7 @@ EntityAllocation(Scene)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -465,7 +454,7 @@ EntityAllocation(Scene)
 // Return value:    Whether the migration was successful. If you tried to migrate to the
 //                  same module it already was in, this would return false.
 
-    virtual bool MigrateToModule(int whichModule);
+	bool MigrateToModule(int whichModule) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -648,7 +637,7 @@ EntityAllocation(Scene)
 //                  LoadData is called on this.
 // Return value:    None.
 
-    void FillUnseenLayer(Vector pixelSize, int team = Activity::TEAM_1, bool createNow = true);
+    void FillUnseenLayer(Vector pixelSize, int team = Activity::TeamOne, bool createNow = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -659,7 +648,7 @@ EntityAllocation(Scene)
 //                  Which team to get the unseen layer for.
 // Return value:    None.
 
-    void SetUnseenLayer(SceneLayer *pNewLayer, int team = Activity::TEAM_1);
+    void SetUnseenLayer(SceneLayer *pNewLayer, int team = Activity::TeamOne);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -670,7 +659,7 @@ EntityAllocation(Scene)
 // Return value:    A pointer to the SceneLayer representing what hasn't been seen by a
 //                  specific team yet. Ownership is NOT transferred!
 
-    SceneLayer * GetUnseenLayer(int team = Activity::TEAM_1) const { return team != Activity::NOTEAM ? m_apUnseenLayer[team] : 0; }
+    SceneLayer * GetUnseenLayer(int team = Activity::TeamOne) const { return team != Activity::NoTeam ? m_apUnseenLayer[team] : 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -680,7 +669,7 @@ EntityAllocation(Scene)
 // Arguments:       Which team to get the unseen layer for.
 // Return value:    The list of pixel coordinates in the unseen layer's scale.
 
-    std::list<Vector> & GetSeenPixels(int team = Activity::TEAM_1) { return m_SeenPixels[team]; }
+    std::list<Vector> & GetSeenPixels(int team = Activity::TeamOne) { return m_SeenPixels[team]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -690,7 +679,7 @@ EntityAllocation(Scene)
 // Arguments:       Which team to get the unseen layer for.
 // Return value:    None.
 
-    void ClearSeenPixels(int team = Activity::TEAM_1);
+    void ClearSeenPixels(int team = Activity::TeamOne);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -704,7 +693,7 @@ EntityAllocation(Scene)
 //                  Which team's unseen layer to check the pixel on.
 // Return value:    Whether the pixel was deemed to be orphan and thus cleaned up.
 
-    bool CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom = NODIR, int team = Activity::TEAM_1);
+    bool CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom = NODIR, int team = Activity::TeamOne);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -798,7 +787,7 @@ EntityAllocation(Scene)
 // Description:     Sucks up all the Actors and Devices currently active in MovableMan and
 //                  puts them into this' list of objects to place on next load.
 //                  Should be done AFTER RetrieveResidentBrains!
-// Arguments:       The team to only retrieve Actors of. If NOTEAM, then all will be grabbed.
+// Arguments:       The team to only retrieve Actors of. If NoTeam, then all will be grabbed.
 //                  Whether to not get any brains at all.
 // Return value:    How many objects were found knocking about in the world, and stored.
 
@@ -1242,7 +1231,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Arguments:       None.
 // Return value:    The number of waypoints in the ScenePath.
 
-    virtual int GetScenePathSize() const { return m_ScenePath.size(); }
+	int GetScenePathSize() const { return m_ScenePath.size(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1290,7 +1279,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Arguments:       None.
 // Return value:    None.
 
-    void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1348,12 +1337,12 @@ protected:
     // Total income this place generates per Metagame round for its owner team
     float m_RoundIncome;
     // The special placed brain actors of each player that inhabit this Scene, OWNED here
-    SceneObject *m_ResidentBrains[Activity::MAXPLAYERCOUNT];
+    SceneObject *m_ResidentBrains[Players::MaxPlayerCount];
     // Budget in oz this place is allocated per player for a metagame round for building (applying) blueprint objects.
-    float m_BuildBudget[Activity::MAXPLAYERCOUNT];
+    float m_BuildBudget[Players::MaxPlayerCount];
     // Budget in ratio of the player for a metagame round. This is used to re-set the BuildBudget to match the ratio
     // that a player budgeted to this site in the previous turn.
-    float m_BuildBudgetRatio[Activity::MAXPLAYERCOUNT];
+    float m_BuildBudgetRatio[Players::MaxPlayerCount];
     // Whether this should be automatically designed by the AI Plan even if it's owned by a human player
     bool m_AutoDesigned;
     // The total amount of gold (in oz) that has been invested in the defenses of this site, by all teams
@@ -1372,15 +1361,15 @@ protected:
     // List of background layers, first is the closest to the terrain, last is closest to the back
     std::list<SceneLayer *> m_BackLayerList;
     // Dimensions of the pixels of the unseen layers, when they are dynamically generated. If 0, the layer was not generated
-    Vector m_UnseenPixelSize[Activity::MAXTEAMCOUNT];
+    Vector m_UnseenPixelSize[Activity::MaxTeamCount];
     // Layers representing the unknown areas for each team
-    SceneLayer *m_apUnseenLayer[Activity::MAXTEAMCOUNT];
+    SceneLayer *m_apUnseenLayer[Activity::MaxTeamCount];
     // Which pixels of the unseen map have just been revealed this frame, in the coordinates of the unseen map
-    std::list<Vector> m_SeenPixels[Activity::MAXTEAMCOUNT];
+    std::list<Vector> m_SeenPixels[Activity::MaxTeamCount];
     // Pixels on the unseen map deemed to be orphans and cleaned up, will be moved to seen pixels next update
-    std::list<Vector> m_CleanedPixels[Activity::MAXTEAMCOUNT];
+    std::list<Vector> m_CleanedPixels[Activity::MaxTeamCount];
     // Whether this Scene is scheduled to be orbitally scanned by any team
-    bool m_ScanScheduled[Activity::MAXTEAMCOUNT];
+    bool m_ScanScheduled[Activity::MaxTeamCount];
 
     // List of all the specified Area:s of the scene
     std::list<Area> m_AreaList;
@@ -1422,8 +1411,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Scene(const Scene &reference) { RTEAbort("Tried to use forbidden method"); }
-    void operator=(const Scene &rhs) { RTEAbort("Tried to use forbidden method"); }
+    Scene(const Scene &reference) {}
+    void operator=(const Scene &rhs) {}
 
 };
 

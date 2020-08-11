@@ -6,20 +6,15 @@
 #include "SettingsMan.h"
 #include "PresetMan.h"
 #include "FrameMan.h"
-#include "UInputMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUICollectionBox.h"
-#include "GUI/GUIProgressBar.h"
 #include "GUI/GUIListBox.h"
-#include "GUI/GUILabel.h"
 #include "GUI/AllegroScreen.h"
 #include "GUI/AllegroBitmap.h"
 #include "GUI/AllegroInput.h"
 
 #include "unzip.h"
-
-extern volatile bool g_Quit;
 
 namespace RTE {
 
@@ -121,7 +116,6 @@ namespace RTE {
 		if (g_System.GetLogToCLI()) { g_System.PrintLoadingToCLI(reportString, newItem); }
 
 		if (g_LoadingGUI.m_ControlManager) {
-			g_UInputMan.Update();
 			if (newItem) {
 				// Write out the last line to the log file before starting a new one
 				if (g_LoadingGUI.m_LoadingLogWriter->WriterOK()) { *g_LoadingGUI.m_LoadingLogWriter << reportString << "\n"; }
@@ -143,31 +137,23 @@ namespace RTE {
 
 				g_FrameMan.FlipFrameBuffers();
 			}
-			// Quit if we're commanded to during loading
-			if (g_Quit) { exit(0); }
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LoadingGUI::LoadDataModules() {
-		// Clear out the PresetMan and all its DataModules
 		g_PresetMan.Destroy();
 		g_PresetMan.Create();
-
-		// Unpack any ".rte.zip" files
-		ExtractArchivedModules();
-		// Load all unpacked modules
+		ExtractZippedModules();
 		g_PresetMan.LoadAllDataModules();
-		// Load the different input device icons. This can't be done during UInputMan::Create() because the icon presets don't exist so we need to do this after modules are loaded.
-		g_UInputMan.LoadDeviceIcons();
 
 		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::ExtractArchivedModules() {
+	void LoadingGUI::ExtractZippedModules() {
 		al_ffblk zippedModuleInfo;
 		unzFile zipFile;
 		for (int result = al_findfirst("*.rte.zip", &zippedModuleInfo, FA_ALL); result == 0; result = al_findnext(&zippedModuleInfo)) {

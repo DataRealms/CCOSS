@@ -43,7 +43,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="filePath">A string defining the path to where the content file itself is located, either within the package file, or directly on the disk.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const char *filePath);
+		int Create(const char *filePath);
 
 		/// <summary>
 		/// Creates a ContentFile to be identical to another, by deep copy.
@@ -57,18 +57,18 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a ContentFile object before deletion from system memory.
 		/// </summary>
-		virtual ~ContentFile() { Destroy(true); }
+		~ContentFile() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the ContentFile object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false) { Clear(); }
+		void Destroy() { Clear(); }
 
 		/// <summary>
 		/// Resets the entire ContentFile, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() { Clear(); }
 
 		/// <summary>
 		/// Frees all loaded data used by all ContentFile instances. This should ONLY be done when quitting the app, or after everything else is completely destroyed.
@@ -88,25 +88,25 @@ namespace RTE {
 		/// Gets the file size of the content file represented by this ContentFile object, in bytes. This should be called AFTER using any of the GetAs methods.
 		/// </summary>
 		/// <returns>A long describing the file size of the content file.</returns>
-		//virtual unsigned long GetDataSize() { if (!m_LoadedData) { GetContent(); } return m_LoadedDataSize; }
+		//unsigned long GetDataSize() { if (!m_LoadedData) { GetContent(); } return m_LoadedDataSize; }
 
 		/// <summary>
 		/// Gets the Allegro DATAFILE type of the DATAFILE represented by this ContentFile.
 		/// </summary>
 		/// <returns>A DATAFILE type as described in the Allegro docs.</returns>
-		//virtual int GetDataType() { if (!m_DataFile) { GetContent(); } return m_DataFile->type; }
+		//int GetDataType() { if (!m_DataFile) { GetContent(); } return m_DataFile->type; }
 
 		/// <summary>
 		/// Gets the file path of the content file represented by this ContentFile object.
 		/// </summary>
 		/// <returns>A string with the datafile object name path, like "datafile.dat#mydataobject".</returns>
-		virtual const std::string & GetDataPath() const { return m_DataPath; };
+		const std::string & GetDataPath() const { return m_DataPath; };
 
 		/// <summary>
 		/// Sets the file path of the content file represented by this ContentFile object.
 		/// </summary>
 		/// <param name="newDataPath">A string with the datafile object name path, like: "datafile.dat#mydataobject".</param>
-		virtual void SetDataPath(std::string newDataPath);
+		void SetDataPath(std::string newDataPath);
 
 		/// <summary>
 		/// Shows whether the data of this has been modified since load, and should therefore be saved out again to the path if this.
@@ -118,13 +118,13 @@ namespace RTE {
 		/// Tells this whether the data loaded by this into memory has been modified and should be saved out to this' path upon writing.
 		/// </summary>
 		/// <param name="modified">Whether the loaded data of this has been modified or not.</param>
-		//virtual void SetDataModified(bool modified = true) { m_DataModified = modified; };
+		//void SetDataModified(bool modified = true) { m_DataModified = modified; };
 
 		/// <summary>
 		/// Creates a hash value out of a path to a ContentFile.
 		/// </summary>
 		/// <returns>Hash value of a path to a ContentFile.</returns>
-		virtual size_t GetHash() const { return std::hash<std::string>()(m_DataPath); }
+		size_t GetHash() const { return std::hash<std::string>()(m_DataPath); }
 
 		/// <summary>
 		/// Converts hash values into file paths to ContentFiles.
@@ -143,7 +143,7 @@ namespace RTE {
 		/// Note it will only apply the first time you get a bitmap since it is only loaded from disk the first time. See allegro docs for the modes.
 		/// </param>
 		/// <returns>The pointer to the beginning of the data object loaded from the allegro .dat datafile. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
-		virtual BITMAP * GetAsBitmap(int conversionMode = 0);
+		BITMAP * GetAsBitmap(int conversionMode = 0);
 
 		/// <summary>
 		/// Loads and transfers the data represented by this ContentFile object as an Allegro BITMAP. Note that ownership of the BITMAP IS TRANSFERRED!
@@ -151,7 +151,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap. See allegro docs for the modes.</param>
 		/// <returns>The pointer to the BITMAP loaded from disk Ownership IS transferred! If 0, the file could not be found/loaded.</returns>
-		virtual BITMAP *LoadAndReleaseBitmap(int conversionMode = 0);
+		BITMAP * LoadAndReleaseBitmap(int conversionMode = 0);
 
 		/// <summary>
 		/// Gets the data represented by this ContentFile object as an array of Allegro BITMAPs, each representing a frame in the animation.
@@ -166,20 +166,20 @@ namespace RTE {
 		/// The pointer to the beginning of the array of BITMAP pointers loaded from the allegro .dat datafile, the length of which is specified with the frameCount argument.
 		/// Ownership of the array IS transferred! Ownership of the BITMAPS is NOT transferred! If 0, the file could not be found/loaded.
 		/// </returns>
-		virtual BITMAP ** GetAsAnimation(int frameCount = 1, int conversionMode = 0);
+		BITMAP ** GetAsAnimation(int frameCount = 1, int conversionMode = 0);
 
 		/// <summary>
 		/// Loads and gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE. Note that ownership of the SAMPLE IS NOT TRANSFERRED!
 		/// </summary>
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
 		/// <returns>The pointer to the beginning of the data object loaded from the file. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
-		virtual FMOD::Sound * GetAsSample(bool abortGameForInvalidSound = true);
+		FMOD::Sound * GetAsSample(bool abortGameForInvalidSound = true);
 
 		/// <summary>
 		/// Loads and gets the data represented by this ContentFile object as a binary chunk of data. Note that ownership of the DATA IS NOT TRANSFERRED!
 		/// </summary>
 		/// <returns>The pointer to the beginning of the raw data loaded from the Allegro .dat datafile. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
-		//virtual char * GetAsRawBinary();
+		//char * GetAsRawBinary();
 #pragma endregion
 
 #pragma region Class Info
@@ -187,7 +187,7 @@ namespace RTE {
 		/// Gets the class name of this Entity.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	protected:
@@ -195,7 +195,7 @@ namespace RTE {
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		/// <summary>
-		/// //!< Enumeration for loading BITMAPs by bit depth. NOTE: This can't be lower down because s_LoadedBitmaps relies on this definition.
+		/// Enumeration for loading BITMAPs by bit depth. NOTE: This can't be lower down because s_LoadedBitmaps relies on this definition.
 		/// </summary>
 		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount };
 

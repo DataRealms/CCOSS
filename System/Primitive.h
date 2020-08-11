@@ -72,7 +72,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+		void Draw(BITMAP *drawScreen, Vector targetPos) override;
 	};
 #pragma endregion
 
@@ -182,7 +182,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+		void Draw(BITMAP *drawScreen, Vector targetPos) override;
 	};
 #pragma endregion
 
@@ -213,7 +213,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+		void Draw(BITMAP *drawScreen, Vector targetPos) override;
 	};
 #pragma endregion
 
@@ -316,7 +316,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+		void Draw(BITMAP *drawScreen, Vector targetPos) override;
 	};
 #pragma endregion
 
@@ -494,7 +494,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+		void Draw(BITMAP *drawScreen, Vector targetPos) override;
 	};
 #pragma endregion
 
@@ -531,7 +531,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+		void Draw(BITMAP *drawScreen, Vector targetPos) override;
 	};
 #pragma endregion
 
@@ -565,7 +565,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		virtual void Draw(BITMAP *drawScreen, Vector targetPos);
+		void Draw(BITMAP *drawScreen, Vector targetPos) override;
 	};
 #pragma endregion
 }

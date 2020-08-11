@@ -61,7 +61,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position.
 
-    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1);
+    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Properties.
 
-    void Create(GUIProperties *Props);
+    void Create(GUIProperties *Props) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ public:
 // Description:     Called when the control has been destroyed.
 // Arguments:       None.
 
-    void Destroy(void);    
+    void Destroy() override; 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +88,7 @@ public:
 // Description:     Called when the skin has been changed.
 // Arguments:       New skin pointer.
 
-    void ChangeSkin(GUISkin *Skin);
+    void ChangeSkin(GUISkin *Skin) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -97,7 +97,7 @@ public:
 // Description:     Called when the mouse goes down on the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    void OnMouseDown(int X, int Y, int Buttons, int Modifier);
+    void OnMouseDown(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ public:
 // Description:     Called when the mouse goes up on the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    void OnMouseUp(int X, int Y, int Buttons, int Modifier);
+    void OnMouseUp(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ public:
 // Arguments:       None.
 // Returns:         0 if the control does not have a panel, otherwise the topmost panel.
 
-    GUIPanel *GetPanel(void);
+    GUIPanel * GetPanel() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -125,7 +125,7 @@ public:
 // Description:     Returns a string representing the control's ID
 // Arguments:       None.
 
-    static std::string GetControlID(void)    { return "SCROLLBAR"; };
+    static std::string GetControlID()    { return "SCROLLBAR"; };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +134,7 @@ public:
 // Description:     Called when receiving a signal.
 // Arguments:       Signal source, Signal code, Signal data.
 
-    void ReceiveSignal(GUIPanel *Source, int Code, int Data);
+    void ReceiveSignal(GUIPanel *Source, int Code, int Data) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +143,7 @@ public:
 // Description:     Called when the control needs to be moved.
 // Arguments:       New position.
 
-    void Move(int X, int Y);
+    void Move(int X, int Y) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +152,7 @@ public:
 // Description:     Called when the control needs to be resized.
 // Arguments:       New size.
 
-    void Resize(int Width, int Height);
+    void Resize(int Width, int Height) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +161,7 @@ public:
 // Description:     Gets the rectangle of the control.
 // Arguments:       Position, Size.
 
-    void GetControlRect(int *X, int *Y, int *Width, int *Height);
+    void GetControlRect(int *X, int *Y, int *Width, int *Height) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +170,7 @@ public:
 // Description:     Gets the control to store the values into properties.
 // Arguments:       None.
 
-    void StoreProperties(void);
+    void StoreProperties() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -179,7 +179,7 @@ public:
 // Description:     Applies new properties to the control.
 // Arguments:       GUIProperties.
 
-    void ApplyProperties(GUIProperties *Props);
+    void ApplyProperties(GUIProperties *Props) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

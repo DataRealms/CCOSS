@@ -113,11 +113,11 @@ friend class MetaSave;
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  NewGame
+// Method:  NewGame
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Wipes any current and sets up a new game based on a size parameter.
 // Arguments:       The size of the new Metagame, from 0 to 1.0, which will affect how
@@ -125,29 +125,29 @@ friend class MetaSave;
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int NewGame(float gameSize = 0.5);
+	int NewGame(float gameSize = 0.5);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  EndGame
+// Method:  EndGame
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Wipes any current metagame and sets things back to as if program start.
 // Arguments:       None.
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int EndGame();
+	int EndGame();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Load
+// Method:  Load
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Load a Metagame from disk out of the special Metagame.rte data module
 // Arguments:       The MetaSave object to load from - Ownership Is Not Transferred!
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Load(const MetaSave *pSave);
+	int Load(const MetaSave *pSave);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -188,35 +188,33 @@ friend class MetaSave;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire MetaMan, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() override { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Destroys and resets (through Clear()) the MetaMan object.
-// Arguments:       Whether to only destroy the members defined in this derived class, or
-//                  to destroy all inherited members also.
 // Return value:    None.
 
-    void Destroy(bool notInherited = false);
+    void Destroy();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
+// Method:  GetClassName
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the class name of this Entity.
 // Arguments:       None.
 // Return value:    A string with the friendly-formatted type name of this object.
 
-    virtual const std::string & GetClassName() const { return m_ClassName; }
+    const std::string & GetClassName() const override { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -279,7 +277,7 @@ friend class MetaSave;
 // Arguments:       Which player.
 // Return value:    The team of that player.
 
-    int GetTeamOfPlayer(int metaPlayer) const { return metaPlayer >= Activity::PLAYER_1 && metaPlayer < m_Players.size() ? m_Players[metaPlayer].GetTeam() : Activity::NOTEAM; }
+    int GetTeamOfPlayer(int metaPlayer) const { return metaPlayer >= Players::PlayerOne && metaPlayer < m_Players.size() ? m_Players[metaPlayer].GetTeam() : Activity::NoTeam; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -289,7 +287,7 @@ friend class MetaSave;
 // Arguments:       Which player.
 // Return value:    The requested MetaPlayer
 
-    MetaPlayer * GetPlayer(int metaPlayer) { return (metaPlayer >= Activity::PLAYER_1 && metaPlayer < m_Players.size()) ? &(m_Players[metaPlayer]) : 0; }
+    MetaPlayer * GetPlayer(int metaPlayer) { return (metaPlayer >= Players::PlayerOne && metaPlayer < m_Players.size()) ? &(m_Players[metaPlayer]) : 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -381,29 +379,6 @@ friend class MetaSave;
 
     int OnlyTeamWithAnyBrainPoolLeft();
 
-/* obsolete, diff win condition now
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OneOrNoneTeamsLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether there is less than two teams left in this game with
-//                  a brain in its ranks at all.
-// Arguments:       None.
-// Return value:    Whether less than two teams have any brains in them left.
-
-    bool OneOrNoneTeamsLeft();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WhichTeamLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates which single team is left with brains, if any.
-// Arguments:       None.
-// Return value:    Which team stands alone with any brains in its ranks, if any. NOTEAM
-//                  is returned if there's either more than one team, OR there are no
-//                  teams at all left with brains in em.
-
-    int WhichTeamLeft();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          NoBrainsLeftInAnyPool
@@ -501,7 +476,7 @@ friend class MetaSave;
 // Arguments:       None.
 // Return value:    Whether the player index passed in is active for the current game.
 
-    bool IsActivePlayer(int metaPlayer) { return metaPlayer >= Activity::PLAYER_1 && metaPlayer < m_Players.size(); }
+    bool IsActivePlayer(int metaPlayer) { return metaPlayer >= Players::PlayerOne && metaPlayer < m_Players.size(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -511,7 +486,7 @@ friend class MetaSave;
 // Arguments:       None.
 // Return value:    Whether the team index passed in is active for the current game.
 
-    bool IsActiveTeam(int team) { return team >= Activity::TEAM_1 && team < m_TeamCount; }
+    bool IsActiveTeam(int team) { return team >= Activity::TeamOne && team < m_TeamCount; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -519,7 +494,7 @@ friend class MetaSave;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether one team has ownership of all revealed sites.
 // Arguments:       None.
-// Return value:    Which team has all sites, if any. If not NOTEAM is returned.
+// Return value:    Which team has all sites, if any. If not NoTeam is returned.
 
     int WhichTeamOwnsAllSites();
 
@@ -598,7 +573,7 @@ friend class MetaSave;
 // Arguments:       None.
 // Return value:    None.
 
-    void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -638,7 +613,7 @@ protected:
     // The number of Team:s in play this game
     int m_TeamCount;
     // The flag icons of all teams
-    Icon m_TeamIcons[Activity::MAXTEAMCOUNT];
+    Icon m_TeamIcons[Activity::MaxTeamCount];
     // The current round the game is on, starting with count on 0
     int m_CurrentRound;
     // All Scenes of the current game, OWNED by this. Stored sequentially in order of revealing
@@ -657,7 +632,7 @@ protected:
 	// Game difficulty
 	int m_Difficulty;
 	// Teams AI Skill
-	int m_TeamAISkill[Activity::MAXTEAMCOUNT];
+	int m_TeamAISkill[Activity::MaxTeamCount];
 
     // Timer for measuring how long each phase has gone for
     Timer m_PhaseTimer;
@@ -680,8 +655,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MetaMan(const MetaMan &reference);
-    MetaMan & operator=(const MetaMan &rhs);
+	MetaMan(const MetaMan &reference) {}
+	MetaMan & operator=(const MetaMan &rhs) {}
 
 };
 } // namespace RTE

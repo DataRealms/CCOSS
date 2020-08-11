@@ -64,7 +64,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Reader::Destroy(bool notInherited) {
+	void Reader::Destroy() {
 		delete m_Stream;
 		// Delete all the streams in the stream stack
 		for (const StreamInfo &streamInfo : m_StreamStack) {

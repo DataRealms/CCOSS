@@ -23,8 +23,8 @@ namespace RTE {
 	/// Convenience macro to cut down on duplicate ClassInfo methods in classes that extend Entity.
 	/// </summary>
 	#define ClassInfoGetters \
-		const Entity::ClassInfo & GetClass() const { return m_sClass; } \
-		const std::string & GetClassName() const { return m_sClass.GetName(); }
+		const Entity::ClassInfo & GetClass() const override { return m_sClass; } \
+		const std::string & GetClassName() const override { return m_sClass.GetName(); }
 
 	/// <summary>
 	/// Static method used in conjunction with ClassInfo to allocate an Entity. 
@@ -36,10 +36,10 @@ namespace RTE {
 		static void operator delete (void *instance) { TYPE::m_sClass.ReturnPoolMemory(instance); }		\
 		static void * operator new (size_t size, void *p) throw() { return p; }							\
 		static void operator delete (void *, void *) throw() {  }										\
-		static void * Allocate() { return malloc(sizeof(TYPE)); }									\
+		static void * Allocate() { return malloc(sizeof(TYPE)); }										\
 		static void Deallocate(void *instance) { free(instance); }										\
 		static Entity * NewInstance() { return new TYPE; }												\
-		virtual Entity * Clone(Entity *cloneTo = 0) const {												\
+		Entity * Clone(Entity *cloneTo = 0) const override {											\
 			TYPE *ent = cloneTo ? dynamic_cast<TYPE *>(cloneTo) : new TYPE();							\
 			RTEAssert(ent, "Tried to clone to an incompatible instance!");								\
 			if (cloneTo) { ent->Destroy(); }															\
@@ -131,14 +131,14 @@ namespace RTE {
 			/// Grabs from the pre-allocated pool, an available chunk of memory the exact size of the Entity this ClassInfo represents. OWNERSHIP IS TRANSFERRED!
 			/// </summary>
 			/// <returns>A pointer to the pre-allocated pool memory. OWNERSHIP IS TRANSFERRED!</returns>
-			virtual void * GetPoolMemory();
+			void * GetPoolMemory();
 
 			/// <summary>
 			/// Returns a raw chunk of memory back to the pre-allocated available pool.
 			/// </summary>
 			/// <param name="returnedMemory">The raw chunk of memory that is being returned. Needs to be the same size as the type this ClassInfo describes. OWNERSHIP IS TRANSFERRED!</param>
 			/// <returns>The count of outstanding memory chunks after this was returned.</returns>
-			virtual int ReturnPoolMemory(void *returnedMemory);
+			int ReturnPoolMemory(void *returnedMemory);
 
 			/// <summary>
 			/// Writes a bunch of useful debug info about the memory pools to a file.
@@ -208,7 +208,7 @@ namespace RTE {
 		/// Makes the Entity ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Creates an Entity to be identical to another, by deep copy.
@@ -224,7 +224,7 @@ namespace RTE {
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
 		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader. This is done by calling Create().</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(Reader &reader, bool checkType = true, bool doCreate = true) { return Serializable::Create(reader, checkType, doCreate); }
+		int Create(Reader &reader, bool checkType = true, bool doCreate = true) override { return Serializable::Create(reader, checkType, doCreate); }
 
 		/// <summary>
 		/// Uses a passed-in instance, or creates a new one, and makes it identical to this.
@@ -249,7 +249,7 @@ namespace RTE {
 		/// <summary>
 		/// Resets the entire Entity, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region INI Handling
@@ -259,7 +259,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="writer">A Writer that the Entity will save itself to.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int SavePresetCopy(Writer &writer) const;
+		int SavePresetCopy(Writer &writer) const;
 #pragma endregion
 
 #pragma region Getters and Setters

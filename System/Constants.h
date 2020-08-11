@@ -9,10 +9,14 @@ namespace RTE {
 	typedef int MID; //!< Distinctive type definition for Material IDs.
 #pragma endregion
 
+#pragma region Filesystem Constants
+	static constexpr char *c_ScreenshotDirectory = { "_Screenshots" };
+#pragma endregion
+
 #pragma region Physics Constants
 	static constexpr float c_PPM = 20.0F; //!< Pixels per Meter constant.
 	static constexpr float c_MPP = 1.0F / c_PPM; //!< Meters per Pixel constant.
-	static constexpr float c_PPL = 1000.F / ((100.0F / c_PPM) * (100.0F / c_PPM) * (100.0F / c_PPM)); //!< Pixels per Liter constant.
+	static constexpr float c_PPL = 1000.0F / ((100.0F / c_PPM) * (100.0F / c_PPM) * (100.0F / c_PPM)); //!< Pixels per Liter constant.
 	static constexpr float c_LPP = 1.0F / c_PPL; //!< Liters per Pixel constant.
 #pragma endregion
 
@@ -53,12 +57,12 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Math Constants
-	static constexpr float c_TwoPI = 6.2831853F;
-	static constexpr float c_PI = 3.1415926F;
-	static constexpr float c_HalfPI = 1.5707963F;
-	static constexpr float c_QuarterPI = 0.7853982F;
-	static constexpr float c_EighthPI = 0.3926991F;
-	static constexpr float c_SixteenthPI = 0.1963495F;
+	static constexpr float c_TwoPI = 6.28318531F;
+	static constexpr float c_PI = 3.14159265F;
+	static constexpr float c_HalfPI = 1.57079633F;
+	static constexpr float c_QuarterPI = 0.78539816F;
+	static constexpr float c_EighthPI = 0.39269908F;
+	static constexpr float c_SixteenthPI = 0.19634954F;
 #pragma endregion
 
 #pragma region Audio Constants
@@ -184,6 +188,20 @@ namespace RTE {
 	/// Circle uses a round zone to capture stick position on both axis then cut-off if this position is inside the round dead zone.
 	/// </summary>
 	enum DeadZoneType { CIRCLE = 0, SQUARE = 1 };
+#pragma endregion
+
+#pragma region Global Enumerations
+	/// <summary>
+	/// Enumeration all available players.
+	/// </summary>
+	enum Players {
+		NoPlayer = -1,
+		PlayerOne = 0,
+		PlayerTwo,
+		PlayerThree,
+		PlayerFour,
+		MaxPlayerCount
+	};
 #pragma endregion
 
 #pragma region Un-Definitions

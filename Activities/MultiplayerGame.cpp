@@ -45,7 +45,6 @@
 
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
@@ -218,11 +217,11 @@ namespace RTE {
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Pauses and unpauses the game.
 
-	void MultiplayerGame::Pause(bool pause)
+	void MultiplayerGame::SetPaused(bool pause)
 	{
 		// Override the pause
 		//m_Paused = false;
-		Activity::Pause(pause);
+		Activity::SetPaused(pause);
 
 		if (pause)
 		{
@@ -256,7 +255,7 @@ namespace RTE {
 	{
 		Activity::End();
 
-		m_ActivityState = OVER;
+		m_ActivityState = ActivityState::Over;
 		g_FrameMan.SetDrawNetworkBackBuffer(false);
 	}
 
@@ -410,7 +409,7 @@ namespace RTE {
 
 		if (m_Mode == CONNECTION)
 		{
-			if (g_NetworkClient.IsConnectedAndRegistred())
+			if (g_NetworkClient.IsConnectedAndRegistered())
 				m_Mode = GAMEPLAY;
 
 			if (m_ConnectionWaitTimer.IsPastRealMS(8000))
@@ -428,7 +427,7 @@ namespace RTE {
 			g_FrameMan.SetDrawNetworkBackBuffer(true);
 			m_pGUIController->EnableMouse(false);
 
-			if (!g_NetworkClient.IsConnectedAndRegistred())
+			if (!g_NetworkClient.IsConnectedAndRegistered())
 			{
 				//g_ActivityMan.EndActivity();
 				//g_ResetActivity = true;
@@ -441,11 +440,6 @@ namespace RTE {
 
 		/*if (g_UInputMan.ElementHeld(0, UInputMan::INPUT_FIRE))
 			g_FrameMan.SetScreenText("FIRE", 0, 0, -1, false);
-		else
-			g_FrameMan.SetScreenText("-", 0, 0, -1, false);*/
-
-		/*if (g_InActivity)
-			g_FrameMan.SetScreenText("IN ACITVITY", 0, 0, -1, false);
 		else
 			g_FrameMan.SetScreenText("-", 0, 0, -1, false);*/
 

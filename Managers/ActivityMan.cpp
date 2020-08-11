@@ -43,10 +43,9 @@ namespace RTE {
 
 		int error = 0;
 
-		// Stop all music, will be started by the Activity right below
+		// Stop all music played by the current activity. It will be re-started by the new Activity. 
 		g_AudioMan.StopMusic();
 
-		// Replace the start activity
 		delete m_StartActivity;
 		m_StartActivity = activity;
 
@@ -60,12 +59,13 @@ namespace RTE {
 			g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was successfully started");
 		else {
 			g_ConsoleMan.PrintString("ERROR: Activity \"" + m_Activity->GetPresetName() + "\" was NOT started due to errors!");
-			m_Activity->SetActivityState(Activity::INERROR);
+			m_Activity->SetActivityState(Activity::HasError);
 			return error;
 		}
 
-		// Make sure the main menu and console exits and we're in the game when the activity starts
+		// Close the console in case it was open by the player or because of a previous Activity error.
 		g_ConsoleMan.SetEnabled(false);
+
 		g_ResumeActivity = true;
 		g_InActivity = true;
 
@@ -75,7 +75,6 @@ namespace RTE {
 		// Reset the mouse input to the center
 		g_UInputMan.SetMouseValueMagnitude(0.05F);
 
-		// Reset the last music position
 		m_LastMusicPath = "";
 		m_LastMusicPos = 0;
 
@@ -84,16 +83,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ActivityMan::StartActivity(string className, string instanceName) {
-		const Entity *entity = g_PresetMan.GetEntityPreset(className, instanceName);
+	int ActivityMan::StartActivity(string className, string presetName) {
+		const Entity *entity = g_PresetMan.GetEntityPreset(className, presetName);
 
 		if (entity) {
 			Activity *newActivity = dynamic_cast<Activity *>(entity->Clone());
-			if (newActivity) {
-				return StartActivity(newActivity);
-			}
+			return StartActivity(newActivity);
 		} else {
-			g_ConsoleMan.PrintString("ERROR: Couldn't find the " + className + " named " + instanceName + " to start! Has it been defined?");
+			g_ConsoleMan.PrintString("ERROR: Couldn't find the " + className + " named " + presetName + " to start! Has it been defined?");
 			return -1;
 		}
 		return 0;
@@ -102,17 +99,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ActivityMan::PauseActivity(bool pause) {
-		if (!m_Activity || (pause && m_Activity->Paused()) || (!pause && !m_Activity->Paused())) {
+		if (!m_Activity || (pause && m_Activity->IsPaused()) || (!pause && !m_Activity->IsPaused())) {
 			return;
 		}
 
 		if (m_Activity) {		
 			if (pause) {
-				// Save the current in-game music position on pause
 				m_LastMusicPath = g_AudioMan.GetMusicPath();
 				m_LastMusicPos = g_AudioMan.GetMusicPosition();
 			} else {
-				// Re-start it again where it was on unpause but only if we have a position to actually resume
 				if (!m_LastMusicPath.empty() && m_LastMusicPos > 0) {
 					g_AudioMan.ClearMusicQueue();
 					g_AudioMan.PlayMusic(m_LastMusicPath.c_str());
@@ -124,7 +119,8 @@ namespace RTE {
 				}
 			}
 
-			m_Activity->Pause(pause);
+			m_Activity->SetPaused(pause);
+			g_InActivity = !pause;
 			g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was " + (pause ? "paused" : "resumed"));
 		} else {
 			g_ConsoleMan.PrintString("ERROR: No Activity to pause!");
@@ -134,14 +130,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ActivityMan::RestartActivity() {
-		// If we have a start activity set, then clone it and pass in. (have to clone, or will delete self in StartActivity)
 		if (m_StartActivity) {
+			// Need to pass in a clone of the activity because the original will be deleted and re-set during StartActivity.
 			return StartActivity(dynamic_cast<Activity *>(m_StartActivity->Clone()));
-		} else {
-			return StartActivity(m_DefaultActivityType, m_DefaultActivityName);
 		}
-		// Report that we had to start the default because there wasn't a specified start activity
-		return -1;
+		return StartActivity(m_DefaultActivityType, m_DefaultActivityName);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

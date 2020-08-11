@@ -86,14 +86,14 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire ObjectPickerGUI, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -283,17 +283,17 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  Draw
+// Method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the menu
 // Arguments:       The bitmap to draw on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *drawBitmap) const;
+	void Draw(BITMAP *drawBitmap) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -425,8 +425,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    ObjectPickerGUI(const ObjectPickerGUI &reference);
-    ObjectPickerGUI & operator=(const ObjectPickerGUI &rhs);
+	ObjectPickerGUI(const ObjectPickerGUI &reference) {}
+	ObjectPickerGUI & operator=(const ObjectPickerGUI &rhs) {}
 
 };
 

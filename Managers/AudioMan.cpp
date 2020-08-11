@@ -8,7 +8,7 @@
 
 namespace RTE {
 
-	const std::string AudioMan::m_ClassName = "AudioMan";
+	const std::string AudioMan::c_ClassName = "AudioMan";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -93,7 +93,7 @@ namespace RTE {
 				}
 
 				int audioSystemPlayerNumber = 0;
-				for (int player = 0; player < currentActivity->GetPlayerCount() && audioSystemPlayerNumber < m_CurrentActivityHumanCount; player++) {
+				for (int player = Players::PlayerOne; player < currentActivity->GetPlayerCount() && audioSystemPlayerNumber < m_CurrentActivityHumanCount; player++) {
 					if (currentActivity->PlayerHuman(player)) {
 						status = m_AudioSystem->set3DListenerAttributes(audioSystemPlayerNumber, &GetAsFMODVector(g_SceneMan.GetScrollTarget(currentActivity->ScreenOfPlayer(player)), g_SettingsMan.c_ListenerZOffset()), NULL, &c_FMODForward, &c_FMODUp);
 						audioSystemPlayerNumber++; 
@@ -702,7 +702,7 @@ namespace RTE {
 		const Activity *currentActivity = g_ActivityMan.GetActivity();
 		float shortestDistance = g_SceneMan.GetSceneDim().GetMagnitude();
 		float longestDistance = 0;
-		for (int player = 0; player < currentActivity->GetPlayerCount(); player++) {
+		for (int player = Players::PlayerOne; player < currentActivity->GetPlayerCount(); player++) {
 			if (currentActivity->PlayerHuman(player)) {
 				float distance = g_SceneMan.ShortestDistance(GetAsVector(channelPosition), g_SceneMan.GetScrollTarget(currentActivity->ScreenOfPlayer(player)), g_SceneMan.SceneWrapsX()).GetMagnitude();
 				shortestDistance = min(shortestDistance, distance);

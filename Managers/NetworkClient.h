@@ -37,14 +37,14 @@ namespace RTE {
 		/// Makes the NetworkClient object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create();
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a NetworkClient object before deletion from system memory.
 		/// </summary>
-		virtual ~NetworkClient() { Destroy(); }
+		~NetworkClient() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the NetworkClient object.
@@ -57,7 +57,7 @@ namespace RTE {
 		/// Gets whether the client is connected and registered to a server.
 		/// </summary>
 		/// <returns>Whether the client is connected and registered to a server.</returns>
-		bool IsConnectedAndRegistred() const { return m_IsConnected && m_IsRegistered; }
+		bool IsConnectedAndRegistered() const { return m_IsConnected && m_IsRegistered; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -91,7 +91,7 @@ namespace RTE {
 		/// Connects to a NAT service and performs punch-through.
 		/// </summary>
 		/// <param name="serviceServerName">NAT service server name (or address) to use for punch-through.</param>
-		/// <param name="serverPort">NAT service server port.</param>
+		/// <param name="serviceServerPort">NAT service server port.</param>
 		/// <param name="playerName">Player name to be used in network game.</param>
 		/// <param name="serverName">Server name (or address) to connect to.</param>
 		/// <param name="serverPassword">Server password.</param>
@@ -113,7 +113,7 @@ namespace RTE {
 		/// Gets the class name of this object.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:
@@ -204,10 +204,10 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="addr"></param>
+		/// <param name="address"></param>
 		/// <param name="serverName"></param>
 		/// <param name="serverPassword"></param>
-		void SendServerGUIDRequest(RakNet::SystemAddress addr, std::string serverName, std::string serverPassword);
+		void SendServerGUIDRequest(RakNet::SystemAddress address, std::string serverName, std::string serverPassword);
 
 		/// <summary>
 		/// 
@@ -313,7 +313,7 @@ namespace RTE {
 		/// Gets the ping time between the client and the server.
 		/// </summary>
 		/// <returns>The ping time between the client and the server.</returns>
-		unsigned short GetPing() const { return IsConnectedAndRegistred() ? m_Client->GetLastPing(m_ServerID) : 0; }
+		unsigned short GetPing() const { return IsConnectedAndRegistered() ? m_Client->GetLastPing(m_ServerID) : 0; }
 
 		/// <summary>
 		/// Clears all the member variables of this NetworkClient, effectively resetting the members of this abstraction level only.

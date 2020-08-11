@@ -73,7 +73,7 @@ void AssemblyEditorGUI::Clear()
     m_CursorOffset.Reset();
     m_CursorInAir = true;
     m_FacingLeft = false;
-    m_PlaceTeam = Activity::TEAM_1;
+    m_PlaceTeam = Activity::TeamOne;
     m_pCurrentObject = 0;
     m_ObjectListOrder = -1;
     m_DrawCurrentObject = true;

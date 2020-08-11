@@ -14,7 +14,15 @@ namespace RTE {
 
 	const std::string NetworkClient::c_ClassName = "NetworkClient";
 
-	struct SLDrawBox { int sourceX; int sourceY; int sourceW; int sourceH; int destX; int destY; };
+	// Data structure for constructing the draw boxes we'll need to use for drawing SceneLayers.
+	struct SLDrawBox {
+		int sourceX;
+		int sourceY;
+		int sourceW;
+		int sourceH;
+		int destX;
+		int destY;
+	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -52,12 +60,6 @@ namespace RTE {
 			soundEntry.second->Stop();
 			delete soundEntry.second;
 		}
-		/*
-		for (std::unordered_map<unsigned short, SoundContainer *>::iterator it = m_ServerSounds.begin(); it != m_ServerSounds.end(); ++it) {
-			it->second->Stop();
-			delete it->second;
-		}
-		*/
 		m_ServerSounds.clear();
 	}
 
@@ -201,12 +203,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void NetworkClient::SendServerGUIDRequest(RakNet::SystemAddress addr, std::string serverName, std::string serverPassword) {
+	void NetworkClient::SendServerGUIDRequest(RakNet::SystemAddress address, std::string serverName, std::string serverPassword) {
 		MsgGetServerRequest msg;
 		msg.Id = ID_NAT_SERVER_GET_SERVER_GUID;
 		strncpy(msg.ServerName, serverName.c_str(), 62);
 		strncpy(msg.ServerPassword, serverPassword.c_str(), 62);
-		m_Client->Send((const char *)&msg, sizeof(RTE::MsgGetServerRequest), IMMEDIATE_PRIORITY, RELIABLE, 0, addr, false);
+		m_Client->Send((const char *)&msg, sizeof(RTE::MsgGetServerRequest), IMMEDIATE_PRIORITY, RELIABLE, 0, address, false);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -260,13 +262,13 @@ namespace RTE {
 		// Store element states as bit flags
 		for (int i = 0; i < INPUT_COUNT; i++) {
 			if (g_UInputMan.ElementHeld(0, i)) { msg.InputElementHeld = msg.InputElementHeld | bitMask; }
-			if (g_UInputMan.AccumulatedElementPressed(i)) { msg.InputElementPressed = msg.InputElementPressed | bitMask; }
-			if (g_UInputMan.AccumulatedElementReleased(i)) { msg.InputElementReleased = msg.InputElementReleased | bitMask; }
+			if (g_UInputMan.NetworkAccumulatedElementPressed(i)) { msg.InputElementPressed = msg.InputElementPressed | bitMask; }
+			if (g_UInputMan.NetworkAccumulatedElementReleased(i)) { msg.InputElementReleased = msg.InputElementReleased | bitMask; }
 
 			bitMask <<= 1;
 		}
 
-		g_UInputMan.ClearAccumulatedStates();
+		g_UInputMan.ClearNetworkAccumulatedStates();
 		m_Client->Send((const char *)&msg, sizeof(msg), IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, m_ServerID, false);
 	}
 
@@ -965,9 +967,9 @@ namespace RTE {
 		long long currentTicks = g_TimerMan.GetRealTickCount();
 		if (currentTicks - m_LastInputSentTime < 0) { m_LastInputSentTime = currentTicks; }
 
-		if (static_cast<double>((currentTicks - m_LastInputSentTime) / g_TimerMan.GetTicksPerSecond()) > 1.0 / inputSend) {
+		if (static_cast<double>((currentTicks - m_LastInputSentTime)) / static_cast<double>(g_TimerMan.GetTicksPerSecond()) > 1.0 / inputSend) {
 			m_LastInputSentTime = g_TimerMan.GetRealTickCount();
-			if (IsConnectedAndRegistred()) { SendInputMsg(); }
+			if (IsConnectedAndRegistered()) { SendInputMsg(); }
 		}
 	}
 

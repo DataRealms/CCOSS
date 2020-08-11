@@ -191,8 +191,8 @@ bool InitMainMenu() {
 /// Reset the current activity.
 /// </summary>
 /// <returns></returns>
-bool ResetActivity()
-{
+bool ResetActivity() {
+	g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
     g_ResetActivity = false;
 
     // Clear and reset out things
@@ -241,7 +241,7 @@ bool ResetActivity()
 /// Start the simulation back up after being paused.
 /// </summary>
 void ResumeActivity() {
-	if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NOTSTARTED) {
+	if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NotStarted) {
 		g_Quit = false;
 		g_InActivity = true;
 		g_ResumeActivity = false;
@@ -623,11 +623,11 @@ bool PlayIntroTitle() {
             pPlanet->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);
 
 			// Manually shake our shakeOffset to randomize some effects
-			if (g_TimerMan.GetAbsoulteTime() > lastShake + 50000)
+			if (g_TimerMan.GetAbsoluteTime() > lastShake + 50000)
 			{
 				shakeOffset.m_X = RangeRand(-3, 3);
 				shakeOffset.m_Y = RangeRand(-3, 3);
-				lastShake = g_TimerMan.GetAbsoulteTime();
+				lastShake = g_TimerMan.GetAbsoluteTime();
 			}
 
 			// Tell the menu that PP promo is off
@@ -705,9 +705,9 @@ bool PlayIntroTitle() {
 			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.25 && orbitRotation > -c_TwoPI)
 			{
 				// Add explosions delay and count them
-				if (g_TimerMan.GetAbsoulteTime() > lastPuff + 1000000)
+				if (g_TimerMan.GetAbsoluteTime() > lastPuff + 1000000)
 				{
-					lastPuff = g_TimerMan.GetAbsoulteTime();
+					lastPuff = g_TimerMan.GetAbsoluteTime();
 					puffActive = true;
 					puffCount++;
 				}
@@ -719,9 +719,9 @@ bool PlayIntroTitle() {
 					if (puffCount == 1)
 					{
 						pFirePuffLarge->SetPos(planetPos + stationOffset);
-						if (g_TimerMan.GetAbsoulteTime() > lastPuffFrame + 50000)
+						if (g_TimerMan.GetAbsoluteTime() > lastPuffFrame + 50000)
 						{
-							lastPuffFrame = g_TimerMan.GetAbsoulteTime();
+							lastPuffFrame = g_TimerMan.GetAbsoluteTime();
 							puffFrame++;
 
 							if (puffFrame >= pFirePuffLarge->GetFrameCount())
@@ -736,9 +736,9 @@ bool PlayIntroTitle() {
 						pFirePuffLarge->Draw(g_FrameMan.GetBackBuffer32());
 					} else {
 						pFirePuffMedium->SetPos(planetPos + stationOffset + shakeOffset);
-						if (g_TimerMan.GetAbsoulteTime() > lastPuffFrame + 50000)
+						if (g_TimerMan.GetAbsoluteTime() > lastPuffFrame + 50000)
 						{
-							lastPuffFrame = g_TimerMan.GetAbsoulteTime();
+							lastPuffFrame = g_TimerMan.GetAbsoluteTime();
 							puffFrame++;
 
 							if (puffFrame >= pFirePuffLarge->GetFrameCount())
@@ -1942,11 +1942,14 @@ int main(int argc, char *argv[]) {
 	g_LoadingGUI.InitLoadingScreen();
 	InitMainMenu();
 
+	std::string screenshotSaveDir = g_System.GetWorkingDirectory() + "/" + c_ScreenshotDirectory;
+	if (!std::experimental::filesystem::exists(screenshotSaveDir)) { g_System.MakeDirectory(screenshotSaveDir); }
+
     if (!g_NetworkServer.IsServerModeEnabled()) {
 		if (g_LaunchIntoEditor) {
 			// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
-			g_UInputMan.GetControlScheme(0)->SetDevice(1);
-			g_UInputMan.GetControlScheme(0)->SetPreset(1);
+			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetDevice(InputDevice::DEVICE_MOUSE_KEYB);
+			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetPreset(InputPreset::PRESET_WASDKEYS);
 			// Start the specified editor activity.
 			EnterEditorActivity(g_EditorToLaunch);
 		} else if (!g_SettingsMan.LaunchIntoActivity()) {

@@ -67,10 +67,6 @@ public:
         EDITORMODECOUNT
     };
 
-/* Not concrete
-// Concrete allocation and cloning definitions
-EntityAllocation(EditorActivity)
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     EditorActivity
@@ -89,7 +85,7 @@ EntityAllocation(EditorActivity)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~EditorActivity() { Destroy(true); }
+	~EditorActivity() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +96,7 @@ EntityAllocation(EditorActivity)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +107,7 @@ EntityAllocation(EditorActivity)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const EditorActivity &reference);
+	int Create(const EditorActivity &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -122,7 +118,7 @@ EntityAllocation(EditorActivity)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Activity::Reset(); }
+	void Reset() override { Clear(); Activity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -133,7 +129,7 @@ EntityAllocation(EditorActivity)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+	void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +160,7 @@ EntityAllocation(EditorActivity)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Start();
+	int Start() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +170,7 @@ EntityAllocation(EditorActivity)
 // Arguments:       Whether to pause the game or not.
 // Return value:    None.
 
-    virtual void Pause(bool pause = true);
+	void SetPaused(bool pause = true) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -184,7 +180,7 @@ EntityAllocation(EditorActivity)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void End();
+	void End() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -195,7 +191,7 @@ EntityAllocation(EditorActivity)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -207,7 +203,7 @@ EntityAllocation(EditorActivity)
 //                  Which screen's GUI to draw onto the bitmap.
 // Return value:    None.
 
-    virtual void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0);
+	void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -219,7 +215,7 @@ EntityAllocation(EditorActivity)
 //                  The absolute position of the target bitmap's upper left corner in the scene.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector());
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -235,7 +231,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateNewDialog() { ; }
+    virtual void UpdateNewDialog() {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -245,7 +241,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateLoadDialog() { ; }
+    virtual void UpdateLoadDialog() {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -255,7 +251,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateSaveDialog() { ; }
+    virtual void UpdateSaveDialog() {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -265,7 +261,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateChangesDialog() { ; }
+    virtual void UpdateChangesDialog() {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -275,7 +271,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateOverwriteDialog() { ; }
+    virtual void UpdateOverwriteDialog() {}
 
 
     // Member variables

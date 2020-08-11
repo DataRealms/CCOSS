@@ -97,7 +97,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    None.
 
-        virtual void Reset() { Clear(); }
+        void Reset() override { Clear(); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    A string with the friendly-formatted type name of this object.
 
-        virtual const std::string & GetClassName() const { return m_sClassName; }
+		const std::string & GetClassName() const override { return m_sClassName; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -117,7 +117,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    A copy of the target Material
 
-        virtual Material &GetTargetMaterial() { return m_TargetMaterial; }
+		Material &GetTargetMaterial() { return m_TargetMaterial; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +127,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    A copy of the Material
 
-        virtual Material &GetFrostingMaterial() { return m_FrostingMaterial; }
+		Material &GetFrostingMaterial() { return m_FrostingMaterial; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -138,7 +138,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    The thickness sample.
 
-        virtual int GetThicknessSample() { return m_MinThickness + floor(0.5 + ((m_MaxThickness - m_MinThickness) * PosRand())); }
+		int GetThicknessSample() { return m_MinThickness + floor(0.5 + ((m_MaxThickness - m_MinThickness) * PosRand())); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +149,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    Whether only appears in air particles.
 
-        virtual bool InAirOnly() { return m_InAirOnly; }
+		bool InAirOnly() { return m_InAirOnly; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -218,7 +218,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~SLTerrain() { Destroy(true); }
+	~SLTerrain() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -229,7 +229,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -256,7 +256,7 @@ ClassInfoGetters
 //                  Anything below 0 is an error signal.
 
 // TODO: streamline interface")
-    virtual int Create(char *filename,
+	int Create(char *filename,
                        bool drawTrans,
                        Vector offset,
                        bool wrapX,
@@ -284,7 +284,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadData();
+	int LoadData() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -296,7 +296,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int SaveData(std::string pathBase);
+	int SaveData(std::string pathBase) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -307,7 +307,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int ClearData();
+	int ClearData() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -317,7 +317,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whether the data in this' bitmap was loaded from a datafile, or generated.
 
-    virtual bool IsFileData() const { return m_pFGColor && m_pFGColor->IsFileData() && m_pBGColor && m_pBGColor->IsFileData(); }
+	bool IsFileData() const override { return m_pFGColor && m_pFGColor->IsFileData() && m_pBGColor && m_pBGColor->IsFileData(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -328,7 +328,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); SceneLayer::Reset(); }
+    void Reset() override { Clear(); SceneLayer::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -339,7 +339,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -352,7 +352,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void LockBitmaps() { SceneLayer::LockBitmaps(); acquire_bitmap(m_pMainBitmap); }
+	void LockBitmaps() override { SceneLayer::LockBitmaps(); acquire_bitmap(m_pMainBitmap); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -365,7 +365,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UnlockBitmaps() { SceneLayer::UnlockBitmaps(); release_bitmap(m_pMainBitmap); }
+	void UnlockBitmaps() override { SceneLayer::UnlockBitmaps(); release_bitmap(m_pMainBitmap); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -551,7 +551,7 @@ ClassInfoGetters
 // Arguments:       The Object to apply to this Terrain. Ownership is NOT xferred!
 // Return value:    Whether successful or not.
 
-    virtual bool ApplyObject(Entity *pEntity);
+	bool ApplyObject(Entity *pEntity);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -562,7 +562,7 @@ ClassInfoGetters
 // Arguments:       The MovableObject to apply to this Terrain. Ownership is NOT xferred!
 // Return value:    None.
 
-    virtual void ApplyMovableObject(MovableObject *pMObject);
+	void ApplyMovableObject(MovableObject *pMObject);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -573,10 +573,10 @@ ClassInfoGetters
 // Arguments:       The TerrainObject to apply to this Terrain. Ownership is NOT xferred!
 // Return value:    None.
 
-    virtual void ApplyTerrainObject(TerrainObject *pTObject);
+	void ApplyTerrainObject(TerrainObject *pTObject);
 
 
-	virtual void RegisterTerrainChange(TerrainObject *pTObject);
+	void RegisterTerrainChange(TerrainObject *pTObject);
 
 
 
@@ -664,7 +664,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -679,7 +679,7 @@ ClassInfoGetters
 //                  is overridder with it. It becomes the new source coordinates.
 // Return value:    None.
 
-    virtual void DrawBackground(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride = Vector(-1, -1));
+	void DrawBackground(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride = Vector(-1, -1));
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -693,7 +693,7 @@ ClassInfoGetters
 //                  is overridder with it. It becomes the new source coordinates.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride = Vector(-1, -1)) const;
+	void Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride = Vector(-1, -1)) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -752,8 +752,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    SLTerrain(const SLTerrain &reference);
-    SLTerrain & operator=(const SLTerrain &rhs);
+	SLTerrain(const SLTerrain &reference) {}
+	SLTerrain & operator=(const SLTerrain &rhs) {}
 
 };
 

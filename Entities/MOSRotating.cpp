@@ -422,48 +422,110 @@ int MOSRotating::Save(Writer &writer) const
 /// </summary>
 /// <param name="pWound">The wound AEmitter to add</param>
 /// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset</param>
-void MOSRotating::AddWound(AEmitter *pWound, const Vector & parentOffsetToSet, bool checkGibWoundLimit) {
-	if (pWound) {
+void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit) {
+	if (woundToAdd) {
 		if (checkGibWoundLimit && !ToDelete() && m_GibWoundLimit && m_Wounds.size() + 1 > m_GibWoundLimit) {
 			// Indicate blast in opposite direction of emission
 			// TODO: don't hardcode here, get some data from the emitter
 			Vector blast(-5, 0);
-			blast.RadRotate(pWound->GetEmitAngle());
+			blast.RadRotate(woundToAdd->GetEmitAngle());
 			GibThis(blast);
 			return;
 		} else {
-            pWound->SetParentOffset(parentOffsetToSet);
-            pWound->SetParent(this);
-			m_Wounds.push_back(pWound);
+            woundToAdd->SetParentOffset(parentOffsetToSet);
+            woundToAdd->SetParent(this);
+			m_Wounds.push_back(woundToAdd);
 		}
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/// <summary>
-/// Removes a specified amount of wounds and returns damage caused by this wounds. Head multiplier is not used.				
-/// </summary>
-/// <param name="amount">Amount of wounds to remove.</param>
-/// <returns>Amount of damage caused by these wounds.</returns>
-int MOSRotating::RemoveWounds(int amount)
-{
-	int deleted = 0;
-	float damage = 0;
+int MOSRotating::GetGibWoundLimit(bool includeDamageTransferringAttachables, bool includeNonDamageTransferringAttachables) const {
+    int gibWoundLimit = m_GibWoundLimit;
+    if (includeDamageTransferringAttachables || includeNonDamageTransferringAttachables) {
+        for (const Attachable *attachable : m_Attachables) {
+            if (includeDamageTransferringAttachables && attachable->GetTransfersDamageToParent()) {
+                gibWoundLimit += attachable->GetGibWoundLimit(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables);
+            } else if (includeNonDamageTransferringAttachables && !attachable->GetTransfersDamageToParent()) {
+                gibWoundLimit += attachable->GetGibWoundLimit(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables);
+            }
+        }
+    }
+    return gibWoundLimit;
+}
 
-    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end();)
-	{
-		damage += (*itr)->GetBurstDamage();
-        delete (*itr);
-		(*itr) = 0;
-		itr = m_Wounds.erase(itr);
-		deleted++;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		if (deleted >= amount)
-			break;
-	}
+int MOSRotating::GetWoundCount(bool includeDamageTransferringAttachables, bool includeNonDamageTransferringAttachables) const {
+    int woundCount = m_Wounds.size();
+    if (includeDamageTransferringAttachables || includeNonDamageTransferringAttachables) {
+        for (const Attachable *attachable : m_Attachables) {
+            if (includeDamageTransferringAttachables && attachable->GetTransfersDamageToParent()) {
+                woundCount += attachable->GetWoundCount(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables);
+            } else if (includeNonDamageTransferringAttachables && !attachable->GetTransfersDamageToParent()) {
+                woundCount += attachable->GetWoundCount(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables);
+            }
+        }
+    }
+    return woundCount;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includeDamageTransferringAttachables, bool includeNonDamageTransferringAttachables) {
+    float damage = 0;
+    int woundCount = GetWoundCount(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables);
+
+    std::vector<std::pair<MOSRotating *, std::size_t>> woundedParts;
+    if (woundCount > 0) { woundedParts.push_back({this, woundCount}); }
+    for (Attachable *attachable : m_Attachables) {
+        bool attachableSatisfiesWoundRemovalCriteria = (includeDamageTransferringAttachables && attachable->GetTransfersDamageToParent()) || (includeNonDamageTransferringAttachables && !attachable->GetTransfersDamageToParent());
+        if (attachableSatisfiesWoundRemovalCriteria && attachable->GetWoundCount(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables) > 0) {
+            woundedParts.push_back({attachable, attachable->GetWoundCount(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables)});
+        }
+    }
+
+    if (woundedParts.empty()) {
+        return damage;
+    }
+
+    /// <summary>
+    /// Internal lambda function to remove the first wound emitter from this MOSRotating.
+    /// </summary>
+    auto removeFirstWoundEmitter = [this]() {
+        if (m_Wounds.size() == 0) {
+            return 0.0F;
+        }
+        float woundDamage = m_Wounds.front()->GetBurstDamage();
+        m_Wounds.pop_front();
+        return woundDamage;
+    };
+
+    for (int i = 0; i < numberOfWoundsToRemove; i++) {
+        if (woundedParts.size() == 0) {
+            break;
+        }
+
+        int woundedPartIndex = static_cast<int>(RangeRand(0.0F, static_cast<float>(woundedParts.size() - 1)));
+        MOSRotating *woundedPart = woundedParts[woundedPartIndex].first;
+        if (woundedPart == this) {
+            damage += removeFirstWoundEmitter() * GetDamageMultiplier();
+        } else {
+            Attachable *woundedPartAsAttachable = dynamic_cast<Attachable *>(woundedPart);
+            if (woundedPartAsAttachable) {
+                damage += woundedPartAsAttachable->RemoveWounds(1, includeDamageTransferringAttachables, includeNonDamageTransferringAttachables) * (woundedPartAsAttachable->GetTransfersDamageToParent() ? woundedPartAsAttachable->GetDamageMultiplier() : 0);
+            }
+        }
+        if (woundedParts[woundedPartIndex].second-- <= 0) {
+            woundedParts.erase(woundedParts.begin() + woundedPartIndex);
+        }
+    }
 
 	return damage;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy

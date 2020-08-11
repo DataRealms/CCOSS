@@ -949,11 +949,6 @@ void ACDropShip::Update()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ResetEmissionTimers
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reset the timers of all emissions so they will start/stop at the 
-//                  correct relative offsets from now.
 void ACDropShip::SetRightThruster(Attachable *newThruster) {
     AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
     if (castedNewThruster) {
@@ -963,14 +958,8 @@ void ACDropShip::SetRightThruster(Attachable *newThruster) {
     }
 }
 
-void ACDropShip::ResetEmissionTimers()
-{
-    if (m_pRThruster && m_pRThruster->IsAttached())
-        m_pRThruster->ResetEmissionTimers();
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    if (m_pLThruster && m_pLThruster->IsAttached())
-        m_pLThruster->ResetEmissionTimers();
 void ACDropShip::SetLeftThruster(Attachable *newThruster) {
     AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
     if (castedNewThruster) {
@@ -980,12 +969,8 @@ void ACDropShip::SetLeftThruster(Attachable *newThruster) {
     }
 }
 
-    if (m_pURThruster && m_pURThruster->IsAttached())
-        m_pURThruster->ResetEmissionTimers();
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    if (m_pULThruster && m_pULThruster->IsAttached())
-        m_pULThruster->ResetEmissionTimers();
 void ACDropShip::SetURightThruster(Attachable *newThruster) {
     AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
     if (castedNewThruster) {
@@ -997,14 +982,6 @@ void ACDropShip::SetURightThruster(Attachable *newThruster) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-
-int ACDropShip::RemoveAnyRandomWounds(int amount)
-{
-	float damage = 0;
 void ACDropShip::SetULeftThruster(Attachable *newThruster) {
     AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
     if (castedNewThruster) {
@@ -1014,33 +991,8 @@ void ACDropShip::SetULeftThruster(Attachable *newThruster) {
     }
 }
 
-	for (int i = 0; i < amount; i++)
-	{
-		// Fill the list of damaged bodyparts
-		std::vector<MOSRotating *> bodyParts;
-		if (GetWoundCount() > 0)
-			bodyParts.push_back(this);
-
-		if (m_pRHatch && m_pRHatch->GetWoundCount())
-			bodyParts.push_back(m_pRHatch);
-		if (m_pLHatch && m_pLHatch->GetWoundCount())
-			bodyParts.push_back(m_pLHatch);
-		if (m_pRThruster && m_pRThruster->GetWoundCount())
-			bodyParts.push_back(m_pRThruster);
-		if (m_pLThruster && m_pLThruster->GetWoundCount())
-			bodyParts.push_back(m_pLThruster);
-
-		// Stop removing wounds if there are not any left
-		if (bodyParts.size() == 0)
-			break;
-
-		int partIndex = RangeRand(0, bodyParts.size() - 1);
-		MOSRotating * part = bodyParts[partIndex];
-		damage += part->RemoveWounds(1);
-	}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	return damage;
 void ACDropShip::SetLeftHatch(Attachable *newHatch) {
     if (newHatch) {
         RemoveAttachable(m_pLHatch);
@@ -1051,14 +1003,6 @@ void ACDropShip::SetLeftHatch(Attachable *newHatch) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-
-int ACDropShip::GetTotalWoundCount() const
-{
-	int count = ACraft::GetWoundCount();
 void ACDropShip::SetRightHatch(Attachable *newHatch) {
     if (newHatch) {
         RemoveAttachable(m_pLHatch);
@@ -1067,38 +1011,28 @@ void ACDropShip::SetRightHatch(Attachable *newHatch) {
     }
 }
 
-    if (m_pRHatch)
-        count += m_pRHatch->GetWoundCount();
-    if (m_pLHatch)
-        count += m_pLHatch->GetWoundCount();
-    if (m_pRThruster)
-        count += m_pRThruster->GetWoundCount();
-    if (m_pLThruster)
-        count += m_pLThruster->GetWoundCount();
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	return count;
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
+// Method:          ResetEmissionTimers
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
+// Description:     Reset the timers of all emissions so they will start/stop at the 
+//                  correct relative offsets from now.
 
-int ACDropShip::GetTotalWoundLimit() const
-{ 
-	int count = ACraft::GetGibWoundLimit();
+void ACDropShip::ResetEmissionTimers()
+{
+    if (m_pRThruster && m_pRThruster->IsAttached())
+        m_pRThruster->ResetEmissionTimers();
 
-    if (m_pRHatch)
-        count += m_pRHatch->GetGibWoundLimit();
-    if (m_pLHatch)
-        count += m_pLHatch->GetGibWoundLimit();
-    if (m_pRThruster)
-        count += m_pRThruster->GetGibWoundLimit();
-    if (m_pLThruster)
-        count += m_pLThruster->GetGibWoundLimit();
+    if (m_pLThruster && m_pLThruster->IsAttached())
+        m_pLThruster->ResetEmissionTimers();
 
-	return count;
+    if (m_pURThruster && m_pURThruster->IsAttached())
+        m_pURThruster->ResetEmissionTimers();
+
+    if (m_pULThruster && m_pULThruster->IsAttached())
+        m_pULThruster->ResetEmissionTimers();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -254,15 +254,6 @@ ClassInfoGetters
     void SetMaxHealth(int newValue) { m_MaxHealth = newValue; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-// Arguments:       Amount of wounds to remove.
-// Return value:    Damage taken from removed wounds.
-
-	virtual int RemoveAnyRandomWounds(int amount);
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAimDistance
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the distance between the actor and the view point when not
@@ -1170,25 +1161,6 @@ ClassInfoGetters
 // Return value:    Returns deployment id of this actor.
 
 	virtual unsigned int GetDeploymentID() const { return m_DeploymentID; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total number of wounds of this actor.
-
-	virtual int GetTotalWoundCount() const { return this->GetWoundCount(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total wound limit of this actor.
-
-	virtual int GetTotalWoundLimit() const { return this->m_GibWoundLimit; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -629,32 +629,51 @@ ClassInfoGetters
 
 	virtual void SetGibWoundLimit(int newLimit) { m_GibWoundLimit = newLimit; }
 
+    /// <summary>
+    /// Gets the gib wound limit for this MOSRotating, optionally recursively adding the gib wound limit of damaging and/or non-damaging attachables and any of their such attachables, and so on.
+    /// </summary>
+    /// <param name="includeDamageTransferringAttachables">Whether to add wound limits of attachables that transfer damage to their parent (this MOSRotating).</param>
+    /// <param name="includeNonDamageTransferringAttachables">Whether to add wound limits of attachables that do not transfer damage to their parent (this MOSRotating).</param>
+    /// <returns>The wound limit of this MOSRotating and, optionally, its attachables.</returns>
+    int GetGibWoundLimit(bool includeDamageTransferringAttachables, bool includeNonDamageTransferringAttachables) const;
+
+    /// <summary>
+    /// Gets the number of wounds directly attached to this MOSRotating.
+    /// <returns>The number of wounds on this MOSRotating.</returns>
+    /// </summary>
+    int GetWoundCount() const { return GetWoundCount(false, false); }
+
+    /// <summary>
+    /// Gets the number of wounds attached to this MOSRotating, optionally recursively including wounds on damaging and/or non-damaging attachables and any of their such attachables, and so on.
+    /// <param name="includeDamageTransferringAttachables">Whether to count wounds from attachables that transfer damage to their parent (this MOSRotating).</param>
+    /// <param name="includeNonDamageTransferringAttachables">Whether to count wounds from attachables that do not transfer damage to their parent (this MOSRotating).</param>
+    /// <returns>The number of wounds on this MOSRotating and, optionally, its attachables.</returns>
+    /// </summary>
+    int GetWoundCount(bool includeDamageTransferringAttachables, bool includeNonDamageTransferringAttachables) const;
 
 	/// <summary>
 	/// Attaches the passed in wound AEmitter and adds it to the list of wounds, changing its parent offset to the passed in Vector.
 	/// </summary>
 	/// <param name="pWound">The wound AEmitter to add</param>
 	/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset</param>
-	virtual void AddWound(AEmitter *pWound, const Vector& parentOffsetToSet, bool checkGibWoundLimit = true);
+	void AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit = true);
 
+    /// <summary>
+    /// Removes a specified number of wounds and returns damage caused by these wounds. Head multiplier is not used.
+    /// </summary>
+    /// <param name="numberOfWoundsToRemove">The number of wounds that should be removed.</param>
+    /// <returns>The amount of damage caused by these wounds.</returns>
+    float RemoveWounds(int numberOfWoundsToRemove) { return RemoveWounds(numberOfWoundsToRemove, true, false); }
 
-	/// <summary>
-	/// Removes a specified amount of wounds and returns damage caused by these wounds. Head multiplier is not used.				
-	/// </summary>
-	/// <param name="amount">Amount of wounds to remove.</param>
-	/// <returns>Amount of damage caused by these wounds.</returns>
-	virtual int RemoveWounds(int amount);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the amount of wound attached to this.
-// Arguments:       Key to retrieve value.
-// Return value:    Wound amount.
-
-	virtual int GetWoundCount() const { return m_Wounds.size(); }; 
-
+    /// <summary>
+    /// Removes a specified number of wounds and returns damage caused by these wounds. Head multiplier is not used.
+    /// Optionally only removes wounds that affect health directly.
+    /// </summary>
+    /// <param name="numberOfWoundsToRemove">The number of wounds that should be removed.</param>
+    /// <param name="includeDamageTransferringAttachables">Whether to remove wounds from attachables that transfer damage to their parent (this MOSRotating).</param>
+    /// <param name="includeNonDamageTransferringAttachables">Whether to remove wounds from attachables that do not transfer damage to their parent (this MOSRotating).</param>
+    /// <returns>The amount of damage caused by the removed wounds.</returns>
+    float RemoveWounds(int numberOfWoundsToRemove, bool includeDamageTransferringAttachables, bool includeNonDamageTransferringAttachables);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetStringValue

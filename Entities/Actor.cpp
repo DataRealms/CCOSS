@@ -1364,35 +1364,6 @@ void Actor::UpdateAI()
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-
-int Actor::RemoveAnyRandomWounds(int amount)
-{
-	float damage = 0;
-
-	for (int i = 0; i < amount; i++)
-	{
-		// Fill the list of damaged bodyparts
-		std::vector<MOSRotating *> bodyParts;
-		if (GetWoundCount() > 0)
-			bodyParts.push_back(this);
-
-		// Stop removing wounds if there are not any left
-		if (bodyParts.size() == 0)
-			break;
-
-		int partIndex = RangeRand(0, bodyParts.size() - 1);
-		MOSRotating * part = bodyParts[partIndex];
-		damage += part->RemoveWounds(1);
-	}
-
-	return damage;
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          VerifyMOIDs
 //////////////////////////////////////////////////////////////////////////////////////////

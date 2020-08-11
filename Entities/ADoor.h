@@ -142,13 +142,6 @@ namespace RTE {
 
 #pragma region Virtual Override Methods
 		/// <summary>
-		/// Removes a specified amount of wounds from the actor and all standard attachables.
-		/// </summary>
-		/// <param name="amount">Amount of wounds to remove.</param>
-		/// <returns>Damage taken from removed wounds.</returns>
-		virtual int RemoveAnyRandomWounds(int amount);
-
-		/// <summary>
 		/// Gibs this, effectively destroying it and creating multiple gibs or pieces in its place.
 		/// </summary>
 		/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>

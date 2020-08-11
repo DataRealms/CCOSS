@@ -285,26 +285,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ADoor::RemoveAnyRandomWounds(int amount) {
-		float damage = 0;
-		for (int i = 0; i < amount; i++) {
-			std::vector<MOSRotating *> woundedBodyParts;
-			if (GetWoundCount() > 0) { woundedBodyParts.push_back(this); }
-			if (m_Door && m_Door->GetWoundCount()) { woundedBodyParts.push_back(m_Door); }
-
-			if (woundedBodyParts.size() == 0) {
-				return damage;
-			}
-
-			int partIndex = RangeRand(0, woundedBodyParts.size() - 1);
-			MOSRotating *part = woundedBodyParts[partIndex];
-			damage += part->RemoveWounds(1);
-		}
-		return damage;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void ADoor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *ignoreMO) {
 		if (m_Door && m_Door->IsAttached()) {
 			EraseDoorMaterial();

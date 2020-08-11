@@ -86,7 +86,7 @@ public:
 // Description:     Clears all the settings.
 // Arguments:       None.
 
-    void Clear(void);
+    void Clear();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -151,7 +151,7 @@ public:
 // Description:     Invalidates the panel
 // Arguments:       None.
 
-    void Invalidate(void);
+    void Invalidate();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -160,7 +160,7 @@ public:
 // Description:     Checks if the panel is valid
 // Arguments:       None.
 
-    bool IsValid(void);
+    bool IsValid();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -278,7 +278,7 @@ public:
 // Description:     Called when the panel gains focus.
 // Arguments:       None.
 
-    virtual void OnGainFocus(void);
+    virtual void OnGainFocus();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -287,7 +287,7 @@ public:
 // Description:     Called when the panel looses focus.
 // Arguments:       None.
 
-    virtual void OnLoseFocus(void);
+    virtual void OnLoseFocus();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -350,7 +350,7 @@ public:
 // Description:     Captures the mouse.
 // Arguments:       None.
 
-    void CaptureMouse(void);
+    void CaptureMouse();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -359,7 +359,7 @@ public:
 // Description:     Releases the mouse.
 // Arguments:       None.
 
-    void ReleaseMouse(void);
+    void ReleaseMouse();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -386,7 +386,7 @@ public:
 // Description:     Gets the visibility of the panel.
 // Arguments:       None.
 
-    bool _GetVisible(void);
+    bool _GetVisible();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -404,7 +404,7 @@ public:
 // Description:     Gets the enabled state of the panel.
 // Arguments:       None.
 
-    bool _GetEnabled(void);
+    bool _GetEnabled();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -413,7 +413,7 @@ public:
 // Description:     Gets the width of the panel.
 // Arguments:       None.
 
-    int GetWidth(void);
+    int GetWidth();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -422,7 +422,7 @@ public:
 // Description:     Gets the height of the panel.
 // Arguments:       None.
 
-    int    GetHeight(void);
+    int    GetHeight();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -468,7 +468,7 @@ public:
 // Description:     Gets the rectangle of the panel.
 // Arguments:       None.
 
-    GUIRect *GetRect(void);
+    GUIRect *GetRect();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -486,7 +486,7 @@ public:
 // Description:     Gets the parent of this panel.
 // Arguments:       None.
 
-    GUIPanel *GetParentPanel(void);
+    GUIPanel *GetParentPanel();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -495,7 +495,7 @@ public:
 // Description:     Gets the panel's ID.
 // Arguments:       None.
 
-    int GetPanelID(void);
+    int GetPanelID();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -513,7 +513,7 @@ public:
 // Description:     Gets the panel's captured state.
 // Arguments:       None.
 
-    bool IsCaptured(void);
+    bool IsCaptured();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -522,7 +522,7 @@ public:
 // Description:     Gets the panel's enabled state.
 // Arguments:       None.
 
-    bool IsEnabled(void);
+    bool IsEnabled();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -550,7 +550,7 @@ public:
 // Description:     Sets the focus of this panel.
 // Arguments:       None.
 
-    void SetFocus(void);
+    void SetFocus();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -559,7 +559,7 @@ public:
 // Description:     Gets the focus value of the panel.
 // Arguments:       None.
 
-    bool HasFocus(void);
+    bool HasFocus();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -577,7 +577,7 @@ public:
 // Description:     Gets the Z index of the panel.
 // Arguments:       None.
 
-    int GetZPos(void);
+    int GetZPos();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -595,7 +595,7 @@ public:
 // Description:     Convert the properties in the panel to a string.
 // Arguments:       None.
 
-    std::string ToString(void);
+    std::string ToString();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

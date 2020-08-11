@@ -70,7 +70,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~HeldDevice() { Destroy(true); }
+	~HeldDevice() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Attachable::Reset(); m_MOType = MovableObject::TypeHeldDevice; }
+    void Reset() override { Clear(); Attachable::Reset(); m_MOType = MovableObject::TypeHeldDevice; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +114,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +124,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A Vector with the absolute position of this' HUD stack top point.
 
-    virtual Vector GetAboveHUDPos() const { return m_Pos + Vector(0, -32); }
+	Vector GetAboveHUDPos() const override { return m_Pos + Vector(0, -32); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -367,13 +367,13 @@ ClassInfoGetters
 	
 	
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
+// Method:  AddPieMenuSlices
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds all slices this needs on a pie menu.
 // Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
 // Return value:    Whether any slices were added.
 
-    virtual bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
+   bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -387,7 +387,7 @@ ClassInfoGetters
 // Return value:    Whether the collision has been deemed valid. If false, then disregard
 //                  any impulses in the Hitdata.
 
-    virtual bool CollideAtPoint(HitData &hitData);
+    bool CollideAtPoint(HitData &hitData) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -420,7 +420,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reload() { ; }
+    virtual void Reload() {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -484,18 +484,8 @@ ClassInfoGetters
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this hit.
 
-    virtual bool OnMOHit(MovableObject *pOtherMO);
+	bool OnMOHit(MovableObject *pOtherMO) override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Travel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Travels this, using its physical representation.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Travel();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -504,7 +494,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -519,10 +509,7 @@ ClassInfoGetters
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -536,12 +523,12 @@ ClassInfoGetters
 //                  get drawn etc.
 // Return value:    None.
 
-    virtual void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
+    void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
 
 	/// <summary>
 	/// Resest all the timers used by this. Can be emitters, etc. This is to prevent backed up emissions to come out all at once while this has been held dormant in an inventory.
 	/// </summary>
-	virtual void ResetAllTimers() { Attachable::ResetAllTimers(); m_ActivationTimer.Reset(); }
+	void ResetAllTimers() override { Attachable::ResetAllTimers(); m_ActivationTimer.Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -603,8 +590,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    HeldDevice(const HeldDevice &reference);
-    HeldDevice & operator=(const HeldDevice &rhs);
+	HeldDevice(const HeldDevice &reference) {}
+	HeldDevice & operator=(const HeldDevice &rhs) {}
 
 };
 

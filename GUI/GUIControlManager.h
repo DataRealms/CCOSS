@@ -64,7 +64,7 @@ public:
 //                  system memory.
 // Arguments:       None.
 
-    virtual ~GUIControlManager() { Destroy(); }
+	~GUIControlManager() { Destroy(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ public:
 // Description:     Frees all the allocated resources.
 // Arguments:       None.
 
-    void Destroy(void);
+	void Destroy();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -91,7 +91,7 @@ public:
 // Description:     Clears all the controls.
 // Arguments:       None.
 
-    void Clear(void);
+    void Clear();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +119,7 @@ public:
 // Description:     Updates the GUI every frame
 // Arguments:       None.
 
-    void Update(void);
+    void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -128,7 +128,7 @@ public:
 // Description:     Draws the GUI to the back buffer.
 // Arguments:       None.
 
-    void Draw(void);
+    void Draw();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +146,7 @@ public:
 // Description:     Draws the mouse.
 // Arguments:       None.
 
-    void DrawMouse(void);
+    void DrawMouse();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -219,7 +219,7 @@ public:
 // Arguments:       None.
 // Returns:         vector<GUIControl *> Pointer.
 
-    std::vector<GUIControl *> *GetControlList(void);
+    std::vector<GUIControl *> *GetControlList();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

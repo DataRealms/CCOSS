@@ -134,19 +134,8 @@ public:
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~SceneMan() { Destroy(); }
+	~SceneMan() { Destroy(); }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the SceneMan object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -157,7 +146,7 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(std::string readerFile);
+	int Create(std::string readerFile);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -183,7 +172,7 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScene
+// Method:  LoadScene
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Actually loads a new Scene into memory. has to be done before using
 //                  this object.
@@ -193,11 +182,11 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadScene(Scene *pNewScene, bool placeObjects = true, bool placeUnits = true);
+	int LoadScene(Scene *pNewScene, bool placeObjects = true, bool placeUnits = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetSceneToLoad
+// Method:  SetSceneToLoad
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Stores a Scene reference to be loaded later into the SceneMan.
 // Arguments:       The instance reference of the Scene, ownership IS NOT (!!) transferred!
@@ -205,11 +194,11 @@ public:
 //                  in its definition.
 // Return value:    None.
 
-    virtual void SetSceneToLoad(const Scene *pLoadScene, bool placeObjects = true, bool placeUnits = true) { m_pSceneToLoad = pLoadScene; m_PlaceObjects = placeObjects; m_PlaceUnits = placeUnits; }
+	void SetSceneToLoad(const Scene *pLoadScene, bool placeObjects = true, bool placeUnits = true) { m_pSceneToLoad = pLoadScene; m_PlaceObjects = placeObjects; m_PlaceUnits = placeUnits; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetSceneToLoad
+// Method:  SetSceneToLoad
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets a scene to load later, by preset name.
 // Arguments:       The name of the Scene preset instance to load.
@@ -218,32 +207,32 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int SetSceneToLoad(std::string sceneName, bool placeObjects = true, bool placeUnits = true);
+	int SetSceneToLoad(std::string sceneName, bool placeObjects = true, bool placeUnits = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetSceneToLoad
+// Method:  GetSceneToLoad
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the stored Scene reference to be loaded later into the SceneMan.
 // Arguments:       None.
 // Return value:    The instance reference of the Scene, ownership IS NOT (!!) transferred!
 
-    virtual const Scene * GetSceneToLoad() { return m_pSceneToLoad; }
+	const Scene * GetSceneToLoad() { return m_pSceneToLoad; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScene
+// Method:  LoadScene
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Actually loads the Scene set to be loaded in SetSceneToLoad.
 // Arguments:       None.
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadScene();
+	int LoadScene();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScene
+// Method:  LoadScene
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Loads a Scene right now, by preset name.
 // Arguments:       The name of the Scene preset instance to load.
@@ -253,11 +242,11 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadScene(std::string sceneName, bool placeObjects = true, bool placeUnits = true);
+	int LoadScene(std::string sceneName, bool placeObjects = true, bool placeUnits = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScene
+// Method:  LoadScene
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Loads a Scene right now, by preset name.
 // Arguments:       The name of the Scene preset instance to load.
@@ -266,18 +255,18 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-	virtual int LoadScene(std::string sceneName, bool placeObjects = true) { return LoadScene(sceneName, placeObjects, true); }
+	int LoadScene(std::string sceneName, bool placeObjects = true) { return LoadScene(sceneName, placeObjects, true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire SceneMan, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() override { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -291,13 +280,13 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
+// Method:  GetClassName
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the class name of this Entity.
 // Arguments:       None.
 // Return value:    A string with the friendly-formatted type name of this object.
 
-    virtual const std::string & GetClassName() const { return m_ClassName; }
+	const std::string & GetClassName() const override { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1788,8 +1777,8 @@ private:
 
     
     // Disallow the use of some implicit methods.
-    SceneMan(const SceneMan &reference);
-    SceneMan & operator=(const SceneMan &rhs);
+	SceneMan(const SceneMan &reference) {}
+	SceneMan & operator=(const SceneMan &rhs) {}
 
 };
 

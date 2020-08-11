@@ -38,25 +38,19 @@ namespace RTE {
 		/// <param name="fpProgressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this Reader's reading.</param>
 		/// <param name="failOK">Whether it's ok for the file to not be there, ie we're only trying to open, and if it's not there, then fail silently.</param>
 		/// <returns>An error return value signaling success or any particular failure.  Anything below 0 is an error signal.</returns>
-		virtual int Create(const char *fileName, bool overwrites = false, ProgressCallback fpProgressCallback = 0, bool failOK = false);
+		int Create(const char *fileName, bool overwrites = false, ProgressCallback fpProgressCallback = 0, bool failOK = false);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a Reader object before deletion from system memory.
 		/// </summary>
-		virtual ~Reader() { Destroy(true); }
+		~Reader() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the Reader object.
 		/// </summary>
-		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false);
-
-		/// <summary>
-		/// Resets the entire Reader, including its inherited members, to their default settings or values.
-		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Destroy();
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -64,13 +58,13 @@ namespace RTE {
 		/// Gets the name of Data Module this reader is reading from.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this Reader.</returns>
-		virtual const std::string & GetReadModuleName() const { return m_DataModuleName; }
+		const std::string & GetReadModuleName() const { return m_DataModuleName; }
 
 		/// <summary>
 		/// Gets the ID of Data Module this reader is reading from.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this Reader.</returns>
-		virtual int GetReadModuleID() const;
+		int GetReadModuleID() const;
 
 		/// <summary>
 		/// Gets a pointer to the istream of this reader.
@@ -197,19 +191,19 @@ namespace RTE {
 		/// </summary>
 		/// <param name="var">A reference to the variable that will be filled by the extracted data.</param>
 		/// <returns>A Reader reference for further use in an expression.</returns>
-		virtual Reader & operator>>(bool &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		virtual Reader & operator>>(char &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		virtual Reader & operator>>(unsigned char &var) { DiscardEmptySpace(); int temp; *m_Stream >> temp; var = temp; return *this; }
-		virtual Reader & operator>>(short &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		virtual Reader & operator>>(unsigned short &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		virtual Reader & operator>>(int &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		virtual Reader & operator>>(unsigned int &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		virtual Reader & operator>>(long &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		virtual Reader & operator>>(unsigned long &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		virtual Reader & operator>>(float &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		virtual Reader & operator>>(double &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		virtual Reader & operator>>(char * var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
-		virtual Reader & operator>>(std::string &var) { var.assign(ReadLine()); return *this; }
+		Reader & operator>>(bool &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		Reader & operator>>(char &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		Reader & operator>>(unsigned char &var) { DiscardEmptySpace(); int temp; *m_Stream >> temp; var = temp; return *this; }
+		Reader & operator>>(short &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		Reader & operator>>(unsigned short &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		Reader & operator>>(int &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		Reader & operator>>(unsigned int &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		Reader & operator>>(long &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		Reader & operator>>(unsigned long &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		Reader & operator>>(float &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		Reader & operator>>(double &var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		Reader & operator>>(char * var) { DiscardEmptySpace(); *m_Stream >> var; return *this; }
+		Reader & operator>>(std::string &var) { var.assign(ReadLine()); return *this; }
 #pragma endregion
 
 #pragma region Class Info
@@ -217,7 +211,7 @@ namespace RTE {
 		/// Gets the class name of this Reader.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this Reader.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:
@@ -226,7 +220,7 @@ namespace RTE {
 		/// A struct containing information from the currently used stream.
 		/// </summary>
 		struct StreamInfo {
-			StreamInfo(std::ifstream *stream, std::string filePath, int currentLine, int prevIndent) : Stream(stream), FilePath(filePath), CurrentLine(currentLine), PreviousIndent(prevIndent) { ; }
+			StreamInfo(std::ifstream *stream, std::string filePath, int currentLine, int prevIndent) : Stream(stream), FilePath(filePath), CurrentLine(currentLine), PreviousIndent(prevIndent) {}
 
 			// NOTE: These members are owned by the reader that owns this struct, so are not deleted when this is destroyed.
 			std::ifstream *Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.

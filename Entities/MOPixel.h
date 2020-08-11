@@ -39,7 +39,7 @@ namespace RTE {
 		/// Makes the MOPixel object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Makes the MOPixel object ready for use.
@@ -51,7 +51,7 @@ namespace RTE {
 		/// <param name="atom">An Atom that will collide with the terrain.</param>
 		/// <param name="lifetime">The amount of time in ms this MOPixel will exist. 0 means unlimited.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(Color color, const float mass, const Vector &position, const Vector &velocity, Atom *atom, const unsigned long lifetime = 0);
+		int Create(Color color, const float mass, const Vector &position, const Vector &velocity, Atom *atom, const unsigned long lifetime = 0);
 
 		/// <summary>
 		/// Creates a MOPixel to be identical to another, by deep copy.
@@ -65,18 +65,18 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a MOPixel object before deletion from system memory.
 		/// </summary>
-		virtual ~MOPixel() { Destroy(true); }
+		 ~MOPixel() override { Destroy(true); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the MOPixel object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false);
+		void Destroy(bool notInherited = false) override;
 
 		/// <summary>
 		/// Resets the entire MOPixel, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); MovableObject::Reset(); }
+		void Reset() override { Clear(); MovableObject::Reset(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -84,13 +84,13 @@ namespace RTE {
 		/// Gets the drawing priority of this MOPixel, if two things were overlap when copying to the terrain, the higher priority MO would end up getting drawn.
 		/// </summary>
 		/// <returns>The drawing priority of this MOPixel.</returns>
-		virtual int GetDrawPriority() const;
+		int GetDrawPriority() const override;
 
 		/// <summary>
 		/// Gets the main Material of this MOPixel.
 		/// </summary>
 		/// <returns>The Material of this MOPixel.</returns>
-		virtual const Material * GetMaterial() const;
+		const Material * GetMaterial() const override;
 
 		/// <summary>
 		/// Gets the current Atom of this MOPixel.
@@ -133,7 +133,7 @@ namespace RTE {
 		/// <summary>
 		/// Travels this MOPixel, using its physical representation.
 		/// </summary>
-		virtual void Travel();
+		void Travel() override;
 
 		/// <summary>
 		/// Calculates the collision response when another MO's Atom collides with this MO's physical representation.
@@ -141,31 +141,31 @@ namespace RTE {
 		/// </summary>
 		/// <param name="hitData">Reference to the HitData struct which describes the collision. This will be modified to represent the results of the collision.</param>
 		/// <returns>Whether the collision has been deemed valid. If false, then disregard any impulses in the HitData.</returns>
-		virtual bool CollideAtPoint(HitData &hitData);
+		bool CollideAtPoint(HitData &hitData) override;
 
 		/// <summary>
 		/// Does the calculations necessary to detect whether this MO appears to have has settled in the world and is at rest or not. IsAtRest() retrieves the answer.
 		/// </summary>
-		virtual void RestDetection();
+		void RestDetection() override;
 
 		/// <summary>
 		/// Defines what should happen when this MOPixel hits and then bounces off of something. This is called by the owned Atom/AtomGroup of this MOPixel during travel.
 		/// </summary>
 		/// <param name="hd">The HitData describing the collision in detail.</param>
 		/// <returns>Whether the MOPixel should immediately halt any travel going on after this bounce.</returns>
-		virtual bool OnBounce(HitData &hd) { return false; }
+		bool OnBounce(HitData &hd) override { return false; }
 
 		/// <summary>
 		/// Defines what should happen when this MOPixel hits and then sink into something. This is called by the owned Atom/AtomGroup of this MOPixel during travel.
 		/// </summary>
 		/// <param name="hd">The HitData describing the collision in detail.</param>
 		/// <returns>Whether the MOPixel should immediately halt any travel going on after this sinkage.</returns>
-		virtual bool OnSink(HitData &hd) { return false; }
+		bool OnSink(HitData &hd) override { return false; }
 
 		/// <summary>
 		/// Updates this MOPixel. Supposed to be done every frame.
 		/// </summary>
-		virtual void Update();
+		void Update() override;
 
 		/// <summary>
 		/// Draws this MOPixel's current graphical representation to a BITMAP of choice.
@@ -174,7 +174,7 @@ namespace RTE {
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
 		/// <param name="mode">In which mode to draw in. See the DrawMode enumeration for the modes.</param>
 		/// <param name="onlyPhysical">Whether to not draw any extra 'ghost' items of this MOPixel, indicator arrows or hovering HUD text and so on.</param>
-		virtual void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const;
+		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 #pragma endregion
 
 	protected:

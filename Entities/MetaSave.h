@@ -27,7 +27,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="savePath">The path of the file to where the MetaMan state should be saved.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(std::string savePath);
+		int Create(std::string savePath);
 
 		/// <summary>
 		/// Creates a MetaSave to be identical to another, by deep copy.
@@ -41,13 +41,13 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a MetaSave object before deletion from system memory.
 		/// </summary>
-		virtual ~MetaSave() { Destroy(true); }
+		~MetaSave() override { Destroy(true); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the MetaSave object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false) { if (!notInherited) { Entity::Destroy(); } Clear(); }
+		void Destroy(bool notInherited = false) override { if (!notInherited) { Entity::Destroy(); } Clear(); }
 #pragma endregion
 
 #pragma region Getters

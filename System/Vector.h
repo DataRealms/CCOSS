@@ -45,7 +45,7 @@ namespace RTE {
 		/// <param name="inputX">Float defining the initial X value of this Vector.</param>
 		/// <param name="inputY">Float defining the initial Y value of this Vector.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(float inputX, float inputY) { m_X = inputX; m_Y = inputY; return 0; }
+		int Create(float inputX, float inputY) { m_X = inputX; m_Y = inputY; return 0; }
 #pragma endregion
 
 #pragma region Destruction
@@ -540,7 +540,7 @@ namespace RTE {
 		/// Gets the class name of this Vector.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this Vector.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	protected:

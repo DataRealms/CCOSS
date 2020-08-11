@@ -53,7 +53,7 @@ public:
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~AllegroScreen() { Destroy(); }
+	~AllegroScreen() override { Destroy(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ public:
 // Description:     Destroy the screen
 // Arguments:       None.
 
-    virtual void Destroy(void);
+	void Destroy() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ public:
 // Description:     Creates a bitmap from a file
 // Arguments:       Filename
 
-    GUIBitmap *CreateBitmap(const std::string Filename);
+    GUIBitmap * CreateBitmap(const std::string Filename) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ public:
 // Description:     Creates an empty bitmap
 // Arguments:       Width and Height
 
-    GUIBitmap *CreateBitmap(int Width, int Height);
+    GUIBitmap * CreateBitmap(int Width, int Height) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ public:
 // Description:     Gets a bitmap representing the screen.
 // Arguments:       None.
 
-    GUIBitmap *GetBitmap(void);
+    GUIBitmap *GetBitmap();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@ public:
 //                  should be converted to. If this is 0, then the current video color depth
 //                  will be used as target.
 
-    unsigned long ConvertColor(unsigned long color, int targetDepth = 0);
+    unsigned long ConvertColor(unsigned long color, int targetDepth = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

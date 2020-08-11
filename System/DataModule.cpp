@@ -92,7 +92,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void DataModule::Destroy(bool notInherited) {
+	void DataModule::Destroy() {
 		for (const PresetEntry &preset : m_PresetList){
 			delete preset.m_EntityPreset;
 		}

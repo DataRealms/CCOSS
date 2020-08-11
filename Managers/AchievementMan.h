@@ -26,7 +26,7 @@ public:
 
     ~AchievementMan() { Sync(); };
 
-    virtual int Create();
+	int Create();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsAchievementUnlocked

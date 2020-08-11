@@ -87,14 +87,14 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire ScenarioGUI, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -197,17 +197,17 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  Draw
+// Method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the menu
 // Arguments:       The bitmap to draw on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *drawBitmap) const;
+	void Draw(BITMAP *drawBitmap) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -556,8 +556,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    ScenarioGUI(const ScenarioGUI &reference);
-    ScenarioGUI & operator=(const ScenarioGUI &rhs);
+	ScenarioGUI(const ScenarioGUI &reference) {}
+	ScenarioGUI & operator=(const ScenarioGUI &rhs) {}
 
 };
 

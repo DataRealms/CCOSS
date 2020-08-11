@@ -73,7 +73,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~MOSRotating() { Destroy(true); }
+	~MOSRotating() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -101,12 +101,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(ContentFile spriteFile,
-                       const int frameCount = 1,
-                       const float mass = 1,
-                       const Vector &position = Vector(0, 0),
-                       const Vector &velocity = Vector(0, 0),
-                       const unsigned long lifetime = 0);
+	int Create(ContentFile spriteFile, const int frameCount = 1, const float mass = 1, const Vector &position = Vector(0, 0), const Vector &velocity = Vector(0, 0), const unsigned long lifetime = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -117,7 +112,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const MOSRotating &reference);
+	int Create(const MOSRotating &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -128,7 +123,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); MOSprite::Reset(); }
+    void Reset() override { Clear(); MOSprite::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +134,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +145,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+    float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -170,19 +165,8 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The the Material of this MOSRotating.
 
-    virtual Material const * GetMaterial() const;
+	Material const * GetMaterial() const override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HitsMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets whether this MovableObject is set to collide with other
-//                  MovableObject:s during travel.
-// Arguments:       None.
-// Return value:    Whether to hit other MO's during travel, or not.
-
-    virtual bool HitsMOs() const;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetDrawPriority
@@ -194,7 +178,7 @@ ClassInfoGetters
 // Return value:    The the priority  of this MovableObject. Higher number, the higher
 //                  priority.
 
-    virtual int GetDrawPriority() const;
+	int GetDrawPriority() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -215,20 +199,7 @@ ClassInfoGetters
 // Return value:    A const reference to the current recoil offset.
 
     const Vector & GetRecoilOffset() const { return m_RecoilOffset; }
-/*
-// TODO: Improve this one! Really crappy fit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetBoundingBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the oriented bounding box which is guaranteed to contain this,
-//                  taking rotation etc into account. It's not guaranteed to be fit
-//                  perfectly though. TODO: MAKE FIT BETTER
-// Arguments:       None.
-// Return value:    A Box which is guaranteed to contain this. Does nto take wrapping into
-//                  account, and parts of this box may be out of bounds!
 
-    virtual Box GetBoundingBox() const { return Box(m_Pos + Vector(-m_MaxRadius, -m_MaxRadius), m_MaxDiameter, m_MaxDiameter); }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGibList
@@ -238,28 +209,6 @@ ClassInfoGetters
 // Return value:    A pointer to the list of gibs. Ownership is NOT transferred!
 
     std::list<Gib> * GetGibList() { return &m_Gibs; }
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetAtom
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Replaces the current Atom of this MOSRotating with a new one.
-// Arguments:       A reference to the new Atom.
-// Return value:    None.
-
-    void SetAtom(Atom *newAtom);
-*/
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetToHitMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets this MovableObject to collide with other MovableObjects during
-//                  travel.
-// Arguments:       Whether to hit other MO's during travel, or not.
-// Return value:    None.
-
-    virtual void SetToHitMOs(bool hitMOs = true);
-*/
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -334,7 +283,7 @@ ClassInfoGetters
 // Return value:    Whether the collision has been deemed valid. If false, then disregard
 //                  any impulses in the Hitdata.
 
-    virtual bool CollideAtPoint(HitData &hitData);
+    bool CollideAtPoint(HitData &hitData) override;
 
 
     /// <summary>
@@ -343,7 +292,7 @@ ClassInfoGetters
     /// </summary>
     /// <param name="hd">The HitData describing the collision in detail.</param>
     /// <return>Whether the MovableObject should immediately halt any travel going on after this bounce.</return>
-    virtual bool OnBounce(HitData &hd);
+	bool OnBounce(HitData &hd) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -356,7 +305,7 @@ ClassInfoGetters
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this sinkage.
 
-    virtual bool OnSink(HitData &hd);
+	bool OnSink(HitData &hd) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -399,7 +348,7 @@ ClassInfoGetters
 // Return value:    Whether any intersection was successfully resolved. Will return true
 //                  even if there wasn't any intersections to begin with.
 
-    virtual bool MoveOutOfTerrain(unsigned char strongerThan = g_MaterialAir);
+	bool MoveOutOfTerrain(unsigned char strongerThan = g_MaterialAir) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -411,7 +360,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ApplyForces();
+	void ApplyForces() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -423,7 +372,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ApplyImpulses();
+	void ApplyImpulses() override;
 
 
 	void AddAttachable(Attachable *pAttachable);
@@ -450,7 +399,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetAllTimers();
+    void ResetAllTimers() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -462,7 +411,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void RestDetection();
+    void RestDetection() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -473,7 +422,7 @@ ClassInfoGetters
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+	bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -483,7 +432,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void EraseFromTerrain();
+	void EraseFromTerrain();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -497,7 +446,7 @@ ClassInfoGetters
 //                  erased terrain.
 // Return value:    Whether deep penetration was detected and erasure was done.
 
-    virtual bool DeepCheck(bool makeMOPs = true, int skipMOP = 2, int maxMOP = 100);
+	bool DeepCheck(bool makeMOPs = true, int skipMOP = 2, int maxMOP = 100);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -508,7 +457,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void PreTravel();
+	void PreTravel() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -518,7 +467,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Travel();
+	void Travel() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -529,7 +478,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void PostTravel();
+	void PostTravel() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -539,7 +488,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -550,7 +499,7 @@ ClassInfoGetters
 // Arguments:       The MovableObject to check this for overlap against.
 // Return value:    Whether it was drawn or not.
 
-    virtual bool DrawMOIDIfOverlapping(MovableObject *pOverlapMO);
+	bool DrawMOIDIfOverlapping(MovableObject *pOverlapMO) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -565,50 +514,47 @@ ClassInfoGetters
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetGibWoundLimit
+// Method:  GetGibWoundLimit
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Return wound limit for this object.
 // Arguments:       None.
 // Return value:    Wound limit of the object.
 
-	virtual int GetGibWoundLimit() const { return m_GibWoundLimit; } 
+	int GetGibWoundLimit() const { return m_GibWoundLimit; } 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetGibImpulseLimit
+// Method:  SetGibImpulseLimit
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Set new impulse limit.
 // Arguments:       New impulse limit.
 // Return value:    None.
 
-	virtual void SetGibImpulseLimit(int newLimit) { m_GibImpulseLimit = newLimit; }
+	void SetGibImpulseLimit(int newLimit) { m_GibImpulseLimit = newLimit; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetGibImpulseLimit
+// Method:  GetGibImpulseLimit
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Return impulse limit for this object.
 // Arguments:       None.
 // Return value:    Impulse limit of the object.
 
-	virtual int GetGibImpulseLimit() const { return m_GibImpulseLimit; } 
+	int GetGibImpulseLimit() const { return m_GibImpulseLimit; } 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetGibWoundLimit
+// Method:  SetGibWoundLimit
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Set new wound limit, current wounds are not affected.
 // Arguments:       New wound limit.
 // Return value:    None.
 
-	virtual void SetGibWoundLimit(int newLimit) { m_GibWoundLimit = newLimit; }
+	void SetGibWoundLimit(int newLimit) { m_GibWoundLimit = newLimit; }
 
 
 	/// <summary>
@@ -616,7 +562,7 @@ ClassInfoGetters
 	/// </summary>
 	/// <param name="pWound">The wound AEmitter to add</param>
 	/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset</param>
-	virtual void AddWound(AEmitter *pWound, const Vector& parentOffsetToSet, bool checkGibWoundLimit = true);
+	void AddWound(AEmitter *pWound, const Vector& parentOffsetToSet, bool checkGibWoundLimit = true);
 
 
 	/// <summary>
@@ -628,59 +574,59 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetWoundCount
+// Method:  GetWoundCount
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the amount of wound attached to this.
 // Arguments:       Key to retrieve value.
 // Return value:    Wound amount.
 
-	virtual int GetWoundCount() const { return m_Wounds.size(); }; 
+	int GetWoundCount() const { return m_Wounds.size(); }; 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetStringValue
+// Method:  GetStringValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the string value associated with the specified key or "" if it does not exist.
 // Arguments:       Key to retrieve value.
 // Return value:    String value.
 
-	virtual std::string GetStringValue(std::string key);
+	std::string GetStringValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetNumberValue
+// Method:  GetNumberValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the number value associated with the specified key or 0 if it does not exist.
 // Arguments:       Key to retrieve value.
 // Return value:    Number (double) value.
 
-	virtual double GetNumberValue(std::string key);
+	double GetNumberValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetObjectValue
+// Method:  GetObjectValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the object value associated with the specified key or 0 if it does not exist.
 // Arguments:       None.
 // Return value:    Object (Entity *) value.
 
-	virtual Entity * GetObjectValue(std::string key);
+	Entity * GetObjectValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetStringValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the string value associated with the specified key.
-// Arguments:       String key and value to set.
-// Return value:    None.
-
-	virtual void SetStringValue(std::string key, std::string value);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetNumberValue
+// Method:  SetStringValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the string value associated with the specified key.
 // Arguments:       String key and value to set.
 // Return value:    None.
 
-	virtual void SetNumberValue(std::string key, double value);
+	void SetStringValue(std::string key, std::string value);
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  SetNumberValue
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the string value associated with the specified key.
+// Arguments:       String key and value to set.
+// Return value:    None.
+
+	void SetNumberValue(std::string key, double value);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetObjectValue
@@ -689,7 +635,7 @@ ClassInfoGetters
 // Arguments:       String key and value to set.
 // Return value:    None.
 
-	virtual void SetObjectValue(std::string key, Entity * value);
+	void SetObjectValue(std::string key, Entity * value);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RemoveStringValue
@@ -698,7 +644,7 @@ ClassInfoGetters
 // Arguments:       String key to remove.
 // Return value:    None.
 
-	virtual void RemoveStringValue(std::string key);
+	void RemoveStringValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RemoveNumberValue
@@ -707,7 +653,7 @@ ClassInfoGetters
 // Arguments:       String key to remove.
 // Return value:    None.
 
-	virtual void RemoveNumberValue(std::string key);
+	void RemoveNumberValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RemoveObjectValue
@@ -716,7 +662,7 @@ ClassInfoGetters
 // Arguments:       String key to remove.
 // Return value:    None.
 
-	virtual void RemoveObjectValue(std::string key);
+	void RemoveObjectValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  StringValueExists
@@ -725,7 +671,7 @@ ClassInfoGetters
 // Arguments:       String key to check.
 // Return value:    True if value exists.
 
-	virtual bool StringValueExists(std::string key);
+	bool StringValueExists(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  NumberValueExists
@@ -734,7 +680,7 @@ ClassInfoGetters
 // Arguments:       String key to check.
 // Return value:    True if value exists.
 
-	virtual bool NumberValueExists(std::string key);
+	bool NumberValueExists(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ObjectValueExists
@@ -743,7 +689,7 @@ ClassInfoGetters
 // Arguments:       String key to check.
 // Return value:    True if value exists.
 
-	virtual bool ObjectValueExists(std::string key);
+	bool ObjectValueExists(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetMOIDs
@@ -752,7 +698,7 @@ ClassInfoGetters
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetDamageMultiplier
@@ -761,7 +707,7 @@ ClassInfoGetters
 // Arguments:       New multiplier value.
 // Return value:    None.
 
-	virtual void SetDamageMultiplier(float newValue) { m_DamageMultiplier = newValue; }
+	void SetDamageMultiplier(float newValue) { m_DamageMultiplier = newValue; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetDamageMultiplier
@@ -770,7 +716,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Current multiplier value.
 
-	virtual float GetDamageMultiplier() const { return m_DamageMultiplier; }
+	float GetDamageMultiplier() const { return m_DamageMultiplier; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsDamageMultiplierRedefined
@@ -780,7 +726,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Current multiplier value.
 
-	virtual bool IsDamageMultiplierRedefined() const { return m_DamageMultiplierRedefined; }
+	bool IsDamageMultiplierRedefined() const { return m_DamageMultiplierRedefined; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -790,17 +736,17 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The amount of impulse force exerted on this during the last frame.
 
-	virtual Vector GetTravelImpulse() const { return m_TravelImpulse; }
+	Vector GetTravelImpulse() const { return m_TravelImpulse; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTravelImpulse
+// Method:          SetTravelImpulse
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the amount of impulse force exerted on this during the last frame.
 // Arguments:       New impulse value
 // Return value:    None.
 
-	virtual void SetTravelImpulse(Vector impulse) { m_TravelImpulse = impulse; }
+	void SetTravelImpulse(Vector impulse) { m_TravelImpulse = impulse; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -839,9 +785,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
     // Member variables
     static Entity::ClassInfo m_sClass;
@@ -945,8 +889,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MOSRotating(const MOSRotating &reference);
-    MOSRotating& operator=(const MOSRotating &rhs);
+	MOSRotating(const MOSRotating &reference) {}
+	MOSRotating& operator=(const MOSRotating &rhs) {}
 
 };
 

@@ -39,20 +39,6 @@ class LuaMan:
 
 public:
 
-/*
-enum ServerResult
-{
-    SUCCESS = 0,
-    FAILEDCONNECTION,
-    INVALIDXML,
-    MAXCOUNT,
-    INVALIDKEY,
-    INVALIDPRODUCT,
-    EXPIREDKEY,
-    INVALIDMACHINE,
-    UNKNOWNERROR
-};
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     LuaMan
@@ -71,7 +57,7 @@ enum ServerResult
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~LuaMan() { Destroy(); }
+    ~LuaMan() { Destroy(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -82,18 +68,18 @@ enum ServerResult
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire LuaMan, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -107,13 +93,13 @@ enum ServerResult
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
+// Method:  GetClassName
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the class name of this Entity.
 // Arguments:       None.
 // Return value:    A string with the friendly-formatted type name of this object.
 
-    virtual const std::string & GetClassName() const { return m_ClassName; }
+	const std::string & GetClassName() const { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -391,8 +377,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    LuaMan(const LuaMan &reference);
-    LuaMan & operator=(const LuaMan &rhs);
+	LuaMan(const LuaMan &reference) {}
+	LuaMan & operator=(const LuaMan &rhs) {}
 
 	//Internal list of opened files used by File* functions 
 	FILE * m_Files[MAX_OPEN_FILES];

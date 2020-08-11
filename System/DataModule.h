@@ -51,25 +51,24 @@ namespace RTE {
 		/// <param name="moduleName">A string defining the name of this DataModule, e.g. "MyModule.rte".</param>
 		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this DataModule's creation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(std::string moduleName, ProgressCallback progressCallback = 0);
+		int Create(std::string moduleName, ProgressCallback progressCallback = 0);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a DataModule object before deletion from system memory.
 		/// </summary>
-		virtual ~DataModule() { Destroy(true); }
+		~DataModule() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the DataModule object.
 		/// </summary>
-		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false);
+		void Destroy();
 
 		/// <summary>
 		/// Resets the entire DataModule, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region INI Handling
@@ -79,7 +78,7 @@ namespace RTE {
 		/// <param name="moduleName">A string defining the name of this DataModule, e.g. "MyModule.rte".</param>
 		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this DataModule's creation.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int ReadModuleProperties(std::string moduleName, ProgressCallback progressCallback = 0);
+		int ReadModuleProperties(std::string moduleName, ProgressCallback progressCallback = 0);
 
 		/// <summary>
 		/// Returns true if loader should ignore missing items in this module.
@@ -93,31 +92,31 @@ namespace RTE {
 		/// Gets the file name of this DataModule, e.g. "MyMod.rte".
 		/// </summary>
 		/// <returns>A string with the data module file name.</returns>
-		virtual const std::string & GetFileName() const { return m_FileName; }
+		const std::string & GetFileName() const { return m_FileName; }
 
 		/// <summary>
 		/// Gets the friendly name of this DataModule, e.g. "My Great Mod".
 		/// </summary>
 		/// <returns>A string with the data module's friendly name.</returns>
-		virtual const std::string & GetFriendlyName() const { return m_FriendlyName; }
+		const std::string & GetFriendlyName() const { return m_FriendlyName; }
 
 		/// <summary>
 		/// Gets the author name of this DataModule, e.g. "Data Realms, LLC".
 		/// </summary>
 		/// <returns>A string with the author's name.</returns>
-		virtual const std::string & GetAuthor() const { return m_Author; }
+		const std::string & GetAuthor() const { return m_Author; }
 
 		/// <summary>
 		/// Gets the description of this DataModule's contents.
 		/// </summary>
 		/// <returns>A string with the description.</returns>
-		virtual const std::string & GetDescription() const { return m_Description; }
+		const std::string & GetDescription() const { return m_Description; }
 
 		/// <summary>
 		/// Gets the version number of this DataModule.
 		/// </summary>
 		/// <returns>An int with the version number, starting at 1.</returns>
-		virtual int GetVersionNumber() const { return m_Version; }
+		int GetVersionNumber() const { return m_Version; }
 
 		/// <summary>
 		/// Gets the BITMAP that visually represents this DataModule, for use in menus.
@@ -249,7 +248,7 @@ namespace RTE {
 		/// Gets the class name of this Entity.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	protected:

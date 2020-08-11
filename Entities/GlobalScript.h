@@ -60,7 +60,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~GlobalScript() { Destroy(true); }
+	~GlobalScript() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -71,18 +71,18 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create() { return 0; }
+   int Create() override { return 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
+// Method:  Create
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates an GlobalScript to be identical to another, by deep copy.
 // Arguments:       A reference to the GlobalScript to deep copy.
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const GlobalScript &reference);
+	int Create(const GlobalScript &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Entity::Reset(); }
+    void Reset() override { Clear(); Entity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -118,10 +118,10 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int ReloadScripts();
+	int ReloadScripts() override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsActive
+// Method:  IsActive
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the script is active or not. Active script can be deactivated
 //					automatically if ti fails to execute it's Update function without errors to avoid
@@ -129,81 +129,81 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    True if script is active
 
-	virtual bool IsActive() const { return m_IsActive; }
+	bool IsActive() const { return m_IsActive; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetActive
+// Method:  SetActive
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Activates or deactivates the script.
 // Arguments:       Whether this script myst be active or not.
 // Return value:    None.
 
-	virtual void SetActive( bool active) { m_IsActive = active; }
+	void SetActive( bool active) { m_IsActive = active; }
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Deactivate
+// Method:  Deactivate
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Deactivates the script. Can be called during script's Update execution to 
 //					stop it's processing when it's not needed anymore.
 // Arguments:       None.
 // Return value:    None.
 
-	virtual void Deactivate() { m_IsActive = false; } 
+	void Deactivate() { m_IsActive = false; } 
 
-// Virtual method:  Start
+// Method:  Start
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Starts the script.
 // Arguments:       None.
 // Return value:    Error code on error.
 
-	virtual int Start();
+	int Start();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Pause
+// Method:  Pause
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the script.
 // Arguments:       Whether to pause the script or not.
 // Return value:    None.
 
-	virtual void Pause(bool pause = true);
+	void Pause(bool pause = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  End
+// Method:  End
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Ends the script.
 // Arguments:       None.
 // Return value:    None.
 
-	virtual void End();
+	void End();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
+// Method:  Update
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this GlobalScript. Supposed to be done every frame.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update();
 
     /// <summary>
     /// Indicates an Actor as having left the game scene and entered orbit.  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
     /// </summary>
     /// <param name="orbitedActor">The actor instance that entered orbit. Ownership IS NOT TRANSFERRED!</param>
-    virtual void EnteredOrbit(Actor *orbitedCraft);
+	void EnteredOrbit(Actor *orbitedCraft);
 
     /// <summary>
     /// Executes the Lua-defined OnPieMenu event handler for this global script.
     /// </summary>
     /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
-    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-	virtual void OnPieMenu(Actor *pieMenuActor);
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+	void OnPieMenu(Actor *pieMenuActor);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ShouldLateUpdate
+// Method:  ShouldLateUpdate
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns true if this script should be updated after MovableMan instead of default update 
 //					during ActivityMan
@@ -218,7 +218,7 @@ ClassInfoGetters
 protected:
 
     // Forbidding copying
-    GlobalScript(const GlobalScript &reference) { }
+    GlobalScript(const GlobalScript &reference) {}
     GlobalScript & operator=(const GlobalScript &rhs) { return *this; }
 
     // Member variables

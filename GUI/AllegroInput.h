@@ -58,7 +58,7 @@ public:
 // Description:     Destructor method used to clean up a AllegroInput object.
 // Arguments:       None.
 
-    ~AllegroInput();
+    ~AllegroInput() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@ public:
 // Description:     Updates the Input.
 // Arguments:       None.
 
-    void Update(void);
+    void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +94,7 @@ private:
 // Description:     Creates the timer.
 // Arguments:       None.
 
-    bool CreateTimer(void);
+    bool CreateTimer();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ private:
 // Description:     Gets the current time since the timer was created.
 // Arguments:       None.
 
-    float GetTime(void);
+    float GetTime();
 
     // Members
     float       m_KeyDelay;

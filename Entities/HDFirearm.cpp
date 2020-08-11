@@ -20,7 +20,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(HDFirearm, HeldDevice, 0)
+ConcreteClassInfo(HDFirearm, HeldDevice, 50)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

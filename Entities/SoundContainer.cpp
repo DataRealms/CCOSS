@@ -3,7 +3,7 @@
 
 namespace RTE {
 
-	ConcreteClassInfo(SoundContainer, Entity, 0);
+	ConcreteClassInfo(SoundContainer, Entity, 50);
 
 	const std::unordered_map<std::string, SoundContainer::SoundCycleMode> SoundContainer::c_CycleModeMap = {
 		{"Random", SoundContainer::SoundCycleMode::MODE_RANDOM},

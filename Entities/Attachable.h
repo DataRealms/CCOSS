@@ -313,8 +313,6 @@ namespace RTE {
 		/// </summary>
 		void Update() override;
 #pragma endregion
-		//TODO This is crap but MOSR needs to account for damage multiplier
-		virtual int RemoveWounds(int amount) { return MOSRotating::RemoveWounds(amount) * m_DamageMultiplier; }
 
 	protected:
 

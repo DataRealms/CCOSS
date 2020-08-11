@@ -57,12 +57,12 @@ namespace RTE {
 		/// Constructor method for LinePrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="start">Start position of the primitive.</param>
+		/// <param name="startPos">Start position of the primitive.</param>
 		/// <param name="end">End position of the primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		LinePrimitive(short player, Vector start, Vector end, unsigned char color) {
-			m_StartPos = start;
-			m_EndPos = end;
+		LinePrimitive(short player, Vector startPos, Vector endPos, unsigned char color) {
+			m_StartPos = startPos;
+			m_EndPos = endPos;
 			m_Color = color;
 			m_Player = player;
 		}
@@ -93,13 +93,13 @@ namespace RTE {
 		/// Constructor method for ArcPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="pos">Position of this primitive.</param>
+		/// <param name="centerPos">Position of this primitive's center.</param>
 		/// <param name="startAngle">The angle from which the arc drawing begins.</param>
 		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
 		/// <param name="radius">Radius of the arc primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		ArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, short thickness, unsigned char color) {
-			m_StartPos = pos;
+		ArcPrimitive(short player, Vector centerPos, float startAngle, float endAngle, short radius, short thickness, unsigned char color) {
+			m_StartPos = centerPos;
 			m_Color = color;
 			m_StartAngle = startAngle;
 			m_EndAngle = endAngle;
@@ -132,16 +132,16 @@ namespace RTE {
 		/// Constructor method for SplinePrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="start">Start position of the primitive.</param>
+		/// <param name="startPos">Start position of the primitive.</param>
 		/// <param name="guideA">The first guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
 		/// <param name="guideB">The second guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
-		/// <param name="end">End position of the primitive.</param>
+		/// <param name="endPos">End position of the primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		SplinePrimitive(short player, Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color) {
-			m_StartPos = start;
+		SplinePrimitive(short player, Vector startPos, Vector guideA, Vector guideB, Vector endPos, unsigned char color) {
+			m_StartPos = startPos;
 			m_GuidePointAPos = guideA;
 			m_GuidePointBPos = guideB;
-			m_EndPos = end;
+			m_EndPos = endPos;
 			m_Color = color;
 			m_Player = player;
 		}
@@ -167,12 +167,12 @@ namespace RTE {
 		/// Constructor method for BoxPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="start">Start position of the primitive.</param>
-		/// <param name="end">End position of the primitive.</param>
+		/// <param name="topLeftPos">Start position of the primitive. Top left corner.</param>
+		/// <param name="bottomRightPos">End position of the primitive. Bottom right corner.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		BoxPrimitive(short player, Vector start, Vector end, unsigned char color) {
-			m_StartPos = start;
-			m_EndPos = end;
+		BoxPrimitive(short player, Vector topLeftPos, Vector bottomRightPos, unsigned char color) {
+			m_StartPos = topLeftPos;
+			m_EndPos = bottomRightPos;
 			m_Color = color;
 			m_Player = player;
 		}
@@ -198,12 +198,12 @@ namespace RTE {
 		/// Constructor method for BoxFillPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="start">Start position of the primitive.</param>
-		/// <param name="end">End position of the primitive.</param>
+		/// <param name="topLeftPos">Start position of the primitive. Top left corner.</param>
+		/// <param name="bottomRightPos">End position of the primitive. Bottom right corner.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		BoxFillPrimitive(short player, Vector start, Vector end, unsigned char color) {
-			m_StartPos = start;
-			m_EndPos = end;
+		BoxFillPrimitive(short player, Vector topLeftPos, Vector bottomRightPos, unsigned char color) {
+			m_StartPos = topLeftPos;
+			m_EndPos = bottomRightPos;
 			m_Color = color;
 			m_Player = player;
 		}
@@ -217,27 +217,27 @@ namespace RTE {
 	};
 #pragma endregion
 
-#pragma region Round Box Primitive
+#pragma region Rounded Box Primitive
 	/// <summary>
 	/// Class used to schedule drawing of box with round corners primitives created from Lua.
 	/// </summary>
-	class RoundBoxPrimitive : public GraphicalPrimitive {
+	class RoundedBoxPrimitive : public GraphicalPrimitive {
 
 	public:
 
 		short m_CornerRadius; //!< The radius of the corners of the box.
 
 		/// <summary>
-		/// Constructor method for RoundBoxPrimitive object.
+		/// Constructor method for RoundedBoxPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="start">Start position of the primitive.</param>
-		/// <param name="end">End position of the primitive.</param>
+		/// <param name="topLeftPos">Start position of the primitive. Top left corner.</param>
+		/// <param name="bottomRightPos">End position of the primitive. Bottom right corner.</param>
 		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		RoundBoxPrimitive(short player, Vector start, Vector end, short cornerRadius, unsigned char color) {
-			m_StartPos = start;
-			m_EndPos = end;
+		RoundedBoxPrimitive(short player, Vector topLeftPos, Vector bottomRightPos, short cornerRadius, unsigned char color) {
+			m_StartPos = topLeftPos;
+			m_EndPos = bottomRightPos;
 			m_CornerRadius = cornerRadius;
 			m_Color = color;
 			m_Player = player;
@@ -252,27 +252,27 @@ namespace RTE {
 	};
 #pragma endregion
 
-#pragma region Filled Round Box Primitive
+#pragma region Filled Rounded Box Primitive
 	/// <summary>
 	/// Class used to schedule drawing of filled box with round corners primitives created from Lua.
 	/// </summary>
-	class RoundBoxFillPrimitive : public GraphicalPrimitive {
+	class RoundedBoxFillPrimitive : public GraphicalPrimitive {
 
 	public:
 
 		short m_CornerRadius; //!< The radius of the corners of the box.
 
 		/// <summary>
-		/// Constructor method for RoundBoxFillPrimitive object.
+		/// Constructor method for RoundedBoxFillPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="start">Start position of the primitive.</param>
-		/// <param name="end">End position of the primitive.</param>
+		/// <param name="topLeftPos">Start position of the primitive. Top left corner.</param>
+		/// <param name="bottomRightPos">End position of the primitive. Bottom right corner.</param>
 		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		RoundBoxFillPrimitive(short player, Vector start, Vector end, short cornerRadius, unsigned char color) {
-			m_StartPos = start;
-			m_EndPos = end;
+		RoundedBoxFillPrimitive(short player, Vector topLeftPos, Vector bottomRightPos, short cornerRadius, unsigned char color) {
+			m_StartPos = topLeftPos;
+			m_EndPos = bottomRightPos;
 			m_CornerRadius = cornerRadius;
 			m_Color = color;
 			m_Player = player;
@@ -301,11 +301,11 @@ namespace RTE {
 		/// Constructor method for CirclePrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="pos">Position of this primitive.</param>
+		/// <param name="centerPos">Position of this primitive's center.</param>
 		/// <param name="radius">Radius of the circle primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		CirclePrimitive(short player, Vector pos, short radius, unsigned char color) {
-			m_StartPos = pos;
+		CirclePrimitive(short player, Vector centerPos, short radius, unsigned char color) {
+			m_StartPos = centerPos;
 			m_Color = color;
 			m_Radius = radius;
 			m_Player = player;
@@ -334,11 +334,11 @@ namespace RTE {
 		/// Constructor method for CircleFillPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="pos">Position of this primitive.</param>
+		/// <param name="centerPos">Position of this primitive's center.</param>
 		/// <param name="radius">Radius of the circle primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		CircleFillPrimitive(short player, Vector pos, short radius, unsigned char color) {
-			m_StartPos = pos;
+		CircleFillPrimitive(short player, Vector centerPos, short radius, unsigned char color) {
+			m_StartPos = centerPos;
 			m_Color = color;
 			m_Radius = radius;
 			m_Player = player;
@@ -368,12 +368,12 @@ namespace RTE {
 		/// Constructor method for EllipsePrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="pos">Position of this primitive.</param>
+		/// <param name="centerPos">Position of this primitive's center.</param>
 		/// <param name="horizRadius">Horizontal radius of the ellipse primitive.</param>
 		/// <param name="vertRadius">Vertical radius of the ellipse primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		EllipsePrimitive(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color) {
-			m_StartPos = pos;
+		EllipsePrimitive(short player, Vector centerPos, short horizRadius, short vertRadius, unsigned char color) {
+			m_StartPos = centerPos;
 			m_Color = color;
 			m_HorizRadius = horizRadius;
 			m_VertRadius = vertRadius;
@@ -404,11 +404,11 @@ namespace RTE {
 		/// Constructor method for EllipseFillPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="pos">Position of this primitive.</param>
+		/// <param name="centerPos">Position of this primitive's center.</param>
 		/// <param name="radius">Radius of the circle primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		EllipseFillPrimitive(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color) {
-			m_StartPos = pos;
+		EllipseFillPrimitive(short player, Vector centerPos, short horizRadius, short vertRadius, unsigned char color) {
+			m_StartPos = centerPos;
 			m_Color = color;
 			m_HorizRadius = horizRadius;
 			m_VertRadius = vertRadius;
@@ -550,11 +550,11 @@ namespace RTE {
 		/// Constructor method for BitmapPrimitive object.
 		/// </summary>
 		/// <param name="player">Player screen to draw this primitive on.</param>
-		/// <param name="pos">Position of this primitive.</param>
+		/// <param name="pos">Position of this primitive's center.</param>
 		/// <param name="bitmap">Bitmap to draw.</param>
 		/// <param name="rotAngle">Angle to rotate bitmap in radians.</param>
-		BitmapPrimitive(short player, Vector pos, BITMAP * bitmap, float rotAngle) {
-			m_StartPos = pos;
+		BitmapPrimitive(short player, Vector centerPos, BITMAP * bitmap, float rotAngle) {
+			m_StartPos = centerPos;
 			m_Bitmap = bitmap;
 			m_RotAngle = rotAngle;
 			m_Player = player;

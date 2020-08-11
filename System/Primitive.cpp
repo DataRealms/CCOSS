@@ -60,6 +60,7 @@ namespace RTE {
 			if (m_Thickness > 1) {
 				for (short i = 0; i < m_Thickness; i++) {
 					arc(drawScreen, drawStart.m_X, drawStart.m_Y, ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
+					// Start and End angles are negative and reversed to compensate for Allegro's way of drawing arcs (counter-clockwise and weird) so we get nice clockwise drawing.
 				}
 			} else {
 				arc(drawScreen, drawStart.m_X, drawStart.m_Y, ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), m_Radius, m_Color);
@@ -160,27 +161,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RoundBoxPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void RoundedBoxPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
 
-			// Top left corner
+			// Draw the top left, bottom left, top right and bottom right corners respectively
 			arc(drawScreen, drawStart.m_X + m_CornerRadius, drawEnd.m_Y + m_CornerRadius, itofix(64), itofix(128), m_CornerRadius, m_Color);
-			// Bottom left corner
 			arc(drawScreen, drawStart.m_X + m_CornerRadius, drawStart.m_Y - m_CornerRadius, itofix(128), itofix(-64), m_CornerRadius, m_Color);
-			// Top right corner
 			arc(drawScreen, drawEnd.m_X - m_CornerRadius, drawEnd.m_Y + m_CornerRadius, itofix(0), itofix(64), m_CornerRadius, m_Color);
-			// Bottom right corner
 			arc(drawScreen, drawEnd.m_X - m_CornerRadius, drawStart.m_Y - m_CornerRadius, itofix(-64), itofix(0), m_CornerRadius, m_Color);
 
-			// Top plane
+			//Draw the top, bottom, left and right planes respectively
 			hline(drawScreen, drawStart.m_X + m_CornerRadius, drawStart.m_Y, drawEnd.m_X - m_CornerRadius, m_Color);	
-			// Bottom plane
 			hline(drawScreen, drawStart.m_X + m_CornerRadius, drawEnd.m_Y, drawEnd.m_X - m_CornerRadius, m_Color);
-			// Left plane
 			vline(drawScreen, drawStart.m_X, drawStart.m_Y - m_CornerRadius, drawEnd.m_Y + m_CornerRadius, m_Color);
-			// Right plane
 			vline(drawScreen, drawEnd.m_X, drawStart.m_Y - m_CornerRadius, drawEnd.m_Y + m_CornerRadius, m_Color);
 		} else {
 			Vector drawStartLeft;
@@ -213,18 +208,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RoundBoxFillPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void RoundedBoxFillPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
 			
-			// Top left corner
+			// Draw the top left, bottom left, top right and bottom right corners respectively
 			circlefill(drawScreen, drawStart.m_X + m_CornerRadius, drawEnd.m_Y + m_CornerRadius, m_CornerRadius, m_Color);
-			// Bottom left corner
 			circlefill(drawScreen, drawStart.m_X + m_CornerRadius, drawStart.m_Y - m_CornerRadius, m_CornerRadius, m_Color);
-			// Top right corner
 			circlefill(drawScreen, drawEnd.m_X - m_CornerRadius, drawEnd.m_Y + m_CornerRadius, m_CornerRadius, m_Color);
-			// Bottom right corner
 			circlefill(drawScreen, drawEnd.m_X - m_CornerRadius, drawStart.m_Y - m_CornerRadius, m_CornerRadius, m_Color);
 
 			rectfill(drawScreen, drawStart.m_X, drawStart.m_Y - m_CornerRadius, drawEnd.m_X, drawEnd.m_Y + m_CornerRadius, m_Color);

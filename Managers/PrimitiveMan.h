@@ -48,227 +48,228 @@ namespace RTE {
 		/// <summary>
 		/// Schedule to draw a line primitive.
 		/// </summary>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
-		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="startPos">Start position of primitive in scene coordinates.</param>
+		/// <param name="endPos">End position of primitive in scene coordinates.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawLinePrimitive(Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new LinePrimitive(-1, start, end, color)); }
+		void DrawLinePrimitive(Vector startPos, Vector endPos, unsigned char color) { m_Primitives.push_back(new LinePrimitive(-1, startPos, endPos, color)); }
 
 		/// <summary>
 		/// Schedule to draw a line primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
-		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="startPos">Start position of primitive in scene coordinates.</param>
+		/// <param name="endPos">End position of primitive in scene coordinates.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawLinePrimitive(short player, Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new LinePrimitive(player, start, end, color)); }
+		void DrawLinePrimitive(short player, Vector startPos, Vector endPos, unsigned char color) { m_Primitives.push_back(new LinePrimitive(player, startPos, endPos, color)); }
 
 		/// <summary>
 		/// Schedule to draw an arc primitive.
 		/// </summary>
-		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="startAngle">The angle from which the arc drawing begins.</param>
 		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
 		/// <param name="radius">Radius of the arc primitive.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, unsigned char color) { m_Primitives.push_back(new ArcPrimitive(-1, pos, startAngle, endAngle, radius, 1, color)); }
+		void DrawArcPrimitive(Vector centerPos, float startAngle, float endAngle, short radius, unsigned char color) { m_Primitives.push_back(new ArcPrimitive(-1, centerPos, startAngle, endAngle, radius, 1, color)); }
 
 		/// <summary>
 		/// Schedule to draw an arc primitive with the option to change thickness.
 		/// </summary>
-		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="startAngle">The angle from which the arc drawing begins.</param>
 		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
 		/// <param name="radius">Radius of the arc primitive.</param>
 		/// <param name="color">Color to draw primitive with.</param>
 		/// <param name="thickness">Thickness of the arc in pixels.</param>
-		void DrawArcPrimitive(Vector pos, float startAngle, float endAngle, short radius, unsigned char color, short thickness) { m_Primitives.push_back(new ArcPrimitive(-1, pos, startAngle, endAngle, radius, thickness, color)); }
+		void DrawArcPrimitive(Vector centerPos, float startAngle, float endAngle, short radius, unsigned char color, short thickness) { m_Primitives.push_back(new ArcPrimitive(-1, centerPos, startAngle, endAngle, radius, thickness, color)); }
 
 		/// <summary>
 		/// Schedule to draw an arc primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="startAngle">The angle from which the arc drawing begins.</param>
 		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
 		/// <param name="radius">Radius of the arc primitive.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, unsigned char color) { m_Primitives.push_back(new ArcPrimitive(player, pos, startAngle, endAngle, radius, 1, color)); }
+		void DrawArcPrimitive(short player, Vector centerPos, float startAngle, float endAngle, short radius, unsigned char color) { m_Primitives.push_back(new ArcPrimitive(player, centerPos, startAngle, endAngle, radius, 1, color)); }
 
 		/// <summary>
 		/// Schedule to draw an arc primitive visible only to a specified player with the option to change thickness.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="startAngle">The angle from which the arc drawing begins.</param>
 		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
 		/// <param name="radius">Radius of the arc primitive.</param>
 		/// <param name="color">Color to draw primitive with.</param>
 		/// <param name="thickness">Thickness of the arc in pixels.</param>
-		void DrawArcPrimitive(short player, Vector pos, float startAngle, float endAngle, short radius, unsigned char color, short thickness) { m_Primitives.push_back(new ArcPrimitive(player, pos, startAngle, endAngle, radius, thickness, color)); }
+		void DrawArcPrimitive(short player, Vector centerPos, float startAngle, float endAngle, short radius, unsigned char color, short thickness) { m_Primitives.push_back(new ArcPrimitive(player, centerPos, startAngle, endAngle, radius, thickness, color)); }
 
 		/// <summary>
 		/// Schedule to draw a Bezier spline primitive.
 		/// </summary>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
+		/// <param name="startPos">Start position of primitive in scene coordinates.</param>
 		/// <param name="guideA">The first guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
 		/// <param name="guideB">The second guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
-		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="endPos">End position of primitive in scene coordinates.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawSplinePrimitive(Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color) { m_Primitives.push_back(new SplinePrimitive(-1, start, guideA, guideB, end, color)); }
+		void DrawSplinePrimitive(Vector startPos, Vector guideA, Vector guideB, Vector endPos, unsigned char color) { m_Primitives.push_back(new SplinePrimitive(-1, startPos, guideA, guideB, endPos, color)); }
 
 		/// <summary>
 		/// Schedule to draw a Bezier spline primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="startPos">Start position of primitive in scene coordinates.</param>
 		/// <param name="guideA">The first guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
 		/// <param name="guideB">The second guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
-		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="endPos">End position of primitive in scene coordinates.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawSplinePrimitive(short player, Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color) { m_Primitives.push_back(new SplinePrimitive(player, start, guideA, guideB, end, color)); }
+		void DrawSplinePrimitive(short player, Vector startPos, Vector guideA, Vector guideB, Vector endPos, unsigned char color) { m_Primitives.push_back(new SplinePrimitive(player, startPos, guideA, guideB, endPos, color)); }
 
 		/// <summary>
 		/// Schedule to draw a box primitive.
 		/// </summary>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
-		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="topLeftPos">Start position of primitive in scene coordinates. Top left corner.</param>
+		/// <param name="bottomRightPos">End position of primitive in scene coordinates. Bottom right corner.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawBoxPrimitive(Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new BoxPrimitive(-1, start, end, color)); }
+		void DrawBoxPrimitive(Vector topLeftPos, Vector bottomRightPos, unsigned char color) { m_Primitives.push_back(new BoxPrimitive(-1, topLeftPos, bottomRightPos, color)); }
 
 		/// <summary>
 		/// Schedule to draw a box primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
-		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="topLeftPos">Start position of primitive in scene coordinates. Top left corner.</param>
+		/// <param name="bottomRightPos">End position of primitive in scene coordinates. Bottom right corner.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawBoxPrimitive(short player, Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new BoxPrimitive(player, start, end, color)); }
+		void DrawBoxPrimitive(short player, Vector topLeftPos, Vector bottomRightPos, unsigned char color) { m_Primitives.push_back(new BoxPrimitive(player, topLeftPos, bottomRightPos, color)); }
 
 		/// <summary>
 		/// Schedule to draw a filled box primitive.
 		/// </summary>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
-		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="topLeftPos">Start position of primitive in scene coordinates. Top left corner.</param>
+		/// <param name="bottomRightPos">End position of primitive in scene coordinates. Bottom right corner.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawBoxFillPrimitive(Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new BoxFillPrimitive(-1, start, end, color)); }
+		void DrawBoxFillPrimitive(Vector topLeftPos, Vector bottomRightPos, unsigned char color) { m_Primitives.push_back(new BoxFillPrimitive(-1, topLeftPos, bottomRightPos, color)); }
 
 		/// <summary>
 		/// Schedule to draw a filled box primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
-		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="topLeftPos">Start position of primitive in scene coordinates. Top left corner.</param>
+		/// <param name="bottomRightPos">End position of primitive in scene coordinates. Bottom right corner.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawBoxFillPrimitive(short player, Vector start, Vector end, unsigned char color) { m_Primitives.push_back(new BoxFillPrimitive(player, start, end, color)); }
+		void DrawBoxFillPrimitive(short player, Vector topLeftPos, Vector bottomRightPos, unsigned char color) { m_Primitives.push_back(new BoxFillPrimitive(player, topLeftPos, bottomRightPos, color)); }
 
 		/// <summary>
-		/// Schedule to draw a round box primitive.
+		/// Schedule to draw a rounded box primitive.
 		/// </summary>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
-		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="topLeftPos">Start position of primitive in scene coordinates. Top left corner.</param>
+		/// <param name="bottomRightPos">End position of primitive in scene coordinates. Bottom right corner.</param>
 		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawRoundBoxPrimitive(Vector start, Vector end, float cornerRadius, unsigned char color) { m_Primitives.push_back(new RoundBoxPrimitive(-1, start, end, cornerRadius, color)); }
+		void DrawRoundedBoxPrimitive(Vector topLeftPos, Vector bottomRightPos, float cornerRadius, unsigned char color) { m_Primitives.push_back(new RoundedBoxPrimitive(-1, topLeftPos, bottomRightPos, cornerRadius, color)); }
 
 		/// <summary>
-		/// Schedule to draw a round box primitive visible only to a specified player.
-		/// </summary>
-		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
-		/// <param name="end">End position of primitive in scene coordinates.</param>
-		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
-		/// <param name="color">Color to draw primitive with.</param>
-		void DrawRoundBoxPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color) { m_Primitives.push_back(new RoundBoxPrimitive(player, start, end, cornerRadius, color)); }
-
-		/// <summary>
-		/// Schedule to draw a filled round box primitive.
-		/// </summary>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
-		/// <param name="end">End position of primitive in scene coordinates.</param>
-		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
-		/// <param name="color">Color to draw primitive with.</param>
-		void DrawRoundBoxFillPrimitive(Vector start, Vector end, float cornerRadius, unsigned char color) { m_Primitives.push_back(new RoundBoxFillPrimitive(-1, start, end, cornerRadius, color)); }
-
-		/// <summary>
-		/// Schedule to draw a filled round box primitive visible only to a specified player.
+		/// Schedule to draw a rounded box primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
-		/// <param name="end">End position of primitive in scene coordinates.</param>
+		/// <param name="topLeftPos">Start position of primitive in scene coordinates. Top left corner.</param>
+		/// <param name="bottomRightPos">End position of primitive in scene coordinates. Bottom right corner.</param>
 		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawRoundBoxFillPrimitive(short player, Vector start, Vector end, float cornerRadius, unsigned char color) { m_Primitives.push_back(new RoundBoxFillPrimitive(player, start, end, cornerRadius, color)); }
+		void DrawRoundedBoxPrimitive(short player, Vector topLeftPos, Vector bottomRightPos, float cornerRadius, unsigned char color) { m_Primitives.push_back(new RoundedBoxPrimitive(player, topLeftPos, bottomRightPos, cornerRadius, color)); }
+
+		/// <summary>
+		/// Schedule to draw a filled rounded box primitive.
+		/// </summary>
+		/// <param name="topLeftPos">Start position of primitive in scene coordinates. Top left corner.</param>
+		/// <param name="bottomRightPos">End position of primitive in scene coordinates. Bottom right corner.</param>
+		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		void DrawRoundedBoxFillPrimitive(Vector topLeftPos, Vector bottomRightPos, float cornerRadius, unsigned char color) { m_Primitives.push_back(new RoundedBoxFillPrimitive(-1, topLeftPos, bottomRightPos, cornerRadius, color)); }
+
+		/// <summary>
+		/// Schedule to draw a filled rounded box primitive visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="topLeftPos">Start position of primitive in scene coordinates. Top left corner.</param>
+		/// <param name="bottomRightPos">End position of primitive in scene coordinates. Bottom right corner.</param>
+		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
+		/// <param name="color">Color to draw primitive with.</param>
+		void DrawRoundedBoxFillPrimitive(short player, Vector topLeftPos, Vector bottomRightPos, float cornerRadius, unsigned char color) { m_Primitives.push_back(new RoundedBoxFillPrimitive(player, topLeftPos, bottomRightPos, cornerRadius, color)); }
 
 		/// <summary>
 		/// Schedule to draw a circle primitive.
 		/// </summary>
-		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="radius">Radius of circle primitive.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawCirclePrimitive(Vector pos, short radius, unsigned char color) { m_Primitives.push_back(new CirclePrimitive(-1, pos, radius, color)); }
+		void DrawCirclePrimitive(Vector centerPos, short radius, unsigned char color) { m_Primitives.push_back(new CirclePrimitive(-1, centerPos, radius, color)); }
 
 		/// <summary>
 		/// Schedule to draw a circle primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="radius">Radius of circle primitive.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawCirclePrimitive(short player, Vector pos, short radius, unsigned char color) { m_Primitives.push_back(new CirclePrimitive(player, pos, radius, color)); }
+		void DrawCirclePrimitive(short player, Vector centerPos, short radius, unsigned char color) { m_Primitives.push_back(new CirclePrimitive(player, centerPos, radius, color)); }
 
 		/// <summary>
 		/// Schedule to draw a filled circle primitive.
 		/// </summary>
-		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="radius">Radius of circle primitive.</param>
 		/// <param name="color">Color to fill primitive with.</param>
-		void DrawCircleFillPrimitive(Vector pos, short radius, unsigned char color) { m_Primitives.push_back(new CircleFillPrimitive(-1, pos, radius, color)); }
+		void DrawCircleFillPrimitive(Vector centerPos, short radius, unsigned char color) { m_Primitives.push_back(new CircleFillPrimitive(-1, centerPos, radius, color)); }
 
 		/// <summary>
 		/// Schedule to draw a filled circle primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="radius">Radius of circle primitive.</param>
 		/// <param name="color">Color to fill primitive with.</param>
-		void DrawCircleFillPrimitive(short player, Vector pos, short radius, unsigned char color) { m_Primitives.push_back(new CircleFillPrimitive(player, pos, radius, color)); }
+		void DrawCircleFillPrimitive(short player, Vector centerPos, short radius, unsigned char color) { m_Primitives.push_back(new CircleFillPrimitive(player, centerPos, radius, color)); }
 
 		/// <summary>
 		/// Schedule to draw an ellipse primitive.
 		/// </summary>
-		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="horizRadius">Horizontal radius of the ellipse primitive.</param>
 		/// <param name="vertRadius">Vertical radius of the ellipse primitive.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawEllipsePrimitive(Vector pos, short horizRadius, short vertRadius, unsigned char color) { m_Primitives.push_back(new EllipsePrimitive(-1, pos, horizRadius, vertRadius, color)); }
+		void DrawEllipsePrimitive(Vector centerPos, short horizRadius, short vertRadius, unsigned char color) { m_Primitives.push_back(new EllipsePrimitive(-1, centerPos, horizRadius, vertRadius, color)); }
 
 		/// <summary>
 		/// Schedule to draw an ellipse primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="horizRadius">Horizontal radius of the ellipse primitive.</param>
 		/// <param name="vertRadius">Vertical radius of the ellipse primitive.</param>
 		/// <param name="color">Color to draw primitive with.</param>
-		void DrawEllipsePrimitive(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color) { m_Primitives.push_back(new EllipsePrimitive(player, pos, horizRadius, vertRadius, color)); }
+		void DrawEllipsePrimitive(short player, Vector centerPos, short horizRadius, short vertRadius, unsigned char color) { m_Primitives.push_back(new EllipsePrimitive(player, centerPos, horizRadius, vertRadius, color)); }
 
 		/// <summary>
 		/// Schedule to draw a filled ellipse primitive.
 		/// </summary>
-		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="horizRadius">Horizontal radius of the ellipse primitive.</param>
 		/// <param name="vertRadius">Vertical radius of the ellipse primitive.</param>
 		/// <param name="color">Color to fill primitive with.</param>
-		void DrawEllipseFillPrimitive(Vector pos, short horizRadius, short vertRadius, unsigned char color) { m_Primitives.push_back(new EllipseFillPrimitive(-1, pos, horizRadius, vertRadius, color)); }
+		void DrawEllipseFillPrimitive(Vector centerPos, short horizRadius, short vertRadius, unsigned char color) { m_Primitives.push_back(new EllipseFillPrimitive(-1, centerPos, horizRadius, vertRadius, color)); }
 
 		/// <summary>
 		/// Schedule to draw a filled ellipse primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="pos">Position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="horizRadius">Horizontal radius of the ellipse primitive.</param>
 		/// <param name="vertRadius">Vertical radius of the ellipse primitive.</param>
 		/// <param name="color">Color to fill primitive with.</param>
-		void DrawEllipseFillPrimitive(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color) { m_Primitives.push_back(new EllipseFillPrimitive(player, pos, horizRadius, vertRadius, color)); }
+		void DrawEllipseFillPrimitive(short player, Vector centerPos, short horizRadius, short vertRadius, unsigned char color) { m_Primitives.push_back(new EllipseFillPrimitive(player, centerPos, horizRadius, vertRadius, color)); }
 
 		/// <summary>
 		/// Schedule to draw a triangle primitive.
@@ -330,44 +331,44 @@ namespace RTE {
 		/// <summary>
 		/// Schedule to draw a bitmap primitive.
 		/// </summary>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="entity">An entity to draw sprite from.</param>
 		/// <param name="rotAngle">Rotation angle in radians.</param>
 		/// <param name="frame">Frame to draw.</param>
-		void DrawBitmapPrimitive(Vector start, Entity *entity, float rotAngle, unsigned short frame) { DrawBitmapPrimitive(-1, start, entity, rotAngle, frame, false, false); }
+		void DrawBitmapPrimitive(Vector centerPos, Entity *entity, float rotAngle, unsigned short frame) { DrawBitmapPrimitive(-1, centerPos, entity, rotAngle, frame, false, false); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive with the option to flip the primitive horizontally and vertically.
 		/// </summary>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="entity">An entity to draw sprite from.</param>
 		/// <param name="rotAngle">Rotation angle in radians.</param>
 		/// <param name="frame">Frame to draw.</param>
 		/// <param name="hFlipped">Whether to flip the sprite horizontally.</param>
 		/// <param name="vFlipped">Whether to flip the sprite vertically.</param>
-		void DrawBitmapPrimitive(Vector start, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped) { DrawBitmapPrimitive(-1, start, entity, rotAngle, frame, hFlipped, vFlipped); }
+		void DrawBitmapPrimitive(Vector centerPos, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped) { DrawBitmapPrimitive(-1, centerPos, entity, rotAngle, frame, hFlipped, vFlipped); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive visible only to a specified player.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="entity">An entity to draw sprite from.</param>
 		/// <param name="rotAngle">Rotation angle in radians.</param>
 		/// <param name="">Frame to draw.</param>
-		void DrawBitmapPrimitive(short player, Vector start, Entity *entity, float rotAngle, unsigned short frame) { DrawBitmapPrimitive(player, start, entity, rotAngle, frame, false, false); }
+		void DrawBitmapPrimitive(short player, Vector centerPos, Entity *entity, float rotAngle, unsigned short frame) { DrawBitmapPrimitive(player, centerPos, entity, rotAngle, frame, false, false); }
 
 		/// <summary>
 		/// Schedule to draw a bitmap primitive visible only to a specified player with the option to flip the primitive horizontally or vertically.
 		/// </summary>
 		/// <param name="player">Player screen to draw primitive on.</param>
-		/// <param name="start">Start position of primitive in scene coordinates.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
 		/// <param name="entity">An entity to draw sprite from.</param>
 		/// <param name="rotAngle">Rotation angle in radians.</param>
 		/// <param name="">Frame to draw.</param>
 		/// <param name="hFlipped">Whether to flip the sprite horizontally.</param>
 		/// <param name="vFlipped">Whether to flip the sprite vertically.</param>
-		void DrawBitmapPrimitive(short player, Vector start, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped);
+		void DrawBitmapPrimitive(short player, Vector centerPos, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped);
 #pragma endregion
 
 #pragma region Class Info

@@ -105,12 +105,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	PrimitiveMan:DrawSplinePrimitive(Vector start, Vector guideA, Vector guideB, Vector end, color)
 	PrimitiveMan:DrawSplinePrimitive(player, Vector start, Vector guideA, Vector guideB, Vector end, color)
 
-	-- Box with round corners (Squircle)
-	PrimitiveMan:DrawRoundBoxPrimitive(Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
-	PrimitiveMan:DrawRoundBoxPrimitive(player, Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
+	-- Box with rounded corners
+	PrimitiveMan:DrawRoundedBoxPrimitive(Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
+	PrimitiveMan:DrawRoundedBoxPrimitive(player, Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
 	
-	PrimitiveMan:DrawRoundBoxFillPrimitive(Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
-	PrimitiveMan:DrawRoundBoxFillPrimitive(player, Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
+	PrimitiveMan:DrawRoundedBoxFillPrimitive(Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
+	PrimitiveMan:DrawRoundedBoxFillPrimitive(player, Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
 
 	-- Triangle
 	PrimitiveMan:DrawTrianglePrimitive(Vector pointA, Vector pointB, Vector pointC, color)

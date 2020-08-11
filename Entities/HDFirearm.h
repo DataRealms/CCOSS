@@ -444,26 +444,6 @@ ClassInfoGetters
 // Return value:    None.
 
     virtual void SetID(const MOID newID);
-    
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Attach
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Attaches this Attachable to a host MOSprite
-// Arguments:       Pointer to the MOSprite to attach to. Ownership is NOT transferred!
-// Return value:    None.
-
-    virtual void Attach(MOSRotating *newParent) { HeldDevice::Attach(newParent); m_Reloading = false; m_ReloadTmr.Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Detach
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Detaches this Attachable from its host MOSprite
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Detach() { HeldDevice::Detach(); m_Activated = m_Reloading = false; m_ReloadTmr.Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -745,6 +725,13 @@ protected:
 // Return value:    None.
 
 	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+
+    /// <summary>
+    /// Sets this HDFirearm's parent MOSRotating, and also sets its Team based on its parent and, if the Attachable is set to collide, adds/removes Atoms to its new/old parent.
+    /// Additionally, sets this Attachable as not reloading, and resets its reload timer.
+    /// </summary>
+    /// <param name="newParent">A pointer to the MOSRotating to set as the new parent. Ownership is NOT transferred!</param>
+    void SetParent(MOSRotating *newParent) override { HeldDevice::SetParent(newParent); m_Reloading = false; m_ReloadTmr.Reset(); }
 
     // Member variables.
     static Entity::ClassInfo m_sClass;

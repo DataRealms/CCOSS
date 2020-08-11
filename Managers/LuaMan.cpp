@@ -1,33 +1,51 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            LuaMan.cpp
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Source file for the LuaMan class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "LuaMan.h"
 #include "System.h"
-#include "RTEManagers.h"
-#include "AllEntities.h"
-#include "DataModule.h"
-#include "ConsoleMan.h"
-#include "SettingsMan.h"
+
+#include "ACDropShip.h"
+#include "ACrab.h"
+#include "ACraft.h"
+#include "ACRocket.h"
+#include "Actor.h"
+#include "ActorEditor.h"
+#include "ADoor.h"
+#include "AEmitter.h"
+#include "Emission.h"
+#include "AHuman.h"
+#include "Arm.h"
+#include "AtomGroup.h"
+#include "Attachable.h"
+#include "HDFirearm.h"
+#include "HeldDevice.h"
+#include "Leg.h"
+#include "LimbPath.h"
+#include "Magazine.h"
+#include "Material.h"
+#include "MOSParticle.h"
+#include "MOPixel.h"
+#include "MOSprite.h"
+#include "MOSRotating.h"
+#include "Scene.h"
 #include "SLTerrain.h"
+#include "TerrainObject.h"
+#include "SoundContainer.h"
+#include "TDExplosive.h"
+#include "ThrownDevice.h"
+#include "Turret.h"
+
+#include "DataModule.h"
 #include "GAScripted.h"
 #include "Box.h"
 #include "BuyMenuGUI.h"
 #include "SceneEditorGUI.h"
 #include "MetaPlayer.h"
-#include "MetaMan.h"
 #include "GUIBanner.h"
-#include "TerrainObject.h"
-#include "Emission.h"
+
+#include "MetaMan.h"
+#include "ConsoleMan.h"
+#include "PresetMan.h"
+#include "PrimitiveMan.h"
+#include "UInputMan.h"
+#include "SettingsMan.h"
 
 #include "lua.hpp"
 
@@ -101,6 +119,17 @@ namespace RTE
 
 const string LuaMan::m_ClassName = "LuaMan";
 
+// Can't have global enums in the master state so we use this dummy struct as a class and register the enums under it.
+struct enum_wrapper {
+	// Nested structs for each enum because we can't register enum_wrapper multiple times under a different name.
+	// We're doing this so we can access each enum separately by name rather than having all of them accessed from a shared name.
+	// If this proves to be a hassle then we can easily revert to the shared name access by registering everything under enum_wrapper.
+	struct input_device {};
+	struct input_elements {};
+	struct mouse_buttons {};
+	struct joy_buttons {};
+	struct joy_directions {};
+};
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Preset clone adapters that will return the exact pre-cast types so we don't have to do:
@@ -376,11 +405,7 @@ struct GAScriptedWrapper:
 };
 */
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this LuaMan, effectively
-//                  resetting the members of this abstraction level only.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LuaMan::Clear()
 {
@@ -398,10 +423,7 @@ void LuaMan::Clear()
 		m_Files[i] = 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the LuaMan object ready for use.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int LuaMan::Create()
 {
@@ -695,19 +717,18 @@ int LuaMan::Create()
             .def("GetBitmapWidth", &TerrainObject::GetBitmapWidth)
             .def("GetBitmapHeight", &TerrainObject::GetBitmapHeight),
 
-        ABSTRACTLUABINDING(MOSprite, MovableObject)
-            .enum_("SpriteAnimMode")
-            [
-                value("NOANIM", 0),
-                value("ALWAYSLOOP", 1),
-                value("ALWAYSRANDOM", 2),
-                value("ALWAYSPINGPONG", 3),
-                value("LOOPWHENMOVING", 4),
-                value("LOOPWHENOPENCLOSE", 5),
-                value("PINGPONGOPENCLOSE", 6),
-                value("OVERLIFETIME", 7),
-                value("ONCOLLIDE", 8)
-            ]
+		ABSTRACTLUABINDING(MOSprite, MovableObject)
+			.enum_("SpriteAnimMode")[
+				value("NOANIM", MOSprite::SpriteAnimMode::NOANIM),
+				value("ALWAYSLOOP", MOSprite::SpriteAnimMode::ALWAYSLOOP),
+				value("ALWAYSRANDOM", MOSprite::SpriteAnimMode::ALWAYSRANDOM),
+				value("ALWAYSPINGPONG", MOSprite::SpriteAnimMode::ALWAYSPINGPONG),
+				value("LOOPWHENMOVING", MOSprite::SpriteAnimMode::LOOPWHENMOVING),
+				value("LOOPWHENOPENCLOSE", MOSprite::SpriteAnimMode::LOOPWHENOPENCLOSE),
+				value("PINGPONGOPENCLOSE", MOSprite::SpriteAnimMode::PINGPONGOPENCLOSE),
+				value("OVERLIFETIME", MOSprite::SpriteAnimMode::OVERLIFETIME),
+				value("ONCOLLIDE", MOSprite::SpriteAnimMode::ONCOLLIDE)
+			]
             .property("Diameter", &MOSprite::GetDiameter)
             .property("BoundingBox", &MOSprite::GetBoundingBox)
             .property("FrameCount", &MOSprite::GetFrameCount)
@@ -830,67 +851,59 @@ int LuaMan::Create()
             .def("CanTriggerBurst", &AEmitter::CanTriggerBurst)
 			.def_readwrite("Emissions", &AEmitter::m_EmissionList, return_stl_iterator),
 
-
-        CONCRETELUABINDING(Actor, MOSRotating)
-            .enum_("Status")
-            [
-                value("STABLE", 0),
-                value("UNSTABLE", 1),
-                value("INACTIVE", 2),
-                value("DYING", 3),
-                value("DEAD", 4)
-            ]
-            .enum_("AIMode")
-            [
-                value("AIMODE_NONE", 0),
-                value("AIMODE_SENTRY", 1),
-                value("AIMODE_PATROL", 2),
-                value("AIMODE_GOTO", 3),
-                value("AIMODE_BRAINHUNT", 4),
-                value("AIMODE_GOLDDIG", 5),
-                value("AIMODE_RETURN", 6),
-                value("AIMODE_STAY", 7),
-                value("AIMODE_SCUTTLE", 8),
-                value("AIMODE_DELIVER", 9),
-                value("AIMODE_BOMB", 10),
-                value("AIMODE_SQUAD", 11),
-                value("AIMODE_COUNT", 12)
-            ]
-            .enum_("ActionState")
-            [
-                value("MOVING", 0),
-                value("MOVING_FAST", 1),
-                value("FIRING", 2),
-                value("ActionStateCount", 3)
-            ]
-            .enum_("AimState")
-            [
-                value("AIMSTILL", 0),
-                value("AIMUP", 1),
-                value("AIMDOWN", 2),
-                value("AimStateCount", 3)
-            ]
-            .enum_("LateralMoveState")
-            [
-                value("LAT_STILL", 0),
-                value("LAT_LEFT", 1),
-                value("LAT_RIGHT", 2)
-            ]
-            .enum_("ObstacleState")
-            [
-                value("PROCEEDING", 0),
-                value("BACKSTEPPING", 1),
-                value("DIGPAUSING", 2),
-                value("JUMPING", 3),
-                value("SOFTLANDING", 4)
-            ]
-            .enum_("TeamBlockState")
-            [
-                value("NOTBLOCKED", 0),
-                value("BLOCKED", 1),
-                value("IGNORINGBLOCK", 2),
-                value("FOLLOWWAIT", 3)
-            ]
+		CONCRETELUABINDING(Actor, MOSRotating)
+			.enum_("Status")[
+				value("STABLE", Actor::Status::STABLE),
+				value("UNSTABLE", Actor::Status::UNSTABLE),
+				value("INACTIVE", Actor::Status::INACTIVE),
+				value("DYING", Actor::Status::DYING),
+				value("DEAD", Actor::Status::DEAD)
+			]
+			.enum_("AIMode")[
+				value("AIMODE_NONE", Actor::AIMode::AIMODE_NONE),
+				value("AIMODE_SENTRY", Actor::AIMode::AIMODE_SENTRY),
+				value("AIMODE_PATROL", Actor::AIMode::AIMODE_PATROL),
+				value("AIMODE_GOTO", Actor::AIMode::AIMODE_GOTO),
+				value("AIMODE_BRAINHUNT", Actor::AIMode::AIMODE_BRAINHUNT),
+				value("AIMODE_GOLDDIG", Actor::AIMode::AIMODE_GOLDDIG),
+				value("AIMODE_RETURN", Actor::AIMode::AIMODE_RETURN),
+				value("AIMODE_STAY", Actor::AIMode::AIMODE_STAY),
+				value("AIMODE_SCUTTLE", Actor::AIMode::AIMODE_SCUTTLE),
+				value("AIMODE_DELIVER", Actor::AIMode::AIMODE_DELIVER),
+				value("AIMODE_BOMB", Actor::AIMode::AIMODE_BOMB),
+				value("AIMODE_SQUAD", Actor::AIMode::AIMODE_SQUAD),
+				value("AIMODE_COUNT", Actor::AIMode::AIMODE_COUNT)
+			]
+			.enum_("ActionState")[
+				value("MOVING", Actor::ActionState::MOVING),
+				value("MOVING_FAST", Actor::ActionState::MOVING_FAST),
+				value("FIRING", Actor::ActionState::FIRING),
+				value("ActionStateCount", Actor::ActionState::ActionStateCount)
+			]
+			.enum_("AimState")[
+				value("AIMSTILL", Actor::AimState::AIMSTILL),
+				value("AIMUP", Actor::AimState::AIMUP),
+				value("AIMDOWN", Actor::AimState::AIMDOWN),
+				value("AimStateCount", Actor::AimState::AimStateCount)
+			]
+			.enum_("LateralMoveState")[
+				value("LAT_STILL", Actor::LateralMoveState::LAT_STILL),
+				value("LAT_LEFT", Actor::LateralMoveState::LAT_LEFT),
+				value("LAT_RIGHT", Actor::LateralMoveState::LAT_RIGHT)
+			]
+			.enum_("ObstacleState")[
+				value("PROCEEDING", Actor::ObstacleState::PROCEEDING),
+				value("BACKSTEPPING", Actor::ObstacleState::BACKSTEPPING),
+				value("DIGPAUSING", Actor::ObstacleState::DIGPAUSING),
+				value("JUMPING", Actor::ObstacleState::JUMPING),
+				value("SOFTLANDING", Actor::ObstacleState::SOFTLANDING)
+			]
+			.enum_("TeamBlockState")[
+				value("NOTBLOCKED", Actor::TeamBlockState::NOTBLOCKED),
+				value("BLOCKED", Actor::TeamBlockState::BLOCKED),
+				value("IGNORINGBLOCK", Actor::TeamBlockState::IGNORINGBLOCK),
+				value("FOLLOWWAIT", Actor::TeamBlockState::FOLLOWWAIT)
+			]
             .def(constructor<>())
             .def("GetController", &Actor::GetController)
             .def("IsPlayerControlled", &Actor::IsPlayerControlled)
@@ -959,14 +972,13 @@ int LuaMan::Create()
             .def("RemoveAnyRandomWounds", &Actor::RemoveAnyRandomWounds)
             .property("DeathSound", &Actor::GetDeathSound, &Actor::SetDeathSound),
 
-        CONCRETELUABINDING(ADoor, Actor)
-			.enum_("DooorState")
-			[
-				value("CLOSED", 0),
-				value("OPENING", 1),
-				value("OPEN", 2),
-				value("CLOSING", 3),
-				value("STOPPED", 4)
+		CONCRETELUABINDING(ADoor, Actor)
+			.enum_("DoorState")[
+				value("CLOSED", ADoor::DoorState::CLOSED),
+				value("OPENING", ADoor::DoorState::OPENING),
+				value("OPEN", ADoor::DoorState::OPEN),
+				value("CLOSING", ADoor::DoorState::CLOSING),
+				value("STOPPED", ADoor::DoorState::STOPPED)
 			]
             .property("Door", &ADoor::GetDoor)
 			.def("GetDoorState", &ADoor::GetDoorState)
@@ -982,79 +994,73 @@ int LuaMan::Create()
         ABSTRACTLUABINDING(Leg, Attachable)
             .property("Foot", &Leg::GetFoot),
 
-        CONCRETELUABINDING(AHuman, Actor)
-            .enum_("UpperBodyState")
-            [
-                value("WEAPON_READY", 0),
-                value("AIMING_SHARP", 1),
-                value("HOLSTERING_BACK", 2),
-                value("HOLSTERING_BELT", 3),
-                value("DEHOLSTERING_BACK", 4),
-                value("DEHOLSTERING_BELT", 5),
-                value("THROWING_PREP", 6),
-                value("THROWING_RELEASE", 7)
-            ]
-            .enum_("MovementState")
-            [
-                value("NOMOVE", 0),
-                value("STAND", 1),
-                value("WALK", 2),
-                value("CROUCH", 3),
-                value("CRAWL", 4),
-                value("ARMCRAWL", 5),
-                value("CLIMB", 6),
-                value("JUMP", 7),
-                value("DISLODGE", 8),
-                value("MOMENTSTATECOUNT", 9)
-            ]
-            .enum_("ProneState")
-            [
-                value("NOTPRONE", 0),
-                value("GOPRONE", 1),
-                value("PRONE", 2),
-                value("PRONESTATECOUNT", 3)
-            ]
-            .enum_("Layer")
-            [
-                value("FGROUND", 0),
-                value("BGROUND", 1)
-            ]
-            .enum_("DeviceHandlingState")
-            [
-                value("STILL", 0),
-                value("POINTING", 1),
-                value("SCANNING", 2),
-                value("AIMING", 3),
-                value("FIRING", 4),
-                value("THROWING", 5),
-                value("DIGGING", 6)
-            ]
-            .enum_("SweepState")
-            [
-                value("NOSWEEP", 0),
-                value("SWEEPINGUP", 1),
-                value("SWEEPINGPAUSE", 2),
-                value("SWEEPINGDOWN", 3),
-                value("SWEEMDOWNPAUSE", 4)
-            ]
-            .enum_("DigState")
-            [
-                value("NOTDIGGING", 0),
-                value("PREDIG", 1),
-                value("STARTDIG", 2),
-                value("TUNNELING", 3),
-                value("FINISHINGDIG", 4),
-                value("PAUSEDIGGER", 5)
-            ]
-            .enum_("JumpState")
-            [
-                value("NOTJUMPING", 0),
-                value("FORWARDJUMP", 1),
-                value("PREJUMP", 2),
-                value("UPJUMP", 3),
-                value("APEXJUMP", 4),
-                value("LANDJUMP", 5)
-            ]
+		CONCRETELUABINDING(AHuman, Actor)
+			// These are all private/protected so they can't be bound, need to consider making them public.
+			.enum_("UpperBodyState")[
+				value("WEAPON_READY", 0 /*AHuman::UpperBodyState::WEAPON_READY*/),
+				value("AIMING_SHARP", 1 /*AHuman::UpperBodyState::AIMING_SHARP*/),
+				value("HOLSTERING_BACK", 2 /*AHuman::UpperBodyState::HOLSTERING_BACK*/),
+				value("HOLSTERING_BELT", 3 /*AHuman::UpperBodyState::HOLSTERING_BELT*/),
+				value("DEHOLSTERING_BACK", 4 /*AHuman::UpperBodyState::DEHOLSTERING_BACK*/),
+				value("DEHOLSTERING_BELT", 5 /*AHuman::UpperBodyState::DEHOLSTERING_BELT*/),
+				value("THROWING_PREP", 6 /*AHuman::UpperBodyState::THROWING_PREP*/),
+				value("THROWING_RELEASE", 7 /*AHuman::UpperBodyState::THROWING_RELEASE*/)
+			]
+			.enum_("MovementState")[
+				value("NOMOVE", 0 /*AHuman::MovementState::NOMOVE*/),
+				value("STAND", 1 /*AHuman::MovementState::STAND*/),
+				value("WALK", 2 /*AHuman::MovementState::WALK*/),
+				value("CROUCH", 3 /*AHuman::MovementState::CROUCH*/),
+				value("CRAWL", 4 /*AHuman::MovementState::CRAWL*/),
+				value("ARMCRAWL", 5 /*AHuman::MovementState::ARMCRAWL*/),
+				value("CLIMB", 6 /*AHuman::MovementState::CLIMB*/),
+				value("JUMP", 7 /*AHuman::MovementState::JUMP*/),
+				value("DISLODGE", 8 /*AHuman::MovementState::DISLODGE*/),
+				value("MOVEMENTSTATECOUNT", 9 /*AHuman::MovementState::MOVEMENTSTATECOUNT*/)
+			]
+			.enum_("ProneState")[
+				value("NOTPRONE", 0 /*AHuman::ProneState::NOTPRONE*/),
+				value("GOPRONE", 1 /*AHuman::ProneState::GOPRONE*/),
+				value("PRONE", 2 /*AHuman::ProneState::PRONE*/),
+				value("PRONESTATECOUNT", 3 /*AHuman::ProneState::PRONESTATECOUNT*/)
+			]		
+			.enum_("Layer")[
+				// Doesn't have qualifier
+				value("FGROUND", 0 /*AHuman::FGROUND*/),
+				value("BGROUND", 1 /*AHuman::BGROUND*/)
+			]
+			.enum_("DeviceHandlingState")[
+				value("STILL", 0 /*AHuman::DeviceHandlingState::STILL*/),
+				value("POINTING", 1 /*AHuman::DeviceHandlingState::POINTING*/),
+				value("SCANNING", 2 /*AHuman::DeviceHandlingState::SCANNING*/),
+				value("AIMING", 3 /*AHuman::DeviceHandlingState::AIMING*/),
+				value("FIRING", 4 /*AHuman::DeviceHandlingState::FIRING*/),
+				value("THROWING", 5 /*AHuman::DeviceHandlingState::THROWING*/),
+				value("DIGGING", 6 /*AHuman::DeviceHandlingState::DIGGING*/)
+			]
+			.enum_("SweepState")[
+				value("NOSWEEP", 0 /*AHuman::SweepState::NOSWEEP*/),
+				value("SWEEPINGUP", 1 /*AHuman::SweepState::SWEEPINGUP*/),
+				value("SWEEPUPPAUSE", 2 /*AHuman::SweepState::SWEEPUPPAUSE*/),
+				value("SWEEPINGDOWN", 3 /*AHuman::SweepState::SWEEPINGDOWN*/),
+				value("SWEEPDOWNPAUSE", 4 /*AHuman::SweepState::SWEEPDOWNPAUSE*/)
+			]
+			.enum_("DigState")[
+				value("NOTDIGGING", 0 /*AHuman::DigState::NOTDIGGING*/),
+				value("PREDIG", 1 /*AHuman::DigState::PREDIG*/),
+				value("STARTDIG", 2 /*AHuman::DigState::STARTDIG*/),
+				value("TUNNELING", 3 /*AHuman::DigState::TUNNELING*/),
+				value("FINISHINGDIG", 4 /*AHuman::DigState::FINISHINGDIG*/),
+				value("PAUSEDIGGER", 5 /*AHuman::DigState::PAUSEDIGGER*/)
+			]
+			.enum_("JumpState")[
+				value("NOTJUMPING", 0 /*AHuman::JumpState::NOTJUMPING*/),
+				value("FORWARDJUMP", 1 /*AHuman::JumpState::FORWARDJUMP*/),
+				value("PREJUMP", 2 /*AHuman::JumpState::PREJUMP*/),
+				value("UPJUMP", 3 /*AHuman::JumpState::UPJUMP*/),
+				value("APEXJUMP", 4 /*AHuman::JumpState::APEXJUMP*/),
+				value("LANDJUMP", 5 /*AHuman::JumpState::LANDJUMP*/)
+			]
             .def(constructor<>())
             .property("Head", &AHuman::GetHead)
             .property("FGArm", &AHuman::GetFGArm)
@@ -1095,61 +1101,57 @@ int LuaMan::Create()
 			.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed),
         
 		CONCRETELUABINDING(ACrab, Actor)
-            .enum_("MovementState")
-            [
-                value("STAND", 0),
-                value("WALK", 1),
-                value("JUMP", 2),
-                value("DISLODGE", 3),
-                value("MOMENTSTATECOUNT", 4)
-            ]
-            .enum_("Side")
-            [
-                value("LEFTSIDE", 0),
-                value("RIGHTSIDE", 1),
-                value("SIDECOUNT", 2)
-            ]
-            .enum_("Layer")
-            [
-                value("FGROUND", 0),
-                value("BGROUND", 1)
-            ]
-            .enum_("DeviceHandlingState")
-            [
-                value("STILL", 0),
-                value("POINTING", 1),
-                value("SCANNING", 2),
-                value("AIMING", 3),
-                value("FIRING", 4),
-                value("THROWING", 5),
-                value("DIGGING", 6)
-            ]
-            .enum_("SweepState")
-            [
-                value("NOSWEEP", 0),
-                value("SWEEPINGUP", 1),
-                value("SWEEPINGPAUSE", 2),
-                value("SWEEPINGDOWN", 3),
-                value("SWEEMDOWNPAUSE", 4)
-            ]
-            .enum_("DigState")
-            [
-                value("NOTDIGGING", 0),
-                value("PREDIG", 1),
-                value("STARTDIG", 2),
-                value("TUNNELING", 3),
-                value("FINISHINGDIG", 4),
-                value("PAUSEDIGGER", 5)
-            ]
-            .enum_("JumpState")
-            [
-                value("NOTJUMPING", 0),
-                value("FORWARDJUMP", 1),
-                value("PREJUMP", 2),
-                value("UPJUMP", 3),
-                value("APEXJUMP", 4),
-                value("LANDJUMP", 5)
-            ]
+			// These are all private/protected so they can't be bound, need to consider making them public.
+			.enum_("MovementState")[
+				value("STAND", 0 /*ACrab::MovementState::STAND*/),
+				value("WALK", 1 /*ACrab::MovementState::WALK*/),
+				value("JUMP", 2 /*ACrab::MovementState::JUMP*/),
+				value("DISLODGE", 3 /*ACrab::MovementState::DISLODGE*/),
+				value("MOVEMENTSTATECOUNT", 4 /*ACrab::MovementState::MOVEMENTSTATECOUNT*/)
+			]
+			.enum_("Side")[
+				// Doesn't have qualifier
+				value("LEFTSIDE", 0 /*ACrab::LEFTSIDE*/),
+				value("RIGHTSIDE", 1 /*ACrab::RIGHTSIDE*/),
+				value("SIDECOUNT", 2 /*ACrab::SIDECOUNT*/)
+			]
+			.enum_("Layer")[
+				// Doesn't have qualifier
+				value("FGROUND", 0 /*ACrab::FGROUND*/),
+				value("BGROUND", 1 /*ACrab::BGROUND*/)
+			]
+			.enum_("DeviceHandlingState")[
+				value("STILL", 0 /*ACrab::DeviceHandlingState::STILL*/),
+				value("POINTING", 1 /*ACrab::DeviceHandlingState::POINTING*/),
+				value("SCANNING", 2 /*ACrab::DeviceHandlingState::SCANNING*/),
+				value("AIMING", 3 /*ACrab::DeviceHandlingState::AIMING*/),
+				value("FIRING", 4 /*ACrab::DeviceHandlingState::FIRING*/),
+				value("THROWING", 5 /*ACrab::DeviceHandlingState::THROWING*/),
+				value("DIGGING", 6 /*ACrab::DeviceHandlingState::DIGGING*/)
+			]
+			.enum_("SweepState")[
+				value("NOSWEEP", 0 /*ACrab::SweepState::NOSWEEP*/),
+				value("SWEEPINGUP", 1 /*ACrab::SweepState::SWEEPINGUP*/),
+				value("SWEEPUPPAUSE", 2 /*ACrab::SweepState::SWEEPUPPAUSE*/),
+				value("SWEEPINGDOWN", 3 /*ACrab::SweepState::SWEEPINGDOWN*/),
+				value("SWEEPDOWNPAUSE", 4 /*ACrab::SweepState::SWEEPDOWNPAUSE*/)
+			]
+			.enum_("DigState")[
+				value("NOTDIGGING", 0 /*ACrab::DigState::NOTDIGGING*/),
+				value("PREDIG", 1 /*ACrab::DigState::PREDIG*/),
+				value("STARTDIG", 2 /*ACrab::DigState::STARTDIG*/),
+				value("TUNNELING", 3 /*ACrab::DigState::TUNNELING*/),
+				value("FINISHINGDIG", 4 /*ACrab::DigState::FINISHINGDIG*/),
+				value("PAUSEDIGGER", 5 /*ACrab::DigState::PAUSEDIGGER*/)
+			]
+			.enum_("JumpState")[
+				value("NOTJUMPING", 0 /*ACrab::JumpState::NOTJUMPING*/),
+				value("FORWARDJUMP", 1 /*ACrab::JumpState::FORWARDJUMP*/),
+				value("PREJUMP", 2 /*ACrab::JumpState::PREJUMP*/),
+				value("UPJUMP", 3 /*ACrab::JumpState::UPJUMP*/),
+				value("APEXJUMP", 4 /*ACrab::JumpState::APEXJUMP*/),
+				value("LANDJUMP", 5 /*ACrab::JumpState::LANDJUMP*/)
+			]
             .def(constructor<>())
             .property("Turret", &ACrab::GetTurret)
             .property("LFGLeg", &ACrab::GetLFGLeg)
@@ -1176,35 +1178,33 @@ int LuaMan::Create()
 
         ABSTRACTLUABINDING(Turret, Attachable),
 
-        ABSTRACTLUABINDING(ACraft, Actor)
-            .enum_("HatchState")
-            [
-                value("CLOSED", 0),
-                value("OPENING", 1),
-                value("OPEN", 2),
-                value("CLOSING", 3),
-                value("HatchStateCount", 4)
-            ]
-            .enum_("Side")
-            [
-                value("RIGHT", 0),
-                value("LEFT", 1)
-            ]
-            .enum_("CraftDeliverySequence")
-            [
-                value("FALL", 0),
-                value("LAND", 1),
-                value("STANDBY", 2),
-                value("UNLOAD", 3),
-                value("LAUNCH", 4),
-                value("UNSTICK", 5)
-            ]
-            .enum_("AltitudeMoveState")
-            [
-                value("HOVER", 0),
-                value("DESCEND", 1),
-                value("ASCEND", 2)
-            ]
+		ABSTRACTLUABINDING(ACraft, Actor)
+			.enum_("HatchState")[
+				value("CLOSED", ACraft::HatchState::CLOSED),
+				value("OPENING", ACraft::HatchState::OPENING),
+				value("OPEN", ACraft::HatchState::OPEN),
+				value("CLOSING", ACraft::HatchState::CLOSING),
+				value("HatchStateCount", ACraft::HatchState::HatchStateCount)
+			]
+			.enum_("Side")[
+				// Doesn't have qualifier
+				value("RIGHT", ACraft::RIGHT),
+				value("LEFT", ACraft::LEFT)
+			]
+			// These are all private/protected so they can't be bound, need to consider making them public.
+			.enum_("CraftDeliverySequence")[
+				value("FALL", 0 /*ACraft::CraftDeliverySequence::FALL*/),
+				value("LAND", 1 /*ACraft::CraftDeliverySequence::LAND*/),
+				value("STANDBY", 2 /*ACraft::CraftDeliverySequence::STANDBY*/),
+				value("UNLOAD", 3 /*ACraft::CraftDeliverySequence::UNLOAD*/),
+				value("LAUNCH", 4 /*ACraft::CraftDeliverySequence::LAUNCH*/),
+				value("UNSTICK", 5 /*ACraft::CraftDeliverySequence::UNSTICK*/)
+			]
+			.enum_("AltitudeMoveState")[
+				value("HOVER", 0 /*ACraft::AltitudeMoveState::HOVER*/),
+				value("DESCEND", 1 /*ACraft::AltitudeMoveState::DESCEND*/),
+				value("ASCEND", 2 /*ACraft::AltitudeMoveState::ASCEND*/)
+			]
             .def("OpenHatch", &ACraft::OpenHatch)
             .def("CloseHatch", &ACraft::CloseHatch)
             .property("HatchState", &ACraft::GetHatchState)
@@ -1224,15 +1224,15 @@ int LuaMan::Create()
 			.def("DetectObstacle", &ACDropShip::DetectObstacle)
             .def("GetAltitude", &ACDropShip::GetAltitude),
 
-        CONCRETELUABINDING(ACRocket, ACraft)
-            .enum_("LandingGearState")
-            [
-                value("RAISED", 0),
-                value("LOWERED", 1),
-                value("LOWERING", 2),
-                value("RAISING", 3),
-                value("GearStateCount", 4)
-            ]
+		CONCRETELUABINDING(ACRocket, ACraft)
+			// These are all private/protected so they can't be bound, need to consider making them public.
+			.enum_("LandingGearState")[
+				value("RAISED", 0 /*ACRocket::LandingGearState::RAISED*/),
+				value("LOWERED", 1 /*ACRocket::LandingGearState::LOWERED*/),
+				value("LOWERING", 2 /*ACRocket::LandingGearState::LOWERING*/),
+				value("RAISING", 3 /*ACRocket::LandingGearState::RAISING*/),
+				value("GearStateCount", 4 /*ACRocket::LandingGearState::GearStateCount*/)
+			]
 			.property("MainEngine", &ACRocket::GetMThruster)
 			.property("LeftEngine", &ACRocket::GetLThruster)
 			.property("RightEngine", &ACRocket::GetRThruster)
@@ -1319,61 +1319,59 @@ int LuaMan::Create()
         CONCRETELUABINDING(TDExplosive, ThrownDevice)
             .property("IsAnimatedManually", &TDExplosive::IsAnimatedManually, &TDExplosive::SetAnimatedManually),
 
-        class_<Controller>("Controller")
-            .enum_("ControlState")
-            [
-                value("PRIMARY_ACTION", 0),
-                value("SECONDARY_ACTION", 1),
-                value("MOVE_IDLE", 2),
-                value("MOVE_RIGHT", 3),
-                value("MOVE_LEFT", 4),
-                value("MOVE_UP", 5),
-                value("MOVE_DOWN", 6),
-                value("MOVE_FAST", 7),
-                value("BODY_JUMPSTART", 8),
-                value("BODY_JUMP", 9),
-                value("BODY_CROUCH", 10),
-                value("AIM_UP", 11),
-                value("AIM_DOWN", 12),
-                value("AIM_SHARP", 13),
-                value("WEAPON_FIRE", 14),
-                value("WEAPON_RELOAD", 15),
-                value("PIE_MENU_ACTIVE", 16),
-                value("WEAPON_CHANGE_NEXT", 17),
-                value("WEAPON_CHANGE_PREV", 18),
-                value("WEAPON_PICKUP", 19),
-                value("WEAPON_DROP", 20),
-                value("ACTOR_NEXT", 21),
-                value("ACTOR_PREV", 22),
-                value("ACTOR_BRAIN", 23),
-                value("ACTOR_NEXT_PREP", 24),
-                value("ACTOR_PREV_PREP", 25),
-                value("HOLD_RIGHT", 26),
-                value("HOLD_LEFT", 27),
-                value("HOLD_UP", 28),
-                value("HOLD_DOWN", 29),
-                value("PRESS_PRIMARY", 30),
-                value("PRESS_SECONDARY", 31),
-                value("PRESS_RIGHT", 32),
-                value("PRESS_LEFT", 33),
-                value("PRESS_UP", 34),
-                value("PRESS_DOWN", 35),
-                value("RELEASE_PRIMARY", 36),
-                value("RELEASE_SECONDARY", 37),
-                value("PRESS_FACEBUTTON", 38),
-                value("SCROLL_UP", 39),
-                value("SCROLL_DOWN", 40),
-                value("DEBUG_ONE", 41),
-                value("CONTROLSTATECOUNT", 42)
-            ]
-            .enum_("InputMode")
-            [
-                value("CIM_DISABLED", 0),
-                value("CIM_PLAYER", 1),
-                value("CIM_AI", 2),
-                value("CIM_NETWORK", 3),
-                value("CIM_INPUTMODECOUNT", 4)
-            ]
+		class_<Controller>("Controller")
+			.enum_("ControlState")[
+				value("PRIMARY_ACTION", ControlState::PRIMARY_ACTION),
+				value("SECONDARY_ACTION", ControlState::SECONDARY_ACTION),
+				value("MOVE_IDLE", ControlState::MOVE_IDLE),
+				value("MOVE_RIGHT", ControlState::MOVE_RIGHT),
+				value("MOVE_LEFT", ControlState::MOVE_LEFT),
+				value("MOVE_UP", ControlState::MOVE_UP),
+				value("MOVE_DOWN", ControlState::MOVE_DOWN),
+				value("MOVE_FAST", ControlState::MOVE_FAST),
+				value("BODY_JUMPSTART", ControlState::BODY_JUMPSTART),
+				value("BODY_JUMP", ControlState::BODY_JUMP),
+				value("BODY_CROUCH", ControlState::BODY_CROUCH),
+				value("AIM_UP", ControlState::AIM_UP),
+				value("AIM_DOWN", ControlState::AIM_DOWN),
+				value("AIM_SHARP", ControlState::AIM_SHARP),
+				value("WEAPON_FIRE", ControlState::WEAPON_FIRE),
+				value("WEAPON_RELOAD", ControlState::WEAPON_RELOAD),
+				value("PIE_MENU_ACTIVE", ControlState::PIE_MENU_ACTIVE),
+				value("WEAPON_CHANGE_NEXT", ControlState::WEAPON_CHANGE_NEXT),
+				value("WEAPON_CHANGE_PREV", ControlState::WEAPON_CHANGE_PREV),
+				value("WEAPON_PICKUP", ControlState::WEAPON_PICKUP),
+				value("WEAPON_DROP", ControlState::WEAPON_DROP),
+				value("ACTOR_NEXT", ControlState::ACTOR_NEXT),
+				value("ACTOR_PREV", ControlState::ACTOR_PREV),
+				value("ACTOR_BRAIN", ControlState::ACTOR_BRAIN),
+				value("ACTOR_NEXT_PREP", ControlState::ACTOR_NEXT_PREP),
+				value("ACTOR_PREV_PREP", ControlState::ACTOR_PREV_PREP),
+				value("HOLD_RIGHT", ControlState::HOLD_RIGHT),
+				value("HOLD_LEFT", ControlState::HOLD_LEFT),
+				value("HOLD_UP", ControlState::HOLD_UP),
+				value("HOLD_DOWN", ControlState::HOLD_DOWN),
+				value("PRESS_PRIMARY", ControlState::PRESS_PRIMARY),
+				value("PRESS_SECONDARY", ControlState::PRESS_SECONDARY),
+				value("PRESS_RIGHT", ControlState::PRESS_RIGHT),
+				value("PRESS_LEFT", ControlState::PRESS_LEFT),
+				value("PRESS_UP", ControlState::PRESS_UP),
+				value("PRESS_DOWN", ControlState::PRESS_DOWN),
+				value("RELEASE_PRIMARY", ControlState::RELEASE_PRIMARY),
+				value("RELEASE_SECONDARY", ControlState::RELEASE_SECONDARY),
+				value("PRESS_FACEBUTTON", ControlState::PRESS_FACEBUTTON),
+				value("SCROLL_UP", ControlState::SCROLL_UP),
+				value("SCROLL_DOWN", ControlState::SCROLL_DOWN),
+				value("DEBUG_ONE", ControlState::DEBUG_ONE),
+				value("CONTROLSTATECOUNT", ControlState::CONTROLSTATECOUNT)
+			]
+			.enum_("InputMode")[
+				value("CIM_DISABLED", Controller::InputMode::CIM_DISABLED),
+				value("CIM_PLAYER", Controller::InputMode::CIM_PLAYER),
+				value("CIM_AI", Controller::InputMode::CIM_AI),
+				value("CIM_NETWORK", Controller::InputMode::CIM_NETWORK),
+				value("CIM_INPUTMODECOUNT", Controller::InputMode::CIM_INPUTMODECOUNT)
+			]
             .def(luabind::constructor<>())
             .property("InputMode", &Controller::GetInputMode, &Controller::SetInputMode)
             .def("IsPlayerControlled", &Controller::IsPlayerControlled)
@@ -1419,12 +1417,11 @@ int LuaMan::Create()
         class_<TimerMan>("TimerManager")
             .property("TicksPerSecond", &TimerMan::GetTicksPerSecondInLua)
             .property("TimeScale", &TimerMan::GetTimeScale, &TimerMan::SetTimeScale)
-            .def("EnableAveraging", &TimerMan::EnableAveraging)
             .property("RealToSimCap", &TimerMan::GetRealToSimCap, &TimerMan::SetRealToSimCap)
             .property("DeltaTimeTicks", &TimerMan::GetDeltaTimeTicks, &TimerMan::SetDeltaTimeTicks)
             .property("DeltaTimeSecs", &TimerMan::GetDeltaTimeSecs, &TimerMan::SetDeltaTimeSecs)
             .property("DeltaTimeMS", &TimerMan::GetDeltaTimeMS)
-            .def("PauseSim", &TimerMan::PauseSim)
+            //.def("PauseSim", &TimerMan::PauseSim) // Forcing this during activity will kill input and your only option will be to Alt+F4. Need to rework input so it's not tied to sim time for this to work.
             .property("OneSimUpdatePerFrame", &TimerMan::IsOneSimUpdatePerFrame, &TimerMan::SetOneSimUpdatePerFrame)
             .def("TimeForSimUpdate", &TimerMan::TimeForSimUpdate)
             .def("DrawnSimUpdate", &TimerMan::DrawnSimUpdate),
@@ -1471,7 +1468,6 @@ int LuaMan::Create()
             .def("GetOfficialModuleCount", &PresetMan::GetOfficialModuleCount)
             .def("AddPreset", &PresetMan::AddEntityPreset)
 			.def_readwrite("Modules", &PresetMan::m_pDataModules, return_stl_iterator)
-			// Disambiguate overloaded member funcs
             .def("GetPreset", (const Entity *(PresetMan::*)(string, string, int))&PresetMan::GetEntityPreset)
             .def("GetPreset", (const Entity *(PresetMan::*)(string, string, string))&PresetMan::GetEntityPreset)
             .def("GetLoadout", (Actor * (PresetMan::*)(std::string, std::string, bool))&PresetMan::GetLoadout, adopt(result))
@@ -1509,80 +1505,7 @@ int LuaMan::Create()
             .def("FadeOutSound", &AudioMan::FadeOutSound),
 
         class_<UInputMan>("UInputManager")
-            .enum_("Players")
-            [
-                value("PLAYER_NONE", -1),
-                value("PLAYER_ONE", 0),
-                value("PLAYER_TWO", 1),
-                value("PLAYER_THREE", 2),
-                value("PLAYER_FOUR", 3),
-                value("MAX_PLAYERS", 4)
-            ]
-            .enum_("InputDevice")
-            [
-                value("DEVICE_KEYB_ONLY", 0),
-                value("DEVICE_MOUSE_KEYB", 1),
-                value("DEVICE_GAMEPAD_1", 2),
-                value("DEVICE_GAMEPAD_2", 3),
-                value("DEVICE_GAMEPAD_3", 4),
-                value("DEVICE_GAMEPAD_4", 5),
-                value("DEVICE_COUNT", 6)
-            ]
-            .enum_("InputElements")
-            [
-                value("INPUT_L_UP", 0),
-                value("INPUT_L_DOWN", 1),
-                value("INPUT_L_LEFT", 2),
-                value("INPUT_L_RIGHT", 3),
-                value("INPUT_R_UP", 4),
-                value("INPUT_R_DOWN", 5),
-                value("INPUT_R_LEFT", 6),
-                value("INPUT_R_RIGHT", 7),
-                value("INPUT_FIRE", 8),
-                value("INPUT_AIM", 9),
-                value("INPUT_AIM_UP", 10),
-                value("INPUT_AIM_DOWN", 11),
-                value("INPUT_AIM_LEFT", 12),
-                value("INPUT_AIM_RIGHT", 13),
-                value("INPUT_PIEMENU", 14),
-                value("INPUT_JUMP", 15),
-                value("INPUT_CROUCH", 16),
-                value("INPUT_NEXT", 17),
-                value("INPUT_PREV", 18),
-                value("INPUT_START", 19),
-                value("INPUT_BACK", 20),
-                value("INPUT_COUNT", 21)
-            ]
-            .enum_("MouseButtons")
-            [
-                value("MOUSE_NONE", -1),
-                value("MOUSE_LEFT", 0),
-                value("MOUSE_RIGHT", 1),
-                value("MOUSE_MIDDLE", 2),
-                value("MAX_MOUSE_BUTTONS", 3)
-            ]
-            .enum_("JoyButtons")
-            [
-                value("JOY_NONE", -1),
-                value("JOY_1", 0),
-                value("JOY_2", 1),
-                value("JOY_3", 2),
-                value("JOY_4", 3),
-                value("JOY_5", 4),
-                value("JOY_6", 5),
-                value("JOY_7", 6),
-                value("JOY_8", 7),
-                value("JOY_9", 8),
-                value("JOY_10", 9),
-                value("JOY_11", 10),
-                value("JOY_12", 11),
-                value("MAX_JOY_BUTTONS", 12)
-            ]
-            .enum_("JoyDirections")
-            [
-                value("JOYDIR_ONE", 0),
-                value("JOYDIR_TWO", 1)
-            ]
+			.def("GetInputDevice", &UInputMan::GetInputDevice)
             .def("ElementPressed", &UInputMan::ElementPressed)
             .def("ElementReleased", &UInputMan::ElementReleased)
             .def("ElementHeld", &UInputMan::ElementHeld)
@@ -1590,12 +1513,12 @@ int LuaMan::Create()
             .def("KeyReleased", &UInputMan::KeyReleased)
             .def("KeyHeld", &UInputMan::KeyHeld)
             .def("WhichKeyHeld", &UInputMan::WhichKeyHeld)
-            .def("MouseButtonPressed", (bool (UInputMan::*)(int,int))&UInputMan::MouseButtonPressed) 
-			.def("MouseButtonPressed", (bool (UInputMan::*)(int))&UInputMan::MouseButtonPressed) 
-			.def("MouseButtonReleased", (bool (UInputMan::*)(int, int))&UInputMan::MouseButtonReleased)
-			.def("MouseButtonReleased", (bool (UInputMan::*)(int))&UInputMan::MouseButtonReleased)
-			.def("MouseButtonHeld", (bool (UInputMan::*)(int, int))&UInputMan::MouseButtonHeld)
-			.def("MouseButtonHeld", (bool (UInputMan::*)(int))&UInputMan::MouseButtonHeld)
+            .def("MouseButtonPressed", (bool (UInputMan::*)(int,short) const)&UInputMan::MouseButtonPressed) 
+			.def("MouseButtonPressed", (bool (UInputMan::*)(int) const)&UInputMan::MouseButtonPressed)
+			.def("MouseButtonReleased", (bool (UInputMan::*)(int, short) const)&UInputMan::MouseButtonReleased)
+			.def("MouseButtonReleased", (bool (UInputMan::*)(int) const)&UInputMan::MouseButtonReleased)
+			.def("MouseButtonHeld", (bool (UInputMan::*)(int, short) const)&UInputMan::MouseButtonHeld)
+			.def("MouseButtonHeld", (bool (UInputMan::*)(int) const)&UInputMan::MouseButtonHeld)
 			.def("MouseWheelMoved", &UInputMan::MouseWheelMoved)
             .def("JoyButtonPressed", &UInputMan::JoyButtonPressed)
             .def("JoyButtonReleased", &UInputMan::JoyButtonReleased)
@@ -1611,16 +1534,15 @@ int LuaMan::Create()
             .def("AnalogStickValues", &UInputMan::AnalogStickValues)
             .def("MouseUsedByPlayer", &UInputMan::MouseUsedByPlayer)
             .def("AnyMouseButtonPress", &UInputMan::AnyMouseButtonPress)
-            .def("TrapMousePos", &UInputMan::TrapMousePos)
             .def("GetMouseMovement", &UInputMan::GetMouseMovement)
             .def("DisableMouseMoving", &UInputMan::DisableMouseMoving)
             .def("SetMousePos", &UInputMan::SetMousePos)
             .def("ForceMouseWithinBox", &UInputMan::ForceMouseWithinBox)
-            .def("ForceMouseWithinPlayerScreen", &UInputMan::ForceMouseWithinPlayerScreen)
+			.def("AnyKeyPress", &UInputMan::AnyKeyPress)
             .def("AnyJoyInput", &UInputMan::AnyJoyInput)
             .def("AnyJoyPress", &UInputMan::AnyJoyPress)
             .def("AnyJoyButtonPress", &UInputMan::AnyJoyButtonPress)
-            .def("AnyInput", &UInputMan::AnyInput)
+            .def("AnyInput", &UInputMan::AnyKeyOrJoyInput)
             .def("AnyPress", &UInputMan::AnyPress)
             .def("AnyStartPress", &UInputMan::AnyStartPress)
             .property("FlagAltState", &UInputMan::FlagAltState)
@@ -1635,14 +1557,13 @@ int LuaMan::Create()
             .def_readwrite("Right", &IntRect::m_Right)
             .def_readwrite("Bottom", &IntRect::m_Bottom),
 
-        CONCRETELUABINDING(Scene, Entity)
-            .enum_("PlacedObjectSets")
-            [
-                value("PLACEONLOAD", 0),
-                value("BLUEPRINT", 1),
-                value("AIPLAN", 2),
-                value("PLACEDSETSCOUNT", 3)
-            ]
+		CONCRETELUABINDING(Scene, Entity)
+			.enum_("PlacedObjectSets")[
+				value("PLACEONLOAD", Scene::PlacedObjectSets::PLACEONLOAD),
+				value("BLUEPRINT", Scene::PlacedObjectSets::BLUEPRINT),
+				value("AIPLAN", Scene::PlacedObjectSets::AIPLAN),
+				value("PLACEDSETSCOUNT", Scene::PlacedObjectSets::PLACEDSETSCOUNT)
+			]
             .property("Location", &Scene::GetLocation, &Scene::SetLocation)
 //            .property("Terrain", &Scene::GetTerrain)
             .property("Dimensions", &Scene::GetDimensions)
@@ -1702,9 +1623,6 @@ int LuaMan::Create()
             .def("GetTerrain", &SceneMan::GetTerrain)
             .def("GetMaterial", &SceneMan::GetMaterial)
             .def("GetMaterialFromID", &SceneMan::GetMaterialFromID)
-//            .property("MOColorBitmap", &SceneMan::GetMOColorBitmap)
-//            .property("DebugBitmap", &SceneMan::GetDebugBitmap)
-//            .property("MOIDBitmap", &SceneMan::GetMOIDBitmap)
             .property("LayerDrawMode", &SceneMan::GetLayerDrawMode, &SceneMan::SetLayerDrawMode)
             .def("GetTerrMatter", &SceneMan::GetTerrMatter)
             .def("GetMOIDPixel", &SceneMan::GetMOIDPixel)
@@ -1787,21 +1705,20 @@ int LuaMan::Create()
 			.property("EnforceMaxPassengersConstraint", &BuyMenuGUI::EnforceMaxPassengersConstraint, &BuyMenuGUI::SetEnforceMaxPassengersConstraint)
 			.property("EnforceMaxMassConstraint", &BuyMenuGUI::EnforceMaxMassConstraint, &BuyMenuGUI::SetEnforceMaxMassConstraint),
 
-        class_<SceneEditorGUI>("SceneEditorGUI")
-            .enum_("EditorGUIMode")
-            [
-                value("INACTIVE", 0),
-                value("PICKINGOBJECT", 1),
-                value("ADDINGOBJECT", 2),
-                value("INSTALLINGBRAIN", 3),
-                value("PLACINGOBJECT", 4),
-                value("MOVINGOBJECT", 5),
-                value("DELETINGOBJECT", 6),
-                value("PLACEINFRONT", 7),
-                value("PLACEBEHIND", 8),
-                value("DONEEDITING", 9),
-                value("EDITORGUIMODECOUNT", 10)
-            ]
+		class_<SceneEditorGUI>("SceneEditorGUI")
+			.enum_("EditorGUIMode")[
+				value("INACTIVE", SceneEditorGUI::EditorGUIMode::INACTIVE),
+				value("PICKINGOBJECT", SceneEditorGUI::EditorGUIMode::PICKINGOBJECT),
+				value("ADDINGOBJECT", SceneEditorGUI::EditorGUIMode::ADDINGOBJECT),
+				value("INSTALLINGBRAIN", SceneEditorGUI::EditorGUIMode::INSTALLINGBRAIN),
+				value("PLACINGOBJECT", SceneEditorGUI::EditorGUIMode::PLACINGOBJECT),
+				value("MOVINGOBJECT", SceneEditorGUI::EditorGUIMode::MOVINGOBJECT),
+				value("DELETINGOBJECT", SceneEditorGUI::EditorGUIMode::DELETINGOBJECT),
+				value("PLACEINFRONT", SceneEditorGUI::EditorGUIMode::PLACEINFRONT),
+				value("PLACEBEHIND", SceneEditorGUI::EditorGUIMode::PLACEBEHIND),
+				value("DONEEDITING", SceneEditorGUI::EditorGUIMode::DONEEDITING),
+				value("EDITORGUIMODECOUNT", SceneEditorGUI::EditorGUIMode::EDITORGUIMODECOUNT)
+			]
             .def("SetCursorPos", &SceneEditorGUI::SetCursorPos)
             .property("EditorMode", &SceneEditorGUI::GetEditorGUIMode, &SceneEditorGUI::SetEditorGUIMode)
             .def("GetCurrentObject", &SceneEditorGUI::GetCurrentObject)
@@ -1809,82 +1726,75 @@ int LuaMan::Create()
             .def("SetModuleSpace", &SceneEditorGUI::SetModuleSpace)
             .def("SetNativeTechModule", &SceneEditorGUI::SetNativeTechModule)
             .def("SetForeignCostMultiplier", &SceneEditorGUI::SetForeignCostMultiplier)
-            .def("TestBrainResidence", &SceneEditorGUI::TestBrainResidence)
-            .def("Update", &SceneEditorGUI::Update),
+            .def("TestBrainResidence", &SceneEditorGUI::TestBrainResidence),
 
-        class_<Activity, Entity>("Activity")
-            .enum_("ActivityState")
-            [
-                value("NOACTIVITY", -1),
-                value("NOTSTARTED", 0),
-                value("STARTING", 1),
-                value("EDITING", 2),
-                value("PREGAME", 3),
-                value("RUNNING", 4),
-                value("INERROR", 6),
-                value("OVER", 7)
-            ]
-            .enum_("Player")
-            [
-                value("NOPLAYER", -1),
-                value("PLAYER_1", 0),
-                value("PLAYER_2", 1),
-                value("PLAYER_3", 2),
-                value("PLAYER_4", 3),
-                value("MAXPLAYERCOUNT", 4)
-            ]
-            .enum_("Team")
-            [
-                value("NOTEAM", -1),
-                value("TEAM_1", 0),
-                value("TEAM_2", 1),
-                value("TEAM_3", 2),
-                value("TEAM_4", 3),
-                value("MAXTEAMCOUNT", 4)
-            ]
-            .enum_("ViewState")
-            [
-                value("NORMAL", 0),
-                value("OBSERVE", 1),
-                value("DEATHWATCH", 2),
-                value("ACTORSELECT", 3),
-                value("AISENTRYPOINT", 4),
-                value("AIPATROLPOINTS", 5),
-                value("AIGOLDDIGPOINT", 6),
-                value("AIGOTOPOINT", 7),
-                value("LZSELECT", 8)
-            ]
-            .enum_("DifficultySetting")
-            [
-                value("MINDIFFICULTY", 0),
-                value("CAKEDIFFICULTY", 15),
-                value("EASYDIFFICULTY", 40),
-                value("MEDIUMDIFFICULTY", 60),
-                value("HARDDIFFICULTY", 85),
-                value("NUTSDIFFICULTY", 98),
-                value("MAXDIFFICULTY", 100),
-                value("TESTDIFFICULTY", -1)
-            ]
-            .enum_("AISkillSetting")
-            [
-				value("INFERIORSKILL", Activity::INFERIORSKILL),
-				value("AVERAGESKILL", Activity::AVERAGESKILL),
-				value("GOODSKILL", Activity::GOODSKILL),
-				value("UNFAIRSKILL", Activity::UNFAIRSKILL),
-				value("DEFAULTSKILL", Activity::DEFAULTSKILL)
-            ]
+		class_<Activity, Entity>("Activity")
+			.enum_("Players")[
+				value("PLAYER_NONE", Players::NoPlayer),
+				value("PLAYER_1", Players::PlayerOne),
+				value("PLAYER_2", Players::PlayerTwo),
+				value("PLAYER_3", Players::PlayerThree),
+				value("PLAYER_4", Players::PlayerFour),
+				value("MAXPLAYERCOUNT", Players::MaxPlayerCount)
+			]
+			.enum_("ActivityState")[
+				value("NOACTIVITY", Activity::ActivityState::NoActivity),
+				value("NOTSTARTED", Activity::ActivityState::NotStarted),
+				value("STARTING", Activity::ActivityState::Starting),
+				value("EDITING", Activity::ActivityState::Editing),
+				value("PREGAME", Activity::ActivityState::PreGame),
+				value("RUNNING", Activity::ActivityState::Running),
+				value("INERROR", Activity::ActivityState::HasError),
+				value("OVER", Activity::ActivityState::Over)
+			]
+			.enum_("Team")[
+				value("NOTEAM", Activity::Teams::NoTeam),
+				value("TEAM_1", Activity::Teams::TeamOne),
+				value("TEAM_2", Activity::Teams::TeamTwo),
+				value("TEAM_3", Activity::Teams::TeamThree),
+				value("TEAM_4", Activity::Teams::TeamFour),
+				value("MAXTEAMCOUNT", Activity::Teams::MaxTeamCount)
+			]
+			.enum_("ViewState")[
+				value("NORMAL", Activity::ViewState::Normal),
+				value("OBSERVE", Activity::ViewState::Observe),
+				value("DEATHWATCH", Activity::ViewState::DeathWatch),
+				value("ACTORSELECT", Activity::ViewState::ActorSelect),
+				value("AISENTRYPOINT", Activity::ViewState::AISentryPoint),
+				value("AIPATROLPOINTS", Activity::ViewState::AIPatrolPoints),
+				value("AIGOLDDIGPOINT", Activity::ViewState::AIGoldDigPoint),
+				value("AIGOTOPOINT", Activity::ViewState::AIGoToPoint),
+				value("LZSELECT", Activity::ViewState::LandingZoneSelect)
+			]
+			.enum_("DifficultySetting")[
+				value("MINDIFFICULTY", Activity::DifficultySetting::MinDifficulty),
+				value("CAKEDIFFICULTY", Activity::DifficultySetting::CakeDifficulty),
+				value("EASYDIFFICULTY", Activity::DifficultySetting::EasyDifficulty),
+				value("MEDIUMDIFFICULTY", Activity::DifficultySetting::MediumDifficulty),
+				value("HARDDIFFICULTY", Activity::DifficultySetting::HardDifficulty),
+				value("NUTSDIFFICULTY", Activity::DifficultySetting::NutsDifficulty),
+				value("MAXDIFFICULTY", Activity::DifficultySetting::MaxDifficulty)
+			]
+			.enum_("AISkillSetting")[
+				value("MINSKILL", Activity::AISkillSetting::MinSkill),
+				value("INFERIORSKILL", Activity::AISkillSetting::InferiorSkill),
+				value("DEFAULTSKILL", Activity::AISkillSetting::DefaultSkill),
+				value("AVERAGESKILL", Activity::AISkillSetting::AverageSkill),
+				value("GOODSKILL", Activity::AISkillSetting::GoodSkill),
+				value("UNFAIRSKILL", Activity::AISkillSetting::UnfairSkill)	
+			]
             .def(constructor<>())
             .property("ClassName", &Activity::GetClassName)
             .property("Description", &Activity::GetDescription)
             .property("InCampaignStage", &Activity::GetInCampaignStage, &Activity::SetInCampaignStage)
             .property("ActivityState", &Activity::GetActivityState, &Activity::SetActivityState)
             .property("SceneName", &Activity::GetSceneName, &Activity::SetSceneName)
-            .property("PlayerCount", &Activity::GetPlayerCount, &Activity::SetPlayerCount)
+            .property("PlayerCount", &Activity::GetPlayerCount)
             .def("DeactivatePlayer", &Activity::DeactivatePlayer)
             .def("PlayerActive", &Activity::PlayerActive)
             .def("PlayerHuman", &Activity::PlayerHuman)
             .property("HumanCount", &Activity::GetHumanCount)
-            .property("TeamCount", &Activity::GetTeamCount, &Activity::SetTeamCount)
+            .property("TeamCount", &Activity::GetTeamCount)
             .def("TeamActive", &Activity::TeamActive)
             .def("GetTeamOfPlayer", &Activity::GetTeamOfPlayer)
             .def("SetTeamOfPlayer", &Activity::SetTeamOfPlayer)
@@ -1911,43 +1821,36 @@ int LuaMan::Create()
             .def("TeamFundsChanged", &Activity::TeamFundsChanged)
             .def("ReportDeath", &Activity::ReportDeath)
             .def("GetTeamDeathCount", &Activity::GetTeamDeathCount)
-            .def("Running", &Activity::Running)
-            .def("Paused", &Activity::Paused)
-            .def("ActivityOver", &Activity::ActivityOver)
+            .def("Running", &Activity::IsRunning)
+            .def("Paused", &Activity::IsPaused)
+            .def("ActivityOver", &Activity::IsOver)
             .def("EnteredOrbit", &Activity::EnteredOrbit)
             .def("SwitchToActor", &Activity::SwitchToActor)
             .def("SwitchToNextActor", &Activity::SwitchToNextActor)
             .def("SwitchToPrevActor", &Activity::SwitchToPrevActor)
             .property("Difficulty", &Activity::GetDifficulty, &Activity::SetDifficulty)
-            .def("IsPlayerTeam", &Activity::IsPlayerTeam)
-            .def("ResetMessageTimer", &Activity::ResetMessageTimer)
-// These are defined later in GAScripted
-/*            .def("Start", &Activity::Start)
-            .def("Pause", &Activity::Pause)
-            .def("End", &Activity::End)*/,
+            .def("IsHumanTeam", &Activity::IsHumanTeam)
+            .def("ResetMessageTimer", &Activity::ResetMessageTimer),
 
-        class_<GUIBanner>("GUIBanner")
-            .enum_("AnimMode")
-            [
-                value("BLINKING", 0),
-                value("FLYBYLEFTWARD", 1),
-                value("FLYBYRIGHTWARD", 2),
-                value("ANIMMODECOUNT", 3)
-            ]
-            .enum_("AnimState")
-            [
-                value("NOTSTARTED", 0),
-                value("SHOWING", 1),
-                value("SHOW", 2),
-                value("HIDING", 3),
-                value("OVER", 4),
-                value("ANIMSTATECOUNT", 5)
-            ]
-            .enum_("BannerColor")
-            [
-                value("RED", 0),
-                value("YELLOW", 1)
-            ]
+		class_<GUIBanner>("GUIBanner")
+			.enum_("AnimMode")[
+				value("BLINKING", GUIBanner::AnimMode::BLINKING),
+				value("FLYBYLEFTWARD", GUIBanner::AnimMode::FLYBYLEFTWARD),
+				value("FLYBYRIGHTWARD", GUIBanner::AnimMode::FLYBYRIGHTWARD),
+				value("ANIMMODECOUNT", GUIBanner::AnimMode::ANIMMODECOUNT)
+			]
+			.enum_("AnimState")[
+				value("NOTSTARTED", GUIBanner::AnimState::NOTSTARTED),
+				value("SHOWING", GUIBanner::AnimState::SHOWING),
+				value("SHOW", GUIBanner::AnimState::SHOW),
+				value("HIDING", GUIBanner::AnimState::HIDING),
+				value("OVER", GUIBanner::AnimState::OVER),
+				value("ANIMSTATECOUNT", GUIBanner::AnimState::ANIMSTATECOUNT)
+			]
+			.enum_("BannerColor")[
+				value("RED", GameActivity::BannerColor::RED),
+				value("YELLOW", GameActivity::BannerColor::YELLOW)
+			]
             .property("BannerText", &GUIBanner::GetBannerText)
             .property("AnimState", &GUIBanner::GetAnimState)
             .def("IsVisible", &GUIBanner::IsVisible)
@@ -1958,14 +1861,13 @@ int LuaMan::Create()
 
         def("ToGameActivity", (GameActivity *(*)(Entity *))&ToGameActivity),
         def("ToGameActivity", (const GameActivity *(*)(const Entity *))&ToConstGameActivity),
-        class_<GameActivity, Activity>("GameActivity")
-            .enum_("ObjectiveArrowDir")
-            [
-                value("ARROWDOWN", 0),
-                value("ARROWLEFT", 1),
-                value("ARROWRIGHT", 2),
-                value("ARROWUP", 3)
-            ]
+		class_<GameActivity, Activity>("GameActivity")
+			.enum_("ObjectiveArrowDir")[
+				value("ARROWDOWN", GameActivity::ObjectiveArrowDir::ARROWDOWN),
+				value("ARROWLEFT", GameActivity::ObjectiveArrowDir::ARROWLEFT),
+				value("ARROWRIGHT", GameActivity::ObjectiveArrowDir::ARROWRIGHT),
+				value("ARROWUP", GameActivity::ObjectiveArrowDir::ARROWUP)
+			]
             .def(constructor<>())
             .def("SetObservationTarget", &GameActivity::SetObservationTarget)
             .def("SetDeathViewTarget", &GameActivity::SetDeathViewTarget)
@@ -2011,7 +1913,7 @@ int LuaMan::Create()
 			.def("SetTeamTech", &GameActivity::SetTeamTech)
 			.def("GetCrabToHumanSpawnRatio", &GameActivity::GetCrabToHumanSpawnRatio)
 			.property("BuyMenuEnabled", &GameActivity::GetBuyMenuEnabled, &GameActivity::SetBuyMenuEnabled)
-			.property("CraftsOrbitAtTheEdge", &GameActivity::GetCraftsOrbitAtTheEdge, &GameActivity::SetCraftsOrbitAtTheEdge)
+			.property("CraftsOrbitAtTheEdge", &GameActivity::GetCraftOrbitAtTheEdge, &GameActivity::SetCraftOrbitAtTheEdge)
             .def("TeamIsCPU", &GameActivity::TeamIsCPU)
             .def("GetStartingGold", &GameActivity::GetStartingGold)
             .def("GetFogOfWarEnabled", &GameActivity::GetFogOfWarEnabled)
@@ -2024,56 +1926,52 @@ int LuaMan::Create()
 			.def_readwrite("PieMenuSlices", &GameActivity::m_CurrentPieMenuSlices, return_stl_iterator),
 		
 		class_<PieMenuGUI::Slice>("Slice")
-			.enum_("Direction")
-			[
-				value("NONE", 0),
-				value("UP", 1),
-				value("RIGHT", 2),
-				value("DOWN", 3),
-				value("LEFT", 4)
+			.enum_("SliceDirection")[
+				value("NONE", PieMenuGUI::Slice::SliceDirection::NONE),
+				value("UP", PieMenuGUI::Slice::SliceDirection::UP),
+				value("RIGHT", PieMenuGUI::Slice::SliceDirection::RIGHT),
+				value("DOWN", PieMenuGUI::Slice::SliceDirection::DOWN),
+				value("LEFT", PieMenuGUI::Slice::SliceDirection::LEFT)
 			]
-
-			.enum_("Type")
-				[
-					value("PSI_NONE", 0),
-					value("PSI_PICKUP", 1),
-					value("PSI_DROP", 2),
-					value("PSI_NEXTITEM", 3),
-					value("PSI_PREVITEM", 4),
-					value("PSI_RELOAD", 5),
-					value("PSI_BUYMENU", 6),
-					value("PSI_STATS", 7),
-					value("PSI_MINIMAP", 8),
-					value("PSI_FORMSQUAD", 9),
-					value("PSI_CEASEFIRE", 10),
-					value("PSI_SENTRY", 11),
-					value("PSI_PATROL", 12),
-					value("PSI_BRAINHUNT", 13),
-					value("PSI_GOLDDIG", 14),
-					value("PSI_GOTO", 15),
-					value("PSI_RETURN", 16),
-					value("PSI_STAY", 17),
-					value("PSI_DELIVER", 18),
-					value("PSI_SCUTTLE", 19),
-					value("PSI_DONE", 20),
-					value("PSI_LOAD", 21),
-					value("PSI_SAVE", 22),
-					value("PSI_NEW", 23),
-					value("PSI_PICK", 24),
-					value("PSI_MOVE", 25),
-					value("PSI_REMOVE", 26),
-					value("PSI_INFRONT", 27),
-					value("PSI_BEHIND", 28),
-					value("PSI_ZOOMIN", 29),
-					value("PSI_ZOOMOUT", 30),
-					value("PSI_TEAM1", 31),
-					value("PSI_TEAM2", 32),
-					value("PSI_TEAM3", 33),
-					value("PSI_TEAM4", 34),
-					value("PSI_SCRIPTED", 35),
-					value("PSI_COUNT", 36)
-				]
-
+			.enum_("PieSliceIndex")[
+				value("PSI_NONE", PieMenuGUI::PieSliceIndex::PSI_NONE),
+				value("PSI_PICKUP", PieMenuGUI::PieSliceIndex::PSI_PICKUP),
+				value("PSI_DROP", PieMenuGUI::PieSliceIndex::PSI_DROP),
+				value("PSI_NEXTITEM", PieMenuGUI::PieSliceIndex::PSI_NEXTITEM),
+				value("PSI_PREVITEM", PieMenuGUI::PieSliceIndex::PSI_PREVITEM),
+				value("PSI_RELOAD", PieMenuGUI::PieSliceIndex::PSI_RELOAD),
+				value("PSI_BUYMENU", PieMenuGUI::PieSliceIndex::PSI_BUYMENU),
+				value("PSI_STATS", PieMenuGUI::PieSliceIndex::PSI_STATS),
+				value("PSI_MINIMAP", PieMenuGUI::PieSliceIndex::PSI_MINIMAP),
+				value("PSI_FORMSQUAD", PieMenuGUI::PieSliceIndex::PSI_FORMSQUAD),
+				value("PSI_CEASEFIRE", PieMenuGUI::PieSliceIndex::PSI_CEASEFIRE),
+				value("PSI_SENTRY", PieMenuGUI::PieSliceIndex::PSI_SENTRY),
+				value("PSI_PATROL", PieMenuGUI::PieSliceIndex::PSI_PATROL),
+				value("PSI_BRAINHUNT", PieMenuGUI::PieSliceIndex::PSI_BRAINHUNT),
+				value("PSI_GOLDDIG", PieMenuGUI::PieSliceIndex::PSI_GOLDDIG),
+				value("PSI_GOTO", PieMenuGUI::PieSliceIndex::PSI_GOTO),
+				value("PSI_RETURN", PieMenuGUI::PieSliceIndex::PSI_RETURN),
+				value("PSI_STAY", PieMenuGUI::PieSliceIndex::PSI_STAY),
+				value("PSI_DELIVER", PieMenuGUI::PieSliceIndex::PSI_DELIVER),
+				value("PSI_SCUTTLE", PieMenuGUI::PieSliceIndex::PSI_SCUTTLE),
+				value("PSI_DONE", PieMenuGUI::PieSliceIndex::PSI_DONE),
+				value("PSI_LOAD", PieMenuGUI::PieSliceIndex::PSI_LOAD),
+				value("PSI_SAVE", PieMenuGUI::PieSliceIndex::PSI_SAVE),
+				value("PSI_NEW", PieMenuGUI::PieSliceIndex::PSI_NEW),
+				value("PSI_PICK", PieMenuGUI::PieSliceIndex::PSI_PICK),
+				value("PSI_MOVE", PieMenuGUI::PieSliceIndex::PSI_MOVE),
+				value("PSI_REMOVE", PieMenuGUI::PieSliceIndex::PSI_REMOVE),
+				value("PSI_INFRONT", PieMenuGUI::PieSliceIndex::PSI_INFRONT),
+				value("PSI_BEHIND", PieMenuGUI::PieSliceIndex::PSI_BEHIND),
+				value("PSI_ZOOMIN", PieMenuGUI::PieSliceIndex::PSI_ZOOMIN),
+				value("PSI_ZOOMOUT", PieMenuGUI::PieSliceIndex::PSI_ZOOMOUT),
+				value("PSI_TEAM1", PieMenuGUI::PieSliceIndex::PSI_TEAM1),
+				value("PSI_TEAM2", PieMenuGUI::PieSliceIndex::PSI_TEAM2),
+				value("PSI_TEAM3", PieMenuGUI::PieSliceIndex::PSI_TEAM3),
+				value("PSI_TEAM4", PieMenuGUI::PieSliceIndex::PSI_TEAM4),
+				value("PSI_SCRIPTED", PieMenuGUI::PieSliceIndex::PSI_SCRIPTED),
+				value("PSI_COUNT", PieMenuGUI::PieSliceIndex::PSI_COUNT)
+			]
 			.def(constructor<>())
 			.property("FunctionName", &PieMenuGUI::Slice::GetFunctionName)
 			.property("Description", &PieMenuGUI::Slice::GetDescription)
@@ -2110,7 +2008,6 @@ int LuaMan::Create()
 
         class_<MetaMan>("MetaManager")
             .property("GameName", &MetaMan::GetGameName, &MetaMan::SetGameName)
-//            .property("GUI", &MetaMan::GetGUI)
             .property("PlayerTurn", &MetaMan::GetPlayerTurn)
             .property("PlayerCount", &MetaMan::GetPlayerCount)
             .def("GetTeamOfPlayer", &MetaMan::GetTeamOfPlayer)
@@ -2182,9 +2079,7 @@ int LuaMan::Create()
             .def("PrintString", &ConsoleMan::PrintString)
             .def("SaveInputLog", &ConsoleMan::SaveInputLog)
             .def("SaveAllText", &ConsoleMan::SaveAllText)
-            .def("Clear", &ConsoleMan::ClearLog)
-			.property("ForceVisibility", &ConsoleMan::IsForceVisible, &ConsoleMan::ForceVisibility)
-			.property("ScreenSize", &ConsoleMan::GetConsoleScreenSize, &ConsoleMan::SetConsoleScreenSize),
+            .def("Clear", &ConsoleMan::ClearLog),
 
         class_<LuaMan>("LuaManager")
             .property("TempEntity", &LuaMan::GetTempEntity)
@@ -2213,7 +2108,77 @@ int LuaMan::Create()
 		def("GetPPM", &GetPPM),
 		def("GetMPP", &GetMPP),
 		def("GetPPL", &GetPPL),
-		def("GetLPP", &GetLPP)
+		def("GetLPP", &GetLPP),
+
+		class_<enum_wrapper::input_device>("InputDevice")
+			.enum_("InputDevice")[
+				value("DEVICE_KEYB_ONLY", InputDevice::DEVICE_KEYB_ONLY),
+				value("DEVICE_MOUSE_KEYB", InputDevice::DEVICE_MOUSE_KEYB),
+				value("DEVICE_GAMEPAD_1", InputDevice::DEVICE_GAMEPAD_1),
+				value("DEVICE_GAMEPAD_2", InputDevice::DEVICE_GAMEPAD_2),
+				value("DEVICE_GAMEPAD_3", InputDevice::DEVICE_GAMEPAD_3),
+				value("DEVICE_GAMEPAD_4", InputDevice::DEVICE_GAMEPAD_4),
+				value("DEVICE_COUNT", InputDevice::DEVICE_COUNT)
+			],
+
+		class_<enum_wrapper::input_elements>("InputElements")
+			.enum_("InputElements")[
+				value("INPUT_L_UP", InputElements::INPUT_L_UP),
+				value("INPUT_L_DOWN", InputElements::INPUT_L_DOWN),
+				value("INPUT_L_LEFT", InputElements::INPUT_L_LEFT),
+				value("INPUT_L_RIGHT", InputElements::INPUT_L_RIGHT),
+				value("INPUT_R_UP", InputElements::INPUT_R_UP),
+				value("INPUT_R_DOWN", InputElements::INPUT_R_DOWN),
+				value("INPUT_R_LEFT", InputElements::INPUT_R_LEFT),
+				value("INPUT_R_RIGHT", InputElements::INPUT_R_RIGHT),
+				value("INPUT_FIRE", InputElements::INPUT_FIRE),
+				value("INPUT_AIM", InputElements::INPUT_AIM),
+				value("INPUT_AIM_UP", InputElements::INPUT_AIM_UP),
+				value("INPUT_AIM_DOWN", InputElements::INPUT_AIM_DOWN),
+				value("INPUT_AIM_LEFT", InputElements::INPUT_AIM_LEFT),
+				value("INPUT_AIM_RIGHT", InputElements::INPUT_AIM_RIGHT),
+				value("INPUT_PIEMENU", InputElements::INPUT_PIEMENU),
+				value("INPUT_JUMP", InputElements::INPUT_JUMP),
+				value("INPUT_CROUCH", InputElements::INPUT_CROUCH),
+				value("INPUT_NEXT", InputElements::INPUT_NEXT),
+				value("INPUT_PREV", InputElements::INPUT_PREV),
+				value("INPUT_START", InputElements::INPUT_START),
+				value("INPUT_BACK", InputElements::INPUT_BACK),
+				value("INPUT_COUNT", InputElements::INPUT_COUNT)
+			],
+
+		class_<enum_wrapper::mouse_buttons>("MouseButtons")
+			.enum_("MouseButtons")[
+				value("MOUSE_NONE", MouseButtons::MOUSE_NONE),
+				value("MOUSE_LEFT", MouseButtons::MOUSE_LEFT),
+				value("MOUSE_RIGHT", MouseButtons::MOUSE_RIGHT),
+				value("MOUSE_MIDDLE", MouseButtons::MOUSE_MIDDLE),
+				value("MAX_MOUSE_BUTTONS", MouseButtons::MAX_MOUSE_BUTTONS)
+			],
+
+		class_<enum_wrapper::joy_buttons>("JoyButtons")
+			.enum_("JoyButtons")[
+				value("JOY_NONE", JoyButtons::JOY_NONE),
+				value("JOY_1", JoyButtons::JOY_1),
+				value("JOY_2", JoyButtons::JOY_2),
+				value("JOY_3", JoyButtons::JOY_3),
+				value("JOY_4", JoyButtons::JOY_4),
+				value("JOY_5", JoyButtons::JOY_5),
+				value("JOY_6", JoyButtons::JOY_6),
+				value("JOY_7", JoyButtons::JOY_7),
+				value("JOY_8", JoyButtons::JOY_8),
+				value("JOY_9", JoyButtons::JOY_9),
+				value("JOY_10", JoyButtons::JOY_10),
+				value("JOY_11", JoyButtons::JOY_11),
+				value("JOY_12", JoyButtons::JOY_12),
+				value("MAX_JOY_BUTTONS", JoyButtons::MAX_JOY_BUTTONS)
+			],
+
+		class_<enum_wrapper::joy_directions>("JoyDirections")
+			.enum_("JoyDirections")[
+				value("JOYDIR_ONE", JoyDirections::JOYDIR_ONE),
+				value("JOYDIR_TWO", JoyDirections::JOYDIR_TWO)
+			]
     ];
 
     // Assign the manager instances to globals in the lua master state
@@ -2244,16 +2209,14 @@ int LuaMan::Create()
     return 0;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void LuaMan::ClearUserModuleCache()
 {
 	luaL_dostring(m_pMasterState, "for m, n in pairs(package.loaded) do if type(n) == \"boolean\" then package.loaded[m] = nil end end");
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the LuaMan object.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LuaMan::Destroy()
 {
@@ -2266,12 +2229,7 @@ void LuaMan::Destroy()
     Clear();
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SavePointerAsGlobal
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Takes a pointer to an object and saves it in the Lua state as a global
-//                  of a specified variable name.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int LuaMan::SavePointerAsGlobal(void *pToSave, string globalName)
 {
@@ -2283,11 +2241,7 @@ int LuaMan::SavePointerAsGlobal(void *pToSave, string globalName)
     return 0;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GlobalIsDefined
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks if there is anything defined on a specific global var in Lua.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool LuaMan::GlobalIsDefined(string globalName)
 {
@@ -2301,11 +2255,7 @@ bool LuaMan::GlobalIsDefined(string globalName)
     return isDefined;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          TableEntryIsDefined
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks if there is anything defined in a specific index of a table.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool LuaMan::TableEntryIsDefined(string tableName, string indexName)
 {
@@ -2329,12 +2279,7 @@ bool LuaMan::TableEntryIsDefined(string tableName, string indexName)
     return isDefined;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ExpressionIsTrue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the result of an arbirary expression in lua as evaluating to
-//                  true or false.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool LuaMan::ExpressionIsTrue(string expression, bool consoleErrors)
 {
@@ -2492,13 +2437,6 @@ int LuaMan::RunScriptFile(const std::string &filePath, bool consoleErrors) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetNewPresetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns an ID string unique to this runtime for use by original presets
-//                  that have scripts associated with them.
-
 string LuaMan::GetNewPresetID()
 {
     // Generate the new ID
@@ -2510,13 +2448,7 @@ string LuaMan::GetNewPresetID()
     return string(newID);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetNewObjectID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns an ID string unique to this runtime for use by individual
-//                  objects that are also tracked in the Lua state and have scripts
-//                  associated with them.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 string LuaMan::GetNewObjectID()
 {
@@ -2529,23 +2461,14 @@ string LuaMan::GetNewObjectID()
     return string(newID);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the state of this LuaMan. Supposed to be done every frame
-//                  before drawing.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LuaMan::Update()
 {
 	lua_gc(m_pMasterState, LUA_GCSTEP, 1);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FileOpen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Opens file. You can open files only inside .rte folders of game directory.
-//					you can open no more that MAX_OPEN_FILES file simultaneously.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int LuaMan::FileOpen(std::string filename, std::string mode)
 {
@@ -2593,10 +2516,7 @@ int LuaMan::FileOpen(std::string filename, std::string mode)
 	return -1;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FileClose
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Closes a previously opened file.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LuaMan::FileClose(int file)
 {
@@ -2607,11 +2527,7 @@ void LuaMan::FileClose(int file)
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FileCloseAll
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Closes all previously opened files.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LuaMan::FileCloseAll()
 {
@@ -2619,13 +2535,7 @@ void LuaMan::FileCloseAll()
 		FileClose(file);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FileReadLine
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a line from file.
-// Arguments:       File number.
-// Return value:    Line from file, or empty string on error.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::string LuaMan::FileReadLine(int file)
 {
@@ -2639,12 +2549,7 @@ std::string LuaMan::FileReadLine(int file)
 	return "";
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FileWriteLine
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Writes a text line to file.
-// Arguments:       File number.
-// Return value:    None.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void LuaMan::FileWriteLine(int file, std::string line)
 {
@@ -2654,12 +2559,7 @@ void LuaMan::FileWriteLine(int file, std::string line)
 		g_ConsoleMan.PrintString("Error: Tried to write to a closed file.");
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FileEOF
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns true if end of file was reached
-// Arguments:       File number.
-// Return value:    Whether or not EOF was reached.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool LuaMan::FileEOF(int file)
 {
@@ -2668,5 +2568,4 @@ bool LuaMan::FileEOF(int file)
 			return false;
 	return true;
 }
-
-} // namespace RTE
+}

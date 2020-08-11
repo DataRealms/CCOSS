@@ -79,9 +79,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New shortcut `ALT + W` to generate a detailed 140x55px mini `WorldDump` to be used for scene previews. No relying on `SceneEditor`, stretches over whole image, no ugly cyan bunkers, no actors or glows and has sky gradient.
 
-- Scripts can now be attached to `ACrab Turrets` and `Legs`. Additionally, a binding to get the Foot of a leg has been added.
+- All text in TextBox (any TextBox) can now be selected using `CTRL + A`.
+
+- Console can now be resized using `CTRL + UP/DOWN` (arrow keys) while open.
+
+- Added new lua function `UInputMan:GetInputDevice(playerNum)` to get a number value representing the input device used by the specified player. Should be useful for making custom key bindings compatible with different input devices.
+
+- Scripts can now be attached to `ACrab.Turret` and `Leg`. Additionally, a binding to get the Foot of a Leg has been added.
 
 ### Changed
+
+- Updated game framework from Allegro 4.2.3.1 to Allegro 4.4.3.1.
+
+- Major cleanup and reformatting in the `Managers` folder.
 
 - Lua error reporting has been improved so script errors will always show filename and line number.
 
@@ -121,11 +131,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Specially handled Lua function `OnScriptRemoveOrDisable` has been changed to `OnScriptDisable`, and no longer has a parameter saying whether it was removed or disabled, since you can no longer remove scripts.
 
-- Game will now Abort with error message when trying to load a copy of a non-existent Presetname that is an AtomGroup, Attachable or AEmitter.
+- When pasting multiple lines of code into the console all of them will be executed instead of the last line being pasted into the textbox and all before it executing.
 
-- Comboboxes (dropdown lists) can now also be closed by clicking on their top part.
+- Input enums moved from `UInputMan` to `Constants` and are no longer accessed with the `UInputManager` prefix. These enums are now accessed with their own names as the prefix.  
+	For example: `UInputManager.DEVICE_KEYB_ONLY` is now `InputDevice.DEVICE_KEYB_ONLY`, `UInputManager.INPUT_L_UP` is now `InputElements.INPUT_L_UP` and so on.
+	
+- `CraftsOrbitAtTheEdge` corrected to `CraftOrbitAtTheEdge`. Applies to both ini property and lua binding.	
 
-- Updated game framework to Allegro 4.4.3.1-custom from Allegro 4.2.3.1-custom.
+- Game will now Abort with an error message when trying to load a copy of a non-existent `AtomGroup`, `Attachable` or `AEmitter` preset.
+
+- ComboBoxes (dropdown lists) can now also be closed by clicking on their top part.
+
+- `Activity:IsPlayerTeam` renamed to `Activity:IsHumanTeam`.
+
+- Screenshot functionality changed: ([Issue #162](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/162))  
+	The `PrintScreen` button will now take a single screenshot on key release and will not take more until the key is pressed and released again.  
+	The `Ctrl+S` key combination is unchanged and will take a single screenshot every frame while the keys are held.  
+	The `Ctrl+W` and `Alt+W` key combinations will now take a single WorldDump/ScenePreview on `W` key release (while `Ctrl/Alt` are still held) and will not take more until the key is pressed and released again.
+	
+	Additionally, all screenshots (excluding abortscreen) will now be saved into a `_Screenshots` folder (`_` so it's on top and not hiding between module folders) to avoid polluting the root directory. ([Issue #163](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/163))  
+	This folder will be created automatically after modules are loaded if it is missing.
+	
+- Controller deadzone setting ignores more input. Previously setting it to the maximum was just enough to eliminate stick drift.
 
 ### Fixed
 
@@ -139,13 +166,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Actors now support their held devices identically while facing to either side. ([Issue #31](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/31))
 
-- Fixed issue where clicking a combobox's scrollbar would release the mouse, thus causing unexpected behavior like not being able to close the list by clicking outside of it.
+- Fixed issue where clicking a ComboBox's scrollbar would release the mouse, thus causing unexpected behavior like not being able to close the list by clicking outside of it.
 
-- Fixed issue where comboboxes did not save the current selection, thus if the combobox was deselected without making a selection then the selection would revert to the default value instead of the last selected value.
+- Fixed issue where ComboBoxes did not save the current selection, thus if the ComboBox was deselected without making a selection then the selection would revert to the default value instead of the last selected value.
 
 - Fixed issue with double clicks and missing clicks in menus (anything that uses AllegroInput).
 
 - Fixed issue where OnPieMenu function wasn't working for `AHuman` equipped items, and made it work for `BGArm` equipped items as well as `FGArm` ones.
+
+- The "woosh" sound played when switching actors from a distance will now take scene wrapping into account. Additionally, attempting to switch to previous or next actor with only one actor will play the more correct "error" sound.
 
 ### Removed
 
@@ -154,6 +183,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Removed `Settings.ini` property `PixelsPerMeter`. Now hardcoded and cannot be changed by the user.
 
 - Removed `MOSParticle` property `Framerate` and lua bindings. `MOSParticle` animation is now handled with `SpriteAnimMode` like everything else.
+
+- Removed `ConsoleMan.ForceVisibility` and `ConsoleMan.ScreenSize` lua bindings.
+
+- Removed `ActivityMan.PlayerCount` and `ActivityMan.TeamCount` setters lua bindings (obsolete and did nothing).
+
+- Removed `Activity` properties `TeamCount` and `PlayerCount`. These are handled internally and do nothing when set in ini.
+
+- Removed `Activity` property `FundsOfTeam#`, use `Team#Funds` instead.
 
 ***
 

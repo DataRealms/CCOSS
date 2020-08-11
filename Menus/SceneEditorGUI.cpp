@@ -75,7 +75,7 @@ void SceneEditorGUI::Clear()
     m_CursorOffset.Reset();
     m_CursorInAir = true;
     m_FacingLeft = false;
-    m_PlaceTeam = Activity::TEAM_1;
+    m_PlaceTeam = Activity::TeamOne;
     m_pCurrentObject = 0;
     m_ObjectListOrder = -1;
     m_DrawCurrentObject = true;
@@ -483,9 +483,9 @@ void SceneEditorGUI::Update()
             m_EditorGUIMode = PLACEBEHIND;
         }
         else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_TEAM1)
-            m_PlaceTeam = Activity::TEAM_1;
+            m_PlaceTeam = Activity::TeamOne;
         else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_TEAM2)
-            m_PlaceTeam = Activity::TEAM_2;
+            m_PlaceTeam = Activity::TeamTwo;
         // Toggle between normal scene object editing, and AI plan editing
         else if (m_pPieMenu->GetPieCommand() == PieMenuGUI::PSI_MINIMAP)
             m_FeatureSet = m_FeatureSet == ONLOADEDIT ? AIPLANEDIT : ONLOADEDIT;

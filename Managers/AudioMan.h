@@ -429,7 +429,7 @@ namespace RTE {
 		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
 		int m_CurrentActivityHumanCount; //!< The stored number of humans in the current activity, used for audio splitscreen handling. Only updated when there's an activity running.
 
-		std::unordered_map<unsigned short, std::vector<FMOD_VECTOR>> soundChannelRolloffs; //!< An unordered map of Sound Channel indices to a std::vector of FMOD_VECTORs representing each Sound Channel's custom attenuation rolloff. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing.
+		std::unordered_map<unsigned short, std::vector<FMOD_VECTOR>> m_SoundChannelRolloffs; //!< An unordered map of Sound Channel indices to a std::vector of FMOD_VECTORs representing each Sound Channel's custom attenuation rolloff. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing.
 
 		double m_SoundsVolume; //!< Global sounds effects volume.
 		double m_MusicVolume; //!< Global music volume.

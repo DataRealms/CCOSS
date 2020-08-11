@@ -107,9 +107,9 @@ namespace RTE {
 		/// </summary>
 		/// <param name="effectPos">The absolute scene coordinates of the center of the effect.</param>
 		/// <param name="effect">A 32bpp BITMAP screen should be drawn centered on the above scene location in the final frame buffer. Ownership is NOT transferred!</param>
-		/// <param name="hash"></param>
+		/// <param name="hash">Hash value of the effect for transmitting over the network.</param>
 		/// <param name="strength">The intensity level this effect should have when blended in post. 0 - 255.</param>
-		/// <param name="angle"></param>
+		/// <param name="angle">The angle this effect should be rotated at.</param>
 		void RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, unsigned char strength = 255, float angle = 0);
 
 		/// <summary>
@@ -179,7 +179,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichScreen">Which player screen to get list for.</param>
 		/// <param name="outputList"></param>
-		void GetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> & outputList);
+		void GetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> &outputList);
 
 		// TODO: Figure out.
 		/// <summary>
@@ -187,7 +187,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichScreen">Which player screen to set list for.</param>
 		/// <param name="inputList"></param>
-		void SetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> & inputList);
+		void SetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> &inputList);
 #pragma endregion
 
 #pragma region Class Info

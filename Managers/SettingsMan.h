@@ -27,12 +27,12 @@ namespace RTE {
 		/// Makes the SettingsMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create() { return (Serializable::Create() < 0) ? -1 : 0; }
+		virtual int Create() { return Serializable::Create(); }
 
 		/// <summary>
-		/// Makes the Serializable ready for use.
+		/// Makes the SettingsMan object ready for use.
 		/// </summary>
-		/// <param name="reader">A Reader that the Serializable will create itself from.</param>
+		/// <param name="reader">A Reader that the SettingsMan will create itself from.</param>
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
 		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>

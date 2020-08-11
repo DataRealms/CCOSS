@@ -19,6 +19,9 @@
 #include "LimbPath.h"
 #include "Timer.h"
 
+// Defined in Winbase.h and conflicts with our method so we need to undefine it manually.
+#undef AddAtom
+
 namespace RTE
 {
 

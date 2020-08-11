@@ -1,14 +1,14 @@
-#pragma once
+#ifndef _RTENETWORKMSG_
+#define _RTENETWORKMSG_
 
-namespace RTE
-{
+#include "MessageIdentifiers.h"
 
-#define MAX_PIXEL_LINE_BUFFER_SIZE 8192
-#define MAX_BACKGROUND_LAYERS_TRANSMITTED 10
-#define FRAMES_TO_REMEMBER 3
+namespace RTE {
 
-	enum CustomMessageIDTypes
-	{
+	/// <summary>
+	/// Enumeration for the different types of network message IDs.
+	/// </summary>
+	enum CustomMessageIDTypes {
 		ID_CUSTOM_START = ID_USER_PACKET_ENUM,
 		ID_NAT_SERVER_REGISTER_SERVER,
 		ID_NAT_SERVER_REGISTER_ACCEPTED,
@@ -33,9 +33,15 @@ namespace RTE
 		ID_SRV_MUSIC_EVENTS
 	};
 
+// Pack the structs so 1 byte members are exactly 1 byte in memory instead of being aligned by 4 bytes (padding) so the correct representation is sent over the network without empty bytes consumed by alignment.
 #pragma pack(push, 1)
-	struct MsgRegisterServer
-	{
+
+	// TODO: Figure out all these and add comments.
+
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgRegisterServer {
 		unsigned char Id;
 
 		char ServerName[64];
@@ -43,33 +49,43 @@ namespace RTE
 		char ServerGuid[64];
 	};
 
-	struct MsgRegisterServerAccepted
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgRegisterServerAccepted {
 		unsigned char Id;
 	};
 
-	struct MsgGetServerRequest
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgGetServerRequest {
 		unsigned char Id;
 
 		char ServerName[64];
 		char ServerPassword[64];
 	};
 
-	struct MsgGetServerAnswer
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgGetServerAnswer {
 		unsigned char Id;
 
 		char ServerGuid[64];
 	};
 
-	struct MsgGetServerNoAnswer
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgGetServerNoAnswer {
 		unsigned char Id;
 	};
 
-	struct MsgRegister
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgRegister {
 		unsigned char Id;
 
 		int ResolutionX;
@@ -78,20 +94,24 @@ namespace RTE
 		char Name[64];
 	};
 
-	struct MsgFrameSetup
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgFrameSetup {
 		unsigned char Id;
 		unsigned char FrameNumber;
 
 		short int TargetPosX;
 		short int TargetPosY;
 
-		float OffsetX[MAX_BACKGROUND_LAYERS_TRANSMITTED];
-		float OffsetY[MAX_BACKGROUND_LAYERS_TRANSMITTED];
+		float OffsetX[c_MaxLayersStoredForNetwork];
+		float OffsetY[c_MaxLayersStoredForNetwork];
 	};
 
-	struct MsgFrameLine
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgFrameLine {
 		unsigned char Id;
 		unsigned char FrameNumber;
 
@@ -101,8 +121,10 @@ namespace RTE
 		unsigned short int UncompressedSize;
 	};
 
-	struct MsgFrameBox
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgFrameBox {
 		unsigned char Id;
 		unsigned char FrameNumber;
 
@@ -115,18 +137,24 @@ namespace RTE
 		unsigned short int UncompressedSize;
 	};
 
-	struct MsgDisconnect
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgDisconnect {
 		unsigned char Id;
 	};
 
-	struct MsgAccepted
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgAccepted {
 		unsigned char Id;
 	};
 
-	struct LightweightSceneLayer
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct LightweightSceneLayer {
 		size_t BitmapHash;
 		bool DrawTrans;
 		float OffsetX;
@@ -151,8 +179,10 @@ namespace RTE
 		unsigned char FillDownColor;
 	};
 
-	struct MsgSceneSetup
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgSceneSetup {
 		unsigned char Id;
 		unsigned char SceneId;
 		short int Width;
@@ -160,11 +190,13 @@ namespace RTE
 		bool SceneWrapsX;
 
 		short int BackgroundLayerCount;
-		LightweightSceneLayer BackgroundLayers[MAX_BACKGROUND_LAYERS_TRANSMITTED];
+		LightweightSceneLayer BackgroundLayers[c_MaxLayersStoredForNetwork];
 	};
 
-	struct MsgSceneLine
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgSceneLine {
 		unsigned char Id;
 		unsigned char SceneId;
 		unsigned short int X;
@@ -175,18 +207,24 @@ namespace RTE
 		unsigned short int UncompressedSize;
 	};
 
-	struct MsgSceneEnd
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgSceneEnd {
 		unsigned char Id;
 	};
 
-	struct MsgSceneAccepted
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgSceneAccepted {
 		unsigned char Id;
 	};
 
-	struct MsgTerrainChange
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgTerrainChange {
 		unsigned char Id;
 
 		unsigned short int X;
@@ -200,8 +238,10 @@ namespace RTE
 		unsigned short int UncompressedSize;
 	};
 
-	struct PostEffectNetworkData
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct PostEffectNetworkData {
 		short int X;
 		short int Y;
 		size_t BitmapHash;
@@ -209,29 +249,54 @@ namespace RTE
 		float Angle;
 	};
 
-	struct MsgPostEffects
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgPostEffects {
 		unsigned char Id;
 		unsigned char FrameNumber;
 		int PostEffectsCount;
 	};
-
-	struct MsgSoundEvents
-	{
+	
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgSoundEvents {
 		unsigned char Id;
 		unsigned char FrameNumber;
 		int SoundEventsCount;
 	};
 
-	struct MsgMusicEvents
-	{
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgMusicEvents {
 		unsigned char Id;
 		unsigned char FrameNumber;
 		int MusicEventsCount;
 	};
 
+	/// <summary>
+	/// 
+	/// </summary>
+	struct MsgInput {
+		unsigned char Id;
+
+		int MouseX;
+		int MouseY;
+		bool MouseButtonPressed[MAX_MOUSE_BUTTONS];
+		bool MouseButtonReleased[MAX_MOUSE_BUTTONS];
+		bool MouseButtonHeld[MAX_MOUSE_BUTTONS];
+		bool ResetActivityVote;
+
+		int MouseWheelMoved;
+
+		unsigned int InputElementPressed;
+		unsigned int InputElementReleased;
+		unsigned int InputElementHeld;
+	};
+
+// Disables the previously set pack pragma.
 #pragma pack(pop)
-
-
 }
-
+#endif

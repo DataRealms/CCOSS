@@ -14,7 +14,6 @@
 #include "GUI/AllegroBitmap.h"
 #include "GUI/AllegroScreen.h"
 
-extern bool g_ResetActivity;
 extern bool g_InActivity;
 
 namespace RTE {
@@ -555,7 +554,7 @@ namespace RTE {
 
 		while (fileNumber < maxFileTrys) {
 			// Check for the file namebase001.bmp; if it exists, try 002, etc.
-			sprintf_s(fullFileName, sizeof(fullFileName), "%s%03i.bmp", nameBase, fileNumber++);
+			sprintf_s(fullFileName, sizeof(fullFileName), "%s/%s%03i.bmp", c_ScreenshotDirectory, nameBase, fileNumber++);
 			if (!std::experimental::filesystem::exists(fullFileName)) {
 				break;
 			}

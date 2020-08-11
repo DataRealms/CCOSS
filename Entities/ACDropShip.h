@@ -266,64 +266,77 @@ ClassInfoGetters
     virtual int GetMaxPassengers() const { return m_MaxPassengers > -1 ? m_MaxPassengers : 4; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetRThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right side engine.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Gets the right side thruster of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the right side thruster of this ACDropship. Ownership is NOT transferred.</returns>
+    AEmitter *GetRightThruster() const { return m_pRThruster; }
 
-    AEmitter * GetRThruster() const { return m_pRThruster; }
+    /// <summary>
+    /// Sets the right side thruster for this ACDropship.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetRightThruster(Attachable *newThruster);
 
+    /// <summary>
+    /// Gets the left side thruster of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the left side thruster of this ACDropship. Ownership is NOT transferred.</returns>
+    AEmitter *GetLeftThruster() const { return m_pLThruster; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetLThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left side engine.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Sets the left side thruster for this ACDropship.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetLeftThruster(Attachable *newThruster);
 
-    AEmitter * GetLThruster() const { return m_pLThruster; }
+    /// <summary>
+    /// Gets the right side secondary thruster of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the right side secondary thruster of this ACDropship. Ownership is NOT transferred.</returns>
+    AEmitter *GetURightThruster() const { return m_pURThruster; }
 
+    /// <summary>
+    /// Sets the right side secondary thruster for this ACDropship.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetURightThruster(Attachable *newThruster);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetURThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right side secondary thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Gets the left side secondary thruster of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the left side secondary thruster of this ACDropship. Ownership is NOT transferred.</returns>
+    AEmitter *GetULeftThruster() const { return m_pULThruster; }
 
-    AEmitter * GetURThruster() const { return m_pURThruster; }
+    /// <summary>
+    /// Sets the left side secondary thruster for this ACDropship.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetULeftThruster(Attachable *newThruster);
 
+    /// <summary>
+    /// Gets the left side hatch of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the left side hatch of this ACDropship. Ownership is NOT transferred.</returns>
+    Attachable *GetLeftHatch() const { return m_pLHatch; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetULThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left side secondary thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Sets the left side hatch for this ACDropship.
+    /// </summary>
+    /// <param name="newHatch">The new hatch to use.</param>
+    void SetLeftHatch(Attachable *newHatch);
 
-    AEmitter * GetULThruster() const { return m_pULThruster; }
+    /// <summary>
+    /// Gets the right side hatch of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the right side hatch of this ACDropship. Ownership is NOT transferred.</returns>
+    Attachable *GetRightHatch() const { return m_pRHatch; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetLHatch
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left side hatch.
-// Arguments:       None.
-// Return value:    An Attachable pointer.
-
-	Attachable * GetLHatch() const { return m_pLHatch; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetRHatch
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right side hatch.
-// Arguments:       None.
-// Return value:    An Attachable pointer.
-
-	Attachable * GetRHatch() const { return m_pRHatch; }
+    /// <summary>
+    /// Sets the right side hatch for this ACDropship.
+    /// </summary>
+    /// <param name="newHatch">The new hatch to use.</param>
+    void SetRightHatch(Attachable *newHatch);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -453,6 +466,7 @@ protected:
     // Body AtomGroups.
     AtomGroup *m_pBodyAG;
     // Thruster emitters.
+    //TODO when this class is cleaned up, these and their getters and setters should probably be renamed (I'd argue the lua bindings should be broken to match but that's debatable). L and R should be Left and Right and they should probably be Primary and Secondary.
     AEmitter *m_pRThruster;
     AEmitter *m_pLThruster;
     AEmitter *m_pURThruster;

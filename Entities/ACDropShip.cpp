@@ -71,47 +71,18 @@ int ACDropShip::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a ACDropShip to be identical to another, by deep copy.
 
-int ACDropShip::Create(const ACDropShip &reference)
-{
+int ACDropShip::Create(const ACDropShip &reference) {
+    if (reference.m_pRThruster) { CloneHardcodedAttachable(reference.m_pRThruster, ACDropShip::SetRightThruster); }
+    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pLThruster, ACDropShip::SetLeftThruster); }
+    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pURThruster, ACDropShip::SetURightThruster); }
+    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pULThruster, ACDropShip::SetULeftThruster); }
+    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pRHatch, ACDropShip::SetRightHatch); }
+    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pLHatch, ACDropShip::SetLeftHatch); }
+
     ACraft::Create(reference);
 
     m_pBodyAG = dynamic_cast<AtomGroup *>(reference.m_pBodyAG->Clone());
     m_pBodyAG->SetOwner(this);
-
-    if (reference.m_pRThruster)
-    {
-        m_pRThruster = dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone());
-		m_pRThruster->SetCanCollideWithTerrainWhenAttached(true);
-        AddAttachable(m_pRThruster, true);
-    }
-    if (reference.m_pLThruster)
-    {
-        m_pLThruster = dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone());
-		m_pLThruster->SetCanCollideWithTerrainWhenAttached(true);
-        AddAttachable(m_pLThruster, true);
-    }
-    if (reference.m_pURThruster)
-    {
-        m_pURThruster = dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone());
-        AddAttachable(m_pURThruster, true);
-    }
-    if (reference.m_pULThruster)
-    {
-        m_pULThruster = dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone());
-        AddAttachable(m_pULThruster, true);
-    }
-    if (reference.m_pRHatch)
-    {
-        m_pRHatch = dynamic_cast<Attachable *>(reference.m_pRHatch->Clone());
-		m_pRHatch->SetCanCollideWithTerrainWhenAttached(true);
-        AddAttachable(m_pRHatch, true);
-    }
-    if (reference.m_pLHatch)
-    {
-        m_pLHatch = dynamic_cast<Attachable *>(reference.m_pLHatch->Clone());
-		m_pLHatch->SetCanCollideWithTerrainWhenAttached(true);
-        AddAttachable(m_pLHatch, true);
-    }
     m_HatchSwingRange = reference.m_HatchSwingRange;
     m_HatchOpeness = reference.m_HatchOpeness;
 
@@ -134,56 +105,50 @@ int ACDropShip::Create(const ACDropShip &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ACDropShip::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "RThruster")
-    {
+int ACDropShip::ReadProperty(std::string propName, Reader &reader) {
+    if (propName == "RThruster") {
         delete m_pRThruster;
         m_pRThruster = new AEmitter;
+        m_pRThruster->SetTransfersDamageToParent(true);
         reader >> m_pRThruster;
-    }
-    else if (propName == "LThruster")
-    {
+    } else if (propName == "LThruster") {
         delete m_pLThruster;
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
-    }
-    else if (propName == "URThruster")
-    {
+        m_pLThruster->SetTransfersDamageToParent(true);
+    } else if (propName == "URThruster") {
         delete m_pURThruster;
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
-    }
-    else if (propName == "ULThruster")
-    {
+        m_pURThruster->SetTransfersDamageToParent(true);
+    } else if (propName == "ULThruster") {
         delete m_pULThruster;
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
-    }
-    else if (propName == "RHatchDoor")
-    {
+        m_pULThruster->SetTransfersDamageToParent(true);
+    } else if (propName == "RHatchDoor") {
         delete m_pRHatch;
         m_pRHatch = new Attachable;
         reader >> m_pRHatch;
-    }
-    else if (propName == "LHatchDoor")
-    {
+        m_pRHatch->SetTransfersDamageToParent(true);
+    } else if (propName == "LHatchDoor") {
         delete m_pLHatch;
         m_pLHatch = new Attachable;
         reader >> m_pLHatch;
-    }
-    else if (propName == "HatchDoorSwingRange")
+        m_pLHatch->SetTransfersDamageToParent(true);
+    } else if (propName == "HatchDoorSwingRange") {
         reader >> m_HatchSwingRange;
-    else if (propName == "AutoStabilize")
+    } else if (propName == "AutoStabilize") {
         reader >> m_AutoStabilize;
-    else if (propName == "ScuttleIfFlippedTime")
+    } else if (propName == "ScuttleIfFlippedTime") {
         reader >> m_ScuttleIfFlippedTime;
-	else if (propName == "MaxEngineAngle")
-		reader >> m_MaxEngineAngle;
-	else if (propName == "LateralControlSpeed")
-		reader >> m_LateralControlSpeed;
-	else
+    } else if (propName == "MaxEngineAngle") {
+        reader >> m_MaxEngineAngle;
+    } else if (propName == "LateralControlSpeed") {
+        reader >> m_LateralControlSpeed;
+    } else {
         return ACraft::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -982,28 +947,55 @@ void ACDropShip::Update()
 */
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ResetEmissionTimers
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Reset the timers of all emissions so they will start/stop at the 
 //                  correct relative offsets from now.
+void ACDropShip::SetRightThruster(Attachable *newThruster) {
+    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+    if (castedNewThruster) {
+        RemoveAttachable(m_pRThruster);
+        m_pRThruster = castedNewThruster;
+        AddAttachable(castedNewThruster);
+    }
+}
 
 void ACDropShip::ResetEmissionTimers()
 {
     if (m_pRThruster && m_pRThruster->IsAttached())
         m_pRThruster->ResetEmissionTimers();
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     if (m_pLThruster && m_pLThruster->IsAttached())
         m_pLThruster->ResetEmissionTimers();
+void ACDropShip::SetLeftThruster(Attachable *newThruster) {
+    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+    if (castedNewThruster) {
+        RemoveAttachable(m_pLThruster);
+        m_pLThruster = castedNewThruster;
+        AddAttachable(castedNewThruster);
+    }
+}
 
     if (m_pURThruster && m_pURThruster->IsAttached())
         m_pURThruster->ResetEmissionTimers();
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     if (m_pULThruster && m_pULThruster->IsAttached())
         m_pULThruster->ResetEmissionTimers();
+void ACDropShip::SetURightThruster(Attachable *newThruster) {
+    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+    if (castedNewThruster) {
+        RemoveAttachable(m_pURThruster);
+        m_pURThruster = castedNewThruster;
+        AddAttachable(castedNewThruster);
+    }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RemoveAnyRandomWounds
@@ -1013,6 +1005,14 @@ void ACDropShip::ResetEmissionTimers()
 int ACDropShip::RemoveAnyRandomWounds(int amount)
 {
 	float damage = 0;
+void ACDropShip::SetULeftThruster(Attachable *newThruster) {
+    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+    if (castedNewThruster) {
+        RemoveAttachable(m_pULThruster);
+        m_pULThruster = castedNewThruster;
+        AddAttachable(castedNewThruster);
+    }
+}
 
 	for (int i = 0; i < amount; i++)
 	{
@@ -1038,10 +1038,18 @@ int ACDropShip::RemoveAnyRandomWounds(int amount)
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	return damage;
+void ACDropShip::SetLeftHatch(Attachable *newHatch) {
+    if (newHatch) {
+        RemoveAttachable(m_pLHatch);
+        m_pLHatch = newHatch;
+        AddAttachable(newHatch);
+    }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetTotalWoundCount
@@ -1051,6 +1059,13 @@ int ACDropShip::RemoveAnyRandomWounds(int amount)
 int ACDropShip::GetTotalWoundCount() const
 {
 	int count = ACraft::GetWoundCount();
+void ACDropShip::SetRightHatch(Attachable *newHatch) {
+    if (newHatch) {
+        RemoveAttachable(m_pLHatch);
+        m_pRHatch = newHatch;
+        AddAttachable(newHatch);
+    }
+}
 
     if (m_pRHatch)
         count += m_pRHatch->GetWoundCount();
@@ -1060,6 +1075,7 @@ int ACDropShip::GetTotalWoundCount() const
         count += m_pRThruster->GetWoundCount();
     if (m_pLThruster)
         count += m_pLThruster->GetWoundCount();
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	return count;
 }

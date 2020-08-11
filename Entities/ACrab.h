@@ -686,6 +686,7 @@ protected:
 
     // Turret which can be mounted with a weapon
     Turret *m_pTurret;
+    //TODO when this class is cleaned up these legs and footgroups should probably be renamed. L and R should be expanded to Left and Right. I think FG and BG can stay as is cause they're everywhere.
     // Left Foreground leg.
     Leg *m_pLFGLeg;
     // Left Background leg.

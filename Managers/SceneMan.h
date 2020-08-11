@@ -14,20 +14,14 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-// *** TEMP
-//#include "resource.h"
-
-#include "RTETools.h"
-#include "Singleton.h"
-#define g_SceneMan SceneMan::Instance()
 #include "Serializable.h"
-
-#include "FrameMan.h"
-#include "ActivityMan.h"
-//#include "MovableMan.h"
-#include "Vector.h"
+#include "Timer.h"
 #include "Box.h"
-//#include "SceneLayer.h"
+#include "Singleton.h"
+
+#include "ActivityMan.h"
+
+#define g_SceneMan SceneMan::Instance()
 
 namespace RTE
 {
@@ -1274,7 +1268,7 @@ public:
 //                  for optimization reasons. 0 = every pixel is checked.
 // Return value:    The MOID of the hit non-ignored MO, or g_NoMOID if terrain or no MO was hit.
 
-    MOID CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID = g_NoMOID, int ignoreTeam = Activity::NOTEAM, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false, int skip = 0);
+    MOID CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID = g_NoMOID, int ignoreTeam = Activity::NoTeam, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false, int skip = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1318,7 +1312,7 @@ public:
 //                  encountered. If no pixel of the right material was found, < 0 is returned.
 //                  If an obstacle on the starting position was encountered, 0 is returned.
 
-    float CastObstacleRay(const Vector &start, const Vector &ray, Vector &obstaclePos, Vector &freePos, MOID ignoreMOID = g_NoMOID, int ignoreTeam = Activity::NOTEAM, unsigned char ignoreMaterial = 0, int skip = 0);
+    float CastObstacleRay(const Vector &start, const Vector &ray, Vector &obstaclePos, Vector &freePos, MOID ignoreMOID = g_NoMOID, int ignoreTeam = Activity::NoTeam, unsigned char ignoreMaterial = 0, int skip = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1775,12 +1769,6 @@ protected:
     Timer m_CleanTimer;
 	// Bitmap to look for orphaned regions
 	BITMAP * m_pOrphanSearchBitmap;
-
-
-// TODO TEMP REMOVE
-    // Debug deque with integers showing how many sim
-//    std::deque<bool> m_DrawnUpdates;
-//    std::deque<int> m_SUSDs;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -1,4 +1,5 @@
 #include "Primitive.h"
+#include "Matrix.h"
 #include "FrameMan.h"
 #include "SceneMan.h"
 

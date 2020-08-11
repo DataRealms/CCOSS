@@ -16,8 +16,6 @@
 #include "ActivityMan.h"
 #include "GameActivity.h"
 
-#include "NetworkServer.h"
-
 namespace RTE
 {
 	class GUIScreen;
@@ -141,7 +139,7 @@ namespace RTE
 		// Arguments:       Whether to pause the game or not.
 		// Return value:    None.
 
-		virtual void Pause(bool pause = true);
+		virtual void SetPaused(bool pause = true);
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -217,13 +215,13 @@ namespace RTE
 		// These add on the player and team max counts
 		enum PlayerColumns
 		{
-			PLAYER_CPU = Activity::MAXPLAYERCOUNT,
+			PLAYER_CPU = Players::MaxPlayerCount,
 			PLAYERCOLUMNCOUNT
 		};
 
 		enum TeamRows
 		{
-			TEAM_DISABLED = Activity::MAXTEAMCOUNT,
+			TEAM_DISABLED = Teams::MaxTeamCount,
 			TEAMROWCOUNT
 		};
 
@@ -259,11 +257,11 @@ namespace RTE
 		int m_LockedCPUTeam;
 
 		//Tech selection combos
-		GUIComboBox *m_apTeamTechSelect[Activity::MAXTEAMCOUNT];
+		GUIComboBox *m_apTeamTechSelect[Teams::MaxTeamCount];
 
 		// AI skill selection
-		GUISlider *m_apTeamAISkillSlider[Activity::MAXTEAMCOUNT];
-		GUILabel *m_apTeamAISkillLabel[Activity::MAXTEAMCOUNT];
+		GUISlider *m_apTeamAISkillSlider[Teams::MaxTeamCount];
+		GUILabel *m_apTeamAISkillLabel[Teams::MaxTeamCount];
 
 		GUILabel *m_pGoldLabel;
 		GUISlider *m_pGoldSlider;

@@ -461,7 +461,7 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
     {
         // Only draw if the team viewing this has seen the space where this is located
         int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-        if (viewingTeam != Activity::NOTEAM)
+        if (viewingTeam != Activity::NoTeam)
         {
             if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
                 return;

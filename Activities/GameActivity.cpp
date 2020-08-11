@@ -14,6 +14,7 @@
 #include "GameActivity.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "FrameMan.h"
 #include "UInputMan.h"
 #include "AudioMan.h"
 #include "MetaMan.h"
@@ -58,7 +59,7 @@ void GameActivity::Clear()
 {
     m_CPUTeam = -1;
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         m_ObservationTarget[player].Reset();
         m_DeathViewTarget[player].Reset();
@@ -99,7 +100,7 @@ void GameActivity::Clear()
 	m_RequireClearPathToOrbitSwitchEnabled = true;
 	m_BuyMenuEnabled = true;
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         m_Deliveries[team].clear();
         m_LandingZoneArea[team].Reset();
@@ -129,31 +130,15 @@ int GameActivity::Create()
         return -1;
 
 //    m_Description = "Define and edit Areas on this Scene.";
-/*
-    ////////////////////////////////
-    // Set up teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-
-    ///////////////////////////////////////
-    // Set up players
-
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-*/
     // Load banners
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         m_pBannerRed[player] = new GUIBanner();
         m_pBannerYellow[player] = new GUIBanner();
     }
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
 		m_TeamIsCPU[team] = false;
     }
@@ -174,7 +159,7 @@ int GameActivity::Create(const GameActivity &reference)
 
     m_CPUTeam = reference.m_CPUTeam;
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         m_ObservationTarget[player] = reference.m_ObservationTarget[player];
         m_DeathViewTarget[player] = reference.m_DeathViewTarget[player];
@@ -194,7 +179,7 @@ int GameActivity::Create(const GameActivity &reference)
 		m_NetworkPlayerNames[player] = reference.m_NetworkPlayerNames[player];
     }
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         m_LandingZoneArea[team] = reference.m_LandingZoneArea[team];
 		m_TeamTech[team] = reference.m_TeamTech[team];
@@ -304,7 +289,7 @@ int GameActivity::Save(Writer &writer) const
 
 void GameActivity::Destroy(bool notInherited)
 {
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         delete m_pPieMenu[player];
         delete m_pBuyGUI[player];
@@ -313,7 +298,7 @@ void GameActivity::Destroy(bool notInherited)
         delete m_pBannerYellow[player];
     }
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         for (deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
             delete itr->pCraft;
@@ -332,7 +317,7 @@ void GameActivity::Destroy(bool notInherited)
 // Description:     Sets tech module name for specified team. Module must set must be loaded.
 	void GameActivity::SetTeamTech(int team, std::string tech)
 	{
-		if (team >= 0 && team < MAXTEAMCOUNT)
+		if (team >= Teams::TeamOne && team < Teams::MaxTeamCount)
 		{
 			if (tech == "-All-" || tech == "-Random-")
 				m_TeamTech[team] = tech;
@@ -366,12 +351,12 @@ void GameActivity::Destroy(bool notInherited)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetCPUTeam
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the current CPU-assisted team, if any (NOTEAM) - LEGACY function
+// Description:     Sets the current CPU-assisted team, if any (NoTeam) - LEGACY function
 
 void GameActivity::SetCPUTeam(int team)
 {
     // Set the legacy var
-	if (team >= 0 && team < MAXTEAMCOUNT)
+	if (team >= Teams::TeamOne && team < Teams::MaxTeamCount)
 	{
 	    m_CPUTeam = team;
 
@@ -382,7 +367,7 @@ void GameActivity::SetCPUTeam(int team)
 
 /* whaaaa?
     // Also set the newer human indicator flags
-    for (int player = PLAYER_1; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
         m_IsHuman[m_Team[player]] = m_IsActive[player] && m_Team[player] != team;
 */
 }
@@ -393,7 +378,7 @@ void GameActivity::SetCPUTeam(int team)
 // Description:     Forces the this to focus player control to a specific Actor for a
 //                  specific team. OWNERSHIP IS NOT TRANSFERRED!
 
-bool GameActivity::SwitchToActor(Actor *pActor, int player, int team)
+bool GameActivity::SwitchToActor(Actor *pActor, short player, short team)
 {
     // Computer players don't focus on any Actor
     if (!m_IsHuman[player])
@@ -403,8 +388,8 @@ bool GameActivity::SwitchToActor(Actor *pActor, int player, int team)
     m_pPieMenu[player]->DisableAnim();
 
     // Disable the AI command mode since it's connected to the current actor
-    if (m_ViewState[player] == AISENTRYPOINT || m_ViewState[player] == AIPATROLPOINTS || m_ViewState[player] == AIGOLDDIGPOINT || m_ViewState[player] == AIGOTOPOINT || m_ViewState[player] == UNITSELECTCIRCLE)
-        m_ViewState[player] = NORMAL;
+    if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint || m_ViewState[player] == ViewState::UnitSelectCircle)
+        m_ViewState[player] = ViewState::Normal;
 
     return Activity::SwitchToActor(pActor, player, team);
 }
@@ -416,14 +401,14 @@ bool GameActivity::SwitchToActor(Actor *pActor, int player, int team)
 // Description:     Forces the this to focus player control to the next Actor of a
 //                  specific team, other than the current one focused on.
 
-void GameActivity::SwitchToNextActor(int player, int team, Actor *pSkip)
+void GameActivity::SwitchToNextActor(short player, short team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
     m_pPieMenu[player]->DisableAnim();
 
     // Disable the AI command mode since it's connected to the current actor
-    if (m_ViewState[player] == AISENTRYPOINT || m_ViewState[player] == AIPATROLPOINTS || m_ViewState[player] == AIGOLDDIGPOINT || m_ViewState[player] == AIGOTOPOINT || m_ViewState[player] == UNITSELECTCIRCLE)
-        m_ViewState[player] = NORMAL;
+    if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint || m_ViewState[player] == ViewState::UnitSelectCircle)
+        m_ViewState[player] = ViewState::Normal;
 
     Activity::SwitchToNextActor(player, team, pSkip);
 }
@@ -435,14 +420,14 @@ void GameActivity::SwitchToNextActor(int player, int team, Actor *pSkip)
 // Description:     Forces this to focus player control to the previous Actor of a
 //                  specific team, other than the current one focused on.
 
-void GameActivity::SwitchToPrevActor(int player, int team, Actor *pSkip)
+void GameActivity::SwitchToPrevActor(short player, short team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
     m_pPieMenu[player]->DisableAnim();
 
     // Disable the AI command mode since it's connected to the current actor
-    if (m_ViewState[player] == AISENTRYPOINT || m_ViewState[player] == AIPATROLPOINTS || m_ViewState[player] == AIGOLDDIGPOINT || m_ViewState[player] == AIGOTOPOINT  || m_ViewState[player] == UNITSELECTCIRCLE)
-        m_ViewState[player] = NORMAL;
+    if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint  || m_ViewState[player] == ViewState::UnitSelectCircle)
+        m_ViewState[player] = ViewState::Normal;
 
     Activity::SwitchToPrevActor(player, team, pSkip);
 }
@@ -478,7 +463,7 @@ void GameActivity::YSortObjectivePoints()
 
 int GameActivity::AddOverridePurchase(const SceneObject *pPurchase, int player)
 {
-	if (player >= Activity::PLAYER_1 && player < Activity::MAXPLAYERCOUNT)
+	if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 	{
 		// Add to purchase list if valid item
 		if (pPurchase)
@@ -598,7 +583,7 @@ int GameActivity::SetOverridePurchaseList(string loadoutName, int player)
 bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor * pTargetMO)
 {
     int team = m_Team[player];
-    if (team == NOTEAM)
+    if (team == Teams::NoTeam)
         return false;
 
     // Prepare the Craft, stuff everything into it and add it to the queue
@@ -630,7 +615,7 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
             m_pBuyGUI[player]->SaveCurrentLoadout();
     }
 
-    if (pDeliveryCraft && (!m_HadBrain[player] || m_pBrain[player]))
+    if (pDeliveryCraft && (!m_HadBrain[player] || m_Brain[player]))
     {
         // Take metaplayer tech modifiers into account when calculating costs of this delivery
         int nativeModule = 0;
@@ -807,7 +792,7 @@ void GameActivity::SetupPlayers()
     Activity::SetupPlayers();
 
     // Add the locked cpu team that can't have any players
-    if (m_CPUTeam != Activity::NOTEAM)
+    if (m_CPUTeam != Teams::NoTeam)
     {
         if (!m_TeamActive[m_CPUTeam])
             m_TeamCount++;
@@ -816,7 +801,7 @@ void GameActivity::SetupPlayers()
     }
 
     // Don't clear a CPU team's active status though
-    for (int team = Activity::TEAM_1; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
 	{
 		if (m_TeamIsCPU[team])
 			m_TeamActive[team] = true;
@@ -845,12 +830,12 @@ int GameActivity::Start()
     if (error < 0)
         return error;
 
-    m_WinnerTeam = Activity::NOTEAM;
+    m_WinnerTeam = Teams::NoTeam;
 
     ////////////////////////////////
     // Set up teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -876,7 +861,7 @@ int GameActivity::Start()
     ///////////////////////////////////////
     // Set up human players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -909,7 +894,7 @@ int GameActivity::Start()
         m_pBuyGUI[player]->Create(&m_PlayerController[player]);
 
 		// Load correct loadouts into buy menu if we're starting a non meta-game activity
-		if (m_pBuyGUI[player]->GetMetaPlayer() == Activity::NOPLAYER)
+		if (m_pBuyGUI[player]->GetMetaPlayer() == Players::NoPlayer)
 		{
 			m_pBuyGUI[player]->SetNativeTechModule(g_PresetMan.GetModuleID(GetTeamTech(GetTeamOfPlayer(player))));
 			m_pBuyGUI[player]->SetForeignCostMultiplier(1.0);
@@ -991,14 +976,14 @@ int GameActivity::Start()
         m_LandingZone[player].Reset();
 
         // Set the initial landing zones to be above the respective brains, but not for the observer player in a three player game
-        if (m_pBrain[player] && !(m_PlayerCount == 3 && ScreenOfPlayer(player) == 3))
+        if (m_Brain[player] && !(m_PlayerCount == 3 && ScreenOfPlayer(player) == 3))
         {
             // Also set the brain to be the selected actor at start
-            SwitchToActor(m_pBrain[player], player, m_Team[player]);
-            m_ActorCursor[player] = m_pBrain[player]->GetPos();
-            m_LandingZone[player].m_X = m_pBrain[player]->GetPos().m_X;
+            SwitchToActor(m_Brain[player], player, m_Team[player]);
+            m_ActorCursor[player] = m_Brain[player]->GetPos();
+            m_LandingZone[player].m_X = m_Brain[player]->GetPos().m_X;
             // Set the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-            m_ObservationTarget[player] = m_pBrain[player]->GetPos();
+            m_ObservationTarget[player] = m_Brain[player]->GetPos();
         }
 
         g_FrameMan.SetScreenText((player % 2 == 0) ? "Mine Gold and buy more firepower with the funds..." : "...then smash the competing brain to claim victory!", ScreenOfPlayer(player), 0);
@@ -1051,9 +1036,9 @@ int GameActivity::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void GameActivity::Pause(bool pause)
+void GameActivity::SetPaused(bool pause)
 {
-    Activity::Pause(pause);
+    Activity::SetPaused(pause);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1068,7 +1053,7 @@ void GameActivity::End()
     bool playerWon = false;
 
     // Disable control of actors.. will be handed over to the observation targets instead
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -1079,12 +1064,12 @@ void GameActivity::End()
         {
             playerWon = true;
             // Set the winner's observation view to his controlled actors instead of his brain
-            if (m_pControlledActor[player] && g_MovableMan.IsActor(m_pControlledActor[player]))
-                m_ObservationTarget[player] = m_pControlledActor[player]->GetPos();
+            if (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player]))
+                m_ObservationTarget[player] = m_ControlledActor[player]->GetPos();
         }
     }
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -1116,7 +1101,7 @@ void GameActivity::End()
     }
 */
 
-    m_ActivityState = OVER;
+    m_ActivityState = ActivityState::Over;
     m_GameOverTimer.Reset();
 }
 
@@ -1130,13 +1115,13 @@ void GameActivity::End()
 void GameActivity::UpdateEditing()
 {
     // Editing the scene, just update the editor guis and see if players are ready to start or not
-    if (m_ActivityState != EDITING)
+    if (m_ActivityState != ActivityState::Editing)
         return;
 
     ///////////////////////////////////////////
     // Iterate through all human players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -1162,7 +1147,7 @@ void GameActivity::UpdateEditing()
                 m_pEditorGUI[player]->SetEditorGUIMode(SceneEditorGUI::INSTALLINGBRAIN);
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
                 g_FrameMan.SetScreenText("PLACE YOUR BRAIN IN A VALID SPOT FIRST!", ScreenOfPlayer(player), 250, 3500);
-                m_MsgTimer[player].Reset();
+                m_MessageTimer[player].Reset();
             }
             // Ready to start
             else
@@ -1181,7 +1166,7 @@ void GameActivity::UpdateEditing()
 
     // Have all players flagged themselves as ready to start the game?
     bool allReady = true;
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -1193,7 +1178,7 @@ void GameActivity::UpdateEditing()
     if (allReady)
     {
         // Make sure any players haven't moved or entombed their brains in the period after flagging themselves "done"
-        for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+        for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
         {
             if (!(m_IsActive[player] && m_IsHuman[player]))
                 continue;
@@ -1209,7 +1194,7 @@ void GameActivity::UpdateEditing()
                 m_pEditorGUI[player]->SetEditorGUIMode(SceneEditorGUI::INSTALLINGBRAIN);
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
                 g_FrameMan.SetScreenText("PLACE YOUR BRAIN IN A VALID SPOT FIRST!", ScreenOfPlayer(player), 333, 3500);
-                m_MsgTimer[player].Reset();
+                m_MessageTimer[player].Reset();
             }
         }
 
@@ -1217,7 +1202,7 @@ void GameActivity::UpdateEditing()
         if (allReady)
         {
             // All resident brains are still in valid spots - place them into the simulation
-            for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+            for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
             {
                 if (!(m_IsActive[player] && m_IsHuman[player]))
                     continue;
@@ -1226,10 +1211,10 @@ void GameActivity::UpdateEditing()
                 g_SceneMan.GetScene()->PlaceResidentBrain(player, *this);
 
                 // Still no brain of this player? Last ditch effort to find one and assign it to this player
-                if (!m_pBrain[player])
-                    m_pBrain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player]);
+                if (!m_Brain[player])
+                    m_Brain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player]);
                 // Um, something went wrong.. we're not done placing brains after all??
-                if (!m_pBrain[player])
+                if (!m_Brain[player])
                 {
                     allReady = false;
                     // Get the brains back into residency so the players who are OK are still so
@@ -1238,11 +1223,11 @@ void GameActivity::UpdateEditing()
                 }
 
                 // Set the brain to be the selected actor at start
-                SwitchToActor(m_pBrain[player], player, m_Team[player]);
-                m_ActorCursor[player] = m_pBrain[player]->GetPos();
-                m_LandingZone[player].m_X = m_pBrain[player]->GetPos().m_X;
+                SwitchToActor(m_Brain[player], player, m_Team[player]);
+                m_ActorCursor[player] = m_Brain[player]->GetPos();
+                m_LandingZone[player].m_X = m_Brain[player]->GetPos().m_X;
                 // Set the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-                m_ObservationTarget[player] = m_pBrain[player]->GetPos();
+                m_ObservationTarget[player] = m_Brain[player]->GetPos();
                 // CLear the messages before starting the game
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
                 // Reset the screen occlusion if any players are still in menus
@@ -1254,7 +1239,7 @@ void GameActivity::UpdateEditing()
         if (allReady)
         {
             // START the game!
-            m_ActivityState = RUNNING;
+            m_ActivityState = ActivityState::Running;
             // Re-enable the AI's if we are done editing
             DisableAIs(false);
             InitAIs();
@@ -1284,7 +1269,7 @@ void GameActivity::Update()
     Activity::Update();
 
     // Avoid game logic when we're editing
-    if (m_ActivityState == EDITING)
+    if (m_ActivityState == ActivityState::Editing)
     {
         UpdateEditing();
         return;
@@ -1293,14 +1278,14 @@ void GameActivity::Update()
     ///////////////////////////////////////////
     // Iterate through all human players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
 
         // The current player's team
         int team = m_Team[player];
-        if (team == NOTEAM)
+        if (team == Teams::NoTeam)
             continue;
 
         // Temporary hack to avoid teh buy menu buy button to be pressed immediately after selecting an LZ for a previous order
@@ -1313,127 +1298,127 @@ void GameActivity::Update()
         // Assure that Controlled Actor is a safe pointer
 
         // Only allow this if player's brain is intact
-        if (g_MovableMan.IsActor(m_pBrain[player]))
+        if (g_MovableMan.IsActor(m_Brain[player]))
         {
             // Note that we have now had a brain
             m_HadBrain[player] = true;
 
             // Tracking normally
-            if (m_ViewState[player] == NORMAL)
+            if (m_ViewState[player] == ViewState::Normal)
             {
                 // Get a next actor if there isn't one
-                if (!m_pControlledActor[player])
+                if (!m_ControlledActor[player])
                     SwitchToNextActor(player, team);
 
                 // Continually set the observation target to the brain during play, so that if/when it dies, the view flies to it in observation mode
-                if (m_ActivityState != OVER && m_ViewState[player] != OBSERVE)
-                    m_ObservationTarget[player] = m_pBrain[player]->GetPos();
+                if (m_ActivityState != ActivityState::Over && m_ViewState[player] != ViewState::Observe)
+                    m_ObservationTarget[player] = m_Brain[player]->GetPos();
 
                 // Save the location of the currently controlled actor so we can know where to watch if he died on us
-                if (g_MovableMan.IsActor(m_pControlledActor[player]))
+                if (g_MovableMan.IsActor(m_ControlledActor[player]))
                 {
-                    m_DeathViewTarget[player] = m_pControlledActor[player]->GetPos();
+                    m_DeathViewTarget[player] = m_ControlledActor[player]->GetPos();
                 }
                 // Add delay after death before switching so the death comedy can be witnessed
                 // Died, so enter death watch mode
                 else
                 {
-                    m_pControlledActor[player] = 0;
-                    m_ViewState[player] = DEATHWATCH;
+                    m_ControlledActor[player] = 0;
+                    m_ViewState[player] = ViewState::DeathWatch;
                     m_DeathTimer[player].Reset();
                 }
             }
             // Ok, done watching death comedy, now automatically switch
-            else if (m_ViewState[player] == DEATHWATCH && m_DeathTimer[player].IsPastSimMS(1500))
+            else if (m_ViewState[player] == ViewState::DeathWatch && m_DeathTimer[player].IsPastSimMS(1500))
             {
                 // Get a next actor if there isn't one
-                if (!m_pControlledActor[player])
+                if (!m_ControlledActor[player])
                     SwitchToNextActor(player, team);
 
                 // If currently focused actor died, get next one
-                if (!g_MovableMan.IsActor(m_pControlledActor[player]))
+                if (!g_MovableMan.IsActor(m_ControlledActor[player]))
                     SwitchToNextActor(player, team);
 
-                if (m_ViewState[player] != ACTORSELECT)
-                    m_ViewState[player] = NORMAL;
+                if (m_ViewState[player] != ViewState::ActorSelect)
+                    m_ViewState[player] = ViewState::Normal;
             }
             // Any other viewing mode and the actor died... go to deathwatch
-            else if (m_pControlledActor[player] && !g_MovableMan.IsActor(m_pControlledActor[player]))
+            else if (m_ControlledActor[player] && !g_MovableMan.IsActor(m_ControlledActor[player]))
             {
-                m_pControlledActor[player] = 0;
-                m_ViewState[player] = DEATHWATCH;
+                m_ControlledActor[player] = 0;
+                m_ViewState[player] = ViewState::DeathWatch;
                 m_DeathTimer[player].Reset();
             }
         }
         // Player brain is now gone! Remove any control he may have had
         else if (m_HadBrain[player])
         {
-            if (m_pControlledActor[player] && g_MovableMan.IsActor(m_pControlledActor[player]))
-                m_pControlledActor[player]->SetControllerMode(Controller::CIM_AI);
-            m_pControlledActor[player] = 0;
-            m_ViewState[player] = OBSERVE;
+            if (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player]))
+                m_ControlledActor[player]->SetControllerMode(Controller::CIM_AI);
+            m_ControlledActor[player] = 0;
+            m_ViewState[player] = ViewState::Observe;
         }
         // Never had a brain, and no actor is selected, so just select the first one we do have
-        else if (m_ViewState[player] != OBSERVE && !g_MovableMan.IsActor(m_pControlledActor[player]))
+        else if (m_ViewState[player] != ViewState::Observe && !g_MovableMan.IsActor(m_ControlledActor[player]))
         {
             // Only try to switch if there's somehting to switch to
             if (!g_MovableMan.GetTeamRoster(team)->empty())
                 SwitchToNextActor(player, team);
             else
-                m_pControlledActor[player] = 0;
+                m_ControlledActor[player] = 0;
         }
 
         ///////////////////////////////////////////
         // Player-commanded actor switching
 
         // Switch to brain actor directly if the player wants to
-        if (m_PlayerController[player].IsState(ACTOR_BRAIN) && m_ViewState[player] != ACTORSELECT)
+        if (m_PlayerController[player].IsState(ACTOR_BRAIN) && m_ViewState[player] != ViewState::ActorSelect)
         {
-            SwitchToActor(m_pBrain[player], player, team);
-            m_ViewState[player] = NORMAL;
+            SwitchToActor(m_Brain[player], player, team);
+            m_ViewState[player] = ViewState::Normal;
         }
         // Switch to next actor if the player wants to
-        else if (m_PlayerController[player].IsState(ACTOR_NEXT) && m_ViewState[player] != ACTORSELECT)
+        else if (m_PlayerController[player].IsState(ACTOR_NEXT) && m_ViewState[player] != ViewState::ActorSelect)
         {
             SwitchToNextActor(player, team);
-            m_ViewState[player] = NORMAL;
+            m_ViewState[player] = ViewState::Normal;
             g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
         }
         // Switch to prev actor if the player wants to
-        else if (m_PlayerController[player].IsState(ACTOR_PREV) && m_ViewState[player] != ACTORSELECT)
+        else if (m_PlayerController[player].IsState(ACTOR_PREV) && m_ViewState[player] != ViewState::ActorSelect)
         {
             SwitchToPrevActor(player, team);
-            m_ViewState[player] = NORMAL;
+            m_ViewState[player] = ViewState::Normal;
             g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
         }
         // Go into manual actor select mode if either actor switch buttons are held for a duration
-        else if (m_ViewState[player] != ACTORSELECT && !m_pBuyGUI[player]->IsVisible() && (m_PlayerController[player].IsState(ACTOR_NEXT_PREP) || m_PlayerController[player].IsState(ACTOR_PREV_PREP)))
+        else if (m_ViewState[player] != ViewState::ActorSelect && !m_pBuyGUI[player]->IsVisible() && (m_PlayerController[player].IsState(ACTOR_NEXT_PREP) || m_PlayerController[player].IsState(ACTOR_PREV_PREP)))
         {
             if (m_ActorSelectTimer[player].IsPastRealMS(250))
             {
                 // Set cursor to start at the head of controlled actor
-                if (m_pControlledActor[player])
+                if (m_ControlledActor[player])
                 {
                     // Give switched from actor an AI controller
-                    m_pControlledActor[player]->SetControllerMode(Controller::CIM_AI);
-                    m_pControlledActor[player]->GetController()->SetDisabled(false);
-                    m_ActorCursor[player] = m_pControlledActor[player]->GetCPUPos();
+                    m_ControlledActor[player]->SetControllerMode(Controller::CIM_AI);
+                    m_ControlledActor[player]->GetController()->SetDisabled(false);
+                    m_ActorCursor[player] = m_ControlledActor[player]->GetCPUPos();
                     m_CursorTimer.Reset();
                 }
-                m_ViewState[player] = ACTORSELECT;
+                m_ViewState[player] = ViewState::ActorSelect;
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
 			}
         }
         else
-            m_ActorSelectTimer[player].Reset();
+			m_ActorSelectTimer[player].Reset();
 
         ////////////////////////////////////
         // Update sceneman scroll targets
 
-        if (m_ViewState[player] == OBSERVE)
+        if (m_ViewState[player] == ViewState::Observe)
         {
             // If we're observing game over state, freeze the view for a bit so the player's input doesn't ruin the focus
-            if (!(m_ActivityState == OVER && !m_GameOverTimer.IsPastRealMS(1000)))
+            if (!(m_ActivityState == ActivityState::Over && !m_GameOverTimer.IsPastRealMS(1000)))
             {
                 // Get cursor input
                 m_PlayerController[player].RelativeCursorMovement(m_ObservationTarget[player], 1.2f);
@@ -1445,7 +1430,7 @@ void GameActivity::Update()
         ///////////////////////////////////////////////////
         // Manually selecting a new actor to switch to
 
-        else if (m_ViewState[player] == ACTORSELECT)
+        else if (m_ViewState[player] == ViewState::ActorSelect)
         {
             // Continuously display message
             g_FrameMan.SetScreenText("Select a body to switch control to...", ScreenOfPlayer(player));
@@ -1468,7 +1453,7 @@ void GameActivity::Update()
                 if (m_PlayerController[player].IsMouseControlled())
                     g_UInputMan.SetMouseValueMagnitude(0);
                 // Switch back to normal view
-                m_ViewState[player] = NORMAL;
+                m_ViewState[player] = ViewState::Normal;
                 // Play err sound to indicate cancellation
                 g_GUISound.UserErrorSound()->Play(player);
                 // Flash the same actor, jsut to show the control went back to him
@@ -1489,7 +1474,7 @@ void GameActivity::Update()
                     g_GUISound.UserErrorSound()->Play(player);
 
                 // Switch back to normal view
-                m_ViewState[player] = NORMAL;
+                m_ViewState[player] = ViewState::Normal;
                 // Stop displaying the message
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
                 // Flash the same actor, jsut to show the control went back to him
@@ -1520,7 +1505,7 @@ void GameActivity::Update()
         ///////////////////////////////////////////////////
         // Selecting points on the scene for the AI to go to
 
-        else if (m_ViewState[player] == AIGOTOPOINT)
+        else if (m_ViewState[player] == ViewState::AIGoToPoint)
         {
             // Continuously display message
             g_FrameMan.SetScreenText("Set waypoints for the AI to go to...", ScreenOfPlayer(player));
@@ -1530,7 +1515,7 @@ void GameActivity::Update()
             // If we are pointing to an actor to follow, then snap cursor to that actor's position
             Actor *pTargetActor = 0;
             float distance = 0;
-            if (pTargetActor = g_MovableMan.GetClosestActor(m_ActorCursor[player], 40, distance, m_pControlledActor[player]))
+            if (pTargetActor = g_MovableMan.GetClosestActor(m_ActorCursor[player], 40, distance, m_ControlledActor[player]))
             {
 //                m_ActorCursor[player] = pTargetActor->GetPos();
 
@@ -1547,47 +1532,47 @@ void GameActivity::Update()
             g_SceneMan.SetScrollTarget(m_ActorCursor[player], 0.1, wrapped, ScreenOfPlayer(player));
 
             // Draw the actor's waypoints
-            m_pControlledActor[player]->DrawWaypoints(true);
+            m_ControlledActor[player]->DrawWaypoints(true);
 
             // Disable the actor's controller
-            m_pControlledActor[player]->GetController()->SetDisabled(true);
+            m_ControlledActor[player]->GetController()->SetDisabled(true);
 
             // Player is done setting waypoints
             if (m_PlayerController[player].IsState(PRESS_SECONDARY))
             {
                 // Stop drawing the waypoints
-//                m_pControlledActor[player]->DrawWaypoints(false);
+//                m_ControlledActor[player]->DrawWaypoints(false);
                 // Update the player's move path now to the first waypoint set
-                m_pControlledActor[player]->UpdateMovePath();
+                m_ControlledActor[player]->UpdateMovePath();
                 // Give player control back to actor
-                m_pControlledActor[player]->GetController()->SetDisabled(false);
+                m_ControlledActor[player]->GetController()->SetDisabled(false);
                 // Switch back to normal view
-                m_ViewState[player] = NORMAL;
+                m_ViewState[player] = ViewState::Normal;
                 // Stop displaying the message
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
             }
             // Player set a new waypoint
-            else if (m_pControlledActor[player] && m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
+            else if (m_ControlledActor[player] && m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
             {
 // TODO: Sound?
                 // If we are pointing to an actor to follow, tehn give that kind of waypoint command
                 if (pTargetActor)
-                    m_pControlledActor[player]->AddAIMOWaypoint(pTargetActor);
+                    m_ControlledActor[player]->AddAIMOWaypoint(pTargetActor);
                 // Just pointing into somewhere in the scene, so give that command
                 else
-                    m_pControlledActor[player]->AddAISceneWaypoint(m_ActorCursor[player]);
+                    m_ControlledActor[player]->AddAISceneWaypoint(m_ActorCursor[player]);
                 // Update the player's move path now to the first waypoint set
-                m_pControlledActor[player]->UpdateMovePath();
+                m_ControlledActor[player]->UpdateMovePath();
             }
         }
-        else if (m_ViewState[player] == UNITSELECTCIRCLE)
+        else if (m_ViewState[player] == ViewState::UnitSelectCircle)
         {
             // Continuously display message
             g_FrameMan.SetScreenText("Select units to group...", ScreenOfPlayer(player));
 
 			m_PlayerController[player].RelativeCursorMovement(m_ActorCursor[player]);
 
-			Vector relativeToActor = m_ActorCursor[player] - m_pControlledActor[player]->GetPos();
+			Vector relativeToActor = m_ActorCursor[player] - m_ControlledActor[player]->GetPos();
 
 			float sceneWidth = g_SceneMan.GetSceneWidth();
 
@@ -1595,13 +1580,13 @@ void GameActivity::Update()
 			if (g_SceneMan.GetScene()->WrapsX())
 				if (relativeToActor.GetMagnitude() > sceneWidth / 2 && relativeToActor.GetMagnitude() > 350)
 					if (m_ActorCursor->m_X < sceneWidth / 2)
-						relativeToActor = m_ActorCursor[player] + Vector(sceneWidth , 0) - m_pControlledActor[player]->GetPos();
+						relativeToActor = m_ActorCursor[player] + Vector(sceneWidth , 0) - m_ControlledActor[player]->GetPos();
 					else
-						relativeToActor = m_ActorCursor[player] - Vector(sceneWidth , 0) - m_pControlledActor[player]->GetPos();
+						relativeToActor = m_ActorCursor[player] - Vector(sceneWidth , 0) - m_ControlledActor[player]->GetPos();
 	
 			// Limit selection range
 			relativeToActor = relativeToActor.CapMagnitude(350);
-			m_ActorCursor[player] = m_pControlledActor[player]->GetPos() + relativeToActor;
+			m_ActorCursor[player] = m_ControlledActor[player]->GetPos() + relativeToActor;
 
             m_pPieMenu[player]->SetEnabled(false);
 
@@ -1612,45 +1597,45 @@ void GameActivity::Update()
             //g_SceneMan.SetScrollTarget(m_ActorCursor[player], 0.1, wrapped, ScreenOfPlayer(player));
 
             // Set the view to the actor pos
-			Vector scrollPos = Vector(m_pControlledActor[player]->GetPos());
+			Vector scrollPos = Vector(m_ControlledActor[player]->GetPos());
             wrapped = g_SceneMan.ForceBounds(scrollPos);
             g_SceneMan.SetScrollTarget(scrollPos, 0.1, wrapped, ScreenOfPlayer(player));
 
             // Disable the actor's controller
-            m_pControlledActor[player]->GetController()->SetDisabled(true);
+            m_ControlledActor[player]->GetController()->SetDisabled(true);
 
             // Player is done setting waypoints
             if (m_PlayerController[player].IsState(PRESS_SECONDARY))
             {
                 // Give player control back to actor
-                m_pControlledActor[player]->GetController()->SetDisabled(false);
+                m_ControlledActor[player]->GetController()->SetDisabled(false);
                 // Switch back to normal view
-                m_ViewState[player] = NORMAL;
+                m_ViewState[player] = ViewState::Normal;
                 // Stop displaying the message
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
             }
             // Player set a new waypoint
-            else if (m_pControlledActor[player] && m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
+            else if (m_ControlledActor[player] && m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
             {
-                //    m_pControlledActor[player]->AddAISceneWaypoint(m_ActorCursor[player]);
+                //    m_ControlledActor[player]->AddAISceneWaypoint(m_ActorCursor[player]);
                 // Give player control back to actor
-                m_pControlledActor[player]->GetController()->SetDisabled(false);
+                m_ControlledActor[player]->GetController()->SetDisabled(false);
                 // Switch back to normal view
-                m_ViewState[player] = NORMAL;
+                m_ViewState[player] = ViewState::Normal;
                 // Stop displaying the message
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
 
 				//Switch commander to sentry mode
-				m_pControlledActor[player]->SetAIMode(Actor::AIMODE_SENTRY);
+				m_ControlledActor[player]->SetAIMode(Actor::AIMODE_SENTRY);
 
 				// Detect nearby actors and attach them to commander
-				float radius = g_SceneMan.ShortestDistance(m_ActorCursor[player],m_pControlledActor[player]->GetPos(), true).GetMagnitude();
+				float radius = g_SceneMan.ShortestDistance(m_ActorCursor[player],m_ControlledActor[player]->GetPos(), true).GetMagnitude();
 
 				Actor *pActor = 0;
 				Actor *pFirstActor = 0;
 
 				// Get the first one
-				pFirstActor = pActor = g_MovableMan.GetNextTeamActor(m_pControlledActor[player]->GetTeam());
+				pFirstActor = pActor = g_MovableMan.GetNextTeamActor(m_ControlledActor[player]->GetTeam());
 
 				do
 				{
@@ -1659,13 +1644,13 @@ void GameActivity::Update()
 					{
 						// If human, set appropriate AI mode
 						if (dynamic_cast<AHuman *>(pActor) || dynamic_cast<ACrab *>(pActor))
-							if (g_SceneMan.ShortestDistance(m_pControlledActor[player]->GetPos(), pActor->GetPos(),true).GetMagnitude() < radius)
+							if (g_SceneMan.ShortestDistance(m_ControlledActor[player]->GetPos(), pActor->GetPos(),true).GetMagnitude() < radius)
 							{
 								pActor->FlashWhite();
 								pActor->ClearAIWaypoints();
 								pActor->SetAIMode(Actor::AIMODE_SQUAD);
-								pActor->AddAIMOWaypoint(m_pControlledActor[player]);
-                                pActor->UpdateMovePath();   // Make sure pActor has m_pControlledActor registered as an AIMOWaypoint
+								pActor->AddAIMOWaypoint(m_ControlledActor[player]);
+                                pActor->UpdateMovePath();   // Make sure pActor has m_ControlledActor registered as an AIMOWaypoint
 							}
 					}
 
@@ -1678,7 +1663,7 @@ void GameActivity::Update()
         ///////////////////////////////////////////////////
         // Selecting LZ, a place for the craft to land
 
-        else if (m_ViewState[player] == LZSELECT)
+        else if (m_ViewState[player] == ViewState::LandingZoneSelect)
         {
             // Continuously display LZ message
             g_FrameMan.SetScreenText("Choose your landing zone...", ScreenOfPlayer(player));
@@ -1707,16 +1692,16 @@ void GameActivity::Update()
                 // Add up the static LZ loaded from the Scene to the one(s) around the player's team's brains
                 Scene::Area totalLZ(m_LandingZoneArea[m_Team[player]]);
 /* This whole concept kinda sucks - defensive AA robots are more fun way to go to prevent bumrushing the brain with craft
-                for (int p = 0; p < MAXPLAYERCOUNT; ++p)
+                for (int p = Players::PlayerOne; p < Players::MaxPlayerCount; ++p)
                 {
                     if (!(m_IsActive[p] && m_IsHuman[p] && m_BrainLZWidth[p] > 0))
                         continue;
                     // Same team as this player and has a brain
-                    if (m_pBrain[p] && m_Team[p] == m_Team[player])
+                    if (m_Brain[p] && m_Team[p] == m_Team[player])
                     {
                         Box brainBox(Vector(0, 0), m_BrainLZWidth[p], 100);
                         // Center the brain LZ box aroud the player's brain
-                        brainBox.SetCenter(m_pBrain[p]->GetPos());
+                        brainBox.SetCenter(m_Brain[p]->GetPos());
                         // Add it to the total LZ
                         totalLZ.AddBox(brainBox);
                     }
@@ -1749,13 +1734,13 @@ void GameActivity::Update()
             }
 
             // Player canceled the order while selecting LZ - can't be done in pregame
-            if (m_PlayerController[player].IsState(PRESS_SECONDARY) && m_ActivityState != PREGAME)
+            if (m_PlayerController[player].IsState(PRESS_SECONDARY) && m_ActivityState != ActivityState::PreGame)
             {
                 // Switch back to normal view
-                m_ViewState[player] = NORMAL;
+                m_ViewState[player] = ViewState::Normal;
                 // Play err sound to indicate cancellation
                 g_FrameMan.SetScreenText("Order canceled!", ScreenOfPlayer(player), 333);
-                m_MsgTimer[player].Reset();
+                m_MessageTimer[player].Reset();
                 g_GUISound.UserErrorSound()->Play(player);
                 // Flash the same actor, jsut to show the control went back to him
                 m_pPieMenu[player]->DisableAnim();
@@ -1772,11 +1757,11 @@ void GameActivity::Update()
                 if (!g_MovableMan.GetNextTeamActor(team))
                 {
                     m_ObservationTarget[player] = m_LandingZone[player];
-                    m_ViewState[player] = OBSERVE;
+                    m_ViewState[player] = ViewState::Observe;
                 }
                 // If there are other guys around, switch back to normal view
                 else
-                    m_ViewState[player] = NORMAL;
+                    m_ViewState[player] = ViewState::Normal;
                 // Stop displaying the LZ message
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
                 // Flash the same actor, jsut to show the control went back to him
@@ -1798,7 +1783,7 @@ void GameActivity::Update()
         ////////////////////////////
         // Deathwatching
 
-        else if (m_ViewState[player] == DEATHWATCH)
+        else if (m_ViewState[player] == ViewState::DeathWatch)
         {
             // Continuously deathwatch message
             g_FrameMan.SetScreenText("Lost control of remote body!", ScreenOfPlayer(player));
@@ -1810,27 +1795,27 @@ void GameActivity::Update()
         // Normal scrolling to view the currently controlled Actor
 		// But only if we're not editing something, because editor will scroll the screen himself
 		// and double scrolling will cause CC gitch when we'll cross the seam
-		else if (m_pControlledActor[player] && m_ActivityState != EDITING && m_ActivityState != PREGAME)
+		else if (m_ControlledActor[player] && m_ActivityState != ActivityState::Editing && m_ActivityState != ActivityState::PreGame)
         {
-            g_SceneMan.SetScrollTarget(m_pControlledActor[player]->GetViewPoint(), 0.1, m_pControlledActor[player]->DidWrap(), ScreenOfPlayer(player));
+            g_SceneMan.SetScrollTarget(m_ControlledActor[player]->GetViewPoint(), 0.1, m_ControlledActor[player]->DidWrap(), ScreenOfPlayer(player));
         }
 
         ////////////////////////////////////////
         // Update the Pie Menu
 
         // Set the valid actor (or 0) so it can be flashed by the piemenu when it activates/deactivates
-        m_pPieMenu[player]->SetActor(m_pControlledActor[player]);
+        m_pPieMenu[player]->SetActor(m_ControlledActor[player]);
 
-        if (m_pControlledActor[player] && m_ViewState[player] != DEATHWATCH && m_ViewState[player] != ACTORSELECT && m_ViewState[player] != AIGOTOPOINT && m_ViewState[player] != UNITSELECTCIRCLE)
+        if (m_ControlledActor[player] && m_ViewState[player] != ViewState::DeathWatch && m_ViewState[player] != ViewState::ActorSelect && m_ViewState[player] != ViewState::AIGoToPoint && m_ViewState[player] != ViewState::UnitSelectCircle)
         {
             if (m_PlayerController[player].IsState(PIE_MENU_ACTIVE))
             {
-                if (!m_pPieMenu[player]->IsEnabled() || m_pControlledActor[player]->PieNeedsUpdate())
+                if (!m_pPieMenu[player]->IsEnabled() || m_ControlledActor[player]->PieNeedsUpdate())
                 {
                     // Remove all previous slices
                     m_pPieMenu[player]->ResetSlices();
                     // Add the slices that the actor needs
-                    m_pControlledActor[player]->AddPieMenuSlices(m_pPieMenu[player]);
+                    m_ControlledActor[player]->AddPieMenuSlices(m_pPieMenu[player]);
                     // Add some additional universal ones
 					if (m_BuyMenuEnabled)
 					{
@@ -1838,7 +1823,7 @@ void GameActivity::Update()
 						m_pPieMenu[player]->AddSlice(buySlice);
 					}
                     // Brain-specific options
-                    if (m_pControlledActor[player] == m_pBrain[player])
+                    if (m_ControlledActor[player] == m_Brain[player])
                     {
 						//PieMenuGUI::Slice statsSlice("Statistics", PieMenuGUI::PSI_STATS, PieMenuGUI::Slice::RIGHT, false);
                         //m_pPieMenu[player]->AddSlice(statsSlice, true);
@@ -1851,7 +1836,7 @@ void GameActivity::Update()
 					m_CurrentPieMenuPlayer = player;
 					m_CurrentPieMenuSlices = GetCurrentPieMenuSlices(player);
 
-					OnPieMenu(m_pControlledActor[player]);
+					OnPieMenu(m_ControlledActor[player]);
 
                     // Realigns slices after possible external pie-menu changes
                     m_pPieMenu[player]->RealignSlices();
@@ -1863,7 +1848,7 @@ void GameActivity::Update()
                 m_pPieMenu[player]->SetEnabled(false);
 // TODO: FIX CRASH BUG HERE WHEN GAME OVER!
             // Set/save position of the menu
-            m_pPieMenu[player]->SetPos(m_pControlledActor[player]->GetCPUPos());
+            m_pPieMenu[player]->SetPos(m_ControlledActor[player]->GetCPUPos());
         }
 
         // Update the Pie menu
@@ -1871,24 +1856,24 @@ void GameActivity::Update()
 
         // If it appears a slice has been activated, then let the controlled actor handle it
         int command = m_pPieMenu[player]->GetPieCommand();
-        if (m_pControlledActor[player] && command != PieMenuGUI::PSI_NONE)
+        if (m_ControlledActor[player] && command != PieMenuGUI::PSI_NONE)
         {
             // AI mode commands that need extra points set in special view modes here
             if (command == PieMenuGUI::PSI_SENTRY)
-                m_ViewState[player] = AISENTRYPOINT;
+                m_ViewState[player] = ViewState::AISentryPoint;
             else if (command == PieMenuGUI::PSI_PATROL)
-                m_ViewState[player] = AIPATROLPOINTS;
+                m_ViewState[player] = ViewState::AIPatrolPoints;
             else if (command == PieMenuGUI::PSI_GOLDDIG)
-                m_ViewState[player] = AIGOLDDIGPOINT;
+                m_ViewState[player] = ViewState::AIGoldDigPoint;
             else if (command == PieMenuGUI::PSI_GOTO)
             {
-                m_ViewState[player] = AIGOTOPOINT;
+                m_ViewState[player] = ViewState::AIGoToPoint;
                 // Clear out the waypoints
-                m_pControlledActor[player]->ClearAIWaypoints();
+                m_ControlledActor[player]->ClearAIWaypoints();
                 // Set cursor to the actor
-                m_ActorCursor[player] = m_pControlledActor[player]->GetPos();
+                m_ActorCursor[player] = m_ControlledActor[player]->GetPos();
                 // Disable Actor's controller while we set the waypoints
-                m_pControlledActor[player]->GetController()->SetDisabled(true);
+                m_ControlledActor[player]->GetController()->SetDisabled(true);
             }
 			else if (command == PieMenuGUI::PSI_FORMSQUAD)
             {
@@ -1899,7 +1884,7 @@ void GameActivity::Update()
 				Actor *pFirstActor = 0;
 
 				// Get the first one
-				pFirstActor = pActor = g_MovableMan.GetNextTeamActor(m_pControlledActor[player]->GetTeam());
+				pFirstActor = pActor = g_MovableMan.GetNextTeamActor(m_ControlledActor[player]->GetTeam());
 
 				// Reset commander if we have any subordinates
 				do
@@ -1908,11 +1893,11 @@ void GameActivity::Update()
 					{
 						// Set appropriate AI mode
 						if (dynamic_cast<AHuman *>(pActor) || dynamic_cast<ACrab *>(pActor))
-							if (pActor->GetAIMOWaypointID() == m_pControlledActor[player]->GetID())
+							if (pActor->GetAIMOWaypointID() == m_ControlledActor[player]->GetID())
 							{
 								pActor->FlashWhite();
 								pActor->ClearAIWaypoints();
-                                pActor->SetAIMode((Actor::AIMode)m_pControlledActor[player]->GetAIMode()); // Inherit the leader's AI mode
+                                pActor->SetAIMode((Actor::AIMode)m_ControlledActor[player]->GetAIMode()); // Inherit the leader's AI mode
 								isCommander = true;
 							}
 					}
@@ -1925,18 +1910,18 @@ void GameActivity::Update()
 				//Now turn on selection UI, if we didn't disconnect anyone
 				if (!isCommander)
 				{
-					m_ViewState[player] = UNITSELECTCIRCLE;
+					m_ViewState[player] = ViewState::UnitSelectCircle;
 					// Set cursor to the actor
-					m_ActorCursor[player] = m_pControlledActor[player]->GetPos() + Vector(50,-50);
+					m_ActorCursor[player] = m_ControlledActor[player]->GetPos() + Vector(50,-50);
 					// Disable Actor's controller while we set the waypoints
-					m_pControlledActor[player]->GetController()->SetDisabled(true);
+					m_ControlledActor[player]->GetController()->SetDisabled(true);
 				}
             }
 			
 			// TODO: More modes?
 
             // If the actor couldn't handle it, then it's probably a game specific one
-            if (!m_pControlledActor[player]->HandlePieCommand(command))
+            if (!m_ControlledActor[player]->HandlePieCommand(command))
             {
                 if (command == PieMenuGUI::PSI_BUYMENU)
                 {
@@ -1961,7 +1946,7 @@ void GameActivity::Update()
         // Enable or disable the Buy Menus if the brain is selected, Skip if an LZ selection button press was just performed
         if (!skipBuyUpdate)
         {
-//            m_pBuyGUI[player]->SetEnabled(m_pControlledActor[player] == m_pBrain[player] && m_ViewState[player] != LZSELECT && m_ActivityState != OVER);
+//            m_pBuyGUI[player]->SetEnabled(m_ControlledActor[player] == m_Brain[player] && m_ViewState[player] != ViewState::LandingZoneSelect && m_ActivityState != ActivityState::Over);
             m_pBuyGUI[player]->Update();
         }
 
@@ -1972,15 +1957,15 @@ void GameActivity::Update()
         if (m_pBuyGUI[player]->PurchaseMade())
         {
             m_pBuyGUI[player]->SetEnabled(false);
-//            SwitchToPrevActor(player, team, m_pBrain[player]);
+//            SwitchToPrevActor(player, team, m_Brain[player]);
             // Start selecting the landing zone
-            m_ViewState[player] = LZSELECT;
+            m_ViewState[player] = ViewState::LandingZoneSelect;
             // Set this to zero so the cursor interpolates down from the sky
             m_LandingZone[player].m_Y = 0;
         }
 
         // After a while of game over, change messages to the final one for everyone
-        if (m_ActivityState == OVER && m_GameOverTimer.IsPastRealMS(m_GameOverPeriod))
+        if (m_ActivityState == ActivityState::Over && m_GameOverTimer.IsPastRealMS(m_GameOverPeriod))
         {
             g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
             //g_FrameMan.SetScreenText("Press [Esc] to leave the battlefield", ScreenOfPlayer(player), 750);
@@ -2000,19 +1985,19 @@ void GameActivity::Update()
         ///////////////////////////////////
         // Enable/disable controlled actors' AI as appropriate when in menus
 
-        if (m_pControlledActor[player])
+        if (m_ControlledActor[player])
         {
             // Don't disable when pie menu is active; it is done inside the Controller Update
-            if (m_pBuyGUI[player]->IsVisible() || m_ViewState[player] == ACTORSELECT || m_ViewState[player] == LZSELECT || m_ViewState[player] == OBSERVE)
-                m_pControlledActor[player]->GetController()->SetInputMode(Controller::CIM_AI);
+            if (m_pBuyGUI[player]->IsVisible() || m_ViewState[player] == ViewState::ActorSelect || m_ViewState[player] == ViewState::LandingZoneSelect || m_ViewState[player] == ViewState::Observe)
+                m_ControlledActor[player]->GetController()->SetInputMode(Controller::CIM_AI);
             else
-                m_pControlledActor[player]->GetController()->SetInputMode(Controller::CIM_PLAYER);
+                m_ControlledActor[player]->GetController()->SetInputMode(Controller::CIM_PLAYER);
         }
 
         ///////////////////////////////////////
         // Configure banners to show when important things happen, like the game over or death of brain
 
-        if (ActivityOver())
+        if (IsOver())
         {
             // Override previous messages
             if (m_pBannerRed[player]->IsVisible() && m_pBannerRed[player]->GetBannerText() != "FAIL")
@@ -2029,7 +2014,7 @@ void GameActivity::Update()
                 m_pBannerRed[player]->ShowText("FAIL", GUIBanner::FLYBYLEFTWARD, 1000, Vector(g_FrameMan.GetPlayerFrameBufferWidth(player), g_FrameMan.GetPlayerFrameBufferHeight(player)), 0.5, 1500, 400);
         }
         // If a player had a brain that is now dead, but his team is not yet done, show the dead banner on his screen
-        else if (m_ActivityState != EDITING && m_ActivityState != STARTING && m_HadBrain[player] && !m_pBrain[player] && !m_pBannerRed[player]->IsVisible())
+        else if (m_ActivityState != ActivityState::Editing && m_ActivityState != ActivityState::Starting && m_HadBrain[player] && !m_Brain[player] && !m_pBannerRed[player]->IsVisible())
         {
             // If repeated too many times, just let the banner stop at showing and not cycle
             if (m_BannerRepeats[player]++ < 6)
@@ -2048,13 +2033,13 @@ void GameActivity::Update()
     ///////////////////////////////////////////
     // Iterate through all teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
 
         // Pause deliveries if game hasn't started yet
-        if (m_ActivityState == Activity::PREGAME)
+        if (m_ActivityState == ActivityState::PreGame)
         {
             for (deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
                 (*itr).timer.Reset();
@@ -2066,12 +2051,12 @@ void GameActivity::Update()
         if (!m_Deliveries[team].empty())
         {
             int player = m_Deliveries[team].front().orderedByPlayer;
-            if (m_MsgTimer[player].IsPastSimMS(1000))
+            if (m_MessageTimer[player].IsPastSimMS(1000))
             {
                 char message[512];
                 sprintf_s(message, sizeof(message), "Next delivery in %i secs", ((int)m_Deliveries[team].front().delay - (int)m_Deliveries[team].front().timer.GetElapsedSimTimeMS()) / 1000);
                 g_FrameMan.SetScreenText(message, ScreenOfPlayer(player));
-                m_MsgTimer[player].Reset();
+                m_MessageTimer[player].Reset();
             }
         }
 
@@ -2084,7 +2069,7 @@ void GameActivity::Update()
             if (pDeliveryCraft)
             {
                 g_FrameMan.SetScreenText("Your order has arrived!", ScreenOfPlayer(player), 333);
-                m_MsgTimer[player].Reset();
+                m_MessageTimer[player].Reset();
 
                 pDeliveryCraft->ResetEmissionTimers();  // Reset the engine timers so they don't emit a massive burst after being added to the world
                 pDeliveryCraft->Update();
@@ -2093,7 +2078,7 @@ void GameActivity::Update()
                 g_MovableMan.AddActor(pDeliveryCraft);
 /*
                 // If the player who ordered this seems stuck int he manu waiting for the delivery, give him direct control
-                if (m_pControlledActor[player] == m_pBrain[player] && m_ViewState[player] != LZSELECT)
+                if (m_ControlledActor[player] == m_Brain[player] && m_ViewState[player] != ViewState::LandingZoneSelect)
                 {
                     SwitchToActor(pDeliveryCraft, player, team);
                 }
@@ -2109,26 +2094,26 @@ void GameActivity::Update()
     if (m_PlayerCount == 3)
     {
         // Update the controller of the observation view
-        m_PlayerController[PLAYER_4].Update();
+        m_PlayerController[Players::PlayerFour].Update();
 
         // Observer user control override
-        if (m_PlayerController[PLAYER_4].RelativeCursorMovement(m_ObservationTarget[PLAYER_4], 1.2))
-            m_DeathTimer[PLAYER_4].Reset();
+        if (m_PlayerController[Players::PlayerFour].RelativeCursorMovement(m_ObservationTarget[Players::PlayerFour], 1.2))
+            m_DeathTimer[Players::PlayerFour].Reset();
 
         // If no user input in a few seconds, start scrolling along the terrain
-        if (m_DeathTimer[PLAYER_4].IsPastSimMS(5000))
+        if (m_DeathTimer[Players::PlayerFour].IsPastSimMS(5000))
         {
             // Make it scroll along
-            m_ObservationTarget[PLAYER_4].m_X += 0.5;
+            m_ObservationTarget[Players::PlayerFour].m_X += 0.5;
 
             // Make view follow the terrain
-            float prevHeight = m_ObservationTarget[PLAYER_4].m_Y;
-            m_ObservationTarget[PLAYER_4].m_Y = 0;
-            m_ObservationTarget[PLAYER_4].m_Y = prevHeight + ((g_SceneMan.FindAltitude(m_ObservationTarget[PLAYER_4], g_SceneMan.GetSceneHeight(), 20) - prevHeight) * 0.02);
+            float prevHeight = m_ObservationTarget[Players::PlayerFour].m_Y;
+            m_ObservationTarget[Players::PlayerFour].m_Y = 0;
+            m_ObservationTarget[Players::PlayerFour].m_Y = prevHeight + ((g_SceneMan.FindAltitude(m_ObservationTarget[Players::PlayerFour], g_SceneMan.GetSceneHeight(), 20) - prevHeight) * 0.02);
         }
 
         // Set the view to the observation position
-        g_SceneMan.SetScrollTarget(m_ObservationTarget[PLAYER_4], 0.1, g_SceneMan.ForceBounds(m_ObservationTarget[PLAYER_4]), ScreenOfPlayer(PLAYER_4));
+        g_SceneMan.SetScrollTarget(m_ObservationTarget[Players::PlayerFour], 0.1, g_SceneMan.ForceBounds(m_ObservationTarget[Players::PlayerFour]), ScreenOfPlayer(Players::PlayerFour));
     }
 */
 }
@@ -2146,10 +2131,10 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 
     char str[512];
     int yTextPos = 0;
-    int team = NOTEAM;
+    int team = Teams::NoTeam;
     int cursor = 0;
     int PoS = PlayerOfScreen(which);
-    if (PoS < 0 || PoS >= Activity::MAXPLAYERCOUNT)
+    if (PoS < Players::PlayerOne || PoS >= Players::MaxPlayerCount)
         return;
     Box screenBox(targetPos, pTargetBitmap->w, pTargetBitmap->h);
     GUIFont *pLargeFont = g_FrameMan.GetLargeFont();
@@ -2159,16 +2144,16 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     Vector landZone;
 
     // Iterate through all players, drawing each currently used LZ cursor.
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
 
-        if (m_ViewState[player] == LZSELECT)
+        if (m_ViewState[player] == ViewState::LandingZoneSelect)
         {
             int halfWidth = 36;
             team = m_Team[player];
-            if (team == NOTEAM)
+            if (team == Teams::NoTeam)
                 continue;
 			cursor = team;
             landZone = m_LandingZone[player] - targetPos;
@@ -2196,7 +2181,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     }
 
     // Iterate through all teams, drawing all pending delivery cursors
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -2211,7 +2196,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
             draw_sprite_h_flip(pTargetBitmap, m_aLZCursor[cursor][frame], landZone.m_X + halfWidth - m_aLZCursor[cursor][frame]->w, landZone.m_Y - 48);
             // Text
             pSmallFont->DrawAligned(&pBitmapInt, landZone.m_X, landZone.m_Y - 38, "ETA:", GUIFont::Centre);
-            if (m_ActivityState == Activity::PREGAME)
+            if (m_ActivityState == ActivityState::PreGame)
                 sprintf_s(str, sizeof(str), "???s");
             else
                 sprintf_s(str, sizeof(str), "%is", ((int)itr->delay - (int)itr->timer.GetElapsedSimTimeMS()) / 1000);
@@ -2233,7 +2218,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 
     // The team of the screen
     team = m_Team[PoS];
-    if (team == NOTEAM)
+    if (team == Teams::NoTeam)
         return;
 
     // None of the following player-specific GUI elements apply if this isn't a played human actor
@@ -2338,7 +2323,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MAX(16, g_SceneMan.GetScreenOcclusion(which).m_X + 16), yTextPos, str, GUIFont::Left);
 /* Not applicable anymore to the 4-team games
     // Body losses
-    sprintf_s(str, sizeof(str), "%c Losses: %c%i %c%i", -39, -62, GetTeamDeathCount(Activity::TEAM_1), -59, GetTeamDeathCount(Activity::TEAM_2));
+    sprintf_s(str, sizeof(str), "%c Losses: %c%i %c%i", -39, -62, GetTeamDeathCount(Teams::TeamOne), -59, GetTeamDeathCount(Teams::TeamTwo));
     g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MIN(pTargetBitmap->w - 4, pTargetBitmap->w - 4 + g_SceneMan.GetScreenOcclusion(which).m_X), yTextPos, str, GUIFont::Right);
 */
     // Show the player's controller scheme icon in the upper right corner of his screen, but only for a minute
@@ -2358,10 +2343,10 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
         }
     }
 
-    if (m_ActivityState == RUNNING)
+    if (m_ActivityState == ActivityState::Running)
     {
         // Pie menu may be visible if we're choosing actors
-        if (/*m_pControlledActor[PoS] && */m_pPieMenu[PoS] && m_pPieMenu[PoS]->IsVisible())
+        if (/*m_ControlledActor[PoS] && */m_pPieMenu[PoS] && m_pPieMenu[PoS]->IsVisible())
             m_pPieMenu[PoS]->Draw(pTargetBitmap, targetPos);
 
         if (m_pBuyGUI[PoS] && m_pBuyGUI[PoS]->IsVisible())
@@ -2369,7 +2354,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     }
 
     // Draw actor picking crosshairs if applicable
-    if (m_ViewState[PoS] == ACTORSELECT && m_IsActive[PoS] && m_IsHuman[PoS])
+    if (m_ViewState[PoS] == ViewState::ActorSelect && m_IsActive[PoS] && m_IsHuman[PoS])
     {
         Vector center = m_ActorCursor[PoS] - targetPos;
         circle(pTargetBitmap, center.m_X, center.m_Y, m_CursorTimer.AlternateReal(150) ? 6 : 8, g_YellowGlowColor);
@@ -2384,7 +2369,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 */
     }
     // AI point commands cursor
-    else if (m_ViewState[PoS] == AIGOTOPOINT)
+    else if (m_ViewState[PoS] == ViewState::AIGoToPoint)
     {
         Vector center = m_ActorCursor[PoS] - targetPos;
         circle(pTargetBitmap, center.m_X, center.m_Y, m_CursorTimer.AlternateReal(150) ? 6 : 8, g_YellowGlowColor);
@@ -2394,16 +2379,16 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 		g_PostProcessMan.RegisterGlowArea(m_ActorCursor[PoS], 10);
 
         // Draw a line from the last set waypoint to the cursor
-        if (m_pControlledActor[PoS] && g_MovableMan.IsActor(m_pControlledActor[PoS]))
-            g_FrameMan.DrawLine(pTargetBitmap, m_pControlledActor[PoS]->GetLastAIWaypoint() - targetPos, m_ActorCursor[PoS] - targetPos, g_YellowGlowColor, 0, AILINEDOTSPACING, 0, true);
+        if (m_ControlledActor[PoS] && g_MovableMan.IsActor(m_ControlledActor[PoS]))
+            g_FrameMan.DrawLine(pTargetBitmap, m_ControlledActor[PoS]->GetLastAIWaypoint() - targetPos, m_ActorCursor[PoS] - targetPos, g_YellowGlowColor, 0, AILINEDOTSPACING, 0, true);
     }
 	// Group selection circle
-	else if (m_ViewState[PoS] == UNITSELECTCIRCLE)
+	else if (m_ViewState[PoS] == ViewState::UnitSelectCircle)
     {
-		if (m_pControlledActor[PoS] && g_MovableMan.IsActor(m_pControlledActor[PoS]))
+		if (m_ControlledActor[PoS] && g_MovableMan.IsActor(m_ControlledActor[PoS]))
 		{
 			Vector cursorDrawPos = m_ActorCursor[PoS] - targetPos;
-			Vector actorPos = m_pControlledActor[PoS]->GetPos();
+			Vector actorPos = m_ControlledActor[PoS]->GetPos();
 			Vector drawPos = actorPos - targetPos;
 
 			//Fix cursor coordinates
@@ -2453,7 +2438,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 				}
 			}
 
-			float radius = g_SceneMan.ShortestDistance(m_ActorCursor[PoS], m_pControlledActor[PoS]->GetPos(), true).GetMagnitude();
+			float radius = g_SceneMan.ShortestDistance(m_ActorCursor[PoS], m_ControlledActor[PoS]->GetPos(), true).GetMagnitude();
 
 			circle(pTargetBitmap, cursorDrawPos.m_X, cursorDrawPos.m_Y, m_CursorTimer.AlternateReal(150) ? 6 : 8, g_YellowGlowColor);
 			circlefill(pTargetBitmap, cursorDrawPos.m_X, cursorDrawPos.m_Y, 2, g_YellowGlowColor);
@@ -2464,7 +2449,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 			if (g_SceneMan.GetScene()->WrapsX())
 			{
 				//Calculate unwrapped cursor position, or it won't glow
-				unwrappedPos = m_ActorCursor[PoS] - m_pControlledActor[PoS]->GetPos();
+				unwrappedPos = m_ActorCursor[PoS] - m_ControlledActor[PoS]->GetPos();
 				float sceneWidth = g_SceneMan.GetSceneWidth();
 				
 				if (unwrappedPos.GetMagnitude() > sceneWidth / 2 && unwrappedPos.GetMagnitude() > 350)
@@ -2530,7 +2515,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 		}
 	}
 
-    if ((m_ActivityState == EDITING || m_ActivityState == PREGAME) && m_pEditorGUI[PoS])
+    if ((m_ActivityState == ActivityState::Editing || m_ActivityState == ActivityState::PreGame) && m_pEditorGUI[PoS])
         m_pEditorGUI[PoS]->Draw(pTargetBitmap, targetPos);
 
     // Draw Banners
@@ -2555,16 +2540,16 @@ void GameActivity::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
     Vector landZone;
 
     // Iterate through all players, drawing each currently used LZ cursor.
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
 
-        if (m_ViewState[player] == LZSELECT)
+        if (m_ViewState[player] == ViewState::LandingZoneSelect)
         {
             int halfWidth = 36;
             int team = m_Team[player];
-            if (team == NOTEAM)
+            if (team == Teams::NoTeam)
                 continue;
             landZone = m_LandingZone[player] - targetPos;
             // Cursor
@@ -2591,7 +2576,7 @@ void GameActivity::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
     }
 
     // Iterate through all teams, drawing all pending delivery cursors
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -2605,7 +2590,7 @@ void GameActivity::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
             draw_sprite_h_flip(pTargetBitmap, m_aLZCursor[cursor][frame], landZone.m_X + halfWidth - m_aLZCursor[cursor][frame]->w, landZone.m_Y - 48);
             // Text
             pSmallFont->DrawAligned(&pBitmapInt, landZone.m_X, landZone.m_Y - 38, "ETA:", GUIFont::Centre);
-            if (m_ActivityState == Activity::PREGAME)
+            if (m_ActivityState == ActivityState::PreGame)
                 sprintf_s(str, sizeof(str), "???s");
             else
                 sprintf_s(str, sizeof(str), "%is", ((int)itr->delay - (int)itr->timer.GetElapsedSimTimeMS()) / 1000);
@@ -2637,7 +2622,7 @@ int GameActivity::GetActiveCPUTeamCount() const
 {
 	int count = 0;
 
-	for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; team++)
+	for (int team = Teams::TeamOne; team < Activity::MaxTeamCount; team++)
 		if (TeamActive(team) && TeamIsCPU(team))
 			count++;
 
@@ -2655,7 +2640,7 @@ int GameActivity::GetActiveHumanTeamCount() const
 {
 	int count = 0;
 
-	for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; team++)
+	for (int team = Teams::TeamOne; team < Activity::MaxTeamCount; team++)
 		if (TeamActive(team) && !TeamIsCPU(team))
 			count++;
 
@@ -2673,15 +2658,15 @@ int GameActivity::OtherTeam(int team)
 {
     // Only one team in this game, so can't return another one
     if (m_TeamCount == 1)
-        return Activity::NOTEAM;
+        return Teams::NoTeam;
 
     // Find another team that is active
     bool loopedOnce = false;
     for (int t = team + 1; ; t++)
     {
         // Loop
-        if (t >= MAXTEAMCOUNT)
-            t = Activity::TEAM_1;
+        if (t >= MaxTeamCount)
+            t = Teams::TeamOne;
 
         if (t == team)
             break;
@@ -2690,7 +2675,7 @@ int GameActivity::OtherTeam(int team)
             return t;
     }
 
-    return Activity::NOTEAM;
+    return Teams::NoTeam;
 }
 
 
@@ -2704,8 +2689,8 @@ bool GameActivity::OneOrNoneTeamsLeft()
 {
     // See if only one team remains with any brains
     int brainTeamCount = 0;
-    int brainTeam = Activity::NOTEAM;
-    for (int t = Activity::TEAM_1; t < MAXTEAMCOUNT; ++t)
+    int brainTeam = Teams::NoTeam;
+    for (int t = Teams::TeamOne; t < Teams::MaxTeamCount; ++t)
     {
         if (!m_TeamActive[t])
             continue;
@@ -2717,7 +2702,7 @@ bool GameActivity::OneOrNoneTeamsLeft()
     }
 
     // If less than two teams left with any brains, they get indicated
-    // Also, if NO teams with brain are left, that is indicated with NOTEAM
+    // Also, if NO teams with brain are left, that is indicated with NoTeam
     if (brainTeamCount <= 1)
         return true;
 
@@ -2733,12 +2718,12 @@ bool GameActivity::OneOrNoneTeamsLeft()
 
 int GameActivity::WhichTeamLeft()
 {
-    int whichTeam = Activity::NOTEAM;
+    int whichTeam = Teams::NoTeam;
 
     // See if only one team remains with any brains
     int brainTeamCount = 0;
-    int brainTeam = Activity::NOTEAM;
-    for (int t = Activity::TEAM_1; t < MAXTEAMCOUNT; ++t)
+    int brainTeam = Teams::NoTeam;
+    for (int t = Teams::TeamOne; t < Teams::MaxTeamCount; ++t)
     {
         if (!m_TeamActive[t])
             continue;
@@ -2753,7 +2738,7 @@ int GameActivity::WhichTeamLeft()
     if (brainTeamCount == 1)
         return brainTeam;
 
-    return Activity::NOTEAM;
+    return Teams::NoTeam;
 }
 
 
@@ -2764,7 +2749,7 @@ int GameActivity::WhichTeamLeft()
 
 bool GameActivity::NoTeamLeft()
 {
-    for (int t = Activity::TEAM_1; t < MAXTEAMCOUNT; ++t)
+    for (int t = Teams::TeamOne; t < Teams::MaxTeamCount; ++t)
     {
         if (!m_TeamActive[t])
             continue;
@@ -2787,7 +2772,7 @@ void GameActivity::InitAIs()
     Actor *pActor = 0;
     Actor *pFirstActor = 0;
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -2833,9 +2818,9 @@ void GameActivity::DisableAIs(bool disable, int whichTeam)
     Actor *pActor = 0;
     Actor *pFirstActor = 0;
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
-        if (!m_TeamActive[team] || (whichTeam != Activity::NOTEAM && team != whichTeam))
+        if (!m_TeamActive[team] || (whichTeam != Teams::NoTeam && team != whichTeam))
             continue;
         // Get the first one
         pFirstActor = pActor = g_MovableMan.GetNextTeamActor(team);
@@ -2927,7 +2912,7 @@ void GameActivity::ObjectivePoint::Draw(BITMAP *pTargetBitmap, BITMAP *pArrowBit
 
 std::string & GameActivity::GetNetworkPlayerName(int player)
 {
-	if (player >= 0 && player < MAXPLAYERCOUNT)
+	if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 		return m_NetworkPlayerNames[player];
 	else
 		return m_NetworkPlayerNames[0];
@@ -2935,7 +2920,7 @@ std::string & GameActivity::GetNetworkPlayerName(int player)
 
 void GameActivity::SetNetworkPlayerName(int player, std::string name)
 {
-	if (player >= 0 && player < MAXPLAYERCOUNT)
+	if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 		m_NetworkPlayerNames[player] = name;
 }
 

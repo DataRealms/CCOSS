@@ -299,9 +299,9 @@ namespace RTE {
 		/// Does not check if any parent types with that name has been added. If found, that instance is returned, otherwise 0.
 		/// </summary>
 		/// <param name="exactType">The exact type name to look for.</param>
-		/// <param name="instanceName">The exact instance name to look for.</param>
+		/// <param name="presetName">The exact PresetName to look for.</param>
 		/// <returns>The found Entity Preset of the exact type and name, if found.</returns>
-		Entity * GetEntityIfExactType(const std::string &exactType, const std::string &instanceName);
+		Entity * GetEntityIfExactType(const std::string &exactType, const std::string &presetName);
 
 		/// <summary>
 		/// Adds a newly added preset instance to the type map, where it will end up in every type-list of every class it derived from as well.

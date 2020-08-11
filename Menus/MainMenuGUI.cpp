@@ -115,15 +115,15 @@ void MainMenuGUI::Clear()
     m_StartPlayers = 1;
     m_StartTeams = 2;
     m_StartFunds = 1600;
-    for (int player = 0; player < SKIRMISHPLAYERCOUNT; ++player)
-        m_aTeamAssignments[player] = Activity::TEAM_1;
+    for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player)
+        m_aTeamAssignments[player] = Activity::TeamOne;
     m_CPUTeam = -1;
-    m_StartDifficulty = GameActivity::MEDIUMDIFFICULTY;
+    m_StartDifficulty = Activity::MediumDifficulty;
     m_Quit = false;
 
     // Config screen
-    m_ConfiguringPlayer = UInputMan::PLAYER_ONE;
-    m_ConfiguringDevice = UInputMan::DEVICE_KEYB_ONLY;
+    m_ConfiguringPlayer = Players::PlayerOne;
+    m_ConfiguringDevice = DEVICE_KEYB_ONLY;
     m_ConfiguringGamepad = DPAD;
     m_ConfigureStep = 0;
     for (int label = 0; label < CONFIGLABELCOUNT; ++label)
@@ -297,44 +297,44 @@ int MainMenuGUI::Create(Controller *pController)
 	str[1] = 0;
 
 	dztype = g_UInputMan.GetControlScheme(0)->GetJoystickDeadzoneType();
-	if (dztype == UInputMan::DeadZoneType::CIRCLE)
+	if (dztype == DeadZoneType::CIRCLE)
 	{
 		m_aDeadZoneCheckbox[P1DEADZONESLIDER]->SetCheck(1);
 		m_aDeadZoneCheckbox[P1DEADZONESLIDER]->SetText("O");
-	} else if(dztype == UInputMan::DeadZoneType::SQUARE) {
+	} else if(dztype == DeadZoneType::SQUARE) {
 		m_aDeadZoneCheckbox[P1DEADZONESLIDER]->SetCheck(0);
 		m_aDeadZoneCheckbox[P1DEADZONESLIDER]->SetText(str);
 	}
 
 	dztype = g_UInputMan.GetControlScheme(1)->GetJoystickDeadzoneType();
-	if (dztype == UInputMan::DeadZoneType::CIRCLE)
+	if (dztype == DeadZoneType::CIRCLE)
 	{
 		m_aDeadZoneCheckbox[P2DEADZONESLIDER]->SetCheck(1);
 		m_aDeadZoneCheckbox[P2DEADZONESLIDER]->SetText("O");
 	}
-	else if (dztype == UInputMan::DeadZoneType::SQUARE) {
+	else if (dztype == DeadZoneType::SQUARE) {
 		m_aDeadZoneCheckbox[P2DEADZONESLIDER]->SetCheck(0);
 		m_aDeadZoneCheckbox[P2DEADZONESLIDER]->SetText(str);
 	}
 
 	dztype = g_UInputMan.GetControlScheme(2)->GetJoystickDeadzoneType();
-	if (dztype == UInputMan::DeadZoneType::CIRCLE)
+	if (dztype == DeadZoneType::CIRCLE)
 	{
 		m_aDeadZoneCheckbox[P3DEADZONESLIDER]->SetCheck(1);
 		m_aDeadZoneCheckbox[P3DEADZONESLIDER]->SetText("O");
 	}
-	else if (dztype == UInputMan::DeadZoneType::SQUARE) {
+	else if (dztype == DeadZoneType::SQUARE) {
 		m_aDeadZoneCheckbox[P3DEADZONESLIDER]->SetCheck(0);
 		m_aDeadZoneCheckbox[P3DEADZONESLIDER]->SetText(str);
 	}
 
 	dztype = g_UInputMan.GetControlScheme(3)->GetJoystickDeadzoneType();
-	if (dztype == UInputMan::DeadZoneType::CIRCLE)
+	if (dztype == DeadZoneType::CIRCLE)
 	{
 		m_aDeadZoneCheckbox[P4DEADZONESLIDER]->SetCheck(1);
 		m_aDeadZoneCheckbox[P4DEADZONESLIDER]->SetText("O");
 	}
-	else if (dztype == UInputMan::DeadZoneType::SQUARE) {
+	else if (dztype == DeadZoneType::SQUARE) {
 		m_aDeadZoneCheckbox[P4DEADZONESLIDER]->SetCheck(0);
 		m_aDeadZoneCheckbox[P4DEADZONESLIDER]->SetText(str);
 	}
@@ -541,6 +541,9 @@ int MainMenuGUI::Create(Controller *pController)
 
 	m_PioneerPromoVisible = false;
 
+	// Load the different input device icons. This can't be done during UInputMan::Create() because the icon presets don't exist so we need to do this after modules are loaded.
+	g_UInputMan.LoadDeviceIcons();
+
     return 0;
 }
 
@@ -638,7 +641,7 @@ void MainMenuGUI::Update()
         {
             m_apScreenBox[MAINSCREEN]->SetVisible(true);
 
-            if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::RUNNING || g_ActivityMan.GetActivity()->GetActivityState() == Activity::EDITING))
+            if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing))
             {
                 m_apScreenBox[MAINSCREEN]->Resize(128, 220);
                 m_aMainMenuButton[RESUME]->SetVisible(true);
@@ -671,7 +674,7 @@ void MainMenuGUI::Update()
 		// Detect whether Planetoid Pioneers promo was clicked and open 
 		if (m_PioneerPromoVisible)
 		{
-			bool buttonHeld = g_UInputMan.MouseButtonPressed(UInputMan::MOUSE_LEFT, -1);
+			bool buttonHeld = g_UInputMan.MouseButtonPressed(MOUSE_LEFT, -1);
 			if (buttonHeld)
 			{
 				// Get mouse position
@@ -1120,16 +1123,16 @@ void MainMenuGUI::Update()
 
 			if (m_MenuScreen == SKIRMISHSCREEN)
             {
-                for (int player = 0; player < SKIRMISHPLAYERCOUNT; ++player)
+                for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player)
                 {
                     // Player team toggle button
 			        if (anEvent.GetControl() == m_aSkirmishButton[player])
                     {
                         // Toggle
-                        if (m_aTeamAssignments[player] == Activity::TEAM_1)
-                            m_aTeamAssignments[player] = Activity::TEAM_2;
+                        if (m_aTeamAssignments[player] == Activity::TeamOne)
+                            m_aTeamAssignments[player] = Activity::TeamTwo;
                         else
-                            m_aTeamAssignments[player] = Activity::TEAM_1;
+                            m_aTeamAssignments[player] = Activity::TeamOne;
 
                         UpdateTeamBoxes();
 
@@ -1182,15 +1185,15 @@ void MainMenuGUI::Update()
 
                 // Set appropriate difficulty level
                 if (anEvent.GetControl()->GetName() == "ButtonStartEasy")
-                    m_StartDifficulty = GameActivity::EASYDIFFICULTY;
+                    m_StartDifficulty = Activity::EasyDifficulty;
                 else if (anEvent.GetControl()->GetName() == "ButtonStartMedium")
-                    m_StartDifficulty = GameActivity::MEDIUMDIFFICULTY;
+                    m_StartDifficulty = Activity::MediumDifficulty;
                 else if (anEvent.GetControl()->GetName() == "ButtonStartHard")
-                    m_StartDifficulty = GameActivity::HARDDIFFICULTY;
+                    m_StartDifficulty = Activity::HardDifficulty;
                 else if (anEvent.GetControl()->GetName() == "ButtonStartDeath")
-                    m_StartDifficulty = GameActivity::MAXDIFFICULTY;
+                    m_StartDifficulty = Activity::MaxDifficulty;
                 else
-                    m_StartDifficulty = GameActivity::MEDIUMDIFFICULTY;
+                    m_StartDifficulty = Activity::MediumDifficulty;
 
                 SetupSkirmishActivity();
 
@@ -1211,7 +1214,7 @@ void MainMenuGUI::Update()
                 for (which = P1NEXT; which <= P4PREV; ++which)
                 {
                     // Calculate the owner of the currently checked button, and if it's next/prev button
-                    player = (which - P1NEXT) % UInputMan::MAX_PLAYERS;
+                    player = (which - P1NEXT) % Players::MaxPlayerCount;
                     bool nextButton = which < P1PREV;
 
                     // Handle the appropriate player's device setting
@@ -1223,7 +1226,7 @@ void MainMenuGUI::Update()
                         if (nextButton)
                         {
                             // Loop around to first if we've gone around
-                            if (++currentDevice >= UInputMan::DEVICE_COUNT)
+                            if (++currentDevice >= DEVICE_COUNT)
                                 currentDevice = 0;
                         }
                         // Prev button pressed, so decrement
@@ -1231,10 +1234,10 @@ void MainMenuGUI::Update()
                         {
                             // Loop around to last if we've gone around
                             if (--currentDevice < 0)
-                                currentDevice = UInputMan::DEVICE_COUNT - 1;
+                                currentDevice = DEVICE_COUNT - 1;
                         }
                         // Set the device and update labels
-                        g_UInputMan.GetControlScheme(player)->SetDevice(currentDevice);
+                        g_UInputMan.GetControlScheme(player)->SetDevice(static_cast<InputDevice>(currentDevice));
                         UpdateDeviceLabels();
 
                         g_GUISound.ButtonPressSound()->Play();
@@ -1278,12 +1281,12 @@ void MainMenuGUI::Update()
                         else
                         {
                             // Set to a default control preset.
-                            UInputMan::Players inputPlayer = static_cast<UInputMan::Players>(which - P1CLEAR);
-                            UInputMan::InputPreset playerPreset = static_cast<UInputMan::InputPreset>(P1CLEAR - which - 1); // Player 1's default preset is at -1 and so on.
+                            Players inputPlayer = static_cast<Players>(which - P1CLEAR);
+                            InputPreset playerPreset = static_cast<InputPreset>(P1CLEAR - which - 1); // Player 1's default preset is at -1 and so on.
                             g_UInputMan.GetControlScheme(inputPlayer)->SetPreset(playerPreset);
                             
                             // Set to a device that fits this preset.
-                            UInputMan::InputDevice deviceType[4] = { UInputMan::DEVICE_MOUSE_KEYB, UInputMan::DEVICE_KEYB_ONLY, UInputMan::DEVICE_GAMEPAD_1, UInputMan::DEVICE_GAMEPAD_2 };
+                            InputDevice deviceType[4] = { DEVICE_MOUSE_KEYB, DEVICE_KEYB_ONLY, DEVICE_GAMEPAD_1, DEVICE_GAMEPAD_2 };
                             g_UInputMan.GetControlScheme(inputPlayer)->SetDevice(deviceType[inputPlayer]);
                             
                             UpdateDeviceLabels();
@@ -1333,7 +1336,7 @@ void MainMenuGUI::Update()
                     m_ScreenChange = true;
 */
                     // Set up the preset that will work well for a 360 controller
-                    g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->SetPreset(UInputMan::PRESET_XBOX360);
+                    g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->SetPreset(PRESET_XBOX360);
 
                     // Go back to the options screen immediately since the preset is all taken care of
                     m_apScreenBox[CONFIGSCREEN]->SetVisible(false);
@@ -1622,19 +1625,19 @@ void MainMenuGUI::Update()
 					m_aDeadZoneLabel[which]->SetText(s);
 
 					// Update control scheme
-					g_UInputMan.GetControlScheme(which)->SetJoystickDeadzone((float)m_aDeadZoneSlider[which]->GetValue() / 250.0);
+					g_UInputMan.GetControlScheme(which)->SetJoystickDeadzone((float)m_aDeadZoneSlider[which]->GetValue() / 200.0F);
 				}
 
 				if (anEvent.GetControl() == m_aDeadZoneCheckbox[which])
 				{
 					if (m_aDeadZoneCheckbox[which]->GetCheck() == 1)
 					{
-						g_UInputMan.GetControlScheme(which)->SetJoystickDeadzoneType(UInputMan::DeadZoneType::CIRCLE);
+						g_UInputMan.GetControlScheme(which)->SetJoystickDeadzoneType(DeadZoneType::CIRCLE);
 						m_aDeadZoneCheckbox[which]->SetText("O");
 					}
 					else 
 					{
-						g_UInputMan.GetControlScheme(which)->SetJoystickDeadzoneType(UInputMan::DeadZoneType::SQUARE);
+						g_UInputMan.GetControlScheme(which)->SetJoystickDeadzoneType(DeadZoneType::SQUARE);
 						char str[2];
 						str[0] = -2;
 						str[1] = 0;
@@ -1706,7 +1709,7 @@ void MainMenuGUI::Draw(BITMAP *drawBitmap) const
 	// Show who controls the cursor
 	int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
 
-	if (device >= UInputMan::DEVICE_GAMEPAD_1)
+	if (device >= DEVICE_GAMEPAD_1)
 	{
 		int mouseX, mouseY;
 		m_pGUIInput->GetMousePosition(&mouseX, &mouseY);
@@ -1736,17 +1739,17 @@ void MainMenuGUI::Draw(BITMAP *drawBitmap) const
 	}
 
 	// Show which joysticks are detected by the game
-	for (int joy = 0; joy < UInputMan::MAX_PLAYERS; joy++)
+	for (int joystick = Players::PlayerOne; joystick < Players::MaxPlayerCount; joystick++)
 	{
-		if (g_UInputMan.JoystickActive(joy))
+		if (g_UInputMan.JoystickActive(joystick))
 		{
-			int matchedDevice = UInputMan::DEVICE_GAMEPAD_1 + joy;
+			int matchedDevice = DEVICE_GAMEPAD_1 + joystick;
 
 			if (matchedDevice != device)
 			{
 				const Icon * pIcon = g_UInputMan.GetDeviceIcon(matchedDevice);
 				if (pIcon)
-					draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * joy, g_FrameMan.GetResY() - 25);
+					draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * joystick, g_FrameMan.GetResY() - 25);
 			}
 		}
 	}
@@ -1777,7 +1780,7 @@ void MainMenuGUI::HideAllScreens()
 void MainMenuGUI::QuitLogic()
 {
     // If quit confirm dialog not already showing, or an activity is running, show it
-    if (m_MenuScreen != QUITSCREEN && g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::RUNNING || g_ActivityMan.GetActivity()->GetActivityState() == Activity::EDITING))
+    if (m_MenuScreen != QUITSCREEN && g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing))
     {
         HideAllScreens();
         m_MenuScreen = QUITSCREEN;
@@ -1808,15 +1811,13 @@ void MainMenuGUI::SetupSkirmishActivity()
 // TODO: ******* add the game mode drop down and base the game mode selection off that instead
 
         // No CPU team, so Brain match
-        if (m_CPUTeam == Activity::NOTEAM)
+        if (m_CPUTeam == Activity::NoTeam)
         {
             g_SceneMan.SetSceneToLoad(m_pSceneSelector->GetItem(m_pSceneSelector->GetSelectedIndex())->m_Name);
 // TODO: Let player choose the GABrainMatch activity instance!
             GABrainMatch *pNewGame = new GABrainMatch;
-            pNewGame->SetPlayerCount(m_StartPlayers);
-            pNewGame->SetTeamCount(m_StartTeams);
 
-            for (int player = 0; player < m_StartPlayers; ++player)
+            for (int player = Players::PlayerOne; player < m_StartPlayers; ++player)
                 pNewGame->SetTeamOfPlayer(player, m_aTeamAssignments[player]);
 
             pNewGame->SetCPUTeam(m_CPUTeam);
@@ -1830,10 +1831,8 @@ void MainMenuGUI::SetupSkirmishActivity()
 // TODO: Let player choose the GABaseDefense activity instance!
             GABaseDefense *pNewGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Skirmish Defense")->Clone());
             RTEAssert(pNewGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
-            pNewGame->SetPlayerCount(m_StartPlayers);
-            pNewGame->SetTeamCount(m_StartTeams);
 
-            for (int player = 0; player < m_StartPlayers; ++player)
+            for (int player = Players::PlayerOne; player < m_StartPlayers; ++player)
                 pNewGame->SetTeamOfPlayer(player, m_aTeamAssignments[player]);
 
             pNewGame->SetCPUTeam(m_CPUTeam);
@@ -1951,9 +1950,9 @@ void MainMenuGUI::UpdateTeamBoxes()
     }
 
     // Update button labels
-    for (int player = 0; player < SKIRMISHPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player)
     {
-        if (m_aTeamAssignments[player] == Activity::TEAM_1)
+        if (m_aTeamAssignments[player] == Activity::TeamOne)
         {
             m_aSkirmishBox[player]->SetDrawColor(makecol(70, 27, 12));
             sprintf_s(str, sizeof(str), "Player %i: %c", player + 1, -62);
@@ -1972,7 +1971,7 @@ void MainMenuGUI::UpdateTeamBoxes()
     // Count how many players on each team
     int team0Count = 0;
     int team1Count = 0;
-    for (int player = 0; player < m_StartPlayers; ++player)
+    for (int player = Players::PlayerOne; player < m_StartPlayers; ++player)
     {
         if (m_aTeamAssignments[player] == 0)
             team0Count++;
@@ -2115,21 +2114,21 @@ void MainMenuGUI::UpdateDeviceLabels()
     string label;
 
     // Cycle through all players
-    for (int player = 0; player < UInputMan::MAX_PLAYERS; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         device = g_UInputMan.GetControlScheme(player)->GetDevice();
 
-        if (device == UInputMan::DEVICE_KEYB_ONLY)
+        if (device == DEVICE_KEYB_ONLY)
             label = "Classic Keyb";
-        else if (device == UInputMan::DEVICE_MOUSE_KEYB)
+        else if (device == DEVICE_MOUSE_KEYB)
             label = "Keyb + Mouse";
-        else if (device == UInputMan::DEVICE_GAMEPAD_1)
+        else if (device == DEVICE_GAMEPAD_1)
             label = "Gamepad 1";
-        else if (device == UInputMan::DEVICE_GAMEPAD_2)
+        else if (device == DEVICE_GAMEPAD_2)
             label = "Gamepad 2";
-        else if (device == UInputMan::DEVICE_GAMEPAD_3)
+        else if (device == DEVICE_GAMEPAD_3)
             label = "Gamepad 3";
-        else if (device == UInputMan::DEVICE_GAMEPAD_4)
+        else if (device == DEVICE_GAMEPAD_4)
             label = "Gamepad 4";
 
         // Set the label
@@ -2170,7 +2169,7 @@ void MainMenuGUI::UpdateConfigScreen()
 	g_UInputMan.SetInputClass(m_pGUIInput);
 
     // Keyboard screens
-    if (m_ConfiguringDevice == UInputMan::DEVICE_KEYB_ONLY)
+    if (m_ConfiguringDevice == DEVICE_KEYB_ONLY)
     {
         if (m_ScreenChange)
         {
@@ -2199,9 +2198,9 @@ void MainMenuGUI::UpdateConfigScreen()
 
             m_pConfigLabel[CONFIGINPUT]->SetText("MOVE or AIM UP");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Up Cursor]" : "[W]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_AIM_UP))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_AIM_UP))
             {
-                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_L_UP);
+                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_L_UP);
                 m_ConfigureStep++;
                 m_ScreenChange = true;
             }
@@ -2211,9 +2210,9 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("MOVE or AIM DOWN");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Down Cursor]" : "[S]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_AIM_DOWN))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_AIM_DOWN))
             {
-                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_L_DOWN);
+                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_L_DOWN);
                 m_ConfigureStep++;
                 m_ScreenChange = true;
             }
@@ -2223,7 +2222,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("MOVE LEFT");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Left Cursor]" : "[A]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_L_LEFT))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_L_LEFT))
             {
                 m_ConfigureStep++;
                 m_ScreenChange = true;
@@ -2234,7 +2233,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("MOVE RIGHT");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Right Cursor]" : "[D]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_L_RIGHT))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_L_RIGHT))
             {
                 m_ConfigureStep++;
                 m_ScreenChange = true;
@@ -2245,7 +2244,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("FIRE / ACTIVATE");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Num 1]" : "[H]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_FIRE))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_FIRE))
 
             {
                 m_ConfigureStep++;
@@ -2257,7 +2256,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("SHARP AIM");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Num 2]" : "[J]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_AIM))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_AIM))
             {
                 m_ConfigureStep++;
                 m_ScreenChange = true;
@@ -2268,7 +2267,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("COMMAND MENU");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Num 3]" : "[K]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_PIEMENU))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_PIEMENU))
             {
                 m_ConfigureStep++;
                 m_ScreenChange = true;
@@ -2279,7 +2278,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("JUMP");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Num Enter]" : "[L]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_JUMP))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_JUMP))
             {
                 m_ConfigureStep++;
                 m_ScreenChange = true;
@@ -2290,7 +2289,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("CROUCH");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Num Del]" : "[.]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_CROUCH))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_CROUCH))
             {
                 m_ConfigureStep++;
                 m_ScreenChange = true;
@@ -2301,7 +2300,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("PREVIOUS BODY");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Num 4]" : "[Q]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_PREV))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_PREV))
             {
                 m_ConfigureStep++;
                 m_ScreenChange = true;
@@ -2315,7 +2314,7 @@ void MainMenuGUI::UpdateConfigScreen()
 
             m_pConfigLabel[CONFIGINPUT]->SetText("NEXT BODY");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Num 5]" : "[E]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_NEXT))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_NEXT))
             {
 				m_ConfigureStep++;
 				m_ScreenChange = true;
@@ -2329,7 +2328,7 @@ void MainMenuGUI::UpdateConfigScreen()
 
 			m_pConfigLabel[CONFIGINPUT]->SetText("RELOAD");
 			m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Num 0]" : "[R]");
-			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_WEAPON_RELOAD))
+			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_WEAPON_RELOAD))
 			{
 				m_ConfigureStep++;
 				m_ScreenChange = true;
@@ -2342,7 +2341,7 @@ void MainMenuGUI::UpdateConfigScreen()
 
 			m_pConfigLabel[CONFIGINPUT]->SetText("PICK UP");
 			m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Num 9]" : "[F]");
-			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_WEAPON_PICKUP))
+			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_WEAPON_PICKUP))
 			{
 				m_ConfigureStep++;
 				m_ScreenChange = true;
@@ -2355,7 +2354,7 @@ void MainMenuGUI::UpdateConfigScreen()
 
 			m_pConfigLabel[CONFIGINPUT]->SetText("DROP");
 			m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Num 6]" : "[G]");
-			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_WEAPON_DROP))
+			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_WEAPON_DROP))
 			{
 				m_ConfigureStep++;
 				m_ScreenChange = true;
@@ -2368,7 +2367,7 @@ void MainMenuGUI::UpdateConfigScreen()
 
 			m_pConfigLabel[CONFIGINPUT]->SetText("PREVIOUS WEAPON");
 			m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Num 7]" : "[X]");
-			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_WEAPON_CHANGE_PREV))
+			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_WEAPON_CHANGE_PREV))
 			{
 				m_ConfigureStep++;
 				m_ScreenChange = true;
@@ -2381,7 +2380,7 @@ void MainMenuGUI::UpdateConfigScreen()
 
 			m_pConfigLabel[CONFIGINPUT]->SetText("NEXT WEAPON");
 			m_pConfigLabel[CONFIGRECOMMENDATION]->SetText(m_ConfiguringPlayer % 2 ? "[Num 8]" : "[C]");
-			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_WEAPON_CHANGE_NEXT))
+			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_WEAPON_CHANGE_NEXT))
 			{
 				m_apScreenBox[CONFIGSCREEN]->SetVisible(false);
 				m_MenuScreen = OPTIONSSCREEN;
@@ -2394,7 +2393,7 @@ void MainMenuGUI::UpdateConfigScreen()
         else if (m_ConfigureStep == 10)
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("START BUTTON");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_START))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_START))
             {
                 m_ConfigureStep++;
                 m_ScreenChange = true;
@@ -2406,7 +2405,7 @@ void MainMenuGUI::UpdateConfigScreen()
             // Hide the skip button on this last step
             m_pConfigSkipButton->SetVisible(false);
             m_pConfigLabel[CONFIGINPUT]->SetText("BACK BUTTON");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_BACK))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_BACK))
             {
                 // Done, go back to options screen
                 m_apScreenBox[CONFIGSCREEN]->SetVisible(false);
@@ -2417,7 +2416,7 @@ void MainMenuGUI::UpdateConfigScreen()
 */      
     }
     // Mouse+keyb
-    else if (m_ConfiguringDevice == UInputMan::DEVICE_MOUSE_KEYB)
+    else if (m_ConfiguringDevice == DEVICE_MOUSE_KEYB)
     {
         if (m_ScreenChange)
         {
@@ -2446,10 +2445,10 @@ void MainMenuGUI::UpdateConfigScreen()
 
             m_pConfigLabel[CONFIGINPUT]->SetText("MOVE UP or JUMP");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText("[W]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_L_UP))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_L_UP))
             {
-                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_R_UP);
-                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_JUMP);
+                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_R_UP);
+                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_JUMP);
                 m_ConfigureStep++;
                 m_ScreenChange = true;
             }
@@ -2459,10 +2458,10 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("MOVE DOWN or CROUCH");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText("[S]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_L_DOWN))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_L_DOWN))
             {
-                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_R_DOWN);
-                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_CROUCH);
+                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_R_DOWN);
+                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_CROUCH);
                 m_ConfigureStep++;
                 m_ScreenChange = true;
             }
@@ -2472,9 +2471,9 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("MOVE LEFT");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText("[A]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_L_LEFT))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_L_LEFT))
             {
-                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_R_LEFT);
+                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_R_LEFT);
                 m_ConfigureStep++;
                 m_ScreenChange = true;
             }
@@ -2484,9 +2483,9 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("MOVE RIGHT");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText("[D]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_L_RIGHT))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_L_RIGHT))
             {
-                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_R_RIGHT);
+                g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_R_RIGHT);
                 m_ConfigureStep++;
                 m_ScreenChange = true;
             }
@@ -2496,7 +2495,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("RELOAD");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText("[R]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_WEAPON_RELOAD))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_WEAPON_RELOAD))
             {
                 m_ConfigureStep++;
                 m_ScreenChange = true;
@@ -2506,7 +2505,7 @@ void MainMenuGUI::UpdateConfigScreen()
 		{
 			m_pConfigLabel[CONFIGINPUT]->SetText("PICK UP");
 			m_pConfigLabel[CONFIGRECOMMENDATION]->SetText("[F]");
-			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_WEAPON_PICKUP))
+			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_WEAPON_PICKUP))
 			{
 				m_ConfigureStep++;
 				m_ScreenChange = true;
@@ -2516,7 +2515,7 @@ void MainMenuGUI::UpdateConfigScreen()
 		{
 			m_pConfigLabel[CONFIGINPUT]->SetText("DROP");
 			m_pConfigLabel[CONFIGRECOMMENDATION]->SetText("[G]");
-			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_WEAPON_DROP))
+			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_WEAPON_DROP))
 			{
 				m_ConfigureStep++;
 				m_ScreenChange = true;
@@ -2526,7 +2525,7 @@ void MainMenuGUI::UpdateConfigScreen()
 		{
 			m_pConfigLabel[CONFIGINPUT]->SetText("PREV WEAPON");
 			m_pConfigLabel[CONFIGRECOMMENDATION]->SetText("[X]");
-			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_WEAPON_CHANGE_PREV))
+			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_WEAPON_CHANGE_PREV))
 			{
 				m_ConfigureStep++;
 				m_ScreenChange = true;
@@ -2536,7 +2535,7 @@ void MainMenuGUI::UpdateConfigScreen()
 		{
 			m_pConfigLabel[CONFIGINPUT]->SetText("NEXT WEAPON");
 			m_pConfigLabel[CONFIGRECOMMENDATION]->SetText("[C]");
-			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_WEAPON_CHANGE_NEXT))
+			if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_WEAPON_CHANGE_NEXT))
 			{
 				m_ConfigureStep++;
 				m_ScreenChange = true;
@@ -2547,7 +2546,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINPUT]->SetText("PREVIOUS BODY");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText("[Q]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_PREV))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_PREV))
             {
                 m_ConfigureStep++;
                 m_ScreenChange = true;
@@ -2561,7 +2560,7 @@ void MainMenuGUI::UpdateConfigScreen()
 
             m_pConfigLabel[CONFIGINPUT]->SetText("NEXT BODY");
             m_pConfigLabel[CONFIGRECOMMENDATION]->SetText("[E]");
-            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, UInputMan::INPUT_NEXT))
+            if (g_UInputMan.CaptureKeyMapping(m_ConfiguringPlayer, INPUT_NEXT))
             {
 //                m_ConfigureStep++;
 //                m_ScreenChange = true;
@@ -2573,9 +2572,9 @@ void MainMenuGUI::UpdateConfigScreen()
         }
     }
     // Gamepad screens
-    else if (m_ConfiguringDevice >= UInputMan::DEVICE_GAMEPAD_1 && m_ConfiguringDevice <= UInputMan::DEVICE_GAMEPAD_4)
+    else if (m_ConfiguringDevice >= DEVICE_GAMEPAD_1 && m_ConfiguringDevice <= DEVICE_GAMEPAD_4)
     {
-        int whichJoy = m_ConfiguringDevice - UInputMan::DEVICE_GAMEPAD_1;
+        int whichJoy = m_ConfiguringDevice - DEVICE_GAMEPAD_1;
         AllegroBitmap *pDiagramBitmap = 0;
 
         // Choose which gamepad type - special first step
@@ -2657,12 +2656,12 @@ void MainMenuGUI::UpdateConfigScreen()
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("MOVE or AIM UP");
 
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_AIM_UP))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_AIM_UP))
                     {
-//                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_L_UP);
-                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, UInputMan::INPUT_L_UP);
-                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, UInputMan::INPUT_R_UP);
-//                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_R_UP);
+//                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_L_UP);
+                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, INPUT_L_UP);
+                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, INPUT_R_UP);
+//                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_R_UP);
                         m_ConfigureStep++;
                         m_ScreenChange = true;
                     }
@@ -2671,12 +2670,12 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 2)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("MOVE or AIM DOWN");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_AIM_DOWN))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_AIM_DOWN))
                     {
-//                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_L_DOWN);
-                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, UInputMan::INPUT_L_DOWN);
-                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, UInputMan::INPUT_R_DOWN);
-//                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_R_DOWN);
+//                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_L_DOWN);
+                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, INPUT_L_DOWN);
+                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, INPUT_R_DOWN);
+//                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_R_DOWN);
                         m_ConfigureStep++;
                         m_ScreenChange = true;
                     }
@@ -2685,10 +2684,10 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 3)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("MOVE LEFT");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_L_LEFT))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_L_LEFT))
                     {
-                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, UInputMan::INPUT_R_LEFT);
-//                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_R_LEFT);
+                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, INPUT_R_LEFT);
+//                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_R_LEFT);
                         m_ConfigureStep++;
                         m_ScreenChange = true;
                     }
@@ -2697,10 +2696,10 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 4)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("MOVE RIGHT");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_L_RIGHT))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_L_RIGHT))
                     {
-                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, UInputMan::INPUT_R_RIGHT);
-//                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_R_RIGHT);
+                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, INPUT_R_RIGHT);
+//                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_R_RIGHT);
                         m_ConfigureStep++;
                         m_ScreenChange = true;
                     }
@@ -2709,7 +2708,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 5)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("SHARP AIM");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_AIM))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_AIM))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2719,7 +2718,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 6)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("FIRE / ACTIVATE");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_FIRE))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_FIRE))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2729,7 +2728,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 7)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("JUMP");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_JUMP))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_JUMP))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2740,7 +2739,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 8)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("COMMAND MENU");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_PIEMENU))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_PIEMENU))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2750,7 +2749,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 9)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("NEXT BODY");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_NEXT))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_NEXT))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2760,7 +2759,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 10)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("PREVIOUS BODY");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_PREV))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_PREV))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2770,7 +2769,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 11)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("START BUTTON");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_START))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_START))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2782,7 +2781,7 @@ void MainMenuGUI::UpdateConfigScreen()
                     // Hide the skip button on this last step
                     m_pConfigSkipButton->SetVisible(false);
                     m_pConfigLabel[CONFIGINPUT]->SetText("BACK BUTTON");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_BACK))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_BACK))
                     {
                         // Done, go back to options screen
                         m_apScreenBox[CONFIGSCREEN]->SetVisible(false);
@@ -2822,10 +2821,10 @@ void MainMenuGUI::UpdateConfigScreen()
                 if (m_ConfigureStep == 1)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("MOVE UP or JUMP");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_L_UP))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_L_UP))
                     {
-                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, UInputMan::INPUT_AIM_UP);
-                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_JUMP);
+                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, INPUT_AIM_UP);
+                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_JUMP);
                         m_ConfigureStep++;
                         m_ScreenChange = true;
                     }
@@ -2834,10 +2833,10 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 2)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("MOVE DOWN or CROUCH");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_L_DOWN))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_L_DOWN))
                     {
-                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, UInputMan::INPUT_AIM_DOWN);
-                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_CROUCH);
+                        g_UInputMan.ClearMapping(m_ConfiguringPlayer, INPUT_AIM_DOWN);
+                        g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_CROUCH);
                         m_ConfigureStep++;
                         m_ScreenChange = true;
                     }
@@ -2846,7 +2845,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 3)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("MOVE LEFT");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_L_LEFT))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_L_LEFT))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2856,7 +2855,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 4)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("MOVE RIGHT");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_L_RIGHT))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_L_RIGHT))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2866,7 +2865,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 5)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("AIM UP");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_R_UP))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_R_UP))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2876,7 +2875,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 6)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("AIM DOWN");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_R_DOWN))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_R_DOWN))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2886,7 +2885,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 7)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("AIM LEFT");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_R_LEFT))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_R_LEFT))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2896,7 +2895,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 8)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("AIM RIGHT");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_R_RIGHT))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_R_RIGHT))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2906,7 +2905,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 9)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("FIRE / ACTIVATE");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_FIRE))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_FIRE))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2916,7 +2915,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 10)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("COMMAND MENU");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_PIEMENU))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_PIEMENU))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2926,7 +2925,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 11)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("NEXT BODY");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_NEXT))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_NEXT))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2936,7 +2935,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 12)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("PREVIOUS BODY");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_PREV))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_PREV))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2947,7 +2946,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 13)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("PREVIOUS WEAPON");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_WEAPON_CHANGE_PREV))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_WEAPON_CHANGE_PREV))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2957,7 +2956,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 14)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("NEXT WEAPON");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_WEAPON_CHANGE_NEXT))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_WEAPON_CHANGE_NEXT))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2967,7 +2966,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 15)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("PICKUP WEAPON");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_WEAPON_PICKUP))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_WEAPON_PICKUP))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2977,7 +2976,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 16)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("RELOAD WEAPON");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_WEAPON_RELOAD))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_WEAPON_RELOAD))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2987,7 +2986,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 else if (m_ConfigureStep == 17)
                 {
                     m_pConfigLabel[CONFIGINPUT]->SetText("START BUTTON");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_START))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_START))
                     {
                         m_ConfigureStep++;
                         m_ScreenChange = true;
@@ -2999,18 +2998,18 @@ void MainMenuGUI::UpdateConfigScreen()
                     // Hide the skip button on this last step
                     m_pConfigSkipButton->SetVisible(false);
                     m_pConfigLabel[CONFIGINPUT]->SetText("BACK BUTTON");
-                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, UInputMan::INPUT_BACK))
+                    if (g_UInputMan.CaptureJoystickMapping(m_ConfiguringPlayer, whichJoy, INPUT_BACK))
                     {
                         // If Xbox controller; if the A button has not been mapped to Activate/fire, then map it automatically
 // These redundancies should apply to all custom analog setups, really
 //                        if (m_ConfiguringGamepad == XBOX360)
                         {
                             // No button assigned to fire, so give it 'A' on the controller (in addition to any axis inputs)
-                            if (g_UInputMan.GetButtonMapping(m_ConfiguringPlayer, UInputMan::INPUT_FIRE) == UInputMan::JOY_NONE)
-                                g_UInputMan.SetButtonMapping(m_ConfiguringPlayer, UInputMan::INPUT_FIRE, UInputMan::JOY_1);
+                            if (g_UInputMan.GetButtonMapping(m_ConfiguringPlayer, INPUT_FIRE) == JOY_NONE)
+                                g_UInputMan.SetButtonMapping(m_ConfiguringPlayer, INPUT_FIRE, JOY_1);
                             // No button assigned to pie menu, so give it 'B' on the controller (in addition to whatever axis it's assinged to)
-                            if (g_UInputMan.GetButtonMapping(m_ConfiguringPlayer, UInputMan::INPUT_PIEMENU) == UInputMan::JOY_NONE)
-                                g_UInputMan.SetButtonMapping(m_ConfiguringPlayer, UInputMan::INPUT_PIEMENU, UInputMan::JOY_2);
+                            if (g_UInputMan.GetButtonMapping(m_ConfiguringPlayer, INPUT_PIEMENU) == JOY_NONE)
+                                g_UInputMan.SetButtonMapping(m_ConfiguringPlayer, INPUT_PIEMENU, JOY_2);
                         }
 
                         // Done, go back to options screen

@@ -78,7 +78,7 @@ void BuyMenuGUI::Clear()
         m_pCategoryTabs[i] = 0;
         m_CategoryItemIndex[i] = 0;
     }
-    m_MetaPlayer = Activity::NOPLAYER;
+    m_MetaPlayer = Players::NoPlayer;
     m_NativeTechModule = 0;
     m_ForeignCostMult = 4.0;
     int moduleCount = g_PresetMan.GetTotalModuleCount();
@@ -352,7 +352,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     char loadoutPath[256];
 
     // A metagame player
-    if (m_MetaPlayer != Activity::NOPLAYER)
+    if (m_MetaPlayer != Players::NoPlayer)
     {
         // Start loading any additional stuff from the custom user file
         sprintf_s(loadoutPath, sizeof(loadoutPath), "Metagames.rte/%s - LoadoutsMP%d.ini", g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
@@ -462,7 +462,7 @@ bool BuyMenuGUI::SaveAllLoadoutsToFile()
 
     char loadoutPath[256];
     // A metagame player
-    if (m_MetaPlayer != Activity::NOPLAYER)
+    if (m_MetaPlayer != Players::NoPlayer)
     {
         // If a new metagame, then just save over the metagame autosave instead of to the new game save
         // Since the players of a new game are likely to have different techs and therefore different default loadouts
@@ -593,7 +593,7 @@ void BuyMenuGUI::SetPosOnScreen(int newPosX, int newPosY)
 
 void BuyMenuGUI::SetMetaPlayer(int metaPlayer)
 {
-    if (metaPlayer >= Activity::PLAYER_1 && metaPlayer < g_MetaMan.GetPlayerCount())
+    if (metaPlayer >= Players::PlayerOne && metaPlayer < g_MetaMan.GetPlayerCount())
     {
         m_MetaPlayer = metaPlayer;
         SetNativeTechModule(g_MetaMan.GetPlayer(m_MetaPlayer)->GetNativeTechModule());

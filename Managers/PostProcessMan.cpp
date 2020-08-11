@@ -205,7 +205,7 @@ namespace RTE {
 		Vector postEffectPosRelativeToBox;
 
 		for (PostEffect &scenePostEffect : m_PostSceneEffects) {
-			if (team != Activity::NOTEAM) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.m_X, scenePostEffect.m_Pos.m_Y, team); }
+			if (team != Activity::NoTeam) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.m_X, scenePostEffect.m_Pos.m_Y, team); }
 
 			if (WithinBox(scenePostEffect.m_Pos, boxPos, boxWidth, boxHeight) && !unseen) {
 				found = true;
@@ -224,7 +224,7 @@ namespace RTE {
 		Vector postEffectPosRelativeToBox;
 
 		for (PostEffect &scenePostEffect : m_PostSceneEffects) {
-			if (team != Activity::NOTEAM) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.m_X, scenePostEffect.m_Pos.m_Y, team); }
+			if (team != Activity::NoTeam) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.m_X, scenePostEffect.m_Pos.m_Y, team); }
 				
 			if (WithinBox(scenePostEffect.m_Pos, left, top, right, bottom) && !unseen) {
 				found = true;

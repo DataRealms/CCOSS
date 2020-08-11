@@ -12,8 +12,8 @@
 // Inclusions of header files
 
 #include "MOSRotating.h"
+#include "SettingsMan.h"
 #include "AtomGroup.h"
-#include "RTEManagers.h"
 #include "SLTerrain.h"
 #include "MOPixel.h"
 #include "MOSParticle.h"

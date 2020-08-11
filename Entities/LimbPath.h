@@ -562,7 +562,7 @@ ClassInfoGetters
 // Return value:    Whether a starting segment that yielded a starting pos free of terrain
 //                  was found or not.
 
-    bool RestartFree(Vector &limbPos, MOID MOIDToIgnore = g_NoMOID, int ignoreTeam = Activity::NOTEAM);
+    bool RestartFree(Vector &limbPos, MOID MOIDToIgnore = g_NoMOID, int ignoreTeam = Activity::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

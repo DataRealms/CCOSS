@@ -48,13 +48,13 @@ namespace RTE {
 		/// This will cause extracted and available data modules to be updated to whatever is within their corresponding zip files.
 		/// The point of this is that it facilitates downloaded mods being loaded without having to be manually unzipped first by the user.
 		/// </summary>
-		void ExtractArchivedModules();
+		void ExtractZippedModules();
 
 	protected:
 
-		static const unsigned int s_MaxFileName = 256; //!< Maximum length of output file directory + name string.
-		static const unsigned int s_FileBufferSize = 8192; //!< Buffer to hold data read from the zip file.
-		static const unsigned int s_MaxUnzippedFileSize = 104857600; //!< Maximum size of single file being extracted from zip archive (100MiB).
+		static constexpr unsigned int s_MaxFileName = 256; //!< Maximum length of output file directory + name string.
+		static constexpr unsigned int s_FileBufferSize = 8192; //!< Buffer to hold data read from the zip file.
+		static constexpr unsigned int s_MaxUnzippedFileSize = 104857600; //!< Maximum size of single file being extracted from zip archive (100MiB).
 
 		GUIControlManager *m_ControlManager; //!< Manager of the whole LoadingGUI.
 		AllegroInput *m_GUIInput; //!< Input interface of this.

@@ -775,7 +775,7 @@ int LuaMan::Create()
 			.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, adopt(_2))
 			.def("RemoveEmitter", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
 			.def("RemoveEmitter", (bool (MOSRotating::*)(long uniqueIDOfAttachableToRemove))&MOSRotating::RemoveAttachable)
-			.def_readonly("Attachables", &MOSRotating::m_AllAttachables, return_stl_iterator)
+			.def_readonly("Attachables", &MOSRotating::m_Attachables, return_stl_iterator)
 			.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator),
 
         CONCRETELUABINDING(Attachable, MOSRotating)

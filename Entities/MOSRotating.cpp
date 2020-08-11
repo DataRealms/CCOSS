@@ -62,7 +62,6 @@ void MOSRotating::Clear()
     m_RecoilOffset.Reset();
     m_Wounds.clear();
     m_Attachables.clear();
-    m_AllAttachables.clear();
     m_Gibs.clear();
     m_GibImpulseLimit = 0;
     m_GibWoundLimit = 0;
@@ -73,8 +72,7 @@ void MOSRotating::Clear()
 	m_pTempBitmap = 0;
 	m_pTempBitmapS = 0;
     m_LoudnessOnGib = 1;
-	m_DamageMultiplier = 1;
-	m_DamageMultiplierRedefined = false;
+	m_DamageMultiplier = -1;
     m_StringValueMap.clear();
     m_NumberValueMap.clear();
     m_ObjectValueMap.clear();
@@ -90,6 +88,8 @@ int MOSRotating::Create()
 {
     if (MOSprite::Create() < 0)
         return -1;
+
+    if (m_DamageMultiplier < 0.0F) { m_DamageMultiplier = 1; }
 
     if (m_pAtomGroup && m_pAtomGroup->AutoGenerate()/* && m_pAtomGroup->GetAtomCount() == 0*/)
         m_pAtomGroup->Create(this);
@@ -197,7 +197,7 @@ int MOSRotating::Create(ContentFile spriteFile,
                         const unsigned long lifetime)
 {
     MOSprite::Create(spriteFile, frameCount, mass, position, velocity, lifetime);
-
+    if (m_DamageMultiplier < 0.0F) { m_DamageMultiplier = 1; }
     return 0;
 }
 
@@ -238,28 +238,20 @@ int MOSRotating::Create(const MOSRotating &reference)
     m_RecoilOffset = reference.m_RecoilOffset;
 
 	// Wound emitter copies
-    AEmitter *pWound = 0;
-    for (list<AEmitter *>::const_iterator itr = reference.m_Wounds.begin(); itr != reference.m_Wounds.end(); ++itr)
-    {
-		pWound = dynamic_cast<AEmitter *>((*itr)->Clone());
-		AddWound(pWound, pWound->GetParentOffset());
-		pWound = 0;
+    for (AEmitter *wound : reference.m_Wounds) {
+        AddWound(dynamic_cast<AEmitter *>(wound), wound->GetParentOffset());
     }
 
 	// Attachable copies
-    m_AllAttachables.clear();
-    Attachable *pAttachable = 0;
-    for (list<Attachable *>::const_iterator aItr = reference.m_Attachables.begin(); aItr != reference.m_Attachables.end(); ++aItr)
-    {
-        pAttachable = dynamic_cast<Attachable *>((*aItr)->Clone());
-        AddAttachable(pAttachable, pAttachable->GetParentOffset());
-        pAttachable = 0;
+    for (const Attachable *attachable : reference.m_Attachables) {
+        if (m_AlreadyCopiedAttachableUniqueIDs.find(attachable->GetUniqueID()) != m_AlreadyCopiedAttachableUniqueIDs.end()) {
+            AddAttachable(dynamic_cast<Attachable *>(attachable->Clone()));
+        }
     }
 
 	// Gib copies
-    for (list<Gib>::const_iterator gItr = reference.m_Gibs.begin(); gItr != reference.m_Gibs.end(); ++gItr)
-    {
-        m_Gibs.push_back(*gItr);
+    for (const Gib &gib : reference.m_Gibs) {
+        m_Gibs.push_back(gib);
     }
 
     m_StringValueMap = reference.m_StringValueMap;
@@ -273,7 +265,6 @@ int MOSRotating::Create(const MOSRotating &reference)
     m_LoudnessOnGib = reference.m_LoudnessOnGib;
 
 	m_DamageMultiplier = reference.m_DamageMultiplier;
-	m_DamageMultiplierRedefined = reference.m_DamageMultiplierRedefined;
 
 /* Allocated in lazy fashion as needed when drawing flipped
     if (!m_pFlipBitmap && m_aSprite[0])
@@ -346,7 +337,6 @@ int MOSRotating::ReadProperty(std::string propName, Reader &reader)
         reader >> m_LoudnessOnGib;
 	else if (propName == "DamageMultiplier") {
 		reader >> m_DamageMultiplier;
-		m_DamageMultiplierRedefined = true;
     } else if (propName == "AddCustomValue") {
         ReadCustomValueProperty(reader);
     } else
@@ -1050,7 +1040,6 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
     }
     // Clear the attachables list, all the attachables ownership have been handed to the movableman
     m_Attachables.clear();
-    m_AllAttachables.clear();
 
     // Play the gib sound
     m_GibSound.Play(m_Pos);
@@ -1618,122 +1607,68 @@ void MOSRotating::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
     MOSprite::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/// <summary>
-/// Attaches the passed in Attachable and adds it to the list of attachables, not changing its parent offset and not treating it as hardcoded.
-/// </summary>
-/// <param name="pAttachable">The Attachable to attach.</param>
-void MOSRotating::AddAttachable(Attachable *pAttachable)
-{
-	if (pAttachable)
-	{
-		AddAttachable(pAttachable, pAttachable->GetParentOffset());
+void MOSRotating::AddAttachable(Attachable *attachable) {
+	if (attachable) {
+		AddAttachable(attachable, attachable->GetParentOffset());
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/// <summary>
-/// Attaches the passed in Attachable and adds it to the list of attachables, changing its parent offset to the passed in Vector but not treating it as hardcoded.
-/// </summary>
-/// <param name="pAttachable">The Attachable to add.</param>
-/// <param name="parentOffsetToSet">The vector to set as the Attachable's parent offset.</param>
-void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet)
-{
-	AddAttachable(pAttachable, parentOffsetToSet, false);
-}
-
-
-/// <summary>
-/// Attaches the passed in Attachable and adds it to the list of attachables, not changing its parent offset but treating it as hardcoded depending on the passed in boolean.
-/// </summary>
-/// <param name="pAttachable">The Attachable to add.</param>
-/// <param name="isHardcodedAttachable">Whether or not the Attachable should be treated as hardcoded.</param>
-void MOSRotating::AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable)
-{
-	if (pAttachable)
-	{
-		AddAttachable(pAttachable, pAttachable->GetParentOffset(), isHardcodedAttachable);
-	}
-}
-
-
-/// <summary>
-/// Attaches the passed in Attachable and adds it to the list of attachables, changing its parent offset to the passed in Vector and treating it as hardcoded depending on the passed in boolean.
-/// </summary>
-/// <param name="pAttachable">The Attachable to add.</param>
-/// <param name="parentOffsetToSet">The vector to set as the Attachable's parent offset.</param>
-/// <param name="isHardcodedAttachable">Whether or not the Attachable should be treated as hardcoded.</param>
-void MOSRotating::AddAttachable(Attachable *pAttachable, const Vector & parentOffsetToSet, bool isHardcodedAttachable) {
-	if (pAttachable) {
-        pAttachable->SetParentOffset(parentOffsetToSet);
-        pAttachable->SetParent(this);
+void MOSRotating::AddAttachable(Attachable *attachable, const Vector& parentOffsetToSet) {
+	if (attachable) {
+        attachable->SetParentOffset(parentOffsetToSet);
+        attachable->SetParent(this);
 
 		// Set the attachable's subgroup ID to it's Unique ID to avoid any possible conflicts when adding atoms to parent group.
-		pAttachable->SetAtomSubgroupID(pAttachable->GetUniqueID());
-
-		if (!isHardcodedAttachable) {
-			m_Attachables.push_back(pAttachable);
-		}
-		m_AllAttachables.push_back(pAttachable);
+        attachable->SetAtomSubgroupID(attachable->GetUniqueID());
+		m_Attachables.push_back(attachable);
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/// <summary>
-/// Detaches the Attachable corresponding to the passed in UniqueId, and removes it from the appropriate attachable lists
-/// </summary>
-/// <param name="attachableUniqueId">The UniqueId of the the attachable to remove</param>
-/// <returns>False if the attachable is invalid, otherwise true</returns>
-bool MOSRotating::RemoveAttachable(long attachableUniqueId)
-{
-	MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueId);
-	if (attachableAsMovableObject)
-	{
+bool MOSRotating::RemoveAttachable(long attachableUniqueID) {
+	MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueID);
+	if (attachableAsMovableObject) {
 		return RemoveAttachable((Attachable *)attachableAsMovableObject);
 	}
 	return false;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/// <summary>
-/// Detaches the passed in Attachable and removes it from the appropriate attachable lists
-/// </summary>
-/// <param name="pAttachable">The attachable to remove</param>
-/// <returns>False if the attachable is invalid, otherwise true</returns>
-bool MOSRotating::RemoveAttachable(Attachable *pAttachable) {
-	if (pAttachable) {
+bool MOSRotating::RemoveAttachable(Attachable *attachable) {
+	if (attachable) {
 		if (m_Attachables.size() > 0) {
-			m_Attachables.remove(pAttachable);
+			m_Attachables.remove(attachable);
 		}
-		if (m_AllAttachables.size() > 0) {
-			m_AllAttachables.remove(pAttachable);
-		}
-        if (pAttachable->ToDeleteWithParent()) {
-            pAttachable->SetToDelete();
+        if (attachable->ToDeleteWithParent()) {
+            attachable->SetToDelete();
         } else {
-            pAttachable->SetParent(nullptr);
+            attachable->SetParent(nullptr);
         }
 		return true;
 	}
 	return false;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/// <summary>
-/// Either detaches or deletes all of this MOSRotating's attachables
-/// </summary>
-/// <param name="destroy">Whether to detach or delete the attachables. Setting this to true deletes them, setting it to false detaches them</param>
 void MOSRotating::DetachOrDestroyAll(bool destroy) {
-	for (list<Attachable *>::const_iterator aItr = m_AllAttachables.begin(); aItr != m_AllAttachables.end(); ++aItr) {
-		if (destroy)
-			delete (*aItr);
-		else
-			(*aItr)->SetParent(nullptr);
-	}
-
-	m_AllAttachables.clear();
+    for (Attachable *attachable : m_Attachables) {
+        if (destroy) {
+            delete attachable;
+        } else {
+            attachable->SetParent(nullptr);
+        }
+    }
+	m_Attachables.clear();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetMOIDs

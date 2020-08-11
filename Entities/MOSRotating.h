@@ -425,19 +425,38 @@ ClassInfoGetters
 
     virtual void ApplyImpulses();
 
+    /// <summary>
+    /// Adds the passed in Attachable the list of attachables and sets its parent to this MOSRotating.
+    /// </summary>
+    /// <param name="attachable">The Attachable to add.</param>
+	void AddAttachable(Attachable *attachable);
 
-	void AddAttachable(Attachable *pAttachable);
+    /// <summary>
+    /// Attaches the passed in Attachable and adds it to the list of attachables, changing its parent offset to the passed in Vector but not treating it as hardcoded.
+    /// Adds the passed in Attachable the list of attachables, changes its parent offset to the passed in Vector, and sets its parent to this MOSRotating.
+    /// </summary>
+    /// <param name="attachable">The Attachable to add.</param>
+    /// <param name="parentOffsetToSet">The Vector to set as the Attachable's parent offset.</param>
+	void AddAttachable(Attachable *attachable, const Vector& parentOffsetToSet);
 
-	void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet);
+    /// <summary>
+    /// Detaches the Attachable corresponding to the passed in UniqueID, and removes it from the appropriate attachable lists.
+    /// </summary>
+    /// <param name="attachableUniqueID">The UniqueID of the the attachable to remove.</param>
+    /// <returns>False if the attachable is invalid, otherwise true.</returns>
+	bool RemoveAttachable(long attachableUniqueID);
 
-	void AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable);
+    /// <summary>
+    /// Detaches the passed in Attachable and removes it from the appropriate attachable lists.
+    /// </summary>
+    /// <param name="attachable">The attachable to remove.</param>
+    /// <returns>False if the attachable is invalid, otherwise true.</returns>
+	bool RemoveAttachable(Attachable *attachable);
 
-	void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet, bool isHardcodedAttachable);
-
-	bool RemoveAttachable(long attachableUniqueId);
-
-	bool RemoveAttachable(Attachable *pAttachable);
-
+    /// <summary>
+    /// Either detaches or deletes all of this MOSRotating's attachables.
+    /// </summary>
+    /// <param name="destroy">Whether to detach or delete the attachables. Setting this to true deletes them, setting it to false detaches them.</param>
 	void DetachOrDestroyAll(bool destroy);
 
 
@@ -772,16 +791,6 @@ ClassInfoGetters
 
 	virtual float GetDamageMultiplier() const { return m_DamageMultiplier; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsDamageMultiplierRedefined
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether the damage multiplier was altered in the .INI definition. 
-//					If not, CC will apply default values during actor construction.
-// Arguments:       None.
-// Return value:    Current multiplier value.
-
-	virtual bool IsDamageMultiplierRedefined() const { return m_DamageMultiplierRedefined; }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTravelImpulse
@@ -808,6 +817,17 @@ ClassInfoGetters
 
 protected:
 
+    /// <summary>
+    /// To be called during Create(reference):
+    /// Clones a hardcoded attachable, setting the appropriate member variable, and calling AddAttachable.
+    /// Also adds the reference attachable's UniqueID to the std::unordered_set of already copied attachable unique IDs so it doesn't get duplicated.
+    /// </summary>
+    /// <param name="referenceAttachable">The relevant hardcoded attachable belonging to the reference object being cloned.</param>
+    /// <param name="hardcodedAttachableSetter">A std::function containing the setter for the given hardcoded attachable. Aside from setting the relevant member variable, this setter should call AddAttachable.</param>
+    template<class T> void CloneHardcodedAttachable(Attachable *referenceAttachable, T hardcodedAttachableSetter) {
+        m_AlreadyCopiedAttachableUniqueIDs.insert(referenceAttachable->GetUniqueID());
+        hardcodedAttachableSetter(*this, dynamic_cast<Attachable *>(referenceAttachable->Clone()));
+    }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ApplyAttachableForces
@@ -869,12 +889,11 @@ protected:
     Vector m_RecoilForce;
     // The vector that the recoil offsets the sprite when m_Recoiled is true.
     Vector m_RecoilOffset;
-    // The list of wound AEmitters currently attached to this MOSRotating, and owned here as well
+    // The list of wound AEmitters currently attached to this MOSRotating, and owned here as well.
     std::list<AEmitter *> m_Wounds;
-    // The list of general Attachables currently attached and Owned by this.
+    // The list of Attachables currently attached and Owned by this.
     std::list<Attachable *> m_Attachables;
-    // The list of all Attachables, including both hardcoded attachables and those added through ini or lua
-    std::list<Attachable *> m_AllAttachables;
+    std::unordered_set<unsigned long> m_AlreadyCopiedAttachableUniqueIDs; //<! An unordered set of Unique IDs, used to avoid duplicating hardcoded attachables (i.e. head, legs, etc.) when cloning.
     // The list of Gib:s this will create when gibbed
     std::list<Gib> m_Gibs;
     // The amount of impulse force required to gib this, in kg * (m/s). 0 means no limit
@@ -894,10 +913,8 @@ protected:
 	// Map to store any object pointers
 	std::map<std::string, Entity *> m_ObjectValueMap;
 
-	// Damage mutliplier for this attachable
+	// Damage multiplier for this attachable
 	float m_DamageMultiplier;
-	// Whether damage multiplier for this attachable was redefined in .ini
-	bool m_DamageMultiplierRedefined;
 
     // Intermediary drawing bitmap used to flip rotating bitmaps. Owned!
     BITMAP *m_pFlipBitmap;

@@ -232,8 +232,9 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         delete m_pHead;
         m_pHead = new Attachable;
         reader >> m_pHead;
-		if (!m_pHead->IsDamageMultiplierRedefined())
-			m_pHead->SetDamageMultiplier(5);
+        if (!m_pHead->GetDamageMultiplier() < 0) {
+            m_pHead->SetDamageMultiplier(5);
+        }
     }
     else if (propName == "Jetpack")
     {

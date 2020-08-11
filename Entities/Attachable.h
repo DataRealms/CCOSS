@@ -319,10 +319,10 @@ namespace RTE {
 	protected:
 
 		/// <summary>
-		/// Attaches this Attachable to a new parent MOSRotating, safely detaching from its old parent first if there is one.
+		/// Sets this Attachable's parent MOSRotating, and also sets its Team based on its parent and, if the Attachable is set to collide, adds/removes Atoms to its new/old parent.
 		/// </summary>
-		/// <param name="newParent">A pointer to the MOSRotating to attach to. Ownership is NOT transferred!</param>
-		void SetParent(MOSRotating *newParent);
+		/// <param name="newParent">A pointer to the MOSRotating to set as the new parent. Ownership is NOT transferred!</param>
+		virtual void SetParent(MOSRotating *newParent);
 
 	private:
 

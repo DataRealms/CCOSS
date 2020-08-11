@@ -198,44 +198,53 @@ ClassInfoGetters
     virtual Vector GetEyePos() const;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetLFGLeg
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left FG Leg as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the Leg Attachable. Ownership is NOT transferred!
+    /// <summary>
+    /// Gets the left FG Leg as an Attachable.
+    /// </summary>
+    /// <returns>A pointer to the Leg Attachable. Ownership is NOT transferred!</returns>
+    Attachable * GetLeftFGLeg() const { return dynamic_cast<Attachable *>(m_pLFGLeg); }
 
-    Attachable * GetLFGLeg() const { return (Attachable *)m_pLFGLeg; }
+    /// <summary>
+    /// Sets the left foreground leg for this Crab. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newLeg">The new leg to use.</param>
+    void SetLeftFGLeg(Attachable *newLeg);
 
+    /// <summary>
+    /// Gets the left BG Leg as an Attachable.
+    /// </summary>
+    /// <returns>A pointer to the Leg Attachable. Ownership is NOT transferred!</returns>
+    Attachable * GetLeftBGLeg() const { return dynamic_cast<Attachable *>(m_pLBGLeg); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetLBGLeg
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left BG Leg as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the Leg Attachable. Ownership is NOT transferred!
+    /// <summary>
+    /// Sets the left background leg for this Crab. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newLeg">The new leg to use.</param>
+    void SetLeftBGLeg(Attachable *newLeg);
 
-    Attachable * GetLBGLeg() const { return (Attachable *)m_pLBGLeg; }
+    /// <summary>
+    /// Gets the right FG Leg as an Attachable.
+    /// </summary>
+    /// <returns>A pointer to the Leg Attachable. Ownership is NOT transferred!</returns>
+    Attachable * GetRightFGLeg() const { return dynamic_cast<Attachable *>(m_pRFGLeg); }
 
+    /// <summary>
+    /// Sets the right foreground leg for this Crab. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newLeg">The new leg to use.</param>
+    void SetRightFGLeg(Attachable *newLeg);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRFGLeg
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right FG Leg as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the Leg Attachable. Ownership is NOT transferred!
+    /// <summary>
+    /// Gets the right BG Leg as an Attachable.
+    /// </summary>
+    /// <returns>A pointer to the Leg Attachable. Ownership is NOT transferred!</returns>
+    Attachable *GetRightBGLeg() const { return dynamic_cast<Attachable *>(m_pRBGLeg); }
 
-    Attachable * GetRFGLeg() const { return (Attachable *)m_pRFGLeg; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetLFGLeg
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right BG Leg as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the Leg Attachable. Ownership is NOT transferred!
-
-    Attachable * GetRBGLeg() const { return (Attachable *)m_pRBGLeg; }
+    /// <summary>
+    /// Sets the right background leg for this Crab. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newLeg">The new leg to use.</param>
+    void SetRightBGLeg(Attachable *newLeg);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -245,7 +254,17 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A pointer to jetpack emitter. Ownership is NOT transferred!
 
+    /// <summary>
+    /// Gets the jetpack emitter for this Crab.
+    /// </summary>
+    /// <returns>A pointer to the jetpack emitter. Ownership is NOT transferred!</returns>
     AEmitter * GetJetpack() const { return (AEmitter *)m_pJetpack; }
+
+    /// <summary>
+    /// Sets the jetpack for this Crab. Ownership IS Transferred!
+    /// </summary>
+    /// <param name="newJetpack">The new jetpack to use.</param>
+    void SetJetpack(Attachable *newJetpack);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -349,14 +368,17 @@ ClassInfoGetters
     virtual bool HandlePieCommand(int pieSliceIndex);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetEquippedItem
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns any equipped turret.
-// Arguments:       None.
-// Return value:    A pointer to an attachable.
+    /// <summary>
+    /// Gets the turret of this Crab.
+    /// </summary>
+    /// <returns>A pointer to the Crab's turret. Ownership is NOT transferred!</returns>
+    Attachable * GetTurret() const;
 
-    virtual Attachable * GetTurret() const;
+    /// <summary>
+    /// Sets the turret for this Crab. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newTurret">The new turret to use.</param>
+    void SetTurret(Attachable *newTurret);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

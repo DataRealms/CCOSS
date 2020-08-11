@@ -161,49 +161,18 @@ int ACrab::Create(BITMAP *pSprite,
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a ACrab to be identical to another, by deep copy.
 
-int ACrab::Create(const ACrab &reference)
-{
+int ACrab::Create(const ACrab &reference) {
+    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pTurret, ACrab::SetTurret); }
+    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pJetpack, ACrab::SetJetpack); }
+    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pLFGLeg, ACrab::SetLeftFGLeg); }
+    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pRFGLeg, ACrab::SetRightFGLeg); }
+    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pLBGLeg, ACrab::SetLeftBGLeg); }
+    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pRBGLeg, ACrab::SetRightBGLeg); }
+
     Actor::Create(reference);
-
-    if (reference.m_pTurret)
-    {
-        m_pTurret = dynamic_cast<Turret *>(reference.m_pTurret->Clone());
-		m_pTurret->SetCanCollideWithTerrainWhenAttached(true);
-        AddAttachable(m_pTurret, true);
-    }
-
-    if (reference.m_pJetpack)
-    {
-        m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        AddAttachable(m_pJetpack, true);
-    }
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
-
-    if (reference.m_pLFGLeg)
-    {
-        m_pLFGLeg = dynamic_cast<Leg *>(reference.m_pLFGLeg->Clone());
-        AddAttachable(m_pLFGLeg, true);
-    }
-
-    if (reference.m_pLBGLeg)
-    {
-        m_pLBGLeg = dynamic_cast<Leg *>(reference.m_pLBGLeg->Clone());
-        AddAttachable(m_pLBGLeg, true);
-    }
-
-    if (reference.m_pRFGLeg)
-    {
-        m_pRFGLeg = dynamic_cast<Leg *>(reference.m_pRFGLeg->Clone());
-        AddAttachable(m_pRFGLeg, true);
-    }
-
-    if (reference.m_pRBGLeg)
-    {
-        m_pRBGLeg = dynamic_cast<Leg *>(reference.m_pRBGLeg->Clone());
-        AddAttachable(m_pRBGLeg, true);
-    }
 
     m_pLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLFGFootGroup->Clone());
     m_pLFGFootGroup->SetOwner(this);
@@ -218,10 +187,8 @@ int ACrab::Create(const ACrab &reference)
 
     m_MoveState = reference.m_MoveState;
 
-    for (int side = 0; side < SIDECOUNT; ++side)
-    {
-        for (int i = 0; i < MOVEMENTSTATECOUNT; ++i)
-        {
+    for (int side = 0; side < SIDECOUNT; ++side) {
+        for (int i = 0; i < MOVEMENTSTATECOUNT; ++i) {
             m_Paths[side][FGROUND][i].Create(reference.m_Paths[side][FGROUND][i]);
             m_Paths[side][BGROUND][i].Create(reference.m_Paths[side][BGROUND][i]);
         }
@@ -255,52 +222,43 @@ int ACrab::Create(const ACrab &reference)
 
 int ACrab::ReadProperty(std::string propName, Reader &reader)
 {
-    if (propName == "Turret")
-    {
+    if (propName == "Turret") {
         delete m_pTurret;
         m_pTurret = new Turret;
         reader >> m_pTurret;
-		if (!m_pTurret->IsDamageMultiplierRedefined())
-			m_pTurret->SetDamageMultiplier(5);
-    }
-    else if (propName == "Jetpack")
-    {
+        m_pTurret->SetTransfersDamageToParent(true);
+        if (m_pTurret->GetDamageMultiplier() < 0.0F) {
+            m_pTurret->SetDamageMultiplier(5);
+        }
+    } else if (propName == "Jetpack") {
         delete m_pJetpack;
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-    }
-    else if (propName == "JumpTime")
-    {
+        m_pJetpack->SetTransfersDamageToParent(true);
+    } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
-        // Convert to ms
         m_JetTimeTotal *= 1000;
-    }
-    else if (propName == "LFGLeg")
-    {
+    } else if (propName == "LFGLeg") {
         delete m_pLFGLeg;
         m_pLFGLeg = new Leg;
         reader >> m_pLFGLeg;
-    }
-    else if (propName == "LBGLeg")
-    {
+        m_pLFGLeg->SetTransfersDamageToParent(true);
+    } else if (propName == "LBGLeg") {
         delete m_pLBGLeg;
         m_pLBGLeg = new Leg;
         reader >> m_pLBGLeg;
-    }
-    else if (propName == "RFGLeg")
-    {
+        m_pLBGLeg->SetTransfersDamageToParent(true);
+    } else if (propName == "RFGLeg") {
         delete m_pRFGLeg;
         m_pRFGLeg = new Leg;
         reader >> m_pRFGLeg;
-    }
-    else if (propName == "RBGLeg")
-    {
+        m_pRFGLeg->SetTransfersDamageToParent(true);
+    } else if (propName == "RBGLeg") {
         delete m_pRBGLeg;
         m_pRBGLeg = new Leg;
         reader >> m_pRBGLeg;
-    }
-    else if (propName == "LFootGroup")
-    {
+        m_pRBGLeg->SetTransfersDamageToParent(true);
+    } else if (propName == "LFootGroup") {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;
         m_pLFGFootGroup = new AtomGroup();
@@ -309,9 +267,7 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         m_pLBGFootGroup->Create(*m_pLFGFootGroup);
         m_pLFGFootGroup->SetOwner(this);
         m_pLBGFootGroup->SetOwner(this);
-    }
-    else if (propName == "RFootGroup")
-    {
+    } else if (propName == "RFootGroup") {
         delete m_pRFGFootGroup;
         delete m_pRBGFootGroup;
         m_pRFGFootGroup = new AtomGroup();
@@ -320,27 +276,27 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         m_pRBGFootGroup->Create(*m_pRFGFootGroup);
         m_pRFGFootGroup->SetOwner(this);
         m_pRBGFootGroup->SetOwner(this);
-    }
-    else if (propName == "StrideSound")
+    } else if (propName == "StrideSound") {
         reader >> m_StrideSound;
-    else if (propName == "LStandLimbPath")
+    } else if (propName == "LStandLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][STAND];
-    else if (propName == "LWalkLimbPath")
+    } else if (propName == "LWalkLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][WALK];
-    else if (propName == "LDislodgeLimbPath")
+    } else if (propName == "LDislodgeLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][DISLODGE];
-    else if (propName == "RStandLimbPath")
+    } else if (propName == "RStandLimbPath") {
         reader >> m_Paths[RIGHTSIDE][FGROUND][STAND];
-    else if (propName == "RWalkLimbPath")
+    } else if (propName == "RWalkLimbPath") {
         reader >> m_Paths[RIGHTSIDE][FGROUND][WALK];
-    else if (propName == "RDislodgeLimbPath")
+    } else if (propName == "RDislodgeLimbPath") {
         reader >> m_Paths[RIGHTSIDE][FGROUND][DISLODGE];
-    else if (propName == "AimRangeUpperLimit")
+    } else if (propName == "AimRangeUpperLimit") {
         reader >> m_AimRangeUpperLimit;
-    else if (propName == "AimRangeLowerLimit")
+    } else if (propName == "AimRangeLowerLimit") {
         reader >> m_AimRangeLowerLimit;
-    else
+    } else {
         return Actor::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -537,6 +493,63 @@ Vector ACrab::GetEyePos() const
     return m_Pos;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetLeftFGLeg(Attachable *newLeg) {
+    Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
+    if (castedNewLeg) {
+        RemoveAttachable(m_pLFGLeg);
+        m_pLFGLeg = castedNewLeg;
+        AddAttachable(castedNewLeg);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetLeftBGLeg(Attachable *newLeg) {
+    Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
+    if (castedNewLeg) {
+        RemoveAttachable(m_pLBGLeg);
+        m_pLBGLeg = castedNewLeg;
+        AddAttachable(castedNewLeg);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline void ACrab::SetRightFGLeg(Attachable *newLeg) {
+    Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
+    if (castedNewLeg) {
+        RemoveAttachable(m_pRFGLeg);
+        m_pRFGLeg = castedNewLeg;
+        AddAttachable(castedNewLeg);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline void ACrab::SetRightBGLeg(Attachable *newLeg) {
+    Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
+    if (castedNewLeg) {
+        RemoveAttachable(m_pRBGLeg);
+        m_pRBGLeg = castedNewLeg;
+        AddAttachable(castedNewLeg);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline void ACrab::SetJetpack(Attachable *newJetpack) {
+    AEmitter *castedNewJetpack = dynamic_cast<AEmitter *>(newJetpack);
+    if (castedNewJetpack) {
+        RemoveAttachable(m_pJetpack);
+        m_pJetpack = castedNewJetpack;
+        AddAttachable(castedNewJetpack);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetID
@@ -709,21 +722,27 @@ bool ACrab::HandlePieCommand(int pieSliceIndex)
     return false;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetTurret
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns any attached turret.
-
-Attachable * ACrab::GetTurret() const
-{
-    if (m_pTurret && m_pTurret->IsAttached())
-    {
+Attachable * ACrab::GetTurret() const {
+    if (m_pTurret && m_pTurret->IsAttached()) {
         return dynamic_cast<Attachable *>(m_pTurret);
     }
-
     return 0;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetTurret(Attachable *newTurret) {
+    Turret *castedNewTurret = dynamic_cast<Turret *>(newTurret);
+    if (castedNewTurret) {
+        RemoveAttachable(m_pTurret);
+        m_pTurret = castedNewTurret;
+        AddAttachable(castedNewTurret);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

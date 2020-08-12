@@ -59,11 +59,10 @@ namespace RTE {
 			Vector drawStart = m_StartPos - targetPos;
 			if (m_Thickness > 1) {
 				for (short i = 0; i < m_Thickness; i++) {
-					// Start and End angles are negative and reversed to compensate for Allegro's way of drawing arcs (counter-clockwise and weird) so we get nice clockwise drawing.
-					arc(drawScreen, drawStart.GetIntX(), drawStart.GetIntY(), ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
+					arc(drawScreen, drawStart.GetIntX(), drawStart.GetIntY(), ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
 				}
 			} else {
-				arc(drawScreen, drawStart.GetIntX(), drawStart.GetIntY(), ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), m_Radius, m_Color);
+				arc(drawScreen, drawStart.GetIntX(), drawStart.GetIntY(), ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), m_Radius, m_Color);
 			}
 		} else {
 			Vector drawStartLeft;
@@ -73,12 +72,12 @@ namespace RTE {
 
 			if (m_Thickness > 1) {
 				for (short i = 0; i < m_Thickness; i++){
-					arc(drawScreen, drawStartLeft.GetIntX(), drawStartLeft.GetIntY(), ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
-					arc(drawScreen, drawStartRight.GetIntX(), drawStartRight.GetIntY(), ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
+					arc(drawScreen, drawStartLeft.GetIntX(), drawStartLeft.GetIntY(), ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
+					arc(drawScreen, drawStartRight.GetIntX(), drawStartRight.GetIntY(), ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
 				}
 			} else {
-				arc(drawScreen, drawStartLeft.GetIntX(), drawStartLeft.GetIntY(), ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), m_Radius, m_Color);
-				arc(drawScreen, drawStartRight.GetIntX(), drawStartRight.GetIntY(), ftofix(GetAllegroAngle(-m_EndAngle)), ftofix(GetAllegroAngle(-m_StartAngle)), m_Radius, m_Color);
+				arc(drawScreen, drawStartLeft.GetIntX(), drawStartLeft.GetIntY(), ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), m_Radius, m_Color);
+				arc(drawScreen, drawStartRight.GetIntX(), drawStartRight.GetIntY(), ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), m_Radius, m_Color);
 			}
 		}
 	}

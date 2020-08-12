@@ -69,6 +69,12 @@ namespace RTE {
 		void SetX(const float newX) { m_X = newX; }
 
 		/// <summary>
+		/// Gets the X value of this Vector.
+		/// </summary>
+		/// <returns>An int value that represents the X value of this Vector.</returns>
+		int GetIntX() const { return static_cast<int>(std::roundf(m_X)); }
+
+		/// <summary>
 		/// Sets the X value of this Vector.
 		/// </summary>
 		/// <param name="newX">An int value that the X value will be set to.</param>
@@ -85,6 +91,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newY">A float value that the Y value will be set to.</param>
 		void SetY(const float newY) { m_Y = newY; }
+
+		/// <summary>
+		/// Gets the Y value of this Vector.
+		/// </summary>
+		/// <returns>An int value that represents the Y value of this Vector.</returns>
+		int GetIntY() const { return static_cast<int>(std::roundf(m_Y)); }
 
 		/// <summary>
 		/// Sets the Y value of this Vector.

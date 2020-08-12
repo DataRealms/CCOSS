@@ -131,10 +131,13 @@ namespace RTE {
 		// Used for handling separators between the datafile name and the object name in .dat datafiles. NOTE: Not currently used
 		int separatorPos = m_DataPath.find('#');
 
+		std::string fileExtension = std::experimental::filesystem::path(m_DataPath).extension().string();
+
 		if (separatorPos == m_DataPath.length()) {
 			RTEAbort("There was no object name following first pound sign in the ContentFile's datafile path, which means there was no actual object defined. The path was:\n\n" + m_DataPath);
 		} else if (separatorPos == -1) {
 			PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
+
 			// If the file didn't open, try using animation naming scheme of adding 000 before the extension
 			if (!pFile) {
 				int extensionPos = m_DataPath.rfind('.');
@@ -142,14 +145,14 @@ namespace RTE {
 				std::string pathWithoutExtension = m_DataPath;
 				pathWithoutExtension.resize(extensionPos);
 
-				pFile = pack_fopen((pathWithoutExtension + "000.bmp").c_str(), F_READ);
+				pFile = pack_fopen((pathWithoutExtension + "000" + fileExtension).c_str(), F_READ);
 				RTEAssert(pFile, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
 			}
 			// Load the bitmap then close the file stream to clean up
 			PALETTE currentPalette;
 			get_palette(currentPalette);
 
-			returnBitmap = load_bmp_pf(pFile, (RGB *)currentPalette);
+			returnBitmap = (fileExtension == ".bmp") ? load_bmp_pf(pFile, currentPalette) : load_png_pf(pFile, currentPalette);
 			pack_fclose(pFile);
 		} else if (separatorPos != m_DataPath.length() - 1) {
 			RTEAbort("Loading bitmaps from allegro datafiles isn't supported yet!");

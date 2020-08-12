@@ -523,6 +523,7 @@ namespace RTE {
 		bool m_VSplitOverride; //!< Whether the screen is set to split vertically in settings.
 	
 		ContentFile m_PaletteFile; //!< File of the screen palette.
+		PALETTE m_Palette; //!< Array of RGB entries read from the palette file.
 
 		unsigned char m_BlackColor; //!< Palette index for the black color.
 		unsigned char m_AlmostBlackColor; //!< Palette index for the closest to black color.

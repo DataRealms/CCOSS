@@ -522,15 +522,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::LoadPalette(const std::string &palettePath) {
-		PALETTE newPalette;
-		BITMAP *tempBitmap = load_bitmap(palettePath.c_str(), newPalette);
+		BITMAP *tempBitmap = load_bitmap(palettePath.c_str(), m_Palette);
 		RTEAssert(tempBitmap, ("Failed to load palette from bitmap with following path:\n\n" + palettePath).c_str());
 
-		set_palette(newPalette);
+		set_palette(m_Palette);
 
 		// Update what black is now with the loaded palette
-		m_BlackColor = bestfit_color(newPalette, 0, 0, 0);
-		m_AlmostBlackColor = bestfit_color(newPalette, 5, 5, 5);
+		m_BlackColor = bestfit_color(m_Palette, 0, 0, 0);
+		m_AlmostBlackColor = bestfit_color(m_Palette, 5, 5, 5);
 
 		destroy_bitmap(tempBitmap);
 
@@ -554,57 +553,66 @@ namespace RTE {
 
 		while (fileNumber < maxFileTrys) {
 			// Check for the file namebase001.bmp; if it exists, try 002, etc.
-			sprintf_s(fullFileName, sizeof(fullFileName), "%s/%s%03i.bmp", c_ScreenshotDirectory, nameBase, fileNumber++);
+			char *fileExtension = { (modeToSave == SaveBitmapMode::SingleBitmap || modeToSave == SaveBitmapMode::ScenePreviewDump) ? ".bmp" : ".png" };
+			sprintf_s(fullFileName, sizeof(fullFileName), "%s/%s%03i%s", c_ScreenshotDirectory, nameBase, fileNumber++, fileExtension);
 			if (!std::experimental::filesystem::exists(fullFileName)) {
 				break;
 			}
 		}
 
-		PALETTE palette;
-		get_palette(palette);
+		int worldDumpBufferBitDepth = 24;
 
 		switch (modeToSave) {
 			case SingleBitmap:
 				if (bitmapToSave) {
-					save_bmp(fullFileName, bitmapToSave, palette);
+					save_bmp(fullFileName, bitmapToSave, m_Palette);
 					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(fullFileName));
 					return 0;
 				}
 				break;
 			case ScreenDump:
 				if (screen) {
-					if (!m_ScreenDumpBuffer) { m_ScreenDumpBuffer = create_bitmap(screen->w, screen->h); }
+					if (!m_ScreenDumpBuffer) { m_ScreenDumpBuffer = create_bitmap_ex(24, screen->w, screen->h); }
 
 					blit(screen, m_ScreenDumpBuffer, 0, 0, 0, 0, screen->w, screen->h);
-					save_bmp(fullFileName, m_ScreenDumpBuffer, palette);
+					save_png(fullFileName, m_ScreenDumpBuffer, nullptr);
 					g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
 					return 0;
 				}
 				break;
 			case ScenePreviewDump:
 			case WorldDump:
-				if (!m_WorldDumpBuffer) { m_WorldDumpBuffer = create_bitmap(g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight()); }
-
-				// Recreate the buffer if the dimensions don't match the current scene.
-				if (m_WorldDumpBuffer->w != g_SceneMan.GetSceneWidth() || m_WorldDumpBuffer->h != g_SceneMan.GetSceneHeight()) {
-					destroy_bitmap(m_WorldDumpBuffer);
-					m_WorldDumpBuffer = create_bitmap(g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
+				worldDumpBufferBitDepth = (modeToSave == SaveBitmapMode::ScenePreviewDump) ? 32 : 24;
+				// Recreate the buffer if it doesn't exist, the bit depth doesn't match the mode or the dimensions don't match the current scene.
+				if (!m_WorldDumpBuffer || bitmap_color_depth(m_WorldDumpBuffer) != worldDumpBufferBitDepth || (m_WorldDumpBuffer->w != g_SceneMan.GetSceneWidth() || m_WorldDumpBuffer->h != g_SceneMan.GetSceneHeight())) {
+					if (m_WorldDumpBuffer) { destroy_bitmap(m_WorldDumpBuffer); }
+					m_WorldDumpBuffer = create_bitmap_ex(worldDumpBufferBitDepth, g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
 				}
 				if (modeToSave == ScenePreviewDump) {
 					DrawWorldDump(true);
 
-					BITMAP *scenePreviewDumpBuffer = create_bitmap(140, 55);
-					blit(m_ScenePreviewDumpGradient, scenePreviewDumpBuffer, 0, 0, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
-					masked_stretch_blit(m_WorldDumpBuffer, scenePreviewDumpBuffer, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
+					BITMAP *scenePreviewDumpBufferIntermediate = create_bitmap( 140, 55);
+					blit(m_ScenePreviewDumpGradient, scenePreviewDumpBufferIntermediate, 0, 0, 0, 0, scenePreviewDumpBufferIntermediate->w, scenePreviewDumpBufferIntermediate->h);
+					masked_stretch_blit(m_WorldDumpBuffer, scenePreviewDumpBufferIntermediate, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h, 0, 0, scenePreviewDumpBufferIntermediate->w, scenePreviewDumpBufferIntermediate->h);
 
-					save_bmp(fullFileName, scenePreviewDumpBuffer, palette);
-					destroy_bitmap(scenePreviewDumpBuffer);
+					// Save and then reload the intermediate buffer to convert it from 32bpp to 8bpp so we can properly have it indexed.
+					save_bmp(fullFileName, scenePreviewDumpBufferIntermediate, m_Palette);
+					BITMAP *scenePreviewDumpBufferFinal = create_bitmap_ex(8, 140, 55);
+					set_color_conversion(COLORCONV_REDUCE_TO_256);
+					BITMAP *tempLoadBitmap = load_bitmap(fullFileName, nullptr);
+					blit(tempLoadBitmap, scenePreviewDumpBufferFinal, 0, 0, 0, 0, scenePreviewDumpBufferFinal->w, scenePreviewDumpBufferFinal->h);
+					// Delete the old file and save the converted one.
+					std::remove(fullFileName);
+					save_bmp(fullFileName, scenePreviewDumpBufferFinal, m_Palette);
 
+					destroy_bitmap(scenePreviewDumpBufferIntermediate);
+					destroy_bitmap(scenePreviewDumpBufferFinal);
+					
 					g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + std::string(fullFileName));
 					return 0;
 				} else {
 					DrawWorldDump();
-					save_bmp(fullFileName, m_WorldDumpBuffer, palette);
+					save_png(fullFileName, m_WorldDumpBuffer, nullptr);
 					g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + std::string(fullFileName));
 					return 0;
 				}
@@ -973,9 +981,9 @@ namespace RTE {
 
 		// Draw sky gradient if we're not dumping a scene preview
 		if (!drawForScenePreview) {
-			clear_to_color(m_WorldDumpBuffer, makecol32(132, 192, 252)); // Light blue color
-			for (unsigned int i = 0; i < m_WorldDumpBuffer->h; i++) {
-				unsigned int lineColor = makecol32(64 + ((static_cast<float>(i) / worldBitmapHeight) * (128 - 64)), 64 + ((static_cast<float>(i) / worldBitmapHeight) * (192 - 64)), 96 + ((static_cast<float>(i) / worldBitmapHeight) * (255 - 96)));
+			clear_to_color(m_WorldDumpBuffer, makecol24(132, 192, 252)); // Light blue color
+			for (int i = 0; i < m_WorldDumpBuffer->h; i++) {
+				int lineColor = makecol24(64 + ((static_cast<float>(i) / worldBitmapHeight) * (128 - 64)), 64 + ((static_cast<float>(i) / worldBitmapHeight) * (192 - 64)), 96 + ((static_cast<float>(i) / worldBitmapHeight) * (255 - 96)));
 				hline(m_WorldDumpBuffer, 0, i, worldBitmapWidth - 1, lineColor);
 			}
 		} else {

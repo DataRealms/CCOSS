@@ -2,6 +2,7 @@
 #define _RTEERROR_
 
 #include "allegro.h"
+#include "loadpng.h"
 
 namespace RTE {
 

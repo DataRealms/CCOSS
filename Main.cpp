@@ -1866,6 +1866,7 @@ int main(int argc, char *argv[]) {
 
     set_config_file("Base.rte/AllegroConfig.txt");
     allegro_init();
+	loadpng_init();
 
     // Enable the exit button on the window
     LOCK_FUNCTION(QuitHandler);

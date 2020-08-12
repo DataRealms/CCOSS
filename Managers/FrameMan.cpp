@@ -542,7 +542,6 @@ namespace RTE {
 		if ((modeToSave == WorldDump || modeToSave == ScenePreviewDump) && !g_ActivityMan.ActivityRunning()) {
 			return 0;
 		}
-
 		if (nameBase == 0 || strlen(nameBase) <= 0) {
 			return -1;
 		}
@@ -564,8 +563,7 @@ namespace RTE {
 
 		switch (modeToSave) {
 			case SingleBitmap:
-				if (bitmapToSave) {
-					save_bmp(fullFileName, bitmapToSave, m_Palette);
+				if (bitmapToSave && save_bmp(fullFileName, bitmapToSave, m_Palette) == 0) {
 					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(fullFileName));
 					return 0;
 				}
@@ -573,11 +571,12 @@ namespace RTE {
 			case ScreenDump:
 				if (screen) {
 					if (!m_ScreenDumpBuffer) { m_ScreenDumpBuffer = create_bitmap_ex(24, screen->w, screen->h); }
-
 					blit(screen, m_ScreenDumpBuffer, 0, 0, 0, 0, screen->w, screen->h);
-					save_png(fullFileName, m_ScreenDumpBuffer, nullptr);
-					g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
-					return 0;
+					// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
+					if (save_png(fullFileName, m_ScreenDumpBuffer, nullptr) == 0) {
+						g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
+						return 0;
+					}		
 				}
 				break;
 			case ScenePreviewDump:
@@ -591,37 +590,52 @@ namespace RTE {
 				if (modeToSave == ScenePreviewDump) {
 					DrawWorldDump(true);
 
-					BITMAP *scenePreviewDumpBufferIntermediate = create_bitmap( 140, 55);
-					blit(m_ScenePreviewDumpGradient, scenePreviewDumpBufferIntermediate, 0, 0, 0, 0, scenePreviewDumpBufferIntermediate->w, scenePreviewDumpBufferIntermediate->h);
-					masked_stretch_blit(m_WorldDumpBuffer, scenePreviewDumpBufferIntermediate, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h, 0, 0, scenePreviewDumpBufferIntermediate->w, scenePreviewDumpBufferIntermediate->h);
+					BITMAP *scenePreviewDumpBuffer = create_bitmap(140, 55);
+					blit(m_ScenePreviewDumpGradient, scenePreviewDumpBuffer, 0, 0, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
+					masked_stretch_blit(m_WorldDumpBuffer, scenePreviewDumpBuffer, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 
-					// Save and then reload the intermediate buffer to convert it from 32bpp to 8bpp so we can properly have it indexed.
-					save_bmp(fullFileName, scenePreviewDumpBufferIntermediate, m_Palette);
-					BITMAP *scenePreviewDumpBufferFinal = create_bitmap_ex(8, 140, 55);
-					set_color_conversion(COLORCONV_REDUCE_TO_256);
-					BITMAP *tempLoadBitmap = load_bitmap(fullFileName, nullptr);
-					blit(tempLoadBitmap, scenePreviewDumpBufferFinal, 0, 0, 0, 0, scenePreviewDumpBufferFinal->w, scenePreviewDumpBufferFinal->h);
-					// Delete the old file and save the converted one.
-					std::remove(fullFileName);
-					save_bmp(fullFileName, scenePreviewDumpBufferFinal, m_Palette);
-
-					destroy_bitmap(scenePreviewDumpBufferIntermediate);
-					destroy_bitmap(scenePreviewDumpBufferFinal);
-					
-					g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + std::string(fullFileName));
-					return 0;
+					if (SaveBitmapAsIndexed(fullFileName, scenePreviewDumpBuffer, m_Palette) == 0) {
+						g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + std::string(fullFileName));
+						destroy_bitmap(scenePreviewDumpBuffer);
+						return 0;
+					}
 				} else {
 					DrawWorldDump();
-					save_png(fullFileName, m_WorldDumpBuffer, nullptr);
-					g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + std::string(fullFileName));
-					return 0;
+					if (save_png(fullFileName, m_WorldDumpBuffer, nullptr) == 0) {
+						g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + std::string(fullFileName));
+						return 0;
+					}
 				}
+				break;
 			default:
 				g_ConsoleMan.PrintString("ERROR: Wrong bitmap save mode passed in, no bitmap was saved!");
 				return -1;
 		}
 		g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + std::string(fullFileName));
 		return -1;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int FrameMan::SaveBitmapAsIndexed(char *fileName, BITMAP *bitmapToSave, PALETTE paletteToIndexWith) const {
+		save_bmp(fileName, bitmapToSave, paletteToIndexWith);
+
+		int lastColorConversionMode = get_color_conversion();
+		set_color_conversion(COLORCONV_REDUCE_TO_256);
+		// nullptr for the PALETTE parameter here because we don't need the bad palette from it and don't want it to overwrite anything.
+		BITMAP *tempLoadBitmap = load_bitmap(fileName, nullptr);
+		std::remove(fileName);
+
+		BITMAP *tempConvertingBitmap = create_bitmap_ex(8, bitmapToSave->w, bitmapToSave->h);
+		blit(tempLoadBitmap, tempConvertingBitmap, 0, 0, 0, 0, tempConvertingBitmap->w, tempConvertingBitmap->h);
+
+		int saveResult = save_bmp(fileName, tempConvertingBitmap, m_Palette);
+
+		set_color_conversion(lastColorConversionMode);
+		destroy_bitmap(tempLoadBitmap);
+		destroy_bitmap(tempConvertingBitmap);
+
+		return saveResult;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

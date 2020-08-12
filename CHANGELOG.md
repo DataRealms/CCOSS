@@ -406,7 +406,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - If the current game resolution is half the desktop resolution or less, you will be able to instantly switch between 1X and 2X resolution multiplier modes in the settings without screen flicker or delay.  
 	If the conditions are not met, the mode switch button will show `Unavailable`.
 
-- `PieMenuActor` and `OrbittedCraft` have now been removed. They are instead replaced with parameters in their respective functions, i.e. `OnPieMenu(pieMenuActor);` and `CraftEnteredOrbit(orbittedCraft);`. Their use is otherwise unchanged.
+- `PieMenuActor` and `OrbitedCraft` have now been removed. They are instead replaced with parameters in their respective functions, i.e. `OnPieMenu(pieMenuActor);` and `CraftEnteredOrbit(orbitedCraft);`. Their use is otherwise unchanged.
 
 ### Fixed
 

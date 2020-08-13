@@ -215,14 +215,6 @@ public:
     /// <param name="newLeg">The new leg to use.</param>
     void SetRightBGLeg(Attachable *newLeg);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetJetpack
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the jetpack as an emitter. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to jetpack emitter. Ownership is NOT transferred!
-
     /// <summary>
     /// Gets the jetpack emitter for this Crab.
     /// </summary>

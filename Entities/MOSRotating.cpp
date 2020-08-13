@@ -62,6 +62,7 @@ void MOSRotating::Clear()
     m_RecoilOffset.Reset();
     m_Wounds.clear();
     m_Attachables.clear();
+    m_AlreadyCopiedAttachableUniqueIDs.clear();
     m_Gibs.clear();
     m_GibImpulseLimit = 0;
     m_GibWoundLimit = 0;

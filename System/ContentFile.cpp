@@ -121,51 +121,39 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	BITMAP *ContentFile::LoadAndReleaseBitmap(int conversionMode) {
+	BITMAP * ContentFile::LoadAndReleaseBitmap(int conversionMode) {
 		if (m_DataPath.empty()) {
-			return 0;
+			return nullptr;
 		}
-		BITMAP *returnBitmap = 0;
+		BITMAP *returnBitmap = nullptr;
 		set_color_conversion((conversionMode == 0) ? COLORCONV_MOST : conversionMode);
 
-		// Used for handling separators between the datafile name and the object name in .dat datafiles. NOTE: Not currently used
-		int separatorPos = m_DataPath.find('#');
+		int extensionPos = m_DataPath.rfind('.');
+		RTEAssert(extensionPos > 0, "Could not find file extension when trying to find image file with path and name:\n\n" + m_DataPath);
 
+		std::string pathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - 4);
 		std::string fileExtension = std::experimental::filesystem::path(m_DataPath).extension().string();
+		std::string altFileExtension = (fileExtension == ".png") ? ".bmp" : ".png";
 
-		if (separatorPos == m_DataPath.length()) {
-			RTEAbort("There was no object name following first pound sign in the ContentFile's datafile path, which means there was no actual object defined. The path was:\n\n" + m_DataPath);
-		} else if (separatorPos == -1) {
-			PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
-
-			// If the file didn't open, try using animation naming scheme of adding 000 before the extension
-			if (!pFile) {
-				int extensionPos = m_DataPath.rfind('.');
-				RTEAssert(extensionPos > 0, "Could not find file extension when trying to load and release bitmap with path and name:\n\n" + m_DataPath);
-				std::string pathWithoutExtension = m_DataPath;
-				pathWithoutExtension.resize(extensionPos);
-
-				pFile = pack_fopen((pathWithoutExtension + "000" + fileExtension).c_str(), F_READ);
-				RTEAssert(pFile, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
+		if (!std::experimental::filesystem::exists(m_DataPath)) {
+			if (std::experimental::filesystem::exists(pathWithoutExtension + "000" + fileExtension)) {
+				m_DataPath = pathWithoutExtension + "000" + fileExtension;
+			} else {
+				if (std::experimental::filesystem::exists(pathWithoutExtension + altFileExtension)) {
+					m_DataPath = pathWithoutExtension + altFileExtension;
+				} else if (std::experimental::filesystem::exists(pathWithoutExtension + "000" + altFileExtension)) {
+					m_DataPath = pathWithoutExtension + "000" + altFileExtension;
+				} else {
+					RTEAbort("Failed to find image file with following path and name:\n\n" + m_DataPath + "\nor\n" + pathWithoutExtension + altFileExtension + "\n\nLoading has been aborted!");
+				}
 			}
-			// Load the bitmap then close the file stream to clean up
-			PALETTE currentPalette;
-			get_palette(currentPalette);
-
-			returnBitmap = (fileExtension == ".bmp") ? load_bmp_pf(pFile, currentPalette) : load_png_pf(pFile, currentPalette);
-			pack_fclose(pFile);
-		} else if (separatorPos != m_DataPath.length() - 1) {
-			RTEAbort("Loading bitmaps from allegro datafiles isn't supported yet!");
-			// Used for loading from DataFiles, disabled because we don't have this properly implemented right now. 
-			/*
-			// Split the datapath into the path and the object name and load the datafile from them
-			m_DataFile = load_datafile_object(m_DataPath.substr(0, separatorPos).c_str(), m_DataPath.substr(separatorPos + 1).c_str());
-			RTEAssert(m_DataFile && m_DataFile->dat && m_DataFile->type == DAT_BITMAP, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
-
-			returnBitmap = (BITMAP *)m_DataFile->dat;
-			*/
 		}
-		RTEAssert(returnBitmap, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
+
+		PALETTE currentPalette;
+		get_palette(currentPalette);
+
+		returnBitmap = load_bitmap(m_DataPath.c_str(), currentPalette);	
+		RTEAssert(returnBitmap, "Failed to load image file with following path and name:\n\n" + m_DataPath + "\nThe image file may be corrupt, incorrectly converted or saved with unsupported parameters.");
 		return returnBitmap;
 	}
 

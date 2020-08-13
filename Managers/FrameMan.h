@@ -34,14 +34,14 @@ namespace RTE {
 		/// Makes the FrameMan object ready for use, which is to be used with SettingsMan first.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a FrameMan object before deletion from system memory.
 		/// </summary>
-		virtual ~FrameMan() { Destroy(); }
+		~FrameMan() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the FrameMan object.
@@ -51,7 +51,7 @@ namespace RTE {
 		/// <summary>
 		/// Resets the entire FrameMan, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -493,7 +493,7 @@ namespace RTE {
 		/// Gets the class name of this Entity.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	protected:

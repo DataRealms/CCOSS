@@ -62,7 +62,7 @@ public:
 // Description:     Gets the event type
 // Arguments:       None.
 
-    int GetType(void);
+    int GetType();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ public:
 // Description:     Gets the msg.
 // Arguments:       None.
 
-    int GetMsg(void);
+    int GetMsg();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ public:
 // Description:     Gets the data.
 // Arguments:       None.
 
-    int GetData(void);
+    int GetData();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ public:
 // Description:     Gets the event control.
 // Arguments:       None.
 
-    GUIControl *GetControl(void);
+    GUIControl *GetControl();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

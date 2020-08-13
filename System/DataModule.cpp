@@ -1,5 +1,7 @@
 #include "DataModule.h"
-#include "RTEManagers.h"
+#include "PresetMan.h"
+#include "SceneMan.h"
+#include "LuaMan.h"
 
 namespace RTE {
 
@@ -90,7 +92,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void DataModule::Destroy(bool notInherited) {
+	void DataModule::Destroy() {
 		for (const PresetEntry &preset : m_PresetList){
 			delete preset.m_EntityPreset;
 		}
@@ -380,8 +382,8 @@ namespace RTE {
 	// TODO: This method is almost identical to GetEntityPreset, except it doesn't return a const Entity *. 
 	// Investigate if the latter needs to return const (based on what's using it) and if not, get rid of this and replace its uses. At the very least, consider renaming this
 	// See https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/87
-	Entity * DataModule::GetEntityIfExactType(const std::string &exactType, const std::string &instanceName) {
-		if (exactType.empty() || instanceName == "None" || instanceName.empty()) {
+	Entity * DataModule::GetEntityIfExactType(const std::string &exactType, const std::string &presetName) {
+		if (exactType.empty() || presetName == "None" || presetName.empty()) {
 			return 0;
 		}
 
@@ -389,7 +391,7 @@ namespace RTE {
 		if (classItr != m_TypeMap.end()) {
 			// Find an instance of that EXACT type and name; derived types are not matched
 			for (std::list<std::pair<std::string, Entity *>>::iterator instItr = (*classItr).second.begin(); instItr != (*classItr).second.end(); ++instItr) {
-				if ((*instItr).first == instanceName && (*instItr).second->GetClassName() == exactType) {
+				if ((*instItr).first == presetName && (*instItr).second->GetClassName() == exactType) {
 					return (*instItr).second;
 				}
 			}

@@ -67,7 +67,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Deployment() { Destroy(true); }
+	~Deployment() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(string loadoutName, const Icon &icon, float spawnRadius);
+	int Create(string loadoutName, const Icon &icon, float spawnRadius);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -115,7 +115,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); SceneObject::Reset(); }
+    void Reset() override { Clear(); SceneObject::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +126,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -138,7 +138,7 @@ ClassInfoGetters
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    virtual BITMAP * GetGraphicalIcon() { return m_Icon.GetBitmaps8() ? m_Icon.GetBitmaps8()[0] : 0; }
+    BITMAP * GetGraphicalIcon() override { return m_Icon.GetBitmaps8() ? m_Icon.GetBitmaps8()[0] : 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The Icon that represents this graphically.
 
-    virtual Icon GetIcon() { return m_Icon; }
+	Icon GetIcon() { return m_Icon; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +170,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The radius this Deployment will be checking within.
 
-    virtual float GetSpawnRadius() const { return m_SpawnRadius; }
+	float GetSpawnRadius() const { return m_SpawnRadius; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -181,7 +181,7 @@ ClassInfoGetters
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+	bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -196,7 +196,7 @@ ClassInfoGetters
 // Return value:    The Actor instance, if any, that this Deployment is supposed to spawn.
 //                  OWNERSHIP IS TRANSFERRED!
 
-    virtual Actor * CreateDeployedActor(int player, float &costTally);
+	Actor * CreateDeployedActor(int player, float &costTally);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -210,7 +210,7 @@ ClassInfoGetters
 // Return value:    The Actor instance, if any, that this Deployment is supposed to spawn.
 //                  OWNERSHIP IS TRANSFERRED!
 
-	virtual Actor * CreateDeployedActor();
+	Actor * CreateDeployedActor();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +223,7 @@ ClassInfoGetters
 // Return value:    The Actor instance, if any, that this Deployment is supposed to spawn.
 //                  OWNERSHIP IS TRANSFERRED!
 
-    virtual SceneObject * CreateDeployedObject(int player, float &costTally);
+	SceneObject * CreateDeployedObject(int player, float &costTally);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -235,7 +235,7 @@ ClassInfoGetters
 // Return value:    The Actor instance, if any, that this Deployment is supposed to spawn.
 //                  OWNERSHIP IS TRANSFERRED!
 
-	virtual SceneObject * CreateDeployedObject();
+	SceneObject * CreateDeployedObject();
 
 
 
@@ -252,7 +252,7 @@ ClassInfoGetters
 // Return value:    Whether the deployment spawning is blocked by one of the Objects in
 //                  the list.
 
-    virtual bool DeploymentBlocked(int player, const std::list<SceneObject *> &existingObjects);
+	bool DeploymentBlocked(int player, const std::list<SceneObject *> &existingObjects);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -265,14 +265,14 @@ ClassInfoGetters
 //                  How much to multiply the value if this happens to be a foreign Tech.
 // Return value:    The cost, in oz of gold.
 
-    virtual float GetGoldValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const { return GetTotalValue(nativeModule, foreignMult, nativeMult); }
+	float GetGoldValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, nativeMult); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGoldValueOld
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     DOES THE SAME THING AS GetGoldValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
 
-    virtual float GetGoldValueOld(int nativeModule = 0, float foreignMult = 1.0) const { return GetTotalValue(nativeModule, foreignMult, 1.0); }
+	float GetGoldValueOld(int nativeModule = 0, float foreignMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, 1.0); }
 
 
 
@@ -287,14 +287,14 @@ ClassInfoGetters
 //                  How much to multiply the value if this happens to be a foreign Tech.
 // Return value:    The current value of this and all contained assets.
 
-    virtual float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const;
+	float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalValueOld
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     DOES THE SAME THING AS GetTotalValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
 
-	virtual float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const { return GetTotalValue(nativeModule, foreignMult, 1.0); } 
+	float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, 1.0); }
 
 
 
@@ -305,7 +305,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    This deployment's ID
 
-	virtual unsigned int GetID() const { return m_ID; };
+	unsigned int GetID() const { return m_ID; };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -315,7 +315,7 @@ ClassInfoGetters
 // Arguments:      Deployment to clone Id from.
 // Return value:    None
 
-	virtual void CloneID(Deployment * from) { if (from) m_ID = from->GetID(); };
+	void CloneID(Deployment * from) { if (from) m_ID = from->GetID(); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -325,7 +325,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-	virtual void NewID() { m_ID = SelectRand(1, 0xFFFF); };
+	void NewID() { m_ID = SelectRand(1, 0xFFFF); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -340,10 +340,7 @@ ClassInfoGetters
 //                  like indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -354,7 +351,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whether flipped or not.
 
-	virtual bool IsHFlipped() const { return m_HFlipped; }
+	bool IsHFlipped() const override { return m_HFlipped; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -365,7 +362,7 @@ ClassInfoGetters
 // Arguments:       A bool with the new value.
 // Return value:    None.
 
-	virtual void SetHFlipped(const bool flipped) { m_HFlipped = flipped; }
+	void SetHFlipped(const bool flipped) override { m_HFlipped = flipped; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -409,8 +406,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Deployment(const Deployment &reference) { RTEAbort("Tried to use forbidden method"); }
-    void operator=(const Deployment &rhs) { RTEAbort("Tried to use forbidden method"); }
+    Deployment(const Deployment &reference) {}
+    void operator=(const Deployment &rhs) {}
 
 };
 

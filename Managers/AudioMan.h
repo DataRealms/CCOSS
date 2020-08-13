@@ -23,8 +23,6 @@ namespace RTE {
 
 	public:
 
-		ClassInfoGetters
-
 		// TODO: Add comments to all these.
 		enum PlaybackPriority {
 			PRIORITY_HIGH = 0,
@@ -81,7 +79,7 @@ namespace RTE {
 		/// Makes the AudioMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create();
 #pragma endregion
 
 #pragma region Destruction
@@ -94,11 +92,6 @@ namespace RTE {
 		/// Destroys and resets (through Clear()) the AudioMan object.
 		/// </summary>
 		void Destroy();
-
-		/// <summary>
-		/// Resets the entire AudioMan including it's inherited members to their default settings or values.
-		/// </summary>
-		void Reset() { Clear(); }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -411,10 +404,17 @@ namespace RTE {
 		void RegisterSoundEvent(int player, NetworkSoundState state, const std::unordered_set<unsigned short> *channels = NULL, const std::vector<size_t> *soundFileHashes = NULL, const Vector &position = Vector(), short loops = 0, float pitch = 1, bool affectedByGlobalPitch = false, float attenuationStartDistance = 0, bool immobile = false, short fadeOutTime = 0);
 #pragma endregion
 
+#pragma region Class Info
+		/// <summary>
+		/// Gets the class name of this object.
+		/// </summary>
+		/// <returns>A string with the friendly-formatted type name of this object.</returns>
+		const std::string & GetClassName() const { return c_ClassName; }
+#pragma endregion
+
 	protected:
 
-		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
-		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this object.
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 		const FMOD_VECTOR c_FMODForward = FMOD_VECTOR{0, 0, 1}; //!< An FMOD_VECTOR defining the Forwards direction. Necessary for 3D Sounds.
 		const FMOD_VECTOR c_FMODUp = FMOD_VECTOR{0, 1, 0}; //!< An FMOD_VECTOR defining the Up direction. Necessary for 3D Sounds.
@@ -429,7 +429,7 @@ namespace RTE {
 		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
 		int m_CurrentActivityHumanCount; //!< The stored number of humans in the current activity, used for audio splitscreen handling. Only updated when there's an activity running.
 
-		std::unordered_map<unsigned short, std::vector<FMOD_VECTOR>> soundChannelRolloffs; //!< An unordered map of Sound Channel indices to a std::vector of FMOD_VECTORs representing each Sound Channel's custom attenuation rolloff. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing.
+		std::unordered_map<unsigned short, std::vector<FMOD_VECTOR>> m_SoundChannelRolloffs; //!< An unordered map of Sound Channel indices to a std::vector of FMOD_VECTORs representing each Sound Channel's custom attenuation rolloff. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing.
 
 		double m_SoundsVolume; //!< Global sounds effects volume.
 		double m_MusicVolume; //!< Global music volume.

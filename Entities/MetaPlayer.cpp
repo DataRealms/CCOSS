@@ -1,6 +1,7 @@
 #include "MetaPlayer.h"
 #include "DataModule.h"
 #include "PresetMan.h"
+#include "ActivityMan.h"
 
 namespace RTE {
 
@@ -10,9 +11,9 @@ namespace RTE {
 
 	void MetaPlayer::Clear() {
 		m_Name = "";
-		m_Team = Activity::NOTEAM;
+		m_Team = Activity::NoTeam;
 		m_Human = true;
-		m_InGamePlayer = Activity::PLAYER_1;
+		m_InGamePlayer = Players::PlayerOne;
 		m_Aggressiveness = 0.5F;
 		m_GameOverRound = -1;
 

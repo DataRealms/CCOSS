@@ -108,7 +108,7 @@ namespace RTE {
 		/// Makes the Controller object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create() { return 0; }
+		int Create() { return 0; }
 
 		/// <summary>
 		/// Makes the Controller object ready for use.
@@ -116,7 +116,7 @@ namespace RTE {
 		/// <param name="mode">The controller input mode, like AI, player etc.</param>
 		/// <param name="controlledActor">The Actor this is supposed to control. Ownership is NOT transferred!</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(InputMode mode, Actor *controlledActor);
+		int Create(InputMode mode, Actor *controlledActor);
 
 		/// <summary>
 		/// Makes the Controller object ready for use.
@@ -124,7 +124,7 @@ namespace RTE {
 		/// <param name="mode">The controller input mode, like AI, player etc.</param>
 		/// <param name="player">Which player is controlling this.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(InputMode mode, int player) { m_InputMode = mode; m_Player = player; return Create(); }
+		int Create(InputMode mode, int player) { m_InputMode = mode; m_Player = player; return Create(); }
 
 		/// <summary>
 		/// Creates a Controller to be identical to another, by deep copy.
@@ -138,17 +138,17 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a Controller object before deletion from system memory.
 		/// </summary>
-		virtual ~Controller() { Destroy(); }
+		~Controller() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the Controller object.
 		/// </summary>
-		virtual void Destroy() { Clear(); }
+		void Destroy() { Clear(); }
 
 		/// <summary>
 		/// Resets the entire Controller, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -275,20 +275,20 @@ namespace RTE {
 		/// Gets which Actor is being controlled by this. 0 if none.
 		/// </summary>
 		/// <returns>A pointer to the Actor which is being controlled by this. Ownership is NOT transferred!</returns>
-		virtual Actor * GetControlledActor() const { return m_ControlledActor; }
+		Actor * GetControlledActor() const { return m_ControlledActor; }
 
 		/// <summary>
 		/// Sets which Actor is supposed to be controlled by this.
 		/// </summary>
 		/// <param name="controlledActor">A pointer to a an Actor which is being controlled by this. Ownership is NOT transferred!</param>
-		virtual void SetControlledActor(Actor *controlledActor = 0) { m_ControlledActor = controlledActor; }
+		void SetControlledActor(Actor *controlledActor = 0) { m_ControlledActor = controlledActor; }
 #pragma endregion
 
 #pragma region Virtual Override Methods
 		/// <summary>
 		/// Updates this Controller. Supposed to be done every frame.
 		/// </summary>
-		virtual void Update();
+		void Update();
 #pragma endregion
 
 #pragma region Operator Overloads
@@ -297,7 +297,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="rhs">A Controller reference.</param>
 		/// <returns>A reference to the changed Controller.</returns>
-		virtual Controller & operator=(const Controller &rhs);
+		Controller & operator=(const Controller &rhs);
 #pragma endregion
 
 	protected:

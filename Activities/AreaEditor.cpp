@@ -256,7 +256,7 @@ int AreaEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void AreaEditor::Pause(bool pause)
+void AreaEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;
@@ -274,7 +274,7 @@ void AreaEditor::End()
 
     
 
-    m_ActivityState = OVER;
+    m_ActivityState = ActivityState::Over;
 }
 
 
@@ -381,13 +381,11 @@ void AreaEditor::Update()
 			Activity * pActivity = dynamic_cast<Activity *>(pActivityPreset->Clone());
 			GameActivity *pTestGame = dynamic_cast<GameActivity *>(pActivity);
             RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GAScripted Activity! Has it been defined?");
-            pTestGame->SetPlayerCount(1);
-            pTestGame->SetTeamCount(2);
             pTestGame->SetTeamOfPlayer(0, 0);
             pTestGame->SetCPUTeam(1);
 			pTestGame->SetStartingGold(10000);
 			pTestGame->SetFogOfWarEnabled(false);
-            pTestGame->SetDifficulty(GameActivity::MEDIUMDIFFICULTY);
+            pTestGame->SetDifficulty(DifficultySetting::MediumDifficulty);
             g_ActivityMan.SetStartActivity(pTestGame);
             g_ResetActivity = true;
         }

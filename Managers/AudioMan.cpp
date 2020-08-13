@@ -8,14 +8,14 @@
 
 namespace RTE {
 
-	const std::string AudioMan::m_ClassName = "AudioMan";
+	const std::string AudioMan::c_ClassName = "AudioMan";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AudioMan::Clear() {
 		m_AudioEnabled = false;
 
-		soundChannelRolloffs.clear();
+		m_SoundChannelRolloffs.clear();
 
 		m_MusicPath.clear();
 		m_SoundsVolume = 1.0;
@@ -93,7 +93,7 @@ namespace RTE {
 				}
 
 				int audioSystemPlayerNumber = 0;
-				for (int player = 0; player < currentActivity->GetPlayerCount() && audioSystemPlayerNumber < m_CurrentActivityHumanCount; player++) {
+				for (int player = Players::PlayerOne; player < currentActivity->GetPlayerCount() && audioSystemPlayerNumber < m_CurrentActivityHumanCount; player++) {
 					if (currentActivity->PlayerHuman(player)) {
 						status = m_AudioSystem->set3DListenerAttributes(audioSystemPlayerNumber, &GetAsFMODVector(g_SceneMan.GetScrollTarget(currentActivity->ScreenOfPlayer(player)), g_SettingsMan.c_ListenerZOffset()), NULL, &c_FMODForward, &c_FMODUp);
 						audioSystemPlayerNumber++; 
@@ -458,8 +458,8 @@ namespace RTE {
 				result = (result == FMOD_OK) ? channel->setPitch(pitch) : result;
 
 				if (!soundContainer->IsImmobile()) {
-					soundChannelRolloffs.insert({static_cast<unsigned short>(channelIndex), {FMOD_VECTOR(soundData.CustomRolloffPoints[0]), FMOD_VECTOR(soundData.CustomRolloffPoints[1])}});
-					result = (result == FMOD_OK) ? channel->set3DCustomRolloff(soundChannelRolloffs.at(channelIndex).data(), 2) : result;
+					m_SoundChannelRolloffs.insert({static_cast<unsigned short>(channelIndex), {FMOD_VECTOR(soundData.CustomRolloffPoints[0]), FMOD_VECTOR(soundData.CustomRolloffPoints[1])}});
+					result = (result == FMOD_OK) ? channel->set3DCustomRolloff(m_SoundChannelRolloffs.at(channelIndex).data(), 2) : result;
 					result = (result == FMOD_OK) ? UpdateMobileSoundChannelCalculated3DEffects(channel) : result;
 				}
 
@@ -653,7 +653,7 @@ namespace RTE {
 			result = (result == FMOD_OK) ? channel->setUserData(NULL) : result;
 
 			// Remove the stored rolloff for this channel
-			if (AudioMan::Instance().soundChannelRolloffs.find(channelIndex) != AudioMan::Instance().soundChannelRolloffs.end()) { AudioMan::Instance().soundChannelRolloffs.erase(channelIndex); }
+			if (AudioMan::Instance().m_SoundChannelRolloffs.find(channelIndex) != AudioMan::Instance().m_SoundChannelRolloffs.end()) { AudioMan::Instance().m_SoundChannelRolloffs.erase(channelIndex); }
 
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: An error occurred when Ending a sound in SoundContainer " + channelSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
@@ -682,7 +682,7 @@ namespace RTE {
 				result = m_MobileSoundChannelGroup->getChannel(i, &channel);
 				result = result == FMOD_OK ? UpdateMobileSoundChannelCalculated3DEffects(channel) : result;
 				if (result != FMOD_OK) {
-					g_ConsoleMan.PrintString("ERROR: An error occured when manually attenuating all playing channels, for channel index " + std::to_string(i) + ": " + std::string(FMOD_ErrorString(result)));
+					g_ConsoleMan.PrintString("ERROR: An error occurred when manually attenuating all playing channels, for channel index " + std::to_string(i) + ": " + std::string(FMOD_ErrorString(result)));
 				}
 			}
 		} else {
@@ -702,7 +702,7 @@ namespace RTE {
 		const Activity *currentActivity = g_ActivityMan.GetActivity();
 		float shortestDistance = g_SceneMan.GetSceneDim().GetMagnitude();
 		float longestDistance = 0;
-		for (int player = 0; player < currentActivity->GetPlayerCount(); player++) {
+		for (int player = Players::PlayerOne; player < currentActivity->GetPlayerCount(); player++) {
 			if (currentActivity->PlayerHuman(player)) {
 				float distance = g_SceneMan.ShortestDistance(GetAsVector(channelPosition), g_SceneMan.GetScrollTarget(currentActivity->ScreenOfPlayer(player)), g_SceneMan.SceneWrapsX()).GetMagnitude();
 				shortestDistance = min(shortestDistance, distance);

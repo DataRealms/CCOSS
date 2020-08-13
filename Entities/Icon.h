@@ -33,7 +33,7 @@ namespace RTE {
 		/// Makes the Icon object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Creates an Icon to be identical to another, by deep copy.
@@ -47,18 +47,18 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up an Icon object before deletion from system memory.
 		/// </summary>
-		virtual ~Icon() { Destroy(true); }
+		~Icon() override { Destroy(true); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the Icon object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false);
+		void Destroy(bool notInherited = false) override;
 
 		/// <summary>
 		/// Resets the entire Icon, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); Entity::Reset(); }
+		void Reset() override { Clear(); Entity::Reset(); }
 #pragma endregion
 
 #pragma region Getters and Setters

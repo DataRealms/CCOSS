@@ -18,6 +18,7 @@
 #include "SettingsMan.h"
 #include "LuaMan.h"
 #include "Atom.h"
+#include "Actor.h"
 
 namespace RTE {
 
@@ -991,9 +992,7 @@ void MovableObject::Update()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this' and its childrens MOID status. Supposed to be done every frame.
 
-void MovableObject::UpdateMOID(vector<MovableObject *> &MOIDIndex,
-                               int rootMOID,
-                               bool makeNewMOID)
+void MovableObject::UpdateMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID)
 {
     // Register the own MOID
     RegMOID(MOIDIndex, rootMOID, makeNewMOID);

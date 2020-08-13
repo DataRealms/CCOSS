@@ -62,7 +62,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Arm() { Destroy(true); }
+	~Arm() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Attachable::Reset(); }
+    void Reset() override { Clear(); Attachable::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +95,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+    float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -194,7 +194,7 @@ ClassInfoGetters
 //                  assigned for this frame.
 // Return value:    None.
 
-    virtual void SetID(const MOID newID);
+    void SetID(const MOID newID) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -366,7 +366,7 @@ ClassInfoGetters
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -376,7 +376,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -391,14 +391,11 @@ ClassInfoGetters
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawHand
+// Method:  DrawHand
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this Arm's hand's graphical representation to a BITMAP of
 //                  choice.
@@ -407,9 +404,7 @@ ClassInfoGetters
 //                  In which mode to draw in. See the DrawMode enumeration for the modes.
 // Return value:    None.
 
-    virtual void DrawHand(BITMAP *pTargetBitmap,
-                          const Vector &targetPos = Vector(),
-                          DrawMode mode = g_DrawColor) const;
+	void DrawHand(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -419,7 +414,7 @@ ClassInfoGetters
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -450,9 +445,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
     // Member variables
@@ -504,8 +497,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Arm(const Arm &reference);
-    Arm & operator=(const Arm &rhs);
+	Arm(const Arm &reference) {}
+	Arm & operator=(const Arm &rhs) {}
 
 };
 

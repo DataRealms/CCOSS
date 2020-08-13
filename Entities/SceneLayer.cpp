@@ -568,6 +568,7 @@ void SceneLayer::Update()
 }
 
 
+// TODO: Declare this in the header and remove the dupe declaration in NetworkClient.cpp
 // Data structure for constructing the draw boxes we'll need to use for drawing
 struct SLDrawBox
 {

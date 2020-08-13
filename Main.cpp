@@ -18,14 +18,15 @@
 /// Cortex Command Community Project - https://github.com/cortex-command-community
 /// </summary>
 
-// Without this nested includes somewhere deep inside Allegro will summon winsock.h and it will conflict with winsock2.h from RakNet.
-#define WIN32_LEAN_AND_MEAN
-
 #include "System.h"
 
-#include "RTEManagers.h"
 #include "MetaMan.h"
+#include "SettingsMan.h"
 #include "ConsoleMan.h"
+#include "PresetMan.h"
+#include "PerformanceMan.h"
+#include "PrimitiveMan.h"
+#include "UInputMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -42,8 +43,6 @@
 
 #include "MultiplayerServerLobby.h"
 #include "NetworkServer.h"
-#include "NetworkClient.h"
-#include "Network.h"
 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
@@ -192,8 +191,8 @@ bool InitMainMenu() {
 /// Reset the current activity.
 /// </summary>
 /// <returns></returns>
-bool ResetActivity()
-{
+bool ResetActivity() {
+	g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
     g_ResetActivity = false;
 
     // Clear and reset out things
@@ -242,7 +241,7 @@ bool ResetActivity()
 /// Start the simulation back up after being paused.
 /// </summary>
 void ResumeActivity() {
-	if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NOTSTARTED) {
+	if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NotStarted) {
 		g_Quit = false;
 		g_InActivity = true;
 		g_ResumeActivity = false;
@@ -401,10 +400,6 @@ bool PlayIntroTitle() {
 	MOSRotating *pPioneerScreaming = new MOSRotating();
 	pPioneerScreaming->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerScreaming.bmp"));
 	pPioneerScreaming->SetWrapDoubleDrawing(false);
-
-	MOSRotating *pPioneerPromo = new MOSRotating();
-	pPioneerPromo->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerPromo.bmp"));
-	pPioneerPromo->SetWrapDoubleDrawing(false);
 
 	MOSParticle * pFirePuffLarge = dynamic_cast<MOSParticle *>(g_PresetMan.GetEntityPreset("MOSParticle", "Fire Puff Large", "Base.rte")->Clone());
 	MOSParticle * pFirePuffMedium = dynamic_cast<MOSParticle *>(g_PresetMan.GetEntityPreset("MOSParticle", "Fire Puff Medium", "Base.rte")->Clone());
@@ -624,11 +619,11 @@ bool PlayIntroTitle() {
             pPlanet->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);
 
 			// Manually shake our shakeOffset to randomize some effects
-			if (g_TimerMan.GetAbsoulteTime() > lastShake + 50000)
+			if (g_TimerMan.GetAbsoluteTime() > lastShake + 50000)
 			{
 				shakeOffset.m_X = RangeRand(-3, 3);
 				shakeOffset.m_Y = RangeRand(-3, 3);
-				lastShake = g_TimerMan.GetAbsoulteTime();
+				lastShake = g_TimerMan.GetAbsoluteTime();
 			}
 
 			// Tell the menu that PP promo is off
@@ -677,21 +672,6 @@ bool PlayIntroTitle() {
 					Box promoBox(pioneerScreamPos.m_X - 125, pioneerScreamPos.m_Y - 70, pioneerScreamPos.m_X + 125, pioneerScreamPos.m_Y + 70);
 					g_pMainMenuGUI->SetPioneerPromoBox(promoBox);
 				} 
-
-				if (orbitRotation < -c_PI * 1.65 && orbitRotation > -c_PI * 1.95)
-				{
-					Vector promoPos = planetPos - Vector(320 - 128, 320 + 29);
-
-					// Draw pioneer promo
-					pPioneerPromo->SetPos(promoPos);
-					pPioneerPromo->Draw(g_FrameMan.GetBackBuffer32());
-
-					// Enable the promo banner and tell the menu where it can be clicked
-					g_pMainMenuGUI->EnablePioneerPromoButton();
-
-					Box promoBox(promoPos.m_X - 128, promoPos.m_Y - 80, promoPos.m_X + 128, promoPos.m_Y + 80);
-					g_pMainMenuGUI->SetPioneerPromoBox(promoBox);
-				}
 			}
 				
 			// Place, rotate and draw station
@@ -706,9 +686,9 @@ bool PlayIntroTitle() {
 			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.25 && orbitRotation > -c_TwoPI)
 			{
 				// Add explosions delay and count them
-				if (g_TimerMan.GetAbsoulteTime() > lastPuff + 1000000)
+				if (g_TimerMan.GetAbsoluteTime() > lastPuff + 1000000)
 				{
-					lastPuff = g_TimerMan.GetAbsoulteTime();
+					lastPuff = g_TimerMan.GetAbsoluteTime();
 					puffActive = true;
 					puffCount++;
 				}
@@ -720,9 +700,9 @@ bool PlayIntroTitle() {
 					if (puffCount == 1)
 					{
 						pFirePuffLarge->SetPos(planetPos + stationOffset);
-						if (g_TimerMan.GetAbsoulteTime() > lastPuffFrame + 50000)
+						if (g_TimerMan.GetAbsoluteTime() > lastPuffFrame + 50000)
 						{
-							lastPuffFrame = g_TimerMan.GetAbsoulteTime();
+							lastPuffFrame = g_TimerMan.GetAbsoluteTime();
 							puffFrame++;
 
 							if (puffFrame >= pFirePuffLarge->GetFrameCount())
@@ -737,9 +717,9 @@ bool PlayIntroTitle() {
 						pFirePuffLarge->Draw(g_FrameMan.GetBackBuffer32());
 					} else {
 						pFirePuffMedium->SetPos(planetPos + stationOffset + shakeOffset);
-						if (g_TimerMan.GetAbsoulteTime() > lastPuffFrame + 50000)
+						if (g_TimerMan.GetAbsoluteTime() > lastPuffFrame + 50000)
 						{
-							lastPuffFrame = g_TimerMan.GetAbsoulteTime();
+							lastPuffFrame = g_TimerMan.GetAbsoluteTime();
 							puffFrame++;
 
 							if (puffFrame >= pFirePuffLarge->GetFrameCount())
@@ -1755,9 +1735,9 @@ bool RunGameLoop() {
 				if (g_MetaMan.GameInProgress()) {
 					g_IntroState = CAMPAIGNFADEIN;
 				} else {
-					Activity * pActivity = g_ActivityMan.GetActivity();
+					const Activity *activity = g_ActivityMan.GetActivity();
 					// If we edited something then return to main menu instead of scenario menu player will probably switch to area/scene editor.
-					if (pActivity && pActivity->GetPresetName() == "None") {
+					if (activity && activity->GetPresetName() == "None") {
 						g_IntroState = MENUAPPEAR;
 					} else {
 						g_IntroState = MAINTOSCENARIO;
@@ -1786,10 +1766,10 @@ bool RunGameLoop() {
 				serverUpdated = true;
 			}
 			if (g_SettingsMan.GetServerSimSleepWhenIdle()) {
-				signed long long ticksToSleep = g_TimerMan.GetTimeToSleep();
+				long long ticksToSleep = g_TimerMan.GetTimeToSleep();
 				if (ticksToSleep > 0) {
-					double secsToSleep = (double)ticksToSleep / (double)g_TimerMan.GetTicksPerSecond();
-					long long milisToSleep = (long long)secsToSleep * (1000);
+					double secsToSleep = static_cast<double>(ticksToSleep) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
+					long long milisToSleep = static_cast<long long>(secsToSleep) * 1000;
 					std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
 				}
 			}
@@ -1922,7 +1902,6 @@ int main(int argc, char *argv[]) {
         g_GUISound.Create();
     }
     g_UInputMan.Create();
-	if (g_NetworkServer.IsServerModeEnabled()) { g_UInputMan.SetMultiplayerMode(true); }
     g_ConsoleMan.Create();
     g_ActivityMan.Create();
     g_MovableMan.Create();
@@ -1933,6 +1912,7 @@ int main(int argc, char *argv[]) {
 
 	if (g_NetworkServer.IsServerModeEnabled()) {
 		g_NetworkServer.Start();
+		g_UInputMan.SetMultiplayerMode(true);
 		g_FrameMan.SetMultiplayerMode(true);
 		g_AudioMan.SetMultiplayerMode(true);
 		g_AudioMan.SetSoundsVolume(0);
@@ -1943,11 +1923,14 @@ int main(int argc, char *argv[]) {
 	g_LoadingGUI.InitLoadingScreen();
 	InitMainMenu();
 
+	std::string screenshotSaveDir = g_System.GetWorkingDirectory() + "/" + c_ScreenshotDirectory;
+	if (!std::experimental::filesystem::exists(screenshotSaveDir)) { g_System.MakeDirectory(screenshotSaveDir); }
+
     if (!g_NetworkServer.IsServerModeEnabled()) {
 		if (g_LaunchIntoEditor) {
 			// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
-			g_UInputMan.GetControlScheme(0)->SetDevice(1);
-			g_UInputMan.GetControlScheme(0)->SetPreset(1);
+			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetDevice(InputDevice::DEVICE_MOUSE_KEYB);
+			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetPreset(InputPreset::PRESET_WASDKEYS);
 			// Start the specified editor activity.
 			EnterEditorActivity(g_EditorToLaunch);
 		} else if (!g_SettingsMan.LaunchIntoActivity()) {

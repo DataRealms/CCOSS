@@ -59,7 +59,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~GABrainMatch() { Destroy(true); }
+	~GABrainMatch() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const GABrainMatch &reference);
+	int Create(const GABrainMatch &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Activity::Reset(); }
+	void Reset() override { Clear(); Activity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+	void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -114,39 +114,8 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Start();
+	int Start() override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Pause
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Pauses and unpauses the game.
-// Arguments:       Whether to pause the game or not.
-// Return value:    None.
-
-    virtual void Pause(bool pause = true);
-*/
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  End
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Forces the current game's end.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void End();
-*/
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateEditing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     This is a special update step for when any player is still editing the
-//                  scene.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void UpdateEditing();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -156,7 +125,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -168,7 +137,7 @@ ClassInfoGetters
 //                  Which screen's GUI to draw onto the bitmap.
 // Return value:    None.
 
-    virtual void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0);
+	void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +149,7 @@ ClassInfoGetters
 //                  The absolute position of the target bitmap's upper left corner in the scene.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector());
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

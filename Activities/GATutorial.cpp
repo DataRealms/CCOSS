@@ -34,7 +34,7 @@
 extern bool g_ResetActivity;
 extern bool g_InActivity;
 
-#define MAPNAME(element) g_UInputMan.GetMappingName(m_TutorialPlayer, UInputMan::element)
+#define MAPNAME(element) g_UInputMan.GetMappingName(m_TutorialPlayer, element)
 
 namespace RTE {
 
@@ -68,18 +68,7 @@ GATutorial::TutStep::TutStep(string text, int stepDuration, string screensPath, 
 
 void GATutorial::Clear()
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
-    m_TutorialPlayer = Activity::PLAYER_1;
+    m_TutorialPlayer = Players::PlayerOne;
 
     for (int area = 0; area < AREACOUNT; ++area)
     {
@@ -123,23 +112,7 @@ int GATutorial::Create()
         return -1;
 
     m_Description = "A tutorial for learning how to play Cortex Command. A good place to start!";
-/*
-    ////////////////////////////////
-    // Set up teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-
-    ///////////////////////////////////////
-    // Set up players
-
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-*/
     return 0;
 }
 
@@ -246,17 +219,6 @@ int GATutorial::Save(Writer &writer) const
 
 void GATutorial::Destroy(bool notInherited)
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
     if (!notInherited)
         GameActivity::Destroy();
     Clear();
@@ -269,7 +231,7 @@ void GATutorial::Destroy(bool notInherited)
 // Description:     Tells if a particular Scene supports this specific Activity on it.
 //                  Usually that means certain Area:s need to be defined in the Scene.
 
-bool GATutorial::SceneIsCompatible(Scene *pScene, int teams)
+bool GATutorial::SceneIsCompatible(Scene *pScene, short teams)
 {
     if (!GameActivity::SceneIsCompatible(pScene, teams))
         return false;
@@ -296,14 +258,14 @@ int GATutorial::Start()
     // Set up teams
 
     // Team 2 is always CPU
-    SetCPUTeam(Activity::TEAM_2);
+    SetCPUTeam(Teams::TeamTwo);
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
 
-        if (team == Activity::TEAM_1)
+        if (team == Teams::TeamOne)
         {
             // See if there are specified landing zone areas defined in the scene
             char str[64];
@@ -338,9 +300,9 @@ int GATutorial::Start()
                     // No brain found on other team... then just place somewhere in the ground, spaced out
                     else
                     {
-                        if (team == TEAM_1)
+                        if (team == Teams::TeamOne)
                             brainPos.SetXY((float)g_SceneMan.GetSceneWidth() * 0.25, (float)g_SceneMan.GetSceneHeight() * 0.75);
-                        if (team == TEAM_2)
+                        if (team == Teams::TeamTwo)
                             brainPos.SetXY((float)g_SceneMan.GetSceneWidth() * 0.75, (float)g_SceneMan.GetSceneHeight() * 0.75);
                     }
                     m_pCPUBrain->SetPos(brainPos);
@@ -359,7 +321,7 @@ int GATutorial::Start()
     ///////////////////////////////////////
     // Set up players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -371,7 +333,7 @@ int GATutorial::Start()
         SetBrainLZWidth(player, 0);
 
         // If we can't find an unassigned brain in the scene to give each player, then force to go into editing mode to place one
-        if (!(m_pBrain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
+        if (!(m_Brain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
         {
             g_ConsoleMan.PrintString("ERROR: Can't find brain for tutorial game mode!");
         }
@@ -379,16 +341,16 @@ int GATutorial::Start()
         else
         {
             m_TutorialPlayer = player;
-            SwitchToActor(m_pBrain[player], player, m_Team[player]);
-            m_ActorCursor[player] = m_pBrain[player]->GetPos();
-            m_LandingZone[player].m_X = m_pBrain[player]->GetPos().m_X;
+            SwitchToActor(m_Brain[player], player, m_Team[player]);
+            m_ActorCursor[player] = m_Brain[player]->GetPos();
+            m_LandingZone[player].m_X = m_Brain[player]->GetPos().m_X;
             // Set the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-            m_ObservationTarget[player] = m_pBrain[player]->GetPos();
+            m_ObservationTarget[player] = m_Brain[player]->GetPos();
         }
 /*
-        if (m_ActivityState == EDITING)
+        if (m_ActivityState == ActivityState::Editing)
             g_FrameMan.SetScreenText((player % 2 == 0) ? "Place your brain vault and build your bunker around it..." : "...then select \"DONE\" from the pie menu!", ScreenOfPlayer(player), 0);
-        else if (m_ActivityState == RUNNING)
+        else if (m_ActivityState == ActivityState::Running)
             g_FrameMan.SetScreenText((player % 2 == 0) ? "Mine Gold and buy more firepower with the funds..." : "...then smash the competing brain to claim victory!", ScreenOfPlayer(player), 0);
 */
     }
@@ -442,7 +404,7 @@ int GATutorial::Start()
     SetupAreas();
 
     // Disable all enemy AIs so they dont attack prematurely
-    DisableAIs(true, Activity::TEAM_2);
+    DisableAIs(true, Teams::TeamTwo);
 
     //////////////////////////////////
     // FIGHT TRIGGERS
@@ -471,9 +433,9 @@ int GATutorial::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void GATutorial::Pause(bool pause)
+void GATutorial::SetPaused(bool pause)
 {
-    GameActivity::Pause(pause);
+    GameActivity::SetPaused(pause);
 
     // Re-setup the ares with any updated control mappings that the player might have made in teh menu
     if (!pause)
@@ -492,7 +454,7 @@ void GATutorial::End()
 
     bool playerWon = false;
     // Show appropriate end game messages
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -501,8 +463,8 @@ void GATutorial::End()
         {
             playerWon = true;
             // Set the winner's observation view to his controlled actors instead of his brain
-            if (m_pControlledActor[player] && g_MovableMan.IsActor(m_pControlledActor[player]))
-                m_ObservationTarget[player] = m_pControlledActor[player]->GetPos();
+            if (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player]))
+                m_ObservationTarget[player] = m_ControlledActor[player]->GetPos();
         }
     }
 
@@ -546,7 +508,7 @@ void GATutorial::UpdateEditing()
 void GATutorial::Update()
 {
     // Avoid game logic when we're editing
-    if (m_ActivityState == EDITING)
+    if (m_ActivityState == ActivityState::Editing)
     {
         UpdateEditing();
         return;
@@ -560,22 +522,22 @@ void GATutorial::Update()
     ///////////////////////////////////////////
     // Iterate through all human players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
         // The current player's team
         int team = m_Team[player];
-        if (team == NOTEAM)
+        if (team == Teams::NoTeam)
             continue;
 
         // Make sure the game is not already ending
-        if (m_ActivityState != OVER)
+        if (m_ActivityState != ActivityState::Over)
         {
             // Check if any player's brain is dead
-            if (!g_MovableMan.IsActor(m_pBrain[player]))
+            if (!g_MovableMan.IsActor(m_Brain[player]))
             {
-                m_pBrain[player] = 0;
+                m_Brain[player] = 0;
                 g_FrameMan.SetScreenText("Your brain has been destroyed!", ScreenOfPlayer(player), 333);
 
                 // Now see if all brains are dead of this player's team, and if so, end the game
@@ -585,15 +547,15 @@ void GATutorial::Update()
                     End();
                 }
 
-                m_MsgTimer[player].Reset();
+                m_MessageTimer[player].Reset();
             }
             // Mark the player brain to be protected when the fight happens
             else if (m_CurrentFightStage >= DEFENDING)
             {
                 // Update the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-//                SetObservationTarget(m_pBrain[player]->GetPos(), player);
+//                SetObservationTarget(m_Brain[player]->GetPos(), player);
                 // Mark the player's brain to be protected by his team
-                AddObjectivePoint("Protect!", m_pBrain[player]->GetPos() + Vector(0, 10), team, GameActivity::ARROWUP);
+                AddObjectivePoint("Protect!", m_Brain[player]->GetPos() + Vector(0, 10), team, GameActivity::ARROWUP);
                 // Mark the CPU brain for desctruction too
                 if (g_MovableMan.IsActor(m_pCPUBrain))
                     AddObjectivePoint("Destroy!", m_pCPUBrain->GetPos() + Vector(0, 12), team, GameActivity::ARROWUP);
@@ -613,7 +575,7 @@ void GATutorial::Update()
     ///////////////////////////////////////////
     // Iterate through all teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -623,7 +585,7 @@ void GATutorial::Update()
         if (team == m_CPUTeam)
         {
             // Spawn the CPU team's attacking forces
-            if (m_SpawnTimer.IsPastSimMS(m_SpawnInterval) && m_ActivityState != OVER)
+            if (m_SpawnTimer.IsPastSimMS(m_SpawnInterval) && m_ActivityState != ActivityState::Over)
             {
                 if (!m_AttackerSpawns.empty())
                 {
@@ -667,7 +629,7 @@ void GATutorial::Update()
         // Check for victory conditions
 
         // Make sure the game is not already ending
-        if (m_ActivityState != OVER && team != m_CPUTeam)
+        if (m_ActivityState != ActivityState::Over && team != m_CPUTeam)
         {
 // TODO: Gotto have budget restrictions in this activity!
 /*
@@ -675,7 +637,7 @@ void GATutorial::Update()
 // TODO Don't hardcode the rocket cost!
             if (m_TeamFunds[team] < 0)//&& Only brain is left of actors)
             {
-                for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+                for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
                 {
                     if (!(m_IsActive[player] && m_IsHuman[player]))
                         continue;
@@ -687,7 +649,7 @@ void GATutorial::Update()
                         g_FrameMan.SetScreenText("Your competition is bankrupt!", ScreenOfPlayer(player));
                         m_WinnerTeam = m_Team[player];
                     }
-                    m_MsgTimer[player].Reset();
+                    m_MessageTimer[player].Reset();
                 }
                 End();
             }
@@ -699,12 +661,12 @@ void GATutorial::Update()
     // TUTORIAL LOGIC
 
     // Detect the player going into new areas
-    if (m_pControlledActor[m_TutorialPlayer])
+    if (m_ControlledActor[m_TutorialPlayer])
     {
         for (int area = 0; area < AREACOUNT; ++area)
         {
             // Switch if within the trigger box of a new area
-            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
+            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_ControlledActor[m_TutorialPlayer]->GetPos()))
             {
                 // Change to the new area
                 m_PrevArea = m_CurrentArea;
@@ -721,7 +683,7 @@ void GATutorial::Update()
         {
 
             // Switch if within the trigger box of a new area
-            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
+            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_ControlledActor[m_TutorialPlayer]->GetPos()))
             {
 
             if (m_FightTriggers[stage].Reset();
@@ -756,7 +718,7 @@ void GATutorial::Update()
 
 /* Draw this manually over the current screen in DrawGUI
     // Take over control of screen messages
-    m_MsgTimer[m_TutorialPlayer].Reset();
+    m_MessageTimer[m_TutorialPlayer].Reset();
     // Display the text of the current step
 //    g_FrameMan.ClearScreenText();
     g_FrameMan.SetScreenText(m_TutAreaSteps[m_CurrentArea][m_CurrentStep].m_Text, 0, 500, -1, true);//, m_TutAreaSteps[m_CurrentArea][m_CurrentStep].m_Duration);
@@ -839,19 +801,19 @@ void GATutorial::Update()
     ////////////////////////
     // FIGHT LOGIC
 
-    if (m_pControlledActor[m_TutorialPlayer])
+    if (m_ControlledActor[m_TutorialPlayer])
     {
         // Triggered defending stage
-        if (m_CurrentFightStage == NOFIGHT && m_FightTriggers[DEFENDING].IsWithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
+        if (m_CurrentFightStage == NOFIGHT && m_FightTriggers[DEFENDING].IsWithinBox(m_ControlledActor[m_TutorialPlayer]->GetPos()))
         {
             // Take over control of screen messages
-            m_MsgTimer[m_TutorialPlayer].Reset();
+            m_MessageTimer[m_TutorialPlayer].Reset();
             // Display the text of the current step
             g_FrameMan.ClearScreenText(ScreenOfPlayer(m_TutorialPlayer));
             g_FrameMan.SetScreenText("DEFEND YOUR BRAIN AGAINST THE INCOMING FORCES!", ScreenOfPlayer(m_TutorialPlayer), 500, 8000, true);
             // This will make all the enemy team AI's go into brain hunt mode
             GameActivity::InitAIs();
-            DisableAIs(false, Activity::TEAM_2);
+            DisableAIs(false, Teams::TeamTwo);
 
             // Advance the stage
             m_CurrentFightStage = DEFENDING;
@@ -862,17 +824,17 @@ void GATutorial::Update()
     // Check for victory conditions
 
     // Check if the CPU brain is dead, if we're playing against the CPU
-    if (!g_MovableMan.IsActor(m_pCPUBrain) && m_ActivityState != OVER)
+    if (!g_MovableMan.IsActor(m_pCPUBrain) && m_ActivityState != ActivityState::Over)
     {
         m_pCPUBrain = 0;
         // Proclaim player winner and end
-        m_WinnerTeam = Activity::TEAM_1;
+        m_WinnerTeam = Teams::TeamOne;
         // Finito!
         End();
     }
 
     // After a while of game over and we won, exit to the campaign menu automatically
-    if (m_ActivityState == OVER && m_WinnerTeam == Activity::TEAM_1)
+    if (m_ActivityState == ActivityState::Over && m_WinnerTeam == Teams::TeamOne)
     {
         if (m_GameOverTimer.IsPastSimMS(m_GameOverPeriod))
         {
@@ -898,7 +860,7 @@ void GATutorial::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 {
     GameActivity::DrawGUI(pTargetBitmap, targetPos, which);
 
-    if (Running())// && (m_AreaTimer.AlternateReal(500) || m_AreaTimer.AlternateReal(250) || m_AreaTimer.AlternateReal(125)))
+    if (IsRunning())// && (m_AreaTimer.AlternateReal(500) || m_AreaTimer.AlternateReal(250) || m_AreaTimer.AlternateReal(125)))
     {
         AllegroBitmap pBitmapInt(pTargetBitmap);
         Vector screenTextPos = m_ScreenPositions[m_CurrentArea] + m_TextOffsets[m_CurrentArea] - targetPos;
@@ -946,7 +908,7 @@ void GATutorial::InitAIs()
     Actor *pActor = 0;
     Actor *pFirstActor = 0;
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -996,7 +958,7 @@ void GATutorial::SetupAreas()
     // Adjust for special commands when using the keyboard-only setup
     string JumpName = MAPNAME(INPUT_L_UP);
     string CrouchName = MAPNAME(INPUT_L_DOWN);
-    if (device == UInputMan::DEVICE_KEYB_ONLY)
+    if (device == DEVICE_KEYB_ONLY)
     {
         JumpName = MAPNAME(INPUT_JUMP);
         CrouchName = MAPNAME(INPUT_CROUCH);
@@ -1005,7 +967,7 @@ void GATutorial::SetupAreas()
     // If no preset, adjust the pie menu and fire names when using the defaults on a gamepad.. otherwise it'll show up as an unhelpful "Joystick"
     string PieName = MAPNAME(INPUT_PIEMENU);
     string FireName = MAPNAME(INPUT_FIRE);
-    if (device >= UInputMan::DEVICE_GAMEPAD_1 && preset == UInputMan::PRESET_NONE)
+    if (device >= DEVICE_GAMEPAD_1 && preset == PRESET_NONE)
     {
         PieName = "Pie Menu Trigger";
         FireName = "Fire Trigger";

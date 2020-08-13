@@ -1370,29 +1370,25 @@ float AtomGroup::Travel(Vector &position,
             {
                 newDir = true;
 
-                // Step back all atoms that hit MO:s during this step iteration.
-                // This is so we aren't intersecting the hit MO anymore.
-                for (const map<MOID,std::list<Atom*>>::value_type &MOAtomMapEntry : hitMOAtoms)
-                {
-					for (Atom *hitMOAtom : MOAtomMapEntry.second)
-						hitMOAtom->StepBack();
-                }
-
-                // Set the mass and other data pertaining to the hitor,
-                // aka this AtomGroup's owner MO.
-                hitData.TotalMass[HITOR] = mass;
-                hitData.MomInertia[HITOR] = m_MomInertia;
-                hitData.ImpulseFactor[HITOR] = 1.0F / static_cast<float>(atomsHitMOsCount);
+				// Set the mass and other data pertaining to the hitor,
+				// aka this AtomGroup's owner MO.
+				hitData.TotalMass[HITOR] = mass;
+				hitData.MomInertia[HITOR] = m_MomInertia;
+				hitData.ImpulseFactor[HITOR] = 1.0F / static_cast<float>(atomsHitMOsCount);
 
 				for (const map<MOID, std::list<Atom *>>::value_type &MOAtomMapEntry : hitMOAtoms)
                 {
-                    // The denominator that the MovableObject being hit should
+					// The denominator that the MovableObject being hit should
                     // divide its mass with for each atom of this AtomGroup that is
                     // colliding with it during this step.
                     hitData.ImpulseFactor[HITEE] = 1.0F / static_cast<float>(MOAtomMapEntry.second.size());
 
                     for (Atom *hitMOAtom : MOAtomMapEntry.second)
                     {
+						// Step back all atoms that hit MOs during this step iteration.
+						// This is so we aren't intersecting the hit MO anymore.
+						hitMOAtom->StepBack();
+
 //                      hitData.HitPoint = aItr->GetCurrentPos();
                         // Calc and store the accurate hit radius of the Atom in relation to the CoM
                         tempVec = hitMOAtom->GetOffset().GetXFlipped(hFlipped);

@@ -6,13 +6,12 @@
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
 
-//struct DATAFILE; // DataFile loading not implemented.
 struct BITMAP;
 
 namespace RTE {
 
 	/// <summary>
-	/// A representation of a content file that is stored either directly on disk or packaged in another file.
+	/// A representation of a content file that is stored directly on disk.
 	/// </summary>
 	class ContentFile : public Serializable {
 
@@ -29,7 +28,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a ContentFile object in system memory, and also do a Create() in the same line.
 		/// </summary>
-		/// <param name="filePath">A string defining the path to where the content file itself is located, either within the package file, or directly on the disk.</param>
+		/// <param name="filePath">A string defining the path to where the content file itself is located.</param>
 		ContentFile(const char *filePath) { Clear(); Create(filePath); }
 
 		/// <summary>
@@ -41,7 +40,7 @@ namespace RTE {
 		/// <summary>
 		/// Makes the ContentFile object ready for use.
 		/// </summary>
-		/// <param name="filePath">A string defining the path to where the content file itself is located, either within the package file, or directly on the disk.</param>
+		/// <param name="filePath">A string defining the path to where the content file itself is located.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const char *filePath);
 
@@ -80,45 +79,20 @@ namespace RTE {
 		/// <summary>
 		/// Gets the ID of the Data Module this file is inside.
 		/// </summary>
-		/// <returns>The ID of the Data Module containing this' file.</returns>
+		/// <returns>The ID of the DataModule containing this' file.</returns>
 		int GetDataModuleID() const;
-
-		//TODO Potentially use these DataSize and DataType methods (as well as their corresponding setters below) to assist with packing base files as Allegro .dat files
-		/// <summary>
-		/// Gets the file size of the content file represented by this ContentFile object, in bytes. This should be called AFTER using any of the GetAs methods.
-		/// </summary>
-		/// <returns>A long describing the file size of the content file.</returns>
-		//unsigned long GetDataSize() { if (!m_LoadedData) { GetContent(); } return m_LoadedDataSize; }
-
-		/// <summary>
-		/// Gets the Allegro DATAFILE type of the DATAFILE represented by this ContentFile.
-		/// </summary>
-		/// <returns>A DATAFILE type as described in the Allegro docs.</returns>
-		//int GetDataType() { if (!m_DataFile) { GetContent(); } return m_DataFile->type; }
 
 		/// <summary>
 		/// Gets the file path of the content file represented by this ContentFile object.
 		/// </summary>
-		/// <returns>A string with the datafile object name path, like "datafile.dat#mydataobject".</returns>
+		/// <returns>A string with the file name path.</returns>
 		const std::string & GetDataPath() const { return m_DataPath; };
 
 		/// <summary>
 		/// Sets the file path of the content file represented by this ContentFile object.
 		/// </summary>
-		/// <param name="newDataPath">A string with the datafile object name path, like: "datafile.dat#mydataobject".</param>
-		void SetDataPath(std::string newDataPath);
-
-		/// <summary>
-		/// Shows whether the data of this has been modified since load, and should therefore be saved out again to the path if this.
-		/// </summary>
-		/// <returns>Whether the data of this has been modified in memory since load.</returns>
-		//bool IsDataModified() const { return m_DataModified; };
-
-		/// <summary>
-		/// Tells this whether the data loaded by this into memory has been modified and should be saved out to this' path upon writing.
-		/// </summary>
-		/// <param name="modified">Whether the loaded data of this has been modified or not.</param>
-		//void SetDataModified(bool modified = true) { m_DataModified = modified; };
+		/// <param name="newDataPath">A string with the new file name path.</param>
+		void SetDataPath(std::string newDataPath) { m_DataPath = newDataPath; s_PathHashes[GetHash()] = m_DataPath; }
 
 		/// <summary>
 		/// Creates a hash value out of a path to a ContentFile.
@@ -136,50 +110,35 @@ namespace RTE {
 
 #pragma region Data Handling
 		/// <summary>
-		/// Gets the data represented by this ContentFile object as an Allegro BITMAP, loading it into the static maps if it's not already loaded. Note that ownership of the BITMAP IS NOT TRANSFERRED!
-		/// </summary>
-		/// <param name="conversionMode">
-		/// The Allegro color conversion mode to use when loading this bitmap.
-		/// Note it will only apply the first time you get a bitmap since it is only loaded from disk the first time. See allegro docs for the modes.
-		/// </param>
-		/// <returns>The pointer to the beginning of the data object loaded from the allegro .dat datafile. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
-		BITMAP * GetAsBitmap(int conversionMode = 0);
-
-		/// <summary>
 		/// Loads and transfers the data represented by this ContentFile object as an Allegro BITMAP. Note that ownership of the BITMAP IS TRANSFERRED!
 		/// Note that this is relatively slow since it reads the data from disk each time.
 		/// </summary>
-		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap. See allegro docs for the modes.</param>
-		/// <returns>The pointer to the BITMAP loaded from disk Ownership IS transferred! If 0, the file could not be found/loaded.</returns>
+		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap. Only applies the first time a bitmap is loaded from the disk.</param>
+		/// <returns>The pointer to the BITMAP loaded from disk.</returns>
 		BITMAP * LoadAndReleaseBitmap(int conversionMode = 0);
 
 		/// <summary>
+		/// Gets the data represented by this ContentFile object as an Allegro BITMAP, loading it into the static maps if it's not already loaded. Note that ownership of the BITMAP is NOT transferred!
+		/// </summary>
+		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap.</param>
+		/// <returns>The pointer to the BITMAP loaded from disk.</returns>
+		BITMAP * GetAsBitmap(int conversionMode = 0);
+
+		/// <summary>
 		/// Gets the data represented by this ContentFile object as an array of Allegro BITMAPs, each representing a frame in the animation.
-		/// It loads the BITMAPs into the static maps if they're not already loaded. Note that ownership of the BITMAPS ARE NOT TRANSFERRED, BUT THE ARRAY ITSELF, IS!
+		/// It loads the BITMAPs into the static maps if they're not already loaded. Note that ownership of the BITMAPS is NOT transferred, BUT THE ARRAY ITSELF, IS!
 		/// </summary>
 		/// <param name="frameCount">The number of frames to attempt to load, more than 1 frame will mean 00# is appended to datapath to handle naming conventions.</param>
-		/// <param name="conversionMode">
-		/// The Allegro color conversion mode to use when loading this bitmap.
-		/// Note it will only apply the first time you get a bitmap since it is only loaded from disk the first time. See allegro docs for the modes.
-		/// </param>
-		/// <returns>
-		/// The pointer to the beginning of the array of BITMAP pointers loaded from the allegro .dat datafile, the length of which is specified with the frameCount argument.
-		/// Ownership of the array IS transferred! Ownership of the BITMAPS is NOT transferred! If 0, the file could not be found/loaded.
-		/// </returns>
+		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap.</param>
+		/// <returns>The pointer to the beginning of the array of BITMAP pointers loaded from the disk, the length of which is specified with the FrameCount argument.</returns>
 		BITMAP ** GetAsAnimation(int frameCount = 1, int conversionMode = 0);
 
 		/// <summary>
-		/// Loads and gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE. Note that ownership of the SAMPLE IS NOT TRANSFERRED!
+		/// Loads and gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE. Note that ownership of the SAMPLE is NOT transferred!
 		/// </summary>
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
 		/// <returns>The pointer to the beginning of the data object loaded from the file. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
 		FMOD::Sound * GetAsSample(bool abortGameForInvalidSound = true);
-
-		/// <summary>
-		/// Loads and gets the data represented by this ContentFile object as a binary chunk of data. Note that ownership of the DATA IS NOT TRANSFERRED!
-		/// </summary>
-		/// <returns>The pointer to the beginning of the raw data loaded from the Allegro .dat datafile. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
-		//char * GetAsRawBinary();
 #pragma endregion
 
 #pragma region Class Info
@@ -203,18 +162,11 @@ namespace RTE {
 		static std::map<size_t, std::string> s_PathHashes; //!< Hash value of the path to this ContentFile's Datafile Object.
 		static std::map<std::string, BITMAP *> s_LoadedBitmaps[BitDepthCount]; //!< Static map containing all the already loaded BITMAPs and their paths, and there's two maps, for each bit depth.
 		static std::map<std::string, FMOD::Sound *> s_LoadedSamples; //!< Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
-		//TODO Potentially use this to handle storing base files packed as Allegro .dat files
-		//static std::map<std::string, std::pair<char *, long>> m_sLoadedBinary; //!< Static map containing all the already loaded binary data. First in pair is the data, second is size in bytes.
 
-		std::string m_DataPath; //!< Path to this ContentFile's Datafile Object's path. "datafile.dat#objectname". In the case of an animation, this filename/name will be appended with 000, 001, 002 etc.
-
+		std::string m_DataPath; //!< Path to this ContentFile's file path. In the case of an animation, this filename/name will be appended with 000, 001, 002 etc.
 		int m_DataModuleID; //!< Data Module ID of where this was loaded from.
 
-		void *m_LoadedData; //!< Non-ownership pointer to the loaded data for convenience. Do not release/delete this.   
-		//long m_LoadedDataSize; //!< Size of loaded data.
-		//bool m_DataModified; //!< Whether the data itself has been modified since load, and should be saved out again to the path on write.
-
-		//DATAFILE *m_DataFile; //!< This is only if the data is loaded from a datafile; needs to be saved so that it can be unloaded as some point.
+		void *m_LoadedData; //!< Non-ownership pointer to the loaded data for convenience. Do not release/delete this.
 
 	private:
 

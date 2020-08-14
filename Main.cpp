@@ -1855,15 +1855,6 @@ int main(int argc, char *argv[]) {
 	///////////////////////////////////////////////////////////////////
     // Initialize Allegro
 
-/* This is obsolete; only applied when we were loading from a compressed Base.rte // might come in handy sometime later actually
-    // Load the Allegro config data from the base datafile
-    DATAFILE *pConfigFile = load_datafile_object("Base.rte/Base.dat", "AConfig");
-    if (pConfigFile) {
-        set_config_data((char *)pConfigFile->dat, pConfigFile->size);
-        // The above copies the data, so this is safe to do
-        unload_datafile_object(pConfigFile);
-    } */
-
     set_config_file("Base.rte/AllegroConfig.txt");
     allegro_init();
 	loadpng_init();

@@ -159,6 +159,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void ConsoleMan::AddLoadWarningLogEntry(std::string &pathToLog, std::string &altFileExtension, const std::string &readerPosition) {
+		std::string newEntry = "\"" + pathToLog + "\" referenced " + readerPosition + ". Found and loaded a file with \"" + altFileExtension + "\" extension.";
+		std::transform(newEntry.begin(), newEntry.end(), newEntry.begin(), ::tolower);
+		if (m_LoadWarningLog.find(newEntry) == m_LoadWarningLog.end()) { m_LoadWarningLog.insert(newEntry); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::SaveLoadWarningLog(const std::string &filePath) {
+		Writer logWriter(filePath.c_str());
+		if (logWriter.WriterOK()) {
+			logWriter << "// File load warnings:";
+			logWriter.NewLine(false);
+			for (const std::string &logEntry : m_LoadWarningLog) {
+				logWriter.NewLineString(logEntry, false);
+			}
+			PrintString("SYSTEM: Loading warning log saved to " + filePath);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void ConsoleMan::PrintString(std::string stringToPrint) {
 		m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + stringToPrint);
 		if (g_System.GetLogToCLI()) { g_System.PrintToCLI(stringToPrint); }

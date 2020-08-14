@@ -50,9 +50,9 @@ namespace RTE {
 
 			// This is the engine for processing all properties of this Serializable upon read creation.
 			while (reader.NextProperty()) {
+				m_CurrentlyReadFileAndLine = ("in file: \"" + reader.GetCurrentFilePath() + "\" on line " + std::to_string(reader.GetCurrentFileLine()));
 				std::string propName = reader.ReadPropName();
-				// We need to check if propName != "" because ReadPropName may return "" when it reads an InlcudeFile without any properties,
-				// in a case they are all commented out or it's the last line in file.
+				// We need to check if propName != "" because ReadPropName may return "" when it reads an InlcudeFile without any properties in case they are all commented out or it's the last line in file.
 				// Also ReadModuleProperty may return "" when it skips IncludeFile till the end of file.
 				if (propName != "" && ReadProperty(propName, reader) < 0) {
 					// TODO: Could not match property. Log here!
@@ -96,6 +96,14 @@ namespace RTE {
 		/// <param name="writer">A Writer that the Serializable will save itself to.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int Save(Writer &writer) const { writer.ObjectStart(GetClassName()); return 0; }
+#pragma endregion
+
+#pragma region Logging
+		/// <summary>
+		/// Gets the file and line that are currently being read. To be used for logging warnings and errors.
+		/// </summary>
+		/// <returns>A string containing the currently read file path and the line being read.</returns>
+		const std::string & GetCurrentlyReadFileAndLine() const { return m_CurrentlyReadFileAndLine; }
 #pragma endregion
 
 #pragma region Operator Overloads
@@ -156,6 +164,8 @@ namespace RTE {
 #pragma endregion
 
 	private:
+
+		std::string m_CurrentlyReadFileAndLine; //!< A string containing the currently read file path and the line being read. Used for logging.
 
 		/// <summary>
 		/// Clears all the member variables of this Object, effectively resetting the members of this abstraction level only.

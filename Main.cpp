@@ -1937,6 +1937,14 @@ int main(int argc, char *argv[]) {
 	std::string screenshotSaveDir = g_System.GetWorkingDirectory() + "/" + c_ScreenshotDirectory;
 	if (!std::experimental::filesystem::exists(screenshotSaveDir)) { g_System.MakeDirectory(screenshotSaveDir); }
 
+	if (g_ConsoleMan.HasLoadWarnings()) {
+		g_ConsoleMan.PrintString("WARNING: References to files with incorrect extensions detected during loading! Files with alternative extensions were found and loaded instead!");
+		g_ConsoleMan.PrintString("Please correct the extensions in the relevant file paths. See \"LoadWarningLog.txt\" for a list of bad references.");
+		g_ConsoleMan.SaveLoadWarningLog("LogLoadingWarning.txt");
+		// Open the console so the user is aware there are loading warnings.
+		g_ConsoleMan.SetEnabled(true);
+	}
+
     if (!g_NetworkServer.IsServerModeEnabled()) {
 		if (g_LaunchIntoEditor) {
 			// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.

@@ -93,12 +93,15 @@ namespace RTE {
 		std::string altFileExtension = (fileExtension == ".png") ? ".bmp" : ".png";
 
 		if (!std::experimental::filesystem::exists(m_DataPath)) {
+			// Check for 000 in the file name in case it is part of an animation but the FrameCount was set to 1. Do not warn about this because it's normal operation.
 			if (std::experimental::filesystem::exists(pathWithoutExtension + "000" + fileExtension)) {
 				SetDataPath(pathWithoutExtension + "000" + fileExtension);
 			} else {
 				if (std::experimental::filesystem::exists(pathWithoutExtension + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, altFileExtension, GetCurrentlyReadFileAndLine());
 					SetDataPath(pathWithoutExtension + altFileExtension);
 				} else if (std::experimental::filesystem::exists(pathWithoutExtension + "000" + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, altFileExtension, GetCurrentlyReadFileAndLine());
 					SetDataPath(pathWithoutExtension + "000" + altFileExtension);
 				} else {
 					RTEAbort("Failed to find image file with following path and name:\n\n" + m_DataPath + "\nor\n" + pathWithoutExtension + altFileExtension + "\n\nLoading has been aborted!");

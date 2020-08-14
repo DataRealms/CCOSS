@@ -80,6 +80,26 @@ namespace RTE {
 
 #pragma region Logging
 		/// <summary>
+		/// Gets whether the loading warning log has any warnings logged or not.
+		/// </summary>
+		/// <returns>Whether the log has logged warnings.</returns>
+		bool HasLoadWarnings() const { return !m_LoadWarningLog.empty(); }
+
+		/// <summary>
+		/// Adds a new entry to the loading warning log.
+		/// </summary>
+		/// <param name="pathToLog">The path that produced the warning.</param>
+		/// <param name="altFileExtension">The alternative file extension to the path that produced the warning (e.g. if file is ".bmp", alternative extension is ".png").</param>
+		/// <param name="readerPosition">The file and line currently being loaded.</param>
+		void AddLoadWarningLogEntry(std::string &pathToLog, std::string &altFileExtension, const std::string &readerPosition = "");
+
+		/// <summary>
+		/// Writes the entire loading warning log to a file.
+		/// </summary>
+		/// <param name="filePath">The filename of the file to write to.</param>
+		void SaveLoadWarningLog(const std::string &filePath);
+
+		/// <summary>
 		/// Writes all the input strings to a log in the order they were entered.
 		/// </summary>
 		/// <param name="filePath">The filename of the file to write to.</param>
@@ -151,6 +171,7 @@ namespace RTE {
 
 		std::deque<std::string> m_InputLog; //!< Log of previously entered input strings.
 		std::deque<std::string>::iterator m_InputLogPosition; //!< Iterator to the current position in the log.
+		std::unordered_set<std::string> m_LoadWarningLog; //!< Log for warnings produced during loading when the specified file type in ini differs from the existing one. 
 
 		std::string m_LastInputString; //!< Place to save the last worked on input string before deactivating the console.
 		short m_LastLogMove; //!< The last direction the log marker was moved. Needed so that changing directions won't need double tapping.

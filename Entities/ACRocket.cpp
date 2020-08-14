@@ -1068,6 +1068,17 @@ void ACRocket::SetLeftLeg(Attachable *newLeg) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void ACRocket::SetMainThruster(Attachable *newThruster) {
+    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+    if (castedNewThruster) {
+        RemoveAttachable(m_pMThruster);
+        m_pMThruster = castedNewThruster;
+        AddAttachable(castedNewThruster);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void ACRocket::SetRightThruster(Attachable *newThruster) {
     AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
     if (castedNewThruster) {

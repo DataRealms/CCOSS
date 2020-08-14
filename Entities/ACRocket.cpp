@@ -91,19 +91,16 @@ int ACRocket::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a ACRocket to be identical to another, by deep copy.
 
-int ACRocket::Create(const ACRocket &reference)
-{
+int ACRocket::Create(const ACRocket &reference) {
+    if (reference.m_pRLeg) { CloneHardcodedAttachable(reference.m_pRLeg, ACRocket::SetRightLeg); }
+    if (reference.m_pLLeg) { CloneHardcodedAttachable(reference.m_pLLeg, ACRocket::SetLeftLeg); }
+    if (reference.m_pMThruster) { CloneHardcodedAttachable(reference.m_pMThruster, ACRocket::SetMainThruster); }
+    if (reference.m_pRThruster) { CloneHardcodedAttachable(reference.m_pRThruster, ACRocket::SetRightThruster); }
+    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pLThruster, ACRocket::SetLeftThruster); }
+    if (reference.m_pURThruster) { CloneHardcodedAttachable(reference.m_pURThruster, ACRocket::SetURightThruster); }
+    if (reference.m_pULThruster) { CloneHardcodedAttachable(reference.m_pULThruster, ACRocket::SetULeftThruster); }
+
     ACraft::Create(reference);
-
-    if (reference.m_pRLeg) {
-        m_pRLeg = dynamic_cast<Leg *>(reference.m_pRLeg->Clone());
-        AddAttachable(m_pRLeg, true);
-    }
-
-    if (reference.m_pLLeg) {
-        m_pLLeg = dynamic_cast<Leg *>(reference.m_pLLeg->Clone());
-        AddAttachable(m_pLLeg, true);
-    }
 
     m_pBodyAG = dynamic_cast<AtomGroup *>(reference.m_pBodyAG->Clone());
     m_pBodyAG->SetOwner(this);
@@ -117,32 +114,6 @@ int ACRocket::Create(const ACRocket &reference)
     {
         m_pLFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLFootGroup->Clone());
         m_pLFootGroup->SetOwner(this);
-    }
-
-    if (reference.m_pMThruster)
-    {
-        m_pMThruster = dynamic_cast<AEmitter *>(reference.m_pMThruster->Clone());
-        AddAttachable(m_pMThruster, true);
-    }
-    if (reference.m_pRThruster)
-    {
-        m_pRThruster = dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone());
-        AddAttachable(m_pRThruster, true);
-    }
-    if (reference.m_pLThruster)
-    {
-        m_pLThruster = dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone());
-        AddAttachable(m_pLThruster, true);
-    }
-    if (reference.m_pURThruster)
-    {
-        m_pURThruster = dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone());
-        AddAttachable(m_pURThruster, true);
-    }
-    if (reference.m_pULThruster)
-    {
-        m_pULThruster = dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone());
-        AddAttachable(m_pULThruster, true);
     }
 
     m_GearState = reference.m_GearState;
@@ -166,77 +137,66 @@ int ACRocket::Create(const ACRocket &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ACRocket::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "RLeg")
-    {
+int ACRocket::ReadProperty(std::string propName, Reader &reader) {
+    if (propName == "RLeg") {
         delete m_pRLeg;
         m_pRLeg = new Leg;
         reader >> m_pRLeg;
-    }
-    else if (propName == "LLeg")
-    {
+        m_pRLeg->SetTransfersDamageToParent(true);
+    } else if (propName == "LLeg") {
         delete m_pLLeg;
         m_pLLeg = new Leg;
         reader >> m_pLLeg;
         m_pLLeg->SetHFlipped(true);
-    }
-    else if (propName == "RFootGroup")
-    {
+        m_pLLeg->SetTransfersDamageToParent(true);
+    } else if (propName == "RFootGroup") {
         delete m_pRFootGroup;
         m_pRFootGroup = new AtomGroup();
         reader >> m_pRFootGroup;
         m_pRFootGroup->SetOwner(this);
-    }
-    else if (propName == "LFootGroup")
-    {
+    } else if (propName == "LFootGroup") {
         delete m_pLFootGroup;
         m_pLFootGroup = new AtomGroup();
         reader >> m_pLFootGroup;
         m_pLFootGroup->SetOwner(this);
-    }
-    else if (propName == "MThruster")
-    {   
+    } else if (propName == "MThruster"){   
         delete m_pMThruster;
         m_pMThruster = new AEmitter;
         reader >> m_pMThruster;
-    }
-    else if (propName == "RThruster")
-    {
+        m_pMThruster->SetTransfersDamageToParent(true);
+    } else if (propName == "RThruster") {
         delete m_pRThruster;
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
-    }
-    else if (propName == "LThruster")
-    {
+        m_pRThruster->SetTransfersDamageToParent(true);
+    } else if (propName == "LThruster") {
         delete m_pLThruster;
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
-    }
-    else if (propName == "URThruster")
-    {
+        m_pLThruster->SetTransfersDamageToParent(true);
+    } else if (propName == "URThruster") {
         delete m_pURThruster;
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
-    }
-    else if (propName == "ULThruster")
-    {
+        m_pURThruster->SetTransfersDamageToParent(true);
+    } else if (propName == "ULThruster") {
         delete m_pULThruster;
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
-    }
-    else if (propName == "RaisedGearLimbPath")
+        m_pULThruster->SetTransfersDamageToParent(true);
+    } else if (propName == "RaisedGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISED];
-    else if (propName == "LoweredGearLimbPath")
+    } else if (propName == "LoweredGearLimbPath") {
         reader >> m_Paths[RIGHT][LOWERED];
-    else if (propName == "LoweringGearLimbPath")
+    } else if (propName == "LoweringGearLimbPath") {
         reader >> m_Paths[RIGHT][LOWERING];
-    else if (propName == "RaisingGearLimbPath")
+    } else if (propName == "RaisingGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISING];
-    else if (propName == "ScuttleIfFlippedTime")
+    } else if (propName == "ScuttleIfFlippedTime") {
         reader >> m_ScuttleIfFlippedTime;
-    else
+    } else {
         return ACraft::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -1083,6 +1043,74 @@ void ACRocket::GetMOIDs(std::vector<MOID> &MOIDs) const
 
 	ACraft::GetMOIDs(MOIDs);
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACRocket::SetRightLeg(Attachable *newLeg) {
+    Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
+    if (castedNewLeg) {
+        RemoveAttachable(m_pRLeg);
+        m_pRLeg = castedNewLeg;
+        AddAttachable(castedNewLeg);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACRocket::SetLeftLeg(Attachable *newLeg) {
+    Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
+    if (castedNewLeg) {
+        RemoveAttachable(m_pLLeg);
+        m_pLLeg = castedNewLeg;
+        AddAttachable(castedNewLeg);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACRocket::SetRightThruster(Attachable *newThruster) {
+    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+    if (castedNewThruster) {
+        RemoveAttachable(m_pRThruster);
+        m_pRThruster = castedNewThruster;
+        AddAttachable(castedNewThruster);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACRocket::SetLeftThruster(Attachable *newThruster) {
+    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+    if (castedNewThruster) {
+        RemoveAttachable(m_pLThruster);
+        m_pLThruster = castedNewThruster;
+        AddAttachable(castedNewThruster);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACRocket::SetURightThruster(Attachable *newThruster) {
+    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+    if (castedNewThruster) {
+        RemoveAttachable(m_pURThruster);
+        m_pURThruster = castedNewThruster;
+        AddAttachable(castedNewThruster);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACRocket::SetULeftThruster(Attachable *newThruster) {
+    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+    if (castedNewThruster) {
+        RemoveAttachable(m_pULThruster);
+        m_pULThruster = castedNewThruster;
+        AddAttachable(castedNewThruster);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

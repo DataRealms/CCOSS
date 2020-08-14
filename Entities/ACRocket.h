@@ -239,55 +239,89 @@ ClassInfoGetters
 
 	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
+    /// <summary>
+    /// Gets the right leg of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the right leg of this ACRocket. Ownership is NOT transferred.</returns>
+    Leg *GetRightLeg() const { return m_pRLeg; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			GetMThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the main thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Sets the right leg for this ACRocket.
+    /// </summary>
+    /// <param name="newLeg">The new leg to use.</param>
+    void SetRightLeg(Attachable *newLeg);
 
-	AEmitter * GetMThruster() const { return m_pMThruster; }
+    /// <summary>
+    /// Gets the left leg of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the left leg of this ACRocket. Ownership is NOT transferred.</returns>
+    Leg *GetLeftLeg() const { return m_pLLeg; }
 
+    /// <summary>
+    /// Sets the left leg for this ACRocket.
+    /// </summary>
+    /// <param name="newLeg">The new leg to use.</param>
+    void SetLeftLeg(Attachable *newLeg);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			GetRThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Gets the main thruster of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the main thruster of this ACRocket. Ownership is NOT transferred.</returns>
+	AEmitter *GetMainThruster() const { return m_pMThruster; }
 
-	AEmitter * GetRThruster() const { return m_pRThruster; }
+    /// <summary>
+    /// Sets the main thruster for this ACRocket.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetMainThruster(Attachable *newThruster);
 
+    /// <summary>
+    /// Gets the right side thruster of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the right side thruster of this ACRocket. Ownership is NOT transferred.</returns>
+	AEmitter *GetRightThruster() const { return m_pRThruster; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			GetLThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Sets the right side thruster for this ACRocket.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetRightThruster(Attachable *newThruster);
 
-	AEmitter * GetLThruster() const { return m_pLThruster; }
+    /// <summary>
+    /// Gets the left side thruster of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the left side thruster of this ACRocket. Ownership is NOT transferred.</returns>
+    AEmitter *GetLeftThruster() const { return m_pLThruster; }
 
+    /// <summary>
+    /// Sets the left side thruster for this ACRocket.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetLeftThruster(Attachable *newThruster);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			GetURThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right side secondary thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Gets the right side secondary thruster of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the right side secondary thruster of this ACRocket. Ownership is NOT transferred.</returns>
+    AEmitter *GetURightThruster() const { return m_pURThruster; }
 
-	AEmitter * GetURThruster() const { return m_pURThruster; }
+    /// <summary>
+    /// Sets the right side secondary thruster for this ACRocket.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetURightThruster(Attachable *newThruster);
 
+    /// <summary>
+    /// Gets the left side secondary thruster of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the left side secondary thruster of this ACRocket. Ownership is NOT transferred.</returns>
+    AEmitter *GetULeftThruster() const { return m_pULThruster; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			GetULThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left side secondary thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
-
-	AEmitter * GetULThruster() const { return m_pULThruster; }
+    /// <summary>
+    /// Sets the left side secondary thruster for this ACRocket.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetULeftThruster(Attachable *newThruster);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

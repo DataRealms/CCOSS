@@ -985,7 +985,7 @@ int LuaMan::Create()
 				value("CLOSING", ADoor::DoorState::CLOSING),
 				value("STOPPED", ADoor::DoorState::STOPPED)
 			]
-            .property("Door", &ADoor::GetDoor)
+            .property("Door", &ADoor::GetDoor, &ADoor::SetDoor)
 			.def("GetDoorState", &ADoor::GetDoorState)
 			.def("OpenDoor", &ADoor::OpenDoor)
 			.def("CloseDoor", &ADoor::CloseDoor)

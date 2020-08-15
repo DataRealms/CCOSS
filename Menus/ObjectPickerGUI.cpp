@@ -110,7 +110,7 @@ int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, strin
 
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.png");
         s_pCursor = cursorFile.GetAsBitmap();
     }
 
@@ -151,7 +151,7 @@ int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, strin
         m_pPopupBox->SetEnabled(false);
         m_pPopupBox->SetVisible(false);
         // Set the font
-        m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+        m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
     }
 
     m_pGroupsList = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("GroupsLB"));

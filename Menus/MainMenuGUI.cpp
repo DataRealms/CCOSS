@@ -383,9 +383,9 @@ int MainMenuGUI::Create(Controller *pController)
     m_pConfigLabel[CONFIGSTEPS] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelConfigStep"));
     m_pConfigLabel[CONFIGINSTRUCTION] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelConfigInstruction"));
     m_pConfigLabel[CONFIGINPUT] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelConfigInput"));
-    ContentFile diagramFile("Base.rte/GUIs/Controllers/D-Pad.bmp");
+    ContentFile diagramFile("Base.rte/GUIs/Controllers/D-Pad.png");
     m_aDPadBitmaps = diagramFile.GetAsAnimation(DPADSTEPS, COLORCONV_8_TO_32);
-    diagramFile.SetDataPath("Base.rte/GUIs/Controllers/DualAnalog.bmp");
+    diagramFile.SetDataPath("Base.rte/GUIs/Controllers/DualAnalog.png");
     m_aDualAnalogBitmaps = diagramFile.GetAsAnimation(DANALOGSTEPS, COLORCONV_8_TO_32);
     m_pRecommendationBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("BoxConfigRec"));
     m_pRecommendationDiagram = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("BoxConfigRecDiagram"));

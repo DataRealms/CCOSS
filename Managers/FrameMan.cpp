@@ -177,7 +177,7 @@ namespace RTE {
 
 		CreateBackBuffers();
 
-		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.bmp");
+		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
 		m_ScenePreviewDumpGradient = scenePreviewGradientFile.LoadAndReleaseBitmap(COLORCONV_8_TO_32);
 
 		return 0;
@@ -746,13 +746,13 @@ namespace RTE {
 			case false:
 				if (!m_LargeFont) {
 					m_LargeFont = new GUIFont("FatFont");
-					m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.bmp");
+					m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.png");
 				}
 				return m_LargeFont;
 			case true:
 				if (!m_SmallFont) {
 					m_SmallFont = new GUIFont("SmallFont");
-					m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.bmp");
+					m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.png");
 				}
 				return m_SmallFont;
 		}

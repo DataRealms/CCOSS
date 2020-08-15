@@ -205,14 +205,14 @@ int ScenarioGUI::Create(Controller *pController)
     m_pDifficultyLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("DifficultyLabel"));
     m_pDifficultySlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("DifficultySlider"));
     m_pActivitySelect->SetDropHeight(64);
-//    m_pActivitySelect->GetListPanel()->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
-    m_pActivityLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+//    m_pActivitySelect->GetListPanel()->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
+    m_pActivityLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
 
     // Scene Info Box
     m_pSceneCloseButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("SceneCloseButton"));
     m_pSceneNameLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneNameLabel"));
     m_pSceneInfoLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneInfoLabel"));
-    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
 
     // Player team assignment box
     char str[128];
@@ -316,7 +316,7 @@ int ScenarioGUI::Create(Controller *pController)
 	m_pScenePreviewBitmap = create_bitmap_ex(8, Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT);
 
 	// Load default preview bitmap
-	ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.bmp");
+	ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.png");
 	m_pDefaultPreviewBitmap = defaultPreview.LoadAndReleaseBitmap();
 
 	clear_to_color(m_pScenePreviewBitmap, g_MaskColor);

@@ -957,14 +957,14 @@ int GameActivity::Start()
             m_pBannerRed[player]->Destroy();
         else
             m_pBannerRed[player] = new GUIBanner;
-        m_pBannerRed[player]->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.bmp", "Base.rte/GUIs/Fonts/BannerFontRedBlur.bmp", 8);
+        m_pBannerRed[player]->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.png", "Base.rte/GUIs/Fonts/BannerFontRedBlur.png", 8);
 
         // Allocate and (re)create the banners
         if (m_pBannerYellow[player])
             m_pBannerYellow[player]->Destroy();
         else
             m_pBannerYellow[player] = new GUIBanner;
-        m_pBannerYellow[player]->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.bmp", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.bmp", 8);
+        m_pBannerYellow[player]->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.png", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.png", 8);
 
         // Resetting the banner repeat counter
         m_BannerRepeats[player] = 0;
@@ -997,25 +997,25 @@ int GameActivity::Start()
 
     if (!(m_aLZCursor[0]))
     {
-        ContentFile cursorFile("Base.rte/GUIs/Indicators/LZArrowRedL.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Indicators/LZArrowRedL.png");
         m_aLZCursor[0] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
-        cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowGreenL.bmp");
+        cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowGreenL.png");
         m_aLZCursor[1] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
-		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowBlueL.bmp");
+		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowBlueL.png");
 		m_aLZCursor[2] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
-		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowYellowL.bmp");
+		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowYellowL.png");
 		m_aLZCursor[3] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
     }
 
     if (!(m_aObjCursor[0]))
     {
-        ContentFile cursorFile("Base.rte/GUIs/Indicators/ObjArrowRed.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Indicators/ObjArrowRed.png");
         m_aObjCursor[0] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
-        cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowGreen.bmp");
+        cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowGreen.png");
         m_aObjCursor[1] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
-		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowBlue.bmp");
+		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowBlue.png");
 		m_aObjCursor[2] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
-		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowYellow.bmp");
+		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowYellow.png");
 		m_aObjCursor[3] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
     }
 

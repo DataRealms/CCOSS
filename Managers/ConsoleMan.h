@@ -83,7 +83,7 @@ namespace RTE {
 		/// Gets whether the loading warning log has any warnings logged or not.
 		/// </summary>
 		/// <returns>Whether the log has logged warnings.</returns>
-		bool HasLoadWarnings() const { return !m_LoadWarningLog.empty(); }
+		bool LoadWarningsExist() const { return !m_LoadWarningLog.empty(); }
 
 		/// <summary>
 		/// Adds a new entry to the loading warning log.
@@ -172,7 +172,7 @@ namespace RTE {
 
 		std::deque<std::string> m_InputLog; //!< Log of previously entered input strings.
 		std::deque<std::string>::iterator m_InputLogPosition; //!< Iterator to the current position in the log.
-		std::unordered_set<std::string> m_LoadWarningLog; //!< Log for warnings produced during loading when the specified file type in ini differs from the existing one. 
+		std::unordered_set<std::string> m_LoadWarningLog; //!< Log for non-fatal errors produced during loading (e.g. used .bmp file extension to load a .png file). 
 
 		std::string m_LastInputString; //!< Place to save the last worked on input string before deactivating the console.
 		short m_LastLogMove; //!< The last direction the log marker was moved. Needed so that changing directions won't need double tapping.

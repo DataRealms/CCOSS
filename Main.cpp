@@ -1918,7 +1918,7 @@ int main(int argc, char *argv[]) {
 	std::string screenshotSaveDir = g_System.GetWorkingDirectory() + "/" + c_ScreenshotDirectory;
 	if (!std::experimental::filesystem::exists(screenshotSaveDir)) { g_System.MakeDirectory(screenshotSaveDir); }
 
-	if (g_ConsoleMan.HasLoadWarnings()) {
+	if (g_ConsoleMan.LoadWarningsExist()) {
 		g_ConsoleMan.PrintString("WARNING: References to files that could not be located or failed to load detected during module loading!\nSee \"LoadWarningLog.txt\" for a list of bad references.");
 		g_ConsoleMan.SaveLoadWarningLog("LogLoadingWarning.txt");
 		// Open the console so the user is aware there are loading warnings.

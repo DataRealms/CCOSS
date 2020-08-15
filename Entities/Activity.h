@@ -627,16 +627,16 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Player to force for.</param>
 		/// <param name="team">Which team to switch to next Actor on.</param>
-		/// <param name="skip">An Actor pointer to skip in the sequence.</param>
-		virtual void SwitchToPrevActor(short player, short team, Actor *skip = 0) { SwitchToPrevOrNextActor(false, player, team, skip); }
+		/// <param name="actorToSkip">An Actor pointer to skip in the sequence.</param>
+		virtual void SwitchToPrevActor(short player, short team, Actor *actorToSkip = 0) { SwitchToPrevOrNextActor(false, player, team, actorToSkip); }
 
 		/// <summary>
 		/// Forces the Activity to focus player control to the next Actor of a specific team, other than the current one focused on.
 		/// </summary>
 		/// <param name="player">Player to force for.</param>
 		/// <param name="team">Which team to switch to next Actor on.</param>
-		/// <param name="skip">An Actor pointer to skip in the sequence.</param>
-		virtual void SwitchToNextActor(short player, short team, Actor *skip = 0) { SwitchToPrevOrNextActor(true, player, team, skip); }
+		/// <param name="actorToSkip">An Actor pointer to skip in the sequence.</param>
+		virtual void SwitchToNextActor(short player, short team, Actor *actorToSkip = 0) { SwitchToPrevOrNextActor(true, player, team, actorToSkip); }
 
 		/// <summary>
 		/// Indicates an Actor as having left the game scene and entered orbit.  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
@@ -721,7 +721,7 @@ namespace RTE {
 		/// <param name="player">Player to force for.</param>
 		/// <param name="team">Which team to switch to next Actor on.</param>
 		/// <param name="skip">An Actor pointer to skip in the sequence.</param>
-		void SwitchToPrevOrNextActor(bool nextActor, short player, short team, Actor *skip = 0);
+		void SwitchToPrevOrNextActor(bool nextActor, short player, short team, const Actor *skip = 0);
 
 		/// <summary>
 		/// Clears all the member variables of this Activity, effectively resetting the members of this abstraction level only.

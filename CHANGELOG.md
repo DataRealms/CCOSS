@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Implemented Lua Just-In-Time compilation (MoonJIT 2.2.0).
+
 - Implemented PNG file loading and saving. PNGs still need to be indexed just like BMPs! Transparency (alpha) not supported (yet).
 
 - New `Settings.ini` property `LoadingScreenReportPrecision = intValue` to control how accurately the module loading progress reports what line is currently being read.  
@@ -86,6 +88,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added new lua function `UInputMan:GetInputDevice(playerNum)` to get a number value representing the input device used by the specified player. Should be useful for making custom key bindings compatible with different input devices.
 
 - Scripts can now be attached to `ACrab.Turret` and `Leg`. Additionally, a binding to get the Foot of a Leg has been added.
+
+- Added H/V flipping capabilities to Bitmap primitives.  New bindings with arguments for flip are:  
+	`PrimitiveMan:DrawBitmapPrimitive(pos, entity, rotAngle, frame, bool hFlipped, bool vFlipped)`  
+	`PrimitiveMan:DrawBitmapPrimitive(player, pos, entity, rotAngle, frame, bool hFlipped, bool vFlipped)`  
+	Original bindings with no flip arguments are untouched and can be called as they were.
+	
+- Added new primitive drawing functions to `PrimitiveMan`:  
+	```
+	-- Arc
+	PrimitiveMan:DrawArcPrimitive(Vector pos, startAngle, endAngle, radius, color)
+	PrimitiveMan:DrawArcPrimitive(player, Vector pos, startAngle, endAngle, radius, color)
+	
+	PrimitiveMan:DrawArcPrimitive(Vector pos, startAngle, endAngle, radius, color, thickness)
+	PrimitiveMan:DrawArcPrimitive(player, Vector pos, startAngle, endAngle, radius, color, thickness)
+
+	-- Spline (Bézier Curve)
+	PrimitiveMan:DrawSplinePrimitive(Vector start, Vector guideA, Vector guideB, Vector end, color)
+	PrimitiveMan:DrawSplinePrimitive(player, Vector start, Vector guideA, Vector guideB, Vector end, color)
+
+	-- Box with rounded corners
+	PrimitiveMan:DrawRoundedBoxPrimitive(Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
+	PrimitiveMan:DrawRoundedBoxPrimitive(player, Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
+	
+	PrimitiveMan:DrawRoundedBoxFillPrimitive(Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
+	PrimitiveMan:DrawRoundedBoxFillPrimitive(player, Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
+
+	-- Triangle
+	PrimitiveMan:DrawTrianglePrimitive(Vector pointA, Vector pointB, Vector pointC, color)
+	PrimitiveMan:DrawTrianglePrimitive(player, Vector pointA, Vector pointB, Vector pointC, color)
+	
+	PrimitiveMan:DrawTriangleFillPrimitive(Vector pointA, Vector pointB, Vector pointC, color)
+	PrimitiveMan:DrawTriangleFillPrimitive(player, Vector pointA, Vector pointB, Vector pointC, color)
+
+	-- Ellipse
+	PrimitiveMan:DrawEllipsePrimitive(Vector pos, horizRadius, vertRadius, color)
+	PrimitiveMan:DrawEllipsePrimitive(player, Vector pos, horizRadius, vertRadius, color)
+	
+	PrimitiveMan:DrawEllipseFillPrimitive(Vector pos, short horizRadius, short vertRadius, color)
+	PrimitiveMan:DrawEllipseFillPrimitive(player, Vector pos, horizRadius, vertRadius, color)
+	```
 
 ### Changed
 
@@ -175,6 +217,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed issue with double clicks and missing clicks in menus (anything that uses AllegroInput).
 
 - Fixed issue where OnPieMenu function wasn't working for `AHuman` equipped items, and made it work for `BGArm` equipped items as well as `FGArm` ones.
+
+- The "woosh" sound played when switching actors from a distance will now take scene wrapping into account. Additionally, attempting to switch to previous or next actor with only one actor will play the more correct "error" sound.
 
 ### Removed
 
@@ -366,7 +410,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - If the current game resolution is half the desktop resolution or less, you will be able to instantly switch between 1X and 2X resolution multiplier modes in the settings without screen flicker or delay.  
 	If the conditions are not met, the mode switch button will show `Unavailable`.
 
-- `PieMenuActor` and `OrbittedCraft` have now been removed. They are instead replaced with parameters in their respective functions, i.e. `OnPieMenu(pieMenuActor);` and `CraftEnteredOrbit(orbittedCraft);`. Their use is otherwise unchanged.
+- `PieMenuActor` and `OrbitedCraft` have now been removed. They are instead replaced with parameters in their respective functions, i.e. `OnPieMenu(pieMenuActor);` and `CraftEnteredOrbit(orbitedCraft);`. Their use is otherwise unchanged.
 
 ### Fixed
 

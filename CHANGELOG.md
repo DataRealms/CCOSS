@@ -128,6 +128,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	PrimitiveMan:DrawEllipseFillPrimitive(Vector pos, short horizRadius, short vertRadius, color)
 	PrimitiveMan:DrawEllipseFillPrimitive(player, Vector pos, horizRadius, vertRadius, color)
 	```
+	
+- Added log for non-fatal loading errors. This log will show image files that have been loaded with incorrect extensions (has no side effects but should be addressed) and audio files that failed loading entirely and will not be audible.  
+	If errors are present the console will be forced open to notify the player (only when loading into main menu).  
+	Log will be automatically deleted if warnings are no longer present to avoid polluting the root directory.	
 
 ### Changed
 
@@ -136,6 +140,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Major cleanup and reformatting in the `Managers` folder.
 
 - Lua error reporting has been improved so script errors will always show filename and line number.
+
+- Ini error reporting has been improved so asset loading crash messages (image and audio files) will also display the ini file and line they are being referenced from and a better explanation why the crash occured. ([Issue #161](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/161))
 
 - `Settings.ini` will now fully populate with all available settings (now also broken into sections) when being created (first time or after delete) rather than with just a limited set of defaults.
 

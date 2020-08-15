@@ -324,7 +324,7 @@ namespace RTE {
 			inputStream.getline(strLine, 1024, '\n');
 			std::string line = strLine;
 
-			if (line != "\r" && !line.empty()) {
+			if (line != "\r") {
 				g_LuaMan.ClearErrors();
 				m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + line);
 				g_LuaMan.RunScriptString(line, false);

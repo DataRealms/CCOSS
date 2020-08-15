@@ -31,7 +31,7 @@ namespace RTE {
 		allegro_message(message);
 #else
 		// Shortened and less confusing one. users have no use of knowing which source file and where.
-		sprintf_s(message, sizeof(message), "%s\n\nThe last frame has been dumped to 'abortscreen.bmp'\n\nYou can copy this message with Ctrl+C", description);
+		sprintf_s(message, sizeof(message), "%s\n\nThe last frame has been dumped to 'abortscreen.bmp'", description);
 		allegro_message(message);
 #endif
 		// True so that the debugbreak code is run and the debugger goes there.
@@ -48,12 +48,15 @@ namespace RTE {
 
 	bool RTEAssertFunc(bool expression, const char *description, const char *file, int line, bool &alwaysIgnore) {
 		if (!expression) {
-			// TODO: Make this display a box in the game asking whether to ignore or abort")
-			// For now, always abort.
-			char error[512];
-			sprintf_s(error, sizeof(error), "Assertion failed: %s", description);
-			RTEAbortFunc(error, __FILE__, __LINE__);
+			// TODO: Make this display a box in the game asking whether to ignore or abort. For now, always abort.
 
+#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD 	
+			char error[512];
+			sprintf_s(error, sizeof(error), "Assertion failed:\n\n%s", description);
+			RTEAbortFunc(error, __FILE__, __LINE__);
+#else
+			RTEAbortFunc(description, __FILE__, __LINE__);
+#endif
 			// True so that the debugbreak code is run and the debugger goes there.
 			return true;
 		}

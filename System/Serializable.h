@@ -47,10 +47,9 @@ namespace RTE {
 				reader.ReportError("Wrong type in Reader when passed to Serializable::Create()");
 				return -1;
 			}
-
 			// This is the engine for processing all properties of this Serializable upon read creation.
 			while (reader.NextProperty()) {
-				m_CurrentlyReadFileAndLine = ("in file: \"" + reader.GetCurrentFilePath() + "\" on line " + std::to_string(reader.GetCurrentFileLine()));
+				m_CurrentlyReadFileAndLine = ("in file: " + reader.GetCurrentFilePath() + " on line " + std::to_string(reader.GetCurrentFileLine()));
 				std::string propName = reader.ReadPropName();
 				// We need to check if propName != "" because ReadPropName may return "" when it reads an InlcudeFile without any properties in case they are all commented out or it's the last line in file.
 				// Also ReadModuleProperty may return "" when it skips IncludeFile till the end of file.
@@ -58,7 +57,6 @@ namespace RTE {
 					// TODO: Could not match property. Log here!
 				}
 			}
-
 			// Now do all the additional initializing needed.
 			return doCreate ? Create() : 0;
 		}

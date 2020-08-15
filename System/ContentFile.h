@@ -92,7 +92,7 @@ namespace RTE {
 		/// Sets the file path of the content file represented by this ContentFile object.
 		/// </summary>
 		/// <param name="newDataPath">A string with the new file name path.</param>
-		void SetDataPath(std::string newDataPath) { m_DataPath = newDataPath; s_PathHashes[GetHash()] = m_DataPath; }
+		void SetDataPath(std::string &newDataPath);
 
 		/// <summary>
 		/// Creates a hash value out of a path to a ContentFile.
@@ -163,8 +163,9 @@ namespace RTE {
 		static std::map<std::string, BITMAP *> s_LoadedBitmaps[BitDepthCount]; //!< Static map containing all the already loaded BITMAPs and their paths, and there's two maps, for each bit depth.
 		static std::map<std::string, FMOD::Sound *> s_LoadedSamples; //!< Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
 
-		std::string m_DataPath; //!< Path to this ContentFile's file path. In the case of an animation, this filename/name will be appended with 000, 001, 002 etc.
 		int m_DataModuleID; //!< Data Module ID of where this was loaded from.
+		std::string m_DataPath; //!< The path to this ContentFile's data file. In the case of an animation, this filename/name will be appended with 000, 001, 002 etc.
+		std::string m_DataPathExtension; //!< The extension of the data file of this ContentFile's path.
 
 		void *m_LoadedData; //!< Non-ownership pointer to the loaded data for convenience. Do not release/delete this.
 

@@ -89,9 +89,10 @@ namespace RTE {
 		/// Adds a new entry to the loading warning log.
 		/// </summary>
 		/// <param name="pathToLog">The path that produced the warning.</param>
-		/// <param name="altFileExtension">The alternative file extension to the path that produced the warning (e.g. if file is ".bmp", alternative extension is ".png").</param>
 		/// <param name="readerPosition">The file and line currently being loaded.</param>
-		void AddLoadWarningLogEntry(std::string &pathToLog, std::string &altFileExtension, const std::string &readerPosition = "");
+		/// <param name="hasAltExtension">Whether the file specified in the path can have an alternative extension or not. This will change the logged warning message.</param>
+		/// <param name="altFileExtension">The alternative file extension to the path that produced the warning (e.g. if file is ".bmp", alternative extension is ".png").</param>
+		void AddLoadWarningLogEntry(const std::string &pathToLog, const std::string &readerPosition = "", bool hasAltExtension = false, const std::string &altFileExtension = "" );
 
 		/// <summary>
 		/// Writes the entire loading warning log to a file.

@@ -1938,11 +1938,13 @@ int main(int argc, char *argv[]) {
 	if (!std::experimental::filesystem::exists(screenshotSaveDir)) { g_System.MakeDirectory(screenshotSaveDir); }
 
 	if (g_ConsoleMan.HasLoadWarnings()) {
-		g_ConsoleMan.PrintString("WARNING: References to files with incorrect extensions detected during loading! Files with alternative extensions were found and loaded instead!");
-		g_ConsoleMan.PrintString("Please correct the extensions in the relevant file paths. See \"LoadWarningLog.txt\" for a list of bad references.");
+		g_ConsoleMan.PrintString("WARNING: References to files that could not be located or failed to load detected during module loading!\nSee \"LoadWarningLog.txt\" for a list of bad references.");
 		g_ConsoleMan.SaveLoadWarningLog("LogLoadingWarning.txt");
 		// Open the console so the user is aware there are loading warnings.
 		g_ConsoleMan.SetEnabled(true);
+	} else {
+		// Delete an existing log if there are no warnings so there's less junk in the root folder.
+		if (std::experimental::filesystem::exists(g_System.GetWorkingDirectory() + "/LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
 	}
 
     if (!g_NetworkServer.IsServerModeEnabled()) {

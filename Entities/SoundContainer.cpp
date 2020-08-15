@@ -118,6 +118,7 @@ namespace RTE {
 		/// <param name="soundPath">The path to the sound file.</param>
 		auto readSound = [&soundData, &reader](const std::string &soundPath) {
 			ContentFile soundFile(soundPath.c_str());
+			soundFile.SetDataPathAndReaderPosition("in file " + reader.GetCurrentFilePath() + " on line " + std::to_string(reader.GetCurrentFileLine()));
 			FMOD::Sound *soundObject = soundFile.GetAsSample();
 			if (g_AudioMan.IsAudioEnabled() && !soundObject) { reader.ReportError(std::string("Failed to load the sound from the file")); }
 

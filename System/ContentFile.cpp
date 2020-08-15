@@ -7,9 +7,9 @@ namespace RTE {
 
 	const std::string ContentFile::c_ClassName = "ContentFile";
 
-	std::map<std::string, BITMAP *> ContentFile::s_LoadedBitmaps[BitDepthCount];
-	std::map<std::string, FMOD::Sound *> ContentFile::s_LoadedSamples;
-	std::map<size_t, std::string> ContentFile::s_PathHashes;
+	std::unordered_map<std::string, BITMAP *> ContentFile::s_LoadedBitmaps[BitDepthCount];
+	std::unordered_map<std::string, FMOD::Sound *> ContentFile::s_LoadedSamples;
+	std::unordered_map<size_t, std::string> ContentFile::s_PathHashes;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -100,7 +100,7 @@ namespace RTE {
 		int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.
-		std::map<std::string, BITMAP *>::iterator foundBitmap = s_LoadedBitmaps[bitDepth].find(m_DataPath);
+		std::unordered_map<std::string, BITMAP *>::iterator foundBitmap = s_LoadedBitmaps[bitDepth].find(m_DataPath);
 		if (foundBitmap != s_LoadedBitmaps[bitDepth].end()) {
 			returnBitmap = (*foundBitmap).second;
 		} else {
@@ -184,7 +184,7 @@ namespace RTE {
 		FMOD::Sound *returnSample = nullptr;
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.
-		std::map<std::string, FMOD::Sound *>::iterator foundSound = s_LoadedSamples.find(m_DataPath);
+		std::unordered_map<std::string, FMOD::Sound *>::iterator foundSound = s_LoadedSamples.find(m_DataPath);
 		if (foundSound != s_LoadedSamples.end()) {
 			returnSample = (*foundSound).second;
 		} else {

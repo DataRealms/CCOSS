@@ -172,10 +172,9 @@ namespace RTE {
 		/// </summary>
 		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount };
 
-		//TODO all of these could probably be replaced with unordered_maps and decrease lookup time.
-		static std::map<size_t, std::string> s_PathHashes; //!< Hash value of the path to this ContentFile's Datafile Object.
-		static std::map<std::string, BITMAP *> s_LoadedBitmaps[BitDepthCount]; //!< Static map containing all the already loaded BITMAPs and their paths, and there's two maps, for each bit depth.
-		static std::map<std::string, FMOD::Sound *> s_LoadedSamples; //!< Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
+		static std::unordered_map<size_t, std::string> s_PathHashes; //!< Static map containing the hash values of paths of all loaded data files.
+		static std::unordered_map<std::string, BITMAP *> s_LoadedBitmaps[BitDepthCount]; //!< Static map containing all the already loaded BITMAPs and their paths, and there's two maps, for each bit depth.
+		static std::unordered_map<std::string, FMOD::Sound *> s_LoadedSamples; //!< Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
 
 		int m_DataModuleID; //!< Data Module ID of where this was loaded from.
 		std::string m_DataPath; //!< The path to this ContentFile's data file. In the case of an animation, this filename/name will be appended with 000, 001, 002 etc.

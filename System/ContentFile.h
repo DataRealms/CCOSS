@@ -92,7 +92,7 @@ namespace RTE {
 		/// Sets the file path of the content file represented by this ContentFile object.
 		/// </summary>
 		/// <param name="newDataPath">A string with the new file name path.</param>
-		void SetDataPath(std::string &newDataPath);
+		void SetDataPath(const std::string &newDataPath);
 
 		/// <summary>
 		/// Creates a hash value out of a path to a ContentFile.
@@ -110,18 +110,10 @@ namespace RTE {
 
 #pragma region Data Handling
 		/// <summary>
-		/// Loads and transfers the data represented by this ContentFile object as an Allegro BITMAP. Note that ownership of the BITMAP IS TRANSFERRED!
-		/// Note that this is relatively slow since it reads the data from disk each time.
-		/// </summary>
-		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap. Only applies the first time a bitmap is loaded from the disk.</param>
-		/// <returns>The pointer to the BITMAP loaded from disk.</returns>
-		BITMAP * LoadAndReleaseBitmap(int conversionMode = 0);
-
-		/// <summary>
 		/// Gets the data represented by this ContentFile object as an Allegro BITMAP, loading it into the static maps if it's not already loaded. Note that ownership of the BITMAP is NOT transferred!
 		/// </summary>
 		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap.</param>
-		/// <returns>The pointer to the BITMAP loaded from disk.</returns>
+		/// <returns>Pointer to the BITMAP loaded from disk.</returns>
 		BITMAP * GetAsBitmap(int conversionMode = 0);
 
 		/// <summary>
@@ -130,15 +122,30 @@ namespace RTE {
 		/// </summary>
 		/// <param name="frameCount">The number of frames to attempt to load, more than 1 frame will mean 00# is appended to datapath to handle naming conventions.</param>
 		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap.</param>
-		/// <returns>The pointer to the beginning of the array of BITMAP pointers loaded from the disk, the length of which is specified with the FrameCount argument.</returns>
+		/// <returns>Pointer to the beginning of the array of BITMAP pointers loaded from the disk, the length of which is specified with the FrameCount argument.</returns>
 		BITMAP ** GetAsAnimation(int frameCount = 1, int conversionMode = 0);
 
 		/// <summary>
-		/// Loads and gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE. Note that ownership of the SAMPLE is NOT transferred!
+		/// Loads and transfers the data represented by this ContentFile object as an Allegro BITMAP. Note that ownership of the BITMAP IS TRANSFERRED!
+		/// Note that this is relatively slow since it reads the data from disk each time.
+		/// </summary>
+		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap. Only applies the first time a bitmap is loaded from the disk.</param>
+		/// <returns>Pointer to the BITMAP loaded from disk.</returns>
+		BITMAP * LoadAndReleaseBitmap(int conversionMode = 0);
+
+		/// <summary>
+		/// Gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE, loading it into the static maps if it's not already loaded. Note that ownership of the BITMAP is NOT transferred!
 		/// </summary>
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
-		/// <returns>The pointer to the beginning of the data object loaded from the file. Ownership is NOT transferred! If 0, the file could not be found/loaded.</returns>
+		/// <returns>Pointer to the FSOUND_SAMPLE loaded from disk.</returns>
 		FMOD::Sound * GetAsSample(bool abortGameForInvalidSound = true);
+
+		/// <summary>
+		/// Loads and transfers the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE. Note that ownership of the SAMPLE is NOT transferred!
+		/// </summary>
+		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
+		/// <returns>Pointer to the FSOUND_SAMPLE loaded from disk.</returns>
+		FMOD::Sound * LoadAndReleaseSample(bool abortGameForInvalidSound = true);
 #pragma endregion
 
 #pragma region Class Info
@@ -166,6 +173,7 @@ namespace RTE {
 		int m_DataModuleID; //!< Data Module ID of where this was loaded from.
 		std::string m_DataPath; //!< The path to this ContentFile's data file. In the case of an animation, this filename/name will be appended with 000, 001, 002 etc.
 		std::string m_DataPathExtension; //!< The extension of the data file of this ContentFile's path.
+		std::string m_DataPathAndReaderPosition; //!< The path to this ContentFile's data file combined with the ini file and line it is being read from. This is used for logging. 
 
 		void *m_LoadedData; //!< Non-ownership pointer to the loaded data for convenience. Do not release/delete this.
 

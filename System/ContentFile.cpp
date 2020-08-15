@@ -17,6 +17,7 @@ namespace RTE {
 		m_DataModuleID = 0;
 		m_DataPath.clear();
 		m_DataPathExtension.clear();
+		m_DataPathAndReaderPosition.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,6 +27,7 @@ namespace RTE {
 		m_DataPath = filePath;
 		m_DataPathExtension = std::experimental::filesystem::path(filePath).extension().string();
 		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n\n" + m_DataPath + "\n" + GetCurrentlyReadFileAndLine());
+		m_DataPathAndReaderPosition = m_DataPath + "\n" + GetCurrentlyReadFileAndLine();
 		s_PathHashes[GetHash()] = m_DataPath;
 
 		return 0;
@@ -81,48 +83,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ContentFile::SetDataPath(std::string &newDataPath) {
+	void ContentFile::SetDataPath(const std::string &newDataPath) {
 		m_DataPath = newDataPath;
 		m_DataPathExtension = std::experimental::filesystem::path(newDataPath).extension().string();
 		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n\n" + m_DataPath + "\n" + GetCurrentlyReadFileAndLine());
 		s_PathHashes[GetHash()] = m_DataPath;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	BITMAP * ContentFile::LoadAndReleaseBitmap(int conversionMode) {
-		if (m_DataPath.empty()) {
-			return nullptr;
-		}
-		std::string dataPathAndAccessLocation = m_DataPath + "\n" + GetCurrentlyReadFileAndLine();			
-		std::string pathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - 4);
-		std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
-
-		if (!std::experimental::filesystem::exists(m_DataPath)) {
-			// Check for 000 in the file name in case it is part of an animation but the FrameCount was set to 1. Do not warn about this because it's normal operation.
-			if (std::experimental::filesystem::exists(pathWithoutExtension + "000" + m_DataPathExtension)) {
-				SetDataPath(pathWithoutExtension + "000" + m_DataPathExtension);
-			} else {
-				if (std::experimental::filesystem::exists(pathWithoutExtension + altFileExtension)) {
-					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetCurrentlyReadFileAndLine(), true, altFileExtension);
-					SetDataPath(pathWithoutExtension + altFileExtension);
-				} else if (std::experimental::filesystem::exists(pathWithoutExtension + "000" + altFileExtension)) {
-					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetCurrentlyReadFileAndLine(), true, altFileExtension);
-					SetDataPath(pathWithoutExtension + "000" + altFileExtension);
-				} else {
-					RTEAbort("Failed to find image file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + "\n" + GetCurrentlyReadFileAndLine());
-				}
-			}
-		}
-		BITMAP *returnBitmap = nullptr;
-
-		PALETTE currentPalette;
-		get_palette(currentPalette);
-
-		set_color_conversion((conversionMode == 0) ? COLORCONV_MOST : conversionMode);
-		returnBitmap = load_bitmap(m_DataPath.c_str(), currentPalette);
-		RTEAssert(returnBitmap, "Failed to load image file with following path and name:\n\n" + dataPathAndAccessLocation + "\nThe file may be corrupt, incorrectly converted or saved with unsupported parameters.");
-		return returnBitmap;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,52 +141,101 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	BITMAP * ContentFile::LoadAndReleaseBitmap(int conversionMode) {
+		if (m_DataPath.empty()) {
+			return nullptr;
+		}
+		std::string pathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - 4);
+		std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
+
+		if (!std::experimental::filesystem::exists(m_DataPath)) {
+			// Check for 000 in the file name in case it is part of an animation but the FrameCount was set to 1. Do not warn about this because it's normal operation.
+			if (std::experimental::filesystem::exists(pathWithoutExtension + "000" + m_DataPathExtension)) {
+				SetDataPath(pathWithoutExtension + "000" + m_DataPathExtension);
+			} else {
+				if (std::experimental::filesystem::exists(pathWithoutExtension + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetCurrentlyReadFileAndLine(), true, altFileExtension);
+					SetDataPath(pathWithoutExtension + altFileExtension);
+				} else if (std::experimental::filesystem::exists(pathWithoutExtension + "000" + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetCurrentlyReadFileAndLine(), true, altFileExtension);
+					SetDataPath(pathWithoutExtension + "000" + altFileExtension);
+				} else {
+					RTEAbort("Failed to find image file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + "\n" + GetCurrentlyReadFileAndLine());
+				}
+			}
+		}
+		BITMAP *returnBitmap = nullptr;
+
+		PALETTE currentPalette;
+		get_palette(currentPalette);
+
+		set_color_conversion((conversionMode == 0) ? COLORCONV_MOST : conversionMode);
+		returnBitmap = load_bitmap(m_DataPath.c_str(), currentPalette);
+		RTEAssert(returnBitmap, "Failed to load image file with following path and name:\n\n" + m_DataPathAndReaderPosition + "\nThe file may be corrupt, incorrectly converted or saved with unsupported parameters.");
+		return returnBitmap;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	FMOD::Sound * ContentFile::GetAsSample(bool abortGameForInvalidSound) {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
 		FMOD::Sound *returnSample = nullptr;
-		std::string dataPathAndAccessLocation = m_DataPath + "\n" + GetCurrentlyReadFileAndLine();
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.
 		std::map<std::string, FMOD::Sound *>::iterator foundSound = s_LoadedSamples.find(m_DataPath);
 		if (foundSound != s_LoadedSamples.end()) {
 			returnSample = (*foundSound).second;
 		} else {
-			if (!std::experimental::filesystem::exists(m_DataPath) && abortGameForInvalidSound) {
-				RTEAbort("Failed to find audio file with following path and name:\n\n" + dataPathAndAccessLocation);
-			} else {
-				std::string errorMessage;
-				unsigned int fileSize = static_cast<unsigned int>(std::experimental::filesystem::file_size(m_DataPath));
-				PACKFILE *fileToLoad = pack_fopen(m_DataPath.c_str(), F_READ);
+			returnSample = LoadAndReleaseSample(abortGameForInvalidSound); //NOTE: This takes ownership of the sample file
 
-				if (!fileToLoad || fileSize <= 0) {
-					RTEAssert(!abortGameForInvalidSound, "Failed to load audio file with following path and name:\n\n" + dataPathAndAccessLocation);
-					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetCurrentlyReadFileAndLine());
-					return returnSample;
-				}
-				char *rawData = new char[fileSize];
-				int bytesRead = pack_fread(rawData, fileSize, fileToLoad);
-				RTEAssert(bytesRead == fileSize, "Read audio file data does not match the reported size of file with following path and name:\n\n" + dataPathAndAccessLocation + "\nThe file may be corrupt.");
-				pack_fclose(fileToLoad);
+			// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED FILE
+			s_LoadedSamples.insert(std::pair<std::string, FMOD::Sound *>(m_DataPath, returnSample));
+		}
+		return returnSample;
+	}
 
-				// Setup fmod info, and make sure to use mode OPENMEMORY since we're doing the loading with ContentFile instead of fmod, and we're deleting the raw data after loading it
-				FMOD_CREATESOUNDEXINFO soundInfo = {};
-				soundInfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
-				soundInfo.length = fileSize;
-				//TODO Consider doing FMOD_CREATESAMPLE for dumping audio files into memory and FMOD_NONBLOCKING to async create sounds
-				FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(rawData, FMOD_OPENMEMORY | FMOD_3D, &soundInfo, &returnSample);
-				delete[] rawData;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-				if (result != FMOD_OK) {
-					errorMessage = "Unable to create sound because of FMOD error: " + std::string(FMOD_ErrorString(result)) + "\nThe path and name were: ";
-					RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + dataPathAndAccessLocation);
-					g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
-					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetCurrentlyReadFileAndLine());
-					return returnSample;
-				}
-				// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED FILE
-				s_LoadedSamples.insert(std::pair<std::string, FMOD::Sound *>(m_DataPath, returnSample));
+	FMOD::Sound * ContentFile::LoadAndReleaseSample(bool abortGameForInvalidSound) {
+		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
+			return nullptr;
+		}
+		FMOD::Sound *returnSample = nullptr;
+
+		if (!std::experimental::filesystem::exists(m_DataPath) && abortGameForInvalidSound) {
+			RTEAbort("Failed to find audio file with following path and name:\n\n" + m_DataPathAndReaderPosition);
+		} else {
+			std::string errorMessage;
+
+			unsigned int fileSize = static_cast<unsigned int>(std::experimental::filesystem::file_size(m_DataPath));
+			PACKFILE *fileToLoad = pack_fopen(m_DataPath.c_str(), F_READ);
+
+			if (!fileToLoad || fileSize <= 0) {
+				RTEAssert(!abortGameForInvalidSound, "Failed to load audio file with following path and name:\n\n" + m_DataPathAndReaderPosition);
+				g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetCurrentlyReadFileAndLine());
+				return returnSample;
+			}
+			char *rawData = new char[fileSize];
+			int bytesRead = pack_fread(rawData, fileSize, fileToLoad);
+			RTEAssert(bytesRead == fileSize, "Read audio file data does not match the reported size of file with following path and name:\n\n" + m_DataPathAndReaderPosition + "\nThe file may be corrupt.");
+			pack_fclose(fileToLoad);
+
+			// Setup fmod info, and make sure to use mode OPENMEMORY since we're doing the loading with ContentFile instead of fmod, and we're deleting the raw data after loading it
+			FMOD_CREATESOUNDEXINFO soundInfo = {};
+			soundInfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
+			soundInfo.length = fileSize;
+			//TODO Consider doing FMOD_CREATESAMPLE for dumping audio files into memory and FMOD_NONBLOCKING to async create sounds
+			FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(rawData, FMOD_OPENMEMORY | FMOD_3D, &soundInfo, &returnSample);
+			delete[] rawData;
+
+			if (result != FMOD_OK) {
+				errorMessage = "Unable to create sound because of FMOD error: " + std::string(FMOD_ErrorString(result)) + "\nThe path and name were: ";
+				RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
+				g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
+				g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetCurrentlyReadFileAndLine());
+				return returnSample;
 			}
 		}
 		return returnSample;

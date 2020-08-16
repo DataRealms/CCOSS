@@ -203,7 +203,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The largest magnitude of offset, in pixels.
 
-    float CalculateMaxRadius();
+    float CalculateMaxRadius() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -579,6 +579,17 @@ ClassInfoGetters
 //                  number of attempts.
 
 	bool ResolveMOSIntersection(Vector &position, Matrix &rotation);
+
+
+	/// <summary>
+	/// Create and add an atom to this AtomGroup's list of atoms, m_Atoms.
+	/// </summary>
+	/// <param name="x">X coordinate in the sprite frame.</param>
+	/// <param name="y">Y coordinate in the sprite frame.</param>
+	/// <param name="spriteOffset">Sprite offset relative to pOwnerMOSRotating.</param>
+	/// <param name="pOwnerMOSRotating">MOSRotating whose outline will be approximated by Atoms of this AtomGroup.</param>
+	/// <param name="calcNormal">Whether to set a normal for the atom. Should be true for surface atoms.</param>
+	void AddAtomToGroup(int x, int y, const Vector &spriteOffset, MOSRotating *pOwnerMOSRotating, bool calcNormal);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -526,10 +526,10 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 
     // Assign the different functions read in from the script to their permanent locations in the preset's table
     for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
+        if (m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
+            m_FunctionsAndScripts.insert({functionName, std::vector<std::pair<std::string, bool> *>()});
+        }
         if (g_LuaMan.GlobalIsDefined(functionName)) {
-            if (m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
-                m_FunctionsAndScripts.insert({functionName, std::vector<std::pair<std::string, bool> *>()});
-            }
             m_FunctionsAndScripts.find(functionName)->second.push_back(&m_AllLoadedScripts.back());
             int error = g_LuaMan.RunScriptString(
                 m_ScriptPresetName + "." + functionName + " = " + m_ScriptPresetName + "." + functionName + " or {}; " +

@@ -244,78 +244,89 @@ ClassInfoGetters
     Vector GetEyePos() const override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHead
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the head Attachable
-// Arguments:       None.
-// Return value:    A pointer to the head Attachable of this. Ownership is NOT transferred!
+    /// <summary>
+    /// Gets the head of this AHuman.
+    /// </summary>
+    /// <returns>A pointer to the head of this AHuman. Ownership is NOT transferred.</returns>
+    Attachable *GetHead() const { return m_pHead; }
 
-    Attachable * GetHead() const { return m_pHead; }
+    /// <summary>
+    /// Sets the head for this AHuman.
+    /// </summary>
+    /// <param name="newHead">The new head to use.</param>
+    void SetHead(Attachable *newHead);
 
+    /// <summary>
+    /// Gets the jetpack of this AHuman.
+    /// </summary>
+    /// <returns>A pointer to the jetpack of this AHuman. Ownership is NOT transferred.</returns>
+    AEmitter *GetJetpack() const { return m_pJetpack; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetFGArm
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the FG Arm as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the FG Arm Attachable of this. Ownership is NOT transferred!
+    /// <summary>
+    /// Sets the jetpack for this AHuman.
+    /// </summary>
+    /// <param name="newJetpac">The new jetpack to use.</param>
+    void SetJetpack(Attachable *newJetpack);
 
-    Attachable * GetFGArm() const { return (Attachable *)m_pFGArm; }
+    /// <summary>
+    /// Gets the foreground Arm of this AHuman.
+    /// </summary>
+    /// <returns>A pointer to the foreground Arm of this AHuman. Ownership is NOT transferred.</returns>
+    Attachable *GetFGArm() const { return static_cast<Attachable *>(m_pFGArm); }
 
+    /// <summary>
+    /// Sets the foreground Arm for this AHuman.
+    /// </summary>
+    /// <param name="newArm">The new Arm to use.</param>
+    void SetFGArm(Attachable *newArm);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetBGArm
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the BG Arm as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the BG Arm Attachable of this. Ownership is NOT transferred!
+    /// <summary>
+    /// Gets the background arm of this AHuman.
+    /// </summary>
+    /// <returns>A pointer to the background arm of this AHuman. Ownership is NOT transferred.</returns>
+    Attachable *GetBGArm() const { return static_cast<Attachable *>(m_pBGArm); }
 
-    Attachable * GetBGArm() const { return (Attachable *)m_pBGArm; }
+    /// <summary>
+    /// Sets the background Arm for this AHuman.
+    /// </summary>
+    /// <param name="newArm">The new Arm to use.</param>
+    void SetBGArm(Attachable *newArm);
 
+    /// <summary>
+    /// Gets the foreground Leg of this AHuman.
+    /// </summary>
+    /// <returns>A pointer to the foreground Leg of this AHuman. Ownership is NOT transferred.</returns>
+    Attachable *GetFGLeg() const { return static_cast<Attachable *>(m_pFGLeg); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetFGLeg
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the FG Leg as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the FG Leg Attachable of this. Ownership is NOT transferred!
+    /// <summary>
+    /// Sets the foreground Leg for this AHuman.
+    /// </summary>
+    /// <param name="newLeg">The new Leg to use.</param>
+    void SetFGLeg(Attachable *newLeg);
 
-    Attachable * GetFGLeg() const { return (Attachable *)m_pFGLeg; }
+    /// <summary>
+    /// Gets the background leg of this AHuman.
+    /// </summary>
+    /// <returns>A pointer to the background leg of this AHuman. Ownership is NOT transferred.</returns>
+    Attachable *GetBGLeg() const { return static_cast<Attachable *>(m_pBGLeg); }
 
+    /// <summary>
+    /// Sets the background Leg for this AHuman.
+    /// </summary>
+    /// <param name="newLeg">The new Leg to use.</param>
+    void SetBGLeg(Attachable *newLeg);
 
 	/// <summary>
 	/// Gets the FG foot attachable of this.
 	/// </summary>
 	/// <returns>A pointer to the FG foot attachable of this. Ownership is NOT transferred!</returns>
-	Attachable * GetFGFoot() const { if (m_pFGLeg) { return m_pFGLeg->GetFoot(); } else { return nullptr; } }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetBGLeg
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the BG Leg as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the BG Leg Attachable of this. Ownership is NOT transferred!
-
-    Attachable * GetBGLeg() const { return (Attachable *)m_pBGLeg; }
-
+    Attachable *GetFGFoot() const { return m_pFGLeg ? m_pFGLeg->GetFoot() : nullptr; }
 
 	/// <summary>
 	/// Gets the BG foot attachable of this.
 	/// </summary>
 	/// <returns>A pointer to the BG foot attachable of this. Ownership is NOT transferred!</returns>
-	Attachable * GetBGFoot() const { if (m_pBGLeg) { return m_pBGLeg->GetFoot(); } else { return nullptr; } }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetJetpack
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the jetpack as an emitter. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to jetpack emitter. Ownership is NOT transferred!
-
-    AEmitter * GetJetpack() const { return (AEmitter *)m_pJetpack; }
+	Attachable *GetBGFoot() const { return m_pBGLeg ? m_pBGLeg->GetFoot() : nullptr; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -326,7 +337,7 @@ ClassInfoGetters
 // Return value:    A pointer to the bitmap of with the head of this. Ownership is NOT
 //                  transferred!
 
-    BITMAP * GetHeadBitmap() const;
+    BITMAP *GetHeadBitmap() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -167,65 +167,77 @@ public:
 	Vector GetEyePos() const override;
 
 
-    /// <summary>
-    /// Gets the left FG Leg as an Attachable.
-    /// </summary>
-    /// <returns>A pointer to the Leg Attachable. Ownership is NOT transferred!</returns>
-    Attachable * GetLeftFGLeg() const { return dynamic_cast<Attachable *>(m_pLFGLeg); }
+	/// <summary>
+	/// Gets the Turret of this Crab.
+	/// </summary>
+	/// <returns>A pointer to the Crab's Turret. Ownership is NOT transferred!</returns>
+	Attachable *GetTurret() const { return (m_pTurret && m_pTurret->IsAttached()) ? dynamic_cast<Attachable *>(m_pTurret) : nullptr; }
+
+	/// <summary>
+	/// Sets the turret for this Crab. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newTurret">The new turret to use.</param>
+	void SetTurret(Attachable *newTurret);
+
+	/// <summary>
+	/// Gets the jetpack of this ACrab.
+	/// </summary>
+	/// <returns>A pointer to the jetpack of this ACrab. Ownership is NOT transferred!</returns>
+	AEmitter *GetJetpack() const { return m_pJetpack; }
+
+	/// <summary>
+	/// Sets the jetpack for this ACrab. Ownership IS Transferred!
+	/// </summary>
+	/// <param name="newJetpack">The new jetpack to use.</param>
+	void SetJetpack(Attachable *newJetpack);
 
     /// <summary>
-    /// Sets the left foreground leg for this Crab. Ownership IS transferred!
+    /// Gets the left foreground Leg of this ACrab.
     /// </summary>
-    /// <param name="newLeg">The new leg to use.</param>
+    /// <returns>A pointer to the left foreground Leg of this ACrab. Ownership is NOT transferred!</returns>
+    Attachable *GetLeftFGLeg() const { return static_cast<Attachable *>(m_pLFGLeg); }
+
+    /// <summary>
+    /// Sets the left foreground Leg for this ACrab. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newLeg">The new Leg to use.</param>
     void SetLeftFGLeg(Attachable *newLeg);
 
     /// <summary>
-    /// Gets the left BG Leg as an Attachable.
+    /// Gets the left background Leg of this ACrab.
     /// </summary>
-    /// <returns>A pointer to the Leg Attachable. Ownership is NOT transferred!</returns>
-    Attachable * GetLeftBGLeg() const { return dynamic_cast<Attachable *>(m_pLBGLeg); }
+    /// <returns>A pointer to the left background Leg of this ACrab. Ownership is NOT transferred!</returns>
+    Attachable *GetLeftBGLeg() const { return static_cast<Attachable *>(m_pLBGLeg); }
 
     /// <summary>
-    /// Sets the left background leg for this Crab. Ownership IS transferred!
+    /// Sets the left background Leg for this ACrab. Ownership IS transferred!
     /// </summary>
-    /// <param name="newLeg">The new leg to use.</param>
+    /// <param name="newLeg">The new Leg to use.</param>
     void SetLeftBGLeg(Attachable *newLeg);
 
     /// <summary>
-    /// Gets the right FG Leg as an Attachable.
+    /// Gets the right foreground Leg of this ACrab.
     /// </summary>
-    /// <returns>A pointer to the Leg Attachable. Ownership is NOT transferred!</returns>
-    Attachable * GetRightFGLeg() const { return dynamic_cast<Attachable *>(m_pRFGLeg); }
+    /// <returns>A pointer to the right foreground Leg of this ACrab. Ownership is NOT transferred!</returns>
+    Attachable *GetRightFGLeg() const { return static_cast<Attachable *>(m_pRFGLeg); }
 
     /// <summary>
-    /// Sets the right foreground leg for this Crab. Ownership IS transferred!
+    /// Sets the right foreground Leg for this ACrab. Ownership IS transferred!
     /// </summary>
-    /// <param name="newLeg">The new leg to use.</param>
+    /// <param name="newLeg">The new Leg to use.</param>
     void SetRightFGLeg(Attachable *newLeg);
 
     /// <summary>
-    /// Gets the right BG Leg as an Attachable.
+    /// Gets the right BG Leg of this ACrab.
     /// </summary>
-    /// <returns>A pointer to the Leg Attachable. Ownership is NOT transferred!</returns>
-    Attachable *GetRightBGLeg() const { return dynamic_cast<Attachable *>(m_pRBGLeg); }
+    /// <returns>A pointer to the right background Leg of this ACrab. Ownership is NOT transferred!</returns>
+    Attachable *GetRightBGLeg() const { return static_cast<Attachable *>(m_pRBGLeg); }
 
     /// <summary>
-    /// Sets the right background leg for this Crab. Ownership IS transferred!
+    /// Sets the right background Leg for this ACrab. Ownership IS transferred!
     /// </summary>
-    /// <param name="newLeg">The new leg to use.</param>
+    /// <param name="newLeg">The new Leg to use.</param>
     void SetRightBGLeg(Attachable *newLeg);
-
-    /// <summary>
-    /// Gets the jetpack emitter for this Crab.
-    /// </summary>
-    /// <returns>A pointer to the jetpack emitter. Ownership is NOT transferred!</returns>
-    AEmitter * GetJetpack() const { return (AEmitter *)m_pJetpack; }
-
-    /// <summary>
-    /// Sets the jetpack for this Crab. Ownership IS Transferred!
-    /// </summary>
-    /// <param name="newJetpack">The new jetpack to use.</param>
-    void SetJetpack(Attachable *newJetpack);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -301,19 +313,6 @@ public:
 //                  found, or there was no slice currently activated by the pie menu.
 
 	bool HandlePieCommand(int pieSliceIndex) override;
-
-
-    /// <summary>
-    /// Gets the turret of this Crab.
-    /// </summary>
-    /// <returns>A pointer to the Crab's turret. Ownership is NOT transferred!</returns>
-    Attachable * GetTurret() const;
-
-    /// <summary>
-    /// Sets the turret for this Crab. Ownership IS transferred!
-    /// </summary>
-    /// <param name="newTurret">The new turret to use.</param>
-    void SetTurret(Attachable *newTurret);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

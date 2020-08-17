@@ -495,6 +495,28 @@ Vector ACrab::GetEyePos() const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void ACrab::SetTurret(Attachable *newTurret) {
+    Turret *castedNewTurret = dynamic_cast<Turret *>(newTurret);
+    if (castedNewTurret) {
+        RemoveAttachable(m_pTurret);
+        m_pTurret = castedNewTurret;
+        AddAttachable(castedNewTurret);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetJetpack(Attachable *newJetpack) {
+    AEmitter *castedNewJetpack = dynamic_cast<AEmitter *>(newJetpack);
+    if (castedNewJetpack) {
+        RemoveAttachable(m_pJetpack);
+        m_pJetpack = castedNewJetpack;
+        AddAttachable(castedNewJetpack);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void ACrab::SetLeftFGLeg(Attachable *newLeg) {
     Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
     if (castedNewLeg) {
@@ -517,7 +539,7 @@ void ACrab::SetLeftBGLeg(Attachable *newLeg) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline void ACrab::SetRightFGLeg(Attachable *newLeg) {
+void ACrab::SetRightFGLeg(Attachable *newLeg) {
     Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
     if (castedNewLeg) {
         RemoveAttachable(m_pRFGLeg);
@@ -528,23 +550,12 @@ inline void ACrab::SetRightFGLeg(Attachable *newLeg) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline void ACrab::SetRightBGLeg(Attachable *newLeg) {
+void ACrab::SetRightBGLeg(Attachable *newLeg) {
     Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
     if (castedNewLeg) {
         RemoveAttachable(m_pRBGLeg);
         m_pRBGLeg = castedNewLeg;
         AddAttachable(castedNewLeg);
-    }
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-inline void ACrab::SetJetpack(Attachable *newJetpack) {
-    AEmitter *castedNewJetpack = dynamic_cast<AEmitter *>(newJetpack);
-    if (castedNewJetpack) {
-        RemoveAttachable(m_pJetpack);
-        m_pJetpack = castedNewJetpack;
-        AddAttachable(castedNewJetpack);
     }
 }
 
@@ -721,28 +732,6 @@ bool ACrab::HandlePieCommand(int pieSliceIndex)
 
     return false;
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-Attachable * ACrab::GetTurret() const {
-    if (m_pTurret && m_pTurret->IsAttached()) {
-        return dynamic_cast<Attachable *>(m_pTurret);
-    }
-    return 0;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ACrab::SetTurret(Attachable *newTurret) {
-    Turret *castedNewTurret = dynamic_cast<Turret *>(newTurret);
-    if (castedNewTurret) {
-        RemoveAttachable(m_pTurret);
-        m_pTurret = castedNewTurret;
-        AddAttachable(castedNewTurret);
-    }
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

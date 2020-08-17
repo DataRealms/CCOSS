@@ -137,45 +137,18 @@ int AHuman::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a AHuman to be identical to another, by deep copy.
 
-int AHuman::Create(const AHuman &reference)
-{
+int AHuman::Create(const AHuman &reference) {
+    if (reference.m_pHead) { CloneHardcodedAttachable(reference.m_pHead, AHuman::SetHead); }
+    if (reference.m_pJetpack) { CloneHardcodedAttachable(reference.m_pJetpack, AHuman::SetJetpack); }
+    if (reference.m_pFGArm) { CloneHardcodedAttachable(reference.m_pFGArm, AHuman::SetFGArm); }
+    if (reference.m_pBGArm) { CloneHardcodedAttachable(reference.m_pBGArm, AHuman::SetBGArm); }
+    if (reference.m_pFGLeg) { CloneHardcodedAttachable(reference.m_pFGLeg, AHuman::SetFGLeg); }
+    if (reference.m_pBGLeg) { CloneHardcodedAttachable(reference.m_pBGLeg, AHuman::SetBGLeg); }
     Actor::Create(reference);
 
 	m_ThrowPrepTime = reference.m_ThrowPrepTime;
-
-    if (reference.m_pHead) {
-        m_pHead = dynamic_cast<Attachable *>(reference.m_pHead->Clone());
-		m_pHead->SetCanCollideWithTerrainWhenAttached(true);
-        AddAttachable(m_pHead, true);
-    }
-
-    if (reference.m_pJetpack) {
-        m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        AddAttachable(m_pJetpack, true);
-    }
-
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
-
-    if (reference.m_pFGArm) {
-        m_pFGArm = dynamic_cast<Arm *>(reference.m_pFGArm->Clone());
-        AddAttachable(m_pFGArm, true);
-    }
-
-    if (reference.m_pBGArm) {
-        m_pBGArm = dynamic_cast<Arm *>(reference.m_pBGArm->Clone());
-        AddAttachable(m_pBGArm, true);
-    }
-
-    if (reference.m_pFGLeg) {
-        m_pFGLeg = dynamic_cast<Leg *>(reference.m_pFGLeg->Clone());
-        AddAttachable(m_pFGLeg, true);
-    }
-
-    if (reference.m_pBGLeg) {
-        m_pBGLeg = dynamic_cast<Leg *>(reference.m_pBGLeg->Clone());
-        AddAttachable(m_pBGLeg, true);
-    }
 
     m_pFGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pFGHandGroup->Clone());
     m_pFGHandGroup->SetOwner(this);
@@ -192,8 +165,7 @@ int AHuman::Create(const AHuman &reference)
     m_MoveState = reference.m_MoveState;
     m_ProneState = reference.m_ProneState;
 
-    for (int i = 0; i < MOVEMENTSTATECOUNT; ++i)
-    {
+    for (int i = 0; i < MOVEMENTSTATECOUNT; ++i) {
         m_Paths[FGROUND][i].Create(reference.m_Paths[FGROUND][i]);
         m_Paths[BGROUND][i].Create(reference.m_Paths[BGROUND][i]);
     }
@@ -223,57 +195,46 @@ int AHuman::Create(const AHuman &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int AHuman::ReadProperty(std::string propName, Reader &reader)
-{
-	if (propName == "ThrowPrepTime")
-		reader >> m_ThrowPrepTime;
-	else if (propName == "Head")
-    {
+int AHuman::ReadProperty(std::string propName, Reader &reader) {
+    if (propName == "ThrowPrepTime") {
+        reader >> m_ThrowPrepTime;
+    } else if (propName == "Head") {
         delete m_pHead;
         m_pHead = new Attachable;
         reader >> m_pHead;
-        if (!m_pHead->GetDamageMultiplier() < 0) {
+        if (m_pHead->GetDamageMultiplier() >= 0.0F) {
             m_pHead->SetDamageMultiplier(5);
         }
-    }
-    else if (propName == "Jetpack")
-    {
+        m_pHead->SetTransfersDamageToParent(true);
+    } else if (propName == "Jetpack") {
         delete m_pJetpack;
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-    }
-    else if (propName == "JumpTime")
-    {
+    } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         // Convert to ms
         m_JetTimeTotal *= 1000;
-    }
-    else if (propName == "FGArm")
-    {
+    } else if (propName == "FGArm") {
         delete m_pFGArm;
         m_pFGArm = new Arm;
         reader >> m_pFGArm;
-    }
-    else if (propName == "BGArm")
-    {
+        m_pFGArm->SetTransfersDamageToParent(true);
+    } else if (propName == "BGArm") {
         delete m_pBGArm;
         m_pBGArm = new Arm;
         reader >> m_pBGArm;
-    }
-    else if (propName == "FGLeg")
-    {
+        m_pBGArm->SetTransfersDamageToParent(true);
+    } else if (propName == "FGLeg") {
         delete m_pFGLeg;
         m_pFGLeg = new Leg;
         reader >> m_pFGLeg;
-    }
-    else if (propName == "BGLeg")
-    {
+        m_pFGLeg->SetTransfersDamageToParent(true);
+    } else if (propName == "BGLeg") {
         delete m_pBGLeg;
         m_pBGLeg = new Leg;
         reader >> m_pBGLeg;
-    }
-    else if (propName == "HandGroup")
-    {
+        m_pBGLeg->SetTransfersDamageToParent(true);
+    } else if (propName == "HandGroup") {
         delete m_pFGHandGroup;
         delete m_pBGHandGroup;
         m_pFGHandGroup = new AtomGroup();
@@ -282,43 +243,39 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         m_pBGHandGroup->Create(*m_pFGHandGroup);
         m_pFGHandGroup->SetOwner(this);
         m_pBGHandGroup->SetOwner(this);
-    }
-    else if (propName == "FGFootGroup")
-    {
+    } else if (propName == "FGFootGroup") {
         delete m_pFGFootGroup;
         m_pFGFootGroup = new AtomGroup();
         reader >> m_pFGFootGroup;
         m_pFGFootGroup->SetOwner(this);
-    }
-    else if (propName == "BGFootGroup")
-    {
+    } else if (propName == "BGFootGroup") {
         delete m_pBGFootGroup;
         m_pBGFootGroup = new AtomGroup();
         reader >> m_pBGFootGroup;
         m_pBGFootGroup->SetOwner(this);
-    }
-    else if (propName == "StrideSound")
+    } else if (propName == "StrideSound") {
         reader >> m_StrideSound;
-    else if (propName == "StandLimbPath")
+    } else if (propName == "StandLimbPath") {
         reader >> m_Paths[FGROUND][STAND];
-    else if (propName == "StandLimbPathBG")
+    } else if (propName == "StandLimbPathBG") {
         reader >> m_Paths[BGROUND][STAND];
-    else if (propName == "WalkLimbPath")
+    } else if (propName == "WalkLimbPath") {
         reader >> m_Paths[FGROUND][WALK];
-    else if (propName == "CrouchLimbPath")
+    } else if (propName == "CrouchLimbPath") {
         reader >> m_Paths[FGROUND][CROUCH];
-    else if (propName == "CrawlLimbPath")
+    } else if (propName == "CrawlLimbPath") {
         reader >> m_Paths[FGROUND][CRAWL];
-    else if (propName == "ArmCrawlLimbPath")
+    } else if (propName == "ArmCrawlLimbPath") {
         reader >> m_Paths[FGROUND][ARMCRAWL];
-    else if (propName == "ClimbLimbPath")
+    } else if (propName == "ClimbLimbPath") {
         reader >> m_Paths[FGROUND][CLIMB];
-    else if (propName == "JumpLimbPath")
+    } else if (propName == "JumpLimbPath") {
         reader >> m_Paths[FGROUND][JUMP];
-    else if (propName == "DislodgeLimbPath")
+    } else if (propName == "DislodgeLimbPath") {
         reader >> m_Paths[FGROUND][DISLODGE];
-    else
+    } else {
         return Actor::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -518,19 +475,78 @@ Vector AHuman::GetEyePos() const
     return m_Pos;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeadBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the sprite representing the head of this.
-
-BITMAP * AHuman::GetHeadBitmap() const
-{
-    if (m_pHead && m_pHead->IsAttached())
-        return m_pHead->GetSpriteFrame(0);
-
-    return 0;
+void AHuman::SetHead(Attachable *newHead) {
+    if (newHead) {
+        RemoveAttachable(m_pHead);
+        m_pHead = newHead;
+        AddAttachable(newHead);
+    }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetJetpack(Attachable *newJetpack) {
+    AEmitter *castedNewJetpack = dynamic_cast<AEmitter *>(newJetpack);
+    if (castedNewJetpack) {
+        RemoveAttachable(m_pJetpack);
+        m_pJetpack = castedNewJetpack;
+        AddAttachable(castedNewJetpack);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetFGArm(Attachable *newArm) {
+    Arm *castedNewArm = dynamic_cast<Arm *>(newArm);
+    if (castedNewArm) {
+        RemoveAttachable(m_pFGArm);
+        m_pFGArm = castedNewArm;
+        AddAttachable(castedNewArm);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetBGArm(Attachable *newArm) {
+    Arm *castedNewArm = dynamic_cast<Arm *>(newArm);
+    if (castedNewArm) {
+        RemoveAttachable(m_pBGArm);
+        m_pBGArm = castedNewArm;
+        AddAttachable(castedNewArm);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetFGLeg(Attachable *newLeg) {
+    Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
+    if (castedNewLeg) {
+        RemoveAttachable(m_pFGLeg);
+        m_pFGLeg = castedNewLeg;
+        AddAttachable(castedNewLeg);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetBGLeg(Attachable *newLeg) {
+    Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
+    if (castedNewLeg) {
+        RemoveAttachable(m_pBGLeg);
+        m_pBGLeg = castedNewLeg;
+        AddAttachable(castedNewLeg);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+BITMAP *AHuman::GetHeadBitmap() const {
+    return (m_pHead && m_pHead->IsAttached()) ? m_pHead->GetSpriteFrame(0) : nullptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

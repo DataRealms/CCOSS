@@ -52,16 +52,9 @@ int Turret::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a Turret to be identical to another, by deep copy.
 
-int Turret::Create(const Turret &reference)
-{
+int Turret::Create(const Turret &reference) {
+    if (reference.m_pMountedMO && reference.m_pMountedMO->IsDevice()) { CloneHardcodedAttachable(dynamic_cast<Attachable *>(reference.m_pMountedMO), this, static_cast<std::function<void(Turret &, Attachable *)>>((void (Turret:: *)(Attachable * newMountedMO)) & Turret::SetMountedMO)); }
     Attachable::Create(reference);
-
-    if (reference.m_pMountedMO) {
-        m_pMountedMO = dynamic_cast<MovableObject *>(reference.m_pMountedMO->Clone());
-        if (m_pMountedMO->IsDevice())
-            dynamic_cast<Attachable *>(m_pMountedMO)->Attach(this,
-                dynamic_cast<Attachable *>(m_pMountedMO)->GetParentOffset());
-    }
 
     m_MountedRotOffset = reference.m_MountedRotOffset;
 
@@ -79,14 +72,11 @@ int Turret::Create(const Turret &reference)
 
 int Turret::ReadProperty(std::string propName, Reader &reader)
 {
-    if (propName == "MountedMO")
-    {
+    if (propName == "MountedMO") {
         const Entity *pEntity = g_PresetMan.GetEntityPreset(reader);
-        if (pEntity)
-        {
+        if (pEntity) {
             m_pMountedMO = dynamic_cast<MovableObject *>(pEntity->Clone());
-            if (m_pMountedMO->IsDevice())
-                dynamic_cast<HeldDevice *>(m_pMountedMO)->Attach(this, dynamic_cast<HeldDevice *>(m_pMountedMO)->GetParentOffset());
+            if (m_pMountedMO->IsDevice()) { AddAttachable(dynamic_cast<HeldDevice *>(m_pMountedMO)); }
         }
         pEntity = 0;
     }
@@ -122,8 +112,6 @@ int Turret::Save(Writer &writer) const
 void Turret::Destroy(bool notInherited)
 {
 //    g_MovableMan.RemoveEntityPreset(this);
-
-    delete m_pMountedMO;
 
     if (!notInherited)
         Attachable::Destroy();
@@ -185,7 +173,7 @@ void Turret::SetMountedMO(MovableObject *newHeldMO)
 {
     if (m_pMountedMO && m_pMountedMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pMountedMO)->IsAttachedTo(this)) {
         HeldDevice *pHeldDev = dynamic_cast<HeldDevice *>(m_pMountedMO);
-        pHeldDev->Detach();
+        RemoveAttachable(pHeldDev);
 // TODO: Refine throwing force to dropped device here?")
         pHeldDev->SetVel(Vector(10 * PosRand(), -15 * PosRand()));
         pHeldDev->SetAngularVel(-10 * PosRand());
@@ -195,9 +183,9 @@ void Turret::SetMountedMO(MovableObject *newHeldMO)
 
     if (newHeldMO && newHeldMO->IsHeldDevice()) {
         HeldDevice *pNewDev = dynamic_cast<HeldDevice *>(newHeldMO);
-        pNewDev->Detach();
+        dynamic_cast<MOSRotating *>(pNewDev->GetParent())->RemoveAttachable(pNewDev);
         g_MovableMan.RemoveMO(pNewDev);
-        pNewDev->Attach(this, pNewDev->GetParentOffset());
+        AddAttachable(pNewDev);
         pNewDev = 0;
     }
     m_pMountedMO = newHeldMO;
@@ -216,8 +204,7 @@ void Turret::SetMountedMO(MovableObject *newHeldMO)
 MovableObject * Turret::ReleaseMountedMO()
 {
     MovableObject *pReturnMO = m_pMountedMO;
-    if (m_pMountedMO && m_pMountedMO->IsDevice())
-        dynamic_cast<Attachable *>(m_pMountedMO)->Detach();
+    if (m_pMountedMO && m_pMountedMO->IsDevice()) { RemoveAttachable(dynamic_cast<Attachable *>(m_pMountedMO)); }
     m_pMountedMO = 0;
     return pReturnMO;
 }
@@ -235,7 +222,7 @@ MovableObject * Turret::DropEverything()
     MovableObject *pReturnMO = m_pMountedMO;
 
     if (m_pMountedMO && m_pMountedMO->IsDevice()) {
-        dynamic_cast<Attachable *>(m_pMountedMO)->Detach();
+        RemoveAttachable(dynamic_cast<Attachable *>(m_pMountedMO));
         g_MovableMan.AddItem(m_pMountedMO);
     }
     else if (m_pMountedMO)
@@ -256,14 +243,10 @@ MovableObject * Turret::DropEverything()
 MovableObject * Turret::SwapMountedMO(MovableObject *newMO)
 {
     MovableObject *oldMO = m_pMountedMO;
-    if (oldMO && oldMO->IsDevice())
-        dynamic_cast<Attachable *>(oldMO)->Detach();
+    if (m_pMountedMO && m_pMountedMO->IsDevice()) { RemoveAttachable(dynamic_cast<Attachable *>(m_pMountedMO)); }
 
     m_pMountedMO = newMO;
-    if (newMO && newMO->IsDevice()) {
-        dynamic_cast<Attachable *>(newMO)->Attach(this,
-            dynamic_cast<Attachable *>(newMO)->GetParentOffset());
-    }
+    if (newMO && newMO->IsDevice()) { AddAttachable(dynamic_cast<Attachable *>(newMO)); }
 
     return oldMO;
 }
@@ -291,7 +274,7 @@ void Turret::Update()
     // Update basic metrics from parent.
     Attachable::Update();
 
-    if (!m_pParent)
+    if (!m_Parent)
     {
         if (m_pMountedMO)
         {

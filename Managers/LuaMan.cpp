@@ -1182,7 +1182,8 @@ int LuaMan::Create()
 			.def("GetLimbPathSpeed", &ACrab::GetLimbPathSpeed)
 			.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed),
 
-        ABSTRACTLUABINDING(Turret, Attachable),
+        CONCRETELUABINDING(Turret, Attachable)
+			.property("MountedMO", &Turret::GetMountedMO, (void (Turret:: *)(Attachable *newMountedMO)) &Turret::SetMountedMO),
 
 		ABSTRACTLUABINDING(ACraft, Actor)
 			.enum_("HatchState")[

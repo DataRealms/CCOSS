@@ -177,6 +177,13 @@ ClassInfoGetters
 
     void SetID(const MOID newID) override;
 
+    /// <summary>
+    /// Replaces the MovableObject currently held by this Turret with a new one. Ownership IS transferred.
+    /// The currently held MovableObject (if there is one) will be dropped and become a detached MovableObject.
+    /// This is primarily used to support clone Create. At some point this should be refactored so Turret can only hold HeldDevices or Attachables anyway.
+    /// </summary>
+    /// <param name="newHeldMO">A pointer to the new MovableObject to hold. Ownership IS transferred.</param>
+    void SetMountedMO(Attachable *newMountedMO) { SetMountedMO(static_cast<MovableObject *>(newMountedMO)); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetMountedMO

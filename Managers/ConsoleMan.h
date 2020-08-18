@@ -193,7 +193,8 @@ namespace RTE {
 		/// Executes the string currently in the console textbox or multiple strings if a newline character is found.
 		/// The input string is saved to the input log if it's different from the previous string. This is called from Update().
 		/// </summary>
-		void FeedString();
+		/// <param name="feedEmptyString">Whether to just pass in an empty string to make a new line.</param>
+		void FeedString(bool feedEmptyString = false);
 
 		/// <summary>
 		/// Loads a previously entered console string from the input log when pressing up or down. This is called from Update().

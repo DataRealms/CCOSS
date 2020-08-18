@@ -270,7 +270,9 @@ namespace RTE {
 		}	
 
 		// Execute string when Enter is pressed, or execute immediately if a newline character is found, meaning multiple strings were pasted in.
-		if ((g_UInputMan.KeyPressed(KEY_ENTER) || g_UInputMan.KeyPressed(KEY_ENTER_PAD)) || (m_InputTextBox->GetText().find_last_of('\n') != std::string::npos)) { FeedString(); }
+		if ((g_UInputMan.KeyPressed(KEY_ENTER) || g_UInputMan.KeyPressed(KEY_ENTER_PAD)) || (m_InputTextBox->GetText().find_last_of('\n') != std::string::npos)) {
+			FeedString(m_InputTextBox->GetText().empty() ? true : false);
+		}
 
 		// TODO: Get this working and see if it actually makes any difference.
 		/*
@@ -316,7 +318,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::FeedString() {
+	void ConsoleMan::FeedString(bool feedEmptyString) {
 		char strLine[1024];
 		std::stringstream inputStream(m_InputTextBox->GetText());
 
@@ -324,16 +326,21 @@ namespace RTE {
 			inputStream.getline(strLine, 1024, '\n');
 			std::string line = strLine;
 
-			if (line != "\r") {
-				g_LuaMan.ClearErrors();
-				m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + line);
-				g_LuaMan.RunScriptString(line, false);
+			if (!feedEmptyString) {
+				if (!line.empty() && line != "\r") {
+					g_LuaMan.ClearErrors();
+					m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + line);
+					g_LuaMan.RunScriptString(line, false);
 
-				if (g_LuaMan.ErrorExists()) { m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + "ERROR: " + g_LuaMan.GetLastError()); }
-				if (m_InputLog.empty() || m_InputLog.front().compare(line) != 0) { m_InputLog.push_front(line); }
+					if (g_LuaMan.ErrorExists()) { m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + "ERROR: " + g_LuaMan.GetLastError()); }
+					if (m_InputLog.empty() || m_InputLog.front() != line) { m_InputLog.push_front(line); }
 
-				m_InputLogPosition = m_InputLog.begin();
-				m_LastLogMove = 0;
+					m_InputLogPosition = m_InputLog.begin();
+					m_LastLogMove = 0;
+				}
+			} else {
+				m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n");
+				break;
 			}
 		}
 		m_InputTextBox->SetText("");

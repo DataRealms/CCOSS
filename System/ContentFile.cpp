@@ -209,42 +209,35 @@ namespace RTE {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
-		FMOD::Sound *returnSample = nullptr;
+		const std::string altFileExtension = (m_DataPathExtension == ".wav") ? ".ogg" : ".wav";
 
-		if (!std::experimental::filesystem::exists(m_DataPath) && abortGameForInvalidSound) {
-			RTEAbort("Failed to find audio file with following path and name:\n\n" + m_DataPathAndReaderPosition);
-		} else {
-			std::string errorMessage;
-
-			unsigned int fileSize = static_cast<unsigned int>(std::experimental::filesystem::file_size(m_DataPath));
-			PACKFILE *fileToLoad = pack_fopen(m_DataPath.c_str(), F_READ);
-
-			if (!fileToLoad || fileSize <= 0) {
-				RTEAssert(!abortGameForInvalidSound, "Failed to load audio file with following path and name:\n\n" + m_DataPathAndReaderPosition);
-				g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetFormattedReaderPosition());
-				return returnSample;
-			}
-			char *rawData = new char[fileSize];
-			int bytesRead = pack_fread(rawData, fileSize, fileToLoad);
-			RTEAssert(bytesRead == fileSize, "Read audio file data does not match the reported size of file with following path and name:\n\n" + m_DataPathAndReaderPosition + "\nThe file may be corrupt.");
-			pack_fclose(fileToLoad);
-
-			// Setup fmod info, and make sure to use mode OPENMEMORY since we're doing the loading with ContentFile instead of fmod, and we're deleting the raw data after loading it
-			FMOD_CREATESOUNDEXINFO soundInfo = {};
-			soundInfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
-			soundInfo.length = fileSize;
-			//TODO Consider doing FMOD_CREATESAMPLE for dumping audio files into memory and FMOD_NONBLOCKING to async create sounds
-			FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(rawData, FMOD_OPENMEMORY | FMOD_3D, &soundInfo, &returnSample);
-			delete[] rawData;
-
-			if (result != FMOD_OK) {
-				errorMessage = "Unable to create sound because of FMOD error: " + std::string(FMOD_ErrorString(result)) + "\nThe path and name were: ";
-				RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
-				g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
-				g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetFormattedReaderPosition());
-				return returnSample;
+		if (!std::experimental::filesystem::exists(m_DataPath)) {
+			if (std::experimental::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
+				g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+				SetDataPath(m_DataPathWithoutExtension + altFileExtension);
+			} else {
+				if (abortGameForInvalidSound) {
+					RTEAbort("Failed to find audio file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + "\n" + m_FormattedReaderPosition);
+				} else {
+					g_ConsoleMan.PrintString("Failed to find audio file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + ". The file was not loaded!");
+					return nullptr;
+				}
 			}
 		}
+		FMOD::Sound *returnSample = nullptr;
+		
+		FMOD_CREATESOUNDEXINFO soundInfo = {};
+		soundInfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
+		soundInfo.length = static_cast<unsigned int>(std::experimental::filesystem::file_size(m_DataPath));
+		//TODO Consider doing FMOD_CREATESAMPLE for dumping audio files into memory and FMOD_NONBLOCKING to async create sounds
+		FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(m_DataPath.c_str(), FMOD_3D, &soundInfo, &returnSample);
+
+		if (result != FMOD_OK) {
+			const std::string errorMessage = "Failed to create sound because of FMOD error: " + std::string(FMOD_ErrorString(result)) + "\nThe path and name were: ";
+			RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
+			g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
+			return returnSample;
+		}	
 		return returnSample;
 	}
 }

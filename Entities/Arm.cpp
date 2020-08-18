@@ -62,16 +62,9 @@ int Arm::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a Arm to be identical to another, by deep copy.
 
-int Arm::Create(const Arm &reference)
-{
+int Arm::Create(const Arm &reference) {
+    if (reference.m_pHeldMO) { CloneHardcodedAttachable(dynamic_cast<Attachable *>(reference.m_pHeldMO), this, static_cast<std::function<void(Arm &, Attachable *)>>((void (Arm:: *)(Attachable *newHeldMO)) &Arm::SetHeldMO)); }
     Attachable::Create(reference);
-
-    if (reference.m_pHeldMO) {
-        m_pHeldMO = dynamic_cast<MovableObject *>(reference.m_pHeldMO->Clone());
-        if (m_pHeldMO->IsDevice())
-            dynamic_cast<Attachable *>(m_pHeldMO)->Attach(this,
-                dynamic_cast<Attachable *>(m_pHeldMO)->GetParentOffset());
-    }
 
     m_HandFile = reference.m_HandFile;
     m_pHand = m_HandFile.GetAsBitmap();
@@ -104,8 +97,7 @@ int Arm::ReadProperty(std::string propName, Reader &reader)
         if (pEntity)
         {
             m_pHeldMO = dynamic_cast<MovableObject *>(pEntity->Clone());
-            if (m_pHeldMO->IsDevice())
-                dynamic_cast<HeldDevice *>(m_pHeldMO)->Attach(this, dynamic_cast<HeldDevice *>(m_pHeldMO)->GetParentOffset());
+            if (m_pHeldMO->IsDevice()) { AddAttachable(dynamic_cast<HeldDevice *>(m_pHeldMO)); }
         }
         pEntity = 0;
     }
@@ -230,7 +222,7 @@ void Arm::SetHeldMO(MovableObject *newHeldMO)
 // TODO: NEED TO REWORK THIS TO WORK WITH THROWNDEVICES!!
     if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pHeldMO)->IsAttachedTo(this)) {
         HeldDevice *pHeldDev = dynamic_cast<HeldDevice *>(m_pHeldMO);
-        pHeldDev->Detach();
+        if (pHeldDev->IsAttached()) { dynamic_cast<MOSRotating *>(pHeldDev->GetParent())->RemoveAttachable(pHeldDev); }
 // TODO: Refine throwing force to dropped device here?")
         pHeldDev->SetVel(Vector(10 * PosRand(), -15 * PosRand()));
         pHeldDev->SetAngularVel(-10 * PosRand());
@@ -240,9 +232,9 @@ void Arm::SetHeldMO(MovableObject *newHeldMO)
 
     if (newHeldMO && (newHeldMO->IsHeldDevice() || newHeldMO->IsThrownDevice())) {
         Attachable *pNewDev = dynamic_cast<Attachable *>(newHeldMO);
-        pNewDev->Detach();
+        if (pNewDev->IsAttached()) { dynamic_cast<MOSRotating *>(pNewDev->GetParent())->RemoveAttachable(pNewDev); }
         g_MovableMan.RemoveMO(pNewDev);
-        pNewDev->Attach(this, pNewDev->GetParentOffset());
+        AddAttachable(pNewDev);
         pNewDev->SetTeam(m_Team);
         pNewDev = 0;
     }
@@ -271,7 +263,7 @@ MovableObject * Arm::ReleaseHeldMO()
 		{
 			// Once detached may have incorrect ID value. Detach will take care m_RootID. New ID will be assigned on next frame.
 			m_pHeldMO->SetID(g_NoMOID);
-			dynamic_cast<Attachable *>(m_pHeldMO)->Detach();
+            RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO));
 		}
     }
     m_pHeldMO = 0;
@@ -291,7 +283,7 @@ MovableObject * Arm::DropEverything()
     MovableObject *pReturnMO = m_pHeldMO;
 
     if (m_pHeldMO && m_pHeldMO->IsDevice()) {
-        dynamic_cast<Attachable *>(m_pHeldMO)->Detach();
+        RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO));
         g_MovableMan.AddItem(m_pHeldMO);
     }
     else if (m_pHeldMO)
@@ -312,13 +304,11 @@ MovableObject * Arm::DropEverything()
 MovableObject * Arm::SwapHeldMO(MovableObject *newMO)
 {
     MovableObject *oldMO = m_pHeldMO;
-    if (oldMO && oldMO->IsDevice())
-        dynamic_cast<Attachable *>(oldMO)->Detach();
+    if (m_pHeldMO && m_pHeldMO->IsDevice()) { RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO)); }
 
     m_pHeldMO = newMO;
     if (newMO && newMO->IsDevice()) {
-        dynamic_cast<Attachable *>(newMO)->Attach(this,
-            dynamic_cast<Attachable *>(newMO)->GetParentOffset());
+        AddAttachable(dynamic_cast<Attachable *>(newMO));
     }
 
     return oldMO;
@@ -424,13 +414,12 @@ void Arm::Update()
     // Update basic metrics from parent.
     Attachable::Update();
 
-    if (!m_pParent) {
+    if (!m_Parent) {
         // When arm is detached, let go of whatever it is holding 
         if (m_pHeldMO) {
             m_pHeldMO->SetVel(m_Vel + Vector(-10 * PosRand(), -15 * PosRand()));
             m_pHeldMO->SetAngularVel(-7);
-            if (m_pHeldMO->IsDevice())
-                dynamic_cast<Attachable *>(m_pHeldMO)->Detach();
+            if (m_pHeldMO->IsDevice()) { RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO)); }
             g_MovableMan.AddItem(m_pHeldMO);
             m_pHeldMO = 0;
         }
@@ -482,7 +471,7 @@ void Arm::Update()
             pHeldDev->SetRotAngle(m_Rotation.GetRadAngle());
             pHeldDev->Update();
             if (pHeldDev->IsRecoiled())
-                m_pParent->AddImpulseForce(pHeldDev->GetRecoilForce());
+                m_Parent->AddImpulseForce(pHeldDev->GetRecoilForce());
             else
                 m_Recoiled = false;
 
@@ -492,7 +481,7 @@ void Arm::Update()
             if (!m_JointPos.IsZero())
                 m_Pos = m_JointPos - RotateOffset(m_JointOffset);
             else
-                m_Pos = m_pParent->GetPos() - RotateOffset(m_JointOffset);
+                m_Pos = m_Parent->GetPos() - RotateOffset(m_JointOffset);
 
             // Apply forces and detach if necessary
             // OBSERVE the memeber pointer is what gets set to 0!$@#$@
@@ -539,7 +528,7 @@ void Arm::Update()
             if (!m_JointPos.IsZero())
                 m_Pos = m_JointPos - RotateOffset(m_JointOffset);
             else
-                m_Pos = m_pParent->GetPos() - RotateOffset(m_JointOffset);
+                m_Pos = m_Parent->GetPos() - RotateOffset(m_JointOffset);
 
             // If holding something other than a FireArm, then update it
             if (m_pHeldMO)
@@ -629,7 +618,7 @@ void Arm::Draw(BITMAP *pTargetBitmap,
     if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && m_pHeldMO->IsDrawnAfterParent())
         m_pHeldMO->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (!onlyPhysical && mode == g_DrawColor && (m_pHeldMO || !m_pParent))
+    if (!onlyPhysical && mode == g_DrawColor && (m_pHeldMO || !m_Parent))
         DrawHand(pTargetBitmap, targetPos, mode);
 
     if (m_pHeldMO && ((!m_pHeldMO->IsHeldDevice() && !m_pHeldMO->IsThrownDevice()) || m_pHeldMO->IsDrawnAfterParent()))

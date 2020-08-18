@@ -244,10 +244,16 @@ ClassInfoGetters
 
 
 	/// <summary>
-	/// Gets the foot Attachable of this.
+	/// Gets the foot of this Leg.
 	/// </summary>
-	/// <returns>A pointer to the foot Attachable of this. Ownership is NOT transferred!</returns>
+    /// <returns>A pointer to foot of this Leg. Ownership is NOT transferred!</returns>
 	Attachable * GetFoot() const { return m_pFoot; }
+
+    /// <summary>
+    /// Sets the foot for this Leg. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newFoot">The new foot to use.</param>
+    void SetFoot(Attachable *newFoot);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -998,7 +998,7 @@ int LuaMan::Create()
 			.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos),
 
         ABSTRACTLUABINDING(Leg, Attachable)
-            .property("Foot", &Leg::GetFoot),
+            .property("Foot", &Leg::GetFoot, &Leg::SetFoot),
 
 		CONCRETELUABINDING(AHuman, Actor)
 			// These are all private/protected so they can't be bound, need to consider making them public.

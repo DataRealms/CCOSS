@@ -157,7 +157,6 @@ void Arm::Destroy(bool notInherited)
 {
 //    g_MovableMan.RemoveEntityPreset(this);
 
-    delete m_pHeldMO;
 // Not owned by this
 //    destroy_bitmap(m_pHand);
 

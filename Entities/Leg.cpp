@@ -50,7 +50,7 @@ void Leg::Clear()
 
 int Leg::Create()
 {
-    if (Attachable::Create() < 0)
+    if (MOSRotating::Create() < 0)
         return -1;
 
     // Make sure the contracted offset is the one closer to the joint
@@ -73,14 +73,10 @@ int Leg::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a Leg to be identical to another, by deep copy.
 
-int Leg::Create(const Leg &reference)
-{
+int Leg::Create(const Leg &reference) {
+    if (reference.m_pFoot) { CloneHardcodedAttachable(reference.m_pFoot, this, static_cast<std::function<void(Leg &, Attachable *)>>(&Leg::SetFoot)); }
     Attachable::Create(reference);
 
-    if (reference.m_pFoot) {
-        m_pFoot = dynamic_cast<Attachable *>(reference.m_pFoot->Clone());
-        AddAttachable(m_pFoot, true);
-    }
     m_ContractedOffset = reference.m_ContractedOffset;
     m_ExtendedOffset = reference.m_ExtendedOffset;
     m_MinExtension = reference.m_MinExtension;
@@ -112,6 +108,7 @@ int Leg::ReadProperty(std::string propName, Reader &reader)
         if (pObj)
         {
             m_pFoot = dynamic_cast<Attachable *>(pObj->Clone());
+            AddAttachable(m_pFoot);
         }
     }
     else if (propName == "ContractedOffset")
@@ -182,7 +179,6 @@ int Leg::Save(Writer &writer) const
 
 void Leg::Destroy(bool notInherited)
 {
-    delete m_pFoot;
     if (!notInherited)
         Attachable::Destroy();
     Clear();
@@ -288,7 +284,7 @@ void Leg::Update()
     // Update basic metrics from parent.
     Attachable::Update();
 
-    if (!m_pParent)
+    if (!m_Parent)
     {
         if (m_pFoot)
         {
@@ -413,6 +409,17 @@ void Leg::GetMOIDs(std::vector<MOID> &MOIDs) const
 	Attachable::GetMOIDs(MOIDs);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Leg::SetFoot(Attachable *newFoot) {
+    if (newFoot) {
+        RemoveAttachable(m_pFoot);
+        m_pFoot = newFoot;
+        AddAttachable(newFoot);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw

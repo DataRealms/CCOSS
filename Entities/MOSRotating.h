@@ -788,10 +788,11 @@ protected:
     /// Also adds the reference attachable's UniqueID to the std::unordered_set of already copied attachable unique IDs so it doesn't get duplicated.
     /// </summary>
     /// <param name="referenceAttachable">The relevant hardcoded attachable belonging to the reference object being cloned.</param>
+    /// <param name="objectToRunSetterOn">A pointer to the object which the setter should be run on. Normally would be this, sent from the child class so types work properly.</param>
     /// <param name="hardcodedAttachableSetter">A std::function containing the setter for the given hardcoded attachable. Aside from setting the relevant member variable, this setter should call AddAttachable.</param>
-    template<class T> void CloneHardcodedAttachable(Attachable *referenceAttachable, T hardcodedAttachableSetter) {
+    template<class T, class U> void CloneHardcodedAttachable(Attachable *referenceAttachable, T objectToRunSetterOn, U hardcodedAttachableSetter) {
         m_AlreadyCopiedAttachableUniqueIDs.insert(referenceAttachable->GetUniqueID());
-        hardcodedAttachableSetter(*this, dynamic_cast<Attachable *>(referenceAttachable->Clone()));
+        hardcodedAttachableSetter(*objectToRunSetterOn, dynamic_cast<Attachable *>(referenceAttachable->Clone()));
     }
 
 //////////////////////////////////////////////////////////////////////////////////////////

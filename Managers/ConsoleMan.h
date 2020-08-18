@@ -103,13 +103,13 @@ namespace RTE {
 		/// Writes all the input strings to a log in the order they were entered.
 		/// </summary>
 		/// <param name="filePath">The filename of the file to write to.</param>
-		void SaveInputLog(std::string filePath);
+		void SaveInputLog(const std::string &filePath);
 
 		/// <summary>
 		/// Writes the entire console buffer to a file.
 		/// </summary>
 		/// <param name="filePath">The filename of the file to write to.</param>
-		void SaveAllText(std::string filePath);
+		void SaveAllText(const std::string &filePath) const;
 
 		/// <summary>
 		/// Clears all previous input.
@@ -122,7 +122,7 @@ namespace RTE {
 		/// Prints a string into the console.
 		/// </summary>
 		/// <param name="stringToPrint">The string to print.</param>
-		void PrintString(std::string stringToPrint);
+		void PrintString(const std::string &stringToPrint) const;
 
 		/// <summary>
 		/// Opens the console and prints the shortcut help text.
@@ -138,7 +138,7 @@ namespace RTE {
 		/// Draws this ConsoleMan's current graphical representation to a BITMAP of choice.
 		/// </summary>
 		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
-		void Draw(BITMAP *targetBitmap);
+		void Draw(BITMAP *targetBitmap) const;
 #pragma endregion
 
 #pragma region Class Info
@@ -205,7 +205,7 @@ namespace RTE {
 		/// <summary>
 		/// Removes any grave accents (`) that are pasted or typed into the textbox by opening/closing it. This is called from Update().
 		/// </summary>
-		void RemoveGraveAccents();
+		void RemoveGraveAccents() const;
 #pragma endregion
 
 		/// <summary>

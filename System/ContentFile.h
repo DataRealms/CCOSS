@@ -61,7 +61,6 @@ namespace RTE {
 		/// <summary>
 		/// Destroys and resets (through Clear()) the ContentFile object.
 		/// </summary>
-		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
 		void Destroy() { Clear(); }
 
 		/// <summary>
@@ -86,7 +85,7 @@ namespace RTE {
 		/// Gets the file path of the content file represented by this ContentFile object.
 		/// </summary>
 		/// <returns>A string with the file name path.</returns>
-		const std::string & GetDataPath() const { return m_DataPath; };
+		const std::string & GetDataPath() const { return m_DataPath; }
 
 		/// <summary>
 		/// Sets the file path of the content file represented by this ContentFile object.

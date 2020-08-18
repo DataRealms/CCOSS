@@ -23,12 +23,12 @@ namespace RTE {
 		m_ConsoleState = ConsoleState::Disabled;
 		m_ReadOnly = false;
 		m_ConsoleScreenRatio = 0.3F;
-		m_GUIScreen = 0;
-		m_GUIInput = 0;
-		m_GUIControlManager = 0;
-		m_ParentBox = 0;
-		m_ConsoleText = 0;
-		m_InputTextBox = 0;
+		m_GUIScreen = nullptr;
+		m_GUIInput = nullptr;
+		m_GUIControlManager = nullptr;
+		m_ParentBox = nullptr;
+		m_ConsoleText = nullptr;
+		m_InputTextBox = nullptr;
 		m_InputLog.clear();
 		m_InputLogPosition = m_InputLog.begin();
 		m_LastInputString.clear();
@@ -164,7 +164,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::SaveAllText(std::string filePath) {
+	void ConsoleMan::SaveAllText(const std::string &filePath) const {
 		Writer logWriter(filePath.c_str());
 		if (logWriter.WriterOK()) {
 			logWriter << m_ConsoleText->GetText();
@@ -182,7 +182,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::PrintString(std::string stringToPrint) {
+	void ConsoleMan::PrintString(const std::string &stringToPrint) const {
 		m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + stringToPrint);
 		if (g_System.GetLogToCLI()) { g_System.PrintToCLI(stringToPrint); }
 	}
@@ -220,7 +220,7 @@ namespace RTE {
 			if (IsEnabled()) {
 				if (!m_ReadOnly) {
 					m_InputTextBox->SetEnabled(false);
-					m_GUIControlManager->GetManager()->SetFocus(0);
+					m_GUIControlManager->GetManager()->SetFocus(nullptr);
 					// Save any text being worked on in the input, as the box keeps getting junk added to it
 					m_LastInputString = m_InputTextBox->GetText();
 					SetEnabled(false);
@@ -265,7 +265,7 @@ namespace RTE {
 			RemoveGraveAccents();
 		} else {
 			m_InputTextBox->SetEnabled(false);
-			m_GUIControlManager->GetManager()->SetFocus(0);
+			m_GUIControlManager->GetManager()->SetFocus(nullptr);
 			return;
 		}	
 
@@ -285,7 +285,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ConsoleMan::ConsoleOpenClose() {
-		float travelCompletionDistance = 0;
+		float travelCompletionDistance;
 
 		if (m_ConsoleState == ConsoleState::Enabling) {
 			m_ParentBox->SetEnabled(true);
@@ -303,7 +303,7 @@ namespace RTE {
 				m_ParentBox->SetEnabled(false);
 				m_ParentBox->SetVisible(false);
 				m_InputTextBox->SetEnabled(false);
-				m_GUIControlManager->GetManager()->SetFocus(0);
+				m_GUIControlManager->GetManager()->SetFocus(nullptr);
 				m_ConsoleState = ConsoleState::Disabled;
 			}
 		}
@@ -349,42 +349,39 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ConsoleMan::LoadLoggedInput(bool nextEntry) {
-		switch (nextEntry) {
-			case true:
-				// See if we should decrement doubly because the last move was in the opposite direction
-				if (m_LastLogMove > 0 && m_InputLogPosition != m_InputLog.begin()) { m_InputLogPosition--; }
+		if (nextEntry) {
+			// See if we should decrement doubly because the last move was in the opposite direction
+			if (m_LastLogMove > 0 && m_InputLogPosition != m_InputLog.begin()) { --m_InputLogPosition; }
 
-				if (m_InputLogPosition == m_InputLog.begin()) {
-					m_InputTextBox->SetText("");
-					m_LastLogMove = 0;
-				} else {
-					m_InputLogPosition--;
-					m_InputTextBox->SetText(*m_InputLogPosition);
-					m_InputTextBox->SetCursorPos(m_InputTextBox->GetText().length());
-					m_LastLogMove = -1;
-				}
-				break;
-			case false:
-				// See if we should increment doubly because the last move was in the opposite direction
-				if (m_LastLogMove < 0 && m_InputLogPosition != m_InputLog.end() - 1) { m_InputLogPosition++; }
-
+			if (m_InputLogPosition == m_InputLog.begin()) {
+				m_InputTextBox->SetText("");
+				m_LastLogMove = 0;
+			} else {
+				--m_InputLogPosition;
 				m_InputTextBox->SetText(*m_InputLogPosition);
 				m_InputTextBox->SetCursorPos(m_InputTextBox->GetText().length());
-				m_InputLogPosition++;
-				m_LastLogMove = 1;
+				m_LastLogMove = -1;
+			}
+		} else {
+			// See if we should increment doubly because the last move was in the opposite direction
+			if (m_LastLogMove < 0 && m_InputLogPosition != m_InputLog.end() - 1) { ++m_InputLogPosition; }
 
-				// Avoid falling off the end
-				if (m_InputLogPosition == m_InputLog.end()) {
-					m_InputLogPosition--;
-					m_LastLogMove = 0;
-				}
-				break;
+			m_InputTextBox->SetText(*m_InputLogPosition);
+			m_InputTextBox->SetCursorPos(m_InputTextBox->GetText().length());
+			++m_InputLogPosition;
+			m_LastLogMove = 1;
+
+			// Avoid falling off the end
+			if (m_InputLogPosition == m_InputLog.end()) {
+				--m_InputLogPosition;
+				m_LastLogMove = 0;
+			}
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::RemoveGraveAccents() {					
+	void ConsoleMan::RemoveGraveAccents() const {
 		std::string textBoxString = m_InputTextBox->GetText();
 		if (std::find(textBoxString.begin(), textBoxString.end(), '`') != textBoxString.end()) {
 			textBoxString.erase(std::remove(textBoxString.begin(), textBoxString.end(), '`'), textBoxString.end());
@@ -395,7 +392,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::Draw(BITMAP *targetBitmap) {
+	void ConsoleMan::Draw(BITMAP *targetBitmap) const {
 		if (m_ConsoleState != ConsoleState::Disabled) {
 			AllegroScreen drawScreen(targetBitmap);
 			m_GUIControlManager->Draw(&drawScreen);

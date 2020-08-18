@@ -57,7 +57,7 @@ void HeldDevice::Clear()
 
 int HeldDevice::Create()
 {
-    if (Attachable::Create() < 0)
+    if (MOSRotating::Create() < 0)
         return -1;
 
     // Set MO Type.
@@ -371,7 +371,7 @@ void HeldDevice::Update()
     Attachable::Update();
 
     // Remove loose items that have completely disappeared into the terrain, unless they're pinned
-    if (!m_pParent && m_PinStrength <= 0 && m_RestTimer.IsPastSimMS(20000) && m_CanBeSquished && m_pAtomGroup->RatioInTerrain() > 0.9)
+    if (!m_Parent && m_PinStrength <= 0 && m_RestTimer.IsPastSimMS(20000) && m_CanBeSquished && m_pAtomGroup->RatioInTerrain() > 0.9)
         GibThis();
 
     if (m_Activated)
@@ -389,7 +389,7 @@ void HeldDevice::Update()
         }
     }
 
-    if (!m_pParent) {
+    if (!m_Parent) {
 
     }
     else {
@@ -457,7 +457,7 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 
     Attachable::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
-    if (!m_pParent)
+    if (!m_Parent)
     {
         // Only draw if the team viewing this has seen the space where this is located
         int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));

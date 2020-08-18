@@ -162,12 +162,15 @@ int ACrab::Create(BITMAP *pSprite,
 // Description:     Creates a ACrab to be identical to another, by deep copy.
 
 int ACrab::Create(const ACrab &reference) {
-    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pTurret, ACrab::SetTurret); }
-    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pJetpack, ACrab::SetJetpack); }
-    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pLFGLeg, ACrab::SetLeftFGLeg); }
-    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pRFGLeg, ACrab::SetRightFGLeg); }
-    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pLBGLeg, ACrab::SetLeftBGLeg); }
-    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pRBGLeg, ACrab::SetRightBGLeg); }
+    //if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pTurret, std::bind(&ACrab::SetTurret, this, dynamic_cast<Attachable *>(reference.m_pTurret->Clone()))); }
+
+
+    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pTurret, this, static_cast<std::function<void (ACrab &, Attachable *)>>(&ACrab::SetTurret)); }
+    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pJetpack, this, static_cast<std::function<void(ACrab &, Attachable *)>>(&ACrab::SetJetpack)); }
+    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pLFGLeg, this, static_cast<std::function<void(ACrab &, Attachable *)>>(&ACrab::SetLeftFGLeg)); }
+    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pRFGLeg, this, static_cast<std::function<void(ACrab &, Attachable *)>>(&ACrab::SetRightFGLeg)); }
+    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pLBGLeg, this, static_cast<std::function<void(ACrab &, Attachable *)>>(&ACrab::SetLeftBGLeg)); }
+    if (reference.m_pTurret) { CloneHardcodedAttachable(reference.m_pRBGLeg, this, static_cast<std::function<void(ACrab &, Attachable *)>>(&ACrab::SetRightBGLeg)); }
 
     Actor::Create(reference);
 
@@ -491,6 +494,10 @@ Vector ACrab::GetEyePos() const
         return m_pTurret->GetMountedMO()->GetPos();
 
     return m_Pos;
+}
+
+Attachable *ACrab::GetTurret() const {
+    return (m_pTurret && m_pTurret->IsAttached()) ? dynamic_cast<Attachable *>(m_pTurret) : nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

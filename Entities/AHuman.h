@@ -15,6 +15,7 @@
 // Inclusions of header files
 
 #include "Actor.h"
+#include "Arm.h"
 #include "Leg.h"
 #include "LimbPath.h"
 
@@ -24,8 +25,6 @@ namespace RTE
 {
 
 class Attachable;
-class Arm;
-class Leg;
 class AEmitter;
 //class LimbPath;
 

@@ -138,12 +138,12 @@ int AHuman::Create()
 // Description:     Creates a AHuman to be identical to another, by deep copy.
 
 int AHuman::Create(const AHuman &reference) {
-    if (reference.m_pHead) { CloneHardcodedAttachable(reference.m_pHead, AHuman::SetHead); }
-    if (reference.m_pJetpack) { CloneHardcodedAttachable(reference.m_pJetpack, AHuman::SetJetpack); }
-    if (reference.m_pFGArm) { CloneHardcodedAttachable(reference.m_pFGArm, AHuman::SetFGArm); }
-    if (reference.m_pBGArm) { CloneHardcodedAttachable(reference.m_pBGArm, AHuman::SetBGArm); }
-    if (reference.m_pFGLeg) { CloneHardcodedAttachable(reference.m_pFGLeg, AHuman::SetFGLeg); }
-    if (reference.m_pBGLeg) { CloneHardcodedAttachable(reference.m_pBGLeg, AHuman::SetBGLeg); }
+    if (reference.m_pHead) { CloneHardcodedAttachable(reference.m_pHead, this, static_cast<std::function<void(AHuman &, Attachable *)>>(&AHuman::SetHead)); }
+    if (reference.m_pJetpack) { CloneHardcodedAttachable(reference.m_pJetpack, this, static_cast<std::function<void(AHuman &, Attachable *)>>(&AHuman::SetJetpack)); }
+    if (reference.m_pFGArm) { CloneHardcodedAttachable(reference.m_pFGArm, this, static_cast<std::function<void(AHuman &, Attachable *)>>(&AHuman::SetFGArm)); }
+    if (reference.m_pBGArm) { CloneHardcodedAttachable(reference.m_pBGArm, this, static_cast<std::function<void(AHuman &, Attachable *)>>(&AHuman::SetBGArm)); }
+    if (reference.m_pFGLeg) { CloneHardcodedAttachable(reference.m_pFGLeg, this, static_cast<std::function<void(AHuman &, Attachable *)>>(&AHuman::SetFGLeg)); }
+    if (reference.m_pBGLeg) { CloneHardcodedAttachable(reference.m_pBGLeg, this, static_cast<std::function<void(AHuman &, Attachable *)>>(&AHuman::SetBGLeg)); }
     Actor::Create(reference);
 
 	m_ThrowPrepTime = reference.m_ThrowPrepTime;

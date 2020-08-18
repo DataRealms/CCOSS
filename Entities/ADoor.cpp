@@ -45,7 +45,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ADoor::Create(const ADoor &reference) {
-		if (reference.m_Door) { CloneHardcodedAttachable(reference.m_Door, ADoor::SetDoor); }
+		if (reference.m_Door) { CloneHardcodedAttachable(reference.m_Door, this, static_cast<std::function<void(ADoor &, Attachable *)>>(&ADoor::SetDoor)); }
 		//TODO this was setting door parent offset to my closed offset, which is super weird. Test that doors are still cool. Old code was AddAttachable(m_Door, m_ClosedOffset, true);
 
 		Actor::Create(reference);

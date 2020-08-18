@@ -92,13 +92,13 @@ int ACRocket::Create()
 // Description:     Creates a ACRocket to be identical to another, by deep copy.
 
 int ACRocket::Create(const ACRocket &reference) {
-    if (reference.m_pRLeg) { CloneHardcodedAttachable(reference.m_pRLeg, ACRocket::SetRightLeg); }
-    if (reference.m_pLLeg) { CloneHardcodedAttachable(reference.m_pLLeg, ACRocket::SetLeftLeg); }
-    if (reference.m_pMThruster) { CloneHardcodedAttachable(reference.m_pMThruster, ACRocket::SetMainThruster); }
-    if (reference.m_pRThruster) { CloneHardcodedAttachable(reference.m_pRThruster, ACRocket::SetRightThruster); }
-    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pLThruster, ACRocket::SetLeftThruster); }
-    if (reference.m_pURThruster) { CloneHardcodedAttachable(reference.m_pURThruster, ACRocket::SetURightThruster); }
-    if (reference.m_pULThruster) { CloneHardcodedAttachable(reference.m_pULThruster, ACRocket::SetULeftThruster); }
+    if (reference.m_pRLeg) { CloneHardcodedAttachable(reference.m_pRLeg, this, static_cast<std::function<void(ACRocket &, Attachable *)>>(&ACRocket::SetRightLeg)); }
+    if (reference.m_pLLeg) { CloneHardcodedAttachable(reference.m_pLLeg, this, static_cast<std::function<void(ACRocket &, Attachable *)>>(&ACRocket::SetLeftLeg)); }
+    if (reference.m_pMThruster) { CloneHardcodedAttachable(reference.m_pMThruster, this, static_cast<std::function<void(ACRocket &, Attachable *)>>(&ACRocket::SetMainThruster)); }
+    if (reference.m_pRThruster) { CloneHardcodedAttachable(reference.m_pRThruster, this, static_cast<std::function<void(ACRocket &, Attachable *)>>(&ACRocket::SetRightThruster)); }
+    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pLThruster, this, static_cast<std::function<void(ACRocket &, Attachable *)>>(&ACRocket::SetLeftThruster)); }
+    if (reference.m_pURThruster) { CloneHardcodedAttachable(reference.m_pURThruster, this, static_cast<std::function<void(ACRocket &, Attachable *)>>(&ACRocket::SetURightThruster)); }
+    if (reference.m_pULThruster) { CloneHardcodedAttachable(reference.m_pULThruster, this, static_cast<std::function<void(ACRocket &, Attachable *)>>(&ACRocket::SetULeftThruster)); }
 
     ACraft::Create(reference);
 

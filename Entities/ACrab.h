@@ -16,6 +16,7 @@
 
 #include "Actor.h"
 #include "LimbPath.h"
+#include "Leg.h"
 
 struct BITMAP;
 
@@ -24,7 +25,6 @@ namespace RTE
 
 class Attachable;
 class Turret;
-class Leg;
 class AEmitter;
 //class LimbPath;
 
@@ -168,15 +168,15 @@ public:
 
 
 	/// <summary>
-	/// Gets the Turret of this Crab.
+	/// Gets the Turret of this ACrab.
 	/// </summary>
-	/// <returns>A pointer to the Crab's Turret. Ownership is NOT transferred!</returns>
-	Attachable *GetTurret() const { return (m_pTurret && m_pTurret->IsAttached()) ? dynamic_cast<Attachable *>(m_pTurret) : nullptr; }
+	/// <returns>A pointer to Turret of this ACrab. Ownership is NOT transferred!</returns>
+	Attachable *GetTurret() const;
 
 	/// <summary>
-	/// Sets the turret for this Crab. Ownership IS transferred!
+	/// Sets the Turret for this ACrab. Ownership IS transferred!
 	/// </summary>
-	/// <param name="newTurret">The new turret to use.</param>
+	/// <param name="newTurret">The new Turret to use.</param>
 	void SetTurret(Attachable *newTurret);
 
 	/// <summary>

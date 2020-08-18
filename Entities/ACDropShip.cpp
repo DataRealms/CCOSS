@@ -72,12 +72,12 @@ int ACDropShip::Create()
 // Description:     Creates a ACDropShip to be identical to another, by deep copy.
 
 int ACDropShip::Create(const ACDropShip &reference) {
-    if (reference.m_pRThruster) { CloneHardcodedAttachable(reference.m_pRThruster, ACDropShip::SetRightThruster); }
-    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pLThruster, ACDropShip::SetLeftThruster); }
-    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pURThruster, ACDropShip::SetURightThruster); }
-    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pULThruster, ACDropShip::SetULeftThruster); }
-    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pRHatch, ACDropShip::SetRightHatch); }
-    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pLHatch, ACDropShip::SetLeftHatch); }
+    if (reference.m_pRThruster) { CloneHardcodedAttachable(reference.m_pRThruster, this, static_cast<std::function<void(ACDropShip &, Attachable *)>>(&ACDropShip::SetRightThruster)); }
+    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pLThruster, this, static_cast<std::function<void(ACDropShip &, Attachable *)>>(&ACDropShip::SetLeftThruster)); }
+    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pURThruster, this, static_cast<std::function<void(ACDropShip &, Attachable *)>>(&ACDropShip::SetURightThruster)); }
+    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pULThruster, this, static_cast<std::function<void(ACDropShip &, Attachable *)>>(&ACDropShip::SetULeftThruster)); }
+    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pRHatch, this, static_cast<std::function<void(ACDropShip &, Attachable *)>>(&ACDropShip::SetRightHatch)); }
+    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pLHatch, this, static_cast<std::function<void(ACDropShip &, Attachable *)>>(&ACDropShip::SetLeftHatch)); }
 
     ACraft::Create(reference);
 

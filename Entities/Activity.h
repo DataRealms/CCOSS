@@ -66,10 +66,10 @@ namespace RTE {
 		/// </summary>
 		enum DifficultySetting {
 			MinDifficulty = 0,
-			CakeDifficulty = 10,
-			EasyDifficulty = 30,
-			MediumDifficulty = 50,
-			HardDifficulty = 70,
+			CakeDifficulty = 20,
+			EasyDifficulty = 40,
+			MediumDifficulty = 60,
+			HardDifficulty = 80,
 			NutsDifficulty = 95,
 			MaxDifficulty = 100,
 		};

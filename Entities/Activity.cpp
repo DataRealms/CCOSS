@@ -603,13 +603,13 @@ void Activity::Clear() {
 	std::string Activity::GetDifficultyString(short difficulty) {
 		if (difficulty < DifficultySetting::CakeDifficulty) {
 			return "Cake";
-		} else if (difficulty < DifficultySetting::EasyDifficulty) {
+		} else if (difficulty <= DifficultySetting::EasyDifficulty) {
 			return "Easy";
-		} else if (difficulty < DifficultySetting::MediumDifficulty) {
+		} else if (difficulty <= DifficultySetting::MediumDifficulty) {
 			return "Medium";
-		} else if (difficulty < DifficultySetting::HardDifficulty) {
+		} else if (difficulty <= DifficultySetting::HardDifficulty) {
 			return "Hard";
-		} else if (difficulty < DifficultySetting::NutsDifficulty) {
+		} else if (difficulty <= DifficultySetting::NutsDifficulty) {
 			return "Nuts";
 		} else {
 			return "Nuts!";

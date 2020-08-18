@@ -142,14 +142,29 @@ ClassInfoGetters
 	void SetRateOfFire(int newRate) { m_RateOfFire = newRate; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetMagazine
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the currently attached Magazine, if any.
-// Arguments:       None.
-// Return value:    The Magazine, if any is attached.
+    /// <summary>
+    /// Gets the Magazine of this HDFirearm.
+    /// </summary>
+    /// <returns>A pointer to Magazine of this HDFirearm. Ownership is NOT transferred!</returns>
+    Magazine *GetMagazine() const { return m_pMagazine; }
 
-	Magazine * GetMagazine() const { return m_pMagazine; }
+    /// <summary>
+    /// Sets the Magazine for this HDFirearm. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newTurret">The new Magazine to use.</param>
+    void SetMagazine(Attachable *newMagazine);
+
+    /// <summary>
+    /// Gets the flash of this HDFirearm.
+    /// </summary>
+    /// <returns>A pointer to flash of this HDFirearm. Ownership is NOT transferred!</returns>
+    Attachable *GetFlash() const { return m_pFlash; }
+
+    /// <summary>
+    /// Sets the flash for this HDFirearm. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newTurret">The new flash to use.</param>
+    void SetFlash(Attachable *newFlash);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

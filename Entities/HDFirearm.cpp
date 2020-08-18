@@ -95,22 +95,12 @@ int HDFirearm::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a HDFirearm to be identical to another, by deep copy.
 
-int HDFirearm::Create(const HDFirearm &reference)
-{
+int HDFirearm::Create(const HDFirearm &reference) {
+    if (reference.m_pMagazine) { CloneHardcodedAttachable(reference.m_pMagazine, this, static_cast<std::function<void(HDFirearm &, Attachable *)>>(&HDFirearm::SetMagazine)); }
+    if (reference.m_pFlash) { CloneHardcodedAttachable(reference.m_pFlash, this, static_cast<std::function<void(HDFirearm &, Attachable *)>>(&HDFirearm::SetFlash)); }
     HeldDevice::Create(reference);
 
     m_pMagazineReference = reference.m_pMagazineReference;
-
-    if (reference.m_pMagazine)
-    {
-        m_pMagazine = dynamic_cast<Magazine *>(reference.m_pMagazine->Clone());
-        AddAttachable(m_pMagazine, m_pMagazine->GetParentOffset(), true);
-    }
-    if (reference.m_pFlash)
-    {
-        m_pFlash = dynamic_cast<Attachable *>(reference.m_pFlash->Clone());
-        m_pFlash->Attach(this, m_pFlash->GetParentOffset());
-    }
     m_FireSound = reference.m_FireSound;
     m_ActiveSound = reference.m_ActiveSound;
     m_DeactivationSound = reference.m_DeactivationSound;
@@ -161,6 +151,7 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader)
 
             delete m_pMagazine;
             m_pMagazine = dynamic_cast<Magazine *>(m_pMagazineReference->Clone());
+            if (m_pMagazine) { AddAttachable(m_pMagazine); }
         }
     }
     else if (propName == "Flash")
@@ -169,8 +160,7 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader)
         if (pObj)
         {
             m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
-            if (m_pFlash)
-                m_pFlash->Attach(this);
+            if (m_pFlash) { AddAttachable(m_pFlash); }
         }
     }
     else if (propName == "FireSound")
@@ -310,8 +300,6 @@ int HDFirearm::Save(Writer &writer) const
 
 void HDFirearm::Destroy(bool notInherited)
 {
-    delete m_pMagazine;
-    delete m_pFlash;
     m_FireSound.Stop();
     m_ActiveSound.Stop();
     m_DeactivationSound.Stop();
@@ -333,12 +321,28 @@ float HDFirearm::GetMass() const
     return m_pMagazine ? m_Mass + m_pMagazine->GetMass() : m_Mass;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetNextMagazineName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the Preset name of the next Magazine that will be loaded into
-//                  this gun. This changes all future mags that will be reloaded.
+void HDFirearm::SetMagazine(Attachable *newMagazine) {
+    Magazine *castedNewMagazine= dynamic_cast<Magazine *>(newMagazine);
+    if (castedNewMagazine) {
+        RemoveAttachable(m_pMagazine);
+        m_pMagazine = castedNewMagazine;
+        AddAttachable(castedNewMagazine);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void HDFirearm::SetFlash(Attachable *newFlash) {
+    if (newFlash) {
+        RemoveAttachable(m_pFlash);
+        m_pFlash = newFlash;
+        AddAttachable(newFlash);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool HDFirearm::SetNextMagazineName(string magName)
 {
@@ -618,7 +622,7 @@ void HDFirearm::Reload()
         {
             m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
             m_pMagazine->SetAngularVel(6 + (-6 * PosRand()));
-            m_pMagazine->Detach();
+            RemoveAttachable(m_pMagazine);
             // Whether the magazine is ok to release into scene
             if (m_pMagazine->IsDiscardable())
                 g_MovableMan.AddParticle(m_pMagazine);
@@ -761,9 +765,9 @@ void HDFirearm::Update()
 
 			int player = -1;
 			Controller * pController = 0;
-			if (m_pParent)
+			if (m_Parent)
 			{
-				Actor * pActor = dynamic_cast<Actor *>(m_pParent);
+				Actor * pActor = dynamic_cast<Actor *>(m_Parent);
 				if (pActor)
 				{
 					pController = pActor->GetController();
@@ -815,7 +819,7 @@ void HDFirearm::Update()
                     Attachable *pAttachable = dynamic_cast<Attachable *>(pParticle);
                     if (pAttachable)
                     {
-                        pAttachable->Detach();
+                        dynamic_cast<MOSRotating *>(pAttachable->GetParent())->RemoveAttachable(pAttachable);
                         // Activate if it is some kind of grenade or whatnot.
                         ThrownDevice *pTD = dynamic_cast<ThrownDevice *>(pAttachable);
                         if (pTD)
@@ -920,7 +924,7 @@ void HDFirearm::Update()
         m_pMagazine = dynamic_cast<Magazine *>(m_pMagazineReference->Clone());
         if (m_pMagazine)
         {
-            m_pMagazine->Attach(this);
+            AddAttachable(m_pMagazine);
             m_ReloadEndSound.Play(m_Pos);
 
             m_ActivationTimer.Reset();
@@ -963,8 +967,8 @@ void HDFirearm::Update()
         }
 
 // TODO: This is broken, revise")
-        if (m_pParent)
-            m_pParent->SetRecoil(m_RecoilForce, m_RecoilOffset, m_Recoiled);
+        if (m_Parent)
+            m_Parent->SetRecoil(m_RecoilForce, m_RecoilOffset, m_Recoiled);
         else
             m_ImpulseForces.push_back(make_pair(m_RecoilForce, m_RecoilOffset));
 
@@ -1157,7 +1161,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
     HeldDevice::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
     // Don't bother if the aim distance is really short, or not held
-    if (!m_pParent || m_SharpAim < 0.15)
+    if (!m_Parent || m_SharpAim < 0.15)
         return;
 
     float sharpLength = m_MaxSharpLength * m_SharpAim;

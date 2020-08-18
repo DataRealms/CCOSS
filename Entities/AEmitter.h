@@ -305,6 +305,18 @@ ClassInfoGetters
     void SetBurstSpacing(const float spacing) { m_BurstSpacing = spacing; }
 
 
+    /// <summary>
+    /// Gets the flash of this AEmitter.
+    /// </summary>
+    /// <returns>A pointer to the AEmitter's flash. Ownership is NOT transferred!</returns>
+    Attachable *GetFlash() const { return m_pFlash; }
+
+    /// <summary>
+    /// Sets the flash for this AEmitter. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newFlash">The new flash to use.</param>
+    void SetFlash(Attachable *newFlash);
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetFlashScale
 //////////////////////////////////////////////////////////////////////////////////////////

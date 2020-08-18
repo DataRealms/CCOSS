@@ -316,7 +316,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Attachable::OrganizeAtomsInParent(bool addToParent) {
-		if (IsAttached()) {
+		if (IsAttached() && m_Parent->GetAtomGroup()) {
 			if (addToParent) {
 				m_Parent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset());
 			} else {

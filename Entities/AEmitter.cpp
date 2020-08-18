@@ -55,25 +55,11 @@ void AEmitter::Clear()
     m_EmitDamage = 0;
     m_LastEmitTmr.Reset();
     m_pFlash = 0;
-    m_FlashScale = 1.0f;
-    m_AvgBurstImpulse = -1.0f;
-    m_AvgImpulse = -1.0f;
+    m_FlashScale = 1.0F;
+    m_AvgBurstImpulse = -1.0F;
+    m_AvgImpulse = -1.0F;
     m_FlashOnlyOnBurst = true;
-    m_LoudnessOnEmit = 1.0f;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Emission object ready for use.
-
-int AEmitter::Create()
-{
-    if (Attachable::Create() < 0)
-        return -1;
-
-    return 0;
+    m_LoudnessOnEmit = 1.0F;
 }
 
 
@@ -82,12 +68,13 @@ int AEmitter::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a AEmitter to be identical to another, by deep copy.
 
-int AEmitter::Create(const AEmitter &reference)
-{
+int AEmitter::Create(const AEmitter &reference) {
+    if (reference.m_pFlash) { CloneHardcodedAttachable(reference.m_pFlash, this, static_cast<std::function<void(AEmitter &, Attachable *)>>(&AEmitter::SetFlash)); }
     Attachable::Create(reference);
 
-    for (list<Emission *>::const_iterator itr = reference.m_EmissionList.begin(); itr != reference.m_EmissionList.end(); ++itr)
+    for (list<Emission *>::const_iterator itr = reference.m_EmissionList.begin(); itr != reference.m_EmissionList.end(); ++itr) {
         m_EmissionList.push_back(dynamic_cast<Emission *>((*itr)->Clone()));
+    }
 
     m_EmissionSound = reference.m_EmissionSound;
     m_BurstSound = reference.m_BurstSound;
@@ -107,12 +94,6 @@ int AEmitter::Create(const AEmitter &reference)
     m_EmitAngle = reference.m_EmitAngle;
     m_EmissionOffset = reference.m_EmissionOffset;
     m_EmitDamage = reference.m_EmitDamage;
-    if (reference.m_pFlash)
-    {
-        m_pFlash = dynamic_cast<Attachable *>(reference.m_pFlash->Clone());
-        if (m_pFlash)
-            m_pFlash->Attach(this);
-    }
     m_FlashScale = reference.m_FlashScale;
     m_FlashOnlyOnBurst = reference.m_FlashOnlyOnBurst;
     m_LoudnessOnEmit = reference.m_LoudnessOnEmit;
@@ -192,11 +173,9 @@ int AEmitter::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "Flash")
     {
         const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
-        if (pObj)
-        {
+        if (pObj) {
             m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
-            if (m_pFlash)
-                m_pFlash->Attach(this);
+            AddAttachable(m_pFlash);
         }
     }
     else if (propName == "FlashScale")
@@ -298,8 +277,6 @@ void AEmitter::Destroy(bool notInherited)
 
     m_EmissionSound.Stop();
 //    m_BurstSound.Stop();
-
-    delete m_pFlash;
 
     if (!notInherited)
         Attachable::Destroy();
@@ -408,6 +385,18 @@ void AEmitter::GibThis(Vector impactImpulse, float internalBlast, MovableObject 
     Attachable::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }
 */
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AEmitter::SetFlash(Attachable *newFlash) {
+    if (newFlash) {
+        RemoveAttachable(m_pFlash);
+        m_pFlash = newFlash;
+        AddAttachable(newFlash);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -563,8 +552,8 @@ void AEmitter::Update()
         m_LastEmitTmr.Reset();
 
         // Apply recoil/push effects, scaled by the joint stiffness
-        if (m_pParent && !m_OnlyLinForces)
-            m_pParent->AddAbsImpulseForce(pushImpulses * m_JointStiffness, m_Pos + m_JointOffset);
+        if (m_Parent && !m_OnlyLinearForces)
+            m_Parent->AddAbsImpulseForce(pushImpulses * m_JointStiffness, m_Pos + m_JointOffset);
         else
             m_ImpulseForces.push_back(make_pair<Vector, Vector>(pushImpulses * m_JointStiffness, Vector()));
 

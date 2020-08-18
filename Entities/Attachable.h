@@ -322,8 +322,6 @@ namespace RTE {
 		/// <param name="newParent">A pointer to the MOSRotating to set as the new parent. Ownership is NOT transferred!</param>
 		virtual void SetParent(MOSRotating *newParent);
 
-	private:
-
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
 		MOSRotating *m_Parent; //!< Pointer to the MOSRotating this attachable is attached to.
@@ -347,6 +345,8 @@ namespace RTE {
 
 		long int m_AtomSubgroupID; //!< The Atom IDs this' atoms will have when attached and added to a parent's AtomGroup.
 		bool m_CollidesWithTerrainWhileAttached; //!< Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
+
+	private:
 
 		/// <summary>
 		/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its atoms to/from its parent AtomGroup.

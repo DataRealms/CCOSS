@@ -27,7 +27,7 @@ namespace RTE {
 	int ContentFile::Create(const char *filePath) {
 		SetDataPath(filePath);
 		SetFormattedReaderPosition(GetFormattedReaderPosition());
-		
+
 		return 0;
 	}
 
@@ -38,7 +38,7 @@ namespace RTE {
 		m_DataPathExtension = reference.m_DataPathExtension;
 		m_DataPathWithoutExtension = reference.m_DataPathWithoutExtension;
 		m_DataModuleID = reference.m_DataModuleID;
-		
+
 		return 0;
 	}
 
@@ -46,7 +46,7 @@ namespace RTE {
 
 	void ContentFile::FreeAllLoaded() {
 		for (int depth = BitDepths::Eight; depth < BitDepths::BitDepthCount; ++depth) {
-			for (const std::pair<std::string, BITMAP *> &bitmap : s_LoadedBitmaps[depth]){
+			for (const std::pair<std::string, BITMAP *> &bitmap : s_LoadedBitmaps[depth]) {
 				destroy_bitmap(bitmap.second);
 			}
 		}
@@ -84,9 +84,9 @@ namespace RTE {
 	void ContentFile::SetDataPath(const std::string &newDataPath) {
 		m_DataPath = newDataPath;
 		m_DataPathExtension = std::experimental::filesystem::path(newDataPath).extension().string();
-		
+
 		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
-		
+
 		m_DataPathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - m_DataPathExtension.length());
 		s_PathHashes[GetHash()] = m_DataPath;
 		m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
@@ -134,7 +134,7 @@ namespace RTE {
 		if (frameCount == 1) {
 			returnBitmaps[0] = GetAsBitmap(conversionMode);
 			return returnBitmaps;
-		}	
+		}
 		char framePath[1024];
 		// For each frame in the animation, temporarily assign it to the datapath member var so that GetAsBitmap and then load it with GetBitmap
 		for (int frameNum = 0; frameNum < frameCount; frameNum++) {
@@ -184,7 +184,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	FMOD::Sound * ContentFile::GetAsSample(bool abortGameForInvalidSound) {
+	FMOD::Sound * ContentFile::GetAsSample(bool abortGameForInvalidSound, bool asyncLoading) {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
@@ -205,7 +205,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	FMOD::Sound * ContentFile::LoadAndReleaseSample(bool abortGameForInvalidSound) {
+	FMOD::Sound * ContentFile::LoadAndReleaseSample(bool abortGameForInvalidSound, bool asyncLoading) {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
@@ -225,19 +225,16 @@ namespace RTE {
 			}
 		}
 		FMOD::Sound *returnSample = nullptr;
-		
-		FMOD_CREATESOUNDEXINFO soundInfo = {};
-		soundInfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
-		soundInfo.length = static_cast<unsigned int>(std::experimental::filesystem::file_size(m_DataPath));
-		//TODO Consider doing FMOD_CREATESAMPLE for dumping audio files into memory and FMOD_NONBLOCKING to async create sounds
-		FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(m_DataPath.c_str(), FMOD_3D, &soundInfo, &returnSample);
+
+		FMOD_MODE fmodFlags = asyncLoading ? (FMOD_CREATESAMPLE | FMOD_3D | FMOD_NONBLOCKING) : (FMOD_CREATESAMPLE | FMOD_3D);
+		FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(m_DataPath.c_str(), fmodFlags, nullptr, &returnSample);
 
 		if (result != FMOD_OK) {
 			const std::string errorMessage = "Failed to create sound because of FMOD error: " + std::string(FMOD_ErrorString(result)) + "\nThe path and name were: ";
 			RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
 			g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
 			return returnSample;
-		}	
+		}
 		return returnSample;
 	}
 }

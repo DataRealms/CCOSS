@@ -241,7 +241,7 @@ namespace RTE {
 #pragma endregion
 
 		/// <summary>
-		/// Shared method for the door opening/closing sequence.
+		/// Shared method for the door opening/closing sequence. This is called from OpenDoor() and CloseDoor().
 		/// </summary>
 		void SharedDoorControls();
 

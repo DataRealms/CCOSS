@@ -98,7 +98,7 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	void ConsoleMan::SetReadOnly() {
 		if (!m_ReadOnly) {
 			// Save the current input string before changing to the read-only notice so we can restore it when switching back
@@ -213,7 +213,7 @@ namespace RTE {
 
 	void ConsoleMan::Update() {
 		if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_TILDE)) {
-			SetReadOnly();		
+			SetReadOnly();
 		}
 
 		if (!g_UInputMan.FlagShiftState() && (!g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_TILDE))) {
@@ -267,7 +267,7 @@ namespace RTE {
 			m_InputTextBox->SetEnabled(false);
 			m_GUIControlManager->GetManager()->SetFocus(nullptr);
 			return;
-		}	
+		}
 
 		// Execute string when Enter is pressed, or execute immediately if a newline character is found, meaning multiple strings were pasted in.
 		if ((g_UInputMan.KeyPressed(KEY_ENTER) || g_UInputMan.KeyPressed(KEY_ENTER_PAD)) || (m_InputTextBox->GetText().find_last_of('\n') != std::string::npos)) {

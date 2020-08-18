@@ -98,7 +98,7 @@ namespace RTE {
 
 #pragma region Logging
 		/// <summary>
-		/// Gets the file and line that are currently being read formatted to be used for logging warnings and errors.
+		/// Gets the file and line that are currently being read. Formatted to be used for logging warnings and errors.
 		/// </summary>
 		/// <returns>A string containing the currently read file path and the line being read.</returns>
 		const std::string & GetFormattedReaderPosition() const { return m_FormattedReaderPosition; }

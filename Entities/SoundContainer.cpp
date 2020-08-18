@@ -158,7 +158,7 @@ namespace RTE {
 		if (soundSetIndex < m_SoundSets.size()) { soundSet = m_SoundSets[soundSetIndex]; }
 
 		ContentFile soundFile(soundFilePath.c_str());
-		FMOD::Sound *soundObject = soundFile.GetAsSample(abortGameForInvalidSound);
+		FMOD::Sound *soundObject = soundFile.GetAsSample(abortGameForInvalidSound, false);
 		if (!soundObject) {
 			return;
 		}

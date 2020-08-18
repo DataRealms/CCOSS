@@ -49,18 +49,11 @@ namespace RTE {
 	bool RTEAssertFunc(bool expression, const char *description, const char *file, int line, bool &alwaysIgnore) {
 		if (!expression) {
 			// TODO: Make this display a box in the game asking whether to ignore or abort. For now, always abort.
-
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD 	
-			char error[512];
-			sprintf_s(error, sizeof(error), "Assertion failed:\n\n%s", description);
-			RTEAbortFunc(error, __FILE__, __LINE__);
-#else
 			RTEAbortFunc(description, __FILE__, __LINE__);
-#endif
+			
 			// True so that the debugbreak code is run and the debugger goes there.
 			return true;
 		}
-		// Assert didn't fail
 		return false;
 	}
 

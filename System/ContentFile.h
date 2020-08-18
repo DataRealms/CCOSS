@@ -98,8 +98,8 @@ namespace RTE {
 		/// Sets the DataPath combined with the file and line it's being created from. This is used in cases we can't get the file and line from Serializable::Create(&reader).
 		/// For example when creating a ContentFile for the sound during the readSound lambda in SoundContainer::ReadSound.
 		/// </summary>
-		/// <param name="newPathAndPosition">The file and line that are currently being read.</param>
-		void SetDataPathAndReaderPosition(const std::string &newPathAndPosition) { m_DataPathAndReaderPosition = m_DataPath + "\n" + newPathAndPosition; }
+		/// <param name="newPosition">The file and line that are currently being read.</param>
+		void SetFormattedReaderPosition(const std::string &newPosition);
 
 		/// <summary>
 		/// Creates a hash value out of a path to a ContentFile.
@@ -125,7 +125,7 @@ namespace RTE {
 
 		/// <summary>
 		/// Gets the data represented by this ContentFile object as an array of Allegro BITMAPs, each representing a frame in the animation.
-		/// It loads the BITMAPs into the static maps if they're not already loaded. Note that ownership of the BITMAPS is NOT transferred, BUT THE ARRAY ITSELF, IS!
+		/// It loads the BITMAPs into the static maps if they're not already loaded. Ownership of the BITMAPs is NOT transferred, but the array itself IS!
 		/// </summary>
 		/// <param name="frameCount">The number of frames to attempt to load, more than 1 frame will mean 00# is appended to datapath to handle naming conventions.</param>
 		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap.</param>
@@ -133,7 +133,7 @@ namespace RTE {
 		BITMAP ** GetAsAnimation(int frameCount = 1, int conversionMode = 0);
 
 		/// <summary>
-		/// Loads and transfers the data represented by this ContentFile object as an Allegro BITMAP. Note that ownership of the BITMAP IS TRANSFERRED!
+		/// Loads and transfers the data represented by this ContentFile object as an Allegro BITMAP. Ownership of the BITMAP IS transferred!
 		/// Note that this is relatively slow since it reads the data from disk each time.
 		/// </summary>
 		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap. Only applies the first time a bitmap is loaded from the disk.</param>
@@ -141,14 +141,14 @@ namespace RTE {
 		BITMAP * LoadAndReleaseBitmap(int conversionMode = 0);
 
 		/// <summary>
-		/// Gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE, loading it into the static maps if it's not already loaded. Note that ownership of the BITMAP is NOT transferred!
+		/// Gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE, loading it into the static maps if it's not already loaded. Ownership of the FSOUND_SAMPLE is NOT transferred!
 		/// </summary>
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
 		/// <returns>Pointer to the FSOUND_SAMPLE loaded from disk.</returns>
 		FMOD::Sound * GetAsSample(bool abortGameForInvalidSound = true);
 
 		/// <summary>
-		/// Loads and transfers the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE. Note that ownership of the SAMPLE is NOT transferred!
+		/// Loads and transfers the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE. Ownership of the FSOUND_SAMPLE is NOT transferred!
 		/// </summary>
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
 		/// <returns>Pointer to the FSOUND_SAMPLE loaded from disk.</returns>
@@ -173,15 +173,17 @@ namespace RTE {
 		enum BitDepths { Eight = 0, ThirtyTwo, BitDepthCount };
 
 		static std::unordered_map<size_t, std::string> s_PathHashes; //!< Static map containing the hash values of paths of all loaded data files.
-		static std::unordered_map<std::string, BITMAP *> s_LoadedBitmaps[BitDepthCount]; //!< Static map containing all the already loaded BITMAPs and their paths, and there's two maps, for each bit depth.
+		static std::unordered_map<std::string, BITMAP *> s_LoadedBitmaps[BitDepthCount]; //!< Static map containing all the already loaded BITMAPs and their paths for each bit depth.
 		static std::unordered_map<std::string, FMOD::Sound *> s_LoadedSamples; //!< Static map containing all the already loaded FSOUND_SAMPLEs and their paths.
 
-		int m_DataModuleID; //!< Data Module ID of where this was loaded from.
 		std::string m_DataPath; //!< The path to this ContentFile's data file. In the case of an animation, this filename/name will be appended with 000, 001, 002 etc.
 		std::string m_DataPathExtension; //!< The extension of the data file of this ContentFile's path.
-		std::string m_DataPathAndReaderPosition; //!< The path to this ContentFile's data file combined with the ini file and line it is being read from. This is used for logging. 
+		std::string m_DataPathWithoutExtension; //!< The path to this ContentFile's data file without the file's extension.
 
-		void *m_LoadedData; //!< Non-ownership pointer to the loaded data for convenience. Do not release/delete this.
+		std::string m_FormattedReaderPosition; //!< A string containing the currently read file path and the line being read. Formatted to be used for logging.
+		std::string m_DataPathAndReaderPosition; //!< The path to this ContentFile's data file combined with the ini file and line it is being read from. This is used for logging.
+
+		int m_DataModuleID; //!< Data Module ID of where this was loaded from.
 
 	private:
 

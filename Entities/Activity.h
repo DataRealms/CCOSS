@@ -707,7 +707,7 @@ namespace RTE {
 	private:
 
 		/// <summary>
-		/// Shared method to get the amount of human or AI controlled brains that are left in this Activity. This is called from HumanBrainCount() and AIBrainCount().
+		/// Shared method to get the amount of human or AI controlled brains that are left in this Activity.
 		/// </summary>
 		/// <param name="getForHuman">Whether to get brain count for Human or for AI. True for Human.</param>
 		/// <returns>How many human or AI controlled brains are left in this Activity.</returns>
@@ -715,7 +715,6 @@ namespace RTE {
 
 		/// <summary>
 		/// Shared method to force the Activity to focus player control to the previous or next Actor of a specific team, other than the current one focused on.
-		/// This is called from SwitchToPrevActor() and SwitchToNextActor().
 		/// </summary>
 		/// <param name="nextActor">Whether to switch to the previous or the next Actor. True for next Actor.</param>
 		/// <param name="player">Player to force for.</param>

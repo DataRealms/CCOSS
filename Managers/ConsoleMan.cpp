@@ -126,7 +126,30 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::SaveInputLog(std::string filePath) {
+	void ConsoleMan::AddLoadWarningLogEntry(const std::string &pathToLog, const std::string &readerPosition, const std::string &altFileExtension) {
+		const std::string pathAndAccessLocation = "\"" + pathToLog + "\" referenced " + readerPosition + ". ";
+		std::string newEntry = pathAndAccessLocation + (!altFileExtension.empty() ? "Found and loaded a file with \"" + altFileExtension + "\" extension." : "The file was not loaded.");
+		std::transform(newEntry.begin(), newEntry.end(), newEntry.begin(), ::tolower);
+		if (m_LoadWarningLog.find(newEntry) == m_LoadWarningLog.end()) { m_LoadWarningLog.insert(newEntry); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::SaveLoadWarningLog(const std::string &filePath) const {
+		Writer logWriter(filePath.c_str());
+		if (logWriter.WriterOK()) {
+			logWriter << "// Warnings produced during loading:";
+			logWriter.NewLine(false);
+			for (const std::string &logEntry : m_LoadWarningLog) {
+				logWriter.NewLineString(logEntry, false);
+			}
+			PrintString("SYSTEM: Loading warning log saved to " + filePath);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::SaveInputLog(const std::string &filePath) {
 		Writer logWriter(filePath.c_str());
 		if (logWriter.WriterOK()) {
 			for (std::deque<std::string>::reverse_iterator logItr = m_InputLog.rbegin(); logItr != m_InputLog.rend(); ++logItr) {
@@ -155,29 +178,6 @@ namespace RTE {
 		m_InputLog.clear();
 		m_InputLogPosition = m_InputLog.begin();
 		m_ConsoleText->SetText("");
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ConsoleMan::AddLoadWarningLogEntry(const std::string &pathToLog, const std::string &readerPosition, bool hasAltExtension, const std::string &altFileExtension ) {
-		std::string pathAndAccessLocation = "\"" + pathToLog + "\" referenced " + readerPosition + ". ";
-		std::string newEntry = pathAndAccessLocation + (hasAltExtension ? "Found and loaded a file with \"" + altFileExtension + "\" extension." : "The file was not loaded.");
-		std::transform(newEntry.begin(), newEntry.end(), newEntry.begin(), ::tolower);
-		if (m_LoadWarningLog.find(newEntry) == m_LoadWarningLog.end()) { m_LoadWarningLog.insert(newEntry); }
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ConsoleMan::SaveLoadWarningLog(const std::string &filePath) {
-		Writer logWriter(filePath.c_str());
-		if (logWriter.WriterOK()) {
-			logWriter << "// Warnings produced during loading:";
-			logWriter.NewLine(false);
-			for (const std::string &logEntry : m_LoadWarningLog) {
-				logWriter.NewLineString(logEntry, false);
-			}
-			PrintString("SYSTEM: Loading warning log saved to " + filePath);
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

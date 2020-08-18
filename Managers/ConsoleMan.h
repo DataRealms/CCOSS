@@ -90,15 +90,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="pathToLog">The path that produced the warning.</param>
 		/// <param name="readerPosition">The file and line currently being loaded.</param>
-		/// <param name="hasAltExtension">Whether the file specified in the path can have an alternative extension or not. This will change the logged warning message.</param>
 		/// <param name="altFileExtension">The alternative file extension to the path that produced the warning (e.g. if file is ".bmp", alternative extension is ".png").</param>
-		void AddLoadWarningLogEntry(const std::string &pathToLog, const std::string &readerPosition = "", bool hasAltExtension = false, const std::string &altFileExtension = "" );
+		void AddLoadWarningLogEntry(const std::string &pathToLog, const std::string &readerPosition = "", const std::string &altFileExtension = "" );
 
 		/// <summary>
 		/// Writes the entire loading warning log to a file.
 		/// </summary>
 		/// <param name="filePath">The filename of the file to write to.</param>
-		void SaveLoadWarningLog(const std::string &filePath);
+		void SaveLoadWarningLog(const std::string &filePath) const;
 
 		/// <summary>
 		/// Writes all the input strings to a log in the order they were entered.
@@ -126,7 +125,7 @@ namespace RTE {
 		void PrintString(std::string stringToPrint);
 
 		/// <summary>
-		/// Opens the console and prints the shortcut help text. This is called from UInputMan when F1 is pressed.
+		/// Opens the console and prints the shortcut help text.
 		/// </summary>
 		void ShowShortcuts();
 

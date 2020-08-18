@@ -14,32 +14,31 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ContentFile::Clear() {
-		m_DataModuleID = 0;
 		m_DataPath.clear();
 		m_DataPathExtension.clear();
+		m_DataPathWithoutExtension.clear();
+		m_FormattedReaderPosition.clear();
 		m_DataPathAndReaderPosition.clear();
+		m_DataModuleID = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ContentFile::Create(const char *filePath) {
-		m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
-		m_DataPath = filePath;
-		m_DataPathExtension = std::experimental::filesystem::path(filePath).extension().string();
-		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n\n" + m_DataPath + "\n" + GetCurrentlyReadFileAndLine());
-		m_DataPathAndReaderPosition = m_DataPath + "\n" + GetCurrentlyReadFileAndLine();
-		s_PathHashes[GetHash()] = m_DataPath;
-
+		SetDataPath(filePath);
+		SetFormattedReaderPosition(GetFormattedReaderPosition());
+		
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ContentFile::Create(const ContentFile &reference) {
-		m_DataModuleID = reference.m_DataModuleID;
 		m_DataPath = reference.m_DataPath;
 		m_DataPathExtension = reference.m_DataPathExtension;
-
+		m_DataPathWithoutExtension = reference.m_DataPathWithoutExtension;
+		m_DataModuleID = reference.m_DataModuleID;
+		
 		return 0;
 	}
 
@@ -56,8 +55,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ContentFile::ReadProperty(std::string propName, Reader &reader) {
-		if (propName == "Path" || propName == "FilePath") {
-			m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
+		if (propName == "FilePath" || propName == "Path") {
 			SetDataPath(reader.ReadPropValue());
 		} else {
 			return Serializable::ReadProperty(propName, reader);
@@ -86,8 +84,19 @@ namespace RTE {
 	void ContentFile::SetDataPath(const std::string &newDataPath) {
 		m_DataPath = newDataPath;
 		m_DataPathExtension = std::experimental::filesystem::path(newDataPath).extension().string();
-		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n\n" + m_DataPath + "\n" + GetCurrentlyReadFileAndLine());
+		
+		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
+		
+		m_DataPathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - m_DataPathExtension.length());
 		s_PathHashes[GetHash()] = m_DataPath;
+		m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ContentFile::SetFormattedReaderPosition(const std::string &newPosition) {
+		m_FormattedReaderPosition = newPosition;
+		m_DataPathAndReaderPosition = m_DataPath + "\n" + newPosition;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,17 +134,15 @@ namespace RTE {
 		if (frameCount == 1) {
 			returnBitmaps[0] = GetAsBitmap(conversionMode);
 			return returnBitmaps;
-		}
-		std::string pathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - 4);
-		
+		}	
 		char framePath[1024];
 		// For each frame in the animation, temporarily assign it to the datapath member var so that GetAsBitmap and then load it with GetBitmap
 		for (int frameNum = 0; frameNum < frameCount; frameNum++) {
-			sprintf_s(framePath, sizeof(framePath), "%s%03i%s", pathWithoutExtension.c_str(), frameNum, m_DataPathExtension.c_str());
+			sprintf_s(framePath, sizeof(framePath), "%s%03i%s", m_DataPathWithoutExtension.c_str(), frameNum, m_DataPathExtension.c_str());
 			m_DataPath = framePath;
 			returnBitmaps[frameNum] = GetAsBitmap(conversionMode);
 		}
-		m_DataPath = pathWithoutExtension + m_DataPathExtension;
+		m_DataPath = m_DataPathWithoutExtension + m_DataPathExtension;
 		return returnBitmaps;
 	}
 
@@ -145,22 +152,22 @@ namespace RTE {
 		if (m_DataPath.empty()) {
 			return nullptr;
 		}
-		std::string pathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - 4);
-		std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
+		SetFormattedReaderPosition(GetFormattedReaderPosition());
+		const std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
 
 		if (!std::experimental::filesystem::exists(m_DataPath)) {
 			// Check for 000 in the file name in case it is part of an animation but the FrameCount was set to 1. Do not warn about this because it's normal operation.
-			if (std::experimental::filesystem::exists(pathWithoutExtension + "000" + m_DataPathExtension)) {
-				SetDataPath(pathWithoutExtension + "000" + m_DataPathExtension);
+			if (std::experimental::filesystem::exists(m_DataPathWithoutExtension + "000" + m_DataPathExtension)) {
+				SetDataPath(m_DataPathWithoutExtension + "000" + m_DataPathExtension);
 			} else {
-				if (std::experimental::filesystem::exists(pathWithoutExtension + altFileExtension)) {
-					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetCurrentlyReadFileAndLine(), true, altFileExtension);
-					SetDataPath(pathWithoutExtension + altFileExtension);
-				} else if (std::experimental::filesystem::exists(pathWithoutExtension + "000" + altFileExtension)) {
-					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetCurrentlyReadFileAndLine(), true, altFileExtension);
-					SetDataPath(pathWithoutExtension + "000" + altFileExtension);
+				if (std::experimental::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
+				} else if (std::experimental::filesystem::exists(m_DataPathWithoutExtension + "000" + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+					SetDataPath(m_DataPathWithoutExtension + "000" + altFileExtension);
 				} else {
-					RTEAbort("Failed to find image file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + "\n" + GetCurrentlyReadFileAndLine());
+					RTEAbort("Failed to find image file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + "\n" + m_FormattedReaderPosition);
 				}
 			}
 		}
@@ -214,7 +221,7 @@ namespace RTE {
 
 			if (!fileToLoad || fileSize <= 0) {
 				RTEAssert(!abortGameForInvalidSound, "Failed to load audio file with following path and name:\n\n" + m_DataPathAndReaderPosition);
-				g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetCurrentlyReadFileAndLine());
+				g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetFormattedReaderPosition());
 				return returnSample;
 			}
 			char *rawData = new char[fileSize];
@@ -234,7 +241,7 @@ namespace RTE {
 				errorMessage = "Unable to create sound because of FMOD error: " + std::string(FMOD_ErrorString(result)) + "\nThe path and name were: ";
 				RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
 				g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
-				g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetCurrentlyReadFileAndLine());
+				g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, GetFormattedReaderPosition());
 				return returnSample;
 			}
 		}

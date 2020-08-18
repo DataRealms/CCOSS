@@ -629,13 +629,13 @@ namespace RTE {
 
 #pragma region Screen Capture
 		/// <summary>
-		/// Draws the current frame of the whole scene to a temporary buffer that is later saved as a screenshot. This is called from SaveBitmap().
+		/// Draws the current frame of the whole scene to a temporary buffer that is later saved as a screenshot.
 		/// </summary>
 		/// <param name="drawForScenePreview">If true will skip drawing objects, post-effects and sky gradient in the WorldDump. To be used for dumping scene preview images.</param>
 		void DrawWorldDump(bool drawForScenePreview = false);
 
 		/// <summary>
-		/// Shared method for saving screenshots or individual bitmaps. Will be called from SaveBitmapToBMP(), SaveScreenToBMP(), SaveWorldToBMP() or SaveWorldToPreviewBMP().
+		/// Shared method for saving screenshots or individual bitmaps.
 		/// </summary>
 		/// <param name="modeToSave">What is being saved. See SaveBitmapMode enumeration for a list of modes.</param>
 		/// <param name="nameBase">
@@ -647,7 +647,7 @@ namespace RTE {
 		int SaveBitmap(SaveBitmapMode modeToSave, const char *nameBase, BITMAP *bitmapToSave = nullptr);
 
 		/// <summary>
-		/// Saves a BITMAP as an 8bpp bitmap file that is indexed with the specified palette. This is called from SaveBitmap() when saving in ScenePreviewDump mode.
+		/// Saves a BITMAP as an 8bpp bitmap file that is indexed with the specified palette.
 		/// </summary>
 		/// <param name="fileName">The full name of the file that is being saved. Path and everything included.</param>
 		/// <param name="bitmapToSave">The BITMAP that is being saved into a file.</param>
@@ -658,7 +658,7 @@ namespace RTE {
 		/// It works by first saving the 32bpp bitmap as is, then loading it back under the REDUCE_TO_256 color conversion mode, blitting it to a fresh bitmap and saving it again with the passed in palette.
 		/// The re-blitted bitmap is properly 8bpp and will be indexed correctly. The old saved file is deleted in the process before the new one is saved.
 		/// </remarks>
-		int SaveBitmapAsIndexed(char *fileName, BITMAP *bitmapToSave, PALETTE paletteToIndexWith) const;
+		int SaveIndexedBitmap(char *fileName, BITMAP *bitmapToSave, PALETTE paletteToIndexWith) const;
 #pragma endregion
 
 		/// <summary>

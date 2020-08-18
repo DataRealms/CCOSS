@@ -582,7 +582,6 @@ namespace RTE {
 			case ScenePreviewDump:
 			case WorldDump:
 				worldDumpBufferBitDepth = (modeToSave == SaveBitmapMode::ScenePreviewDump) ? 32 : 24;
-				// Recreate the buffer if it doesn't exist, the bit depth doesn't match the mode or the dimensions don't match the current scene.
 				if (!m_WorldDumpBuffer || bitmap_color_depth(m_WorldDumpBuffer) != worldDumpBufferBitDepth || (m_WorldDumpBuffer->w != g_SceneMan.GetSceneWidth() || m_WorldDumpBuffer->h != g_SceneMan.GetSceneHeight())) {
 					if (m_WorldDumpBuffer) { destroy_bitmap(m_WorldDumpBuffer); }
 					m_WorldDumpBuffer = create_bitmap_ex(worldDumpBufferBitDepth, g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
@@ -594,7 +593,7 @@ namespace RTE {
 					blit(m_ScenePreviewDumpGradient, scenePreviewDumpBuffer, 0, 0, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 					masked_stretch_blit(m_WorldDumpBuffer, scenePreviewDumpBuffer, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 
-					if (SaveBitmapAsIndexed(fullFileName, scenePreviewDumpBuffer, m_Palette) == 0) {
+					if (SaveIndexedBitmap(fullFileName, scenePreviewDumpBuffer, m_Palette) == 0) {
 						g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + std::string(fullFileName));
 						destroy_bitmap(scenePreviewDumpBuffer);
 						return 0;
@@ -617,7 +616,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SaveBitmapAsIndexed(char *fileName, BITMAP *bitmapToSave, PALETTE paletteToIndexWith) const {
+	int FrameMan::SaveIndexedBitmap(char *fileName, BITMAP *bitmapToSave, PALETTE paletteToIndexWith) const {
 		save_bmp(fileName, bitmapToSave, paletteToIndexWith);
 
 		int lastColorConversionMode = get_color_conversion();

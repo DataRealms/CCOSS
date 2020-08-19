@@ -71,6 +71,10 @@ namespace RTE {
 		m_SmallFont = 0;
 		m_TextBlinkTimer.Reset();
 
+		m_TempBackBuffer8 = nullptr;
+		m_TempBackBuffer32 = nullptr;
+		m_TempPlayerScreen = nullptr;
+
 		for (short screenCount = 0; screenCount < c_MaxScreenCount; ++screenCount) {
 			m_ScreenText[screenCount].clear();
 			m_TextDuration[screenCount] = -1;
@@ -86,6 +90,11 @@ namespace RTE {
 				m_NetworkBackBufferFinal8[bufferFrame][screenCount] = 0;
 				m_NetworkBackBufferIntermediateGUI8[bufferFrame][screenCount] = 0;
 				m_NetworkBackBufferFinalGUI8[bufferFrame][screenCount] = 0;
+
+				m_TempNetworkBackBufferIntermediate8[bufferFrame][screenCount] = nullptr;
+				m_TempNetworkBackBufferIntermediateGUI8[bufferFrame][screenCount] = nullptr;
+				m_TempNetworkBackBufferFinal8[bufferFrame][screenCount] = nullptr;
+				m_TempNetworkBackBufferFinalGUI8[bufferFrame][screenCount] = nullptr;
 			}
 		}
 	}
@@ -227,6 +236,25 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void FrameMan::RecreateBackBuffers() {
+		m_TempBackBuffer8 = m_BackBuffer8;
+		m_TempBackBuffer32 = m_BackBuffer32;
+
+		for (short i = 0; i < c_MaxScreenCount; i++) {
+			for (short f = 0; f < 2; f++) {
+				m_TempNetworkBackBufferIntermediate8[f][i] = m_NetworkBackBufferIntermediate8[f][i];
+				m_TempNetworkBackBufferIntermediateGUI8[f][i] = m_NetworkBackBufferIntermediateGUI8[f][i];
+				m_TempNetworkBackBufferFinal8[f][i] = m_NetworkBackBufferFinal8[f][i];
+				m_TempNetworkBackBufferFinalGUI8[f][i] = m_NetworkBackBufferFinalGUI8[f][i];
+			}
+		}
+		if (m_HSplit || m_VSplit) { m_TempPlayerScreen = m_PlayerScreen; }
+
+		CreateBackBuffers();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int FrameMan::ReadProperty(std::string propName, Reader &reader) {
 		if (propName == "ResolutionX") {
 			reader >> m_ResX;
@@ -289,6 +317,23 @@ namespace RTE {
 		delete m_SmallFont;
 
 		Clear();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::DestroyTempBackBuffers() {
+		destroy_bitmap(m_TempBackBuffer8);
+		destroy_bitmap(m_TempBackBuffer32);
+		destroy_bitmap(m_TempPlayerScreen);
+
+		for (short i = 0; i < c_MaxScreenCount; i++) {
+			for (short f = 0; f < 2; f++) {
+				destroy_bitmap(m_TempNetworkBackBufferIntermediate8[f][i]);
+				destroy_bitmap(m_TempNetworkBackBufferIntermediateGUI8[f][i]);
+				destroy_bitmap(m_TempNetworkBackBufferFinal8[f][i]);
+				destroy_bitmap(m_TempNetworkBackBufferFinalGUI8[f][i]);
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

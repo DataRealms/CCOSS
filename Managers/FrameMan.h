@@ -49,6 +49,11 @@ namespace RTE {
 		void Destroy();
 
 		/// <summary>
+		/// Destroys the temporary backbuffers to free the memory that was allocated to the current backbuffers before they were overwritten. This MUST be called after every resolution change!
+		/// </summary>
+		void DestroyTempBackBuffers();
+
+		/// <summary>
 		/// Resets the entire FrameMan, including its inherited members, to their default settings or values.
 		/// </summary>
 		void Reset() override { Clear(); }
@@ -579,6 +584,18 @@ namespace RTE {
 		/// </summary>
 		enum SaveBitmapMode { SingleBitmap = 0, ScreenDump, WorldDump, ScenePreviewDump};
 
+		/// <summary>
+		/// BITMAPs to temporarily store the backbuffers when recreating them. These are needed to have a pointer to their original allocated memory after overwriting them so it can be deleted.
+		/// Overwriting the backbuffers without storing the original pointers and deleting them after the resolution change will result in a memory leak.
+		/// </summary>
+		BITMAP *m_TempBackBuffer8;
+		BITMAP *m_TempBackBuffer32;
+		BITMAP *m_TempPlayerScreen;
+		BITMAP *m_TempNetworkBackBufferIntermediate8[2][c_MaxScreenCount];
+		BITMAP *m_TempNetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount];
+		BITMAP *m_TempNetworkBackBufferFinal8[2][c_MaxScreenCount];
+		BITMAP *m_TempNetworkBackBufferFinalGUI8[2][c_MaxScreenCount];
+
 #pragma region Create Breakdown
 		/// <summary>
 		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Create().
@@ -597,6 +614,13 @@ namespace RTE {
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int CreateBackBuffers();
+#pragma endregion
+
+#pragma region Resolution Handling
+		/// <summary>
+		/// Stores the current backbuffers in the temporary backbuffers and calls CreateBackbuffers() to overwrite the current ones with new resolution settings.
+		/// </summary>
+		void RecreateBackBuffers();
 #pragma endregion
 
 #pragma region Draw Breakdown

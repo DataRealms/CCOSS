@@ -139,7 +139,7 @@ int BuyMenuGUI::Create(Controller *pController)
 
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.png");
         s_pCursor = cursorFile.GetAsBitmap();
     }
 
@@ -165,8 +165,8 @@ int BuyMenuGUI::Create(Controller *pController)
         // Set the images for the logo and header decorations
         GUICollectionBox *pHeader = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogHeader"));
         m_pLogo = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogLogo"));
-        ContentFile headerFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuHeader.bmp");
-        ContentFile logoFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuLogo.bmp");
+        ContentFile headerFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuHeader.png");
+        ContentFile logoFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuLogo.png");
         pHeader->SetDrawImage(new AllegroBitmap(headerFile.GetAsBitmap()));
         m_pLogo->SetDrawImage(new AllegroBitmap(logoFile.GetAsBitmap()));
         pHeader->SetDrawType(GUICollectionBox::Image);
@@ -187,7 +187,7 @@ int BuyMenuGUI::Create(Controller *pController)
         m_pPopupBox->SetEnabled(false);
         m_pPopupBox->SetVisible(false);
         // Set the font
-        m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+        m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
     }
 
     m_pCategoryTabs[CRAFT] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("CraftTab"));

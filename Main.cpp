@@ -329,76 +329,76 @@ bool PlayIntroTitle() {
 
     // Load the Intro slides
     BITMAP **apIntroSlides = new BITMAP *[SLIDECOUNT];
-    ContentFile introSlideFile("Base.rte/GUIs/Title/Intro/IntroSlideA.bmp");
+    ContentFile introSlideFile("Base.rte/GUIs/Title/Intro/IntroSlideA.png");
     apIntroSlides[SLIDEPAST] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideB.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideB.png");
     apIntroSlides[SLIDENOW] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideC.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideC.png");
     apIntroSlides[SLIDEVR] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideD.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideD.png");
     apIntroSlides[SLIDETRAVEL] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideE.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideE.png");
     apIntroSlides[SLIDEALIENS] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideF.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideF.png");
     apIntroSlides[SLIDETRADE] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideG.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideG.png");
     apIntroSlides[SLIDEPEACE] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideH.bmp");
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideH.png");
     apIntroSlides[SLIDEFRONTIER] = introSlideFile.LoadAndReleaseBitmap();
 
     ContentFile alphaFile;
     BITMAP *pAlpha = 0;
 
     MOSParticle *pDRLogo = new MOSParticle();
-    pDRLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.bmp"));
+    pDRLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.png"));
     pDRLogo->SetWrapDoubleDrawing(false);
 
 	MOSParticle *pFMODLogo = new MOSParticle();
-	pFMODLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.bmp"));
+	pFMODLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.png"));
 	pFMODLogo->SetWrapDoubleDrawing(false);
 
     SceneLayer *pBackdrop = new SceneLayer();
-    pBackdrop->Create(ContentFile("Base.rte/GUIs/Title/Nebula.bmp"), false, Vector(), false, false, Vector(0, -1.0));//startYOffset + resY));
+    pBackdrop->Create(ContentFile("Base.rte/GUIs/Title/Nebula.png"), false, Vector(), false, false, Vector(0, -1.0));//startYOffset + resY));
     float backdropScrollRatio = 1.0F / 3.0F;
 
     MOSParticle *pTitle = new MOSParticle();
-    pTitle->Create(ContentFile("Base.rte/GUIs/Title/Title.bmp"));
+    pTitle->Create(ContentFile("Base.rte/GUIs/Title/Title.png"));
     pTitle->SetWrapDoubleDrawing(false);
     // Logo glow effect
     MOSParticle *pTitleGlow = new MOSParticle();
-    pTitleGlow->Create(ContentFile("Base.rte/GUIs/Title/TitleGlow.bmp"));
+    pTitleGlow->Create(ContentFile("Base.rte/GUIs/Title/TitleGlow.png"));
     pTitleGlow->SetWrapDoubleDrawing(false);
     // Add alpha
-    alphaFile.SetDataPath("Base.rte/GUIs/Title/TitleAlpha.bmp");
+    alphaFile.SetDataPath("Base.rte/GUIs/Title/TitleAlpha.png");
     set_write_alpha_blender();
     draw_trans_sprite(pTitle->GetSpriteFrame(0), alphaFile.GetAsBitmap(), 0, 0);
 
     MOSParticle *pPlanet = new MOSParticle();
-    pPlanet->Create(ContentFile("Base.rte/GUIs/Title/Planet.bmp"));
+    pPlanet->Create(ContentFile("Base.rte/GUIs/Title/Planet.png"));
     pPlanet->SetWrapDoubleDrawing(false);
     // Add alpha
-    alphaFile.SetDataPath("Base.rte/GUIs/Title/PlanetAlpha.bmp");
+    alphaFile.SetDataPath("Base.rte/GUIs/Title/PlanetAlpha.png");
     set_write_alpha_blender();
     draw_trans_sprite(pPlanet->GetSpriteFrame(0), alphaFile.GetAsBitmap(), 0, 0);
 
     MOSParticle *pMoon = new MOSParticle();
-    pMoon->Create(ContentFile("Base.rte/GUIs/Title/Moon.bmp"));
+    pMoon->Create(ContentFile("Base.rte/GUIs/Title/Moon.png"));
     pMoon->SetWrapDoubleDrawing(false);
     // Add alpha
-    alphaFile.SetDataPath("Base.rte/GUIs/Title/MoonAlpha.bmp");
+    alphaFile.SetDataPath("Base.rte/GUIs/Title/MoonAlpha.png");
     set_write_alpha_blender();
     draw_trans_sprite(pMoon->GetSpriteFrame(0), alphaFile.GetAsBitmap(), 0, 0);
 
     MOSRotating *pStation = new MOSRotating();
-    pStation->Create(ContentFile("Base.rte/GUIs/Title/Station.bmp"));
+    pStation->Create(ContentFile("Base.rte/GUIs/Title/Station.png"));
     pStation->SetWrapDoubleDrawing(false);
 
 	MOSRotating *pPioneerCapsule = new MOSRotating();
-	pPioneerCapsule->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerCapsule.bmp"));
+	pPioneerCapsule->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerCapsule.png"));
 	pPioneerCapsule->SetWrapDoubleDrawing(false);
 
 	MOSRotating *pPioneerScreaming = new MOSRotating();
-	pPioneerScreaming->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerScreaming.bmp"));
+	pPioneerScreaming->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerScreaming.png"));
 	pPioneerScreaming->SetWrapDoubleDrawing(false);
 
 	MOSParticle * pFirePuffLarge = dynamic_cast<MOSParticle *>(g_PresetMan.GetEntityPreset("MOSParticle", "Fire Puff Large", "Base.rte")->Clone());
@@ -416,9 +416,9 @@ bool PlayIntroTitle() {
     // Generate stars!
     int starArea = resX * pBackdrop->GetBitmap()->h;
     int starCount = starArea / 1000;
-    ContentFile starSmallFile("Base.rte/GUIs/Title/Stars/StarSmall.bmp");
-    ContentFile starLargeFile("Base.rte/GUIs/Title/Stars/StarLarge.bmp");
-    ContentFile starHugeFile("Base.rte/GUIs/Title/Stars/StarHuge.bmp");
+    ContentFile starSmallFile("Base.rte/GUIs/Title/Stars/StarSmall.png");
+    ContentFile starLargeFile("Base.rte/GUIs/Title/Stars/StarLarge.png");
+    ContentFile starHugeFile("Base.rte/GUIs/Title/Stars/StarHuge.png");
     int starSmallBitmapCount = 4;
     int starLargeBitmapCount = 1;
     int starHugeBitmapCount = 2;
@@ -452,7 +452,7 @@ bool PlayIntroTitle() {
 
     // Font stuff
     GUISkin *pSkin = g_pMainMenuGUI->GetGUIControlManager()->GetSkin();
-    GUIFont *pFont = pSkin->GetFont("fatfont.bmp");
+    GUIFont *pFont = pSkin->GetFont("fatfont.png");
     AllegroBitmap backBuffer(g_FrameMan.GetBackBuffer32());
     int yTextPos = 0;
     // Timers
@@ -1836,17 +1836,9 @@ int main(int argc, char *argv[]) {
 	///////////////////////////////////////////////////////////////////
     // Initialize Allegro
 
-/* This is obsolete; only applied when we were loading from a compressed Base.rte // might come in handy sometime later actually
-    // Load the Allegro config data from the base datafile
-    DATAFILE *pConfigFile = load_datafile_object("Base.rte/Base.dat", "AConfig");
-    if (pConfigFile) {
-        set_config_data((char *)pConfigFile->dat, pConfigFile->size);
-        // The above copies the data, so this is safe to do
-        unload_datafile_object(pConfigFile);
-    } */
-
     set_config_file("Base.rte/AllegroConfig.txt");
     allegro_init();
+	loadpng_init();
 
     // Enable the exit button on the window
     LOCK_FUNCTION(QuitHandler);
@@ -1925,6 +1917,16 @@ int main(int argc, char *argv[]) {
 
 	std::string screenshotSaveDir = g_System.GetWorkingDirectory() + "/" + c_ScreenshotDirectory;
 	if (!std::experimental::filesystem::exists(screenshotSaveDir)) { g_System.MakeDirectory(screenshotSaveDir); }
+
+	if (g_ConsoleMan.LoadWarningsExist()) {
+		g_ConsoleMan.PrintString("WARNING: References to files that could not be located or failed to load detected during module loading!\nSee \"LoadWarningLog.txt\" for a list of bad references.");
+		g_ConsoleMan.SaveLoadWarningLog("LogLoadingWarning.txt");
+		// Open the console so the user is aware there are loading warnings.
+		g_ConsoleMan.SetEnabled(true);
+	} else {
+		// Delete an existing log if there are no warnings so there's less junk in the root folder.
+		if (std::experimental::filesystem::exists(g_System.GetWorkingDirectory() + "/LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
+	}
 
     if (!g_NetworkServer.IsServerModeEnabled()) {
 		if (g_LaunchIntoEditor) {

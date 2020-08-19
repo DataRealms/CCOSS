@@ -285,9 +285,9 @@ int Actor::Create(const Actor &reference)
         iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Follow000.bmp");
         m_apAIIcons[AIMODE_SQUAD] = iconFile.GetAsBitmap();
 
-        ContentFile arrowFile("Base.rte/GUIs/Indicators/SelectArrow.bmp");
+        ContentFile arrowFile("Base.rte/GUIs/Indicators/SelectArrow.png");
         m_apSelectArrow = arrowFile.GetAsAnimation(4);
-        ContentFile alarmFile("Base.rte/GUIs/Indicators/AlarmExclamation.bmp");
+        ContentFile alarmFile("Base.rte/GUIs/Indicators/AlarmExclamation.png");
         m_apAlarmExclamation = alarmFile.GetAsAnimation(2);
 
         m_sIconsLoaded = true;

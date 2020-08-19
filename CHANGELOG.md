@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Implemented Lua Just-In-Time compilation (MoonJIT 2.2.0).
 
+- Implemented PNG file loading and saving. PNGs still need to be indexed just like BMPs! Transparency (alpha) not supported (yet).
+
 - New `Settings.ini` property `LoadingScreenReportPrecision = intValue` to control how accurately the module loading progress reports what line is currently being read.  
 	Only relevant when `DisableLoadingScreen = 0`. Default value is 100, lower values increase loading times (especially if set to 1).  
 	This should be used for debugging where you need to pinpoint the exact line that is crashing and the crash message isn't helping or doesn't exist at all.
@@ -77,7 +79,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New value `STOPPED` (4) was to the `ADoor.DoorState` enumeration. `ADoor:GetDoorState` will return this if the door was stopped by the user via `ADoor:StopDoor`.
 
-- New shortcut `ALT + W` to generate a detailed 140x55px mini `WorldDump` to be used for scene previews. No relying on `SceneEditor`, stretches over whole image, no ugly cyan bunkers, no actors or glows and has sky gradient.
+- New shortcut `ALT + W` to generate a detailed 140x55px mini `WorldDump` to be used for scene previews. No relying on `SceneEditor`, stretches over whole image, no ugly cyan bunkers, no actors or glows, has sky gradient, indexed to palette.
 
 - All text in TextBox (any TextBox) can now be selected using `CTRL + A`.
 
@@ -126,6 +128,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	PrimitiveMan:DrawEllipseFillPrimitive(Vector pos, short horizRadius, short vertRadius, color)
 	PrimitiveMan:DrawEllipseFillPrimitive(player, Vector pos, horizRadius, vertRadius, color)
 	```
+	
+- Added log for non-fatal loading errors. This log will show image files that have been loaded with incorrect extensions (has no side effects but should be addressed) and audio files that failed loading entirely and will not be audible.  
+	If errors are present the console will be forced open to notify the player (only when loading into main menu).  
+	Log will be automatically deleted if warnings are no longer present to avoid polluting the root directory.	
 
 ### Changed
 
@@ -134,6 +140,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Major cleanup and reformatting in the `Managers` folder.
 
 - Lua error reporting has been improved so script errors will always show filename and line number.
+
+- Ini error reporting has been improved so asset loading crash messages (image and audio files) will also display the ini file and line they are being referenced from and a better explanation why the crash occured. ([Issue #161](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/161))
 
 - `Settings.ini` will now fully populate with all available settings (now also broken into sections) when being created (first time or after delete) rather than with just a limited set of defaults.
 
@@ -191,6 +199,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 	Additionally, all screenshots (excluding abortscreen) will now be saved into a `_Screenshots` folder (`_` so it's on top and not hiding between module folders) to avoid polluting the root directory. ([Issue #163](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/163))  
 	This folder will be created automatically after modules are loaded if it is missing.
+	
+- `ScreenDumps` and `WorldDumps` are now saved as compressed PNGs.
 	
 - Controller deadzone setting ignores more input. Previously setting it to the maximum was just enough to eliminate stick drift.
 

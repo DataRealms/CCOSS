@@ -43,7 +43,7 @@ namespace RTE {
 		// Loading splash screen
 		g_FrameMan.ClearBackBuffer32();
 		SceneLayer *loadingSplash = new SceneLayer();
-		loadingSplash->Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.bmp"), false, Vector(), true, false, Vector(1.0, 0));
+		loadingSplash->Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.png"), false, Vector(), true, false, Vector(1.0, 0));
 
 		// Hardcoded offset to make room for the loading box only if DisableLoadingScreen is false.
 		int loadingSplashOffset = g_SettingsMan.DisableLoadingScreen() ? 14 : 120;

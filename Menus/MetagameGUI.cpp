@@ -390,10 +390,10 @@ int MetagameGUI::Create(Controller *pController)
     m_pBannerRedBottom = new GUIBanner();
     m_pBannerYellowTop = new GUIBanner();
     m_pBannerYellowBottom = new GUIBanner();
-    m_pBannerRedTop->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.bmp", "Base.rte/GUIs/Fonts/BannerFontRedBlur.bmp", 32);
-    m_pBannerRedBottom->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.bmp", "Base.rte/GUIs/Fonts/BannerFontRedBlur.bmp", 32);
-    m_pBannerYellowTop->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.bmp", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.bmp", 32);
-    m_pBannerYellowBottom->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.bmp", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.bmp", 32);
+    m_pBannerRedTop->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.png", "Base.rte/GUIs/Fonts/BannerFontRedBlur.png", 32);
+    m_pBannerRedBottom->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.png", "Base.rte/GUIs/Fonts/BannerFontRedBlur.png", 32);
+    m_pBannerYellowTop->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.png", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.png", 32);
+    m_pBannerYellowBottom->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.png", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.png", 32);
 
     // General game message label
     m_pGameMessageLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("GameMessageLabel"));
@@ -410,7 +410,7 @@ int MetagameGUI::Create(Controller *pController)
     m_pToolTipBox->SetEnabled(false);
     m_pToolTipBox->SetVisible(false);
     // Set the font
-    m_pToolTipText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+    m_pToolTipText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
     m_apScreenBox[NEWDIALOG] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("NewGameDialog"));
@@ -523,7 +523,7 @@ int MetagameGUI::Create(Controller *pController)
     m_pSceneOwnerTeam = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SceneOwnerTeam"));
     m_pSceneResidentsLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneResidentsLabel"));
     m_pSceneInfoLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneInfoLabel"));
-    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
     m_pSceneInfoPopup->SetVisible(false);
     m_pSceneBudgetLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneBudgetLabel"));
     m_pSceneBudgetSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("SceneBudgetSlider"));

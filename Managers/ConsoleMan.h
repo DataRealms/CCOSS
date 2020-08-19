@@ -80,16 +80,36 @@ namespace RTE {
 
 #pragma region Logging
 		/// <summary>
+		/// Gets whether the loading warning log has any warnings logged or not.
+		/// </summary>
+		/// <returns>Whether the log has logged warnings.</returns>
+		bool LoadWarningsExist() const { return !m_LoadWarningLog.empty(); }
+
+		/// <summary>
+		/// Adds a new entry to the loading warning log.
+		/// </summary>
+		/// <param name="pathToLog">The path that produced the warning.</param>
+		/// <param name="readerPosition">The file and line currently being loaded.</param>
+		/// <param name="altFileExtension">The alternative file extension to the path that produced the warning (e.g. if file is ".bmp", alternative extension is ".png").</param>
+		void AddLoadWarningLogEntry(const std::string &pathToLog, const std::string &readerPosition = "", const std::string &altFileExtension = "" );
+
+		/// <summary>
+		/// Writes the entire loading warning log to a file.
+		/// </summary>
+		/// <param name="filePath">The filename of the file to write to.</param>
+		void SaveLoadWarningLog(const std::string &filePath) const;
+
+		/// <summary>
 		/// Writes all the input strings to a log in the order they were entered.
 		/// </summary>
 		/// <param name="filePath">The filename of the file to write to.</param>
-		void SaveInputLog(std::string filePath);
+		void SaveInputLog(const std::string &filePath);
 
 		/// <summary>
 		/// Writes the entire console buffer to a file.
 		/// </summary>
 		/// <param name="filePath">The filename of the file to write to.</param>
-		void SaveAllText(std::string filePath);
+		void SaveAllText(const std::string &filePath) const;
 
 		/// <summary>
 		/// Clears all previous input.
@@ -102,10 +122,10 @@ namespace RTE {
 		/// Prints a string into the console.
 		/// </summary>
 		/// <param name="stringToPrint">The string to print.</param>
-		void PrintString(std::string stringToPrint);
+		void PrintString(const std::string &stringToPrint) const;
 
 		/// <summary>
-		/// Opens the console and prints the shortcut help text. This is called from UInputMan when F1 is pressed.
+		/// Opens the console and prints the shortcut help text.
 		/// </summary>
 		void ShowShortcuts();
 
@@ -118,7 +138,7 @@ namespace RTE {
 		/// Draws this ConsoleMan's current graphical representation to a BITMAP of choice.
 		/// </summary>
 		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
-		void Draw(BITMAP *targetBitmap);
+		void Draw(BITMAP *targetBitmap) const;
 #pragma endregion
 
 #pragma region Class Info
@@ -151,6 +171,7 @@ namespace RTE {
 
 		std::deque<std::string> m_InputLog; //!< Log of previously entered input strings.
 		std::deque<std::string>::iterator m_InputLogPosition; //!< Iterator to the current position in the log.
+		std::unordered_set<std::string> m_LoadWarningLog; //!< Log for non-fatal errors produced during loading (e.g. used .bmp file extension to load a .png file). 
 
 		std::string m_LastInputString; //!< Place to save the last worked on input string before deactivating the console.
 		short m_LastLogMove; //!< The last direction the log marker was moved. Needed so that changing directions won't need double tapping.
@@ -172,7 +193,8 @@ namespace RTE {
 		/// Executes the string currently in the console textbox or multiple strings if a newline character is found.
 		/// The input string is saved to the input log if it's different from the previous string. This is called from Update().
 		/// </summary>
-		void FeedString();
+		/// <param name="feedEmptyString">Whether to just pass in an empty string to make a new line.</param>
+		void FeedString(bool feedEmptyString = false);
 
 		/// <summary>
 		/// Loads a previously entered console string from the input log when pressing up or down. This is called from Update().
@@ -183,7 +205,7 @@ namespace RTE {
 		/// <summary>
 		/// Removes any grave accents (`) that are pasted or typed into the textbox by opening/closing it. This is called from Update().
 		/// </summary>
-		void RemoveGraveAccents();
+		void RemoveGraveAccents() const;
 #pragma endregion
 
 		/// <summary>

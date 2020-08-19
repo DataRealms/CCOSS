@@ -523,6 +523,7 @@ namespace RTE {
 		bool m_VSplitOverride; //!< Whether the screen is set to split vertically in settings.
 	
 		ContentFile m_PaletteFile; //!< File of the screen palette.
+		PALETTE m_Palette; //!< Array of RGB entries read from the palette file.
 
 		unsigned char m_BlackColor; //!< Palette index for the black color.
 		unsigned char m_AlmostBlackColor; //!< Palette index for the closest to black color.
@@ -628,21 +629,36 @@ namespace RTE {
 
 #pragma region Screen Capture
 		/// <summary>
-		/// Draws the current frame of the whole scene to a temporary buffer that is later saved as a screenshot. This is called from SaveBitmap().
+		/// Draws the current frame of the whole scene to a temporary buffer that is later saved as a screenshot.
 		/// </summary>
 		/// <param name="drawForScenePreview">If true will skip drawing objects, post-effects and sky gradient in the WorldDump. To be used for dumping scene preview images.</param>
 		void DrawWorldDump(bool drawForScenePreview = false);
 
 		/// <summary>
-		/// Shared method for saving screenshots or individual bitmaps. Will be called from SaveBitmapToBMP(), SaveScreenToBMP(), SaveWorldToBMP() or SaveWorldToPreviewBMP().
+		/// Shared method for saving screenshots or individual bitmaps.
 		/// </summary>
 		/// <param name="modeToSave">What is being saved. See SaveBitmapMode enumeration for a list of modes.</param>
 		/// <param name="nameBase">
-		/// The filename of the file to save to, WITHOUT EXTENSION.
+		/// The name of the file that is being saved, WITHOUT EXTENSION.
 		/// Eg, If "Test" is passed in, this function will save to Test000.bmp, if that file does not already exist. If it does exist, it will attempt 001, and so on.
 		/// </param>
-		/// <param name="bitmapToSave">The individual bitmap that will be dumped. 0 if not in SingleBitmap mode.</param>
-		int SaveBitmap(SaveBitmapMode modeToSave, const char *nameBase, BITMAP *bitmapToSave = 0);
+		/// <param name="bitmapToSave">The individual bitmap that will be dumped. 0 or nullptr if not in SingleBitmap mode.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int SaveBitmap(SaveBitmapMode modeToSave, const char *nameBase, BITMAP *bitmapToSave = nullptr);
+
+		/// <summary>
+		/// Saves a BITMAP as an 8bpp bitmap file that is indexed with the specified palette.
+		/// </summary>
+		/// <param name="fileName">The full name of the file that is being saved. Path and everything included.</param>
+		/// <param name="bitmapToSave">The BITMAP that is being saved into a file.</param>
+		/// <param name="paletteToIndexWith">What PALETTE to use for indexing the file.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <remarks>
+		/// This method is a workaround to Allegro being unable to set a color conversion mode when saving files.
+		/// It works by first saving the 32bpp bitmap as is, then loading it back under the REDUCE_TO_256 color conversion mode, blitting it to a fresh bitmap and saving it again with the passed in palette.
+		/// The re-blitted bitmap is properly 8bpp and will be indexed correctly. The old saved file is deleted in the process before the new one is saved.
+		/// </remarks>
+		int SaveIndexedBitmap(char *fileName, BITMAP *bitmapToSave, PALETTE paletteToIndexWith) const;
 #pragma endregion
 
 		/// <summary>

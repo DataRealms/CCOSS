@@ -362,7 +362,7 @@ int GATutorial::Start()
     // COMMON SCREENS
     ContentFile screenFile;
     BITMAP **apScreens;
-    screenFile.SetDataPath("Base.rte/GUIs/Tutorial/ScreenStatic.bmp");
+    screenFile.SetDataPath("Base.rte/GUIs/Tutorial/ScreenStatic.png");
     apScreens = screenFile.GetAsAnimation(3);
     m_apCommonScreens[SCREENOFF] = apScreens[0];
     m_apCommonScreens[STATICLITTLE] = apScreens[1];
@@ -377,13 +377,13 @@ int GATutorial::Start()
     for (int room = 0; room < ROOMCOUNT; ++room)
     {
         if (room == ROOM0)
-            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryA.bmp");
+            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryA.png");
         else if (room == ROOM1)
-            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryB.bmp");
+            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryB.png");
         else if (room == ROOM2)
-            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryC.bmp");
+            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryC.png");
         else if (room == ROOM3)
-            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryD.bmp");
+            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryD.png");
         apSigns = signFile.GetAsAnimation(2);
         m_aapRoomSigns[room][UNLIT] = apSigns[0];
         m_aapRoomSigns[room][LIT] = apSigns[1];
@@ -984,11 +984,11 @@ void GATutorial::SetupAreas()
     m_TextOffsets[BRAINCHAMBER].SetXY(m_apCommonScreens[0]->w / 2, m_apCommonScreens[0]->h + 4);
     // Set up the steps
     m_TutAreaSteps[BRAINCHAMBER].clear();
-    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("Welcome to Cortex Command", 4000, "Base.rte/GUIs/Tutorial/CCLogo.bmp", 2));
-    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("Above is your disembodied brain", 4000, "Base.rte/GUIs/Tutorial/ArrowUp.bmp", 2));
-    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("With it, you can remotely control other bodies", 4000, "Base.rte/GUIs/Tutorial/BodyZap.bmp", 2));
-    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("Switch to one now by using [" + MAPNAME(INPUT_PREV) + "] or [" + MAPNAME(INPUT_NEXT) + "]", 4000, "Base.rte/GUIs/Tutorial/BodyZap.bmp", 2));
-    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("If you haven't set up your controls yet, hit [Esc] and do so", 8000, "Base.rte/GUIs/Tutorial/Joystick.bmp", 2));
+    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("Welcome to Cortex Command", 4000, "Base.rte/GUIs/Tutorial/CCLogo.png", 2));
+    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("Above is your disembodied brain", 4000, "Base.rte/GUIs/Tutorial/ArrowUp.png", 2));
+    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("With it, you can remotely control other bodies", 4000, "Base.rte/GUIs/Tutorial/BodyZap.png", 2));
+    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("Switch to one now by using [" + MAPNAME(INPUT_PREV) + "] or [" + MAPNAME(INPUT_NEXT) + "]", 4000, "Base.rte/GUIs/Tutorial/BodyZap.png", 2));
+    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("If you haven't set up your controls yet, hit [Esc] and do so", 8000, "Base.rte/GUIs/Tutorial/Joystick.png", 2));
 
     // BODYSTORAGE
     // Set up the trigger area
@@ -1001,10 +1001,10 @@ void GATutorial::SetupAreas()
     m_TextOffsets[BODYSTORAGE].SetXY(m_apCommonScreens[0]->w / 2, m_apCommonScreens[0]->h + 4);
     // Set up the steps
     m_TutAreaSteps[BODYSTORAGE].clear();
-    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Here are some dummy bodies for practice", 4000, "Base.rte/GUIs/Tutorial/BodyHop.bmp", 2));
-    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Quickly switch control between them left and right with [" + MAPNAME(INPUT_PREV) + "] and [" + MAPNAME(INPUT_NEXT) + "]", 6000, "Base.rte/GUIs/Tutorial/BodyZap.bmp", 2));
-    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Or hold down either [" + MAPNAME(INPUT_PREV) + "] or [" + MAPNAME(INPUT_NEXT) + "] to get a selection cursor", 6000, "Base.rte/GUIs/Tutorial/BodyZap.bmp", 2));
-    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Switch to the leftmost body and walk it out of the room with [" + MAPNAME(INPUT_L_LEFT) + "]", 8000, "Base.rte/GUIs/Tutorial/ArrowLeft.bmp", 2));
+    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Here are some dummy bodies for practice", 4000, "Base.rte/GUIs/Tutorial/BodyHop.png", 2));
+    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Quickly switch control between them left and right with [" + MAPNAME(INPUT_PREV) + "] and [" + MAPNAME(INPUT_NEXT) + "]", 6000, "Base.rte/GUIs/Tutorial/BodyZap.png", 2));
+    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Or hold down either [" + MAPNAME(INPUT_PREV) + "] or [" + MAPNAME(INPUT_NEXT) + "] to get a selection cursor", 6000, "Base.rte/GUIs/Tutorial/BodyZap.png", 2));
+    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Switch to the leftmost body and walk it out of the room with [" + MAPNAME(INPUT_L_LEFT) + "]", 8000, "Base.rte/GUIs/Tutorial/ArrowLeft.png", 2));
 
     // SHAFT
     // Set up the trigger area
@@ -1017,11 +1017,11 @@ void GATutorial::SetupAreas()
     m_TextOffsets[SHAFT].SetXY(m_apCommonScreens[0]->w / 2, m_apCommonScreens[0]->h + 4);
     // Set up the steps
     m_TutAreaSteps[SHAFT].clear();
-    m_TutAreaSteps[SHAFT].push_back(TutStep("Use [" + JumpName + "] to activate jetpack", 4000, "Base.rte/GUIs/Tutorial/ArrowUp.bmp", 2));
-    m_TutAreaSteps[SHAFT].push_back(TutStep("Fire jetpack in bursts for better control", 4000, "Base.rte/GUIs/Tutorial/BodyJetpack.bmp", 2));
-    m_TutAreaSteps[SHAFT].push_back(TutStep("Adjust the jet direction by aiming or looking", 4000, "Base.rte/GUIs/Tutorial/BodyJetpack.bmp", 2));
-    m_TutAreaSteps[SHAFT].push_back(TutStep("Jump height is affected by the body's total weight", 4000, "Base.rte/GUIs/Tutorial/BodyJetpack.bmp", 2));
-    m_TutAreaSteps[SHAFT].push_back(TutStep("So the more you carry, the less you can jump", 8000, "Base.rte/GUIs/Tutorial/BodyJetpack.bmp", 2));
+    m_TutAreaSteps[SHAFT].push_back(TutStep("Use [" + JumpName + "] to activate jetpack", 4000, "Base.rte/GUIs/Tutorial/ArrowUp.png", 2));
+    m_TutAreaSteps[SHAFT].push_back(TutStep("Fire jetpack in bursts for better control", 4000, "Base.rte/GUIs/Tutorial/BodyJetpack.png", 2));
+    m_TutAreaSteps[SHAFT].push_back(TutStep("Adjust the jet direction by aiming or looking", 4000, "Base.rte/GUIs/Tutorial/BodyJetpack.png", 2));
+    m_TutAreaSteps[SHAFT].push_back(TutStep("Jump height is affected by the body's total weight", 4000, "Base.rte/GUIs/Tutorial/BodyJetpack.png", 2));
+    m_TutAreaSteps[SHAFT].push_back(TutStep("So the more you carry, the less you can jump", 8000, "Base.rte/GUIs/Tutorial/BodyJetpack.png", 2));
 
     // OBSTACLECOURSE
     // Set up the trigger area
@@ -1034,11 +1034,11 @@ void GATutorial::SetupAreas()
     m_TextOffsets[OBSTACLECOURSE].SetXY(m_apCommonScreens[0]->w / 2, m_apCommonScreens[0]->h + 4);
     // Set up the steps
     m_TutAreaSteps[OBSTACLECOURSE].clear();
-    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("Obstacle course", 2000, "Base.rte/GUIs/Tutorial/BodyHop.bmp", 2));
-    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("Climb obstacles by holding [" + MAPNAME(INPUT_L_RIGHT) + "]", 4000, "Base.rte/GUIs/Tutorial/ArrowRight.bmp", 2));
-    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("Even climb ladders by simply moving toward them", 8000, "Base.rte/GUIs/Tutorial/BodyClimb.bmp", 2));
-    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("You can also crouch and crawl with [" + CrouchName + "]", 6000, "Base.rte/GUIs/Tutorial/BodyCrawl.bmp", 2));
-    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("In tight spaces, you may need to angle your head down to get through", 8000, "Base.rte/GUIs/Tutorial/BodyCrawl.bmp", 2));
+    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("Obstacle course", 2000, "Base.rte/GUIs/Tutorial/BodyHop.png", 2));
+    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("Climb obstacles by holding [" + MAPNAME(INPUT_L_RIGHT) + "]", 4000, "Base.rte/GUIs/Tutorial/ArrowRight.png", 2));
+    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("Even climb ladders by simply moving toward them", 8000, "Base.rte/GUIs/Tutorial/BodyClimb.png", 2));
+    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("You can also crouch and crawl with [" + CrouchName + "]", 6000, "Base.rte/GUIs/Tutorial/BodyCrawl.png", 2));
+    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("In tight spaces, you may need to angle your head down to get through", 8000, "Base.rte/GUIs/Tutorial/BodyCrawl.png", 2));
 
     // FIRINGRANGE
     // Set up the trigger area
@@ -1051,15 +1051,15 @@ void GATutorial::SetupAreas()
     m_TextOffsets[FIRINGRANGE].SetXY(m_apCommonScreens[0]->w / 2, m_apCommonScreens[0]->h + 4);
     // Set up the steps
     m_TutAreaSteps[FIRINGRANGE].clear();
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Firing range", 2000, "Base.rte/GUIs/Tutorial/FireTarget.bmp", 1));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Pick up the weapon by first standing over it", 4000, "Base.rte/GUIs/Tutorial/ArrowRight.bmp", 2));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("And then hold down [" + PieName + "]", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.bmp", 1, 500));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Point up to 'Pick Up'", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.bmp", 2, 500));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Release [" + PieName + "] to complete the command", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.bmp", 1));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("If you aim continuously toward your target", 4000, "Base.rte/GUIs/Tutorial/BodyAim.bmp", 3));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("It improves your accuracy and view distance", 4000, "Base.rte/GUIs/Tutorial/BodyAim.bmp", 3));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Use [" + FireName + "] to Fire!", 4000, "Base.rte/GUIs/Tutorial/BodyFire.bmp", 2));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Reload manually with [" + PieName + "] + up", 8000, "Base.rte/GUIs/Tutorial/BodyFire.bmp", 2));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Firing range", 2000, "Base.rte/GUIs/Tutorial/FireTarget.png", 1));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Pick up the weapon by first standing over it", 4000, "Base.rte/GUIs/Tutorial/ArrowRight.png", 2));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("And then hold down [" + PieName + "]", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.png", 1, 500));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Point up to 'Pick Up'", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.png", 2, 500));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Release [" + PieName + "] to complete the command", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.png", 1));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("If you aim continuously toward your target", 4000, "Base.rte/GUIs/Tutorial/BodyAim.png", 3));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("It improves your accuracy and view distance", 4000, "Base.rte/GUIs/Tutorial/BodyAim.png", 3));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Use [" + FireName + "] to Fire!", 4000, "Base.rte/GUIs/Tutorial/BodyFire.png", 2));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Reload manually with [" + PieName + "] + up", 8000, "Base.rte/GUIs/Tutorial/BodyFire.png", 2));
 
     // ROOFTOP
     // Set up the trigger area
@@ -1072,18 +1072,18 @@ void GATutorial::SetupAreas()
     m_TextOffsets[ROOFTOP].SetXY(m_apCommonScreens[0]->w / 2, -16);
     // Set up the steps
     m_TutAreaSteps[ROOFTOP].clear();
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Pick up the digging tool", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.bmp", 2, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Use it on the dirt here", 8000, "Base.rte/GUIs/Tutorial/DigPile.bmp", 2, 750));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("If you dig up gold, it is added to your team's funds", 4000, "Base.rte/GUIs/Tutorial/Funds.bmp", 2, 250));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Funds can be spent in the Buy Menu", 4000, "Base.rte/GUIs/Tutorial/Funds.bmp", 1, 333));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Which is opened through the Command Menu", 4000, "Base.rte/GUIs/Tutorial/MenuBuyMenu.bmp", 1, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Hold [" + PieName + "] and point up-left to 'Buy Menu'", 6000, "Base.rte/GUIs/Tutorial/MenuBuyMenu.bmp", 2, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("The Buy Menu works like a shopping cart", 6000, "Base.rte/GUIs/Tutorial/BuyMenuCargo.bmp", 1, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Add to the Cargo list the items you want delivered", 6000, "Base.rte/GUIs/Tutorial/BuyMenuCargo.bmp", 2, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Then use the BUY button, or click outside the menu", 4000, "Base.rte/GUIs/Tutorial/BuyMenuBuy.bmp", 2, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Finally select a flat area where you want the goods delivered", 8000, "Base.rte/GUIs/Tutorial/BuyMenuBuy.bmp", 1, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Next, you can go explore to the west to try flying and climbing in the wild", 6000, "Base.rte/GUIs/Tutorial/ArrowLeft.bmp", 2));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Or, go to the east to learn about squads!", 8000, "Base.rte/GUIs/Tutorial/ArrowRight.bmp", 2));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Pick up the digging tool", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.png", 2, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Use it on the dirt here", 8000, "Base.rte/GUIs/Tutorial/DigPile.png", 2, 750));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("If you dig up gold, it is added to your team's funds", 4000, "Base.rte/GUIs/Tutorial/Funds.png", 2, 250));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Funds can be spent in the Buy Menu", 4000, "Base.rte/GUIs/Tutorial/Funds.png", 1, 333));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Which is opened through the Command Menu", 4000, "Base.rte/GUIs/Tutorial/MenuBuyMenu.png", 1, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Hold [" + PieName + "] and point up-left to 'Buy Menu'", 6000, "Base.rte/GUIs/Tutorial/MenuBuyMenu.png", 2, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("The Buy Menu works like a shopping cart", 6000, "Base.rte/GUIs/Tutorial/BuyMenuCargo.png", 1, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Add to the Cargo list the items you want delivered", 6000, "Base.rte/GUIs/Tutorial/BuyMenuCargo.png", 2, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Then use the BUY button, or click outside the menu", 4000, "Base.rte/GUIs/Tutorial/BuyMenuBuy.png", 2, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Finally select a flat area where you want the goods delivered", 8000, "Base.rte/GUIs/Tutorial/BuyMenuBuy.png", 1, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Next, you can go explore to the west to try flying and climbing in the wild", 6000, "Base.rte/GUIs/Tutorial/ArrowLeft.png", 2));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Or, go to the east to learn about squads!", 8000, "Base.rte/GUIs/Tutorial/ArrowRight.png", 2));
 
     // ROOFEAST
     // Set up the trigger area
@@ -1096,12 +1096,12 @@ void GATutorial::SetupAreas()
     m_TextOffsets[ROOFEAST].SetXY(m_apCommonScreens[0]->w / 2, -16);
     // Set up the steps
     m_TutAreaSteps[ROOFEAST].clear();
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point up-right to 'Form Squad'", 4000, "Base.rte/GUIs/Tutorial/MenuTeam.bmp", 2, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Adjust selection circle to select nearby bodies", 4000, "Base.rte/GUIs/Tutorial/TeamSelect.bmp", 4, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("All selected units will follow you, and engage on their own", 4000, "Base.rte/GUIs/Tutorial/TeamFollow.bmp", 2, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Units with weapons similar to the leader's will fire in unison with him.", 4000, "Base.rte/GUIs/Tutorial/TeamFollow.bmp", 2, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point up-right again to disband squad", 4000, "Base.rte/GUIs/Tutorial/MenuTeam.bmp", 2, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Next, you can go to the east for a TRIAL BATTLE!", 8000, "Base.rte/GUIs/Tutorial/ArrowRight.bmp", 2));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point up-right to 'Form Squad'", 4000, "Base.rte/GUIs/Tutorial/MenuTeam.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Adjust selection circle to select nearby bodies", 4000, "Base.rte/GUIs/Tutorial/TeamSelect.png", 4, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("All selected units will follow you, and engage on their own", 4000, "Base.rte/GUIs/Tutorial/TeamFollow.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Units with weapons similar to the leader's will fire in unison with him.", 4000, "Base.rte/GUIs/Tutorial/TeamFollow.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point up-right again to disband squad", 4000, "Base.rte/GUIs/Tutorial/MenuTeam.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Next, you can go to the east for a TRIAL BATTLE!", 8000, "Base.rte/GUIs/Tutorial/ArrowRight.png", 2));
 
     m_AreaTimer.Reset();
     m_StepTimer.Reset();

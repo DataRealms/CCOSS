@@ -252,17 +252,9 @@ int ACRocket::Save(Writer &writer) const
 
 void ACRocket::Destroy(bool notInherited)
 {
-    delete m_pRLeg;
-    delete m_pLLeg;
     delete m_pBodyAG;
     delete m_pRFootGroup;
     delete m_pLFootGroup;
-
-    delete m_pMThruster;
-    delete m_pRThruster;
-    delete m_pLThruster;
-    delete m_pURThruster;
-    delete m_pULThruster;
     
 //    for (deque<LimbPath *>::iterator itr = m_WalkPaths.begin();
 //         itr != m_WalkPaths.end(); ++itr)

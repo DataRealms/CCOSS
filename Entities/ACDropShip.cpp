@@ -199,12 +199,6 @@ int ACDropShip::Save(Writer &writer) const
 void ACDropShip::Destroy(bool notInherited)
 {
     delete m_pBodyAG;
-    delete m_pRThruster;
-    delete m_pLThruster;
-    delete m_pURThruster;
-    delete m_pULThruster;
-    delete m_pRHatch;
-    delete m_pLHatch;
 
     if (!notInherited)
         ACraft::Destroy();

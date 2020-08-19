@@ -189,7 +189,6 @@ namespace RTE {
 		m_DoorMoveSound.Stop();
 		m_DoorDirectionChangeSound.Stop();
 		m_DoorMoveEndSound.Stop();
-		delete m_Door;
 		if (!notInherited) { Actor::Destroy(); }
 
 		for (ADSensor &sensor : m_Sensors) {

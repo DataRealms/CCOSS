@@ -147,7 +147,7 @@ namespace RTE {
 		/// Sets and switches to a new windowed mode resolution multiplier.
 		/// </summary>
 		/// <param name="multiplier">The multiplier to switch to.</param>
-		/// <returns>Error code, anything other than 0 is error.</returns>
+		/// <returns>Error code, anything other than 0 is an error.</returns>
 		int SwitchResolutionMultiplier(unsigned char multiplier = 1);
 
 		/// <summary>
@@ -313,17 +313,17 @@ namespace RTE {
 		/// <summary>
 		/// Flips the frame buffers, showing the backbuffer on the current display.
 		/// </summary>
-		void FlipFrameBuffers();
+		void FlipFrameBuffers() const;
 
 		/// <summary>
 		/// Clears the 8bpp backbuffer with black.
 		/// </summary>
-		void ClearBackBuffer8() { clear_to_color(m_BackBuffer8, m_BlackColor); }
+		void ClearBackBuffer8() const { clear_to_color(m_BackBuffer8, m_BlackColor); }
 
 		/// <summary>
 		/// Clears the 32bpp backbuffer with black.
 		/// </summary>
-		void ClearBackBuffer32() { clear_to_color(m_BackBuffer32, 0); }
+		void ClearBackBuffer32() const { clear_to_color(m_BackBuffer32, 0); }
 
 		/// <summary>
 		/// Sets a specific recalculated transparency table which is used for any subsequent transparency drawing.
@@ -342,7 +342,7 @@ namespace RTE {
 		/// <summary>
 		/// Draws a line that can be dotted or with other effects.
 		/// </summary>
-		/// <param name="pBitmap">The Bitmap to draw to. Ownership is NOT transferred.</param>
+		/// <param name="bitmap">The Bitmap to draw to. Ownership is NOT transferred.</param>
 		/// <param name="start">The absolute Start point.</param>
 		/// <param name="end">The absolute end point.</param>
 		/// <param name="color">The color value of the line.</param>
@@ -351,8 +351,8 @@ namespace RTE {
 		/// <param name="skipStart">The start of the skipping phase. If skip is 10 and this is 5, the first dot will be drawn after 5 pixels.</param>
 		/// <param name="shortestWrap">Whether the line should take the shortest possible route across scene wraps.</param>
 		/// <returns>The end state of the skipping phase. Eg if 4 is returned here the last dot was placed 4 pixels ago.</returns>
-		int DrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor = 0, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false) {
-			return SharedDrawLine(bitmap, start, end, color, altColor, skip, skipStart, shortestWrap, false, 0);
+		int DrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor = 0, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false) const {
+			return SharedDrawLine(bitmap, start, end, color, altColor, skip, skipStart, shortestWrap, false, nullptr);
 		}
 
 		/// <summary>
@@ -366,7 +366,7 @@ namespace RTE {
 		/// <param name="skipStart">The start of the skipping phase. If skip is 10 and this is 5, the first dot will be drawn after 5 pixels.</param>
 		/// <param name="shortestWrap">Whether the line should take the shortest possible route across scene wraps.</param>
 		/// <returns>The end state of the skipping phase. Eg if 4 is returned here the last dot was placed 4 pixels ago.</returns>
-		int DrawDotLine(BITMAP *bitmap, const Vector &start, const Vector &end, BITMAP *dot, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false) {
+		int DrawDotLine(BITMAP *bitmap, const Vector &start, const Vector &end, BITMAP *dot, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false) const {
 			return SharedDrawLine(bitmap, start, end, 0, 0, skip, skipStart, shortestWrap, true, dot);
 		}
 #pragma endregion
@@ -639,6 +639,17 @@ namespace RTE {
 		BITMAP *m_TempNetworkBackBufferFinal8[2][c_MaxScreenCount];
 		BITMAP *m_TempNetworkBackBufferFinalGUI8[2][c_MaxScreenCount];
 
+		/// <summary>
+		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window. 
+		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
+		/// </summary>
+		static void DisplaySwitchOut();
+
+		/// <summary>
+		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
+		/// </summary>
+		static void DisplaySwitchIn();
+
 #pragma region Create Breakdown
 		/// <summary>
 		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Create().
@@ -673,20 +684,20 @@ namespace RTE {
 		/// </summary>
 		/// <param name="playerScreen">The player screen to update offset for.</param>
 		/// <param name="screenOffset">Vector representing the screen offset.</param>
-		void UpdateScreenOffsetForSplitScreen(short playerScreen, Vector &screenOffset);
+		void UpdateScreenOffsetForSplitScreen(short playerScreen, Vector &screenOffset) const;
 
 		/// <summary>
 		/// Draws all the text messages to the specified player screen. This is called during Draw().
 		/// </summary>
-		/// <param name="playerScreenToFlash">The player screen the text will be shown on.</param>
-		/// <param name="guiBitmap">The bitmap the text will be drawn on.</param>
+		/// <param name="playerScreen">The player screen the text will be shown on.</param>
+		/// <param name="playerGUIBitmap">The bitmap the text will be drawn on.</param>
 		void DrawScreenText(short playerScreen, AllegroBitmap playerGUIBitmap);
 
 		/// <summary>
 		/// Draws the screen flash effect to the specified player screen with parameters set by FlashScreen(). This is called during Draw().
 		/// </summary>
-		/// <param name="playerScreenToFlash">The player screen the flash effect will be shown to.</param>
-		/// <param name="guiBitmap">The bitmap the flash effect will be drawn on.</param>
+		/// <param name="playerScreen">The player screen the flash effect will be shown to.</param>
+		/// <param name="playerGUIBitmap">The bitmap the flash effect will be drawn on.</param>
 		void DrawScreenFlash(short playerScreen, BITMAP *playerGUIBitmap);
 
 		/// <summary>
@@ -700,7 +711,7 @@ namespace RTE {
 		/// Draws the current frame of the whole scene to a temporary buffer that is later saved as a screenshot.
 		/// </summary>
 		/// <param name="drawForScenePreview">If true will skip drawing objects, post-effects and sky gradient in the WorldDump. To be used for dumping scene preview images.</param>
-		void DrawWorldDump(bool drawForScenePreview = false);
+		void DrawWorldDump(bool drawForScenePreview = false) const;
 
 		/// <summary>
 		/// Shared method for saving screenshots or individual bitmaps.
@@ -732,7 +743,7 @@ namespace RTE {
 		/// <summary>
 		/// Shared method for drawing lines to avoid duplicate code. Will by called by either DrawLine() or DrawDotLine().
 		/// </summary>
-		/// <param name="pBitmap">The Bitmap to draw to. Ownership is NOT transferred.</param>
+		/// <param name="bitmap">The Bitmap to draw to. Ownership is NOT transferred.</param>
 		/// <param name="start">The absolute Start point.</param>
 		/// <param name="end">The absolute end point.</param>
 		/// <param name="color">The color value of the line.</param>
@@ -743,7 +754,7 @@ namespace RTE {
 		/// <param name="drawDot">Whether to draw a regular line or a dot line. True for dot line.</param>
 		/// <param name="dot">The bitmap to be used for dots (will be centered).</param>
 		/// <returns>The end state of the skipping phase. Eg if 4 is returned here the last dot was placed 4 pixels ago.</returns>
-		int SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor = 0, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false, bool drawDot = false, BITMAP *dot = 0);
+		int SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor = 0, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false, bool drawDot = false, BITMAP *dot = nullptr) const;
 
 		/// <summary>
 		/// Gets the requested font from the GUI engine's current skin. Ownership is NOT transferred!

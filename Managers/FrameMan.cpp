@@ -22,18 +22,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/// <summary>
-	/// Callback function for the allegro set_display_switch_callback. It will be called when focus is switched away from the game window. 
-	/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
-	/// </summary>
-	void DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true); }
+	void FrameMan::DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/// <summary>
-	/// Callback function for the allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
-	/// </summary>
-	void DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
+	void FrameMan::DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -52,14 +45,14 @@ namespace RTE {
 		m_VSplit = false;
 		m_HSplitOverride = false;
 		m_VSplitOverride = false;
-		m_PlayerScreen = 0;
+		m_PlayerScreen = nullptr;
 		m_PlayerScreenWidth = 0;
 		m_PlayerScreenHeight = 0;
-		m_ScreenDumpBuffer = 0;
-		m_WorldDumpBuffer = 0;
-		m_ScenePreviewDumpGradient = 0;
-		m_BackBuffer8 = 0;
-		m_BackBuffer32 = 0;
+		m_ScreenDumpBuffer = nullptr;
+		m_WorldDumpBuffer = nullptr;
+		m_ScenePreviewDumpGradient = nullptr;
+		m_BackBuffer8 = nullptr;
+		m_BackBuffer32 = nullptr;
 		m_DrawNetworkBackBuffer = false;
 		m_StoreNetworkBackBuffer = false;
 		m_NetworkFrameCurrent = 0;
@@ -67,9 +60,9 @@ namespace RTE {
 		m_PaletteFile.Reset();
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
-		m_GUIScreen = 0;
-		m_LargeFont = 0;
-		m_SmallFont = 0;
+		m_GUIScreen = nullptr;
+		m_LargeFont = nullptr;
+		m_SmallFont = nullptr;
 		m_TextBlinkTimer.Reset();
 
 		m_TempBackBuffer8 = nullptr;
@@ -87,10 +80,10 @@ namespace RTE {
 			m_FlashTimer[screenCount].Reset();
 
 			for (short bufferFrame = 0; bufferFrame < 2; bufferFrame++) {
-				m_NetworkBackBufferIntermediate8[bufferFrame][screenCount] = 0;
-				m_NetworkBackBufferFinal8[bufferFrame][screenCount] = 0;
-				m_NetworkBackBufferIntermediateGUI8[bufferFrame][screenCount] = 0;
-				m_NetworkBackBufferFinalGUI8[bufferFrame][screenCount] = 0;
+				m_NetworkBackBufferIntermediate8[bufferFrame][screenCount] = nullptr;
+				m_NetworkBackBufferFinal8[bufferFrame][screenCount] = nullptr;
+				m_NetworkBackBufferIntermediateGUI8[bufferFrame][screenCount] = nullptr;
+				m_NetworkBackBufferFinalGUI8[bufferFrame][screenCount] = nullptr;
 
 				m_TempNetworkBackBufferIntermediate8[bufferFrame][screenCount] = nullptr;
 				m_TempNetworkBackBufferIntermediateGUI8[bufferFrame][screenCount] = nullptr;
@@ -179,9 +172,9 @@ namespace RTE {
 		// Create transparency color table
 		PALETTE ccPalette;
 		get_palette(ccPalette);
-		create_trans_table(&m_LessTransTable, ccPalette, 192, 192, 192, 0);
-		create_trans_table(&m_HalfTransTable, ccPalette, 128, 128, 128, 0);
-		create_trans_table(&m_MoreTransTable, ccPalette, 64, 64, 64, 0);
+		create_trans_table(&m_LessTransTable, ccPalette, 192, 192, 192, nullptr);
+		create_trans_table(&m_HalfTransTable, ccPalette, 128, 128, 128, nullptr);
+		create_trans_table(&m_MoreTransTable, ccPalette, 64, 64, 64, nullptr);
 		// Set the one Allegro currently uses
 		color_map = &m_HalfTransTable;
 
@@ -209,11 +202,13 @@ namespace RTE {
 			for (short f = 0; f < 2; f++) {
 				m_NetworkBackBufferIntermediate8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 				clear_to_color(m_NetworkBackBufferIntermediate8[f][i], m_BlackColor);
+
 				m_NetworkBackBufferIntermediateGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 				clear_to_color(m_NetworkBackBufferIntermediateGUI8[f][i], g_MaskColor);
 
 				m_NetworkBackBufferFinal8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 				clear_to_color(m_NetworkBackBufferFinal8[f][i], m_BlackColor);
+
 				m_NetworkBackBufferFinalGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 				clear_to_color(m_NetworkBackBufferFinalGUI8[f][i], g_MaskColor);
 			}
@@ -300,6 +295,12 @@ namespace RTE {
 
 	void FrameMan::Destroy() {
 		destroy_bitmap(m_BackBuffer8);
+		destroy_bitmap(m_BackBuffer32);
+		destroy_bitmap(m_PlayerScreen);
+		destroy_bitmap(m_ScreenDumpBuffer);
+		destroy_bitmap(m_WorldDumpBuffer);
+		destroy_bitmap(m_ScenePreviewDumpGradient);
+
 		for (short i = 0; i < c_MaxScreenCount; i++) {
 			for (short f = 0; f < 2; f++) {
 				destroy_bitmap(m_NetworkBackBufferIntermediate8[f][i]);
@@ -308,11 +309,7 @@ namespace RTE {
 				destroy_bitmap(m_NetworkBackBufferFinalGUI8[f][i]);
 			}
 		}
-		destroy_bitmap(m_BackBuffer32);
-		destroy_bitmap(m_PlayerScreen);
-		destroy_bitmap(m_ScreenDumpBuffer);
-		destroy_bitmap(m_WorldDumpBuffer);
-		destroy_bitmap(m_ScenePreviewDumpGradient);
+
 		delete m_GUIScreen;
 		delete m_LargeFont;
 		delete m_SmallFont;
@@ -371,10 +368,6 @@ namespace RTE {
 			return -1;
 		}
 
-		// Save the palette so we can re-set it after the switch.
-		PALETTE pal;
-		get_palette(pal);
-
 		// Need to save these first for recovery attempts to work (screen might be 0)
 		unsigned short resX = m_ResX;
 		unsigned short resY = m_ResY;
@@ -391,17 +384,14 @@ namespace RTE {
 				return 1;
 			}
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new windowed mode multiplier, reverted back to previous setting!");
-			set_palette(pal);
+			set_palette(m_Palette);
 			return 1;
 		}
-		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
+		set_palette(m_Palette);
 		m_ResMultiplier = multiplier;
 
-		Writer settingsWriter("Base.rte/Settings.ini");
-		g_SettingsMan.Save(settingsWriter);
-		settingsWriter.Destroy();
-
-		set_palette(pal);
+		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
+		g_SettingsMan.UpdateSettingsFile();
 
 		FlipFrameBuffers();
 		return 0;
@@ -591,7 +581,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::FlipFrameBuffers() {
+	void FrameMan::FlipFrameBuffers() const {
 		if (m_ResMultiplier > 1) {
 			stretch_blit(m_BackBuffer32, screen, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
 		} else {
@@ -660,7 +650,7 @@ namespace RTE {
 		if ((modeToSave == WorldDump || modeToSave == ScenePreviewDump) && !g_ActivityMan.ActivityRunning()) {
 			return 0;
 		}
-		if (nameBase == 0 || strlen(nameBase) <= 0) {
+		if (nameBase == nullptr || strlen(nameBase) <= 0) {
 			return -1;
 		}
 
@@ -677,7 +667,7 @@ namespace RTE {
 			}
 		}
 
-		int worldDumpBufferBitDepth = 24;
+		int worldDumpBufferBitDepth;
 
 		switch (modeToSave) {
 			case SingleBitmap:
@@ -757,7 +747,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor, unsigned short skip, unsigned short skipStart, bool shortestWrap, bool drawDot, BITMAP *dot) {
+	int FrameMan::SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor, unsigned short skip, unsigned short skipStart, bool shortestWrap, bool drawDot, BITMAP *dot) const {
 		RTEAssert(bitmap, "Trying to draw line to null Bitmap");
 		if (drawDot) { RTEAssert(dot, "Trying to draw line of dots without specifying a dot Bitmap"); }
 
@@ -780,17 +770,17 @@ namespace RTE {
 		// Just make the alt the same color as the main one if no one was specified
 		if (altColor == 0) { altColor = color; }
 
-		intPos[X] = floorf(start.m_X);
-		intPos[Y] = floorf(start.m_Y);
+		intPos[X] = start.GetFloorIntX();
+		intPos[Y] = start.GetFloorIntY();
 
 		// Wrap line around the scene if it makes it shorter
 		if (shortestWrap) {
 			Vector deltaVec = g_SceneMan.ShortestDistance(start, end, false);
-			delta[X] = floorf(deltaVec.m_X);
-			delta[Y] = floorf(deltaVec.m_Y);
+			delta[X] = deltaVec.GetFloorIntX();
+			delta[Y] = deltaVec.GetFloorIntY();
 		} else {
-			delta[X] = floorf(end.m_X) - intPos[X];
-			delta[Y] = floorf(end.m_Y) - intPos[Y];
+			delta[X] = end.GetFloorIntX() - intPos[X];
+			delta[Y] = end.GetFloorIntY() - intPos[Y];
 		}
 		if (delta[X] == 0 && delta[Y] == 0) {
 			return 0;
@@ -859,28 +849,25 @@ namespace RTE {
 	GUIFont * FrameMan::GetFont(bool isSmall) {
 		if (!m_GUIScreen) { m_GUIScreen = new AllegroScreen(m_BackBuffer8); }
 
-		switch (isSmall) {
-			case false:
-				if (!m_LargeFont) {
-					m_LargeFont = new GUIFont("FatFont");
-					m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.png");
-				}
-				return m_LargeFont;
-			case true:
-				if (!m_SmallFont) {
-					m_SmallFont = new GUIFont("SmallFont");
-					m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.png");
-				}
-				return m_SmallFont;
+		if (isSmall) {
+			if (!m_SmallFont) {
+				m_SmallFont = new GUIFont("SmallFont");
+				m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.png");
+			}
+			return m_SmallFont;
+		}	
+		if (!m_LargeFont) {
+			m_LargeFont = new GUIFont("FatFont");
+			m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.png");
 		}
-		return 0;
+		return m_LargeFont;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::UpdateScreenOffsetForSplitScreen(short playerScreen, Vector &screenOffset) {
+	void FrameMan::UpdateScreenOffsetForSplitScreen(short playerScreen, Vector &screenOffset) const {
 		switch (playerScreen) {
-			case 1:
+			case Players::PlayerTwo:
 				// If both splits, or just VSplit, then in upper right quadrant
 				if ((m_VSplit && !m_HSplit) || (m_VSplit && m_HSplit)) {
 					screenOffset.SetIntXY(GetResX() / 2, 0);
@@ -889,11 +876,11 @@ namespace RTE {
 					screenOffset.SetIntXY(0, GetResY() / 2);
 				}
 				break;
-			case 2:
+			case Players::PlayerThree:
 				// Always lower left quadrant
 				screenOffset.SetIntXY(0, GetResY() / 2);
 				break;
-			case 3:
+			case Players::PlayerFour:
 				// Always lower right quadrant
 				screenOffset.SetIntXY(GetResX() / 2, GetResY() / 2);
 				break;
@@ -1053,15 +1040,15 @@ namespace RTE {
 
 				if (m_TextCentered[playerScreen]) { textPosY = (bufferOrScreenHeight / 2) - 52; }
 
-				int screenOcclusionOffsetX = g_SceneMan.GetScreenOcclusion(playerScreen).m_X;
+				int screenOcclusionOffsetX = g_SceneMan.GetScreenOcclusion(playerScreen).GetIntX();
 				// If there's really no room to offset the text into, then don't
 				if (GetPlayerScreenWidth() <= GetResX() / 2) { screenOcclusionOffsetX = 0; }
 
 				// Draw text and handle blinking by turning on and off extra surrounding characters. Text is always drawn to keep it readable.
 				if (m_TextBlinking[playerScreen] && m_TextBlinkTimer.AlternateReal(m_TextBlinking[playerScreen])) {
-					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, (">>> " + m_ScreenText[playerScreen] + " <<<").c_str(), GUIFont::Centre);
+					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, ">>> " + m_ScreenText[playerScreen] + " <<<", GUIFont::Centre);
 				} else {
-					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, m_ScreenText[playerScreen].c_str(), GUIFont::Centre);
+					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, m_ScreenText[playerScreen], GUIFont::Centre);
 				}
 				textPosY += 12;
 			}
@@ -1090,7 +1077,7 @@ namespace RTE {
 	void FrameMan::DrawScreenFlash(short playerScreen, BITMAP *playerGUIBitmap) {
 		if (m_FlashScreenColor[playerScreen] != -1) {
 			// If set to flash for a period of time, first be solid and then start flashing slower
-			float timeTillLimit = m_FlashTimer[playerScreen].LeftTillRealTimeLimitMS();
+			double timeTillLimit = m_FlashTimer[playerScreen].LeftTillRealTimeLimitMS();
 
 			if (timeTillLimit < 10 || m_FlashTimer[playerScreen].AlternateReal(50)) {
 				if (m_FlashedLastFrame[playerScreen]) {
@@ -1106,7 +1093,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::DrawWorldDump(bool drawForScenePreview) {
+	void FrameMan::DrawWorldDump(bool drawForScenePreview) const {
 		float worldBitmapWidth = static_cast<float>(m_WorldDumpBuffer->w);
 		float worldBitmapHeight = static_cast<float>(m_WorldDumpBuffer->h);
 
@@ -1147,14 +1134,13 @@ namespace RTE {
 				effectPosX = postEffect.m_Pos.GetFloorIntX() - (effectBitmap->w / 2);
 				effectPosY = postEffect.m_Pos.GetFloorIntY() - (effectBitmap->h / 2);
 
-				if (postEffect.m_Angle == 0) {
+				if (postEffect.m_Angle == 0.0F) {
 					draw_trans_sprite(m_WorldDumpBuffer, effectBitmap, effectPosX, effectPosY);
 				} else {
 					BITMAP *targetBitmap = g_PostProcessMan.GetTempEffectBitmap(effectBitmap);
 					clear_to_color(targetBitmap, 0);
 
-					fixed fAngle;
-					fAngle = fixmul(postEffect.m_Angle, radtofix_r);
+					 fixed fAngle = fixmul(postEffect.m_Angle, radtofix_r);
 
 					rotate_sprite(targetBitmap, effectBitmap, 0, 0, fAngle);
 					draw_trans_sprite(m_WorldDumpBuffer, targetBitmap, effectPosX, effectPosY);

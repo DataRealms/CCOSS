@@ -1043,7 +1043,7 @@ float AtomGroup::Travel(Vector &position,
             }
 #ifdef DEBUG_BUILD
             // Draw the positions of the atoms at the start of each segment, for visual debugging.
-            putpixel(g_SceneMan.GetMOColorBitmap(), (*atom)->GetCurrentPos().m_X, (*atom)->GetCurrentPos().m_Y, 122);
+            putpixel(g_SceneMan.GetMOColorBitmap(), atom->GetCurrentPos().GetIntX(), atom->GetCurrentPos().GetIntY(), 122);
 #endif
         }
 

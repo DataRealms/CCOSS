@@ -49,7 +49,8 @@ namespace RTE {
 		void Destroy();
 
 		/// <summary>
-		/// Destroys the temporary backbuffers to free the memory that was allocated to the current backbuffers before they were overwritten. This MUST be called after every resolution change!
+		/// Destroys the temporary backbuffers to free the memory that was allocated to the current backbuffers before they were overwritten and allocated new memory addresses.
+		/// This will be called by ReinitMainMenu() and MUST NOT BE CALLED ANYWHERE ELSE!
 		/// </summary>
 		void DestroyTempBackBuffers();
 
@@ -148,6 +149,45 @@ namespace RTE {
 		/// <param name="multiplier">The multiplier to switch to.</param>
 		/// <returns>Error code, anything other than 0 is error.</returns>
 		int SwitchResolutionMultiplier(unsigned char multiplier = 1);
+
+		/// <summary>
+		/// Gets whether the game window is in fullscreen (borderless window) mode or not.
+		/// </summary>
+		/// <returns>True if the game window resolution matches the desktop resolution.</returns>
+		bool IsFullscreen() const { return m_ResX == m_ScreenResX && m_ResY == m_ScreenResY; }
+
+		/// <summary>
+		/// Gets whether the game window is in upscaled fullscreen (borderless window) mode or not.
+		/// </summary>
+		/// <returns>True if the game window is exactly half of the desktop resolution and the multiplier is set to 2.</returns>
+		bool IsUpscaledFullscreen() const { return m_ResMultiplier == 2 && m_ResX == m_ScreenResX / 2 && m_ResY == m_ScreenResY / 2; }
+		
+		/// <summary>
+		/// Switches the game window into fullscreen or upscaled fullscreen mode.
+		/// </summary>
+		/// <param name="upscaled">Whether to switch to upscaled mode or not.</param>
+		void SwitchToFullscreen(bool upscaled);
+
+		/// <summary>
+		/// Gets whether the game window resolution was changed.
+		/// </summary>
+		/// <returns>Whether the game window resolution was changed.</returns>
+		bool ResolutionChanged() const { return m_ResChanged; }
+
+		/// <summary>
+		/// Sets whether the game window resolution was changed. Used to reset the flag after the change is complete. This is called from ReinitMainMenu() and should not be called anywhere else.
+		/// </summary>
+		/// <param name="resolutionChanged">Whether the resolution changed or not.</param>
+		void SetResolutionChanged(bool resolutionChanged) { m_ResChanged = resolutionChanged; }
+
+		/// <summary>
+		/// Switches the game window resolution to the specified dimensions.
+		/// </summary>
+		/// <param name="newResX">New width to set window to.</param>
+		/// <param name="newResY">New height to set window to.</param>
+		/// <param name="newMultiplier">New resolution multiplier to set window to.</param>
+		/// <returns>Error code, anything other than 0 is an error.</returns>
+		int SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier = 1);
 #pragma endregion
 
 #pragma region Split-Screen Handling
@@ -517,10 +557,13 @@ namespace RTE {
 		unsigned short m_NewResX; //!< New game window width that will take effect next time the FrameMan is started.
 		unsigned short m_NewResY; //!< New game window height that will take effect next time the FrameMan is started.
 
-		unsigned char m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
-		unsigned char m_NewResMultiplier; //!< This is the new multiple that will take effect next time the FrameMan is started.
+		unsigned short m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
+		unsigned short m_NewResMultiplier; //!< This is the new multiple that will take effect next time the FrameMan is started.
 
-		bool m_Fullscreen; //!< Whether in fullscreen mode (borderless window) or not.
+		bool m_ResChanged; //!< Whether the resolution was changed through the settings fullscreen/upscaled fullscreen buttons.
+
+		bool m_Fullscreen; //!< Whether in fullscreen (borderless window) mode or not. True when resolution matches desktop.
+		bool m_UpscaledFullscreen; //!< Whether in upscaled fullscreen (borderless window) mode or not. True when multiplier equals 2 and resolution matches half of desktop. 
 
 		bool m_HSplit; //!< Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.
@@ -619,6 +662,7 @@ namespace RTE {
 #pragma region Resolution Handling
 		/// <summary>
 		/// Stores the current backbuffers in the temporary backbuffers and calls CreateBackbuffers() to overwrite the current ones with new resolution settings.
+		/// The storing is done so we can later free the original allocated memory otherwise we will lose the pointer to it and have a memory leak.
 		/// </summary>
 		void RecreateBackBuffers();
 #pragma endregion

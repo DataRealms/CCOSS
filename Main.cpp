@@ -167,8 +167,7 @@ END_OF_FUNCTION(QuitHandler)
 /// <summary>
 /// Load and initialize the Main Menu.
 /// </summary>
-/// <returns></returns>
-bool InitMainMenu() {
+void InitMainMenu() {
     g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 
     // Create the main menu interface
@@ -181,8 +180,22 @@ bool InitMainMenu() {
     g_pScenarioGUI->Create(g_pMainMenuController);
     // And the Metagame GUI too
     g_MetaMan.GetGUI()->Create(g_pMainMenuController);
+}
 
-    return true;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// <summary>
+/// Destroy the Main Menu and initialize it again after a resolution change. Must be done otherwise the GUIs retain the original resolution settings and become all screwy.
+/// </summary>
+void ReinitMainMenu() {
+	g_pMainMenuGUI->Destroy();
+	g_pMainMenuController->Destroy();
+	g_pScenarioGUI->Destroy();
+	g_MetaMan.GetGUI()->Destroy();
+
+	InitMainMenu();
+	g_FrameMan.DestroyTempBackBuffers();
+	g_FrameMan.SetResolutionChanged(false);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

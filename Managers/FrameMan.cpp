@@ -45,6 +45,7 @@ namespace RTE {
 		m_ResY = 540;
 		m_NewResX = m_ResX;
 		m_NewResY = m_ResY;
+		m_ResChanged = false;
 		m_Fullscreen = false;
 		m_ResMultiplier = 1;
 		m_HSplit = false;
@@ -403,6 +404,78 @@ namespace RTE {
 		set_palette(pal);
 
 		FlipFrameBuffers();
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::SwitchToFullscreen(bool upscaled) {
+		if ((upscaled && IsUpscaledFullscreen()) || (!upscaled && IsFullscreen())) {
+			return;
+		}
+		unsigned short resX = m_ScreenResX;
+		unsigned short resY = m_ScreenResY;
+		unsigned short resMultiplier = 1;
+
+		if (upscaled) {
+			if (!IsFullscreen() && m_ResMultiplier == 1 && m_ResX == m_ScreenResX / 2 && m_ResY == m_ScreenResY / 2) {
+				SwitchResolutionMultiplier(2);
+				return;
+			}
+			resX /= 2;
+			resY /= 2;
+			resMultiplier = 2;
+		}	
+		SwitchResolution(resX, resY, resMultiplier);
+	}
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int FrameMan::SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier) {
+		if (!IsValidResolution(newResX, newResY) || newResX <= 0 || newResX > m_ScreenResX || newResY <= 0 || newResY > m_ScreenResY) {
+			return -1;
+		}
+
+		/*
+		// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
+		if (g_ActivityMan.GetActivity()) {
+			g_ActivityMan.EndActivity();
+		}
+		*/
+
+		// Need to save these first for recovery attempts to work (screen might be 0)
+		unsigned short resX = m_ResX;
+		unsigned short resY = m_ResY;
+		unsigned short resMultiplier = m_ResMultiplier;
+
+		ValidateResolution(newResX, newResY);
+
+		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations.
+		set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
+
+		ClearBackBuffer8();
+		ClearBackBuffer32();
+
+		if (set_gfx_mode(m_GfxDriver, newResX * newMultiplier, newResY * newMultiplier, 0, 0) != 0) {
+			if (set_gfx_mode(m_GfxDriver, resX * resMultiplier, resY * resMultiplier, 0, 0) != 0) {
+				allegro_message("Unable to set back to previous resolution because: %s!", allegro_error);
+				return 1;
+			}
+			g_ConsoleMan.PrintString("ERROR: Failed to switch to new resolution, reverted back to previous setting!");
+			set_palette(m_Palette);
+			return 1;
+		}
+		m_ResX = m_NewResX = newResX;
+		m_ResY = m_NewResY = newResY;
+		m_ResMultiplier = m_NewResMultiplier = newMultiplier;
+		
+		RecreateBackBuffers();
+		set_palette(m_Palette);
+
+		g_ConsoleMan.PrintString("SYSTEM: Switched to different resolution.");
+		g_SettingsMan.UpdateSettingsFile();
+
+		m_ResChanged = true;
 		return 0;
 	}
 

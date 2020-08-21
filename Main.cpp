@@ -656,26 +656,23 @@ bool PlayIntroTitle() {
         // Menu drawing
 
         // Main Menu updating and drawing, behind title
-        if (g_IntroState >= MENUAPPEAR)
-        {
-            if (g_IntroState == MENUAPPEAR)
-            {
-				// TODO: some fancy transparency effect here
-/*
-                g_pMainMenuGUI->Update();
-                clear_to_color(pFadeScreen, 0xFFFF00FF);
-                g_pMainMenuGUI->Draw(pFadeScreen);
-                fadePos = 255 * sectionProgress;
-                set_trans_blender(fadePos, fadePos, fadePos, fadePos);
-                draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pFadeScreen, 0, 0);
-*/
-            }
-            else if (g_IntroState == MENUACTIVE)
-            {
-                g_pMainMenuGUI->Update();
-                g_pMainMenuGUI->Draw(g_FrameMan.GetBackBuffer32());
-            }
-        }
+		if (g_IntroState >= MENUAPPEAR) {
+			//if (g_IntroState == MENUAPPEAR) {}
+
+			if (g_IntroState == MENUACTIVE) {
+				if (g_FrameMan.ResolutionChanged()) {
+					resX = g_FrameMan.GetResX();
+					resY = g_FrameMan.GetResY();
+					//starArea = resX * pBackdrop->GetBitmap()->h;
+					//starCount = starArea / 1000;
+
+					ReinitMainMenu();
+					g_pMainMenuGUI->SetMenuScreen(MainMenuGUI::OPTIONSSCREEN);
+				}
+				g_pMainMenuGUI->Update();
+				g_pMainMenuGUI->Draw(g_FrameMan.GetBackBuffer32());
+			}
+		}
 
         // Scenario setup menu update and drawing
         if (g_IntroState == SCENARIOMENU)

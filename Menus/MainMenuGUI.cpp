@@ -1037,6 +1037,7 @@ void MainMenuGUI::Update()
 					if (g_ActivityMan.GetActivity()) {
 						m_ResolutionChangeToUpscaled = false;
 						m_ResolutionChangeDialog->SetVisible(true);
+						m_apScreenBox[OPTIONSSCREEN]->SetEnabled(false);
 						m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
 					} else {
 						HideAllScreens();
@@ -1057,6 +1058,7 @@ void MainMenuGUI::Update()
 					if (g_ActivityMan.GetActivity()) {
 						m_ResolutionChangeToUpscaled = true;
 						m_ResolutionChangeDialog->SetVisible(true);
+						m_apScreenBox[OPTIONSSCREEN]->SetEnabled(false);
 						m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
 					} else {
 						HideAllScreens();
@@ -1072,6 +1074,7 @@ void MainMenuGUI::Update()
 				HideAllScreens();
 				m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
 				m_ResolutionChangeDialog->SetVisible(false);
+				m_apScreenBox[OPTIONSSCREEN]->SetEnabled(true);
 				m_ButtonConfirmResolutionChangeFullscreen->SetVisible(false);
 				g_FrameMan.SwitchToFullscreen(m_ResolutionChangeToUpscaled ? true : false, true);
 			}
@@ -1081,6 +1084,7 @@ void MainMenuGUI::Update()
 				HideAllScreens();
 				m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
 				m_ResolutionChangeDialog->SetVisible(false);
+				m_apScreenBox[OPTIONSSCREEN]->SetEnabled(true);
 				m_ButtonConfirmResolutionChange->SetVisible(false);
 				g_FrameMan.SwitchResolution(g_FrameMan.GetNewResX(), g_FrameMan.GetNewResY(), 1, true);
 			}
@@ -1095,6 +1099,7 @@ void MainMenuGUI::Update()
 			if (anEvent.GetControl() == m_ButtonCancelResolutionChange) {
 				g_GUISound.ButtonPressSound()->Play();
 				m_ResolutionChangeDialog->SetVisible(false);
+				m_apScreenBox[OPTIONSSCREEN]->SetEnabled(true);
 			}
 			
 			// Return to main menu button pressed

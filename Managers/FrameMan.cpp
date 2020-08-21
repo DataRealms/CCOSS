@@ -112,16 +112,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::ValidateResolution(unsigned short &resX, unsigned short &resY) {
-		if (resX * m_ResMultiplier > m_ScreenResX || resY * m_ResMultiplier > m_ScreenResY) {
+	void FrameMan::ValidateResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier) {
+		if (resX * resMultiplier > m_ScreenResX || resY * resMultiplier > m_ScreenResY) {
 			allegro_message("Resolution too high to fit display, overriding to fit!");
-			resX = m_NewResX = m_ScreenResX / m_ResMultiplier;
-			resY = m_NewResY = m_ScreenResY / m_ResMultiplier;
-		} else if (resX * m_ResMultiplier == 1366 && resY * m_ResMultiplier == 768) {
+			resX = m_NewResX = m_ScreenResX / resMultiplier;
+			resY = m_NewResY = m_ScreenResY / resMultiplier;
+		} else if (resX * resMultiplier == 1366 && resY * resMultiplier == 768) {
 			allegro_message("Unfortunately, 1366x768 resolution is not supported by Cortex Command's graphics API. 1360x768 will be used instead!");
-			resX = m_NewResX = 1360 / m_ResMultiplier;
-			resY = m_NewResY = 768 / m_ResMultiplier;
-		} else if ((resX * m_ResMultiplier) % 4 > 0) {
+			resX = m_NewResX = 1360 / resMultiplier;
+			resY = m_NewResY = 768 / resMultiplier;
+		} else if ((resX * resMultiplier) % 4 > 0) {
 			allegro_message("Resolution width that is not divisible by 4 is not supported!\nOverriding to closest valid width!");
 			resX = m_NewResX = std::floor(resX / 4) * 4;
 		} else {
@@ -130,7 +130,7 @@ namespace RTE {
 				allegro_message("Abnormal aspect ratio detected! Reverting to defaults!");
 				resX = m_NewResX = 960;
 				resY = m_NewResY = 540;
-				m_ResMultiplier = m_NewResMultiplier = 1;
+				resMultiplier = m_ResMultiplier = m_NewResMultiplier = 1;
 			}
 		}
 	}
@@ -139,7 +139,7 @@ namespace RTE {
 
 	int FrameMan::Create() {
 		SetGraphicsDriver();
-		ValidateResolution(m_ResX, m_ResY);
+		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
 		set_color_depth(m_BPP);
 
 		if (set_gfx_mode(m_GfxDriver, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, 0, 0) != 0) {
@@ -399,7 +399,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SwitchToFullscreen(bool upscaled) {
+	void FrameMan::SwitchToFullscreen(bool upscaled, bool endActivity) {
 		if ((upscaled && IsUpscaledFullscreen()) || (!upscaled && IsFullscreen())) {
 			return;
 		}
@@ -416,29 +416,27 @@ namespace RTE {
 			resY /= 2;
 			resMultiplier = 2;
 		}	
-		SwitchResolution(resX, resY, resMultiplier);
+		SwitchResolution(resX, resY, resMultiplier, endActivity);
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier) {
+	int FrameMan::SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier, bool endActivity) {
 		if (!IsValidResolution(newResX, newResY) || newResX <= 0 || newResX > m_ScreenResX || newResY <= 0 || newResY > m_ScreenResY) {
 			return -1;
 		}
 
-		/*
 		// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
 		if (g_ActivityMan.GetActivity()) {
 			g_ActivityMan.EndActivity();
 		}
-		*/
-
+		
 		// Need to save these first for recovery attempts to work (screen might be 0)
 		unsigned short resX = m_ResX;
 		unsigned short resY = m_ResY;
 		unsigned short resMultiplier = m_ResMultiplier;
 
-		ValidateResolution(newResX, newResY);
+		ValidateResolution(newResX, newResY, newMultiplier);
 
 		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations.
 		set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);

@@ -166,7 +166,8 @@ namespace RTE {
 		/// Switches the game window into fullscreen or upscaled fullscreen mode.
 		/// </summary>
 		/// <param name="upscaled">Whether to switch to upscaled mode or not.</param>
-		void SwitchToFullscreen(bool upscaled);
+		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
+		void SwitchToFullscreen(bool upscaled, bool endActivity = false);
 
 		/// <summary>
 		/// Gets whether the game window resolution was changed.
@@ -186,8 +187,9 @@ namespace RTE {
 		/// <param name="newResX">New width to set window to.</param>
 		/// <param name="newResY">New height to set window to.</param>
 		/// <param name="newMultiplier">New resolution multiplier to set window to.</param>
+		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
 		/// <returns>Error code, anything other than 0 is an error.</returns>
-		int SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier = 1);
+		int SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier = 1, bool endActivity = false);
 #pragma endregion
 
 #pragma region Split-Screen Handling
@@ -659,9 +661,10 @@ namespace RTE {
 		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Create().
 		/// </summary>
-		/// <param name="resX">Game window width (m_ResX or m_NewResX).</param>
-		/// <param name="resY">Game window height (m_ResY or m_NewResY).</param>
-		void ValidateResolution(unsigned short &resX, unsigned short &resY);
+		/// <param name="resX">Game window width to check.</param>
+		/// <param name="resY">Game window height to check.</param>
+		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
+		void ValidateResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier);
 
 		/// <summary>
 		/// Creates all the frame buffer bitmaps to be used by FrameMan. This is called during Create().

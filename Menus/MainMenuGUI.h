@@ -722,6 +722,12 @@ protected:
 	GUIListBox *m_pModManagerScriptsListBox;
 	GUILabel *m_pModManagerDescriptionLabel;
 
+	GUICollectionBox *m_ResolutionChangeDialog;
+	GUIButton *m_ButtonConfirmResolutionChange;
+	GUIButton *m_ButtonCancelResolutionChange;
+	GUIButton *m_ButtonConfirmResolutionChangeFullscreen;
+	bool m_ResolutionChangeToUpscaled;
+
 	std::vector<ModRecord> m_KnownMods;
 	std::vector<ScriptRecord> m_KnownScripts;
 

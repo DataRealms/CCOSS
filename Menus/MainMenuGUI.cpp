@@ -651,7 +651,7 @@ void MainMenuGUI::Update()
             m_aMainMenuButton[PLAYTUTORIAL]->SetVisible(false);
             m_aMainMenuButton[METACONTINUE]->SetVisible(false);
             // Move main menu button back to center
-            m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 280);
+            m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 320);
             m_ScreenChange = false;
         }
     
@@ -746,7 +746,7 @@ void MainMenuGUI::Update()
         {
             m_apScreenBox[OPTIONSSCREEN]->SetVisible(true);
             m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
-			m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 332);
+			m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 360);
             m_pBackToOptionsButton->SetVisible(false);
             UpdateDeviceLabels();
             m_ScreenChange = false;
@@ -785,36 +785,30 @@ void MainMenuGUI::Update()
     //////////////////////////////////////
     // EDITOR MENU SCREEN
 
-    else if (m_MenuScreen == EDITORSCREEN)
-    {
-        if (m_ScreenChange)
-        {
-            m_apScreenBox[EDITORSCREEN]->SetVisible(true);
-//            m_aEditorButton[ACTOREDITOR]->SetEnabled(false);
-            m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
-            m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 318);
-            m_ScreenChange = false;
-        }
-
-//        m_aMainMenuButton[BACKTOMAIN]->SetFocus();
-    }
+	else if (m_MenuScreen == EDITORSCREEN) {
+		if (m_ScreenChange) {
+			m_apScreenBox[EDITORSCREEN]->SetVisible(true);
+			m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
+			m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 285);
+			m_ScreenChange = false;
+		}
+	}
 
     //////////////////////////////////////
     // CREDITS MENU SCREEN
 
-    else if (m_MenuScreen == CREDITSSCREEN)
-    {
-        if (m_ScreenChange)
-        {
-            m_apScreenBox[CREDITSSCREEN]->SetVisible(true);
-            m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
-            // Set the scroll panel to be out of sight at the bottom of the credits screen box
-            m_pScrollPanel->SetPositionRel(0, m_apScreenBox[CREDITSSCREEN]->GetHeight());
-            m_ScrollTimer.Reset();
-            m_ScreenChange = false;
-        }
+	else if (m_MenuScreen == CREDITSSCREEN) {
+		if (m_ScreenChange) {
+			m_apScreenBox[CREDITSSCREEN]->SetVisible(true);
+			m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
+			m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 430);
+			// Set the scroll panel to be out of sight at the bottom of the credits screen box
+			m_pScrollPanel->SetPositionRel(0, m_apScreenBox[CREDITSSCREEN]->GetHeight());
+			m_ScrollTimer.Reset();
+			m_ScreenChange = false;
+		}
 
-        long scrollTime = 36000;
+        long scrollTime = 180000;
         float scrollProgress = (float)m_ScrollTimer.GetElapsedRealTimeMS() / (float)scrollTime;
         int scrollDist = -m_apScreenBox[CREDITSSCREEN]->GetHeight() + (-m_pScrollPanel->GetHeight());
         // Scroll the scroll panel upwards, GetYPos returns absolute coordinates

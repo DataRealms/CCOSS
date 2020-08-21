@@ -406,26 +406,6 @@ bool PlayIntroTitle() {
     pStation->Create(ContentFile("Base.rte/GUIs/Title/Station.png"));
     pStation->SetWrapDoubleDrawing(false);
 
-	MOSRotating *pPioneerCapsule = new MOSRotating();
-	pPioneerCapsule->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerCapsule.png"));
-	pPioneerCapsule->SetWrapDoubleDrawing(false);
-
-	MOSRotating *pPioneerScreaming = new MOSRotating();
-	pPioneerScreaming->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerScreaming.png"));
-	pPioneerScreaming->SetWrapDoubleDrawing(false);
-
-	MOSParticle * pFirePuffLarge = dynamic_cast<MOSParticle *>(g_PresetMan.GetEntityPreset("MOSParticle", "Fire Puff Large", "Base.rte")->Clone());
-	MOSParticle * pFirePuffMedium = dynamic_cast<MOSParticle *>(g_PresetMan.GetEntityPreset("MOSParticle", "Fire Puff Medium", "Base.rte")->Clone());
-
-	long long lastShake = 0;
-	long long lastPuffFrame = 0;
-	long long lastPuff = 0;
-	bool puffActive = false;
-	int puffFrame = 0;
-	int puffCount = 0;
-
-	Vector shakeOffset(0, 0);
-
     // Generate stars!
     int starArea = resX * pBackdrop->GetBitmap()->h;
     int starCount = starArea / 1000;
@@ -630,62 +610,6 @@ bool PlayIntroTitle() {
 
             pMoon->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);
             pPlanet->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);
-
-			// Manually shake our shakeOffset to randomize some effects
-			if (g_TimerMan.GetAbsoluteTime() > lastShake + 50000)
-			{
-				shakeOffset.m_X = RangeRand(-3, 3);
-				shakeOffset.m_Y = RangeRand(-3, 3);
-				lastShake = g_TimerMan.GetAbsoluteTime();
-			}
-
-			// Tell the menu that PP promo is off
-			g_pMainMenuGUI->DisablePioneerPromoButton();
-
-
-			// Draw pioneer promo capsule
-			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.27 && orbitRotation > -c_PI * 1.85)
-			{
-				// Start drawing pioneer capsule
-				// Slowly decrease radius to show that the capsule is falling
-				float radiusperc = 1 - ((fabs(orbitRotation) - (1.27 * c_PI)) / (0.35 * c_PI) / 4);
-				// Slowly decrease size to make the capsule disappear after a while
-				float sizeperc = 1 - ((fabs(orbitRotation) - (1.27 * c_PI)) / (0.35 * c_PI) / 1.5);
-
-				// Rotate, place and draw capsule
-				capsuleOffset.SetXY(orbitRadius * radiusperc, 0);
-				capsuleOffset.RadRotate(orbitRotation);
-				pPioneerCapsule->SetScale(sizeperc);
-				pPioneerCapsule->SetPos(planetPos + capsuleOffset);
-				pPioneerCapsule->SetRotAngle(orbitRotation);
-				pPioneerCapsule->Draw(g_FrameMan.GetBackBuffer32());
-			}
-
-			// Enable promo clickables only if we're in main menu and the station is at the required location (under the menu)
-			if (g_IntroState == MENUACTIVE && g_pMainMenuGUI->AllowPioneerPromo() &&  orbitRotation < -c_PI * 1.25 && orbitRotation > -c_PI * 1.95)
-			{
-				// After capsule flew some time, start showing angry pioneer
-				if (orbitRotation < -c_PI * 1.32 && orbitRotation > -c_PI * 1.65)
-				{
-					Vector pioneerScreamPos = planetPos - Vector(320 - 130, 320 + 44);
-
-					// Draw line to indicate that the screaming guy is the one in the drop pod
-					drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
-					g_pScenarioGUI->SetPlanetInfo(Vector(0,0), planetRadius);
-					g_pScenarioGUI->DrawScreenLineToSitePoint(g_FrameMan.GetBackBuffer32(), pioneerScreamPos, pPioneerCapsule->GetPos(), makecol(255, 255, 255), -1, -1, 40, 0.20);
-					drawing_mode(DRAW_MODE_SOLID, 0, 0, 0);
-
-					// Draw pioneer
-					pPioneerScreaming->SetPos(pioneerScreamPos + shakeOffset);
-					pPioneerScreaming->Draw(g_FrameMan.GetBackBuffer32());
-
-					// Enable the promo banner and tell the menu where it can be clicked
-					g_pMainMenuGUI->EnablePioneerPromoButton();
-
-					Box promoBox(pioneerScreamPos.m_X - 125, pioneerScreamPos.m_Y - 70, pioneerScreamPos.m_X + 125, pioneerScreamPos.m_Y + 70);
-					g_pMainMenuGUI->SetPioneerPromoBox(promoBox);
-				} 
-			}
 				
 			// Place, rotate and draw station
 			stationOffset.SetXY(orbitRadius, 0);
@@ -693,64 +617,6 @@ bool PlayIntroTitle() {
 			pStation->SetPos(planetPos + stationOffset);
 			pStation->SetRotAngle(-c_HalfPI + orbitRotation);
 			pStation->Draw(g_FrameMan.GetBackBuffer32());
-
-			// Start explosion effects to show that there's something wrong with the station
-			// but only if we're not in campaign
-			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.25 && orbitRotation > -c_TwoPI)
-			{
-				// Add explosions delay and count them
-				if (g_TimerMan.GetAbsoluteTime() > lastPuff + 1000000)
-				{
-					lastPuff = g_TimerMan.GetAbsoluteTime();
-					puffActive = true;
-					puffCount++;
-				}
-
-				// If explosion was authorized
-				if (puffActive)
-				{
-					// First explosion is big while other are smaller
-					if (puffCount == 1)
-					{
-						pFirePuffLarge->SetPos(planetPos + stationOffset);
-						if (g_TimerMan.GetAbsoluteTime() > lastPuffFrame + 50000)
-						{
-							lastPuffFrame = g_TimerMan.GetAbsoluteTime();
-							puffFrame++;
-
-							if (puffFrame >= pFirePuffLarge->GetFrameCount())
-							{
-								// Manually reset frame counters and disable other explosions until it's time
-								puffFrame = 0;
-								puffActive = 0;
-							}
-
-							pFirePuffLarge->SetFrame(puffFrame);
-						}
-						pFirePuffLarge->Draw(g_FrameMan.GetBackBuffer32());
-					} else {
-						pFirePuffMedium->SetPos(planetPos + stationOffset + shakeOffset);
-						if (g_TimerMan.GetAbsoluteTime() > lastPuffFrame + 50000)
-						{
-							lastPuffFrame = g_TimerMan.GetAbsoluteTime();
-							puffFrame++;
-
-							if (puffFrame >= pFirePuffLarge->GetFrameCount())
-							{
-								// Manually reset frame counters and disable other explosions until it's time
-								puffFrame = 0;
-								puffActive = 0;
-							}
-
-							pFirePuffMedium->SetFrame(puffFrame);
-						}
-						pFirePuffMedium->Draw(g_FrameMan.GetBackBuffer32());
-					}
-				}
-			} else {
-				//Reset explosions counter
-				puffCount = 0;
-			}
 
 			orbitRotation -= 0.0020; //0.0015
 
@@ -1664,10 +1530,6 @@ bool PlayIntroTitle() {
     delete pPlanet; pPlanet = 0;
     delete pMoon; pMoon = 0;
     delete pStation; pStation = 0;
-	delete pPioneerCapsule; pPioneerCapsule = 0;
-	delete pPioneerScreaming; pPioneerScreaming = 0;
-	delete pFirePuffLarge; pFirePuffLarge = 0;
-	delete pFirePuffMedium; pFirePuffMedium = 0;
     delete [] aStars; aStars = 0;
 
     return true;

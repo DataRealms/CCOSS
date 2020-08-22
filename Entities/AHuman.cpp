@@ -31,7 +31,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(AHuman, Actor, 0)
+ConcreteClassInfo(AHuman, Actor, 20)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -634,7 +634,7 @@ void AHuman::ChunkGold()
 */
 }
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          OnBounce
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -659,7 +659,7 @@ bool AHuman::OnSink(const Vector &pos)
 {
     return false;
 }
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  AddPieMenuSlices
@@ -3075,8 +3075,12 @@ void AHuman::UpdateAI()
 int AHuman::OnPieMenu(Actor *pieMenuActor) {
 	int status = Actor::OnPieMenu(pieMenuActor);
 
-    if (status >= 0 && m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsDevice()) {
-        return m_pFGArm->GetHeldDevice()->OnPieMenu(pieMenuActor);
+    // Note: This is a bit ugly, but it should make this function output different error statuses based on whether the AHuman's OnPieMenuFunction fails, or its weapons' do, though the specifics can't be sussed out by the error alone.
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsDevice()) {
+        status += m_pFGArm->GetHeldDevice()->OnPieMenu(pieMenuActor);
+    }
+    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsDevice()) {
+        status += m_pBGArm->GetHeldDevice()->OnPieMenu(pieMenuActor);
     }
 
 	return status;
@@ -3621,7 +3625,8 @@ void AHuman::Update()
     // Try to detect a new item
     if (!m_pItemInReach && m_Status == STABLE)
     {
-        MOID itemMOID = g_SceneMan.CastMORay(m_Pos, Vector((m_HFlipped ? -reach : reach) * RandomNum(), RandomNum(0.0F, reach)), m_MOID, Activity::NOTEAM, g_MaterialGrass, true, 2);
+        MOID itemMOID = g_SceneMan.CastMORay(m_Pos, Vector((m_HFlipped ? -reach : reach) * RandomNum(), RandomNum(0.0F, reach)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
+
         MovableObject *pItem = g_MovableMan.GetMOFromID(itemMOID);
         if (pItem)
         {
@@ -4701,7 +4706,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
     // Only draw if the team viewing this is on the same team OR has seen the space where this is located
     int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NOTEAM)
+    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
     {
         if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
             return;
@@ -4920,7 +4925,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         if (m_Controller.IsState(AI_MODE_SET))
         {
             int iconOff = m_apAIIcons[0]->w + 2;
-            int iconColor = m_Team == Activity::TEAM_1 ? AIICON_RED : AIICON_GREEN;
+            int iconColor = m_Team == Activity::TeamOne ? AIICON_RED : AIICON_GREEN;
             Vector iconPos = GetCPUPos() - targetPos;
             
             if (m_AIMode == AIMODE_SENTRY)

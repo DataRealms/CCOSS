@@ -14,25 +14,15 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
-#include "Singleton.h"
-#define g_PresetMan PresetMan::Instance()
-
-//#include "Serializable.h"
 #include "Entity.h"
-#include "Actor.h"
-//#include "FrameMan.h"
-//#include "SceneMan.h"
-//#include "Vector.h"
-//#include "MOPixel.h"
-//#include "AHuman.h"
-//#include "MovableEntity.h"
-//#include "LimbPath.h"
-//#include "AtomGroup.h"
+#include "Singleton.h"
+
+#define g_PresetMan PresetMan::Instance()
 
 namespace RTE
 {
 
+class Actor;
 class DataModule;
 
 
@@ -75,7 +65,7 @@ public:
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~PresetMan() { Destroy(); }
+    ~PresetMan() { Destroy(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -86,18 +76,18 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+    int Create();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire PresetMan, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+    void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -111,13 +101,13 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
+// Method:  GetClassName
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the class name of this Entity.
 // Arguments:       None.
 // Return value:    A string with the friendly-formatted type name of this entity.
 
-    virtual const std::string & GetClassName() const { return m_ClassName; }
+    const std::string & GetClassName() const { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -543,9 +533,9 @@ private:
     void Clear();
 
 
-    // Disallow the use of some implicit methods.
-    PresetMan(const PresetMan &reference);
-    PresetMan & operator=(const PresetMan &rhs);
+	// Disallow the use of some implicit methods.
+	PresetMan(const PresetMan &reference) {}
+	PresetMan & operator=(const PresetMan &rhs) {}
 
 };
 

@@ -27,27 +27,27 @@ namespace RTE {
 		/// Makes the ADSensor object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create() { return Serializable::Create(); }
+		int Create() override { return Serializable::Create(); }
 
 		/// <summary>
 		/// Creates an ADSensor to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the ADSensor to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const ADSensor &reference);
+		int Create(const ADSensor &reference);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up an ADSensor object before deletion from system memory.
 		/// </summary>
-		virtual ~ADSensor() { Destroy(); }
+		~ADSensor() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the ADSensor object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false) { Clear(); }
+		void Destroy() { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -61,7 +61,7 @@ namespace RTE {
 		/// Sets the starting position offset of this ADSensor from the owning ADoor position.
 		/// </summary>
 		/// <param name="startOffsetValue">The new starting coordinates relative to the m_Pos of this' ADoor.</param>
-		void SetStartOffset(Vector startOffsetValue) { m_StartOffset = startOffsetValue; }
+		void SetStartOffset(const Vector &startOffsetValue) { m_StartOffset = startOffsetValue; }
 
 		/// <summary>
 		/// Gets the sensor ray vector out from the start offset's position.
@@ -73,7 +73,7 @@ namespace RTE {
 		/// Sets the sensor ray vector out from the start offset's position.
 		/// </summary>
 		/// <param name="sensorRayValue">The new sensor ray vector.</param>
-		void SetSensorRay(Vector sensorRayValue) { m_SensorRay = sensorRayValue; }
+		void SetSensorRay(const Vector &sensorRayValue) { m_SensorRay = sensorRayValue; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -85,7 +85,7 @@ namespace RTE {
 		/// <param name="doorHFlipped">Flipping of this ADSensor's ADoor.</param>
 		/// <param name="ignoreMOID">Which MOID to ignore, if any.</param>
 		/// <returns>The root Actor of the first MOID hit by the sensor ray. 0 if none.</returns>
-		Actor * SenseActor(Vector &doorPos, Matrix &doorRot, bool doorHFlipped = false, MOID ignoreMOID = g_NoMOID);
+		Actor * SenseActor(const Vector &doorPos, const Matrix &doorRot, bool doorHFlipped = false, MOID ignoreMOID = g_NoMOID);
 #pragma endregion
 
 #pragma region Class Info
@@ -93,7 +93,7 @@ namespace RTE {
 		/// Gets the class name of this Entity.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return m_sClassName; }
+		const std::string & GetClassName() const override { return m_sClassName; }
 #pragma endregion
 
 	protected:

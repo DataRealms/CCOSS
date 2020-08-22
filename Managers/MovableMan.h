@@ -14,22 +14,13 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
-#include "Singleton.h"
-#define g_MovableMan MovableMan::Instance()
-
 #include "Serializable.h"
 #include "Entity.h"
-#include "FrameMan.h"
 #include "SceneMan.h"
 #include "LuaMan.h"
-#include "ActivityMan.h"
-#include "Vector.h"
-//#include "MOPixel.h"
-//#include "AHuman.h"
-//#include "MovableObject.h"
-//#include "LimbPath.h"
-//#include "AtomGroup.h"
+#include "Singleton.h"
+
+#define g_MovableMan MovableMan::Instance()
 
 namespace RTE
 {
@@ -37,10 +28,7 @@ namespace RTE
 class MovableObject;
 class Actor;
 class MOPixel;
-//class Actor;
 class AHuman;
-//class AtomGroup;
-//class Atom;
 class SceneLayer;
 
 
@@ -53,13 +41,13 @@ class SceneLayer;
 
 struct AlarmEvent
 {
-    AlarmEvent() { m_ScenePos.Reset(); m_Team = Activity::NOTEAM; m_Range = 1; }
-    AlarmEvent(const Vector &pos, int team = Activity::NOTEAM, float range = 1) { m_ScenePos = pos; m_Team = (Activity::Team)team; m_Range = range; }
+    AlarmEvent() { m_ScenePos.Reset(); m_Team = Activity::NoTeam; m_Range = 1; }
+    AlarmEvent(const Vector &pos, int team = Activity::NoTeam, float range = 1) { m_ScenePos = pos; m_Team = (Activity::Teams)team; m_Range = range; }
     
     // Absolute position in the scene where this occurred
     Vector m_ScenePos;
     // The team of whatever object that caused this event
-    Activity::Team m_Team;
+    Activity::Teams m_Team;
     // The range multiplier, that this alarming event can be heard
     float m_Range;
 };
@@ -104,29 +92,29 @@ public:
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~MovableMan() { Destroy(); }
+	~MovableMan() { Destroy(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
+// Method:  Create
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the MovableMan object ready for use.
 // Arguments:       None.
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire MovableMan, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() override { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -140,13 +128,13 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
+// Method:  GetClassName
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the class name of this Entity.
 // Arguments:       None.
 // Return value:    A string with the friendly-formatted type name of this object.
 
-    virtual const std::string & GetClassName() const { return m_ClassName; }
+	const std::string & GetClassName() const override { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -285,7 +273,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get a pointer to an Actor in the internal Actor list that is is not of
 //                  the specified team and closest to a specific scene point.
-// Arguments:       Which team to try to get an enemy Actor for. NOTEAM means all teams.
+// Arguments:       Which team to try to get an enemy Actor for. NoTeam means all teams.
 //                  The Scene point to search for the closest to.
 //                  The maximum radius around that scene point to search.
 //                  A vector to be filled out with the distance of the returned closest to
@@ -390,20 +378,6 @@ public:
 
     Actor * GetUnassignedBrain(int team = 0) const;
 
-/* uuuh?
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPlayerBrain
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Get a pointer to the resident brain actor of a specific player, or
-//                  failing that, a brain of a team which 
-//                  been assigned to a player yet.
-// Arguments:       Which team to try to get the brain for. 0 means first team, 1 means 2nd.
-// Return value:    An Actor pointer to the requested team's first brain encountered
-//                  in the list that hasn't been assigned to a player. 0 if there are no
-//                  unassigned brains of that team.
-
-    Actor * GetPlayerBrain(int team = 0) const;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetParticleCount
@@ -686,7 +660,7 @@ public:
 // Method:          KillAllActors
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Kills and destroys all actors of a specific team.
-// Arguments:       The team to NOT annihilate, if NOTEAM, then ALL actors die.
+// Arguments:       The team to NOT annihilate, if NoTeam, then ALL actors die.
 // Return value:    How many Actors were killed.
 
     int KillAllActors(int exceptTeam = -1);
@@ -698,7 +672,7 @@ public:
 // Description:     Adds to a list ALL Actors in the world and removes them from the
 //                  MovableMan. Ownership IS transferred!
 // Arguments:       The list of Actors to put the evacuated Actor instances in.
-//                  The team to only eject Actors of. If NOTEAM, then all will be grabbed.
+//                  The team to only eject Actors of. If NoTeam, then all will be grabbed.
 //                  Whether to not grab any brains at all.
 // Return value:    How many Actors was transferred to the list.
 
@@ -722,10 +696,10 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Opens all doors and keeps them open until this is called again with false.
 // Arguments:       Whether to open all doors (true), or undo this action (false)
-//                  Which team to do this for. NOTEAM means all teams.
+//                  Which team to do this for. NoTeam means all teams.
 // Return value:    None.
 
-    void OpenAllDoors(bool open = true, int team = Activity::NOTEAM);
+    void OpenAllDoors(bool open = true, int team = Activity::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -735,10 +709,10 @@ public:
 //                  Used for making pathfinding work better, allowing teammember to navigate
 //                  through friendly bases.
 // Arguments:       Whether to enable the override (true), or undo this action (false)
-//                  Which team to do this for. NOTEAM means all teams.
+//                  Which team to do this for. NoTeam means all teams.
 // Return value:    None.
 
-    void OverrideMaterialDoors(bool enable, int team = Activity::NOTEAM);
+    void OverrideMaterialDoors(bool enable, int team = Activity::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -836,7 +810,7 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -861,19 +835,6 @@ public:
 
     void UpdateDrawMOIDs(BITMAP *pTargetBitmap);
 
-
-
-/* Obsolete, now done in SceneMan's version with registered rectangles
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws NoMOID ID where all this MovableMan's MO's with registered MOIDs
-//                  are on a BITMAP of choice. It essentially undos the effect of UpdateDrawMOIDs.
-// Arguments:       None.
-// Return value:    None.
-
-    void ClearMOIDs();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Draw
@@ -984,11 +945,11 @@ protected:
     std::deque<MovableObject *> m_AddedParticles;
 
     // Roster of each team's actors, sorted by their X positions in the scene. Actors not owned here
-    std::list<Actor *> m_ActorRoster[Activity::MAXTEAMCOUNT];
+    std::list<Actor *> m_ActorRoster[Activity::MaxTeamCount];
     // Whether to draw HUD lines between the actors of a specific team
-    bool m_SortTeamRoster[Activity::MAXTEAMCOUNT];
+    bool m_SortTeamRoster[Activity::MaxTeamCount];
 	// Every team's MO footprint
-	int m_TeamMOIDCount[Activity::MAXTEAMCOUNT];
+	int m_TeamMOIDCount[Activity::MaxTeamCount];
 
     // Optimization implementation
     // MO's that have already been asked whether they exist in the manager this frame, and the search result.
@@ -1047,8 +1008,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MovableMan(const MovableMan &reference);
-    MovableMan & operator=(const MovableMan &rhs);
+	MovableMan(const MovableMan &reference) {}
+	MovableMan & operator=(const MovableMan &rhs) {}
 
 };
 

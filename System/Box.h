@@ -62,7 +62,7 @@ namespace RTE {
 		/// <param name="corner1">Vector position of the upper left corner of this box.</param>
 		/// <param name="corner2">Vector position of the lower right corner of this box.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const Vector &corner1, const Vector &corner2);
+		int Create(const Vector &corner1, const Vector &corner2);
 
 		/// <summary>
 		/// Makes the Box object ready for use.
@@ -72,7 +72,7 @@ namespace RTE {
 		/// <param name="x2">X position of box lower right corner.</param>
 		/// <param name="y2">Y position of box lower right corner.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(float x1, float y1, float x2, float y2);
+		int Create(float x1, float y1, float x2, float y2);
 
 		/// <summary>
 		/// Makes the Box object ready for use.
@@ -81,21 +81,21 @@ namespace RTE {
 		/// <param name="width">Width of this box.</param>
 		/// <param name="height">Height of this box.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const Vector &corner, float width, float height);
+		int Create(const Vector &corner, float width, float height);
 
 		/// <summary>
 		/// Creates a Box to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the Box to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const Box &reference);
+		int Create(const Box &reference);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Resets the entire Box object to the default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -254,7 +254,7 @@ namespace RTE {
 		/// Gets the class name of this Box.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this Box.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	protected:

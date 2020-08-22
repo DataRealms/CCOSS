@@ -78,7 +78,7 @@ void BuyMenuGUI::Clear()
         m_pCategoryTabs[i] = 0;
         m_CategoryItemIndex[i] = 0;
     }
-    m_MetaPlayer = Activity::NOPLAYER;
+    m_MetaPlayer = Players::NoPlayer;
     m_NativeTechModule = 0;
     m_ForeignCostMult = 4.0;
     int moduleCount = g_PresetMan.GetTotalModuleCount();
@@ -139,7 +139,7 @@ int BuyMenuGUI::Create(Controller *pController)
 
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.png");
         s_pCursor = cursorFile.GetAsBitmap();
     }
 
@@ -165,8 +165,8 @@ int BuyMenuGUI::Create(Controller *pController)
         // Set the images for the logo and header decorations
         GUICollectionBox *pHeader = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogHeader"));
         m_pLogo = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CatalogLogo"));
-        ContentFile headerFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuHeader.bmp");
-        ContentFile logoFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuLogo.bmp");
+        ContentFile headerFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuHeader.png");
+        ContentFile logoFile("Base.rte/GUIs/Skins/BuyMenu/BuyMenuLogo.png");
         pHeader->SetDrawImage(new AllegroBitmap(headerFile.GetAsBitmap()));
         m_pLogo->SetDrawImage(new AllegroBitmap(logoFile.GetAsBitmap()));
         pHeader->SetDrawType(GUICollectionBox::Image);
@@ -187,7 +187,7 @@ int BuyMenuGUI::Create(Controller *pController)
         m_pPopupBox->SetEnabled(false);
         m_pPopupBox->SetVisible(false);
         // Set the font
-        m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+        m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
     }
 
     m_pCategoryTabs[CRAFT] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("CraftTab"));
@@ -352,7 +352,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     char loadoutPath[256];
 
     // A metagame player
-    if (m_MetaPlayer != Activity::NOPLAYER)
+    if (m_MetaPlayer != Players::NoPlayer)
     {
         // Start loading any additional stuff from the custom user file
         sprintf_s(loadoutPath, sizeof(loadoutPath), "Metagames.rte/%s - LoadoutsMP%d.ini", g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
@@ -462,7 +462,7 @@ bool BuyMenuGUI::SaveAllLoadoutsToFile()
 
     char loadoutPath[256];
     // A metagame player
-    if (m_MetaPlayer != Activity::NOPLAYER)
+    if (m_MetaPlayer != Players::NoPlayer)
     {
         // If a new metagame, then just save over the metagame autosave instead of to the new game save
         // Since the players of a new game are likely to have different techs and therefore different default loadouts
@@ -593,7 +593,7 @@ void BuyMenuGUI::SetPosOnScreen(int newPosX, int newPosY)
 
 void BuyMenuGUI::SetMetaPlayer(int metaPlayer)
 {
-    if (metaPlayer >= Activity::PLAYER_1 && metaPlayer < g_MetaMan.GetPlayerCount())
+    if (metaPlayer >= Players::PlayerOne && metaPlayer < g_MetaMan.GetPlayerCount())
     {
         m_MetaPlayer = metaPlayer;
         SetNativeTechModule(g_MetaMan.GetPlayer(m_MetaPlayer)->GetNativeTechModule());
@@ -1080,7 +1080,7 @@ void BuyMenuGUI::Update()
         }
 
         // Switch back focus to the category list if the player presses up while on the save button
-        if (m_pController->IsState(PRESS_UP) || m_pController->IsState(SCROLL_UP))
+        if (pressUp)
         {
             if (m_pSaveButton->HasFocus())
             {
@@ -1093,7 +1093,7 @@ void BuyMenuGUI::Update()
                 g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
         }
-        else if (m_pController->IsState(PRESS_DOWN) || m_pController->IsState(SCROLL_DOWN))
+        else if (pressDown)
         {
             if (m_pSaveButton->HasFocus())
             {
@@ -1413,12 +1413,12 @@ void BuyMenuGUI::Update()
         }
 
         // Switch back focus to the order list if the player presses up
-        if (m_pController->IsState(PRESS_UP) || m_pController->IsState(SCROLL_UP))
+        if (pressUp)
         {
             m_MenuFocus = ORDER;
             m_FocusChange = -1;
         }
-        else if (m_pController->IsState(PRESS_DOWN) || m_pController->IsState(SCROLL_DOWN))
+        else if (pressDown)
             g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
     }
 

@@ -35,7 +35,7 @@ void SceneObject::SOPlacer::Clear()
     m_Offset.Reset();
     m_RotAngle = 0;
     m_HFlipped = false;
-    m_Team = Activity::NOTEAM;
+    m_Team = Activity::NoTeam;
 }
 
 /*
@@ -131,7 +131,7 @@ int SceneObject::SOPlacer::Save(Writer &writer) const
         writer.NewProperty("HFlipped");
         writer << m_HFlipped;
     }
-    if (m_Team >= Activity::TEAM_1)
+    if (m_Team >= Activity::TeamOne)
     {
         writer.NewProperty("Team");
         writer << m_Team;
@@ -200,8 +200,8 @@ void SceneObject::Clear()
     m_Pos.Reset();
     m_OzValue = 0;
     m_Buyable = true;
-    m_Team = Activity::NOTEAM;
-    m_PlacedByPlayer = Activity::NOPLAYER;
+    m_Team = Activity::NoTeam;
+    m_PlacedByPlayer = Players::NoPlayer;
 }
 
 /*

@@ -73,7 +73,7 @@ void AssemblyEditorGUI::Clear()
     m_CursorOffset.Reset();
     m_CursorInAir = true;
     m_FacingLeft = false;
-    m_PlaceTeam = Activity::TEAM_1;
+    m_PlaceTeam = Activity::TeamOne;
     m_pCurrentObject = 0;
     m_ObjectListOrder = -1;
     m_DrawCurrentObject = true;
@@ -151,9 +151,9 @@ int AssemblyEditorGUI::Create(Controller *pController, FeatureSets featureSet, i
     // Only load the static dot bitmaps once
     if (!s_pValidPathDot)
     {
-        ContentFile dotFile("Base.rte/GUIs/Indicators/PathDotValid.bmp");
+        ContentFile dotFile("Base.rte/GUIs/Indicators/PathDotValid.png");
         s_pValidPathDot = dotFile.GetAsBitmap();
-        dotFile.SetDataPath("Base.rte/GUIs/Indicators/PathDotInvalid.bmp");
+        dotFile.SetDataPath("Base.rte/GUIs/Indicators/PathDotInvalid.png");
         s_pInvalidPathDot = dotFile.GetAsBitmap();
     }
 

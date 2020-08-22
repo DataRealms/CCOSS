@@ -188,33 +188,23 @@ void GUIListBox::ReceiveSignal(GUIPanel *Source, int Code, int Data)
 {
     if (Source->GetPanelID() == GetPanelID())
     {
-        // MouseMove
-        if (Code == GUIListPanel::MouseMove)
-            AddEvent(GUIEvent::Notification, MouseMove, Data);
-
-        // MouseEnter
-        if (Code == GUIListPanel::MouseEnter)
-            AddEvent(GUIEvent::Notification, MouseEnter, Data);
-
-        // MouseLeave
-        if (Code == GUIListPanel::MouseLeave)
-            AddEvent(GUIEvent::Notification, MouseLeave, Data);
-
-        // Select
-        if (Code == GUIListPanel::Select)
-            AddEvent(GUIEvent::Notification, Select, 0);
-
-        // MouseDown
-        if (Code == GUIListPanel::MouseDown)
-            AddEvent(GUIEvent::Notification, MouseDown, 0);
-
-        // Double click
-        if (Code == GUIListPanel::DoubleClick)
-            AddEvent(GUIEvent::Notification, DoubleClick, 0);
-
-        // KeyDown
-        if (Code == GUIListPanel::KeyDown)
-            AddEvent(GUIEvent::Notification, KeyDown, Data);
+		if (Code == GUIListPanel::MouseMove) {
+			AddEvent(GUIEvent::Notification, MouseMove, Data);
+		} else if (Code == GUIListPanel::MouseEnter) {
+			AddEvent(GUIEvent::Notification, MouseEnter, Data);
+		} else if (Code == GUIListPanel::MouseLeave) {
+			AddEvent(GUIEvent::Notification, MouseLeave, Data);
+		} else if (Code == GUIListPanel::Select) {
+			AddEvent(GUIEvent::Notification, Select, 0);
+		} else if (Code == GUIListPanel::MouseDown) {
+			AddEvent(GUIEvent::Notification, MouseDown, 0);
+		} else if (Code == GUIListPanel::DoubleClick) {
+			AddEvent(GUIEvent::Notification, DoubleClick, 0);
+		} else if (Code == GUIListPanel::KeyDown) {
+			AddEvent(GUIEvent::Notification, KeyDown, Data);
+		} else if (Code == GUIListPanel::EdgeHit) {
+			AddEvent(GUIEvent::Notification, EdgeHit, Data);
+		}
     }
 
     GUIListPanel::ReceiveSignal(Source, Code, Data);

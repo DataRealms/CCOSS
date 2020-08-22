@@ -38,32 +38,32 @@ namespace RTE {
 		/// Makes the ADoor object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create() { return Actor::Create(); }
+		int Create() override { return Actor::Create(); }
 
 		/// <summary>
 		/// Creates a ADoor to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the ADoor to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const ADoor &reference);
+		int Create(const ADoor &reference);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a ADoor object before deletion from system memory.
 		/// </summary>
-		virtual ~ADoor() { Destroy(true); }
+		~ADoor() override { Destroy(true); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the ADoor object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false);
+		void Destroy(bool notInherited = false) override;
 
 		/// <summary>
 		/// Resets the entire ADoor, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); Actor::Reset(); }
+		void Reset() override { Clear(); Actor::Reset(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -83,19 +83,19 @@ namespace RTE {
 		/// Gets the mass value of this ADoor, including the mass of its currently attached parts.
 		/// </summary>
 		/// <returns>A float describing the mass value in Kilograms (kg).</returns>
-		virtual float GetMass() const;
+		float GetMass() const override;
 
 		/// <summary>
 		/// Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector to store MOIDs.
 		/// </summary>
 		/// <param name="MOIDs"></param>
-		virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+		void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 		/// <summary>
 		/// Sets the MOID of this ADoor for this frame.
 		/// </summary>
 		/// <param name="newID">A MOID specifying the MOID that this ADoor is assigned for this frame.</param>
-		virtual void SetID(const MOID newID);
+		void SetID(const MOID newID) override;
 
 		/// <summary>
 		/// Sets whether this ADoor closes (or opens) after a while by default.
@@ -107,14 +107,14 @@ namespace RTE {
 		/// Tells whether the player can switch control to this at all.
 		/// </summary>
 		/// <returns>Whether a player can control this at all.</returns>
-		virtual bool IsControllable() const { return false; }
+		bool IsControllable() const override { return false; }
 
 		/// <summary>
 		/// Indicates whether this' current graphical representation overlaps a point in absolute scene coordinates.
 		/// </summary>
 		/// <param name="scenePoint">The point in absolute scene coordinates.</param>
 		/// <returns>Whether this' graphical representation overlaps the scene point.</returns>
-		virtual bool IsOnScenePoint(Vector &scenePoint) const;
+		bool IsOnScenePoint(Vector &scenePoint) const override;
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -146,7 +146,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="amount">Amount of wounds to remove.</param>
 		/// <returns>Damage taken from removed wounds.</returns>
-		virtual int RemoveAnyRandomWounds(int amount);
+		int RemoveAnyRandomWounds(int amount) override;
 
 		/// <summary>
 		/// Gibs this, effectively destroying it and creating multiple gibs or pieces in its place.
@@ -154,12 +154,12 @@ namespace RTE {
 		/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
 		/// <param name="internalBlast">The internal blast impulse which will push the gibs away from the center.</param>
 		/// <param name="pIgnoreMO">A pointer to an MO which the gibs should not be colliding with!</param>
-		virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *ignoreMO = 0);
+		void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *ignoreMO = 0) override;
 
 		/// <summary>
 		/// Updates this ADoor. Supposed to be done every frame.
 		/// </summary>
-		virtual void Update();
+		void Update() override;
 
 		/// <summary>
 		/// Draws this ADoor's current graphical representation to a BITMAP of choice.
@@ -168,7 +168,7 @@ namespace RTE {
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
 		/// <param name="mode">Which mode to draw in. See the DrawMode enumeration for the modes.</param>
 		/// <param name="onlyPhysical">Whether to not draw any extra 'ghost' items of this ADoor, indicator arrows or hovering HUD text and so on.</param>
-		virtual void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const;
+		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 		/// <summary>
 		/// Draws this ADoor's current graphical HUD overlay representation to a BITMAP of choice.
@@ -177,7 +177,7 @@ namespace RTE {
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
 		/// <param name="whichScreen">Which player's screen this is being drawn to. May affect what HUD elements get drawn etc.</param>
 		/// <param name="playerControlled">Whether or not this MovableObject is currently player controlled (not applicable for ADoor)</param>
-		virtual void DrawHUD(BITMAP *targetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
+		void DrawHUD(BITMAP *targetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
 #pragma endregion
 
 	protected:
@@ -251,7 +251,7 @@ namespace RTE {
 		/// <param name="MOIDIndex">The MOID index to register itself and its children in.</param>
 		/// <param name="rootMOID">The MOID of the root MO of this MO, ie the highest parent of this MO. 0 means that this MO is the root, ie it is owned by MovableMan.</param>
 		/// <param name="makeNewMOID">Whether this MO should make a new MOID to use for itself, or to use the same as the last one in the index (presumably its parent),</param>
-		virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true);
+		void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 		/// <summary>
 		/// Draws the material under the position of the door attachable, to create terrain collision detection for the doors.

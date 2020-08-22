@@ -62,7 +62,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Arm() { Destroy(true); }
+	~Arm() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Attachable::Reset(); }
+    void Reset() override { Clear(); Attachable::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +95,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+    float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Vector with the current absolute scene hand position.
 
-    Vector GetHandPos() const { return m_Pos + m_HandOffset; }
+    Vector GetHandPos() const { return m_JointPos + m_HandOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -194,7 +194,7 @@ ClassInfoGetters
 //                  assigned for this frame.
 // Return value:    None.
 
-    virtual void SetID(const MOID newID);
+    void SetID(const MOID newID) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -217,16 +217,16 @@ ClassInfoGetters
 // Arguments:       Vector with the new absolute scene hand position.
 // Return value:    None.
 
-    void SetHandPos(const Vector &newHandPos) { m_HandOffset = newHandPos - m_Pos; }
+    void SetHandPos(const Vector &newHandPos) { m_HandOffset = newHandPos - m_JointPos; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetIdleOffset
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the offset from the position of this Arm to which its hand will
+// Description:     Gets the offset from the joint position of this Arm to which its hand will
 //                  go when not holding a device and not able to reach a certain target.
 // Arguments:       None.
-// Return value:    Vector with the new idle offset relative to the position of this Arm.
+// Return value:    Vector with the new idle offset relative to the joint position of this Arm.
 
 	Vector GetIdleOffset() const { return m_IdleOffset; }
 
@@ -234,9 +234,9 @@ ClassInfoGetters
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetIdleOffset
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the offset from the position of this Arm to which its hand will
+// Description:     Sets the offset from the joint position of this Arm to which its hand will
 //                  go when not holding a device and not able to reach a certain target.
-// Arguments:       Vector with the new idle offset relative to the position of this Arm.
+// Arguments:       Vector with the new idle offset relative to the joint position of this Arm.
 // Return value:    None.
 
     void SetIdleOffset(const Vector &newIdleOffset) { m_IdleOffset = newIdleOffset; }
@@ -366,7 +366,7 @@ ClassInfoGetters
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -376,7 +376,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -391,14 +391,11 @@ ClassInfoGetters
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawHand
+// Method:  DrawHand
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this Arm's hand's graphical representation to a BITMAP of
 //                  choice.
@@ -407,9 +404,7 @@ ClassInfoGetters
 //                  In which mode to draw in. See the DrawMode enumeration for the modes.
 // Return value:    None.
 
-    virtual void DrawHand(BITMAP *pTargetBitmap,
-                          const Vector &targetPos = Vector(),
-                          DrawMode mode = g_DrawColor) const;
+	void DrawHand(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -419,7 +414,7 @@ ClassInfoGetters
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -450,9 +445,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
     // Member variables
@@ -467,22 +460,21 @@ protected:
     ContentFile m_HandFile;
     // The small bitmap holding the hand bitmap.
     BITMAP *m_pHand;
-    // The maximum reaching length of this arm, in pixels, from the m_Pos.
+	// The maximum reaching length of this Arm. Max distance between the joint position and the hand offset. Length of a straight arm sprite in pixels.
     float m_MaxLength;
-    // Current offset position the.hand relative to the m_Pos.
+    // Current offset position of the hand relative to m_JointPos.
     Vector m_HandOffset;
-    // The target offset that this Arm's hand is reaching after.
+    // The target position that this Arm's hand is reaching after.
     // If (0, 0), the Arm is currently not reaching after anything.
     Vector m_TargetPoint;
-    // The target offset from m_Pos that this Arm's hand is reaching after when
-    // not reaching for or doing anything else.
+    // The target offset relative to m_JointPos that this Arm's hand is moving to while not reaching for or doing anything else.
     Vector m_IdleOffset;
     // How fast the arm moves to a reach target,
     // on a scale from 0.0 (frozen) to 1.0 (instantly there).
     float m_MoveSpeed;
     // Wether this Arm will go to idle position if it didn't reach or not.
     bool m_WillIdle;
-    // Wether this Arm reaached the reach target last Update.
+    // Whether this Arm reached the reach target last Update.
     bool m_DidReach;
 
 
@@ -504,8 +496,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Arm(const Arm &reference);
-    Arm & operator=(const Arm &rhs);
+	Arm(const Arm &reference) {}
+	Arm & operator=(const Arm &rhs) {}
 
 };
 

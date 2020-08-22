@@ -1,4 +1,5 @@
 #include "Entity.h"
+#include "RTETools.h"
 #include "PresetMan.h"
 #include "ConsoleMan.h"
 #include "DataModule.h"

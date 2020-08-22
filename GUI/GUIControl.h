@@ -64,8 +64,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position, Size
 
-    virtual void Create(const std::string Name, int X, int Y, 
-                        int Width = -1, int Height = -1);
+    virtual void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -83,7 +82,7 @@ public:
 // Description:     Called when the control has been destroyed.
 // Arguments:       None.
 
-    virtual void Destroy(void);
+    virtual void Destroy();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +91,7 @@ public:
 // Description:     Called when the control is activated and ready for use.
 // Arguments:       None.
 
-    virtual void Activate(void);
+    virtual void Activate();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +118,7 @@ public:
 // Description:     Gets the control's name.
 // Arguments:       None.
 
-    std::string GetName(void);
+    std::string GetName();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -137,7 +136,7 @@ public:
 // Description:     Gets the control's tooltip string.
 // Arguments:       None.
 
-    std::string GetToolTip(void);
+    std::string GetToolTip();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +145,7 @@ public:
 // Description:     Returns a string representing the control's ID
 // Arguments:       None.
 
-    std::string GetID(void);
+    std::string GetID();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +154,7 @@ public:
 // Description:     Returns the anchor flags.
 // Arguments:       None.
 
-    int GetAnchor(void);
+    int GetAnchor();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -173,7 +172,7 @@ public:
 // Description:     Gets the children lst
 // Arguments:       None.
 
-    std::vector<GUIControl *> *GetChildren(void);
+    std::vector<GUIControl *> *GetChildren();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -183,7 +182,7 @@ public:
 // Arguments:       None.
 // Returns:         0 if the control does not have a panel, otherwise the topmost panel.
 
-    virtual GUIPanel *GetPanel(void);
+    virtual GUIPanel * GetPanel();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -202,7 +201,7 @@ public:
 // Description:     Gets the control to store the values into properties.
 // Arguments:       None.
 
-    virtual void StoreProperties(void);
+    virtual void StoreProperties();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +246,7 @@ public:
 // Description:     Gets the visibility of the control.
 // Arguments:       None.
 
-    virtual bool GetVisible(void);
+    virtual bool GetVisible();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -265,7 +264,7 @@ public:
 // Description:     Gets the enabled state of the control.
 // Arguments:       None.
 
-    virtual bool GetEnabled(void);
+    virtual bool GetEnabled();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -274,7 +273,7 @@ public:
 // Description:     Gets the parent of this control.
 // Arguments:       None.
 
-    GUIControl *GetParent(void);
+    GUIControl *GetParent();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -283,7 +282,7 @@ public:
 // Description:     Gets the control properties.
 // Arguments:       None.
 
-    GUIProperties *GetProperties(void);
+    GUIProperties *GetProperties();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -301,7 +300,7 @@ public:
 // Description:     Returns the IsContainer value.
 // Arguments:       None.
 
-    bool IsContainer(void);
+    bool IsContainer();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -319,7 +318,7 @@ public:
 // Description:     Removes all the children.
 // Arguments:       None.
 
-    void RemoveChildren(void);
+    void RemoveChildren();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

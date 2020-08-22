@@ -17,7 +17,7 @@ namespace RTE {
 
 	int Icon::Create() {
 		if (!m_BitmapsIndexed || !m_BitmapsTrueColor) {
-			if (m_BitmapFile.GetDataPath().empty()) { m_BitmapFile.SetDataPath("Base.rte/GUIs/DefaultIcon.bmp"); }
+			if (m_BitmapFile.GetDataPath().empty()) { m_BitmapFile.SetDataPath("Base.rte/GUIs/DefaultIcon.png"); }
 
 			m_BitmapsIndexed = m_BitmapFile.GetAsAnimation(m_FrameCount, COLORCONV_REDUCE_TO_256);
 			m_BitmapsTrueColor = m_BitmapFile.GetAsAnimation(m_FrameCount, COLORCONV_8_TO_32);

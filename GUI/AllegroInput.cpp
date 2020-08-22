@@ -236,16 +236,43 @@ void AllegroInput::Update(void)
 		m_PrevNetworkMouseButtonsStates[player][0] = m_NetworkMouseButtonsEvents[player][0];
 		m_PrevNetworkMouseButtonsStates[player][1] = m_NetworkMouseButtonsEvents[player][1];
 		m_PrevNetworkMouseButtonsStates[player][2] = m_NetworkMouseButtonsEvents[player][2];
-	}
-	else 
-	{
-		m_MouseButtonsEvents[0] = mouse_b & AMBLEFT ? (m_MouseButtonsStates[0] == Up ? Pushed : Repeat) : (m_MouseButtonsStates[0] == Down ? Released : None);
-		m_MouseButtonsEvents[1] = mouse_b & AMBMIDDLE ? (m_MouseButtonsStates[1] == Up ? Pushed : Repeat) : (m_MouseButtonsStates[1] == Down ? Released : None);
-		m_MouseButtonsEvents[2] = mouse_b & AMBRIGHT ? (m_MouseButtonsStates[2] == Up ? Pushed : Repeat) : (m_MouseButtonsStates[2] == Down ? Released : None);
+	} else {
+		if (!m_KeyJoyMouseCursor) {
+			if (mouse_b & AMBLEFT) {
+				m_MouseButtonsEvents[0] = (m_MouseButtonsStates[0] == Up) ? Pushed : Repeat;
+				m_MouseButtonsStates[0] = Down;
+			} else {
+				m_MouseButtonsEvents[0] = (m_MouseButtonsStates[0] == Down) ? Released : None;
+				m_MouseButtonsStates[0] = Up;
+			}
+		}
 
-		m_MouseButtonsStates[0] = mouse_b & AMBLEFT ? Down : Up;
-		m_MouseButtonsStates[1] = mouse_b & AMBMIDDLE ? Down : Up;
-		m_MouseButtonsStates[2] = mouse_b & AMBRIGHT ? Down : Up;
+		if (mouse_b & AMBMIDDLE) {
+			m_MouseButtonsEvents[1] = (m_MouseButtonsStates[1] == Up) ? Pushed : Repeat;
+			m_MouseButtonsStates[1] = Down;
+		} else {
+			m_MouseButtonsEvents[1] = (m_MouseButtonsStates[1] == Down) ? Released : None;
+			m_MouseButtonsStates[1] = Up;
+		}
+
+		if (mouse_b & AMBRIGHT) {
+			m_MouseButtonsEvents[2] = (m_MouseButtonsStates[2] == Up) ? Pushed : Repeat;
+			m_MouseButtonsStates[2] = Down;
+		} else {
+			m_MouseButtonsEvents[2] = (m_MouseButtonsStates[2] == Down) ? Released : None;
+			m_MouseButtonsStates[2] = Up;
+		}
+
+		if (m_Player < 0 || m_Player >= 4) {
+			for (int i = 0; i < 4; i++) {
+				m_MouseWheelChange = g_UInputMan.MouseWheelMovedByPlayer(i);
+				if (m_MouseWheelChange) {
+					break;
+				}
+			}
+		} else {
+			m_MouseWheelChange = g_UInputMan.MouseWheelMovedByPlayer(m_Player);
+		}
 	}
 
 	/*if (m_Player >= 0 && m_Player < 4)
@@ -307,29 +334,22 @@ void AllegroInput::Update(void)
         mouse_x = MIN((g_FrameMan.GetResX() * mouseDenominator) - 3, mouse_x);
         mouse_y = MIN((g_FrameMan.GetResY() * mouseDenominator) - 3, mouse_y);
 
-        // Button states/presses, Primary - ACTUALLY make either button work, we don't have use for secondary in menus
-        if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER))
-        {
-            m_MouseButtonsStates[0] = Down;
-            m_MouseButtonsEvents[0] = Repeat;
-        }
-        if (g_UInputMan.MenuButtonPressed(UInputMan::MENU_EITHER))
-            m_MouseButtonsEvents[0] = Pushed;
-        else if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_EITHER))
-            m_MouseButtonsEvents[0] = Released;
-/* Just do both
-        // Secondary
-        if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_SECONDARY))
-        {
-            m_MouseButtonsStates[2] = Down;
-            m_MouseButtonsEvents[2] = Repeat;
-        }            
-        if (g_UInputMan.MenuButtonPressed(UInputMan::MENU_SECONDARY))
-            m_MouseButtonsEvents[2] = Pushed;
-        else if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_SECONDARY))
-            m_MouseButtonsEvents[2] = Released;
-*/
-    }
+		// Button states/presses, Primary - ACTUALLY make either button work, we don't have use for secondary in menus
+		if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER)) {
+			m_MouseButtonsStates[0] = Down;
+			m_MouseButtonsEvents[0] = Repeat;
+		}
+		if (g_UInputMan.MenuButtonPressed(UInputMan::MENU_EITHER)) {
+			m_MouseButtonsStates[0] = Down;
+			m_MouseButtonsEvents[0] = Pushed;
+		} else if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_EITHER)) {
+			m_MouseButtonsStates[0] = Up;
+			m_MouseButtonsEvents[0] = Released;
+		} else if (m_MouseButtonsEvents[0] == Released) {
+			m_MouseButtonsStates[0] = Up;
+			m_MouseButtonsEvents[0] = None;
+		}
+	}
 
     // Update the mouse position of this GUIInput, based on the allegro mouse vars (which may have been altered by joystick or keyboard input)
 //    m_MouseX = mouse_x;
@@ -349,7 +369,7 @@ void AllegroInput::Update(void)
 // Method:          ConvertKeyEvent
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Converts from allegro's key push to that used by this GUI lib, with
-//                  timings for repats taken into consideration.
+//                  timings for repeats taken into consideration.
 
 void AllegroInput::ConvertKeyEvent(int allegroKey, int guilibKey, float elapsedS)
 {

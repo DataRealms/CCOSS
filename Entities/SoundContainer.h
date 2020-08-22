@@ -84,18 +84,18 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a SoundContainer object before deletion from system memory.
 		/// </summary>
-		virtual ~SoundContainer() { Destroy(true); }
+		~SoundContainer() override { Destroy(true); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the SoundContainer object. It doesn't delete the Sound files, since they're owned by ContentFile static maps.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false) { if (!notInherited) { Entity::Destroy(); } Clear(); }
+		void Destroy(bool notInherited = false) override { if (!notInherited) { Entity::Destroy(); } Clear(); }
 
 		/// <summary>
 		/// Resets the entire SoundContainer, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); Entity::Reset(); }
+		void Reset() override { Clear(); Entity::Reset(); }
 #pragma endregion
 
 #pragma region INI Handling

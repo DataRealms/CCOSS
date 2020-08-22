@@ -60,12 +60,12 @@ int Deployment::Create()
 
 	if (!m_apArrowLeftBitmap)
 	{
-		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.bmp");
+		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.png");
 		m_apArrowLeftBitmap = arrowFile.GetAsAnimation(1);
 	}
 	if (!m_apArrowRightBitmap)
 	{
-		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.bmp");
+		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.png");
 		m_apArrowRightBitmap = arrowFile.GetAsAnimation(1);
 	}
 
@@ -89,12 +89,12 @@ int Deployment::Create(string loadoutName, const Icon &icon, float spawnRadius)
 
 	if (!m_apArrowLeftBitmap)
 	{
-		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.bmp");
+		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.png");
 		m_apArrowLeftBitmap = arrowFile.GetAsAnimation(1);
 	}
 	if (!m_apArrowRightBitmap)
 	{
-		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.bmp");
+		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.png");
 		m_apArrowRightBitmap = arrowFile.GetAsAnimation(1);
 	}
 

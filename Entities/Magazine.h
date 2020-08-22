@@ -61,7 +61,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Magazine() { Destroy(true); }
+	~Magazine() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +94,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Attachable::Reset(); }
+    void Reset() override { Clear(); Attachable::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -105,7 +105,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A pointer to the next Round preset of ammo, or 0 if this Magazine is empty.
 
-    virtual const Round * GetNextRound() const;
+	const Round * GetNextRound() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -127,19 +127,8 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    A pointer to the next Round of ammo, or 0 if this Magazine is empty.
 
-    virtual Round * PopNextRound();
+	Round * PopNextRound();
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetParentOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the current position offset of this Magazine relative to the
-//                  parent Actor's position, if attached.
-// Arguments:       A const reference to the new parent offset.
-// Return value:    None.
-
-    void SetParentOffset(const Vector &newOffset) { m_ParentOffset = newOffset; }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetRoundCount
@@ -270,7 +259,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -285,10 +274,7 @@ ClassInfoGetters
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -338,8 +324,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Magazine(const Magazine &reference);
-    Magazine & operator=(const Magazine &rhs);
+	Magazine(const Magazine &reference) {}
+	Magazine & operator=(const Magazine &rhs) {}
 
 };
 

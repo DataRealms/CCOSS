@@ -21,7 +21,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(Attachable, MOSRotating, 0)
+ConcreteClassInfo(Attachable, MOSRotating, 100)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -511,9 +511,9 @@ void Attachable::Update()
         // Attached, so get all metrics from parent and apply
 //        m_HFlipped = m_pParent->IsHFlipped();  not flexible enough
         if (!m_JointPos.IsZero())
-            m_Pos = m_JointPos.GetFloored() - RotateOffset(m_JointOffset);
+            m_Pos = m_JointPos - RotateOffset(m_JointOffset);
         else
-            m_Pos = m_pParent->GetPos().GetFloored() - RotateOffset(m_JointOffset);
+            m_Pos = m_pParent->GetPos() - RotateOffset(m_JointOffset);
 //        m_Rotation = m_pParent->GetRotMatrix();
         m_Vel = m_pParent->GetVel();
 //        m_AngularVel =  m_pParent->GetAngularVel();
@@ -550,7 +550,7 @@ void Attachable::Update()
     MOSRotating::Update();
 
     // If we're attached to something, MoveableMan doesn't own us, and therefore isn't calling our ScriptUpdate (and our parent isn't calling it either), so we should here
-    if (m_pParent != NULL && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }
+    if (IsAttached() && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }
 }
 
 

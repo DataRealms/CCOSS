@@ -15,6 +15,7 @@
 #include "PresetMan.h"
 #include "MovableMan.h"
 #include "UInputMan.h"
+#include "FrameMan.h"
 #include "AudioMan.h"
 #include "Controller.h"
 #include "Scene.h"
@@ -44,17 +45,6 @@ ConcreteClassInfo(GABaseDefense, GameActivity, 0)
 
 void GABaseDefense::Clear()
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
     m_SpawnTimer.Reset();
     m_SpawnInterval = 20000;
     m_SpawnIntervalEasiest = 20000;
@@ -75,23 +65,7 @@ int GABaseDefense::Create()
 
     if (m_Description.empty())
         m_Description = "Defend your base in an AI onslaught.";
-/*
-    ////////////////////////////////
-    // Set up teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-
-    ///////////////////////////////////////
-    // Set up players
-
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-*/
     return 0;
 }
 
@@ -181,18 +155,6 @@ int GABaseDefense::Save(Writer &writer) const
 
 void GABaseDefense::Destroy(bool notInherited)
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
-
     for (vector<Actor *>::const_iterator itr = m_AttackerSpawns.begin(); itr != m_AttackerSpawns.end(); ++itr)
     {
         delete (*itr);
@@ -218,7 +180,7 @@ int GABaseDefense::Start()
     // Set up teams
 
     /* CPU attacker doesn't need a brain
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -228,7 +190,7 @@ int GABaseDefense::Start()
     ///////////////////////////////////////
     // Set up players
 
-    for (int player = PLAYER_1; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -236,7 +198,7 @@ int GABaseDefense::Start()
         // Make sure all players have resident brains, or make them edit one in
         if (!g_SceneMan.GetScene()->GetResidentBrain(player))
         {
-            m_ActivityState = EDITING;
+            m_ActivityState = ActivityState::Editing;
             const Entity *pBrainBunker = g_PresetMan.GetEntityPreset("TerrainObject", "Brain Vault");
             m_pEditorGUI[player]->SetCurrentObject(dynamic_cast<SceneObject *>(pBrainBunker->Clone()));
             m_pEditorGUI[player]->SetEditorGUIMode(SceneEditorGUI::INSTALLINGBRAIN);
@@ -246,12 +208,12 @@ int GABaseDefense::Start()
 
 /* Obsolete with resident brains
         // Find and assign any available brains in the scene to players without them
-        if (!m_pBrain[player])
+        if (!m_Brain[player])
         {
             // If we can't find an unassigned brain in the scene to give each player, then force to go into editing mode to place one
-            if (!(m_pBrain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
+            if (!(m_Brain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
             {
-                m_ActivityState = EDITING;
+                m_ActivityState = ActivityState::Editing;
                 // Play editing music
                 g_AudioMan.ClearMusicQueue();
                 g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/ccambient4.ogg");
@@ -264,17 +226,17 @@ int GABaseDefense::Start()
             // Set the found brain to be the selected actor at start
             else
             {
-                SwitchToActor(m_pBrain[player], player, m_Team[player]);
-                m_ActorCursor[player] = m_pBrain[player]->GetPos();
-                m_LandingZone[player].m_X = m_pBrain[player]->GetPos().m_X;
+                SwitchToActor(m_Brain[player], player, m_Team[player]);
+                m_ActorCursor[player] = m_Brain[player]->GetPos();
+                m_LandingZone[player].m_X = m_Brain[player]->GetPos().m_X;
                 // Set the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-                m_ObservationTarget[player] = m_pBrain[player]->GetPos();
+                m_ObservationTarget[player] = m_Brain[player]->GetPos();
             }
         }
 */
     }
 
-    if (m_ActivityState == EDITING)
+    if (m_ActivityState == ActivityState::Editing)
     {
         // Play editing music
         g_AudioMan.ClearMusicQueue();
@@ -282,87 +244,30 @@ int GABaseDefense::Start()
     }
 
     // Second pass after we have determined whether we need to be editing or not
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         // Only applies to human players
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
 
         g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
-        if (m_ActivityState == EDITING)
+        if (m_ActivityState == ActivityState::Editing)
             g_FrameMan.SetScreenText((player % 2 == 0) ? "Place your brain vault and build your bunker around it..." : "...then select \"DONE\" from the pie menu!", ScreenOfPlayer(player), 0, 3000);
-        else if (m_ActivityState == RUNNING)
+        else if (m_ActivityState == ActivityState::Running)
             g_FrameMan.SetScreenText((player % 2 == 0) ? "Mine Gold and buy more firepower with the funds..." : "...then smash the competing brain to claim victory!", ScreenOfPlayer(player), 0, 3000);
     }
 
     // Disable AI if we are editing
-    DisableAIs(m_ActivityState == EDITING);
+    DisableAIs(m_ActivityState == ActivityState::Editing);
 
     // Set the spawn intervals based ont he min-max and the currently difficulty
-    m_SpawnInterval = floorf(LERP(MINDIFFICULTY, MAXDIFFICULTY, m_SpawnIntervalEasiest, m_SpawnIntervalHardest, m_Difficulty));
+    m_SpawnInterval = floorf(LERP(DifficultySetting::MinDifficulty, DifficultySetting::MaxDifficulty, m_SpawnIntervalEasiest, m_SpawnIntervalHardest, m_Difficulty));
 
     m_SpawnTimer.Reset();
-
-    if (m_Difficulty == TESTDIFFICULTY)
-    {
-//        m_SpawnInterval = 200000;
-//        m_SpawnTimer.SetElapsedSimTimeMS(210000);
-        m_SpawnInterval = 25000;
-    }
 
     return error;
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Pause
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Pauses and unpauses the game.
-
-void GABaseDefense::Pause(bool pause)
-{
-    m_Paused = pause;
-}
-*/
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          End
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Forces the current game's end.
-
-void GABaseDefense::End()
-{
-// TODO: Update these messages to reflect attack budget running out!
-
-    // Show appropriate end game messages
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        if (!m_IsActive[player])
-            continue;
-
-        if (m_Team[player] == m_WinnerTeam)
-            g_FrameMan.SetScreenText("Your competition's wetware is mush!", ScreenOfPlayer(player));
-        else
-            g_FrameMan.SetScreenText("Your brain has been destroyed!", ScreenOfPlayer(player));
-
-        m_MsgTimer[player].Reset();
-    }
-
-    GameActivity::End();
-}
-*/
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateEditing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     This is a special update step for when any player is still editing the
-//                  scene.
-
-void GABaseDefense::UpdateEditing()
-{
-    GameActivity::UpdateEditing();
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
@@ -373,7 +278,7 @@ void GABaseDefense::UpdateEditing()
 void GABaseDefense::Update()
 {
     // Avoid game logic when we're editing
-    if (m_ActivityState == EDITING)
+    if (m_ActivityState == ActivityState::Editing)
     {
         UpdateEditing();
         return;
@@ -387,7 +292,7 @@ void GABaseDefense::Update()
     ///////////////////////////////////////////
     // Iterate through all human players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!m_IsActive[player])
             continue;
@@ -396,10 +301,10 @@ void GABaseDefense::Update()
         int team = m_Team[player];
 
         // Make sure the game is not already ending
-        if (m_ActivityState != OVER)
+        if (m_ActivityState != ActivityState::Over)
         {
             // Check if any player's brain is dead
-            if (!g_MovableMan.IsActor(m_pBrain[player]) || !m_pBrain[player]->HasObjectInGroup("Brains"))
+            if (!g_MovableMan.IsActor(m_Brain[player]) || !m_Brain[player]->HasObjectInGroup("Brains"))
             {
                 SetPlayerBrain(0, player);
                 // Try to find a new unassigned brain this player can use instead, or if his old brain entered a craft
@@ -427,21 +332,21 @@ void GABaseDefense::Update()
                         m_WinnerTeam = OtherTeam(team);
                         End();
                     }
-                    m_MsgTimer[player].Reset();
+                    m_MessageTimer[player].Reset();
                 }
             }
             else
             {
                 // Update the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-                SetObservationTarget(m_pBrain[player]->GetPos(), player);
+                SetObservationTarget(m_Brain[player]->GetPos(), player);
                 // Mark each brain to be protected and destroyed by the respective teams
-                AddObjectivePoint("Protect!", m_pBrain[player]->GetAboveHUDPos(), team, GameActivity::ARROWDOWN);
-                for (int t = Activity::TEAM_1; t < MAXTEAMCOUNT; ++t)
+                AddObjectivePoint("Protect!", m_Brain[player]->GetAboveHUDPos(), team, GameActivity::ARROWDOWN);
+                for (int t = Teams::TeamOne; t < Teams::MaxTeamCount; ++t)
                 {
                     if (!m_TeamActive[team])
                         continue;
                     if (t != team)
-                        AddObjectivePoint("Destroy!", m_pBrain[player]->GetAboveHUDPos(), t, GameActivity::ARROWDOWN);
+                        AddObjectivePoint("Destroy!", m_Brain[player]->GetAboveHUDPos(), t, GameActivity::ARROWDOWN);
                 }
             }
         }
@@ -459,7 +364,7 @@ void GABaseDefense::Update()
     ///////////////////////////////////////////
     // Iterate through all teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -470,7 +375,7 @@ void GABaseDefense::Update()
         if (team == m_CPUTeam)
         {
             // Spawn the CPU team's attacking forces
-            if (m_SpawnTimer.IsPastSimMS(m_SpawnInterval) && m_ActivityState != OVER)
+            if (m_SpawnTimer.IsPastSimMS(m_SpawnInterval) && m_ActivityState != ActivityState::Over)
             {
                 if (!m_AttackerSpawns.empty())
                 {
@@ -514,7 +419,7 @@ void GABaseDefense::Update()
         // Check for victory conditions
 
         // Make sure the game is not already ending
-        if (m_ActivityState != OVER && team != m_CPUTeam)
+        if (m_ActivityState != ActivityState::Over && team != m_CPUTeam)
         {
 // TODO: Gotto have budget restrictions in this activity!
 /*
@@ -522,7 +427,7 @@ void GABaseDefense::Update()
 // TODO Don't hardcode the rocket cost!
             if (m_TeamFunds[team] < 0)//&& Only brain is left of actors)
             {
-                for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+                for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
                 {
                     if (!m_IsActive[player])
                         continue;
@@ -534,7 +439,7 @@ void GABaseDefense::Update()
                         g_FrameMan.SetScreenText("Your competition is bankrupt!", ScreenOfPlayer(player));
                         m_WinnerTeam = m_Team[player];
                     }
-                    m_MsgTimer[player].Reset();
+                    m_MessageTimer[player].Reset();
                 }
                 End();
             }

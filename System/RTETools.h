@@ -194,6 +194,15 @@ namespace RTE {
 	bool WithinBox(Vector &point, float left, float top, float right, float bottom);
 #pragma endregion
 
+#pragma region Conversion
+	/// <summary>
+	/// Returns a corrected angle value that can be used with Allegro fixed point math routines where 256 equals 360 degrees.
+	/// </summary>
+	/// <param name="angleDegrees">The angle value to correct. In degrees.</param>
+	/// <returns>A float with the represented angle as full rotations being 256.</returns>
+	float GetAllegroAngle(float angleDegrees);
+#pragma endregion
+
 #pragma region Misc
 	/// <summary>
 	/// Fires up the default browser for the current OS on a specific URL.

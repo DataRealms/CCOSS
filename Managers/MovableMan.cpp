@@ -52,14 +52,14 @@ void MovableMan::Clear()
     m_AddedActors.clear();
     m_AddedItems.clear();
     m_AddedParticles.clear();
-    m_ActorRoster[Activity::TEAM_1].clear();
-    m_ActorRoster[Activity::TEAM_2].clear();
-    m_ActorRoster[Activity::TEAM_3].clear();
-    m_ActorRoster[Activity::TEAM_4].clear();
-    m_SortTeamRoster[Activity::TEAM_1] = false;
-    m_SortTeamRoster[Activity::TEAM_2] = false;
-    m_SortTeamRoster[Activity::TEAM_3] = false;
-    m_SortTeamRoster[Activity::TEAM_4] = false;
+    m_ActorRoster[Activity::TeamOne].clear();
+    m_ActorRoster[Activity::TeamTwo].clear();
+    m_ActorRoster[Activity::TeamThree].clear();
+    m_ActorRoster[Activity::TeamFour].clear();
+    m_SortTeamRoster[Activity::TeamOne] = false;
+    m_SortTeamRoster[Activity::TeamTwo] = false;
+    m_SortTeamRoster[Activity::TeamThree] = false;
+    m_SortTeamRoster[Activity::TeamFour] = false;
     m_ValiditySearchResults.clear();
     m_AddedAlarmEvents.clear();
     m_AlarmEvents.clear();
@@ -177,16 +177,11 @@ void MovableMan::Destroy()
 // Description:     Gets a MO from its MOID. Note that MOID's are only valid during the
 //                  same frame as they were assigned to the MOs!
 
-MovableObject * MovableMan::GetMOFromID(MOID whichID)
-{
-    RTEAssert(whichID == g_NoMOID || (whichID >= 0 && whichID < m_MOIDIndex.size()), "MOID out of bounds!");
-
-    if (whichID != g_NoMOID && whichID != 0 && whichID < m_MOIDIndex.size())
-    {
-        return m_MOIDIndex[whichID];
-    }
-    
-    return 0;
+MovableObject * MovableMan::GetMOFromID(MOID whichID) {
+	if (whichID != g_NoMOID && whichID != 0 && whichID < m_MOIDIndex.size()) {
+		return m_MOIDIndex[whichID];
+	}
+	return nullptr;
 }
 
 
@@ -241,14 +236,14 @@ void MovableMan::PurgeAllMOs()
     m_AddedActors.clear();
     m_AddedItems.clear();
     m_AddedParticles.clear();
-    m_ActorRoster[Activity::TEAM_1].clear();
-    m_ActorRoster[Activity::TEAM_2].clear();
-    m_ActorRoster[Activity::TEAM_3].clear();
-    m_ActorRoster[Activity::TEAM_4].clear();
-    m_SortTeamRoster[Activity::TEAM_1] = false;
-    m_SortTeamRoster[Activity::TEAM_2] = false;
-    m_SortTeamRoster[Activity::TEAM_3] = false;
-    m_SortTeamRoster[Activity::TEAM_4] = false;
+    m_ActorRoster[Activity::TeamOne].clear();
+    m_ActorRoster[Activity::TeamTwo].clear();
+    m_ActorRoster[Activity::TeamThree].clear();
+    m_ActorRoster[Activity::TeamFour].clear();
+    m_SortTeamRoster[Activity::TeamOne] = false;
+    m_SortTeamRoster[Activity::TeamTwo] = false;
+    m_SortTeamRoster[Activity::TeamThree] = false;
+    m_SortTeamRoster[Activity::TeamFour] = false;
     m_ValiditySearchResults.clear();
     m_AddedAlarmEvents.clear();
     m_AlarmEvents.clear();
@@ -382,7 +377,7 @@ Actor * MovableMan::GetPrevActorInGroup(std::string group, Actor *pBeforeThis)
 
 Actor * MovableMan::GetNextTeamActor(int team, Actor *pAfterThis)
 {
-    if (team < 0 || team >= Activity::MAXTEAMCOUNT || m_ActorRoster[team].empty())
+    if (team < Activity::TeamOne || team >= Activity::MaxTeamCount || m_ActorRoster[team].empty())
         return 0;
 /*
     // Begin at the beginning
@@ -467,7 +462,7 @@ Actor * MovableMan::GetNextTeamActor(int team, Actor *pAfterThis)
 
 Actor * MovableMan::GetPrevTeamActor(int team, Actor *pBeforeThis)
 {
-    if (team < 0 || team >= Activity::MAXTEAMCOUNT || m_Actors.empty() ||  m_ActorRoster[team].empty())
+    if (team < Activity::TeamOne || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
         return 0;
 /* Obsolete, now uses team rosters which are sorted
     // Begin at the reverse beginning
@@ -552,7 +547,7 @@ Actor * MovableMan::GetPrevTeamActor(int team, Actor *pBeforeThis)
 
 Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, float &getDistance, const Actor *pExcludeThis)
 {
-    if (team < Activity::NOTEAM || team >= Activity::MAXTEAMCOUNT || m_Actors.empty() ||  m_ActorRoster[team].empty())
+    if (team < Activity::NoTeam || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
         return 0;
 
     Activity *pActivity = g_ActivityMan.GetActivity();
@@ -563,11 +558,11 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
     Actor *pClosestActor = 0;
 
     // If we're looking for a noteam actor, then go through the entire actor list instead
-    if (team == Activity::NOTEAM)
+    if (team == Activity::NoTeam)
     {
         for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
         {
-            if ((*aIt) == pExcludeThis || (*aIt)->GetTeam() != Activity::NOTEAM)
+            if ((*aIt) == pExcludeThis || (*aIt)->GetTeam() != Activity::NoTeam)
                 continue;
 
             distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
@@ -614,7 +609,7 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
 
 Actor * MovableMan::GetClosestEnemyActor(int team, const Vector &scenePoint, int maxRadius, Vector &getDistance)
 {
-    if (team < Activity::NOTEAM || team >= Activity::MAXTEAMCOUNT || m_Actors.empty() ||  m_ActorRoster[team].empty())
+    if (team < Activity::NoTeam || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
         return 0;
     
     Activity *pActivity = g_ActivityMan.GetActivity();
@@ -692,7 +687,7 @@ Actor * MovableMan::GetClosestActor(Vector &scenePoint, int maxRadius, float &ge
 
 Actor * MovableMan::GetClosestBrainActor(int team, const Vector &scenePoint) const
 {
-    if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT || m_Actors.empty() ||  m_ActorRoster[team].empty())
+    if (team < Activity::TeamOne || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
         return 0;
 
     Vector distanceVec;
@@ -728,7 +723,7 @@ Actor * MovableMan::GetClosestBrainActor(int team, const Vector &scenePoint) con
 
 Actor * MovableMan::GetClosestOtherBrainActor(int notOfTeam, const Vector &scenePoint) const
 {
-    if (notOfTeam < Activity::TEAM_1 || notOfTeam >= Activity::MAXTEAMCOUNT || m_Actors.empty())
+    if (notOfTeam < Activity::TeamOne || notOfTeam >= Activity::MaxTeamCount || m_Actors.empty())
         return 0;
 
     float testDistance = g_SceneMan.GetSceneDim().GetLargest();
@@ -736,7 +731,7 @@ Actor * MovableMan::GetClosestOtherBrainActor(int notOfTeam, const Vector &scene
     Actor *pClosestBrain = 0;
     Actor *pContenderBrain = 0;
 
-    for (int t = Activity::TEAM_1; t < g_ActivityMan.GetActivity()->GetTeamCount(); ++t)
+    for (int t = Activity::TeamOne; t < g_ActivityMan.GetActivity()->GetTeamCount(); ++t)
     {
         if (t != notOfTeam)
         {
@@ -771,12 +766,12 @@ Actor * MovableMan::GetUnassignedBrain(int team) const
     }
 
     // Also need to look through all the actors added this frame, one might be a brain.
-    int actorTeam = Activity::NOTEAM;
+    int actorTeam = Activity::NoTeam;
     for (deque<Actor *>::const_iterator aaIt = m_AddedActors.begin(); aaIt != m_AddedActors.end(); ++aaIt)
     {
         int actorTeam = (*aaIt)->GetTeam();
         // Accept no-team brains too - ACTUALLY, DON'T
-        if ((actorTeam == team/* || actorTeam == Activity::NOTEAM*/) && (*aaIt)->HasObjectInGroup("Brains") && !g_ActivityMan.GetActivity()->IsAssignedBrain(*aaIt))
+        if ((actorTeam == team/* || actorTeam == Activity::NoTeam*/) && (*aaIt)->HasObjectInGroup("Brains") && !g_ActivityMan.GetActivity()->IsAssignedBrain(*aaIt))
             return *aaIt;
     }
 
@@ -1039,7 +1034,7 @@ void MovableMan::AddActorToTeamRoster(Actor * pActorToAdd)
 	// Also re-set the TEam so that the Team Icons get set up properly
 	pActorToAdd->SetTeam(team);
 	// Only add to a roster if it's on a team AND is controllable (eg doors are not)
-	if (team >= Activity::TEAM_1 && team < Activity::MAXTEAMCOUNT && pActorToAdd->IsControllable())
+	if (team >= Activity::TeamOne && team < Activity::MaxTeamCount && pActorToAdd->IsControllable())
 	{
 		m_ActorRoster[pActorToAdd->GetTeam()].push_back(pActorToAdd);
 		m_ActorRoster[pActorToAdd->GetTeam()].sort(MOXPosComparison());
@@ -1062,7 +1057,7 @@ void MovableMan::RemoveActorFromTeamRoster(Actor * pActorToRem)
 	int team = pActorToRem->GetTeam();
 
 	// Remove from roster as well
-	if (team >= Activity::TEAM_1 && team < Activity::MAXTEAMCOUNT)
+	if (team >= Activity::TeamOne && team < Activity::MaxTeamCount)
 		m_ActorRoster[team].remove(pActorToRem);
 }
 
@@ -1431,7 +1426,7 @@ int MovableMan::EjectAllActors(list<SceneObject *> &actorList, int onlyTeam, boo
     for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
     {
         // Only grab ones of a specific team; delete all others
-        if ((onlyTeam == Activity::NOTEAM || (*aIt)->GetTeam() == onlyTeam) && (!noBrains || !(*aIt)->HasObjectInGroup("Brains")))
+        if ((onlyTeam == Activity::NoTeam || (*aIt)->GetTeam() == onlyTeam) && (!noBrains || !(*aIt)->HasObjectInGroup("Brains")))
         {
             actorList.push_back((*aIt));
             addedCount++;
@@ -1446,7 +1441,7 @@ int MovableMan::EjectAllActors(list<SceneObject *> &actorList, int onlyTeam, boo
     for (deque<Actor *>::iterator aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
     {
         // Only grab ones of a specific team; delete all others
-        if ((onlyTeam == Activity::NOTEAM || (*aIt)->GetTeam() == onlyTeam) && (!noBrains || !(*aIt)->HasObjectInGroup("Brains")))
+        if ((onlyTeam == Activity::NoTeam || (*aIt)->GetTeam() == onlyTeam) && (!noBrains || !(*aIt)->HasObjectInGroup("Brains")))
         {
             actorList.push_back((*aIt));
             addedCount++;
@@ -1458,7 +1453,7 @@ int MovableMan::EjectAllActors(list<SceneObject *> &actorList, int onlyTeam, boo
     m_AddedActors.clear();
 
     // Also clear the actor rosters
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
         m_ActorRoster[team].clear();
 
     return addedCount;
@@ -1503,7 +1498,7 @@ int MovableMan::EjectAllItems(list<SceneObject *> &itemList)
 
 int MovableMan::GetTeamMOIDCount(int team) const
 {
-	if (team > Activity::NOTEAM && team < Activity::MAXTEAMCOUNT)
+	if (team > Activity::NoTeam && team < Activity::MaxTeamCount)
 		return m_TeamMOIDCount[team];
 	else
 		return 0;
@@ -1520,7 +1515,7 @@ void MovableMan::OpenAllDoors(bool open, int team)
     for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
     {
         pDoor = dynamic_cast<ADoor *>(*aIt);
-        if (pDoor && (team == Activity::NOTEAM || pDoor->GetTeam() == team))
+        if (pDoor && (team == Activity::NoTeam || pDoor->GetTeam() == team))
         {
             // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
             pDoor->Update();
@@ -1535,7 +1530,7 @@ void MovableMan::OpenAllDoors(bool open, int team)
     for (deque<Actor *>::iterator aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
     {
         pDoor = dynamic_cast<ADoor *>(*aIt);
-        if (pDoor && (team == Activity::NOTEAM || pDoor->GetTeam() == team))
+        if (pDoor && (team == Activity::NoTeam || pDoor->GetTeam() == team))
         {
             // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
             pDoor->Update();
@@ -1562,7 +1557,7 @@ void MovableMan::OverrideMaterialDoors(bool enable, int team)
     for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
     {
         pDoor = dynamic_cast<ADoor *>(*aIt);
-        if (pDoor && (team == Activity::NOTEAM || pDoor->GetTeam() == team))
+        if (pDoor && (team == Activity::NoTeam || pDoor->GetTeam() == team))
         {
             // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
             pDoor->Update();
@@ -1573,7 +1568,7 @@ void MovableMan::OverrideMaterialDoors(bool enable, int team)
     for (deque<Actor *>::iterator aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
     {
         pDoor = dynamic_cast<ADoor *>(*aIt);
-        if (pDoor && (team == Activity::NOTEAM || pDoor->GetTeam() == team))
+        if (pDoor && (team == Activity::NoTeam || pDoor->GetTeam() == team))
         {
             // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
             pDoor->Update();
@@ -1655,10 +1650,10 @@ void MovableMan::Update()
 		g_PostProcessMan.ClearScenePostEffects();
 
     // Reset the draw HUD roster line settings
-    m_SortTeamRoster[Activity::TEAM_1] = false;
-    m_SortTeamRoster[Activity::TEAM_2] = false;
-    m_SortTeamRoster[Activity::TEAM_3] = false;
-    m_SortTeamRoster[Activity::TEAM_4] = false;
+    m_SortTeamRoster[Activity::TeamOne] = false;
+    m_SortTeamRoster[Activity::TeamTwo] = false;
+    m_SortTeamRoster[Activity::TeamThree] = false;
+    m_SortTeamRoster[Activity::TeamFour] = false;
     // Clear out MO finding optimization buffer - will be added to each frame as thigns are searched for as curently exisitng in the manager
     m_ValiditySearchResults.clear();
 
@@ -1754,12 +1749,8 @@ void MovableMan::Update()
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
-				//g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
 				(*aIt)->Update();
-				//g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
-				//g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
                 (*aIt)->UpdateScripts();
-				//g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
                 (*aIt)->ApplyImpulses();
             }
         }
@@ -1934,7 +1925,7 @@ void MovableMan::Update()
 			}
 
             // Remove from team rosters
-			if ((*aIt)->GetTeam() >= Activity::TEAM_1 && (*aIt)->GetTeam() < Activity::MAXTEAMCOUNT)
+			if ((*aIt)->GetTeam() >= Activity::TeamOne && (*aIt)->GetTeam() < Activity::MaxTeamCount)
                 //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
 				RemoveActorFromTeamRoster(*aIt);
 
@@ -2010,9 +2001,9 @@ void MovableMan::Update()
 
 	// COUNT MOID USAGE PER TEAM  //////////////////////////////////////////////////
 	{
-		int team = Activity::NOTEAM;
+		int team = Activity::NoTeam;
 
-		for (team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; team++)
+		for (team = Activity::TeamOne; team < Activity::MaxTeamCount; team++)
 			m_TeamMOIDCount[team] = 0;
 		
 		for (vector<MovableObject *>::iterator itr = m_MOIDIndex.begin(); itr != m_MOIDIndex.end(); ++itr)
@@ -2021,7 +2012,7 @@ void MovableMan::Update()
 			{
 				team = (*itr)->GetTeam();
 
-				if (team > Activity::NOTEAM && team < Activity::MAXTEAMCOUNT)
+				if (team > Activity::NoTeam && team < Activity::MaxTeamCount)
 					m_TeamMOIDCount[team]++;
 			}
 		}
@@ -2036,14 +2027,14 @@ void MovableMan::Update()
 
     // Sort team rosters if necessary
     {
-        if (m_SortTeamRoster[Activity::TEAM_1])
-            m_ActorRoster[Activity::TEAM_1].sort(MOXPosComparison());
-        if (m_SortTeamRoster[Activity::TEAM_2])
-            m_ActorRoster[Activity::TEAM_2].sort(MOXPosComparison());
-        if (m_SortTeamRoster[Activity::TEAM_3])
-            m_ActorRoster[Activity::TEAM_3].sort(MOXPosComparison());
-        if (m_SortTeamRoster[Activity::TEAM_4])
-            m_ActorRoster[Activity::TEAM_4].sort(MOXPosComparison());
+        if (m_SortTeamRoster[Activity::TeamOne])
+            m_ActorRoster[Activity::TeamOne].sort(MOXPosComparison());
+        if (m_SortTeamRoster[Activity::TeamTwo])
+            m_ActorRoster[Activity::TeamTwo].sort(MOXPosComparison());
+        if (m_SortTeamRoster[Activity::TeamThree])
+            m_ActorRoster[Activity::TeamThree].sort(MOXPosComparison());
+        if (m_SortTeamRoster[Activity::TeamFour])
+            m_ActorRoster[Activity::TeamFour].sort(MOXPosComparison());
     }
 }
 

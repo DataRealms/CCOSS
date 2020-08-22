@@ -28,7 +28,7 @@ namespace RTE {
 		/// Makes the Round object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Creates a Round to be identical to another, by deep copy.
@@ -42,18 +42,18 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a Round object before deletion from system memory.
 		/// </summary>
-		virtual ~Round() { Destroy(true); }
+		~Round() override { Destroy(true); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the Round object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false) { if (!notInherited) { Entity::Destroy(); } Clear(); }
+		void Destroy(bool notInherited = false) override { if (!notInherited) { Entity::Destroy(); } Clear(); }
 
 		/// <summary>
 		/// Resets the entire Round, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); Entity::Reset(); }
+		void Reset() override { Clear(); Entity::Reset(); }
 #pragma endregion
 
 #pragma region Getters and Setters

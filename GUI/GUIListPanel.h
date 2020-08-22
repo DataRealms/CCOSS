@@ -50,7 +50,8 @@ public:
         MouseEnter, // Mouse left the panel
         MouseLeave, // Mouse left the panel
         DoubleClick,// Double click
-        KeyDown    // Key Down
+		KeyDown,    // Key Down
+		EdgeHit //!< Tried scrolling the selection past the first or last item. data = 0 for top edge, data = 1 for bottom edge.
     } Signal;
 
     // Item structure
@@ -112,7 +113,7 @@ public:
 // Description:     Called when the panel has been destroyed.
 // Arguments:       None.
 
-    void Destroy(void);    
+    void Destroy(); 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +135,7 @@ public:
 // Description:     Clears the liost.
 // Arguments:       None.
 
-    void ClearList(void);
+    void ClearList();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +153,7 @@ public:
 // Description:     Draws the panel
 // Arguments:       Screen class
 
-    void Draw(GUIScreen *Screen);
+    void Draw(GUIScreen *Screen) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +162,7 @@ public:
 // Description:     Called when the mouse goes down on the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    virtual void OnMouseDown(int X, int Y, int Buttons, int Modifier);
+	void OnMouseDown(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +171,7 @@ public:
 // Description:     Called when the mouse goes up on the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    virtual void OnMouseUp(int X, int Y, int Buttons, int Modifier);
+	void OnMouseUp(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -179,7 +180,7 @@ public:
 // Description:     Called when the mouse moves (over the panel, or when captured).
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    virtual void OnMouseMove(int X, int Y, int Buttons, int Modifier);
+	void OnMouseMove(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +189,7 @@ public:
 // Description:     Called when the mouse enters the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    virtual void OnMouseEnter(int X, int Y, int Buttons, int Modifier);
+	void OnMouseEnter(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -197,7 +198,7 @@ public:
 // Description:     Called when the mouse leaves the panel
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    virtual void OnMouseLeave(int X, int Y, int Buttons, int Modifier);
+	void OnMouseLeave(int X, int Y, int Buttons, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -206,7 +207,17 @@ public:
 // Description:     Called when the mouse has double-clicked on the pane.
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
-    virtual void OnDoubleClick(int X, int Y, int Buttons, int Modifier);
+	void OnDoubleClick(int X, int Y, int Buttons, int Modifier) override;
+
+
+	/// <summary>
+	/// Called when the mouse scroll wheel is moved.
+	/// </summary>
+	/// <param name="x">Mouse X position.</param>
+	/// <param name="y">Mouse Y position.</param>
+	/// <param name="modifier">Activated modifier buttons.</param>
+	/// <param name="mouseWheelChange">The amount of wheel movement. Positive is scroll up, negative is scroll down.</param>
+	void OnMouseWheelChange(int x, int y, int modifier, int mouseWheelChange) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -215,7 +226,7 @@ public:
 // Description:     Called when a key is pressed (OnDown & repeating).
 // Arguments:       KeyCode, Modifier.
 
-    virtual void OnKeyPress(int KeyCode, int Modifier);
+	void OnKeyPress(int KeyCode, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -224,7 +235,7 @@ public:
 // Description:     Called when a key goes down.
 // Arguments:       KeyCode, Modifier.
 
-    virtual void OnKeyDown(int KeyCode, int Modifier);
+	void OnKeyDown(int KeyCode, int Modifier) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -244,7 +255,7 @@ public:
 // Description:     Called when the panel gains focus.
 // Arguments:       None.
 
-    virtual void OnGainFocus(void);
+	void OnGainFocus() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -253,7 +264,7 @@ public:
 // Description:     Called when the panel looses focus.
 // Arguments:       None.
 
-    virtual void OnLoseFocus(void);
+	void OnLoseFocus() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -262,7 +273,7 @@ public:
 // Description:     Called when receiving a signal.
 // Arguments:       Signal source, Signal code, Signal data.
 
-    void ReceiveSignal(GUIPanel *Source, int Code, int Data);
+    void ReceiveSignal(GUIPanel *Source, int Code, int Data) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -271,7 +282,7 @@ public:
 // Description:     Locks the control from updating every time a new item is added.
 // Arguments:       None.
 
-    void BeginUpdate(void);
+    void BeginUpdate();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -281,7 +292,7 @@ public:
 //                  Will automatically update the control.
 // Arguments:       None.
 
-    void EndUpdate(void);
+    void EndUpdate();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -299,7 +310,7 @@ public:
 // Description:     Gets the multi-selection value.
 // Arguments:       None.
 
-    bool GetMultiSelect(void);
+    bool GetMultiSelect();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -317,7 +328,7 @@ public:
 // Description:     Gets the selected (or first in the selected list) item.
 // Arguments:       None.
 
-    Item *GetSelected(void);
+    Item *GetSelected();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -326,7 +337,7 @@ public:
 // Description:     Gets the item list.
 // Arguments:       None.
 
-    std::vector<Item *> *GetItemList(void);
+    std::vector<Item *> *GetItemList();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -395,7 +406,7 @@ public:
 // Arguments:       None.
 // Returns:         Index, or -1 if there is no items selected.
 
-    int GetSelectedIndex(void);
+    int GetSelectedIndex();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -424,7 +435,7 @@ public:
 // Description:     Gets the selection list.
 // Arguments:       None.
 
-    std::vector<Item *>    *GetSelectionList(void);
+    std::vector<Item *>    *GetSelectionList();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -442,7 +453,7 @@ public:
 // Description:     Adjusts the size of the panel.
 // Arguments:       Width, Height.
 
-    void SetSize(int Width, int Height);
+    void SetSize(int Width, int Height) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -500,6 +511,20 @@ public:
     void ScrollToBottom();
 
 
+	/// <summary>
+	/// Sets whether the scroll panel scrolls in a loop or not.
+	/// </summary>
+	/// <param name="scrollLoop">True to scroll in a loop, false to scroll with edge stopping.</param>
+	void SetSelectionScrollingLoop(bool scrollLoop);
+
+
+	/// <summary>
+	/// Sets whether the list panel can be scrolled with the mouse scroll wheel.
+	/// </summary>
+	/// <param name="mouseScroll">True to enable scrolling, false to disable.</param>
+	void SetMouseScrolling(bool mouseScroll);
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -527,7 +552,7 @@ private:
 // Description:     Build the drawing bitmap.
 // Arguments:       None.
 
-    void BuildDrawBitmap(void);
+    void BuildDrawBitmap();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -536,7 +561,7 @@ private:
 // Description:     Adjusts the scrollbars.
 // Arguments:       None.
 
-    void AdjustScrollbars(void);
+    void AdjustScrollbars();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -546,6 +571,20 @@ private:
 // Arguments:       Mouse Position, Modifier.
 
     void SelectItem(int X, int Y, int Modifier);
+
+
+	/// <summary>
+	/// Perform list scrolling through the scrollbar.
+	/// </summary>
+	/// <param name="MouseWheelChange">Amount and direction of scrolling. Positive to scroll up, negative to scroll down.</param>
+	void ScrollBarScrolling(int mouseWheelChange);
+
+
+	/// <summary>
+	/// Perform list scrolling by changing the currently selected list item.
+	/// </summary>
+	/// <param name="MouseWheelChange">Amount and direction of scrolling. Positive to scroll up, negative to scroll down.</param>
+	void SelectionListScrolling(int mouseWheelChange);
 
 
 // Members    
@@ -571,6 +610,8 @@ private:
     bool                m_MultiSelect;
     bool                m_HotTracking;
     int                    m_LastSelected;
+	bool				m_LoopSelectionScroll; //!< Whether the list panel scrolls in a loop or not, while scrolling the selection list (as opposed to the scrollbar).
+	bool				m_MouseScroll; //!< Whether the list panel enables scrolling with the mouse scroll wheel.
     
     // This draws items differently, not with boxes etc.
     bool                m_AlternateDrawMode;

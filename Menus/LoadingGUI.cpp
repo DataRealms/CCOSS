@@ -6,20 +6,15 @@
 #include "SettingsMan.h"
 #include "PresetMan.h"
 #include "FrameMan.h"
-#include "UInputMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUICollectionBox.h"
-#include "GUI/GUIProgressBar.h"
 #include "GUI/GUIListBox.h"
-#include "GUI/GUILabel.h"
 #include "GUI/AllegroScreen.h"
 #include "GUI/AllegroBitmap.h"
 #include "GUI/AllegroInput.h"
 
 #include "unzip.h"
-
-extern volatile bool g_Quit;
 
 namespace RTE {
 
@@ -48,7 +43,7 @@ namespace RTE {
 		// Loading splash screen
 		g_FrameMan.ClearBackBuffer32();
 		SceneLayer *loadingSplash = new SceneLayer();
-		loadingSplash->Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.bmp"), false, Vector(), true, false, Vector(1.0, 0));
+		loadingSplash->Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.png"), false, Vector(), true, false, Vector(1.0, 0));
 
 		// Hardcoded offset to make room for the loading box only if DisableLoadingScreen is false.
 		int loadingSplashOffset = g_SettingsMan.DisableLoadingScreen() ? 14 : 120;
@@ -121,7 +116,6 @@ namespace RTE {
 		if (g_System.GetLogToCLI()) { g_System.PrintLoadingToCLI(reportString, newItem); }
 
 		if (g_LoadingGUI.m_ControlManager) {
-			g_UInputMan.Update();
 			if (newItem) {
 				// Write out the last line to the log file before starting a new one
 				if (g_LoadingGUI.m_LoadingLogWriter->WriterOK()) { *g_LoadingGUI.m_LoadingLogWriter << reportString << "\n"; }
@@ -143,21 +137,15 @@ namespace RTE {
 
 				g_FrameMan.FlipFrameBuffers();
 			}
-			// Quit if we're commanded to during loading
-			if (g_Quit) { exit(0); }
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LoadingGUI::LoadDataModules() {
-		// Clear out the PresetMan and all its DataModules
 		g_PresetMan.Destroy();
 		g_PresetMan.Create();
-
-		// Unpack any ".rte.zip" files
-		ExtractArchivedModules();
-		// Load all unpacked modules
+		ExtractZippedModules();
 		g_PresetMan.LoadAllDataModules();
 
 		return true;
@@ -165,7 +153,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::ExtractArchivedModules() {
+	void LoadingGUI::ExtractZippedModules() {
 		al_ffblk zippedModuleInfo;
 		unzFile zipFile;
 		for (int result = al_findfirst("*.rte.zip", &zippedModuleInfo, FA_ALL); result == 0; result = al_findnext(&zippedModuleInfo)) {

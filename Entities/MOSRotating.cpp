@@ -245,7 +245,7 @@ int MOSRotating::Create(const MOSRotating &reference)
 
 	// Attachable copies
     for (const Attachable *attachable : reference.m_Attachables) {
-        if (m_AlreadyCopiedAttachableUniqueIDs.find(attachable->GetUniqueID()) != m_AlreadyCopiedAttachableUniqueIDs.end()) {
+        if (m_AlreadyCopiedAttachableUniqueIDs.find(attachable->GetUniqueID()) == m_AlreadyCopiedAttachableUniqueIDs.end()) {
             AddAttachable(dynamic_cast<Attachable *>(attachable->Clone()));
         }
     }

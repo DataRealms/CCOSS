@@ -110,82 +110,73 @@ int AEmitter::Create(const AEmitter &reference) {
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int AEmitter::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "AddEmission")
-    {
+int AEmitter::ReadProperty(std::string propName, Reader &reader) {
+    if (propName == "AddEmission") {
         Emission * emission = new Emission();
         reader >> *emission;
         m_EmissionList.push_back(emission);
-    }
-    else if (propName == "EmissionSound")
+    } else if (propName == "EmissionSound") {
         reader >> m_EmissionSound;
-    else if (propName == "BurstSound")
+    } else if (propName == "BurstSound") {
         reader >> m_BurstSound;
-    else if (propName == "EndSound")
+    } else if (propName == "EndSound") {
         reader >> m_EndSound;
-    else if (propName == "EmissionEnabled")
+    } else if (propName == "EmissionEnabled") {
         reader >> m_EmitEnabled;
-    else if (propName == "EmissionCount")
+    } else if (propName == "EmissionCount") {
         reader >> m_EmitCount;
-    else if (propName == "EmissionCountLimit")
+    } else if (propName == "EmissionCountLimit") {
         reader >> m_EmitCountLimit;
-    else if (propName == "ParticlesPerMinute")
-    {
+    } else if (propName == "ParticlesPerMinute") {
         float ppm;
         reader >> ppm;
         // Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility
-        for (list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
+        for (list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr) {
             (*eItr)->m_PPM = ppm / m_EmissionList.size();
-    }
-    else if (propName == "MinThrottleRange")
+        }
+    } else if (propName == "MinThrottleRange") {
         reader >> m_MinThrottleRange;
-    else if (propName == "MaxThrottleRange")
+    } else if (propName == "MaxThrottleRange") {
         reader >> m_MaxThrottleRange;
-    else if (propName == "Throttle")
+    } else if (propName == "Throttle") {
         reader >> m_Throttle;
-    else if (propName == "EmissionsIgnoreThis")
+    } else if (propName == "EmissionsIgnoreThis") {
         reader >> m_EmissionsIgnoreThis;
-    else if (propName == "BurstSize")
-    {
+    } else if (propName == "BurstSize") {
         int burstSize;
         reader >> burstSize;
         // Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility
-        for (list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
+        for (list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr) {
             (*eItr)->m_BurstSize = ceilf((float)burstSize / (float)m_EmissionList.size());
-    }
-    else if (propName == "BurstScale")
+        }
+    } else if (propName == "BurstScale") {
         reader >> m_BurstScale;
-    else if (propName == "BurstDamage")
+    } else if (propName == "BurstDamage") {
         reader >> m_BurstDamage;
-	else if (propName == "EmitterDamageMultiplier")
+    } else if (propName == "EmitterDamageMultiplier") {
 		reader >> m_EmitterDamageMultiplier;
-	else if (propName == "BurstSpacing")
+    } else if (propName == "BurstSpacing") {
         reader >> m_BurstSpacing;
-    else if (propName == "BurstTriggered")
+    } else if (propName == "BurstTriggered") {
         reader >> m_BurstTriggered;
-    else if (propName == "EmissionAngle")
+    } else if (propName == "EmissionAngle") {
         reader >> m_EmitAngle;
-    else if (propName == "EmissionOffset")
+    } else if (propName == "EmissionOffset") {
         reader >> m_EmissionOffset;
-    else if (propName == "EmissionDamage")
+    } else if (propName == "EmissionDamage") {
         reader >> m_EmitDamage;
-    else if (propName == "Flash")
-    {
+    } else if (propName == "Flash") {
         const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
         if (pObj) {
             m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
-            AddAttachable(m_pFlash);
         }
-    }
-    else if (propName == "FlashScale")
+    } else if (propName == "FlashScale") {
         reader >> m_FlashScale;
-    else if (propName == "FlashOnlyOnBurst")
+    } else if (propName == "FlashOnlyOnBurst") {
         reader >> m_FlashOnlyOnBurst;
-    else if (propName == "LoudnessOnEmit")
+    } else if (propName == "LoudnessOnEmit") {
         reader >> m_LoudnessOnEmit;
-    else
-    {
+    } else {
         return Attachable::ReadProperty(propName, reader);
     }
 

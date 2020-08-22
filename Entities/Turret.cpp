@@ -70,18 +70,16 @@ int Turret::Create(const Turret &reference) {
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Turret::ReadProperty(std::string propName, Reader &reader)
-{
+int Turret::ReadProperty(std::string propName, Reader &reader) {
     if (propName == "MountedMO") {
         const Entity *pEntity = g_PresetMan.GetEntityPreset(reader);
         if (pEntity) {
             m_pMountedMO = dynamic_cast<MovableObject *>(pEntity->Clone());
-            if (m_pMountedMO->IsDevice()) { AddAttachable(dynamic_cast<HeldDevice *>(m_pMountedMO)); }
         }
         pEntity = 0;
-    }
-    else
+    } else {
         return Attachable::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -183,7 +181,7 @@ void Turret::SetMountedMO(MovableObject *newHeldMO)
 
     if (newHeldMO && newHeldMO->IsHeldDevice()) {
         HeldDevice *pNewDev = dynamic_cast<HeldDevice *>(newHeldMO);
-        dynamic_cast<MOSRotating *>(pNewDev->GetParent())->RemoveAttachable(pNewDev);
+        if (pNewDev->IsAttached()) { dynamic_cast<MOSRotating *>(pNewDev->GetParent())->RemoveAttachable(pNewDev); }
         g_MovableMan.RemoveMO(pNewDev);
         AddAttachable(pNewDev);
         pNewDev = 0;

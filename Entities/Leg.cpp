@@ -100,29 +100,19 @@ int Leg::Create(const Leg &reference) {
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Leg::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "Foot")
-    {
+int Leg::ReadProperty(std::string propName, Reader &reader) {
+    if (propName == "Foot") {
         const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
-        if (pObj)
-        {
+        if (pObj) {
             m_pFoot = dynamic_cast<Attachable *>(pObj->Clone());
-            AddAttachable(m_pFoot);
         }
-    }
-    else if (propName == "ContractedOffset")
-    {
+    } else if (propName == "ContractedOffset") {
         reader >> m_ContractedOffset;
         m_MinExtension = m_ContractedOffset.GetMagnitude();
-    }
-    else if (propName == "ExtendedOffset")
-    {
+    } else if (propName == "ExtendedOffset") {
         reader >> m_ExtendedOffset;
         m_MaxExtension = m_ExtendedOffset.GetMagnitude();
-    }
-    else if (propName == "MaxLength")
-    {
+    } else if (propName == "MaxLength") {
         // For backward compatibiltiy with before
         float maxLength;
         reader >> maxLength;
@@ -131,15 +121,15 @@ int Leg::ReadProperty(std::string propName, Reader &reader)
         m_ContractedOffset.SetXY(m_MinExtension, 0);
         m_MaxExtension = maxLength;
         m_ExtendedOffset.SetXY(m_MaxExtension, 0);
-    }
-    else if (propName == "IdleOffset")
+    } else if (propName == "IdleOffset") {
         reader >> m_IdleOffset;
-    else if (propName == "WillIdle")
+    } else if (propName == "WillIdle") {
         reader >> m_WillIdle;
-    else if (propName == "MoveSpeed")
+    } else if (propName == "MoveSpeed") {
         reader >> m_MoveSpeed;
-    else
+    } else {
         return Attachable::ReadProperty(propName, reader);
+    }
 
     return 0;
 }

@@ -140,91 +140,73 @@ int HDFirearm::Create(const HDFirearm &reference) {
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int HDFirearm::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "Magazine")
-    {
+int HDFirearm::ReadProperty(std::string propName, Reader &reader) {
+    if (propName == "Magazine") {
         const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
-        if (pObj)
-        {
+        if (pObj) {
             m_pMagazineReference = dynamic_cast<const Magazine *>(pObj);
-
             delete m_pMagazine;
             m_pMagazine = dynamic_cast<Magazine *>(m_pMagazineReference->Clone());
-            if (m_pMagazine) { AddAttachable(m_pMagazine); }
         }
-    }
-    else if (propName == "Flash")
-    {
+    } else if (propName == "Flash") {
         const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
-        if (pObj)
-        {
+        if (pObj) {
+            delete m_pFlash;
             m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
-            if (m_pFlash) { AddAttachable(m_pFlash); }
         }
-    }
-    else if (propName == "FireSound")
+    } else if (propName == "FireSound") {
         reader >> m_FireSound;
-    else if (propName == "ActiveSound") {
+    } else if (propName == "ActiveSound") {
         reader >> m_ActiveSound;
         m_ActiveSound.SetAffectedByGlobalPitch(false); //Active sound (i.e. weapon spinup) modifies its pitch, so it has to account for global pitch on its own.
-    } else if (propName == "DeactivationSound")
+    } else if (propName == "DeactivationSound") {
         reader >> m_DeactivationSound;
-    else if (propName == "EmptySound")
+    } else if (propName == "EmptySound") {
         reader >> m_EmptySound;
-    else if (propName == "ReloadStartSound")
+    } else if (propName == "ReloadStartSound") {
         reader >> m_ReloadStartSound;
-    else if (propName == "ReloadEndSound")
+    } else if (propName == "ReloadEndSound") {
         reader >> m_ReloadEndSound;
-    else if (propName == "RateOfFire")
+    } else if (propName == "RateOfFire") {
         reader >> m_RateOfFire;
-    else if (propName == "ActivationDelay")
+    } else if (propName == "ActivationDelay") {
         reader >> m_ActivationDelay;
-    else if (propName == "DeactivationDelay")
+    } else if (propName == "DeactivationDelay") {
         reader >> m_DeactivationDelay;
-    else if (propName == "ReloadTime")
+    } else if (propName == "ReloadTime") {
         reader >> m_ReloadTime;
-    else if (propName == "FullAuto")
+    } else if (propName == "FullAuto") {
         reader >> m_FullAuto;
-    else if (propName == "FireIgnoresThis")
+    } else if (propName == "FireIgnoresThis") {
         reader >> m_FireIgnoresThis;
-    else if (propName == "RecoilTransmission")
+    } else if (propName == "RecoilTransmission") {
         reader >> m_RecoilTransmission;
-	else if (propName == "IsAnimatedManually")
+    } else if (propName == "IsAnimatedManually") {
 		reader >> m_IsAnimatedManually;
-	else if (propName == "ShakeRange")
-    {
+    } else if (propName == "ShakeRange") {
         reader >> m_ShakeRange;
         m_ShakeRange /= 2;
-    }
-    else if (propName == "SharpShakeRange")
-    {
+    } else if (propName == "SharpShakeRange") {
         reader >> m_SharpShakeRange;
         m_SharpShakeRange /= 2;
-    }
-    else if (propName == "NoSupportFactor")
+    } else if (propName == "NoSupportFactor") {
         reader >> m_NoSupportFactor;
-    else if (propName == "ParticleSpreadRange")
-    {
+    } else if (propName == "ParticleSpreadRange") {
         reader >> m_ParticleSpreadRange;
         m_ParticleSpreadRange /= 2;
-    }
-    else if (propName == "ShellSpreadRange")
-    {
+    } else if (propName == "ShellSpreadRange") {
         reader >> m_ShellSpreadRange;
         m_ShellSpreadRange /= 2;
-    }
-    else if (propName == "ShellAngVelRange")
-    {
+    } else if (propName == "ShellAngVelRange") {
         reader >> m_ShellAngVelRange;
         m_ShellAngVelRange /= 2;
-    }
-    else if (propName == "MuzzleOffset")
+    } else if (propName == "MuzzleOffset") {
         reader >> m_MuzzleOff;
-    else if (propName == "EjectionOffset")
+    } else if (propName == "EjectionOffset") {
         reader >> m_EjectOff;
-    else
+    } else {
         return HeldDevice::ReadProperty(propName, reader);
+    }
 
     return 0;
 }

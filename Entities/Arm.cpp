@@ -88,34 +88,28 @@ int Arm::Create(const Arm &reference) {
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Arm::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "HeldDevice")
-    {
+int Arm::ReadProperty(std::string propName, Reader &reader) {
+    if (propName == "HeldDevice") {
         const Entity *pEntity;
         pEntity = g_PresetMan.GetEntityPreset(reader);
-        if (pEntity)
-        {
+        if (pEntity) {
             m_pHeldMO = dynamic_cast<MovableObject *>(pEntity->Clone());
-            if (m_pHeldMO->IsDevice()) { AddAttachable(dynamic_cast<HeldDevice *>(m_pHeldMO)); }
         }
         pEntity = 0;
-    }
-    else if (propName == "Hand")
-    {
+    } else if (propName == "Hand") {
         reader >> m_HandFile;
         m_pHand = m_HandFile.GetAsBitmap();
-    }
-    else if (propName == "MaxLength")
+    } else if (propName == "MaxLength") {
         reader >> m_MaxLength;
-    else if (propName == "IdleOffset")
+    } else if (propName == "IdleOffset") {
         reader >> m_IdleOffset;
-    else if (propName == "WillIdle")
+    } else if (propName == "WillIdle") {
         reader >> m_WillIdle;
-    else if (propName == "MoveSpeed")
+    } else if (propName == "MoveSpeed") {
         reader >> m_MoveSpeed;
-    else
+    } else {
         return Attachable::ReadProperty(propName, reader);
+    }
 
     return 0;
 }

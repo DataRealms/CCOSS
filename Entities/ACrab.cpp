@@ -481,11 +481,13 @@ Vector ACrab::GetCPUPos() const
 
 Vector ACrab::GetEyePos() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->GetMountedMO())
-        return m_pTurret->GetMountedMO()->GetPos();
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
+        return m_pTurret->GetMountedDevice()->GetPos();
 
     return m_Pos;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Attachable *ACrab::GetTurret() const {
     return (m_pTurret && m_pTurret->IsAttached()) ? dynamic_cast<Attachable *>(m_pTurret) : nullptr;
@@ -686,7 +688,7 @@ bool ACrab::AddPieMenuSlices(PieMenuGUI *pPieMenu)
     Actor::AddPieMenuSlices(pPieMenu);
 
     // Add any custom slices from a currently held device
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
         m_pTurret->GetMountedDevice()->AddPieMenuSlices(pPieMenu);
 
     return true;
@@ -739,9 +741,9 @@ bool ACrab::HandlePieCommand(int pieSliceIndex)
 
 MovableObject * ACrab::GetEquippedItem() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsSomethingMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        return m_pTurret->GetMountedMO();
+        return m_pTurret->GetMountedDevice();
     }
 
     return 0;
@@ -756,9 +758,9 @@ MovableObject * ACrab::GetEquippedItem() const
 
 bool ACrab::FirearmIsReady() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsSomethingMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
         if (pWeapon && pWeapon->GetRoundInMagCount() != 0)
             return true;
     }
@@ -774,9 +776,9 @@ bool ACrab::FirearmIsReady() const
 
 bool ACrab::FirearmIsEmpty() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
         if (pWeapon && pWeapon->GetRoundInMagCount() == 0)
             return true;
     }
@@ -792,9 +794,9 @@ bool ACrab::FirearmIsEmpty() const
 
 bool ACrab::FirearmNeedsReload() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
         if (pWeapon && pWeapon->NeedsReloading())
             return true;
     }
@@ -810,9 +812,9 @@ bool ACrab::FirearmNeedsReload() const
 
 bool ACrab::FirearmIsSemiAuto() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
         return pWeapon && !pWeapon->IsFullAuto();
     }
     return false;
@@ -828,9 +830,9 @@ bool ACrab::FirearmIsSemiAuto() const
 
 void ACrab::ReloadFirearm()
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
         if (pWeapon)
             pWeapon->Reload();
     }
@@ -846,9 +848,9 @@ void ACrab::ReloadFirearm()
 int ACrab::FirearmActivationDelay() const
 {
     // Check if the currently held device is already the desired type
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
         if (pWeapon)
             return pWeapon->GetActivationDelay();
     }
@@ -879,7 +881,7 @@ bool ACrab::IsWithinRange(Vector &point) const
     float range = m_AimDistance;
 
     // Add the sharp range of the equipped weapon
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
         range += m_pTurret->GetMountedDevice()->GetSharpLength() * m_SharpAimProgress;
     }
@@ -905,7 +907,7 @@ bool ACrab::Look(float FOVSpread, float range)
     Vector aimPos = GetCPUPos();
 
     // If aiming down the barrel, look through that
-    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
         aimPos = m_pTurret->GetMountedDevice()->GetPos();
         aimDistance += m_pTurret->GetMountedDevice()->GetSharpLength();
@@ -947,7 +949,7 @@ MovableObject * ACrab::LookForMOs(float FOVSpread, unsigned char ignoreMaterial,
     float aimDistance = m_AimDistance + g_FrameMan.GetPlayerScreenWidth() * 0.51;   // Set the length of the look vector
 
     // If aiming down the barrel, look through that
-    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
         aimPos = m_pTurret->GetMountedDevice()->GetPos();
         aimDistance += m_pTurret->GetMountedDevice()->GetSharpLength();
@@ -2461,17 +2463,14 @@ void ACrab::Update()
     ////////////////////////////////////
     // Fire/Activate held devices
 
-    if (m_pTurret && m_pTurret->IsAttached())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
         // Activate held device, if a device is held.
-        if (m_pTurret->IsHeldDeviceMounted())
-        {
-            m_pTurret->GetMountedDevice()->SetSharpAim(m_SharpAimProgress);
-            if (m_Controller.IsState(WEAPON_FIRE))
-                m_pTurret->GetMountedDevice()->Activate();
-            else
-                m_pTurret->GetMountedDevice()->Deactivate();
-        }
+        m_pTurret->GetMountedDevice()->SetSharpAim(m_SharpAimProgress);
+        if (m_Controller.IsState(WEAPON_FIRE))
+            m_pTurret->GetMountedDevice()->Activate();
+        else
+            m_pTurret->GetMountedDevice()->Deactivate();
     }
 
     // Controller disabled
@@ -2726,7 +2725,7 @@ void ACrab::Update()
     // Reset this each frame
     m_SharpAimMaxedOut = false;
 
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
         float maxLength = m_pTurret->GetMountedDevice()->GetSharpLength();
 
@@ -2772,7 +2771,7 @@ void ACrab::Update()
         m_pTurret->SetHFlipped(m_HFlipped);
         m_pTurret->SetJointPos(m_Pos + m_pTurret->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
         m_pTurret->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pTurret->SetMountedRotOffset((m_HFlipped ? -m_AimAngle : m_AimAngle) - m_Rotation.GetRadAngle());
+        m_pTurret->SetMountedDeviceRotOffset((m_HFlipped ? -m_AimAngle : m_AimAngle) - m_Rotation.GetRadAngle());
         m_pTurret->Update();
         // Update the Atoms' offsets in the parent group
 //        Matrix atomRot(FacingAngle(m_pTurret->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
@@ -3104,7 +3103,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     // Player AI drawing
 
     // Device aiming reticule
-    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
         m_pTurret->GetMountedDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsPlayerControlled());
 
     //////////////////////////////////////

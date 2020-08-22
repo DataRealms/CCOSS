@@ -20,7 +20,6 @@ namespace RTE {
 		SerializableOverrideMethods
 		ClassInfoGetters
 
-
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a Attachable object in system memory. Create() should be called before using the object.
@@ -37,7 +36,7 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a Attachable object before deletion from system memory.
+		/// Destructor method used to clean up an Attachable object before deletion from system memory.
 		/// </summary>
 		~Attachable() override { Destroy(true); }
 
@@ -305,7 +304,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
 		/// <param name="internalBlast">The internal blast impulse which will push the gibs away from the center.</param>
-		/// <param name="MOToIgnore">A pointer to an MO which the gibs shuold not be colliding with!</param>
+		/// <param name="MOToIgnore">A pointer to an MO which the gibs should not be colliding with!</param>
 		void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *MOToIgnore = 0) override;
 
 		/// <summary>

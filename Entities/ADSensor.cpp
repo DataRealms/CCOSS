@@ -57,14 +57,14 @@ namespace RTE {
 
 	Actor * ADSensor::SenseActor(const Vector &doorPos, const Matrix &doorRot, bool doorHFlipped, MOID ignoreMOID) {
 		Actor *sensedActor = 0;
-		MOID foundMOID = g_SceneMan.CastMORay(doorPos + m_StartOffset.GetXFlipped(doorHFlipped) * doorRot, m_SensorRay.GetXFlipped(doorHFlipped) * doorRot, ignoreMOID, Activity::NOTEAM, 0, true, m_Skip);
+		MOID foundMOID = g_SceneMan.CastMORay(doorPos + m_StartOffset.GetXFlipped(doorHFlipped) * doorRot, m_SensorRay.GetXFlipped(doorHFlipped) * doorRot, ignoreMOID, Activity::NoTeam, 0, true, m_Skip);
 
 		if (foundMOID) {
 			sensedActor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(g_MovableMan.GetRootMOID(foundMOID)));
 
 			// Reverse the ray direction if the sensed actor was not valid, to see if we hit anything else relevant.
 			if (!sensedActor || !sensedActor->IsControllable()) {
-				foundMOID = g_SceneMan.CastMORay(doorPos + (m_StartOffset.GetXFlipped(doorHFlipped) + m_SensorRay.GetXFlipped(doorHFlipped)) * doorRot, (-m_SensorRay.GetXFlipped(doorHFlipped)) * doorRot, ignoreMOID, Activity::NOTEAM, 0, true, m_Skip);
+				foundMOID = g_SceneMan.CastMORay(doorPos + (m_StartOffset.GetXFlipped(doorHFlipped) + m_SensorRay.GetXFlipped(doorHFlipped)) * doorRot, (-m_SensorRay.GetXFlipped(doorHFlipped)) * doorRot, ignoreMOID, Activity::NoTeam, 0, true, m_Skip);
 
 				if (foundMOID) { sensedActor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(g_MovableMan.GetRootMOID(foundMOID))); }
 			}

@@ -58,11 +58,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Color::SetRGBWithIndex(unsigned char index) {
+
 		m_Index = index;
 
 		RGB color;
 		get_color(static_cast<int>(m_Index), &color);
 
+		// Multiply by 4 because the Allegro RGB struct elements are in range 0-63, and proper RGB needs 0-255.
 		m_R = color.r * 4;
 		m_G = color.g * 4;
 		m_B = color.b * 4;

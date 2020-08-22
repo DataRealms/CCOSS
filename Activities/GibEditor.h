@@ -74,7 +74,7 @@ ClassInfoGetters
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~GibEditor() { Destroy(true); }
+	~GibEditor() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const GibEditor &reference);
+	int Create(const GibEditor &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); EditorActivity::Reset(); }
+	void Reset() override { Clear(); EditorActivity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +118,7 @@ ClassInfoGetters
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+	void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +149,7 @@ ClassInfoGetters
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Start();
+	int Start() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -159,7 +159,7 @@ ClassInfoGetters
 // Arguments:       Whether to pause the game or not.
 // Return value:    None.
 
-    virtual void Pause(bool pause = true);
+	void SetPaused(bool pause = true) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +169,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void End();
+	void End() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +180,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -192,7 +192,7 @@ ClassInfoGetters
 //                  Which screen's GUI to draw onto the bitmap.
 // Return value:    None.
 
-    virtual void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0);
+	void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +204,7 @@ ClassInfoGetters
 //                  The absolute position of the target bitmap's upper left corner in the scene.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector());
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -245,7 +245,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateNewDialog();
+	void UpdateNewDialog() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -255,7 +255,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateLoadDialog();
+	void UpdateLoadDialog() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -265,7 +265,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateSaveDialog();
+	void UpdateSaveDialog() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -275,7 +275,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateChangesDialog();
+	void UpdateChangesDialog() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -285,7 +285,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateOverwriteDialog();
+	void UpdateOverwriteDialog() override;
 
 
     // Member variables

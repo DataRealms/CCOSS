@@ -96,9 +96,6 @@
     <ClInclude Include="Managers\PresetMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="Managers\RTEManagers.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
     <ClInclude Include="Managers\SceneMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
@@ -232,9 +229,6 @@
       <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\AHuman.h">
-      <Filter>Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Entities\AllEntities.h">
       <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\Arm.h">
@@ -408,12 +402,6 @@
     <ClInclude Include="Managers\NetworkServer.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="Managers\Network.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="Managers\NetworkMessages.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
     <ClInclude Include="Activities\MultiplayerGame.h">
       <Filter>Activities</Filter>
     </ClInclude>
@@ -475,6 +463,21 @@
       <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\Round.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="System\NetworkMessages.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\InputScheme.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\InputMapping.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\MetaSave.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Activity.h">
       <Filter>Entities</Filter>
     </ClInclude>
   </ItemGroup>
@@ -901,6 +904,18 @@
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="Entities\Round.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="System\InputScheme.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\InputMapping.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\MetaSave.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Activity.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
   </ItemGroup>

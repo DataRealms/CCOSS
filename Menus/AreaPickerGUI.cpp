@@ -86,7 +86,7 @@ int AreaPickerGUI::Create(Controller *pController, string onlyOfType)
 
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.png");
         s_pCursor = cursorFile.GetAsBitmap();
     }
 

@@ -27,16 +27,16 @@ namespace RTE {
 		/// Makes the SettingsMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create() { return (Serializable::Create() < 0) ? -1 : 0; }
+		int Create() override { return Serializable::Create(); }
 
 		/// <summary>
-		/// Makes the Serializable ready for use.
+		/// Makes the SettingsMan object ready for use.
 		/// </summary>
-		/// <param name="reader">A Reader that the Serializable will create itself from.</param>
+		/// <param name="reader">A Reader that the SettingsMan will create itself from.</param>
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
 		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(Reader &reader, bool checkType = true, bool doCreate = true);
+		int Create(Reader &reader, bool checkType = true, bool doCreate = true) override;
 #pragma endregion
 
 #pragma region Destruction
@@ -53,7 +53,7 @@ namespace RTE {
 		/// <summary>
 		/// Resets the entire SettingsMan, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region Settings Manager Operations
@@ -463,7 +463,7 @@ namespace RTE {
 		/// Gets the class name of this object.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	protected:

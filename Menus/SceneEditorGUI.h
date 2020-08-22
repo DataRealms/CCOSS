@@ -108,14 +108,14 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire SceneEditorGUI, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -278,18 +278,18 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  Draw
+// Method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the editor
 // Arguments:       The bitmap to draw on.
 //                  The absolute position of the target bitmap's upper left corner in the scene.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) const;
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -410,8 +410,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    SceneEditorGUI(const SceneEditorGUI &reference);
-    SceneEditorGUI & operator=(const SceneEditorGUI &rhs);
+	SceneEditorGUI(const SceneEditorGUI &reference) {}
+	SceneEditorGUI & operator=(const SceneEditorGUI &rhs) {}
 
 };
 

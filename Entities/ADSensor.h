@@ -27,27 +27,27 @@ namespace RTE {
 		/// Makes the ADSensor object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create() { return Serializable::Create(); }
+		int Create() override { return Serializable::Create(); }
 
 		/// <summary>
 		/// Creates an ADSensor to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the ADSensor to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const ADSensor &reference);
+		int Create(const ADSensor &reference);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up an ADSensor object before deletion from system memory.
 		/// </summary>
-		virtual ~ADSensor() { Destroy(); }
+		~ADSensor() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the ADSensor object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false) { Clear(); }
+		void Destroy() { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -93,7 +93,7 @@ namespace RTE {
 		/// Gets the class name of this Entity.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return m_sClassName; }
+		const std::string & GetClassName() const override { return m_sClassName; }
 #pragma endregion
 
 	protected:

@@ -19,7 +19,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(ACDropShip, ACraft, 0)
+ConcreteClassInfo(ACDropShip, ACraft, 10)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -345,11 +345,11 @@ MOID ACDropShip::DetectObstacle(float distance)
     MOID detected = g_NoMOID;
 
     // Check center too?
-    if ((detected = g_SceneMan.CastMORay(m_Pos, checkRay, m_RootMOID, Activity::NOTEAM, 0, true, 30)) != g_NoMOID)
+    if ((detected = g_SceneMan.CastMORay(m_Pos, checkRay, m_RootMOID, Activity::NoTeam, 0, true, 30)) != g_NoMOID)
         return detected;
-    if ((detected = g_SceneMan.CastMORay(rPos, checkRay, m_RootMOID, Activity::NOTEAM, 0, true, 30)) != g_NoMOID)
+    if ((detected = g_SceneMan.CastMORay(rPos, checkRay, m_RootMOID, Activity::NoTeam, 0, true, 30)) != g_NoMOID)
         return detected;
-    if ((detected = g_SceneMan.CastMORay(lPos, checkRay, m_RootMOID, Activity::NOTEAM, 0, true, 30)) != g_NoMOID)
+    if ((detected = g_SceneMan.CastMORay(lPos, checkRay, m_RootMOID, Activity::NoTeam, 0, true, 30)) != g_NoMOID)
         return detected;
 
     return false;

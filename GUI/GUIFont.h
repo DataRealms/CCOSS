@@ -155,7 +155,7 @@ public:
 // Description:     Gets the font height.
 // Arguments:       None.
 
-    int GetFontHeight(void);
+    int GetFontHeight();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +164,7 @@ public:
 // Description:     Gets the name of the font
 // Arguments:       None.
 
-    std::string GetName(void);
+    std::string GetName();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -173,7 +173,7 @@ public:
 // Description:     Destroys the font data
 // Arguments:       None.
 
-    void Destroy(void);
+    void Destroy();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -182,7 +182,7 @@ public:
 // Description:     Get the character kerning (spacing)
 // Arguments:       None.
 
-    int GetKerning(void);
+    int GetKerning();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

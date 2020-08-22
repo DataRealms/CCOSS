@@ -35,7 +35,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(Actor, MOSRotating, 0);
+ConcreteClassInfo(Actor, MOSRotating, 20);
 
 BITMAP **Actor::m_apNoTeamIcon;
 BITMAP *Actor::m_apAIIcons[AIMODE_COUNT];
@@ -285,9 +285,9 @@ int Actor::Create(const Actor &reference)
         iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Follow000.bmp");
         m_apAIIcons[AIMODE_SQUAD] = iconFile.GetAsBitmap();
 
-        ContentFile arrowFile("Base.rte/GUIs/Indicators/SelectArrow.bmp");
+        ContentFile arrowFile("Base.rte/GUIs/Indicators/SelectArrow.png");
         m_apSelectArrow = arrowFile.GetAsAnimation(4);
-        ContentFile alarmFile("Base.rte/GUIs/Indicators/AlarmExclamation.bmp");
+        ContentFile alarmFile("Base.rte/GUIs/Indicators/AlarmExclamation.png");
         m_apAlarmExclamation = alarmFile.GetAsAnimation(2);
 
         m_sIconsLoaded = true;
@@ -1076,7 +1076,7 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
 	{
 		int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
 		// Only flash if player is human (AI players don't have screens!)
-		if (brainOfPlayer != Activity::NOPLAYER && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
+		if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
 		{
 			// Croaked.. flash for a longer period
 			if (m_ToDelete || m_Status == DEAD)
@@ -1643,7 +1643,7 @@ void Actor::Update()
 	if (g_SettingsMan.FlashOnBrainDamage())
 	{
 		int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
-		if (brainOfPlayer != Activity::NOPLAYER && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
+		if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
 		{
 			// Got Hurt
 			if (m_PrevHealth - m_Health > 1.5)
@@ -1713,7 +1713,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     // Only draw if the team viewing this is on the same team OR has seen the space where this is located
     int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NOTEAM)
+    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
     {
         if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
             return;
@@ -1788,13 +1788,13 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 				{
 					m_pControllerIcon = 0;
 					if (m_Team == 0)
-						m_pControllerIcon = g_UInputMan.GetDeviceIcon(UInputMan::DEVICE_GAMEPAD_1);
+						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_1);
 					else if (m_Team == 1)
-						m_pControllerIcon = g_UInputMan.GetDeviceIcon(UInputMan::DEVICE_GAMEPAD_2);
+						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_2);
 					else if (m_Team == 2)
-						m_pControllerIcon = g_UInputMan.GetDeviceIcon(UInputMan::DEVICE_GAMEPAD_3);
+						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_3);
 					else if (m_Team == 3)
-						m_pControllerIcon = g_UInputMan.GetDeviceIcon(UInputMan::DEVICE_GAMEPAD_4);
+						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_4);
 					if (m_pControllerIcon)
 					{
 						BITMAP **apControllerBitmaps = 0;
@@ -1996,11 +1996,11 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     // AI Mode team roster HUD lines
     if (/*m_Controller.IsState(PIE_MENU_ACTIVE) || */m_Controller.IsState(ACTOR_NEXT_PREP) || m_Controller.IsState(ACTOR_PREV_PREP))
     {
-        int prevColor = m_Controller.IsState(ACTOR_PREV_PREP) ? 122 : (m_Team == Activity::TEAM_1 ? 13 : 147);
-        int nextColor = m_Controller.IsState(ACTOR_NEXT_PREP) ? 122 : (m_Team == Activity::TEAM_1 ? 13 : 147);
+        int prevColor = m_Controller.IsState(ACTOR_PREV_PREP) ? 122 : (m_Team == Activity::TeamOne ? 13 : 147);
+        int nextColor = m_Controller.IsState(ACTOR_NEXT_PREP) ? 122 : (m_Team == Activity::TeamOne ? 13 : 147);
         int prevSpacing = m_Controller.IsState(ACTOR_PREV_PREP) ? 3 : 9;
         int nextSpacing = m_Controller.IsState(ACTOR_NEXT_PREP) ? 3 : 9;
-        int altColor = m_Team == Activity::TEAM_1 ? 11 : 160;
+        int altColor = m_Team == Activity::TeamOne ? 11 : 160;
 
         Actor *pPrevAdj = 0;
         Actor *pNextAdj = 0;

@@ -58,10 +58,6 @@ public:
         SpriteAnimModeCount
     };
 
-/* abstract class
-// Concrete allocation and cloning definitions
-EntityAllocation(MOSprite)
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     MOSprite
@@ -80,7 +76,7 @@ EntityAllocation(MOSprite)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~MOSprite() { Destroy(true); }
+	~MOSprite() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -97,12 +93,7 @@ EntityAllocation(MOSprite)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(ContentFile spriteFile,
-                       const int frameCount = 1,
-                       const float mass = 1,
-                       const Vector &position = Vector(0, 0),
-                       const Vector &velocity = Vector(0, 0),
-                       const unsigned long lifetime = 0);
+	int Create(ContentFile spriteFile, const int frameCount = 1, const float mass = 1, const Vector &position = Vector(0, 0), const Vector &velocity = Vector(0, 0), const unsigned long lifetime = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -113,7 +104,7 @@ EntityAllocation(MOSprite)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const MOSprite &reference);
+	int Create(const MOSprite &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +115,7 @@ EntityAllocation(MOSprite)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +126,7 @@ EntityAllocation(MOSprite)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); MovableObject::Reset(); }
+    void Reset() override { Clear(); MovableObject::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +137,7 @@ EntityAllocation(MOSprite)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +147,7 @@ EntityAllocation(MOSprite)
 // Arguments:       None.
 // Return value:    The radius from its center to the edge of its graphical representation.
 
-    virtual float GetRadius() const { return m_MaxRadius; }
+	float GetRadius() const override { return m_MaxRadius; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -166,7 +157,7 @@ EntityAllocation(MOSprite)
 // Arguments:       None.
 // Return value:    The largest diameter across its graphical representation.
 
-    virtual float GetDiameter() const { return m_MaxDiameter; }
+	float GetDiameter() const override { return m_MaxDiameter; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -176,7 +167,7 @@ EntityAllocation(MOSprite)
 // Arguments:       None.
 // Return value:    A Vector with the absolute position of this' HUD stack top point.
 
-    virtual Vector GetAboveHUDPos() const { return m_Pos + Vector(0, -m_MaxRadius); }
+	Vector GetAboveHUDPos() const override { return m_Pos + Vector(0, -m_MaxRadius); }
 
 // TODO: Improve this one! Really crappy fit
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -189,7 +180,7 @@ EntityAllocation(MOSprite)
 // Return value:    A Box which is guaranteed to contain this. Does nto take wrapping into
 //                  account, and parts of this box may be out of bounds!
 
-    virtual Box GetBoundingBox() const { return Box(m_Pos + Vector(-m_MaxRadius, -m_MaxRadius), m_MaxDiameter, m_MaxDiameter); }
+	Box GetBoundingBox() const { return Box(m_Pos + Vector(-m_MaxRadius, -m_MaxRadius), m_MaxDiameter, m_MaxDiameter); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -253,7 +244,7 @@ EntityAllocation(MOSprite)
 // Arguments:       None.
 // Return value:    Whether flipped or not.
 
-    virtual bool IsHFlipped() const { return m_HFlipped; }
+	bool IsHFlipped() const override { return m_HFlipped; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -263,7 +254,7 @@ EntityAllocation(MOSprite)
 // Arguments:       None.
 // Return value:    The rotational Matrix of this MovableObject.
 
-    virtual Matrix GetRotMatrix() const { return m_Rotation; }
+	Matrix GetRotMatrix() const override { return m_Rotation; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -273,7 +264,7 @@ EntityAllocation(MOSprite)
 // Arguments:       None.
 // Return value:    The rotational angle of this, in radians.
 
-    virtual float GetRotAngle() const { return m_Rotation.GetRadAngle(); }
+	float GetRotAngle() const override { return m_Rotation.GetRadAngle(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -284,7 +275,7 @@ EntityAllocation(MOSprite)
 // Arguments:       None.
 // Return value:    The angular velocity in radians per second.
 
-    virtual float GetAngularVel() const { return m_AngularVel; }
+	float GetAngularVel() const override { return m_AngularVel; }
 
 
 /* Can't do this since sprite is owned by ContentMan.
@@ -369,7 +360,7 @@ EntityAllocation(MOSprite)
 // Arguments:       A bool with the new value.
 // Return value:    None.
 
-    virtual void SetHFlipped(const bool flipped) { m_HFlipped = flipped; }
+	void SetHFlipped(const bool flipped) override { m_HFlipped = flipped; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -379,7 +370,7 @@ EntityAllocation(MOSprite)
 // Arguments:       The new absolute angle in radians.
 // Return value:    None.
 
-    virtual void SetRotAngle(float newAngle) { m_Rotation.SetRadAngle(newAngle); }
+	void SetRotAngle(float newAngle) override { m_Rotation.SetRadAngle(newAngle); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -390,7 +381,7 @@ EntityAllocation(MOSprite)
 // Arguments:       The new angular velocity in radians per second.
 // Return value:    None.
 
-    virtual void SetAngularVel(float newRotVel) { m_AngularVel = newRotVel; }
+	void SetAngularVel(float newRotVel) override { m_AngularVel = newRotVel; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -402,7 +393,7 @@ EntityAllocation(MOSprite)
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    virtual BITMAP * GetGraphicalIcon() { return m_aSprite[0]; }
+    BITMAP * GetGraphicalIcon() override { return m_aSprite[0]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -413,8 +404,8 @@ EntityAllocation(MOSprite)
 // Arguments:       None.
 // Return value:    Whether this is either moving or rotating too fast.
 
-    virtual bool IsTooFast() const { return m_Vel.GetLargest() > 500.0f || fabs(m_AngularVel) > (2000.0f / (m_MaxRadius + 1.0f)); }
-    //virtual bool IsTooFast() const { return m_Vel.GetLargest() > 500 || fabs(m_AngularVel) > 100.0f; }
+	bool IsTooFast() const override { return m_Vel.GetLargest() > 500.0f || fabs(m_AngularVel) > (2000.0f / (m_MaxRadius + 1.0f)); }
+    //bool IsTooFast() const override { return m_Vel.GetLargest() > 500 || fabs(m_AngularVel) > 100.0f; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -425,7 +416,7 @@ EntityAllocation(MOSprite)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void FixTooFast() { while (IsTooFast()) { m_Vel *= 0.5; m_AngularVel *= 0.5; } }
+	void FixTooFast() override { while (IsTooFast()) { m_Vel *= 0.5; m_AngularVel *= 0.5; } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -436,30 +427,8 @@ EntityAllocation(MOSprite)
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+	bool IsOnScenePoint(Vector &scenePoint) const override;
 
-/* implemented in MovableObject
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  PreTravel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does stuff that needs to be done before Update(). Always call before
-//                  calling Update.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void PreTravel();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  PostTravel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does stuff that needs to be done after Update(). Always call after
-//                  calling Update.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void PostTravel();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RotateOffset
@@ -470,7 +439,7 @@ EntityAllocation(MOSprite)
 // Arguments:       A vector which is supposed to be offset from this' center when upright.
 // Return value:    The resulting vector whihch has been flipped and rotated as appropriate.
 
-    virtual Vector RotateOffset(const Vector &offset) const;
+	Vector RotateOffset(const Vector &offset) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -482,7 +451,7 @@ EntityAllocation(MOSprite)
 // Arguments:       A vector which is supposed to be offset from this' center when upright.
 // Return value:    The resulting vector whihch has been flipped and rotated as appropriate.
 
-    virtual Vector UnRotateOffset(const Vector &offset) const;
+	Vector UnRotateOffset(const Vector &offset) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -492,7 +461,7 @@ EntityAllocation(MOSprite)
 // Arguments:       Emitter preset name and module name
 // Return value:    None
 
-	virtual void SetEntryWound(std::string presetName, std::string moduleName);
+	void SetEntryWound(std::string presetName, std::string moduleName);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetExitWound
@@ -501,7 +470,7 @@ EntityAllocation(MOSprite)
 // Arguments:       Emitter preset name and module name
 // Return value:    None
 
-	virtual void SetExitWound(std::string presetName, std::string moduleName);
+	void SetExitWound(std::string presetName, std::string moduleName);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -511,7 +480,7 @@ EntityAllocation(MOSprite)
 // Arguments:       None
 // Return value:    Wound emitter preset name
 
-	virtual std::string GetEntryWoundPresetName() const;
+	std::string GetEntryWoundPresetName() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -521,7 +490,7 @@ EntityAllocation(MOSprite)
 // Arguments:       None
 // Return value:    Wound emitter preset name
 
-	virtual std::string GetExitWoundPresetName() const;
+	std::string GetExitWoundPresetName() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -531,16 +500,16 @@ EntityAllocation(MOSprite)
 // Arguments:       None
 // Return value:    Animation duration in ms
 
-	virtual int GetSpriteAnimDuration() const { return m_SpriteAnimDuration; }
+	int GetSpriteAnimDuration() const { return m_SpriteAnimDuration; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetSpriteAnimDuration
+// Virtual method:  SetSpriteAnimDuration
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets animation duration in ms
 // Arguments:       Animation duration in ms
 // Return value:    Mone
 
-	virtual void SetSpriteAnimDuration(int newDuration) { m_SpriteAnimDuration = newDuration; }
+	void SetSpriteAnimDuration(int newDuration) { m_SpriteAnimDuration = newDuration; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -550,7 +519,7 @@ EntityAllocation(MOSprite)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -565,10 +534,7 @@ EntityAllocation(MOSprite)
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const = 0;
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -641,8 +607,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MOSprite(const MOSprite &reference);
-    MOSprite & operator=(const MOSprite &rhs);
+	MOSprite(const MOSprite &reference) {}
+	MOSprite & operator=(const MOSprite &rhs) {}
 
 };
 

@@ -126,6 +126,8 @@ int g_IntroState = START;
 int g_StationOffsetX;
 int g_StationOffsetY;
 
+bool g_HadResolutionChange = false; //!< Need this so we can restart PlayIntroTitle without an endless loop or leaks. Will be set true by ReinitMainMenu and set back to false at the end of the switch.
+
 MainMenuGUI *g_pMainMenuGUI = 0;
 ScenarioGUI *g_pScenarioGUI = 0;
 Controller *g_pMainMenuController = 0;
@@ -195,7 +197,7 @@ void ReinitMainMenu() {
 
 	InitMainMenu();
 	g_FrameMan.DestroyTempBackBuffers();
-	g_FrameMan.SetResolutionChanged(false);
+	g_HadResolutionChange = true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -660,14 +662,17 @@ bool PlayIntroTitle() {
 			//if (g_IntroState == MENUAPPEAR) {}
 
 			if (g_IntroState == MENUACTIVE) {
-				if (g_FrameMan.ResolutionChanged()) {
-					resX = g_FrameMan.GetResX();
-					resY = g_FrameMan.GetResY();
-					//starArea = resX * pBackdrop->GetBitmap()->h;
-					//starCount = starArea / 1000;
-
-					ReinitMainMenu();
+				// This will be true after we break from the current PlayIntroTitle and get to this point in the new one, so we must reset the flags here otherwise we will loop for all eternity.
+				if (g_HadResolutionChange) {
+					g_FrameMan.SetResolutionChanged(false);
+					g_HadResolutionChange = false;
+					// Change the screen to the options menu otherwise we're at the main screen after reiniting.
 					g_pMainMenuGUI->SetMenuScreen(MainMenuGUI::OPTIONSSCREEN);
+				}
+				if (g_FrameMan.ResolutionChanged()) {
+					ReinitMainMenu();
+					// Break here so we can go on and destruct everything and start PlayIntroTitle() again to get all the elements properly aligned instead of doing it manually and without any leaks.
+					break;
 				}
 				g_pMainMenuGUI->Update();
 				g_pMainMenuGUI->Draw(g_FrameMan.GetBackBuffer32());
@@ -1515,19 +1520,28 @@ bool PlayIntroTitle() {
     }
 
     // Clean up heap data
-    destroy_bitmap(pFadeScreen); pFadeScreen = 0;
-    for (int slide = 0; slide < SLIDECOUNT; ++slide)
-    {
-        destroy_bitmap(apIntroSlides[slide]);
-        apIntroSlides[slide] = 0;
-    }
-    delete [] apIntroSlides; apIntroSlides = 0;
-    delete pBackdrop; pBackdrop = 0;
-    delete pTitle; pTitle = 0;
-    delete pPlanet; pPlanet = 0;
-    delete pMoon; pMoon = 0;
-    delete pStation; pStation = 0;
-    delete [] aStars; aStars = 0;
+    destroy_bitmap(pFadeScreen);
+	pFadeScreen = nullptr;
+	for (int slide = 0; slide < SLIDECOUNT; ++slide) {
+		destroy_bitmap(apIntroSlides[slide]);
+		apIntroSlides[slide] = nullptr;
+	}
+	delete[] apIntroSlides;
+	apIntroSlides = nullptr;
+    delete pBackdrop;
+	pBackdrop = nullptr;
+    delete pTitle;
+	pTitle = nullptr;
+    delete pPlanet;
+	pPlanet = nullptr;
+    delete pMoon;
+	pMoon = nullptr;
+    delete pStation;
+	pStation = nullptr;
+    delete [] aStars;
+	aStars = nullptr;
+
+	if (g_FrameMan.ResolutionChanged()) { PlayIntroTitle(); }
 
     return true;
 }

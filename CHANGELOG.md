@@ -204,6 +204,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Controller deadzone setting ignores more input. Previously setting it to the maximum was just enough to eliminate stick drift.
 
+- `Arm.HandPos` will now get/set the hand position as relative to the arm's joint position, instead of relative to the arm's center of mass.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.

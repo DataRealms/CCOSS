@@ -238,13 +238,6 @@ int MainMenuGUI::Create(Controller *pController)
     m_aSkirmishButton[P3TEAM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP3Team"));
     m_aSkirmishButton[P4TEAM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP4Team"));
     m_pCPUTeamLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelCPUTeam"));
-
-    m_aOptionButton[FULLSCREENORWINDOWED] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonFullscreen"));
-	if (g_FrameMan.IsUpscaledFullscreen()) {
-		m_aOptionButton[FULLSCREENORWINDOWED]->SetText("Windowed");
-	} else {
-		m_aOptionButton[FULLSCREENORWINDOWED]->SetText("Fullscreen");
-	}
 	
     m_aOptionButton[UPSCALEDFULLSCREEN] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonUpscaledFullscreen"));
     m_aOptionButton[P1NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP1NextDevice"));
@@ -437,6 +430,13 @@ int MainMenuGUI::Create(Controller *pController)
 	m_ButtonConfirmResolutionChangeFullscreen = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonConfirmResolutionChangeFullscreen"));
 	m_ButtonConfirmResolutionChangeFullscreen->SetVisible(false);
 	m_ButtonCancelResolutionChange = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonCancelResolutionChange"));
+
+	m_aOptionButton[FULLSCREENORWINDOWED] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonFullscreen"));
+	if (g_FrameMan.GetResX() * g_FrameMan.ResolutionMultiplier() == m_MaxResX && g_FrameMan.GetResY() * g_FrameMan.ResolutionMultiplier() == m_MaxResY) {
+		m_aOptionButton[FULLSCREENORWINDOWED]->SetText("Windowed");
+	} else {
+		m_aOptionButton[FULLSCREENORWINDOWED]->SetText("Fullscreen");
+	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// Load mod data and fill the lists
@@ -1044,7 +1044,18 @@ void MainMenuGUI::Update()
 						m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
 						g_FrameMan.SwitchToFullscreen(false);
 					}
-				} else if (g_FrameMan.IsUpscaledFullscreen()) {
+				} else if (g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
+					if (g_ActivityMan.GetActivity()) {
+						m_ResolutionChangeToUpscaled = false;
+						m_ResolutionChangeDialog->SetVisible(true);
+						m_apScreenBox[OPTIONSSCREEN]->SetEnabled(false);
+						m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
+					} else {
+						HideAllScreens();
+						m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
+						g_FrameMan.SwitchResolution(960,540);
+					}
+				} else if (!g_FrameMan.IsFullscreen() && g_FrameMan.IsUpscaledFullscreen()) {
 					g_FrameMan.SwitchResolutionMultiplier(1);
 				}
 				UpdateResolutionCombo();
@@ -1076,7 +1087,12 @@ void MainMenuGUI::Update()
 				m_ResolutionChangeDialog->SetVisible(false);
 				m_apScreenBox[OPTIONSSCREEN]->SetEnabled(true);
 				m_ButtonConfirmResolutionChangeFullscreen->SetVisible(false);
-				g_FrameMan.SwitchToFullscreen(m_ResolutionChangeToUpscaled ? true : false, true);
+				if (g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
+					g_FrameMan.SwitchResolution(960, 540, 1, true);
+				} else {
+					g_FrameMan.SwitchToFullscreen(m_ResolutionChangeToUpscaled ? true : false, true);
+				}
+				UpdateResolutionCombo();
 			}
 
 			if (anEvent.GetControl() == m_ButtonConfirmResolutionChange) {
@@ -1087,10 +1103,11 @@ void MainMenuGUI::Update()
 				m_apScreenBox[OPTIONSSCREEN]->SetEnabled(true);
 				m_ButtonConfirmResolutionChange->SetVisible(false);
 				g_FrameMan.SwitchResolution(g_FrameMan.GetNewResX(), g_FrameMan.GetNewResY(), 1, true);
+				UpdateResolutionCombo();
 			}
 			
 			// Update the label to whatever we ended up with
-			if (g_FrameMan.IsUpscaledFullscreen()) {
+			if (g_FrameMan.GetResX() * g_FrameMan.ResolutionMultiplier() == m_MaxResX && g_FrameMan.GetResY() * g_FrameMan.ResolutionMultiplier() == m_MaxResY) {
 				m_aOptionButton[FULLSCREENORWINDOWED]->SetText("Windowed");
 			} else {
 				m_aOptionButton[FULLSCREENORWINDOWED]->SetText("Fullscreen");

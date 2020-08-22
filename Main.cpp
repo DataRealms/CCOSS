@@ -1538,7 +1538,7 @@ bool PlayIntroTitle() {
 	pMoon = nullptr;
     delete pStation;
 	pStation = nullptr;
-    delete [] aStars;
+    delete[] aStars;
 	aStars = nullptr;
 
 	if (g_FrameMan.ResolutionChanged()) { PlayIntroTitle(); }

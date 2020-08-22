@@ -226,7 +226,7 @@ namespace RTE {
 		}
 		FMOD::Sound *returnSample = nullptr;
 
-		FMOD_MODE fmodFlags = asyncLoading ? (FMOD_CREATESAMPLE | FMOD_3D | FMOD_NONBLOCKING) : (FMOD_CREATESAMPLE | FMOD_3D);
+		FMOD_MODE fmodFlags = FMOD_CREATESAMPLE | FMOD_3D | (asyncLoading ? FMOD_NONBLOCKING : FMOD_DEFAULT);
 		FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(m_DataPath.c_str(), fmodFlags, nullptr, &returnSample);
 
 		if (result != FMOD_OK) {

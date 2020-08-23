@@ -136,16 +136,22 @@ ClassInfoGetters
 
     void Destroy(bool notInherited = false) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACDropShip, including the mass of its
-//                  currently attached body parts and inventory.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
+    /// <summary>
+    /// Gets the mass value of this MOSRotating, including the mass of all its Attachables and their Attachables and so on.
+    /// </summary>
+    /// <returns>The mass of this MOSRotating and all Attachables in Kilograms (kg).</returns>
     float GetMass() const override;
+
+    /// <summary>
+    /// Gets the MOIDs of this MOSRotating and all its Attachables and Wounds, putting them into the MOIDs vector.
+    /// </summary>
+    /// <param name="MOIDs">The vector that will store all the MOIDs of this MOSRotating.</param>
+    void GetMOIDs(std::vector<MOID> &MOIDs) const override;
+
+    /// <summary>
+    /// Sets the MOID of this MOSRotating and any Attachables on it to be g_NoMOID (255) for this frame.
+    /// </summary>
+    void SetAsNoID() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -433,14 +439,11 @@ ClassInfoGetters
     void RestDetection() override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-// Arguments:       The point in absolute scene coordinates.
-// Return value:    Whether this' graphical rep overlaps the scene point.
-
+    /// <summary>
+    /// Indicates whether this MOSRotating's current graphical representation, including its Attachables, overlaps a point in absolute scene coordinates.
+    /// </summary>
+    /// <param name="scenePoint">The point in absolute scene coordinates to check for overlap with.</param>
+    /// <returns>Whether or not this MOSRotating's graphical representation overlaps the given scene point.</returns>
 	bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
@@ -728,15 +731,6 @@ ClassInfoGetters
 // Return value:    True if value exists.
 
 	bool ObjectValueExists(std::string key);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetDamageMultiplier

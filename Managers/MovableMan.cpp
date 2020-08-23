@@ -2121,7 +2121,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         }
         else
-            m_Actors[i]->SetID(g_NoMOID);
+            m_Actors[i]->SetAsNoID();
     }
     for (i = 0; i < iCount; ++i)
     {
@@ -2132,7 +2132,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         }
         else
-            m_Items[i]->SetID(g_NoMOID);
+            m_Items[i]->SetAsNoID();
     }
     for (i = 0; i < parCount; ++i)
     {
@@ -2143,7 +2143,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         }
         else
-            m_Particles[i]->SetID(g_NoMOID);
+            m_Particles[i]->SetAsNoID();
     }
 }
 

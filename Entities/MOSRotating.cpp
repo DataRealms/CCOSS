@@ -554,23 +554,29 @@ void MOSRotating::Destroy(bool notInherited)
     Clear();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACDropShip, including the mass of its
-//                  currently attached body parts and inventory.
-
-float MOSRotating::GetMass() const
-{
+float MOSRotating::GetMass() const {
     float totalMass = MOSprite::GetMass();
-
-    for (list<Attachable *>::const_iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
-        totalMass += (*aItr)->GetMass();
-
+    for (const Attachable *attachable : m_Attachables) {
+        totalMass += attachable->GetMass();
+    }
+    for (const AEmitter *wound : m_Wounds) {
+        totalMass += wound->GetMass();
+    }
     return totalMass;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MOSRotating::SetAsNoID() {
+    MovableObject::SetAsNoID();
+    for (Attachable *attachable : m_Attachables) {
+        attachable->SetAsNoID();
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetMaterial
@@ -1254,84 +1260,32 @@ void MOSRotating::RestDetection()
     m_PrevAngVel = m_AngularVel;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-
-bool MOSRotating::IsOnScenePoint(Vector &scenePoint) const
-{
-    if (!m_aSprite[m_Frame])
+bool MOSRotating::IsOnScenePoint(Vector &scenePoint) const {
+    if (!m_aSprite[m_Frame]) {
         return false;
-// TODO: TAKE CARE OF WRAPPING
-/*
-    // Take care of wrapping situations
-    bitmapPos = m_Pos + m_BitmapOffset;
-    Vector aScenePoint[4];
-    aScenePoint[0] = scenePoint;
-    int passes = 1;
-
-    // See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap
-    if (targetPos.IsZero())
-    {
-        if (g_SceneMan.SceneWrapsX())
-        {
-            if (bitmapPos.m_X < m_pFGColor->w)
-            {
-                aScenePoint[passes] = aScenePoint[0];
-                aScenePoint[passes].m_X += g_SceneMan.GetSceneWidth();
-                passes++;
-            }
-            else if (aScenePoint[0].m_X > pTargetBitmap->w - m_pFGColor->w)
-            {
-                aScenePoint[passes] = aScenePoint[0];
-                aScenePoint[passes].m_X -= g_SceneMan.GetSceneWidth();
-                passes++;
-            }
-        }
-        if (g_SceneMan.SceneWrapsY())
-        {
-            
-        }
     }
 
-    // Check all the passes needed
-    for (int i = 0; i < passes; ++i)
-    {
-        if (IsWithinBox(aScenePoint[i], m_Pos + m_BitmapOffset, m_pFGColor->w, m_pFGColor->h))
-        {
-            if (getpixel(m_pFGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor ||
-               (m_pBGColor && getpixel(m_pBGColor, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaskColor) ||
-               (m_pMaterial && getpixel(m_pMaterial, aScenePoint[i].m_X, aScenePoint[i].m_Y) != g_MaterialAir))
-               return true;
-        }
-    }
-*/
-    if (WithinBox(scenePoint, m_Pos.m_X - m_MaxRadius, m_Pos.m_Y - m_MaxRadius, m_Pos.m_X + m_MaxRadius, m_Pos.m_Y + m_MaxRadius))
-    {
-        // Get scene point in object's relative space
+    if (WithinBox(scenePoint, m_Pos.m_X - m_MaxRadius, m_Pos.m_Y - m_MaxRadius, m_Pos.m_X + m_MaxRadius, m_Pos.m_Y + m_MaxRadius)) {
         Vector spritePoint = scenePoint - m_Pos;
-        // Rotate it back to correspond with the unrotated bitmap
         spritePoint = UnRotateOffset(spritePoint);
-        // Check for overlap on the local rotated relative point. subtract spriteoffset to get into sprite bitmap's space
-        int pixel = getpixel(m_aSprite[m_Frame], spritePoint.m_X - m_SpriteOffset.m_X, spritePoint.m_Y - m_SpriteOffset.m_Y);
-        // Check that it isn't outside the bitmap, and not of the key color
-        if (pixel != -1 && pixel != g_MaskColor)
-           return true;
+        int pixel = getpixel(m_aSprite[m_Frame], static_cast<int>(spritePoint.m_X - m_SpriteOffset.m_X), static_cast<int>(spritePoint.m_Y - m_SpriteOffset.m_Y));
+        if (pixel != -1 && pixel != g_MaskColor) {
+            return true;
+        }
     }
 
-    // Check the attachables too, backward since the latter ones tend to be larger, and therefore more likeyl to be on the point
-    for (list<Attachable *>::const_reverse_iterator aItr = m_Attachables.rbegin(); aItr != m_Attachables.rend(); ++aItr)
-    {
-        if ((*aItr)->IsOnScenePoint(scenePoint))
+    for (const Attachable *attachable : m_Attachables) {
+        if (attachable->IsOnScenePoint(scenePoint)) {
             return true;
+        }
     }
 
     return false;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  EraseFromTerrain
@@ -1648,26 +1602,18 @@ bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
     return false;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-
-void MOSRotating::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                                  MOID rootMOID,
-                                  bool makeNewMOID)
-{
-    // Register all the eligible attachables
-    for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
-    {
-// TODO: Which should it be, don't register at all, or register as same as parent??
-        if ((*aItr)->GetsHitByMOs())
-            (*aItr)->UpdateMOID(MOIDIndex, m_RootMOID, (*aItr)->GetsHitByMOs());
-    }
-
+//TODO This should just be defined in MOSR instead of having an empty definition in MO. MOSR would need to override UpdateMOID accordingly, but this would clean things up a little.
+void MOSRotating::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
     MOSprite::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
+
+    for (Attachable *attachable : m_Attachables) {
+        // Anything that doesn't get hit by MOs doesn't need an ID, since that's only actually used for collision stuff.
+        if (attachable->GetsHitByMOs()) {
+            attachable->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
+        }
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1733,22 +1679,16 @@ void MOSRotating::DetachOrDestroyAll(bool destroy) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-void MOSRotating::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	// Get MOIDs all the eligible attachables
-	for (list<Attachable *>::const_iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
-		(*aItr)->GetMOIDs(MOIDs);
-
-	// Get self MOID
-	MOSprite::GetMOIDs(MOIDs);
+void MOSRotating::GetMOIDs(std::vector<MOID> &MOIDs) const {
+    MOSprite::GetMOIDs(MOIDs);
+    for (const Attachable *attachable : m_Attachables) {
+        if (attachable->GetsHitByMOs()) {
+            attachable->GetMOIDs(MOIDs);
+        }
+    }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

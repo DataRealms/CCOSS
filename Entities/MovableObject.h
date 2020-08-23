@@ -778,15 +778,10 @@ friend class Atom;
     void SetAge(double newAge = 0) { m_AgeTimer.SetElapsedSimTimeMS(newAge); }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       An int specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    virtual void SetID(const MOID newID) { m_MOID = newID; }
+    /// <summary>
+    /// Sets the MOID of this MovableObject to be g_NoMOID (255) for this frame.
+    /// </summary>
+    virtual void SetAsNoID() { m_MOID = g_NoMOID; }
 
     /// <summary>
     /// Sets this object as having been added to MovableMan. Should only really be done in MovableMan::AddObject.

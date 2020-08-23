@@ -1025,27 +1025,19 @@ void MovableObject::GetMOIDs(std::vector<MOID> &MOIDs) const
 //                  itself and its children for this frame.
 //                  BITMAP of choice.
 
-void MovableObject::RegMOID(vector<MovableObject *> &MOIDIndex,
-                            MOID rootMOID,
-                            bool makeNewMOID)
-{
-    // Make a new MOID for itself
-    if (makeNewMOID)
-    {
-		// Skip g_NoMOID item
-		if (MOIDIndex.size() == g_NoMOID)
-			MOIDIndex.push_back(0);
+void MovableObject::RegMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
+    if (!makeNewMOID && GetParent()) {
+        m_MOID = GetParent()->GetID();
+    } else {
+        if (MOIDIndex.size() == g_NoMOID) {
+            MOIDIndex.push_back(0);
+        }
 
 		m_MOID = MOIDIndex.size();
 		MOIDIndex.push_back(this);
     }
-    // Use the parent's MOID instead (the two are considered the same MO)
-    else
-        m_MOID = MOIDIndex.size() - 1;
 
-    // Assign the root MOID
     m_RootMOID = (rootMOID == g_NoMOID ? m_MOID : rootMOID);
-
 }
 
 } // namespace RTE

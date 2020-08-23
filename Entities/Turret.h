@@ -104,12 +104,6 @@ namespace RTE {
 		void Update() override;
 #pragma endregion
 
-
-		//These die soon
-		float GetMass() const override;
-		void SetID(const MOID newID) override;
-		void GetMOIDs(std::vector<MOID> &MOIDs) const override;
-
 	protected:
 
 		//This dies soon

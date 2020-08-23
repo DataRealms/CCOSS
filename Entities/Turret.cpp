@@ -100,29 +100,7 @@ namespace RTE {
 		}
 
 		Attachable::Update();
-		//TODO consider expanding the stuff used in clone create to allow for clearing hardcoded attachables (might be as simple as updating unique id entries and calling things accordingly)
+		//TODO consider expanding the stuff used in clone create to allow for clearing hardcoded attachables members (might be as simple as updating unique id entries and calling things accordingly)
 		if (std::find(m_Attachables.begin(), m_Attachables.end(), m_MountedDevice) == m_Attachables.end()) { m_MountedDevice = nullptr; }
-	}
-
-	//TODO KILL KILL KILL
-	float Turret::GetMass() const {
-		return m_Mass + (m_MountedDevice ? m_MountedDevice->GetMass() : 0);
-	}
-	void Turret::SetID(const MOID newID) {
-		MovableObject::SetID(newID);
-		if (m_MountedDevice)
-			m_MountedDevice->SetID(newID);
-	}
-	void Turret::GetMOIDs(std::vector<MOID> &MOIDs) const {
-		if (m_MountedDevice && m_MountedDevice->GetsHitByMOs())
-			m_MountedDevice->GetMOIDs(MOIDs);
-
-		Attachable::GetMOIDs(MOIDs);
-	}
-	void Turret::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
-		if (m_MountedDevice && m_MountedDevice->GetsHitByMOs())
-			m_MountedDevice->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-
-		Attachable::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
 	}
 }

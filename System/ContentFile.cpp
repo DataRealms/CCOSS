@@ -195,7 +195,7 @@ namespace RTE {
 		if (foundSound != s_LoadedSamples.end()) {
 			returnSample = (*foundSound).second;
 		} else {
-			returnSample = LoadAndReleaseSample(abortGameForInvalidSound); //NOTE: This takes ownership of the sample file
+			returnSample = LoadAndReleaseSample(abortGameForInvalidSound, asyncLoading); //NOTE: This takes ownership of the sample file
 
 			// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED FILE
 			s_LoadedSamples.insert(std::pair<std::string, FMOD::Sound *>(m_DataPath, returnSample));

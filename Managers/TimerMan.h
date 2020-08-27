@@ -3,7 +3,7 @@
 
 // TODO: Figure out where we can include these without imploding the whole game and keeping QPC working and having no method/macro conflicts.
 #include "allegro.h"
-#include "winalleg.h"
+//#include "winalleg.h"
 
 // Windows.h defines these and they conflict with our methods so we need to undefine them manually.
 #undef GetClassName

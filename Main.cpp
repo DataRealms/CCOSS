@@ -329,8 +329,8 @@ bool PlayIntroTitle() {
     g_UInputMan.DisableKeys(false);
     g_UInputMan.TrapMousePos(false);
 
-    // Stop all audio
-    g_AudioMan.StopAll();
+	// Don't stop the music if reiniting after a resolution change
+	if (!g_FrameMan.ResolutionChanged()) { g_AudioMan.StopAll(); }
 
     g_FrameMan.ClearBackBuffer32();
     g_FrameMan.FlipFrameBuffers();

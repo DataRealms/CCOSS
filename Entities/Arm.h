@@ -116,7 +116,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Vector with the current absolute scene hand position.
 
-    Vector GetHandPos() const { return m_Pos + m_HandOffset; }
+    Vector GetHandPos() const { return m_JointPos + m_HandOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -217,16 +217,16 @@ ClassInfoGetters
 // Arguments:       Vector with the new absolute scene hand position.
 // Return value:    None.
 
-    void SetHandPos(const Vector &newHandPos) { m_HandOffset = newHandPos - m_Pos; }
+    void SetHandPos(const Vector &newHandPos) { m_HandOffset = newHandPos - m_JointPos; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetIdleOffset
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the offset from the position of this Arm to which its hand will
+// Description:     Gets the offset from the joint position of this Arm to which its hand will
 //                  go when not holding a device and not able to reach a certain target.
 // Arguments:       None.
-// Return value:    Vector with the new idle offset relative to the position of this Arm.
+// Return value:    Vector with the new idle offset relative to the joint position of this Arm.
 
 	Vector GetIdleOffset() const { return m_IdleOffset; }
 
@@ -234,9 +234,9 @@ ClassInfoGetters
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetIdleOffset
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the offset from the position of this Arm to which its hand will
+// Description:     Sets the offset from the joint position of this Arm to which its hand will
 //                  go when not holding a device and not able to reach a certain target.
-// Arguments:       Vector with the new idle offset relative to the position of this Arm.
+// Arguments:       Vector with the new idle offset relative to the joint position of this Arm.
 // Return value:    None.
 
     void SetIdleOffset(const Vector &newIdleOffset) { m_IdleOffset = newIdleOffset; }
@@ -460,15 +460,14 @@ protected:
     ContentFile m_HandFile;
     // The small bitmap holding the hand bitmap.
     BITMAP *m_pHand;
-    // The maximum reaching length of this arm, in pixels, from the m_Pos.
+	// The maximum reaching length of this Arm. Max distance between the joint position and the hand offset. Length of a straight arm sprite in pixels.
     float m_MaxLength;
-    // Current offset position the.hand relative to the m_Pos.
+    // Current offset position of the hand relative to m_JointPos.
     Vector m_HandOffset;
-    // The target offset that this Arm's hand is reaching after.
+    // The target position that this Arm's hand is reaching after.
     // If (0, 0), the Arm is currently not reaching after anything.
     Vector m_TargetPoint;
-    // The target offset from m_Pos that this Arm's hand is reaching after when
-    // not reaching for or doing anything else.
+    // The target offset relative to m_JointPos that this Arm's hand is moving to while not reaching for or doing anything else.
     Vector m_IdleOffset;
     // How fast the arm moves to a reach target,
     // on a scale from 0.0 (frozen) to 1.0 (instantly there).

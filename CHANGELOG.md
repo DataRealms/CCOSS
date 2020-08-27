@@ -206,6 +206,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Controller deadzone setting ignores more input. Previously setting it to the maximum was just enough to eliminate stick drift.
 
+- `Arm.HandPos` will now get/set the hand position as relative to the arm's joint position, instead of relative to the arm's center of mass.
+
 - Resolution settings in options screen changed:  
 	Resolution multiplier button changed to `Fullscreen` button - this will set the game window resolution to match the desktop resolution. When resolution matches the desktop, this button will change to `Windowed` and will allow setting the game window resolution back to default (960x540).  
 	Added `Upscaled Fullscreen` button - this will change the resolution to half of the desktop and the multiplier to 2. The `Fullscreen` button will change to `Windowed` in this mode to return to non-upscaled mode (960x540).  

@@ -1,0 +1,13 @@
+menu_src = files('AreaEditorGUI.cpp',
+'AreaPickerGUI.cpp',
+'AssemblyEditorGUI.cpp',
+'BuyMenuGUI.cpp',
+'GibEditorGUI.cpp',
+'LoadingGUI.cpp',
+'MainMenuGUI.cpp',
+'MetagameGUI.cpp',
+'MultiplayerGameGUI.cpp',
+'ObjectPickerGUI.cpp',
+'PieMenuGUI.cpp',
+'ScenarioGUI.cpp',
+'SceneEditorGUI.cpp')

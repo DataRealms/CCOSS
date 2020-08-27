@@ -13,6 +13,7 @@ deps = [dependency('boost'),
   dependency('flac')
   ]
 
+pch = 'System/StandardIncludes.h'
 subdir('Activities')
 subdir('Entities')
 subdir('GUI')
@@ -22,4 +23,5 @@ subdir('System')
 
 
 executable('CCOSS', 'Main.cpp', act_src, ent_src, gui_src, man_src,
-            menu_src, sys_src, dependencies: deps, include_directories:inc_dirs, override_options:['cpp_std=c++14'])
+            menu_src, sys_src, dependencies: deps, include_directories:inc_dirs,
+            override_options:['cpp_std=c++11'], cpp_args:['-fpermissive', '-Wno-write-strings', '-Wno-unknown-pragmas'], cpp_pch:pch)

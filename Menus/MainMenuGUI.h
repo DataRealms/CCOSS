@@ -75,7 +75,21 @@ public:
 			bool operator<(const ScriptRecord &rhs) const { return PresetName < rhs.PresetName; }
 	};
 
-
+	enum MenuScreen {
+		ROOT = 0,
+		MAINSCREEN,
+		PLAYERSSCREEN,
+		SKIRMISHSCREEN,
+		DIFFICULTYSCREEN,
+		OPTIONSSCREEN,
+		CONFIGSCREEN,
+		EDITORSCREEN,
+		CREDITSSCREEN,
+		METASCREEN,
+		QUITSCREEN,
+		MODMANAGERSCREEN,
+		SCREENCOUNT
+	};
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     MainMenuGUI
@@ -305,6 +319,12 @@ public:
 	void StartAssemblyEditor();
 #pragma endregion
 
+	/// <summary>
+	/// Sets the main menu GUI to display a screen.
+	/// </summary>
+	/// <param name="screenToShow">Which screen to show. See MenuScreen enumeration.</param>
+	void SetMenuScreen(MenuScreen screenToShow) { m_MenuScreen = screenToShow; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -452,23 +472,6 @@ protected:
         DISABLED
     };
 
-    enum MenuScreen
-    {
-        ROOT = 0,
-        MAINSCREEN,
-        PLAYERSSCREEN,
-        SKIRMISHSCREEN,
-        DIFFICULTYSCREEN,
-        OPTIONSSCREEN,
-        CONFIGSCREEN,
-        EDITORSCREEN,
-        CREDITSSCREEN,
-        METASCREEN,
-        QUITSCREEN,
-		MODMANAGERSCREEN,
-        SCREENCOUNT
-    };
-
     enum MainButtons
     {
         CAMPAIGN = 0,
@@ -499,7 +502,7 @@ protected:
 
     enum OptionsButtons
     {
-        RESOLUTIONMULTIPLIER = 0,
+        FULLSCREENORWINDOWED = 0,
         P1NEXT,
         P2NEXT,
         P3NEXT,
@@ -516,6 +519,7 @@ protected:
         P2CLEAR,
         P3CLEAR,
         P4CLEAR,
+    	UPSCALEDFULLSCREEN,
         OPTIONSBUTTONCOUNT
     };
 
@@ -656,8 +660,6 @@ protected:
     GUICheckbox *m_aOptionsCheckbox[OPTIONSCHECKBOXCOUNT];
     // Resolution combobox
     GUIComboBox *m_pResolutionCombo;
-    // Resolution restart notice
-    GUILabel *m_pResolutionNoticeLabel;
     // Option sound sliders
     GUILabel *m_pSoundLabel;
     GUILabel *m_pMusicLabel;
@@ -719,6 +721,12 @@ protected:
 	GUIListBox *m_pModManagerModsListBox;
 	GUIListBox *m_pModManagerScriptsListBox;
 	GUILabel *m_pModManagerDescriptionLabel;
+
+	GUICollectionBox *m_ResolutionChangeDialog;
+	GUIButton *m_ButtonConfirmResolutionChange;
+	GUIButton *m_ButtonCancelResolutionChange;
+	GUIButton *m_ButtonConfirmResolutionChangeFullscreen;
+	bool m_ResolutionChangeToUpscaled;
 
 	std::vector<ModRecord> m_KnownMods;
 	std::vector<ScriptRecord> m_KnownScripts;

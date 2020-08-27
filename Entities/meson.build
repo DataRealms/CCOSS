@@ -1,3 +1,4 @@
+ent_inc = include_directories('.')
 ent_src = files('ACDropShip.cpp',
 'ACRocket.cpp',
 'ACrab.cpp',

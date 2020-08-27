@@ -1,6 +1,12 @@
-project('CCOSS-community', 'cpp')
+project('CCOSS-community', 'cpp', default_options:['cpp_std=c++14'])
 
-src_dirs = include_directories('.')
+inc_dirs = include_directories('Activities',
+          'Entities',
+          'GUI',
+          'Managers',
+          'Menus',
+          'System',
+          'external/linux/include')
 
 deps = [dependency('boost'),
   dependency('allegro-5'),
@@ -14,5 +20,6 @@ subdir('Managers')
 subdir('Menus')
 subdir('System')
 
+
 executable('CCOSS', 'Main.cpp', act_src, ent_src, gui_src, man_src,
-            menu_src, sys_src, dependencies: deps) #, include_directories:src_dirs)
+            menu_src, sys_src, dependencies: deps, include_directories:inc_dirs, override_options:['cpp_std=c++14'])

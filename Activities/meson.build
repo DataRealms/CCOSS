@@ -1,3 +1,5 @@
+act_inc = include_directories('.')
+
 act_src = files('ActorEditor.cpp',
 'AreaEditor.cpp',
 'AssemblyEditor.cpp',

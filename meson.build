@@ -24,4 +24,4 @@ subdir('System')
 
 executable('CCOSS', 'Main.cpp', act_src, ent_src, gui_src, man_src,
             menu_src, sys_src, dependencies: deps, include_directories:inc_dirs,
-            override_options:['cpp_std=c++11'], cpp_args:['-fpermissive', '-Wno-write-strings', '-Wno-unknown-pragmas'], cpp_pch:pch)
+            override_options:['cpp_std=c++11'], cpp_args:['-Wno-write-strings', '-Wno-unknown-pragmas', '-Wno-unused-variable'], cpp_pch:pch)

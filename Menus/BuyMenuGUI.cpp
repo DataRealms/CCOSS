@@ -2328,17 +2328,17 @@ void BuyMenuGUI::UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel)
 	if (!pLabel)
 		return;
 
-	char buf[64];
+  std::string buf;
 
 	if (pCraft && pCraft->GetMaxMass() != 0)
 	{
 		if (pCraft->GetMaxMass() > 0)
-			std::snprintf(buf, sizeof(buf), "%d / %d", (int)GetTotalOrderMass() - (int)GetCraftMass(), (int)pCraft->GetMaxMass() - (int)GetCraftMass());
+			buf = std::to_string(static_cast<int>(GetTotalOrderMass()) - static_cast<int>(GetCraftMass())) + " / " + std::to_string(static_cast<int>(pCraft->GetMaxMass()) - static_cast<int>(GetCraftMass()));
 		else
-			strcpy_s(buf, sizeof(buf), "NO CARGO SPACE");
+			buf = "NO CARGO SPACE";
 	}
 	else
-		std::snprintf(buf, sizeof(buf), "%d", (int)GetTotalOrderMass());
+		buf = std::to_string(static_cast<int>(GetTotalOrderMass()));
 
 	pLabel->SetText(buf);
 }
@@ -2354,17 +2354,17 @@ void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft * pCraft, GUILabel * pL
 	if (!pLabel)
 		return;
 
-	char buf[64];
+  std::string buf;
 
 	if (pCraft && pCraft->GetMaxPassengers() != 0)
 	{
 		if (pCraft->GetMaxPassengers() > 0)
-			std::snprintf(buf, sizeof(buf), "%d / %d", GetTotalOrderPassengers(), pCraft->GetMaxPassengers());
+			buf = std::to_string(GetTotalOrderPassengers()) + " / " + std::to_string(pCraft->GetMaxPassengers());
 		else 
-			std::snprintf(buf, sizeof(buf), "%d", GetTotalOrderPassengers());
+			buf = std::to_string(GetTotalOrderPassengers());
 	}
 	else
-		strcpy_s(buf, sizeof(buf), "NO ROOM");
+		buf = "NO ROOM";
 
 	pLabel->SetText(buf);
 }

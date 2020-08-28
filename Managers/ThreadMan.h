@@ -17,9 +17,6 @@
 #include "global_types.h"
 
 
-#include <string>
-#include <deque>
-
 //#include <boost/thread.hpp>
 
 #include "Singleton.h"

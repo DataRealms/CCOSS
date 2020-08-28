@@ -17,9 +17,6 @@
 #include "Vector.h"
 #include "Controller.h"
 
-#include <string>
-#include <list>
-
 struct BITMAP;
 
 

@@ -6,7 +6,9 @@ inc_dirs = include_directories('Activities',
           'Managers',
           'Menus',
           'System',
-          'external/linux/include')
+          'external/linux/include',
+          'external/linux/include/RakNet',
+          'external/linux/include/fmod')
 
 deps = [dependency('boost'),
   dependency('allegro-5'),

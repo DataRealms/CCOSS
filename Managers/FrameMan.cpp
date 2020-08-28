@@ -553,7 +553,7 @@ namespace RTE {
 		while (fileNumber < maxFileTrys) {
 			// Check for the file namebase001.bmp; if it exists, try 002, etc.
 			char *fileExtension = { (modeToSave == SaveBitmapMode::SingleBitmap || modeToSave == SaveBitmapMode::ScenePreviewDump) ? ".bmp" : ".png" };
-			sprintf_s(fullFileName, sizeof(fullFileName), "%s/%s%03i%s", c_ScreenshotDirectory, nameBase, fileNumber++, fileExtension);
+			std::snprintf(fullFileName, sizeof(fullFileName), "%s/%s%03i%s", c_ScreenshotDirectory, nameBase, fileNumber++, fileExtension);
 			if (!std::experimental::filesystem::exists(fullFileName)) {
 				break;
 			}

@@ -1023,8 +1023,6 @@ void ACRocket::Update()
     ////////////////////////////////////////
     // Hatch Operation
 
-	RTEAssert(m_FrameCount > 0, "Frame count for ACRocket hatch is 0.");
-
     unsigned int lastFrame = m_FrameCount - 1;
 
     if (m_HatchState == OPENING) {

@@ -188,7 +188,12 @@ namespace RTE {
 					char outputDirName[s_MaxFileName];
 					char parentDirName[s_MaxFileName];
 					// Copy the file path to a separate directory path
+#ifdef __STDC_LIB_EXT1__
 					strcpy_s(outputDirName, sizeof(outputDirName), outputFileName);
+#else
+          // Some compilers dont yet implement strcpy_s use unsafe strcpy instead
+          strcpy(outputDirName, outputFileName);
+#endif
 					// Find the last slash in the directory path, so we can cut off everything after that (ie the actual filename), and only have the directory path left
 					char *slashPos = strrchr(outputDirName, '/');
 					// Try to find the other kind of slash if we found none
@@ -199,7 +204,13 @@ namespace RTE {
 					// If that file's directory doesn't exist yet, then create it, and all its parent directories above if need be
 					for (int nested = 0; !std::experimental::filesystem::exists(outputDirName) && slashPos; ++nested) {
 						// Keep making new working copies of the path that we can dice up
+#ifdef __STDC_LIB_EXT1__
 						strcpy_s(parentDirName, sizeof(parentDirName), outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
+#else
+            // Some compilers may not yet implement strcpy_s use unsafe strcpy for now
+            strcpy(parentDirName, outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
+#endif
+
 						// Start off at the beginning
 						slashPos = parentDirName;
 						for (int j = 0; j <= nested && slashPos; ++j) {

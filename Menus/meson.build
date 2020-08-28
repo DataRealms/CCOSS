@@ -1,4 +1,4 @@
-menu_src = files('AreaEditorGUI.cpp',
+sources += files('AreaEditorGUI.cpp',
 'AreaPickerGUI.cpp',
 'AssemblyEditorGUI.cpp',
 'BuyMenuGUI.cpp',

@@ -1,5 +1,4 @@
-
-gui_src = files('AllegroBitmap.cpp',
+sources += files('AllegroBitmap.cpp',
 'AllegroInput.cpp',
 'AllegroScreen.cpp',
 'GUI.cpp',

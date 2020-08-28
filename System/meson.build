@@ -1,4 +1,4 @@
-sys_src = files('Atom.cpp',
+sources += files('Atom.cpp',
 'Box.cpp',
 'Color.cpp',
 'ContentFile.cpp',

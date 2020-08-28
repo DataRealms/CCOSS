@@ -1,5 +1,4 @@
-ent_inc = include_directories('.')
-ent_src = files('ACDropShip.cpp',
+sources += files('ACDropShip.cpp',
 'ACRocket.cpp',
 'ACrab.cpp',
 'ACraft.cpp',

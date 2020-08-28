@@ -60,8 +60,8 @@ namespace RTE {
 
 	Vector & Vector::RadRotate(float angle) {
 		angle = -angle;
-		float tempX = m_X * std::cosf(angle) - m_Y * std::sinf(angle);
-		float tempY = m_X * std::sinf(angle) + m_Y * std::cosf(angle);
+		float tempX = m_X * std::cos(angle) - m_Y * std::sin(angle);
+		float tempY = m_X * std::sin(angle) + m_Y * std::cos(angle);
 		m_X = tempX;
 		m_Y = tempY;
 

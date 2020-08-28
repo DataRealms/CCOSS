@@ -59,7 +59,7 @@ namespace RTE {
 			return end;
 		}
 		float t = 1 - progressScalar;
-		return (end - start) * (std::sinf(-t * c_HalfPI) + 1) + start;
+		return (end - start) * (std::sin(-t * c_HalfPI) + 1) + start;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ namespace RTE {
 		} else if (progressScalar >= 1.0F) {
 			return end;
 		}
-		return (end - start) * -std::sinf(-progressScalar * c_HalfPI) + start;
+		return (end - start) * -std::sin(-progressScalar * c_HalfPI) + start;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

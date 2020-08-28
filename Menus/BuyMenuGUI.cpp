@@ -827,11 +827,11 @@ void BuyMenuGUI::Update()
 
         Vector position, occlusion;
 
-        float toGo = -floorf((float)m_pParentBox->GetXPos());
+        float toGo = -std::floor((float)m_pParentBox->GetXPos());
         float goProgress = m_MenuSpeed * m_MenuTimer.GetElapsedRealTimeS();
         if (goProgress > 1.0)
             goProgress = 1.0;
-        position.m_X = m_pParentBox->GetXPos() + ceilf(toGo * goProgress);
+        position.m_X = m_pParentBox->GetXPos() + std::ceil(toGo * goProgress);
         occlusion.m_X = m_pParentBox->GetWidth() + m_pParentBox->GetXPos();
 
         // If not split screened, then make the menu scroll in diagonally instead of straight from the side
@@ -856,11 +856,11 @@ void BuyMenuGUI::Update()
     // Animate the menu out of view
     else if (m_MenuEnabled == DISABLING)
     {
-        float toGo = -ceilf(((float)m_pParentBox->GetWidth() + (float)m_pParentBox->GetXPos()));
+        float toGo = -std::ceil(((float)m_pParentBox->GetWidth() + (float)m_pParentBox->GetXPos()));
         float goProgress = m_MenuSpeed * m_MenuTimer.GetElapsedRealTimeS();
         if (goProgress > 1.0)
             goProgress = 1.0;
-        m_pParentBox->SetPositionAbs(m_pParentBox->GetXPos() + floorf(toGo * goProgress), 0);
+        m_pParentBox->SetPositionAbs(m_pParentBox->GetXPos() + std::floor(toGo * goProgress), 0);
         g_SceneMan.SetScreenOcclusion(Vector(m_pParentBox->GetWidth() + m_pParentBox->GetXPos(), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
         m_pPopupBox->SetVisible(false);
 
@@ -2309,7 +2309,7 @@ void BuyMenuGUI::TryPurchase()
 	}
 
 	// Only allow purchase if there is a delivery craft and enough funds
-	if (m_pSelectedCraft && floorf(GetTotalOrderCost()) <= floorf(g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam())))
+	if (m_pSelectedCraft && std::floor(GetTotalOrderCost()) <= std::floor(g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam())))
 	{
 		//            m_pBuyButton->OnKeyPress(0, 0);
 		m_PurchaseMade = true;

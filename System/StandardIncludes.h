@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cctype>
 #include <cerrno>
+#include <cmath>
 #include <cstdarg>
 #include <cstddef>
 #include <cstdlib>

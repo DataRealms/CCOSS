@@ -696,8 +696,8 @@ namespace RTE {
 					offsetY = scrollOverride.GetFloorIntY();
 				} else {
 					// Regular scroll
-					offsetX = std::floorf(m_BackgroundLayers[frame][i].OffsetX * m_BackgroundLayers[frame][i].ScrollRatioX);
-					offsetY = std::floorf(m_BackgroundLayers[frame][i].OffsetY * m_BackgroundLayers[frame][i].ScrollRatioY);
+					offsetX = std::std::floor(m_BackgroundLayers[frame][i].OffsetX * m_BackgroundLayers[frame][i].ScrollRatioX);
+					offsetY = std::std::floor(m_BackgroundLayers[frame][i].OffsetY * m_BackgroundLayers[frame][i].ScrollRatioY);
 			
 					// Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0
 					// ForceBounds(offsetX, offsetY);

@@ -385,7 +385,7 @@ void HeldDevice::Update()
         if (m_SpriteAnimMode == LOOPWHENMOVING && m_Activated)
         {
             float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;
-            m_Frame = floorf((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);
+            m_Frame = std::floor((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);
         }
     }
 

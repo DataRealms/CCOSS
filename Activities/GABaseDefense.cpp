@@ -261,7 +261,7 @@ int GABaseDefense::Start()
     DisableAIs(m_ActivityState == ActivityState::Editing);
 
     // Set the spawn intervals based ont he min-max and the currently difficulty
-    m_SpawnInterval = floorf(LERP(DifficultySetting::MinDifficulty, DifficultySetting::MaxDifficulty, m_SpawnIntervalEasiest, m_SpawnIntervalHardest, m_Difficulty));
+    m_SpawnInterval = std::floor(LERP(DifficultySetting::MinDifficulty, DifficultySetting::MaxDifficulty, m_SpawnIntervalEasiest, m_SpawnIntervalHardest, m_Difficulty));
 
     m_SpawnTimer.Reset();
 
@@ -379,7 +379,7 @@ void GABaseDefense::Update()
             {
                 if (!m_AttackerSpawns.empty())
                 {
-                    int whichSpawn = floorf(m_AttackerSpawns.size() * PosRand());
+                    int whichSpawn = std::floor(m_AttackerSpawns.size() * PosRand());
                     Actor *pSpawn = dynamic_cast<Actor *>(m_AttackerSpawns[whichSpawn]->Clone());
                     if (pSpawn)
                     {

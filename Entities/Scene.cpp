@@ -830,10 +830,10 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
                             {
                                 // Translate to the scaled unseen layer's coordinates
                                 Vector scale = m_apUnseenLayer[ownerTeam]->GetScaleInverse();
-                                int scaledX = floorf((pTO->GetPos().m_X - (float)(pTO->GetFGColorBitmap()->w / 2)) * scale.m_X);
-                                int scaledY = floorf((pTO->GetPos().m_Y - (float)(pTO->GetFGColorBitmap()->h / 2)) * scale.m_Y);
-                                int scaledW = ceilf(pTO->GetFGColorBitmap()->w * scale.m_X);
-                                int scaledH = ceilf(pTO->GetFGColorBitmap()->h * scale.m_Y);
+                                int scaledX = std::floor((pTO->GetPos().m_X - (float)(pTO->GetFGColorBitmap()->w / 2)) * scale.m_X);
+                                int scaledY = std::floor((pTO->GetPos().m_Y - (float)(pTO->GetFGColorBitmap()->h / 2)) * scale.m_Y);
+                                int scaledW = std::ceil(pTO->GetFGColorBitmap()->w * scale.m_X);
+                                int scaledH = std::ceil(pTO->GetFGColorBitmap()->h * scale.m_Y);
                                 // Fill the box with key color for the owner ownerTeam, revealing the area that this thing is on
                                 rectfill(m_apUnseenLayer[ownerTeam]->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_MaskColor);
                                 // Expand the box a little so the whole placed object is going to be hidden

@@ -1635,10 +1635,10 @@ bool SceneMan::CastUnseenRay(int team, const Vector &start, const Vector &ray, V
     // Save the projected end of the ray pos
     endPos = start + ray;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -1776,10 +1776,10 @@ bool SceneMan::CastMaterialRay(const Vector &start, const Vector &ray, unsigned 
     int intPos[2], delta[2], delta2[2], increment[2];
     bool foundPixel = false;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -1907,10 +1907,10 @@ bool SceneMan::CastNotMaterialRay(const Vector &start, const Vector &ray, unsign
     int intPos[2], delta[2], delta2[2], increment[2];
     bool foundPixel = false;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
 
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -2038,10 +2038,10 @@ float SceneMan::CastStrengthSumRay(const Vector &start, const Vector &end, int s
     unsigned char materialID;
     Material foundMaterial;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -2132,10 +2132,10 @@ float SceneMan::CastMaxStrengthRay(const Vector &start, const Vector &end, int s
     unsigned char materialID;
     Material foundMaterial;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -2229,10 +2229,10 @@ bool SceneMan::CastStrengthRay(const Vector &start, const Vector &ray, float str
     unsigned char materialID;
     Material const * foundMaterial;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -2353,10 +2353,10 @@ bool SceneMan::CastWeaknessRay(const Vector &start, const Vector &ray, float str
     unsigned char materialID;
     Material const *foundMaterial;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -2472,10 +2472,10 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
     MOID hitMOID = g_NoMOID;
     unsigned char hitTerrain = 0;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 && delta[Y] == 0)
         return g_NoMOID;
@@ -2614,10 +2614,10 @@ bool SceneMan::CastFindMORay(const Vector &start, const Vector &ray, MOID target
     MOID hitMOID = g_NoMOID;
     unsigned char hitTerrain = 0;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 && delta[Y] == 0)
         return g_NoMOID;
@@ -2736,10 +2736,10 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
     int intPos[2], delta[2], delta2[2], increment[2];
     bool hitObstacle = false;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     // The fraction of a pixel that we start from, to be added to the integer result positions for accuracy
     Vector startFraction(start.m_X - intPos[X], start.m_Y - intPos[Y]);
 
@@ -3012,13 +3012,13 @@ bool SceneMan::ForceBounds(Vector &pos)
 {
     RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
-    int posX = floorf(pos.m_X);
-    int posY = floorf(pos.m_Y);
+    int posX = std::floor(pos.m_X);
+    int posY = std::floor(pos.m_Y);
 
     bool wrapped = m_pCurrentScene->GetTerrain()->ForceBounds(posX, posY);
 
-    pos.m_X = posX + (pos.m_X - floorf(pos.m_X));
-    pos.m_Y = posY + (pos.m_Y - floorf(pos.m_Y));
+    pos.m_X = posX + (pos.m_X - std::floor(pos.m_X));
+    pos.m_Y = posY + (pos.m_Y - std::floor(pos.m_Y));
 
     return wrapped;
 }
@@ -3047,13 +3047,13 @@ bool SceneMan::WrapPosition(Vector &pos)
 {
     RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
-    int posX = floorf(pos.m_X);
-    int posY = floorf(pos.m_Y);
+    int posX = std::floor(pos.m_X);
+    int posY = std::floor(pos.m_Y);
 
     bool wrapped = m_pCurrentScene->GetTerrain()->WrapPosition(posX, posY);
 
-    pos.m_X = posX + (pos.m_X - floorf(pos.m_X));
-    pos.m_Y = posY + (pos.m_Y - floorf(pos.m_Y));
+    pos.m_X = posX + (pos.m_X - std::floor(pos.m_X));
+    pos.m_Y = posY + (pos.m_Y - std::floor(pos.m_Y));
 
     return wrapped;
 }
@@ -3070,8 +3070,8 @@ Vector SceneMan::SnapPosition(const Vector &pos, bool snap)
 
     if (snap)
     {
-        snappedPos.m_X = floorf((pos.m_X / SCENESNAPSIZE) + 0.5) * SCENESNAPSIZE;
-        snappedPos.m_Y = floorf((pos.m_Y / SCENESNAPSIZE) + 0.5) * SCENESNAPSIZE;
+        snappedPos.m_X = std::floor((pos.m_X / SCENESNAPSIZE) + 0.5) * SCENESNAPSIZE;
+        snappedPos.m_Y = std::floor((pos.m_Y / SCENESNAPSIZE) + 0.5) * SCENESNAPSIZE;
     }
 
     return snappedPos;

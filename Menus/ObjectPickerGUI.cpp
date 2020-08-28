@@ -468,7 +468,7 @@ void ObjectPickerGUI::Update()
 
         float enabledPos = g_FrameMan.GetPlayerFrameBufferWidth(m_pController->GetPlayer()) - m_pParentBox->GetWidth();
 
-        float toGo = floorf((enabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
+        float toGo = std::floor((enabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
         position.m_X = m_pParentBox->GetXPos() + toGo;
         occlusion.m_X = m_pParentBox->GetXPos() - g_FrameMan.GetPlayerFrameBufferWidth(m_pController->GetPlayer());
 
@@ -483,7 +483,7 @@ void ObjectPickerGUI::Update()
     {
         float disabledPos = g_FrameMan.GetPlayerFrameBufferWidth(m_pController->GetPlayer());
 
-        float toGo = ceilf((disabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
+        float toGo = std::ceil((disabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
         m_pParentBox->SetPositionAbs(m_pParentBox->GetXPos() + toGo, 0);
         g_SceneMan.SetScreenOcclusion(Vector(m_pParentBox->GetXPos() - g_FrameMan.GetPlayerFrameBufferWidth(m_pController->GetPlayer()), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
         m_pPopupBox->SetVisible(false);

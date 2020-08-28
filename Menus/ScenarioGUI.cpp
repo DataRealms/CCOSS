@@ -1948,7 +1948,7 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     int totalSegments = 0;
     int drawnFirstSegments = 0;
     int lastSegmentsToDraw = 0;
-    int circleRadius = squareSite ? floorf(6 * circleSize) : floorf(8 * circleSize);
+    int circleRadius = squareSite ? std::floor(6 * circleSize) : std::floor(8 * circleSize);
     int chamferSize = CHAMFERSIZE;
     Vector chamferPoint1;
     Vector chamferPoint2;

@@ -1546,7 +1546,7 @@ void Actor::Update()
 	        DropAllInventory();
 
         Material const * AuMat = g_SceneMan.GetMaterial(std::string("Gold"));
-        int goldCount = m_GoldCarried/*floorf(GetGoldCarried())*/;
+        int goldCount = m_GoldCarried/*std::floor(GetGoldCarried())*/;
         for (int i = 0; i < goldCount; i++)
         {
 /*
@@ -1576,7 +1576,7 @@ void Actor::Update()
     ////////////////////////////////
     // Death logic
 
-    if (m_Status != DYING && m_Status != DEAD && floorf(m_Health) <= 0)
+    if (m_Status != DYING && m_Status != DEAD && std::floor(m_Health) <= 0)
     {
         m_DeathSound.Play(m_Pos);
 		m_Controller.SetDisabled(true);
@@ -1616,7 +1616,7 @@ void Actor::Update()
             {
 // TODO: improve; make this 
                 float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;
-                m_Frame = floorf((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);           
+                m_Frame = std::floor((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);           
             }
         }
     }

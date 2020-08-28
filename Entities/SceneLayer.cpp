@@ -485,13 +485,13 @@ bool SceneLayer::ForceBounds(int &posX, int &posY, bool scaled) const
 
 bool SceneLayer::ForceBounds(Vector &pos, bool scaled) const
 {
-    int posX = floorf(pos.m_X);
-    int posY = floorf(pos.m_Y);
+    int posX = std::floor(pos.m_X);
+    int posY = std::floor(pos.m_Y);
 
     bool wrapped = ForceBounds(posX, posY, scaled);
 
-    pos.m_X = posX + (pos.m_X - floorf(pos.m_X));
-    pos.m_Y = posY + (pos.m_Y - floorf(pos.m_Y));
+    pos.m_X = posX + (pos.m_X - std::floor(pos.m_X));
+    pos.m_Y = posY + (pos.m_Y - std::floor(pos.m_Y));
 
     return wrapped;
 }
@@ -545,13 +545,13 @@ bool SceneLayer::WrapPosition(int &posX, int &posY, bool scaled) const
 
 bool SceneLayer::WrapPosition(Vector &pos, bool scaled) const
 {
-    int posX = floorf(pos.m_X);
-    int posY = floorf(pos.m_Y);
+    int posX = std::floor(pos.m_X);
+    int posY = std::floor(pos.m_Y);
 
     bool wrapped = WrapPosition(posX, posY, scaled);
 
-    pos.m_X = posX + (pos.m_X - floorf(pos.m_X));
-    pos.m_Y = posY + (pos.m_Y - floorf(pos.m_Y));
+    pos.m_X = posX + (pos.m_X - std::floor(pos.m_X));
+    pos.m_Y = posY + (pos.m_Y - std::floor(pos.m_Y));
 
     return wrapped;
 }
@@ -611,8 +611,8 @@ void SceneLayer::Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrol
     // Regular scroll
     else
     {
-        offsetX = floorf(m_Offset.m_X * m_ScrollRatio.m_X);
-        offsetY = floorf(m_Offset.m_Y * m_ScrollRatio.m_Y);
+        offsetX = std::floor(m_Offset.m_X * m_ScrollRatio.m_X);
+        offsetY = std::floor(m_Offset.m_Y * m_ScrollRatio.m_Y);
         // Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0
 //        ForceBounds(offsetX, offsetY);
         WrapPosition(offsetX, offsetY);
@@ -797,8 +797,8 @@ void SceneLayer::DrawScaled(BITMAP *pTargetBitmap, Box &targetBox, const Vector 
     // Regular scroll
     else
     {
-        offsetX = floorf(m_Offset.m_X * m_ScrollRatio.m_X);
-        offsetY = floorf(m_Offset.m_Y * m_ScrollRatio.m_Y);
+        offsetX = std::floor(m_Offset.m_X * m_ScrollRatio.m_X);
+        offsetY = std::floor(m_Offset.m_Y * m_ScrollRatio.m_Y);
         // Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0
 //        ForceBounds(offsetX, offsetY);
         WrapPosition(offsetX, offsetY);

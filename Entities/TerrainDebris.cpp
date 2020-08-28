@@ -129,15 +129,15 @@ namespace RTE {
 
 		for (unsigned int piece = 0; piece < pieceCount; ++piece) {
 			bool place = false;
-			unsigned short currentBitmap = std::floorf(static_cast<float>(m_BitmapCount) * PosRand());
+			unsigned short currentBitmap = std::std::floor(static_cast<float>(m_BitmapCount) * PosRand());
 			RTEAssert(currentBitmap >= 0 && currentBitmap < m_BitmapCount, "Bitmap index is out of bounds!");
 
 			pieceBox.SetWidth(m_Bitmaps[currentBitmap]->w);
 			pieceBox.SetHeight(m_Bitmaps[currentBitmap]->h);
 
-			int x = std::floorf(static_cast<float>(terrainWidth) * PosRand());
+			int x = std::std::floor(static_cast<float>(terrainWidth) * PosRand());
 			int y = 0;
-			int depth = std::floorf(RangeRand(m_MinDepth, m_MaxDepth));
+			int depth = std::std::floor(RangeRand(m_MinDepth, m_MaxDepth));
 
 			while (y < terrBitmap->h) {
 				// Find the air-terrain boundary

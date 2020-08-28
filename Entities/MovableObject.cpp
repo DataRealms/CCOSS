@@ -358,13 +358,13 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
     {
         float strength;
         reader >> strength;
-        m_EffectStartStrength = floorf((float)255 * strength);
+        m_EffectStartStrength = std::floor((float)255 * strength);
     }
     else if (propName == "EffectStopStrength")
     {
         float strength;
         reader >> strength;
-        m_EffectStopStrength = floorf((float)255 * strength);
+        m_EffectStopStrength = std::floor((float)255 * strength);
     }
     else if (propName == "EffectAlwaysShows")
         reader >> m_EffectAlwaysShows;

@@ -546,7 +546,7 @@ const Scene * MetaMan::GetNextSceneOfPlayer(int player, const Scene *pStartScene
     for (vector<Scene *>::const_iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
     {
         // Don't search beyond what has been revealed already
-        if (scenesSearched >= floorf(m_RevealedScenes))
+        if (scenesSearched >= std::floor(m_RevealedScenes))
             break;
 
         // Find the place where to start the actual search for the next owned Scene from
@@ -1044,10 +1044,10 @@ int MetaMan::SelectScenePresets(float gameSize, int playerCount, list<Scene *> *
     // How many scenes the game should end up with, according to the specified game size.
     // Note that it will never be all or none of all the available scenes!
 // TODO: Hook these constants up to settings!!
-    int minCount = MAX(3, MIN(floorf(playerCount * 1.5), scenePresets.size()));
-    int maxCount = MAX(floorf(scenePresets.size() * 0.7), minCount);
+    int minCount = MAX(3, MIN(std::floor(playerCount * 1.5), scenePresets.size()));
+    int maxCount = MAX(std::floor(scenePresets.size() * 0.7), minCount);
     // Determine the actual game size
-    int gameSceneCount = minCount + floorf((maxCount - minCount) * gameSize);
+    int gameSceneCount = minCount + std::floor((maxCount - minCount) * gameSize);
     // Clamp
     gameSceneCount = MIN(gameSceneCount, maxCount);
     gameSceneCount = MAX(gameSceneCount, minCount);
@@ -1061,7 +1061,7 @@ int MetaMan::SelectScenePresets(float gameSize, int playerCount, list<Scene *> *
         {
             // Randomly select one of the scenes and remove it
             currentIndex = 0;
-            randomIndex = floorf(scenePresets.size() * PosRand());
+            randomIndex = std::floor(scenePresets.size() * PosRand());
             for (list<Scene *>::iterator pItr = scenePresets.begin(); pItr != scenePresets.end(); ++pItr)
             {
                 if (currentIndex == randomIndex)
@@ -1119,7 +1119,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
 
     // Tally up all the scenes according to who owns them
     int sceneCount = 0;
-    int revealedScenes = floorf(m_RevealedScenes);
+    int revealedScenes = std::floor(m_RevealedScenes);
     vector<Scene *> ownedScenes;
     vector<Scene *> enemyScenes;
     vector<Scene *> unclaimedScenes;

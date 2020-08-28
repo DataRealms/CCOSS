@@ -913,13 +913,13 @@ void MetagameGUI::SelectScene(Scene *pScene)
             // If owned by this player's team, make the budget slider represent the currently set setting of this Scene
             if (m_pSelectedScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer))
             {
-                m_pSceneBudgetSlider->SetValue(floorf((m_pSelectedScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                m_pSceneBudgetSlider->SetValue(std::floor((m_pSelectedScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
             }
             // Owned by enemy player, so show the attack budget set up for this scene
             else if (g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()))
             {
                 if (m_pSelectedScene->GetPresetName() == g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName())
-                    m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                    m_pSceneBudgetSlider->SetValue(std::floor((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
                 // Not the current target, so set slider to 0. It will set the new budget as 
                 else
                     m_pSceneBudgetSlider->SetValue(0);
@@ -928,7 +928,7 @@ void MetagameGUI::SelectScene(Scene *pScene)
             else
             {
                 if (m_pSelectedScene->GetPresetName() == g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName())
-                    m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                    m_pSceneBudgetSlider->SetValue(std::floor((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
                 // Not the current target, so set slider to 0. It will set the new budget as 
                 else
                     m_pSceneBudgetSlider->SetValue(0);
@@ -1169,7 +1169,7 @@ bool MetagameGUI::StartNewGame()
             
             // Set the starting brains for this player
             // Start with the baseline setting
-            newPlayer.m_BrainPool = ceilf(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
+            newPlayer.m_BrainPool = std::ceil(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
             // Baseline can never be 0
             newPlayer.m_BrainPool = MAX(newPlayer.m_BrainPool, 1);
             // Apply the handicap!
@@ -2589,7 +2589,7 @@ void MetagameGUI::UpdateInput()
 
                     // Update the budget slider to reflect the scan cost being deducted from the funds
                     if (g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName() == m_pSelectedScene->GetPresetName())
-                        m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                        m_pSceneBudgetSlider->SetValue(std::floor((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
 
                     // Play an appropriate sound to indicate that the scan is bought and scheduled
                     g_GUISound.ItemChangeSound()->Play();
@@ -3308,16 +3308,16 @@ void MetagameGUI::UpdateSiteRevealing()
     if (g_MetaMan.m_StateChanged)
     {
         // Save the number of sites we have reveelaed up til now so we can compare
-        m_AnimCountStart = m_AnimCountCurrent = (int)floorf(g_MetaMan.m_RevealedScenes);
+        m_AnimCountStart = m_AnimCountCurrent = (int)std::floor(g_MetaMan.m_RevealedScenes);
         // Progress the number of site we have revealed with the set rate + the extra
         g_MetaMan.m_RevealedScenes += g_MetaMan.m_RevealRate + g_MetaMan.m_RevealExtra;
         // Reset the extra to 0 now after we've applied it
         g_MetaMan.m_RevealExtra = 0;
         // Don't reveal more than there are scenes!
-        if ((int)floorf(g_MetaMan.m_RevealedScenes) >= g_MetaMan.m_Scenes.size())
+        if ((int)std::floor(g_MetaMan.m_RevealedScenes) >= g_MetaMan.m_Scenes.size())
             g_MetaMan.m_RevealedScenes = g_MetaMan.m_Scenes.size();
         // Figure out how many new sites we gots this round
-        int delta = (int)floorf(g_MetaMan.m_RevealedScenes) - m_AnimCountStart;
+        int delta = (int)std::floor(g_MetaMan.m_RevealedScenes) - m_AnimCountStart;
         // No new sites this round, so just continue onto next phase!
         if (delta < 1)
         {
@@ -5974,7 +5974,7 @@ float MetagameGUI::UpdatePlayerActionLines(int metaPlayer)//, bool addUnallocate
     while (pScene = g_MetaMan.GetNextSceneOfPlayer(metaPlayer, pScene))
     {
         // Add line for scenes which are owned and whose build budgets have been set to something
-        if (pScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer) && floorf(pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer())) > 0)
+        if (pScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer) && std::floor(pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer())) > 0)
         {
             m_ActionSiteLines[metaPlayer].push_back(SiteLine(metaPlayer, meterStart, pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / totalFunds, pScene->GetLocation() + pScene->GetLocationOffset(), pScene->GetPresetName(), pScene, c_GUIColorGreen, -1, -1, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(pScene->GetTeamOwnership())));
             m_ActionSiteLines[metaPlayer].back().m_FundsAmount = pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer());
@@ -6047,7 +6047,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
         }
 
         // Write the description, and add the total defense investment in this place so far as a lil stat
-        std::snprintf(str, sizeof(str), "Total base investments here: %doz", (int)floorf(m_pSelectedScene->GetTotalInvestment()));
+        std::snprintf(str, sizeof(str), "Total base investments here: %doz", (int)std::floor(m_pSelectedScene->GetTotalInvestment()));
         m_pSceneInfoLabel->SetText(m_pSelectedScene->GetDescription() + "\n" + string(str));
         // Adjust the height of the text box and container so it fits the text to display
         int newHeight = m_pSceneInfoLabel->ResizeHeightToFit();
@@ -6067,7 +6067,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
 
             // Set up the slider limit bar
             bool sceneOwnedByPlayer = m_pSelectedScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer);
-            int blockedWidth = floorf((m_pSceneBudgetSlider->GetWidth() - 4) * g_MetaMan.GetBudgetedRatioOfPlayer(metaPlayer, m_pSelectedScene, sceneOwnedByPlayer));
+            int blockedWidth = std::floor((m_pSceneBudgetSlider->GetWidth() - 4) * g_MetaMan.GetBudgetedRatioOfPlayer(metaPlayer, m_pSelectedScene, sceneOwnedByPlayer));
 
             if (blockedWidth > 0)
             {
@@ -6090,7 +6090,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
             if (sceneOwnedByPlayer)
             {
                 // Set the budget label as per the slider
-                int budget = floorf(((float)m_pSceneBudgetSlider->GetValue() / 100.0f) * g_MetaMan.m_Players[metaPlayer].GetFunds());
+                int budget = std::floor(((float)m_pSceneBudgetSlider->GetValue() / 100.0f) * g_MetaMan.m_Players[metaPlayer].GetFunds());
                 std::snprintf(str, sizeof(str), "Build Budget: %d oz", budget);
                 m_pSceneBudgetLabel->SetText(str);
                 m_apMetaButton[SCANNOW]->SetVisible(false);
@@ -6111,7 +6111,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                 if (sceneChanged)
                 {
                     // Set the budget label as per the slider
-                    int budget = floorf(((float)m_pSceneBudgetSlider->GetValue() / 100.0f) * g_MetaMan.m_Players[metaPlayer].GetFunds());
+                    int budget = std::floor(((float)m_pSceneBudgetSlider->GetValue() / 100.0f) * g_MetaMan.m_Players[metaPlayer].GetFunds());
                     // Set the appropriate action message, depending on whether this is enemy owned, or merely unexplored
                     if (g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()))
                     {
@@ -6176,7 +6176,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                     // Make the blockage bar be all over the place
                     m_pSceneBudgetBar->SetVisible(true);
                     m_pSceneBudgetBar->SetPositionAbs(m_pSceneBudgetSlider->GetXPos() - 2, m_pSceneBudgetSlider->GetYPos());
-                    m_pSceneBudgetBar->SetSize(floorf((m_pSceneBudgetSlider->GetWidth() + 4)), m_pSceneBudgetSlider->GetHeight());
+                    m_pSceneBudgetBar->SetSize(std::floor((m_pSceneBudgetSlider->GetWidth() + 4)), m_pSceneBudgetSlider->GetHeight());
                     m_pSceneBudgetSlider->SetVisible(false);
                 }
             }
@@ -6259,7 +6259,7 @@ void MetagameGUI::UpdateGameSizeLabels()
 
     // Set the length label also according to the game length slider
 // TODO: don't hardcode the range of this
-    int brainCount = ceilf(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
+    int brainCount = std::ceil(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
     brainCount = MAX(brainCount, 1);
     std::snprintf(str, sizeof(str), "Game Length: %c%c%d starting brains", -48, -36, brainCount);
     m_pLengthLabel->SetText(str);
@@ -6738,7 +6738,7 @@ bool MetagameGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     int totalSegments = 0;
     int drawnFirstSegments = 0;
     int lastSegmentsToDraw = 0;
-    int circleRadius = squareSite ? floorf(6 * circleSize) : floorf(8 * circleSize);
+    int circleRadius = squareSite ? std::floor(6 * circleSize) : std::floor(8 * circleSize);
     int chamferSize = CHAMFERSIZE;
     Vector chamferPoint1;
     Vector chamferPoint2;
@@ -6877,7 +6877,7 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     int drawnFirstSegments = 0;
     int lastSegmentsToDraw = 0;
     int meterHeight = 5;
-    int circleRadius = squareSite ? floorf(6 * circleSize) : floorf(8 * circleSize);
+    int circleRadius = squareSite ? std::floor(6 * circleSize) : std::floor(8 * circleSize);
     int chamferSize = CHAMFERSIZE;
     Vector chamferPoint1;
     Vector chamferPoint2;

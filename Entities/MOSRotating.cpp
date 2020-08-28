@@ -753,8 +753,8 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
 
         // Figure out the entry position in the un-rotated sprite's coordinates.
         Vector entryPos = (g_SceneMan.ShortestDistance(m_Pos, hd.HitPoint) / m_Rotation).GetXFlipped(m_HFlipped) - m_SpriteOffset;
-        intPos[X] = floorf(entryPos.m_X);
-        intPos[Y] = floorf(entryPos.m_Y);
+        intPos[X] = std::floor(entryPos.m_X);
+        intPos[Y] = std::floor(entryPos.m_Y);
 
         // Get the un-rotated direction and max possible
         // travel length of the particle.
@@ -763,8 +763,8 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
         dir = dir.GetXFlipped(m_HFlipped);
 
         // Bresenham's line drawing algorithm preparation
-        delta[X] = floorf(entryPos.m_X + dir.m_X) - intPos[X];
-        delta[Y] = floorf(entryPos.m_Y + dir.m_Y) - intPos[Y];
+        delta[X] = std::floor(entryPos.m_X + dir.m_X) - intPos[X];
+        delta[Y] = std::floor(entryPos.m_Y + dir.m_Y) - intPos[Y];
         domSteps = 0;
         subSteps = 0;
 

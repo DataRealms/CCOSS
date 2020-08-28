@@ -980,7 +980,7 @@ void HDFirearm::Update()
             m_pFlash->SetHFlipped(m_HFlipped);
             m_pFlash->SetJointPos(m_Pos + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation));
             m_pFlash->SetRotAngle(m_Rotation.GetRadAngle());
-            m_pFlash->SetFrame(floorf((m_pFlash->GetFrameCount()/* - 1*/) * PosRand() - 0.001));
+            m_pFlash->SetFrame(std::floor((m_pFlash->GetFrameCount()/* - 1*/) * PosRand() - 0.001));
             m_pFlash->Update();
         }
 
@@ -1021,7 +1021,7 @@ void HDFirearm::Update()
                 {
                     float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % animDuration;
 					if (!m_IsAnimatedManually)
-	                    m_Frame = floorf((cycleTime / (float)animDuration) * (float)m_FrameCount);
+	                    m_Frame = std::floor((cycleTime / (float)animDuration) * (float)m_FrameCount);
                 }
                 else
                     m_ActiveSound.Stop();

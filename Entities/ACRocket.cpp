@@ -1027,7 +1027,7 @@ void ACRocket::Update()
 
     if (m_HatchState == OPENING) {
         if (m_HatchTimer.GetElapsedSimTimeMS() <= m_HatchDelay && m_HatchDelay)
-            m_Frame = floorf((float)lastFrame * ((float)m_HatchTimer.GetElapsedSimTimeMS() / (float)m_HatchDelay));
+            m_Frame = std::floor((float)lastFrame * ((float)m_HatchTimer.GetElapsedSimTimeMS() / (float)m_HatchDelay));
         else
         {
             m_Frame = lastFrame;
@@ -1038,7 +1038,7 @@ void ACRocket::Update()
     else if (m_HatchState == CLOSING) {
         if (m_HatchTimer.GetElapsedSimTimeMS() <= m_HatchDelay && m_HatchDelay)
 
-            m_Frame = lastFrame - floorf((float)lastFrame * ((float)m_HatchTimer.GetElapsedSimTimeMS() / (float)m_HatchDelay));
+            m_Frame = lastFrame - std::floor((float)lastFrame * ((float)m_HatchTimer.GetElapsedSimTimeMS() / (float)m_HatchDelay));
         else
         {
             m_Frame = 0;
@@ -1243,11 +1243,11 @@ void ACRocket::Draw(BITMAP *pTargetBitmap,
     if (mode == g_DrawColor) {
 #ifdef DEBUG_BUILD
         acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
+        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
+                              std::floor(m_Pos.m_Y),
                               64);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
+        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
+                              std::floor(m_Pos.m_Y),
                               64);
         release_bitmap(pTargetBitmap);
 

@@ -21,8 +21,8 @@ namespace RTE {
 		int sceneHeight = g_SceneMan.GetSceneHeight();
 
 		// Make overlapping nodes at seams if necessary, to make sure all scene pixels are covered
-		int nodeXCount = std::std::ceil(static_cast<float>(sceneWidth) / static_cast<float>(m_NodeDimension));
-		int nodeYCount = std::std::ceil(static_cast<float>(sceneHeight) / static_cast<float>(m_NodeDimension));
+		int nodeXCount = std::ceil(static_cast<float>(sceneWidth) / static_cast<float>(m_NodeDimension));
+		int nodeYCount = std::ceil(static_cast<float>(sceneHeight) / static_cast<float>(m_NodeDimension));
 
 		// Create and assign scene coordinate positions for all nodes
 		PathNode *node = 0;
@@ -120,10 +120,10 @@ namespace RTE {
 		g_SceneMan.ForceBounds(end);
 
 		// Convert from absolute scene pixel coordinates to path node indices
-		int startNodeX = std::std::floor(start.m_X / static_cast<float>(m_NodeDimension));
-		int startNodeY = std::std::floor(start.m_Y / static_cast<float>(m_NodeDimension));
-		int endNodeX = std::std::floor(end.m_X / static_cast<float>(m_NodeDimension));
-		int endNodeY = std::std::floor(end.m_Y / static_cast<float>(m_NodeDimension));
+		int startNodeX = std::floor(start.m_X / static_cast<float>(m_NodeDimension));
+		int startNodeY = std::floor(start.m_Y / static_cast<float>(m_NodeDimension));
+		int endNodeX = std::floor(end.m_X / static_cast<float>(m_NodeDimension));
+		int endNodeY = std::floor(end.m_Y / static_cast<float>(m_NodeDimension));
 
 		// Clear out the results if it happens to contain anything
 		pathResult.clear();
@@ -320,10 +320,10 @@ namespace RTE {
 		box.Unflip();
 
 		// Get the extents of the box' potential influence on nodes and their connecting edges
-		int firstX = std::std::floor((box.m_Corner.m_X / static_cast<float>(m_NodeDimension)) + 0.5F) - 1;
-		int lastX = std::std::floor(((box.m_Corner.m_X + box.m_Width) / static_cast<float>(m_NodeDimension)) + 0.5F) + 1;
-		int firstY = std::std::floor((box.m_Corner.m_Y / static_cast<float>(m_NodeDimension)) + 0.5F) - 1;
-		int lastY = std::std::floor(((box.m_Corner.m_Y + box.m_Height) / static_cast<float>(m_NodeDimension)) + 0.5F) + 1;
+		int firstX = std::floor((box.m_Corner.m_X / static_cast<float>(m_NodeDimension)) + 0.5F) - 1;
+		int lastX = std::floor(((box.m_Corner.m_X + box.m_Width) / static_cast<float>(m_NodeDimension)) + 0.5F) + 1;
+		int firstY = std::floor((box.m_Corner.m_Y / static_cast<float>(m_NodeDimension)) + 0.5F) - 1;
+		int lastY = std::floor(((box.m_Corner.m_Y + box.m_Height) / static_cast<float>(m_NodeDimension)) + 0.5F) + 1;
 
 		// Truncate the influence
 		if (firstX < 0) { firstX = 0; }

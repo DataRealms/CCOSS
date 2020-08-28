@@ -76,7 +76,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float EaseInOut(float start, float end, float progressScalar) {
-		return start * (2 * std::std::pow(progressScalar, 3) - 3 * std::std::pow(progressScalar, 2) + 1) + end * (3 * std::std::pow(progressScalar, 2) - 2 * std::std::pow(progressScalar, 3));
+		return start * (2 * std::pow(progressScalar, 3) - 3 * std::pow(progressScalar, 2) + 1) + end * (3 * std::pow(progressScalar, 2) - 2 * std::pow(progressScalar, 3));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

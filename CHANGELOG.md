@@ -131,7 +131,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Added log for non-fatal loading errors. This log will show image files that have been loaded with incorrect extensions (has no side effects but should be addressed) and audio files that failed loading entirely and will not be audible.  
 	If errors are present the console will be forced open to notify the player (only when loading into main menu).  
-	Log will be automatically deleted if warnings are no longer present to avoid polluting the root directory.	
+	Log will be automatically deleted if warnings are no longer present to avoid polluting the root directory.
+	
+- Game window resolution can now be changed without restarting the game.
 
 ### Changed
 
@@ -205,6 +207,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Controller deadzone setting ignores more input. Previously setting it to the maximum was just enough to eliminate stick drift.
 
 - `Arm.HandPos` will now get/set the hand position as relative to the arm's joint position, instead of relative to the arm's center of mass.
+
+- Resolution settings in options screen changed:  
+	Resolution multiplier button changed to `Fullscreen` button - this will set the game window resolution to match the desktop resolution. When resolution matches the desktop, this button will change to `Windowed` and will allow setting the game window resolution back to default (960x540).  
+	Added `Upscaled Fullscreen` button - this will change the resolution to half of the desktop and the multiplier to 2. The `Fullscreen` button will change to `Windowed` in this mode to return to non-upscaled mode (960x540).  
+	Selecting any resolution setting from the resolution combobox will immediately change to selected resolution. (Known bug: Clicking off the combobox without making a new selection while in `Upscaled Fullscreen` mode will change resolution to `Fullscreen`. This will be addressed later.)  
+	
+	**Note:** Changing the game window resolution while an Activity is active requires ending the Activity. A dialog box will appear asking to confirm the change.
 
 - Moved from C-style random number generation to C++ standard.
 

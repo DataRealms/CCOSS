@@ -59,6 +59,7 @@ namespace RTE {
     static bool alwaysIgnore = false;\
     if (!alwaysIgnore){\
       if(RTEAssertFunc(expression, description, __FILE__, __LINE__, alwaysIgnore)){}\
+    }\
   }
 #endif
 }

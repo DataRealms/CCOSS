@@ -1,6 +1,7 @@
 #ifndef _RTEINCLUDES_
 #define _RTEINCLUDES_
 
+
 // Inclusion of relevant C++ Standard Library headers.
 #include <algorithm>
 #include <array>
@@ -35,6 +36,10 @@
 // TODO: don't forget to replace with <filesystem> when eventually enable ++17
 // standard.
 #include <experimental/filesystem>
+
+// Inclusion of relevant C Standard Library headers.
+#define __STDC_WANT_LIB_EXT1__
+#include <string.h>
 
 // TODO: Get rid of these once alias qualifiers are added.
 using std::array;

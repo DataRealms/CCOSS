@@ -12,7 +12,8 @@ inc_dirs = include_directories('Activities',
 
 deps = [dependency('boost'),
   dependency('allegro-5'),
-  dependency('flac')
+  dependency('flac'),
+  dependency('luajit')
   ]
 
 pch = 'System/StandardIncludes.h'
@@ -23,7 +24,8 @@ subdir('GUI')
 subdir('Managers')
 subdir('Menus')
 subdir('System')
+subdir('external/sources')
 
 
-executable('CCOSS', 'Main.cpp',sources, dependencies: deps, include_directories:inc_dirs,
+executable('CCOSS', 'Main.cpp',sources, luabind_src, raknet_src, dependencies: deps, include_directories:inc_dirs,
             override_options:['cpp_std=c++14'], cpp_args:['-fpermissive','-w', '-Wno-return-type', '-Wno-write-strings', '-Wno-unknown-pragmas', '-Wno-unused-variable'], cpp_pch:pch)

@@ -14,6 +14,6 @@ sources += files('AchievementMan.cpp',
 'PrimitiveMan.cpp',
 'SceneMan.cpp',
 'SettingsMan.cpp',
-'ThreadMan.cpp',
+#'ThreadMan.cpp',
 'TimerMan.cpp',
 'UInputMan.cpp')

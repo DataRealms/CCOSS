@@ -1205,7 +1205,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
 		{
 			// And the target scene, randomly selected for now from all unfriendly targets
 			int unfriendlySceneCount = enemyScenes.size() + unclaimedScenes.size();
-			int targetIndex = RandomNum<int>(0, unfriendlySceneCount - 1);
+			int targetIndex = RandomNum(0, unfriendlySceneCount - 1);
 			// Give it a strong preference for unclaimed scenes! They make more strategic sense than to attack a hardened target
 			if (!unclaimedScenes.empty() && targetIndex >= unclaimedScenes.size())
 				targetIndex = RandomNum() < 0.75F ? RandomNum<int>(0, unclaimedScenes.size() - 1) : targetIndex;

@@ -129,7 +129,7 @@ namespace RTE {
 
 		for (unsigned int piece = 0; piece < pieceCount; ++piece) {
 			bool place = false;
-			unsigned short currentBitmap = RandomNum<int>(0, m_BitmapCount - 1);
+			unsigned short currentBitmap = RandomNum<unsigned short>(0, m_BitmapCount - 1);
 			RTEAssert(currentBitmap >= 0 && currentBitmap < m_BitmapCount, "Bitmap index is out of bounds!");
 
 			pieceBox.SetWidth(m_Bitmaps[currentBitmap]->w);
@@ -137,7 +137,7 @@ namespace RTE {
 
 			int x = RandomNum<int>(0, terrainWidth);
 			int y = 0;
-			int depth = RandomNum<int>(m_MinDepth, m_MaxDepth);
+			int depth = RandomNum(m_MinDepth, m_MaxDepth);
 
 			while (y < terrBitmap->h) {
 				// Find the air-terrain boundary

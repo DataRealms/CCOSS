@@ -10,7 +10,7 @@ namespace RTE {
 
 	class Vector;
 
-	extern std::mt19937 RTETools_RNG; //!< The random number generator used for all random functions.result.
+	extern std::mt19937 g_RNG; //!< The random number generator used for all random functions.
 
 #pragma region Physics Constants Getters
 	/// <summary>
@@ -40,24 +40,15 @@ namespace RTE {
 
 #pragma region Random Numbers
 	/// <summary>
-	/// Seed the mt19937 random number generator.
-	/// mt19937 is the standard mersenne_twister_engine.
+	/// Seed the mt19937 random number generator. mt19937 is the standard mersenne_twister_engine.
 	/// </summary>
 	void SeedRNG();
 
 	/// <summary>
-	/// Seed the mt19937 random number generator.
-	/// mt19937 is the standard mersenne_twister_engine.
+	/// Seed the mt19937 random number generator. mt19937 is the standard mersenne_twister_engine.
 	/// </summary>
 	/// <param name="seed">Seed for the random number generator.</param>
 	void SeedRNG(unsigned int seed);
-
-	/// <summary>
-	/// Generate a pre-seed for the mt19937 random number generator.
-	/// The pre-seed is used in SeedRNG with seed = 0 to create a good seed sequence for the RNG.
-	/// </summary>
-	/// <returns>A pre-seed for the mt19937 random number generator.</returns>
-	std::array<int, 624> GeneratePreSeed();
 
 	/// <summary>
 	/// Uniformly distributed random double in the range [0, 1].
@@ -74,17 +65,15 @@ namespace RTE {
 	/// <summary>
 	/// Template function which returns a Uniformly distributed random number in the range [0, 1].
 	/// </summary>
-	/// <param name="min">Lower boundary of the range to pick a number from.</param>
-	/// <param name="max">Upper boundary of the range to pick a number from.</param>
 	/// <returns>Uniformly distributed random number in the range [0, 1].</returns>
 	template <typename floatType = float>
 	typename std::enable_if<std::is_floating_point<floatType>::value, floatType>::type RandomNum() {
-		return std::uniform_real_distribution<floatType>(floatType(0.0), std::nextafter(floatType(1.0), std::numeric_limits<floatType>::max()))(RTETools_RNG);
+		return std::uniform_real_distribution<floatType>(floatType(0.0), std::nextafter(floatType(1.0), std::numeric_limits<floatType>::max()))(g_RNG);
 	}
 
 	template <typename intType>
 	typename std::enable_if<std::is_integral<intType>::value, intType>::type RandomNum() {
-		return std::uniform_int_distribution<intType>(intType(0), intType(1))(RTETools_RNG);
+		return std::uniform_int_distribution<intType>(intType(0), intType(1))(g_RNG);
 	}
 
 	/// <summary>
@@ -95,18 +84,14 @@ namespace RTE {
 	/// <returns>Uniformly distributed random number in the range [min, max].</returns>
 	template <typename floatType = float>
 	typename std::enable_if<std::is_floating_point<floatType>::value, floatType>::type RandomNum(floatType min, floatType max) {
-		if (max < min) {
-			std::swap(min, max);
-		}
-		return (std::uniform_real_distribution<floatType>(floatType(0.0), std::nextafter(max - min, std::numeric_limits<floatType>::max()))(RTETools_RNG) + min);
+		if (max < min) { std::swap(min, max); }
+		return (std::uniform_real_distribution<floatType>(floatType(0.0), std::nextafter(max - min, std::numeric_limits<floatType>::max()))(g_RNG) + min);
 	}
 
 	template <typename intType>
 	typename std::enable_if<std::is_integral<intType>::value, intType>::type RandomNum(intType min, intType max) {
-		if (max < min) {
-			std::swap(min, max);
-		}
-		return (std::uniform_int_distribution<intType>(intType(0), max - min)(RTETools_RNG) + min);
+		if (max < min) { std::swap(min, max); }
+		return (std::uniform_int_distribution<intType>(intType(0), max - min)(g_RNG) + min);
 	}
 #pragma endregion
 

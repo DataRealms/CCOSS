@@ -1978,7 +1978,7 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
         // Transparency effect on the scene dots and lines
         drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
         // Screen blend the dots and lines, with some flickering in its intensity
-		int blendAmount = 130 + RandomNum<int>(-45, 45);
+		int blendAmount = 130 + RandomNum(-45, 45);
         set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
         // Draw the scene location dots
@@ -2005,11 +2005,11 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
             else
             {
                 // Make it flicker more if it's currently being fought over
-				blendAmount = 95 + (battleSite ? RandomNum<int>(-25, 25) : RandomNum<int>(-15, 15));
+				blendAmount = 95 + (battleSite ? RandomNum(-25, 25) : RandomNum(-15, 15));
                 set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
                 circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 4, c_GUIColorYellow);
                 circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 2, c_GUIColorYellow);
-				blendAmount = 210 + RandomNum<int>(-45, 45);
+				blendAmount = 210 + RandomNum(-45, 45);
                 set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
                 circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 1, c_GUIColorYellow);
             }
@@ -6685,7 +6685,7 @@ void MetagameGUI::UpdatePlayerLineRatios(vector<SiteLine> &lineList, int metaPla
 
 void MetagameGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Vector &end, int color)
 {
-	int blendAmount = 210 + RandomNum<int>(-15, 15);
+	int blendAmount = 210 + RandomNum(-15, 15);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
     line(drawBitmap, start.m_X, start.m_Y, end.m_X, end.m_Y, color);
 /* Looks like ass
@@ -6701,7 +6701,7 @@ void MetagameGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Ve
         line(drawBitmap, start.m_X - 1, start.m_Y, end.m_X - 1, end.m_Y, color);
     }
 */
-	blendAmount = 45 + RandomNum<int>(-25, 25);
+	blendAmount = 45 + RandomNum(-25, 25);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
     line(drawBitmap, start.m_X + 1, start.m_Y, end.m_X + 1, end.m_Y, color);
     line(drawBitmap, start.m_X - 1, start.m_Y, end.m_X - 1, end.m_Y, color);
@@ -6814,7 +6814,7 @@ bool MetagameGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     // Draw a circle around the site target
     if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments))
     {
-		int blendAmount = 225 + RandomNum<int>(-20, 20);
+		int blendAmount = 225 + RandomNum(-20, 20);
         set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
         // If specified, draw a squareSite instead (with chamfered corners)
@@ -6978,7 +6978,7 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     // Draw a circle around the site target
     if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments))
     {
-        int blendAmount = 225 + RandomNum<int>(-20, 20);
+        int blendAmount = 225 + RandomNum(-20, 20);
         set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
         // If specified, draw a squareSite instead (with chamfered corners)

@@ -2117,7 +2117,6 @@ int LuaMan::Create()
         // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
         def("DeleteEntity", &DeleteEntity, adopt(_1)),
 		def("RangeRand", (double(*)(double, double))& RandomNum),
-        //def("PosRand", (double(*)(void))& RandomNum),
 		def("PosRand", &PosRand),
         def("NormalRand", &NormalRand),
         def("SelectRand", (int(*)(int, int)) &RandomNum),

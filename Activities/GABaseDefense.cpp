@@ -400,7 +400,7 @@ void GABaseDefense::Update()
                         }
                         else
                         {
-							landingZone.m_X = static_cast<float>(RandomNum<int>(0, g_SceneMan.GetSceneWidth()));
+							landingZone.m_X = static_cast<float>(RandomNum(0, g_SceneMan.GetSceneWidth()));
                         }
                         Vector dropStart(landingZone.m_X, -50);
                         pSpawn->SetPos(dropStart);

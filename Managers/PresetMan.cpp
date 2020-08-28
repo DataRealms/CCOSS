@@ -715,7 +715,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 		if (totalWeight == 0)
 			return 0;
 
-		selection = RandomNum<int>(0, totalWeight - 1);
+		selection = RandomNum(0, totalWeight - 1);
 
 		for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
 		{

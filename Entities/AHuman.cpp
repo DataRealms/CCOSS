@@ -3101,7 +3101,7 @@ void AHuman::Update()
 
 		if (RandomNum() > 0.8F)
 		{
-			int hat = RandomNum<int>(1, 20);
+			int hat = RandomNum(1, 20);
 
             std::stringstream hatName;
             hatName << "Random Hat " << hat;

@@ -980,7 +980,7 @@ void HDFirearm::Update()
             m_pFlash->SetHFlipped(m_HFlipped);
             m_pFlash->SetJointPos(m_Pos + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation));
             m_pFlash->SetRotAngle(m_Rotation.GetRadAngle());
-			m_pFlash->SetFrame(RandomNum<int>(0, m_pFlash->GetFrameCount() - 1));
+			m_pFlash->SetFrame(RandomNum(0, m_pFlash->GetFrameCount() - 1));
             m_pFlash->Update();
         }
 
@@ -1184,7 +1184,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
         aimPoint4 += m_Pos;
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-		int glow = (155 + RandomNum<int>(0, 100));
+		int glow = (155 + RandomNum(0, 100));
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint1, YellowDot, glow);
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
@@ -1223,7 +1223,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
         aimPoint3 += m_Pos;
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-        int glow = (55 + RandomNum<int>(0, 100));
+        int glow = (55 + RandomNum(0, 100));
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
 

@@ -185,7 +185,7 @@ namespace RTE {
 		//Send a signal that server is going to shutdown
 		m_IsInServerMode = false;
 		// Wait for thread to shut down
-		Sleep(250);
+		RakSleep(250);
 		m_Server->Shutdown(300);
 		// We're done with the network
 		RakNet::RakPeerInterface::DestroyInstance(m_Server);
@@ -857,7 +857,7 @@ namespace RTE {
 							m_SendBufferBytes[player] = (int)rns.bytesInSendBuffer[MEDIUM_PRIORITY] + (int)rns.bytesInSendBuffer[HIGH_PRIORITY];
 							m_SendBufferMessages[player] = (int)rns.messageInSendBuffer[MEDIUM_PRIORITY] + (int)rns.messageInSendBuffer[HIGH_PRIORITY];
 
-							Sleep(25);
+							RakSleep(25);
 						} while (rns.messageInSendBuffer[HIGH_PRIORITY] > 1000 && IsPlayerConnected(player));
 
 						if (!IsPlayerConnected(player)) {
@@ -1656,7 +1656,7 @@ namespace RTE {
 				} else {
 					return RakNet::UNASSIGNED_SYSTEM_ADDRESS;
 				}
-				Sleep(100);
+				RakSleep(100);
 			}
 		}
 	}

@@ -111,7 +111,7 @@ namespace RTE {
 
 		m_IsRegistered = false;
 		m_IsConnected = false;
-		Sleep(250);
+		RakSleep(250);
 		RakNet::AddressOrGUID addr = m_Client->GetSystemAddressFromIndex(0);
 		m_Client->CloseConnection(addr, true);
 		g_ConsoleMan.PrintString("CLIENT: Disconnect");

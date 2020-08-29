@@ -279,7 +279,7 @@ int MainMenuGUI::Create(Controller *pController)
 	m_aDeadZoneSlider[P4DEADZONESLIDER]->SetValue(g_UInputMan.GetControlScheme(3)->GetJoystickDeadzone() * 250);
 
 	// Set value labels
-  std::string s;
+	char s[256];
 
 	sprintf_s(s, sizeof(s), "%d", m_aDeadZoneSlider[P1DEADZONESLIDER]->GetValue());
 	m_aDeadZoneLabel[P1DEADZONESLIDER]->SetText(s);
@@ -1970,7 +1970,7 @@ void MainMenuGUI::UpdateScenesBox()
 
 void MainMenuGUI::UpdateTeamBoxes()
 {
-  std::string str;
+    char str[128];
 
     // Hide all team assignment panels initially, and center their contents
     for (int box = 0; box < SKIRMISHPLAYERCOUNT; ++box)
@@ -2099,7 +2099,7 @@ void MainMenuGUI::UpdateResolutionCombo() {
 #endif
         int width = 0;
         int height = 0;
-        std::string resString = "";
+		char resString[256] = "";
         // Index of found useful resolution (32bit)
         int foundIndex = 0;
         int currentResIndex = -1;
@@ -2178,7 +2178,7 @@ void MainMenuGUI::UpdateResolutionCombo() {
 
 void MainMenuGUI::UpdateVolumeSliders()
 {
-    std::string labelText;
+    char labelText[512];
     int volume = (int)(g_AudioMan.GetSoundsVolume() * 100);
     sprintf_s(labelText, sizeof(labelText), "Sound Volume: %i", volume);
     m_pSoundLabel->SetText(labelText);
@@ -2236,7 +2236,7 @@ void MainMenuGUI::UpdateDeviceLabels()
 
 void MainMenuGUI::UpdateConfigScreen()
 {
-    std::string str;
+    char str[256];
 
     if (m_ScreenChange)
     {

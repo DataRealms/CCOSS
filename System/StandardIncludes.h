@@ -37,8 +37,9 @@
 // standard.
 #include <experimental/filesystem>
 
-// Since GCC does not implement sprintf_s use workaround
+// Linux specific headers that MSVC uses implicitly
 #ifdef __unix__
+// Since GCC does not implement sprintf_s use workaround
 #define sprintf_s std::snprintf
 #define __STDC_WANT_LIB_EXT1__
 #include <string.h>

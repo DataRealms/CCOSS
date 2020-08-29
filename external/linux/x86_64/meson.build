@@ -1,3 +1,4 @@
-shared_libs = files('libfmod.so.11',
-                    'libfmodL.so.11',
-                    'libraknet.so.4')
+csd = meson.current_source_dir()
+link_libs = [compiler.find_library('libfmod', dirs: csd),
+            compiler.find_library('libfmodL', dirs: csd),
+            compiler.find_library('libraknet', dirs: csd)]

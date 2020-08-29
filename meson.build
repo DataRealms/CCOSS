@@ -16,10 +16,11 @@ deps = [dependency('boost'),
   dependency('luajit'),
   dependency('minizip'),
   dependency('threads'),
-  dependency('liblz4')
+  dependency('liblz4'),
+  dependency('libpng')
   ]
 
-shared_libs = []
+compiler = meson.get_compiler('cpp')
 
 pch = 'System/StandardIncludes.h'
 sources = []
@@ -32,5 +33,5 @@ subdir('System')
 subdir('external')
 
 
-executable('CCOSS', 'Main.cpp',sources, luabind_src, raknet_src, link_depends: shared_libs, dependencies: deps, include_directories:inc_dirs,
+executable('CCOSS', 'Main.cpp',sources, luabind_src, raknet_src, dependencies: [deps,link_libs], include_directories:inc_dirs,
             override_options:['cpp_std=c++17'], cpp_args:['-pedantic-errors','-fpermissive','-w', '-Wno-return-type', '-Wno-write-strings', '-Wno-unknown-pragmas', '-Wno-unused-variable'], cpp_pch:pch)

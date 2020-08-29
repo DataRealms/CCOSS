@@ -52,7 +52,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float Vector::GetAbsRadAngle() const {
-		float radAngle = -std::atan2f(m_Y, m_X);
+		float radAngle = -std::atan2(m_Y, m_X);
 		return (radAngle < -c_HalfPI) ? (radAngle + c_TwoPI) : radAngle;
 	}
 

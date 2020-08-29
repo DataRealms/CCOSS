@@ -9,6 +9,6 @@ sources += files('ActorEditor.cpp',
 'GATutorial.cpp',
 'GameActivity.cpp',
 'GibEditor.cpp',
-#'MultiplayerGame.cpp',
-#'MultiplayerServerLobby.cpp',
+'MultiplayerGame.cpp',
+'MultiplayerServerLobby.cpp',
 'SceneEditor.cpp')

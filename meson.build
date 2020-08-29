@@ -33,4 +33,4 @@ subdir('external')
 
 
 executable('CCOSS', 'Main.cpp',sources, luabind_src, raknet_src, link_depends: shared_libs, dependencies: deps, include_directories:inc_dirs,
-            override_options:['cpp_std=c++17'], cpp_args:['-fpermissive','-w', '-Wno-return-type', '-Wno-write-strings', '-Wno-unknown-pragmas', '-Wno-unused-variable'], cpp_pch:pch)
+            override_options:['cpp_std=c++17'], cpp_args:['-pedantic-errors','-fpermissive','-w', '-Wno-return-type', '-Wno-write-strings', '-Wno-unknown-pragmas', '-Wno-unused-variable'], cpp_pch:pch)

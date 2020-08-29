@@ -63,7 +63,7 @@ namespace RTE {
 	float NormalRand();
 
 	/// <summary>
-	/// Template function which returns a Uniformly distributed random number in the range [0, 1].
+	/// Function template which returns a Uniformly distributed random number in the range [0, 1].
 	/// </summary>
 	/// <returns>Uniformly distributed random number in the range [0, 1].</returns>
 	template <typename floatType = float>
@@ -71,13 +71,17 @@ namespace RTE {
 		return std::uniform_real_distribution<floatType>(floatType(0.0), std::nextafter(floatType(1.0), std::numeric_limits<floatType>::max()))(g_RNG);
 	}
 
+	/// <summary>
+	/// Function template specialization for int types which returns a Uniformly distributed random number in the range [0, 1].
+	/// </summary>
+	/// <returns>Uniformly distributed random number in the range [0, 1].</returns>
 	template <typename intType>
 	typename std::enable_if<std::is_integral<intType>::value, intType>::type RandomNum() {
 		return std::uniform_int_distribution<intType>(intType(0), intType(1))(g_RNG);
 	}
 
 	/// <summary>
-	/// Template function which returns a Uniformly distributed random number in the range [min, max].
+	/// Function template which returns a Uniformly distributed random number in the range [min, max].
 	/// </summary>
 	/// <param name="min">Lower boundary of the range to pick a number from.</param>
 	/// <param name="max">Upper boundary of the range to pick a number from.</param>
@@ -88,6 +92,12 @@ namespace RTE {
 		return (std::uniform_real_distribution<floatType>(floatType(0.0), std::nextafter(max - min, std::numeric_limits<floatType>::max()))(g_RNG) + min);
 	}
 
+	/// <summary>
+	/// Function template specialization for int types which returns a Uniformly distributed random number in the range [min, max].
+	/// </summary>
+	/// <param name="min">Lower boundary of the range to pick a number from.</param>
+	/// <param name="max">Upper boundary of the range to pick a number from.</param>
+	/// <returns>Uniformly distributed random number in the range [min, max].</returns>
 	template <typename intType>
 	typename std::enable_if<std::is_integral<intType>::value, intType>::type RandomNum(intType min, intType max) {
 		if (max < min) { std::swap(min, max); }

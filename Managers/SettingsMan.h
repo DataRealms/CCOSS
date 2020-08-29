@@ -62,6 +62,11 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether Settings.ini needs to be overwritten with the complete list of settings or not.</returns>
 		bool SettingsNeedOverwrite() const { return m_SettingsNeedOverwrite; }
+
+		/// <summary>
+		/// Overwrites the settings file to save changes made from within the game.
+		/// </summary>
+		void UpdateSettingsFile();
 #pragma endregion
 
 #pragma region Engine Settings

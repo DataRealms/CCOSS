@@ -373,6 +373,8 @@ void AddParticle(MovableMan &This, MovableObject *pParticle)
     else
         This.AddParticle(pParticle);
 }
+double NormalRand() { return RandomNormalNum<double>(); }
+double PosRand() { return RandomNum<double>(); }
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////

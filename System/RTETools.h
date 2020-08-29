@@ -51,24 +51,11 @@ namespace RTE {
 	void SeedRNG(unsigned int seed);
 
 	/// <summary>
-	/// Uniformly distributed random double in the range [0, 1]. Used for binding to lua.
-	/// </summary>
-	/// <returns>Uniformly distributed random double in the range [0, 1].</returns>
-	double PosRand();
-
-	/// <summary>
-	/// Uniformly distributed random double in the range [-1, 1]. Used for binding to lua.
-	/// </summary>
-	/// <returns>Uniformly distributed random double in the range [-1, 1].</returns>
-	double NormalRand();
-
-	/// <summary>
 	/// Function template which returns a uniformly distributed random number in the range [-1, 1].
 	/// </summary>
 	/// <returns>Uniformly distributed random number in the range [-1, 1].</returns>
 	template <typename floatType = float>
-	typename std::enable_if<std::is_floating_point<floatType>::value, floatType>::type RandomNormalNum()
-	{
+	typename std::enable_if<std::is_floating_point<floatType>::value, floatType>::type RandomNormalNum() {
 		return std::uniform_real_distribution<floatType>(floatType(-1.0), std::nextafter(floatType(1.0), std::numeric_limits<floatType>::max()))(g_RNG);
 	}
 
@@ -77,8 +64,7 @@ namespace RTE {
 	/// </summary>
 	/// <returns>Uniformly distributed random number in the range [-1, 1].</returns>
 	template <typename intType>
-	typename std::enable_if<std::is_integral<intType>::value, intType>::type RandomNormalNum()
-	{
+	typename std::enable_if<std::is_integral<intType>::value, intType>::type RandomNormalNum() {
 		return std::uniform_int_distribution<intType>(intType(-1), intType(1))(g_RNG);
 	}
 

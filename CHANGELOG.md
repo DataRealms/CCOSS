@@ -215,7 +215,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 	**Note:** Changing the game window resolution while an Activity is active requires ending the Activity. A dialog box will appear asking to confirm the change.
 
-- Moved from C-style random number generation to C++ standard.
+- Moved from C-style random number generation to C++ standard. This includes usage of an mt19937 random number generator.
+- For C++ coders the functions SelectRand, PosRand and RangeRand have been replaced by the function template RandomNum() and its overload RandomNum(T min, T max). The function NormalRand has been replaced by the function template RandomNormalNum(). For lua coders there is no change.
 
 ### Fixed
 

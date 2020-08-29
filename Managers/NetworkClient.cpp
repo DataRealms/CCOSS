@@ -7,8 +7,11 @@
 #include "UInputMan.h"
 
 #include "NetworkClient.h"
-
-#include "LZ4/lz4.h"
+#ifndef __unix__
+#include "lz4.h"
+#else
+#include <lz4.h>
+#endif
 
 namespace RTE {
 

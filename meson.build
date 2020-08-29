@@ -15,7 +15,8 @@ deps = [dependency('boost'),
   dependency('flac'),
   dependency('luajit'),
   dependency('minizip'),
-  dependency('threads')
+  dependency('threads'),
+  dependency('liblz4')
   ]
 
 shared_libs = []

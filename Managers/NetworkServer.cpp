@@ -17,8 +17,13 @@
 #include "RakNetStatistics.h"
 #include "RakSleep.h"
 
+#ifndef __unix__
 #include "LZ4/lz4.h"
 #include "LZ4/lz4hc.h"
+#else
+#include <lz4.h>
+#include <lz4hc.h>
+#endif
 
 extern bool g_ResetActivity;
 extern bool g_InActivity;

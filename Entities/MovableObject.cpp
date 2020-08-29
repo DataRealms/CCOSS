@@ -984,7 +984,7 @@ int MovableObject::OnPieMenu(Actor *pieMenuActor) {
 void MovableObject::Update()
 {
 	if (m_RandomizeEffectRotAngleEveryFrame)
-		m_EffectRotAngle = c_PI * 2.0F * NormalRand();
+		m_EffectRotAngle = c_PI * 2.0F * RandomNormalNum();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

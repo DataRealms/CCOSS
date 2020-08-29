@@ -1578,7 +1578,7 @@ bool AHuman::Look(float FOVSpread, float range)
     aimMatrix.SetXFlipped(m_HFlipped);
     lookVector *= aimMatrix;
     // Add the spread
-	lookVector.DegRotate(FOVSpread * NormalRand());
+	lookVector.DegRotate(FOVSpread * RandomNormalNum());
 
     // TODO: generate an alarm event if we spot an enemy actor?
 
@@ -1596,7 +1596,7 @@ bool AHuman::Look(float FOVSpread, float range)
 bool AHuman::LookForGold(float FOVSpread, float range, Vector &foundLocation)
 {
     Vector ray(m_HFlipped ? -range : range, 0);
-	ray.DegRotate(FOVSpread * NormalRand());
+	ray.DegRotate(FOVSpread * RandomNormalNum());
 
     return g_SceneMan.CastMaterialRay(m_Pos, ray, g_MaterialGold, foundLocation, 4);
 }
@@ -1634,7 +1634,7 @@ MovableObject * AHuman::LookForMOs(float FOVSpread, unsigned char ignoreMaterial
     aimMatrix.SetXFlipped(m_HFlipped);
     lookVector *= aimMatrix;
     // Add the spread
-    lookVector.DegRotate(FOVSpread * NormalRand());
+    lookVector.DegRotate(FOVSpread * RandomNormalNum());
 
     MOID seenMOID = g_SceneMan.CastMORay(aimPos, lookVector, m_MOID, IgnoresWhichTeam(), ignoreMaterial, ignoreAllTerrain, 5);
     pSeenMO = g_MovableMan.GetMOFromID(seenMOID);
@@ -1658,7 +1658,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     {
         RemoveAttachable(m_pHead);
         m_pHead->SetVel(m_Vel + m_pHead->GetParentOffset() * RandomNum());
-        m_pHead->SetAngularVel(NormalRand());
+        m_pHead->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pHead);
         m_pHead = 0;
     }
@@ -1674,7 +1674,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     {
         RemoveAttachable(m_pFGArm);
         m_pFGArm->SetVel(m_Vel + m_pFGArm->GetParentOffset() * RandomNum());
-        m_pFGArm->SetAngularVel(NormalRand());
+        m_pFGArm->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pFGArm);
         m_pFGArm = 0;
     }
@@ -1682,7 +1682,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     {
         RemoveAttachable(m_pBGArm);
         m_pBGArm->SetVel(m_Vel + m_pBGArm->GetParentOffset() * RandomNum());
-        m_pBGArm->SetAngularVel(NormalRand());
+        m_pBGArm->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pBGArm);
         m_pBGArm = 0;
     }
@@ -1690,7 +1690,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     {
         RemoveAttachable(m_pFGLeg);
         m_pFGLeg->SetVel(m_Vel + m_pFGLeg->GetParentOffset() * RandomNum());
-        m_pFGLeg->SetAngularVel(NormalRand());
+        m_pFGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pFGLeg);
         m_pFGLeg = 0;
     }
@@ -1698,7 +1698,7 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     {
         RemoveAttachable(m_pBGLeg);
         m_pBGLeg->SetVel(m_Vel + m_pBGLeg->GetParentOffset() * RandomNum());
-        m_pBGLeg->SetAngularVel(NormalRand());
+        m_pBGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pBGLeg);
         m_pBGLeg = 0;
     }
@@ -3532,10 +3532,10 @@ void AHuman::Update()
                     {
                         pMO->SetPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) + Vector(m_HFlipped ? -15 : 15, -8));
                         float throwScalar = (float)MIN(m_ThrowTmr.GetElapsedSimTimeMS(), m_ThrowPrepTime) / (float)m_ThrowPrepTime;
-                        Vector tossVec(pThrown->GetMinThrowVel() + ((pThrown->GetMaxThrowVel() - pThrown->GetMinThrowVel()) * throwScalar), 0.5F * NormalRand());
+                        Vector tossVec(pThrown->GetMinThrowVel() + ((pThrown->GetMaxThrowVel() - pThrown->GetMinThrowVel()) * throwScalar), 0.5F * RandomNormalNum());
                         tossVec.RadRotate(m_AimAngle);
                         pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-                        pMO->SetAngularVel(5.0F * NormalRand());
+                        pMO->SetAngularVel(5.0F * RandomNormalNum());
 
                         if (pMO->IsHeldDevice())
                         {
@@ -3597,9 +3597,9 @@ void AHuman::Update()
             MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
             if (pMO) {
                 pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
-                Vector tossVec(5.0F + 2.0F * NormalRand(), -2.0F + 1.0F * NormalRand());
+                Vector tossVec(5.0F + 2.0F * RandomNormalNum(), -2.0F + 1.0F * RandomNormalNum());
                 pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-                pMO->SetAngularVel(5.0F * NormalRand());
+                pMO->SetAngularVel(5.0F * RandomNormalNum());
                 if (pMO->IsDevice())
                     g_MovableMan.AddItem(pMO);
                 else {

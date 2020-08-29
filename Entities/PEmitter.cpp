@@ -478,7 +478,7 @@ namespace RTE {
 						pParticle->SetVel(parentVel + emitVel);
 
 						if (pParticle->GetLifetime() != 0)
-							pParticle->SetLifetime(pParticle->GetLifetime() * (1.0F + ((*eItr).GetLifeVariation() * NormalRand())));
+							pParticle->SetLifetime(pParticle->GetLifetime() * (1.0F + ((*eItr).GetLifeVariation() * RandomNormalNum())));
 						pParticle->SetTeam(m_Team);
 						pParticle->SetIgnoresTeamHits(true);
 

@@ -948,7 +948,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
             gibROffset = RotateOffset((*gItr).GetOffset());
             // Put variation on the lifetime, if it's not set to be endless
             if (pGib->GetLifetime() != 0)
-                pGib->SetLifetime(pGib->GetLifetime() * (1.0F + ((*gItr).GetLifeVariation() * NormalRand())));
+                pGib->SetLifetime(pGib->GetLifetime() * (1.0F + ((*gItr).GetLifeVariation() * RandomNormalNum())));
             // Set up its position and velocity according to the parameters of this AEmitter.
             pGib->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
             pGib->SetRotAngle(m_Rotation.GetRadAngle() + pGib->GetRotMatrix().GetRadAngle());
@@ -966,7 +966,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
             // Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
             else
             {
-                pGib->SetAngularVel((pGib->GetAngularVel() * 0.5F + pGib->GetAngularVel() * RandomNum()) * (NormalRand() > 0.0F ? 1.0F : -1.0F));
+                pGib->SetAngularVel((pGib->GetAngularVel() * 0.5F + pGib->GetAngularVel() * RandomNum()) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
             }
 
 // TODO: Optimize making the random angles!")
@@ -1030,7 +1030,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
         // Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
         else
         {
-            pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.5F + pAttachable->GetAngularVel() * RandomNum()) * (NormalRand() > 0.0F ? 1.0F : -1.0F));
+            pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.5F + pAttachable->GetAngularVel() * RandomNum()) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
         }
 
 // TODO: Optimize making the random angles!")

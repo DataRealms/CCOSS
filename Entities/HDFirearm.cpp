@@ -784,7 +784,7 @@ void HDFirearm::Update()
 
                 pRound = m_pMagazine->PopNextRound();
                 shake = (m_ShakeRange - ((m_ShakeRange - m_SharpShakeRange) * m_SharpAim)) *
-                        (m_Supported ? 1.0F : m_NoSupportFactor) * NormalRand();
+                        (m_Supported ? 1.0F : m_NoSupportFactor) * RandomNormalNum();
                 tempNozzle = m_MuzzleOff.GetYFlipped(m_HFlipped);
                 tempNozzle.DegRotate(degAimAngle + shake);
                 roundVel.SetIntXY(pRound->GetFireVel(), 0);
@@ -804,7 +804,7 @@ void HDFirearm::Update()
                     pParticle->SetPos(m_Pos + particlePos);
 
                     particleVel = roundVel;
-                    particleSpread = m_ParticleSpreadRange * NormalRand();
+                    particleSpread = m_ParticleSpreadRange * RandomNormalNum();
                     particleVel.DegRotate(particleSpread);
                     pParticle->SetVel(m_Vel + particleVel);
                     pParticle->SetRotAngle(particleVel.GetAbsRadAngle());
@@ -846,7 +846,7 @@ void HDFirearm::Update()
                 if (pShell)
                 {
                     tempEject = m_EjectOff.GetYFlipped(m_HFlipped);
-                    shellSpread = m_ShellSpreadRange * NormalRand();
+                    shellSpread = m_ShellSpreadRange * RandomNormalNum();
                     tempEject.DegRotate(degAimAngle + shellSpread);
                     pShell->SetPos(m_Pos + tempEject);
 
@@ -855,7 +855,7 @@ void HDFirearm::Update()
                     shellVel.DegRotate(degAimAngle + 150 * (m_HFlipped ? -1 : 1) + shellSpread);
                     pShell->SetVel(m_Vel + shellVel);
                     pShell->SetRotAngle(m_Rotation.GetRadAngle());
-                    pShell->SetAngularVel(pShell->GetAngularVel() + (m_ShellAngVelRange * NormalRand()));
+                    pShell->SetAngularVel(pShell->GetAngularVel() + (m_ShellAngVelRange * RandomNormalNum()));
 //                  // Set the ejected shell to not hit this HeldDevice's parent, if applicable
 //                  if (m_FireIgnoresThis)
 //                      pParticle->SetWhichMOToNotHit(pRootParent, 1.0f);

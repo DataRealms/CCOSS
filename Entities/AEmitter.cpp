@@ -530,12 +530,12 @@ void AEmitter::Update()
 					}
     // TODO: Optimize making the random angles!")
                     emitVel.SetXY(velMin + RandomNum(0.0F, velRange), 0.0F);
-					emitVel.RadRotate(m_EmitAngle.GetRadAngle() + spread * NormalRand());
+					emitVel.RadRotate(m_EmitAngle.GetRadAngle() + spread * RandomNormalNum());
                     emitVel = RotateOffset(emitVel);
                     pParticle->SetVel(parentVel + emitVel);
 
                     if (pParticle->GetLifetime() != 0)
-                        pParticle->SetLifetime(pParticle->GetLifetime() * (1.0F + ((*eItr)->GetLifeVariation() * NormalRand())));
+                        pParticle->SetLifetime(pParticle->GetLifetime() * (1.0F + ((*eItr)->GetLifeVariation() * RandomNormalNum())));
                     pParticle->SetTeam(m_Team);
                     pParticle->SetIgnoresTeamHits(true);
 

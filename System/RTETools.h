@@ -51,19 +51,39 @@ namespace RTE {
 	void SeedRNG(unsigned int seed);
 
 	/// <summary>
-	/// Uniformly distributed random double in the range [0, 1].
+	/// Uniformly distributed random double in the range [0, 1]. Used for binding to lua.
 	/// </summary>
 	/// <returns>Uniformly distributed random double in the range [0, 1].</returns>
 	double PosRand();
 
 	/// <summary>
-	/// Uniformly distributed random float in the range [-1, 1].
+	/// Uniformly distributed random double in the range [-1, 1]. Used for binding to lua.
 	/// </summary>
-	/// <returns>Uniformly distributed random float in the range [-1, 1].</returns>
-	float NormalRand();
+	/// <returns>Uniformly distributed random double in the range [-1, 1].</returns>
+	double NormalRand();
 
 	/// <summary>
-	/// Function template which returns a Uniformly distributed random number in the range [0, 1].
+	/// Function template which returns a uniformly distributed random number in the range [-1, 1].
+	/// </summary>
+	/// <returns>Uniformly distributed random number in the range [-1, 1].</returns>
+	template <typename floatType = float>
+	typename std::enable_if<std::is_floating_point<floatType>::value, floatType>::type RandomNormalNum()
+	{
+		return std::uniform_real_distribution<floatType>(floatType(-1.0), std::nextafter(floatType(1.0), std::numeric_limits<floatType>::max()))(g_RNG);
+	}
+
+	/// <summary>
+	/// Function template specialization for int types which returns a uniformly distributed random number in the range [-1, 1].
+	/// </summary>
+	/// <returns>Uniformly distributed random number in the range [-1, 1].</returns>
+	template <typename intType>
+	typename std::enable_if<std::is_integral<intType>::value, intType>::type RandomNormalNum()
+	{
+		return std::uniform_int_distribution<intType>(intType(-1), intType(1))(g_RNG);
+	}
+
+	/// <summary>
+	/// Function template which returns a uniformly distributed random number in the range [0, 1].
 	/// </summary>
 	/// <returns>Uniformly distributed random number in the range [0, 1].</returns>
 	template <typename floatType = float>
@@ -72,7 +92,7 @@ namespace RTE {
 	}
 
 	/// <summary>
-	/// Function template specialization for int types which returns a Uniformly distributed random number in the range [0, 1].
+	/// Function template specialization for int types which returns a uniformly distributed random number in the range [0, 1].
 	/// </summary>
 	/// <returns>Uniformly distributed random number in the range [0, 1].</returns>
 	template <typename intType>
@@ -81,7 +101,7 @@ namespace RTE {
 	}
 
 	/// <summary>
-	/// Function template which returns a Uniformly distributed random number in the range [min, max].
+	/// Function template which returns a uniformly distributed random number in the range [min, max].
 	/// </summary>
 	/// <param name="min">Lower boundary of the range to pick a number from.</param>
 	/// <param name="max">Upper boundary of the range to pick a number from.</param>
@@ -93,7 +113,7 @@ namespace RTE {
 	}
 
 	/// <summary>
-	/// Function template specialization for int types which returns a Uniformly distributed random number in the range [min, max].
+	/// Function template specialization for int types which returns a uniformly distributed random number in the range [min, max].
 	/// </summary>
 	/// <param name="min">Lower boundary of the range to pick a number from.</param>
 	/// <param name="max">Upper boundary of the range to pick a number from.</param>

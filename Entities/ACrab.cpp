@@ -917,7 +917,7 @@ bool ACrab::Look(float FOVSpread, float range)
     aimMatrix.SetXFlipped(m_HFlipped);
     lookVector *= aimMatrix;
     // Add the spread
-    lookVector.DegRotate(FOVSpread * NormalRand());
+    lookVector.DegRotate(FOVSpread * RandomNormalNum());
 
     // TODO: generate an alarm event if we spot an enemy actor?
 
@@ -960,7 +960,7 @@ MovableObject * ACrab::LookForMOs(float FOVSpread, unsigned char ignoreMaterial,
     aimMatrix.SetXFlipped(m_HFlipped);
     lookVector *= aimMatrix;
     // Add the spread
-    lookVector.DegRotate(FOVSpread * NormalRand());
+    lookVector.DegRotate(FOVSpread * RandomNormalNum());
 
     MOID seenMOID = g_SceneMan.CastMORay(aimPos, lookVector, m_MOID, IgnoresWhichTeam(), ignoreMaterial, ignoreAllTerrain, 5);
     pSeenMO = g_MovableMan.GetMOFromID(seenMOID);
@@ -984,7 +984,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     {
         RemoveAttachable(m_pTurret);
         m_pTurret->SetVel(m_Vel + m_pTurret->GetParentOffset() * RandomNum());
-        m_pTurret->SetAngularVel(NormalRand());
+        m_pTurret->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pTurret);
         m_pTurret = 0;
     }
@@ -1000,7 +1000,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     {
         RemoveAttachable(m_pLFGLeg);
         m_pLFGLeg->SetVel(m_Vel + m_pLFGLeg->GetParentOffset() * RandomNum());
-        m_pLFGLeg->SetAngularVel(NormalRand());
+        m_pLFGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pLFGLeg);
         m_pLFGLeg = 0;
     }
@@ -1008,7 +1008,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     {
         RemoveAttachable(m_pLBGLeg);
         m_pLBGLeg->SetVel(m_Vel + m_pLBGLeg->GetParentOffset() * RandomNum());
-        m_pLBGLeg->SetAngularVel(NormalRand());
+        m_pLBGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pLBGLeg);
         m_pLBGLeg = 0;
     }
@@ -1016,7 +1016,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     {
         RemoveAttachable(m_pRFGLeg);
         m_pRFGLeg->SetVel(m_Vel + m_pRFGLeg->GetParentOffset() * RandomNum());
-        m_pRFGLeg->SetAngularVel(NormalRand());
+        m_pRFGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pRFGLeg);
         m_pRFGLeg = 0;
     }
@@ -1024,7 +1024,7 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     {
         RemoveAttachable(m_pRBGLeg);
         m_pRBGLeg->SetVel(m_Vel + m_pRBGLeg->GetParentOffset() * RandomNum());
-        m_pRBGLeg->SetAngularVel(NormalRand());
+        m_pRBGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pRBGLeg);
         m_pRBGLeg = 0;
     }

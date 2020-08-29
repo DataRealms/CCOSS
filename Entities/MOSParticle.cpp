@@ -125,7 +125,7 @@ namespace RTE {
 		if (m_SpriteAnimMode == ONCOLLIDE) {
 			// Change angular velocity after collision.
 			if (hitCount >= 1) {
-				m_AngularVel *= 0.5F * velMag * NormalRand();
+				m_AngularVel *= 0.5F * velMag * RandomNormalNum();
 				m_AngularVel = -m_AngularVel;
 			}
 

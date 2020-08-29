@@ -394,7 +394,7 @@ void GABaseDefense::Update()
                             // Get the opposite side
                             landingZone.m_X += g_SceneMan.GetSceneWidth() / 2;
                             // Now give the zone width
-                            landingZone.m_X += (g_SceneMan.GetSceneWidth() / 2.0F) * 0.75F * NormalRand();
+                            landingZone.m_X += (g_SceneMan.GetSceneWidth() / 2.0F) * 0.75F * RandomNormalNum();
                             // Wrap
                             g_SceneMan.WrapPosition(landingZone);
                         }

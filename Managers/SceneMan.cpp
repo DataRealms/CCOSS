@@ -1332,7 +1332,7 @@ bool SceneMan::TryPenetrate(const int posX,
                             if (spawnColor.GetIndex() != g_MaskColor)
                             {
                                 // Figure out the randomized velocity the spray should have upward
-								sprayVel.SetXY(sprayMag* NormalRand() * 0.5F, (-sprayMag * 0.5F) + (-sprayMag * RandomNum(0.0F, 0.5F)));
+								sprayVel.SetXY(sprayMag* RandomNormalNum() * 0.5F, (-sprayMag * 0.5F) + (-sprayMag * RandomNum(0.0F, 0.5F)));
 
                                 // Create the new spray pixel
 								pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(posX, testY), sprayVel, new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2), 0);

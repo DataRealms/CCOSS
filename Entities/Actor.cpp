@@ -705,7 +705,7 @@ bool Actor::Look(float FOVSpread, float range)
         // Set the distance in the look direction
         lookVector.SetMagnitude(range);
         // Add the spread from the directed look
-        lookVector.DegRotate(FOVSpread * NormalRand());
+        lookVector.DegRotate(FOVSpread * RandomNormalNum());
     }
 
 	Vector ignored;
@@ -909,7 +909,7 @@ void Actor::DropAllInventory()
 			velRange = 10.0F;
 
 			// Randomize the offset from center to be within the original object
-			gibROffset.SetXY(m_MaxRadius * 0.35F * NormalRand(), m_MaxRadius * 0.35F * NormalRand());
+			gibROffset.SetXY(m_MaxRadius * 0.35F * RandomNormalNum(), m_MaxRadius * 0.35F * RandomNormalNum());
 			// Set up its position and velocity according to the parameters of this AEmitter.
 			pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
 			pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
@@ -927,7 +927,7 @@ void Actor::DropAllInventory()
 			// Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
 			else
 			{
-				pObject->SetAngularVel((pObject->GetAngularVel() * 0.5F + pObject->GetAngularVel() * RandomNum()) * (NormalRand() > 0.0F ? 1.0F : -1.0F));
+				pObject->SetAngularVel((pObject->GetAngularVel() * 0.5F + pObject->GetAngularVel() * RandomNum()) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
 			}
 
 			// TODO: Optimize making the random angles!")
@@ -947,7 +947,7 @@ void Actor::DropAllInventory()
 			// Detect whether we're dealing with a passenger and add it as Actor instead
 			if (pPassenger = dynamic_cast<Actor *>(pObject))
 			{
-				pPassenger->SetRotAngle(c_HalfPI * NormalRand());
+				pPassenger->SetRotAngle(c_HalfPI * RandomNormalNum());
 				pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5.0F);
 				pPassenger->SetHFlipped(RandomNum() > 0.5F);
 				pPassenger->SetStatus(UNSTABLE);
@@ -1011,7 +1011,7 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
         velRange = 10.0F;
 
         // Randomize the offset from center to be within the original object
-        gibROffset.SetXY(m_MaxRadius * 0.35F * NormalRand(), m_MaxRadius * 0.35F * NormalRand());
+        gibROffset.SetXY(m_MaxRadius * 0.35F * RandomNormalNum(), m_MaxRadius * 0.35F * RandomNormalNum());
         // Set up its position and velocity according to the parameters of this AEmitter.
         pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
         pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
@@ -1029,7 +1029,7 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
         // Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
         else
         {
-            pObject->SetAngularVel((pObject->GetAngularVel() * 0.5F + pObject->GetAngularVel() * RandomNum()) * (NormalRand() > 0.0F ? 1.0F : -1.0F));
+            pObject->SetAngularVel((pObject->GetAngularVel() * 0.5F + pObject->GetAngularVel() * RandomNum()) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
         }
 
 // TODO: Optimize making the random angles!")
@@ -1054,7 +1054,7 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
         // Detect whether we're dealing with a passenger and add it as Actor instead
         if (pPassenger = dynamic_cast<Actor *>(pObject))
         {
-            pPassenger->SetRotAngle(c_HalfPI * NormalRand());
+            pPassenger->SetRotAngle(c_HalfPI * RandomNormalNum());
             pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5.0F);
             pPassenger->SetHFlipped(RandomNum() > 0.5F);
             pPassenger->SetStatus(UNSTABLE);
@@ -1561,7 +1561,7 @@ void Actor::Update()
             MOPixel *pixelMO = new MOPixel(AuMat->GetColor(),
                                            AuMat->GetPixelDensity(),
                                            Vector(m_Pos.m_X, m_Pos.m_Y - 10),
-                                           Vector(4.0F * NormalRand(), RandomNum(-5.0F, -7.0F)),
+                                           Vector(4.0F * RandomNormalNum(), RandomNum(-5.0F, -7.0F)),
                                            new Atom(Vector(), AuMat->GetIndex(), 0, AuMat->GetColor(), 2),
                                            0);
 

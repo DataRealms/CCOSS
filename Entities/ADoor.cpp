@@ -311,7 +311,7 @@ namespace RTE {
 			m_Door->DeepCheck(true);
 			m_Door->SetPinStrength(0);
 			m_Door->SetVel(m_Vel + m_Door->GetParentOffset() * RandomNum());
-			m_Door->SetAngularVel(NormalRand());
+			m_Door->SetAngularVel(RandomNormalNum());
 			g_MovableMan.AddParticle(m_Door);
 			RemoveAttachable(m_Door);
 			m_Door = 0;

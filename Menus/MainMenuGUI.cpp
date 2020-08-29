@@ -2126,7 +2126,7 @@ void MainMenuGUI::UpdateResolutionCombo() {
 					sprintf_s(resString, sizeof(resString), "%ix%i", width, height);
 
 					// Add useful notation to the standardized resolutions
-					if (width == 800 && height == 600) { strcat(resString " SVGA"); }
+					if (width == 800 && height == 600) { strcat(resString, " SVGA"); }
 					if (width == 1024 && height == 600) { strcat(resString, " WSVGA"); }
 					if (width == 1024 && height == 768) { strcat(resString, " XGA"); }
 					if (width == 1280 && height == 720) { strcat(resString, " HD"); }

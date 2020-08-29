@@ -6,6 +6,8 @@
 #include "PerformanceMan.h"
 #include "UInputMan.h"
 
+#include "RakSleep.h"
+
 #include "NetworkClient.h"
 #ifndef __unix__
 #include "lz4.h"

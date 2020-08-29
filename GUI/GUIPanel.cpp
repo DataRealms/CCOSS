@@ -960,7 +960,7 @@ string GUIPanel::WriteValue(const string Name, int Value)
     string OutString = Name;
     OutString += " = ";
 
-    std::snprintf(buf, sizeof(buf), "%i", Value);
+    sprintf_s(buf, sizeof(buf), "%i", Value);
     OutString += buf;
     OutString += "\n";
 

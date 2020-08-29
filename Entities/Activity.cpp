@@ -755,13 +755,13 @@ void Activity::Clear() {
 		}
 
 		float totalValue = orbitedCraft->GetTotalValue(0, foreignCostMult, nativeCostMult);
-		std::snprintf(messageString, sizeof(messageString), "Returned Craft + Cargo added %.0f oz to Funds!", totalValue);
+		sprintf_s(messageString, sizeof(messageString), "Returned Craft + Cargo added %.0f oz to Funds!", totalValue);
 
 		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			if (m_IsActive[player]) {
 				if (brainOnBoard && orbitedCraft == GetPlayerBrain(static_cast<Players>(player))) {
 					m_BrainEvacuated[player] = true;
-					std::snprintf(messageString, sizeof(messageString), "YOUR BRAIN HAS BEEN EVACUATED BACK INTO ORBIT!");
+					sprintf_s(messageString, sizeof(messageString), "YOUR BRAIN HAS BEEN EVACUATED BACK INTO ORBIT!");
 				}
 
 				if (m_Team[player] == orbitedCraftTeam) {

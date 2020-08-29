@@ -138,7 +138,7 @@ namespace RTE {
 		char framePath[1024];
 		// For each frame in the animation, temporarily assign it to the datapath member var so that GetAsBitmap and then load it with GetBitmap
 		for (int frameNum = 0; frameNum < frameCount; frameNum++) {
-			std::snprintf(framePath, sizeof(framePath), "%s%03i%s", m_DataPathWithoutExtension.c_str(), frameNum, m_DataPathExtension.c_str());
+			sprintf_s(framePath, sizeof(framePath), "%s%03i%s", m_DataPathWithoutExtension.c_str(), frameNum, m_DataPathExtension.c_str());
 			m_DataPath = framePath;
 			returnBitmaps[frameNum] = GetAsBitmap(conversionMode);
 		}

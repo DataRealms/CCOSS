@@ -1847,7 +1847,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 */
-            std::snprintf(str, sizeof(str), "%.0f", m_Health);
+            sprintf_s(str, sizeof(str), "%.0f", m_Health);
 //            pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y - 35, str, GUIFont::Left);
             pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
 
@@ -1857,7 +1857,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             if (GetGoldCarried() > 0) {
                 str[0] = m_GoldPicked ? -57 : -58; str[1] = 0;
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                std::snprintf(str, sizeof(str), "%.0f oz", GetGoldCarried());
+                sprintf_s(str, sizeof(str), "%.0f oz", GetGoldCarried());
                 pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, str, GUIFont::Left);
 
                 m_HUDStack += -11;
@@ -1877,7 +1877,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             // Draw the contol pointer, if controlled and under the icon's time limit
             if (m_Controller.IsPlayetControlled() && m_NewControlTmr.GetElapsedSimTimeMS() < 1500)
             {
-                std::snprintf(str, sizeof(str), "%c", -38);
+                sprintf_s(str, sizeof(str), "%c", -38);
                 pSymbolFont->DrawAligned(&bitmapInt, cpuPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 */
@@ -1890,27 +1890,27 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     // Obstacle state
     if (m_ObstacleState == PROCEEDING)
-        std::snprintf(str, sizeof(str), "PROCEEDING");
+        sprintf_s(str, sizeof(str), "PROCEEDING");
     else if (m_ObstacleState == BACKSTEPPING)
-        std::snprintf(str, sizeof(str), "BACKSTEPPING");
+        sprintf_s(str, sizeof(str), "BACKSTEPPING");
     else if (m_ObstacleState == JUMPING)
-        std::snprintf(str, sizeof(str), "JUMPING");
+        sprintf_s(str, sizeof(str), "JUMPING");
     else if (m_ObstacleState == SOFTLANDING)
-        std::snprintf(str, sizeof(str), "SOFTLANDING");
+        sprintf_s(str, sizeof(str), "SOFTLANDING");
     else
-        std::snprintf(str, sizeof(str), "DIGPAUSING");
+        sprintf_s(str, sizeof(str), "DIGPAUSING");
     pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
     // Team Block State
     if (m_TeamBlockState == BLOCKED)
-        std::snprintf(str, sizeof(str), "BLOCKED");
+        sprintf_s(str, sizeof(str), "BLOCKED");
     else if (m_TeamBlockState == IGNORINGBLOCK)
-        std::snprintf(str, sizeof(str), "IGNORINGBLOCK");
+        sprintf_s(str, sizeof(str), "IGNORINGBLOCK");
     else if (m_TeamBlockState == FOLLOWWAIT)
-        std::snprintf(str, sizeof(str), "FOLLOWWAIT");
+        sprintf_s(str, sizeof(str), "FOLLOWWAIT");
     else
-        std::snprintf(str, sizeof(str), "NOTBLOCKED");
+        sprintf_s(str, sizeof(str), "NOTBLOCKED");
     pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 

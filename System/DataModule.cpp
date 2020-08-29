@@ -38,7 +38,7 @@ namespace RTE {
 		// Report that we're starting to read a new DataModule
 		if (progressCallback) {
 			char report[512];
-			std::snprintf(report, sizeof(report), "%s %c loading:", m_FileName.c_str(), -43);
+			sprintf_s(report, sizeof(report), "%s %c loading:", m_FileName.c_str(), -43);
 			progressCallback(std::string(report), true);
 		}
 
@@ -109,7 +109,7 @@ namespace RTE {
 		// Report that we're starting to read a new DataModule
 		if (progressCallback) {
 			char report[512];
-			std::snprintf(report, sizeof(report), "%s %c reading properties:", m_FileName.c_str(), -43);
+			sprintf_s(report, sizeof(report), "%s %c reading properties:", m_FileName.c_str(), -43);
 			progressCallback(std::string(report), true);
 		}
 		Reader reader;

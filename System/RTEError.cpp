@@ -27,11 +27,11 @@ namespace RTE {
 
 #if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD 	
 		// Show message box with explanation
-		std::snprintf(message, sizeof(message), "Runtime Error in file %s, line %i, because:\n\n%s\n\nThe last frame has been dumped to 'abortscreen.bmp'", file, line, description);
+		sprintf_s(message, sizeof(message), "Runtime Error in file %s, line %i, because:\n\n%s\n\nThe last frame has been dumped to 'abortscreen.bmp'", file, line, description);
 		allegro_message(message);
 #else
 		// Shortened and less confusing one. users have no use of knowing which source file and where.
-		std::snprintf(message, sizeof(message), "%s\n\nThe last frame has been dumped to 'abortscreen.bmp'", description);
+		sprintf_s(message, sizeof(message), "%s\n\nThe last frame has been dumped to 'abortscreen.bmp'", description);
 		allegro_message(message);
 #endif
 		// True so that the debugbreak code is run and the debugger goes there.

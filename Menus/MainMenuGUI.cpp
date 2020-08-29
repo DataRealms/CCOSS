@@ -2126,23 +2126,23 @@ void MainMenuGUI::UpdateResolutionCombo() {
 					sprintf_s(resString, sizeof(resString), "%ix%i", width, height);
 
 					// Add useful notation to the standardized resolutions
-					if (width == 800 && height == 600) { resString+" SVGA"; }
-					if (width == 1024 && height == 600) { resString+" WSVGA"; }
-					if (width == 1024 && height == 768) { resString+" XGA"; }
-					if (width == 1280 && height == 720) { resString+" HD"; }
-					if (width == 1280 && (height == 768 || height == 800)) { resString+" WXGA"; }
-					if (width == 1280 && height == 1024) { resString+" SXGA"; }
-					if (width == 1400 && height == 1050) { resString+" SXGA+"; }
-					if (width == 1600 && height == 900) { resString+" HD+"; }
-					if (width == 1600 && height == 1200) { resString+" UGA"; }
-					if (width == 1680 && height == 1050) { resString+" WSXGA+"; }
-					if (width == 1920 && height == 1080) { resString+" FHD"; }
-					if (width == 1920 && height == 1200) { resString+" WUXGA"; }
-					if (width == 2048 && height == 1080) { resString+" DCI 2K"; }
-					if (width == 2560 && height == 1440) { resString+" QHD"; }
-					if (width == 3200 && height == 1800) { resString+" QHD+"; }
-					if (width == 3840 && height == 2160) { resString+" 4K UHD"; }
-					if (width == 4096 && height == 2160) { resString+" DCI 4K"; }
+					if (width == 800 && height == 600) { strcat_s(resString, sizeof(resString), " SVGA"); }
+					if (width == 1024 && height == 600) { strcat_s(resString, sizeof(resString), " WSVGA"); }
+					if (width == 1024 && height == 768) { strcat_s(resString, sizeof(resString), " XGA"); }
+					if (width == 1280 && height == 720) { strcat_s(resString, sizeof(resString), " HD"); }
+					if (width == 1280 && (height == 768 || height == 800)) { strcat_s(resString, sizeof(resString), " WXGA"); }
+					if (width == 1280 && height == 1024) { strcat_s(resString, sizeof(resString), " SXGA"); }
+					if (width == 1400 && height == 1050) { strcat_s(resString, sizeof(resString), " SXGA+"); }
+					if (width == 1600 && height == 900) { strcat_s(resString, sizeof(resString), " HD+"); }
+					if (width == 1600 && height == 1200) { strcat_s(resString, sizeof(resString), " UGA"); }
+					if (width == 1680 && height == 1050) { strcat_s(resString, sizeof(resString), " WSXGA+"); }
+					if (width == 1920 && height == 1080) { strcat_s(resString, sizeof(resString), " FHD"); }
+					if (width == 1920 && height == 1200) { strcat_s(resString, sizeof(resString), " WUXGA"); }
+					if (width == 2048 && height == 1080) { strcat_s(resString, sizeof(resString), " DCI 2K"); }
+					if (width == 2560 && height == 1440) { strcat_s(resString, sizeof(resString), " QHD"); }
+					if (width == 3200 && height == 1800) { strcat_s(resString, sizeof(resString), " QHD+"); }
+					if (width == 3840 && height == 2160) { strcat_s(resString, sizeof(resString), " 4K UHD"); }
+					if (width == 4096 && height == 2160) { strcat_s(resString, sizeof(resString), " DCI 4K"); }
 
 					m_pResolutionCombo->AddItem(resString);
 

@@ -1023,11 +1023,11 @@ void ACRocket::Update()
     ////////////////////////////////////////
     // Hatch Operation
 
-    int lastFrame = m_FrameCount - 1;
+    unsigned int lastFrame = m_FrameCount - 1;
 
     if (m_HatchState == OPENING) {
         if (m_HatchTimer.GetElapsedSimTimeMS() <= m_HatchDelay && m_HatchDelay)
-            m_Frame = floorf((float)lastFrame * ((float)m_HatchTimer.GetElapsedSimTimeMS() / (float)m_HatchDelay));
+            m_Frame = static_cast<unsigned int>(static_cast<double>(lastFrame) * (m_HatchTimer.GetElapsedSimTimeMS() / static_cast<double>(m_HatchDelay)));
         else
         {
             m_Frame = lastFrame;
@@ -1038,7 +1038,7 @@ void ACRocket::Update()
     else if (m_HatchState == CLOSING) {
         if (m_HatchTimer.GetElapsedSimTimeMS() <= m_HatchDelay && m_HatchDelay)
 
-            m_Frame = lastFrame - floorf((float)lastFrame * ((float)m_HatchTimer.GetElapsedSimTimeMS() / (float)m_HatchDelay));
+            m_Frame = lastFrame - static_cast<unsigned int>(static_cast<double>(lastFrame) * (m_HatchTimer.GetElapsedSimTimeMS() / static_cast<double>(m_HatchDelay)));
         else
         {
             m_Frame = 0;
@@ -1135,7 +1135,7 @@ int ACRocket::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = RangeRand(0, bodyParts.size() - 1);
+		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}

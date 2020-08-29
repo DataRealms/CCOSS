@@ -138,7 +138,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    The thickness sample.
 
-		int GetThicknessSample() { return m_MinThickness + floor(0.5 + ((m_MaxThickness - m_MinThickness) * PosRand())); }
+		int GetThicknessSample() { return m_MinThickness + RandomNum(0, m_MaxThickness - m_MinThickness); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////

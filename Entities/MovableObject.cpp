@@ -226,7 +226,7 @@ int MovableObject::Create(const MovableObject &reference)
 	m_RandomizeEffectRotAngleEveryFrame = reference.m_RandomizeEffectRotAngleEveryFrame;
 
 	if (m_RandomizeEffectRotAngle)
-		m_EffectRotAngle = c_PI * 2 * NormalRand();
+		m_EffectRotAngle = c_PI * RandomNum(-2.0F, 2.0F);
 
 	m_ScreenEffectHash = reference.m_ScreenEffectHash;
     m_EffectStartTime = reference.m_EffectStartTime;
@@ -984,7 +984,7 @@ int MovableObject::OnPieMenu(Actor *pieMenuActor) {
 void MovableObject::Update()
 {
 	if (m_RandomizeEffectRotAngleEveryFrame)
-		m_EffectRotAngle = c_PI * 2 * NormalRand();
+		m_EffectRotAngle = c_PI * 2.0F * RandomNormalNum();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

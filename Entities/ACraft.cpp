@@ -732,7 +732,7 @@ void ACraft::DropAllInventory()
             else
             {
                 (*exitee)->SetVel(m_Vel + exitVel * antiGravBoost);
-                (*exitee)->SetAngularVel(5 * NormalRand());
+                (*exitee)->SetAngularVel(5.0F * RandomNormalNum());
                 // Avoid it having immediate collisions with this
                 (*exitee)->SetWhichMOToNotHit(this, 0.5f);
                 // Avoid this immediate collisions with it
@@ -1103,7 +1103,7 @@ void ACraft::SetAttachableVelocitiesForGibbing(Attachable * pAttachable, Vector 
     newVel.SetMagnitude(internalBlast);
     newVel += m_Vel + impactImpulse;
     pAttachable->SetVel(newVel);
-    pAttachable->SetAngularVel(NormalRand());
+    pAttachable->SetAngularVel(RandomNormalNum());
 }
 
 } // namespace RTE

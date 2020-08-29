@@ -840,7 +840,7 @@ void GibEditor::StuffEditedGibs(MOSRotating *pEditedObject)
 // TODO: do proper velocity calculations here!
 // ... actually leave these as 0 and let them be calculated in GibThis
 //            newGib.m_MinVelocity = (100.0f + 50.0f * NormalRand()) / (*gItr)->GetMass();
-//            newGib.m_MaxVelocity = newGib.m_MinVelocity + ((100.0f * PosRand()) / (*gItr)->GetMass());
+//            newGib.m_MaxVelocity = newGib.m_MinVelocity + ((100.0f * RandomNum()) / (*gItr)->GetMass());
             pObjectGibList->push_back(newGib);
         }
     }

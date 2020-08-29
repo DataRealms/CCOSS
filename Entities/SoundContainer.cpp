@@ -209,9 +209,9 @@ namespace RTE {
 				/// Internal lambda function to pick a random sound that's not the previously played sound. Done to avoid scoping issues inside the switch below.
 				/// </summary>
 				auto selectRandomSound = [&soundSetCount, this]() {
-					size_t soundToSelect = std::floorf(static_cast<float>(soundSetCount) * PosRand());
+					size_t soundToSelect = RandomNum(0, soundSetCount - 1);
 					while (soundToSelect == m_SelectedSoundSet) {
-						soundToSelect = std::floorf(static_cast<float>(soundSetCount) * PosRand());
+						soundToSelect = RandomNum(0, soundSetCount - 1);
 					}
 					m_SelectedSoundSet = soundToSelect;
 				};

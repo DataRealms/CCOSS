@@ -917,7 +917,7 @@ bool ACrab::Look(float FOVSpread, float range)
     aimMatrix.SetXFlipped(m_HFlipped);
     lookVector *= aimMatrix;
     // Add the spread
-    lookVector.DegRotate(FOVSpread * NormalRand());
+    lookVector.DegRotate(FOVSpread * RandomNormalNum());
 
     // TODO: generate an alarm event if we spot an enemy actor?
 
@@ -960,7 +960,7 @@ MovableObject * ACrab::LookForMOs(float FOVSpread, unsigned char ignoreMaterial,
     aimMatrix.SetXFlipped(m_HFlipped);
     lookVector *= aimMatrix;
     // Add the spread
-    lookVector.DegRotate(FOVSpread * NormalRand());
+    lookVector.DegRotate(FOVSpread * RandomNormalNum());
 
     MOID seenMOID = g_SceneMan.CastMORay(aimPos, lookVector, m_MOID, IgnoresWhichTeam(), ignoreMaterial, ignoreAllTerrain, 5);
     pSeenMO = g_MovableMan.GetMOFromID(seenMOID);
@@ -983,8 +983,8 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     if (m_pTurret && m_pTurret->IsAttached())
     {
         RemoveAttachable(m_pTurret);
-        m_pTurret->SetVel(m_Vel + m_pTurret->GetParentOffset() * PosRand());
-        m_pTurret->SetAngularVel(NormalRand());
+        m_pTurret->SetVel(m_Vel + m_pTurret->GetParentOffset() * RandomNum());
+        m_pTurret->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pTurret);
         m_pTurret = 0;
     }
@@ -999,32 +999,32 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     if (m_pLFGLeg && m_pLFGLeg->IsAttached())
     {
         RemoveAttachable(m_pLFGLeg);
-        m_pLFGLeg->SetVel(m_Vel + m_pLFGLeg->GetParentOffset() * PosRand());
-        m_pLFGLeg->SetAngularVel(NormalRand());
+        m_pLFGLeg->SetVel(m_Vel + m_pLFGLeg->GetParentOffset() * RandomNum());
+        m_pLFGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pLFGLeg);
         m_pLFGLeg = 0;
     }
     if (m_pLBGLeg && m_pLBGLeg->IsAttached())
     {
         RemoveAttachable(m_pLBGLeg);
-        m_pLBGLeg->SetVel(m_Vel + m_pLBGLeg->GetParentOffset() * PosRand());
-        m_pLBGLeg->SetAngularVel(NormalRand());
+        m_pLBGLeg->SetVel(m_Vel + m_pLBGLeg->GetParentOffset() * RandomNum());
+        m_pLBGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pLBGLeg);
         m_pLBGLeg = 0;
     }
     if (m_pRFGLeg && m_pRFGLeg->IsAttached())
     {
         RemoveAttachable(m_pRFGLeg);
-        m_pRFGLeg->SetVel(m_Vel + m_pRFGLeg->GetParentOffset() * PosRand());
-        m_pRFGLeg->SetAngularVel(NormalRand());
+        m_pRFGLeg->SetVel(m_Vel + m_pRFGLeg->GetParentOffset() * RandomNum());
+        m_pRFGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pRFGLeg);
         m_pRFGLeg = 0;
     }
     if (m_pRBGLeg && m_pRBGLeg->IsAttached())
     {
         RemoveAttachable(m_pRBGLeg);
-        m_pRBGLeg->SetVel(m_Vel + m_pRBGLeg->GetParentOffset() * PosRand());
-        m_pRBGLeg->SetAngularVel(NormalRand());
+        m_pRBGLeg->SetVel(m_Vel + m_pRBGLeg->GetParentOffset() * RandomNum());
+        m_pRBGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pRBGLeg);
         m_pRBGLeg = 0;
     }
@@ -3025,7 +3025,7 @@ int ACrab::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = RangeRand(0, bodyParts.size() - 1);
+		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}

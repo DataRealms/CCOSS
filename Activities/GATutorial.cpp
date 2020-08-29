@@ -589,7 +589,7 @@ void GATutorial::Update()
             {
                 if (!m_AttackerSpawns.empty())
                 {
-                    int whichSpawn = floorf(m_AttackerSpawns.size() * PosRand());
+                    int whichSpawn = floorf(m_AttackerSpawns.size() * RandomNum());
                     Actor *pSpawn = dynamic_cast<Actor *>(m_AttackerSpawns[whichSpawn]->Clone());
                     if (pSpawn)
                     {
@@ -610,7 +610,7 @@ void GATutorial::Update()
                         }
                         else
                         {
-                            landingZone.m_X = g_SceneMan.GetSceneWidth() * PosRand();
+                            landingZone.m_X = g_SceneMan.GetSceneWidth() * RandomNum();
                         }
                         Vector dropStart(landingZone.m_X, -50);
                         pSpawn->SetPos(dropStart);

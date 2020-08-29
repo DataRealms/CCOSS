@@ -875,7 +875,7 @@ namespace RTE {
 
 						// TODO: improve sticky logic!
 						// Check if particle is sticky and should adhere to where it collided
-						if (m_Material->GetStickiness() >= PosRand() && velocity.GetLargest() > 0.5F) {
+						if (m_Material->GetStickiness() >= RandomNum() && velocity.GetLargest() > 0.5F) {
 							// SPLAT, so update position, apply to terrain and delete, and stop traveling
 							m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
 							g_SceneMan.GetTerrain()->ApplyMovableObject(m_OwnerMO);
@@ -960,7 +960,7 @@ namespace RTE {
 
 		// Draw the trail
 		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
-			int length = m_TrailLength /* + 3 * PosRand()*/;
+			int length = m_TrailLength /* + 3 * RandomNum()*/;
 			for (int i = trailPoints.size() - std::min(length, static_cast<int>(trailPoints.size())); i < trailPoints.size(); ++i) {
 				putpixel(trailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
 			}

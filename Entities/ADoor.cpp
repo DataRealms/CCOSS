@@ -296,7 +296,7 @@ namespace RTE {
 				return damage;
 			}
 
-			int partIndex = RangeRand(0, woundedBodyParts.size() - 1);
+			int partIndex = RandomNum<int>(0, woundedBodyParts.size() - 1);
 			MOSRotating *part = woundedBodyParts[partIndex];
 			damage += part->RemoveWounds(1);
 		}
@@ -310,8 +310,8 @@ namespace RTE {
 			EraseDoorMaterial();
 			m_Door->DeepCheck(true);
 			m_Door->SetPinStrength(0);
-			m_Door->SetVel(m_Vel + m_Door->GetParentOffset() * PosRand());
-			m_Door->SetAngularVel(NormalRand());
+			m_Door->SetVel(m_Vel + m_Door->GetParentOffset() * RandomNum());
+			m_Door->SetAngularVel(RandomNormalNum());
 			g_MovableMan.AddParticle(m_Door);
 			RemoveAttachable(m_Door);
 			m_Door = 0;

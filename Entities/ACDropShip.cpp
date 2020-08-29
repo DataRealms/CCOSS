@@ -533,7 +533,7 @@ void ACDropShip::UpdateAI()
             if (!IsInventoryEmpty() && m_AIMode != AIMODE_STAY)
             {
                 // Randomly choose a direction to be going when unloading
-                m_LateralMoveState = PosRand() > 0.5 ? LAT_LEFT : LAT_RIGHT;
+                m_LateralMoveState = RandomNum() > 0.5F ? LAT_LEFT : LAT_RIGHT;
                 DropAllInventory();
                 m_DeliveryState = UNLOAD;
                 // Start ascending since we're probably doing downward at max already
@@ -1034,7 +1034,7 @@ int ACDropShip::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = RangeRand(0, bodyParts.size() - 1);
+		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}

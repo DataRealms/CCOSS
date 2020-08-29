@@ -460,7 +460,7 @@ void SceneEditor::Update()
                     }
 
 					// Make random planet coord's for this scene
-					float angle = RangeRand(0, 2 * c_PI);
+					float angle = RandomNum(0.0F, c_TwoPI);
                     Vector pos = Vector((int)(150 * cos(angle)), (int)(150 * sin(angle)));
 					pNewScene->SetLocation(pos);
 

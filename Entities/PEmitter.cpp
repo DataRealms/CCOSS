@@ -472,13 +472,13 @@ namespace RTE {
 						else
 							pParticle->SetPos(m_Pos + RotateOffset(m_EmissionOffset));
 						// TODO: Optimize making the random angles!")
-						emitVel.SetXY(velMin + velRange * PosRand(), 0);
-						emitVel.RadRotate(m_EmitAngle.GetRadAngle() + spread * NormalRand());
+						emitVel.SetXY(velMin + RandomNum(0.0F, velRange), 0);
+						emitVel.RadRotate(m_EmitAngle.GetRadAngle() + RandomNum(0.0F, spread));
 						emitVel = RotateOffset(emitVel);
 						pParticle->SetVel(parentVel + emitVel);
 
 						if (pParticle->GetLifetime() != 0)
-							pParticle->SetLifetime(pParticle->GetLifetime() * (1.0 + ((*eItr).GetLifeVariation() * NormalRand())));
+							pParticle->SetLifetime(pParticle->GetLifetime() * (1.0F + ((*eItr).GetLifeVariation() * RandomNormalNum())));
 						pParticle->SetTeam(m_Team);
 						pParticle->SetIgnoresTeamHits(true);
 

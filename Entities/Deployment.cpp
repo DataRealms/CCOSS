@@ -256,7 +256,7 @@ Actor * Deployment::CreateDeployedActor(int player, float &costTally)
 						moduleList.push_back(pModule->GetFileName());
 				}
 
-				int selection = SelectRand(1, moduleList.size() - 1);
+				int selection = RandomNum<int>(1, moduleList.size() - 1);
 				nativeModule = g_PresetMan.GetModuleID(moduleList.at(selection));
 			}
 			foreignCostMult = 1.0;
@@ -350,7 +350,7 @@ SceneObject * Deployment::CreateDeployedObject(int player, float &costTally)
 					}
 				}
 
-				int selection = SelectRand(1, moduleList.size() - 1);
+				int selection = RandomNum<int>(1, moduleList.size() - 1);
 				nativeModule = g_PresetMan.GetModuleID(moduleList.at(selection));
 			}
 			foreignCostMult = 1.0;

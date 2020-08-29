@@ -379,7 +379,7 @@ void GABaseDefense::Update()
             {
                 if (!m_AttackerSpawns.empty())
                 {
-                    int whichSpawn = floorf(m_AttackerSpawns.size() * PosRand());
+					int whichSpawn = RandomNum<int>(0, m_AttackerSpawns.size() - 1);
                     Actor *pSpawn = dynamic_cast<Actor *>(m_AttackerSpawns[whichSpawn]->Clone());
                     if (pSpawn)
                     {
@@ -394,13 +394,13 @@ void GABaseDefense::Update()
                             // Get the opposite side
                             landingZone.m_X += g_SceneMan.GetSceneWidth() / 2;
                             // Now give the zone width
-                            landingZone.m_X += (g_SceneMan.GetSceneWidth() / 2) * 0.75 * NormalRand();
+                            landingZone.m_X += (g_SceneMan.GetSceneWidth() / 2.0F) * 0.75F * RandomNormalNum();
                             // Wrap
                             g_SceneMan.WrapPosition(landingZone);
                         }
                         else
                         {
-                            landingZone.m_X = g_SceneMan.GetSceneWidth() * PosRand();
+							landingZone.m_X = static_cast<float>(RandomNum(0, g_SceneMan.GetSceneWidth()));
                         }
                         Vector dropStart(landingZone.m_X, -50);
                         pSpawn->SetPos(dropStart);

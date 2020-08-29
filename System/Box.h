@@ -170,7 +170,7 @@ namespace RTE {
 		/// Gets a random point within this box.
 		/// </summary>
 		/// <returns>The random point within the box.</returns>
-		Vector GetRandomPoint() const { return Vector(m_Corner.m_X + m_Width * PosRand(), m_Corner.m_Y + m_Height * PosRand()); }
+		Vector GetRandomPoint() const { return Vector(m_Corner.m_X + RandomNum(0.0F, m_Width), m_Corner.m_Y + RandomNum(0.0F, m_Height)); }
 #pragma endregion
 
 #pragma region Detection

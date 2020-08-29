@@ -37,9 +37,12 @@
 // standard.
 #include <experimental/filesystem>
 
-// Inclusion of relevant C Standard Library headers.
+// Since GCC does not implement sprintf_s use workaround
+#ifdef __unix__
+#define sprintf_s std::snprintf
 #define __STDC_WANT_LIB_EXT1__
 #include <string.h>
+#endif
 
 // TODO: Get rid of these once alias qualifiers are added.
 using std::array;

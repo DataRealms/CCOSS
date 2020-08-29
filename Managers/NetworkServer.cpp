@@ -831,7 +831,11 @@ namespace RTE {
 
 					// Compression failed or ineffective, send as is
 					if (result == 0 || result == width) {
+#ifdef __STDC_LIB_EXT1__
 						memcpy_s(m_PixelLineBuffer[player] + sizeof(MsgSceneLine), c_MaxPixelLineBufferSize, bmp->line[lineY] + lineX, width);
+#else
+						memcpy(m_PixelLineBuffer[player] + sizeof(MsgSceneLine), bmp->line[lineY] + lineX, width);
+#endif
 					} else {
 						sceneData->DataSize = result;
 					}
@@ -1017,7 +1021,11 @@ namespace RTE {
 
 			// Compression failed or ineffective, send as is
 			if (result == 0 || result == size) {
+#ifdef __STDC_LIB_EXT1__
 				memcpy_s(m_PixelLineBuffer[player] + sizeof(MsgTerrainChange), c_MaxPixelLineBufferSize, m_TerrainChangeBuffer[player], size);
+#else
+				memcpy(m_PixelLineBuffer[player] + sizeof(MsgTerrainChange), m_TerrainChangeBuffer[player], size);
+#endif
 			} else {
 				msg->DataSize = result;
 			}
@@ -1352,7 +1360,11 @@ namespace RTE {
 
 							// Compression failed or ineffective, send as is
 							if (result == 0 || result == backBuffer->w) {
+#ifdef __STDC_LIB_EXT1__
 								memcpy_s(m_PixelLineBuffer[player] + sizeof(MsgFrameBox), c_MaxPixelLineBufferSize, m_TerrainChangeBuffer[player], size);
+#else
+								memcpy(m_PixelLineBuffer[player] + sizeof(MsgFrameBox), m_TerrainChangeBuffer[player], size);
+#endif
 							} else {
 								frameData->DataSize = result;
 							}
@@ -1451,7 +1463,11 @@ namespace RTE {
 
 						// Compression failed or ineffective, send as is
 						if (result == 0 || result == m_BackBuffer8[player]->w) {
+#ifdef __STDC_LIB_EXT1__
 							memcpy_s(m_PixelLineBuffer[player] + sizeof(MsgFrameLine), c_MaxPixelLineBufferSize, backBuffer->line[m_CurrentFrameLine], backBuffer->w);
+#else
+							memcpy(m_PixelLineBuffer[player] + sizeof(MsgFrameLine), backBuffer->line[m_CurrentFrameLine], backBuffer->w);
+#endif
 						} else {
 							frameData->DataSize = result;
 						}

@@ -536,8 +536,10 @@ namespace detail
       handle m_key;
   };
 
-// Needed because of some strange ADL issues.
 
+#if BOOST_VERSION < 105700
+// BOOST 1.57+ won't build this 
+// Needed because of some strange ADL issues.
 #define LUABIND_OPERATOR_ADL_WKND(op) \
   inline bool operator op( \
       basic_iterator<basic_access> const& x \
@@ -557,7 +559,8 @@ namespace detail
   LUABIND_OPERATOR_ADL_WKND(!=)
 
 #undef LUABIND_OPERATOR_ADL_WKND
- 
+#endif
+
 } // namespace detail
 
 namespace adl

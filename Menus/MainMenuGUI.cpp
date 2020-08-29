@@ -2008,8 +2008,11 @@ void MainMenuGUI::UpdateResolutionCombo() {
 	
     if (m_pResolutionCombo->GetCount() <= 0) {
 		// Get a list of modes from the fullscreen driver even though we're not using it. This is so we don't need to populate the list manually and has all the reasonable resolutions.
+#ifdef _WIN32
         GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
-
+#elif __unix__
+        GFX_MODE_LIST *resList = get_gfx_mode_list(g_FrameMan.IsFullscreen() ? GFX_XWINDOWS_FULLSCREEN : GFX_XWINDOWS);
+#endif
         int width = 0;
         int height = 0;
         std::string resString = "";

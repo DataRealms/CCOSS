@@ -780,30 +780,17 @@ namespace RTE {
 		// Just make the alt the same color as the main one if no one was specified
 		if (altColor == 0) { altColor = color; }
 
-<<<<<<< HEAD
-		intPos[X] = std::floor(start.m_X);
-		intPos[Y] = std::floor(start.m_Y);
-=======
 		intPos[X] = start.GetFloorIntX();
 		intPos[Y] = start.GetFloorIntY();
->>>>>>> development
 
 		// Wrap line around the scene if it makes it shorter
 		if (shortestWrap) {
 			Vector deltaVec = g_SceneMan.ShortestDistance(start, end, false);
-<<<<<<< HEAD
-			delta[X] = std::floor(deltaVec.m_X);
-			delta[Y] = std::floor(deltaVec.m_Y);
-		} else {
-			delta[X] = std::floor(end.m_X) - intPos[X];
-			delta[Y] = std::floor(end.m_Y) - intPos[Y];
-=======
 			delta[X] = deltaVec.GetFloorIntX();
 			delta[Y] = deltaVec.GetFloorIntY();
 		} else {
 			delta[X] = end.GetFloorIntX() - intPos[X];
 			delta[Y] = end.GetFloorIntY() - intPos[Y];
->>>>>>> development
 		}
 		if (delta[X] == 0 && delta[Y] == 0) {
 			return 0;

@@ -12,6 +12,7 @@ inc_dirs = include_directories('Activities',
 
 deps = [dependency('boost'),
   dependency('allegro'),
+  dependency('loadpng'),
   dependency('flac'),
   dependency('luajit'),
   dependency('minizip'),
@@ -33,5 +34,5 @@ subdir('System')
 subdir('external')
 
 
-executable('CCOSS', 'Main.cpp',sources, luabind_src, raknet_src, dependencies: [deps,link_libs], include_directories:inc_dirs,
-            override_options:['cpp_std=c++17'], cpp_args:['-pedantic-errors','-fpermissive','-w', '-Wno-return-type', '-Wno-write-strings', '-Wno-unknown-pragmas', '-Wno-unused-variable'], cpp_pch:pch)
+executable('CCOSS', 'Main.cpp',sources, luabind_src, raknet_src,link_args: '-lstdc++fs',dependencies: [deps,link_libs], include_directories:inc_dirs,
+            override_options:['cpp_std=c++14'], cpp_args:['-pedantic','-fpermissive', '-Wno-return-type', '-Wno-write-strings', '-Wno-unknown-pragmas', '-Wno-unused-variable', '-g', '-Og'], cpp_pch:pch)

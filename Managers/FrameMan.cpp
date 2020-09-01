@@ -32,8 +32,14 @@ namespace RTE {
 
 	void FrameMan::Clear() {
 		m_GfxDriver = GFX_AUTODETECT_WINDOWED;
-		m_ScreenResX = SCREEN_W;//GetSystemMetrics(SM_CXSCREEN);
-		m_ScreenResY = SCREEN_H;//GetSystemMetrics(SM_CYSCREEN);
+    #ifdef _WIN32
+		m_ScreenResX = GetSystemMetrics(SM_CXSCREEN);
+		m_ScreenResY = GetSystemMetrics(SM_CYSCREEN);
+    #elif __unix__
+    // TODO: find linux native solution
+    m_ScreenResX = 1920; // Hardcoding until I find a better Solution
+    m_ScreenResY = 1080;
+    #endif
 		m_ResX = 960;
 		m_ResY = 540;
 		m_NewResX = m_ResX;
@@ -96,30 +102,22 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::SetGraphicsDriver() {
+    #ifdef _WIN32
 		if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) {
-#ifdef _WIN32
 			m_GfxDriver = GFX_DIRECTX_OVL;
-#else
-      m_GfxDriver = GFX_AUTODETECT_WINDOWED;
-#endif
 			g_ConsoleMan.PrintString("SYSTEM: Using overlay DirectX windowed driver!");
 		} else if (g_SettingsMan.ForceNonOverlayedWindowGfxDriver()) {
-#ifdef _WIN32
 			m_GfxDriver = GFX_DIRECTX_WIN;
-#else
-      m_GfxDriver = GFX_AUTODETECT_WINDOWED;
-#endif
 			g_ConsoleMan.PrintString("SYSTEM: Using non-overlay DirectX windowed driver!");
 		} else if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) {
-#ifdef _WIN32
 			m_GfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
-#else
-      m_GfxDriver = GFX_AUTODETECT_FULLSCREEN; //There may be better options, but I need to build for now
-#endif
 			g_ConsoleMan.PrintString("SYSTEM: Using DirectX fullscreen-windowed driver!");
 		} else {
 			m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		}
+    #else
+    m_GfxDriver = GFX_AUTODETECT_WINDOWED;
+    #endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -7,6 +7,9 @@
 *.vs
 *.APS
 
+compile_commands.json
+*/.ccls_cache
+
 /build
 
 /_Bin

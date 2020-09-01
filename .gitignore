@@ -8,7 +8,7 @@
 *.APS
 
 compile_commands.json
-*/.ccls_cache
+/.ccls-cache
 
 /build
 

@@ -34,7 +34,46 @@ Simply open `RTEA.sln` with Visual Studio, choose your configuration, and run th
 
 The first build will take a while, but future ones should be quicker.
 
-***
+## Linux Build Instructions ##
+The Linux build uses the meson build system, and builds against system libraries
+
+Dependencies:
+
+* `allegro4`
+* `loadpng`
+* `flac`
+* `luajit`
+* `minizip`
+* `lz4`
+* `libpng`
+* `meson>=0.49`
+
+Building:
+
+1. Install Dependencies (see below for some distro-specific instructions)
+
+2. Clone this Source Repository and the [Data Respository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data), folder structure doesn't really matter here
+
+3. open a terminal in the Source Repository
+
+4. `meson builddir`
+
+5. `cd builddir`
+
+6. `meson compile` or `meson compile CCOSS.x86\_64` if you want a release build
+
+Running:
+
+1. Copy `CCOSS_debug.x86_64` or `CCOSS.x86_64` (depending on if you made a release build) into the **Data Repository**
+
+2. Copy libfmod.so.11 and libfmod.so.11.11 from external/linux/x86_64 into the **Data Repository**
+
+3. Run `env LD_LIBRARY_PATH=. ./CCOSS.x86_64` or `./CCOS_debug.x86_64` in the **Data Repository**
+
+### Arch Linux ###
+`pacman -S allegro4 flac luajit minizip lz4 libpng meson`
+### Ubuntu ###
+`apt-get install liballegro4.4 libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev meson`
 
 ## More Information ##
 

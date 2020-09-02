@@ -14,6 +14,10 @@
 #include "GUI/AllegroBitmap.h"
 #include "GUI/AllegroScreen.h"
 
+#ifdef __unix__
+#include <X11/Xlib.h>
+#endif
+
 extern bool g_InActivity;
 
 namespace RTE {
@@ -36,9 +40,11 @@ namespace RTE {
 		m_ScreenResX = GetSystemMetrics(SM_CXSCREEN);
 		m_ScreenResY = GetSystemMetrics(SM_CYSCREEN);
     #elif __unix__
-    // TODO: find linux native solution
-    m_ScreenResX = 1920; // Hardcoding until I find a better Solution
-    m_ScreenResY = 1080;
+    Display* dpy = XOpenDisplay(NULL);
+    XWindowAttributes ra;
+    XGetWindowAttributes(dpy, DefaultRootWindow(dpy), &ra);
+    m_ScreenResX = ra.width;
+    m_ScreenResY = ra.height;
     #endif
 		m_ResX = 960;
 		m_ResY = 540;
@@ -116,12 +122,12 @@ namespace RTE {
 			m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		}
     #else
-    if(IsFullscreen()){
-      m_GfxDriver = GFX_AUTODETECT_FULLSCREEN;
-    }
-    else{
-      m_GfxDriver = GFX_AUTODETECT_WINDOWED;
-    }
+      if (m_ResX * m_ResMultiplier == m_ScreenResX &&
+          m_ResY * m_ResMultiplier == m_ScreenResY) {
+        m_GfxDriver = GFX_AUTODETECT_FULLSCREEN;
+      } else {
+        m_GfxDriver = GFX_AUTODETECT_WINDOWED;
+      }
     #endif
 	}
 
@@ -382,8 +388,16 @@ namespace RTE {
 			allegro_message("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!");
 			return -1;
 		}
+#ifdef __unix__
+    if (m_ResX * multiplier == m_ScreenResX &&
+        m_ResY * multiplier == m_ScreenResY) {
+      m_GfxDriver = GFX_AUTODETECT_FULLSCREEN;
+    } else {
+      m_GfxDriver = GFX_AUTODETECT_WINDOWED;
+    }
+#endif
 
-		// Need to save these first for recovery attempts to work (screen might be 0)
+                // Need to save these first for recovery attempts to work (screen might be 0)
 		unsigned short resX = m_ResX;
 		unsigned short resY = m_ResY;
 
@@ -437,18 +451,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier, bool endActivity) {
-    #ifdef __unix__
-    if(!IsFullscreen()&&m_GfxDriver ==GFX_AUTODETECT_WINDOWED){
-      m_GfxDriver = GFX_AUTODETECT_FULLSCREEN;
-    }else{
-      m_GfxDriver = GFX_AUTODETECT_WINDOWED;
-    }
-    #endif
+
     if (!IsValidResolution(newResX, newResY) || newResX <= 0 || newResX > m_ScreenResX || newResY <= 0 || newResY > m_ScreenResY) {
 			return -1;
 		}
 
-		// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
+#ifdef __unix__
+    if (newResX*newMultiplier == m_ScreenResX &&newResY*newMultiplier == m_ScreenResY){
+      m_GfxDriver = GFX_AUTODETECT_FULLSCREEN;
+    }else {
+      m_GfxDriver = GFX_AUTODETECT_WINDOWED;
+    }
+#endif
+    
+    // Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
 		if (g_ActivityMan.GetActivity()) {
 			g_ActivityMan.EndActivity();
 		}

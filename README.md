@@ -46,6 +46,7 @@ Dependencies:
 * `minizip`
 * `lz4`
 * `libpng`
+* `libX11`
 * `meson>=0.49`
 
 Building:
@@ -60,7 +61,7 @@ Building:
 
 5. `cd builddir`
 
-6. `meson compile` or `meson compile CCOSS.x86\_64` if you want a release build
+6. `meson compile` or `meson compile CCOSS` if you want a release build
 
 Running:
 
@@ -73,7 +74,7 @@ Running:
 ### Arch Linux ###
 `pacman -S allegro4 flac luajit minizip lz4 libpng meson`
 ### Ubuntu ###
-`apt-get install liballegro4.4 libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev meson`
+`apt-get install liballegro4.4 libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev meson`
 
 ## More Information ##
 

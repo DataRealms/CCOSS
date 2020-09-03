@@ -41,7 +41,6 @@
 #ifdef __unix__
 // Since GCC does not implement sprintf_s use workaround
 #define __STDC_WANT_LIB_EXT1__ 1
-#include <string.h>
 #ifndef __STDC_LIB_EXT1__
 #define sprintf_s std::snprintf
 #endif

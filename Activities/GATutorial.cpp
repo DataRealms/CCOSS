@@ -589,7 +589,7 @@ void GATutorial::Update()
             {
                 if (!m_AttackerSpawns.empty())
                 {
-                    int whichSpawn = std::floor(m_AttackerSpawns.size() * PosRand());
+                    int whichSpawn = std::floor(m_AttackerSpawns.size() * RandomNum());
                     Actor *pSpawn = dynamic_cast<Actor *>(m_AttackerSpawns[whichSpawn]->Clone());
                     if (pSpawn)
                     {

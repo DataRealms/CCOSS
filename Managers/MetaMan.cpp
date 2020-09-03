@@ -1061,7 +1061,7 @@ int MetaMan::SelectScenePresets(float gameSize, int playerCount, list<Scene *> *
         {
             // Randomly select one of the scenes and remove it
             currentIndex = 0;
-            randomIndex = std::floor(scenePresets.size() * PosRand());
+            randomIndex = RandomNum<int>(0, scenePresets.size - 1);
             for (list<Scene *>::iterator pItr = scenePresets.begin(); pItr != scenePresets.end(); ++pItr)
             {
                 if (currentIndex == randomIndex)

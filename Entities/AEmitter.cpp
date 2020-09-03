@@ -577,7 +577,7 @@ void AEmitter::Update()
             // Don't set the flipping for the flash because that is wasting resources when drawing,
             // just handle the flipping of the rotation here.
             m_pFlash->SetRotAngle(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
-//            m_pFlash->SetFrame(std::floor((m_pFlash->GetFrameCount()/* - 1*/) * PosRand() - 0.001));
+//            m_pFlash->SetFrame(std::floor((m_pFlash->GetFrameCount()/* - 1*/) * RandomNum() - 0.001));
             m_pFlash->SetScale(m_FlashScale);
             m_pFlash->SetNextFrame();
             m_pFlash->Update();

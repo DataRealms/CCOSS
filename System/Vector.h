@@ -3,7 +3,6 @@
 
 #include "Serializable.h"
 #include "RTETools.h"
-#include <cmath>
 
 namespace RTE {
 

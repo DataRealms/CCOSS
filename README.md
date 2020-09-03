@@ -67,9 +67,11 @@ Running:
 
 1. Copy `CCOSS_debug.x86_64` or `CCOSS.x86_64` (depending on if you made a release build) into the **Data Repository**
 
-2. Copy libfmod.so.11 and libfmod.so.11.11 from external/linux/x86_64 into the **Data Repository**
+2. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**
 
-3. Run `env LD_LIBRARY_PATH=. ./CCOSS.x86_64` or `./CCOS_debug.x86_64` in the **Data Repository**
+3. Copy libfmod.so.11 and libfmod.so.11.11 from external/linux/x86_64 into the **Data Repository**
+
+4. Run `env LD_LIBRARY_PATH=. ./CCOSS.x86_64` or `./CCOS_debug.x86_64` in the **Data Repository**
 
 ### Arch Linux ###
 `pacman -S allegro4 flac luajit minizip lz4 libpng libx11 meson`

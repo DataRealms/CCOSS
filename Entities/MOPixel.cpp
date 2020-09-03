@@ -26,7 +26,7 @@ namespace RTE {
 		}
 		if (!m_Atom) { m_Atom = new Atom; }
 
-		if (m_MinLethalRange < m_MaxLethalRange) { m_LethalRange *= RangeRand(m_MinLethalRange, m_MaxLethalRange); }
+		if (m_MinLethalRange < m_MaxLethalRange) { m_LethalRange *= RandomNum(m_MinLethalRange, m_MaxLethalRange); }
 		m_LethalSharpness = m_Sharpness * 0.5F;
 
 		return 0;
@@ -39,7 +39,7 @@ namespace RTE {
 		m_Atom = atom;
 		m_Atom->SetOwner(this);
 
-		if (m_MinLethalRange < m_MaxLethalRange) { m_LethalRange *= RangeRand(m_MinLethalRange, m_MaxLethalRange); }
+		if (m_MinLethalRange < m_MaxLethalRange) { m_LethalRange *= RandomNum(m_MinLethalRange, m_MaxLethalRange); }
 		m_LethalSharpness = m_Sharpness * 0.5F;
 
 		return MovableObject::Create(mass, position, velocity, lifetime);
@@ -126,7 +126,7 @@ namespace RTE {
 
 	void MOPixel::SetLethalRange(float range) {
 		m_LethalRange = range;
-		if (m_MinLethalRange < m_MaxLethalRange) { m_LethalRange *= RangeRand(m_MinLethalRange, m_MaxLethalRange); }
+		if (m_MinLethalRange < m_MaxLethalRange) { m_LethalRange *= RandomNum(m_MinLethalRange, m_MaxLethalRange); }
 
 		// convert to meters
 		m_LethalRange /= c_PPM;

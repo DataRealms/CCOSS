@@ -424,22 +424,22 @@ bool PlayIntroTitle() {
     StarSize size;
 
     for (int star = 0; star < starCount; ++star) {
-        if (PosRand() < 0.95) {
+        if (RandomNum() < 0.95F) {
             aStars[star].m_Size = StarSmall;
-            aStars[star].m_pBitmap = apStarSmallBitmaps[SelectRand(0, starSmallBitmapCount - 1)];
-            aStars[star].m_Intensity = RangeRand(0.001, 0.5);
+            aStars[star].m_pBitmap = apStarSmallBitmaps[RandomNum(0, starSmallBitmapCount - 1)];
+            aStars[star].m_Intensity = RandomNum(0.001F, 0.5F);
         }
-        else if (PosRand() < 0.85) {
+        else if (RandomNum() < 0.85F) {
             aStars[star].m_Size = StarLarge;
-            aStars[star].m_pBitmap = apStarLargeBitmaps[SelectRand(0, starLargeBitmapCount - 1)];
-            aStars[star].m_Intensity = RangeRand(0.6, 1.0);
+            aStars[star].m_pBitmap = apStarLargeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
+            aStars[star].m_Intensity = RandomNum(0.6F, 1.0F);
         }
         else {
             aStars[star].m_Size = StarHuge;
-            aStars[star].m_pBitmap = apStarHugeBitmaps[SelectRand(0, starLargeBitmapCount - 1)];
-            aStars[star].m_Intensity = RangeRand(0.9, 1.0);
+            aStars[star].m_pBitmap = apStarHugeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
+            aStars[star].m_Intensity = RandomNum(0.9F, 1.0F);
         }
-        aStars[star].m_Pos.SetXY(resX * PosRand(), pBackdrop->GetBitmap()->h * PosRand());//resY * PosRand());
+        aStars[star].m_Pos.SetXY(resX * RandomNum(), pBackdrop->GetBitmap()->h * RandomNum());//resY * RandomNum());
         aStars[star].m_Pos.Floor();
         // To match the nebula scroll
         aStars[star].m_ScrollRatio = backdropScrollRatio;
@@ -600,7 +600,7 @@ bool PlayIntroTitle() {
             for (int star = 0; star < starCount; ++star)
             {
                 size = aStars[star].m_Size;
-                int intensity = 185 * aStars[star].m_Intensity + (size == StarSmall ? 35 : 70) * PosRand();
+                int intensity = 185 * aStars[star].m_Intensity + (size == StarSmall ? 35 : 70) * RandomNum();
                 set_screen_blender(intensity, intensity, intensity, intensity);
                 starDrawPos.SetXY(aStars[star].m_Pos.m_X, aStars[star].m_Pos.m_Y - scrollOffset.m_Y * aStars[star].m_ScrollRatio);
                 draw_trans_sprite(g_FrameMan.GetBackBuffer32(), aStars[star].m_pBitmap, starDrawPos.GetFloorIntX(), starDrawPos.GetFloorIntY());
@@ -649,7 +649,7 @@ bool PlayIntroTitle() {
 
             pTitle->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);
             // Screen blend the title glow on top, with some flickering in its intensity
-            int blendAmount = 220 + 35 * NormalRand();
+			int blendAmount = 220 + RandomNum(-35, 35);
             set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
             pTitleGlow->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawTrans);
         }
@@ -1731,7 +1731,7 @@ int main(int argc, char *argv[]) {
     set_close_button_callback(QuitHandler);
 
     // Seed the random number generator
-    SeedRand();
+    SeedRNG();
 
     ///////////////////////////////////////////////////////////////////
     // Instantiate all the managers

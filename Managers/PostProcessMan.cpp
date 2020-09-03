@@ -332,7 +332,7 @@ namespace RTE {
 					testpixel = _getpixel(g_FrameMan.GetBackBuffer8(), x, y);
 
 					// YELLOW
-					if ((testpixel == g_YellowGlowColor && PosRand() < 0.9) || testpixel == 98 || (testpixel == 120 && PosRand() < 0.7)) {
+					if ((testpixel == g_YellowGlowColor && RandomNum() < 0.9F) || testpixel == 98 || (testpixel == 120 && RandomNum() < 0.7F)) {
 						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_YellowGlow, x - 2, y - 2);
 					}
 					// TODO: Enable and add more colors once we actually have something that needs these.

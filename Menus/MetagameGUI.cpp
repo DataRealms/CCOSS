@@ -1144,14 +1144,14 @@ bool MetagameGUI::StartNewGame()
                 // If the "random" selection, choose one from the list of loaded techs
                 if (m_apPlayerTechSelect[player]->GetSelectedIndex() <= 0)//pTechItem->m_ExtraIndex < 0)
                 {
-                    int selection = SelectRand(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
+                    int selection = RandomNum<int>(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
 					
 					// Don't let the game to chose the same faction twice
 					bool ok = false;
 					while (!ok)
 					{
 						ok = true;
-						selection = SelectRand(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
+						selection = RandomNum<int>(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
 
 						for (int p = 0; p < player; p++)
 							if (selection == m_apPlayerTechSelect[p]->GetSelectedIndex())
@@ -1978,7 +1978,7 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
         // Transparency effect on the scene dots and lines
         drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
         // Screen blend the dots and lines, with some flickering in its intensity
-        int blendAmount = 130 + 45 * NormalRand();
+		int blendAmount = 130 + RandomNum(-45, 45);
         set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
         // Draw the scene location dots
@@ -2005,11 +2005,11 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
             else
             {
                 // Make it flicker more if it's currently being fought over
-                blendAmount = 95 + (battleSite ? 25 : 15) * NormalRand();
+				blendAmount = 95 + (battleSite ? RandomNum(-25, 25) : RandomNum(-15, 15));
                 set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
                 circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 4, c_GUIColorYellow);
                 circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 2, c_GUIColorYellow);
-                blendAmount = 210 + 45 * NormalRand();
+				blendAmount = 210 + RandomNum(-45, 45);
                 set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
                 circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 1, c_GUIColorYellow);
             }
@@ -3124,7 +3124,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
                 // Also declare winner of the activity
                 pOffensive->SetWinnerTeam(pOffensive->GetTeamOfPlayer(activePlayer));
                 // Just mess with the funds; the metaplayers' funds will be affected afterward, according to their shares etc
-//                pOffensive->SetTeamFunds(pOffensive->GetTeamFunds(pOffensive->GetTeamOfPlayer(activePlayer)) * PosRand(), pOffensive->GetTeamOfPlayer(activePlayer));
+//                pOffensive->SetTeamFunds(pOffensive->GetTeamFunds(pOffensive->GetTeamOfPlayer(activePlayer)) * RandomNum(), pOffensive->GetTeamOfPlayer(activePlayer));
                 // For now, just deduct the price of the brain
                 pOffensive->ChangeTeamFunds(-cost, pOffensive->GetTeamOfPlayer(activePlayer));
                 // Signal that ownership of the site has changed
@@ -3136,7 +3136,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
     else
     {
         // First see if NO TEAM will get this - could be all brains die
-        if (PosRand() < 0.05)
+        if (RandomNum() < 0.05F)
         {
             // See if we should signal change of ownership
             if (pScene->GetTeamOwnership() != Activity::NoTeam)
@@ -3198,7 +3198,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
                     aTeamChance[team] = aTeamChance[team] / totalPoints;
             }
             // The deciding normalized scalar number
-            float decision = PosRand();
+            float decision = RandomNum();
             // Keeps track of the thresholds
             float teamChanceTally = 0;
             int winnerTeam = Activity::NoTeam;
@@ -3276,7 +3276,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             {
                 // LOSER.. but evacuated successfully?
                 if (pOffensive->PlayerActive(player) && pOffensive->PlayerHadBrain(player) && aMetaPlayers[player] && aMetaPlayers[player]->GetTeam() != winnerTeam)
-                    pOffensive->SetBrainEvacuated(player, PosRand() < 0.25);
+                    pOffensive->SetBrainEvacuated(player, RandomNum() < 0.25F);
             }
         }
 
@@ -3288,7 +3288,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             {
                 // Just mess with the funds; the metaplayers' funds will be affected afterward, according to their shares
                 // Never let team funds dip below 0
-                pOffensive->SetTeamFunds(MAX(0, pOffensive->GetTeamFunds(team) * PosRand()), team);
+                pOffensive->SetTeamFunds(MAX(0, pOffensive->GetTeamFunds(team) * RandomNum()), team);
             }
         }
     }
@@ -4831,7 +4831,7 @@ void MetagameGUI::UpdateOffensives()
                     !g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->BrainWasEvacuated(g_MetaMan.m_Players[mp].GetInGamePlayer()))
                 {
                     // If not yet blown up, then see if we should yet
-                    if (!m_aAnimDestroyed[mp] && m_AnimTimer2.GetElapsedRealTimeMS() > (m_AnimModeDuration * 0.5) && PosRand() < 0.05)
+                    if (!m_aAnimDestroyed[mp] && m_AnimTimer2.GetElapsedRealTimeMS() > (m_AnimModeDuration * 0.5F) && RandomNum() < 0.05F)
                     {
                         // Add circle explosion effect to where the brain icon used to be
                         m_SiteSwitchIndicators.push_back(SiteTarget(m_aBrainIconPos[mp], 0, SiteTarget::CIRCLEGROW, c_GUIColorRed));
@@ -6685,7 +6685,7 @@ void MetagameGUI::UpdatePlayerLineRatios(vector<SiteLine> &lineList, int metaPla
 
 void MetagameGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Vector &end, int color)
 {
-    int blendAmount = 210 + 15 * NormalRand();
+	int blendAmount = 210 + RandomNum(-15, 15);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
     line(drawBitmap, start.m_X, start.m_Y, end.m_X, end.m_Y, color);
 /* Looks like ass
@@ -6701,7 +6701,7 @@ void MetagameGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Ve
         line(drawBitmap, start.m_X - 1, start.m_Y, end.m_X - 1, end.m_Y, color);
     }
 */
-    blendAmount = 45 + 25 * NormalRand();
+	blendAmount = 45 + RandomNum(-25, 25);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
     line(drawBitmap, start.m_X + 1, start.m_Y, end.m_X + 1, end.m_Y, color);
     line(drawBitmap, start.m_X - 1, start.m_Y, end.m_X - 1, end.m_Y, color);
@@ -6814,7 +6814,7 @@ bool MetagameGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     // Draw a circle around the site target
     if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments))
     {
-        int blendAmount = 225 + 20 * NormalRand();
+		int blendAmount = 225 + RandomNum(-20, 20);
         set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
         // If specified, draw a squareSite instead (with chamfered corners)
@@ -6978,7 +6978,7 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     // Draw a circle around the site target
     if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments))
     {
-        int blendAmount = 225 + 20 * NormalRand();
+        int blendAmount = 225 + RandomNum(-20, 20);
         set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
         // If specified, draw a squareSite instead (with chamfered corners)

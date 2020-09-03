@@ -373,6 +373,8 @@ void AddParticle(MovableMan &This, MovableObject *pParticle)
     else
         This.AddParticle(pParticle);
 }
+double NormalRand() { return RandomNormalNum<double>(); }
+double PosRand() { return RandomNum<double>(); }
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -2116,10 +2118,10 @@ int LuaMan::Create()
 
         // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
         def("DeleteEntity", &DeleteEntity, adopt(_1)),
-        def("PosRand", &PosRand),
+		def("RangeRand", (double(*)(double, double))& RandomNum),
+		def("PosRand", &PosRand),
         def("NormalRand", &NormalRand),
-        def("RangeRand", &RangeRand),
-        def("SelectRand", &SelectRand),
+        def("SelectRand", (int(*)(int, int)) &RandomNum),
         def("LERP", &LERP),
         def("EaseIn", &EaseIn),
         def("EaseOut", &EaseOut),

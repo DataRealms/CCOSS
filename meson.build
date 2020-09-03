@@ -19,6 +19,7 @@ deps = [dependency('boost'),
   dependency('threads'),
   dependency('liblz4'),
   dependency('libpng'),
+  dependency('boost'),
   dependency('x11')
   ]
 

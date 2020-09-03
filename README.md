@@ -48,6 +48,7 @@ Dependencies:
 * `libpng`
 * `libX11`
 * `meson>=0.49`
+* `boost>=1.55`
 
 Building:
 

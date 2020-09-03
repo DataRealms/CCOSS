@@ -379,35 +379,36 @@ void GABaseDefense::Update()
             {
                 if (!m_AttackerSpawns.empty())
                 {
-                  int whichSpawn = RandomNum<int>(0, m_AttackerSpawns.size() - 1);
-                  Actor *pSpawn = dynamic_cast<Actor *>(
-                      m_AttackerSpawns[whichSpawn]->Clone());
-                  if (pSpawn) {
-                    Vector landingZone;
-                    Actor *pEnemyBrain =
-                        g_MovableMan.GetFirstOtherBrainActor(team);
+                    int whichSpawn = std::floor(m_AttackerSpawns.size() * PosRand());
+                    Actor *pSpawn = dynamic_cast<Actor *>(m_AttackerSpawns[whichSpawn]->Clone());
+                    if (pSpawn)
+                    {
+                        Vector landingZone;
+                        Actor *pEnemyBrain = g_MovableMan.GetFirstOtherBrainActor(team);
 
-                    // Don't land right on top of player team's base
-                    if (pEnemyBrain) {
-                      // Get player team's base pos
-                      landingZone = pEnemyBrain->GetPos();
-                      // Get the opposite side
-                      landingZone.m_X += g_SceneMan.GetSceneWidth() / 2;
-                      // Now give the zone width
-                      landingZone.m_X += (g_SceneMan.GetSceneWidth() / 2) *
-                                         0.75 * NormalRand();
-                      // Wrap
-                      g_SceneMan.WrapPosition(landingZone);
-                    } else {
-                      landingZone.m_X = g_SceneMan.GetSceneWidth() * PosRand();
-                    }
-                    Vector dropStart(landingZone.m_X, -50);
-                    pSpawn->SetPos(dropStart);
-                    pSpawn->SetTeam(team);
-                    pSpawn->SetControllerMode(Controller::CIM_AI);
-                    // Let the spawn into the world, passing ownership
-                    g_MovableMan.AddActor(pSpawn);
-                    pSpawn = 0;
+                        // Don't land right on top of player team's base
+                        if (pEnemyBrain)
+                        {
+                            // Get player team's base pos
+                            landingZone = pEnemyBrain->GetPos();
+                            // Get the opposite side
+                            landingZone.m_X += g_SceneMan.GetSceneWidth() / 2;
+                            // Now give the zone width
+                            landingZone.m_X += (g_SceneMan.GetSceneWidth() / 2) * 0.75 * NormalRand();
+                            // Wrap
+                            g_SceneMan.WrapPosition(landingZone);
+                        }
+                        else
+                        {
+                            landingZone.m_X = g_SceneMan.GetSceneWidth() * PosRand();
+                        }
+                        Vector dropStart(landingZone.m_X, -50);
+                        pSpawn->SetPos(dropStart);
+                        pSpawn->SetTeam(team);
+                        pSpawn->SetControllerMode(Controller::CIM_AI);
+                        // Let the spawn into the world, passing ownership
+                        g_MovableMan.AddActor(pSpawn);
+                        pSpawn = 0;
                     }
                 }
                 m_SpawnTimer.Reset();

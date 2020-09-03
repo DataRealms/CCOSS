@@ -490,10 +490,10 @@ void MOSprite::Update() {
                 m_SpriteAnimTimer.Reset();
 			    break;
 		    case ALWAYSRANDOM:
-          while (m_Frame == prevFrame) {
-            m_Frame = RandomNum<int>(0, m_FrameCount - 1);
-          }
-          m_SpriteAnimTimer.Reset();
+			    while (m_Frame == prevFrame) {
+				    m_Frame = std::floor(static_cast<float>(m_FrameCount) * PosRand());
+			    }
+                m_SpriteAnimTimer.Reset();
 			    break;
 		    case ALWAYSPINGPONG:
 			    if (m_Frame == m_FrameCount - 1) {

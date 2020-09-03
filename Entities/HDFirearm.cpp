@@ -980,7 +980,7 @@ void HDFirearm::Update()
             m_pFlash->SetHFlipped(m_HFlipped);
             m_pFlash->SetJointPos(m_Pos + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation));
             m_pFlash->SetRotAngle(m_Rotation.GetRadAngle());
-            m_pFlash->SetFrame(RandomNum(0, m_pFlash->GetFrameCount() - 1));
+            m_pFlash->SetFrame(std::floor((m_pFlash->GetFrameCount()/* - 1*/) * PosRand() - 0.001));
             m_pFlash->Update();
         }
 

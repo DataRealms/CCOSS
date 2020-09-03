@@ -1026,19 +1026,19 @@ void ACRocket::Update()
     int lastFrame = m_FrameCount - 1;
 
     if (m_HatchState == OPENING) {
-      if (m_HatchTimer.GetElapsedSimTimeMS() <= m_HatchDelay && m_HatchDelay)
-        m_Frame = static_cast<unsigned int>(static_cast<double>(lastFrame) * (m_HatchTimer.GetElapsedSimTimeMS() / static_cast<double>(m_HatchDelay)));
-
-      else {
-        m_Frame = lastFrame;
-        m_HatchState = OPEN;
-        DropAllInventory();
+        if (m_HatchTimer.GetElapsedSimTimeMS() <= m_HatchDelay && m_HatchDelay)
+            m_Frame = std::floor((float)lastFrame * ((float)m_HatchTimer.GetElapsedSimTimeMS() / (float)m_HatchDelay));
+        else
+        {
+            m_Frame = lastFrame;
+            m_HatchState = OPEN;
+            DropAllInventory();
         }
     }
     else if (m_HatchState == CLOSING) {
         if (m_HatchTimer.GetElapsedSimTimeMS() <= m_HatchDelay && m_HatchDelay)
-          m_Frame = lastFrame - static_cast<unsigned int>(static_cast<double>(lastFrame) * (m_HatchTimer.GetElapsedSimTimeMS() / static_cast<double>(m_HatchDelay)));
 
+            m_Frame = lastFrame - std::floor((float)lastFrame * ((float)m_HatchTimer.GetElapsedSimTimeMS() / (float)m_HatchDelay));
         else
         {
             m_Frame = 0;

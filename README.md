@@ -63,6 +63,8 @@ Building:
 5. `cd builddir`
 
 6. `meson compile` or `meson compile CCOSS` if you want a release build
+  If the build fails because of memory shortage you may need to reduce the number of build threads (meson will use all available threads by default) using th `-j<number of threads>` option
+
 
 Running:
 
@@ -75,9 +77,9 @@ Running:
 4. Run `env LD_LIBRARY_PATH=. ./CCOSS.x86_64` or `./CCOS_debug.x86_64` in the **Data Repository**
 
 ### Arch Linux ###
-`pacman -S allegro4 flac luajit minizip lz4 libpng libx11 meson`
+`# pacman -S allegro4 flac luajit minizip lz4 libpng libx11 meson`
 ### Ubuntu ###
-`apt-get install liballegro4.4 libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev meson`
+`# apt-get install liballegro4.4 libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev meson`
 
 ## More Information ##
 

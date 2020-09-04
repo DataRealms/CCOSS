@@ -1,0 +1,21 @@
+luabind_src = files('class.cpp',
+'class_info.cpp',
+'class_registry.cpp',
+'class_rep.cpp',
+'create_class.cpp',
+'error.cpp',
+'find_best_match.cpp',
+'function.cpp',
+'implicit_cast.cpp',
+'link_compatibility.cpp',
+'object_rep.cpp',
+'open.cpp',
+'overload_rep.cpp',
+'pcall.cpp',
+'ref.cpp',
+'scope.cpp',
+'stack_content_by_name.cpp',
+'weak_ref.cpp',
+'wrapper_base.cpp')
+
+luabind = static_library('luabind071', luabind_src, include_directories:inc_dirs, dependencies: [deps, moonjit_dep], cpp_args:extra_args+release_args)

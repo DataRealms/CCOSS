@@ -108,3 +108,5 @@ raknet_src = files('Base64Encoder.cpp',
 'WSAStartupSingleton.cpp',
 '_FindFirst.cpp',
 'gettimeofday.cpp')
+
+raknet = static_library('raknet', raknet_src, cpp_args:extra_args+release_args, dependencies: deps, include_directories:inc_dirs)

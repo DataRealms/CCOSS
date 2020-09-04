@@ -18,4 +18,4 @@ luabind_src = files('class.cpp',
 'weak_ref.cpp',
 'wrapper_base.cpp')
 
-luabind = static_library('luabind071', luabind_src, include_directories:inc_dirs, dependencies: [deps, moonjit_dep], cpp_args:extra_args+release_args)
+luabind = static_library('luabind071', luabind_src, include_directories:inc_dirs, dependencies: [deps], cpp_args:extra_args+release_args)

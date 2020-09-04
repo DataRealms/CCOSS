@@ -62,8 +62,8 @@ Building:
 
 5. `cd builddir`
 
-6. `meson compile` or `meson compile CCOSS` if you want a release build
-  If the build fails because of memory shortage you may need to reduce the number of build threads (meson will use all available threads by default) using th `-j<number of threads>` option
+6. `meson compile` or `meson [-j<num of threads>] compile CCOSS` if you want a release build
+  If the build fails because of memory shortage you may need to reduce the number of build threads (meson will use all available threads by default) using the `-j<number of threads>` option
 
 
 Running:

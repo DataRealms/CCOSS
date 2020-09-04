@@ -14,7 +14,7 @@ deps = [dependency('boost'),
   dependency('allegro'),
   dependency('loadpng'),
   dependency('flac'),
-#  dependency('luajit'),
+  dependency('luajit'),
   dependency('minizip'),
   dependency('threads'),
   dependency('liblz4'),
@@ -50,9 +50,9 @@ subdir('System')
 subdir('external')
 
 executable('CCOSS_debug', 'Main.cpp',sources, link_args: link_args, link_with: [luabind, raknet],
-            dependencies: [deps, moonjit_dep], include_directories:inc_dirs, objects:ext_libs,
+            dependencies: [deps], include_directories:inc_dirs, objects:ext_libs,
             cpp_args:extra_args+debug_args, cpp_pch:pch, name_suffix:suffix)
 
 executable('CCOSS', 'Main.cpp', sources, link_args: '-lstdc++fs', link_with: [luabind,raknet],
-            dependencies: [deps, moonjit_dep], include_directories:inc_dirs, objects: ext_libs,
+            dependencies: [deps], include_directories:inc_dirs, objects: ext_libs,
             cpp_args:extra_args+release_args, cpp_pch:pch, name_suffix:suffix, build_by_default:false)

@@ -72,7 +72,7 @@ Running:
 
 2. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**
 
-3. Copy (or link) libfmod.so.11 and libfmod.so.11.11 from `<Source Repository Root>/external/linux/x86_64` into the **Data Repository**
+3. Copy (or link) libfmod.so from `<Source Repository Root>/external/lib/linux/x86_64` into the **Data Repository**
 
 4. Run `env LD_LIBRARY_PATH=. ./CCOSS.x86_64` or `./CCOS_debug.x86_64` in the **Data Repository**
 

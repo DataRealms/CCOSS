@@ -25,11 +25,11 @@ namespace RTE {
 
 	int System::MakeDirectory(const std::string& path) {
 #ifdef _WIN32
-    return _mkdir(path.c_str()); 
+		return _mkdir(path.c_str());
 #elif __unix__
-    return mkdir(path.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH);
+		return mkdir(path.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 #endif
-  }
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

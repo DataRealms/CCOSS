@@ -12,6 +12,8 @@
 
 #include "GUI.h"
 #include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
 using namespace RTE;
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -19,12 +21,6 @@ using namespace RTE;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the text from the clipboard.
 
-bool GUIUtil::GetClipboardText(std::string *Text) {
-	Display *dpy;
-	Window owner;
-	Atom clip;
-
-	return false;
-}
+bool GUIUtil::GetClipboardText(std::string *Text) { return false; }
 
 bool GUIUtil::SetClipboardText(std::string Text) { return false; }

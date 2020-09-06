@@ -108,7 +108,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::SetGraphicsDriver() {
-    #ifdef _WIN32
+#ifdef _WIN32
 		if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) {
 			m_GfxDriver = GFX_DIRECTX_OVL;
 			g_ConsoleMan.PrintString("SYSTEM: Using overlay DirectX windowed driver!");
@@ -121,14 +121,9 @@ namespace RTE {
 		} else {
 			m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		}
-    #else
-      if (m_ResX * m_ResMultiplier == m_ScreenResX &&
-          m_ResY * m_ResMultiplier == m_ScreenResY) {
-        m_GfxDriver = GFX_AUTODETECT_FULLSCREEN;
-      } else {
-        m_GfxDriver = GFX_AUTODETECT_WINDOWED;
-      }
-    #endif
+#else
+		m_GfxDriver= (m_ResX * m_ResMultiplier == m_ScreenResX && m_ResY * m_ResMultiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -389,15 +384,10 @@ namespace RTE {
 			return -1;
 		}
 #ifdef __unix__
-    if (m_ResX * multiplier == m_ScreenResX &&
-        m_ResY * multiplier == m_ScreenResY) {
-      m_GfxDriver = GFX_AUTODETECT_FULLSCREEN;
-    } else {
-      m_GfxDriver = GFX_AUTODETECT_WINDOWED;
-    }
+		m_GfxDriver= (m_ResX * multiplier == m_ScreenResX && m_ResY * multiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
 #endif
 
-                // Need to save these first for recovery attempts to work (screen might be 0)
+		// Need to save these first for recovery attempts to work (screen might be 0)
 		unsigned short resX = m_ResX;
 		unsigned short resY = m_ResY;
 
@@ -452,19 +442,15 @@ namespace RTE {
 
 	int FrameMan::SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier, bool endActivity) {
 
-    if (!IsValidResolution(newResX, newResY) || newResX <= 0 || newResX > m_ScreenResX || newResY <= 0 || newResY > m_ScreenResY) {
+		if (!IsValidResolution(newResX, newResY) || newResX <= 0 || newResX > m_ScreenResX || newResY <= 0 || newResY > m_ScreenResY) {
 			return -1;
 		}
 
 #ifdef __unix__
-    if (newResX*newMultiplier == m_ScreenResX &&newResY*newMultiplier == m_ScreenResY){
-      m_GfxDriver = GFX_AUTODETECT_FULLSCREEN;
-    }else {
-      m_GfxDriver = GFX_AUTODETECT_WINDOWED;
-    }
+		m_GfxDriver= (newResX * newMultiplier == m_ScreenResX && newResY * newMultiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
 #endif
-    
-    // Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
+
+		// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
 		if (g_ActivityMan.GetActivity()) {
 			g_ActivityMan.EndActivity();
 		}

@@ -52,4 +52,4 @@ executable('CCCP_debug', 'Main.cpp',sources, link_args: link_args, link_with: [l
 
 executable('CCCP', 'Main.cpp', sources, link_args: '-lstdc++fs', link_with: [luabind,raknet],
             dependencies: [deps], include_directories:[source_inc_dirs, external_inc_dirs], objects: ext_libs,
-            cpp_args:extra_args, cpp_pch:pch, name_suffix:suffix, build_by_default:false, override_options:['buildtype=release', 'optimization=3'])
+            cpp_args:extra_args, cpp_pch:pch, name_suffix:suffix, build_by_default:false, override_options:['buildtype=release', 'optimization=3', 'debug=false'])

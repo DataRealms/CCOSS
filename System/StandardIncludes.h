@@ -33,8 +33,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-// TODO: don't forget to replace with <filesystem> when eventually enable ++17
-// standard.
+// TODO: don't forget to replace with <filesystem> when eventually enable ++17 standard.
 #include <experimental/filesystem>
 
 // Linux specific headers that MSVC uses implicitly

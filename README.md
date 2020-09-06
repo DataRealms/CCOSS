@@ -68,7 +68,7 @@ Building:
 
 Running:
 
-1. Copy (or link, prefferrable for quick debug builds) `builddir/CCCP_debug.x86_64` or `builddir/CCCP.x86_64` (depending on if you made a release build) into the **Data Repository**
+1. Copy (or link, preferrable for quick debug builds) `builddir/CCCP_debug.x86_64` or `builddir/CCCP.x86_64` (depending on if you made a release build) into the **Data Repository**
 
 2. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**
 

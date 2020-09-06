@@ -4,6 +4,11 @@
 #include "allegro.h"
 #include "loadpng.h"
 
+#ifdef _WIN32
+#define DebuggerBreak() __debugbreak();
+#else
+#define DebuggerBreak() ;
+
 namespace RTE {
 
 	static BITMAP *g_ScreendumpBuffer = 0; //!< Buffer for saving abort screendumps.
@@ -22,17 +27,11 @@ namespace RTE {
 	/// <param name="line">The line where the abortion is made.</param>
 	extern bool RTEAbortFunc(const char *description, const char *file, int line);
 	extern bool RTEAbortFunc(const std::string description, const char *file, int line);
-#ifdef _WIN32
   #define RTEAbort(description) {								\
     if (RTEAbortFunc(description, __FILE__, __LINE__)) {	\
-      __debugbreak();										\
+      DebuggerBreak();										\
     }														\
   }
-#else
-  #define RTEAbort(description){\
-    if (RTEAbortFunc(description, __FILE__, __LINE__)){}\
-  }
-#endif
 	/// <summary>
 	/// A souped-up, customized assert function that brings up a nice dialog box on assert failure.
 	/// The user can choose to break or ignore the particular assertion failure once, or to always ignore.
@@ -45,22 +44,13 @@ namespace RTE {
 	/// <returns>Whether the assertion failed AND the user chose to break in the dialog box.</returns>
 	extern bool RTEAssertFunc(bool expression, const char *description, const char *file, int line, bool &alwaysIgnore);
 	extern bool RTEAssertFunc(bool expression, const std::string description, const char *file, int line, bool &alwaysIgnore);
-#ifdef _WIN32
   #define RTEAssert(expression, description) {												\
     static bool alwaysIgnore = false;														\
     if (!alwaysIgnore) {																	\
       if (RTEAssertFunc(expression, description, __FILE__, __LINE__, alwaysIgnore)) {		\
-        __debugbreak();																	\
+        DebuggerBreak();																	\
       }																					\
     }																						\
   }
-#else
-  #define RTEAssert(expression, description){\
-    static bool alwaysIgnore = false;\
-    if (!alwaysIgnore){\
-      if(RTEAssertFunc(expression, description, __FILE__, __LINE__, alwaysIgnore)){}\
-    }\
-  }
-#endif
 }
 #endif

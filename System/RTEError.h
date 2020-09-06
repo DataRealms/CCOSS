@@ -8,6 +8,7 @@
 #define DebuggerBreak() __debugbreak();
 #else
 #define DebuggerBreak() ;
+#endif
 
 namespace RTE {
 

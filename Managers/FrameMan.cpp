@@ -36,16 +36,17 @@ namespace RTE {
 
 	void FrameMan::Clear() {
 		m_GfxDriver = GFX_AUTODETECT_WINDOWED;
-    #ifdef _WIN32
-		m_ScreenResX = GetSystemMetrics(SM_CXSCREEN);
-		m_ScreenResY = GetSystemMetrics(SM_CYSCREEN);
-    #elif __unix__
-    Display* dpy = XOpenDisplay(NULL);
-    XWindowAttributes ra;
-    XGetWindowAttributes(dpy, DefaultRootWindow(dpy), &ra);
-    m_ScreenResX = ra.width;
-    m_ScreenResY = ra.height;
-    #endif
+#ifdef _WIN32
+		m_ScreenResX= GetSystemMetrics(SM_CXSCREEN);
+		m_ScreenResY= GetSystemMetrics(SM_CYSCREEN);
+#elif __unix__
+		Display *dpy= XOpenDisplay(NULL);
+		XWindowAttributes ra;
+		XGetWindowAttributes(dpy, DefaultRootWindow(dpy), &ra);
+		m_ScreenResX= ra.width;
+		m_ScreenResY= ra.height;
+		XCloseDisplay(dpy);
+#endif
 		m_ResX = 960;
 		m_ResY = 540;
 		m_NewResX = m_ResX;

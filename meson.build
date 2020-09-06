@@ -1,14 +1,11 @@
-project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++14', 'default_library=static'])
+project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++14'])
 
-inc_dirs = include_directories('Activities',
+source_inc_dirs = include_directories('Activities',
           'Entities',
           'GUI',
           'Managers',
           'Menus',
-          'System',
-          'external/linux/include',
-          'external/linux/include/RakNet',
-          'external/linux/include/fmod')
+          'System')
 
 deps = [dependency('boost'),
   dependency('allegro'),
@@ -50,9 +47,9 @@ subdir('System')
 subdir('external')
 
 executable('CCOSS_debug', 'Main.cpp',sources, link_args: link_args, link_with: [luabind, raknet],
-            dependencies: [deps], include_directories:inc_dirs, objects:ext_libs,
+            dependencies: [deps], include_directories:[source_inc_dirs, external_inc_dirs], objects:ext_libs,
             cpp_args:extra_args+debug_args, cpp_pch:pch, name_suffix:suffix)
 
 executable('CCOSS', 'Main.cpp', sources, link_args: '-lstdc++fs', link_with: [luabind,raknet],
-            dependencies: [deps], include_directories:inc_dirs, objects: ext_libs,
+            dependencies: [deps], include_directories:[source_inc_dirs, external_inc_dirs], objects: ext_libs,
             cpp_args:extra_args+release_args, cpp_pch:pch, name_suffix:suffix, build_by_default:false)

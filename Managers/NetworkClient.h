@@ -4,7 +4,6 @@
 #include "Singleton.h"
 #include "SoundContainer.h"
 
-//#include <WinSock2.h> //Seems to be Unused
 #include "RakPeerInterface.h"
 #include "NetworkMessages.h"
 

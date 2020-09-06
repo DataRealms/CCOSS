@@ -39,6 +39,7 @@
 // Linux specific headers that MSVC uses implicitly
 #ifdef __unix__
 // Since GCC does not implement buffer safe functions until c++17
+// This will be needed once c++17 is enabled
 #define __STDC_WANT_LIB_EXT1__ 1
 #endif
 

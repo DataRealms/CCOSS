@@ -264,7 +264,6 @@ namespace RTE {
 		FMOD::Channel *soundChannel;
 
 		const std::unordered_set<unsigned short> *channels = soundContainer->GetPlayingChannels();
-    //TODO: Check if this works with MSVC
 		for (std::unordered_set<unsigned short>::const_iterator channelIterator = channels->begin(); channelIterator != channels->end(); ++channelIterator) {
 			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
 			if (result == FMOD_OK) { soundChannel->setPitch(pitch); }

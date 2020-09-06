@@ -441,7 +441,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier, bool endActivity) {
-
 		if (!IsValidResolution(newResX, newResY) || newResX <= 0 || newResX > m_ScreenResX || newResY <= 0 || newResY > m_ScreenResY) {
 			return -1;
 		}

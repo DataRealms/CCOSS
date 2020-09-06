@@ -393,11 +393,9 @@ namespace RTE {
 						}
 
 						if (saveSettings){
-              // Only allowed by MSVC compiler extensions
-							// g_SettingsMan.Save(Writer("Base.rte/Settings.ini"));
-              RTE::Writer writer("Base.rte/Settings.ini");
-              g_SettingsMan.Save(writer);
-            }
+							RTE::Writer writer("Base.rte/Settings.ini");
+							g_SettingsMan.Save(writer);
+						}
 						m_pGUIController->EnableMouse(false);
 						m_Mode = CONNECTION;
 						m_ConnectionWaitTimer.Reset();

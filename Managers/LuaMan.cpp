@@ -2463,7 +2463,7 @@ string LuaMan::GetNewPresetID()
 {
     // Generate the new ID
     char newID[64];
-    sprintf_s(newID, sizeof(newID), "Pre%05i", m_NextPresetID);
+    std::snprintf(newID, sizeof(newID), "Pre%05i", m_NextPresetID);
     // Increment the ID so it will be diff for the next one (improve this primitive approach??)
     m_NextPresetID++;
 
@@ -2476,7 +2476,7 @@ string LuaMan::GetNewObjectID()
 {
     // Generate the new ID
     char newID[64];
-    sprintf_s(newID, sizeof(newID), "Obj%05i", m_NextObjectID);
+    std::snprintf(newID, sizeof(newID), "Obj%05i", m_NextObjectID);
     // Increment the ID so it will be diff for the next one (improve this primitive approach??)
     m_NextObjectID++;
 

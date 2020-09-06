@@ -656,7 +656,7 @@ namespace RTE {
 					strncpy(path, musDataPtr->Path, 255);
 
 					char buf[128];
-					sprintf_s(buf, sizeof(buf), "MUSIC %s %d", path, musDataPtr->Loops);
+					std::snprintf(buf, sizeof(buf), "MUSIC %s %d", path, musDataPtr->Loops);
 					g_ConsoleMan.PrintString(buf);
 
 					g_AudioMan.PlayMusic(path, musDataPtr->Loops);

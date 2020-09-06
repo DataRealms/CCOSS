@@ -1542,7 +1542,7 @@ namespace RTE {
 		char buf[256];
 
 		if (m_NatServerConnected) {
-			sprintf_s(buf, sizeof(buf), "NAT SERVICE CONNECTED\nName: %s  Pass: %s", g_SettingsMan.GetNATServerName().c_str(), g_SettingsMan.GetNATServerPassword().c_str());
+			std::snprintf(buf, sizeof(buf), "NAT SERVICE CONNECTED\nName: %s  Pass: %s", g_SettingsMan.GetNATServerName().c_str(), g_SettingsMan.GetNATServerPassword().c_str());
 			g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, midX, 20, buf, GUIFont::Centre);
 		} else {
 			g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, midX, 20, "NOT CONNECTED TO NAT SERVICE", GUIFont::Centre);
@@ -1551,7 +1551,7 @@ namespace RTE {
 		if (g_InActivity) {
 			const GameActivity *gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
 			if (gameActivity) {
-				sprintf_s(buf, sizeof(buf), "Activity: %s   Players: %d", gameActivity->GetPresetName().c_str(), gameActivity->GetPlayerCount());
+				std::snprintf(buf, sizeof(buf), "Activity: %s   Players: %d", gameActivity->GetPresetName().c_str(), gameActivity->GetPlayerCount());
 				g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, midX, 50, buf, GUIFont::Centre);
 			}
 		} else {
@@ -1616,7 +1616,7 @@ namespace RTE {
 			std::string playerName = IsPlayerConnected(i) ? GetPlayerName(i) : "- NO PLAYER -";
 
 			// Jesus christ
-			sprintf_s(buf, sizeof(buf),
+			std::snprintf(buf, sizeof(buf),
 					  "%s\nPing %u\nCmp Mbit: %.1f\nUnc Mbit: %.1f\nR: %.2f\nFrame Kbit: %lu\nGlow Kbit: %lu\nSound Kbit: %lu\nScene Kbit: %lu\nFrames sent: %uK\nFrame skipped: %uK\nBlocks full: %uK\nBlocks empty: %uK\nBlk Ratio: %.2f\nFPS: %d\nSend Ms %d\nTotal Data %lu MB",
 					  (i == c_MaxClients) ? "- TOTALS - " : playerName.c_str(),
 					  (i < c_MaxClients) ? m_Ping[i] : 0,
@@ -1641,7 +1641,7 @@ namespace RTE {
 
 			if (i < c_MaxClients) {
 				int lines = 2;
-				sprintf_s(buf, sizeof(buf), "Thread: %d\nBuffer: %d / %d", m_ThreadExitReason[i], m_SendBufferMessages[i], m_SendBufferBytes[i] / 1024);
+				std::snprintf(buf, sizeof(buf), "Thread: %d\nBuffer: %d / %d", m_ThreadExitReason[i], m_SendBufferMessages[i], m_SendBufferBytes[i] / 1024);
 				g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, 10 + i * g_FrameMan.GetResX() / 5, g_FrameMan.GetResY() - lines * 15, buf, GUIFont::Left);
 			}
 		}
@@ -1695,7 +1695,7 @@ namespace RTE {
 			if (votes > 0) {
 				char buf[128];
 
-				sprintf_s(buf, sizeof(buf), "Voting to end activity %d of %d", votes, votesNeeded);
+				std::snprintf(buf, sizeof(buf), "Voting to end activity %d of %d", votes, votesNeeded);
 				for (short i = 0; i < c_MaxClients; i++) {
 					g_FrameMan.SetScreenText(buf, i, 0, -1, false);
 				}

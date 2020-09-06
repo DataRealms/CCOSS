@@ -38,10 +38,10 @@
 
 // Linux specific headers that MSVC uses implicitly
 #ifdef __unix__
-// Since GCC does not implement sprintf_s use workaround
+// Since GCC does not implement std::snprintf use workaround
 #define __STDC_WANT_LIB_EXT1__ 1
 #ifndef __STDC_LIB_EXT1__
-#define sprintf_s std::snprintf
+#define std::snprintf std::snprintf
 #endif
 #endif
 

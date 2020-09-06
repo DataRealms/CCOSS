@@ -394,7 +394,7 @@ namespace RTE {
 		if (m_AudioEnabled && seconds > 0) {
 			// Encode the silence as number of secs preceded by '@'
 			char str[256];
-			sprintf_s(str, sizeof(str), "@%i", seconds);
+			std::snprintf(str, sizeof(str), "@%i", seconds);
 			m_MusicPlayList.push_back(std::string(str));
 		}
 	}

@@ -2095,7 +2095,7 @@ void MainMenuGUI::UpdateResolutionCombo() {
 #ifdef _WIN32
         GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
 #elif __unix__
-        GFX_MODE_LIST *resList = get_gfx_mode_list(g_FrameMan.IsFullscreen() ? GFX_XWINDOWS_FULLSCREEN : GFX_XWINDOWS);
+        GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_XWINDOWS_FULLSCREEN);
 #endif
         int width = 0;
         int height = 0;

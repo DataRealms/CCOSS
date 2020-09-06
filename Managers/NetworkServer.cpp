@@ -348,8 +348,6 @@ namespace RTE {
 				connected = true;
 
 				msg = "SERVER: Client connected as #";
-        // WinApi, use STL std::to_string instead
-				// _itoa(index, buf, 10);
 				msg += std::to_string(index);
 				g_ConsoleMan.PrintString(msg);
 				break;
@@ -397,11 +395,8 @@ namespace RTE {
 		char buf[32];
 
 		msg = "SERVER: CLIENT REGISTRATION: RES ";
-    // _itoa is totally unneccessary when working with STL strings
-		// _itoa(msgReg->ResolutionX, buf, 10);
 		msg += std::to_string(msgReg->ResolutionX);
 		msg += " x ";
-		// _itoa(msgReg->ResolutionY, buf, 10);
 		msg += std::to_string(msgReg->ResolutionY);
 		g_ConsoleMan.PrintString(msg);
 

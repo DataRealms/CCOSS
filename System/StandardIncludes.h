@@ -38,11 +38,8 @@
 
 // Linux specific headers that MSVC uses implicitly
 #ifdef __unix__
-// Since GCC does not implement std::snprintf use workaround
+// Since GCC does not implement buffer safe functions until c++17
 #define __STDC_WANT_LIB_EXT1__ 1
-#ifndef __STDC_LIB_EXT1__
-#define std::snprintf std::snprintf
-#endif
 #endif
 
 // TODO: Get rid of these once alias qualifiers are added.

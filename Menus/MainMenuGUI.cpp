@@ -2099,7 +2099,7 @@ void MainMenuGUI::UpdateResolutionCombo() {
 #endif
         int width = 0;
         int height = 0;
-		char resString[256] = "";
+        std::string resString = "";
         // Index of found useful resolution (32bit)
         int foundIndex = 0;
         int currentResIndex = -1;
@@ -2123,26 +2123,26 @@ void MainMenuGUI::UpdateResolutionCombo() {
 						m_MaxResX = width;
 						m_MaxResY = height;
 					}
-					std::snprintf(resString, sizeof(resString), "%ix%i", width, height);
+					resString = std::to_string(width) + "x" + std::to_string(height);
 
 					// Add useful notation to the standardized resolutions
-					if (width == 800 && height == 600) { strcat(resString, " SVGA"); }
-					if (width == 1024 && height == 600) { strcat(resString, " WSVGA"); }
-					if (width == 1024 && height == 768) { strcat(resString, " XGA"); }
-					if (width == 1280 && height == 720) { strcat(resString, " HD"); }
-					if (width == 1280 && (height == 768 || height == 800)) { strcat(resString, " WXGA"); }
-					if (width == 1280 && height == 1024) { strcat(resString, " SXGA"); }
-					if (width == 1400 && height == 1050) { strcat(resString, " SXGA+"); }
-					if (width == 1600 && height == 900) { strcat(resString, " HD+"); }
-					if (width == 1600 && height == 1200) { strcat(resString, " UGA"); }
-					if (width == 1680 && height == 1050) { strcat(resString, " WSXGA+"); }
-					if (width == 1920 && height == 1080) { strcat(resString, " FHD"); }
-					if (width == 1920 && height == 1200) { strcat(resString, " WUXGA"); }
-					if (width == 2048 && height == 1080) { strcat(resString, " DCI 2K"); }
-					if (width == 2560 && height == 1440) { strcat(resString, " QHD"); }
-					if (width == 3200 && height == 1800) { strcat(resString, " QHD+"); }
-					if (width == 3840 && height == 2160) { strcat(resString, " 4K UHD"); }
-					if (width == 4096 && height == 2160) { strcat(resString, " DCI 4K"); }
+					if (width == 800 && height == 600) { resString += " SVGA"; }
+					if (width == 1024 && height == 600) { resString += " WSVGA"; }
+					if (width == 1024 && height == 768) { resString += " XGA"; }
+					if (width == 1280 && height == 720) { resString += " HD"; }
+					if (width == 1280 && (height == 768 || height == 800)) { resString += " WXGA"; }
+					if (width == 1280 && height == 1024) { resString += " SXGA"; }
+					if (width == 1400 && height == 1050) { resString += " SXGA+"; }
+					if (width == 1600 && height == 900) { resString += " HD+"; }
+					if (width == 1600 && height == 1200) { resString += " UGA"; }
+					if (width == 1680 && height == 1050) { resString += " WSXGA+"; }
+					if (width == 1920 && height == 1080) { resString += " FHD"; }
+					if (width == 1920 && height == 1200) { resString += " WUXGA"; }
+					if (width == 2048 && height == 1080) { resString += " DCI 2K"; }
+					if (width == 2560 && height == 1440) { resString += " QHD"; }
+					if (width == 3200 && height == 1800) { resString += " QHD+"; }
+					if (width == 3840 && height == 2160) { resString += " 4K UHD"; }
+					if (width == 4096 && height == 2160) { resString += " DCI 4K"; }
 
 					m_pResolutionCombo->AddItem(resString);
 
@@ -2160,7 +2160,7 @@ void MainMenuGUI::UpdateResolutionCombo() {
         // If none of the listed matched our resolution set for next start, add a 'custom' one to display as the current res
 		if (currentResIndex < 0) {
 			const char *isUpscaled = { (g_FrameMan.ResolutionMultiplier() > 1) ? "Upscaled" : "Custom" };
-			std::snprintf(resString, sizeof(resString), "%ix%i %s", g_FrameMan.GetResX() / g_FrameMan.ResolutionMultiplier(), g_FrameMan.GetResY() / g_FrameMan.ResolutionMultiplier(), isUpscaled);
+			resString += std::to_string(g_FrameMan.GetResX() / g_FrameMan.ResolutionMultiplier()) + "x" + std::to_string(g_FrameMan.GetResY() / g_FrameMan.ResolutionMultiplier()) + " " + isUpscaled;
 			m_pResolutionCombo->AddItem(resString);
 			currentResIndex = m_pResolutionCombo->GetCount() - 1;
 		}

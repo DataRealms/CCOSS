@@ -62,19 +62,19 @@ Building:
 
 5. `cd builddir`
 
-6. `meson compile` or `meson [-j<num of threads>] compile CCOSS` if you want a release build
+6. `meson compile` or `meson [-j<num of threads>] compile CCCP` if you want a release build
   If the build fails because of memory shortage you may need to reduce the number of build threads (meson will use all available threads by default) using the `-j<number of threads>` option
 
 
 Running:
 
-1. Copy (or link, prefferrable for quick debug builds) `builddir/CCOSS_debug.x86_64` or `builddir/CCOSS.x86_64` (depending on if you made a release build) into the **Data Repository**
+1. Copy (or link, prefferrable for quick debug builds) `builddir/CCCP_debug.x86_64` or `builddir/CCCP.x86_64` (depending on if you made a release build) into the **Data Repository**
 
 2. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**
 
 3. Copy (or link) libfmod.so from `<Source Repository Root>/external/lib/linux/x86_64` into the **Data Repository**
 
-4. Run `env LD_LIBRARY_PATH=. ./CCOSS.x86_64` or `./CCOS_debug.x86_64` in the **Data Repository**
+4. Run `env LD_LIBRARY_PATH=. ./CCCP.x86_64` or `./CCCP_debug.x86_64` in the **Data Repository**
 
 ### Arch Linux ###
 `# pacman -S allegro4 flac luajit minizip lz4 libpng libx11 meson`

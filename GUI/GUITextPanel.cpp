@@ -16,6 +16,8 @@
 
 #ifdef _WIN32
 #include "WinUtil.h"
+#elif defined(__unix__)
+// #include "LinuxUtil.h" //not yet implemented
 #endif
 
 using namespace RTE;

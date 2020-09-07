@@ -5,9 +5,9 @@
 #include "loadpng.h"
 
 #ifdef _WIN32
-#define DebuggerBreak() __debugbreak();
+#define DebuggerBreak __debugbreak();
 #else
-#define DebuggerBreak() ;
+#define DebuggerBreak ;
 #endif
 
 namespace RTE {
@@ -31,7 +31,7 @@ namespace RTE {
 	#define RTEAbort(description) \
 	{ \
 		if (RTEAbortFunc(description, __FILE__, __LINE__)) { \
-			DebuggerBreak(); \
+			DebuggerBreak \
 		} \
 	}
 	/// <summary>
@@ -51,7 +51,7 @@ namespace RTE {
 		static bool alwaysIgnore= false; \
 		if (!alwaysIgnore) { \
 			if (RTEAssertFunc(expression, description, __FILE__, __LINE__, alwaysIgnore)) { \
-				DebuggerBreak(); \
+				DebuggerBreak \
 			} \
 		} \
 	}

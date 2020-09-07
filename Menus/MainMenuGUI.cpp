@@ -2156,10 +2156,10 @@ void MainMenuGUI::UpdateResolutionCombo() {
             }
         }
 		if (resList) { destroy_gfx_mode_list(resList); }
-		
-        // If none of the listed matched our resolution set for next start, add a 'custom' one to display as the current res
+
+		// If none of the listed matched our resolution set for next start, add a 'custom' one to display as the current res
 		if (currentResIndex < 0) {
-      std::string isUpscaled = (g_FrameMan.ResolutionMultiplier() > 1) ? "Upscaled" : "Custom";
+			std::string isUpscaled= (g_FrameMan.ResolutionMultiplier() > 1) ? "Upscaled" : "Custom";
 			resString += std::to_string(g_FrameMan.GetResX() / g_FrameMan.ResolutionMultiplier()) + "x" + std::to_string(g_FrameMan.GetResY() / g_FrameMan.ResolutionMultiplier()) + isUpscaled;
 			m_pResolutionCombo->AddItem(resString);
 			currentResIndex = m_pResolutionCombo->GetCount() - 1;

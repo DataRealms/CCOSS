@@ -2798,7 +2798,7 @@ void ACrab::Update()
         m_pLFGLeg->SetJointPos(m_Pos + m_pLFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
         // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
         m_pLFGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pLFGLeg->ReachToward(m_pLFGFootGroup->GetLimbPos(m_HFlipped));
+        m_pLFGLeg->SetTargetOffset(m_pLFGFootGroup->GetLimbPos(m_HFlipped));
         m_pLFGLeg->Update();
         m_Health -= m_pLFGLeg->CollectDamage();
     }
@@ -2811,7 +2811,7 @@ void ACrab::Update()
         m_pLBGLeg->SetJointPos(m_Pos + m_pLBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
         // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
         m_pLBGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pLBGLeg->ReachToward(m_pLBGFootGroup->GetLimbPos(m_HFlipped));
+        m_pLBGLeg->SetTargetOffset(m_pLBGFootGroup->GetLimbPos(m_HFlipped));
         m_pLBGLeg->Update();
         m_Health -= m_pLBGLeg->CollectDamage();
     }
@@ -2821,7 +2821,7 @@ void ACrab::Update()
         m_pRFGLeg->SetHFlipped(m_HFlipped);
         m_pRFGLeg->SetJointPos(m_Pos + m_pRFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
         m_pRFGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pRFGLeg->ReachToward(m_pRFGFootGroup->GetLimbPos(m_HFlipped));
+        m_pRFGLeg->SetTargetOffset(m_pRFGFootGroup->GetLimbPos(m_HFlipped));
         m_pRFGLeg->Update();
         m_Health -= m_pRFGLeg->CollectDamage();
     }
@@ -2832,7 +2832,7 @@ void ACrab::Update()
         m_pRBGLeg->SetJointPos(m_Pos + m_pRBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
         // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
         m_pRBGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pRBGLeg->ReachToward(m_pRBGFootGroup->GetLimbPos(m_HFlipped));
+        m_pRBGLeg->SetTargetOffset(m_pRBGFootGroup->GetLimbPos(m_HFlipped));
         m_pRBGLeg->Update();
         m_Health -= m_pRBGLeg->CollectDamage();
     }

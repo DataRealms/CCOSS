@@ -977,7 +977,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
 					gibVel.SetXY(velMin + RandomNum(0.0F, velRange), 0);
 				else
 					gibVel.SetMagnitude(velMin + RandomNum(0.0F, velRange));
-				gibVel.RadRotate(impactImpulse.GetAbsRadAngle() + RandomNum(0.0F, spread));
+				gibVel.RadRotate(impactImpulse.GetAbsRadAngle() + spread * RandomNormalNum());
 // Don't! the offset was already rotated!
 //                gibVel = RotateOffset(gibVel);
                 // Distribute any impact implse out over all the gibs

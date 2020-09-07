@@ -499,7 +499,6 @@ namespace RTE {
 
 		if (anySoundsPlaying) {
 			const std::unordered_set<unsigned short> *channels = soundContainer->GetPlayingChannels();
-      //TODO: Check if this works with MSVC
 			for (std::unordered_set<unsigned short>::const_iterator channelIterator = channels->begin(); channelIterator != channels->end();) {
 				result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
 				++channelIterator; // NOTE - stopping the sound will remove the channel, screwing things up if we don't move to the next iterator preemptively

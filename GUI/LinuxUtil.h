@@ -1,15 +1,6 @@
 #ifndef _LINUXUTIL_
 #define _LINUXUTIL_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIUtil.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIUtil class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
-
 namespace RTE {
 
 	///<summary>
@@ -18,9 +9,7 @@ namespace RTE {
 	///</summary>
 	class LinuxUtil {
 
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Public member variable, method and friend function declarations
-
+//////////////////////////////////////////////////////////////////////////////////////////
 	public:
 		///<summary>
 		///Constructor method used to instantiate a LinuxUtil object in system memory
@@ -44,4 +33,4 @@ namespace RTE {
 
 }; // namespace RTE
 
-#endif //  _GUIUTIL_
+#endif //  _LINUXUTIL_

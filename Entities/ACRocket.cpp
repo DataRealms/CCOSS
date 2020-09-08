@@ -267,27 +267,6 @@ void ACRocket::Destroy(bool notInherited)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACRocket, including the mass of its
-//                  currently attached body parts and inventory.
-
-float ACRocket::GetMass() const
-{
-    float totalMass = ACraft::GetMass();
-//    if (m_pCapsule)
-//        totalMass += m_pCapsule->GetMass();
-    if (m_pRLeg)
-        totalMass += m_pRLeg->GetMass();
-    if (m_pLLeg)
-        totalMass += m_pLLeg->GetMass();
-    if (m_pMThruster)
-        totalMass += m_pMThruster->GetMass();
-    return totalMass;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetAltitude
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the altitide of this' pos (or appropriate low point) over the
@@ -303,25 +282,6 @@ float ACRocket::GetAltitude(int max, int accuracy)
         pos = m_Pos;
 
     return g_SceneMan.FindAltitude(pos, max, accuracy);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-
-void ACRocket::SetID(const MOID newID)
-{
-    MovableObject::SetID(newID);
-//    if (m_pCapsule)
-//        m_pCapsule->SetID(newID);
-    if (m_pRLeg)
-        m_pRLeg->SetID(newID);
-    if (m_pLLeg)
-        m_pLLeg->SetID(newID);
-    if (m_pMThruster)
-        m_pMThruster->SetID(newID);
 }
 
 /*
@@ -999,43 +959,6 @@ void ACRocket::Update()
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-
-void ACRocket::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                                MOID rootMOID,
-                                bool makeNewMOID)
-{
-    if (m_pRLeg)
-        m_pRLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pLLeg)
-        m_pLLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-
-    ACraft::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-void ACRocket::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	if (m_pRLeg)
-		m_pRLeg->GetMOIDs(MOIDs);
-	if (m_pLLeg)
-		m_pLLeg->GetMOIDs(MOIDs);
-
-	ACraft::GetMOIDs(MOIDs);
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACRocket::SetRightLeg(Attachable *newLeg) {
@@ -1140,82 +1063,24 @@ void ACRocket::ResetEmissionTimers()
         m_pULThruster->ResetEmissionTimers();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ACRocket's current graphical representation to a
-//                  BITMAP of choice.
-
-void ACRocket::Draw(BITMAP *pTargetBitmap,
-                   const Vector &targetPos,
-                   DrawMode mode,
-                   bool onlyPhysical) const
-{
-    if (m_pMThruster && !m_pMThruster->IsDrawnAfterParent() && (mode == g_DrawColor || mode == g_DrawMaterial))
-        m_pMThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (m_pRLeg && !m_pRLeg->IsDrawnAfterParent())
-        m_pRLeg->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);    
-    if (m_pLLeg && !m_pLLeg->IsDrawnAfterParent())
-        m_pLLeg->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (mode == g_DrawColor || mode == g_DrawMaterial) {
-        if (m_pRThruster && !m_pRThruster->IsDrawnAfterParent())
-            m_pRThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pLThruster && !m_pLThruster->IsDrawnAfterParent())
-            m_pLThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pURThruster && !m_pURThruster->IsDrawnAfterParent())
-            m_pURThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pULThruster && !m_pULThruster->IsDrawnAfterParent())
-            m_pULThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-    }
-
+#ifdef DEBUG_BUILD
+void ACRocket::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     ACraft::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (m_pMThruster && m_pMThruster->IsDrawnAfterParent() && (mode == g_DrawColor || mode == g_DrawMaterial))
-        m_pMThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (m_pRLeg && m_pRLeg->IsDrawnAfterParent())
-        m_pRLeg->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-    if (m_pLLeg && m_pLLeg->IsDrawnAfterParent())
-        m_pLLeg->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (mode == g_DrawColor || mode == g_DrawMaterial) {
-        if (m_pRThruster && m_pRThruster->IsDrawnAfterParent())
-            m_pRThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pLThruster && m_pLThruster->IsDrawnAfterParent())
-            m_pLThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pURThruster && m_pURThruster->IsDrawnAfterParent())
-            m_pURThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pULThruster && m_pULThruster->IsDrawnAfterParent())
-            m_pULThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-    }
-/*
-    if (m_pCapsule)
-        m_pCapsule->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-*/
     if (mode == g_DrawColor) {
-#ifdef DEBUG_BUILD
         acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
-                              64);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
-                              64);
+        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
+        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
         release_bitmap(pTargetBitmap);
 
+        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
         m_pRFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pLFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
-//        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
 //        m_pDeepGroup->Draw(pTargetBitmap, targetPos, false, 13);
-#endif
-//        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false);
-//        m_pFGFootGroup->Draw(pTargetBitmap, targetPos, true);
-//        m_pBGFootGroup->Draw(pTargetBitmap, targetPos, true);
-//        m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true);
     }
 }
+#endif
 
 } // namespace RTE

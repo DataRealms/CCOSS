@@ -207,29 +207,6 @@ void ACDropShip::Destroy(bool notInherited)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACDropShip, including the mass of its
-//                  currently attached body parts and inventory.
-
-float ACDropShip::GetMass() const
-{
-    float totalMass = ACraft::GetMass();
-
-    if (m_pRThruster)
-        totalMass += m_pRThruster->GetMass();
-    if (m_pLThruster)
-        totalMass += m_pLThruster->GetMass();
-    if (m_pRHatch)
-        totalMass += m_pRHatch->GetMass();
-    if (m_pLHatch)
-        totalMass += m_pLHatch->GetMass();
-
-    return totalMass;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetAltitude
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the altitide of this' pos (or appropriate low point) over the
@@ -312,25 +289,6 @@ MOID ACDropShip::DetectObstacle(float distance)
         return detected;
 
     return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-
-void ACDropShip::SetID(const MOID newID)
-{
-    MovableObject::SetID(newID);
-    if (m_pRThruster)
-        m_pRThruster->SetID(newID);
-    if (m_pLThruster)
-        m_pLThruster->SetID(newID);
-    if (m_pRHatch)
-        m_pRHatch->SetID(newID);
-    if (m_pLHatch)
-        m_pLHatch->SetID(newID);
 }
 
 /*
@@ -420,22 +378,6 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
     }
 
     Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-
-bool ACDropShip::IsOnScenePoint(Vector &scenePoint) const
-{
-    return ((m_pLThruster && m_pLThruster->IsOnScenePoint(scenePoint)) ||
-            (m_pRThruster && m_pRThruster->IsOnScenePoint(scenePoint)) ||
-            MOSRotating::IsOnScenePoint(scenePoint) ||
-            (m_pLHatch && m_pLHatch->IsOnScenePoint(scenePoint)) ||
-            (m_pRHatch && m_pRHatch->IsOnScenePoint(scenePoint)));
 }
 
 
@@ -1029,103 +971,21 @@ void ACDropShip::ResetEmissionTimers()
         m_pULThruster->ResetEmissionTimers();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACDropShip::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID,
-                                 bool makeNewMOID)
-{
-    if (m_pRHatch)
-        m_pRHatch->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pLHatch)
-        m_pLHatch->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pRThruster)
-        m_pRThruster->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pLThruster)
-        m_pLThruster->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-
-    ACraft::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-void ACDropShip::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	if (m_pRHatch)
-		m_pRHatch->GetMOIDs(MOIDs);
-	if (m_pLHatch)
-		m_pLHatch->GetMOIDs(MOIDs);
-	if (m_pRThruster)
-		m_pRThruster->GetMOIDs(MOIDs);
-	if (m_pLThruster)
-		m_pLThruster->GetMOIDs(MOIDs);
-
-	ACraft::GetMOIDs(MOIDs);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ACDropShip's current graphical representation to a
-//                  BITMAP of choice.
-
-void ACDropShip::Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos,
-                      DrawMode mode,
-                      bool onlyPhysical) const
-{
-    if (m_pRHatch)
-        m_pRHatch->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-    if (m_pLHatch)
-        m_pLHatch->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (m_pRThruster && !m_pRThruster->IsDrawnAfterParent())
-        m_pRThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-    if (m_pLThruster && !m_pLThruster->IsDrawnAfterParent())
-        m_pLThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
+#ifdef DEBUG_BUILD
+void ACDropShip::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     ACraft::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (m_pRThruster && m_pRThruster->IsDrawnAfterParent())
-        m_pRThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-    if (m_pLThruster && m_pLThruster->IsDrawnAfterParent())
-        m_pLThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (mode == g_DrawColor || mode == g_DrawMaterial)
-    {
-        if (m_pURThruster)
-            m_pURThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pULThruster)
-            m_pULThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-    }
-
-    if (mode == g_DrawColor)
-    {
-#ifdef DEBUG_BUILD
+    if (mode == g_DrawColor) {
         acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
-                              64);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
-                              64);
+        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
+        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
         release_bitmap(pTargetBitmap);
 
         m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
 //        m_pDeepGroup->Draw(pTargetBitmap, targetPos, false, 13);
-#endif
     }
 }
-
+#endif
 } // namespace RTE

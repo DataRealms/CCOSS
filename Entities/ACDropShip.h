@@ -110,17 +110,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACDropShip, including the mass of its
-//                  currently attached body parts and inventory.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    float GetMass() const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetAltitude
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the altitide of this' pos (or appropriate low point) over the
@@ -141,17 +130,6 @@ ClassInfoGetters
 // Return value:    Which MOID was detected as obstacle. g_NoMOID means nothing was detected.
 
 	MOID DetectObstacle(float distance);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       A moid specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    void SetID(const MOID newID) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -179,17 +157,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-// Arguments:       The point in absolute scene coordinates.
-// Return value:    Whether this' graphical rep overlaps the scene point.
-
-    bool IsOnScenePoint(Vector &scenePoint) const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateAI
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this' AI state. Supposed to be done every frame that this has
@@ -210,6 +177,7 @@ ClassInfoGetters
 	void Update() override;
 
 
+#ifdef DEBUG_BUILD
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -223,6 +191,7 @@ ClassInfoGetters
 // Return value:    None.
 
     void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
+#endif
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -322,16 +291,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetMaxEngineAngle
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get max engine rotation angle in degrees.
@@ -385,20 +344,6 @@ ClassInfoGetters
 // Protected member variable and method declarations
 
 protected:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
     // Member variables

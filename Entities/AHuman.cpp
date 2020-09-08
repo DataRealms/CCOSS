@@ -219,11 +219,13 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         m_pFGArm = new Arm;
         reader >> m_pFGArm;
         m_pFGArm->SetTransfersDamageToParent(true);
+        m_pFGArm->SetDrawnAfterParent(true);
     } else if (propName == "BGArm") {
         delete m_pBGArm;
         m_pBGArm = new Arm;
         reader >> m_pBGArm;
         m_pBGArm->SetTransfersDamageToParent(true);
+        m_pBGArm->SetDrawnAfterParent(false);
     } else if (propName == "FGLeg") {
         delete m_pFGLeg;
         m_pFGLeg = new Leg;
@@ -357,29 +359,6 @@ void AHuman::Destroy(bool notInherited)
     if (!notInherited)
         Actor::Destroy();
     Clear();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this AHuman, including the mass of its
-//                  currently attached body parts and inventory.
-
-float AHuman::GetMass() const
-{
-    float totalMass = Actor::GetMass();
-    if (m_pHead)
-        totalMass += m_pHead->GetMass();
-    if (m_pFGArm)
-        totalMass += m_pFGArm->GetMass();
-    if (m_pBGArm)
-        totalMass += m_pBGArm->GetMass();
-    if (m_pFGLeg)
-        totalMass += m_pFGLeg->GetMass();
-    if (m_pBGLeg)
-        totalMass += m_pBGLeg->GetMass();
-    return totalMass;
 }
 
 
@@ -541,27 +520,6 @@ BITMAP *AHuman::GetHeadBitmap() const {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-
-void AHuman::SetID(const MOID newID)
-{
-    MovableObject::SetID(newID);
-    if (m_pHead)
-        m_pHead->SetID(newID);
-    if (m_pFGArm)
-        m_pFGArm->SetID(newID);
-    if (m_pBGArm)
-        m_pBGArm->SetID(newID);
-    if (m_pFGLeg)
-        m_pFGLeg->SetID(newID);
-    if (m_pBGLeg)
-        m_pBGLeg->SetID(newID);
-}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1715,24 +1673,6 @@ void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
     }
 
     Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-
-bool AHuman::IsOnScenePoint(Vector &scenePoint) const
-{
-    return ((m_pFGArm && m_pFGArm->IsOnScenePoint(scenePoint)) ||
-            (m_pFGLeg && m_pFGLeg->IsOnScenePoint(scenePoint)) ||
-            (m_pHead && m_pHead->IsOnScenePoint(scenePoint)) ||
-            Actor::IsOnScenePoint(scenePoint) ||
-            (m_pJetpack && m_pJetpack->IsOnScenePoint(scenePoint)) ||
-            (m_pBGArm && m_pBGArm->IsOnScenePoint(scenePoint)) ||
-            (m_pBGLeg && m_pBGLeg->IsOnScenePoint(scenePoint)));
 }
 
 
@@ -4486,99 +4426,23 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
     release_bitmap(pTargetBitmap);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame
-
-void AHuman::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                              MOID rootMOID,
-                              bool makeNewMOID)
-{
-    if (m_pBGLeg)
-        m_pBGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pBGArm)
-        m_pBGArm->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pJetpack)
-        m_pJetpack->UpdateMOID(MOIDIndex, m_RootMOID, false);
-    if (m_pHead)
-        m_pHead->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pFGLeg)
-        m_pFGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pFGArm)
-        m_pFGArm->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-
-    Actor::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-void AHuman::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	if (m_pBGLeg)
-		m_pBGLeg->GetMOIDs(MOIDs);
-	if (m_pBGArm)
-		m_pBGArm->GetMOIDs(MOIDs);
-	if (m_pJetpack)
-		m_pJetpack->GetMOIDs(MOIDs);
-	if (m_pHead)
-		m_pHead->GetMOIDs(MOIDs);
-	if (m_pFGLeg)
-		m_pFGLeg->GetMOIDs(MOIDs);
-	if (m_pFGArm)
-		m_pFGArm->GetMOIDs(MOIDs);
-
-	Actor::GetMOIDs(MOIDs);
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this AHuman's current graphical representation to a
 //                  BITMAP of choice.
 
-void AHuman::Draw(BITMAP *pTargetBitmap,
-                  const Vector &targetPos,
-                  DrawMode mode,
-                  bool onlyPhysical) const
-{
-    // Override color drawing with flash, if requested.
+void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
 
-    if (m_pBGLeg)
-        m_pBGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pBGArm)
-        m_pBGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pJetpack)
-        m_pJetpack->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pHead && !m_pHead->IsDrawnAfterParent())
-        m_pHead->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-
     Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (m_pHead && m_pHead->IsDrawnAfterParent())
-        m_pHead->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pFGLeg)
-        m_pFGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pFGArm)
-    {
-        m_pFGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-        // Draw background Arm's hand after the HeldDevice of FGArm is drawn.
-        if (!onlyPhysical && mode == g_DrawColor && (m_pBGArm && m_pBGArm->DidReach() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice() && !m_pFGArm->GetHeldDevice()->IsReloading() && !m_pFGArm->GetHeldDevice()->IsShield()))
-            m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
+    // Draw background Arm's hand after the HeldDevice of FGArm is drawn if the FGArm is holding a weapon.
+    if (m_pFGArm && m_pBGArm && !onlyPhysical && mode == g_DrawColor && m_pBGArm->DidReach() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice() && !m_pFGArm->GetHeldDevice()->IsReloading() && !m_pFGArm->GetHeldDevice()->IsShield()) {
+        m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
     }
     
 #ifdef DEBUG_BUILD
-    if (mode == g_DrawDebug)
-    {
+    if (mode == g_DrawDebug) {
         // Limbpath debug drawing
         m_Paths[m_HFlipped][WALK].Draw(pTargetBitmap, targetPos, 122);
         m_Paths[m_HFlipped][CRAWL].Draw(pTargetBitmap, targetPos, 122);
@@ -4586,15 +4450,10 @@ void AHuman::Draw(BITMAP *pTargetBitmap,
         m_Paths[m_HFlipped][CLIMB].Draw(pTargetBitmap, targetPos, 165);
     }
 
-    if (mode == g_DrawColor && !onlyPhysical)
-    {
+    if (mode == g_DrawColor && !onlyPhysical) {
         acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
-                              64);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
-                              64);
+        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
+        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
         release_bitmap(pTargetBitmap);
 
 //        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);

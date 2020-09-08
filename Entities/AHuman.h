@@ -158,17 +158,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this AHuman, including the mass of its
-//                  currently attached body parts and inventory.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    float GetMass() const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGoldCarried
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets how many ounces of gold this Actor is carrying.
@@ -377,17 +366,6 @@ ClassInfoGetters
 // Return value:    None.
 
 	void SetJetTimeLeft(float newValue) { m_JetTimeLeft = newValue < m_JetTimeTotal ? newValue : m_JetTimeTotal; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       A moid specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    void SetID(const MOID newID) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -747,17 +725,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-// Arguments:       The point in absolute scene coordinates.
-// Return value:    Whether this' graphical rep overlaps the scene point.
-
-	bool IsOnScenePoint(Vector &scenePoint) const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resest all the timers used by this. Can be emitters, etc. This is to
@@ -837,16 +804,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetLimbPathSpeed
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get walking limb path speed for the specified preset.
@@ -904,20 +861,6 @@ ClassInfoGetters
 // Protected member variable and method declarations
 
 protected:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

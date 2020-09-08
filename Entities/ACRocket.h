@@ -125,17 +125,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACRocket, including the mass of its
-//                  currently attached body parts and inventory.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    float GetMass() const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetAltitude
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the altitide of this' pos (or appropriate low point) over the
@@ -146,17 +135,6 @@ ClassInfoGetters
 // Return value:    The rough altitude over the terrain, in pixels.
 
 	float GetAltitude(int max = 0, int accuracy = 0) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       A MOID specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    void SetID(const MOID newID) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -204,6 +182,7 @@ ClassInfoGetters
 	void ResetEmissionTimers() override;
 
 
+#ifdef DEBUG_BUILD
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -217,6 +196,7 @@ ClassInfoGetters
 // Return value:    None.
 
     void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
+#endif
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -229,15 +209,6 @@ ClassInfoGetters
 //                  Default is two.
 
 	int GetMaxPassengers() const override { return m_MaxPassengers > -1 ? m_MaxPassengers : 2; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
     /// <summary>
     /// Gets the right leg of this ACRocket.
@@ -338,20 +309,6 @@ ClassInfoGetters
 // Protected member variable and method declarations
 
 protected:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
     // Member variables

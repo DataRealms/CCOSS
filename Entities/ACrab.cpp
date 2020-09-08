@@ -421,29 +421,6 @@ void ACrab::Destroy(bool notInherited)
     Clear();
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACrab, including the mass of its
-//                  currently attached body parts and inventory.
-
-float ACrab::GetMass() const
-{
-    float totalMass = Actor::GetMass();
-    if (m_pTurret)
-        totalMass += m_pTurret->GetMass();
-    if (m_pLFGLeg)
-        totalMass += m_pLFGLeg->GetMass();
-    if (m_pLBGLeg)
-        totalMass += m_pLBGLeg->GetMass();
-    if (m_pRFGLeg)
-        totalMass += m_pRFGLeg->GetMass();
-    if (m_pRBGLeg)
-        totalMass += m_pRBGLeg->GetMass();
-    return totalMass;
-}
-
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalValue
@@ -560,27 +537,6 @@ void ACrab::SetRightBGLeg(Attachable *newLeg) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-
-void ACrab::SetID(const MOID newID)
-{
-    MovableObject::SetID(newID);
-    if (m_pTurret)
-        m_pTurret->SetID(newID);
-    if (m_pLFGLeg)
-        m_pLFGLeg->SetID(newID);
-    if (m_pLBGLeg)
-        m_pLBGLeg->SetID(newID);
-    if (m_pRFGLeg)
-        m_pRFGLeg->SetID(newID);
-    if (m_pRBGLeg)
-        m_pRBGLeg->SetID(newID);
-}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1038,24 +994,6 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     }
 
     Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-
-bool ACrab::IsOnScenePoint(Vector &scenePoint) const
-{
-    return ((m_pTurret && m_pTurret->IsOnScenePoint(scenePoint)) ||
-            (m_pLFGLeg && m_pLFGLeg->IsOnScenePoint(scenePoint)) ||
-            (m_pRFGLeg && m_pRFGLeg->IsOnScenePoint(scenePoint)) ||
-            Actor::IsOnScenePoint(scenePoint) ||
-            (m_pJetpack && m_pJetpack->IsOnScenePoint(scenePoint)) ||
-            (m_pLBGLeg && m_pLBGLeg->IsOnScenePoint(scenePoint)) ||
-            (m_pRBGLeg && m_pRBGLeg->IsOnScenePoint(scenePoint)));
 }
 
 
@@ -2945,101 +2883,16 @@ void ACrab::Update()
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-
-void ACrab::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                         MOID rootMOID,
-                         bool makeNewMOID)
-{
-    if (m_pLBGLeg)
-        m_pLBGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pRBGLeg)
-        m_pRBGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pJetpack)
-        m_pJetpack->UpdateMOID(MOIDIndex, m_RootMOID, false);
-    if (m_pLFGLeg)
-        m_pLFGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pRFGLeg)
-        m_pRFGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pTurret)
-        m_pTurret->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-
-    Actor::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-void ACrab::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	if (m_pLBGLeg)
-		m_pLBGLeg->GetMOIDs(MOIDs);
-	if (m_pRBGLeg)
-		m_pRBGLeg->GetMOIDs(MOIDs);
-	if (m_pJetpack)
-		m_pJetpack->GetMOIDs(MOIDs);
-	if (m_pLFGLeg)
-		m_pLFGLeg->GetMOIDs(MOIDs);
-	if (m_pRFGLeg)
-		m_pRFGLeg->GetMOIDs(MOIDs);
-	if (m_pTurret)
-		m_pTurret->GetMOIDs(MOIDs);
-
-	Actor::GetMOIDs(MOIDs);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ACrab's current graphical representation to a
-//                  BITMAP of choice.
-
-void ACrab::Draw(BITMAP *pTargetBitmap,
-                  const Vector &targetPos,
-                  DrawMode mode,
-                  bool onlyPhysical) const
-{
-    // Override color drawing with flash, if requested.
-    DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
-
-    if (m_pLBGLeg)
-        m_pLBGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pRBGLeg)
-        m_pRBGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pJetpack)
-        m_pJetpack->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pTurret && !m_pTurret->IsDrawnAfterParent())
-        m_pTurret->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-
-    Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (m_pTurret && m_pTurret->IsDrawnAfterParent())
-        m_pTurret->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pRFGLeg)
-        m_pRFGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pLFGLeg)
-        m_pLFGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef DEBUG_BUILD
-//    if (mode == g_DrawDebug)
-    if (mode == g_DrawColor && !onlyPhysical)
-    {
+void ACrab::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
+    Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+
+    if (mode == g_DrawColor && !onlyPhysical) {
         acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
-                              64);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
-                              64);
+        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
+        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
         release_bitmap(pTargetBitmap);
 
         m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
@@ -3048,8 +2901,8 @@ void ACrab::Draw(BITMAP *pTargetBitmap,
         m_pRFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pRBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
-#endif
 }
+#endif
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

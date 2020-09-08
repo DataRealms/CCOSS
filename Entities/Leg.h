@@ -8,7 +8,7 @@ namespace RTE {
 	class HeldDevice;
 
 	/// <summary>
-	/// A detatchable leg that will be controlled by LimbPaths.
+	/// A detatchable Leg that will be controlled by LimbPaths.
 	/// </summary>
 	class Leg : public Attachable {
 
@@ -69,20 +69,25 @@ namespace RTE {
 		void SetFoot(Attachable *newFoot);
 
 		/// <summary>
-		/// Gets the max length this Leg can reach from its socket to the foot.
+		/// Gets the min length this of Leg, the minimum allowed length from its joint to its ankle's position.
 		/// </summary>
-		/// <returns>The max length of reach, in pixels, of this Leg.</returns>
+		/// <returns>The min length, in pixels, of this Leg.</returns>
+		float GetMinLength() const { return m_MinExtension; }
+
+		/// <summary>
+		/// Gets the max length this Leg, the maximum allowed length from its joint to its ankle's position.
+		/// </summary>
+		/// <returns>The max length, in pixels, of this Leg.</returns>
 		float GetMaxLength() const { return m_MaxExtension; }
 
-		//TODO I think this is in absolute scene coordinates actually, since it works based off of joint pos not joint offset. Look into this and update accordingly. Also look at the member variable, the (0, 0) thing seems wrong.
 		/// <summary>
-		/// Sets the point the Leg should move towards, in relative coordinates.
+		/// Sets the position this Leg should move towards, in absolute coordinates.
 		/// </summary>
-		/// <param name="targetOffset">The offset the Leg should move towards.</param>
-		void SetTargetOffset(const Vector &targetOffset) { m_TargetOffset = targetOffset; }
+		/// <param name="targetPosition">The position the Leg should move towards.</param>
+		void SetTargetPosition(const Vector &targetPosition) { m_TargetPosition = targetPosition; }
 
 		/// <summary>
-		/// Sets this to go into idle offset mode if the target appears to be above the joint of the Leg.
+		/// Sets whether this Leg will go into idle offset mode if the target appears to be above the joint of the Leg.
 		/// </summary>
 		/// <param name="idle">Whether to enable idling if the target offset is above the joint.</param>
 		void EnableIdle(bool idle = true) { m_WillIdle = idle; }
@@ -106,21 +111,21 @@ namespace RTE {
 		float m_MaxExtension; //!< Precalculated max extension of the Leg (from the joint) based on the extended offset.
 		float m_CurrentNormalizedExtension; //!< Normalized scalar of where the ankle offset's magnitude is between the min and max extensions
 		
-		Vector m_TargetOffset; //!< The target offset that this Leg's foot is moving towards. If (0, 0), the Leg will not try  towards anything.
-		Vector m_IdleOffset; //!< The target offset from m_Pos that this Leg's foot is reaching towards when not reaching for or anything else.
+		Vector m_TargetPosition; //!< The absolute position that this Leg's foot is moving towards.
+		Vector m_IdleOffset; //!< The target offset from m_Pos that this Leg's foot is moving towards when allowed to idle and the target position is not acceptable.
 
 		Vector m_CurrentAnkleOffset; //!< Current offset from the joint to the ankle where the foot should be.
 		
-		bool m_WillIdle; //!< Whether the Leg will go to idle position if the target is above the joint.
+		bool m_WillIdle; //!< Whether the Leg will go to idle position if the target position is above the Leg's joint position.
 		float m_MoveSpeed; //!< How fast the Leg moves to a reach target, 0 means it doesn't and 1 means it moves instantly.
 
 	private:
 
 		/// <summary>
-		/// Updates the current ankle offset for this Leg. Should only be called from Update.
+		/// Updates the current ankle offset for this Leg, and sets the foot's parent offset to match up with it. Should only be called from Update.
 		/// If the Leg is attached, the current ankle offset is based on the target offset and move speed, and whether the Leg should idle or not, otherwise it puts it in a reasonable position.
 		/// </summary>
-		void UpdateCurrentAnkleOffset();
+		void UpdateCurrentAnkleOffsetAndFootParentOffset();
 
 		/// <summary>
 		/// Updates the rotation of the Leg. Should only be called from Update.
@@ -132,14 +137,13 @@ namespace RTE {
 		/// Sets the Leg's frame to the appropriate one based on its current extension, and updates the normalized extension value. Should only be called from Update.
 		/// Works the same whether attached or not.
 		/// </summary>
-		void UpdateFrameAndNormalizedExtension();
+		void UpdateLegFrameAndNormalizedExtension();
 
 		/// <summary>
-		/// Updates the frame, joint position and rotation of the Leg's foot Attachable. Should only be called from Update.
-		/// If the Leg is attached, the rotation and frame depend on the target offset, otherwise the rotation is set to be perpendicular to the Leg.
-		/// The joint position is always updated to include the current ankle offset so the foot Attachable stays in the appropriate position.
+		/// Updates the frame and rotation of the Leg's foot Attachable. Should only be called from Update.
+		/// If the Leg is attached, the foot's rotation and frame depend on the ankle offset, otherwise the foot's rotation is set to be perpendicular to the Leg's rotation.
 		/// </summary>
-		void UpdateFootFrameJointPositionAndRotation();
+		void UpdateFootFrameAndRotation();
 
 		/// <summary>
 		/// Clears all the member variables of this Leg, effectively resetting the members of this abstraction level only.

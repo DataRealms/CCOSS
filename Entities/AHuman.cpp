@@ -4087,7 +4087,7 @@ void AHuman::Update()
         m_pFGLeg->SetJointPos(m_Pos + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
         m_pFGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
 //        if (!m_ArmClimbing[FGROUND])
-            m_pFGLeg->SetTargetOffset(m_pFGFootGroup->GetLimbPos(m_HFlipped));
+            m_pFGLeg->SetTargetPosition(m_pFGFootGroup->GetLimbPos(m_HFlipped));
         m_pFGLeg->Update();
         m_Health -= m_pFGLeg->CollectDamage();
     }
@@ -4099,7 +4099,7 @@ void AHuman::Update()
         // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
         m_pBGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
 //        if (!m_ArmClimbing[BGROUND])
-            m_pBGLeg->SetTargetOffset(m_pBGFootGroup->GetLimbPos(m_HFlipped));
+            m_pBGLeg->SetTargetPosition(m_pBGFootGroup->GetLimbPos(m_HFlipped));
         m_pBGLeg->Update();
         m_Health -= m_pBGLeg->CollectDamage();
     }

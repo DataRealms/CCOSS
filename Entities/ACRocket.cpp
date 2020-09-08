@@ -794,11 +794,11 @@ void ACRocket::Update()
         m_pRLeg->SetJointPos(m_Pos + m_pRLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
 /* Obsolete
         if (!m_pMThruster->IsEmitting())
-            m_pRLeg->SetTargetOffset(m_Pos + Vector(18, 40) * m_Rotation);
+            m_pRLeg->SetTargetPosition(m_Pos + Vector(18, 40) * m_Rotation);
         else
-            m_pRLeg->SetTargetOffset(m_Pos + Vector(13, 40) * m_Rotation);
+            m_pRLeg->SetTargetPosition(m_Pos + Vector(13, 40) * m_Rotation);
 */
-        m_pRLeg->SetTargetOffset(m_pRFootGroup->GetLimbPos(m_HFlipped));
+        m_pRLeg->SetTargetPosition(m_pRFootGroup->GetLimbPos(m_HFlipped));
         m_pRLeg->Update();
         m_Health -= m_pRLeg->CollectDamage();
     }
@@ -808,11 +808,11 @@ void ACRocket::Update()
         m_pLLeg->SetJointPos(m_Pos + m_pLLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
 /* Obsolete
         if (!m_pMThruster->IsEmitting())
-            m_pLLeg->SetTargetOffset(m_Pos + Vector(-18, 40) * m_Rotation);
+            m_pLLeg->SetTargetPosition(m_Pos + Vector(-18, 40) * m_Rotation);
         else
-            m_pLLeg->SetTargetOffset(m_Pos + Vector(-13, 40) * m_Rotation);
+            m_pLLeg->SetTargetPosition(m_Pos + Vector(-13, 40) * m_Rotation);
 */
-        m_pLLeg->SetTargetOffset(m_pLFootGroup->GetLimbPos(!m_HFlipped));
+        m_pLLeg->SetTargetPosition(m_pLFootGroup->GetLimbPos(!m_HFlipped));
         m_pLLeg->Update();
         m_Health -= m_pLLeg->CollectDamage();
     }

@@ -109,4 +109,5 @@ raknet_src = files('Base64Encoder.cpp',
 '_FindFirst.cpp',
 'gettimeofday.cpp')
 
-raknet = static_library('raknet', raknet_src, cpp_args:extra_args+release_args, dependencies: deps, include_directories:external_inc_dirs)
+raknet = static_library('raknet', raknet_src, cpp_args:extra_args, dependencies: deps, include_directories:external_inc_dirs, override_options:['debug=false', 'optimization=3'])
+raknet_debug = static_library('raknet_debug', raknet_src, cpp_args:extra_args, dependencies: deps, include_directories:external_inc_dirs, override_options:['debug=true', 'optimization=g'])

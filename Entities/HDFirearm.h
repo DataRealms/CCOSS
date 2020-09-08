@@ -110,17 +110,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this HDFirearm, including the mass of Magazine
-//                  may have inserted.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    float GetMass() const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetRateOfFire
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the rate of fire of this. This applies even if semi-auto. it
@@ -440,17 +429,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       An moid specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    void SetID(const MOID newID) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resest all the timers used by this. Can be emitters, etc. This is to
@@ -700,30 +678,6 @@ ClassInfoGetters
 // Protected member variable and method declarations
 
 protected:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
     /// <summary>
     /// Sets this HDFirearm's parent MOSRotating, and also sets its Team based on its parent and, if the Attachable is set to collide, adds/removes Atoms to its new/old parent.

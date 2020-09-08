@@ -15,6 +15,7 @@ namespace RTE {
 		m_Parent = 0;
 		m_ParentOffset.Reset();
 		m_DrawAfterParent = true;
+		m_DrawnNormallyByParent = true;
 		m_TransfersDamageToParent = false;
 		m_DeleteWithParent = false;
 
@@ -43,6 +44,7 @@ namespace RTE {
 		m_Parent = reference.m_Parent;
 		m_ParentOffset = reference.m_ParentOffset;
 		m_DrawAfterParent = reference.m_DrawAfterParent;
+		m_DrawnNormallyByParent = reference.m_DrawnNormallyByParent;
 		m_TransfersDamageToParent = reference.m_TransfersDamageToParent;
 		m_DeleteWithParent = reference.m_DeleteWithParent;
 

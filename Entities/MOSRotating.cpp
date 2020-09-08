@@ -1060,8 +1060,6 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
     for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ) //NOTE: No increment to handle RemoveAttachable removing the object
     {
         RTEAssert((*aItr), "Broken Attachable!");
-        if (!(*aItr))
-            continue;
 
         // Get handy handle to the object we're putting
         pAttachable = *aItr;
@@ -1526,30 +1524,17 @@ void MOSRotating::Update()
     }
 
     // Update all the attached wound emitters
-    for (list<AEmitter *>::iterator itr = m_Wounds.begin();
-        itr != m_Wounds.end(); ++itr)
-    {
-        if ((*itr))
-        {
-            (*itr)->SetJointPos(m_Pos + RotateOffset((*itr)->GetParentOffset()));
-			if ((*itr)->InheritsRotAngle())
-				(*itr)->SetRotAngle(m_Rotation.GetRadAngle());
-//            (*itr)->SetEmitAngle(m_Rotation);
-            (*itr)->Update();
-        }
-        else
-            RTEAbort("Broken emitter!!");
+    for (AEmitter *wound : m_Wounds) {
+        RTEAssert(wound, "Broken wound AEmitter");
+        wound->SetJointPos(m_Pos + RotateOffset(wound->GetParentOffset()));
+        wound->Update();
     }
 
     // Update all the attachables
     Attachable *pAttachable = 0;
-    for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ) // NOTE NO INCCREMENT!
-    {
-        RTEAssert((*aItr), "Broken Attachable!");
-        if (!(*aItr))
-            continue;
-
+    for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ) {
         pAttachable = *aItr;
+        RTEAssert(pAttachable, "Broken Attachable!");
         ++aItr;
 
         pAttachable->SetHFlipped(m_HFlipped);
@@ -1797,24 +1782,22 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
         }
     }
 
-
 	// Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
 	// Only draw attachables and emitters which are not drawn after parent, so we draw them before
-	if (mode == g_DrawColor || (!onlyPhysical && mode == g_DrawMaterial))
-	{
-		for (list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
-		{
-			if (!(*itr)->IsDrawnAfterParent())
-				(*itr)->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-		}
+	if (mode == g_DrawColor || (!onlyPhysical && mode == g_DrawMaterial)) {
+        for (const AEmitter *woundToDraw : m_Wounds) {
+            if (!woundToDraw->IsDrawnAfterParent()) {
+                woundToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+            }
+        }
 	}
 
 	// Draw all the attached attachables
-	for (list<Attachable *>::const_iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
-	{
-		if (!(*aItr)->IsDrawnAfterParent())
-			(*aItr)->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-	}
+    for (const Attachable *attachableToDraw : m_Attachables) {
+        if (!attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) {
+            attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+        }
+    }
 
 
     //////////////////
@@ -1923,21 +1906,21 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
     }
 
     // Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
-    if (mode == g_DrawColor || (!onlyPhysical && mode == g_DrawMaterial))
-    {
-		for (list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
-		{
-			if ((*itr)->IsDrawnAfterParent())
-				(*itr)->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-		}
+    // Only draw attachables and emitters which are not drawn after parent, so we draw them before
+    if (mode == g_DrawColor || (!onlyPhysical && mode == g_DrawMaterial)) {
+        for (const AEmitter *woundToDraw : m_Wounds) {
+            if (woundToDraw->IsDrawnAfterParent()) {
+                woundToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+            }
+        }
     }
 
     // Draw all the attached attachables
-	for (list<Attachable *>::const_iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
-	{
-		if ((*aItr)->IsDrawnAfterParent())
-			(*aItr)->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-	}
+    for (const Attachable *attachableToDraw : m_Attachables) {
+        if (attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) {
+            attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+        }
+    }
 }
 
 

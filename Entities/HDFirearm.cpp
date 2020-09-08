@@ -153,6 +153,7 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader) {
         if (pObj) {
             delete m_pFlash;
             m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
+            m_pFlash->SetDrawnNormallyByParent(false);
         }
     } else if (propName == "FireSound") {
         reader >> m_FireSound;
@@ -289,18 +290,6 @@ void HDFirearm::Destroy(bool notInherited)
     if (!notInherited)
         HeldDevice::Destroy();
     Clear();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this HDFirearm, including the mass of Magazine
-//                  may have inserted.
-
-float HDFirearm::GetMass() const
-{
-    return m_pMagazine ? m_Mass + m_pMagazine->GetMass() : m_Mass;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -519,19 +508,6 @@ void HDFirearm::RestDetection()
 
     if (m_FiredOnce)
         m_RestTimer.Reset();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-
-void HDFirearm::SetID(const MOID newID)
-{
-    MovableObject::SetID(newID);
-    if (m_pMagazine)
-        m_pMagazine->SetID(newID);
 }
 
 
@@ -1041,39 +1017,6 @@ void HDFirearm::Update()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-
-void HDFirearm::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID,
-                                 bool makeNewMOID)
-{
-    if (m_pMagazine && m_pMagazine->GetsHitByMOs())
-        m_pMagazine->UpdateMOID(MOIDIndex, m_RootMOID, false);
-
-    HeldDevice::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-void HDFirearm::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	if (m_pMagazine && m_pMagazine->GetsHitByMOs())
-		m_pMagazine->GetMOIDs(MOIDs);
-
-	HeldDevice::GetMOIDs(MOIDs);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:  EstimateDigStrenght
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Estimates what material strength the rounds in the magazine can destroy. 
@@ -1093,32 +1036,25 @@ float HDFirearm::EstimateDigStrenght()
 // Description:     Draws this HDFirearm's current graphical representation to a
 //                  BITMAP of choice.
 
-void HDFirearm::Draw(BITMAP *pTargetBitmap,
-                     const Vector &targetPos,
-                     DrawMode mode,
-                     bool onlyPhysical) const
-{
-    if (m_pMagazine && !m_pMagazine->IsDrawnAfterParent())
-        m_pMagazine->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (m_pFlash && m_FireFrame && !m_pFlash->IsDrawnAfterParent() && mode == g_DrawColor && !onlyPhysical)
+void HDFirearm::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
+    if (m_pFlash && m_FireFrame && !m_pFlash->IsDrawnAfterParent() && mode == g_DrawColor && !onlyPhysical) {
         m_pFlash->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+    }
 
     HeldDevice::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (m_pMagazine && m_pMagazine->IsDrawnAfterParent())
-        m_pMagazine->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (m_pFlash && m_FireFrame && m_pFlash->IsDrawnAfterParent() && mode == g_DrawColor && !onlyPhysical)
+    if (m_pFlash && m_FireFrame && m_pFlash->IsDrawnAfterParent() && mode == g_DrawColor && !onlyPhysical) {
         m_pFlash->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+    }
 
     // Fudge the muzzle pos forward a little bit so the glow aligns nicely
     Vector muzzlePos = m_MuzzleOff;
     muzzlePos.m_X += 4;
     muzzlePos = m_Pos + RotateOffset(muzzlePos);
     // Set the screen flash effect to draw at the final post processing stage
-    if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical && !g_SceneMan.ObscuredPoint(muzzlePos))
-		g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55 + 200 * PosRand(), m_pFlash->GetEffectRotAngle());
+    if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical && !g_SceneMan.ObscuredPoint(muzzlePos)) {
+        g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55 + 200 * PosRand(), m_pFlash->GetEffectRotAngle());
+    }
 }
 
 

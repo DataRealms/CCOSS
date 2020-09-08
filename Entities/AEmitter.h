@@ -450,19 +450,6 @@ ClassInfoGetters
 
     void ResetAllTimers() override { Attachable::ResetAllTimers(); m_BurstTimer.Reset(); m_LastEmitTmr.Reset(); }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//					The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update

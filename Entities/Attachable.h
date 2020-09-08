@@ -109,6 +109,20 @@ namespace RTE {
 		bool IsDrawnAfterParent() const override { return m_DrawAfterParent; }
 
 		/// <summary>
+		/// Gets whether this Attachable should be drawn normally by its parent.
+		/// Some attachables (e.g. AEmitter flashes) require custom handling for when they should or shouldn't draw, to be done by the specific parent class.
+		/// </summary>
+		/// <returns>Whether this Attachable should be drawn normally by its parent.</returns>
+		bool IsDrawnNormallyByParent() const { return m_DrawnNormallyByParent; }
+
+		/// <summary>
+		/// Sets whether this Attachable should be drawn normally by its parent.
+		/// Some attachables (e.g. AEmitter flashes) require custom handling for when they should or shouldn't draw, to be done by the specific parent class.
+		/// </summary>
+		/// <param name="drawnNormallyByParent">Whether this Attachable should be drawn normally by its parent.</param>
+		void SetDrawnNormallyByParent(bool drawnNormallyByParent) { m_DrawnNormallyByParent = drawnNormallyByParent; }
+
+		/// <summary>
 		/// Gets whether this Attachable will collect its damage and transfer it to its parent if attached. Transferred damage accounts for the Attachable's damage multiplier.
 		/// </summary>
 		/// <returns>Whether this Attachable will transfer damage to its parent or not.</returns>
@@ -121,9 +135,9 @@ namespace RTE {
 		void SetTransfersDamageToParent(bool transfersDamageToParent) { m_TransfersDamageToParent = transfersDamageToParent; }
 
 		/// <summary>
-		/// Gets whether this attachable will be deleted automatically when its parent is being deleted or not.
+		/// Gets whether this Attachable will be deleted automatically when its parent is being deleted or not.
 		/// </summary>
-		/// <returns>Whether this attachable is marked to be deleted along with it's parent or not.</returns>
+		/// <returns>Whether this Attachable is marked to be deleted along with it's parent or not.</returns>
 		bool ToDeleteWithParent() const { return m_DeleteWithParent; }
 #pragma endregion
 
@@ -326,8 +340,9 @@ namespace RTE {
 		MOSRotating *m_Parent; //!< Pointer to the MOSRotating this attachable is attached to.
 		Vector m_ParentOffset; //!< The offset from the parent's Pos to the joint point this Attachable is attached with.
 		bool m_DrawAfterParent; //!< Whether to draw this Attachable after (in front of) or before (behind) the parent.
+		bool m_DrawnNormallyByParent; //!< Whether this Attachable will be be drawn normally when attached, or will require special handling by some non-MOSR parent type.
 		bool m_TransfersDamageToParent; //<! Whether this Attachable will collect its damage and send it to its parent, accounting for its damage multiplier.
-		bool m_DeleteWithParent; //!< Whether this attachable should be deleted when its parent is set ToDelete.
+		bool m_DeleteWithParent; //!< Whether this Attachable should be deleted when its parent is set ToDelete.
 		
 		float m_JointStrength; //!< The amount of impulse force needed on this to deatch it from the host Actor, in kg * m/s.
 		float m_JointStiffness; //!< The normalized joint stiffness scalar. 1.0 means impulse forces on this attachable will be transferred to the parent with 100% strength, 0 means they will not transfer at all.

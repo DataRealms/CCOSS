@@ -169,6 +169,7 @@ int AEmitter::ReadProperty(std::string propName, Reader &reader) {
         const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
         if (pObj) {
             m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
+            m_pFlash->SetDrawnNormallyByParent(false);
         }
     } else if (propName == "FlashScale") {
         reader >> m_FlashScale;
@@ -360,22 +361,6 @@ float AEmitter::EstimateImpulse(bool burst)
     
     return m_AvgImpulse * throttleFactor;
 }
-
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-
-void AEmitter::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    
-
-    Attachable::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-}
-*/
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

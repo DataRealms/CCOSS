@@ -103,10 +103,16 @@ namespace RTE {
 		void SetParentOffset(const Vector &newParentOffset) { m_ParentOffset = newParentOffset; }
 
 		/// <summary>
-		/// Gets whether this Attachable is to be drawn after (in front of) or before (behind) the parent.
+		/// Gets whether this Attachable is to be drawn after (in front of) or before (behind) its parent.
 		/// </summary>
 		/// <returns>Whether this Attachable is to be drawn after its parent or not.</returns>
 		bool IsDrawnAfterParent() const override { return m_DrawAfterParent; }
+
+		/// <summary>
+		/// Sets whether this Attachabe is to be drawn after (in front of) or before (behind) its parent.
+		/// </summary>
+		/// <param name="drawAfterParent">Whether this Attachable is to be drawn after its parent.</param>
+		void SetDrawnAfterParent(bool drawAfterParent) { m_DrawAfterParent = drawAfterParent; }
 
 		/// <summary>
 		/// Gets whether this Attachable should be drawn normally by its parent.

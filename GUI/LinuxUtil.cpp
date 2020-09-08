@@ -4,7 +4,7 @@
 #include <X11/Xutil.h>
 
 namespace RTE {
-	bool GUIUtil::GetClipboardText(std::string *Text) { return false; }
+	bool LinuxUtil::GetClipboardText(std::string *Text) { return false; }
 
-	bool GUIUtil::SetClipboardText(std::string Text) { return false; }
+	bool LinuxUtil::SetClipboardText(std::string Text) { return false; }
 } // namespace RTE

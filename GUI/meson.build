@@ -35,3 +35,7 @@ sources += files('AllegroBitmap.cpp',
 if build_machine.system() == 'windows'
   sources+=files('WinUtil.cpp')
 endif
+
+if build_machine.system() == 'linux'
+  sources+=files('LinuxUtil.cpp')
+endif

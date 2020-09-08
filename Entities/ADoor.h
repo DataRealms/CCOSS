@@ -86,24 +86,6 @@ namespace RTE {
 		DoorState GetDoorState() const { return m_DoorState; }
 
 		/// <summary>
-		/// Gets the mass value of this ADoor, including the mass of its currently attached parts.
-		/// </summary>
-		/// <returns>A float describing the mass value in Kilograms (kg).</returns>
-		float GetMass() const override;
-
-		/// <summary>
-		/// Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector to store MOIDs.
-		/// </summary>
-		/// <param name="MOIDs"></param>
-		void GetMOIDs(std::vector<MOID> &MOIDs) const override;
-
-		/// <summary>
-		/// Sets the MOID of this ADoor for this frame.
-		/// </summary>
-		/// <param name="newID">A MOID specifying the MOID that this ADoor is assigned for this frame.</param>
-		void SetID(const MOID newID) override;
-
-		/// <summary>
 		/// Sets whether this ADoor closes (or opens) after a while by default.
 		/// </summary>
 		/// <param name="closedByDefault">Whether the door by default goes to a closed position. If not, then it will open after a while.</param>
@@ -114,13 +96,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether a player can control this at all.</returns>
 		bool IsControllable() const override { return false; }
-
-		/// <summary>
-		/// Indicates whether this' current graphical representation overlaps a point in absolute scene coordinates.
-		/// </summary>
-		/// <param name="scenePoint">The point in absolute scene coordinates.</param>
-		/// <returns>Whether this' graphical representation overlaps the scene point.</returns>
-		bool IsOnScenePoint(Vector &scenePoint) const override;
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -159,15 +134,6 @@ namespace RTE {
 		/// Updates this ADoor. Supposed to be done every frame.
 		/// </summary>
 		void Update() override;
-
-		/// <summary>
-		/// Draws this ADoor's current graphical representation to a BITMAP of choice.
-		/// </summary>
-		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
-		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
-		/// <param name="mode">Which mode to draw in. See the DrawMode enumeration for the modes.</param>
-		/// <param name="onlyPhysical">Whether to not draw any extra 'ghost' items of this ADoor, indicator arrows or hovering HUD text and so on.</param>
-		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 		/// <summary>
 		/// Draws this ADoor's current graphical HUD overlay representation to a BITMAP of choice.
@@ -243,14 +209,6 @@ namespace RTE {
 		/// Shared method for the door opening/closing sequence. This is called from OpenDoor() and CloseDoor().
 		/// </summary>
 		void SharedDoorControls();
-
-		/// <summary>
-		/// Makes this MO register itself and all its attached children in the MOID register and get IDs for itself and its children for this frame.
-		/// </summary>
-		/// <param name="MOIDIndex">The MOID index to register itself and its children in.</param>
-		/// <param name="rootMOID">The MOID of the root MO of this MO, ie the highest parent of this MO. 0 means that this MO is the root, ie it is owned by MovableMan.</param>
-		/// <param name="makeNewMOID">Whether this MO should make a new MOID to use for itself, or to use the same as the last one in the index (presumably its parent),</param>
-		void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 		/// <summary>
 		/// Draws the material under the position of the door attachable, to create terrain collision detection for the doors.

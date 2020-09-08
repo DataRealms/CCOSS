@@ -106,14 +106,10 @@ namespace RTE {
 
 	protected:
 
-		//This dies soon
-		void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
-
-
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		HeldDevice *m_MountedDevice; //<! Pointer to the mounted HeldDevice of this Turret, if any.
-		float m_MountedDeviceRotOffset; //<! The relative offset angle (in radians) of the mounted HeldDevice from this Turret's rotation.
+		HeldDevice *m_MountedDevice; //!< Pointer to the mounted HeldDevice of this Turret, if any.
+		float m_MountedDeviceRotOffset; //!< The relative offset angle (in radians) of the mounted HeldDevice from this Turret's rotation.
 
 	private:
 

@@ -209,34 +209,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float ADoor::GetMass() const {
-		float totalMass = Actor::GetMass();
-		if (m_Door) { totalMass += m_Door->GetMass(); }
-		return totalMass;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ADoor::GetMOIDs(std::vector<MOID> &MOIDs) const {
-		if (m_Door) { m_Door->GetMOIDs(MOIDs); }
-		Actor::GetMOIDs(MOIDs);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ADoor::SetID(const MOID newID) {
-		Actor::SetID(newID);
-		if (m_Door) { m_Door->SetID(newID); }
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool ADoor::IsOnScenePoint(Vector &scenePoint) const {
-		return ((m_Door && m_Door->IsOnScenePoint(scenePoint)) || Actor::IsOnScenePoint(scenePoint));
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void ADoor::DrawDoorMaterial() {
 		if (!m_Door || m_DoorMaterialTempErased || !g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
 			return;
@@ -304,13 +276,6 @@ namespace RTE {
 			m_Door = 0;
 		}
 		Actor::GibThis(impactImpulse, internalBlast, ignoreMO);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ADoor::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
-		if (m_Door) { m_Door->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID); }
-		Actor::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -502,25 +467,6 @@ namespace RTE {
 			}
 		}
 		m_Door->Update();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ADoor::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
-		// Override color drawing with flash, if requested.
-		DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
-
-		if (m_Door && m_Door->IsAttached()) {
-			if (!m_Door->IsDrawnAfterParent()) {
-				m_Door->Draw(targetBitmap, targetPos, realMode, onlyPhysical);
-				Actor::Draw(targetBitmap, targetPos, mode, onlyPhysical);
-			} else {
-				Actor::Draw(targetBitmap, targetPos, mode, onlyPhysical);
-				m_Door->Draw(targetBitmap, targetPos, realMode, onlyPhysical);
-			}
-		} else {
-			Actor::Draw(targetBitmap, targetPos, mode, onlyPhysical);
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

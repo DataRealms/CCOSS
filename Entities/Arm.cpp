@@ -161,18 +161,6 @@ void Arm::Destroy(bool notInherited)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this Arm, including the mass of any device it
-//                  may be holding.
-
-float Arm::GetMass() const
-{
-    return m_Mass + (m_pHeldMO ? m_pHeldMO->GetMass() : 0);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetHeldDevice
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the HeldDevice currently held by this Arm, IF the thing held is
@@ -187,19 +175,6 @@ HeldDevice * Arm::GetHeldDevice() const
     if (m_pHeldMO && m_pHeldMO->IsHeldDevice())
         pRetDev = dynamic_cast<HeldDevice *>(m_pHeldMO);
     return pRetDev;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-
-void Arm::SetID(const MOID newID)
-{
-    MovableObject::SetID(newID);
-    if (m_pHeldMO)
-        m_pHeldMO->SetID(newID);
 }
 
 
@@ -255,7 +230,7 @@ MovableObject * Arm::ReleaseHeldMO()
 		if (m_pHeldMO->IsDevice())
 		{
 			// Once detached may have incorrect ID value. Detach will take care m_RootID. New ID will be assigned on next frame.
-			m_pHeldMO->SetID(g_NoMOID);
+            m_pHeldMO->SetAsNoID();
             RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO));
 		}
     }
@@ -557,65 +532,21 @@ void Arm::Update()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-
-void Arm::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                           MOID rootMOID,
-                           bool makeNewMOID)
-{
-    if (m_pHeldMO && m_pHeldMO->GetsHitByMOs())
-        m_pHeldMO->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-
-    Attachable::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-void Arm::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	if (m_pHeldMO)
-		m_pHeldMO->GetMOIDs(MOIDs);
-
-	Attachable::GetMOIDs(MOIDs);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this Arm's current graphical representation to a
 //                  BITMAP of choice.
 
-void Arm::Draw(BITMAP *pTargetBitmap,
-               const Vector &targetPos,
-               DrawMode mode,
-               bool onlyPhysical) const
-{
-    if (m_pHeldMO && !m_pHeldMO->IsDrawnAfterParent())
-        m_pHeldMO->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
+void Arm::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     Attachable::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (!onlyPhysical && mode == g_DrawColor && (!m_DidReach && !m_pHeldMO))
-        DrawHand(pTargetBitmap, targetPos, mode);
-
-    if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && m_pHeldMO->IsDrawnAfterParent())
-        m_pHeldMO->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (!onlyPhysical && mode == g_DrawColor && (m_pHeldMO || !m_Parent))
-        DrawHand(pTargetBitmap, targetPos, mode);
-
-    if (m_pHeldMO && ((!m_pHeldMO->IsHeldDevice() && !m_pHeldMO->IsThrownDevice()) || m_pHeldMO->IsDrawnAfterParent()))
-        m_pHeldMO->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+    if (m_pHeldMO || (!m_pHeldMO && !m_DidReach) || !m_Parent) {
+        if (!onlyPhysical && (mode == g_DrawColor || mode == g_DrawWhite)) {
+            DrawHand(pTargetBitmap, targetPos, mode);
+        }
+        if (m_pHeldMO && m_pHeldMO->IsDrawnAfterParent()) {
+            m_pHeldMO->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+        }
+    }
 }
 
 
@@ -625,22 +556,25 @@ void Arm::Draw(BITMAP *pTargetBitmap,
 // Description:     Draws this Arm's hand's graphical representation to a BITMAP of
 //                  choice.
 
-void Arm::DrawHand(BITMAP *pTargetBitmap,
-                   const Vector &targetPos,
-                   DrawMode mode) const
-{
-
-    Vector handPos(m_JointPos +
-                   m_HandOffset +
-                   (m_Recoiled ? m_RecoilOffset : Vector()) -
-                   targetPos);
+void Arm::DrawHand(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode) const {
+    Vector handPos(m_JointPos + m_HandOffset + (m_Recoiled ? m_RecoilOffset : Vector()) - targetPos);
     handPos.m_X -= (m_pHand->w / 2) + 1;
     handPos.m_Y -= (m_pHand->h / 2) + 1;
 
-    if (!m_HFlipped)
-        draw_sprite(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY());
-    else
-        draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY());
+    if (!m_HFlipped) {
+        if (mode == g_DrawWhite) {
+            draw_character_ex(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY(), g_WhiteColor, -1);
+        } else {
+            draw_sprite(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY());
+        }
+    } else {
+        //TODO this won't draw flipped. It should draw onto a temp bitmap and then draw that flipped. Maybe it can reuse a temp bitmap from MOSR, maybe not?
+        if (mode == g_DrawWhite) {
+            draw_character_ex(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY(), g_WhiteColor, -1);
+        } else {
+            draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY());
+        }
+    }
 }
 
 } // namespace RTE

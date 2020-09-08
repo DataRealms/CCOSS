@@ -17,7 +17,7 @@
 #ifdef _WIN32
 #include "WinUtil.h"
 #elif defined(__unix__)
-// #include "LinuxUtil.h" //not yet implemented
+#include "LinuxUtil.h"
 #endif
 
 using namespace RTE;
@@ -293,6 +293,8 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 		if (m_GotSelection) {
 #ifdef _WIN32
 			WinUtil::SetClipboardText(GetSelectionText());
+#elif defined(__unix__)
+			LinuxUtil::SetClipboardText(GetSelectionText());
 #endif
 			RemoveSelectionText();
 			SendSignal(Changed, 0);
@@ -304,9 +306,11 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 	if (asciiChar == 'c' && ModKey) {
 		if (m_GotSelection) {
 #ifdef _WIN32
-      WinUtil::SetClipboardText(GetSelectionText()); 
+			WinUtil::SetClipboardText(GetSelectionText());
+#elif defined(__unix__)
+			LinuxUtil::SetClipboardText(GetSelectionText());
 #endif
-    }
+		}
 		return;
 	}
 
@@ -316,6 +320,8 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 		string Text = "";
 #ifdef _WIN32
 		WinUtil::GetClipboardText(&Text);
+#elif defined(__unix__)
+		LinuxUtil::GetClipboardText(&Text);
 #endif
 		m_Text.insert(m_CursorIndex, Text);
 		m_CursorIndex += Text.size();

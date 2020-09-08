@@ -9,12 +9,11 @@ namespace RTE {
 	///</summary>
 	class LinuxUtil {
 
-//////////////////////////////////////////////////////////////////////////////////////////
 	public:
 		///<summary>
 		///Constructor method used to instantiate a LinuxUtil object in system memory
 		///</summary>
-		LinuxUtil(){};
+		LinuxUtil() {};
 
 		///<summary>
 		/// Gets the text from the Atom CLIPBOARD

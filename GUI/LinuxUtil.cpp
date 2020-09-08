@@ -3,8 +3,8 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-using namespace RTE;
+namespace RTE {
+	bool GUIUtil::GetClipboardText(std::string *Text) { return false; }
 
-bool GUIUtil::GetClipboardText(std::string *Text) { return false; }
-
-bool GUIUtil::SetClipboardText(std::string Text) { return false; }
+	bool GUIUtil::SetClipboardText(std::string Text) { return false; }
+} // namespace RTE

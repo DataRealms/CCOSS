@@ -340,7 +340,7 @@ ClassInfoGetters
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+    virtual void GibThis(const Vector &impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -381,14 +381,14 @@ ClassInfoGetters
 	void ApplyImpulses() override;
 
     /// <summary>
-    /// Adds the passed in Attachable the list of attachables and sets its parent to this MOSRotating.
+    /// Adds the passed in Attachable the list of Attachables and sets its parent to this MOSRotating.
     /// </summary>
     /// <param name="attachable">The Attachable to add.</param>
 	void AddAttachable(Attachable *attachable);
 
     /// <summary>
-    /// Attaches the passed in Attachable and adds it to the list of attachables, changing its parent offset to the passed in Vector but not treating it as hardcoded.
-    /// Adds the passed in Attachable the list of attachables, changes its parent offset to the passed in Vector, and sets its parent to this MOSRotating.
+    /// Attaches the passed in Attachable and adds it to the list of Attachables, changing its parent offset to the passed in Vector but not treating it as hardcoded.
+    /// Adds the passed in Attachable the list of Attachables, changes its parent offset to the passed in Vector, and sets its parent to this MOSRotating.
     /// </summary>
     /// <param name="attachable">The Attachable to add.</param>
     /// <param name="parentOffsetToSet">The Vector to set as the Attachable's parent offset.</param>
@@ -409,9 +409,9 @@ ClassInfoGetters
 	bool RemoveAttachable(Attachable *attachable);
 
     /// <summary>
-    /// Either detaches or deletes all of this MOSRotating's attachables.
+    /// Either detaches or deletes all of this MOSRotating's Attachables.
     /// </summary>
-    /// <param name="destroy">Whether to detach or delete the attachables. Setting this to true deletes them, setting it to false detaches them.</param>
+    /// <param name="destroy">Whether to detach or delete the Attachables. Setting this to true deletes them, setting it to false detaches them.</param>
 	void DetachOrDestroyAll(bool destroy);
 
 
@@ -539,64 +539,52 @@ ClassInfoGetters
     void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetGibWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return wound limit for this object.
-// Arguments:       None.
-// Return value:    Wound limit of the object.
-
-	int GetGibWoundLimit() const { return m_GibWoundLimit; } 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  SetGibImpulseLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Set new impulse limit.
-// Arguments:       New impulse limit.
-// Return value:    None.
-
-	void SetGibImpulseLimit(int newLimit) { m_GibImpulseLimit = newLimit; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetGibImpulseLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return impulse limit for this object.
-// Arguments:       None.
-// Return value:    Impulse limit of the object.
-
-	int GetGibImpulseLimit() const { return m_GibImpulseLimit; } 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  SetGibWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Set new wound limit, current wounds are not affected.
-// Arguments:       New wound limit.
-// Return value:    None.
-
-	void SetGibWoundLimit(int newLimit) { m_GibWoundLimit = newLimit; }
+    /// <summary>
+    /// Gets the gib impulse limit for this MOSRotating, i.e. the amount of impulse force required in a frame to gib this MOSRotating.
+    /// </summary>
+    /// <returns>The gib impulse limit of this MOSRotating.</returns>
+	int GetGibImpulseLimit() const { return m_GibImpulseLimit; }
 
     /// <summary>
-    /// Gets the gib wound limit for this MOSRotating, optionally recursively adding the gib wound limit of damaging and/or non-damaging attachables and any of their such attachables, and so on.
+    /// Sets the gib impulse limit for this MOSRotating, i.e. the amount of impulse force required in a frame to gib this MOSRotating.
     /// </summary>
-    /// <param name="includeDamageTransferringAttachables">Whether to add wound limits of attachables that transfer damage to their parent (this MOSRotating).</param>
-    /// <param name="includeNonDamageTransferringAttachables">Whether to add wound limits of attachables that do not transfer damage to their parent (this MOSRotating).</param>
-    /// <returns>The wound limit of this MOSRotating and, optionally, its attachables.</returns>
+    /// <param name="newGibImpulseLimit">The new gib impulse limit to use.</param>
+    void SetGibImpulseLimit(int newGibImpulseLimit) { m_GibImpulseLimit = newGibImpulseLimit; }
+
+    /// <summary>
+    /// Gets the gib wound limit for this MOSRotating, i.e. the total number of wounds required to gib this MOSRotating.
+    /// Includes Attachables that transfer damage to this MOSRotating.
+    /// </summary>
+    /// <returns></returns>
+    int GetGibWoundLimit() const { return GetGibWoundLimit(true, false); }
+
+    /// <summary>
+    /// Gets the gib wound limit for this MOSRotating, i.e. the total number of wounds required to gib this MOSRotating.
+    /// Optionally recursively adds the gib wound limits of damaging and/or non-damaging Attachables and any of their such Attachables.
+    /// </summary>
+    /// <param name="includeDamageTransferringAttachables">Whether to add wound limits of Attachables that transfer damage to their parent (this MOSRotating).</param>
+    /// <param name="includeNonDamageTransferringAttachables">Whether to add wound limits of Attachables that do not transfer damage to their parent (this MOSRotating).</param>
+    /// <returns>The wound limit of this MOSRotating and, optionally, its Attachables.</returns>
     int GetGibWoundLimit(bool includeDamageTransferringAttachables, bool includeNonDamageTransferringAttachables) const;
+
+    /// <summary>
+    /// Sets the gib wound limit for this MOSRotating, i.e. the total number of wounds required to gib this MOSRotating.
+    /// This will not directly trigger gibbing, even if the limit is lower than the current number of wounds.
+    /// </summary>
+    /// <param name="newLimit">The new gib wound limit to use.</param>
+    void SetGibWoundLimit(int newGibWoundLimit) { m_GibWoundLimit = newGibWoundLimit; }
 
     /// <summary>
     /// Gets the number of wounds directly attached to this MOSRotating.
     /// <returns>The number of wounds on this MOSRotating.</returns>
     /// </summary>
-    int GetWoundCount() const { return GetWoundCount(false, false); }
+    int GetWoundCount() const { return GetWoundCount(true, false); }
 
     /// <summary>
-    /// Gets the number of wounds attached to this MOSRotating, optionally recursively including wounds on damaging and/or non-damaging attachables and any of their such attachables, and so on.
-    /// <param name="includeDamageTransferringAttachables">Whether to count wounds from attachables that transfer damage to their parent (this MOSRotating).</param>
-    /// <param name="includeNonDamageTransferringAttachables">Whether to count wounds from attachables that do not transfer damage to their parent (this MOSRotating).</param>
-    /// <returns>The number of wounds on this MOSRotating and, optionally, its attachables.</returns>
+    /// Gets the number of wounds attached to this MOSRotating, optionally recursively including wounds on damaging and/or non-damaging Attachables and any of their such Attachables, and so on.
+    /// <param name="includeDamageTransferringAttachables">Whether to count wounds from Attachables that transfer damage to their parent (this MOSRotating).</param>
+    /// <param name="includeNonDamageTransferringAttachables">Whether to count wounds from Attachables that do not transfer damage to their parent (this MOSRotating).</param>
+    /// <returns>The number of wounds on this MOSRotating and, optionally, its Attachables.</returns>
     /// </summary>
     int GetWoundCount(bool includeDamageTransferringAttachables, bool includeNonDamageTransferringAttachables) const;
 
@@ -619,8 +607,8 @@ ClassInfoGetters
     /// Optionally only removes wounds that affect health directly.
     /// </summary>
     /// <param name="numberOfWoundsToRemove">The number of wounds that should be removed.</param>
-    /// <param name="includeDamageTransferringAttachables">Whether to remove wounds from attachables that transfer damage to their parent (this MOSRotating).</param>
-    /// <param name="includeNonDamageTransferringAttachables">Whether to remove wounds from attachables that do not transfer damage to their parent (this MOSRotating).</param>
+    /// <param name="includeDamageTransferringAttachables">Whether to remove wounds from Attachables that transfer damage to their parent (this MOSRotating).</param>
+    /// <param name="includeNonDamageTransferringAttachables">Whether to remove wounds from Attachables that do not transfer damage to their parent (this MOSRotating).</param>
     /// <returns>The amount of damage caused by the removed wounds.</returns>
     float RemoveWounds(int numberOfWoundsToRemove, bool includeDamageTransferringAttachables, bool includeNonDamageTransferringAttachables);
 
@@ -851,7 +839,7 @@ protected:
     std::list<AEmitter *> m_Wounds;
     // The list of Attachables currently attached and Owned by this.
     std::list<Attachable *> m_Attachables;
-    std::unordered_set<unsigned long> m_AlreadyCopiedAttachableUniqueIDs; //<! An unordered set of Unique IDs, used to avoid duplicating hardcoded attachables (i.e. head, legs, etc.) when cloning.
+    std::unordered_set<unsigned long> m_AlreadyCopiedAttachableUniqueIDs; //<! An unordered set of Unique IDs, used to avoid duplicating hardcoded Attachables (i.e. head, legs, etc.) when cloning.
     // The list of Gib:s this will create when gibbed
     std::list<Gib> m_Gibs;
     // The amount of impulse force required to gib this, in kg * (m/s). 0 means no limit

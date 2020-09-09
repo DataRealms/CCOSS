@@ -966,7 +966,7 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
 // Description:     Gibs this, effectively destroying it and creating multiple gibs or
 //                  pieces in its place.
 
-void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
+void MOSRotating::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
     // Can't, or is already gibbed, so don't do anything
     if (m_MissionCritical || m_ToDelete)
@@ -1494,66 +1494,46 @@ void MOSRotating::PostTravel()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this MOSRotating. Supposed to be done every frame.
 
-void MOSRotating::Update()
-{
-
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+void MOSRotating::Update() {
 	RTEAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
-#endif
 
     MOSprite::Update();
 
-	if (m_InheritEffectRotAngle)
-		m_EffectRotAngle = m_Rotation.GetRadAngle();
+    if (m_InheritEffectRotAngle) {
+        m_EffectRotAngle = m_Rotation.GetRadAngle();
+    }
 
-    // Align the orienatation with the velocity vector, if any
-    if (m_OrientToVel > 0 && m_Vel.GetLargest() > 5.0)
-    {
-        // Clamp
-        if (m_OrientToVel > 1.0)
-            m_OrientToVel = 1.0;
+    if (m_OrientToVel > 0 && m_Vel.GetLargest() > 5.0) {
+        Clamp(m_OrientToVel, 1.0F, 0.0F);
 
-        // Velocity influence
-        float velInfluence = m_OrientToVel < 1.0 ? m_Vel.GetMagnitude() / 100 : 1.0f;
-        if (velInfluence > 1.0)
-            velInfluence = 1.0;
-
-        // Figure the difference in current velocity vector and 
+        float velInfluence = Limit(m_OrientToVel < 1.0 ? m_Vel.GetMagnitude() / 100 : 1.0F, 1.0F, 0.0F);
         float radsToGo = m_Rotation.GetRadAngleTo(m_Vel.GetAbsRadAngle());
         m_Rotation += (radsToGo * m_OrientToVel * velInfluence);
     }
 
-    // Update all the attached wound emitters
     for (AEmitter *wound : m_Wounds) {
         RTEAssert(wound, "Broken wound AEmitter");
-        wound->SetJointPos(m_Pos + RotateOffset(wound->GetParentOffset()));
         wound->Update();
     }
 
-    // Update all the attachables
     Attachable *pAttachable = 0;
     for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ) {
         pAttachable = *aItr;
         RTEAssert(pAttachable, "Broken Attachable!");
         ++aItr;
 
-        pAttachable->SetHFlipped(m_HFlipped);
-        pAttachable->SetJointPos(m_Pos + RotateOffset((pAttachable)->GetParentOffset()));
-        if (pAttachable->InheritsRotAngle())
-        {
-            pAttachable->SetRotAngle(m_Rotation.GetRadAngle());
-        }
         pAttachable->Update();
 
         ApplyAttachableForces(pAttachable);
     }
 
-    // Create intermediate flipping bitmap if there isn't one yet
-    if (m_HFlipped && !m_pFlipBitmap && m_aSprite[0])
+    // Create intermediate flipping bitmaps if they don't exist
+    if (m_HFlipped && !m_pFlipBitmap && m_aSprite[0]) {
         m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
-
-	if (m_HFlipped && !m_pFlipBitmapS && m_aSprite[0])
+    }
+    if (m_HFlipped && !m_pFlipBitmapS && m_aSprite[0]) {
         m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h);
+    }
 }
 
 

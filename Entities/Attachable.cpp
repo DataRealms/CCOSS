@@ -245,8 +245,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//TODO change impactImpulse to a const reference Vector
-	void Attachable::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO) {
+	void Attachable::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO) {
 		if (m_Parent) {
 			m_Parent->RemoveAttachable(this);
 		} else {
@@ -259,21 +258,17 @@ namespace RTE {
 
 	void Attachable::Update() {
 		if (!m_Parent) {
-			//TODO right now parents are responsible for setting JointPos. The only one that seems to do much with this is Leg, everything else looks much the same. I'd rather attachables do this internally cause that makes way more sense. Will take some cleanup though.
 			m_JointPos = m_Pos + RotateOffset(m_JointOffset);
 		} else {
 			m_PrevPos = m_Pos;
 			m_PrevVel = m_Vel;
 
-			if (!m_JointPos.IsZero()) {
-				m_Pos = m_JointPos - RotateOffset(m_JointOffset);
-			} else {
-				m_Pos = m_Parent->GetPos() - RotateOffset(m_JointOffset);
-			}
+			m_JointPos = m_Parent->GetPos() + m_Parent->RotateOffset(GetParentOffset());
+			m_Pos = m_JointPos - RotateOffset(m_JointOffset);
 			m_Vel = m_Parent->GetVel();
 			m_Team = m_Parent->GetTeam();
-
-			//TODO RotAngle should be set here based on whether or not this InheritsRotAngle. It's currently done by MOSR which is dumdum. Alternatively, see below.
+			m_HFlipped = m_Parent->IsHFlipped();
+			if (InheritsRotAngle()) { SetRotAngle(m_Parent->GetRotAngle()); }
 
 			m_DeepCheck = false;
 		}

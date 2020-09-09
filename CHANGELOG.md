@@ -137,6 +137,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Codebase now uses the C++17 standard.
+
 - Updated game framework from Allegro 4.2.3.1 to Allegro 4.4.3.1.
 
 - Major cleanup and reformatting in the `Managers` folder.

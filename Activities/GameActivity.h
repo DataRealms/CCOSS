@@ -951,9 +951,7 @@ protected:
 
 
     // Comparison functor for sorting objective points by their y pos using STL's sort
-    struct ObjPointYPosComparison:
-        public std::binary_function<ObjectivePoint &, ObjectivePoint &, bool>
-    {
+    struct ObjPointYPosComparison {
         bool operator()(ObjectivePoint &rhs, ObjectivePoint &lhs) { return rhs.m_ScenePos.m_Y < lhs.m_ScenePos.m_Y; }
     };
 

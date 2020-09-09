@@ -1876,7 +1876,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
                     pItemBitmap = pModule->GetIcon() ? new AllegroBitmap(pModule->GetIcon()) : 0;
                     // Passing in ownership of the bitmap, making uppercase the name
                     string name = pModule->GetFriendlyName();
-                    transform(name.begin(), name.end(), name.begin(), std::pointer_to_unary_function<int, int>(toupper));
+                    transform(name.begin(), name.end(), name.begin(), ::toupper);
                     m_pShopList->AddItem(name, m_aExpandedModules[moduleID] ? "-" : "+", pItemBitmap, 0, moduleID);
                 }
 

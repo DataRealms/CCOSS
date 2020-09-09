@@ -31,9 +31,7 @@ const string MovableMan::m_ClassName = "MovableMan";
 
 
 // Comparison functor for sorting movable objects by their X position using STL's sort
-// TODO: Test to see if not having the binary_function part affects anything. Nothing immediately obvious is wrong without it.
-struct MOXPosComparison //: public std::binary_function<MovableObject *, MovableObject *, bool>
-{
+struct MOXPosComparison {
     bool operator()(MovableObject *pRhs, MovableObject *pLhs) { return pRhs->GetPos().m_X < pLhs->GetPos().m_X; }
 };
 

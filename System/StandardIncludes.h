@@ -35,8 +35,7 @@
 #include <limits>
 #include <random>
 #include <array>
-// TODO: don't forget to replace with <filesystem> when eventually enable ++17 standard.
-#include <experimental/filesystem>
+#include <filesystem>
 
 // TODO: Get rid of these once alias qualifiers are added.
 using std::string;

@@ -973,7 +973,7 @@ void Actor::DropAllInventory()
 // Description:     Gibs this, effectively destroying it and creating multiple gibs or
 //                  pieces in its place.
 
-void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
+void Actor::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
     // Play death sound
 // TODO: Don't attenuate since death is pretty important.. maybe only make this happen for teh brains

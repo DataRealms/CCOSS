@@ -128,7 +128,7 @@ namespace RTE {
 		/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
 		/// <param name="internalBlast">The internal blast impulse which will push the gibs away from the center.</param>
 		/// <param name="pIgnoreMO">A pointer to an MO which the gibs should not be colliding with!</param>
-		void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *ignoreMO = 0) override;
+		void GibThis(const Vector &impactImpulse = Vector(), float internalBlast = 10, MovableObject *ignoreMO = 0) override;
 
 		/// <summary>
 		/// Updates this ADoor. Supposed to be done every frame.

@@ -264,7 +264,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ADoor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *ignoreMO) {
+	void ADoor::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *ignoreMO) {
 		if (m_Door && m_Door->IsAttached()) {
 			EraseDoorMaterial();
 			m_Door->DeepCheck(true);

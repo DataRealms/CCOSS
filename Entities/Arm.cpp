@@ -365,8 +365,7 @@ bool Arm::ConstrainHand()
 // Description:     Gibs this, effectively destroying it and creating multiple gibs or
 //                  pieces in its place.
 
-void Arm::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
+void Arm::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO) {
     DropEverything();
     Attachable::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }
@@ -540,7 +539,7 @@ void Arm::Update()
 void Arm::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     Attachable::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
     if (m_pHeldMO || (!m_pHeldMO && !m_DidReach) || !m_Parent) {
-        if (!onlyPhysical && (mode == g_DrawColor || mode == g_DrawWhite)) {
+        if (!onlyPhysical && (mode == g_DrawColor || mode == g_DrawWhite || mode == g_DrawTrans)) {
             DrawHand(pTargetBitmap, targetPos, mode);
         }
         if (m_pHeldMO && m_pHeldMO->IsDrawnAfterParent()) {

@@ -413,7 +413,7 @@ int FirearmActivationDelay() const;
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-	void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
+	void GibThis(const Vector &impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

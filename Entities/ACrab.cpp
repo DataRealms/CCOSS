@@ -941,7 +941,7 @@ MovableObject * ACrab::LookForMOs(float FOVSpread, unsigned char ignoreMaterial,
 // Description:     Gibs this, effectively destroying it and creating multiple gibs or
 //                  pieces in its place.
 
-void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
+void ACrab::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
     // Detach all limbs and let loose
     if (m_pTurret && m_pTurret->IsAttached())

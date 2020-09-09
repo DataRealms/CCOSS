@@ -324,7 +324,7 @@ bool ACDropShip::OnSink(const Vector &pos)
 // Description:     Gibs this, effectively destroying it and creating multiple gibs or
 //                  pieces in its place.
 
-void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
+void ACDropShip::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
     // TODO: maybe make hardcoded attachables gib if their gib list isn't empty
     // Detach all limbs and let loose

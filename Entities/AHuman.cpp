@@ -1620,7 +1620,7 @@ MovableObject * AHuman::LookForMOs(float FOVSpread, unsigned char ignoreMaterial
 // Description:     Gibs this, effectively destroying it and creating multiple gibs or
 //                  pieces in its place.
 
-void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
+void AHuman::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
 {
     // Detach all limbs and let loose
     if (m_pHead && m_pHead->IsAttached())

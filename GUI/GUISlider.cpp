@@ -123,7 +123,7 @@ void GUISlider::Create(GUIProperties *Props)
     m_Value = MAX(m_Value, m_Minimum);
     m_Value = MIN(m_Value, m_Maximum);
 
-	m_DeltaValue = std::max((m_Maximum - m_Minimum) / 20, 1);
+	m_DeltaValue = std::max((m_Maximum - m_Minimum) / 100, 1);
 
     // Re-Calculate the knob info
     CalculateKnob();
@@ -463,23 +463,27 @@ void GUISlider::OnMouseMove(int X, int Y, int Buttons, int Modifier)
 
 void GUISlider::OnMouseWheelChange(int x, int y, int modifier, int mouseWheelChange) {
 	m_OldValue = m_Value;
+	int MousePos = X;
+	int KnobTop = 0;
 	int Size = 1;
 
 	if (m_Orientation == Horizontal) {
+		KnobTop = m_X + m_KnobPosition;
 		Size = m_Width;
 	}
 
 	if (m_Orientation == Vertical) {
+		KnobTop = m_Y + m_KnobPosition;
 		Size = m_Height;
 	}
 	
-	//const float ratio = static_cast<float>(m_DeltaValue) / static_cast<float>(m_Maximum - m_Minimum);
+	const float ratio = static_cast<float>(m_DeltaValue) / static_cast<float>(m_Maximum - m_Minimum);
 	if (mouseWheelChange < 0) {
 		m_Value = std::max(m_Value - m_DeltaValue, m_Minimum);
-		//m_KnobPosition = std::max(m_KnobPosition - std::max(static_cast<int>(ratio * static_cast<float>(Size - m_KnobSize)),1), 0);
+		m_KnobPosition = std::max(m_KnobPosition - std::max(static_cast<int>(ratio * static_cast<float>(Size - m_KnobSize)),1), 0);
 	} else {
 		m_Value = std::min(m_Value + m_DeltaValue, m_Maximum);
-		//m_KnobPosition = std::min(m_KnobPosition + std::max(static_cast<int>(ratio * static_cast<float>(Size - m_KnobSize)),1), Size - m_KnobSize);
+		m_KnobPosition = std::min(m_KnobPosition + std::max(static_cast<int>(ratio * static_cast<float>(Size - m_KnobSize)),1), Size - m_KnobSize);
 	}
 
 	if (m_Value != m_OldValue)

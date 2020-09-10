@@ -2177,12 +2177,10 @@ void MainMenuGUI::UpdateVolumeSliders()
     int volume = (int)(g_AudioMan.GetSoundsVolume() * 100);
     sprintf_s(labelText, sizeof(labelText), "Sound Volume: %i", volume);
     m_pSoundLabel->SetText(labelText);
-    m_pSoundSlider->SetValue(volume);
 
     volume = (int)(g_AudioMan.GetMusicVolume() * 100);
     sprintf_s(labelText, sizeof(labelText), "Music Volume: %i", volume);
     m_pMusicLabel->SetText(labelText);
-    m_pMusicSlider->SetValue(volume);
 }
 
 

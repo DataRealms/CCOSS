@@ -598,8 +598,7 @@ bool PlayIntroTitle() {
 
             for (int star = 0; star < starCount; ++star)
             {
-                const StarSize size = aStars[star].m_Size;
-				const int intensity = aStars[star].m_Intensity + RandomNum(0, 35 * (size + 1));
+				const int intensity = aStars[star].m_Intensity + RandomNum(0, 35 * (aStars[star].m_Size + 1));
                 set_screen_blender(intensity, intensity, intensity, intensity);
 				const std::array<int, 2> starDrawPos = { aStars[star].m_Pos[0], aStars[star].m_Pos[1] - static_cast<int>(scrollOffset.m_Y * aStars[star].m_ScrollRatio) };
                 draw_trans_sprite(g_FrameMan.GetBackBuffer32(), aStars[star].m_pBitmap, starDrawPos[0], starDrawPos[1]);

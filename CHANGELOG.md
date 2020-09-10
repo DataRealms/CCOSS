@@ -217,8 +217,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 	**Note:** Changing the game window resolution while an Activity is active requires ending the Activity. A dialog box will appear asking to confirm the change.
 
-- Moved from C-style random number generation to C++ standard. This includes usage of an mt19937 random number generator.
-- For C++ coders the functions SelectRand, PosRand and RangeRand have been replaced by the function template RandomNum() and its overload RandomNum(T min, T max). The function NormalRand has been replaced by the function template RandomNormalNum(). For lua coders there is no change.
+- Moved from C-style random number generation to C++ standard. This includes usage of an mt19937 random number generator.  
+	For C++ coders the functions SelectRand, PosRand and RangeRand have been replaced by the function template RandomNum() and its overload RandomNum(T min, T max). The function NormalRand has been replaced by the function template RandomNormalNum(). For lua coders there is no change.
+	
+- Resolution validation changed to support multiple screens. Incompatible/bad resolution settings will be overridden at startup with messages explaining the issue.  
+	**Note:** For multi-screen to work properly, the left-most screen MUST be set as primary. Screens having different resolutions does not actually matter but different heights will still be warned about and overridden due to the likeliness of GUI elementes being cropped on the shortest screen.  
+	Resolution validation can be disabled for multi-screen setups with `Settings.ini` property `DisableMultiScreenResolutionValidation`. Bad settings are likely to crash, use at own risk.  
+	For setups with more than 3 screens `DisableMultiScreenResolutionValidation` must be set true.
 
 ### Fixed
 

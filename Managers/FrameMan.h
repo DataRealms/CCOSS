@@ -557,7 +557,7 @@ namespace RTE {
 
 		int m_GfxDriver; //!< The graphics driver that will be used for rendering.
 
-		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation or not. Allows setting whatever crazy resolution that may or may not crash.
+		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation when running multi-screen mode or not. Allows setting whatever crazy resolution that may or may not crash.
 
 		unsigned short m_NumScreens; //!< Number of physical screens.
 		unsigned short m_ScreenResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution). 

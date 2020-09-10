@@ -1142,7 +1142,7 @@ void MainMenuGUI::Update()
 					g_SettingsMan.SetShowToolTips(m_aOptionsCheckbox[SHOWTOOLTIPS]->GetCheck());
 					g_SettingsMan.SetPreciseCollisions(m_aOptionsCheckbox[PRECISECOLLISIONS]->GetCheck());
 
-                    g_SettingsMan.UpdateSettingsFile();
+					g_SettingsMan.UpdateSettingsFile();
 				}
 
                 m_MenuScreen = MAINSCREEN;

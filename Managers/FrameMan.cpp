@@ -163,7 +163,7 @@ namespace RTE {
 			const char *leftNotPrimaryMessage = {
 				"Due to limitations in Cortex Command's graphics API it is impossible to properly run multi-screen mode when the left-most screen is not set as primary.\n"
 				"Please configure your left-most screen to be primary to utilize all screens, as the game window will extend right but will not extend left, leaving any screen left of the primary unused.\n\n"
-				"You can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!\n\nResolution settings will be overridden fit primary screen only!"
+				"You can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!\n\nResolution settings will be overridden to fit primary screen only!"
 			};
 			allegro_message(leftNotPrimaryMessage);
 			resX = m_NewResX = m_PrimaryScreenResX / resMultiplier;

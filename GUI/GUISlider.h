@@ -132,6 +132,16 @@ public:
     void OnMouseMove(int X, int Y, int Buttons, int Modifier) override;
 
 
+	/// <summary>
+	/// Called when the mouse scroll wheel is moved.
+	/// </summary>
+	/// <param name="x">Mouse X position.</param>
+	/// <param name="y">Mouse Y position.</param>
+	/// <param name="modifier">Activated modifier buttons.</param>
+	/// <param name="mouseWheelChange">The amount of wheel movement. Positive is scroll up, negative is scroll down.</param>
+	void OnMouseWheelChange(int x, int y, int modifier, int mouseWheelChange) override;
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetPanel
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -325,11 +335,12 @@ private:
     GUIBitmap        *m_KnobImage;
 
     // Properties
-    int                m_Orientation;
-    int                m_TickDirection;
-    int                m_Minimum;
-    int                m_Maximum;
-    int                m_Value;
+	int                m_Orientation;
+	int                m_TickDirection;
+	int                m_Minimum;
+	int                m_Maximum;
+	int                m_Value;
+	int m_DeltaValue;
 
     // Internal variables
     int                m_KnobPosition;

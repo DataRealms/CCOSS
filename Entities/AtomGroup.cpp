@@ -1215,9 +1215,10 @@ float AtomGroup::Travel(Vector &position,
 
             // TERRAIN COLLISION RESPONSE /////////////////////////////////////////////////////
             // Determine which of the colliding Atom:s will penetrate the terrain.
-            do
+			bool somethingPenetrated = false;
+			do
             {
-                penetratingAtoms.clear();
+				somethingPenetrated = false;
 
                 distMass = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
                 distMI = m_MomInertia / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
@@ -1242,11 +1243,12 @@ float AtomGroup::Travel(Vector &position,
                         // Move the penetrating atom to the pen. list from the coll. list.
 						penetratingAtoms.push_back(*aItr);
 						aItr = hitTerrAtoms.erase(aItr);
+						somethingPenetrated = true;
 					} else
 						++aItr;
                 }
             }
-            while (!hitTerrAtoms.empty() && !penetratingAtoms.empty());
+            while (!hitTerrAtoms.empty() && somethingPenetrated);
 
             // TERRAIN BOUNCE //////////////////////////////////////////////////////////////////
             // If some Atoms could not penetrate even though all the impulse was on them,

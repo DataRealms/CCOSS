@@ -1248,7 +1248,7 @@ float AtomGroup::Travel(Vector &position,
 						++aItr;
                 }
             }
-            while (!hitTerrAtoms.empty() && somethingPenetrated);
+			while (!hitTerrAtoms.empty() && somethingPenetrated);
 
             // TERRAIN BOUNCE //////////////////////////////////////////////////////////////////
             // If some Atoms could not penetrate even though all the impulse was on them,

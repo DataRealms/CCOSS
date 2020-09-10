@@ -38,7 +38,6 @@ GUISlider::GUISlider(GUIManager *Manager, GUIControlManager *ControlManager)
     m_Minimum = 0;
     m_Value = 0;
     m_Maximum = 100;
-	m_DeltaValue = 1;
 }
 
 
@@ -122,8 +121,6 @@ void GUISlider::Create(GUIProperties *Props)
     // Clamp the value
     m_Value = MAX(m_Value, m_Minimum);
     m_Value = MIN(m_Value, m_Maximum);
-
-	m_DeltaValue = std::max((m_Maximum - m_Minimum) / 100, 1);
 
     // Re-Calculate the knob info
     CalculateKnob();
@@ -441,7 +438,7 @@ void GUISlider::OnMouseMove(int X, int Y, int Buttons, int Modifier)
         if (Area > 0) {
             float p = (float)m_KnobPosition / (float)(Area);
             int MaxRange = (m_Maximum - m_Minimum);
-            m_Value = static_cast<int>(static_cast<float>(MaxRange) * p) + m_Minimum;
+            m_Value = (float)MaxRange * p + m_Minimum;
         }
 
         // Clamp the value
@@ -463,27 +460,24 @@ void GUISlider::OnMouseMove(int X, int Y, int Buttons, int Modifier)
 
 void GUISlider::OnMouseWheelChange(int x, int y, int modifier, int mouseWheelChange) {
 	m_OldValue = m_Value;
-	int MousePos = X;
-	int KnobTop = 0;
 	int Size = 1;
 
 	if (m_Orientation == Horizontal) {
-		KnobTop = m_X + m_KnobPosition;
 		Size = m_Width;
-	}
-
-	if (m_Orientation == Vertical) {
-		KnobTop = m_Y + m_KnobPosition;
+	} else {
 		Size = m_Height;
 	}
 	
-	const float ratio = static_cast<float>(m_DeltaValue) / static_cast<float>(m_Maximum - m_Minimum);
+	const int deltaValue = std::max((m_Maximum - m_Minimum) / 100, 1);
+	const float ratio = static_cast<float>(deltaValue) / static_cast<float>(m_Maximum - m_Minimum);
+	const int posRange = Size - m_KnobSize;
+	const int deltaPos = std::max(static_cast<int>(ratio * static_cast<float>(posRange)),1);
 	if (mouseWheelChange < 0) {
-		m_Value = std::max(m_Value - m_DeltaValue, m_Minimum);
-		m_KnobPosition = std::max(m_KnobPosition - std::max(static_cast<int>(ratio * static_cast<float>(Size - m_KnobSize)),1), 0);
+		m_Value = std::max(m_Value - deltaValue, m_Minimum);
+		m_KnobPosition = std::max(m_KnobPosition - deltaPos, 0);
 	} else {
-		m_Value = std::min(m_Value + m_DeltaValue, m_Maximum);
-		m_KnobPosition = std::min(m_KnobPosition + std::max(static_cast<int>(ratio * static_cast<float>(Size - m_KnobSize)),1), Size - m_KnobSize);
+		m_Value = std::min(m_Value + deltaValue, m_Maximum);
+		m_KnobPosition = std::min(m_KnobPosition + deltaPos, posRange);
 	}
 
 	if (m_Value != m_OldValue)

@@ -340,7 +340,6 @@ private:
 	int                m_Minimum;
 	int                m_Maximum;
 	int                m_Value;
-	int m_DeltaValue;
 
     // Internal variables
     int                m_KnobPosition;

@@ -32,8 +32,12 @@ namespace RTE {
 
 	void FrameMan::Clear() {
 		m_GfxDriver = GFX_AUTODETECT_WINDOWED;
-		m_ScreenResX = GetSystemMetrics(SM_CXSCREEN);
-		m_ScreenResY = GetSystemMetrics(SM_CYSCREEN);
+		m_DisableMultiScreenResolutionValidation = false;
+		m_NumScreens = GetSystemMetrics(SM_CMONITORS);
+		m_ScreenResX = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		m_ScreenResY = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+		m_PrimaryScreenResX = GetSystemMetrics(SM_CXSCREEN);
+		m_PrimaryScreenResY = GetSystemMetrics(SM_CYSCREEN);
 		m_ResX = 960;
 		m_ResY = 540;
 		m_NewResX = m_ResX;
@@ -124,13 +128,74 @@ namespace RTE {
 		} else if ((resX * resMultiplier) % 4 > 0) {
 			allegro_message("Resolution width that is not divisible by 4 is not supported!\nOverriding to closest valid width!");
 			resX = m_NewResX = std::floor(resX / 4) * 4;
-		} else {
+		}
+
+		if (m_NumScreens == 1) {
 			float currentAspectRatio = static_cast<float>(resX) / static_cast<float>(resY);
 			if (currentAspectRatio < 1 || currentAspectRatio > 4) {
 				allegro_message("Abnormal aspect ratio detected! Reverting to defaults!");
 				resX = m_NewResX = 960;
 				resY = m_NewResY = 540;
 				resMultiplier = m_ResMultiplier = m_NewResMultiplier = 1;
+			}
+		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 1 && m_NumScreens < 4) {
+			if (resX * resMultiplier > m_PrimaryScreenResX || resY * resMultiplier > m_PrimaryScreenResY) { ValidateMultiScreenResolution(resX, resY, resMultiplier); }
+		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 3) {
+			allegro_message("Number of screens is too damn high! Overriding to defaults!\n\nPlease disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
+			resX = m_NewResX = 960;
+			resY = m_NewResY = 540;
+			resMultiplier = m_ResMultiplier = m_NewResMultiplier = 1;
+		}
+
+		g_SettingsMan.UpdateSettingsFile();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::ValidateMultiScreenResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier) {
+		POINT pointOnScreen;
+		HMONITOR screenHandle;
+		MONITORINFO screenInfo;
+
+		pointOnScreen = { -1 , 0 };
+		screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
+		if (screenHandle != NULL) {
+			const char *leftNotPrimaryMessage = {
+				"Due to limitations in Cortex Command's graphics API it is impossible to properly run multi-screen mode when the left-most screen is not set as primary.\n"
+				"Please configure your left-most screen to be primary to utilize all screens, as the game window will extend right but will not extend left, leaving any screen left of the primary unused.\n\n"
+				"You can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!\n\nResolution settings will be overridden to fit primary screen only!"
+			};
+			allegro_message(leftNotPrimaryMessage);
+			resX = m_NewResX = m_PrimaryScreenResX / resMultiplier;
+			resY = m_NewResY = m_PrimaryScreenResY / resMultiplier;
+			return;
+		}
+
+		pointOnScreen = { m_PrimaryScreenResX + 1 , 0 };
+		screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
+		screenInfo = { sizeof(MONITORINFO) };
+		GetMonitorInfo(screenHandle, &screenInfo);
+		unsigned short centerScreenResY = screenInfo.rcMonitor.bottom;
+
+		if (centerScreenResY != m_PrimaryScreenResY) {
+			allegro_message("Center screen height is not identical to primary screen, overriding to fit primary screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
+			resX = m_NewResX = m_PrimaryScreenResX / resMultiplier;
+			resY = m_NewResY = m_PrimaryScreenResY / resMultiplier;
+			return;
+		}
+
+		if (m_NumScreens == 3) {
+			pointOnScreen = { screenInfo.rcMonitor.right + 1 , 0 };
+			screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
+			screenInfo = { sizeof(MONITORINFO) };
+			GetMonitorInfo(screenHandle, &screenInfo);
+			unsigned short rightScreenResY = screenInfo.rcMonitor.bottom;
+
+			if (rightScreenResY != m_PrimaryScreenResY) {
+				allegro_message("Right screen height is not identical to primary screen, overriding to extend to center screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
+				resX = m_NewResX = (m_ScreenResX - (screenInfo.rcMonitor.right - screenInfo.rcMonitor.left)) / resMultiplier;
+				resY = m_NewResY = m_PrimaryScreenResY / resMultiplier;
+				return;
 			}
 		}
 	}
@@ -260,6 +325,8 @@ namespace RTE {
 			m_NewResY = m_ResY;
 		} else if (propName == "ResolutionMultiplier") {
 			reader >> m_ResMultiplier;
+		} else if (propName == "DisableMultiScreenResolutionValidation") {
+			reader >> m_DisableMultiScreenResolutionValidation;
 		} else if (propName == "HSplitScreen") {
 			reader >> m_HSplitOverride;
 		} else if (propName == "VSplitScreen") {
@@ -281,6 +348,10 @@ namespace RTE {
 		writer << m_ResX;
 		writer.NewProperty("ResolutionY");
 		writer << m_ResY;
+		writer.NewProperty("ResolutionMultiplier");
+		writer << m_ResMultiplier;
+		writer.NewProperty("DisableMultiScreenResolutionValidation");
+		writer << m_DisableMultiScreenResolutionValidation;
 		writer.NewProperty("HSplitScreen");
 		writer << m_HSplitOverride;
 		writer.NewProperty("VSplitScreen");

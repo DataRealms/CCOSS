@@ -145,8 +145,7 @@ struct Star {
 	std::array<int, 2> m_Pos = { 0 };
     // Scrolling ratio
     float m_ScrollRatio = 1.0F;
-    // Normalized intensity 0-1.0
-    int m_Intensity = 1;
+    int m_Intensity = 0;
     // Type
     StarSize m_Size = StarSmall;
 
@@ -424,7 +423,6 @@ bool PlayIntroTitle() {
     BITMAP **apStarLargeBitmaps = starLargeFile.GetAsAnimation(starLargeBitmapCount);
     BITMAP **apStarHugeBitmaps = starHugeFile.GetAsAnimation(starHugeBitmapCount);
     Star *aStars = new Star[starCount];
-    StarSize size;
 
     for (int star = 0; star < starCount; ++star) {
         if (RandomNum() < 0.95F) {
@@ -598,13 +596,12 @@ bool PlayIntroTitle() {
 			Box backdropBox;
             pBackdrop->Draw(g_FrameMan.GetBackBuffer32(), backdropBox, scrollOffset * backdropScrollRatio);
 
-			std::array<int, 2> starDrawPos;
             for (int star = 0; star < starCount; ++star)
             {
-                size = aStars[star].m_Size;
-				int intensity = aStars[star].m_Intensity + RandomNum(0, 35 * (size + 1));
+                const StarSize size = aStars[star].m_Size;
+				const int intensity = aStars[star].m_Intensity + RandomNum(0, 35 * (size + 1));
                 set_screen_blender(intensity, intensity, intensity, intensity);
-				starDrawPos = std::array<int, 2> { aStars[star].m_Pos[0], static_cast<int>(aStars[star].m_Pos[1] - scrollOffset.m_Y * aStars[star].m_ScrollRatio) };
+				const std::array<int, 2> starDrawPos = { aStars[star].m_Pos[0], aStars[star].m_Pos[1] - static_cast<int>(scrollOffset.m_Y * aStars[star].m_ScrollRatio) };
                 draw_trans_sprite(g_FrameMan.GetBackBuffer32(), aStars[star].m_pBitmap, starDrawPos[0], starDrawPos[1]);
             }
 

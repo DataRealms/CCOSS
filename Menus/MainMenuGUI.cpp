@@ -2174,13 +2174,15 @@ void MainMenuGUI::UpdateResolutionCombo() {
 void MainMenuGUI::UpdateVolumeSliders()
 {
     char labelText[512];
-    int volume = (int)(g_AudioMan.GetSoundsVolume() * 100);
+    int volume = static_cast<int>(std::round(g_AudioMan.GetSoundsVolume() * 100));
     sprintf_s(labelText, sizeof(labelText), "Sound Volume: %i", volume);
     m_pSoundLabel->SetText(labelText);
+	m_pSoundSlider->SetValue(volume);
 
-    volume = (int)(g_AudioMan.GetMusicVolume() * 100);
+    volume = static_cast<int>(std::round(g_AudioMan.GetMusicVolume() * 100));
     sprintf_s(labelText, sizeof(labelText), "Music Volume: %i", volume);
     m_pMusicLabel->SetText(labelText);
+	m_pMusicSlider->SetValue(volume);
 }
 
 

@@ -474,10 +474,10 @@ void GUISlider::OnMouseWheelChange(int x, int y, int modifier, int mouseWheelCha
 	const int deltaPos = std::max(static_cast<int>(ratio * static_cast<float>(posRange)),1);
 	if (mouseWheelChange < 0) {
 		m_Value = std::max(m_Value - deltaValue, m_Minimum);
-		m_KnobPosition = std::max(m_KnobPosition - deltaPos, 0);
+		m_KnobPosition = std::max(m_KnobPosition - deltaPos, m_EndThickness);
 	} else {
 		m_Value = std::min(m_Value + deltaValue, m_Maximum);
-		m_KnobPosition = std::min(m_KnobPosition + deltaPos, posRange);
+		m_KnobPosition = std::min(m_KnobPosition + deltaPos, posRange - m_EndThickness);
 	}
 
 	if (m_Value != m_OldValue)

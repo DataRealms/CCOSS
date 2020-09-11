@@ -293,9 +293,9 @@ ClassInfoGetters
     void SetFGLeg(Attachable *newLeg);
 
     /// <summary>
-    /// Gets the background leg of this AHuman.
+    /// Gets the background Leg of this AHuman.
     /// </summary>
-    /// <returns>A pointer to the background leg of this AHuman. Ownership is NOT transferred.</returns>
+    /// <returns>A pointer to the background Leg of this AHuman. Ownership is NOT transferred.</returns>
     Attachable *GetBGLeg() const { return static_cast<Attachable *>(m_pBGLeg); }
 
     /// <summary>
@@ -305,16 +305,28 @@ ClassInfoGetters
     void SetBGLeg(Attachable *newLeg);
 
 	/// <summary>
-	/// Gets the FG foot attachable of this.
+	/// Gets the foot Attachable of this AHuman's foreground Leg.
 	/// </summary>
-	/// <returns>A pointer to the FG foot attachable of this. Ownership is NOT transferred!</returns>
+	/// <returns>A pointer to the foot Attachable of this AHuman's foreground Leg. Ownership is NOT transferred!</returns>
     Attachable *GetFGFoot() const { return m_pFGLeg ? m_pFGLeg->GetFoot() : nullptr; }
 
+    /// <summary>
+    /// Sets the foot Attachable of this AHuman's foreground Leg.
+    /// </summary>
+    /// <param name="newFoot">The new foot for this AHuman's foreground Leg to use.</param>
+    void SetFGFoot(Attachable *newFoot) { if (m_pFGLeg && m_pFGLeg->IsAttached()) { m_pFGLeg->SetFoot(newFoot); } }
+
 	/// <summary>
-	/// Gets the BG foot attachable of this.
+    /// Gets the foot Attachable of this AHuman's background Leg.
 	/// </summary>
-	/// <returns>A pointer to the BG foot attachable of this. Ownership is NOT transferred!</returns>
+    /// <returns>A pointer to the foot Attachable of this AHuman's background Leg. Ownership is NOT transferred!</returns>
 	Attachable *GetBGFoot() const { return m_pBGLeg ? m_pBGLeg->GetFoot() : nullptr; }
+
+    /// <summary>
+    /// Sets the foot Attachable of this AHuman's background Leg.
+    /// </summary>
+    /// <param name="newFoot">The new foot for this AHuman's background Leg to use.</param>
+    void SetBGFoot(Attachable *newFoot) { if (m_pBGLeg && m_pBGLeg->IsAttached()) { m_pBGLeg->SetFoot(newFoot); } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

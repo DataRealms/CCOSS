@@ -420,26 +420,26 @@ bool PlayIntroTitle() {
     BITMAP **apStarSmallBitmaps = starSmallFile.GetAsAnimation(starSmallBitmapCount);
     BITMAP **apStarLargeBitmaps = starLargeFile.GetAsAnimation(starLargeBitmapCount);
     BITMAP **apStarHugeBitmaps = starHugeFile.GetAsAnimation(starHugeBitmapCount);
-    Star *Stars = new Star[starCount];
+    Star *stars = new Star[starCount];
 
 	for (int star = 0; star < starCount; ++star) {
 		if (RandomNum() < 0.95F) {
 			// Default size is StarSmall.
-			Stars[star].m_Bitmap = apStarSmallBitmaps[RandomNum(0, starSmallBitmapCount - 1)];
-			Stars[star].m_Intensity = RandomNum(0, 92);
+			stars[star].m_Bitmap = apStarSmallBitmaps[RandomNum(0, starSmallBitmapCount - 1)];
+			stars[star].m_Intensity = RandomNum(0, 92);
 		} else if (RandomNum() < 0.85F) {
-			Stars[star].m_Size = StarLarge;
-			Stars[star].m_Bitmap = apStarLargeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
-			Stars[star].m_Intensity = RandomNum(111, 185);
+			stars[star].m_Size = StarLarge;
+			stars[star].m_Bitmap = apStarLargeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
+			stars[star].m_Intensity = RandomNum(111, 185);
 		} else {
-			Stars[star].m_Size = StarHuge;
-			Stars[star].m_Bitmap = apStarHugeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
-			Stars[star].m_Intensity = RandomNum(166, 185);
+			stars[star].m_Size = StarHuge;
+			stars[star].m_Bitmap = apStarHugeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
+			stars[star].m_Intensity = RandomNum(166, 185);
 		}
-		Stars[star].m_PosX = RandomNum(0, resX);
-		Stars[star].m_PosY = RandomNum(0, pBackdrop->GetBitmap()->h);
+		stars[star].m_PosX = RandomNum(0, resX);
+		stars[star].m_PosY = RandomNum(0, pBackdrop->GetBitmap()->h);
         // To match the nebula scroll
-        Stars[star].m_ScrollRatio = backdropScrollRatio;
+        stars[star].m_ScrollRatio = backdropScrollRatio;
     }
 
     // Font stuff
@@ -595,11 +595,11 @@ bool PlayIntroTitle() {
 
             for (int star = 0; star < starCount; ++star)
             {
-				const int intensity = Stars[star].m_Intensity + RandomNum(0, 35 * (Stars[star].m_Size + 1));
+				const int intensity = stars[star].m_Intensity + RandomNum(0, 35 * (stars[star].m_Size + 1));
 				set_screen_blender(intensity, intensity, intensity, intensity);
-				const int &starDrawPosX = Stars[star].m_PosX;
-				int starDrawPosY = Stars[star].m_PosY - static_cast<int>(scrollOffset.m_Y * Stars[star].m_ScrollRatio);
-				draw_trans_sprite(g_FrameMan.GetBackBuffer32(), Stars[star].m_Bitmap, starDrawPosX, starDrawPosY);
+				const int &starDrawPosX = stars[star].m_PosX;
+				int starDrawPosY = stars[star].m_PosY - static_cast<int>(scrollOffset.m_Y * stars[star].m_ScrollRatio);
+				draw_trans_sprite(g_FrameMan.GetBackBuffer32(), stars[star].m_Bitmap, starDrawPosX, starDrawPosY);
             }
 
             planetPos.SetXY(g_FrameMan.GetResX() / 2, 567 - scrollOffset.GetFloorIntY());
@@ -1534,8 +1534,8 @@ bool PlayIntroTitle() {
 	pMoon = nullptr;
     delete pStation;
 	pStation = nullptr;
-    delete[] Stars;
-	Stars = nullptr;
+    delete[] stars;
+	stars = nullptr;
 
 	if (g_FrameMan.ResolutionChanged()) { PlayIntroTitle(); }
 

@@ -38,6 +38,7 @@ GUISlider::GUISlider(GUIManager *Manager, GUIControlManager *ControlManager)
     m_Minimum = 0;
     m_Value = 0;
     m_Maximum = 100;
+	m_ValueResolution = 1;
 }
 
 
@@ -117,6 +118,10 @@ void GUISlider::Create(GUIProperties *Props)
     Props->GetValue("Minimum", &m_Minimum);
     Props->GetValue("Maximum", &m_Maximum);
     Props->GetValue("Value", &m_Value);
+	const bool gotValueRes = Props->GetValue("ValueResolution", &m_ValueResolution);
+	if (!gotValueRes) {
+		m_ValueResolution = std::max((m_Maximum - m_Minimum) / 100, 1);
+	}
 
     // Clamp the value
     m_Value = MAX(m_Value, m_Minimum);
@@ -460,24 +465,17 @@ void GUISlider::OnMouseMove(int X, int Y, int Buttons, int Modifier)
 
 void GUISlider::OnMouseWheelChange(int x, int y, int modifier, int mouseWheelChange) {
 	m_OldValue = m_Value;
-	int Size = 1;
-
-	if (m_Orientation == Horizontal) {
-		Size = m_Width;
-	} else {
-		Size = m_Height;
-	}
+	const int size = (m_Orientation == Horizontal) ? m_Width : m_Height;
 	
-	const int deltaValue = std::max((m_Maximum - m_Minimum) / 100, 1);
-	const float ratio = static_cast<float>(deltaValue) / static_cast<float>(m_Maximum - m_Minimum);
-	const int posRange = Size - m_KnobSize;
-	const int deltaPos = std::max(static_cast<int>(ratio * static_cast<float>(posRange)),1);
+	const float ratio = static_cast<float>(m_ValueResolution) / static_cast<float>(m_Maximum - m_Minimum);
+	const int posRange = size - m_KnobSize - m_EndThickness;
+	const int posDelta = std::max(static_cast<int>(ratio * static_cast<float>(posRange)),1);
 	if (mouseWheelChange < 0) {
-		m_Value = std::max(m_Value - deltaValue, m_Minimum);
-		m_KnobPosition = std::max(m_KnobPosition - deltaPos, m_EndThickness);
+		m_Value = std::max(m_Value - m_ValueResolution, m_Minimum);
+		m_KnobPosition = std::max(m_KnobPosition - posDelta, m_EndThickness);
 	} else {
-		m_Value = std::min(m_Value + deltaValue, m_Maximum);
-		m_KnobPosition = std::min(m_KnobPosition + deltaPos, posRange - m_EndThickness);
+		m_Value = std::min(m_Value + m_ValueResolution, m_Maximum);
+		m_KnobPosition = std::min(m_KnobPosition + posDelta, posRange);
 	}
 
 	if (m_Value != m_OldValue)
@@ -792,4 +790,10 @@ void GUISlider::ApplyProperties(GUIProperties *Props)
     m_Value = MIN(m_Value, m_Maximum);
 
     BuildBitmap();
+}
+
+void GUISlider::SetValueResolution(int valueRes) {
+	if (valueRes >= 1 && valueRes <= m_Maximum - m_Minimum) {
+		m_ValueResolution = valueRes;
+	}
 }

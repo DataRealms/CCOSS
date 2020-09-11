@@ -296,6 +296,13 @@ public:
     void ApplyProperties(GUIProperties *Props) override;
 
 
+	/// <summary>
+	/// Sets the value resolution for this slider.
+	/// </summary>
+	/// <param name="valueRes">The new value resolution</param>
+	void SetValueResolution(int valueRes);
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations
 
@@ -331,24 +338,24 @@ private:
 
 // Members
 
-    GUIBitmap        *m_DrawBitmap;
-    GUIBitmap        *m_KnobImage;
+	GUIBitmap *m_DrawBitmap;
+	GUIBitmap *m_KnobImage;
 
-    // Properties
-	int                m_Orientation;
-	int                m_TickDirection;
-	int                m_Minimum;
-	int                m_Maximum;
-	int                m_Value;
+	// Properties
+	int m_Orientation;
+	int m_TickDirection;
+	int m_Minimum;
+	int m_Maximum;
+	int m_Value;
+	int m_ValueResolution;
 
-    // Internal variables
-    int                m_KnobPosition;
-    int                m_KnobSize;
-    bool            m_KnobGrabbed;
-    int                m_KnobGrabPos;
-    int             m_EndThickness;
-    int                m_OldValue;
-
+	// Internal variables
+	int m_KnobPosition;
+	int m_KnobSize;
+	bool m_KnobGrabbed;
+	int m_KnobGrabPos;
+	int m_EndThickness;
+	int m_OldValue;
 };
 
 

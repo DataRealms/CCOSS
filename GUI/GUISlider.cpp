@@ -473,11 +473,7 @@ void GUISlider::OnMouseWheelChange(int x, int y, int modifier, int mouseWheelCha
 	}
 	
 	if (m_Value != m_OldValue) {
-		const int size = (m_Orientation == Horizontal) ? m_Width : m_Height;
-		const int posRange = size - m_KnobSize - m_EndThickness;
-		const float ratio = static_cast<float>(m_Value - m_Minimum) / static_cast<float>(m_Maximum - m_Minimum);
-		m_KnobPosition = std::max(m_EndThickness, static_cast<int>(std::round(static_cast<float>(posRange) * ratio)));
-
+		CalculateKnob();
 		AddEvent(GUIEvent::Notification, Changed, 0);
 	}
 }
@@ -537,37 +533,17 @@ GUIPanel *GUISlider::GetPanel(void)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Calculates the knob position and size.
 
-void GUISlider::CalculateKnob(void)
-{
-    m_KnobPosition = 0;
-    m_KnobSize = 0;
+void GUISlider::CalculateKnob(void) {
+	if (!m_KnobImage)
+		return;
 
-    // Knob image not loaded yet
-    if (!m_KnobImage)
-        return;
-
-    if (m_Orientation == Horizontal) {
-        // Horizontal
-        m_KnobSize = m_KnobImage->GetWidth();
-        
-        if (m_Maximum-m_Minimum > 0) {
-            float V = (float)(m_Value-m_Minimum) / (float)(m_Maximum-m_Minimum);
-            m_KnobPosition = (float)(m_Width-m_KnobSize)*V;
-        }
-
-    } else {
-        // Vertical
-        m_KnobSize = m_KnobImage->GetHeight();
-        
-        if (m_Maximum-m_Minimum > 0) {
-            float V = (float)(m_Value-m_Minimum) / (float)(m_Maximum-m_Minimum);
-            m_KnobPosition = (float)(m_Height-m_KnobSize)*V;
-        }
-    }
-
-    // Clamp the knob position again for the graphics
-    m_KnobPosition = MAX(m_KnobPosition, m_EndThickness);
-    m_KnobPosition = MIN(m_KnobPosition, (m_Orientation == Horizontal ? m_Width : m_Height) - m_KnobSize - m_EndThickness);
+	if (m_Maximum > m_Minimum) {
+		const bool orientation = (m_Orientation == Horizontal);
+		m_KnobSize = (orientation) ? m_KnobImage->GetWidth() : m_KnobImage->GetHeight();
+		const int size = (orientation) ? m_Width : m_Height;
+		const float valueRatio = static_cast<float>(m_Value - m_Minimum) / static_cast<float>(m_Maximum - m_Minimum);
+		m_KnobPosition = m_EndThickness + static_cast<int>(static_cast<float>(size - m_KnobSize - 2 * m_EndThickness) * valueRatio);
+	}
 }
 
 

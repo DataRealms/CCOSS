@@ -26,12 +26,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Turret::ReadProperty(std::string propName, Reader &reader) {
-		if (propName == "MountedMO") {
-			const Entity *pEntity = g_PresetMan.GetEntityPreset(reader);
-			if (pEntity) {
-				m_MountedDevice = dynamic_cast<HeldDevice *>(pEntity->Clone());
+		if (propName == "MountedDevice") {
+			const Entity *entity = g_PresetMan.GetEntityPreset(reader);
+			if (entity) {
+				m_MountedDevice = dynamic_cast<HeldDevice *>(entity->Clone());
+				m_MountedDevice->SetInheritsRotAngle(false);
 			}
-			pEntity = 0;
+			entity = 0;
 		} else {
 			return Attachable::ReadProperty(propName, reader);
 		}
@@ -44,7 +45,7 @@ namespace RTE {
 	int Turret::Save(Writer &writer) const {
 		Attachable::Save(writer);
 
-		writer.NewProperty("MountedMO");
+		writer.NewProperty("MountedDevice");
 		writer << m_MountedDevice;
 
 		return 0;
@@ -88,7 +89,6 @@ namespace RTE {
 
 	void Turret::Update() {
 		if (m_MountedDevice) {
-			m_MountedDevice->SetJointPos(m_Pos + m_MountedDevice->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
 			m_MountedDevice->SetRotAngle(m_Rotation.GetRadAngle() + m_MountedDeviceRotOffset);
 			if (m_Parent) {
 				//if (m_MountedDevice->IsRecoiled()) {

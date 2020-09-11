@@ -123,9 +123,7 @@ void GUISlider::Create(GUIProperties *Props)
 		m_ValueResolution = std::max((m_Maximum - m_Minimum) / 100, 1);
 	}
 
-    // Clamp the value
-    m_Value = MAX(m_Value, m_Minimum);
-    m_Value = MIN(m_Value, m_Maximum);
+    m_Value = std::clamp(m_Value, m_Minimum,m_Maximum);
 
     // Re-Calculate the knob info
     CalculateKnob();
@@ -361,9 +359,7 @@ void GUISlider::OnMouseDown(int X, int Y, int Buttons, int Modifier)
         Size = m_Height;
     }
 
-    // Clamp the knob position
-    m_KnobPosition = MAX(m_KnobPosition, 0);
-    m_KnobPosition = MIN(m_KnobPosition, Size-m_KnobSize);
+	m_KnobPosition = std::clamp(m_KnobPosition, m_EndThickness, Size - m_KnobSize - m_EndThickness);
 
     // Calculate the new value
     int Area = Size-m_KnobSize;
@@ -373,13 +369,7 @@ void GUISlider::OnMouseDown(int X, int Y, int Buttons, int Modifier)
         m_Value = (float)MaxRange * p + m_Minimum;
     }
 
-    // Clamp the value
-    m_Value = MAX(m_Value, m_Minimum);
-    m_Value = MIN(m_Value, m_Maximum);
-
-    // Clamp the knob position again for the graphics
-    m_KnobPosition = MAX(m_KnobPosition, m_EndThickness);
-    m_KnobPosition = MIN(m_KnobPosition, Size-m_KnobSize-m_EndThickness);
+	m_Value = std::clamp(m_Value, m_Minimum, m_Maximum);
 
     // If the value has changed, add the "Changed" notification
     if (m_Value != m_OldValue)
@@ -694,17 +684,12 @@ void GUISlider::SetValue(int Value)
 {
     int OldValue = m_Value;
 
-    m_Value = Value;
-
-    // Clamp it
-    m_Value = MAX(m_Value, m_Minimum);
-    m_Value = MIN(m_Value, m_Maximum);
+	m_Value = std::clamp(Value, m_Minimum, m_Maximum);
     
-    if (m_Value != OldValue)
-        AddEvent(GUIEvent::Notification, Changed, 0);
-
-    // Re-Calculate the knob info
-    CalculateKnob();
+	if (m_Value != OldValue) {
+		CalculateKnob();
+		AddEvent(GUIEvent::Notification, Changed, 0);
+	}
 }
 
 

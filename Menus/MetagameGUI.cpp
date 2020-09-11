@@ -913,28 +913,24 @@ void MetagameGUI::SelectScene(Scene *pScene)
             // If owned by this player's team, make the budget slider represent the currently set setting of this Scene
             if (m_pSelectedScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer))
             {
-				m_pSceneBudgetSlider->SetMinimum(0);
-				m_pSceneBudgetSlider->SetMaximum(static_cast<int>(g_MetaMan.m_Players[metaPlayer].GetFunds()));
-                m_pSceneBudgetSlider->SetValue(static_cast<int>(m_pSelectedScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer())));
+                m_pSceneBudgetSlider->SetValue(floorf((m_pSelectedScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
             }
             // Owned by enemy player, so show the attack budget set up for this scene
             else if (g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()))
             {
-				if (m_pSelectedScene->GetPresetName() == g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName()) {
-					m_pSceneBudgetSlider->SetMinimum(0);
-					m_pSceneBudgetSlider->SetMaximum(static_cast<int>(g_MetaMan.m_Players[metaPlayer].GetFunds()));
-					m_pSceneBudgetSlider->SetValue(static_cast<int>((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget())));
-				} else // Not the current target, so set slider to 0.
+                if (m_pSelectedScene->GetPresetName() == g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName())
+                    m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                // Not the current target, so set slider to 0. It will set the new budget as 
+                else
                     m_pSceneBudgetSlider->SetValue(0);
             }
             // Unowned site, so set up expedition budget (same so far)
             else
             {
-				if (m_pSelectedScene->GetPresetName() == g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName()) {
-					m_pSceneBudgetSlider->SetMinimum(0);
-					m_pSceneBudgetSlider->SetMaximum(static_cast<int>(g_MetaMan.m_Players[metaPlayer].GetFunds()));
-					m_pSceneBudgetSlider->SetValue(static_cast<int>(g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget()));
-				} else // Not the current target, so set slider to 0.
+                if (m_pSelectedScene->GetPresetName() == g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName())
+                    m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                // Not the current target, so set slider to 0. It will set the new budget as 
+                else
                     m_pSceneBudgetSlider->SetValue(0);
             }
         }
@@ -2592,11 +2588,8 @@ void MetagameGUI::UpdateInput()
                     UpdateScenesBox(true);
 
                     // Update the budget slider to reflect the scan cost being deducted from the funds
-					if (g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName() == m_pSelectedScene->GetPresetName()) {
-						m_pSceneBudgetSlider->SetMinimum(0);
-						m_pSceneBudgetSlider->SetMaximum(static_cast<int>(g_MetaMan.m_Players[metaPlayer].GetFunds()));
-						m_pSceneBudgetSlider->SetValue(static_cast<int>((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() )));
-					}
+                    if (g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName() == m_pSelectedScene->GetPresetName())
+                        m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
 
                     // Play an appropriate sound to indicate that the scan is bought and scheduled
                     g_GUISound.ItemChangeSound()->Play();
@@ -2639,7 +2632,7 @@ void MetagameGUI::UpdateInput()
                         UpdateScenesBox(true);
 
                         // If owned by this player, then set update base building budget for this Scene
-						const float budget = static_cast<float>(m_pSceneBudgetSlider->GetValue());
+                        float budget = ((float)m_pSceneBudgetSlider->GetValue() / 100.0f) * g_MetaMan.m_Players[metaPlayer].GetFunds();
                         if (m_pSelectedScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer))
                         {
                             m_pSelectedScene->SetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer(), budget);
@@ -6074,7 +6067,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
 
             // Set up the slider limit bar
             bool sceneOwnedByPlayer = m_pSelectedScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer);
-            int blockedWidth = static_cast<int>(static_cast<float>(m_pSceneBudgetSlider->GetWidth() - 4) * g_MetaMan.GetBudgetedRatioOfPlayer(metaPlayer, m_pSelectedScene, sceneOwnedByPlayer));
+            int blockedWidth = floorf((m_pSceneBudgetSlider->GetWidth() - 4) * g_MetaMan.GetBudgetedRatioOfPlayer(metaPlayer, m_pSelectedScene, sceneOwnedByPlayer));
 
             if (blockedWidth > 0)
             {

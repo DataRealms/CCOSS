@@ -142,13 +142,13 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader) {
         delete m_pRLeg;
         m_pRLeg = new Leg;
         reader >> m_pRLeg;
-        m_pRLeg->SetTransfersDamageToParent(true);
+        if (!m_pRLeg->GetDamageMultiplierSetInINI()) { m_pRLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "LLeg") {
         delete m_pLLeg;
         m_pLLeg = new Leg;
         reader >> m_pLLeg;
-        m_pLLeg->SetHFlipped(true);
-        m_pLLeg->SetTransfersDamageToParent(true);
+        m_pLLeg->SetInheritsHFlipped(2);
+        if (!m_pLLeg->GetDamageMultiplierSetInINI()) { m_pLLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "RFootGroup") {
         delete m_pRFootGroup;
         m_pRFootGroup = new AtomGroup();
@@ -163,27 +163,31 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader) {
         delete m_pMThruster;
         m_pMThruster = new AEmitter;
         reader >> m_pMThruster;
-        m_pMThruster->SetTransfersDamageToParent(true);
+        if (!m_pMThruster->GetDamageMultiplierSetInINI()) { m_pMThruster->SetDamageMultiplier(1.0F); }
     } else if (propName == "RThruster") {
         delete m_pRThruster;
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
-        m_pRThruster->SetTransfersDamageToParent(true);
+        if (!m_pRThruster->GetDamageMultiplierSetInINI()) { m_pRThruster->SetDamageMultiplier(1.0F); }
+        m_pRThruster->SetInheritsRotAngle(false);
     } else if (propName == "LThruster") {
         delete m_pLThruster;
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
-        m_pLThruster->SetTransfersDamageToParent(true);
+        if (!m_pLThruster->GetDamageMultiplierSetInINI()) { m_pLThruster->SetDamageMultiplier(1.0F); }
+        m_pLThruster->SetInheritsRotAngle(false);
     } else if (propName == "URThruster") {
         delete m_pURThruster;
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
-        m_pURThruster->SetTransfersDamageToParent(true);
+        if (!m_pURThruster->GetDamageMultiplierSetInINI()) { m_pURThruster->SetDamageMultiplier(1.0F); }
+        m_pURThruster->SetInheritsRotAngle(false);
     } else if (propName == "ULThruster") {
         delete m_pULThruster;
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
-        m_pULThruster->SetTransfersDamageToParent(true);
+        if (!m_pULThruster->GetDamageMultiplierSetInINI()) { m_pULThruster->SetDamageMultiplier(1.0F); }
+        m_pULThruster->SetInheritsRotAngle(false);
     } else if (propName == "RaisedGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISED];
     } else if (propName == "LoweredGearLimbPath") {
@@ -559,7 +563,6 @@ void ACRocket::UpdateAI()
 
 void ACRocket::Update()
 {
-    float mass = GetMass();
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 
     // Look/aim update, make the scanner point aftward if the rocket is falling
@@ -772,100 +775,40 @@ void ACRocket::Update()
         m_GearState = LOWERED;
     }
 
-    /////////////////////////////////////////////////
-    // Update MovableObject, adds on the forces etc, updated viewpoint
-
-    ACraft::Update();
-
 
     /////////////////////////////////
-    // Update Attachable:s
-/*
-    if (m_pCapsule && m_pCapsule->IsAttached())
-    {
-        m_pCapsule->SetJointPos(m_Pos + m_pCapsule->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pCapsule->SetRotAngle(m_Rotation);
-        m_pCapsule->Update();
-        m_Health -= m_pCapsule->CollectDamage();
-    }
-*/
-    if (m_pRLeg && m_pRLeg->IsAttached())
-    {
-        m_pRLeg->SetJointPos(m_Pos + m_pRLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-/* Obsolete
-        if (!m_pMThruster->IsEmitting())
-            m_pRLeg->SetTargetPosition(m_Pos + Vector(18, 40) * m_Rotation);
-        else
-            m_pRLeg->SetTargetPosition(m_Pos + Vector(13, 40) * m_Rotation);
-*/
+    // Manage Attachable:s
+    if (m_pRLeg && m_pRLeg->IsAttached()) {
         m_pRLeg->SetTargetPosition(m_pRFootGroup->GetLimbPos(m_HFlipped));
-        m_pRLeg->Update();
-        m_Health -= m_pRLeg->CollectDamage();
     }
 
-    if (m_pLLeg && m_pLLeg->IsAttached())
-    {
-        m_pLLeg->SetJointPos(m_Pos + m_pLLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-/* Obsolete
-        if (!m_pMThruster->IsEmitting())
-            m_pLLeg->SetTargetPosition(m_Pos + Vector(-18, 40) * m_Rotation);
-        else
-            m_pLLeg->SetTargetPosition(m_Pos + Vector(-13, 40) * m_Rotation);
-*/
+    if (m_pLLeg && m_pLLeg->IsAttached()) {
         m_pLLeg->SetTargetPosition(m_pLFootGroup->GetLimbPos(!m_HFlipped));
-        m_pLLeg->Update();
-        m_Health -= m_pLLeg->CollectDamage();
     }
-
-    // Apply forces transferred from the attachables and
-    // add detachment wounds to this if applicable
-
-//    if (!ApplyAttachableForces(m_pCapsule))
-//        m_pCapsule = 0;
-    if (!ApplyAttachableForces(m_pRLeg))
-        m_pRLeg = 0;
-    if (!ApplyAttachableForces(m_pLLeg))
-        m_pLLeg = 0;
 
     if (m_pMThruster) {
-        m_pMThruster->SetJointPos(m_Pos + RotateOffset(m_pMThruster->GetParentOffset()));
-//        m_pMThruster->SetVel(m_Vel);
         m_pMThruster->SetRotAngle(m_Rotation.GetRadAngle() - c_HalfPI);
-//        m_pMThruster->SetEmitAngle(m_Rotation - c_HalfPI);
-        m_pMThruster->Update();
     }
 
     if (m_pRThruster) {
-        m_pRThruster->SetJointPos(m_Pos + RotateOffset(m_pRThruster->GetParentOffset()));
-        m_pRThruster->SetVel(m_Vel);
         m_pRThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_EighthPI);
-//        m_pRThruster->SetEmitAngle(m_Rotation);
-        m_pRThruster->Update();
     }
 
     if (m_pLThruster) {
-        m_pLThruster->SetJointPos(m_Pos + RotateOffset(m_pLThruster->GetParentOffset()));
-        m_pLThruster->SetVel(m_Vel);
         m_pLThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_PI - c_EighthPI);
-//        m_pLThruster->SetEmitAngle(m_Rotation + c_PI);
-        m_pLThruster->Update();
     }
 
     if (m_pURThruster) {
-        m_pURThruster->SetJointPos(m_Pos + RotateOffset(m_pURThruster->GetParentOffset()));
-        m_pURThruster->SetVel(m_Vel);
         m_pURThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_HalfPI - c_QuarterPI / 2);
-//        m_pURThruster->SetEmitAngle(-c_QuarterPI / 2);
-        m_pURThruster->Update();
     }
 
     if (m_pULThruster) {
-        m_pULThruster->SetJointPos(m_Pos + RotateOffset(m_pULThruster->GetParentOffset()));
-        m_pULThruster->SetVel(m_Vel);
         m_pULThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_HalfPI + c_QuarterPI / 2);
-//        m_pULThruster->SetEmitAngle(c_QuarterPI / 2);
-        m_pULThruster->Update();
     }
+
+    /////////////////////////////////////////////////
+    // Update MovableObject, adds on the forces etc, updated viewpoint
+    ACraft::Update();
 
     ///////////////////////////////////
     // Explosion logic

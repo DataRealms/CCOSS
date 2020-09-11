@@ -37,7 +37,6 @@ void ACDropShip::Clear()
     m_pULThruster = 0;
     m_pRHatch = 0;
     m_pLHatch = 0;
-// TODO: don't hardcode
     m_HatchSwingRange.SetDegAngle(90);
     m_HatchOpeness = 0;
     m_LateralControl = 0;
@@ -109,33 +108,37 @@ int ACDropShip::ReadProperty(std::string propName, Reader &reader) {
     if (propName == "RThruster") {
         delete m_pRThruster;
         m_pRThruster = new AEmitter;
-        m_pRThruster->SetTransfersDamageToParent(true);
         reader >> m_pRThruster;
+        if (!m_pRThruster->GetDamageMultiplierSetInINI()) { m_pRThruster->SetDamageMultiplier(1.0F); }
+        m_pRThruster->SetInheritsRotAngle(false);
     } else if (propName == "LThruster") {
         delete m_pLThruster;
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
-        m_pLThruster->SetTransfersDamageToParent(true);
+        if (!m_pLThruster->GetDamageMultiplierSetInINI()) { m_pLThruster->SetDamageMultiplier(1.0F); }
+        m_pLThruster->SetInheritsRotAngle(false);
     } else if (propName == "URThruster") {
         delete m_pURThruster;
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
-        m_pURThruster->SetTransfersDamageToParent(true);
+        if (!m_pURThruster->GetDamageMultiplierSetInINI()) { m_pURThruster->SetDamageMultiplier(1.0F); }
     } else if (propName == "ULThruster") {
         delete m_pULThruster;
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
-        m_pULThruster->SetTransfersDamageToParent(true);
+        if (!m_pULThruster->GetDamageMultiplierSetInINI()) { m_pULThruster->SetDamageMultiplier(1.0F); }
     } else if (propName == "RHatchDoor") {
         delete m_pRHatch;
         m_pRHatch = new Attachable;
         reader >> m_pRHatch;
-        m_pRHatch->SetTransfersDamageToParent(true);
+        if (!m_pRHatch->GetDamageMultiplierSetInINI()) { m_pRHatch->SetDamageMultiplier(1.0F); }
+        m_pRHatch->SetInheritsRotAngle(false);
     } else if (propName == "LHatchDoor") {
         delete m_pLHatch;
         m_pLHatch = new Attachable;
         reader >> m_pLHatch;
-        m_pLHatch->SetTransfersDamageToParent(true);
+        if (!m_pLHatch->GetDamageMultiplierSetInINI()) { m_pLHatch->SetDamageMultiplier(1.0F); }
+        m_pLHatch->SetInheritsRotAngle(false);
     } else if (propName == "HatchDoorSwingRange") {
         reader >> m_HatchSwingRange;
     } else if (propName == "AutoStabilize") {
@@ -530,8 +533,6 @@ void ACDropShip::UpdateAI()
 
 void ACDropShip::Update()
 {
-	float mass = GetMass();
-
 	/////////////////////////////////
 	// Controller update and handling
 
@@ -687,134 +688,79 @@ void ACDropShip::Update()
 		}
 	}
 
-	/////////////////////////////////////////////////
-	// Update MovableObject, adds on the forces etc, updated viewpoint
+    /////////////////////////////////
+    // Manage Attachable:s
+    Matrix engineRot = 0;
+    if (m_Rotation.GetDegAngle() > m_MaxEngineAngle) {
+        engineRot.SetDegAngle(m_Rotation.GetDegAngle() - m_MaxEngineAngle);
+    } else if (m_Rotation.GetDegAngle() < -m_MaxEngineAngle) {
+        engineRot.SetDegAngle(m_Rotation.GetDegAngle() + m_MaxEngineAngle);
+    } else {
+        // Lateral control application
+        engineRot.SetDegAngle(m_MaxEngineAngle * m_LateralControl);
+    }
 
-	ACraft::Update();
-
-
-	/////////////////////////////////
-	// Update Attachable:s
-
-// TODO: don't hardcode the 20 deg tilt range!
-	Matrix engineRot = 0;
-	// Clamp engine rotation to within +-20 of body rotation
-	if (m_Rotation.GetDegAngle() > m_MaxEngineAngle)
-		engineRot.SetDegAngle(m_Rotation.GetDegAngle() - m_MaxEngineAngle);
-	else if (m_Rotation.GetDegAngle() < -m_MaxEngineAngle)
-		engineRot.SetDegAngle(m_Rotation.GetDegAngle() + m_MaxEngineAngle);
-	// Lateral control application
-	else
-		engineRot.SetDegAngle(m_MaxEngineAngle * m_LateralControl);
-
-    if (m_pRThruster && m_pRThruster->IsAttached())
-    {
+    if (m_pRThruster && m_pRThruster->IsAttached()) {
         m_pRThruster->SetRotAngle(engineRot.GetRadAngle());
-        m_pRThruster->SetJointPos(m_Pos + m_pRThruster->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pRThruster->Update();
 
         // Update the Atoms' offsets in the parent group
         Matrix atomRot(FacingAngle(m_pRThruster->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
         m_pAtomGroup->UpdateSubAtoms(m_pRThruster->GetAtomSubgroupID(), m_pRThruster->GetParentOffset() - (m_pRThruster->GetJointOffset() * atomRot), atomRot);
-
-        m_Health -= m_pRThruster->CollectDamage();
     }
 
-    if (m_pLThruster && m_pLThruster->IsAttached())
-    {
+    if (m_pLThruster && m_pLThruster->IsAttached()) {
         m_pLThruster->SetRotAngle(engineRot.GetRadAngle());
-        m_pLThruster->SetJointPos(m_Pos + m_pLThruster->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pLThruster->Update();
 
         // Update the Atoms' offsets in the parent group
         Matrix atomRot(FacingAngle(m_pLThruster->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
         m_pAtomGroup->UpdateSubAtoms(m_pLThruster->GetAtomSubgroupID(), m_pLThruster->GetParentOffset() - (m_pLThruster->GetJointOffset() * atomRot), atomRot);
-
-        m_Health -= m_pLThruster->CollectDamage();
     }
 
     // Auto balancing with the up thrusters
-
-    if (m_pURThruster && m_pURThruster->IsAttached() && m_pULThruster && m_pULThruster->IsAttached())
-    {
-        if (m_AutoStabilize)
-        {
+    if (m_pURThruster && m_pURThruster->IsAttached() && m_pULThruster && m_pULThruster->IsAttached()) {
+        if (m_AutoStabilize) {
             // Use a PD-controller for balance
-            float change = 0.9 * m_AngularVel + 0.8 * m_Rotation.GetRadAngle();
-            if (change > 0.2)
-            {
-                if (!m_pURThruster->IsEmitting())
+            float change = 0.9F * m_AngularVel + 0.8F * m_Rotation.GetRadAngle();
+            if (change > 0.2F) {
+                if (!m_pURThruster->IsEmitting()) {
                     m_pURThruster->TriggerBurst();
+                }
                 m_pURThruster->EnableEmission(true);
-            }
-            else
+            } else {
                 m_pURThruster->EnableEmission(false);
-
-            if (change < -0.2)
-            {
-                if (!m_pULThruster->IsEmitting())
-                    m_pULThruster->TriggerBurst();
-                m_pULThruster->EnableEmission(true);
             }
-            else
+
+            if (change < -0.2F) {
+                if (!m_pULThruster->IsEmitting()) {
+                    m_pULThruster->TriggerBurst();
+                }
+                m_pULThruster->EnableEmission(true);
+            } else {
                 m_pULThruster->EnableEmission(false);
+            }
         }
-
-        m_pURThruster->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pURThruster->SetJointPos(m_Pos + m_pURThruster->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pURThruster->Update();
-
-        m_pULThruster->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pULThruster->SetJointPos(m_Pos + m_pULThruster->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pULThruster->Update();
     }
 
     // Hatch door pieces
-
-    if (m_pRHatch && m_pRHatch->IsAttached())
-    {
+    if (m_pRHatch && m_pRHatch->IsAttached()) {
         m_pRHatch->SetRotAngle(m_Rotation.GetRadAngle() + m_HatchSwingRange.GetRadAngle() * m_HatchOpeness);
-        m_pRHatch->SetJointPos(m_Pos + m_pRHatch->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pRHatch->Update();
 
-		// Update the Atoms' offsets in the parent group
-		Matrix atomRot(FacingAngle(m_pRHatch->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-		m_pAtomGroup->UpdateSubAtoms(m_pRHatch->GetAtomSubgroupID(), m_pRHatch->GetParentOffset() - (m_pRHatch->GetJointOffset() * atomRot), atomRot);
-
-        m_Health -= m_pRHatch->CollectDamage();
+        // Update the Atoms' offsets in the parent group
+        Matrix atomRot(FacingAngle(m_pRHatch->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
+        m_pAtomGroup->UpdateSubAtoms(m_pRHatch->GetAtomSubgroupID(), m_pRHatch->GetParentOffset() - (m_pRHatch->GetJointOffset() * atomRot), atomRot);
     }
 
-    if (m_pLHatch && m_pLHatch->IsAttached())
-    {
+    if (m_pLHatch && m_pLHatch->IsAttached()) {
         m_pLHatch->SetRotAngle(m_Rotation.GetRadAngle() - m_HatchSwingRange.GetRadAngle() * m_HatchOpeness);
-        m_pLHatch->SetJointPos(m_Pos + m_pLHatch->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pLHatch->Update();
 
-		// Update the Atoms' offsets in the parent group
-		Matrix atomRot(FacingAngle(m_pLHatch->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-		m_pAtomGroup->UpdateSubAtoms(m_pLHatch->GetAtomSubgroupID(), m_pLHatch->GetParentOffset() - (m_pLHatch->GetJointOffset() * atomRot), atomRot);
-
-        m_Health -= m_pLHatch->CollectDamage();
+        // Update the Atoms' offsets in the parent group
+        Matrix atomRot(FacingAngle(m_pLHatch->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
+        m_pAtomGroup->UpdateSubAtoms(m_pLHatch->GetAtomSubgroupID(), m_pLHatch->GetParentOffset() - (m_pLHatch->GetJointOffset() * atomRot), atomRot);
     }
 
-    ///////////////////////////////////////////////////////////
-    // Apply forces transferred from the attachables and
-    // add detachment wounds to this if applicable
-
-    if (!ApplyAttachableForces(m_pRHatch))
-        m_pRHatch = 0;
-    if (!ApplyAttachableForces(m_pLHatch))
-        m_pLHatch = 0;
-    if (!ApplyAttachableForces(m_pRThruster))
-        m_pRThruster = 0;
-    if (!ApplyAttachableForces(m_pLThruster))
-        m_pLThruster = 0;
-    if (!ApplyAttachableForces(m_pURThruster))
-        m_pURThruster = 0;
-    if (!ApplyAttachableForces(m_pULThruster))
-        m_pULThruster = 0;
-
-// TODO: add hatch damage here
+	/////////////////////////////////////////////////
+	// Update MovableObject, adds on the forces etc, updated viewpoint
+	ACraft::Update();
 
     ///////////////////////////////////
     // Explosion logic

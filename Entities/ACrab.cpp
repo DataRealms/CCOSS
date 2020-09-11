@@ -2646,6 +2646,8 @@ void ACrab::Update()
         }
     }
 
+    /////////////////////////////////
+    // Manage Attachable:s
     if (m_pTurret && m_pTurret->IsAttached()) {
         m_pTurret->SetMountedDeviceRotOffset((m_AimAngle * static_cast<float>(GetFlipFactor())) - m_Rotation.GetRadAngle());
     }

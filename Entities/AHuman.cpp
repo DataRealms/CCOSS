@@ -3980,18 +3980,8 @@ void AHuman::Update()
         }
     }
 
-
-
-
-
-
-
-
-
-
     /////////////////////////////////
-    // Update Attachable:s
-
+    // Manage Attachable:s
     if (m_pHead && m_pHead->IsAttached()) {
         float toRotate = 0;
         // Only rotate the head to match the aim angle if body is stable and upright

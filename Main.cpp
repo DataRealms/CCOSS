@@ -597,7 +597,7 @@ bool PlayIntroTitle() {
             {
 				const int intensity = Stars[star].m_Intensity + RandomNum(0, 35 * (Stars[star].m_Size + 1));
 				set_screen_blender(intensity, intensity, intensity, intensity);
-				int &starDrawPosX = Stars[star].m_PosX;
+				const int &starDrawPosX = Stars[star].m_PosX;
 				int starDrawPosY = Stars[star].m_PosY - static_cast<int>(scrollOffset.m_Y * Stars[star].m_ScrollRatio);
 				draw_trans_sprite(g_FrameMan.GetBackBuffer32(), Stars[star].m_Bitmap, starDrawPosX, starDrawPosY);
             }

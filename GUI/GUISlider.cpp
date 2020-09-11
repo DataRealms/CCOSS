@@ -475,8 +475,8 @@ void GUISlider::OnMouseWheelChange(int x, int y, int modifier, int mouseWheelCha
 	if (m_Value != m_OldValue) {
 		const int size = (m_Orientation == Horizontal) ? m_Width : m_Height;
 		const int posRange = size - m_KnobSize - m_EndThickness;
-		const float ratio = static_cast<float>(m_Value) / static_cast<float>(m_Maximum - m_Minimum);
-		m_KnobPosition = m_EndThickness + static_cast<int>(std::round(static_cast<float>(posRange) * ratio));
+		const float ratio = static_cast<float>(m_Value - m_Minimum) / static_cast<float>(m_Maximum - m_Minimum);
+		m_KnobPosition = std::max(m_EndThickness, static_cast<int>(std::round(static_cast<float>(posRange) * ratio)));
 
 		AddEvent(GUIEvent::Notification, Changed, 0);
 	}

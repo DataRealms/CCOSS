@@ -546,6 +546,7 @@ int MetagameGUI::Create(Controller *pController)
     m_pGoldSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("GoldSlider"));
     m_pLengthLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LengthLabel"));
     m_pLengthSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("LengthSlider"));
+
     m_pErrorLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("StartErrorLabel"));
     m_apPlayerControlButton[Players::PlayerOne] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("P1ControlButton"));
     m_apPlayerControlButton[Players::PlayerTwo] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("P2ControlButton"));
@@ -1169,7 +1170,7 @@ bool MetagameGUI::StartNewGame()
             
             // Set the starting brains for this player
             // Start with the baseline setting
-            newPlayer.m_BrainPool = ceilf(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
+            newPlayer.m_BrainPool = m_pLengthSlider->GetValue();
             // Baseline can never be 0
             newPlayer.m_BrainPool = MAX(newPlayer.m_BrainPool, 1);
             // Apply the handicap!
@@ -6258,8 +6259,7 @@ void MetagameGUI::UpdateGameSizeLabels()
     m_pGoldLabel->SetText(str);
 
     // Set the length label also according to the game length slider
-// TODO: don't hardcode the range of this
-    int brainCount = ceilf(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
+    int brainCount = m_pLengthSlider->GetValue();
     brainCount = MAX(brainCount, 1);
     sprintf_s(str, sizeof(str), "Game Length: %c%c%d starting brains", -48, -36, brainCount);
     m_pLengthLabel->SetText(str);

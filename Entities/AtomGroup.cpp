@@ -1939,8 +1939,9 @@ before adding them to the MovableMan.
 
             // TERRAIN COLLISION RESPONSE /////////////////////////////////////////////////////
             // Determine which of the colliding Atom:s will penetrate the terrain.
+			bool somethingPenetrated = false;
             do {
-                penetratingAtoms.clear();
+				somethingPenetrated = false;
 
                 massDist = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
@@ -1954,11 +1955,12 @@ before adding them to the MovableMan.
                         // Move the penetrating atom to the pen. list from the coll. list.
                         penetratingAtoms.push_back(pair<Atom *, Vector>((*aoItr).first, (*aoItr).second));
                         aoItr = hitTerrAtoms.erase(aoItr);
+						somethingPenetrated = true;
                     }
                     else
                         ++aoItr;
                 }
-            } while (!hitTerrAtoms.empty() && !penetratingAtoms.empty());
+			} while (!hitTerrAtoms.empty() && somethingPenetrated);
 
             // TERRAIN BOUNCE //////////////////////////////////////////////////////////////////
             // If some Atom:s could not penetrate even though all the mass was on them,

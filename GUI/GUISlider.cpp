@@ -465,22 +465,23 @@ void GUISlider::OnMouseMove(int X, int Y, int Buttons, int Modifier)
 
 void GUISlider::OnMouseWheelChange(int x, int y, int modifier, int mouseWheelChange) {
 	m_OldValue = m_Value;
-	const int size = (m_Orientation == Horizontal) ? m_Width : m_Height;
-	
-	const float ratio = static_cast<float>(m_ValueResolution) / static_cast<float>(m_Maximum - m_Minimum);
-	const int posRange = size - m_KnobSize - m_EndThickness;
-	const int posDelta = std::max(static_cast<int>(ratio * static_cast<float>(posRange)),1);
+
 	if (mouseWheelChange < 0) {
 		m_Value = std::max(m_Value - m_ValueResolution, m_Minimum);
-		m_KnobPosition = std::max(m_KnobPosition - posDelta, m_EndThickness);
 	} else {
 		m_Value = std::min(m_Value + m_ValueResolution, m_Maximum);
-		m_KnobPosition = std::min(m_KnobPosition + posDelta, posRange);
 	}
+	
+	if (m_Value != m_OldValue) {
+		const int size = (m_Orientation == Horizontal) ? m_Width : m_Height;
+		const int posRange = size - m_KnobSize - m_EndThickness;
+		const float ratio = static_cast<float>(m_Value) / static_cast<float>(m_Maximum - m_Minimum);
+		m_KnobPosition = m_EndThickness + static_cast<int>(std::round(static_cast<float>(posRange) * ratio));
 
-	if (m_Value != m_OldValue)
 		AddEvent(GUIEvent::Notification, Changed, 0);
+	}
 }
+
 /*
 
 //////////////////////////////////////////////////////////////////////////////////////////

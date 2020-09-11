@@ -1464,10 +1464,13 @@ void Actor::Update()
     }
 
     /////////////////////////////////////
-    // Detract damage caused by wounds from health
-
-    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
-        m_Health -= (*itr)->CollectDamage() * m_DamageMultiplier; //Actors must apply DamageMultiplier effects to their main MO by themselves
+    // Take damage from wounds and wounds on Attachables
+    for (AEmitter *wound : m_Wounds) {
+        m_Health -= wound->CollectDamage() * m_DamageMultiplier;
+    }
+    for (Attachable *attachable : m_Attachables) {
+        m_Health -= attachable->CollectDamage();
+    }
 
     /////////////////////////////////////////////
     // Take damage from large hits during travel

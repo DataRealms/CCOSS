@@ -202,14 +202,14 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         delete m_pHead;
         m_pHead = new Attachable;
         reader >> m_pHead;
-        if (m_pHead->GetDamageMultiplier() >= 0.0F) {
-            m_pHead->SetDamageMultiplier(5);
-        }
-        m_pHead->SetTransfersDamageToParent(true);
+        if (!m_pHead->GetDamageMultiplierSetInINI()) { m_pHead->SetDamageMultiplier(5.0F); }
+        m_pHead->SetInheritsRotAngle(false);
     } else if (propName == "Jetpack") {
         delete m_pJetpack;
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
+        if (!m_pJetpack->GetDamageMultiplierSetInINI()) { m_pJetpack->SetDamageMultiplier(0.0F); }
+        m_pJetpack->SetOnlyLinearForces(true);
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         // Convert to ms
@@ -218,24 +218,24 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         delete m_pFGArm;
         m_pFGArm = new Arm;
         reader >> m_pFGArm;
-        m_pFGArm->SetTransfersDamageToParent(true);
+        if (!m_pFGArm->GetDamageMultiplierSetInINI()) { m_pFGArm->SetDamageMultiplier(1.0F); }
         m_pFGArm->SetDrawnAfterParent(true);
     } else if (propName == "BGArm") {
         delete m_pBGArm;
         m_pBGArm = new Arm;
         reader >> m_pBGArm;
-        m_pBGArm->SetTransfersDamageToParent(true);
+        if (!m_pBGArm->GetDamageMultiplierSetInINI()) { m_pBGArm->SetDamageMultiplier(1.0F); }
         m_pBGArm->SetDrawnAfterParent(false);
     } else if (propName == "FGLeg") {
         delete m_pFGLeg;
         m_pFGLeg = new Leg;
         reader >> m_pFGLeg;
-        m_pFGLeg->SetTransfersDamageToParent(true);
+        if (!m_pFGLeg->GetDamageMultiplierSetInINI()) { m_pFGLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "BGLeg") {
         delete m_pBGLeg;
         m_pBGLeg = new Leg;
         reader >> m_pBGLeg;
-        m_pBGLeg->SetTransfersDamageToParent(true);
+        if (!m_pBGLeg->GetDamageMultiplierSetInINI()) { m_pBGLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "HandGroup") {
         delete m_pFGHandGroup;
         delete m_pBGHandGroup;
@@ -3980,10 +3980,111 @@ void AHuman::Update()
         }
     }
 
+
+
+
+
+
+
+
+
+
+    /////////////////////////////////
+    // Update Attachable:s
+
+    if (m_pHead && m_pHead->IsAttached()) {
+        float toRotate = 0;
+        // Only rotate the head to match the aim angle if body is stable and upright
+        if (m_Status == STABLE && fabs(m_Rotation.GetRadAngle()) < (c_HalfPI + c_QuarterPI)) {
+            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_HFlipped ? -m_AimAngle : m_AimAngle) * 0.7 + m_Rotation.GetRadAngle() * 0.2);
+            toRotate *= 0.15;
+        }
+        // If dying upright, make head slump forward or back depending on body lean
+// TODO: Doesn't work too well, but probably could
+//        else if ((m_Status == DEAD || m_Status == DYING) && fabs(m_Rotation.GetRadAngle()) < c_QuarterPI)
+//        {
+//            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle() + ((m_HFlipped && m_Rotation.GetRadAngle() > 0) || (!m_HFlipped && m_Rotation.GetRadAngle() > 0) ? c_PI : -c_PI) * 0.6);
+//            toRotate *= 0.10;
+//        }
+        // Make head just keep rotating loosely with the body if unstable or upside down
+        else {
+            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle());
+            toRotate *= 0.10F;
+        }
+        // Now actually rotate by the amount calculated above
+        m_pHead->SetRotAngle(m_pHead->GetRotAngle() + toRotate);
+
+        // Update the Atoms' offsets in the parent group
+        Matrix headAtomRot(FacingAngle(m_pHead->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
+        m_pAtomGroup->UpdateSubAtoms(m_pHead->GetAtomSubgroupID(), m_pHead->GetParentOffset() - (m_pHead->GetJointOffset() * headAtomRot), headAtomRot);
+    }
+
+    if (m_pFGLeg && m_pFGLeg->IsAttached()) {
+        m_pFGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
+        m_pFGLeg->SetTargetPosition(m_pFGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pBGLeg && m_pBGLeg->IsAttached()) {
+        m_pBGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
+        m_pBGLeg->SetTargetPosition(m_pBGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pFGArm && m_pFGArm->IsAttached()) {
+        m_pFGArm->SetRotAngle(m_AimAngle * static_cast<float>(GetFlipFactor()));
+        m_pFGArm->SetRotAngle(m_HFlipped ? (-m_AimAngle/* + -m_Rotation*/) : (m_AimAngle/* + m_Rotation*/));
+
+        if (m_Status == STABLE) {
+            if (m_ArmClimbing[FGROUND]) {
+                // Can't climb with anything in the arm?
+                //UnequipBGArm();
+                m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
+            } else if (!m_pFGArm->IsReaching()) {
+                // This will likely make the arm idle since the target will be out of range
+                m_pFGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
+            }
+        } else {
+            // Unstable, so just drop the arm limply
+            m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
+        }
+    }
+
+    if (m_pBGArm && m_pBGArm->IsAttached()) {
+        if (m_Status == STABLE) {
+            if (m_ArmClimbing[BGROUND]) {
+                // Can't climb with the shield
+                UnequipBGArm();
+                m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
+            } else if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice() && !m_pBGArm->HoldsHeldDevice()) {
+                // Re-equip shield in BG arm after climbing
+                EquipShieldInBGArm();
+                m_pBGArm->Reach(m_pFGArm->GetHeldDevice()->GetSupportPos());
+                //            m_pBGArm->ReachToward(m_Pos + m_WalkPaths.front()->GetCurrentPos());
+
+                // BGArm does reach to support the device held by FGArm.
+                if (m_pBGArm->DidReach()) {
+                    m_pFGArm->GetHeldDevice()->SetSupported(true);
+                    m_pBGArm->SetRecoil(m_pFGArm->GetHeldDevice()->GetRecoilForce(), m_pFGArm->GetHeldDevice()->GetRecoilOffset(), m_pFGArm->GetHeldDevice()->IsRecoiled());
+                } else {
+                    // BGArm did not reach to support the device.
+                    m_pFGArm->GetHeldDevice()->SetSupported(false);
+                    m_pBGArm->SetRecoil(Vector(), Vector(), false);
+                }
+            } else {
+                // Re-equip shield in BG arm after climbing
+                EquipShieldInBGArm();
+                // This will likely make the arm idle since the target will be out of range
+                m_pBGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
+                m_pBGArm->SetRotAngle(m_HFlipped ? (-m_AimAngle + -m_Rotation.GetRadAngle()) : (m_AimAngle + m_Rotation.GetRadAngle()));
+            }
+        } else {
+            // Unstable, so just drop the arm limply
+            m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
+        }
+    }
+
     /////////////////////////////////////////////////
     // Update MovableObject, adds on the forces etc
     // NOTE: this also updates the controller, so any setstates of it will be wiped!
-
     Actor::Update();
 
     ////////////////////////////////////
@@ -4033,176 +4134,6 @@ void AHuman::Update()
     if (m_Vel.GetMagnitude() > 10.0)
         m_ViewPoint += m_Vel * 6;
 
-    /////////////////////////////////
-    // Update Attachable:s
-
-    if (m_pHead && m_pHead->IsAttached())
-    {
-        m_pHead->SetHFlipped(m_HFlipped);
-        m_pHead->SetJointPos(m_Pos + m_pHead->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        float toRotate = 0;
-        // Only rotate the head to match the aim angle if body is stable and upright
-        if (m_Status == STABLE && fabs(m_Rotation.GetRadAngle()) < (c_HalfPI + c_QuarterPI))
-        {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_HFlipped ? -m_AimAngle : m_AimAngle) * 0.7 + m_Rotation.GetRadAngle() * 0.2);
-            toRotate *= 0.15;
-        }
-        // If dying upright, make head slump forward or back depending on body lean
-// TODO: Doesn't work too well, but probably could
-//        else if ((m_Status == DEAD || m_Status == DYING) && fabs(m_Rotation.GetRadAngle()) < c_QuarterPI)
-//        {
-//            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle() + ((m_HFlipped && m_Rotation.GetRadAngle() > 0) || (!m_HFlipped && m_Rotation.GetRadAngle() > 0) ? c_PI : -c_PI) * 0.6);
-//            toRotate *= 0.10;
-//        }
-        // Make head just keep rotating loosely with the body if unstable or upside down
-        else
-        {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle());
-            toRotate *= 0.10;
-        }
-        // Now actually rotate by the amount calculated above
-        m_pHead->SetRotAngle(m_pHead->GetRotMatrix().GetRadAngle() + toRotate);
-
-        m_pHead->Update();
-        // Update the Atoms' offsets in the parent group
-        Matrix headAtomRot(FacingAngle(m_pHead->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-        m_pAtomGroup->UpdateSubAtoms(m_pHead->GetAtomSubgroupID(), m_pHead->GetParentOffset() - (m_pHead->GetJointOffset() * headAtomRot), headAtomRot);
-
-        m_Health -= m_pHead->CollectDamage();// * 5; // This is done in CollectDamage via m_DamageMultiplier now.
-    }
-
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        m_pJetpack->SetHFlipped(m_HFlipped);
-        m_pJetpack->SetJointPos(m_Pos + m_pJetpack->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pJetpack->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pJetpack->SetOnlyLinearForces(true);
-        m_pJetpack->Update();
-//        m_Health -= m_pJetpack->CollectDamage() * 10;
-    }
-
-    if (m_pFGLeg && m_pFGLeg->IsAttached())
-    {
-        m_pFGLeg->SetHFlipped(m_HFlipped);
-        m_pFGLeg->SetJointPos(m_Pos + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pFGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
-//        if (!m_ArmClimbing[FGROUND])
-            m_pFGLeg->SetTargetPosition(m_pFGFootGroup->GetLimbPos(m_HFlipped));
-        m_pFGLeg->Update();
-        m_Health -= m_pFGLeg->CollectDamage();
-    }
-
-    if (m_pBGLeg && m_pBGLeg->IsAttached())
-    {
-        m_pBGLeg->SetHFlipped(m_HFlipped);
-        m_pBGLeg->SetJointPos(m_Pos + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pBGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
-//        if (!m_ArmClimbing[BGROUND])
-            m_pBGLeg->SetTargetPosition(m_pBGFootGroup->GetLimbPos(m_HFlipped));
-        m_pBGLeg->Update();
-        m_Health -= m_pBGLeg->CollectDamage();
-    }
-
-    if (m_pFGArm && m_pFGArm->IsAttached())
-    {
-        m_pFGArm->SetHFlipped(m_HFlipped);
-        m_pFGArm->SetJointPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pFGArm->SetRotAngle(m_HFlipped ? (-m_AimAngle/* + -m_Rotation*/) : (m_AimAngle/* + m_Rotation*/));
-//        m_pFGArm->SetRotTarget(m_HFlipped ? (-m_AimAngle/* + -m_Rotation*/) : (m_AimAngle/* + m_Rotation*/));
-
-        if (m_Status == STABLE)
-        {
-            if (m_ArmClimbing[FGROUND])
-            {
-                // Can't climb with anything in the arm?
-    //            UnequipBGArm();
-                m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-            }
-            // This will likely make the arm idle since the target will be out of range
-            else if (!m_pFGArm->IsReaching())
-                m_pFGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-        }
-        // Unstable, so just drop the arm limply
-        else
-            m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-
-        m_pFGArm->Update();
-        m_Health -= m_pFGArm->CollectDamage();
-    }
-
-    if (m_pBGArm && m_pBGArm->IsAttached())
-    {
-        m_pBGArm->SetHFlipped(m_HFlipped);
-        m_pBGArm->SetJointPos(m_Pos + m_pBGArm->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        if (m_Status == STABLE)
-        {
-            if (m_ArmClimbing[BGROUND])
-            {
-                // Can't climb with the shield
-                UnequipBGArm();
-                m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
-                m_pBGArm->Update();
-            }
-            else if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice() && !m_pBGArm->HoldsHeldDevice())
-            {
-                // Re-equip shield in BG arm after climbing
-                EquipShieldInBGArm();
-                m_pBGArm->Reach(m_pFGArm->GetHeldDevice()->GetSupportPos());
-    //            m_pBGArm->ReachToward(m_Pos + m_WalkPaths.front()->GetCurrentPos());
-                m_pBGArm->Update();
-
-                // BGArm does reach to support the device held by FGArm.
-                if (m_pBGArm->DidReach())
-                {
-                    m_pFGArm->GetHeldDevice()->SetSupported(true);
-                    m_pBGArm->SetRecoil(m_pFGArm->GetHeldDevice()->GetRecoilForce(),
-                                        m_pFGArm->GetHeldDevice()->GetRecoilOffset(),
-                                        m_pFGArm->GetHeldDevice()->IsRecoiled());
-                }
-                // BGArm did not reach to support the device.
-                else
-                {
-                    m_pFGArm->GetHeldDevice()->SetSupported(false);
-                    m_pBGArm->SetRecoil(Vector(), Vector(), false);
-                }
-            }
-            else
-            {
-                // Re-equip shield in BG arm after climbing
-                EquipShieldInBGArm();
-                // This will likely make the arm idle since the target will be out of range
-                m_pBGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-                m_pBGArm->SetRotAngle(m_HFlipped ? (-m_AimAngle + -m_Rotation.GetRadAngle()) : (m_AimAngle + m_Rotation.GetRadAngle()));
-                m_pBGArm->Update();
-            }
-        }
-        // Unstable, so just drop the arm limply
-        else
-        {
-            m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
-            m_pBGArm->Update();
-        }
-
-        m_Health -= m_pBGArm->CollectDamage();
-    }
-
-    /////////////////////////////
-    // Apply forces transferred from the attachables and
-    // add detachment wounds to this if applicable
-
-    if (!ApplyAttachableForces(m_pHead))
-        m_pHead = 0;
-    if (!ApplyAttachableForces(m_pJetpack))
-        m_pJetpack = 0;
-    if (!ApplyAttachableForces(m_pFGArm, true))
-        m_pFGArm = 0;
-    if (!ApplyAttachableForces(m_pBGArm, true))
-        m_pBGArm = 0;
-    if (!ApplyAttachableForces(m_pFGLeg, true))
-        m_pFGLeg = 0;
-    if (!ApplyAttachableForces(m_pBGLeg, true))
-        m_pBGLeg = 0;
 /* Done by pie menu now, see HandlePieCommand()
     ////////////////////////////////////////
     // AI mode setting

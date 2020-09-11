@@ -42,20 +42,23 @@ void Arm::Clear()
     m_DidReach = false;
 }
 
-/*
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Create
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Round object ready for use.
+// Description:     Makes the Arm object ready for use.
 
-int Arm::Create()
-{
-    if (Attachable::Create() < 0)
+int Arm::Create() {
+    if (MOSRotating::Create() < 0) {
         return -1;
+    }
+
+    // Ensure Arms don't get flagged as inheriting RotAngle, since they never do and always set their RotAngle for themselves.
+    m_InheritsRotAngle = false;
 
     return 0;
 }
-*/
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create

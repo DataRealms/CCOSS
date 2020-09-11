@@ -65,6 +65,12 @@ ClassInfoGetters
 	~Arm() override { Destroy(true); }
 
 
+    /// <summary>
+    /// Makes the Arm object ready for use.
+    /// </summary>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    int Create() override;
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
 //////////////////////////////////////////////////////////////////////////////////////////

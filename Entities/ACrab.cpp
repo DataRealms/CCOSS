@@ -226,15 +226,13 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         delete m_pTurret;
         m_pTurret = new Turret;
         reader >> m_pTurret;
-        m_pTurret->SetTransfersDamageToParent(true);
-        if (m_pTurret->GetDamageMultiplier() < 0.0F) {
-            m_pTurret->SetDamageMultiplier(5);
-        }
+        if (!m_pTurret->GetDamageMultiplierSetInINI()) { m_pTurret->SetDamageMultiplier(5.0F); }
     } else if (propName == "Jetpack") {
         delete m_pJetpack;
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-        m_pJetpack->SetTransfersDamageToParent(true);
+        if (!m_pJetpack->GetDamageMultiplierSetInINI()) { m_pJetpack->SetDamageMultiplier(0.0F); }
+        m_pJetpack->SetOnlyLinearForces(true);
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         m_JetTimeTotal *= 1000;
@@ -242,22 +240,24 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         delete m_pLFGLeg;
         m_pLFGLeg = new Leg;
         reader >> m_pLFGLeg;
-        m_pLFGLeg->SetTransfersDamageToParent(true);
+        if (!m_pLFGLeg->GetDamageMultiplierSetInINI()) { m_pLFGLeg->SetDamageMultiplier(1.0F); }
+        m_pLFGLeg->SetInheritsHFlipped(2);
     } else if (propName == "LBGLeg") {
         delete m_pLBGLeg;
         m_pLBGLeg = new Leg;
         reader >> m_pLBGLeg;
-        m_pLBGLeg->SetTransfersDamageToParent(true);
+        if (!m_pLBGLeg->GetDamageMultiplierSetInINI()) { m_pLBGLeg->SetDamageMultiplier(1.0F); }
+        m_pLBGLeg->SetInheritsHFlipped(2);
     } else if (propName == "RFGLeg") {
         delete m_pRFGLeg;
         m_pRFGLeg = new Leg;
         reader >> m_pRFGLeg;
-        m_pRFGLeg->SetTransfersDamageToParent(true);
+        if (!m_pRFGLeg->GetDamageMultiplierSetInINI()) { m_pRFGLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "RBGLeg") {
         delete m_pRBGLeg;
         m_pRBGLeg = new Leg;
         reader >> m_pRBGLeg;
-        m_pRBGLeg->SetTransfersDamageToParent(true);
+        if (!m_pRBGLeg->GetDamageMultiplierSetInINI()) { m_pRBGLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "LFootGroup") {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;
@@ -2646,12 +2646,35 @@ void ACrab::Update()
         }
     }
 
+    if (m_pTurret && m_pTurret->IsAttached()) {
+        m_pTurret->SetMountedDeviceRotOffset((m_AimAngle * static_cast<float>(GetFlipFactor())) - m_Rotation.GetRadAngle());
+    }
+
+    if (m_pLFGLeg && m_pLFGLeg->IsAttached()) {
+        m_pLFGLeg->EnableIdle(m_Status != UNSTABLE);
+        m_pLFGLeg->SetTargetPosition(m_pLFGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pLBGLeg && m_pLBGLeg->IsAttached()) {
+        m_pLBGLeg->EnableIdle(m_Status != UNSTABLE);
+        m_pLBGLeg->SetTargetPosition(m_pLBGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pRFGLeg && m_pRFGLeg->IsAttached()) {
+        m_pRFGLeg->EnableIdle(m_Status != UNSTABLE);
+        m_pRFGLeg->SetTargetPosition(m_pRFGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pRBGLeg && m_pRBGLeg->IsAttached()) {
+        m_pRBGLeg->EnableIdle(m_Status != UNSTABLE);
+        m_pRBGLeg->SetTargetPosition(m_pRBGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+
     /////////////////////////////////////////////////
     // Update MovableObject, adds on the forces etc
     // NOTE: this also updates the controller, so any setstates of it will be wiped!
-
     Actor::Update();
-
 
     ////////////////////////////////////
     // Update viewpoint
@@ -2700,97 +2723,6 @@ void ACrab::Update()
     if (m_Vel.GetMagnitude() > 10.0)
         m_ViewPoint += m_Vel * 6;
 
-
-    /////////////////////////////////
-    // Update Attachable:s
-
-    if (m_pTurret && m_pTurret->IsAttached())
-    {
-        m_pTurret->SetHFlipped(m_HFlipped);
-        m_pTurret->SetJointPos(m_Pos + m_pTurret->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pTurret->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pTurret->SetMountedDeviceRotOffset((m_HFlipped ? -m_AimAngle : m_AimAngle) - m_Rotation.GetRadAngle());
-        m_pTurret->Update();
-        // Update the Atoms' offsets in the parent group
-//        Matrix atomRot(FacingAngle(m_pTurret->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-//        m_pAtomGroup->UpdateSubAtoms(m_pTurret->GetAtomSubgroupID(), m_pTurret->GetParentOffset() - (m_pTurret->GetJointOffset() * atomRot), atomRot);
-
-        m_Health -= m_pTurret->CollectDamage();// * 5;
-    }
-
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        m_pJetpack->SetHFlipped(m_HFlipped);
-        m_pJetpack->SetJointPos(m_Pos + m_pJetpack->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pJetpack->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pJetpack->SetOnlyLinearForces(true);
-        m_pJetpack->Update();
-//        m_Health -= m_pJetpack->CollectDamage() * 10;
-    }
-
-    if (m_pLFGLeg && m_pLFGLeg->IsAttached())
-    {
-        // Left legs always flipped the other way
-        m_pLFGLeg->SetHFlipped(!m_HFlipped);
-        // Don't flip the parent offset though, that's probably done in the ini
-        m_pLFGLeg->SetJointPos(m_Pos + m_pLFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pLFGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pLFGLeg->SetTargetPosition(m_pLFGFootGroup->GetLimbPos(m_HFlipped));
-        m_pLFGLeg->Update();
-        m_Health -= m_pLFGLeg->CollectDamage();
-    }
-
-    if (m_pLBGLeg && m_pLBGLeg->IsAttached())
-    {
-        // Left legs always flipped the other way
-        m_pLBGLeg->SetHFlipped(!m_HFlipped);
-        // Don't flip the parent offset though, that's probably done in the ini
-        m_pLBGLeg->SetJointPos(m_Pos + m_pLBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pLBGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pLBGLeg->SetTargetPosition(m_pLBGFootGroup->GetLimbPos(m_HFlipped));
-        m_pLBGLeg->Update();
-        m_Health -= m_pLBGLeg->CollectDamage();
-    }
-
-    if (m_pRFGLeg && m_pRFGLeg->IsAttached())
-    {
-        m_pRFGLeg->SetHFlipped(m_HFlipped);
-        m_pRFGLeg->SetJointPos(m_Pos + m_pRFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pRFGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pRFGLeg->SetTargetPosition(m_pRFGFootGroup->GetLimbPos(m_HFlipped));
-        m_pRFGLeg->Update();
-        m_Health -= m_pRFGLeg->CollectDamage();
-    }
-
-    if (m_pRBGLeg && m_pRBGLeg->IsAttached())
-    {
-        m_pRBGLeg->SetHFlipped(m_HFlipped);
-        m_pRBGLeg->SetJointPos(m_Pos + m_pRBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pRBGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pRBGLeg->SetTargetPosition(m_pRBGFootGroup->GetLimbPos(m_HFlipped));
-        m_pRBGLeg->Update();
-        m_Health -= m_pRBGLeg->CollectDamage();
-    }
-
-    /////////////////////////////
-    // Apply forces transferred from the attachables and
-    // add detachment wounds to this if applicable
-
-    if (!ApplyAttachableForces(m_pTurret))
-        m_pTurret = 0;
-    if (!ApplyAttachableForces(m_pJetpack))
-        m_pJetpack = 0;
-    if (!ApplyAttachableForces(m_pLFGLeg))
-        m_pLFGLeg = 0;
-    if (!ApplyAttachableForces(m_pLBGLeg))
-        m_pLBGLeg = 0;
-    if (!ApplyAttachableForces(m_pRFGLeg))
-        m_pRFGLeg = 0;
-    if (!ApplyAttachableForces(m_pRBGLeg))
-        m_pRBGLeg = 0;
 /* Done by pie menu now, see HandlePieCommand()
     ////////////////////////////////////////
     // AI mode setting

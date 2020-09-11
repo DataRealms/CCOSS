@@ -200,12 +200,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float Attachable::CollectDamage() {
-		if (m_DamageMultiplier > 0) {
+		if (m_DamageMultiplier != 0) {
 			float totalDamage = m_DamageCount;
 			m_DamageCount = 0;
 
 			for (AEmitter *wound : m_Wounds) {
 				totalDamage += wound->CollectDamage();
+			}
+			for (Attachable *attachable : m_Attachables) {
+				totalDamage += attachable->CollectDamage();
 			}
 			return totalDamage * m_DamageMultiplier;
 		}

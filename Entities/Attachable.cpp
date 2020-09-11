@@ -16,7 +16,6 @@ namespace RTE {
 		m_ParentOffset.Reset();
 		m_DrawAfterParent = true;
 		m_DrawnNormallyByParent = true;
-		m_TransfersDamageToParent = false;
 		m_DeleteWithParent = false;
 
 		m_JointStrength = 10;
@@ -30,6 +29,7 @@ namespace RTE {
 		m_BreakWound = 0;
 		m_ParentBreakWound = 0;
 
+		m_InheritsHFlipped = 1;
 		m_InheritsRotAngle = true;
 
 		m_AtomSubgroupID = -1;
@@ -45,7 +45,6 @@ namespace RTE {
 		m_ParentOffset = reference.m_ParentOffset;
 		m_DrawAfterParent = reference.m_DrawAfterParent;
 		m_DrawnNormallyByParent = reference.m_DrawnNormallyByParent;
-		m_TransfersDamageToParent = reference.m_TransfersDamageToParent;
 		m_DeleteWithParent = reference.m_DeleteWithParent;
 
 		m_JointStrength = reference.m_JointStrength;
@@ -59,6 +58,7 @@ namespace RTE {
 		m_BreakWound = reference.m_BreakWound;
 		m_ParentBreakWound = reference.m_ParentBreakWound;
 
+		m_InheritsHFlipped = reference.m_InheritsHFlipped;
 		m_InheritsRotAngle = reference.m_InheritsRotAngle;
 
 		m_AtomSubgroupID = reference.m_AtomSubgroupID;
@@ -74,8 +74,6 @@ namespace RTE {
 			reader >> m_ParentOffset;
 		} else if (propName == "DrawAfterParent") {
 			reader >> m_DrawAfterParent;
-		} else if (propName == "TransfersDamageToParent") {
-			reader >> m_TransfersDamageToParent;
 		} else if (propName == "DeleteWithParent") {
 			reader >> m_DeleteWithParent;
 		} else if (propName == "JointStrength" || propName == "Strength") {
@@ -89,6 +87,9 @@ namespace RTE {
 			if (!m_ParentBreakWound) { m_ParentBreakWound = m_BreakWound; }
 		} else if (propName == "ParentBreakWound") {
 			m_ParentBreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
+		} else if (propName == "InheritsHFlipped") {
+			reader >> m_InheritsHFlipped;
+			if (m_InheritsHFlipped != 0 && m_InheritsHFlipped != 1) { m_InheritsHFlipped = 2; }
 		} else if (propName == "InheritsRotAngle") {
 			reader >> m_InheritsRotAngle;
 		} else if (propName == "CollidesWithTerrainWhenAttached") {
@@ -109,8 +110,6 @@ namespace RTE {
 		writer << m_ParentOffset;
 		writer.NewProperty("DrawAfterParent");
 		writer << m_DrawAfterParent;
-		writer.NewProperty("TransfersDamageToParent");
-		writer << m_TransfersDamageToParent;
 		writer.NewProperty("DeleteWithParent");
 		writer << m_DeleteWithParent;
 
@@ -126,8 +125,12 @@ namespace RTE {
 		writer.NewProperty("ParentBreakWound");
 		writer << m_ParentBreakWound;
 
+		writer.NewProperty("InheritsHFlipped");
+		if (m_InheritsHFlipped != 0 && m_InheritsHFlipped != 1) { m_InheritsHFlipped = 2; }
+		writer << m_InheritsHFlipped;
 		writer.NewProperty("InheritsRotAngle");
 		writer << m_InheritsRotAngle;
+
 		writer.NewProperty("CollidesWithTerrainWhileAttached");
 		writer << m_CollidesWithTerrainWhileAttached;
 
@@ -197,13 +200,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float Attachable::CollectDamage() {
-		float totalDamage = m_DamageCount;
-		m_DamageCount = 0;
+		if (m_DamageMultiplier > 0) {
+			float totalDamage = m_DamageCount;
+			m_DamageCount = 0;
 
-		for (AEmitter *wound : m_Wounds) {
-			totalDamage += wound->CollectDamage();
+			for (AEmitter *wound : m_Wounds) {
+				totalDamage += wound->CollectDamage();
+			}
+			return totalDamage * m_DamageMultiplier;
 		}
-		return totalDamage * m_DamageMultiplier;
+		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -267,7 +273,7 @@ namespace RTE {
 			m_Pos = m_JointPos - RotateOffset(m_JointOffset);
 			m_Vel = m_Parent->GetVel();
 			m_Team = m_Parent->GetTeam();
-			m_HFlipped = m_Parent->IsHFlipped();
+			if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
 			if (InheritsRotAngle()) { SetRotAngle(m_Parent->GetRotAngle()); }
 
 			m_DeepCheck = false;

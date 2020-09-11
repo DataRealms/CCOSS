@@ -129,18 +129,6 @@ namespace RTE {
 		void SetDrawnNormallyByParent(bool drawnNormallyByParent) { m_DrawnNormallyByParent = drawnNormallyByParent; }
 
 		/// <summary>
-		/// Gets whether this Attachable will collect its damage and transfer it to its parent if attached. Transferred damage accounts for the Attachable's damage multiplier.
-		/// </summary>
-		/// <returns>Whether this Attachable will transfer damage to its parent or not.</returns>
-		bool GetTransfersDamageToParent() const { return m_TransfersDamageToParent; }
-
-		/// <summary>
-		/// Sets whether this Attachable will collect its damage and transfer it to its parent if attached. Transferred damage accounts for the Attachable's damage multiplier.
-		/// </summary>
-		/// <param name="transfersDamageToParent">Whether this Attachable should transfer damage to its parent.</param>
-		void SetTransfersDamageToParent(bool transfersDamageToParent) { m_TransfersDamageToParent = transfersDamageToParent; }
-
-		/// <summary>
 		/// Gets whether this Attachable will be deleted automatically when its parent is being deleted or not.
 		/// </summary>
 		/// <returns>Whether this Attachable is marked to be deleted along with it's parent or not.</returns>
@@ -236,10 +224,10 @@ namespace RTE {
 		void AddDamage(float damageAmount) { m_DamageCount += damageAmount; }
 
 		/// <summary>
-		/// Gets the amount of damage points this Attachable has sustained and should cause its parent, then resets the damage count.
-		/// This should normally be called AFTER Update() to get the correct damage for a given frame.
+		/// Calculates the amount of damage this Attachable has sustained since the last time this method was called and returns it, modified by the Attachable's damage multiplier.
+		/// This should normally be called AFTER updating this Attachable in order to get the correct damage for a given frame.
 		/// </summary>
-		/// <returns>A float with the damage points accumulated since the last time this method was called.</returns>
+		/// <returns>A float with the damage accumulated, multiplied by the Attachable's damage multiplier, since the last time this method was called.</returns>
 		float CollectDamage();
 
 		/// <summary>
@@ -267,11 +255,25 @@ namespace RTE {
 		void SetParentBreakWound(const AEmitter *breakWound) { m_ParentBreakWound = breakWound; }
 #pragma endregion
 
-#pragma region Rotation Getters and Setters
+#pragma region Inherited Value Getters and Setters
+		/// <summary>
+		/// Gets whether or not this Attachable inherits its parent's HFlipped value, i.e. whether it has its HFlipped value reset to match/reverse its parent's every frame, if attached.
+		/// 0 means no inheritance, 1 means inheritance, any other value means reversed inheritance (i.e. if the parent's HFlipped value is true, this Attachable's HFlipped value will be false).
+		/// </summary>
+		/// <returns>Whether or not this Attachable inherits its parent's HFlipped value.</returns>
+		int InheritsHFlipped() const { return m_InheritsHFlipped; }
+
+		/// <summary>
+		/// Sets whether or not this Attachable inherits its parent's HFlipped value, i.e. whether it has its HFlipped value reset to match/reverse its parent's every frame, if attached.
+		/// 0 means no inheritance, 1 means inheritance, any other value means reversed inheritance (i.e. if the parent's HFlipped value is true, this Attachable's HFlipped value will be false).
+		/// </summary>
+		/// <param name="inheritsRotAngle">Whether or not to inherit its parent's HFlipped value.</param>
+		void SetInheritsHFlipped(int inheritsHFlipped) { m_InheritsHFlipped = inheritsHFlipped; }
+
 		/// <summary>
 		/// Gets whether or not this Attachable inherits its RotAngle from its parent, i.e. whether it has its RotAngle reset to match its parent every frame, if attached.
 		/// </summary>
-		/// <returns>Whether or not this Attachable inherits its RotAngle from its parent.</returns>
+		/// <returns>Whether or not this Attachable inherits its parent's RotAngle.</returns>
 		bool InheritsRotAngle() const { return m_InheritsRotAngle; }
 
 		/// <summary>
@@ -347,7 +349,6 @@ namespace RTE {
 		Vector m_ParentOffset; //!< The offset from the parent's Pos to the joint point this Attachable is attached with.
 		bool m_DrawAfterParent; //!< Whether to draw this Attachable after (in front of) or before (behind) the parent.
 		bool m_DrawnNormallyByParent; //!< Whether this Attachable will be be drawn normally when attached, or will require special handling by some non-MOSR parent type.
-		bool m_TransfersDamageToParent; //<! Whether this Attachable will collect its damage and send it to its parent, accounting for its damage multiplier.
 		bool m_DeleteWithParent; //!< Whether this Attachable should be deleted when its parent is set ToDelete.
 		
 		float m_JointStrength; //!< The amount of impulse force needed on this to deatch it from the host Actor, in kg * m/s.
@@ -361,7 +362,8 @@ namespace RTE {
 		const AEmitter *m_BreakWound; //!< The wound this Attachable will receive when it breaks from its parent.
 		const AEmitter *m_ParentBreakWound; //!< The wound this Attachable's parent will receive when the Attachable breaks from its parent.
 
-		bool m_InheritsRotAngle; //!< Whether this Attachable should inherit its parent's RotAngle.
+		int m_InheritsHFlipped; //!< Whether this Attachable should inherit its parent's HFlipped. Defaults to true.
+		bool m_InheritsRotAngle; //!< Whether this Attachable should inherit its parent's RotAngle. Defaults to true.
 
 		long int m_AtomSubgroupID; //!< The Atom IDs this' atoms will have when attached and added to a parent's AtomGroup.
 		bool m_CollidesWithTerrainWhileAttached; //!< Whether this attachable currently has terrain collisions enabled while it's attached to a parent.

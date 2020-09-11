@@ -73,7 +73,8 @@ void MOSRotating::Clear()
 	m_pTempBitmap = 0;
 	m_pTempBitmapS = 0;
     m_LoudnessOnGib = 1;
-	m_DamageMultiplier = -1;
+	m_DamageMultiplier = 0;
+    m_DamageMultiplierSetInINI = false;
     m_StringValueMap.clear();
     m_NumberValueMap.clear();
     m_ObjectValueMap.clear();
@@ -89,8 +90,6 @@ int MOSRotating::Create()
 {
     if (MOSprite::Create() < 0)
         return -1;
-
-    if (m_DamageMultiplier < 0.0F) { m_DamageMultiplier = 1; }
 
     if (m_pAtomGroup && m_pAtomGroup->AutoGenerate()/* && m_pAtomGroup->GetAtomCount() == 0*/)
         m_pAtomGroup->Create(this);
@@ -198,7 +197,6 @@ int MOSRotating::Create(ContentFile spriteFile,
                         const unsigned long lifetime)
 {
     MOSprite::Create(spriteFile, frameCount, mass, position, velocity, lifetime);
-    if (m_DamageMultiplier < 0.0F) { m_DamageMultiplier = 1; }
     return 0;
 }
 
@@ -266,6 +264,7 @@ int MOSRotating::Create(const MOSRotating &reference)
     m_LoudnessOnGib = reference.m_LoudnessOnGib;
 
 	m_DamageMultiplier = reference.m_DamageMultiplier;
+    m_DamageMultiplierSetInINI = reference.m_DamageMultiplierSetInINI;
 
 /* Allocated in lazy fashion as needed when drawing flipped
     if (!m_pFlipBitmap && m_aSprite[0])
@@ -338,6 +337,7 @@ int MOSRotating::ReadProperty(std::string propName, Reader &reader)
         reader >> m_LoudnessOnGib;
 	else if (propName == "DamageMultiplier") {
 		reader >> m_DamageMultiplier;
+        m_DamageMultiplierSetInINI = true;
     } else if (propName == "AddCustomValue") {
         ReadCustomValueProperty(reader);
     } else
@@ -442,14 +442,16 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MOSRotating::GetGibWoundLimit(bool includeDamageTransferringAttachables, bool includeNonDamageTransferringAttachables) const {
+int MOSRotating::GetGibWoundLimit(bool includeAttachablesWithAPositiveDamageMultiplier, bool includeAttachablesWithANegativeDamageMultiplier, bool includeAttachablesWithNoDamageMultiplier) const {
     int gibWoundLimit = m_GibWoundLimit;
-    if (includeDamageTransferringAttachables || includeNonDamageTransferringAttachables) {
+    if (includeAttachablesWithAPositiveDamageMultiplier || includeAttachablesWithANegativeDamageMultiplier || includeAttachablesWithNoDamageMultiplier) {
         for (const Attachable *attachable : m_Attachables) {
-            if (includeDamageTransferringAttachables && attachable->GetTransfersDamageToParent()) {
-                gibWoundLimit += attachable->GetGibWoundLimit(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables);
-            } else if (includeNonDamageTransferringAttachables && !attachable->GetTransfersDamageToParent()) {
-                gibWoundLimit += attachable->GetGibWoundLimit(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables);
+            bool attachableSatisfiesConditions = (includeAttachablesWithAPositiveDamageMultiplier && attachable->GetDamageMultiplier() > 0) ||
+                (includeAttachablesWithANegativeDamageMultiplier && attachable->GetDamageMultiplier() < 0) ||
+                (includeAttachablesWithNoDamageMultiplier && attachable->GetDamageMultiplier() == 0);
+
+            if (attachableSatisfiesConditions) {
+                gibWoundLimit += attachable->GetGibWoundLimit(includeAttachablesWithAPositiveDamageMultiplier, includeAttachablesWithANegativeDamageMultiplier, includeAttachablesWithNoDamageMultiplier);
             }
         }
     }
@@ -458,14 +460,16 @@ int MOSRotating::GetGibWoundLimit(bool includeDamageTransferringAttachables, boo
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MOSRotating::GetWoundCount(bool includeDamageTransferringAttachables, bool includeNonDamageTransferringAttachables) const {
+int MOSRotating::GetWoundCount(bool includeAttachablesWithAPositiveDamageMultiplier, bool includeAttachablesWithANegativeDamageMultiplier, bool includeAttachablesWithNoDamageMultiplier) const {
     int woundCount = m_Wounds.size();
-    if (includeDamageTransferringAttachables || includeNonDamageTransferringAttachables) {
+    if (includeAttachablesWithAPositiveDamageMultiplier || includeAttachablesWithANegativeDamageMultiplier || includeAttachablesWithNoDamageMultiplier) {
         for (const Attachable *attachable : m_Attachables) {
-            if (includeDamageTransferringAttachables && attachable->GetTransfersDamageToParent()) {
-                woundCount += attachable->GetWoundCount(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables);
-            } else if (includeNonDamageTransferringAttachables && !attachable->GetTransfersDamageToParent()) {
-                woundCount += attachable->GetWoundCount(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables);
+            bool attachableSatisfiesConditions = (includeAttachablesWithAPositiveDamageMultiplier && attachable->GetDamageMultiplier() > 0) ||
+                (includeAttachablesWithANegativeDamageMultiplier && attachable->GetDamageMultiplier() < 0) ||
+                (includeAttachablesWithNoDamageMultiplier && attachable->GetDamageMultiplier() == 0);
+
+            if (attachableSatisfiesConditions) {
+                woundCount += attachable->GetWoundCount(includeAttachablesWithAPositiveDamageMultiplier, includeAttachablesWithANegativeDamageMultiplier, includeAttachablesWithNoDamageMultiplier);
             }
         }
     }
@@ -474,16 +478,21 @@ int MOSRotating::GetWoundCount(bool includeDamageTransferringAttachables, bool i
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includeDamageTransferringAttachables, bool includeNonDamageTransferringAttachables) {
+float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includeAttachablesWithAPositiveDamageMultiplier, bool includeAttachablesWithANegativeDamageMultiplier, bool includeAttachablesWithNoDamageMultiplier) {
     float damage = 0;
-    int woundCount = GetWoundCount(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables);
+    int woundCount = GetWoundCount(includeAttachablesWithAPositiveDamageMultiplier, includeAttachablesWithANegativeDamageMultiplier, includeAttachablesWithNoDamageMultiplier);
 
     std::vector<std::pair<MOSRotating *, std::size_t>> woundedParts;
     if (woundCount > 0) { woundedParts.push_back({this, woundCount}); }
+
     for (Attachable *attachable : m_Attachables) {
-        bool attachableSatisfiesWoundRemovalCriteria = (includeDamageTransferringAttachables && attachable->GetTransfersDamageToParent()) || (includeNonDamageTransferringAttachables && !attachable->GetTransfersDamageToParent());
-        if (attachableSatisfiesWoundRemovalCriteria && attachable->GetWoundCount(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables) > 0) {
-            woundedParts.push_back({attachable, attachable->GetWoundCount(includeDamageTransferringAttachables, includeNonDamageTransferringAttachables)});
+        bool attachableSatisfiesConditions = (includeAttachablesWithAPositiveDamageMultiplier && attachable->GetDamageMultiplier() > 0) ||
+            (includeAttachablesWithANegativeDamageMultiplier && attachable->GetDamageMultiplier() < 0) ||
+            (includeAttachablesWithNoDamageMultiplier && attachable->GetDamageMultiplier() == 0);
+        int attachableWoundCount = attachable->GetWoundCount(includeAttachablesWithAPositiveDamageMultiplier, includeAttachablesWithANegativeDamageMultiplier, includeAttachablesWithNoDamageMultiplier);
+
+        if (attachableSatisfiesConditions && attachableWoundCount > 0) {
+            woundedParts.push_back({attachable, attachableWoundCount});
         }
     }
 
@@ -513,10 +522,7 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includeDamageTr
         if (woundedPart == this) {
             damage += removeFirstWoundEmitter() * GetDamageMultiplier();
         } else {
-            Attachable *woundedPartAsAttachable = dynamic_cast<Attachable *>(woundedPart);
-            if (woundedPartAsAttachable) {
-                damage += woundedPartAsAttachable->RemoveWounds(1, includeDamageTransferringAttachables, includeNonDamageTransferringAttachables) * (woundedPartAsAttachable->GetTransfersDamageToParent() ? woundedPartAsAttachable->GetDamageMultiplier() : 0);
-            }
+            damage += woundedPart->RemoveWounds(1, includeAttachablesWithAPositiveDamageMultiplier, includeAttachablesWithANegativeDamageMultiplier, includeAttachablesWithNoDamageMultiplier) * woundedPart->GetDamageMultiplier();
         }
         if (woundedParts[woundedPartIndex].second-- <= 0) {
             woundedParts.erase(woundedParts.begin() + woundedPartIndex);

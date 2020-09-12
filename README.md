@@ -78,8 +78,16 @@ Running:
 
 ### Arch Linux ###
 `# pacman -S allegro4 flac luajit minizip lz4 libpng libx11 meson`
+
 ### Ubuntu ###
 `# apt-get install liballegro4.4 libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev meson`
+
+### Troubleshooting ###
+Until borderless windows are implemented, you might seem get stuck in fullscreen mode. Try Alt-Return, or if that doesn't work kill CC with ctrl-alt-end.
+
+On X11 media keys and such don't work in fullscreen, this is a known issue (this does not happen on Wayland).
+
+If you get errors similar to `ALSA lib ... could not open slave`, add your user to the `audio` group and reboot (this is generally not recommended) or check your audio setup.
 
 ## More Information ##
 

@@ -145,15 +145,6 @@ struct Star {
 	float m_ScrollRatio = 1.0F;
 	int m_Intensity = 0; //!< Intensity value on a scale from 0 to 255.
 	StarSize m_Size = StarSmall;
-
-	Star() {}
-	Star(BITMAP *pBitmap, int posX, int posY, float scrollRatio, int intensity) :
-		m_Bitmap(pBitmap),
-		m_PosX(posX),
-		m_PosY(posY),
-		m_ScrollRatio(scrollRatio),
-		m_Intensity(intensity)
-	{}
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

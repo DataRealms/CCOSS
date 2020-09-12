@@ -200,7 +200,7 @@ namespace RTE {
 					if (slashPos) { *(++slashPos) = 0; }
 
 					// If that file's directory doesn't exist yet, then create it, and all its parent directories above if need be
-					for (int nested = 0; !std::experimental::filesystem::exists(outputDirName) && slashPos; ++nested) {
+					for (int nested = 0; !std::filesystem::exists(outputDirName) && slashPos; ++nested) {
 						// Keep making new working copies of the path that we can dice up
 #ifdef __STDC_LIB_EXT1__
 						strcpy_s(parentDirName, sizeof(parentDirName), outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
@@ -235,7 +235,7 @@ namespace RTE {
 					} else {
 						// Validate so only certain file types are extracted:  .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3
 						// Get the file extension
-						std::string fileExtension = std::experimental::filesystem::path(outputFileName).extension().string();
+						std::string fileExtension = std::filesystem::path(outputFileName).extension().string();
 						std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), ::tolower);
 						const char *ext = fileExtension.c_str();
 						// Validate only certain file types to be included! .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3

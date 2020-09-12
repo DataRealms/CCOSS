@@ -1258,13 +1258,15 @@ bool SceneMan::TryPenetrate(const int posX,
                                 new Atom(Vector(), spawnMat, 0, spawnColor, 2),
                                 0);
 */
-				float tempMax = velocity.m_X * sprayScale;
-				float tempMin = tempMax / 2.0F;
+				float tempMaxX = velocity.m_X * sprayScale;
+				float tempMinX = tempMaxX / 2.0F;
+				float tempMaxY = velocity.m_Y * sprayScale;
+				float tempMinY = tempMaxY / 2.0F;
                 MOPixel *pixelMO = new MOPixel(spawnColor,
                                                spawnMat->GetPixelDensity(),
                                                Vector(posX, posY),
-                                               Vector(-RandomNum(tempMin, tempMax),
-                                                      -RandomNum(tempMin, tempMax)),
+                                               Vector(-RandomNum(tempMinX, tempMaxX),
+                                                      -RandomNum(tempMinY, tempMaxY)),
 //                                              -(impulse * (sprayScale * RandomNum() / spawnMat.density)),
                                                new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2),
                                                0);

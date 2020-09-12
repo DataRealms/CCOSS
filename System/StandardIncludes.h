@@ -1,6 +1,8 @@
 #ifndef _RTEINCLUDES_
 #define _RTEINCLUDES_
 
+// This restores features removed from the C++17 standard (auto_ptr and some other stuff). This is needed for LuaBind to work because it relies on it heavily.
+#define _HAS_AUTO_PTR_ETC 1
 
 // Inclusion of relevant C++ Standard Library headers.
 #include <algorithm>
@@ -15,6 +17,7 @@
 #include <cstring>
 #include <ctime>
 #include <deque>
+#include <filesystem>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -33,8 +36,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-// TODO: don't forget to replace with <filesystem> when eventually enable ++17 standard.
-#include <experimental/filesystem>
 
 // Linux specific headers that MSVC uses implicitly
 #ifdef __unix__

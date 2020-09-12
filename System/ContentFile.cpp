@@ -83,7 +83,7 @@ namespace RTE {
 
 	void ContentFile::SetDataPath(const std::string &newDataPath) {
 		m_DataPath = newDataPath;
-		m_DataPathExtension = std::experimental::filesystem::path(newDataPath).extension().string();
+		m_DataPathExtension = std::filesystem::path(newDataPath).extension().string();
 
 		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
 
@@ -155,15 +155,15 @@ namespace RTE {
 		SetFormattedReaderPosition(GetFormattedReaderPosition());
 		const std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
 
-		if (!std::experimental::filesystem::exists(m_DataPath)) {
+		if (!std::filesystem::exists(m_DataPath)) {
 			// Check for 000 in the file name in case it is part of an animation but the FrameCount was set to 1. Do not warn about this because it's normal operation.
-			if (std::experimental::filesystem::exists(m_DataPathWithoutExtension + "000" + m_DataPathExtension)) {
+			if (std::filesystem::exists(m_DataPathWithoutExtension + "000" + m_DataPathExtension)) {
 				SetDataPath(m_DataPathWithoutExtension + "000" + m_DataPathExtension);
 			} else {
-				if (std::experimental::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
+				if (std::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
 					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
-				} else if (std::experimental::filesystem::exists(m_DataPathWithoutExtension + "000" + altFileExtension)) {
+				} else if (std::filesystem::exists(m_DataPathWithoutExtension + "000" + altFileExtension)) {
 					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 					SetDataPath(m_DataPathWithoutExtension + "000" + altFileExtension);
 				} else {
@@ -211,8 +211,8 @@ namespace RTE {
 		}
 		const std::string altFileExtension = (m_DataPathExtension == ".wav") ? ".ogg" : ".wav";
 
-		if (!std::experimental::filesystem::exists(m_DataPath)) {
-			if (std::experimental::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
+		if (!std::filesystem::exists(m_DataPath)) {
+			if (std::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
 				g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 				SetDataPath(m_DataPathWithoutExtension + altFileExtension);
 			} else {

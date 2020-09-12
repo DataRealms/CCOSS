@@ -93,13 +93,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`PrimitiveMan:DrawBitmapPrimitive(pos, entity, rotAngle, frame, bool hFlipped, bool vFlipped)`  
 	`PrimitiveMan:DrawBitmapPrimitive(player, pos, entity, rotAngle, frame, bool hFlipped, bool vFlipped)`  
 	Original bindings with no flip arguments are untouched and can be called as they were.
-	
+
 - Added new primitive drawing functions to `PrimitiveMan`:  
 	```
 	-- Arc
 	PrimitiveMan:DrawArcPrimitive(Vector pos, startAngle, endAngle, radius, color)
 	PrimitiveMan:DrawArcPrimitive(player, Vector pos, startAngle, endAngle, radius, color)
-	
+
 	PrimitiveMan:DrawArcPrimitive(Vector pos, startAngle, endAngle, radius, color, thickness)
 	PrimitiveMan:DrawArcPrimitive(player, Vector pos, startAngle, endAngle, radius, color, thickness)
 
@@ -110,32 +110,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	-- Box with rounded corners
 	PrimitiveMan:DrawRoundedBoxPrimitive(Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
 	PrimitiveMan:DrawRoundedBoxPrimitive(player, Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
-	
+
 	PrimitiveMan:DrawRoundedBoxFillPrimitive(Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
 	PrimitiveMan:DrawRoundedBoxFillPrimitive(player, Vector upperLeftCorner, Vector bottomRightCorner, cornerRadius, color)
 
 	-- Triangle
 	PrimitiveMan:DrawTrianglePrimitive(Vector pointA, Vector pointB, Vector pointC, color)
 	PrimitiveMan:DrawTrianglePrimitive(player, Vector pointA, Vector pointB, Vector pointC, color)
-	
+
 	PrimitiveMan:DrawTriangleFillPrimitive(Vector pointA, Vector pointB, Vector pointC, color)
 	PrimitiveMan:DrawTriangleFillPrimitive(player, Vector pointA, Vector pointB, Vector pointC, color)
 
 	-- Ellipse
 	PrimitiveMan:DrawEllipsePrimitive(Vector pos, horizRadius, vertRadius, color)
 	PrimitiveMan:DrawEllipsePrimitive(player, Vector pos, horizRadius, vertRadius, color)
-	
+
 	PrimitiveMan:DrawEllipseFillPrimitive(Vector pos, short horizRadius, short vertRadius, color)
 	PrimitiveMan:DrawEllipseFillPrimitive(player, Vector pos, horizRadius, vertRadius, color)
 	```
-	
+
 - Added log for non-fatal loading errors. This log will show image files that have been loaded with incorrect extensions (has no side effects but should be addressed) and audio files that failed loading entirely and will not be audible.  
 	If errors are present the console will be forced open to notify the player (only when loading into main menu).  
 	Log will be automatically deleted if warnings are no longer present to avoid polluting the root directory.
-	
+
 - Game window resolution can now be changed without restarting the game.
 
 ### Changed
+
+- Codebase now uses the C++17 standard.
 
 - Updated game framework from Allegro 4.2.3.1 to Allegro 4.4.3.1.
 
@@ -185,8 +187,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Input enums moved from `UInputMan` to `Constants` and are no longer accessed with the `UInputManager` prefix. These enums are now accessed with their own names as the prefix.  
 	For example: `UInputManager.DEVICE_KEYB_ONLY` is now `InputDevice.DEVICE_KEYB_ONLY`, `UInputManager.INPUT_L_UP` is now `InputElements.INPUT_L_UP` and so on.
-	
-- `CraftsOrbitAtTheEdge` corrected to `CraftOrbitAtTheEdge`. Applies to both ini property and lua binding.	
+
+- `CraftsOrbitAtTheEdge` corrected to `CraftOrbitAtTheEdge`. Applies to both ini property and lua binding.
 
 - Game will now Abort with an error message when trying to load a copy of a non-existent `AtomGroup`, `Attachable` or `AEmitter` preset.
 
@@ -198,12 +200,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	The `PrintScreen` button will now take a single screenshot on key release and will not take more until the key is pressed and released again.  
 	The `Ctrl+S` key combination is unchanged and will take a single screenshot every frame while the keys are held.  
 	The `Ctrl+W` and `Alt+W` key combinations will now take a single WorldDump/ScenePreview on `W` key release (while `Ctrl/Alt` are still held) and will not take more until the key is pressed and released again.
-	
+
 	Additionally, all screenshots (excluding abortscreen) will now be saved into a `_Screenshots` folder (`_` so it's on top and not hiding between module folders) to avoid polluting the root directory. ([Issue #163](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/163))  
 	This folder will be created automatically after modules are loaded if it is missing.
-	
+
 - `ScreenDumps` and `WorldDumps` are now saved as compressed PNGs.
-	
+
 - Controller deadzone setting ignores more input. Previously setting it to the maximum was just enough to eliminate stick drift.
 
 - `Arm.HandPos` will now get/set the hand position as relative to the arm's joint position, instead of relative to the arm's center of mass.
@@ -212,11 +214,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Resolution multiplier button changed to `Fullscreen` button - this will set the game window resolution to match the desktop resolution. When resolution matches the desktop, this button will change to `Windowed` and will allow setting the game window resolution back to default (960x540).  
 	Added `Upscaled Fullscreen` button - this will change the resolution to half of the desktop and the multiplier to 2. The `Fullscreen` button will change to `Windowed` in this mode to return to non-upscaled mode (960x540).  
 	Selecting any resolution setting from the resolution combobox will immediately change to selected resolution. (Known bug: Clicking off the combobox without making a new selection while in `Upscaled Fullscreen` mode will change resolution to `Fullscreen`. This will be addressed later.)  
-	
+
 	**Note:** Changing the game window resolution while an Activity is active requires ending the Activity. A dialog box will appear asking to confirm the change.
 
-- Moved from C-style random number generation to C++ standard. This includes usage of an mt19937 random number generator.
-- For C++ coders the functions SelectRand, PosRand and RangeRand have been replaced by the function template RandomNum() and its overload RandomNum(T min, T max). The function NormalRand has been replaced by the function template RandomNormalNum(). For lua coders there is no change.
+- Moved from C-style random number generation to C++ standard. This includes usage of an mt19937 random number generator.  
+	For C++ coders the functions SelectRand, PosRand and RangeRand have been replaced by the function template RandomNum() and its overload RandomNum(T min, T max). The function NormalRand has been replaced by the function template RandomNormalNum(). For lua coders there is no change.
+	
+- Resolution validation changed to support multiple screens. Incompatible/bad resolution settings will be overridden at startup with messages explaining the issue.  
+	**Note:** For multi-screen to work properly, the left-most screen MUST be set as primary. Screens having different resolutions does not actually matter but different heights will still be warned about and overridden due to the likeliness of GUI elementes being cropped on the shortest screen.  
+	Resolution validation can be disabled for multi-screen setups with `Settings.ini` property `DisableMultiScreenResolutionValidation`. Bad settings are likely to crash, use at own risk.  
+	For setups with more than 3 screens `DisableMultiScreenResolutionValidation` must be set true.
+
+- Damage to actors from impulses is now relative to their max health instead of being on a scale from 0 to 100.
 
 ### Fixed
 

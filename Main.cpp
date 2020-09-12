@@ -1802,7 +1802,7 @@ int main(int argc, char *argv[]) {
 	InitMainMenu();
 
 	std::string screenshotSaveDir = g_System.GetWorkingDirectory() + "/" + c_ScreenshotDirectory;
-	if (!std::experimental::filesystem::exists(screenshotSaveDir)) { g_System.MakeDirectory(screenshotSaveDir); }
+	if (!std::filesystem::exists(screenshotSaveDir)) { g_System.MakeDirectory(screenshotSaveDir); }
 
 	if (g_ConsoleMan.LoadWarningsExist()) {
 		g_ConsoleMan.PrintString("WARNING: References to files that could not be located or failed to load detected during module loading!\nSee \"LoadWarningLog.txt\" for a list of bad references.");
@@ -1811,7 +1811,7 @@ int main(int argc, char *argv[]) {
 		g_ConsoleMan.SetEnabled(true);
 	} else {
 		// Delete an existing log if there are no warnings so there's less junk in the root folder.
-		if (std::experimental::filesystem::exists(g_System.GetWorkingDirectory() + "/LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
+		if (std::filesystem::exists(g_System.GetWorkingDirectory() + "/LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
 	}
 
     if (!g_NetworkServer.IsServerModeEnabled()) {

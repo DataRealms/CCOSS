@@ -1142,8 +1142,7 @@ void MainMenuGUI::Update()
 					g_SettingsMan.SetShowToolTips(m_aOptionsCheckbox[SHOWTOOLTIPS]->GetCheck());
 					g_SettingsMan.SetPreciseCollisions(m_aOptionsCheckbox[PRECISECOLLISIONS]->GetCheck());
 
-					Writer writer("Base.rte/Settings.ini");
-                    g_SettingsMan.Save(writer);
+					g_SettingsMan.UpdateSettingsFile();
 				}
 
                 m_MenuScreen = MAINSCREEN;
@@ -1528,8 +1527,7 @@ void MainMenuGUI::Update()
 				if (anEvent.GetControl() == m_pModManagerBackButton)
 				{
 					// Save settings
-					Writer writer("Base.rte/Settings.ini");
-					g_SettingsMan.Save(writer);
+					g_SettingsMan.UpdateSettingsFile();
 
 					// Hide all screens, the appropriate screen will reappear on next update
 					HideAllScreens();

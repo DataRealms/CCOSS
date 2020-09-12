@@ -1508,10 +1508,8 @@ void Actor::Update()
     if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage)
 	{
         m_PainSound.Play(m_Pos);
-		// TODO: IMPROVE AND DON'T HARDCODE
-        //m_Health -= 10;
-		float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
-		float damage = impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * 100;
+		const float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
+		const float damage = impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth;
 		if (damage > 0)
 			m_Health -= damage;
 		if (m_Status != DYING && m_Status != DEAD)

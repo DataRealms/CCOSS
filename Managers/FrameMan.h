@@ -144,6 +144,12 @@ namespace RTE {
 		unsigned short ResolutionMultiplier() const { return m_ResMultiplier; }
 
 		/// <summary>
+		/// Gets whether resolution validation in multi-screen mode is disabled or not.
+		/// </summary>
+		/// <returns>Whether resolution validation in multi-screen mode is disabled or not.</returns>
+		bool IsMultiScreenResolutionValidationDisabled() const { return m_DisableMultiScreenResolutionValidation; }
+
+		/// <summary>
 		/// Sets and switches to a new windowed mode resolution multiplier.
 		/// </summary>
 		/// <param name="multiplier">The multiplier to switch to.</param>
@@ -551,8 +557,13 @@ namespace RTE {
 
 		int m_GfxDriver; //!< The graphics driver that will be used for rendering.
 
-		unsigned short m_ScreenResX; //!< Width of the physical screen (desktop resolution). 
-		unsigned short m_ScreenResY; //!< Height of the physical screen (desktop resolution).
+		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation when running multi-screen mode or not. Allows setting whatever crazy resolution that may or may not crash.
+
+		unsigned short m_NumScreens; //!< Number of physical screens.
+		unsigned short m_ScreenResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution). 
+		unsigned short m_ScreenResY; //!< Height of the primary or tallest screen if more than one available (desktop resolution).
+		unsigned short m_PrimaryScreenResX; //!< Width of the primary physical screen only.
+		unsigned short m_PrimaryScreenResY; //!< Height of the primary physical screen only.
 
 		unsigned short m_ResX; //!< Game window width.
 		unsigned short m_ResY; //!< Game window height.
@@ -665,6 +676,14 @@ namespace RTE {
 		/// <param name="resY">Game window height to check.</param>
 		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
 		void ValidateResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier);
+
+		/// <summary>
+		/// Checks whether the passed in multi-screen resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during ValidateResolution().
+		/// </summary>
+		/// <param name="resX">Game window width to check.</param>
+		/// <param name="resY">Game window height to check.</param>
+		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
+		void ValidateMultiScreenResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier);
 
 		/// <summary>
 		/// Creates all the frame buffer bitmaps to be used by FrameMan. This is called during Create().

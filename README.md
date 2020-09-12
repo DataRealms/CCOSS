@@ -49,6 +49,7 @@ Dependencies:
 * `libX11`
 * `meson>=0.49`
 * `boost>=1.55`
+* `xorg-misc-fonts`
 
 Building:
 
@@ -77,7 +78,7 @@ Running:
 4. Run `env LD_LIBRARY_PATH=. ./CCCP.x86_64` or `./CCCP_debug.x86_64` in the **Data Repository**
 
 ### Arch Linux ###
-`# pacman -S allegro4 flac luajit minizip lz4 libpng libx11 meson`
+`# pacman -S allegro4 flac luajit minizip lz4 libpng libx11 meson xorg-fonts-misc`
 
 ### Ubuntu ###
 `# apt-get install liballegro4.4 libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev meson`
@@ -87,7 +88,12 @@ Until borderless windows are implemented, you might seem get stuck in fullscreen
 
 On X11 media keys and such don't work in fullscreen, this is a known issue (this does not happen on Wayland).
 
-If you get errors similar to `ALSA lib ... could not open slave`, add your user to the `audio` group and reboot (this is generally not recommended) or check your audio setup.
+If you get errors similar to `ALSA lib ... could not open slave`, try adding:
+```
+option snd_mia index=0
+option snd_intel_hda index=1
+```
+to `/etc/modprobe.d/alsa-base.conf`
 
 ## More Information ##
 

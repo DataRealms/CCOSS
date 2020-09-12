@@ -143,7 +143,7 @@ struct Star {
 	int m_PosX = 0;
 	int m_PosY = 0;
 	float m_ScrollRatio = 1.0F;
-	int m_Intensity = 0; // <! Intensity value on a scale from 0 to 255.
+	int m_Intensity = 0; //!< Intensity value on a scale from 0 to 255.
 	StarSize m_Size = StarSmall;
 
 	Star() {}

@@ -1,4 +1,4 @@
-project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++14'])
+project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17'])
 
 source_inc_dirs = include_directories('Activities',
           'Entities',
@@ -7,7 +7,7 @@ source_inc_dirs = include_directories('Activities',
           'Menus',
           'System')
 
-deps = [dependency('boost'),
+deps = [
   dependency('allegro'),
   dependency('loadpng'),
   dependency('flac'),
@@ -32,8 +32,6 @@ endif
 
 pch = 'System/StandardIncludes.h'
 sources = []
-luabind_src = []
-raknet_src = []
 subdir('Activities')
 subdir('Entities')
 subdir('GUI')

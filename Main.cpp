@@ -147,8 +147,8 @@ struct Star {
 	StarSize m_Size = StarSmall;
 
 	Star() {}
-	Star(BITMAP *pBitmap, int posX, int posY, float scrollRatio, int intensity)
-		: m_Bitmap(pBitmap),
+	Star(BITMAP *pBitmap, int posX, int posY, float scrollRatio, int intensity) :
+		m_Bitmap(pBitmap),
 		m_PosX(posX),
 		m_PosY(posY),
 		m_ScrollRatio(scrollRatio),

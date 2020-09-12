@@ -143,7 +143,7 @@ struct Star {
 	int m_PosX = 0;
 	int m_PosY = 0;
 	float m_ScrollRatio = 1.0F;
-	int m_Intensity = 0;
+	int m_Intensity = 0; // <! Intensity value on a scale from 0 to 255.
 	StarSize m_Size = StarSmall;
 
 	Star() {}
@@ -595,7 +595,7 @@ bool PlayIntroTitle() {
 
             for (int star = 0; star < starCount; ++star)
             {
-				const int intensity = stars[star].m_Intensity + RandomNum(0, 35 * (stars[star].m_Size + 1));
+				const int intensity = stars[star].m_Intensity + RandomNum(0, (stars[star].m_Size == StarSmall) ? 35 : 70);
 				set_screen_blender(intensity, intensity, intensity, intensity);
 				const int &starDrawPosX = stars[star].m_PosX;
 				int starDrawPosY = stars[star].m_PosY - static_cast<int>(scrollOffset.m_Y * stars[star].m_ScrollRatio);

@@ -72,21 +72,23 @@ namespace RTE {
 		}
 		m_MSPFAverage /= m_MSPFs.size();
 
+		float pitch = 1.0F;
+
 		// Update the SimSpeed; if set to do one sim update per frame, adjust global sound pitch to match the ratio of sim time over real time.
 		// TODO: This belongs in TimerMan so figure out where exactly to shove it in it.
 		if (g_TimerMan.IsOneSimUpdatePerFrame()) {
 			m_SimSpeed = g_TimerMan.GetDeltaTimeMS() / static_cast<float>(m_MSPFAverage);
 
 			// TODO: This should be built into the SimSpeed setter (which again, should be in TimerMan) so you can't screw it up.
-			if (g_TimerMan.IsSimSpeedLimited() && m_SimSpeed > 1.0) { m_SimSpeed = 1.0; }
+			if (g_TimerMan.IsSimSpeedLimited() && m_SimSpeed > 1.0F) { m_SimSpeed = 1.0F; }
 
 			// Soften the ratio of the pitch adjustment so it's not such an extreme effect on the audio
 			// TODO: This coefficient should probably move to SettingsMan and be loaded from ini. That way this effect can be lessened or even turned off entirely by users. 0.35 is a good default value though.
-			float pitch = m_SimSpeed + (1.0F - m_SimSpeed) * 0.35;
-			g_AudioMan.SetGlobalPitch(pitch);
+			pitch = m_SimSpeed + (1.0F - m_SimSpeed) * 0.35F;
 		} else {
-			m_SimSpeed = 1.0;
+			m_SimSpeed = 1.0F;
 		}
+		g_AudioMan.SetGlobalPitch(pitch);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

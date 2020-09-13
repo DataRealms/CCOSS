@@ -427,43 +427,27 @@ void LuaMan::Clear()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int LuaMan::Create()
-{
-    // Create the master state
-    m_pMasterState = lua_open();
+int LuaMan::Create() {
+    m_pMasterState = luaL_newstate();
     // Attach the master state to LuaBind
-    open(m_pMasterState);
-    // Open the lua libs for the master state
-    //luaL_openlibs(m_pMasterState);
+    luabind::open(m_pMasterState);
 
-	// Load only libraries we need
-	lua_pushcfunction(m_pMasterState, luaopen_base);
-	lua_pushliteral(m_pMasterState, LUA_COLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
+	const luaL_Reg libsToLoad[] = {
+		{ LUA_COLIBNAME, luaopen_base },
+		{ LUA_LOADLIBNAME, luaopen_package },
+		{ LUA_TABLIBNAME, luaopen_table },
+		{ LUA_STRLIBNAME, luaopen_string },
+		{ LUA_MATHLIBNAME, luaopen_math },
+		{ LUA_DBLIBNAME, luaopen_debug },
+		{ LUA_JITLIBNAME, luaopen_jit },
+		{ NULL, NULL } // End of array
+	};
 
-	lua_pushcfunction(m_pMasterState, luaopen_table);
-	lua_pushliteral(m_pMasterState, LUA_TABLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
-
-	lua_pushcfunction(m_pMasterState, luaopen_string);
-	lua_pushliteral(m_pMasterState, LUA_STRLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
-
-	lua_pushcfunction(m_pMasterState, luaopen_math);
-	lua_pushliteral(m_pMasterState, LUA_MATHLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
-
-	lua_pushcfunction(m_pMasterState, luaopen_debug);
-	lua_pushliteral(m_pMasterState, LUA_DBLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
-
-	lua_pushcfunction(m_pMasterState, luaopen_package);
-	lua_pushliteral(m_pMasterState, LUA_LOADLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
-
-	lua_pushcfunction(m_pMasterState, luaopen_jit);
-	lua_pushliteral(m_pMasterState, LUA_LOADLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
+	for (const luaL_Reg *lib = libsToLoad; lib->func; lib++) {
+		lua_pushcfunction(m_pMasterState, lib->func);
+		lua_pushstring(m_pMasterState, lib->name);
+		lua_call(m_pMasterState, 1, 0);
+	}
 
 	// LuaJIT should start automatically after we load the library but we're making sure it did anyway.
 	if (!luaJIT_setmode(m_pMasterState, 0, LUAJIT_MODE_ENGINE | LUAJIT_MODE_ON)) { RTEAbort("Failed to initialize LuaJIT!"); }

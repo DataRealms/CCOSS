@@ -135,6 +135,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Game window resolution can now be changed without restarting the game.
 
+- GUI sliders (like for music volume) can now be adjusted with the mouse scroll wheel.
+
 ### Changed
 
 - Codebase now uses the C++17 standard.

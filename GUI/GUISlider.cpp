@@ -118,12 +118,11 @@ void GUISlider::Create(GUIProperties *Props)
     Props->GetValue("Minimum", &m_Minimum);
     Props->GetValue("Maximum", &m_Maximum);
     Props->GetValue("Value", &m_Value);
-	const bool gotValueRes = Props->GetValue("ValueResolution", &m_ValueResolution);
-	if (!gotValueRes) {
+	if (!Props->GetValue("ValueResolution", &m_ValueResolution)) {
 		m_ValueResolution = std::max((m_Maximum - m_Minimum) / 100, 1);
 	}
 
-    m_Value = std::clamp(m_Value, m_Minimum,m_Maximum);
+	m_Value = std::clamp(m_Value, m_Minimum, m_Maximum);
 
     // Re-Calculate the knob info
     CalculateKnob();
@@ -524,15 +523,16 @@ GUIPanel *GUISlider::GetPanel(void)
 // Description:     Calculates the knob position and size.
 
 void GUISlider::CalculateKnob(void) {
-	if (!m_KnobImage)
+	if (!m_KnobImage) {
 		return;
+	}
 
 	if (m_Maximum > m_Minimum) {
-		const bool orientation = (m_Orientation == Horizontal);
-		m_KnobSize = (orientation) ? m_KnobImage->GetWidth() : m_KnobImage->GetHeight();
-		const int size = (orientation) ? m_Width : m_Height;
+		const bool horizontalOrientation = (m_Orientation == Horizontal);
+		m_KnobSize = (horizontalOrientation) ? m_KnobImage->GetWidth() : m_KnobImage->GetHeight();
+		const int size = (horizontalOrientation) ? m_Width : m_Height;
 		const float valueRatio = static_cast<float>(m_Value - m_Minimum) / static_cast<float>(m_Maximum - m_Minimum);
-		m_KnobPosition = m_EndThickness + static_cast<int>(static_cast<float>(size - m_KnobSize - 2 * m_EndThickness) * valueRatio);
+		m_KnobPosition = m_EndThickness + static_cast<int>(static_cast<float>(size - m_KnobSize - (m_EndThickness * 2)) * valueRatio);
 	}
 }
 

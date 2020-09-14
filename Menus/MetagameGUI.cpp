@@ -546,9 +546,6 @@ int MetagameGUI::Create(Controller *pController)
     m_pGoldSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("GoldSlider"));
     m_pLengthLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LengthLabel"));
     m_pLengthSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("LengthSlider"));
-	m_pLengthSlider->SetMinimum(1);
-	m_pLengthSlider->SetMaximum(20);
-	m_pLengthSlider->SetValue(10);
     m_pErrorLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("StartErrorLabel"));
     m_apPlayerControlButton[Players::PlayerOne] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("P1ControlButton"));
     m_apPlayerControlButton[Players::PlayerTwo] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("P2ControlButton"));

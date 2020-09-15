@@ -16,7 +16,7 @@ namespace RTE {
 		m_ParentOffset.Reset();
 		m_DrawAfterParent = true;
 		m_DrawnNormallyByParent = true;
-		m_DeleteWithParent = false;
+		m_DeleteWhenRemovedFromParent = false;
 
 		m_JointStrength = 10;
 		m_JointStiffness = 1.0;
@@ -33,7 +33,17 @@ namespace RTE {
 		m_InheritsRotAngle = true;
 
 		m_AtomSubgroupID = -1;
-		m_CollidesWithTerrainWhileAttached = false;
+		m_CollidesWithTerrainWhileAttached = true;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int Attachable::Create() {
+		MOSRotating::Create();
+
+		m_AtomSubgroupID = GetUniqueID();
+
+		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +55,7 @@ namespace RTE {
 		m_ParentOffset = reference.m_ParentOffset;
 		m_DrawAfterParent = reference.m_DrawAfterParent;
 		m_DrawnNormallyByParent = reference.m_DrawnNormallyByParent;
-		m_DeleteWithParent = reference.m_DeleteWithParent;
+		m_DeleteWhenRemovedFromParent = reference.m_DeleteWhenRemovedFromParent;
 
 		m_JointStrength = reference.m_JointStrength;
 		m_JointStiffness = reference.m_JointStiffness;
@@ -61,7 +71,6 @@ namespace RTE {
 		m_InheritsHFlipped = reference.m_InheritsHFlipped;
 		m_InheritsRotAngle = reference.m_InheritsRotAngle;
 
-		m_AtomSubgroupID = reference.m_AtomSubgroupID;
 		m_CollidesWithTerrainWhileAttached = reference.m_CollidesWithTerrainWhileAttached;
 
 		return 0;
@@ -74,8 +83,8 @@ namespace RTE {
 			reader >> m_ParentOffset;
 		} else if (propName == "DrawAfterParent") {
 			reader >> m_DrawAfterParent;
-		} else if (propName == "DeleteWithParent") {
-			reader >> m_DeleteWithParent;
+		} else if (propName == "DeleteWhenRemovedFromParent" || propName == "DeleteWithParent") {
+			reader >> m_DeleteWhenRemovedFromParent;
 		} else if (propName == "JointStrength" || propName == "Strength") {
 			reader >> m_JointStrength;
 		} else if (propName == "JointStiffness" || propName == "Stiffness") {
@@ -110,8 +119,8 @@ namespace RTE {
 		writer << m_ParentOffset;
 		writer.NewProperty("DrawAfterParent");
 		writer << m_DrawAfterParent;
-		writer.NewProperty("DeleteWithParent");
-		writer << m_DeleteWithParent;
+		writer.NewProperty("DeleteWhenRemovedFromParent");
+		writer << m_DeleteWhenRemovedFromParent;
 
 		writer.NewProperty("JointStrength");
 		writer << m_JointStrength;
@@ -126,8 +135,7 @@ namespace RTE {
 		writer << m_ParentBreakWound;
 
 		writer.NewProperty("InheritsHFlipped");
-		if (m_InheritsHFlipped != 0 && m_InheritsHFlipped != 1) { m_InheritsHFlipped = 2; }
-		writer << m_InheritsHFlipped;
+		writer << ((m_InheritsHFlipped == 0 || m_InheritsHFlipped == 1) ? m_InheritsHFlipped : 2);
 		writer.NewProperty("InheritsRotAngle");
 		writer << m_InheritsRotAngle;
 
@@ -144,13 +152,13 @@ namespace RTE {
 			return false;
 		}
 
-		Vector forces;
+		Vector totalForce;
 		for (const std::pair<Vector, Vector> &force : m_Forces) {
-			forces += force.first;
+			totalForce += force.first;
 		}
-		m_Forces.clear();
 
-		jointForces += forces;
+		jointForces += totalForce;
+		m_Forces.clear();
 		return true;
 	}
 
@@ -161,39 +169,35 @@ namespace RTE {
 			return false;
 		}
 
-		Vector impulseForces;
+		Vector totalImpulseForce;
 		for (const std::pair<Vector, Vector> &impulseForce : m_ImpulseForces) {
-			impulseForces += impulseForce.first;
+			totalImpulseForce += impulseForce.first;
 		}
-		impulseForces *= m_JointStiffness;
 
-		if (impulseForces.GetMagnitude() > m_JointStrength) {
-			impulseForces.SetMagnitude(m_JointStrength);
-			jointImpulses += impulseForces;
-			if (m_BreakWound) {
-				AEmitter *breakWound = dynamic_cast<AEmitter *>(m_BreakWound->Clone());
-				if (breakWound) {
-					breakWound->SetEmitAngle(m_JointOffset.GetAbsRadAngle());
-					AddWound(breakWound, m_JointOffset, false);
-					breakWound = 0;
+		if (m_GibImpulseLimit > 0 && totalImpulseForce.GetMagnitude() > m_GibImpulseLimit) {
+			jointImpulses += (totalImpulseForce.SetMagnitude(totalImpulseForce.GetMagnitude() - m_GibImpulseLimit)) * m_JointStiffness;
+			GibThis();
+			return false;
+		} else if (m_JointStrength > 0 && totalImpulseForce.GetMagnitude() > m_JointStrength) {
+			jointImpulses += (totalImpulseForce.SetMagnitude(totalImpulseForce.GetMagnitude() - m_JointStiffness)) * m_JointStiffness;
+			m_Parent->RemoveAttachable(this, true, true);
+			return false;
+		} else {
+			jointImpulses += totalImpulseForce * m_JointStiffness;
+		}
+
+		// Rough explanation of what this is doing:
+		// The first part is getting the Dot/Scalar product of the perpendicular of the offset vector for the force onto the force vector itself (dot product is the amount two vectors are pointing in the same direction).
+		// The second part is dividing that Dot product by the moment of inertia, i.e. the torque needed to make it turn. All of this is multiplied by 1 - JointStiffness, because max stiffness joints transfer all force to parents and min stiffness transfer none.
+		if (!m_InheritsRotAngle) {
+			for (const std::pair<Vector, Vector> &impulseForce : m_ImpulseForces) {
+				if (!impulseForce.second.IsZero()) {
+					m_AngularVel += (impulseForce.second.GetPerpendicular().Dot(impulseForce.first) / m_pAtomGroup->GetMomentOfInertia()) * (1.0F - m_JointStiffness);
 				}
 			}
-			m_Parent->RemoveAttachable(this);
-			g_MovableMan.AddParticle(this);
-			return false;
 		}
 
-		for (const std::pair<Vector, Vector> &impulseForce : m_ImpulseForces) {
-			if (!impulseForce.second.IsZero()) {
-				// Rough explanation of what this is doing:
-				// The first part is getting the Dot/Scalar product of the perpendicular of the offset vector for the force onto the force vector itself (dot product is the amount two vectors are pointing in the same direction).
-				// The second part is dividing that Dot product by the moment of inertia, i.e. the torque needed to make it turn. All of this is multiplied by 1 - JointStiffness, because max stiffness joints transfer all force to parents and min stiffness transfer none.
-				m_AngularVel += (impulseForce.second.GetPerpendicular().Dot(impulseForce.first) / m_pAtomGroup->GetMomentOfInertia()) * (1.0F - m_JointStiffness);
-			}
-		}
 		m_ImpulseForces.clear();
-
-		jointImpulses += impulseForces;
 		return true;
 	}
 
@@ -255,8 +259,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Attachable::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO) {
+		m_ToDelete = true; // Necessary to avoid oddities with breakwounds
 		if (m_Parent) {
-			m_Parent->RemoveAttachable(this);
+			m_Parent->RemoveAttachable(this, true, true);
 		} else {
 			SetParent(nullptr);
 		}
@@ -278,6 +283,14 @@ namespace RTE {
 			m_Team = m_Parent->GetTeam();
 			if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
 			if (InheritsRotAngle()) { SetRotAngle(m_Parent->GetRotAngle()); }
+
+			if (m_CollidesWithTerrainWhileAttached) {
+				float facingAngle = (m_HFlipped ? c_PI : 0) + GetRotAngle() * static_cast<float>(GetFlipFactor());
+				float parentFacingAngle = (m_Parent->IsHFlipped() ? c_PI : 0) + m_Parent->GetRotAngle() * static_cast<float>(m_Parent->GetFlipFactor());
+
+				Matrix atomRot(facingAngle - parentFacingAngle);
+				m_pAtomGroup->UpdateSubAtoms(GetAtomSubgroupID(), GetParentOffset() - (GetJointOffset() * atomRot), atomRot);
+			}
 
 			m_DeepCheck = false;
 		}

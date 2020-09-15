@@ -27,10 +27,16 @@ namespace RTE {
 		Attachable() { Clear(); }
 		
 		/// <summary>
-		/// Creates a Attachable to be identical to another, by deep copy.
+		/// Makes the Attachable object ready for use.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create();
+
+		/// <summary>
+		/// Creates an Attachable to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the Attachable to deep copy.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const Attachable &reference);
 #pragma endregion
 
@@ -129,10 +135,16 @@ namespace RTE {
 		void SetDrawnNormallyByParent(bool drawnNormallyByParent) { m_DrawnNormallyByParent = drawnNormallyByParent; }
 
 		/// <summary>
-		/// Gets whether this Attachable will be deleted automatically when its parent is being deleted or not.
+		/// Gets whether this Attachable will be deleted when it's removed from its parent. Has no effect until the Attachable is added to a parent.
 		/// </summary>
-		/// <returns>Whether this Attachable is marked to be deleted along with it's parent or not.</returns>
-		bool ToDeleteWithParent() const { return m_DeleteWithParent; }
+		/// <returns>Whether this Attachable is marked to be deleted when it's removed from its parent or not.</returns>
+		bool GetDeleteWhenRemovedFromParent() const { return m_DeleteWhenRemovedFromParent; }
+
+		/// <summary>
+		/// Sets whether this Attachable will be deleted when it's removed from its parent.
+		/// </summary>
+		/// <param name="deleteWhenRemovedFromParent">Whether this Attachable should be deleted when it's removed from its parent.</param>
+		void SetDeleteWhenRemovedFromParent(bool deleteWhenRemovedFromParent) { m_DeleteWhenRemovedFromParent = deleteWhenRemovedFromParent; }
 #pragma endregion
 
 #pragma region Joint Getters and Setters
@@ -173,13 +185,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="offset">A Vector describing the offset of the joint relative to the this Attachable's origin/center of mass position.</param>
 		void SetJointOffset(Vector offset) { m_JointOffset = offset; }
-
-		/// <summary>
-		/// Sets the position of this Attachable by defining where the joint is.
-		/// Upon Update(), this will be translated into what the actual position of the Attachable origin/center of mass is, depending on its set rotational angle and joint offset.
-		/// </summary>
-		/// <param name="newJointPos">A const reference to the new joint position to set the position with.</param>
-		void SetJointPos(const Vector &jointPos) { m_JointPos = jointPos; }
 #pragma endregion
 
 #pragma region Force Managment
@@ -240,7 +245,7 @@ namespace RTE {
 		/// Sets the AEmitter that represents the wound added to this Attachable when it gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
 		/// </summary>
 		/// <param name="breakWound">The AEmitter to use for this Attachable's breakwound.</param>
-		void SetBreakWound(const AEmitter *breakWound) { m_BreakWound = breakWound; } //TODO I added this for consistency but do we want it? Maybe should have a string version that does the presetman lookup, cause we need to have a working pointer to the breakwound.
+		void SetBreakWound(AEmitter *breakWound) { m_BreakWound = breakWound; } //TODO I added this for consistency but do we want it? Maybe should have a string version that does the presetman lookup, cause we need to have a working pointer to the breakwound.
 
 		/// <summary>
 		/// Gets the AEmitter that represents the wound added to this Attachable's parent when this Attachable gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
@@ -252,7 +257,7 @@ namespace RTE {
 		/// Sets the AEmitter that represents the wound added to this Attachable's parent when this Attachable gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
 		/// </summary>
 		/// <param name="breakWound">The AEmitter to use for the parent's breakwound.</param>
-		void SetParentBreakWound(const AEmitter *breakWound) { m_ParentBreakWound = breakWound; }
+		void SetParentBreakWound(AEmitter *breakWound) { m_ParentBreakWound = breakWound; }
 #pragma endregion
 
 #pragma region Inherited Value Getters and Setters
@@ -349,7 +354,7 @@ namespace RTE {
 		Vector m_ParentOffset; //!< The offset from the parent's Pos to the joint point this Attachable is attached with.
 		bool m_DrawAfterParent; //!< Whether to draw this Attachable after (in front of) or before (behind) the parent.
 		bool m_DrawnNormallyByParent; //!< Whether this Attachable will be be drawn normally when attached, or will require special handling by some non-MOSR parent type.
-		bool m_DeleteWithParent; //!< Whether this Attachable should be deleted when its parent is set ToDelete.
+		bool m_DeleteWhenRemovedFromParent; //!< Whether this Attachable should be deleted when it's removed from its parent.
 		
 		float m_JointStrength; //!< The amount of impulse force needed on this to deatch it from the host Actor, in kg * m/s.
 		float m_JointStiffness; //!< The normalized joint stiffness scalar. 1.0 means impulse forces on this attachable will be transferred to the parent with 100% strength, 0 means they will not transfer at all.

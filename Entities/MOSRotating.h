@@ -395,18 +395,36 @@ ClassInfoGetters
 	void AddAttachable(Attachable *attachable, const Vector& parentOffsetToSet);
 
     /// <summary>
-    /// Detaches the Attachable corresponding to the passed in UniqueID, and removes it from the appropriate attachable lists.
+    /// Detaches the Attachable corresponding to the passed in UniqueID, and removes it from the appropriate Attachable lists. Does not add it to MovableMan or add break wounds.
     /// </summary>
-    /// <param name="attachableUniqueID">The UniqueID of the the attachable to remove.</param>
-    /// <returns>False if the attachable is invalid, otherwise true.</returns>
-	bool RemoveAttachable(long attachableUniqueID);
+    /// <param name="attachableUniqueID">The UniqueID of the the Attachable to remove.</param>
+    /// <returns>False if the Attachable is invalid, otherwise true.</returns>
+    bool RemoveAttachable(long attachableUniqueID) { return RemoveAttachable(attachableUniqueID, false, false); }
 
     /// <summary>
-    /// Detaches the passed in Attachable and removes it from the appropriate attachable lists.
+    /// Detaches the Attachable corresponding to the passed in UniqueID, and removes it from the appropriate Attachable lists. Optionally adds it to MovableMan and/or adds break wounds.
     /// </summary>
-    /// <param name="attachable">The attachable to remove.</param>
-    /// <returns>False if the attachable is invalid, otherwise true.</returns>
-	bool RemoveAttachable(Attachable *attachable);
+    /// <param name="attachableUniqueID">The UniqueID of the the Attachable to remove.</param>
+    /// <param name="addToMovableMan">Whether or not to add the Attacahble to MovableMan once it has been removed.</param>
+    /// <param name="addBreakWounds">Whether or not to add break wounds to the Attachable and this MOSRotating.</param>
+    /// <returns>False if the Attachable is invalid, otherwise true.</returns>
+    bool RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds);
+
+    /// <summary>
+    /// Detaches the passed in Attachable and removes it from the appropriate Attachable lists. Does not add it to MovableMan or add break wounds.
+    /// </summary>
+    /// <param name="attachable">The Attachable to remove.</param>
+    /// <returns>False if the Attachable is invalid, otherwise true.</returns>
+    bool RemoveAttachable(Attachable *attachable) { return RemoveAttachable(attachable, false, false); }
+
+    /// <summary>
+    /// Detaches the passed in Attachable and removes it from the appropriate Attachable lists. Optionally adds it to MovableMan and/or adds break wounds.
+    /// </summary>
+    /// <param name="attachable">The Attachable to remove.</param>
+    /// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
+    /// <param name="addBreakWounds">Whether or not to add break wounds to the Attachable and this MOSRotating.</param>
+    /// <returns>False if the Attachable is invalid, otherwise true.</returns>
+    bool RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds);
 
     /// <summary>
     /// Either detaches or deletes all of this MOSRotating's Attachables.
@@ -596,9 +614,9 @@ ClassInfoGetters
 	/// Attaches the passed in wound AEmitter and adds it to the list of wounds, changing its parent offset to the passed in Vector.
 	/// </summary>
 	/// <param name="woundToAdd">The wound AEmitter to add.</param>
-	/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset<./param>
-	/// <param name="checkGibWoundLimit">Whether to gib this MOSRotating if adding this wound raises its wound count past its gib wound limit.</param>
-	void AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit = true);
+	/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset.</param>
+	/// <param name="checkGibWoundLimit">Whether to gib this MOSRotating if adding this wound raises its wound count past its gib wound limit. Defaults to true.</param>
+    void AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit = true);
 
     /// <summary>
     /// Removes a specified number of wounds, including  and returns damage caused by these wounds.
@@ -790,22 +808,12 @@ protected:
         hardcodedAttachableSetter(*objectToRunSetterOn, dynamic_cast<Attachable *>(referenceAttachable->Clone()));
     }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ApplyAttachableForces
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the joint force transfer stuff for an attachable. Convencinece
-//                  method. If this returns false, it means the attachable has been knocked
-//                  off and has been passed to MovableMan OR deleted. In either case,
-//                  if false is returned just set the pointer to 0 and be done with it.
-// Arguments:       A pointer to the attachable to mess with. Ownership isn't transferred,
-//                  but if the return is false, then the object has been deleted!
-//					If isCritical is true, then if attachable is gibbed created break wound
-//					emits indefenitely to guarantee actor's death.
-// Return value:    Whether or not the joint held up to the forces and impulses which had
-//                  accumulated on the Attachable during this Update(). If false, the passed
-//                  in instance is now deleted and invalid!
-
-    bool ApplyAttachableForces(Attachable *pAttachable, bool isCritical = false);
+    /// <summary>
+    /// Transfers forces and impulse forces from the given Attachable to this MOSRotating or removed the Attachable if needed.
+    /// </summary>
+    /// <param name="attachable">A pointer to the Attachable to apply forces from. Ownership is NOT transferred!</param>
+    /// <returns>Whether or not the Attachable has been removed, in which case it'll usually be passed to MovableMan or deleted.</returns>
+    bool TransferForcesFromAttachable(Attachable *attachable);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

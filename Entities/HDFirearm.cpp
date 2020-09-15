@@ -154,6 +154,7 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader) {
             delete m_pFlash;
             m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
             m_pFlash->SetDrawnNormallyByParent(false);
+            m_pFlash->SetDeleteWhenRemovedFromParent(true);
         }
     } else if (propName == "FireSound") {
         reader >> m_FireSound;

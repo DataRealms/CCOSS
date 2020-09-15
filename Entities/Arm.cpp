@@ -204,7 +204,6 @@ void Arm::SetHeldMO(MovableObject *newHeldMO)
     if (newHeldMO && (newHeldMO->IsHeldDevice() || newHeldMO->IsThrownDevice())) {
         Attachable *pNewDev = dynamic_cast<Attachable *>(newHeldMO);
         if (pNewDev->IsAttached()) { dynamic_cast<MOSRotating *>(pNewDev->GetParent())->RemoveAttachable(pNewDev); }
-        g_MovableMan.RemoveMO(pNewDev);
         AddAttachable(pNewDev);
         pNewDev->SetTeam(m_Team);
         pNewDev = 0;

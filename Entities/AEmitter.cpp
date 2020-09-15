@@ -171,6 +171,7 @@ int AEmitter::ReadProperty(std::string propName, Reader &reader) {
             m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
             m_pFlash->SetDrawnNormallyByParent(false);
             m_pFlash->SetInheritsRotAngle(false);
+            m_pFlash->SetDeleteWhenRemovedFromParent(true);
         }
     } else if (propName == "FlashScale") {
         reader >> m_FlashScale;

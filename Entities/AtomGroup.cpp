@@ -1220,43 +1220,40 @@ float AtomGroup::Travel(Vector &position,
             {
 				somethingPenetrated = false;
 
-				distMass = mass / static_cast<float>((hitTerrAtoms.size() - penetratingAtoms.size()) * (m_Resolution ? m_Resolution : 1));
-				distMI = m_MomInertia / static_cast<float>((hitTerrAtoms.size() - penetratingAtoms.size()) * (m_Resolution ? m_Resolution : 1));
+                distMass = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
+                distMI = m_MomInertia / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
 				for (std::list<Atom*>::iterator aItr = hitTerrAtoms.begin(); aItr != hitTerrAtoms.end(); )
                 {
-					const std::list<Atom *>::iterator duplicateAtomItr = std::find(penetratingAtoms.begin(), penetratingAtoms.end(), *aItr);
-					if (duplicateAtomItr == penetratingAtoms.end()) {
-						// Calc and store the accurate hit radius of the Atom in relation to the CoM
-						tempVec = (*aItr)->GetOffset().GetXFlipped(hFlipped);
-						hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= c_MPP;
-						// Figure out the pre-collision velocity of the hitting atom due to body translation and rotation.
-						hitData.HitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
+                    // Calc and store the accurate hit radius of the Atom in relation to the CoM
+                    tempVec = (*aItr)->GetOffset().GetXFlipped(hFlipped);
+                    hitData.HitRadius[HITOR] = tempVec.RadRotate(rotation.GetRadAngle()) *= c_MPP;
+                    // Figure out the pre-collision velocity of the hitting atom due to body translation and rotation.
+                    hitData.HitVel[HITOR] = velocity + tempVec.Perpendicularize() * angVel;
 
-						radMag = hitData.HitRadius[HITOR].GetMagnitude();
-						// These are set temporarily here, will be re-set later when the normal of the hit terrain bitmap (ortho pixel side) is known.
-						hitData.HitDenominator = (1.0F / distMass) + ((radMag * radMag) / distMI);
-						hitData.PreImpulse[HITOR] = hitData.HitVel[HITOR] / hitData.HitDenominator;
-						// Set the atom with the hit data with all the info we have so far.
-						(*aItr)->SetHitData(hitData);
+                    radMag = hitData.HitRadius[HITOR].GetMagnitude();
+                    // These are set temporarily here, will be re-set later when the normal of the hit terrain bitmap (ortho pixel side) is known.
+                    hitData.HitDenominator = (1.0F / distMass) + ((radMag * radMag) / distMI);
+                    hitData.PreImpulse[HITOR] = hitData.HitVel[HITOR] / hitData.HitDenominator;
+                    // Set the atom with the hit data with all the info we have so far.
+                    (*aItr)->SetHitData(hitData);
 
-						if (g_SceneMan.WillPenetrate((*aItr)->GetCurrentPos().GetFloorIntX(), (*aItr)->GetCurrentPos().GetFloorIntY(), hitData.PreImpulse[HITOR]))
-						{
-							// Move the penetrating atom to the pen. list from the coll. list.
-							penetratingAtoms.push_back(*aItr);
-							somethingPenetrated = true;
-						} else
-							++aItr;
+                    if (g_SceneMan.WillPenetrate((*aItr)->GetCurrentPos().GetFloorIntX(), (*aItr)->GetCurrentPos().GetFloorIntY(), hitData.PreImpulse[HITOR]))
+                    {
+                        // Move the penetrating atom to the pen. list from the coll. list.
+						penetratingAtoms.push_back(*aItr);
+						aItr = hitTerrAtoms.erase(aItr);
+						somethingPenetrated = true;
 					} else
 						++aItr;
                 }
             }
-			while (somethingPenetrated);
+			while (!hitTerrAtoms.empty() && somethingPenetrated);
 
             // TERRAIN BOUNCE //////////////////////////////////////////////////////////////////
             // If some Atoms could not penetrate even though all the impulse was on them,
             // gather the bounce results and apply them to the owner.
-			if (hitTerrAtoms.size() != penetratingAtoms.size())
+            if (!hitTerrAtoms.empty())
             {
                 newDir = true;
 
@@ -1946,31 +1943,29 @@ before adding them to the MovableMan.
             do {
 				somethingPenetrated = false;
 
-				massDist = mass / static_cast<float>((hitTerrAtoms.size() - penetratingAtoms.size()) * (m_Resolution ? m_Resolution : 1));
+                massDist = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
                 for (deque<pair<Atom *, Vector> >::iterator aoItr = hitTerrAtoms.begin(); aoItr != hitTerrAtoms.end(); )
                 {
-					const deque<pair<Atom *, Vector> >::iterator duplicateAtomItr = std::find(penetratingAtoms.begin(), penetratingAtoms.end(), *aoItr);
-					if (duplicateAtomItr == penetratingAtoms.end()) {
-						if (g_SceneMan.WillPenetrate(intPos[X] + (*aoItr).second.GetFloorIntX(),
-							intPos[Y] + (*aoItr).second.GetFloorIntY(),
-							forceVel,
-							massDist))
-						{
-							// Move the penetrating atom to the pen. list from the coll. list.
-							penetratingAtoms.push_back(pair<Atom *, Vector>((*aoItr).first, (*aoItr).second));
-							somethingPenetrated = true;
-						} else
-							++aoItr;
-					} else
-						++aoItr;
+                    if (g_SceneMan.WillPenetrate(intPos[X] + (*aoItr).second.GetFloorIntX(),
+                                                 intPos[Y] + (*aoItr).second.GetFloorIntY(),
+                                                 forceVel,
+                                                 massDist))
+                    {
+                        // Move the penetrating atom to the pen. list from the coll. list.
+                        penetratingAtoms.push_back(pair<Atom *, Vector>((*aoItr).first, (*aoItr).second));
+                        aoItr = hitTerrAtoms.erase(aoItr);
+						somethingPenetrated = true;
+                    }
+                    else
+                        ++aoItr;
                 }
-			} while (somethingPenetrated);
+			} while (!hitTerrAtoms.empty() && somethingPenetrated);
 
             // TERRAIN BOUNCE //////////////////////////////////////////////////////////////////
             // If some Atom:s could not penetrate even though all the mass was on them,
             // gather the bounce results and apply them to the owner.
-			if (hitTerrAtoms.size() != penetratingAtoms.size())
+            if (!hitTerrAtoms.empty())
             {
                 newDir = true;
                 prevError = error;

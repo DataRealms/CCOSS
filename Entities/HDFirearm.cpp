@@ -939,11 +939,8 @@ void HDFirearm::Update()
 
         // Display gun flame frame.
         if (m_pFlash) {
-            m_pFlash->SetHFlipped(m_HFlipped);
-            m_pFlash->SetJointPos(m_Pos + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation));
-            m_pFlash->SetRotAngle(m_Rotation.GetRadAngle());
+            m_pFlash->SetParentOffset(m_MuzzleOff);
             m_pFlash->SetFrame(floorf((m_pFlash->GetFrameCount()/* - 1*/) * PosRand() - 0.001));
-            m_pFlash->Update();
         }
 
         // Play firing sound
@@ -1001,16 +998,9 @@ void HDFirearm::Update()
     // Update fitted Magazine.
 
     if (m_pMagazine) {
-        m_pMagazine->SetHFlipped(m_HFlipped);
-        m_pMagazine->SetJointPos(m_Pos + RotateOffset(m_pMagazine->GetParentOffset()));
-        m_pMagazine->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pMagazine->Update();
         // Recoil offset has to be applied after the Update or it'll get reset within the update
         m_pMagazine->SetRecoil(m_RecoilForce, m_RecoilOffset, m_Recoiled);
     }
-
-    if (!ApplyAttachableForces(m_pMagazine))
-        m_pMagazine = 0;
 
     m_FiredLastFrame = m_FireFrame;
 }

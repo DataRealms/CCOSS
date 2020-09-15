@@ -162,8 +162,8 @@ namespace RTE {
 		}
 
 		if (m_Foot) {
-			// In order to keep the ankle in the right place, we need to convert its offset to work as the ParentOffset for the foot. The Foot will then use this to set its JointPos when it's updated.
-			// Unfortunately UnRotateOffset doesn't work for this, since it's Vector/Matrix division, which isn't commutative.
+			// In order to keep the foot in the right place, we need to convert its offset (the ankle offstet) to work as the ParentOffset for the foot.
+			// The foot will then use this to set its JointPos when it's updated. Unfortunately UnRotateOffset doesn't work for this, since it's Vector/Matrix division, which isn't commutative.
 			Vector ankleOffsetAsParentOffset = RotateOffset(m_JointOffset) + m_CurrentAnkleOffset;
 			ankleOffsetAsParentOffset.RadRotate(-m_Rotation.GetRadAngle()).FlipX(m_HFlipped);
 			m_Foot->SetParentOffset(ankleOffsetAsParentOffset);

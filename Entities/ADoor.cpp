@@ -86,6 +86,7 @@ namespace RTE {
 			delete m_Door;
 			m_Door = new Attachable;
 			reader >> m_Door;
+			m_Door->SetInheritsRotAngle(false);
 			m_DoorMaterialID = m_Door->GetMaterial()->GetIndex();
 		} else if (propName == "OpenOffset") {
 			reader >> m_OpenOffset;
@@ -349,14 +350,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::Update() {
-		Actor::Update();
 
 		if (m_Door && m_Door->IsAttached()) {
 			if (m_DoorState != STOPPED && m_SensorTimer.IsPastSimMS(m_SensorInterval)) { UpdateSensors(); }
-			UpdateDoorAttachable();
+			UpdateDoorAttachableActions();
 		}
 
-		if (m_Door && !ApplyAttachableForces(m_Door)) {
+		Actor::Update();
+
+		if (m_Door) {
 			EraseDoorMaterial();
 			m_Door = 0;
 			// Start the spinning out of control animation for the motor, start it slow
@@ -412,13 +414,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ADoor::UpdateDoorAttachable() {
+	void ADoor::UpdateDoorAttachableActions() {
 		Vector startOffset;
 		Vector endOffset;
 		float startAngle;
 		float endAngle;
-
-		m_Door->SetHFlipped(m_HFlipped);
 
 		if (m_DoorState == OPEN || m_DoorState == OPENING) {
 			startOffset = m_ClosedOffset;
@@ -433,16 +433,16 @@ namespace RTE {
 		}
 
 		if (m_DoorState == OPEN || m_DoorState == CLOSED) {
-			m_Door->SetJointPos(m_Pos + endOffset.GetXFlipped(m_HFlipped) * m_Rotation);
-			m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * GetFlipFactor()));
+			m_Door->SetParentOffset(endOffset);
+			m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * static_cast<float>(GetFlipFactor())));
 		} else if (m_DoorState == OPENING || m_DoorState == CLOSING) {
 			if (!m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
 
 			if (m_DoorMoveTimer.IsPastSimMS(m_DoorMoveTime)) {
 				m_ResetToDefaultStateTimer.Reset();
 
-				m_Door->SetJointPos(m_Pos + endOffset.GetXFlipped(m_HFlipped) * m_Rotation);
-				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * GetFlipFactor()));
+				m_Door->SetParentOffset(endOffset);
+				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * static_cast<float>(GetFlipFactor())));
 
 				m_DoorMoveSound.Stop();
 				m_DoorMoveEndSound.Play(m_Pos);
@@ -459,14 +459,13 @@ namespace RTE {
 				// TODO: Make this work across rotation 0. Probably the best solution would be to setup an angle LERP that properly handles the 2PI border and +- angles.
 				float updatedAngle = LERP(0, m_DoorMoveTime, startAngle, endAngle, m_DoorMoveTimer.GetElapsedSimTimeMS());
 
-				m_Door->SetJointPos(m_Pos + updatedOffset.GetXFlipped(m_HFlipped) * m_Rotation);
+				m_Door->SetParentOffset(updatedOffset);
 				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (updatedAngle * GetFlipFactor()));
 
 				// Clear away any terrain debris when the door is moving but only after a short delay so it doesn't take a chunk out of the ground
 				if (m_DoorMoveTimer.IsPastSimMS(50)) { m_Door->DeepCheck(true); }
 			}
 		}
-		m_Door->Update();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

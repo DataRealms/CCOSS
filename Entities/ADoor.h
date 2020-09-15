@@ -202,7 +202,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the door attachable position and movement based on the current state of this ADoor. This is called from Update().
 		/// </summary>
-		void UpdateDoorAttachable();
+		void UpdateDoorAttachableActions();
 #pragma endregion
 
 		/// <summary>

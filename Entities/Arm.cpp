@@ -379,9 +379,9 @@ void Arm::GibThis(const Vector &impactImpulse, float internalBlast, MovableObjec
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this Arm. Supposed to be done every frame.
 
-void Arm::Update()
-{
-    // Update basic metrics from parent.
+void Arm::Update() {
+
+
     Attachable::Update();
 
     if (!m_Parent) {
@@ -396,8 +396,7 @@ void Arm::Update()
         // Update hand
         m_HandOffset.SetXY(m_MaxLength * 0.65, 0);
         m_HandOffset.RadRotate((m_HFlipped ? c_PI : 0) + m_Rotation.GetRadAngle());
-    }
-    else {
+    } else {
         // Attached, so act like it
 
         // If a Firearm or Shield device is held, but not a throwable, update it and arm configuration accordingly.
@@ -437,9 +436,13 @@ void Arm::Update()
             ConstrainHand();
 
             float handAngle = m_HandOffset.GetAbsRadAngle();
-            pHeldDev->SetJointPos(m_JointPos + m_HandOffset);
-            pHeldDev->SetRotAngle(m_Rotation.GetRadAngle());
-            pHeldDev->Update();
+
+            // In order to keep the HeldDevice in the right place, we need to convert its offset (the hand offset) to work as the ParentOffset for the HeldDevice.
+            // The HeldDevice will then use this to set its JointPos when it's updated. Unfortunately UnRotateOffset doesn't work for this, since it's Vector/Matrix division, which isn't commutative.
+            Vector handOffsetAsParentOffset = RotateOffset(m_JointOffset) + m_HandOffset;
+            handOffsetAsParentOffset.RadRotate(-m_Rotation.GetRadAngle()).FlipX(m_HFlipped);
+            pHeldDev->SetParentOffset(handOffsetAsParentOffset);
+            
             if (pHeldDev->IsRecoiled())
                 m_Parent->AddImpulseForce(pHeldDev->GetRecoilForce());
             else
@@ -448,15 +451,8 @@ void Arm::Update()
             m_Rotation = (m_HFlipped ? c_PI : 0) + handAngle;
 
             // Redo the positioning of the arm now since the rotation has changed and RotateOffset will return different results
-            if (!m_JointPos.IsZero())
-                m_Pos = m_JointPos - RotateOffset(m_JointOffset);
-            else
-                m_Pos = m_Parent->GetPos() - RotateOffset(m_JointOffset);
+            m_Pos = m_JointPos - RotateOffset(m_JointOffset);
 
-            // Apply forces and detach if necessary
-            // OBSERVE the memeber pointer is what gets set to 0!$@#$@
-            if (!ApplyAttachableForces(pHeldDev))
-                m_pHeldMO = 0;
             // If it blew up or whatever, releaes it from hand and put into scene so it'll be cleaned up properly
             if (m_pHeldMO && m_pHeldMO->IsSetToDelete())
                 g_MovableMan.AddItem(ReleaseHeldMO());
@@ -495,22 +491,18 @@ void Arm::Update()
             m_Rotation = (m_HFlipped ? c_PI : 0) + m_HandOffset.GetAbsRadAngle();
 
             // Redo the positioning of the arm now since the rotation has changed and RotateOffset will return different results
-            if (!m_JointPos.IsZero())
-                m_Pos = m_JointPos - RotateOffset(m_JointOffset);
-            else
-                m_Pos = m_Parent->GetPos() - RotateOffset(m_JointOffset);
+            m_Pos = m_JointPos - RotateOffset(m_JointOffset);
 
             // If holding something other than a FireArm, then update it
-            if (m_pHeldMO)
-            {
+            if (m_pHeldMO) {
                 Attachable *pHeldDev = dynamic_cast<Attachable *>(m_pHeldMO);
-                if (pHeldDev)
-                    pHeldDev->SetJointPos(m_JointPos + m_HandOffset);
-                else
-                    m_pHeldMO->SetPos(m_JointPos + m_HandOffset);
-                m_pHeldMO->SetHFlipped(m_HFlipped);
-                m_pHeldMO->SetRotAngle(m_Rotation.GetRadAngle());
-                m_pHeldMO->Update();
+
+                // In order to keep the HeldDevice in the right place, we need to convert its offset (the hand offset) to work as the ParentOffset for the HeldDevice.
+                // The HeldDevice will then use this to set its JointPos when it's updated. Unfortunately UnRotateOffset doesn't work for this, since it's Vector/Matrix division, which isn't commutative.
+                Vector handOffsetAsParentOffset = RotateOffset(m_JointOffset) + m_HandOffset;
+                handOffsetAsParentOffset.RadRotate(-m_Rotation.GetRadAngle()).FlipX(m_HFlipped);
+                pHeldDev->SetParentOffset(handOffsetAsParentOffset);
+
                 // If it blew up or whatever, releaes it from hand and put into scene so it'll be cleaned up properly
                 if (m_pHeldMO->IsSetToDelete())
                     g_MovableMan.AddItem(ReleaseHeldMO());

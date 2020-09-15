@@ -170,6 +170,7 @@ int AEmitter::ReadProperty(std::string propName, Reader &reader) {
         if (pObj) {
             m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
             m_pFlash->SetDrawnNormallyByParent(false);
+            m_pFlash->SetInheritsRotAngle(false);
         }
     } else if (propName == "FlashScale") {
         reader >> m_FlashScale;
@@ -390,6 +391,17 @@ void AEmitter::Update()
             m_Frame = 0;
     }
 
+    // Update and show flash if there is one
+    if (m_pFlash && (!m_FlashOnlyOnBurst || m_BurstTriggered)) {
+        m_pFlash->SetParentOffset(m_EmissionOffset);
+        if (m_EmitEnabled && !m_WasEmitting) {
+            // Don't set the flipping for the flash because that is wasting resources when drawing, just handle the flipping of the rotation here.
+            m_pFlash->SetRotAngle(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
+            m_pFlash->SetScale(m_FlashScale);
+            m_pFlash->SetNextFrame();
+        }
+    }
+
     Attachable::Update();
 
     if (m_EmitEnabled)
@@ -533,21 +545,6 @@ void AEmitter::Update()
         else
             m_ImpulseForces.push_back(make_pair<Vector, Vector>(pushImpulses * m_JointStiffness, Vector()));
 
-        // Update and show flash if there is one
-        if (m_pFlash && (!m_FlashOnlyOnBurst || m_BurstTriggered)) {
-            if (!m_EmissionOffset.IsZero())
-                m_pFlash->SetJointPos(m_Pos + RotateOffset(m_EmissionOffset)/* + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation)*/);
-            else
-                m_pFlash->SetJointPos(m_Pos/* + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation)*/);
-            // Don't set the flipping for the flash because that is wasting resources when drawing,
-            // just handle the flipping of the rotation here.
-            m_pFlash->SetRotAngle(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
-//            m_pFlash->SetFrame(floorf((m_pFlash->GetFrameCount()/* - 1*/) * PosRand() - 0.001));
-            m_pFlash->SetScale(m_FlashScale);
-            m_pFlash->SetNextFrame();
-            m_pFlash->Update();
-        }
-
         // Count the the damage caused by the emissions, and only if we're not bursting
         if (!m_BurstTriggered)
             m_DamageCount += (float)emissions * m_EmitDamage * m_EmitterDamageMultiplier;
@@ -568,14 +565,6 @@ void AEmitter::Update()
     // Do stuff to stop emission
 	else
 	{
-		// Fix for when emitter is not emitting the flash is drawn on the wrong position
-		if (m_pFlash) {
-			if (!m_EmissionOffset.IsZero())
-				m_pFlash->SetJointPos(m_Pos + RotateOffset(m_EmissionOffset)/* + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation)*/);
-			else
-				m_pFlash->SetJointPos(m_Pos/* + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation)*/);
-		}
-
 		if (m_WasEmitting)
 		{
 			m_EmissionSound.Stop();

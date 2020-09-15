@@ -744,18 +744,10 @@ void ACDropShip::Update()
     // Hatch door pieces
     if (m_pRHatch && m_pRHatch->IsAttached()) {
         m_pRHatch->SetRotAngle(m_Rotation.GetRadAngle() + m_HatchSwingRange.GetRadAngle() * m_HatchOpeness);
-
-        // Update the Atoms' offsets in the parent group
-        Matrix atomRot(FacingAngle(m_pRHatch->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-        m_pAtomGroup->UpdateSubAtoms(m_pRHatch->GetAtomSubgroupID(), m_pRHatch->GetParentOffset() - (m_pRHatch->GetJointOffset() * atomRot), atomRot);
     }
 
     if (m_pLHatch && m_pLHatch->IsAttached()) {
         m_pLHatch->SetRotAngle(m_Rotation.GetRadAngle() - m_HatchSwingRange.GetRadAngle() * m_HatchOpeness);
-
-        // Update the Atoms' offsets in the parent group
-        Matrix atomRot(FacingAngle(m_pLHatch->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-        m_pAtomGroup->UpdateSubAtoms(m_pLHatch->GetAtomSubgroupID(), m_pLHatch->GetParentOffset() - (m_pLHatch->GetJointOffset() * atomRot), atomRot);
     }
 
 	/////////////////////////////////////////////////

@@ -118,7 +118,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TimerMan::Update() {
-    long long prevTime = m_RealTimeTicks;
+		long long prevTime = m_RealTimeTicks;
 #ifdef _WIN32
 		LARGE_INTEGER tickReading;
 
@@ -133,7 +133,7 @@ namespace RTE {
 		curTime= static_cast<long long>((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
 		m_RealTimeTicks = curTime - m_StartTime;
 #endif
-		// Figure the increase in real time 
+		// Figure the increase in real time
 		unsigned long long timeIncrease = m_RealTimeTicks - prevTime;
 		// Cap it if too long (as when the app went out of focus)
 		if (timeIncrease > m_RealToSimCap) { timeIncrease = m_RealToSimCap; }

@@ -323,7 +323,7 @@ namespace RTE {
 				memset(bmp->line[lineNumber], g_MaskColor, bmp->w);
 			} else {
 				if (frameData->DataSize == frameData->UncompressedSize) {
-#if defined(__STDC_LIB_EXT1__) || defined(_WIN32)
+#ifdef _WIN32
 					memcpy_s(bmp->line[lineNumber], bmp->w, packet->data + sizeof(MsgFrameLine), pixels);
 #else
 					//Fallback to non safe memcpy
@@ -369,7 +369,7 @@ namespace RTE {
 				rectfill(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_MaskColor);
 			} else {
 				if (frameData->DataSize == frameData->UncompressedSize) {
-#if defined(__STDC_LIB_EXT1__) || defined(_WIN32)
+#ifdef _WIN32
 					memcpy_s(m_PixelLineBuffer, size, packet->data + sizeof(MsgFrameBox), size);
 #else
 					// Fallback to unsafe memcpy
@@ -382,7 +382,7 @@ namespace RTE {
 				// Copy box to bitmap line by line
 				const unsigned char *lineAddr = m_PixelLineBuffer;
 				for (int y = 0; y < maxHeight; y++) {
-#if defined(__STDC_LIB_EXT1__) || defined(_WIN32)
+#ifdef _WIN32
 					memcpy_s(bmp->line[bpy + y] + bpx, maxWidth, lineAddr, maxWidth);
 #else
 					memcpy(bmp->line[bpy + y] + bpx, lineAddr, maxWidth);
@@ -437,7 +437,7 @@ namespace RTE {
 				memset(bmp->line[liney] + linex, g_MaskColor, width);
 			} else {
 				if (frameData->DataSize == frameData->UncompressedSize) {
-#if defined(__STDC_LIB_EXT1__) || defined(_WIN32)
+#ifdef _WIN32
 					memcpy_s(bmp->line[liney] + linex, width, packet->data + sizeof(MsgSceneLine), pixels);
 #else
 					memcpy(bmp->line[liney] + linex, packet->data + sizeof(MsgSceneLine), pixels);
@@ -545,7 +545,7 @@ namespace RTE {
 			int size = frameData->UncompressedSize;
 
 			if (frameData->DataSize == frameData->UncompressedSize) {
-#if defined(__STDC_LIB_EXT1__) || defined(_WIN32)
+#ifdef _WIN32
 				memcpy_s(m_PixelLineBuffer, size, packet->data + sizeof(MsgTerrainChange), size);
 #else
 				memcpy(m_PixelLineBuffer, packet->data + sizeof(MsgTerrainChange), size);

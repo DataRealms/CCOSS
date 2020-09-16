@@ -5,57 +5,50 @@
 #define _HAS_AUTO_PTR_ETC 1
 
 // Inclusion of relevant C++ Standard Library headers.
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <cctype>
-#include <cerrno>
-#include <cmath>
+#include <cstdlib>
 #include <cstdarg>
 #include <cstddef>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <deque>
-#include <filesystem>
-#include <fstream>
 #include <functional>
-#include <iostream>
-#include <istream>
-#include <limits>
-#include <list>
-#include <map>
-#include <mutex>
-#include <queue>
-#include <random>
-#include <regex>
-#include <set>
-#include <sstream>
-#include <string>
 #include <thread>
+#include <mutex>
+#include <cctype>
+#include <string>
+#include <cstring>
+#include <vector>
+#include <list>
+#include <set>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
-
-// Linux specific headers that MSVC uses implicitly
-#ifdef __unix__
-// Since GCC does not implement buffer safe functions until c++17
-// This will be needed once c++17 is enabled
-#define __STDC_WANT_LIB_EXT1__ 1
-#endif
+#include <queue>
+#include <deque>
+#include <regex>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <istream>
+#include <algorithm>
+#include <cmath>
+#include <ctime>
+#include <cerrno>
+#include <cassert>
+#include <limits>
+#include <random>
+#include <array>
+#include <filesystem>
 
 // TODO: Get rid of these once alias qualifiers are added.
-using std::array;
-using std::deque;
-using std::ios_base;
-using std::list;
-using std::make_pair;
-using std::map;
-using std::max;
-using std::min;
-using std::pair;
-using std::set;
 using std::string;
+using std::list;
+using std::pair;
+using std::deque;
+using std::map;
+using std::set;
 using std::vector;
+using std::ios_base;
+using std::array;
+using std::make_pair;
+using std::min;
+using std::max;
 
 #endif

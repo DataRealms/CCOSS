@@ -167,35 +167,35 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader) {
         reader >> m_pMThruster;
         AddAttachable(m_pMThruster);
         if (!m_pMThruster->GetDamageMultiplierSetInINI()) { m_pMThruster->SetDamageMultiplier(1.0F); }
-        m_pMThruster->SetInheritsRotAngle(false);
+        m_pMThruster->SetInheritedRotAngleOffset(-c_HalfPI);
     } else if (propName == "RThruster") {
         RemoveAttachable(m_pRThruster);
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
         AddAttachable(m_pRThruster);
         if (!m_pRThruster->GetDamageMultiplierSetInINI()) { m_pRThruster->SetDamageMultiplier(1.0F); }
-        m_pRThruster->SetInheritsRotAngle(false);
+        m_pRThruster->SetInheritedRotAngleOffset(c_EighthPI);
     } else if (propName == "LThruster") {
         RemoveAttachable(m_pLThruster);
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
         AddAttachable(m_pLThruster);
         if (!m_pLThruster->GetDamageMultiplierSetInINI()) { m_pLThruster->SetDamageMultiplier(1.0F); }
-        m_pLThruster->SetInheritsRotAngle(false);
+        m_pLThruster->SetInheritedRotAngleOffset(c_PI - c_EighthPI);
     } else if (propName == "URThruster") {
         RemoveAttachable(m_pURThruster);
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
         AddAttachable(m_pURThruster);
         if (!m_pURThruster->GetDamageMultiplierSetInINI()) { m_pURThruster->SetDamageMultiplier(1.0F); }
-        m_pURThruster->SetInheritsRotAngle(false);
+        m_pURThruster->SetInheritedRotAngleOffset(c_HalfPI - c_EighthPI);
     } else if (propName == "ULThruster") {
         RemoveAttachable(m_pULThruster);
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
         AddAttachable(m_pULThruster);
         if (!m_pULThruster->GetDamageMultiplierSetInINI()) { m_pULThruster->SetDamageMultiplier(1.0F); }
-        m_pULThruster->SetInheritsRotAngle(false);
+        m_pULThruster->SetInheritedRotAngleOffset(c_HalfPI + c_EighthPI);
     } else if (propName == "RaisedGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISED];
     } else if (propName == "LoweredGearLimbPath") {
@@ -792,26 +792,6 @@ void ACRocket::Update()
 
     if (m_pLLeg && m_pLLeg->IsAttached()) {
         m_pLLeg->SetTargetPosition(m_pLFootGroup->GetLimbPos(!m_HFlipped));
-    }
-
-    if (m_pMThruster) {
-        m_pMThruster->SetRotAngle(m_Rotation.GetRadAngle() - c_HalfPI);
-    }
-
-    if (m_pRThruster) {
-        m_pRThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_EighthPI);
-    }
-
-    if (m_pLThruster) {
-        m_pLThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_PI - c_EighthPI);
-    }
-
-    if (m_pURThruster) {
-        m_pURThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_HalfPI - c_QuarterPI / 2);
-    }
-
-    if (m_pULThruster) {
-        m_pULThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_HalfPI + c_QuarterPI / 2);
     }
 
     /////////////////////////////////////////////////

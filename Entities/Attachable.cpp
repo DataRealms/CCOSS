@@ -31,6 +31,7 @@ namespace RTE {
 
 		m_InheritsHFlipped = 1;
 		m_InheritsRotAngle = true;
+		m_InheritedRotAngleOffset = 0;
 
 		m_AtomSubgroupID = -1;
 		m_CollidesWithTerrainWhileAttached = true;
@@ -70,6 +71,7 @@ namespace RTE {
 
 		m_InheritsHFlipped = reference.m_InheritsHFlipped;
 		m_InheritsRotAngle = reference.m_InheritsRotAngle;
+		m_InheritedRotAngleOffset = reference.m_InheritedRotAngleOffset;
 
 		m_CollidesWithTerrainWhileAttached = reference.m_CollidesWithTerrainWhileAttached;
 
@@ -101,6 +103,10 @@ namespace RTE {
 			if (m_InheritsHFlipped != 0 && m_InheritsHFlipped != 1) { m_InheritsHFlipped = 2; }
 		} else if (propName == "InheritsRotAngle") {
 			reader >> m_InheritsRotAngle;
+		} else if (propName == "InheritedRotAngleRadOffset" || propName == "InheritedRotAngleOffset") {
+			reader >> m_InheritedRotAngleOffset;
+		} else if (propName == "InheritedRotAngleDegOffset") {
+			m_InheritedRotAngleOffset = DegreesToRadians(std::stof(reader.ReadPropValue()));
 		} else if (propName == "CollidesWithTerrainWhenAttached") {
 			reader >> m_CollidesWithTerrainWhileAttached;
 		} else {
@@ -138,6 +144,8 @@ namespace RTE {
 		writer << ((m_InheritsHFlipped == 0 || m_InheritsHFlipped == 1) ? m_InheritsHFlipped : 2);
 		writer.NewProperty("InheritsRotAngle");
 		writer << m_InheritsRotAngle;
+		writer.NewProperty("InheritedRotAngleOffset");
+		writer << m_InheritedRotAngleOffset;
 
 		writer.NewProperty("CollidesWithTerrainWhileAttached");
 		writer << m_CollidesWithTerrainWhileAttached;
@@ -282,7 +290,7 @@ namespace RTE {
 			m_Vel = m_Parent->GetVel();
 			m_Team = m_Parent->GetTeam();
 			if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
-			if (InheritsRotAngle()) { SetRotAngle(m_Parent->GetRotAngle()); }
+			if (InheritsRotAngle()) { SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset); }
 
 			if (m_CollidesWithTerrainWhileAttached) {
 				float facingAngle = (m_HFlipped ? c_PI : 0) + GetRotAngle() * static_cast<float>(GetFlipFactor());

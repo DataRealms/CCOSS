@@ -708,18 +708,10 @@ void ACDropShip::Update()
 
     if (m_pRThruster && m_pRThruster->IsAttached()) {
         m_pRThruster->SetRotAngle(engineRot.GetRadAngle());
-
-        // Update the Atoms' offsets in the parent group
-        Matrix atomRot(FacingAngle(m_pRThruster->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-        m_pAtomGroup->UpdateSubAtoms(m_pRThruster->GetAtomSubgroupID(), m_pRThruster->GetParentOffset() - (m_pRThruster->GetJointOffset() * atomRot), atomRot);
     }
 
     if (m_pLThruster && m_pLThruster->IsAttached()) {
         m_pLThruster->SetRotAngle(engineRot.GetRadAngle());
-
-        // Update the Atoms' offsets in the parent group
-        Matrix atomRot(FacingAngle(m_pLThruster->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-        m_pAtomGroup->UpdateSubAtoms(m_pLThruster->GetAtomSubgroupID(), m_pLThruster->GetParentOffset() - (m_pLThruster->GetJointOffset() * atomRot), atomRot);
     }
 
     // Auto balancing with the up thrusters

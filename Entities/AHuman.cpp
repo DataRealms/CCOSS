@@ -242,6 +242,7 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         reader >> m_pBGLeg;
         AddAttachable(m_pBGLeg);
         if (!m_pBGLeg->GetDamageMultiplierSetInINI()) { m_pBGLeg->SetDamageMultiplier(1.0F); }
+        m_pBGLeg->SetDrawnAfterParent(false);
     } else if (propName == "HandGroup") {
         delete m_pFGHandGroup;
         delete m_pBGHandGroup;
@@ -4037,10 +4038,6 @@ void AHuman::Update()
         }
         // Now actually rotate by the amount calculated above
         m_pHead->SetRotAngle(m_pHead->GetRotAngle() + toRotate);
-
-        // Update the Atoms' offsets in the parent group
-        Matrix headAtomRot(FacingAngle(m_pHead->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-        m_pAtomGroup->UpdateSubAtoms(m_pHead->GetAtomSubgroupID(), m_pHead->GetParentOffset() - (m_pHead->GetJointOffset() * headAtomRot), headAtomRot);
     }
 
     if (m_pFGLeg && m_pFGLeg->IsAttached()) {

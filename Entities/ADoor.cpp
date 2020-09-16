@@ -45,7 +45,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ADoor::Create(const ADoor &reference) {
-		if (reference.m_Door) { CloneHardcodedAttachable(reference.m_Door, this, static_cast<std::function<void(ADoor &, Attachable *)>>(&ADoor::SetDoor)); }
+		if (reference.m_Door) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_Door->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ADoor *>(parent)->SetDoor(attachable); }}); }
 		//TODO this was setting door parent offset to my closed offset, which is super weird. Test that doors are still cool. Old code was AddAttachable(m_Door, m_ClosedOffset, true);
 
 		Actor::Create(reference);
@@ -83,9 +83,10 @@ namespace RTE {
 
 	int ADoor::ReadProperty(std::string propName, Reader &reader) {
 		if (propName == "Door") {
-			delete m_Door;
+			RemoveAttachable(m_Door);
 			m_Door = new Attachable;
 			reader >> m_Door;
+			AddAttachable(m_Door);
 			m_Door->SetInheritsRotAngle(false);
 			m_DoorMaterialID = m_Door->GetMaterial()->GetIndex();
 		} else if (propName == "OpenOffset") {
@@ -201,7 +202,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::SetDoor(Attachable *newDoor) {
-		if (newDoor) {
+		if (newDoor == nullptr) {
+			if (m_Door && m_Door->IsAttachedTo(this)) { RemoveAttachable(m_Door); }
+			m_Door = nullptr;
+		} else {
 			RemoveAttachable(m_Door);
 			m_Door = newDoor;
 			AddAttachable(newDoor);

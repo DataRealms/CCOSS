@@ -69,7 +69,7 @@ void AEmitter::Clear()
 // Description:     Creates a AEmitter to be identical to another, by deep copy.
 
 int AEmitter::Create(const AEmitter &reference) {
-    if (reference.m_pFlash) { CloneHardcodedAttachable(reference.m_pFlash, this, static_cast<std::function<void(AEmitter &, Attachable *)>>(&AEmitter::SetFlash)); }
+    if (reference.m_pFlash) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AEmitter *>(parent)->SetFlash(attachable); }}); }
     Attachable::Create(reference);
 
     for (list<Emission *>::const_iterator itr = reference.m_EmissionList.begin(); itr != reference.m_EmissionList.end(); ++itr) {
@@ -166,9 +166,11 @@ int AEmitter::ReadProperty(std::string propName, Reader &reader) {
     } else if (propName == "EmissionDamage") {
         reader >> m_EmitDamage;
     } else if (propName == "Flash") {
-        const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
-        if (pObj) {
-            m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
+        RemoveAttachable(m_pFlash);
+        const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);
+        if (flashEntity) {
+            m_pFlash = dynamic_cast<Attachable *>(flashEntity->Clone());
+            AddAttachable(m_pFlash);
             m_pFlash->SetDrawnNormallyByParent(false);
             m_pFlash->SetInheritsRotAngle(false);
             m_pFlash->SetDeleteWhenRemovedFromParent(true);
@@ -367,7 +369,10 @@ float AEmitter::EstimateImpulse(bool burst)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AEmitter::SetFlash(Attachable *newFlash) {
-    if (newFlash) {
+    if (newFlash == nullptr) {
+        if (m_pFlash && m_pFlash->IsAttachedTo(this)) { RemoveAttachable(m_pFlash); }
+        m_pFlash = nullptr;
+    } else {
         RemoveAttachable(m_pFlash);
         m_pFlash = newFlash;
         AddAttachable(newFlash);
@@ -395,12 +400,10 @@ void AEmitter::Update()
     // Update and show flash if there is one
     if (m_pFlash && (!m_FlashOnlyOnBurst || m_BurstTriggered)) {
         m_pFlash->SetParentOffset(m_EmissionOffset);
-        if (m_EmitEnabled && !m_WasEmitting) {
-            // Don't set the flipping for the flash because that is wasting resources when drawing, just handle the flipping of the rotation here.
-            m_pFlash->SetRotAngle(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
-            m_pFlash->SetScale(m_FlashScale);
-            m_pFlash->SetNextFrame();
-        }
+        // Don't set the flipping for the flash because that is wasting resources when drawing, just handle the flipping of the rotation here.
+        m_pFlash->SetRotAngle(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
+        m_pFlash->SetScale(m_FlashScale);
+        m_pFlash->SetNextFrame();
     }
 
     Attachable::Update();

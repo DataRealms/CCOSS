@@ -796,19 +796,6 @@ ClassInfoGetters
 protected:
 
     /// <summary>
-    /// To be called during Create(reference):
-    /// Clones a hardcoded attachable, setting the appropriate member variable, and calling AddAttachable.
-    /// Also adds the reference attachable's UniqueID to the std::unordered_set of already copied attachable unique IDs so it doesn't get duplicated.
-    /// </summary>
-    /// <param name="referenceAttachable">The relevant hardcoded attachable belonging to the reference object being cloned.</param>
-    /// <param name="objectToRunSetterOn">A pointer to the object which the setter should be run on. Normally would be this, sent from the child class so types work properly.</param>
-    /// <param name="hardcodedAttachableSetter">A std::function containing the setter for the given hardcoded attachable. Aside from setting the relevant member variable, this setter should call AddAttachable.</param>
-    template<class T, class U> void CloneHardcodedAttachable(Attachable *referenceAttachable, T objectToRunSetterOn, U hardcodedAttachableSetter) {
-        m_AlreadyCopiedAttachableUniqueIDs.insert(referenceAttachable->GetUniqueID());
-        hardcodedAttachableSetter(*objectToRunSetterOn, dynamic_cast<Attachable *>(referenceAttachable->Clone()));
-    }
-
-    /// <summary>
     /// Transfers forces and impulse forces from the given Attachable to this MOSRotating or removed the Attachable if needed.
     /// </summary>
     /// <param name="attachable">A pointer to the Attachable to apply forces from. Ownership is NOT transferred!</param>
@@ -860,7 +847,7 @@ protected:
     std::list<AEmitter *> m_Wounds;
     // The list of Attachables currently attached and Owned by this.
     std::list<Attachable *> m_Attachables;
-    std::unordered_set<unsigned long> m_AlreadyCopiedAttachableUniqueIDs; //<! An unordered set of Unique IDs, used to avoid duplicating hardcoded Attachables (i.e. head, legs, etc.) when cloning.
+    std::unordered_map<unsigned long, std::function<void (MOSRotating*, Attachable*)>> m_HardcodedAttachableUniqueIDsAndSetters; //<! An unordered map of Unique IDs to setter lambda functions, used to properly set member pointers for hardcoded Attachables (i.e. head, legs, etc.) when cloning.
     // The list of Gib:s this will create when gibbed
     std::list<Gib> m_Gibs;
     // The amount of impulse force required to gib this, in kg * (m/s). 0 means no limit

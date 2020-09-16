@@ -138,12 +138,12 @@ int AHuman::Create()
 // Description:     Creates a AHuman to be identical to another, by deep copy.
 
 int AHuman::Create(const AHuman &reference) {
-    if (reference.m_pHead) { CloneHardcodedAttachable(reference.m_pHead, this, static_cast<std::function<void(AHuman &, Attachable *)>>(&AHuman::SetHead)); }
-    if (reference.m_pJetpack) { CloneHardcodedAttachable(reference.m_pJetpack, this, static_cast<std::function<void(AHuman &, Attachable *)>>(&AHuman::SetJetpack)); }
-    if (reference.m_pFGArm) { CloneHardcodedAttachable(reference.m_pFGArm, this, static_cast<std::function<void(AHuman &, Attachable *)>>(&AHuman::SetFGArm)); }
-    if (reference.m_pBGArm) { CloneHardcodedAttachable(reference.m_pBGArm, this, static_cast<std::function<void(AHuman &, Attachable *)>>(&AHuman::SetBGArm)); }
-    if (reference.m_pFGLeg) { CloneHardcodedAttachable(reference.m_pFGLeg, this, static_cast<std::function<void(AHuman &, Attachable *)>>(&AHuman::SetFGLeg)); }
-    if (reference.m_pBGLeg) { CloneHardcodedAttachable(reference.m_pBGLeg, this, static_cast<std::function<void(AHuman &, Attachable *)>>(&AHuman::SetBGLeg)); }
+    if (reference.m_pHead) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pHead->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetHead(attachable); }}); }
+    if (reference.m_pJetpack) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetJetpack(attachable); }}); }
+    if (reference.m_pFGArm) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pFGArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetFGArm(attachable); }}); }
+    if (reference.m_pBGArm) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pBGArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetBGArm(attachable); }}); }
+    if (reference.m_pFGLeg) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pFGLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetFGLeg(attachable); }}); }
+    if (reference.m_pBGLeg) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pBGLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetBGLeg(attachable); }}); }
     Actor::Create(reference);
 
 	m_ThrowPrepTime = reference.m_ThrowPrepTime;
@@ -199,15 +199,17 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
     if (propName == "ThrowPrepTime") {
         reader >> m_ThrowPrepTime;
     } else if (propName == "Head") {
-        delete m_pHead;
+        RemoveAttachable(m_pHead);
         m_pHead = new Attachable;
         reader >> m_pHead;
+        AddAttachable(m_pHead);
         if (!m_pHead->GetDamageMultiplierSetInINI()) { m_pHead->SetDamageMultiplier(5.0F); }
         m_pHead->SetInheritsRotAngle(false);
     } else if (propName == "Jetpack") {
-        delete m_pJetpack;
+        RemoveAttachable(m_pJetpack);
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
+        AddAttachable(m_pJetpack);
         if (!m_pJetpack->GetDamageMultiplierSetInINI()) { m_pJetpack->SetDamageMultiplier(0.0F); }
         m_pJetpack->SetOnlyLinearForces(true);
     } else if (propName == "JumpTime") {
@@ -215,26 +217,30 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         // Convert to ms
         m_JetTimeTotal *= 1000;
     } else if (propName == "FGArm") {
-        delete m_pFGArm;
+        RemoveAttachable(m_pFGArm);
         m_pFGArm = new Arm;
         reader >> m_pFGArm;
+        AddAttachable(m_pFGArm);
         if (!m_pFGArm->GetDamageMultiplierSetInINI()) { m_pFGArm->SetDamageMultiplier(1.0F); }
         m_pFGArm->SetDrawnAfterParent(true);
     } else if (propName == "BGArm") {
-        delete m_pBGArm;
+        RemoveAttachable(m_pBGArm);
         m_pBGArm = new Arm;
         reader >> m_pBGArm;
+        AddAttachable(m_pBGArm);
         if (!m_pBGArm->GetDamageMultiplierSetInINI()) { m_pBGArm->SetDamageMultiplier(1.0F); }
         m_pBGArm->SetDrawnAfterParent(false);
     } else if (propName == "FGLeg") {
-        delete m_pFGLeg;
+        RemoveAttachable(m_pFGLeg);
         m_pFGLeg = new Leg;
         reader >> m_pFGLeg;
+        AddAttachable(m_pFGLeg);
         if (!m_pFGLeg->GetDamageMultiplierSetInINI()) { m_pFGLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "BGLeg") {
-        delete m_pBGLeg;
+        RemoveAttachable(m_pBGLeg);
         m_pBGLeg = new Leg;
         reader >> m_pBGLeg;
+        AddAttachable(m_pBGLeg);
         if (!m_pBGLeg->GetDamageMultiplierSetInINI()) { m_pBGLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "HandGroup") {
         delete m_pFGHandGroup;
@@ -451,7 +457,10 @@ Vector AHuman::GetEyePos() const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetHead(Attachable *newHead) {
-    if (newHead) {
+    if (newHead == nullptr) {
+        if (m_pHead && m_pHead->IsAttachedTo(this)) { RemoveAttachable(m_pHead); }
+        m_pHead = nullptr;
+    } else {
         RemoveAttachable(m_pHead);
         m_pHead = newHead;
         AddAttachable(newHead);
@@ -461,55 +470,80 @@ void AHuman::SetHead(Attachable *newHead) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetJetpack(Attachable *newJetpack) {
-    AEmitter *castedNewJetpack = dynamic_cast<AEmitter *>(newJetpack);
-    if (castedNewJetpack) {
-        RemoveAttachable(m_pJetpack);
-        m_pJetpack = castedNewJetpack;
-        AddAttachable(castedNewJetpack);
+    if (newJetpack == nullptr) {
+        if (m_pJetpack && m_pJetpack->IsAttachedTo(this)) { RemoveAttachable(m_pJetpack); }
+        m_pJetpack = nullptr;
+    } else {
+        AEmitter *castedNewJetpack = dynamic_cast<AEmitter *>(newJetpack);
+        if (castedNewJetpack) {
+            RemoveAttachable(m_pJetpack);
+            m_pJetpack = castedNewJetpack;
+            AddAttachable(castedNewJetpack);
+        }
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetFGArm(Attachable *newArm) {
-    Arm *castedNewArm = dynamic_cast<Arm *>(newArm);
-    if (castedNewArm) {
-        RemoveAttachable(m_pFGArm);
-        m_pFGArm = castedNewArm;
-        AddAttachable(castedNewArm);
+    if (newArm == nullptr) {
+        if (m_pFGArm && m_pFGArm->IsAttachedTo(this)) { RemoveAttachable(m_pFGArm); }
+        m_pFGArm = nullptr;
+    } else {
+        Arm *castedNewArm = dynamic_cast<Arm *>(newArm);
+        if (castedNewArm) {
+            RemoveAttachable(m_pFGArm);
+            m_pFGArm = castedNewArm;
+            AddAttachable(castedNewArm);
+        }
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetBGArm(Attachable *newArm) {
-    Arm *castedNewArm = dynamic_cast<Arm *>(newArm);
-    if (castedNewArm) {
-        RemoveAttachable(m_pBGArm);
-        m_pBGArm = castedNewArm;
-        AddAttachable(castedNewArm);
+    if (newArm == nullptr) {
+        if (m_pBGArm && m_pBGArm->IsAttachedTo(this)) { RemoveAttachable(m_pBGArm); }
+        m_pBGArm = nullptr;
+    } else {
+        Arm *castedNewArm = dynamic_cast<Arm *>(newArm);
+        if (castedNewArm) {
+            RemoveAttachable(m_pBGArm);
+            m_pBGArm = castedNewArm;
+            AddAttachable(castedNewArm);
+        }
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetFGLeg(Attachable *newLeg) {
-    Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
-    if (castedNewLeg) {
-        RemoveAttachable(m_pFGLeg);
-        m_pFGLeg = castedNewLeg;
-        AddAttachable(castedNewLeg);
+    if (newLeg == nullptr) {
+        if (m_pFGLeg && m_pFGLeg->IsAttachedTo(this)) { RemoveAttachable(m_pFGLeg); }
+        m_pFGLeg = nullptr;
+    } else {
+        Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
+        if (castedNewLeg) {
+            RemoveAttachable(m_pFGLeg);
+            m_pFGLeg = castedNewLeg;
+            AddAttachable(castedNewLeg);
+        }
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetBGLeg(Attachable *newLeg) {
-    Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
-    if (castedNewLeg) {
-        RemoveAttachable(m_pBGLeg);
-        m_pBGLeg = castedNewLeg;
-        AddAttachable(castedNewLeg);
+    if (newLeg == nullptr) {
+        if (m_pBGLeg && m_pBGLeg->IsAttachedTo(this)) { RemoveAttachable(m_pBGLeg); }
+        m_pBGLeg = nullptr;
+    } else {
+        Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
+        if (castedNewLeg) {
+            RemoveAttachable(m_pBGLeg);
+            m_pBGLeg = castedNewLeg;
+            AddAttachable(castedNewLeg);
+        }
     }
 }
 

@@ -49,7 +49,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Leg::Create(const Leg &reference) {
-		if (reference.m_Foot) { CloneHardcodedAttachable(reference.m_Foot, this, static_cast<std::function<void(Leg &, Attachable *)>>(&Leg::SetFoot)); }
+		if (reference.m_Foot) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_Foot->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<Leg *>(parent)->SetFoot(attachable); }}); }
 		Attachable::Create(reference);
 
 		m_ContractedOffset = reference.m_ContractedOffset;
@@ -74,11 +74,12 @@ namespace RTE {
 
 	int Leg::ReadProperty(std::string propName, Reader &reader) {
 		if (propName == "Foot") {
-			delete m_Foot;
+			RemoveAttachable(m_Foot);
 			const Entity *footEntity = g_PresetMan.GetEntityPreset(reader);
 			if (footEntity) {
 				m_Foot = dynamic_cast<Attachable *>(footEntity->Clone());
-				m_Foot->SetInheritsRotAngle(false); // Foot RotAngles are handled specially by Leg.
+				AddAttachable(m_Foot);
+				m_Foot->SetInheritsRotAngle(false);
 			}
 		} else if (propName == "ContractedOffset") {
 			reader >> m_ContractedOffset;
@@ -123,7 +124,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Leg::SetFoot(Attachable *newFoot) {
-		if (newFoot) {
+		if (newFoot == nullptr) {
+			if (m_Foot && m_Foot->IsAttachedTo(this)) { RemoveAttachable(m_Foot); }
+			m_Foot = nullptr;
+		} else {
 			RemoveAttachable(m_Foot);
 			m_Foot = newFoot;
 			AddAttachable(newFoot);

@@ -68,7 +68,7 @@ namespace RTE {
 		/// The currently mounted HeldDevice (if there is one) will be dropped and added to MovableMan.
 		/// </summary>
 		/// <param name="newMountedDevice">The new HeldDevice to use.</param>
-		void SetMountedDevice(HeldDevice *newMountedDevice);
+		void SetMountedDevice(Attachable *newMountedDevice);
 
 		/// <summary>
 		/// Indicates whether a ThrownDevice is mounted or not.
@@ -81,20 +81,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newOffsetAngle">The new offset angle in radians, relative from the rest of the turret.</param>
 		void SetMountedDeviceRotOffset(float newOffsetAngle) { m_MountedDeviceRotOffset = newOffsetAngle; }
-#pragma endregion
-
-#pragma region Mounted Device Management
-		/// <summary>
-		/// Makes this Turret unmount its mounted HeldDevice. Ownership IS transferred!
-		/// </summary>
-		/// <returns>A pointer to the previously mounted HeldDevice. Ownership IS transferred!</returns>
-		HeldDevice * ReleaseMountedDevice();
-
-		/// <summary>
-		/// Makes this Turret unmount its mounted HeldDevice and give it to MovableMan. Ownership IS transferred to MovableMan.
-		/// </summary>
-		/// <returns>A pointer to the previously mounted HeldDevice. Ownership IS transferred to MovableMan.</returns>
-		HeldDevice *DropMountedDevice();
 #pragma endregion
 
 #pragma region Override Methods

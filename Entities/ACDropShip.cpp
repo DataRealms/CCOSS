@@ -71,12 +71,12 @@ int ACDropShip::Create()
 // Description:     Creates a ACDropShip to be identical to another, by deep copy.
 
 int ACDropShip::Create(const ACDropShip &reference) {
-    if (reference.m_pRThruster) { CloneHardcodedAttachable(reference.m_pRThruster, this, static_cast<std::function<void(ACDropShip &, Attachable *)>>(&ACDropShip::SetRightThruster)); }
-    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pLThruster, this, static_cast<std::function<void(ACDropShip &, Attachable *)>>(&ACDropShip::SetLeftThruster)); }
-    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pURThruster, this, static_cast<std::function<void(ACDropShip &, Attachable *)>>(&ACDropShip::SetURightThruster)); }
-    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pULThruster, this, static_cast<std::function<void(ACDropShip &, Attachable *)>>(&ACDropShip::SetULeftThruster)); }
-    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pRHatch, this, static_cast<std::function<void(ACDropShip &, Attachable *)>>(&ACDropShip::SetRightHatch)); }
-    if (reference.m_pLThruster) { CloneHardcodedAttachable(reference.m_pLHatch, this, static_cast<std::function<void(ACDropShip &, Attachable *)>>(&ACDropShip::SetLeftHatch)); }
+    if (reference.m_pRThruster) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pRThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetRightThruster(attachable); }}); }
+    if (reference.m_pLThruster) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pLThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetLeftThruster(attachable); }}); }
+    if (reference.m_pURThruster) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pURThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetURightThruster(attachable); }}); }
+    if (reference.m_pULThruster) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pULThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetULeftThruster(attachable); }}); }
+    if (reference.m_pRHatch) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pRHatch->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetRightHatch(attachable); }}); }
+    if (reference.m_pLHatch) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pLHatch->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetLeftHatch(attachable); }}); }
 
     ACraft::Create(reference);
 
@@ -106,37 +106,43 @@ int ACDropShip::Create(const ACDropShip &reference) {
 
 int ACDropShip::ReadProperty(std::string propName, Reader &reader) {
     if (propName == "RThruster") {
-        delete m_pRThruster;
+        RemoveAttachable(m_pRThruster);
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
+        AddAttachable(m_pRThruster);
         if (!m_pRThruster->GetDamageMultiplierSetInINI()) { m_pRThruster->SetDamageMultiplier(1.0F); }
         m_pRThruster->SetInheritsRotAngle(false);
     } else if (propName == "LThruster") {
-        delete m_pLThruster;
+        RemoveAttachable(m_pLThruster);
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
+        AddAttachable(m_pLThruster);
         if (!m_pLThruster->GetDamageMultiplierSetInINI()) { m_pLThruster->SetDamageMultiplier(1.0F); }
         m_pLThruster->SetInheritsRotAngle(false);
     } else if (propName == "URThruster") {
-        delete m_pURThruster;
+        RemoveAttachable(m_pURThruster);
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
+        AddAttachable(m_pURThruster);
         if (!m_pURThruster->GetDamageMultiplierSetInINI()) { m_pURThruster->SetDamageMultiplier(1.0F); }
     } else if (propName == "ULThruster") {
-        delete m_pULThruster;
+        RemoveAttachable(m_pULThruster);
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
+        AddAttachable(m_pULThruster);
         if (!m_pULThruster->GetDamageMultiplierSetInINI()) { m_pULThruster->SetDamageMultiplier(1.0F); }
     } else if (propName == "RHatchDoor") {
-        delete m_pRHatch;
+        RemoveAttachable(m_pRHatch);
         m_pRHatch = new Attachable;
         reader >> m_pRHatch;
+        AddAttachable(m_pRHatch);
         if (!m_pRHatch->GetDamageMultiplierSetInINI()) { m_pRHatch->SetDamageMultiplier(1.0F); }
         m_pRHatch->SetInheritsRotAngle(false);
     } else if (propName == "LHatchDoor") {
-        delete m_pLHatch;
+        RemoveAttachable(m_pLHatch);
         m_pLHatch = new Attachable;
         reader >> m_pLHatch;
+        AddAttachable(m_pLHatch);
         if (!m_pLHatch->GetDamageMultiplierSetInINI()) { m_pLHatch->SetDamageMultiplier(1.0F); }
         m_pLHatch->SetInheritsRotAngle(false);
     } else if (propName == "HatchDoorSwingRange") {
@@ -824,51 +830,74 @@ void ACDropShip::Update()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetRightThruster(Attachable *newThruster) {
-    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
-    if (castedNewThruster) {
-        RemoveAttachable(m_pRThruster);
-        m_pRThruster = castedNewThruster;
-        AddAttachable(castedNewThruster);
+    if (newThruster == nullptr) {
+        if (m_pRThruster && m_pRThruster->IsAttachedTo(this)) { RemoveAttachable(m_pRThruster); }
+        m_pRThruster = nullptr;
+    } else {
+        AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+        if (castedNewThruster) {
+            RemoveAttachable(m_pRThruster);
+            m_pRThruster = castedNewThruster;
+            AddAttachable(castedNewThruster);
+        }
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetLeftThruster(Attachable *newThruster) {
-    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
-    if (castedNewThruster) {
-        RemoveAttachable(m_pLThruster);
-        m_pLThruster = castedNewThruster;
-        AddAttachable(castedNewThruster);
+    if (newThruster == nullptr) {
+        if (m_pLThruster && m_pLThruster->IsAttachedTo(this)) { RemoveAttachable(m_pLThruster); }
+        m_pLThruster = nullptr;
+    } else {
+        AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+        if (castedNewThruster) {
+            RemoveAttachable(m_pLThruster);
+            m_pLThruster = castedNewThruster;
+            AddAttachable(castedNewThruster);
+        }
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetURightThruster(Attachable *newThruster) {
-    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
-    if (castedNewThruster) {
-        RemoveAttachable(m_pURThruster);
-        m_pURThruster = castedNewThruster;
-        AddAttachable(castedNewThruster);
+    if (newThruster == nullptr) {
+        if (m_pURThruster && m_pURThruster->IsAttachedTo(this)) { RemoveAttachable(m_pURThruster); }
+        m_pURThruster = nullptr;
+    } else {
+        AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+        if (castedNewThruster) {
+            RemoveAttachable(m_pURThruster);
+            m_pURThruster = castedNewThruster;
+            AddAttachable(castedNewThruster);
+        }
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetULeftThruster(Attachable *newThruster) {
-    AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
-    if (castedNewThruster) {
-        RemoveAttachable(m_pULThruster);
-        m_pULThruster = castedNewThruster;
-        AddAttachable(castedNewThruster);
+    if (newThruster == nullptr) {
+        if (m_pULThruster && m_pULThruster->IsAttachedTo(this)) { RemoveAttachable(m_pULThruster); }
+        m_pULThruster = nullptr;
+    } else {
+        AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
+        if (castedNewThruster) {
+            RemoveAttachable(m_pULThruster);
+            m_pULThruster = castedNewThruster;
+            AddAttachable(castedNewThruster);
+        }
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetLeftHatch(Attachable *newHatch) {
-    if (newHatch) {
+    if (newHatch == nullptr) {
+        if (m_pLHatch && m_pLHatch->IsAttachedTo(this)) { RemoveAttachable(m_pLHatch); }
+        m_pLHatch = nullptr;
+    } else {
         RemoveAttachable(m_pLHatch);
         m_pLHatch = newHatch;
         AddAttachable(newHatch);
@@ -878,8 +907,11 @@ void ACDropShip::SetLeftHatch(Attachable *newHatch) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetRightHatch(Attachable *newHatch) {
-    if (newHatch) {
-        RemoveAttachable(m_pLHatch);
+    if (newHatch == nullptr) {
+        if (m_pRHatch && m_pRHatch->IsAttachedTo(this)) { RemoveAttachable(m_pRHatch); }
+        m_pRHatch = nullptr;
+    } else {
+        RemoveAttachable(m_pRHatch);
         m_pRHatch = newHatch;
         AddAttachable(newHatch);
     }

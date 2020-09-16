@@ -96,8 +96,8 @@ int HDFirearm::Create()
 // Description:     Creates a HDFirearm to be identical to another, by deep copy.
 
 int HDFirearm::Create(const HDFirearm &reference) {
-    if (reference.m_pMagazine) { CloneHardcodedAttachable(reference.m_pMagazine, this, static_cast<std::function<void(HDFirearm &, Attachable *)>>(&HDFirearm::SetMagazine)); }
-    if (reference.m_pFlash) { CloneHardcodedAttachable(reference.m_pFlash, this, static_cast<std::function<void(HDFirearm &, Attachable *)>>(&HDFirearm::SetFlash)); }
+    if (reference.m_pMagazine) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pMagazine->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<HDFirearm *>(parent)->SetMagazine(attachable); }}); }
+    if (reference.m_pFlash) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<HDFirearm *>(parent)->SetFlash(attachable); }}); }
     HeldDevice::Create(reference);
 
     m_pMagazineReference = reference.m_pMagazineReference;
@@ -142,17 +142,18 @@ int HDFirearm::Create(const HDFirearm &reference) {
 
 int HDFirearm::ReadProperty(std::string propName, Reader &reader) {
     if (propName == "Magazine") {
-        const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
-        if (pObj) {
-            m_pMagazineReference = dynamic_cast<const Magazine *>(pObj);
-            delete m_pMagazine;
-            m_pMagazine = dynamic_cast<Magazine *>(m_pMagazineReference->Clone());
+        RemoveAttachable(m_pMagazine);
+        const Entity *magazineEntity = g_PresetMan.GetEntityPreset(reader);
+        if (magazineEntity) {
+            m_pMagazine = dynamic_cast<Magazine *>(magazineEntity->Clone());
+            AddAttachable(m_pMagazine);
         }
     } else if (propName == "Flash") {
-        const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
-        if (pObj) {
-            delete m_pFlash;
-            m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
+        RemoveAttachable(m_pFlash);
+        const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);
+        if (flashEntity) {
+            m_pFlash = dynamic_cast<Attachable *>(flashEntity->Clone());
+            AddAttachable(m_pFlash);
             m_pFlash->SetDrawnNormallyByParent(false);
             m_pFlash->SetDeleteWhenRemovedFromParent(true);
         }
@@ -296,18 +297,26 @@ void HDFirearm::Destroy(bool notInherited)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void HDFirearm::SetMagazine(Attachable *newMagazine) {
-    Magazine *castedNewMagazine= dynamic_cast<Magazine *>(newMagazine);
-    if (castedNewMagazine) {
-        RemoveAttachable(m_pMagazine);
-        m_pMagazine = castedNewMagazine;
-        AddAttachable(castedNewMagazine);
+    if (newMagazine == nullptr) {
+        if (m_pMagazine && m_pMagazine->IsAttachedTo(this)) { RemoveAttachable(m_pMagazine); }
+        m_pMagazine = nullptr;
+    } else {
+        Magazine *castedNewMagazine = dynamic_cast<Magazine *>(newMagazine);
+        if (castedNewMagazine) {
+            RemoveAttachable(m_pMagazine);
+            m_pMagazine = castedNewMagazine;
+            AddAttachable(castedNewMagazine);
+        }
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void HDFirearm::SetFlash(Attachable *newFlash) {
-    if (newFlash) {
+    if (newFlash == nullptr) {
+        if (m_pFlash && m_pFlash->IsAttachedTo(this)) { RemoveAttachable(m_pFlash); }
+        m_pFlash = nullptr;
+    } else {
         RemoveAttachable(m_pFlash);
         m_pFlash = newFlash;
         AddAttachable(newFlash);

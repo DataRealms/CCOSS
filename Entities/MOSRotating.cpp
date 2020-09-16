@@ -62,7 +62,7 @@ void MOSRotating::Clear()
     m_RecoilOffset.Reset();
     m_Wounds.clear();
     m_Attachables.clear();
-    m_AlreadyCopiedAttachableUniqueIDs.clear();
+    m_HardcodedAttachableUniqueIDsAndSetters.clear();
     m_Gibs.clear();
     m_GibImpulseLimit = 0;
     m_GibWoundLimit = 0;
@@ -242,9 +242,18 @@ int MOSRotating::Create(const MOSRotating &reference)
     }
 
 	// Attachable copies
-    for (const Attachable *attachable : reference.m_Attachables) {
-        if (m_AlreadyCopiedAttachableUniqueIDs.find(attachable->GetUniqueID()) == m_AlreadyCopiedAttachableUniqueIDs.end()) {
-            AddAttachable(dynamic_cast<Attachable *>(attachable->Clone()));
+    Attachable *newAttachable;
+    for (const Attachable *referenceAttachable : reference.m_Attachables) {
+        newAttachable = dynamic_cast<Attachable *>(referenceAttachable->Clone());
+        newAttachable->m_Parent = nullptr;
+
+        std::unordered_map<unsigned long, std::function<void(MOSRotating *, Attachable *)>>::iterator hardcodedAttachableMapEntry = m_HardcodedAttachableUniqueIDsAndSetters.find(referenceAttachable->GetUniqueID());
+        if (hardcodedAttachableMapEntry != m_HardcodedAttachableUniqueIDsAndSetters.end()) {
+            (*hardcodedAttachableMapEntry).second(this, newAttachable);
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({newAttachable->GetUniqueID(), hardcodedAttachableMapEntry->second});
+            m_HardcodedAttachableUniqueIDsAndSetters.erase(hardcodedAttachableMapEntry);
+        } else {
+            AddAttachable(newAttachable);
         }
     }
 
@@ -1619,7 +1628,7 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
     if (!attachable) {
         return false;
     }
-    RTEAssert(!attachable->IsAttached() || attachable->IsAttachedTo(this), "Tried to transfer forces from another parent's (" + attachable->GetParent()->GetModuleAndPresetName() + ") Attachable (" + attachable->GetModuleAndPresetName() + "), this should never happen!");
+    RTEAssert(!attachable->IsAttached() || attachable->IsAttachedTo(this), "Tried to remove attachable that was attached to another parent (" + (attachable->GetParent() ? attachable->GetParent()->GetModuleAndPresetName() : "ERROR") + ") Attachable (" + attachable->GetModuleAndPresetName() + "), this should never happen!");
     if (!attachable->IsAttached()) {
         int a = 0;
     }
@@ -1627,8 +1636,8 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
     if (m_Attachables.size() > 0) { m_Attachables.remove(attachable); }
     attachable->SetParent(nullptr);
 
-    if (attachable->GetDeleteWhenRemovedFromParent()) { attachable->SetToDelete(); }
-    if (addToMovableMan || attachable->IsSetToDelete()) { g_MovableMan.AddMO(attachable); }
+    std::unordered_map<unsigned long, std::function<void(MOSRotating *, Attachable *)>>::iterator hardcodedAttachableMapEntry = m_HardcodedAttachableUniqueIDsAndSetters.find(attachable->GetUniqueID());
+    if (hardcodedAttachableMapEntry != m_HardcodedAttachableUniqueIDsAndSetters.end()) { hardcodedAttachableMapEntry->second(this, nullptr); }
     
     if (addBreakWounds) {
         if (!m_ToDelete && attachable->GetParentBreakWound()) {
@@ -1647,6 +1656,11 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
                 childBreakWound = nullptr;
             }
         }
+    }
+    if (!addToMovableMan || attachable->GetDeleteWhenRemovedFromParent()) {
+        delete attachable;
+    } else if (addToMovableMan || attachable->IsSetToDelete()) {
+        g_MovableMan.AddMO(attachable);
     }
     return true;
 }
@@ -1919,7 +1933,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 
     // Draw all the attached attachables
     for (const Attachable *attachableToDraw : m_Attachables) {
-        if (attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent() && (!onlyPhysical || attachableToDraw->GetCollidesWithTerrainWhileAttached())) {
+        if (attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) {
             attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
         }
     }

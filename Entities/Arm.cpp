@@ -66,7 +66,7 @@ int Arm::Create() {
 // Description:     Creates a Arm to be identical to another, by deep copy.
 
 int Arm::Create(const Arm &reference) {
-    if (reference.m_pHeldMO) { CloneHardcodedAttachable(dynamic_cast<Attachable *>(reference.m_pHeldMO), this, static_cast<std::function<void(Arm &, Attachable *)>>((void (Arm:: *)(Attachable *newHeldMO)) &Arm::SetHeldMO)); }
+    if (reference.m_pHeldMO) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pHeldMO->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<Arm *>(parent)->SetHeldMO(attachable); }}); }
     Attachable::Create(reference);
 
     m_HandFile = reference.m_HandFile;
@@ -93,12 +93,12 @@ int Arm::Create(const Arm &reference) {
 
 int Arm::ReadProperty(std::string propName, Reader &reader) {
     if (propName == "HeldDevice") {
-        const Entity *pEntity;
-        pEntity = g_PresetMan.GetEntityPreset(reader);
-        if (pEntity) {
-            m_pHeldMO = dynamic_cast<MovableObject *>(pEntity->Clone());
+        RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO));
+        const Entity *heldDeviceEntity = g_PresetMan.GetEntityPreset(reader);
+        if (heldDeviceEntity) {
+            m_pHeldMO = dynamic_cast<MovableObject *>(heldDeviceEntity->Clone());
+            AddAttachable(dynamic_cast<Attachable *>(m_pHeldMO));
         }
-        pEntity = 0;
     } else if (propName == "Hand") {
         reader >> m_HandFile;
         m_pHand = m_HandFile.GetAsBitmap();
@@ -188,27 +188,32 @@ HeldDevice * Arm::GetHeldDevice() const
 //                  one. Ownership IS transferred. The currently held MovableObject
 //                  (if there is one) will be dropped and become a detached MovableObject,
 
-void Arm::SetHeldMO(MovableObject *newHeldMO)
-{
-// TODO: NEED TO REWORK THIS TO WORK WITH THROWNDEVICES!!
-    if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pHeldMO)->IsAttachedTo(this)) {
-        HeldDevice *pHeldDev = dynamic_cast<HeldDevice *>(m_pHeldMO);
-        if (pHeldDev->IsAttached()) { dynamic_cast<MOSRotating *>(pHeldDev->GetParent())->RemoveAttachable(pHeldDev); }
-// TODO: Refine throwing force to dropped device here?")
-        pHeldDev->SetVel(Vector(10 * PosRand(), -15 * PosRand()));
-        pHeldDev->SetAngularVel(-10 * PosRand());
-        g_MovableMan.AddItem(pHeldDev);
-        m_pHeldMO = pHeldDev = 0;
-    }
+void Arm::SetHeldMO(MovableObject *newHeldMO) {
+    if (newHeldMO == nullptr) {
+        Attachable *heldMOAsAttachable = dynamic_cast<Attachable *>(m_pHeldMO);
+        if (m_pHeldMO && heldMOAsAttachable && heldMOAsAttachable->IsAttachedTo(this)) { RemoveAttachable(heldMOAsAttachable); }
+        m_pHeldMO = nullptr;
+    } else {
+        //TODO All this needs cleaning up, it should work just like all other hardcoded attachable setters and rely on RemoveAttachable to add it to MovableMan, etc.
+        if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pHeldMO)->IsAttachedTo(this)) {
+            HeldDevice *pHeldDev = dynamic_cast<HeldDevice *>(m_pHeldMO);
+            if (pHeldDev->IsAttached()) { dynamic_cast<MOSRotating *>(pHeldDev->GetParent())->RemoveAttachable(pHeldDev); }
+            // TODO: Refine throwing force to dropped device here?")
+            pHeldDev->SetVel(Vector(10 * PosRand(), -15 * PosRand()));
+            pHeldDev->SetAngularVel(-10 * PosRand());
+            g_MovableMan.AddItem(pHeldDev);
+            m_pHeldMO = pHeldDev = 0;
+        }
 
-    if (newHeldMO && (newHeldMO->IsHeldDevice() || newHeldMO->IsThrownDevice())) {
-        Attachable *pNewDev = dynamic_cast<Attachable *>(newHeldMO);
-        if (pNewDev->IsAttached()) { dynamic_cast<MOSRotating *>(pNewDev->GetParent())->RemoveAttachable(pNewDev); }
-        AddAttachable(pNewDev);
-        pNewDev->SetTeam(m_Team);
-        pNewDev = 0;
+        if (newHeldMO && (newHeldMO->IsHeldDevice() || newHeldMO->IsThrownDevice())) {
+            Attachable *pNewDev = dynamic_cast<Attachable *>(newHeldMO);
+            if (pNewDev->IsAttached()) { dynamic_cast<MOSRotating *>(pNewDev->GetParent())->RemoveAttachable(pNewDev); }
+            AddAttachable(pNewDev);
+            pNewDev->SetTeam(m_Team);
+            pNewDev = 0;
+        }
+        m_pHeldMO = newHeldMO;
     }
-    m_pHeldMO = newHeldMO;
 }
 
 

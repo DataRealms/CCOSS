@@ -64,11 +64,11 @@ namespace RTE {
 		QueryPerformanceCounter(&tickReading);
 		long long ticks = tickReading.QuadPart;
 #elif __unix__
-    timespec my_TimeSpec;
-    clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
-    // Get the nanoseconds value for right now and convert it to microseconds, since we don't
-    // honestly need anything more than that.
-    long long ticks = static_cast<int64_t>((my_TimeSpec.tv_sec*1000000)+(my_TimeSpec.tv_nsec/1000));
+		timespec my_TimeSpec;
+		clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
+		// Get the nanoseconds value for right now and convert it to microseconds, since we don't
+		// honestly need anything more than that.
+		long long ticks = static_cast<int64_t>((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
 #endif
 	  return (ticks * 1000000) / m_TicksPerSecond;
 	}
@@ -81,11 +81,11 @@ namespace RTE {
 		QueryPerformanceCounter(&tempLInt);
 		m_StartTime = tempLInt.QuadPart;
 #elif __unix__
-    timespec my_TimeSpec;
-    clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
-    // Get the nanoseconds value for right now and convert it to microseconds, since we don't
-    // honestly need anything more than that.
-    m_StartTime = static_cast<int64_t>((my_TimeSpec.tv_sec*1000000)+(my_TimeSpec.tv_nsec/1000));
+		timespec my_TimeSpec;
+		clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
+		// Get the nanoseconds value for right now and convert it to microseconds, since we don't
+		// honestly need anything more than that.
+		m_StartTime = static_cast<int64_t>((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
 #endif
 
 		m_RealTimeTicks = 0;
@@ -127,11 +127,11 @@ namespace RTE {
 
 		m_RealTimeTicks = tickReading.QuadPart - m_StartTime;
 #elif __unix__
-    std::uint64_t curTime;
-    timespec my_TimeSpec;
-    clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
-    curTime = static_cast<long long>((my_TimeSpec.tv_sec*1000000)+(my_TimeSpec.tv_nsec / 1000));
-    m_RealTimeTicks = curTime - m_StartTime;
+		std::uint64_t curTime;
+		timespec my_TimeSpec;
+		clock_gettime(CLOCK_MONOTONIC, &my_TimeSpec);
+		curTime= static_cast<long long>((my_TimeSpec.tv_sec * 1000000) + (my_TimeSpec.tv_nsec / 1000));
+		m_RealTimeTicks = curTime - m_StartTime;
 #endif
 		// Figure the increase in real time 
 		unsigned long long timeIncrease = m_RealTimeTicks - prevTime;

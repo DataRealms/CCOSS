@@ -965,14 +965,6 @@ namespace RTE {
 				}
 			}
 
-			// Mouse wheel update, translate motion into discrete ticks
-			if (std::abs(mouse_z) >= 1) {
-				m_MouseWheelChange = mouse_z;
-				position_mouse_z(0);
-			} else {
-				m_MouseWheelChange = 0;
-			}
-
 			// Enable the mouse cursor positioning again after having been disabled. Only do this when the mouse is within the drawing area so it
 			// won't cause the whole window to move if the user clicks the title bar and unintentionally drags it due to programmatic positioning.
 			int mousePosX = mouse_x / g_FrameMan.ResolutionMultiplier();
@@ -980,8 +972,10 @@ namespace RTE {
 			if (m_DisableMouseMoving && m_PrepareToEnableMouseMoving && (mousePosX >= 0 && mousePosX < g_FrameMan.GetResX() && mousePosY >= 0 && mousePosY < g_FrameMan.GetResY())) {
 				m_DisableMouseMoving = m_PrepareToEnableMouseMoving = false;
 			}
-		} else if (g_InActivity == false) {
-			// Mouse wheel update for menus, regardless of player devices.
+		}
+		if (mousePlayer != Players::NoPlayer || g_InActivity == false) {
+			// Mouse wheel update happens while a device is kb+mouse and while in the menus regardless of player devices.
+			// Translate motion into discrete ticks.
 			if (std::abs(mouse_z) >= 1) {
 				m_MouseWheelChange = mouse_z;
 				position_mouse_z(0);

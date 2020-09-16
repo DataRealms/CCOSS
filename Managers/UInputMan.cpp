@@ -980,6 +980,14 @@ namespace RTE {
 			if (m_DisableMouseMoving && m_PrepareToEnableMouseMoving && (mousePosX >= 0 && mousePosX < g_FrameMan.GetResX() && mousePosY >= 0 && mousePosY < g_FrameMan.GetResY())) {
 				m_DisableMouseMoving = m_PrepareToEnableMouseMoving = false;
 			}
+		} else if (g_InActivity == false) {
+			// Mouse wheel update for menus, regardless of player devices.
+			if (std::abs(mouse_z) >= 1) {
+				m_MouseWheelChange = mouse_z;
+				position_mouse_z(0);
+			} else {
+				m_MouseWheelChange = 0;
+			}
 		}
 	}
 

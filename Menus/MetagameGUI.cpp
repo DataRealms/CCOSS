@@ -1227,7 +1227,7 @@ bool MetagameGUI::StartNewGame()
     
 
     // Start game of specified size!
-    g_MetaMan.NewGame((float)m_pSizeSlider->GetValue() / 100.0);
+    g_MetaMan.NewGame(m_pSizeSlider->GetValue());
 
     return true;
 }
@@ -6244,12 +6244,19 @@ void MetagameGUI::UpdateGameSizeLabels()
         if (m_apPlayerControlButton[player]->GetText() != "None")
             ++playerCount;
 
-    // How many scenes does the current slider setting yield
-    int selectedCount = g_MetaMan.SelectScenePresets((float)m_pSizeSlider->GetValue() / 100.0, playerCount);
-    // How many scenes are there total
-    int totalCount = g_MetaMan.TotalScenePresets();
+	// How many scenes the game should end up with, according to the specified game size.
+	// Note that it will never be all or none of all the available scenes!
+// TODO: Hook these constants up to settings!!
+	// How many scenes are there total
+	int totalCount = g_MetaMan.TotalScenePresets();
+	int minCount = std::clamp((playerCount * 3 / 2), 3, totalCount);
+	int maxCount = std::max(totalCount * 7 / 10, minCount);
+	m_pSizeSlider->SetMinimum(minCount);
+	m_pSizeSlider->SetMaximum(maxCount);
+	m_pSizeSlider->SetValueResolution(1);
+
     char str[256];
-    sprintf_s(str, sizeof(str), "Game Size: %d/%d sites", selectedCount, totalCount);
+    sprintf_s(str, sizeof(str), "Game Size: %d/%d sites", m_pSizeSlider->GetValue(), totalCount);
     m_pSizeLabel->SetText(str);
 
     // How much starting gold does the slider yield

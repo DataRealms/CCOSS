@@ -632,10 +632,13 @@ int GUISlider::GetTickDirection(void)
 
 void GUISlider::SetMinimum(int Minimum)
 {
-    m_Minimum = Minimum;
+	if (Minimum != m_Minimum) {
+		m_Minimum = Minimum;
+		m_Value = std::max(m_Value, m_Minimum);
 
-    // Re-Calculate the knob info
-    CalculateKnob();
+		// Re-Calculate the knob info
+		CalculateKnob();
+	}
 }
 
 
@@ -657,10 +660,13 @@ int GUISlider::GetMinimum(void)
 
 void GUISlider::SetMaximum(int Maximum)
 {
-    m_Maximum = Maximum;
+	if (Maximum != m_Maximum) {
+		m_Maximum = Maximum;
+		m_Value = std::min(m_Value, m_Maximum);
 
-    // Re-Calculate the knob info
-    CalculateKnob();
+		// Re-Calculate the knob info
+		CalculateKnob();
+	}
 }
 
 

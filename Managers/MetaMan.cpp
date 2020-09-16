@@ -90,11 +90,11 @@ int MetaMan::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Wipes any current and sets up a new game based on a size parameter.
 
-int MetaMan::NewGame(float gameSize)
+int MetaMan::NewGame(int gameSize)
 {
     // Grab a random selection of Scene presets from all available
     list<Scene *> scenePresets;
-    SelectScenePresets(gameSize, m_Players.size(), &scenePresets);
+    SelectScenePresets(gameSize, &scenePresets);
 
     // Destroy and clear any pre-existing scenes from previous games
     for (vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
@@ -1035,29 +1035,19 @@ int MetaMan::TotalScenePresets(std::list<Scene *> *pScenes)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Yields a set of randomly selected Scene presets for a new game.
 
-int MetaMan::SelectScenePresets(float gameSize, int playerCount, list<Scene *> *pSelected)
+int MetaMan::SelectScenePresets(int gameSize, list<Scene *> *pSelected)
 {
     // Get the list of ALL eligible read-in Scene presets
     list<Scene *> scenePresets;
     TotalScenePresets(&scenePresets);
 
-    // How many scenes the game should end up with, according to the specified game size.
-    // Note that it will never be all or none of all the available scenes!
-// TODO: Hook these constants up to settings!!
-    int minCount = MAX(3, MIN(floorf(playerCount * 1.5), scenePresets.size()));
-    int maxCount = MAX(floorf(scenePresets.size() * 0.7), minCount);
-    // Determine the actual game size
-    int gameSceneCount = minCount + floorf((maxCount - minCount) * gameSize);
-    // Clamp
-    gameSceneCount = MIN(gameSceneCount, maxCount);
-    gameSceneCount = MAX(gameSceneCount, minCount);
-
     // If we need to actually fill the list, do so
     if (pSelected)
     {
         // Go through the list and randomly knock out as many presets as necessary to reach the number we need for this game
-        int randomIndex, currentIndex;
-        while (scenePresets.size() > gameSceneCount)
+		int randomIndex;
+		int currentIndex;
+        while (scenePresets.size() > gameSize)
         {
             // Randomly select one of the scenes and remove it
             currentIndex = 0;
@@ -1075,11 +1065,12 @@ int MetaMan::SelectScenePresets(float gameSize, int playerCount, list<Scene *> *
 
         // Cast and copy (not deep!) to fill the provided list
         pSelected->clear();
-        for (list<Scene *>::iterator pItr = scenePresets.begin(); pItr != scenePresets.end(); ++pItr)
-            pSelected->push_back(dynamic_cast<Scene *>(*pItr));
+		for (Scene *scenePointer : scenePresets) {
+			pSelected->push_back(scenePointer);
+		}
     }
 
-    return gameSceneCount;
+    return gameSize;
 }
 
 

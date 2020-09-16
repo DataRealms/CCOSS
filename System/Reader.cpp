@@ -56,7 +56,7 @@ namespace RTE {
 		m_ReportProgress = fpProgressCallback;
 		if (m_ReportProgress && m_Stream->good()) {
 			char report[512];
-			sprintf_s(report, sizeof(report), "\t%s on line %i", m_FileName.c_str(), m_CurrentLine);
+			std::snprintf(report, sizeof(report), "\t%s on line %i", m_FileName.c_str(), m_CurrentLine);
 			m_ReportProgress(std::string(report), true);
 		}
 		return m_Stream->good() ? 0 : -1;
@@ -259,7 +259,7 @@ namespace RTE {
 					m_CurrentLine++;
 					// Only report every few lines
 					if (m_ReportProgress && (m_CurrentLine % g_SettingsMan.LoadingScreenReportPrecision() == 0)) {
-						sprintf_s(report, sizeof(report), "%s%s reading line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
+						std::snprintf(report, sizeof(report), "%s%s reading line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
 						m_ReportProgress(std::string(report), false);
 					}
 				}
@@ -326,7 +326,7 @@ namespace RTE {
 
 	void Reader::ReportError(std::string errorDesc) {
 		char error[1024];
-		sprintf_s(error, sizeof(error), "%s Error happened in %s at line %i!", errorDesc.c_str(), m_FilePath.c_str(), m_CurrentLine);
+		std::snprintf(error, sizeof(error), "%s Error happened in %s at line %i!", errorDesc.c_str(), m_FilePath.c_str(), m_CurrentLine);
 		RTEAbort(error);
 	}
 
@@ -336,7 +336,7 @@ namespace RTE {
 		// Report that we're including a file
 		if (m_ReportProgress) {
 			char report[512];
-			sprintf_s(report, sizeof(report), "%s%s on line %i includes:", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
+			std::snprintf(report, sizeof(report), "%s%s on line %i includes:", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
 			m_ReportProgress(std::string(report), false);
 		}
 		// Push the current stream onto the StreamStack for future retrieval when the new include file has run out of data.
@@ -377,7 +377,7 @@ namespace RTE {
 				m_ReportTabs.append("\t");
 			}
 			char report[512];
-			sprintf_s(report, sizeof(report), "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
+			std::snprintf(report, sizeof(report), "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
 			m_ReportProgress(std::string(report), true);
 		}
 		// Discard any fluff in the beginning of the new file
@@ -392,7 +392,7 @@ namespace RTE {
 		// Do final report on the file we're closing
 		if (m_ReportProgress) {
 			char report[512];
-			sprintf_s(report, sizeof(report), "%s%s - done! %c", m_ReportTabs.c_str(), m_FileName.c_str(), -42);
+			std::snprintf(report, sizeof(report), "%s%s - done! %c", m_ReportTabs.c_str(), m_FileName.c_str(), -42);
 			m_ReportProgress(std::string(report), false);
 		}
 		if (m_StreamStack.empty()) {
@@ -421,7 +421,7 @@ namespace RTE {
 				m_ReportTabs.append("\t");
 			}
 			char report[512];
-			sprintf_s(report, sizeof(report), "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
+			std::snprintf(report, sizeof(report), "%s%s on line %i", m_ReportTabs.c_str(), m_FileName.c_str(), m_CurrentLine);
 			m_ReportProgress(std::string(report), true);
 		}
 		// Set up the resumed file for reading again

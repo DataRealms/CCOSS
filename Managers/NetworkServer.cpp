@@ -17,8 +17,8 @@
 #include "RakNetStatistics.h"
 #include "RakSleep.h"
 
-#include "LZ4/lz4.h"
-#include "LZ4/lz4hc.h"
+#include <lz4.h>
+#include <lz4hc.h>
 
 extern bool g_ResetActivity;
 extern bool g_InActivity;
@@ -180,7 +180,7 @@ namespace RTE {
 		//Send a signal that server is going to shutdown
 		m_IsInServerMode = false;
 		// Wait for thread to shut down
-		Sleep(250);
+		RakSleep(250);
 		m_Server->Shutdown(300);
 		// We're done with the network
 		RakNet::RakPeerInterface::DestroyInstance(m_Server);
@@ -348,8 +348,7 @@ namespace RTE {
 				connected = true;
 
 				msg = "SERVER: Client connected as #";
-				_itoa(index, buf, 10);
-				msg += buf;
+				msg += std::to_string(index);
 				g_ConsoleMan.PrintString(msg);
 				break;
 			}
@@ -396,11 +395,9 @@ namespace RTE {
 		char buf[32];
 
 		msg = "SERVER: CLIENT REGISTRATION: RES ";
-		_itoa(msgReg->ResolutionX, buf, 10);
-		msg += buf;
+		msg += std::to_string(msgReg->ResolutionX);
 		msg += " x ";
-		_itoa(msgReg->ResolutionY, buf, 10);
-		msg += buf;
+		msg += std::to_string(msgReg->ResolutionY);
 		g_ConsoleMan.PrintString(msg);
 
 		for (short index = 0; index < c_MaxClients; index++) {
@@ -826,7 +823,11 @@ namespace RTE {
 
 					// Compression failed or ineffective, send as is
 					if (result == 0 || result == width) {
+#ifdef _WIN32
 						memcpy_s(m_PixelLineBuffer[player] + sizeof(MsgSceneLine), c_MaxPixelLineBufferSize, bmp->line[lineY] + lineX, width);
+#else
+						memcpy(m_PixelLineBuffer[player] + sizeof(MsgSceneLine), bmp->line[lineY] + lineX, width);
+#endif
 					} else {
 						sceneData->DataSize = result;
 					}
@@ -852,7 +853,7 @@ namespace RTE {
 							m_SendBufferBytes[player] = (int)rns.bytesInSendBuffer[MEDIUM_PRIORITY] + (int)rns.bytesInSendBuffer[HIGH_PRIORITY];
 							m_SendBufferMessages[player] = (int)rns.messageInSendBuffer[MEDIUM_PRIORITY] + (int)rns.messageInSendBuffer[HIGH_PRIORITY];
 
-							Sleep(25);
+							RakSleep(25);
 						} while (rns.messageInSendBuffer[HIGH_PRIORITY] > 1000 && IsPlayerConnected(player));
 
 						if (!IsPlayerConnected(player)) {
@@ -1012,7 +1013,11 @@ namespace RTE {
 
 			// Compression failed or ineffective, send as is
 			if (result == 0 || result == size) {
+#ifdef _WIN32
 				memcpy_s(m_PixelLineBuffer[player] + sizeof(MsgTerrainChange), c_MaxPixelLineBufferSize, m_TerrainChangeBuffer[player], size);
+#else
+				memcpy(m_PixelLineBuffer[player] + sizeof(MsgTerrainChange), m_TerrainChangeBuffer[player], size);
+#endif
 			} else {
 				msg->DataSize = result;
 			}
@@ -1347,7 +1352,11 @@ namespace RTE {
 
 							// Compression failed or ineffective, send as is
 							if (result == 0 || result == backBuffer->w) {
+#ifdef _WIN32
 								memcpy_s(m_PixelLineBuffer[player] + sizeof(MsgFrameBox), c_MaxPixelLineBufferSize, m_TerrainChangeBuffer[player], size);
+#else
+								memcpy(m_PixelLineBuffer[player] + sizeof(MsgFrameBox), m_TerrainChangeBuffer[player], size);
+#endif
 							} else {
 								frameData->DataSize = result;
 							}
@@ -1446,7 +1455,11 @@ namespace RTE {
 
 						// Compression failed or ineffective, send as is
 						if (result == 0 || result == m_BackBuffer8[player]->w) {
+#ifdef _WIN32
 							memcpy_s(m_PixelLineBuffer[player] + sizeof(MsgFrameLine), c_MaxPixelLineBufferSize, backBuffer->line[m_CurrentFrameLine], backBuffer->w);
+#else
+							memcpy(m_PixelLineBuffer[player] + sizeof(MsgFrameLine), backBuffer->line[m_CurrentFrameLine], backBuffer->w);
+#endif
 						} else {
 							frameData->DataSize = result;
 						}
@@ -1529,7 +1542,7 @@ namespace RTE {
 		char buf[256];
 
 		if (m_NatServerConnected) {
-			sprintf_s(buf, sizeof(buf), "NAT SERVICE CONNECTED\nName: %s  Pass: %s", g_SettingsMan.GetNATServerName().c_str(), g_SettingsMan.GetNATServerPassword().c_str());
+			std::snprintf(buf, sizeof(buf), "NAT SERVICE CONNECTED\nName: %s  Pass: %s", g_SettingsMan.GetNATServerName().c_str(), g_SettingsMan.GetNATServerPassword().c_str());
 			g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, midX, 20, buf, GUIFont::Centre);
 		} else {
 			g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, midX, 20, "NOT CONNECTED TO NAT SERVICE", GUIFont::Centre);
@@ -1538,7 +1551,7 @@ namespace RTE {
 		if (g_InActivity) {
 			const GameActivity *gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
 			if (gameActivity) {
-				sprintf_s(buf, sizeof(buf), "Activity: %s   Players: %d", gameActivity->GetPresetName().c_str(), gameActivity->GetPlayerCount());
+				std::snprintf(buf, sizeof(buf), "Activity: %s   Players: %d", gameActivity->GetPresetName().c_str(), gameActivity->GetPlayerCount());
 				g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, midX, 50, buf, GUIFont::Centre);
 			}
 		} else {
@@ -1603,7 +1616,7 @@ namespace RTE {
 			std::string playerName = IsPlayerConnected(i) ? GetPlayerName(i) : "- NO PLAYER -";
 
 			// Jesus christ
-			sprintf_s(buf, sizeof(buf),
+			std::snprintf(buf, sizeof(buf),
 					  "%s\nPing %u\nCmp Mbit: %.1f\nUnc Mbit: %.1f\nR: %.2f\nFrame Kbit: %lu\nGlow Kbit: %lu\nSound Kbit: %lu\nScene Kbit: %lu\nFrames sent: %uK\nFrame skipped: %uK\nBlocks full: %uK\nBlocks empty: %uK\nBlk Ratio: %.2f\nFPS: %d\nSend Ms %d\nTotal Data %lu MB",
 					  (i == c_MaxClients) ? "- TOTALS - " : playerName.c_str(),
 					  (i < c_MaxClients) ? m_Ping[i] : 0,
@@ -1628,7 +1641,7 @@ namespace RTE {
 
 			if (i < c_MaxClients) {
 				int lines = 2;
-				sprintf_s(buf, sizeof(buf), "Thread: %d\nBuffer: %d / %d", m_ThreadExitReason[i], m_SendBufferMessages[i], m_SendBufferBytes[i] / 1024);
+				std::snprintf(buf, sizeof(buf), "Thread: %d\nBuffer: %d / %d", m_ThreadExitReason[i], m_SendBufferMessages[i], m_SendBufferBytes[i] / 1024);
 				g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, 10 + i * g_FrameMan.GetResX() / 5, g_FrameMan.GetResY() - lines * 15, buf, GUIFont::Left);
 			}
 		}
@@ -1651,7 +1664,7 @@ namespace RTE {
 				} else {
 					return RakNet::UNASSIGNED_SYSTEM_ADDRESS;
 				}
-				Sleep(100);
+				RakSleep(100);
 			}
 		}
 	}
@@ -1682,7 +1695,7 @@ namespace RTE {
 			if (votes > 0) {
 				char buf[128];
 
-				sprintf_s(buf, sizeof(buf), "Voting to end activity %d of %d", votes, votesNeeded);
+				std::snprintf(buf, sizeof(buf), "Voting to end activity %d of %d", votes, votesNeeded);
 				for (short i = 0; i < c_MaxClients; i++) {
 					g_FrameMan.SetScreenText(buf, i, 0, -1, false);
 				}

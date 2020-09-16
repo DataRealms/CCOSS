@@ -221,7 +221,7 @@ int ScenarioGUI::Create(Controller *pController)
         for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team)
         {
             // +1 because the controls are indexed starting at 1, not 0
-            sprintf_s(str, sizeof(str), "P%dT%dBox", player + 1, team + 1);
+            std::snprintf(str, sizeof(str), "P%dT%dBox", player + 1, team + 1);
             m_aapPlayerBoxes[player][team] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl(str));
         }
     }
@@ -1451,7 +1451,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                     if (!pIcon)
                     {
                         char str[128];
-                        sprintf_s(str, sizeof(str), "Team %d Default", team + 1);
+                        std::snprintf(str, sizeof(str), "Team %d Default", team + 1);
                         pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", str));
                     }
                     m_apTeamNameLabels[team]->SetText(pActivity->GetTeamName(team) + ":");
@@ -1514,7 +1514,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
             m_aScenarioButton[STARTGAME]->SetVisible(false);
             m_pStartErrorLabel->SetVisible(true);
             char str[256];
-            sprintf_s(str, sizeof(str), "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
+            std::snprintf(str, sizeof(str), "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
             m_pStartErrorLabel->SetText(str);
         }
         // If we are under the required number of teams with players assigned, disable the start button and show why
@@ -1523,7 +1523,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
             m_aScenarioButton[STARTGAME]->SetVisible(false);
             m_pStartErrorLabel->SetVisible(true);
             char str[256];
-            sprintf_s(str, sizeof(str), "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
+            std::snprintf(str, sizeof(str), "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
             m_pStartErrorLabel->SetText(str);
         }
 		// Assign at least one human player
@@ -1546,9 +1546,9 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
 		int startGold = m_pGoldSlider->GetValue();
 		startGold = startGold - startGold % 500;
 		if (m_pGoldSlider->GetValue() == m_pGoldSlider->GetMaximum())
-			sprintf_s(str, sizeof(str), "Starting Gold: %c Infinite", -58);
+			std::snprintf(str, sizeof(str), "Starting Gold: %c Infinite", -58);
 		else
-			sprintf_s(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
+			std::snprintf(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
 		m_pGoldLabel->SetText(str);
 
 
@@ -1948,7 +1948,7 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     int totalSegments = 0;
     int drawnFirstSegments = 0;
     int lastSegmentsToDraw = 0;
-    int circleRadius = squareSite ? floorf(6 * circleSize) : floorf(8 * circleSize);
+    int circleRadius = squareSite ? std::floor(6 * circleSize) : std::floor(8 * circleSize);
     int chamferSize = CHAMFERSIZE;
     Vector chamferPoint1;
     Vector chamferPoint2;

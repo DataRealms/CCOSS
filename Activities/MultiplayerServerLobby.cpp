@@ -255,7 +255,7 @@ namespace RTE {
 			for (int team = Teams::TeamOne; team < TEAMROWCOUNT; ++team)
 			{
 				// +1 because the controls are indexed starting at 1, not 0
-				sprintf_s(str, sizeof(str), "P%dT%dBox", player + 1, team + 1);
+				std::snprintf(str, sizeof(str), "P%dT%dBox", player + 1, team + 1);
 				m_aapPlayerBoxes[player][team] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl(str));
 			}
 		}
@@ -765,7 +765,7 @@ namespace RTE {
 										if (!pIcon)
 										{
 											char str[128];
-											sprintf_s(str, sizeof(str), "Team %d Default", team + 1);
+											std::snprintf(str, sizeof(str), "Team %d Default", team + 1);
 											pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", str));
 										}
 										m_apTeamNameLabels[team]->SetText(pActivity->GetTeamName(team) + ":");
@@ -828,7 +828,7 @@ namespace RTE {
 				m_pStartScenarioButton->SetVisible(false);
 				m_pStartErrorLabel->SetVisible(true);
 				char str[256];
-				sprintf_s(str, sizeof(str), "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
+				std::snprintf(str, sizeof(str), "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
 				m_pStartErrorLabel->SetText(str);
 			}
 			// If we are under the required number of teams with players assigned, disable the start button and show why
@@ -837,7 +837,7 @@ namespace RTE {
 				m_pStartScenarioButton->SetVisible(false);
 				m_pStartErrorLabel->SetVisible(true);
 				char str[256];
-				sprintf_s(str, sizeof(str), "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
+				std::snprintf(str, sizeof(str), "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
 				m_pStartErrorLabel->SetText(str);
 			}
 			// Assign at least one human player
@@ -860,9 +860,9 @@ namespace RTE {
 			int startGold = m_pGoldSlider->GetValue();
 			startGold = startGold - startGold % 500;
 			if (m_pGoldSlider->GetValue() == m_pGoldSlider->GetMaximum())
-				sprintf_s(str, sizeof(str), "Starting Gold: %c Infinite", -58);
+				std::snprintf(str, sizeof(str), "Starting Gold: %c Infinite", -58);
 			else
-				sprintf_s(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
+				std::snprintf(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
 			m_pGoldLabel->SetText(str);
 
 
@@ -1168,7 +1168,7 @@ namespace RTE {
 			m_pGUIInput->GetMousePosition(&x, &y);
 
 			char buf[256];
-			sprintf_s(buf, sizeof(buf), "MB-%d%d%d MS-%d%d%d   %d - %d", states[0], states[1], states[2], events[0], events[1], events[2], x, y);
+			std::snprintf(buf, sizeof(buf), "MB-%d%d%d MS-%d%d%d   %d - %d", states[0], states[1], states[2], events[0], events[1], events[2], x, y);
 
 			result = result + buf;
 			g_FrameMan.SetScreenText(result, 0, 0, -1, false);

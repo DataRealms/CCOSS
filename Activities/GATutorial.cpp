@@ -269,7 +269,7 @@ int GATutorial::Start()
         {
             // See if there are specified landing zone areas defined in the scene
             char str[64];
-            sprintf_s(str, sizeof(str), "LZ Team %d", team + 1);
+            std::snprintf(str, sizeof(str), "LZ Team %d", team + 1);
             Scene::Area *pArea = g_SceneMan.GetScene()->GetArea(str);
     //        pArea = pArea ? pArea : g_SceneMan.GetScene()->GetArea("Landing Zone");
             // If area is defined, save a copy so we can lock the LZ selection to within its boxes
@@ -589,7 +589,7 @@ void GATutorial::Update()
             {
                 if (!m_AttackerSpawns.empty())
                 {
-                    int whichSpawn = floorf(m_AttackerSpawns.size() * RandomNum());
+                    int whichSpawn = std::floor(m_AttackerSpawns.size() * RandomNum());
                     Actor *pSpawn = dynamic_cast<Actor *>(m_AttackerSpawns[whichSpawn]->Clone());
                     if (pSpawn)
                     {

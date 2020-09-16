@@ -291,12 +291,12 @@ namespace RTE {
 			m_ParentBox->SetEnabled(true);
 			m_ParentBox->SetVisible(true);
 
-			travelCompletionDistance = std::floorf(static_cast<float>(m_ParentBox->GetYPos()) * 0.5F);
+			travelCompletionDistance = std::floor(static_cast<float>(m_ParentBox->GetYPos()) * 0.5F);
 			m_ParentBox->SetPositionAbs(0, m_ParentBox->GetYPos() - static_cast<int>(travelCompletionDistance));
 
 			if (m_ParentBox->GetYPos() >= 0) { m_ConsoleState = ConsoleState::Enabled; }
 		} else if (m_ConsoleState == ConsoleState::Disabling) {
-			travelCompletionDistance = std::ceilf((static_cast<float>(m_ParentBox->GetHeight()) + static_cast<float>(m_ParentBox->GetYPos())) * 0.5F);
+			travelCompletionDistance = std::ceil((static_cast<float>(m_ParentBox->GetHeight()) + static_cast<float>(m_ParentBox->GetYPos())) * 0.5F);
 			m_ParentBox->SetPositionAbs(0, m_ParentBox->GetYPos() - static_cast<int>(travelCompletionDistance));
 
 			if (m_ParentBox->GetYPos() <= -m_ParentBox->GetHeight()) {

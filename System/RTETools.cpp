@@ -59,7 +59,7 @@ namespace RTE {
 			return end;
 		}
 		float t = 1 - progressScalar;
-		return (end - start) * (std::sinf(-t * c_HalfPI) + 1) + start;
+		return (end - start) * (std::sin(-t * c_HalfPI) + 1) + start;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,13 +70,13 @@ namespace RTE {
 		} else if (progressScalar >= 1.0F) {
 			return end;
 		}
-		return (end - start) * -std::sinf(-progressScalar * c_HalfPI) + start;
+		return (end - start) * -std::sin(-progressScalar * c_HalfPI) + start;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float EaseInOut(float start, float end, float progressScalar) {
-		return start * (2 * std::powf(progressScalar, 3) - 3 * std::powf(progressScalar, 2) + 1) + end * (3 * std::powf(progressScalar, 2) - 2 * std::powf(progressScalar, 3));
+		return start * (2 * std::pow(progressScalar, 3) - 3 * std::pow(progressScalar, 2) + 1) + end * (3 * std::pow(progressScalar, 2) - 2 * std::pow(progressScalar, 3));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

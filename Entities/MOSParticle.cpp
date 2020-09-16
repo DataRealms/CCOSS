@@ -131,10 +131,11 @@ namespace RTE {
 
 			// TODO: Rework this so it's less incomprehensible black magic math and not driven by AngularVel.
 			double newFrame = m_Rotation.GetRadAngle();
-			newFrame -= std::floorf(m_Rotation.GetRadAngle() / (2.0F * c_PI)) * (2.0F * c_PI);
+
+			newFrame -= std::floor(m_Rotation.GetRadAngle() / (2.0F * c_PI)) * (2.0F * c_PI);
 			newFrame /= (2.0F * c_PI);
 			newFrame *= m_FrameCount;
-			m_Frame = std::floorf(newFrame);
+			m_Frame = std::floor(newFrame);
 			m_Rotation += m_AngularVel * deltaTime;
 
 			if (m_Frame >= m_FrameCount) { m_Frame = m_FrameCount - 1; }

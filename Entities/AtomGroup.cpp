@@ -880,7 +880,7 @@ float AtomGroup::Travel(Vector &position,
 
             // Loop through atoms
 
-                // All atoms whose (progress += velRatio) >= ceilf(prevProgress), take a step to their
+                // All atoms whose (progress += velRatio) >= std::ceil(prevProgress), take a step to their
                 // next pixel locations and check for collisions. all others do nothing.
 
                     // If any collision, add atom to approprite collision list (MO or terrain), and if MO, to
@@ -1800,7 +1800,7 @@ before adding them to the MovableMan.
 /*
 #ifdef DEBUG_BUILD
                 // Draw the positions of the hitpoints on screen for easy debugging.
-                putpixel(g_SceneMan.GetMOColorBitmap(), floorf(position.m_X + rotatedOffset.m_X), floorf(position.m_Y + rotatedOffset.m_Y), 122);
+                putpixel(g_SceneMan.GetMOColorBitmap(), std::floor(position.m_X + rotatedOffset.m_X), std::floor(position.m_Y + rotatedOffset.m_Y), 122);
 #endif
 */
             }

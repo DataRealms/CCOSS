@@ -725,11 +725,11 @@ void AssemblyEditorGUI::Update()
 					number = i;
 					char currentName[256];
 
-					sprintf_s(currentName, sizeof(currentName), "%s - %d", m_CurrentAssemblyName.c_str(), 1);
+					std::snprintf(currentName, sizeof(currentName), "%s - %d", m_CurrentAssemblyName.c_str(), 1);
 
 					for (list<Entity *>::iterator itr = assemblies.begin(); itr != assemblies.end(); itr++)
 					{
-						sprintf_s(currentName, sizeof(currentName), "%s - %d", m_CurrentAssemblyName.c_str(), number);
+						std::snprintf(currentName, sizeof(currentName), "%s - %d", m_CurrentAssemblyName.c_str(), number);
 						if ((*itr)->GetPresetName() == currentName)
 						{
 							number = 0;

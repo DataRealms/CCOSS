@@ -261,7 +261,7 @@ int GABaseDefense::Start()
     DisableAIs(m_ActivityState == ActivityState::Editing);
 
     // Set the spawn intervals based ont he min-max and the currently difficulty
-    m_SpawnInterval = floorf(LERP(DifficultySetting::MinDifficulty, DifficultySetting::MaxDifficulty, m_SpawnIntervalEasiest, m_SpawnIntervalHardest, m_Difficulty));
+    m_SpawnInterval = std::floor(LERP(DifficultySetting::MinDifficulty, DifficultySetting::MaxDifficulty, m_SpawnIntervalEasiest, m_SpawnIntervalHardest, m_Difficulty));
 
     m_SpawnTimer.Reset();
 

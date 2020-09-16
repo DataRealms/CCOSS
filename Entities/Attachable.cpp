@@ -247,7 +247,12 @@ bool Attachable::ParticlePenetration(HitData &hd)
 //                  pieces in its place.
 
 void Attachable::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO) {
-    m_pParent ? m_pParent->RemoveAttachable(this) : Detach();
+    if(m_pParent){
+      m_pParent->RemoveAttachable(this);
+    }
+    else{
+      Detach();
+    }
     MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }
 

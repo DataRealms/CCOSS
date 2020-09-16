@@ -1021,7 +1021,7 @@ void HDFirearm::Update()
                 {
                     float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % animDuration;
 					if (!m_IsAnimatedManually)
-	                    m_Frame = floorf((cycleTime / (float)animDuration) * (float)m_FrameCount);
+	                    m_Frame = std::floor((cycleTime / (float)animDuration) * (float)m_FrameCount);
                 }
                 else
                     m_ActiveSound.Stop();

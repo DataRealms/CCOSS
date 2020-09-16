@@ -327,10 +327,9 @@ namespace RTE {
 							saveSettings = true;
 						}
 
-						if (saveSettings){
-							RTE::Writer writer("Base.rte/Settings.ini");
-							g_SettingsMan.Save(writer);
-						}
+						if (saveSettings)
+							g_SettingsMan.UpdateSettingsFile();
+
 						m_pGUIController->EnableMouse(false);
 						m_Mode = CONNECTION;
 						m_ConnectionWaitTimer.Reset();

@@ -38,10 +38,10 @@ namespace RTE {
 		QueryPerformanceFrequency(&tempLInt);
 		m_TicksPerSecond = tempLInt.QuadPart;
 #elif __unix__
-    timespec my_TimeSpec;
-    clock_getres(CLOCK_MONOTONIC, &my_TimeSpec);
+		timespec my_TimeSpec;
+		clock_getres(CLOCK_MONOTONIC, &my_TimeSpec);
 
-    m_TicksPerSecond = ((1e9/my_TimeSpec.tv_nsec)/1000);
+		m_TicksPerSecond= ((1e9 / my_TimeSpec.tv_nsec) / 1000);
 #endif
 
 		// Reset the real time setting so that we can measure how much real time has passed till the next Update.

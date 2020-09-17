@@ -35,9 +35,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector & Vector::SetMagnitude(float newMag) {
-		Vector temp(*this);
-		SetXY(newMag, 0);
-		AbsRotateTo(temp);
+		if (IsZero()) {
+			SetXY(newMag, 0.0F);
+		} else {
+			*this *= newMag / GetMagnitude();
+		}
 		return *this;
 	}
 
@@ -52,7 +54,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float Vector::GetAbsRadAngle() const {
-		float radAngle = -std::atan2(m_Y, m_X);
+		const float radAngle = -std::atan2(m_Y, m_X);
 		return (radAngle < -c_HalfPI) ? (radAngle + c_TwoPI) : radAngle;
 	}
 
@@ -60,8 +62,8 @@ namespace RTE {
 
 	Vector & Vector::RadRotate(float angle) {
 		angle = -angle;
-		float tempX = m_X * std::cos(angle) - m_Y * std::sin(angle);
-		float tempY = m_X * std::sin(angle) + m_Y * std::cos(angle);
+		const float tempX = m_X * std::cos(angle) - m_Y * std::sin(angle);
+		const float tempY = m_X * std::sin(angle) + m_Y * std::cos(angle);
 		m_X = tempX;
 		m_Y = tempY;
 
@@ -86,7 +88,7 @@ namespace RTE {
 			for (const Vector &vector : rhs) {
 				*this += vector;
 			}
-			*this /= rhs.size();
+			*this /= static_cast<float>(rhs.size());
 		}
 		return *this;
 	}

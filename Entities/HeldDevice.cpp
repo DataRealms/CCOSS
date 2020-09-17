@@ -385,7 +385,7 @@ void HeldDevice::Update()
         if (m_SpriteAnimMode == LOOPWHENMOVING && m_Activated)
         {
             float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;
-            m_Frame = floorf((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);
+            m_Frame = std::floor((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);
         }
     }
 
@@ -516,7 +516,7 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
                 m_BlinkTimer.Reset();
 
             pSymbolFont->DrawAligned(&pBitmapInt, drawPos.m_X - 1, drawPos.m_Y - 20, str, GUIFont::Centre);
-            sprintf_s(str, sizeof(str), "%s", m_PresetName.c_str());
+            std::snprintf(str, sizeof(str), "%s", m_PresetName.c_str());
             pTextFont->DrawAligned(&pBitmapInt, drawPos.m_X + 0, drawPos.m_Y - 29, str, GUIFont::Centre);
         }
     }

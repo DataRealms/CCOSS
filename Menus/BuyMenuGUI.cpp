@@ -355,7 +355,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     if (m_MetaPlayer != Players::NoPlayer)
     {
         // Start loading any additional stuff from the custom user file
-        sprintf_s(loadoutPath, sizeof(loadoutPath), "Metagames.rte/%s - LoadoutsMP%d.ini", g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
+        std::snprintf(loadoutPath, sizeof(loadoutPath), "Metagames.rte/%s - LoadoutsMP%d.ini", g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
 
         if (!exists(loadoutPath))
         {
@@ -366,7 +366,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     // Not a metagame player, just a regular scenario player
     else
 	{
-        sprintf_s(loadoutPath, sizeof(loadoutPath), "Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
+        std::snprintf(loadoutPath, sizeof(loadoutPath), "Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
 
 	}
 
@@ -468,12 +468,12 @@ bool BuyMenuGUI::SaveAllLoadoutsToFile()
         // Since the players of a new game are likely to have different techs and therefore different default loadouts
         // So we should start fresh with new loadouts loaded from tech defaults for each player
         if (g_MetaMan.GetGameName() == DEFAULTGAMENAME)
-            sprintf_s(loadoutPath, sizeof(loadoutPath), "Metagames.rte/%s - LoadoutsMP%d.ini", AUTOSAVENAME, m_MetaPlayer + 1);
+            std::snprintf(loadoutPath, sizeof(loadoutPath), "Metagames.rte/%s - LoadoutsMP%d.ini", AUTOSAVENAME, m_MetaPlayer + 1);
         else
-            sprintf_s(loadoutPath, sizeof(loadoutPath), "Metagames.rte/%s - LoadoutsMP%d.ini", g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
+            std::snprintf(loadoutPath, sizeof(loadoutPath), "Metagames.rte/%s - LoadoutsMP%d.ini", g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
     }
     else
-        sprintf_s(loadoutPath, sizeof(loadoutPath), "Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
+        std::snprintf(loadoutPath, sizeof(loadoutPath), "Base.rte/LoadoutsP%d.ini", m_pController->GetPlayer() + 1);
 
     // Open the file
     Writer loadoutFile(loadoutPath, false);
@@ -827,11 +827,11 @@ void BuyMenuGUI::Update()
 
         Vector position, occlusion;
 
-        float toGo = -floorf((float)m_pParentBox->GetXPos());
+        float toGo = -std::floor((float)m_pParentBox->GetXPos());
         float goProgress = m_MenuSpeed * m_MenuTimer.GetElapsedRealTimeS();
         if (goProgress > 1.0)
             goProgress = 1.0;
-        position.m_X = m_pParentBox->GetXPos() + ceilf(toGo * goProgress);
+        position.m_X = m_pParentBox->GetXPos() + std::ceil(toGo * goProgress);
         occlusion.m_X = m_pParentBox->GetWidth() + m_pParentBox->GetXPos();
 
         // If not split screened, then make the menu scroll in diagonally instead of straight from the side
@@ -856,11 +856,11 @@ void BuyMenuGUI::Update()
     // Animate the menu out of view
     else if (m_MenuEnabled == DISABLING)
     {
-        float toGo = -ceilf(((float)m_pParentBox->GetWidth() + (float)m_pParentBox->GetXPos()));
+        float toGo = -std::ceil(((float)m_pParentBox->GetWidth() + (float)m_pParentBox->GetXPos()));
         float goProgress = m_MenuSpeed * m_MenuTimer.GetElapsedRealTimeS();
         if (goProgress > 1.0)
             goProgress = 1.0;
-        m_pParentBox->SetPositionAbs(m_pParentBox->GetXPos() + floorf(toGo * goProgress), 0);
+        m_pParentBox->SetPositionAbs(m_pParentBox->GetXPos() + std::floor(toGo * goProgress), 0);
         g_SceneMan.SetScreenOcclusion(Vector(m_pParentBox->GetWidth() + m_pParentBox->GetXPos(), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
         m_pPopupBox->SetVisible(false);
 
@@ -2228,7 +2228,7 @@ void BuyMenuGUI::AddPresetsToItemList()
         }
 
         // Make the cost label
-        sprintf_s(costString, sizeof(costString), "%.0f", loadoutCost);
+        std::snprintf(costString, sizeof(costString), "%.0f", loadoutCost);
         // Get a good icon and wrap it, while not passing ownership into the AllegroBitmap
         // We're trying to pick the icon of the first passenger, or the first item if there's no passengers in the loadout
         pItemBitmap = new AllegroBitmap(pPassenger ? const_cast<Actor *>(pPassenger)->GetGraphicalIcon() : const_cast<SceneObject *>((*lItr).GetCargoList()->front())->GetGraphicalIcon());
@@ -2247,7 +2247,7 @@ void BuyMenuGUI::AddPresetsToItemList()
 void BuyMenuGUI::UpdateTotalCostLabel(int whichTeam)
 {
     char newText[512];
-    sprintf_s(newText, sizeof(newText), "Cost: %.0f/%.0f", GetTotalOrderCost(), g_ActivityMan.GetActivity()->GetTeamFunds(whichTeam));
+    std::snprintf(newText, sizeof(newText), "Cost: %.0f/%.0f", GetTotalOrderCost(), g_ActivityMan.GetActivity()->GetTeamFunds(whichTeam));
     m_pCostLabel->SetText(newText);
 }
 
@@ -2309,7 +2309,7 @@ void BuyMenuGUI::TryPurchase()
 	}
 
 	// Only allow purchase if there is a delivery craft and enough funds
-	if (m_pSelectedCraft && floorf(GetTotalOrderCost()) <= floorf(g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam())))
+	if (m_pSelectedCraft && std::floor(GetTotalOrderCost()) <= std::floor(g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam())))
 	{
 		//            m_pBuyButton->OnKeyPress(0, 0);
 		m_PurchaseMade = true;
@@ -2333,12 +2333,16 @@ void BuyMenuGUI::UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel)
 	if (pCraft && pCraft->GetMaxMass() != 0)
 	{
 		if (pCraft->GetMaxMass() > 0)
-			sprintf_s(buf, sizeof(buf), "%d / %d", (int)GetTotalOrderMass() - (int)GetCraftMass(), (int)pCraft->GetMaxMass() - (int)GetCraftMass());
+			std::snprintf(buf, sizeof(buf), "%d / %d", (int)GetTotalOrderMass() - (int)GetCraftMass(), (int)pCraft->GetMaxMass() - (int)GetCraftMass());
 		else
+#ifdef _WIN32
 			strcpy_s(buf, sizeof(buf), "NO CARGO SPACE");
+#else
+			strcpy(buf, "NO CARGO SPACE");
+#endif
 	}
 	else
-		sprintf_s(buf, sizeof(buf), "%d", (int)GetTotalOrderMass());
+		std::snprintf(buf, sizeof(buf), "%d", (int)GetTotalOrderMass());
 
 	pLabel->SetText(buf);
 }
@@ -2359,12 +2363,16 @@ void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft * pCraft, GUILabel * pL
 	if (pCraft && pCraft->GetMaxPassengers() != 0)
 	{
 		if (pCraft->GetMaxPassengers() > 0)
-			sprintf_s(buf, sizeof(buf), "%d / %d", GetTotalOrderPassengers(), pCraft->GetMaxPassengers());
+			std::snprintf(buf, sizeof(buf), "%d / %d", GetTotalOrderPassengers(), pCraft->GetMaxPassengers());
 		else 
-			sprintf_s(buf, sizeof(buf), "%d", GetTotalOrderPassengers());
+			std::snprintf(buf, sizeof(buf), "%d", GetTotalOrderPassengers());
 	}
 	else
+#ifdef _WIN32
 		strcpy_s(buf, sizeof(buf), "NO ROOM");
+#else
+		strcpy(buf, "NO ROOM");
+#endif
 
 	pLabel->SetText(buf);
 }

@@ -88,7 +88,7 @@ namespace RTE {
 		/// Gets the line of the current file line this reader is reading from.
 		/// </summary>
 		/// <returns>The line number that will be read from next.</returns>
-		std::string GetCurrentFileLineString() const { char str[128]; sprintf_s(str, sizeof(str), "%d", m_CurrentLine); return str; }
+		std::string GetCurrentFileLineString() const { char str[128]; std::snprintf(str, sizeof(str), "%d", m_CurrentLine); return str; }
 
 		/// <summary>
 		/// Shows whether objects read from this will be overwriting any existing ones with the same names.

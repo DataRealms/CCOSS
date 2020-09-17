@@ -6,9 +6,10 @@
 #include "PerformanceMan.h"
 #include "UInputMan.h"
 
-#include "NetworkClient.h"
+#include "RakSleep.h"
 
-#include "LZ4/lz4.h"
+#include "NetworkClient.h"
+#include <lz4.h>
 
 namespace RTE {
 
@@ -108,7 +109,7 @@ namespace RTE {
 
 		m_IsRegistered = false;
 		m_IsConnected = false;
-		Sleep(250);
+		RakSleep(250);
 		RakNet::AddressOrGUID addr = m_Client->GetSystemAddressFromIndex(0);
 		m_Client->CloseConnection(addr, true);
 		g_ConsoleMan.PrintString("CLIENT: Disconnect");
@@ -322,7 +323,12 @@ namespace RTE {
 				memset(bmp->line[lineNumber], g_MaskColor, bmp->w);
 			} else {
 				if (frameData->DataSize == frameData->UncompressedSize) {
+#ifdef _WIN32
 					memcpy_s(bmp->line[lineNumber], bmp->w, packet->data + sizeof(MsgFrameLine), pixels);
+#else
+					//Fallback to non safe memcpy
+					memcpy(bmp->line[lineNumber], packet->data + sizeof(MsgFrameLine), pixels);
+#endif
 				} else {
 					LZ4_decompress_safe((char *)(packet->data + sizeof(MsgFrameLine)), (char *)(bmp->line[lineNumber]), frameData->DataSize, bmp->w);
 				}
@@ -363,14 +369,25 @@ namespace RTE {
 				rectfill(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_MaskColor);
 			} else {
 				if (frameData->DataSize == frameData->UncompressedSize) {
+#ifdef _WIN32
 					memcpy_s(m_PixelLineBuffer, size, packet->data + sizeof(MsgFrameBox), size);
+#else
+					// Fallback to unsafe memcpy
+					memcpy(m_PixelLineBuffer, packet->data + sizeof(MsgFrameBox), size);
+#endif
+
 				} else {
 					LZ4_decompress_safe((char *)(packet->data + sizeof(MsgFrameBox)), (char *)(m_PixelLineBuffer), size, frameData->UncompressedSize);
 				}
 				// Copy box to bitmap line by line
 				const unsigned char *lineAddr = m_PixelLineBuffer;
 				for (int y = 0; y < maxHeight; y++) {
+#ifdef _WIN32
 					memcpy_s(bmp->line[bpy + y] + bpx, maxWidth, lineAddr, maxWidth);
+#else
+					memcpy(bmp->line[bpy + y] + bpx, lineAddr, maxWidth);
+#endif
+
 					lineAddr += maxWidth;
 				}
 
@@ -420,7 +437,11 @@ namespace RTE {
 				memset(bmp->line[liney] + linex, g_MaskColor, width);
 			} else {
 				if (frameData->DataSize == frameData->UncompressedSize) {
+#ifdef _WIN32
 					memcpy_s(bmp->line[liney] + linex, width, packet->data + sizeof(MsgSceneLine), pixels);
+#else
+					memcpy(bmp->line[liney] + linex, packet->data + sizeof(MsgSceneLine), pixels);
+#endif
 				} else {
 					LZ4_decompress_safe((char *)(packet->data + sizeof(MsgSceneLine)), (char *)(bmp->line[liney] + linex), frameData->DataSize, width);
 				}
@@ -524,7 +545,11 @@ namespace RTE {
 			int size = frameData->UncompressedSize;
 
 			if (frameData->DataSize == frameData->UncompressedSize) {
+#ifdef _WIN32
 				memcpy_s(m_PixelLineBuffer, size, packet->data + sizeof(MsgTerrainChange), size);
+#else
+				memcpy(m_PixelLineBuffer, packet->data + sizeof(MsgTerrainChange), size);
+#endif
 			} else {
 				LZ4_decompress_safe((char *)(packet->data + sizeof(MsgTerrainChange)), (char *)m_PixelLineBuffer, frameData->DataSize, size);
 			}
@@ -631,7 +656,7 @@ namespace RTE {
 					strncpy(path, musDataPtr->Path, 255);
 
 					char buf[128];
-					sprintf_s(buf, sizeof(buf), "MUSIC %s %d", path, musDataPtr->Loops);
+					std::snprintf(buf, sizeof(buf), "MUSIC %s %d", path, musDataPtr->Loops);
 					g_ConsoleMan.PrintString(buf);
 
 					g_AudioMan.PlayMusic(path, musDataPtr->Loops);
@@ -696,8 +721,8 @@ namespace RTE {
 					offsetY = scrollOverride.GetFloorIntY();
 				} else {
 					// Regular scroll
-					offsetX = std::floorf(m_BackgroundLayers[frame][i].OffsetX * m_BackgroundLayers[frame][i].ScrollRatioX);
-					offsetY = std::floorf(m_BackgroundLayers[frame][i].OffsetY * m_BackgroundLayers[frame][i].ScrollRatioY);
+					offsetX = std::floor(m_BackgroundLayers[frame][i].OffsetX * m_BackgroundLayers[frame][i].ScrollRatioX);
+					offsetY = std::floor(m_BackgroundLayers[frame][i].OffsetY * m_BackgroundLayers[frame][i].ScrollRatioY);
 			
 					// Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0
 					// ForceBounds(offsetX, offsetY);

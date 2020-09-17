@@ -508,7 +508,7 @@ int MetagameGUI::Create(Controller *pController)
     // Just get the menu button temporarily so we can set the custom menu icon
     if (GUIButton *pMenuButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("OpenMenuButton")))
     {
-        sprintf_s(str, sizeof(str), "%c", -22);
+        std::snprintf(str, sizeof(str), "%c", -22);
         pMenuButton->SetText(string(str));
     }
 
@@ -620,7 +620,7 @@ int MetagameGUI::Create(Controller *pController)
 
     // Add the handicap options to the dropdowns
     // Prepare the brain icon
-    sprintf_s(str, sizeof(str), "%c", -48);
+    std::snprintf(str, sizeof(str), "%c", -48);
     for (int metaPlayer = Players::PlayerOne; metaPlayer < Players::MaxPlayerCount; ++metaPlayer)
     {
         m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(string(str) + " +5", "", 0, 0, -1);
@@ -913,13 +913,13 @@ void MetagameGUI::SelectScene(Scene *pScene)
             // If owned by this player's team, make the budget slider represent the currently set setting of this Scene
             if (m_pSelectedScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer))
             {
-                m_pSceneBudgetSlider->SetValue(floorf((m_pSelectedScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                m_pSceneBudgetSlider->SetValue(std::floor((m_pSelectedScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
             }
             // Owned by enemy player, so show the attack budget set up for this scene
             else if (g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()))
             {
                 if (m_pSelectedScene->GetPresetName() == g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName())
-                    m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                    m_pSceneBudgetSlider->SetValue(std::floor((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
                 // Not the current target, so set slider to 0. It will set the new budget as 
                 else
                     m_pSceneBudgetSlider->SetValue(0);
@@ -928,7 +928,7 @@ void MetagameGUI::SelectScene(Scene *pScene)
             else
             {
                 if (m_pSelectedScene->GetPresetName() == g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName())
-                    m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                    m_pSceneBudgetSlider->SetValue(std::floor((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
                 // Not the current target, so set slider to 0. It will set the new budget as 
                 else
                     m_pSceneBudgetSlider->SetValue(0);
@@ -1019,7 +1019,7 @@ string MetagameGUI::GetRoundName(int roundNumber)
             return "TWELVE";
     }
     char numStr[8];
-    sprintf_s(numStr, sizeof(numStr), "%d", roundNumber + 1);
+    std::snprintf(numStr, sizeof(numStr), "%d", roundNumber + 1);
     return string(numStr);
 }
 
@@ -1073,7 +1073,7 @@ bool MetagameGUI::StartNewGame()
             // Disallow empty player name strings
             if (m_apPlayerNameBox[player]->GetText() == "")
             {
-                sprintf_s(str, sizeof(str), "Player %d", player);
+                std::snprintf(str, sizeof(str), "Player %d", player);
                 m_apPlayerNameBox[player]->SetText(str);
             }
 
@@ -1511,7 +1511,7 @@ void MetagameGUI::Update()
 				else
 					difficultyString = "Difficulty: Nuts!";
 
-				sprintf_s(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pAutoSave->GetSiteCount(), pAutoSave->GetPlayerCount(), pAutoSave->GetRoundCount() + 1, difficultyString.c_str());
+				std::snprintf(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pAutoSave->GetSiteCount(), pAutoSave->GetPlayerCount(), pAutoSave->GetRoundCount() + 1, difficultyString.c_str());
                 m_pLoadInfoLabel->SetText(info);
                 // Show the Load button since we have one locked in
                 m_apMetaButton[LOADNOW]->SetVisible(true);
@@ -1807,7 +1807,7 @@ void MetagameGUI::Update()
                 m_pBannerRedTop->ShowText(winnerNames, GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
                 m_pBannerYellowBottom->ShowText(plural ? "WIN!" : "WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);
 //                char winStr[256];
-//                sprintf_s(winStr, sizeof(winStr), "Team %d", winner + 1);
+//                std::snprintf(winStr, sizeof(winStr), "Team %d", winner + 1);
 //                m_pBannerRedTop->ShowText(winStr, GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
 //                m_pBannerYellowBottom->ShowText("WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);
             }
@@ -2507,7 +2507,7 @@ void MetagameGUI::UpdateInput()
                     BaseEditor *pNewEditor = new BaseEditor;
                     pNewEditor->Create();
                     char str[64];
-                    sprintf_s(str, sizeof(str), "R%dEdit", g_MetaMan.m_CurrentRound + 1);
+                    std::snprintf(str, sizeof(str), "R%dEdit", g_MetaMan.m_CurrentRound + 1);
                     pNewEditor->SetPresetName(g_MetaMan.GetGameName() + str);
 
                     // Gotto deact all players since by default there is one in slot 1
@@ -2538,7 +2538,7 @@ void MetagameGUI::UpdateInput()
                 GAScripted *pScanActivity = new GAScripted;
                 pScanActivity->Create("Base.rte/Activities/SiteScan.lua", "SiteScan");
                 char str[64];
-                sprintf_s(str, sizeof(str), "R%dScan", g_MetaMan.m_CurrentRound + 1);
+                std::snprintf(str, sizeof(str), "R%dScan", g_MetaMan.m_CurrentRound + 1);
                 pScanActivity->SetPresetName(g_MetaMan.GetGameName() + str);
 
                 // Gotto deact all players since by default there is one in slot 1
@@ -2589,7 +2589,7 @@ void MetagameGUI::UpdateInput()
 
                     // Update the budget slider to reflect the scan cost being deducted from the funds
                     if (g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName() == m_pSelectedScene->GetPresetName())
-                        m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                        m_pSceneBudgetSlider->SetValue(std::floor((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
 
                     // Play an appropriate sound to indicate that the scan is bought and scheduled
                     g_GUISound.ItemChangeSound()->Play();
@@ -2745,7 +2745,7 @@ void MetagameGUI::UpdateInput()
 					else
 						difficultyString = "Difficulty: Nuts!";
 
-                    sprintf_s(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pGame->GetSiteCount(), pGame->GetPlayerCount(), pGame->GetRoundCount() + 1, difficultyString.c_str());
+                    std::snprintf(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pGame->GetSiteCount(), pGame->GetPlayerCount(), pGame->GetRoundCount() + 1, difficultyString.c_str());
                     m_pLoadInfoLabel->SetText(info);
                     // Show the Load button since we have one locked in
                     m_apMetaButton[LOADNOW]->SetVisible(true);
@@ -2784,7 +2784,7 @@ void MetagameGUI::UpdateInput()
 					else
 						difficultyString = "Difficulty: Nuts!";
 
-                    sprintf_s(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pGame->GetSiteCount(), pGame->GetPlayerCount(), pGame->GetRoundCount() + 1, difficultyString.c_str());
+                    std::snprintf(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pGame->GetSiteCount(), pGame->GetPlayerCount(), pGame->GetRoundCount() + 1, difficultyString.c_str());
                     m_pSaveInfoLabel->SetText(info);
                     m_pSaveInfoLabel->SetVisible(true);
                     // Show the Save button since we have one to overwrite locked in
@@ -3308,16 +3308,16 @@ void MetagameGUI::UpdateSiteRevealing()
     if (g_MetaMan.m_StateChanged)
     {
         // Save the number of sites we have reveelaed up til now so we can compare
-        m_AnimCountStart = m_AnimCountCurrent = (int)floorf(g_MetaMan.m_RevealedScenes);
+        m_AnimCountStart = m_AnimCountCurrent = (int)std::floor(g_MetaMan.m_RevealedScenes);
         // Progress the number of site we have revealed with the set rate + the extra
         g_MetaMan.m_RevealedScenes += g_MetaMan.m_RevealRate + g_MetaMan.m_RevealExtra;
         // Reset the extra to 0 now after we've applied it
         g_MetaMan.m_RevealExtra = 0;
         // Don't reveal more than there are scenes!
-        if ((int)floorf(g_MetaMan.m_RevealedScenes) >= g_MetaMan.m_Scenes.size())
+        if ((int)std::floor(g_MetaMan.m_RevealedScenes) >= g_MetaMan.m_Scenes.size())
             g_MetaMan.m_RevealedScenes = g_MetaMan.m_Scenes.size();
         // Figure out how many new sites we gots this round
-        int delta = (int)floorf(g_MetaMan.m_RevealedScenes) - m_AnimCountStart;
+        int delta = (int)std::floor(g_MetaMan.m_RevealedScenes) - m_AnimCountStart;
         // No new sites this round, so just continue onto next phase!
         if (delta < 1)
         {
@@ -4155,7 +4155,7 @@ void MetagameGUI::UpdateBaseBuilding()
                 else
                 {
                     char str[64];
-                    sprintf_s(str, sizeof(str), m_AnimBuildCount == 1 ? "Built %d item" : "Built %d items", m_AnimBuildCount);
+                    std::snprintf(str, sizeof(str), m_AnimBuildCount == 1 ? "Built %d item" : "Built %d items", m_AnimBuildCount);
                     PlayerTextIndication(m_AnimMetaPlayer, str, m_PlanetCenter + m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_PlanetPoint, 2500);
                 }
                 m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_OnlyFirstSegments = -1;
@@ -4298,7 +4298,7 @@ void MetagameGUI::SetupOffensives()
                         GAScripted *pOffensive = new GAScripted;
                         pOffensive->Create("Base.rte/Activities/MetaFight.lua", "MetaFight");
                         char str[64];
-                        sprintf_s(str, sizeof(str), "R%dA%d", g_MetaMan.m_CurrentRound + 1, offensiveCount);
+                        std::snprintf(str, sizeof(str), "R%dA%d", g_MetaMan.m_CurrentRound + 1, offensiveCount);
                         pOffensive->SetPresetName(g_MetaMan.GetGameName() + str);
                         // Associate the name of the scene with where this thing is supposed to take place
                         pOffensive->SetSceneName(targetName);
@@ -4413,7 +4413,7 @@ void MetagameGUI::UpdateOffensives()
     if (m_AnimActivityChange)
     {   
         // Show which mission we're on of all the offensive activities in queue
-        sprintf_s(str, sizeof(str), "Battle %d of %d", (g_MetaMan.m_CurrentOffensive + 1), (int)(g_MetaMan.m_RoundOffensives.size()));
+        std::snprintf(str, sizeof(str), "Battle %d of %d", (g_MetaMan.m_CurrentOffensive + 1), (int)(g_MetaMan.m_RoundOffensives.size()));
         m_pPhaseLabel->SetText(str);
 
         // Find the scene being attacked in this offensive Activity
@@ -5326,14 +5326,14 @@ void MetagameGUI::UpdatePreBattleAttackers(float progress)
 
             // Write the brain label, with info if applicable for the current progress of animation
             if (progress < 1.0)
-                sprintf_s(str, sizeof(str), "%c", -48);
+                std::snprintf(str, sizeof(str), "%c", -48);
             // When at site destination, take into account the side the brain icon needs to be on
             else
             {
                 if (quadIndex <= 1)
-                    sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
+                    std::snprintf(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
                 else
-                    sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+                    std::snprintf(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
             }
             m_apPlayerBrainTravelLabel[mp]->SetText(str);
             m_apPlayerBrainTravelLabel[mp]->SetToolTip("The specific brain that is being sent in to attack this place, and the funds he has been budgeted to do so with.");
@@ -5480,14 +5480,14 @@ void MetagameGUI::UpdatePreBattleDefenders(float progress)
 
             // Write the brain label, with info if applicable for the current progress of animation
             if (progress < 1.0)
-                sprintf_s(str, sizeof(str), "%c", -48);
+                std::snprintf(str, sizeof(str), "%c", -48);
             // When at site destination, take into account the side the brain icon needs to be on
             else
             {
                 if (quadIndex <= 1)
-                    sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
+                    std::snprintf(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
                 else
-                    sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+                    std::snprintf(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
             }
             m_apPlayerBrainTravelLabel[mp]->SetText(str);
             m_apPlayerBrainTravelLabel[mp]->SetToolTip("The resident brain that is defending this site from attack, and the unallocated funds of its player that he gets to use (beyond the defense investments already made here).");
@@ -5620,14 +5620,14 @@ void MetagameGUI::UpdatePostBattleRetreaters(float progress)
 
             // Write the brain label, with info if applicable for the current progress of animation
             if (progress > 0)
-                sprintf_s(str, sizeof(str), "%c", -48);
+                std::snprintf(str, sizeof(str), "%c", -48);
             // When at site destination, take into account the side the brain icon needs to be on
             else
             {
                 if (quadIndex <= 1)
-                    sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
+                    std::snprintf(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
                 else
-                    sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+                    std::snprintf(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
             }
             m_apPlayerBrainTravelLabel[mp]->SetText(str);
             m_apPlayerBrainTravelLabel[mp]->SetToolTip("The specific brain that is being sent in to attack this place, and the funds he has been budgeted to do so with.");
@@ -5780,25 +5780,25 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
                 {
                     // Death mask
                     if (progress > 0)
-                        sprintf_s(str, sizeof(str), "%c", -26);
+                        std::snprintf(str, sizeof(str), "%c", -26);
                     // Brain with line blinking over it and the funds still showing
                     else
                     {
                         if (quadIndex <= 1)
                         {
                             if (m_aAnimDestroyed[mp])
-                                sprintf_s(str, sizeof(str), "%c %.0f oz     ", -58, m_aBattleFunds[mp]);
+                                std::snprintf(str, sizeof(str), "%c %.0f oz     ", -58, m_aBattleFunds[mp]);
                             else
-                                sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -26);
-//                            sprintf_s(str, sizeof(str), "%c %.0f oz %c", -58, m_aBattleFunds[mp], m_AnimTimer2.AlternateReal(200) ? -39 : -26);
+                                std::snprintf(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -26);
+//                            std::snprintf(str, sizeof(str), "%c %.0f oz %c", -58, m_aBattleFunds[mp], m_AnimTimer2.AlternateReal(200) ? -39 : -26);
                         }
                         else
                         {
                             if (m_aAnimDestroyed[mp])
-                                sprintf_s(str, sizeof(str), "     %c %.0f oz", -58, m_aBattleFunds[mp]);
+                                std::snprintf(str, sizeof(str), "     %c %.0f oz", -58, m_aBattleFunds[mp]);
                             else
-                                sprintf_s(str, sizeof(str), "%c%c %c %.0f oz",  m_aAnimDestroyed[mp] ? ' ' : -26, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
-//                            sprintf_s(str, sizeof(str), "%c %c %.0f oz", m_AnimTimer2.AlternateReal(200) ? -39 : -26, -58, m_aBattleFunds[mp]);
+                                std::snprintf(str, sizeof(str), "%c%c %c %.0f oz",  m_aAnimDestroyed[mp] ? ' ' : -26, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+//                            std::snprintf(str, sizeof(str), "%c %c %.0f oz", m_AnimTimer2.AlternateReal(200) ? -39 : -26, -58, m_aBattleFunds[mp]);
                         }
                     }
                     m_apPlayerBrainTravelLabel[mp]->SetText(str);
@@ -5865,16 +5865,16 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
 
                 // Write the brain label, with info if applicable for the current progress of animation
                 if (progress > 0)
-                    sprintf_s(str, sizeof(str), "%c", -48);
+                    std::snprintf(str, sizeof(str), "%c", -48);
                 // When at site start position, take into account the side the brain icon needs to be on
                 else
                 {
                     if (quadIndex <= 1)
-                        sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
-//                        sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], -47, -48);
+                        std::snprintf(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
+//                        std::snprintf(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], -47, -48);
                     else
-                        sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
-//                        sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, -47, -58, m_aBattleFunds[mp]);
+                        std::snprintf(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+//                        std::snprintf(str, sizeof(str), "%c%c %c %.0f oz", -48, -47, -58, m_aBattleFunds[mp]);
                 }
                 m_apPlayerBrainTravelLabel[mp]->SetText(str);
                 m_apPlayerBrainTravelLabel[mp]->SetToolTip("The new resident brain that has won this site and is settling in here now.");
@@ -5974,7 +5974,7 @@ float MetagameGUI::UpdatePlayerActionLines(int metaPlayer)//, bool addUnallocate
     while (pScene = g_MetaMan.GetNextSceneOfPlayer(metaPlayer, pScene))
     {
         // Add line for scenes which are owned and whose build budgets have been set to something
-        if (pScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer) && floorf(pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer())) > 0)
+        if (pScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer) && std::floor(pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer())) > 0)
         {
             m_ActionSiteLines[metaPlayer].push_back(SiteLine(metaPlayer, meterStart, pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / totalFunds, pScene->GetLocation() + pScene->GetLocationOffset(), pScene->GetPresetName(), pScene, c_GUIColorGreen, -1, -1, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(pScene->GetTeamOwnership())));
             m_ActionSiteLines[metaPlayer].back().m_FundsAmount = pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer());
@@ -6015,7 +6015,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
     {
         char str[256];
         // Set the close button to have that fancy X
-        sprintf_s(str, sizeof(str), "%c", -36);
+        std::snprintf(str, sizeof(str), "%c", -36);
         m_pSceneCloseButton->SetText(string(str));
 
         // Set the currently selected scene's texts
@@ -6030,7 +6030,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
             m_pSceneOwnerTeam->SetDrawType(GUICollectionBox::Image);
             m_pSceneOwnerTeam->SetDrawImage(new AllegroBitmap(g_MetaMan.m_TeamIcons[m_pSelectedScene->GetTeamOwnership()].GetBitmaps32()[0]));
             // Show how many resident brains there are hanging out here
-            sprintf_s(str, sizeof(str), "%c", -26);
+            std::snprintf(str, sizeof(str), "%c", -26);
             string brainString = "";
             int brainCount = m_pSelectedScene->GetResidentBrainCount();
             for (int i = 0; i < brainCount; ++i)
@@ -6047,7 +6047,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
         }
 
         // Write the description, and add the total defense investment in this place so far as a lil stat
-        sprintf_s(str, sizeof(str), "Total base investments here: %doz", (int)floorf(m_pSelectedScene->GetTotalInvestment()));
+        std::snprintf(str, sizeof(str), "Total base investments here: %doz", (int)floorf(m_pSelectedScene->GetTotalInvestment()));
         m_pSceneInfoLabel->SetText(m_pSelectedScene->GetDescription() + "\n" + string(str));
         // Adjust the height of the text box and container so it fits the text to display
         int newHeight = m_pSceneInfoLabel->ResizeHeightToFit();
@@ -6067,7 +6067,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
 
             // Set up the slider limit bar
             bool sceneOwnedByPlayer = m_pSelectedScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer);
-            int blockedWidth = floorf((m_pSceneBudgetSlider->GetWidth() - 4) * g_MetaMan.GetBudgetedRatioOfPlayer(metaPlayer, m_pSelectedScene, sceneOwnedByPlayer));
+            int blockedWidth = std::floor((m_pSceneBudgetSlider->GetWidth() - 4) * g_MetaMan.GetBudgetedRatioOfPlayer(metaPlayer, m_pSelectedScene, sceneOwnedByPlayer));
 
             if (blockedWidth > 0)
             {
@@ -6091,7 +6091,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
             {
                 // Set the budget label as per the slider
                 int budget = floorf(((float)m_pSceneBudgetSlider->GetValue() / 100.0f) * g_MetaMan.m_Players[metaPlayer].GetFunds());
-                sprintf_s(str, sizeof(str), "Build Budget: %d oz", budget);
+                std::snprintf(str, sizeof(str), "Build Budget: %d oz", budget);
                 m_pSceneBudgetLabel->SetText(str);
                 m_apMetaButton[SCANNOW]->SetVisible(false);
                 m_apMetaButton[SCANLATER]->SetVisible(false);
@@ -6111,17 +6111,17 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                 if (sceneChanged)
                 {
                     // Set the budget label as per the slider
-                    int budget = floorf(((float)m_pSceneBudgetSlider->GetValue() / 100.0f) * g_MetaMan.m_Players[metaPlayer].GetFunds());
+                    int budget = std::floor(((float)m_pSceneBudgetSlider->GetValue() / 100.0f) * g_MetaMan.m_Players[metaPlayer].GetFunds());
                     // Set the appropriate action message, depending on whether this is enemy owned, or merely unexplored
                     if (g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()))
                     {
-                        sprintf_s(str, sizeof(str), "Attack Budget: %d oz", budget);
+                        std::snprintf(str, sizeof(str), "Attack Budget: %d oz", budget);
                         m_pSceneBudgetLabel->SetToolTip("Sets how much of your total funds will be budgeted toward exploring this site. Any gold that isn't used in the attack will return to your account afterward, but will also be tied up and can't be used for defense if someone else attacks any of your bases during the same turn. You can only attack one site per turn!");
                         m_pSceneBudgetSlider->SetToolTip("Sets how much of your total funds will be budgeted toward exploring this site. Any gold that isn't used in the attack will return to your account afterward, but will also be tied up and can't be used for defense if someone else attacks any of your bases during the same turn. You can only attack one site per turn!");
                     }
                     else
                     {
-                        sprintf_s(str, sizeof(str), "Expedition Budget: %d oz", budget);
+                        std::snprintf(str, sizeof(str), "Expedition Budget: %d oz", budget);
                         m_pSceneBudgetLabel->SetToolTip("Sets how much of your total funds will be budgeted toward attacking this site. Any gold that isn't used in the attack will return to your account afterward, but will also be tied up and can't be used for defense if someone else attacks any of your bases during the same turn. You can only explore one site per turn!");
                         m_pSceneBudgetSlider->SetToolTip("Sets how much of your total funds will be budgeted toward attacking this site. Any gold that isn't used in the attack will return to your account afterward, but will also be tied up and can't be used for defense if someone else attacks any of your bases during the same turn. You can only explore one site per turn!");
                     }
@@ -6147,7 +6147,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                         m_apMetaButton[SCANNOW]->SetVisible(false);
                         m_apMetaButton[SCANLATER]->SetVisible(false);
                         m_pScanInfoLabel->SetVisible(true);
-                        sprintf_s(str, sizeof(str), "%d", SCANCOST);
+                        std::snprintf(str, sizeof(str), "%d", SCANCOST);
                         m_pScanInfoLabel->SetText("Need " + string(str) + " oz left to Scan!");
                     }
                     // Site can be scheduled to be scanned
@@ -6159,7 +6159,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                         m_pScanInfoLabel->SetVisible(false);
                         m_apMetaButton[DESIGNBASE]->SetVisible(false);
                         m_apMetaButton[SCENEACTION]->SetVisible(true);
-                        sprintf_s(str, sizeof(str), "%d", SCANCOST);
+                        std::snprintf(str, sizeof(str), "%d", SCANCOST);
                         m_apMetaButton[SCENEACTION]->SetText("Scan Site (" + string(str) + " oz)");
                         m_apMetaButton[SCENEACTION]->SetToolTip("Performs an orbital scan of this site, which will show everything that is on the surface, but will not be able to penetrate far into the ground.");
                     }
@@ -6176,7 +6176,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                     // Make the blockage bar be all over the place
                     m_pSceneBudgetBar->SetVisible(true);
                     m_pSceneBudgetBar->SetPositionAbs(m_pSceneBudgetSlider->GetXPos() - 2, m_pSceneBudgetSlider->GetYPos());
-                    m_pSceneBudgetBar->SetSize(floorf((m_pSceneBudgetSlider->GetWidth() + 4)), m_pSceneBudgetSlider->GetHeight());
+                    m_pSceneBudgetBar->SetSize(std::floor((m_pSceneBudgetSlider->GetWidth() + 4)), m_pSceneBudgetSlider->GetHeight());
                     m_pSceneBudgetSlider->SetVisible(false);
                 }
             }
@@ -6255,18 +6255,18 @@ void MetagameGUI::UpdateGameSizeLabels()
 	m_pSizeSlider->SetValueResolution(1);
 
     char str[256];
-    sprintf_s(str, sizeof(str), "Game Size: %d/%d sites", m_pSizeSlider->GetValue(), totalCount);
+    std::snprintf(str, sizeof(str), "Game Size: %d/%d sites", m_pSizeSlider->GetValue(), totalCount);
     m_pSizeLabel->SetText(str);
 
     // How much starting gold does the slider yield
     int startGold = STARTGOLDMIN + ((STARTGOLDMAX - STARTGOLDMIN) * (float)m_pGoldSlider->GetValue() / 100.0);
-    sprintf_s(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
+    std::snprintf(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
     m_pGoldLabel->SetText(str);
 
     // Set the length label also according to the game length slider
     int brainCount = m_pLengthSlider->GetValue();
     brainCount = MAX(brainCount, 1);
-    sprintf_s(str, sizeof(str), "Game Length: %c%c%d starting brains", -48, -36, brainCount);
+    std::snprintf(str, sizeof(str), "Game Length: %c%c%d starting brains", -48, -36, brainCount);
     m_pLengthLabel->SetText(str);
 
     if (m_pDifficultySlider->GetValue() < Activity::CakeDifficulty)
@@ -6400,8 +6400,8 @@ void MetagameGUI::UpdatePlayerBars()
             if ((!m_PreTurn && metaPlayer == (g_MetaMan.m_GameState - MetaMan::PLAYER1TURN) && m_pSelectedScene) ||
                 metaPlayer == m_ActivePlayerIncomeLines || g_MetaMan.m_GameState == MetaMan::COUNTINCOME || g_MetaMan.m_GameState == MetaMan::BUILDBASES || g_MetaMan.m_GameState == MetaMan::RUNACTIVITIES || g_MetaMan.m_GameState == MetaMan::ENDROUND)
             {
-                sprintf_s(str, sizeof(str), "%c %.0f oz", -58, (*mpItr).m_Funds);
-//                sprintf_s(str, sizeof(str), "%cx%d %c %.0f oz", -48, (*mpItr).GetBrainPoolCount(), -58, (*mpItr).m_Funds);
+                std::snprintf(str, sizeof(str), "%c %.0f oz", -58, (*mpItr).m_Funds);
+//                std::snprintf(str, sizeof(str), "%cx%d %c %.0f oz", -48, (*mpItr).GetBrainPoolCount(), -58, (*mpItr).m_Funds);
                 m_apPlayerBarLabel[metaPlayer]->SetText(str);
                 m_apPlayerBarLabel[metaPlayer]->SetHAlignment(GUIFont::Right);
                 m_apPlayerBarLabel[metaPlayer]->SetToolTip("This player's total funds");
@@ -6411,7 +6411,7 @@ void MetagameGUI::UpdatePlayerBars()
             {
                 // If the player is out of the game, show a skull before the name
                 if (g_MetaMan.GetTotalBrainCountOfPlayer(metaPlayer) <= 0)
-                    sprintf_s(str, sizeof(str), "%c ", -39);
+                    std::snprintf(str, sizeof(str), "%c ", -39);
                 else
                     str[0] = 0;
 
@@ -6436,7 +6436,7 @@ void MetagameGUI::UpdatePlayerBars()
             // [Brain Icon] [X] Number
             // The number to display is adjusted with whether any brains are out and about in the gui animations
             int brainDisplayCount = (*mpItr).GetBrainPoolCount() - (*mpItr).GetBrainsInTransit();
-            sprintf_s(str, sizeof(str), "%c%c%d", brainDisplayCount > 0 ? -48 : -25, -36, brainDisplayCount);
+            std::snprintf(str, sizeof(str), "%c%c%d", brainDisplayCount > 0 ? -48 : -25, -36, brainDisplayCount);
             m_apBrainPoolLabel[metaPlayer]->SetText(str);
 
             // Animate any funds change indicator labels, make them float upward
@@ -6569,7 +6569,7 @@ void MetagameGUI::PlayerTextIndication(int metaPlayer, string text, const Vector
 void MetagameGUI::FundsChangeIndication(int metaPlayer, float change, const Vector &screenPos, double animLengthMS)
 {
     char str[256];
-    sprintf_s(str, sizeof(str), change >= 1.0 ? "%c +%.0f oz" : (change <= -1.0 ? "%c %.0f oz" : "%c %.0f oz"), -58, change);
+    std::snprintf(str, sizeof(str), change >= 1.0 ? "%c +%.0f oz" : (change <= -1.0 ? "%c %.0f oz" : "%c %.0f oz"), -58, change);
     m_apFundsChangeLabel[metaPlayer]->SetText(str);
     m_apFundsChangeLabel[metaPlayer]->SetHAlignment(GUIFont::Right);
     m_apFundsChangeLabel[metaPlayer]->SetVAlignment(GUIFont::Top);
@@ -6594,7 +6594,7 @@ void MetagameGUI::BrainsChangeIndication(int metaPlayer, int change, const Vecto
     char str[256];
     // [Brain Icon] [X] Number
     // The number to display is adjusted with whether any brains are out and about in the gui animations
-    sprintf_s(str, sizeof(str), change >= 0 ? "%c+%d" : "%c%d", -48, change);
+    std::snprintf(str, sizeof(str), change >= 0 ? "%c+%d" : "%c%d", -48, change);
     m_apBrainChangeLabel[metaPlayer]->SetText(str);
 
     m_apBrainChangeLabel[metaPlayer]->SetHAlignment(fontAlignment);
@@ -6743,7 +6743,7 @@ bool MetagameGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     int totalSegments = 0;
     int drawnFirstSegments = 0;
     int lastSegmentsToDraw = 0;
-    int circleRadius = squareSite ? floorf(6 * circleSize) : floorf(8 * circleSize);
+    int circleRadius = squareSite ? std::floor(6 * circleSize) : std::floor(8 * circleSize);
     int chamferSize = CHAMFERSIZE;
     Vector chamferPoint1;
     Vector chamferPoint2;
@@ -6882,7 +6882,7 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     int drawnFirstSegments = 0;
     int lastSegmentsToDraw = 0;
     int meterHeight = 5;
-    int circleRadius = squareSite ? floorf(6 * circleSize) : floorf(8 * circleSize);
+    int circleRadius = squareSite ? std::floor(6 * circleSize) : std::floor(8 * circleSize);
     int chamferSize = CHAMFERSIZE;
     Vector chamferPoint1;
     Vector chamferPoint2;

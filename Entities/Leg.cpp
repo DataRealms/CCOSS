@@ -248,7 +248,7 @@ void Leg::BendLeg()
     else if (m_CurrentNormalizedExtension > 1.0)
         m_CurrentNormalizedExtension = 1.0;
 
-    m_Frame = floorf(m_CurrentNormalizedExtension * m_FrameCount);
+    m_Frame = std::floor(m_CurrentNormalizedExtension * m_FrameCount);
 
     // Clamp
     if (m_Frame >= m_FrameCount)

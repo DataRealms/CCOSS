@@ -546,7 +546,7 @@ const Scene * MetaMan::GetNextSceneOfPlayer(int player, const Scene *pStartScene
     for (vector<Scene *>::const_iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
     {
         // Don't search beyond what has been revealed already
-        if (scenesSearched >= floorf(m_RevealedScenes))
+        if (scenesSearched >= std::floor(m_RevealedScenes))
             break;
 
         // Find the place where to start the actual search for the next owned Scene from
@@ -1110,7 +1110,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
 
     // Tally up all the scenes according to who owns them
     int sceneCount = 0;
-    int revealedScenes = floorf(m_RevealedScenes);
+    int revealedScenes = std::floor(m_RevealedScenes);
     vector<Scene *> ownedScenes;
     vector<Scene *> enemyScenes;
     vector<Scene *> unclaimedScenes;

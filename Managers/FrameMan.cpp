@@ -14,6 +14,10 @@
 #include "GUI/AllegroBitmap.h"
 #include "GUI/AllegroScreen.h"
 
+#ifdef __unix__
+#include <X11/Xlib.h>
+#endif
+
 extern bool g_InActivity;
 
 namespace RTE {
@@ -33,11 +37,21 @@ namespace RTE {
 	void FrameMan::Clear() {
 		m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		m_DisableMultiScreenResolutionValidation = false;
+#ifdef _WIN32
 		m_NumScreens = GetSystemMetrics(SM_CMONITORS);
 		m_ScreenResX = GetSystemMetrics(SM_CXVIRTUALSCREEN);
 		m_ScreenResY = GetSystemMetrics(SM_CYVIRTUALSCREEN);
 		m_PrimaryScreenResX = GetSystemMetrics(SM_CXSCREEN);
 		m_PrimaryScreenResY = GetSystemMetrics(SM_CYSCREEN);
+#elif __unix__
+		m_NumScreens = 1;
+		Display *dpy = XOpenDisplay(NULL);
+		XWindowAttributes ra;
+		XGetWindowAttributes(dpy, DefaultRootWindow(dpy), &ra);
+		m_ScreenResX = m_PrimaryScreenResX = ra.width;
+		m_ScreenResY = m_PrimaryScreenResY = ra.height;
+		XCloseDisplay(dpy);
+#endif
 		m_ResX = 960;
 		m_ResY = 540;
 		m_NewResX = m_ResX;
@@ -100,6 +114,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::SetGraphicsDriver() {
+#ifdef _WIN32
 		if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) {
 			m_GfxDriver = GFX_DIRECTX_OVL;
 			g_ConsoleMan.PrintString("SYSTEM: Using overlay DirectX windowed driver!");
@@ -112,6 +127,9 @@ namespace RTE {
 		} else {
 			m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		}
+#else
+		m_GfxDriver= (m_ResX * m_ResMultiplier == m_ScreenResX && m_ResY * m_ResMultiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,6 +171,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::ValidateMultiScreenResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier) {
+#ifdef _WIN32
 		POINT pointOnScreen;
 		HMONITOR screenHandle;
 		MONITORINFO screenInfo;
@@ -198,6 +217,7 @@ namespace RTE {
 				return;
 			}
 		}
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -438,6 +458,9 @@ namespace RTE {
 			allegro_message("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!");
 			return -1;
 		}
+#ifdef __unix__
+		m_GfxDriver= (m_ResX * multiplier == m_ScreenResX && m_ResY * multiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+#endif
 
 		// Need to save these first for recovery attempts to work (screen might be 0)
 		unsigned short resX = m_ResX;
@@ -496,6 +519,10 @@ namespace RTE {
 		if (!IsValidResolution(newResX, newResY) || newResX <= 0 || newResX > m_ScreenResX || newResY <= 0 || newResY > m_ScreenResY) {
 			return -1;
 		}
+
+#ifdef __unix__
+		m_GfxDriver= (newResX * newMultiplier == m_ScreenResX && newResY * newMultiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+#endif
 
 		// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
 		if (g_ActivityMan.GetActivity()) {
@@ -730,7 +757,7 @@ namespace RTE {
 		while (fileNumber < maxFileTrys) {
 			// Check for the file namebase001.bmp; if it exists, try 002, etc.
 			char *fileExtension = { (modeToSave == SaveBitmapMode::SingleBitmap || modeToSave == SaveBitmapMode::ScenePreviewDump) ? ".bmp" : ".png" };
-			sprintf_s(fullFileName, sizeof(fullFileName), "%s/%s%03i%s", c_ScreenshotDirectory, nameBase, fileNumber++, fileExtension);
+			std::snprintf(fullFileName, sizeof(fullFileName), "%s/%s%03i%s", c_ScreenshotDirectory, nameBase, fileNumber++, fileExtension);
 			if (!std::filesystem::exists(fullFileName)) {
 				break;
 			}

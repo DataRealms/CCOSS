@@ -880,7 +880,7 @@ float AtomGroup::Travel(Vector &position,
 
             // Loop through atoms
 
-                // All atoms whose (progress += velRatio) >= ceilf(prevProgress), take a step to their
+                // All atoms whose (progress += velRatio) >= std::ceil(prevProgress), take a step to their
                 // next pixel locations and check for collisions. all others do nothing.
 
                     // If any collision, add atom to approprite collision list (MO or terrain), and if MO, to
@@ -1215,9 +1215,10 @@ float AtomGroup::Travel(Vector &position,
 
             // TERRAIN COLLISION RESPONSE /////////////////////////////////////////////////////
             // Determine which of the colliding Atom:s will penetrate the terrain.
-            do
+			bool somethingPenetrated = false;
+			do
             {
-                penetratingAtoms.clear();
+				somethingPenetrated = false;
 
                 distMass = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
                 distMI = m_MomInertia / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
@@ -1242,11 +1243,12 @@ float AtomGroup::Travel(Vector &position,
                         // Move the penetrating atom to the pen. list from the coll. list.
 						penetratingAtoms.push_back(*aItr);
 						aItr = hitTerrAtoms.erase(aItr);
+						somethingPenetrated = true;
 					} else
 						++aItr;
                 }
             }
-            while (!hitTerrAtoms.empty() && !penetratingAtoms.empty());
+			while (!hitTerrAtoms.empty() && somethingPenetrated);
 
             // TERRAIN BOUNCE //////////////////////////////////////////////////////////////////
             // If some Atoms could not penetrate even though all the impulse was on them,
@@ -1798,7 +1800,7 @@ before adding them to the MovableMan.
 /*
 #ifdef DEBUG_BUILD
                 // Draw the positions of the hitpoints on screen for easy debugging.
-                putpixel(g_SceneMan.GetMOColorBitmap(), floorf(position.m_X + rotatedOffset.m_X), floorf(position.m_Y + rotatedOffset.m_Y), 122);
+                putpixel(g_SceneMan.GetMOColorBitmap(), std::floor(position.m_X + rotatedOffset.m_X), std::floor(position.m_Y + rotatedOffset.m_Y), 122);
 #endif
 */
             }
@@ -1937,8 +1939,9 @@ before adding them to the MovableMan.
 
             // TERRAIN COLLISION RESPONSE /////////////////////////////////////////////////////
             // Determine which of the colliding Atom:s will penetrate the terrain.
+			bool somethingPenetrated = false;
             do {
-                penetratingAtoms.clear();
+				somethingPenetrated = false;
 
                 massDist = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
@@ -1952,11 +1955,12 @@ before adding them to the MovableMan.
                         // Move the penetrating atom to the pen. list from the coll. list.
                         penetratingAtoms.push_back(pair<Atom *, Vector>((*aoItr).first, (*aoItr).second));
                         aoItr = hitTerrAtoms.erase(aoItr);
+						somethingPenetrated = true;
                     }
                     else
                         ++aoItr;
                 }
-            } while (!hitTerrAtoms.empty() && !penetratingAtoms.empty());
+			} while (!hitTerrAtoms.empty() && somethingPenetrated);
 
             // TERRAIN BOUNCE //////////////////////////////////////////////////////////////////
             // If some Atom:s could not penetrate even though all the mass was on them,

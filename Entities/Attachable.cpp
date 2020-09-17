@@ -17,13 +17,12 @@ namespace RTE {
 		m_DrawAfterParent = true;
 		m_DrawnNormallyByParent = true;
 		m_DeleteWhenRemovedFromParent = false;
+		m_ApplyTransferredForcesAtOffset = true;
 
 		m_JointStrength = 10;
 		m_JointStiffness = 1.0;
 		m_JointOffset.Reset();
 		m_JointPos.Reset();
-
-		m_OnlyLinearForces = false;
 
 		m_DamageCount = 0;
 		m_BreakWound = 0;
@@ -57,13 +56,12 @@ namespace RTE {
 		m_DrawAfterParent = reference.m_DrawAfterParent;
 		m_DrawnNormallyByParent = reference.m_DrawnNormallyByParent;
 		m_DeleteWhenRemovedFromParent = reference.m_DeleteWhenRemovedFromParent;
+		m_ApplyTransferredForcesAtOffset = reference.m_ApplyTransferredForcesAtOffset;
 
 		m_JointStrength = reference.m_JointStrength;
 		m_JointStiffness = reference.m_JointStiffness;
 		m_JointOffset = reference.m_JointOffset;
 		m_JointPos = reference.m_JointPos;
-
-		m_OnlyLinearForces = reference.m_OnlyLinearForces;
 
 		m_DamageCount = reference.m_DamageCount;
 		m_BreakWound = reference.m_BreakWound;
@@ -85,8 +83,10 @@ namespace RTE {
 			reader >> m_ParentOffset;
 		} else if (propName == "DrawAfterParent") {
 			reader >> m_DrawAfterParent;
-		} else if (propName == "DeleteWhenRemovedFromParent" || propName == "DeleteWithParent") {
+		} else if (propName == "DeleteWhenRemovedFromParent") {
 			reader >> m_DeleteWhenRemovedFromParent;
+		} else if (propName == "ApplyTransferredForcesAtOffset") {
+			reader >> m_ApplyTransferredForcesAtOffset;
 		} else if (propName == "JointStrength" || propName == "Strength") {
 			reader >> m_JointStrength;
 		} else if (propName == "JointStiffness" || propName == "Stiffness") {
@@ -127,6 +127,8 @@ namespace RTE {
 		writer << m_DrawAfterParent;
 		writer.NewProperty("DeleteWhenRemovedFromParent");
 		writer << m_DeleteWhenRemovedFromParent;
+		writer.NewProperty("ApplyTransferredForcesAtOffset");
+		writer << m_ApplyTransferredForcesAtOffset;
 
 		writer.NewProperty("JointStrength");
 		writer << m_JointStrength;

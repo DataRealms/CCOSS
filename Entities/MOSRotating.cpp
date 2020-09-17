@@ -1955,10 +1955,10 @@ bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
             intact = attachable->TransferJointForces(forces) && attachable->TransferJointImpulses(impulses);
 
             if (!forces.IsZero()) {
-                AddForce(forces, attachable->GetOnlyLinearForces() ? Vector() : attachable->GetParentOffset() * m_Rotation);
+                AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation : Vector());
             }
             if (!impulses.IsZero()) {
-                AddImpulseForce(impulses, attachable->GetOnlyLinearForces() ? Vector() : attachable->GetParentOffset() * m_Rotation);
+                AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation : Vector());
             }
             if (!intact) { RemoveAttachable(attachable, true, true); }
         } else {

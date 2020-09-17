@@ -145,6 +145,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="deleteWhenRemovedFromParent">Whether this Attachable should be deleted when it's removed from its parent.</param>
 		void SetDeleteWhenRemovedFromParent(bool deleteWhenRemovedFromParent) { m_DeleteWhenRemovedFromParent = deleteWhenRemovedFromParent; }
+
+		/// <summary>
+		/// Gets whether forces transferred from this Attachable should be applied at its parent's offset (rotated to match the parent) where they will produce torque, or directly at its parent's position.
+		/// </summary>
+		/// <returns>Whether forces transferred from this Attachable should be applied at an offset.</returns>
+		bool GetApplyTransferredForcesAtOffset() const { return m_ApplyTransferredForcesAtOffset; }
+
+		/// <summary>
+		/// Sets whether forces transferred from this Attachable should be applied at its parent's offset (rotated to match the parent) where they will produce torque, or directly at its parent's position.
+		/// </summary>
+		/// <param name="appliesTransferredForcesAtOffset">Whether forces transferred from this Attachable should be applied at an offset.</param>
+		void SetApplyTransferredForcesAtOffset(bool appliesTransferredForcesAtOffset) { m_ApplyTransferredForcesAtOffset = appliesTransferredForcesAtOffset; }
 #pragma endregion
 
 #pragma region Joint Getters and Setters
@@ -187,19 +199,7 @@ namespace RTE {
 		void SetJointOffset(Vector offset) { m_JointOffset = offset; }
 #pragma endregion
 
-#pragma region Force Managment
-		/// <summary>
-		/// Indicates whether this Attachable only cares about linear forces that it creates through emissions, ie no torquing due to the parent offset.
-		/// </summary>
-		/// <returns>Whether this is only using linear forces or not.</returns>
-		bool GetOnlyLinearForces() const { return m_OnlyLinearForces; }
-
-		/// <summary>
-		/// Sets whether this AEmitter should only care about linear forces that it creates through emissions, ie no torquing due to the parent offset.
-		/// </summary>
-		/// <param name="onlyLinearForces">Whether to only use linear forces or not.</param>
-		void SetOnlyLinearForces(bool onlyLinearForces) { m_OnlyLinearForces = onlyLinearForces; }
-
+#pragma region Force Transferral
 		/// <summary>
 		/// Bundles up all the accumulated forces of this Attachable and calculates how they transfer to the joint, and therefore to the parent.
 		/// </summary>
@@ -367,13 +367,13 @@ namespace RTE {
 		bool m_DrawAfterParent; //!< Whether to draw this Attachable after (in front of) or before (behind) the parent.
 		bool m_DrawnNormallyByParent; //!< Whether this Attachable will be be drawn normally when attached, or will require special handling by some non-MOSR parent type.
 		bool m_DeleteWhenRemovedFromParent; //!< Whether this Attachable should be deleted when it's removed from its parent.
+		bool m_ApplyTransferredForcesAtOffset; //!< Whether forces transferred from this Attachable should be applied at the rotated parent offset (which will produce torque), or directly at the parent's position. Mostly useful to make jetpacks and similar emitters viable.
 		
 		float m_JointStrength; //!< The amount of impulse force needed on this to deatch it from the host Actor, in kg * m/s.
 		float m_JointStiffness; //!< The normalized joint stiffness scalar. 1.0 means impulse forces on this attachable will be transferred to the parent with 100% strength, 0 means they will not transfer at all.
 		Vector m_JointOffset; //!< The offset to the joint (the point around which this Attachable and its parent hinge) from its center of mass/origin.
 		Vector m_JointPos; //!< The absolute position of the joint that the parent sets upon Update() if this Attachable is attached to it.
 
-		bool m_OnlyLinearForces; //!< Whether to only record linear forces, ie no torquing due to the parent offset.
 
 		float m_DamageCount; //!< The number of damage points that this Attachable has accumulated since the last time CollectDamage() was called.
 		const AEmitter *m_BreakWound; //!< The wound this Attachable will receive when it breaks from its parent.

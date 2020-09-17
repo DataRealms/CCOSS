@@ -38,7 +38,7 @@ namespace RTE {
 		if (IsZero()) {
 			SetXY(newMag, 0.0F);
 		} else {
-			*this *= newMag / GetMagnitude();
+			*this *= (newMag / GetMagnitude());
 		}
 		return *this;
 	}

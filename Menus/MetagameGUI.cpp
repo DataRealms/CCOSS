@@ -1169,7 +1169,7 @@ bool MetagameGUI::StartNewGame()
             
             // Set the starting brains for this player
             // Start with the baseline setting
-            newPlayer.m_BrainPool = std::ceil(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
+            newPlayer.m_BrainPool = m_pLengthSlider->GetValue();
             // Baseline can never be 0
             newPlayer.m_BrainPool = MAX(newPlayer.m_BrainPool, 1);
             // Apply the handicap!
@@ -1227,7 +1227,7 @@ bool MetagameGUI::StartNewGame()
     
 
     // Start game of specified size!
-    g_MetaMan.NewGame((float)m_pSizeSlider->GetValue() / 100.0);
+    g_MetaMan.NewGame(m_pSizeSlider->GetValue());
 
     return true;
 }
@@ -6244,12 +6244,18 @@ void MetagameGUI::UpdateGameSizeLabels()
         if (m_apPlayerControlButton[player]->GetText() != "None")
             ++playerCount;
 
-    // How many scenes does the current slider setting yield
-    int selectedCount = g_MetaMan.SelectScenePresets((float)m_pSizeSlider->GetValue() / 100.0, playerCount);
-    // How many scenes are there total
-    int totalCount = g_MetaMan.TotalScenePresets();
+	// How many scenes the game should end up with, according to the specified game size.
+	// Note that it will never be all or none of all the available scenes!
+// TODO: Hook these constants up to settings!!
+	// How many scenes are there total
+	const int totalCount = g_MetaMan.TotalScenePresets();
+	const int minCount = std::clamp((playerCount * 3 / 2), 3, totalCount);
+	m_pSizeSlider->SetMinimum(minCount);
+	m_pSizeSlider->SetMaximum(std::max(totalCount * 7 / 10, minCount));
+	m_pSizeSlider->SetValueResolution(1);
+
     char str[256];
-    std::snprintf(str, sizeof(str), "Game Size: %d/%d sites", selectedCount, totalCount);
+    std::snprintf(str, sizeof(str), "Game Size: %d/%d sites", m_pSizeSlider->GetValue(), totalCount);
     m_pSizeLabel->SetText(str);
 
     // How much starting gold does the slider yield
@@ -6258,8 +6264,7 @@ void MetagameGUI::UpdateGameSizeLabels()
     m_pGoldLabel->SetText(str);
 
     // Set the length label also according to the game length slider
-// TODO: don't hardcode the range of this
-    int brainCount = std::ceil(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
+    int brainCount = m_pLengthSlider->GetValue();
     brainCount = MAX(brainCount, 1);
     std::snprintf(str, sizeof(str), "Game Length: %c%c%d starting brains", -48, -36, brainCount);
     m_pLengthLabel->SetText(str);

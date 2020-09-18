@@ -995,12 +995,7 @@ int MetaMan::TotalScenePresets(std::list<Scene *> *pScenes)
     {
         pScenePreset = dynamic_cast<Scene *>(*sItr);
         // Filter out editor or special scenes, or ones that don't have locations defined.
-        if (pScenePreset && !pScenePreset->GetLocation().IsZero() &&
-            pScenePreset->IsMetagamePlayable() &&
-            pScenePreset->GetPresetName().find("Editor") == string::npos &&
-            pScenePreset->GetPresetName().find("Test") == string::npos &&
-            pScenePreset->GetPresetName().find("Tutorial") == string::npos && 
-			pScenePreset->GetMetasceneParent() == "")
+        if (pScenePreset && !pScenePreset->GetLocation().IsZero() && pScenePreset->IsMetagamePlayable() && pScenePreset->GetMetasceneParent() == "")
         {
             // Make sure this exact site location on the planet isn't occupied already
             locationOK = true;

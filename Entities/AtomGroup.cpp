@@ -1192,17 +1192,10 @@ float AtomGroup::Travel(Vector &position,
             // Special case of being at rest
             if (stepCount == 0 && stepsOnSeg == 1)
             {
-                segProgress = 0.0F;
                 halted = true;
 //                m_pOwnerMO->SetToSettle(true);
-            }
-            // Normal travel
-			else if (stepCount == 0) {
-				// Hit on first atom, but has farther to go
-				segProgress = 0.75F / static_cast<float>(stepsOnSeg);
-			} else {
-				segProgress = static_cast<float>(stepCount) / static_cast<float>(stepsOnSeg);
 			}
+			segProgress = static_cast<float>(stepCount) / static_cast<float>(stepsOnSeg);
 
             // Move position forward to the hit position.
             preHitPos = position;
@@ -1298,8 +1291,6 @@ float AtomGroup::Travel(Vector &position,
 				// Calc and store the collision response effects.
 				for (Atom *penetratingAtom : penetratingAtoms)
 				{
-
-
 					// This gets re-set later according to the ortho pixel edges hit.
 //                  hitData.BitmapNormal = -(hitData.HitVel[HITOR].GetNormalized());
 //                  hitData.SquaredMIHandle[HITOR] = hitData.HitRadius[HITOR].GetPerpendicular()/*.Dot(hitData.BitmapNormal)*/;

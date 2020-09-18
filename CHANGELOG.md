@@ -229,6 +229,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Damage to actors from impulses is now relative to their max health instead of being on a scale from 0 to 100.
 
+- Scenes with a PresetName containing the strings "Test", "Editor" and "Tutorial" are no longer excluded from the scenarios screen and from the metagame.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.

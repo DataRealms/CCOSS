@@ -1291,80 +1291,56 @@ float AtomGroup::Travel(Vector &position,
                 }
             }
             // TERRAIN SINK ////////////////////////////////////////////////////////////////
-            // Else all Atom:s must have penetrated and therefore the entire group has
-            // sunken into the terrain. Get the penetration resistance results and
-            // apply them to the owner.
-            else if (!penetratingAtoms.empty())
-            {
-                // Re-calculate the progress made on this segment before hitting something.
-                // We do this because the hitting step made resulted in a terrain sink,
-                // which means the segment progressed another step, and the segmentProgress
-                // should reflect this.
-                segProgress = static_cast<float>(stepCount + 1) / static_cast<float>(stepsOnSeg);
+            // Handle terrain penetration effects.
+			if (!penetratingAtoms.empty()) {
+				hitFactor = 1.0F / static_cast<float>(penetratingAtoms.size());
 
-// TODO: Wrapping detection here may be screwed up on very special cases.")
-                // Move position forward to the sink hit position.
-                position = preHitPos + linSegTraj * segProgress;
-                // Wrap position, if necessary.
-                didWrap = g_SceneMan.WrapPosition(position) || didWrap;
-                // Move rotation forward according to the progress made on the segment, incl sink.
-                rotation = preHitRot + rotDelta * segProgress;
-/*
-                // Adjust the radius etc to account for the sinking into the terrain.
-                (*aItr)->SetHitRadius((*aItr)->GetOffset().RadRotate(rotation));
-                // Figure out the pre-collision velocity of the
-                // hitting atom due to body translation and rotation.
-                (*aItr)->SetHitVel(velocity + (*aItr)->GetOffset().RadRotate(rotation + c_HalfPI) *
-                                            c_MPP * angVel);
-*/
-                hitFactor = 1.0F / static_cast<float>(penetratingAtoms.size());
-
-                // Calc and store the collision response effects.
-                for (Atom *penetratingAtom : penetratingAtoms)
-                {
+				// Calc and store the collision response effects.
+				for (Atom *penetratingAtom : penetratingAtoms)
+				{
 
 
-                    // This gets re-set later according to the ortho pixel edges hit.
+					// This gets re-set later according to the ortho pixel edges hit.
 //                  hitData.BitmapNormal = -(hitData.HitVel[HITOR].GetNormalized());
 //                  hitData.SquaredMIHandle[HITOR] = hitData.HitRadius[HITOR].GetPerpendicular()/*.Dot(hitData.BitmapNormal)*/;
 //                  hitData.SquaredMIHandle[HITOR] *= hitData.SquaredMIHandle[HITOR];
 //                  hitData.HitDenominator = (1.0 / distMass) + (hitData.SquaredMIHandle[HITOR] / distMI);
 //                  hitData.PreImpulse[HITOR] = hitData.HitVel[HITOR] / hitData.HitDenominator;
 
-                    // Get the hitdata so far gathered for this Atom.
-                    hitData = penetratingAtom->GetHitData();
+					// Get the hitdata so far gathered for this Atom.
+					hitData = penetratingAtom->GetHitData();
 
-                    if (g_SceneMan.TryPenetrate(penetratingAtom->GetCurrentPos().GetFloorIntX(),
-                                                penetratingAtom->GetCurrentPos().GetFloorIntY(),
-                                                hitData.PreImpulse[HITOR],
-                                                hitData.HitVel[HITOR],
-                                                retardation,
-                                                1.0F,
-                                                1/*(*penetratingAtom)->GetNumPenetrations()*/))
-                    {
+					if (g_SceneMan.TryPenetrate(penetratingAtom->GetCurrentPos().GetFloorIntX(),
+						penetratingAtom->GetCurrentPos().GetFloorIntY(),
+						hitData.PreImpulse[HITOR],
+						hitData.HitVel[HITOR],
+						retardation,
+						1.0F,
+						1/*(*penetratingAtom)->GetNumPenetrations()*/))
+					{
 
-                        // Recalc these here without the distributed mass and MI.
-                        radMag = hitData.HitRadius[HITOR].GetMagnitude();
-                        hitData.HitDenominator = (1.0F / mass) + ((radMag * radMag) / m_MomInertia);
-                        hitData.PreImpulse[HITOR] = hitData.HitVel[HITOR] / hitData.HitDenominator;
-                        hitData.TotalMass[HITOR] = mass;
-                        hitData.MomInertia[HITOR] = m_MomInertia;
-                        hitData.ImpulseFactor[HITOR] = hitFactor;
-                        // Finally calculate the hit response impulse.
-                        hitData.ResImpulse[HITOR] = ((hitData.HitVel[HITOR] * retardation) /
-                                                     hitData.HitDenominator) * hitFactor;
+						// Recalc these here without the distributed mass and MI.
+						radMag = hitData.HitRadius[HITOR].GetMagnitude();
+						hitData.HitDenominator = (1.0F / mass) + ((radMag * radMag) / m_MomInertia);
+						hitData.PreImpulse[HITOR] = hitData.HitVel[HITOR] / hitData.HitDenominator;
+						hitData.TotalMass[HITOR] = mass;
+						hitData.MomInertia[HITOR] = m_MomInertia;
+						hitData.ImpulseFactor[HITOR] = hitFactor;
+						// Finally calculate the hit response impulse.
+						hitData.ResImpulse[HITOR] = ((hitData.HitVel[HITOR] * retardation) /
+							hitData.HitDenominator) * hitFactor;
 
-                        // Call the call-on-sink function, if requested.
-                        if (callOnSink)
-                            halted = halted || m_pOwnerMO->OnSink(hitData);
+						// Call the call-on-sink function, if requested.
+						if (callOnSink)
+							halted = halted || m_pOwnerMO->OnSink(hitData);
 
-                        // Copy back the new hit data with all the info we have so far.
-                        penetratingAtom->SetHitData(hitData);
-                        // Save the atom for later application of its hit data to the body.
-                        hitResponseAtoms.push_back(penetratingAtom);
-                    }
-                }
-            }
+						// Copy back the new hit data with all the info we have so far.
+						penetratingAtom->SetHitData(hitData);
+						// Save the atom for later application of its hit data to the body.
+						hitResponseAtoms.push_back(penetratingAtom);
+					}
+				}
+			}
 
             // MOVABLEOBJECT COLLISION RESPONSE ///////////////////////////////////////////////
             ///////////////////////////////////////////////////////////////////////////////////

@@ -168,14 +168,14 @@ namespace RTE {
 	/// </summary>
 	/// <param name="angleInDegrees">The angle in degrees to be converted.</param>
 	/// <returns>The converted angle in radians.</returns>
-	float DegreesToRadians(float angleInDegrees) { return angleInDegrees / c_PI * 180.0F; }
+	float DegreesToRadians(float angleInDegrees);
 
 	/// <summary>
 	/// Returns the given angle converted from radians to degrees.
 	/// </summary>
 	/// <param name="angleInRadians">The angle in radians to be converted.</param>
 	/// <returns>The converted angle in degrees.</returns>
-	float RadiansToDegrees(float angleInRadians) { return angleInRadians / 180.0F * c_PI; }
+	float RadiansToDegrees(float angleInRadians);
 #pragma endregion
 
 #pragma region Misc

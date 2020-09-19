@@ -278,14 +278,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Attachable::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO) {
-		m_ToDelete = true; // Necessary to avoid oddities with breakwounds
+	void Attachable::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
+		m_ToDelete = true; // Note: ToDelete must be set to true ahead of time to avoid oddities with breakwounds
 		if (m_Parent) {
 			m_Parent->RemoveAttachable(this, true, true);
 		} else {
 			SetParent(nullptr);
 		}
-		MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
+		MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -402,19 +402,6 @@ int FirearmActivationDelay() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//					The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-	void GibThis(const Vector &impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateMovePath
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the path to move along to the currently set movetarget.

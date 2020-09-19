@@ -235,6 +235,7 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         AddAttachable(m_pJetpack);
         if (!m_pJetpack->GetDamageMultiplierSetInINI()) { m_pJetpack->SetDamageMultiplier(0.0F); }
         m_pJetpack->SetApplyTransferredForcesAtOffset(false);
+        m_pJetpack->SetDeleteWhenRemovedFromParent(true);
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         m_JetTimeTotal *= 1000;
@@ -968,68 +969,6 @@ MovableObject * ACrab::LookForMOs(float FOVSpread, unsigned char ignoreMaterial,
         return pSeenMO->GetRootParent();
 
     return pSeenMO;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-
-void ACrab::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    // Detach all limbs and let loose
-    if (m_pTurret && m_pTurret->IsAttached())
-    {
-        RemoveAttachable(m_pTurret);
-        m_pTurret->SetVel(m_Vel + m_pTurret->GetParentOffset() * PosRand());
-        m_pTurret->SetAngularVel(NormalRand());
-        g_MovableMan.AddParticle(m_pTurret);
-        m_pTurret = 0;
-    }
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        // Jetpacks are really nothing, so just delete them safely
-        RemoveAttachable(m_pJetpack);
-        m_pJetpack->SetToDelete(true);
-        g_MovableMan.AddParticle(m_pJetpack);
-        m_pJetpack = 0;
-    }
-    if (m_pLFGLeg && m_pLFGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pLFGLeg);
-        m_pLFGLeg->SetVel(m_Vel + m_pLFGLeg->GetParentOffset() * PosRand());
-        m_pLFGLeg->SetAngularVel(NormalRand());
-        g_MovableMan.AddParticle(m_pLFGLeg);
-        m_pLFGLeg = 0;
-    }
-    if (m_pLBGLeg && m_pLBGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pLBGLeg);
-        m_pLBGLeg->SetVel(m_Vel + m_pLBGLeg->GetParentOffset() * PosRand());
-        m_pLBGLeg->SetAngularVel(NormalRand());
-        g_MovableMan.AddParticle(m_pLBGLeg);
-        m_pLBGLeg = 0;
-    }
-    if (m_pRFGLeg && m_pRFGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pRFGLeg);
-        m_pRFGLeg->SetVel(m_Vel + m_pRFGLeg->GetParentOffset() * PosRand());
-        m_pRFGLeg->SetAngularVel(NormalRand());
-        g_MovableMan.AddParticle(m_pRFGLeg);
-        m_pRFGLeg = 0;
-    }
-    if (m_pRBGLeg && m_pRBGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pRBGLeg);
-        m_pRBGLeg->SetVel(m_Vel + m_pRBGLeg->GetParentOffset() * PosRand());
-        m_pRBGLeg->SetAngularVel(NormalRand());
-        g_MovableMan.AddParticle(m_pRBGLeg);
-        m_pRBGLeg = 0;
-    }
-
-    Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }
 
 

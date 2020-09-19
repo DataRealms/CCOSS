@@ -33,6 +33,7 @@ namespace RTE {
 				m_MountedDevice = dynamic_cast<HeldDevice *>(mountedDeviceEntity->Clone());
 				AddAttachable(m_MountedDevice);
 				m_MountedDevice->SetInheritsRotAngle(false);
+				m_MountedDevice->SetDeleteWhenRemovedFromParent(true);
 			}
 		} else {
 			return Attachable::ReadProperty(propName, reader);

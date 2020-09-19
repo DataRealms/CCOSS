@@ -92,6 +92,9 @@ int HeldDevice::Create()
         else
             m_Loudness = 1.0;
     }
+
+    // Make it so held devices are dropped when their parent gibs
+    m_ParentGibBlastStrengthMultiplier = 0.0F;
     
     // All HeldDevice:s by default avoid hitting and getting physically hit by AtomGoups when they are at rest
     m_IgnoresAGHitsWhenSlowerThan = 1.0;

@@ -123,12 +123,12 @@ namespace RTE {
 
 #pragma region Virtual Override Methods
 		/// <summary>
-		/// Gibs this, effectively destroying it and creating multiple gibs or pieces in its place.
+		/// Destroys this ADoor and creates its specified Gibs in its place with appropriate velocities.
+		/// Any Attachables are removed and also given appropriate velocities.
 		/// </summary>
 		/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
-		/// <param name="internalBlast">The internal blast impulse which will push the gibs away from the center.</param>
-		/// <param name="pIgnoreMO">A pointer to an MO which the gibs should not be colliding with!</param>
-		void GibThis(const Vector &impactImpulse = Vector(), float internalBlast = 10, MovableObject *ignoreMO = 0) override;
+		/// <param name="movableObjectToIgnore">A pointer to an MO which the Gibs and Attachables should not be colliding with.</param>
+		void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
 
 		/// <summary>
 		/// Updates this ADoor. Supposed to be done every frame.

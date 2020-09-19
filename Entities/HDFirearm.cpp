@@ -148,6 +148,7 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader) {
             m_pMagazine = dynamic_cast<Magazine *>(magazineEntity->Clone());
             AddAttachable(m_pMagazine);
         }
+        m_pMagazine->SetDeleteWhenRemovedFromParent(true);
     } else if (propName == "Flash") {
         RemoveAttachable(m_pFlash);
         const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);

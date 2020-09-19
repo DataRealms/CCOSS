@@ -365,12 +365,12 @@ namespace RTE {
 		bool ParticlePenetration(HitData &hitData) override;
 
 		/// <summary>
-		/// Gibs this, effectively destroying it and creating gibs in its place.
+		/// Destroys this Attachable and creates its specified Gibs in its place with appropriate velocities.
+		/// Any Attachables are removed and also given appropriate velocities.
 		/// </summary>
 		/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
-		/// <param name="internalBlast">The internal blast impulse which will push the gibs away from the center.</param>
-		/// <param name="MOToIgnore">A pointer to an MO which the gibs should not be colliding with!</param>
-		void GibThis(const Vector &impactImpulse = Vector(), float internalBlast = 10, MovableObject *MOToIgnore = 0) override;
+		/// <param name="movableObjectToIgnore">A pointer to an MO which the Gibs and Attachables should not be colliding with.</param>
+		virtual void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr);
 
 		/// <summary>
 		/// Updates this Attachable. Supposed to be done every frame.

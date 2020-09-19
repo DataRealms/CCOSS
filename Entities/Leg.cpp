@@ -80,6 +80,7 @@ namespace RTE {
 				m_Foot = dynamic_cast<Attachable *>(footEntity->Clone());
 				AddAttachable(m_Foot);
 				m_Foot->SetInheritsRotAngle(false);
+				m_Foot->SetParentGibBlastStrengthMultiplier(0.0F);
 			}
 		} else if (propName == "ContractedOffset") {
 			reader >> m_ContractedOffset;

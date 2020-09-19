@@ -581,8 +581,6 @@ enum
 
 protected:
 
-    void SetAttachableVelocitiesForGibbing(Attachable* pAttachable, Vector impactImpulse, float internalBlast);
-
     // Member variables
     static Entity::ClassInfo m_sClass;
     // Current movement state.

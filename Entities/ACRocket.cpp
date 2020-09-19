@@ -322,75 +322,6 @@ bool ACRocket::OnSink(const Vector &pos)
     return false;
 }
 */
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-
-void ACRocket::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    // TODO: maybe make hardcoded attachables gib if their gib list isn't empty
-    // Detach all limbs and let loose
-    if (m_pRLeg && m_pRLeg->IsAttached())
-    {
-        RemoveAttachable(m_pRLeg);
-        SetAttachableVelocitiesForGibbing(m_pRLeg, impactImpulse, internalBlast);
-        m_pRLeg->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pRLeg);
-        m_pRLeg = 0;
-    }
-    if (m_pLLeg && m_pLLeg->IsAttached())
-    {
-        RemoveAttachable(m_pLLeg);
-        SetAttachableVelocitiesForGibbing(m_pLLeg, impactImpulse, internalBlast);
-        m_pLLeg->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pLLeg);
-        m_pLLeg = 0;
-    }
-    if (m_pMThruster && m_pMThruster->IsAttached())
-    {
-        RemoveAttachable(m_pMThruster);
-        SetAttachableVelocitiesForGibbing(m_pMThruster, impactImpulse, internalBlast);
-        m_pMThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pMThruster);
-        m_pMThruster = 0;
-    }
-    if (m_pRThruster && m_pRThruster->IsAttached())
-    {
-        RemoveAttachable(m_pRThruster);
-        SetAttachableVelocitiesForGibbing(m_pRThruster, impactImpulse, internalBlast);
-        m_pRThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pRThruster);
-        m_pRThruster = 0;
-    }
-    if (m_pLThruster && m_pLThruster->IsAttached())
-    {
-        RemoveAttachable(m_pLThruster);
-        SetAttachableVelocitiesForGibbing(m_pLThruster, impactImpulse, internalBlast);
-        m_pLThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pLThruster);
-        m_pLThruster = 0;
-    }
-    if (m_pURThruster && m_pURThruster->IsAttached())
-    {
-        RemoveAttachable(m_pURThruster);
-        SetAttachableVelocitiesForGibbing(m_pURThruster, impactImpulse, internalBlast);
-        m_pURThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pURThruster);
-        m_pURThruster = 0;
-    }
-    if (m_pULThruster && m_pULThruster->IsAttached())
-    {
-        RemoveAttachable(m_pULThruster);
-        SetAttachableVelocitiesForGibbing(m_pULThruster, impactImpulse, internalBlast);
-        m_pULThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pULThruster);
-        m_pULThruster = 0;
-    }
-
-    Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -802,7 +733,7 @@ void ACRocket::Update()
     // Explosion logic
 
     if (m_Status == DEAD)
-        GibThis(Vector(), 50);
+        GibThis();
 
     ////////////////////////////////////////
     // Balance stuff

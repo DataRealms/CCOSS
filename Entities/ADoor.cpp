@@ -269,18 +269,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ADoor::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *ignoreMO) {
+	void ADoor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
 		if (m_Door && m_Door->IsAttached()) {
 			EraseDoorMaterial();
 			m_Door->DeepCheck(true);
 			m_Door->SetPinStrength(0);
-			m_Door->SetVel(m_Vel + m_Door->GetParentOffset() * PosRand());
-			m_Door->SetAngularVel(NormalRand());
-			g_MovableMan.AddParticle(m_Door);
-			RemoveAttachable(m_Door);
-			m_Door = 0;
 		}
-		Actor::GibThis(impactImpulse, internalBlast, ignoreMO);
+		Actor::GibThis(impactImpulse, movableObjectToIgnore);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -384,7 +379,7 @@ namespace RTE {
 
 			m_Health -= 0.4F;
 		}
-		if (m_Status == DEAD) { GibThis(Vector(), 50); }
+		if (m_Status == DEAD) { GibThis(); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

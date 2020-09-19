@@ -327,68 +327,6 @@ bool ACDropShip::OnSink(const Vector &pos)
 }
 */
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-
-void ACDropShip::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    // TODO: maybe make hardcoded attachables gib if their gib list isn't empty
-    // Detach all limbs and let loose
-    if (m_pRThruster && m_pRThruster->IsAttached())
-    {
-        RemoveAttachable(m_pRThruster);
-        SetAttachableVelocitiesForGibbing(m_pRThruster, impactImpulse, internalBlast);
-        m_pRThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pRThruster);
-        m_pRThruster = 0;
-    }
-    if (m_pLThruster && m_pLThruster->IsAttached())
-    {
-        RemoveAttachable(m_pLThruster);
-        SetAttachableVelocitiesForGibbing(m_pLThruster, impactImpulse, internalBlast);
-        m_pLThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pLThruster);
-        m_pLThruster = 0;
-    }
-    if (m_pRHatch && m_pRHatch->IsAttached())
-    {
-        RemoveAttachable(m_pRHatch);
-        SetAttachableVelocitiesForGibbing(m_pRHatch, impactImpulse, internalBlast);
-        m_pRHatch->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pRHatch);
-        m_pRHatch = 0;
-    }
-    if (m_pLHatch && m_pLHatch->IsAttached())
-    {
-        RemoveAttachable(m_pLHatch);
-        SetAttachableVelocitiesForGibbing(m_pLHatch, impactImpulse, internalBlast);
-        m_pLHatch->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pLHatch);
-        m_pLHatch = 0;
-    }
-    if (m_pURThruster && m_pURThruster->IsAttached())
-    {
-        RemoveAttachable(m_pURThruster);
-        SetAttachableVelocitiesForGibbing(m_pURThruster, impactImpulse, internalBlast);
-        m_pURThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pURThruster);
-        m_pURThruster = 0;
-    }
-    if (m_pULThruster && m_pULThruster->IsAttached())
-    {
-        RemoveAttachable(m_pULThruster);
-        SetAttachableVelocitiesForGibbing(m_pULThruster, impactImpulse, internalBlast);
-        m_pULThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pULThruster);
-        m_pULThruster = 0;
-    }
-
-    Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateAI
@@ -756,7 +694,7 @@ void ACDropShip::Update()
     // Explosion logic
 
     if (m_Status == DEAD)
-        GibThis(Vector(), 50);
+        GibThis();
 
     ////////////////////////////////////////
     // Balance stuff

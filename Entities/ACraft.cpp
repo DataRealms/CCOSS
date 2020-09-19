@@ -1076,19 +1076,4 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     }
 }
 
-/// <summary>
-/// Helper method to remove code duplication in ACDropship and ACRocket gibbing
-/// </summary>
-/// <param name="pAttachable">The attachable to set velocities for</param>
-/// <param name="impactImpulse">The impactImpulse passed in from GibThis</param>
-/// <param name="internalBlast">The internalBlast passed in from GibThis</param>
-void ACraft::SetAttachableVelocitiesForGibbing(Attachable * pAttachable, Vector impactImpulse, float internalBlast)
-{
-    Vector newVel(pAttachable->GetPos() - m_Pos);
-    newVel.SetMagnitude(internalBlast);
-    newVel += m_Vel + impactImpulse;
-    pAttachable->SetVel(newVel);
-    pAttachable->SetAngularVel(NormalRand());
-}
-
 } // namespace RTE

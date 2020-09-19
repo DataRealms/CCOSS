@@ -973,14 +973,14 @@ void Actor::DropAllInventory()
 // Description:     Gibs this, effectively destroying it and creating multiple gibs or
 //                  pieces in its place.
 
-void Actor::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
+void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore)
 {
     // Play death sound
 // TODO: Don't attenuate since death is pretty important.. maybe only make this happen for teh brains
     m_DeathSound.Play(m_Pos);
 
     // Gib all the regular gibs
-    MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
+    MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
 
 	if (g_SettingsMan.EnableCrabBombs()) {
 		unsigned short crabCount = 0;
@@ -1007,7 +1007,7 @@ void Actor::GibThis(const Vector &impactImpulse, float internalBlast, MovableObj
         pObject = *gItr;
 
         // Generate the velocities procedurally
-        velMin = internalBlast / pObject->GetMass();
+        velMin = m_GibBlastStrength / pObject->GetMass();
         velRange = 10.0f;
 
         // Randomize the offset from center to be within the original object
@@ -1048,8 +1048,8 @@ void Actor::GibThis(const Vector &impactImpulse, float internalBlast, MovableObj
         pObject->ResetAllTimers();
 
         // Set the gib to not hit a specific MO
-        if (pIgnoreMO)
-            pObject->SetWhichMOToNotHit(pIgnoreMO);
+        if (movableObjectToIgnore)
+            pObject->SetWhichMOToNotHit(movableObjectToIgnore);
 
         // Detect whether we're dealing with a passenger and add it as Actor instead
         if (pPassenger = dynamic_cast<Actor *>(pObject))

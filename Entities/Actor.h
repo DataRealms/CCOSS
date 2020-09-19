@@ -981,17 +981,13 @@ ClassInfoGetters
     void DrawWaypoints(bool drawWaypoints = true) { m_DrawWaypoints = drawWaypoints; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//                  The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-    void GibThis(const Vector &impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
+    /// <summary>
+    /// Destroys this MOSRotating and creates its specified Gibs in its place with appropriate velocities.
+    /// Any Attachables are removed and also given appropriate velocities.
+    /// </summary>
+    /// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
+    /// <param name="movableObjectToIgnore">A pointer to an MO which the Gibs and Attachables should not be colliding with.</param>
+    void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

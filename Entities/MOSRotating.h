@@ -594,6 +594,18 @@ ClassInfoGetters
     void SetGibWoundLimit(int newGibWoundLimit) { m_GibWoundLimit = newGibWoundLimit; }
 
     /// <summary>
+    /// Gets the gib blast strength this MOSRotating, i.e. the strength with which Gibs and Attachables will be launched when this MOSRotating is gibbed.
+    /// </summary>
+    /// <returns>The gib blast strength of this MOSRotating.</returns>
+	int GetGibBlastStrength() const { return m_GibBlastStrength; }
+
+    /// <summary>
+    /// Sets the gib blast strength this MOSRotating, i.e. the strength with which Gibs and Attachables will be launched when this MOSRotating is gibbed.
+    /// </summary>
+    /// <param name="newGibBlastStrength">The new gib blast strength to use.</param>
+    void SetGibBlastStrength(int newGibBlastStrength) { m_GibBlastStrength = newGibBlastStrength; }
+
+    /// <summary>
     /// Gets the number of wounds attached to this MOSRotating.
     /// Includes any Attachables (and their Attachables, etc.) that have a positive damage multiplier.
     /// <returns>The number of wounds on this MOSRotating.</returns>
@@ -847,13 +859,14 @@ protected:
     std::list<AEmitter *> m_Wounds;
     // The list of Attachables currently attached and Owned by this.
     std::list<Attachable *> m_Attachables;
-    std::unordered_map<unsigned long, std::function<void (MOSRotating*, Attachable*)>> m_HardcodedAttachableUniqueIDsAndSetters; //<! An unordered map of Unique IDs to setter lambda functions, used to properly set member pointers for hardcoded Attachables (i.e. head, legs, etc.) when cloning.
+    std::unordered_map<unsigned long, std::function<void (MOSRotating*, Attachable*)>> m_HardcodedAttachableUniqueIDsAndSetters; //!< An unordered map of Unique IDs to setter lambda functions, used to properly set member pointers for hardcoded Attachables (i.e. head, legs, etc.) when cloning.
     // The list of Gib:s this will create when gibbed
     std::list<Gib> m_Gibs;
     // The amount of impulse force required to gib this, in kg * (m/s). 0 means no limit
     float m_GibImpulseLimit;
     // The number of wound emitters allowed before this gets gibbed. 0 means this can't get gibbed
     int m_GibWoundLimit;
+    float m_GibBlastStrength; //!< The strength with which Gibs and Attachables will get launched when this MOSRotating is gibbed.
     // Gib sound effect
     SoundContainer m_GibSound;
     // Whether to flash effect on gib

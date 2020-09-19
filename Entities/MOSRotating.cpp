@@ -66,6 +66,7 @@ void MOSRotating::Clear()
     m_Gibs.clear();
     m_GibImpulseLimit = 0;
     m_GibWoundLimit = 0;
+    m_GibBlastStrength = 10.0F;
     m_GibSound.Reset();
     m_EffectOnGib = true;
     m_pFlipBitmap = 0;
@@ -268,6 +269,7 @@ int MOSRotating::Create(const MOSRotating &reference)
 
     m_GibImpulseLimit = reference.m_GibImpulseLimit;
     m_GibWoundLimit = reference.m_GibWoundLimit;
+    m_GibBlastStrength = reference.m_GibBlastStrength;
     m_GibSound = reference.m_GibSound;
     m_EffectOnGib = reference.m_EffectOnGib;
     m_LoudnessOnGib = reference.m_LoudnessOnGib;
@@ -338,7 +340,9 @@ int MOSRotating::ReadProperty(std::string propName, Reader &reader)
         reader >> m_GibImpulseLimit;
     else if (propName == "GibWoundLimit" || propName == "WoundLimit")
         reader >> m_GibWoundLimit;
-    else if (propName == "GibSound")
+    else if (propName == "GibBlastStrength") {
+        reader >> m_GibBlastStrength;
+    } else if (propName == "GibSound")
         reader >> m_GibSound;
     else if (propName == "EffectOnGib")
         reader >> m_EffectOnGib;

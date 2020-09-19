@@ -19,6 +19,9 @@ namespace RTE {
 		m_DeleteWhenRemovedFromParent = false;
 		m_ApplyTransferredForcesAtOffset = true;
 
+		m_GibWithParentChance = 0;
+		m_ParentGibBlastStrengthMultiplier = 1;
+
 		m_JointStrength = 10;
 		m_JointStiffness = 1.0;
 		m_JointOffset.Reset();
@@ -58,6 +61,9 @@ namespace RTE {
 		m_DeleteWhenRemovedFromParent = reference.m_DeleteWhenRemovedFromParent;
 		m_ApplyTransferredForcesAtOffset = reference.m_ApplyTransferredForcesAtOffset;
 
+		m_GibWithParentChance = reference.m_GibWithParentChance;
+		m_ParentGibBlastStrengthMultiplier = reference.m_ParentGibBlastStrengthMultiplier;
+
 		m_JointStrength = reference.m_JointStrength;
 		m_JointStiffness = reference.m_JointStiffness;
 		m_JointOffset = reference.m_JointOffset;
@@ -87,6 +93,10 @@ namespace RTE {
 			reader >> m_DeleteWhenRemovedFromParent;
 		} else if (propName == "ApplyTransferredForcesAtOffset") {
 			reader >> m_ApplyTransferredForcesAtOffset;
+		} else if (propName == "GibWithParentChance") {
+			reader >> m_GibWithParentChance;
+		} else if (propName == "ParentGibBlastStrengthMultiplier") {
+			reader >> m_ParentGibBlastStrengthMultiplier;
 		} else if (propName == "JointStrength" || propName == "Strength") {
 			reader >> m_JointStrength;
 		} else if (propName == "JointStiffness" || propName == "Stiffness") {

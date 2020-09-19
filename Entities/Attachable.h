@@ -159,6 +159,32 @@ namespace RTE {
 		void SetApplyTransferredForcesAtOffset(bool appliesTransferredForcesAtOffset) { m_ApplyTransferredForcesAtOffset = appliesTransferredForcesAtOffset; }
 #pragma endregion
 
+#pragma region Parent Gib Handling Getters and Setters
+		/// <summary>
+		/// Gets the percentage chance that this Attachable will gib when its parent does. 0 means never, 1 means always.
+		/// </summary>
+		/// <returns>A float with the percentage chance this Attachable will gib when its parent gibs.</returns>
+		float GetGibWithParentChance() const { return m_GibWithParentChance; }
+
+		/// <summary>
+		/// Sets the percentage chance that this Attachable will gib when its parent does. 0 means never, 1 means always.
+		/// </summary>
+		/// <param name="gibWithParentChance">A float describing the percentage chance this Attachable will gib when its parent gibs.</param>
+		void SetGibWithParentChance(float gibWithParentChance) { m_GibWithParentChance = gibWithParentChance; }
+
+		/// <summary>
+		/// Gets the multiplier this Attacahble will apply to its parent's gib blast strength when the parent gibs.
+		/// </summary>
+		/// <returns>A float with the gib blast strength multiplier of this Attachable.</returns>
+		float GetParentGibBlastStrengthMultiplier() const { return m_ParentGibBlastStrengthMultiplier; }
+
+		/// <summary>
+		/// Sets the multiplier this Attacahble will apply to its parent's gib blast strength when the parent gibs.
+		/// </summary>
+		/// <param name="parentGibBlastStrengthMultiplier">A float describing the gib blast strength multiplier of this Attachable.</param>
+		void SetParentGibBlastStrengthMultiplier(float parentGibBlastStrengthMultiplier) { m_ParentGibBlastStrengthMultiplier = parentGibBlastStrengthMultiplier; }
+#pragma endregion
+
 #pragma region Joint Getters and Setters
 		/// <summary>
 		/// Gets the amount of impulse force the joint of this Attachable can handle before breaking.
@@ -369,11 +395,13 @@ namespace RTE {
 		bool m_DeleteWhenRemovedFromParent; //!< Whether this Attachable should be deleted when it's removed from its parent.
 		bool m_ApplyTransferredForcesAtOffset; //!< Whether forces transferred from this Attachable should be applied at the rotated parent offset (which will produce torque), or directly at the parent's position. Mostly useful to make jetpacks and similar emitters viable.
 		
+		float m_GibWithParentChance; //!< The percentage chance that this Attachable will gib when its parent does. 0 means never, 1 means always.
+		float m_ParentGibBlastStrengthMultiplier; //!< The multiplier this Attacahble will apply to its parent's gib blast strength when the parent gibs.
+		
 		float m_JointStrength; //!< The amount of impulse force needed on this to deatch it from the host Actor, in kg * m/s.
 		float m_JointStiffness; //!< The normalized joint stiffness scalar. 1.0 means impulse forces on this attachable will be transferred to the parent with 100% strength, 0 means they will not transfer at all.
 		Vector m_JointOffset; //!< The offset to the joint (the point around which this Attachable and its parent hinge) from its center of mass/origin.
 		Vector m_JointPos; //!< The absolute position of the joint that the parent sets upon Update() if this Attachable is attached to it.
-
 
 		float m_DamageCount; //!< The number of damage points that this Attachable has accumulated since the last time CollectDamage() was called.
 		const AEmitter *m_BreakWound; //!< The wound this Attachable will receive when it breaks from its parent.

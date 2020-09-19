@@ -974,173 +974,103 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
     return false;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-
-void MOSRotating::GibThis(const Vector &impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    // Can't, or is already gibbed, so don't do anything
-    if (m_MissionCritical || m_ToDelete)
+void MOSRotating::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
+    if (m_MissionCritical || m_ToDelete) {
         return;
-
-    MovableObject *pGib = 0;
-    float velMin, velRange, spread, angularVel;
-    Vector gibROffset, gibVel;
-    for (list<Gib>::iterator gItr = m_Gibs.begin(); gItr != m_Gibs.end(); ++gItr)
-    {
-		// Throwing out gibs
-        for (int i = 0; i < (*gItr).GetCount(); ++i)
-        {
-            // Make a copy after the preset particle
-            // THIS IS A TIME SINK, takes up the vast bulk of time of GibThis
-			{
-				// Create gibs
-				pGib = dynamic_cast<MovableObject *>((*gItr).GetParticlePreset()->Clone());
-			}
-
-            // Generate the velocities procedurally
-            if ((*gItr).GetMinVelocity() == 0 && (*gItr).GetMaxVelocity() == 0)
-            {
-                velMin = internalBlast / pGib->GetMass();
-                velRange = 10.0f;
-            }
-            // Use the ones defined already
-            else
-            {
-                velMin = (*gItr).GetMinVelocity();
-                velRange = (*gItr).GetMaxVelocity() - (*gItr).GetMinVelocity();
-            }
-            spread = (*gItr).GetSpread();
-            gibROffset = RotateOffset((*gItr).GetOffset());
-            // Put variation on the lifetime, if it's not set to be endless
-            if (pGib->GetLifetime() != 0)
-                pGib->SetLifetime(pGib->GetLifetime() * (1.0 + ((*gItr).GetLifeVariation() * NormalRand())));
-            // Set up its position and velocity according to the parameters of this AEmitter.
-            pGib->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
-            pGib->SetRotAngle(m_Rotation.GetRadAngle() + pGib->GetRotMatrix().GetRadAngle());
-            // Rotational angle
-            pGib->SetAngularVel((pGib->GetAngularVel() * 0.35) + (pGib->GetAngularVel() * 0.65 / pGib->GetMass()) * PosRand());
-            // Make it rotate away in the appropriate direction depending on which side of the object it is on
-            // If the object is far to the relft or right of the center, make it always rotate outwards to some degree
-            if (gibROffset.m_X > m_aSprite[0]->w / 3)
-            {
-                float offCenterRatio = gibROffset.m_X / (m_aSprite[0]->w / 2);
-                angularVel = fabs(pGib->GetAngularVel() * 0.5);
-                angularVel += fabs(pGib->GetAngularVel() * 0.5 * offCenterRatio);
-                pGib->SetAngularVel(angularVel * (gibROffset.m_X > 0 ? -1 : 1));
-            }
-            // Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
-            else
-            {
-                pGib->SetAngularVel((pGib->GetAngularVel() * 0.5 + pGib->GetAngularVel() * PosRand()) * (NormalRand() > 0 ? 1 : -1));
-            }
-
-// TODO: Optimize making the random angles!")
-            {
-				// Pretty much always zero
-                gibVel = gibROffset;
-                if (gibVel.IsZero())
-                    gibVel.SetXY(velMin + velRange * PosRand(), 0);
-                else
-                    gibVel.SetMagnitude(velMin + velRange * PosRand());
-                gibVel.RadRotate(impactImpulse.GetAbsRadAngle() + spread * NormalRand());
-// Don't! the offset was already rotated!
-//                gibVel = RotateOffset(gibVel);
-                // Distribute any impact implse out over all the gibs
-//                gibVel += (impactImpulse / m_Gibs.size()) / pGib->GetMass();
-            }
-
-            // Only add the velocity of the parent if it's suppposed to
-            if ((*gItr).InheritsVelocity())
-                pGib->SetVel(m_Vel + gibVel);
-            else
-                pGib->SetVel(gibVel);
-
-            // Set the gib to not hit a specific MO
-            if (pIgnoreMO)
-                pGib->SetWhichMOToNotHit(pIgnoreMO);
-
-            // Add the gib to the scene
-            g_MovableMan.AddParticle(pGib);
-            pGib = 0;
-        }
     }
 
-    // Throw out all the attachables
-    Attachable *pAttachable = 0;
-    for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ) //NOTE: No increment to handle RemoveAttachable removing the object
-    {
-        RTEAssert((*aItr), "Broken Attachable!");
+    CreateGibsWhenGibbing(impactImpulse, movableObjectToIgnore);
 
-        // Get handy handle to the object we're putting
-        pAttachable = *aItr;
+    RemoveAttachablesWhenGibbing(impactImpulse, movableObjectToIgnore);
 
-		// TODO: Rework this whole system
-        // Generate the velocities procedurally
-        velMin = internalBlast / (1 + pAttachable->GetMass());
-        velRange = 10.0f;
-
-        // Rotational angle velocity
-        pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.35) + (pAttachable->GetAngularVel() * 0.65 / pAttachable->GetMass()) * PosRand());
-        // Make it rotate away in the appropriate direction depending on which side of the object it is on
-        // If the object is far to the relft or right of the center, make it always rotate outwards to some degree
-        if (pAttachable->GetParentOffset().m_X > m_aSprite[0]->w / 3)
-        {
-            float offCenterRatio = pAttachable->GetParentOffset().m_X / (m_aSprite[0]->w / 2);
-            angularVel = fabs(pAttachable->GetAngularVel() * 0.5);
-            angularVel += fabs(pAttachable->GetAngularVel() * 0.5 * offCenterRatio);
-            pAttachable->SetAngularVel(angularVel * (pAttachable->GetParentOffset().m_X > 0 ? -1 : 1));
-        }
-        // Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
-        else
-        {
-            pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.5 + pAttachable->GetAngularVel() * PosRand()) * (NormalRand() > 0 ? 1 : -1));
-        }
-
-// TODO: Optimize making the random angles!")
-        gibVel = pAttachable->GetParentOffset();
-        if (gibVel.IsZero())
-            gibVel.SetXY(velMin + velRange * PosRand(), 0);
-        else
-            gibVel.SetMagnitude(velMin + velRange * PosRand());
-        gibVel.RadRotate(impactImpulse.GetAbsRadAngle());
-        pAttachable->SetVel(m_Vel + gibVel);
-
-        // Set the gib to not hit a specific MO
-        if (pIgnoreMO)
-            pAttachable->SetWhichMOToNotHit(pIgnoreMO);
-
-        // Safely remove attachable and add it to the scene
-        ++aItr;
-        RemoveAttachable(pAttachable);
-        g_MovableMan.AddParticle(pAttachable);
-        pAttachable = 0;
-    }
-    // Clear the attachables list, all the attachables ownership have been handed to the movableman
-    m_Attachables.clear();
-
-    // Play the gib sound
     m_GibSound.Play(m_Pos);
 
-    // Flash post effect if it is defined
-    if (m_pScreenEffect && m_EffectOnGib && (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY())))
-    {
-        // Set the screen effect to draw at the final post processing stage
+    if (m_pScreenEffect && m_EffectOnGib && (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY()))) {
 		g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, 255, m_EffectRotAngle);
     }
 
-    // Things breaking apart makes alarming noises!
-    if (m_LoudnessOnGib > 0)
+    if (m_LoudnessOnGib > 0) {
         g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, m_LoudnessOnGib));
+    }
 
-    // Mark this for deletion!
     m_ToDelete = true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
+    for (const Gib &gibSettingsObject : m_Gibs) {
+        if (gibSettingsObject.GetCount() == 0) {
+            continue;
+        }
+        MovableObject *gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone());
+        gibParticleClone->SetRotAngle(GetRotAngle() + gibParticleClone->GetRotAngle());
+        Vector rotatedGibOffset = RotateOffset(gibSettingsObject.GetOffset());
+        gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
+
+        float minVelocity = (gibSettingsObject.GetMinVelocity() == 0 && gibSettingsObject.GetMaxVelocity() == 0) ? m_GibBlastStrength / gibParticleClone->GetMass() : gibSettingsObject.GetMinVelocity();
+        float velocityRange = (gibSettingsObject.GetMinVelocity() == 0 && gibSettingsObject.GetMaxVelocity() == 0) ? 10.0F : gibSettingsObject.GetMaxVelocity() - gibSettingsObject.GetMinVelocity();
+        for (int i = 0; i < gibSettingsObject.GetCount(); i++) {
+            if (i > 0) { gibParticleClone = dynamic_cast<MovableObject *>(gibParticleClone->Clone()); }
+
+            if (gibParticleClone->GetLifetime() != 0) { gibParticleClone->SetLifetime(gibParticleClone->GetLifetime() * static_cast<int>((1.0F + gibSettingsObject.GetLifeVariation() * NormalRand()/*RandomNormalNum()*/))); }
+
+            gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / gibParticleClone->GetMass()) * PosRand()/*RandomNum()*/);
+            if (rotatedGibOffset.GetRoundIntX() > m_aSprite[0]->w / 3) {
+                float offCenterRatio = rotatedGibOffset.m_X / (static_cast<float>(m_aSprite[0]->w) / 2.0F);
+                float angularVel = fabs(gibParticleClone->GetAngularVel() * 0.5F) + fabs(gibParticleClone->GetAngularVel() * 0.5F * offCenterRatio);
+                gibParticleClone->SetAngularVel(angularVel * (rotatedGibOffset.m_X > 0 ? -1 : 1));
+            } else {
+                gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.5F + (gibParticleClone->GetAngularVel() * PosRand()/*RandomNum()*/)) * (NormalRand()/*RandomNormalNum()*/ > 0.0F ? 1.0F : -1.0F));
+            }
+
+            Vector gibVelocity = rotatedGibOffset.SetMagnitude(minVelocity + (velocityRange * PosRand())).RadRotate(impactImpulse.GetAbsRadAngle() + gibSettingsObject.GetSpread() + NormalRand());
+            //Vector gibVelocity = rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange)).RadRotate(impactImpulse.GetAbsRadAngle() + gib.GetSpread() + RandomNormalNum());
+            gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? m_Vel : Vector()));
+
+            if (movableObjectToIgnore) {
+                gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore);
+            }
+
+            g_MovableMan.AddParticle(gibParticleClone);
+        }
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
+    Attachable *attachable;
+    for (list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end();) {
+        RTEAssert((*attachableIterator), "Broken Attachable!");
+        attachable = *attachableIterator;
+
+        if (PosRand()/*RandomNum()*/ < attachable->GetGibWithParentChance()) {
+            ++attachableIterator;
+            attachable->GibThis();
+            continue;
+        }
+
+        if (!attachable->GetDeleteWhenRemovedFromParent()) {
+            float attachableGibBlastStrength = (attachable->GetParentGibBlastStrengthMultiplier() == 0 ? 1 : attachable->GetParentGibBlastStrengthMultiplier() * m_GibBlastStrength) / (1 + attachable->GetMass());
+            attachable->SetAngularVel((attachable->GetAngularVel() * 0.5F) + (attachable->GetAngularVel() * 0.5F * attachableGibBlastStrength * NormalRand()/*RandomNormalNum()*/));
+            Vector gibBlastVel = Vector(attachable->GetParentOffset()).SetMagnitude(attachableGibBlastStrength * 0.5 + (attachableGibBlastStrength * PosRand()/*RandomNum()*/));
+            attachable->SetVel(m_Vel + gibBlastVel + impactImpulse);
+
+            if (movableObjectToIgnore) {
+                attachable->SetWhichMOToNotHit(movableObjectToIgnore);
+            }
+        }
+
+        ++attachableIterator;
+        RemoveAttachable(attachable, true, true);
+    }
+    m_Attachables.clear();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  MoveOutOfTerrain

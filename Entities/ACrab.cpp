@@ -100,6 +100,16 @@ int ACrab::Create()
     if (Actor::Create() < 0)
         return -1;
 
+    if (m_IsOriginalPreset) {
+        Attachable *orderedAttachables[] = {m_pLBGLeg, m_pRBGLeg, m_pJetpack, m_pTurret, m_pLFGLeg, m_pRFGLeg};
+        std::list<Attachable *> attachablesCopy = m_Attachables;
+        m_Attachables.clear();
+        std::copy_if(std::begin(orderedAttachables), std::end(orderedAttachables), std::back_inserter(m_Attachables), [](const Attachable *attachable) { return attachable != nullptr; });
+        std::copy_if(attachablesCopy.begin(), attachablesCopy.end(), std::back_inserter(m_Attachables), [this](const Attachable *attachable) {
+            return (std::find(m_Attachables.begin(), m_Attachables.end(), attachable) == m_Attachables.end());
+        });
+    }
+
     // Create the background paths copied from the foreground ones which were already read in
     for (int side = 0; side < SIDECOUNT; ++side)
     {

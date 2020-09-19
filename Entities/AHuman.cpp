@@ -104,6 +104,16 @@ int AHuman::Create()
     if (Actor::Create() < 0)
         return -1;
 
+    if (m_IsOriginalPreset) {
+        Attachable *orderedAttachables[] = {m_pBGArm, m_pBGLeg, m_pHead, m_pJetpack, m_pFGLeg, m_pFGArm};
+        std::list<Attachable *> attachablesCopy = m_Attachables;
+        m_Attachables.clear();
+        std::copy_if(std::begin(orderedAttachables), std::end(orderedAttachables), std::back_inserter(m_Attachables), [](const Attachable *attachable) { return attachable != nullptr; });
+        std::copy_if(attachablesCopy.begin(), attachablesCopy.end(), std::back_inserter(m_Attachables), [this](const Attachable *attachable) {
+            return (std::find(m_Attachables.begin(), m_Attachables.end(), attachable) == m_Attachables.end());
+        });
+    }
+
     // Make the limb paths for the background limbs
     for (int i = 0; i < MOVEMENTSTATECOUNT; ++i)
     {

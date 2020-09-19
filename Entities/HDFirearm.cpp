@@ -145,10 +145,10 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader) {
         RemoveAttachable(m_pMagazine);
         const Entity *magazineEntity = g_PresetMan.GetEntityPreset(reader);
         if (magazineEntity) {
+            m_pMagazineReference = dynamic_cast<const Magazine *>(magazineEntity);
             m_pMagazine = dynamic_cast<Magazine *>(magazineEntity->Clone());
             AddAttachable(m_pMagazine);
         }
-        m_pMagazine->SetDeleteWhenRemovedFromParent(true);
     } else if (propName == "Flash") {
         RemoveAttachable(m_pFlash);
         const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);
@@ -591,12 +591,7 @@ void HDFirearm::Reload()
         {
             m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
             m_pMagazine->SetAngularVel(6 + (-6 * PosRand()));
-            RemoveAttachable(m_pMagazine);
-            // Whether the magazine is ok to release into scene
-            if (m_pMagazine->IsDiscardable())
-                g_MovableMan.AddParticle(m_pMagazine);
-            else
-                delete m_pMagazine;
+            RemoveAttachable(m_pMagazine, m_pMagazine->IsDiscardable(), false);
             m_pMagazine = 0;
         }
 

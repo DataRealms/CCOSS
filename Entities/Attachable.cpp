@@ -199,8 +199,7 @@ namespace RTE {
 			GibThis();
 			return false;
 		} else if (m_JointStrength > 0 && totalImpulseForce.GetMagnitude() > m_JointStrength) {
-			jointImpulses += (totalImpulseForce.SetMagnitude(totalImpulseForce.GetMagnitude() - m_JointStiffness)) * m_JointStiffness;
-			m_Parent->RemoveAttachable(this, true, true);
+			jointImpulses += (totalImpulseForce.SetMagnitude(totalImpulseForce.GetMagnitude() - m_JointStrength)) * m_JointStiffness;
 			return false;
 		} else {
 			jointImpulses += totalImpulseForce * m_JointStiffness;
@@ -279,13 +278,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Attachable::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
-		m_ToDelete = true; // Note: ToDelete must be set to true ahead of time to avoid oddities with breakwounds
+		MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
 		if (m_Parent) {
 			m_Parent->RemoveAttachable(this, true, true);
 		} else {
 			SetParent(nullptr);
 		}
-		MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1006,17 +1006,24 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             continue;
         }
         MovableObject *gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone());
-        gibParticleClone->SetRotAngle(GetRotAngle() + gibParticleClone->GetRotAngle());
+
+        float minVelocity = gibSettingsObject.GetMinVelocity();
+        float velocityRange = gibSettingsObject.GetMaxVelocity() - gibSettingsObject.GetMinVelocity();
+        if (gibSettingsObject.GetMinVelocity() == 0 && gibSettingsObject.GetMaxVelocity() == 0) {
+            minVelocity = m_GibBlastStrength / gibParticleClone->GetMass();
+            velocityRange = 10.0F;
+        }
         Vector rotatedGibOffset = RotateOffset(gibSettingsObject.GetOffset());
-        gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
-
-        float minVelocity = (gibSettingsObject.GetMinVelocity() == 0 && gibSettingsObject.GetMaxVelocity() == 0) ? m_GibBlastStrength / gibParticleClone->GetMass() : gibSettingsObject.GetMinVelocity();
-        float velocityRange = (gibSettingsObject.GetMinVelocity() == 0 && gibSettingsObject.GetMaxVelocity() == 0) ? 10.0F : gibSettingsObject.GetMaxVelocity() - gibSettingsObject.GetMinVelocity();
         for (int i = 0; i < gibSettingsObject.GetCount(); i++) {
-            if (i > 0) { gibParticleClone = dynamic_cast<MovableObject *>(gibParticleClone->Clone()); }
+            if (i > 0) {
+                gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone());
+            }
 
-            if (gibParticleClone->GetLifetime() != 0) { gibParticleClone->SetLifetime(gibParticleClone->GetLifetime() * static_cast<int>((1.0F + gibSettingsObject.GetLifeVariation() * NormalRand()/*RandomNormalNum()*/))); }
+            if (gibParticleClone->GetLifetime() != 0) {
+                gibParticleClone->SetLifetime(static_cast<int>(static_cast<float>(gibParticleClone->GetLifetime()) * (1.0F + (gibSettingsObject.GetLifeVariation() * NormalRand()/*RandomNormalNum()*/))));
+            }
 
+            gibParticleClone->SetRotAngle(GetRotAngle() + gibParticleClone->GetRotAngle());
             gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / gibParticleClone->GetMass()) * PosRand()/*RandomNum()*/);
             if (rotatedGibOffset.GetRoundIntX() > m_aSprite[0]->w / 3) {
                 float offCenterRatio = rotatedGibOffset.m_X / (static_cast<float>(m_aSprite[0]->w) / 2.0F);
@@ -1026,6 +1033,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
                 gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.5F + (gibParticleClone->GetAngularVel() * PosRand()/*RandomNum()*/)) * (NormalRand()/*RandomNormalNum()*/ > 0.0F ? 1.0F : -1.0F));
             }
 
+            gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
             Vector gibVelocity = rotatedGibOffset.SetMagnitude(minVelocity + (velocityRange * PosRand())).RadRotate(impactImpulse.GetAbsRadAngle() + gibSettingsObject.GetSpread() + NormalRand());
             //Vector gibVelocity = rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange)).RadRotate(impactImpulse.GetAbsRadAngle() + gib.GetSpread() + RandomNormalNum());
             gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? m_Vel : Vector()));

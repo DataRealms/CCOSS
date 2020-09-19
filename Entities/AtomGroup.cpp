@@ -205,7 +205,7 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 		// If atoms are to be placed right at (below) the bitmap of the sprite.
 		if (depth <= 0)
 		{
-			// First scan horizontally, and place Atom:s on outer silhouette edges.
+			// First scan horizontally, and place Atoms on outer silhouette edges.
 			for (y = 0; y < height; y += m_Resolution)
 			{
 				// Scan LEFT to RIGHT, placing one Atom on each first encountered silhouette edge
@@ -215,7 +215,7 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 					// Detect if we are crossing a silhouette boundary.
 					if (getpixel(refSprite, x, y) != g_MaskColor)
 					{
-						// Mark that an atom has been put in this location, to avoid duplicate Atom:s
+						// Mark that an atom has been put in this location, to avoid duplicate Atoms
 						putpixel(checkBitmap, x, y, 99);
 						AddAtomToGroup(x, y, spriteOffset, pOwnerMOSRotating, true);
 						break;
@@ -229,7 +229,7 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 					// Detect if we are crossing a silhouette boundary.
 					if (getpixel(refSprite, x, y) != g_MaskColor)
 					{
-						// Mark that an atom has been put in this location, to avoid duplicate Atom:s
+						// Mark that an atom has been put in this location, to avoid duplicate Atoms
 						putpixel(checkBitmap, x, y, 99);
 						AddAtomToGroup(x, y, spriteOffset, pOwnerMOSRotating, true);
 						break;
@@ -237,7 +237,7 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 				}
 			}
 
-			// Then scan vertically, and place Atom:s on silhouette edge, but avoiding duplicates.
+			// Then scan vertically, and place Atoms on silhouette edge, but avoiding duplicates.
 			for (x = 0; x < width; x += m_Resolution)
 			{
 				// Scan TOP to BOTTOM, placing one Atom on each first encountered silhouette edge
@@ -352,7 +352,7 @@ int AtomGroup::Create(MOSRotating *pOwnerMOSRotating, Material const *material, 
 							// Depth is cleared in all directions, so go ahead and place Atom.
 							if (clear && getpixel(checkBitmap, x, y) == g_MaskColor)
 							{
-								// Mark that an atom has been put in this location, to avoid duplicate Atom:s
+								// Mark that an atom has been put in this location, to avoid duplicate Atoms
 								putpixel(checkBitmap, x, y, 99);
 								AddAtomToGroup(x, y, spriteOffset, pOwnerMOSRotating, false);
 							}
@@ -574,7 +574,7 @@ void AtomGroup::Destroy(bool notInherited)
 // Friend operator: AtomGroup addition
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Addition operator overload for AtomGroup:s which adds together the
-//                  Atom:s of two Groups and merges them into one.
+//                  Atoms of two Groups and merges them into one.
 
 AtomGroup operator+(const AtomGroup &lhs, const AtomGroup &rhs)
 {
@@ -589,7 +589,7 @@ AtomGroup operator+(const AtomGroup &lhs, const AtomGroup &rhs)
 // Friend operator: AtomGroup pointer addition
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Addition operator overload for AtomGroup:s pointer which adds together
-//                  the Atom:s of two Groups pointed to and merges them into one.
+//                  the Atoms of two Groups pointed to and merges them into one.
 //                  Ownership of the returned dallocated AG IS TRANSFERRED!
 
 AtomGroup * operator+(const AtomGroup *lhs, const AtomGroup *rhs)
@@ -669,8 +669,8 @@ void AtomGroup::SetOwner(MOSRotating *newOwner)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddAtoms
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a list of new Atom:s to the internal list that makes up this group.
-//                  Ownership of all Atom:s in the list IS NOT transferred!
+// Description:     Adds a list of new Atoms to the internal list that makes up this group.
+//                  Ownership of all Atoms in the list IS NOT transferred!
 
 void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, long int subID, const Vector &offset, const Matrix &offsetRotation)
 {
@@ -803,7 +803,7 @@ bool AtomGroup::IsIgnoringMOID(MOID which)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Travel
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the group of Atom:s travel together and react when terrain is
+// Description:     Makes the group of Atoms travel together and react when terrain is
 //                  hit. Effects are direcly applied to the owning MovableObject.
 
 float AtomGroup::Travel(const float travelTime,
@@ -834,7 +834,7 @@ float AtomGroup::Travel(const float travelTime,
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Travel
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the group of Atom:s travel together and react when terrain is
+// Description:     Makes the group of Atoms travel together and react when terrain is
 //                  hit. Effects are applied to the passed in variables.
 
 float AtomGroup::Travel(Vector &position,
@@ -1144,7 +1144,7 @@ float AtomGroup::Travel(Vector &position,
 
 							// Yes, MO hit. See if we already have another atom hitting this MO in this step.
 							// If not, then create a new deque unique for that MO's ID
-							// and insert into the map of MO-hitting Atom:s.
+							// and insert into the map of MO-hitting Atoms.
 							if (!(hitMOAtoms.count(tempMOID)))
 							{
 								list<Atom *> newDeque;
@@ -1184,7 +1184,7 @@ float AtomGroup::Travel(Vector &position,
             if (hitTerrAtoms.empty() && hitMOAtoms.empty())
                 continue;
 
-            // There are colliding Atom:s, therefore the group hit something.
+            // There are colliding Atoms, therefore the group hit something.
             hitStep = true;
             ++hitCount;
 
@@ -1207,7 +1207,7 @@ float AtomGroup::Travel(Vector &position,
             rotation += rotDelta * segProgress;
 
             // TERRAIN COLLISION RESPONSE /////////////////////////////////////////////////////
-            // Determine which of the colliding Atom:s will penetrate the terrain.
+            // Determine which of the colliding Atoms will penetrate the terrain.
 			bool somethingPenetrated = false;
 			do
             {
@@ -1444,7 +1444,7 @@ float AtomGroup::Travel(Vector &position,
     // Clear out the MOIDs from the ignore list.
     ClearMOIDIgnoreList();
 
-    // If too many Atom:s are ignoring terrain, make a hole for the body so they won't
+    // If too many Atoms are ignoring terrain, make a hole for the body so they won't
     int ignoreCount = 0;
     int maxIgnore = m_Atoms.size() / 2;
 	for (const Atom *atom : m_Atoms)
@@ -1480,7 +1480,7 @@ float AtomGroup::Travel(Vector &position,
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          PushTravel
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the group of Atom:s travel together and react when terrain is
+// Description:     Makes the group of Atoms travel together and react when terrain is
 //                  hit. Effects are applied to the passed in variables. This is the
 //                  version that doesn't do rotations, only translational effect.
 
@@ -1776,7 +1776,7 @@ before adding them to the MovableMan.
             if (hitTerrAtoms.empty() && hitMOAtoms.empty())
                 continue;
 
-            // There are colliding Atom:s, therefore the group hit something.
+            // There are colliding Atoms, therefore the group hit something.
             hitPos[X] = intPos[X];
             hitPos[Y] = intPos[Y];
             ++hitCount;
@@ -1905,7 +1905,7 @@ before adding them to the MovableMan.
             }
 
             // TERRAIN COLLISION RESPONSE /////////////////////////////////////////////////////
-            // Determine which of the colliding Atom:s will penetrate the terrain.
+            // Determine which of the colliding Atoms will penetrate the terrain.
 			bool somethingPenetrated = false;
             do {
 				somethingPenetrated = false;
@@ -1930,7 +1930,7 @@ before adding them to the MovableMan.
 			} while (!hitTerrAtoms.empty() && somethingPenetrated);
 
             // TERRAIN BOUNCE //////////////////////////////////////////////////////////////////
-            // If some Atom:s could not penetrate even though all the mass was on them,
+            // If some Atoms could not penetrate even though all the mass was on them,
             // gather the bounce results and apply them to the owner.
             if (!hitTerrAtoms.empty())
             {
@@ -2032,7 +2032,7 @@ before adding them to the MovableMan.
                 }
             }
             // TERRAIN SINK ////////////////////////////////////////////////////////////////
-            // Else all Atom:s must have penetrated and therefore the entire group has
+            // Else all Atoms must have penetrated and therefore the entire group has
             // sunken into the terrain. Get the penetration resistance results and
             // apply them to the owner.
             else if (!penetratingAtoms.empty())
@@ -2116,7 +2116,7 @@ before adding them to the MovableMan.
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          PushAsLimb
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the group of Atom:s travel together as a limb, relative to the
+// Description:     Makes the group of Atoms travel together as a limb, relative to the
 //                  position of the owning MovableObject. If terrain is hit, resulting
 //                  accelerations should be applied to the MovableObject's static body.
 
@@ -2191,7 +2191,7 @@ bool AtomGroup::PushAsLimb(const Vector &jointPos,
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          FlailAsLimb
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the group of Atom:s travel together as a lifeless limb, constrained
+// Description:     Makes the group of Atoms travel together as a lifeless limb, constrained
 //                  to a radius around the joint pin in the center.
 
 void AtomGroup::FlailAsLimb(const Vector ownerPos,
@@ -2242,7 +2242,7 @@ void AtomGroup::FlailAsLimb(const Vector ownerPos,
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          InTerrain
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether any of the Atom:s in this AtomGroup are on terrain
+// Description:     Checks whether any of the Atoms in this AtomGroup are on terrain
 //                  pixels.
 
 bool AtomGroup::InTerrain()
@@ -2304,7 +2304,7 @@ float AtomGroup::RatioInTerrain()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ResolveTerrainIntersection
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether any of the Atom:s in this AtomGroup are on top of
+// Description:     Checks whether any of the Atoms in this AtomGroup are on top of
 //                  terrain pixels, and if so, attempt to move the OwnerMO of this out
 //                  so none of this' Atoms are inside any other MOS's silhouette anymore.
 
@@ -2412,7 +2412,7 @@ bool AtomGroup::ResolveTerrainIntersection(Vector &position, Matrix &rotation, u
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ResolveMOSIntersection
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether any of the Atom:s in this AtomGroup are on top of
+// Description:     Checks whether any of the Atoms in this AtomGroup are on top of
 //                  other MOSprite:s, and if so, attempt to move the OwnerMO of this out
 //                  so none of this' Atoms are inside any other MOS's silhouette anymore.
 

@@ -1720,12 +1720,8 @@ void ScenarioGUI::GetAllScenesAndActivities()
     {
         pScene = dynamic_cast<Scene *>(*pItr);
         // Only add non-editor and non-special scenes, or ones that don't have locations defined, or have Test in their names, or are metascenes
-		if (pScene && !pScene->GetLocation().IsZero() && 
-			pScene->GetPresetName().find("Editor") == string::npos && 
-			pScene->GetPresetName().find("Test") == string::npos && 
-			!pScene->IsMetagameInternal() && 
-			(pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
-            filteredScenes.push_back(pScene);
+		if (pScene && !pScene->GetLocation().IsZero() && !pScene->IsMetagameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
+			filteredScenes.push_back(pScene);
     }
 
 	//Clear offsets

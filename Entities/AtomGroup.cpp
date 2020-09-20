@@ -955,7 +955,7 @@ float AtomGroup::Travel(Vector &position,
     list<Atom *> hitTerrAtoms;
     list<Atom *> penetratingAtoms;
     list<Atom *> hitResponseAtoms;
-	Vector linSegTraj; //!< The planned travel trajectory of this AtomGroup's origin in pixels.
+	Vector linSegTraj; // The planned travel trajectory of this AtomGroup's origin in pixels.
 	Vector atomTraj;
 	Vector preHitPos;
 	Vector hitNormal;
@@ -1475,7 +1475,7 @@ Vector AtomGroup::PushTravel(Vector &position,
 
     bool hFlipped = m_pOwnerMO->m_HFlipped;
 
-    Vector trajectory = velocity * travelTime * c_PPM; //!< Trajectory length in pixels.
+    Vector trajectory = velocity * travelTime * c_PPM; // Trajectory length in pixels.
 
 	int legCount = 0;
 	int stepCount = 0;

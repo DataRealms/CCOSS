@@ -336,12 +336,12 @@ namespace RTE {
 			ResetAllTimers();
 
 			m_Parent = newParent;
-			OrganizeAtomsInParent(newParent != nullptr);
+			if (m_CollidesWithTerrainWhileAttached) { OrganizeAtomsInParent(true); }
 		} else {
 			m_RootMOID = m_MOID;
 			m_RestTimer.Reset();
 
-			OrganizeAtomsInParent(newParent != nullptr);
+			if (m_CollidesWithTerrainWhileAttached) { OrganizeAtomsInParent(false); }
 			m_Parent = newParent;
 		}
 

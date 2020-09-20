@@ -93,8 +93,11 @@ int HeldDevice::Create()
             m_Loudness = 1.0;
     }
 
-    // Make it so held devices are dropped when their parent gibs
+    // Make it so held devices are dropped gently when their parent gibs
     m_ParentGibBlastStrengthMultiplier = 0.0F;
+
+    // Make it so users can't accidentally set this to true for HeldDevices, since it'll cause crashes when swapping inventory items around.
+    m_DeleteWhenRemovedFromParent = false;
     
     // All HeldDevice:s by default avoid hitting and getting physically hit by AtomGoups when they are at rest
     m_IgnoresAGHitsWhenSlowerThan = 1.0;

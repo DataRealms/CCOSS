@@ -1599,7 +1599,7 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
             }
         }
     }
-    if (!addToMovableMan || attachable->GetDeleteWhenRemovedFromParent()) {
+    if (!attachable->IsSetToDelete() && attachable->GetDeleteWhenRemovedFromParent()) {
         delete attachable;
     } else if (addToMovableMan || attachable->IsSetToDelete()) {
         g_MovableMan.AddMO(attachable);

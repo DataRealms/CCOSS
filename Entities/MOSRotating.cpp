@@ -1553,13 +1553,10 @@ bool MOSRotating::RemoveAttachable(long attachableUniqueID, bool addToMovableMan
 
 
 bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
-    if (!attachable) {
+    if (!attachable || !attachable->IsAttached()) {
         return false;
     }
-    RTEAssert(!attachable->IsAttached() || attachable->IsAttachedTo(this), "Tried to remove attachable that was attached to another parent (" + (attachable->GetParent() ? attachable->GetParent()->GetModuleAndPresetName() : "ERROR") + ") Attachable (" + attachable->GetModuleAndPresetName() + "), this should never happen!");
-    if (!attachable->IsAttached()) {
-        int a = 0;
-    }
+    RTEAssert(attachable->IsAttachedTo(this), "Tried to remove attachable that was attached to another parent (" + (attachable->GetParent() ? attachable->GetParent()->GetModuleAndPresetName() : "ERROR") + ") Attachable (" + attachable->GetModuleAndPresetName() + "), this should never happen!");
 
     if (m_Attachables.size() > 0) { m_Attachables.remove(attachable); }
     attachable->SetParent(nullptr);
@@ -1886,14 +1883,13 @@ bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
             intact = attachable->TransferJointForces(forces) && attachable->TransferJointImpulses(impulses);
 
             if (!forces.IsZero()) {
-                AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation : Vector());
+                AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector());
             }
             if (!impulses.IsZero()) {
-                AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation : Vector());
+                AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector());
             }
-            if (!intact) { RemoveAttachable(attachable, true, true); }
         } else {
-            RemoveAttachable(attachable);
+            RTEAbort("Tried to transfer forces from a Non-Attached, Non-Deleting Attachable " + attachable->GetModuleAndPresetName() + ". This should never happen!");
         }
     }
     return intact;

@@ -170,6 +170,9 @@ namespace RTE {
 		if (!m_Parent) {
 			return false;
 		}
+		if (m_Forces.empty()) {
+			return true;
+		}
 
 		Vector totalForce;
 		for (const std::pair<Vector, Vector> &force : m_Forces) {
@@ -187,6 +190,9 @@ namespace RTE {
 		if (!m_Parent) {
 			return false;
 		}
+		if (m_ImpulseForces.empty()) {
+			return true;
+		}
 
 		Vector totalImpulseForce;
 		for (const std::pair<Vector, Vector> &impulseForce : m_ImpulseForces) {
@@ -194,11 +200,12 @@ namespace RTE {
 		}
 
 		if (m_GibImpulseLimit > 0 && totalImpulseForce.GetMagnitude() > m_GibImpulseLimit) {
-			jointImpulses += (totalImpulseForce.SetMagnitude(totalImpulseForce.GetMagnitude() - m_GibImpulseLimit)) * m_JointStiffness;
+			jointImpulses += (totalImpulseForce.SetMagnitude(m_GibImpulseLimit)) * m_JointStiffness;
 			GibThis();
 			return false;
 		} else if (m_JointStrength > 0 && totalImpulseForce.GetMagnitude() > m_JointStrength) {
-			jointImpulses += (totalImpulseForce.SetMagnitude(totalImpulseForce.GetMagnitude() - m_JointStrength)) * m_JointStiffness;
+			jointImpulses += (totalImpulseForce.SetMagnitude(m_JointStrength)) * m_JointStiffness;
+			m_Parent->RemoveAttachable(this, true, true);
 			return false;
 		} else {
 			jointImpulses += totalImpulseForce * m_JointStiffness;

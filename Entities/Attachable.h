@@ -173,7 +173,7 @@ namespace RTE {
 		void SetGibWithParentChance(float gibWithParentChance) { m_GibWithParentChance = gibWithParentChance; }
 
 		/// <summary>
-		/// Gets the multiplier this Attacahble will apply to its parent's gib blast strength when the parent gibs.
+		/// Gets the multiplier this Attachable will apply to its parent's gib blast strength when the parent gibs.
 		/// </summary>
 		/// <returns>A float with the gib blast strength multiplier of this Attachable.</returns>
 		float GetParentGibBlastStrengthMultiplier() const { return m_ParentGibBlastStrengthMultiplier; }
@@ -228,22 +228,20 @@ namespace RTE {
 #pragma region Force Transferral
 		/// <summary>
 		/// Bundles up all the accumulated forces of this Attachable and calculates how they transfer to the joint, and therefore to the parent.
+		/// If the accumulated forces exceed the joint strength of this Attachable, the jointForces Vector will be filled to the limit and false will be returned.
+		/// Additionally, in this case, the Attachable will remove itself from its parent.
 		/// </summary>
 		/// <param name="jointForces">A vector that will have the forces affecting the joint ADDED to it.</param>
-		/// <returns>
-		/// If the accumulated forces exceed the strength of the joint, the attachable will only fill out the forces up to the strength threshold and then detach itself and return false.
-		/// The parent should react accordingly in that case, by nulling out pointers to the Attachable.
-		/// </returns>
+		/// <returns>False if the Attachable has no parent or its accumulated forces are greater than its joint strength, otherwise true.</returns>
 		bool TransferJointForces(Vector &jointForces);
 
 		/// <summary>
 		/// Bundles up all the accumulated impulse forces of this Attachable and calculates how they transfer to the joint, and therefore to the parent.
+		/// If the accumulated impulse forces exceed the joint strength or gib impulse limit of this Attachable, the jointImpulses Vector will be filled up to that limit and false will be returned.
+		/// Additionally, in this case, the Attachable will remove itself from its parent and gib itself if appropriate.
 		/// </summary>
-		/// <param name="jointImpulses">A vector that will have with the impulse forces affecting the joint ADDED to it.</param>
-		/// <returns>
-		/// If the accumulated impulse forces exceed the strength of the joint, the attachable will only fill out the forces up to the strength threshold and then detach itself and return false.
-		/// The parent should react accordingly in that case, by nulling out pointers to the Attachable.
-		/// </returns>
+		/// <param name="jointImpulses">A vector that will have the impulse forces affecting the joint ADDED to it.</param>
+		/// <returns>False if the Attachable has no parent or its accumulated forces are greater than its joint strength or gib impulse limit, otherwise true.</returns>
 		bool TransferJointImpulses(Vector &jointImpulses);
 #pragma endregion
 

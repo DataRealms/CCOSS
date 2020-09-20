@@ -849,38 +849,38 @@ float AtomGroup::Travel(Vector &position,
                         bool callOnSink,
                         bool scenePreLocked)
 {
-	// Establish the travel trajectory of the origin of the AG during the time frame
+    // Establish the travel trajectory of the origin of the AG during the time frame
 
-	// SEGMENT LOOP //////////////////////////////////////////////
-	// loop through all segments between hits
+    // SEGMENT LOOP //////////////////////////////////////////////
+    // loop through all segments between hits
 
-		// Loop through the atoms
+        // Loop through the atoms
+        
+            // Establish each atom's added trajectory based on its offset and the MO's angular vel
 
-			// Establish each atom's added trajectory based on its offset and the MO's angular vel
+            // Add the origin traj and added offset rotation traj for each atom, to get its total trajectory
 
-			// Add the origin traj and added offset rotation traj for each atom, to get its total trajectory
+            // Reset the Atoms and init them for a new straight segment, using the calculated traj. As a first step of segment,
+            // make the start step for all atoms, the atoms themselves should check if they are already on another MO,
+            // and if so, to remember to ignore that MO for the rest of this AG's travel.
 
-			// Reset the Atoms and init them for a new straight segment, using the calculated traj. As a first step of segment,
-			// make the start step for all atoms, the atoms themselves should check if they are already on another MO,
-			// and if so, to remember to ignore that MO for the rest of this AG's travel.
+        // Find out which atom's total individual trajectory is the longest of them all, meaning its velocity is the
+        // greatest of all atoms in this group during this travel. Calculate and store that max velocity also
+        // highestVel = ((longestTraj / PPM) / traveltime).
 
-		// Find out which atom's total individual trajectory is the longest of them all, meaning its velocity is the
-		// greatest of all atoms in this group during this travel. Calculate and store that max velocity also
-		// highestVel = ((longestTraj / PPM) / traveltime).
+        // Loop through the atoms again
 
-		// Loop through the atoms again
+            // Calc and save the normalized velocity ratio of all atoms by dividing their traj length with the longest.
+            // The fastest atom(s) thus gets a ratio of 1.0, and all others get something 1.0 > x >= 0.0
 
-			// Calc and save the normalized velocity ratio of all atoms by dividing their traj length with the longest.
-			// The fastest atom(s) thus gets a ratio of 1.0, and all others get something 1.0 > x >= 0.0
+            // Somehow save each step ratio associated with its corresponding atom
 
-			// Somehow save each step ratio associated with its corresponding atom
+        // STEP LOOP //////////////////////////////////////////////
+        // Loop through all the steps that the longest atom traj has to take this AG travel
 
-		// STEP LOOP //////////////////////////////////////////////
-		// Loop through all the steps that the longest atom traj has to take this AG travel
+            // Loop through atoms
 
-			// Loop through atoms
-
-				// All atoms whose (progress += velRatio) >= std::ceil(prevProgress), take a step to their
+                // All atoms whose (progress += velRatio) >= std::ceil(prevProgress), take a step to their
                 // next pixel locations and check for collisions. all others do nothing.
 
                     // If any collision, add atom to approprite collision list (MO or terrain), and if MO, to

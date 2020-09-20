@@ -1136,7 +1136,7 @@ namespace RTE {
 
 				if (m_TextCentered[playerScreen]) { textPosY = (bufferOrScreenHeight / 2) - 52; }
 
-				int screenOcclusionOffsetX = g_SceneMan.GetScreenOcclusion(playerScreen).GetIntX();
+				int screenOcclusionOffsetX = g_SceneMan.GetScreenOcclusion(playerScreen).GetRoundIntX();
 				// If there's really no room to offset the text into, then don't
 				if (GetPlayerScreenWidth() <= GetResX() / 2) { screenOcclusionOffsetX = 0; }
 

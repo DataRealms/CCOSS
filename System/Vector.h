@@ -190,7 +190,7 @@ namespace RTE {
 		float GetMagnitude() const { return std::sqrt(std::pow(m_X, 2.0F) + std::pow(m_Y, 2.0F)); }
 
 		/// <summary>
-		/// Sets the magnitude of this Vector and keeps its angle intact.
+		/// Sets the magnitude of this Vector. A negative magnitude will invert the Vector's direction.
 		/// </summary>
 		/// <param name="newMag">A float value that the magnitude will be set to.</param>
 		/// <returns>A reference to this after the change.</returns>
@@ -312,13 +312,13 @@ namespace RTE {
 		/// Returns the greatest integer that is not greater than the X value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the X value of this Vector.</returns>
-		int GetFloorIntX() const { return static_cast<int>(std::floor(m_X)); }
+		int GetFloorIntX() const { return static_cast<int>(m_X); }
 
 		/// <summary>
 		/// Returns the greatest integer that is not greater than the Y value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the Y value of this Vector.</returns>
-		int GetFloorIntY() const { return static_cast<int>(std::floor(m_Y)); }
+		int GetFloorIntY() const { return static_cast<int>(m_Y); }
 
 		/// <summary>
 		/// Returns a ceilinged copy of this Vector. Does not alter this Vector.

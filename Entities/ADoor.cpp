@@ -45,7 +45,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ADoor::Create(const ADoor &reference) {
-		if (reference.m_Door) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_Door->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ADoor *>(parent)->SetDoor(attachable); }}); }
+		if (reference.m_Door) {
+			m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_Door->GetUniqueID());
+			SetDoor(dynamic_cast<Attachable *>(reference.m_Door->Clone()));
+		}
 
 		Actor::Create(reference);
 
@@ -208,6 +211,7 @@ namespace RTE {
 			RemoveAttachable(m_Door);
 			m_Door = newDoor;
 			AddAttachable(newDoor);
+			m_HardcodedAttachableUniqueIDsAndSetters.insert({newDoor->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ADoor *>(parent)->SetDoor(attachable); }});
 		}
 	}
 

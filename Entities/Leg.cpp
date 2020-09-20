@@ -49,7 +49,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Leg::Create(const Leg &reference) {
-		if (reference.m_Foot) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_Foot->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<Leg *>(parent)->SetFoot(attachable); }}); }
+		if (reference.m_Foot) {
+			m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_Foot->GetUniqueID());
+			SetFoot(dynamic_cast<Attachable *>(reference.m_Foot->Clone()));
+		}
 		Attachable::Create(reference);
 
 		m_ContractedOffset = reference.m_ContractedOffset;
@@ -132,6 +135,7 @@ namespace RTE {
 			RemoveAttachable(m_Foot);
 			m_Foot = newFoot;
 			AddAttachable(newFoot);
+			m_HardcodedAttachableUniqueIDsAndSetters.insert({newFoot->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<Leg *>(parent)->SetFoot(attachable); }});
 		}
 	}
 

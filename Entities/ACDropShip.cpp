@@ -71,13 +71,30 @@ int ACDropShip::Create()
 // Description:     Creates a ACDropShip to be identical to another, by deep copy.
 
 int ACDropShip::Create(const ACDropShip &reference) {
-    if (reference.m_pRThruster) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pRThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetRightThruster(attachable); }}); }
-    if (reference.m_pLThruster) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pLThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetLeftThruster(attachable); }}); }
-    if (reference.m_pURThruster) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pURThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetURightThruster(attachable); }}); }
-    if (reference.m_pULThruster) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pULThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetULeftThruster(attachable); }}); }
-    if (reference.m_pRHatch) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pRHatch->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetRightHatch(attachable); }}); }
-    if (reference.m_pLHatch) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pLHatch->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetLeftHatch(attachable); }}); }
-
+    if (reference.m_pRThruster) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRThruster->GetUniqueID());
+        SetRightThruster(dynamic_cast<Attachable *>(reference.m_pRThruster->Clone()));
+    }
+    if (reference.m_pLThruster) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLThruster->GetUniqueID());
+        SetLeftThruster(dynamic_cast<Attachable *>(reference.m_pLThruster->Clone()));
+    }
+    if (reference.m_pURThruster) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pURThruster->GetUniqueID());
+        SetURightThruster(dynamic_cast<Attachable *>(reference.m_pURThruster->Clone()));
+    }
+    if (reference.m_pULThruster) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pULThruster->GetUniqueID());
+        SetULeftThruster(dynamic_cast<Attachable *>(reference.m_pULThruster->Clone()));
+    }
+    if (reference.m_pRHatch) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRHatch->GetUniqueID());
+        SetRightHatch(dynamic_cast<Attachable *>(reference.m_pRHatch->Clone()));
+    }
+    if (reference.m_pLHatch) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLHatch->GetUniqueID());
+        SetLeftHatch(dynamic_cast<Attachable *>(reference.m_pLHatch->Clone()));
+    }
     ACraft::Create(reference);
 
     m_pBodyAG = dynamic_cast<AtomGroup *>(reference.m_pBodyAG->Clone());
@@ -769,6 +786,7 @@ void ACDropShip::SetRightThruster(Attachable *newThruster) {
             RemoveAttachable(m_pRThruster);
             m_pRThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetRightThruster(attachable); }});
         }
     }
 }
@@ -785,6 +803,7 @@ void ACDropShip::SetLeftThruster(Attachable *newThruster) {
             RemoveAttachable(m_pLThruster);
             m_pLThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetLeftThruster(attachable); }});
         }
     }
 }
@@ -801,6 +820,7 @@ void ACDropShip::SetURightThruster(Attachable *newThruster) {
             RemoveAttachable(m_pURThruster);
             m_pURThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetURightThruster(attachable); }});
         }
     }
 }
@@ -817,20 +837,8 @@ void ACDropShip::SetULeftThruster(Attachable *newThruster) {
             RemoveAttachable(m_pULThruster);
             m_pULThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetULeftThruster(attachable); }});
         }
-    }
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ACDropShip::SetLeftHatch(Attachable *newHatch) {
-    if (newHatch == nullptr) {
-        if (m_pLHatch && m_pLHatch->IsAttachedTo(this)) { RemoveAttachable(m_pLHatch); }
-        m_pLHatch = nullptr;
-    } else {
-        RemoveAttachable(m_pLHatch);
-        m_pLHatch = newHatch;
-        AddAttachable(newHatch);
     }
 }
 
@@ -844,6 +852,21 @@ void ACDropShip::SetRightHatch(Attachable *newHatch) {
         RemoveAttachable(m_pRHatch);
         m_pRHatch = newHatch;
         AddAttachable(newHatch);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newHatch->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetRightHatch(attachable); }});
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACDropShip::SetLeftHatch(Attachable *newHatch) {
+    if (newHatch == nullptr) {
+        if (m_pLHatch && m_pLHatch->IsAttachedTo(this)) { RemoveAttachable(m_pLHatch); }
+        m_pLHatch = nullptr;
+    } else {
+        RemoveAttachable(m_pLHatch);
+        m_pLHatch = newHatch;
+        AddAttachable(newHatch);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newHatch->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetLeftHatch(attachable); }});
     }
 }
 

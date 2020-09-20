@@ -96,8 +96,14 @@ int HDFirearm::Create()
 // Description:     Creates a HDFirearm to be identical to another, by deep copy.
 
 int HDFirearm::Create(const HDFirearm &reference) {
-    if (reference.m_pMagazine) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pMagazine->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<HDFirearm *>(parent)->SetMagazine(attachable); }}); }
-    if (reference.m_pFlash) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<HDFirearm *>(parent)->SetFlash(attachable); }}); }
+    if (reference.m_pMagazine) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pMagazine->GetUniqueID());
+        SetMagazine(dynamic_cast<Attachable *>(reference.m_pMagazine->Clone()));
+    }
+    if (reference.m_pFlash) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFlash->GetUniqueID());
+        SetFlash(dynamic_cast<Attachable *>(reference.m_pFlash->Clone()));
+    }
     HeldDevice::Create(reference);
 
     m_pMagazineReference = reference.m_pMagazineReference;
@@ -307,6 +313,7 @@ void HDFirearm::SetMagazine(Attachable *newMagazine) {
             RemoveAttachable(m_pMagazine);
             m_pMagazine = castedNewMagazine;
             AddAttachable(castedNewMagazine);
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewMagazine->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<HDFirearm *>(parent)->SetMagazine(attachable); }});
         }
     }
 }
@@ -321,6 +328,7 @@ void HDFirearm::SetFlash(Attachable *newFlash) {
         RemoveAttachable(m_pFlash);
         m_pFlash = newFlash;
         AddAttachable(newFlash);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<HDFirearm *>(parent)->SetFlash(attachable); }});
     }
 }
 

@@ -104,16 +104,6 @@ int AHuman::Create()
     if (Actor::Create() < 0)
         return -1;
 
-    if (m_IsOriginalPreset) {
-        Attachable *orderedAttachables[] = {m_pBGArm, m_pBGLeg, m_pHead, m_pJetpack, m_pFGLeg, m_pFGArm};
-        std::list<Attachable *> attachablesCopy = m_Attachables;
-        m_Attachables.clear();
-        std::copy_if(std::begin(orderedAttachables), std::end(orderedAttachables), std::back_inserter(m_Attachables), [](const Attachable *attachable) { return attachable != nullptr; });
-        std::copy_if(attachablesCopy.begin(), attachablesCopy.end(), std::back_inserter(m_Attachables), [this](const Attachable *attachable) {
-            return (std::find(m_Attachables.begin(), m_Attachables.end(), attachable) == m_Attachables.end());
-        });
-    }
-
     // Make the limb paths for the background limbs
     for (int i = 0; i < MOVEMENTSTATECOUNT; ++i)
     {
@@ -148,12 +138,31 @@ int AHuman::Create()
 // Description:     Creates a AHuman to be identical to another, by deep copy.
 
 int AHuman::Create(const AHuman &reference) {
-    if (reference.m_pHead) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pHead->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetHead(attachable); }}); }
-    if (reference.m_pJetpack) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetJetpack(attachable); }}); }
-    if (reference.m_pFGArm) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pFGArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetFGArm(attachable); }}); }
-    if (reference.m_pBGArm) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pBGArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetBGArm(attachable); }}); }
-    if (reference.m_pFGLeg) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pFGLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetFGLeg(attachable); }}); }
-    if (reference.m_pBGLeg) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pBGLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetBGLeg(attachable); }}); }
+    //Note - hardcoded attachable copying is organized based on desired draw order here.
+    if (reference.m_pBGArm) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pBGArm->GetUniqueID());
+        SetBGArm(dynamic_cast<Attachable *>(reference.m_pBGArm->Clone()));
+    }
+    if (reference.m_pBGLeg) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pBGLeg->GetUniqueID());
+        SetBGLeg(dynamic_cast<Attachable *>(reference.m_pBGLeg->Clone()));
+    }
+    if (reference.m_pJetpack) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pJetpack->GetUniqueID());
+        SetJetpack(dynamic_cast<Attachable *>(reference.m_pJetpack->Clone()));
+    }
+    if (reference.m_pHead) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pHead->GetUniqueID());
+        SetHead(dynamic_cast<Attachable *>(reference.m_pHead->Clone()));
+    }
+    if (reference.m_pFGLeg) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFGLeg->GetUniqueID());
+        SetFGLeg(dynamic_cast<Attachable *>(reference.m_pFGLeg->Clone()));
+    }
+    if (reference.m_pFGArm) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFGArm->GetUniqueID());
+        SetFGArm(dynamic_cast<Attachable *>(reference.m_pFGArm->Clone()));
+    }
     Actor::Create(reference);
 
 	m_ThrowPrepTime = reference.m_ThrowPrepTime;
@@ -476,6 +485,7 @@ void AHuman::SetHead(Attachable *newHead) {
         RemoveAttachable(m_pHead);
         m_pHead = newHead;
         AddAttachable(newHead);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newHead->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetHead(attachable); }});
     }
 }
 
@@ -491,6 +501,7 @@ void AHuman::SetJetpack(Attachable *newJetpack) {
             RemoveAttachable(m_pJetpack);
             m_pJetpack = castedNewJetpack;
             AddAttachable(castedNewJetpack);
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetJetpack(attachable); }});
         }
     }
 }
@@ -507,6 +518,7 @@ void AHuman::SetFGArm(Attachable *newArm) {
             RemoveAttachable(m_pFGArm);
             m_pFGArm = castedNewArm;
             AddAttachable(castedNewArm);
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetFGArm(attachable); }});
         }
     }
 }
@@ -523,6 +535,7 @@ void AHuman::SetBGArm(Attachable *newArm) {
             RemoveAttachable(m_pBGArm);
             m_pBGArm = castedNewArm;
             AddAttachable(castedNewArm);
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetBGArm(attachable); }});
         }
     }
 }
@@ -539,6 +552,7 @@ void AHuman::SetFGLeg(Attachable *newLeg) {
             RemoveAttachable(m_pFGLeg);
             m_pFGLeg = castedNewLeg;
             AddAttachable(castedNewLeg);
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetFGLeg(attachable); }});
         }
     }
 }
@@ -555,6 +569,7 @@ void AHuman::SetBGLeg(Attachable *newLeg) {
             RemoveAttachable(m_pBGLeg);
             m_pBGLeg = castedNewLeg;
             AddAttachable(castedNewLeg);
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetBGLeg(attachable); }});
         }
     }
 }

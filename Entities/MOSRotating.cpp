@@ -62,6 +62,7 @@ void MOSRotating::Clear()
     m_RecoilOffset.Reset();
     m_Wounds.clear();
     m_Attachables.clear();
+    m_ReferenceHardcodedAttachableUniqueIDs.clear();
     m_HardcodedAttachableUniqueIDsAndSetters.clear();
     m_Gibs.clear();
     m_GibImpulseLimit = 0;
@@ -207,26 +208,21 @@ int MOSRotating::Create(ContentFile spriteFile,
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a MOSRotating to be identical to another, by deep copy.
 
-int MOSRotating::Create(const MOSRotating &reference)
-{
+int MOSRotating::Create(const MOSRotating &reference) {
     MOSprite::Create(reference);
 
-    if (!reference.m_pAtomGroup)
+    if (!reference.m_pAtomGroup) {
         return -1;
+    }
 
-    {
-        // THESE ATOMGROUP COPYING ARE A TIME SINK!
-        m_pAtomGroup = new AtomGroup();
-        m_pAtomGroup->Create(*reference.m_pAtomGroup, true);
-        if (m_pAtomGroup)
-            m_pAtomGroup->SetOwner(this);
+    // THESE ATOMGROUP COPYING ARE A TIME SINK!
+    m_pAtomGroup = new AtomGroup();
+    m_pAtomGroup->Create(*reference.m_pAtomGroup, true);
+    if (m_pAtomGroup) { m_pAtomGroup->SetOwner(this); }
 
-        if (reference.m_pDeepGroup)
-        {
-            m_pDeepGroup = dynamic_cast<AtomGroup *>(reference.m_pDeepGroup->Clone());
-            if (m_pDeepGroup)
-                m_pDeepGroup->SetOwner(this);
-        }
+    if (reference.m_pDeepGroup) {
+        m_pDeepGroup = dynamic_cast<AtomGroup *>(reference.m_pDeepGroup->Clone());
+        if (m_pDeepGroup) { m_pDeepGroup->SetOwner(this); }
     }
 
     m_DeepCheck = reference.m_DeepCheck;
@@ -237,28 +233,18 @@ int MOSRotating::Create(const MOSRotating &reference)
     m_RecoilForce = reference.m_RecoilForce;
     m_RecoilOffset = reference.m_RecoilOffset;
 
-	// Wound emitter copies
-    for (AEmitter *wound : reference.m_Wounds) {
-        AddWound(dynamic_cast<AEmitter *>(wound), wound->GetParentOffset());
+    for (const AEmitter *wound : reference.m_Wounds) {
+        AddWound(dynamic_cast<AEmitter *>(wound->Clone()), wound->GetParentOffset(), false);
     }
 
-	// Attachable copies
-    Attachable *newAttachable;
     for (const Attachable *referenceAttachable : reference.m_Attachables) {
-        newAttachable = dynamic_cast<Attachable *>(referenceAttachable->Clone());
-        newAttachable->m_Parent = nullptr;
-
-        std::unordered_map<unsigned long, std::function<void(MOSRotating *, Attachable *)>>::iterator hardcodedAttachableMapEntry = m_HardcodedAttachableUniqueIDsAndSetters.find(referenceAttachable->GetUniqueID());
-        if (hardcodedAttachableMapEntry != m_HardcodedAttachableUniqueIDsAndSetters.end()) {
-            (*hardcodedAttachableMapEntry).second(this, newAttachable);
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({newAttachable->GetUniqueID(), hardcodedAttachableMapEntry->second});
-            m_HardcodedAttachableUniqueIDsAndSetters.erase(hardcodedAttachableMapEntry);
-        } else {
+        if (m_ReferenceHardcodedAttachableUniqueIDs.find(referenceAttachable->GetUniqueID()) == m_ReferenceHardcodedAttachableUniqueIDs.end()) {
+            Attachable *newAttachable = dynamic_cast<Attachable *>(referenceAttachable->Clone());
             AddAttachable(newAttachable);
         }
     }
+    m_ReferenceHardcodedAttachableUniqueIDs.clear();
 
-	// Gib copies
     for (const Gib &gib : reference.m_Gibs) {
         m_Gibs.push_back(gib);
     }
@@ -1579,7 +1565,10 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
     attachable->SetParent(nullptr);
 
     std::unordered_map<unsigned long, std::function<void(MOSRotating *, Attachable *)>>::iterator hardcodedAttachableMapEntry = m_HardcodedAttachableUniqueIDsAndSetters.find(attachable->GetUniqueID());
-    if (hardcodedAttachableMapEntry != m_HardcodedAttachableUniqueIDsAndSetters.end()) { hardcodedAttachableMapEntry->second(this, nullptr); }
+    if (hardcodedAttachableMapEntry != m_HardcodedAttachableUniqueIDsAndSetters.end()) {
+        hardcodedAttachableMapEntry->second(this, nullptr);
+        m_HardcodedAttachableUniqueIDsAndSetters.erase(hardcodedAttachableMapEntry);
+    }
     
     if (addBreakWounds) {
         if (!m_ToDelete && attachable->GetParentBreakWound()) {

@@ -69,7 +69,10 @@ void AEmitter::Clear()
 // Description:     Creates a AEmitter to be identical to another, by deep copy.
 
 int AEmitter::Create(const AEmitter &reference) {
-    if (reference.m_pFlash) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_pFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AEmitter *>(parent)->SetFlash(attachable); }}); }
+    if (reference.m_pFlash) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFlash->GetUniqueID());
+        SetFlash(dynamic_cast<Attachable *>(reference.m_pFlash->Clone()));
+    }
     Attachable::Create(reference);
 
     for (list<Emission *>::const_iterator itr = reference.m_EmissionList.begin(); itr != reference.m_EmissionList.end(); ++itr) {
@@ -376,6 +379,7 @@ void AEmitter::SetFlash(Attachable *newFlash) {
         RemoveAttachable(m_pFlash);
         m_pFlash = newFlash;
         AddAttachable(newFlash);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AEmitter *>(parent)->SetFlash(attachable); }});
     }
 }
 

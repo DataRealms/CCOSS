@@ -144,7 +144,7 @@ namespace RTE {
 		/// Sets whether this Attachable will be deleted when it's removed from its parent.
 		/// </summary>
 		/// <param name="deleteWhenRemovedFromParent">Whether this Attachable should be deleted when it's removed from its parent.</param>
-		void SetDeleteWhenRemovedFromParent(bool deleteWhenRemovedFromParent) { m_DeleteWhenRemovedFromParent = deleteWhenRemovedFromParent; }
+		virtual void SetDeleteWhenRemovedFromParent(bool deleteWhenRemovedFromParent) { m_DeleteWhenRemovedFromParent = deleteWhenRemovedFromParent; }
 
 		/// <summary>
 		/// Gets whether forces transferred from this Attachable should be applied at its parent's offset (rotated to match the parent) where they will produce torque, or directly at its parent's position.

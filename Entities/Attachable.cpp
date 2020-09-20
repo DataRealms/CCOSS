@@ -54,7 +54,6 @@ namespace RTE {
 	int Attachable::Create(const Attachable &reference) {
 		MOSRotating::Create(reference);
 
-		m_Parent = reference.m_Parent;
 		m_ParentOffset = reference.m_ParentOffset;
 		m_DrawAfterParent = reference.m_DrawAfterParent;
 		m_DrawnNormallyByParent = reference.m_DrawnNormallyByParent;

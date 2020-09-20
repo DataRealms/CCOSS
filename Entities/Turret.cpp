@@ -15,7 +15,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Turret::Create(const Turret &reference) {
-		if (reference.m_MountedDevice) { m_HardcodedAttachableUniqueIDsAndSetters.insert({reference.m_MountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<Turret *>(parent)->SetMountedDevice(attachable); }}); }
+		if (reference.m_MountedDevice) {
+			m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_MountedDevice->GetUniqueID());
+			SetMountedDevice(dynamic_cast<Attachable *>(reference.m_MountedDevice->Clone()));
+		}
 		Attachable::Create(reference);
 
 		m_MountedDeviceRotOffset = reference.m_MountedDeviceRotOffset;
@@ -65,6 +68,7 @@ namespace RTE {
 				RemoveAttachable(m_MountedDevice);
 				m_MountedDevice = castedNewMountedDevice;
 				AddAttachable(castedNewMountedDevice);
+				m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<Turret *>(parent)->SetMountedDevice(attachable); }});
 			}
 		}
 	}

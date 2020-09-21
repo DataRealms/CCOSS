@@ -282,6 +282,19 @@ ClassInfoGetters
 	void SetSupportOffset(Vector newOffset) { m_SupportOffset = newOffset; }
 
 
+    /// <summary>
+    /// Gets the multiplier for how well this HeldDevice can be gripped by Arms.
+    /// </summary>
+    /// <returns>The grip strength multiplier for this HeldDevice.</returns>
+    float GetGripStrengthMultiplier() { return m_GripStrengthMultiplier; }
+
+    /// <summary>
+    /// Sets the multiplier for how well this HeldDevice can be gripped by Arms.
+    /// </summary>
+    /// <param name="gripStrengthMultiplier">The new grip strength multiplier for this HeldDevice.</param>
+    void SetGripStrengthMultiplier(float gripStrengthMultiplier) { m_GripStrengthMultiplier = gripStrengthMultiplier; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetSharpAim
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -536,6 +549,20 @@ ClassInfoGetters
     /// <param name="deleteWhenRemovedFromParent">Whether this Attachable should be deleted when it's removed from its parent.</param>
     void SetDeleteWhenRemovedFromParent(bool deleteWhenRemovedFromParent) final { m_DeleteWhenRemovedFromParent = false; }
 
+#pragma region Force Transferral
+    /// <summary>
+    /// Bundles up all the accumulated impulse forces of this Attachable and calculates how they transfer to the joint, and therefore to the parent.
+    /// If the accumulated impulse forces exceed the joint strength or gib impulse limit of this Attachable, the jointImpulses Vector will be filled up to that limit and false will be returned.
+    /// Additionally, in this case, the Attachable will remove itself from its parent and gib itself if appropriate.
+    /// </summary>
+    /// <param name="jointImpulses">A vector that will have the impulse forces affecting the joint ADDED to it.</param>
+    /// <param name="jointStiffnessOverride">An optional override for the Attachable's joint stiffness for this function call. Primarily used to allow subclasses to perform special behaviour.</param>
+    /// <param name="jointStrengthOverride">An optional override for the Attachable's joint strength for this function call. Primarily used to allow subclasses to perform special behaviour.</param>
+    /// <param name="gibImpulseLimitOverride">An optional override for the Attachable's gib impulse limit for this function call. Primarily used to allow subclasses to perform special behaviour.</param>
+    /// <returns>False if the Attachable has no parent or its accumulated forces are greater than its joint strength or gib impulse limit, otherwise true.</returns>
+    bool TransferJointImpulses(Vector &jointImpulses, float jointStiffnessOverride = -1, float jointStrengthOverride = -1, float gibImpulseLimitOverride = -1) override;
+#pragma endregion
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -568,6 +595,7 @@ protected:
     float m_MaxSharpLength;
     // If this HeldDevice is currently being supported by a second hand.
     bool m_Supported;
+    float m_GripStrengthMultiplier; //!< The multiplier for how well this HeldDevice can be gripped by Arms.
     // Blink timer for the icon
     Timer m_BlinkTimer;
     // Extra pie menu options that this should add to any actor who holds this device

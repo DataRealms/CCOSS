@@ -49,7 +49,6 @@ void HDFirearm::Clear()
     m_ReloadTime = 0;
     m_FullAuto = false;
     m_FireIgnoresThis = true;
-    m_RecoilTransmission = 1.0;
     m_ShakeRange = 0;
     m_SharpShakeRange = 0;
     m_NoSupportFactor = 0;
@@ -121,7 +120,6 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_ReloadTime = reference.m_ReloadTime;
     m_FullAuto = reference.m_FullAuto;
     m_FireIgnoresThis = reference.m_FireIgnoresThis;
-    m_RecoilTransmission = reference.m_RecoilTransmission;
     m_ShakeRange = reference.m_ShakeRange;
     m_SharpShakeRange = reference.m_SharpShakeRange;
     m_NoSupportFactor = reference.m_NoSupportFactor;
@@ -190,7 +188,7 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader) {
     } else if (propName == "FireIgnoresThis") {
         reader >> m_FireIgnoresThis;
     } else if (propName == "RecoilTransmission") {
-        reader >> m_RecoilTransmission;
+        reader >> m_JointStiffness;
     } else if (propName == "IsAnimatedManually") {
 		reader >> m_IsAnimatedManually;
     } else if (propName == "ShakeRange") {
@@ -261,7 +259,7 @@ int HDFirearm::Save(Writer &writer) const
     writer.NewProperty("FireIgnoresThis");
     writer << m_FireIgnoresThis;
     writer.NewProperty("RecoilTransmission");
-    writer << m_RecoilTransmission;
+    writer << m_JointStiffness;
 	writer.NewProperty("IsAnimatedManually");
 	writer << m_IsAnimatedManually;
 	writer.NewProperty("ShakeRange");
@@ -931,7 +929,7 @@ void HDFirearm::Update()
         // Set up the recoil force and shake offsets
         if (m_Recoiled)
         {
-            m_RecoilForce.SetXY(totalFireForce * m_RecoilTransmission, 0);
+            m_RecoilForce.SetXY(totalFireForce * m_JointStiffness, 0);
             m_RecoilForce = RotateOffset(m_RecoilForce);
             m_RecoilForce = -m_RecoilForce;
 

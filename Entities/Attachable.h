@@ -241,8 +241,11 @@ namespace RTE {
 		/// Additionally, in this case, the Attachable will remove itself from its parent and gib itself if appropriate.
 		/// </summary>
 		/// <param name="jointImpulses">A vector that will have the impulse forces affecting the joint ADDED to it.</param>
+		/// <param name="jointStiffnessOverride">An optional override for the Attachable's joint stiffness for this function call. Primarily used to allow subclasses to perform special behaviour.</param>
+		/// <param name="jointStrengthOverride">An optional override for the Attachable's joint strength for this function call. Primarily used to allow subclasses to perform special behaviour.</param>
+		/// <param name="gibImpulseLimitOverride">An optional override for the Attachable's gib impulse limit for this function call. Primarily used to allow subclasses to perform special behaviour.</param>
 		/// <returns>False if the Attachable has no parent or its accumulated forces are greater than its joint strength or gib impulse limit, otherwise true.</returns>
-		bool TransferJointImpulses(Vector &jointImpulses);
+		virtual bool TransferJointImpulses(Vector &jointImpulses, float jointStiffnessOverride = -1, float jointStrengthOverride = -1, float gibImpulseLimitOverride = -1);
 #pragma endregion
 
 #pragma region Damage and Wound Management

@@ -186,29 +186,32 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool Attachable::TransferJointImpulses(Vector &jointImpulses) {
+	bool Attachable::TransferJointImpulses(Vector &jointImpulses, float jointStiffnessOverride, float jointStrengthOverride, float gibImpulseLimitOverride) {
 		if (!m_Parent) {
 			return false;
 		}
 		if (m_ImpulseForces.empty()) {
 			return true;
 		}
+		jointStiffnessOverride = jointStiffnessOverride > 0 ? jointStiffnessOverride : m_JointStiffness;
+		jointStrengthOverride = jointStrengthOverride > 0 ? jointStrengthOverride : m_JointStrength;
+		gibImpulseLimitOverride = gibImpulseLimitOverride > 0 ? gibImpulseLimitOverride : m_GibImpulseLimit;
 
 		Vector totalImpulseForce;
 		for (const std::pair<Vector, Vector> &impulseForce : m_ImpulseForces) {
 			totalImpulseForce += impulseForce.first;
 		}
 
-		if (m_GibImpulseLimit > 0 && totalImpulseForce.GetMagnitude() > m_GibImpulseLimit) {
-			jointImpulses += (totalImpulseForce.SetMagnitude(m_GibImpulseLimit)) * m_JointStiffness;
+		if (gibImpulseLimitOverride > 0 && totalImpulseForce.GetMagnitude() > gibImpulseLimitOverride) {
+			jointImpulses += (totalImpulseForce.SetMagnitude(gibImpulseLimitOverride)) * jointStiffnessOverride;
 			GibThis();
 			return false;
-		} else if (m_JointStrength > 0 && totalImpulseForce.GetMagnitude() > m_JointStrength) {
-			jointImpulses += (totalImpulseForce.SetMagnitude(m_JointStrength)) * m_JointStiffness;
+		} else if (jointStrengthOverride > 0 && totalImpulseForce.GetMagnitude() > jointStrengthOverride) {
+			jointImpulses += (totalImpulseForce.SetMagnitude(jointStrengthOverride)) * jointStiffnessOverride;
 			m_Parent->RemoveAttachable(this, true, true);
 			return false;
 		} else {
-			jointImpulses += totalImpulseForce * m_JointStiffness;
+			jointImpulses += totalImpulseForce * jointStiffnessOverride;
 		}
 
 		// Rough explanation of what this is doing:
@@ -217,7 +220,7 @@ namespace RTE {
 		if (!m_InheritsRotAngle) {
 			for (const std::pair<Vector, Vector> &impulseForce : m_ImpulseForces) {
 				if (!impulseForce.second.IsZero()) {
-					m_AngularVel += (impulseForce.second.GetPerpendicular().Dot(impulseForce.first) / m_pAtomGroup->GetMomentOfInertia()) * (1.0F - m_JointStiffness);
+					m_AngularVel += (impulseForce.second.GetPerpendicular().Dot(impulseForce.first) / m_pAtomGroup->GetMomentOfInertia()) * (1.0F - jointStiffnessOverride);
 				}
 			}
 		}

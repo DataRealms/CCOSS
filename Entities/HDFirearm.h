@@ -654,27 +654,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:  SetRecoilTransmission
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the calar of how much of the fire recoil force is transmitted to 
-//					who/whatever is holding this weapon
-// Arguments:       New transmission value.
-// Return value:    None.
-
-	void SetRecoilTransmission(float recoilTransmission) { m_RecoilTransmission = recoilTransmission; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetRecoilTransmission
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the calar of how much of the fire recoil force is transmitted to 
-//					who/whatever is holding this weapon
-// Arguments:       None.
-// Return value:    Transmission value.
-
-	float GetRecoilTransmission() const { return m_RecoilTransmission; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
@@ -727,8 +706,6 @@ protected:
     // Whether particles fired from this HDFirearm will ignore hits with itself,
     // and the root parent of this HDFirearm, regardless if they are set to hit MOs.
     bool m_FireIgnoresThis;
-    // Scalar of how much of the fire recoil force is transmitted to who/whatever is holding this weapon
-    float m_RecoilTransmission;
 
     // Timer for timing how long ago the last round was fired.
     Timer m_LastFireTmr;

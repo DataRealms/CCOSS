@@ -76,17 +76,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Turret::Update() {
-		if (m_MountedDevice) {
-			m_MountedDevice->SetRotAngle(m_Rotation.GetRadAngle() + m_MountedDeviceRotOffset);
-			if (m_Parent) {
-				//if (m_MountedDevice->IsRecoiled()) {
-				//	m_Parent->AddImpulseForce(m_MountedDevice->GetRecoilForce());
-				//} else {
-					m_Recoiled = false;
-				//}
-			}
-		}
-
 		Attachable::Update();
+		if (m_MountedDevice) { m_MountedDevice->SetRotAngle(m_Rotation.GetRadAngle() + m_MountedDeviceRotOffset); }
 	}
 }

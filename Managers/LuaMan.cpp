@@ -993,6 +993,7 @@ int LuaMan::Create()
 
 		ABSTRACTLUABINDING(Arm, Attachable)
 			.property("IdleOffset", &Arm::GetIdleOffset, &Arm::SetIdleOffset)
+            .property("GripStrength", &Arm::GetGripStrength, &Arm::SetGripStrength)
 			.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos),
 
         ABSTRACTLUABINDING(Leg, Attachable)
@@ -1272,6 +1273,7 @@ int LuaMan::Create()
             .def("IsFull", &HeldDevice::IsFull)
 			.property("SharpLength", &HeldDevice::GetSharpLength, &HeldDevice::SetSharpLength)
 			.property("SupportOffset", &HeldDevice::GetSupportOffset, &HeldDevice::SetSupportOffset)
+            .property("GripStrengthMultiplier", &HeldDevice::GetGripStrengthMultiplier, &HeldDevice::SetGripStrengthMultiplier)
 			.def("SetSupported", &HeldDevice::SetSupported),
 
         CONCRETELUABINDING(Magazine, Attachable)
@@ -1318,7 +1320,7 @@ int LuaMan::Create()
             .def("CompareTrajectories", &HDFirearm::CompareTrajectories)
             .def("SetNextMagazineName", &HDFirearm::SetNextMagazineName)
 			.property("IsAnimatedManually", &HDFirearm::IsAnimatedManually, &HDFirearm::SetAnimatedManually)
-			.property("RecoilTransmission", &HDFirearm::GetRecoilTransmission, &HDFirearm::SetRecoilTransmission),
+			.property("RecoilTransmission", &HDFirearm::GetJointStiffness, &HDFirearm::SetJointStiffness),
 
         CONCRETELUABINDING(ThrownDevice, HeldDevice)
             .property("MinThrowVel", &ThrownDevice::GetMinThrowVel, &ThrownDevice::SetMinThrowVel)

@@ -14,6 +14,7 @@
 #include "HeldDevice.h"
 #include "MovableMan.h"
 #include "AtomGroup.h"
+#include "Arm.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -44,6 +45,7 @@ void HeldDevice::Clear()
     m_MaxSharpLength = 0;
     m_Supported = false;
     m_SupportOffset.Reset();
+    m_GripStrengthMultiplier = 1.0;
     m_BlinkTimer.Reset();
     m_PieSlices.clear();
     m_Loudness = -1;
@@ -131,6 +133,7 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_StanceOffset = reference.m_StanceOffset;
     m_SharpStanceOffset = reference.m_SharpStanceOffset;
     m_SupportOffset = reference.m_SupportOffset;
+    m_GripStrengthMultiplier = reference.m_GripStrengthMultiplier;
 
     m_SharpAim = reference.m_SharpAim;
     m_MaxSharpLength = reference.m_MaxSharpLength;
@@ -166,7 +169,9 @@ int HeldDevice::ReadProperty(std::string propName, Reader &reader)
         reader >> m_SharpStanceOffset;
     else if (propName == "SupportOffset")
         reader >> m_SupportOffset;
-    else if (propName == "SharpLength")
+    else if (propName == "GripStrengthMultiplier") {
+        reader >> m_GripStrengthMultiplier;
+    } else if (propName == "SharpLength")
         reader >> m_MaxSharpLength;
     else if (propName == "Loudness")
         reader >> m_Loudness;
@@ -207,6 +212,8 @@ int HeldDevice::Save(Writer &writer) const
     writer << m_SharpStanceOffset;
     writer.NewProperty("SupportOffset");
     writer << m_SupportOffset;
+    writer.NewProperty("GripStrengthMultiplier");
+    writer << m_GripStrengthMultiplier;
     writer.NewProperty("SharpLength");
     writer << m_MaxSharpLength;
     writer.NewProperty("Loudness");
@@ -352,6 +359,25 @@ bool HeldDevice::OnMOHit(MovableObject *pOtherMO)
     // Don't terminate, continue on
     return false;
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool HeldDevice::TransferJointImpulses(Vector &jointImpulses, float jointStiffnessOverride, float jointStrengthOverride, float gibImpulseLimitOverride) {
+    if (!m_Parent) {
+        return false;
+    }
+    if (m_ImpulseForces.empty()) {
+        return true;
+    }
+    const Arm *parentAsArm = dynamic_cast<Arm *>(m_Parent);
+    if (parentAsArm && parentAsArm->GetGripStrength() > 0 && jointStrengthOverride < 0) {
+        jointStrengthOverride = parentAsArm->GetGripStrength() * m_GripStrengthMultiplier;
+    }
+    Attachable::TransferJointImpulses(jointImpulses, jointStiffnessOverride, jointStrengthOverride, gibImpulseLimitOverride);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////

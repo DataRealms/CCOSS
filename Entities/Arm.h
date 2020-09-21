@@ -170,6 +170,18 @@ ClassInfoGetters
 
     MovableObject * GetHeldMO() const { return m_pHeldMO; }
 
+    /// <summary>
+    /// Gets the the strength with which this Arm will grip its HeldDevice.
+    /// </summary>
+    /// <returns>The grip strength of this Arm.</returns>
+    float GetGripStrength() const { return m_GripStrength; }
+
+    /// <summary>
+    /// Sets the strength with which this Arm will grip its HeldDevice.
+    /// </summary>
+    /// <param name="newGripStrength">The new grip strength for this Arm to use.</param>
+    void SetGripStrength(float newGripStrength) { m_GripStrength = newGripStrength; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetMaxLength
@@ -409,6 +421,7 @@ protected:
     MovableObject *m_pHeldMO;
     // Whether or not this arm is currently supporting something held in another hand
     bool m_Supporting;
+    float m_GripStrength; //!< The strength with which this Arm will grip its HeldDevice. Effectively supercedes the HeldDevice's JointStrength.
     // The file containing the hand bitmap.
     ContentFile m_HandFile;
     // The small bitmap holding the hand bitmap.

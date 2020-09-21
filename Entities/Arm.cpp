@@ -31,6 +31,7 @@ void Arm::Clear()
 {
 //    m_HandOffset.Reset();
     m_pHeldMO = 0;
+    m_GripStrength = 0;
     m_HandFile.Reset();
     m_pHand = 0;
     m_MaxLength = 0;
@@ -72,6 +73,7 @@ int Arm::Create(const Arm &reference) {
     }
     Attachable::Create(reference);
 
+    m_GripStrength = reference.m_GripStrength;
     m_HandFile = reference.m_HandFile;
     m_pHand = m_HandFile.GetAsBitmap();
     RTEAssert(m_pHand, "Failed to load hand bitmap in Arm::Create")
@@ -102,6 +104,8 @@ int Arm::ReadProperty(std::string propName, Reader &reader) {
             m_pHeldMO = dynamic_cast<MovableObject *>(heldDeviceEntity->Clone());
             AddAttachable(dynamic_cast<Attachable *>(m_pHeldMO));
         }
+    } else if (propName == "GripStrength") {
+        reader >> m_GripStrength;
     } else if (propName == "Hand") {
         reader >> m_HandFile;
         m_pHand = m_HandFile.GetAsBitmap();
@@ -133,6 +137,8 @@ int Arm::Save(Writer &writer) const
 
     writer.NewProperty("HeldDevice");
     writer << m_pHeldMO;
+    writer.NewProperty("GripStrength");
+    writer << m_GripStrength;
     writer.NewProperty("HandGroup");
     writer << m_HandFile;
     writer.NewProperty("MaxLength");

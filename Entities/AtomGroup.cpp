@@ -371,7 +371,7 @@ namespace RTE {
 				}
 #ifdef DEBUG_BUILD
 				// Draw the positions of the Atoms at the start of each segment, for visual debugging.
-				//putpixel(g_SceneMan.GetMOColorBitmap(), atom->GetCurrentPos().GetIntX(), atom->GetCurrentPos().GetIntY(), 122);
+				//putpixel(g_SceneMan.GetMOColorBitmap(), atom->GetCurrentPos().GetFloorIntX(), atom->GetCurrentPos().GetFloorIntY(), 122);
 #endif
 			}
 
@@ -1523,9 +1523,9 @@ namespace RTE {
 
 		for (const Atom *atom : m_Atoms) {
 			if (!useLimbPos) {
-				atomPos = (m_OwnerMO->GetPos() + (atom->GetOffset().GetXFlipped(m_OwnerMO->m_HFlipped) * m_OwnerMO->GetRotMatrix())).GetFloored();
+				atomPos = (m_OwnerMO->GetPos() + (atom->GetOffset().GetXFlipped(m_OwnerMO->m_HFlipped) * m_OwnerMO->GetRotMatrix()));
 			} else {
-				atomPos = (m_LimbPos + (atom->GetOffset().GetXFlipped(m_OwnerMO->m_HFlipped) * m_OwnerMO->GetRotMatrix())).GetFloored();
+				atomPos = (m_LimbPos + (atom->GetOffset().GetXFlipped(m_OwnerMO->m_HFlipped) * m_OwnerMO->GetRotMatrix()));
 			}
 			// Draw normal first, then draw the Atom position
 			if (!atom->GetNormal().IsZero()) {

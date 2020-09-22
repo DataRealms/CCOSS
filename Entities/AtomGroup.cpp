@@ -1344,7 +1344,7 @@ namespace RTE {
 
 			if (rayHit) {
 				// Determine the longest clearing distance so far
-				atomExitVector = clearPos - atomPos.GetFloored();
+				atomExitVector = clearPos - atomPos;
 				if (atomExitVector.GetMagnitude() > longestDistance) {
 					// We found the Atom with the longest to travel along the exit direction to clear, so that's the distance to move the whole object to clear all its Atoms.
 					longestDistance = atomExitVector.GetMagnitude();

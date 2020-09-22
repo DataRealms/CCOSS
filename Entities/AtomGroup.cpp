@@ -680,7 +680,7 @@ namespace RTE {
 			}
 		} while (segRatio != 1.0F || hitStep && /*!linSegTraj.GetFloored().IsZero() &&*/ !halted);
 
-		ResolveMOSIntersection(position, rotation);
+		ResolveMOSIntersection(position);
 
 		if (!scenePreLocked) { g_SceneMan.UnlockScene(); }
 
@@ -1368,7 +1368,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AtomGroup::ResolveMOSIntersection(Vector &position, Matrix &rotation) {
+	bool AtomGroup::ResolveMOSIntersection(Vector &position) {
 		if (!m_OwnerMO->m_HitsMOs) {
 			return true;
 		}
@@ -1383,8 +1383,7 @@ namespace RTE {
 
 		// First go through all Atoms to find the first intersection and get the intersected MO
 		for (Atom *atom : m_Atoms) {
-			atomOffset = atom->GetOffset().GetXFlipped(m_OwnerMO->IsHFlipped());
-			atomOffset *= rotation;
+			atomOffset = m_OwnerMO->RotateOffset(atom->GetOffset());
 			atom->SetupPos(position + atomOffset);
 			atomPos = atom->GetCurrentPos();
 			hitMOID = g_SceneMan.GetMOIDPixel(atomPos.GetFloorIntX(), atomPos.GetFloorIntY());

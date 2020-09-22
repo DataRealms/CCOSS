@@ -323,7 +323,7 @@ namespace RTE {
 		/// <param name="position">Current position of the owner MO.</param>
 		/// <param name="rotation">Current rotation of the owner MO.</param>
 		/// <returns>Whether all intersections were successfully resolved.</returns>
-		bool ResolveMOSIntersection(Vector &position, Matrix &rotation);
+		bool ResolveMOSIntersection(Vector &position);
 #pragma endregion
 
 #pragma region Debug

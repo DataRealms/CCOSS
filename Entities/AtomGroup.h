@@ -162,7 +162,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newPos">The Vector with the new absolute position.</param>
 		/// <param name="hFlipped"></param>
-		void SetLimbPos(Vector &newPos, bool hFlipped = false) { m_LimbPos = newPos - m_JointOffset.GetXFlipped(hFlipped); }
+		void SetLimbPos(const Vector &newPos, bool hFlipped = false) { m_LimbPos = newPos - m_JointOffset.GetXFlipped(hFlipped); }
 
 		/// <summary>
 		/// Gets the current mass moment of inertia of this AtomGroup

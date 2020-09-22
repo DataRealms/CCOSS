@@ -1254,7 +1254,7 @@ namespace RTE {
 			}
 #ifdef DEBUG_BUILD
 			// Draw a dot for each Atom for visual reference.
-			putpixel(g_SceneMan.GetDebugBitmap(), atomPos.m_X, atomPos.m_Y, 112);
+			putpixel(g_SceneMan.GetDebugBitmap(), atomPos.GetFloorIntX(), atomPos.GetFloorIntY(), 112);
 #endif
 		}
 

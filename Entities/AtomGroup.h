@@ -1,662 +1,388 @@
 #ifndef _RTEATOMGROUP_
 #define _RTEATOMGROUP_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            AtomGroup.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the AtomGroup class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
-#include "Entity.h"
 #include "Atom.h"
-#include "LimbPath.h"
-#include "Timer.h"
 
 // Defined in Winbase.h and conflicts with our method so we need to undefine it manually.
 #undef AddAtom
 
-namespace RTE
-{
+namespace RTE {
 
-enum { BODY = 0, LIMB = 1 };
-
-class MovableObject;
-class MOSRotating;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           AtomGroup
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A group of Atom:s that move and interact with the terrain in unison.
-// Parent(s):       Entity.
-// Class history:   05/29/2001 AtomGroup created.
-
-class AtomGroup:
-    public Entity
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
-
-public:
-
-
-// Concrete allocation and cloning definitions
-EntityAllocation(AtomGroup)
-SerializableOverrideMethods
-ClassInfoGetters
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     AtomGroup
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a AtomGroup object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
-
-    AtomGroup() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     AtomGroup
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Copy constructor method used to instantiate a AtomGroup object
-//                  identical to an already existing one.
-// Arguments:       A AtomGroup object which is passed in by reference.
-
-    AtomGroup(const AtomGroup &reference) { Clear(); Create(reference); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~AtomGroup
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a AtomGroup object before deletion
-//                  from system memory.
-// Arguments:       None.
-
-	~AtomGroup() override { Destroy(true); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the AtomGroup object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-   int Create() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a AtomGroup to be identical to another, by deep copy.
-// Arguments:       A reference to the AtomGroup to deep copy.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	int Create(const AtomGroup &reference);
-
-    /// <summary>
-    /// Creates an AtomGroup to be identical to another, by deep copy, with the option to only copy atoms that belong to the reference AtomGroup's owner
-    /// </summary>
-    /// <param name="reference">A reference to the AtomGroup to deep copy</param>
-    /// <param name="onlyCopyOwnerAtoms">Whether or not to only copy atoms that belong to the reference AtomGroup's owner directly</param>
-    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-	int Create(const AtomGroup & reference, bool onlyCopyOwnerAtoms);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a AtomGroup after the silhouette shape of a passed in MOSRotating,
-//                  by dotting the outline of the sprite with atoms. The passed in MOSRotating
-//                  will also be made the owner of this AtomGroup.
-// Arguments:       A pointer to an MOSRotating whose outline will be approximated by Atoms
-//                  of this AtomGroup, and that will be set as the owner of this AtomGroup.
-//                  Ownership is not transferred!
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    int Create(MOSRotating *pOwnerMOSRotating);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a AtomGroup after the silhouette shape of a passed in MOSRotating,
-//                  by dotting the outline of the sprite with atoms. The passed in MOSRotating
-//                  will also be made the owner of this AtomGroup.
-// Arguments:       A pointer to an MOSRotating whose outline will be approximated by Atoms
-//                  of this AtomGroup, and that will be set as the owner of this AtomGroup.
-//                  Ownership is not transferred!
-//                  The Material that the Atom:s of this AtomGroup should be of.
-//                  Resolution, or density of the Atoms in representing the MOSRotating's
-//                  silhouette. 1 means higest res, 2 means every other pixel on the
-//                  MOSRotating's edge is covered by an atom, 3 mean every third, etc.
-//                  The depth into the sprite that the atom:s should be placed.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    int Create(MOSRotating *pOwnerMOSRotating, Material const * material, int resolution = 1, int depth = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the entire AtomGroup, including its inherited members, to their
-//                  default settings or values.
-// Arguments:       None.
-// Return value:    None.
-
-    void Reset() override { Clear(); Entity::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the AtomGroup object.
-// Arguments:       Whether to only destroy the members defined in this derived class, or
-//                  to destroy all inherited members also.
-// Return value:    None.
-
-    void Destroy(bool notInherited = false) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Friend operator: AtomGroup addition
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Addition operator overload for AtomGroup:s which adds together the
-//                  Atom:s of two Groups and merges them into one.
-// Arguments:       An AtomGroup reference as the left hand side operand..
-//                  An AtomGroup reference as the right hand side operand.
-// Return value:    The resulting AtomGroup.
-
-//    friend AtomGroup operator+(const AtomGroup &lhs, const AtomGroup &rhs);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Friend operator: AtomGroup pointer addition
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Addition operator overload for AtomGroup:s pointer which adds together
-//                  the Atom:s of two Groups pointed to and merges them into one.
-//                  Ownership of the returned dallocated AG IS TRANSFERRED!
-// Arguments:       An AtomGroup pointer as the left hand side operand.
-//                  An AtomGroup pointer as the right hand side operand.
-// Return value:    The resulting dynamically allocated AtomGroup. OWNERSHIP IS TRANSFERRED!
-
-//    friend AtomGroup * operator+(const AtomGroup *lhs, const AtomGroup *rhs);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CalculateMaxRadius
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the longest magnitude of all the atom's offsets.
-// Arguments:       None.
-// Return value:    The largest magnitude of offset, in pixels.
-
-    float CalculateMaxRadius() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMaterial
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the material of this AtomGroup
-// Arguments:       None.
-// Return value:    A reference to the material.
-
-	Material const * GetMaterial() const { if (m_pMaterial) return m_pMaterial; else return g_SceneMan.GetMaterialFromID(g_MaterialAir); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetAtomList
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the current list of Atom:s that make up the group.
-// Arguments:       None.
-// Return value:    A reference to the list.
-
-    const std::list<Atom *> & GetAtomList() const { return m_Atoms; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetAtomCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the current number of Atoms that make up the group.
-// Arguments:       None.
-// Return value:    An int with the count.
-
-    int GetAtomCount() const { return m_Atoms.size(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMomentOfInertia
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the current mass moment of inertia of this AtomGroup
-// Arguments:       None.
-// Return value:    A float with the moment of inertia, in Kg * SceneUnits^2
-
-    float GetMomentOfInertia();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetOwner
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the current owner MOSRotating of this AtomGroup.
-// Arguments:       None.
-// Return value:    A const pointer to the owner.
-
-    MOSRotating * GetOwner() const { return m_pOwnerMO; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetResolution
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the resolution of this AtomGroup. Basically density of the Atoms
-//                  in representing a MOSRotating's silhouette. 0 means the Atom config
-//                  wasn't genereated by a silhouette, but defined manually.
-// Arguments:       None.
-// Return value:    The resolution setting. If 0, Atom:s were placed manually.
-
-    const int GetResolution() const { return m_Resolution; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDepth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the depth, or how deep into the bitmap of the owning MO's
-//                  graphical representation the Atom:s of this AtomGroup are located.
-// Arguments:       None.
-// Return value:    The depth, in pixels. If 0, Atom:s are right on the bitmap.
-
-    const int GetDepth() const { return m_Depth; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetLimbPos
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the current position of this AtomGroup as a limb.
-// Arguments:       None.
-// Return value:    The absolute limb position in the world
-
-    Vector GetLimbPos(bool hFlipped = false) const
-    {
-        return m_LimbPos.GetFloored() + m_JointOffset.GetXFlipped(hFlipped);
-    }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetLimbPos
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the current position of this AtomGroup as a limb.
-// Arguments:       The Vector with the new absolute position
-// Return value:    None.
-
-    void SetLimbPos(Vector &newPos, bool hFlipped = false)
-    {
-        m_LimbPos = newPos - m_JointOffset.GetXFlipped(hFlipped);
-    }
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetOwner
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the current owner MovableObject of this AtomGroup.
-// Arguments:       A pointer to the new owner. Ownership is NOT transferred!
-// Return value:    None.
-
-    void SetOwner(MOSRotating *newOwner);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AutoGenerate
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells whether this AtomGroup's Atom:s are to be automatically generated
-//                  based on a bitmap, or manually specified.
-// Arguments:       None.
-// Return value:    Autogenerate or not.
-
-    bool AutoGenerate() { return m_AutoGenerate; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddMOIDToIgnore
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a MOID that this Atom should ignore collisions with during its
-//                  next travel sequence.
-// Arguments:       The MOID to add to the ignore list.
-// Return value:    None.
-
-    void AddMOIDToIgnore(MOID ignore);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMOIDIgnoreList
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clear the list of MOIDs that this Atom is set to ignore collisions
-//                  with during its next travel sequence. This should be done each frame
-//                  so that fresh MOIDs can be re-added. (MOIDs are only valid during a
-//                  frame)
-// Arguments:       None.
-// Return value:    None.
-
-    void ClearMOIDIgnoreList();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsIgnoringMOID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether this Atom is set to ignore collisions with a MO of a
-///                 specific MOID.
-// Arguments:       The MOID to check if it is ignored.
-// Return value:    Whether or not this MOID is being ignored.
-
-    bool IsIgnoringMOID(MOID which);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddAtom
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a new Atom onto the internal list that makes up the group.
-//                  Ownership IS transferred!
-// Arguments:       A pointer to an Atom that will pushed onto the end of the list.
-//                  Ownership IS transferred!
-//                  The subgroup ID that the new atom will have within the group.
-// Return value:    None.
-
-    void AddAtom(Atom *newAtom, int atomID = 0) { newAtom->SetSubID(atomID); m_Atoms.push_back(newAtom); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddAtoms
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a list of new Atom:s to the internal list that makes up this group.
-//                  Ownership of all Atom:s in the list IS NOT transferred!
-// Arguments:       A deque of pointers to a Atom:s whose copies will be pushed onto the
-//                  end of this AtomGroup's list. Ownership IS NOT transferred!
-//                  The desired subgroup IDs of the atoms to be added.
-//                  An offset that should be applied to all added atom:s.
-//                  The rotation of the placed atoms around the above offset.
-// Return value:    None.
-
-    void AddAtoms(const std::list<Atom *> &atomList, long int subID = 0, const Vector &offset = Vector(), const Matrix &offsetRotation = Matrix());
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateSubAtoms
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the offsets of a subgroup of Atoms of this. This allows chunks
-//                  representing sub parts of the whole to more closely represent the
-//                  graphics better.
-// Arguments:       The desired subgroup IDs of the atoms to update offsets of.
-//                  An offset that should be re-applied applied to atom:s of that subgroup.
-//                  The rotation of the updated atoms around the above offset.
-// Return value:    Whether any atoms of that group was found and updated.
-
-    bool UpdateSubAtoms(long int subID = 0, const Vector &newOffset = Vector(), const Matrix& newOffsetRotation = Matrix());
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAtoms
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes all atoms of a specific subgroup ID from this AtomGroup.
-// Arguments:       The ID of the subgroup of atoms to remove.
-// Return value:    Whether any Atoms of that subgroup ID were found and removed.
-
-    bool RemoveAtoms(long int removeID);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Travel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the group of Atom:s travel together and react when terrain is
-//                  hit. Effects are direcly applied to the owning MovableObject.
-// Arguments:       The amount of time in s that this Atom is supposed to travel.
-//                  Whether to call the parent MO's OnBounce function upon bouncing
-//                  against anything, or not.
-//                  Whether to call the parent MO's OnSink function upon sinking into
-//                  against anything, or not.
-//                  Whether the Scene has been pre-locked or not.
-// Return value:    The amount of time remaining of the travelTime passed in, in s. This
-//                  may only possibly be a nonzero if callOnBounce or callOnSink are true.
-
-	float Travel(float travelTime, bool callOnBounce = false, bool callOnSink = false, bool scenePreLocked = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Travel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the group of Atom:s travel together and react when terrain is
-//                  hit. Effects are applied to the passed in variables.
-// Arguments:       A reference to a Vector with the starting position of the AtomGroup
-//                  origin. The value of this Vector will be altered accoring to where
-//                  the AtomGroup ends up after done travelling.
-//                  A Vector with the total desired velocity of the AtomGroup. Will also
-//                  be altered according to any collision response.
-//                  The current rotation Matrix of the AtomGroup. Will be altered
-//                  accordingly as travel happens.
-//                  The current desired angular velocity of the owner MO, in r/s. Will
-//                  be altered.
-//                  A bool that will be set to whether the position change involved a
-//                  wrapping of the scene or not.
-//                  A float to be filled out with the total magnitudes of all the forces
-//                  exerted on this through collisions during this frame.
-//                  The designated mass of the AtomGroup at this time.
-//                  The amount of time in s that this Atom is supposed to travel.
-//                  Whether to call the parent MO's OnBounce function upon bouncing
-//                  against anything, or not.
-//                  Whether to call the parent MO's OnSink function upon sinking into
-//                  against anything, or not.
-//                  Whether the Scene has been pre-locked or not.
-// Return value:    The amount of time remaining of the travelTime passed in, in s. This
-//                  may only possibly be a nonzero if callOnBounce or callOnSink are true.
-
-	float Travel(Vector &position, Vector &velocity, Matrix &rotation, float &angVel, bool &didWrap, Vector &totalImpulse, float mass, float travelTime, bool callOnBounce = false, bool callOnSink = false, bool scenePreLocked = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PushTravel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the group of Atom:s travel together without rotations and react
-//                  with the scene by pushing against it.
-// Arguments:       A reference to a Vector with the starting position of the AtomGroup
-//                  origin. The value of this Vector will be altered accoring to where
-//                  the AtomGroup ends up after done travelling.
-//                  A Vector with the total desired velocity of the AtomGroup. Will not be
-//                  altered.
-//                  The maximum force that the push against other stuff in the scene can
-//                  have, in kg * m/s^2.
-//                  A bool that will be set to whether the position change involved a
-//                  wrapping of the scene or not.
-//                  The amount of time in s that this Atom is supposed to travel.
-//                  Whether to call the parent MO's OnBounce function upon bouncing
-//                  against anything, or not.
-//                  Whether to call the parent MO's OnSink function upon sinking into
-//                  against anything, or not.
-//                  Whether the Scene has been pre-locked or not.
-// Return value:    The resulting push impulse force is reported back through here, in\
-//                  kg * m/s.
-
-	Vector PushTravel(Vector &position, Vector velocity, float pushForce, bool &didWrap, float travelTime, bool callOnBounce = false, bool callOnSink = false, bool scenePreLocked = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PushAsLimb
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the group of Atom:s travel together as a pushing entity,
-//                  relative to the position of the owning MovableObject. If stuff in the
-//                  scene is hit, resulting forces are be added to the owning
-//                  MovableObject's impulse forces.
-// Arguments:       A reference to a Vector with the world position of the joint of the
-//                  of the path along which this AtomGroup is being pushed.
-//                  A Vector with the velocity of the owning MovableObject.
-//                  A Matrix with the rotation of the owning movableObject.
-//                  The vector that the resulting impulse forces of this push will be
-//                  added to. IE this will be altered according to any collision response.
-//                  A LimbPath which this AtomGroup should travel along.
-//                  The amount of time in s that this Atom is supposed to travel.
-//                  Pointer to a bool which gets set to true if the limbpath got restarted
-//                  during this push. It does NOT get initalized to false!
-//                  Whether the forces created by this should have rotational leverage on
-//                  the owner, or only have translational effect.
-// Return value:    Whether the LimbPath passed in could start free of terrain or not.
-
-	bool PushAsLimb(const Vector &jointPos, const Vector &velocity, const Matrix &rotation, LimbPath &limbPath, const float travelTime, bool *pRestarted = 0, bool affectRotation = true);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FlailAsLimb
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the group of Atom:s travel together as a lifeless limb, constrained
-//                  to a radius around the joint pin in the center.
-// Arguments:       A Vector with the world position of the owner MovableObject.
-//                  A Vector with the rotated offset of the joint that this should flail
-//                  around in a radius.
-//                  The radius/range of the limb this is to simulate.
-//                  A Vector with the velocity of the owning MovableObject.
-//                  A float with the angular velocity in rad/s of the owning MovableObject.
-//                  The mass of this dead weight limb.
-//                  The amount of time in s that this Atom is supposed to travel.
-// Return value:    None.
-
-	void FlailAsLimb(const Vector ownerPos, const Vector jointOffset, const float limbRadius, const Vector velocity, const float angVel, const float mass, const float travelTime);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          InTerrain
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether any of the Atom:s in this AtomGroup are on top of
-//                  terrain pixels.
-// Arguments:       None.
-// Return value:    Whether any Atom of this AtomGroup is on top of a terrain pixel.
-
-	bool InTerrain();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RatioInTerrain
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows the ratio of how many atoms of this group that are on top of
-//                  intact terrain pixels.
-// Arguments:       None.
-// Return value:    The ratio of atoms on top of terrain pixels, form 0 to 1.0
-
-	float RatioInTerrain();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ResolveTerrainIntersection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether any of the Atom:s in this AtomGroup are on top of
-//                  terrain pixels, and if so, attempt to move the OwnerMO of this out
-//                  so none of this' Atoms are inside any other MOS's silhouette anymore.
-// Arguments:       Current position and rotation of the owner MO.
-//                  Only consider materials stronger than this specific one.
-// Return value:    Whether any intersection was successfully resolved. Will return true
-//                  even if there wasn't any intersections to begin with.
-
-	bool ResolveTerrainIntersection(Vector &position, Matrix &rotation, unsigned char strongerThan = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ResolveMOSIntersection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether any of the Atom:s in this AtomGroup are on top of
-//                  other MOSprite:s, and if so, attempt to move the OwnerMO of this out
-//                  so none of this' Atoms are inside any other MOS's silhouette anymore.
-// Arguments:       Current positiona and rotation of the owner MO.
-//                  The number of attempts allowed to clear intersections with MO's. Each
-//                  move results in a counted attempt.
-// Return value:    Whether all intersections were successfully eliminated in the alloted
-//                  number of attempts.
-
-	bool ResolveMOSIntersection(Vector &position, Matrix &rotation);
-
+	class MOSRotating;
+	class LimbPath;
 
 	/// <summary>
-	/// Create and add an atom to this AtomGroup's list of atoms, m_Atoms.
+	/// A group of Atoms that move and interact with the terrain in unison.
 	/// </summary>
-	/// <param name="x">X coordinate in the sprite frame.</param>
-	/// <param name="y">Y coordinate in the sprite frame.</param>
-	/// <param name="spriteOffset">Sprite offset relative to pOwnerMOSRotating.</param>
-	/// <param name="pOwnerMOSRotating">MOSRotating whose outline will be approximated by Atoms of this AtomGroup.</param>
-	/// <param name="calcNormal">Whether to set a normal for the atom. Should be true for surface atoms.</param>
-	void AddAtomToGroup(int x, int y, const Vector &spriteOffset, MOSRotating *pOwnerMOSRotating, bool calcNormal);
+	class AtomGroup : public Entity {
 
+	public:
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this AtomGroup's current graphical debug representation to a
-//                  BITMAP of choice.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  Whether to use the limb position of this AtomGroup, or the owner's
-//                  position.
-//                  The color to draw the atoms' pixels as.
-// Return value:    None.
+		EntityAllocation(AtomGroup)
+		SerializableOverrideMethods
+		ClassInfoGetters
 
-	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), bool useLimbPos = false, unsigned char color = 34) const;
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate an AtomGroup object in system memory. Create() should be called before using the object.
+		/// </summary>
+		AtomGroup() { Clear(); }
 
+		/// <summary>
+		/// Copy constructor method used to instantiate a AtomGroup object identical to an already existing one.
+		/// </summary>
+		/// <param name="reference">An AtomGroup object which is passed in by reference.</param>
+		AtomGroup(const AtomGroup &reference) { Clear(); Create(reference); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
+		/// <summary>
+		/// Makes the AtomGroup object ready for use.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create() override;
 
-private:
+		/// <summary>
+		/// Creates a AtomGroup to be identical to another, by deep copy.
+		/// </summary>
+		/// <param name="reference">A reference to the AtomGroup to deep copy.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create(const AtomGroup &reference) { return Create(reference, false); }
 
+		/// <summary>
+		/// Creates an AtomGroup to be identical to another, by deep copy, with the option to only copy atoms that belong to the reference AtomGroup's owner.
+		/// </summary>
+		/// <param name="reference">A reference to the AtomGroup to deep copy.</param>
+		/// <param name="onlyCopyOwnerAtoms">Whether or not to only copy Atoms that belong to the reference AtomGroup's owner directly.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create(const AtomGroup &reference, bool onlyCopyOwnerAtoms);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this AtomGroup, effectively
-//                  resetting the members of this abstraction level only.
-// Arguments:       None.
-// Return value:    None.
+		/// <summary>
+		/// Creates an AtomGroup after the silhouette shape of a passed in MOSRotating by dotting the outline of the sprite with Atoms. 
+		/// The passed in MOSRotating will also be made the owner of this AtomGroup! Ownership of the MOSRotating is NOT transferred!
+		/// </summary>
+		/// <param name="ownerMOSRotating">A pointer to a MOSRotating whose outline will be approximated by Atoms of this AtomGroup, and that will be set as the owner of this AtomGroup.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create(MOSRotating *ownerMOSRotating) { return Create(ownerMOSRotating, m_Material, m_Resolution, m_Depth); }
 
-    void Clear();
+		/// <summary>
+		/// Creates an AtomGroup after the silhouette shape of a passed in MOSRotating by dotting the outline of the sprite with Atoms.
+		/// The passed in MOSRotating will also be made the owner of this AtomGroup! Ownership of the MOSRotating is NOT transferred!
+		/// </summary>
+		/// <param name="ownerMOSRotating">A pointer to an MOSRotating whose outline will be approximated by Atoms of this AtomGroup, and that will be set as the owner of this AtomGroup.</param>
+		/// <param name="material">The Material that the Atoms of this AtomGroup should be.</param>
+		/// <param name="resolution">
+		/// Resolution, or density of the Atoms in representing the MOSRotating's silhouette.
+		/// 1 means highest resolution, 2 means every other pixel on the MOSRotating's edge is covered by an Atom, 3 mean every third, etc.</param>
+		/// <param name="depth">The depth into the sprite that the Atoms should be placed.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create(MOSRotating *ownerMOSRotating, Material const *material, int resolution = 1, int depth = 0);
+#pragma endregion
 
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up an AtomGroup object before deletion from system memory.
+		/// </summary>
+		~AtomGroup() override { Destroy(true); }
 
-    static Entity::ClassInfo m_sClass;
+		/// <summary>
+		/// Destroys and resets (through Clear()) the AtomGroup object.
+		/// </summary>
+		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
+		void Destroy(bool notInherited = false) override;
 
-    // Whether or not the Atom:s were automatically generated based on a sprite, or manually defined
-    bool m_AutoGenerate;
-	// Material of this AtomGroup
-    Material const * m_pMaterial;
-    // Resolution, or density of the Atoms in representing a MOSRotating's silhouette.
-    // 0 means the Atom config wasn't genereated by a silhouette, but defined manually.
-    int m_Resolution;
-    // Depth, or how deep into the bitmap of the owning MO's graphical representation
-    // the Atom:s of this AtomGroup are located, in pixels.
-    int m_Depth;
-    // List of Atoms that constitute the group. Owned by this
-    std::list<Atom *> m_Atoms;
-    // Sub groupings of atoms, not owned in here. Point to atoms owned in m_Atoms.
-	std::unordered_map<long int, std::list<Atom *> > m_SubGroups;
-    // Moment of Inertia for this AtomGroup
-    float m_MomInertia;
-    // The owner of this AtomGroup. The owner is obviously not owned by this AtomGroup.
-    MOSRotating *m_pOwnerMO;
-    // The last position of this AtomGroup when used as a limb.
-    Vector m_LimbPos;
-    // The offset of the wrist/ankle relative to this AtomGroup's
-    // origin when used as a limb.
-    Vector m_JointOffset;
-	// ignore hits with MOs of these IDs
-	std::list<MOID> m_IgnoreMOIDs;
+		/// <summary>
+		/// Resets the entire AtomGroup, including its inherited members, to their default settings or values.
+		/// </summary>
+		void Reset() override { Clear(); Entity::Reset(); }
+#pragma endregion
 
-// TODO: REMOVE THIS")
-    Vector m_TestPos;
+#pragma region Getters and Setters
+		/// <summary>
+		/// Gets the current list of Atoms that make up the group.
+		/// </summary>
+		/// <returns>A const reference to the Atom list.</returns>
+		const std::list<Atom *> & GetAtomList() const { return m_Atoms; }
 
-};
+		/// <summary>
+		/// Gets the current number of Atoms that make up the group.
+		/// </summary>
+		/// <returns>The number of Atoms that make up the group.</returns>
+		int GetAtomCount() const { return m_Atoms.size(); }
 
-} // namespace RTE
+		/// <summary>
+		/// Gets max radius of the AtomGroup through the longest magnitude of all the Atom's offsets.
+		/// </summary>
+		/// <returns>The largest magnitude of Atom's offsets, in pixels.</returns>
+		float CalculateMaxRadius() const;
 
-#endif // File
+		/// <summary>
+		/// Gets the current owner MOSRotating of this AtomGroup.
+		/// </summary>
+		/// <returns>A pointer to the owner.</returns>
+		MOSRotating * GetOwner() const { return m_OwnerMO; }
+
+		/// <summary>
+		/// Sets the current owner MOSRotating of this AtomGroup.
+		/// </summary>
+		/// <param name="newOwner">A pointer to the new owner. Ownership is NOT transferred!</param>
+		void SetOwner(MOSRotating *newOwner);
+
+		/// <summary>
+		/// Gets the Material of this AtomGroup.
+		/// </summary>
+		/// <returns>A const pointer to the Material.</returns>
+		const Material * GetMaterial() const { return (m_Material) ? m_Material : g_SceneMan.GetMaterialFromID(g_MaterialAir); }
+
+		/// <summary>
+		/// Gets whether this AtomGroup's Atoms are to be automatically generated based on a bitmap, or manually specified.
+		/// </summary>
+		/// <returns>Whether this AtomGroup is auto generated from a bitmap or not.</returns>
+		bool AutoGenerate() { return m_AutoGenerate; }
+
+		/// <summary>
+		/// Gets the resolution of this AtomGroup. Basically density of the Atoms in representing a MOSRotating's silhouette.
+		/// </summary>
+		/// <returns>The resolution setting. 0 means the Atom config wasn't generated by a silhouette, but defined manually.</returns>
+		const int GetResolution() const { return m_Resolution; }
+
+		/// <summary>
+		/// Gets the depth, or how deep into the bitmap of the owning MO's graphical representation the Atoms of this AtomGroup are located.
+		/// </summary>
+		/// <returns>The depth, in pixels. If 0, Atoms are right on the bitmap.</returns>
+		const int GetDepth() const { return m_Depth; }
+
+		/// <summary>
+		/// Gets the current position of this AtomGroup as a limb.
+		/// </summary>
+		/// <param name="hFlipped"></param>
+		/// <returns>The absolute limb position in the world.</returns>
+		Vector GetLimbPos(bool hFlipped = false) const { return m_LimbPos.GetFloored() + m_JointOffset.GetXFlipped(hFlipped); }
+
+		/// <summary>
+		/// Sets the current position of this AtomGroup as a limb.
+		/// </summary>
+		/// <param name="newPos">The Vector with the new absolute position.</param>
+		/// <param name="hFlipped"></param>
+		void SetLimbPos(Vector &newPos, bool hFlipped = false) { m_LimbPos = newPos - m_JointOffset.GetXFlipped(hFlipped); }
+
+		/// <summary>
+		/// Gets the current mass moment of inertia of this AtomGroup
+		/// </summary>
+		/// <returns>A float with the moment of inertia, in Kg * SceneUnits^2.</returns>
+		float GetMomentOfInertia();
+#pragma endregion
+
+#pragma region Atom Management
+		/// <summary>
+		/// Adds a new Atom into the internal list that makes up this AtomGroup. Ownership of the Atom IS transferred!
+		/// </summary>
+		/// <param name="newAtom">A pointer to an Atom that will pushed onto the end of the list. Ownership IS transferred!</param>
+		/// <param name="atomID">The subgroup ID that the new Atom will have within the group.</param>
+		void AddAtom(Atom *newAtom, long atomID = 0) { newAtom->SetSubID(atomID); m_Atoms.push_back(newAtom); }
+
+		/// <summary>
+		/// Adds a list of new Atoms to the internal list that makes up this AtomGroup. Ownership of all Atoms in the list IS NOT transferred!
+		/// </summary>
+		/// <param name="atomList">A list of pointers to a Atoms whose copies will be pushed onto the end of this AtomGroup's list. Ownership IS NOT transferred!</param>
+		/// <param name="subID">The desired subgroup IDs of the atoms to be added.</param>
+		/// <param name="offset">An offset that should be applied to all added Atoms.</param>
+		/// <param name="offsetRotation">The rotation of the placed Atoms around the specified offset.</param>
+		void AddAtoms(const std::list<Atom *> &atomList, long subID = 0, const Vector &offset = Vector(), const Matrix &offsetRotation = Matrix());
+
+		/// <summary>
+		/// Removes all Atoms of a specific subgroup ID from this AtomGroup.
+		/// </summary>
+		/// <param name="removeID">The ID of the subgroup of atoms to remove.</param>
+		/// <returns>Whether any Atoms of that subgroup ID were found and removed.</returns>
+		bool RemoveAtoms(long removeID);
+
+		/// <summary>
+		/// Updates the offsets of a subgroup of Atoms in this AtomGroup. This allows chunks representing sub parts of the whole to more closely represent the graphics better.
+		/// </summary>
+		/// <param name="subID">The desired subgroup IDs of the Atoms to update offsets of.</param>
+		/// <param name="newOffset">An offset that should be re-applied to Atoms of that subgroup.</param>
+		/// <param name="newOffsetRotation">The rotation of the updated Atoms around the specified offset.</param>
+		/// <returns>Whether any Atoms of that group was found and updated.</returns>
+		bool UpdateSubAtoms(long subID = 0, const Vector &newOffset = Vector(), const Matrix& newOffsetRotation = Matrix());
+#pragma endregion
+
+#pragma region Travel
+		/// <summary>
+		/// Makes this AtomGroup travel and react when terrain is hit. Effects are directly applied to the owning MOSRotating.
+		/// </summary>
+		/// <param name="travelTime">The amount of time in s that this AtomGroup is supposed to travel.</param>
+		/// <param name="callOnBounce">Whether to call the parent MO's OnBounce function upon bouncing against anything or not.</param>
+		/// <param name="callOnSink">Whether to call the parent MO's OnSink function upon sinking into anything or not.</param>
+		/// <param name="scenePreLocked">Whether the Scene has been pre-locked or not.</param>
+		/// <returns>The amount of time remaining of the travelTime passed in, in seconds. This may only possibly be a non-zero if callOnBounce or callOnSink are true.</returns>
+		float Travel(float travelTime, bool callOnBounce = false, bool callOnSink = false, bool scenePreLocked = false);
+
+		/// <summary>
+		/// Makes this AtomGroup travel and react when terrain is hit. Effects are applied to the passed in variables.
+		/// </summary>
+		/// <param name="position">A reference to a Vector with the starting position of the AtomGroup origin. Will be altered according to where the AtomGroup ends up after done traveling.</param>
+		/// <param name="velocity">A Vector with the total desired velocity of the AtomGroup. Will also be altered according to any collision response.</param>
+		/// <param name="rotation">The current rotation Matrix of the AtomGroup. Will be altered accordingly as travel happens.</param>
+		/// <param name="angVel">The current desired angular velocity of the owner MO, in r/s. Will be altered.</param>
+		/// <param name="didWrap">A bool that will be set to whether the position change involved a wrapping of the scene or not.</param>
+		/// <param name="totalImpulse">A float to be filled out with the total magnitudes of all the forces exerted on this through collisions during this frame.</param>
+		/// <param name="mass">The designated mass of the AtomGroup at this time.</param>
+		/// <param name="travelTime">The amount of time in seconds that this AtomGroup is supposed to travel.</param>
+		/// <param name="callOnBounce">Whether to call the parent MO's OnBounce function upon bouncing against anything or not.</param>
+		/// <param name="callOnSink">Whether to call the parent MO's OnSink function upon sinking into anything or not.</param>
+		/// <param name="scenePreLocked">Whether the Scene has been pre-locked or not.</param>
+		/// <returns>The amount of time remaining of the travelTime passed in, in seconds. This may only possibly be a non-zero if callOnBounce or callOnSink are true.</returns>
+		/// <remarks>
+		/// Pseudocode explaining how this works can be found at: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Notes-on-AtomGroup::Travel
+		/// </remarks>
+		float Travel(Vector &position, Vector &velocity, Matrix &rotation, float &angVel, bool &didWrap, Vector &totalImpulse, float mass, float travelTime, bool callOnBounce = false, bool callOnSink = false, bool scenePreLocked = false);
+
+		/// <summary>
+		/// Makes this AtomGroup travel without rotation and react with the scene by pushing against it.
+		/// </summary>
+		/// <param name="position">A reference to a Vector with the starting position of the AtomGroup origin. Will be altered according to where the AtomGroup ends up after done traveling.</param>
+		/// <param name="velocity">A Vector with the total desired velocity of the AtomGroup. Will not be altered.</param>
+		/// <param name="pushForce">The maximum force that the push against other stuff in the scene can have, in kg * m/s^2.</param>
+		/// <param name="didWrap">A bool that will be set to whether the position change involved a wrapping of the scene or not.</param>
+		/// <param name="travelTime">The amount of time in seconds that this AtomGroup is supposed to travel.</param>
+		/// <param name="callOnBounce">Whether to call the parent MO's OnBounce function upon bouncing against anything or not.</param>
+		/// <param name="callOnSink">Whether to call the parent MO's OnSink function upon sinking into anything or not.</param>
+		/// <param name="scenePreLocked">Whether the Scene has been pre-locked or not.</param>
+		/// <returns>A Vector with the resulting push impulse force, in kg * m/s.</returns>
+		Vector PushTravel(Vector &position, Vector velocity, float pushForce, bool &didWrap, float travelTime, bool callOnBounce = false, bool callOnSink = false, bool scenePreLocked = false);
+
+		/// <summary>
+		/// Makes this AtomGroup travel as a pushing entity relative to the position of the owning MOSRotating.
+		/// If stuff in the scene is hit, resulting forces are be added to the owning MOSRotating's impulse forces.
+		/// </summary>
+		/// <param name="jointPos">A reference to a Vector with the world position of the joint of the of the path along which this AtomGroup is being pushed.</param>
+		/// <param name="velocity">A Vector with the velocity of the owning MOSRotating.</param>
+		/// <param name="rotation">A Matrix with the rotation of the owning MOSRotating.</param>
+		/// <param name="limbPath">A LimbPath which this AtomGroup should travel along.</param>
+		/// <param name="travelTime">The amount of time in seconds that this AtomGroup is supposed to travel.</param>
+		/// <param name="restarted">Pointer to a bool which gets set to true if the LimbPath got restarted during this push. It does NOT get initialized to false!</param>
+		/// <param name="affectRotation">Whether the forces created by this should have rotational leverage on the owner or only have translational effect.</param>
+		/// <returns>Whether the LimbPath passed in could start free of terrain or not.</returns>
+		bool PushAsLimb(const Vector &jointPos, const Vector &velocity, const Matrix &rotation, LimbPath &limbPath, const float travelTime, bool *restarted = nullptr, bool affectRotation = true);
+
+		/// <summary>
+		/// Makes this AtomGroup travel as a lifeless limb, constrained to a radius around the joint pin in the center.
+		/// </summary>
+		/// <param name="ownerPos">A Vector with the world position of the owner MOSRotating.</param>
+		/// <param name="jointOffset">A Vector with the rotated offset of the joint that this should flail around in a radius.</param>
+		/// <param name="limbRadius">The radius/range of the limb this is to simulate.</param>
+		/// <param name="velocity">A Vector with the velocity of the owning MOSRotating.</param>
+		/// <param name="angVel">A float with the angular velocity in rad/s of the owning MOSRotating.</param>
+		/// <param name="mass">The mass of this dead weight limb.</param>
+		/// <param name="travelTime">The amount of time in seconds that this AtomGroup is supposed to travel.</param>
+		void FlailAsLimb(const Vector &ownerPos, const Vector &jointOffset, const float limbRadius, const Vector &velocity, const float angVel, const float mass, const float travelTime);
+#pragma endregion
+
+#pragma region Collision
+		/// <summary>
+		/// Adds a MOID that this AtomGroup should ignore collisions with during its next Travel sequence.
+		/// </summary>
+		/// <param name="moidToIgnore">The MOID to add to the ignore list.</param>
+		void AddMOIDToIgnore(MOID moidToIgnore) { m_IgnoreMOIDs.push_back(moidToIgnore); }
+
+		/// <summary>
+		/// Checks whether this AtomGroup is set to ignore collisions with a MO of a specific MOID.
+		/// </summary>
+		/// <param name="whichMOID">The MOID to check if it is ignored.</param>
+		/// <returns>Whether or not this MOID is being ignored.</returns>
+		bool IsIgnoringMOID(MOID whichMOID) { return (*(m_Atoms.begin()))->IsIgnoringMOID(whichMOID); }
+
+		/// <summary>
+		/// Clears the list of MOIDs that this AtomGroup is set to ignore collisions with during its next Travel sequence.
+		/// This should be done each frame so that fresh MOIDs can be re-added. (MOIDs are only valid during a frame).
+		/// </summary>
+		void ClearMOIDIgnoreList() { m_IgnoreMOIDs.clear(); }
+
+		/// <summary>
+		/// Gets whether any of the Atoms in this AtomGroup are on top of terrain pixels.
+		/// </summary>
+		/// <returns>Whether any Atom of this AtomGroup is on top of a terrain pixel.</returns>
+		bool InTerrain() const;
+
+		/// <summary>
+		/// Gets the ratio of how many Atoms of this AtomGroup that are on top of intact terrain pixels.
+		/// </summary>
+		/// <returns>The ratio of Atoms on top of terrain pixels, form 0 to 1.0.</returns>
+		float RatioInTerrain() const;
+
+		/// <summary>
+		/// Checks whether any of the Atoms in this AtomGroup are on top of terrain pixels, and if so, attempt to move the OwnerMO out so none of the Atoms are inside any terrain pixels anymore.
+		/// </summary>
+		/// <param name="position">Current position of the owner MO.</param>
+		/// <param name="rotation">Current rotation of the owner MO.</param>
+		/// <param name="strongerThan">Only attempt to move out of materials stronger than this specific ID.</param>
+		/// <returns>Whether any intersection was successfully resolved. Will return true even if there wasn't any intersections to begin with.</returns>
+		bool ResolveTerrainIntersection(Vector &position, Matrix &rotation, unsigned char strongerThan = 0) const;
+
+		/// <summary>
+		/// Checks whether any of the Atoms in this AtomGroup are on top of MOSprites, and if so, attempt to move the OwnerMO out so none of the Atoms are inside the other MOSprite's silhouette anymore.
+		/// </summary>
+		/// <param name="position">Current position of the owner MO.</param>
+		/// <param name="rotation">Current rotation of the owner MO.</param>
+		/// <returns>Whether all intersections were successfully resolved.</returns>
+		bool ResolveMOSIntersection(Vector &position, Matrix &rotation);
+#pragma endregion
+
+#pragma region Debug
+		/// <summary>
+		/// Draws this AtomGroup's current graphical debug representation to a BITMAP of choice.
+		/// </summary>
+		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
+		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
+		/// <param name="useLimbPos">Whether to use the limb position of this AtomGroup, or the owner's position.</param>
+		/// <param name="color">The color to draw the Atoms' pixels as.</param>
+		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), bool useLimbPos = false, unsigned char color = 34) const;
+#pragma endregion
+
+	protected:
+
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
+
+		std::list<Atom *> m_Atoms; //!< List of Atoms that constitute the group. Owned by this.
+		std::unordered_map<long, std::list<Atom *>> m_SubGroups; //!< Sub groupings of Atoms. Points to atoms owned in m_Atoms. Not owned.
+
+		MOSRotating *m_OwnerMO; //!< The owner of this AtomGroup. The owner is obviously not owned by this AtomGroup.
+		const Material *m_Material; //!< Material of this AtomGroup
+
+		bool m_AutoGenerate; //!< // Whether or not the Atoms were automatically generated based on a sprite, or manually defined.
+		int m_Resolution; //!< Resolution, or density of the Atoms in representing a MOSRotating's silhouette. 0 means the Atom config wasn't generated by a silhouette, but defined manually.
+		int m_Depth; //!< Depth, or how deep into the bitmap of the owning MO's graphical representation the Atoms of this AtomGroup are located, in pixels.
+
+		Vector m_JointOffset; //!< The offset of the wrist/ankle relative to this AtomGroup's origin when used as a limb.
+		Vector m_LimbPos; //!< The last position of this AtomGroup when used as a limb.
+
+		float m_MomInertia; //!< Moment of Inertia for this AtomGroup.
+
+		std::list<MOID> m_IgnoreMOIDs; //!< Ignore hits with MOs of these IDs.
+
+	private:
+
+#pragma region Create Breakdown
+		/// <summary>
+		/// Generates an AtomGroup using the owner MOSRotating's sprite outline.
+		/// </summary>
+		/// <param name="ownerMOSRotating">MOSRotating whose outline will be approximated by Atoms of this AtomGroup.</param>
+		void GenerateAtomGroup(MOSRotating *ownerMOSRotating);
+
+		/// <summary>
+		/// Create and add an Atom to this AtomGroup's list of Atoms. This is called during GenerateAtomGroup().
+		/// </summary>
+		/// <param name="ownerMOSRotating">MOSRotating whose outline will be approximated by Atoms of this AtomGroup.</param>
+		/// <param name="spriteOffset">Sprite offset relative to the owner MOSRotating.</param>
+		/// <param name="x">X coordinate in the sprite frame.</param>
+		/// <param name="y">Y coordinate in the sprite frame.</param>
+		/// <param name="calcNormal">Whether to set a normal for the Atom. Should be true for surface Atoms.</param>
+		void AddAtomToGroup(MOSRotating *ownerMOSRotating, const Vector &spriteOffset, int x, int y, bool calcNormal);
+#pragma endregion
+
+		/// <summary>
+		/// Clears all the member variables of this AtomGroup, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+	};
+}
+#endif

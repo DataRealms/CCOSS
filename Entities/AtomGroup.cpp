@@ -1563,7 +1563,7 @@ namespace RTE {
 					// Scan RIGHT to LEFT, placing one Atom on each first encountered silhouette edge
 					for (x = spriteWidth - 1; x >= 0; --x) {
 						// Detect if we are crossing a silhouette boundary.
-						if (getpixel(refSprite, x, y) != g_MaskColor) {
+						if (getpixel(refSprite, x, y) != g_MaskColor && getpixel(checkBitmap, x, y) == g_MaskColor) {
 							// Mark that an Atom has been put in this location, to avoid duplicate Atoms
 							putpixel(checkBitmap, x, y, 99);
 							AddAtomToGroup(ownerMOSRotating, spriteOffset, x, y, true);
@@ -1578,6 +1578,7 @@ namespace RTE {
 					for (y = 0; y < spriteHeight; ++y) {
 						// Detect if we are crossing a silhouette boundary, but make sure Atom wasn't already placed during the horizontal scans.
 						if (getpixel(refSprite, x, y) != g_MaskColor && getpixel(checkBitmap, x, y) == g_MaskColor) {
+							putpixel(checkBitmap, x, y, 99);
 							AddAtomToGroup(ownerMOSRotating, spriteOffset, x, y, true);
 							break;
 						}

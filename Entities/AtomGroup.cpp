@@ -380,7 +380,7 @@ namespace RTE {
 			// The amount of rotation to be achieved during the time slot, in radians.
 			float rotDelta = angVel * timeLeft;
 
-			// Cap the segment if the oration is too severe. This will chunk the segment into several in order to more closely approximate the arc an Atom on a rotating body will trace.
+			// Cap the segment if the rotation is too severe. This will chunk the segment into several in order to more closely approximate the arc an Atom on a rotating body will trace.
 			if (std::fabs(rotDelta) > segRotLimit) {
 				segRatio = segRotLimit / std::fabs(rotDelta);
 				rotDelta = (rotDelta > 0) ? segRotLimit : -segRotLimit;

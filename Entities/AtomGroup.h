@@ -313,10 +313,9 @@ namespace RTE {
 		/// Checks whether any of the Atoms in this AtomGroup are on top of terrain pixels, and if so, attempt to move the OwnerMO out so none of the Atoms are inside any terrain pixels anymore.
 		/// </summary>
 		/// <param name="position">Current position of the owner MO.</param>
-		/// <param name="rotation">Current rotation of the owner MO.</param>
 		/// <param name="strongerThan">Only attempt to move out of materials stronger than this specific ID.</param>
 		/// <returns>Whether any intersection was successfully resolved. Will return true even if there wasn't any intersections to begin with.</returns>
-		bool ResolveTerrainIntersection(Vector &position, Matrix &rotation, unsigned char strongerThan = 0) const;
+		bool ResolveTerrainIntersection(Vector &position, unsigned char strongerThan = 0) const;
 
 		/// <summary>
 		/// Checks whether any of the Atoms in this AtomGroup are on top of MOSprites, and if so, attempt to move the OwnerMO out so none of the Atoms are inside the other MOSprite's silhouette anymore.

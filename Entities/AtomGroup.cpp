@@ -1280,7 +1280,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AtomGroup::ResolveTerrainIntersection(Vector &position, Matrix &rotation, unsigned char strongerThan) const {
+	bool AtomGroup::ResolveTerrainIntersection(Vector &position, unsigned char strongerThan) const {
 		std::list<Atom *> intersectingAtoms;
 		MOID hitMaterial = g_MaterialAir;
 
@@ -1292,8 +1292,7 @@ namespace RTE {
 
 		// First go through all Atoms to find the first intersection and get the intersected MO
 		for (Atom *atom : m_Atoms) {
-			atomOffset = atom->GetOffset().GetXFlipped(m_OwnerMO->IsHFlipped());
-			atomOffset *= rotation;
+			atomOffset = m_OwnerMO->RotateOffset(atom->GetOffset());
 			atom->SetupPos(position + atomOffset);
 			atomPos = atom->GetCurrentPos();
 			hitMaterial = g_SceneMan.GetTerrain()->GetPixel(atomPos.GetFloorIntX(), atomPos.GetFloorIntY());

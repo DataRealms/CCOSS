@@ -799,6 +799,9 @@ namespace RTE {
 			delta[X] = nextPosition.GetFloorIntX() - intPos[X];
 			delta[Y] = nextPosition.GetFloorIntY() - intPos[Y];
 
+			hit[X] = false;
+			hit[Y] = false;
+
 			if (delta[X] == 0 && delta[Y] == 0) {
 				break;
 			}
@@ -844,9 +847,6 @@ namespace RTE {
 
 			if (delta[X] > 1000) { delta[X] = 1000; }
 			if (delta[Y] > 1000) { delta[Y] = 1000; }
-
-			hit[X] = false;
-			hit[Y] = false;
 
 			// Bresenham's line drawing algorithm execution
 			for (int domSteps = 0; domSteps < delta[dom] && !(hit[X] || hit[Y]); ++domSteps) {

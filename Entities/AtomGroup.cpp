@@ -371,7 +371,7 @@ namespace RTE {
 				}
 #ifdef DEBUG_BUILD
 				// Draw the positions of the Atoms at the start of each segment, for visual debugging.
-				putpixel(g_SceneMan.GetMOColorBitmap(), atom->GetCurrentPos().GetIntX(), atom->GetCurrentPos().GetIntY(), 122);
+				//putpixel(g_SceneMan.GetMOColorBitmap(), atom->GetCurrentPos().GetIntX(), atom->GetCurrentPos().GetIntY(), 122);
 #endif
 			}
 
@@ -752,7 +752,7 @@ namespace RTE {
 
 		HitData hitData;
 
-		std::map<MOID, std::set<Atom *>>MOIgnoreMap;
+		std::map<MOID, std::set<Atom *>> MOIgnoreMap;
 		std::map<MOID, std::deque<std::pair<Atom *, Vector>>> hitMOAtoms;
 		std::deque<std::pair<Atom *, Vector>> hitTerrAtoms;
 		std::deque<std::pair<Atom *, Vector>> penetratingAtoms;
@@ -798,9 +798,6 @@ namespace RTE {
 			const Vector nextPosition = position + trajectory;
 			delta[X] = nextPosition.GetFloorIntX() - intPos[X];
 			delta[Y] = nextPosition.GetFloorIntY() - intPos[Y];
-
-			hit[X] = false;
-			hit[Y] = false;
 
 			if (delta[X] == 0 && delta[Y] == 0) {
 				break;
@@ -848,6 +845,9 @@ namespace RTE {
 			if (delta[X] > 1000) { delta[X] = 1000; }
 			if (delta[Y] > 1000) { delta[Y] = 1000; }
 
+			hit[X] = false;
+			hit[Y] = false;
+
 			// Bresenham's line drawing algorithm execution
 			for (int domSteps = 0; domSteps < delta[dom] && !(hit[X] || hit[Y]); ++domSteps) {
 				if (subStepped) { ++subSteps; }
@@ -880,7 +880,7 @@ namespace RTE {
 					if (hitMOs) {
 						tempMOID = g_SceneMan.GetMOIDPixel(intPos[X] + flippedOffset.GetFloorIntX(), intPos[Y] + flippedOffset.GetFloorIntY());
 						// Check the ignore map for Atoms that should ignore hits against certain MOs.
-						if (tempMOID != g_NoMOID && (MOIgnoreMap.count(tempMOID) != 0)) { ignoreHit = (MOIgnoreMap.at(tempMOID).count(atom) != 0); }
+						if (tempMOID != g_NoMOID && (MOIgnoreMap.count(tempMOID) != 0)) { ignoreHit = MOIgnoreMap.at(tempMOID).count(atom) != 0; }
 					}
 
 					if (hitMOs && tempMOID && !ignoreHit) {
@@ -891,7 +891,7 @@ namespace RTE {
 							hitMOAtoms.insert({ tempMOID, newDeque });
 						} else {
 							// If another Atom of this group has already hit this same MO during this step, go ahead and add the new Atom to the corresponding deque for that MOID.
-							(hitMOAtoms.at(tempMOID)).push_back({ atom, flippedOffset });
+							hitMOAtoms.at(tempMOID).push_back({ atom, flippedOffset });
 						}
 						// Count the number of Atoms of this group that hit MOs this step. Used to properly distribute the mass of the owner MO in later collision responses during this step.
 						atomsHitMOsCount++;
@@ -902,7 +902,7 @@ namespace RTE {
 
 #ifdef DEBUG_BUILD
 					// Draw the positions of the hit points on screen for easy debugging.
-					putpixel(g_SceneMan.GetMOColorBitmap(), std::floor(position.m_X + flippedOffset.m_X), std::floor(position.m_Y + flippedOffset.m_Y), 122);
+					//putpixel(g_SceneMan.GetMOColorBitmap(), std::floor(position.m_X + flippedOffset.m_X), std::floor(position.m_Y + flippedOffset.m_Y), 122);
 #endif
 				}
 
@@ -977,12 +977,12 @@ namespace RTE {
 								//if (hitData.HitPoint.IsZero()) {
 									// NOTE: THis can actually be wrong since there may not in fact be a corner pixel, but two pixels hit on X and Y directions
 									hitData.HitPoint = (sub == X) ? Vector(static_cast<float>(hitPos[X]), static_cast<float>(intPos[Y])) : Vector(static_cast<float>(intPos[X]), static_cast<float>(hitPos[Y]));
-							/*
-							// We hit pixels in both sub and dom directions on the other MO, a corner hit.
-							} else {
-								hitData.HitPoint.SetXY(hitPos[X], hitPos[Y]);
-							}
-							*/
+								/*
+								// We hit pixels in both sub and dom directions on the other MO, a corner hit.
+								} else {
+									hitData.HitPoint.SetXY(hitPos[X], hitPos[Y]);
+								}
+								*/
 								hitData.BitmapNormal[sub] = static_cast<float>(-increment[sub]);
 							}
 
@@ -1014,7 +1014,7 @@ namespace RTE {
 							}
 						}
 					}
-					// If any MO's were hit, continue on to the next leg without doing terrain stuff now.
+					// If any MOs were hit, continue on to the next leg without doing terrain stuff now.
 					// Any terrain collisions will be taken care of on the next leg, when the effects of these MO hits have been applied.
 					hitTerrAtoms.clear();
 				}
@@ -1030,14 +1030,14 @@ namespace RTE {
 
 					massDist = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
-					for (std::deque<std::pair<Atom *, Vector>>::iterator aoItr = hitTerrAtoms.begin(); aoItr != hitTerrAtoms.end(); ) {
-						if (g_SceneMan.WillPenetrate(intPos[X] + (*aoItr).second.GetFloorIntX(), intPos[Y] + (*aoItr).second.GetFloorIntY(), forceVel, massDist)) {
-							// Move the penetrating Atom to the pen. list from the coll. list.
-							penetratingAtoms.push_back({ (*aoItr).first, (*aoItr).second });
-							aoItr = hitTerrAtoms.erase(aoItr);
+					for (std::deque<std::pair<Atom *, Vector>>::iterator atomItr = hitTerrAtoms.begin(); atomItr != hitTerrAtoms.end(); ) {
+						if (g_SceneMan.WillPenetrate(intPos[X] + (*atomItr).second.GetFloorIntX(), intPos[Y] + (*atomItr).second.GetFloorIntY(), forceVel, massDist)) {
+							// Move the penetrating Atom to the penetrating list from the collision list.
+							penetratingAtoms.push_back({ (*atomItr).first, (*atomItr).second });
+							atomItr = hitTerrAtoms.erase(atomItr);
 							somethingPenetrated = true;
 						} else {
-							++aoItr;
+							++atomItr;
 						}
 					}
 				} while (!hitTerrAtoms.empty() && somethingPenetrated);
@@ -1054,7 +1054,7 @@ namespace RTE {
 					didWrap = !g_SceneMan.WrapPosition(intPos[X], intPos[Y]) && didWrap;
 
 					// Call the call-on-bounce function, if requested.
-					//if (m_OwnerMO && callOnBounce) { halted = m_OwnerMO->OnBounce(position); }               
+					//if (m_OwnerMO && callOnBounce) { halted = m_OwnerMO->OnBounce(position); }
 
 					// Calculate the distributed mass that each bouncing Atom has.
 					massDist = mass / static_cast<float>((hitTerrAtoms.size()/* + atomsHitMOsCount*/) * (m_Resolution ? m_Resolution : 1));
@@ -1523,9 +1523,9 @@ namespace RTE {
 
 		for (const Atom *atom : m_Atoms) {
 			if (!useLimbPos) {
-				atomPos = (m_OwnerMO->GetPos() + (atom->GetOffset().GetXFlipped(m_OwnerMO->m_HFlipped))).GetFloored();
+				atomPos = (m_OwnerMO->GetPos() + (atom->GetOffset().GetXFlipped(m_OwnerMO->m_HFlipped) * m_OwnerMO->GetRotMatrix())).GetFloored();
 			} else {
-				atomPos = (m_LimbPos + (atom->GetOffset().GetXFlipped(m_OwnerMO->m_HFlipped))).GetFloored();
+				atomPos = (m_LimbPos + (atom->GetOffset().GetXFlipped(m_OwnerMO->m_HFlipped) * m_OwnerMO->GetRotMatrix())).GetFloored();
 			}
 			// Draw normal first, then draw the Atom position
 			if (!atom->GetNormal().IsZero()) {

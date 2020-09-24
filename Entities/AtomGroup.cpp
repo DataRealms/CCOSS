@@ -1120,7 +1120,9 @@ namespace RTE {
 
 				// All Atoms must have penetrated and therefore the entire group has sunken into the terrain. Get the penetration resistance results and apply them to the owner.
 				else if (!penetratingAtoms.empty()) {
-					//bool sinkHit = hit[dom] = hit[sub] = true;
+					//bool sinkHit = true;
+					hit[dom] = true;
+					hit[sub] = true;
 
 					// Call the call-on-sink function, if requested.
 					//if (m_OwnerMO && callOnSink) { halted = m_OwnerMO->OnSink(position); }

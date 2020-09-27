@@ -856,6 +856,7 @@ void HDFirearm::Update()
                     pShell->SetVel(m_Vel + shellVel);
                     pShell->SetRotAngle(m_Rotation.GetRadAngle());
                     pShell->SetAngularVel(pShell->GetAngularVel() + (m_ShellAngVelRange * RandomNormalNum()));
+					pShell->SetHFlipped(m_HFlipped);
 //                  // Set the ejected shell to not hit this HeldDevice's parent, if applicable
 //                  if (m_FireIgnoresThis)
 //                      pParticle->SetWhichMOToNotHit(pRootParent, 1.0f);

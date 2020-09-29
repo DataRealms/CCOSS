@@ -3485,6 +3485,7 @@ void AHuman::Update()
     ////////////////////////////////////
     // Fire/Activate held devices
 
+	ThrownDevice *pThrown = nullptr;
     if (m_pFGArm && m_pFGArm->IsAttached())
     {
         // DOn't reach toward anything
@@ -3502,7 +3503,7 @@ void AHuman::Update()
         // Throw whatever is held if it's a thrown device
         else if (m_pFGArm->GetHeldMO())
         {
-            ThrownDevice *pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
+            pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
             if (pThrown)
             {
                 if (m_Controller.IsState(WEAPON_FIRE))
@@ -3568,6 +3569,10 @@ void AHuman::Update()
         else if (m_ArmsState == THROWING_RELEASE)
             m_pFGArm->SetHandPos(m_Pos + (m_HolsterOffset + Vector(15, -15)).GetXFlipped(m_HFlipped));
     }
+
+	if (!pThrown && m_ArmsState == THROWING_PREP) {
+		m_ArmsState = WEAPON_READY;
+	}
 
     if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsHeldDevice())
     {

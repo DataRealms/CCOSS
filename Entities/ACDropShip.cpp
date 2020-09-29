@@ -893,22 +893,4 @@ void ACDropShip::ResetEmissionTimers()
     if (m_pULThruster && m_pULThruster->IsAttached())
         m_pULThruster->ResetEmissionTimers();
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#ifdef DEBUG_BUILD
-void ACDropShip::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
-    ACraft::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (mode == g_DrawColor) {
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
-        release_bitmap(pTargetBitmap);
-
-        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
-//        m_pDeepGroup->Draw(pTargetBitmap, targetPos, false, 13);
-    }
-}
-#endif
 } // namespace RTE

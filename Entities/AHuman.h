@@ -655,7 +655,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-	void ReloadFirearm();
+	void ReloadFirearm() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -693,7 +693,7 @@ ClassInfoGetters
 // Return value:    Whether gold was spotted by this ray cast. If so, foundLocation
 //                  has been filled out with the absolute location of the gold.
 
-	bool LookForGold(float FOVSpread, float range, Vector &foundLocation);
+	bool LookForGold(float FOVSpread, float range, Vector &foundLocation) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

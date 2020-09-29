@@ -511,8 +511,9 @@ Vector AHuman::GetCPUPos() const
 
 Vector AHuman::GetEyePos() const
 {
-    if (m_pHead && m_pHead->IsAttached())
-        return m_Pos + m_pHead->GetParentOffset() * 1.2;
+	if (m_pHead && m_pHead->IsAttached()) {
+		return m_Pos + m_pHead->GetParentOffset() * 1.2F;
+	}
 
     return m_Pos;
 }
@@ -1289,7 +1290,7 @@ bool AHuman::EquipShieldInBGArm()
     {
         pShield = dynamic_cast<HeldDevice *>(*itr);
         // Found proper device to equip, so make the switch!
-        if (pShield && pShield->IsShield() || pShield->IsDualWieldable())
+        if (pShield && (pShield->IsShield() || pShield->IsDualWieldable()))
         {
             // Erase the inventory entry containing the device we now have switched to
             *itr = 0;
@@ -1386,7 +1387,7 @@ bool AHuman::FirearmIsReady() const
     // Check if the currently held device is already the desired type
     if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsSomething())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pWeapon && pWeapon->GetRoundInMagCount() != 0)
             return true;
     }
@@ -1405,7 +1406,7 @@ bool AHuman::ThrowableIsReady() const
     // Check if the currently held thrown device is already the desired type
     if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsSomething())
     {
-        ThrownDevice *pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
+        const ThrownDevice *pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
         if (pThrown)// && pThrown->blah() > 0)
             return true;
     }
@@ -1423,7 +1424,7 @@ bool AHuman::FirearmIsEmpty() const
 {
     if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pWeapon && pWeapon->GetRoundInMagCount() == 0)
             return true;
     }
@@ -1441,7 +1442,7 @@ bool AHuman::FirearmNeedsReload() const
 {
     if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pWeapon && pWeapon->NeedsReloading())
             return true;
     }
@@ -1459,7 +1460,7 @@ bool AHuman::FirearmIsSemiAuto() const
 {
     if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         return pWeapon && !pWeapon->IsFullAuto();
     }
     return false;
@@ -1473,13 +1474,14 @@ bool AHuman::FirearmIsSemiAuto() const
 // Arguments:       None.
 // Return value:    None.
 
-void AHuman::ReloadFirearm()
+void AHuman::ReloadFirearm() const
 {
     if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
         HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-        if (pWeapon)
-            pWeapon->Reload();
+		if (pWeapon) {
+			pWeapon->Reload();
+		}
     }
 }
 
@@ -1495,7 +1497,7 @@ int AHuman::FirearmActivationDelay() const
     // Check if the currently held device is already the desired type
     if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsSomething())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pWeapon)
             return pWeapon->GetActivationDelay();
     }
@@ -1593,7 +1595,7 @@ bool AHuman::Look(float FOVSpread, float range)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Casts a material detecting ray in the direction of where this is facing.
 
-bool AHuman::LookForGold(float FOVSpread, float range, Vector &foundLocation)
+bool AHuman::LookForGold(float FOVSpread, float range, Vector &foundLocation) const
 {
     Vector ray(m_HFlipped ? -range : range, 0);
 	ray.DegRotate(FOVSpread * RandomNormalNum());
@@ -1812,38 +1814,30 @@ void AHuman::UpdateAI()
     ///////////////////////////////////////////////
     // React to relevant AlarmEvents
 
-    const list<AlarmEvent> &events = g_MovableMan.GetAlarmEvents();
-    if (!events.empty())
-    {
-        Vector alarmVec;
-        Vector sensorPos = GetEyePos();
-        for (list<AlarmEvent>::const_iterator aeItr = events.begin(); aeItr != events.end(); ++aeItr)
-        {
-            // Caused by some other team's activites - alarming!
-            if (aeItr->m_Team != m_Team)
-            {
-                // See how far away the alarm situation is
-                alarmVec = g_SceneMan.ShortestDistance(sensorPos, aeItr->m_ScenePos);
-                // Only react if the alarm is within range and this is perceptive enough to hear it
-                if (alarmVec.GetLargest() <= aeItr->m_Range * m_Perceptiveness)
-                {
+	const list<AlarmEvent> &events = g_MovableMan.GetAlarmEvents();
+	if (!events.empty()) {
+		Vector alarmVec;
+		Vector sensorPos = GetEyePos();
+		for (const AlarmEvent &alarmEvent : events) {
+			// Caused by some other team's activites - alarming!
+			if (alarmEvent.m_Team != m_Team) {
+				// See how far away the alarm situation is
+				alarmVec = g_SceneMan.ShortestDistance(sensorPos, alarmEvent.m_ScenePos);
+				// Only react if the alarm is within range and this is perceptive enough to hear it
+				if (alarmVec.GetLargest() <= alarmEvent.m_Range * m_Perceptiveness) {
 					Vector zero;
-                    // Now check if we have line of sight to the alarm point
-                    // Don't check all the way to the target, we are checking for no obstacles, and target will be an obstacle in itself
-                    if (g_SceneMan.CastObstacleRay(sensorPos, alarmVec * 0.9, zero, zero, m_RootMOID, IgnoresWhichTeam(), g_MaterialGrass, 5) < 0)
-                    {
-                        // If this is the same alarm location as last, then don't repeat the signal
-                        if (g_SceneMan.ShortestDistance(m_LastAlarmPos, aeItr->m_ScenePos).GetLargest() > 10)
-                        {
-                            // Yes! WE ARE ALARMED!
-                            AlarmPoint(aeItr->m_ScenePos);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-    }
+					// Now check if we have line of sight to the alarm point
+					// Don't check all the way to the target, we are checking for no obstacles, and target will be an obstacle in itself
+					if (g_SceneMan.CastObstacleRay(sensorPos, alarmVec * 0.9F, zero, zero, m_RootMOID, IgnoresWhichTeam(), g_MaterialGrass, 5) < 0 && g_SceneMan.ShortestDistance(m_LastAlarmPos, alarmEvent.m_ScenePos).GetLargest() > 10) {
+						// If this is the same alarm location as last, then don't repeat the signal
+							// Yes! WE ARE ALARMED!
+						AlarmPoint(alarmEvent.m_ScenePos);
+						break;
+					}
+				}
+			}
+		}
+	}
 
     ////////////////////////////////////////////////
     // AI MODES
@@ -1906,10 +1900,10 @@ void AHuman::UpdateAI()
         // Calculate the path to the target brain if need for refresh (note updating each pathfindingupdated causes small chug, maybe space em out with a timer?)
         // Also if we're way off form the path, or haven't made progress toward the current waypoint in a while, update the path to see if we can improve
         // Also if we seem to have completed the path to the current waypoint, we should update to get the path to the next waypoint
-        if (m_UpdateMovePath || (m_ProgressTimer.IsPastSimMS(10000) && m_DeviceState != DIGGING) || (m_MovePath.empty() && m_MoveVector.GetLargest() < m_CharHeight * 0.5f))// || (m_MoveVector.GetLargest() > m_CharHeight * 2))// || g_SceneMan.GetScene()->PathFindingUpdated())
+        if (m_UpdateMovePath || (m_ProgressTimer.IsPastSimMS(10000) && m_DeviceState != DIGGING) || (m_MovePath.empty() && m_MoveVector.GetLargest() < m_CharHeight * 0.5F))// || (m_MoveVector.GetLargest() > m_CharHeight * 2))// || g_SceneMan.GetScene()->PathFindingUpdated())
         {
             // Also never update while jumping
-            if (m_DeviceState != JUMPING)
+            if (m_ObstacleState != JUMPING)
                 UpdateMovePath();
         }
 
@@ -1973,8 +1967,8 @@ void AHuman::UpdateAI()
     // Brain hunting
     else if (m_AIMode == AIMODE_BRAINHUNT)
     {
-        // Just set up the closest brain target and switch to GOTO mode
-        Actor *pTargetBrain = g_MovableMan.GetClosestBrainActor(m_Team == 0 ? 1 : 0, m_Pos);
+        // Just set up the closest brain as a target and switch to GOTO mode
+        const Actor *pTargetBrain = g_MovableMan.GetClosestBrainActor(m_Team == 0 ? 1 : 0, m_Pos);
         if (pTargetBrain)
         {
             m_UpdateMovePath = true;
@@ -2606,12 +2600,12 @@ void AHuman::UpdateAI()
         // Got the height, now wait until we crest the top and start falling again
         if (m_JumpState == APEXJUMP)
         {
-			Vector notUsed;
+			Vector notUsedInner;
 			
             m_PointingTarget = m_JumpTarget;
 
             // We are falling again, and we can still see the target! start adjusting our aim and jet nozzle forward
-            if (m_Vel.m_Y > 4.0 && !g_SceneMan.CastStrengthRay(cpuPos, m_JumpTarget - cpuPos, 5, notUsed, 3))
+            if (m_Vel.m_Y > 4.0 && !g_SceneMan.CastStrengthRay(cpuPos, m_JumpTarget - cpuPos, 5, notUsedInner, 3))
             {
                 m_DeviceState = POINTING;
                 m_JumpState = LANDJUMP;
@@ -2628,7 +2622,7 @@ void AHuman::UpdateAI()
                 m_JumpTimer.Reset();
             }
             // If we've fallen below the target again, then abort the jump
-            else if (cpuPos.m_Y > m_JumpTarget.m_Y && g_SceneMan.CastStrengthRay(cpuPos, g_SceneMan.ShortestDistance(cpuPos, m_JumpTarget), 5, notUsed, 3))
+            else if (cpuPos.m_Y > m_JumpTarget.m_Y && g_SceneMan.CastStrengthRay(cpuPos, g_SceneMan.ShortestDistance(cpuPos, m_JumpTarget), 5, notUsedInner, 3))
             {
                 // Set the move target back to the ledge, to undo any checked off points we may have seen while hovering oer teh edge
                 m_MoveTarget = m_JumpTarget;
@@ -2642,7 +2636,7 @@ void AHuman::UpdateAI()
         // We are high and falling again, now go forward to land on top of the ledge
         if (m_JumpState == LANDJUMP)
         {
-			Vector notUsed;
+			Vector notUsedInner;
 			
             m_PointingTarget = m_JumpTarget;
 
@@ -2653,7 +2647,7 @@ void AHuman::UpdateAI()
             // If we've fallen below the target again, then abort the jump
             // If we're flying past the target too, end the jump
             // Lastly, if we're flying way over the target again, just cut the jets!
-            if (m_JumpTimer.IsPastSimMS(3500) || (cpuPos.m_Y > m_JumpTarget.m_Y && g_SceneMan.CastStrengthRay(cpuPos, m_JumpTarget - cpuPos, 5, notUsed, 3)) ||
+            if (m_JumpTimer.IsPastSimMS(3500) || (cpuPos.m_Y > m_JumpTarget.m_Y && g_SceneMan.CastStrengthRay(cpuPos, m_JumpTarget - cpuPos, 5, notUsedInner, 3)) ||
                 (m_JumpingRight && m_Pos.m_X > m_JumpTarget.m_X) || (!m_JumpingRight && m_Pos.m_X < m_JumpTarget.m_X) || (cpuPos.m_Y < m_JumpTarget.m_Y - m_CharHeight))
             {
                 m_JumpState = NOTJUMPING;
@@ -2713,14 +2707,14 @@ void AHuman::UpdateAI()
             list<Vector>::iterator prevItr = m_MovePath.begin();
             // Start by looking at the dip between last checked waypoint and the next
 // TODO: not wrap safe!
-            int dip = m_MoveTarget.m_Y - m_PrevPathTarget.m_Y;
+            int dip = m_MoveTarget.GetFloorIntY() - m_PrevPathTarget.GetFloorIntY();
             // See if the next few path points dip steeply
             for (int i = 0; i < 3 && dip < m_CharHeight && pItr != m_MovePath.end(); ++i)
             {
                 ++pItr;
                 if (pItr == m_MovePath.end())
                     break;
-                dip += (*pItr).m_Y - (*prevItr).m_Y;
+                dip += (*pItr).GetFloorIntY() - (*prevItr).GetFloorIntY();
                 ++prevItr;
                 if (dip >= m_CharHeight)
                     break;
@@ -2740,10 +2734,10 @@ void AHuman::UpdateAI()
                         break;
                 }
 				
-				Vector notUsed;
+				Vector notUsedInner;
 				
                 // The rise is high enough to warrant looking across the trench for obstacles in the way of a jump
-                if (rise >= m_CharHeight && !g_SceneMan.CastStrengthRay(cpuPos, Vector((*pItr).m_X - cpuPos.m_X, 0), 5, notUsed, 3))
+                if (rise >= m_CharHeight && !g_SceneMan.CastStrengthRay(cpuPos, Vector((*pItr).m_X - cpuPos.m_X, 0), 5, notUsedInner, 3))
                 {
                     // JUMP!!!
                     m_Controller.SetState(BODY_JUMPSTART, true);
@@ -2971,15 +2965,12 @@ void AHuman::UpdateAI()
                 m_Controller.SetState(WEAPON_PICKUP, true);
             }
         }
-        else if (m_DeviceState == DIGGING)
-        {
-            // Ok we're actually stuck, so backtrack
-            if (m_StuckTimer.IsPastSimMS(5000))
-            {
-                m_ObstacleState = BACKSTEPPING;
-                m_StuckTimer.Reset();
-            }
-        }
+		else if (m_DeviceState == DIGGING && m_StuckTimer.IsPastSimMS(5000))
+		{
+			// Ok we're actually stuck, so backtrack.
+			m_ObstacleState = BACKSTEPPING;
+			m_StuckTimer.Reset();
+		}
     }
     if (m_ObstacleState == JUMPING)
     {
@@ -3120,7 +3111,6 @@ void AHuman::Update()
 	}
 
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
-    float mass = GetMass();
 
     // Set Default direction of all the paths!
     m_Paths[FGROUND][WALK].SetHFlip(m_HFlipped);
@@ -3180,7 +3170,6 @@ void AHuman::Update()
         if (m_Controller.IsState(PIE_MENU_ACTIVE))
         {
             // Don't change anything
-            ;
         }
         // Direct the jetpack nozzle according to movement stick if analog input is present
         else if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1)
@@ -3211,7 +3200,6 @@ void AHuman::Update()
     if (m_Controller.IsState(PIE_MENU_ACTIVE))
     {
         // Just keep the previous movestate, don't stand up or stop walking or stop jumping
-        ;
     }
     else if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE)
     {
@@ -3352,20 +3340,14 @@ void AHuman::Update()
             }
 
             // Detect reloading and move hand accordingly
-            if (pDevice->IsReloading())
-            {
-                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
-                    m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-                }
-            }
+			if (pDevice->IsReloading() && m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
+				m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+			}
 
             // Detect reloading being completed and move hand accordingly
-            if (pDevice->DoneReloading())
-            {
-                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
-                    m_pBGArm->SetHandPos(pDevice->GetMagazinePos());
-                }
-            }
+			if (pDevice->DoneReloading() && m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
+				m_pBGArm->SetHandPos(pDevice->GetMagazinePos());
+			}
         }
     }
 
@@ -3381,8 +3363,8 @@ void AHuman::Update()
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMUP; 
         m_AimAngle += m_Controller.IsState(AIM_SHARP) ?
-                      MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
-                      MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
+                      std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
+                      std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
         if (m_AimAngle > m_AimRange)
             m_AimAngle = m_AimRange;
     }
@@ -3394,8 +3376,8 @@ void AHuman::Update()
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMDOWN;
         m_AimAngle -= m_Controller.IsState(AIM_SHARP) ?
-                      MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
-                      MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
+                      std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
+                      std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
         if (m_AimAngle < -m_AimRange)
             m_AimAngle = -m_AimRange;
     }
@@ -3524,7 +3506,7 @@ void AHuman::Update()
 					}
 					if (pMO) {
 						pMO->SetPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) + Vector(m_HFlipped ? -15 : 15, -8));
-						float throwScalar = (float)MIN(m_ThrowTmr.GetElapsedSimTimeMS(), m_ThrowPrepTime) / (float)m_ThrowPrepTime;
+						float throwScalar = static_cast<float>(std::min(m_ThrowTmr.GetElapsedSimTimeMS(), static_cast<double>(m_ThrowPrepTime)) / m_ThrowPrepTime);
 						Vector tossVec(pThrown->GetMinThrowVel() + ((pThrown->GetMaxThrowVel() - pThrown->GetMinThrowVel()) * throwScalar), 0.5F * RandomNormalNum());
 						tossVec.RadRotate(m_AimAngle);
 						pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
@@ -3583,30 +3565,28 @@ void AHuman::Update()
     ////////////////////////////////////////
     // Item dropping logic
 
-    if (m_Controller.IsState(WEAPON_DROP)) {
-        if (m_pFGArm && m_pFGArm->IsAttached()) {
-            MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
-            if (pMO) {
-                pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
-                Vector tossVec(5.0F + 2.0F * RandomNormalNum(), -2.0F + 1.0F * RandomNormalNum());
-                pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-                pMO->SetAngularVel(5.0F * RandomNormalNum());
-                if (pMO->IsDevice())
-                    g_MovableMan.AddItem(pMO);
-                else {
-                    if (pMO->IsGold()) {
-                        m_GoldInInventoryChunk = 0;
-                        ChunkGold();
-                    }
-                    g_MovableMan.AddParticle(pMO);
-                }
-            }
+	if (m_Controller.IsState(WEAPON_DROP) && m_pFGArm && m_pFGArm->IsAttached()) {
+		MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
+		if (pMO) {
+			pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
+			Vector tossVec(5.0F + 2.0F * RandomNormalNum(), -2.0F + 1.0F * RandomNormalNum());
+			pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) *m_Rotation);
+			pMO->SetAngularVel(5.0F * RandomNormalNum());
+			if (pMO->IsDevice()) {
+				g_MovableMan.AddItem(pMO);
+			} else {
+				if (pMO->IsGold()) {
+					m_GoldInInventoryChunk = 0;
+					ChunkGold();
+				}
+				g_MovableMan.AddParticle(pMO);
+			}
+		}
 
-            m_pFGArm->SetHeldMO(SwapNextInventory());
-            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-            m_PieNeedsUpdate = true;
-        }
-    }
+		m_pFGArm->SetHeldMO(SwapNextInventory());
+		m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+		m_PieNeedsUpdate = true;
+	}
 
     ////////////////////////////////////////
     // Item pickup logic
@@ -3692,7 +3672,6 @@ void AHuman::Update()
                                                                      m_Vel,
                                                                      Matrix(),
                                                                      m_Paths[FGROUND][WALK],
-//                                                                     mass,
                                                                      deltaTime,
                                                                      &playStride,
                                                                      false);
@@ -3711,7 +3690,6 @@ void AHuman::Update()
                                                                      m_Vel,
                                                                      Matrix(),
                                                                      m_Paths[BGROUND][WALK],
-//                                                                     mass,
                                                                      deltaTime,
                                                                      &playStride,
                                                                      false);
@@ -3747,7 +3725,6 @@ void AHuman::Update()
                                            m_Vel,
                                            m_Rotation,
                                            m_Paths[FGROUND][CLIMB],
-            //                             mass,
                                            deltaTime);
             }
             else
@@ -3770,7 +3747,6 @@ void AHuman::Update()
                                            m_Vel,
                                            m_Rotation,
                                            m_Paths[BGROUND][CLIMB],
-            //                             mass,
                                            deltaTime);
             }
             else
@@ -3812,7 +3788,6 @@ void AHuman::Update()
                                                                    m_Vel,
                                                                    m_Rotation,
                                                                    m_Paths[FGROUND][CRAWL],
-                        //                                           mass,
                                                                    deltaTime,
                                                                    0,
                                                                    true);
@@ -3832,7 +3807,6 @@ void AHuman::Update()
                                                                    m_Vel,
                                                                    m_Rotation,
                                                                    m_Paths[BGROUND][CRAWL],
-                        //                                           mass,
                                                                    deltaTime,
                                                                    0,
                                                                    true);
@@ -3851,7 +3825,6 @@ void AHuman::Update()
                                             m_Vel,
                                             m_Rotation,
                                             m_Paths[BGROUND][ARMCRAWL],
-            //                              mass,
                                             deltaTime,
                                             0,
                                             true);
@@ -3928,7 +3901,6 @@ void AHuman::Update()
                                            m_Vel,
                                            Matrix(),
                                            m_Paths[FGROUND][CROUCH],
-//                                           mass / 2,
                                            deltaTime);
 
             if (m_pBGLeg)
@@ -3936,7 +3908,6 @@ void AHuman::Update()
                                            m_Vel,
                                            Matrix(),
                                            m_Paths[BGROUND][CROUCH],
-//                                           mass / 2,
                                            deltaTime);
         }
         // STANDING
@@ -3952,7 +3923,6 @@ void AHuman::Update()
                                       m_Vel,
                                       Matrix(),
                                       m_Paths[FGROUND][STAND],
-        //                            mass / 2,
                                       deltaTime,
                                       0,
                                       false);
@@ -3962,7 +3932,6 @@ void AHuman::Update()
                                       m_Vel,
                                       Matrix(),
                                       m_Paths[BGROUND][STAND],
-        //                            mass / 2,
                                       deltaTime,
                                       0,
                                       false);
@@ -4682,10 +4651,8 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
     // Only draw if the team viewing this is on the same team OR has seen the space where this is located
     int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
-    {
-        if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
-            return;
+    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam)) {
+		return;
     }
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
@@ -4787,20 +4754,24 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             // Display normal jet icons
             else
             {
-                float acceleration = m_pJetpack->EstimateImpulse(false) / max(GetMass(), 0.1f);
-                str[0] = acceleration > 0.47 ? -31 : (acceleration > 0.35 ? -30 : -29);
+                float acceleration = m_pJetpack->EstimateImpulse(false) / max(GetMass(), 0.1F);
+				if (acceleration > 0.47F) {
+					str[0] = -31;
+				} else {
+					str[0] = acceleration > 0.35F ? -30 : -29;
+				}
                 // Do the blinky blink
                 if ((str[0] == -29 || str[0] == -30) && m_IconBlinkTimer.AlternateSim(250))
                     str[0] = -28;
             }
             // null-terminate
             str[1] = 0;
-            pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Centre);
+            pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 11, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
 
             float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
 // TODO: Don't hardcode this shit
-            char gaugeColor = jetTimeRatio > 0.6 ? 149 : (jetTimeRatio > 0.3 ? 77 : 13);
-            rectfill(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 6, drawPos.m_X + (16 * jetTimeRatio), drawPos.m_Y + m_HUDStack + 7, gaugeColor);
+            int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
+            rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + (16 * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
 //                    rect(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack - 2, drawPos.m_X + 24, drawPos.m_Y + m_HUDStack - 4, 238);
 //                    std::snprintf(str, sizeof(str), "%.0f Kg", mass);
 //                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);

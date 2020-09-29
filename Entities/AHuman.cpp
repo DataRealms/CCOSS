@@ -4419,30 +4419,16 @@ void AHuman::Update()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws an aiming aid in front of this HeldDevice for throwing.
 
-void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos, float amount)
+void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos, double amount) const
 {
     const int pointCount = 9;
     Vector points[pointCount];
-//    Color colors[pointCount];
+    //Color colors[pointCount];
 
-    points[0].SetXY(0, 0);
-//    colors[0].SetRGB(255, 225, 0);
-    points[1].SetXY(4, 0);
-//    colors[1].SetRGB(250, 210, 5);
-    points[2].SetXY(8, 0);
-//    colors[2].SetRGB(250, 180, 5);
-    points[3].SetXY(12, 0);
-//    colors[3].SetRGB(250, 160, 5);
-    points[4].SetXY(16, 0);
-//    colors[4].SetRGB(242, 120, 5);
-    points[5].SetXY(20, 0);
-//    colors[5].SetRGB(240, 90, 6);
-    points[6].SetXY(24, 0);
-//    colors[6].SetRGB(240, 50, 8);
-    points[7].SetXY(28, 0);
-//    colors[7].SetRGB(230, 40, 10);
-    points[8].SetXY(32, 0);
-//    colors[8].SetRGB(230, 30, 10);
+	for (int index = 0; index < pointCount; index++) {
+		points[index].SetXY(static_cast<float>(index * 4), 0.0F);
+		//colors[index].SetRGB(255 - index * 3, 225 - index * 20, index);
+	}
 
     Vector outOffset(m_HFlipped ? -15 : 15, -4);
 //    Matrix aimMatrix(m_AimAngle);
@@ -4450,7 +4436,7 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
 
     acquire_bitmap(pTargetBitmap);
 
-    for (int i = 0; i < (pointCount * amount); ++i) {
+    for (int i = 0; i < pointCount * amount; ++i) {
         points[i].FlipX(m_HFlipped);
         points[i] += outOffset;
         points[i].RadRotate(m_HFlipped ? -m_AimAngle : m_AimAngle);
@@ -4459,9 +4445,9 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
             points[i] += m_pFGArm->GetParentOffset();
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, 55.0F + RandomNum(0.0F, 100.0F));
+		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, 55 + RandomNum(0, 100));
 
-        putpixel(pTargetBitmap, points[i].m_X - targetPos.m_X, points[i].m_Y - targetPos.m_Y, g_YellowGlowColor);
+        putpixel(pTargetBitmap, points[i].GetFloorIntX() - targetPos.GetFloorIntX(), points[i].GetFloorIntY() - targetPos.GetFloorIntY(), g_YellowGlowColor);
     }
 
     release_bitmap(pTargetBitmap);
@@ -4659,23 +4645,23 @@ void AHuman::Draw(BITMAP *pTargetBitmap,
         m_Paths[m_HFlipped][CLIMB].Draw(pTargetBitmap, targetPos, 165);
     }
 
-	if (mode == g_DrawColor && !onlyPhysical)
-	{
-		acquire_bitmap(pTargetBitmap);
-		putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-			std::floor(m_Pos.m_Y),
-			64);
-		putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-			std::floor(m_Pos.m_Y),
-			64);
-		release_bitmap(pTargetBitmap);
+    if (mode == g_DrawColor && !onlyPhysical)
+    {
+        acquire_bitmap(pTargetBitmap);
+        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
+                              std::floor(m_Pos.m_Y),
+                              64);
+        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
+                              std::floor(m_Pos.m_Y),
+                              64);
+        release_bitmap(pTargetBitmap);
 
-		//        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
-		m_pFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
-		m_pBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
-		m_pFGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
-		m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
-	}
+//        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
+        m_pFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
+        m_pBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
+        m_pFGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
+        m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
+    }
 #endif
 }
 
@@ -4687,67 +4673,67 @@ void AHuman::Draw(BITMAP *pTargetBitmap,
 //                  BITMAP of choice.
 
 void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
-	if (!m_HUDVisible)
-		return;
+    if (!m_HUDVisible)
+        return;
 
-	// Only do HUD if on a team
-	if (m_Team < 0)
-		return;
+    // Only do HUD if on a team
+    if (m_Team < 0)
+        return;
 
-	// Only draw if the team viewing this is on the same team OR has seen the space where this is located
-	int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-	if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
-	{
-		if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
-			return;
-	}
+    // Only draw if the team viewing this is on the same team OR has seen the space where this is located
+    int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
+    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
+    {
+        if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
+            return;
+    }
 
-	Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
+    Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
 #ifdef DEBUG_BUILD
-	// Limbpath debug drawing
-	m_Paths[FGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
-	m_Paths[FGROUND][CRAWL].Draw(pTargetBitmap, targetPos, 122);
-	m_Paths[FGROUND][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
-	m_Paths[FGROUND][CLIMB].Draw(pTargetBitmap, targetPos, 98);
+    // Limbpath debug drawing
+    m_Paths[FGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
+    m_Paths[FGROUND][CRAWL].Draw(pTargetBitmap, targetPos, 122);
+    m_Paths[FGROUND][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
+    m_Paths[FGROUND][CLIMB].Draw(pTargetBitmap, targetPos, 98);
 
-	m_Paths[BGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
-	m_Paths[BGROUND][CRAWL].Draw(pTargetBitmap, targetPos, 122);
-	m_Paths[BGROUND][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
-	m_Paths[BGROUND][CLIMB].Draw(pTargetBitmap, targetPos, 98);
+    m_Paths[BGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
+    m_Paths[BGROUND][CRAWL].Draw(pTargetBitmap, targetPos, 122);
+    m_Paths[BGROUND][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
+    m_Paths[BGROUND][CLIMB].Draw(pTargetBitmap, targetPos, 98);
 
-	// Draw the AI paths
-	list<Vector>::iterator last = m_MovePath.begin();
-	Vector waypoint, lastPoint, lineVec;
-	for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end(); ++lItr)
-	{
-		lastPoint = (*last) - targetPos;
-		waypoint = lastPoint + g_SceneMan.ShortestDistance(lastPoint, (*lItr) - targetPos);
-		line(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, waypoint.m_X, waypoint.m_Y, g_RedColor);
-		last = lItr;
-	}
-	waypoint = m_MoveTarget - targetPos;
-	circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 3, g_RedColor);
-	lastPoint = m_PrevPathTarget - targetPos;
-	circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
-	lastPoint = m_DigTunnelEndPos - targetPos;
-	circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
-	// Raidus
+    // Draw the AI paths
+    list<Vector>::iterator last = m_MovePath.begin();
+    Vector waypoint, lastPoint, lineVec;
+    for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end(); ++lItr)
+    {
+        lastPoint = (*last) - targetPos;
+        waypoint = lastPoint + g_SceneMan.ShortestDistance(lastPoint, (*lItr) - targetPos);
+        line(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, waypoint.m_X, waypoint.m_Y, g_RedColor);
+        last = lItr;
+    }
+    waypoint = m_MoveTarget - targetPos;
+    circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 3, g_RedColor);
+    lastPoint = m_PrevPathTarget - targetPos;
+    circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
+    lastPoint = m_DigTunnelEndPos - targetPos;
+    circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
+    // Raidus
 //    waypoint = m_Pos - targetPos;
 //    circle(pTargetBitmap, waypoint.m_X, waypoint.m_Y, m_MoveProximityLimit, g_RedColor);  
 #endif
 
-	// Player AI drawing
+    // Player AI drawing
 
-	// Device aiming reticule
+    // Device aiming reticule
 	if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice()) {
 		m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsPlayerControlled());
 	}
+        
 
-
-	// Throwing reticule
+    // Throwing reticule
 	if (m_ArmsState == THROWING_PREP) {
-		DrawThrowingReticule(pTargetBitmap, targetPos, std::min(static_cast<float>(m_ThrowTmr.GetElapsedSimTimeMS() / m_ThrowPrepTime), 1.0F));
+		DrawThrowingReticule(pTargetBitmap, targetPos, std::min(m_ThrowTmr.GetElapsedSimTimeMS() / m_ThrowPrepTime, 1.0));
 	}
 
     //////////////////////////////////////

@@ -164,23 +164,6 @@ ClassInfoGetters
 	void Update() override;
 
 
-#ifdef DEBUG_BUILD
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ACDropShip's current graphical representation to a
-//                  BITMAP of choice.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  In which mode to draw in. See the DrawMode enumeration for the modes.
-//                  Whether to not draw any extra 'ghost' items of this MovableObject,
-//                  indicator arrows or hovering HUD text and so on.
-// Return value:    None.
-
-    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
-#endif
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:	GetMaxPassengers
 //////////////////////////////////////////////////////////////////////////////////////////

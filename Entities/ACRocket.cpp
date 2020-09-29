@@ -995,15 +995,8 @@ void ACRocket::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mod
     ACraft::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
     if (mode == g_DrawColor) {
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
-        release_bitmap(pTargetBitmap);
-
-        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
         m_pRFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pLFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
-//        m_pDeepGroup->Draw(pTargetBitmap, targetPos, false, 13);
     }
 }
 #endif

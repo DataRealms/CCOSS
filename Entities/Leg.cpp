@@ -36,6 +36,9 @@ namespace RTE {
 		// Ensure Legs don't get flagged as inheriting RotAngle, since they never do and always set their RotAngle for themselves.
 		m_InheritsRotAngle = false;
 
+		// Ensure Legs don't collide with terrain when attached since their expansion/contraction is frame based so atom group doesn't know how to account for it.
+		SetCollidesWithTerrainWhileAttached(false);
+
 		if (m_ContractedOffset.GetMagnitude() > m_ExtendedOffset.GetMagnitude()) {
 			std::swap(m_ContractedOffset, m_ExtendedOffset);
 		}

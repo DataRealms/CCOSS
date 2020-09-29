@@ -153,6 +153,13 @@ ClassInfoGetters
     /// </summary>
     void SetAsNoID() override;
 
+    /// <summary>
+    /// Sets this MOSRotating to not hit a specific other MO and all its children even though MO hitting is enabled on this MOSRotating.
+    /// </summary>
+    /// <param name="moToNotHit">A pointer to the MO to not be hitting. 0 means don't ignore anyhting. Ownership is NOT transferred!</param>
+    /// <param name="forHowLong">How long, in seconds, to ignore the specified MO. A negative number means forever.</param>
+    void SetWhichMOToNotHit(MovableObject *moToNotHit = 0, float forHowLong = -1) override;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAtomGroup

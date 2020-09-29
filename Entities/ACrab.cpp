@@ -2823,12 +2823,6 @@ void ACrab::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, 
     Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
     if (mode == g_DrawColor && !onlyPhysical) {
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X), floorf(m_Pos.m_Y), 64);
-        release_bitmap(pTargetBitmap);
-
-        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
         m_pLFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pLBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pRFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);

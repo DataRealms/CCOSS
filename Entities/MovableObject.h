@@ -822,17 +822,18 @@ friend class Atom;
     void SetToGetHitByMOs(bool getHitByMOs = true) { m_GetsHitByMOs = getHitByMOs; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetWhichMOToNotHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets this MO to not hit a specific other MO and all its children even
-//                  though MO hitting is enabled on this MovableObject
-// Arguments:       A pointer to the MO to not be hitting. 0 means don't ignore anyhting.
-//                  Ownership is not transferred!
-//                  For how long, in S, to ignore the above. Negative number means forever.
-// Return value:    None.
+    /// <summary>
+    /// Gets the MO this MO is set not to hit even when MO hitting is enabled on this MO.
+    /// </summary>
+    /// <returns>The MO this MO is set not to hit.</returns>
+    const MovableObject *GetWhichMOToNotHit() const { return m_pMOToNotHit; }
 
-    void SetWhichMOToNotHit(MovableObject *moToNotHit = 0, float forHowLong = -1) { m_pMOToNotHit = moToNotHit; m_MOIgnoreTimer.Reset(); m_MOIgnoreTimer.SetSimTimeLimitS(forHowLong); }
+    /// <summary>
+    /// Sets this MO to not hit a specific other MO and all its children even when MO hitting is enabled on this MO.
+    /// </summary>
+    /// <param name="moToNotHit">A pointer to the MO to not be hitting. 0 means don't ignore anyhting. Ownership is NOT transferred!</param>
+    /// <param name="forHowLong">How long, in seconds, to ignore the specified MO. A negative number means forever.</param>
+    virtual void SetWhichMOToNotHit(MovableObject *moToNotHit = 0, float forHowLong = -1) { m_pMOToNotHit = moToNotHit; m_MOIgnoreTimer.Reset(); m_MOIgnoreTimer.SetSimTimeLimitS(forHowLong); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -1619,6 +1619,12 @@ void MOSRotating::GetMOIDs(std::vector<MOID> &MOIDs) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void MOSRotating::SetWhichMOToNotHit(MovableObject *moToNotHit, float forHowLong) {
+    MOSprite::SetWhichMOToNotHit(moToNotHit, forHowLong);
+    for (Attachable *attachable : m_Attachables) { attachable->SetWhichMOToNotHit(moToNotHit, forHowLong); }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
@@ -1865,6 +1871,13 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
             attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
         }
     }
+
+#ifdef DEBUG_BUILD
+    if (mode == g_DrawColor && !onlyPhysical && m_pAtomGroup && GetRootParent() == this) {
+        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
+        //m_pDeepGroup->Draw(pTargetBitmap, targetPos, false, 13);
+    }
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

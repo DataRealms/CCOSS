@@ -3486,89 +3486,75 @@ void AHuman::Update()
     // Fire/Activate held devices
 
 	ThrownDevice *pThrown = nullptr;
-    if (m_pFGArm && m_pFGArm->IsAttached())
-    {
-        // DOn't reach toward anything
-        m_pFGArm->ReachToward(Vector());
+	if (m_pFGArm && m_pFGArm->IsAttached()) {
+		// DOn't reach toward anything
+		m_pFGArm->ReachToward(Vector());
 
-        // Activate held device, if it's not a thrown device.
-        if (m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice())
-        {
-            m_pFGArm->GetHeldDevice()->SetSharpAim(m_SharpAimProgress);
-            if (m_Controller.IsState(WEAPON_FIRE))
-                m_pFGArm->GetHeldDevice()->Activate();
-            else
-                m_pFGArm->GetHeldDevice()->Deactivate();
-        }
-        // Throw whatever is held if it's a thrown device
-        else if (m_pFGArm->GetHeldMO())
-        {
-            pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
-            if (pThrown)
-            {
-                if (m_Controller.IsState(WEAPON_FIRE))
-                {
-                    if (m_ArmsState != THROWING_PREP/* || m_ThrowTmr.GetElapsedSimTimeMS() > m_ThrowPrepTime*/)
-                    {
-                        m_ThrowTmr.Reset();
+		// Activate held device, if it's not a thrown device.
+		if (m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice()) {
+			m_pFGArm->GetHeldDevice()->SetSharpAim(m_SharpAimProgress);
+			if (m_Controller.IsState(WEAPON_FIRE)) {
+				m_pFGArm->GetHeldDevice()->Activate();
+			} else {
+				m_pFGArm->GetHeldDevice()->Deactivate();
+			}
+		}
+		// Throw whatever is held if it's a thrown device
+		else if (m_pFGArm->GetHeldMO()) {
+			pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
+			if (pThrown) {
+				if (m_Controller.IsState(WEAPON_FIRE)) {
+					if (m_ArmsState != THROWING_PREP/* || m_ThrowTmr.GetElapsedSimTimeMS() > m_ThrowPrepTime*/) {
+						m_ThrowTmr.Reset();
 						if (!pThrown->ActivatesWhenReleased()) {
 							pThrown->Activate();
 						}
-                    }
-                    m_ArmsState = THROWING_PREP;
-                    m_pFGArm->ReachToward(m_Pos + pThrown->GetStartThrowOffset().GetXFlipped(m_HFlipped));
-                }
-                else if (m_ArmsState == THROWING_PREP)
-                {
-                    m_ArmsState = THROWING_RELEASE;
-                    
-                    m_pFGArm->SetHandPos(m_Pos + pThrown->GetEndThrowOffset().GetXFlipped(m_HFlipped));
+					}
+					m_ArmsState = THROWING_PREP;
+					m_pFGArm->ReachToward(m_Pos + pThrown->GetStartThrowOffset().GetXFlipped(m_HFlipped));
+				} else if (m_ArmsState == THROWING_PREP) {
+					m_ArmsState = THROWING_RELEASE;
 
-                    MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
+					m_pFGArm->SetHandPos(m_Pos + pThrown->GetEndThrowOffset().GetXFlipped(m_HFlipped));
+
+					MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
 
 					if (pThrown->ActivatesWhenReleased()) {
 						pThrown->Activate();
 					}
-                    if (pMO)
-                    {
-                        pMO->SetPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) + Vector(m_HFlipped ? -15 : 15, -8));
-                        float throwScalar = (float)MIN(m_ThrowTmr.GetElapsedSimTimeMS(), m_ThrowPrepTime) / (float)m_ThrowPrepTime;
-                        Vector tossVec(pThrown->GetMinThrowVel() + ((pThrown->GetMaxThrowVel() - pThrown->GetMinThrowVel()) * throwScalar), 0.5F * RandomNormalNum());
-                        tossVec.RadRotate(m_AimAngle);
-                        pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-                        pMO->SetAngularVel(5.0F * RandomNormalNum());
+					if (pMO) {
+						pMO->SetPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) + Vector(m_HFlipped ? -15 : 15, -8));
+						float throwScalar = (float)MIN(m_ThrowTmr.GetElapsedSimTimeMS(), m_ThrowPrepTime) / (float)m_ThrowPrepTime;
+						Vector tossVec(pThrown->GetMinThrowVel() + ((pThrown->GetMaxThrowVel() - pThrown->GetMinThrowVel()) * throwScalar), 0.5F * RandomNormalNum());
+						tossVec.RadRotate(m_AimAngle);
+						pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
+						pMO->SetAngularVel(5.0F * RandomNormalNum());
 
-                        if (pMO->IsHeldDevice())
-                        {
-                            // Set the grenade or whatever to ignore hits with same team
-                            pMO->SetTeam(m_Team);
-                            pMO->SetIgnoresTeamHits(true);
-                            g_MovableMan.AddItem(pMO);
-                        }
-                        else
-                        {
-                            if (pMO->IsGold())
-                            {
-                                m_GoldInInventoryChunk = 0;
-                                ChunkGold();
-                            }
-                            g_MovableMan.AddParticle(pMO);
-                        }
-                        pMO = 0;
-                    }
-                    m_ThrowTmr.Reset();
-                }
-            }
-        }
-        else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100)
-        {
-            m_pFGArm->SetHeldMO(SwapNextInventory());
-            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-            m_ArmsState = WEAPON_READY;
-        }
-        else if (m_ArmsState == THROWING_RELEASE)
-            m_pFGArm->SetHandPos(m_Pos + (m_HolsterOffset + Vector(15, -15)).GetXFlipped(m_HFlipped));
-    }
+						if (pMO->IsHeldDevice()) {
+							// Set the grenade or whatever to ignore hits with same team
+							pMO->SetTeam(m_Team);
+							pMO->SetIgnoresTeamHits(true);
+							g_MovableMan.AddItem(pMO);
+						} else {
+							if (pMO->IsGold()) {
+								m_GoldInInventoryChunk = 0;
+								ChunkGold();
+							}
+							g_MovableMan.AddParticle(pMO);
+						}
+						pMO = 0;
+					}
+					m_ThrowTmr.Reset();
+				}
+			}
+		} else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100) {
+			m_pFGArm->SetHeldMO(SwapNextInventory());
+			m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+			m_ArmsState = WEAPON_READY;
+		} else if (m_ArmsState == THROWING_RELEASE) {
+			m_pFGArm->SetHandPos(m_Pos + (m_HolsterOffset + Vector(15, -15)).GetXFlipped(m_HFlipped));
+		}
+	}
 
 	if (!pThrown && m_ArmsState == THROWING_PREP) {
 		m_ArmsState = WEAPON_READY;
@@ -4673,23 +4659,23 @@ void AHuman::Draw(BITMAP *pTargetBitmap,
         m_Paths[m_HFlipped][CLIMB].Draw(pTargetBitmap, targetPos, 165);
     }
 
-    if (mode == g_DrawColor && !onlyPhysical)
-    {
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-                              std::floor(m_Pos.m_Y),
-                              64);
-        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-                              std::floor(m_Pos.m_Y),
-                              64);
-        release_bitmap(pTargetBitmap);
+	if (mode == g_DrawColor && !onlyPhysical)
+	{
+		acquire_bitmap(pTargetBitmap);
+		putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
+			std::floor(m_Pos.m_Y),
+			64);
+		putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
+			std::floor(m_Pos.m_Y),
+			64);
+		release_bitmap(pTargetBitmap);
 
-//        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
-        m_pFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
-        m_pBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
-        m_pFGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
-        m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
-    }
+		//        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
+		m_pFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
+		m_pBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
+		m_pFGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
+		m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
+	}
 #endif
 }
 
@@ -4700,71 +4686,69 @@ void AHuman::Draw(BITMAP *pTargetBitmap,
 // Description:     Draws this Actor's current graphical HUD overlay representation to a
 //                  BITMAP of choice.
 
-void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled)
-{
-    if (!m_HUDVisible)
-        return;
+void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
+	if (!m_HUDVisible)
+		return;
 
-    // Only do HUD if on a team
-    if (m_Team < 0)
-        return;
+	// Only do HUD if on a team
+	if (m_Team < 0)
+		return;
 
-    // Only draw if the team viewing this is on the same team OR has seen the space where this is located
-    int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
-    {
-        if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
-            return;
-    }
+	// Only draw if the team viewing this is on the same team OR has seen the space where this is located
+	int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
+	if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
+	{
+		if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
+			return;
+	}
 
-    Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
+	Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
 #ifdef DEBUG_BUILD
-    // Limbpath debug drawing
-    m_Paths[FGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
-    m_Paths[FGROUND][CRAWL].Draw(pTargetBitmap, targetPos, 122);
-    m_Paths[FGROUND][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
-    m_Paths[FGROUND][CLIMB].Draw(pTargetBitmap, targetPos, 98);
+	// Limbpath debug drawing
+	m_Paths[FGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
+	m_Paths[FGROUND][CRAWL].Draw(pTargetBitmap, targetPos, 122);
+	m_Paths[FGROUND][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
+	m_Paths[FGROUND][CLIMB].Draw(pTargetBitmap, targetPos, 98);
 
-    m_Paths[BGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
-    m_Paths[BGROUND][CRAWL].Draw(pTargetBitmap, targetPos, 122);
-    m_Paths[BGROUND][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
-    m_Paths[BGROUND][CLIMB].Draw(pTargetBitmap, targetPos, 98);
+	m_Paths[BGROUND][WALK].Draw(pTargetBitmap, targetPos, 122);
+	m_Paths[BGROUND][CRAWL].Draw(pTargetBitmap, targetPos, 122);
+	m_Paths[BGROUND][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
+	m_Paths[BGROUND][CLIMB].Draw(pTargetBitmap, targetPos, 98);
 
-    // Draw the AI paths
-    list<Vector>::iterator last = m_MovePath.begin();
-    Vector waypoint, lastPoint, lineVec;
-    for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end(); ++lItr)
-    {
-        lastPoint = (*last) - targetPos;
-        waypoint = lastPoint + g_SceneMan.ShortestDistance(lastPoint, (*lItr) - targetPos);
-        line(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, waypoint.m_X, waypoint.m_Y, g_RedColor);
-        last = lItr;
-    }
-    waypoint = m_MoveTarget - targetPos;
-    circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 3, g_RedColor);
-    lastPoint = m_PrevPathTarget - targetPos;
-    circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
-    lastPoint = m_DigTunnelEndPos - targetPos;
-    circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
-    // Raidus
+	// Draw the AI paths
+	list<Vector>::iterator last = m_MovePath.begin();
+	Vector waypoint, lastPoint, lineVec;
+	for (list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end(); ++lItr)
+	{
+		lastPoint = (*last) - targetPos;
+		waypoint = lastPoint + g_SceneMan.ShortestDistance(lastPoint, (*lItr) - targetPos);
+		line(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, waypoint.m_X, waypoint.m_Y, g_RedColor);
+		last = lItr;
+	}
+	waypoint = m_MoveTarget - targetPos;
+	circlefill(pTargetBitmap, waypoint.m_X, waypoint.m_Y, 3, g_RedColor);
+	lastPoint = m_PrevPathTarget - targetPos;
+	circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
+	lastPoint = m_DigTunnelEndPos - targetPos;
+	circlefill(pTargetBitmap, lastPoint.m_X, lastPoint.m_Y, 2, g_YellowGlowColor);
+	// Raidus
 //    waypoint = m_Pos - targetPos;
 //    circle(pTargetBitmap, waypoint.m_X, waypoint.m_Y, m_MoveProximityLimit, g_RedColor);  
 #endif
 
-    // Player AI drawing
+	// Player AI drawing
 
-    // Device aiming reticule
-    if (m_Controller.IsState(AIM_SHARP) &&
-        m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
-        m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsPlayerControlled());
-        
+	// Device aiming reticule
+	if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice()) {
+		m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsPlayerControlled());
+	}
 
-    // Throwing reticule
-    if (m_ArmsState == THROWING_PREP)
-        DrawThrowingReticule(pTargetBitmap,
-                             targetPos,
-                             MIN((float)m_ThrowTmr.GetElapsedSimTimeMS() / (float)m_ThrowPrepTime, 1.0));
+
+	// Throwing reticule
+	if (m_ArmsState == THROWING_PREP) {
+		DrawThrowingReticule(pTargetBitmap, targetPos, std::min(static_cast<float>(m_ThrowTmr.GetElapsedSimTimeMS() / m_ThrowPrepTime), 1.0F));
+	}
 
     //////////////////////////////////////
     // Draw stat info HUD

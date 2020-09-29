@@ -3538,7 +3538,7 @@ void AHuman::Update()
 		}
 	}
 
-	if (!pThrown && m_ArmsState == THROWING_PREP) {
+	if (m_ArmsState == THROWING_PREP && !pThrown) {
 		m_ArmsState = WEAPON_READY;
 	}
 
@@ -3570,7 +3570,7 @@ void AHuman::Update()
 		if (pMO) {
 			pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
 			Vector tossVec(5.0F + 2.0F * RandomNormalNum(), -2.0F + 1.0F * RandomNormalNum());
-			pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) *m_Rotation);
+			pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
 			pMO->SetAngularVel(5.0F * RandomNormalNum());
 			if (pMO->IsDevice()) {
 				g_MovableMan.AddItem(pMO);

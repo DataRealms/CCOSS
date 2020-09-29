@@ -15,6 +15,7 @@
 #include "MovableMan.h"
 #include "AtomGroup.h"
 #include "Arm.h"
+#include "Actor.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -364,17 +365,25 @@ bool HeldDevice::OnMOHit(MovableObject *pOtherMO)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool HeldDevice::TransferJointImpulses(Vector &jointImpulses, float jointStiffnessOverride, float jointStrengthOverride, float gibImpulseLimitOverride) {
-    if (!m_Parent) {
+    MovableObject *parent = m_Parent;
+    if (!parent) {
         return false;
     }
     if (m_ImpulseForces.empty()) {
         return true;
     }
-    const Arm *parentAsArm = dynamic_cast<Arm *>(m_Parent);
+    const Arm *parentAsArm = dynamic_cast<Arm *>(parent);
     if (parentAsArm && parentAsArm->GetGripStrength() > 0 && jointStrengthOverride < 0) {
         jointStrengthOverride = parentAsArm->GetGripStrength() * m_GripStrengthMultiplier;
     }
-    Attachable::TransferJointImpulses(jointImpulses, jointStiffnessOverride, jointStrengthOverride, gibImpulseLimitOverride);
+    bool intact = Attachable::TransferJointImpulses(jointImpulses, jointStiffnessOverride, jointStrengthOverride, gibImpulseLimitOverride);
+    if (!intact) {
+        Actor *rootParentAsActor = dynamic_cast<Actor *>(parent->GetRootParent());
+        if (rootParentAsActor && rootParentAsActor->GetStatus() == Actor::STABLE) {
+            rootParentAsActor->SetStatus(Actor::UNSTABLE);
+        }
+    }
+    return intact;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

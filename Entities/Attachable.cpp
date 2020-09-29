@@ -349,6 +349,7 @@ namespace RTE {
 		} else {
 			m_RootMOID = m_MOID;
 			m_RestTimer.Reset();
+			if (m_pMOToNotHit && m_Parent && m_Parent->GetWhichMOToNotHit() == m_pMOToNotHit) { m_pMOToNotHit = nullptr; }
 
 			if (m_CollidesWithTerrainWhileAttached) { OrganizeAtomsInParent(false); }
 			m_Parent = newParent;

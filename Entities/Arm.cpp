@@ -206,15 +206,10 @@ void Arm::SetHeldMO(MovableObject *newHeldMO) {
         if (m_pHeldMO && heldMOAsAttachable && heldMOAsAttachable->IsAttachedTo(this)) { RemoveAttachable(heldMOAsAttachable); }
         m_pHeldMO = nullptr;
     } else {
-        //TODO All this needs cleaning up, it should work just like all other hardcoded attachable setters and rely on RemoveAttachable to add it to MovableMan, etc.
+        //TODO All this needs cleaning up, this should do the basics, some other method should be responsible for replacing held things
         if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pHeldMO)->IsAttachedTo(this)) {
             HeldDevice *oldHeldDevice = dynamic_cast<HeldDevice *>(m_pHeldMO);
             if (oldHeldDevice->IsAttached()) { dynamic_cast<MOSRotating *>(oldHeldDevice->GetParent())->RemoveAttachable(oldHeldDevice, true, false); }
-            // TODO: Refine throwing force to dropped device here?")
-            pHeldDev->SetVel(Vector(10 * PosRand(), -15 * PosRand()));
-            pHeldDev->SetAngularVel(-10 * PosRand());
-            g_MovableMan.AddItem(pHeldDev);
-            m_pHeldMO = pHeldDev = 0;
             m_pHeldMO = nullptr;
         }
 
@@ -447,10 +442,7 @@ void Arm::Update() {
             handOffsetAsParentOffset.RadRotate(-m_Rotation.GetRadAngle()).FlipX(m_HFlipped);
             pHeldDev->SetParentOffset(handOffsetAsParentOffset);
             
-            if (pHeldDev->IsRecoiled())
-                m_Parent->AddImpulseForce(pHeldDev->GetRecoilForce());
-            else
-                m_Recoiled = false;
+            m_Recoiled = pHeldDev->IsRecoiled();
 
             m_Rotation = (m_HFlipped ? c_PI : 0) + handAngle;
 

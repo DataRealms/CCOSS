@@ -37,6 +37,8 @@ namespace RTE {
 				AddAttachable(m_MountedDevice);
 				m_MountedDevice->SetInheritsRotAngle(false);
 				m_MountedDevice->SetDeleteWhenRemovedFromParent(true);
+				//Force weapons mounted on turrets to never be removed due to forces. This doesn't affect them gibbing from hitting their impulse limits though.
+				m_MountedDevice->SetJointStrength(0.0F);
 			}
 		} else {
 			return Attachable::ReadProperty(propName, reader);
@@ -76,7 +78,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Turret::Update() {
-		Attachable::Update();
 		if (m_MountedDevice) { m_MountedDevice->SetRotAngle(m_Rotation.GetRadAngle() + m_MountedDeviceRotOffset); }
+		Attachable::Update();
 	}
 }

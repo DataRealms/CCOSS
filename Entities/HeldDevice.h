@@ -286,7 +286,7 @@ ClassInfoGetters
     /// Gets the multiplier for how well this HeldDevice can be gripped by Arms.
     /// </summary>
     /// <returns>The grip strength multiplier for this HeldDevice.</returns>
-    float GetGripStrengthMultiplier() { return m_GripStrengthMultiplier; }
+    float GetGripStrengthMultiplier() const { return m_GripStrengthMultiplier; }
 
     /// <summary>
     /// Sets the multiplier for how well this HeldDevice can be gripped by Arms.

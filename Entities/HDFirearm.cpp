@@ -938,11 +938,7 @@ void HDFirearm::Update()
             m_RecoilOffset.SetMagnitude(1.25);
         }
 
-// TODO: This is broken, revise")
-        if (m_Parent)
-            m_Parent->SetRecoil(m_RecoilForce, m_RecoilOffset, m_Recoiled);
-        else
-            m_ImpulseForces.push_back(make_pair(m_RecoilForce, m_RecoilOffset));
+        AddImpulseForce(m_RecoilForce, m_RecoilOffset);
 
         // Display gun animation
 		if (!m_IsAnimatedManually)

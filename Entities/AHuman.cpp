@@ -1267,7 +1267,7 @@ bool AHuman::EquipShieldInBGArm()
     if (m_pBGArm->HoldsSomething())
     {
         pShield = dynamic_cast<HeldDevice *>(m_pBGArm->GetHeldMO());
-        if (pShield && pShield->IsShield() || pShield->IsDualWieldable())
+		if (pShield && (pShield->IsShield() || pShield->IsDualWieldable()))
         {
             // If we're holding a shield, but aren't supposed to, because we need to support the FG hand's two-handed device,
             // then let go of the shield and put it back in inventory

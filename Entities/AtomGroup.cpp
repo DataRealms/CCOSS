@@ -748,7 +748,8 @@ namespace RTE {
 		Vector legProgress;
 		Vector forceVel;
 		Vector returnPush;
-		Vector trajectory = velocity * travelTime * c_PPM; // Trajectory length in pixels.
+		Vector ownerVel = velocity;
+		Vector trajectory = ownerVel * travelTime * c_PPM; // Trajectory length in pixels.
 
 		HitData hitData;
 
@@ -793,7 +794,7 @@ namespace RTE {
 			intPos[Y] = position.GetFloorIntY();
 
 			float prevTrajMag = trajectory.GetMagnitude();
-			trajectory = velocity * timeLeft * c_PPM;
+			trajectory = ownerVel * timeLeft * c_PPM;
 
 			const Vector nextPosition = position + trajectory;
 			delta[X] = nextPosition.GetFloorIntX() - intPos[X];
@@ -924,7 +925,7 @@ namespace RTE {
 				timeLeft *= (trajectory.GetMagnitude() - legProgress.GetMagnitude()) / prevTrajMag;
 
 				// The capped velocity used for the push calculations. a = F / m
-				forceVel = Vector(velocity).CapMagnitude((pushForce * timeLeft) / mass);
+				forceVel = Vector(ownerVel).CapMagnitude((pushForce * timeLeft) / mass);
 
 				// MOVABLEOBJECT COLLISION RESPONSE /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1149,11 +1150,11 @@ namespace RTE {
 					for (const std::pair<Vector, Vector> &impulseForcesEntry : impulseForces) {
 						// Cap the impulse to what the max push force is
 						//impulseForcesEntry.first.CapMagnitude(pushForce * (travelTime/* - timeLeft*/));
-						//velocity += impulseForcesEntry.first / mass;
+						ownerVel += impulseForcesEntry.first / mass;
 						returnPush += impulseForcesEntry.first;
 					}
 					// Stunt travel time if there is no more velocity
-					if (velocity.IsZero()) { timeLeft = 0; }
+					if (ownerVel.IsZero()) { timeLeft = 0; }
 				}
 				++stepCount;
 			}

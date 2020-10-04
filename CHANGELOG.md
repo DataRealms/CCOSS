@@ -137,6 +137,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - GUI sliders (like for music volume) can now be adjusted with the mouse scroll wheel.
 
+- Exposed PEmitter to lua. Bindings are identical to AEmitter's bindings, except that damage-related bindings don't exist for PEmitter.
+
 ### Changed
 
 - Codebase now uses the C++17 standard.

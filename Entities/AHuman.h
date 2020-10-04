@@ -655,7 +655,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-	void ReloadFirearm();
+	void ReloadFirearm() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -693,7 +693,7 @@ ClassInfoGetters
 // Return value:    Whether gold was spotted by this ray cast. If so, foundLocation
 //                  has been filled out with the absolute location of the gold.
 
-	bool LookForGold(float FOVSpread, float range, Vector &foundLocation);
+	bool LookForGold(float FOVSpread, float range, Vector &foundLocation) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -958,7 +958,7 @@ protected:
 //                  reticule should be drawn, to indicate force in the throw.
 // Return value:    None.
 
-	void DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), float amount = 1.0);
+	void DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), double amount = 1.0) const;
 
 
     // Member variables

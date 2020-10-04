@@ -25,7 +25,7 @@ namespace RTE
 //////////////////////////////////////////////////////////////////////////////////////////
 // Class:           PEmitter
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     
+// Description:     A particle MO that creates and emits particle MOs.
 // Parent(s):       MOSParticle.
 // Class history:   02/29/2004 PEmitter created.
 
@@ -39,6 +39,7 @@ class PEmitter :
 
 public:
 
+	friend class LuaMan;
 
 	// Concrete allocation and cloning definitions
 	EntityAllocation(PEmitter)
@@ -328,6 +329,13 @@ public:
 	void SetFlashScale(float flashScale = 1.0f) { m_FlashScale = flashScale; }
 
 
+	/// <summary>
+	/// Gets the display scale factor of the flash effect. This is purely visual.
+	/// </summary>
+	/// <returns>The scale factor of the flash draw.</returns>
+	float GetFlashScale() const { return m_FlashScale; }
+
+
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          SetEmitAngle
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -463,6 +471,18 @@ public:
 	// Return value:    None.
 
 	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
+
+	/// <summary>
+	/// Gets the number of emissions left before emitter is disabled.
+	/// </summary>
+	/// <returns>The number of emissions left before emitter is disabled.</returns>
+	long GetEmitCountLimit() const { return m_EmitCountLimit; }
+
+	/// <summary>
+	/// Sets the number of emissions left before emitter is disabled.
+	/// </summary>
+	/// <param name="newValue">New number of emissions left.</param>
+	void SetEmitCountLimit(long newValue) { m_EmitCountLimit = newValue; }
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Protected member variable and method declarations

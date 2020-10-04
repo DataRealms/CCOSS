@@ -20,7 +20,7 @@ namespace RTE {
 		m_Depth = 0;
 		m_JointOffset.Reset();
 		m_LimbPos.Reset();
-		m_MomInertia = 0;
+		m_MomentOfInertia = 0;
 		m_IgnoreMOIDs.clear();
 	}
 
@@ -66,12 +66,12 @@ namespace RTE {
 				m_Atoms.push_back(atomCopy);
 
 				// Add to the appropriate spot in the subgroup map
-				long subID = atomCopy->GetSubID();
-				if (subID != 0) {
+				long subgroupID = atomCopy->GetSubID();
+				if (subgroupID != 0) {
 					// Make a new list for the subgroup ID if there isn't one already
-					if (m_SubGroups.find(subID) == m_SubGroups.end()) { m_SubGroups.insert({ subID, std::list<Atom *>() }); }
+					if (m_SubGroups.find(subgroupID) == m_SubGroups.end()) { m_SubGroups.insert({ subgroupID, std::list<Atom *>() }); }
 
-					m_SubGroups.find(subID)->second.push_back(atomCopy);
+					m_SubGroups.find(subgroupID)->second.push_back(atomCopy);
 				}
 			}
 		}
@@ -202,38 +202,38 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float AtomGroup::GetMomentOfInertia() {
-		if (m_MomInertia == 0.0F) {
+		if (m_MomentOfInertia == 0.0F) {
 			RTEAssert(m_OwnerMO, "Getting AtomGroup stuff without a parent MO!");
 
 			float distMass = m_OwnerMO->GetMass() / static_cast<float>(m_Atoms.size());
 			float radius = 0.0F;
 			for (const Atom *atom : m_Atoms) {
 				radius = atom->GetOffset().GetMagnitude() * c_MPP;
-				m_MomInertia += distMass * radius * radius;
+				m_MomentOfInertia += distMass * radius * radius;
 			}
 		}
 		// Avoid zero (if radius is nonexistent, for example), will cause divide by zero problems otherwise
-		if (m_MomInertia == 0.0F) { m_MomInertia = 0.000001F; }
+		if (m_MomentOfInertia == 0.0F) { m_MomentOfInertia = 0.000001F; }
 
-		return m_MomInertia;
+		return m_MomentOfInertia;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, long subID, const Vector &offset, const Matrix &offsetRotation) {
-		if (m_SubGroups.count(subID) == 0) { m_SubGroups.insert({ subID, std::list<Atom *>() }); }
+	void AtomGroup::AddAtoms(const std::list<Atom *> &atomList, long subgroupID, const Vector &offset, const Matrix &offsetRotation) {
+		if (m_SubGroups.count(subgroupID) == 0) { m_SubGroups.insert({ subgroupID, std::list<Atom *>() }); }
 
 		Atom *atomToAdd;
 		for (const Atom * atom : atomList) {
 			atomToAdd = new Atom(*atom);
-			atomToAdd->SetSubID(subID);
+			atomToAdd->SetSubID(subgroupID);
 			atomToAdd->SetOffset(offset + (atomToAdd->GetOriginalOffset() * offsetRotation));
 			atomToAdd->SetOwner(m_OwnerMO);
 			// Put ownership here - not sure if this is a TODO or not.
 			m_Atoms.push_back(atomToAdd);
 
 			// Add the Atom to the subgroup in the SubGroups map, not transferring ownership
-			m_SubGroups.at(subID).push_back(atomToAdd);
+			m_SubGroups.at(subgroupID).push_back(atomToAdd);
 		}
 	}
 
@@ -262,13 +262,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AtomGroup::UpdateSubAtoms(long subID, const Vector &newOffset, const Matrix &newOffsetRotation) {
-		if (m_SubGroups.count(subID) == 0) {
+	bool AtomGroup::UpdateSubAtoms(long subgroupID, const Vector &newOffset, const Matrix &newOffsetRotation) {
+		if (m_SubGroups.count(subgroupID) == 0) {
 			return false;
 		}
-		RTEAssert(!m_SubGroups.at(subID).empty(), "Found empty Atom subgroup list!?");
+		RTEAssert(!m_SubGroups.at(subgroupID).empty(), "Found empty Atom subgroup list!?");
 
-		for (Atom *subGroupAtom : m_SubGroups.at(subID)) {
+		for (Atom *subGroupAtom : m_SubGroups.at(subgroupID)) {
 			subGroupAtom->SetOffset(newOffset + (subGroupAtom->GetOriginalOffset() * newOffsetRotation));
 		}
 		return true;
@@ -282,10 +282,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float AtomGroup::Travel(Vector &position, Vector &velocity, Matrix &rotation, float &angVel, bool &didWrap, Vector &totalImpulse, float mass, float travelTime, bool callOnBounce, bool callOnSink, bool scenePreLocked) {
+	float AtomGroup::Travel(Vector &position, Vector &velocity, Matrix &rotation, float &angularVel, bool &didWrap, Vector &totalImpulse, float mass, float travelTime, bool callOnBounce, bool callOnSink, bool scenePreLocked) {
 		RTEAssert(m_OwnerMO, "Traveling an AtomGroup without a parent MO!");
 
-		m_MomInertia = GetMomentOfInertia();
+		m_MomentOfInertia = GetMomentOfInertia();
 
 		didWrap = false;
 
@@ -333,7 +333,7 @@ namespace RTE {
 						// Calculate and store the accurate hit radius of the Atom in relation to the CoM.
 						hitData.HitRadius[HITOR] = startOff * c_MPP;
 						// Figure out the pre-collision velocity of the hitting Atom due to body translation and rotation.
-						hitData.HitVel[HITOR] = velocity + hitData.HitRadius[HITOR].GetPerpendicular() * angVel;
+						hitData.HitVel[HITOR] = velocity + hitData.HitRadius[HITOR].GetPerpendicular() * angularVel;
 
 						/*
 						radMag = hitData.HitRadius[HITOR].GetMagnitude();
@@ -345,7 +345,7 @@ namespace RTE {
 
 						hitFactor = 1.0; // / (float)hitTerrAtoms.size();
 						atom->GetHitData().mass[HITOR] = mass;
-						atom->GetHitData().MomInertia[HITOR] = m_MomInertia;
+						atom->GetHitData().MomInertia[HITOR] = m_MomentOfInertia;
 						atom->GetHitData().ImpulseFactor[HITOR] = hitFactor;
 
 						// Call the call-on-bounce function, if requested.
@@ -363,7 +363,7 @@ namespace RTE {
 
 							// Apply terrain conflict response
 							velocity += hitData.ResImpulse[HITOR] / mass;
-							angVel += hitData.HitRadius[HITOR].GetPerpendicular().Dot(hitData.ResImpulse[HITOR]) / m_MomInertia;
+							angularVel += hitData.HitRadius[HITOR].GetPerpendicular().Dot(hitData.ResImpulse[HITOR]) / m_MomentOfInertia;
 							// Accumulate all the impulse forces so the MO can determine if it took damaged as a result
 							totalImpulse += hitData.ResImpulse[HITOR];
 						}
@@ -378,7 +378,7 @@ namespace RTE {
 			linSegTraj = velocity * timeLeft * c_PPM;
 
 			// The amount of rotation to be achieved during the time slot, in radians.
-			float rotDelta = angVel * timeLeft;
+			float rotDelta = angularVel * timeLeft;
 
 			// Cap the segment if the rotation is too severe. This will chunk the segment into several in order to more closely approximate the arc an Atom on a rotating body will trace.
 			if (std::fabs(rotDelta) > segRotLimit) {
@@ -499,14 +499,14 @@ namespace RTE {
 					somethingPenetrated = false;
 
 					const float massDistribution = mass / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
-					const float momentInertiaDistribution = m_MomInertia / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
+					const float momentInertiaDistribution = m_MomentOfInertia / static_cast<float>(hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1));
 
 					// Determine which of the colliding Atoms will penetrate the terrain.
 					for (std::list<Atom*>::iterator atomItr = hitTerrAtoms.begin(); atomItr != hitTerrAtoms.end(); ) {
 						// Calculate and store the accurate hit radius of the Atom in relation to the CoM
 						hitData.HitRadius[HITOR] = m_OwnerMO->RotateOffset((*atomItr)->GetOffset()) * c_MPP;
 						// Figure out the pre-collision velocity of the hitting Atom due to body translation and rotation.
-						hitData.HitVel[HITOR] = velocity + hitData.HitRadius[HITOR].GetPerpendicular() * angVel;
+						hitData.HitVel[HITOR] = velocity + hitData.HitRadius[HITOR].GetPerpendicular() * angularVel;
 
 						const float radMag = hitData.HitRadius[HITOR].GetMagnitude();
 						// These are set temporarily here, will be re-set later when the normal of the hit terrain bitmap (ortho pixel side) is known.
@@ -537,14 +537,14 @@ namespace RTE {
 
 					// Calculate the distributed mass that each bouncing Atom has.
 					//massDistribution = mass /*/ (hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1))*/;
-					//momentInertiaDistribution = m_MomInertia/* / (hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1))*/;
+					//momentInertiaDistribution = m_MomentOfInertia/* / (hitTerrAtoms.size() * (m_Resolution ? m_Resolution : 1))*/;
 
 					const float hitFactor = 1.0F / static_cast<float>(hitTerrAtoms.size());
 
 					// Gather the collision response effects so that the impulse force can be calculated.
 					for (Atom *hitTerrAtom : hitTerrAtoms) {
 						hitTerrAtom->GetHitData().TotalMass[HITOR] = mass;
-						hitTerrAtom->GetHitData().MomInertia[HITOR] = m_MomInertia;
+						hitTerrAtom->GetHitData().MomInertia[HITOR] = m_MomentOfInertia;
 						hitTerrAtom->GetHitData().ImpulseFactor[HITOR] = hitFactor;
 
 						// Get the HitData so far gathered for this Atom.
@@ -585,10 +585,10 @@ namespace RTE {
 						if (g_SceneMan.TryPenetrate(penetratingAtom->GetCurrentPos().GetFloorIntX(), penetratingAtom->GetCurrentPos().GetFloorIntY(), hitData.PreImpulse[HITOR], hitData.HitVel[HITOR], retardation, 1.0F, 1/*(*penetratingAtom)->GetNumPenetrations()*/)) {
 							// Recalculate these here without the distributed mass and MI.
 							const float radMag = hitData.HitRadius[HITOR].GetMagnitude();
-							hitData.HitDenominator = (1.0F / mass) + ((radMag * radMag) / m_MomInertia);
+							hitData.HitDenominator = (1.0F / mass) + ((radMag * radMag) / m_MomentOfInertia);
 							hitData.PreImpulse[HITOR] = hitData.HitVel[HITOR] / hitData.HitDenominator;
 							hitData.TotalMass[HITOR] = mass;
-							hitData.MomInertia[HITOR] = m_MomInertia;
+							hitData.MomInertia[HITOR] = m_MomentOfInertia;
 							hitData.ImpulseFactor[HITOR] = hitFactor;
 							// Finally calculate the hit response impulse.
 							hitData.ResImpulse[HITOR] = ((hitData.HitVel[HITOR] * retardation) / hitData.HitDenominator) * hitFactor;
@@ -609,7 +609,7 @@ namespace RTE {
 				if (hitsMOs && !hitMOAtoms.empty()) {
 					// Set the mass and other data pertaining to the hitor, aka this AtomGroup's owner MO.
 					hitData.TotalMass[HITOR] = mass;
-					hitData.MomInertia[HITOR] = m_MomInertia;
+					hitData.MomInertia[HITOR] = m_MomentOfInertia;
 					hitData.ImpulseFactor[HITOR] = 1.0F / static_cast<float>(atomsHitMOsCount);
 
 					for (const map<MOID, std::list<Atom *>>::value_type &MOAtomMapEntry : hitMOAtoms) {
@@ -624,7 +624,7 @@ namespace RTE {
 							// Calculate and store the accurate hit radius of the Atom in relation to the CoM
 							hitData.HitRadius[HITOR] = m_OwnerMO->RotateOffset(hitMOAtom->GetOffset()) * c_MPP;
 							// Figure out the pre-collision velocity of the hitting Atom due to body translation and rotation.
-							hitData.HitVel[HITOR] = velocity + hitData.HitRadius[HITOR].GetPerpendicular() * angVel;
+							hitData.HitVel[HITOR] = velocity + hitData.HitRadius[HITOR].GetPerpendicular() * angularVel;
 							// Set the Atom with the HitData with all the info we have so far.
 							hitMOAtom->SetHitData(hitData);
 							// Let the Atom calculate the impulse force resulting from the collision, and only add it if collision is valid
@@ -652,7 +652,7 @@ namespace RTE {
 					// TODO: Investigate damping!
 					hitData = hitResponseAtom->GetHitData();
 					velocity += hitData.ResImpulse[HITOR] / mass;
-					angVel += hitData.HitRadius[HITOR].GetPerpendicular().Dot(hitData.ResImpulse[HITOR]) / m_MomInertia;
+					angularVel += hitData.HitRadius[HITOR].GetPerpendicular().Dot(hitData.ResImpulse[HITOR]) / m_MomentOfInertia;
 					// Accumulate all the impulse forces so the MO can determine if it took damaged as a result
 					totalImpulse += hitData.ResImpulse[HITOR];
 				}
@@ -718,7 +718,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector AtomGroup::PushTravel(Vector &position, Vector velocity, float pushForce, bool &didWrap, float travelTime, bool callOnBounce, bool callOnSink, bool scenePreLocked) {
+	Vector AtomGroup::PushTravel(Vector &position, const Vector &velocity, float pushForce, bool &didWrap, float travelTime, bool callOnBounce, bool callOnSink, bool scenePreLocked) {
 		RTEAssert(m_OwnerMO, "Traveling an AtomGroup without a parent MO!");
 
 		didWrap = false;
@@ -1149,7 +1149,7 @@ namespace RTE {
 					for (const std::pair<Vector, Vector> &impulseForcesEntry : impulseForces) {
 						// Cap the impulse to what the max push force is
 						//impulseForcesEntry.first.CapMagnitude(pushForce * (travelTime/* - timeLeft*/));
-						velocity += impulseForcesEntry.first / mass;
+						//velocity += impulseForcesEntry.first / mass;
 						returnPush += impulseForcesEntry.first;
 					}
 					// Stunt travel time if there is no more velocity
@@ -1216,12 +1216,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AtomGroup::FlailAsLimb(const Vector &ownerPos, const Vector &jointOffset, const float limbRadius, const Vector &velocity, const float angVel, const float mass, const float travelTime) {
+	void AtomGroup::FlailAsLimb(const Vector &ownerPos, const Vector &jointOffset, const float limbRadius, const Vector &velocity, const float angularVel, const float mass, const float travelTime) {
 		RTEAssert(m_OwnerMO, "Traveling an AtomGroup without a parent MO!");
 
 		bool didWrap = false;
 		Vector jointPos = ownerPos + jointOffset;
-		Vector centrifugalVel = jointOffset * std::fabs(angVel);
+		Vector centrifugalVel = jointOffset * std::fabs(angularVel);
 
 		// Do the push travel calculations and get the resulting push impulse vector back.
 		Vector pushImpulse = PushTravel(m_LimbPos, velocity + centrifugalVel, 100, didWrap, travelTime, false, false, false);

@@ -31,6 +31,7 @@
 #include "TDExplosive.h"
 #include "ThrownDevice.h"
 #include "Turret.h"
+#include "PEmitter.h"
 
 #include "DataModule.h"
 #include "GAScripted.h"
@@ -206,6 +207,7 @@ LUAENTITYCREATE(HDFirearm)
 LUAENTITYCREATE(ThrownDevice)
 LUAENTITYCREATE(TDExplosive)
 LUAENTITYCREATE(TerrainObject)
+LUAENTITYCREATE(PEmitter)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -250,6 +252,7 @@ LUAENTITYCLONE(HDFirearm)
 LUAENTITYCLONE(ThrownDevice)
 LUAENTITYCLONE(TDExplosive)
 LUAENTITYCLONE(TerrainObject)
+LUAENTITYCLONE(PEmitter)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Explicit deletion of any Entity instance that Lua owns.. it will probably be handled
@@ -316,6 +319,7 @@ LUAENTITYCAST(HDFirearm)
 LUAENTITYCAST(ThrownDevice)
 LUAENTITYCAST(TDExplosive)
 LUAENTITYCAST(TerrainObject)
+LUAENTITYCAST(PEmitter)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -836,6 +840,24 @@ int LuaMan::Create() {
             .def("IsSetToBurst", &AEmitter::IsSetToBurst)
             .def("CanTriggerBurst", &AEmitter::CanTriggerBurst)
 			.def_readwrite("Emissions", &AEmitter::m_EmissionList, return_stl_iterator),
+
+		CONCRETELUABINDING(PEmitter, MOSParticle)
+			.def("IsEmitting", &PEmitter::IsEmitting)
+			.def("EnableEmission", &PEmitter::EnableEmission)
+			.property("BurstScale", &PEmitter::GetBurstScale, &PEmitter::SetBurstScale)
+			.property("EmitAngle", &PEmitter::GetEmitAngle, &PEmitter::SetEmitAngle)
+			.property("GetThrottle", &PEmitter::GetThrottle, &PEmitter::SetThrottle)
+			.property("Throttle", &PEmitter::GetThrottle, &PEmitter::SetThrottle)
+			.property("BurstSpacing", &PEmitter::GetBurstSpacing, &PEmitter::SetBurstSpacing)
+			.property("EmitCountLimit", &PEmitter::GetEmitCountLimit, &PEmitter::SetEmitCountLimit)
+			.property("FlashScale", &PEmitter::GetFlashScale, &PEmitter::SetFlashScale)
+			.def("GetEmitVector", &PEmitter::GetEmitVector)
+			.def("GetRecoilVector", &PEmitter::GetRecoilVector)
+			.def("EstimateImpulse", &PEmitter::EstimateImpulse)
+			.def("TriggerBurst", &PEmitter::TriggerBurst)
+			.def("IsSetToBurst", &PEmitter::IsSetToBurst)
+			.def("CanTriggerBurst", &PEmitter::CanTriggerBurst)
+			.def_readwrite("Emissions", &PEmitter::m_EmissionList, return_stl_iterator),
 
 		CONCRETELUABINDING(Actor, MOSRotating)
 			.enum_("Status")[

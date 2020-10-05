@@ -438,6 +438,9 @@ int MainMenuGUI::Create(Controller *pController)
 		m_aOptionButton[FULLSCREENORWINDOWED]->SetText("Fullscreen");
 	}
 
+	m_VersionLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("VersionLabel"));
+	m_VersionLabel->SetText(c_GameVersion);
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// Load mod data and fill the lists
     for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i)  

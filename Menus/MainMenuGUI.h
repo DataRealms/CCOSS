@@ -685,6 +685,7 @@ protected:
     GUIButton *m_aEditorButton[EDITORBUTTONCOUNT];
     // Metagame notice label
     GUILabel *m_pMetaNoticeLabel;
+	GUILabel *m_VersionLabel; //!< CCCP version number.
 
     // Controller diagram bitmaps
     BITMAP **m_aDPadBitmaps;

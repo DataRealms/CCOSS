@@ -441,6 +441,7 @@ int MainMenuGUI::Create(Controller *pController)
 
 	m_VersionLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("VersionLabel"));
 	m_VersionLabel->SetText(c_GameVersion);
+	m_VersionLabel->SetPositionAbs(10, g_FrameMan.GetResY() - m_VersionLabel->GetTextHeight() - 10);
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// Load mod data and fill the lists

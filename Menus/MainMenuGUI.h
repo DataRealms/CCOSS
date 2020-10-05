@@ -636,7 +636,7 @@ protected:
     // Collection box of the buy GUIs
     GUICollectionBox *m_apScreenBox[SCREENCOUNT];
     // The main menu buttons
-    GUIButton *m_aMainMenuButton[MAINMENUBUTTONCOUNT];
+    GUIButton *m_MainMenuButtons[MAINMENUBUTTONCOUNT];
     // Skirmish scene selction box
     GUIComboBox *m_pSceneSelector;
     // The skirmish setup screen team box panels

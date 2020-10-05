@@ -10,7 +10,7 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Game Version
-	static constexpr char *c_GameVersion = "Pre-release 3";
+	static constexpr char *c_GameVersion = "Pre-Release 3";
 #pragma endregion
 
 #pragma region Filesystem Constants

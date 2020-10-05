@@ -674,8 +674,6 @@ void MainMenuGUI::Update()
             m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
             m_MainMenuButtons[PLAYTUTORIAL]->SetVisible(false);
             m_MainMenuButtons[METACONTINUE]->SetVisible(false);
-            // Move main menu button back to center
-            m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(260, 320);
             m_ScreenChange = false;
         }
     
@@ -735,7 +733,7 @@ void MainMenuGUI::Update()
 //            m_pGUIController->GetControl("ButtonStartSkirmish")->SetVisible(true);
             UpdateTeamBoxes();
             // Move main menu button over so the start button fits
-            m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(200, 280);
+			m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(200, 280);
             m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
             m_ScreenChange = false;
         }
@@ -770,7 +768,8 @@ void MainMenuGUI::Update()
         {
             m_apScreenBox[OPTIONSSCREEN]->SetVisible(true);
             m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
-			m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(260, 360);
+			m_apScreenBox[OPTIONSSCREEN]->GUIPanel::AddChild(m_MainMenuButtons[BACKTOMAIN]);
+			m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(180, 220);
             m_pBackToOptionsButton->SetVisible(false);
             UpdateDeviceLabels();
             m_ScreenChange = false;
@@ -813,7 +812,8 @@ void MainMenuGUI::Update()
 		if (m_ScreenChange) {
 			m_apScreenBox[EDITORSCREEN]->SetVisible(true);
 			m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
-			m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(260, 285);
+			m_apScreenBox[EDITORSCREEN]->GUIPanel::AddChild(m_MainMenuButtons[BACKTOMAIN]);
+			m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(4, 145);
 			m_ScreenChange = false;
 		}
 	}
@@ -825,7 +825,8 @@ void MainMenuGUI::Update()
 		if (m_ScreenChange) {
 			m_apScreenBox[CREDITSSCREEN]->SetVisible(true);
 			m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
-			m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(260, 430);
+			m_apScreenBox[CREDITSSCREEN]->GUIPanel::AddChild(m_MainMenuButtons[BACKTOMAIN]);
+			m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(240, 298);
 			// Set the scroll panel to be out of sight at the bottom of the credits screen box
 			m_pScrollPanel->SetPositionRel(0, m_apScreenBox[CREDITSSCREEN]->GetHeight());
 			m_ScrollTimer.Reset();
@@ -1139,7 +1140,6 @@ void MainMenuGUI::Update()
                 // Hide all screens, the appropriate screen will reappear on next update
                 HideAllScreens();
                 m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
-                m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(260, 280);
 
                 // If leaving the options screen, save the settings!
                 if (m_MenuScreen == OPTIONSSCREEN)
@@ -1241,8 +1241,6 @@ void MainMenuGUI::Update()
                     // CPU team present, so ask for the difficulty level of it before starting
                     else
                     {
-                        // Move main menu button back to center
-                        m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(260, 280);
                         m_MenuScreen = DIFFICULTYSCREEN;
                         m_ScreenChange = true;
                         g_GUISound.ButtonPressSound()->Play();

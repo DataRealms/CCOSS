@@ -182,7 +182,7 @@ int MainMenuGUI::Create(Controller *pController)
     m_pGUIController->Load("Base.rte/GUIs/MainMenuGUI.ini");
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
-    GUICollectionBox *pRootBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("root"));
+	m_apScreenBox[ROOT] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("root"));
     m_apScreenBox[MAINSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("MainScreen"));
     m_apScreenBox[PLAYERSSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PlayersScreen"));
     m_apScreenBox[SKIRMISHSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SkirmishScreen"));
@@ -195,6 +195,7 @@ int MainMenuGUI::Create(Controller *pController)
     m_apScreenBox[QUITSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("QuitConfirmBox"));
     m_apScreenBox[MODMANAGERSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ModManagerScreen"));
 
+	GUICollectionBox *pRootBox = m_apScreenBox[ROOT];
     pRootBox->SetPositionAbs((g_FrameMan.GetResX() - pRootBox->GetWidth()) / 2, 0);// (g_FrameMan.GetResY() - pRootBox->GetHeight()) / 2);
 // NO, this screws up the menu positioning!
 //    pRootBox->Resize(pRootBox->GetWidth(), g_FrameMan.GetResY());
@@ -1848,7 +1849,7 @@ void MainMenuGUI::Draw(BITMAP *drawBitmap) const
 
 void MainMenuGUI::HideAllScreens()
 {
-    for (int iscreen = 0; iscreen < SCREENCOUNT; ++iscreen)
+    for (int iscreen = MAINSCREEN; iscreen < SCREENCOUNT; ++iscreen)
     {
         if (m_apScreenBox[iscreen])
             m_apScreenBox[iscreen]->SetVisible(false);

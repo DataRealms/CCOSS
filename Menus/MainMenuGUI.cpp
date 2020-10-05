@@ -533,7 +533,7 @@ int MainMenuGUI::Create(Controller *pController)
 	}
 
     // Read all the credits from the file and set the credits label
-    GUILabel *pCreditsLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("CreditsLabel"));
+	m_CreditsLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("CreditsLabel"));
     Reader creditsReader("Credits.txt");
     string creditsText = creditsReader.ReadTo('#', true);
 
@@ -548,8 +548,8 @@ int MainMenuGUI::Create(Controller *pController)
         if (*sItr == -87)//'©')
             (*sItr) = (char)221;
     }
-    pCreditsLabel->SetText(creditsText);
-    m_pScrollPanel->Resize(m_pScrollPanel->GetWidth(), pCreditsLabel->ResizeHeightToFit());
+	m_CreditsLabel->SetText(creditsText);
+	m_CreditsLabel->ResizeHeightToFit();
 
     // Set initial focus, category list, and label settings
     m_ScreenChange = true;
@@ -827,21 +827,20 @@ void MainMenuGUI::Update()
 			m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
 			m_apScreenBox[CREDITSSCREEN]->GUIPanel::AddChild(m_MainMenuButtons[BACKTOMAIN]);
 			m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(240, 298);
-			// Set the scroll panel to be out of sight at the bottom of the credits screen box
-			m_pScrollPanel->SetPositionRel(0, m_apScreenBox[CREDITSSCREEN]->GetHeight());
+			m_pScrollPanel->SetPositionRel(0, 0);
+			m_CreditsLabel->SetPositionRel(0, m_pScrollPanel->GetHeight());
 			m_ScrollTimer.Reset();
 			m_ScreenChange = false;
 		}
 
-        long scrollTime = 180000;
+        long scrollTime = 90000;
         float scrollProgress = (float)m_ScrollTimer.GetElapsedRealTimeMS() / (float)scrollTime;
-        int scrollDist = -m_apScreenBox[CREDITSSCREEN]->GetHeight() + (-m_pScrollPanel->GetHeight());
-        // Scroll the scroll panel upwards, GetYPos returns absolute coordinates
-        m_pScrollPanel->SetPositionRel(0, m_apScreenBox[CREDITSSCREEN]->GetHeight() + (scrollDist * scrollProgress));
+        int scrollDist = m_pScrollPanel->GetHeight() + m_CreditsLabel->GetHeight();
+		m_CreditsLabel->SetPositionRel(0, m_pScrollPanel->GetHeight() - static_cast<int>(static_cast<float>(scrollDist) * scrollProgress));
         // If we've scrolled through the whole thing, reset to the bottom and restart scroll
         if (m_ScrollTimer.IsPastRealMS(scrollTime))
         {
-            m_pScrollPanel->SetPositionRel(0, m_apScreenBox[CREDITSSCREEN]->GetHeight());
+			m_CreditsLabel->SetPositionRel(0, m_pScrollPanel->GetHeight());
             m_ScrollTimer.Reset();
         }
 

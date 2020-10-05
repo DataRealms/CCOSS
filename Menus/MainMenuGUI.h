@@ -713,6 +713,7 @@ protected:
     GUICollectionBox *m_pEditorPanel;
     // Scrolling panel for the credits
     GUICollectionBox *m_pScrollPanel;
+	GUILabel *m_CreditsLabel; //!< The label containing all the credits text.
     // Timer for credits scrolling pacing
     Timer m_ScrollTimer;
 

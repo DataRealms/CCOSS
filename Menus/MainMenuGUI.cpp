@@ -195,13 +195,15 @@ int MainMenuGUI::Create(Controller *pController)
     m_apScreenBox[QUITSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("QuitConfirmBox"));
     m_apScreenBox[MODMANAGERSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ModManagerScreen"));
 
-	GUICollectionBox *pRootBox = m_apScreenBox[ROOT];
-    pRootBox->SetPositionAbs((g_FrameMan.GetResX() - pRootBox->GetWidth()) / 2, 0);// (g_FrameMan.GetResY() - pRootBox->GetHeight()) / 2);
-// NO, this screws up the menu positioning!
-//    pRootBox->Resize(pRootBox->GetWidth(), g_FrameMan.GetResY());
+	m_apScreenBox[ROOT]->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-    // Set up screens' initial positions and visibility
-    m_apScreenBox[QUITSCREEN]->CenterInParent(true, true);
+	for (int iscreen = MAINSCREEN; iscreen < SCREENCOUNT; ++iscreen)
+	{
+		if (m_apScreenBox[iscreen]) {
+			m_apScreenBox[iscreen]->CenterInParent(true, true);
+		}
+	}
+
     // Hide all screens, the appropriate screen will reappear on next update
     HideAllScreens();
 

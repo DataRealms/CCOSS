@@ -64,6 +64,7 @@ void MOSRotating::Clear()
     m_Attachables.clear();
     m_ReferenceHardcodedAttachableUniqueIDs.clear();
     m_HardcodedAttachableUniqueIDsAndSetters.clear();
+    m_AttachableAndWoundMass = 0.0F;
     m_Gibs.clear();
     m_GibImpulseLimit = 0;
     m_GibWoundLimit = 0;
@@ -466,6 +467,7 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
         } else {
             woundToAdd->SetParentOffset(parentOffsetToSet);
             woundToAdd->SetParent(this);
+            m_AttachableAndWoundMass += woundToAdd->GetMass();
             m_Wounds.push_back(woundToAdd);
         }
     }
@@ -503,6 +505,7 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includeAttachab
             return 0.0F;
         }
         float woundDamage = m_Wounds.front()->GetBurstDamage();
+        m_AttachableAndWoundMass -= m_Wounds.front()->GetMass();
         m_Wounds.pop_front();
         return woundDamage;
     };
@@ -553,19 +556,6 @@ void MOSRotating::Destroy(bool notInherited)
     if (!notInherited)
         MOSprite::Destroy();
     Clear();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-float MOSRotating::GetMass() const {
-    float totalMass = MOSprite::GetMass();
-    for (const Attachable *attachable : m_Attachables) {
-        totalMass += attachable->GetMass();
-    }
-    for (const AEmitter *wound : m_Wounds) {
-        totalMass += wound->GetMass();
-    }
-    return totalMass;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1535,6 +1525,7 @@ void MOSRotating::AddAttachable(Attachable *attachable, const Vector& parentOffs
         if (g_MovableMan.ValidMO(attachable)) { g_MovableMan.RemoveMO(attachable); }
         attachable->SetParentOffset(parentOffsetToSet);
         attachable->SetParent(this);
+        m_AttachableAndWoundMass += attachable->GetMass();
 		m_Attachables.push_back(attachable);
 	}
 }
@@ -1560,6 +1551,7 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
 
     if (m_Attachables.size() > 0) { m_Attachables.remove(attachable); }
     attachable->SetParent(nullptr);
+    m_AttachableAndWoundMass -= attachable->GetMass();
 
     std::unordered_map<unsigned long, std::function<void(MOSRotating *, Attachable *)>>::iterator hardcodedAttachableMapEntry = m_HardcodedAttachableUniqueIDsAndSetters.find(attachable->GetUniqueID());
     if (hardcodedAttachableMapEntry != m_HardcodedAttachableUniqueIDsAndSetters.end()) {
@@ -1595,12 +1587,17 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MOSRotating::DetachOrDestroyAll(bool destroy) {
-    for (Attachable *attachable : m_Attachables) {
+void MOSRotating::RemoveOrDestroyAllAttachables(bool destroy) {
+    Attachable *attachable;
+    for (list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
+        attachable = *attachableIterator;
+        RTEAssert(attachable, "Broken Attachable!");
+        ++attachableIterator;
+
         if (destroy) {
             delete attachable;
         } else {
-            attachable->SetParent(nullptr);
+            RemoveAttachable(attachable);
         }
     }
 	m_Attachables.clear();

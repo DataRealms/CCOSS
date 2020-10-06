@@ -325,11 +325,11 @@ namespace RTE {
 					Matrix atomRotationForSubgroup(facingAngle - parentFacingAngle);
 					Vector atomOffsetForSubgroup;
 					CalculateAtomOffsetForSubgroup(atomOffsetForSubgroup);
+					// Note: This line looks weird because CalculateAtomOffsetForSubgroup already adds JointOffset to the value, so we have to subtract it and added its rotated value instead.
 					atomOffsetForSubgroup += GetJointOffset() - (GetJointOffset() * atomRotationForSubgroup);
 					rootParentAsMOSR->GetAtomGroup()->UpdateSubAtoms(GetAtomSubgroupID(), atomOffsetForSubgroup, atomRotationForSubgroup);
 				}
 			}
-
 			m_DeepCheck = false;
 		}
 
@@ -341,25 +341,66 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void Attachable::SetMass(const float newMass) {
+		float previousMassForUpdatingParent = m_Parent ? GetMass() : 0.0F;
+		MovableObject::SetMass(newMass);
+		if (m_Parent) { m_Parent->UpdateAttachableAndWoundMass(previousMassForUpdatingParent, GetMass()); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Attachable::AddAttachable(Attachable *attachable, const Vector &parentOffsetToSet) {
+		float previousMassForUpdatingParent = m_Parent ? GetMass() : 0.0F;
+		MOSRotating::AddAttachable(attachable, parentOffsetToSet);
+		if (m_Parent) { m_Parent->UpdateAttachableAndWoundMass(previousMassForUpdatingParent, GetMass()); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool Attachable::RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
+		float previousMassForUpdatingParent = m_Parent ? GetMass() : 0.0F;
+		bool result = MOSRotating::RemoveAttachable(attachable, addToMovableMan, addBreakWounds);
+		if (m_Parent) { m_Parent->UpdateAttachableAndWoundMass(previousMassForUpdatingParent, GetMass()); }
+		return result;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Attachable::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit) {
+		float previousMassForUpdatingParent = m_Parent ? GetMass() : 0.0F;
+		MOSRotating::AddWound(woundToAdd, parentOffsetToSet, checkGibWoundLimit);
+		if (m_Parent) { m_Parent->UpdateAttachableAndWoundMass(previousMassForUpdatingParent, GetMass()); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float Attachable::RemoveWounds(int numberOfWoundsToRemove, bool includeAttachablesWithAPositiveDamageMultiplier, bool includeAttachablesWithANegativeDamageMultiplier, bool includeAttachablesWithNoDamageMultiplier) {
+		float previousMassForUpdatingParent = m_Parent ? GetMass() : 0.0F;
+		float result = MOSRotating::RemoveWounds(numberOfWoundsToRemove, includeAttachablesWithAPositiveDamageMultiplier, includeAttachablesWithANegativeDamageMultiplier, includeAttachablesWithNoDamageMultiplier);
+		if (m_Parent) { m_Parent->UpdateAttachableAndWoundMass(previousMassForUpdatingParent, GetMass()); }
+		return result;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void Attachable::SetParent(MOSRotating *newParent) {
 		if (newParent == m_Parent) {
 			return;
 		}
-
-		m_Team = newParent ? newParent->GetTeam() : -1;
 		MOSRotating *parentToUseForScriptCall = newParent ? newParent : m_Parent;
+
+		//TODO Get rid of the need for calling ResetAllTimers, if something like inventory swapping needs timers reset it should do it itself! This blanket handling probably has side-effects.
+		// Timers are reset here as a precaution, so that if something was sitting in an inventory, it doesn't cause backed up emissions.
+		ResetAllTimers();
 		
 		if (newParent) {
-			//TODO see if this is reasonable. Seems like inventory swapping should do this cleanup internally. Also note that it used to be done regardless of newParent existing (i.e. any time Attach was called) but I changed that, might be bad?
-			
-			// Timers are reset here as a precaution, so that if something was sitting in an inventory, it doesn't cause backed up emissions.
-			ResetAllTimers();
-
 			m_Parent = newParent;
+			m_Team = newParent->GetTeam();
 			if (m_CollidesWithTerrainWhileAttached) { AddOrRemoveAtomsFromRootParentAtomGroup(true); }
 		} else {
 			m_RootMOID = m_MOID;
 			m_RestTimer.Reset();
+			m_Team = -1;
 			if (m_pMOToNotHit && m_Parent && m_Parent->GetWhichMOToNotHit() == m_pMOToNotHit) { m_pMOToNotHit = nullptr; }
 
 			if (m_CollidesWithTerrainWhileAttached) { AddOrRemoveAtomsFromRootParentAtomGroup(false); }

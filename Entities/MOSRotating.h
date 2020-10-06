@@ -140,7 +140,14 @@ ClassInfoGetters
     /// Gets the mass value of this MOSRotating, including the mass of all its Attachables and their Attachables and so on.
     /// </summary>
     /// <returns>The mass of this MOSRotating and all Attachables in Kilograms (kg).</returns>
-    float GetMass() const override;
+    float GetMass() const override { return MOSprite::GetMass() + m_AttachableAndWoundMass; }
+
+    /// <summary>
+    /// Updates the total mass of Attachables and wounds for this MOSRotating, intended to be used when Attachables' masses get modified. Simply subtracts the old mass and adds the new one.
+    /// </summary>
+    /// <param name="oldAttachableOrWoundMass">The mass the Attachable or wound had before its mass was modified.</param>
+    /// <param name="newAttachableOrWoundMass">The up-to-date mass of the Attachable or wound after its mass was modified.</param>
+    void UpdateAttachableAndWoundMass(float oldAttachableOrWoundMass, float newAttachableOrWoundMass) { m_AttachableAndWoundMass += newAttachableOrWoundMass - oldAttachableOrWoundMass; }
 
     /// <summary>
     /// Gets the MOIDs of this MOSRotating and all its Attachables and Wounds, putting them into the MOIDs vector.
@@ -390,22 +397,21 @@ ClassInfoGetters
 	void AddAttachable(Attachable *attachable);
 
     /// <summary>
-    /// Attaches the passed in Attachable and adds it to the list of Attachables, changing its parent offset to the passed in Vector but not treating it as hardcoded.
     /// Adds the passed in Attachable the list of Attachables, changes its parent offset to the passed in Vector, and sets its parent to this MOSRotating.
     /// </summary>
     /// <param name="attachable">The Attachable to add.</param>
     /// <param name="parentOffsetToSet">The Vector to set as the Attachable's parent offset.</param>
-	void AddAttachable(Attachable *attachable, const Vector& parentOffsetToSet);
+	virtual void AddAttachable(Attachable *attachable, const Vector& parentOffsetToSet);
 
     /// <summary>
-    /// Detaches the Attachable corresponding to the passed in UniqueID, and removes it from the appropriate Attachable lists. Does not add it to MovableMan or add break wounds.
+    /// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Does not add it to MovableMan or add break wounds.
     /// </summary>
     /// <param name="attachableUniqueID">The UniqueID of the the Attachable to remove.</param>
     /// <returns>False if the Attachable is invalid, otherwise true.</returns>
     bool RemoveAttachable(long attachableUniqueID) { return RemoveAttachable(attachableUniqueID, false, false); }
 
     /// <summary>
-    /// Detaches the Attachable corresponding to the passed in UniqueID, and removes it from the appropriate Attachable lists. Optionally adds it to MovableMan and/or adds break wounds.
+    /// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
     /// </summary>
     /// <param name="attachableUniqueID">The UniqueID of the the Attachable to remove.</param>
     /// <param name="addToMovableMan">Whether or not to add the Attacahble to MovableMan once it has been removed.</param>
@@ -414,26 +420,26 @@ ClassInfoGetters
     bool RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds);
 
     /// <summary>
-    /// Detaches the passed in Attachable and removes it from the appropriate Attachable lists. Does not add it to MovableMan or add break wounds.
+    /// Removes the passed in Attachable and sets its parent to nullptr. Does not add it to MovableMan or add break wounds.
     /// </summary>
     /// <param name="attachable">The Attachable to remove.</param>
     /// <returns>False if the Attachable is invalid, otherwise true.</returns>
     bool RemoveAttachable(Attachable *attachable) { return RemoveAttachable(attachable, false, false); }
 
     /// <summary>
-    /// Detaches the passed in Attachable and removes it from the appropriate Attachable lists. Optionally adds it to MovableMan and/or adds break wounds.
+    /// Removes the passed in Attachable and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
     /// </summary>
     /// <param name="attachable">The Attachable to remove.</param>
     /// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
     /// <param name="addBreakWounds">Whether or not to add break wounds to the Attachable and this MOSRotating.</param>
     /// <returns>False if the Attachable is invalid, otherwise true.</returns>
-    bool RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds);
+    virtual bool RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds);
 
     /// <summary>
-    /// Either detaches or deletes all of this MOSRotating's Attachables.
+    /// Either removes or deletes all of this MOSRotating's Attachables.
     /// </summary>
-    /// <param name="destroy">Whether to detach or delete the Attachables. Setting this to true deletes them, setting it to false detaches them.</param>
-	void DetachOrDestroyAll(bool destroy);
+    /// <param name="destroy">Whether to remove or delete the Attachables. Setting this to true deletes them, setting it to false removes them.</param>
+	void RemoveOrDestroyAllAttachables(bool destroy);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -626,15 +632,15 @@ ClassInfoGetters
     int GetWoundCount(bool includeAttachablesWithAPositiveDamageMultiplier, bool includeAttachablesWithANegativeDamageMultiplier, bool includeAttachablesWithNoDamageMultiplier) const;
 
 	/// <summary>
-	/// Attaches the passed in wound AEmitter and adds it to the list of wounds, changing its parent offset to the passed in Vector.
+	/// Adds the passed in wound AEmitter to the list of wounds and changes its parent offset to the passed in Vector.
 	/// </summary>
 	/// <param name="woundToAdd">The wound AEmitter to add.</param>
 	/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset.</param>
 	/// <param name="checkGibWoundLimit">Whether to gib this MOSRotating if adding this wound raises its wound count past its gib wound limit. Defaults to true.</param>
-    void AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit = true);
+    virtual void AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit = true);
 
     /// <summary>
-    /// Removes a specified number of wounds, including  and returns damage caused by these wounds.
+    /// Removes the specified number of wounds from this MOSRotating, and returns damage caused by these removed wounds.
     /// Includes any Attachables (and their Attachables, etc.) that have a positive damage multiplier.
     /// </summary>
     /// <param name="numberOfWoundsToRemove">The number of wounds that should be removed.</param>
@@ -642,15 +648,15 @@ ClassInfoGetters
     float RemoveWounds(int numberOfWoundsToRemove) { return RemoveWounds(numberOfWoundsToRemove, true, false, false); }
 
     /// <summary>
-    /// Removes a specified number of wounds and returns damage caused by these wounds. Head multiplier is not used.
-    /// Optionally adds removes wounds from Attachables (and their Attachables, etc.) that match the conditions set by the provided parameters.
+    /// Removes the specified number of wounds from this MOSRotating, and returns damage caused by these removed wounds.
+    /// Optionally removes wounds from Attachables (and their Attachables, etc.) that match the conditions set by the provided inclusion parameters.
     /// </summary>
     /// <param name="numberOfWoundsToRemove">The number of wounds that should be removed.</param>
     /// <param name="includeAttachablesWithAPositiveDamageMultiplier">Whether to count wounds from Attachables that have a positive damage multiplier, i.e. those that damage their parent (this MOSRotating) when wounded.</param>
     /// <param name="includeAttachablesWithANegativeDamageMultiplier">Whether to count wounds from Attachables that have a negative damage multiplier, i.e. those that heal their parent (this MOSRotating) when wounded.</param>
     /// <param name="includeAttachablesWithNoDamageMultiplier">Whether to count wounds from Attachables that a zero damage multiplier, i.e. those that do not affect their parent (this MOSRotating) when wounded.</param>
     /// <returns>The amount of damage caused by these wounds, taking damage multipliers into account.</returns>
-    float RemoveWounds(int numberOfWoundsToRemove, bool includeAttachablesWithAPositiveDamageMultiplier, bool includeAttachablesWithANegativeDamageMultiplier, bool includeAttachablesWithNoDamageMultiplier);
+    virtual float RemoveWounds(int numberOfWoundsToRemove, bool includeAttachablesWithAPositiveDamageMultiplier, bool includeAttachablesWithANegativeDamageMultiplier, bool includeAttachablesWithNoDamageMultiplier);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetStringValue
@@ -878,6 +884,7 @@ protected:
     std::list<Attachable *> m_Attachables;
     std::unordered_set<unsigned long> m_ReferenceHardcodedAttachableUniqueIDs; //!< An unordered set is filled with the Unique IDs of all of the reference object's hardcoded Attachables when using the copy Create.
     std::unordered_map<unsigned long, std::function<void (MOSRotating*, Attachable*)>> m_HardcodedAttachableUniqueIDsAndSetters; //!< An unordered map of Unique IDs to setter lambda functions, used to call the appropriate hardcoded Attachable setter when a hardcoded Attachable is removed.
+    float m_AttachableAndWoundMass; //!< The mass of all Attachables and wounds on this MOSRotating. Used in combination with its actual mass and any other affecting factors to get its total mass.
     // The list of Gib:s this will create when gibbed
     std::list<Gib> m_Gibs;
     // The amount of impulse force required to gib this, in kg * (m/s). 0 means no limit

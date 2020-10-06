@@ -23,6 +23,12 @@ namespace RTE {
 		TDExplosive() { Clear(); }
 
 		/// <summary>
+		/// Makes the TDExplosive object ready for use.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create() override;
+
+		/// <summary>
 		/// Creates a TDExplosive to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the TDExplosive to deep copy.</param>

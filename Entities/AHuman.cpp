@@ -3068,7 +3068,7 @@ void AHuman::Update()
                 Attachable *pNewHat = dynamic_cast<Attachable *>(preset->Clone());
                 if (pNewHat)
                 {
-			        m_pHead->DetachOrDestroyAll(true);
+			        m_pHead->RemoveOrDestroyAllAttachables(true);
 			        m_pHead->AddAttachable(pNewHat, pNewHat->GetParentOffset());
                 }
 			}

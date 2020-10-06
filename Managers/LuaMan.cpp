@@ -993,6 +993,7 @@ int LuaMan::Create()
 			.def("SetClosedByDefault", &ADoor::SetClosedByDefault),
 
 		ABSTRACTLUABINDING(Arm, Attachable)
+            .property("HeldDevice", &Arm::GetHeldMO)
 			.property("IdleOffset", &Arm::GetIdleOffset, &Arm::SetIdleOffset)
             .property("GripStrength", &Arm::GetGripStrength, &Arm::SetGripStrength)
 			.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos),

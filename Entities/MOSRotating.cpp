@@ -1522,6 +1522,7 @@ void MOSRotating::AddAttachable(Attachable *attachable) {
 
 void MOSRotating::AddAttachable(Attachable *attachable, const Vector& parentOffsetToSet) {
 	if (attachable) {
+        RTEAssert(!attachable->IsAttached(), "Tried to add Attachable " + attachable->GetModuleAndPresetName() + " but it already has a parent, " + (attachable->GetParent() ? attachable->GetParent()->GetModuleAndPresetName() : "ERROR") + ".");
         if (g_MovableMan.ValidMO(attachable)) { g_MovableMan.RemoveMO(attachable); }
         attachable->SetParentOffset(parentOffsetToSet);
         attachable->SetParent(this);

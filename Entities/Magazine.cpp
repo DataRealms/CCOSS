@@ -48,7 +48,7 @@ void Magazine::Clear()
 
 int Magazine::Create()
 {
-    if (MOSRotating::Create() < 0)
+    if (Attachable::Create() < 0)
         return -1;
     
     // Read projectile properties for AI aim caluculations

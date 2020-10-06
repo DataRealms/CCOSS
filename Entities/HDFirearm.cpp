@@ -152,6 +152,7 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader) {
             m_pMagazineReference = dynamic_cast<const Magazine *>(magazineEntity);
             m_pMagazine = dynamic_cast<Magazine *>(magazineEntity->Clone());
             AddAttachable(m_pMagazine);
+            m_pMagazine->SetCollidesWithTerrainWhileAttached(false);
         }
     } else if (propName == "Flash") {
         RemoveAttachable(m_pFlash);
@@ -161,6 +162,7 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader) {
             AddAttachable(m_pFlash);
             m_pFlash->SetDrawnNormallyByParent(false);
             m_pFlash->SetDeleteWhenRemovedFromParent(true);
+            m_pFlash->SetCollidesWithTerrainWhileAttached(false);
         }
     } else if (propName == "FireSound") {
         reader >> m_FireSound;

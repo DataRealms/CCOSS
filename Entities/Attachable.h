@@ -210,7 +210,7 @@ namespace RTE {
 		/// 1.0 means impulse forces on this attachable will be transferred to the parent with 100% strength, 0 means they will not transfer at all.
 		/// </summary>
 		/// <param name="jointStiffness">A float describing the normalized stiffness scalar of this Attachable's joint. It will automatically be limited between 0 and 1.0.</param>
-		void SetJointStiffness(float jointStiffness) { m_JointStiffness = Limit(jointStiffness, 1, 0); }
+		void SetJointStiffness(float jointStiffness) { m_JointStiffness = Limit(jointStiffness, 1.0F, 0.0F); }
 
 		/// <summary>
 		/// Gets the offset of the joint (the point around which this Attachable and its parent hinge) from this Attachable's center of mass/origin.
@@ -418,10 +418,17 @@ namespace RTE {
 	private:
 
 		/// <summary>
-		/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its atoms to/from its parent AtomGroup.
+		/// Calculates the offset this Attachable's Atoms should be given when added to its root parent's AtomGroup as a subgroup, and fills the passed in Vector with it.
+		/// If the Attachable's parent is the root parent, the Vector is not modified, as the calculated offset is (0, 0).
 		/// </summary>
-		/// <param name="addToParent">Whether to add this Attachable's atoms to the parent's AtomGroup or remove them.</param>
-		void OrganizeAtomsInParent(bool addToParent);
+		/// <param name="atomOffsetForSubgroup">A reference to the Vector that will be filled in with the offset this Attachable's Atoms should use when added to their root parent's AtomGroup as a subgroup.</param>
+		void CalculateAtomOffsetForSubgroup(Vector &atomOffsetForSubgroup) const;
+
+		/// <summary>
+		/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its Atoms to/from its root parent's AtomGroup.
+		/// </summary>
+		/// <param name="addAtoms">Whether to add this Attachable's Atoms to the root parent's AtomGroup or remove them.</param>
+		void AddOrRemoveAtomsFromRootParentAtomGroup(bool addAtoms);
 
 		/// <summary>
 		/// Clears all the member variables of this Attachable, effectively resetting the members of this abstraction level only.

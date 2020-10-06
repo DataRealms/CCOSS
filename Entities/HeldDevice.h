@@ -543,12 +543,6 @@ ClassInfoGetters
 	/// </summary>
 	void ResetAllTimers() override { Attachable::ResetAllTimers(); m_ActivationTimer.Reset(); }
 
-    /// <summary>
-    /// Override to ensure that HeldDevices and their children can NOT be set to delete when removed from their parent as that causes problems when swapping inventory items around.
-    /// </summary>
-    /// <param name="deleteWhenRemovedFromParent">Whether this Attachable should be deleted when it's removed from its parent.</param>
-    void SetDeleteWhenRemovedFromParent(bool deleteWhenRemovedFromParent) final { m_DeleteWhenRemovedFromParent = false; }
-
 #pragma region Force Transferral
     /// <summary>
     /// Bundles up all the accumulated impulse forces of this Attachable and calculates how they transfer to the joint, and therefore to the parent.

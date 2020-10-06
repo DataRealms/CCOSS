@@ -78,6 +78,8 @@ namespace RTE {
 
 		m_CollidesWithTerrainWhileAttached = reference.m_CollidesWithTerrainWhileAttached;
 
+		m_AtomSubgroupID = GetUniqueID();
+
 		return 0;
 	}
 
@@ -251,7 +253,7 @@ namespace RTE {
 
 	void Attachable::SetCollidesWithTerrainWhileAttached(bool collidesWithTerrainWhileAttached) {
 		if (m_CollidesWithTerrainWhileAttached != collidesWithTerrainWhileAttached) {
-			OrganizeAtomsInParent(collidesWithTerrainWhileAttached);
+			AddOrRemoveAtomsFromRootParentAtomGroup(collidesWithTerrainWhileAttached);
 			m_CollidesWithTerrainWhileAttached = collidesWithTerrainWhileAttached;
 		}
 	}
@@ -311,12 +313,21 @@ namespace RTE {
 			if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
 			if (InheritsRotAngle()) { SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset); }
 
-			if (m_CollidesWithTerrainWhileAttached) {
+			MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());
+			if (rootParentAsMOSR && m_CollidesWithTerrainWhileAttached) {
+				// This safety check exists to ensure the parent's AtomGroup contains this Attachable's Atoms in a subgroup. Hardcoded Attachables need this in order to work, since they're cloned before their parent's AtomGroup exists.
+				if (!rootParentAsMOSR->GetAtomGroup()->ContainsSubGroup(m_AtomSubgroupID)) { AddOrRemoveAtomsFromRootParentAtomGroup(true); }
+
 				float facingAngle = (m_HFlipped ? c_PI : 0) + GetRotAngle() * static_cast<float>(GetFlipFactor());
 				float parentFacingAngle = (m_Parent->IsHFlipped() ? c_PI : 0) + m_Parent->GetRotAngle() * static_cast<float>(m_Parent->GetFlipFactor());
 
-				Matrix atomRot(facingAngle - parentFacingAngle);
-				m_pAtomGroup->UpdateSubAtoms(GetAtomSubgroupID(), GetParentOffset() - (GetJointOffset() * atomRot), atomRot);
+				if (!InheritsRotAngle()) {
+					Matrix atomRotationForSubgroup(facingAngle - parentFacingAngle);
+					Vector atomOffsetForSubgroup;
+					CalculateAtomOffsetForSubgroup(atomOffsetForSubgroup);
+					atomOffsetForSubgroup += GetJointOffset() - (GetJointOffset() * atomRotationForSubgroup);
+					rootParentAsMOSR->GetAtomGroup()->UpdateSubAtoms(GetAtomSubgroupID(), atomOffsetForSubgroup, atomRotationForSubgroup);
+				}
 			}
 
 			m_DeepCheck = false;
@@ -345,14 +356,20 @@ namespace RTE {
 			ResetAllTimers();
 
 			m_Parent = newParent;
-			if (m_CollidesWithTerrainWhileAttached) { OrganizeAtomsInParent(true); }
+			if (m_CollidesWithTerrainWhileAttached) { AddOrRemoveAtomsFromRootParentAtomGroup(true); }
 		} else {
 			m_RootMOID = m_MOID;
 			m_RestTimer.Reset();
 			if (m_pMOToNotHit && m_Parent && m_Parent->GetWhichMOToNotHit() == m_pMOToNotHit) { m_pMOToNotHit = nullptr; }
 
-			if (m_CollidesWithTerrainWhileAttached) { OrganizeAtomsInParent(false); }
+			if (m_CollidesWithTerrainWhileAttached) { AddOrRemoveAtomsFromRootParentAtomGroup(false); }
+			for (Attachable *attachable : m_Attachables) {
+				if (attachable->GetCollidesWithTerrainWhileAttached()) { attachable->AddOrRemoveAtomsFromRootParentAtomGroup(false); }
+			}
 			m_Parent = newParent;
+			for (Attachable *attachable : m_Attachables) {
+				if (attachable->GetCollidesWithTerrainWhileAttached()) { attachable->AddOrRemoveAtomsFromRootParentAtomGroup(true); }
+			}
 		}
 
 		if (parentToUseForScriptCall && parentToUseForScriptCall->GetRootParent()->HasEverBeenAddedToMovableMan()) {
@@ -362,12 +379,30 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Attachable::OrganizeAtomsInParent(bool addToParent) {
-		if (IsAttached() && m_Parent->GetAtomGroup()) {
-			if (addToParent) {
-				m_Parent->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), GetParentOffset() - GetJointOffset());
-			} else {
-				m_Parent->GetAtomGroup()->RemoveAtoms(GetAtomSubgroupID());
+	void Attachable::CalculateAtomOffsetForSubgroup(Vector &atomOffsetForSubgroup) const {
+		if (m_Parent) {
+			const Attachable *parentAsAttachable = dynamic_cast<Attachable *>(m_Parent);
+			if (parentAsAttachable) {
+				parentAsAttachable->CalculateAtomOffsetForSubgroup(atomOffsetForSubgroup);
+			}
+			atomOffsetForSubgroup += GetParentOffset() - GetJointOffset();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Attachable::AddOrRemoveAtomsFromRootParentAtomGroup(bool addAtoms) {
+		MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());
+		if (rootParentAsMOSR && IsAttached()) {
+			AtomGroup *rootParentAtomGroup = rootParentAsMOSR->GetAtomGroup();
+			if (rootParentAtomGroup) {
+				if (addAtoms && !rootParentAtomGroup->ContainsSubGroup(GetAtomSubgroupID())) {
+					Vector atomOffsetForSubgroup;
+					CalculateAtomOffsetForSubgroup(atomOffsetForSubgroup);
+					rootParentAsMOSR->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), atomOffsetForSubgroup);
+				} else if (!addAtoms && rootParentAtomGroup->ContainsSubGroup(GetAtomSubgroupID())) {
+					rootParentAsMOSR->GetAtomGroup()->RemoveAtoms(GetAtomSubgroupID());
+				}
 			}
 		}
 	}

@@ -1380,12 +1380,12 @@ void MOSRotating::Travel()
 	}
 
     // Set the atom to ignore a certain MO, if set and applicable.
-    if (m_HitsMOs && m_pMOToNotHit && g_MovableMan.ValidMO(m_pMOToNotHit) && !m_MOIgnoreTimer.IsPastSimTimeLimit())
-    {
-        MOID root = m_pMOToNotHit->GetID();
-        int footprint = m_pMOToNotHit->GetMOIDFootprint();
-        for (int i = 0; i < footprint; ++i)
-            m_pAtomGroup->AddMOIDToIgnore(root + i);
+    if (m_HitsMOs && m_pMOToNotHit && g_MovableMan.ValidMO(m_pMOToNotHit) && !m_MOIgnoreTimer.IsPastSimTimeLimit()) {
+        std::vector<MOID> MOIDsNotToHit;
+        m_pMOToNotHit->GetMOIDs(MOIDsNotToHit);
+        for (const MOID &MOIDNotToHit : MOIDsNotToHit) {
+            m_pAtomGroup->AddMOIDToIgnore(MOIDNotToHit);
+        }
     }
 
     /////////////////////////////////

@@ -177,6 +177,7 @@ int AEmitter::ReadProperty(std::string propName, Reader &reader) {
             m_pFlash->SetDrawnNormallyByParent(false);
             m_pFlash->SetInheritsRotAngle(false);
             m_pFlash->SetDeleteWhenRemovedFromParent(true);
+            m_pFlash->SetCollidesWithTerrainWhileAttached(false);
         }
     } else if (propName == "FlashScale") {
         reader >> m_FlashScale;

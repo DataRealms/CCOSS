@@ -315,7 +315,7 @@ namespace RTE {
 
 			MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());
 			if (rootParentAsMOSR && m_CollidesWithTerrainWhileAttached) {
-				// This safety check exists to ensure the parent's AtomGroup contains this Attachable's Atoms in a subgroup. Hardcoded Attachables need this in order to work, since they're cloned before their parent's AtomGroup exists.
+				// Note: This safety check exists to ensure the parent's AtomGroup contains this Attachable's Atoms in a subgroup. Hardcoded Attachables need this in order to work, since they're cloned before their parent's AtomGroup exists.
 				if (!rootParentAsMOSR->GetAtomGroup()->ContainsSubGroup(m_AtomSubgroupID)) { AddOrRemoveAtomsFromRootParentAtomGroup(true); }
 
 				float facingAngle = (m_HFlipped ? c_PI : 0) + GetRotAngle() * static_cast<float>(GetFlipFactor());

@@ -257,33 +257,33 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         m_JetTimeTotal *= 1000;
-    } else if (propName == "LFGLeg") {
+    } else if (propName == "LFGLeg" || propName == "LeftFGLeg") {
         RemoveAttachable(m_pLFGLeg);
         m_pLFGLeg = new Leg;
         reader >> m_pLFGLeg;
         AddAttachable(m_pLFGLeg);
         if (!m_pLFGLeg->GetDamageMultiplierSetInINI()) { m_pLFGLeg->SetDamageMultiplier(1.0F); }
         m_pLFGLeg->SetInheritsHFlipped(2);
-    } else if (propName == "LBGLeg") {
+    } else if (propName == "LBGLeg" || propName == "LeftFGLeg") {
         RemoveAttachable(m_pLBGLeg);
         m_pLBGLeg = new Leg;
         reader >> m_pLBGLeg;
         AddAttachable(m_pLBGLeg);
         if (!m_pLBGLeg->GetDamageMultiplierSetInINI()) { m_pLBGLeg->SetDamageMultiplier(1.0F); }
         m_pLBGLeg->SetInheritsHFlipped(2);
-    } else if (propName == "RFGLeg") {
+    } else if (propName == "RFGLeg" || propName == "LeftFGLeg") {
         RemoveAttachable(m_pRFGLeg);
         m_pRFGLeg = new Leg;
         reader >> m_pRFGLeg;
         AddAttachable(m_pRFGLeg);
         if (!m_pRFGLeg->GetDamageMultiplierSetInINI()) { m_pRFGLeg->SetDamageMultiplier(1.0F); }
-    } else if (propName == "RBGLeg") {
+    } else if (propName == "RBGLeg" || propName == "LeftFGLeg") {
         RemoveAttachable(m_pRBGLeg);
         m_pRBGLeg = new Leg;
         reader >> m_pRBGLeg;
         AddAttachable(m_pRBGLeg);
         if (!m_pRBGLeg->GetDamageMultiplierSetInINI()) { m_pRBGLeg->SetDamageMultiplier(1.0F); }
-    } else if (propName == "LFootGroup") {
+    } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;
         m_pLFGFootGroup = new AtomGroup();
@@ -292,7 +292,7 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         m_pLBGFootGroup->Create(*m_pLFGFootGroup);
         m_pLFGFootGroup->SetOwner(this);
         m_pLBGFootGroup->SetOwner(this);
-    } else if (propName == "RFootGroup") {
+    } else if (propName == "RFootGroup" || propName == "RightFootGroup") {
         delete m_pRFGFootGroup;
         delete m_pRBGFootGroup;
         m_pRFGFootGroup = new AtomGroup();
@@ -303,17 +303,17 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         m_pRBGFootGroup->SetOwner(this);
     } else if (propName == "StrideSound") {
         reader >> m_StrideSound;
-    } else if (propName == "LStandLimbPath") {
+    } else if (propName == "LStandLimbPath" || propName == "LeftStandLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][STAND];
-    } else if (propName == "LWalkLimbPath") {
+    } else if (propName == "LWalkLimbPath" || propName == "LeftWalkLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][WALK];
-    } else if (propName == "LDislodgeLimbPath") {
+    } else if (propName == "LDislodgeLimbPath" || propName == "LeftDislodgeLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][DISLODGE];
-    } else if (propName == "RStandLimbPath") {
+    } else if (propName == "RStandLimbPath" || propName == "RightStandLimbPath") {
         reader >> m_Paths[RIGHTSIDE][FGROUND][STAND];
-    } else if (propName == "RWalkLimbPath") {
+    } else if (propName == "RWalkLimbPath" || propName == "RightWalkLimbPath") {
         reader >> m_Paths[RIGHTSIDE][FGROUND][WALK];
-    } else if (propName == "RDislodgeLimbPath") {
+    } else if (propName == "RDislodgeLimbPath" || propName == "RightDislodgeLimbPath") {
         reader >> m_Paths[RIGHTSIDE][FGROUND][DISLODGE];
     } else if (propName == "AimRangeUpperLimit") {
         reader >> m_AimRangeUpperLimit;

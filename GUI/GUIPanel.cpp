@@ -127,11 +127,10 @@ void GUIPanel::AddChild(GUIPanel *child, bool convertToAbsolutePos)
         child->m_Width = std::max(child->m_Width, 0);
         child->m_Height = std::max(child->m_Height, 0);
 
-        int Zpos = 0;
-        // Get the last child in the list
+        int zPos = 0;
         if (m_Children.size() > 0) {
 			GUIPanel *lastChild = m_Children.back();
-			Zpos = lastChild->GetZPos() + 1;
+			zPos = lastChild->GetZPos() + 1;
         }
 
         // Remove the child from any previous parent
@@ -141,7 +140,7 @@ void GUIPanel::AddChild(GUIPanel *child, bool convertToAbsolutePos)
 
         // Setup the inherited values
         child->m_Parent = this;
-        child->Setup(m_Manager, Zpos);
+        child->Setup(m_Manager, zPos);
 
         // Add the child to the list
         m_Children.push_back(child);

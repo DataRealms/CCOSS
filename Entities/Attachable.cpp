@@ -440,9 +440,9 @@ namespace RTE {
 				if (addAtoms && !rootParentAtomGroup->ContainsSubGroup(GetAtomSubgroupID())) {
 					Vector atomOffsetForSubgroup;
 					CalculateAtomOffsetForSubgroup(atomOffsetForSubgroup);
-					rootParentAsMOSR->GetAtomGroup()->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), atomOffsetForSubgroup);
+					rootParentAtomGroup->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), atomOffsetForSubgroup);
 				} else if (!addAtoms && rootParentAtomGroup->ContainsSubGroup(GetAtomSubgroupID())) {
-					rootParentAsMOSR->GetAtomGroup()->RemoveAtoms(GetAtomSubgroupID());
+					rootParentAtomGroup->RemoveAtoms(GetAtomSubgroupID());
 				}
 			}
 		}

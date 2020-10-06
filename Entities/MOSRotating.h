@@ -394,7 +394,7 @@ ClassInfoGetters
     /// Adds the passed in Attachable the list of Attachables and sets its parent to this MOSRotating.
     /// </summary>
     /// <param name="attachable">The Attachable to add.</param>
-	void AddAttachable(Attachable *attachable);
+	virtual void AddAttachable(Attachable *attachable);
 
     /// <summary>
     /// Adds the passed in Attachable the list of Attachables, changes its parent offset to the passed in Vector, and sets its parent to this MOSRotating.
@@ -408,7 +408,7 @@ ClassInfoGetters
     /// </summary>
     /// <param name="attachableUniqueID">The UniqueID of the the Attachable to remove.</param>
     /// <returns>False if the Attachable is invalid, otherwise true.</returns>
-    bool RemoveAttachable(long attachableUniqueID) { return RemoveAttachable(attachableUniqueID, false, false); }
+    virtual bool RemoveAttachable(long attachableUniqueID) { return RemoveAttachable(attachableUniqueID, false, false); }
 
     /// <summary>
     /// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
@@ -417,14 +417,14 @@ ClassInfoGetters
     /// <param name="addToMovableMan">Whether or not to add the Attacahble to MovableMan once it has been removed.</param>
     /// <param name="addBreakWounds">Whether or not to add break wounds to the Attachable and this MOSRotating.</param>
     /// <returns>False if the Attachable is invalid, otherwise true.</returns>
-    bool RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds);
+    virtual bool RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds);
 
     /// <summary>
     /// Removes the passed in Attachable and sets its parent to nullptr. Does not add it to MovableMan or add break wounds.
     /// </summary>
     /// <param name="attachable">The Attachable to remove.</param>
     /// <returns>False if the Attachable is invalid, otherwise true.</returns>
-    bool RemoveAttachable(Attachable *attachable) { return RemoveAttachable(attachable, false, false); }
+    virtual bool RemoveAttachable(Attachable *attachable) { return RemoveAttachable(attachable, false, false); }
 
     /// <summary>
     /// Removes the passed in Attachable and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
@@ -645,7 +645,7 @@ ClassInfoGetters
     /// </summary>
     /// <param name="numberOfWoundsToRemove">The number of wounds that should be removed.</param>
     /// <returns>The amount of damage caused by these wounds, taking damage multipliers into account.</returns>
-    float RemoveWounds(int numberOfWoundsToRemove) { return RemoveWounds(numberOfWoundsToRemove, true, false, false); }
+    virtual float RemoveWounds(int numberOfWoundsToRemove) { return RemoveWounds(numberOfWoundsToRemove, true, false, false); }
 
     /// <summary>
     /// Removes the specified number of wounds from this MOSRotating, and returns damage caused by these removed wounds.

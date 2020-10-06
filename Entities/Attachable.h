@@ -377,46 +377,30 @@ namespace RTE {
 		/// Updates this Attachable. Supposed to be done every frame.
 		/// </summary>
 		void Update() override;
+#pragma endregion
 
-		/// <summary>
-		/// Sets the mass of this Attachable.
-		/// </summary>
-		/// <param name="newMass">A float specifying the new mass value in Kilograms (kg).</param>
+#pragma region Override Methods for Handling Mass
+		/*
+		 NOTE: Method comments are left blank here so Doxygen will treat them as inherited. Unfortunately there's no way to make VS do this for C++ (inheritdoc tag doesn't work).
+		*/
 		void SetMass(const float newMass) final;
 
-		/// <summary>
-		/// Adds the passed in Attachable the list of Attachables, changes its parent offset to the passed in Vector, and sets its parent to this MOSRotating.
-		/// </summary>
-		/// <param name="attachable">The Attachable to add.</param>
-		/// <param name="parentOffsetToSet">The Vector to set as the Attachable's parent offset.</param>
+		void AddAttachable(Attachable *attachable) final { MOSRotating::AddAttachable(attachable); }
+
 		void AddAttachable(Attachable *attachable, const Vector &parentOffsetToSet) final;
 
-		/// <summary>
-		/// Removes the passed in Attachable and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
-		/// </summary>
-		/// <param name="attachable">The Attachable to remove.</param>
-		/// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
-		/// <param name="addBreakWounds">Whether or not to add break wounds to the Attachable and this MOSRotating.</param>
-		/// <returns>False if the Attachable is invalid, otherwise true.</returns>
+		bool RemoveAttachable(long attachableUniqueID) final { return MOSRotating::RemoveAttachable(attachableUniqueID); }
+
+		bool RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) final { return MOSRotating::RemoveAttachable(attachableUniqueID, addToMovableMan, addBreakWounds); }
+
+		bool RemoveAttachable(Attachable *attachable) final { return MOSRotating::RemoveAttachable(attachable); }
+
 		bool RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) final;
 
-		/// <summary>
-		/// Adds the passed in wound AEmitter to the list of wounds and changes its parent offset to the passed in Vector.
-		/// </summary>
-		/// <param name="woundToAdd">The wound AEmitter to add.</param>
-		/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset.</param>
-		/// <param name="checkGibWoundLimit">Whether to gib this MOSRotating if adding this wound raises its wound count past its gib wound limit. Defaults to true.</param>
 		void AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit = true) final;
 
-		/// <summary>
-		/// Removes the specified number of wounds from this MOSRotating, and returns damage caused by these removed wounds.
-		/// Optionally removes wounds from Attachables (and their Attachables, etc.) that match the conditions set by the provided inclusion parameters.
-		/// </summary>
-		/// <param name="numberOfWoundsToRemove">The number of wounds that should be removed.</param>
-		/// <param name="includeAttachablesWithAPositiveDamageMultiplier">Whether to count wounds from Attachables that have a positive damage multiplier, i.e. those that damage their parent (this MOSRotating) when wounded.</param>
-		/// <param name="includeAttachablesWithANegativeDamageMultiplier">Whether to count wounds from Attachables that have a negative damage multiplier, i.e. those that heal their parent (this MOSRotating) when wounded.</param>
-		/// <param name="includeAttachablesWithNoDamageMultiplier">Whether to count wounds from Attachables that a zero damage multiplier, i.e. those that do not affect their parent (this MOSRotating) when wounded.</param>
-		/// <returns>The amount of damage caused by these wounds, taking damage multipliers into account.</returns>
+		float RemoveWounds(int numberOfWoundsToRemove) final { return MOSRotating::RemoveWounds(numberOfWoundsToRemove); }
+
 		float RemoveWounds(int numberOfWoundsToRemove, bool includeAttachablesWithAPositiveDamageMultiplier, bool includeAttachablesWithANegativeDamageMultiplier, bool includeAttachablesWithNoDamageMultiplier) override;
 #pragma endregion
 

@@ -144,6 +144,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Exposed PEmitter to lua. Bindings are identical to AEmitter's bindings, except that damage-related bindings don't exist for PEmitter.
 
+- Added Lua (R/W) properties for all hardcoded Attachables. You can now set them on the fly to be created objects of the relevant type. Note that trying to set things inappropriately (e.g. setting an HDFirearm as something's Leg) will probably crash the game; that's your problem to deal with.
+	You can read and write the following properties:
+	AHuman - `Head, Jetpack, FGArm, BGArm, FGLeg, BGLeg, FGFoot, BGFoot`
+	ACrab - `Turret, Jetpack, LeftFGLeg, LeftBGLeg, RightFGLeg, RightBGLeg`
+	ACDropship - `RightEngine, LeftEngine, RightThruster, LeftThruster, RightHatch, LeftHatch`
+	ACRocket - `RightLeg, LeftLeg, MainEngine, LeftEngine, RightEngine, LeftThruster, RightThruster`
+	ADoor - `Door`
+	Turret - `MountedDevice`
+	Leg - `Foot`
+	HDFirearm - `Magazine, Flash`
+	AEmitter - `Flash`
+
+- Added `Vector:ClampMagnitude(upperLimit, lowerLimit)` Lua function that lets you limit a Vector's upper and lower magnitude.
+
+- Added `MOSRotating GibBlastStrength` INI and Lua (R/W) property. This lets you define how much force created `Gibs` and any `Attachables` will get launched when the MOSRotating gibs.
+
+- New INI and Lua (R/W) properties for Attachables:
+	`ParentBreakWound = AEmitter...` allows you to optionally define different BreakWounds for the `Attachable` and its parent. By default it matches `BreakWound` for ease of use.ma
+	`InheritsHFlipped = 0/1/2` allows you to define whether the `Attachable` will inherit its parent's HFlipped value or not. 0 means no inheritance, 1 means normal inheritance, 2 means reversed inheritance (technically any value other than 0 or 1 will act as reversed inheritance). Defaults to 1 to preserve normal behaviour.
+	`InheritedRotAngleRadOffset = angle` and `InheritedRotAngleDegOffset = angle` allow you specify an offset to keep an `Attachable's` rotation at when `InheritsRotAngle` is set to true. In Lua there's only `InheritedRotAngleOffset` which takes/returns radians, to avoid confusion. For example, `InheritedRotAngleDegOffset = 90` would make the Attachable always face perpendicular to its parent. Does nothing if the `Attachable's` `InheritsRotAngle` is set to false or the `Attachable` has no parent.
+	`GibWithParentChance = 0 - 1` allows you to specify whether this `Attachable` should be gibbed when its parent does and what the chance of that happening is. 0 means never, 1 means always.
+	`ParentGibBlastStrengthMultiplier = number` allows you to specify the multiplier this `Attachable` will apply to its parent's gib blast strength when the parent gibs. Usually this would be a positive number, but it doesn't have to be.
+
+- New INI and Lua (R/W) `Arm` property `GripStrength`. This effectively replaces the `JointStrength` of the held `HeldDevice`, allowing `Arms` to control how tightly equipment is held.
+
+- New INI and Lua (R/W) `HeldDevice` property `GripStrengthMultiplier`. This allows `HeldDevices` to multiply the `GripStrength` of their `Arms` to support them being more or less easy to hold.
+
+- New Lua `MovableObject` function `GetWhichMOToNotHit`. This provides access to the MO that has been set to not be hit by `SetWhichMOToNotHit`.
+
 ### Changed
 
 - Codebase now uses the C++17 standard.
@@ -238,6 +267,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Scenes with a PresetName containing the strings "Test", "Editor" and "Tutorial" are no longer excluded from the scenarios screen and from the metagame.
 
+- Hands will now draw in transparent drawing mode, i.e. editing menu.
+
+- `AHuman` background `Leg` will no longer draw in front of the `AHuman`. The real result of this is that the background foot will no longer draw in front of the foregroundone.
+
+- Everything draws better when flashing white, including crafts which used to be terrible at it.
+
+- Reworked Attachable managment
+	`DamageMultiplier` on `Attachables` now works as expected, all `Attachables` can now transfer damage to their root parent. This will travel up chains of `Attachables`, as long as every `Attachable` in the chain has a non-zero DamageMultiplier (yes, negative numbers are supported if you wanna be weird, have fun).
+	`Attachable` terrain collision has been reworked so that it can be changed simply by setting `CollidesWithTerrainWhileAttached = true/false` in INI or Lua. Also, `Attachables` attached to other `Attachables` will now collide with terrain properly.
+	`BreakWounds` on `Attachables` now gets added to both the `Attachable` and the parent when the `Attachable` is broken off. If `ParentBreakWound` is defined, the parent will use this instead of the regular `BreakWound`.
+	
+- `Attachable.BreakWound` now has R/W access in Lua.
+
+- `Attachable.DeleteWithParent` is now `Attachable.DeleteWhenRemovedFromParent`, since this more accurately describes what it does.
+
+- `Attachable.OnlyLinearForces` has been renamed to `Attachable.ApplyTransferredForcesAtOffset` and its effect has been reversed, so something that checked `OnlyLinearForces == true` would now check `ApplyTransferredForcesAtOffset == false`, since this makes more sense to use.
+
+- `Arms` and `Legs` on `AHumans` will no longer bleed out indefinitely. If you want this to happen, adjust their `BreakWound` or `ParentBreakWound` accordingly.
+		
+- Reworked wound management
+	Wound management is now always done with `MOSRotating` functions, instead of requiring different ones for `Actors`. This means TotalWoundCount and RemoveAnyRandomWounds no longer exist.
+	You can get all wounds with `GetWounds`, get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), get the gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property), and remove wounds with `RemoveWounds`.
+	All of these functions have two variants, one lets you just specify any normal arguments (e.g. number of wounds to remove), the other lets you also specify whether you want to include `Attachables` with a positive `DamageMultiplier` (i.e. `Attachables` that damage their parent), `Attachables` with a negative `DamageMultiplier` (i.e. `Attachables` that heal their parent) or `Attachables` with no `DamageMultiplier` (i.e. `Attachables` that don't affect their parent).
+	Without any arguments, these functions will only include `Attachables` with a positive `DamageMultiplier` in their counting calculations. The property variants (e.g. mosr.WoundCount) also behave this way.
+	Note that this process is recursive, so if an `Attachable` that satisfies the conditions has `Attachables` that also satisfy the conditions, their wounds will be included in the results.
+
+- Renamed `Turret` INI property `MountedMO` to `MountedDevice` to better match the new reality that `Turrets` can only mount `HeldDevices` and their child classes.
+
+- Renamed `ACrab` `LFGLeg`, `LBGLeg`, `RFGLeg` and `RBGLeg` Lua properties to `LeftFGLeg`, `LeftBGLeg`, `RightFGLeg`, `RightBGLeg` respectively, to be more consistent with other naming.
+	For the time being, the INI properties (as well as the ones for setting `FootGroups` and `LimbPaths`) support both single letter and written out versions (i.e. `LStandLimbPath` and `LeftStandLimbPath` are both supported). This single letter versions will probably be deprecated over time.
+
+- `MovableMan:AddMO` will now add to `HeldDevices` (or any child class) to its `Items` collection, making it able to provide the functionality of `AddParticle`, `AddActor` and `AddItem`.
+
+- Changed and cleaned up how gibbing works and how it affects `Attachables`. In particular, limbs will better inherit velocity during gibbing and things are more customizable. See `Attachable` properties for more details.
+	As an added bonus,  `Attachables` on `ACDropShips` and `ACRockets` can now be shot down when the craft gibs; fight back against the baleful dropship engines!
+	
+- Improved native recoil handling! Guns transfer recoil to arms/turrets, which transfer it to AHumans/ACrabs, all of it properly accounts for joint strengths (or grip strengths) and offsets at every step. ([Issue #7](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/7) and [Issue #8](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/8)).
+
+- Due to the nature of various `Attachable` and force transferral changes, AEmitters seem to apply far more force now, so `DropShip` engines may need higher `JointStrengths` and `GibImpulseLimits`, otherwise they may break off or gib during normal use.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.
@@ -260,6 +329,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The "woosh" sound played when switching actors from a distance will now take scene wrapping into account. Additionally, attempting to switch to previous or next actor with only one actor will play the more correct "error" sound.
 
+- `MovableObject:SetWhichMOToNotHit` will now work properly for Attachables. They will also not hit the relevant MO. When they're removed, Attachables will check if they have the same MO for this value and, if so, unset it so they can hit that MO.
+
+- Craft sucking up objects now works properly again.
+
+- Getting the `Mass` of an `MOSRotating` has now been made more efficient. Additionally, `Attachables` of `Attachables` will now be included in Mass, so some things have gotten a lot heavier (e.g. Dummy Dreadnought).
+
+- The moment of inertia of `AtomGroups` now updates when the mass or Atoms change, meaning losing `Attachables` or changing mass will properly affect how rotational forces apply to MOSRotatings.
+
 ### Removed
 
 - Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.
@@ -277,6 +354,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Removed `Activity` property `FundsOfTeam#`, use `Team#Funds` instead.
 
 - Removed `Attachable` Lua write capability for `AtomSubGroupID` as changing this can cause all kinds of problems, and `RotTarget` as this didn't actually work.
+
+- Removed `MaxLength` property from `Leg`, since it was a mostly unused leftover caused by Leg being originally copied from Arm, and was actually a fake setting that just set other properties. To replace it, set the following:
+	```
+	ContractedOffset = Vector
+		X = //Old MaxLength/2
+		Y = 0
+	ExtendedOffset = Vector
+		X = //Old MaxLength
+		Y = 0
+	```
+
+- Removed `Attachable.RotTarget` from Lua and INI. The property never worked and no longer exists.
+
+- Removed `Attachable:CollectDamage`, `Attachable:TransferJointForces` and `Attachable:TransferJointImpulses` Lua function definitions. These are internal functions that should never have been exposed to Lua.
+
+- Removed `MOSRotating:ApplyForces` and `MOSRotating:ApplyImpulses` Lua functions. These are both internal functions that should never have been exposed to Lua.
 
 ***
 

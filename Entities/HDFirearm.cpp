@@ -598,7 +598,7 @@ void HDFirearm::Reload()
         if (m_pMagazine)
         {
             m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
-            m_pMagazine->SetAngularVel(6 + (-6 * PosRand()));
+            m_pMagazine->SetAngularVel(6.0F + (-RandomNum(0.0F, 6.0F)));
             RemoveAttachable(m_pMagazine, m_pMagazine->IsDiscardable(), false);
             m_pMagazine = 0;
         }
@@ -760,7 +760,7 @@ void HDFirearm::Update()
 
                 pRound = m_pMagazine->PopNextRound();
                 shake = (m_ShakeRange - ((m_ShakeRange - m_SharpShakeRange) * m_SharpAim)) *
-                        (m_Supported ? 1.0 : m_NoSupportFactor) * NormalRand();
+                        (m_Supported ? 1.0F : m_NoSupportFactor) * RandomNormalNum();
                 tempNozzle = m_MuzzleOff.GetYFlipped(m_HFlipped);
                 tempNozzle.DegRotate(degAimAngle + shake);
                 roundVel.SetIntXY(pRound->GetFireVel(), 0);
@@ -776,11 +776,11 @@ void HDFirearm::Update()
                     pParticle = pRound->PopNextParticle();
 
                     // Only make the particles separate back behind the nozzle, not in front. THis is to avoid silly penetration firings
-                    particlePos = tempNozzle + (roundVel.GetNormalized() * -PosRand() * pRound->GetSeparation());
+					particlePos = tempNozzle + (roundVel.GetNormalized() * (-RandomNum()) * pRound->GetSeparation());
                     pParticle->SetPos(m_Pos + particlePos);
 
                     particleVel = roundVel;
-                    particleSpread = m_ParticleSpreadRange * NormalRand();
+                    particleSpread = m_ParticleSpreadRange * RandomNormalNum();
                     particleVel.DegRotate(particleSpread);
                     pParticle->SetVel(m_Vel + particleVel);
                     pParticle->SetRotAngle(particleVel.GetAbsRadAngle());
@@ -824,7 +824,7 @@ void HDFirearm::Update()
                 if (pShell)
                 {
                     tempEject = m_EjectOff.GetYFlipped(m_HFlipped);
-                    shellSpread = m_ShellSpreadRange * NormalRand();
+                    shellSpread = m_ShellSpreadRange * RandomNormalNum();
                     tempEject.DegRotate(degAimAngle + shellSpread);
                     pShell->SetPos(m_Pos + tempEject);
 
@@ -833,7 +833,8 @@ void HDFirearm::Update()
                     shellVel.DegRotate(degAimAngle + 150 * (m_HFlipped ? -1 : 1) + shellSpread);
                     pShell->SetVel(m_Vel + shellVel);
                     pShell->SetRotAngle(m_Rotation.GetRadAngle());
-                    pShell->SetAngularVel(pShell->GetAngularVel() + (m_ShellAngVelRange * NormalRand()));
+                    pShell->SetAngularVel(pShell->GetAngularVel() + (m_ShellAngVelRange * RandomNormalNum()));
+					pShell->SetHFlipped(m_HFlipped);
 //                  // Set the ejected shell to not hit this HeldDevice's parent, if applicable
 //                  if (m_FireIgnoresThis)
 //                      pParticle->SetWhichMOToNotHit(pRootParent, 1.0f);
@@ -864,7 +865,7 @@ void HDFirearm::Update()
         if (roundsFired <= 0 && m_pMagazine->IsEmpty())
         {
             m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
-            m_pMagazine->SetAngularVel(6 + (-6 * PosRand()));
+            m_pMagazine->SetAngularVel(6 + (-6 * RandomNum()));
             m_pMagazine->Detach();
             g_MovableMan.AddParticle(m_pMagazine);
             m_pMagazine = 0;
@@ -952,7 +953,7 @@ void HDFirearm::Update()
         // Display gun flame frame.
         if (m_pFlash) {
             m_pFlash->SetParentOffset(m_MuzzleOff);
-            m_pFlash->SetFrame(floorf((m_pFlash->GetFrameCount()/* - 1*/) * PosRand() - 0.001));
+            m_pFlash->SetFrame(RandomNum(0, m_pFlash->GetFrameCount() - 1));
         }
 
         // Play firing sound
@@ -992,7 +993,7 @@ void HDFirearm::Update()
                 {
                     float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % animDuration;
 					if (!m_IsAnimatedManually)
-	                    m_Frame = floorf((cycleTime / (float)animDuration) * (float)m_FrameCount);
+	                    m_Frame = std::floor((cycleTime / (float)animDuration) * (float)m_FrameCount);
                 }
                 else
                     m_ActiveSound.Stop();
@@ -1055,7 +1056,7 @@ void HDFirearm::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mo
     muzzlePos = m_Pos + RotateOffset(muzzlePos);
     // Set the screen flash effect to draw at the final post processing stage
     if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical && !g_SceneMan.ObscuredPoint(muzzlePos)) {
-        g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55 + 200 * PosRand(), m_pFlash->GetEffectRotAngle());
+        g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55.0F + RandomNum(0.0F, 200.0F), m_pFlash->GetEffectRotAngle());
     }
 }
 
@@ -1108,7 +1109,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
         aimPoint4 += m_Pos;
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-        int glow = 155 + 100 * PosRand();
+		int glow = (155 + RandomNum(0, 100));
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint1, YellowDot, glow);
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
@@ -1147,7 +1148,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
         aimPoint3 += m_Pos;
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-        int glow = 55 + 100 * PosRand();
+        int glow = (55 + RandomNum(0, 100));
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
 

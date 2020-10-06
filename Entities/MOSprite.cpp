@@ -491,7 +491,7 @@ void MOSprite::Update() {
 			    break;
 		    case ALWAYSRANDOM:
 			    while (m_Frame == prevFrame) {
-				    m_Frame = std::floorf(static_cast<float>(m_FrameCount) * PosRand());
+					m_Frame = RandomNum<int>(0, m_FrameCount - 1);
 			    }
                 m_SpriteAnimTimer.Reset();
 			    break;

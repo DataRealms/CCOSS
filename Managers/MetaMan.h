@@ -120,12 +120,12 @@ friend class MetaSave;
 // Method:  NewGame
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Wipes any current and sets up a new game based on a size parameter.
-// Arguments:       The size of the new Metagame, from 0 to 1.0, which will affect how
+// Arguments:       The size of the new Metagame, which will affect how
 //                  many Scenes/Sites will ultimately be used.
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-	int NewGame(float gameSize = 0.5);
+	int NewGame(int gameSize = 3);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -535,14 +535,13 @@ friend class MetaSave;
 // Method:          SelectScenePresets
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Yields a set of randomly selected Scene presets for a new game.
-// Arguments:       The normalized scalar from 0 to 1.0 that controls the size of the set.
-//                  The number of players that will be playing this new game.
+// Arguments:       The size of the set.
 //                  The list to fill with the selected presets, depending on currently
 //                  set player numbers and loaded eligible scenes. If no list is passed
 //                  it will be ignored. Presets returned in list are NOT OWNED there.
 // Return value:    The count of selected preset scenes.
 
-    int SelectScenePresets(float gameSize, int playerCount, std::list<Scene *> *pSelected = 0);
+    int SelectScenePresets(int gameSize, std::list<Scene *> *pSelected = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

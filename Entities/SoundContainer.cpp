@@ -118,6 +118,7 @@ namespace RTE {
 		/// <param name="soundPath">The path to the sound file.</param>
 		auto readSound = [&soundData, &reader](const std::string &soundPath) {
 			ContentFile soundFile(soundPath.c_str());
+			soundFile.SetFormattedReaderPosition("in file " + reader.GetCurrentFilePath() + " on line " + std::to_string(reader.GetCurrentFileLine()));
 			FMOD::Sound *soundObject = soundFile.GetAsSample();
 			if (g_AudioMan.IsAudioEnabled() && !soundObject) { reader.ReportError(std::string("Failed to load the sound from the file")); }
 
@@ -157,7 +158,7 @@ namespace RTE {
 		if (soundSetIndex < m_SoundSets.size()) { soundSet = m_SoundSets[soundSetIndex]; }
 
 		ContentFile soundFile(soundFilePath.c_str());
-		FMOD::Sound *soundObject = soundFile.GetAsSample(abortGameForInvalidSound);
+		FMOD::Sound *soundObject = soundFile.GetAsSample(abortGameForInvalidSound, false);
 		if (!soundObject) {
 			return;
 		}
@@ -208,9 +209,9 @@ namespace RTE {
 				/// Internal lambda function to pick a random sound that's not the previously played sound. Done to avoid scoping issues inside the switch below.
 				/// </summary>
 				auto selectRandomSound = [&soundSetCount, this]() {
-					size_t soundToSelect = std::floorf(static_cast<float>(soundSetCount) * PosRand());
+					size_t soundToSelect = RandomNum(0, soundSetCount - 1);
 					while (soundToSelect == m_SelectedSoundSet) {
-						soundToSelect = std::floorf(static_cast<float>(soundSetCount) * PosRand());
+						soundToSelect = RandomNum(0, soundSetCount - 1);
 					}
 					m_SelectedSoundSet = soundToSelect;
 				};

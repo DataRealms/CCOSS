@@ -69,12 +69,6 @@ namespace RTE {
 		void SetX(const float newX) { m_X = newX; }
 
 		/// <summary>
-		/// Gets the X value of this Vector.
-		/// </summary>
-		/// <returns>An int value that represents the X value of this Vector.</returns>
-		int GetIntX() const { return static_cast<int>(std::roundf(m_X)); }
-
-		/// <summary>
 		/// Sets the X value of this Vector.
 		/// </summary>
 		/// <param name="newX">An int value that the X value will be set to.</param>
@@ -91,12 +85,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newY">A float value that the Y value will be set to.</param>
 		void SetY(const float newY) { m_Y = newY; }
-
-		/// <summary>
-		/// Gets the Y value of this Vector.
-		/// </summary>
-		/// <returns>An int value that represents the Y value of this Vector.</returns>
-		int GetIntY() const { return static_cast<int>(std::roundf(m_Y)); }
 
 		/// <summary>
 		/// Sets the Y value of this Vector.
@@ -179,7 +167,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="opp">The Vector to compare with.</param>
 		/// <returns>Whether the X and Y components of this Vector each have opposite signs to their corresponding components of a passed in Vector.</returns>
-		bool IsOpposedTo(const Vector &opp) { return ((XIsZero() && opp.XIsZero()) || (signbit(m_X) != signbit(opp.m_X))) && ((YIsZero() && opp.YIsZero()) || (signbit(m_Y) != signbit(opp.m_Y))); }
+		bool IsOpposedTo(const Vector &opp) { return ((XIsZero() && opp.XIsZero()) || (std::signbit(m_X) != std::signbit(opp.m_X))) && ((YIsZero() && opp.YIsZero()) || (std::signbit(m_Y) != std::signbit(opp.m_Y))); }
 #pragma endregion
 
 #pragma region Magnitude
@@ -187,10 +175,10 @@ namespace RTE {
 		/// Gets the magnitude of this Vector.
 		/// </summary>
 		/// <returns>A float describing the magnitude.</returns>
-		float GetMagnitude() const { return std::sqrtf(std::powf(m_X, 2.0F) + std::powf(m_Y, 2.0F)); }
+		float GetMagnitude() const { return std::sqrt(std::pow(m_X, 2.0F) + std::pow(m_Y, 2.0F)); }
 
 		/// <summary>
-		/// Sets the magnitude of this Vector and keeps its angle intact.
+		/// Sets the magnitude of this Vector. A negative magnitude will invert the Vector's direction.
 		/// </summary>
 		/// <param name="newMag">A float value that the magnitude will be set to.</param>
 		/// <returns>A reference to this after the change.</returns>
@@ -285,12 +273,12 @@ namespace RTE {
 		/// <summary>
 		/// Sets the X and Y of this Vector to the greatest integers that are not greater than their original values. E.g. -1.02 becomes -2.0.
 		/// </summary>
-		void Floor() { m_X = std::floorf(m_X); m_Y = std::floorf(m_Y); }
+		void Floor() { m_X = std::floor(m_X); m_Y = std::floor(m_Y); }
 
 		/// <summary>
 		/// Sets the X and Y of this Vector to the lowest integers that are not less than their original values. E.g. -1.02 becomes -1.0.
 		/// </summary>
-		void Ceiling() { m_X = std::ceilf(m_X); m_Y = std::ceilf(m_Y); }
+		void Ceiling() { m_X = std::ceil(m_X); m_Y = std::ceil(m_Y); }
 
 		/// <summary>
 		/// Returns a rounded copy of this Vector. Does not alter this Vector.
@@ -320,13 +308,13 @@ namespace RTE {
 		/// Returns the greatest integer that is not greater than the X value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the X value of this Vector.</returns>
-		int GetFloorIntX() const { return static_cast<int>(std::floorf(m_X)); }
+		int GetFloorIntX() const { return static_cast<int>(m_X); }
 
 		/// <summary>
 		/// Returns the greatest integer that is not greater than the Y value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the Y value of this Vector.</returns>
-		int GetFloorIntY() const { return static_cast<int>(std::floorf(m_Y)); }
+		int GetFloorIntY() const { return static_cast<int>(m_Y); }
 
 		/// <summary>
 		/// Returns a ceilinged copy of this Vector. Does not alter this Vector.
@@ -338,13 +326,13 @@ namespace RTE {
 		/// Returns the lowest integer that is not less than the X value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the X value of this Vector.</returns>
-		int GetCeilingIntX() const { return static_cast<int>(std::ceilf(m_X)); }
+		int GetCeilingIntX() const { return static_cast<int>(std::ceil(m_X)); }
 
 		/// <summary>
 		/// Returns the lowest integer that is not less than the Y value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the Y value of this Vector.</returns>
-		int GetCeilingIntY() const { return static_cast<int>(std::ceilf(m_Y)); }
+		int GetCeilingIntY() const { return static_cast<int>(std::ceil(m_Y)); }
 #pragma endregion
 
 #pragma region Vector Products

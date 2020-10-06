@@ -23,12 +23,12 @@ namespace RTE {
 		m_ConsoleState = ConsoleState::Disabled;
 		m_ReadOnly = false;
 		m_ConsoleScreenRatio = 0.3F;
-		m_GUIScreen = 0;
-		m_GUIInput = 0;
-		m_GUIControlManager = 0;
-		m_ParentBox = 0;
-		m_ConsoleText = 0;
-		m_InputTextBox = 0;
+		m_GUIScreen = nullptr;
+		m_GUIInput = nullptr;
+		m_GUIControlManager = nullptr;
+		m_ParentBox = nullptr;
+		m_ConsoleText = nullptr;
+		m_InputTextBox = nullptr;
 		m_InputLog.clear();
 		m_InputLogPosition = m_InputLog.begin();
 		m_LastInputString.clear();
@@ -98,7 +98,7 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	void ConsoleMan::SetReadOnly() {
 		if (!m_ReadOnly) {
 			// Save the current input string before changing to the read-only notice so we can restore it when switching back
@@ -126,7 +126,30 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::SaveInputLog(std::string filePath) {
+	void ConsoleMan::AddLoadWarningLogEntry(const std::string &pathToLog, const std::string &readerPosition, const std::string &altFileExtension) {
+		const std::string pathAndAccessLocation = "\"" + pathToLog + "\" referenced " + readerPosition + ". ";
+		std::string newEntry = pathAndAccessLocation + (!altFileExtension.empty() ? "Found and loaded a file with \"" + altFileExtension + "\" extension." : "The file was not loaded.");
+		std::transform(newEntry.begin(), newEntry.end(), newEntry.begin(), ::tolower);
+		if (m_LoadWarningLog.find(newEntry) == m_LoadWarningLog.end()) { m_LoadWarningLog.insert(newEntry); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::SaveLoadWarningLog(const std::string &filePath) const {
+		Writer logWriter(filePath.c_str());
+		if (logWriter.WriterOK()) {
+			logWriter << "// Warnings produced during loading:";
+			logWriter.NewLine(false);
+			for (const std::string &logEntry : m_LoadWarningLog) {
+				logWriter.NewLineString(logEntry, false);
+			}
+			PrintString("SYSTEM: Loading warning log saved to " + filePath);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::SaveInputLog(const std::string &filePath) {
 		Writer logWriter(filePath.c_str());
 		if (logWriter.WriterOK()) {
 			for (std::deque<std::string>::reverse_iterator logItr = m_InputLog.rbegin(); logItr != m_InputLog.rend(); ++logItr) {
@@ -141,7 +164,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::SaveAllText(std::string filePath) {
+	void ConsoleMan::SaveAllText(const std::string &filePath) const {
 		Writer logWriter(filePath.c_str());
 		if (logWriter.WriterOK()) {
 			logWriter << m_ConsoleText->GetText();
@@ -159,7 +182,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::PrintString(std::string stringToPrint) {
+	void ConsoleMan::PrintString(const std::string &stringToPrint) const {
 		m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + stringToPrint);
 		if (g_System.GetLogToCLI()) { g_System.PrintToCLI(stringToPrint); }
 	}
@@ -190,14 +213,14 @@ namespace RTE {
 
 	void ConsoleMan::Update() {
 		if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_TILDE)) {
-			SetReadOnly();		
+			SetReadOnly();
 		}
 
 		if (!g_UInputMan.FlagShiftState() && (!g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_TILDE))) {
 			if (IsEnabled()) {
 				if (!m_ReadOnly) {
 					m_InputTextBox->SetEnabled(false);
-					m_GUIControlManager->GetManager()->SetFocus(0);
+					m_GUIControlManager->GetManager()->SetFocus(nullptr);
 					// Save any text being worked on in the input, as the box keeps getting junk added to it
 					m_LastInputString = m_InputTextBox->GetText();
 					SetEnabled(false);
@@ -242,12 +265,14 @@ namespace RTE {
 			RemoveGraveAccents();
 		} else {
 			m_InputTextBox->SetEnabled(false);
-			m_GUIControlManager->GetManager()->SetFocus(0);
+			m_GUIControlManager->GetManager()->SetFocus(nullptr);
 			return;
-		}	
+		}
 
 		// Execute string when Enter is pressed, or execute immediately if a newline character is found, meaning multiple strings were pasted in.
-		if ((g_UInputMan.KeyPressed(KEY_ENTER) || g_UInputMan.KeyPressed(KEY_ENTER_PAD)) || (m_InputTextBox->GetText().find_last_of('\n') != std::string::npos)) { FeedString(); }
+		if ((g_UInputMan.KeyPressed(KEY_ENTER) || g_UInputMan.KeyPressed(KEY_ENTER_PAD)) || (m_InputTextBox->GetText().find_last_of('\n') != std::string::npos)) {
+			FeedString(m_InputTextBox->GetText().empty() ? true : false);
+		}
 
 		// TODO: Get this working and see if it actually makes any difference.
 		/*
@@ -260,25 +285,25 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ConsoleMan::ConsoleOpenClose() {
-		float travelCompletionDistance = 0;
+		float travelCompletionDistance;
 
 		if (m_ConsoleState == ConsoleState::Enabling) {
 			m_ParentBox->SetEnabled(true);
 			m_ParentBox->SetVisible(true);
 
-			travelCompletionDistance = std::floorf(static_cast<float>(m_ParentBox->GetYPos()) * 0.5F);
+			travelCompletionDistance = std::floor(static_cast<float>(m_ParentBox->GetYPos()) * 0.5F);
 			m_ParentBox->SetPositionAbs(0, m_ParentBox->GetYPos() - static_cast<int>(travelCompletionDistance));
 
 			if (m_ParentBox->GetYPos() >= 0) { m_ConsoleState = ConsoleState::Enabled; }
 		} else if (m_ConsoleState == ConsoleState::Disabling) {
-			travelCompletionDistance = std::ceilf((static_cast<float>(m_ParentBox->GetHeight()) + static_cast<float>(m_ParentBox->GetYPos())) * 0.5F);
+			travelCompletionDistance = std::ceil((static_cast<float>(m_ParentBox->GetHeight()) + static_cast<float>(m_ParentBox->GetYPos())) * 0.5F);
 			m_ParentBox->SetPositionAbs(0, m_ParentBox->GetYPos() - static_cast<int>(travelCompletionDistance));
 
 			if (m_ParentBox->GetYPos() <= -m_ParentBox->GetHeight()) {
 				m_ParentBox->SetEnabled(false);
 				m_ParentBox->SetVisible(false);
 				m_InputTextBox->SetEnabled(false);
-				m_GUIControlManager->GetManager()->SetFocus(0);
+				m_GUIControlManager->GetManager()->SetFocus(nullptr);
 				m_ConsoleState = ConsoleState::Disabled;
 			}
 		}
@@ -293,7 +318,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::FeedString() {
+	void ConsoleMan::FeedString(bool feedEmptyString) {
 		char strLine[1024];
 		std::stringstream inputStream(m_InputTextBox->GetText());
 
@@ -301,16 +326,21 @@ namespace RTE {
 			inputStream.getline(strLine, 1024, '\n');
 			std::string line = strLine;
 
-			if (line != "\r" && !line.empty()) {
-				g_LuaMan.ClearErrors();
-				m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + line);
-				g_LuaMan.RunScriptString(line, false);
+			if (!feedEmptyString) {
+				if (!line.empty() && line != "\r") {
+					g_LuaMan.ClearErrors();
+					m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + line);
+					g_LuaMan.RunScriptString(line, false);
 
-				if (g_LuaMan.ErrorExists()) { m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + "ERROR: " + g_LuaMan.GetLastError()); }
-				if (m_InputLog.empty() || m_InputLog.front().compare(line) != 0) { m_InputLog.push_front(line); }
+					if (g_LuaMan.ErrorExists()) { m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + "ERROR: " + g_LuaMan.GetLastError()); }
+					if (m_InputLog.empty() || m_InputLog.front() != line) { m_InputLog.push_front(line); }
 
-				m_InputLogPosition = m_InputLog.begin();
-				m_LastLogMove = 0;
+					m_InputLogPosition = m_InputLog.begin();
+					m_LastLogMove = 0;
+				}
+			} else {
+				m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n");
+				break;
 			}
 		}
 		m_InputTextBox->SetText("");
@@ -319,42 +349,39 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ConsoleMan::LoadLoggedInput(bool nextEntry) {
-		switch (nextEntry) {
-			case true:
-				// See if we should decrement doubly because the last move was in the opposite direction
-				if (m_LastLogMove > 0 && m_InputLogPosition != m_InputLog.begin()) { m_InputLogPosition--; }
+		if (nextEntry) {
+			// See if we should decrement doubly because the last move was in the opposite direction
+			if (m_LastLogMove > 0 && m_InputLogPosition != m_InputLog.begin()) { --m_InputLogPosition; }
 
-				if (m_InputLogPosition == m_InputLog.begin()) {
-					m_InputTextBox->SetText("");
-					m_LastLogMove = 0;
-				} else {
-					m_InputLogPosition--;
-					m_InputTextBox->SetText(*m_InputLogPosition);
-					m_InputTextBox->SetCursorPos(m_InputTextBox->GetText().length());
-					m_LastLogMove = -1;
-				}
-				break;
-			case false:
-				// See if we should increment doubly because the last move was in the opposite direction
-				if (m_LastLogMove < 0 && m_InputLogPosition != m_InputLog.end() - 1) { m_InputLogPosition++; }
-
+			if (m_InputLogPosition == m_InputLog.begin()) {
+				m_InputTextBox->SetText("");
+				m_LastLogMove = 0;
+			} else {
+				--m_InputLogPosition;
 				m_InputTextBox->SetText(*m_InputLogPosition);
 				m_InputTextBox->SetCursorPos(m_InputTextBox->GetText().length());
-				m_InputLogPosition++;
-				m_LastLogMove = 1;
+				m_LastLogMove = -1;
+			}
+		} else {
+			// See if we should increment doubly because the last move was in the opposite direction
+			if (m_LastLogMove < 0 && m_InputLogPosition != m_InputLog.end() - 1) { ++m_InputLogPosition; }
 
-				// Avoid falling off the end
-				if (m_InputLogPosition == m_InputLog.end()) {
-					m_InputLogPosition--;
-					m_LastLogMove = 0;
-				}
-				break;
+			m_InputTextBox->SetText(*m_InputLogPosition);
+			m_InputTextBox->SetCursorPos(m_InputTextBox->GetText().length());
+			++m_InputLogPosition;
+			m_LastLogMove = 1;
+
+			// Avoid falling off the end
+			if (m_InputLogPosition == m_InputLog.end()) {
+				--m_InputLogPosition;
+				m_LastLogMove = 0;
+			}
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::RemoveGraveAccents() {					
+	void ConsoleMan::RemoveGraveAccents() const {
 		std::string textBoxString = m_InputTextBox->GetText();
 		if (std::find(textBoxString.begin(), textBoxString.end(), '`') != textBoxString.end()) {
 			textBoxString.erase(std::remove(textBoxString.begin(), textBoxString.end(), '`'), textBoxString.end());
@@ -365,7 +392,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::Draw(BITMAP *targetBitmap) {
+	void ConsoleMan::Draw(BITMAP *targetBitmap) const {
 		if (m_ConsoleState != ConsoleState::Disabled) {
 			AllegroScreen drawScreen(targetBitmap);
 			m_GUIControlManager->Draw(&drawScreen);

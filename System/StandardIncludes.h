@@ -1,6 +1,9 @@
 #ifndef _RTEINCLUDES_
 #define _RTEINCLUDES_
 
+// This restores features removed from the C++17 standard (auto_ptr and some other stuff). This is needed for LuaBind to work because it relies on it heavily.
+#define _HAS_AUTO_PTR_ETC 1
+
 // Inclusion of relevant C++ Standard Library headers.
 #include <cstdlib>
 #include <cstdarg>
@@ -32,8 +35,7 @@
 #include <limits>
 #include <random>
 #include <array>
-// TODO: don't forget to replace with <filesystem> when eventually enable ++17 standard.
-#include <experimental/filesystem>
+#include <filesystem>
 
 // TODO: Get rid of these once alias qualifiers are added.
 using std::string;

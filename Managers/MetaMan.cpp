@@ -90,11 +90,11 @@ int MetaMan::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Wipes any current and sets up a new game based on a size parameter.
 
-int MetaMan::NewGame(float gameSize)
+int MetaMan::NewGame(int gameSize)
 {
     // Grab a random selection of Scene presets from all available
     list<Scene *> scenePresets;
-    SelectScenePresets(gameSize, m_Players.size(), &scenePresets);
+    SelectScenePresets(gameSize, &scenePresets);
 
     // Destroy and clear any pre-existing scenes from previous games
     for (vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
@@ -127,7 +127,7 @@ int MetaMan::NewGame(float gameSize)
 			}
 		}
 		// Finally select some random metascene
-		int selection = SelectRand(0, metascenesList.size() - 1);
+		int selection = RandomNum<int>(0, metascenesList.size() - 1);
 		Scene * pSelectedScene = metascenesList.at(selection);
 
 		//Copy selected scene
@@ -546,7 +546,7 @@ const Scene * MetaMan::GetNextSceneOfPlayer(int player, const Scene *pStartScene
     for (vector<Scene *>::const_iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
     {
         // Don't search beyond what has been revealed already
-        if (scenesSearched >= floorf(m_RevealedScenes))
+        if (scenesSearched >= std::floor(m_RevealedScenes))
             break;
 
         // Find the place where to start the actual search for the next owned Scene from
@@ -995,12 +995,7 @@ int MetaMan::TotalScenePresets(std::list<Scene *> *pScenes)
     {
         pScenePreset = dynamic_cast<Scene *>(*sItr);
         // Filter out editor or special scenes, or ones that don't have locations defined.
-        if (pScenePreset && !pScenePreset->GetLocation().IsZero() &&
-            pScenePreset->IsMetagamePlayable() &&
-            pScenePreset->GetPresetName().find("Editor") == string::npos &&
-            pScenePreset->GetPresetName().find("Test") == string::npos &&
-            pScenePreset->GetPresetName().find("Tutorial") == string::npos && 
-			pScenePreset->GetMetasceneParent() == "")
+        if (pScenePreset && !pScenePreset->GetLocation().IsZero() && pScenePreset->IsMetagamePlayable() && pScenePreset->GetMetasceneParent() == "")
         {
             // Make sure this exact site location on the planet isn't occupied already
             locationOK = true;
@@ -1035,33 +1030,23 @@ int MetaMan::TotalScenePresets(std::list<Scene *> *pScenes)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Yields a set of randomly selected Scene presets for a new game.
 
-int MetaMan::SelectScenePresets(float gameSize, int playerCount, list<Scene *> *pSelected)
+int MetaMan::SelectScenePresets(int gameSize, list<Scene *> *pSelected)
 {
     // Get the list of ALL eligible read-in Scene presets
     list<Scene *> scenePresets;
     TotalScenePresets(&scenePresets);
 
-    // How many scenes the game should end up with, according to the specified game size.
-    // Note that it will never be all or none of all the available scenes!
-// TODO: Hook these constants up to settings!!
-    int minCount = MAX(3, MIN(floorf(playerCount * 1.5), scenePresets.size()));
-    int maxCount = MAX(floorf(scenePresets.size() * 0.7), minCount);
-    // Determine the actual game size
-    int gameSceneCount = minCount + floorf((maxCount - minCount) * gameSize);
-    // Clamp
-    gameSceneCount = MIN(gameSceneCount, maxCount);
-    gameSceneCount = MAX(gameSceneCount, minCount);
-
     // If we need to actually fill the list, do so
     if (pSelected)
     {
         // Go through the list and randomly knock out as many presets as necessary to reach the number we need for this game
-        int randomIndex, currentIndex;
-        while (scenePresets.size() > gameSceneCount)
+		int randomIndex;
+		int currentIndex;
+        while (scenePresets.size() > gameSize)
         {
             // Randomly select one of the scenes and remove it
             currentIndex = 0;
-            randomIndex = floorf(scenePresets.size() * PosRand());
+			randomIndex = RandomNum<int>(0, scenePresets.size() - 1);
             for (list<Scene *>::iterator pItr = scenePresets.begin(); pItr != scenePresets.end(); ++pItr)
             {
                 if (currentIndex == randomIndex)
@@ -1075,11 +1060,12 @@ int MetaMan::SelectScenePresets(float gameSize, int playerCount, list<Scene *> *
 
         // Cast and copy (not deep!) to fill the provided list
         pSelected->clear();
-        for (list<Scene *>::iterator pItr = scenePresets.begin(); pItr != scenePresets.end(); ++pItr)
-            pSelected->push_back(dynamic_cast<Scene *>(*pItr));
+		for (Scene *scenePointer : scenePresets) {
+			pSelected->push_back(scenePointer);
+		}
     }
 
-    return gameSceneCount;
+    return gameSize;
 }
 
 
@@ -1119,7 +1105,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
 
     // Tally up all the scenes according to who owns them
     int sceneCount = 0;
-    int revealedScenes = floorf(m_RevealedScenes);
+    int revealedScenes = std::floor(m_RevealedScenes);
     vector<Scene *> ownedScenes;
     vector<Scene *> enemyScenes;
     vector<Scene *> unclaimedScenes;
@@ -1197,7 +1183,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
     {
         pThisPlayer->SetOffensiveBudget(pThisPlayer->GetFunds() * offenseRatio);
 		// Use two methods to select which scene to attack, first one is based on the previously obtained scene mark and the second is mostly random
-		if (PosRand() < 0.6 && pBestAttackCandidateScene)
+		if (RandomNum() < 0.6F && pBestAttackCandidateScene)
 		{
 			pThisPlayer->SetOffensiveTargetName(pBestAttackCandidateScene->GetPresetName());
 		}
@@ -1205,10 +1191,10 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
 		{
 			// And the target scene, randomly selected for now from all unfriendly targets
 			int unfriendlySceneCount = enemyScenes.size() + unclaimedScenes.size();
-			int targetIndex = SelectRand(0, unfriendlySceneCount - 1);
+			int targetIndex = RandomNum(0, unfriendlySceneCount - 1);
 			// Give it a strong preference for unclaimed scenes! They make more strategic sense than to attack a hardened target
 			if (!unclaimedScenes.empty() && targetIndex >= unclaimedScenes.size())
-				targetIndex = PosRand() < 0.75 ? SelectRand(0, unclaimedScenes.size() - 1) : targetIndex;
+				targetIndex = RandomNum() < 0.75F ? RandomNum<int>(0, unclaimedScenes.size() - 1) : targetIndex;
 			// From index to actual Scene and selection
 			Scene *selectedTarget = targetIndex < unclaimedScenes.size() ? unclaimedScenes[targetIndex] : enemyScenes[targetIndex - unclaimedScenes.size()];
 			if (selectedTarget)

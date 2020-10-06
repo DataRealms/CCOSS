@@ -1054,11 +1054,13 @@ int SceneMan::RemoveOrphans(int posX, int posY,
 
             // Get the new pixel from the pre-allocated pool, should be faster than dynamic allocation
             // Density is used as the mass for the new MOPixel
+			float tempMax = 2.0F * sprayScale;
+			float tempMin = tempMax / 2.0F;
             MOPixel *pixelMO = new MOPixel(spawnColor,
                                            spawnMat->GetPixelDensity(),
                                            Vector(posX, posY),
-                                           Vector(-RangeRand((2 * sprayScale) / 2 , 2 * sprayScale),
-                                                  -RangeRand((2 * sprayScale) / 2 , 2 * sprayScale)),
+                                           Vector(-RandomNum(tempMin, tempMax),
+                                                  -RandomNum(tempMin, tempMax)),
                                            new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2),
                                            0);
 
@@ -1250,18 +1252,22 @@ bool SceneMan::TryPenetrate(const int posX,
                 pixelMO->Create(spawnColor,
                                 spawnMat.pixelDensity,
                                 Vector(posX, posY),
-                                Vector(-RangeRand((velocity.m_X * sprayScale) / 2 , velocity.m_X * sprayScale),
-                                       -RangeRand((velocity.m_Y * sprayScale) / 2 , velocity.m_Y * sprayScale)),
-//                                               -(impulse * (sprayScale * PosRand() / spawnMat.density)),
+                                Vector(-RandomNum((velocity.m_X * sprayScale) / 2 , velocity.m_X * sprayScale),
+                                       -RandomNum((velocity.m_Y * sprayScale) / 2 , velocity.m_Y * sprayScale)),
+//                                               -(impulse * (sprayScale * RandomNum() / spawnMat.density)),
                                 new Atom(Vector(), spawnMat, 0, spawnColor, 2),
                                 0);
 */
+				float tempMaxX = velocity.m_X * sprayScale;
+				float tempMinX = tempMaxX / 2.0F;
+				float tempMaxY = velocity.m_Y * sprayScale;
+				float tempMinY = tempMaxY / 2.0F;
                 MOPixel *pixelMO = new MOPixel(spawnColor,
                                                spawnMat->GetPixelDensity(),
                                                Vector(posX, posY),
-                                               Vector(-RangeRand((velocity.m_X * sprayScale) / 2 , velocity.m_X * sprayScale),
-                                                      -RangeRand((velocity.m_Y * sprayScale) / 2 , velocity.m_Y * sprayScale)),
-//                                              -(impulse * (sprayScale * PosRand() / spawnMat.density)),
+                                               Vector(-RandomNum(tempMinX, tempMaxX),
+                                                      -RandomNum(tempMinY, tempMaxY)),
+//                                              -(impulse * (sprayScale * RandomNum() / spawnMat.density)),
                                                new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2),
                                                0);
 
@@ -1277,7 +1283,7 @@ bool SceneMan::TryPenetrate(const int posX,
             m_pCurrentScene->GetTerrain()->SetMaterialPixel(posX, posY, g_MaterialAir);
         }
 // TODO: Improve / tweak randomized pushing away of terrain")
-        else if (PosRand() <= airRatio)
+        else if (RandomNum() <= airRatio)
         {
             m_pCurrentScene->GetTerrain()->SetFGColorPixel(posX, posY, g_MaskColor);
 			RegisterTerrainChange(posX, posY, 1, 1, g_MaskColor, false);
@@ -1315,7 +1321,7 @@ bool SceneMan::TryPenetrate(const int posX,
                     if (sceneMat->IsScrap() || _getpixel(pBGColor, posX, testY) == g_MaskColor)
                     {
                         //  Only generate  particles of some of 'em
-                        if (PosRand() > 0.75)
+                        if (RandomNum() > 0.75F)
                         {
                             // Figure out the mateiral and color of the new spray particle
                             spawnMat = sceneMat->GetSpawnMaterial() ? GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
@@ -1328,7 +1334,7 @@ bool SceneMan::TryPenetrate(const int posX,
                             if (spawnColor.GetIndex() != g_MaskColor)
                             {
                                 // Figure out the randomized velocity the spray should have upward
-                                sprayVel.SetXY(sprayMag * NormalRand() * 0.5, (-sprayMag * 0.5) + (-sprayMag * 0.5 * PosRand()));
+								sprayVel.SetXY(sprayMag* RandomNormalNum() * 0.5F, (-sprayMag * 0.5F) + (-sprayMag * RandomNum(0.0F, 0.5F)));
 
                                 // Create the new spray pixel
 								pixelMO = new MOPixel(spawnColor, spawnMat->GetPixelDensity(), Vector(posX, testY), sprayVel, new Atom(Vector(), spawnMat->GetIndex(), 0, spawnColor, 2), 0);
@@ -1357,7 +1363,7 @@ bool SceneMan::TryPenetrate(const int posX,
         }
 
 		// Remove orphaned regions if told to by parent MO who travelled an atom which tries to penetrate terrain
-		if (removeOrphansRadius && removeOrphansMaxArea && removeOrphansRate > 0 && PosRand() < removeOrphansRate)
+		if (removeOrphansRadius && removeOrphansMaxArea && removeOrphansRate > 0 && RandomNum() < removeOrphansRate)
 		{
 			RemoveOrphans(posX, posY, removeOrphansRadius, removeOrphansMaxArea, true);
 			/*PALETTE palette;
@@ -1635,10 +1641,10 @@ bool SceneMan::CastUnseenRay(int team, const Vector &start, const Vector &ray, V
     // Save the projected end of the ray pos
     endPos = start + ray;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -1776,10 +1782,10 @@ bool SceneMan::CastMaterialRay(const Vector &start, const Vector &ray, unsigned 
     int intPos[2], delta[2], delta2[2], increment[2];
     bool foundPixel = false;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -1907,10 +1913,10 @@ bool SceneMan::CastNotMaterialRay(const Vector &start, const Vector &ray, unsign
     int intPos[2], delta[2], delta2[2], increment[2];
     bool foundPixel = false;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
 
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -2038,10 +2044,10 @@ float SceneMan::CastStrengthSumRay(const Vector &start, const Vector &end, int s
     unsigned char materialID;
     Material foundMaterial;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -2132,10 +2138,10 @@ float SceneMan::CastMaxStrengthRay(const Vector &start, const Vector &end, int s
     unsigned char materialID;
     Material foundMaterial;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -2229,10 +2235,10 @@ bool SceneMan::CastStrengthRay(const Vector &start, const Vector &ray, float str
     unsigned char materialID;
     Material const * foundMaterial;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -2353,10 +2359,10 @@ bool SceneMan::CastWeaknessRay(const Vector &start, const Vector &ray, float str
     unsigned char materialID;
     Material const *foundMaterial;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 &&  delta[Y] == 0)
         return false;
@@ -2472,10 +2478,10 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
     MOID hitMOID = g_NoMOID;
     unsigned char hitTerrain = 0;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 && delta[Y] == 0)
         return g_NoMOID;
@@ -2614,10 +2620,10 @@ bool SceneMan::CastFindMORay(const Vector &start, const Vector &ray, MOID target
     MOID hitMOID = g_NoMOID;
     unsigned char hitTerrain = 0;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     
     if (delta[X] == 0 && delta[Y] == 0)
         return g_NoMOID;
@@ -2736,10 +2742,10 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
     int intPos[2], delta[2], delta2[2], increment[2];
     bool hitObstacle = false;
 
-    intPos[X] = floorf(start.m_X);
-    intPos[Y] = floorf(start.m_Y);
-    delta[X] = floorf(start.m_X + ray.m_X) - intPos[X];
-    delta[Y] = floorf(start.m_Y + ray.m_Y) - intPos[Y];
+    intPos[X] = std::floor(start.m_X);
+    intPos[Y] = std::floor(start.m_Y);
+    delta[X] = std::floor(start.m_X + ray.m_X) - intPos[X];
+    delta[Y] = std::floor(start.m_Y + ray.m_Y) - intPos[Y];
     // The fraction of a pixel that we start from, to be added to the integer result positions for accuracy
     Vector startFraction(start.m_X - intPos[X], start.m_Y - intPos[Y]);
 
@@ -3012,13 +3018,13 @@ bool SceneMan::ForceBounds(Vector &pos)
 {
     RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
-    int posX = floorf(pos.m_X);
-    int posY = floorf(pos.m_Y);
+    int posX = std::floor(pos.m_X);
+    int posY = std::floor(pos.m_Y);
 
     bool wrapped = m_pCurrentScene->GetTerrain()->ForceBounds(posX, posY);
 
-    pos.m_X = posX + (pos.m_X - floorf(pos.m_X));
-    pos.m_Y = posY + (pos.m_Y - floorf(pos.m_Y));
+    pos.m_X = posX + (pos.m_X - std::floor(pos.m_X));
+    pos.m_Y = posY + (pos.m_Y - std::floor(pos.m_Y));
 
     return wrapped;
 }
@@ -3047,13 +3053,13 @@ bool SceneMan::WrapPosition(Vector &pos)
 {
     RTEAssert(m_pCurrentScene, "Trying to access scene before there is one!");
 
-    int posX = floorf(pos.m_X);
-    int posY = floorf(pos.m_Y);
+    int posX = std::floor(pos.m_X);
+    int posY = std::floor(pos.m_Y);
 
     bool wrapped = m_pCurrentScene->GetTerrain()->WrapPosition(posX, posY);
 
-    pos.m_X = posX + (pos.m_X - floorf(pos.m_X));
-    pos.m_Y = posY + (pos.m_Y - floorf(pos.m_Y));
+    pos.m_X = posX + (pos.m_X - std::floor(pos.m_X));
+    pos.m_Y = posY + (pos.m_Y - std::floor(pos.m_Y));
 
     return wrapped;
 }
@@ -3070,8 +3076,8 @@ Vector SceneMan::SnapPosition(const Vector &pos, bool snap)
 
     if (snap)
     {
-        snappedPos.m_X = floorf((pos.m_X / SCENESNAPSIZE) + 0.5) * SCENESNAPSIZE;
-        snappedPos.m_Y = floorf((pos.m_Y / SCENESNAPSIZE) + 0.5) * SCENESNAPSIZE;
+        snappedPos.m_X = std::floor((pos.m_X / SCENESNAPSIZE) + 0.5) * SCENESNAPSIZE;
+        snappedPos.m_Y = std::floor((pos.m_Y / SCENESNAPSIZE) + 0.5) * SCENESNAPSIZE;
     }
 
     return snappedPos;
@@ -3643,7 +3649,7 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 //            g_ActivityMan.GetActivity()->Draw(pTargetBitmap, targetPos, m_LastUpdatedScreen);
             g_ActivityMan.GetActivity()->DrawGUI(pTargetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
-//            sprintf_s(str, sizeof(str), "Normal Layer Draw Mode\nHit M to cycle modes");
+//            std::snprintf(str, sizeof(str), "Normal Layer Draw Mode\nHit M to cycle modes");
 
 #ifdef DEBUG_BUILD
             m_pDebugLayer->Draw(pTargetBitmap, Box());

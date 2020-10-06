@@ -31,6 +31,7 @@
 #include "TDExplosive.h"
 #include "ThrownDevice.h"
 #include "Turret.h"
+#include "PEmitter.h"
 
 #include "DataModule.h"
 #include "GAScripted.h"
@@ -207,6 +208,7 @@ LUAENTITYCREATE(HDFirearm)
 LUAENTITYCREATE(ThrownDevice)
 LUAENTITYCREATE(TDExplosive)
 LUAENTITYCREATE(TerrainObject)
+LUAENTITYCREATE(PEmitter)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -251,6 +253,7 @@ LUAENTITYCLONE(HDFirearm)
 LUAENTITYCLONE(ThrownDevice)
 LUAENTITYCLONE(TDExplosive)
 LUAENTITYCLONE(TerrainObject)
+LUAENTITYCLONE(PEmitter)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Explicit deletion of any Entity instance that Lua owns.. it will probably be handled
@@ -317,6 +320,7 @@ LUAENTITYCAST(HDFirearm)
 LUAENTITYCAST(ThrownDevice)
 LUAENTITYCAST(TDExplosive)
 LUAENTITYCAST(TerrainObject)
+LUAENTITYCAST(PEmitter)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -374,6 +378,8 @@ void AddParticle(MovableMan &This, MovableObject *pParticle)
     else
         This.AddParticle(pParticle);
 }
+double NormalRand() { return RandomNormalNum<double>(); }
+double PosRand() { return RandomNum<double>(); }
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -426,43 +432,27 @@ void LuaMan::Clear()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int LuaMan::Create()
-{
-    // Create the master state
-    m_pMasterState = lua_open();
+int LuaMan::Create() {
+    m_pMasterState = luaL_newstate();
     // Attach the master state to LuaBind
-    open(m_pMasterState);
-    // Open the lua libs for the master state
-    //luaL_openlibs(m_pMasterState);
+    luabind::open(m_pMasterState);
 
-	// Load only libraries we need
-	lua_pushcfunction(m_pMasterState, luaopen_base);
-	lua_pushliteral(m_pMasterState, LUA_COLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
+	const luaL_Reg libsToLoad[] = {
+		{ LUA_COLIBNAME, luaopen_base },
+		{ LUA_LOADLIBNAME, luaopen_package },
+		{ LUA_TABLIBNAME, luaopen_table },
+		{ LUA_STRLIBNAME, luaopen_string },
+		{ LUA_MATHLIBNAME, luaopen_math },
+		{ LUA_DBLIBNAME, luaopen_debug },
+		{ LUA_JITLIBNAME, luaopen_jit },
+		{ NULL, NULL } // End of array
+	};
 
-	lua_pushcfunction(m_pMasterState, luaopen_table);
-	lua_pushliteral(m_pMasterState, LUA_TABLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
-
-	lua_pushcfunction(m_pMasterState, luaopen_string);
-	lua_pushliteral(m_pMasterState, LUA_STRLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
-
-	lua_pushcfunction(m_pMasterState, luaopen_math);
-	lua_pushliteral(m_pMasterState, LUA_MATHLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
-
-	lua_pushcfunction(m_pMasterState, luaopen_debug);
-	lua_pushliteral(m_pMasterState, LUA_DBLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
-
-	lua_pushcfunction(m_pMasterState, luaopen_package);
-	lua_pushliteral(m_pMasterState, LUA_LOADLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
-
-	lua_pushcfunction(m_pMasterState, luaopen_jit);
-	lua_pushliteral(m_pMasterState, LUA_LOADLIBNAME);
-	lua_call(m_pMasterState, 1, 0);
+	for (const luaL_Reg *lib = libsToLoad; lib->func; lib++) {
+		lua_pushcfunction(m_pMasterState, lib->func);
+		lua_pushstring(m_pMasterState, lib->name);
+		lua_call(m_pMasterState, 1, 0);
+	}
 
 	// LuaJIT should start automatically after we load the library but we're making sure it did anyway.
 	if (!luaJIT_setmode(m_pMasterState, 0, LUAJIT_MODE_ENGINE | LUAJIT_MODE_ON)) { RTEAbort("Failed to initialize LuaJIT!"); }
@@ -858,6 +848,24 @@ int LuaMan::Create()
             .def("IsSetToBurst", &AEmitter::IsSetToBurst)
             .def("CanTriggerBurst", &AEmitter::CanTriggerBurst)
 			.def_readwrite("Emissions", &AEmitter::m_EmissionList, return_stl_iterator),
+
+		CONCRETELUABINDING(PEmitter, MOSParticle)
+			.def("IsEmitting", &PEmitter::IsEmitting)
+			.def("EnableEmission", &PEmitter::EnableEmission)
+			.property("BurstScale", &PEmitter::GetBurstScale, &PEmitter::SetBurstScale)
+			.property("EmitAngle", &PEmitter::GetEmitAngle, &PEmitter::SetEmitAngle)
+			.property("GetThrottle", &PEmitter::GetThrottle, &PEmitter::SetThrottle)
+			.property("Throttle", &PEmitter::GetThrottle, &PEmitter::SetThrottle)
+			.property("BurstSpacing", &PEmitter::GetBurstSpacing, &PEmitter::SetBurstSpacing)
+			.property("EmitCountLimit", &PEmitter::GetEmitCountLimit, &PEmitter::SetEmitCountLimit)
+			.property("FlashScale", &PEmitter::GetFlashScale, &PEmitter::SetFlashScale)
+			.def("GetEmitVector", &PEmitter::GetEmitVector)
+			.def("GetRecoilVector", &PEmitter::GetRecoilVector)
+			.def("EstimateImpulse", &PEmitter::EstimateImpulse)
+			.def("TriggerBurst", &PEmitter::TriggerBurst)
+			.def("IsSetToBurst", &PEmitter::IsSetToBurst)
+			.def("CanTriggerBurst", &PEmitter::CanTriggerBurst)
+			.def_readwrite("Emissions", &PEmitter::m_EmissionList, return_stl_iterator),
 
 		CONCRETELUABINDING(Actor, MOSRotating)
 			.enum_("Status")[
@@ -2128,10 +2136,10 @@ int LuaMan::Create()
 
         // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
         def("DeleteEntity", &DeleteEntity, adopt(_1)),
-        def("PosRand", &PosRand),
+		def("RangeRand", (double(*)(double, double))& RandomNum),
+		def("PosRand", &PosRand),
         def("NormalRand", &NormalRand),
-        def("RangeRand", &RangeRand),
-        def("SelectRand", &SelectRand),
+        def("SelectRand", (int(*)(int, int)) &RandomNum),
         def("LERP", &LERP),
         def("EaseIn", &EaseIn),
         def("EaseOut", &EaseOut),
@@ -2473,7 +2481,7 @@ string LuaMan::GetNewPresetID()
 {
     // Generate the new ID
     char newID[64];
-    sprintf_s(newID, sizeof(newID), "Pre%05i", m_NextPresetID);
+    std::snprintf(newID, sizeof(newID), "Pre%05i", m_NextPresetID);
     // Increment the ID so it will be diff for the next one (improve this primitive approach??)
     m_NextPresetID++;
 
@@ -2486,7 +2494,7 @@ string LuaMan::GetNewObjectID()
 {
     // Generate the new ID
     char newID[64];
-    sprintf_s(newID, sizeof(newID), "Obj%05i", m_NextObjectID);
+    std::snprintf(newID, sizeof(newID), "Obj%05i", m_NextObjectID);
     // Increment the ID so it will be diff for the next one (improve this primitive approach??)
     m_NextObjectID++;
 

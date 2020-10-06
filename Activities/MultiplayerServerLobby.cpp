@@ -245,8 +245,8 @@ namespace RTE {
 		m_pDifficultyLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("DifficultyLabel"));
 		m_pDifficultySlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("DifficultySlider"));
 		//m_pActivitySelect->SetDropHeight(64);
-		//    m_pActivitySelect->GetListPanel()->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
-		//m_pActivityLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+		//    m_pActivitySelect->GetListPanel()->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
+		//m_pActivityLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
 
 		// Player team assignment box
 		char str[128];
@@ -255,7 +255,7 @@ namespace RTE {
 			for (int team = Teams::TeamOne; team < TEAMROWCOUNT; ++team)
 			{
 				// +1 because the controls are indexed starting at 1, not 0
-				sprintf_s(str, sizeof(str), "P%dT%dBox", player + 1, team + 1);
+				std::snprintf(str, sizeof(str), "P%dT%dBox", player + 1, team + 1);
 				m_aapPlayerBoxes[player][team] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl(str));
 			}
 		}
@@ -341,7 +341,7 @@ namespace RTE {
 
 		m_pScenePreviewBitmap = create_bitmap_ex(8, Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT);
 
-		ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.bmp");
+		ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.png");
 		m_pDefaultPreviewBitmap = defaultPreview.LoadAndReleaseBitmap();
 
 		clear_to_color(m_pScenePreviewBitmap, g_MaskColor);
@@ -358,7 +358,7 @@ namespace RTE {
 
 		if (!m_pCursor)
 		{
-			ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.bmp");
+			ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.png");
 			m_pCursor = cursorFile.GetAsBitmap();
 		}
 
@@ -765,7 +765,7 @@ namespace RTE {
 										if (!pIcon)
 										{
 											char str[128];
-											sprintf_s(str, sizeof(str), "Team %d Default", team + 1);
+											std::snprintf(str, sizeof(str), "Team %d Default", team + 1);
 											pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", str));
 										}
 										m_apTeamNameLabels[team]->SetText(pActivity->GetTeamName(team) + ":");
@@ -828,7 +828,7 @@ namespace RTE {
 				m_pStartScenarioButton->SetVisible(false);
 				m_pStartErrorLabel->SetVisible(true);
 				char str[256];
-				sprintf_s(str, sizeof(str), "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
+				std::snprintf(str, sizeof(str), "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
 				m_pStartErrorLabel->SetText(str);
 			}
 			// If we are under the required number of teams with players assigned, disable the start button and show why
@@ -837,7 +837,7 @@ namespace RTE {
 				m_pStartScenarioButton->SetVisible(false);
 				m_pStartErrorLabel->SetVisible(true);
 				char str[256];
-				sprintf_s(str, sizeof(str), "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
+				std::snprintf(str, sizeof(str), "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
 				m_pStartErrorLabel->SetText(str);
 			}
 			// Assign at least one human player
@@ -860,9 +860,9 @@ namespace RTE {
 			int startGold = m_pGoldSlider->GetValue();
 			startGold = startGold - startGold % 500;
 			if (m_pGoldSlider->GetValue() == m_pGoldSlider->GetMaximum())
-				sprintf_s(str, sizeof(str), "Starting Gold: %c Infinite", -58);
+				std::snprintf(str, sizeof(str), "Starting Gold: %c Infinite", -58);
 			else
-				sprintf_s(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
+				std::snprintf(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
 			m_pGoldLabel->SetText(str);
 
 
@@ -977,7 +977,7 @@ namespace RTE {
 				// If the "random" selection, choose one from the list of loaded techs
 				if (m_apTeamTechSelect[team]->GetSelectedIndex() == 1)//pTechItem->m_ExtraIndex < 0)
 				{
-					int selection = SelectRand(1, m_apTeamTechSelect[team]->GetListPanel()->GetItemList()->size() - 1);
+					int selection = RandomNum<int>(1, m_apTeamTechSelect[team]->GetListPanel()->GetItemList()->size() - 1);
 					m_apTeamTechSelect[team]->SetSelectedIndex(selection);
 					pTechItem = m_apTeamTechSelect[team]->GetSelectedItem();
 
@@ -1042,11 +1042,7 @@ namespace RTE {
 		{
 			pScene = dynamic_cast<Scene *>(*pItr);
 			// Only add non-editor and non-special scenes, or ones that don't have locations defined, or have Test in their names, or are metascenes
-			if (pScene && !pScene->GetLocation().IsZero() &&
-				pScene->GetPresetName().find("Editor") == string::npos &&
-				pScene->GetPresetName().find("Test") == string::npos &&
-				!pScene->IsMetagameInternal() &&
-				(pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
+			if (pScene && !pScene->GetLocation().IsZero() && !pScene->IsMetagameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
 				filteredScenes.push_back(pScene);
 		}
 
@@ -1168,7 +1164,7 @@ namespace RTE {
 			m_pGUIInput->GetMousePosition(&x, &y);
 
 			char buf[256];
-			sprintf_s(buf, sizeof(buf), "MB-%d%d%d MS-%d%d%d   %d - %d", states[0], states[1], states[2], events[0], events[1], events[2], x, y);
+			std::snprintf(buf, sizeof(buf), "MB-%d%d%d MS-%d%d%d   %d - %d", states[0], states[1], states[2], events[0], events[1], events[2], x, y);
 
 			result = result + buf;
 			g_FrameMan.SetScreenText(result, 0, 0, -1, false);

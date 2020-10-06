@@ -522,7 +522,7 @@ ClassInfoGetters
 //                  Actor.
 // Return value:    None.
 
-    void AddGold(float goldOz) { m_GoldCarried += ceilf(goldOz); m_GoldPicked = true; }
+    void AddGold(float goldOz) { m_GoldCarried += std::ceil(goldOz); m_GoldPicked = true; }
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -325,7 +325,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-	void NewID() { m_ID = SelectRand(1, 0xFFFF); };
+	void NewID() { m_ID = RandomNum(1, 0xFFFF); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

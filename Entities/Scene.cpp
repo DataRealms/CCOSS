@@ -402,7 +402,7 @@ Vector Scene::Area::GetRandomPoint() const
         return Vector();
 
     // Randomly choose a box, and a point within it
-    return m_BoxList[floor(RangeRand(0, m_BoxList.size()))].GetRandomPoint();
+	return m_BoxList[RandomNum<int>(0, m_BoxList.size() - 1)].GetRandomPoint();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -830,10 +830,10 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
                             {
                                 // Translate to the scaled unseen layer's coordinates
                                 Vector scale = m_apUnseenLayer[ownerTeam]->GetScaleInverse();
-                                int scaledX = floorf((pTO->GetPos().m_X - (float)(pTO->GetFGColorBitmap()->w / 2)) * scale.m_X);
-                                int scaledY = floorf((pTO->GetPos().m_Y - (float)(pTO->GetFGColorBitmap()->h / 2)) * scale.m_Y);
-                                int scaledW = ceilf(pTO->GetFGColorBitmap()->w * scale.m_X);
-                                int scaledH = ceilf(pTO->GetFGColorBitmap()->h * scale.m_Y);
+                                int scaledX = std::floor((pTO->GetPos().m_X - (float)(pTO->GetFGColorBitmap()->w / 2)) * scale.m_X);
+                                int scaledY = std::floor((pTO->GetPos().m_Y - (float)(pTO->GetFGColorBitmap()->h / 2)) * scale.m_Y);
+                                int scaledW = std::ceil(pTO->GetFGColorBitmap()->w * scale.m_X);
+                                int scaledH = std::ceil(pTO->GetFGColorBitmap()->h * scale.m_Y);
                                 // Fill the box with key color for the owner ownerTeam, revealing the area that this thing is on
                                 rectfill(m_apUnseenLayer[ownerTeam]->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_MaskColor);
                                 // Expand the box a little so the whole placed object is going to be hidden
@@ -871,7 +871,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 					team = 0;
 				if (brainLocations[team].size() > 0)
 				{
-					int selection = SelectRand(0, brainLocations[team].size() - 1);
+					int selection = RandomNum<int>(0, brainLocations[team].size() - 1);
 					pBrains[t]->SetPos(brainLocations[team].at(selection));
 				}
 			}
@@ -1028,7 +1028,7 @@ int Scene::SaveData(string pathBase)
     {
         if (m_apUnseenLayer[team])
         {
-            sprintf_s(str, sizeof(str), "T%d", team);
+            std::snprintf(str, sizeof(str), "T%d", team);
             // Save unseen layer data to disk
             if (m_apUnseenLayer[team]->SaveData(pathBase + " US" + str + ".bmp") < 0)
             {
@@ -1444,7 +1444,7 @@ int Scene::Save(Writer &writer) const
     {
         if (m_ResidentBrains[player])
         {
-            sprintf_s(str, sizeof(str), "P%dResidentBrain", player + 1);
+            std::snprintf(str, sizeof(str), "P%dResidentBrain", player + 1);
             writer.NewProperty(str);
             writer.ObjectStart(m_ResidentBrains[player]->GetClassName());
             writer.NewProperty("CopyOf");

@@ -205,14 +205,14 @@ int ScenarioGUI::Create(Controller *pController)
     m_pDifficultyLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("DifficultyLabel"));
     m_pDifficultySlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("DifficultySlider"));
     m_pActivitySelect->SetDropHeight(64);
-//    m_pActivitySelect->GetListPanel()->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
-    m_pActivityLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+//    m_pActivitySelect->GetListPanel()->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
+    m_pActivityLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
 
     // Scene Info Box
     m_pSceneCloseButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("SceneCloseButton"));
     m_pSceneNameLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneNameLabel"));
     m_pSceneInfoLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneInfoLabel"));
-    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
 
     // Player team assignment box
     char str[128];
@@ -221,7 +221,7 @@ int ScenarioGUI::Create(Controller *pController)
         for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team)
         {
             // +1 because the controls are indexed starting at 1, not 0
-            sprintf_s(str, sizeof(str), "P%dT%dBox", player + 1, team + 1);
+            std::snprintf(str, sizeof(str), "P%dT%dBox", player + 1, team + 1);
             m_aapPlayerBoxes[player][team] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl(str));
         }
     }
@@ -316,7 +316,7 @@ int ScenarioGUI::Create(Controller *pController)
 	m_pScenePreviewBitmap = create_bitmap_ex(8, Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT);
 
 	// Load default preview bitmap
-	ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.bmp");
+	ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.png");
 	m_pDefaultPreviewBitmap = defaultPreview.LoadAndReleaseBitmap();
 
 	clear_to_color(m_pScenePreviewBitmap, g_MaskColor);
@@ -628,7 +628,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
     // Transparency effect on the scene dots and lines
     drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
     // Screen blend the dots and lines, with some flicekring in its intensity
-    int blendAmount = 120 + 55 * NormalRand();
+	int blendAmount = 120 + RandomNum(-55, 55);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
     // Draw sites etc only when selecting them
@@ -647,11 +647,11 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
 				color = c_GUIColorYellow;
 
             screenLocation = m_PlanetCenter + (*sItr)->GetLocation() + (*sItr)->GetLocationOffset();
-            blendAmount = 85 + 25 * NormalRand();
+			blendAmount = 85 + RandomNum(-25, 25);
             set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
             circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 4, color);
             circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 2, color);
-            blendAmount = 200 + 55 * NormalRand();
+			blendAmount = 200 + RandomNum(-55, 55);
             set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
             circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 1, color);
         }
@@ -1451,7 +1451,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                     if (!pIcon)
                     {
                         char str[128];
-                        sprintf_s(str, sizeof(str), "Team %d Default", team + 1);
+                        std::snprintf(str, sizeof(str), "Team %d Default", team + 1);
                         pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", str));
                     }
                     m_apTeamNameLabels[team]->SetText(pActivity->GetTeamName(team) + ":");
@@ -1514,7 +1514,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
             m_aScenarioButton[STARTGAME]->SetVisible(false);
             m_pStartErrorLabel->SetVisible(true);
             char str[256];
-            sprintf_s(str, sizeof(str), "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
+            std::snprintf(str, sizeof(str), "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
             m_pStartErrorLabel->SetText(str);
         }
         // If we are under the required number of teams with players assigned, disable the start button and show why
@@ -1523,7 +1523,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
             m_aScenarioButton[STARTGAME]->SetVisible(false);
             m_pStartErrorLabel->SetVisible(true);
             char str[256];
-            sprintf_s(str, sizeof(str), "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
+            std::snprintf(str, sizeof(str), "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
             m_pStartErrorLabel->SetText(str);
         }
 		// Assign at least one human player
@@ -1546,9 +1546,9 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
 		int startGold = m_pGoldSlider->GetValue();
 		startGold = startGold - startGold % 500;
 		if (m_pGoldSlider->GetValue() == m_pGoldSlider->GetMaximum())
-			sprintf_s(str, sizeof(str), "Starting Gold: %c Infinite", -58);
+			std::snprintf(str, sizeof(str), "Starting Gold: %c Infinite", -58);
 		else
-			sprintf_s(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
+			std::snprintf(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
 		m_pGoldLabel->SetText(str);
 
 
@@ -1660,7 +1660,7 @@ bool ScenarioGUI::StartGame()
 			// If the "random" selection, choose one from the list of loaded techs
 			if (m_apTeamTechSelect[team]->GetSelectedIndex() == 1)//pTechItem->m_ExtraIndex < 0)
 			{
-				int selection = SelectRand(1, m_apTeamTechSelect[team]->GetListPanel()->GetItemList()->size() - 1);
+				int selection = RandomNum<int>(1, m_apTeamTechSelect[team]->GetListPanel()->GetItemList()->size() - 1);
 				m_apTeamTechSelect[team]->SetSelectedIndex(selection);
 				pTechItem = m_apTeamTechSelect[team]->GetSelectedItem();
 
@@ -1720,12 +1720,8 @@ void ScenarioGUI::GetAllScenesAndActivities()
     {
         pScene = dynamic_cast<Scene *>(*pItr);
         // Only add non-editor and non-special scenes, or ones that don't have locations defined, or have Test in their names, or are metascenes
-		if (pScene && !pScene->GetLocation().IsZero() && 
-			pScene->GetPresetName().find("Editor") == string::npos && 
-			pScene->GetPresetName().find("Test") == string::npos && 
-			!pScene->IsMetagameInternal() && 
-			(pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
-            filteredScenes.push_back(pScene);
+		if (pScene && !pScene->GetLocation().IsZero() && !pScene->IsMetagameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
+			filteredScenes.push_back(pScene);
     }
 
 	//Clear offsets
@@ -1895,7 +1891,7 @@ void ScenarioGUI::UpdateSiteNameLabel(bool visible, string text, const Vector &l
 
 void ScenarioGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Vector &end, int color) const
 {
-    int blendAmount = 210 + 15 * NormalRand();
+	int blendAmount = 210 + RandomNum(-15, 15);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
     line(drawBitmap, start.m_X, start.m_Y, end.m_X, end.m_Y, color);
 /* Looks like ass
@@ -1911,7 +1907,7 @@ void ScenarioGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Ve
         line(drawBitmap, start.m_X - 1, start.m_Y, end.m_X - 1, end.m_Y, color);
     }
 */
-    blendAmount = 45 + 25 * NormalRand();
+	blendAmount = 45 + RandomNum(-25, 25);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
     line(drawBitmap, start.m_X + 1, start.m_Y, end.m_X + 1, end.m_Y, color);
     line(drawBitmap, start.m_X - 1, start.m_Y, end.m_X - 1, end.m_Y, color);
@@ -1948,7 +1944,7 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     int totalSegments = 0;
     int drawnFirstSegments = 0;
     int lastSegmentsToDraw = 0;
-    int circleRadius = squareSite ? floorf(6 * circleSize) : floorf(8 * circleSize);
+    int circleRadius = squareSite ? std::floor(6 * circleSize) : std::floor(8 * circleSize);
     int chamferSize = CHAMFERSIZE;
     Vector chamferPoint1;
     Vector chamferPoint2;
@@ -2024,7 +2020,7 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     // Draw a circle around the site target
     if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments))
     {
-        int blendAmount = 225 + 20 * NormalRand();
+		int blendAmount = 225 + RandomNum(-20, 20);
         set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
         // If specified, draw a squareSite instead (with chamfered corners)

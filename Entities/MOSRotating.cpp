@@ -515,7 +515,7 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includeAttachab
             break;
         }
 
-        int woundedPartIndex = static_cast<int>(RangeRand(0.0F, static_cast<float>(woundedParts.size() - 1)));
+        int woundedPartIndex = RandomNum(0, static_cast<int>(woundedParts.size()) - 1);
         MOSRotating *woundedPart = woundedParts[woundedPartIndex].first;
         if (woundedPart == this) {
             damage += removeFirstWoundEmitter() * GetDamageMultiplier();
@@ -799,8 +799,8 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
 
         // Figure out the entry position in the un-rotated sprite's coordinates.
         Vector entryPos = (g_SceneMan.ShortestDistance(m_Pos, hd.HitPoint) / m_Rotation).GetXFlipped(m_HFlipped) - m_SpriteOffset;
-        intPos[X] = floorf(entryPos.m_X);
-        intPos[Y] = floorf(entryPos.m_Y);
+        intPos[X] = std::floor(entryPos.m_X);
+        intPos[Y] = std::floor(entryPos.m_Y);
 
         // Get the un-rotated direction and max possible
         // travel length of the particle.
@@ -809,8 +809,8 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
         dir = dir.GetXFlipped(m_HFlipped);
 
         // Bresenham's line drawing algorithm preparation
-        delta[X] = floorf(entryPos.m_X + dir.m_X) - intPos[X];
-        delta[Y] = floorf(entryPos.m_Y + dir.m_Y) - intPos[Y];
+        delta[X] = std::floor(entryPos.m_X + dir.m_X) - intPos[X];
+        delta[Y] = std::floor(entryPos.m_Y + dir.m_Y) - intPos[Y];
         domSteps = 0;
         subSteps = 0;
 
@@ -996,22 +996,21 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             }
 
             if (gibParticleClone->GetLifetime() != 0) {
-                gibParticleClone->SetLifetime(static_cast<int>(static_cast<float>(gibParticleClone->GetLifetime()) * (1.0F + (gibSettingsObject.GetLifeVariation() * NormalRand()/*RandomNormalNum()*/))));
+                gibParticleClone->SetLifetime(static_cast<int>(static_cast<float>(gibParticleClone->GetLifetime()) * (1.0F + (gibSettingsObject.GetLifeVariation() * RandomNormalNum()))));
             }
 
             gibParticleClone->SetRotAngle(GetRotAngle() + gibParticleClone->GetRotAngle());
-            gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / gibParticleClone->GetMass()) * PosRand()/*RandomNum()*/);
+            gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / gibParticleClone->GetMass()) * RandomNum());
             if (rotatedGibOffset.GetRoundIntX() > m_aSprite[0]->w / 3) {
                 float offCenterRatio = rotatedGibOffset.m_X / (static_cast<float>(m_aSprite[0]->w) / 2.0F);
                 float angularVel = fabs(gibParticleClone->GetAngularVel() * 0.5F) + fabs(gibParticleClone->GetAngularVel() * 0.5F * offCenterRatio);
                 gibParticleClone->SetAngularVel(angularVel * (rotatedGibOffset.m_X > 0 ? -1 : 1));
             } else {
-                gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.5F + (gibParticleClone->GetAngularVel() * PosRand()/*RandomNum()*/)) * (NormalRand()/*RandomNormalNum()*/ > 0.0F ? 1.0F : -1.0F));
+                gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.5F + (gibParticleClone->GetAngularVel() * RandomNum())) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
             }
 
             gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
-            Vector gibVelocity = rotatedGibOffset.SetMagnitude(minVelocity + (velocityRange * PosRand())).RadRotate(impactImpulse.GetAbsRadAngle() + gibSettingsObject.GetSpread() + NormalRand());
-            //Vector gibVelocity = rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange)).RadRotate(impactImpulse.GetAbsRadAngle() + gib.GetSpread() + RandomNormalNum());
+            Vector gibVelocity = rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange)).RadRotate(impactImpulse.GetAbsRadAngle() + gibSettingsObject.GetSpread() + RandomNormalNum());
             gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? m_Vel : Vector()));
 
             if (movableObjectToIgnore) {
@@ -1031,7 +1030,7 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
         RTEAssert((*attachableIterator), "Broken Attachable!");
         attachable = *attachableIterator;
 
-        if (PosRand()/*RandomNum()*/ < attachable->GetGibWithParentChance()) {
+        if (RandomNum() < attachable->GetGibWithParentChance()) {
             ++attachableIterator;
             attachable->GibThis();
             continue;
@@ -1039,8 +1038,8 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
 
         if (!attachable->GetDeleteWhenRemovedFromParent()) {
             float attachableGibBlastStrength = (attachable->GetParentGibBlastStrengthMultiplier() == 0 ? 1 : attachable->GetParentGibBlastStrengthMultiplier() * m_GibBlastStrength) / (1 + attachable->GetMass());
-            attachable->SetAngularVel((attachable->GetAngularVel() * 0.5F) + (attachable->GetAngularVel() * 0.5F * attachableGibBlastStrength * NormalRand()/*RandomNormalNum()*/));
-            Vector gibBlastVel = Vector(attachable->GetParentOffset()).SetMagnitude(attachableGibBlastStrength * 0.5 + (attachableGibBlastStrength * PosRand()/*RandomNum()*/));
+            attachable->SetAngularVel((attachable->GetAngularVel() * 0.5F) + (attachable->GetAngularVel() * 0.5F * attachableGibBlastStrength * RandomNormalNum()));
+            Vector gibBlastVel = Vector(attachable->GetParentOffset()).SetMagnitude(attachableGibBlastStrength * 0.5 + (attachableGibBlastStrength * RandomNum()));
             attachable->SetVel(m_Vel + gibBlastVel + impactImpulse);
 
             if (movableObjectToIgnore) {
@@ -1298,7 +1297,7 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
                 {
                     tally -= 1.0;
                     (*itr)->SetPos((*itr)->GetPos() - m_Vel.GetNormalized() * depth);
-                    (*itr)->SetVel(Vector(velMag * splashDir * PosRand(), -velMag * PosRand()));
+					(*itr)->SetVel(Vector(velMag * RandomNum(0.0F, splashDir), -RandomNum(0.0F, velMag)));
                     m_DeepHardness += (*itr)->GetMaterial()->GetIntegrity() * (*itr)->GetMaterial()->GetPixelDensity();
                     g_MovableMan.AddParticle(*itr);
                     *itr = 0;

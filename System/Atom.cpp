@@ -399,11 +399,11 @@ namespace RTE {
 		if (m_IntPos[X] > 0 && m_IntPos[Y] > 0) {
 			m_PrevIntPos[X] = m_IntPos[X];
 			m_PrevIntPos[Y] = m_IntPos[Y];
-			m_IntPos[X] = std::floorf(startPos.m_X);
-			m_IntPos[Y] = std::floorf(startPos.m_Y);
+			m_IntPos[X] = std::floor(startPos.m_X);
+			m_IntPos[Y] = std::floor(startPos.m_Y);
 		} else {
-			m_IntPos[X] = m_PrevIntPos[X] = std::floorf(startPos.m_X);
-			m_IntPos[Y] = m_PrevIntPos[Y] = std::floorf(startPos.m_Y);
+			m_IntPos[X] = m_PrevIntPos[X] = std::floor(startPos.m_X);
+			m_IntPos[Y] = m_PrevIntPos[Y] = std::floor(startPos.m_Y);
 		}
 
 		if ((m_TerrainMatHit = g_SceneMan.GetTerrMatter(m_IntPos[X], m_IntPos[Y])) != g_MaterialAir) {
@@ -434,8 +434,8 @@ namespace RTE {
 		m_SegTraj = trajectory;
 
 		// Bresenham's line drawing algorithm preparation
-		m_Delta[X] = std::floorf(startPos.m_X + trajectory.m_X) - std::floorf(startPos.m_X);
-		m_Delta[Y] = std::floorf(startPos.m_Y + trajectory.m_Y) - std::floorf(startPos.m_Y);
+		m_Delta[X] = std::floor(startPos.m_X + trajectory.m_X) - std::floor(startPos.m_X);
+		m_Delta[Y] = std::floor(startPos.m_Y + trajectory.m_Y) - std::floor(startPos.m_Y);
 		m_DomSteps = 0;
 		m_SubSteps = 0;
 		m_SubStepped = false;
@@ -484,7 +484,7 @@ namespace RTE {
 
 		// Only take the step if the step ratio permits it
 		float prevProgress = m_SegProgress;
-		if (m_Delta[m_Dom] && (m_SegProgress += m_StepRatio) >= std::floorf(prevProgress + 1.0F)) {
+		if (m_Delta[m_Dom] && (m_SegProgress += m_StepRatio) >= std::floor(prevProgress + 1.0F)) {
 			m_StepWasTaken = true;
 			m_MOIDHit = g_NoMOID;
 			m_TerrainMatHit = g_MaterialAir;
@@ -645,8 +645,8 @@ namespace RTE {
 
 		// Loop for all the different straight segments (between bounces etc) that have to be traveled during the timeLeft.
 		do {
-			intPos[X] = std::floorf(position.m_X);
-			intPos[Y] = std::floorf(position.m_Y);
+			intPos[X] = std::floor(position.m_X);
+			intPos[Y] = std::floor(position.m_Y);
 
 			// Get trail bitmap and put first pixel.
 			if (m_TrailLength) {
@@ -656,8 +656,8 @@ namespace RTE {
 			// Compute and scale the actual on-screen travel trajectory for this segment, based on the velocity, the travel time and the pixels-per-meter constant.
 			segTraj = velocity * timeLeft * c_PPM;
 
-			delta[X] = std::floorf(position.m_X + segTraj.m_X) - intPos[X];
-			delta[Y] = std::floorf(position.m_Y + segTraj.m_Y) - intPos[Y];
+			delta[X] = std::floor(position.m_X + segTraj.m_X) - intPos[X];
+			delta[Y] = std::floor(position.m_Y + segTraj.m_Y) - intPos[Y];
 
 			//segProgress = 0.0F;
 			//delta2[X] = 0;
@@ -875,7 +875,7 @@ namespace RTE {
 
 						// TODO: improve sticky logic!
 						// Check if particle is sticky and should adhere to where it collided
-						if (m_Material->GetStickiness() >= PosRand() && velocity.GetLargest() > 0.5F) {
+						if (m_Material->GetStickiness() >= RandomNum() && velocity.GetLargest() > 0.5F) {
 							// SPLAT, so update position, apply to terrain and delete, and stop traveling
 							m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
 							g_SceneMan.GetTerrain()->ApplyMovableObject(m_OwnerMO);
@@ -960,7 +960,7 @@ namespace RTE {
 
 		// Draw the trail
 		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
-			int length = m_TrailLength /* + 3 * PosRand()*/;
+			int length = m_TrailLength /* + 3 * RandomNum()*/;
 			for (int i = trailPoints.size() - std::min(length, static_cast<int>(trailPoints.size())); i < trailPoints.size(); ++i) {
 				putpixel(trailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
 			}

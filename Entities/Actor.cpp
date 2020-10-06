@@ -285,9 +285,9 @@ int Actor::Create(const Actor &reference)
         iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Follow000.bmp");
         m_apAIIcons[AIMODE_SQUAD] = iconFile.GetAsBitmap();
 
-        ContentFile arrowFile("Base.rte/GUIs/Indicators/SelectArrow.bmp");
+        ContentFile arrowFile("Base.rte/GUIs/Indicators/SelectArrow.png");
         m_apSelectArrow = arrowFile.GetAsAnimation(4);
-        ContentFile alarmFile("Base.rte/GUIs/Indicators/AlarmExclamation.bmp");
+        ContentFile alarmFile("Base.rte/GUIs/Indicators/AlarmExclamation.png");
         m_apAlarmExclamation = alarmFile.GetAsAnimation(2);
 
         m_sIconsLoaded = true;
@@ -698,14 +698,14 @@ bool Actor::Look(float FOVSpread, float range)
     if (lookVector.GetLargest() < 0.01)
     {
         lookVector.SetXY(range, 0);
-        lookVector.DegRotate(180 * NormalRand());
+		lookVector.DegRotate(RandomNum(-180.0F, 180.0F));
     }
     else
     {
         // Set the distance in the look direction
         lookVector.SetMagnitude(range);
         // Add the spread from the directed look
-        lookVector.DegRotate(FOVSpread * NormalRand());
+        lookVector.DegRotate(FOVSpread * RandomNormalNum());
     }
 
 	Vector ignored;
@@ -905,37 +905,37 @@ void Actor::DropAllInventory()
 		if (pObject)
 		{
 			// Generate the velocities procedurally
-			velMin = 3.0f;
-			velRange = 10.0f;
+			velMin = 3.0F;
+			velRange = 10.0F;
 
 			// Randomize the offset from center to be within the original object
-			gibROffset.SetXY(m_MaxRadius * 0.35 * NormalRand(), m_MaxRadius * 0.35 * NormalRand());
+			gibROffset.SetXY(m_MaxRadius * 0.35F * RandomNormalNum(), m_MaxRadius * 0.35F * RandomNormalNum());
 			// Set up its position and velocity according to the parameters of this AEmitter.
 			pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
 			pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
 			// Rotational angle
-			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35) + (pObject->GetAngularVel() * 0.65 / pObject->GetMass()) * PosRand());
+			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / pObject->GetMass()) * RandomNum());
 			// Make it rotate away in the appropriate direction depending on which side of the object it is on
 			// If the object is far to the relft or right of the center, make it always rotate outwards to some degree
 			if (gibROffset.m_X > m_aSprite[0]->w / 3)
 			{
 				float offCenterRatio = gibROffset.m_X / (m_aSprite[0]->w / 2);
-				angularVel = fabs(pObject->GetAngularVel() * 0.5);
-				angularVel += fabs(pObject->GetAngularVel() * 0.5 * offCenterRatio);
-				pObject->SetAngularVel(angularVel * (gibROffset.m_X > 0 ? -1 : 1));
+				angularVel = fabs(pObject->GetAngularVel() * 0.5F);
+				angularVel += fabs(pObject->GetAngularVel() * 0.5F * offCenterRatio);
+				pObject->SetAngularVel(angularVel * (gibROffset.m_X > 0.0F ? -1 : 1));
 			}
 			// Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
 			else
 			{
-				pObject->SetAngularVel((pObject->GetAngularVel() * 0.5 + pObject->GetAngularVel() * PosRand()) * (NormalRand() > 0 ? 1 : -1));
+				pObject->SetAngularVel((pObject->GetAngularVel() * 0.5F + pObject->GetAngularVel() * RandomNum()) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
 			}
 
 			// TODO: Optimize making the random angles!")
 			gibVel = gibROffset;
 			if (gibVel.IsZero())
-				gibVel.SetXY(velMin + velRange * PosRand(), 0);
+				gibVel.SetXY(velMin + RandomNum(0.0F, velRange), 0.0F);
 			else
-				gibVel.SetMagnitude(velMin + velRange * PosRand());
+				gibVel.SetMagnitude(velMin + RandomNum(0.0F, velRange));
 			// Don't! the offset was already rotated!
 			//            gibVel = RotateOffset(gibVel);
 			// Distribute any impact implse out over all the gibs
@@ -947,9 +947,9 @@ void Actor::DropAllInventory()
 			// Detect whether we're dealing with a passenger and add it as Actor instead
 			if (pPassenger = dynamic_cast<Actor *>(pObject))
 			{
-				pPassenger->SetRotAngle(c_HalfPI * NormalRand());
-				pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5);
-				pPassenger->SetHFlipped(PosRand() > 0.5);
+				pPassenger->SetRotAngle(c_HalfPI * RandomNormalNum());
+				pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5.0F);
+				pPassenger->SetHFlipped(RandomNum() > 0.5F);
 				pPassenger->SetStatus(UNSTABLE);
 				g_MovableMan.AddActor(pPassenger);
 			}
@@ -1011,33 +1011,33 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
         velRange = 10.0f;
 
         // Randomize the offset from center to be within the original object
-        gibROffset.SetXY(m_MaxRadius * 0.35 * NormalRand(), m_MaxRadius * 0.35 * NormalRand());
+        gibROffset.SetXY(m_MaxRadius * 0.35F * RandomNormalNum(), m_MaxRadius * 0.35F * RandomNormalNum());
         // Set up its position and velocity according to the parameters of this AEmitter.
         pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
         pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
         // Rotational angle
-        pObject->SetAngularVel((pObject->GetAngularVel() * 0.35) + (pObject->GetAngularVel() * 0.65 / pObject->GetMass()) * PosRand());
+        pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / pObject->GetMass()) * RandomNum());
         // Make it rotate away in the appropriate direction depending on which side of the object it is on
         // If the object is far to the relft or right of the center, make it always rotate outwards to some degree
         if (gibROffset.m_X > m_aSprite[0]->w / 3)
         {
             float offCenterRatio = gibROffset.m_X / (m_aSprite[0]->w / 2);
-            angularVel = fabs(pObject->GetAngularVel() * 0.5);
-            angularVel += fabs(pObject->GetAngularVel() * 0.5 * offCenterRatio);
+            angularVel = fabs(pObject->GetAngularVel() * 0.5F);
+            angularVel += fabs(pObject->GetAngularVel() * 0.5F * offCenterRatio);
             pObject->SetAngularVel(angularVel * (gibROffset.m_X > 0 ? -1 : 1));
         }
         // Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
         else
         {
-            pObject->SetAngularVel((pObject->GetAngularVel() * 0.5 + pObject->GetAngularVel() * PosRand()) * (NormalRand() > 0 ? 1 : -1));
+            pObject->SetAngularVel((pObject->GetAngularVel() * 0.5F + pObject->GetAngularVel() * RandomNum()) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
         }
 
 // TODO: Optimize making the random angles!")
         gibVel = gibROffset;
         if (gibVel.IsZero())
-            gibVel.SetXY(velMin + velRange * PosRand(), 0);
+            gibVel.SetXY(velMin + RandomNum(0.0F, velRange), 0.0F);
         else
-            gibVel.SetMagnitude(velMin + velRange * PosRand());
+            gibVel.SetMagnitude(velMin + RandomNum(0.0F, velRange));
         gibVel.RadRotate(impactImpulse.GetAbsRadAngle());
 // Don't! the offset was already rotated!
 //            gibVel = RotateOffset(gibVel);
@@ -1054,9 +1054,9 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
         // Detect whether we're dealing with a passenger and add it as Actor instead
         if (pPassenger = dynamic_cast<Actor *>(pObject))
         {
-            pPassenger->SetRotAngle(c_HalfPI * NormalRand());
-            pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5);
-            pPassenger->SetHFlipped(PosRand() > 0.5);
+            pPassenger->SetRotAngle(c_HalfPI * RandomNormalNum());
+            pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5.0F);
+            pPassenger->SetHFlipped(RandomNum() > 0.5F);
             pPassenger->SetStatus(UNSTABLE);
             g_MovableMan.AddActor(pPassenger);
         }
@@ -1482,10 +1482,8 @@ void Actor::Update()
     if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage)
 	{
         m_PainSound.Play(m_Pos);
-		// TODO: IMPROVE AND DON'T HARDCODE
-        //m_Health -= 10;
-		float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
-		float damage = impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * 100;
+		const float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
+		const float damage = impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth;
 		if (damage > 0)
 			m_Health -= damage;
 		if (m_Status != DYING && m_Status != DEAD)
@@ -1520,7 +1518,7 @@ void Actor::Update()
 	        DropAllInventory();
 
         Material const * AuMat = g_SceneMan.GetMaterial(std::string("Gold"));
-        int goldCount = m_GoldCarried/*floorf(GetGoldCarried())*/;
+        int goldCount = m_GoldCarried/*std::floor(GetGoldCarried())*/;
         for (int i = 0; i < goldCount; i++)
         {
 /*
@@ -1528,14 +1526,14 @@ void Actor::Update()
             pixelMO->Create(AuMat.color,
                             AuMat.pixelDensity,
                             Vector(m_Pos.m_X, m_Pos.m_Y - 10),
-                            Vector(4 * NormalRand(), RangeRand(-5, -7)),
+                            Vector(4 * NormalRand(), RandomNum(-5, -7)),
                             new Atom(Vector(), AuMat, 0, AuMat.color, 2),
                             0);
 */
             MOPixel *pixelMO = new MOPixel(AuMat->GetColor(),
                                            AuMat->GetPixelDensity(),
                                            Vector(m_Pos.m_X, m_Pos.m_Y - 10),
-                                           Vector(4 * NormalRand(), RangeRand(-5, -7)),
+                                           Vector(4.0F * RandomNormalNum(), RandomNum(-5.0F, -7.0F)),
                                            new Atom(Vector(), AuMat->GetIndex(), 0, AuMat->GetColor(), 2),
                                            0);
 
@@ -1550,7 +1548,7 @@ void Actor::Update()
     ////////////////////////////////
     // Death logic
 
-    if (m_Status != DYING && m_Status != DEAD && floorf(m_Health) <= 0)
+    if (m_Status != DYING && m_Status != DEAD && std::floor(m_Health) <= 0)
     {
         m_DeathSound.Play(m_Pos);
 		m_Controller.SetDisabled(true);
@@ -1590,7 +1588,7 @@ void Actor::Update()
             {
 // TODO: improve; make this 
                 float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;
-                m_Frame = floorf((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);           
+                m_Frame = std::floor((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);           
             }
         }
     }
@@ -1821,7 +1819,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 */
-            sprintf_s(str, sizeof(str), "%.0f", m_Health);
+            std::snprintf(str, sizeof(str), "%.0f", m_Health);
 //            pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y - 35, str, GUIFont::Left);
             pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
 
@@ -1831,7 +1829,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             if (GetGoldCarried() > 0) {
                 str[0] = m_GoldPicked ? -57 : -58; str[1] = 0;
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                sprintf_s(str, sizeof(str), "%.0f oz", GetGoldCarried());
+                std::snprintf(str, sizeof(str), "%.0f oz", GetGoldCarried());
                 pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, str, GUIFont::Left);
 
                 m_HUDStack += -11;
@@ -1851,7 +1849,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             // Draw the contol pointer, if controlled and under the icon's time limit
             if (m_Controller.IsPlayetControlled() && m_NewControlTmr.GetElapsedSimTimeMS() < 1500)
             {
-                sprintf_s(str, sizeof(str), "%c", -38);
+                std::snprintf(str, sizeof(str), "%c", -38);
                 pSymbolFont->DrawAligned(&bitmapInt, cpuPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 */
@@ -1864,27 +1862,27 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     // Obstacle state
     if (m_ObstacleState == PROCEEDING)
-        sprintf_s(str, sizeof(str), "PROCEEDING");
+        std::snprintf(str, sizeof(str), "PROCEEDING");
     else if (m_ObstacleState == BACKSTEPPING)
-        sprintf_s(str, sizeof(str), "BACKSTEPPING");
+        std::snprintf(str, sizeof(str), "BACKSTEPPING");
     else if (m_ObstacleState == JUMPING)
-        sprintf_s(str, sizeof(str), "JUMPING");
+        std::snprintf(str, sizeof(str), "JUMPING");
     else if (m_ObstacleState == SOFTLANDING)
-        sprintf_s(str, sizeof(str), "SOFTLANDING");
+        std::snprintf(str, sizeof(str), "SOFTLANDING");
     else
-        sprintf_s(str, sizeof(str), "DIGPAUSING");
+        std::snprintf(str, sizeof(str), "DIGPAUSING");
     pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
     // Team Block State
     if (m_TeamBlockState == BLOCKED)
-        sprintf_s(str, sizeof(str), "BLOCKED");
+        std::snprintf(str, sizeof(str), "BLOCKED");
     else if (m_TeamBlockState == IGNORINGBLOCK)
-        sprintf_s(str, sizeof(str), "IGNORINGBLOCK");
+        std::snprintf(str, sizeof(str), "IGNORINGBLOCK");
     else if (m_TeamBlockState == FOLLOWWAIT)
-        sprintf_s(str, sizeof(str), "FOLLOWWAIT");
+        std::snprintf(str, sizeof(str), "FOLLOWWAIT");
     else
-        sprintf_s(str, sizeof(str), "NOTBLOCKED");
+        std::snprintf(str, sizeof(str), "NOTBLOCKED");
     pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 

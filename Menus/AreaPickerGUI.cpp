@@ -86,7 +86,7 @@ int AreaPickerGUI::Create(Controller *pController, string onlyOfType)
 
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.png");
         s_pCursor = cursorFile.GetAsBitmap();
     }
 
@@ -316,7 +316,7 @@ void AreaPickerGUI::Update()
 
         float enabledPos = g_FrameMan.GetPlayerScreenWidth() - m_pParentBox->GetWidth();
 
-        float toGo = floorf((enabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
+        float toGo = std::floor((enabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
         position.m_X = m_pParentBox->GetXPos() + toGo;
         occlusion.m_X = m_pParentBox->GetXPos() - g_FrameMan.GetPlayerScreenWidth();
 
@@ -331,7 +331,7 @@ void AreaPickerGUI::Update()
     {
         float disabledPos = g_FrameMan.GetPlayerScreenWidth();
 
-        float toGo = ceilf((disabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
+        float toGo = std::ceil((disabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
         m_pParentBox->SetPositionAbs(m_pParentBox->GetXPos() + toGo, 0);
         g_SceneMan.SetScreenOcclusion(Vector(m_pParentBox->GetXPos() - g_FrameMan.GetPlayerScreenWidth(), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
 

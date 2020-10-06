@@ -99,7 +99,6 @@ void MainMenuGUI::Clear()
     for (int checkbox = 0; checkbox < OPTIONSCHECKBOXCOUNT; ++checkbox)
         m_aOptionsCheckbox[checkbox] = 0;
     m_pResolutionCombo = 0;
-    m_pResolutionNoticeLabel = 0;
     m_pSoundLabel = 0;
     m_pMusicLabel = 0;
     m_pSoundSlider = 0;
@@ -150,6 +149,12 @@ void MainMenuGUI::Clear()
     m_pXBox360TypeButton = 0;
 
     m_pModManagerBackButton = 0;
+
+	m_ResolutionChangeDialog = nullptr;
+	m_ButtonConfirmResolutionChange = nullptr;
+	m_ButtonConfirmResolutionChangeFullscreen = nullptr;
+	m_ButtonCancelResolutionChange = nullptr;
+	m_ResolutionChangeToUpscaled = false;
 
 	m_MaxResX = 0;
 	m_MaxResY = 0;
@@ -233,8 +238,8 @@ int MainMenuGUI::Create(Controller *pController)
     m_aSkirmishButton[P3TEAM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP3Team"));
     m_aSkirmishButton[P4TEAM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP4Team"));
     m_pCPUTeamLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelCPUTeam"));
-
-    m_aOptionButton[RESOLUTIONMULTIPLIER] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonFullscreen"));
+	
+    m_aOptionButton[UPSCALEDFULLSCREEN] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonUpscaledFullscreen"));
     m_aOptionButton[P1NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP1NextDevice"));
     m_aOptionButton[P2NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP2NextDevice"));
     m_aOptionButton[P3NEXT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP3NextDevice"));
@@ -276,13 +281,13 @@ int MainMenuGUI::Create(Controller *pController)
 	// Set value labels
 	char s[256];
 
-	sprintf_s(s, sizeof(s), "%d", m_aDeadZoneSlider[P1DEADZONESLIDER]->GetValue());
+	std::snprintf(s, sizeof(s), "%d", m_aDeadZoneSlider[P1DEADZONESLIDER]->GetValue());
 	m_aDeadZoneLabel[P1DEADZONESLIDER]->SetText(s);
-	sprintf_s(s, sizeof(s), "%d", m_aDeadZoneSlider[P2DEADZONESLIDER]->GetValue());
+	std::snprintf(s, sizeof(s), "%d", m_aDeadZoneSlider[P2DEADZONESLIDER]->GetValue());
 	m_aDeadZoneLabel[P2DEADZONESLIDER]->SetText(s);
-	sprintf_s(s, sizeof(s), "%d", m_aDeadZoneSlider[P3DEADZONESLIDER]->GetValue());
+	std::snprintf(s, sizeof(s), "%d", m_aDeadZoneSlider[P3DEADZONESLIDER]->GetValue());
 	m_aDeadZoneLabel[P3DEADZONESLIDER]->SetText(s);
-	sprintf_s(s, sizeof(s), "%d", m_aDeadZoneSlider[P4DEADZONESLIDER]->GetValue());
+	std::snprintf(s, sizeof(s), "%d", m_aDeadZoneSlider[P4DEADZONESLIDER]->GetValue());
 	m_aDeadZoneLabel[P4DEADZONESLIDER]->SetText(s);
 
 	// Set deadzone checkboxes
@@ -353,19 +358,6 @@ int MainMenuGUI::Create(Controller *pController)
     m_pResolutionCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ComboResolution"));
     UpdateResolutionCombo();
 
-	// Set labels only when we know max resolution, as it defines whether we can switch to 2X windowed mode or not
-	if (g_FrameMan.ResolutionMultiplier() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 && g_FrameMan.GetResY() <= m_MaxResY / 2) {
-		m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 2X");
-	} else if (g_FrameMan.ResolutionMultiplier() > 1) {
-		m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 1X");
-	} else {
-		m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Unavailable");
-    }
-
-    m_pResolutionNoticeLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelResolutionNotice"));
-    // Only show when the new res doesn't mathc the current res
-    m_pResolutionNoticeLabel->SetVisible(false);
-
     m_pSoundLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelSoundVolume"));
     m_pMusicLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelMusicVolume"));
     m_pSoundSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("SliderSoundVolume"));
@@ -383,9 +375,9 @@ int MainMenuGUI::Create(Controller *pController)
     m_pConfigLabel[CONFIGSTEPS] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelConfigStep"));
     m_pConfigLabel[CONFIGINSTRUCTION] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelConfigInstruction"));
     m_pConfigLabel[CONFIGINPUT] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelConfigInput"));
-    ContentFile diagramFile("Base.rte/GUIs/Controllers/D-Pad.bmp");
+    ContentFile diagramFile("Base.rte/GUIs/Controllers/D-Pad.png");
     m_aDPadBitmaps = diagramFile.GetAsAnimation(DPADSTEPS, COLORCONV_8_TO_32);
-    diagramFile.SetDataPath("Base.rte/GUIs/Controllers/DualAnalog.bmp");
+    diagramFile.SetDataPath("Base.rte/GUIs/Controllers/DualAnalog.png");
     m_aDualAnalogBitmaps = diagramFile.GetAsAnimation(DANALOGSTEPS, COLORCONV_8_TO_32);
     m_pRecommendationBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("BoxConfigRec"));
     m_pRecommendationDiagram = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("BoxConfigRecDiagram"));
@@ -428,6 +420,23 @@ int MainMenuGUI::Create(Controller *pController)
 	m_pModManagerModsListBox = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("ModsLB"));
 	m_pModManagerScriptsListBox = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("ScriptsLB"));
 	m_pModManagerDescriptionLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelDescription"));
+
+	// Resolution change dialog
+	m_ResolutionChangeDialog = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ResolutionChangeDialog"));
+	m_ResolutionChangeDialog->CenterInParent(true, true);
+	m_ResolutionChangeDialog->SetVisible(false);
+	m_ButtonConfirmResolutionChange = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonConfirmResolutionChange"));
+	m_ButtonConfirmResolutionChange->SetVisible(false);
+	m_ButtonConfirmResolutionChangeFullscreen = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonConfirmResolutionChangeFullscreen"));
+	m_ButtonConfirmResolutionChangeFullscreen->SetVisible(false);
+	m_ButtonCancelResolutionChange = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonCancelResolutionChange"));
+
+	m_aOptionButton[FULLSCREENORWINDOWED] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonFullscreen"));
+	if (g_FrameMan.GetResX() * g_FrameMan.ResolutionMultiplier() == m_MaxResX && g_FrameMan.GetResY() * g_FrameMan.ResolutionMultiplier() == m_MaxResY) {
+		m_aOptionButton[FULLSCREENORWINDOWED]->SetText("Windowed");
+	} else {
+		m_aOptionButton[FULLSCREENORWINDOWED]->SetText("Fullscreen");
+	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// Load mod data and fill the lists
@@ -658,7 +667,7 @@ void MainMenuGUI::Update()
             m_aMainMenuButton[PLAYTUTORIAL]->SetVisible(false);
             m_aMainMenuButton[METACONTINUE]->SetVisible(false);
             // Move main menu button back to center
-            m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 280);
+            m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 320);
             m_ScreenChange = false;
         }
     
@@ -753,7 +762,7 @@ void MainMenuGUI::Update()
         {
             m_apScreenBox[OPTIONSSCREEN]->SetVisible(true);
             m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
-			m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 332);
+			m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 360);
             m_pBackToOptionsButton->SetVisible(false);
             UpdateDeviceLabels();
             m_ScreenChange = false;
@@ -792,36 +801,30 @@ void MainMenuGUI::Update()
     //////////////////////////////////////
     // EDITOR MENU SCREEN
 
-    else if (m_MenuScreen == EDITORSCREEN)
-    {
-        if (m_ScreenChange)
-        {
-            m_apScreenBox[EDITORSCREEN]->SetVisible(true);
-//            m_aEditorButton[ACTOREDITOR]->SetEnabled(false);
-            m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
-            m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 318);
-            m_ScreenChange = false;
-        }
-
-//        m_aMainMenuButton[BACKTOMAIN]->SetFocus();
-    }
+	else if (m_MenuScreen == EDITORSCREEN) {
+		if (m_ScreenChange) {
+			m_apScreenBox[EDITORSCREEN]->SetVisible(true);
+			m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
+			m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 285);
+			m_ScreenChange = false;
+		}
+	}
 
     //////////////////////////////////////
     // CREDITS MENU SCREEN
 
-    else if (m_MenuScreen == CREDITSSCREEN)
-    {
-        if (m_ScreenChange)
-        {
-            m_apScreenBox[CREDITSSCREEN]->SetVisible(true);
-            m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
-            // Set the scroll panel to be out of sight at the bottom of the credits screen box
-            m_pScrollPanel->SetPositionRel(0, m_apScreenBox[CREDITSSCREEN]->GetHeight());
-            m_ScrollTimer.Reset();
-            m_ScreenChange = false;
-        }
+	else if (m_MenuScreen == CREDITSSCREEN) {
+		if (m_ScreenChange) {
+			m_apScreenBox[CREDITSSCREEN]->SetVisible(true);
+			m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
+			m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 430);
+			// Set the scroll panel to be out of sight at the bottom of the credits screen box
+			m_pScrollPanel->SetPositionRel(0, m_apScreenBox[CREDITSSCREEN]->GetHeight());
+			m_ScrollTimer.Reset();
+			m_ScreenChange = false;
+		}
 
-        long scrollTime = 36000;
+        long scrollTime = 180000;
         float scrollProgress = (float)m_ScrollTimer.GetElapsedRealTimeMS() / (float)scrollTime;
         int scrollDist = -m_apScreenBox[CREDITSSCREEN]->GetHeight() + (-m_pScrollPanel->GetHeight());
         // Scroll the scroll panel upwards, GetYPos returns absolute coordinates
@@ -1026,29 +1029,102 @@ void MainMenuGUI::Update()
                 g_GUISound.ExitMenuSound()->Play();
             }
 
-			// Multiplier toggle button pressed
-			if (anEvent.GetControl() == m_aOptionButton[RESOLUTIONMULTIPLIER]) {
+			// Fullscreen/windowed toggle button pressed
+			if (anEvent.GetControl() == m_aOptionButton[FULLSCREENORWINDOWED]) {
 				g_GUISound.ButtonPressSound()->Play();
 
-				if (g_FrameMan.ResolutionMultiplier() > 1) {
+				if (!g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
+					if (g_ActivityMan.GetActivity()) {
+						m_ResolutionChangeToUpscaled = false;
+						m_ResolutionChangeDialog->SetVisible(true);
+						m_apScreenBox[OPTIONSSCREEN]->SetEnabled(false);
+						m_aMainMenuButton[BACKTOMAIN]->SetEnabled(false);
+						m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
+					} else {
+						HideAllScreens();
+						m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
+						g_FrameMan.SwitchToFullscreen(false);
+					}
+				} else if (g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
+					if (g_ActivityMan.GetActivity()) {
+						m_ResolutionChangeToUpscaled = false;
+						m_ResolutionChangeDialog->SetVisible(true);
+						m_apScreenBox[OPTIONSSCREEN]->SetEnabled(false);
+						m_aMainMenuButton[BACKTOMAIN]->SetEnabled(false);
+						m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
+					} else {
+						HideAllScreens();
+						m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
+						g_FrameMan.SwitchResolution(960,540);
+					}
+				} else if (!g_FrameMan.IsFullscreen() && g_FrameMan.IsUpscaledFullscreen()) {
 					g_FrameMan.SwitchResolutionMultiplier(1);
-				} else if (g_FrameMan.ResolutionMultiplier() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 && g_FrameMan.GetResY() <= m_MaxResY / 2) {
-					g_FrameMan.SwitchResolutionMultiplier(2);
 				}
+				UpdateResolutionCombo();
 			}
 
+			// Upscaled fullscreen button pressed
+			if (anEvent.GetControl() == m_aOptionButton[UPSCALEDFULLSCREEN]) {
+				g_GUISound.ButtonPressSound()->Play();
+
+				if (!g_FrameMan.IsUpscaledFullscreen()) {
+					if (g_ActivityMan.GetActivity()) {
+						m_ResolutionChangeToUpscaled = true;
+						m_ResolutionChangeDialog->SetVisible(true);
+						m_apScreenBox[OPTIONSSCREEN]->SetEnabled(false);
+						m_aMainMenuButton[BACKTOMAIN]->SetEnabled(false);
+						m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
+					} else {
+						HideAllScreens();
+						m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
+						g_FrameMan.SwitchToFullscreen(true);
+					}
+				}
+				UpdateResolutionCombo();
+			}
+
+			if (anEvent.GetControl() == m_ButtonConfirmResolutionChangeFullscreen) {
+				g_GUISound.ButtonPressSound()->Play();
+				HideAllScreens();
+				m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
+				m_aMainMenuButton[BACKTOMAIN]->SetEnabled(true);
+				m_ResolutionChangeDialog->SetVisible(false);
+				m_apScreenBox[OPTIONSSCREEN]->SetEnabled(true);
+				m_ButtonConfirmResolutionChangeFullscreen->SetVisible(false);
+				if (!m_ResolutionChangeToUpscaled && g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
+					g_FrameMan.SwitchResolution(960, 540, 1, true);
+				} else {
+					g_FrameMan.SwitchToFullscreen(m_ResolutionChangeToUpscaled ? true : false, true);
+				}
+				UpdateResolutionCombo();
+			}
+
+			if (anEvent.GetControl() == m_ButtonConfirmResolutionChange) {
+				g_GUISound.ButtonPressSound()->Play();
+				HideAllScreens();
+				m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
+				m_aMainMenuButton[BACKTOMAIN]->SetEnabled(true);
+				m_ResolutionChangeDialog->SetVisible(false);
+				m_apScreenBox[OPTIONSSCREEN]->SetEnabled(true);
+				m_ButtonConfirmResolutionChange->SetVisible(false);
+				g_FrameMan.SwitchResolution(g_FrameMan.GetNewResX(), g_FrameMan.GetNewResY(), 1, true);
+				UpdateResolutionCombo();
+			}
+			
 			// Update the label to whatever we ended up with
-			if (g_FrameMan.ResolutionMultiplier() == 1 && g_FrameMan.GetResX() <= m_MaxResX / 2 && g_FrameMan.GetResY() <= m_MaxResY / 2) {
-				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetVisible(true);
-				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 2X");
-			} else if (g_FrameMan.ResolutionMultiplier() > 1) {
-				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetVisible(true); 
-				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Go 1X");
+			if (g_FrameMan.GetResX() * g_FrameMan.ResolutionMultiplier() == m_MaxResX && g_FrameMan.GetResY() * g_FrameMan.ResolutionMultiplier() == m_MaxResY) {
+				m_aOptionButton[FULLSCREENORWINDOWED]->SetText("Windowed");
 			} else {
-				//m_aOptionButton[RESOLUTIONMULTIPLIER]->SetVisible(false);
-				m_aOptionButton[RESOLUTIONMULTIPLIER]->SetText("Unavailable");
+				m_aOptionButton[FULLSCREENORWINDOWED]->SetText("Fullscreen");
 			}
 
+			if (anEvent.GetControl() == m_ButtonCancelResolutionChange) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_ResolutionChangeDialog->SetVisible(false);
+				m_apScreenBox[OPTIONSSCREEN]->SetEnabled(true);
+				m_aMainMenuButton[BACKTOMAIN]->SetEnabled(true);
+			}
+			
 			// Return to main menu button pressed
 			if (anEvent.GetControl() == m_aMainMenuButton[BACKTOMAIN])
             {
@@ -1066,8 +1142,7 @@ void MainMenuGUI::Update()
 					g_SettingsMan.SetShowToolTips(m_aOptionsCheckbox[SHOWTOOLTIPS]->GetCheck());
 					g_SettingsMan.SetPreciseCollisions(m_aOptionsCheckbox[PRECISECOLLISIONS]->GetCheck());
 
-					Writer writer("Base.rte/Settings.ini");
-                    g_SettingsMan.Save(writer);
+					g_SettingsMan.UpdateSettingsFile();
 				}
 
                 m_MenuScreen = MAINSCREEN;
@@ -1452,8 +1527,7 @@ void MainMenuGUI::Update()
 				if (anEvent.GetControl() == m_pModManagerBackButton)
 				{
 					// Save settings
-					Writer writer("Base.rte/Settings.ini");
-					g_SettingsMan.Save(writer);
+					g_SettingsMan.UpdateSettingsFile();
 
 					// Hide all screens, the appropriate screen will reappear on next update
 					HideAllScreens();
@@ -1575,18 +1649,26 @@ void MainMenuGUI::Update()
                     GUIListPanel::Item *pResItem = m_pResolutionCombo->GetItem(m_pResolutionCombo->GetSelectedIndex());
                     if (pResItem && !pResItem->m_Name.empty())
                     {
-                        int newResX = g_FrameMan.GetResX();
-                        int newResY = g_FrameMan.GetResY();
+                        int newResX;
+                        int newResY;
                         sscanf(pResItem->m_Name.c_str(), "%4dx%4d", &newResX, &newResY);
                         // Sanity check the values and then set them as the new resolution to be switched to next time FrameMan is created
 						if (g_FrameMan.IsValidResolution(newResX, newResY)) {
-							g_FrameMan.SetNewResX(newResX / g_FrameMan.ResolutionMultiplier());
-							g_FrameMan.SetNewResY(newResY / g_FrameMan.ResolutionMultiplier());
+							g_FrameMan.SetNewResX(newResX);
+							g_FrameMan.SetNewResY(newResY);
 						}
                     }
 
-                    // Update the resolution restart notice
-                    m_pResolutionNoticeLabel->SetVisible(g_FrameMan.IsNewResSet());
+					if (g_FrameMan.IsNewResSet()) {
+						if (g_ActivityMan.GetActivity()) {
+							m_ResolutionChangeDialog->SetVisible(true);
+							m_ButtonConfirmResolutionChange->SetVisible(true);
+						} else {
+							HideAllScreens();
+							m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
+							g_FrameMan.SwitchResolution(g_FrameMan.GetNewResX(), g_FrameMan.GetNewResY(), 1);
+						}
+					}
                 }
             }
 
@@ -1621,7 +1703,7 @@ void MainMenuGUI::Update()
 				{
 					// Display value
 					char s[256];
-					sprintf_s(s, sizeof(s), "%d", m_aDeadZoneSlider[which]->GetValue());
+					std::snprintf(s, sizeof(s), "%d", m_aDeadZoneSlider[which]->GetValue());
 					m_aDeadZoneLabel[which]->SetText(s);
 
 					// Update control scheme
@@ -1728,7 +1810,7 @@ void MainMenuGUI::Draw(BITMAP *drawBitmap) const
 			float axis10 = g_UInputMan.AnalogAxisValue(0, 1, 0);
 			float axis11 = g_UInputMan.AnalogAxisValue(0, 1, 1);
 			char s[256];
-			sprintf_s(s, sizeof(s), "Aim %.1f %.1f - Stick 0 %.1f %.1f - Stick 1 %.1f %.1f", aim.GetX(), aim.GetY(), axis00, axis01, axis10, axis11);
+			std::snprintf(s, sizeof(s), "Aim %.1f %.1f - Stick 0 %.1f %.1f - Stick 1 %.1f %.1f", aim.GetX(), aim.GetY(), axis00, axis01, axis10, axis11);
 
 			GUILabel * debugLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelDebug"));
 			if (debugLabel)
@@ -1955,12 +2037,12 @@ void MainMenuGUI::UpdateTeamBoxes()
         if (m_aTeamAssignments[player] == Activity::TeamOne)
         {
             m_aSkirmishBox[player]->SetDrawColor(makecol(70, 27, 12));
-            sprintf_s(str, sizeof(str), "Player %i: %c", player + 1, -62);
+            std::snprintf(str, sizeof(str), "Player %i: %c", player + 1, -62);
         }
         else
         {
             m_aSkirmishBox[player]->SetDrawColor(makecol(47, 55, 40));
-            sprintf_s(str, sizeof(str), "Player %i: %c", player + 1, -59);
+            std::snprintf(str, sizeof(str), "Player %i: %c", player + 1, -59);
         }
         m_aSkirmishButton[player]->SetText(str);
     }
@@ -1982,12 +2064,12 @@ void MainMenuGUI::UpdateTeamBoxes()
     // See if either team is empty of human players - that becomes the CPU team
     if (team0Count == 0 || team1Count == 0)
     {
-        sprintf_s(str, sizeof(str), "CPU Team: %c", team0Count == 0 ? -62 : -59);
+        std::snprintf(str, sizeof(str), "CPU Team: %c", team0Count == 0 ? -62 : -59);
         m_CPUTeam = team0Count == 0 ? 0 : 1;
     }
     else
     {
-        sprintf_s(str, sizeof(str), "No CPU Team (both have players)");
+        std::snprintf(str, sizeof(str), "No CPU Team (both have players)");
         m_CPUTeam = -1;
     }
 
@@ -2008,11 +2090,14 @@ void MainMenuGUI::UpdateResolutionCombo() {
 	
     if (m_pResolutionCombo->GetCount() <= 0) {
 		// Get a list of modes from the fullscreen driver even though we're not using it. This is so we don't need to populate the list manually and has all the reasonable resolutions.
+#ifdef _WIN32
         GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
-
+#elif __unix__
+        GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_XWINDOWS_FULLSCREEN);
+#endif
         int width = 0;
         int height = 0;
-		char resString[256] = "";
+        std::string resString = "";
         // Index of found useful resolution (32bit)
         int foundIndex = 0;
         int currentResIndex = -1;
@@ -2036,26 +2121,26 @@ void MainMenuGUI::UpdateResolutionCombo() {
 						m_MaxResX = width;
 						m_MaxResY = height;
 					}
-					sprintf_s(resString, sizeof(resString), "%ix%i", width, height);
+					resString = std::to_string(width) + "x" + std::to_string(height);
 
 					// Add useful notation to the standardized resolutions
-					if (width == 800 && height == 600) { strcat_s(resString, sizeof(resString), " SVGA"); }
-					if (width == 1024 && height == 600) { strcat_s(resString, sizeof(resString), " WSVGA"); }
-					if (width == 1024 && height == 768) { strcat_s(resString, sizeof(resString), " XGA"); }
-					if (width == 1280 && height == 720) { strcat_s(resString, sizeof(resString), " HD"); }
-					if (width == 1280 && (height == 768 || height == 800)) { strcat_s(resString, sizeof(resString), " WXGA"); }
-					if (width == 1280 && height == 1024) { strcat_s(resString, sizeof(resString), " SXGA"); }
-					if (width == 1400 && height == 1050) { strcat_s(resString, sizeof(resString), " SXGA+"); }
-					if (width == 1600 && height == 900) { strcat_s(resString, sizeof(resString), " HD+"); }
-					if (width == 1600 && height == 1200) { strcat_s(resString, sizeof(resString), " UGA"); }
-					if (width == 1680 && height == 1050) { strcat_s(resString, sizeof(resString), " WSXGA+"); }
-					if (width == 1920 && height == 1080) { strcat_s(resString, sizeof(resString), " FHD"); }
-					if (width == 1920 && height == 1200) { strcat_s(resString, sizeof(resString), " WUXGA"); }
-					if (width == 2048 && height == 1080) { strcat_s(resString, sizeof(resString), " DCI 2K"); }
-					if (width == 2560 && height == 1440) { strcat_s(resString, sizeof(resString), " QHD"); }
-					if (width == 3200 && height == 1800) { strcat_s(resString, sizeof(resString), " QHD+"); }
-					if (width == 3840 && height == 2160) { strcat_s(resString, sizeof(resString), " 4K UHD"); }
-					if (width == 4096 && height == 2160) { strcat_s(resString, sizeof(resString), " DCI 4K"); }
+					if (width == 800 && height == 600) { resString += " SVGA"; }
+					if (width == 1024 && height == 600) { resString += " WSVGA"; }
+					if (width == 1024 && height == 768) { resString += " XGA"; }
+					if (width == 1280 && height == 720) { resString += " HD"; }
+					if (width == 1280 && (height == 768 || height == 800)) { resString += " WXGA"; }
+					if (width == 1280 && height == 1024) { resString += " SXGA"; }
+					if (width == 1400 && height == 1050) { resString += " SXGA+"; }
+					if (width == 1600 && height == 900) { resString += " HD+"; }
+					if (width == 1600 && height == 1200) { resString += " UGA"; }
+					if (width == 1680 && height == 1050) { resString += " WSXGA+"; }
+					if (width == 1920 && height == 1080) { resString += " FHD"; }
+					if (width == 1920 && height == 1200) { resString += " WUXGA"; }
+					if (width == 2048 && height == 1080) { resString += " DCI 2K"; }
+					if (width == 2560 && height == 1440) { resString += " QHD"; }
+					if (width == 3200 && height == 1800) { resString += " QHD+"; }
+					if (width == 3840 && height == 2160) { resString += " 4K UHD"; }
+					if (width == 4096 && height == 2160) { resString += " DCI 4K"; }
 
 					m_pResolutionCombo->AddItem(resString);
 
@@ -2069,10 +2154,11 @@ void MainMenuGUI::UpdateResolutionCombo() {
             }
         }
 		if (resList) { destroy_gfx_mode_list(resList); }
-		
-        // If none of the listed matched our resolution set for next start, add a 'custom' one to display as the current res
+
+		// If none of the listed matched our resolution set for next start, add a 'custom' one to display as the current res
 		if (currentResIndex < 0) {
-			sprintf_s(resString, sizeof(resString), "%ix%i Custom", g_FrameMan.GetNewResX() * g_FrameMan.ResolutionMultiplier(), g_FrameMan.GetNewResY() * g_FrameMan.ResolutionMultiplier());
+			std::string isUpscaled = (g_FrameMan.ResolutionMultiplier() > 1) ? " Upscaled" : " Custom";
+			resString = std::to_string(g_FrameMan.GetResX() / g_FrameMan.ResolutionMultiplier()) + "x" + std::to_string(g_FrameMan.GetResY() / g_FrameMan.ResolutionMultiplier()) + isUpscaled;
 			m_pResolutionCombo->AddItem(resString);
 			currentResIndex = m_pResolutionCombo->GetCount() - 1;
 		}
@@ -2091,15 +2177,15 @@ void MainMenuGUI::UpdateResolutionCombo() {
 void MainMenuGUI::UpdateVolumeSliders()
 {
     char labelText[512];
-    int volume = (int)(g_AudioMan.GetSoundsVolume() * 100);
-    sprintf_s(labelText, sizeof(labelText), "Sound Volume: %i", volume);
+    int volume = static_cast<int>(std::round(g_AudioMan.GetSoundsVolume() * 100));
+    std::snprintf(labelText, sizeof(labelText), "Sound Volume: %i", volume);
     m_pSoundLabel->SetText(labelText);
-    m_pSoundSlider->SetValue(volume);
+	m_pSoundSlider->SetValue(volume);
 
-    volume = (int)(g_AudioMan.GetMusicVolume() * 100);
-    sprintf_s(labelText, sizeof(labelText), "Music Volume: %i", volume);
+    volume = static_cast<int>(std::round(g_AudioMan.GetMusicVolume() * 100));
+    std::snprintf(labelText, sizeof(labelText), "Music Volume: %i", volume);
     m_pMusicLabel->SetText(labelText);
-    m_pMusicSlider->SetValue(volume);
+	m_pMusicSlider->SetValue(volume);
 }
 
 
@@ -2175,7 +2261,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINSTRUCTION]->SetVisible(true);
             m_pConfigLabel[CONFIGINPUT]->SetVisible(true);
-            sprintf_s(str, sizeof(str), "Keyboard Configuration - Player %i", m_ConfiguringPlayer + 1);
+            std::snprintf(str, sizeof(str), "Keyboard Configuration - Player %i", m_ConfiguringPlayer + 1);
             m_pConfigLabel[CONFIGTITLE]->SetText(str);
             m_pConfigLabel[CONFIGINSTRUCTION]->SetText("Press the key for");
             m_pConfigLabel[CONFIGSTEPS]->SetVisible(true);
@@ -2187,7 +2273,7 @@ void MainMenuGUI::UpdateConfigScreen()
         }
 		
         // Step label update
-        sprintf_s(str, sizeof(str), "Step %i / %i", m_ConfigureStep + 1, KEYBOARDSTEPS);
+        std::snprintf(str, sizeof(str), "Step %i / %i", m_ConfigureStep + 1, KEYBOARDSTEPS);
         m_pConfigLabel[CONFIGSTEPS]->SetText(str);
 
         // Move/Aim up
@@ -2422,7 +2508,7 @@ void MainMenuGUI::UpdateConfigScreen()
         {
             m_pConfigLabel[CONFIGINSTRUCTION]->SetVisible(true);
             m_pConfigLabel[CONFIGINPUT]->SetVisible(true);
-            sprintf_s(str, sizeof(str), "Mouse + Keyboard Configuration - Player %i", m_ConfiguringPlayer + 1);
+            std::snprintf(str, sizeof(str), "Mouse + Keyboard Configuration - Player %i", m_ConfiguringPlayer + 1);
             m_pConfigLabel[CONFIGTITLE]->SetText(str);
             m_pConfigLabel[CONFIGINSTRUCTION]->SetText("Press the key for");
             m_pConfigLabel[CONFIGSTEPS]->SetVisible(true);
@@ -2434,7 +2520,7 @@ void MainMenuGUI::UpdateConfigScreen()
         }
 
         // Step label update
-        sprintf_s(str, sizeof(str), "Step %i / %i", m_ConfigureStep + 1, MOUSESTEPS);
+        std::snprintf(str, sizeof(str), "Step %i / %i", m_ConfigureStep + 1, MOUSESTEPS);
         m_pConfigLabel[CONFIGSTEPS]->SetText(str);
 
         // Move up
@@ -2581,7 +2667,7 @@ void MainMenuGUI::UpdateConfigScreen()
         if (m_ConfigureStep == 0)
         {
             // Set title
-            sprintf_s(str, sizeof(str), "Choose Gamepad Type for Player %i:", m_ConfiguringPlayer + 1);
+            std::snprintf(str, sizeof(str), "Choose Gamepad Type for Player %i:", m_ConfiguringPlayer + 1);
             m_pConfigLabel[CONFIGTITLE]->SetText(str);
 
             // Hide the back button on this first step
@@ -2629,7 +2715,7 @@ void MainMenuGUI::UpdateConfigScreen()
             {
                 if (m_ScreenChange)
                 {
-                    sprintf_s(str, sizeof(str), "D-Pad Gamepad Configuration - Player %i", m_ConfiguringPlayer + 1);
+                    std::snprintf(str, sizeof(str), "D-Pad Gamepad Configuration - Player %i", m_ConfiguringPlayer + 1);
                     m_pConfigLabel[CONFIGTITLE]->SetText(str);
                     m_pConfigLabel[CONFIGRECOMMENDATION]->SetVisible(false);
                     m_pConfigLabel[CONFIGINSTRUCTION]->SetText("Press the button or move the stick for");
@@ -2641,7 +2727,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 }
 
                 // Step label update
-                sprintf_s(str, sizeof(str), "Step %i / %i", m_ConfigureStep + 1, DPADSTEPS);
+                std::snprintf(str, sizeof(str), "Step %i / %i", m_ConfigureStep + 1, DPADSTEPS);
                 m_pConfigLabel[CONFIGSTEPS]->SetText(str);
 
                 // Diagram update
@@ -2795,7 +2881,7 @@ void MainMenuGUI::UpdateConfigScreen()
             {
                 if (m_ScreenChange)
                 {
-                    sprintf_s(str, sizeof(str), "Dual Analog Gamepad Configuration - Player %i", m_ConfiguringPlayer + 1);
+                    std::snprintf(str, sizeof(str), "Dual Analog Gamepad Configuration - Player %i", m_ConfiguringPlayer + 1);
                     m_pConfigLabel[CONFIGTITLE]->SetText(str);
                     m_pConfigLabel[CONFIGRECOMMENDATION]->SetVisible(false);
                     m_pConfigLabel[CONFIGINSTRUCTION]->SetText("Press the button or move the stick for");
@@ -2807,7 +2893,7 @@ void MainMenuGUI::UpdateConfigScreen()
                 }
 
                 // Step label update
-                sprintf_s(str, sizeof(str), "Step %i / %i", m_ConfigureStep + 1, DANALOGSTEPS);
+                std::snprintf(str, sizeof(str), "Step %i / %i", m_ConfigureStep + 1, DANALOGSTEPS);
                 m_pConfigLabel[CONFIGSTEPS]->SetText(str);
 
                 // Diagram update

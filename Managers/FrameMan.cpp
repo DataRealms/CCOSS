@@ -14,6 +14,10 @@
 #include "GUI/AllegroBitmap.h"
 #include "GUI/AllegroScreen.h"
 
+#ifdef __unix__
+#include <X11/Xlib.h>
+#endif
+
 extern bool g_InActivity;
 
 namespace RTE {
@@ -22,43 +26,51 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/// <summary>
-	/// Callback function for the allegro set_display_switch_callback. It will be called when focus is switched away from the game window. 
-	/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
-	/// </summary>
-	void DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true); }
+	void FrameMan::DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/// <summary>
-	/// Callback function for the allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
-	/// </summary>
-	void DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
+	void FrameMan::DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Clear() {
 		m_GfxDriver = GFX_AUTODETECT_WINDOWED;
-		m_ScreenResX = GetSystemMetrics(SM_CXSCREEN);
-		m_ScreenResY = GetSystemMetrics(SM_CYSCREEN);
+		m_DisableMultiScreenResolutionValidation = false;
+#ifdef _WIN32
+		m_NumScreens = GetSystemMetrics(SM_CMONITORS);
+		m_ScreenResX = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		m_ScreenResY = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+		m_PrimaryScreenResX = GetSystemMetrics(SM_CXSCREEN);
+		m_PrimaryScreenResY = GetSystemMetrics(SM_CYSCREEN);
+#elif __unix__
+		m_NumScreens = 1;
+		Display *dpy = XOpenDisplay(NULL);
+		XWindowAttributes ra;
+		XGetWindowAttributes(dpy, DefaultRootWindow(dpy), &ra);
+		m_ScreenResX = m_PrimaryScreenResX = ra.width;
+		m_ScreenResY = m_PrimaryScreenResY = ra.height;
+		XCloseDisplay(dpy);
+#endif
 		m_ResX = 960;
 		m_ResY = 540;
 		m_NewResX = m_ResX;
 		m_NewResY = m_ResY;
+		m_ResChanged = false;
 		m_Fullscreen = false;
 		m_ResMultiplier = 1;
 		m_HSplit = false;
 		m_VSplit = false;
 		m_HSplitOverride = false;
 		m_VSplitOverride = false;
-		m_PlayerScreen = 0;
+		m_PlayerScreen = nullptr;
 		m_PlayerScreenWidth = 0;
 		m_PlayerScreenHeight = 0;
-		m_ScreenDumpBuffer = 0;
-		m_WorldDumpBuffer = 0;
-		m_ScenePreviewDumpGradient = 0;
-		m_BackBuffer8 = 0;
-		m_BackBuffer32 = 0;
+		m_ScreenDumpBuffer = nullptr;
+		m_WorldDumpBuffer = nullptr;
+		m_ScenePreviewDumpGradient = nullptr;
+		m_BackBuffer8 = nullptr;
+		m_BackBuffer32 = nullptr;
 		m_DrawNetworkBackBuffer = false;
 		m_StoreNetworkBackBuffer = false;
 		m_NetworkFrameCurrent = 0;
@@ -66,10 +78,14 @@ namespace RTE {
 		m_PaletteFile.Reset();
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
-		m_GUIScreen = 0;
-		m_LargeFont = 0;
-		m_SmallFont = 0;
+		m_GUIScreen = nullptr;
+		m_LargeFont = nullptr;
+		m_SmallFont = nullptr;
 		m_TextBlinkTimer.Reset();
+
+		m_TempBackBuffer8 = nullptr;
+		m_TempBackBuffer32 = nullptr;
+		m_TempPlayerScreen = nullptr;
 
 		for (short screenCount = 0; screenCount < c_MaxScreenCount; ++screenCount) {
 			m_ScreenText[screenCount].clear();
@@ -82,10 +98,15 @@ namespace RTE {
 			m_FlashTimer[screenCount].Reset();
 
 			for (short bufferFrame = 0; bufferFrame < 2; bufferFrame++) {
-				m_NetworkBackBufferIntermediate8[bufferFrame][screenCount] = 0;
-				m_NetworkBackBufferFinal8[bufferFrame][screenCount] = 0;
-				m_NetworkBackBufferIntermediateGUI8[bufferFrame][screenCount] = 0;
-				m_NetworkBackBufferFinalGUI8[bufferFrame][screenCount] = 0;
+				m_NetworkBackBufferIntermediate8[bufferFrame][screenCount] = nullptr;
+				m_NetworkBackBufferFinal8[bufferFrame][screenCount] = nullptr;
+				m_NetworkBackBufferIntermediateGUI8[bufferFrame][screenCount] = nullptr;
+				m_NetworkBackBufferFinalGUI8[bufferFrame][screenCount] = nullptr;
+
+				m_TempNetworkBackBufferIntermediate8[bufferFrame][screenCount] = nullptr;
+				m_TempNetworkBackBufferIntermediateGUI8[bufferFrame][screenCount] = nullptr;
+				m_TempNetworkBackBufferFinal8[bufferFrame][screenCount] = nullptr;
+				m_TempNetworkBackBufferFinalGUI8[bufferFrame][screenCount] = nullptr;
 			}
 		}
 	}
@@ -93,6 +114,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::SetGraphicsDriver() {
+#ifdef _WIN32
 		if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) {
 			m_GfxDriver = GFX_DIRECTX_OVL;
 			g_ConsoleMan.PrintString("SYSTEM: Using overlay DirectX windowed driver!");
@@ -105,38 +127,104 @@ namespace RTE {
 		} else {
 			m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		}
+#else
+		m_GfxDriver= (m_ResX * m_ResMultiplier == m_ScreenResX && m_ResY * m_ResMultiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::ValidateResolution(unsigned short &resX, unsigned short &resY) {
-		if (resX * m_ResMultiplier > m_ScreenResX || resY * m_ResMultiplier > m_ScreenResY) {
+	void FrameMan::ValidateResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier) {
+		if (resX * resMultiplier > m_ScreenResX || resY * resMultiplier > m_ScreenResY) {
 			allegro_message("Resolution too high to fit display, overriding to fit!");
-			resX = m_NewResX = m_ScreenResX / m_ResMultiplier;
-			resY = m_NewResY = m_ScreenResY / m_ResMultiplier;
-		} else if (resX * m_ResMultiplier == 1366 && resY * m_ResMultiplier == 768) {
+			resX = m_NewResX = m_ScreenResX / resMultiplier;
+			resY = m_NewResY = m_ScreenResY / resMultiplier;
+		} else if (resX * resMultiplier == 1366 && resY * resMultiplier == 768) {
 			allegro_message("Unfortunately, 1366x768 resolution is not supported by Cortex Command's graphics API. 1360x768 will be used instead!");
-			resX = m_NewResX = 1360 / m_ResMultiplier;
-			resY = m_NewResY = 768 / m_ResMultiplier;
-		} else if ((resX * m_ResMultiplier) % 4 > 0) {
+			resX = m_NewResX = 1360 / resMultiplier;
+			resY = m_NewResY = 768 / resMultiplier;
+		} else if ((resX * resMultiplier) % 4 > 0) {
 			allegro_message("Resolution width that is not divisible by 4 is not supported!\nOverriding to closest valid width!");
 			resX = m_NewResX = std::floor(resX / 4) * 4;
-		} else {
+		}
+
+		if (m_NumScreens == 1) {
 			float currentAspectRatio = static_cast<float>(resX) / static_cast<float>(resY);
 			if (currentAspectRatio < 1 || currentAspectRatio > 4) {
 				allegro_message("Abnormal aspect ratio detected! Reverting to defaults!");
 				resX = m_NewResX = 960;
 				resY = m_NewResY = 540;
-				m_ResMultiplier = m_NewResMultiplier = 1;
+				resMultiplier = m_ResMultiplier = m_NewResMultiplier = 1;
+			}
+		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 1 && m_NumScreens < 4) {
+			if (resX * resMultiplier > m_PrimaryScreenResX || resY * resMultiplier > m_PrimaryScreenResY) { ValidateMultiScreenResolution(resX, resY, resMultiplier); }
+		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 3) {
+			allegro_message("Number of screens is too damn high! Overriding to defaults!\n\nPlease disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
+			resX = m_NewResX = 960;
+			resY = m_NewResY = 540;
+			resMultiplier = m_ResMultiplier = m_NewResMultiplier = 1;
+		}
+
+		g_SettingsMan.UpdateSettingsFile();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::ValidateMultiScreenResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier) {
+#ifdef _WIN32
+		POINT pointOnScreen;
+		HMONITOR screenHandle;
+		MONITORINFO screenInfo;
+
+		pointOnScreen = { -1 , 0 };
+		screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
+		if (screenHandle != NULL) {
+			const char *leftNotPrimaryMessage = {
+				"Due to limitations in Cortex Command's graphics API it is impossible to properly run multi-screen mode when the left-most screen is not set as primary.\n"
+				"Please configure your left-most screen to be primary to utilize all screens, as the game window will extend right but will not extend left, leaving any screen left of the primary unused.\n\n"
+				"You can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!\n\nResolution settings will be overridden to fit primary screen only!"
+			};
+			allegro_message(leftNotPrimaryMessage);
+			resX = m_NewResX = m_PrimaryScreenResX / resMultiplier;
+			resY = m_NewResY = m_PrimaryScreenResY / resMultiplier;
+			return;
+		}
+
+		pointOnScreen = { m_PrimaryScreenResX + 1 , 0 };
+		screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
+		screenInfo = { sizeof(MONITORINFO) };
+		GetMonitorInfo(screenHandle, &screenInfo);
+		unsigned short centerScreenResY = screenInfo.rcMonitor.bottom;
+
+		if (centerScreenResY != m_PrimaryScreenResY) {
+			allegro_message("Center screen height is not identical to primary screen, overriding to fit primary screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
+			resX = m_NewResX = m_PrimaryScreenResX / resMultiplier;
+			resY = m_NewResY = m_PrimaryScreenResY / resMultiplier;
+			return;
+		}
+
+		if (m_NumScreens == 3) {
+			pointOnScreen = { screenInfo.rcMonitor.right + 1 , 0 };
+			screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
+			screenInfo = { sizeof(MONITORINFO) };
+			GetMonitorInfo(screenHandle, &screenInfo);
+			unsigned short rightScreenResY = screenInfo.rcMonitor.bottom;
+
+			if (rightScreenResY != m_PrimaryScreenResY) {
+				allegro_message("Right screen height is not identical to primary screen, overriding to extend to center screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
+				resX = m_NewResX = (m_ScreenResX - (screenInfo.rcMonitor.right - screenInfo.rcMonitor.left)) / resMultiplier;
+				resY = m_NewResY = m_PrimaryScreenResY / resMultiplier;
+				return;
 			}
 		}
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::Create() {
 		SetGraphicsDriver();
-		ValidateResolution(m_ResX, m_ResY);
+		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
 		set_color_depth(m_BPP);
 
 		if (set_gfx_mode(m_GfxDriver, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, 0, 0) != 0) {
@@ -169,15 +257,15 @@ namespace RTE {
 		// Create transparency color table
 		PALETTE ccPalette;
 		get_palette(ccPalette);
-		create_trans_table(&m_LessTransTable, ccPalette, 192, 192, 192, 0);
-		create_trans_table(&m_HalfTransTable, ccPalette, 128, 128, 128, 0);
-		create_trans_table(&m_MoreTransTable, ccPalette, 64, 64, 64, 0);
+		create_trans_table(&m_LessTransTable, ccPalette, 192, 192, 192, nullptr);
+		create_trans_table(&m_HalfTransTable, ccPalette, 128, 128, 128, nullptr);
+		create_trans_table(&m_MoreTransTable, ccPalette, 64, 64, 64, nullptr);
 		// Set the one Allegro currently uses
 		color_map = &m_HalfTransTable;
 
 		CreateBackBuffers();
 
-		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.bmp");
+		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
 		m_ScenePreviewDumpGradient = scenePreviewGradientFile.LoadAndReleaseBitmap(COLORCONV_8_TO_32);
 
 		return 0;
@@ -199,11 +287,13 @@ namespace RTE {
 			for (short f = 0; f < 2; f++) {
 				m_NetworkBackBufferIntermediate8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 				clear_to_color(m_NetworkBackBufferIntermediate8[f][i], m_BlackColor);
+
 				m_NetworkBackBufferIntermediateGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 				clear_to_color(m_NetworkBackBufferIntermediateGUI8[f][i], g_MaskColor);
 
 				m_NetworkBackBufferFinal8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 				clear_to_color(m_NetworkBackBufferFinal8[f][i], m_BlackColor);
+
 				m_NetworkBackBufferFinalGUI8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 				clear_to_color(m_NetworkBackBufferFinalGUI8[f][i], g_MaskColor);
 			}
@@ -227,6 +317,25 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void FrameMan::RecreateBackBuffers() {
+		m_TempBackBuffer8 = m_BackBuffer8;
+		m_TempBackBuffer32 = m_BackBuffer32;
+
+		for (short i = 0; i < c_MaxScreenCount; i++) {
+			for (short f = 0; f < 2; f++) {
+				m_TempNetworkBackBufferIntermediate8[f][i] = m_NetworkBackBufferIntermediate8[f][i];
+				m_TempNetworkBackBufferIntermediateGUI8[f][i] = m_NetworkBackBufferIntermediateGUI8[f][i];
+				m_TempNetworkBackBufferFinal8[f][i] = m_NetworkBackBufferFinal8[f][i];
+				m_TempNetworkBackBufferFinalGUI8[f][i] = m_NetworkBackBufferFinalGUI8[f][i];
+			}
+		}
+		if (m_HSplit || m_VSplit) { m_TempPlayerScreen = m_PlayerScreen; }
+
+		CreateBackBuffers();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int FrameMan::ReadProperty(std::string propName, Reader &reader) {
 		if (propName == "ResolutionX") {
 			reader >> m_ResX;
@@ -236,6 +345,8 @@ namespace RTE {
 			m_NewResY = m_ResY;
 		} else if (propName == "ResolutionMultiplier") {
 			reader >> m_ResMultiplier;
+		} else if (propName == "DisableMultiScreenResolutionValidation") {
+			reader >> m_DisableMultiScreenResolutionValidation;
 		} else if (propName == "HSplitScreen") {
 			reader >> m_HSplitOverride;
 		} else if (propName == "VSplitScreen") {
@@ -257,6 +368,10 @@ namespace RTE {
 		writer << m_ResX;
 		writer.NewProperty("ResolutionY");
 		writer << m_ResY;
+		writer.NewProperty("ResolutionMultiplier");
+		writer << m_ResMultiplier;
+		writer.NewProperty("DisableMultiScreenResolutionValidation");
+		writer << m_DisableMultiScreenResolutionValidation;
 		writer.NewProperty("HSplitScreen");
 		writer << m_HSplitOverride;
 		writer.NewProperty("VSplitScreen");
@@ -271,6 +386,12 @@ namespace RTE {
 
 	void FrameMan::Destroy() {
 		destroy_bitmap(m_BackBuffer8);
+		destroy_bitmap(m_BackBuffer32);
+		destroy_bitmap(m_PlayerScreen);
+		destroy_bitmap(m_ScreenDumpBuffer);
+		destroy_bitmap(m_WorldDumpBuffer);
+		destroy_bitmap(m_ScenePreviewDumpGradient);
+
 		for (short i = 0; i < c_MaxScreenCount; i++) {
 			for (short f = 0; f < 2; f++) {
 				destroy_bitmap(m_NetworkBackBufferIntermediate8[f][i]);
@@ -279,16 +400,29 @@ namespace RTE {
 				destroy_bitmap(m_NetworkBackBufferFinalGUI8[f][i]);
 			}
 		}
-		destroy_bitmap(m_BackBuffer32);
-		destroy_bitmap(m_PlayerScreen);
-		destroy_bitmap(m_ScreenDumpBuffer);
-		destroy_bitmap(m_WorldDumpBuffer);
-		destroy_bitmap(m_ScenePreviewDumpGradient);
+
 		delete m_GUIScreen;
 		delete m_LargeFont;
 		delete m_SmallFont;
 
 		Clear();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::DestroyTempBackBuffers() {
+		destroy_bitmap(m_TempBackBuffer8);
+		destroy_bitmap(m_TempBackBuffer32);
+		destroy_bitmap(m_TempPlayerScreen);
+
+		for (short i = 0; i < c_MaxScreenCount; i++) {
+			for (short f = 0; f < 2; f++) {
+				destroy_bitmap(m_TempNetworkBackBufferIntermediate8[f][i]);
+				destroy_bitmap(m_TempNetworkBackBufferIntermediateGUI8[f][i]);
+				destroy_bitmap(m_TempNetworkBackBufferFinal8[f][i]);
+				destroy_bitmap(m_TempNetworkBackBufferFinalGUI8[f][i]);
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -324,10 +458,9 @@ namespace RTE {
 			allegro_message("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!");
 			return -1;
 		}
-
-		// Save the palette so we can re-set it after the switch.
-		PALETTE pal;
-		get_palette(pal);
+#ifdef __unix__
+		m_GfxDriver= (m_ResX * multiplier == m_ScreenResX && m_ResY * multiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+#endif
 
 		// Need to save these first for recovery attempts to work (screen might be 0)
 		unsigned short resX = m_ResX;
@@ -345,19 +478,90 @@ namespace RTE {
 				return 1;
 			}
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new windowed mode multiplier, reverted back to previous setting!");
-			set_palette(pal);
+			set_palette(m_Palette);
 			return 1;
 		}
-		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
+		set_palette(m_Palette);
 		m_ResMultiplier = multiplier;
 
-		Writer settingsWriter("Base.rte/Settings.ini");
-		g_SettingsMan.Save(settingsWriter);
-		settingsWriter.Destroy();
-
-		set_palette(pal);
+		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
+		g_SettingsMan.UpdateSettingsFile();
 
 		FlipFrameBuffers();
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::SwitchToFullscreen(bool upscaled, bool endActivity) {
+		if ((upscaled && IsUpscaledFullscreen()) || (!upscaled && IsFullscreen())) {
+			return;
+		}
+		unsigned short resX = m_ScreenResX;
+		unsigned short resY = m_ScreenResY;
+		unsigned short resMultiplier = 1;
+
+		if (upscaled) {
+			if (!IsFullscreen() && m_ResMultiplier == 1 && m_ResX == m_ScreenResX / 2 && m_ResY == m_ScreenResY / 2) {
+				SwitchResolutionMultiplier(2);
+				return;
+			}
+			resX /= 2;
+			resY /= 2;
+			resMultiplier = 2;
+		}	
+		SwitchResolution(resX, resY, resMultiplier, endActivity);
+	}
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int FrameMan::SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier, bool endActivity) {
+		if (!IsValidResolution(newResX, newResY) || newResX <= 0 || newResX > m_ScreenResX || newResY <= 0 || newResY > m_ScreenResY) {
+			return -1;
+		}
+
+#ifdef __unix__
+		m_GfxDriver= (newResX * newMultiplier == m_ScreenResX && newResY * newMultiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+#endif
+
+		// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
+		if (g_ActivityMan.GetActivity()) {
+			g_ActivityMan.EndActivity();
+		}
+		
+		// Need to save these first for recovery attempts to work (screen might be 0)
+		unsigned short resX = m_ResX;
+		unsigned short resY = m_ResY;
+		unsigned short resMultiplier = m_ResMultiplier;
+
+		ValidateResolution(newResX, newResY, newMultiplier);
+
+		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations.
+		set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
+
+		ClearBackBuffer8();
+		ClearBackBuffer32();
+
+		if (set_gfx_mode(m_GfxDriver, newResX * newMultiplier, newResY * newMultiplier, 0, 0) != 0) {
+			if (set_gfx_mode(m_GfxDriver, resX * resMultiplier, resY * resMultiplier, 0, 0) != 0) {
+				allegro_message("Unable to set back to previous resolution because: %s!", allegro_error);
+				return 1;
+			}
+			g_ConsoleMan.PrintString("ERROR: Failed to switch to new resolution, reverted back to previous setting!");
+			set_palette(m_Palette);
+			return 1;
+		}
+		m_ResX = m_NewResX = newResX;
+		m_ResY = m_NewResY = newResY;
+		m_ResMultiplier = m_NewResMultiplier = newMultiplier;
+		
+		RecreateBackBuffers();
+		set_palette(m_Palette);
+
+		g_ConsoleMan.PrintString("SYSTEM: Switched to different resolution.");
+		g_SettingsMan.UpdateSettingsFile();
+
+		m_ResChanged = true;
 		return 0;
 	}
 
@@ -473,7 +677,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::FlipFrameBuffers() {
+	void FrameMan::FlipFrameBuffers() const {
 		if (m_ResMultiplier > 1) {
 			stretch_blit(m_BackBuffer32, screen, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h, 0, 0, SCREEN_W, SCREEN_H);
 		} else {
@@ -522,15 +726,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool FrameMan::LoadPalette(const std::string &palettePath) {
-		PALETTE newPalette;
-		BITMAP *tempBitmap = load_bitmap(palettePath.c_str(), newPalette);
+		BITMAP *tempBitmap = load_bitmap(palettePath.c_str(), m_Palette);
 		RTEAssert(tempBitmap, ("Failed to load palette from bitmap with following path:\n\n" + palettePath).c_str());
 
-		set_palette(newPalette);
+		set_palette(m_Palette);
 
 		// Update what black is now with the loaded palette
-		m_BlackColor = bestfit_color(newPalette, 0, 0, 0);
-		m_AlmostBlackColor = bestfit_color(newPalette, 5, 5, 5);
+		m_BlackColor = bestfit_color(m_Palette, 0, 0, 0);
+		m_AlmostBlackColor = bestfit_color(m_Palette, 5, 5, 5);
 
 		destroy_bitmap(tempBitmap);
 
@@ -543,8 +746,7 @@ namespace RTE {
 		if ((modeToSave == WorldDump || modeToSave == ScenePreviewDump) && !g_ActivityMan.ActivityRunning()) {
 			return 0;
 		}
-
-		if (nameBase == 0 || strlen(nameBase) <= 0) {
+		if (nameBase == nullptr || strlen(nameBase) <= 0) {
 			return -1;
 		}
 
@@ -554,41 +756,39 @@ namespace RTE {
 
 		while (fileNumber < maxFileTrys) {
 			// Check for the file namebase001.bmp; if it exists, try 002, etc.
-			sprintf_s(fullFileName, sizeof(fullFileName), "%s/%s%03i.bmp", c_ScreenshotDirectory, nameBase, fileNumber++);
-			if (!std::experimental::filesystem::exists(fullFileName)) {
+			char *fileExtension = { (modeToSave == SaveBitmapMode::SingleBitmap || modeToSave == SaveBitmapMode::ScenePreviewDump) ? ".bmp" : ".png" };
+			std::snprintf(fullFileName, sizeof(fullFileName), "%s/%s%03i%s", c_ScreenshotDirectory, nameBase, fileNumber++, fileExtension);
+			if (!std::filesystem::exists(fullFileName)) {
 				break;
 			}
 		}
 
-		PALETTE palette;
-		get_palette(palette);
+		int worldDumpBufferBitDepth;
 
 		switch (modeToSave) {
 			case SingleBitmap:
-				if (bitmapToSave) {
-					save_bmp(fullFileName, bitmapToSave, palette);
+				if (bitmapToSave && save_bmp(fullFileName, bitmapToSave, m_Palette) == 0) {
 					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(fullFileName));
 					return 0;
 				}
 				break;
 			case ScreenDump:
 				if (screen) {
-					if (!m_ScreenDumpBuffer) { m_ScreenDumpBuffer = create_bitmap(screen->w, screen->h); }
-
+					if (!m_ScreenDumpBuffer) { m_ScreenDumpBuffer = create_bitmap_ex(24, screen->w, screen->h); }
 					blit(screen, m_ScreenDumpBuffer, 0, 0, 0, 0, screen->w, screen->h);
-					save_bmp(fullFileName, m_ScreenDumpBuffer, palette);
-					g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
-					return 0;
+					// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
+					if (save_png(fullFileName, m_ScreenDumpBuffer, nullptr) == 0) {
+						g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
+						return 0;
+					}		
 				}
 				break;
 			case ScenePreviewDump:
 			case WorldDump:
-				if (!m_WorldDumpBuffer) { m_WorldDumpBuffer = create_bitmap(g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight()); }
-
-				// Recreate the buffer if the dimensions don't match the current scene.
-				if (m_WorldDumpBuffer->w != g_SceneMan.GetSceneWidth() || m_WorldDumpBuffer->h != g_SceneMan.GetSceneHeight()) {
-					destroy_bitmap(m_WorldDumpBuffer);
-					m_WorldDumpBuffer = create_bitmap(g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
+				worldDumpBufferBitDepth = (modeToSave == SaveBitmapMode::ScenePreviewDump) ? 32 : 24;
+				if (!m_WorldDumpBuffer || bitmap_color_depth(m_WorldDumpBuffer) != worldDumpBufferBitDepth || (m_WorldDumpBuffer->w != g_SceneMan.GetSceneWidth() || m_WorldDumpBuffer->h != g_SceneMan.GetSceneHeight())) {
+					if (m_WorldDumpBuffer) { destroy_bitmap(m_WorldDumpBuffer); }
+					m_WorldDumpBuffer = create_bitmap_ex(worldDumpBufferBitDepth, g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
 				}
 				if (modeToSave == ScenePreviewDump) {
 					DrawWorldDump(true);
@@ -597,17 +797,19 @@ namespace RTE {
 					blit(m_ScenePreviewDumpGradient, scenePreviewDumpBuffer, 0, 0, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 					masked_stretch_blit(m_WorldDumpBuffer, scenePreviewDumpBuffer, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 
-					save_bmp(fullFileName, scenePreviewDumpBuffer, palette);
-					destroy_bitmap(scenePreviewDumpBuffer);
-
-					g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + std::string(fullFileName));
-					return 0;
+					if (SaveIndexedBitmap(fullFileName, scenePreviewDumpBuffer, m_Palette) == 0) {
+						g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + std::string(fullFileName));
+						destroy_bitmap(scenePreviewDumpBuffer);
+						return 0;
+					}
 				} else {
 					DrawWorldDump();
-					save_bmp(fullFileName, m_WorldDumpBuffer, palette);
-					g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + std::string(fullFileName));
-					return 0;
+					if (save_png(fullFileName, m_WorldDumpBuffer, nullptr) == 0) {
+						g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + std::string(fullFileName));
+						return 0;
+					}
 				}
+				break;
 			default:
 				g_ConsoleMan.PrintString("ERROR: Wrong bitmap save mode passed in, no bitmap was saved!");
 				return -1;
@@ -618,7 +820,30 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor, unsigned short skip, unsigned short skipStart, bool shortestWrap, bool drawDot, BITMAP *dot) {
+	int FrameMan::SaveIndexedBitmap(char *fileName, BITMAP *bitmapToSave, PALETTE paletteToIndexWith) const {
+		save_bmp(fileName, bitmapToSave, paletteToIndexWith);
+
+		int lastColorConversionMode = get_color_conversion();
+		set_color_conversion(COLORCONV_REDUCE_TO_256);
+		// nullptr for the PALETTE parameter here because we don't need the bad palette from it and don't want it to overwrite anything.
+		BITMAP *tempLoadBitmap = load_bitmap(fileName, nullptr);
+		std::remove(fileName);
+
+		BITMAP *tempConvertingBitmap = create_bitmap_ex(8, bitmapToSave->w, bitmapToSave->h);
+		blit(tempLoadBitmap, tempConvertingBitmap, 0, 0, 0, 0, tempConvertingBitmap->w, tempConvertingBitmap->h);
+
+		int saveResult = save_bmp(fileName, tempConvertingBitmap, m_Palette);
+
+		set_color_conversion(lastColorConversionMode);
+		destroy_bitmap(tempLoadBitmap);
+		destroy_bitmap(tempConvertingBitmap);
+
+		return saveResult;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int FrameMan::SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor, unsigned short skip, unsigned short skipStart, bool shortestWrap, bool drawDot, BITMAP *dot) const {
 		RTEAssert(bitmap, "Trying to draw line to null Bitmap");
 		if (drawDot) { RTEAssert(dot, "Trying to draw line of dots without specifying a dot Bitmap"); }
 
@@ -641,17 +866,17 @@ namespace RTE {
 		// Just make the alt the same color as the main one if no one was specified
 		if (altColor == 0) { altColor = color; }
 
-		intPos[X] = floorf(start.m_X);
-		intPos[Y] = floorf(start.m_Y);
+		intPos[X] = start.GetFloorIntX();
+		intPos[Y] = start.GetFloorIntY();
 
 		// Wrap line around the scene if it makes it shorter
 		if (shortestWrap) {
 			Vector deltaVec = g_SceneMan.ShortestDistance(start, end, false);
-			delta[X] = floorf(deltaVec.m_X);
-			delta[Y] = floorf(deltaVec.m_Y);
+			delta[X] = deltaVec.GetFloorIntX();
+			delta[Y] = deltaVec.GetFloorIntY();
 		} else {
-			delta[X] = floorf(end.m_X) - intPos[X];
-			delta[Y] = floorf(end.m_Y) - intPos[Y];
+			delta[X] = end.GetFloorIntX() - intPos[X];
+			delta[Y] = end.GetFloorIntY() - intPos[Y];
 		}
 		if (delta[X] == 0 && delta[Y] == 0) {
 			return 0;
@@ -720,28 +945,25 @@ namespace RTE {
 	GUIFont * FrameMan::GetFont(bool isSmall) {
 		if (!m_GUIScreen) { m_GUIScreen = new AllegroScreen(m_BackBuffer8); }
 
-		switch (isSmall) {
-			case false:
-				if (!m_LargeFont) {
-					m_LargeFont = new GUIFont("FatFont");
-					m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.bmp");
-				}
-				return m_LargeFont;
-			case true:
-				if (!m_SmallFont) {
-					m_SmallFont = new GUIFont("SmallFont");
-					m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.bmp");
-				}
-				return m_SmallFont;
+		if (isSmall) {
+			if (!m_SmallFont) {
+				m_SmallFont = new GUIFont("SmallFont");
+				m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.png");
+			}
+			return m_SmallFont;
+		}	
+		if (!m_LargeFont) {
+			m_LargeFont = new GUIFont("FatFont");
+			m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.png");
 		}
-		return 0;
+		return m_LargeFont;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::UpdateScreenOffsetForSplitScreen(short playerScreen, Vector &screenOffset) {
+	void FrameMan::UpdateScreenOffsetForSplitScreen(short playerScreen, Vector &screenOffset) const {
 		switch (playerScreen) {
-			case 1:
+			case Players::PlayerTwo:
 				// If both splits, or just VSplit, then in upper right quadrant
 				if ((m_VSplit && !m_HSplit) || (m_VSplit && m_HSplit)) {
 					screenOffset.SetIntXY(GetResX() / 2, 0);
@@ -750,11 +972,11 @@ namespace RTE {
 					screenOffset.SetIntXY(0, GetResY() / 2);
 				}
 				break;
-			case 2:
+			case Players::PlayerThree:
 				// Always lower left quadrant
 				screenOffset.SetIntXY(0, GetResY() / 2);
 				break;
-			case 3:
+			case Players::PlayerFour:
 				// Always lower right quadrant
 				screenOffset.SetIntXY(GetResX() / 2, GetResY() / 2);
 				break;
@@ -914,15 +1136,15 @@ namespace RTE {
 
 				if (m_TextCentered[playerScreen]) { textPosY = (bufferOrScreenHeight / 2) - 52; }
 
-				int screenOcclusionOffsetX = g_SceneMan.GetScreenOcclusion(playerScreen).m_X;
+				int screenOcclusionOffsetX = g_SceneMan.GetScreenOcclusion(playerScreen).GetRoundIntX();
 				// If there's really no room to offset the text into, then don't
 				if (GetPlayerScreenWidth() <= GetResX() / 2) { screenOcclusionOffsetX = 0; }
 
 				// Draw text and handle blinking by turning on and off extra surrounding characters. Text is always drawn to keep it readable.
 				if (m_TextBlinking[playerScreen] && m_TextBlinkTimer.AlternateReal(m_TextBlinking[playerScreen])) {
-					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, (">>> " + m_ScreenText[playerScreen] + " <<<").c_str(), GUIFont::Centre);
+					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, ">>> " + m_ScreenText[playerScreen] + " <<<", GUIFont::Centre);
 				} else {
-					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, m_ScreenText[playerScreen].c_str(), GUIFont::Centre);
+					GetLargeFont()->DrawAligned(&playerGUIBitmap, (bufferOrScreenWidth + screenOcclusionOffsetX) / 2, textPosY, m_ScreenText[playerScreen], GUIFont::Centre);
 				}
 				textPosY += 12;
 			}
@@ -951,7 +1173,7 @@ namespace RTE {
 	void FrameMan::DrawScreenFlash(short playerScreen, BITMAP *playerGUIBitmap) {
 		if (m_FlashScreenColor[playerScreen] != -1) {
 			// If set to flash for a period of time, first be solid and then start flashing slower
-			float timeTillLimit = m_FlashTimer[playerScreen].LeftTillRealTimeLimitMS();
+			double timeTillLimit = m_FlashTimer[playerScreen].LeftTillRealTimeLimitMS();
 
 			if (timeTillLimit < 10 || m_FlashTimer[playerScreen].AlternateReal(50)) {
 				if (m_FlashedLastFrame[playerScreen]) {
@@ -967,15 +1189,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::DrawWorldDump(bool drawForScenePreview) {
+	void FrameMan::DrawWorldDump(bool drawForScenePreview) const {
 		float worldBitmapWidth = static_cast<float>(m_WorldDumpBuffer->w);
 		float worldBitmapHeight = static_cast<float>(m_WorldDumpBuffer->h);
 
 		// Draw sky gradient if we're not dumping a scene preview
 		if (!drawForScenePreview) {
-			clear_to_color(m_WorldDumpBuffer, makecol32(132, 192, 252)); // Light blue color
-			for (unsigned int i = 0; i < m_WorldDumpBuffer->h; i++) {
-				unsigned int lineColor = makecol32(64 + ((static_cast<float>(i) / worldBitmapHeight) * (128 - 64)), 64 + ((static_cast<float>(i) / worldBitmapHeight) * (192 - 64)), 96 + ((static_cast<float>(i) / worldBitmapHeight) * (255 - 96)));
+			clear_to_color(m_WorldDumpBuffer, makecol24(132, 192, 252)); // Light blue color
+			for (int i = 0; i < m_WorldDumpBuffer->h; i++) {
+				int lineColor = makecol24(64 + ((static_cast<float>(i) / worldBitmapHeight) * (128 - 64)), 64 + ((static_cast<float>(i) / worldBitmapHeight) * (192 - 64)), 96 + ((static_cast<float>(i) / worldBitmapHeight) * (255 - 96)));
 				hline(m_WorldDumpBuffer, 0, i, worldBitmapWidth - 1, lineColor);
 			}
 		} else {
@@ -1008,14 +1230,13 @@ namespace RTE {
 				effectPosX = postEffect.m_Pos.GetFloorIntX() - (effectBitmap->w / 2);
 				effectPosY = postEffect.m_Pos.GetFloorIntY() - (effectBitmap->h / 2);
 
-				if (postEffect.m_Angle == 0) {
+				if (postEffect.m_Angle == 0.0F) {
 					draw_trans_sprite(m_WorldDumpBuffer, effectBitmap, effectPosX, effectPosY);
 				} else {
 					BITMAP *targetBitmap = g_PostProcessMan.GetTempEffectBitmap(effectBitmap);
 					clear_to_color(targetBitmap, 0);
 
-					fixed fAngle;
-					fAngle = fixmul(postEffect.m_Angle, radtofix_r);
+					 fixed fAngle = fixmul(postEffect.m_Angle, radtofix_r);
 
 					rotate_sprite(targetBitmap, effectBitmap, 0, 0, fAngle);
 					draw_trans_sprite(m_WorldDumpBuffer, targetBitmap, effectPosX, effectPosY);

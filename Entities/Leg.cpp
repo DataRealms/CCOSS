@@ -210,7 +210,7 @@ namespace RTE {
 			m_Frame = 0;
 		} else {
 			m_CurrentNormalizedExtension = Limit((m_CurrentAnkleOffset.GetMagnitude() - m_MinExtension) / (m_MaxExtension - m_MinExtension), 1.0F, 0.0F);
-			m_Frame = std::min(m_FrameCount - 1, static_cast<unsigned int>(std::floorf(m_CurrentNormalizedExtension * static_cast<float>(m_FrameCount))));
+			m_Frame = std::min(m_FrameCount - 1, static_cast<unsigned int>(std::floor(m_CurrentNormalizedExtension * static_cast<float>(m_FrameCount))));
 		}
 	}
 

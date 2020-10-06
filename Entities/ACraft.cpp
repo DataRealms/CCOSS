@@ -732,7 +732,7 @@ void ACraft::DropAllInventory()
             else
             {
                 (*exitee)->SetVel(m_Vel + exitVel * antiGravBoost);
-                (*exitee)->SetAngularVel(5 * NormalRand());
+                (*exitee)->SetAngularVel(5.0F * RandomNormalNum());
                 // Avoid it having immediate collisions with this
                 (*exitee)->SetWhichMOToNotHit(this, 0.5f);
                 // Avoid this immediate collisions with it
@@ -1035,22 +1035,22 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             
             if (m_AIMode == AIMODE_RETURN)
             {
-                sprintf_s(str, sizeof(str), "%s", "Return");
+                std::snprintf(str, sizeof(str), "%s", "Return");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X, iconPos.m_Y - 18, str, GUIFont::Centre);
             }
             else if (m_AIMode == AIMODE_DELIVER)
             {
-                sprintf_s(str, sizeof(str), "%s", "Deliver");
+                std::snprintf(str, sizeof(str), "%s", "Deliver");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X - 9, iconPos.m_Y - 5, str, GUIFont::Right);
             }
             else if (m_AIMode == AIMODE_SCUTTLE)
             {
-                sprintf_s(str, sizeof(str), "%s", "Scuttle");
+                std::snprintf(str, sizeof(str), "%s", "Scuttle");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X + 9, iconPos.m_Y - 5, str, GUIFont::Left);
             }
             else if (m_AIMode == AIMODE_STAY)
             {
-                sprintf_s(str, sizeof(str), "%s", "Stay");
+                std::snprintf(str, sizeof(str), "%s", "Stay");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X, iconPos.m_Y + 8, str, GUIFont::Centre);
             }
 

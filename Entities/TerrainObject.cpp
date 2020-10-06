@@ -56,9 +56,9 @@ int TerrainObject::Create()
     {
 /*
         if (m_pFGColor->w > 24)
-            m_BitmapOffset.m_X = -ceilf(((float)m_pFGColor->w / (float)2) + 0.5f);
+            m_BitmapOffset.m_X = -std::ceil(((float)m_pFGColor->w / (float)2) + 0.5f);
         if (m_pFGColor->h > 24)
-            m_BitmapOffset.m_Y = -ceilf(((float)m_pFGColor->h / (float)2) + 0.5f);
+            m_BitmapOffset.m_Y = -std::ceil(((float)m_pFGColor->h / (float)2) + 0.5f);
 */
         if (m_pFGColor->w > 24)
             m_BitmapOffset.m_X = -(m_pFGColor->w / 2);

@@ -293,7 +293,7 @@ int PieMenuGUI::Create(Controller *pController, Actor *pFocusActor)
     // Load the static pie icons and cursor if havne't been done yet
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/Skins/PieCursor.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/PieCursor.png");
         s_pCursor = cursorFile.GetAsBitmap();
 //        cursorFile.SetDataPath("Base.rte/Effects/Glows/YellowSmall.bmp");
 //        s_pCursorGlow = cursorFile.GetAsBitmap();

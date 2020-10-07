@@ -337,7 +337,7 @@ namespace RTE {
 		BITMAP *m_DefaultPreviewBitmap;
 
 		
-		std::list<Scene *> *m_ScenarioScenes; //!< The current set of Scenes being displayed - not owned.
+		std::list<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed - not owned, and neither are the scenes.
 		
 		std::map<Activity *, std::list<Scene *> > m_Activities; //!< The map of Activities, and the Scenes compatible with each, neither of which are owned here.
 		

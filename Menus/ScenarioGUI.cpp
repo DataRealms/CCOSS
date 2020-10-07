@@ -53,14 +53,11 @@
 #include "DataModule.h"
 #include "Scene.h"
 
-extern int g_IntroState;
 extern volatile bool g_Quit;
-extern int g_StationOffsetX;
-extern int g_StationOffsetY;
 
 using namespace RTE;
 
-#define CHAMFERSIZE 40
+constexpr int CHAMFERSIZE = 40;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -79,12 +76,12 @@ void ScenarioGUI::Clear()
     m_ScreenChange = false;
     m_SceneFocus = 0;
     m_FocusChange = 0;
-    m_MenuSpeed = 0.3;
+    m_MenuSpeed = 0.3F;
     m_BlinkTimer.Reset();
     m_BlinkMode = NOBLINK;
 
     m_PlanetCenter.Reset();
-    m_PlanetRadius = 240.0f;
+    m_PlanetRadius = 240.0F;
 
     m_pRootBox = 0;
     m_pActivityBox = 0;

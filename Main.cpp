@@ -1321,8 +1321,9 @@ bool PlayIntroTitle() {
             }
 
             // Detect if the current game has been commanded to resume
-            if (g_pScenarioGUI->ActivityResumed())
-                g_ResumeActivity = true;
+			if (scenarioGUIResult == ScenarioGUI::ScenarioUpdateResult::ACTIVITYRESUMED) {
+				g_ResumeActivity = true;
+			}
 
             // Detect if a game has been commanded to restart
             if (g_pScenarioGUI->ActivityRestarted())

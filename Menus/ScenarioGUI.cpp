@@ -139,7 +139,6 @@ void ScenarioGUI::Clear() {
 	m_PrevMousePos.Reset();
 
 	m_ActivityRestarted = false;
-	m_ActivityResumed = false;
 	m_StartPlayers = 1;
 	m_StartTeams = 2;
 	m_StartFunds = 1600;
@@ -176,7 +175,7 @@ int ScenarioGUI::Create(Controller *pController) {
 	// Make the root box fill the screen
 	m_ScenarioRootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-	m_ScenarioButtons[BACKTOMAIN] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("BackToMainButton"));
+	m_ScenarioButtons[BACKTOMAINBUTTON] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("BackToMainButton"));
 	m_ScenarioButtons[RESUME] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("ButtonResume"));
 	m_ScenarioButtons[STARTHERE] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("SceneSelectButton"));
 	m_ScenarioButtons[STARTGAME] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("StartButton"));
@@ -286,7 +285,7 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_QuitConfirmButton = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("ConfirmButton"));
 
 	// Set up initial combo box locations and sizes
-	m_ScenarioButtons[BACKTOMAIN]->SetPositionRel(m_ScenarioRootBox->GetWidth() - m_ScenarioButtons[BACKTOMAIN]->GetWidth() - 16, m_ScenarioRootBox->GetHeight() - m_ScenarioButtons[BACKTOMAIN]->GetHeight() - 22);
+	m_ScenarioButtons[BACKTOMAINBUTTON]->SetPositionRel(m_ScenarioRootBox->GetWidth() - m_ScenarioButtons[BACKTOMAINBUTTON]->GetWidth() - 16, m_ScenarioRootBox->GetHeight() - m_ScenarioButtons[BACKTOMAINBUTTON]->GetHeight() - 22);
 	m_ScenarioButtons[RESUME]->SetPositionRel(m_ScenarioRootBox->GetWidth() - m_ScenarioButtons[RESUME]->GetWidth() - 16, m_ScenarioRootBox->GetHeight() - m_ScenarioButtons[RESUME]->GetHeight() - 47);
 	m_ScenarioActivityBox->SetPositionRel(16, 16);
 	m_ScenarioSceneInfoBox->SetPositionRel(m_ScenarioRootBox->GetWidth() - m_ScenarioSceneInfoBox->GetWidth() - 16, 16);
@@ -364,7 +363,6 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 
 	// Reset the specific triggers
 	m_ActivityRestarted = false;
-	m_ActivityResumed = false;
 	m_StartDifficulty = 0;
 
 	if (g_ConsoleMan.IsEnabled()) {
@@ -383,9 +381,11 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 	Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
 
-	ScenarioUpdateInputResult updateInputResult = UpdateInput();
-	if (updateInputResult == ScenarioUpdateInputResult::BACKTOMAIN) {
+	ScenarioUpdateResult updateInputResult = UpdateInput();
+	if (updateInputResult == ScenarioUpdateResult::BACKTOMAIN) {
 		result = ScenarioUpdateResult::BACKTOMAIN;
+	} else if (updateInputResult == ScenarioUpdateResult::ACTIVITYRESUMED) {
+		result = ScenarioUpdateResult::ACTIVITYRESUMED;
 	}
 
 	/*
@@ -537,14 +537,14 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	else if (m_MenuScreen == PLAYERSETUP) {
 		if (m_ScreenChange) {
 			m_ScenarioPlayerSetupBox->SetVisible(true);
-			//            m_ScenarioButtons[BACKTOMAIN]->SetVisible(true);
+			//            m_ScenarioButtons[BACKTOMAINBUTTON]->SetVisible(true);
 			m_ScreenChange = false;
 		}
 
 		// Update the player selection box
 		UpdatePlayersBox(false);
 
-		//        m_ScenarioButtons[BACKTOMAIN]->SetFocus();
+		//        m_ScenarioButtons[BACKTOMAINBUTTON]->SetFocus();
 	}
 
 	//////////////////////////////////////
@@ -556,7 +556,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 			m_ScreenChange = false;
 		}
 
-		//        m_ScenarioButtons[BACKTOMAIN]->SetFocus();
+		//        m_ScenarioButtons[BACKTOMAINBUTTON]->SetFocus();
 	}
 
 	// Save mouse pos for next frame so we can do dragging
@@ -695,8 +695,8 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ScenarioGUI::ScenarioUpdateInputResult ScenarioGUI::UpdateInput() {
-	ScenarioUpdateInputResult result = NOEVENT;
+ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
+	ScenarioUpdateResult result = NOEVENT;
 	// TODO: if activity is running, allow esc to resume activity instead of quitting.
 	// If esc pressed, show quit dialog if applicable
 	if (g_UInputMan.KeyPressed(KEY_ESC)) {
@@ -777,7 +777,7 @@ ScenarioGUI::ScenarioUpdateInputResult ScenarioGUI::UpdateInput() {
 
 				g_GUISound.BackButtonPressSound()->Play();
 
-				result = ScenarioUpdateInputResult::BACKTOMAIN;
+				result = ScenarioUpdateResult::BACKTOMAIN;
 			}
 
 			// Quit program button pressed
@@ -791,8 +791,8 @@ ScenarioGUI::ScenarioUpdateInputResult ScenarioGUI::UpdateInput() {
 			}
 
 			else if (eventControlName == "ButtonResume") {
-				m_ActivityResumed = true;
 				g_GUISound.BackButtonPressSound()->Play();
+				result = ScenarioUpdateResult::ACTIVITYRESUMED;
 			}
 
 			// Most big dialog cancel buttons lead back to the game menu too

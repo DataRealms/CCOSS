@@ -42,12 +42,8 @@ namespace RTE {
 
 		enum ScenarioUpdateResult {
 			NOEVENT = 0,
-			BACKTOMAIN
-		};
-
-		enum ScenarioUpdateInputResult {
-			NOEVENT = 0,
-			BACKTOMAIN
+			BACKTOMAIN,
+			ACTIVITYRESUMED
 		};
 
 		/// <summary>
@@ -109,12 +105,6 @@ namespace RTE {
 		bool ActivityRestarted() { return m_ActivityRestarted; }
 
 		/// <summary>
-		/// Reports whether the player has decided to resume the current activity.
-		/// </summary>
-		/// <returns>Whether the activity should be resumed.</returns>
-		bool ActivityResumed() { return m_ActivityResumed; }
-
-		/// <summary>
 		/// Updates the state of this Menu each frame.
 		/// </summary>
 		ScenarioUpdateResult Update();
@@ -146,7 +136,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the user input processing.
 		/// </summary>
-		ScenarioUpdateInputResult UpdateInput();
+		ScenarioUpdateResult UpdateInput();
 
 		/// <summary>
 		/// Hides all menu screens, so a single screen can be unhidden and shown alone.
@@ -227,7 +217,7 @@ namespace RTE {
 		};
 
 		enum ScenarioButtons {
-			BACKTOMAIN = 0,
+			BACKTOMAINBUTTON = 0,
 			STARTHERE,
 			STARTGAME,
 			RESUME,
@@ -350,7 +340,6 @@ namespace RTE {
 		Vector m_PrevMousePos; //!< Previous pos of mouse to calculate dragging.
 
 		bool m_ActivityRestarted; //!< Whether the game was restarted this frame or not.
-		bool m_ActivityResumed; //!< Whether the game was resumed this frame or not.
 		int m_StartPlayers; //!< How many players are chosen to be in the new game.
 		int m_StartTeams; //!< How many teams are chosen to be in the new game.
 		int m_StartFunds; //!< How much money both teams start with in the new game.

@@ -167,11 +167,6 @@ namespace RTE {
 		void KeepBoxOnScreen(GUICollectionBox *pBox, int margin = 10);
 
 		/// <summary>
-		/// Sets the ActivityMan up with the current data for a skirmish game.
-		/// </summary>
-		void SetupSkirmishActivity();
-
-		/// <summary>
 		/// Updates the contents of the Activity selection box.
 		/// </summary>
 		void UpdateActivityBox();

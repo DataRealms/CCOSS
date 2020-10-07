@@ -137,11 +137,6 @@ void ScenarioGUI::Clear() {
 	m_ScenarioHoveredScene = 0;
 	m_ScenarioSelectedScene = 0;
 	m_PrevMousePos.Reset();
-
-	m_StartPlayers = 1;
-	m_StartTeams = 2;
-	m_StartFunds = 1600;
-	m_StartDifficulty = Activity::MediumDifficulty;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -359,9 +354,6 @@ void ScenarioGUI::SetEnabled(bool enable) {
 ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	ScenarioUpdateResult result = ScenarioUpdateResult::NOEVENT;
 	m_ScenarioController->Update();
-
-	// Reset the specific triggers
-	m_StartDifficulty = 0;
 
 	if (g_ConsoleMan.IsEnabled()) {
 		return result;

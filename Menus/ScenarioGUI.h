@@ -272,7 +272,6 @@ namespace RTE {
 		GUICollectionBox *m_ScenarioPlayerSetupBox;
 		GUICollectionBox *m_ScenarioQuitConfirmBox;
 
-		
 		GUIButton *m_ScenarioButtons[SCENARIOBUTTONCOUNT]; //!< The menu buttons we want to manipulate.
 		
 		GUILabel *m_ScenarioScenePlanetLabel; //!< Hover name label over Scenes.
@@ -299,7 +298,6 @@ namespace RTE {
 		
 		int m_LockedCPUTeam; //!< Which team the CPU is locked to, if any.
 
-		
 		GUIComboBox *m_TeamTechSelect[Activity::MaxTeamCount]; //!< Tech selection combos.
 
 		// AI skill selection
@@ -319,7 +317,6 @@ namespace RTE {
 		BITMAP *m_ScenePreviewBitmap;
 		BITMAP *m_DefaultPreviewBitmap;
 
-		
 		std::list<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed - not owned, and neither are the scenes.
 		
 		std::map<Activity *, std::list<Scene *> > m_Activities; //!< The map of Activities, and the Scenes compatible with each, neither of which are owned here.
@@ -334,10 +331,6 @@ namespace RTE {
 		
 		Vector m_PrevMousePos; //!< Previous pos of mouse to calculate dragging.
 
-		int m_StartPlayers; //!< How many players are chosen to be in the new game.
-		int m_StartTeams; //!< How many teams are chosen to be in the new game.
-		int m_StartFunds; //!< How much money both teams start with in the new game.
-		int m_StartDifficulty; //!< Difficulty setting.
 		bool m_SelectTutorial; //!< Select tutorial activity when switched to scenario GUI.
 
 	private:

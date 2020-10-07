@@ -175,7 +175,6 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_ScenarioQuitConfirmBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ConfirmDialog"));
 
 	// Make the root box fill the screen
-//    m_ScenarioRootBox->SetPositionAbs((g_FrameMan.GetResX() - m_ScenarioRootBox->GetWidth()) / 2, 0);// (g_FrameMan.GetResY() - m_ScenarioRootBox->GetHeight()) / 2);
 	m_ScenarioRootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
 	m_ScenarioButtons[BACKTOMAIN] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("BackToMainButton"));
@@ -728,13 +727,7 @@ void ScenarioGUI::UpdateInput() {
 	if (m_MenuScreen == SCENESELECT && !m_ScenarioDraggedBox && menuButtonHeld && !m_EngageDrag && !m_ActivitySelectComboBox->IsDropped()) {
 		GUICollectionBox *pBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioRootBox, 1));
 
-		// Activity box?
-		if (pBox == m_ScenarioActivityBox) {
-			m_ScenarioDraggedBox = pBox;
-		}
-
-		// Scene info box?
-		if (pBox == m_ScenarioSceneInfoBox) {
+		if (pBox == m_ScenarioActivityBox || pBox == m_ScenarioSceneInfoBox) {
 			m_ScenarioDraggedBox = pBox;
 		}
 
@@ -759,9 +752,9 @@ void ScenarioGUI::UpdateInput() {
 		// Ensure the drag didn't shove it off-screen
 		KeepBoxOnScreen(m_ScenarioDraggedBox);
 	}
-	// TODO ARG FIX THIS SHOULD NOT BE TWO UPDATES OF GUICONTROLLER IN THIS GUI
-		//////////////////////////////////////////
-		// Update the ControlManager
+
+	//////////////////////////////////////////
+	// Update the ControlManager
 
 	m_ScenarioGUIController->Update();
 
@@ -854,7 +847,7 @@ void ScenarioGUI::UpdateInput() {
 				m_EngageDrag = true;
 			}
 
-			if (eventControl == m_DifficultySlider) {
+			else if (eventControl == m_DifficultySlider) {
 				// Update the difficulty label etc
 				UpdateActivityBox();
 
@@ -863,7 +856,7 @@ void ScenarioGUI::UpdateInput() {
 				m_EngageDrag = true;
 			}
 
-			if (eventControl == m_ActivitySelectComboBox) {
+			else if (eventControl == m_ActivitySelectComboBox) {
 				// Also stop dragging any panels if we're over the selection list
 				m_ScenarioDraggedBox = 0;
 				m_EngageDrag = true;

@@ -182,7 +182,7 @@ namespace RTE {
 		/// Counts how many players are currently assigned to play this Activity.
 		/// </summary>
 		/// <returns>The number of players already assigned to play the selected Activity.</returns>
-		int PlayerCount();
+		int PlayerCount() const;
 
 		/// <summary>
 		/// Sets up and starts the currently selected Activity and settings.
@@ -202,7 +202,7 @@ namespace RTE {
 		/// <param name="text">Text to show above the location.</param>
 		/// <param name="location">The location in planetary coords.</param>
 		/// <param name="height">How high above the location to show the text.</param>
-		void UpdateSiteNameLabel(bool visible, string text = "", const Vector &location = Vector(), float height = 1.0F);
+		void UpdateSiteNameLabel(bool visible, const string &text = "", const Vector &location = Vector(), float height = 1.0F);
 
 		/// <summary>
 		/// Draws a fancy thick flickering line to point out scene points on the planet.

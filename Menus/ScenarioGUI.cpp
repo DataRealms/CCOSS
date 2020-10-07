@@ -256,15 +256,14 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_CPULockLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("CPULockLabel"));
 
 	// Populate the tech comboboxes with the available tech modules
-	const DataModule *pModule = 0;
-	string techName;
-	string techString = " Tech";
-	string::size_type techPos = string::npos;
+	const DataModule *dataModule = nullptr;
 	for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i) {
-		pModule = g_PresetMan.GetDataModule(i);
-		if (pModule) {
-			techName = pModule->GetFriendlyName();
-			if ((techPos = techName.find(techString)) != string::npos) {
+		dataModule = g_PresetMan.GetDataModule(i);
+		if (dataModule) {
+			std::string techName = dataModule->GetFriendlyName();
+			std::string techString = " Tech";
+			std::string::size_type techPos = techName.find(techString);
+			if (techPos != string::npos) {
 				techName.replace(techPos, techString.length(), "");
 				m_TeamTechSelect[Activity::TeamOne]->GetListPanel()->AddItem(techName, "", 0, 0, i);
 				m_TeamTechSelect[Activity::TeamTwo]->GetListPanel()->AddItem(techName, "", 0, 0, i);
@@ -386,7 +385,7 @@ void ScenarioGUI::Update() {
 	int mouseX;
 	int mouseY;
 	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
-	Vector mousePos(mouseX, mouseY);
+	Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
 
 	UpdateInput();
 
@@ -447,7 +446,7 @@ void ScenarioGUI::Update() {
 		int mouseX;
 		int mouseY;
 		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
-		Vector mousePos(mouseX, mouseY);
+		Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
 		Vector screenLocation;
 
 		bool mouseIsInBox = false;
@@ -585,7 +584,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	if (m_MenuScreen == SCENESELECT && m_ScenarioScenes) {
 		// Draw the scene location dots
 		Vector screenLocation;
-		for (Scene * scene : *m_ScenarioScenes) {
+		for (const Scene * scene : *m_ScenarioScenes) {
 			int color;
 
 			// Mark user-created scenes to let players easily distinguish them from built-in
@@ -622,15 +621,10 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	// Draw scene preview after GUI
 	if (m_MenuScreen == SCENESELECT && m_ScenarioScenes && m_ScenarioSelectedScene && m_ScenarioSceneInfoBox->GetVisible()) {
 		BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
-		if (preview) {
-			int xOffset = 0;
-			int yOffset = 0;
-			blit(preview, m_ScenePreviewBitmap, xOffset, yOffset, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
-		} else {
-			int xOffset = 0;
-			int yOffset = 0;
-			blit(m_DefaultPreviewBitmap, m_ScenePreviewBitmap, xOffset, yOffset, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
-		}
+		int xOffset = 0;
+		int yOffset = 0;
+		preview = preview ? preview : m_DefaultPreviewBitmap;
+		blit(preview, m_ScenePreviewBitmap, xOffset, yOffset, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
 		draw_sprite(drawBitmap, m_ScenePreviewBitmap, m_ScenarioSceneInfoBox->GetXPos() + 10, m_ScenarioSceneInfoBox->GetYPos() + 33);
 	}
 
@@ -642,11 +636,11 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 			// Disabled shaded boxes
 			if (pActivity && (!pActivity->TeamActive(team) || m_LockedCPUTeam == team)) {
 				// TODO: understand why the blending isnt working as desired
-								// Transparency effect on the overlay boxes
+				//Transparency effect on the overlay boxes
 				drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
 				// Screen blend the dots and lines, with some flicekring in its intensity
-				int blendAmount = 230;
-				set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
+				int blendAmountInner = 230;
+				set_screen_blender(blendAmountInner, blendAmountInner, blendAmountInner, blendAmountInner);
 				rectfill(drawBitmap, m_ScenarioPlayerSetupBox->GetXPos() + 110, m_ScenarioPlayerSetupBox->GetYPos() + lineY, m_ScenarioPlayerSetupBox->GetXPos() + m_ScenarioPlayerSetupBox->GetWidth() - 12, m_ScenarioPlayerSetupBox->GetYPos() + lineY + 25, c_GUIColorDarkBlue);
 			}
 			// Back to solid drawing
@@ -729,7 +723,7 @@ void ScenarioGUI::UpdateInput() {
 	int mouseX;
 	int mouseY;
 	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
-	Vector mousePos(mouseX, mouseY);
+	Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
 
 	// If not currently dragging a box, see if we should start
 	bool menuButtonHeld = g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER);
@@ -778,10 +772,12 @@ void ScenarioGUI::UpdateInput() {
 
 	GUIEvent anEvent;
 	while (m_ScenarioGUIController->GetEvent(&anEvent)) {
+		std::string eventControlName = anEvent.GetControl()->GetName();
+		GUIControl *eventControl = anEvent.GetControl();
 		// Commands
 		if (anEvent.GetType() == GUIEvent::Command) {
 			// Return to main menu button pressed
-			if (anEvent.GetControl()->GetName() == "BackToMainButton") {
+			if (eventControlName == "BackToMainButton") {
 				// Hide all screens, the appropriate screen will reappear on next update
 				HideAllScreens();
 
@@ -794,7 +790,7 @@ void ScenarioGUI::UpdateInput() {
 			}
 
 			// Quit program button pressed
-			if (anEvent.GetControl()->GetName() == "ConfirmButton") {
+			else if (eventControlName == "ConfirmButton") {
 				// Hide all screens, the appropriate screen will reappear on next update
 				HideAllScreens();
 				m_ScreenChange = true;
@@ -803,13 +799,13 @@ void ScenarioGUI::UpdateInput() {
 				g_GUISound.BackButtonPressSound()->Play();
 			}
 
-			if (anEvent.GetControl()->GetName() == "ButtonResume") {
+			else if (eventControlName == "ButtonResume") {
 				m_ActivityResumed = true;
 				g_GUISound.BackButtonPressSound()->Play();
 			}
 
 			// Most big dialog cancel buttons lead back to the game menu too
-			if (anEvent.GetControl()->GetName() == "PlayerCancelButton" || anEvent.GetControl()->GetName() == "ConfirmCancelButton") {
+			else if (eventControlName == "PlayerCancelButton" || eventControlName == "ConfirmCancelButton") {
 				// Hide all previously shown screens
 				HideAllScreens();
 				m_MenuScreen = SCENESELECT;
@@ -818,7 +814,7 @@ void ScenarioGUI::UpdateInput() {
 			}
 
 			// Start Scenario Here menu button pressed
-			if (anEvent.GetControl() == m_ScenarioButtons[STARTHERE]) {
+			else if (eventControl == m_ScenarioButtons[STARTHERE]) {
 				// Set up the player setup box based on updated Activity selection
 				UpdatePlayersBox(true);
 				// Hide all screens, the appropriate screen will reappear on next update
@@ -830,7 +826,7 @@ void ScenarioGUI::UpdateInput() {
 			}
 
 			// Start game button pressed
-			if (anEvent.GetControl() == m_ScenarioButtons[STARTGAME]) {
+			else if (eventControl == m_ScenarioButtons[STARTGAME]) {
 				// Try to start the game
 				if (StartGame()) {
 					// Hide all previously shown screens, show
@@ -843,7 +839,7 @@ void ScenarioGUI::UpdateInput() {
 				}
 			}
 
-			if (anEvent.GetControl() == m_SceneCloseButton) {
+			else if (eventControl == m_SceneCloseButton) {
 				m_ScenarioSelectedScene = 0;
 				g_GUISound.ButtonPressSound()->Play();
 			}
@@ -851,15 +847,16 @@ void ScenarioGUI::UpdateInput() {
 
 		else if (anEvent.GetType() == GUIEvent::Notification) {
 			// Button focus notification that we can play a sound to
-			if (dynamic_cast<GUIButton *>(anEvent.GetControl())) {
-				if (anEvent.GetMsg() == GUIButton::Focused)
+			if (dynamic_cast<GUIButton *>(eventControl)) {
+				if (anEvent.GetMsg() == GUIButton::Focused) {
 					g_GUISound.SelectionChangeSound()->Play();
+				}
 				// Also stop dragging any panels if we're over any button
 				m_ScenarioDraggedBox = 0;
 				m_EngageDrag = true;
 			}
 
-			if (anEvent.GetControl() == m_DifficultySlider) {
+			if (eventControl == m_DifficultySlider) {
 				// Update the difficulty label etc
 				UpdateActivityBox();
 
@@ -868,7 +865,7 @@ void ScenarioGUI::UpdateInput() {
 				m_EngageDrag = true;
 			}
 
-			if (anEvent.GetControl() == m_ActivitySelectComboBox) {
+			if (eventControl == m_ActivitySelectComboBox) {
 				// Also stop dragging any panels if we're over the selection list
 				m_ScenarioDraggedBox = 0;
 				m_EngageDrag = true;
@@ -912,15 +909,16 @@ void ScenarioGUI::HideAllScreens() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox *pBox, int margin) {
+	//TODO: Consider the GUIControl anchor point?
 	// Make sure the box doesn't go entirely outside of the screen
-	if (pBox->GetXPos() < (-pBox->GetWidth() + margin)) {
-		pBox->SetPositionAbs(-pBox->GetWidth() + margin, pBox->GetYPos());
+	if (pBox->GetXPos() < (margin - pBox->GetWidth())) {
+		pBox->SetPositionAbs(margin - pBox->GetWidth(), pBox->GetYPos());
 	}
 	if (pBox->GetXPos() > m_ScenarioRootBox->GetWidth() - margin) {
 		pBox->SetPositionAbs(m_ScenarioRootBox->GetWidth() - margin, pBox->GetYPos());
 	}
-	if (pBox->GetYPos() < (-pBox->GetHeight() + margin)) {
-		pBox->SetPositionAbs(pBox->GetXPos(), -pBox->GetHeight() + margin);
+	if (pBox->GetYPos() < (margin - pBox->GetHeight())) {
+		pBox->SetPositionAbs(pBox->GetXPos(), margin - pBox->GetHeight());
 	}
 	if (pBox->GetYPos() > m_ScenarioRootBox->GetHeight() - margin) {
 		pBox->SetPositionAbs(pBox->GetXPos(), m_ScenarioRootBox->GetHeight() - margin);
@@ -931,12 +929,15 @@ void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox *pBox, int margin) {
 
 void ScenarioGUI::UpdateActivityBox() {
 	// Get the currently selected Activity
-	const Activity *pSelected = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
+	const Activity *selectedActivity;
+	if (m_ActivitySelectComboBox) {
+		selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
+	}
 
-	if (pSelected) {
+	if (selectedActivity) {
 		// Pull out the list of Scenes that are compatible with this Activity
 		map<Activity *, list<Scene *> >::iterator asItr;
-		if (m_Activities.end() != (asItr = m_Activities.find(const_cast<Activity *>(pSelected)))) {
+		if (m_Activities.end() != (asItr = m_Activities.find(const_cast<Activity *>(selectedActivity)))) {
 			m_ScenarioScenes = &((*asItr).second);
 		} else {
 			m_ScenarioScenes = 0;
@@ -944,11 +945,11 @@ void ScenarioGUI::UpdateActivityBox() {
 
 		// Set the description
 		if (m_ScenarioScenes && m_ScenarioScenes->size() == 1) {
-			m_ActivityLabel->SetText(pSelected->GetDescription() + "\n\nThe only site where this activity can be played has been selected for you.");
+			m_ActivityLabel->SetText(selectedActivity->GetDescription() + "\n\nThe only site where this activity can be played has been selected for you.");
 		} else if (m_ScenarioScenes && m_ScenarioScenes->size() > 1) {
-			m_ActivityLabel->SetText(pSelected->GetDescription() + "\n\nSites where this activity can be played appear on the planet. Select one to begin!");
+			m_ActivityLabel->SetText(selectedActivity->GetDescription() + "\n\nSites where this activity can be played appear on the planet. Select one to begin!");
 		} else {
-			m_ActivityLabel->SetText(pSelected->GetDescription() + "\n\nNO sites appear to be compatible with this selected activity! Please try another.");
+			m_ActivityLabel->SetText(selectedActivity->GetDescription() + "\n\nNO sites appear to be compatible with this selected activity! Please try another.");
 		}
 		m_DifficultyLabel->SetVisible(true);
 		m_DifficultySlider->SetVisible(true);
@@ -971,71 +972,61 @@ void ScenarioGUI::UpdateActivityBox() {
 		m_ScenarioActivityBox->Resize(m_ScenarioActivityBox->GetWidth(), newHeight + 110);
 		UpdateScenesBox();
 
-		const GameActivity *pSelectedGA = dynamic_cast<const GameActivity *>(pSelected);
-		if (pSelectedGA) {
+		const GameActivity *selectedGA = dynamic_cast<const GameActivity *>(selectedActivity);
+		if (selectedGA) {
 			// Set gold slider value if activity sepcifies default gold amounts for difficulties
-			if (m_DifficultySlider->GetValue() < Activity::CakeDifficulty) {
-				if (pSelectedGA->GetDefaultGoldCake() > -1) {
-					m_GoldSlider->SetValue(pSelectedGA->GetDefaultGoldCake());
-				}
-			} else if (m_DifficultySlider->GetValue() < Activity::EasyDifficulty) {
-				if (pSelectedGA->GetDefaultGoldEasy() > -1) {
-					m_GoldSlider->SetValue(pSelectedGA->GetDefaultGoldEasy());
-				}
-			} else if (m_DifficultySlider->GetValue() < Activity::MediumDifficulty) {
-				if (pSelectedGA->GetDefaultGoldMedium() > -1) {
-					m_GoldSlider->SetValue(pSelectedGA->GetDefaultGoldMedium());
-				}
-			} else if (m_DifficultySlider->GetValue() < Activity::HardDifficulty) {
-				if (pSelectedGA->GetDefaultGoldHard() > -1) {
-					m_GoldSlider->SetValue(pSelectedGA->GetDefaultGoldHard());
-				}
-			} else if (m_DifficultySlider->GetValue() < Activity::NutsDifficulty) {
-				if (pSelectedGA->GetDefaultGoldNuts() > -1) {
-					m_GoldSlider->SetValue(pSelectedGA->GetDefaultGoldNuts());
-				}
-			} else {
-				if (pSelectedGA->GetDefaultGoldNuts() > -1) {
-					m_GoldSlider->SetValue(pSelectedGA->GetDefaultGoldNuts());
-				}
+			if (m_DifficultySlider->GetValue() < Activity::CakeDifficulty && selectedGA->GetDefaultGoldCake() > -1) {
+				m_GoldSlider->SetValue(selectedGA->GetDefaultGoldCake());
+			} else if (m_DifficultySlider->GetValue() < Activity::EasyDifficulty && selectedGA->GetDefaultGoldEasy() > -1) {
+				m_GoldSlider->SetValue(selectedGA->GetDefaultGoldEasy());
+			} else if (m_DifficultySlider->GetValue() < Activity::MediumDifficulty && selectedGA->GetDefaultGoldMedium() > -1) {
+				m_GoldSlider->SetValue(selectedGA->GetDefaultGoldMedium());
+			} else if (m_DifficultySlider->GetValue() < Activity::HardDifficulty && selectedGA->GetDefaultGoldHard() > -1) {
+				m_GoldSlider->SetValue(selectedGA->GetDefaultGoldHard());
+			} else if (m_DifficultySlider->GetValue() < Activity::NutsDifficulty && selectedGA->GetDefaultGoldNuts() > -1) {
+				m_GoldSlider->SetValue(selectedGA->GetDefaultGoldNuts());
+			} else if (selectedGA->GetDefaultGoldNuts() > -1) {
+				m_GoldSlider->SetValue(selectedGA->GetDefaultGoldNuts());
 			}
-			m_GoldSlider->SetEnabled(pSelectedGA->GetGoldSwitchEnabled());
+			m_GoldSlider->SetEnabled(selectedGA->GetGoldSwitchEnabled());
 
 			//Set default fog of war flag and enable or disable it if necessary
-			if (pSelectedGA->GetDefaultFogOfWar() > -1) {
-				if (pSelectedGA->GetDefaultFogOfWar() == 0) {
+			if (selectedGA->GetDefaultFogOfWar() > -1) {
+				if (selectedGA->GetDefaultFogOfWar() == 0) {
 					m_FogOfWarCheckbox->SetCheck(0);
 				} else {
 					m_FogOfWarCheckbox->SetCheck(1);
 				}
 			}
-			m_FogOfWarCheckbox->SetEnabled(pSelectedGA->GetFogOfWarSwitchEnabled());
+			m_FogOfWarCheckbox->SetEnabled(selectedGA->GetFogOfWarSwitchEnabled());
 
 			//Set default clear path to orbit flag and enable or disable it if necessary
-			if (pSelectedGA->GetDefaultRequireClearPathToOrbit() > -1) {
-				if (pSelectedGA->GetDefaultRequireClearPathToOrbit() == 0) {
+			if (selectedGA->GetDefaultRequireClearPathToOrbit() > -1) {
+				if (selectedGA->GetDefaultRequireClearPathToOrbit() == 0) {
 					m_RequireClearPathToOrbitCheckbox->SetCheck(0);
 				} else {
 					m_RequireClearPathToOrbitCheckbox->SetCheck(1);
 				}
 			}
-			m_RequireClearPathToOrbitCheckbox->SetEnabled(pSelectedGA->GetRequireClearPathToOrbitSwitchEnabled());
+			m_RequireClearPathToOrbitCheckbox->SetEnabled(selectedGA->GetRequireClearPathToOrbitSwitchEnabled());
 
 			//Set default deploy units flag and enable or disable it if necessary
-			if (pSelectedGA->GetDefaultDeployUnits() > -1) {
-				if (pSelectedGA->GetDefaultDeployUnits() == 0) {
+			if (selectedGA->GetDefaultDeployUnits() > -1) {
+				if (selectedGA->GetDefaultDeployUnits() == 0) {
 					m_DeployUnitsCheckbox->SetCheck(0);
 				} else {
 					m_DeployUnitsCheckbox->SetCheck(1);
 				}
 			}
-			m_DeployUnitsCheckbox->SetEnabled(pSelectedGA->GetDeployUnitsSwitchEnabled());
+			m_DeployUnitsCheckbox->SetEnabled(selectedGA->GetDeployUnitsSwitchEnabled());
 		}
 	} else {
 		m_ScenarioScenes = 0;
 		m_ActivityLabel->SetText("No Activity selected.");
 		m_DifficultyLabel->SetVisible(false);
-		m_DifficultySlider->SetVisible(false);
+		if (m_DifficultySlider) {
+			m_DifficultySlider->SetVisible(false);
+		}
 		// Resize the box to fit the desc
 		int newHeight = m_ActivityLabel->ResizeHeightToFit();
 		m_ScenarioActivityBox->Resize(m_ScenarioActivityBox->GetWidth(), newHeight + 125);
@@ -1051,9 +1042,9 @@ void ScenarioGUI::UpdateScenesBox() {
 	// Always show the info box if something is selected
 	if (m_ScenarioSelectedScene) {
 		// Fill combo box
-		const Activity *pActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
+		const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
 
-		if (pActivity) {
+		if (selectedActivity) {
 			// Clear preview bitmap
 			clear_to_color(m_ScenePreviewBitmap, g_MaskColor);
 		}
@@ -1081,25 +1072,24 @@ void ScenarioGUI::UpdateScenesBox() {
 
 void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 	// Get the currently selected Activity
-	const Activity *pActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
+	const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
 	const Icon *pIcon = 0;
 	bool teamHasPlayers = false;
 	bool teamHasHumans = false;
 	int teamsWithPlayers = 0;
 	int teamsWithHumans = 0;
 
-	if (pActivity && m_ScenarioSelectedScene) {
+	if (selectedActivity && m_ScenarioSelectedScene) {
 		// Get mouse position and figure out if any cell is being hovered over
 		int mouseX;
 		int mouseY;
 		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
-		Vector mousePos(mouseX, mouseY);
-		bool menuButtonHeld = g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER);
+		Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
 		bool menuButtonReleased = g_UInputMan.MenuButtonReleased(UInputMan::MENU_EITHER);
-		GUICollectionBox *pHoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioPlayerSetupBox, 1));
+		const GUICollectionBox *pHoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioPlayerSetupBox, 1));
 
 		// Is this a game activity?
-		const GameActivity *pGameActivity = dynamic_cast<const GameActivity *>(pActivity);
+		const GameActivity *pGameActivity = dynamic_cast<const GameActivity *>(selectedActivity);
 
 		if (newActivity && pGameActivity) {
 			// The pre-set team that should absolutely be CPU played
@@ -1146,7 +1136,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 				// Make the hovered cell light up and able to be selected
 				if (m_PlayerBoxes[player][team] == pHoveredCell
 					// if an active team row, but including the 'not playing' row
-					&& (pActivity->TeamActive(team) || team == TEAM_DISABLED)
+					&& (selectedActivity->TeamActive(team) || team == TEAM_DISABLED)
 					// That isn't on a team row locked to the CPU
 					&& m_LockedCPUTeam != team
 					// And not the CPU player if he is locked to a CPU team
@@ -1280,16 +1270,16 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 									m_TeamNameLabels[team]->SetText("Not Playing:");
 								}
 								// Active player team
-								else if (pActivity->TeamActive(team)) {
+								else if (selectedActivity->TeamActive(team)) {
 									// Set the team flag icons on the floating player bars
-									pIcon = pActivity->GetTeamIcon(team);
+									pIcon = selectedActivity->GetTeamIcon(team);
 									// Revert to default if needed
 									if (!pIcon) {
 										char str[128];
 										std::snprintf(str, sizeof(str), "Team %d Default", team + 1);
 										pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", str));
 									}
-									m_TeamNameLabels[team]->SetText(pActivity->GetTeamName(team) + ":");
+									m_TeamNameLabels[team]->SetText(selectedActivity->GetTeamName(team) + ":");
 								}
 								// Disabled/unplayable teams
 								else {
@@ -1304,7 +1294,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 			}
 
 			// Check if the team has any players assigned at all
-			if (pActivity->TeamActive(team)) {
+			if (selectedActivity->TeamActive(team)) {
 				teamHasPlayers = false;
 				for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
 					// CPU is sometimes disabled, but still counts as a team
@@ -1341,7 +1331,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 		}
 
 		// If we are over capacity with players, disable the start button and show why
-		if (pActivity->GetMaxPlayerSupport() < PlayerCount()) {
+		if (selectedActivity->GetMaxPlayerSupport() < PlayerCount()) {
 			m_ScenarioButtons[STARTGAME]->SetVisible(false);
 			m_StartErrorLabel->SetVisible(true);
 			char str[256];
@@ -1349,7 +1339,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 			m_StartErrorLabel->SetText(str);
 		}
 		// If we are under the required number of teams with players assigned, disable the start button and show why
-		else if (pActivity->GetMinTeamsRequired() > teamsWithPlayers) {
+		else if (selectedActivity->GetMinTeamsRequired() > teamsWithPlayers) {
 			m_ScenarioButtons[STARTGAME]->SetVisible(false);
 			m_StartErrorLabel->SetVisible(true);
 			char str[256];
@@ -1397,7 +1387,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int ScenarioGUI::PlayerCount() {
+int ScenarioGUI::PlayerCount() const {
 	int count = 0;
 	// Go through all the on-team non-CPU cells and see how many players are already assigned.
 	for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
@@ -1414,48 +1404,51 @@ int ScenarioGUI::PlayerCount() {
 
 bool ScenarioGUI::StartGame() {
 	// Get the currently selected Activity
-	const Activity *pActivityPreset = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
+	const Activity *activityPreset = nullptr;
+	if (m_ActivitySelectComboBox) {
+		activityPreset = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
+	}
 
-	if (!pActivityPreset || !m_ScenarioSelectedScene) {
+	if (!activityPreset || !m_ScenarioSelectedScene) {
 		return false;
 	}
 
 	// Create the actual instance of hte Activity we want to start
-	Activity *pActivity = dynamic_cast<Activity *>(pActivityPreset->Clone());
-	GameActivity *pGameActivity = dynamic_cast<GameActivity *>(pActivity);
+	Activity *activityInstance = dynamic_cast<Activity *>(activityPreset->Clone());
+	GameActivity *gameActivity = dynamic_cast<GameActivity *>(activityInstance);
 
 	// Set up the basic settings
-	if (pGameActivity) {
-		pGameActivity->SetDifficulty(m_DifficultySlider->GetValue());
+	if (gameActivity) {
+		gameActivity->SetDifficulty(m_DifficultySlider->GetValue());
 
-		pGameActivity->SetFogOfWarEnabled(m_FogOfWarCheckbox->GetCheck());
-		pGameActivity->SetRequireClearPathToOrbit(m_RequireClearPathToOrbitCheckbox->GetCheck());
+		gameActivity->SetFogOfWarEnabled(m_FogOfWarCheckbox->GetCheck());
+		gameActivity->SetRequireClearPathToOrbit(m_RequireClearPathToOrbitCheckbox->GetCheck());
 
 
-		// If gold slider is at it max value then the amount is 'infinite' and we must set some rediculously high value
+		// If gold slider is at it max value then the amount is 'infinite' and we must set some ridiculously high value.
 		if (m_GoldSlider->GetValue() == m_GoldSlider->GetMaximum()) {
-			pGameActivity->SetStartingGold(1000000);
+			gameActivity->SetStartingGold(1000000);
 		} else {
 			int startGold = m_GoldSlider->GetValue();
 			startGold = startGold - startGold % 500;
-			pGameActivity->SetStartingGold(startGold);
+			gameActivity->SetStartingGold(startGold);
 		}
 	}
 
 	g_SceneMan.SetSceneToLoad(m_ScenarioSelectedScene, true, m_DeployUnitsCheckbox->GetCheck());
 
 	// Set up the player and team assignments
-	pActivity->ClearPlayers(false);
+	activityInstance->ClearPlayers(false);
 	for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
 		for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team) {
 			if (team != TEAM_DISABLED && m_PlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image) {
 				// Add the human players, not including CPU players
 				if (player != PLAYER_CPU) {
-					pActivity->AddPlayer(player, true, team, 0);
+					activityInstance->AddPlayer(player, true, team, 0);
 				}
 				// CPU team, so mark it as such.. there are no actual CPU players
-				else if (pGameActivity) {
-					pGameActivity->SetCPUTeam(team);
+				else if (gameActivity) {
+					gameActivity->SetCPUTeam(team);
 				}
 			}
 		}
@@ -1463,7 +1456,7 @@ bool ScenarioGUI::StartGame() {
 
 	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
 		// Set up techs
-		GUIListPanel::Item *pTechItem = m_TeamTechSelect[team]->GetSelectedItem();
+		const GUIListPanel::Item *pTechItem = m_TeamTechSelect[team]->GetSelectedItem();
 		if (pTechItem) {
 			// If the "random" selection, choose one from the list of loaded techs
 			if (m_TeamTechSelect[team]->GetSelectedIndex() == 1)//pTechItem->m_ExtraIndex < 0)
@@ -1479,18 +1472,18 @@ bool ScenarioGUI::StartGame() {
 			// Now set the selected tech's module index as what the metaplayer is going to use
 			if (pTechItem) {
 				if (pTechItem->m_ExtraIndex == -2) {
-					pGameActivity->SetTeamTech(team, "-All-");
+					gameActivity->SetTeamTech(team, "-All-");
 				} else {
-					pGameActivity->SetTeamTech(team, g_PresetMan.GetDataModuleName(pTechItem->m_ExtraIndex));
+					gameActivity->SetTeamTech(team, g_PresetMan.GetDataModuleName(pTechItem->m_ExtraIndex));
 				}
 			}
 		}
 
 		// Set up AI skill levels
 		if (m_TeamAISkillSlider[team]->IsEnabled()) {
-			pGameActivity->SetTeamAISkill(team, m_TeamAISkillSlider[team]->GetValue());
+			gameActivity->SetTeamAISkill(team, m_TeamAISkillSlider[team]->GetValue());
 		} else {
-			pGameActivity->SetTeamAISkill(team, Activity::DefaultSkill);
+			gameActivity->SetTeamAISkill(team, Activity::DefaultSkill);
 		}
 	}
 
@@ -1498,7 +1491,7 @@ bool ScenarioGUI::StartGame() {
 	g_LuaMan.FileCloseAll();
 
 	// Put the new and newly set up Activity as the one to start
-	g_ActivityMan.SetStartActivity(pActivity);
+	g_ActivityMan.SetStartActivity(activityInstance);
 
 	// Kill any Campaign games currently running
 	if (g_MetaMan.GameInProgress()) {
@@ -1600,7 +1593,7 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 	// Get the list of all read-in Activity presets
 	presetList.clear();
 	g_PresetMan.GetAllOfType(presetList, "Activity");
-	Activity *presetActivity = 0;
+	Activity *presetActivity = nullptr;
 
 	int selectedActivityIndex = m_ActivitySelectComboBox->GetSelectedIndex();
 
@@ -1652,7 +1645,7 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::UpdateSiteNameLabel(bool visible, string text, const Vector &location, float height) {
+void ScenarioGUI::UpdateSiteNameLabel(bool visible, const string &text, const Vector &location, float height) {
 	// Set up the hover label to appear over any hovered scene location
 	m_ScenarioScenePlanetLabel->SetVisible(visible);
 	if (visible) {
@@ -1730,15 +1723,15 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
 	int totalSegments = 0;
 	int drawnFirstSegments = 0;
 	int lastSegmentsToDraw = 0;
-	int circleRadius = squareSite ? std::floor(6 * circleSize) : std::floor(8 * circleSize);
+	int circleRadius = squareSite ? static_cast<int>(6.0F * circleSize) : static_cast<int>(8.0F * circleSize);
 	int chamferSize = CHAMFERSIZE;
 	Vector chamferPoint1;
 	Vector chamferPoint2;
 	Vector sitePos = m_PlanetCenter + planetPoint;
-	bool siteIsAbove = sitePos.m_Y < screenPoint.m_Y;
+	bool siteIsAbove = sitePos.GetFloorIntY() < screenPoint.GetFloorIntY();
 	float yDirMult = siteIsAbove ? -1.0 : 1.0;
-	bool twoBends = fabs(sitePos.m_Y - screenPoint.m_Y) < (channelHeight - circleRadius);
-	bool noBends = (fabs(sitePos.m_X - screenPoint.m_X) < circleRadius);// && ((m_apPlayerBox[player]->GetWidth() * meterAmount * 0.5) >= fabs(sitePos.m_X - screenPoint.m_X));
+	bool twoBends = std::fabs(sitePos.GetFloorIntY() - screenPoint.GetFloorIntY()) < (channelHeight - circleRadius);
+	bool noBends = std::fabs(sitePos.GetFloorIntX() - screenPoint.GetFloorIntX()) < circleRadius;// && ((m_apPlayerBox[player]->GetWidth() * meterAmount * 0.5) >= fabs(sitePos.GetFloorIntX() - screenPoint.GetFloorIntX()));
 	Vector firstBend(screenPoint.m_X, twoBends ? (screenPoint.m_Y + channelHeight * yDirMult) : sitePos.m_Y);
 	Vector secondBend(sitePos.m_X, firstBend.m_Y);
 	bool siteIsLeft = sitePos.m_X < screenPoint.m_X;
@@ -1756,60 +1749,80 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
 	// Extra lines depending on whether there needs to be two bends due to the site being in the 'channel', ie next to the floating player bar
 	else if (twoBends) {
 		// Cap the chamfer size on the second bend appropriately
-		chamferSize = MIN((firstBend - secondBend).GetMagnitude() - 15, chamferSize);
-		chamferSize = MIN((secondBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
+		chamferSize = std::min(static_cast<int>((firstBend - secondBend).GetMagnitude() - 15), chamferSize);
+		chamferSize = std::min(static_cast<int>((secondBend - sitePos).GetMagnitude() - circleRadius * 3), chamferSize);
 		// Snap the chamfer to not exist below a minimum size
 		chamferSize = (chamferSize < 15) ? 0 : chamferSize;
 		// No inverted chamfer
-		chamferSize = MAX(0, chamferSize);
+		chamferSize = std::max(0, chamferSize);
 		chamferPoint1.SetXY(secondBend.m_X + chamferSize * -xDirMult, secondBend.m_Y);
 		chamferPoint2.SetXY(secondBend.m_X, secondBend.m_Y + chamferSize * -yDirMult);
 		// How many of the last segments to draw: to first bend + to second bend chamfer + chamfer + to site + circle
 		totalSegments = lastSegmentsToDraw = 1 + 1 + (int)(chamferSize > 0) + 1 + 1;
 		// Line to the first bend
-		if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments)) {
+		drawnFirstSegments++;
+		lastSegmentsToDraw--;
+		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
 			DrawGlowLine(drawBitmap, screenPoint, firstBend, color);
 		}
-		// Line to the second bend, incl the chamfer
-		if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments)) {
+		// Line to the second bend, including the chamfer
+		drawnFirstSegments++;
+		lastSegmentsToDraw--;
+		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
 			DrawGlowLine(drawBitmap, firstBend, chamferPoint1, color);
 		}
-		if (chamferSize > 0 && !(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments)) {
-			DrawGlowLine(drawBitmap, chamferPoint1, chamferPoint2, color);
+		if (chamferSize > 0) {
+			drawnFirstSegments++;
+			lastSegmentsToDraw--;
+			if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
+				DrawGlowLine(drawBitmap, chamferPoint1, chamferPoint2, color);
+			}
 		}
 		// Line to the site
-		if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments)) {
+		drawnFirstSegments++;
+		lastSegmentsToDraw--;
+		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
 			DrawGlowLine(drawBitmap, chamferPoint2, sitePos + Vector(0, (circleRadius + 1) * yDirMult), color);
 		}
 	}
 	// Just one bend
 	else {
 		// Cap the chamfer size on the first bend appropriately
-		chamferSize = MIN((screenPoint - firstBend).GetMagnitude() - 15, chamferSize);
-		chamferSize = MIN((firstBend - sitePos).GetMagnitude() - circleRadius * 3, chamferSize);
+		chamferSize = std::min(static_cast<int>((screenPoint - firstBend).GetMagnitude() - 15), chamferSize);
+		chamferSize = std::min(static_cast<int>((firstBend - sitePos).GetMagnitude() - circleRadius * 3), chamferSize);
 		// Snap the chamfer to not exist below a minimum size
 		chamferSize = (chamferSize < 15) ? 0 : chamferSize;
 		// No inverted chamfer
-		chamferSize = MAX(0, chamferSize);
+		chamferSize = std::max(0, chamferSize);
 		chamferPoint1.SetXY(screenPoint.m_X, firstBend.m_Y + chamferSize * -yDirMult);
 		chamferPoint2.SetXY(firstBend.m_X + chamferSize * xDirMult, sitePos.m_Y);
 		// How many of the last segments to draw: to first bend chamfer + chamfer + to site + circle
 		totalSegments = lastSegmentsToDraw = 1 + (int)(chamferSize > 0) + 1 + 1;
-		// Draw line to the first bend, incl the chamfer
-		if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments)) {
+		// Draw line to the first bend, including the chamfer
+		drawnFirstSegments++;
+		lastSegmentsToDraw--;
+		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
 			DrawGlowLine(drawBitmap, screenPoint, chamferPoint1, color);
 		}
-		if (chamferSize > 0 && !(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments)) {
-			DrawGlowLine(drawBitmap, chamferPoint1, chamferPoint2, color);
+		if (chamferSize > 0) {
+			drawnFirstSegments++;
+			lastSegmentsToDraw--;
+			if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
+				DrawGlowLine(drawBitmap, chamferPoint1, chamferPoint2, color);
+			}
 		}
 		// Draw line to the site
-		if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments)) {
+		drawnFirstSegments++;
+		lastSegmentsToDraw--;
+		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
 			DrawGlowLine(drawBitmap, chamferPoint2, sitePos + Vector((circleRadius + 1) * -xDirMult, 0), color);
 		}
 	}
 
 	// Draw a circle around the site target
-	if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments)) {
+	drawnFirstSegments++;
+	lastSegmentsToDraw--;
+	if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
 		int blendAmount = 225 + RandomNum(-20, 20);
 		set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 

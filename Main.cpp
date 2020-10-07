@@ -1326,7 +1326,7 @@ bool PlayIntroTitle() {
 			}
 
             // Detect if a game has been commanded to restart
-            if (g_pScenarioGUI->ActivityRestarted())
+            if (scenarioGUIResult == ScenarioGUI::ScenarioUpdateResult::ACTIVITYRESTARTED)
             {
                 // Make sure the scene is going to be reset with the new parameters
                 g_ResetActivity = true;

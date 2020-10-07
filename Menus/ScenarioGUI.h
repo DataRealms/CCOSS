@@ -43,7 +43,8 @@ namespace RTE {
 		enum ScenarioUpdateResult {
 			NOEVENT = 0,
 			BACKTOMAIN,
-			ACTIVITYRESUMED
+			ACTIVITYRESUMED,
+			ACTIVITYRESTARTED
 		};
 
 		/// <summary>
@@ -97,12 +98,6 @@ namespace RTE {
 		/// <param name="center">The absolute screen coordinates of the planet's center.</param>
 		/// <param name="radius">The radius, in screen pixel units, of the planet.</param>
 		void SetPlanetInfo(const Vector &center, float radius) { m_PlanetCenter = center; m_PlanetRadius = radius; }
-
-		/// <summary>
-		/// Reports whether the player has decided to restart an activity this frame. All parameters for the new game have been fed into ActivityMan already.
-		/// </summary>
-		/// <returns>Whether the activity should be restarted.</returns>
-		bool ActivityRestarted() { return m_ActivityRestarted; }
 
 		/// <summary>
 		/// Updates the state of this Menu each frame.
@@ -339,7 +334,6 @@ namespace RTE {
 		
 		Vector m_PrevMousePos; //!< Previous pos of mouse to calculate dragging.
 
-		bool m_ActivityRestarted; //!< Whether the game was restarted this frame or not.
 		int m_StartPlayers; //!< How many players are chosen to be in the new game.
 		int m_StartTeams; //!< How many teams are chosen to be in the new game.
 		int m_StartFunds; //!< How much money both teams start with in the new game.
@@ -352,7 +346,6 @@ namespace RTE {
 		/// Clears all the member variables of this ScenarioGUI, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
-
 
 		// Disallow the use of some implicit methods.
 		ScenarioGUI(const ScenarioGUI &reference) {}

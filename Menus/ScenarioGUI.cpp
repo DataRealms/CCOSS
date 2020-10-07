@@ -138,7 +138,6 @@ void ScenarioGUI::Clear() {
 	m_ScenarioSelectedScene = 0;
 	m_PrevMousePos.Reset();
 
-	m_ActivityRestarted = false;
 	m_StartPlayers = 1;
 	m_StartTeams = 2;
 	m_StartFunds = 1600;
@@ -362,7 +361,6 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	m_ScenarioController->Update();
 
 	// Reset the specific triggers
-	m_ActivityRestarted = false;
 	m_StartDifficulty = 0;
 
 	if (g_ConsoleMan.IsEnabled()) {
@@ -382,10 +380,8 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
 
 	ScenarioUpdateResult updateInputResult = UpdateInput();
-	if (updateInputResult == ScenarioUpdateResult::BACKTOMAIN) {
-		result = ScenarioUpdateResult::BACKTOMAIN;
-	} else if (updateInputResult == ScenarioUpdateResult::ACTIVITYRESUMED) {
-		result = ScenarioUpdateResult::ACTIVITYRESUMED;
+	if (result == ScenarioUpdateResult::NOEVENT) {
+		result = updateInputResult;
 	}
 
 	/*
@@ -825,6 +821,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 					//                    m_MenuScreen = SCENESELECT;
 					//                    m_ScreenChange = true;
 					g_GUISound.ButtonPressSound()->Play();
+					result = ScenarioUpdateResult::ACTIVITYRESTARTED;
 				} else {
 					g_GUISound.UserErrorSound()->Play();
 				}
@@ -1491,7 +1488,7 @@ bool ScenarioGUI::StartGame() {
 	}
 
 	// Signal the start of this Activity we just set up
-	return m_ActivityRestarted = true;
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

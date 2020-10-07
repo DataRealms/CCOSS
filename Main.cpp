@@ -667,10 +667,11 @@ bool PlayIntroTitle() {
 		}
 
         // Scenario setup menu update and drawing
+		ScenarioGUI::ScenarioUpdateResult scenarioGUIResult;
         if (g_IntroState == SCENARIOMENU)
         {
             g_pScenarioGUI->SetPlanetInfo(planetPos, planetRadius);
-            g_pScenarioGUI->Update();
+			scenarioGUIResult = g_pScenarioGUI->Update();
             g_pScenarioGUI->Draw(g_FrameMan.GetBackBuffer32());
         }
 
@@ -1313,7 +1314,7 @@ bool PlayIntroTitle() {
             }
 
             // Detect if user wants to go back to main menu
-            if (g_pScenarioGUI->BackToMain())
+            if (scenarioGUIResult == ScenarioGUI::ScenarioUpdateResult::BACKTOMAIN)
             {
                 g_IntroState = PLANETTOMAIN;
                 sectionSwitch = true;

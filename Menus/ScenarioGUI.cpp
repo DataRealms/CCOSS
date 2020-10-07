@@ -144,7 +144,6 @@ void ScenarioGUI::Clear() {
 	m_StartTeams = 2;
 	m_StartFunds = 1600;
 	m_StartDifficulty = Activity::MediumDifficulty;
-	m_BackToMain = false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -359,21 +358,21 @@ void ScenarioGUI::SetEnabled(bool enable) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::Update() {
+ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
+	ScenarioUpdateResult result = ScenarioUpdateResult::NOEVENT;
 	m_ScenarioController->Update();
 
 	// Reset the specific triggers
 	m_ActivityRestarted = false;
 	m_ActivityResumed = false;
 	m_StartDifficulty = 0;
-	m_BackToMain = false;
 
 	if (g_ConsoleMan.IsEnabled()) {
-		return;
+		return result;
 	}
 
 	if (m_MenuEnabled != ENABLED && m_MenuEnabled != ENABLING) {
-		return;
+		return result;
 	}
 
 	////////////////////////////////////////////
@@ -384,7 +383,10 @@ void ScenarioGUI::Update() {
 	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 	Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
 
-	UpdateInput();
+	ScenarioUpdateInputResult updateInputResult = UpdateInput();
+	if (updateInputResult == ScenarioUpdateInputResult::BACKTOMAIN) {
+		result = ScenarioUpdateResult::BACKTOMAIN;
+	}
 
 	/*
 		////////////////////////////////////////////
@@ -557,15 +559,12 @@ void ScenarioGUI::Update() {
 		//        m_ScenarioButtons[BACKTOMAIN]->SetFocus();
 	}
 
-	//////////////////////////////////////////
-	// Update the ControlManager
-// Don't do this twice!! it's already done in UpdateInput
-//    m_pGUIController->Update();
-
 	// Save mouse pos for next frame so we can do dragging
 	if (m_EngageDrag) {
 		m_PrevMousePos = mousePos;
 	}
+
+	return result;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -696,7 +695,8 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::UpdateInput() {
+ScenarioGUI::ScenarioUpdateInputResult ScenarioGUI::UpdateInput() {
+	ScenarioUpdateInputResult result = NOEVENT;
 	// TODO: if activity is running, allow esc to resume activity instead of quitting.
 	// If esc pressed, show quit dialog if applicable
 	if (g_UInputMan.KeyPressed(KEY_ESC)) {
@@ -772,12 +772,12 @@ void ScenarioGUI::UpdateInput() {
 				// Hide all screens, the appropriate screen will reappear on next update
 				HideAllScreens();
 
-				// Signal that we want to go back to main menu
-				m_BackToMain = true;
 				m_MenuScreen = SCENESELECT;
 				m_ScreenChange = true;
 
 				g_GUISound.BackButtonPressSound()->Play();
+
+				result = ScenarioUpdateInputResult::BACKTOMAIN;
 			}
 
 			// Quit program button pressed
@@ -882,6 +882,7 @@ void ScenarioGUI::UpdateInput() {
 			}
 		}
 	}
+	return result;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -40,6 +40,16 @@ namespace RTE {
 
 	public:
 
+		enum ScenarioUpdateResult {
+			NOEVENT = 0,
+			BACKTOMAIN
+		};
+
+		enum ScenarioUpdateInputResult {
+			NOEVENT = 0,
+			BACKTOMAIN
+		};
+
 		/// <summary>
 		/// Constructor method used to instantiate a ScenarioGUI object in system memory. Create() should be called before using the object.
 		/// </summary>
@@ -105,15 +115,9 @@ namespace RTE {
 		bool ActivityResumed() { return m_ActivityResumed; }
 
 		/// <summary>
-		/// Reports whether the player has decided to go back to the main menu.
-		/// </summary>
-		/// <returns>Whether we should go back to main menu.</returns>
-		bool BackToMain() { return m_BackToMain; }
-
-		/// <summary>
 		/// Updates the state of this Menu each frame.
 		/// </summary>
-		void Update();
+		ScenarioUpdateResult Update();
 
 		/// <summary>
 		/// Draws the menu.
@@ -142,7 +146,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the user input processing.
 		/// </summary>
-		void UpdateInput();
+		ScenarioUpdateInputResult UpdateInput();
 
 		/// <summary>
 		/// Hides all menu screens, so a single screen can be unhidden and shown alone.
@@ -351,7 +355,6 @@ namespace RTE {
 		int m_StartTeams; //!< How many teams are chosen to be in the new game.
 		int m_StartFunds; //!< How much money both teams start with in the new game.
 		int m_StartDifficulty; //!< Difficulty setting.
-		bool m_BackToMain; //!< Whether user has chosen to go back to the main menu.
 		bool m_SelectTutorial; //!< Select tutorial activity when switched to scenario GUI.
 
 	private:

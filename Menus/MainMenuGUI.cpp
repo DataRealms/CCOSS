@@ -84,7 +84,7 @@ void MainMenuGUI::Clear()
     for (int screen = 0; screen < SCREENCOUNT; ++screen)
         m_apScreenBox[screen] = 0;
     for (int button = 0; button < MAINMENUBUTTONCOUNT; ++button)
-        m_aMainMenuButton[button] = 0;
+        m_MainMenuButtons[button] = 0;
     m_pTeamBox = 0;
     m_pSceneSelector = 0;
     for (int box = 0; box < SKIRMISHPLAYERCOUNT; ++box)
@@ -182,7 +182,7 @@ int MainMenuGUI::Create(Controller *pController)
     m_pGUIController->Load("Base.rte/GUIs/MainMenuGUI.ini");
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
-    GUICollectionBox *pRootBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("root"));
+	m_apScreenBox[ROOT] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("root"));
     m_apScreenBox[MAINSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("MainScreen"));
     m_apScreenBox[PLAYERSSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PlayersScreen"));
     m_apScreenBox[SKIRMISHSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SkirmishScreen"));
@@ -195,9 +195,9 @@ int MainMenuGUI::Create(Controller *pController)
     m_apScreenBox[QUITSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("QuitConfirmBox"));
     m_apScreenBox[MODMANAGERSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ModManagerScreen"));
 
-    pRootBox->SetPositionAbs((g_FrameMan.GetResX() - pRootBox->GetWidth()) / 2, 0);// (g_FrameMan.GetResY() - pRootBox->GetHeight()) / 2);
+	m_apScreenBox[ROOT]->SetPositionAbs((g_FrameMan.GetResX() - m_apScreenBox[ROOT]->GetWidth()) / 2, 0);// (g_FrameMan.GetResY() - m_apScreenBox[ROOT]->GetHeight()) / 2);
 // NO, this screws up the menu positioning!
-//    pRootBox->Resize(pRootBox->GetWidth(), g_FrameMan.GetResY());
+//    m_apScreenBox[ROOT]->Resize(m_apScreenBox[ROOT]->GetWidth(), g_FrameMan.GetResY());
 
     // Set up screens' initial positions and visibility
     m_apScreenBox[QUITSCREEN]->CenterInParent(true, true);
@@ -209,23 +209,23 @@ int MainMenuGUI::Create(Controller *pController)
     // Credits scrolling panel
     m_pScrollPanel = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CreditsPanel"));
 
-    m_aMainMenuButton[CAMPAIGN] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToCampaign"));
-    m_aMainMenuButton[SKIRMISH] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToSkirmish"));
-	m_aMainMenuButton[MULTIPLAYER] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToMultiplayer"));
-	m_aMainMenuButton[OPTIONS] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToOptions"));
-    m_aMainMenuButton[MODMANAGER] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToModManager"));
-    m_aMainMenuButton[EDITOR] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToEditor"));
-    m_aMainMenuButton[CREDITS] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToCreds"));
-    m_aMainMenuButton[QUIT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonQuit"));
-    m_aMainMenuButton[RESUME] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonResume"));
-    m_aMainMenuButton[PLAYTUTORIAL] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonTutorial"));
-    m_aMainMenuButton[METACONTINUE] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonContinue"));
-    m_aMainMenuButton[BACKTOMAIN] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonBackToMain"));
-    m_aMainMenuButton[QUITCONFIRM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("QuitConfirmButton"));
-    m_aMainMenuButton[QUITCANCEL] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("QuitCancelButton"));
-    m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
-    m_aMainMenuButton[PLAYTUTORIAL]->SetVisible(false);
-    m_aMainMenuButton[METACONTINUE]->SetVisible(false);
+    m_MainMenuButtons[CAMPAIGN] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToCampaign"));
+    m_MainMenuButtons[SKIRMISH] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToSkirmish"));
+	m_MainMenuButtons[MULTIPLAYER] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToMultiplayer"));
+	m_MainMenuButtons[OPTIONS] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToOptions"));
+    m_MainMenuButtons[MODMANAGER] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToModManager"));
+    m_MainMenuButtons[EDITOR] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToEditor"));
+    m_MainMenuButtons[CREDITS] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToCreds"));
+    m_MainMenuButtons[QUIT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonQuit"));
+    m_MainMenuButtons[RESUME] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonResume"));
+    m_MainMenuButtons[PLAYTUTORIAL] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonTutorial"));
+    m_MainMenuButtons[METACONTINUE] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonContinue"));
+    m_MainMenuButtons[BACKTOMAIN] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonBackToMain"));
+    m_MainMenuButtons[QUITCONFIRM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("QuitConfirmButton"));
+    m_MainMenuButtons[QUITCANCEL] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("QuitCancelButton"));
+    m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
+    m_MainMenuButtons[PLAYTUTORIAL]->SetVisible(false);
+    m_MainMenuButtons[METACONTINUE]->SetVisible(false);
 
     m_pSceneSelector = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ComboScene"));
     m_pTeamBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelTeams"));
@@ -438,6 +438,10 @@ int MainMenuGUI::Create(Controller *pController)
 		m_aOptionButton[FULLSCREENORWINDOWED]->SetText("Fullscreen");
 	}
 
+	m_VersionLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("VersionLabel"));
+	m_VersionLabel->SetText(c_GameVersion);
+	m_VersionLabel->SetPositionAbs(10, g_FrameMan.GetResY() - m_VersionLabel->GetTextHeight() - 10);
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// Load mod data and fill the lists
     for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i)  
@@ -525,7 +529,7 @@ int MainMenuGUI::Create(Controller *pController)
 	}
 
     // Read all the credits from the file and set the credits label
-    GUILabel *pCreditsLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("CreditsLabel"));
+	m_CreditsLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("CreditsLabel"));
     Reader creditsReader("Credits.txt");
     string creditsText = creditsReader.ReadTo('#', true);
 
@@ -540,8 +544,8 @@ int MainMenuGUI::Create(Controller *pController)
         if (*sItr == -87)//'©')
             (*sItr) = (char)221;
     }
-    pCreditsLabel->SetText(creditsText);
-    m_pScrollPanel->Resize(m_pScrollPanel->GetWidth(), pCreditsLabel->ResizeHeightToFit());
+	m_CreditsLabel->SetText(creditsText);
+	m_CreditsLabel->ResizeHeightToFit();
 
     // Set initial focus, category list, and label settings
     m_ScreenChange = true;
@@ -653,29 +657,27 @@ void MainMenuGUI::Update()
             if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing))
             {
                 m_apScreenBox[MAINSCREEN]->Resize(128, 220);
-                m_aMainMenuButton[RESUME]->SetVisible(true);
+                m_MainMenuButtons[RESUME]->SetVisible(true);
             }
             else
             {
                 m_apScreenBox[MAINSCREEN]->Resize(128, 196);
-                m_aMainMenuButton[RESUME]->SetVisible(false);
+                m_MainMenuButtons[RESUME]->SetVisible(false);
             }
             // Restore the label on the campaign button
-            m_aMainMenuButton[CAMPAIGN]->SetText("Metagame (WIP)");
+            m_MainMenuButtons[CAMPAIGN]->SetText("Metagame (WIP)");
 
-            m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
-            m_aMainMenuButton[PLAYTUTORIAL]->SetVisible(false);
-            m_aMainMenuButton[METACONTINUE]->SetVisible(false);
-            // Move main menu button back to center
-            m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 320);
+            m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
+            m_MainMenuButtons[PLAYTUTORIAL]->SetVisible(false);
+            m_MainMenuButtons[METACONTINUE]->SetVisible(false);
             m_ScreenChange = false;
         }
     
         // Blink the resume button to show the game is still going
-        if (m_aMainMenuButton[RESUME]->GetVisible())
+        if (m_MainMenuButtons[RESUME]->GetVisible())
         {
             if (m_BlinkTimer.AlternateReal(500))
-                m_aMainMenuButton[RESUME]->SetFocus();
+                m_MainMenuButtons[RESUME]->SetFocus();
             else
                 m_pGUIController->GetManager()->SetFocus(0);
         }
@@ -707,11 +709,11 @@ void MainMenuGUI::Update()
         if (m_ScreenChange)
         {
             m_apScreenBox[PLAYERSSCREEN]->SetVisible(true);
-            m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
+            m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
             m_ScreenChange = false;
         }
 
-//        m_aMainMenuButton[BACKTOMAIN]->SetFocus();
+//        m_MainMenuButtons[BACKTOMAIN]->SetFocus();
     }
 
     //////////////////////////////////////
@@ -727,15 +729,15 @@ void MainMenuGUI::Update()
 //            m_pGUIController->GetControl("ButtonStartSkirmish")->SetVisible(true);
             UpdateTeamBoxes();
             // Move main menu button over so the start button fits
-            m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(200, 280);
-            m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
+			m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(200, 280);
+            m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
             m_ScreenChange = false;
         }
 
 //        for (int box = 0; box < SKIRMISHPLAYERCOUNT; ++box)
 //            m_aSkirmishBox[box] = 0;
 
-//        m_aMainMenuButton[BACKTOMAIN]->SetFocus();
+//        m_MainMenuButtons[BACKTOMAIN]->SetFocus();
     }
 
 	//////////////////////////////////////
@@ -746,11 +748,11 @@ void MainMenuGUI::Update()
         if (m_ScreenChange)
         {
             m_apScreenBox[DIFFICULTYSCREEN]->SetVisible(true);
-            m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
+            m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
             m_ScreenChange = false;
         }
 
-//        m_aMainMenuButton[BACKTOMAIN]->SetFocus();
+//        m_MainMenuButtons[BACKTOMAIN]->SetFocus();
     }
 
     //////////////////////////////////////
@@ -761,8 +763,9 @@ void MainMenuGUI::Update()
         if (m_ScreenChange)
         {
             m_apScreenBox[OPTIONSSCREEN]->SetVisible(true);
-            m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
-			m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 360);
+            m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
+			m_apScreenBox[OPTIONSSCREEN]->GUIPanel::AddChild(m_MainMenuButtons[BACKTOMAIN]);
+			m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(180, 220);
             m_pBackToOptionsButton->SetVisible(false);
             UpdateDeviceLabels();
             m_ScreenChange = false;
@@ -777,7 +780,7 @@ void MainMenuGUI::Update()
         if (m_ScreenChange)
         {
             m_apScreenBox[CONFIGSCREEN]->SetVisible(true);
-            m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
+            m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
             m_pBackToOptionsButton->SetVisible(true);
             // Let this pass through, UpdateConfigScreen uses it
             //m_ScreenChange = false;
@@ -804,8 +807,9 @@ void MainMenuGUI::Update()
 	else if (m_MenuScreen == EDITORSCREEN) {
 		if (m_ScreenChange) {
 			m_apScreenBox[EDITORSCREEN]->SetVisible(true);
-			m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
-			m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 285);
+			m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
+			m_apScreenBox[EDITORSCREEN]->GUIPanel::AddChild(m_MainMenuButtons[BACKTOMAIN]);
+			m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(4, 145);
 			m_ScreenChange = false;
 		}
 	}
@@ -816,27 +820,27 @@ void MainMenuGUI::Update()
 	else if (m_MenuScreen == CREDITSSCREEN) {
 		if (m_ScreenChange) {
 			m_apScreenBox[CREDITSSCREEN]->SetVisible(true);
-			m_aMainMenuButton[BACKTOMAIN]->SetVisible(true);
-			m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 430);
-			// Set the scroll panel to be out of sight at the bottom of the credits screen box
-			m_pScrollPanel->SetPositionRel(0, m_apScreenBox[CREDITSSCREEN]->GetHeight());
+			m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
+			m_apScreenBox[CREDITSSCREEN]->GUIPanel::AddChild(m_MainMenuButtons[BACKTOMAIN]);
+			m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(240, 298);
+			m_pScrollPanel->SetPositionRel(0, 0);
+			m_CreditsLabel->SetPositionRel(0, m_pScrollPanel->GetHeight());
 			m_ScrollTimer.Reset();
 			m_ScreenChange = false;
 		}
 
-        long scrollTime = 180000;
+        long scrollTime = 90000;
         float scrollProgress = (float)m_ScrollTimer.GetElapsedRealTimeMS() / (float)scrollTime;
-        int scrollDist = -m_apScreenBox[CREDITSSCREEN]->GetHeight() + (-m_pScrollPanel->GetHeight());
-        // Scroll the scroll panel upwards, GetYPos returns absolute coordinates
-        m_pScrollPanel->SetPositionRel(0, m_apScreenBox[CREDITSSCREEN]->GetHeight() + (scrollDist * scrollProgress));
+        int scrollDist = m_pScrollPanel->GetHeight() + m_CreditsLabel->GetHeight();
+		m_CreditsLabel->SetPositionRel(0, m_pScrollPanel->GetHeight() - static_cast<int>(static_cast<float>(scrollDist) * scrollProgress));
         // If we've scrolled through the whole thing, reset to the bottom and restart scroll
         if (m_ScrollTimer.IsPastRealMS(scrollTime))
         {
-            m_pScrollPanel->SetPositionRel(0, m_apScreenBox[CREDITSSCREEN]->GetHeight());
+			m_CreditsLabel->SetPositionRel(0, m_pScrollPanel->GetHeight());
             m_ScrollTimer.Reset();
         }
 
-//        m_aMainMenuButton[BACKTOMAIN]->SetFocus();
+//        m_MainMenuButtons[BACKTOMAIN]->SetFocus();
     }
 
     //////////////////////////////////////
@@ -847,8 +851,8 @@ void MainMenuGUI::Update()
         if (m_ScreenChange)
         {
             m_apScreenBox[METASCREEN]->SetVisible(true);
-            m_aMainMenuButton[PLAYTUTORIAL]->SetVisible(true);
-            m_aMainMenuButton[METACONTINUE]->SetVisible(true);
+            m_MainMenuButtons[PLAYTUTORIAL]->SetVisible(true);
+            m_MainMenuButtons[METACONTINUE]->SetVisible(true);
             m_pMetaNoticeLabel->SetText("- A T T E N T I O N -\n\nPlease note that the Campaign is in an INCOMPLETE, fully playable, yet still imperfect state!\nAs such, it is lacking some polish, audio, and game balancing, and we will be upgrading it significantly in future.\nThat said, you can absolutely enjoy fighting the A.I. and/or up to three friends in co-op, 2 vs 2, etc.\n\nAlso, if you have not yet played Cortex Command, we recommend you first try the tutorial:");
             m_pMetaNoticeLabel->SetVisible(true);
             // Flag that this notice has now been shown once, so no need to keep showing it
@@ -856,7 +860,7 @@ void MainMenuGUI::Update()
             m_ScreenChange = false;
         }
 
-//        m_aMainMenuButton[BACKTOMAIN]->SetFocus();
+//        m_MainMenuButtons[BACKTOMAIN]->SetFocus();
     }
 
     //////////////////////////////////////
@@ -870,7 +874,7 @@ void MainMenuGUI::Update()
             m_ScreenChange = false;
         }
 
-//        m_aMainMenuButton[QUITCONFIRM]->SetFocus();
+//        m_MainMenuButtons[QUITCONFIRM]->SetFocus();
     }
 
     //////////////////////////////////////////
@@ -888,18 +892,18 @@ void MainMenuGUI::Update()
 		if (anEvent.GetType() == GUIEvent::Command)
         {
 			// Campaign button pressed
-			if (anEvent.GetControl() == m_aMainMenuButton[CAMPAIGN])
+			if (anEvent.GetControl() == m_MainMenuButtons[CAMPAIGN])
             {
 /*
                 // Disable the campaign button for now
-                if (m_aMainMenuButton[CAMPAIGN]->GetText() == "Campaign")
+                if (m_MainMenuButtons[CAMPAIGN]->GetText() == "Campaign")
                 {
-                    m_aMainMenuButton[CAMPAIGN]->SetText("COMING SOON!");
+                    m_MainMenuButtons[CAMPAIGN]->SetText("COMING SOON!");
                     g_GUISound.ExitMenuSound()->Play();
                 }
                 else
                 {
-                    m_aMainMenuButton[CAMPAIGN]->SetText("Campaign");
+                    m_MainMenuButtons[CAMPAIGN]->SetText("Campaign");
                     g_GUISound.ButtonPressSound()->Play();
                 }
 */
@@ -919,7 +923,7 @@ void MainMenuGUI::Update()
             }
 
 			// Skirmish button pressed
-			if (anEvent.GetControl() == m_aMainMenuButton[SKIRMISH])
+			if (anEvent.GetControl() == m_MainMenuButtons[SKIRMISH])
             {
                 m_ScenarioStarted = true;
                 m_CampaignStarted = false;
@@ -936,7 +940,7 @@ void MainMenuGUI::Update()
 //                g_GUISound.ExitMenuSound()->Play();
             }
 
-			if (anEvent.GetControl() == m_aMainMenuButton[MULTIPLAYER])
+			if (anEvent.GetControl() == m_MainMenuButtons[MULTIPLAYER])
 			{
 				m_ScenarioStarted = true;
 				m_CampaignStarted = false;
@@ -965,7 +969,7 @@ void MainMenuGUI::Update()
 			}
 
 			// Options button pressed
-			if (anEvent.GetControl() == m_aMainMenuButton[OPTIONS])
+			if (anEvent.GetControl() == m_MainMenuButtons[OPTIONS])
             {
                 // Hide all screens, the appropriate screen will reappear on next update
                 HideAllScreens();
@@ -976,7 +980,7 @@ void MainMenuGUI::Update()
             }
 
 			// Editor button pressed
-			if (anEvent.GetControl() == m_aMainMenuButton[EDITOR])
+			if (anEvent.GetControl() == m_MainMenuButtons[EDITOR])
             {
                 m_CampaignStarted = false;
 
@@ -993,7 +997,7 @@ void MainMenuGUI::Update()
             }
 
 			// Editor button pressed
-			if (anEvent.GetControl() == m_aMainMenuButton[MODMANAGER])
+			if (anEvent.GetControl() == m_MainMenuButtons[MODMANAGER])
             {
                 // Hide all screens, the appropriate screen will reappear on next update
                 HideAllScreens();
@@ -1004,7 +1008,7 @@ void MainMenuGUI::Update()
             }
 
 			// Credits button pressed
-			if (anEvent.GetControl() == m_aMainMenuButton[CREDITS])
+			if (anEvent.GetControl() == m_MainMenuButtons[CREDITS])
             {
                 // Hide all screens, the appropriate screen will reappear on next update
                 HideAllScreens();
@@ -1015,14 +1019,14 @@ void MainMenuGUI::Update()
             }
 
 			// Quit button pressed
-			if (anEvent.GetControl() == m_aMainMenuButton[QUIT])
+			if (anEvent.GetControl() == m_MainMenuButtons[QUIT])
             {
                 QuitLogic();
                 g_GUISound.ButtonPressSound()->Play();
             }
 
 			// Resume button pressed
-			if (anEvent.GetControl() == m_aMainMenuButton[RESUME])
+			if (anEvent.GetControl() == m_MainMenuButtons[RESUME])
             {
                 m_ActivityResumed = true;
 
@@ -1038,11 +1042,11 @@ void MainMenuGUI::Update()
 						m_ResolutionChangeToUpscaled = false;
 						m_ResolutionChangeDialog->SetVisible(true);
 						m_apScreenBox[OPTIONSSCREEN]->SetEnabled(false);
-						m_aMainMenuButton[BACKTOMAIN]->SetEnabled(false);
+						m_MainMenuButtons[BACKTOMAIN]->SetEnabled(false);
 						m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
 					} else {
 						HideAllScreens();
-						m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
+						m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
 						g_FrameMan.SwitchToFullscreen(false);
 					}
 				} else if (g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
@@ -1050,11 +1054,11 @@ void MainMenuGUI::Update()
 						m_ResolutionChangeToUpscaled = false;
 						m_ResolutionChangeDialog->SetVisible(true);
 						m_apScreenBox[OPTIONSSCREEN]->SetEnabled(false);
-						m_aMainMenuButton[BACKTOMAIN]->SetEnabled(false);
+						m_MainMenuButtons[BACKTOMAIN]->SetEnabled(false);
 						m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
 					} else {
 						HideAllScreens();
-						m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
+						m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
 						g_FrameMan.SwitchResolution(960,540);
 					}
 				} else if (!g_FrameMan.IsFullscreen() && g_FrameMan.IsUpscaledFullscreen()) {
@@ -1072,11 +1076,11 @@ void MainMenuGUI::Update()
 						m_ResolutionChangeToUpscaled = true;
 						m_ResolutionChangeDialog->SetVisible(true);
 						m_apScreenBox[OPTIONSSCREEN]->SetEnabled(false);
-						m_aMainMenuButton[BACKTOMAIN]->SetEnabled(false);
+						m_MainMenuButtons[BACKTOMAIN]->SetEnabled(false);
 						m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
 					} else {
 						HideAllScreens();
-						m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
+						m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
 						g_FrameMan.SwitchToFullscreen(true);
 					}
 				}
@@ -1086,8 +1090,8 @@ void MainMenuGUI::Update()
 			if (anEvent.GetControl() == m_ButtonConfirmResolutionChangeFullscreen) {
 				g_GUISound.ButtonPressSound()->Play();
 				HideAllScreens();
-				m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
-				m_aMainMenuButton[BACKTOMAIN]->SetEnabled(true);
+				m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
+				m_MainMenuButtons[BACKTOMAIN]->SetEnabled(true);
 				m_ResolutionChangeDialog->SetVisible(false);
 				m_apScreenBox[OPTIONSSCREEN]->SetEnabled(true);
 				m_ButtonConfirmResolutionChangeFullscreen->SetVisible(false);
@@ -1102,8 +1106,8 @@ void MainMenuGUI::Update()
 			if (anEvent.GetControl() == m_ButtonConfirmResolutionChange) {
 				g_GUISound.ButtonPressSound()->Play();
 				HideAllScreens();
-				m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
-				m_aMainMenuButton[BACKTOMAIN]->SetEnabled(true);
+				m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
+				m_MainMenuButtons[BACKTOMAIN]->SetEnabled(true);
 				m_ResolutionChangeDialog->SetVisible(false);
 				m_apScreenBox[OPTIONSSCREEN]->SetEnabled(true);
 				m_ButtonConfirmResolutionChange->SetVisible(false);
@@ -1122,16 +1126,15 @@ void MainMenuGUI::Update()
 				g_GUISound.ButtonPressSound()->Play();
 				m_ResolutionChangeDialog->SetVisible(false);
 				m_apScreenBox[OPTIONSSCREEN]->SetEnabled(true);
-				m_aMainMenuButton[BACKTOMAIN]->SetEnabled(true);
+				m_MainMenuButtons[BACKTOMAIN]->SetEnabled(true);
 			}
 			
 			// Return to main menu button pressed
-			if (anEvent.GetControl() == m_aMainMenuButton[BACKTOMAIN])
+			if (anEvent.GetControl() == m_MainMenuButtons[BACKTOMAIN])
             {
                 // Hide all screens, the appropriate screen will reappear on next update
                 HideAllScreens();
-                m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
-                m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 280);
+                m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
 
                 // If leaving the options screen, save the settings!
                 if (m_MenuScreen == OPTIONSSCREEN)
@@ -1233,8 +1236,6 @@ void MainMenuGUI::Update()
                     // CPU team present, so ask for the difficulty level of it before starting
                     else
                     {
-                        // Move main menu button back to center
-                        m_aMainMenuButton[BACKTOMAIN]->SetPositionRel(260, 280);
                         m_MenuScreen = DIFFICULTYSCREEN;
                         m_ScreenChange = true;
                         g_GUISound.ButtonPressSound()->Play();
@@ -1488,7 +1489,7 @@ void MainMenuGUI::Update()
 			if (m_MenuScreen == METASCREEN)
             {
                 // Play tutorial button pressed
-                if (anEvent.GetControl() == m_aMainMenuButton[PLAYTUTORIAL])
+                if (anEvent.GetControl() == m_MainMenuButtons[PLAYTUTORIAL])
                 {
                     // Hide all screens, the appropriate screen will reappear on next update
                     HideAllScreens();
@@ -1506,7 +1507,7 @@ void MainMenuGUI::Update()
                     g_GUISound.ButtonPressSound()->Play();
                 }
                 // Go to registration dialog button
-                else if (anEvent.GetControl() == m_aMainMenuButton[METACONTINUE])
+                else if (anEvent.GetControl() == m_MainMenuButtons[METACONTINUE])
                 {
                     m_CampaignStarted = true;
 
@@ -1555,7 +1556,7 @@ void MainMenuGUI::Update()
 			if (m_MenuScreen == QUITSCREEN)
             {
                 // Confirm quitting of game
-                if (anEvent.GetControl() == m_aMainMenuButton[QUITCONFIRM])
+                if (anEvent.GetControl() == m_MainMenuButtons[QUITCONFIRM])
                 {
                     m_Quit = true;
 
@@ -1566,7 +1567,7 @@ void MainMenuGUI::Update()
                     g_GUISound.ButtonPressSound()->Play();
                 }
                 // Cancel quitting
-                else if (anEvent.GetControl() == m_aMainMenuButton[QUITCANCEL])
+                else if (anEvent.GetControl() == m_MainMenuButtons[QUITCANCEL])
                 {
                     // Hide all screens, the appropriate screen will reappear on next update
                     HideAllScreens();
@@ -1665,7 +1666,7 @@ void MainMenuGUI::Update()
 							m_ButtonConfirmResolutionChange->SetVisible(true);
 						} else {
 							HideAllScreens();
-							m_aMainMenuButton[BACKTOMAIN]->SetVisible(false);
+							m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
 							g_FrameMan.SwitchResolution(g_FrameMan.GetNewResX(), g_FrameMan.GetNewResY(), 1);
 						}
 					}
@@ -1845,7 +1846,7 @@ void MainMenuGUI::Draw(BITMAP *drawBitmap) const
 
 void MainMenuGUI::HideAllScreens()
 {
-    for (int iscreen = 0; iscreen < SCREENCOUNT; ++iscreen)
+    for (int iscreen = MAINSCREEN; iscreen < SCREENCOUNT; ++iscreen)
     {
         if (m_apScreenBox[iscreen])
             m_apScreenBox[iscreen]->SetVisible(false);

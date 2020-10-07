@@ -89,14 +89,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int AtomGroup::Create(MOSRotating *ownerMOSRotating, Material const *material, int resolution, int depth) {
-		if (!ownerMOSRotating || resolution < 0) {
-			RTEAbort("Trying to generate an AtomGroup without sprite and//or 0 resolution setting!");
-		}
+		RTEAssert(ownerMOSRotating, "Trying to generate an AtomGroup for a MOSRotating without a sprite!");
 
 		m_OwnerMO = ownerMOSRotating;
 		m_Material = material;
 		m_AutoGenerate = true;
-		m_Resolution = (resolution > 0) ? resolution : g_MovableMan.GetAGResolution();
+		m_Resolution = (resolution > 0) ? resolution : c_DefaultAtomGroupResolution;
 		m_Depth = depth;
 
 		GenerateAtomGroup(m_OwnerMO);

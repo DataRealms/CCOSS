@@ -18,6 +18,8 @@ namespace RTE {
 	static constexpr float c_MPP = 1.0F / c_PPM; //!< Meters per Pixel constant.
 	static constexpr float c_PPL = 1000.0F / ((100.0F / c_PPM) * (100.0F / c_PPM) * (100.0F / c_PPM)); //!< Pixels per Liter constant.
 	static constexpr float c_LPP = 1.0F / c_PPL; //!< Liters per Pixel constant.
+
+	static constexpr int c_DefaultAtomGroupResolution = 5; //!< The global default AtomGroup resolution setting.
 #pragma endregion
 
 #pragma region Graphics Constants

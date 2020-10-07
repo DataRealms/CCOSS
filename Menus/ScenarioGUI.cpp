@@ -620,20 +620,18 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	m_ScenarioGUIController->Draw(&drawScreen);
 
 	// Draw scene preview after GUI
-	if (m_MenuScreen == SCENESELECT && m_ScenarioScenes) {
-		if (m_ScenarioSelectedScene && m_ScenarioSceneInfoBox->GetVisible()) {
-			BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
-			if (preview) {
-				int xOffset = 0;
-				int yOffset = 0;
-				blit(preview, m_ScenePreviewBitmap, xOffset, yOffset, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
-			} else {
-				int xOffset = 0;
-				int yOffset = 0;
-				blit(m_DefaultPreviewBitmap, m_ScenePreviewBitmap, xOffset, yOffset, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
-			}
-			draw_sprite(drawBitmap, m_ScenePreviewBitmap, m_ScenarioSceneInfoBox->GetXPos() + 10, m_ScenarioSceneInfoBox->GetYPos() + 33);
+	if (m_MenuScreen == SCENESELECT && m_ScenarioScenes && m_ScenarioSelectedScene && m_ScenarioSceneInfoBox->GetVisible()) {
+		BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
+		if (preview) {
+			int xOffset = 0;
+			int yOffset = 0;
+			blit(preview, m_ScenePreviewBitmap, xOffset, yOffset, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
+		} else {
+			int xOffset = 0;
+			int yOffset = 0;
+			blit(m_DefaultPreviewBitmap, m_ScenePreviewBitmap, xOffset, yOffset, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
 		}
+		draw_sprite(drawBitmap, m_ScenePreviewBitmap, m_ScenarioSceneInfoBox->GetXPos() + 10, m_ScenarioSceneInfoBox->GetYPos() + 33);
 	}
 
 	// Draw the Player-Team matrix lines and disabled overlay effects
@@ -757,12 +755,10 @@ void ScenarioGUI::UpdateInput() {
 		m_EngageDrag = false;
 	}
 
-	// Figure out dragging of the dialog boxes, if one is being dragged
-	if (m_ScenarioDraggedBox && !m_EngageDrag) {
-		// Only start drag if we're over a threshold, to prevent small unintentional nudges
-		if ((mousePos - m_PrevMousePos).GetLargest() > 4) {
-			m_EngageDrag = true;
-		}
+	// Figure out dragging of the dialog boxes, if one is being dragged.
+	// Only start drag if we're over a threshold, to prevent small unintentional nudges.
+	if (m_ScenarioDraggedBox && !m_EngageDrag && (mousePos - m_PrevMousePos).GetLargest() > 4) {
+		m_EngageDrag = true;
 	}
 
 	// Actually drag if we now are engaged
@@ -1220,18 +1216,16 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 								}
 							}
 						}
-						// If a human player changed to a CPU team, remove the CPU guy
-						else if (player != PLAYER_CPU && team != TEAM_DISABLED) {
-							// Deselect the CPU's team assignment if he's on the same team as the newly assigned human player
-							if (m_PlayerBoxes[PLAYER_CPU][team]->GetDrawType() == GUICollectionBox::Image) {
-								m_PlayerBoxes[PLAYER_CPU][team]->SetDrawType(GUICollectionBox::Color);
-								m_PlayerBoxes[PLAYER_CPU][team]->SetDrawColor(c_GUIColorBlue);
-								// Move him to disabled
-								//m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-								//pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-								//if (pIcon)
-								//    m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
-							}
+						// If a human player changed to a CPU team, remove the CPU guy.
+						// Deselect the CPU's team assignment if he's on the same team as the newly assigned human player.
+						else if (player != PLAYER_CPU && team != TEAM_DISABLED && m_PlayerBoxes[PLAYER_CPU][team]->GetDrawType() == GUICollectionBox::Image) {
+							m_PlayerBoxes[PLAYER_CPU][team]->SetDrawType(GUICollectionBox::Color);
+							m_PlayerBoxes[PLAYER_CPU][team]->SetDrawColor(c_GUIColorBlue);
+							// Move him to disabled
+							//m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
+							//pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+							//if (pIcon)
+							//    m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 						}
 						g_GUISound.FocusChangeSound()->Play();
 

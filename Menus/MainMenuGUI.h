@@ -636,7 +636,7 @@ protected:
     // Collection box of the buy GUIs
     GUICollectionBox *m_apScreenBox[SCREENCOUNT];
     // The main menu buttons
-    GUIButton *m_aMainMenuButton[MAINMENUBUTTONCOUNT];
+    GUIButton *m_MainMenuButtons[MAINMENUBUTTONCOUNT];
     // Skirmish scene selction box
     GUIComboBox *m_pSceneSelector;
     // The skirmish setup screen team box panels
@@ -685,6 +685,7 @@ protected:
     GUIButton *m_aEditorButton[EDITORBUTTONCOUNT];
     // Metagame notice label
     GUILabel *m_pMetaNoticeLabel;
+	GUILabel *m_VersionLabel; //!< CCCP version number.
 
     // Controller diagram bitmaps
     BITMAP **m_aDPadBitmaps;
@@ -712,6 +713,7 @@ protected:
     GUICollectionBox *m_pEditorPanel;
     // Scrolling panel for the credits
     GUICollectionBox *m_pScrollPanel;
+	GUILabel *m_CreditsLabel; //!< The label containing all the credits text.
     // Timer for credits scrolling pacing
     Timer m_ScrollTimer;
 

@@ -27,13 +27,9 @@ namespace RTE {
 	class GUICollectionBox;
 	class GUIComboBox;
 	class GUICheckbox;
-	class GUITab;
-	class GUIListBox;
-	class GUITextBox;
 	class GUIButton;
 	class GUILabel;
 	class GUISlider;
-	class Entity;
 	class Scene;
 	class Activity;
 

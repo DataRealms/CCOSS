@@ -254,14 +254,13 @@ namespace RTE {
 			TEAMROWCOUNT
 		};
 
+		Controller *m_ScenarioController; //!< Controller which controls this menu. Not owned.
 		
-		Controller *m_pController; //!< Controller which controls this menu. Not owned.
+		GUIScreen *m_ScenarioGUIScreen; //!< GUI Screen for use by the in-game GUI.
 		
-		GUIScreen *m_pGUIScreen; //!< GUI Screen for use by the in-game GUI.
+		GUIInput *m_ScenarioGUIInput; //!< Input controller.
 		
-		GUIInput *m_pGUIInput; //!< Input controller.
-		
-		GUIControlManager *m_pGUIController; //!< The control manager which holds all the controls.
+		GUIControlManager *m_ScenarioGUIController; //!< The control manager which holds all the controls.
 		
 		int m_MenuEnabled; //!< Visibility state of the menu.
 		
@@ -279,77 +278,76 @@ namespace RTE {
 		
 		int m_BlinkMode; //!< What we're blinking.
 
-		
 		Vector m_PlanetCenter; //!< The absolute screen position of the planet center.
 		
 		float m_PlanetRadius; //!< The screen radius of the planet.
 
 		// The different dialog/floating boxes
-		GUICollectionBox *m_pRootBox;
-		GUICollectionBox *m_pActivityBox;
-		GUICollectionBox *m_pSceneInfoBox;
-		GUICollectionBox *m_pPlayerSetupBox;
-		GUICollectionBox *m_pQuitConfirmBox;
+		GUICollectionBox *m_ScenarioRootBox;
+		GUICollectionBox *m_ScenarioActivityBox;
+		GUICollectionBox *m_ScenarioSceneInfoBox;
+		GUICollectionBox *m_ScenarioPlayerSetupBox;
+		GUICollectionBox *m_ScenarioQuitConfirmBox;
 
 		
-		GUIButton *m_aScenarioButton[SCENARIOBUTTONCOUNT]; //!< The menu buttons we want to manipulate.
+		GUIButton *m_ScenarioButtons[SCENARIOBUTTONCOUNT]; //!< The menu buttons we want to manipulate.
 		
-		GUILabel *m_pScenePlanetLabel; //!< Hover name label over Scenes.
+		GUILabel *m_ScenarioScenePlanetLabel; //!< Hover name label over Scenes.
 
 		// Activity selection screen controls
-		GUIComboBox *m_pActivitySelect;
-		GUILabel *m_pActivityLabel;
-		GUILabel *m_pDifficultyLabel;
-		GUISlider *m_pDifficultySlider;
+		GUIComboBox *m_ActivitySelectComboBox;
+		GUILabel *m_ActivityLabel;
+		GUILabel *m_DifficultyLabel;
+		GUISlider *m_DifficultySlider;
 
 		// Scene Info controls
-		GUIButton *m_pSceneCloseButton;
-		GUILabel *m_pSceneNameLabel;
-		GUILabel *m_pSceneInfoLabel;
+		GUIButton *m_SceneCloseButton;
+		GUILabel *m_SceneNameLabel;
+		GUILabel *m_SceneInfoLabel;
 
 		// Player setup controls
 		// Boxes in the matrix which detect and display where a control setting is and should be
-	//    bool m_aaControls[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];
-		GUICollectionBox *m_aapPlayerBoxes[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];
-		GUICollectionBox *m_apTeamBoxes[TEAMROWCOUNT];
-		GUILabel *m_apTeamNameLabels[TEAMROWCOUNT];
-		GUILabel *m_pStartErrorLabel;
-		GUILabel *m_pCPULockLabel;
+	    //bool m_aaControls[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];
+		GUICollectionBox *m_PlayerBoxes[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];
+		GUICollectionBox *m_TeamBoxes[TEAMROWCOUNT];
+		GUILabel *m_TeamNameLabels[TEAMROWCOUNT];
+		GUILabel *m_StartErrorLabel;
+		GUILabel *m_CPULockLabel;
 		
 		int m_LockedCPUTeam; //!< Which team the CPU is locked to, if any.
 
 		
-		GUIComboBox *m_apTeamTechSelect[Activity::MaxTeamCount]; //!< Tech selection combos.
+		GUIComboBox *m_TeamTechSelect[Activity::MaxTeamCount]; //!< Tech selection combos.
 
 		// AI skill selection
-		GUISlider *m_apTeamAISkillSlider[Activity::MaxTeamCount];
-		GUILabel *m_apTeamAISkillLabel[Activity::MaxTeamCount];
+		GUISlider *m_TeamAISkillSlider[Activity::MaxTeamCount];
+		GUILabel *m_TeamAISkillLabel[Activity::MaxTeamCount];
 
-		GUILabel *m_pGoldLabel;
-		GUISlider *m_pGoldSlider;
-		GUICheckbox *m_pFogOfWarCheckbox;
-		GUICheckbox *m_pRequireClearPathToOrbitCheckbox;
-		GUICheckbox *m_pDeployUnitsCheckbox;
+		GUILabel *m_GoldLabel;
+		GUISlider *m_GoldSlider;
+		GUICheckbox *m_FogOfWarCheckbox;
+		GUICheckbox *m_RequireClearPathToOrbitCheckbox;
+		GUICheckbox *m_DeployUnitsCheckbox;
 
 		// The confirmation box and its controls
-		GUILabel *m_pQuitConfirmLabel;
-		GUIButton *m_pQuitConfirmButton;
+		GUILabel *m_QuitConfirmLabel;
+		GUIButton *m_QuitConfirmButton;
 
-		BITMAP *m_pScenePreviewBitmap;
-		BITMAP *m_pDefaultPreviewBitmap;
+		BITMAP *m_ScenePreviewBitmap;
+		BITMAP *m_DefaultPreviewBitmap;
 
 		
-		std::list<Scene *> *m_pScenes; //!< The current set of Scenes being displayed - not owned.
+		std::list<Scene *> *m_ScenarioScenes; //!< The current set of Scenes being displayed - not owned.
 		
 		std::map<Activity *, std::list<Scene *> > m_Activities; //!< The map of Activities, and the Scenes compatible with each, neither of which are owned here.
 		
-		GUICollectionBox *m_pDraggedBox; //!< Currently dragged GUI box.
+		GUICollectionBox *m_ScenarioDraggedBox; //!< Currently dragged GUI box.
 		
 		bool m_EngageDrag; //!< New potential drag is starting.
 		
-		Scene *m_pHoveredScene; //!< The scene preset currently hovered, NOT OWNED.
+		Scene *m_ScenarioHoveredScene; //!< The scene preset currently hovered, NOT OWNED.
 		
-		Scene *m_pSelectedScene; //!< The scene preset currently selected, NOT OWNED.
+		Scene *m_ScenarioSelectedScene; //!< The scene preset currently selected, NOT OWNED.
 		
 		Vector m_PrevMousePos; //!< Previous pos of mouse to calculate dragging.
 

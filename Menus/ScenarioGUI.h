@@ -111,12 +111,6 @@ namespace RTE {
 		bool BackToMain() { return m_BackToMain; }
 
 		/// <summary>
-		/// Reports whether the player has decided to quit the program.
-		/// </summary>
-		/// <returns>Whether the program has been commanded to shut down by the user.</returns>
-		bool QuitProgram() { return m_Quit; }
-
-		/// <summary>
 		/// Updates the state of this Menu each frame.
 		/// </summary>
 		void Update();
@@ -358,7 +352,6 @@ namespace RTE {
 		int m_StartFunds; //!< How much money both teams start with in the new game.
 		int m_StartDifficulty; //!< Difficulty setting.
 		bool m_BackToMain; //!< Whether user has chosen to go back to the main menu.
-		bool m_Quit; //!< Player selected to quit the program.
 		bool m_SelectTutorial; //!< Select tutorial activity when switched to scenario GUI.
 
 	private:

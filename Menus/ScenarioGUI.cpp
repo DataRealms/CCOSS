@@ -145,7 +145,6 @@ void ScenarioGUI::Clear() {
 	m_StartFunds = 1600;
 	m_StartDifficulty = Activity::MediumDifficulty;
 	m_BackToMain = false;
-	m_Quit = false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -369,7 +368,6 @@ void ScenarioGUI::Update() {
 	m_ActivityResumed = false;
 	m_StartDifficulty = 0;
 	m_BackToMain = false;
-	m_Quit = false;
 
 	if (g_ConsoleMan.IsEnabled()) {
 		return;
@@ -929,7 +927,7 @@ void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox *pBox, int margin) {
 
 void ScenarioGUI::UpdateActivityBox() {
 	// Get the currently selected Activity
-	const Activity *selectedActivity;
+	const Activity *selectedActivity = nullptr;
 	if (m_ActivitySelectComboBox) {
 		selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
 	}

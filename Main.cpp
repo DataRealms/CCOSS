@@ -1312,9 +1312,6 @@ bool PlayIntroTitle() {
                 sectionSwitch = false;
             }
 
-            // Detect quitting of the program from the menu button
-            g_Quit = g_Quit || g_pScenarioGUI->QuitProgram();
-
             // Detect if user wants to go back to main menu
             if (g_pScenarioGUI->BackToMain())
             {

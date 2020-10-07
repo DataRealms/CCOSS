@@ -585,17 +585,17 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	if (m_MenuScreen == SCENESELECT && m_ScenarioScenes) {
 		// Draw the scene location dots
 		Vector screenLocation;
-		for (list<Scene *>::const_iterator sItr = m_ScenarioScenes->begin(); sItr != m_ScenarioScenes->end(); ++sItr) {
+		for (Scene * scene : *m_ScenarioScenes) {
 			int color;
 
 			// Mark user-created scenes to let players easily distinguish them from built-in
-			if ((*sItr)->GetModuleID() == g_PresetMan.GetModuleID("Scenes.rte")) {
+			if (scene->GetModuleID() == g_PresetMan.GetModuleID("Scenes.rte")) {
 				color = c_GUIColorGreen;
 			} else {
 				color = c_GUIColorYellow;
 			}
 
-			screenLocation = m_PlanetCenter + (*sItr)->GetLocation() + (*sItr)->GetLocationOffset();
+			screenLocation = m_PlanetCenter + scene->GetLocation() + scene->GetLocationOffset();
 			blendAmount = 85 + RandomNum(-25, 25);
 			set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 			circlefill(drawBitmap, screenLocation.GetFloorIntX(), screenLocation.GetFloorIntY(), 4, color);
@@ -1526,58 +1526,56 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 	list<Entity *> presetList;
 	g_PresetMan.GetAllOfType(presetList, "Scene");
 	list<Scene *> filteredScenes;
-	Scene *pScene = 0;
 
 	// Go through the list and cast all the pointers to scenes so we have a handy list
-	for (list<Entity *>::iterator pItr = presetList.begin(); pItr != presetList.end(); ++pItr) {
-		pScene = dynamic_cast<Scene *>(*pItr);
+	for (Entity * presetEntity : presetList) {
+		Scene *presetScene = dynamic_cast<Scene *>(presetEntity);
 		// Only add non-editor and non-special scenes, or ones that don't have locations defined, or have Test in their names, or are metascenes
-		if (pScene && !pScene->GetLocation().IsZero() && !pScene->IsMetagameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes())) {
-			filteredScenes.push_back(pScene);
+		if (presetScene && !presetScene->GetLocation().IsZero() && !presetScene->IsMetagameInternal() && (presetScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes())) {
+			filteredScenes.push_back(presetScene);
 		}
 	}
 
-	//Clear offsets
-	for (list<Scene *>::iterator pItr = filteredScenes.begin(); pItr != filteredScenes.end(); ++pItr) {
-		(*pItr)->SetLocationOffset(Vector(0, 0));
+	for (Scene * filteredScene : filteredScenes) {
+		filteredScene->SetLocationOffset(Vector(0, 0));
 	}
 
 	// We need to calculate planet center manually because m_PlanetCenter reflects coords of moving planet
 	// which is outside the screen when this is called first time
 	Vector planetCenter = Vector(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
-	// Correct planet pos a bit when it's location is known
+	// Correct planet pos a bit when its location is known.
 	if (!m_PlanetCenter.IsZero()) {
 		planetCenter = m_PlanetCenter;
 	}
 
 	//Move out-of-screen scenes closer to the middle of the planet if we have planet info
-	for (list<Scene *>::iterator pItr = filteredScenes.begin(); pItr != filteredScenes.end(); ++pItr) {
-		float y = planetCenter.GetY() + (*pItr)->GetLocation().GetY();
+	for (Scene *filteredScene : filteredScenes) {
+		float y = planetCenter.GetY() + filteredScene->GetLocation().GetY();
 
 		// Do not touch scenes outside the planet, they might be hidden intentionally
-		if (abs((*pItr)->GetLocation().GetY()) < m_PlanetRadius + 100 && abs((*pItr)->GetLocation().GetX()) < m_PlanetRadius + 100) {
+		if (abs(filteredScene->GetLocation().GetY()) < m_PlanetRadius + 100 && abs(filteredScene->GetLocation().GetX()) < m_PlanetRadius + 100) {
 			if (y < 10) {
-				(*pItr)->SetLocationOffset(Vector(0, -y + 14));
+				filteredScene->SetLocationOffset(Vector(0, -y + 14));
 			}
 
 			if (y > g_FrameMan.GetResY() - 10) {
-				(*pItr)->SetLocationOffset(Vector(0, -(y - g_FrameMan.GetResY() + 14)));
+				filteredScene->SetLocationOffset(Vector(0, -(y - g_FrameMan.GetResY() + 14)));
 			}
 		}
 	}
 
 	// Add offsets to reveal overlapping scenes if any
-	for (list<Scene *>::iterator pItr = filteredScenes.begin(); pItr != filteredScenes.end(); ++pItr) {
+	for (Scene *filteredScene1 : filteredScenes) {
 		bool isOverlapped = false;
 
 		do {
 			isOverlapped = false;
 
 			// Find overlapping scene dot
-			for (list<Scene *>::iterator pItr2 = filteredScenes.begin(); pItr2 != filteredScenes.end(); ++pItr2) {
-				if ((*pItr) != (*pItr2)) {
-					Vector pos1 = (*pItr)->GetLocation() + (*pItr)->GetLocationOffset();
-					Vector pos2 = (*pItr2)->GetLocation() + (*pItr2)->GetLocationOffset();
+			for (const Scene * filteredScene2 : filteredScenes) {
+				if (filteredScene1 != filteredScene2) {
+					Vector pos1 = filteredScene1->GetLocation() + filteredScene1->GetLocationOffset();
+					Vector pos2 = filteredScene2->GetLocation() + filteredScene2->GetLocationOffset();
 
 					if ((pos1 - pos2).GetMagnitude() < 8) {
 						isOverlapped = true;
@@ -1588,18 +1586,18 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 
 			// Move the dot closer to the planet center
 			Vector offsetIncrement;
-			if ((*pItr)->GetLocation().GetY() > 0) {
+			if (filteredScene1->GetLocation().GetY() > 0) {
 				offsetIncrement = Vector(0, -8);
 			} else {
 				offsetIncrement = Vector(0, 8);
 			}
 
 			if (isOverlapped) {
-				if (abs((*pItr)->GetLocation().GetY()) > m_PlanetRadius) {
+				if (abs(filteredScene1->GetLocation().GetY()) > m_PlanetRadius) {
 					offsetIncrement.m_Y = -offsetIncrement.m_Y * 2;
 				}
 
-				(*pItr)->SetLocationOffset((*pItr)->GetLocationOffset() + offsetIncrement);
+				filteredScene1->SetLocationOffset(filteredScene1->GetLocationOffset() + offsetIncrement);
 
 			}
 		} while (isOverlapped);
@@ -1608,7 +1606,7 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 	// Get the list of all read-in Activity presets
 	presetList.clear();
 	g_PresetMan.GetAllOfType(presetList, "Activity");
-	Activity *pActivity = 0;
+	Activity *presetActivity = 0;
 
 	int selectedActivityIndex = m_ActivitySelectComboBox->GetSelectedIndex();
 
@@ -1618,27 +1616,25 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 	m_ActivitySelectComboBox->ClearList();
 	int index = 0;
 	int tutorialIndex = -1;
-	for (list<Entity *>::iterator pItr = presetList.begin(); pItr != presetList.end(); ++pItr) {
-		bool isMetaActivity = false;
-
-		pActivity = dynamic_cast<Activity *>(*pItr);
+	for (Entity *presetEntity : presetList) {
+		presetActivity = dynamic_cast<Activity *>(presetEntity);
 		// Only add non-editor and non-special activities
-		if (pActivity/* && pActivity->GetClassName() != "GATutorial" */ && pActivity->GetClassName().find("Editor") == string::npos) {
+		if (presetActivity/* && pActivity->GetClassName() != "GATutorial" */ && presetActivity->GetClassName().find("Editor") == string::npos) {
 			// Prepare a new entry in the list of Activity:ies that we have
-			pair<Activity *, list<Scene *> > newPair(pActivity, list<Scene *>());
-			for (list<Scene *>::iterator sItr = filteredScenes.begin(); sItr != filteredScenes.end(); ++sItr) {
-				// Check if the Scene has the required Area:s and such needed for this Activity
-				if (pActivity->SceneIsCompatible(*sItr)) {
-					newPair.second.push_back(*sItr);
+			pair<Activity *, list<Scene *> > newPair(presetActivity, list<Scene *>());
+			for (Scene *filteredScene : filteredScenes) {
+				// Check if the Scene has the required Areas and such needed for this Activity.
+				if (presetActivity->SceneIsCompatible(filteredScene)) {
+					newPair.second.push_back(filteredScene);
 				}
 			}
 
 			m_Activities.insert(newPair);
 			// Add to the activity selection combo, and attach the activity copy, not passing in ownership
-			m_ActivitySelectComboBox->AddItem(pActivity->GetPresetName(), "", 0, pActivity);
+			m_ActivitySelectComboBox->AddItem(presetActivity->GetPresetName(), "", 0, presetActivity);
 
 			// Save the tutorial mission so we can select it by default
-			if (pActivity->GetClassName() == "GATutorial") {
+			if (presetActivity->GetClassName() == "GATutorial") {
 				tutorialIndex = index;
 			}
 			index++;

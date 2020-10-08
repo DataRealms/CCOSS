@@ -71,9 +71,7 @@ void ScenarioGUI::Clear() {
 	m_ScreenChange = false;
 	m_SceneFocus = 0;
 	m_FocusChange = 0;
-	m_MenuSpeed = 0.3F;
 	m_BlinkTimer.Reset();
-	m_BlinkMode = NOBLINK;
 
 	m_PlanetCenter.Reset();
 	m_PlanetRadius = 240.0F;
@@ -577,10 +575,11 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	// Draw scene preview after GUI.
 	if (m_MenuScreen == SCENESELECT && m_ScenarioScenes && m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
 		BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
-		int xOffset = 0;
-		int yOffset = 0;
-		preview = preview ? preview : m_DefaultPreviewBitmap;
-		blit(preview, m_ScenePreviewBitmap, xOffset, yOffset, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
+		if (!preview) {
+			preview = m_DefaultPreviewBitmap;
+		}
+		
+		blit(preview, m_ScenePreviewBitmap, 0, 0, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
 		draw_sprite(drawBitmap, m_ScenePreviewBitmap, m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + 10, m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + 33);
 	} else if (m_MenuScreen == PLAYERSETUP) {
 		// Draw the Player-Team matrix lines and disabled overlay effects.

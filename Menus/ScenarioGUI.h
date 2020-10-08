@@ -264,11 +264,7 @@ namespace RTE {
 		
 		int m_FocusChange; //!< Focus change direction - 0 is none, negative is back, positive forward.
 		
-		float m_MenuSpeed; //!< Speed at which the menus appear and disappear.
-		
 		Timer m_BlinkTimer; //!< Notification blink timer.
-		
-		int m_BlinkMode; //!< What we're blinking.
 
 		Vector m_PlanetCenter; //!< The absolute screen position of the planet center.
 		

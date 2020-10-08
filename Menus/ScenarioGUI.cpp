@@ -191,55 +191,46 @@ int ScenarioGUI::Create(Controller *pController) {
 	for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
 		for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team) {
 			// +1 because the controls are indexed starting at 1, not 0
-			const std::string playerString = "P" + std::to_string(player + 1) + "T" + std::to_string(team + 1) + "Box";
-			m_PlayerBoxes[player][team] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(playerString));
+			const std::string controlString = "P" + std::to_string(player + 1) + "T" + std::to_string(team + 1) + "Box";
+			m_PlayerBoxes[player][team] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
 		}
 	}
 
 	m_TeamBoxes[TEAM_DISABLED] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("TDIcon"));
-	m_TeamBoxes[Activity::TeamOne] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("T1Icon"));
-	m_TeamBoxes[Activity::TeamTwo] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("T2Icon"));
-	m_TeamBoxes[Activity::TeamThree] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("T3Icon"));
-	m_TeamBoxes[Activity::TeamFour] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("T4Icon"));
 	m_TeamNameLabels[TEAM_DISABLED] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("TDLabel"));
-	m_TeamNameLabels[Activity::TeamOne] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("T1Label"));
-	m_TeamNameLabels[Activity::TeamTwo] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("T2Label"));
-	m_TeamNameLabels[Activity::TeamThree] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("T3Label"));
-	m_TeamNameLabels[Activity::TeamFour] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("T4Label"));
-	m_TeamTechSelect[Activity::TeamOne] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl("T1TechCombo"));
-	m_TeamTechSelect[Activity::TeamTwo] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl("T2TechCombo"));
-	m_TeamTechSelect[Activity::TeamThree] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl("T3TechCombo"));
-	m_TeamTechSelect[Activity::TeamFour] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl("T4TechCombo"));
-	m_TeamAISkillSlider[Activity::TeamOne] = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl("T1AISkillSlider"));
-	m_TeamAISkillSlider[Activity::TeamTwo] = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl("T2AISkillSlider"));
-	m_TeamAISkillSlider[Activity::TeamThree] = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl("T3AISkillSlider"));
-	m_TeamAISkillSlider[Activity::TeamFour] = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl("T4AISkillSlider"));
-	m_TeamAISkillLabel[Activity::TeamOne] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("T1AISkillLabel"));
-	m_TeamAISkillLabel[Activity::TeamTwo] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("T2AISkillLabel"));
-	m_TeamAISkillLabel[Activity::TeamThree] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("T3AISkillLabel"));
-	m_TeamAISkillLabel[Activity::TeamFour] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("T4AISkillLabel"));
 
-	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; team++) {
-		// Hide tech combobxes by default
+	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
+		std::string controlString = "T" + std::to_string(team + 1) + "Icon";
+		m_TeamBoxes[team] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
+
+		controlString = "T" + std::to_string(team + 1) + "Label";
+		m_TeamNameLabels[team] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
+
+		controlString = "T" + std::to_string(team + 1) + "TechCombo";
+		m_TeamTechSelect[team] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl(controlString));
 		m_TeamTechSelect[team]->SetEnabled(false);
 		m_TeamTechSelect[team]->SetVisible(false);
-		// Add a "Random" tech choice to all the combo boxes first so that's at least in there always
 		m_TeamTechSelect[team]->GetListPanel()->AddItem("-All-", "", 0, 0, -2);
 		m_TeamTechSelect[team]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
 		m_TeamTechSelect[team]->SetSelectedIndex(0);
-		// Hide AIs skill combobxes by default
+
+		controlString = "T" + std::to_string(team + 1) + "AISkillSlider";
+		m_TeamAISkillSlider[team] = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl(controlString));
 		m_TeamAISkillSlider[team]->SetEnabled(false);
 		m_TeamAISkillSlider[team]->SetVisible(false);
 		m_TeamAISkillSlider[team]->SetValue(Activity::DefaultSkill);
 
+		controlString = "T" + std::to_string(team + 1) + "AISkillLabel";
+		m_TeamAISkillLabel[team] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
 		m_TeamAISkillLabel[team]->SetEnabled(false);
 		m_TeamAISkillLabel[team]->SetVisible(false);
 		m_TeamAISkillLabel[team]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[team]->GetValue()));
 	}
+
 	m_StartErrorLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("StartErrorLabel"));
 	m_CPULockLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("CPULockLabel"));
 
-	// Populate the tech comboboxes with the available tech modules
+	// Populate the tech comboboxes with the available tech modules.
 	const DataModule *dataModule = nullptr;
 	for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i) {
 		dataModule = g_PresetMan.GetDataModule(i);
@@ -249,19 +240,17 @@ int ScenarioGUI::Create(Controller *pController) {
 			std::string::size_type techPos = techName.find(techString);
 			if (techPos != string::npos) {
 				techName.replace(techPos, techString.length(), "");
-				m_TeamTechSelect[Activity::TeamOne]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-				m_TeamTechSelect[Activity::TeamTwo]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-				m_TeamTechSelect[Activity::TeamThree]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-				m_TeamTechSelect[Activity::TeamFour]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+				for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
+					m_TeamTechSelect[team]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+				}
 			}
 		}
 	}
 
-	// Make the lists be scrolled to the top when they are initially dropped
-	m_TeamTechSelect[Activity::TeamOne]->GetListPanel()->ScrollToTop();
-	m_TeamTechSelect[Activity::TeamTwo]->GetListPanel()->ScrollToTop();
-	m_TeamTechSelect[Activity::TeamThree]->GetListPanel()->ScrollToTop();
-	m_TeamTechSelect[Activity::TeamFour]->GetListPanel()->ScrollToTop();
+	// Make the lists be scrolled to the top when they are initially dropped.
+	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
+		m_TeamTechSelect[team]->GetListPanel()->ScrollToTop();
+	}
 
 	m_GoldLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("GoldLabel"));
 	m_GoldSlider = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl("GoldSlider"));
@@ -272,7 +261,7 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_QuitConfirmLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("ConfirmLabel"));
 	m_QuitConfirmButton = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("ConfirmButton"));
 
-	// Set up initial combo box locations and sizes
+	// Set up initial combobox locations and sizes.
 	m_ScenarioButtons[BACKTOMAINBUTTON]->SetPositionRel(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - m_ScenarioButtons[BACKTOMAINBUTTON]->GetWidth() - 16, m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - m_ScenarioButtons[BACKTOMAINBUTTON]->GetHeight() - 22);
 	m_ScenarioButtons[RESUME]->SetPositionRel(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - m_ScenarioButtons[RESUME]->GetWidth() - 16, m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - m_ScenarioButtons[RESUME]->GetHeight() - 47);
 	m_ScenarioScreenBoxes[ACTIVITY]->SetPositionRel(16, 16);
@@ -282,24 +271,20 @@ int ScenarioGUI::Create(Controller *pController) {
 
 	m_ScenePreviewBitmap = create_bitmap_ex(8, Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT);
 
-	// Load default preview bitmap
+	// Load default preview bitmap.
 	ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.png");
 	m_DefaultPreviewBitmap = defaultPreview.LoadAndReleaseBitmap();
 
 	clear_to_color(m_ScenePreviewBitmap, g_MaskColor);
 
-	// Set initial focus, category list, and label settings
+	// Set initial focus, category list, and label settings.
 	m_ScreenChange = true;
 	m_FocusChange = 1;
-	//CategoryChange();
 
-	// Fill our Scene and Activity lists
 	GetAllScenesAndActivities();
 
-	// Update the first box visible
 	UpdateActivityBox();
 
-	// Hide all screens, the appropriate screen will reappear on next update
 	HideAllScreens();
 
 	return 0;
@@ -401,7 +386,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	if (m_MenuScreen == SCENESELECT) {
 		if (m_ScreenChange) {
 			m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
-			// Scene box only appears when a scene is actively selected
+			// Scene box only appears when a scene is actively selected.
 			m_ScenarioScreenBoxes[SCENEINFO]->SetVisible(false);
 
 			m_ScreenChange = false;
@@ -423,16 +408,11 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 			}
 		}
 
-		// Get mouse position so we can see which scene it hovers over
-		int mouseX;
-		int mouseY;
-		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
-		Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
 		Vector screenLocation;
 
 		bool mouseIsInBox = false;
 
-		// Detect if mouse is inside UI boxes
+		// Detect if mouse is inside UI boxes.
 		const GUIRect *rect;
 		rect = m_ScenarioScreenBoxes[ACTIVITY]->GetRect();
 		if (mouseX > rect->left && mouseX < rect->right && mouseY > rect->top && mouseY < rect->bottom) {
@@ -444,34 +424,33 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 			mouseIsInBox = true;
 		}
 
-		// Validate mouse position as being over the planet area for hover operations!
+		// Validate mouse position as being over the planet area for hover operations.
 		if (m_ScenarioScenes && !m_ScenarioDraggedBox && (mousePos - m_PlanetCenter).GetMagnitude() < m_PlanetRadius && !mouseIsInBox) {
-			// If unlocked, detect any Scene close to the mouse and highlight it
+			// If unlocked, detect any Scene close to the mouse and highlight it.
 			bool foundAnyHover = false;
 			//bool foundNewHover = false;
-			list<Scene *>::iterator sItr;
-			list<Scene *>::iterator newCandidateItr = m_ScenarioScenes->end();
+			Scene *candidateScene = nullptr;
 			float distance = 0;
 			float shortestDist = 1000000.0F;
-			for (sItr = m_ScenarioScenes->begin(); sItr != m_ScenarioScenes->end(); ++sItr) {
-				screenLocation = m_PlanetCenter + (*sItr)->GetLocation() + (*sItr)->GetLocationOffset();
+			for (Scene*scenarioScene : *m_ScenarioScenes) {
+				screenLocation = m_PlanetCenter + scenarioScene->GetLocation() + scenarioScene->GetLocationOffset();
 				distance = (screenLocation - mousePos).GetMagnitude();
 
-				// The first new scene the mouse's position is close to when unlocked, make selected
+				// The first new scene the mouse's position is close to when unlocked, make selected.
 				if (distance < 16 && distance < shortestDist) {
 					// This is now the shortest
 					shortestDist = distance;
 					foundAnyHover = true;
-					// See if the scene hovered is different from the previously hovered one, and if so, set it to the new candidate to switch hovering to
-// Actually, don't because it will cause alternating each frame if two hover zones overlap!
-//                    if (*sItr != m_ScenarioHoveredScene)
-					newCandidateItr = sItr;
+					// See if the scene hovered is different from the previously hovered one, and if so, set it to the new candidate to switch hovering to.
+// Actually, don't because it will cause alternating each frame if two hover zones overlap.
+//                    if (*scenarioScene != m_ScenarioHoveredScene)
+					candidateScene = scenarioScene;
 				}
 			}
 
-			// Set new hovered scene to be the one now closest to the cursor, if there is any and if it is different the a currently hovered one
-			if (newCandidateItr != m_ScenarioScenes->end() && (*newCandidateItr) != m_ScenarioHoveredScene) {
-				m_ScenarioHoveredScene = (*newCandidateItr);
+			// Set new hovered scene to be the one now closest to the cursor, if there is any and if it is different than the currently hovered one.
+			if (candidateScene != nullptr && candidateScene != m_ScenarioHoveredScene) {
+				m_ScenarioHoveredScene = candidateScene;
 				//foundNewHover = true;
 				g_GUISound.SelectionChangeSound()->Play();
 				UpdateScenesBox();
@@ -481,22 +460,22 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 				m_ScenarioHoveredScene = 0;
 			}
 
-			// Set up the hover label to appear over any hovered scene location
+			// Set up the hover label to appear over any hovered scene location.
 			if (m_ScenarioHoveredScene) {
 				UpdateSiteNameLabel(true, m_ScenarioHoveredScene->GetPresetName(), m_ScenarioHoveredScene->GetLocation() + m_ScenarioHoveredScene->GetLocationOffset());
 			} else {
 				UpdateSiteNameLabel(false);
 			}
 
-			// If clicked, whatever is hovered becomes selected
+			// If clicked, whatever is hovered becomes selected.
 			if (g_UInputMan.MenuButtonPressed(UInputMan::MENU_EITHER)) {
 				if (m_ScenarioHoveredScene) {
 					m_ScenarioSelectedScene = m_ScenarioHoveredScene;
 					g_GUISound.ItemChangeSound()->Play();
 					UpdateScenesBox();
 				}
-				/* Can't do this, doesn't take into account clicks on floating UI boxes
-								// Not hovering over anything on click, so deselect whatever was selected
+				/* Can't do this, doesn't take into account clicks on floating UI boxes.
+								// Not hovering over anything on click, so deselect whatever was selected.
 								else if (m_ScenarioSelectedScene)
 								{
 									m_ScenarioSelectedScene = 0;
@@ -506,8 +485,8 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 			}
 		}
 
-		// Update the Activity setup and Scene info boxes
-// No need to do this all the time, just when controls change
+		// Update the Activity setup and Scene info boxes.
+// No need to do this all the time, just when controls change.
 //        UpdateActivityBox();
 		//if (!m_pSchemeSelect->IsDropped())
 		UpdateScenesBox();
@@ -519,14 +498,14 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	else if (m_MenuScreen == PLAYERSETUP) {
 		if (m_ScreenChange) {
 			m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->SetVisible(true);
-			//            m_ScenarioButtons[BACKTOMAINBUTTON]->SetVisible(true);
+			//m_ScenarioButtons[BACKTOMAINBUTTON]->SetVisible(true);
 			m_ScreenChange = false;
 		}
 
 		// Update the player selection box
 		UpdatePlayersBox(false);
 
-		//        m_ScenarioButtons[BACKTOMAINBUTTON]->SetFocus();
+		//m_ScenarioButtons[BACKTOMAINBUTTON]->SetFocus();
 	}
 
 	//////////////////////////////////////
@@ -538,10 +517,10 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 			m_ScreenChange = false;
 		}
 
-		//        m_ScenarioButtons[BACKTOMAINBUTTON]->SetFocus();
+		//m_ScenarioButtons[BACKTOMAINBUTTON]->SetFocus();
 	}
 
-	// Save mouse pos for next frame so we can do dragging
+	// Save mouse pos for next frame so we can do dragging.
 	if (m_EngageDrag) {
 		m_PrevMousePos = mousePos;
 	}
@@ -552,20 +531,20 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
-	// Transparency effect on the scene dots and lines
+	// Transparency effect on the scene dots and lines.
 	drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
-	// Screen blend the dots and lines, with some flicekring in its intensity
+	// Screen blend the dots and lines, with some flickering in its intensity.
 	int blendAmount = 120 + RandomNum(-55, 55);
 	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
-	// Draw sites etc only when selecting them
+	// Draw sites etc only when selecting them.
 	if (m_MenuScreen == SCENESELECT && m_ScenarioScenes) {
-		// Draw the scene location dots
+		// Draw the scene location dots.
 		Vector screenLocation;
 		for (const Scene * scene : *m_ScenarioScenes) {
 			int color;
 
-			// Mark user-created scenes to let players easily distinguish them from built-in
+			// Mark user-created scenes to let players easily distinguish them from built-in.
 			if (scene->GetModuleID() == g_PresetMan.GetModuleID("Scenes.rte")) {
 				color = c_GUIColorGreen;
 			} else {
@@ -582,21 +561,20 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 			circlefill(drawBitmap, screenLocation.GetFloorIntX(), screenLocation.GetFloorIntY(), 1, color);
 		}
 
-		// Draw the lines etc pointing at the selected Scene from the Scene Info box
+		// Draw the lines etc pointing at the selected Scene from the Scene Info box.
 		if (m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
 			Vector sceneInfoBoxPos(m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + (m_ScenarioScreenBoxes[SCENEINFO]->GetWidth() / 2), m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + (m_ScenarioScreenBoxes[SCENEINFO]->GetHeight() / 2));
 			DrawScreenLineToSitePoint(drawBitmap, sceneInfoBoxPos, m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset(), c_GUIColorWhite, -1, -1, (m_ScenarioScreenBoxes[SCENEINFO]->GetHeight() / 2) + CHAMFERSIZE + 6, 1.0);
 		}
 	}
 
-	// Back to solid drawing
 	drawing_mode(DRAW_MODE_SOLID, 0, 0, 0);
 
 	AllegroScreen drawScreen(drawBitmap);
 
 	m_ScenarioGUIController->Draw(&drawScreen);
 
-	// Draw scene preview after GUI
+	// Draw scene preview after GUI.
 	if (m_MenuScreen == SCENESELECT && m_ScenarioScenes && m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
 		BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
 		int xOffset = 0;
@@ -604,26 +582,24 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 		preview = preview ? preview : m_DefaultPreviewBitmap;
 		blit(preview, m_ScenePreviewBitmap, xOffset, yOffset, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
 		draw_sprite(drawBitmap, m_ScenePreviewBitmap, m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + 10, m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + 33);
-	}
-
-	// Draw the Player-Team matrix lines and disabled overlay effects
-	if (m_MenuScreen == PLAYERSETUP) {
-		const Activity *pActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
+	} else if (m_MenuScreen == PLAYERSETUP) {
+		// Draw the Player-Team matrix lines and disabled overlay effects.
+		const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
 		int lineY = 80;
 		for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
-			// Disabled shaded boxes
-			if (pActivity && (!pActivity->TeamActive(team) || m_LockedCPUTeam == team)) {
+			// Disabled shaded boxes.
+			if (selectedActivity && (!selectedActivity->TeamActive(team) || m_LockedCPUTeam == team)) {
 				// TODO: understand why the blending isnt working as desired
-				//Transparency effect on the overlay boxes
+				//Transparency effect on the overlay boxes.
 				drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
-				// Screen blend the dots and lines, with some flicekring in its intensity
+				// Screen blend the dots and lines, with some flickering in its intensity.
 				int blendAmountInner = 230;
 				set_screen_blender(blendAmountInner, blendAmountInner, blendAmountInner, blendAmountInner);
 				rectfill(drawBitmap, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetXPos() + 110, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetYPos() + lineY, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetXPos() + m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetWidth() - 12, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetYPos() + lineY + 25, c_GUIColorDarkBlue);
 			}
-			// Back to solid drawing
+
 			drawing_mode(DRAW_MODE_SOLID, 0, 0, 0);
-			// Cell border separator lines
+			// Cell border separator lines.
 			line(drawBitmap, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetXPos() + 110, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetYPos() + lineY, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetXPos() + m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetWidth() - 12, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetYPos() + lineY, c_GUIColorLightBlue);
 			lineY += 25;
 		}
@@ -646,7 +622,6 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 
 	m_ScenarioGUIController->DrawMouse();
 
-	// Show who controls the cursor
 	int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
 
 	if (device >= DEVICE_GAMEPAD_1) {
@@ -660,7 +635,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 		}
 	}
 
-	// Show which joysticks are detected by the game
+	// Show which joysticks are detected by the game.
 	for (int joystick = Players::PlayerOne; joystick < Players::MaxPlayerCount; joystick++) {
 		if (g_UInputMan.JoystickActive(joystick)) {
 			int matchedDevice = DEVICE_GAMEPAD_1 + joystick;
@@ -680,9 +655,9 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 	ScenarioUpdateResult result = NOEVENT;
 	// TODO: if activity is running, allow esc to resume activity instead of quitting.
-	// If esc pressed, show quit dialog if applicable
+	// If esc pressed, show quit dialog if applicable.
 	if (g_UInputMan.KeyPressed(KEY_ESC)) {
-		// Just quit if the dialog is already up
+		// Just quit if the dialog is already up.
 		if (m_ScenarioScreenBoxes[QUITCONFIRM]->GetVisible()) {
 			g_Quit = true;
 		} else {
@@ -698,13 +673,12 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 	///////////////////////////////////////////////////////////
 	// Mouse handling
 
-	// Get mouse position
 	int mouseX;
 	int mouseY;
 	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 	Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
 
-	// If not currently dragging a box, see if we should start
+	// If not currently dragging a box, see if we should start.
 	bool menuButtonHeld = g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER);
 	if (m_MenuScreen == SCENESELECT && !m_ScenarioDraggedBox && menuButtonHeld && !m_EngageDrag && !m_ActivitySelectComboBox->IsDropped()) {
 		GUICollectionBox *pBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], 1));
@@ -713,7 +687,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			m_ScenarioDraggedBox = pBox;
 		}
 
-		// Save the mouse pos at the start of the drag so we can measure if we should engage
+		// Save the mouse pos at the start of the drag so we can measure if we should engage.
 		if (m_ScenarioDraggedBox) {
 			m_PrevMousePos = mousePos;
 		}
@@ -728,10 +702,10 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 		m_EngageDrag = true;
 	}
 
-	// Actually drag if we now are engaged
+	// Actually drag if we now are engaged.
 	if (m_ScenarioDraggedBox && m_EngageDrag) {
 		m_ScenarioDraggedBox->MoveRelative(mousePos.GetFloorIntX() - m_PrevMousePos.GetFloorIntX(), mousePos.GetFloorIntY() - m_PrevMousePos.GetFloorIntY());
-		// Ensure the drag didn't shove it off-screen
+		// Ensure the drag didn't shove it off-screen.
 		KeepBoxOnScreen(m_ScenarioDraggedBox);
 	}
 
@@ -745,9 +719,9 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 
 	GUIEvent anEvent;
 	while (m_ScenarioGUIController->GetEvent(&anEvent)) {
-		std::string eventControlName = anEvent.GetControl()->GetName();
+		const std::string eventControlName = anEvent.GetControl()->GetName();
 		GUIControl *eventControl = anEvent.GetControl();
-		// Commands
+
 		if (anEvent.GetType() == GUIEvent::Command) {
 			if (eventControlName == "BackToMainButton") {
 				HideAllScreens();
@@ -776,7 +750,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 				g_GUISound.BackButtonPressSound()->Play();
 			} else if (eventControl == m_ScenarioButtons[STARTHERE]) {
 				// Start Scenario Here menu button pressed.
-				// Set up the player setup box based on updated Activity selection
+				// Set up the player setup box based on updated Activity selection.
 				UpdatePlayersBox(true);
 				HideAllScreens();
 				m_MenuScreen = PLAYERSETUP;
@@ -784,11 +758,10 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 
 				g_GUISound.ButtonPressSound()->Play();
 			} else if (eventControl == m_ScenarioButtons[STARTGAME]) {
-				// Start game button pressed
 				if (StartGame()) {
 					HideAllScreens();
-					//                    m_MenuScreen = SCENESELECT;
-					//                    m_ScreenChange = true;
+					//m_MenuScreen = SCENESELECT;
+					//m_ScreenChange = true;
 					g_GUISound.ButtonPressSound()->Play();
 					result = ScenarioUpdateResult::ACTIVITYRESTARTED;
 				} else {
@@ -799,26 +772,25 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 				g_GUISound.ButtonPressSound()->Play();
 			}
 		} else if (anEvent.GetType() == GUIEvent::Notification) {
-			// Button focus notification that we can play a sound to
 			if (dynamic_cast<GUIButton *>(eventControl)) {
 				if (anEvent.GetMsg() == GUIButton::Focused) {
 					g_GUISound.SelectionChangeSound()->Play();
 				}
-				// Also stop dragging any panels if we're over any button
+				// Also stop dragging any panels if we're over any button.
 				m_ScenarioDraggedBox = 0;
 				m_EngageDrag = true;
 			} else if (eventControl == m_DifficultySlider) {
 				UpdateActivityBox();
 
-				// Also stop dragging any panels if we're over any button
+				// Also stop dragging any panels if we're over any button.
 				m_ScenarioDraggedBox = 0;
 				m_EngageDrag = true;
 			} else if (eventControl == m_ActivitySelectComboBox) {
-				// Also stop dragging any panels if we're over the selection list
+				// Also stop dragging any panels if we're over the selection list.
 				m_ScenarioDraggedBox = 0;
 				m_EngageDrag = true;
 
-				// The activity selection changed
+				// The activity selection changed.
 				if (anEvent.GetMsg() == GUIComboBox::Closed) {
 					UpdateActivityBox();
 
@@ -826,7 +798,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 					if (m_ScenarioScenes && m_ScenarioScenes->size() == 1) {
 						m_ScenarioSelectedScene = m_ScenarioScenes->front();
 					} else {
-						// Deselect any previously selected scene.. it may not be compatible with the new activity.
+						// Deselect any previously selected scene. it may not be compatible with the new activity.
 						m_ScenarioSelectedScene = 0;
 					}
 
@@ -854,7 +826,7 @@ void ScenarioGUI::HideAllScreens() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox *pBox, int margin) {
-	// Make sure the box doesn't go entirely outside of the screen
+	// Make sure the box doesn't go entirely outside of the screen.
 	if (pBox->GetXPos() < (margin - pBox->GetWidth())) {
 		pBox->SetPositionAbs(margin - pBox->GetWidth(), pBox->GetYPos());
 	}
@@ -872,14 +844,14 @@ void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox *pBox, int margin) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::UpdateActivityBox() {
-	// Get the currently selected Activity
+	// Get the currently selected Activity.
 	const Activity *selectedActivity = nullptr;
 	if (m_ActivitySelectComboBox) {
 		selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
 	}
 
 	if (selectedActivity) {
-		// Pull out the list of Scenes that are compatible with this Activity
+		// Pull out the list of Scenes that are compatible with this Activity.
 		map<Activity *, list<Scene *> >::iterator asItr;
 		if (m_Activities.end() != (asItr = m_Activities.find(const_cast<Activity *>(selectedActivity)))) {
 			m_ScenarioScenes = &((*asItr).second);
@@ -887,7 +859,7 @@ void ScenarioGUI::UpdateActivityBox() {
 			m_ScenarioScenes = 0;
 		}
 
-		// Set the description
+		// Set the description.
 		if (m_ScenarioScenes && m_ScenarioScenes->size() == 1) {
 			m_ActivityLabel->SetText(selectedActivity->GetDescription() + "\n\nThe only site where this activity can be played has been selected for you.");
 		} else if (m_ScenarioScenes && m_ScenarioScenes->size() > 1) {
@@ -911,14 +883,14 @@ void ScenarioGUI::UpdateActivityBox() {
 			m_DifficultyLabel->SetText("Difficulty: Nuts!");
 		}
 
-		// Resize the box to fit the desc
+		// Resize the box to fit the desc.
 		int newHeight = m_ActivityLabel->ResizeHeightToFit();
 		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), newHeight + 110);
 		UpdateScenesBox();
 
 		const GameActivity *selectedGA = dynamic_cast<const GameActivity *>(selectedActivity);
 		if (selectedGA) {
-			// Set gold slider value if activity sepcifies default gold amounts for difficulties
+			// Set gold slider value if activity specifies default gold amounts for difficulties.
 			if (m_DifficultySlider->GetValue() < Activity::CakeDifficulty && selectedGA->GetDefaultGoldCake() > -1) {
 				m_GoldSlider->SetValue(selectedGA->GetDefaultGoldCake());
 			} else if (m_DifficultySlider->GetValue() < Activity::EasyDifficulty && selectedGA->GetDefaultGoldEasy() > -1) {
@@ -934,33 +906,24 @@ void ScenarioGUI::UpdateActivityBox() {
 			}
 			m_GoldSlider->SetEnabled(selectedGA->GetGoldSwitchEnabled());
 
-			//Set default fog of war flag and enable or disable it if necessary
-			if (selectedGA->GetDefaultFogOfWar() > -1) {
-				if (selectedGA->GetDefaultFogOfWar() == 0) {
-					m_FogOfWarCheckbox->SetCheck(0);
-				} else {
-					m_FogOfWarCheckbox->SetCheck(1);
-				}
+			//Set default fog of war flag and enable or disable it if necessary.
+			int defFogOfWar = selectedGA->GetDefaultFogOfWar();
+			if (defFogOfWar > -1) {
+				m_FogOfWarCheckbox->SetCheck(defFogOfWar != 0);
 			}
 			m_FogOfWarCheckbox->SetEnabled(selectedGA->GetFogOfWarSwitchEnabled());
 
-			//Set default clear path to orbit flag and enable or disable it if necessary
-			if (selectedGA->GetDefaultRequireClearPathToOrbit() > -1) {
-				if (selectedGA->GetDefaultRequireClearPathToOrbit() == 0) {
-					m_RequireClearPathToOrbitCheckbox->SetCheck(0);
-				} else {
-					m_RequireClearPathToOrbitCheckbox->SetCheck(1);
-				}
+			//Set default clear path to orbit flag and enable or disable it if necessary.
+			int defReqClearPath = selectedGA->GetDefaultRequireClearPathToOrbit();
+			if (defReqClearPath > -1) {
+				m_RequireClearPathToOrbitCheckbox->SetCheck(defReqClearPath != 0);
 			}
 			m_RequireClearPathToOrbitCheckbox->SetEnabled(selectedGA->GetRequireClearPathToOrbitSwitchEnabled());
 
-			//Set default deploy units flag and enable or disable it if necessary
-			if (selectedGA->GetDefaultDeployUnits() > -1) {
-				if (selectedGA->GetDefaultDeployUnits() == 0) {
-					m_DeployUnitsCheckbox->SetCheck(0);
-				} else {
-					m_DeployUnitsCheckbox->SetCheck(1);
-				}
+			//Set default deploy units flag and enable or disable it if necessary.
+			int defDeployUnits = selectedGA->GetDefaultDeployUnits();
+			if (defDeployUnits > -1) {
+				m_DeployUnitsCheckbox->SetCheck(defDeployUnits != 0);
 			}
 			m_DeployUnitsCheckbox->SetEnabled(selectedGA->GetDeployUnitsSwitchEnabled());
 		}
@@ -971,36 +934,36 @@ void ScenarioGUI::UpdateActivityBox() {
 		if (m_DifficultySlider) {
 			m_DifficultySlider->SetVisible(false);
 		}
-		// Resize the box to fit the desc
+		// Resize the box to fit the desc.
 		int newHeight = m_ActivityLabel->ResizeHeightToFit();
 		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), newHeight + 125);
 		UpdateScenesBox();
 	}
-	// Make sure the box doesn't go entirely outside of the screen
+	// Make sure the box doesn't go entirely outside of the screen.
 	KeepBoxOnScreen(m_ScenarioScreenBoxes[ACTIVITY]);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::UpdateScenesBox() {
-	// Always show the info box if something is selected
+	// Always show the info box if something is selected.
 	if (m_ScenarioSelectedScene) {
-		// Fill combo box
+		// Fill combobox.
 		const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
 
 		if (selectedActivity) {
-			// Clear preview bitmap
+			// Clear preview bitmap.
 			clear_to_color(m_ScenePreviewBitmap, g_MaskColor);
 		}
 
-		// Set the currently selected scene's texts
+		// Set the currently selected scene's texts.
 		m_ScenarioScreenBoxes[SCENEINFO]->SetVisible(true);
 		m_SceneNameLabel->SetText(m_ScenarioSelectedScene->GetPresetName());
 		m_SceneInfoLabel->SetText(m_ScenarioSelectedScene->GetDescription());
-		// Adjust the height of the text box and container so it fits the text to display
+
 		int newHeight = m_SceneInfoLabel->ResizeHeightToFit();
 		m_ScenarioScreenBoxes[SCENEINFO]->Resize(m_ScenarioScreenBoxes[SCENEINFO]->GetWidth(), newHeight + 140);
-		// Blink the start game button
+		// Blink the start game button.
 		m_ScenarioButtons[STARTHERE]->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <");
 	} else {
 		m_ScenarioScreenBoxes[SCENEINFO]->SetVisible(false);
@@ -1008,14 +971,14 @@ void ScenarioGUI::UpdateScenesBox() {
 		m_SceneInfoLabel->SetText("");
 	}
 
-	// Make sure the box doesn't go entirely outside of the screen
+	// Make sure the box doesn't go entirely outside of the screen.
 	KeepBoxOnScreen(m_ScenarioScreenBoxes[SCENEINFO]);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
-	// Get the currently selected Activity
+	// Get the currently selected Activity.
 	const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
 	const Icon *pIcon = 0;
 	bool teamHasPlayers = false;
@@ -1024,12 +987,11 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 	int teamsWithHumans = 0;
 
 	if (selectedActivity && m_ScenarioSelectedScene) {
-		// Get mouse position and figure out if any cell is being hovered over
+		// Get mouse position and figure out if any cell is being hovered over.
 		int mouseX;
 		int mouseY;
 		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 		Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
-		bool menuButtonReleased = g_UInputMan.MenuButtonReleased(UInputMan::MENU_EITHER);
 		const GUICollectionBox *pHoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN], 1));
 
 		// Is this a game activity?
@@ -1044,95 +1006,87 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 			}
 		}
 
-		// Set up the matrix of player control boxes
+		// Set up the matrix of player control boxes.
 		for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
-			for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team) {
+			for (int indexTeam1 = Activity::TeamOne; indexTeam1 < TEAMROWCOUNT; ++indexTeam1) {
 				if (newActivity) {
-					// Everyone starts on the Disabled row, except perhaps the CPU which may be on its locked team
-					if (team == TEAM_DISABLED) {
-						m_PlayerBoxes[player][team]->SetDrawType(GUICollectionBox::Image);
+					// Everyone starts on the Disabled row, except perhaps the CPU which may be on its locked team.
+					if (indexTeam1 == TEAM_DISABLED) {
+						m_PlayerBoxes[player][indexTeam1]->SetDrawType(GUICollectionBox::Image);
 						pIcon = player == PLAYER_CPU ? dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU")) : g_UInputMan.GetSchemeIcon(player);
 						if (pIcon) {
-							m_PlayerBoxes[player][team]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+							m_PlayerBoxes[player][indexTeam1]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 						}
 					}
-					// De-highlight all other cells initially
+					// De-highlight all other cells initially.
 					else {
-						m_PlayerBoxes[player][team]->SetDrawType(GUICollectionBox::Color);
-						m_PlayerBoxes[player][team]->SetDrawColor(c_GUIColorBlue);
+						m_PlayerBoxes[player][indexTeam1]->SetDrawType(GUICollectionBox::Color);
+						m_PlayerBoxes[player][indexTeam1]->SetDrawColor(c_GUIColorBlue);
 					}
 
-					// The CPU gets placed on its locked team
+					// The CPU gets placed on its locked team.
 					if (m_LockedCPUTeam != Activity::NoTeam && player == PLAYER_CPU) {
-						if (team == m_LockedCPUTeam) {
-							m_PlayerBoxes[player][team]->SetDrawType(GUICollectionBox::Image);
+						if (indexTeam1 == m_LockedCPUTeam) {
+							m_PlayerBoxes[player][indexTeam1]->SetDrawType(GUICollectionBox::Image);
 							pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 							if (pIcon) {
-								m_PlayerBoxes[player][team]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+								m_PlayerBoxes[player][indexTeam1]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 							}
 						} else {
-							m_PlayerBoxes[player][team]->SetDrawType(GUICollectionBox::Color);
-							m_PlayerBoxes[player][team]->SetDrawColor(c_GUIColorBlue);
+							m_PlayerBoxes[player][indexTeam1]->SetDrawType(GUICollectionBox::Color);
+							m_PlayerBoxes[player][indexTeam1]->SetDrawColor(c_GUIColorBlue);
 						}
 					}
 				}
 
-				// Make the hovered cell light up and able to be selected
-				if (m_PlayerBoxes[player][team] == pHoveredCell
-					// if an active team row, but including the 'not playing' row
-					&& (selectedActivity->TeamActive(team) || team == TEAM_DISABLED)
-					// That isn't on a team row locked to the CPU
-					&& m_LockedCPUTeam != team
-					// And not the CPU player if he is locked to a CPU team
-					&& (m_LockedCPUTeam == Activity::NoTeam || player != PLAYER_CPU))
-					// And a cell not already selected
-					//&& m_PlayerBoxes[player][team]->GetDrawType() != GUICollectionBox::Image)
-					// And players aren't maxed out for this Activity, or we are removing a player from team assignment
-//                    && (player == PLAYER_CPU || team == TEAM_DISABLED || (pGameActivity && PlayerCount() < pGameActivity->GetMaxPlayerSupport())))
-				{
-					// Is this being pushed and selected?
-					if (menuButtonReleased) {
-						// Need to clear all other rows of this column
+				// Make the hovered cell light up and able to be selected if:
+				// It's under an active team row or the 'not playing' row.
+				// It's not a team row locked to the CPU.
+				// It's not the CPU player if he is locked to a CPU team.
+				if (m_PlayerBoxes[player][indexTeam1] == pHoveredCell && (selectedActivity->TeamActive(indexTeam1) || indexTeam1 == TEAM_DISABLED) && m_LockedCPUTeam != indexTeam1
+					&& (m_LockedCPUTeam == Activity::NoTeam || player != PLAYER_CPU)) {
+					if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_EITHER)) {
+						// Need to clear all other rows of this column.
 // TODO:  -- unless the CPU column?
-						for (int t2 = Activity::TeamOne; t2 < TEAMROWCOUNT; ++t2) {
-							// This clicked cell should get the icon of this column
-							if (t2 == team) {
+						for (int indexTeam2 = Activity::TeamOne; indexTeam2 < TEAMROWCOUNT; ++indexTeam2) {
+							// This clicked cell should get the icon of this column.
+							if (indexTeam2 == indexTeam1) {
 								if (player != PLAYER_CPU) {
-									m_PlayerBoxes[player][t2]->SetDrawType(GUICollectionBox::Image);
+									m_PlayerBoxes[player][indexTeam2]->SetDrawType(GUICollectionBox::Image);
 									pIcon = player == PLAYER_CPU ? dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU")) : g_UInputMan.GetSchemeIcon(player);
 									if (pIcon) {
-										m_PlayerBoxes[player][t2]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+										m_PlayerBoxes[player][indexTeam2]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 									}
 								} else {
-									//Select or unselect CPU cells
-									if (m_PlayerBoxes[player][t2]->GetDrawType() == GUICollectionBox::Image) {
-										m_PlayerBoxes[player][t2]->SetDrawType(GUICollectionBox::Color);
-										m_PlayerBoxes[player][t2]->SetDrawColor(c_GUIColorBlue);
+									//Select or unselect CPU cells.
+									if (m_PlayerBoxes[player][indexTeam2]->GetDrawType() == GUICollectionBox::Image) {
+										m_PlayerBoxes[player][indexTeam2]->SetDrawType(GUICollectionBox::Color);
+										m_PlayerBoxes[player][indexTeam2]->SetDrawColor(c_GUIColorBlue);
 									} else {
 										pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 										if (pIcon) {
-											m_PlayerBoxes[player][t2]->SetDrawType(GUICollectionBox::Image);
-											m_PlayerBoxes[player][t2]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+											m_PlayerBoxes[player][indexTeam2]->SetDrawType(GUICollectionBox::Image);
+											m_PlayerBoxes[player][indexTeam2]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 										}
 									}
 								}
 							}
-							// Now unselected columns
+							// Now unselected columns.
 							else {
 								if (player != PLAYER_CPU) {
-									m_PlayerBoxes[player][t2]->SetDrawType(GUICollectionBox::Color);
-									m_PlayerBoxes[player][t2]->SetDrawColor(c_GUIColorBlue);
+									m_PlayerBoxes[player][indexTeam2]->SetDrawType(GUICollectionBox::Color);
+									m_PlayerBoxes[player][indexTeam2]->SetDrawColor(c_GUIColorBlue);
 								}
 							}
 						}
-						// If CPU changed to an actual team assignment, clear all human players off his new team
-						if (player == PLAYER_CPU && team != TEAM_DISABLED) {
+						// If CPU changed to an actual team assignment, clear all human players off his new team.
+						if (player == PLAYER_CPU && indexTeam1 != TEAM_DISABLED) {
 							for (int p2 = Players::PlayerOne; p2 < Players::MaxPlayerCount; ++p2) {
-								// Deselect the player's team assignment if he's on the same team as the CPU
-								if (m_PlayerBoxes[p2][team]->GetDrawType() == GUICollectionBox::Image) {
-									m_PlayerBoxes[p2][team]->SetDrawType(GUICollectionBox::Color);
-									m_PlayerBoxes[p2][team]->SetDrawColor(c_GUIColorBlue);
-									// Move him to disabled
+								// Deselect the player's team assignment if he's on the same team as the CPU.
+								if (m_PlayerBoxes[p2][indexTeam1]->GetDrawType() == GUICollectionBox::Image) {
+									m_PlayerBoxes[p2][indexTeam1]->SetDrawType(GUICollectionBox::Color);
+									m_PlayerBoxes[p2][indexTeam1]->SetDrawColor(c_GUIColorBlue);
+									// Move him to disabled.
 									m_PlayerBoxes[p2][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
 									pIcon = g_UInputMan.GetSchemeIcon(p2);
 									if (pIcon) {
@@ -1141,8 +1095,8 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 								}
 							}
 						}
-						// If Player clicked CPU disabled button, clear CPU row
-						if (player == PLAYER_CPU && team == TEAM_DISABLED) {
+						// If Player clicked CPU disabled button, clear CPU row.
+						if (player == PLAYER_CPU && indexTeam1 == TEAM_DISABLED) {
 							for (int t2 = Activity::TeamOne; t2 <= Activity::TeamFour; ++t2) {
 								if (m_PlayerBoxes[PLAYER_CPU][t2]->GetDrawType() == GUICollectionBox::Image) {
 									m_PlayerBoxes[PLAYER_CPU][t2]->SetDrawType(GUICollectionBox::Color);
@@ -1152,10 +1106,10 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 						}
 						// If a human player changed to a CPU team, remove the CPU guy.
 						// Deselect the CPU's team assignment if he's on the same team as the newly assigned human player.
-						else if (player != PLAYER_CPU && team != TEAM_DISABLED && m_PlayerBoxes[PLAYER_CPU][team]->GetDrawType() == GUICollectionBox::Image) {
-							m_PlayerBoxes[PLAYER_CPU][team]->SetDrawType(GUICollectionBox::Color);
-							m_PlayerBoxes[PLAYER_CPU][team]->SetDrawColor(c_GUIColorBlue);
-							// Move him to disabled
+						else if (player != PLAYER_CPU && indexTeam1 != TEAM_DISABLED && m_PlayerBoxes[PLAYER_CPU][indexTeam1]->GetDrawType() == GUICollectionBox::Image) {
+							m_PlayerBoxes[PLAYER_CPU][indexTeam1]->SetDrawType(GUICollectionBox::Color);
+							m_PlayerBoxes[PLAYER_CPU][indexTeam1]->SetDrawColor(c_GUIColorBlue);
+							// Move him to disabled.
 							//m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
 							//pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 							//if (pIcon)
@@ -1163,14 +1117,14 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 						}
 						g_GUISound.FocusChangeSound()->Play();
 
-						//Check if we need to clear or set CPU disabled team icon
+						//Check if we need to clear or set CPU disabled team icon.
 						bool noCPUs = true;
 						for (int t2 = Activity::TeamOne; t2 <= Activity::TeamFour; ++t2) {
 							if (m_PlayerBoxes[PLAYER_CPU][t2]->GetDrawType() == GUICollectionBox::Image) {
 								noCPUs = false;
 							}
 						}
-						//Select or unselect CPU disabled icon
+						//Select or unselect CPU disabled icon.
 						if (noCPUs) {
 							pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 							if (pIcon) {
@@ -1183,65 +1137,64 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 						}
 
 					}
-					// Just highlight the cell
-					else if (m_PlayerBoxes[player][team]->GetDrawColor() != c_GUIColorLightBlue) {
-						m_PlayerBoxes[player][team]->SetDrawColor(c_GUIColorLightBlue);
+					// Just highlight the cell.
+					else if (m_PlayerBoxes[player][indexTeam1]->GetDrawColor() != c_GUIColorLightBlue) {
+						m_PlayerBoxes[player][indexTeam1]->SetDrawColor(c_GUIColorLightBlue);
 						g_GUISound.SelectionChangeSound()->Play();
 					}
 				}
-				// Un-highlight all other cells
-				else if (pHoveredCell && m_PlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Color) {
-					m_PlayerBoxes[player][team]->SetDrawColor(c_GUIColorBlue);
+				// Un-highlight all other cells.
+				else if (pHoveredCell && m_PlayerBoxes[player][indexTeam1]->GetDrawType() == GUICollectionBox::Color) {
+					m_PlayerBoxes[player][indexTeam1]->SetDrawColor(c_GUIColorBlue);
 				}
 			}
 		}
 
-		// Team info columns
+		// Team info columns.
 		for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team) {
-			// Update the team names and such
+			// Update the team names and such.
 			if (newActivity) {
 				m_TeamBoxes[team]->SetDrawType(GUICollectionBox::Image);
-				/* pointless; the CPU player icon suffices, and doesn't block the real team banner
+				/* pointless; the CPU player icon suffices, and doesn't block the real team banner.
 								// CPU Team
 								if (pGameActivity && pGameActivity->GetCPUTeam() == team)
 								{
 									pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "CPU Team"));
 									m_TeamNameLabels[team]->SetText(pActivity->GetTeamName(team) + ":");
 								}
-								// The not playing row
+								// The not-playing row.
 								else */if (team == TEAM_DISABLED) {
 									pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Disabled Team"));
 									m_TeamNameLabels[team]->SetText("Not Playing:");
 								}
-								// Active player team
+								// Active player team.
 								else if (selectedActivity->TeamActive(team)) {
-									// Set the team flag icons on the floating player bars
+									// Set the team flag icons on the floating player bars.
 									pIcon = selectedActivity->GetTeamIcon(team);
-									// Revert to default if needed
+									// Revert to default if needed.
 									if (!pIcon) {
-										char str[128];
-										std::snprintf(str, sizeof(str), "Team %d Default", team + 1);
-										pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", str));
+										const std::string teamString = "Team " + std::to_string(team + 1) + " Default";
+										pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", teamString));
 									}
 									m_TeamNameLabels[team]->SetText(selectedActivity->GetTeamName(team) + ":");
 								}
-								// Disabled/unplayable teams
+								// Disabled/unplayable teams.
 								else {
 									pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Locked Team"));
 									m_TeamNameLabels[team]->SetText("Unavailable");
 								}
 
-								// Finally set whatever Icon we came up with
+								// Finally set whatever Icon we came up with.
 								if (pIcon) {
 									m_TeamBoxes[team]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 								}
 			}
 
-			// Check if the team has any players assigned at all
+			// Check if the team has any players assigned at all.
 			if (selectedActivity->TeamActive(team)) {
 				teamHasPlayers = false;
 				for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
-					// CPU is sometimes disabled, but still counts as a team
+					// CPU is sometimes disabled, but still counts as a team.
 					if (team != TEAM_DISABLED && m_PlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image) {
 						teamHasPlayers = true;
 						if (player != PLAYER_CPU) {
@@ -1274,54 +1227,51 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 			}
 		}
 
-		// If we are over capacity with players, disable the start button and show why
-		if (selectedActivity->GetMaxPlayerSupport() < PlayerCount()) {
+		// If we are over capacity with players, disable the start button and show why.
+		int maxPlayers = pGameActivity->GetMaxPlayerSupport();
+		int minTeamsRequired = pGameActivity->GetMinTeamsRequired();
+		if (maxPlayers < PlayerCount()) {
 			m_ScenarioButtons[STARTGAME]->SetVisible(false);
 			m_StartErrorLabel->SetVisible(true);
-			char str[256];
-			std::snprintf(str, sizeof(str), "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
-			m_StartErrorLabel->SetText(str);
-		}
-		// If we are under the required number of teams with players assigned, disable the start button and show why
-		else if (selectedActivity->GetMinTeamsRequired() > teamsWithPlayers) {
+			const std::string msgString = "Too many players assigned! Max for this activity is " + std::to_string(maxPlayers);
+			m_StartErrorLabel->SetText(msgString);
+		} else if (minTeamsRequired > teamsWithPlayers) {
+			// If we are under the required number of teams with players assigned, disable the start button and show why.
 			m_ScenarioButtons[STARTGAME]->SetVisible(false);
 			m_StartErrorLabel->SetVisible(true);
-			char str[256];
-			std::snprintf(str, sizeof(str), "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
-			m_StartErrorLabel->SetText(str);
-		}
-		// Assign at least one human player
-		else if (teamsWithHumans == 0) {
+			const std::string msgString = "Assign players to at\nleast " + std::to_string(minTeamsRequired) + " of the teams!";
+			m_StartErrorLabel->SetText(msgString);
+		} else if (teamsWithHumans == 0) {
+			// Assign at least one human player.
 			m_ScenarioButtons[STARTGAME]->SetVisible(false);
 			m_StartErrorLabel->SetVisible(true);
 			m_StartErrorLabel->SetText("Assign human players\nto at least one team!");
-		}
-		// Everything checks out; let the player start if they want to
-		else {
+		} else {
+			// Everything checks out; let the player start if they want to
 			m_ScenarioButtons[STARTGAME]->SetVisible(true);
 			m_StartErrorLabel->SetVisible(false);
 		}
 
-		// How much starting gold does the slider yield
-		char str[256];
+		// How much starting gold does the slider yield.
+		char goldString[256];
 		//int startGold = (float)m_GoldSlider->GetMinimum() + ((m_GoldSlider->GetMaximum() - m_GoldSlider->GetMinimum()) * (float)m_GoldSlider->GetValue() / 100.0);
 		int startGold = m_GoldSlider->GetValue();
 		startGold = startGold - startGold % 500;
 		if (m_GoldSlider->GetValue() == m_GoldSlider->GetMaximum()) {
-			std::snprintf(str, sizeof(str), "Starting Gold: %c Infinite", -58);
+			std::snprintf(goldString, sizeof(goldString), "Starting Gold: %c Infinite", -58);
 		} else {
-			std::snprintf(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
+			std::snprintf(goldString, sizeof(goldString), "Starting Gold: %c %d oz", -58, startGold);
 		}
-		m_GoldLabel->SetText(str);
+		m_GoldLabel->SetText(goldString);
 
 
-		// Set skill labels
+		// Set skill labels.
 		for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; team++) {
 			m_TeamAISkillLabel[team]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[team]->GetValue()));
 		}
 	}
 
-	// Reset all buttons and positions of things if a new activity has been selected
+	// Reset all buttons and positions of things if a new activity has been selected.
 	if (newActivity) {
 		m_ScenarioButtons[STARTGAME]->SetVisible(false);
 		m_StartErrorLabel->SetVisible(true);
@@ -1347,7 +1297,7 @@ int ScenarioGUI::PlayerCount() const {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool ScenarioGUI::StartGame() {
-	// Get the currently selected Activity
+	// Get the currently selected Activity.
 	const Activity *activityPreset = nullptr;
 	if (m_ActivitySelectComboBox) {
 		activityPreset = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
@@ -1357,11 +1307,11 @@ bool ScenarioGUI::StartGame() {
 		return false;
 	}
 
-	// Create the actual instance of hte Activity we want to start
+	// Create the actual instance of the Activity we want to start.
 	Activity *activityInstance = dynamic_cast<Activity *>(activityPreset->Clone());
 	GameActivity *gameActivity = dynamic_cast<GameActivity *>(activityInstance);
 
-	// Set up the basic settings
+	// Set up the basic settings.
 	if (gameActivity) {
 		gameActivity->SetDifficulty(m_DifficultySlider->GetValue());
 
@@ -1369,7 +1319,7 @@ bool ScenarioGUI::StartGame() {
 		gameActivity->SetRequireClearPathToOrbit(m_RequireClearPathToOrbitCheckbox->GetCheck());
 
 
-		// If gold slider is at it max value then the amount is 'infinite' and we must set some ridiculously high value.
+		// If gold slider is at its max value then the amount is 'infinite' and we must set some ridiculously high value.
 		if (m_GoldSlider->GetValue() == m_GoldSlider->GetMaximum()) {
 			gameActivity->SetStartingGold(1000000);
 		} else {
@@ -1381,16 +1331,16 @@ bool ScenarioGUI::StartGame() {
 
 	g_SceneMan.SetSceneToLoad(m_ScenarioSelectedScene, true, m_DeployUnitsCheckbox->GetCheck());
 
-	// Set up the player and team assignments
+	// Set up the player and team assignments.
 	activityInstance->ClearPlayers(false);
 	for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
 		for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team) {
 			if (team != TEAM_DISABLED && m_PlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image) {
-				// Add the human players, not including CPU players
+				// Add the human players, not including CPU players.
 				if (player != PLAYER_CPU) {
 					activityInstance->AddPlayer(player, true, team, 0);
 				}
-				// CPU team, so mark it as such.. there are no actual CPU players
+				// CPU team, so mark it as such. there are no actual CPU players.
 				else if (gameActivity) {
 					gameActivity->SetCPUTeam(team);
 				}
@@ -1399,21 +1349,21 @@ bool ScenarioGUI::StartGame() {
 	}
 
 	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
-		// Set up techs
+		// Set up techs.
 		const GUIListPanel::Item *techItem = m_TeamTechSelect[team]->GetSelectedItem();
 		if (techItem) {
-			// If the "random" selection, choose one from the list of loaded techs
+			// If the "random" selection, choose one from the list of loaded techs.
 			if (m_TeamTechSelect[team]->GetSelectedIndex() == 1)//techItem->m_ExtraIndex < 0)
 			{
 				int selection = RandomNum<int>(1, m_TeamTechSelect[team]->GetListPanel()->GetItemList()->size() - 1);
 				m_TeamTechSelect[team]->SetSelectedIndex(selection);
 				techItem = m_TeamTechSelect[team]->GetSelectedItem();
 
-				// Switch back to -Random-
+				// Switch back to -Random-.
 				m_TeamTechSelect[team]->SetSelectedIndex(1);
 			}
 
-			// Now set the selected tech's module index as what the metaplayer is going to use
+			// Now set the selected tech's module index as what the metaplayer is going to use.
 			if (techItem) {
 				if (techItem->m_ExtraIndex == -2) {
 					gameActivity->SetTeamTech(team, "-All-");
@@ -1423,7 +1373,7 @@ bool ScenarioGUI::StartGame() {
 			}
 		}
 
-		// Set up AI skill levels
+		// Set up AI skill levels.
 		if (m_TeamAISkillSlider[team]->IsEnabled()) {
 			gameActivity->SetTeamAISkill(team, m_TeamAISkillSlider[team]->GetValue());
 		} else {
@@ -1431,37 +1381,37 @@ bool ScenarioGUI::StartGame() {
 		}
 	}
 
-	//Force close all previously opened files
+	//Force close all previously opened files.
 	g_LuaMan.FileCloseAll();
 
-	// Put the new and newly set up Activity as the one to start
+	// Put the new and newly set up Activity as the one to start.
 	g_ActivityMan.SetStartActivity(activityInstance);
 
-	// Kill any Campaign games currently running
+	// Kill any Campaign games currently running.
 	if (g_MetaMan.GameInProgress()) {
 		g_MetaMan.EndGame();
 	}
 
-	// Signal the start of this Activity we just set up
+	// Signal the start of this Activity we just set up.
 	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::GetAllScenesAndActivities() {
-	// Redo the list of Activities
+	// Redo the list of Activities.
 	m_Activities.clear();
 	m_ScenarioScenes = 0;
 
-	// Get the list of all read in Scene presets
+	// Get the list of all read in Scene presets.
 	list<Entity *> presetList;
 	g_PresetMan.GetAllOfType(presetList, "Scene");
 	list<Scene *> filteredScenes;
 
-	// Go through the list and cast all the pointers to scenes so we have a handy list
+	// Go through the list and cast all the pointers to scenes so we have a handy list.
 	for (Entity * presetEntity : presetList) {
 		Scene *presetScene = dynamic_cast<Scene *>(presetEntity);
-		// Only add non-editor and non-special scenes, or ones that don't have locations defined, or have Test in their names, or are metascenes
+		// Only add non-editor and non-special scenes, or ones that don't have locations defined, or are metascenes.
 		if (presetScene && !presetScene->GetLocation().IsZero() && !presetScene->IsMetagameInternal() && (presetScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes())) {
 			filteredScenes.push_back(presetScene);
 		}
@@ -1471,19 +1421,18 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 		filteredScene->SetLocationOffset(Vector(0, 0));
 	}
 
-	// We need to calculate planet center manually because m_PlanetCenter reflects coords of moving planet
-	// which is outside the screen when this is called first time
+	// We need to calculate planet center manually because m_PlanetCenter reflects coords of moving planet which is outside the screen when this is called first time.
 	Vector planetCenter = Vector(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
 	// Correct planet pos a bit when its location is known.
 	if (!m_PlanetCenter.IsZero()) {
 		planetCenter = m_PlanetCenter;
 	}
 
-	//Move out-of-screen scenes closer to the middle of the planet if we have planet info
+	//Move out-of-screen scenes closer to the middle of the planet if we have planet info.
 	for (Scene *filteredScene : filteredScenes) {
 		float y = planetCenter.GetY() + filteredScene->GetLocation().GetY();
 
-		// Do not touch scenes outside the planet, they might be hidden intentionally
+		// Do not touch scenes outside the planet, they might be hidden intentionally.
 		if (abs(filteredScene->GetLocation().GetY()) < m_PlanetRadius + 100 && abs(filteredScene->GetLocation().GetX()) < m_PlanetRadius + 100) {
 			if (y < 10) {
 				filteredScene->SetLocationOffset(Vector(0, -y + 14));
@@ -1495,14 +1444,14 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 		}
 	}
 
-	// Add offsets to reveal overlapping scenes if any
+	// Add offsets to reveal overlapping scenes if any.
 	for (Scene *filteredScene1 : filteredScenes) {
 		bool isOverlapped = false;
 
 		do {
 			isOverlapped = false;
 
-			// Find overlapping scene dot
+			// Find overlapping scene dot.
 			for (const Scene * filteredScene2 : filteredScenes) {
 				if (filteredScene1 != filteredScene2) {
 					Vector pos1 = filteredScene1->GetLocation() + filteredScene1->GetLocationOffset();
@@ -1515,7 +1464,7 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 				}
 			}
 
-			// Move the dot closer to the planet center
+			// Move the dot closer to the planet center.
 			Vector offsetIncrement;
 			if (filteredScene1->GetLocation().GetY() > 0) {
 				offsetIncrement = Vector(0, -8);
@@ -1534,24 +1483,24 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 		} while (isOverlapped);
 	}
 
-	// Get the list of all read-in Activity presets
+	// Get the list of all read-in Activity presets.
 	presetList.clear();
 	g_PresetMan.GetAllOfType(presetList, "Activity");
 	Activity *presetActivity = nullptr;
 
 	int selectedActivityIndex = m_ActivitySelectComboBox->GetSelectedIndex();
 
-	// Go through the list and cast all the pointers to Activities so we have a handy list
-	// Associate all Scenes compatible with each Activity
-	// Populate the activities selection dropdown while we're at it
+	// Go through the list and cast all the pointers to Activities so we have a handy list.
+	// Associate all Scenes compatible with each Activity.
+	// Populate the activities selection dropdown while we're at it.
 	m_ActivitySelectComboBox->ClearList();
 	int index = 0;
 	int tutorialIndex = -1;
 	for (Entity *presetEntity : presetList) {
 		presetActivity = dynamic_cast<Activity *>(presetEntity);
-		// Only add non-editor and non-special activities
+		// Only add non-editor and non-special activities.
 		if (presetActivity/* && pActivity->GetClassName() != "GATutorial" */ && presetActivity->GetClassName().find("Editor") == string::npos) {
-			// Prepare a new entry in the list of Activity:ies that we have
+			// Prepare a new entry in the list of Activities that we have.
 			pair<Activity *, list<Scene *> > newPair(presetActivity, list<Scene *>());
 			for (Scene *filteredScene : filteredScenes) {
 				// Check if the Scene has the required Areas and such needed for this Activity.
@@ -1561,10 +1510,10 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 			}
 
 			m_Activities.insert(newPair);
-			// Add to the activity selection combo, and attach the activity copy, not passing in ownership
+			// Add to the activity selection combobox, and attach the activity copy, not passing in ownership.
 			m_ActivitySelectComboBox->AddItem(presetActivity->GetPresetName(), "", 0, presetActivity);
 
-			// Save the tutorial mission so we can select it by default
+			// Save the tutorial mission so we can select it by default.
 			if (presetActivity->GetClassName() == "GATutorial") {
 				tutorialIndex = index;
 			}
@@ -1572,7 +1521,7 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 		}
 	}
 
-	// Select the Tutorial Activity and Scene by default to start
+	// Select the Tutorial Activity and Scene by default to start.
 	if (tutorialIndex >= 0) {
 		if (m_SelectTutorial) {
 			m_ActivitySelectComboBox->SetSelectedIndex(tutorialIndex);
@@ -1582,7 +1531,7 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 		UpdateActivityBox();
 		m_ScenarioSelectedScene = m_ScenarioScenes ? m_ScenarioScenes->front() : 0;
 		UpdateScenesBox();
-		// Switch to tutorial just once
+		// Switch to tutorial just once.
 		m_SelectTutorial = false;
 	}
 }
@@ -1590,14 +1539,14 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::UpdateSiteNameLabel(bool visible, const string &text, const Vector &location, float height) {
-	// Set up the hover label to appear over any hovered scene location
+	// Set up the hover label to appear over any hovered scene location.
 	m_ScenarioScenePlanetLabel->SetVisible(visible);
 	if (visible) {
 		m_ScenarioScenePlanetLabel->SetText(text);
-		m_ScenarioScenePlanetLabel->SetPositionAbs(m_PlanetCenter.m_X + location.m_X - (m_ScenarioScenePlanetLabel->GetWidth() / 2),
-			m_PlanetCenter.m_Y + location.m_Y - (m_ScenarioScenePlanetLabel->GetHeight() * 1.5 * height));
+		m_ScenarioScenePlanetLabel->SetPositionAbs(m_PlanetCenter.GetFloorIntX() + location.GetFloorIntX() - (m_ScenarioScenePlanetLabel->GetWidth() / 2),
+			m_PlanetCenter.GetFloorIntY() + location.GetFloorIntY() - (m_ScenarioScenePlanetLabel->GetHeight() * 1.5 * height));
 
-		// Clamp it to within the screen.. only Y applies to the label though
+		// Clamp it to within the screen. only Y applies to the label though.
 		int pad = 6;
 		/*
 				if (m_ScenarioScenePlanetLabel->GetXPos() < pad)
@@ -1620,7 +1569,7 @@ void ScenarioGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Ve
 	int blendAmount = 210 + RandomNum(-15, 15);
 	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 	line(drawBitmap, start.GetFloorIntX(), start.GetFloorIntY(), end.GetFloorIntX(), end.GetFloorIntY(), color);
-	/* Looks like ass
+	/* Looks like ass.
 		// Draw the thickener lines thicker in the appropriate directions
 		if (fabs(end.GetFloorIntX() - start.GetFloorIntX()) > fabs(end.GetFloorIntY() - start.GetFloorIntY()))
 		{
@@ -1652,11 +1601,11 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
 	int channelHeight,
 	float circleSize,
 	bool squareSite) const {
-	// No part of the line is visible with these params, so just quit
+	// No part of the line is visible with these params, so just quit.
 	if (onlyFirstSegments == 0 || onlyLastSegments == 0) {
 		return false;
 	}
-	// Detect disabling of the segment controls
+	// Detect disabling of the segment controls.
 	if (onlyFirstSegments < 0) {
 		onlyFirstSegments = 100;
 	}
@@ -1681,35 +1630,35 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
 	bool siteIsLeft = sitePos.m_X < screenPoint.m_X;
 	float xDirMult = siteIsLeft ? -1.0 : 1.0;
 
-	// No bends, meaning the mid of the meter goes straight up/down into the site circle
+	// No bends, meaning the mid of the meter goes straight up/down into the site circle.
 	if (noBends) {
-		// How many possible segments there are total for this type of line: to site + circle
+		// How many possible segments there are total for this type of line: to site + circle.
 		totalSegments = lastSegmentsToDraw = 1 + 1;
-		// Draw the line to the site
+		// Draw the line to the site.
 		if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments)) {
 			DrawGlowLine(drawBitmap, screenPoint + Vector(sitePos.m_X - screenPoint.m_X, 0), sitePos + Vector(0, (circleRadius + 1) * -yDirMult), color);
 		}
 	}
-	// Extra lines depending on whether there needs to be two bends due to the site being in the 'channel', ie next to the floating player bar
+	// Extra lines depending on whether there needs to be two bends due to the site being in the 'channel', ie next to the floating player bar.
 	else if (twoBends) {
-		// Cap the chamfer size on the second bend appropriately
+		// Cap the chamfer size on the second bend appropriately.
 		chamferSize = std::min(static_cast<int>((firstBend - secondBend).GetMagnitude() - 15), chamferSize);
 		chamferSize = std::min(static_cast<int>((secondBend - sitePos).GetMagnitude() - circleRadius * 3), chamferSize);
-		// Snap the chamfer to not exist below a minimum size
+		// Snap the chamfer to not exist below a minimum size.
 		chamferSize = (chamferSize < 15) ? 0 : chamferSize;
-		// No inverted chamfer
+		// No inverted chamfer.
 		chamferSize = std::max(0, chamferSize);
 		chamferPoint1.SetXY(secondBend.m_X + chamferSize * -xDirMult, secondBend.m_Y);
 		chamferPoint2.SetXY(secondBend.m_X, secondBend.m_Y + chamferSize * -yDirMult);
-		// How many of the last segments to draw: to first bend + to second bend chamfer + chamfer + to site + circle
+		// How many of the last segments to draw: to first bend + to second bend chamfer + chamfer + to site + circle.
 		totalSegments = lastSegmentsToDraw = 1 + 1 + (int)(chamferSize > 0) + 1 + 1;
-		// Line to the first bend
+		// Line to the first bend.
 		drawnFirstSegments++;
 		lastSegmentsToDraw--;
 		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
 			DrawGlowLine(drawBitmap, screenPoint, firstBend, color);
 		}
-		// Line to the second bend, including the chamfer
+		// Line to the second bend, including the chamfer.
 		drawnFirstSegments++;
 		lastSegmentsToDraw--;
 		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
@@ -1722,27 +1671,27 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
 				DrawGlowLine(drawBitmap, chamferPoint1, chamferPoint2, color);
 			}
 		}
-		// Line to the site
+		// Line to the site.
 		drawnFirstSegments++;
 		lastSegmentsToDraw--;
 		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
 			DrawGlowLine(drawBitmap, chamferPoint2, sitePos + Vector(0, (circleRadius + 1) * yDirMult), color);
 		}
 	}
-	// Just one bend
+	// Just one bend.
 	else {
-		// Cap the chamfer size on the first bend appropriately
+		// Cap the chamfer size on the first bend appropriately.
 		chamferSize = std::min(static_cast<int>((screenPoint - firstBend).GetMagnitude() - 15), chamferSize);
 		chamferSize = std::min(static_cast<int>((firstBend - sitePos).GetMagnitude() - circleRadius * 3), chamferSize);
-		// Snap the chamfer to not exist below a minimum size
+		// Snap the chamfer to not exist below a minimum size.
 		chamferSize = (chamferSize < 15) ? 0 : chamferSize;
-		// No inverted chamfer
+		// No inverted chamfer.
 		chamferSize = std::max(0, chamferSize);
 		chamferPoint1.SetXY(screenPoint.m_X, firstBend.m_Y + chamferSize * -yDirMult);
 		chamferPoint2.SetXY(firstBend.m_X + chamferSize * xDirMult, sitePos.m_Y);
-		// How many of the last segments to draw: to first bend chamfer + chamfer + to site + circle
+		// How many of the last segments to draw: to first bend chamfer + chamfer + to site + circle.
 		totalSegments = lastSegmentsToDraw = 1 + (int)(chamferSize > 0) + 1 + 1;
-		// Draw line to the first bend, including the chamfer
+		// Draw line to the first bend, including the chamfer.
 		drawnFirstSegments++;
 		lastSegmentsToDraw--;
 		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
@@ -1755,7 +1704,7 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
 				DrawGlowLine(drawBitmap, chamferPoint1, chamferPoint2, color);
 			}
 		}
-		// Draw line to the site
+		// Draw line to the site.
 		drawnFirstSegments++;
 		lastSegmentsToDraw--;
 		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
@@ -1763,14 +1712,14 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
 		}
 	}
 
-	// Draw a circle around the site target
+	// Draw a circle around the site target.
 	drawnFirstSegments++;
 	lastSegmentsToDraw--;
 	if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
 		int blendAmount = 225 + RandomNum(-20, 20);
 		set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
-		// If specified, draw a squareSite instead (with chamfered corners)
+		// If specified, draw a squareSite instead (with chamfered corners).
 		if (squareSite) {
 			hline(drawBitmap, sitePos.GetFloorIntX() - circleRadius - 1, sitePos.GetFloorIntY() - circleRadius - 1, sitePos.GetFloorIntX() + circleRadius, color);
 			hline(drawBitmap, sitePos.GetFloorIntX() - circleRadius - 1, sitePos.GetFloorIntY() - circleRadius - 1 - 1, sitePos.GetFloorIntX() + circleRadius, color);

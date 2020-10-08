@@ -755,9 +755,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 		GUIControl *eventControl = anEvent.GetControl();
 		// Commands
 		if (anEvent.GetType() == GUIEvent::Command) {
-			// Return to main menu button pressed
 			if (eventControlName == "BackToMainButton") {
-				// Hide all screens, the appropriate screen will reappear on next update
 				HideAllScreens();
 
 				m_MenuScreen = SCENESELECT;
@@ -766,49 +764,34 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 				g_GUISound.BackButtonPressSound()->Play();
 
 				result = ScenarioUpdateResult::BACKTOMAIN;
-			}
-
-			// Quit program button pressed
-			else if (eventControlName == "ConfirmButton") {
-				// Hide all screens, the appropriate screen will reappear on next update
+			} else if (eventControlName == "ConfirmButton") {
+				// Quit program button pressed.
 				HideAllScreens();
 				m_ScreenChange = true;
 				g_Quit = true;
 
 				g_GUISound.BackButtonPressSound()->Play();
-			}
-
-			else if (eventControlName == "ButtonResume") {
+			} else if (eventControlName == "ButtonResume") {
 				g_GUISound.BackButtonPressSound()->Play();
 				result = ScenarioUpdateResult::ACTIVITYRESUMED;
-			}
-
-			// Most big dialog cancel buttons lead back to the game menu too
-			else if (eventControlName == "PlayerCancelButton" || eventControlName == "ConfirmCancelButton") {
-				// Hide all previously shown screens
+			} else if (eventControlName == "PlayerCancelButton" || eventControlName == "ConfirmCancelButton") {
+				// Most big dialog cancel buttons lead back to the game menu too.
 				HideAllScreens();
 				m_MenuScreen = SCENESELECT;
 				m_ScreenChange = true;
 				g_GUISound.BackButtonPressSound()->Play();
-			}
-
-			// Start Scenario Here menu button pressed
-			else if (eventControl == m_ScenarioButtons[STARTHERE]) {
+			} else if (eventControl == m_ScenarioButtons[STARTHERE]) {
+				// Start Scenario Here menu button pressed.
 				// Set up the player setup box based on updated Activity selection
 				UpdatePlayersBox(true);
-				// Hide all screens, the appropriate screen will reappear on next update
 				HideAllScreens();
 				m_MenuScreen = PLAYERSETUP;
 				m_ScreenChange = true;
 
 				g_GUISound.ButtonPressSound()->Play();
-			}
-
-			// Start game button pressed
-			else if (eventControl == m_ScenarioButtons[STARTGAME]) {
-				// Try to start the game
+			} else if (eventControl == m_ScenarioButtons[STARTGAME]) {
+				// Start game button pressed
 				if (StartGame()) {
-					// Hide all previously shown screens, show
 					HideAllScreens();
 					//                    m_MenuScreen = SCENESELECT;
 					//                    m_ScreenChange = true;
@@ -817,15 +800,11 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 				} else {
 					g_GUISound.UserErrorSound()->Play();
 				}
-			}
-
-			else if (eventControl == m_SceneCloseButton) {
+			} else if (eventControl == m_SceneCloseButton) {
 				m_ScenarioSelectedScene = 0;
 				g_GUISound.ButtonPressSound()->Play();
 			}
-		}
-
-		else if (anEvent.GetType() == GUIEvent::Notification) {
+		} else if (anEvent.GetType() == GUIEvent::Notification) {
 			// Button focus notification that we can play a sound to
 			if (dynamic_cast<GUIButton *>(eventControl)) {
 				if (anEvent.GetMsg() == GUIButton::Focused) {
@@ -834,37 +813,29 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 				// Also stop dragging any panels if we're over any button
 				m_ScenarioDraggedBox = 0;
 				m_EngageDrag = true;
-			}
-
-			else if (eventControl == m_DifficultySlider) {
-				// Update the difficulty label etc
+			} else if (eventControl == m_DifficultySlider) {
 				UpdateActivityBox();
 
 				// Also stop dragging any panels if we're over any button
 				m_ScenarioDraggedBox = 0;
 				m_EngageDrag = true;
-			}
-
-			else if (eventControl == m_ActivitySelectComboBox) {
+			} else if (eventControl == m_ActivitySelectComboBox) {
 				// Also stop dragging any panels if we're over the selection list
 				m_ScenarioDraggedBox = 0;
 				m_EngageDrag = true;
 
 				// The activity selection changed
 				if (anEvent.GetMsg() == GUIComboBox::Closed) {
-					// Update the difficulty label etc
 					UpdateActivityBox();
 
-					// If there is only one Scene compatible with this newly selected Activity, then automatically select it
+					// If there is only one Scene compatible with this newly selected Activity, then automatically select it.
 					if (m_ScenarioScenes && m_ScenarioScenes->size() == 1) {
 						m_ScenarioSelectedScene = m_ScenarioScenes->front();
-					}
-					// Deselect any previously selected scene.. it may not be compatible with the new activity
-					else {
+					} else {
+						// Deselect any previously selected scene.. it may not be compatible with the new activity.
 						m_ScenarioSelectedScene = 0;
 					}
 
-					// Update the scene info box
 					UpdateScenesBox();
 					g_GUISound.ItemChangeSound()->Play();
 				}
@@ -890,7 +861,6 @@ void ScenarioGUI::HideAllScreens() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox *pBox, int margin) {
-	//TODO: Consider the GUIControl anchor point?
 	// Make sure the box doesn't go entirely outside of the screen
 	if (pBox->GetXPos() < (margin - pBox->GetWidth())) {
 		pBox->SetPositionAbs(margin - pBox->GetWidth(), pBox->GetYPos());

@@ -208,7 +208,7 @@ namespace RTE {
 			SCENESELECT,
 			PLAYERSETUP,
 			CONFIRMQUIT,
-			SCREENCOUNT
+			MENUCOUNT
 		};
 
 		enum ScenarioButtons {
@@ -235,6 +235,15 @@ namespace RTE {
 		enum TeamRows {
 			TEAM_DISABLED = Activity::MaxTeamCount,
 			TEAMROWCOUNT
+		};
+
+		enum ScreenBox {
+			ROOTSCREEN = 0,
+			ACTIVITY,
+			SCENEINFO,
+			PLAYERSETUPSCREEN,
+			QUITCONFIRM,
+			SCREENCOUNT
 		};
 
 		Controller *m_ScenarioController; //!< Controller which controls this menu. Not owned.
@@ -265,12 +274,7 @@ namespace RTE {
 		
 		float m_PlanetRadius; //!< The screen radius of the planet.
 
-		// The different dialog/floating boxes
-		GUICollectionBox *m_ScenarioRootBox;
-		GUICollectionBox *m_ScenarioActivityBox;
-		GUICollectionBox *m_ScenarioSceneInfoBox;
-		GUICollectionBox *m_ScenarioPlayerSetupBox;
-		GUICollectionBox *m_ScenarioQuitConfirmBox;
+		std::array<GUICollectionBox *, static_cast<int>(SCREENCOUNT)> m_ScenarioScreenBoxes; //!< The different dialog/floating boxes.
 
 		GUIButton *m_ScenarioButtons[SCENARIOBUTTONCOUNT]; //!< The menu buttons we want to manipulate.
 		

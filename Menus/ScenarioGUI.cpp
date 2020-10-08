@@ -228,18 +228,21 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_StartErrorLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("StartErrorLabel"));
 	m_CPULockLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("CPULockLabel"));
 
-	// Populate the tech comboboxes with the available tech modules.
-	const DataModule *dataModule = nullptr;
-	for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i) {
-		dataModule = g_PresetMan.GetDataModule(i);
-		if (dataModule) {
-			std::string techName = dataModule->GetFriendlyName();
-			std::string techString = " Tech";
-			std::string::size_type techPos = techName.find(techString);
-			if (techPos != string::npos) {
-				techName.replace(techPos, techString.length(), "");
-				for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
-					m_TeamTechSelect[team]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+	{
+		// Populate the tech comboboxes with the available tech modules.
+		const DataModule *dataModule = nullptr;
+		const std::string techString = " Tech";
+		std::string techName = "";
+		for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i) {
+			dataModule = g_PresetMan.GetDataModule(i);
+			if (dataModule) {
+				techName = dataModule->GetFriendlyName();
+				const std::string::size_type techPos = techName.find(techString);
+				if (techPos != string::npos) {
+					techName.replace(techPos, techString.length(), "");
+					for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
+						m_TeamTechSelect[team]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+					}
 				}
 			}
 		}
@@ -979,7 +982,6 @@ void ScenarioGUI::UpdateScenesBox() {
 void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 	// Get the currently selected Activity.
 	const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
-	const Icon *pIcon = 0;
 	bool teamHasPlayers = false;
 	bool teamHasHumans = false;
 	int teamsWithPlayers = 0;
@@ -1012,7 +1014,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 					// Everyone starts on the Disabled row, except perhaps the CPU which may be on its locked team.
 					if (indexTeam1 == TEAM_DISABLED) {
 						m_PlayerBoxes[player][indexTeam1]->SetDrawType(GUICollectionBox::Image);
-						pIcon = player == PLAYER_CPU ? dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU")) : g_UInputMan.GetSchemeIcon(player);
+						const Icon *pIcon = player == PLAYER_CPU ? dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU")) : g_UInputMan.GetSchemeIcon(player);
 						if (pIcon) {
 							m_PlayerBoxes[player][indexTeam1]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 						}
@@ -1027,7 +1029,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 					if (m_LockedCPUTeam != Activity::NoTeam && player == PLAYER_CPU) {
 						if (indexTeam1 == m_LockedCPUTeam) {
 							m_PlayerBoxes[player][indexTeam1]->SetDrawType(GUICollectionBox::Image);
-							pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+							const Icon *pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 							if (pIcon) {
 								m_PlayerBoxes[player][indexTeam1]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 							}
@@ -1052,7 +1054,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 							if (indexTeam2 == indexTeam1) {
 								if (player != PLAYER_CPU) {
 									m_PlayerBoxes[player][indexTeam2]->SetDrawType(GUICollectionBox::Image);
-									pIcon = player == PLAYER_CPU ? dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU")) : g_UInputMan.GetSchemeIcon(player);
+									const Icon *pIcon = player == PLAYER_CPU ? dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU")) : g_UInputMan.GetSchemeIcon(player);
 									if (pIcon) {
 										m_PlayerBoxes[player][indexTeam2]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 									}
@@ -1062,7 +1064,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 										m_PlayerBoxes[player][indexTeam2]->SetDrawType(GUICollectionBox::Color);
 										m_PlayerBoxes[player][indexTeam2]->SetDrawColor(c_GUIColorBlue);
 									} else {
-										pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+										const Icon *pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 										if (pIcon) {
 											m_PlayerBoxes[player][indexTeam2]->SetDrawType(GUICollectionBox::Image);
 											m_PlayerBoxes[player][indexTeam2]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
@@ -1087,7 +1089,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 									m_PlayerBoxes[p2][indexTeam1]->SetDrawColor(c_GUIColorBlue);
 									// Move him to disabled.
 									m_PlayerBoxes[p2][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-									pIcon = g_UInputMan.GetSchemeIcon(p2);
+									const Icon *pIcon = g_UInputMan.GetSchemeIcon(p2);
 									if (pIcon) {
 										m_PlayerBoxes[p2][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 									}
@@ -1125,7 +1127,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 						}
 						//Select or unselect CPU disabled icon.
 						if (noCPUs) {
-							pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+							const Icon *pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 							if (pIcon) {
 								m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
 								m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
@@ -1154,39 +1156,32 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 			// Update the team names and such.
 			if (newActivity) {
 				m_TeamBoxes[team]->SetDrawType(GUICollectionBox::Image);
-				/* pointless; the CPU player icon suffices, and doesn't block the real team banner.
-								// CPU Team
-								if (pGameActivity && pGameActivity->GetCPUTeam() == team)
-								{
-									pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "CPU Team"));
-									m_TeamNameLabels[team]->SetText(pActivity->GetTeamName(team) + ":");
-								}
-								// The not-playing row.
-								else */if (team == TEAM_DISABLED) {
-									pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Disabled Team"));
-									m_TeamNameLabels[team]->SetText("Not Playing:");
-								}
-								// Active player team.
-								else if (selectedActivity->TeamActive(team)) {
-									// Set the team flag icons on the floating player bars.
-									pIcon = selectedActivity->GetTeamIcon(team);
-									// Revert to default if needed.
-									if (!pIcon) {
-										const std::string teamString = "Team " + std::to_string(team + 1) + " Default";
-										pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", teamString));
-									}
-									m_TeamNameLabels[team]->SetText(selectedActivity->GetTeamName(team) + ":");
-								}
-								// Disabled/unplayable teams.
-								else {
-									pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Locked Team"));
-									m_TeamNameLabels[team]->SetText("Unavailable");
-								}
+				const Icon *pIcon = nullptr;
+				if (team == TEAM_DISABLED) {
+					pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Disabled Team"));
+					m_TeamNameLabels[team]->SetText("Not Playing:");
+				}
+				// Active player team.
+				else if (selectedActivity->TeamActive(team)) {
+					// Set the team flag icons on the floating player bars.
+					pIcon = selectedActivity->GetTeamIcon(team);
+					// Revert to default if needed.
+					if (!pIcon) {
+						const std::string teamString = "Team " + std::to_string(team + 1) + " Default";
+						pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", teamString));
+					}
+					m_TeamNameLabels[team]->SetText(selectedActivity->GetTeamName(team) + ":");
+				}
+				// Disabled/unplayable teams.
+				else {
+					pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Locked Team"));
+					m_TeamNameLabels[team]->SetText("Unavailable");
+				}
 
-								// Finally set whatever Icon we came up with.
-								if (pIcon) {
-									m_TeamBoxes[team]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
-								}
+				// Finally set whatever Icon we came up with.
+				if (pIcon) {
+					m_TeamBoxes[team]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+				}
 			}
 
 			// Check if the team has any players assigned at all.
@@ -1615,19 +1610,19 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
 	int totalSegments = 0;
 	int drawnFirstSegments = 0;
 	int lastSegmentsToDraw = 0;
-	int circleRadius = squareSite ? static_cast<int>(6.0F * circleSize) : static_cast<int>(8.0F * circleSize);
 	int chamferSize = CHAMFERSIZE;
 	Vector chamferPoint1;
 	Vector chamferPoint2;
-	Vector sitePos = m_PlanetCenter + planetPoint;
-	bool siteIsAbove = sitePos.GetFloorIntY() < screenPoint.GetFloorIntY();
-	float yDirMult = siteIsAbove ? -1.0 : 1.0;
-	bool twoBends = std::fabs(sitePos.GetFloorIntY() - screenPoint.GetFloorIntY()) < (channelHeight - circleRadius);
-	bool noBends = std::fabs(sitePos.GetFloorIntX() - screenPoint.GetFloorIntX()) < circleRadius;// && ((m_apPlayerBox[player]->GetWidth() * meterAmount * 0.5) >= fabs(sitePos.GetFloorIntX() - screenPoint.GetFloorIntX()));
-	Vector firstBend(screenPoint.m_X, twoBends ? (screenPoint.m_Y + channelHeight * yDirMult) : sitePos.m_Y);
-	Vector secondBend(sitePos.m_X, firstBend.m_Y);
-	bool siteIsLeft = sitePos.m_X < screenPoint.m_X;
-	float xDirMult = siteIsLeft ? -1.0 : 1.0;
+	const Vector sitePos = m_PlanetCenter + planetPoint;
+	const bool siteIsAbove = sitePos.GetFloorIntY() < screenPoint.GetFloorIntY();
+	const float yDirMult = siteIsAbove ? -1.0F : 1.0F;
+	const int circleRadius = squareSite ? static_cast<int>(6.0F * circleSize) : static_cast<int>(8.0F * circleSize);
+	const bool twoBends = std::fabs(sitePos.GetFloorIntY() - screenPoint.GetFloorIntY()) < (channelHeight - circleRadius);
+	const bool noBends = std::fabs(sitePos.GetFloorIntX() - screenPoint.GetFloorIntX()) < circleRadius;// && ((m_apPlayerBox[player]->GetWidth() * meterAmount * 0.5) >= fabs(sitePos.GetFloorIntX() - screenPoint.GetFloorIntX()));
+	const Vector firstBend(screenPoint.m_X, twoBends ? (screenPoint.m_Y + channelHeight * yDirMult) : sitePos.m_Y);
+	const Vector secondBend(sitePos.m_X, firstBend.m_Y);
+	const bool siteIsLeft = sitePos.m_X < screenPoint.m_X;
+	const float xDirMult = siteIsLeft ? -1.0 : 1.0;
 
 	// No bends, meaning the mid of the meter goes straight up/down into the site circle.
 	if (noBends) {

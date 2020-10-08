@@ -78,7 +78,7 @@ namespace RTE {
 		/// Gets the GUIControlManager owned and used by this.
 		/// </summary>
 		/// <returns>The GUIControlManager. Ownership is not transferred!</returns>
-		GUIControlManager *GetGUIControlManager();
+		GUIControlManager * GetGUIControlManager();
 
 		/// <summary>
 		/// Enables or disables the menu. This will animate it in and out of view.
@@ -289,7 +289,6 @@ namespace RTE {
 
 		// Player setup controls
 		// Boxes in the matrix which detect and display where a control setting is and should be
-	    //bool m_aaControls[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];
 		GUICollectionBox *m_PlayerBoxes[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];
 		GUICollectionBox *m_TeamBoxes[TEAMROWCOUNT];
 		GUILabel *m_TeamNameLabels[TEAMROWCOUNT];

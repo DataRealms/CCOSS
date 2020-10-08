@@ -565,7 +565,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 		// Draw the lines etc pointing at the selected Scene from the Scene Info box.
 		if (m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
 			Vector sceneInfoBoxPos(m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + (m_ScenarioScreenBoxes[SCENEINFO]->GetWidth() / 2), m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + (m_ScenarioScreenBoxes[SCENEINFO]->GetHeight() / 2));
-			DrawScreenLineToSitePoint(drawBitmap, sceneInfoBoxPos, m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset(), c_GUIColorWhite, -1, -1, (m_ScenarioScreenBoxes[SCENEINFO]->GetHeight() / 2) + CHAMFERSIZE + 6, 1.0);
+			DrawWhiteScreenLineToSitePoint(drawBitmap, sceneInfoBoxPos, m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset(), (m_ScenarioScreenBoxes[SCENEINFO]->GetHeight() / 2) + CHAMFERSIZE + 6);
 		}
 	}
 
@@ -1586,55 +1586,24 @@ void ScenarioGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Ve
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
-	const Vector &screenPoint,
-	const Vector &planetPoint,
-	int color,
-	int onlyFirstSegments,
-	int onlyLastSegments,
-	int channelHeight,
-	float circleSize,
-	bool squareSite) const {
-	// No part of the line is visible with these params, so just quit.
-	if (onlyFirstSegments == 0 || onlyLastSegments == 0) {
-		return false;
-	}
-	// Detect disabling of the segment controls.
-	if (onlyFirstSegments < 0) {
-		onlyFirstSegments = 100;
-	}
-	if (onlyLastSegments < 0) {
-		onlyLastSegments = 100;
-	}
-
-	int totalSegments = 0;
-	int drawnFirstSegments = 0;
-	int lastSegmentsToDraw = 0;
-	int chamferSize = CHAMFERSIZE;
-	Vector chamferPoint1;
-	Vector chamferPoint2;
+void ScenarioGUI::DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vector &screenPoint, const Vector &planetPoint, int channelHeight) const {
+	const int color = c_GUIColorWhite;
 	const Vector sitePos = m_PlanetCenter + planetPoint;
-	const bool siteIsAbove = sitePos.GetFloorIntY() < screenPoint.GetFloorIntY();
-	const float yDirMult = siteIsAbove ? -1.0F : 1.0F;
-	const int circleRadius = squareSite ? static_cast<int>(6.0F * circleSize) : static_cast<int>(8.0F * circleSize);
-	const bool twoBends = std::fabs(sitePos.GetFloorIntY() - screenPoint.GetFloorIntY()) < (channelHeight - circleRadius);
-	const bool noBends = std::fabs(sitePos.GetFloorIntX() - screenPoint.GetFloorIntX()) < circleRadius;// && ((m_apPlayerBox[player]->GetWidth() * meterAmount * 0.5) >= fabs(sitePos.GetFloorIntX() - screenPoint.GetFloorIntX()));
-	const Vector firstBend(screenPoint.m_X, twoBends ? (screenPoint.m_Y + channelHeight * yDirMult) : sitePos.m_Y);
-	const Vector secondBend(sitePos.m_X, firstBend.m_Y);
-	const bool siteIsLeft = sitePos.m_X < screenPoint.m_X;
-	const float xDirMult = siteIsLeft ? -1.0 : 1.0;
+	const float yDirMult = sitePos.m_Y < screenPoint.m_Y ? -1.0F : 1.0F;
+	const int circleRadius = 8;
 
 	// No bends, meaning the mid of the meter goes straight up/down into the site circle.
-	if (noBends) {
-		// How many possible segments there are total for this type of line: to site + circle.
-		totalSegments = lastSegmentsToDraw = 1 + 1;
+	if (std::fabs(sitePos.GetFloorIntX() - screenPoint.GetFloorIntX()) < circleRadius) {
 		// Draw the line to the site.
-		if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments)) {
-			DrawGlowLine(drawBitmap, screenPoint + Vector(sitePos.m_X - screenPoint.m_X, 0), sitePos + Vector(0, (circleRadius + 1) * -yDirMult), color);
-		}
-	}
-	// Extra lines depending on whether there needs to be two bends due to the site being in the 'channel', ie next to the floating player bar.
-	else if (twoBends) {
+		DrawGlowLine(drawBitmap, screenPoint + Vector(sitePos.m_X - screenPoint.m_X, 0), sitePos + Vector(0, (circleRadius + 1) * -yDirMult), color);
+	} else if (std::fabs(sitePos.GetFloorIntY() - screenPoint.GetFloorIntY()) < (channelHeight - circleRadius)) {
+		// Extra lines depending on whether there needs to be two bends due to the site being in the 'channel', ie next to the floating player bar.
+		const Vector firstBend(screenPoint.m_X, screenPoint.m_Y + channelHeight * yDirMult);
+		const Vector secondBend(sitePos.m_X, firstBend.m_Y);
+		Vector chamferPoint1;
+		Vector chamferPoint2;
+		const float xDirMult = sitePos.m_X < screenPoint.m_X ? -1.0F : 1.0F;
+		int chamferSize = CHAMFERSIZE;
 		// Cap the chamfer size on the second bend appropriately.
 		chamferSize = std::min(static_cast<int>((firstBend - secondBend).GetMagnitude() - 15), chamferSize);
 		chamferSize = std::min(static_cast<int>((secondBend - sitePos).GetMagnitude() - circleRadius * 3), chamferSize);
@@ -1644,36 +1613,22 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
 		chamferSize = std::max(0, chamferSize);
 		chamferPoint1.SetXY(secondBend.m_X + chamferSize * -xDirMult, secondBend.m_Y);
 		chamferPoint2.SetXY(secondBend.m_X, secondBend.m_Y + chamferSize * -yDirMult);
-		// How many of the last segments to draw: to first bend + to second bend chamfer + chamfer + to site + circle.
-		totalSegments = lastSegmentsToDraw = 1 + 1 + (int)(chamferSize > 0) + 1 + 1;
 		// Line to the first bend.
-		drawnFirstSegments++;
-		lastSegmentsToDraw--;
-		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
-			DrawGlowLine(drawBitmap, screenPoint, firstBend, color);
-		}
+		DrawGlowLine(drawBitmap, screenPoint, firstBend, color);
 		// Line to the second bend, including the chamfer.
-		drawnFirstSegments++;
-		lastSegmentsToDraw--;
-		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
-			DrawGlowLine(drawBitmap, firstBend, chamferPoint1, color);
-		}
+		DrawGlowLine(drawBitmap, firstBend, chamferPoint1, color);
 		if (chamferSize > 0) {
-			drawnFirstSegments++;
-			lastSegmentsToDraw--;
-			if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
-				DrawGlowLine(drawBitmap, chamferPoint1, chamferPoint2, color);
-			}
+			DrawGlowLine(drawBitmap, chamferPoint1, chamferPoint2, color);
 		}
 		// Line to the site.
-		drawnFirstSegments++;
-		lastSegmentsToDraw--;
-		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
-			DrawGlowLine(drawBitmap, chamferPoint2, sitePos + Vector(0, (circleRadius + 1) * yDirMult), color);
-		}
-	}
-	// Just one bend.
-	else {
+		DrawGlowLine(drawBitmap, chamferPoint2, sitePos + Vector(0, (circleRadius + 1) * yDirMult), color);
+	} else {
+		// Just one bend.
+		const Vector firstBend(screenPoint.m_X, sitePos.m_Y);
+		Vector chamferPoint1;
+		Vector chamferPoint2;
+		const float xDirMult = sitePos.m_X < screenPoint.m_X ? -1.0F : 1.0F;
+		int chamferSize = CHAMFERSIZE;
 		// Cap the chamfer size on the first bend appropriately.
 		chamferSize = std::min(static_cast<int>((screenPoint - firstBend).GetMagnitude() - 15), chamferSize);
 		chamferSize = std::min(static_cast<int>((firstBend - sitePos).GetMagnitude() - circleRadius * 3), chamferSize);
@@ -1683,51 +1638,19 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
 		chamferSize = std::max(0, chamferSize);
 		chamferPoint1.SetXY(screenPoint.m_X, firstBend.m_Y + chamferSize * -yDirMult);
 		chamferPoint2.SetXY(firstBend.m_X + chamferSize * xDirMult, sitePos.m_Y);
-		// How many of the last segments to draw: to first bend chamfer + chamfer + to site + circle.
-		totalSegments = lastSegmentsToDraw = 1 + (int)(chamferSize > 0) + 1 + 1;
 		// Draw line to the first bend, including the chamfer.
-		drawnFirstSegments++;
-		lastSegmentsToDraw--;
-		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
-			DrawGlowLine(drawBitmap, screenPoint, chamferPoint1, color);
-		}
+		DrawGlowLine(drawBitmap, screenPoint, chamferPoint1, color);
 		if (chamferSize > 0) {
-			drawnFirstSegments++;
-			lastSegmentsToDraw--;
-			if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
-				DrawGlowLine(drawBitmap, chamferPoint1, chamferPoint2, color);
-			}
+			DrawGlowLine(drawBitmap, chamferPoint1, chamferPoint2, color);
 		}
 		// Draw line to the site.
-		drawnFirstSegments++;
-		lastSegmentsToDraw--;
-		if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
-			DrawGlowLine(drawBitmap, chamferPoint2, sitePos + Vector((circleRadius + 1) * -xDirMult, 0), color);
-		}
+		DrawGlowLine(drawBitmap, chamferPoint2, sitePos + Vector((circleRadius + 1) * -xDirMult, 0), color);
 	}
 
 	// Draw a circle around the site target.
-	drawnFirstSegments++;
-	lastSegmentsToDraw--;
-	if (!(drawnFirstSegments >= onlyFirstSegments || lastSegmentsToDraw > onlyLastSegments)) {
-		int blendAmount = 225 + RandomNum(-20, 20);
-		set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
+	int blendAmount = 225 + RandomNum(-20, 20);
+	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
-		// If specified, draw a squareSite instead (with chamfered corners).
-		if (squareSite) {
-			hline(drawBitmap, sitePos.GetFloorIntX() - circleRadius - 1, sitePos.GetFloorIntY() - circleRadius - 1, sitePos.GetFloorIntX() + circleRadius, color);
-			hline(drawBitmap, sitePos.GetFloorIntX() - circleRadius - 1, sitePos.GetFloorIntY() - circleRadius - 1 - 1, sitePos.GetFloorIntX() + circleRadius, color);
-			hline(drawBitmap, sitePos.GetFloorIntX() - circleRadius - 1, sitePos.GetFloorIntY() + circleRadius, sitePos.GetFloorIntX() + circleRadius, color);
-			hline(drawBitmap, sitePos.GetFloorIntX() - circleRadius - 1, sitePos.GetFloorIntY() + circleRadius + 1, sitePos.GetFloorIntX() + circleRadius, color);
-			vline(drawBitmap, sitePos.GetFloorIntX() - circleRadius - 1, sitePos.GetFloorIntY() - circleRadius - 1, sitePos.GetFloorIntY() + circleRadius, color);
-			vline(drawBitmap, sitePos.GetFloorIntX() - circleRadius - 1 - 1, sitePos.GetFloorIntY() - circleRadius - 1, sitePos.GetFloorIntY() + circleRadius, color);
-			vline(drawBitmap, sitePos.GetFloorIntX() + circleRadius, sitePos.GetFloorIntY() + circleRadius, sitePos.GetFloorIntY() - circleRadius - 1, color);
-			vline(drawBitmap, sitePos.GetFloorIntX() + circleRadius + 1, sitePos.GetFloorIntY() + circleRadius, sitePos.GetFloorIntY() - circleRadius - 1, color);
-		} else {
-			circle(drawBitmap, sitePos.GetFloorIntX(), sitePos.GetFloorIntY(), circleRadius, color);
-			circle(drawBitmap, sitePos.GetFloorIntX(), sitePos.GetFloorIntY(), circleRadius - 1, color);
-		}
-	}
-
-	return totalSegments <= onlyFirstSegments && totalSegments <= onlyLastSegments;
+	circle(drawBitmap, sitePos.GetFloorIntX(), sitePos.GetFloorIntY(), circleRadius, color);
+	circle(drawBitmap, sitePos.GetFloorIntX(), sitePos.GetFloorIntY(), circleRadius - 1, color);
 }

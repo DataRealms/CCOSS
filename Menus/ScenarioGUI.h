@@ -116,15 +116,8 @@ namespace RTE {
 		/// <param name="drawBitmap">The bitmap to draw to.</param>
 		/// <param name="screenPoint">The point on the screen to point from, in screen coordinates.</param>
 		/// <param name="planetPoint">The point on the planet to point at, in planet coordinates.</param>
-		/// <param name="color">The color of the line.</param>
-		/// <param name="onlyFirstSegments">How many of the segments from the start (the start of the line) to draw.</param>
-		/// <param name="onlyLastSegments">How many of the segments from the end (site circle) to draw. -1 is all.</param>
 		/// <param name="channelHeight">The height of the 'channel' above and below that the lines will go around the player bar.</param>
-		/// <param name="circleSize">What size factor from 'normal' should the circle's diameter be drawn.</param>
-		/// <param name="squareSite">Whether to draw the planet site as a square (true) or a circle (false).</param>
-		/// <returns>Whether all segments of the line were drawn with the segment params.</returns>
-		bool DrawScreenLineToSitePoint(BITMAP *drawBitmap, const Vector &screenPoint, const Vector &planetPoint, int color, int onlyFirstSegments = -1, int onlyLastSegments = -1,
-			int channelHeight = 80, float circleSize = 1.0F, bool squareSite = false) const;
+		void DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vector &screenPoint, const Vector &planetPoint, int channelHeight = 80) const;
 
 	protected:
 

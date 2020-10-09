@@ -197,32 +197,35 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_TeamBoxes[TEAM_DISABLED] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("TDIcon"));
 	m_TeamNameLabels[TEAM_DISABLED] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("TDLabel"));
 
-	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
-		std::string controlString = "T" + std::to_string(team + 1) + "Icon";
-		m_TeamBoxes[team] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
+	{
+		std::string controlString = "";
+		for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
+			controlString = "T" + std::to_string(team + 1) + "Icon";
+			m_TeamBoxes[team] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
 
-		controlString = "T" + std::to_string(team + 1) + "Label";
-		m_TeamNameLabels[team] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
+			controlString = "T" + std::to_string(team + 1) + "Label";
+			m_TeamNameLabels[team] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
 
-		controlString = "T" + std::to_string(team + 1) + "TechCombo";
-		m_TeamTechSelect[team] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl(controlString));
-		m_TeamTechSelect[team]->SetEnabled(false);
-		m_TeamTechSelect[team]->SetVisible(false);
-		m_TeamTechSelect[team]->GetListPanel()->AddItem("-All-", "", 0, 0, -2);
-		m_TeamTechSelect[team]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-		m_TeamTechSelect[team]->SetSelectedIndex(0);
+			controlString = "T" + std::to_string(team + 1) + "TechCombo";
+			m_TeamTechSelect[team] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl(controlString));
+			m_TeamTechSelect[team]->SetEnabled(false);
+			m_TeamTechSelect[team]->SetVisible(false);
+			m_TeamTechSelect[team]->GetListPanel()->AddItem("-All-", "", 0, 0, -2);
+			m_TeamTechSelect[team]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
+			m_TeamTechSelect[team]->SetSelectedIndex(0);
 
-		controlString = "T" + std::to_string(team + 1) + "AISkillSlider";
-		m_TeamAISkillSlider[team] = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl(controlString));
-		m_TeamAISkillSlider[team]->SetEnabled(false);
-		m_TeamAISkillSlider[team]->SetVisible(false);
-		m_TeamAISkillSlider[team]->SetValue(Activity::DefaultSkill);
+			controlString = "T" + std::to_string(team + 1) + "AISkillSlider";
+			m_TeamAISkillSlider[team] = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl(controlString));
+			m_TeamAISkillSlider[team]->SetEnabled(false);
+			m_TeamAISkillSlider[team]->SetVisible(false);
+			m_TeamAISkillSlider[team]->SetValue(Activity::DefaultSkill);
 
-		controlString = "T" + std::to_string(team + 1) + "AISkillLabel";
-		m_TeamAISkillLabel[team] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
-		m_TeamAISkillLabel[team]->SetEnabled(false);
-		m_TeamAISkillLabel[team]->SetVisible(false);
-		m_TeamAISkillLabel[team]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[team]->GetValue()));
+			controlString = "T" + std::to_string(team + 1) + "AISkillLabel";
+			m_TeamAISkillLabel[team] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
+			m_TeamAISkillLabel[team]->SetEnabled(false);
+			m_TeamAISkillLabel[team]->SetVisible(false);
+			m_TeamAISkillLabel[team]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[team]->GetValue()));
+		}
 	}
 
 	m_StartErrorLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("StartErrorLabel"));
@@ -409,42 +412,23 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 			}
 		}
 
-		Vector screenLocation;
-
-		bool mouseIsInBox = false;
-
-		// Detect if mouse is inside UI boxes.
-		const GUIRect *rect;
-		rect = m_ScenarioScreenBoxes[ACTIVITY]->GetRect();
-		if (mouseX > rect->left && mouseX < rect->right && mouseY > rect->top && mouseY < rect->bottom) {
-			mouseIsInBox = true;
-		}
-
-		rect = m_ScenarioScreenBoxes[SCENEINFO]->GetRect();
-		if (mouseX > rect->left && mouseX < rect->right && mouseY > rect->top && mouseY < rect->bottom) {
-			mouseIsInBox = true;
-		}
+		bool mouseIsInBox = m_ScenarioScreenBoxes[ACTIVITY]->PointInside(mouseX, mouseY) || m_ScenarioScreenBoxes[SCENEINFO]->PointInside(mouseX, mouseY);
 
 		// Validate mouse position as being over the planet area for hover operations.
 		if (m_ScenarioScenes && !m_ScenarioDraggedBox && (mousePos - m_PlanetCenter).GetMagnitude() < m_PlanetRadius && !mouseIsInBox) {
 			// If unlocked, detect any Scene close to the mouse and highlight it.
 			bool foundAnyHover = false;
-			//bool foundNewHover = false;
 			Scene *candidateScene = nullptr;
 			float distance = 0;
 			float shortestDist = 1000000.0F;
-			for (Scene*scenarioScene : *m_ScenarioScenes) {
+			Vector screenLocation;
+			for (Scene *scenarioScene : *m_ScenarioScenes) {
 				screenLocation = m_PlanetCenter + scenarioScene->GetLocation() + scenarioScene->GetLocationOffset();
 				distance = (screenLocation - mousePos).GetMagnitude();
 
-				// The first new scene the mouse's position is close to when unlocked, make selected.
 				if (distance < 16 && distance < shortestDist) {
-					// This is now the shortest
 					shortestDist = distance;
 					foundAnyHover = true;
-					// See if the scene hovered is different from the previously hovered one, and if so, set it to the new candidate to switch hovering to.
-// Actually, don't because it will cause alternating each frame if two hover zones overlap.
-//                    if (*scenarioScene != m_ScenarioHoveredScene)
 					candidateScene = scenarioScene;
 				}
 			}
@@ -452,19 +436,12 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 			// Set new hovered scene to be the one now closest to the cursor, if there is any and if it is different than the currently hovered one.
 			if (candidateScene != nullptr && candidateScene != m_ScenarioHoveredScene) {
 				m_ScenarioHoveredScene = candidateScene;
-				//foundNewHover = true;
 				g_GUISound.SelectionChangeSound()->Play();
-				UpdateScenesBox();
+				UpdateSiteNameLabel(true, m_ScenarioHoveredScene->GetPresetName(), m_ScenarioHoveredScene->GetLocation() + m_ScenarioHoveredScene->GetLocationOffset());
 			}
 
 			if (!foundAnyHover) {
 				m_ScenarioHoveredScene = 0;
-			}
-
-			// Set up the hover label to appear over any hovered scene location.
-			if (m_ScenarioHoveredScene) {
-				UpdateSiteNameLabel(true, m_ScenarioHoveredScene->GetPresetName(), m_ScenarioHoveredScene->GetLocation() + m_ScenarioHoveredScene->GetLocationOffset());
-			} else {
 				UpdateSiteNameLabel(false);
 			}
 
@@ -473,7 +450,6 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 				if (m_ScenarioHoveredScene) {
 					m_ScenarioSelectedScene = m_ScenarioHoveredScene;
 					g_GUISound.ItemChangeSound()->Play();
-					UpdateScenesBox();
 				}
 				/* Can't do this, doesn't take into account clicks on floating UI boxes.
 								// Not hovering over anything on click, so deselect whatever was selected.
@@ -487,8 +463,8 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 		}
 
 		// Update the Activity setup and Scene info boxes.
-// No need to do this all the time, just when controls change.
-//        UpdateActivityBox();
+		// No need to do this all the time, just when controls change.
+		//UpdateActivityBox();
 		//if (!m_pSchemeSelect->IsDropped())
 		UpdateScenesBox();
 	}
@@ -535,7 +511,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	// Transparency effect on the scene dots and lines.
 	drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
 	// Screen blend the dots and lines, with some flickering in its intensity.
-	int blendAmount = 120 + RandomNum(-55, 55);
+	int blendAmount = 65 + RandomNum(0, 110);
 	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
 	// Draw sites etc only when selecting them.
@@ -553,13 +529,15 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 			}
 
 			screenLocation = m_PlanetCenter + scene->GetLocation() + scene->GetLocationOffset();
-			blendAmount = 85 + RandomNum(-25, 25);
+			const int screenLocationX = screenLocation.GetFloorIntX();
+			const int screenLocationY = screenLocation.GetFloorIntY();
+			blendAmount = 60 + RandomNum(0, 50);
 			set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-			circlefill(drawBitmap, screenLocation.GetFloorIntX(), screenLocation.GetFloorIntY(), 4, color);
-			circlefill(drawBitmap, screenLocation.GetFloorIntX(), screenLocation.GetFloorIntY(), 2, color);
-			blendAmount = 200 + RandomNum(-55, 55);
+			circlefill(drawBitmap, screenLocationX, screenLocationY, 4, color);
+			circlefill(drawBitmap, screenLocationX, screenLocationY, 2, color);
+			blendAmount = 145 + RandomNum(0, 110);
 			set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-			circlefill(drawBitmap, screenLocation.GetFloorIntX(), screenLocation.GetFloorIntY(), 1, color);
+			circlefill(drawBitmap, screenLocationX, screenLocationY, 1, color);
 		}
 
 		// Draw the lines etc pointing at the selected Scene from the Scene Info box.
@@ -967,14 +945,13 @@ void ScenarioGUI::UpdateScenesBox() {
 		m_ScenarioScreenBoxes[SCENEINFO]->Resize(m_ScenarioScreenBoxes[SCENEINFO]->GetWidth(), newHeight + 140);
 		// Blink the start game button.
 		m_ScenarioButtons[STARTHERE]->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <");
+		// Make sure the box doesn't go entirely outside of the screen.
+		KeepBoxOnScreen(m_ScenarioScreenBoxes[SCENEINFO]);
 	} else {
 		m_ScenarioScreenBoxes[SCENEINFO]->SetVisible(false);
 		m_SceneNameLabel->SetText("");
 		m_SceneInfoLabel->SetText("");
 	}
-
-	// Make sure the box doesn't go entirely outside of the screen.
-	KeepBoxOnScreen(m_ScenarioScreenBoxes[SCENEINFO]);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -188,7 +188,6 @@ int ScenarioGUI::Create(Controller *pController) {
 	// Player team assignment box.
 	for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
 		for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team) {
-			// +1 because the controls are indexed starting at 1, not 0
 			const std::string controlString = "P" + std::to_string(player + 1) + "T" + std::to_string(team + 1) + "Box";
 			m_PlayerBoxes[player][team] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
 		}
@@ -354,10 +353,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 	Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
 
-	ScenarioUpdateResult updateInputResult = UpdateInput();
-	if (result == ScenarioUpdateResult::NOEVENT) {
-		result = updateInputResult;
-	}
+	result = UpdateInput();
 
 	//////////////////////////////////////
 	// SCENE SELECTION SCREEN
@@ -610,14 +606,12 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 	ScenarioUpdateResult result = NOEVENT;
 	// TODO: if activity is running, allow esc to resume activity instead of quitting.
-	// If esc pressed, show quit dialog if applicable.
 	if (g_UInputMan.KeyPressed(KEY_ESC)) {
-		// Just quit if the dialog is already up.
 		if (m_ScenarioScreenBoxes[QUITCONFIRM]->GetVisible()) {
 			g_Quit = true;
 		} else {
 			HideAllScreens();
-			m_QuitConfirmLabel->SetText("Sure you want to quit to OS?"); //\nAny unsaved progress\nwill be lost!");
+			m_QuitConfirmLabel->SetText("Are you sure you want to quit to OS?"); //\nAny unsaved progress\nwill be lost!");
 			m_QuitConfirmButton->SetText("Quit");
 			m_ScenarioScreenBoxes[QUITCONFIRM]->SetVisible(true);
 			m_MenuScreen = CONFIRMQUIT;
@@ -769,7 +763,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::HideAllScreens() {
-	for (int iScreen = ACTIVITY; iScreen < SCREENCOUNT; iScreen++) {
+	for (int iScreen = 1; iScreen < SCREENCOUNT; iScreen++) {
 		m_ScenarioScreenBoxes[iScreen]->SetVisible(false);
 	}
 

@@ -263,9 +263,9 @@ namespace RTE {
 		
 		float m_PlanetRadius; //!< The screen radius of the planet.
 
-		std::array<GUICollectionBox *, static_cast<int>(SCREENCOUNT)> m_ScenarioScreenBoxes; //!< The different dialog/floating boxes.
+		GUICollectionBox *m_ScenarioScreenBoxes[SCREENCOUNT]; //!< The different dialog/floating boxes.
 
-		std::array <GUIButton *, static_cast<int>(SCENARIOBUTTONCOUNT)> m_ScenarioButtons; //!< The menu buttons we want to manipulate.
+		GUIButton *m_ScenarioButtons[SCENARIOBUTTONCOUNT]; //!< The menu buttons we want to manipulate.
 		
 		GUILabel *m_ScenarioScenePlanetLabel; //!< Hover name label over Scenes.
 

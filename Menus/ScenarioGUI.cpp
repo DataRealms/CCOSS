@@ -67,7 +67,6 @@ void ScenarioGUI::Clear() {
 	m_ScenarioGUIInput = 0;
 	m_ScenarioGUIController = 0;
 	m_MenuEnabled = ENABLED;
-	m_MenuScreen = SCENESELECT;
 	m_ScreenChange = false;
 	m_SceneFocus = 0;
 	m_FocusChange = 0;
@@ -323,7 +322,7 @@ void ScenarioGUI::SetEnabled(bool enable) {
 		g_GUISound.ExitMenuSound()->Play();
 	} else if (enable && m_MenuEnabled == ENABLED) {
 		HideAllScreens();
-		m_MenuScreen = SCENESELECT;
+		m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 		// Reload all scenes and actvities to reflect scene changes player might do in scene editor.
 		GetAllScenesAndActivities();
 	}
@@ -358,36 +357,28 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	//////////////////////////////////////
 	// SCENE SELECTION SCREEN
 
-	if (m_MenuScreen == SCENESELECT) {
-		if (m_ScreenChange) {
-			m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
-			// Scene box only appears when a scene is actively selected.
-			m_ScenarioScreenBoxes[SCENEINFO]->SetVisible(false);
+	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
+		{
+			const Activity *currentActivity = g_ActivityMan.GetActivity();
+			if (currentActivity && (currentActivity->GetActivityState() == Activity::Running || currentActivity->GetActivityState() == Activity::Editing)) {
+				if (!m_ScenarioButtons[RESUME]->GetVisible()) {
+					m_ScenarioButtons[RESUME]->SetVisible(true);
+				}
 
-			m_ScreenChange = false;
-		}
-
-		if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
-			if (!m_ScenarioButtons[RESUME]->GetVisible()) {
-				m_ScenarioButtons[RESUME]->SetVisible(true);
-			}
-
-			if (m_BlinkTimer.AlternateReal(500)) {
-				m_ScenarioButtons[RESUME]->SetFocus();
+				if (m_BlinkTimer.AlternateReal(500)) {
+					m_ScenarioButtons[RESUME]->SetFocus();
+				} else {
+					m_ScenarioGUIController->GetManager()->SetFocus(0);
+				}
 			} else {
-				m_ScenarioGUIController->GetManager()->SetFocus(0);
-			}
-		} else {
-			if (m_ScenarioButtons[RESUME]->GetVisible()) {
-				m_ScenarioButtons[RESUME]->SetVisible(false);
+				if (m_ScenarioButtons[RESUME]->GetVisible()) {
+					m_ScenarioButtons[RESUME]->SetVisible(false);
+				}
 			}
 		}
 
-		bool mouseIsInBox = m_ScenarioScreenBoxes[ACTIVITY]->PointInside(mouseX, mouseY) || m_ScenarioScreenBoxes[SCENEINFO]->PointInside(mouseX, mouseY);
-
-		// Validate mouse position as being over the planet area for hover operations.
-		if (m_ScenarioScenes && !m_ScenarioDraggedBox && (mousePos - m_PlanetCenter).GetMagnitude() < m_PlanetRadius && !mouseIsInBox) {
-			// If unlocked, detect any Scene close to the mouse and highlight it.
+		// If the mouse is over the planet, check if it's over a site point, then display the site's label.
+		if (m_ScenarioScenes && !m_ScenarioDraggedBox && (mousePos - m_PlanetCenter).GetMagnitude() < m_PlanetRadius && !(m_ScenarioScreenBoxes[ACTIVITY]->PointInside(mouseX, mouseY) || m_ScenarioScreenBoxes[SCENEINFO]->PointInside(mouseX, mouseY))) {
 			bool foundAnyHover = false;
 			Scene *candidateScene = nullptr;
 			float distance = 0;
@@ -404,7 +395,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 				}
 			}
 
-			// Set new hovered scene to be the one now closest to the cursor, if there is any and if it is different than the currently hovered one.
+			// Set new hovered scene to be the one closest to the cursor, if there is any and if it is different than the currently hovered one.
 			if (candidateScene != nullptr && candidateScene != m_ScenarioHoveredScene) {
 				m_ScenarioHoveredScene = candidateScene;
 				g_GUISound.SelectionChangeSound()->Play();
@@ -422,50 +413,17 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 					m_ScenarioSelectedScene = m_ScenarioHoveredScene;
 					g_GUISound.ItemChangeSound()->Play();
 				}
-				/* Can't do this, doesn't take into account clicks on floating UI boxes.
-								// Not hovering over anything on click, so deselect whatever was selected.
-								else if (m_ScenarioSelectedScene)
-								{
-									m_ScenarioSelectedScene = 0;
-									g_GUISound.FocusChangeSound()->Play();
-								}
-				*/
 			}
 		}
 
-		// Update the Activity setup and Scene info boxes.
-		// No need to do this all the time, just when controls change.
-		//UpdateActivityBox();
-		//if (!m_pSchemeSelect->IsDropped())
 		UpdateScenesBox();
 	}
 
 	//////////////////////////////////////
 	// PLAYER TEAM ASSIGNMENT SCREEN
 
-	else if (m_MenuScreen == PLAYERSETUP) {
-		if (m_ScreenChange) {
-			m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->SetVisible(true);
-			//m_ScenarioButtons[BACKTOMAINBUTTON]->SetVisible(true);
-			m_ScreenChange = false;
-		}
-
-		// Update the player selection box
+	else if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
 		UpdatePlayersBox(false);
-
-		//m_ScenarioButtons[BACKTOMAINBUTTON]->SetFocus();
-	}
-
-	//////////////////////////////////////
-	// QUIT CONFIRM DIALOG
-
-	else if (m_MenuScreen == CONFIRMQUIT) {
-		if (m_ScreenChange) {
-			m_ScenarioScreenBoxes[QUITCONFIRM]->SetVisible(true);
-			m_ScreenChange = false;
-		}
-
-		//m_ScenarioButtons[BACKTOMAINBUTTON]->SetFocus();
 	}
 
 	// Save mouse pos for next frame so we can do dragging.
@@ -486,7 +444,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
 	// Draw sites etc only when selecting them.
-	if (m_MenuScreen == SCENESELECT && m_ScenarioScenes) {
+	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible() && m_ScenarioScenes) {
 		// Draw the scene location dots.
 		Vector screenLocation;
 		for (const Scene * scene : *m_ScenarioScenes) {
@@ -525,7 +483,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	m_ScenarioGUIController->Draw(&drawScreen);
 
 	// Draw scene preview after GUI.
-	if (m_MenuScreen == SCENESELECT && m_ScenarioScenes && m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
+	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible() && m_ScenarioScenes && m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
 		BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
 		if (!preview) {
 			preview = m_DefaultPreviewBitmap;
@@ -533,7 +491,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 		
 		blit(preview, m_ScenePreviewBitmap, 0, 0, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
 		draw_sprite(drawBitmap, m_ScenePreviewBitmap, m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + 10, m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + 33);
-	} else if (m_MenuScreen == PLAYERSETUP) {
+	} else if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
 		// Draw the Player-Team matrix lines and disabled overlay effects.
 		const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
 		int lineY = 80;
@@ -614,8 +572,6 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			m_QuitConfirmLabel->SetText("Are you sure you want to quit to OS?"); //\nAny unsaved progress\nwill be lost!");
 			m_QuitConfirmButton->SetText("Quit");
 			m_ScenarioScreenBoxes[QUITCONFIRM]->SetVisible(true);
-			m_MenuScreen = CONFIRMQUIT;
-			m_ScreenChange = true;
 		}
 	}
 
@@ -629,7 +585,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 
 	// If not currently dragging a box, see if we should start.
 	bool menuButtonHeld = g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER);
-	if (m_MenuScreen == SCENESELECT && !m_ScenarioDraggedBox && menuButtonHeld && !m_EngageDrag && !m_ActivitySelectComboBox->IsDropped()) {
+	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible() && !m_ScenarioDraggedBox && menuButtonHeld && !m_EngageDrag && !m_ActivitySelectComboBox->IsDropped()) {
 		GUICollectionBox *pBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], 1));
 
 		if (pBox == m_ScenarioScreenBoxes[ACTIVITY] || pBox == m_ScenarioScreenBoxes[SCENEINFO]) {
@@ -675,8 +631,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			if (eventControlName == "BackToMainButton") {
 				HideAllScreens();
 
-				m_MenuScreen = SCENESELECT;
-				m_ScreenChange = true;
+				m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 
 				g_GUISound.BackButtonPressSound()->Play();
 
@@ -694,23 +649,20 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			} else if (eventControlName == "PlayerCancelButton" || eventControlName == "ConfirmCancelButton") {
 				// Most big dialog cancel buttons lead back to the game menu too.
 				HideAllScreens();
-				m_MenuScreen = SCENESELECT;
-				m_ScreenChange = true;
+				m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 				g_GUISound.BackButtonPressSound()->Play();
 			} else if (eventControl == m_ScenarioButtons[STARTHERE]) {
 				// Start Scenario Here menu button pressed.
 				// Set up the player setup box based on updated Activity selection.
 				UpdatePlayersBox(true);
 				HideAllScreens();
-				m_MenuScreen = PLAYERSETUP;
-				m_ScreenChange = true;
+				m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->SetVisible(true);
 
 				g_GUISound.ButtonPressSound()->Play();
 			} else if (eventControl == m_ScenarioButtons[STARTGAME]) {
 				if (StartGame()) {
 					HideAllScreens();
-					//m_MenuScreen = SCENESELECT;
-					//m_ScreenChange = true;
+					m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 					g_GUISound.ButtonPressSound()->Play();
 					result = ScenarioUpdateResult::ACTIVITYRESTARTED;
 				} else {

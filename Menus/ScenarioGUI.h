@@ -196,14 +196,6 @@ namespace RTE {
 			DISABLED
 		};
 
-		enum MenuScreen {
-			ROOT = 0,
-			SCENESELECT,
-			PLAYERSETUP,
-			CONFIRMQUIT,
-			MENUCOUNT
-		};
-
 		enum ScenarioButtons {
 			BACKTOMAINBUTTON = 0,
 			STARTHERE,
@@ -248,8 +240,6 @@ namespace RTE {
 		GUIControlManager *m_ScenarioGUIController; //!< The control manager which holds all the controls.
 		
 		int m_MenuEnabled; //!< Visibility state of the menu.
-		
-		int m_MenuScreen; //!< Screen selection state.
 		
 		bool m_ScreenChange; //!< Change in menu screens detected.
 		

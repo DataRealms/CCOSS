@@ -594,6 +594,7 @@ bool PlayIntroTitle() {
             }
 
             planetPos.SetXY(g_FrameMan.GetResX() / 2, 567 - scrollOffset.GetFloorIntY());
+			//g_pScenarioGUI->SetPlanetInfo(planetPos, planetRadius);
             pMoon->SetPos(Vector(planetPos.m_X + 200, 364 - scrollOffset.GetFloorIntY() * 0.60));
             pPlanet->SetPos(planetPos);
 
@@ -667,7 +668,7 @@ bool PlayIntroTitle() {
 		}
 
         // Scenario setup menu update and drawing
-		ScenarioGUI::ScenarioUpdateResult scenarioGUIResult;
+		ScenarioGUI::ScenarioUpdateResult scenarioGUIResult = ScenarioGUI::NOEVENT;
         if (g_IntroState == SCENARIOMENU)
         {
             g_pScenarioGUI->SetPlanetInfo(planetPos, planetRadius);

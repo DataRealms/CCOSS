@@ -97,7 +97,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="center">The absolute screen coordinates of the planet's center.</param>
 		/// <param name="radius">The radius, in screen pixel units, of the planet.</param>
-		void SetPlanetInfo(const Vector &center, float radius) { m_PlanetCenter = center; m_PlanetRadius = radius; }
+		void SetPlanetInfo(const Vector &center, float radius);
 
 		/// <summary>
 		/// Updates the state of this Menu each frame.
@@ -114,10 +114,8 @@ namespace RTE {
 		/// Draws fancy thick flickering lines to point out scene points on the planet, from an arbitrary screen point.
 		/// </summary>
 		/// <param name="drawBitmap">The bitmap to draw to.</param>
-		/// <param name="screenPoint">The point on the screen to point from, in screen coordinates.</param>
 		/// <param name="planetPoint">The point on the planet to point at, in planet coordinates.</param>
-		/// <param name="channelHeight">The height of the 'channel' above and below that the lines will go around the player bar.</param>
-		void DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vector &screenPoint, const Vector &planetPoint, int channelHeight = 80) const;
+		void DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vector &planetPoint) const;
 
 	protected:
 
@@ -188,6 +186,11 @@ namespace RTE {
 		/// <param name="end">The end Vector for the line, in absolute screen coordinates.</param>
 		/// <param name="color">The color to draw the line in. Use makecol(r, g, b) to create the color.</param>
 		void DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Vector &end, int color) const;
+
+		/// <summary>
+		/// Calculates how to draw lines from the scene info box to a site point on the planet.
+		/// </summary>
+		void CalculateLinesToSitePoint();
 
 		enum MenuEnabled {
 			ENABLING = 0,
@@ -314,6 +317,8 @@ namespace RTE {
 		Vector m_PrevMousePos; //!< Previous pos of mouse to calculate dragging.
 
 		bool m_SelectTutorial; //!< Select tutorial activity when switched to scenario GUI.
+
+		std::vector<Vector> m_LinePointsToSite; //!< Collection of points that form lines from a screen point to the selected site point.
 
 	private:
 

@@ -131,6 +131,7 @@ void ScenarioGUI::Clear() {
 	m_ScenarioHoveredScene = 0;
 	m_ScenarioSelectedScene = 0;
 	m_PrevMousePos.Reset();
+	m_LinePointsToSite.clear();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -332,6 +333,17 @@ void ScenarioGUI::SetEnabled(bool enable) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void ScenarioGUI::SetPlanetInfo(const Vector &center, float radius) {
+	const bool centerChanged = (center != m_PlanetCenter);
+	m_PlanetCenter = center;
+	m_PlanetRadius = radius;
+	if (centerChanged && m_ScenarioSelectedScene) {
+		CalculateLinesToSitePoint();
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	ScenarioUpdateResult result = ScenarioUpdateResult::NOEVENT;
 	m_ScenarioController->Update();
@@ -356,6 +368,9 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 
 	//////////////////////////////////////
 	// SCENE SELECTION SCREEN
+
+	// Update the scenes box at least once per update to keep the "start here" button blinking.
+	UpdateScenesBox();
 
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
 		{
@@ -411,12 +426,12 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 			if (g_UInputMan.MenuButtonPressed(UInputMan::MENU_EITHER)) {
 				if (m_ScenarioHoveredScene) {
 					m_ScenarioSelectedScene = m_ScenarioHoveredScene;
+					UpdateScenesBox();
+					CalculateLinesToSitePoint();
 					g_GUISound.ItemChangeSound()->Play();
 				}
 			}
 		}
-
-		UpdateScenesBox();
 	}
 
 	//////////////////////////////////////
@@ -447,7 +462,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible() && m_ScenarioScenes) {
 		// Draw the scene location dots.
 		Vector screenLocation;
-		for (const Scene * scene : *m_ScenarioScenes) {
+		for (const Scene *scene : *m_ScenarioScenes) {
 			int color;
 
 			// Mark user-created scenes to let players easily distinguish them from built-in.
@@ -471,8 +486,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 
 		// Draw the lines etc pointing at the selected Scene from the Scene Info box.
 		if (m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
-			Vector sceneInfoBoxPos(m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + (m_ScenarioScreenBoxes[SCENEINFO]->GetWidth() / 2), m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + (m_ScenarioScreenBoxes[SCENEINFO]->GetHeight() / 2));
-			DrawWhiteScreenLineToSitePoint(drawBitmap, sceneInfoBoxPos, m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset(), (m_ScenarioScreenBoxes[SCENEINFO]->GetHeight() / 2) + CHAMFERSIZE + 6);
+			DrawWhiteScreenLineToSitePoint(drawBitmap, m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset());
 		}
 	}
 
@@ -670,6 +684,8 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 				}
 			} else if (eventControl == m_SceneCloseButton) {
 				m_ScenarioSelectedScene = 0;
+				UpdateScenesBox();
+				m_LinePointsToSite.clear();
 				g_GUISound.ButtonPressSound()->Play();
 			}
 		} else if (anEvent.GetType() == GUIEvent::Notification) {
@@ -698,12 +714,16 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 					// If there is only one Scene compatible with this newly selected Activity, then automatically select it.
 					if (m_ScenarioScenes && m_ScenarioScenes->size() == 1) {
 						m_ScenarioSelectedScene = m_ScenarioScenes->front();
+						UpdateScenesBox();
+						CalculateLinesToSitePoint();
+
 					} else {
 						// Deselect any previously selected scene. it may not be compatible with the new activity.
 						m_ScenarioSelectedScene = 0;
+						UpdateScenesBox();
+						m_LinePointsToSite.clear();
 					}
 
-					UpdateScenesBox();
 					g_GUISound.ItemChangeSound()->Play();
 				}
 			}
@@ -787,7 +807,6 @@ void ScenarioGUI::UpdateActivityBox() {
 		// Resize the box to fit the desc.
 		int newHeight = m_ActivityLabel->ResizeHeightToFit();
 		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), newHeight + 110);
-		UpdateScenesBox();
 
 		const GameActivity *selectedGA = dynamic_cast<const GameActivity *>(selectedActivity);
 		if (selectedGA) {
@@ -838,7 +857,6 @@ void ScenarioGUI::UpdateActivityBox() {
 		// Resize the box to fit the desc.
 		int newHeight = m_ActivityLabel->ResizeHeightToFit();
 		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), newHeight + 125);
-		UpdateScenesBox();
 	}
 	// Make sure the box doesn't go entirely outside of the screen.
 	KeepBoxOnScreen(m_ScenarioScreenBoxes[ACTIVITY]);
@@ -1421,8 +1439,14 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 			m_ActivitySelectComboBox->SetSelectedIndex(selectedActivityIndex);
 		}
 		UpdateActivityBox();
-		m_ScenarioSelectedScene = m_ScenarioScenes ? m_ScenarioScenes->front() : 0;
-		UpdateScenesBox();
+		if (m_ScenarioScenes) {
+			m_ScenarioSelectedScene = m_ScenarioScenes->front();
+			UpdateScenesBox();
+			CalculateLinesToSitePoint();
+		} else {
+			m_ScenarioSelectedScene = nullptr;
+			UpdateScenesBox();
+		}
 		// Switch to tutorial just once.
 		m_SelectTutorial = false;
 	}
@@ -1484,23 +1508,48 @@ void ScenarioGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Ve
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vector &screenPoint, const Vector &planetPoint, int channelHeight) const {
+void ScenarioGUI::DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vector &planetPoint) const {
 	const int color = c_GUIColorWhite;
 	const Vector sitePos = m_PlanetCenter + planetPoint;
-	const float yDirMult = sitePos.m_Y < screenPoint.m_Y ? -1.0F : 1.0F;
+	const int circleRadius = 8;
+	
+
+	for (int index = 0; index < m_LinePointsToSite.size() - 1; index++) {
+		DrawGlowLine(drawBitmap, m_LinePointsToSite[index], m_LinePointsToSite[index + 1], color);
+	}
+
+	// Draw a circle around the site target.
+	int blendAmount = 225 + RandomNum(-20, 20);
+	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
+
+	circle(drawBitmap, sitePos.GetFloorIntX(), sitePos.GetFloorIntY(), circleRadius, color);
+	circle(drawBitmap, sitePos.GetFloorIntX(), sitePos.GetFloorIntY(), circleRadius - 1, color);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ScenarioGUI::CalculateLinesToSitePoint() {
+	const Vector sceneInfoBoxPos(m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + (m_ScenarioScreenBoxes[SCENEINFO]->GetWidth() / 2), m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + (m_ScenarioScreenBoxes[SCENEINFO]->GetHeight() / 2));
+	const Vector planetPoint = m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset();
+	const int channelHeight = (m_ScenarioScreenBoxes[SCENEINFO]->GetHeight() / 2) + CHAMFERSIZE + 6;
+	const Vector sitePos = m_PlanetCenter + planetPoint;
+	const float yDirMult = sitePos.m_Y < sceneInfoBoxPos.m_Y ? -1.0F : 1.0F;
 	const int circleRadius = 8;
 
+	m_LinePointsToSite.clear();
+
 	// No bends, meaning the mid of the meter goes straight up/down into the site circle.
-	if (std::fabs(sitePos.GetFloorIntX() - screenPoint.GetFloorIntX()) < circleRadius) {
+	if (std::fabs(sitePos.GetFloorIntX() - sceneInfoBoxPos.GetFloorIntX()) < circleRadius) {
 		// Draw the line to the site.
-		DrawGlowLine(drawBitmap, screenPoint + Vector(sitePos.m_X - screenPoint.m_X, 0), sitePos + Vector(0, (circleRadius + 1) * -yDirMult), color);
-	} else if (std::fabs(sitePos.GetFloorIntY() - screenPoint.GetFloorIntY()) < (channelHeight - circleRadius)) {
+		m_LinePointsToSite.emplace_back(sceneInfoBoxPos + Vector(sitePos.m_X - sceneInfoBoxPos.m_X, 0));
+		m_LinePointsToSite.emplace_back(sitePos + Vector(0, (circleRadius + 1) * -yDirMult));
+	} else if (std::fabs(sitePos.GetFloorIntY() - sceneInfoBoxPos.GetFloorIntY()) < (channelHeight - circleRadius)) {
 		// Extra lines depending on whether there needs to be two bends due to the site being in the 'channel', ie next to the floating player bar.
-		const Vector firstBend(screenPoint.m_X, screenPoint.m_Y + channelHeight * yDirMult);
+		const Vector firstBend(sceneInfoBoxPos.m_X, sceneInfoBoxPos.m_Y + channelHeight * yDirMult);
 		const Vector secondBend(sitePos.m_X, firstBend.m_Y);
 		Vector chamferPoint1;
 		Vector chamferPoint2;
-		const float xDirMult = sitePos.m_X < screenPoint.m_X ? -1.0F : 1.0F;
+		const float xDirMult = sitePos.m_X < sceneInfoBoxPos.m_X ? -1.0F : 1.0F;
 		int chamferSize = CHAMFERSIZE;
 		// Cap the chamfer size on the second bend appropriately.
 		chamferSize = std::min(static_cast<int>((firstBend - secondBend).GetMagnitude() - 15), chamferSize);
@@ -1512,43 +1561,38 @@ void ScenarioGUI::DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vecto
 		chamferPoint1.SetXY(secondBend.m_X + chamferSize * -xDirMult, secondBend.m_Y);
 		chamferPoint2.SetXY(secondBend.m_X, secondBend.m_Y + chamferSize * -yDirMult);
 		// Line to the first bend.
-		DrawGlowLine(drawBitmap, screenPoint, firstBend, color);
+		m_LinePointsToSite.emplace_back(sceneInfoBoxPos);
+		m_LinePointsToSite.emplace_back(firstBend);
 		// Line to the second bend, including the chamfer.
-		DrawGlowLine(drawBitmap, firstBend, chamferPoint1, color);
+		m_LinePointsToSite.emplace_back(chamferPoint1);
 		if (chamferSize > 0) {
-			DrawGlowLine(drawBitmap, chamferPoint1, chamferPoint2, color);
+			m_LinePointsToSite.emplace_back(chamferPoint2);
 		}
 		// Line to the site.
-		DrawGlowLine(drawBitmap, chamferPoint2, sitePos + Vector(0, (circleRadius + 1) * yDirMult), color);
+		m_LinePointsToSite.emplace_back(sitePos + Vector(0, (circleRadius + 1) * yDirMult));
 	} else {
 		// Just one bend.
-		const Vector firstBend(screenPoint.m_X, sitePos.m_Y);
+		const Vector firstBend(sceneInfoBoxPos.m_X, sitePos.m_Y);
 		Vector chamferPoint1;
 		Vector chamferPoint2;
-		const float xDirMult = sitePos.m_X < screenPoint.m_X ? -1.0F : 1.0F;
+		const float xDirMult = sitePos.m_X < sceneInfoBoxPos.m_X ? -1.0F : 1.0F;
 		int chamferSize = CHAMFERSIZE;
 		// Cap the chamfer size on the first bend appropriately.
-		chamferSize = std::min(static_cast<int>((screenPoint - firstBend).GetMagnitude() - 15), chamferSize);
+		chamferSize = std::min(static_cast<int>((sceneInfoBoxPos - firstBend).GetMagnitude() - 15), chamferSize);
 		chamferSize = std::min(static_cast<int>((firstBend - sitePos).GetMagnitude() - circleRadius * 3), chamferSize);
 		// Snap the chamfer to not exist below a minimum size.
 		chamferSize = (chamferSize < 15) ? 0 : chamferSize;
 		// No inverted chamfer.
 		chamferSize = std::max(0, chamferSize);
-		chamferPoint1.SetXY(screenPoint.m_X, firstBend.m_Y + chamferSize * -yDirMult);
+		chamferPoint1.SetXY(sceneInfoBoxPos.m_X, firstBend.m_Y + chamferSize * -yDirMult);
 		chamferPoint2.SetXY(firstBend.m_X + chamferSize * xDirMult, sitePos.m_Y);
 		// Draw line to the first bend, including the chamfer.
-		DrawGlowLine(drawBitmap, screenPoint, chamferPoint1, color);
+		m_LinePointsToSite.emplace_back(sceneInfoBoxPos);
+		m_LinePointsToSite.emplace_back(chamferPoint1);
 		if (chamferSize > 0) {
-			DrawGlowLine(drawBitmap, chamferPoint1, chamferPoint2, color);
+			m_LinePointsToSite.emplace_back(chamferPoint2);
 		}
 		// Draw line to the site.
-		DrawGlowLine(drawBitmap, chamferPoint2, sitePos + Vector((circleRadius + 1) * -xDirMult, 0), color);
+		m_LinePointsToSite.emplace_back(sitePos + Vector((circleRadius + 1) * -xDirMult, 0));
 	}
-
-	// Draw a circle around the site target.
-	int blendAmount = 225 + RandomNum(-20, 20);
-	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-
-	circle(drawBitmap, sitePos.GetFloorIntX(), sitePos.GetFloorIntY(), circleRadius, color);
-	circle(drawBitmap, sitePos.GetFloorIntX(), sitePos.GetFloorIntY(), circleRadius - 1, color);
 }

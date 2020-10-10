@@ -265,7 +265,7 @@ namespace RTE {
 
 		std::array<GUICollectionBox *, static_cast<int>(SCREENCOUNT)> m_ScenarioScreenBoxes; //!< The different dialog/floating boxes.
 
-		GUIButton *m_ScenarioButtons[SCENARIOBUTTONCOUNT]; //!< The menu buttons we want to manipulate.
+		std::array <GUIButton *, static_cast<int>(SCENARIOBUTTONCOUNT)> m_ScenarioButtons; //!< The menu buttons we want to manipulate.
 		
 		GUILabel *m_ScenarioScenePlanetLabel; //!< Hover name label over Scenes.
 

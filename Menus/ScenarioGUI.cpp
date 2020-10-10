@@ -76,14 +76,14 @@ void ScenarioGUI::Clear() {
 	m_PlanetCenter.Reset();
 	m_PlanetRadius = 240.0F;
 
-	for (const GUICollectionBox *iScreen : m_ScenarioScreenBoxes) {
+	for (GUICollectionBox *&iScreen : m_ScenarioScreenBoxes) {
 		iScreen = nullptr;
 	}
 
 	m_SelectTutorial = true;
 
-	for (int button = 0; button < SCENARIOBUTTONCOUNT; ++button) {
-		m_ScenarioButtons[button] = 0;
+	for (GUIButton *&button : m_ScenarioButtons) {
+		button = nullptr;
 	}
 	m_ScenarioScenePlanetLabel = 0;
 
@@ -358,31 +358,6 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	if (result == ScenarioUpdateResult::NOEVENT) {
 		result = updateInputResult;
 	}
-
-	/*
-		////////////////////////////////////////////
-		// Notification blinking logic
-
-		if (m_BlinkMode == NOFUNDS)
-		{
-			m_pCostLabel->SetVisible((m_BlinkTimer.GetElapsedRealTimeMS() % 500) > 250);
-		}
-		else if (m_BlinkMode == NOCRAFT)
-		{
-			bool blink = (m_BlinkTimer.GetElapsedRealTimeMS() % 500) > 250;
-			m_pCraftLabel->SetVisible(blink);
-			m_pCraftBox->SetVisible(blink);
-		}
-
-		// Time out the blinker
-		if (m_BlinkMode != NOBLINK && m_BlinkTimer.IsPastRealMS(1500))
-		{
-			m_pCostLabel->SetVisible(true);
-			m_pCraftLabel->SetVisible(true);
-			m_pCraftBox->SetVisible(true);
-			m_BlinkMode = NOBLINK;
-		}
-	*/
 
 	//////////////////////////////////////
 	// SCENE SELECTION SCREEN

@@ -62,10 +62,10 @@ constexpr int CHAMFERSIZE = 40;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::Clear() {
-	m_ScenarioController = 0;
-	m_ScenarioGUIScreen = 0;
-	m_ScenarioGUIInput = 0;
-	m_ScenarioGUIController = 0;
+	m_ScenarioController = nullptr;
+	m_ScenarioGUIScreen = nullptr;
+	m_ScenarioGUIInput = nullptr;
+	m_ScenarioGUIController = nullptr;
 	m_MenuEnabled = ENABLED;
 	m_ScreenChange = false;
 	m_SceneFocus = 0;
@@ -84,16 +84,16 @@ void ScenarioGUI::Clear() {
 	for (GUIButton *&button : m_ScenarioButtons) {
 		button = nullptr;
 	}
-	m_ScenarioScenePlanetLabel = 0;
+	m_ScenarioScenePlanetLabel = nullptr;
 
-	m_ActivitySelectComboBox = 0;
-	m_ActivityLabel = 0;
-	m_DifficultyLabel = 0;
-	m_DifficultySlider = 0;
+	m_ActivitySelectComboBox = nullptr;
+	m_ActivityLabel = nullptr;
+	m_DifficultyLabel = nullptr;
+	m_DifficultySlider = nullptr;
 
-	m_SceneCloseButton = 0;
-	m_SceneNameLabel = 0;
-	m_SceneInfoLabel = 0;
+	m_SceneCloseButton = nullptr;
+	m_SceneNameLabel = nullptr;
+	m_SceneInfoLabel = nullptr;
 	for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
 		for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team) {
 			m_PlayerBoxes[player][team] = 0;
@@ -111,25 +111,25 @@ void ScenarioGUI::Clear() {
 		m_TeamAISkillLabel[team] = 0;
 	}
 
-	m_StartErrorLabel = 0;
-	m_CPULockLabel = 0;
+	m_StartErrorLabel = nullptr;
+	m_CPULockLabel = nullptr;
 	m_LockedCPUTeam = Activity::NoTeam;
 
-	m_GoldLabel = 0;
-	m_GoldSlider = 0;
-	m_FogOfWarCheckbox = 0;
-	m_RequireClearPathToOrbitCheckbox = 0;
-	m_DeployUnitsCheckbox = 0;
+	m_GoldLabel = nullptr;
+	m_GoldSlider = nullptr;
+	m_FogOfWarCheckbox = nullptr;
+	m_RequireClearPathToOrbitCheckbox = nullptr;
+	m_DeployUnitsCheckbox = nullptr;
 
-	m_QuitConfirmLabel = 0;
-	m_QuitConfirmButton = 0;
+	m_QuitConfirmLabel = nullptr;
+	m_QuitConfirmButton = nullptr;
 
-	m_ScenarioScenes = 0;
+	m_ScenarioScenes = nullptr;
 	m_Activities.clear();
-	m_ScenarioDraggedBox = 0;
+	m_ScenarioDraggedBox = nullptr;
 	m_EngageDrag = false;
-	m_ScenarioHoveredScene = 0;
-	m_ScenarioSelectedScene = 0;
+	m_ScenarioHoveredScene = nullptr;
+	m_ScenarioSelectedScene = nullptr;
 	m_PrevMousePos.Reset();
 	m_LinePointsToSite.clear();
 }
@@ -161,6 +161,7 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_ScenarioScreenBoxes[PLAYERSETUPSCREEN] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("PlayerSetupBox"));
 	m_ScenarioScreenBoxes[QUITCONFIRM] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ConfirmDialog"));
 
+	m_ScenarioScreenBoxes[ROOTSCREEN]->SetPositionAbs(0, 0);
 	m_ScenarioScreenBoxes[ROOTSCREEN]->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
 	m_ScenarioButtons[BACKTOMAINBUTTON] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("BackToMainButton"));
@@ -324,7 +325,7 @@ void ScenarioGUI::SetEnabled(bool enable) {
 	} else if (enable && m_MenuEnabled == ENABLED) {
 		HideAllScreens();
 		m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
-		// Reload all scenes and actvities to reflect scene changes player might do in scene editor.
+		// Reload all scenes and activities to reflect scene changes player might do in scene editor.
 		GetAllScenesAndActivities();
 	}
 
@@ -415,7 +416,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 			}
 
 			if (!foundAnyHover) {
-				m_ScenarioHoveredScene = 0;
+				m_ScenarioHoveredScene = nullptr;
 				UpdateSiteNameLabel(false);
 			}
 		}
@@ -498,7 +499,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 		draw_sprite(drawBitmap, m_ScenePreviewBitmap, m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + 10, m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + 33);
 	} else if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
 		// Draw the Player-Team matrix lines and disabled overlay effects.
-		const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
+		const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
 		int lineY = 80;
 		for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
 			// Disabled shaded boxes.
@@ -610,7 +611,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 				m_PrevMousePos = mousePos;
 			}
 		} else if (!menuButtonHeld) {
-			m_ScenarioDraggedBox = 0;
+			m_ScenarioDraggedBox = nullptr;
 			m_EngageDrag = false;
 		}
 	}
@@ -681,7 +682,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 					g_GUISound.UserErrorSound()->Play();
 				}
 			} else if (eventControl == m_SceneCloseButton) {
-				m_ScenarioSelectedScene = 0;
+				m_ScenarioSelectedScene = nullptr;
 				HideScenesBox();
 				m_LinePointsToSite.clear();
 				g_GUISound.ButtonPressSound()->Play();
@@ -692,16 +693,16 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 					g_GUISound.SelectionChangeSound()->Play();
 				}
 				// Also stop dragging any panels if we're over any button.
-				m_ScenarioDraggedBox = 0;
+				m_ScenarioDraggedBox = nullptr;
 				m_EngageDrag = true;
 			} else if (eventControl == m_DifficultySlider) {
 				UpdateActivityBox();
 				// Also stop dragging any panels if we're over any button.
-				m_ScenarioDraggedBox = 0;
+				m_ScenarioDraggedBox = nullptr;
 				m_EngageDrag = true;
 			} else if (eventControl == m_ActivitySelectComboBox) {
 				// Also stop dragging any panels if we're over the selection list.
-				m_ScenarioDraggedBox = 0;
+				m_ScenarioDraggedBox = nullptr;
 				m_EngageDrag = true;
 
 				// The activity selection changed.
@@ -715,7 +716,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 						CalculateLinesToSitePoint();
 					} else {
 						// Deselect any previously selected scene. it may not be compatible with the new activity.
-						m_ScenarioSelectedScene = 0;
+						m_ScenarioSelectedScene = nullptr;
 						HideScenesBox();
 						m_LinePointsToSite.clear();
 					}
@@ -764,7 +765,7 @@ void ScenarioGUI::UpdateActivityBox() {
 	// Get the currently selected Activity.
 	const Activity *selectedActivity = nullptr;
 	if (m_ActivitySelectComboBox) {
-		selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
+		selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
 	}
 
 	if (selectedActivity) {
@@ -773,7 +774,7 @@ void ScenarioGUI::UpdateActivityBox() {
 		if (m_Activities.end() != (asItr = m_Activities.find(const_cast<Activity *>(selectedActivity)))) {
 			m_ScenarioScenes = &((*asItr).second);
 		} else {
-			m_ScenarioScenes = 0;
+			m_ScenarioScenes = nullptr;
 		}
 
 		// Set the description.
@@ -782,7 +783,7 @@ void ScenarioGUI::UpdateActivityBox() {
 		} else if (m_ScenarioScenes && m_ScenarioScenes->size() > 1) {
 			m_ActivityLabel->SetText(selectedActivity->GetDescription() + "\n\nSites where this activity can be played appear on the planet. Select one to begin!");
 		} else {
-			m_ActivityLabel->SetText(selectedActivity->GetDescription() + "\n\nNO sites appear to be compatible with this selected activity! Please try another.");
+			m_ActivityLabel->SetText(selectedActivity->GetDescription() + "\n\nNo sites appear to be compatible with this selected activity! Please try another.");
 		}
 		m_DifficultyLabel->SetVisible(true);
 		m_DifficultySlider->SetVisible(true);
@@ -801,9 +802,10 @@ void ScenarioGUI::UpdateActivityBox() {
 		}
 
 		// Resize the box to fit the desc.
-		int newHeight = m_ActivityLabel->ResizeHeightToFit();
-		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), newHeight + 110);
-
+		const int textHeight = m_ActivityLabel->ResizeHeightToFit();
+		const int padding = 110;
+		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), textHeight + padding);
+		
 		const GameActivity *selectedGA = dynamic_cast<const GameActivity *>(selectedActivity);
 		if (selectedGA) {
 			// Set gold slider value if activity specifies default gold amounts for difficulties.
@@ -823,36 +825,37 @@ void ScenarioGUI::UpdateActivityBox() {
 			m_GoldSlider->SetEnabled(selectedGA->GetGoldSwitchEnabled());
 
 			//Set default fog of war flag and enable or disable it if necessary.
-			int defFogOfWar = selectedGA->GetDefaultFogOfWar();
+			const int defFogOfWar = selectedGA->GetDefaultFogOfWar();
 			if (defFogOfWar > -1) {
 				m_FogOfWarCheckbox->SetCheck(defFogOfWar != 0);
 			}
 			m_FogOfWarCheckbox->SetEnabled(selectedGA->GetFogOfWarSwitchEnabled());
 
 			//Set default clear path to orbit flag and enable or disable it if necessary.
-			int defReqClearPath = selectedGA->GetDefaultRequireClearPathToOrbit();
+			const int defReqClearPath = selectedGA->GetDefaultRequireClearPathToOrbit();
 			if (defReqClearPath > -1) {
 				m_RequireClearPathToOrbitCheckbox->SetCheck(defReqClearPath != 0);
 			}
 			m_RequireClearPathToOrbitCheckbox->SetEnabled(selectedGA->GetRequireClearPathToOrbitSwitchEnabled());
 
 			//Set default deploy units flag and enable or disable it if necessary.
-			int defDeployUnits = selectedGA->GetDefaultDeployUnits();
+			const int defDeployUnits = selectedGA->GetDefaultDeployUnits();
 			if (defDeployUnits > -1) {
 				m_DeployUnitsCheckbox->SetCheck(defDeployUnits != 0);
 			}
 			m_DeployUnitsCheckbox->SetEnabled(selectedGA->GetDeployUnitsSwitchEnabled());
 		}
 	} else {
-		m_ScenarioScenes = 0;
+		m_ScenarioScenes = nullptr;
 		m_ActivityLabel->SetText("No Activity selected.");
 		m_DifficultyLabel->SetVisible(false);
 		if (m_DifficultySlider) {
 			m_DifficultySlider->SetVisible(false);
 		}
 		// Resize the box to fit the desc.
-		int newHeight = m_ActivityLabel->ResizeHeightToFit();
-		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), newHeight + 125);
+		const int textHeight = m_ActivityLabel->ResizeHeightToFit();
+		const int padding = 125;
+		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), textHeight + padding);
 	}
 	// Make sure the box doesn't go entirely outside of the screen.
 	KeepBoxOnScreen(m_ScenarioScreenBoxes[ACTIVITY]);
@@ -867,8 +870,8 @@ void ScenarioGUI::ShowScenesBox() {
 		m_SceneInfoLabel->SetText(m_ScenarioSelectedScene->GetDescription());
 	}
 	const int textHeight = m_SceneInfoLabel->ResizeHeightToFit();
-	const int bitmapAndPaddingHeight = 140;
-	m_ScenarioScreenBoxes[SCENEINFO]->Resize(m_ScenarioScreenBoxes[SCENEINFO]->GetWidth(), textHeight + bitmapAndPaddingHeight);
+	const int padding = 140;
+	m_ScenarioScreenBoxes[SCENEINFO]->Resize(m_ScenarioScreenBoxes[SCENEINFO]->GetWidth(), textHeight + padding);
 	KeepBoxOnScreen(m_ScenarioScreenBoxes[SCENEINFO]);
 	m_ScenarioScreenBoxes[SCENEINFO]->SetVisible(true);
 }
@@ -877,7 +880,7 @@ void ScenarioGUI::ShowScenesBox() {
 
 void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 	// Get the currently selected Activity.
-	const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
+	const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
 	bool teamHasPlayers = false;
 	bool teamHasHumans = false;
 	int teamsWithPlayers = 0;
@@ -1190,7 +1193,7 @@ bool ScenarioGUI::StartGame() {
 	// Get the currently selected Activity.
 	const Activity *activityPreset = nullptr;
 	if (m_ActivitySelectComboBox) {
-		activityPreset = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : 0;
+		activityPreset = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
 	}
 
 	if (!activityPreset || !m_ScenarioSelectedScene) {
@@ -1291,7 +1294,7 @@ bool ScenarioGUI::StartGame() {
 void ScenarioGUI::GetAllScenesAndActivities() {
 	// Redo the list of Activities.
 	m_Activities.clear();
-	m_ScenarioScenes = 0;
+	m_ScenarioScenes = nullptr;
 
 	// Get the list of all read in Scene presets.
 	list<Entity *> presetList;
@@ -1408,24 +1411,23 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 	}
 
 	// Select the Tutorial Activity and Scene by default to start.
-	if (tutorialIndex >= 0) {
-		if (m_SelectTutorial) {
-			m_ActivitySelectComboBox->SetSelectedIndex(tutorialIndex);
-		} else {
-			m_ActivitySelectComboBox->SetSelectedIndex(selectedActivityIndex);
-		}
-		UpdateActivityBox();
-		if (m_ScenarioScenes) {
-			m_ScenarioSelectedScene = m_ScenarioScenes->front();
-			ShowScenesBox();
-			CalculateLinesToSitePoint();
-		} else {
-			m_ScenarioSelectedScene = nullptr;
-			HideScenesBox();
-		}
-		// Switch to tutorial just once.
-		m_SelectTutorial = false;
+	if (m_SelectTutorial && tutorialIndex >= 0) {
+		m_ActivitySelectComboBox->SetSelectedIndex(tutorialIndex);
+	} else {
+		m_ActivitySelectComboBox->SetSelectedIndex(selectedActivityIndex);
 	}
+
+	UpdateActivityBox();
+	if (m_ScenarioScenes) {
+		m_ScenarioSelectedScene = m_ScenarioScenes->front();
+		ShowScenesBox();
+		CalculateLinesToSitePoint();
+	} else {
+		m_ScenarioSelectedScene = nullptr;
+		HideScenesBox();
+	}
+	// Switch to tutorial just once.
+	m_SelectTutorial = false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

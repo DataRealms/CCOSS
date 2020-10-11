@@ -142,9 +142,14 @@ namespace RTE {
 		void UpdateActivityBox();
 
 		/// <summary>
-		/// Updates the contents of the Scene selection box.
+		/// Show the Scene info box.
 		/// </summary>
-		void UpdateScenesBox();
+		void ShowScenesBox();
+
+		/// <summary>
+		/// Hide the Scene info box
+		/// </summary>
+		void HideScenesBox() const;
 
 		/// <summary>
 		/// Updates the contents of the player config box.

@@ -249,12 +249,6 @@ namespace RTE {
 		
 		int m_MenuEnabled; //!< Visibility state of the menu.
 		
-		bool m_ScreenChange; //!< Change in menu screens detected.
-		
-		int m_SceneFocus; //!< Focus state on selecting scenes.
-		
-		int m_FocusChange; //!< Focus change direction - 0 is none, negative is back, positive forward.
-		
 		Timer m_BlinkTimer; //!< Notification blink timer.
 
 		Vector m_PlanetCenter; //!< The absolute screen position of the planet center.

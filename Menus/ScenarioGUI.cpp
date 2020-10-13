@@ -67,9 +67,6 @@ void ScenarioGUI::Clear() {
 	m_ScenarioGUIInput = nullptr;
 	m_ScenarioGUIController = nullptr;
 	m_MenuEnabled = ENABLED;
-	m_ScreenChange = false;
-	m_SceneFocus = 0;
-	m_FocusChange = 0;
 	m_BlinkTimer.Reset();
 
 	m_PlanetCenter.Reset();
@@ -197,55 +194,51 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_TeamBoxes[TEAM_DISABLED] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("TDIcon"));
 	m_TeamNameLabels[TEAM_DISABLED] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("TDLabel"));
 
-	{
-		std::string controlString = "";
-		for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
-			controlString = "T" + std::to_string(team + 1) + "Icon";
-			m_TeamBoxes[team] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
+	std::string controlString = "";
+	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
+		controlString = "T" + std::to_string(team + 1) + "Icon";
+		m_TeamBoxes[team] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
 
-			controlString = "T" + std::to_string(team + 1) + "Label";
-			m_TeamNameLabels[team] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
+		controlString = "T" + std::to_string(team + 1) + "Label";
+		m_TeamNameLabels[team] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
 
-			controlString = "T" + std::to_string(team + 1) + "TechCombo";
-			m_TeamTechSelect[team] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl(controlString));
-			m_TeamTechSelect[team]->SetEnabled(false);
-			m_TeamTechSelect[team]->SetVisible(false);
-			m_TeamTechSelect[team]->GetListPanel()->AddItem("-All-", "", 0, 0, -2);
-			m_TeamTechSelect[team]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-			m_TeamTechSelect[team]->SetSelectedIndex(0);
+		controlString = "T" + std::to_string(team + 1) + "TechCombo";
+		m_TeamTechSelect[team] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl(controlString));
+		m_TeamTechSelect[team]->SetEnabled(false);
+		m_TeamTechSelect[team]->SetVisible(false);
+		m_TeamTechSelect[team]->GetListPanel()->AddItem("-All-", "", 0, 0, -2);
+		m_TeamTechSelect[team]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
+		m_TeamTechSelect[team]->SetSelectedIndex(0);
 
-			controlString = "T" + std::to_string(team + 1) + "AISkillSlider";
-			m_TeamAISkillSlider[team] = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl(controlString));
-			m_TeamAISkillSlider[team]->SetEnabled(false);
-			m_TeamAISkillSlider[team]->SetVisible(false);
-			m_TeamAISkillSlider[team]->SetValue(Activity::DefaultSkill);
+		controlString = "T" + std::to_string(team + 1) + "AISkillSlider";
+		m_TeamAISkillSlider[team] = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl(controlString));
+		m_TeamAISkillSlider[team]->SetEnabled(false);
+		m_TeamAISkillSlider[team]->SetVisible(false);
+		m_TeamAISkillSlider[team]->SetValue(Activity::DefaultSkill);
 
-			controlString = "T" + std::to_string(team + 1) + "AISkillLabel";
-			m_TeamAISkillLabel[team] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
-			m_TeamAISkillLabel[team]->SetEnabled(false);
-			m_TeamAISkillLabel[team]->SetVisible(false);
-			m_TeamAISkillLabel[team]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[team]->GetValue()));
-		}
+		controlString = "T" + std::to_string(team + 1) + "AISkillLabel";
+		m_TeamAISkillLabel[team] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
+		m_TeamAISkillLabel[team]->SetEnabled(false);
+		m_TeamAISkillLabel[team]->SetVisible(false);
+		m_TeamAISkillLabel[team]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[team]->GetValue()));
 	}
 
 	m_StartErrorLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("StartErrorLabel"));
 	m_CPULockLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("CPULockLabel"));
 
-	{
-		// Populate the tech comboboxes with the available tech modules.
-		const DataModule *dataModule = nullptr;
-		const std::string techString = " Tech";
-		std::string techName = "";
-		for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i) {
-			dataModule = g_PresetMan.GetDataModule(i);
-			if (dataModule) {
-				techName = dataModule->GetFriendlyName();
-				const std::string::size_type techPos = techName.find(techString);
-				if (techPos != string::npos) {
-					techName.replace(techPos, techString.length(), "");
-					for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
-						m_TeamTechSelect[team]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-					}
+	// Populate the tech comboboxes with the available tech modules.
+	const DataModule *dataModule = nullptr;
+	const std::string techString = " Tech";
+	std::string techName = "";
+	for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i) {
+		dataModule = g_PresetMan.GetDataModule(i);
+		if (dataModule) {
+			techName = dataModule->GetFriendlyName();
+			const std::string::size_type techPos = techName.find(techString);
+			if (techPos != string::npos) {
+				techName.replace(techPos, techString.length(), "");
+				for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
+					m_TeamTechSelect[team]->GetListPanel()->AddItem(techName, "", 0, 0, i);
 				}
 			}
 		}
@@ -280,10 +273,6 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_DefaultPreviewBitmap = defaultPreview.LoadAndReleaseBitmap();
 
 	clear_to_color(m_ScenePreviewBitmap, g_MaskColor);
-
-	// Set initial focus, category list, and label settings.
-	m_ScreenChange = true;
-	m_FocusChange = 1;
 
 	GetAllScenesAndActivities();
 
@@ -328,8 +317,6 @@ void ScenarioGUI::SetEnabled(bool enable) {
 		// Reload all scenes and activities to reflect scene changes player might do in scene editor.
 		GetAllScenesAndActivities();
 	}
-
-	m_ScreenChange = true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -650,7 +637,6 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			} else if (eventControlName == "ConfirmButton") {
 				// Quit program button pressed.
 				HideAllScreens();
-				m_ScreenChange = true;
 				g_Quit = true;
 				g_GUISound.BackButtonPressSound()->Play();
 			} else if (eventControlName == "ButtonResume") {
@@ -737,8 +723,6 @@ void ScenarioGUI::HideAllScreens() {
 	}
 
 	m_ScenarioScenePlanetLabel->SetVisible(false);
-
-	m_ScreenChange = true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1314,27 +1314,18 @@ bool PlayIntroTitle() {
                 sectionSwitch = false;
             }
 
-            // Detect if user wants to go back to main menu
-            if (scenarioGUIResult == ScenarioGUI::ScenarioUpdateResult::BACKTOMAIN)
-            {
-                g_IntroState = PLANETTOMAIN;
-                sectionSwitch = true;
-            }
-
-            // Detect if the current game has been commanded to resume
-			if (scenarioGUIResult == ScenarioGUI::ScenarioUpdateResult::ACTIVITYRESUMED) {
+			if (scenarioGUIResult == ScenarioGUI::ScenarioUpdateResult::BACKTOMAIN) {
+				g_IntroState = PLANETTOMAIN;
+				sectionSwitch = true;
+			} else if (scenarioGUIResult == ScenarioGUI::ScenarioUpdateResult::ACTIVITYRESUMED) {
 				g_ResumeActivity = true;
+			} else if (scenarioGUIResult == ScenarioGUI::ScenarioUpdateResult::ACTIVITYRESTARTED) {
+				// Make sure the scene is going to be reset with the new parameters
+				g_ResetActivity = true;
+
+				g_IntroState = FADEOUT;
+				sectionSwitch = true;
 			}
-
-            // Detect if a game has been commanded to restart
-            if (scenarioGUIResult == ScenarioGUI::ScenarioUpdateResult::ACTIVITYRESTARTED)
-            {
-                // Make sure the scene is going to be reset with the new parameters
-                g_ResetActivity = true;
-
-                g_IntroState = FADEOUT;
-                sectionSwitch = true;
-            }
 
 			// In server mode once we exited to main or scenario menu we need to start Lobby activity 
 			if (g_NetworkServer.IsServerModeEnabled())

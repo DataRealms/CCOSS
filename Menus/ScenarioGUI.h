@@ -172,7 +172,7 @@ namespace RTE {
 		/// <summary>
 		/// Gathers all the available Scene:s and Activity presets there are.
 		/// </summary>
-		void GetAllScenesAndActivities();
+		void GetAllScenesAndActivities(bool selectTutorial);
 
 		/// <summary>
 		/// Updates the floating label over a planet site.
@@ -210,13 +210,6 @@ namespace RTE {
 			STARTGAME,
 			RESUME,
 			SCENARIOBUTTONCOUNT
-		};
-
-		enum BlinkMode {
-			NOBLINK = 0,
-			NOFUNDS,
-			NOCRAFT,
-			BLINKMODECOUNT
 		};
 
 		// These add on the player and team max counts
@@ -307,15 +300,13 @@ namespace RTE {
 		
 		GUICollectionBox *m_ScenarioDraggedBox; //!< Currently dragged GUI box.
 		
-		bool m_EngageDrag; //!< New potential drag is starting.
+		bool m_DragEngaged; //!< GUI panel dragging is in progress.
 		
 		Scene *m_ScenarioHoveredScene; //!< The scene preset currently hovered, NOT OWNED.
 		
 		Scene *m_ScenarioSelectedScene; //!< The scene preset currently selected, NOT OWNED.
 		
 		Vector m_PrevMousePos; //!< Previous pos of mouse to calculate dragging.
-
-		bool m_SelectTutorial; //!< Select tutorial activity when switched to scenario GUI.
 
 		std::vector<Vector> m_LinePointsToSite; //!< Collection of points that form lines from a screen point to the selected site point.
 

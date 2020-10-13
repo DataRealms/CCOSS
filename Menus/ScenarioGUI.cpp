@@ -76,8 +76,6 @@ void ScenarioGUI::Clear() {
 		iScreen = nullptr;
 	}
 
-	m_SelectTutorial = true;
-
 	for (GUIButton *&button : m_ScenarioButtons) {
 		button = nullptr;
 	}
@@ -124,7 +122,7 @@ void ScenarioGUI::Clear() {
 	m_ScenarioScenes = nullptr;
 	m_Activities.clear();
 	m_ScenarioDraggedBox = nullptr;
-	m_EngageDrag = false;
+	m_DragEngaged = false;
 	m_ScenarioHoveredScene = nullptr;
 	m_ScenarioSelectedScene = nullptr;
 	m_PrevMousePos.Reset();
@@ -274,7 +272,7 @@ int ScenarioGUI::Create(Controller *pController) {
 
 	clear_to_color(m_ScenePreviewBitmap, g_MaskColor);
 
-	GetAllScenesAndActivities();
+	GetAllScenesAndActivities(true);
 
 	UpdateActivityBox();
 
@@ -315,7 +313,7 @@ void ScenarioGUI::SetEnabled(bool enable) {
 		HideAllScreens();
 		m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 		// Reload all scenes and activities to reflect scene changes player might do in scene editor.
-		GetAllScenesAndActivities();
+		GetAllScenesAndActivities(false);
 	}
 }
 
@@ -379,14 +377,13 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 		if (m_ScenarioScenes && !m_ScenarioDraggedBox && (mousePos - m_PlanetCenter).GetMagnitude() < m_PlanetRadius && !(m_ScenarioScreenBoxes[ACTIVITY]->PointInside(mouseX, mouseY) || m_ScenarioScreenBoxes[SCENEINFO]->PointInside(mouseX, mouseY))) {
 			bool foundAnyHover = false;
 			Scene *candidateScene = nullptr;
-			float distance = 0;
-			float shortestDist = 1000000.0F;
-			Vector screenLocation;
+			float shortestDist = 16.0F;
+			Vector screenLocation(0, 0);
 			for (Scene *scenarioScene : *m_ScenarioScenes) {
 				screenLocation = m_PlanetCenter + scenarioScene->GetLocation() + scenarioScene->GetLocationOffset();
-				distance = (screenLocation - mousePos).GetMagnitude();
+				const float distance = (screenLocation - mousePos).GetMagnitude();
 
-				if (distance < 16 && distance < shortestDist) {
+				if (distance < shortestDist) {
 					shortestDist = distance;
 					foundAnyHover = true;
 					candidateScene = scenarioScene;
@@ -398,9 +395,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 				m_ScenarioHoveredScene = candidateScene;
 				g_GUISound.SelectionChangeSound()->Play();
 				UpdateSiteNameLabel(true, m_ScenarioHoveredScene->GetPresetName(), m_ScenarioHoveredScene->GetLocation() + m_ScenarioHoveredScene->GetLocationOffset());
-			}
-
-			if (!foundAnyHover) {
+			} else if (!foundAnyHover) {
 				m_ScenarioHoveredScene = nullptr;
 				UpdateSiteNameLabel(false);
 			}
@@ -419,7 +414,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	}
 
 	// Save mouse pos for next frame so we can do dragging.
-	if (m_EngageDrag) {
+	if (m_DragEngaged) {
 		m_PrevMousePos = mousePos;
 	}
 
@@ -584,7 +579,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 
 		bool menuButtonHeld = g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER);
 		// If not currently dragging a box, see if we should start.
-		if (!m_ScenarioDraggedBox && menuButtonHeld && !m_EngageDrag && !m_ActivitySelectComboBox->IsDropped()) {
+		if (!m_ScenarioDraggedBox && menuButtonHeld && !m_DragEngaged && !m_ActivitySelectComboBox->IsDropped()) {
 			GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], 1));
 
 			if (hoveredBox == m_ScenarioScreenBoxes[ACTIVITY] || hoveredBox == m_ScenarioScreenBoxes[SCENEINFO]) {
@@ -594,18 +589,18 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			}
 		} else if (!menuButtonHeld) {
 			m_ScenarioDraggedBox = nullptr;
-			m_EngageDrag = false;
+			m_DragEngaged = false;
 		}
 	}
 
 	// Figure out dragging of the dialog boxes, if one is being dragged.
 	// Only start drag if we're over a threshold, to prevent small unintentional nudges.
-	if (m_ScenarioDraggedBox && !m_EngageDrag && (mousePos - m_PrevMousePos).GetLargest() > 4) {
-		m_EngageDrag = true;
+	if (m_ScenarioDraggedBox && !m_DragEngaged && (mousePos - m_PrevMousePos).GetLargest() > 4) {
+		m_DragEngaged = true;
 	}
 
 	// Actually drag if we now are engaged.
-	if (m_ScenarioDraggedBox && m_EngageDrag) {
+	if (m_ScenarioDraggedBox && m_DragEngaged) {
 		m_ScenarioDraggedBox->MoveRelative(mousePos.GetFloorIntX() - m_PrevMousePos.GetFloorIntX(), mousePos.GetFloorIntY() - m_PrevMousePos.GetFloorIntY());
 		// Ensure the drag didn't shove it off-screen.
 		KeepBoxOnScreen(m_ScenarioDraggedBox);
@@ -1269,7 +1264,7 @@ bool ScenarioGUI::StartGame() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::GetAllScenesAndActivities() {
+void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 	// Redo the list of Activities.
 	m_Activities.clear();
 	m_ScenarioScenes = nullptr;
@@ -1389,7 +1384,7 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 	}
 
 	// Select the Tutorial Activity and Scene by default to start.
-	if (m_SelectTutorial && tutorialIndex >= 0) {
+	if (selectTutorial && tutorialIndex >= 0) {
 		m_ActivitySelectComboBox->SetSelectedIndex(tutorialIndex);
 	} else {
 		m_ActivitySelectComboBox->SetSelectedIndex(selectedActivityIndex);
@@ -1404,8 +1399,6 @@ void ScenarioGUI::GetAllScenesAndActivities() {
 		m_ScenarioSelectedScene = nullptr;
 		HideScenesBox();
 	}
-	// Switch to tutorial just once.
-	m_SelectTutorial = false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -151,12 +151,6 @@ namespace RTE {
 		void UpdatePlayersBox(bool newActivity);
 
 		/// <summary>
-		/// Counts how many players are currently assigned to play this Activity.
-		/// </summary>
-		/// <returns>The number of players already assigned to play the selected Activity.</returns>
-		int PlayerCount() const;
-
-		/// <summary>
 		/// Sets up and starts the currently selected Activity and settings.
 		/// </summary>
 		/// <returns>Whether the game was set up and started successfully.</returns>

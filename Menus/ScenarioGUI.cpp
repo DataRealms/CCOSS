@@ -842,10 +842,6 @@ void ScenarioGUI::ShowScenesBox() {
 void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 	// Get the currently selected Activity.
 	const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
-	bool teamHasPlayers = false;
-	bool teamHasHumans = false;
-	int teamsWithPlayers = 0;
-	int teamsWithHumans = 0;
 
 	if (selectedActivity && m_ScenarioSelectedScene) {
 		// Get mouse position and figure out if any cell is being hovered over.
@@ -873,21 +869,67 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 				}
 			}
 
+			const Icon *iconPointer;
+
 			// Human players start on the disabled team row.
 			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 				m_PlayerBoxes[player][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-				const Icon *pIcon = g_UInputMan.GetSchemeIcon(player);
-				if (pIcon) {
-					m_PlayerBoxes[player][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+				iconPointer = g_UInputMan.GetSchemeIcon(player);
+				if (iconPointer) {
+					m_PlayerBoxes[player][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
 				}
 			}
 
 			// CPU player either has a locked team or starts on the disabled team row.
 			int InitialCPUTeam = (m_LockedCPUTeam != Activity::NoTeam) ? m_LockedCPUTeam : TEAM_DISABLED;
 			m_PlayerBoxes[PLAYER_CPU][InitialCPUTeam]->SetDrawType(GUICollectionBox::Image);
-			const Icon *pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-			if (pIcon) {
-				m_PlayerBoxes[PLAYER_CPU][InitialCPUTeam]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+			iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+			if (iconPointer) {
+				m_PlayerBoxes[PLAYER_CPU][InitialCPUTeam]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
+			}
+
+			// Setup the team info column.
+			iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Disabled Team"));
+			m_TeamNameLabels[TEAM_DISABLED]->SetText("Not Playing:");
+			if (iconPointer) {
+				m_TeamBoxes[TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
+				m_TeamBoxes[TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
+			}
+
+			for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+				m_TeamBoxes[teamIndex]->SetDrawType(GUICollectionBox::Image);
+				if (selectedActivity->TeamActive(teamIndex)) {
+					iconPointer = selectedActivity->GetTeamIcon(teamIndex);
+					// Revert to default if needed.
+					if (!iconPointer) {
+						const std::string teamString = "Team " + std::to_string(teamIndex + 1) + " Default";
+						iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", teamString));
+					}
+
+					m_TeamNameLabels[teamIndex]->SetText(selectedActivity->GetTeamName(teamIndex) + ":");
+
+					m_TeamTechSelect[teamIndex]->SetEnabled(true);
+					m_TeamTechSelect[teamIndex]->SetVisible(true);
+					m_TeamAISkillSlider[teamIndex]->SetEnabled(true);
+					m_TeamAISkillSlider[teamIndex]->SetVisible(true);
+					m_TeamAISkillLabel[teamIndex]->SetVisible(true);
+				} else {
+					// Disabled/unplayable teams.
+					iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Locked Team"));
+
+					m_TeamNameLabels[teamIndex]->SetText("Unavailable");
+
+					m_TeamTechSelect[teamIndex]->SetEnabled(false);
+					m_TeamTechSelect[teamIndex]->SetVisible(false);
+					m_TeamAISkillSlider[teamIndex]->SetEnabled(false);
+					m_TeamAISkillSlider[teamIndex]->SetVisible(false);
+					m_TeamAISkillLabel[teamIndex]->SetVisible(false);
+				}
+
+				// Finally set whatever Icon we came up with.
+				if (iconPointer) {
+					m_TeamBoxes[teamIndex]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
+				}
 			}
 		}
 
@@ -916,9 +958,9 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 				if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_EITHER)) {
 					// Move the player's icon to the correct row.
 					m_PlayerBoxes[hoveredPlayer][hoveredTeam]->SetDrawType(GUICollectionBox::Image);
-					const Icon *pIcon = (hoveredPlayer != PLAYER_CPU) ? g_UInputMan.GetSchemeIcon(hoveredPlayer) : dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-					if (pIcon) {
-						m_PlayerBoxes[hoveredPlayer][hoveredTeam]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+					const Icon *playerIcon = (hoveredPlayer != PLAYER_CPU) ? g_UInputMan.GetSchemeIcon(hoveredPlayer) : dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+					if (playerIcon) {
+						m_PlayerBoxes[hoveredPlayer][hoveredTeam]->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0]));
 					}
 
 					// Clear all unhovered rows of this column.
@@ -936,9 +978,9 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 								m_PlayerBoxes[humanPlayer][hoveredTeam]->SetDrawType(GUICollectionBox::Color);
 								m_PlayerBoxes[humanPlayer][hoveredTeam]->SetDrawColor(c_GUIColorBlue);
 								m_PlayerBoxes[humanPlayer][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-								const Icon *pIcon = g_UInputMan.GetSchemeIcon(humanPlayer);
-								if (pIcon) {
-									m_PlayerBoxes[humanPlayer][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+								playerIcon = g_UInputMan.GetSchemeIcon(humanPlayer);
+								if (playerIcon) {
+									m_PlayerBoxes[humanPlayer][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0]));
 								}
 							}
 						}
@@ -949,9 +991,9 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 						m_PlayerBoxes[PLAYER_CPU][hoveredTeam]->SetDrawType(GUICollectionBox::Color);
 						m_PlayerBoxes[PLAYER_CPU][hoveredTeam]->SetDrawColor(c_GUIColorBlue);
 						m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-						pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-						if (pIcon) {
-							m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+						playerIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+						if (playerIcon) {
+							m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0]));
 						}
 					}
 
@@ -965,72 +1007,22 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 			}
 		}
 
-		// Team info columns.
-		for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team) {
-			// Update the team names and such.
-			if (newActivity) {
-				m_TeamBoxes[team]->SetDrawType(GUICollectionBox::Image);
-				const Icon *pIcon = nullptr;
-				if (team == TEAM_DISABLED) {
-					pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Disabled Team"));
-					m_TeamNameLabels[team]->SetText("Not Playing:");
-				}
-				// Active player team.
-				else if (selectedActivity->TeamActive(team)) {
-					// Set the team flag icons on the floating player bars.
-					pIcon = selectedActivity->GetTeamIcon(team);
-					// Revert to default if needed.
-					if (!pIcon) {
-						const std::string teamString = "Team " + std::to_string(team + 1) + " Default";
-						pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", teamString));
-					}
-					m_TeamNameLabels[team]->SetText(selectedActivity->GetTeamName(team) + ":");
-				}
-				// Disabled/unplayable teams.
-				else {
-					pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Locked Team"));
-					m_TeamNameLabels[team]->SetText("Unavailable");
-				}
-
-				// Finally set whatever Icon we came up with.
-				if (pIcon) {
-					m_TeamBoxes[team]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
-				}
-			}
-
-			// Check if the team has any players assigned at all.
-			if (selectedActivity->TeamActive(team)) {
-				teamHasPlayers = false;
-				for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
+		// Count players in the teams.
+		int teamsWithPlayers = 0;
+		int teamsWithHumans = 0;
+		int humansInTeams = 0;
+		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+			if (selectedActivity->TeamActive(teamIndex)) {
+				for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
 					// CPU is sometimes disabled, but still counts as a team.
-					if (team != TEAM_DISABLED && m_PlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image) {
-						teamHasPlayers = true;
-						if (player != PLAYER_CPU) {
-							teamHasHumans = true;
+					if (m_PlayerBoxes[playerIndex][teamIndex]->GetDrawType() == GUICollectionBox::Image) {
+						++teamsWithPlayers;
+						if (playerIndex != PLAYER_CPU) {
+							++teamsWithHumans;
+							++humansInTeams;
 						}
+						break;
 					}
-				}
-				if (teamHasPlayers) {
-					++teamsWithPlayers;
-				}
-				if (teamHasHumans) {
-					++teamsWithHumans;
-				}
-
-				m_TeamTechSelect[team]->SetEnabled(true);
-				m_TeamTechSelect[team]->SetVisible(true);
-
-				m_TeamAISkillSlider[team]->SetEnabled(true);
-				m_TeamAISkillSlider[team]->SetVisible(true);
-				m_TeamAISkillLabel[team]->SetVisible(true);
-			} else {
-				if (team >= Activity::TeamOne && team < Activity::MaxTeamCount) {
-					m_TeamTechSelect[team]->SetEnabled(false);
-					m_TeamTechSelect[team]->SetVisible(false);
-
-					m_TeamAISkillSlider[team]->SetEnabled(false);
-					m_TeamAISkillSlider[team]->SetVisible(false);
-					m_TeamAISkillLabel[team]->SetVisible(false);
 				}
 			}
 		}
@@ -1038,7 +1030,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 		// If we are over capacity with players, disable the start button and show why.
 		int maxPlayers = gameActivity->GetMaxPlayerSupport();
 		int minTeamsRequired = gameActivity->GetMinTeamsRequired();
-		if (maxPlayers < PlayerCount()) {
+		if (humansInTeams > maxPlayers) {
 			m_ScenarioButtons[STARTGAME]->SetVisible(false);
 			m_StartErrorLabel->SetVisible(true);
 			const std::string msgString = "Too many players assigned! Max for this activity is " + std::to_string(maxPlayers);
@@ -1084,21 +1076,6 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 		m_StartErrorLabel->SetVisible(true);
 		m_CPULockLabel->SetVisible(m_LockedCPUTeam != Activity::NoTeam);
 	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int ScenarioGUI::PlayerCount() const {
-	int count = 0;
-	// Go through all the on-team non-CPU cells and see how many players are already assigned.
-	for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-		for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
-			if (m_PlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image) {
-				++count;
-			}
-		}
-	}
-	return count;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

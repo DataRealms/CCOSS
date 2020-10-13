@@ -66,7 +66,6 @@ void ScenarioGUI::Clear() {
 	m_ScenarioGUIScreen = nullptr;
 	m_ScenarioGUIInput = nullptr;
 	m_ScenarioGUIController = nullptr;
-	m_MenuEnabled = ENABLED;
 	m_BlinkTimer.Reset();
 
 	m_PlanetCenter.Reset();
@@ -302,19 +301,11 @@ GUIControlManager *ScenarioGUI::GetGUIControlManager() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::SetEnabled(bool enable) {
-	if (enable && m_MenuEnabled != ENABLED && m_MenuEnabled != ENABLING) {
-		m_MenuEnabled = ENABLING;
-		g_GUISound.EnterMenuSound()->Play();
-	} else if (!enable && m_MenuEnabled != DISABLED && m_MenuEnabled != DISABLING) {
-		m_MenuEnabled = DISABLING;
-		g_GUISound.ExitMenuSound()->Play();
-	} else if (enable && m_MenuEnabled == ENABLED) {
-		HideAllScreens();
-		m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
-		// Reload all scenes and activities to reflect scene changes player might do in scene editor.
-		GetAllScenesAndActivities(false);
-	}
+void ScenarioGUI::SetEnabled() {
+	HideAllScreens();
+	m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
+	// Reload all scenes and activities to reflect scene changes player might do in scene editor.
+	GetAllScenesAndActivities(false);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -335,10 +326,6 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	m_ScenarioController->Update();
 
 	if (g_ConsoleMan.IsEnabled()) {
-		return result;
-	}
-
-	if (m_MenuEnabled != ENABLED && m_MenuEnabled != ENABLING) {
 		return result;
 	}
 
@@ -1487,9 +1474,8 @@ void ScenarioGUI::CalculateLinesToSitePoint() {
 
 	m_LinePointsToSite.clear();
 
-	// No bends, meaning the mid of the meter goes straight up/down into the site circle.
 	if (std::fabs(sitePos.GetFloorIntX() - sceneInfoBoxPos.GetFloorIntX()) < circleRadius) {
-		// Draw the line to the site.
+		// No bends, meaning the mid of the meter goes straight up/down into the site circle.
 		m_LinePointsToSite.emplace_back(sceneInfoBoxPos + Vector(sitePos.m_X - sceneInfoBoxPos.m_X, 0));
 		m_LinePointsToSite.emplace_back(sitePos + Vector(0, (circleRadius + 1) * -yDirMult));
 	} else if (std::fabs(sitePos.GetFloorIntY() - sceneInfoBoxPos.GetFloorIntY()) < (channelHeight - circleRadius)) {

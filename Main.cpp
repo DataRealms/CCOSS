@@ -1270,7 +1270,7 @@ bool PlayIntroTitle() {
                 sectionSwitch = false;
 
                 // Reset the Scenario menu
-                g_pScenarioGUI->SetEnabled(true);
+                g_pScenarioGUI->SetEnabled();
 
                 // Play the scenario music with juicy start sound
                 g_GUISound.SplashSound()->Play();

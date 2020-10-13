@@ -81,16 +81,9 @@ namespace RTE {
 		GUIControlManager * GetGUIControlManager();
 
 		/// <summary>
-		/// Enables or disables the menu. This will animate it in and out of view.
+		/// Enables the menu. This will animate it in and out of view.
 		/// </summary>
-		/// <param name="enable">Whether to enable or disable the menu.</param>
-		void SetEnabled(bool enable = true);
-
-		/// <summary>
-		/// Reports whether the menu is enabled or not.
-		/// </summary>
-		/// <returns>Whether the menu is enabled or not.</returns>
-		bool IsEnabled() { return m_MenuEnabled == ENABLED || m_MenuEnabled == ENABLING; }
+		void SetEnabled();
 
 		/// <summary>
 		/// Sets where the planet is on the screen and its other data so the menu can overlay properly on it.
@@ -239,8 +232,6 @@ namespace RTE {
 		GUIInput *m_ScenarioGUIInput; //!< Input controller.
 		
 		GUIControlManager *m_ScenarioGUIController; //!< The control manager which holds all the controls.
-		
-		int m_MenuEnabled; //!< Visibility state of the menu.
 		
 		Timer m_BlinkTimer; //!< Notification blink timer.
 

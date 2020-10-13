@@ -227,15 +227,15 @@ int ScenarioGUI::Create(Controller *pController) {
 	const DataModule *dataModule = nullptr;
 	const std::string techString = " Tech";
 	std::string techName = "";
-	for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i) {
-		dataModule = g_PresetMan.GetDataModule(i);
+	for (int moduleIndex = 0; moduleIndex < g_PresetMan.GetTotalModuleCount(); ++moduleIndex) {
+		dataModule = g_PresetMan.GetDataModule(moduleIndex);
 		if (dataModule) {
 			techName = dataModule->GetFriendlyName();
 			const std::string::size_type techPos = techName.find(techString);
 			if (techPos != string::npos) {
 				techName.replace(techPos, techString.length(), "");
-				for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
-					m_TeamTechSelect[team]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+				for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+					m_TeamTechSelect[teamIndex]->GetListPanel()->AddItem(techName, "", 0, 0, moduleIndex);
 				}
 			}
 		}
@@ -335,7 +335,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	int mouseX;
 	int mouseY;
 	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
-	Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
+	Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
 	result = UpdateInput();
 
@@ -461,7 +461,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 		if (!preview) {
 			preview = m_DefaultPreviewBitmap;
 		}
-		
+
 		blit(preview, m_ScenePreviewBitmap, 0, 0, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
 		draw_sprite(drawBitmap, m_ScenePreviewBitmap, m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + 10, m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + 33);
 	} else if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
@@ -765,7 +765,7 @@ void ScenarioGUI::UpdateActivityBox() {
 		const int textHeight = m_ActivityLabel->ResizeHeightToFit();
 		const int padding = 110;
 		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), textHeight + padding);
-		
+
 		const GameActivity *selectedGA = dynamic_cast<const GameActivity *>(selectedActivity);
 		if (selectedGA) {
 			// Set gold slider value if activity specifies default gold amounts for difficulties.
@@ -1080,7 +1080,6 @@ void ScenarioGUI::UpdatePlayersBox() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool ScenarioGUI::StartGame() {
-	// Get the currently selected Activity.
 	const Activity *activityPreset = nullptr;
 	if (m_ActivitySelectComboBox) {
 		activityPreset = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
@@ -1090,17 +1089,14 @@ bool ScenarioGUI::StartGame() {
 		return false;
 	}
 
-	// Create the actual instance of the Activity we want to start.
 	Activity *activityInstance = dynamic_cast<Activity *>(activityPreset->Clone());
 	GameActivity *gameActivity = dynamic_cast<GameActivity *>(activityInstance);
 
 	// Set up the basic settings.
 	if (gameActivity) {
 		gameActivity->SetDifficulty(m_DifficultySlider->GetValue());
-
 		gameActivity->SetFogOfWarEnabled(m_FogOfWarCheckbox->GetCheck());
 		gameActivity->SetRequireClearPathToOrbit(m_RequireClearPathToOrbitCheckbox->GetCheck());
-
 
 		// If gold slider is at its max value then the amount is 'infinite' and we must set some ridiculously high value.
 		if (m_GoldSlider->GetValue() == m_GoldSlider->GetMaximum()) {
@@ -1116,51 +1112,46 @@ bool ScenarioGUI::StartGame() {
 
 	// Set up the player and team assignments.
 	activityInstance->ClearPlayers(false);
-	for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
-		for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team) {
-			if (team != TEAM_DISABLED && m_PlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image) {
-				// Add the human players, not including CPU players.
-				if (player != PLAYER_CPU) {
-					activityInstance->AddPlayer(player, true, team, 0);
-				}
-				// CPU team, so mark it as such. there are no actual CPU players.
-				else if (gameActivity) {
-					gameActivity->SetCPUTeam(team);
-				}
+	for (int playerIndex = Players::PlayerOne; playerIndex < Players::MaxPlayerCount; ++playerIndex) {
+		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+			if (m_PlayerBoxes[playerIndex][teamIndex]->GetDrawType() == GUICollectionBox::Image) {
+				activityInstance->AddPlayer(playerIndex, true, teamIndex, 0);
+				break;
 			}
 		}
 	}
 
-	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
-		// Set up techs.
-		const GUIListPanel::Item *techItem = m_TeamTechSelect[team]->GetSelectedItem();
-		if (techItem) {
-			// If the "random" selection, choose one from the list of loaded techs.
-			if (m_TeamTechSelect[team]->GetSelectedIndex() == 1)//techItem->m_ExtraIndex < 0)
-			{
-				int selection = RandomNum<int>(1, m_TeamTechSelect[team]->GetListPanel()->GetItemList()->size() - 1);
-				m_TeamTechSelect[team]->SetSelectedIndex(selection);
-				techItem = m_TeamTechSelect[team]->GetSelectedItem();
-
-				// Switch back to -Random-.
-				m_TeamTechSelect[team]->SetSelectedIndex(1);
+	if (gameActivity) {
+		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+			if (m_PlayerBoxes[PLAYER_CPU][teamIndex]->GetDrawType() == GUICollectionBox::Image) {
+				gameActivity->SetCPUTeam(teamIndex);
+				break;
 			}
+		}
+	}
 
-			// Now set the selected tech's module index as what the metaplayer is going to use.
-			if (techItem) {
-				if (techItem->m_ExtraIndex == -2) {
-					gameActivity->SetTeamTech(team, "-All-");
-				} else {
-					gameActivity->SetTeamTech(team, g_PresetMan.GetDataModuleName(techItem->m_ExtraIndex));
-				}
+	const GUIListPanel::Item *techItem;
+	for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+		techItem = m_TeamTechSelect[teamIndex]->GetSelectedItem();
+		if (techItem) {
+			if (techItem->m_ExtraIndex == -2) {
+				// Selected "All".
+				gameActivity->SetTeamTech(teamIndex, "-All-");
+			} else if (techItem->m_ExtraIndex == -1) {
+				// Selected "Random".
+				const int selection = RandomNum<int>(2, m_TeamTechSelect[teamIndex]->GetListPanel()->GetItemList()->size() - 1);
+				m_TeamTechSelect[teamIndex]->SetSelectedIndex(selection);
+				gameActivity->SetTeamTech(teamIndex, g_PresetMan.GetDataModuleName(m_TeamTechSelect[teamIndex]->GetSelectedItem()->m_ExtraIndex));
+			} else {
+				gameActivity->SetTeamTech(teamIndex, g_PresetMan.GetDataModuleName(techItem->m_ExtraIndex));
 			}
 		}
 
 		// Set up AI skill levels.
-		if (m_TeamAISkillSlider[team]->IsEnabled()) {
-			gameActivity->SetTeamAISkill(team, m_TeamAISkillSlider[team]->GetValue());
+		if (m_TeamAISkillSlider[teamIndex]->IsEnabled()) {
+			gameActivity->SetTeamAISkill(teamIndex, m_TeamAISkillSlider[teamIndex]->GetValue());
 		} else {
-			gameActivity->SetTeamAISkill(team, Activity::DefaultSkill);
+			gameActivity->SetTeamAISkill(teamIndex, Activity::DefaultSkill);
 		}
 	}
 
@@ -1192,7 +1183,7 @@ void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 	list<Scene *> filteredScenes;
 
 	// Go through the list and cast all the pointers to scenes so we have a handy list.
-	for (Entity * presetEntity : presetList) {
+	for (Entity *presetEntity : presetList) {
 		Scene *presetScene = dynamic_cast<Scene *>(presetEntity);
 		// Only add non-editor and non-special scenes, or ones that don't have locations defined, or are metascenes.
 		if (presetScene && !presetScene->GetLocation().IsZero() && !presetScene->IsMetagameInternal() && (presetScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes())) {
@@ -1200,7 +1191,7 @@ void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 		}
 	}
 
-	for (Scene * filteredScene : filteredScenes) {
+	for (Scene *filteredScene : filteredScenes) {
 		filteredScene->SetLocationOffset(Vector(0, 0));
 	}
 
@@ -1231,7 +1222,7 @@ void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 			isOverlapped = false;
 
 			// Find overlapping scene dot.
-			for (const Scene * filteredScene2 : filteredScenes) {
+			for (const Scene *filteredScene2 : filteredScenes) {
 				if (filteredScene1 != filteredScene2) {
 					Vector pos1 = filteredScene1->GetLocation() + filteredScene1->GetLocationOffset();
 					Vector pos2 = filteredScene2->GetLocation() + filteredScene2->GetLocationOffset();
@@ -1338,8 +1329,7 @@ void ScenarioGUI::UpdateSiteNameLabel(bool visible, const string &text, const Ve
 		*/
 		if (m_ScenarioScenePlanetLabel->GetYPos() < pad) {
 			m_ScenarioScenePlanetLabel->SetPositionAbs(m_ScenarioScenePlanetLabel->GetXPos(), pad);
-		}
-		else if (m_ScenarioScenePlanetLabel->GetYPos() + m_ScenarioScenePlanetLabel->GetHeight() + pad >= g_FrameMan.GetResY()) {
+		} else if (m_ScenarioScenePlanetLabel->GetYPos() + m_ScenarioScenePlanetLabel->GetHeight() + pad >= g_FrameMan.GetResY()) {
 			m_ScenarioScenePlanetLabel->SetPositionAbs(m_ScenarioScenePlanetLabel->GetXPos(), g_FrameMan.GetResY() - m_ScenarioScenePlanetLabel->GetHeight() - pad);
 		}
 	}
@@ -1378,7 +1368,7 @@ void ScenarioGUI::DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vecto
 	const int color = c_GUIColorWhite;
 	const Vector sitePos = m_PlanetCenter + planetPoint;
 	const int circleRadius = 8;
-	
+
 
 	for (int index = 0; index < m_LinePointsToSite.size() - 1; index++) {
 		DrawGlowLine(drawBitmap, m_LinePointsToSite[index], m_LinePointsToSite[index + 1], color);
@@ -1462,6 +1452,6 @@ void ScenarioGUI::CalculateLinesToSitePoint() {
 	}
 }
 
-void ScenarioGUI::HideScenesBox() const{
+void ScenarioGUI::HideScenesBox() const {
 	m_ScenarioScreenBoxes[SCENEINFO]->SetVisible(false);
 }

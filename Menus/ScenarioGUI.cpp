@@ -358,22 +358,20 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	// SCENE SELECTION SCREEN
 
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
-		{
-			const Activity *currentActivity = g_ActivityMan.GetActivity();
-			if (currentActivity && (currentActivity->GetActivityState() == Activity::Running || currentActivity->GetActivityState() == Activity::Editing)) {
-				if (!m_ScenarioButtons[RESUME]->GetVisible()) {
-					m_ScenarioButtons[RESUME]->SetVisible(true);
-				}
+		const Activity *currentActivity = g_ActivityMan.GetActivity();
+		if (currentActivity && (currentActivity->GetActivityState() == Activity::Running || currentActivity->GetActivityState() == Activity::Editing)) {
+			if (!m_ScenarioButtons[RESUME]->GetVisible()) {
+				m_ScenarioButtons[RESUME]->SetVisible(true);
+			}
 
-				if (m_BlinkTimer.AlternateReal(500)) {
-					m_ScenarioButtons[RESUME]->SetFocus();
-				} else {
-					m_ScenarioGUIController->GetManager()->SetFocus(0);
-				}
+			if (m_BlinkTimer.AlternateReal(500)) {
+				m_ScenarioButtons[RESUME]->SetFocus();
 			} else {
-				if (m_ScenarioButtons[RESUME]->GetVisible()) {
-					m_ScenarioButtons[RESUME]->SetVisible(false);
-				}
+				m_ScenarioGUIController->GetManager()->SetFocus(0);
+			}
+		} else {
+			if (m_ScenarioButtons[RESUME]->GetVisible()) {
+				m_ScenarioButtons[RESUME]->SetVisible(false);
 			}
 		}
 
@@ -591,10 +589,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 
 			if (hoveredBox == m_ScenarioScreenBoxes[ACTIVITY] || hoveredBox == m_ScenarioScreenBoxes[SCENEINFO]) {
 				m_ScenarioDraggedBox = hoveredBox;
-			}
-
-			// Save the mouse pos at the start of the drag so we can measure if we should engage.
-			if (m_ScenarioDraggedBox) {
+				// Save the mouse pos at the start of the drag so we can measure if we should engage.
 				m_PrevMousePos = mousePos;
 			}
 		} else if (!menuButtonHeld) {
@@ -614,6 +609,9 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 		m_ScenarioDraggedBox->MoveRelative(mousePos.GetFloorIntX() - m_PrevMousePos.GetFloorIntX(), mousePos.GetFloorIntY() - m_PrevMousePos.GetFloorIntY());
 		// Ensure the drag didn't shove it off-screen.
 		KeepBoxOnScreen(m_ScenarioDraggedBox);
+		if (m_ScenarioDraggedBox == m_ScenarioScreenBoxes[SCENEINFO]) {
+			CalculateLinesToSitePoint();
+		}
 	}
 
 	//////////////////////////////////////////
@@ -680,16 +678,13 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 				}
 				// Also stop dragging any panels if we're over any button.
 				m_ScenarioDraggedBox = nullptr;
-				m_EngageDrag = true;
 			} else if (eventControl == m_DifficultySlider) {
 				UpdateActivityBox();
 				// Also stop dragging any panels if we're over any button.
 				m_ScenarioDraggedBox = nullptr;
-				m_EngageDrag = true;
 			} else if (eventControl == m_ActivitySelectComboBox) {
 				// Also stop dragging any panels if we're over the selection list.
 				m_ScenarioDraggedBox = nullptr;
-				m_EngageDrag = true;
 
 				// The activity selection changed.
 				if (anEvent.GetMsg() == GUIComboBox::Closed) {
@@ -875,7 +870,6 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 		int mouseX;
 		int mouseY;
 		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
-		Vector mousePos(static_cast<float>(mouseX),static_cast<float>(mouseY));
 		const GUICollectionBox *pHoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN], 1));
 
 		// Is this a game activity?

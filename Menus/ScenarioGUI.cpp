@@ -192,32 +192,32 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_TeamNameLabels[TEAM_DISABLED] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("TDLabel"));
 
 	std::string controlString = "";
-	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
-		controlString = "T" + std::to_string(team + 1) + "Icon";
-		m_TeamBoxes[team] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
+	for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+		controlString = "T" + std::to_string(teamIndex + 1) + "Icon";
+		m_TeamBoxes[teamIndex] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
 
-		controlString = "T" + std::to_string(team + 1) + "Label";
-		m_TeamNameLabels[team] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
+		controlString = "T" + std::to_string(teamIndex + 1) + "Label";
+		m_TeamNameLabels[teamIndex] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
 
-		controlString = "T" + std::to_string(team + 1) + "TechCombo";
-		m_TeamTechSelect[team] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl(controlString));
-		m_TeamTechSelect[team]->SetEnabled(false);
-		m_TeamTechSelect[team]->SetVisible(false);
-		m_TeamTechSelect[team]->GetListPanel()->AddItem("-All-", "", 0, 0, -2);
-		m_TeamTechSelect[team]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-		m_TeamTechSelect[team]->SetSelectedIndex(0);
+		controlString = "T" + std::to_string(teamIndex + 1) + "TechCombo";
+		m_TeamTechSelect[teamIndex] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl(controlString));
+		m_TeamTechSelect[teamIndex]->SetEnabled(false);
+		m_TeamTechSelect[teamIndex]->SetVisible(false);
+		m_TeamTechSelect[teamIndex]->GetListPanel()->AddItem("-All-", "", 0, 0, -2);
+		m_TeamTechSelect[teamIndex]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
+		m_TeamTechSelect[teamIndex]->SetSelectedIndex(0);
 
-		controlString = "T" + std::to_string(team + 1) + "AISkillSlider";
-		m_TeamAISkillSlider[team] = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl(controlString));
-		m_TeamAISkillSlider[team]->SetEnabled(false);
-		m_TeamAISkillSlider[team]->SetVisible(false);
-		m_TeamAISkillSlider[team]->SetValue(Activity::DefaultSkill);
+		controlString = "T" + std::to_string(teamIndex + 1) + "AISkillSlider";
+		m_TeamAISkillSlider[teamIndex] = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl(controlString));
+		m_TeamAISkillSlider[teamIndex]->SetEnabled(false);
+		m_TeamAISkillSlider[teamIndex]->SetVisible(false);
+		m_TeamAISkillSlider[teamIndex]->SetValue(Activity::DefaultSkill);
 
-		controlString = "T" + std::to_string(team + 1) + "AISkillLabel";
-		m_TeamAISkillLabel[team] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
-		m_TeamAISkillLabel[team]->SetEnabled(false);
-		m_TeamAISkillLabel[team]->SetVisible(false);
-		m_TeamAISkillLabel[team]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[team]->GetValue()));
+		controlString = "T" + std::to_string(teamIndex + 1) + "AISkillLabel";
+		m_TeamAISkillLabel[teamIndex] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
+		m_TeamAISkillLabel[teamIndex]->SetEnabled(false);
+		m_TeamAISkillLabel[teamIndex]->SetVisible(false);
+		m_TeamAISkillLabel[teamIndex]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[teamIndex]->GetValue()));
 	}
 
 	m_StartErrorLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("StartErrorLabel"));
@@ -840,26 +840,25 @@ void ScenarioGUI::ShowScenesBox() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
-	// Get the currently selected Activity.
 	const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
 
 	if (selectedActivity && m_ScenarioSelectedScene) {
-		// Get mouse position and figure out if any cell is being hovered over.
 		int mouseX;
 		int mouseY;
 		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
-		const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN], 1));
-
 		const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(selectedActivity);
 
 		if (newActivity) {
 			if (gameActivity) {
 				m_LockedCPUTeam = gameActivity->GetCPUTeam();
-				// Align the locked CPU team text label with the appropriate row.
 				if (m_LockedCPUTeam != Activity::NoTeam) {
 					m_CPULockLabel->SetPositionAbs(m_CPULockLabel->GetXPos(), m_TeamNameLabels[m_LockedCPUTeam]->GetYPos());
 				}
 			}
+
+			m_ScenarioButtons[STARTGAME]->SetVisible(false);
+			m_StartErrorLabel->SetVisible(true);
+			m_CPULockLabel->SetVisible(m_LockedCPUTeam != Activity::NoTeam);
 
 			// Set up initial color for all cells.
 			for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
@@ -888,7 +887,6 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 				m_PlayerBoxes[PLAYER_CPU][InitialCPUTeam]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
 			}
 
-			// Setup the team info column.
 			iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Disabled Team"));
 			m_TeamNameLabels[TEAM_DISABLED]->SetText("Not Playing:");
 			if (iconPointer) {
@@ -897,6 +895,10 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 			}
 
 			for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+				// Reset controls to default values.
+				m_TeamTechSelect[teamIndex]->SetSelectedIndex(0);
+				m_TeamAISkillSlider[teamIndex]->SetValue(Activity::DefaultSkill);
+
 				m_TeamBoxes[teamIndex]->SetDrawType(GUICollectionBox::Image);
 				if (selectedActivity->TeamActive(teamIndex)) {
 					iconPointer = selectedActivity->GetTeamIcon(teamIndex);
@@ -914,7 +916,6 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 					m_TeamAISkillSlider[teamIndex]->SetVisible(true);
 					m_TeamAISkillLabel[teamIndex]->SetVisible(true);
 				} else {
-					// Disabled/unplayable teams.
 					iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Locked Team"));
 
 					m_TeamNameLabels[teamIndex]->SetText("Unavailable");
@@ -926,13 +927,13 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 					m_TeamAISkillLabel[teamIndex]->SetVisible(false);
 				}
 
-				// Finally set whatever Icon we came up with.
 				if (iconPointer) {
 					m_TeamBoxes[teamIndex]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
 				}
 			}
 		}
 
+		const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN], 1));
 		if (hoveredCell) {
 			int hoveredPlayer = PLAYERCOLUMNCOUNT;
 			int hoveredTeam = TEAMROWCOUNT;
@@ -1014,7 +1015,6 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
 			if (selectedActivity->TeamActive(teamIndex)) {
 				for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
-					// CPU is sometimes disabled, but still counts as a team.
 					if (m_PlayerBoxes[playerIndex][teamIndex]->GetDrawType() == GUICollectionBox::Image) {
 						++teamsWithPlayers;
 						if (playerIndex != PLAYER_CPU) {
@@ -1027,54 +1027,42 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 			}
 		}
 
-		// If we are over capacity with players, disable the start button and show why.
-		int maxPlayers = gameActivity->GetMaxPlayerSupport();
-		int minTeamsRequired = gameActivity->GetMinTeamsRequired();
-		if (humansInTeams > maxPlayers) {
-			m_ScenarioButtons[STARTGAME]->SetVisible(false);
-			m_StartErrorLabel->SetVisible(true);
-			const std::string msgString = "Too many players assigned! Max for this activity is " + std::to_string(maxPlayers);
-			m_StartErrorLabel->SetText(msgString);
-		} else if (minTeamsRequired > teamsWithPlayers) {
-			// If we are under the required number of teams with players assigned, disable the start button and show why.
-			m_ScenarioButtons[STARTGAME]->SetVisible(false);
-			m_StartErrorLabel->SetVisible(true);
-			const std::string msgString = "Assign players to at\nleast " + std::to_string(minTeamsRequired) + " of the teams!";
-			m_StartErrorLabel->SetText(msgString);
-		} else if (teamsWithHumans == 0) {
-			// Assign at least one human player.
-			m_ScenarioButtons[STARTGAME]->SetVisible(false);
-			m_StartErrorLabel->SetVisible(true);
-			m_StartErrorLabel->SetText("Assign human players\nto at least one team!");
-		} else {
-			// Everything checks out; let the player start if they want to
-			m_ScenarioButtons[STARTGAME]->SetVisible(true);
-			m_StartErrorLabel->SetVisible(false);
+		if (gameActivity) {
+			int maxPlayers = gameActivity->GetMaxPlayerSupport();
+			int minTeamsRequired = gameActivity->GetMinTeamsRequired();
+			if (humansInTeams > maxPlayers) {
+				m_ScenarioButtons[STARTGAME]->SetVisible(false);
+				const std::string msgString = "Too many players assigned! Max for this activity is " + std::to_string(maxPlayers);
+				m_StartErrorLabel->SetText(msgString);
+				m_StartErrorLabel->SetVisible(true);
+			} else if (minTeamsRequired > teamsWithPlayers) {
+				m_ScenarioButtons[STARTGAME]->SetVisible(false);
+				const std::string msgString = "Assign players to at\nleast " + std::to_string(minTeamsRequired) + " of the teams!";
+				m_StartErrorLabel->SetText(msgString);
+				m_StartErrorLabel->SetVisible(true);
+			} else if (teamsWithHumans == 0) {
+				m_ScenarioButtons[STARTGAME]->SetVisible(false);
+				m_StartErrorLabel->SetText("Assign human players\nto at least one team!");
+				m_StartErrorLabel->SetVisible(true);
+			} else {
+				m_ScenarioButtons[STARTGAME]->SetVisible(true);
+				m_StartErrorLabel->SetVisible(false);
+			}
 		}
 
-		// How much starting gold does the slider yield.
 		char goldString[256];
-		//int startGold = (float)m_GoldSlider->GetMinimum() + ((m_GoldSlider->GetMaximum() - m_GoldSlider->GetMinimum()) * (float)m_GoldSlider->GetValue() / 100.0);
-		int startGold = m_GoldSlider->GetValue();
-		startGold = startGold - startGold % 500;
 		if (m_GoldSlider->GetValue() == m_GoldSlider->GetMaximum()) {
 			std::snprintf(goldString, sizeof(goldString), "Starting Gold: %c Infinite", -58);
 		} else {
+			int startGold = m_GoldSlider->GetValue();
+			startGold = startGold - (startGold % 500);
 			std::snprintf(goldString, sizeof(goldString), "Starting Gold: %c %d oz", -58, startGold);
 		}
 		m_GoldLabel->SetText(goldString);
 
-
-		// Set skill labels.
-		for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; team++) {
-			m_TeamAISkillLabel[team]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[team]->GetValue()));
+		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; teamIndex++) {
+			m_TeamAISkillLabel[teamIndex]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[teamIndex]->GetValue()));
 		}
-	}
-
-	if (newActivity) {
-		m_ScenarioButtons[STARTGAME]->SetVisible(false);
-		m_StartErrorLabel->SetVisible(true);
-		m_CPULockLabel->SetVisible(m_LockedCPUTeam != Activity::NoTeam);
 	}
 }
 

@@ -865,9 +865,9 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 				}
 			}
 
-			// Set up initial color for cells in the team1 - team4 rows.
+			// Set up initial color for all cells.
 			for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
-				for (int teamIndex1 = Activity::TeamOne; teamIndex1 < Activity::MaxTeamCount; ++teamIndex1) {
+				for (int teamIndex1 = Activity::TeamOne; teamIndex1 < TEAMROWCOUNT; ++teamIndex1) {
 					m_PlayerBoxes[player][teamIndex1]->SetDrawType(GUICollectionBox::Color);
 					m_PlayerBoxes[player][teamIndex1]->SetDrawColor(c_GUIColorBlue);
 				}
@@ -891,115 +891,76 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 			}
 		}
 
-		for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
-			for (int teamIndex1 = Activity::TeamOne; teamIndex1 < TEAMROWCOUNT; ++teamIndex1) {
-				// Make the hovered cell light up and able to be selected if:
-				// It's under an active team row or the 'not playing' row.
-				// It's not a team row locked to the CPU.
-				// It's not the CPU player if he is locked to a CPU team.
-				if (m_PlayerBoxes[player][teamIndex1] == hoveredCell && (selectedActivity->TeamActive(teamIndex1) || teamIndex1 == TEAM_DISABLED) && m_LockedCPUTeam != teamIndex1
-					&& (m_LockedCPUTeam == Activity::NoTeam || player != PLAYER_CPU)) {
-					if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_EITHER)) {
-						// Need to clear all other rows of this column.
-						// TODO:  -- unless the CPU column?
-						for (int teamIndex2 = Activity::TeamOne; teamIndex2 < TEAMROWCOUNT; ++teamIndex2) {
-							// This clicked cell should get the icon of this column.
-							if (teamIndex2 == teamIndex1) {
-								if (player != PLAYER_CPU) {
-									m_PlayerBoxes[player][teamIndex2]->SetDrawType(GUICollectionBox::Image);
-									const Icon *pIcon = player == PLAYER_CPU ? dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU")) : g_UInputMan.GetSchemeIcon(player);
-									if (pIcon) {
-										m_PlayerBoxes[player][teamIndex2]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
-									}
-								} else {
-									//Select or unselect CPU cells.
-									if (m_PlayerBoxes[player][teamIndex2]->GetDrawType() == GUICollectionBox::Image) {
-										m_PlayerBoxes[player][teamIndex2]->SetDrawType(GUICollectionBox::Color);
-										m_PlayerBoxes[player][teamIndex2]->SetDrawColor(c_GUIColorBlue);
-									} else {
-										const Icon *pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-										if (pIcon) {
-											m_PlayerBoxes[player][teamIndex2]->SetDrawType(GUICollectionBox::Image);
-											m_PlayerBoxes[player][teamIndex2]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
-										}
-									}
-								}
-							}
-							// Now unselected columns.
-							else {
-								if (player != PLAYER_CPU) {
-									m_PlayerBoxes[player][teamIndex2]->SetDrawType(GUICollectionBox::Color);
-									m_PlayerBoxes[player][teamIndex2]->SetDrawColor(c_GUIColorBlue);
-								}
-							}
-						}
-						// If CPU changed to an actual team assignment, clear all human players off his new team.
-						if (player == PLAYER_CPU && teamIndex1 != TEAM_DISABLED) {
-							for (int p2 = Players::PlayerOne; p2 < Players::MaxPlayerCount; ++p2) {
-								// Deselect the player's team assignment if he's on the same team as the CPU.
-								if (m_PlayerBoxes[p2][teamIndex1]->GetDrawType() == GUICollectionBox::Image) {
-									m_PlayerBoxes[p2][teamIndex1]->SetDrawType(GUICollectionBox::Color);
-									m_PlayerBoxes[p2][teamIndex1]->SetDrawColor(c_GUIColorBlue);
-									// Move him to disabled.
-									m_PlayerBoxes[p2][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-									const Icon *pIcon = g_UInputMan.GetSchemeIcon(p2);
-									if (pIcon) {
-										m_PlayerBoxes[p2][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
-									}
-								}
-							}
-						}
-						// If Player clicked CPU disabled button, clear CPU row.
-						if (player == PLAYER_CPU && teamIndex1 == TEAM_DISABLED) {
-							for (int t2 = Activity::TeamOne; t2 <= Activity::TeamFour; ++t2) {
-								if (m_PlayerBoxes[PLAYER_CPU][t2]->GetDrawType() == GUICollectionBox::Image) {
-									m_PlayerBoxes[PLAYER_CPU][t2]->SetDrawType(GUICollectionBox::Color);
-									m_PlayerBoxes[PLAYER_CPU][t2]->SetDrawColor(c_GUIColorBlue);
-								}
-							}
-						}
-						// If a human player changed to a CPU team, remove the CPU guy.
-						// Deselect the CPU's team assignment if he's on the same team as the newly assigned human player.
-						else if (player != PLAYER_CPU && teamIndex1 != TEAM_DISABLED && m_PlayerBoxes[PLAYER_CPU][teamIndex1]->GetDrawType() == GUICollectionBox::Image) {
-							m_PlayerBoxes[PLAYER_CPU][teamIndex1]->SetDrawType(GUICollectionBox::Color);
-							m_PlayerBoxes[PLAYER_CPU][teamIndex1]->SetDrawColor(c_GUIColorBlue);
-							// Move him to disabled.
-							//m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-							//pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-							//if (pIcon)
-							//    m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
-						}
-						g_GUISound.FocusChangeSound()->Play();
-
-						//Check if we need to clear or set CPU disabled team icon.
-						bool noCPUs = true;
-						for (int t2 = Activity::TeamOne; t2 <= Activity::TeamFour; ++t2) {
-							if (m_PlayerBoxes[PLAYER_CPU][t2]->GetDrawType() == GUICollectionBox::Image) {
-								noCPUs = false;
-							}
-						}
-						//Select or unselect CPU disabled icon.
-						if (noCPUs) {
-							const Icon *pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-							if (pIcon) {
-								m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-								m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
-							}
-						} else {
-							m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Color);
-							m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawColor(c_GUIColorBlue);
-						}
-
-					}
-					// Just highlight the cell.
-					else if (m_PlayerBoxes[player][teamIndex1]->GetDrawColor() != c_GUIColorLightBlue) {
-						m_PlayerBoxes[player][teamIndex1]->SetDrawColor(c_GUIColorLightBlue);
-						g_GUISound.SelectionChangeSound()->Play();
+		if (hoveredCell) {
+			int hoveredPlayer = PLAYERCOLUMNCOUNT;
+			int hoveredTeam = TEAMROWCOUNT;
+			for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
+				for (int teamIndex = Activity::TeamOne; teamIndex < TEAMROWCOUNT; ++teamIndex) {
+					if (m_PlayerBoxes[playerIndex][teamIndex] == hoveredCell) {
+						hoveredPlayer = playerIndex;
+						hoveredTeam = teamIndex;
+					} else if (m_PlayerBoxes[playerIndex][teamIndex]->GetDrawType() == GUICollectionBox::Color) {
+						// Un-highlight all other cells.
+						m_PlayerBoxes[playerIndex][teamIndex]->SetDrawColor(c_GUIColorBlue);
 					}
 				}
-				// Un-highlight all other cells.
-				else if (hoveredCell && m_PlayerBoxes[player][teamIndex1]->GetDrawType() == GUICollectionBox::Color) {
-					m_PlayerBoxes[player][teamIndex1]->SetDrawColor(c_GUIColorBlue);
+			}
+
+			// Make the hovered cell light up and able to be selected if:
+			// It's under an active team row or the disabled team row.
+			// It's not a team row locked to the CPU.
+			// It's not the CPU player if he is locked to a CPU team.
+			// It doesn't already contain an image.
+			if ((selectedActivity->TeamActive(hoveredTeam) || hoveredTeam == TEAM_DISABLED) && m_LockedCPUTeam != hoveredTeam
+				&& (m_LockedCPUTeam == Activity::NoTeam || hoveredPlayer != PLAYER_CPU) && m_PlayerBoxes[hoveredPlayer][hoveredTeam]->GetDrawType() != GUICollectionBox::Image) {
+				if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_EITHER)) {
+					// Move the player's icon to the correct row.
+					m_PlayerBoxes[hoveredPlayer][hoveredTeam]->SetDrawType(GUICollectionBox::Image);
+					const Icon *pIcon = (hoveredPlayer != PLAYER_CPU) ? g_UInputMan.GetSchemeIcon(hoveredPlayer) : dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+					if (pIcon) {
+						m_PlayerBoxes[hoveredPlayer][hoveredTeam]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+					}
+
+					// Clear all unhovered rows of this column.
+					for (int nonHoveredTeam = Activity::TeamOne; nonHoveredTeam < TEAMROWCOUNT; ++nonHoveredTeam) {
+						if (nonHoveredTeam != hoveredTeam) {
+							m_PlayerBoxes[hoveredPlayer][nonHoveredTeam]->SetDrawType(GUICollectionBox::Color);
+							m_PlayerBoxes[hoveredPlayer][nonHoveredTeam]->SetDrawColor(c_GUIColorBlue);
+						}
+					}
+
+					// If CPU changed team, remove human players from the team.
+					if (hoveredPlayer == PLAYER_CPU && hoveredTeam != TEAM_DISABLED) {
+						for (int humanPlayer = Players::PlayerOne; humanPlayer < Players::MaxPlayerCount; ++humanPlayer) {
+							if (m_PlayerBoxes[humanPlayer][hoveredTeam]->GetDrawType() == GUICollectionBox::Image) {
+								m_PlayerBoxes[humanPlayer][hoveredTeam]->SetDrawType(GUICollectionBox::Color);
+								m_PlayerBoxes[humanPlayer][hoveredTeam]->SetDrawColor(c_GUIColorBlue);
+								m_PlayerBoxes[humanPlayer][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
+								const Icon *pIcon = g_UInputMan.GetSchemeIcon(humanPlayer);
+								if (pIcon) {
+									m_PlayerBoxes[humanPlayer][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+								}
+							}
+						}
+					}
+
+					// If a human player changed team, remove the CPU from the team.
+					else if (hoveredPlayer != PLAYER_CPU && hoveredTeam != TEAM_DISABLED && m_PlayerBoxes[PLAYER_CPU][hoveredTeam]->GetDrawType() == GUICollectionBox::Image) {
+						m_PlayerBoxes[PLAYER_CPU][hoveredTeam]->SetDrawType(GUICollectionBox::Color);
+						m_PlayerBoxes[PLAYER_CPU][hoveredTeam]->SetDrawColor(c_GUIColorBlue);
+						m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
+						pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+						if (pIcon) {
+							m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+						}
+					}
+
+					g_GUISound.FocusChangeSound()->Play();
+				} else if (m_PlayerBoxes[hoveredPlayer][hoveredTeam]->GetDrawType() == GUICollectionBox::Color &&
+					m_PlayerBoxes[hoveredPlayer][hoveredTeam]->GetDrawColor() != c_GUIColorLightBlue) {
+					// Just highlight the cell.
+					m_PlayerBoxes[hoveredPlayer][hoveredTeam]->SetDrawColor(c_GUIColorLightBlue);
+					g_GUISound.SelectionChangeSound()->Play();
 				}
 			}
 		}

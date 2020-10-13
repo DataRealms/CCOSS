@@ -852,81 +852,75 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 		int mouseX;
 		int mouseY;
 		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
-		const GUICollectionBox *pHoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN], 1));
+		const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN], 1));
 
-		// Is this a game activity?
-		const GameActivity *pGameActivity = dynamic_cast<const GameActivity *>(selectedActivity);
+		const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(selectedActivity);
 
-		if (newActivity && pGameActivity) {
-			// The pre-set team that should absolutely be CPU played
-			m_LockedCPUTeam = pGameActivity->GetCPUTeam();
-			// Align the locked CPU team text label with the appropriate row
-			if (m_LockedCPUTeam != Activity::NoTeam) {
-				m_CPULockLabel->SetPositionAbs(m_CPULockLabel->GetXPos(), m_TeamNameLabels[m_LockedCPUTeam]->GetYPos());
+		if (newActivity) {
+			if (gameActivity) {
+				m_LockedCPUTeam = gameActivity->GetCPUTeam();
+				// Align the locked CPU team text label with the appropriate row.
+				if (m_LockedCPUTeam != Activity::NoTeam) {
+					m_CPULockLabel->SetPositionAbs(m_CPULockLabel->GetXPos(), m_TeamNameLabels[m_LockedCPUTeam]->GetYPos());
+				}
+			}
+
+			// Set up initial color for cells in the team1 - team4 rows.
+			for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
+				for (int teamIndex1 = Activity::TeamOne; teamIndex1 < Activity::MaxTeamCount; ++teamIndex1) {
+					m_PlayerBoxes[player][teamIndex1]->SetDrawType(GUICollectionBox::Color);
+					m_PlayerBoxes[player][teamIndex1]->SetDrawColor(c_GUIColorBlue);
+				}
+			}
+
+			// Human players start on the disabled team row.
+			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+				m_PlayerBoxes[player][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
+				const Icon *pIcon = g_UInputMan.GetSchemeIcon(player);
+				if (pIcon) {
+					m_PlayerBoxes[player][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+				}
+			}
+
+			// CPU player either has a locked team or starts on the disabled team row.
+			int InitialCPUTeam = (m_LockedCPUTeam != Activity::NoTeam) ? m_LockedCPUTeam : TEAM_DISABLED;
+			m_PlayerBoxes[PLAYER_CPU][InitialCPUTeam]->SetDrawType(GUICollectionBox::Image);
+			const Icon *pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+			if (pIcon) {
+				m_PlayerBoxes[PLAYER_CPU][InitialCPUTeam]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 			}
 		}
 
-		// Set up the matrix of player control boxes.
 		for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
-			for (int indexTeam1 = Activity::TeamOne; indexTeam1 < TEAMROWCOUNT; ++indexTeam1) {
-				if (newActivity) {
-					// Everyone starts on the Disabled row, except perhaps the CPU which may be on its locked team.
-					if (indexTeam1 == TEAM_DISABLED) {
-						m_PlayerBoxes[player][indexTeam1]->SetDrawType(GUICollectionBox::Image);
-						const Icon *pIcon = player == PLAYER_CPU ? dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU")) : g_UInputMan.GetSchemeIcon(player);
-						if (pIcon) {
-							m_PlayerBoxes[player][indexTeam1]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
-						}
-					}
-					// De-highlight all other cells initially.
-					else {
-						m_PlayerBoxes[player][indexTeam1]->SetDrawType(GUICollectionBox::Color);
-						m_PlayerBoxes[player][indexTeam1]->SetDrawColor(c_GUIColorBlue);
-					}
-
-					// The CPU gets placed on its locked team.
-					if (m_LockedCPUTeam != Activity::NoTeam && player == PLAYER_CPU) {
-						if (indexTeam1 == m_LockedCPUTeam) {
-							m_PlayerBoxes[player][indexTeam1]->SetDrawType(GUICollectionBox::Image);
-							const Icon *pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-							if (pIcon) {
-								m_PlayerBoxes[player][indexTeam1]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
-							}
-						} else {
-							m_PlayerBoxes[player][indexTeam1]->SetDrawType(GUICollectionBox::Color);
-							m_PlayerBoxes[player][indexTeam1]->SetDrawColor(c_GUIColorBlue);
-						}
-					}
-				}
-
+			for (int teamIndex1 = Activity::TeamOne; teamIndex1 < TEAMROWCOUNT; ++teamIndex1) {
 				// Make the hovered cell light up and able to be selected if:
 				// It's under an active team row or the 'not playing' row.
 				// It's not a team row locked to the CPU.
 				// It's not the CPU player if he is locked to a CPU team.
-				if (m_PlayerBoxes[player][indexTeam1] == pHoveredCell && (selectedActivity->TeamActive(indexTeam1) || indexTeam1 == TEAM_DISABLED) && m_LockedCPUTeam != indexTeam1
+				if (m_PlayerBoxes[player][teamIndex1] == hoveredCell && (selectedActivity->TeamActive(teamIndex1) || teamIndex1 == TEAM_DISABLED) && m_LockedCPUTeam != teamIndex1
 					&& (m_LockedCPUTeam == Activity::NoTeam || player != PLAYER_CPU)) {
 					if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_EITHER)) {
 						// Need to clear all other rows of this column.
-// TODO:  -- unless the CPU column?
-						for (int indexTeam2 = Activity::TeamOne; indexTeam2 < TEAMROWCOUNT; ++indexTeam2) {
+						// TODO:  -- unless the CPU column?
+						for (int teamIndex2 = Activity::TeamOne; teamIndex2 < TEAMROWCOUNT; ++teamIndex2) {
 							// This clicked cell should get the icon of this column.
-							if (indexTeam2 == indexTeam1) {
+							if (teamIndex2 == teamIndex1) {
 								if (player != PLAYER_CPU) {
-									m_PlayerBoxes[player][indexTeam2]->SetDrawType(GUICollectionBox::Image);
+									m_PlayerBoxes[player][teamIndex2]->SetDrawType(GUICollectionBox::Image);
 									const Icon *pIcon = player == PLAYER_CPU ? dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU")) : g_UInputMan.GetSchemeIcon(player);
 									if (pIcon) {
-										m_PlayerBoxes[player][indexTeam2]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+										m_PlayerBoxes[player][teamIndex2]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 									}
 								} else {
 									//Select or unselect CPU cells.
-									if (m_PlayerBoxes[player][indexTeam2]->GetDrawType() == GUICollectionBox::Image) {
-										m_PlayerBoxes[player][indexTeam2]->SetDrawType(GUICollectionBox::Color);
-										m_PlayerBoxes[player][indexTeam2]->SetDrawColor(c_GUIColorBlue);
+									if (m_PlayerBoxes[player][teamIndex2]->GetDrawType() == GUICollectionBox::Image) {
+										m_PlayerBoxes[player][teamIndex2]->SetDrawType(GUICollectionBox::Color);
+										m_PlayerBoxes[player][teamIndex2]->SetDrawColor(c_GUIColorBlue);
 									} else {
 										const Icon *pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 										if (pIcon) {
-											m_PlayerBoxes[player][indexTeam2]->SetDrawType(GUICollectionBox::Image);
-											m_PlayerBoxes[player][indexTeam2]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
+											m_PlayerBoxes[player][teamIndex2]->SetDrawType(GUICollectionBox::Image);
+											m_PlayerBoxes[player][teamIndex2]->SetDrawImage(new AllegroBitmap(pIcon->GetBitmaps32()[0]));
 										}
 									}
 								}
@@ -934,18 +928,18 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 							// Now unselected columns.
 							else {
 								if (player != PLAYER_CPU) {
-									m_PlayerBoxes[player][indexTeam2]->SetDrawType(GUICollectionBox::Color);
-									m_PlayerBoxes[player][indexTeam2]->SetDrawColor(c_GUIColorBlue);
+									m_PlayerBoxes[player][teamIndex2]->SetDrawType(GUICollectionBox::Color);
+									m_PlayerBoxes[player][teamIndex2]->SetDrawColor(c_GUIColorBlue);
 								}
 							}
 						}
 						// If CPU changed to an actual team assignment, clear all human players off his new team.
-						if (player == PLAYER_CPU && indexTeam1 != TEAM_DISABLED) {
+						if (player == PLAYER_CPU && teamIndex1 != TEAM_DISABLED) {
 							for (int p2 = Players::PlayerOne; p2 < Players::MaxPlayerCount; ++p2) {
 								// Deselect the player's team assignment if he's on the same team as the CPU.
-								if (m_PlayerBoxes[p2][indexTeam1]->GetDrawType() == GUICollectionBox::Image) {
-									m_PlayerBoxes[p2][indexTeam1]->SetDrawType(GUICollectionBox::Color);
-									m_PlayerBoxes[p2][indexTeam1]->SetDrawColor(c_GUIColorBlue);
+								if (m_PlayerBoxes[p2][teamIndex1]->GetDrawType() == GUICollectionBox::Image) {
+									m_PlayerBoxes[p2][teamIndex1]->SetDrawType(GUICollectionBox::Color);
+									m_PlayerBoxes[p2][teamIndex1]->SetDrawColor(c_GUIColorBlue);
 									// Move him to disabled.
 									m_PlayerBoxes[p2][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
 									const Icon *pIcon = g_UInputMan.GetSchemeIcon(p2);
@@ -956,7 +950,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 							}
 						}
 						// If Player clicked CPU disabled button, clear CPU row.
-						if (player == PLAYER_CPU && indexTeam1 == TEAM_DISABLED) {
+						if (player == PLAYER_CPU && teamIndex1 == TEAM_DISABLED) {
 							for (int t2 = Activity::TeamOne; t2 <= Activity::TeamFour; ++t2) {
 								if (m_PlayerBoxes[PLAYER_CPU][t2]->GetDrawType() == GUICollectionBox::Image) {
 									m_PlayerBoxes[PLAYER_CPU][t2]->SetDrawType(GUICollectionBox::Color);
@@ -966,9 +960,9 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 						}
 						// If a human player changed to a CPU team, remove the CPU guy.
 						// Deselect the CPU's team assignment if he's on the same team as the newly assigned human player.
-						else if (player != PLAYER_CPU && indexTeam1 != TEAM_DISABLED && m_PlayerBoxes[PLAYER_CPU][indexTeam1]->GetDrawType() == GUICollectionBox::Image) {
-							m_PlayerBoxes[PLAYER_CPU][indexTeam1]->SetDrawType(GUICollectionBox::Color);
-							m_PlayerBoxes[PLAYER_CPU][indexTeam1]->SetDrawColor(c_GUIColorBlue);
+						else if (player != PLAYER_CPU && teamIndex1 != TEAM_DISABLED && m_PlayerBoxes[PLAYER_CPU][teamIndex1]->GetDrawType() == GUICollectionBox::Image) {
+							m_PlayerBoxes[PLAYER_CPU][teamIndex1]->SetDrawType(GUICollectionBox::Color);
+							m_PlayerBoxes[PLAYER_CPU][teamIndex1]->SetDrawColor(c_GUIColorBlue);
 							// Move him to disabled.
 							//m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
 							//pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
@@ -998,14 +992,14 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 
 					}
 					// Just highlight the cell.
-					else if (m_PlayerBoxes[player][indexTeam1]->GetDrawColor() != c_GUIColorLightBlue) {
-						m_PlayerBoxes[player][indexTeam1]->SetDrawColor(c_GUIColorLightBlue);
+					else if (m_PlayerBoxes[player][teamIndex1]->GetDrawColor() != c_GUIColorLightBlue) {
+						m_PlayerBoxes[player][teamIndex1]->SetDrawColor(c_GUIColorLightBlue);
 						g_GUISound.SelectionChangeSound()->Play();
 					}
 				}
 				// Un-highlight all other cells.
-				else if (pHoveredCell && m_PlayerBoxes[player][indexTeam1]->GetDrawType() == GUICollectionBox::Color) {
-					m_PlayerBoxes[player][indexTeam1]->SetDrawColor(c_GUIColorBlue);
+				else if (hoveredCell && m_PlayerBoxes[player][teamIndex1]->GetDrawType() == GUICollectionBox::Color) {
+					m_PlayerBoxes[player][teamIndex1]->SetDrawColor(c_GUIColorBlue);
 				}
 			}
 		}
@@ -1081,8 +1075,8 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 		}
 
 		// If we are over capacity with players, disable the start button and show why.
-		int maxPlayers = pGameActivity->GetMaxPlayerSupport();
-		int minTeamsRequired = pGameActivity->GetMinTeamsRequired();
+		int maxPlayers = gameActivity->GetMaxPlayerSupport();
+		int minTeamsRequired = gameActivity->GetMinTeamsRequired();
 		if (maxPlayers < PlayerCount()) {
 			m_ScenarioButtons[STARTGAME]->SetVisible(false);
 			m_StartErrorLabel->SetVisible(true);
@@ -1124,7 +1118,6 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 		}
 	}
 
-	// Reset all buttons and positions of things if a new activity has been selected.
 	if (newActivity) {
 		m_ScenarioButtons[STARTGAME]->SetVisible(false);
 		m_StartErrorLabel->SetVisible(true);

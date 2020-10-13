@@ -140,15 +140,19 @@ namespace RTE {
 		void ShowScenesBox();
 
 		/// <summary>
-		/// Hide the Scene info box
+		/// Hide the Scene info box.
 		/// </summary>
 		void HideScenesBox() const;
 
 		/// <summary>
+		/// Shows the player config box.
+		/// </summary>
+		void ShowPlayersBox();
+
+		/// <summary>
 		/// Updates the contents of the player config box.
 		/// </summary>
-		/// <param name="newActivity">Whether we shuold refresh completely because there's a new Activity selected.</param>
-		void UpdatePlayersBox(bool newActivity);
+		void UpdatePlayersBox();
 
 		/// <summary>
 		/// Sets up and starts the currently selected Activity and settings.

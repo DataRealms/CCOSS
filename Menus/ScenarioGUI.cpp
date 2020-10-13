@@ -397,7 +397,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	// PLAYER TEAM ASSIGNMENT SCREEN
 
 	else if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
-		UpdatePlayersBox(false);
+		UpdatePlayersBox();
 	}
 
 	// Save mouse pos for next frame so we can do dragging.
@@ -623,20 +623,19 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 				g_GUISound.BackButtonPressSound()->Play();
 				result = ScenarioUpdateResult::ACTIVITYRESUMED;
 			} else if (eventControlName == "PlayerCancelButton") {
+				// Cancel button on the player config box.
 				HideAllScreens();
 				m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 				ShowScenesBox();
 				g_GUISound.BackButtonPressSound()->Play();
 			} else if (eventControlName == "ConfirmCancelButton") {
+				// Cancel button on the quit confirm dialog box.
 				HideAllScreens();
 				m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 				g_GUISound.BackButtonPressSound()->Play();
 			} else if (eventControl == m_ScenarioButtons[STARTHERE]) {
-				// Start Scenario Here menu button pressed.
-				// Set up the player setup box based on updated Activity selection.
-				UpdatePlayersBox(true);
 				HideAllScreens();
-				m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->SetVisible(true);
+				ShowPlayersBox();
 				g_GUISound.ButtonPressSound()->Play();
 			} else if (eventControl == m_ScenarioButtons[STARTGAME]) {
 				if (StartGame()) {
@@ -839,7 +838,8 @@ void ScenarioGUI::ShowScenesBox() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
+void ScenarioGUI::ShowPlayersBox() {
+	m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->SetVisible(true);
 	const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
 
 	if (selectedActivity && m_ScenarioSelectedScene) {
@@ -848,90 +848,101 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity) {
 		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 		const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(selectedActivity);
 
-		if (newActivity) {
-			if (gameActivity) {
-				m_LockedCPUTeam = gameActivity->GetCPUTeam();
-				if (m_LockedCPUTeam != Activity::NoTeam) {
-					m_CPULockLabel->SetPositionAbs(m_CPULockLabel->GetXPos(), m_TeamNameLabels[m_LockedCPUTeam]->GetYPos());
-				}
-			}
-
-			m_ScenarioButtons[STARTGAME]->SetVisible(false);
-			m_StartErrorLabel->SetVisible(true);
-			m_CPULockLabel->SetVisible(m_LockedCPUTeam != Activity::NoTeam);
-
-			// Set up initial color for all cells.
-			for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
-				for (int teamIndex1 = Activity::TeamOne; teamIndex1 < TEAMROWCOUNT; ++teamIndex1) {
-					m_PlayerBoxes[player][teamIndex1]->SetDrawType(GUICollectionBox::Color);
-					m_PlayerBoxes[player][teamIndex1]->SetDrawColor(c_GUIColorBlue);
-				}
-			}
-
-			const Icon *iconPointer;
-
-			// Human players start on the disabled team row.
-			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-				m_PlayerBoxes[player][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-				iconPointer = g_UInputMan.GetSchemeIcon(player);
-				if (iconPointer) {
-					m_PlayerBoxes[player][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
-				}
-			}
-
-			// CPU player either has a locked team or starts on the disabled team row.
-			int InitialCPUTeam = (m_LockedCPUTeam != Activity::NoTeam) ? m_LockedCPUTeam : TEAM_DISABLED;
-			m_PlayerBoxes[PLAYER_CPU][InitialCPUTeam]->SetDrawType(GUICollectionBox::Image);
-			iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-			if (iconPointer) {
-				m_PlayerBoxes[PLAYER_CPU][InitialCPUTeam]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
-			}
-
-			iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Disabled Team"));
-			m_TeamNameLabels[TEAM_DISABLED]->SetText("Not Playing:");
-			if (iconPointer) {
-				m_TeamBoxes[TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-				m_TeamBoxes[TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
-			}
-
-			for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
-				// Reset controls to default values.
-				m_TeamTechSelect[teamIndex]->SetSelectedIndex(0);
-				m_TeamAISkillSlider[teamIndex]->SetValue(Activity::DefaultSkill);
-
-				m_TeamBoxes[teamIndex]->SetDrawType(GUICollectionBox::Image);
-				if (selectedActivity->TeamActive(teamIndex)) {
-					iconPointer = selectedActivity->GetTeamIcon(teamIndex);
-					// Revert to default if needed.
-					if (!iconPointer) {
-						const std::string teamString = "Team " + std::to_string(teamIndex + 1) + " Default";
-						iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", teamString));
-					}
-
-					m_TeamNameLabels[teamIndex]->SetText(selectedActivity->GetTeamName(teamIndex) + ":");
-
-					m_TeamTechSelect[teamIndex]->SetEnabled(true);
-					m_TeamTechSelect[teamIndex]->SetVisible(true);
-					m_TeamAISkillSlider[teamIndex]->SetEnabled(true);
-					m_TeamAISkillSlider[teamIndex]->SetVisible(true);
-					m_TeamAISkillLabel[teamIndex]->SetVisible(true);
-				} else {
-					iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Locked Team"));
-
-					m_TeamNameLabels[teamIndex]->SetText("Unavailable");
-
-					m_TeamTechSelect[teamIndex]->SetEnabled(false);
-					m_TeamTechSelect[teamIndex]->SetVisible(false);
-					m_TeamAISkillSlider[teamIndex]->SetEnabled(false);
-					m_TeamAISkillSlider[teamIndex]->SetVisible(false);
-					m_TeamAISkillLabel[teamIndex]->SetVisible(false);
-				}
-
-				if (iconPointer) {
-					m_TeamBoxes[teamIndex]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
-				}
+		if (gameActivity) {
+			m_LockedCPUTeam = gameActivity->GetCPUTeam();
+			if (m_LockedCPUTeam != Activity::NoTeam) {
+				m_CPULockLabel->SetPositionAbs(m_CPULockLabel->GetXPos(), m_TeamNameLabels[m_LockedCPUTeam]->GetYPos());
 			}
 		}
+
+		m_ScenarioButtons[STARTGAME]->SetVisible(false);
+		m_StartErrorLabel->SetVisible(true);
+		m_CPULockLabel->SetVisible(m_LockedCPUTeam != Activity::NoTeam);
+
+		// Set up initial color for all cells.
+		for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
+			for (int teamIndex1 = Activity::TeamOne; teamIndex1 < TEAMROWCOUNT; ++teamIndex1) {
+				m_PlayerBoxes[player][teamIndex1]->SetDrawType(GUICollectionBox::Color);
+				m_PlayerBoxes[player][teamIndex1]->SetDrawColor(c_GUIColorBlue);
+			}
+		}
+
+		const Icon *iconPointer;
+
+		// Human players start on the disabled team row.
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+			m_PlayerBoxes[player][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
+			iconPointer = g_UInputMan.GetSchemeIcon(player);
+			if (iconPointer) {
+				m_PlayerBoxes[player][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
+			}
+		}
+
+		// CPU player either has a locked team or starts on the disabled team row.
+		int InitialCPUTeam = (m_LockedCPUTeam != Activity::NoTeam) ? m_LockedCPUTeam : TEAM_DISABLED;
+		m_PlayerBoxes[PLAYER_CPU][InitialCPUTeam]->SetDrawType(GUICollectionBox::Image);
+		iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+		if (iconPointer) {
+			m_PlayerBoxes[PLAYER_CPU][InitialCPUTeam]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
+		}
+
+		iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Disabled Team"));
+		m_TeamNameLabels[TEAM_DISABLED]->SetText("Not Playing:");
+		if (iconPointer) {
+			m_TeamBoxes[TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
+			m_TeamBoxes[TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
+		}
+
+		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+			// Reset controls to default values.
+			m_TeamTechSelect[teamIndex]->SetSelectedIndex(0);
+			m_TeamAISkillSlider[teamIndex]->SetValue(Activity::DefaultSkill);
+
+			m_TeamBoxes[teamIndex]->SetDrawType(GUICollectionBox::Image);
+			if (selectedActivity->TeamActive(teamIndex)) {
+				iconPointer = selectedActivity->GetTeamIcon(teamIndex);
+				// Revert to default if needed.
+				if (!iconPointer) {
+					const std::string teamString = "Team " + std::to_string(teamIndex + 1) + " Default";
+					iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", teamString));
+				}
+
+				m_TeamNameLabels[teamIndex]->SetText(selectedActivity->GetTeamName(teamIndex) + ":");
+
+				m_TeamTechSelect[teamIndex]->SetEnabled(true);
+				m_TeamTechSelect[teamIndex]->SetVisible(true);
+				m_TeamAISkillSlider[teamIndex]->SetEnabled(true);
+				m_TeamAISkillSlider[teamIndex]->SetVisible(true);
+				m_TeamAISkillLabel[teamIndex]->SetVisible(true);
+			} else {
+				iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Locked Team"));
+
+				m_TeamNameLabels[teamIndex]->SetText("Unavailable");
+
+				m_TeamTechSelect[teamIndex]->SetEnabled(false);
+				m_TeamTechSelect[teamIndex]->SetVisible(false);
+				m_TeamAISkillSlider[teamIndex]->SetEnabled(false);
+				m_TeamAISkillSlider[teamIndex]->SetVisible(false);
+				m_TeamAISkillLabel[teamIndex]->SetVisible(false);
+			}
+
+			if (iconPointer) {
+				m_TeamBoxes[teamIndex]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
+			}
+		}
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ScenarioGUI::UpdatePlayersBox() {
+	const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
+
+	if (selectedActivity && m_ScenarioSelectedScene) {
+		int mouseX;
+		int mouseY;
+		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
+		const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(selectedActivity);
 
 		const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN], 1));
 		if (hoveredCell) {

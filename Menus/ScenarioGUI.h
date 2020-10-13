@@ -188,13 +188,6 @@ namespace RTE {
 		/// </summary>
 		void CalculateLinesToSitePoint();
 
-		enum MenuEnabled {
-			ENABLING = 0,
-			ENABLED,
-			DISABLING,
-			DISABLED
-		};
-
 		enum ScenarioButtons {
 			BACKTOMAINBUTTON = 0,
 			STARTHERE,

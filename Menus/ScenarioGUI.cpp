@@ -71,12 +71,12 @@ void ScenarioGUI::Clear() {
 	m_PlanetCenter.Reset();
 	m_PlanetRadius = 240.0F;
 
-	for (GUICollectionBox *&iScreen : m_ScenarioScreenBoxes) {
-		iScreen = nullptr;
+	for (GUICollectionBox *&screenIndex : m_ScenarioScreenBoxes) {
+		screenIndex = nullptr;
 	}
 
-	for (GUIButton *&button : m_ScenarioButtons) {
-		button = nullptr;
+	for (GUIButton *&buttonIndex : m_ScenarioButtons) {
+		buttonIndex = nullptr;
 	}
 	m_ScenarioScenePlanetLabel = nullptr;
 
@@ -88,21 +88,21 @@ void ScenarioGUI::Clear() {
 	m_SceneCloseButton = nullptr;
 	m_SceneNameLabel = nullptr;
 	m_SceneInfoLabel = nullptr;
-	for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
-		for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team) {
-			m_PlayerBoxes[player][team] = 0;
+	for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
+		for (int teamIndex = Activity::TeamOne; teamIndex < TEAMROWCOUNT; ++teamIndex) {
+			m_PlayerBoxes[playerIndex][teamIndex] = nullptr;
 		}
 	}
 
-	for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team) {
-		m_TeamBoxes[team] = 0;
-		m_TeamNameLabels[team] = 0;
+	for (int teamIndex = Activity::TeamOne; teamIndex < TEAMROWCOUNT; ++teamIndex) {
+		m_TeamBoxes[teamIndex] = nullptr;
+		m_TeamNameLabels[teamIndex] = nullptr;
 	}
 
-	for (int team = Activity::TeamOne; team < RTE::Activity::MaxTeamCount; ++team) {
-		m_TeamTechSelect[team] = 0;
-		m_TeamAISkillSlider[team] = 0;
-		m_TeamAISkillLabel[team] = 0;
+	for (int teamIndex = Activity::TeamOne; teamIndex < RTE::Activity::MaxTeamCount; ++teamIndex) {
+		m_TeamTechSelect[teamIndex] = nullptr;
+		m_TeamAISkillSlider[teamIndex] = nullptr;
+		m_TeamAISkillLabel[teamIndex] = nullptr;
 	}
 
 	m_StartErrorLabel = nullptr;
@@ -181,10 +181,10 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_SceneInfoLabel->SetFont(m_ScenarioGUIController->GetSkin()->GetFont("smallfont.png"));
 
 	// Player team assignment box.
-	for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
-		for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team) {
-			const std::string controlString = "P" + std::to_string(player + 1) + "T" + std::to_string(team + 1) + "Box";
-			m_PlayerBoxes[player][team] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
+	for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
+		for (int teamIndex = Activity::TeamOne; teamIndex < TEAMROWCOUNT; ++teamIndex) {
+			const std::string controlString = "P" + std::to_string(playerIndex + 1) + "T" + std::to_string(teamIndex + 1) + "Box";
+			m_PlayerBoxes[playerIndex][teamIndex] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
 		}
 	}
 
@@ -242,8 +242,8 @@ int ScenarioGUI::Create(Controller *pController) {
 	}
 
 	// Make the lists be scrolled to the top when they are initially dropped.
-	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
-		m_TeamTechSelect[team]->GetListPanel()->ScrollToTop();
+	for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+		m_TeamTechSelect[teamIndex]->GetListPanel()->ScrollToTop();
 	}
 
 	m_GoldLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("GoldLabel"));
@@ -329,18 +329,12 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 		return result;
 	}
 
-	////////////////////////////////////////////
-	// Do all input handling!
-
 	int mouseX;
 	int mouseY;
 	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 	Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
 	result = UpdateInput();
-
-	//////////////////////////////////////
-	// SCENE SELECTION SCREEN
 
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
 		const Activity *currentActivity = g_ActivityMan.GetActivity();
@@ -392,11 +386,8 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	if (m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
 		m_ScenarioButtons[STARTHERE]->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <");
 	}
-
-	//////////////////////////////////////
-	// PLAYER TEAM ASSIGNMENT SCREEN
-
-	else if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
+	
+	if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
 		UpdatePlayersBox();
 	}
 
@@ -421,17 +412,17 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible() && m_ScenarioScenes) {
 		// Draw the scene location dots.
 		Vector screenLocation;
-		for (const Scene *scene : *m_ScenarioScenes) {
+		for (const Scene *scenePointer : *m_ScenarioScenes) {
 			int color;
 
 			// Mark user-created scenes to let players easily distinguish them from built-in.
-			if (scene->GetModuleID() == g_PresetMan.GetModuleID("Scenes.rte")) {
+			if (scenePointer->GetModuleID() == g_PresetMan.GetModuleID("Scenes.rte")) {
 				color = c_GUIColorGreen;
 			} else {
 				color = c_GUIColorYellow;
 			}
 
-			screenLocation = m_PlanetCenter + scene->GetLocation() + scene->GetLocationOffset();
+			screenLocation = m_PlanetCenter + scenePointer->GetLocation() + scenePointer->GetLocationOffset();
 			const int screenLocationX = screenLocation.GetFloorIntX();
 			const int screenLocationY = screenLocation.GetFloorIntY();
 			blendAmount = 60 + RandomNum(0, 50);
@@ -468,9 +459,9 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 		// Draw the Player-Team matrix lines and disabled overlay effects.
 		const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
 		int lineY = 80;
-		for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team) {
+		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
 			// Disabled shaded boxes.
-			if (selectedActivity && (!selectedActivity->TeamActive(team) || m_LockedCPUTeam == team)) {
+			if (selectedActivity && (!selectedActivity->TeamActive(teamIndex) || m_LockedCPUTeam == teamIndex)) {
 				// TODO: understand why the blending isnt working as desired
 				//Transparency effect on the overlay boxes.
 				drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
@@ -487,17 +478,17 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 		}
 
 		// Manually draw UI elements on top of colored rectangle
-		for (int team = Activity::MaxTeamCount - 1; team >= Activity::TeamOne; team--) {
-			if (m_TeamTechSelect[team]->GetVisible()) {
-				m_TeamTechSelect[team]->Draw(&drawScreen);
-				if (m_TeamTechSelect[team]->IsDropped()) {
-					m_TeamTechSelect[team]->GetListPanel()->Draw(&drawScreen);
+		for (int teamIndex = Activity::MaxTeamCount - 1; teamIndex >= Activity::TeamOne; teamIndex--) {
+			if (m_TeamTechSelect[teamIndex]->GetVisible()) {
+				m_TeamTechSelect[teamIndex]->Draw(&drawScreen);
+				if (m_TeamTechSelect[teamIndex]->IsDropped()) {
+					m_TeamTechSelect[teamIndex]->GetListPanel()->Draw(&drawScreen);
 				}
 			}
 
-			if (m_TeamAISkillSlider[team]->GetVisible()) {
-				m_TeamAISkillSlider[team]->Draw(&drawScreen);
-				m_TeamAISkillLabel[team]->Draw(&drawScreen);
+			if (m_TeamAISkillSlider[teamIndex]->GetVisible()) {
+				m_TeamAISkillSlider[teamIndex]->Draw(&drawScreen);
+				m_TeamAISkillLabel[teamIndex]->Draw(&drawScreen);
 			}
 		}
 	}
@@ -518,14 +509,14 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	}
 
 	// Show which joysticks are detected by the game.
-	for (int joystick = Players::PlayerOne; joystick < Players::MaxPlayerCount; joystick++) {
-		if (g_UInputMan.JoystickActive(joystick)) {
-			int matchedDevice = DEVICE_GAMEPAD_1 + joystick;
+	for (int joystickIndex = Players::PlayerOne; joystickIndex < Players::MaxPlayerCount; joystickIndex++) {
+		if (g_UInputMan.JoystickActive(joystickIndex)) {
+			int matchedDevice = DEVICE_GAMEPAD_1 + joystickIndex;
 
 			if (matchedDevice != device) {
 				const Icon *pIcon = g_UInputMan.GetDeviceIcon(matchedDevice);
 				if (pIcon) {
-					draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * joystick, g_FrameMan.GetResY() - 25);
+					draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * joystickIndex, g_FrameMan.GetResY() - 25);
 				}
 			}
 		}
@@ -694,8 +685,8 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::HideAllScreens() {
-	for (int iScreen = 1; iScreen < SCREENCOUNT; iScreen++) {
-		m_ScenarioScreenBoxes[iScreen]->SetVisible(false);
+	for (int screenIndex = 1; screenIndex < SCREENCOUNT; screenIndex++) {
+		m_ScenarioScreenBoxes[screenIndex]->SetVisible(false);
 	}
 
 	m_ScenarioScenePlanetLabel->SetVisible(false);
@@ -860,21 +851,21 @@ void ScenarioGUI::ShowPlayersBox() {
 		m_CPULockLabel->SetVisible(m_LockedCPUTeam != Activity::NoTeam);
 
 		// Set up initial color for all cells.
-		for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player) {
-			for (int teamIndex1 = Activity::TeamOne; teamIndex1 < TEAMROWCOUNT; ++teamIndex1) {
-				m_PlayerBoxes[player][teamIndex1]->SetDrawType(GUICollectionBox::Color);
-				m_PlayerBoxes[player][teamIndex1]->SetDrawColor(c_GUIColorBlue);
+		for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
+			for (int teamIndex = Activity::TeamOne; teamIndex < TEAMROWCOUNT; ++teamIndex) {
+				m_PlayerBoxes[playerIndex][teamIndex]->SetDrawType(GUICollectionBox::Color);
+				m_PlayerBoxes[playerIndex][teamIndex]->SetDrawColor(c_GUIColorBlue);
 			}
 		}
 
 		const Icon *iconPointer;
 
 		// Human players start on the disabled team row.
-		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			m_PlayerBoxes[player][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-			iconPointer = g_UInputMan.GetSchemeIcon(player);
+		for (int playerIndex = Players::PlayerOne; playerIndex < Players::MaxPlayerCount; ++playerIndex) {
+			m_PlayerBoxes[playerIndex][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
+			iconPointer = g_UInputMan.GetSchemeIcon(playerIndex);
 			if (iconPointer) {
-				m_PlayerBoxes[player][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
+				m_PlayerBoxes[playerIndex][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
 			}
 		}
 
@@ -1147,7 +1138,6 @@ bool ScenarioGUI::StartGame() {
 			}
 		}
 
-		// Set up AI skill levels.
 		if (m_TeamAISkillSlider[teamIndex]->IsEnabled()) {
 			gameActivity->SetTeamAISkill(teamIndex, m_TeamAISkillSlider[teamIndex]->GetValue());
 		} else {
@@ -1155,18 +1145,14 @@ bool ScenarioGUI::StartGame() {
 		}
 	}
 
-	//Force close all previously opened files.
 	g_LuaMan.FileCloseAll();
 
-	// Put the new and newly set up Activity as the one to start.
 	g_ActivityMan.SetStartActivity(activityInstance);
 
-	// Kill any Campaign games currently running.
 	if (g_MetaMan.GameInProgress()) {
 		g_MetaMan.EndGame();
 	}
 
-	// Signal the start of this Activity we just set up.
 	return true;
 }
 
@@ -1369,7 +1355,6 @@ void ScenarioGUI::DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vecto
 	const Vector sitePos = m_PlanetCenter + planetPoint;
 	const int circleRadius = 8;
 
-
 	for (int index = 0; index < m_LinePointsToSite.size() - 1; index++) {
 		DrawGlowLine(drawBitmap, m_LinePointsToSite[index], m_LinePointsToSite[index + 1], color);
 	}
@@ -1441,13 +1426,13 @@ void ScenarioGUI::CalculateLinesToSitePoint() {
 		chamferSize = std::max(0, chamferSize);
 		chamferPoint1.SetXY(sceneInfoBoxPos.m_X, firstBend.m_Y + chamferSize * -yDirMult);
 		chamferPoint2.SetXY(firstBend.m_X + chamferSize * xDirMult, sitePos.m_Y);
-		// Draw line to the first bend, including the chamfer.
+		// Line to the first bend, including the chamfer.
 		m_LinePointsToSite.emplace_back(sceneInfoBoxPos);
 		m_LinePointsToSite.emplace_back(chamferPoint1);
 		if (chamferSize > 0) {
 			m_LinePointsToSite.emplace_back(chamferPoint2);
 		}
-		// Draw line to the site.
+		// Line to the site.
 		m_LinePointsToSite.emplace_back(sitePos + Vector((circleRadius + 1) * -xDirMult, 0));
 	}
 }

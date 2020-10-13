@@ -594,7 +594,6 @@ bool PlayIntroTitle() {
             }
 
             planetPos.SetXY(g_FrameMan.GetResX() / 2, 567 - scrollOffset.GetFloorIntY());
-			//g_pScenarioGUI->SetPlanetInfo(planetPos, planetRadius);
             pMoon->SetPos(Vector(planetPos.m_X + 200, 364 - scrollOffset.GetFloorIntY() * 0.60));
             pPlanet->SetPos(planetPos);
 

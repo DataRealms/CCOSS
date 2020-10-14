@@ -347,7 +347,8 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 		}
 
 		// If the mouse is over the planet, check if it's over a site point, then display the site's label.
-		if (m_ScenarioScenes && !m_ScenarioDraggedBox && (mousePos - m_PlanetCenter).GetMagnitude() < m_PlanetRadius && !(m_ScenarioScreenBoxes[ACTIVITY]->PointInside(mouseX, mouseY) || m_ScenarioScreenBoxes[SCENEINFO]->PointInside(mouseX, mouseY))) {
+		if (m_ScenarioScenes && !m_ScenarioDraggedBox && (mousePos - m_PlanetCenter).GetMagnitude() < m_PlanetRadius &&
+			!(m_ScenarioScreenBoxes[ACTIVITY]->PointInside(mouseX, mouseY) || m_ScenarioScreenBoxes[SCENEINFO]->PointInside(mouseX, mouseY))) {
 			bool foundAnyHover = false;
 			Scene *candidateScene = nullptr;
 			float shortestDist = 16.0F;
@@ -380,11 +381,6 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 		m_ScenarioButtons[STARTHERE]->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <");
 	} else if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
 		UpdatePlayersBox();
-	}
-
-	// Save mouse pos for next frame so we can do dragging.
-	if (m_DragEngaged) {
-		m_PrevMousePos = mousePos;
 	}
 
 	return result;
@@ -535,42 +531,36 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 	Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
-		if (g_UInputMan.MenuButtonPressed(UInputMan::MENU_EITHER) && m_ScenarioHoveredScene) {
-			m_ScenarioSelectedScene = m_ScenarioHoveredScene;
-			ShowScenesBox();
-			CalculateLinesToSitePoint();
-			g_GUISound.ItemChangeSound()->Play();
-		}
-
-		bool menuButtonHeld = g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER);
-		// If not currently dragging a box, see if we should start.
-		if (!m_ScenarioDraggedBox && menuButtonHeld && !m_DragEngaged && !m_ActivitySelectComboBox->IsDropped()) {
-			GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], 1));
-
-			if (hoveredBox == m_ScenarioScreenBoxes[ACTIVITY] || hoveredBox == m_ScenarioScreenBoxes[SCENEINFO]) {
-				m_ScenarioDraggedBox = hoveredBox;
-				// Save the mouse pos at the start of the drag so we can measure if we should engage.
-				m_PrevMousePos = mousePos;
+		// Actually drag if drag is engaged.
+		if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER) && m_ScenarioDraggedBox && m_DragEngaged) {
+			m_ScenarioDraggedBox->MoveRelative(mousePos.GetFloorIntX() - m_PrevMousePos.GetFloorIntX(), mousePos.GetFloorIntY() - m_PrevMousePos.GetFloorIntY());
+			m_PrevMousePos = mousePos;
+			// Ensure the drag didn't shove it off-screen.
+			KeepBoxOnScreen(m_ScenarioDraggedBox);
+			if (m_ScenarioDraggedBox == m_ScenarioScreenBoxes[SCENEINFO]) {
+				CalculateLinesToSitePoint();
 			}
-		} else if (!menuButtonHeld) {
+		} else {
 			m_ScenarioDraggedBox = nullptr;
 			m_DragEngaged = false;
 		}
-	}
 
-	// Figure out dragging of the dialog boxes, if one is being dragged.
-	// Only start drag if we're over a threshold, to prevent small unintentional nudges.
-	if (m_ScenarioDraggedBox && !m_DragEngaged && (mousePos - m_PrevMousePos).GetLargest() > 4) {
-		m_DragEngaged = true;
-	}
+		if (g_UInputMan.MenuButtonPressed(UInputMan::MENU_EITHER)) {
+			if (m_ScenarioHoveredScene) {
+				m_ScenarioSelectedScene = m_ScenarioHoveredScene;
+				ShowScenesBox();
+				CalculateLinesToSitePoint();
+				g_GUISound.ItemChangeSound()->Play();
+			}
 
-	// Actually drag if we now are engaged.
-	if (m_ScenarioDraggedBox && m_DragEngaged) {
-		m_ScenarioDraggedBox->MoveRelative(mousePos.GetFloorIntX() - m_PrevMousePos.GetFloorIntX(), mousePos.GetFloorIntY() - m_PrevMousePos.GetFloorIntY());
-		// Ensure the drag didn't shove it off-screen.
-		KeepBoxOnScreen(m_ScenarioDraggedBox);
-		if (m_ScenarioDraggedBox == m_ScenarioScreenBoxes[SCENEINFO]) {
-			CalculateLinesToSitePoint();
+			GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], 1));
+			GUIControl *hoveredControl = dynamic_cast<GUIControl *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], -1));
+			const bool nonDragControl = (dynamic_cast<GUIButton *>(hoveredControl) || dynamic_cast<GUISlider *>(hoveredControl) || dynamic_cast<GUIComboBox *>(hoveredControl));
+			if (hoveredBox && !nonDragControl && !m_DragEngaged && !m_ActivitySelectComboBox->IsDropped()) {
+				m_DragEngaged = true;
+				m_ScenarioDraggedBox = hoveredBox;
+				m_PrevMousePos = mousePos;
+			}
 		}
 	}
 
@@ -587,59 +577,35 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 		const std::string eventControlName = anEvent.GetControl()->GetName();
 		GUIControl *eventControl = anEvent.GetControl();
 
-		if (anEvent.GetType() == GUIEvent::Command) {
-			if (eventControlName == "BackToMainButton") {
-				HideAllScreens();
-				g_GUISound.BackButtonPressSound()->Play();
-				return ScenarioUpdateResult::BACKTOMAIN;
-			} else if (eventControlName == "ButtonResume") {
-				g_GUISound.BackButtonPressSound()->Play();
-				return ScenarioUpdateResult::ACTIVITYRESUMED;
-			} else if (eventControlName == "PlayerCancelButton") {
-				// Cancel button on the player config box.
-				HideAllScreens();
-				m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
-				ShowScenesBox();
-				g_GUISound.BackButtonPressSound()->Play();
-			} else if (eventControl == m_ScenarioButtons[STARTHERE]) {
-				HideAllScreens();
-				ShowPlayersBox();
-				g_GUISound.ButtonPressSound()->Play();
-			} else if (eventControl == m_ScenarioButtons[STARTGAME]) {
-				if (StartGame()) {
+		if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
+			if (anEvent.GetType() == GUIEvent::Command) {
+				if (eventControlName == "BackToMainButton") {
 					HideAllScreens();
-					m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
-					g_GUISound.ButtonPressSound()->Play();
-					return ScenarioUpdateResult::ACTIVITYRESTARTED;
-				} else {
-					g_GUISound.UserErrorSound()->Play();
+					g_GUISound.BackButtonPressSound()->Play();
+					return ScenarioUpdateResult::BACKTOMAIN;
+				} else if (eventControlName == "ButtonResume") {
+					g_GUISound.BackButtonPressSound()->Play();
+					return ScenarioUpdateResult::ACTIVITYRESUMED;
 				}
-			} else if (eventControl == m_SceneCloseButton) {
-				m_ScenarioSelectedScene = nullptr;
-				HideScenesBox();
-				m_LinePointsToSite.clear();
-				g_GUISound.ButtonPressSound()->Play();
-			}
-		} else if (anEvent.GetType() == GUIEvent::Notification) {
-			if (dynamic_cast<GUIButton *>(eventControl)) {
-				if (anEvent.GetMsg() == GUIButton::Focused) {
-					g_GUISound.SelectionChangeSound()->Play();
-				}
-				// Also stop dragging any panels if we're over any button.
-				m_ScenarioDraggedBox = nullptr;
-			} else if (eventControl == m_DifficultySlider) {
-				UpdateActivityBox();
-				// Also stop dragging any panels if we're over any button.
-				m_ScenarioDraggedBox = nullptr;
-			} else if (eventControl == m_ActivitySelectComboBox) {
-				// Also stop dragging any panels if we're over the selection list.
-				m_ScenarioDraggedBox = nullptr;
 
-				// The activity selection changed.
-				if (anEvent.GetMsg() == GUIComboBox::Closed) {
+				if (m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
+					if (eventControl == m_ScenarioButtons[STARTHERE]) {
+						HideAllScreens();
+						ShowPlayersBox();
+						g_GUISound.ButtonPressSound()->Play();
+					} else if (eventControl == m_SceneCloseButton) {
+						m_ScenarioSelectedScene = nullptr;
+						HideScenesBox();
+						m_LinePointsToSite.clear();
+						g_GUISound.ButtonPressSound()->Play();
+					}
+				}
+
+			} else if (anEvent.GetType() == GUIEvent::Notification) {
+				if (eventControl == m_ActivitySelectComboBox && anEvent.GetMsg() == GUIComboBox::Closed) {
+					// The activity selection might have changed.
+					// TODO: Store previous activity, so if the activity has not changed then don't do anything.
 					UpdateActivityBox();
-
-					// If there is only one Scene compatible with this newly selected Activity, then automatically select it.
 					if (m_ScenarioScenes && m_ScenarioScenes->size() == 1) {
 						m_ScenarioSelectedScene = m_ScenarioScenes->front();
 						ShowScenesBox();
@@ -652,8 +618,33 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 					}
 
 					g_GUISound.ItemChangeSound()->Play();
+				} else if (eventControl == m_DifficultySlider) {
+					UpdateActivityBox();
 				}
 			}
+
+		} else if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
+			if (anEvent.GetType() == GUIEvent::Command) {
+				if (eventControlName == "PlayerCancelButton") {
+					HideAllScreens();
+					m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
+					ShowScenesBox();
+					g_GUISound.BackButtonPressSound()->Play();
+				} else if (eventControl == m_ScenarioButtons[STARTGAME]) {
+					if (StartGame()) {
+						HideAllScreens();
+						m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
+						g_GUISound.ButtonPressSound()->Play();
+						return ScenarioUpdateResult::ACTIVITYRESTARTED;
+					} else {
+						g_GUISound.UserErrorSound()->Play();
+					}
+				}
+			}
+		}
+
+		if (dynamic_cast<GUIButton *>(eventControl) && anEvent.GetType() == GUIEvent::Notification && anEvent.GetMsg() == GUIButton::Focused) {
+			g_GUISound.SelectionChangeSound()->Play();
 		}
 	}
 

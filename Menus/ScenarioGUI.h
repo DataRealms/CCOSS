@@ -216,7 +216,6 @@ namespace RTE {
 			ACTIVITY,
 			SCENEINFO,
 			PLAYERSETUPSCREEN,
-			QUITCONFIRM,
 			SCREENCOUNT
 		};
 
@@ -271,10 +270,6 @@ namespace RTE {
 		// AI skill selection.
 		GUISlider *m_TeamAISkillSlider[Activity::MaxTeamCount];
 		GUILabel *m_TeamAISkillLabel[Activity::MaxTeamCount];
-
-		// The confirmation box and its controls.
-		GUILabel *m_QuitConfirmLabel;
-		GUIButton *m_QuitConfirmButton;
 
 		BITMAP *m_ScenePreviewBitmap;
 		BITMAP *m_DefaultPreviewBitmap;

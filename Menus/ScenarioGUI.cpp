@@ -53,8 +53,6 @@
 #include "DataModule.h"
 #include "Scene.h"
 
-extern volatile bool g_Quit;
-
 using namespace RTE;
 
 constexpr int CHAMFERSIZE = 40;
@@ -115,9 +113,6 @@ void ScenarioGUI::Clear() {
 	m_RequireClearPathToOrbitCheckbox = nullptr;
 	m_DeployUnitsCheckbox = nullptr;
 
-	m_QuitConfirmLabel = nullptr;
-	m_QuitConfirmButton = nullptr;
-
 	m_ScenarioScenes = nullptr;
 	m_Activities.clear();
 	m_ScenarioDraggedBox = nullptr;
@@ -153,7 +148,6 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_ScenarioScreenBoxes[ACTIVITY] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ActivitySelectBox"));
 	m_ScenarioScreenBoxes[SCENEINFO] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("SceneInfoBox"));
 	m_ScenarioScreenBoxes[PLAYERSETUPSCREEN] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("PlayerSetupBox"));
-	m_ScenarioScreenBoxes[QUITCONFIRM] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ConfirmDialog"));
 
 	m_ScenarioScreenBoxes[ROOTSCREEN]->SetPositionAbs(0, 0);
 	m_ScenarioScreenBoxes[ROOTSCREEN]->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
@@ -254,16 +248,12 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_RequireClearPathToOrbitCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController->GetControl("RequireClearPathToOrbitCheckbox"));
 	m_DeployUnitsCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController->GetControl("DeployUnitsCheckbox"));
 
-	m_QuitConfirmLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("ConfirmLabel"));
-	m_QuitConfirmButton = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("ConfirmButton"));
-
 	// Set up initial combobox locations and sizes.
 	m_ScenarioButtons[BACKTOMAINBUTTON]->SetPositionRel(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - m_ScenarioButtons[BACKTOMAINBUTTON]->GetWidth() - 16, m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - m_ScenarioButtons[BACKTOMAINBUTTON]->GetHeight() - 22);
 	m_ScenarioButtons[RESUME]->SetPositionRel(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - m_ScenarioButtons[RESUME]->GetWidth() - 16, m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - m_ScenarioButtons[RESUME]->GetHeight() - 47);
 	m_ScenarioScreenBoxes[ACTIVITY]->SetPositionRel(16, 16);
 	m_ScenarioScreenBoxes[SCENEINFO]->SetPositionRel(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - m_ScenarioScreenBoxes[SCENEINFO]->GetWidth() - 16, 16);
 	m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->CenterInParent(true, true);
-	m_ScenarioScreenBoxes[QUITCONFIRM]->CenterInParent(true, true);
 
 	m_ScenePreviewBitmap = create_bitmap_ex(8, Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT);
 
@@ -523,16 +513,16 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
-	ScenarioUpdateResult result = NOEVENT;
 	// TODO: if activity is running, allow esc to resume activity instead of quitting.
 	if (g_UInputMan.KeyPressed(KEY_ESC)) {
-		if (m_ScenarioScreenBoxes[QUITCONFIRM]->GetVisible()) {
-			g_Quit = true;
-		} else {
+		if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
 			HideAllScreens();
-			m_QuitConfirmLabel->SetText("Are you sure you want to quit to OS?"); //\nAny unsaved progress\nwill be lost!");
-			m_QuitConfirmButton->SetText("Quit");
-			m_ScenarioScreenBoxes[QUITCONFIRM]->SetVisible(true);
+			m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
+			ShowScenesBox();
+			g_GUISound.BackButtonPressSound()->Play();
+		} else {
+			g_GUISound.BackButtonPressSound()->Play();
+			return ScenarioUpdateResult::BACKTOMAIN;
 		}
 	}
 
@@ -601,25 +591,15 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			if (eventControlName == "BackToMainButton") {
 				HideAllScreens();
 				g_GUISound.BackButtonPressSound()->Play();
-				result = ScenarioUpdateResult::BACKTOMAIN;
-			} else if (eventControlName == "ConfirmButton") {
-				// Quit program button pressed.
-				HideAllScreens();
-				g_Quit = true;
-				g_GUISound.BackButtonPressSound()->Play();
+				return ScenarioUpdateResult::BACKTOMAIN;
 			} else if (eventControlName == "ButtonResume") {
 				g_GUISound.BackButtonPressSound()->Play();
-				result = ScenarioUpdateResult::ACTIVITYRESUMED;
+				return ScenarioUpdateResult::ACTIVITYRESUMED;
 			} else if (eventControlName == "PlayerCancelButton") {
 				// Cancel button on the player config box.
 				HideAllScreens();
 				m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 				ShowScenesBox();
-				g_GUISound.BackButtonPressSound()->Play();
-			} else if (eventControlName == "ConfirmCancelButton") {
-				// Cancel button on the quit confirm dialog box.
-				HideAllScreens();
-				m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 				g_GUISound.BackButtonPressSound()->Play();
 			} else if (eventControl == m_ScenarioButtons[STARTHERE]) {
 				HideAllScreens();
@@ -630,7 +610,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 					HideAllScreens();
 					m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 					g_GUISound.ButtonPressSound()->Play();
-					result = ScenarioUpdateResult::ACTIVITYRESTARTED;
+					return ScenarioUpdateResult::ACTIVITYRESTARTED;
 				} else {
 					g_GUISound.UserErrorSound()->Play();
 				}
@@ -676,7 +656,8 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			}
 		}
 	}
-	return result;
+
+	return ScenarioUpdateResult::NOEVENT;;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

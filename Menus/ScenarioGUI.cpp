@@ -329,8 +329,8 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 		return result;
 	}
 
-	int mouseX;
-	int mouseY;
+	int mouseX = 0;
+	int mouseY = 0;
 	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 	Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
@@ -386,9 +386,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 
 	if (m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
 		m_ScenarioButtons[STARTHERE]->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <");
-	}
-	
-	if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
+	} else if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
 		UpdatePlayersBox();
 	}
 
@@ -457,12 +455,9 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 		const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
 		int lineY = 80;
 		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
-			// Disabled shaded boxes.
 			if (selectedActivity && (!selectedActivity->TeamActive(teamIndex) || m_LockedCPUTeam == teamIndex)) {
-				// TODO: understand why the blending isnt working as desired
-				//Transparency effect on the overlay boxes.
+				// Apply a colored overlay on top of team rows that are not human-playable.
 				drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
-				// Screen blend the dots and lines, with some flickering in its intensity.
 				int blendAmountInner = 230;
 				set_screen_blender(blendAmountInner, blendAmountInner, blendAmountInner, blendAmountInner);
 				rectfill(drawBitmap, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetXPos() + 110, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetYPos() + lineY, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetXPos() + m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetWidth() - 12, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetYPos() + lineY + 25, c_GUIColorDarkBlue);
@@ -474,7 +469,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 			lineY += 25;
 		}
 
-		// Manually draw UI elements on top of colored rectangle
+		// Manually draw UI elements on top of colored rectangle.
 		for (int teamIndex = Activity::MaxTeamCount - 1; teamIndex >= Activity::TeamOne; teamIndex--) {
 			if (m_TeamTechSelect[teamIndex]->GetVisible()) {
 				m_TeamTechSelect[teamIndex]->Draw(&drawScreen);
@@ -492,28 +487,27 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 
 	m_ScenarioGUIController->DrawMouse();
 
-	int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
+	const int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
+	const Icon *deviceIcon = nullptr;
 
 	if (device >= DEVICE_GAMEPAD_1) {
-		int mouseX;
-		int mouseY;
+		int mouseX = 0;
+		int mouseY = 0;
 		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
-
-		const Icon *pIcon = g_UInputMan.GetDeviceIcon(device);
-		if (pIcon) {
-			draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], mouseX + 16, mouseY - 4);
+		deviceIcon = g_UInputMan.GetDeviceIcon(device);
+		if (deviceIcon) {
+			draw_sprite(drawBitmap, deviceIcon->GetBitmaps8()[0], mouseX + 16, mouseY - 4);
 		}
 	}
 
 	// Show which joysticks are detected by the game.
-	for (int joystickIndex = Players::PlayerOne; joystickIndex < Players::MaxPlayerCount; joystickIndex++) {
-		if (g_UInputMan.JoystickActive(joystickIndex)) {
-			int matchedDevice = DEVICE_GAMEPAD_1 + joystickIndex;
-
+	for (int playerIndex = Players::PlayerOne; playerIndex < Players::MaxPlayerCount; playerIndex++) {
+		if (g_UInputMan.JoystickActive(playerIndex)) {
+			const int matchedDevice = DEVICE_GAMEPAD_1 + playerIndex;
 			if (matchedDevice != device) {
-				const Icon *pIcon = g_UInputMan.GetDeviceIcon(matchedDevice);
-				if (pIcon) {
-					draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * joystickIndex, g_FrameMan.GetResY() - 25);
+				deviceIcon = g_UInputMan.GetDeviceIcon(matchedDevice);
+				if (deviceIcon) {
+					draw_sprite(drawBitmap, deviceIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * playerIndex, g_FrameMan.GetResY() - 25);
 				}
 			}
 		}
@@ -539,8 +533,8 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 	///////////////////////////////////////////////////////////
 	// Mouse handling
 
-	int mouseX;
-	int mouseY;
+	int mouseX = 0;
+	int mouseY = 0;
 	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 	Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
@@ -831,8 +825,8 @@ void ScenarioGUI::ShowPlayersBox() {
 	const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
 
 	if (selectedActivity && m_ScenarioSelectedScene) {
-		int mouseX;
-		int mouseY;
+		int mouseX = 0;
+		int mouseY = 0;
 		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 		const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(selectedActivity);
 
@@ -855,7 +849,7 @@ void ScenarioGUI::ShowPlayersBox() {
 			}
 		}
 
-		const Icon *iconPointer;
+		const Icon *iconPointer = nullptr;
 
 		// Human players start on the disabled team row.
 		for (int playerIndex = Players::PlayerOne; playerIndex < Players::MaxPlayerCount; ++playerIndex) {
@@ -927,8 +921,8 @@ void ScenarioGUI::UpdatePlayersBox() {
 	const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
 
 	if (selectedActivity && m_ScenarioSelectedScene) {
-		int mouseX;
-		int mouseY;
+		int mouseX = 0;
+		int mouseY = 0;
 		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 		const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(selectedActivity);
 

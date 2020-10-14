@@ -189,12 +189,14 @@ int ScenarioGUI::Create(Controller *pController) {
 	}
 
 	m_TeamBoxes[TEAM_DISABLED] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("TDIcon"));
+	m_TeamBoxes[TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
 	m_TeamNameLabels[TEAM_DISABLED] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("TDLabel"));
 
 	std::string controlString = "";
 	for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
 		controlString = "T" + std::to_string(teamIndex + 1) + "Icon";
 		m_TeamBoxes[teamIndex] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
+		m_TeamBoxes[teamIndex]->SetDrawType(GUICollectionBox::Image);
 
 		controlString = "T" + std::to_string(teamIndex + 1) + "Label";
 		m_TeamNameLabels[teamIndex] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
@@ -400,12 +402,10 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
-	drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
-	int blendAmount = 65 + RandomNum(0, 110);
-	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-
+void ScenarioGUI::DrawSitePoints(BITMAP *drawBitmap) const {
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible() && m_ScenarioScenes) {
+		drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
+
 		Vector screenLocation;
 		for (const Scene *scenePointer : *m_ScenarioScenes) {
 			int color;
@@ -420,7 +420,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 			screenLocation = m_PlanetCenter + scenePointer->GetLocation() + scenePointer->GetLocationOffset();
 			const int screenLocationX = screenLocation.GetFloorIntX();
 			const int screenLocationY = screenLocation.GetFloorIntY();
-			blendAmount = 60 + RandomNum(0, 50);
+			int blendAmount = 60 + RandomNum(0, 50);
 			set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 			circlefill(drawBitmap, screenLocationX, screenLocationY, 4, color);
 			circlefill(drawBitmap, screenLocationX, screenLocationY, 2, color);
@@ -434,6 +434,12 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 			DrawWhiteScreenLineToSitePoint(drawBitmap, m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset());
 		}
 	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
+	DrawSitePoints(drawBitmap);
 
 	drawing_mode(DRAW_MODE_SOLID, 0, 0, 0);
 
@@ -458,8 +464,8 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 			if (selectedActivity && (!selectedActivity->TeamActive(teamIndex) || m_LockedCPUTeam == teamIndex)) {
 				// Apply a colored overlay on top of team rows that are not human-playable.
 				drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
-				int blendAmountInner = 230;
-				set_screen_blender(blendAmountInner, blendAmountInner, blendAmountInner, blendAmountInner);
+				int blendAmount = 230;
+				set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 				rectfill(drawBitmap, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetXPos() + 110, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetYPos() + lineY, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetXPos() + m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetWidth() - 12, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetYPos() + lineY + 25, c_GUIColorDarkBlue);
 			}
 
@@ -871,7 +877,6 @@ void ScenarioGUI::ShowPlayersBox() {
 		iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Disabled Team"));
 		m_TeamNameLabels[TEAM_DISABLED]->SetText("Not Playing:");
 		if (iconPointer) {
-			m_TeamBoxes[TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
 			m_TeamBoxes[TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0]));
 		}
 
@@ -880,7 +885,6 @@ void ScenarioGUI::ShowPlayersBox() {
 			m_TeamTechSelect[teamIndex]->SetSelectedIndex(0);
 			m_TeamAISkillSlider[teamIndex]->SetValue(Activity::DefaultSkill);
 
-			m_TeamBoxes[teamIndex]->SetDrawType(GUICollectionBox::Image);
 			if (selectedActivity->TeamActive(teamIndex)) {
 				iconPointer = selectedActivity->GetTeamIcon(teamIndex);
 				// Revert to default if needed.

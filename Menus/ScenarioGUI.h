@@ -98,6 +98,12 @@ namespace RTE {
 		ScenarioUpdateResult Update();
 
 		/// <summary>
+		/// Draws the site points on top of the planet.
+		/// </summary>
+		/// <param name="drawBitmap">The bitmap to draw on.</param>
+		void DrawSitePoints(BITMAP *drawBitmap) const;
+
+		/// <summary>
 		/// Draws the menu.
 		/// </summary>
 		/// <param name="drawBitmap">The bitmap to draw on.</param>
@@ -234,40 +240,39 @@ namespace RTE {
 		
 		GUILabel *m_ScenarioScenePlanetLabel; //!< Hover name label over Scenes.
 
-		// Activity selection screen controls
+		// Activity selection screen controls.
 		GUIComboBox *m_ActivitySelectComboBox;
 		GUILabel *m_ActivityLabel;
 		GUILabel *m_DifficultyLabel;
 		GUISlider *m_DifficultySlider;
 
-		// Scene Info controls
+		// Scene Info controls.
 		GUIButton *m_SceneCloseButton;
 		GUILabel *m_SceneNameLabel;
 		GUILabel *m_SceneInfoLabel;
 
 		// Player setup controls
-		// Boxes in the matrix which detect and display where a control setting is and should be
+		// Boxes in the matrix which detect and display where a control setting is and should be.
 		GUICollectionBox *m_PlayerBoxes[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];
 		GUICollectionBox *m_TeamBoxes[TEAMROWCOUNT];
 		GUILabel *m_TeamNameLabels[TEAMROWCOUNT];
 		GUILabel *m_StartErrorLabel;
 		GUILabel *m_CPULockLabel;
-		
-		int m_LockedCPUTeam; //!< Which team the CPU is locked to, if any.
-
-		GUIComboBox *m_TeamTechSelect[Activity::MaxTeamCount]; //!< Tech selection combos.
-
-		// AI skill selection
-		GUISlider *m_TeamAISkillSlider[Activity::MaxTeamCount];
-		GUILabel *m_TeamAISkillLabel[Activity::MaxTeamCount];
-
 		GUILabel *m_GoldLabel;
 		GUISlider *m_GoldSlider;
 		GUICheckbox *m_FogOfWarCheckbox;
 		GUICheckbox *m_RequireClearPathToOrbitCheckbox;
 		GUICheckbox *m_DeployUnitsCheckbox;
+		
+		int m_LockedCPUTeam; //!< Which team the CPU is locked to, if any.
 
-		// The confirmation box and its controls
+		GUIComboBox *m_TeamTechSelect[Activity::MaxTeamCount]; //!< Tech selection combos.
+
+		// AI skill selection.
+		GUISlider *m_TeamAISkillSlider[Activity::MaxTeamCount];
+		GUILabel *m_TeamAISkillLabel[Activity::MaxTeamCount];
+
+		// The confirmation box and its controls.
 		GUILabel *m_QuitConfirmLabel;
 		GUIButton *m_QuitConfirmButton;
 

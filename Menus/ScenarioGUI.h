@@ -279,8 +279,6 @@ namespace RTE {
 		
 		GUICollectionBox *m_ScenarioDraggedBox; //!< Currently dragged GUI box.
 		
-		bool m_DragEngaged; //!< GUI panel dragging is in progress.
-		
 		Scene *m_ScenarioHoveredScene; //!< The scene preset currently hovered, NOT OWNED.
 		
 		Scene *m_ScenarioSelectedScene; //!< The scene preset currently selected, NOT OWNED.

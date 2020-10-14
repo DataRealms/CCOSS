@@ -116,7 +116,6 @@ void ScenarioGUI::Clear() {
 	m_ScenarioScenes = nullptr;
 	m_Activities.clear();
 	m_ScenarioDraggedBox = nullptr;
-	m_DragEngaged = false;
 	m_ScenarioHoveredScene = nullptr;
 	m_ScenarioSelectedScene = nullptr;
 	m_PrevMousePos.Reset();
@@ -531,7 +530,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 	Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
-		if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER) && m_ScenarioDraggedBox && m_DragEngaged) {
+		if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER) && m_ScenarioDraggedBox) {
 			m_ScenarioDraggedBox->MoveRelative(mousePos.GetFloorIntX() - m_PrevMousePos.GetFloorIntX(), mousePos.GetFloorIntY() - m_PrevMousePos.GetFloorIntY());
 			m_PrevMousePos = mousePos;
 
@@ -541,7 +540,6 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			}
 		} else {
 			m_ScenarioDraggedBox = nullptr;
-			m_DragEngaged = false;
 		}
 
 		if (g_UInputMan.MenuButtonPressed(UInputMan::MENU_EITHER)) {
@@ -555,8 +553,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], 1));
 			GUIControl *hoveredControl = dynamic_cast<GUIControl *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], -1));
 			const bool nonDragControl = (dynamic_cast<GUIButton *>(hoveredControl) || dynamic_cast<GUISlider *>(hoveredControl) || dynamic_cast<GUIComboBox *>(hoveredControl));
-			if (hoveredBox && !nonDragControl && !m_DragEngaged && !m_ActivitySelectComboBox->IsDropped()) {
-				m_DragEngaged = true;
+			if (hoveredBox && !nonDragControl && !m_ScenarioDraggedBox && !m_ActivitySelectComboBox->IsDropped()) {
 				m_ScenarioDraggedBox = hoveredBox;
 				m_PrevMousePos = mousePos;
 			}

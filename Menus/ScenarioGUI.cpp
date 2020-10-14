@@ -403,15 +403,11 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
-	// Transparency effect on the scene dots and lines.
 	drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
-	// Screen blend the dots and lines, with some flickering in its intensity.
 	int blendAmount = 65 + RandomNum(0, 110);
 	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
-	// Draw sites etc only when selecting them.
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible() && m_ScenarioScenes) {
-		// Draw the scene location dots.
 		Vector screenLocation;
 		for (const Scene *scenePointer : *m_ScenarioScenes) {
 			int color;
@@ -1310,45 +1306,36 @@ void ScenarioGUI::UpdateSiteNameLabel(const string &text, const Vector &location
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Vector &end, int color) const {
-	int blendAmount = 210 + RandomNum(-15, 15);
+	int blendAmount = 195 + RandomNum(0, 30);
+	const int startX = start.GetFloorIntX();
+	const int startY = start.GetFloorIntY();
+	const int endX = end.GetFloorIntX();
+	const int endY = end.GetFloorIntY();
 	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-	line(drawBitmap, start.GetFloorIntX(), start.GetFloorIntY(), end.GetFloorIntX(), end.GetFloorIntY(), color);
-	/* Looks like ass.
-		// Draw the thickener lines thicker in the appropriate directions
-		if (fabs(end.GetFloorIntX() - start.GetFloorIntX()) > fabs(end.GetFloorIntY() - start.GetFloorIntY()))
-		{
-			line(drawBitmap, start.GetFloorIntX(), start.GetFloorIntY() + 1, end.GetFloorIntX(), end.GetFloorIntY() + 1, color);
-			line(drawBitmap, start.GetFloorIntX(), start.GetFloorIntY() - 1, end.GetFloorIntX(), end.GetFloorIntY() - 1, color);
-		}
-		else
-		{
-			line(drawBitmap, start.GetFloorIntX() + 1, start.GetFloorIntY(), end.GetFloorIntX() + 1, end.GetFloorIntY(), color);
-			line(drawBitmap, start.GetFloorIntX() - 1, start.GetFloorIntY(), end.GetFloorIntX() - 1, end.GetFloorIntY(), color);
-		}
-	*/
-	blendAmount = 45 + RandomNum(-25, 25);
+	line(drawBitmap, startX, startY, endX, endY, color);
+
+	blendAmount = 20 + RandomNum(0, 50);
 	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-	line(drawBitmap, start.GetFloorIntX() + 1, start.GetFloorIntY(), end.GetFloorIntX() + 1, end.GetFloorIntY(), color);
-	line(drawBitmap, start.GetFloorIntX() - 1, start.GetFloorIntY(), end.GetFloorIntX() - 1, end.GetFloorIntY(), color);
-	line(drawBitmap, start.GetFloorIntX(), start.GetFloorIntY() + 1, end.GetFloorIntX(), end.GetFloorIntY() + 1, color);
-	line(drawBitmap, start.GetFloorIntX(), start.GetFloorIntY() - 1, end.GetFloorIntX(), end.GetFloorIntY() - 1, color);
+	line(drawBitmap, startX + 1, startY, endX + 1, endY, color);
+	line(drawBitmap, startX - 1, startY, endX - 1, endY, color);
+	line(drawBitmap, startX, startY + 1, endX, endY + 1, color);
+	line(drawBitmap, startX, startY - 1, endX, endY - 1, color);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vector &planetPoint) const {
 	const int color = c_GUIColorWhite;
-	const Vector sitePos = m_PlanetCenter + planetPoint;
-	const int circleRadius = 8;
-
+	
 	for (int index = 0; index < m_LinePointsToSite.size() - 1; index++) {
 		DrawGlowLine(drawBitmap, m_LinePointsToSite[index], m_LinePointsToSite[index + 1], color);
 	}
 
 	// Draw a circle around the site target.
+	const Vector sitePos = m_PlanetCenter + planetPoint;
+	const int circleRadius = 8;
 	int blendAmount = 225 + RandomNum(-20, 20);
 	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-
 	circle(drawBitmap, sitePos.GetFloorIntX(), sitePos.GetFloorIntY(), circleRadius, color);
 	circle(drawBitmap, sitePos.GetFloorIntX(), sitePos.GetFloorIntY(), circleRadius - 1, color);
 }

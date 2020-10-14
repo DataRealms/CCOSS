@@ -168,11 +168,9 @@ namespace RTE {
 		/// <summary>
 		/// Updates the floating label over a planet site.
 		/// </summary>
-		/// <param name="visible">Label is visible.</param>
 		/// <param name="text">Text to show above the location.</param>
-		/// <param name="location">The location in planetary coords.</param>
-		/// <param name="height">How high above the location to show the text.</param>
-		void UpdateSiteNameLabel(bool visible, const string &text = "", const Vector &location = Vector(), float height = 1.0F);
+		/// <param name="location">The location in planetary coords (relative to the planet center).</param>
+		void UpdateSiteNameLabel(const string &text = "", const Vector &location = Vector());
 
 		/// <summary>
 		/// Draws a fancy thick flickering line to point out scene points on the planet.

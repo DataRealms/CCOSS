@@ -375,10 +375,11 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 			if (candidateScene != nullptr && candidateScene != m_ScenarioHoveredScene) {
 				m_ScenarioHoveredScene = candidateScene;
 				g_GUISound.SelectionChangeSound()->Play();
-				UpdateSiteNameLabel(true, m_ScenarioHoveredScene->GetPresetName(), m_ScenarioHoveredScene->GetLocation() + m_ScenarioHoveredScene->GetLocationOffset());
+				UpdateSiteNameLabel(m_ScenarioHoveredScene->GetPresetName(), m_ScenarioHoveredScene->GetLocation() + m_ScenarioHoveredScene->GetLocationOffset());
+				m_ScenarioScenePlanetLabel->SetVisible(true);
 			} else if (!foundAnyHover) {
 				m_ScenarioHoveredScene = nullptr;
-				UpdateSiteNameLabel(false);
+				m_ScenarioScenePlanetLabel->SetVisible(false);
 			}
 		}
 	}
@@ -1297,28 +1298,13 @@ void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::UpdateSiteNameLabel(bool visible, const string &text, const Vector &location, float height) {
-	// Set up the hover label to appear over any hovered scene location.
-	m_ScenarioScenePlanetLabel->SetVisible(visible);
-	if (visible) {
-		m_ScenarioScenePlanetLabel->SetText(text);
-		m_ScenarioScenePlanetLabel->SetPositionAbs(m_PlanetCenter.GetFloorIntX() + location.GetFloorIntX() - (m_ScenarioScenePlanetLabel->GetWidth() / 2),
-			m_PlanetCenter.GetFloorIntY() + location.GetFloorIntY() - (m_ScenarioScenePlanetLabel->GetHeight() * 1.5 * height));
-
-		// Clamp it to within the screen. only Y applies to the label though.
-		int pad = 6;
-		/*
-				if (m_ScenarioScenePlanetLabel->GetXPos() < pad)
-					m_ScenarioScenePlanetLabel->SetPositionAbs(pad, m_ScenarioScenePlanetLabel->GetYPos());
-				else if (m_ScenarioScenePlanetLabel->GetXPos() + m_ScenarioScenePlanetLabel->GetWidth() + pad >= g_FrameMan.GetResX())
-					m_ScenarioScenePlanetLabel->SetPositionAbs(g_FrameMan.GetResX() - m_ScenarioScenePlanetLabel->GetWidth() - pad, m_ScenarioScenePlanetLabel->GetYPos());
-		*/
-		if (m_ScenarioScenePlanetLabel->GetYPos() < pad) {
-			m_ScenarioScenePlanetLabel->SetPositionAbs(m_ScenarioScenePlanetLabel->GetXPos(), pad);
-		} else if (m_ScenarioScenePlanetLabel->GetYPos() + m_ScenarioScenePlanetLabel->GetHeight() + pad >= g_FrameMan.GetResY()) {
-			m_ScenarioScenePlanetLabel->SetPositionAbs(m_ScenarioScenePlanetLabel->GetXPos(), g_FrameMan.GetResY() - m_ScenarioScenePlanetLabel->GetHeight() - pad);
-		}
-	}
+void ScenarioGUI::UpdateSiteNameLabel(const string &text, const Vector &location) {
+	m_ScenarioScenePlanetLabel->SetText(text);
+	Vector AbsolutePosition = m_PlanetCenter + location - Vector(m_ScenarioScenePlanetLabel->GetWidth() / 2, 0.0F) - Vector(0.0F, m_ScenarioScenePlanetLabel->GetHeight() * 1.5F);
+	float padding = 6.0F;
+	AbsolutePosition.m_X = std::clamp(AbsolutePosition.m_X, padding, g_FrameMan.GetResX() - m_ScenarioScenePlanetLabel->GetWidth() - padding);
+	AbsolutePosition.m_Y = std::clamp(AbsolutePosition.m_Y,padding, g_FrameMan.GetResY() - m_ScenarioScenePlanetLabel->GetHeight() - padding);
+	m_ScenarioScenePlanetLabel->SetPositionAbs(AbsolutePosition.GetFloorIntX(), AbsolutePosition.GetFloorIntY());
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

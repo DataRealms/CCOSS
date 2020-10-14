@@ -131,9 +131,8 @@ namespace RTE {
 		/// <summary>
 		/// Makes sure a specific box doesn't end up moved completely off-screen.
 		/// </summary>
-		/// <param name="pBox">The GUICollectionBox to adjust, if necessary.</param>
-		/// <param name="margin">The amount of margin to allow the box to stay within.</param>
-		void KeepBoxOnScreen(GUICollectionBox *pBox, int margin = 10);
+		/// <param name="screenBox">The GUICollectionBox to adjust, if necessary.</param>
+		void KeepBoxOnScreen(GUICollectionBox *screenBox);
 
 		/// <summary>
 		/// Updates the contents of the Activity selection box.

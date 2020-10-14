@@ -531,11 +531,10 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 	Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
-		// Actually drag if drag is engaged.
 		if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER) && m_ScenarioDraggedBox && m_DragEngaged) {
 			m_ScenarioDraggedBox->MoveRelative(mousePos.GetFloorIntX() - m_PrevMousePos.GetFloorIntX(), mousePos.GetFloorIntY() - m_PrevMousePos.GetFloorIntY());
 			m_PrevMousePos = mousePos;
-			// Ensure the drag didn't shove it off-screen.
+
 			KeepBoxOnScreen(m_ScenarioDraggedBox);
 			if (m_ScenarioDraggedBox == m_ScenarioScreenBoxes[SCENEINFO]) {
 				CalculateLinesToSitePoint();
@@ -663,19 +662,18 @@ void ScenarioGUI::HideAllScreens() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox *pBox, int margin) {
+void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox *screenBox) {
 	// Make sure the box doesn't go entirely outside of the screen.
-	if (pBox->GetXPos() < (margin - pBox->GetWidth())) {
-		pBox->SetPositionAbs(margin - pBox->GetWidth(), pBox->GetYPos());
+	if (screenBox->GetXPos() < 0) {
+		screenBox->SetPositionAbs(0, screenBox->GetYPos());
+	} else if (screenBox->GetXPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - screenBox->GetWidth()) {
+		screenBox->SetPositionAbs(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - screenBox->GetWidth(), screenBox->GetYPos());
 	}
-	if (pBox->GetXPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - margin) {
-		pBox->SetPositionAbs(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - margin, pBox->GetYPos());
-	}
-	if (pBox->GetYPos() < (margin - pBox->GetHeight())) {
-		pBox->SetPositionAbs(pBox->GetXPos(), margin - pBox->GetHeight());
-	}
-	if (pBox->GetYPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - margin) {
-		pBox->SetPositionAbs(pBox->GetXPos(), m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - margin);
+
+	if (screenBox->GetYPos() < 0) {
+		screenBox->SetPositionAbs(screenBox->GetXPos(), 0);
+	} else if (screenBox->GetYPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - screenBox->GetHeight()) {
+		screenBox->SetPositionAbs(screenBox->GetXPos(), m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - screenBox->GetHeight());
 	}
 }
 
@@ -777,7 +775,7 @@ void ScenarioGUI::UpdateActivityBox() {
 		const int padding = 125;
 		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), textHeight + padding);
 	}
-	// Make sure the box doesn't go entirely outside of the screen.
+
 	KeepBoxOnScreen(m_ScenarioScreenBoxes[ACTIVITY]);
 }
 

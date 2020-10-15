@@ -1121,7 +1121,6 @@ void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 	g_PresetMan.GetAllOfType(presetList, "Scene");
 	list<Scene *> filteredScenes;
 
-	// Go through the list and cast all the pointers to scenes so we have a handy list.
 	for (Entity *presetEntity : presetList) {
 		Scene *presetScene = dynamic_cast<Scene *>(presetEntity);
 		// Only add non-editor and non-special scenes, or ones that don't have locations defined, or are metascenes.
@@ -1137,59 +1136,38 @@ void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 	// We need to calculate planet center manually because m_PlanetCenter reflects coords of moving planet which is outside the screen when this is called first time.
 	Vector planetCenter = m_PlanetCenter.IsZero() ? Vector(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2) : m_PlanetCenter;
 
-	//Move out-of-screen scenes closer to the middle of the planet if we have planet info.
+	//If a scene is on the planet but outside the screen then move it into the screen.
 	for (Scene *filteredScene : filteredScenes) {
-		float y = planetCenter.GetY() + filteredScene->GetLocation().GetY();
-
-		// Do not touch scenes outside the planet, they might be hidden intentionally.
-		if (abs(filteredScene->GetLocation().GetY()) < m_PlanetRadius + 100 && abs(filteredScene->GetLocation().GetX()) < m_PlanetRadius + 100) {
-			if (y < 10) {
-				filteredScene->SetLocationOffset(Vector(0, -y + 14));
+		const float sceneYPos = (planetCenter + filteredScene->GetLocation() + filteredScene->GetLocationOffset()).GetY();
+		if (std::abs(filteredScene->GetLocation().GetY()) < m_PlanetRadius + 100 && std::abs(filteredScene->GetLocation().GetX()) < m_PlanetRadius + 100) {
+			if (sceneYPos < 10) {
+				filteredScene->SetLocationOffset(filteredScene->GetLocationOffset() + Vector(0, 10 - sceneYPos));
 			}
 
-			if (y > g_FrameMan.GetResY() - 10) {
-				filteredScene->SetLocationOffset(Vector(0, -(y - g_FrameMan.GetResY() + 14)));
+			if (sceneYPos > g_FrameMan.GetResY() - 10) {
+				filteredScene->SetLocationOffset(filteredScene->GetLocationOffset() + Vector(0, g_FrameMan.GetResY() - 10 - sceneYPos));
 			}
 		}
 	}
 
-	// Add offsets to reveal overlapping scenes if any.
+	// If site points are overlapping then move one of them towards the planet center.
 	for (Scene *filteredScene1 : filteredScenes) {
-		bool isOverlapped = false;
+		for (const Scene *filteredScene2 : filteredScenes) {
+			if (filteredScene1 != filteredScene2) {
+				const Vector pos1 = filteredScene1->GetLocation() + filteredScene1->GetLocationOffset();
+				const Vector pos2 = filteredScene2->GetLocation() + filteredScene2->GetLocationOffset();
+				const float overlap = pos1.GetY() - pos2.GetY();
+				const float overlapMagnitude = std::abs(overlap);
 
-		do {
-			isOverlapped = false;
-
-			// Find overlapping scene dot.
-			for (const Scene *filteredScene2 : filteredScenes) {
-				if (filteredScene1 != filteredScene2) {
-					Vector pos1 = filteredScene1->GetLocation() + filteredScene1->GetLocationOffset();
-					Vector pos2 = filteredScene2->GetLocation() + filteredScene2->GetLocationOffset();
-
-					if ((pos1 - pos2).GetMagnitude() < 8) {
-						isOverlapped = true;
-						break;
+				if (overlapMagnitude < 8.0F) {
+					if ((overlap>0 && pos1.GetY()>0) || (overlap < 0 && pos1.GetY() < 0)) {
+						filteredScene1->SetLocationOffset(Vector(0, -overlap * (1.0F + 8.0F / overlapMagnitude)));
+					} else {
+						filteredScene1->SetLocationOffset(Vector(0, overlap));
 					}
 				}
 			}
-
-			// Move the dot closer to the planet center.
-			Vector offsetIncrement;
-			if (filteredScene1->GetLocation().GetY() > 0) {
-				offsetIncrement = Vector(0, -8);
-			} else {
-				offsetIncrement = Vector(0, 8);
-			}
-
-			if (isOverlapped) {
-				if (abs(filteredScene1->GetLocation().GetY()) > m_PlanetRadius) {
-					offsetIncrement.m_Y = -offsetIncrement.m_Y * 2;
-				}
-
-				filteredScene1->SetLocationOffset(filteredScene1->GetLocationOffset() + offsetIncrement);
-
-			}
-		} while (isOverlapped);
+		}
 	}
 
 	// Get the list of all read-in Activity presets.
@@ -1197,44 +1175,39 @@ void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 	g_PresetMan.GetAllOfType(presetList, "Activity");
 	Activity *presetActivity = nullptr;
 
-	int selectedActivityIndex = m_ActivitySelectComboBox->GetSelectedIndex();
+	int previousSelectedActivityIndex = m_ActivitySelectComboBox->GetSelectedIndex();
 
-	// Go through the list and cast all the pointers to Activities so we have a handy list.
 	// Associate all Scenes compatible with each Activity.
-	// Populate the activities selection dropdown while we're at it.
+	// Populate the activities selection dropdown.
 	m_ActivitySelectComboBox->ClearList();
 	int index = 0;
 	int tutorialIndex = -1;
 	for (Entity *presetEntity : presetList) {
 		presetActivity = dynamic_cast<Activity *>(presetEntity);
-		// Only add non-editor and non-special activities.
-		if (presetActivity/* && pActivity->GetClassName() != "GATutorial" */ && presetActivity->GetClassName().find("Editor") == string::npos) {
-			// Prepare a new entry in the list of Activities that we have.
+		if (presetActivity && presetActivity->GetClassName().find("Editor") == string::npos) {
 			pair<Activity *, list<Scene *> > newPair(presetActivity, list<Scene *>());
 			for (Scene *filteredScene : filteredScenes) {
-				// Check if the Scene has the required Areas and such needed for this Activity.
 				if (presetActivity->SceneIsCompatible(filteredScene)) {
 					newPair.second.push_back(filteredScene);
 				}
 			}
 
 			m_Activities.insert(newPair);
-			// Add to the activity selection combobox, and attach the activity copy, not passing in ownership.
+			// Add to the activity selection combobox, and attach the activity pointer, not passing in ownership.
 			m_ActivitySelectComboBox->AddItem(presetActivity->GetPresetName(), "", 0, presetActivity);
 
 			// Save the tutorial mission so we can select it by default.
-			if (presetActivity->GetClassName() == "GATutorial") {
+			if (selectTutorial && presetActivity->GetClassName() == "GATutorial") {
 				tutorialIndex = index;
 			}
 			index++;
 		}
 	}
 
-	// Select the Tutorial Activity and Scene by default to start.
 	if (selectTutorial && tutorialIndex >= 0) {
 		m_ActivitySelectComboBox->SetSelectedIndex(tutorialIndex);
 	} else {
-		m_ActivitySelectComboBox->SetSelectedIndex(selectedActivityIndex);
+		m_ActivitySelectComboBox->SetSelectedIndex(previousSelectedActivityIndex);
 	}
 	m_ScenarioSelectedActivity = dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity);
 

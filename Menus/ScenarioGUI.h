@@ -1,19 +1,6 @@
 #ifndef _SCENARIOGUI_
 #define _SCENARIOGUI_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            ScenarioGUI.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     ScenarioGUI class
-// Project:         GUI Library
-// Author(s):       Daniel Tabar
-//                  dtabar@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "ActivityMan.h"
 #include "Timer.h"
 
@@ -166,7 +153,7 @@ namespace RTE {
 		bool StartGame();
 
 		/// <summary>
-		/// Gathers all the available Scene:s and Activity presets there are.
+		/// Gathers all the available Scenes and Activity presets there are.
 		/// </summary>
 		void GetAllScenesAndActivities(bool selectTutorial);
 

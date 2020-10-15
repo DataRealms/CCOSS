@@ -248,7 +248,6 @@ namespace RTE {
 		GUIButton *m_SceneCloseButton;
 		GUILabel *m_SceneNameLabel;
 		GUILabel *m_SceneInfoLabel;
-		GUICollectionBox *m_ScenePreviewBox;
 
 		// Player setup controls
 		// Boxes in the matrix which detect and display where a control setting is and should be.

@@ -172,9 +172,6 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_SceneNameLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("SceneNameLabel"));
 	m_SceneInfoLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("SceneInfoLabel"));
 	m_SceneInfoLabel->SetFont(m_ScenarioGUIController->GetSkin()->GetFont("smallfont.png"));
-	m_ScenePreviewBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->AddControl("ScenePreviewBox", "COLLECTIONBOX", m_ScenarioScreenBoxes[SCENEINFO], 0, 0, Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT));
-	m_ScenePreviewBox->SetPositionRel(10, 33);
-	m_ScenePreviewBox->SetDrawType(GUICollectionBox::Image);
 
 	// Player team assignment box.
 	for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
@@ -433,6 +430,8 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 
 	AllegroScreen drawScreen(drawBitmap);
 
+	m_ScenarioGUIController->Draw(&drawScreen);
+
 	// Draw scene preview after GUI.
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible() && m_ScenarioScenes && m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
 		BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
@@ -441,10 +440,8 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 		}
 
 		blit(preview, m_ScenePreviewBitmap, 0, 0, 0, 0, m_ScenePreviewBitmap->w, m_ScenePreviewBitmap->h);
-		m_ScenePreviewBox->SetDrawImage(new AllegroBitmap(m_ScenePreviewBitmap));
-		m_ScenarioGUIController->Draw(&drawScreen);
+		draw_sprite(drawBitmap, m_ScenePreviewBitmap, m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + 10, m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + 33);
 	} else if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
-		m_ScenarioGUIController->Draw(&drawScreen);
 		// Draw the Player-Team matrix lines and disabled overlay effects.
 		const Activity *selectedActivity = m_ActivitySelectComboBox->GetSelectedItem() ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr;
 		int lineY = 80;
@@ -782,6 +779,7 @@ void ScenarioGUI::UpdateActivityBox() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::ShowScenesBox() {
+	clear_to_color(m_ScenePreviewBitmap, g_MaskColor);
 	if (m_ScenarioSelectedScene) {
 		m_SceneNameLabel->SetText(m_ScenarioSelectedScene->GetPresetName());
 		m_SceneInfoLabel->SetText(m_ScenarioSelectedScene->GetDescription());

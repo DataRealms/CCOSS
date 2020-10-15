@@ -510,13 +510,12 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 	// TODO: if activity is running, allow esc to resume activity instead of quitting.
 	if (g_UInputMan.KeyPressed(KEY_ESC)) {
+		g_GUISound.BackButtonPressSound()->Play();
 		if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
 			HideAllScreens();
 			m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 			ShowScenesBox();
-			g_GUISound.BackButtonPressSound()->Play();
 		} else {
-			g_GUISound.BackButtonPressSound()->Play();
 			return ScenarioUpdateResult::BACKTOMAIN;
 		}
 	}

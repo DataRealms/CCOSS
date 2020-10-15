@@ -116,7 +116,7 @@ namespace RTE {
 		/// <param name="planetPoint">The point on the planet to point at, in planet coordinates.</param>
 		void DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vector &planetPoint) const;
 
-	protected:
+	private:
 
 		/// <summary>
 		/// Updates the user input processing.
@@ -191,6 +191,11 @@ namespace RTE {
 		/// </summary>
 		void CalculateLinesToSitePoint();
 
+		/// <summary>
+		/// Clears all the member variables of this ScenarioGUI, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+
 		enum ScenarioButtons {
 			BACKTOMAINBUTTON = 0,
 			STARTHERE,
@@ -219,23 +224,19 @@ namespace RTE {
 		};
 
 		Controller *m_ScenarioController; //!< Controller which controls this menu. Not owned.
-		
 		GUIScreen *m_ScenarioGUIScreen; //!< GUI Screen for use by the in-game GUI.
-		
 		GUIInput *m_ScenarioGUIInput; //!< Input controller.
-		
 		GUIControlManager *m_ScenarioGUIController; //!< The control manager which holds all the controls.
-		
+
 		Timer m_BlinkTimer; //!< Notification blink timer.
 
 		Vector m_PlanetCenter; //!< The absolute screen position of the planet center.
-		
 		float m_PlanetRadius; //!< The screen radius of the planet.
 
 		GUICollectionBox *m_ScenarioScreenBoxes[SCREENCOUNT]; //!< The different dialog/floating boxes.
 
 		GUIButton *m_ScenarioButtons[SCENARIOBUTTONCOUNT]; //!< The menu buttons we want to manipulate.
-		
+
 		GUILabel *m_ScenarioScenePlanetLabel; //!< Hover name label over Scenes.
 
 		// Activity selection screen controls.
@@ -250,7 +251,6 @@ namespace RTE {
 		GUILabel *m_SceneInfoLabel;
 
 		// Player setup controls
-		// Boxes in the matrix which detect and display where a control setting is and should be.
 		GUICollectionBox *m_PlayerBoxes[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];
 		GUICollectionBox *m_TeamBoxes[TEAMROWCOUNT];
 		GUILabel *m_TeamNameLabels[TEAMROWCOUNT];
@@ -261,10 +261,10 @@ namespace RTE {
 		GUICheckbox *m_FogOfWarCheckbox;
 		GUICheckbox *m_RequireClearPathToOrbitCheckbox;
 		GUICheckbox *m_DeployUnitsCheckbox;
-		
+
 		int m_LockedCPUTeam; //!< Which team the CPU is locked to, if any.
 
-		GUIComboBox *m_TeamTechSelect[Activity::MaxTeamCount]; //!< Tech selection combos.
+		GUIComboBox *m_TeamTechSelect[Activity::MaxTeamCount]; //!< Tech selection combobox array.
 
 		// AI skill selection.
 		GUISlider *m_TeamAISkillSlider[Activity::MaxTeamCount];
@@ -273,31 +273,19 @@ namespace RTE {
 		BITMAP *m_ScenePreviewBitmap;
 		BITMAP *m_DefaultPreviewBitmap;
 
-		std::list<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed - not owned, and neither are the scenes.
-		
-		std::map<Activity *, std::list<Scene *> > m_Activities; //!< The map of Activities, and the Scenes compatible with each, neither of which are owned here.
-		
 		GUICollectionBox *m_ScenarioDraggedBox; //!< Currently dragged GUI box.
-		
-		Scene *m_ScenarioHoveredScene; //!< The scene preset currently hovered, NOT OWNED.
-		
-		Scene *m_ScenarioSelectedScene; //!< The scene preset currently selected, NOT OWNED.
-		
 		Vector m_PrevMousePos; //!< Previous pos of mouse to calculate dragging.
+
+		std::map<Activity *, std::list<Scene *> > m_Activities; //!< The map of Activities, and the Scenes compatible with each, neither of which are owned here.
+		std::list<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed - not owned, and neither are the scenes.
+		Scene *m_ScenarioHoveredScene; //!< The scene preset currently hovered, NOT OWNED.
+		Scene *m_ScenarioSelectedScene; //!< The scene preset currently selected, NOT OWNED.
 
 		std::vector<Vector> m_LinePointsToSite; //!< Collection of points that form lines from a screen point to the selected site point.
 
-	private:
-
-		/// <summary>
-		/// Clears all the member variables of this ScenarioGUI, effectively resetting the members of this abstraction level only.
-		/// </summary>
-		void Clear();
-
 		// Disallow the use of some implicit methods.
-		ScenarioGUI(const ScenarioGUI &reference) {}
-		ScenarioGUI &operator=(const ScenarioGUI &rhs) {}
-
+		ScenarioGUI(const ScenarioGUI &) = delete;
+		ScenarioGUI &operator=(const ScenarioGUI &) = delete;
 	};
 }
 #endif

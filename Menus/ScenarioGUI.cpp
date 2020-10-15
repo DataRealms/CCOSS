@@ -320,6 +320,7 @@ void ScenarioGUI::Update() {
 	Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
+		// Handle the resume button.
 		const Activity *currentActivity = g_ActivityMan.GetActivity();
 		if (currentActivity && (currentActivity->GetActivityState() == Activity::Running || currentActivity->GetActivityState() == Activity::Editing)) {
 			if (!m_ScenarioButtons[RESUME]->GetVisible()) {
@@ -331,13 +332,11 @@ void ScenarioGUI::Update() {
 			} else {
 				m_ScenarioGUIController->GetManager()->SetFocus(0);
 			}
-		} else {
-			if (m_ScenarioButtons[RESUME]->GetVisible()) {
-				m_ScenarioButtons[RESUME]->SetVisible(false);
-			}
+		} else if (m_ScenarioButtons[RESUME]->GetVisible()) {
+			m_ScenarioButtons[RESUME]->SetVisible(false);
 		}
 
-		// If the mouse is over the planet, check if it's over a site point, then display the site's label.
+		// If the mouse is over a site point, then display the site's label.
 		bool foundAnyHover = false;
 		if (m_ScenarioScenes && !m_ScenarioDraggedBox && !m_ScenarioScreenBoxes[ACTIVITY]->PointInside(mouseX, mouseY) && !m_ScenarioScreenBoxes[SCENEINFO]->PointInside(mouseX, mouseY)) {
 			Scene *candidateScene = nullptr;
@@ -386,9 +385,9 @@ void ScenarioGUI::DrawSitePoints(BITMAP *drawBitmap) const {
 		for (const Scene *scenePointer : *m_ScenarioScenes) {
 			int color;
 
-			// Mark user-created scenes to let players easily distinguish them from built-in.
+			// Mark user-created scenes to let players distinguish them from built-in.
 			if (scenePointer->GetModuleID() == g_PresetMan.GetModuleID("Scenes.rte")) {
-				color = c_GUIColorGreen;
+				color = c_GUIColorRed;
 			} else {
 				color = c_GUIColorYellow;
 			}
@@ -405,7 +404,6 @@ void ScenarioGUI::DrawSitePoints(BITMAP *drawBitmap) const {
 			circlefill(drawBitmap, screenLocationX, screenLocationY, 1, color);
 		}
 
-		// Draw the lines etc pointing at the selected Scene from the Scene Info box.
 		if (m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
 			DrawWhiteScreenLineToSitePoint(drawBitmap, m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset());
 		}
@@ -471,6 +469,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	const int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
 	const Icon *deviceIcon = nullptr;
 
+	// Draw the active joystick's sprite next to the mouse.
 	if (device >= DEVICE_GAMEPAD_1) {
 		int mouseX = 0;
 		int mouseY = 0;
@@ -510,14 +509,12 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 		}
 	}
 
-	///////////////////////////////////////////////////////////
-	// Mouse handling
-
 	int mouseX = 0;
 	int mouseY = 0;
 	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 	Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
+	// Handle GUI panel dragging.
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
 		if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER) && m_ScenarioDraggedBox) {
 			m_ScenarioDraggedBox->MoveRelative(mousePos.GetFloorIntX() - m_PrevMousePos.GetFloorIntX(), mousePos.GetFloorIntY() - m_PrevMousePos.GetFloorIntY());
@@ -548,9 +545,6 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			}
 		}
 	}
-
-	//////////////////////////////////////////
-	// Update the ControlManager
 
 	m_ScenarioGUIController->Update();
 
@@ -636,7 +630,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 		}
 	}
 
-	return ScenarioUpdateResult::NOEVENT;;
+	return ScenarioUpdateResult::NOEVENT;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -652,7 +646,7 @@ void ScenarioGUI::HideAllScreens() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox *screenBox) {
-	// Make sure the box doesn't go entirely outside of the screen.
+	// Prevent the box from going outside of the screen.
 	if (screenBox->GetXPos() < 0) {
 		screenBox->SetPositionAbs(0, screenBox->GetYPos());
 	} else if (screenBox->GetXPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - screenBox->GetWidth()) {
@@ -687,6 +681,7 @@ void ScenarioGUI::UpdateActivityBox() {
 		} else {
 			m_ActivityLabel->SetText(m_ScenarioSelectedActivity->GetDescription() + "\n\nNo sites appear to be compatible with this selected activity! Please try another.");
 		}
+
 		m_DifficultyLabel->SetVisible(true);
 		m_DifficultySlider->SetVisible(true);
 		if (m_DifficultySlider->GetValue() < Activity::CakeDifficulty) {
@@ -703,7 +698,6 @@ void ScenarioGUI::UpdateActivityBox() {
 			m_DifficultyLabel->SetText("Difficulty: Nuts!");
 		}
 
-		// Resize the box to fit the desc.
 		const int textHeight = m_ActivityLabel->ResizeHeightToFit();
 		const int padding = 110;
 		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), textHeight + padding);
@@ -726,21 +720,19 @@ void ScenarioGUI::UpdateActivityBox() {
 			}
 			m_GoldSlider->SetEnabled(selectedGA->GetGoldSwitchEnabled());
 
-			//Set default fog of war flag and enable or disable it if necessary.
+			// Set default checkbox states and enable or disable them.
 			const int defFogOfWar = selectedGA->GetDefaultFogOfWar();
 			if (defFogOfWar > -1) {
 				m_FogOfWarCheckbox->SetCheck(defFogOfWar != 0);
 			}
 			m_FogOfWarCheckbox->SetEnabled(selectedGA->GetFogOfWarSwitchEnabled());
 
-			//Set default clear path to orbit flag and enable or disable it if necessary.
 			const int defReqClearPath = selectedGA->GetDefaultRequireClearPathToOrbit();
 			if (defReqClearPath > -1) {
 				m_RequireClearPathToOrbitCheckbox->SetCheck(defReqClearPath != 0);
 			}
 			m_RequireClearPathToOrbitCheckbox->SetEnabled(selectedGA->GetRequireClearPathToOrbitSwitchEnabled());
 
-			//Set default deploy units flag and enable or disable it if necessary.
 			const int defDeployUnits = selectedGA->GetDefaultDeployUnits();
 			if (defDeployUnits > -1) {
 				m_DeployUnitsCheckbox->SetCheck(defDeployUnits != 0);
@@ -754,7 +746,7 @@ void ScenarioGUI::UpdateActivityBox() {
 		if (m_DifficultySlider) {
 			m_DifficultySlider->SetVisible(false);
 		}
-		// Resize the box to fit the desc.
+
 		const int textHeight = m_ActivityLabel->ResizeHeightToFit();
 		const int padding = 125;
 		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), textHeight + padding);
@@ -771,6 +763,7 @@ void ScenarioGUI::ShowScenesBox() {
 		m_SceneNameLabel->SetText(m_ScenarioSelectedScene->GetPresetName());
 		m_SceneInfoLabel->SetText(m_ScenarioSelectedScene->GetDescription());
 	}
+
 	const int textHeight = m_SceneInfoLabel->ResizeHeightToFit();
 	const int padding = 140;
 	m_ScenarioScreenBoxes[SCENEINFO]->Resize(m_ScenarioScreenBoxes[SCENEINFO]->GetWidth(), textHeight + padding);
@@ -834,20 +827,18 @@ void ScenarioGUI::ShowPlayersBox() {
 		}
 
 		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
-			// Reset controls to default values.
+			// Reset GUI controls to default values.
 			m_TeamTechSelect[teamIndex]->SetSelectedIndex(0);
 			m_TeamAISkillSlider[teamIndex]->SetValue(Activity::DefaultSkill);
 
 			if (m_ScenarioSelectedActivity->TeamActive(teamIndex)) {
 				iconPointer = m_ScenarioSelectedActivity->GetTeamIcon(teamIndex);
-				// Revert to default if needed.
 				if (!iconPointer) {
 					const std::string teamString = "Team " + std::to_string(teamIndex + 1) + " Default";
 					iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", teamString));
 				}
 
 				m_TeamNameLabels[teamIndex]->SetText(m_ScenarioSelectedActivity->GetTeamName(teamIndex) + ":");
-
 				m_TeamTechSelect[teamIndex]->SetEnabled(true);
 				m_TeamTechSelect[teamIndex]->SetVisible(true);
 				m_TeamAISkillSlider[teamIndex]->SetEnabled(true);
@@ -855,9 +846,7 @@ void ScenarioGUI::ShowPlayersBox() {
 				m_TeamAISkillLabel[teamIndex]->SetVisible(true);
 			} else {
 				iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Locked Team"));
-
 				m_TeamNameLabels[teamIndex]->SetText("Unavailable");
-
 				m_TeamTechSelect[teamIndex]->SetEnabled(false);
 				m_TeamTechSelect[teamIndex]->SetVisible(false);
 				m_TeamAISkillSlider[teamIndex]->SetEnabled(false);
@@ -875,7 +864,6 @@ void ScenarioGUI::ShowPlayersBox() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::UpdatePlayersBox() {
-
 	if (m_ScenarioSelectedActivity && m_ScenarioSelectedScene) {
 		int mouseX = 0;
 		int mouseY = 0;
@@ -884,6 +872,7 @@ void ScenarioGUI::UpdatePlayersBox() {
 
 		const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[PLAYERSETUPSCREEN], 1));
 		if (hoveredCell) {
+			// Find which cell is being hovered over.
 			int hoveredPlayer = PLAYERCOLUMNCOUNT;
 			int hoveredTeam = TEAMROWCOUNT;
 			for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
@@ -959,29 +948,33 @@ void ScenarioGUI::UpdatePlayersBox() {
 
 		// Count players in the teams.
 		int teamsWithPlayers = 0;
-		int teamsWithHumans = 0;
+		bool teamWithHumans = false;
 		int humansInTeams = 0;
 		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+			bool foundPlayer = false;
 			if (m_ScenarioSelectedActivity->TeamActive(teamIndex)) {
 				for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
 					if (m_PlayerBoxes[playerIndex][teamIndex]->GetDrawType() == GUICollectionBox::Image) {
-						++teamsWithPlayers;
+						foundPlayer = true;
 						if (playerIndex != PLAYER_CPU) {
-							++teamsWithHumans;
 							++humansInTeams;
+							teamWithHumans = true;
 						}
-						break;
 					}
+				}
+
+				if (foundPlayer) {
+					teamsWithPlayers++;
 				}
 			}
 		}
 
 		if (gameActivity) {
-			int maxPlayers = gameActivity->GetMaxPlayerSupport();
+			int maxHumanPlayers = gameActivity->GetMaxPlayerSupport();
 			int minTeamsRequired = gameActivity->GetMinTeamsRequired();
-			if (humansInTeams > maxPlayers) {
+			if (humansInTeams > maxHumanPlayers) {
 				m_ScenarioButtons[STARTGAME]->SetVisible(false);
-				const std::string msgString = "Too many players assigned! Max for this activity is " + std::to_string(maxPlayers);
+				const std::string msgString = "Too many players assigned! Max for this activity is " + std::to_string(maxHumanPlayers);
 				m_StartErrorLabel->SetText(msgString);
 				m_StartErrorLabel->SetVisible(true);
 			} else if (minTeamsRequired > teamsWithPlayers) {
@@ -989,7 +982,7 @@ void ScenarioGUI::UpdatePlayersBox() {
 				const std::string msgString = "Assign players to at\nleast " + std::to_string(minTeamsRequired) + " of the teams!";
 				m_StartErrorLabel->SetText(msgString);
 				m_StartErrorLabel->SetVisible(true);
-			} else if (teamsWithHumans == 0) {
+			} else if (teamWithHumans == 0) {
 				m_ScenarioButtons[STARTGAME]->SetVisible(false);
 				m_StartErrorLabel->SetText("Assign human players\nto at least one team!");
 				m_StartErrorLabel->SetVisible(true);
@@ -1066,6 +1059,7 @@ bool ScenarioGUI::StartGame() {
 
 	const GUIListPanel::Item *techItem;
 	for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+		// Handle player techs.
 		techItem = m_TeamTechSelect[teamIndex]->GetSelectedItem();
 		if (techItem) {
 			if (techItem->m_ExtraIndex == -2) {

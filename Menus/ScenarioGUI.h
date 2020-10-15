@@ -62,12 +62,6 @@ namespace RTE {
 		void Destroy();
 
 		/// <summary>
-		/// Gets the GUIControlManager owned and used by this.
-		/// </summary>
-		/// <returns>The GUIControlManager. Ownership is not transferred!</returns>
-		GUIControlManager * GetGUIControlManager();
-
-		/// <summary>
 		/// Enables the menu. This will animate it in and out of view.
 		/// </summary>
 		void SetEnabled();

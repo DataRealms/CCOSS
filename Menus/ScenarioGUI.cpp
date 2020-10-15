@@ -1120,19 +1120,28 @@ void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 	}
 
 	// If site points are overlapping then move one of them towards the planet center.
-	for (Scene *filteredScene1 : filteredScenes) {
-		for (const Scene *filteredScene2 : filteredScenes) {
-			if (filteredScene1 != filteredScene2) {
-				const Vector pos1 = filteredScene1->GetLocation() + filteredScene1->GetLocationOffset();
-				const Vector pos2 = filteredScene2->GetLocation() + filteredScene2->GetLocationOffset();
-				const float overlap = pos1.GetY() - pos2.GetY();
-				const float overlapMagnitude = std::abs(overlap);
+	const float requiredDistance = 8.0F;
+	bool foundOverlap = true;
+	while (foundOverlap) {
+		foundOverlap = false;
+		for (Scene *filteredScene1 : filteredScenes) {
+			for (const Scene *filteredScene2 : filteredScenes) {
+				if (filteredScene1 != filteredScene2) {
+					const Vector pos1 = filteredScene1->GetLocation() + filteredScene1->GetLocationOffset();
+					const Vector pos2 = filteredScene2->GetLocation() + filteredScene2->GetLocationOffset();
+					const Vector overlap = pos1 - pos2;
+					const float overlapMagnitude = overlap.GetMagnitude();
 
-				if (overlapMagnitude < 8.0F) {
-					if ((overlap>0 && pos1.GetY()>0) || (overlap < 0 && pos1.GetY() < 0)) {
-						filteredScene1->SetLocationOffset(Vector(0, -overlap * (1.0F + 8.0F / overlapMagnitude)));
-					} else {
-						filteredScene1->SetLocationOffset(Vector(0, overlap));
+					if (overlapMagnitude < requiredDistance) {
+						foundOverlap = true;
+						const float overlapY = overlap.GetY();
+						if ((overlapY > 0 && pos1.GetY() > 0) || (overlapY < 0 && pos1.GetY() < 0)) {
+							filteredScene1->SetLocationOffset(filteredScene1->GetLocationOffset() + Vector(0, -overlapY * (1.0F + requiredDistance / std::abs(overlapY))));
+						} else if (overlapMagnitude == 0.0F) {
+							filteredScene1->SetLocationOffset(filteredScene1->GetLocationOffset() + Vector(0, (pos1.GetY() > 0) ? -requiredDistance : requiredDistance));
+						} else {
+							filteredScene1->SetLocationOffset(filteredScene1->GetLocationOffset() + Vector(0, overlapY));
+						}
 					}
 				}
 			}

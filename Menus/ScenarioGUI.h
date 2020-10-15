@@ -82,7 +82,12 @@ namespace RTE {
 		/// <summary>
 		/// Updates the state of this Menu each frame.
 		/// </summary>
-		ScenarioUpdateResult Update();
+		void Update();
+
+		/// <summary>
+		/// Updates the user input processing.
+		/// </summary>
+		ScenarioUpdateResult UpdateInput();
 
 		/// <summary>
 		/// Draws the site points on top of the planet.
@@ -104,11 +109,6 @@ namespace RTE {
 		void DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vector &planetPoint) const;
 
 	private:
-
-		/// <summary>
-		/// Updates the user input processing.
-		/// </summary>
-		ScenarioUpdateResult UpdateInput();
 
 		/// <summary>
 		/// Hides all menu screens, so a single screen can be unhidden and shown alone.

@@ -313,20 +313,17 @@ void ScenarioGUI::SetPlanetInfo(const Vector &center, float radius) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
-	ScenarioUpdateResult result = ScenarioUpdateResult::NOEVENT;
+void ScenarioGUI::Update() {
 	m_ScenarioController->Update();
 
 	if (g_ConsoleMan.IsEnabled()) {
-		return result;
+		return;
 	}
 
 	int mouseX = 0;
 	int mouseY = 0;
 	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 	Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
-
-	result = UpdateInput();
 
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
 		const Activity *currentActivity = g_ActivityMan.GetActivity();
@@ -347,9 +344,8 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 		}
 
 		// If the mouse is over the planet, check if it's over a site point, then display the site's label.
-		if (m_ScenarioScenes && !m_ScenarioDraggedBox && (mousePos - m_PlanetCenter).GetMagnitude() < m_PlanetRadius &&
-			!(m_ScenarioScreenBoxes[ACTIVITY]->PointInside(mouseX, mouseY) || m_ScenarioScreenBoxes[SCENEINFO]->PointInside(mouseX, mouseY))) {
-			bool foundAnyHover = false;
+		bool foundAnyHover = false;
+		if (m_ScenarioScenes && !m_ScenarioDraggedBox && !m_ScenarioScreenBoxes[ACTIVITY]->PointInside(mouseX, mouseY) && !m_ScenarioScreenBoxes[SCENEINFO]->PointInside(mouseX, mouseY)) {
 			Scene *candidateScene = nullptr;
 			float shortestDist = 16.0F;
 			Vector screenLocation(0, 0);
@@ -370,10 +366,12 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 				g_GUISound.SelectionChangeSound()->Play();
 				UpdateSiteNameLabel(m_ScenarioHoveredScene->GetPresetName(), m_ScenarioHoveredScene->GetLocation() + m_ScenarioHoveredScene->GetLocationOffset());
 				m_ScenarioScenePlanetLabel->SetVisible(true);
-			} else if (!foundAnyHover) {
-				m_ScenarioHoveredScene = nullptr;
-				m_ScenarioScenePlanetLabel->SetVisible(false);
 			}
+		}
+
+		if (!foundAnyHover) {
+			m_ScenarioHoveredScene = nullptr;
+			m_ScenarioScenePlanetLabel->SetVisible(false);
 		}
 	}
 
@@ -382,8 +380,6 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 	} else if (m_ScenarioScreenBoxes[PLAYERSETUPSCREEN]->GetVisible()) {
 		UpdatePlayersBox();
 	}
-
-	return result;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

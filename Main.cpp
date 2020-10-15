@@ -671,7 +671,8 @@ bool PlayIntroTitle() {
         if (g_IntroState == SCENARIOMENU)
         {
             g_pScenarioGUI->SetPlanetInfo(planetPos, planetRadius);
-			scenarioGUIResult = g_pScenarioGUI->Update();
+			scenarioGUIResult = g_pScenarioGUI->UpdateInput();
+			g_pScenarioGUI->Update();
             g_pScenarioGUI->Draw(g_FrameMan.GetBackBuffer32());
         }
 

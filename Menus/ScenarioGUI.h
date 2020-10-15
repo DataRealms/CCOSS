@@ -280,6 +280,7 @@ namespace RTE {
 		std::list<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed - not owned, and neither are the scenes.
 		Scene *m_ScenarioHoveredScene; //!< The scene preset currently hovered, NOT OWNED.
 		Scene *m_ScenarioSelectedScene; //!< The scene preset currently selected, NOT OWNED.
+		const Activity *m_ScenarioSelectedActivity; //!< The currently selected activity, not owned.
 
 		std::vector<Vector> m_LinePointsToSite; //!< Collection of points that form lines from a screen point to the selected site point.
 

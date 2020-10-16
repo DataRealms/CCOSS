@@ -233,6 +233,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Scenes with a PresetName containing the strings "Test", "Editor" and "Tutorial" are no longer excluded from the scenarios screen and from the metagame.
 
+- In the scenarios screen, scenes from Scenes.rte will appear red. Previously they were green and not very distinguishable from regular scenes.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.
@@ -270,6 +272,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Removed `Activity` properties `TeamCount` and `PlayerCount`. These are handled internally and do nothing when set in ini.
 
 - Removed `Activity` property `FundsOfTeam#`, use `Team#Funds` instead.
+
+- Removed the quit-confirmation dialog from the scenarios screen. Now pressing escape will lead back to the main menu.
 
 ***
 

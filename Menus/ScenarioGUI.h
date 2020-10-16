@@ -110,7 +110,7 @@ namespace RTE {
 		void HideAllScreens();
 
 		/// <summary>
-		/// Makes sure a specific box doesn't end up moved completely off-screen.
+		/// Makes sure a specific box doesn't move off-screen.
 		/// </summary>
 		/// <param name="screenBox">The GUICollectionBox to adjust, if necessary.</param>
 		void KeepBoxOnScreen(GUICollectionBox *screenBox);
@@ -121,12 +121,12 @@ namespace RTE {
 		void UpdateActivityBox();
 
 		/// <summary>
-		/// Show the Scene info box.
+		/// Shows the Scene info box.
 		/// </summary>
 		void ShowScenesBox();
 
 		/// <summary>
-		/// Hide the Scene info box.
+		/// Hides the Scene info box.
 		/// </summary>
 		void HideScenesBox() const;
 
@@ -168,7 +168,7 @@ namespace RTE {
 		void DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Vector &end, int color) const;
 
 		/// <summary>
-		/// Calculates how to draw lines from the scene info box to a site point on the planet.
+		/// Calculates how to draw lines from the scene info box to the selected site point on the planet.
 		/// </summary>
 		void CalculateLinesToSitePoint();
 
@@ -200,7 +200,7 @@ namespace RTE {
 			ROOTSCREEN = 0,
 			ACTIVITY,
 			SCENEINFO,
-			PLAYERSETUPSCREEN,
+			PLAYERSETUP,
 			SCREENCOUNT
 		};
 
@@ -211,27 +211,41 @@ namespace RTE {
 
 		Timer m_BlinkTimer; //!< Notification blink timer.
 
-		Vector m_PlanetCenter; //!< The absolute screen position of the planet center.
-		float m_PlanetRadius; //!< The screen radius of the planet.
-
 		GUICollectionBox *m_ScenarioScreenBoxes[SCREENCOUNT]; //!< The different dialog/floating boxes.
 
 		GUIButton *m_ScenarioButtons[SCENARIOBUTTONCOUNT]; //!< The menu buttons we want to manipulate.
 
-		GUILabel *m_ScenarioScenePlanetLabel; //!< Hover name label over Scenes.
+		GUICollectionBox *m_ScenarioDraggedBox; //!< Currently dragged GUI box.
+		Vector m_PrevMousePos; //!< Previous pos of mouse to calculate dragging.
 
-		// Activity selection screen controls.
+		Vector m_PlanetCenter; //!< The absolute screen position of the planet center.
+		float m_PlanetRadius; //!< The screen radius of the planet.
+
+		std::list<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed - not owned, and neither are the scenes.
+		Scene *m_ScenarioHoveredScene; //!< The scene preset currently hovered, NOT OWNED.
+		GUILabel *m_ScenarioScenePlanetLabel; //!< Hover name label over Scenes.
+		Scene *m_ScenarioSelectedScene; //!< The scene preset currently selected, NOT OWNED.
+
+		std::vector<Vector> m_LinePointsToSite; //!< Collection of points that form lines from a screen point to the selected site point.
+
+		// Activity selection.
 		GUIComboBox *m_ActivitySelectComboBox;
 		GUILabel *m_ActivityLabel;
 		GUILabel *m_DifficultyLabel;
 		GUISlider *m_DifficultySlider;
 
-		// Scene Info controls.
+		std::map<Activity *, std::list<Scene *> > m_Activities; //!< The map of Activities, and the Scenes compatible with each, neither of which are owned here.
+		const Activity *m_ScenarioSelectedActivity; //!< The currently selected activity, not owned.
+
+		// Scene Info.
 		GUIButton *m_SceneCloseButton;
 		GUILabel *m_SceneNameLabel;
 		GUILabel *m_SceneInfoLabel;
 
-		// Player setup controls
+		BITMAP *m_ScenePreviewBitmap;
+		BITMAP *m_DefaultPreviewBitmap;
+
+		// Player setup.
 		GUICollectionBox *m_PlayerBoxes[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];
 		GUICollectionBox *m_TeamBoxes[TEAMROWCOUNT];
 		GUILabel *m_TeamNameLabels[TEAMROWCOUNT];
@@ -242,28 +256,11 @@ namespace RTE {
 		GUICheckbox *m_FogOfWarCheckbox;
 		GUICheckbox *m_RequireClearPathToOrbitCheckbox;
 		GUICheckbox *m_DeployUnitsCheckbox;
+		GUIComboBox *m_TeamTechSelect[Activity::MaxTeamCount]; //!< Tech selection combobox array.
+		GUISlider *m_TeamAISkillSlider[Activity::MaxTeamCount]; //!< AI skill slider array.
+		GUILabel *m_TeamAISkillLabel[Activity::MaxTeamCount]; //!< AI skill label array.
 
 		int m_LockedCPUTeam; //!< Which team the CPU is locked to, if any.
-
-		GUIComboBox *m_TeamTechSelect[Activity::MaxTeamCount]; //!< Tech selection combobox array.
-
-		// AI skill selection.
-		GUISlider *m_TeamAISkillSlider[Activity::MaxTeamCount];
-		GUILabel *m_TeamAISkillLabel[Activity::MaxTeamCount];
-
-		BITMAP *m_ScenePreviewBitmap;
-		BITMAP *m_DefaultPreviewBitmap;
-
-		GUICollectionBox *m_ScenarioDraggedBox; //!< Currently dragged GUI box.
-		Vector m_PrevMousePos; //!< Previous pos of mouse to calculate dragging.
-
-		std::map<Activity *, std::list<Scene *> > m_Activities; //!< The map of Activities, and the Scenes compatible with each, neither of which are owned here.
-		std::list<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed - not owned, and neither are the scenes.
-		Scene *m_ScenarioHoveredScene; //!< The scene preset currently hovered, NOT OWNED.
-		Scene *m_ScenarioSelectedScene; //!< The scene preset currently selected, NOT OWNED.
-		const Activity *m_ScenarioSelectedActivity; //!< The currently selected activity, not owned.
-
-		std::vector<Vector> m_LinePointsToSite; //!< Collection of points that form lines from a screen point to the selected site point.
 
 		// Disallow the use of some implicit methods.
 		ScenarioGUI(const ScenarioGUI &) = delete;

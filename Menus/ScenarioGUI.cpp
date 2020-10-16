@@ -522,7 +522,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			}
 
 			GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], 1));
-			GUIControl *hoveredControl = dynamic_cast<GUIControl *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], -1));
+			GUIControl *hoveredControl = m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], -1);
 			const bool nonDragControl = (dynamic_cast<GUIButton *>(hoveredControl) || dynamic_cast<GUISlider *>(hoveredControl) || dynamic_cast<GUIComboBox *>(hoveredControl));
 			if (hoveredBox && !nonDragControl && !m_ScenarioDraggedBox && !m_ActivitySelectComboBox->IsDropped()) {
 				m_ScenarioDraggedBox = hoveredBox;
@@ -651,11 +651,12 @@ void ScenarioGUI::UpdateActivityBox() {
 
 	if (m_ScenarioSelectedActivity) {
 		// Pull out the list of Scenes that are compatible with this Activity.
-		map<Activity *, list<Scene *> >::iterator asItr;
-		if (m_Activities.end() != (asItr = m_Activities.find(const_cast<Activity *>(m_ScenarioSelectedActivity)))) {
-			m_ScenarioScenes = &((*asItr).second);
-		} else {
-			m_ScenarioScenes = nullptr;
+		m_ScenarioScenes = nullptr;
+		for (std::pair<Activity *, list<Scene *>> activityScenePair : m_Activities) {
+			if (activityScenePair.first == m_ScenarioSelectedActivity) {
+				m_ScenarioScenes = &(activityScenePair.second);
+				break;
+			}
 		}
 
 		// Set the description.

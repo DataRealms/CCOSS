@@ -95,13 +95,6 @@ namespace RTE {
 		/// <param name="drawBitmap">The bitmap to draw on.</param>
 		void Draw(BITMAP *drawBitmap) const;
 
-		/// <summary>
-		/// Draws fancy thick flickering lines to point out scene points on the planet, from an arbitrary screen point.
-		/// </summary>
-		/// <param name="drawBitmap">The bitmap to draw to.</param>
-		/// <param name="planetPoint">The point on the planet to point at, in planet coordinates.</param>
-		void DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vector &planetPoint) const;
-
 	private:
 
 		/// <summary>
@@ -157,6 +150,12 @@ namespace RTE {
 		/// <param name="text">Text to show above the location.</param>
 		/// <param name="location">The location in planetary coords (relative to the planet center).</param>
 		void UpdateSiteNameLabel(const string &text = "", const Vector &location = Vector());
+
+		/// <summary>
+		/// Draws fancy thick flickering lines to point out the selected scene point on the planet, from the scene info box.
+		/// </summary>
+		/// <param name="drawBitmap">The bitmap to draw to.</param>
+		void DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap) const;
 
 		/// <summary>
 		/// Draws a fancy thick flickering line to point out scene points on the planet.

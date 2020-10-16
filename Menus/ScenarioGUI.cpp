@@ -377,7 +377,7 @@ void ScenarioGUI::DrawSitePoints(BITMAP *drawBitmap) const {
 		}
 
 		if (m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
-			DrawWhiteScreenLineToSitePoint(drawBitmap, m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset());
+			DrawWhiteScreenLineToSitePoint(drawBitmap);
 		}
 	}
 }
@@ -1217,29 +1217,30 @@ void ScenarioGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Ve
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap, const Vector &planetPoint) const {
+void ScenarioGUI::DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap) const {
 	const int color = c_GUIColorWhite;
 	
 	for (int index = 0; index < m_LinePointsToSite.size() - 1; index++) {
 		DrawGlowLine(drawBitmap, m_LinePointsToSite[index], m_LinePointsToSite[index + 1], color);
 	}
 
-	// Draw a circle around the site target.
-	const Vector sitePos = m_PlanetCenter + planetPoint;
+	// Draw a circle around the selected site point.
+	const Vector sitePos = m_PlanetCenter + m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset();
+	const int sitePosX = sitePos.GetFloorIntX();
+	const int sitePosY = sitePos.GetFloorIntY();
 	const int circleRadius = 8;
-	int blendAmount = 225 + RandomNum(-20, 20);
+	const int blendAmount = 225 + RandomNum(-20, 20);
 	set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-	circle(drawBitmap, sitePos.GetFloorIntX(), sitePos.GetFloorIntY(), circleRadius, color);
-	circle(drawBitmap, sitePos.GetFloorIntX(), sitePos.GetFloorIntY(), circleRadius - 1, color);
+	circle(drawBitmap, sitePosX, sitePosY, circleRadius, color);
+	circle(drawBitmap, sitePosX, sitePosY, circleRadius - 1, color);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::CalculateLinesToSitePoint() {
 	const Vector sceneInfoBoxPos(m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + (m_ScenarioScreenBoxes[SCENEINFO]->GetWidth() / 2), m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + (m_ScenarioScreenBoxes[SCENEINFO]->GetHeight() / 2));
-	const Vector planetPoint = m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset();
 	const int channelHeight = (m_ScenarioScreenBoxes[SCENEINFO]->GetHeight() / 2) + CHAMFERSIZE + 6;
-	const Vector sitePos = m_PlanetCenter + planetPoint;
+	const Vector sitePos = m_PlanetCenter + m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset();
 	const float yDirMult = sitePos.m_Y < sceneInfoBoxPos.m_Y ? -1.0F : 1.0F;
 	const int circleRadius = 8;
 

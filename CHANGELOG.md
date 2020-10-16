@@ -257,6 +257,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The "woosh" sound played when switching actors from a distance will now take scene wrapping into account. Additionally, attempting to switch to previous or next actor with only one actor will play the more correct "error" sound.
 
+- Fix bug: in the scenarios screen, choosing -random- as a player's tech and pressing start game had a 1 in (number of techs + 1) chance to crash the game.
+
 ### Removed
 
 - Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.

@@ -1464,13 +1464,14 @@ void Actor::Update()
     }
 
     /////////////////////////////////////
-    // Take damage from wounds and wounds on Attachables
+    // Take damage/heal from wounds and wounds on Attachables
     for (AEmitter *wound : m_Wounds) {
         m_Health -= wound->CollectDamage() * m_DamageMultiplier;
     }
     for (Attachable *attachable : m_Attachables) {
         m_Health -= attachable->CollectDamage();
     }
+    m_Health = std::min(m_MaxHealth, m_Health);
 
     /////////////////////////////////////////////
     // Take damage from large hits during travel

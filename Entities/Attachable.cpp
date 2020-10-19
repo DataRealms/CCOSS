@@ -290,11 +290,7 @@ namespace RTE {
 
 	void Attachable::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
 		MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
-		if (m_Parent) {
-			m_Parent->RemoveAttachable(this, true, true);
-		} else {
-			SetParent(nullptr);
-		}
+		if (m_Parent) { m_Parent->RemoveAttachable(this, true, true); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -325,7 +321,7 @@ namespace RTE {
 					Matrix atomRotationForSubgroup(facingAngle - parentFacingAngle);
 					Vector atomOffsetForSubgroup;
 					CalculateAtomOffsetForSubgroup(atomOffsetForSubgroup);
-					// Note: This line looks weird because CalculateAtomOffsetForSubgroup already adds JointOffset to the value, so we have to subtract it and added its rotated value instead.
+					// Note: This line looks weird because CalculateAtomOffsetForSubgroup already adds JointOffset to the value, so we have to subtract it and add its rotated value instead.
 					atomOffsetForSubgroup += GetJointOffset() - (GetJointOffset() * atomRotationForSubgroup);
 					rootParentAsMOSR->GetAtomGroup()->UpdateSubAtoms(GetAtomSubgroupID(), atomOffsetForSubgroup, atomRotationForSubgroup);
 				}

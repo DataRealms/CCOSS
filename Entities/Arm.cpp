@@ -202,17 +202,16 @@ HeldDevice * Arm::GetHeldDevice() const
 void Arm::SetHeldMO(MovableObject *newHeldMO) {
     if (newHeldMO == nullptr) {
         Attachable *heldMOAsAttachable = dynamic_cast<Attachable *>(m_pHeldMO);
-        if (m_pHeldMO && heldMOAsAttachable && heldMOAsAttachable->IsAttachedTo(this)) { RemoveAttachable(heldMOAsAttachable); }
+        if (heldMOAsAttachable && heldMOAsAttachable->IsAttachedTo(this)) { RemoveAttachable(heldMOAsAttachable); }
         m_pHeldMO = nullptr;
     } else {
         //TODO All this needs cleaning up, this should do the basics, some other method should be responsible for replacing held things
         if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pHeldMO)->IsAttachedTo(this)) {
-            HeldDevice *oldHeldDevice = dynamic_cast<HeldDevice *>(m_pHeldMO);
-            if (oldHeldDevice->IsAttached()) { dynamic_cast<MOSRotating *>(oldHeldDevice->GetParent())->RemoveAttachable(oldHeldDevice, true, false); }
+            RemoveAttachable(dynamic_cast<HeldDevice *>(m_pHeldMO), true, false);
             m_pHeldMO = nullptr;
         }
 
-        if (newHeldMO && (newHeldMO->IsHeldDevice() || newHeldMO->IsThrownDevice())) {
+        if (newHeldMO->IsHeldDevice()) {
             Attachable *newHeldDevice = dynamic_cast<Attachable *>(newHeldMO);
             if (newHeldDevice->IsAttached()) { dynamic_cast<MOSRotating *>(newHeldDevice->GetParent())->RemoveAttachable(newHeldDevice); }
             AddAttachable(newHeldDevice);
@@ -433,8 +432,6 @@ void Arm::Update() {
             // Make sure the weapon cannot be extended beyond the reach of the arm.
             ConstrainHand();
 
-            float handAngle = m_HandOffset.GetAbsRadAngle();
-
             // In order to keep the HeldDevice in the right place, we need to convert its offset (the hand offset) to work as the ParentOffset for the HeldDevice.
             // The HeldDevice will then use this to set its JointPos when it's updated. Unfortunately UnRotateOffset doesn't work for this, since it's Vector/Matrix division, which isn't commutative.
             Vector handOffsetAsParentOffset = RotateOffset(m_JointOffset) + m_HandOffset;
@@ -497,7 +494,7 @@ void Arm::Update() {
                 handOffsetAsParentOffset.RadRotate(-m_Rotation.GetRadAngle()).FlipX(m_HFlipped);
                 pHeldDev->SetParentOffset(handOffsetAsParentOffset);
 
-                // If it blew up or whatever, releaes it from hand and put into scene so it'll be cleaned up properly
+                // If it blew up or whatever, release it from hand and put into scene so it'll be cleaned up properly
                 if (m_pHeldMO->IsSetToDelete())
                     g_MovableMan.AddItem(ReleaseHeldMO());
             }
@@ -557,9 +554,9 @@ void Arm::DrawHand(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode
     } else {
         //TODO this won't draw flipped. It should draw onto a temp bitmap and then draw that flipped. Maybe it can reuse a temp bitmap from MOSR, maybe not?
         if (mode == g_DrawWhite) {
-            draw_character_ex(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY(), g_WhiteColor, -1);
+            draw_character_ex(pTargetBitmap, m_pHand, handPos.GetFloorIntX(), handPos.GetFloorIntX(), g_WhiteColor, -1);
         } else {
-            draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY());
+            draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.GetFloorIntX(), handPos.GetFloorIntX());
         }
     }
 }

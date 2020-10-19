@@ -3983,7 +3983,6 @@ void AHuman::Update()
 
     if (m_pFGArm && m_pFGArm->IsAttached()) {
         m_pFGArm->SetRotAngle(m_AimAngle * static_cast<float>(GetFlipFactor()));
-        m_pFGArm->SetRotAngle(m_HFlipped ? (-m_AimAngle/* + -m_Rotation*/) : (m_AimAngle/* + m_Rotation*/));
 
         if (m_Status == STABLE) {
             if (m_ArmClimbing[FGROUND]) {

@@ -1008,7 +1008,7 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
 
         // Generate the velocities procedurally
         velMin = m_GibBlastStrength / pObject->GetMass();
-        velRange = 10.0f;
+        velRange = 10.0F;
 
         // Randomize the offset from center to be within the original object
         gibROffset.SetXY(m_MaxRadius * 0.35F * RandomNormalNum(), m_MaxRadius * 0.35F * RandomNormalNum());

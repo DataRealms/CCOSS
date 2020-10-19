@@ -269,12 +269,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Hands will now draw in transparent drawing mode, i.e. editing menu.
 
-- `AHuman` background `Leg` will no longer draw in front of the `AHuman`. The real result of this is that the background foot will no longer draw in front of the foregroundone.
+- `AHuman` background `Leg` will no longer draw in front of the `AHuman`. The real result of this is that the background foot will no longer draw in front of the foreground one.
 
 - Everything draws better when flashing white, including crafts which used to be terrible at it.
 
 - Reworked Attachable managment
-	`DamageMultiplier` on `Attachables` now works as expected, all `Attachables` can now transfer damage to their root parent. This will travel up chains of `Attachables`, as long as every `Attachable` in the chain has a non-zero DamageMultiplier (yes, negative numbers are supported if you wanna be weird, have fun).
+	`DamageMultiplier` on `Attachables` now works as expected, all `Attachables` can now transfer damage to their root parent. This will travel up chains of `Attachables`, as long as every `Attachable` in the chain has a non-zero DamageMultiplier (yes, negative numbers are supported if you wanna have healing instead of damage or weirdness with chaining negative multipliers).
 	`Attachable` terrain collision has been reworked so that it can be changed simply by setting `CollidesWithTerrainWhileAttached = true/false` in INI or Lua. Also, `Attachables` attached to other `Attachables` will now collide with terrain properly.
 	`BreakWounds` on `Attachables` now gets added to both the `Attachable` and the parent when the `Attachable` is broken off. If `ParentBreakWound` is defined, the parent will use this instead of the regular `BreakWound`.
 	
@@ -298,7 +298,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Renamed `ACrab` `LFGLeg`, `LBGLeg`, `RFGLeg` and `RBGLeg` Lua properties to `LeftFGLeg`, `LeftBGLeg`, `RightFGLeg`, `RightBGLeg` respectively, to be more consistent with other naming.
 	For the time being, the INI properties (as well as the ones for setting `FootGroups` and `LimbPaths`) support both single letter and written out versions (i.e. `LStandLimbPath` and `LeftStandLimbPath` are both supported). This single letter versions will probably be deprecated over time.
 
-- `MovableMan:AddMO` will now add to `HeldDevices` (or any child class) to its `Items` collection, making it able to provide the functionality of `AddParticle`, `AddActor` and `AddItem`.
+- `MovableMan:AddMO` will now add `HeldDevices` (or any child class of `HeldDevice`) to its `Items` collection, making it able to provide the functionality of `AddParticle`, `AddActor` and `AddItem`.
 
 - Changed and cleaned up how gibbing works and how it affects `Attachables`. In particular, limbs will better inherit velocity during gibbing and things are more customizable. See `Attachable` properties for more details.
 	As an added bonus,  `Attachables` on `ACDropShips` and `ACRockets` can now be shot down when the craft gibs; fight back against the baleful dropship engines!

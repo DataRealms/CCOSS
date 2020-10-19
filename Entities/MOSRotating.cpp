@@ -520,6 +520,7 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includeAttachab
         if (woundedPart == this) {
             damage += removeFirstWoundEmitter() * GetDamageMultiplier();
         } else {
+            //TODO This is less efficient than it should be. We already collected all wounded parts and their wounds above, we should pass that in (make another function overload) instead of collecting everything again. It might be wise to use a tree for this purpose.
             damage += woundedPart->RemoveWounds(1, includeAttachablesWithAPositiveDamageMultiplier, includeAttachablesWithANegativeDamageMultiplier, includeAttachablesWithNoDamageMultiplier);
         }
         if (woundedParts[woundedPartIndex].second-- <= 0) {
@@ -1432,9 +1433,9 @@ void MOSRotating::Update() {
     }
 
     if (m_OrientToVel > 0 && m_Vel.GetLargest() > 5.0) {
-        Clamp(m_OrientToVel, 1.0F, 0.0F);
+        m_OrientToVel = std::clamp(m_OrientToVel, 0.0F, 1.0F);
 
-        float velInfluence = Limit(m_OrientToVel < 1.0 ? m_Vel.GetMagnitude() / 100.0F : 1.0F, 1.0F, 0.0F);
+        float velInfluence = std::clamp(m_OrientToVel < 1.0 ? m_Vel.GetMagnitude() / 100.0F : 1.0F, 0.0F, 1.0F);
         float radsToGo = m_Rotation.GetRadAngleTo(m_Vel.GetAbsRadAngle());
         m_Rotation += radsToGo * m_OrientToVel * velInfluence;
     }
@@ -1547,7 +1548,7 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
     if (!attachable || !attachable->IsAttached()) {
         return false;
     }
-    RTEAssert(attachable->IsAttachedTo(this), "Tried to remove attachable that was attached to another parent (" + (attachable->GetParent() ? attachable->GetParent()->GetModuleAndPresetName() : "ERROR") + ") Attachable (" + attachable->GetModuleAndPresetName() + "), this should never happen!");
+    RTEAssert(attachable->IsAttachedTo(this), "Tried to remove Attachable " + attachable->GetModuleAndPresetName() + " from presumed parent " + GetModuleAndPresetName() + ", but it had a different parent (" + (attachable->GetParent() ? attachable->GetParent()->GetModuleAndPresetName() : "ERROR") + "). This should never happen!");
 
     if (m_Attachables.size() > 0) { m_Attachables.remove(attachable); }
     attachable->SetParent(nullptr);
@@ -1581,6 +1582,8 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
         delete attachable;
     } else if (addToMovableMan || attachable->IsSetToDelete()) {
         g_MovableMan.AddMO(attachable);
+    } else {
+        RTEAbort("Tried to remove Attachable " + attachable->GetModuleAndPresetName() + " from parent " + GetModuleAndPresetName() + " but it was not set to delete, or be added to MovableMan, or delete when removed from parent. This should never happen.");
     }
     return true;
 }
@@ -1880,10 +1883,10 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
-    RTEAssert(attachable->IsAttached(), "Tried to transfer forces from Attachable (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
-    RTEAssert(attachable->IsAttachedTo(this), "Tried to transfer forces from another parent's (" + attachable->GetParent()->GetModuleAndPresetName() + ") Attachable (" + attachable->GetModuleAndPresetName() + "), this should never happen!");
     bool intact = false;
     if (attachable) {
+        RTEAssert(attachable->IsAttached(), "Tried to transfer forces from Attachable (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
+        RTEAssert(attachable->IsAttachedTo(this), "Tried to transfer forces from another parent's (" + attachable->GetParent()->GetModuleAndPresetName() + ") Attachable (" + attachable->GetModuleAndPresetName() + "), this should never happen!");
         if (attachable->IsSetToDelete()) {
             RemoveAttachable(attachable, true, true);
         } else if (attachable->IsAttached()) {

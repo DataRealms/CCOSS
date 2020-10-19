@@ -75,8 +75,8 @@ int AEmitter::Create(const AEmitter &reference) {
     }
     Attachable::Create(reference);
 
-    for (list<Emission *>::const_iterator itr = reference.m_EmissionList.begin(); itr != reference.m_EmissionList.end(); ++itr) {
-        m_EmissionList.push_back(dynamic_cast<Emission *>((*itr)->Clone()));
+    for (const Emission *referenceEmission : reference.m_EmissionList) {
+        m_EmissionList.push_back(dynamic_cast<Emission *>(referenceEmission->Clone()));
     }
 
     m_EmissionSound = reference.m_EmissionSound;

@@ -1471,7 +1471,7 @@ void Actor::Update()
     for (Attachable *attachable : m_Attachables) {
         m_Health -= attachable->CollectDamage();
     }
-    m_Health = std::min(m_MaxHealth, m_Health);
+    m_Health = std::min(m_Health, m_MaxHealth);
 
     /////////////////////////////////////////////
     // Take damage from large hits during travel

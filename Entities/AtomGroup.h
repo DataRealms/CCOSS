@@ -116,7 +116,7 @@ namespace RTE {
 		/// Gets the current owner MOSRotating of this AtomGroup.
 		/// </summary>
 		/// <returns>A pointer to the owner.</returns>
-		MOSRotating * GetOwner() const { return m_OwnerMO; }
+		MOSRotating * GetOwner() const { return m_OwnerMOSR; }
 
 		/// <summary>
 		/// Sets the current owner MOSRotating of this AtomGroup.
@@ -134,7 +134,7 @@ namespace RTE {
 		/// Gets whether this AtomGroup's Atoms are to be automatically generated based on a bitmap, or manually specified.
 		/// </summary>
 		/// <returns>Whether this AtomGroup is auto generated from a bitmap or not.</returns>
-		bool AutoGenerate() { return m_AutoGenerate; }
+		bool AutoGenerate() const { return m_AutoGenerate; }
 
 		/// <summary>
 		/// Gets the resolution (density of Atoms) of this AtomGroup. Higher values mean a less dense and less accurate physical representation of the owner MOSR's graphical representation.
@@ -143,10 +143,17 @@ namespace RTE {
 		int GetResolution() const { return m_Resolution; }
 
 		/// <summary>
-		/// Gets The depth Atoms in this AtomGroup are placed off the edge of the owning MOSR's graphical representation outline towards it's center.
+		/// Gets the depth Atoms in this AtomGroup are placed off the edge of the owning MOSR's graphical representation outline towards it's center.
 		/// </summary>
 		/// <returns>The depth, in pixels. If 0, Atoms are placed right on the edge of the MOSR outline.</returns>
 		int GetDepth() const { return m_Depth; }
+
+		/// <summary>
+		/// Gets the position of an Atom in this AtomGroup adjusted to the Owner MOSRotating horizontal flip and rotation.
+		/// </summary>
+		/// <param name="atom">The individual Atom to get the position for.</param>
+		/// <returns>The position of an Atom in this AtomGroup adjusted to the Owner MOSRotating horizontal flip and rotation.</returns>
+		Vector GetAtomPos(const Atom *atom) const;
 
 		/// <summary>
 		/// Gets the current position of this AtomGroup as a limb.
@@ -165,7 +172,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets the current mass moment of inertia of this AtomGroup.
 		/// </summary>
-		/// <returns>A float with the moment of inertia, in Kg * SceneUnits^2.</returns>
+		/// <returns>A float with the moment of inertia, in Kg * meter^2.</returns>
 		float GetMomentOfInertia();
 #pragma endregion
 
@@ -338,10 +345,12 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
+		// TODO: It's probably worth trying out changing this from a list to a vector. m_Atoms is iterated over often and we could probably get some big gainz by doing this swap.
+		// The downside is anytime attachables with atoms get added we may have the cost of resizing the vector but that's an uncommon use case while iterating over atoms happens multiple times per frame.
 		std::list<Atom *> m_Atoms; //!< List of Atoms that constitute the group. Owned by this.
 		std::unordered_map<long, std::list<Atom *>> m_SubGroups; //!< Sub groupings of Atoms. Points to Atoms owned in m_Atoms. Not owned.
 
-		MOSRotating *m_OwnerMO; //!< The owner of this AtomGroup. The owner is obviously not owned by this AtomGroup.
+		MOSRotating *m_OwnerMOSR; //!< The owner of this AtomGroup. The owner is obviously not owned by this AtomGroup.
 		const Material *m_Material; //!< Material of this AtomGroup.
 
 		bool m_AutoGenerate; //!< Whether the Atoms in this AtomGroup were automatically generated based on a sprite, or manually defined.

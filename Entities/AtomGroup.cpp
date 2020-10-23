@@ -1470,6 +1470,7 @@ namespace RTE {
 			float normMassA = invMassA / (invMassA + invMassB);
 			float normMassB = invMassB / (invMassA + invMassB);
 
+			//TODO investigate whether we should apply some (relatively small) amount of movement to the object even if it's a lot heavier, for more realistic physics
 			// If the intersected is much larger than this' MO, then only move this. Otherwise, apply the movements to both this and the intersected MO's, proportional to their respective masses.
 			if (normMassB < 0.33F) {
 				thisExit = totalExitVector;

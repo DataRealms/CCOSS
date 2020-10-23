@@ -202,10 +202,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float AtomGroup::GetMomentOfInertia() {
-		if (m_MomentOfInertia == 0.0F) {
+		float currentOwnerMass = m_OwnerMOSR->GetMass();
+		if (m_MomentOfInertia == 0.0F || std::abs(m_StoredOwnerMass - currentOwnerMass) >= (m_StoredOwnerMass / 10.0F)) {
 			RTEAssert(m_OwnerMOSR, "Tried to calculate moment of inertia for an AtomGroup with no parent!");
 
-			float distMass = m_OwnerMOSR->GetMass() / static_cast<float>(m_Atoms.size());
+			m_StoredOwnerMass = currentOwnerMass;
+			float distMass = m_StoredOwnerMass / static_cast<float>(m_Atoms.size());
 			float radius = 0.0F;
 			for (const Atom *atom : m_Atoms) {
 				radius = atom->GetOffset().GetMagnitude() * c_MPP;
@@ -229,9 +231,11 @@ namespace RTE {
 			atomToAdd->SetSubID(subgroupID);
 			atomToAdd->SetOffset(offset + (atomToAdd->GetOriginalOffset() * offsetRotation));
 			atomToAdd->SetOwner(m_OwnerMOSR);
+			atomToAdd->SetIgnoreMOIDsByGroup(&m_IgnoreMOIDs);
 			m_Atoms.push_back(atomToAdd);
 			m_SubGroups.at(subgroupID).push_back(atomToAdd);
 		}
+		if (!atomList.empty()) { m_MomentOfInertia = 0.0F; }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -253,6 +257,7 @@ namespace RTE {
 			}
 		}
 		m_SubGroups.erase(removeID);
+		if (removedAny) { m_MomentOfInertia = 0.0F; }
 
 		return removedAny;
 	}

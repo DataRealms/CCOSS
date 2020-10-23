@@ -1584,7 +1584,8 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
     } else if (addToMovableMan || attachable->IsSetToDelete()) {
         g_MovableMan.AddMO(attachable);
     } else {
-        RTEAbort("Tried to remove Attachable " + attachable->GetModuleAndPresetName() + " from parent " + GetModuleAndPresetName() + " but it was not set to delete, or be added to MovableMan, or delete when removed from parent. This should never happen.");
+        delete attachable;
+        //RTEAbort("Tried to remove Attachable " + attachable->GetModuleAndPresetName() + " from parent " + GetModuleAndPresetName() + " but it was not set to delete, or be added to MovableMan, or delete when removed from parent. This should never happen.");
     }
     return true;
 }

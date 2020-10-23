@@ -499,12 +499,12 @@ Attachable *ACrab::GetTurret() const {
 
 void ACrab::SetTurret(Attachable *newTurret) {
     if (newTurret == nullptr) {
-        if (m_pTurret && m_pTurret->IsAttachedTo(this)) { RemoveAttachable(m_pTurret); }
+        if (m_pTurret && m_pTurret->IsAttached()) { RemoveAttachable(m_pTurret); }
         m_pTurret = nullptr;
     } else {
         Turret *castedNewTurret = dynamic_cast<Turret *>(newTurret);
         if (castedNewTurret) {
-            RemoveAttachable(m_pTurret);
+            if (m_pTurret && m_pTurret->IsAttached()) { RemoveAttachable(m_pTurret); }
             m_pTurret = castedNewTurret;
             AddAttachable(castedNewTurret);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewTurret->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACrab *>(parent)->SetTurret(attachable); }});
@@ -516,12 +516,12 @@ void ACrab::SetTurret(Attachable *newTurret) {
 
 void ACrab::SetJetpack(Attachable *newJetpack) {
     if (newJetpack == nullptr) {
-        if (m_pJetpack && m_pJetpack->IsAttachedTo(this)) { RemoveAttachable(m_pJetpack); }
+        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
         m_pJetpack = nullptr;
     } else {
         AEmitter *castedNewJetpack = dynamic_cast<AEmitter *>(newJetpack);
         if (castedNewJetpack) {
-            RemoveAttachable(m_pJetpack);
+            if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
             m_pJetpack = castedNewJetpack;
             AddAttachable(castedNewJetpack);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACrab *>(parent)->SetJetpack(attachable); }});
@@ -533,12 +533,12 @@ void ACrab::SetJetpack(Attachable *newJetpack) {
 
 void ACrab::SetLeftFGLeg(Attachable *newLeg) {
     if (newLeg == nullptr) {
-        if (m_pLFGLeg && m_pLFGLeg->IsAttachedTo(this)) { RemoveAttachable(m_pLFGLeg); }
+        if (m_pLFGLeg && m_pLFGLeg->IsAttached()) { RemoveAttachable(m_pLFGLeg); }
         m_pLFGLeg = nullptr;
     } else {
         Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
         if (castedNewLeg) {
-            RemoveAttachable(m_pLFGLeg);
+            if (m_pLFGLeg && m_pLFGLeg->IsAttached()) { RemoveAttachable(m_pLFGLeg); }
             m_pLFGLeg = castedNewLeg;
             AddAttachable(castedNewLeg);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACrab *>(parent)->SetLeftFGLeg(attachable); }});
@@ -550,12 +550,12 @@ void ACrab::SetLeftFGLeg(Attachable *newLeg) {
 
 void ACrab::SetLeftBGLeg(Attachable *newLeg) {
     if (newLeg == nullptr) {
-        if (m_pLBGLeg && m_pLBGLeg->IsAttachedTo(this)) { RemoveAttachable(m_pLBGLeg); }
+        if (m_pLBGLeg && m_pLBGLeg->IsAttached()) { RemoveAttachable(m_pLBGLeg); }
         m_pLBGLeg = nullptr;
     } else {
         Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
         if (castedNewLeg) {
-            RemoveAttachable(m_pLBGLeg);
+            if (m_pLBGLeg && m_pLBGLeg->IsAttached()) { RemoveAttachable(m_pLBGLeg); }
             m_pLBGLeg = castedNewLeg;
             AddAttachable(castedNewLeg);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACrab *>(parent)->SetLeftBGLeg(attachable); }});
@@ -567,12 +567,12 @@ void ACrab::SetLeftBGLeg(Attachable *newLeg) {
 
 void ACrab::SetRightFGLeg(Attachable *newLeg) {
     if (newLeg == nullptr) {
-        if (m_pRFGLeg && m_pRFGLeg->IsAttachedTo(this)) { RemoveAttachable(m_pRFGLeg); }
+        if (m_pRFGLeg && m_pRFGLeg->IsAttached()) { RemoveAttachable(m_pRFGLeg); }
         m_pRFGLeg = nullptr;
     } else {
         Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
         if (castedNewLeg) {
-            RemoveAttachable(m_pRFGLeg);
+            if (m_pRFGLeg && m_pRFGLeg->IsAttached()) { RemoveAttachable(m_pRFGLeg); }
             m_pRFGLeg = castedNewLeg;
             AddAttachable(castedNewLeg);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACrab *>(parent)->SetRightFGLeg(attachable); }});
@@ -584,12 +584,12 @@ void ACrab::SetRightFGLeg(Attachable *newLeg) {
 
 void ACrab::SetRightBGLeg(Attachable *newLeg) {
     if (newLeg == nullptr) {
-        if (m_pRBGLeg && m_pRBGLeg->IsAttachedTo(this)) { RemoveAttachable(m_pRBGLeg); }
+        if (m_pRBGLeg && m_pRBGLeg->IsAttached()) { RemoveAttachable(m_pRBGLeg); }
         m_pRBGLeg = nullptr;
     } else {
         Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
         if (castedNewLeg) {
-            RemoveAttachable(m_pRBGLeg);
+            if (m_pRBGLeg && m_pRBGLeg->IsAttached()) { RemoveAttachable(m_pRBGLeg); }
             m_pRBGLeg = castedNewLeg;
             AddAttachable(castedNewLeg);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACrab *>(parent)->SetRightBGLeg(attachable); }});

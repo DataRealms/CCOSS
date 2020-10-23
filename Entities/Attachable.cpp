@@ -321,7 +321,8 @@ namespace RTE {
 					Matrix atomRotationForSubgroup(facingAngle - parentFacingAngle);
 					Vector atomOffsetForSubgroup;
 					CalculateAtomOffsetForSubgroup(atomOffsetForSubgroup);
-					// Note: This line looks weird because CalculateAtomOffsetForSubgroup already adds JointOffset to the value, so we have to subtract it and add its rotated value instead.
+					//TODO CalculateAtomOffsetForSubgroup should just return the rotated value. This means AtomGroup::AddAtoms needs to be modified to exect this rotated value instead of doing rotation internally. Alternatively, UpdateSubAtoms should expect unrotated atom offsets and deal with things interally, either way, it should be consistent.
+					// Note: This line looks weird because CalculateAtomOffsetForSubgroup already subtracts JointOffset from the value, so we have to re-add it and then subtract its rotated value instead.
 					atomOffsetForSubgroup += GetJointOffset() - (GetJointOffset() * atomRotationForSubgroup);
 					rootParentAsMOSR->GetAtomGroup()->UpdateSubAtoms(GetAtomSubgroupID(), atomOffsetForSubgroup, atomRotationForSubgroup);
 				}

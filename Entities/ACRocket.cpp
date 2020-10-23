@@ -845,12 +845,12 @@ void ACRocket::Update()
 
 void ACRocket::SetRightLeg(Attachable *newLeg) {
     if (newLeg == nullptr) {
-        if (m_pRLeg && m_pRLeg->IsAttachedTo(this)) { RemoveAttachable(m_pRLeg); }
+        if (m_pRLeg && m_pRLeg->IsAttached()) { RemoveAttachable(m_pRLeg); }
         m_pRLeg = nullptr;
     } else {
         Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
         if (castedNewLeg) {
-            RemoveAttachable(m_pRLeg);
+            if (m_pRLeg && m_pRLeg->IsAttached()) { RemoveAttachable(m_pRLeg); }
             m_pRLeg = castedNewLeg;
             AddAttachable(castedNewLeg);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACRocket *>(parent)->SetRightLeg(attachable); }});
@@ -862,12 +862,12 @@ void ACRocket::SetRightLeg(Attachable *newLeg) {
 
 void ACRocket::SetLeftLeg(Attachable *newLeg) {
     if (newLeg == nullptr) {
-        if (m_pLLeg && m_pLLeg->IsAttachedTo(this)) { RemoveAttachable(m_pLLeg); }
+        if (m_pLLeg && m_pLLeg->IsAttached()) { RemoveAttachable(m_pLLeg); }
         m_pLLeg = nullptr;
     } else {
         Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
         if (castedNewLeg) {
-            RemoveAttachable(m_pLLeg);
+            if (m_pLLeg && m_pLLeg->IsAttached()) { RemoveAttachable(m_pLLeg); }
             m_pLLeg = castedNewLeg;
             AddAttachable(castedNewLeg);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACRocket *>(parent)->SetLeftLeg(attachable); }});
@@ -879,12 +879,12 @@ void ACRocket::SetLeftLeg(Attachable *newLeg) {
 
 void ACRocket::SetMainThruster(Attachable *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pMThruster && m_pMThruster->IsAttachedTo(this)) { RemoveAttachable(m_pMThruster); }
+        if (m_pMThruster && m_pMThruster->IsAttached()) { RemoveAttachable(m_pMThruster); }
         m_pMThruster = nullptr;
     } else {
         AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
         if (castedNewThruster) {
-            RemoveAttachable(m_pMThruster);
+            if (m_pMThruster && m_pMThruster->IsAttached()) { RemoveAttachable(m_pMThruster); }
             m_pMThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACRocket *>(parent)->SetMainThruster(attachable); }});
@@ -896,12 +896,12 @@ void ACRocket::SetMainThruster(Attachable *newThruster) {
 
 void ACRocket::SetRightThruster(Attachable *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pRThruster && m_pRThruster->IsAttachedTo(this)) { RemoveAttachable(m_pRThruster); }
+        if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAttachable(m_pRThruster); }
         m_pRThruster = nullptr;
     } else {
         AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
         if (castedNewThruster) {
-            RemoveAttachable(m_pRThruster);
+            if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAttachable(m_pRThruster); }
             m_pRThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACRocket *>(parent)->SetRightThruster(attachable); }});
@@ -913,12 +913,12 @@ void ACRocket::SetRightThruster(Attachable *newThruster) {
 
 void ACRocket::SetLeftThruster(Attachable *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pLThruster && m_pLThruster->IsAttachedTo(this)) { RemoveAttachable(m_pLThruster); }
+        if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAttachable(m_pLThruster); }
         m_pLThruster = nullptr;
     } else {
         AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
         if (castedNewThruster) {
-            RemoveAttachable(m_pLThruster);
+            if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAttachable(m_pLThruster); }
             m_pLThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACRocket *>(parent)->SetLeftThruster(attachable); }});
@@ -930,12 +930,12 @@ void ACRocket::SetLeftThruster(Attachable *newThruster) {
 
 void ACRocket::SetURightThruster(Attachable *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pURThruster && m_pURThruster->IsAttachedTo(this)) { RemoveAttachable(m_pURThruster); }
+        if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAttachable(m_pURThruster); }
         m_pURThruster = nullptr;
     } else {
         AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
         if (castedNewThruster) {
-            RemoveAttachable(m_pURThruster);
+            if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAttachable(m_pURThruster); }
             m_pURThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACRocket *>(parent)->SetURightThruster(attachable); }});
@@ -947,12 +947,12 @@ void ACRocket::SetURightThruster(Attachable *newThruster) {
 
 void ACRocket::SetULeftThruster(Attachable *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pULThruster && m_pULThruster->IsAttachedTo(this)) { RemoveAttachable(m_pULThruster); }
+        if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAttachable(m_pULThruster); }
         m_pULThruster = nullptr;
     } else {
         AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
         if (castedNewThruster) {
-            RemoveAttachable(m_pULThruster);
+            if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAttachable(m_pULThruster); }
             m_pULThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACRocket *>(parent)->SetULeftThruster(attachable); }});

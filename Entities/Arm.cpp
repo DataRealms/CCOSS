@@ -202,11 +202,11 @@ HeldDevice * Arm::GetHeldDevice() const
 void Arm::SetHeldMO(MovableObject *newHeldMO) {
     if (newHeldMO == nullptr) {
         Attachable *heldMOAsAttachable = dynamic_cast<Attachable *>(m_pHeldMO);
-        if (heldMOAsAttachable && heldMOAsAttachable->IsAttachedTo(this)) { RemoveAttachable(heldMOAsAttachable); }
+        if (heldMOAsAttachable && heldMOAsAttachable->IsAttached()) { RemoveAttachable(heldMOAsAttachable); }
         m_pHeldMO = nullptr;
     } else {
         //TODO All this needs cleaning up, this should do the basics, some other method should be responsible for replacing held things
-        if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pHeldMO)->IsAttachedTo(this)) {
+        if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pHeldMO)->IsAttached())) {
             RemoveAttachable(dynamic_cast<HeldDevice *>(m_pHeldMO), true, false);
             m_pHeldMO = nullptr;
         }
@@ -547,16 +547,16 @@ void Arm::DrawHand(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode
 
     if (!m_HFlipped) {
         if (mode == g_DrawWhite) {
-            draw_character_ex(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY(), g_WhiteColor, -1);
+            draw_character_ex(pTargetBitmap, m_pHand, handPos.GetFloorIntX(), handPos.GetFloorIntY(), g_WhiteColor, -1);
         } else {
-            draw_sprite(pTargetBitmap, m_pHand, handPos.GetRoundIntX(), handPos.GetRoundIntY());
+            draw_sprite(pTargetBitmap, m_pHand, handPos.GetFloorIntX(), handPos.GetFloorIntY());
         }
     } else {
         //TODO this won't draw flipped. It should draw onto a temp bitmap and then draw that flipped. Maybe it can reuse a temp bitmap from MOSR, maybe not?
         if (mode == g_DrawWhite) {
-            draw_character_ex(pTargetBitmap, m_pHand, handPos.GetFloorIntX(), handPos.GetFloorIntX(), g_WhiteColor, -1);
+            draw_character_ex(pTargetBitmap, m_pHand, handPos.GetFloorIntX(), handPos.GetFloorIntY(), g_WhiteColor, -1);
         } else {
-            draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.GetFloorIntX(), handPos.GetFloorIntX());
+            draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.GetFloorIntX(), handPos.GetFloorIntY());
         }
     }
 }

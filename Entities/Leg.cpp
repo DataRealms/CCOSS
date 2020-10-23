@@ -133,10 +133,10 @@ namespace RTE {
 
 	void Leg::SetFoot(Attachable *newFoot) {
 		if (newFoot == nullptr) {
-			if (m_Foot && m_Foot->IsAttachedTo(this)) { RemoveAttachable(m_Foot); }
+			if (m_Foot && m_Foot->IsAttached()) { RemoveAttachable(m_Foot); }
 			m_Foot = nullptr;
 		} else {
-			RemoveAttachable(m_Foot);
+			if (m_Foot && m_Foot->IsAttached()) { RemoveAttachable(m_Foot); }
 			m_Foot = newFoot;
 			AddAttachable(newFoot);
 			m_HardcodedAttachableUniqueIDsAndSetters.insert({newFoot->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<Leg *>(parent)->SetFoot(attachable); }});

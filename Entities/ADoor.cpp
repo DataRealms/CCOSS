@@ -205,10 +205,10 @@ namespace RTE {
 
 	void ADoor::SetDoor(Attachable *newDoor) {
 		if (newDoor == nullptr) {
-			if (m_Door && m_Door->IsAttachedTo(this)) { RemoveAttachable(m_Door); }
+			if (m_Door && m_Door->IsAttached()) { RemoveAttachable(m_Door); }
 			m_Door = nullptr;
 		} else {
-			RemoveAttachable(m_Door);
+			if (m_Door && m_Door->IsAttached()) { RemoveAttachable(m_Door); }
 			m_Door = newDoor;
 			AddAttachable(newDoor);
 			m_HardcodedAttachableUniqueIDsAndSetters.insert({newDoor->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ADoor *>(parent)->SetDoor(attachable); }});

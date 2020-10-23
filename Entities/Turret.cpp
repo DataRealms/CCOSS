@@ -62,12 +62,12 @@ namespace RTE {
 
 	void Turret::SetMountedDevice(Attachable *newMountedDevice) {
 		if (newMountedDevice == nullptr) {
-			if (m_MountedDevice && m_MountedDevice->IsAttachedTo(this)) { RemoveAttachable(m_MountedDevice); }
+			if (m_MountedDevice && m_MountedDevice->IsAttached()) { RemoveAttachable(m_MountedDevice); }
 			m_MountedDevice = nullptr;
 		} else {
 			HeldDevice *castedNewMountedDevice = dynamic_cast<HeldDevice *>(newMountedDevice);
 			if (castedNewMountedDevice) {
-				RemoveAttachable(m_MountedDevice);
+				if (m_MountedDevice && m_MountedDevice->IsAttached()) { RemoveAttachable(m_MountedDevice); }
 				m_MountedDevice = castedNewMountedDevice;
 				AddAttachable(castedNewMountedDevice);
 				m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<Turret *>(parent)->SetMountedDevice(attachable); }});

@@ -486,10 +486,10 @@ Vector AHuman::GetEyePos() const
 
 void AHuman::SetHead(Attachable *newHead) {
     if (newHead == nullptr) {
-        if (m_pHead && m_pHead->IsAttachedTo(this)) { RemoveAttachable(m_pHead); }
+        if (m_pHead && m_pHead->IsAttached()) { RemoveAttachable(m_pHead); }
         m_pHead = nullptr;
     } else {
-        RemoveAttachable(m_pHead);
+        if (m_pHead && m_pHead->IsAttached()) { RemoveAttachable(m_pHead); }
         m_pHead = newHead;
         AddAttachable(newHead);
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newHead->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetHead(attachable); }});
@@ -500,12 +500,12 @@ void AHuman::SetHead(Attachable *newHead) {
 
 void AHuman::SetJetpack(Attachable *newJetpack) {
     if (newJetpack == nullptr) {
-        if (m_pJetpack && m_pJetpack->IsAttachedTo(this)) { RemoveAttachable(m_pJetpack); }
+        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
         m_pJetpack = nullptr;
     } else {
         AEmitter *castedNewJetpack = dynamic_cast<AEmitter *>(newJetpack);
         if (castedNewJetpack) {
-            RemoveAttachable(m_pJetpack);
+            if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
             m_pJetpack = castedNewJetpack;
             AddAttachable(castedNewJetpack);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetJetpack(attachable); }});
@@ -517,12 +517,12 @@ void AHuman::SetJetpack(Attachable *newJetpack) {
 
 void AHuman::SetFGArm(Attachable *newArm) {
     if (newArm == nullptr) {
-        if (m_pFGArm && m_pFGArm->IsAttachedTo(this)) { RemoveAttachable(m_pFGArm); }
+        if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAttachable(m_pFGArm); }
         m_pFGArm = nullptr;
     } else {
         Arm *castedNewArm = dynamic_cast<Arm *>(newArm);
         if (castedNewArm) {
-            RemoveAttachable(m_pFGArm);
+            if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAttachable(m_pFGArm); }
             m_pFGArm = castedNewArm;
             AddAttachable(castedNewArm);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetFGArm(attachable); }});
@@ -534,12 +534,12 @@ void AHuman::SetFGArm(Attachable *newArm) {
 
 void AHuman::SetBGArm(Attachable *newArm) {
     if (newArm == nullptr) {
-        if (m_pBGArm && m_pBGArm->IsAttachedTo(this)) { RemoveAttachable(m_pBGArm); }
+        if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAttachable(m_pBGArm); }
         m_pBGArm = nullptr;
     } else {
         Arm *castedNewArm = dynamic_cast<Arm *>(newArm);
         if (castedNewArm) {
-            RemoveAttachable(m_pBGArm);
+            if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAttachable(m_pBGArm); }
             m_pBGArm = castedNewArm;
             AddAttachable(castedNewArm);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetBGArm(attachable); }});
@@ -551,12 +551,12 @@ void AHuman::SetBGArm(Attachable *newArm) {
 
 void AHuman::SetFGLeg(Attachable *newLeg) {
     if (newLeg == nullptr) {
-        if (m_pFGLeg && m_pFGLeg->IsAttachedTo(this)) { RemoveAttachable(m_pFGLeg); }
+        if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAttachable(m_pFGLeg); }
         m_pFGLeg = nullptr;
     } else {
         Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
         if (castedNewLeg) {
-            RemoveAttachable(m_pFGLeg);
+            if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAttachable(m_pFGLeg); }
             m_pFGLeg = castedNewLeg;
             AddAttachable(castedNewLeg);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetFGLeg(attachable); }});
@@ -568,12 +568,12 @@ void AHuman::SetFGLeg(Attachable *newLeg) {
 
 void AHuman::SetBGLeg(Attachable *newLeg) {
     if (newLeg == nullptr) {
-        if (m_pBGLeg && m_pBGLeg->IsAttachedTo(this)) { RemoveAttachable(m_pBGLeg); }
+        if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAttachable(m_pBGLeg); }
         m_pBGLeg = nullptr;
     } else {
         Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
         if (castedNewLeg) {
-            RemoveAttachable(m_pBGLeg);
+            if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAttachable(m_pBGLeg); }
             m_pBGLeg = castedNewLeg;
             AddAttachable(castedNewLeg);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetBGLeg(attachable); }});

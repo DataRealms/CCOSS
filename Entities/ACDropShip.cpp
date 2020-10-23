@@ -778,12 +778,12 @@ void ACDropShip::Update()
 
 void ACDropShip::SetRightThruster(Attachable *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pRThruster && m_pRThruster->IsAttachedTo(this)) { RemoveAttachable(m_pRThruster); }
+        if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAttachable(m_pRThruster); }
         m_pRThruster = nullptr;
     } else {
         AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
         if (castedNewThruster) {
-            RemoveAttachable(m_pRThruster);
+            if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAttachable(m_pRThruster); }
             m_pRThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetRightThruster(attachable); }});
@@ -795,12 +795,12 @@ void ACDropShip::SetRightThruster(Attachable *newThruster) {
 
 void ACDropShip::SetLeftThruster(Attachable *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pLThruster && m_pLThruster->IsAttachedTo(this)) { RemoveAttachable(m_pLThruster); }
+        if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAttachable(m_pLThruster); }
         m_pLThruster = nullptr;
     } else {
         AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
         if (castedNewThruster) {
-            RemoveAttachable(m_pLThruster);
+            if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAttachable(m_pLThruster); }
             m_pLThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetLeftThruster(attachable); }});
@@ -812,12 +812,12 @@ void ACDropShip::SetLeftThruster(Attachable *newThruster) {
 
 void ACDropShip::SetURightThruster(Attachable *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pURThruster && m_pURThruster->IsAttachedTo(this)) { RemoveAttachable(m_pURThruster); }
+        if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAttachable(m_pURThruster); }
         m_pURThruster = nullptr;
     } else {
         AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
         if (castedNewThruster) {
-            RemoveAttachable(m_pURThruster);
+            if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAttachable(m_pURThruster); }
             m_pURThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetURightThruster(attachable); }});
@@ -829,12 +829,12 @@ void ACDropShip::SetURightThruster(Attachable *newThruster) {
 
 void ACDropShip::SetULeftThruster(Attachable *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pULThruster && m_pULThruster->IsAttachedTo(this)) { RemoveAttachable(m_pULThruster); }
+        if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAttachable(m_pULThruster); }
         m_pULThruster = nullptr;
     } else {
         AEmitter *castedNewThruster = dynamic_cast<AEmitter *>(newThruster);
         if (castedNewThruster) {
-            RemoveAttachable(m_pULThruster);
+            if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAttachable(m_pULThruster); }
             m_pULThruster = castedNewThruster;
             AddAttachable(castedNewThruster);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetULeftThruster(attachable); }});
@@ -846,10 +846,10 @@ void ACDropShip::SetULeftThruster(Attachable *newThruster) {
 
 void ACDropShip::SetRightHatch(Attachable *newHatch) {
     if (newHatch == nullptr) {
-        if (m_pRHatch && m_pRHatch->IsAttachedTo(this)) { RemoveAttachable(m_pRHatch); }
+        if (m_pRHatch && m_pRHatch->IsAttached()) { RemoveAttachable(m_pRHatch); }
         m_pRHatch = nullptr;
     } else {
-        RemoveAttachable(m_pRHatch);
+        if (m_pRHatch && m_pRHatch->IsAttached()) { RemoveAttachable(m_pRHatch); }
         m_pRHatch = newHatch;
         AddAttachable(newHatch);
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newHatch->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetRightHatch(attachable); }});
@@ -860,10 +860,10 @@ void ACDropShip::SetRightHatch(Attachable *newHatch) {
 
 void ACDropShip::SetLeftHatch(Attachable *newHatch) {
     if (newHatch == nullptr) {
-        if (m_pLHatch && m_pLHatch->IsAttachedTo(this)) { RemoveAttachable(m_pLHatch); }
+        if (m_pLHatch && m_pLHatch->IsAttached()) { RemoveAttachable(m_pLHatch); }
         m_pLHatch = nullptr;
     } else {
-        RemoveAttachable(m_pLHatch);
+        if (m_pLHatch && m_pLHatch->IsAttached()) { RemoveAttachable(m_pLHatch); }
         m_pLHatch = newHatch;
         AddAttachable(newHatch);
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newHatch->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACDropShip *>(parent)->SetLeftHatch(attachable); }});

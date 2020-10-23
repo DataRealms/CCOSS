@@ -1578,6 +1578,7 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
             }
         }
     }
+    //TODO Deletion should be made more consistent. Once other code is cleaned up and we can safely delete right away if the Attachable IsSetToDelete, we should do that. Alternatively we could add to MovableMan and let that take care of it in both deletion cases, but I think that may be a waste. Would need to investigate.
     if (!attachable->IsSetToDelete() && attachable->GetDeleteWhenRemovedFromParent()) {
         delete attachable;
     } else if (addToMovableMan || attachable->IsSetToDelete()) {

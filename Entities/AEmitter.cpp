@@ -370,10 +370,10 @@ float AEmitter::EstimateImpulse(bool burst)
 
 void AEmitter::SetFlash(Attachable *newFlash) {
     if (newFlash == nullptr) {
-        if (m_pFlash && m_pFlash->IsAttachedTo(this)) { RemoveAttachable(m_pFlash); }
+        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
         m_pFlash = nullptr;
     } else {
-        RemoveAttachable(m_pFlash);
+        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
         m_pFlash = newFlash;
         AddAttachable(newFlash);
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AEmitter *>(parent)->SetFlash(attachable); }});

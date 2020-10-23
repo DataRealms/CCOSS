@@ -305,12 +305,12 @@ void HDFirearm::Destroy(bool notInherited)
 
 void HDFirearm::SetMagazine(Attachable *newMagazine) {
     if (newMagazine == nullptr) {
-        if (m_pMagazine && m_pMagazine->IsAttachedTo(this)) { RemoveAttachable(m_pMagazine); }
+        if (m_pMagazine && m_pMagazine->IsAttached()) { RemoveAttachable(m_pMagazine); }
         m_pMagazine = nullptr;
     } else {
         Magazine *castedNewMagazine = dynamic_cast<Magazine *>(newMagazine);
         if (castedNewMagazine) {
-            RemoveAttachable(m_pMagazine);
+            if (m_pMagazine && m_pMagazine->IsAttached()) { RemoveAttachable(m_pMagazine); }
             m_pMagazine = castedNewMagazine;
             AddAttachable(castedNewMagazine);
             m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewMagazine->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<HDFirearm *>(parent)->SetMagazine(attachable); }});
@@ -322,10 +322,10 @@ void HDFirearm::SetMagazine(Attachable *newMagazine) {
 
 void HDFirearm::SetFlash(Attachable *newFlash) {
     if (newFlash == nullptr) {
-        if (m_pFlash && m_pFlash->IsAttachedTo(this)) { RemoveAttachable(m_pFlash); }
+        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
         m_pFlash = nullptr;
     } else {
-        RemoveAttachable(m_pFlash);
+        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
         m_pFlash = newFlash;
         AddAttachable(newFlash);
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<HDFirearm *>(parent)->SetFlash(attachable); }});

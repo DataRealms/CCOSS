@@ -1,1 +1,1 @@
-ext_libs = [files('libfmod.so.11')]
+ext_libs = [files('libfmod.so.12')]

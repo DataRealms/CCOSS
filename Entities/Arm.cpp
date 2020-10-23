@@ -206,7 +206,7 @@ void Arm::SetHeldMO(MovableObject *newHeldMO) {
         m_pHeldMO = nullptr;
     } else {
         //TODO All this needs cleaning up, this should do the basics, some other method should be responsible for replacing held things
-        if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pHeldMO)->IsAttached())) {
+        if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pHeldMO)->IsAttached()) {
             RemoveAttachable(dynamic_cast<HeldDevice *>(m_pHeldMO), true, false);
             m_pHeldMO = nullptr;
         }

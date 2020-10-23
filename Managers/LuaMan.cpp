@@ -1107,8 +1107,8 @@ int LuaMan::Create() {
 				value("LANDJUMP", 5 /*AHuman::JumpState::LANDJUMP*/)
 			]
             .def(constructor<>())
-            .property("Head", &AHuman::GetHead, &AHuman::SetHead)
-            .property("Jetpack", &AHuman::GetJetpack, &AHuman::SetJetpack)
+            .property("Head", &AHuman::GetHead, &AHuman::SetHead, detail::null_type(), adopt(_2))
+            .property("Jetpack", &AHuman::GetJetpack, &AHuman::SetJetpack, detail::null_type(), adopt(_2))
             .property("FGArm", &AHuman::GetFGArm, &AHuman::SetFGArm, detail::null_type(), adopt(_2))
             .property("BGArm", &AHuman::GetBGArm, &AHuman::SetBGArm, detail::null_type(), adopt(_2))
             .property("FGLeg", &AHuman::GetFGLeg, &AHuman::SetFGLeg, detail::null_type(), adopt(_2))

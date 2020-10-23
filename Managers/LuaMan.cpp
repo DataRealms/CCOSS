@@ -2070,7 +2070,6 @@ int LuaMan::Create() {
             .def("GetFirstOtherBrainActor", &MovableMan::GetFirstOtherBrainActor)
             .def("GetUnassignedBrain", &MovableMan::GetUnassignedBrain)
             .def("GetParticleCount", &MovableMan::GetParticleCount)
-            .def("GetAGResolution", &MovableMan::GetAGResolution)
             .def("GetSplashRatio", &MovableMan::GetSplashRatio)
             .property("MaxDroppedItems", &MovableMan::GetMaxDroppedItems, &MovableMan::SetMaxDroppedItems)
             .def("SortTeamRoster", &MovableMan::SortTeamRoster)

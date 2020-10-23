@@ -390,16 +390,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetAGResolution
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the global default AtomGroup resolution setting.
-// Arguments:       None.
-// Return value:    The global AtomGroup resolution setting, from 1 (highest res) upward.
-
-    int GetAGResolution() const { return m_AGResolution; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetSplashRatio
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the global setting for how much splash MOPixels should be created
@@ -965,8 +955,6 @@ protected:
 
     // The list created each frame to register all the current MO's
     std::vector<MovableObject *> m_MOIDIndex;
-    // Global AtomGroup resolution setting.
-    int m_AGResolution;
     // The ration of terrain pixels to be converted into MOPixel:s upon
     // deep impact of MO.
     float m_SplashRatio;

@@ -195,7 +195,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector AtomGroup::GetAtomPos(const Atom *atom) const {
+	Vector AtomGroup::GetAdjustedAtomOffset(const Atom *atom) const {
 		return atom->GetOffset().GetXFlipped(m_OwnerMOSR->m_HFlipped) * m_OwnerMOSR->GetRotMatrix();
 	}
 
@@ -1243,7 +1243,7 @@ namespace RTE {
 		Vector atomPos;
 
 		for (const Atom *atom : m_Atoms) {
-			atomPos = m_OwnerMOSR->GetPos() + GetAtomPos(atom);
+			atomPos = m_OwnerMOSR->GetPos() + GetAdjustedAtomOffset(atom);
 			if (g_SceneMan.GetTerrMatter(atomPos.GetFloorIntX(), atomPos.GetFloorIntY()) != g_MaterialAir) {
 				penetrates = true;
 				break;
@@ -1272,7 +1272,7 @@ namespace RTE {
 		int inTerrain = 0;
 
 		for (const Atom *atom : m_Atoms) {
-			atomPos = m_OwnerMOSR->GetPos() + GetAtomPos(atom);
+			atomPos = m_OwnerMOSR->GetPos() + GetAdjustedAtomOffset(atom);
 			if (g_SceneMan.GetTerrMatter(atomPos.GetFloorIntX(), atomPos.GetFloorIntY()) != g_MaterialAir) { inTerrain++; }
 		}
 
@@ -1511,9 +1511,9 @@ namespace RTE {
 
 		for (const Atom *atom : m_Atoms) {
 			if (!useLimbPos) {
-				atomPos = m_OwnerMOSR->GetPos() + GetAtomPos(atom);
+				atomPos = m_OwnerMOSR->GetPos() + GetAdjustedAtomOffset(atom);
 			} else {
-				atomPos = m_LimbPos + GetAtomPos(atom);
+				atomPos = m_LimbPos + GetAdjustedAtomOffset(atom);
 			}
 			if (!atom->GetNormal().IsZero()) {
 				normal = atom->GetNormal().GetXFlipped(m_OwnerMOSR->m_HFlipped) * 5;

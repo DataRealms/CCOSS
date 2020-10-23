@@ -149,11 +149,11 @@ namespace RTE {
 		int GetDepth() const { return m_Depth; }
 
 		/// <summary>
-		/// Gets the position of an Atom in this AtomGroup adjusted to the Owner MOSRotating horizontal flip and rotation.
+		/// Gets the offset of an Atom in this AtomGroup adjusted to the Owner MOSRotating horizontal flip and rotation.
 		/// </summary>
-		/// <param name="atom">The individual Atom to get the position for.</param>
-		/// <returns>The position of an Atom in this AtomGroup adjusted to the Owner MOSRotating horizontal flip and rotation.</returns>
-		Vector GetAtomPos(const Atom *atom) const;
+		/// <param name="atom">The individual Atom to get the offset for.</param>
+		/// <returns>The offset of an Atom in this AtomGroup adjusted to the Owner MOSRotating horizontal flip and rotation.</returns>
+		Vector GetAdjustedAtomOffset(const Atom *atom) const;
 
 		/// <summary>
 		/// Gets the current position of this AtomGroup as a limb.

@@ -1550,7 +1550,7 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
     }
     RTEAssert(attachable->IsAttachedTo(this), "Tried to remove Attachable " + attachable->GetModuleAndPresetName() + " from presumed parent " + GetModuleAndPresetName() + ", but it had a different parent (" + (attachable->GetParent() ? attachable->GetParent()->GetModuleAndPresetName() : "ERROR") + "). This should never happen!");
 
-    if (m_Attachables.size() > 0) { m_Attachables.remove(attachable); }
+    if (!m_Attachables.empty()) { m_Attachables.remove(attachable); }
     attachable->SetParent(nullptr);
     m_AttachableAndWoundMass -= attachable->GetMass();
 
@@ -1578,15 +1578,8 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
             }
         }
     }
-    //TODO Deletion should be made more consistent. Once other code is cleaned up and we can safely delete right away if the Attachable IsSetToDelete, we should do that. Alternatively we could add to MovableMan and let that take care of it in both deletion cases, but I think that may be a waste. Would need to investigate.
-    if (!attachable->IsSetToDelete() && attachable->GetDeleteWhenRemovedFromParent()) {
-        delete attachable;
-    } else if (addToMovableMan || attachable->IsSetToDelete()) {
-        g_MovableMan.AddMO(attachable);
-    } else {
-        delete attachable;
-        //RTEAbort("Tried to remove Attachable " + attachable->GetModuleAndPresetName() + " from parent " + GetModuleAndPresetName() + " but it was not set to delete, or be added to MovableMan, or delete when removed from parent. This should never happen.");
-    }
+    if (attachable->GetDeleteWhenRemovedFromParent()) { attachable->SetToDelete(); }
+    if (addToMovableMan || attachable->IsSetToDelete()) { g_MovableMan.AddMO(attachable); }
     return true;
 }
 

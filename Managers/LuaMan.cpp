@@ -382,6 +382,30 @@ double NormalRand() { return RandomNormalNum<double>(); }
 double PosRand() { return RandomNum<double>(); }
 
 /*
+These methods are needed to specially handling removing attachables with Lua in order to avoid memory leaks. They have silly names cause luabind otherwise makes it difficult to pass values to them properly.
+Eventually RemoveAttachable should return the removed attachable, making this whole thing no longer unsafe and these methods unnecessary (there's a TODO in MOSRotating.h for it).
+*/
+bool RemoveAttachableLuaSafe4(MOSRotating *luaSelfObject, Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
+    if (!addToMovableMan && !attachable->IsSetToDelete()) {
+        attachable->SetToDelete();
+    }
+    return luaSelfObject->RemoveAttachable(attachable, addToMovableMan, addBreakWounds);
+}
+bool RemoveAttachableLuaSafe3(MOSRotating *luaSelfObject, Attachable *attachable) {
+    return RemoveAttachableLuaSafe4(luaSelfObject, attachable, false, false);
+}
+bool RemoveAttachableLuaSafe2(MOSRotating *luaSelfObject, long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) {
+    MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueID);
+    if (attachableAsMovableObject) {
+        return RemoveAttachableLuaSafe4(luaSelfObject, dynamic_cast<Attachable *>(attachableAsMovableObject), addToMovableMan, addBreakWounds);
+    }
+    return false;
+}
+bool RemoveAttachableLuaSafe1(MOSRotating *luaSelfObject, long attachableUniqueID) {
+    return RemoveAttachableLuaSafe2(luaSelfObject, attachableUniqueID, false, false);
+}
+
+/*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Wrapper for the GAScripted so we can derive new classes from it purely in lua:
 //
@@ -788,10 +812,16 @@ int LuaMan::Create() {
             .def("ObjectValueExists", &MOSRotating::ObjectValueExists)
             .def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, adopt(_2))
             .def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, adopt(_2))
+            .def("RemoveAttachable", &RemoveAttachableLuaSafe1)
+            .def("RemoveAttachable", &RemoveAttachableLuaSafe2)
+            .def("RemoveAttachable", &RemoveAttachableLuaSafe3)
+            .def("RemoveAttachable", &RemoveAttachableLuaSafe4)
+            /*
+            .def("RemoveAttachable", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable)
+            .def("RemoveAttachable", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
             .def("RemoveAttachable", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
             .def("RemoveAttachable", (bool (MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
-            .def("RemoveAttachable", (bool (MOSRotating::*)(long uniqueIDOfAttachableToRemove))&MOSRotating::RemoveAttachable)
-            .def("RemoveAttachable", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
+            */
 			.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, adopt(_2))
 			.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, adopt(_2))
 			.def("RemoveEmitter", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)

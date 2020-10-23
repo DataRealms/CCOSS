@@ -403,6 +403,7 @@ ClassInfoGetters
     /// <param name="parentOffsetToSet">The Vector to set as the Attachable's parent offset.</param>
 	virtual void AddAttachable(Attachable *attachable, const Vector& parentOffsetToSet);
 
+    //TODO All RemoveAttachable methods should return the removed attachable (if it's not deleted) so there's no potential memory leaks or other safety problems. Very little cares about whether this actually succeeded or failed anyway, so returning a boolean here is kind of pointless. This should probably be done as part of Arm cleanup.
     /// <summary>
     /// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Does not add it to MovableMan or add break wounds.
     /// </summary>
@@ -412,6 +413,7 @@ ClassInfoGetters
 
     /// <summary>
     /// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
+    /// If the Attachable is not set to delete or delete when removed from its parent, and addToMovableMan is false, the caller must hang onto a pointer to the Attachable ahead of time to avoid memory leaks.
     /// </summary>
     /// <param name="attachableUniqueID">The UniqueID of the the Attachable to remove.</param>
     /// <param name="addToMovableMan">Whether or not to add the Attacahble to MovableMan once it has been removed.</param>
@@ -428,6 +430,7 @@ ClassInfoGetters
 
     /// <summary>
     /// Removes the passed in Attachable and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
+    /// If the Attachable is not set to delete or delete when removed from its parent, and addToMovableMan is false, the caller must hang onto a pointer to the Attachable ahead of time to avoid memory leaks.
     /// </summary>
     /// <param name="attachable">The Attachable to remove.</param>
     /// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>

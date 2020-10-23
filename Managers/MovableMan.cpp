@@ -62,7 +62,6 @@ void MovableMan::Clear()
     m_AddedAlarmEvents.clear();
     m_AlarmEvents.clear();
     m_MOIDIndex.clear();
-    m_AGResolution = 1;
     m_SplashRatio = 0.75;
     m_MaxDroppedItems = 25;
     m_SloMoTimer.Reset();
@@ -109,8 +108,6 @@ int MovableMan::ReadProperty(std::string propName, Reader &reader)
         g_PresetMan.GetEntityPreset(reader);
     else if (propName == "AddActor")
         g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "DefaultAtomGroupResolution")
-        reader >> m_AGResolution;
     else if (propName == "SplashRatio")
         reader >> m_SplashRatio;
     else if (propName == "MaxUnheldItems")

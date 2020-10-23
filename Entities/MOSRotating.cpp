@@ -1065,7 +1065,7 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
 
 bool MOSRotating::MoveOutOfTerrain(unsigned char strongerThan)
 {
-    return m_pAtomGroup->ResolveTerrainIntersection(m_Pos, m_Rotation, strongerThan);
+    return m_pAtomGroup->ResolveTerrainIntersection(m_Pos, strongerThan);
 }
 
 

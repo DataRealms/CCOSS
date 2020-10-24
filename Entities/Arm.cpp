@@ -263,8 +263,7 @@ MovableObject * Arm::DropEverything()
     MovableObject *pReturnMO = m_pHeldMO;
 
     if (m_pHeldMO && m_pHeldMO->IsDevice()) {
-        RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO));
-        g_MovableMan.AddItem(m_pHeldMO);
+        RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO), true, false);
     }
     else if (m_pHeldMO)
         g_MovableMan.AddParticle(m_pHeldMO);
@@ -386,8 +385,7 @@ void Arm::Update() {
         if (m_pHeldMO) {
 			m_pHeldMO->SetVel(m_Vel + Vector(-RandomNum(0.0F, 10.0F), -RandomNum(0.0F, 15.0F)));
             m_pHeldMO->SetAngularVel(-7);
-            if (m_pHeldMO->IsDevice()) { RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO)); }
-            g_MovableMan.AddItem(m_pHeldMO);
+            if (m_pHeldMO->IsDevice()) { RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO), true, false); }
             m_pHeldMO = 0;
         }
         // Update hand
@@ -447,7 +445,7 @@ void Arm::Update() {
 
             // If it blew up or whatever, releaes it from hand and put into scene so it'll be cleaned up properly
             if (m_pHeldMO && m_pHeldMO->IsSetToDelete())
-                g_MovableMan.AddItem(ReleaseHeldMO());
+                ReleaseHeldMO();
         }
         // Adjust rotation and hand distance if reaching toward something.
         else
@@ -496,7 +494,7 @@ void Arm::Update() {
 
                 // If it blew up or whatever, release it from hand and put into scene so it'll be cleaned up properly
                 if (m_pHeldMO->IsSetToDelete())
-                    g_MovableMan.AddItem(ReleaseHeldMO());
+                    ReleaseHeldMO();
             }
         }
 

@@ -1453,7 +1453,11 @@ void MOSRotating::Update() {
 
         attachable->Update();
 
-        TransferForcesFromAttachable(attachable);
+        if (attachable->IsAttachedTo(this) && attachable->IsSetToDelete()) {
+            RemoveAttachable(attachable, true, false);
+        } else if (!attachable->IsSetToDelete()) {
+            TransferForcesFromAttachable(attachable);
+        }
     }
 
     // Create intermediate flipping bitmaps if they don't exist
@@ -1882,22 +1886,17 @@ bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
     if (attachable) {
         RTEAssert(attachable->IsAttached(), "Tried to transfer forces from Attachable (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
         RTEAssert(attachable->IsAttachedTo(this), "Tried to transfer forces from another parent's (" + attachable->GetParent()->GetModuleAndPresetName() + ") Attachable (" + attachable->GetModuleAndPresetName() + "), this should never happen!");
-        if (attachable->IsSetToDelete()) {
-            RemoveAttachable(attachable, true, true);
-        } else if (attachable->IsAttached()) {
-            attachable->PostTravel();
-            Vector forces;
-            Vector impulses;
-            intact = attachable->TransferJointForces(forces) && attachable->TransferJointImpulses(impulses);
+        
+        attachable->PostTravel();
+        Vector forces;
+        Vector impulses;
+        intact = attachable->TransferJointForces(forces) && attachable->TransferJointImpulses(impulses);
 
-            if (!forces.IsZero()) {
-                AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector());
-            }
-            if (!impulses.IsZero()) {
-                AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector());
-            }
-        } else {
-            RTEAbort("Tried to transfer forces from a Non-Attached, Non-Deleting Attachable " + attachable->GetModuleAndPresetName() + ". This should never happen!");
+        if (!forces.IsZero()) {
+            AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector());
+        }
+        if (!impulses.IsZero()) {
+            AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector());
         }
     }
     return intact;

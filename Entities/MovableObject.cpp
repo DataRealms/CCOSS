@@ -1029,9 +1029,7 @@ void MovableObject::RegMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, b
     if (!makeNewMOID && GetParent()) {
         m_MOID = GetParent()->GetID();
     } else {
-        if (MOIDIndex.size() == g_NoMOID) {
-            MOIDIndex.push_back(0);
-        }
+        if (MOIDIndex.size() == g_NoMOID) { MOIDIndex.push_back(0); }
 
 		m_MOID = MOIDIndex.size();
 		MOIDIndex.push_back(this);

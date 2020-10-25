@@ -42,11 +42,11 @@ void HeldDevice::Clear()
 	m_DualWieldable = false;
     m_StanceOffset.Reset();
     m_SharpStanceOffset.Reset();
-    m_SharpAim = 0.0f;
+    m_SharpAim = 0.0F;
     m_MaxSharpLength = 0;
     m_Supported = false;
     m_SupportOffset.Reset();
-    m_GripStrengthMultiplier = 1.0;
+    m_GripStrengthMultiplier = 1.0F;
     m_BlinkTimer.Reset();
     m_PieSlices.clear();
     m_Loudness = -1;
@@ -60,7 +60,7 @@ void HeldDevice::Clear()
 
 int HeldDevice::Create()
 {
-    if (MOSRotating::Create() < 0)
+    if (Attachable::Create() < 0)
         return -1;
 
     // Set MO Type.

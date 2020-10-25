@@ -831,9 +831,9 @@ friend class Atom;
     /// <summary>
     /// Sets this MO to not hit a specific other MO and all its children even when MO hitting is enabled on this MO.
     /// </summary>
-    /// <param name="moToNotHit">A pointer to the MO to not be hitting. 0 means don't ignore anyhting. Ownership is NOT transferred!</param>
+    /// <param name="moToNotHit">A pointer to the MO to not be hitting. Null pointer means don't ignore anyhting. Ownership is NOT transferred!</param>
     /// <param name="forHowLong">How long, in seconds, to ignore the specified MO. A negative number means forever.</param>
-    virtual void SetWhichMOToNotHit(MovableObject *moToNotHit = 0, float forHowLong = -1) { m_pMOToNotHit = moToNotHit; m_MOIgnoreTimer.Reset(); m_MOIgnoreTimer.SetSimTimeLimitS(forHowLong); }
+    virtual void SetWhichMOToNotHit(MovableObject *moToNotHit = nullptr, float forHowLong = -1) { m_pMOToNotHit = moToNotHit; m_MOIgnoreTimer.Reset(); m_MOIgnoreTimer.SetSimTimeLimitS(forHowLong); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

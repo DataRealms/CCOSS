@@ -792,9 +792,7 @@ void HDFirearm::Update()
                     Attachable *pAttachable = dynamic_cast<Attachable *>(pParticle);
                     if (pAttachable)
                     {
-                        if (pAttachable->IsAttached()) {
-                            dynamic_cast<MOSRotating *>(pAttachable->GetParent())->RemoveAttachable(pAttachable);
-                        }
+                        if (pAttachable->IsAttached()) { dynamic_cast<MOSRotating *>(pAttachable->GetParent())->RemoveAttachable(pAttachable); }
                         // Activate if it is some kind of grenade or whatnot.
                         ThrownDevice *pTD = dynamic_cast<ThrownDevice *>(pAttachable);
                         if (pTD)

@@ -54,9 +54,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector & Vector::ClampMagnitude(float upperLimit, float lowerLimit) {
-		if (upperLimit < lowerLimit) {
-			std::swap(upperLimit, lowerLimit);
-		}
+		if (upperLimit < lowerLimit) { std::swap(upperLimit, lowerLimit); }
 		if (upperLimit == 0 && lowerLimit == 0) {
 			Reset();
 		} else if (GetMagnitude() > upperLimit) {

@@ -8,7 +8,7 @@ namespace RTE {
 	class HeldDevice;
 
 	/// <summary>
-	/// A detatchable turret pod that can hold HeldDevices.
+	/// A detachable turret pod that can hold HeldDevices.
 	/// </summary>
 	class Turret : public Attachable {
 
@@ -28,7 +28,7 @@ namespace RTE {
 		/// Creates a Turret to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the Turret to deep copy.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const Turret &reference);
 #pragma endregion
 

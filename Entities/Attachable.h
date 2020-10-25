@@ -30,7 +30,7 @@ namespace RTE {
 		/// Makes the Attachable object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Creates an Attachable to be identical to another, by deep copy.

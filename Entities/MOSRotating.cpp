@@ -240,8 +240,7 @@ int MOSRotating::Create(const MOSRotating &reference) {
 
     for (const Attachable *referenceAttachable : reference.m_Attachables) {
         if (m_ReferenceHardcodedAttachableUniqueIDs.find(referenceAttachable->GetUniqueID()) == m_ReferenceHardcodedAttachableUniqueIDs.end()) {
-            Attachable *newAttachable = dynamic_cast<Attachable *>(referenceAttachable->Clone());
-            AddAttachable(newAttachable);
+            AddAttachable(dynamic_cast<Attachable *>(referenceAttachable->Clone()));
         }
     }
     m_ReferenceHardcodedAttachableUniqueIDs.clear();
@@ -488,9 +487,7 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includeAttachab
             (includeAttachablesWithNoDamageMultiplier && attachable->GetDamageMultiplier() == 0);
         int attachableWoundCount = attachable->GetWoundCount(includeAttachablesWithAPositiveDamageMultiplier, includeAttachablesWithANegativeDamageMultiplier, includeAttachablesWithNoDamageMultiplier);
 
-        if (attachableSatisfiesConditions && attachableWoundCount > 0) {
-            woundedParts.push_back({attachable, attachableWoundCount});
-        }
+        if (attachableSatisfiesConditions && attachableWoundCount > 0) { woundedParts.push_back({attachable, attachableWoundCount}); }
     }
 
     if (woundedParts.empty()) {
@@ -501,7 +498,7 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includeAttachab
     /// Internal lambda function to remove the first wound emitter from this MOSRotating.
     /// </summary>
     auto removeFirstWoundEmitter = [this]() {
-        if (m_Wounds.size() == 0) {
+        if (m_Wounds.empty()) {
             return 0.0F;
         }
         float woundDamage = m_Wounds.front()->GetBurstDamage();
@@ -511,7 +508,7 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includeAttachab
     };
 
     for (int i = 0; i < numberOfWoundsToRemove; i++) {
-        if (woundedParts.size() == 0) {
+        if (woundedParts.empty()) {
             break;
         }
 
@@ -523,9 +520,7 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includeAttachab
             //TODO This is less efficient than it should be. We already collected all wounded parts and their wounds above, we should pass that in (make another function overload) instead of collecting everything again. It might be wise to use a tree for this purpose.
             damage += woundedPart->RemoveWounds(1, includeAttachablesWithAPositiveDamageMultiplier, includeAttachablesWithANegativeDamageMultiplier, includeAttachablesWithNoDamageMultiplier);
         }
-        if (woundedParts[woundedPartIndex].second-- <= 0) {
-            woundedParts.erase(woundedParts.begin() + woundedPartIndex);
-        }
+        if (woundedParts[woundedPartIndex].second-- <= 0) { woundedParts.erase(woundedParts.begin() + woundedPartIndex); }
     }
 
 	return damage;
@@ -968,9 +963,7 @@ void MOSRotating::GibThis(const Vector &impactImpulse, MovableObject *movableObj
 		g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, 255, m_EffectRotAngle);
     }
 
-    if (m_LoudnessOnGib > 0) {
-        g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, m_LoudnessOnGib));
-    }
+    if (m_LoudnessOnGib > 0) { g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, m_LoudnessOnGib)); }
 
     m_ToDelete = true;
 }
@@ -992,9 +985,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
         }
         Vector rotatedGibOffset = RotateOffset(gibSettingsObject.GetOffset());
         for (int i = 0; i < gibSettingsObject.GetCount(); i++) {
-            if (i > 0) {
-                gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone());
-            }
+            gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone());
 
             if (gibParticleClone->GetLifetime() != 0) {
                 gibParticleClone->SetLifetime(static_cast<int>(static_cast<float>(gibParticleClone->GetLifetime()) * (1.0F + (gibSettingsObject.GetLifeVariation() * RandomNormalNum()))));
@@ -1004,7 +995,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / gibParticleClone->GetMass()) * RandomNum());
             if (rotatedGibOffset.GetRoundIntX() > m_aSprite[0]->w / 3) {
                 float offCenterRatio = rotatedGibOffset.m_X / (static_cast<float>(m_aSprite[0]->w) / 2.0F);
-                float angularVel = fabs(gibParticleClone->GetAngularVel() * 0.5F) + fabs(gibParticleClone->GetAngularVel() * 0.5F * offCenterRatio);
+                float angularVel = fabs(gibParticleClone->GetAngularVel() * 0.5F) + std::fabs(gibParticleClone->GetAngularVel() * 0.5F * offCenterRatio);
                 gibParticleClone->SetAngularVel(angularVel * (rotatedGibOffset.m_X > 0 ? -1 : 1));
             } else {
                 gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.5F + (gibParticleClone->GetAngularVel() * RandomNum())) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
@@ -1014,9 +1005,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             Vector gibVelocity = rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange)).RadRotate(impactImpulse.GetAbsRadAngle() + gibSettingsObject.GetSpread() + RandomNormalNum());
             gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? m_Vel : Vector()));
 
-            if (movableObjectToIgnore) {
-                gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore);
-            }
+            if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
 
             g_MovableMan.AddParticle(gibParticleClone);
         }
@@ -1027,7 +1016,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 
 void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
     Attachable *attachable;
-    for (list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end();) {
+    for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end();) {
         RTEAssert((*attachableIterator), "Broken Attachable!");
         attachable = *attachableIterator;
 
@@ -1040,12 +1029,10 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
         if (!attachable->GetDeleteWhenRemovedFromParent()) {
             float attachableGibBlastStrength = (attachable->GetParentGibBlastStrengthMultiplier() == 0 ? 1 : attachable->GetParentGibBlastStrengthMultiplier() * m_GibBlastStrength) / (1 + attachable->GetMass());
             attachable->SetAngularVel((attachable->GetAngularVel() * 0.5F) + (attachable->GetAngularVel() * 0.5F * attachableGibBlastStrength * RandomNormalNum()));
-            Vector gibBlastVel = Vector(attachable->GetParentOffset()).SetMagnitude(attachableGibBlastStrength * 0.5 + (attachableGibBlastStrength * RandomNum()));
+            Vector gibBlastVel = Vector(attachable->GetParentOffset()).SetMagnitude(attachableGibBlastStrength * 0.5F + (attachableGibBlastStrength * RandomNum()));
             attachable->SetVel(m_Vel + gibBlastVel + impactImpulse);
 
-            if (movableObjectToIgnore) {
-                attachable->SetWhichMOToNotHit(movableObjectToIgnore);
-            }
+            if (movableObjectToIgnore) { attachable->SetWhichMOToNotHit(movableObjectToIgnore); }
         }
 
         ++attachableIterator;
@@ -1428,14 +1415,12 @@ void MOSRotating::Update() {
 
     MOSprite::Update();
 
-    if (m_InheritEffectRotAngle) {
-        m_EffectRotAngle = m_Rotation.GetRadAngle();
-    }
+    if (m_InheritEffectRotAngle) { m_EffectRotAngle = m_Rotation.GetRadAngle(); }
 
-    if (m_OrientToVel > 0 && m_Vel.GetLargest() > 5.0) {
+    if (m_OrientToVel > 0 && m_Vel.GetLargest() > 5.0F) {
         m_OrientToVel = std::clamp(m_OrientToVel, 0.0F, 1.0F);
 
-        float velInfluence = std::clamp(m_OrientToVel < 1.0 ? m_Vel.GetMagnitude() / 100.0F : 1.0F, 0.0F, 1.0F);
+        float velInfluence = std::clamp(m_OrientToVel < 1.0F ? m_Vel.GetMagnitude() / 100.0F : 1.0F, 0.0F, 1.0F);
         float radsToGo = m_Rotation.GetRadAngleTo(m_Vel.GetAbsRadAngle());
         m_Rotation += radsToGo * m_OrientToVel * velInfluence;
     }
@@ -1446,7 +1431,7 @@ void MOSRotating::Update() {
     }
 
     Attachable *attachable = 0;
-    for (list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
+    for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
         attachable = *attachableIterator;
         RTEAssert(attachable, "Broken Attachable!");
         ++attachableIterator;
@@ -1460,13 +1445,8 @@ void MOSRotating::Update() {
         }
     }
 
-    // Create intermediate flipping bitmaps if they don't exist
-    if (m_HFlipped && !m_pFlipBitmap && m_aSprite[0]) {
-        m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
-    }
-    if (m_HFlipped && !m_pFlipBitmapS && m_aSprite[0]) {
-        m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h);
-    }
+    if (m_HFlipped && !m_pFlipBitmap && m_aSprite[0]) { m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h); }
+    if (m_HFlipped && !m_pFlipBitmapS && m_aSprite[0]) { m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h); }
 }
 
 
@@ -1508,18 +1488,14 @@ void MOSRotating::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex, MOID root
 
     for (Attachable *attachable : m_Attachables) {
         // Anything that doesn't get hit by MOs doesn't need an ID, since that's only actually used for collision stuff.
-        if (attachable->GetsHitByMOs()) {
-            attachable->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-        }
+        if (attachable->GetsHitByMOs()) { attachable->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID); }
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MOSRotating::AddAttachable(Attachable *attachable) {
-	if (attachable) {
-		AddAttachable(attachable, attachable->GetParentOffset());
-	}
+	if (attachable) { AddAttachable(attachable, attachable->GetParentOffset()); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1591,7 +1567,7 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
 
 void MOSRotating::RemoveOrDestroyAllAttachables(bool destroy) {
     Attachable *attachable;
-    for (list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
+    for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
         attachable = *attachableIterator;
         RTEAssert(attachable, "Broken Attachable!");
         ++attachableIterator;
@@ -1610,9 +1586,7 @@ void MOSRotating::RemoveOrDestroyAllAttachables(bool destroy) {
 void MOSRotating::GetMOIDs(std::vector<MOID> &MOIDs) const {
     MOSprite::GetMOIDs(MOIDs);
     for (const Attachable *attachable : m_Attachables) {
-        if (attachable->GetsHitByMOs()) {
-            attachable->GetMOIDs(MOIDs);
-        }
+        if (attachable->GetsHitByMOs()) { attachable->GetMOIDs(MOIDs); }
     }
 }
 
@@ -1735,17 +1709,13 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 	// Only draw attachables and emitters which are not drawn after parent, so we draw them before
 	if (mode == g_DrawColor || (!onlyPhysical && mode == g_DrawMaterial)) {
         for (const AEmitter *woundToDraw : m_Wounds) {
-            if (!woundToDraw->IsDrawnAfterParent()) {
-                woundToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-            }
+            if (!woundToDraw->IsDrawnAfterParent()) { woundToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
         }
 	}
 
 	// Draw all the attached attachables
     for (const Attachable *attachableToDraw : m_Attachables) {
-        if (!attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) {
-            attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        }
+        if (!attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) { attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
     }
 
 
@@ -1858,17 +1828,13 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
     // Only draw attachables and emitters which are not drawn after parent, so we draw them before
     if (mode == g_DrawColor || (!onlyPhysical && mode == g_DrawMaterial)) {
         for (const AEmitter *woundToDraw : m_Wounds) {
-            if (woundToDraw->IsDrawnAfterParent()) {
-                woundToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-            }
+            if (woundToDraw->IsDrawnAfterParent()) { woundToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
         }
     }
 
     // Draw all the attached attachables
     for (const Attachable *attachableToDraw : m_Attachables) {
-        if (attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) {
-            attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        }
+        if (attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) { attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
     }
 
 #ifdef DEBUG_BUILD
@@ -1892,12 +1858,8 @@ bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
         Vector impulses;
         intact = attachable->TransferJointForces(forces) && attachable->TransferJointImpulses(impulses);
 
-        if (!forces.IsZero()) {
-            AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector());
-        }
-        if (!impulses.IsZero()) {
-            AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector());
-        }
+        if (!forces.IsZero()) { AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
+        if (!impulses.IsZero()) { AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
     }
     return intact;
 }

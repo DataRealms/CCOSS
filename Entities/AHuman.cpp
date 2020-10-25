@@ -380,17 +380,13 @@ int AHuman::Save(Writer &writer) const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Destroys and resets (through Clear()) the AHuman object.
 
-void AHuman::Destroy(bool notInherited)
-{
+void AHuman::Destroy(bool notInherited) {
+    delete m_pFGHandGroup;
     delete m_pBGHandGroup;
     delete m_pFGFootGroup;
     delete m_pBGFootGroup;
-//    for (deque<LimbPath *>::iterator itr = m_WalkPaths.begin();
-//         itr != m_WalkPaths.end(); ++itr)
-//        delete *itr;
 
-    if (!notInherited)
-        Actor::Destroy();
+    if (!notInherited) { Actor::Destroy(); }
     Clear();
 }
 
@@ -3951,9 +3947,9 @@ void AHuman::Update()
     if (m_pHead && m_pHead->IsAttached()) {
         float toRotate = 0;
         // Only rotate the head to match the aim angle if body is stable and upright
-        if (m_Status == STABLE && fabs(m_Rotation.GetRadAngle()) < (c_HalfPI + c_QuarterPI)) {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_HFlipped ? -m_AimAngle : m_AimAngle) * 0.7 + m_Rotation.GetRadAngle() * 0.2);
-            toRotate *= 0.15;
+        if (m_Status == STABLE && std::fabs(m_Rotation.GetRadAngle()) < (c_HalfPI + c_QuarterPI)) {
+            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_HFlipped ? -m_AimAngle : m_AimAngle) * 0.7F + m_Rotation.GetRadAngle() * 0.2F);
+            toRotate *= 0.15F;
         }
         // If dying upright, make head slump forward or back depending on body lean
 // TODO: Doesn't work too well, but probably could

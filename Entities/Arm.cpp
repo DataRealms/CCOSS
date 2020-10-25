@@ -29,7 +29,7 @@ ConcreteClassInfo(Arm, Attachable, 50)
 
 void Arm::Clear()
 {
-    m_pHeldMO = 0;
+    m_pHeldMO = nullptr;
     m_GripStrength = 0;
     m_HandFile.Reset();
     m_pHand = 0;
@@ -49,7 +49,7 @@ void Arm::Clear()
 // Description:     Makes the Arm object ready for use.
 
 int Arm::Create() {
-    if (MOSRotating::Create() < 0) {
+    if (Attachable::Create() < 0) {
         return -1;
     }
 

@@ -8,7 +8,7 @@ namespace RTE {
 	class HeldDevice;
 
 	/// <summary>
-	/// A detatchable Leg that will be controlled by LimbPaths.
+	/// A detachable Leg that will be controlled by LimbPaths.
 	/// </summary>
 	class Leg : public Attachable {
 
@@ -26,14 +26,14 @@ namespace RTE {
 		/// <summary>
 		/// Makes the Leg object ready for use.
 		/// </summary>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create() override;
 
 		/// <summary>
 		/// Creates a Leg to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the Leg to deep copy.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const Leg &reference);
 #pragma endregion
 
@@ -93,10 +93,12 @@ namespace RTE {
 		void EnableIdle(bool idle = true) { m_WillIdle = idle; }
 #pragma endregion
 
+#pragma region Override Methods
 		/// <summary>
 		/// Updates this Leg. Supposed to be done every frame.
 		/// </summary>
 		void Update() override;
+#pragma endregion
 
 	protected:
 
@@ -109,7 +111,7 @@ namespace RTE {
 
 		float m_MinExtension; //!< Precalculated min extension of the Leg (from the joint) based on the contracted offset.
 		float m_MaxExtension; //!< Precalculated max extension of the Leg (from the joint) based on the extended offset.
-		float m_CurrentNormalizedExtension; //!< Normalized scalar of where the ankle offset's magnitude is between the min and max extensions
+		float m_CurrentNormalizedExtension; //!< Normalized scalar of where the ankle offset's magnitude is between the min and max extensions.
 		
 		Vector m_TargetPosition; //!< The absolute position that this Leg's foot is moving towards.
 		Vector m_IdleOffset; //!< The target offset from m_Pos that this Leg's foot is moving towards when allowed to idle and the target position is not acceptable.
@@ -121,6 +123,7 @@ namespace RTE {
 
 	private:
 
+#pragma region Update Breakdown
 		/// <summary>
 		/// Updates the current ankle offset for this Leg, and sets the foot's parent offset to match up with it. Should only be called from Update.
 		/// If the Leg is attached, the current ankle offset is based on the target offset and move speed, and whether the Leg should idle or not, otherwise it puts it in a reasonable position.
@@ -144,6 +147,7 @@ namespace RTE {
 		/// If the Leg is attached, the foot's rotation and frame depend on the ankle offset, otherwise the foot's rotation is set to be perpendicular to the Leg's rotation.
 		/// </summary>
 		void UpdateFootFrameAndRotation();
+#pragma endregion
 
 		/// <summary>
 		/// Clears all the member variables of this Leg, effectively resetting the members of this abstraction level only.

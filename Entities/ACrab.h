@@ -194,7 +194,7 @@ public:
     /// Gets the left background Leg of this ACrab.
     /// </summary>
     /// <returns>A pointer to the left background Leg of this ACrab. Ownership is NOT transferred!</returns>
-    Leg * GetLeftBGLeg() const { m_pLBGLeg; }
+    Leg * GetLeftBGLeg() const { return m_pLBGLeg; }
 
     /// <summary>
     /// Sets the left background Leg for this ACrab. Ownership IS transferred!

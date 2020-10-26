@@ -272,7 +272,7 @@ namespace RTE {
 		/// Sets the AEmitter that represents the wound added to this Attachable when it gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
 		/// </summary>
 		/// <param name="breakWound">The AEmitter to use for this Attachable's breakwound.</param>
-		void SetBreakWound(const AEmitter *breakWound) { m_BreakWound = breakWound; } //TODO I added this for consistency but do we want it? Maybe should have a string version that does the presetman lookup, cause we need to have a working pointer to the breakwound.
+		void SetBreakWound(AEmitter *breakWound) { m_BreakWound = breakWound; }
 
 		/// <summary>
 		/// Gets the AEmitter that represents the wound added to this Attachable's parent when this Attachable gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
@@ -284,7 +284,7 @@ namespace RTE {
 		/// Sets the AEmitter that represents the wound added to this Attachable's parent when this Attachable gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
 		/// </summary>
 		/// <param name="breakWound">The AEmitter to use for the parent's breakwound.</param>
-		void SetParentBreakWound(const AEmitter *breakWound) { m_ParentBreakWound = breakWound; }
+		void SetParentBreakWound(AEmitter *breakWound) { m_ParentBreakWound = breakWound; }
 #pragma endregion
 
 #pragma region Inherited Value Getters and Setters

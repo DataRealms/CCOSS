@@ -63,13 +63,13 @@ namespace RTE {
 		/// Gets the MO which is the parent of this Attachable.
 		/// </summary>
 		/// <returns>A pointer to the parent of this Attachable.</returns>
-		MovableObject *GetParent() override { return m_Parent; }
+		MovableObject * GetParent() override { return m_Parent; }
 
 		/// <summary>
 		/// Gets the MO which is the parent of this Attachable. 
 		/// </summary>
 		/// <returns>A pointer to the parent of this Attachable.</returns>
-		const MovableObject *GetParent() const override { return m_Parent; }
+		const MovableObject * GetParent() const override { return m_Parent; }
 
 		/// <summary>
 		/// Indicates whether this Attachable is attached to an MOSRotating parent or not.
@@ -88,19 +88,19 @@ namespace RTE {
 		/// Gets the MO which is the ultimate root parent of this Attachable and its parent.
 		/// </summary>
 		/// <returns>A pointer to the highest root parent of this Attachable.</returns>
-		MovableObject *GetRootParent() override { return m_Parent ? m_Parent->GetRootParent() : this; }
+		MovableObject * GetRootParent() override { return m_Parent ? m_Parent->GetRootParent() : this; }
 
 		/// <summary>
 		/// Gets the MO which is the ultimate root parent of this Attachable and its parent.
 		/// </summary>
 		/// <returns>A pointer to the highest root parent of this Attachable.</returns>
-		const MovableObject *GetRootParent() const override { return m_Parent ? m_Parent->GetRootParent() : this; }
+		const MovableObject * GetRootParent() const override { return m_Parent ? m_Parent->GetRootParent() : this; }
 
 		/// <summary>
 		/// Gets the stored offset between this Attachable's parent's position and the joint position. This should be maintained by the parent.
 		/// </summary>
 		/// <returns>A const reference Vector describing the offset from the parent's position to the joint position.</returns>
-		const Vector &GetParentOffset() const { return m_ParentOffset; }
+		const Vector & GetParentOffset() const { return m_ParentOffset; }
 
 		/// <summary>
 		/// Sets the stored offset between this Attachable's parent's Pos and the joint position. This should be maintained by the parent.
@@ -222,7 +222,7 @@ namespace RTE {
 		/// Sets the offset of the joint (the point around which this Attachable and its parent hinge) from this Attachable's center of mass/origin.
 		/// </summary>
 		/// <param name="offset">A Vector describing the offset of the joint relative to the this Attachable's origin/center of mass position.</param>
-		void SetJointOffset(Vector offset) { m_JointOffset = offset; }
+		void SetJointOffset(const Vector &offset) { m_JointOffset = offset; }
 #pragma endregion
 
 #pragma region Force Transferral
@@ -266,25 +266,25 @@ namespace RTE {
 		/// Gets the AEmitter that represents the wound added to this Attachable when it gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
 		/// </summary>
 		/// <returns>A const pointer to the break wound AEmitter.</returns>
-		const AEmitter *GetBreakWound() const { return m_BreakWound; }
+		const AEmitter * GetBreakWound() const { return m_BreakWound; }
 
 		/// <summary>
 		/// Sets the AEmitter that represents the wound added to this Attachable when it gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
 		/// </summary>
 		/// <param name="breakWound">The AEmitter to use for this Attachable's breakwound.</param>
-		void SetBreakWound(AEmitter *breakWound) { m_BreakWound = breakWound; } //TODO I added this for consistency but do we want it? Maybe should have a string version that does the presetman lookup, cause we need to have a working pointer to the breakwound.
+		void SetBreakWound(const AEmitter *breakWound) { m_BreakWound = breakWound; } //TODO I added this for consistency but do we want it? Maybe should have a string version that does the presetman lookup, cause we need to have a working pointer to the breakwound.
 
 		/// <summary>
 		/// Gets the AEmitter that represents the wound added to this Attachable's parent when this Attachable gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
 		/// </summary>
 		/// <returns>A const pointer to the parent break wound AEmitter.</returns>
-		const AEmitter *GetParentBreakWound() const { return m_ParentBreakWound; }
+		const AEmitter * GetParentBreakWound() const { return m_ParentBreakWound; }
 
 		/// <summary>
 		/// Sets the AEmitter that represents the wound added to this Attachable's parent when this Attachable gets detached from its parent. OWNERSHIP IS NOT TRANSFERRED!
 		/// </summary>
 		/// <param name="breakWound">The AEmitter to use for the parent's breakwound.</param>
-		void SetParentBreakWound(AEmitter *breakWound) { m_ParentBreakWound = breakWound; }
+		void SetParentBreakWound(const AEmitter *breakWound) { m_ParentBreakWound = breakWound; }
 #pragma endregion
 
 #pragma region Inherited Value Getters and Setters

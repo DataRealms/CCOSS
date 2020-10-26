@@ -826,7 +826,7 @@ friend class Atom;
     /// Gets the MO this MO is set not to hit even when MO hitting is enabled on this MO.
     /// </summary>
     /// <returns>The MO this MO is set not to hit.</returns>
-    const MovableObject *GetWhichMOToNotHit() const { return m_pMOToNotHit; }
+    const MovableObject * GetWhichMOToNotHit() const { return m_pMOToNotHit; }
 
     /// <summary>
     /// Sets this MO to not hit a specific other MO and all its children even when MO hitting is enabled on this MO.

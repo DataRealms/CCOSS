@@ -234,7 +234,7 @@ ClassInfoGetters
     /// Gets the head of this AHuman.
     /// </summary>
     /// <returns>A pointer to the head of this AHuman. Ownership is NOT transferred.</returns>
-    Attachable *GetHead() const { return m_pHead; }
+    Attachable * GetHead() const { return m_pHead; }
 
     /// <summary>
     /// Sets the head for this AHuman.
@@ -246,7 +246,7 @@ ClassInfoGetters
     /// Gets the jetpack of this AHuman.
     /// </summary>
     /// <returns>A pointer to the jetpack of this AHuman. Ownership is NOT transferred.</returns>
-    AEmitter *GetJetpack() const { return m_pJetpack; }
+    AEmitter * GetJetpack() const { return m_pJetpack; }
 
     /// <summary>
     /// Sets the jetpack for this AHuman.
@@ -258,7 +258,7 @@ ClassInfoGetters
     /// Gets the foreground Arm of this AHuman.
     /// </summary>
     /// <returns>A pointer to the foreground Arm of this AHuman. Ownership is NOT transferred.</returns>
-    Attachable *GetFGArm() const { return static_cast<Attachable *>(m_pFGArm); }
+    Attachable * GetFGArm() const { return static_cast<Attachable *>(m_pFGArm); }
 
     /// <summary>
     /// Sets the foreground Arm for this AHuman.
@@ -270,7 +270,7 @@ ClassInfoGetters
     /// Gets the background arm of this AHuman.
     /// </summary>
     /// <returns>A pointer to the background arm of this AHuman. Ownership is NOT transferred.</returns>
-    Attachable *GetBGArm() const { return static_cast<Attachable *>(m_pBGArm); }
+    Attachable * GetBGArm() const { return static_cast<Attachable *>(m_pBGArm); }
 
     /// <summary>
     /// Sets the background Arm for this AHuman.
@@ -282,7 +282,7 @@ ClassInfoGetters
     /// Gets the foreground Leg of this AHuman.
     /// </summary>
     /// <returns>A pointer to the foreground Leg of this AHuman. Ownership is NOT transferred.</returns>
-    Attachable *GetFGLeg() const { return static_cast<Attachable *>(m_pFGLeg); }
+    Attachable * GetFGLeg() const { return static_cast<Attachable *>(m_pFGLeg); }
 
     /// <summary>
     /// Sets the foreground Leg for this AHuman.
@@ -294,7 +294,7 @@ ClassInfoGetters
     /// Gets the background Leg of this AHuman.
     /// </summary>
     /// <returns>A pointer to the background Leg of this AHuman. Ownership is NOT transferred.</returns>
-    Attachable *GetBGLeg() const { return static_cast<Attachable *>(m_pBGLeg); }
+    Attachable * GetBGLeg() const { return static_cast<Attachable *>(m_pBGLeg); }
 
     /// <summary>
     /// Sets the background Leg for this AHuman.
@@ -306,7 +306,7 @@ ClassInfoGetters
 	/// Gets the foot Attachable of this AHuman's foreground Leg.
 	/// </summary>
 	/// <returns>A pointer to the foot Attachable of this AHuman's foreground Leg. Ownership is NOT transferred!</returns>
-    Attachable *GetFGFoot() const { return m_pFGLeg ? m_pFGLeg->GetFoot() : nullptr; }
+    Attachable * GetFGFoot() const { return m_pFGLeg ? m_pFGLeg->GetFoot() : nullptr; }
 
     /// <summary>
     /// Sets the foot Attachable of this AHuman's foreground Leg.
@@ -318,7 +318,7 @@ ClassInfoGetters
     /// Gets the foot Attachable of this AHuman's background Leg.
 	/// </summary>
     /// <returns>A pointer to the foot Attachable of this AHuman's background Leg. Ownership is NOT transferred!</returns>
-	Attachable *GetBGFoot() const { return m_pBGLeg ? m_pBGLeg->GetFoot() : nullptr; }
+	Attachable * GetBGFoot() const { return m_pBGLeg ? m_pBGLeg->GetFoot() : nullptr; }
 
     /// <summary>
     /// Sets the foot Attachable of this AHuman's background Leg.

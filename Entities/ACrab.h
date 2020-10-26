@@ -158,7 +158,7 @@ public:
 	/// Gets the Turret of this ACrab.
 	/// </summary>
 	/// <returns>A pointer to Turret of this ACrab. Ownership is NOT transferred!</returns>
-	Attachable *GetTurret() const;
+	Turret * GetTurret() const { return m_pTurret; }
 
 	/// <summary>
 	/// Sets the Turret for this ACrab. Ownership IS transferred!
@@ -170,7 +170,7 @@ public:
 	/// Gets the jetpack of this ACrab.
 	/// </summary>
 	/// <returns>A pointer to the jetpack of this ACrab. Ownership is NOT transferred!</returns>
-	AEmitter *GetJetpack() const { return m_pJetpack; }
+	AEmitter * GetJetpack() const { return m_pJetpack; }
 
 	/// <summary>
 	/// Sets the jetpack for this ACrab. Ownership IS Transferred!
@@ -182,7 +182,7 @@ public:
     /// Gets the left foreground Leg of this ACrab.
     /// </summary>
     /// <returns>A pointer to the left foreground Leg of this ACrab. Ownership is NOT transferred!</returns>
-    Attachable *GetLeftFGLeg() const { return static_cast<Attachable *>(m_pLFGLeg); }
+    Leg * GetLeftFGLeg() const { return m_pLFGLeg; }
 
     /// <summary>
     /// Sets the left foreground Leg for this ACrab. Ownership IS transferred!
@@ -194,7 +194,7 @@ public:
     /// Gets the left background Leg of this ACrab.
     /// </summary>
     /// <returns>A pointer to the left background Leg of this ACrab. Ownership is NOT transferred!</returns>
-    Attachable *GetLeftBGLeg() const { return static_cast<Attachable *>(m_pLBGLeg); }
+    Leg * GetLeftBGLeg() const { m_pLBGLeg; }
 
     /// <summary>
     /// Sets the left background Leg for this ACrab. Ownership IS transferred!
@@ -206,7 +206,7 @@ public:
     /// Gets the right foreground Leg of this ACrab.
     /// </summary>
     /// <returns>A pointer to the right foreground Leg of this ACrab. Ownership is NOT transferred!</returns>
-    Attachable *GetRightFGLeg() const { return static_cast<Attachable *>(m_pRFGLeg); }
+    Leg * GetRightFGLeg() const { return m_pRFGLeg; }
 
     /// <summary>
     /// Sets the right foreground Leg for this ACrab. Ownership IS transferred!
@@ -218,7 +218,7 @@ public:
     /// Gets the right BG Leg of this ACrab.
     /// </summary>
     /// <returns>A pointer to the right background Leg of this ACrab. Ownership is NOT transferred!</returns>
-    Attachable *GetRightBGLeg() const { return static_cast<Attachable *>(m_pRBGLeg); }
+    Leg * GetRightBGLeg() const { return m_pRBGLeg; }
 
     /// <summary>
     /// Sets the right background Leg for this ACrab. Ownership IS transferred!

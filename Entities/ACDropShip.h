@@ -180,7 +180,7 @@ ClassInfoGetters
     /// Gets the right side thruster of this ACDropship.
     /// </summary>
     /// <returns>A pointer to the right side thruster of this ACDropship. Ownership is NOT transferred.</returns>
-    AEmitter *GetRightThruster() const { return m_pRThruster; }
+    AEmitter * GetRightThruster() const { return m_pRThruster; }
 
     /// <summary>
     /// Sets the right side thruster for this ACDropship.
@@ -192,7 +192,7 @@ ClassInfoGetters
     /// Gets the left side thruster of this ACDropship.
     /// </summary>
     /// <returns>A pointer to the left side thruster of this ACDropship. Ownership is NOT transferred.</returns>
-    AEmitter *GetLeftThruster() const { return m_pLThruster; }
+    AEmitter * GetLeftThruster() const { return m_pLThruster; }
 
     /// <summary>
     /// Sets the left side thruster for this ACDropship.
@@ -204,7 +204,7 @@ ClassInfoGetters
     /// Gets the right side secondary thruster of this ACDropship.
     /// </summary>
     /// <returns>A pointer to the right side secondary thruster of this ACDropship. Ownership is NOT transferred.</returns>
-    AEmitter *GetURightThruster() const { return m_pURThruster; }
+    AEmitter * GetURightThruster() const { return m_pURThruster; }
 
     /// <summary>
     /// Sets the right side secondary thruster for this ACDropship.
@@ -216,7 +216,7 @@ ClassInfoGetters
     /// Gets the left side secondary thruster of this ACDropship.
     /// </summary>
     /// <returns>A pointer to the left side secondary thruster of this ACDropship. Ownership is NOT transferred.</returns>
-    AEmitter *GetULeftThruster() const { return m_pULThruster; }
+    AEmitter * GetULeftThruster() const { return m_pULThruster; }
 
     /// <summary>
     /// Sets the left side secondary thruster for this ACDropship.
@@ -228,7 +228,7 @@ ClassInfoGetters
     /// Gets the left side hatch of this ACDropship.
     /// </summary>
     /// <returns>A pointer to the left side hatch of this ACDropship. Ownership is NOT transferred.</returns>
-    Attachable *GetLeftHatch() const { return m_pLHatch; }
+    Attachable * GetLeftHatch() const { return m_pLHatch; }
 
     /// <summary>
     /// Sets the left side hatch for this ACDropship.
@@ -240,7 +240,7 @@ ClassInfoGetters
     /// Gets the right side hatch of this ACDropship.
     /// </summary>
     /// <returns>A pointer to the right side hatch of this ACDropship. Ownership is NOT transferred.</returns>
-    Attachable *GetRightHatch() const { return m_pRHatch; }
+    Attachable * GetRightHatch() const { return m_pRHatch; }
 
     /// <summary>
     /// Sets the right side hatch for this ACDropship.

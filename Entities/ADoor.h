@@ -71,7 +71,7 @@ namespace RTE {
 		/// Gets the moving door Attachable of this ADoor
 		/// </summary>
 		/// <returns>A pointer to the door Attachable of this. Ownership is NOT transferred!</returns>
-		Attachable *GetDoor() const { return m_Door; }
+		Attachable * GetDoor() const { return m_Door; }
 
 		/// <summary>
 		/// Sets the moving door Attachable for this ADoor.

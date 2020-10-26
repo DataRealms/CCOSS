@@ -60,7 +60,7 @@ namespace RTE {
 		/// Gets the foot of this Leg.
 		/// </summary>
 		/// <returns>A pointer to foot of this Leg. Ownership is NOT transferred!</returns>
-		Attachable *GetFoot() const { return m_Foot; }
+		Attachable * GetFoot() const { return m_Foot; }
 
 		/// <summary>
 		/// Sets the foot for this Leg. Ownership IS transferred!

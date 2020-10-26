@@ -135,7 +135,7 @@ ClassInfoGetters
     /// Gets the Magazine of this HDFirearm.
     /// </summary>
     /// <returns>A pointer to Magazine of this HDFirearm. Ownership is NOT transferred!</returns>
-    Magazine *GetMagazine() const { return m_pMagazine; }
+    Magazine * GetMagazine() const { return m_pMagazine; }
 
     /// <summary>
     /// Sets the Magazine for this HDFirearm. Ownership IS transferred!
@@ -147,7 +147,7 @@ ClassInfoGetters
     /// Gets the flash of this HDFirearm.
     /// </summary>
     /// <returns>A pointer to flash of this HDFirearm. Ownership is NOT transferred!</returns>
-    Attachable *GetFlash() const { return m_pFlash; }
+    Attachable * GetFlash() const { return m_pFlash; }
 
     /// <summary>
     /// Sets the flash for this HDFirearm. Ownership IS transferred!

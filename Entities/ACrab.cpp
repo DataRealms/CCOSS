@@ -491,12 +491,6 @@ Vector ACrab::GetEyePos() const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Attachable *ACrab::GetTurret() const {
-    return (m_pTurret && m_pTurret->IsAttached()) ? dynamic_cast<Attachable *>(m_pTurret) : nullptr;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void ACrab::SetTurret(Attachable *newTurret) {
     if (newTurret == nullptr) {
         if (m_pTurret && m_pTurret->IsAttached()) { RemoveAttachable(m_pTurret); }

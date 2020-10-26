@@ -309,7 +309,7 @@ ClassInfoGetters
     /// Gets the flash of this AEmitter.
     /// </summary>
     /// <returns>A pointer to the AEmitter's flash. Ownership is NOT transferred!</returns>
-    Attachable *GetFlash() const { return m_pFlash; }
+    Attachable * GetFlash() const { return m_pFlash; }
 
     /// <summary>
     /// Sets the flash for this AEmitter. Ownership IS transferred!

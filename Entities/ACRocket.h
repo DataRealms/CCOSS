@@ -201,7 +201,7 @@ ClassInfoGetters
     /// Gets the right leg of this ACRocket.
     /// </summary>
     /// <returns>A pointer to the right leg of this ACRocket. Ownership is NOT transferred.</returns>
-    Leg *GetRightLeg() const { return m_pRLeg; }
+    Leg * GetRightLeg() const { return m_pRLeg; }
 
     /// <summary>
     /// Sets the right leg for this ACRocket.
@@ -213,7 +213,7 @@ ClassInfoGetters
     /// Gets the left leg of this ACRocket.
     /// </summary>
     /// <returns>A pointer to the left leg of this ACRocket. Ownership is NOT transferred.</returns>
-    Leg *GetLeftLeg() const { return m_pLLeg; }
+    Leg * GetLeftLeg() const { return m_pLLeg; }
 
     /// <summary>
     /// Sets the left leg for this ACRocket.
@@ -225,7 +225,7 @@ ClassInfoGetters
     /// Gets the main thruster of this ACRocket.
     /// </summary>
     /// <returns>A pointer to the main thruster of this ACRocket. Ownership is NOT transferred.</returns>
-	AEmitter *GetMainThruster() const { return m_pMThruster; }
+	AEmitter * GetMainThruster() const { return m_pMThruster; }
 
     /// <summary>
     /// Sets the main thruster for this ACRocket.
@@ -237,7 +237,7 @@ ClassInfoGetters
     /// Gets the right side thruster of this ACRocket.
     /// </summary>
     /// <returns>A pointer to the right side thruster of this ACRocket. Ownership is NOT transferred.</returns>
-	AEmitter *GetRightThruster() const { return m_pRThruster; }
+	AEmitter * GetRightThruster() const { return m_pRThruster; }
 
     /// <summary>
     /// Sets the right side thruster for this ACRocket.
@@ -249,7 +249,7 @@ ClassInfoGetters
     /// Gets the left side thruster of this ACRocket.
     /// </summary>
     /// <returns>A pointer to the left side thruster of this ACRocket. Ownership is NOT transferred.</returns>
-    AEmitter *GetLeftThruster() const { return m_pLThruster; }
+    AEmitter * GetLeftThruster() const { return m_pLThruster; }
 
     /// <summary>
     /// Sets the left side thruster for this ACRocket.
@@ -261,7 +261,7 @@ ClassInfoGetters
     /// Gets the right side secondary thruster of this ACRocket.
     /// </summary>
     /// <returns>A pointer to the right side secondary thruster of this ACRocket. Ownership is NOT transferred.</returns>
-    AEmitter *GetURightThruster() const { return m_pURThruster; }
+    AEmitter * GetURightThruster() const { return m_pURThruster; }
 
     /// <summary>
     /// Sets the right side secondary thruster for this ACRocket.
@@ -273,7 +273,7 @@ ClassInfoGetters
     /// Gets the left side secondary thruster of this ACRocket.
     /// </summary>
     /// <returns>A pointer to the left side secondary thruster of this ACRocket. Ownership is NOT transferred.</returns>
-    AEmitter *GetULeftThruster() const { return m_pULThruster; }
+    AEmitter * GetULeftThruster() const { return m_pULThruster; }
 
     /// <summary>
     /// Sets the left side secondary thruster for this ACRocket.

@@ -206,7 +206,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="subgroupID">The subgroupID to check for.</param>
 		/// <returns>Whether this AtomGroup contains a subgroup with the given subgroupID.</returns>
-		bool ContainsSubGroup(long int subgroupID) { return m_SubGroups.count(subgroupID) != 0; }
+		bool ContainsSubGroup(long subgroupID) const { return m_SubGroups.count(subgroupID) != 0; }
 
 		/// <summary>
 		/// Updates the offsets of a subgroup of Atoms in this AtomGroup. This allows repositioning a subgroup to match the position and rotation of the graphical representation of it's owner MOSR.

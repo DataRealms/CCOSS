@@ -591,11 +591,11 @@ ClassInfoGetters
     /// Gets the gib wound limit for this MOSRotating, i.e. the total number of wounds required to gib this MOSRotating.
     /// Optionally adds the gib wound limits of Attachables (and their Attachables, etc.) that match the conditions set by the provided parameters.
     /// </summary>
-    /// <param name="includeAttachablesWithAPositiveDamageMultiplier">Whether to count wounds from Attachables that have a positive damage multiplier, i.e. those that damage their parent (this MOSRotating) when wounded.</param>
-    /// <param name="includeAttachablesWithANegativeDamageMultiplier">Whether to count wounds from Attachables that have a negative damage multiplier, i.e. those that heal their parent (this MOSRotating) when wounded.</param>
-    /// <param name="includeAttachablesWithNoDamageMultiplier">Whether to count wounds from Attachables that a zero damage multiplier, i.e. those that do not affect their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includePositiveDamageAttachables">Whether to count wounds from Attachables that have a positive damage multiplier, i.e. those that damage their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includeNegativeDamageAttachables">Whether to count wounds from Attachables that have a negative damage multiplier, i.e. those that heal their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includeNoDamageAttachables">Whether to count wounds from Attachables that a zero damage multiplier, i.e. those that do not affect their parent (this MOSRotating) when wounded.</param>
     /// <returns>The wound limit of this MOSRotating and, optionally, its Attachables.</returns>
-    int GetGibWoundLimit(bool includeAttachablesWithAPositiveDamageMultiplier, bool includeAttachablesWithANegativeDamageMultiplier, bool includeAttachablesWithNoDamageMultiplier) const;
+    int GetGibWoundLimit(bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables) const;
 
     /// <summary>
     /// Sets the gib wound limit for this MOSRotating, i.e. the total number of wounds required to gib this MOSRotating.
@@ -626,12 +626,12 @@ ClassInfoGetters
     /// <summary>
     /// Gets the number of wounds attached to this MOSRotating.
     /// Optionally adds the wound counts of Attachables (and their Attachables, etc.) that match the conditions set by the provided parameters.
-    /// <param name="includeAttachablesWithAPositiveDamageMultiplier">Whether to count wounds from Attachables that have a positive damage multiplier, i.e. those that damage their parent (this MOSRotating) when wounded.</param>
-    /// <param name="includeAttachablesWithANegativeDamageMultiplier">Whether to count wounds from Attachables that have a negative damage multiplier, i.e. those that heal their parent (this MOSRotating) when wounded.</param>
-    /// <param name="includeAttachablesWithNoDamageMultiplier">Whether to count wounds from Attachables that a zero damage multiplier, i.e. those that do not affect their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includePositiveDamageAttachables">Whether to count wounds from Attachables that have a positive damage multiplier, i.e. those that damage their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includeNegativeDamageAttachables">Whether to count wounds from Attachables that have a negative damage multiplier, i.e. those that heal their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includeNoDamageAttachables">Whether to count wounds from Attachables that a zero damage multiplier, i.e. those that do not affect their parent (this MOSRotating) when wounded.</param>
     /// <returns>The number of wounds on this MOSRotating and, optionally, its Attachables.</returns>
     /// </summary>
-    int GetWoundCount(bool includeAttachablesWithAPositiveDamageMultiplier, bool includeAttachablesWithANegativeDamageMultiplier, bool includeAttachablesWithNoDamageMultiplier) const;
+    int GetWoundCount(bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables) const;
 
 	/// <summary>
 	/// Adds the passed in wound AEmitter to the list of wounds and changes its parent offset to the passed in Vector.
@@ -654,11 +654,11 @@ ClassInfoGetters
     /// Optionally removes wounds from Attachables (and their Attachables, etc.) that match the conditions set by the provided inclusion parameters.
     /// </summary>
     /// <param name="numberOfWoundsToRemove">The number of wounds that should be removed.</param>
-    /// <param name="includeAttachablesWithAPositiveDamageMultiplier">Whether to count wounds from Attachables that have a positive damage multiplier, i.e. those that damage their parent (this MOSRotating) when wounded.</param>
-    /// <param name="includeAttachablesWithANegativeDamageMultiplier">Whether to count wounds from Attachables that have a negative damage multiplier, i.e. those that heal their parent (this MOSRotating) when wounded.</param>
-    /// <param name="includeAttachablesWithNoDamageMultiplier">Whether to count wounds from Attachables that a zero damage multiplier, i.e. those that do not affect their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includePositiveDamageAttachables">Whether to count wounds from Attachables that have a positive damage multiplier, i.e. those that damage their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includeNegativeDamageAttachables">Whether to count wounds from Attachables that have a negative damage multiplier, i.e. those that heal their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includeNoDamageAttachables">Whether to count wounds from Attachables that a zero damage multiplier, i.e. those that do not affect their parent (this MOSRotating) when wounded.</param>
     /// <returns>The amount of damage caused by these wounds, taking damage multipliers into account.</returns>
-    virtual float RemoveWounds(int numberOfWoundsToRemove, bool includeAttachablesWithAPositiveDamageMultiplier, bool includeAttachablesWithANegativeDamageMultiplier, bool includeAttachablesWithNoDamageMultiplier);
+    virtual float RemoveWounds(int numberOfWoundsToRemove, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetStringValue

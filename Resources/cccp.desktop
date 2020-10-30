@@ -3,5 +3,5 @@ Categories=Game;
 Type=Application
 Icon=cccp
 Name=cccp
-Exec=cccp
+Exec=CCCP.x86_64
 

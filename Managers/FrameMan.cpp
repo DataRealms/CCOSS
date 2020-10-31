@@ -312,6 +312,9 @@ namespace RTE {
 			m_PlayerScreenWidth = m_PlayerScreen->w;
 			m_PlayerScreenHeight = m_PlayerScreen->h;
 		}
+
+		m_ScreenDumpBuffer = create_bitmap_ex(24, screen->w, screen->h);
+
 		return 0;
 	}
 
@@ -774,7 +777,10 @@ namespace RTE {
 				break;
 			case ScreenDump:
 				if (screen) {
-					if (!m_ScreenDumpBuffer) { m_ScreenDumpBuffer = create_bitmap_ex(24, screen->w, screen->h); }
+					if (m_ScreenDumpBuffer->w != screen->w || m_ScreenDumpBuffer->h != screen->h) {
+						destroy_bitmap(m_ScreenDumpBuffer);
+						m_ScreenDumpBuffer = create_bitmap_ex(24, screen->w, screen->h);
+					}
 					blit(screen, m_ScreenDumpBuffer, 0, 0, 0, 0, screen->w, screen->h);
 					// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
 					if (save_png(fullFileName, m_ScreenDumpBuffer, nullptr) == 0) {

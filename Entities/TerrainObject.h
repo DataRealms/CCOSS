@@ -340,8 +340,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    TerrainObject(const TerrainObject &reference) {}
-    void operator=(const TerrainObject &rhs) {}
+    TerrainObject(const TerrainObject &reference) = delete;
+    void operator=(const TerrainObject &rhs) = delete;
 
 };
 

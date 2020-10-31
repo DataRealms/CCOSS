@@ -544,8 +544,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		NetworkServer(const NetworkServer &reference) {}
-		NetworkServer & operator=(const NetworkServer &rhs) {}
+		NetworkServer(const NetworkServer &reference) = delete;
+		NetworkServer & operator=(const NetworkServer &rhs) = delete;
 	};
 }
 #endif

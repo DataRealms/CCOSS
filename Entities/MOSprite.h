@@ -607,8 +607,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	MOSprite(const MOSprite &reference) {}
-	MOSprite & operator=(const MOSprite &rhs) {}
+	MOSprite(const MOSprite &reference) = delete;
+	MOSprite & operator=(const MOSprite &rhs) = delete;
 
 };
 

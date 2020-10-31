@@ -160,8 +160,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		MOSParticle(const MOSParticle &reference) {}
-		MOSParticle & operator=(const MOSParticle &rhs) {}
+		MOSParticle(const MOSParticle &reference) = delete;
+		MOSParticle & operator=(const MOSParticle &rhs) = delete;
 	};
 }
 #endif

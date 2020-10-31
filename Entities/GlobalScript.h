@@ -218,7 +218,7 @@ ClassInfoGetters
 protected:
 
     // Forbidding copying
-    GlobalScript(const GlobalScript &reference) {}
+	GlobalScript(const GlobalScript &reference) = delete;
     GlobalScript & operator=(const GlobalScript &rhs) { return *this; }
 
     // Member variables

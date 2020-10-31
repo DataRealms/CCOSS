@@ -193,8 +193,8 @@ namespace RTE {
 
 
 			// Forbidding copying
-			ClassInfo(const ClassInfo &reference) {}
-			ClassInfo & operator=(const ClassInfo &rhs) {}
+			ClassInfo(const ClassInfo &reference) = delete;
+			ClassInfo & operator=(const ClassInfo &rhs) = delete;
 		};
 #pragma endregion
 

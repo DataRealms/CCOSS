@@ -142,8 +142,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		ThrownDevice(const ThrownDevice &reference) {}
-		ThrownDevice & operator=(const ThrownDevice &rhs) {}
+		ThrownDevice(const ThrownDevice &reference) = delete;
+		ThrownDevice & operator=(const ThrownDevice &rhs) = delete;
 	};
 }
 #endif

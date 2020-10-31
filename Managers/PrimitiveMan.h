@@ -387,8 +387,8 @@ namespace RTE {
 	private:
 
 		// Disallow the use of some implicit methods.
-		PrimitiveMan(const PrimitiveMan &reference) {}
-		PrimitiveMan & operator=(const PrimitiveMan &rhs) {}
+		PrimitiveMan(const PrimitiveMan &reference) = delete;
+		PrimitiveMan & operator=(const PrimitiveMan &rhs) = delete;
 	};
 }
 #endif

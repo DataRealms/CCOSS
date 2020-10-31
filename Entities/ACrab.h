@@ -728,8 +728,8 @@ private:
 	void Clear();
 
 	// Disallow the use of some implicit methods.
-	ACrab(const ACrab &reference) {}
-	ACrab & operator=(const ACrab &rhs) {}
+	ACrab(const ACrab &reference) = delete;
+	ACrab & operator=(const ACrab &rhs) = delete;
 
 };
 

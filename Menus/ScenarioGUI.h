@@ -556,8 +556,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	ScenarioGUI(const ScenarioGUI &reference) {}
-	ScenarioGUI & operator=(const ScenarioGUI &rhs) {}
+	ScenarioGUI(const ScenarioGUI &reference) = delete;
+	ScenarioGUI & operator=(const ScenarioGUI &rhs) = delete;
 
 };
 

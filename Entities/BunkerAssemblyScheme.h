@@ -330,8 +330,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    BunkerAssemblyScheme(const BunkerAssemblyScheme &reference) {}
-    void operator=(const BunkerAssemblyScheme &rhs) {}
+    BunkerAssemblyScheme(const BunkerAssemblyScheme &reference) = delete;
+    void operator=(const BunkerAssemblyScheme &rhs) = delete;
 
 };
 

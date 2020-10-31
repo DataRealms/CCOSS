@@ -164,8 +164,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		Round(const Round &reference) {}
-		Round & operator=(const Round &rhs) {}
+		Round(const Round &reference) = delete;
+		Round & operator=(const Round &rhs) = delete;
 	};
 }
 #endif

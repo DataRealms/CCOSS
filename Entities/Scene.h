@@ -1411,8 +1411,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Scene(const Scene &reference) {}
-    void operator=(const Scene &rhs) {}
+    Scene(const Scene &reference) = delete;
+    void operator=(const Scene &rhs) = delete;
 
 };
 

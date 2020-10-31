@@ -442,8 +442,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	AssemblyEditorGUI(const AssemblyEditorGUI &reference) {}
-	AssemblyEditorGUI & operator=(const AssemblyEditorGUI &rhs) {}
+	AssemblyEditorGUI(const AssemblyEditorGUI &reference) = delete;
+	AssemblyEditorGUI & operator=(const AssemblyEditorGUI &rhs) = delete;
 
 };
 

@@ -174,8 +174,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		Writer(const Writer &reference) {}
-		Writer & operator=(const Writer &rhs) {}
+		Writer(const Writer &reference) = delete;
+		Writer & operator=(const Writer &rhs) = delete;
 	};
 }
 #endif

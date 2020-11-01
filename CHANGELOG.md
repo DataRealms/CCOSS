@@ -173,6 +173,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New Lua `MovableObject` function `GetWhichMOToNotHit`. This provides access to the MO that has been set to not be hit by `SetWhichMOToNotHit`.
 
+- Added `HeldDevice` handling to limit which `Actor(s)` can pick it up. Note that pickup limitations are all done by PresetName, so you can not use this to specify specific `Actors` (yet).
+	The INI definition looks like this:
+	```
+	PickupableBy = PickupableByEntries
+		AddActorEntry = First Actor PresetName Here
+		AddActorEntry = Second Actor PresetName Here
+	// Alternatively, you can set it to never be pickupable with
+	NoActorsCanPickThisUp = 1
+	```
+	The Lua properties and functions are as follows:
+	```
+	heldDevice.HasPickupLimitations; --(R) Whether or not this HeldDevice has any limitations affecting whether it can be picked up.
+	heldDevice.NoActorsCanPickThisUp --(R/W) Whether this HeldDevice is/should be pickupable by any Actors.
+	heldDevice:ActorCanPickThisUp(actor) -- Whether or not a given Actor can pick up this HeldDevice.
+	heldDevice:AddActorWhoCanPickThisUp(actor) -- Allows the given Actor (and any others with the same PresetName) to pick up this HeldDevice.
+	heldDevice:RemoveActorWhoCanPickThisUp(actor) -- Disallows the given Actor (and any others with the same PresetName) from picking up this HeldDevice.
+	```
+
 ### Changed
 
 - Codebase now uses the C++17 standard.

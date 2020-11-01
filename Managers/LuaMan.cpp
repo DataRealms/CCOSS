@@ -1313,6 +1313,11 @@ int LuaMan::Create() {
             .def("IsFull", &HeldDevice::IsFull)
 			.property("SharpLength", &HeldDevice::GetSharpLength, &HeldDevice::SetSharpLength)
 			.property("SupportOffset", &HeldDevice::GetSupportOffset, &HeldDevice::SetSupportOffset)
+            .property("HasPickupLimitations", &HeldDevice::HasPickupLimitations)
+            .property("NoActorsCanPickThisUp", &HeldDevice::GetNoActorsCanPickThisUp, &HeldDevice::SetNoActorsCanPickThisUp)
+            .def("ActorCanPickThisUp", &HeldDevice::ActorCanPickThisUp)
+            .def("AddActorWhoCanPickThisUp", &HeldDevice::AddActorWhoCanPickThisUp)
+            .def("RemoveActorWhoCanPickThisUp", &HeldDevice::RemoveActorWhoCanPickThisUp)
             .property("GripStrengthMultiplier", &HeldDevice::GetGripStrengthMultiplier, &HeldDevice::SetGripStrengthMultiplier)
 			.def("SetSupported", &HeldDevice::SetSupported),
 

@@ -3467,7 +3467,7 @@ void AHuman::Update()
 							// Set the grenade or whatever to ignore hits with same team
 							pMO->SetTeam(m_Team);
 							pMO->SetIgnoresTeamHits(true);
-							g_MovableMan.AddItem(pMO);
+							g_MovableMan.AddMO(pMO);
 						} else {
 							if (pMO->IsGold()) {
 								m_GoldInInventoryChunk = 0;
@@ -3524,7 +3524,7 @@ void AHuman::Update()
 			pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
 			pMO->SetAngularVel(5.0F * RandomNormalNum());
 			if (pMO->IsDevice()) {
-				g_MovableMan.AddItem(pMO);
+				g_MovableMan.AddMO(pMO);
 			} else {
 				if (pMO->IsGold()) {
 					m_GoldInInventoryChunk = 0;
@@ -3559,8 +3559,7 @@ void AHuman::Update()
     }
 
     // Item currently set to be within reach has expired or is now out of range
-    if (m_pItemInReach && (!g_MovableMan.IsDevice(m_pItemInReach) || (m_pItemInReach->GetPos() - m_Pos).GetMagnitude() > reach))
-    {
+    if (m_pItemInReach && (m_pItemInReach->GetNoActorsCanPickThisUp() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->ActorCanPickThisUp(GetPresetName())) || !g_MovableMan.IsDevice(m_pItemInReach) || (m_pItemInReach->GetPos() - m_Pos).GetMagnitude() > reach)) {
         m_pItemInReach = 0;
         m_PieNeedsUpdate = true;
     }

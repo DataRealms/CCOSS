@@ -581,11 +581,10 @@ ClassInfoGetters
     void SetGibImpulseLimit(float newGibImpulseLimit) { m_GibImpulseLimit = newGibImpulseLimit; }
 
     /// <summary>
-    /// Gets the gib wound limit for this MOSRotating, i.e. the total number of wounds required to gib this MOSRotating.
-    /// Includes any Attachables (and their Attachables, etc.) that have a positive damage multiplier.
+    /// Gets the gib wound limit for this MOSRotating, i.e. the total number of wounds required to gib this MOSRotating. Does not include any Attachables.
     /// </summary>
     /// <returns></returns>
-    int GetGibWoundLimit() const { return GetGibWoundLimit(true, false, false); }
+    int GetGibWoundLimit() const { return GetGibWoundLimit(false, false, false); }
 
     /// <summary>
     /// Gets the gib wound limit for this MOSRotating, i.e. the total number of wounds required to gib this MOSRotating.

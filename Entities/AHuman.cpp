@@ -237,7 +237,6 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         AddAttachable(m_pJetpack);
         if (!m_pJetpack->GetDamageMultiplierSetInINI()) { m_pJetpack->SetDamageMultiplier(0.0F); }
         m_pJetpack->SetApplyTransferredForcesAtOffset(false);
-        m_pJetpack->SetDeleteWhenRemovedFromParent(true);
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         // Convert to ms

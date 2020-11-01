@@ -50,6 +50,8 @@ int Magazine::Create()
 {
     if (Attachable::Create() < 0)
         return -1;
+
+    SetCollidesWithTerrainWhileAttached(false);
     
     // Read projectile properties for AI aim caluculations
     const Round * pNextRound = GetNextRound();

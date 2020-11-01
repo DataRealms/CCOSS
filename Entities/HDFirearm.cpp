@@ -152,7 +152,6 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader) {
             m_pMagazineReference = dynamic_cast<const Magazine *>(magazineEntity);
             m_pMagazine = dynamic_cast<Magazine *>(magazineEntity->Clone());
             AddAttachable(m_pMagazine);
-            m_pMagazine->SetCollidesWithTerrainWhileAttached(false);
         }
     } else if (propName == "Flash") {
         RemoveAttachable(m_pFlash);
@@ -599,7 +598,7 @@ void HDFirearm::Reload()
         {
             m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
             m_pMagazine->SetAngularVel(6.0F + (-RandomNum(0.0F, 6.0F)));
-            if (m_pMagazine->IsDiscardable()) { m_pMagazine->SetToDelete(); }
+            if (!m_pMagazine->IsDiscardable()) { m_pMagazine->SetToDelete(); }
             RemoveAttachable(m_pMagazine, m_pMagazine->IsDiscardable(), false);
             m_pMagazine = 0;
         }

@@ -147,16 +147,17 @@ ClassInfoGetters
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 	int LoadScript(std::string const &scriptPath, bool loadAsEnabledScript = false) override;
 
+    /// <summary>
+    /// Gets the mass of this Actor's inventory. Does not include any equipped item (for actor subtypes that have that).
+    /// </summary>
+    /// <returns>The mass of this Actor's inventory.</returns>
+    float GetInventoryMass() const;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this Actor, including the mass of its
-//                  currently attached body parts and inventory.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    float GetMass() const override;
+    /// <summary>
+    /// Gets the mass of this Actor, including the mass of its Attachables, wounds and inventory.
+    /// </summary>
+    /// <returns>The mass of this Actor, its inventory and all its Attachables and wounds in Kilograms (kg).</returns>
+    float GetMass() const override { return MOSRotating::GetMass() + GetInventoryMass() + (m_GoldCarried * g_SceneMan.GetKgPerOz()); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

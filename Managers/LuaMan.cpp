@@ -773,6 +773,7 @@ int LuaMan::Create() {
 
         CONCRETELUABINDING(MOSRotating, MOSprite)
             /*.property("Material", &MOSRotating::GetMaterial)*/
+            .property("IndividualMass", &MOSRotating::GetIndividualMass)
             .property("RecoilForce", &MOSRotating::GetRecoilForce)
             .property("RecoilOffset", &MOSRotating::GetRecoilOffset)
 			.property("TravelImpulse", &MOSRotating::GetTravelImpulse, &MOSRotating::SetTravelImpulse)
@@ -963,6 +964,7 @@ int LuaMan::Create() {
             .property("Status", &Actor::GetStatus, &Actor::SetStatus)
             .property("Health", &Actor::GetHealth, &Actor::SetHealth)
             .property("MaxHealth", &Actor::GetMaxHealth, &Actor::SetMaxHealth)
+            .property("InventoryMass", &Actor::GetInventoryMass)
             .property("GoldCarried", &Actor::GetGoldCarried, &Actor::SetGoldCarried)
             .property("AimRange", &Actor::GetAimRange, &Actor::SetAimRange)
             .def("GetAimAngle", &Actor::GetAimAngle)

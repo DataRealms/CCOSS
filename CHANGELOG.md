@@ -190,6 +190,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	heldDevice:AddActorWhoCanPickThisUp(actor) -- Allows the given Actor (and any others with the same PresetName) to pick up this HeldDevice.
 	heldDevice:RemoveActorWhoCanPickThisUp(actor) -- Disallows the given Actor (and any others with the same PresetName) from picking up this HeldDevice.
 	```
+	
+- Added `MOSRotating` Lua (R) property `IndividualMass`. This provides access to the `MOSRotating's` actual mass value, not including any `Attachables` or inventory items. Note that the normal `Mass` property is still used to set the `MOSRotating's` mass.
+
+- Added `Actor` Lua (R) property `InventoryMass`. This provides access to the mass of the `Actor's` inventory separate from the `Actor's` actual mass.
 
 ### Changed
 

@@ -506,21 +506,15 @@ int Actor::LoadScript(std::string const &scriptPath, bool loadAsEnabledScript) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this Actor, including the mass of its
-//                  currently attached body parts and inventory.
-
-float Actor::GetMass() const
-{
-    float totalMass = MOSRotating::GetMass();
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
-        totalMass += (*itr)->GetMass();
-    totalMass += m_GoldCarried * g_SceneMan.GetKgPerOz();
-    return totalMass;
+float Actor::GetInventoryMass() const {
+    float inventoryMass = 0.0F;
+    for (const MovableObject *inventoryItem : m_Inventory) {
+        inventoryMass += inventoryItem->GetMass();
+    }
+    return inventoryMass;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

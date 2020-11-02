@@ -137,9 +137,15 @@ ClassInfoGetters
     void Destroy(bool notInherited = false) override;
 
     /// <summary>
-    /// Gets the mass value of this MOSRotating, including the mass of all its Attachables and their Attachables and so on.
+    /// Gets the mass value of this MOSRotating, not including any Attachables or wounds.
     /// </summary>
-    /// <returns>The mass of this MOSRotating and all Attachables in Kilograms (kg).</returns>
+    /// <returns>The mass of this MOSRotating.</returns>
+    float GetIndividualMass() const { return MovableObject::GetMass(); }
+
+    /// <summary>
+    /// Gets the mass value of this MOSRotating, including the mass of all its Attachables and wounds, and their Attachables and so on.
+    /// </summary>
+    /// <returns>The mass of this MOSRotating and all of its Attachables and wounds in Kilograms (kg).</returns>
     float GetMass() const override { return MovableObject::GetMass() + m_AttachableAndWoundMass; }
 
     /// <summary>

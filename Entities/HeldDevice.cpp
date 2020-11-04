@@ -25,6 +25,7 @@ namespace RTE {
 
 ConcreteClassInfo(HeldDevice, Attachable, 50)
 
+const std::string HeldDevice::c_NoPickupString = "|-NONE-|";
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -289,9 +290,9 @@ Vector HeldDevice::GetStanceOffset() const
 
 void HeldDevice::SetNoActorsCanPickThisUp(bool noActors) {
     if (noActors) {
-        AddActorWhoCanPickThisUp("|-NONE-|");
+        AddActorWhoCanPickThisUp(c_NoPickupString);
     } else {
-        RemoveActorWhoCanPickThisUp("|-NONE-|");
+        RemoveActorWhoCanPickThisUp(c_NoPickupString);
     }
 }
 

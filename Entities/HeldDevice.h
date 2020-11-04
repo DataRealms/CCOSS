@@ -291,7 +291,7 @@ ClassInfoGetters
     /// Gets whether no Actors (or child classes) can pick up this HeldDevice.
     /// </summary>
     /// <returns>Whether no Actors (or child classes) can pick up this HeldDevice.</returns>
-    bool GetNoActorsCanPickThisUp() const { return m_ActorsWhoCanPickThisUp.find("NONE") != m_ActorsWhoCanPickThisUp.end(); }
+    bool GetNoActorsCanPickThisUp() const { return m_ActorsWhoCanPickThisUp.find(c_NoPickupString) != m_ActorsWhoCanPickThisUp.end(); }
 
     /// <summary>
     /// Sets whether no Actors (or child classes) can pick up this HeldDevice.
@@ -599,6 +599,8 @@ ClassInfoGetters
 
 protected:
 
+    static const std::string c_NoPickupString; //!< Static string for adding a no allowed pickups entry.
+
     // Member variables
     static Entity::ClassInfo m_sClass;
     // Indicates what kind of held device this is, see the HeldDeviceType enum
@@ -625,7 +627,7 @@ protected:
     float m_MaxSharpLength;
     // If this HeldDevice is currently being supported by a second hand.
     bool m_Supported;
-    std::unordered_set<std::string> m_ActorsWhoCanPickThisUp; //!< The unordered set of Actors (and appropriate subclasses) who can pick up this held device if it's dropped. An empty set means any Actors can pick it up, a "NONE" entry means none can pick it up.
+    std::unordered_set<std::string> m_ActorsWhoCanPickThisUp; //!< The unordered set of Actors (and appropriate subclasses) who can pick up this held device if it's dropped. An empty set means any Actors can pick it up, a c_NoPickupString entry means none can pick it up.
     float m_GripStrengthMultiplier; //!< The multiplier for how well this HeldDevice can be gripped by Arms.
     // Blink timer for the icon
     Timer m_BlinkTimer;

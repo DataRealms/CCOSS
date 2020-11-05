@@ -262,8 +262,8 @@ namespace RTE {
 		int m_LockedCPUTeam; //!< Which team the CPU is locked to, if any.
 
 		// Disallow the use of some implicit methods.
-		ScenarioGUI(const ScenarioGUI &) = delete;
-		ScenarioGUI &operator=(const ScenarioGUI &) = delete;
+		ScenarioGUI(const ScenarioGUI &reference) = delete;
+		ScenarioGUI & operator=(const ScenarioGUI &rhs) = delete;
 	};
 }
 #endif

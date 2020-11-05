@@ -1084,7 +1084,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
 
 bool MOSRotating::MoveOutOfTerrain(unsigned char strongerThan)
 {
-    return m_pAtomGroup->ResolveTerrainIntersection(m_Pos, m_Rotation, strongerThan);
+    return m_pAtomGroup->ResolveTerrainIntersection(m_Pos, strongerThan);
 }
 
 

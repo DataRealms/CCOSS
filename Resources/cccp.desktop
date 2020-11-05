@@ -1,0 +1,7 @@
+[Desktop Entry]
+Categories=Game;
+Type=Application
+Icon=cccp
+Name=cccp
+Exec=CCCP.x86_64
+

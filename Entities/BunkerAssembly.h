@@ -277,8 +277,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    BunkerAssembly(const BunkerAssembly &reference) {}
-    void operator=(const BunkerAssembly &rhs) {}
+    BunkerAssembly(const BunkerAssembly &reference) = delete;
+    void operator=(const BunkerAssembly &rhs) = delete;
 
 };
 

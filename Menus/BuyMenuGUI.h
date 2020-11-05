@@ -858,8 +858,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	BuyMenuGUI(const BuyMenuGUI &reference) {}
-	BuyMenuGUI & operator=(const BuyMenuGUI &rhs) {}
+	BuyMenuGUI(const BuyMenuGUI &reference) = delete;
+	BuyMenuGUI & operator=(const BuyMenuGUI &rhs) = delete;
 
 };
 

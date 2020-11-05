@@ -493,8 +493,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		AudioMan(const AudioMan &reference) {}
-		AudioMan & operator=(const AudioMan &rhs) {}
+		AudioMan(const AudioMan &reference) = delete;
+		AudioMan & operator=(const AudioMan &rhs) = delete;
 	};
 }
 #endif

@@ -650,8 +650,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	Attachable(const Attachable &reference) {}
-	Attachable & operator=(const Attachable &rhs) {}
+	Attachable(const Attachable &reference) = delete;
+	Attachable & operator=(const Attachable &rhs) = delete;
 
 };
 

@@ -752,8 +752,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	SLTerrain(const SLTerrain &reference) {}
-	SLTerrain & operator=(const SLTerrain &rhs) {}
+	SLTerrain(const SLTerrain &reference) = delete;
+	SLTerrain & operator=(const SLTerrain &rhs) = delete;
 
 };
 

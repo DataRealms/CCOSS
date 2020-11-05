@@ -534,8 +534,8 @@ private:
 
 
 	// Disallow the use of some implicit methods.
-	PresetMan(const PresetMan &reference) {}
-	PresetMan & operator=(const PresetMan &rhs) {}
+	PresetMan(const PresetMan &reference) = delete;
+	PresetMan & operator=(const PresetMan &rhs) = delete;
 
 };
 

@@ -320,8 +320,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		NetworkClient(const NetworkClient &reference) {}
-		NetworkClient & operator=(const NetworkClient &rhs) {}
+		NetworkClient(const NetworkClient &reference) = delete;
+		NetworkClient & operator=(const NetworkClient &rhs) = delete;
 	};
 }
 #endif

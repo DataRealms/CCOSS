@@ -169,8 +169,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		ActivityMan(const ActivityMan &reference) {}
-		ActivityMan & operator=(const ActivityMan &rhs) {}
+		ActivityMan(const ActivityMan &reference) = delete;
+		ActivityMan & operator=(const ActivityMan &rhs) = delete;
 	};
 }
 #endif

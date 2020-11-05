@@ -408,8 +408,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	GibEditorGUI(const GibEditorGUI &reference) {}
-	GibEditorGUI & operator=(const GibEditorGUI &rhs) {}
+	GibEditorGUI(const GibEditorGUI &reference) = delete;
+	GibEditorGUI & operator=(const GibEditorGUI &rhs) = delete;
 
 };
 

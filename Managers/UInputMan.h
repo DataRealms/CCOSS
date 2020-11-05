@@ -921,8 +921,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		UInputMan(const UInputMan &reference) {}
-		UInputMan & operator=(const UInputMan &rhs) {}
+		UInputMan(const UInputMan &reference) = delete;
+		UInputMan & operator=(const UInputMan &rhs) = delete;
 	};
 }
 #endif

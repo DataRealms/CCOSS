@@ -39,6 +39,7 @@ The Linux build uses the meson build system, and builds against system libraries
 
 Dependencies:
 
+* `g++>=8.1` (needs to support c++17)
 * `allegro4`
 * `loadpng`
 * `flac`

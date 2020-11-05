@@ -1783,7 +1783,7 @@ int main(int argc, char *argv[]) {
 	if (!std::filesystem::exists(screenshotSaveDir)) { g_System.MakeDirectory(screenshotSaveDir); }
 
 	if (g_ConsoleMan.LoadWarningsExist()) {
-		g_ConsoleMan.PrintString("WARNING: References to files that could not be located or failed to load detected during module loading!\nSee \"LoadWarningLog.txt\" for a list of bad references.");
+		g_ConsoleMan.PrintString("WARNING: References to files that could not be located or failed to load detected during module loading!\nSee \"LogLoadingWarning.txt\" for a list of bad references.");
 		g_ConsoleMan.SaveLoadWarningLog("LogLoadingWarning.txt");
 		// Open the console so the user is aware there are loading warnings.
 		g_ConsoleMan.SetEnabled(true);

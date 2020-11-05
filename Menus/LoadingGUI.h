@@ -73,8 +73,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		LoadingGUI(const LoadingGUI &reference) {}
-		LoadingGUI &operator=(const LoadingGUI &rhs) {}
+		LoadingGUI(const LoadingGUI &reference) = delete;
+		LoadingGUI &operator=(const LoadingGUI &rhs) = delete;
 	};
 }
 #endif

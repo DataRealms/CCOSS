@@ -134,7 +134,7 @@ int AEmitter::ReadProperty(std::string propName, Reader &reader) {
         float ppm;
         reader >> ppm;
         // Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility.
-        for (Emission *emission : m_EmissionList) { emission->m_PPM = ppm; }
+        for (Emission *emission : m_EmissionList) { emission->m_PPM = ppm / static_cast<float>(m_EmissionList.size()); }
     } else if (propName == "MinThrottleRange") {
         reader >> m_MinThrottleRange;
     } else if (propName == "MaxThrottleRange") {

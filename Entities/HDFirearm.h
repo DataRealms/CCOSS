@@ -663,7 +663,7 @@ protected:
     /// Additionally, sets this Attachable as not reloading, and resets its reload timer.
     /// </summary>
     /// <param name="newParent">A pointer to the MOSRotating to set as the new parent. Ownership is NOT transferred!</param>
-    void SetParent(MOSRotating *newParent) override { HeldDevice::SetParent(newParent); m_Reloading = false; m_ReloadTmr.Reset(); }
+    void SetParent(MOSRotating *newParent) override { HeldDevice::SetParent(newParent); Deactivate(); m_Reloading = false; m_ReloadTmr.Reset(); }
 
     // Member variables.
     static Entity::ClassInfo m_sClass;

@@ -146,20 +146,33 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Leg::Update() {
-		UpdateCurrentAnkleOffsetAndFootParentOffset();
+		UpdateCurrentAnkleOffset();
+
+		if (m_Foot) {
+			// In order to keep the foot in the right place, we need to convert its offset (the ankle offstet) to work as the ParentOffset for the foot.
+			// The foot will then use this to set its JointPos when it's updated. Unfortunately UnRotateOffset doesn't work for this, since it's Vector/Matrix division, which isn't commutative.
+			Vector ankleOffsetAsParentOffset = RotateOffset(m_JointOffset) + m_CurrentAnkleOffset;
+			ankleOffsetAsParentOffset.RadRotate(-m_Rotation.GetRadAngle()).FlipX(m_HFlipped);
+			m_Foot->SetParentOffset(ankleOffsetAsParentOffset);
+		}
 
 		Attachable::Update();
 
 		UpdateLegRotation();
 
-		UpdateLegFrameAndNormalizedExtension();
+		if (m_FrameCount == 1) {
+			m_Frame = 0;
+		} else {
+			m_CurrentNormalizedExtension = Limit((m_CurrentAnkleOffset.GetMagnitude() - m_MinExtension) / (m_MaxExtension - m_MinExtension), 1.0F, 0.0F);
+			m_Frame = std::min(m_FrameCount - 1, static_cast<unsigned int>(std::floor(m_CurrentNormalizedExtension * static_cast<float>(m_FrameCount))));
+		}
 
 		UpdateFootFrameAndRotation();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Leg::UpdateCurrentAnkleOffsetAndFootParentOffset() {
+	void Leg::UpdateCurrentAnkleOffset() {
 		if (IsAttached()) {
 			Vector targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_TargetPosition, g_SceneMan.SceneWrapsX());
 			if (m_WillIdle && targetOffset.m_Y < -3) {
@@ -172,14 +185,6 @@ namespace RTE {
 		} else {
 			m_CurrentAnkleOffset.SetXY(m_MaxExtension * 0.60F, 0);
 			m_CurrentAnkleOffset.RadRotate((m_HFlipped ? c_PI : 0) + m_Rotation.GetRadAngle());
-		}
-
-		if (m_Foot) {
-			// In order to keep the foot in the right place, we need to convert its offset (the ankle offstet) to work as the ParentOffset for the foot.
-			// The foot will then use this to set its JointPos when it's updated. Unfortunately UnRotateOffset doesn't work for this, since it's Vector/Matrix division, which isn't commutative.
-			Vector ankleOffsetAsParentOffset = RotateOffset(m_JointOffset) + m_CurrentAnkleOffset;
-			ankleOffsetAsParentOffset.RadRotate(-m_Rotation.GetRadAngle()).FlipX(m_HFlipped);
-			m_Foot->SetParentOffset(ankleOffsetAsParentOffset);
 		}
 	}
 
@@ -200,17 +205,6 @@ namespace RTE {
 			extraRotation -= (m_ExtendedOffset.GetAbsRadAngle() - m_ContractedOffset.GetAbsRadAngle()) * extraRotationRatio;
 
 			m_Rotation.SetRadAngle(m_Rotation.GetRadAngle() + extraRotation * static_cast<float>(GetFlipFactor()));
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void Leg::UpdateLegFrameAndNormalizedExtension() {
-		if (m_FrameCount == 1) {
-			m_Frame = 0;
-		} else {
-			m_CurrentNormalizedExtension = Limit((m_CurrentAnkleOffset.GetMagnitude() - m_MinExtension) / (m_MaxExtension - m_MinExtension), 1.0F, 0.0F);
-			m_Frame = std::min(m_FrameCount - 1, static_cast<unsigned int>(std::floor(m_CurrentNormalizedExtension * static_cast<float>(m_FrameCount))));
 		}
 	}
 

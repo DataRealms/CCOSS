@@ -125,22 +125,16 @@ namespace RTE {
 
 #pragma region Update Breakdown
 		/// <summary>
-		/// Updates the current ankle offset for this Leg, and sets the foot's parent offset to match up with it. Should only be called from Update.
+		/// Updates the current ankle offset for this Leg. Should only be called from Update.
 		/// If the Leg is attached, the current ankle offset is based on the target offset and move speed, and whether the Leg should idle or not, otherwise it puts it in a reasonable position.
 		/// </summary>
-		void UpdateCurrentAnkleOffsetAndFootParentOffset();
+		void UpdateCurrentAnkleOffset();
 
 		/// <summary>
 		/// Updates the rotation of the Leg. Should only be called from Update.
 		/// If the Leg is attached, this applies extra rotation to line up the Leg's sprite with its extension line, otherwise it does nothing.
 		/// </summary>
 		void UpdateLegRotation();
-
-		/// <summary>
-		/// Sets the Leg's frame to the appropriate one based on its current extension, and updates the normalized extension value. Should only be called from Update.
-		/// Works the same whether attached or not.
-		/// </summary>
-		void UpdateLegFrameAndNormalizedExtension();
 
 		/// <summary>
 		/// Updates the frame and rotation of the Leg's foot Attachable. Should only be called from Update.

@@ -204,9 +204,9 @@ namespace RTE {
 		};
 
 		Controller *m_ScenarioController; //!< Controller which controls this menu. Not owned.
-		GUIScreen *m_ScenarioGUIScreen; //!< GUI Screen for use by the in-game GUI.
-		GUIInput *m_ScenarioGUIInput; //!< Input controller.
-		GUIControlManager *m_ScenarioGUIController; //!< The control manager which holds all the controls.
+		std::unique_ptr<GUIScreen> m_ScenarioGUIScreen; //!< GUI Screen for use by the in-game GUI.
+		std::unique_ptr<GUIInput> m_ScenarioGUIInput; //!< Input controller.
+		std::unique_ptr<GUIControlManager> m_ScenarioGUIController; //!< The control manager which holds all the controls.
 
 		Timer m_BlinkTimer; //!< Notification blink timer.
 
@@ -241,8 +241,8 @@ namespace RTE {
 		GUILabel *m_SceneNameLabel;
 		GUILabel *m_SceneInfoLabel;
 
-		BITMAP *m_ScenePreviewBitmap;
-		BITMAP *m_DefaultPreviewBitmap;
+		BITMAP *m_ScenePreviewBitmap; // Owned.
+		BITMAP *m_DefaultPreviewBitmap; // Owned.
 
 		// Player setup.
 		GUICollectionBox *m_PlayerBoxes[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];

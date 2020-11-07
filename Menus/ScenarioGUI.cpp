@@ -100,15 +100,15 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_ScenarioController = pController;
 
 	if (!m_ScenarioGUIScreen) {
-		m_ScenarioGUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32());
+		m_ScenarioGUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
 	}
 	if (!m_ScenarioGUIInput) {
-		m_ScenarioGUIInput = new AllegroInput(-1, true);
+		m_ScenarioGUIInput = std::make_unique<AllegroInput>(-1, true);
 	}
 	if (!m_ScenarioGUIController) {
-		m_ScenarioGUIController = new GUIControlManager();
+		m_ScenarioGUIController = std::make_unique<GUIControlManager>();
 	}
-	if (!m_ScenarioGUIController->Create(m_ScenarioGUIScreen, m_ScenarioGUIInput, "Base.rte/GUIs/Skins/MainMenu")) {
+	if (!m_ScenarioGUIController->Create(m_ScenarioGUIScreen.get(), m_ScenarioGUIInput.get(), "Base.rte/GUIs/Skins/MainMenu")) {
 		RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
 	}
 	m_ScenarioGUIController->Load("Base.rte/GUIs/ScenarioGUI.ini");
@@ -245,10 +245,6 @@ int ScenarioGUI::Create(Controller *pController) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::Destroy() {
-	delete m_ScenarioGUIController;
-	delete m_ScenarioGUIInput;
-	delete m_ScenarioGUIScreen;
-
 	destroy_bitmap(m_ScenePreviewBitmap);
 	destroy_bitmap(m_DefaultPreviewBitmap);
 

@@ -315,8 +315,8 @@ public:
 
 private:
 
-    GUIScreen        *m_Screen;
-    GUIInput        *m_Input;
+    GUIScreen        *m_Screen; // Not owned.
+    GUIInput        *m_Input; // Not owned.
     GUISkin            *m_Skin;
     GUIManager        *m_GUIManager;
 

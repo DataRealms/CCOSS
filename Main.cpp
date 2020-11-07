@@ -183,7 +183,7 @@ void InitMainMenu() {
 void ReinitMainMenu() {
 	g_pMainMenuGUI->Destroy();
 	g_pMainMenuController->Destroy();
-	g_pScenarioGUI->Destroy();
+	g_pScenarioGUI->Reset();
 	g_MetaMan.GetGUI()->Destroy();
 
 	InitMainMenu();

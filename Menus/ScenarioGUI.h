@@ -4,8 +4,6 @@
 #include "ActivityMan.h"
 #include "Timer.h"
 
-struct BITMAP;
-
 namespace RTE {
 
 	class GUIScreen;
@@ -19,6 +17,7 @@ namespace RTE {
 	class GUISlider;
 	class Scene;
 	class Activity;
+	class AllegroBitmap;
 
 	/// <summary>
 	/// A menu for setting up and launching scenario games.
@@ -42,7 +41,7 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a ScenarioGUI object before deletion from system memory.
 		/// </summary>
-		~ScenarioGUI() { Destroy(); }
+		~ScenarioGUI() = default;
 
 		/// <summary>
 		/// Makes the ScenarioGUI object ready for use.
@@ -55,11 +54,6 @@ namespace RTE {
 		/// Resets the entire ScenarioGUI, including its inherited members, to their default settings or values.
 		/// </summary>
 		void Reset() { Clear(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the ScenarioGUI object.
-		/// </summary>
-		void Destroy();
 
 		/// <summary>
 		/// Enables the menu. This will animate it in and out of view.
@@ -241,8 +235,9 @@ namespace RTE {
 		GUILabel *m_SceneNameLabel;
 		GUILabel *m_SceneInfoLabel;
 
-		BITMAP *m_ScenePreviewBitmap; // Owned.
-		BITMAP *m_DefaultPreviewBitmap; // Owned.
+		std::unique_ptr<AllegroBitmap> m_ScenePreviewBitmap;
+		std::unique_ptr<AllegroBitmap> m_DefaultPreviewBitmap;
+		std::unique_ptr<ContentFile> m_DefaultPreviewContentFile;
 
 		// Player setup.
 		GUICollectionBox *m_PlayerBoxes[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];

@@ -1110,8 +1110,8 @@ private:
     void Clear();
 
     // Disallow the use of some implicit methods.
-	AHuman(const AHuman &reference) {}
-	AHuman & operator=(const AHuman &rhs) {}
+	AHuman(const AHuman &reference) = delete;
+	AHuman & operator=(const AHuman &rhs) = delete;
 
 };
 

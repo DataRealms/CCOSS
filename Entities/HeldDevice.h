@@ -590,8 +590,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	HeldDevice(const HeldDevice &reference) {}
-	HeldDevice & operator=(const HeldDevice &rhs) {}
+	HeldDevice(const HeldDevice &reference) = delete;
+	HeldDevice & operator=(const HeldDevice &rhs) = delete;
 
 };
 

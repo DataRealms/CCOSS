@@ -332,8 +332,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	Leg(const Leg &reference) {}
-	Leg & operator=(const Leg &rhs) {}
+	Leg(const Leg &reference) = delete;
+	Leg & operator=(const Leg &rhs) = delete;
 
 };
 

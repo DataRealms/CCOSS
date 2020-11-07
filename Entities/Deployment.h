@@ -406,8 +406,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Deployment(const Deployment &reference) {}
-    void operator=(const Deployment &rhs) {}
+    Deployment(const Deployment &reference) = delete;
+    void operator=(const Deployment &rhs) = delete;
 
 };
 

@@ -847,8 +847,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	HDFirearm(const HDFirearm &reference) {}
-	HDFirearm & operator=(const HDFirearm &rhs) {}
+	HDFirearm(const HDFirearm &reference) = delete;
+	HDFirearm & operator=(const HDFirearm &rhs) = delete;
 
 };
 

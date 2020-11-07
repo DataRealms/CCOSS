@@ -377,8 +377,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	LuaMan(const LuaMan &reference) {}
-	LuaMan & operator=(const LuaMan &rhs) {}
+	LuaMan(const LuaMan &reference) = delete;
+	LuaMan & operator=(const LuaMan &rhs) = delete;
 
 	//Internal list of opened files used by File* functions 
 	FILE * m_Files[MAX_OPEN_FILES];

@@ -281,8 +281,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		Reader(const Reader &reference) {}
-		Reader & operator=(const Reader &rhs) {}
+		Reader(const Reader &reference) = delete;
+		Reader & operator=(const Reader &rhs) = delete;
 	};
 }
 #endif

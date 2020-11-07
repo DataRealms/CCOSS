@@ -889,8 +889,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	MOSRotating(const MOSRotating &reference) {}
-	MOSRotating& operator=(const MOSRotating &rhs) {}
+	MOSRotating(const MOSRotating &reference) = delete;
+	MOSRotating& operator=(const MOSRotating &rhs) = delete;
 
 };
 

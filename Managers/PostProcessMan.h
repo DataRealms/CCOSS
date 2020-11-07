@@ -282,8 +282,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		PostProcessMan(const PostProcessMan &reference) {}
-		PostProcessMan & operator=(const PostProcessMan &rhs) {}
+		PostProcessMan(const PostProcessMan &reference) = delete;
+		PostProcessMan & operator=(const PostProcessMan &rhs) = delete;
 	};
 }
 #endif

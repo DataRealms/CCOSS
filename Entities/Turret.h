@@ -354,8 +354,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	Turret(const Turret &reference) {}
-	Turret & operator=(const Turret &rhs) {}
+	Turret(const Turret &reference) = delete;
+	Turret & operator=(const Turret &rhs) = delete;
 
 };
 

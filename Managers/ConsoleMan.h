@@ -214,8 +214,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		ConsoleMan(const ConsoleMan &reference) {}
-		ConsoleMan & operator=(const ConsoleMan &rhs) {}
+		ConsoleMan(const ConsoleMan &reference) = delete;
+		ConsoleMan & operator=(const ConsoleMan &rhs) = delete;
 	};
 }
 #endif

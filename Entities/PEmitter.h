@@ -562,8 +562,8 @@ private:
 
 
 	// Disallow the use of some implicit methods.
-	PEmitter(const PEmitter &reference) {}
-	PEmitter & operator=(const PEmitter &rhs) {}
+	PEmitter(const PEmitter &reference) = delete;
+	PEmitter & operator=(const PEmitter &rhs) = delete;
 
 };
 

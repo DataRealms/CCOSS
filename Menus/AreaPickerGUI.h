@@ -303,8 +303,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	AreaPickerGUI(const AreaPickerGUI &reference) {}
-	AreaPickerGUI & operator=(const AreaPickerGUI &rhs) {}
+	AreaPickerGUI(const AreaPickerGUI &reference) = delete;
+	AreaPickerGUI & operator=(const AreaPickerGUI &rhs) = delete;
 
 };
 

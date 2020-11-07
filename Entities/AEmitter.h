@@ -660,8 +660,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	AEmitter(const AEmitter &reference) {}
-	AEmitter & operator=(const AEmitter &rhs) {}
+	AEmitter(const AEmitter &reference) = delete;
+	AEmitter & operator=(const AEmitter &rhs) = delete;
 
 };
 

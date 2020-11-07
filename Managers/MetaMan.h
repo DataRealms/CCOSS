@@ -654,8 +654,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	MetaMan(const MetaMan &reference) {}
-	MetaMan & operator=(const MetaMan &rhs) {}
+	MetaMan(const MetaMan &reference) = delete;
+	MetaMan & operator=(const MetaMan &rhs) = delete;
 
 };
 } // namespace RTE

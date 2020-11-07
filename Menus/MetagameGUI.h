@@ -1277,8 +1277,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	MetagameGUI(const MetagameGUI &reference) {}
-	MetagameGUI & operator=(const MetagameGUI &rhs) {}
+	MetagameGUI(const MetagameGUI &reference) = delete;
+	MetagameGUI & operator=(const MetagameGUI &rhs) = delete;
 
 };
 

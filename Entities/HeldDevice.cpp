@@ -181,7 +181,12 @@ int HeldDevice::ReadProperty(std::string propName, Reader &reader)
             while (reader.NextProperty()) {
                 std::string pickupableByEntryType = reader.ReadPropName();
                 if (pickupableByEntryType == "AddActorEntry") {
-                    m_ActorsWhoCanPickThisUp.insert(reader.ReadPropValue());
+                    std::string actorEntryValue = reader.ReadPropValue();
+                    if (actorEntryValue == "none" || actorEntryValue == "None" || actorEntryValue == "NONE") {
+                        m_ActorsWhoCanPickThisUp.insert(c_NoPickupString);
+                    } else {
+                        m_ActorsWhoCanPickThisUp.insert(actorEntryValue);
+                    }
                 } else if (pickupableByEntryType == "AddGroupEntry ") {
                     reader.ReportError("AddGroupEntry is not yet supported.");
                 } else if (pickupableByEntryType == "AddDataModuleEntry ") {
@@ -193,10 +198,6 @@ int HeldDevice::ReadProperty(std::string propName, Reader &reader)
         } else {
             m_ActorsWhoCanPickThisUp.insert(pickupableByValue);
         }
-    } else if (propName == "NoActorsCanPickThisUp") {
-        bool noActorsCanPickThisUp;
-        reader >> noActorsCanPickThisUp;
-        SetNoActorsCanPickThisUp(noActorsCanPickThisUp);
     } else if (propName == "GripStrengthMultiplier") {
         reader >> m_GripStrengthMultiplier;
     } else if (propName == "SharpLength")

@@ -179,8 +179,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	PickupableBy = PickupableByEntries
 		AddActorEntry = First Actor PresetName Here
 		AddActorEntry = Second Actor PresetName Here
-	// Alternatively, you can set it to never be pickupable with
-	NoActorsCanPickThisUp = 1
+		AddActorEntry = None //This sets it to never be pickupable
 	```
 	The Lua properties and functions are as follows:
 	```

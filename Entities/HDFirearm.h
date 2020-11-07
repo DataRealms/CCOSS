@@ -140,8 +140,8 @@ ClassInfoGetters
     /// <summary>
     /// Sets the Magazine for this HDFirearm. Ownership IS transferred!
     /// </summary>
-    /// <param name="newTurret">The new Magazine to use.</param>
-    void SetMagazine(Attachable *newMagazine);
+    /// <param name="newMagazine">The new Magazine to use.</param>
+    void SetMagazine(Magazine *newMagazine);
 
     /// <summary>
     /// Gets the flash of this HDFirearm.
@@ -659,8 +659,8 @@ ClassInfoGetters
 protected:
 
     /// <summary>
-    /// Sets this HDFirearm's parent MOSRotating, and also sets its Team based on its parent and, if the Attachable is set to collide, adds/removes Atoms to its new/old parent.
-    /// Additionally, sets this Attachable as not reloading, and resets its reload timer.
+    /// Sets this Attachable's parent MOSRotating, and also sets its Team based on its parent and, if the Attachable is set to collide, adds/removes Atoms to its new/old parent.
+    /// Additionally, sets this HDFirearm as not firing or reloading, and resets its reload timer.
     /// </summary>
     /// <param name="newParent">A pointer to the MOSRotating to set as the new parent. Ownership is NOT transferred!</param>
     void SetParent(MOSRotating *newParent) override { HeldDevice::SetParent(newParent); Deactivate(); m_Reloading = false; m_ReloadTmr.Reset(); }

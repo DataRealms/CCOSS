@@ -17,7 +17,7 @@ namespace RTE {
 	int Turret::Create(const Turret &reference) {
 		if (reference.m_MountedDevice) {
 			m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_MountedDevice->GetUniqueID());
-			SetMountedDevice(dynamic_cast<Attachable *>(reference.m_MountedDevice->Clone()));
+			SetMountedDevice(dynamic_cast<HeldDevice *>(reference.m_MountedDevice->Clone()));
 		}
 		Attachable::Create(reference);
 
@@ -60,18 +60,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Turret::SetMountedDevice(Attachable *newMountedDevice) {
+	void Turret::SetMountedDevice(HeldDevice *newMountedDevice) {
 		if (newMountedDevice == nullptr) {
 			if (m_MountedDevice && m_MountedDevice->IsAttached()) { RemoveAttachable(m_MountedDevice); }
 			m_MountedDevice = nullptr;
 		} else {
-			HeldDevice *castedNewMountedDevice = dynamic_cast<HeldDevice *>(newMountedDevice);
-			if (castedNewMountedDevice) {
-				if (m_MountedDevice && m_MountedDevice->IsAttached()) { RemoveAttachable(m_MountedDevice); }
-				m_MountedDevice = castedNewMountedDevice;
-				AddAttachable(castedNewMountedDevice);
-				m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<Turret *>(parent)->SetMountedDevice(attachable); }});
-			}
+			if (m_MountedDevice && m_MountedDevice->IsAttached()) { RemoveAttachable(m_MountedDevice); }
+			m_MountedDevice = newMountedDevice;
+			AddAttachable(newMountedDevice);
+
+			m_HardcodedAttachableUniqueIDsAndSetters.insert({newMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+				HeldDevice *castedAttachable = dynamic_cast<HeldDevice *>(attachable);
+				RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetMountedDevice");
+				dynamic_cast<Turret *>(parent)->SetMountedDevice(castedAttachable);
+			}});
 		}
 	}
 

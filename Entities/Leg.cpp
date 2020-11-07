@@ -139,7 +139,10 @@ namespace RTE {
 			if (m_Foot && m_Foot->IsAttached()) { RemoveAttachable(m_Foot); }
 			m_Foot = newFoot;
 			AddAttachable(newFoot);
-			m_HardcodedAttachableUniqueIDsAndSetters.insert({newFoot->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<Leg *>(parent)->SetFoot(attachable); }});
+
+			m_HardcodedAttachableUniqueIDsAndSetters.insert({newFoot->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+				dynamic_cast<Leg *>(parent)->SetFoot(attachable);
+			}});
 		}
 	}
 

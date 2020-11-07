@@ -186,7 +186,7 @@ ClassInfoGetters
     /// Sets the right side thruster for this ACDropship.
     /// </summary>
     /// <param name="newThruster">The new thruster to use.</param>
-    void SetRightThruster(Attachable *newThruster);
+    void SetRightThruster(AEmitter *newThruster);
 
     /// <summary>
     /// Gets the left side thruster of this ACDropship.
@@ -198,7 +198,7 @@ ClassInfoGetters
     /// Sets the left side thruster for this ACDropship.
     /// </summary>
     /// <param name="newThruster">The new thruster to use.</param>
-    void SetLeftThruster(Attachable *newThruster);
+    void SetLeftThruster(AEmitter *newThruster);
 
     /// <summary>
     /// Gets the right side secondary thruster of this ACDropship.
@@ -210,7 +210,7 @@ ClassInfoGetters
     /// Sets the right side secondary thruster for this ACDropship.
     /// </summary>
     /// <param name="newThruster">The new thruster to use.</param>
-    void SetURightThruster(Attachable *newThruster);
+    void SetURightThruster(AEmitter *newThruster);
 
     /// <summary>
     /// Gets the left side secondary thruster of this ACDropship.
@@ -222,7 +222,7 @@ ClassInfoGetters
     /// Sets the left side secondary thruster for this ACDropship.
     /// </summary>
     /// <param name="newThruster">The new thruster to use.</param>
-    void SetULeftThruster(Attachable *newThruster);
+    void SetULeftThruster(AEmitter *newThruster);
 
     /// <summary>
     /// Gets the left side hatch of this ACDropship.

@@ -200,26 +200,26 @@ ClassInfoGetters
     /// <summary>
     /// Gets the right leg of this ACRocket.
     /// </summary>
-    /// <returns>A pointer to the right leg of this ACRocket. Ownership is NOT transferred.</returns>
+    /// <returns>A pointer to the right Leg of this ACRocket. Ownership is NOT transferred.</returns>
     Leg * GetRightLeg() const { return m_pRLeg; }
 
     /// <summary>
-    /// Sets the right leg for this ACRocket.
+    /// Sets the right Leg for this ACRocket.
     /// </summary>
-    /// <param name="newLeg">The new leg to use.</param>
-    void SetRightLeg(Attachable *newLeg);
+    /// <param name="newLeg">The new Leg to use.</param>
+    void SetRightLeg(Leg *newLeg);
 
     /// <summary>
-    /// Gets the left leg of this ACRocket.
+    /// Gets the left Leg of this ACRocket.
     /// </summary>
-    /// <returns>A pointer to the left leg of this ACRocket. Ownership is NOT transferred.</returns>
+    /// <returns>A pointer to the left Leg of this ACRocket. Ownership is NOT transferred.</returns>
     Leg * GetLeftLeg() const { return m_pLLeg; }
 
     /// <summary>
-    /// Sets the left leg for this ACRocket.
+    /// Sets the left Leg for this ACRocket.
     /// </summary>
-    /// <param name="newLeg">The new leg to use.</param>
-    void SetLeftLeg(Attachable *newLeg);
+    /// <param name="newLeg">The new Leg to use.</param>
+    void SetLeftLeg(Leg *newLeg);
 
     /// <summary>
     /// Gets the main thruster of this ACRocket.
@@ -231,7 +231,7 @@ ClassInfoGetters
     /// Sets the main thruster for this ACRocket.
     /// </summary>
     /// <param name="newThruster">The new thruster to use.</param>
-    void SetMainThruster(Attachable *newThruster);
+    void SetMainThruster(AEmitter *newThruster);
 
     /// <summary>
     /// Gets the right side thruster of this ACRocket.
@@ -243,7 +243,7 @@ ClassInfoGetters
     /// Sets the right side thruster for this ACRocket.
     /// </summary>
     /// <param name="newThruster">The new thruster to use.</param>
-    void SetRightThruster(Attachable *newThruster);
+    void SetRightThruster(AEmitter *newThruster);
 
     /// <summary>
     /// Gets the left side thruster of this ACRocket.
@@ -255,7 +255,7 @@ ClassInfoGetters
     /// Sets the left side thruster for this ACRocket.
     /// </summary>
     /// <param name="newThruster">The new thruster to use.</param>
-    void SetLeftThruster(Attachable *newThruster);
+    void SetLeftThruster(AEmitter *newThruster);
 
     /// <summary>
     /// Gets the right side secondary thruster of this ACRocket.
@@ -267,7 +267,7 @@ ClassInfoGetters
     /// Sets the right side secondary thruster for this ACRocket.
     /// </summary>
     /// <param name="newThruster">The new thruster to use.</param>
-    void SetURightThruster(Attachable *newThruster);
+    void SetURightThruster(AEmitter *newThruster);
 
     /// <summary>
     /// Gets the left side secondary thruster of this ACRocket.
@@ -279,7 +279,7 @@ ClassInfoGetters
     /// Sets the left side secondary thruster for this ACRocket.
     /// </summary>
     /// <param name="newThruster">The new thruster to use.</param>
-    void SetULeftThruster(Attachable *newThruster);
+    void SetULeftThruster(AEmitter *newThruster);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

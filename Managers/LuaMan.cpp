@@ -188,6 +188,8 @@ struct enum_wrapper {
 
 // These are expanded by the preprocessor to all the different cloning function definitions.
 LUAENTITYCREATE(Attachable)
+LUAENTITYCREATE(Arm)
+LUAENTITYCREATE(Leg)
 LUAENTITYCREATE(AEmitter)
 LUAENTITYCREATE(Turret)
 LUAENTITYCREATE(Actor)
@@ -233,6 +235,9 @@ LUAENTITYCLONE(Entity)
 LUAENTITYCLONE(SceneObject)
 LUAENTITYCLONE(MovableObject)
 LUAENTITYCLONE(Attachable)
+LUAENTITYCLONE(Arm)
+LUAENTITYCLONE(Leg)
+LUAENTITYCLONE(Emission)
 LUAENTITYCLONE(AEmitter)
 LUAENTITYCLONE(Turret)
 LUAENTITYCLONE(Actor)
@@ -1032,13 +1037,13 @@ int LuaMan::Create() {
 			.def("StopDoor", &ADoor::StopDoor)
 			.def("SetClosedByDefault", &ADoor::SetClosedByDefault),
 
-		ABSTRACTLUABINDING(Arm, Attachable)
+		CONCRETELUABINDING(Arm, Attachable)
             .property("HeldDevice", &Arm::GetHeldMO)
 			.property("IdleOffset", &Arm::GetIdleOffset, &Arm::SetIdleOffset)
             .property("GripStrength", &Arm::GetGripStrength, &Arm::SetGripStrength)
 			.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos),
 
-        ABSTRACTLUABINDING(Leg, Attachable)
+        CONCRETELUABINDING(Leg, Attachable)
             .property("Foot", &Leg::GetFoot, &Leg::SetFoot, detail::null_type(), adopt(_2)),
 
 		CONCRETELUABINDING(AHuman, Actor)

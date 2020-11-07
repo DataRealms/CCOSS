@@ -68,7 +68,7 @@ namespace RTE {
 		/// The currently mounted HeldDevice (if there is one) will be dropped and added to MovableMan.
 		/// </summary>
 		/// <param name="newMountedDevice">The new HeldDevice to use.</param>
-		void SetMountedDevice(Attachable *newMountedDevice);
+		void SetMountedDevice(HeldDevice *newMountedDevice);
 
 		/// <summary>
 		/// Indicates whether a ThrownDevice is mounted or not.

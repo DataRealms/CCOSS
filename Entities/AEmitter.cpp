@@ -376,7 +376,10 @@ void AEmitter::SetFlash(Attachable *newFlash) {
         if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
         m_pFlash = newFlash;
         AddAttachable(newFlash);
-        m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AEmitter *>(parent)->SetFlash(attachable); }});
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            dynamic_cast<AEmitter *>(parent)->SetFlash(attachable);
+        }});
     }
 }
 

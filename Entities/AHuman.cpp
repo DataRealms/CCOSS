@@ -147,15 +147,15 @@ int AHuman::Create(const AHuman &reference) {
     //Note - hardcoded attachable copying is organized based on desired draw order here.
     if (reference.m_pBGArm) {
         m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pBGArm->GetUniqueID());
-        SetBGArm(dynamic_cast<Attachable *>(reference.m_pBGArm->Clone()));
+        SetBGArm(dynamic_cast<Arm *>(reference.m_pBGArm->Clone()));
     }
     if (reference.m_pBGLeg) {
         m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pBGLeg->GetUniqueID());
-        SetBGLeg(dynamic_cast<Attachable *>(reference.m_pBGLeg->Clone()));
+        SetBGLeg(dynamic_cast<Leg *>(reference.m_pBGLeg->Clone()));
     }
     if (reference.m_pJetpack) {
         m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pJetpack->GetUniqueID());
-        SetJetpack(dynamic_cast<Attachable *>(reference.m_pJetpack->Clone()));
+        SetJetpack(dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone()));
     }
     if (reference.m_pHead) {
         m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pHead->GetUniqueID());
@@ -163,11 +163,11 @@ int AHuman::Create(const AHuman &reference) {
     }
     if (reference.m_pFGLeg) {
         m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFGLeg->GetUniqueID());
-        SetFGLeg(dynamic_cast<Attachable *>(reference.m_pFGLeg->Clone()));
+        SetFGLeg(dynamic_cast<Leg *>(reference.m_pFGLeg->Clone()));
     }
     if (reference.m_pFGArm) {
         m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFGArm->GetUniqueID());
-        SetFGArm(dynamic_cast<Attachable *>(reference.m_pFGArm->Clone()));
+        SetFGArm(dynamic_cast<Arm *>(reference.m_pFGArm->Clone()));
     }
     Actor::Create(reference);
 
@@ -487,92 +487,105 @@ void AHuman::SetHead(Attachable *newHead) {
         if (m_pHead && m_pHead->IsAttached()) { RemoveAttachable(m_pHead); }
         m_pHead = newHead;
         AddAttachable(newHead);
-        m_HardcodedAttachableUniqueIDsAndSetters.insert({newHead->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetHead(attachable); }});
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newHead->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            dynamic_cast<AHuman *>(parent)->SetHead(attachable);
+        }});
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void AHuman::SetJetpack(Attachable *newJetpack) {
+void AHuman::SetJetpack(AEmitter *newJetpack) {
     if (newJetpack == nullptr) {
         if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
         m_pJetpack = nullptr;
     } else {
-        AEmitter *castedNewJetpack = dynamic_cast<AEmitter *>(newJetpack);
-        if (castedNewJetpack) {
-            if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
-            m_pJetpack = castedNewJetpack;
-            AddAttachable(castedNewJetpack);
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetJetpack(attachable); }});
-        }
+        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
+        m_pJetpack = newJetpack;
+        AddAttachable(newJetpack);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
+            dynamic_cast<AHuman *>(parent)->SetJetpack(castedAttachable);
+        }});
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void AHuman::SetFGArm(Attachable *newArm) {
+void AHuman::SetFGArm(Arm *newArm) {
     if (newArm == nullptr) {
         if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAttachable(m_pFGArm); }
         m_pFGArm = nullptr;
     } else {
-        Arm *castedNewArm = dynamic_cast<Arm *>(newArm);
-        if (castedNewArm) {
-            if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAttachable(m_pFGArm); }
-            m_pFGArm = castedNewArm;
-            AddAttachable(castedNewArm);
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetFGArm(attachable); }});
-        }
+        if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAttachable(m_pFGArm); }
+        m_pFGArm = newArm;
+        AddAttachable(newArm);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Arm *castedAttachable = dynamic_cast<Arm *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
+            dynamic_cast<AHuman *>(parent)->SetFGArm(castedAttachable);
+        }});
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void AHuman::SetBGArm(Attachable *newArm) {
+void AHuman::SetBGArm(Arm *newArm) {
     if (newArm == nullptr) {
         if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAttachable(m_pBGArm); }
         m_pBGArm = nullptr;
     } else {
-        Arm *castedNewArm = dynamic_cast<Arm *>(newArm);
-        if (castedNewArm) {
-            if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAttachable(m_pBGArm); }
-            m_pBGArm = castedNewArm;
-            AddAttachable(castedNewArm);
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetBGArm(attachable); }});
-        }
+        if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAttachable(m_pBGArm); }
+        m_pBGArm = newArm;
+        AddAttachable(newArm);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Arm *castedAttachable = dynamic_cast<Arm *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetBGArm");
+            dynamic_cast<AHuman *>(parent)->SetBGArm(castedAttachable);
+        }});
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void AHuman::SetFGLeg(Attachable *newLeg) {
+void AHuman::SetFGLeg(Leg *newLeg) {
     if (newLeg == nullptr) {
         if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAttachable(m_pFGLeg); }
         m_pFGLeg = nullptr;
     } else {
-        Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
-        if (castedNewLeg) {
-            if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAttachable(m_pFGLeg); }
-            m_pFGLeg = castedNewLeg;
-            AddAttachable(castedNewLeg);
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetFGLeg(attachable); }});
-        }
+        if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAttachable(m_pFGLeg); }
+        m_pFGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetFGLeg");
+            dynamic_cast<AHuman *>(parent)->SetFGLeg(castedAttachable);
+        }});
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void AHuman::SetBGLeg(Attachable *newLeg) {
+void AHuman::SetBGLeg(Leg *newLeg) {
     if (newLeg == nullptr) {
         if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAttachable(m_pBGLeg); }
         m_pBGLeg = nullptr;
     } else {
-        Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
-        if (castedNewLeg) {
-            if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAttachable(m_pBGLeg); }
-            m_pBGLeg = castedNewLeg;
-            AddAttachable(castedNewLeg);
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<AHuman *>(parent)->SetBGLeg(attachable); }});
-        }
+        if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAttachable(m_pBGLeg); }
+        m_pBGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetBGLeg");
+            dynamic_cast<AHuman *>(parent)->SetBGLeg(castedAttachable);
+        }});
     }
 }
 

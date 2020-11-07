@@ -164,7 +164,7 @@ public:
 	/// Sets the Turret for this ACrab. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newTurret">The new Turret to use.</param>
-	void SetTurret(Attachable *newTurret);
+	void SetTurret(Turret *newTurret);
 
 	/// <summary>
 	/// Gets the jetpack of this ACrab.
@@ -176,7 +176,7 @@ public:
 	/// Sets the jetpack for this ACrab. Ownership IS Transferred!
 	/// </summary>
 	/// <param name="newJetpack">The new jetpack to use.</param>
-	void SetJetpack(Attachable *newJetpack);
+	void SetJetpack(AEmitter *newJetpack);
 
     /// <summary>
     /// Gets the left foreground Leg of this ACrab.
@@ -188,7 +188,7 @@ public:
     /// Sets the left foreground Leg for this ACrab. Ownership IS transferred!
     /// </summary>
     /// <param name="newLeg">The new Leg to use.</param>
-    void SetLeftFGLeg(Attachable *newLeg);
+    void SetLeftFGLeg(Leg *newLeg);
 
     /// <summary>
     /// Gets the left background Leg of this ACrab.
@@ -200,7 +200,7 @@ public:
     /// Sets the left background Leg for this ACrab. Ownership IS transferred!
     /// </summary>
     /// <param name="newLeg">The new Leg to use.</param>
-    void SetLeftBGLeg(Attachable *newLeg);
+    void SetLeftBGLeg(Leg *newLeg);
 
     /// <summary>
     /// Gets the right foreground Leg of this ACrab.
@@ -212,7 +212,7 @@ public:
     /// Sets the right foreground Leg for this ACrab. Ownership IS transferred!
     /// </summary>
     /// <param name="newLeg">The new Leg to use.</param>
-    void SetRightFGLeg(Attachable *newLeg);
+    void SetRightFGLeg(Leg *newLeg);
 
     /// <summary>
     /// Gets the right BG Leg of this ACrab.
@@ -224,7 +224,7 @@ public:
     /// Sets the right background Leg for this ACrab. Ownership IS transferred!
     /// </summary>
     /// <param name="newLeg">The new Leg to use.</param>
-    void SetRightBGLeg(Attachable *newLeg);
+    void SetRightBGLeg(Leg *newLeg);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -165,27 +165,27 @@ int ACrab::Create(const ACrab &reference) {
     //Note - hardcoded attachable copying is organized based on desired draw order here.
     if (reference.m_pLBGLeg) {
         m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLBGLeg->GetUniqueID());
-        SetLeftBGLeg(dynamic_cast<Attachable *>(reference.m_pLBGLeg->Clone()));
+        SetLeftBGLeg(dynamic_cast<Leg *>(reference.m_pLBGLeg->Clone()));
     }
     if (reference.m_pRBGLeg) {
         m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRBGLeg->GetUniqueID());
-        SetRightBGLeg(dynamic_cast<Attachable *>(reference.m_pRBGLeg->Clone()));
+        SetRightBGLeg(dynamic_cast<Leg *>(reference.m_pRBGLeg->Clone()));
     }
     if (reference.m_pJetpack) {
         m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pJetpack->GetUniqueID());
-        SetJetpack(dynamic_cast<Attachable *>(reference.m_pJetpack->Clone()));
+        SetJetpack(dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone()));
     }
     if (reference.m_pTurret) {
         m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pTurret->GetUniqueID());
-        SetTurret(dynamic_cast<Attachable *>(reference.m_pTurret->Clone()));
+        SetTurret(dynamic_cast<Turret *>(reference.m_pTurret->Clone()));
     }
     if (reference.m_pLFGLeg) {
         m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLFGLeg->GetUniqueID());
-        SetLeftFGLeg(dynamic_cast<Attachable *>(reference.m_pLFGLeg->Clone()));
+        SetLeftFGLeg(dynamic_cast<Leg *>(reference.m_pLFGLeg->Clone()));
     }
     if (reference.m_pRFGLeg) {
         m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRFGLeg->GetUniqueID());
-        SetRightFGLeg(dynamic_cast<Attachable *>(reference.m_pRFGLeg->Clone()));
+        SetRightFGLeg(dynamic_cast<Leg *>(reference.m_pRFGLeg->Clone()));
     }
     Actor::Create(reference);
 
@@ -491,103 +491,115 @@ Vector ACrab::GetEyePos() const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACrab::SetTurret(Attachable *newTurret) {
+void ACrab::SetTurret(Turret *newTurret) {
     if (newTurret == nullptr) {
         if (m_pTurret && m_pTurret->IsAttached()) { RemoveAttachable(m_pTurret); }
         m_pTurret = nullptr;
     } else {
-        Turret *castedNewTurret = dynamic_cast<Turret *>(newTurret);
-        if (castedNewTurret) {
-            if (m_pTurret && m_pTurret->IsAttached()) { RemoveAttachable(m_pTurret); }
-            m_pTurret = castedNewTurret;
-            AddAttachable(castedNewTurret);
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewTurret->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACrab *>(parent)->SetTurret(attachable); }});
-        }
+        if (m_pTurret && m_pTurret->IsAttached()) { RemoveAttachable(m_pTurret); }
+        m_pTurret = newTurret;
+        AddAttachable(newTurret);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newTurret->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Turret *castedAttachable = dynamic_cast<Turret *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetTurret");
+            dynamic_cast<ACrab *>(parent)->SetTurret(castedAttachable);
+        }});
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACrab::SetJetpack(Attachable *newJetpack) {
+void ACrab::SetJetpack(AEmitter *newJetpack) {
     if (newJetpack == nullptr) {
         if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
         m_pJetpack = nullptr;
     } else {
-        AEmitter *castedNewJetpack = dynamic_cast<AEmitter *>(newJetpack);
-        if (castedNewJetpack) {
-            if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
-            m_pJetpack = castedNewJetpack;
-            AddAttachable(castedNewJetpack);
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACrab *>(parent)->SetJetpack(attachable); }});
-        }
+        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
+        m_pJetpack = newJetpack;
+        AddAttachable(newJetpack);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
+            dynamic_cast<ACrab *>(parent)->SetJetpack(castedAttachable);
+        }});
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACrab::SetLeftFGLeg(Attachable *newLeg) {
+void ACrab::SetLeftFGLeg(Leg *newLeg) {
     if (newLeg == nullptr) {
         if (m_pLFGLeg && m_pLFGLeg->IsAttached()) { RemoveAttachable(m_pLFGLeg); }
         m_pLFGLeg = nullptr;
     } else {
-        Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
-        if (castedNewLeg) {
-            if (m_pLFGLeg && m_pLFGLeg->IsAttached()) { RemoveAttachable(m_pLFGLeg); }
-            m_pLFGLeg = castedNewLeg;
-            AddAttachable(castedNewLeg);
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACrab *>(parent)->SetLeftFGLeg(attachable); }});
-        }
+        if (m_pLFGLeg && m_pLFGLeg->IsAttached()) { RemoveAttachable(m_pLFGLeg); }
+        m_pLFGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftFGLeg");
+            dynamic_cast<ACrab *>(parent)->SetLeftFGLeg(castedAttachable);
+        }});
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACrab::SetLeftBGLeg(Attachable *newLeg) {
+void ACrab::SetLeftBGLeg(Leg *newLeg) {
     if (newLeg == nullptr) {
         if (m_pLBGLeg && m_pLBGLeg->IsAttached()) { RemoveAttachable(m_pLBGLeg); }
         m_pLBGLeg = nullptr;
     } else {
-        Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
-        if (castedNewLeg) {
-            if (m_pLBGLeg && m_pLBGLeg->IsAttached()) { RemoveAttachable(m_pLBGLeg); }
-            m_pLBGLeg = castedNewLeg;
-            AddAttachable(castedNewLeg);
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACrab *>(parent)->SetLeftBGLeg(attachable); }});
-        }
+        if (m_pLBGLeg && m_pLBGLeg->IsAttached()) { RemoveAttachable(m_pLBGLeg); }
+        m_pLBGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftBGLeg");
+            dynamic_cast<ACrab *>(parent)->SetLeftBGLeg(castedAttachable);
+        }});
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACrab::SetRightFGLeg(Attachable *newLeg) {
+void ACrab::SetRightFGLeg(Leg *newLeg) {
     if (newLeg == nullptr) {
         if (m_pRFGLeg && m_pRFGLeg->IsAttached()) { RemoveAttachable(m_pRFGLeg); }
         m_pRFGLeg = nullptr;
     } else {
-        Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
-        if (castedNewLeg) {
-            if (m_pRFGLeg && m_pRFGLeg->IsAttached()) { RemoveAttachable(m_pRFGLeg); }
-            m_pRFGLeg = castedNewLeg;
-            AddAttachable(castedNewLeg);
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACrab *>(parent)->SetRightFGLeg(attachable); }});
-        }
+        if (m_pRFGLeg && m_pRFGLeg->IsAttached()) { RemoveAttachable(m_pRFGLeg); }
+        m_pRFGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightFGLeg");
+            dynamic_cast<ACrab *>(parent)->SetRightFGLeg(castedAttachable);
+        }});
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACrab::SetRightBGLeg(Attachable *newLeg) {
+void ACrab::SetRightBGLeg(Leg *newLeg) {
     if (newLeg == nullptr) {
         if (m_pRBGLeg && m_pRBGLeg->IsAttached()) { RemoveAttachable(m_pRBGLeg); }
         m_pRBGLeg = nullptr;
     } else {
-        Leg *castedNewLeg = dynamic_cast<Leg *>(newLeg);
-        if (castedNewLeg) {
-            if (m_pRBGLeg && m_pRBGLeg->IsAttached()) { RemoveAttachable(m_pRBGLeg); }
-            m_pRBGLeg = castedNewLeg;
-            AddAttachable(castedNewLeg);
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({castedNewLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) { dynamic_cast<ACrab *>(parent)->SetRightBGLeg(attachable); }});
-        }
+        if (m_pRBGLeg && m_pRBGLeg->IsAttached()) { RemoveAttachable(m_pRBGLeg); }
+        m_pRBGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightBGLeg");
+            dynamic_cast<ACrab *>(parent)->SetRightBGLeg(castedAttachable);
+        }});
     }
 }
 

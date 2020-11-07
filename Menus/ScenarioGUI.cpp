@@ -1052,6 +1052,7 @@ bool ScenarioGUI::StartGame() {
 
 	g_ActivityMan.SetStartActivity(activityInstance);
 
+	//TODO: Why is there metagame handling here?
 	if (g_MetaMan.GameInProgress()) {
 		g_MetaMan.EndGame();
 	}

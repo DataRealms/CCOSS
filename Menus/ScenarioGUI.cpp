@@ -485,7 +485,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			m_ScenarioDraggedBox->MoveRelative(mousePos.GetFloorIntX() - m_PrevMousePos.GetFloorIntX(), mousePos.GetFloorIntY() - m_PrevMousePos.GetFloorIntY());
 			m_PrevMousePos = mousePos;
 
-			KeepBoxOnScreen(m_ScenarioDraggedBox);
+			KeepBoxOnScreen(*m_ScenarioDraggedBox);
 			if (m_ScenarioDraggedBox == m_ScenarioScreenBoxes[SCENEINFO]) {
 				CalculateLinesToSitePoint();
 			}
@@ -610,17 +610,17 @@ void ScenarioGUI::HideAllScreens() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox *screenBox) {
-	if (screenBox->GetXPos() < 0) {
-		screenBox->SetPositionAbs(0, screenBox->GetYPos());
-	} else if (screenBox->GetXPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - screenBox->GetWidth()) {
-		screenBox->SetPositionAbs(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - screenBox->GetWidth(), screenBox->GetYPos());
+void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox &screenBox) const {
+	if (screenBox.GetXPos() < 0) {
+		screenBox.SetPositionAbs(0, screenBox.GetYPos());
+	} else if (screenBox.GetXPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - screenBox.GetWidth()) {
+		screenBox.SetPositionAbs(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - screenBox.GetWidth(), screenBox.GetYPos());
 	}
 
-	if (screenBox->GetYPos() < 0) {
-		screenBox->SetPositionAbs(screenBox->GetXPos(), 0);
-	} else if (screenBox->GetYPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - screenBox->GetHeight()) {
-		screenBox->SetPositionAbs(screenBox->GetXPos(), m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - screenBox->GetHeight());
+	if (screenBox.GetYPos() < 0) {
+		screenBox.SetPositionAbs(screenBox.GetXPos(), 0);
+	} else if (screenBox.GetYPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - screenBox.GetHeight()) {
+		screenBox.SetPositionAbs(screenBox.GetXPos(), m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - screenBox.GetHeight());
 	}
 }
 
@@ -716,7 +716,7 @@ void ScenarioGUI::UpdateActivityBox() {
 		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), textHeight + padding);
 	}
 
-	KeepBoxOnScreen(m_ScenarioScreenBoxes[ACTIVITY]);
+	KeepBoxOnScreen(*m_ScenarioScreenBoxes[ACTIVITY]);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -731,7 +731,7 @@ void ScenarioGUI::ShowScenesBox() {
 	const int textHeight = m_SceneInfoLabel->ResizeHeightToFit();
 	const int padding = 140;
 	m_ScenarioScreenBoxes[SCENEINFO]->Resize(m_ScenarioScreenBoxes[SCENEINFO]->GetWidth(), textHeight + padding);
-	KeepBoxOnScreen(m_ScenarioScreenBoxes[SCENEINFO]);
+	KeepBoxOnScreen(*m_ScenarioScreenBoxes[SCENEINFO]);
 	m_ScenarioScreenBoxes[SCENEINFO]->SetVisible(true);
 }
 

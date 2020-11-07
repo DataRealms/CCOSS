@@ -106,7 +106,7 @@ namespace RTE {
 		/// Makes sure a specific box doesn't move off-screen.
 		/// </summary>
 		/// <param name="screenBox">The GUICollectionBox to adjust, if necessary.</param>
-		void KeepBoxOnScreen(GUICollectionBox *screenBox);
+		void KeepBoxOnScreen(GUICollectionBox &screenBox) const;
 
 		/// <summary>
 		/// Updates the contents of the Activity selection box.

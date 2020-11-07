@@ -581,16 +581,16 @@ ClassInfoGetters
 
 #pragma region Force Transferral
     /// <summary>
-    /// Bundles up all the accumulated impulse forces of this Attachable and calculates how they transfer to the joint, and therefore to the parent.
-    /// If the accumulated impulse forces exceed the joint strength or gib impulse limit of this Attachable, the jointImpulses Vector will be filled up to that limit and false will be returned.
-    /// Additionally, in this case, the Attachable will remove itself from its parent and gib itself if appropriate.
+    /// Bundles up all the accumulated impulse forces of this HeldDevice and calculates how they transfer to the joint, and therefore to the parent.
+    /// If the accumulated impulse forces exceed the joint strength or gib impulse limit of this HeldDevice, the jointImpulses Vector will be filled up to that limit and false will be returned.
+    /// Additionally, in this case, the HeldDevice will remove itself from its parent, destabilizing said parent if it's an Actor, and gib itself if appropriate.
     /// </summary>
     /// <param name="jointImpulses">A vector that will have the impulse forces affecting the joint ADDED to it.</param>
-    /// <param name="jointStiffnessOverride">An optional override for the Attachable's joint stiffness for this function call. Primarily used to allow subclasses to perform special behavior.</param>
-    /// <param name="jointStrengthOverride">An optional override for the Attachable's joint strength for this function call. Primarily used to allow subclasses to perform special behavior.</param>
-    /// <param name="gibImpulseLimitOverride">An optional override for the Attachable's gib impulse limit for this function call. Primarily used to allow subclasses to perform special behavior.</param>
-    /// <returns>False if the Attachable has no parent or its accumulated forces are greater than its joint strength or gib impulse limit, otherwise true.</returns>
-    bool TransferJointImpulses(Vector &jointImpulses, float jointStiffnessOverride = -1, float jointStrengthOverride = -1, float gibImpulseLimitOverride = -1) override;
+    /// <param name="jointStiffnessValueToUse">An optional override for the HeldDevice's joint stiffness for this function call. Primarily used to allow subclasses to perform special behavior.</param>
+    /// <param name="jointStrengthValueToUse">An optional override for the HeldDevice's joint strength for this function call. Primarily used to allow subclasses to perform special behavior.</param>
+    /// <param name="gibImpulseLimitValueToUse">An optional override for the HeldDevice's gib impulse limit for this function call. Primarily used to allow subclasses to perform special behavior.</param>
+    /// <returns>False if the HeldDevice has no parent or its accumulated forces are greater than its joint strength or gib impulse limit, otherwise true.</returns>
+    bool TransferJointImpulses(Vector &jointImpulses, float jointStiffnessValueToUse = -1, float jointStrengthValueToUse = -1, float gibImpulseLimitValueToUse = -1) override;
 #pragma endregion
 
 

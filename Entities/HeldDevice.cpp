@@ -403,7 +403,7 @@ bool HeldDevice::OnMOHit(MovableObject *pOtherMO)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool HeldDevice::TransferJointImpulses(Vector &jointImpulses, float jointStiffnessOverride, float jointStrengthOverride, float gibImpulseLimitOverride) {
+bool HeldDevice::TransferJointImpulses(Vector &jointImpulses, float jointStiffnessValueToUse, float jointStrengthValueToUse, float gibImpulseLimitValueToUse) {
     MovableObject *parent = m_Parent;
     if (!parent) {
         return false;
@@ -412,10 +412,10 @@ bool HeldDevice::TransferJointImpulses(Vector &jointImpulses, float jointStiffne
         return true;
     }
     const Arm *parentAsArm = dynamic_cast<Arm *>(parent);
-    if (parentAsArm && parentAsArm->GetGripStrength() > 0 && jointStrengthOverride < 0) {
-        jointStrengthOverride = parentAsArm->GetGripStrength() * m_GripStrengthMultiplier;
+    if (parentAsArm && parentAsArm->GetGripStrength() > 0 && jointStrengthValueToUse < 0) {
+        jointStrengthValueToUse = parentAsArm->GetGripStrength() * m_GripStrengthMultiplier;
     }
-    bool intact = Attachable::TransferJointImpulses(jointImpulses, jointStiffnessOverride, jointStrengthOverride, gibImpulseLimitOverride);
+    bool intact = Attachable::TransferJointImpulses(jointImpulses, jointStiffnessValueToUse, jointStrengthValueToUse, gibImpulseLimitValueToUse);
     if (!intact) {
         Actor *rootParentAsActor = dynamic_cast<Actor *>(parent->GetRootParent());
         if (rootParentAsActor && rootParentAsActor->GetStatus() == Actor::STABLE) {

@@ -128,6 +128,7 @@ int g_StationOffsetY;
 
 bool g_HadResolutionChange = false; //!< Need this so we can restart PlayIntroTitle without an endless loop or leaks. Will be set true by ReinitMainMenu and set back to false at the end of the switch.
 
+// TODO: De-globalize these dynamic-memory objects. Make them bound to some scope.
 MainMenuGUI *g_pMainMenuGUI = 0;
 std::unique_ptr<ScenarioGUI> g_pScenarioGUI;
 Controller *g_pMainMenuController = 0;

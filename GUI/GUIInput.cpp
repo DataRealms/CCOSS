@@ -176,7 +176,7 @@ void GUIInput::SetNetworkMouseButton(int whichPlayer, int state1, int state2, in
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the mouse position
 
-void GUIInput::GetMousePosition(int *X, int *Y)
+void GUIInput::GetMousePosition(int *X, int *Y) const
 {
 	if (m_OverrideInput)
 	{

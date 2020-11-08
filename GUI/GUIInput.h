@@ -158,7 +158,7 @@ public:
 // Description:     Gets the mouse position
 // Arguments:       Pointers to store the X and Y coordinates in
 
-    void GetMousePosition(int *X, int *Y);
+    void GetMousePosition(int *X, int *Y) const;
 
 
 	static void SetNetworkMouseMovement(int whichPlayer, int x, int y);

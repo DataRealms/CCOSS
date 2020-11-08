@@ -130,8 +130,8 @@ bool g_HadResolutionChange = false; //!< Need this so we can restart PlayIntroTi
 
 // TODO: De-globalize these dynamic-memory objects. Make them bound to some scope.
 MainMenuGUI *g_pMainMenuGUI = 0;
-std::unique_ptr<ScenarioGUI> g_pScenarioGUI;
 Controller *g_pMainMenuController = 0;
+std::unique_ptr<ScenarioGUI> g_pScenarioGUI;
 
 enum StarSize {
 	StarSmall = 0,
@@ -170,7 +170,7 @@ void InitMainMenu() {
     g_pMainMenuController->SetTeam(0);
     g_pMainMenuGUI->Create(g_pMainMenuController);
     // As well as the Scenario setup menu interface
-	g_pScenarioGUI = std::make_unique<ScenarioGUI>(g_pMainMenuController);
+	g_pScenarioGUI = std::make_unique<ScenarioGUI>(*g_pMainMenuController);
     // And the Metagame GUI too
     g_MetaMan.GetGUI()->Create(g_pMainMenuController);
 }
@@ -1775,7 +1775,7 @@ int main(int argc, char *argv[]) {
 		g_AudioMan.SetMusicVolume(0);
 	}
 
-    new LoadingGUI();
+    LoadingGUI loadingGUI = LoadingGUI();
 	g_LoadingGUI.InitLoadingScreen();
 	InitMainMenu();
 

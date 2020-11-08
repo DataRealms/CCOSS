@@ -2,7 +2,12 @@
 #define _SCENARIOGUI_
 
 #include "ActivityMan.h"
+#include "FrameMan.h"
 #include "Timer.h"
+#include "GUI.h"
+#include "Interface.h"
+#include "AllegroScreen.h"
+#include "AllegroInput.h"
 
 namespace RTE {
 
@@ -36,7 +41,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a ScenarioGUI object in system memory. Create() should be called before using the object.
 		/// </summary>
-		explicit ScenarioGUI(Controller *pController);
+		explicit ScenarioGUI(Controller &pController);
 
 		/// <summary>
 		/// Destructor method used to clean up a ScenarioGUI object before deletion from system memory.
@@ -191,10 +196,10 @@ namespace RTE {
 			SCREENCOUNT
 		};
 
-		Controller *m_ScenarioController; //!< Controller which controls this menu. Not owned.
-		std::unique_ptr<GUIScreen> m_ScenarioGUIScreen; //!< GUI Screen for use by the in-game GUI.
-		std::unique_ptr<GUIInput> m_ScenarioGUIInput; //!< Input controller.
-		std::unique_ptr<GUIControlManager> m_ScenarioGUIController; //!< The control manager which holds all the controls.
+		Controller &m_ScenarioController; //!< Reference to the Controller which controls this menu.
+		AllegroScreen m_ScenarioGUIScreen = AllegroScreen(g_FrameMan.GetBackBuffer32()); //!< GUI Screen for use by the in-game GUI.
+		AllegroInput m_ScenarioGUIInput = AllegroInput(-1, true); //!< Input controller.
+		GUIControlManager m_ScenarioGUIController = GUIControlManager(); //!< The control manager which holds all the controls.
 
 		Timer m_BlinkTimer; //!< Notification blink timer.
 

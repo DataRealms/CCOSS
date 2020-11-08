@@ -129,7 +129,7 @@ int g_StationOffsetY;
 bool g_HadResolutionChange = false; //!< Need this so we can restart PlayIntroTitle without an endless loop or leaks. Will be set true by ReinitMainMenu and set back to false at the end of the switch.
 
 MainMenuGUI *g_pMainMenuGUI = 0;
-ScenarioGUI *g_pScenarioGUI = 0;
+std::unique_ptr<ScenarioGUI> g_pScenarioGUI;
 Controller *g_pMainMenuController = 0;
 
 enum StarSize {
@@ -169,7 +169,7 @@ void InitMainMenu() {
     g_pMainMenuController->SetTeam(0);
     g_pMainMenuGUI->Create(g_pMainMenuController);
     // As well as the Scenario setup menu interface
-	g_pScenarioGUI = new ScenarioGUI(g_pMainMenuController);
+	g_pScenarioGUI = std::make_unique<ScenarioGUI>(g_pMainMenuController);
     // And the Metagame GUI too
     g_MetaMan.GetGUI()->Create(g_pMainMenuController);
 }
@@ -182,7 +182,7 @@ void InitMainMenu() {
 void ReinitMainMenu() {
 	delete g_pMainMenuGUI;
 	delete g_pMainMenuController;
-	delete g_pScenarioGUI;
+	g_pScenarioGUI.reset();
 	g_MetaMan.GetGUI()->Destroy();
 
 	InitMainMenu();
@@ -1833,7 +1833,10 @@ int main(int argc, char *argv[]) {
     g_LuaMan.Destroy();
     ContentFile::FreeAllLoaded();
     g_ConsoleMan.Destroy();
-	delete g_pScenarioGUI;
+
+	g_pScenarioGUI.reset();
+	delete g_pMainMenuGUI;
+	delete g_pMainMenuController;
 
 #ifdef DEBUG_BUILD
     // Dump out the info about how well memory cleanup went

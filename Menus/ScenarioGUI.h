@@ -118,6 +118,12 @@ namespace RTE {
 		void HideScenesBox() const;
 
 		/// <summary>
+		/// Sets the currently selected scene.
+		/// </summary>
+		/// <param name="newSelectedScene">The new selected scene.</param>
+		void SetSelectedScene(Scene *newSelectedScene);
+
+		/// <summary>
 		/// Shows the player config box.
 		/// </summary>
 		void ShowPlayersBox();
@@ -237,7 +243,6 @@ namespace RTE {
 
 		std::unique_ptr<AllegroBitmap> m_ScenePreviewBitmap;
 		std::unique_ptr<AllegroBitmap> m_DefaultPreviewBitmap;
-		std::unique_ptr<ContentFile> m_DefaultPreviewContentFile;
 
 		// Player setup.
 		GUICollectionBox *m_PlayerBoxes[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];

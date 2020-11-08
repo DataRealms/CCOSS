@@ -91,6 +91,9 @@ void ScenarioGUI::Clear() {
 	m_ScenarioSelectedActivity = nullptr;
 	m_PrevMousePos.Reset();
 	m_LinePointsToSite.clear();
+
+	m_ScenePreviewBitmap.release();
+	m_DefaultPreviewBitmap.release();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,9 +231,12 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
 	m_ScenePreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
 
-	// Load default preview bitmap. It's owned by at a ContentFile static field.
-	m_DefaultPreviewContentFile = std::make_unique<ContentFile>("Base.rte/GUIs/DefaultPreview.png");
-	m_DefaultPreviewBitmap = std::make_unique<AllegroBitmap>(m_DefaultPreviewContentFile->GetAsBitmap());
+	// Load default preview bitmap.
+	m_DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();
+	m_DefaultPreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
+	ContentFile defaultPreviewContent("Base.rte/GUIs/DefaultPreview.png");
+	BITMAP *defaultPreview = defaultPreviewContent.LoadAndReleaseBitmap();
+	blit(defaultPreview, m_DefaultPreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_DefaultPreviewBitmap->GetBitmap()->w, m_DefaultPreviewBitmap->GetBitmap()->h);
 
 	clear_to_color(m_ScenePreviewBitmap->GetBitmap(), g_MaskColor);
 
@@ -380,12 +386,6 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 
 	// Draw scene preview after GUI.
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible() && m_ScenarioScenes && m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
-		BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
-		if (!preview) {
-			preview = m_DefaultPreviewBitmap->GetBitmap();
-		}
-
-		blit(preview, m_ScenePreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_ScenePreviewBitmap->GetBitmap()->w, m_ScenePreviewBitmap->GetBitmap()->h);
 		draw_sprite(drawBitmap, m_ScenePreviewBitmap->GetBitmap(), m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + 10, m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + 33);
 	} else if (m_ScenarioScreenBoxes[PLAYERSETUP]->GetVisible()) {
 		// Draw the Player-Team matrix lines and disabled overlay effects.
@@ -487,9 +487,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 
 		if (g_UInputMan.MenuButtonPressed(UInputMan::MENU_EITHER)) {
 			if (m_ScenarioHoveredScene) {
-				m_ScenarioSelectedScene = m_ScenarioHoveredScene;
-				ShowScenesBox();
-				CalculateLinesToSitePoint();
+				SetSelectedScene(m_ScenarioHoveredScene);
 				g_GUISound.ItemChangeSound()->Play();
 			}
 
@@ -530,9 +528,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 						ShowPlayersBox();
 						g_GUISound.ButtonPressSound()->Play();
 					} else if (eventControl == m_SceneCloseButton) {
-						m_ScenarioSelectedScene = nullptr;
-						HideScenesBox();
-						m_LinePointsToSite.clear();
+						SetSelectedScene(nullptr);
 						g_GUISound.ButtonPressSound()->Play();
 					}
 				}
@@ -545,14 +541,10 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 						// The activity selection has changed.
 						UpdateActivityBox();
 						if (m_ScenarioScenes && m_ScenarioScenes->size() == 1) {
-							m_ScenarioSelectedScene = m_ScenarioScenes->front();
-							ShowScenesBox();
-							CalculateLinesToSitePoint();
+							SetSelectedScene(m_ScenarioScenes->front());
 						} else {
 							// Deselect any previously selected scene. it may not be compatible with the new activity.
-							m_ScenarioSelectedScene = nullptr;
-							HideScenesBox();
-							m_LinePointsToSite.clear();
+							SetSelectedScene(nullptr);
 						}
 
 						g_GUISound.ItemChangeSound()->Play();
@@ -1168,12 +1160,9 @@ void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 
 	UpdateActivityBox();
 	if (m_ScenarioScenes) {
-		m_ScenarioSelectedScene = m_ScenarioScenes->front();
-		ShowScenesBox();
-		CalculateLinesToSitePoint();
+		SetSelectedScene(m_ScenarioScenes->front());
 	} else {
-		m_ScenarioSelectedScene = nullptr;
-		HideScenesBox();
+		SetSelectedScene(nullptr);
 	}
 }
 
@@ -1299,4 +1288,22 @@ void ScenarioGUI::CalculateLinesToSitePoint() {
 
 void ScenarioGUI::HideScenesBox() const {
 	m_ScenarioScreenBoxes[SCENEINFO]->SetVisible(false);
+}
+
+void ScenarioGUI::SetSelectedScene(Scene *newSelectedScene) {
+	m_ScenarioSelectedScene = newSelectedScene;
+	if (m_ScenarioSelectedScene) {
+		ShowScenesBox();
+
+		BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
+		if (!preview) {
+			preview = m_DefaultPreviewBitmap->GetBitmap();
+		}
+		blit(preview, m_ScenePreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_ScenePreviewBitmap->GetBitmap()->w, m_ScenePreviewBitmap->GetBitmap()->h);
+
+		CalculateLinesToSitePoint();
+	} else {
+		HideScenesBox();
+		m_LinePointsToSite.clear();
+	}
 }

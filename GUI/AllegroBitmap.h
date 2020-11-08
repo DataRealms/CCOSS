@@ -163,7 +163,7 @@ public:
 // Description:     Gets the Width of the bitmap.
 // Arguments:       None.
 
-    int GetWidth() override;
+    int GetWidth() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ public:
 // Description:     Gets the Height of the bitmap.
 // Arguments:       None.
 
-    int GetHeight() override;
+    int GetHeight() const override;
 
 /* NA, color key is always 0 with allegro
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -248,6 +248,12 @@ public:
 // Arguments:       None.
 
     BITMAP * GetBitmap();
+
+	/// <summary>
+	/// Gets a pointer to the const BITMAP.
+	/// </summary>
+	/// <returns></returns>
+	const BITMAP * GetConstBitmap() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

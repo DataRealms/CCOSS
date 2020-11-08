@@ -50,12 +50,12 @@ namespace RTE {
 		/// <summary>
 		/// Gets the Width of the bitmap.
 		/// </summary>
-		virtual int GetWidth() { return 0; }
+		virtual int GetWidth() const { return 0; }
 
 		/// <summary>
 		/// Gets the Height of the bitmap.
 		/// </summary>
-		virtual int GetHeight() { return 0; }
+		virtual int GetHeight() const { return 0; }
 
 		/// <summary>
 		/// Gets the number of bits per pixel color depth of this bitmap.

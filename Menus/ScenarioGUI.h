@@ -8,6 +8,7 @@
 #include "Interface.h"
 #include "AllegroScreen.h"
 #include "AllegroInput.h"
+#include "AllegroBitmap.h"
 
 namespace RTE {
 
@@ -22,7 +23,6 @@ namespace RTE {
 	class GUISlider;
 	class Scene;
 	class Activity;
-	class AllegroBitmap;
 
 	/// <summary>
 	/// A menu for setting up and launching scenario games.
@@ -74,7 +74,7 @@ namespace RTE {
 		/// Draws the menu.
 		/// </summary>
 		/// <param name="drawBitmap">The bitmap to draw on.</param>
-		void Draw(BITMAP *drawBitmap) const;
+		void Draw(BITMAP *drawBitmap);
 
 	private:
 
@@ -234,8 +234,8 @@ namespace RTE {
 		GUILabel *m_SceneNameLabel;
 		GUILabel *m_SceneInfoLabel;
 
-		std::unique_ptr<AllegroBitmap> m_ScenePreviewBitmap;
-		std::unique_ptr<AllegroBitmap> m_DefaultPreviewBitmap;
+		AllegroBitmap m_ScenePreviewBitmap = AllegroBitmap();
+		AllegroBitmap m_DefaultPreviewBitmap = AllegroBitmap();
 
 		// Player setup.
 		GUICollectionBox *m_PlayerBoxes[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];

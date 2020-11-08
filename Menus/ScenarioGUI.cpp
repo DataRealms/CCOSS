@@ -148,17 +148,15 @@ ScenarioGUI::ScenarioGUI(Controller &pController) :
 	m_ScenarioScreenBoxes[SCENEINFO]->SetPositionRel(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - m_ScenarioScreenBoxes[SCENEINFO]->GetWidth() - 16, 16);
 	m_ScenarioScreenBoxes[PLAYERSETUP]->CenterInParent(true, true);
 
-	m_ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
-	m_ScenePreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
+	m_ScenePreviewBitmap.Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
 
 	// Load default preview bitmap.
-	m_DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();
-	m_DefaultPreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
+	m_DefaultPreviewBitmap.Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
 	ContentFile defaultPreviewContent("Base.rte/GUIs/DefaultPreview.png");
 	BITMAP *defaultPreview = defaultPreviewContent.LoadAndReleaseBitmap();
-	blit(defaultPreview, m_DefaultPreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_DefaultPreviewBitmap->GetBitmap()->w, m_DefaultPreviewBitmap->GetBitmap()->h);
+	blit(defaultPreview, m_DefaultPreviewBitmap.GetBitmap(), 0, 0, 0, 0, m_DefaultPreviewBitmap.GetWidth(), m_DefaultPreviewBitmap.GetHeight());
 
-	clear_to_color(m_ScenePreviewBitmap->GetBitmap(), g_MaskColor);
+	clear_to_color(m_ScenePreviewBitmap.GetBitmap(), g_MaskColor);
 
 	GetAllScenesAndActivities(true);
 
@@ -293,7 +291,7 @@ void ScenarioGUI::DrawSitePoints(BITMAP *drawBitmap) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
+void ScenarioGUI::Draw(BITMAP *drawBitmap) {
 	DrawSitePoints(drawBitmap);
 
 	drawing_mode(DRAW_MODE_SOLID, 0, 0, 0);
@@ -304,7 +302,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 
 	// Draw scene preview after GUI.
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible() && m_ScenarioScenes && m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
-		draw_sprite(drawBitmap, m_ScenePreviewBitmap->GetBitmap(), m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + 10, m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + 33);
+		draw_sprite(drawBitmap, m_ScenePreviewBitmap.GetBitmap(), m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + 10, m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + 33);
 	} else if (m_ScenarioScreenBoxes[PLAYERSETUP]->GetVisible()) {
 		// Draw the Player-Team matrix lines and disabled overlay effects.
 		int lineY = 80;
@@ -624,16 +622,16 @@ void ScenarioGUI::UpdateActivityBox() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::ShowScenesBox() {
-	clear_to_color(m_ScenePreviewBitmap->GetBitmap(), g_MaskColor);
+	clear_to_color(m_ScenePreviewBitmap.GetBitmap(), g_MaskColor);
 	if (m_ScenarioSelectedScene) {
 		m_SceneNameLabel->SetText(m_ScenarioSelectedScene->GetPresetName());
 		m_SceneInfoLabel->SetText(m_ScenarioSelectedScene->GetDescription());
 
 		BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
 		if (!preview) {
-			preview = m_DefaultPreviewBitmap->GetBitmap();
+			preview = m_DefaultPreviewBitmap.GetBitmap();
 		}
-		blit(preview, m_ScenePreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_ScenePreviewBitmap->GetBitmap()->w, m_ScenePreviewBitmap->GetBitmap()->h);
+		blit(preview, m_ScenePreviewBitmap.GetBitmap(), 0, 0, 0, 0, m_ScenePreviewBitmap.GetBitmap()->w, m_ScenePreviewBitmap.GetBitmap()->h);
 	}
 
 	const int textHeight = m_SceneInfoLabel->ResizeHeightToFit();

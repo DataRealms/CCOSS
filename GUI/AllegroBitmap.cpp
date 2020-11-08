@@ -379,7 +379,3 @@ BITMAP *AllegroBitmap::GetBitmap()
 {
     return m_pBitmap;
 }
-
-const BITMAP * AllegroBitmap::GetConstBitmap() const{
-	return m_pBitmap;
-}

@@ -249,12 +249,6 @@ public:
 
     BITMAP * GetBitmap();
 
-	/// <summary>
-	/// Gets a pointer to the const BITMAP.
-	/// </summary>
-	/// <returns></returns>
-	const BITMAP * GetConstBitmap() const;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  HasBitmap

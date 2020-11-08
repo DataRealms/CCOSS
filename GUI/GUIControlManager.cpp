@@ -391,7 +391,7 @@ void GUIControlManager::Draw(void)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the GUI to the back buffer.
 
-void GUIControlManager::Draw(GUIScreen *pScreen) const
+void GUIControlManager::Draw(GUIScreen *pScreen)
 {
     m_GUIManager->Draw(pScreen);
 }
@@ -402,7 +402,7 @@ void GUIControlManager::Draw(GUIScreen *pScreen) const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the mouse.
 
-void GUIControlManager::DrawMouse(void) const
+void GUIControlManager::DrawMouse(void)
 {
     int MouseX, MouseY;
     m_Input->GetMousePosition(&MouseX, &MouseY);

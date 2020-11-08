@@ -137,7 +137,7 @@ public:
 // Description:     Draws the GUI to the back buffer.
 // Arguments:       The GUIScreen to draw to, overriding the one passed in on constuction
 
-    void Draw(GUIScreen *pScreen) const;
+    void Draw(GUIScreen *pScreen);
 	
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +146,7 @@ public:
 // Description:     Draws the mouse.
 // Arguments:       None.
 
-    void DrawMouse() const;
+    void DrawMouse();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

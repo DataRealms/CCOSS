@@ -1219,20 +1219,20 @@ void ScenarioGUI::DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap) const {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::CalculateLinesToSitePoint() {
+	m_LinePointsToSite.clear();
+
+	const Vector sitePos = m_PlanetCenter + m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset(); // Target site point.
+	if (m_ScenarioScreenBoxes[SCENEINFO]->PointInside(sitePos.GetFloorIntX(), sitePos.GetFloorIntY())) {
+		return;
+	}
+
 	const int halfBoxHeight = m_ScenarioScreenBoxes[SCENEINFO]->GetHeight() / 2;
 	const Vector sceneBoxCenter(m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + (m_ScenarioScreenBoxes[SCENEINFO]->GetWidth() / 2), m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + halfBoxHeight);
-	const Vector sitePos = m_PlanetCenter + m_ScenarioSelectedScene->GetLocation() + m_ScenarioSelectedScene->GetLocationOffset(); // Target site point.
 	const float yDirMult = sitePos.m_Y < sceneBoxCenter.m_Y ? -1.0F : 1.0F;
 	const Vector sceneBoxEdge = sceneBoxCenter + Vector(0, halfBoxHeight) * yDirMult; // Point on the scene box where the line starts.
 	const int circleRadius = 8; // Radius of the circle drawn around the site point.
 	const int minStraightLength = 15; // Minimum length of straight line at the box edge and site point edge.
 	const int minSiteDistance = circleRadius + minStraightLength; // Minimum distance from a chamfer point to the site point.
-	
-	m_LinePointsToSite.clear();
-
-	if (m_ScenarioScreenBoxes[SCENEINFO]->PointInside(sitePos.GetFloorIntX(), sitePos.GetFloorIntY())) {
-		return;
-	}
 
 	if (std::fabs(sceneBoxCenter.GetFloorIntX() - sitePos.GetFloorIntX()) < minSiteDistance) {
 		// No bends, meaning the line goes straight up/down to the site circle.

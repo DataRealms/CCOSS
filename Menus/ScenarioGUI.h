@@ -66,18 +66,18 @@ namespace RTE {
 		ScenarioUpdateResult UpdateInput();
 
 		/// <summary>
-		/// Draws the site points on top of the planet.
-		/// </summary>
-		/// <param name="drawBitmap">The bitmap to draw on.</param>
-		void DrawSitePoints(BITMAP *drawBitmap) const;
-
-		/// <summary>
 		/// Draws the menu.
 		/// </summary>
 		/// <param name="drawBitmap">The bitmap to draw on.</param>
 		void Draw(BITMAP *drawBitmap) const;
 
 	private:
+
+		/// <summary>
+		/// Draws the site points on top of the planet.
+		/// </summary>
+		/// <param name="drawBitmap">The bitmap to draw on.</param>
+		void DrawSitePoints(BITMAP *drawBitmap) const;
 
 		/// <summary>
 		/// Hides all menu screens, so a single screen can be unhidden and shown alone.

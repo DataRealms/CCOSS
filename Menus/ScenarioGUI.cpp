@@ -633,6 +633,12 @@ void ScenarioGUI::ShowScenesBox() {
 	if (m_ScenarioSelectedScene) {
 		m_SceneNameLabel->SetText(m_ScenarioSelectedScene->GetPresetName());
 		m_SceneInfoLabel->SetText(m_ScenarioSelectedScene->GetDescription());
+
+		BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
+		if (!preview) {
+			preview = m_DefaultPreviewBitmap->GetBitmap();
+		}
+		blit(preview, m_ScenePreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_ScenePreviewBitmap->GetBitmap()->w, m_ScenePreviewBitmap->GetBitmap()->h);
 	}
 
 	const int textHeight = m_SceneInfoLabel->ResizeHeightToFit();
@@ -1216,13 +1222,6 @@ void ScenarioGUI::HideScenesBox() const {
 void ScenarioGUI::SetSelectedScene(Scene *newSelectedScene) {
 	m_ScenarioSelectedScene = newSelectedScene;
 	ShowScenesBox();
-
-	BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
-	if (!preview) {
-		preview = m_DefaultPreviewBitmap->GetBitmap();
-	}
-	blit(preview, m_ScenePreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_ScenePreviewBitmap->GetBitmap()->w, m_ScenePreviewBitmap->GetBitmap()->h);
-
 	CalculateLinesToSitePoint();
 }
 

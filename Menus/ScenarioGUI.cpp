@@ -29,88 +29,13 @@ using namespace RTE;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::Clear() {
-	m_ScenarioController = nullptr;
-	m_ScenarioGUIScreen = nullptr;
-	m_ScenarioGUIInput = nullptr;
-	m_ScenarioGUIController = nullptr;
-	m_BlinkTimer.Reset();
-
-	m_PlanetCenter.Reset();
-	m_PlanetRadius = 240.0F;
-
-	for (GUICollectionBox *&screenIndex : m_ScenarioScreenBoxes) {
-		screenIndex = nullptr;
-	}
-
-	for (GUIButton *&buttonIndex : m_ScenarioButtons) {
-		buttonIndex = nullptr;
-	}
-	m_ScenarioScenePlanetLabel = nullptr;
-
-	m_ActivitySelectComboBox = nullptr;
-	m_ActivityLabel = nullptr;
-	m_DifficultyLabel = nullptr;
-	m_DifficultySlider = nullptr;
-
-	m_SceneCloseButton = nullptr;
-	m_SceneNameLabel = nullptr;
-	m_SceneInfoLabel = nullptr;
-	for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
-		for (int teamIndex = Activity::TeamOne; teamIndex < TEAMROWCOUNT; ++teamIndex) {
-			m_PlayerBoxes[playerIndex][teamIndex] = nullptr;
-		}
-	}
-
-	for (int teamIndex = Activity::TeamOne; teamIndex < TEAMROWCOUNT; ++teamIndex) {
-		m_TeamBoxes[teamIndex] = nullptr;
-		m_TeamNameLabels[teamIndex] = nullptr;
-	}
-
-	for (int teamIndex = Activity::TeamOne; teamIndex < RTE::Activity::MaxTeamCount; ++teamIndex) {
-		m_TeamTechSelect[teamIndex] = nullptr;
-		m_TeamAISkillSlider[teamIndex] = nullptr;
-		m_TeamAISkillLabel[teamIndex] = nullptr;
-	}
-
-	m_StartErrorLabel = nullptr;
-	m_CPULockLabel = nullptr;
-	m_LockedCPUTeam = Activity::NoTeam;
-
-	m_GoldLabel = nullptr;
-	m_GoldSlider = nullptr;
-	m_FogOfWarCheckbox = nullptr;
-	m_RequireClearPathToOrbitCheckbox = nullptr;
-	m_DeployUnitsCheckbox = nullptr;
-
-	m_ScenarioScenes = nullptr;
-	m_Activities.clear();
-	m_ScenarioDraggedBox = nullptr;
-	m_ScenarioHoveredScene = nullptr;
-	m_ScenarioSelectedScene = nullptr;
-	m_ScenarioSelectedActivity = nullptr;
-	m_PrevMousePos.Reset();
-	m_LinePointsToSite.clear();
-
-	m_ScenePreviewBitmap.release();
-	m_DefaultPreviewBitmap.release();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-int ScenarioGUI::Create(Controller *pController) {
+ScenarioGUI::ScenarioGUI(Controller *pController) :
+	m_ScenarioController(pController) {
 	RTEAssert(pController, "No controller sent to ScenarioGUI on creation!");
-	m_ScenarioController = pController;
+	m_ScenarioGUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
+	m_ScenarioGUIInput = std::make_unique<AllegroInput>(-1, true);
+	m_ScenarioGUIController = std::make_unique<GUIControlManager>();
 
-	if (!m_ScenarioGUIScreen) {
-		m_ScenarioGUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
-	}
-	if (!m_ScenarioGUIInput) {
-		m_ScenarioGUIInput = std::make_unique<AllegroInput>(-1, true);
-	}
-	if (!m_ScenarioGUIController) {
-		m_ScenarioGUIController = std::make_unique<GUIControlManager>();
-	}
 	if (!m_ScenarioGUIController->Create(m_ScenarioGUIScreen.get(), m_ScenarioGUIInput.get(), "Base.rte/GUIs/Skins/MainMenu")) {
 		RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
 	}
@@ -121,7 +46,7 @@ int ScenarioGUI::Create(Controller *pController) {
 	m_ScenarioScreenBoxes[ACTIVITY] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ActivitySelectBox"));
 	m_ScenarioScreenBoxes[SCENEINFO] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("SceneInfoBox"));
 	m_ScenarioScreenBoxes[PLAYERSETUP] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("PlayerSetupBox"));
-
+	
 	m_ScenarioScreenBoxes[ROOTSCREEN]->SetPositionAbs(0, 0);
 	m_ScenarioScreenBoxes[ROOTSCREEN]->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
@@ -245,8 +170,6 @@ int ScenarioGUI::Create(Controller *pController) {
 	UpdateActivityBox();
 
 	HideAllScreens();
-
-	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

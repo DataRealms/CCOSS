@@ -36,24 +36,12 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a ScenarioGUI object in system memory. Create() should be called before using the object.
 		/// </summary>
-		ScenarioGUI() { Clear(); }
+		explicit ScenarioGUI(Controller *pController);
 
 		/// <summary>
 		/// Destructor method used to clean up a ScenarioGUI object before deletion from system memory.
 		/// </summary>
 		~ScenarioGUI() = default;
-
-		/// <summary>
-		/// Makes the ScenarioGUI object ready for use.
-		/// </summary>
-		/// <param name="pController">A pointer to a Controller which will control this Menu. Ownership is NOT TRANSFERRED!</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(Controller *pController);
-
-		/// <summary>
-		/// Resets the entire ScenarioGUI, including its inherited members, to their default settings or values.
-		/// </summary>
-		void Reset() { Clear(); }
 
 		/// <summary>
 		/// Enables the menu. This will animate it in and out of view.
@@ -176,11 +164,6 @@ namespace RTE {
 		/// </summary>
 		void CalculateLinesToSitePoint();
 
-		/// <summary>
-		/// Clears all the member variables of this ScenarioGUI, effectively resetting the members of this abstraction level only.
-		/// </summary>
-		void Clear();
-
 		enum ScenarioButtons {
 			BACKTOMAINBUTTON = 0,
 			STARTHERE,
@@ -223,7 +206,7 @@ namespace RTE {
 		Vector m_PrevMousePos; //!< Previous pos of mouse to calculate dragging.
 
 		Vector m_PlanetCenter; //!< The absolute screen position of the planet center.
-		float m_PlanetRadius; //!< The screen radius of the planet.
+		float m_PlanetRadius = 240.0F; //!< The screen radius of the planet.
 
 		std::list<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed - not owned, and neither are the scenes.
 		Scene *m_ScenarioHoveredScene; //!< The scene preset currently hovered, NOT OWNED.
@@ -264,7 +247,7 @@ namespace RTE {
 		GUISlider *m_TeamAISkillSlider[Activity::MaxTeamCount]; //!< AI skill slider array.
 		GUILabel *m_TeamAISkillLabel[Activity::MaxTeamCount]; //!< AI skill label array.
 
-		int m_LockedCPUTeam; //!< Which team the CPU is locked to, if any.
+		int m_LockedCPUTeam = Activity::NoTeam; //!< Which team the CPU is locked to, if any.
 
 		// Disallow the use of some implicit methods.
 		ScenarioGUI(const ScenarioGUI &reference) = delete;

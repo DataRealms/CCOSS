@@ -169,8 +169,7 @@ void InitMainMenu() {
     g_pMainMenuController->SetTeam(0);
     g_pMainMenuGUI->Create(g_pMainMenuController);
     // As well as the Scenario setup menu interface
-	g_pScenarioGUI = new ScenarioGUI();
-    g_pScenarioGUI->Create(g_pMainMenuController);
+	g_pScenarioGUI = new ScenarioGUI(g_pMainMenuController);
     // And the Metagame GUI too
     g_MetaMan.GetGUI()->Create(g_pMainMenuController);
 }
@@ -1834,6 +1833,7 @@ int main(int argc, char *argv[]) {
     g_LuaMan.Destroy();
     ContentFile::FreeAllLoaded();
     g_ConsoleMan.Destroy();
+	delete g_pScenarioGUI;
 
 #ifdef DEBUG_BUILD
     // Dump out the info about how well memory cleanup went

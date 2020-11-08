@@ -124,6 +124,11 @@ namespace RTE {
 		void SetSelectedScene(Scene *newSelectedScene);
 
 		/// <summary>
+		/// Unsets the currently selected scene.
+		/// </summary>
+		void UnselectScene();
+
+		/// <summary>
 		/// Shows the player config box.
 		/// </summary>
 		void ShowPlayersBox();

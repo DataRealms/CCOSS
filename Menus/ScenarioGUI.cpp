@@ -528,7 +528,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 						ShowPlayersBox();
 						g_GUISound.ButtonPressSound()->Play();
 					} else if (eventControl == m_SceneCloseButton) {
-						SetSelectedScene(nullptr);
+						UnselectScene();
 						g_GUISound.ButtonPressSound()->Play();
 					}
 				}
@@ -544,7 +544,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 							SetSelectedScene(m_ScenarioScenes->front());
 						} else {
 							// Deselect any previously selected scene. it may not be compatible with the new activity.
-							SetSelectedScene(nullptr);
+							UnselectScene();
 						}
 
 						g_GUISound.ItemChangeSound()->Play();
@@ -1162,7 +1162,7 @@ void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 	if (m_ScenarioScenes) {
 		SetSelectedScene(m_ScenarioScenes->front());
 	} else {
-		SetSelectedScene(nullptr);
+		UnselectScene();
 	}
 }
 
@@ -1292,18 +1292,19 @@ void ScenarioGUI::HideScenesBox() const {
 
 void ScenarioGUI::SetSelectedScene(Scene *newSelectedScene) {
 	m_ScenarioSelectedScene = newSelectedScene;
-	if (m_ScenarioSelectedScene) {
-		ShowScenesBox();
+	ShowScenesBox();
 
-		BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
-		if (!preview) {
-			preview = m_DefaultPreviewBitmap->GetBitmap();
-		}
-		blit(preview, m_ScenePreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_ScenePreviewBitmap->GetBitmap()->w, m_ScenePreviewBitmap->GetBitmap()->h);
-
-		CalculateLinesToSitePoint();
-	} else {
-		HideScenesBox();
-		m_LinePointsToSite.clear();
+	BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
+	if (!preview) {
+		preview = m_DefaultPreviewBitmap->GetBitmap();
 	}
+	blit(preview, m_ScenePreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_ScenePreviewBitmap->GetBitmap()->w, m_ScenePreviewBitmap->GetBitmap()->h);
+
+	CalculateLinesToSitePoint();
+}
+
+void ScenarioGUI::UnselectScene() {
+	m_ScenarioSelectedScene = nullptr;
+	HideScenesBox();
+	m_LinePointsToSite.clear();
 }

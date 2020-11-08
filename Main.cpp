@@ -181,9 +181,9 @@ void InitMainMenu() {
 /// Destroy the Main Menu and initialize it again after a resolution change. Must be done otherwise the GUIs retain the original resolution settings and become all screwy.
 /// </summary>
 void ReinitMainMenu() {
-	g_pMainMenuGUI->Destroy();
-	g_pMainMenuController->Destroy();
-	g_pScenarioGUI->Reset();
+	delete g_pMainMenuGUI;
+	delete g_pMainMenuController;
+	delete g_pScenarioGUI;
 	g_MetaMan.GetGUI()->Destroy();
 
 	InitMainMenu();

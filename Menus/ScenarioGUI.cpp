@@ -29,67 +29,70 @@ using namespace RTE;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ScenarioGUI::ScenarioGUI(Controller &pController) :
+ScenarioGUI::ScenarioGUI(Controller *pController) :
 	m_ScenarioController(pController) {
-	if (!m_ScenarioGUIController.Create(&m_ScenarioGUIScreen, &m_ScenarioGUIInput, "Base.rte/GUIs/Skins/MainMenu")) {
+	RTEAssert(pController, "No controller sent to ScenarioGUI on creation!");
+	m_ScenarioGUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
+	m_ScenarioGUIInput = std::make_unique <AllegroInput>(-1, true);
+	if (!m_ScenarioGUIController->Create(m_ScenarioGUIScreen.get(), m_ScenarioGUIInput.get(), "Base.rte/GUIs/Skins/MainMenu")) {
 		RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
 	}
-	m_ScenarioGUIController.Load("Base.rte/GUIs/ScenarioGUI.ini");
+	m_ScenarioGUIController->Load("Base.rte/GUIs/ScenarioGUI.ini");
 
 	// Make sure we have convenient points to the containing GUI collection boxes.
-	m_ScenarioScreenBoxes[ROOTSCREEN] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController.GetControl("root"));
-	m_ScenarioScreenBoxes[ACTIVITY] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController.GetControl("ActivitySelectBox"));
-	m_ScenarioScreenBoxes[SCENEINFO] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController.GetControl("SceneInfoBox"));
-	m_ScenarioScreenBoxes[PLAYERSETUP] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController.GetControl("PlayerSetupBox"));
+	m_ScenarioScreenBoxes[ROOTSCREEN] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("root"));
+	m_ScenarioScreenBoxes[ACTIVITY] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ActivitySelectBox"));
+	m_ScenarioScreenBoxes[SCENEINFO] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("SceneInfoBox"));
+	m_ScenarioScreenBoxes[PLAYERSETUP] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("PlayerSetupBox"));
 	
 	m_ScenarioScreenBoxes[ROOTSCREEN]->SetPositionAbs(0, 0);
 	m_ScenarioScreenBoxes[ROOTSCREEN]->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-	m_ScenarioButtons[BACKTOMAINBUTTON] = dynamic_cast<GUIButton *>(m_ScenarioGUIController.GetControl("BackToMainButton"));
-	m_ScenarioButtons[RESUME] = dynamic_cast<GUIButton *>(m_ScenarioGUIController.GetControl("ButtonResume"));
-	m_ScenarioButtons[STARTHERE] = dynamic_cast<GUIButton *>(m_ScenarioGUIController.GetControl("SceneSelectButton"));
-	m_ScenarioButtons[STARTGAME] = dynamic_cast<GUIButton *>(m_ScenarioGUIController.GetControl("StartButton"));
+	m_ScenarioButtons[BACKTOMAINBUTTON] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("BackToMainButton"));
+	m_ScenarioButtons[RESUME] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("ButtonResume"));
+	m_ScenarioButtons[STARTHERE] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("SceneSelectButton"));
+	m_ScenarioButtons[STARTGAME] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("StartButton"));
 
-	m_ScenarioScenePlanetLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController.GetControl("ScenePlanetLabel"));
+	m_ScenarioScenePlanetLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("ScenePlanetLabel"));
 	m_ScenarioScenePlanetLabel->SetVisible(false);
 
 	// Activity Selection Box.
-	m_ActivitySelectComboBox = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController.GetControl("ActivitySelectCombo"));
-	m_ActivityLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController.GetControl("ActivityDescLabel"));
-	m_DifficultyLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController.GetControl("DifficultyLabel"));
-	m_DifficultySlider = dynamic_cast<GUISlider *>(m_ScenarioGUIController.GetControl("DifficultySlider"));
+	m_ActivitySelectComboBox = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl("ActivitySelectCombo"));
+	m_ActivityLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("ActivityDescLabel"));
+	m_DifficultyLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("DifficultyLabel"));
+	m_DifficultySlider = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl("DifficultySlider"));
 	m_ActivitySelectComboBox->SetDropHeight(64);
-	m_ActivityLabel->SetFont(m_ScenarioGUIController.GetSkin()->GetFont("smallfont.png"));
+	m_ActivityLabel->SetFont(m_ScenarioGUIController->GetSkin()->GetFont("smallfont.png"));
 
 	// Scene Info Box.
-	m_SceneCloseButton = dynamic_cast<GUIButton *>(m_ScenarioGUIController.GetControl("SceneCloseButton"));
-	m_SceneNameLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController.GetControl("SceneNameLabel"));
-	m_SceneInfoLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController.GetControl("SceneInfoLabel"));
-	m_SceneInfoLabel->SetFont(m_ScenarioGUIController.GetSkin()->GetFont("smallfont.png"));
+	m_SceneCloseButton = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("SceneCloseButton"));
+	m_SceneNameLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("SceneNameLabel"));
+	m_SceneInfoLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("SceneInfoLabel"));
+	m_SceneInfoLabel->SetFont(m_ScenarioGUIController->GetSkin()->GetFont("smallfont.png"));
 
 	// Player team assignment box.
 	for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
 		for (int teamIndex = Activity::TeamOne; teamIndex < TEAMROWCOUNT; ++teamIndex) {
 			const std::string controlString = "P" + std::to_string(playerIndex + 1) + "T" + std::to_string(teamIndex + 1) + "Box";
-			m_PlayerBoxes[playerIndex][teamIndex] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController.GetControl(controlString));
+			m_PlayerBoxes[playerIndex][teamIndex] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
 		}
 	}
 
-	m_TeamBoxes[TEAM_DISABLED] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController.GetControl("TDIcon"));
+	m_TeamBoxes[TEAM_DISABLED] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("TDIcon"));
 	m_TeamBoxes[TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-	m_TeamNameLabels[TEAM_DISABLED] = dynamic_cast<GUILabel *>(m_ScenarioGUIController.GetControl("TDLabel"));
+	m_TeamNameLabels[TEAM_DISABLED] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("TDLabel"));
 
 	std::string controlString = "";
 	for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
 		controlString = "T" + std::to_string(teamIndex + 1) + "Icon";
-		m_TeamBoxes[teamIndex] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController.GetControl(controlString));
+		m_TeamBoxes[teamIndex] = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl(controlString));
 		m_TeamBoxes[teamIndex]->SetDrawType(GUICollectionBox::Image);
 
 		controlString = "T" + std::to_string(teamIndex + 1) + "Label";
-		m_TeamNameLabels[teamIndex] = dynamic_cast<GUILabel *>(m_ScenarioGUIController.GetControl(controlString));
+		m_TeamNameLabels[teamIndex] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
 
 		controlString = "T" + std::to_string(teamIndex + 1) + "TechCombo";
-		m_TeamTechSelect[teamIndex] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController.GetControl(controlString));
+		m_TeamTechSelect[teamIndex] = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl(controlString));
 		m_TeamTechSelect[teamIndex]->SetEnabled(false);
 		m_TeamTechSelect[teamIndex]->SetVisible(false);
 		m_TeamTechSelect[teamIndex]->GetListPanel()->AddItem("-All-", "", 0, 0, -2);
@@ -97,20 +100,20 @@ ScenarioGUI::ScenarioGUI(Controller &pController) :
 		m_TeamTechSelect[teamIndex]->SetSelectedIndex(0);
 
 		controlString = "T" + std::to_string(teamIndex + 1) + "AISkillSlider";
-		m_TeamAISkillSlider[teamIndex] = dynamic_cast<GUISlider *>(m_ScenarioGUIController.GetControl(controlString));
+		m_TeamAISkillSlider[teamIndex] = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl(controlString));
 		m_TeamAISkillSlider[teamIndex]->SetEnabled(false);
 		m_TeamAISkillSlider[teamIndex]->SetVisible(false);
 		m_TeamAISkillSlider[teamIndex]->SetValue(Activity::DefaultSkill);
 
 		controlString = "T" + std::to_string(teamIndex + 1) + "AISkillLabel";
-		m_TeamAISkillLabel[teamIndex] = dynamic_cast<GUILabel *>(m_ScenarioGUIController.GetControl(controlString));
+		m_TeamAISkillLabel[teamIndex] = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl(controlString));
 		m_TeamAISkillLabel[teamIndex]->SetEnabled(false);
 		m_TeamAISkillLabel[teamIndex]->SetVisible(false);
 		m_TeamAISkillLabel[teamIndex]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[teamIndex]->GetValue()));
 	}
 
-	m_StartErrorLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController.GetControl("StartErrorLabel"));
-	m_CPULockLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController.GetControl("CPULockLabel"));
+	m_StartErrorLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("StartErrorLabel"));
+	m_CPULockLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("CPULockLabel"));
 
 	// Populate the tech comboboxes with the available tech modules.
 	const DataModule *dataModule = nullptr;
@@ -135,11 +138,11 @@ ScenarioGUI::ScenarioGUI(Controller &pController) :
 		m_TeamTechSelect[teamIndex]->GetListPanel()->ScrollToTop();
 	}
 
-	m_GoldLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController.GetControl("GoldLabel"));
-	m_GoldSlider = dynamic_cast<GUISlider *>(m_ScenarioGUIController.GetControl("GoldSlider"));
-	m_FogOfWarCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController.GetControl("FogOfWarCheckbox"));
-	m_RequireClearPathToOrbitCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController.GetControl("RequireClearPathToOrbitCheckbox"));
-	m_DeployUnitsCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController.GetControl("DeployUnitsCheckbox"));
+	m_GoldLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("GoldLabel"));
+	m_GoldSlider = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl("GoldSlider"));
+	m_FogOfWarCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController->GetControl("FogOfWarCheckbox"));
+	m_RequireClearPathToOrbitCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController->GetControl("RequireClearPathToOrbitCheckbox"));
+	m_DeployUnitsCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController->GetControl("DeployUnitsCheckbox"));
 
 	// Set up initial combobox locations and sizes.
 	m_ScenarioButtons[BACKTOMAINBUTTON]->SetPositionRel(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - m_ScenarioButtons[BACKTOMAINBUTTON]->GetWidth() - 16, m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - m_ScenarioButtons[BACKTOMAINBUTTON]->GetHeight() - 22);
@@ -148,15 +151,15 @@ ScenarioGUI::ScenarioGUI(Controller &pController) :
 	m_ScenarioScreenBoxes[SCENEINFO]->SetPositionRel(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - m_ScenarioScreenBoxes[SCENEINFO]->GetWidth() - 16, 16);
 	m_ScenarioScreenBoxes[PLAYERSETUP]->CenterInParent(true, true);
 
-	m_ScenePreviewBitmap.Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
+	m_ScenePreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
 
 	// Load default preview bitmap.
-	m_DefaultPreviewBitmap.Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
+	m_DefaultPreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
 	ContentFile defaultPreviewContent("Base.rte/GUIs/DefaultPreview.png");
 	BITMAP *defaultPreview = defaultPreviewContent.LoadAndReleaseBitmap();
-	blit(defaultPreview, m_DefaultPreviewBitmap.GetBitmap(), 0, 0, 0, 0, m_DefaultPreviewBitmap.GetWidth(), m_DefaultPreviewBitmap.GetHeight());
+	blit(defaultPreview, m_DefaultPreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_DefaultPreviewBitmap->GetWidth(), m_DefaultPreviewBitmap->GetHeight());
 
-	clear_to_color(m_ScenePreviewBitmap.GetBitmap(), g_MaskColor);
+	clear_to_color(m_ScenePreviewBitmap->GetBitmap(), g_MaskColor);
 
 	GetAllScenesAndActivities(true);
 
@@ -188,7 +191,7 @@ void ScenarioGUI::SetPlanetInfo(const Vector &center, float radius) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::Update() {
-	m_ScenarioController.Update();
+	m_ScenarioController->Update();
 
 	if (g_ConsoleMan.IsEnabled()) {
 		return;
@@ -196,7 +199,7 @@ void ScenarioGUI::Update() {
 
 	int mouseX = 0;
 	int mouseY = 0;
-	m_ScenarioGUIInput.GetMousePosition(&mouseX, &mouseY);
+	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
 		// Handle the resume button.
@@ -209,7 +212,7 @@ void ScenarioGUI::Update() {
 			if (m_BlinkTimer.AlternateReal(500)) {
 				m_ScenarioButtons[RESUME]->SetFocus();
 			} else {
-				m_ScenarioGUIController.GetManager()->SetFocus(0);
+				m_ScenarioGUIController->GetManager()->SetFocus(0);
 			}
 		} else if (m_ScenarioButtons[RESUME]->GetVisible()) {
 			m_ScenarioButtons[RESUME]->SetVisible(false);
@@ -298,11 +301,11 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) {
 
 	AllegroScreen drawScreen(drawBitmap);
 
-	m_ScenarioGUIController.Draw(&drawScreen);
+	m_ScenarioGUIController->Draw(&drawScreen);
 
 	// Draw scene preview after GUI.
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible() && m_ScenarioScenes && m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
-		draw_sprite(drawBitmap, m_ScenePreviewBitmap.GetBitmap(), m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + 10, m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + 33);
+		draw_sprite(drawBitmap, m_ScenePreviewBitmap->GetBitmap(), m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + 10, m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + 33);
 	} else if (m_ScenarioScreenBoxes[PLAYERSETUP]->GetVisible()) {
 		// Draw the Player-Team matrix lines and disabled overlay effects.
 		int lineY = 80;
@@ -337,7 +340,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) {
 		}
 	}
 
-	m_ScenarioGUIController.DrawMouse();
+	m_ScenarioGUIController->DrawMouse();
 
 	const int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
 	const Icon *deviceIcon = nullptr;
@@ -346,7 +349,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) {
 	if (device >= DEVICE_GAMEPAD_1) {
 		int mouseX = 0;
 		int mouseY = 0;
-		m_ScenarioGUIInput.GetMousePosition(&mouseX, &mouseY);
+		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 		deviceIcon = g_UInputMan.GetDeviceIcon(device);
 		if (deviceIcon) {
 			draw_sprite(drawBitmap, deviceIcon->GetBitmaps8()[0], mouseX + 16, mouseY - 4);
@@ -384,7 +387,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 
 	int mouseX = 0;
 	int mouseY = 0;
-	m_ScenarioGUIInput.GetMousePosition(&mouseX, &mouseY);
+	m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 	const Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
 	// Handle GUI panel dragging.
@@ -393,7 +396,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			m_ScenarioDraggedBox->MoveRelative(mousePos.GetFloorIntX() - m_PrevMousePos.GetFloorIntX(), mousePos.GetFloorIntY() - m_PrevMousePos.GetFloorIntY());
 			m_PrevMousePos = mousePos;
 
-			KeepBoxOnScreen(*m_ScenarioDraggedBox);
+			KeepBoxOnScreen(m_ScenarioDraggedBox);
 			if (m_ScenarioDraggedBox == m_ScenarioScreenBoxes[SCENEINFO]) {
 				CalculateLinesToSitePoint();
 			}
@@ -407,8 +410,8 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 				g_GUISound.ItemChangeSound()->Play();
 			}
 
-			GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController.GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], 1));
-			const GUIControl *hoveredControl = m_ScenarioGUIController.GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], -1);
+			GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], 1));
+			const GUIControl *hoveredControl = m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], -1);
 			const bool nonDragControl = (dynamic_cast<const GUIButton *>(hoveredControl) || dynamic_cast<const GUISlider *>(hoveredControl) || dynamic_cast<const GUIComboBox *>(hoveredControl));
 			if (hoveredBox && !nonDragControl && !m_ScenarioDraggedBox && !m_ActivitySelectComboBox->IsDropped()) {
 				m_ScenarioDraggedBox = hoveredBox;
@@ -417,13 +420,13 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 		}
 	}
 
-	m_ScenarioGUIController.Update();
+	m_ScenarioGUIController->Update();
 
 	///////////////////////////////////////
 	// Handle events
 
 	GUIEvent anEvent;
-	while (m_ScenarioGUIController.GetEvent(&anEvent)) {
+	while (m_ScenarioGUIController->GetEvent(&anEvent)) {
 		const std::string eventControlName = anEvent.GetControl()->GetName();
 		const GUIControl *eventControl = anEvent.GetControl();
 
@@ -510,17 +513,17 @@ void ScenarioGUI::HideAllScreens() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox &screenBox) const {
-	if (screenBox.GetXPos() < 0) {
-		screenBox.SetPositionAbs(0, screenBox.GetYPos());
-	} else if (screenBox.GetXPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - screenBox.GetWidth()) {
-		screenBox.SetPositionAbs(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - screenBox.GetWidth(), screenBox.GetYPos());
+void ScenarioGUI::KeepBoxOnScreen(GUICollectionBox *screenBox) const {
+	if (screenBox->GetXPos() < 0) {
+		screenBox->SetPositionAbs(0, screenBox->GetYPos());
+	} else if (screenBox->GetXPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - screenBox->GetWidth()) {
+		screenBox->SetPositionAbs(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - screenBox->GetWidth(), screenBox->GetYPos());
 	}
 
-	if (screenBox.GetYPos() < 0) {
-		screenBox.SetPositionAbs(screenBox.GetXPos(), 0);
-	} else if (screenBox.GetYPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - screenBox.GetHeight()) {
-		screenBox.SetPositionAbs(screenBox.GetXPos(), m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - screenBox.GetHeight());
+	if (screenBox->GetYPos() < 0) {
+		screenBox->SetPositionAbs(screenBox->GetXPos(), 0);
+	} else if (screenBox->GetYPos() > m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - screenBox->GetHeight()) {
+		screenBox->SetPositionAbs(screenBox->GetXPos(), m_ScenarioScreenBoxes[ROOTSCREEN]->GetHeight() - screenBox->GetHeight());
 	}
 }
 
@@ -616,28 +619,28 @@ void ScenarioGUI::UpdateActivityBox() {
 		m_ScenarioScreenBoxes[ACTIVITY]->Resize(m_ScenarioScreenBoxes[ACTIVITY]->GetWidth(), textHeight + padding);
 	}
 
-	KeepBoxOnScreen(*m_ScenarioScreenBoxes[ACTIVITY]);
+	KeepBoxOnScreen(m_ScenarioScreenBoxes[ACTIVITY]);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::ShowScenesBox() {
-	clear_to_color(m_ScenePreviewBitmap.GetBitmap(), g_MaskColor);
+	clear_to_color(m_ScenePreviewBitmap->GetBitmap(), g_MaskColor);
 	if (m_ScenarioSelectedScene) {
 		m_SceneNameLabel->SetText(m_ScenarioSelectedScene->GetPresetName());
 		m_SceneInfoLabel->SetText(m_ScenarioSelectedScene->GetDescription());
 
 		BITMAP *preview = m_ScenarioSelectedScene->GetPreviewBitmap();
 		if (!preview) {
-			preview = m_DefaultPreviewBitmap.GetBitmap();
+			preview = m_DefaultPreviewBitmap->GetBitmap();
 		}
-		blit(preview, m_ScenePreviewBitmap.GetBitmap(), 0, 0, 0, 0, m_ScenePreviewBitmap.GetBitmap()->w, m_ScenePreviewBitmap.GetBitmap()->h);
+		blit(preview, m_ScenePreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_ScenePreviewBitmap->GetBitmap()->w, m_ScenePreviewBitmap->GetBitmap()->h);
 	}
 
 	const int textHeight = m_SceneInfoLabel->ResizeHeightToFit();
 	const int padding = 140;
 	m_ScenarioScreenBoxes[SCENEINFO]->Resize(m_ScenarioScreenBoxes[SCENEINFO]->GetWidth(), textHeight + padding);
-	KeepBoxOnScreen(*m_ScenarioScreenBoxes[SCENEINFO]);
+	KeepBoxOnScreen(m_ScenarioScreenBoxes[SCENEINFO]);
 	m_ScenarioScreenBoxes[SCENEINFO]->SetVisible(true);
 }
 
@@ -649,7 +652,7 @@ void ScenarioGUI::ShowPlayersBox() {
 	if (m_ScenarioSelectedActivity && m_ScenarioSelectedScene) {
 		int mouseX = 0;
 		int mouseY = 0;
-		m_ScenarioGUIInput.GetMousePosition(&mouseX, &mouseY);
+		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 		const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(m_ScenarioSelectedActivity);
 
 		if (gameActivity) {
@@ -737,10 +740,10 @@ void ScenarioGUI::UpdatePlayersBox() {
 	if (m_ScenarioSelectedActivity && m_ScenarioSelectedScene) {
 		int mouseX = 0;
 		int mouseY = 0;
-		m_ScenarioGUIInput.GetMousePosition(&mouseX, &mouseY);
+		m_ScenarioGUIInput->GetMousePosition(&mouseX, &mouseY);
 		const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(m_ScenarioSelectedActivity);
 
-		const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController.GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[PLAYERSETUP], 1));
+		const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[PLAYERSETUP], 1));
 		if (hoveredCell) {
 			// Find which cell is being hovered over.
 			int hoveredPlayer = PLAYERCOLUMNCOUNT;

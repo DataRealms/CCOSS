@@ -4,11 +4,6 @@
 #include "ActivityMan.h"
 #include "FrameMan.h"
 #include "Timer.h"
-#include "GUI.h"
-#include "Interface.h"
-#include "AllegroScreen.h"
-#include "AllegroInput.h"
-#include "AllegroBitmap.h"
 
 namespace RTE {
 
@@ -23,6 +18,7 @@ namespace RTE {
 	class GUISlider;
 	class Scene;
 	class Activity;
+	class AllegroBitmap;
 
 	/// <summary>
 	/// A menu for setting up and launching scenario games.
@@ -41,7 +37,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a ScenarioGUI object in system memory. Create() should be called before using the object.
 		/// </summary>
-		explicit ScenarioGUI(Controller &pController);
+		explicit ScenarioGUI(Controller *pController);
 
 		/// <summary>
 		/// Destructor method used to clean up a ScenarioGUI object before deletion from system memory.
@@ -93,7 +89,7 @@ namespace RTE {
 		/// Makes sure a specific box doesn't move off-screen.
 		/// </summary>
 		/// <param name="screenBox">The GUICollectionBox to adjust, if necessary.</param>
-		void KeepBoxOnScreen(GUICollectionBox &screenBox) const;
+		void KeepBoxOnScreen(GUICollectionBox *screenBox) const;
 
 		/// <summary>
 		/// Updates the contents of the Activity selection box.
@@ -196,10 +192,10 @@ namespace RTE {
 			SCREENCOUNT
 		};
 
-		Controller &m_ScenarioController; //!< Reference to the Controller which controls this menu.
-		AllegroScreen m_ScenarioGUIScreen = AllegroScreen(g_FrameMan.GetBackBuffer32()); //!< GUI Screen for use by the in-game GUI.
-		AllegroInput m_ScenarioGUIInput = AllegroInput(-1, true); //!< Input controller.
-		GUIControlManager m_ScenarioGUIController = GUIControlManager(); //!< The control manager which holds all the controls.
+		Controller *m_ScenarioController; //!< Reference to the Controller which controls this menu. Not owned.
+		std::unique_ptr<GUIScreen> m_ScenarioGUIScreen; //!< GUI Screen for use by the in-game GUI.
+		std::unique_ptr<GUIInput> m_ScenarioGUIInput; //!< Input controller.
+		std::unique_ptr<GUIControlManager> m_ScenarioGUIController = std::make_unique <GUIControlManager>(); //!< The control manager which holds all the controls.
 
 		Timer m_BlinkTimer; //!< Notification blink timer.
 
@@ -234,8 +230,8 @@ namespace RTE {
 		GUILabel *m_SceneNameLabel;
 		GUILabel *m_SceneInfoLabel;
 
-		AllegroBitmap m_ScenePreviewBitmap = AllegroBitmap();
-		AllegroBitmap m_DefaultPreviewBitmap = AllegroBitmap();
+		std::unique_ptr<AllegroBitmap> m_ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
+		std::unique_ptr<AllegroBitmap> m_DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();
 
 		// Player setup.
 		GUICollectionBox *m_PlayerBoxes[PLAYERCOLUMNCOUNT][TEAMROWCOUNT];
@@ -254,7 +250,7 @@ namespace RTE {
 
 		int m_LockedCPUTeam = Activity::NoTeam; //!< Which team the CPU is locked to, if any.
 
-		// Disallow the use of some implicit methods.
+		// Disallow the use of some implicit methods. No copy-construction and no copy-assignment.
 		ScenarioGUI(const ScenarioGUI &reference) = delete;
 		ScenarioGUI & operator=(const ScenarioGUI &rhs) = delete;
 	};

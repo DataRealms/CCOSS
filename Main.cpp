@@ -128,7 +128,7 @@ int g_StationOffsetY;
 
 bool g_HadResolutionChange = false; //!< Need this so we can restart PlayIntroTitle without an endless loop or leaks. Will be set true by ReinitMainMenu and set back to false at the end of the switch.
 
-// TODO: De-globalize these dynamic-memory objects. Make them bound to some scope. Preferably as objects and not pointers.
+// TODO: De-globalize these dynamic-memory objects. Make them bound to some scope.
 MainMenuGUI *g_pMainMenuGUI = 0;
 std::unique_ptr<ScenarioGUI> g_pScenarioGUI;
 Controller *g_pMainMenuController = 0;
@@ -170,7 +170,7 @@ void InitMainMenu() {
     g_pMainMenuController->SetTeam(0);
     g_pMainMenuGUI->Create(g_pMainMenuController);
     // As well as the Scenario setup menu interface
-	g_pScenarioGUI = std::make_unique<ScenarioGUI>(*g_pMainMenuController);
+	g_pScenarioGUI = std::make_unique<ScenarioGUI>(g_pMainMenuController);
     // And the Metagame GUI too
     g_MetaMan.GetGUI()->Create(g_pMainMenuController);
 }

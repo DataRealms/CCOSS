@@ -134,7 +134,7 @@ namespace RTE {
 		auto readSound = [&soundData, &reader](const std::string &soundPath) {
 			ContentFile soundFile(soundPath.c_str());
 			soundFile.SetFormattedReaderPosition("in file " + reader.GetCurrentFilePath() + " on line " + std::to_string(reader.GetCurrentFileLine()));
-			FMOD::Sound *soundObject = soundFile.GetAsSample();
+			FMOD::Sound *soundObject = soundFile.GetAsSound();
 			if (g_AudioMan.IsAudioEnabled() && !soundObject) { reader.ReportError(std::string("Failed to load the sound from the file")); }
 
 			soundData.SoundFile = soundFile;
@@ -227,7 +227,7 @@ namespace RTE {
 		if (soundSetIndex < m_SoundSets.size()) { soundSet = m_SoundSets[soundSetIndex]; }
 
 		ContentFile soundFile(soundFilePath.c_str());
-		FMOD::Sound *soundObject = soundFile.GetAsSample(abortGameForInvalidSound, false);
+		FMOD::Sound *soundObject = soundFile.GetAsSound(abortGameForInvalidSound, false);
 		if (!soundObject) {
 			return;
 		}

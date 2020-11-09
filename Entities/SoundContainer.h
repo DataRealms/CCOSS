@@ -65,7 +65,7 @@ namespace RTE {
 		/// <param name="immobile">Whether this SoundContainer's sounds will be treated as immobile, i.e. they won't be affected by 3D sound manipulation.</param>
 		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch.</param>
 		/// <returns>An error return value signaing success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(const std::string &soundFilePath, bool immobile = false, bool affectedByGlobalPitch = true) { AddSound(soundFilePath); SetImmobile(immobile); SetAffectedByGlobalPitch(affectedByGlobalPitch); return 0; }
+		int Create(const std::string &soundFilePath, bool immobile = false, bool affectedByGlobalPitch = true) { AddSound(soundFilePath, true); SetImmobile(immobile); SetAffectedByGlobalPitch(affectedByGlobalPitch); return 0; }
 #pragma endregion
 
 #pragma region Destruction

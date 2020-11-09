@@ -296,7 +296,7 @@ namespace RTE {
 			std::string nextString = m_MusicPlayList.front();
 			m_MusicPlayList.pop_front();
 
-			if (nextString.at(0) == '@') {
+			if (!nextString.empty() && nextString.at(0) == '@') {
 				try {
 					int seconds = std::stoi(nextString.substr(1, nextString.size()));
 					m_SilenceTimer.SetRealTimeLimitS((seconds > 0) ? seconds : 0);

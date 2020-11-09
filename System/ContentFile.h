@@ -145,7 +145,7 @@ namespace RTE {
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
 		/// <param name="asyncLoading">Whether to enable FMOD asynchronous loading or not. Should be disabled for loading audio files with Lua AddSound.
 		/// <returns>Pointer to the FSOUND_SAMPLE loaded from disk.</returns>
-		FMOD::Sound * GetAsSample(bool abortGameForInvalidSound = true, bool asyncLoading = true);
+		FMOD::Sound * GetAsSound(bool abortGameForInvalidSound = true, bool asyncLoading = true);
 
 		/// <summary>
 		/// Loads and transfers the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE. Ownership of the FSOUND_SAMPLE is NOT transferred!
@@ -153,7 +153,7 @@ namespace RTE {
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error</param>
 		/// <param name="asyncLoading">Whether to enable FMOD asynchronous loading or not. Should be disabled for loading audio files with Lua AddSound.
 		/// <returns>Pointer to the FSOUND_SAMPLE loaded from disk.</returns>
-		FMOD::Sound * LoadAndReleaseSample(bool abortGameForInvalidSound, bool asyncLoading);
+		FMOD::Sound * LoadAndReleaseSound(bool abortGameForInvalidSound, bool asyncLoading);
 #pragma endregion
 
 #pragma region Class Info

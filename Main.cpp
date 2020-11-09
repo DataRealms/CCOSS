@@ -1775,7 +1775,7 @@ int main(int argc, char *argv[]) {
 		g_AudioMan.SetMusicVolume(0);
 	}
 
-    LoadingGUI loadingGUI = LoadingGUI();
+	new LoadingGUI();
 	g_LoadingGUI.InitLoadingScreen();
 	InitMainMenu();
 

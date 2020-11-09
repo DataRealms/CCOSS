@@ -133,11 +133,6 @@ ScenarioGUI::ScenarioGUI(Controller *pController) :
 		}
 	}
 
-	// Make the lists be scrolled to the top when they are initially dropped.
-	for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
-		m_TeamTechSelect[teamIndex]->GetListPanel()->ScrollToTop();
-	}
-
 	m_GoldLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("GoldLabel"));
 	m_GoldSlider = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl("GoldSlider"));
 	m_FogOfWarCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController->GetControl("FogOfWarCheckbox"));
@@ -156,7 +151,7 @@ ScenarioGUI::ScenarioGUI(Controller *pController) :
 	// Load default preview bitmap.
 	m_DefaultPreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
 	ContentFile defaultPreviewContent("Base.rte/GUIs/DefaultPreview.png");
-	BITMAP *defaultPreview = defaultPreviewContent.LoadAndReleaseBitmap();
+	BITMAP *defaultPreview = defaultPreviewContent.LoadAndReleaseBitmap(); // Owned here and deleted at end of scope.
 	blit(defaultPreview, m_DefaultPreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_DefaultPreviewBitmap->GetWidth(), m_DefaultPreviewBitmap->GetHeight());
 
 	clear_to_color(m_ScenePreviewBitmap->GetBitmap(), g_MaskColor);

@@ -33,18 +33,22 @@ namespace RTE {
 			ACTIVITYRESTARTED
 		};
 
+		// Disallow the use of some implicit methods. No copy-construction and no copy-assignment.
+		ScenarioGUI(const ScenarioGUI &reference) = delete;
+		ScenarioGUI &operator=(const ScenarioGUI &rhs) = delete;
+
 		/// <summary>
-		/// Constructor method used to instantiate a ScenarioGUI object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate this ScenarioGUI object in system memory.
 		/// </summary>
 		explicit ScenarioGUI(Controller *pController);
 
 		/// <summary>
-		/// Destructor method used to clean up a ScenarioGUI object before deletion from system memory.
+		/// Destructor method used to delete this ScenarioGUI object from system memory.
 		/// </summary>
 		~ScenarioGUI() = default;
 
 		/// <summary>
-		/// Enables the menu. This will animate it in and out of view.
+		/// Enables the menu by making the activity box visible and fetching the available activities and scenes.
 		/// </summary>
 		void SetEnabled();
 
@@ -69,7 +73,7 @@ namespace RTE {
 		/// Draws the menu.
 		/// </summary>
 		/// <param name="drawBitmap">The bitmap to draw on.</param>
-		void Draw(BITMAP *drawBitmap);
+		void Draw(BITMAP *drawBitmap) const;
 
 	private:
 
@@ -135,20 +139,20 @@ namespace RTE {
 		/// <summary>
 		/// Gathers all the available Scenes and Activity presets there are.
 		/// </summary>
-		void GetAllScenesAndActivities(bool selectTutorial);
+		void GetScenesAndActivities(bool selectTutorial);
 
 		/// <summary>
 		/// Updates the floating label over a planet site.
 		/// </summary>
 		/// <param name="text">Text to show above the location.</param>
 		/// <param name="location">The location in planetary coords (relative to the planet center).</param>
-		void UpdateSiteNameLabel(const string &text = "", const Vector &location = Vector());
+		void SetSiteNameLabel(const string &text, const Vector &location);
 
 		/// <summary>
 		/// Draws fancy thick flickering lines to point out the selected scene point on the planet, from the scene info box.
 		/// </summary>
 		/// <param name="drawBitmap">The bitmap to draw to.</param>
-		void DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap) const;
+		void DrawLineToSitePoint(BITMAP *drawBitmap) const;
 
 		/// <summary>
 		/// Draws a fancy thick flickering line to point out scene points on the planet.
@@ -191,10 +195,10 @@ namespace RTE {
 			SCREENCOUNT
 		};
 
-		Controller *m_ScenarioController; //!< Reference to the Controller which controls this menu. Not owned.
+		Controller *m_ScenarioController; //!< The Controller which controls this menu. Not owned.
 		std::unique_ptr<GUIScreen> m_ScenarioGUIScreen; //!< GUI Screen for use by the in-game GUI.
 		std::unique_ptr<GUIInput> m_ScenarioGUIInput; //!< Input controller.
-		std::unique_ptr<GUIControlManager> m_ScenarioGUIController = std::make_unique <GUIControlManager>(); //!< The control manager which holds all the controls.
+		std::unique_ptr<GUIControlManager> m_ScenarioGUIController = std::make_unique <GUIControlManager>(); //!< The control manager which owns all the GUI elements.
 
 		Timer m_BlinkTimer; //!< Notification blink timer.
 
@@ -208,10 +212,10 @@ namespace RTE {
 		Vector m_PlanetCenter; //!< The absolute screen position of the planet center.
 		float m_PlanetRadius = 240.0F; //!< The screen radius of the planet.
 
-		std::list<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed - not owned, and neither are the scenes.
-		Scene *m_ScenarioHoveredScene; //!< The scene preset currently hovered, NOT OWNED.
-		GUILabel *m_ScenarioScenePlanetLabel; //!< Hover name label over Scenes.
-		Scene *m_ScenarioSelectedScene; //!< The scene preset currently selected, NOT OWNED.
+		std::list<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed. Not owned, and neither are the scenes.
+		Scene *m_ScenarioHoveredScene; //!< The scene preset currently hovered. Not owned.
+		Scene *m_ScenarioSelectedScene; //!< The scene preset currently selected. Not owned.
+		GUILabel *m_SitePointLabel; //!< Hover name label over Scenes.
 
 		std::vector<Vector> m_LinePointsToSite; //!< Collection of points that form lines from a screen point to the selected site point.
 
@@ -222,7 +226,7 @@ namespace RTE {
 		GUISlider *m_DifficultySlider;
 
 		std::map<Activity *, std::list<Scene *> > m_Activities; //!< The map of Activities, and the Scenes compatible with each, neither of which are owned here.
-		const Activity *m_ScenarioSelectedActivity; //!< The currently selected activity, not owned.
+		const Activity *m_ScenarioSelectedActivity; //!< The currently selected activity. Not owned.
 
 		// Scene Info.
 		GUIButton *m_SceneCloseButton;
@@ -248,10 +252,6 @@ namespace RTE {
 		GUILabel *m_TeamAISkillLabel[Activity::MaxTeamCount]; //!< AI skill label array.
 
 		int m_LockedCPUTeam = Activity::NoTeam; //!< Which team the CPU is locked to, if any.
-
-		// Disallow the use of some implicit methods. No copy-construction and no copy-assignment.
-		ScenarioGUI(const ScenarioGUI &reference) = delete;
-		ScenarioGUI & operator=(const ScenarioGUI &rhs) = delete;
 	};
 }
 #endif

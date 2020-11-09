@@ -52,8 +52,8 @@ ScenarioGUI::ScenarioGUI(Controller *pController) :
 	m_ScenarioButtons[STARTHERE] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("SceneSelectButton"));
 	m_ScenarioButtons[STARTGAME] = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("StartButton"));
 
-	m_ScenarioScenePlanetLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("ScenePlanetLabel"));
-	m_ScenarioScenePlanetLabel->SetVisible(false);
+	m_SitePointLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("ScenePlanetLabel"));
+	m_SitePointLabel->SetVisible(false);
 
 	// Activity Selection Box.
 	m_ActivitySelectComboBox = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl("ActivitySelectCombo"));
@@ -150,12 +150,12 @@ ScenarioGUI::ScenarioGUI(Controller *pController) :
 	// Load default preview bitmap.
 	m_DefaultPreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
 	ContentFile defaultPreviewContent("Base.rte/GUIs/DefaultPreview.png");
-	BITMAP *defaultPreview = defaultPreviewContent.LoadAndReleaseBitmap(); // Owned here and deleted at end of scope.
+	BITMAP *defaultPreview = defaultPreviewContent.LoadAndReleaseBitmap();
 	blit(defaultPreview, m_DefaultPreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_DefaultPreviewBitmap->GetWidth(), m_DefaultPreviewBitmap->GetHeight());
-
+	destroy_bitmap(defaultPreview);
 	clear_to_color(m_ScenePreviewBitmap->GetBitmap(), g_MaskColor);
 
-	GetAllScenesAndActivities(true);
+	GetScenesAndActivities(true);
 
 	UpdateActivityBox();
 
@@ -168,7 +168,7 @@ void ScenarioGUI::SetEnabled() {
 	HideAllScreens();
 	m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 	// Reload all scenes and activities to reflect scene changes player might do in scene editor.
-	GetAllScenesAndActivities(false);
+	GetScenesAndActivities(false);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -234,14 +234,14 @@ void ScenarioGUI::Update() {
 			if (candidateScene != nullptr && candidateScene != m_ScenarioHoveredScene) {
 				m_ScenarioHoveredScene = candidateScene;
 				g_GUISound.SelectionChangeSound()->Play();
-				UpdateSiteNameLabel(m_ScenarioHoveredScene->GetPresetName(), m_ScenarioHoveredScene->GetLocation() + m_ScenarioHoveredScene->GetLocationOffset());
-				m_ScenarioScenePlanetLabel->SetVisible(true);
+				SetSiteNameLabel(m_ScenarioHoveredScene->GetPresetName(), m_ScenarioHoveredScene->GetLocation() + m_ScenarioHoveredScene->GetLocationOffset());
+				m_SitePointLabel->SetVisible(true);
 			}
 		}
 
 		if (!foundAnyHover) {
 			m_ScenarioHoveredScene = nullptr;
-			m_ScenarioScenePlanetLabel->SetVisible(false);
+			m_SitePointLabel->SetVisible(false);
 		}
 	}
 
@@ -281,14 +281,14 @@ void ScenarioGUI::DrawSitePoints(BITMAP *drawBitmap) const {
 		}
 
 		if (m_ScenarioSelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
-			DrawWhiteScreenLineToSitePoint(drawBitmap);
+			DrawLineToSitePoint(drawBitmap);
 		}
 	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::Draw(BITMAP *drawBitmap) {
+void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	DrawSitePoints(drawBitmap);
 
 	drawing_mode(DRAW_MODE_SOLID, 0, 0, 0);
@@ -502,7 +502,7 @@ void ScenarioGUI::HideAllScreens() {
 		m_ScenarioScreenBoxes[screenIndex]->SetVisible(false);
 	}
 
-	m_ScenarioScenePlanetLabel->SetVisible(false);
+	m_SitePointLabel->SetVisible(false);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -961,7 +961,7 @@ bool ScenarioGUI::StartGame() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
+void ScenarioGUI::GetScenesAndActivities(bool selectTutorial) {
 	// Redo the list of Activities.
 	m_Activities.clear();
 	m_ScenarioScenes = nullptr;
@@ -1078,7 +1078,7 @@ void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 	m_ScenarioSelectedActivity = dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity);
 
 	UpdateActivityBox();
-	if (m_ScenarioScenes) {
+	if (m_ScenarioScenes && (m_ScenarioScenes->size() == 1 || selectTutorial)) {
 		SetSelectedScene(m_ScenarioScenes->front());
 	} else {
 		UnselectScene();
@@ -1087,13 +1087,13 @@ void ScenarioGUI::GetAllScenesAndActivities(bool selectTutorial) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::UpdateSiteNameLabel(const string &text, const Vector &location) {
-	m_ScenarioScenePlanetLabel->SetText(text);
-	Vector AbsolutePosition = m_PlanetCenter + location - Vector(m_ScenarioScenePlanetLabel->GetWidth() / 2, 0.0F) - Vector(0.0F, m_ScenarioScenePlanetLabel->GetHeight() * 1.5F);
+void ScenarioGUI::SetSiteNameLabel(const string &text, const Vector &location) {
+	m_SitePointLabel->SetText(text);
+	Vector AbsolutePosition = m_PlanetCenter + location - Vector(m_SitePointLabel->GetWidth() / 2, 0.0F) - Vector(0.0F, m_SitePointLabel->GetHeight() * 1.5F);
 	const float padding = 6.0F;
-	AbsolutePosition.m_X = std::clamp(AbsolutePosition.m_X, padding, g_FrameMan.GetResX() - m_ScenarioScenePlanetLabel->GetWidth() - padding);
-	AbsolutePosition.m_Y = std::clamp(AbsolutePosition.m_Y,padding, g_FrameMan.GetResY() - m_ScenarioScenePlanetLabel->GetHeight() - padding);
-	m_ScenarioScenePlanetLabel->SetPositionAbs(AbsolutePosition.GetFloorIntX(), AbsolutePosition.GetFloorIntY());
+	AbsolutePosition.m_X = std::clamp(AbsolutePosition.m_X, padding, g_FrameMan.GetResX() - m_SitePointLabel->GetWidth() - padding);
+	AbsolutePosition.m_Y = std::clamp(AbsolutePosition.m_Y,padding, g_FrameMan.GetResY() - m_SitePointLabel->GetHeight() - padding);
+	m_SitePointLabel->SetPositionAbs(AbsolutePosition.GetFloorIntX(), AbsolutePosition.GetFloorIntY());
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1117,7 +1117,7 @@ void ScenarioGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Ve
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScenarioGUI::DrawWhiteScreenLineToSitePoint(BITMAP *drawBitmap) const {
+void ScenarioGUI::DrawLineToSitePoint(BITMAP *drawBitmap) const {
 	const int color = c_GUIColorWhite;
 	
 	for (int index = 1; index < m_LinePointsToSite.size(); index++) {

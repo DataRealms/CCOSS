@@ -19,13 +19,17 @@ namespace RTE {
 
 		m_PlayingChannels.clear();
 
+		m_Immobile = false;
 		m_AttenuationStartDistance = c_DefaultAttenuationStartDistance;
 		m_Loops = 0;
+		m_SoundPropertiesUpToDate = false;
+
 		m_Priority = AudioMan::PRIORITY_NORMAL;
 		m_AffectedByGlobalPitch = true;
-		m_Immobile = false;
 
-		m_AllSoundPropertiesUpToDate = false;
+		m_Pos = Vector();
+		m_Volume = 1.0F;
+		m_Pitch = 1.0F;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,11 +49,16 @@ namespace RTE {
 
 		m_PlayingChannels.clear();
 
+		m_Immobile = reference.m_Immobile;
 		m_AttenuationStartDistance = reference.m_AttenuationStartDistance;
 		m_Loops = reference.m_Loops;
+
 		m_Priority = reference.m_Priority;
 		m_AffectedByGlobalPitch = reference.m_AffectedByGlobalPitch;
-		m_Immobile = reference.m_Immobile;
+
+		m_Pos = reference.m_Pos;
+		m_Volume = reference.m_Volume;
+		m_Pitch = reference.m_Pitch;
 
 		return 0;
 	}
@@ -66,6 +75,8 @@ namespace RTE {
 			} else {
 				reader.ReportError("Cycle mode " + cycleModeString + " is invalid.");
 			}
+		} else if (propName == "Immobile") {
+			reader >> m_Immobile;
 		} else if (propName == "AttenuationStartDistance") {
 			reader >> m_AttenuationStartDistance;
 		} else if (propName == "LoopSetting") {
@@ -75,8 +86,12 @@ namespace RTE {
 			if (m_Priority < 0 || m_Priority > 256) { reader.ReportError("SoundContainer priority must be between 256 (lowest priority) and 0 (highest priority)."); }
 		} else if (propName == "AffectedByGlobalPitch") {
 			reader >> m_AffectedByGlobalPitch;
-		} else if (propName == "Immobile") {
-			reader >> m_Immobile;
+		} else if (propName == "Position") {
+			reader >> m_Pos;
+		} else if (propName == "Volume") {
+			reader >> m_Volume;
+		} else if (propName == "Pitch") {
+			reader >> m_Pitch;
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -166,7 +181,7 @@ namespace RTE {
 		soundSet.push_back({soundFile, soundObject, offset, minimumAudibleDistance, attenuationStartDistance});
 		if (soundSetIndex >= m_SoundSets.size()) { m_SoundSets.push_back(soundSet); }
 
-		m_AllSoundPropertiesUpToDate = false;
+		m_SoundPropertiesUpToDate = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -250,7 +265,7 @@ namespace RTE {
 				result = (result == FMOD_OK) ? soundData.SoundObject->setMode(soundMode) : result;
 				result = (result == FMOD_OK) ? soundData.SoundObject->setLoopCount(m_Loops) : result;
 				if (m_Immobile) {
-					result = (result == FMOD_OK) ? soundData.SoundObject->set3DMinMaxDistance(m_AttenuationStartDistance, c_SoundMaxAudibleDistance) : result;
+					result = (result == FMOD_OK) ? soundData.SoundObject->set3DMinMaxDistance(std::max(0.0F, m_AttenuationStartDistance), c_SoundMaxAudibleDistance) : result;
 				} else {
 					//FMOD_VECTOR customRolloffPoints[10];
 					//CalculateCustomRolloffPoints(soundData, customRolloffPoints, 10);
@@ -262,7 +277,7 @@ namespace RTE {
 				}
 			}
 		}
-		m_AllSoundPropertiesUpToDate = result == FMOD_OK;
+		m_SoundPropertiesUpToDate = result == FMOD_OK;
 
 		return result;
 	}
@@ -271,7 +286,7 @@ namespace RTE {
 
 	//TODO this needs to be used or be deleted
 	void SoundContainer::CalculateCustomRolloffPoints(const SoundData &soundDataToCalculateFor, FMOD_VECTOR *rolloffPoints, int numRolloffPoints) {
-		int attenuationStartDistance = (soundDataToCalculateFor.AttenuationStartDistance < 0) ? m_AttenuationStartDistance : soundDataToCalculateFor.AttenuationStartDistance;
+		float attenuationStartDistance = (soundDataToCalculateFor.AttenuationStartDistance < 0) ? m_AttenuationStartDistance : soundDataToCalculateFor.AttenuationStartDistance;
 		float currentDistance = attenuationStartDistance;
 		float currentVolumeLevel = 1;
 

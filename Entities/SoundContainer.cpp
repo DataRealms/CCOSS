@@ -164,7 +164,61 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SoundContainer::Save(Writer &writer) const { return 0; }
+	int SoundContainer::Save(Writer &writer) const {
+		Entity::Save(writer);
+
+		for (const std::vector<SoundData> &soundSet : m_SoundSets) {
+			writer.NewProperty("AddSoundSet");
+			writer.ObjectStart("SoundSet");
+
+			for (const SoundData &soundData : soundSet) {
+				writer.NewProperty("AddSound");
+				writer.ObjectStart("ContentFile");
+
+				writer.NewProperty("FilePath");
+				writer << soundData.SoundFile.GetDataPath();
+				writer.NewProperty("Offset");
+				writer << soundData.Offset;
+				writer.NewProperty("MinimumAudibleDistance");
+				writer << soundData.MinimumAudibleDistance;
+				writer.NewProperty("AttenuationStartDistance");
+				writer << soundData.AttenuationStartDistance;
+
+				writer.ObjectEnd();
+			}
+			writer.ObjectEnd();
+		}
+
+		writer.NewProperty("CycleMode");
+		bool t = m_SoundSelectionCycleMode == SoundCycleMode::MODE_FORWARDS;
+		std::list<std::pair<const std::string, SoundContainer::SoundCycleMode>>::const_iterator cycleModeMapEntry = std::find_if(c_CycleModeMap.begin(), c_CycleModeMap.end(), [&soundSelectionCycleMode = m_SoundSelectionCycleMode](auto element) { return element.second == soundSelectionCycleMode; });
+		if (cycleModeMapEntry != c_CycleModeMap.end()) {
+			writer << cycleModeMapEntry->first;
+		} else {
+			writer << m_SoundSelectionCycleMode;
+		}
+
+		writer.NewProperty("Immobile");
+		writer << m_Immobile;
+		writer.NewProperty("AttenuationStartDistance");
+		writer << m_AttenuationStartDistance;
+		writer.NewProperty("LoopSetting");
+		writer << m_Loops;
+
+		writer.NewProperty("Priority");
+		writer << m_Priority;
+		writer.NewProperty("AffectedByGlobalPitch");
+		writer << m_AffectedByGlobalPitch;
+
+		writer.NewProperty("Pos");
+		writer << m_Pos;
+		writer.NewProperty("Volume");
+		writer << m_Volume;
+		writer.NewProperty("Pitch");
+		writer << m_Pitch;
+
+		return 0;
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

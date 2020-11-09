@@ -20,7 +20,6 @@
 #include "GUI/GUILabel.h"
 #include "GUI/GUISlider.h"
 
-
 #include "Entity.h"
 #include "DataModule.h"
 #include "Scene.h"

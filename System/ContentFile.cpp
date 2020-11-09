@@ -190,7 +190,6 @@ namespace RTE {
 		}
 		FMOD::Sound *returnSample = nullptr;
 
-		// Check if the file has already been read and loaded from the disk and, if so, use that data.
 		std::unordered_map<std::string, FMOD::Sound *>::iterator foundSound = s_LoadedSamples.find(m_DataPath);
 		if (foundSound != s_LoadedSamples.end()) {
 			returnSample = (*foundSound).second;

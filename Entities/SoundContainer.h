@@ -301,8 +301,8 @@ namespace RTE {
 		/// <summary>
 		/// Sets the volume sounds in this SoundContainer should be played at. Note that this does not factor volume changes due to the SoundContainer's position. Does not affect currently playing sounds.
 		/// </summary>
-		/// <param name="newVolume">The new volume sounds in this SoundContainer should be played at.</param>
-		void SetVolume(float newVolume) { newVolume = std::clamp(newVolume, 0.0F, 1.0F); if (IsBeingPlayed()) { g_AudioMan.ChangePlayingSoundContainerVolume(this, newVolume); } m_Volume = newVolume; }
+		/// <param name="newVolume">The new volume sounds in this SoundContainer should be played at. Limited between 0 and 10.</param>
+		void SetVolume(float newVolume) { newVolume = std::clamp(newVolume, 0.0F, 10.0F); if (IsBeingPlayed()) { g_AudioMan.ChangePlayingSoundContainerVolume(this, newVolume); } m_Volume = newVolume; }
 
 		/// <summary>
 		/// Gets the pitch the sounds in this SoundContainer are played at. Note that this does not factor in global pitch.
@@ -311,9 +311,9 @@ namespace RTE {
 		float GetPitch() const { return m_Pitch; }
 
 		/// <summary>
-		/// Sets the pitch sounds in this SoundContainer should be played at and updates any playing instances accordingly. Note that this does not factor in global pitch.
+		/// Sets the pitch sounds in this SoundContainer should be played at and updates any playing instances accordingly.
 		/// </summary>
-		/// <param name="newPitch">The new pitch sounds in this SoundContainer should be played at.</param>
+		/// <param name="newPitch">The new pitch sounds in this SoundContainer should be played at. Limited between 0.125 and 8 (8 octaves up or down).</param>
 		void SetPitch(float newPitch) { newPitch = std::clamp(newPitch, 0.125F, 8.0F); if (IsBeingPlayed()) { g_AudioMan.ChangePlayingSoundContainerPitch(this, newPitch); } m_Pitch = newPitch; }
 #pragma endregion
 

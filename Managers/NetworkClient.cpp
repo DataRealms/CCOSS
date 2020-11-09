@@ -609,11 +609,20 @@ namespace RTE {
 										soundContainerToHandle->Stop();
 										soundContainerToHandle->Reset();
 									}
-									soundContainerToHandle->Create(sndDataPtr->Loops, sndDataPtr->AffectedByGlobalPitch, sndDataPtr->AttenuationStartDistance, sndDataPtr->Immobile);
 									for (size_t soundFileHash : sndDataPtr->SoundFileHashes) {
 										if (soundFileHash != 0) { soundContainerToHandle->AddSound(ContentFile::GetPathFromHash(soundFileHash)); }
 									}
-									g_AudioMan.PlaySound(soundContainerToHandle, Vector(sndDataPtr->Position[0], sndDataPtr->Position[1]), -1, -1, sndDataPtr->Pitch);
+									soundContainerToHandle->SetImmobile(sndDataPtr->Immobile);
+									soundContainerToHandle->SetAttenuationStartDistance(sndDataPtr->AttenuationStartDistance);
+									soundContainerToHandle->SetLoopSetting(sndDataPtr->Loops);
+
+									//soundContainerToHandle->SetPriority(sndDataPtr.Priority);
+									soundContainerToHandle->SetAffectedByGlobalPitch(sndDataPtr->AffectedByGlobalPitch);
+									
+									soundContainerToHandle->SetPosition(Vector(sndDataPtr->Position[0], sndDataPtr->Position[1]));
+									soundContainerToHandle->SetVolume(sndDataPtr->Volume);
+									soundContainerToHandle->SetPitch(sndDataPtr->Pitch);
+									soundContainerToHandle->Play();
 									break;
 								case AudioMan::SOUND_STOP:
 									soundContainerToHandle->Stop();
@@ -621,8 +630,11 @@ namespace RTE {
 								case AudioMan::SOUND_SET_POSITION:
 									soundContainerToHandle->SetPosition(Vector(sndDataPtr->Position[0], sndDataPtr->Position[1]));
 									break;
+								case AudioMan::SOUND_SET_VOLUME:
+									soundContainerToHandle->SetVolume(sndDataPtr->Volume);
+									break;
 								case AudioMan::SOUND_SET_PITCH:
-									g_AudioMan.SetSoundPitch(soundContainerToHandle, sndDataPtr->Pitch);
+									soundContainerToHandle->SetPitch(sndDataPtr->Pitch);
 									break;
 								case AudioMan::SOUND_FADE_OUT:
 									g_AudioMan.FadeOutSound(soundContainerToHandle, sndDataPtr->FadeOutTime);

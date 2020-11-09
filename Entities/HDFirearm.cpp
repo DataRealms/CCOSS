@@ -1009,13 +1009,13 @@ void HDFirearm::Update()
                 if (m_Activated && !m_Reloading && m_ActivationTimer.GetElapsedSimTimeMS() < m_ActivationDelay)
                 {
                     animDuration = (int)LERP(0, m_ActivationDelay, (float)(m_SpriteAnimDuration * 10), (float)m_SpriteAnimDuration, m_ActivationTimer.GetElapsedSimTimeMS());
-                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTimer.GetElapsedSimTimeMS()) * g_AudioMan.GetGlobalPitch());
+                    m_ActiveSound.SetPitch(LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTimer.GetElapsedSimTimeMS()));
                 }
                 // Spin down
                 if ((!m_Activated || m_Reloading) && m_LastFireTmr.GetElapsedSimTimeMS() < m_DeactivationDelay)
                 {
                     animDuration = (int)LERP(0, m_DeactivationDelay, (float)m_SpriteAnimDuration, (float)(m_SpriteAnimDuration * 10), m_LastFireTmr.GetElapsedSimTimeMS());
-                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_DeactivationDelay, 1.0, 0, m_LastFireTmr.GetElapsedSimTimeMS()) * g_AudioMan.GetGlobalPitch());
+                    m_ActiveSound.SetPitch(LERP(0, m_DeactivationDelay, 1.0, 0, m_LastFireTmr.GetElapsedSimTimeMS()));
                 }
 
                 if (animDuration > 0 && !(m_Reloading && m_LastFireTmr.GetElapsedSimTimeMS() >= m_DeactivationDelay))

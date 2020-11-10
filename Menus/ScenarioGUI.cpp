@@ -146,14 +146,14 @@ ScenarioGUI::ScenarioGUI(Controller *pController) :
 	m_ScenarioScreenBoxes[PLAYERSETUP]->CenterInParent(true, true);
 
 	m_ScenePreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
+	clear_to_color(m_ScenePreviewBitmap->GetBitmap(), g_MaskColor);
 
-	// Load default preview bitmap.
+	// Load and own the default preview bitmap.
 	m_DefaultPreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
 	ContentFile defaultPreviewContent("Base.rte/GUIs/DefaultPreview.png");
 	BITMAP *defaultPreview = defaultPreviewContent.LoadAndReleaseBitmap();
 	blit(defaultPreview, m_DefaultPreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_DefaultPreviewBitmap->GetWidth(), m_DefaultPreviewBitmap->GetHeight());
 	destroy_bitmap(defaultPreview);
-	clear_to_color(m_ScenePreviewBitmap->GetBitmap(), g_MaskColor);
 
 	GetScenesAndActivities(true);
 

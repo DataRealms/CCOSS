@@ -231,7 +231,7 @@ void AllegroBitmap::SetPixel(int X, int Y, unsigned long Color)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the Width of the bitmap.
 
-int AllegroBitmap::GetWidth(void) const
+int AllegroBitmap::GetWidth(void)
 {
     if (!m_pBitmap)
         return 0;
@@ -245,7 +245,7 @@ int AllegroBitmap::GetWidth(void) const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the Height of the bitmap.
 
-int AllegroBitmap::GetHeight(void) const
+int AllegroBitmap::GetHeight(void)
 {
     if (!m_pBitmap)
         return 0;

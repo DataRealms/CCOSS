@@ -163,7 +163,7 @@ public:
 // Description:     Gets the Width of the bitmap.
 // Arguments:       None.
 
-    int GetWidth() const override;
+    int GetWidth() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ public:
 // Description:     Gets the Height of the bitmap.
 // Arguments:       None.
 
-    int GetHeight() const override;
+    int GetHeight() override;
 
 /* NA, color key is always 0 with allegro
 //////////////////////////////////////////////////////////////////////////////////////////

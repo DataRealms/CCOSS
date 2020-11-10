@@ -195,9 +195,9 @@ namespace RTE {
 			SCREENCOUNT
 		};
 
-		Controller *m_ScenarioController; //!< The Controller which controls this menu. Not owned.
-		std::unique_ptr<GUIScreen> m_ScenarioGUIScreen; //!< GUI Screen for use by the in-game GUI.
-		std::unique_ptr<GUIInput> m_ScenarioGUIInput; //!< Input controller.
+		Controller *m_Controller; //!< The Controller which controls this menu. Not owned.
+		std::unique_ptr<GUIScreen> m_GUIScreen; //!< GUI Screen for use by the in-game GUI.
+		std::unique_ptr<GUIInput> m_GUIInput; //!< Input controller.
 		std::unique_ptr<GUIControlManager> m_ScenarioGUIController = std::make_unique <GUIControlManager>(); //!< The control manager which owns all the GUI elements.
 
 		Timer m_BlinkTimer; //!< Notification blink timer.
@@ -206,15 +206,15 @@ namespace RTE {
 
 		GUIButton *m_ScenarioButtons[SCENARIOBUTTONCOUNT]; //!< The menu buttons we want to manipulate.
 
-		GUICollectionBox *m_ScenarioDraggedBox; //!< Currently dragged GUI box.
+		GUICollectionBox *m_DraggedBox; //!< Currently dragged GUI box.
 		Vector m_PrevMousePos; //!< Previous pos of mouse to calculate dragging.
 
 		Vector m_PlanetCenter; //!< The absolute screen position of the planet center.
 		float m_PlanetRadius = 240.0F; //!< The screen radius of the planet.
 
 		std::list<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed. Not owned, and neither are the scenes.
-		Scene *m_ScenarioHoveredScene; //!< The scene preset currently hovered. Not owned.
-		Scene *m_ScenarioSelectedScene; //!< The scene preset currently selected. Not owned.
+		Scene *m_HoveredScene; //!< The scene preset currently hovered. Not owned.
+		Scene *m_SelectedScene; //!< The scene preset currently selected. Not owned.
 		GUILabel *m_SitePointLabel; //!< Hover name label over Scenes.
 
 		std::vector<Vector> m_LinePointsToSite; //!< Collection of points that form lines from a screen point to the selected site point.
@@ -226,7 +226,7 @@ namespace RTE {
 		GUISlider *m_DifficultySlider;
 
 		std::map<Activity *, std::list<Scene *> > m_Activities; //!< The map of Activities, and the Scenes compatible with each, neither of which are owned here.
-		const Activity *m_ScenarioSelectedActivity; //!< The currently selected activity. Not owned.
+		const Activity *m_SelectedActivity; //!< The currently selected activity. Not owned.
 
 		// Scene Info.
 		GUIButton *m_SceneCloseButton;

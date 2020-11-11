@@ -135,6 +135,9 @@ namespace RTE {
 		/// </summary>
 		void UpdatePlayersBox();
 
+		
+		void ClickInPlayerSetup(int hoveredPlayer, int hoveredTeam);
+
 		/// <summary>
 		/// Sets up and starts the currently selected Activity and settings.
 		/// </summary>

@@ -733,157 +733,159 @@ void ScenarioGUI::ShowPlayersBox() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ScenarioGUI::UpdatePlayersBox() {
-	if (m_SelectedActivity && m_SelectedScene) {
-		int mouseX = 0;
-		int mouseY = 0;
-		m_GUIInput->GetMousePosition(&mouseX, &mouseY);
-		const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(m_SelectedActivity);
+	RTEAssert(m_SelectedActivity && m_SelectedScene, "Trying to start a scenario game without an activity or a scene.");
 
-		const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[PLAYERSETUP], 1));
-		if (hoveredCell) {
-			// Find which cell is being hovered over.
-			int hoveredPlayer = PLAYERCOLUMNCOUNT;
-			int hoveredTeam = TEAMROWCOUNT;
+	int mouseX = 0;
+	int mouseY = 0;
+	m_GUIInput->GetMousePosition(&mouseX, &mouseY);
+	const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(m_SelectedActivity);
+
+	const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[PLAYERSETUP], 1));
+	if (hoveredCell) {
+		// Find which cell is being hovered over.
+		int hoveredPlayer = PLAYERCOLUMNCOUNT;
+		int hoveredTeam = TEAMROWCOUNT;
+		for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
+			for (int teamIndex = Activity::TeamOne; teamIndex < TEAMROWCOUNT; ++teamIndex) {
+				if (m_PlayerBoxes[playerIndex][teamIndex] == hoveredCell) {
+					hoveredPlayer = playerIndex;
+					hoveredTeam = teamIndex;
+				} else if (m_PlayerBoxes[playerIndex][teamIndex]->GetDrawType() == GUICollectionBox::Color) {
+					// Un-highlight all other cells.
+					m_PlayerBoxes[playerIndex][teamIndex]->SetDrawColor(c_GUIColorBlue);
+				}
+			}
+		}
+
+		// Make the hovered cell light up and able to be selected if:
+		// It's under an active team row or the disabled team row.
+		// It's not a team row locked to the CPU.
+		// It's not the CPU player if he is locked to a CPU team.
+		// It doesn't already contain an image.
+		if ((m_SelectedActivity->TeamActive(hoveredTeam) || hoveredTeam == TEAM_DISABLED) && m_LockedCPUTeam != hoveredTeam
+			&& (m_LockedCPUTeam == Activity::NoTeam || hoveredPlayer != PLAYER_CPU) && m_PlayerBoxes[hoveredPlayer][hoveredTeam]->GetDrawType() != GUICollectionBox::Image) {
+			if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_EITHER)) {
+				ClickInPlayerSetup(hoveredPlayer, hoveredTeam);
+			} else if (m_PlayerBoxes[hoveredPlayer][hoveredTeam]->GetDrawType() == GUICollectionBox::Color &&
+				m_PlayerBoxes[hoveredPlayer][hoveredTeam]->GetDrawColor() != c_GUIColorLightBlue) {
+				// Just highlight the cell.
+				m_PlayerBoxes[hoveredPlayer][hoveredTeam]->SetDrawColor(c_GUIColorLightBlue);
+				g_GUISound.SelectionChangeSound()->Play();
+			}
+		}
+	}
+
+	// Count players in the teams.
+	int teamsWithPlayers = 0;
+	bool teamWithHumans = false;
+	int humansInTeams = 0;
+	for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
+		bool foundPlayer = false;
+		if (m_SelectedActivity->TeamActive(teamIndex)) {
 			for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
-				for (int teamIndex = Activity::TeamOne; teamIndex < TEAMROWCOUNT; ++teamIndex) {
-					if (m_PlayerBoxes[playerIndex][teamIndex] == hoveredCell) {
-						hoveredPlayer = playerIndex;
-						hoveredTeam = teamIndex;
-					} else if (m_PlayerBoxes[playerIndex][teamIndex]->GetDrawType() == GUICollectionBox::Color) {
-						// Un-highlight all other cells.
-						m_PlayerBoxes[playerIndex][teamIndex]->SetDrawColor(c_GUIColorBlue);
+				if (m_PlayerBoxes[playerIndex][teamIndex]->GetDrawType() == GUICollectionBox::Image) {
+					foundPlayer = true;
+					if (playerIndex != PLAYER_CPU) {
+						++humansInTeams;
+						teamWithHumans = true;
 					}
 				}
 			}
 
-			// Make the hovered cell light up and able to be selected if:
-			// It's under an active team row or the disabled team row.
-			// It's not a team row locked to the CPU.
-			// It's not the CPU player if he is locked to a CPU team.
-			// It doesn't already contain an image.
-			if ((m_SelectedActivity->TeamActive(hoveredTeam) || hoveredTeam == TEAM_DISABLED) && m_LockedCPUTeam != hoveredTeam
-				&& (m_LockedCPUTeam == Activity::NoTeam || hoveredPlayer != PLAYER_CPU) && m_PlayerBoxes[hoveredPlayer][hoveredTeam]->GetDrawType() != GUICollectionBox::Image) {
-				if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_EITHER)) {
-					// Move the player's icon to the correct row.
-					m_PlayerBoxes[hoveredPlayer][hoveredTeam]->SetDrawType(GUICollectionBox::Image);
-					const Icon *playerIcon = (hoveredPlayer != PLAYER_CPU) ? g_UInputMan.GetSchemeIcon(hoveredPlayer) : dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-					if (playerIcon) {
-						m_PlayerBoxes[hoveredPlayer][hoveredTeam]->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0]));
-					}
-
-					// Clear all unhovered rows of this column.
-					for (int nonHoveredTeam = Activity::TeamOne; nonHoveredTeam < TEAMROWCOUNT; ++nonHoveredTeam) {
-						if (nonHoveredTeam != hoveredTeam) {
-							m_PlayerBoxes[hoveredPlayer][nonHoveredTeam]->SetDrawType(GUICollectionBox::Color);
-							m_PlayerBoxes[hoveredPlayer][nonHoveredTeam]->SetDrawColor(c_GUIColorBlue);
-						}
-					}
-
-					// If CPU changed team, remove human players from the team.
-					if (hoveredPlayer == PLAYER_CPU && hoveredTeam != TEAM_DISABLED) {
-						for (int humanPlayer = Players::PlayerOne; humanPlayer < Players::MaxPlayerCount; ++humanPlayer) {
-							if (m_PlayerBoxes[humanPlayer][hoveredTeam]->GetDrawType() == GUICollectionBox::Image) {
-								m_PlayerBoxes[humanPlayer][hoveredTeam]->SetDrawType(GUICollectionBox::Color);
-								m_PlayerBoxes[humanPlayer][hoveredTeam]->SetDrawColor(c_GUIColorBlue);
-								m_PlayerBoxes[humanPlayer][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-								playerIcon = g_UInputMan.GetSchemeIcon(humanPlayer);
-								if (playerIcon) {
-									m_PlayerBoxes[humanPlayer][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0]));
-								}
-							}
-						}
-					}
-
-					// If a human player changed team, remove the CPU from the team.
-					else if (hoveredPlayer != PLAYER_CPU && hoveredTeam != TEAM_DISABLED && m_PlayerBoxes[PLAYER_CPU][hoveredTeam]->GetDrawType() == GUICollectionBox::Image) {
-						m_PlayerBoxes[PLAYER_CPU][hoveredTeam]->SetDrawType(GUICollectionBox::Color);
-						m_PlayerBoxes[PLAYER_CPU][hoveredTeam]->SetDrawColor(c_GUIColorBlue);
-						m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
-						playerIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-						if (playerIcon) {
-							m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0]));
-						}
-					}
-
-					g_GUISound.FocusChangeSound()->Play();
-				} else if (m_PlayerBoxes[hoveredPlayer][hoveredTeam]->GetDrawType() == GUICollectionBox::Color &&
-					m_PlayerBoxes[hoveredPlayer][hoveredTeam]->GetDrawColor() != c_GUIColorLightBlue) {
-					// Just highlight the cell.
-					m_PlayerBoxes[hoveredPlayer][hoveredTeam]->SetDrawColor(c_GUIColorLightBlue);
-					g_GUISound.SelectionChangeSound()->Play();
-				}
+			if (foundPlayer) {
+				teamsWithPlayers++;
 			}
 		}
+	}
 
-		// Count players in the teams.
-		int teamsWithPlayers = 0;
-		bool teamWithHumans = false;
-		int humansInTeams = 0;
-		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
-			bool foundPlayer = false;
-			if (m_SelectedActivity->TeamActive(teamIndex)) {
-				for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
-					if (m_PlayerBoxes[playerIndex][teamIndex]->GetDrawType() == GUICollectionBox::Image) {
-						foundPlayer = true;
-						if (playerIndex != PLAYER_CPU) {
-							++humansInTeams;
-							teamWithHumans = true;
-						}
-					}
-				}
-
-				if (foundPlayer) {
-					teamsWithPlayers++;
-				}
-			}
-		}
-
-		if (gameActivity) {
-			const int maxHumanPlayers = gameActivity->GetMaxPlayerSupport();
-			const int minTeamsRequired = gameActivity->GetMinTeamsRequired();
-			if (humansInTeams > maxHumanPlayers) {
-				m_ScenarioButtons[STARTGAME]->SetVisible(false);
-				const std::string msgString = "Too many players assigned! Max for this activity is " + std::to_string(maxHumanPlayers);
-				m_StartErrorLabel->SetText(msgString);
-				m_StartErrorLabel->SetVisible(true);
-			} else if (minTeamsRequired > teamsWithPlayers) {
-				m_ScenarioButtons[STARTGAME]->SetVisible(false);
-				const std::string msgString = "Assign players to at\nleast " + std::to_string(minTeamsRequired) + " of the teams!";
-				m_StartErrorLabel->SetText(msgString);
-				m_StartErrorLabel->SetVisible(true);
-			} else if (teamWithHumans == 0) {
-				m_ScenarioButtons[STARTGAME]->SetVisible(false);
-				m_StartErrorLabel->SetText("Assign human players\nto at least one team!");
-				m_StartErrorLabel->SetVisible(true);
-			} else {
-				m_ScenarioButtons[STARTGAME]->SetVisible(true);
-				m_StartErrorLabel->SetVisible(false);
-			}
-		}
-
-		char goldString[256];
-		if (m_GoldSlider->GetValue() == m_GoldSlider->GetMaximum()) {
-			std::snprintf(goldString, sizeof(goldString), "Starting Gold: %c Infinite", -58);
+	if (gameActivity) {
+		const int maxHumanPlayers = gameActivity->GetMaxPlayerSupport();
+		const int minTeamsRequired = gameActivity->GetMinTeamsRequired();
+		if (humansInTeams > maxHumanPlayers) {
+			m_ScenarioButtons[STARTGAME]->SetVisible(false);
+			const std::string msgString = "Too many players assigned! Max for this activity is " + std::to_string(maxHumanPlayers);
+			m_StartErrorLabel->SetText(msgString);
+			m_StartErrorLabel->SetVisible(true);
+		} else if (minTeamsRequired > teamsWithPlayers) {
+			m_ScenarioButtons[STARTGAME]->SetVisible(false);
+			const std::string msgString = "Assign players to at\nleast " + std::to_string(minTeamsRequired) + " of the teams!";
+			m_StartErrorLabel->SetText(msgString);
+			m_StartErrorLabel->SetVisible(true);
+		} else if (teamWithHumans == 0) {
+			m_ScenarioButtons[STARTGAME]->SetVisible(false);
+			m_StartErrorLabel->SetText("Assign human players\nto at least one team!");
+			m_StartErrorLabel->SetVisible(true);
 		} else {
-			int startGold = m_GoldSlider->GetValue();
-			startGold = startGold - (startGold % 500);
-			std::snprintf(goldString, sizeof(goldString), "Starting Gold: %c %d oz", -58, startGold);
+			m_ScenarioButtons[STARTGAME]->SetVisible(true);
+			m_StartErrorLabel->SetVisible(false);
 		}
-		m_GoldLabel->SetText(goldString);
+	}
 
-		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; teamIndex++) {
-			m_TeamAISkillLabel[teamIndex]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[teamIndex]->GetValue()));
-		}
+	char goldString[256];
+	if (m_GoldSlider->GetValue() == m_GoldSlider->GetMaximum()) {
+		std::snprintf(goldString, sizeof(goldString), "Starting Gold: %c Infinite", -58);
+	} else {
+		int startGold = m_GoldSlider->GetValue();
+		startGold = startGold - (startGold % 500);
+		std::snprintf(goldString, sizeof(goldString), "Starting Gold: %c %d oz", -58, startGold);
+	}
+	m_GoldLabel->SetText(goldString);
+
+	for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; teamIndex++) {
+		m_TeamAISkillLabel[teamIndex]->SetText(Activity::GetAISkillString(m_TeamAISkillSlider[teamIndex]->GetValue()));
 	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ScenarioGUI::StartGame() {
-	if (!m_SelectedActivity || !m_SelectedScene) {
-		return false;
+void ScenarioGUI::ClickInPlayerSetup(int hoveredPlayer, int hoveredTeam) {
+	// Move the player's icon to the correct row.
+	m_PlayerBoxes[hoveredPlayer][hoveredTeam]->SetDrawType(GUICollectionBox::Image);
+	const Icon *playerIcon = (hoveredPlayer != PLAYER_CPU) ? g_UInputMan.GetSchemeIcon(hoveredPlayer) : dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+	if (playerIcon) {
+		m_PlayerBoxes[hoveredPlayer][hoveredTeam]->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0]));
 	}
 
+	// Clear all unhovered rows of this column.
+	for (int nonHoveredTeam = Activity::TeamOne; nonHoveredTeam < TEAMROWCOUNT; ++nonHoveredTeam) {
+		if (nonHoveredTeam != hoveredTeam) {
+			m_PlayerBoxes[hoveredPlayer][nonHoveredTeam]->SetDrawType(GUICollectionBox::Color);
+			m_PlayerBoxes[hoveredPlayer][nonHoveredTeam]->SetDrawColor(c_GUIColorBlue);
+		}
+	}
+
+	// If CPU changed team, remove human players from the team.
+	if (hoveredPlayer == PLAYER_CPU && hoveredTeam != TEAM_DISABLED) {
+		for (int humanPlayer = Players::PlayerOne; humanPlayer < Players::MaxPlayerCount; ++humanPlayer) {
+			if (m_PlayerBoxes[humanPlayer][hoveredTeam]->GetDrawType() == GUICollectionBox::Image) {
+				m_PlayerBoxes[humanPlayer][hoveredTeam]->SetDrawType(GUICollectionBox::Color);
+				m_PlayerBoxes[humanPlayer][hoveredTeam]->SetDrawColor(c_GUIColorBlue);
+				m_PlayerBoxes[humanPlayer][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
+				playerIcon = g_UInputMan.GetSchemeIcon(humanPlayer);
+				if (playerIcon) {
+					m_PlayerBoxes[humanPlayer][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0]));
+				}
+			}
+		}
+	}
+
+	// If a human player changed team, remove the CPU from the team.
+	else if (hoveredPlayer != PLAYER_CPU && hoveredTeam != TEAM_DISABLED && m_PlayerBoxes[PLAYER_CPU][hoveredTeam]->GetDrawType() == GUICollectionBox::Image) {
+		m_PlayerBoxes[PLAYER_CPU][hoveredTeam]->SetDrawType(GUICollectionBox::Color);
+		m_PlayerBoxes[PLAYER_CPU][hoveredTeam]->SetDrawColor(c_GUIColorBlue);
+		m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawType(GUICollectionBox::Image);
+		playerIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+		if (playerIcon) {
+			m_PlayerBoxes[PLAYER_CPU][TEAM_DISABLED]->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0]));
+		}
+	}
+
+	g_GUISound.FocusChangeSound()->Play();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool ScenarioGUI::StartGame() {
 	Activity *activityInstance = dynamic_cast<Activity *>(m_SelectedActivity->Clone());
 	GameActivity *gameActivity = dynamic_cast<GameActivity *>(activityInstance);
 

@@ -78,6 +78,11 @@ namespace RTE {
 	private:
 
 		/// <summary>
+		/// Displays the site's name label if the mouse is over a site point. Otherwise the label is hidden.
+		/// </summary>
+		void UpdateHoveredScene(int mouseX, int mouseY);
+
+		/// <summary>
 		/// Draws the site points on top of the planet.
 		/// </summary>
 		/// <param name="drawBitmap">The bitmap to draw on.</param>

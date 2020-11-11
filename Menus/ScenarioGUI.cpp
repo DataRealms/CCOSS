@@ -169,6 +169,15 @@ void ScenarioGUI::SetEnabled() {
 	m_ScenarioScreenBoxes[ACTIVITY]->SetVisible(true);
 	// Reload all scenes and activities to reflect scene changes player might do in scene editor.
 	GetScenesAndActivities(false);
+
+	const Activity *currentActivity = g_ActivityMan.GetActivity();
+	if (currentActivity && (currentActivity->GetActivityState() == Activity::Running || currentActivity->GetActivityState() == Activity::Editing)) {
+		if (!m_ScenarioButtons[RESUME]->GetVisible()) {
+			m_ScenarioButtons[RESUME]->SetVisible(true);
+		}
+	} else if (m_ScenarioButtons[RESUME]->GetVisible()) {
+		m_ScenarioButtons[RESUME]->SetVisible(false);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -196,59 +205,50 @@ void ScenarioGUI::Update() {
 	m_GUIInput->GetMousePosition(&mouseX, &mouseY);
 
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
-		// Handle the resume button.
-		const Activity *currentActivity = g_ActivityMan.GetActivity();
-		if (currentActivity && (currentActivity->GetActivityState() == Activity::Running || currentActivity->GetActivityState() == Activity::Editing)) {
-			if (!m_ScenarioButtons[RESUME]->GetVisible()) {
-				m_ScenarioButtons[RESUME]->SetVisible(true);
-			}
-
-			if (m_BlinkTimer.AlternateReal(500)) {
-				m_ScenarioButtons[RESUME]->SetFocus();
-			} else {
-				m_ScenarioGUIController->GetManager()->SetFocus(0);
-			}
-		} else if (m_ScenarioButtons[RESUME]->GetVisible()) {
-			m_ScenarioButtons[RESUME]->SetVisible(false);
+		if (m_ScenarioButtons[RESUME]->GetVisible()) {
+			GUIPanel *focusPanel = (m_BlinkTimer.AlternateReal(500)) ? m_ScenarioButtons[RESUME] : nullptr;
+			m_ScenarioGUIController->GetManager()->SetFocus(focusPanel);
 		}
 
-		// If the mouse is over a site point, then display the site's label.
-		bool foundAnyHover = false;
-		if (m_ScenarioScenes && !m_DraggedBox && !m_ScenarioScreenBoxes[ACTIVITY]->PointInside(mouseX, mouseY) && !m_ScenarioScreenBoxes[SCENEINFO]->PointInside(mouseX, mouseY)) {
-			Scene *candidateScene = nullptr;
-			float shortestDist = 16.0F;
-			Vector screenLocation(0, 0);
-			const Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
-			for (Scene *scenarioScene : *m_ScenarioScenes) {
-				screenLocation = m_PlanetCenter + scenarioScene->GetLocation() + scenarioScene->GetLocationOffset();
-				const float distance = (screenLocation - mousePos).GetMagnitude();
+		if (m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
+			m_ScenarioButtons[STARTHERE]->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <");
+		}
+	} else if (m_ScenarioScreenBoxes[PLAYERSETUP]->GetVisible()) {
+		UpdatePlayersBox();
+	}
+}
 
-				if (distance < shortestDist) {
-					shortestDist = distance;
-					foundAnyHover = true;
-					candidateScene = scenarioScene;
-				}
-			}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			// Set new hovered scene to be the one closest to the cursor, if there is any and if it is different than the currently hovered one.
-			if (candidateScene != nullptr && candidateScene != m_HoveredScene) {
-				m_HoveredScene = candidateScene;
-				g_GUISound.SelectionChangeSound()->Play();
-				SetSiteNameLabel(m_HoveredScene->GetPresetName(), m_HoveredScene->GetLocation() + m_HoveredScene->GetLocationOffset());
-				m_SitePointLabel->SetVisible(true);
+void ScenarioGUI::UpdateHoveredScene(int mouseX, int mouseY) {
+	bool foundAnyHover = false;
+	if (m_ScenarioScenes && !m_DraggedBox && !m_ScenarioScreenBoxes[ACTIVITY]->PointInside(mouseX, mouseY) && !m_ScenarioScreenBoxes[SCENEINFO]->PointInside(mouseX, mouseY)) {
+		Scene *candidateScene = nullptr;
+		float shortestDist = 16.0F;
+		const Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
+		for (Scene *scenarioScene : *m_ScenarioScenes) {
+			const Vector screenLocation = m_PlanetCenter + scenarioScene->GetLocation() + scenarioScene->GetLocationOffset();
+			const float distance = (screenLocation - mousePos).GetMagnitude();
+
+			if (distance < shortestDist) {
+				shortestDist = distance;
+				foundAnyHover = true;
+				candidateScene = scenarioScene;
 			}
 		}
 
-		if (!foundAnyHover) {
-			m_HoveredScene = nullptr;
-			m_SitePointLabel->SetVisible(false);
+		// Set new hovered scene to be the one closest to the cursor, if there is any and if it is different than the currently hovered one.
+		if (candidateScene != nullptr && candidateScene != m_HoveredScene) {
+			m_HoveredScene = candidateScene;
+			g_GUISound.SelectionChangeSound()->Play();
+			SetSiteNameLabel(m_HoveredScene->GetPresetName(), m_HoveredScene->GetLocation() + m_HoveredScene->GetLocationOffset());
+			m_SitePointLabel->SetVisible(true);
 		}
 	}
 
-	if (m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
-		m_ScenarioButtons[STARTHERE]->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <");
-	} else if (m_ScenarioScreenBoxes[PLAYERSETUP]->GetVisible()) {
-		UpdatePlayersBox();
+	if (!foundAnyHover) {
+		m_HoveredScene = nullptr;
+		m_SitePointLabel->SetVisible(false);
 	}
 }
 
@@ -384,8 +384,10 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 	m_GUIInput->GetMousePosition(&mouseX, &mouseY);
 	const Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
-	// Handle GUI panel dragging.
+	// Handle mouse hover and drag.
 	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible()) {
+		UpdateHoveredScene(mouseX, mouseY);
+		
 		if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER) && m_DraggedBox) {
 			m_DraggedBox->MoveRelative(mousePos.GetFloorIntX() - m_PrevMousePos.GetFloorIntX(), mousePos.GetFloorIntY() - m_PrevMousePos.GetFloorIntY());
 			m_PrevMousePos = mousePos;
@@ -405,7 +407,7 @@ ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
 			}
 
 			GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], 1));
-			const GUIControl *hoveredControl = m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioScreenBoxes[ROOTSCREEN], -1);
+			const GUIControl *hoveredControl = m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, hoveredBox, 1);
 			const bool nonDragControl = (dynamic_cast<const GUIButton *>(hoveredControl) || dynamic_cast<const GUISlider *>(hoveredControl) || dynamic_cast<const GUIComboBox *>(hoveredControl));
 			if (hoveredBox && !nonDragControl && !m_DraggedBox && !m_ActivitySelectComboBox->IsDropped()) {
 				m_DraggedBox = hoveredBox;

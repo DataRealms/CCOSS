@@ -258,31 +258,31 @@ int Actor::Create(const Actor &reference)
     // Only load the static AI mode icons once
     if (!m_sIconsLoaded)
     {
-        ContentFile noTeamFile("Base.rte/GUIs/TeamIcons/NoTeam.bmp");
+        ContentFile noTeamFile("Base.rte/GUIs/TeamIcons/NoTeam.png");
         m_apNoTeamIcon = noTeamFile.GetAsAnimation(2);
 
-        ContentFile iconFile("Base.rte/GUIs/PieIcons/Blank000.bmp");
+        ContentFile iconFile("Base.rte/GUIs/PieIcons/Blank000.png");
         m_apAIIcons[AIMODE_NONE] = iconFile.GetAsBitmap();
         m_apAIIcons[AIMODE_BOMB] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Eye000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Eye000.png");
         m_apAIIcons[AIMODE_SENTRY] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Cycle000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Cycle000.png");
         m_apAIIcons[AIMODE_PATROL] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/GoTo000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/GoTo000.png");
         m_apAIIcons[AIMODE_GOTO] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Brain000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Brain000.png");
         m_apAIIcons[AIMODE_BRAINHUNT] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Dig000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Dig000.png");
         m_apAIIcons[AIMODE_GOLDDIG] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Return000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Return000.png");
         m_apAIIcons[AIMODE_RETURN] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Land000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Land000.png");
         m_apAIIcons[AIMODE_STAY] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Launch000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Launch000.png");
         m_apAIIcons[AIMODE_DELIVER] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Death000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Death000.png");
         m_apAIIcons[AIMODE_SCUTTLE] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Follow000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Follow000.png");
         m_apAIIcons[AIMODE_SQUAD] = iconFile.GetAsBitmap();
 
         ContentFile arrowFile("Base.rte/GUIs/Indicators/SelectArrow.png");

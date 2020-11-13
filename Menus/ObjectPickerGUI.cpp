@@ -130,7 +130,7 @@ int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, strin
         m_pParentBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PickerGUIBox"));
 
         // Set the background image of the parent collection box
-//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.bmp");
+//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.png");
 //        m_pParentBox->SetDrawImage(new AllegroBitmap(backgroundFile.GetAsBitmap()));
 //        m_pParentBox->SetDrawBackground(true);
 //        m_pParentBox->SetDrawType(GUICollectionBox::Image);

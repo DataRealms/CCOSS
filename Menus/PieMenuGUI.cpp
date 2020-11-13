@@ -295,7 +295,7 @@ int PieMenuGUI::Create(Controller *pController, Actor *pFocusActor)
     {
         ContentFile cursorFile("Base.rte/GUIs/Skins/PieCursor.png");
         s_pCursor = cursorFile.GetAsBitmap();
-//        cursorFile.SetDataPath("Base.rte/Effects/Glows/YellowSmall.bmp");
+//        cursorFile.SetDataPath("Base.rte/Effects/Glows/YellowSmall.png");
 //        s_pCursorGlow = cursorFile.GetAsBitmap();
     }
 

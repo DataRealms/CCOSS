@@ -1002,7 +1002,8 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             }
 
             gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
-            Vector gibVelocity = rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange)).RadRotate(impactImpulse.GetAbsRadAngle() + gibSettingsObject.GetSpread() + RandomNormalNum());
+            Vector gibVelocity = rotatedGibOffset.IsZero() ? Vector(minVelocity + RandomNum(0.0F, velocityRange), 0.0F) : rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange));
+            gibVelocity.RadRotate(impactImpulse.GetAbsRadAngle() + (gibSettingsObject.GetSpread() * RandomNormalNum()));
             gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? m_Vel : Vector()));
 
             if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }

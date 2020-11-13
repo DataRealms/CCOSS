@@ -161,7 +161,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added `MOSRotating GibBlastStrength` INI and Lua (R/W) property. This lets you define how much force created `Gibs` and any `Attachables` will get launched when the MOSRotating gibs.
 
 - New INI and Lua (R/W) properties for Attachables:
-	`ParentBreakWound = AEmitter...` allows you to optionally define different BreakWounds for the `Attachable` and its parent. By default it matches `BreakWound` for ease of use.ma
+	`ParentBreakWound = AEmitter...` allows you to optionally define different BreakWounds for the `Attachable` and its parent. By default it matches `BreakWound` for ease of use.
 	`InheritsHFlipped = 0/1/2` allows you to define whether the `Attachable` will inherit its parent's HFlipped value or not. 0 means no inheritance, 1 means normal inheritance, 2 means reversed inheritance (technically any value other than 0 or 1 will act as reversed inheritance). Defaults to 1 to preserve normal behaviour.
 	`InheritedRotAngleRadOffset = angle` and `InheritedRotAngleDegOffset = angle` allow you specify an offset to keep an `Attachable's` rotation at when `InheritsRotAngle` is set to true. In Lua there's only `InheritedRotAngleOffset` which takes/returns radians, to avoid confusion. For example, `InheritedRotAngleDegOffset = 90` would make the Attachable always face perpendicular to its parent. Does nothing if the `Attachable's` `InheritsRotAngle` is set to false or the `Attachable` has no parent.
 	`GibWithParentChance = 0 - 1` allows you to specify whether this `Attachable` should be gibbed when its parent does and what the chance of that happening is. 0 means never, 1 means always.
@@ -173,21 +173,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New Lua `MovableObject` function `GetWhichMOToNotHit`. This provides access to the MO that has been set to not be hit by `SetWhichMOToNotHit`.
 
-- Added `HeldDevice` handling to limit which `Actor(s)` can pick it up. Note that pickup limitations are all done by PresetName, so you can not use this to specify specific `Actors` (yet).
+- Added `HeldDevice` handling to limit which `Actor(s)` can pick it up. Note that pickup limitations are all done by PresetName, so you can not use this to precisely specify individual `Actors`.
 	The INI definition looks like this:
 	```
 	PickupableBy = PickupableByEntries
-		AddActorEntry = First Actor PresetName Here
-		AddActorEntry = Second Actor PresetName Here
-		AddActorEntry = None //This sets it to never be pickupable
+		AddPresetNameEntry = First Actor PresetName Here
+		AddPresetNameEntry = Second Actor PresetName Here
+	//Alternatively, if you want this not to be pickupable
+	PickupableBy = None
 	```
 	The Lua properties and functions are as follows:
 	```
 	heldDevice.HasPickupLimitations; --(R) Whether or not this HeldDevice has any limitations affecting whether it can be picked up.
-	heldDevice.NoActorsCanPickThisUp --(R/W) Whether this HeldDevice is/should be pickupable by any Actors.
-	heldDevice:ActorCanPickThisUp(actor) -- Whether or not a given Actor can pick up this HeldDevice.
-	heldDevice:AddActorWhoCanPickThisUp(actor) -- Allows the given Actor (and any others with the same PresetName) to pick up this HeldDevice.
-	heldDevice:RemoveActorWhoCanPickThisUp(actor) -- Disallows the given Actor (and any others with the same PresetName) from picking up this HeldDevice.
+	heldDevice.UnPickupable --(R/W) Whether this HeldDevice is/should be pickupable.
+	heldDevice:IsPickupableBy(actor) -- Whether or not a given Actor can pick up this HeldDevice.
+	heldDevice:AddPickupableByPresetName(presetName) -- Allows Actors with the given PresetName to pick up this HeldDevice.
+	heldDevice:RemovePickupableByPresetName(presetName) -- Disallows Actors with the given PresetNames from picking up this HeldDevice (as long as there are other pickup limitations).
 	```
 	
 - Added `MOSRotating` Lua (R) property `IndividualMass`. This provides access to the `MOSRotating's` actual mass value, not including any `Attachables` or inventory items. Note that the normal `Mass` property is still used to set the `MOSRotating's` mass.
@@ -292,7 +293,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `AHuman` background `Leg` will no longer draw in front of the `AHuman`. The real result of this is that the background foot will no longer draw in front of the foreground one.
 
-- Everything draws better when flashing white, including crafts which used to be terrible at it.
+- Everything draws better when flashing white, including craft which used to be terrible at it.
 
 - Reworked Attachable managment
 	`DamageMultiplier` on `Attachables` now works as expected, all `Attachables` can now transfer damage to their root parent. This will travel up chains of `Attachables`, as long as every `Attachable` in the chain has a non-zero DamageMultiplier (yes, negative numbers are supported if you wanna have healing instead of damage or weirdness with chaining negative multipliers).
@@ -354,7 +355,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Craft sucking up objects now works properly again.
 
-- Getting the `Mass` of an `MOSRotating` has now been made more efficient. Additionally, `Attachables` of `Attachables` will now be included in Mass, so some things have gotten a lot heavier (e.g. Dummy Dreadnought).
+- Getting the `Mass` of a `MOSRotating` has now been made more efficient. Additionally, `Attachables` of `Attachables` will now be included in Mass, so some things have gotten a lot heavier (e.g. Dummy Dreadnought).
 
 - The moment of inertia of `AtomGroups` now updates when the mass or Atoms change, meaning losing `Attachables` or changing mass will properly affect how rotational forces apply to MOSRotatings.
 

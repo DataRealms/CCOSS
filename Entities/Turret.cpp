@@ -36,7 +36,7 @@ namespace RTE {
 				m_MountedDevice = dynamic_cast<HeldDevice *>(mountedDeviceEntity->Clone());
 				AddAttachable(m_MountedDevice);
 				m_MountedDevice->SetInheritsRotAngle(false);
-				m_MountedDevice->SetNoActorsCanPickThisUp(true);
+				m_MountedDevice->SetUnPickupable(true);
 				//Force weapons mounted on turrets to never be removed due to forces. This doesn't affect them gibbing from hitting their impulse limits though.
 				m_MountedDevice->SetJointStrength(0.0F);
 			}

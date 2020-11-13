@@ -3572,7 +3572,7 @@ void AHuman::Update()
     }
 
     // Item currently set to be within reach has expired or is now out of range
-    if (m_pItemInReach && (m_pItemInReach->GetNoActorsCanPickThisUp() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->ActorCanPickThisUp(GetPresetName())) || !g_MovableMan.IsDevice(m_pItemInReach) || (m_pItemInReach->GetPos() - m_Pos).GetMagnitude() > reach)) {
+    if (m_pItemInReach && (m_pItemInReach->IsUnPickupable() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->IsPickupableBy(this)) || !g_MovableMan.IsDevice(m_pItemInReach) || (m_pItemInReach->GetPos() - m_Pos).GetMagnitude() > reach)) {
         m_pItemInReach = 0;
         m_PieNeedsUpdate = true;
     }

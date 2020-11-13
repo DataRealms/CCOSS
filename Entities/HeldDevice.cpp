@@ -47,7 +47,7 @@ void HeldDevice::Clear()
     m_MaxSharpLength = 0;
     m_Supported = false;
     m_SupportOffset.Reset();
-    m_ActorsWhoCanPickThisUp.clear();
+    m_PickupableByPresetNames.clear();
     m_GripStrengthMultiplier = 1.0F;
     m_BlinkTimer.Reset();
     m_PieSlices.clear();
@@ -136,8 +136,8 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_StanceOffset = reference.m_StanceOffset;
     m_SharpStanceOffset = reference.m_SharpStanceOffset;
     m_SupportOffset = reference.m_SupportOffset;
-    for (std::string referenceActorWhoCanPickThisUp : reference.m_ActorsWhoCanPickThisUp) {
-        m_ActorsWhoCanPickThisUp.insert(referenceActorWhoCanPickThisUp);
+    for (std::string referenceActorWhoCanPickThisUp : reference.m_PickupableByPresetNames) {
+        m_PickupableByPresetNames.insert(referenceActorWhoCanPickThisUp);
     }
     m_GripStrengthMultiplier = reference.m_GripStrengthMultiplier;
 
@@ -180,14 +180,11 @@ int HeldDevice::ReadProperty(std::string propName, Reader &reader)
         if (pickupableByValue == "PickupableByEntries") {
             while (reader.NextProperty()) {
                 std::string pickupableByEntryType = reader.ReadPropName();
-                if (pickupableByEntryType == "AddActorEntry") {
-                    std::string actorEntryValue = reader.ReadPropValue();
-                    if (actorEntryValue == "none" || actorEntryValue == "None" || actorEntryValue == "NONE") {
-                        m_ActorsWhoCanPickThisUp.insert(c_NoPickupString);
-                    } else {
-                        m_ActorsWhoCanPickThisUp.insert(actorEntryValue);
-                    }
-                } else if (pickupableByEntryType == "AddGroupEntry ") {
+                if (pickupableByEntryType == "AddPresetNameEntry") {
+                    m_PickupableByPresetNames.insert(reader.ReadPropValue());
+                } else if (pickupableByEntryType == "AddClassNameEntry ") {
+                    reader.ReportError("AddClassNameEntry is not yet supported.");
+                } else if (pickupableByEntryType == "AddGroupEntry") {
                     reader.ReportError("AddGroupEntry is not yet supported.");
                 } else if (pickupableByEntryType == "AddDataModuleEntry ") {
                     reader.ReportError("AddDataModuleEntry is not yet supported.");
@@ -195,8 +192,8 @@ int HeldDevice::ReadProperty(std::string propName, Reader &reader)
                     break;
                 }
             }
-        } else {
-            m_ActorsWhoCanPickThisUp.insert(pickupableByValue);
+        } else if (pickupableByValue == "None") {
+            SetUnPickupable(true);
         }
     } else if (propName == "GripStrengthMultiplier") {
         reader >> m_GripStrengthMultiplier;
@@ -289,11 +286,11 @@ Vector HeldDevice::GetStanceOffset() const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void HeldDevice::SetNoActorsCanPickThisUp(bool noActors) {
-    if (noActors) {
-        AddActorWhoCanPickThisUp(c_NoPickupString);
+void HeldDevice::SetUnPickupable(bool unpickupable) {
+    if (unpickupable) {
+        AddPickupableByPresetName(c_NoPickupString);
     } else {
-        RemoveActorWhoCanPickThisUp(c_NoPickupString);
+        RemovePickupableByPresetName(c_NoPickupString);
     }
 }
 
@@ -537,7 +534,7 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 
     Attachable::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
-    if (!m_Parent && !GetNoActorsCanPickThisUp())
+    if (!m_Parent && !IsUnPickupable())
     {
         // Only draw if the team viewing this has seen the space where this is located
         int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));

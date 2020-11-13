@@ -15,6 +15,7 @@
 // Inclusions of header files
 
 #include "Attachable.h"
+#include "Actor.h"
 #include "PieMenuGUI.h"
 
 namespace RTE
@@ -282,41 +283,42 @@ ClassInfoGetters
 	void SetSupportOffset(Vector newOffset) { m_SupportOffset = newOffset; }
 
     /// <summary>
-    /// Gets whether this HeldDevice has any limitations on who can pick it up.
+    /// Gets whether this HeldDevice has any limitations on what can pick it up.
     /// </summary>
-    /// <returns>Whether this HeldDevice has any limitations on who can pick it up.</returns>
-    bool HasPickupLimitations() const { return !m_ActorsWhoCanPickThisUp.empty(); }
+    /// <returns>Whether this HeldDevice has any limitations on what can pick it up.</returns>
+    bool HasPickupLimitations() const { return IsUnPickupable() || !m_PickupableByPresetNames.empty(); }
 
     /// <summary>
-    /// Gets whether no Actors (or child classes) can pick up this HeldDevice.
+    /// Gets whether this HeldDevice cannot be picked up at all.
     /// </summary>
-    /// <returns>Whether no Actors (or child classes) can pick up this HeldDevice.</returns>
-    bool GetNoActorsCanPickThisUp() const { return m_ActorsWhoCanPickThisUp.find(c_NoPickupString) != m_ActorsWhoCanPickThisUp.end(); }
+    /// <returns>Whether this HeldDevice cannot be picked up at all.</returns>
+    bool IsUnPickupable() const { return m_PickupableByPresetNames.find(c_NoPickupString) != m_PickupableByPresetNames.end(); }
 
     /// <summary>
-    /// Sets whether no Actors (or child classes) can pick up this HeldDevice.
+    /// Sets whether this HeldDevice cannot be picked up at all.
     /// </summary>
-    /// <param name="noActors">Whether no Actors (or child classes) should be able to pick up this HeldDevice. True means none will be able to, false means any other limitations will apply normally.</param>
-    void SetNoActorsCanPickThisUp(bool noActors);
+    /// <param name="unpickupable">Whether this HeldDevice cannot be picked up at all. True means it cannot, false means any other limitations will apply normally.</param>
+    void SetUnPickupable(bool unpickupable);
 
     /// <summary>
-    /// Checks whether Actors with the given PresetName can pick up this HeldDevice.
+    /// Checks whether the given Actor can pick up this HeldDevice.
     /// </summary>
-    /// <param name="actor">The PresetName of the Actor to check. Ownership is NOT transferred.</param>
-    /// <returns>Whether Actors with the given PresetName can pick up this HeldDevice.</returns>
-    bool ActorCanPickThisUp(const std::string &actorPresetName) { return m_ActorsWhoCanPickThisUp.find(actorPresetName) != m_ActorsWhoCanPickThisUp.end(); }
+    /// <param name="actor">The Actor to check. Ownership is NOT transferred.</param>
+    /// <returns>Whether the given Actor can pick up this HeldDevice.</returns>
+    bool IsPickupableBy(const Actor *actor) const { return !HasPickupLimitations() || m_PickupableByPresetNames.find(actor->GetPresetName()) != m_PickupableByPresetNames.end(); }
 
     /// <summary>
-    /// Allow any Actors (or child classes) with the given PresetName to pick up this HeldDevice, as long as it's not set so no Actors can pick it up.
+    /// Specify that objects with the given PresetName can pick up this HeldDevice.
     /// </summary>
-    /// <param name="actorPresetName">The PresetName of an Actor who should be able to pick up this HeldDevice.</param>
-    void AddActorWhoCanPickThisUp(const std::string &actorPresetName) { m_ActorsWhoCanPickThisUp.insert(actorPresetName); }
+    /// <param name="presetName">The PresetName of an object that should be able to pick up this HeldDevice.</param>
+    void AddPickupableByPresetName(const std::string &presetName) { SetUnPickupable(false); m_PickupableByPresetNames.insert(presetName); }
 
     /// <summary>
-    /// Remove allowance for any Actors (or child classes) with the given PresetName from picking up this HeldDevice. Note that if no specific Actors are allowed to pick this HeldDevice up, all Actors will be allowed to do so unless it's set so no Actors can pick it up.
+    /// Remove allowance for objects with the given PresetName to pick up this HeldDevice.
+    /// Note that if the last allowance is removed, the HeldDevice will no longer have pickup limitations, rather than setting itself as unpickupable.
     /// </summary>
-    /// <param name="actorPresetName">The PresetName of an Actor who should no longer be able to pick up this HeldDevice.</param>
-    void RemoveActorWhoCanPickThisUp(const std::string &actorPresetName) { m_ActorsWhoCanPickThisUp.erase(m_ActorsWhoCanPickThisUp.find(actorPresetName)); }
+    /// <param name="actorPresetName">The PresetName of an object that should no longer be able to pick up this HeldDevice.</param>
+    void RemovePickupableByPresetName(const std::string &actorPresetName) { m_PickupableByPresetNames.erase(m_PickupableByPresetNames.find(actorPresetName)); }
 
     /// <summary>
     /// Gets the multiplier for how well this HeldDevice can be gripped by Arms.
@@ -627,7 +629,7 @@ protected:
     float m_MaxSharpLength;
     // If this HeldDevice is currently being supported by a second hand.
     bool m_Supported;
-    std::unordered_set<std::string> m_ActorsWhoCanPickThisUp; //!< The unordered set of Actors (and appropriate subclasses) who can pick up this held device if it's dropped. An empty set means any Actors can pick it up, a c_NoPickupString entry means none can pick it up.
+    std::unordered_set<std::string> m_PickupableByPresetNames; //!< The unordered set of PresetNames that can pick up this HeldDevice if it's dropped. An empty set means there are no PresetName limitations.
     float m_GripStrengthMultiplier; //!< The multiplier for how well this HeldDevice can be gripped by Arms.
     // Blink timer for the icon
     Timer m_BlinkTimer;

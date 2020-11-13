@@ -217,19 +217,22 @@ namespace RTE {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
-		const std::string altFileExtension = (m_DataPathExtension == ".wav") ? ".ogg" : ".wav";
 
 		if (!std::filesystem::exists(m_DataPath)) {
-			if (std::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
-				g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
-				SetDataPath(m_DataPathWithoutExtension + altFileExtension);
-			} else {
-				if (abortGameForInvalidSound) {
-					RTEAbort("Failed to find audio file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + "\n" + m_FormattedReaderPosition);
-				} else {
-					g_ConsoleMan.PrintString("Failed to find audio file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + ". The file was not loaded!");
-					return nullptr;
+			bool foundAltExtension = false;
+			for (const std::string &altFileExtension : c_SupportedAudioFormats) {
+				if (std::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
+					foundAltExtension = true;
+					break;
 				}
+			}
+			if (!foundAltExtension) {
+				std::string errorMessage = "Failed to find audio file with following path and name:\n\n" + m_DataPath + " or any alternative supported file type";
+				RTEAssert(!abortGameForInvalidSound, errorMessage + "\n" + m_FormattedReaderPosition);
+				g_ConsoleMan.PrintString(errorMessage + ". The file was not loaded!");
+				return nullptr;
 			}
 		}
 		FMOD::Sound *returnSample = nullptr;

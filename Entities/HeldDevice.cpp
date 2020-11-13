@@ -25,8 +25,6 @@ namespace RTE {
 
 ConcreteClassInfo(HeldDevice, Attachable, 50)
 
-const std::string HeldDevice::c_NoPickupString = "|-NONE-|";
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -47,6 +45,7 @@ void HeldDevice::Clear()
     m_MaxSharpLength = 0;
     m_Supported = false;
     m_SupportOffset.Reset();
+    m_IsUnPickupable = false;
     m_PickupableByPresetNames.clear();
     m_GripStrengthMultiplier = 1.0F;
     m_BlinkTimer.Reset();
@@ -136,6 +135,7 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_StanceOffset = reference.m_StanceOffset;
     m_SharpStanceOffset = reference.m_SharpStanceOffset;
     m_SupportOffset = reference.m_SupportOffset;
+    m_IsUnPickupable = reference.m_IsUnPickupable;
     for (std::string referenceActorWhoCanPickThisUp : reference.m_PickupableByPresetNames) {
         m_PickupableByPresetNames.insert(referenceActorWhoCanPickThisUp);
     }
@@ -284,17 +284,6 @@ Vector HeldDevice::GetStanceOffset() const
         return m_StanceOffset.GetXFlipped(m_HFlipped);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void HeldDevice::SetUnPickupable(bool unpickupable) {
-    if (unpickupable) {
-        AddPickupableByPresetName(c_NoPickupString);
-    } else {
-        RemovePickupableByPresetName(c_NoPickupString);
-    }
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetSupportPos

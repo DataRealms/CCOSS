@@ -292,13 +292,13 @@ ClassInfoGetters
     /// Gets whether this HeldDevice cannot be picked up at all.
     /// </summary>
     /// <returns>Whether this HeldDevice cannot be picked up at all.</returns>
-    bool IsUnPickupable() const { return m_PickupableByPresetNames.find(c_NoPickupString) != m_PickupableByPresetNames.end(); }
+    bool IsUnPickupable() const { return m_IsUnPickupable; }
 
     /// <summary>
     /// Sets whether this HeldDevice cannot be picked up at all.
     /// </summary>
-    /// <param name="unpickupable">Whether this HeldDevice cannot be picked up at all. True means it cannot, false means any other limitations will apply normally.</param>
-    void SetUnPickupable(bool unpickupable);
+    /// <param name="shouldBeUnPickupable">Whether this HeldDevice cannot be picked up at all. True means it cannot, false means any other limitations will apply normally.</param>
+    void SetUnPickupable(bool shouldBeUnPickupable) { m_IsUnPickupable = shouldBeUnPickupable; }
 
     /// <summary>
     /// Checks whether the given Actor can pick up this HeldDevice.
@@ -601,8 +601,6 @@ ClassInfoGetters
 
 protected:
 
-    static const std::string c_NoPickupString; //!< Static string for adding a no allowed pickups entry.
-
     // Member variables
     static Entity::ClassInfo m_sClass;
     // Indicates what kind of held device this is, see the HeldDeviceType enum
@@ -629,6 +627,7 @@ protected:
     float m_MaxSharpLength;
     // If this HeldDevice is currently being supported by a second hand.
     bool m_Supported;
+    bool m_IsUnPickupable; //!< Whether or not this HeldDevice should be able to be picked up at all.
     std::unordered_set<std::string> m_PickupableByPresetNames; //!< The unordered set of PresetNames that can pick up this HeldDevice if it's dropped. An empty set means there are no PresetName limitations.
     float m_GripStrengthMultiplier; //!< The multiplier for how well this HeldDevice can be gripped by Arms.
     // Blink timer for the icon

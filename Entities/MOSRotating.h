@@ -422,7 +422,7 @@ ClassInfoGetters
     /// </summary>
     /// <param name="attachableUniqueID">The UniqueID of the Attachable to remove.</param>
     /// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
-    /// <param name="addBreakWounds">Whether or not to add break wounds to the Attachable and this MOSRotating.</param>
+    /// <param name="addBreakWounds">Whether or not to add break wounds to the removed Attachable and this MOSRotating.</param>
     /// <returns>False if the Attachable is invalid, otherwise true.</returns>
     virtual bool RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds);
 
@@ -439,7 +439,7 @@ ClassInfoGetters
     /// </summary>
     /// <param name="attachable">The Attachable to remove.</param>
     /// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
-    /// <param name="addBreakWounds">Whether or not to add break wounds to the Attachable and this MOSRotating.</param>
+    /// <param name="addBreakWounds">Whether or not to add break wounds to the removed Attachable and this MOSRotating.</param>
     /// <returns>False if the Attachable is invalid, otherwise true.</returns>
     virtual bool RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds);
 

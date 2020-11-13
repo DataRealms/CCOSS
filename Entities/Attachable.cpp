@@ -12,30 +12,30 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Attachable::Clear() {
-		m_Parent = 0;
+		m_Parent = nullptr;
 		m_ParentOffset.Reset();
 		m_DrawAfterParent = true;
 		m_DrawnNormallyByParent = true;
 		m_DeleteWhenRemovedFromParent = false;
 		m_ApplyTransferredForcesAtOffset = true;
 
-		m_GibWithParentChance = 0;
+		m_GibWithParentChance = 0.0F;
 		m_ParentGibBlastStrengthMultiplier = 1;
 
-		m_JointStrength = 10;
-		m_JointStiffness = 1.0;
+		m_JointStrength = 10.0F;
+		m_JointStiffness = 1.0F;
 		m_JointOffset.Reset();
 		m_JointPos.Reset();
 
-		m_DamageCount = 0;
-		m_BreakWound = 0;
-		m_ParentBreakWound = 0;
+		m_DamageCount = 0.0F;
+		m_BreakWound = nullptr;
+		m_ParentBreakWound = nullptr;
 
 		m_InheritsHFlipped = 1;
 		m_InheritsRotAngle = true;
-		m_InheritedRotAngleOffset = 0;
+		m_InheritedRotAngleOffset = 0.0F;
 
-		m_AtomSubgroupID = -1;
+		m_AtomSubgroupID = -1L;
 		m_CollidesWithTerrainWhileAttached = true;
 	}
 
@@ -263,14 +263,10 @@ namespace RTE {
 	bool Attachable::ParticlePenetration(HitData &hd) {
 		bool penetrated = MOSRotating::ParticlePenetration(hd);
 
-		if (hd.Body[HITOR]->DamageOnCollision() != 0) {
-			AddDamage(hd.Body[HITOR]->DamageOnCollision());
-		}
+		if (hd.Body[HITOR]->DamageOnCollision() != 0) { AddDamage(hd.Body[HITOR]->DamageOnCollision()); }
 
 		if (penetrated && m_Parent) {
-			if (hd.Body[HITOR]->DamageOnPenetration() != 0) {
-				AddDamage(hd.Body[HITOR]->DamageOnPenetration());
-			}
+			if (hd.Body[HITOR]->DamageOnPenetration() != 0) { AddDamage(hd.Body[HITOR]->DamageOnPenetration()); }
 
 			// If the parent is an actor, generate an alarm point for them, moving it slightly away from the body (in the direction they got hit from) to get a good reaction.
 			Actor *parentAsActor = dynamic_cast<Actor *>(GetRootParent());
@@ -420,9 +416,7 @@ namespace RTE {
 	void Attachable::CalculateAtomOffsetForSubgroup(Vector &atomOffsetForSubgroup) const {
 		if (m_Parent) {
 			const Attachable *parentAsAttachable = dynamic_cast<Attachable *>(m_Parent);
-			if (parentAsAttachable) {
-				parentAsAttachable->CalculateAtomOffsetForSubgroup(atomOffsetForSubgroup);
-			}
+			if (parentAsAttachable) { parentAsAttachable->CalculateAtomOffsetForSubgroup(atomOffsetForSubgroup); }
 			atomOffsetForSubgroup += GetParentOffset() - GetJointOffset();
 		}
 	}

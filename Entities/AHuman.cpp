@@ -3480,7 +3480,7 @@ void AHuman::Update()
 							// Set the grenade or whatever to ignore hits with same team
 							pMO->SetTeam(m_Team);
 							pMO->SetIgnoresTeamHits(true);
-							g_MovableMan.AddMO(pMO);
+							g_MovableMan.AddItem(pMO);
 						} else {
 							if (pMO->IsGold()) {
 								m_GoldInInventoryChunk = 0;
@@ -3537,7 +3537,7 @@ void AHuman::Update()
 			pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
 			pMO->SetAngularVel(5.0F * RandomNormalNum());
 			if (pMO->IsDevice()) {
-				g_MovableMan.AddMO(pMO);
+				g_MovableMan.AddItem(pMO);
 			} else {
 				if (pMO->IsGold()) {
 					m_GoldInInventoryChunk = 0;

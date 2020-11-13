@@ -15,12 +15,12 @@ namespace RTE {
 
 		m_MinExtension = 0;
 		m_MaxExtension = 0;
-		m_CurrentNormalizedExtension = 0;
+		m_NormalizedExtension = 0;
 
 		m_TargetPosition.Reset();
 		m_IdleOffset.Reset();
 
-		m_CurrentAnkleOffset.Reset();
+		m_AnkleOffset.Reset();
 
 		m_WillIdle = false;
 		m_MoveSpeed = 0;
@@ -39,9 +39,7 @@ namespace RTE {
 		// Ensure Legs don't collide with terrain when attached since their expansion/contraction is frame based so atom group doesn't know how to account for it.
 		SetCollidesWithTerrainWhileAttached(false);
 
-		if (m_ContractedOffset.GetMagnitude() > m_ExtendedOffset.GetMagnitude()) {
-			std::swap(m_ContractedOffset, m_ExtendedOffset);
-		}
+		if (m_ContractedOffset.GetMagnitude() > m_ExtendedOffset.GetMagnitude()) { std::swap(m_ContractedOffset, m_ExtendedOffset); }
 
 		m_MinExtension = m_ContractedOffset.GetMagnitude();
 		m_MaxExtension = m_ExtendedOffset.GetMagnitude();
@@ -63,12 +61,12 @@ namespace RTE {
 
 		m_MinExtension = reference.m_MinExtension;
 		m_MaxExtension = reference.m_MaxExtension;
-		m_CurrentNormalizedExtension = reference.m_CurrentNormalizedExtension;
+		m_NormalizedExtension = reference.m_NormalizedExtension;
 
 		m_TargetPosition = reference.m_TargetPosition;
 		m_IdleOffset = reference.m_IdleOffset;
 
-		m_CurrentAnkleOffset = reference.m_CurrentAnkleOffset;
+		m_AnkleOffset = reference.m_AnkleOffset;
 
 		m_WillIdle = reference.m_WillIdle;
 		m_MoveSpeed = reference.m_MoveSpeed;
@@ -152,9 +150,9 @@ namespace RTE {
 		UpdateCurrentAnkleOffset();
 
 		if (m_Foot) {
-			// In order to keep the foot in the right place, we need to convert its offset (the ankle offstet) to work as the ParentOffset for the foot.
+			// In order to keep the foot in the right place, we need to convert its offset (the ankle offset) to work as the ParentOffset for the foot.
 			// The foot will then use this to set its JointPos when it's updated. Unfortunately UnRotateOffset doesn't work for this, since it's Vector/Matrix division, which isn't commutative.
-			Vector ankleOffsetAsParentOffset = RotateOffset(m_JointOffset) + m_CurrentAnkleOffset;
+			Vector ankleOffsetAsParentOffset = RotateOffset(m_JointOffset) + m_AnkleOffset;
 			ankleOffsetAsParentOffset.RadRotate(-m_Rotation.GetRadAngle()).FlipX(m_HFlipped);
 			m_Foot->SetParentOffset(ankleOffsetAsParentOffset);
 		}
@@ -166,8 +164,8 @@ namespace RTE {
 		if (m_FrameCount == 1) {
 			m_Frame = 0;
 		} else {
-			m_CurrentNormalizedExtension = Limit((m_CurrentAnkleOffset.GetMagnitude() - m_MinExtension) / (m_MaxExtension - m_MinExtension), 1.0F, 0.0F);
-			m_Frame = std::min(m_FrameCount - 1, static_cast<unsigned int>(std::floor(m_CurrentNormalizedExtension * static_cast<float>(m_FrameCount))));
+			m_NormalizedExtension = std::clamp((m_AnkleOffset.GetMagnitude() - m_MinExtension) / (m_MaxExtension - m_MinExtension), 0.0F, 1.0F);
+			m_Frame = std::min(m_FrameCount - 1, static_cast<unsigned int>(std::floor(m_NormalizedExtension * static_cast<float>(m_FrameCount))));
 		}
 
 		UpdateFootFrameAndRotation();
@@ -178,16 +176,14 @@ namespace RTE {
 	void Leg::UpdateCurrentAnkleOffset() {
 		if (IsAttached()) {
 			Vector targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_TargetPosition, g_SceneMan.SceneWrapsX());
-			if (m_WillIdle && targetOffset.m_Y < -3) {
-				targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped);
-			}
+			if (m_WillIdle && targetOffset.m_Y < -3) { targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped); }
 
-			Vector distanceFromTargetOffsetToAnkleOffset(targetOffset - m_CurrentAnkleOffset);
-			m_CurrentAnkleOffset += distanceFromTargetOffsetToAnkleOffset * m_MoveSpeed;
-			m_CurrentAnkleOffset.ClampMagnitude(m_MaxExtension, m_MinExtension + 0.1F);
+			Vector distanceFromTargetOffsetToAnkleOffset(targetOffset - m_AnkleOffset);
+			m_AnkleOffset += distanceFromTargetOffsetToAnkleOffset * m_MoveSpeed;
+			m_AnkleOffset.ClampMagnitude(m_MaxExtension, m_MinExtension + 0.1F);
 		} else {
-			m_CurrentAnkleOffset.SetXY(m_MaxExtension * 0.60F, 0);
-			m_CurrentAnkleOffset.RadRotate((m_HFlipped ? c_PI : 0) + m_Rotation.GetRadAngle());
+			m_AnkleOffset.SetXY(m_MaxExtension * 0.60F, 0);
+			m_AnkleOffset.RadRotate((m_HFlipped ? c_PI : 0) + m_Rotation.GetRadAngle());
 		}
 	}
 
@@ -195,10 +191,10 @@ namespace RTE {
 
 	void Leg::UpdateLegRotation() {
 		if (IsAttached()) {
-			m_Rotation = m_CurrentAnkleOffset.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0);
+			m_Rotation = m_AnkleOffset.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0);
 
 			// Get a normalized scalar for where the Leg should be rotated to between the contracted and extended offsets. EaseOut is used to get the sine effect needed.
-			float extraRotationRatio = (EaseOut(m_MinExtension, m_MaxExtension, m_CurrentNormalizedExtension) - m_MinExtension) / (m_MaxExtension - m_MinExtension);
+			float extraRotationRatio = (EaseOut(m_MinExtension, m_MaxExtension, m_NormalizedExtension) - m_MinExtension) / (m_MaxExtension - m_MinExtension);
 
 			// The contracted offset's inverse angle is the base for the rotation correction.
 			float extraRotation = -(m_ContractedOffset.GetAbsRadAngle());
@@ -216,7 +212,7 @@ namespace RTE {
 	void Leg::UpdateFootFrameAndRotation() {
 		if (m_Foot) {
 			if (IsAttached()) {
-				float ankleOffsetHorizontalDistanceAccountingForFlipping = m_CurrentAnkleOffset.GetXFlipped(m_HFlipped).GetX();
+				float ankleOffsetHorizontalDistanceAccountingForFlipping = m_AnkleOffset.GetXFlipped(m_HFlipped).GetX();
 				if (ankleOffsetHorizontalDistanceAccountingForFlipping < -10) {
 					m_Foot->SetFrame(3);
 				} else if (ankleOffsetHorizontalDistanceAccountingForFlipping < -6) {

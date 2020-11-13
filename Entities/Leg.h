@@ -111,12 +111,12 @@ namespace RTE {
 
 		float m_MinExtension; //!< Precalculated min extension of the Leg (from the joint) based on the contracted offset.
 		float m_MaxExtension; //!< Precalculated max extension of the Leg (from the joint) based on the extended offset.
-		float m_CurrentNormalizedExtension; //!< Normalized scalar of where the ankle offset's magnitude is between the min and max extensions.
+		float m_NormalizedExtension; //!< Normalized scalar of where the ankle offset's magnitude is between the min and max extensions.
 		
 		Vector m_TargetPosition; //!< The absolute position that this Leg's foot is moving towards.
 		Vector m_IdleOffset; //!< The target offset from m_Pos that this Leg's foot is moving towards when allowed to idle and the target position is not acceptable.
 
-		Vector m_CurrentAnkleOffset; //!< Current offset from the joint to the ankle where the foot should be.
+		Vector m_AnkleOffset; //!< Current offset from the joint to the ankle where the foot should be.
 		
 		bool m_WillIdle; //!< Whether the Leg will go to idle position if the target position is above the Leg's joint position.
 		float m_MoveSpeed; //!< How fast the Leg moves to a reach target, 0 means it doesn't and 1 means it moves instantly.

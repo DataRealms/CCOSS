@@ -791,8 +791,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		FrameMan(const FrameMan &reference) {}
-		FrameMan & operator=(const FrameMan &rhs) {}
+		FrameMan(const FrameMan &reference) = delete;
+		FrameMan & operator=(const FrameMan &rhs) = delete;
 	};
 }
 #endif

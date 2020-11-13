@@ -1777,8 +1777,8 @@ private:
 
     
     // Disallow the use of some implicit methods.
-	SceneMan(const SceneMan &reference) {}
-	SceneMan & operator=(const SceneMan &rhs) {}
+	SceneMan(const SceneMan &reference) = delete;
+	SceneMan & operator=(const SceneMan &rhs) = delete;
 
 };
 

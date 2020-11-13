@@ -342,8 +342,8 @@ private:
     void Clear();
 
     // Disallow the use of some implicit methods.
-	ACRocket(const ACRocket &reference) {}
-	ACRocket & operator=(const ACRocket &rhs) {}
+	ACRocket(const ACRocket &reference) = delete;
+	ACRocket & operator=(const ACRocket &rhs) = delete;
 
 };
 

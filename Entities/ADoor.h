@@ -230,8 +230,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		ADoor(const ADoor &reference) {}
-		ADoor & operator=(const ADoor &rhs) {}
+		ADoor(const ADoor &reference) = delete;
+		ADoor & operator=(const ADoor &rhs) = delete;
 	};
 }
 #endif

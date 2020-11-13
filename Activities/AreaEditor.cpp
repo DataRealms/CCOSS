@@ -214,7 +214,7 @@ int AreaEditor::Start()
         m_pSaveDialogBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SaveDialogBox"));
 
         // Set the background image of the parent collection box
-//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.bmp");
+//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.png");
 //        m_pSaveDialogBox->SetDrawImage(new AllegroBitmap(backgroundFile.GetAsBitmap()));
 //        m_pSaveDialogBox->SetDrawBackground(true);
 //        m_pSaveDialogBox->SetDrawType(GUICollectionBox::Image);

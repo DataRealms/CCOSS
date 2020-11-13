@@ -728,8 +728,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		Activity(const Activity &reference) {}
-		Activity & operator=(const Activity &rhs) {}
+		Activity(const Activity &reference) = delete;
+		Activity & operator=(const Activity &rhs) = delete;
 	};
 }
 #endif

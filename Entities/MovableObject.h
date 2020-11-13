@@ -1962,8 +1962,8 @@ private:
     void Clear();
 
 	// Disallow the use of some implicit methods.
-	MovableObject(const MovableObject &reference) {}
-	MovableObject& operator=(const MovableObject& ref) {}
+	MovableObject(const MovableObject &reference) = delete;
+	MovableObject& operator=(const MovableObject& ref) = delete;
 };
 
 } // namespace RTE

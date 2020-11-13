@@ -1,1 +1,3 @@
-ext_libs = [files('libfmod.so.11')]
+cp = find_program('cp')
+fmod_so = files('libfmod.so.11', 'libfmod.so')
+fmod = custom_target('libfmod', output:['libfmod.so'], input:fmod_so, command:[cp, '-P', '@INPUT@', '@OUTDIR@'])

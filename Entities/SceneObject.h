@@ -543,7 +543,7 @@ public:
 protected:
 
     // Forbidding copying
-    SceneObject(const SceneObject &reference) {}
+	SceneObject(const SceneObject &reference) = delete;
     SceneObject & operator=(const SceneObject &rhs) { return *this; }
 
 

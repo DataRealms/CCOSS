@@ -100,8 +100,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		MetaSave(const MetaSave &reference) {}
-		MetaSave & operator=(const MetaSave &rhs) {}
+		MetaSave(const MetaSave &reference) = delete;
+		MetaSave & operator=(const MetaSave &rhs) = delete;
 	};
 }
 #endif

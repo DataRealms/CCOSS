@@ -786,8 +786,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	MainMenuGUI(const MainMenuGUI &reference) {}
-	MainMenuGUI & operator=(const MainMenuGUI &rhs) {}
+	MainMenuGUI(const MainMenuGUI &reference) = delete;
+	MainMenuGUI & operator=(const MainMenuGUI &rhs) = delete;
 
 };
 

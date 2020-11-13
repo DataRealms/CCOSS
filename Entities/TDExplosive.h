@@ -98,8 +98,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		TDExplosive(const TDExplosive &reference) {}
-		TDExplosive & operator=(const TDExplosive &rhs) {}
+		TDExplosive(const TDExplosive &reference) = delete;
+		TDExplosive & operator=(const TDExplosive &rhs) = delete;
 	};
 }
 

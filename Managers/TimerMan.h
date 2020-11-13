@@ -274,8 +274,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		TimerMan(const TimerMan &reference) {}
-		TimerMan & operator=(const TimerMan &rhs) {}
+		TimerMan(const TimerMan &reference) = delete;
+		TimerMan & operator=(const TimerMan &rhs) = delete;
 	};
 }
 #endif

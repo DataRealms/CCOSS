@@ -1481,8 +1481,8 @@ private:
     void Clear();
 
     // Disallow the use of some implicit methods.
-	Actor(const Actor &reference) {}
-	Actor & operator=(const Actor &rhs) {}
+	Actor(const Actor &reference) = delete;
+	Actor & operator=(const Actor &rhs) = delete;
 
 };
 

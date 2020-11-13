@@ -324,8 +324,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	Magazine(const Magazine &reference) {}
-	Magazine & operator=(const Magazine &rhs) {}
+	Magazine(const Magazine &reference) = delete;
+	Magazine & operator=(const Magazine &rhs) = delete;
 
 };
 

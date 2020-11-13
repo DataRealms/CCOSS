@@ -666,8 +666,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	ACraft(const ACraft &reference) {}
-	ACraft & operator=(const ACraft &rhs) {}
+	ACraft(const ACraft &reference) = delete;
+	ACraft & operator=(const ACraft &rhs) = delete;
 
 };
 

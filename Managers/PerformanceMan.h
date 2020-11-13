@@ -210,8 +210,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		PerformanceMan(const PerformanceMan &reference) {}
-		PerformanceMan & operator=(const PerformanceMan &rhs) {}
+		PerformanceMan(const PerformanceMan &reference) = delete;
+		PerformanceMan & operator=(const PerformanceMan &rhs) = delete;
 	};
 }
 #endif

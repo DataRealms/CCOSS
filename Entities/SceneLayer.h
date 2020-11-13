@@ -536,8 +536,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    SceneLayer(const SceneLayer &reference) {}
-    void operator=(const SceneLayer &rhs) {}
+    SceneLayer(const SceneLayer &reference) = delete;
+    void operator=(const SceneLayer &rhs) = delete;
 
 };
 

@@ -462,8 +462,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	Arm(const Arm &reference) {}
-	Arm & operator=(const Arm &rhs) {}
+	Arm(const Arm &reference) = delete;
+	Arm & operator=(const Arm &rhs) = delete;
 
 };
 

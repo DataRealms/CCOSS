@@ -365,8 +365,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-	ACDropShip(const ACDropShip &reference) {}
-	ACDropShip & operator=(const ACDropShip &rhs) {}
+	ACDropShip(const ACDropShip &reference) = delete;
+	ACDropShip & operator=(const ACDropShip &rhs) = delete;
 
 };
 

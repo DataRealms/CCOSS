@@ -368,7 +368,7 @@ namespace RTE {
 		/// <param name="lhs">A Vector reference as the left hand side operand.</param>
 		/// <param name="rhs">A Vector reference as the right hand side operand.</param>
 		/// <returns>The resulting Vector.</returns>
-		friend Vector operator+(const Vector &lhs, const Vector &rhs) { Vector returnVector(lhs.m_X + rhs.m_X, lhs.m_Y + rhs.m_Y); return returnVector; }
+		friend Vector operator+(const Vector &lhs, const Vector &rhs) { return Vector(lhs.m_X + rhs.m_X, lhs.m_Y + rhs.m_Y); }
 
 		/// <summary>
 		/// Subtraction operator overload for Vectors.
@@ -376,14 +376,14 @@ namespace RTE {
 		/// <param name="lhs">A Vector reference as the left hand side operand.</param>
 		/// <param name="rhs">A Vector reference as the right hand side operand.</param>
 		/// <returns>The resulting Vector.</returns>
-		friend Vector operator-(const Vector &lhs, const Vector &rhs) { Vector returnVector(lhs.m_X - rhs.m_X, lhs.m_Y - rhs.m_Y); return returnVector; }
+		friend Vector operator-(const Vector &lhs, const Vector &rhs) { return Vector(lhs.m_X - rhs.m_X, lhs.m_Y - rhs.m_Y); }
 
 		/// <summary>
 		/// Multiplication operator overload for a Vector and a float.
 		/// </summary>
 		/// <param name="rhs">A float reference as the right hand side operand.</param>
 		/// <returns>The resulting Vector.</returns>
-		Vector operator*(const float &rhs) const { Vector returnVector(m_X * rhs, m_Y * rhs); return returnVector; }
+		Vector operator*(const float &rhs) const { return Vector(m_X * rhs, m_Y * rhs); }
 
 		/// <summary>
 		/// Multiplication operator overload for Vectors.
@@ -391,7 +391,7 @@ namespace RTE {
 		/// <param name="lhs">A Vector reference as the left hand side operand.</param>
 		/// <param name="rhs">A Vector reference as the right hand side operand.</param>
 		/// <returns>The resulting Vector.</returns>
-		friend Vector operator*(const Vector &lhs, const Vector &rhs) { Vector returnVector(lhs.m_X * rhs.m_X, lhs.m_Y * rhs.m_Y); return returnVector; }
+		friend Vector operator*(const Vector &lhs, const Vector &rhs) { return Vector(lhs.m_X * rhs.m_X, lhs.m_Y * rhs.m_Y); }
 
 		/// <summary>
 		/// Division operator overload for a Vector and a float.

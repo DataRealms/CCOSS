@@ -29,6 +29,12 @@ namespace RTE {
 		explicit Vector(const float inputX = 0.0F, const float inputY = 0.0F) :
 		m_X(inputX),
 		m_Y(inputY) {};
+
+		/// <summary>
+		/// Copy constructor method used to instantiate a Vector object identical to an already existing one.
+		/// </summary>
+		/// <param name="reference">A Vector object which is passed in by reference.</param>
+		Vector(const Vector &reference) = default;
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -325,6 +331,13 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Operator Overloads
+		/// <summary>
+		/// Copy assignment operator for Vectors.
+		/// </summary>
+		/// <param name="rhs">A Vector reference.</param>
+		/// <returns>A reference to the changed Vector.</returns>
+		Vector & operator=(const Vector &rhs) = default;
+
 		/// <summary>
 		/// An assignment operator for setting this Vector equal to the average of an std::deque of Vectors.
 		/// </summary>

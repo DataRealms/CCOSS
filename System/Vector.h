@@ -371,13 +371,6 @@ namespace RTE {
 		friend Vector operator+(const Vector &lhs, const Vector &rhs) { Vector returnVector(lhs.m_X + rhs.m_X, lhs.m_Y + rhs.m_Y); return returnVector; }
 
 		/// <summary>
-		/// Subtraction operator overload for a Vector and a float.
-		/// </summary>
-		/// <param name="rhs">A float reference as the right hand side operand.</param>
-		/// <returns>The resulting Vector.</returns>
-		Vector operator-(const float &rhs) const { Vector returnVector(m_X - rhs, m_Y - rhs); return returnVector; }
-
-		/// <summary>
 		/// Subtraction operator overload for Vectors.
 		/// </summary>
 		/// <param name="lhs">A Vector reference as the left hand side operand.</param>
@@ -424,26 +417,12 @@ namespace RTE {
 		}
 
 		/// <summary>
-		/// Self-addition operator overload for a Vector and a float.
-		/// </summary>
-		/// <param name="rhs">A float reference as the right hand side operand.</param>
-		/// <returns>A reference to the resulting Vector.</returns>
-		Vector & operator+=(const float &rhs) { m_X += rhs; m_Y += rhs; return *this; }
-
-		/// <summary>
 		/// Self-addition operator overload for Vectors.
 		/// </summary>
 		/// <param name="lhs">A Vector reference as the left hand side operand.</param>
 		/// <param name="rhs">A Vector reference as the right hand side operand.</param>
 		/// <returns>A reference to the resulting Vector (the left one).</returns>
 		friend Vector & operator+=(Vector &lhs, const Vector &rhs) { lhs.m_X += rhs.m_X; lhs.m_Y += rhs.m_Y; return lhs; }
-
-		/// <summary>
-		/// Self-subtraction operator overload for a Vector and a float.
-		/// </summary>
-		/// <param name="rhs">A float reference as the right hand side operand.</param>
-		/// <returns>A reference to the resulting Vector.</returns>
-		Vector & operator-=(const float &rhs) { m_X -= rhs; m_Y -= rhs; return *this; }
 
 		/// <summary>
 		/// Self-subtraction operator overload for Vectors.

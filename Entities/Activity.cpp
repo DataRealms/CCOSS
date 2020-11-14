@@ -286,9 +286,12 @@ void Activity::Clear() {
 
 		// Intentionally doing all players, all need controllers
 		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+			short playerScreen = ScreenOfPlayer(player);
 			m_ViewState[player] = ViewState::Normal;
-			g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
-			g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
+			g_FrameMan.ClearScreenText(playerScreen);
+			if (playerScreen >= 0) {
+				g_SceneMan.SetScreenOcclusion(Vector(), playerScreen);
+			}
 
 			m_PlayerController[player].Destroy();
 			m_PlayerController[player].Create(Controller::CIM_PLAYER, player);

@@ -34,7 +34,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::SetMagnitude(float newMag) {
+	Vector & Vector::SetMagnitude(const float newMag) {
 		if (IsZero()) {
 			SetXY(newMag, 0.0F);
 		} else {
@@ -45,7 +45,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::CapMagnitude(float capMag) {
+	Vector & Vector::CapMagnitude(const float capMag) {
 		if (capMag == 0) { Reset(); }
 		if (GetMagnitude() > capMag) { SetMagnitude(capMag); }
 		return *this;
@@ -60,12 +60,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::RadRotate(float angle) {
-		angle = -angle;
-		const float tempX = m_X * std::cos(angle) - m_Y * std::sin(angle);
-		const float tempY = m_X * std::sin(angle) + m_Y * std::cos(angle);
-		m_X = tempX;
-		m_Y = tempY;
+	Vector & Vector::RadRotate(const float angle) {
+		const float adjustedAngle = -angle;
+		const float newX = m_X * std::cos(adjustedAngle) - m_Y * std::sin(adjustedAngle);
+		const float newY = m_X * std::sin(adjustedAngle) + m_Y * std::cos(adjustedAngle);
+		m_X = newX;
+		m_Y = newY;
 
 		return *this;
 	}

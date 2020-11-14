@@ -26,7 +26,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="inputX">Float defining the initial X value of this Vector.</param>
 		/// <param name="inputY">Float defining the initial Y value of this Vector.</param>
-		Vector(const float inputX = 0.0F, const float inputY = 0.0F) :
+		explicit Vector(const float inputX = 0.0F, const float inputY = 0.0F) :
 		m_X(inputX),
 		m_Y(inputY) {};
 #pragma endregion

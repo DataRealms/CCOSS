@@ -17,16 +17,21 @@ namespace RTE {
 
 		SerializableOverrideMethods
 
-		float m_X; //!< X value of this vector.
-		float m_Y; //!< Y value of this vector.
+		float m_X = 0.0F; //!< X value of this vector.
+		float m_Y = 0.0F; //!< Y value of this vector.
 
 #pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate a Vector object with values (0, 0).
+		/// </summary>
+		Vector() {};
+
 		/// <summary>
 		/// Constructor method used to instantiate a Vector object from X and Y values.
 		/// </summary>
 		/// <param name="inputX">Float defining the initial X value of this Vector.</param>
 		/// <param name="inputY">Float defining the initial Y value of this Vector.</param>
-		explicit Vector(const float inputX = 0.0F, const float inputY = 0.0F) :
+		Vector(const float inputX, const float inputY) :
 		m_X(inputX),
 		m_Y(inputY) {};
 

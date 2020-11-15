@@ -292,13 +292,13 @@ namespace RTE {
 		/// Returns the greatest integer that is not greater than the X value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the X value of this Vector.</returns>
-		int GetFloorIntX() const { return static_cast<int>(m_X); }
+		int GetFloorIntX() const { return static_cast<int>(std::floor(m_X)); }
 
 		/// <summary>
 		/// Returns the greatest integer that is not greater than the Y value of this Vector.
 		/// </summary>
 		/// <returns>An int value that represents the Y value of this Vector.</returns>
-		int GetFloorIntY() const { return static_cast<int>(m_Y); }
+		int GetFloorIntY() const { return static_cast<int>(std::floor(m_Y)); }
 
 		/// <summary>
 		/// Returns a ceilinged copy of this Vector. Does not alter this Vector.

@@ -39,7 +39,7 @@ The Linux build uses the meson build system, and builds against system libraries
 
 Dependencies:
 
-* `g++>=8.1` (needs to support c++17)
+* `g++>=8.1` (needs to support c++17 filesystem)
 * `allegro4`
 * `loadpng`
 * `flac`
@@ -48,7 +48,7 @@ Dependencies:
 * `lz4`
 * `libpng`
 * `libX11`
-* `meson>=0.49`
+* `meson>=0.43`
 * `boost>=1.55`
 * `xorg-misc-fonts`
 
@@ -56,7 +56,7 @@ Building:
 
 1. Install Dependencies (see below for some distro-specific instructions)
 
-2. Clone this Source Repository and the [Data Respository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data), folder structure doesn't really matter here
+2. Clone this Source Repository and the [Data Respository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data)
 
 3. open a terminal in the Source Repository
 
@@ -64,19 +64,22 @@ Building:
 
 5. `cd builddir`
 
-6. `meson compile` or `meson [-j<num of threads>] compile CCCP` if you want a release build
-  If the build fails because of memory shortage you may need to reduce the number of build threads (meson will use all available threads by default) using the `-j<number of threads>` option
+For `meson` versions `>=0.54` (check `meson --version`):
+
+6. `meson compile` for debug build, or `meson compile CCCP` for a release build. If the build fails because of memory shortage you may need to reduce the number of build threads (meson will use all available threads by default) using the `-j<number of threads>` option
+
+For `meson` versions `<0.54`
+
+6. `ninja` for debug builds, or `ninja CCCP.x86_64` for release builds. Using the `-j<number of threads>` option will also work here.
 
 
 Running:
 
-1. Copy (or link, preferable for quick debug builds) `builddir/CCCP_debug.x86_64` or `builddir/CCCP.x86_64` (depending on if you made a release build) into the **Data Repository**
+1. Copy (or link, might be preferable for testing builds) `builddir/CCCP_debug.x86_64` or `builddir/CCCP.x86_64` (depending on if you made a release build) into the **Data Repository**
 
 2. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**
 
-3. Copy (or link) `libfmod.so.11` from `<Source Repository Root>/external/lib/linux/x86_64` into the **Data Repository**
-
-4. Run `env LD_LIBRARY_PATH=. ./CCCP.x86_64` or `./CCCP_debug.x86_64` in the **Data Repository**
+3. Run `./CCCP.x86_64` or `./CCCP_debug.x86_64` in the **Data Repository**
 
 ### Arch Linux ###
 `# pacman -S allegro4 flac luajit minizip lz4 libpng libx11 meson xorg-fonts-misc`

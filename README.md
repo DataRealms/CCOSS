@@ -52,6 +52,7 @@ Dependencies:
 * `boost>=1.55`
 * `xorg-misc-fonts`
 
+
 Building:
 
 1. Install Dependencies (see below for some distro-specific instructions)
@@ -85,7 +86,7 @@ Running:
 `# pacman -S allegro4 flac luajit minizip lz4 libpng libx11 meson xorg-fonts-misc`
 
 ### Ubuntu ###
-`# apt-get install liballegro4.4 libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev meson`
+`# apt-get install liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev meson`
 
 ### Troubleshooting ###
 Until borderless windows are implemented, you might seem get stuck in fullscreen mode. Try Alt-Return, or if that doesn't work kill CC with ctrl-alt-end.

@@ -52,7 +52,6 @@ Dependencies:
 * `boost>=1.55`
 * `xorg-misc-fonts`
 
-
 Building:
 
 1. Install Dependencies (see below for some distro-specific instructions)
@@ -67,7 +66,7 @@ Building:
 
 For `meson` versions `>=0.54` (check `meson --version`):
 
-6. `meson compile` for debug build, or `meson compile CCCP` for a release build. If the build fails because of memory shortage you may need to reduce the number of build threads (meson will use all available threads by default) using the `-j<number of threads>` option
+6. `meson compile` for debug build, or `meson compile CCCP` for a release build. If the build fails because of memory shortage you may need to reduce the number of build threads (meson will use all available threads by default) using the `-j<number of threads>` option, if this doesn't help increase your swap size to at least 6Gb
 
 For `meson` versions `<0.54`
 

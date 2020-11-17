@@ -72,6 +72,8 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Audio Constants
+	static constexpr std::array<const char*, 3> c_SupportedAudioFormats = { ".wav", ".ogg", ".flac" };
+
 	static constexpr unsigned short c_MaxSoftwareChannels = 128;
 	static constexpr unsigned short c_MaxVirtualChannels = 1024;
 	static constexpr unsigned short c_MaxPlayingSoundsPerContainer = 128;

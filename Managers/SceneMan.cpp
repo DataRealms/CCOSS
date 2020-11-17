@@ -170,22 +170,18 @@ Material * SceneMan::AddMaterialCopy(Material *mat)
 // Description:     Actually loads a new Scene into memory. has to be done before using
 //                  this object.
 
-int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits)
-{
-    if (!pNewScene)
-        return -1;
+int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
+	if (!pNewScene) {
+		return -1;
+	}
 
-    // Unload and destroy any scene we might have loaded already
-    if (m_pCurrentScene)
-    {
-        delete m_pCurrentScene;
-        m_pCurrentScene = 0;
-    }
+	g_MovableMan.PurgeAllMOs();
+	g_PostProcessMan.ClearScenePostEffects();
 
-    // Clear out all the MO's in the scene
-    g_MovableMan.PurgeAllMOs();
-    // Clear the post effects
-    g_PostProcessMan.ClearScenePostEffects();
+	if (m_pCurrentScene) {
+		delete m_pCurrentScene;
+		m_pCurrentScene = nullptr;
+	}
 
 	g_NetworkServer.LockScene(true);
 
@@ -441,9 +437,10 @@ void SceneMan::Destroy()
 
 Vector SceneMan::GetSceneDim() const
 {
-    if (m_pCurrentScene)
-        RTEAssert(m_pCurrentScene->GetTerrain() && m_pCurrentScene->GetTerrain()->GetBitmap(), "Trying to get terrain info before there is a scene or terrain!");
-        return m_pCurrentScene->GetDimensions();
+	if (m_pCurrentScene) {
+		RTEAssert(m_pCurrentScene->GetTerrain() && m_pCurrentScene->GetTerrain()->GetBitmap(), "Trying to get terrain info before there is a scene or terrain!");
+		return m_pCurrentScene->GetDimensions();
+	}
     return Vector();
 }
 

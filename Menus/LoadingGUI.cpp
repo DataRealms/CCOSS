@@ -231,15 +231,15 @@ namespace RTE {
 						g_System.MakeDirectory(outputFileName);
 						// It's a file
 					} else {
-						// Validate so only certain file types are extracted:  .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3
+						// Validate so only certain file types are extracted:  .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3 .flac
 						// Get the file extension
 						std::string fileExtension = std::filesystem::path(outputFileName).extension().string();
 						std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), ::tolower);
 						const char *ext = fileExtension.c_str();
-						// Validate only certain file types to be included! .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3
+						// Validate only certain file types to be included! .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3 .flac
 						if (!(std::strcmp(ext, ".ini") == 0 || std::strcmp(ext, ".txt") == 0 || std::strcmp(ext, ".lua") == 0 || std::strcmp(ext, ".cfg") == 0 ||
 							std::strcmp(ext, ".bmp") == 0 || std::strcmp(ext, ".png") == 0 || std::strcmp(ext, ".jpg") == 0 || std::strcmp(ext, ".jpeg") == 0 ||
-							std::strcmp(ext, ".wav") == 0 || std::strcmp(ext, ".ogg") == 0 || std::strcmp(ext, ".mp3") == 0)) {
+							std::strcmp(ext, ".wav") == 0 || std::strcmp(ext, ".ogg") == 0 || std::strcmp(ext, ".mp3") == 0 || std::strcmp(ext, ".flac") == 0)) {
 							LoadingSplashProgressReport("Skipping: " + std::string(outputFileName) + " - bad extension!", true);
 
 							// Keep going through!!

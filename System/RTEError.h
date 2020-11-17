@@ -10,6 +10,12 @@
 #define DebuggerBreak ;
 #endif
 
+#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+#define AbortAction DebuggerBreak
+#else
+#define AbortAction std::exit(EXIT_FAILURE);
+#endif
+
 namespace RTE {
 
 	/// <summary>
@@ -27,8 +33,8 @@ namespace RTE {
 	extern bool RTEAbortFunc(const char *description, const char *file, int line);
 	extern bool RTEAbortFunc(const std::string description, const char *file, int line);
 
-	#define RTEAbort(description) {												\
-		if (RTEAbortFunc(description, __FILE__, __LINE__)) { DebuggerBreak }	\
+	#define RTEAbort(description) {											\
+		if (RTEAbortFunc(description, __FILE__, __LINE__)) { AbortAction }	\
 	}
 
 	/// <summary>
@@ -47,7 +53,7 @@ namespace RTE {
 	#define RTEAssert(expression, description) {															\
 		static bool alwaysIgnore = false;																	\
 		if (!alwaysIgnore) {																				\
-			if (RTEAssertFunc(expression, description, __FILE__, __LINE__, alwaysIgnore)) { DebuggerBreak }	\
+			if (RTEAssertFunc(expression, description, __FILE__, __LINE__, alwaysIgnore)) { AbortAction }	\
 		}																									\
 	}
 }

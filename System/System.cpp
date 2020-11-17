@@ -69,7 +69,7 @@ namespace RTE {
 		inputString = std::regex_replace(inputString, regexError, "\033[1;31m$&\033[0;0m");
 
 		// Color .rte-paths green
-		std::regex regexPath("\\w*\\.rte\\/(\\w| |\\.|\\/)*(\\/|\\.bmp|\\.wav|\\.lua|\\.ini)");
+		std::regex regexPath("\\w*\\.rte\\/(\\w| |\\.|\\/)*(\\/|\\.bmp|\\.png|\\.wav|\\.ogg|\\.flac||\\.lua|\\.ini)");
 		inputString = std::regex_replace(inputString, regexPath, "\033[1;32m$&\033[0;0m");
 
 		// Color names in quotes yellow

@@ -25,7 +25,7 @@ link_args=[]
 extra_args=[]
 
 if meson.get_compiler('cpp').get_id() == 'gcc'
-  extra_args = ['-pedantic', '-fpermissive', '-Wno-write-strings', '-Wno-unknown-pragmas']
+  extra_args = ['-fpermissive', '-Wno-write-strings', '-Wno-unknown-pragmas']
   release_args = ['-w']
   suffix = 'x86_64'
   if compiler.version().version_compare('<9')

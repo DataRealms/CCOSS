@@ -83,7 +83,9 @@ namespace RTE {
 
 	void ContentFile::SetDataPath(const std::string &newDataPath) {
 		m_DataPath = newDataPath;
-		m_DataPathExtension = std::filesystem::path(newDataPath).extension().string();
+		CorrectBackslashesInPaths(m_DataPath);
+
+		m_DataPathExtension = std::filesystem::path(m_DataPath).extension().string();
 
 		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
 

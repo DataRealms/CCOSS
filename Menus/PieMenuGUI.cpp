@@ -191,9 +191,10 @@ int PieMenuGUI::Slice::ReadProperty(std::string propName, Reader &reader)
         reader >> m_Icon;
     else if (propName == "Direction")
         reader >> m_Direction;
-    else if (propName == "ScriptPath")
-        reader >> m_ScriptPath;
-    else if (propName == "FunctionName")
+	else if (propName == "ScriptPath") {
+		reader >> m_ScriptPath;
+		CorrectBackslashesInPaths(m_ScriptPath);
+	} else if (propName == "FunctionName")
         reader >> m_FunctionName;
     else
         return Serializable::ReadProperty(propName, reader);

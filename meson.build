@@ -51,7 +51,7 @@ debug = executable('CCCP_debug', 'Main.cpp',sources, link_with: [luabind_debug, 
 
 release = executable('CCCP', 'Main.cpp', sources, link_with: [luabind, raknet, fmod],
             dependencies: [deps], include_directories:[source_inc_dirs, external_inc_dirs],
-            cpp_args:extra_args, cpp_pch:pch, name_suffix:suffix, build_by_default:false, override_options:['buildtype=release', 'optimization=3', 'debug=false'])
+            cpp_args:extra_args, link_args:link_args, cpp_pch:pch, name_suffix:suffix, build_by_default:false, override_options:['buildtype=release', 'optimization=3', 'debug=false'])
 
 #AppImage Targeting
 wget = find_program('wget')

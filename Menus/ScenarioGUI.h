@@ -1,7 +1,7 @@
 #ifndef _SCENARIOGUI_
 #define _SCENARIOGUI_
 
-#include "ActivityMan.h"
+#include "Activity.h"
 #include "Timer.h"
 
 namespace RTE {

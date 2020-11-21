@@ -170,7 +170,7 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader) {
         m_pLLeg = new Leg;
         reader >> m_pLLeg;
         AddAttachable(m_pLLeg);
-        m_pLLeg->SetInheritsHFlipped(2);
+        m_pLLeg->SetInheritsHFlipped(-1);
         if (!m_pLLeg->GetDamageMultiplierSetInINI()) { m_pLLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "RFootGroup") {
         delete m_pRFootGroup;

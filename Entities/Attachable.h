@@ -290,14 +290,14 @@ namespace RTE {
 #pragma region Inherited Value Getters and Setters
 		/// <summary>
 		/// Gets whether or not this Attachable inherits its parent's HFlipped value, i.e. whether it has its HFlipped value reset to match/reverse its parent's every frame, if attached.
-		/// 0 means no inheritance, 1 means inheritance, any other value means reversed inheritance (i.e. if the parent's HFlipped value is true, this Attachable's HFlipped value will be false).
+		/// -1 (or technically any value that's not 0 or 1) means reversed inheritance (i.e. if the parent's HFlipped value is true, this Attachable's HFlipped value will be false), 0 means no inheritance, 1 means normal inheritance.
 		/// </summary>
 		/// <returns>Whether or not this Attachable inherits its parent's HFlipped value.</returns>
 		int InheritsHFlipped() const { return m_InheritsHFlipped; }
 
 		/// <summary>
 		/// Sets whether or not this Attachable inherits its parent's HFlipped value, i.e. whether it has its HFlipped value reset to match/reverse its parent's every frame, if attached.
-		/// 0 means no inheritance, 1 means inheritance, any other value means reversed inheritance (i.e. if the parent's HFlipped value is true, this Attachable's HFlipped value will be false).
+		/// -1 (or technically any value that's not 0 or 1) means reversed inheritance (i.e. if the parent's HFlipped value is true, this Attachable's HFlipped value will be false), 0 means no inheritance, 1 means normal inheritance.
 		/// </summary>
 		/// <param name="inheritsRotAngle">Whether or not to inherit its parent's HFlipped value.</param>
 		void SetInheritsHFlipped(int inheritsHFlipped) { m_InheritsHFlipped = inheritsHFlipped; }

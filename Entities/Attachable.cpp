@@ -111,7 +111,7 @@ namespace RTE {
 			m_ParentBreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
 		} else if (propName == "InheritsHFlipped") {
 			reader >> m_InheritsHFlipped;
-			if (m_InheritsHFlipped != 0 && m_InheritsHFlipped != 1) { m_InheritsHFlipped = 2; }
+			if (m_InheritsHFlipped != 0 && m_InheritsHFlipped != 1) { m_InheritsHFlipped = -1; }
 		} else if (propName == "InheritsRotAngle") {
 			reader >> m_InheritsRotAngle;
 		} else if (propName == "InheritedRotAngleRadOffset" || propName == "InheritedRotAngleOffset") {

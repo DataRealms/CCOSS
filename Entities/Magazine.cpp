@@ -38,6 +38,9 @@ void Magazine::Clear()
     m_AIAimMaxDistance = -1;
     m_AIAimPenetration = 0;
     m_AIBlastRadius = -1;
+
+    // NOTE: This special override of a parent class member variable avoids needing an extra variable to avoid overwriting INI values.
+    m_CollidesWithTerrainWhileAttached = false;
 }
 
 
@@ -50,8 +53,6 @@ int Magazine::Create()
 {
     if (Attachable::Create() < 0)
         return -1;
-
-    SetCollidesWithTerrainWhileAttached(false);
     
     // Read projectile properties for AI aim caluculations
     const Round * pNextRound = GetNextRound();

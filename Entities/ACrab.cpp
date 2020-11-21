@@ -263,14 +263,14 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         reader >> m_pLFGLeg;
         AddAttachable(m_pLFGLeg);
         if (!m_pLFGLeg->GetDamageMultiplierSetInINI()) { m_pLFGLeg->SetDamageMultiplier(1.0F); }
-        m_pLFGLeg->SetInheritsHFlipped(2);
+        m_pLFGLeg->SetInheritsHFlipped(-1);
     } else if (propName == "LBGLeg" || propName == "LeftFGLeg") {
         RemoveAttachable(m_pLBGLeg);
         m_pLBGLeg = new Leg;
         reader >> m_pLBGLeg;
         AddAttachable(m_pLBGLeg);
         if (!m_pLBGLeg->GetDamageMultiplierSetInINI()) { m_pLBGLeg->SetDamageMultiplier(1.0F); }
-        m_pLBGLeg->SetInheritsHFlipped(2);
+        m_pLBGLeg->SetInheritsHFlipped(-1);
     } else if (propName == "RFGLeg" || propName == "LeftFGLeg") {
         RemoveAttachable(m_pRFGLeg);
         m_pRFGLeg = new Leg;

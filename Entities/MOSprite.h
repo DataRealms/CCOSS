@@ -453,6 +453,13 @@ public:
 
 	Vector UnRotateOffset(const Vector &offset) const;
 
+    /// <summary>
+    /// Adjusts an absolute angle based on wether this MOSprite is flipped.
+    /// </summary>
+    /// <param name="angle">The input angle in radians.</param>
+    /// <returns>The output angle in radians, which will be unaltered if this MOSprite is not flipped.</returns>
+    float FacingAngle(float angle) const { return (m_HFlipped ? c_PI : 0) + (angle * static_cast<float>(GetFlipFactor())); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetEntryWound

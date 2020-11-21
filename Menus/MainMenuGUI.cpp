@@ -636,9 +636,7 @@ void MainMenuGUI::Update()
 
     // If esc pressed, show quit dialog if applicable
 	if (g_UInputMan.KeyPressed(KEY_ESC)) {
-		if (m_MenuScreen != OPTIONSSCREEN) {
-			QuitLogic();
-		} else {
+		if (m_MenuScreen == OPTIONSSCREEN) {
 			HideAllScreens();
 			m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
 
@@ -653,6 +651,24 @@ void MainMenuGUI::Update()
 			m_ScreenChange = true;
 
 			g_GUISound.BackButtonPressSound()->Play();
+		} else if (m_MenuScreen == MODMANAGERSCREEN) {
+			g_SettingsMan.UpdateSettingsFile();
+
+			HideAllScreens();
+			m_MenuScreen = MAINSCREEN;
+			m_ScreenChange = true;
+
+			g_GUISound.BackButtonPressSound()->Play();
+		} else if (m_MenuScreen == EDITORSCREEN || m_MenuScreen == CREDITSSCREEN) {
+			HideAllScreens();
+			m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
+
+			m_MenuScreen = MAINSCREEN;
+			m_ScreenChange = true;
+
+			g_GUISound.BackButtonPressSound()->Play();
+		} else {
+			QuitLogic();
 		}
 	}
 

@@ -329,6 +329,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Due to the nature of various `Attachable` and force transferral changes, AEmitters seem to apply far more force now, so `DropShip` engines may need higher `JointStrengths` and `GibImpulseLimits`, otherwise they may break off or gib during normal use.
 
+- The `FacingAngle` function has been moved from `Actor` to `MOSprite` so it can be used more widely.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.

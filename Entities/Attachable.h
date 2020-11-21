@@ -491,6 +491,8 @@ namespace RTE {
 		long m_AtomSubgroupID; //!< The Atom IDs this' atoms will have when attached and added to a parent's AtomGroup.
 		bool m_CollidesWithTerrainWhileAttached; //!< Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
 
+		float m_PrevRotAngleOffset; //!< The previous frame's difference between this Attachable's RotAngle and it's root parent's RotAngle.
+
 		/// <summary>
 		/// Sets this Attachable's parent MOSRotating, and also sets its Team based on its parent and, if the Attachable is set to collide, adds/removes Atoms to its new/old parent.
 		/// </summary>
@@ -498,13 +500,6 @@ namespace RTE {
 		virtual void SetParent(MOSRotating *newParent);
 
 	private:
-
-		/// <summary>
-		/// Calculates the offset this Attachable's Atoms should be given when added to its root parent's AtomGroup as a subgroup, and fills the passed in Vector with it.
-		/// If the Attachable's parent is the root parent, the Vector is not modified, as the calculated offset is (0, 0).
-		/// </summary>
-		/// <param name="atomOffsetForSubgroup">A reference to the Vector that will be filled in with the offset this Attachable's Atoms should use when added to their root parent's AtomGroup as a subgroup.</param>
-		void CalculateAtomOffsetForSubgroup(Vector &atomOffsetForSubgroup) const;
 
 		/// <summary>
 		/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its Atoms to/from its root parent's AtomGroup.

@@ -37,6 +37,8 @@ namespace RTE {
 
 		m_AtomSubgroupID = -1L;
 		m_CollidesWithTerrainWhileAttached = true;
+
+		m_PrevRotAngleOffset = 0.0F;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,9 +78,10 @@ namespace RTE {
 		m_InheritsRotAngle = reference.m_InheritsRotAngle;
 		m_InheritedRotAngleOffset = reference.m_InheritedRotAngleOffset;
 
+		m_AtomSubgroupID = GetUniqueID();
 		m_CollidesWithTerrainWhileAttached = reference.m_CollidesWithTerrainWhileAttached;
 
-		m_AtomSubgroupID = GetUniqueID();
+		m_PrevRotAngleOffset = reference.m_PrevRotAngleOffset;
 
 		return 0;
 	}
@@ -295,35 +298,30 @@ namespace RTE {
 		if (!m_Parent) {
 			m_JointPos = m_Pos + RotateOffset(m_JointOffset);
 		} else {
-			m_PrevPos = m_Pos;
-			m_PrevVel = m_Vel;
-
 			m_JointPos = m_Parent->GetPos() + m_Parent->RotateOffset(GetParentOffset());
 			m_Pos = m_JointPos - RotateOffset(m_JointOffset);
 			m_Vel = m_Parent->GetVel();
 			m_Team = m_Parent->GetTeam();
 			if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
-			if (InheritsRotAngle()) { SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset); }
+			if (InheritsRotAngle()) { SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset * static_cast<float>(m_Parent->GetFlipFactor())); }
 
 			MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());
+			float currentRotAngleOffset = (GetRotAngle() * static_cast<float>(GetFlipFactor())) - rootParentAsMOSR->GetRotAngle();
 			if (rootParentAsMOSR && m_CollidesWithTerrainWhileAttached) {
 				// Note: This safety check exists to ensure the parent's AtomGroup contains this Attachable's Atoms in a subgroup. Hardcoded Attachables need this in order to work, since they're cloned before their parent's AtomGroup exists.
 				if (!rootParentAsMOSR->GetAtomGroup()->ContainsSubGroup(m_AtomSubgroupID)) { AddOrRemoveAtomsFromRootParentAtomGroup(true); }
 
-				float facingAngle = (m_HFlipped ? c_PI : 0) + GetRotAngle() * static_cast<float>(GetFlipFactor());
-				float parentFacingAngle = (m_Parent->IsHFlipped() ? c_PI : 0) + m_Parent->GetRotAngle() * static_cast<float>(m_Parent->GetFlipFactor());
-
-				if (!InheritsRotAngle()) {
-					Matrix atomRotationForSubgroup(facingAngle - parentFacingAngle);
-					Vector atomOffsetForSubgroup;
-					CalculateAtomOffsetForSubgroup(atomOffsetForSubgroup);
-					//TODO CalculateAtomOffsetForSubgroup should just return the rotated value. This means AtomGroup::AddAtoms needs to be modified to exect this rotated value instead of doing rotation internally. Alternatively, UpdateSubAtoms should expect unrotated atom offsets and deal with things interally, either way, it should be consistent.
-					// Note: This line looks weird because CalculateAtomOffsetForSubgroup already subtracts JointOffset from the value, so we have to re-add it and then subtract its rotated value instead.
-					atomOffsetForSubgroup += GetJointOffset() - (GetJointOffset() * atomRotationForSubgroup);
+				if (std::abs(currentRotAngleOffset - m_PrevRotAngleOffset) > 0.01745F) { // Update for 1 degree differences
+					Matrix atomRotationForSubgroup(rootParentAsMOSR->FacingAngle(GetRotAngle()) - rootParentAsMOSR->FacingAngle(rootParentAsMOSR->GetRotAngle()));
+					Vector atomOffsetForSubgroup = g_SceneMan.ShortestDistance(rootParentAsMOSR->GetPos(), m_Pos, g_SceneMan.SceneWrapsX());
 					rootParentAsMOSR->GetAtomGroup()->UpdateSubAtoms(GetAtomSubgroupID(), atomOffsetForSubgroup, atomRotationForSubgroup);
 				}
 			}
 			m_DeepCheck = false;
+
+			m_PrevPos = m_Pos;
+			m_PrevVel = m_Vel;
+			m_PrevRotAngleOffset = currentRotAngleOffset;
 		}
 
 		MOSRotating::Update();
@@ -413,25 +411,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Attachable::CalculateAtomOffsetForSubgroup(Vector &atomOffsetForSubgroup) const {
-		if (m_Parent) {
-			const Attachable *parentAsAttachable = dynamic_cast<Attachable *>(m_Parent);
-			if (parentAsAttachable) { parentAsAttachable->CalculateAtomOffsetForSubgroup(atomOffsetForSubgroup); }
-			atomOffsetForSubgroup += GetParentOffset() - GetJointOffset();
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void Attachable::AddOrRemoveAtomsFromRootParentAtomGroup(bool addAtoms) {
 		MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());
 		if (rootParentAsMOSR && IsAttached()) {
 			AtomGroup *rootParentAtomGroup = rootParentAsMOSR->GetAtomGroup();
 			if (rootParentAtomGroup) {
 				if (addAtoms && !rootParentAtomGroup->ContainsSubGroup(GetAtomSubgroupID())) {
-					Vector atomOffsetForSubgroup;
-					CalculateAtomOffsetForSubgroup(atomOffsetForSubgroup);
-					rootParentAtomGroup->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), atomOffsetForSubgroup);
+					Vector atomOffsetForSubgroup = g_SceneMan.ShortestDistance(rootParentAsMOSR->GetPos(), m_Pos, g_SceneMan.SceneWrapsX());
+					Matrix atomRotationForSubgroup(rootParentAsMOSR->FacingAngle(GetRotAngle()) - rootParentAsMOSR->FacingAngle(rootParentAsMOSR->GetRotAngle()));
+					rootParentAtomGroup->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), atomOffsetForSubgroup, atomRotationForSubgroup);
 				} else if (!addAtoms && rootParentAtomGroup->ContainsSubGroup(GetAtomSubgroupID())) {
 					rootParentAtomGroup->RemoveAtoms(GetAtomSubgroupID());
 				}
